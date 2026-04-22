@@ -44,29 +44,18 @@ final class ProductFilterChips extends AbstractBlock {
 			$style   = $tags->get_attribute( 'style' );
 		}
 
-		$context_items = array_values(
-			array_map(
+		$visible_items = array_values(
+			array_filter(
+				$items,
 				function ( $item ) {
-					$item['id'] = $item['type'] . '-' . $item['value'];
-					return $item;
-				},
-				$items
+					return empty( $item['hidden'] );
+				}
 			)
 		);
 
-		$display_limit      = 15;
-		$has_more_items     = count( $context_items ) > $display_limit;
 		$wrapper_attributes = array(
 			'data-wp-interactive' => $store_namespace,
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
-			'data-wp-context'     => wp_json_encode(
-				array(
-					'items'        => $context_items,
-					'displayLimit' => $display_limit,
-					'showingAll'   => false,
-				),
-				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-			),
 			'class'               => esc_attr( $classes ),
 		);
 
@@ -85,11 +74,12 @@ final class ProductFilterChips extends AbstractBlock {
 				<div class="wc-block-product-filter-chips__items">
 					<?php if ( $dynamic_items ) : ?>
 						<template
-							data-wp-each--item="state.displayedItems"
+							data-wp-each--item="context.items"
 							data-wp-each-key="context.item.id"
 						>
 							<button
 								class="wc-block-product-filter-chips__item"
+								data-wp-bind--hidden="context.item.hidden"
 								type="button"
 								role="checkbox"
 								data-wp-bind--id="context.item.id"
@@ -108,10 +98,7 @@ final class ProductFilterChips extends AbstractBlock {
 							</button>
 						</template>
 					<?php endif; ?>
-					<?php
-					$displayed_items = $dynamic_items ? array_slice( $context_items, 0, $display_limit ) : $context_items;
-					foreach ( $displayed_items as $item ) {
-						?>
+					<?php foreach ( $visible_items as $item ) { ?>
 						<button
 							class="wc-block-product-filter-chips__item"
 							type="button"
@@ -141,15 +128,6 @@ final class ProductFilterChips extends AbstractBlock {
 						</button>
 					<?php } ?>
 				</div>
-				<?php if ( $dynamic_items && $has_more_items ) : ?>
-					<button
-						class="wc-block-product-filter-chips__show-more"
-						data-wp-on--click="actions.showAll"
-						data-wp-bind--hidden="!state.hasMoreItems"
-					>
-						<?php esc_html_e( 'Show more...', 'woocommerce' ); ?>
-					</button>
-				<?php endif; ?>
 			</fieldset>
 		</div>
 		<?php

@@ -111,6 +111,7 @@ final class ProductFilterRating extends AbstractBlock {
 				);
 
 				$item = array(
+					'id'        => 'rating-' . $rating['rating'],
 					'label'     => $this->render_rating_label( (int) $rating['rating'] ),
 					'ariaLabel' => $aria_label,
 					'value'     => (string) $rating['rating'],
