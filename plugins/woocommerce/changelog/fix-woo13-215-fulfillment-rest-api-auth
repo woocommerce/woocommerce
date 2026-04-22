@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix unauthenticated access to guest order fulfillments via REST API.

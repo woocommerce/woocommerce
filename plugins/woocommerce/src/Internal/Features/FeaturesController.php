@@ -429,6 +429,16 @@ class FeaturesController {
 					},
 				),
 			),
+			'deferred_transactional_emails'      => array(
+				'name'                         => __( 'Deferred emails', 'woocommerce' ),
+				'description'                  => __(
+					'Send transactional emails asynchronously via Action Scheduler instead of during the current request.',
+					'woocommerce'
+				),
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => false,
+			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
 				'description'                  => __(
@@ -546,6 +556,18 @@ class FeaturesController {
 				'name'                         => __( 'Agentic Checkout API', 'woocommerce' ),
 				'description'                  => __(
 					'Enable the Agentic Checkout API for AI-powered checkout experiences (e.g., ChatGPT). This adds REST API endpoints that allow AI agents to create and manage checkout sessions.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
+			'dual_code_graphql_api'              => array(
+				'name'                         => __( 'Dual Code & GraphQL API', 'woocommerce' ),
+				'description'                  => __(
+					'Experimental code-first API for WooCommerce with automatic GraphQL endpoint generation. Requires PHP 8.1 or later.',
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,

@@ -985,6 +985,14 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					case 'relative_date_selector':
 						$value = wc_parse_relative_date_option( $raw_value );
 						break;
+					case 'password':
+						// Non-string or absent → null so the option is skipped, not overwritten.
+						// Only trim — no wp_strip_all_tags() or wc_clean() which would corrupt
+						// passwords containing '<' or percent-like sequences.
+						// $raw_value is already wp_unslash()ed upstream, so no stripslashes() needed.
+						// Matches WC_Settings_API::validate_password_field() behavior.
+						$value = is_string( $raw_value ) ? trim( $raw_value ) : null;
+						break;
 					default:
 						$value = wc_clean( $raw_value );
 						break;

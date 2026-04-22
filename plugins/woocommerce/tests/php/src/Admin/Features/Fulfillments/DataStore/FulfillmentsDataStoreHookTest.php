@@ -83,7 +83,8 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$this->store->create( $this->get_test_fulfillment( $this->order->get_id() ) );
+		$fulfillment = $this->get_test_fulfillment( $this->order->get_id() );
+		$this->store->create( $fulfillment );
 		$this->assertTrue( $hook_called, 'The fulfillment before create hook was not called.' );
 		$fulfillments = $this->store->read_fulfillments( WC_Order::class, (string) $this->order->get_id() );
 		$this->assertCount( 1, $fulfillments, 'Fulfillment was not created.' );
@@ -105,7 +106,8 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 
 		$this->expectException( \Exception::class );
 		$this->expectExceptionMessage( 'Fulfillment creation prevented by hook.' );
-		$this->store->create( $this->get_test_fulfillment( $this->order->get_id() ) );
+		$fulfillment = $this->get_test_fulfillment( $this->order->get_id() );
+		$this->store->create( $fulfillment );
 
 		$this->assertTrue( $hook_called, 'The fulfillment before create hook was not called.' );
 
@@ -131,7 +133,8 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 			2
 		);
 
-		$this->store->create( $this->get_test_fulfillment( $this->order->get_id() ) );
+		$fulfillment = $this->get_test_fulfillment( $this->order->get_id() );
+		$this->store->create( $fulfillment );
 		$this->assertTrue( $hook_called, 'The fulfillment after create hook was not called.' );
 
 		// Compare the received fulfillment with the expected data.
@@ -217,19 +220,26 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$fulfillment->save();
 		$this->assertNotNull( $fulfillment->get_id(), 'Fulfillment ID should not be null.' );
 
-		$hook_called = false;
+		$hook_called              = false;
+		$received_fulfillment     = null;
+		$received_changes         = null;
+		$received_previous_status = null;
 		add_action(
 			'woocommerce_fulfillment_after_update',
-			function ( $fulfillment ) use ( &$hook_called, &$received_fulfillment ) {
-				$received_fulfillment = $fulfillment;
-				$hook_called          = true;
-				return $fulfillment;
+			function ( $fulfillment, $changes, $previous_status ) use ( &$hook_called, &$received_fulfillment, &$received_changes, &$received_previous_status ) {
+				$received_fulfillment     = $fulfillment;
+				$received_changes         = $changes;
+				$received_previous_status = $previous_status;
+				$hook_called              = true;
 			},
 			10,
-			2
+			3
 		);
 
-		// Add a modification to the saved fulfillment, so we can see the difference.
+		$old_status = $fulfillment->get_status();
+
+		// Modify a tracked property so changes are populated.
+		$fulfillment->set_status( 'fulfilled' );
 		$fulfillment->add_meta_data( 'test_meta_update', 'test_meta_value' );
 
 		$this->store->update( $fulfillment );
@@ -245,6 +255,12 @@ class FulfillmentsDataStoreHookTest extends WC_Unit_Test_Case {
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_key_2' ), $fulfillment->get_meta( 'test_meta_key_2' ) );
 		$this->assertEquals( $received_fulfillment->get_meta( 'test_meta_update' ), $fulfillment->get_meta( 'test_meta_update' ) );
 		$this->assertEquals( $received_fulfillment->get_items(), $fulfillment->get_items() );
+
+		// Verify changes and previous_status are passed correctly.
+		$this->assertIsArray( $received_changes );
+		$this->assertArrayHasKey( 'status', $received_changes );
+		$this->assertSame( 'fulfilled', $received_changes['status'] );
+		$this->assertEquals( $old_status, $received_previous_status );
 	}
 
 	/**

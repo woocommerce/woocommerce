@@ -8,6 +8,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 use Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes\ControllerTestCase;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\ValidateSchema;
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 
 /**
@@ -76,6 +77,8 @@ class Products extends ControllerTestCase {
 		$this->assertEquals( $this->products[0]->get_length(), $data['dimensions']->length );
 		$this->assertEquals( $this->products[0]->get_width(), $data['dimensions']->width );
 		$this->assertEquals( $this->products[0]->get_height(), $data['dimensions']->height );
+		$this->assertEquals( wc_format_weight( (float) $this->products[0]->get_weight() ), $data['formatted_weight'] );
+		$this->assertEquals( html_entity_decode( wc_format_dimensions( (array) $this->products[0]->get_dimensions( false ) ), ENT_QUOTES, get_bloginfo( 'charset' ) ), $data['formatted_dimensions'] );
 		$this->assertCount( 0, $data['grouped_products'] );
 
 		$this->assertCount( 1, $data['images'] );
@@ -529,6 +532,210 @@ class Products extends ControllerTestCase {
 	}
 
 	/**
+	 * Data provider for non-published product statuses.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_non_published_statuses() {
+		return array(
+			'draft'      => array( ProductStatus::DRAFT ),
+			'pending'    => array( ProductStatus::PENDING ),
+			'private'    => array( ProductStatus::PRIVATE ),
+			'trash'      => array( ProductStatus::TRASH ),
+			'auto-draft' => array( ProductStatus::AUTO_DRAFT ),
+		);
+	}
+
+	/**
+	 * @testdox Non-published products should not be returned when queried by ID ($status).
+	 * @dataProvider provider_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
+	 */
+	public function test_non_published_product_by_id_returns_404( $status ) {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Non Published Product',
+				'regular_price' => 10,
+			)
+		);
+		$product->set_status( $status );
+		$product->save();
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Non-published products should not be included in the collection response ($status).
+	 * @dataProvider provider_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
+	 */
+	public function test_non_published_products_excluded_from_collection( $status ) {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Non Published Product In Collection',
+				'regular_price' => 10,
+			)
+		);
+		$product->set_status( $status );
+		$product->save();
+
+		$response    = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+		$data        = $response->get_data();
+		$product_ids = array_map(
+			function ( $product ) {
+				return $product['id'];
+			},
+			$data
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotContains( $product->get_id(), $product_ids );
+	}
+
+	/**
+	 * @testdox Non-published products should not be returned when queried by slug ($status).
+	 * @dataProvider provider_non_published_statuses
+	 *
+	 * @param string $status The product status to test.
+	 */
+	public function test_non_published_product_by_slug_returns_404( $status ) {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Non Published Product By Slug',
+				'regular_price' => 10,
+			)
+		);
+		$product->set_status( $status );
+		$product->save();
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_slug() ) );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * @testdox Password-protected products in collection should have redacted content and is_password_protected true.
+	 */
+	public function test_password_protected_product_redacts_content_in_collection() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Protected Product',
+				'regular_price'     => 10,
+				'short_description' => 'Secret short desc',
+				'description'       => 'Secret full desc',
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'testpass',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products' ) );
+		$data     = $response->get_data();
+
+		$protected_product = null;
+		foreach ( $data as $item ) {
+			if ( $item['id'] === $product->get_id() ) {
+				$protected_product = $item;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $protected_product );
+		$this->assertTrue( $protected_product['is_password_protected'] );
+		$this->assertArrayHasKey( 'description', $protected_product );
+		$this->assertSame( '', $protected_product['description'] );
+		$this->assertArrayHasKey( 'short_description', $protected_product );
+		$this->assertSame( '', $protected_product['short_description'] );
+	}
+
+	/**
+	 * @testdox Password-protected product by ID should have redacted content.
+	 */
+	public function test_password_protected_product_by_id_redacts_content() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Protected Product By ID',
+				'regular_price'     => 10,
+				'short_description' => 'Secret short desc',
+				'description'       => 'Secret full desc',
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'testpass',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( $data['is_password_protected'] );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertSame( '', $data['description'] );
+		$this->assertArrayHasKey( 'short_description', $data );
+		$this->assertSame( '', $data['short_description'] );
+	}
+
+	/**
+	 * @testdox Password-protected product by slug should have redacted content.
+	 */
+	public function test_password_protected_product_by_slug_redacts_content() {
+		$fixtures = new FixtureData();
+		$product  = $fixtures->get_simple_product(
+			array(
+				'name'              => 'Protected Product By Slug',
+				'regular_price'     => 10,
+				'short_description' => 'Secret short desc',
+				'description'       => 'Secret full desc',
+			)
+		);
+
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'testpass',
+			)
+		);
+
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $product->get_slug() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertTrue( $data['is_password_protected'] );
+		$this->assertArrayHasKey( 'description', $data );
+		$this->assertSame( '', $data['description'] );
+		$this->assertArrayHasKey( 'short_description', $data );
+		$this->assertSame( '', $data['short_description'] );
+	}
+
+	/**
+	 * @testdox Non-password-protected product should have is_password_protected false.
+	 */
+	public function test_non_password_protected_product_has_false_flag() {
+		$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/' . $this->products[0]->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertFalse( $data['is_password_protected'] );
+	}
+
+	/**
 	 * @testdox Related query parameter returns empty when no related products exist.
 	 */
 	public function test_related_query_parameter_returns_empty_when_no_related() {
@@ -553,5 +760,20 @@ class Products extends ControllerTestCase {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $response->get_data() );
+	}
+
+	/**
+	 * @testdox Related query parameter returns 404 for non-existent product and does not create a transient.
+	 */
+	public function test_related_query_parameter_returns_404_for_nonexistent_product() {
+		$nonexistent_id = 999999999;
+
+		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products' );
+		$request->set_param( 'related', $nonexistent_id );
+
+		$response = rest_get_server()->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+		$this->assertFalse( get_transient( 'wc_related_' . $nonexistent_id ), 'No transient should be created for a non-existent product.' );
 	}
 }

@@ -3,9 +3,12 @@
 /**
  * External dependencies
  */
-import { addFilter } from '@wordpress/hooks';
+import { addFilter, addAction } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
-import { initializeEditor } from '@woocommerce/email-editor';
+import {
+	initializeEditor,
+	registerEntityAction,
+} from '@woocommerce/email-editor';
 
 /**
  * Internal dependencies
@@ -14,6 +17,7 @@ import { NAME_SPACE } from './constants';
 import { modifyTemplateSidebar } from './templates';
 import { modifySidebar } from './sidebar_settings';
 import { registerEmailValidationRules } from './email-validation';
+import getResetNotificationEmailContentAction from './reset-notification-email-content';
 
 import './style.scss';
 
@@ -68,4 +72,26 @@ addFilter( 'woocommerce_email_editor_create_coupon_handler', NAME_SPACE, () => {
 modifySidebar();
 modifyTemplateSidebar();
 registerEmailValidationRules();
+
+/**
+ * Register the reset notification email content entity action for the woo_email post type.
+ * This action allows users to reset the email content to the original state as distributed by the plugin.
+ */
+const registerResetNotificationEmailContentAction = ( postType: string ) => {
+	if ( postType !== 'woo_email' ) {
+		return;
+	}
+	registerEntityAction(
+		'postType',
+		postType,
+		getResetNotificationEmailContentAction()
+	);
+};
+
+addAction(
+	'core.registerPostTypeSchema',
+	`${ NAME_SPACE }/reset-notification-email-content`,
+	registerResetNotificationEmailContentAction
+);
+
 initializeEditor( 'woocommerce-email-editor' );

@@ -14,8 +14,8 @@ We look forward to reviewing your extension, theme, or integration for listing i
 
 This includes an analysis of the product's business model and revenue share structure with Woo, as well as product rationale, competition, and developer/company history.
 
-- **Mutually beneficial partnership**: Products must share revenue with Woo, exclude spam links, affiliate links, or links to upsell products outside of the Woo Marketplace. See our [monetization expectations](./monetization-expectations.md).
-- **Trademark compliance**: Ensure that product names do not violate Woo's [trademark guidelines](https://woocommerce.com/trademark-guidelines/#sg-trademarks). Select a unique name that builds your brand and sets your product apart from others. [Review our product name guidelines](https://woocommerce.com/document/product-page-content-and-assets/#section-14).
+- **Mutually beneficial partnership**: Products must share revenue with Woo, exclude spam links, affiliate links, or links to upsell products outside of the Woo Marketplace. See our [monetization expectations](/docs/woo-marketplace/monetization-expectations/).
+- **Trademark compliance**: Ensure that product names do not violate Woo's [trademark guidelines](https://woocommerce.com/trademark-guidelines/#sg-trademarks). Select a unique name that builds your brand and sets your product apart from others. [Review our product name guidelines](/docs/woo-marketplace/product-page-content-and-assets/#naming-guidelines).
 - **Competitive pricing**: Is the proposed price equal to or less than the price of the product sold in other environments? Select a suggested price that matches the price you sell elsewhere.
 
 </details>
@@ -32,7 +32,7 @@ PHP 7.4 reached [End of Life](https://www.php.net/supported-versions.php) (EOL) 
 
 - Products must support the two latest **major releases** of both [WooCommerce](https://wordpress.org/plugins/woocommerce/) and [WordPress](https://wordpress.org/download/).
 - Products must adhere to foundational guidelines outlined in our [developer hub](https://developer.woocommerce.com/).
-- If your pricing model is based on a standard, tiered monthly subscription, we require you to implement the [SaaS Billing API](https://woocommerce.com/document/billing-api-for-saas-products/). API keys and sandbox access are granted manually after products are submitted for Marketplace consideration.
+- If your pricing model is based on a standard, tiered monthly subscription, you will be required to implement the [SaaS Billing API](/docs/woo-marketplace/billing-api-saas/) before launch. API keys and sandbox access are granted manually after products are submitted for Marketplace consideration.
 - Products must be able to pass the following [Quality Insights Toolkit](https://qit.woo.com/docs/) (QIT) tests:
     - [API](https://qit.woo.com/docs/managed-tests/woo-api)
     - [End-to-end](https://qit.woo.com/docs/managed-tests/woo-e2e) (E2E)
@@ -48,9 +48,9 @@ PHP 7.4 reached [End of Life](https://www.php.net/supported-versions.php) (EOL) 
 <summary>User experience compliance</summary>
 
 - The product review includes a deeper analysis of the product's user experience (UX) and user interface (UI).
-- Ensure that your product's [critical flows](https://developer.woocommerce.com/testing-extensions-and-maintaining-quality-code/critical-flows/) have been thoroughly tested. See an example of [critical flows in the core WooCommerce plugin](https://developer.woocommerce.com/docs/contribution/testing/core-critical-flows/).
-- Extensions must adhere to [development best practices](https://developer.woocommerce.com/docs/extensions/best-practices-extensions/extension-development-best-practices/) and [UX guidelines](https://developer.woocommerce.com/docs/extensions/ux-guidelines-extensions/).
-- Themes must adhere to [theme development](https://developer.woocommerce.com/docs/theming/block-theme-development/theming-woo-blocks/), [design](https://developer.woocommerce.com/docs/user-experience-guidelines/ux-guidelines-themes/), and [UX guidelines](https://developer.woocommerce.com/docs/user-experience-guidelines/ux-guidelines-themes/).
+- Ensure that your product's [critical flows](https://developer.woocommerce.com/testing-extensions-and-maintaining-quality-code/critical-flows/) have been thoroughly tested. See an example of [critical flows in the core WooCommerce plugin](/docs/contribution/testing/core-critical-flows/).
+- Extensions must adhere to [development best practices](/docs/extensions/best-practices-extensions/extension-development-best-practices/) and [UX guidelines](/docs/extensions/ux-guidelines-extensions/).
+- Themes must adhere to [design](/docs/theming/theme-development/theme-design-ux-guidelines/), and [UX guidelines](/docs/user-experience-guidelines/ux-guidelines-themes/). If you are submitting a block theme, also review [theme development](/docs/theming/block-theme-development/theming-woo-blocks/).
 - **Accessibility**: It is important that all customers can use the stores where your extension is installed. Extension submissions must meet the [WordPress Accessibility Coding Standards](https://developer.wordpress.org/coding-standards/wordpress-coding-standards/accessibility/). For more information, review WordPress's [accessibility quick start guide](https://make.wordpress.org/accessibility/handbook/best-practices/quick-start-guide/).
 - Does the product have a single core purpose and use WooCommerce features as much as possible?
 - Can the product function "out of the box" without much configuration?
@@ -97,7 +97,7 @@ As we evolve within the WordPress ecosystem, we're placing a strong emphasis on 
 High-Performance Order Storage (HPOS) is the **default experience for new WooCommerce stores**. It moves order data from the WordPress post and postmeta tables to dedicated order tables to improve scalability and reliability.
 
 :::info
-**All new extension submissions must be HPOS-compatible.** View our [HPOS recipe book](https://developer.woocommerce.com/docs/hpos-extension-recipe-book/) for ways to support HPOS in your product.
+**All new extension submissions must be HPOS-compatible.** View our [HPOS recipe book](/docs/features/high-performance-order-storage/recipe-book/) for ways to support HPOS in your product.
 :::
 
 </details>
@@ -167,6 +167,14 @@ Once the submission is in business review, you can expect a formal decision from
 <summary>Can I resubmit a previously rejected product?</summary>
 
 Yes. You are welcome to resubmit products, providing the previously-received feedback was incorporated and your product was improved to comply with our guidelines and quality standards.
+
+</details>
+
+<details>
+<summary>Why does my QIT test result link show "Invalid URL" or say it has expired?</summary>
+
+- QIT test result links are temporary signed URLs. They expire after a short period of time. This is expected and not an error.
+- To get fresh results, re-run the test from the submission in your [Vendor Dashboard](https://woocommerce.com/wp-admin/). New links will be generated with the updated results.
 
 </details>
 

@@ -2,7 +2,7 @@
 	"name": "@woocommerce/plugin-woocommerce",
 	"private": true,
 	"title": "WooCommerce",
-	"version": "10.7.0",
+	"version": "10.8.0",
 	"homepage": "https://woocommerce.com/",
 	"repository": {
 		"type": "git",
@@ -22,6 +22,8 @@
 		"build:project:copy-assets:email-editor": "rsync -avhW --checksum --delete --quiet ../../packages/php/email-editor/src/ packages/email-editor/src",
 		"build:project:copy-assets:blueprint": "rsync -avhW --checksum --delete --quiet ../../packages/php/blueprint/src/ packages/blueprint/src",
 		"build:project:actualize-translation-domains": "wireit",
+		"build:api": "php src/Internal/Api/DesignTime/Scripts/build-api.php",
+		"build:api:check": "php src/Internal/Api/DesignTime/Scripts/check-api-staleness.php",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"env:destroy": "pnpm wp-env destroy",
@@ -99,6 +101,9 @@
 		"wp-env": "wp-env"
 	},
 	"lint-staged": {
+		"src/Api/**/*.php": [
+			"php src/Internal/Api/DesignTime/Scripts/check-api-staleness.php"
+		],
 		"*.php": [
 			"php -d display_errors=1 -l",
 			"composer run-script lint-staged"
@@ -880,7 +885,11 @@
 					"testType": "e2e",
 					"command": "test:e2e:paypal-standard",
 					"shardingArguments": [],
-					"changes": [],
+					"changes": [
+						"includes/gateways/paypal/**/*.php",
+						"src/Gateways/PayPal/**/*.php",
+						"tests/e2e-pw/tests/paypal/**"
+					],
 					"events": [
 						"pull_request",
 						"push",
@@ -937,7 +946,7 @@
 		"wp-textdomain": "1.0.1"
 	},
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"browserslist": [
 		"> 0.1%",
@@ -978,6 +987,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/admin-library/build",
 				"node_modules/@woocommerce/block-library/build",
 				"node_modules/@woocommerce/classic-assets/build",

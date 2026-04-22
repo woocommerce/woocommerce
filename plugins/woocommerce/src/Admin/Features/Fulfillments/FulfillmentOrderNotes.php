@@ -24,19 +24,11 @@ use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 class FulfillmentOrderNotes {
 
 	/**
-	 * Stores the previous status of a fulfillment before update.
-	 *
-	 * @var array<int, string>
-	 */
-	private array $previous_statuses = array();
-
-	/**
 	 * Register hooks for fulfillment order notes.
 	 */
 	public function register(): void {
 		add_action( 'woocommerce_fulfillment_after_create', array( $this, 'add_fulfillment_created_note' ), 10, 1 );
-		add_filter( 'woocommerce_fulfillment_before_update', array( $this, 'capture_previous_status' ), 10, 1 );
-		add_action( 'woocommerce_fulfillment_after_update', array( $this, 'add_fulfillment_updated_note' ), 10, 1 );
+		add_action( 'woocommerce_fulfillment_after_update', array( $this, 'add_fulfillment_updated_note' ), 10, 3 );
 		add_action( 'woocommerce_fulfillment_after_delete', array( $this, 'add_fulfillment_deleted_note' ), 10, 1 );
 	}
 
@@ -94,48 +86,33 @@ class FulfillmentOrderNotes {
 	}
 
 	/**
-	 * Capture the previous status of a fulfillment before update.
-	 *
-	 * This is hooked into `woocommerce_fulfillment_before_update` to record
-	 * the old status so we can detect status changes in the after_update hook.
-	 *
-	 * @param Fulfillment $fulfillment The fulfillment object.
-	 * @return Fulfillment The unmodified fulfillment object.
-	 */
-	public function capture_previous_status( Fulfillment $fulfillment ): Fulfillment {
-		if ( $fulfillment->get_id() > 0 ) {
-			$old_fulfillment                                   = new Fulfillment( (string) $fulfillment->get_id() );
-			$this->previous_statuses[ $fulfillment->get_id() ] = $old_fulfillment->get_status() ?? 'unfulfilled';
-		}
-		return $fulfillment;
-	}
-
-	/**
 	 * Add an order note when a fulfillment is updated.
 	 *
-	 * If the status changed, a status change note is added.
-	 * Otherwise, a general update note is added.
+	 * Only adds a note when tracked properties change (status, items,
+	 * tracking number, tracking URL, shipping provider). If the status
+	 * changed, a dedicated status change note is added instead.
 	 *
-	 * @param Fulfillment $fulfillment The fulfillment object.
+	 * @param Fulfillment $fulfillment     The fulfillment object (post-update).
+	 * @param array       $changes         Changes as returned by Fulfillment::get_changes() before
+	 *                                     save. Core data props at top level, meta under 'meta_data'.
+	 * @param string      $previous_status The fulfillment status before the update.
 	 */
-	public function add_fulfillment_updated_note( Fulfillment $fulfillment ): void {
+	public function add_fulfillment_updated_note( Fulfillment $fulfillment, array $changes = array(), string $previous_status = 'unfulfilled' ): void {
+		if ( empty( $changes ) ) {
+			return;
+		}
+
 		$order = $fulfillment->get_order();
 		if ( ! $order instanceof \WC_Order ) {
 			return;
 		}
 
-		$fulfillment_id = $fulfillment->get_id();
-		$old_status     = $this->previous_statuses[ $fulfillment_id ] ?? null;
-		$new_status     = $fulfillment->get_status() ?? 'unfulfilled';
-
-		// If status changed, add a status change note.
-		if ( null !== $old_status && $old_status !== $new_status ) {
-			$this->add_fulfillment_status_changed_note( $fulfillment, $order, $old_status, $new_status );
-			unset( $this->previous_statuses[ $fulfillment_id ] );
+		// If status changed, add a dedicated status change note.
+		if ( array_key_exists( 'status', $changes ) ) {
+			$new_status = $changes['status'] ?? 'unfulfilled';
+			$this->add_fulfillment_status_changed_note( $fulfillment, $order, $previous_status, $new_status );
 			return;
 		}
-
-		unset( $this->previous_statuses[ $fulfillment_id ] );
 
 		$items_text    = $this->format_items( $fulfillment, $order );
 		$tracking_text = $this->format_tracking( $fulfillment );
@@ -346,17 +323,17 @@ class FulfillmentOrderNotes {
 	 * @return string The formatted tracking information, or empty string if no tracking number is present.
 	 */
 	private function format_tracking( Fulfillment $fulfillment ): string {
-		$tracking_number   = $fulfillment->get_meta( '_tracking_number', true );
-		$shipping_provider = $fulfillment->get_meta( '_shipping_provider', true );
-		$tracking_url      = $fulfillment->get_meta( '_tracking_url', true );
+		$tracking_number   = $fulfillment->get_tracking_number();
+		$shipping_provider = $fulfillment->get_shipment_provider();
+		$tracking_url      = $fulfillment->get_tracking_url();
 
-		if ( ! is_string( $tracking_number ) || '' === $tracking_number ) {
+		if ( null === $tracking_number ) {
 			return '';
 		}
 
 		$parts = array( $tracking_number );
 
-		if ( is_string( $shipping_provider ) && '' !== $shipping_provider ) {
+		if ( null !== $shipping_provider ) {
 			$parts[] = sprintf(
 				/* translators: %s: shipping provider name */
 				__( 'Provider: %s', 'woocommerce' ),
@@ -364,7 +341,7 @@ class FulfillmentOrderNotes {
 			);
 		}
 
-		if ( is_string( $tracking_url ) && '' !== $tracking_url ) {
+		if ( null !== $tracking_url ) {
 			$parts[] = sprintf(
 				/* translators: %s: tracking URL */
 				__( 'URL: %s', 'woocommerce' ),

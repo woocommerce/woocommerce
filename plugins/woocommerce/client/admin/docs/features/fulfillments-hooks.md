@@ -53,19 +53,30 @@ function update_inventory_system( $fulfillment ) {
 
 Fired after a fulfillment is successfully updated in the database.
 
-**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php:262`
+**File:** `src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php`
 
 **Parameters:**
 
 -   `$data` (Fulfillment) - The updated fulfillment object
+-   `$changes` (array) - The changes that were applied, as returned by `Fulfillment::get_changes()` before save. Core data properties (e.g. `status`, `is_fulfilled`) sit at the top level; meta-based changes (e.g. `_tracking_number`, `_shipment_provider`, `_items`) are nested under the `meta_data` key.
+-   `$previous_status` (string) - The fulfillment status before the update (e.g. `'unfulfilled'`)
 
-**Purpose:** Allows plugins to perform actions after a fulfillment is updated.
+**Purpose:** Allows plugins to perform actions after a fulfillment is updated. All core data and metadata changes are included in `$changes`.
 
 ```php
-add_action( 'woocommerce_fulfillment_after_update', 'sync_fulfillment_changes' );
+add_action( 'woocommerce_fulfillment_after_update', 'sync_fulfillment_changes', 10, 3 );
 
-function sync_fulfillment_changes( $fulfillment ) {
-    // Sync changes to external fulfillment service
+function sync_fulfillment_changes( $fulfillment, $changes, $previous_status ) {
+    // Check if tracking info changed
+    $meta_changes = $changes['meta_data'] ?? array();
+    if ( array_key_exists( '_tracking_number', $meta_changes ) ) {
+        // Sync tracking to external service
+    }
+
+    // Check if status changed
+    if ( array_key_exists( 'status', $changes ) ) {
+        // Status changed from $previous_status to $changes['status']
+    }
 }
 ```
 
@@ -114,7 +125,7 @@ add_action( 'woocommerce_fulfillment_created_notification', 'send_sms_notificati
 
 function send_sms_notification( $order_id, $fulfillment, $order ) {
     $phone = $order->get_billing_phone();
-    $tracking = $fulfillment->get_meta( '_tracking_number', true );
+    $tracking = $fulfillment->get_tracking_number();
 
     if ( $phone && $tracking ) {
         // Send SMS notification
@@ -273,7 +284,7 @@ Called after the fulfillment items table in emails.
 add_action( 'woocommerce_email_after_fulfillment_table', 'add_tracking_info', 10, 5 );
 
 function add_tracking_info( $order, $fulfillment, $sent_to_admin, $plain_text, $email ) {
-    $tracking = $fulfillment->get_meta( '_tracking_number', true );
+    $tracking = $fulfillment->get_tracking_number();
     if ( $tracking ) {
         echo '<p>Track your package: ' . esc_html( $tracking ) . '</p>';
     }
