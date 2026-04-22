@@ -271,6 +271,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( ! ( $product instanceof \WC_Product ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
+
 		if ( $product->is_type( ProductType::VARIATION ) ) {
 			$this->set_product_id( $product->get_parent_id() );
 			$this->set_variation_id( $product->get_id() );
@@ -278,9 +279,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		} else {
 			$this->set_product_id( $product->get_id() );
 		}
+		$this->product = $product;
+
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
-		$this->product = $product;
+
 	}
 
 	/**
