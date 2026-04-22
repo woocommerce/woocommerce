@@ -50,7 +50,7 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		customLabelElement,
 	} = attributes;
 	const selectableItems = context[ 'woocommerce/selectableItems' ];
-	const { isLoading, items, showCounts } = selectableItems;
+	const { isLoading, items } = selectableItems;
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const blockProps = useBlockProps( {
@@ -130,7 +130,7 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 													  )
 													: item.label }
 											</span>
-											{ showCounts && (
+											{ item.count !== undefined && (
 												<span className="wc-block-product-filter-checkbox-list__count">
 													{ ` (${ item.count })` }
 												</span>
