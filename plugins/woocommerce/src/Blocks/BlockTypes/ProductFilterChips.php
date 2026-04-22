@@ -86,7 +86,7 @@ final class ProductFilterChips extends AbstractBlock {
 								data-wp-bind--aria-label="context.item.ariaLabel"
 								data-wp-on--click="actions.<?php echo esc_attr( $select_action ); ?>"
 								data-wp-bind--value="context.item.value"
-								data-wp-bind--aria-checked="state.isFilterSelected"
+								data-wp-bind--aria-checked="context.item.selected"
 							>
 								<span class="wc-block-product-filter-chips__label">
 									<span class="wc-block-product-filter-chips__text" data-wp-text="context.item.label"></span>
@@ -109,7 +109,7 @@ final class ProductFilterChips extends AbstractBlock {
 							<?php endif; ?>
 							data-wp-on--click="actions.<?php echo esc_attr( $select_action ); ?>"
 							value="<?php echo esc_attr( $item['value'] ); ?>"
-							data-wp-bind--aria-checked="state.isFilterSelected"
+							data-wp-bind--aria-checked="context.item.selected"
 							<?php if ( $dynamic_items ) : ?>
 								data-wp-each-child
 								<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
