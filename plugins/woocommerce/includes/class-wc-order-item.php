@@ -230,14 +230,15 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	/**
 	 * Aggregate and set properties based on passed in order object.
 	 *
-	 * @param WC_Abstract_Order $order Order instance.
+	 * @param WC_Order $order Order instance.
 	 * @return void
 	 */
 	public function set_order( $order ) {
-		if ( $order instanceof \WC_Order ) {
-			$this->set_order_id( $order->get_id() );
-			$this->order = $order;
+		if ( ! ( $order instanceof \WC_Order ) ) {
+			$this->error( 'order_item_invalid_order', __( 'Invalid order', 'woocommerce' ) );
 		}
+		$this->set_order_id( $order->get_id() );
+		$this->order = $order;
 	}
 
 	/**
