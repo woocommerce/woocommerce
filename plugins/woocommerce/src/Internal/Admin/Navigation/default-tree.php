@@ -70,11 +70,6 @@ return array(
 		'icon'     => 'dashicons-admin-generic',
 		'position' => 90,
 	),
-	'admin.php?page=wc-settings&tab=checkout&from=PAYMENTS_MENU_ITEM'        => array(
-		'parent'   => 'wc-settings',
-		'title'    => __( 'Payments', 'woocommerce' ),
-		'position' => 10,
-	),
 	'woocommerce-payments'                                                   => array(
 		'parent'   => 'wc-settings',
 		'title'    => __( 'WooPayments', 'woocommerce' ),
