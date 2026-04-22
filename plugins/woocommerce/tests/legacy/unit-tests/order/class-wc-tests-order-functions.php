@@ -1560,7 +1560,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * @throws Exception When unable to create an order.
 	 */
 	public function test_wc_update_coupon_usage_counts() {
-		$coupon_code       = 'coupon1';
+		$coupon_code       = 'coupon' . uniqid( '', true );
 		$coupon_data_store = WC_Data_Store::load( 'coupon' );
 
 		$coupon = WC_Helper_Coupon::create_coupon(
@@ -1603,7 +1603,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * Tests the fix for issue #26741
 	 */
 	public function test_wc_cancelled_order_releases_coupon_hold_from_pending_state() {
-		$coupon_code       = 'coupon1';
+		$coupon_code       = 'coupon' . uniqid( '', true );
 		$coupon_data_store = WC_Data_Store::load( 'coupon' );
 
 		$coupon = WC_Helper_Coupon::create_coupon(
@@ -1640,7 +1640,7 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	 * Test if everything works as expected when coupon hold is disabled using filter.
 	 */
 	public function test_wc_update_usage_count_without_coupon_hold() {
-		$coupon_code       = 'coupon1';
+		$coupon_code       = 'coupon' . uniqid( '', true );
 		$coupon_data_store = WC_Data_Store::load( 'coupon' );
 
 		$coupon = WC_Helper_Coupon::create_coupon(
