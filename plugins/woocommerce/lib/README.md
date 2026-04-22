@@ -21,6 +21,19 @@ Composer treats `require` dependencies as transitive while `require-dev` depende
 
 Updating a package is as easy as changing the version in `composer.json` and then running `composer run-script build-lib` from the root directory.
 
+`build-lib` prefers `composer install` so that routine rebuilds respect `lib/composer.lock`
+and don't silently bump unrelated dependencies to their latest in-range version. It automatically
+switches to `composer update` when `lib/composer.json` has been modified (so a newly added
+or bumped package can refresh the lock). Pass `--update` to force a full update even when
+`composer.json` hasn't changed — useful for picking up in-range upstream releases deliberately:
+
+```sh
+composer run-script build-lib -- --update
+```
+
+The `--` separator tells Composer to forward `--update` to the build script rather than
+interpret it as one of its own options.
+
 ## Ignoring Packages
 
 If you would like to add a package which does not undergo conflict avoidance you must take steps to ensure it appears in
@@ -37,7 +50,9 @@ The `lib/packages/Detection/MobileDetect.php` file
 These fixes are already present in newer versions of the package, but we can't update to any of these versions
 because they all require PHP 8. The package version currently in use is the newest one supporting PHP 7.4.
 
-Therefore, as long as WooCommerce runs in PHP 7.4 and no alternative solution is found for this, 
-the changes in `lib/packages/Detection/MobileDetect.php` must be manually reverted after running
-`composer run-script build-lib`. This can be accomplished from the command line by running
+Therefore, as long as WooCommerce runs in PHP 7.4 and no alternative solution is found for this,
+the changes in `lib/packages/Detection/MobileDetect.php` must be reverted after running
+`composer run-script build-lib`. `bin/build-lib.sh` does this automatically via `git restore`
+at the end of the build when run inside a git working tree. If you rebuild outside of git
+(e.g. from a tarball), restore the patched file manually:
 `git restore ./plugins/woocommerce/lib/packages/Detection/MobileDetect.php` from the root of the repository.
