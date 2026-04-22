@@ -675,7 +675,10 @@ class OrderSchema extends AbstractSchema {
 		$needs_refund_data = array_intersect( array( 'line_items', 'shipping_lines', 'fee_lines' ), $include_fields );
 		$refund_data       = ! empty( $needs_refund_data )
 			? $this->data_utils->compute_refunded_quantities_and_totals( $order )
-			: array( 'qtys' => array(), 'totals' => array() );
+			: array(
+				'qtys'   => array(),
+				'totals' => array(),
+			);
 
 		if ( in_array( 'line_items', $include_fields, true ) ) {
 			/**
