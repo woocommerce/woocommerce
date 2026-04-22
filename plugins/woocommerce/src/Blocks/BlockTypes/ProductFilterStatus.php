@@ -108,15 +108,21 @@ final class ProductFilterStatus extends AbstractBlock {
 		$query                   = $filter_params[ self::STOCK_STATUS_QUERY_VAR ] ?? '';
 		$selected_stock_statuses = array_filter( explode( ',', $query ) );
 
+		$show_counts    = $attributes['showCounts'] ?? false;
 		$filter_options = array_map(
-			function ( $item ) use ( $stock_statuses, $selected_stock_statuses ) {
-				return array(
+			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $show_counts ) {
+				$option = array(
 					'label'    => $stock_statuses[ $item['status'] ],
 					'value'    => $item['status'],
 					'selected' => in_array( $item['status'], $selected_stock_statuses, true ),
-					'count'    => $item['count'],
 					'type'     => 'status',
 				);
+
+				if ( $show_counts ) {
+					$option['count'] = $item['count'];
+				}
+
+				return $option;
 			},
 			$stock_status_data
 		);
@@ -127,7 +133,6 @@ final class ProductFilterStatus extends AbstractBlock {
 			'selectAction'   => 'toggleFilter',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => __( 'Status', 'woocommerce' ),
-			'showCounts'     => $attributes['showCounts'] ?? false,
 			'dynamicItems'   => false,
 		);
 

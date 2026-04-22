@@ -184,29 +184,34 @@ final class ProductFilterAttribute extends AbstractBlock {
 			$selected_terms = array_filter( explode( ',', $filter_params[ $filter_param_key ] ) );
 		}
 
+		$show_counts    = $block_attributes['showCounts'] ?? false;
 		$filter_context = array(
 			'items'          => array(),
 			'selectionMode'  => $block_attributes['selectType'] ?? 'multiple',
 			'selectAction'   => 'toggleFilter',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => $product_attribute->name,
-			'showCounts'     => $block_attributes['showCounts'] ?? false,
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
 			$attribute_options = array_map(
-				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute ) {
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 
-					return array(
+					$item = array(
 						'label'              => $term['name'],
 						'value'              => $term['slug'],
 						'selected'           => in_array( $term['slug'], $selected_terms, true ),
-						'count'              => $term['count'],
 						'type'               => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
 						'attributeQueryType' => $block_attributes['queryType'],
 					);
+
+					if ( $show_counts ) {
+						$item['count'] = $term['count'];
+					}
+
+					return $item;
 				},
 				$attribute_terms
 			);
