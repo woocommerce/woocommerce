@@ -6,7 +6,8 @@ import { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { Color, SelectableItemsBlockContext } from '../../types';
+import type { SelectableItemsBlockContext } from '../../../../types/type-defs/selectable-items';
+import type { Color } from '../../types';
 
 export type BlockAttributes = {
 	className: string;
