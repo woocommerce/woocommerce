@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Align settings page input padding and Select2 multi-select border-radius with WordPress 7.0 native form-control sizing.
