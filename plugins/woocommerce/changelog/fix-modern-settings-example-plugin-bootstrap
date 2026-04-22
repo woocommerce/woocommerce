@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix the modernised settings SDK example plugin — drop a `plugins_loaded` + `class_exists( 'WC_Settings_Page' )` guard that always failed, so the Modern Example tab now registers.

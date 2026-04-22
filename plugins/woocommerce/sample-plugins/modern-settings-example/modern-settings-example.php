@@ -15,21 +15,23 @@
 
 defined( 'ABSPATH' ) || exit;
 
-add_action(
-	'plugins_loaded',
-	static function (): void {
-		if ( ! class_exists( 'WC_Settings_Page' ) ) {
-			return;
-		}
-
+/**
+ * Register the settings page.
+ *
+ * The `woocommerce_get_settings_pages` filter is fired inside
+ * `WC_Admin_Settings::get_settings_pages()`, which is the same function that
+ * `include_once`s `class-wc-settings-page.php`. That means `WC_Settings_Page`
+ * is always loaded by the time this callback runs, so we can safely
+ * `require_once` our subclass here. There is no equivalent guarantee at
+ * `plugins_loaded`, so hooking later (or guarding on `class_exists` there)
+ * would silently never register the tab.
+ */
+add_filter(
+	'woocommerce_get_settings_pages',
+	static function ( array $pages ): array {
 		require_once __DIR__ . '/includes/class-modern-settings-example-tab.php';
 
-		add_filter(
-			'woocommerce_get_settings_pages',
-			static function ( array $pages ): array {
-				$pages[] = new \Modern_Settings_Example\Modern_Settings_Example_Tab();
-				return $pages;
-			}
-		);
+		$pages[] = new \Modern_Settings_Example\Modern_Settings_Example_Tab();
+		return $pages;
 	}
 );

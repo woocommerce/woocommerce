@@ -12,21 +12,18 @@ A minimal, installable demonstration of the [WooCommerce Modernised Settings SDK
 
 1. Copy this directory to `wp-content/plugins/modern-settings-example/`.
 2. Activate **WooCommerce Modernised Settings Example** from **Plugins** in `wp-admin`.
-3. Enable the `modern-settings` feature flag. Two ways:
+3. Enable the `modern-settings` feature flag by dropping the snippet below into a mu-plugin:
 
-    - **WooCommerce Beta Tester** (recommended): install the plugin, then go to **Tools → WooCommerce → Beta tester → Features** and toggle **Modern Settings** on.
-    - **Programmatically**: drop the snippet below into a mu-plugin.
-
-      ```php
-      <?php
-      add_filter(
-          'woocommerce_admin_features',
-          static function ( array $features ): array {
-              $features[] = 'modern-settings';
-              return $features;
-          }
-      );
-      ```
+    ```php
+    <?php
+    add_filter(
+        'woocommerce_admin_features',
+        static function ( array $features ): array {
+            $features[] = 'modern-settings';
+            return $features;
+        }
+    );
+    ```
 
 4. Visit **WooCommerce → Settings → Modern Example**.
 
