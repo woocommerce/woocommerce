@@ -15,6 +15,7 @@ Things that must happen before this branch — or any descendant feature work �
 - [ ] Decide the migration story for any real alpha-site data (likely none, but confirm). Meta-key split in this PR already invalidated in-flight alpha emails — call this out in release notes if any alpha adopters exist.
 - [ ] Audit for remaining CodeRabbit Should-fix / Nice-to-have items that should ship with GA (see [`CODERABBIT-TRIAGE.md`](./CODERABBIT-TRIAGE.md)).
 - [ ] Out-of-BIS-scope but blocking the min-WP narrative: clean up `function_exists( 'wp_fast_hash' )` shims that still exist in `plugins/woocommerce/includes/wc-core-functions.php:1274` and `plugins/woocommerce/includes/class-wc-session-handler.php:311-336`. Not BIS work, but someone should file a follow-up so these don't linger.
+- [ ] **Playwright e2e coverage.** The alpha ships with zero browser-level tests. Before GA we need at minimum: guest signup (simple + variable) → success notice + DB row, stock return → back-in-stock email dispatched, unsubscribe link → `status=cancelled` + `source=USER`, admin create form renders select2 correctly, admin cancel → `date_notified` stays NULL. See the decision log entry for PR #53641 for historical groundwork.
 
 ## Decisions log
 
@@ -61,6 +62,19 @@ Unrelated to the BIS code itself, but cost an hour of debugging. Captured in det
 - They share one `.sqlite` file but the new driver maintains its own MySQL information-schema mirror.
 - Tables created via CLI `WC_Install::install()` are invisible to HTTP requests until the PDO driver has run a `CREATE TABLE` against them itself.
 - Recovery ritual when the meta tables go missing from the PDO driver's view: drop the two BIS tables, then re-run `WC_Install::install()` from an HTTP request (not WP-CLI).
+
+### 2026-04-22 — PR #53641 (closed) is the historical Playwright port — not a drop-in
+
+[woocommerce/woocommerce#53641](https://github.com/woocommerce/woocommerce/pull/53641) ("Migrate Back in stock notifications tests to Core", Nathan Silveira, Dec 2024 → closed Mar 2025) contains ~2000 lines of Playwright specs + a 936-line BDD helper that cover the canonical BIS flows: signup (simple/variable/"any"), signup count display, confirmations, notifications, management, account activity, catalog prompts. The author marked it `[Do not merge]` from day one; it was never intended to land in that form.
+
+**Why it's not a drop-in for the current core alpha:**
+
+- All option slugs are the original external plugin's `wc_bis_*` names (e.g. `wc_bis_account_required`, `wc_bis_double_opt_in_required`). Core uses `woocommerce_customer_stock_notifications_*` names. ~20–30 rewrites required across helper + specs.
+- The test-env setup creates three shortcode pages (`[bis_confirmation_received_email]`, `[bis_verify_received_email]`, `[bis_notification_received_email]`) and scrapes them for email content. Those shortcodes only exist in the original plugin. Replace with Mailpit-style assertions or REST reads of notification state.
+- Selectors have likely drifted since Dec 2024 — particularly the admin create form, which this PR just fixed for malformed `<option>` markup and a missing attribute space.
+- Needs storage-state / customer-user wiring in `playwright.config` to match the current e2e-pw conventions.
+
+**Action:** file a follow-up issue to adapt these specs to the core alpha. Rough estimate 1–2 days of work. Files are stashed in the repo on the closed PR's head SHA (`722e4ba15f3c86c93294adebc8b1787e66cf26c2`) and also cached locally under `/tmp/bis-e2e-pr53641/` during triage.
 
 ### 2026-04-22 — `.wp-env.override.json` does not honor `testsPort`
 
