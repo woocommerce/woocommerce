@@ -86,6 +86,19 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 	opacity: 0.6;
 }
 
+// Prevent the flash-of-native-rail on Woo pages. The body gets
+// `wc-nav-v2-active` server-side; the rail is hidden until our JS replaces
+// #adminmenu's contents and adds `wc-nav-v2-rail-ready` to the body.
+// The .no-js override keeps the rail visible when JS is disabled — it'll
+// show the native WP rail rather than a permanently-hidden one.
+body.wc-nav-v2-active #adminmenu {
+	visibility: hidden;
+}
+body.wc-nav-v2-active.wc-nav-v2-rail-ready #adminmenu,
+html.no-js body.wc-nav-v2-active #adminmenu {
+	visibility: visible;
+}
+
 // Spec §6.3: touch devices do not get the hover cascade. Tapping navigates.
 @media (hover: none) {
 	li#toplevel_page_woocommerce > .wp-submenu {

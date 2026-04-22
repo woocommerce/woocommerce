@@ -394,6 +394,13 @@
 			console.error( 'navigation_v2: rail injection failed', err );
 		}
 
+		// Reveal the rail now that injection has completed (or failed). The
+		// SCSS hides #adminmenu on body.wc-nav-v2-active to prevent a flash
+		// of the native rail before we replace its contents; adding
+		// wc-nav-v2-rail-ready flips visibility back on. Unconditional so a
+		// partial failure doesn't leave users staring at an empty rail.
+		$( 'body' ).addClass( 'wc-nav-v2-rail-ready' );
+
 		// Tracks — clicks.
 		$( '#adminmenu' ).on( 'click.wcnavv2', 'a', function () {
 			var $a      = $( this );
