@@ -82,7 +82,7 @@ class Tree_Builder {
 
 				$tree[ $child_slug ] = array(
 					'parent'     => $slug,
-					'title'      => $this->clean_title( $entry[0] ?? $child_slug ),
+					'title'      => self::clean_title( $entry[0] ?? $child_slug ),
 					'position'   => $auto_pos,
 					'source'     => 'rehomed',
 					'capability' => $entry[1] ?? 'read',
@@ -114,9 +114,9 @@ class Tree_Builder {
 	 * @param string $raw Raw title, possibly containing `<span class="update-plugins count-N">N</span>` etc.
 	 * @return string
 	 */
-	private function clean_title( string $raw ): string {
+	public static function clean_title( string $raw ): string {
 		$raw = preg_replace( '/\s*<span class=["\'](?:update-plugins|awaiting-mod|menu-counter)[^"\']*["\'][^>]*>.*?<\/span>\s*/i', '', $raw );
-		return trim( wp_strip_all_tags( $raw ) );
+		return trim( html_entity_decode( wp_strip_all_tags( $raw ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 	}
 
 	/**
@@ -253,7 +253,7 @@ class Tree_Builder {
 				continue;
 			}
 
-			$title     = $this->clean_title( $entry[0] ?? $slug );
+			$title     = self::clean_title( $entry[0] ?? $slug );
 			$title_key = strtolower( trim( $title ) );
 			if ( '' !== $title_key && isset( $existing_titles[ $title_key ] ) ) {
 				// Another item with the same title is already attached — skip dupe.

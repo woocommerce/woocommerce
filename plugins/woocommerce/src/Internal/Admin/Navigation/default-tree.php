@@ -80,7 +80,10 @@ return array(
 		'title'    => __( 'WooPayments', 'woocommerce' ),
 		'position' => 20,
 	),
-	'wc-addons'                                                              => array(
+	// Use the modern wc-admin Marketplace path so the rail highlights when
+	// users land on Extensions (the classic `wc-addons` slug 302-redirects to
+	// this URL anyway).
+	'wc-admin&path=/extensions'                                              => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Extensions', 'woocommerce' ),
 		'icon'     => 'dashicons-admin-plugins',

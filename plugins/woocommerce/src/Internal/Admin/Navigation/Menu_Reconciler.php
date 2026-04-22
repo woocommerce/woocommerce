@@ -158,7 +158,7 @@ class Menu_Reconciler {
 				continue;
 			}
 			$id    = $page->get_id();
-			$label = $page->get_label();
+			$label = Tree_Builder::clean_title( (string) $page->get_label() );
 			if ( '' === $id || '' === $label ) {
 				continue;
 			}
@@ -243,6 +243,38 @@ class Menu_Reconciler {
 					$node['title'],
 				);
 			}
+		}
+
+		// Preserve access-check registration for any tree descendant (e.g.
+		// Status, Settings tabs, Marketing Overview) whose slug WC originally
+		// registered under `woocommerce` as a submenu. We don't want those
+		// rendered in the top-level flyout, but WP's user_can_access_admin_page
+		// iterates $submenu[parent] for the slug match, so dropping them
+		// breaks direct page access. Append them with the `hide-if-js` class
+		// so WP hides them from the rendered flyout but keeps them on the
+		// access-check path.
+		$visible_slugs = array();
+		foreach ( $submenu['woocommerce'] as $entry ) {
+			if ( isset( $entry[2] ) ) {
+				$visible_slugs[ $entry[2] ] = true;
+			}
+		}
+		foreach ( $tree as $slug => $node ) {
+			if ( 'woocommerce' === $slug ) {
+				continue;
+			}
+			if ( isset( $visible_slugs[ $slug ] ) ) {
+				continue;
+			}
+			if ( ! isset( $original_by_slug[ $slug ] ) ) {
+				continue;
+			}
+			$entry = $original_by_slug[ $slug ];
+			// $submenu entries: [title, cap, slug, page_title, classes].
+			// WP appends $classes to the rendered <li> when present.
+			$existing_classes         = isset( $entry[4] ) ? (string) $entry[4] : '';
+			$entry[4]                 = trim( $existing_classes . ' hide-if-js' );
+			$submenu['woocommerce'][] = $entry;
 		}
 	}
 

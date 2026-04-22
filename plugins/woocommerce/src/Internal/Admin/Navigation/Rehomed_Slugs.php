@@ -50,7 +50,8 @@ final class Rehomed_Slugs {
 		'coupons-moved',
 		// Legacy reports page (deprecated).
 		'wc-reports',
-		// Modern Extensions page — duplicate of the classic `wc-addons` entry.
-		'wc-admin&path=/extensions',
+		// Legacy Extensions page — the default tree uses the modern
+		// `wc-admin&path=/extensions` Marketplace path instead.
+		'wc-addons',
 	);
 }
