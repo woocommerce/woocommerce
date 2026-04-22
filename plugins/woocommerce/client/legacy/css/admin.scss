@@ -8358,6 +8358,7 @@ table.bar_chart {
 
 			.select2-selection__rendered {
 				line-height: 38px;
+				padding: 0 12px; // Match WP 7.0 native input padding so text aligns with sibling inputs.
 			}
 
 			.select2-selection__arrow {
@@ -8616,6 +8617,16 @@ table.bar_chart {
 	&.post-type-product #postdivrich.woocommerce-product-description {
 		margin-left: 4px;
 		margin-right: 4px;
+	}
+
+	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
+	.wc-shipping-zone-settings #zone_name {
+		padding: 0 12px;
+	}
+
+	// Zone regions TreeSelectControl: match WP 7.0 native select border-radius.
+	#wc-shipping-zone-region-picker-root .woocommerce-tree-select-control .components-base-control {
+		border-radius: 2px;
 	}
 }
 
