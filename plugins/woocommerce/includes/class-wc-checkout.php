@@ -563,9 +563,9 @@ class WC_Checkout {
 			// Order model compositions: inject the order and product instances.
 			if ( $item instanceof WC_Order_Item_Product ) {
 				$item->set_order( $order ); // Earlier order instance injection aiming set_backorder_meta logic.
-				if ( $product ) {
-					$item->set_product( $product );
-				}
+				// if ( $product ) {
+				// 	$item->set_product( $product );
+				// }
 			}
 
 			$item->set_backorder_meta();
