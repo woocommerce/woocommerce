@@ -1,8 +1,8 @@
-# Store-Agnostic Inner Blocks Pattern
+# Selectable Items Inner Blocks
 
 ## Overview
 
-This document defines the **`woocommerce/selectableItems` context protocol** - a contract between parent blocks and reusable inner blocks for rendering selectable item lists (swatches, chips, dropdowns, etc.).
+This document defines the **`woocommerce/selectableItems` context protocol** — a contract between parent blocks and reusable inner blocks for rendering selectable item lists (chips, checkbox lists, dropdowns, etc.).
 
 **Status:** Draft specification
 **Protocol Name:** `woocommerce/selectableItems`
