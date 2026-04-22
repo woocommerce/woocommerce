@@ -146,6 +146,27 @@ const productFiltersStore = {
 					filter.type === item.type && filter.value === item.value
 			);
 		},
+		get displayedItems() {
+			const context = getContext< ProductFiltersContext >();
+			const { items, showingAll, displayLimit } = context as ProductFiltersContext & {
+				items?: FilterItem[];
+				showingAll?: boolean;
+				displayLimit?: number;
+			};
+			if ( ! items ) return [];
+			if ( showingAll || ! displayLimit ) return items;
+			return items.slice( 0, displayLimit );
+		},
+		get hasMoreItems() {
+			const context = getContext< ProductFiltersContext >();
+			const { items, showingAll, displayLimit } = context as ProductFiltersContext & {
+				items?: FilterItem[];
+				showingAll?: boolean;
+				displayLimit?: number;
+			};
+			if ( ! items || ! displayLimit ) return false;
+			return ! showingAll && items.length > displayLimit;
+		},
 	},
 	actions: {
 		openOverlay: () => {
@@ -188,6 +209,12 @@ const productFiltersStore = {
 				selectFilter();
 			}
 			actions.navigate();
+		},
+		showAll: () => {
+			const context = getContext< ProductFiltersContext >() as ProductFiltersContext & {
+				showingAll?: boolean;
+			};
+			context.showingAll = true;
 		},
 		// TODO: Remove the hardcoded type once https://github.com/woocommerce/gutenberg/pull/8 is merged.
 		*navigate(): Generator {
