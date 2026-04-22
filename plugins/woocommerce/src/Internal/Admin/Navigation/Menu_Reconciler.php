@@ -130,8 +130,38 @@ class Menu_Reconciler {
 
 		$this->remove_rehomed_top_level_items();
 		$this->replace_woocommerce_submenu( $tree );
+		$this->hide_non_woo_relocated_items();
 
 		self::$tree = $tree;
+	}
+
+	/**
+	 * Hide items in other WP admin menus (like Tools) that our tree relocates
+	 * into the Woo rail. We keep the original $submenu entries intact so WP's
+	 * access check still resolves the slug — just add a `hide-if-js` class
+	 * to the entry so the rendered rail doesn't show it twice.
+	 *
+	 * Tuple format: `[ parent_slug, child_slug ]`.
+	 */
+	private function hide_non_woo_relocated_items(): void {
+		global $submenu;
+
+		$relocations = array(
+			array( 'tools.php', 'action-scheduler' ),
+		);
+
+		foreach ( $relocations as list( $parent, $child ) ) {
+			if ( ! isset( $submenu[ $parent ] ) ) {
+				continue;
+			}
+			foreach ( $submenu[ $parent ] as $key => $entry ) {
+				if ( ! isset( $entry[2] ) || $entry[2] !== $child ) {
+					continue;
+				}
+				$existing                   = isset( $entry[4] ) ? (string) $entry[4] : '';
+				$submenu[ $parent ][ $key ][4] = trim( $existing . ' hide-if-js' );
+			}
+		}
 	}
 
 	/**
