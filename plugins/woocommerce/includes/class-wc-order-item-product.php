@@ -406,29 +406,26 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 * @return WC_Product|bool
 	 */
 	public function get_product() {
+		// Refresh/instantiate/cache cycle for the product instance.
 		if ( $this->product ) {
-			// Invalidate the product instance if it was changed meanwhile: uses in-memory cached post data behind scenes.
 			$product_id  = $this->product->get_id();
 			$modified_at = $this->product->get_date_modified();
 			if ( $modified_at && $modified_at->getTimestamp() !== get_post_modified_time( 'U', true, $product_id ) ) {
 				$this->product = null;
 			}
 		}
+		$this->product = $this->product ?? wc_get_product( $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id() );
 
-		if ( null === $this->product ) {
-			// Instantiate and cache the product instance.
-			$product = wc_get_product( $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id() );
-			// Backwards compatible filter from WC_Order::get_product_from_item().
-			if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
-				// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- TBD, digital archeology.
-				$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
-			}
+		// Backwards compatible filter from WC_Order::get_product_from_item().
+		$product = $this->product;
+		if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
 			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- TBD, digital archeology.
-			$this->product = apply_filters( 'woocommerce_order_item_product', $product, $this );
-			// TBD: apply the filters in set_product as well, to ensure they are not bypassed.
+			$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
 		}
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- TBD, digital archeology.
+		$product = apply_filters( 'woocommerce_order_item_product', $product, $this );
 
-		return $this->product;
+		return $product;
 	}
 
 	/**
