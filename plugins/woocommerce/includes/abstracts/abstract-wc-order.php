@@ -1170,10 +1170,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Set parent.
+		$item->set_order_id( $this->get_id() );
 		if ( $this instanceof \WC_Order ) {
 			$item->set_order( $this );
 		}
-		$item->set_order_id( $this->get_id() );
 
 		// Append new row with generated temporary ID.
 		$item_id = $item->get_id();
