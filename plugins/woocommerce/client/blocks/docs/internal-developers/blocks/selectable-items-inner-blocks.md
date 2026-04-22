@@ -509,7 +509,6 @@ protected function render( $attributes, $content, $block ) {
         array_map(
             function ( $item ) {
                 $item['id']        = $item['type'] . '-' . $item['value'];
-                $item['ariaLabel'] = $this->get_aria_label( $item );
                 return $item;
             },
             $items
