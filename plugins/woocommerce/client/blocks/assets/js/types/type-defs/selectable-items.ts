@@ -3,29 +3,27 @@
  */
 import type { ReactNode } from 'react';
 
-export interface SelectableItemsContext {
-	items: SelectableItem[];
+export type SelectableItem< T = unknown > = (
+	| { label: string; ariaLabel?: string }
+	| { label: ReactNode; ariaLabel: string }
+) & {
+	id: string;
+	value: string;
+	selected?: boolean;
+	disabled?: boolean;
+	hidden?: boolean;
+	type?: string;
+} & T;
+
+export interface SelectableItemsContext< T = unknown > {
+	items: SelectableItem< T >[];
 	selectionMode: 'single' | 'multiple';
 	selectAction: string;
 	storeNamespace: string;
 	groupLabel?: string;
-	showCounts?: boolean;
+	dynamicItems?: boolean;
 }
 
-export type SelectableItem = (
-	| { label: string; ariaLabel?: string }
-	| { label: ReactNode; ariaLabel: string }
- ) & {
-	value: string;
-	selected?: boolean;
-	count?: number;
-	disabled?: boolean;
-	type?: string;
-	color?: string;
-	image?: string;
-	id?: number;
-	parent?: number;
-	depth?: number;
-	menuOrder?: number;
-	[ key: string ]: unknown;
+export type SelectableItemsBlockContext< T = unknown > = {
+	'woocommerce/selectableItems': SelectableItemsContext< T >;
 };
