@@ -89,10 +89,13 @@ return array(
 		'icon'     => 'dashicons-admin-plugins',
 		'position' => 95,
 	),
+	// Status always sits at the end of Settings; use a high position so
+	// later additions (Scheduled Actions at 100, third-party tabs, etc.)
+	// still sort before it.
 	'wc-status'                                                              => array(
 		'parent'   => 'wc-settings',
 		'title'    => __( 'Status', 'woocommerce' ),
-		'position' => 99,
+		'position' => 9999,
 	),
 	// Action Scheduler registers itself as a submenu of Tools with the bare
 	// slug `action-scheduler`; surface it inside Settings here and override
