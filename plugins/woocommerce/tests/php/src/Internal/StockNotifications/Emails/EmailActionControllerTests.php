@@ -25,11 +25,11 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$notification->set_status( NotificationStatus::PENDING );
 		$notification->set_user_email( 'test@example.com' );
 		$key = time() . ':' . wp_fast_hash( 'test' );
-		$notification->update_meta_data( 'email_link_action_key', $key );
+		$notification->update_meta_data( 'verification_action_key', $key );
 		$id = $notification->save();
 
 		$controller = new EmailActionController();
-		$controller->validate_and_maybe_process_request( $id, 'test' );
+		$controller->validate_and_maybe_process_request( $id, 'test', 'verify' );
 		$updated_notification = Factory::get_notification( $id );
 		$this->assertEquals( NotificationStatus::ACTIVE, $updated_notification->get_status() );
 	}
@@ -44,11 +44,11 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->set_user_email( 'test@example.com' );
 		$key = wp_fast_hash( 'test' );
-		$notification->update_meta_data( 'email_link_action_key', $key );
+		$notification->update_meta_data( 'unsubscribe_action_key', $key );
 		$id = $notification->save();
 
 		$controller = new EmailActionController();
-		$controller->validate_and_maybe_process_request( $id, 'test' );
+		$controller->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
 		$updated_notification = Factory::get_notification( $id );
 		$this->assertEquals( NotificationStatus::CANCELLED, $updated_notification->get_status() );
 		$this->assertEquals( NotificationCancellationSource::USER, $updated_notification->get_cancellation_source() );
