@@ -551,12 +551,6 @@ class WC_Checkout {
 			);
 
 			if ( $product ) {
-				// Order model compositions: inject the order and product instances.
-				if ( $item instanceof WC_Order_Item_Product ) {
-					$item->set_order( $order ); // Earlier order instance injection aiming set_backorder_meta logic.
-					$item->set_product( $product );
-				}
-
 				$item->set_props(
 					array(
 						'name'         => $product->get_name(),
@@ -565,6 +559,13 @@ class WC_Checkout {
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
 					)
 				);
+			}
+			// Order model compositions: inject the order and product instances.
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$item->set_order( $order ); // Earlier order instance injection aiming set_backorder_meta logic.
+				if ( $product ) {
+					$item->set_product( $product );
+				}
 			}
 
 			$item->set_backorder_meta();
