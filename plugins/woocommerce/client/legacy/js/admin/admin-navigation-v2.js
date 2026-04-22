@@ -157,7 +157,17 @@
 			aClasses.push( 'wp-has-submenu', 'wp-not-current-submenu' );
 		}
 
-		var $li = $( '<li></li>' ).addClass( liClasses.join( ' ' ) );
+		// wc-admin's React router calls wpNavMenuClassChange( page, url ) when
+		// routing between pages and queries `#<wpOpenMenu>` to highlight the
+		// active top-level. Each wc-admin page declares a `wpOpenMenu` like
+		// `toplevel_page_woocommerce-marketing`. Give our rail items the same
+		// WP-native `toplevel_page_<slug>` id so those lookups succeed and
+		// wc-admin's highlighting works across navigation.
+		var liId = 'toplevel_page_' + cssSlug( node.slug );
+
+		var $li = $( '<li></li>' )
+			.attr( 'id', liId )
+			.addClass( liClasses.join( ' ' ) );
 		var $a  = $( '<a></a>' )
 			.attr( 'href', toAdminUrl( node.url || node.slug ) )
 			.addClass( aClasses.join( ' ' ) );
@@ -339,10 +349,18 @@
 		}
 
 		var isWooPage = window.wcNavV2Config.isWooPage === '1';
-		if ( isWooPage ) {
-			injectWooRail();
-		} else {
-			injectNativeCascade();
+		// Wrap in try/catch so any bug in our rail injection can't take down
+		// wc-admin's React app (which also runs at DOM-ready). Errors log to
+		// the console but never bubble.
+		try {
+			if ( isWooPage ) {
+				injectWooRail();
+			} else {
+				injectNativeCascade();
+			}
+		} catch ( err ) {
+			// eslint-disable-next-line no-console
+			console.error( 'navigation_v2: rail injection failed', err );
 		}
 
 		// Tracks — clicks.
