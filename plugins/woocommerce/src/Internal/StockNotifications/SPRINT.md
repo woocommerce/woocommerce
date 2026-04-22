@@ -101,6 +101,42 @@ Things explicitly parked for later. Cross-reference before starting sibling work
 - **`is_email()` guard + batching** in `PrivacyEraser::erase_notification_data()` — half-addressed in this PR (null guard + time normalisation); the rest remains Should-fix.
 - **`wp_fast_hash` shim cleanup in core** — out of BIS scope; covered in the pre-ship checklist above.
 
+## Handoff ↔ sprint reconciliation
+
+Reconciled against the [2025-08-23 "Back in Stock Notifications: Paused" handoff post](https://somewherewarmattic.wordpress.com/2025/08/23/handoff-back-in-stock-notifications-paused/) on 2026-04-22.
+
+**Covered by a sprint issue:**
+
+| Handoff item | WOOPLUG | Sprint issue | Status |
+|---|---|---|---|
+| Verify/confirm emails | 5410 | [RSM-438](https://linear.app/a8c/issue/RSM-438) | Backlog — Urgent |
+| Data tracking | 4995 | [RSM-439](https://linear.app/a8c/issue/RSM-439) | Backlog — High |
+| Data migration | 5001 | [RSM-442](https://linear.app/a8c/issue/RSM-442) | Scope cut |
+| E2E tests | 5412 | [RSM-437](https://linear.app/a8c/issue/RSM-437) | Backlog — Medium (enriched with PR #53641/#55836 context) |
+| CodeRabbit review | 5411 | rolled into RSM-436 + RSM-443 | **Done** in [PR #64329](https://github.com/woocommerce/woocommerce/pull/64329) — 8 of 9 Must-fix landed, #9 absorbed into RSM-438 |
+| Service init optimization | 5228 | inside RSM-443 | Recommended no action (constructors are cheap) |
+| Rate limiter | 4996 | [RSM-441](https://linear.app/a8c/issue/RSM-441) | Backlog — Medium |
+| My Account page | 4997 | [RSM-444](https://linear.app/a8c/issue/RSM-444) | Scope cut |
+| Copy review | — | inside RSM-443 | Days 9–10 polish |
+
+**In the sprint but not from the handoff** (surfaced from Technical Fitness / PRD review):
+
+- [RSM-440](https://linear.app/a8c/issue/RSM-440) — Design pass on signup form + email (High, Days 1–3)
+- [RSM-445](https://linear.app/a8c/issue/RSM-445) — Basic analytics/signups dashboard (Medium, Days 4–8; full dashboard remains out of MVP scope per PRD)
+- [RSM-446](https://linear.app/a8c/issue/RSM-446) — Variations form accessibility fix (High, Days 4–8)
+
+**Correctly excluded as beyond-i1** (handoff matches sprint scope):
+
+- Gutenberg Email Editor support
+- Frontend Blocks: BIS form block for single-product template
+- `BatchProcessingController` improvements
+
+**Gaps — handoff items with no RSM issue:**
+
+- [ ] **Docs:** "Move and refine documentation in Core" (handoff § Other Work). Not tracked. Decide: file an RSM issue, or defer post-sabbatical.
+- [ ] **Integrations:** Assess current BIS plugin integrations with Product Bundles, Subscriptions, Pre-Orders (handoff § Other Work). Not tracked. Decide: file an RSM issue, or defer post-sabbatical.
+- [ ] **Post-merge coordination:** CfT (internal/external) + Product/Marketing follow-ups (handoff § Other Work). Post-merge by definition; needs an owner once this PR lands.
+
 ## Open questions
 
 Holding tank for things we need product/team decisions on. Empty = nothing blocked on others right now.
