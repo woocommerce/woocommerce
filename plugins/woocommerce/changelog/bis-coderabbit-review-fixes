@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Address CodeRabbit review feedback on the Back in Stock Notifications alpha: fix copy-paste bug in cancel action, split verification and unsubscribe action keys, guard unreadable notifications in retention and privacy erasers, repair malformed option tags in the admin create form, correct operator precedence in the background processor, rename typo filter, and drop unused sprintf arg in the verified email template.
