@@ -547,6 +547,7 @@ class WC_Checkout {
 					'subtotal_tax' => $values['line_subtotal_tax'],
 					'total_tax'    => $values['line_tax'],
 					'taxes'        => $values['line_tax_data'],
+					'order'        => $order, // Order model compositions: inject the order instance.
 				)
 			);
 
@@ -557,15 +558,9 @@ class WC_Checkout {
 						'tax_class'    => $product->get_tax_class(),
 						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
+						'product'      => $product, // Order model compositions: inject the product instance.
 					)
 				);
-			}
-			// Order model compositions: inject the order and product instances.
-			if ( $item instanceof WC_Order_Item_Product && $product instanceof \WC_Product ) {
-				$item->set_order( $order ); // Earlier order instance injection aiming set_backorder_meta logic.
-				if ( in_array( get_post_type( $product->get_id() ) , array( 'product_variation', 'product' ), true ) ) {
-					$item->set_product( $product );
-				}
 			}
 
 			$item->set_backorder_meta();
