@@ -3,6 +3,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Refunds;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
 use WC_Cache_Helper;
 use WC_Helper_Product;
@@ -357,6 +358,113 @@ class DataUtilsTest extends WC_Unit_Test_Case {
 	 */
 	public function test_calculate_refund_amount_returns_null_for_empty() {
 		$this->assertNull( $this->data_utils->calculate_refund_amount( array() ) );
+	}
+
+	/**
+	 * @testdox Should compute line item refund total for a product based on unit price and quantity.
+	 */
+	public function test_compute_line_item_refund_total_product(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 25.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props( array( 'product' => $product, 'quantity' => 4, 'subtotal' => 100.00, 'total' => 100.00 ) );
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$this->assertSame( 50.00, $this->data_utils->compute_line_item_refund_total( $item, 2 ) );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox Should return error when preview line item quantity exceeds refundable.
+	 */
+	public function test_validate_preview_line_items_quantity_exceeds_refundable(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 25.00 );
+		$product->save();
+
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props( array( 'product' => $product, 'quantity' => 2, 'subtotal' => 50.00, 'total' => 50.00 ) );
+		$item->save();
+		$order->add_item( $item );
+		$order->set_total( 50.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		wc_create_refund( array(
+			'order_id'   => $order->get_id(),
+			'amount'     => 25.00,
+			'line_items' => array( $item->get_id() => array( 'qty' => 1, 'refund_total' => 25.00, 'refund_tax' => array() ) ),
+		) );
+
+		$result = $this->data_utils->validate_preview_line_items(
+			array( array( 'line_item_id' => $item->get_id(), 'quantity' => 2 ) ),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'quantity_exceeds_refundable', $result->get_error_code() );
+
+		$product->delete( true );
+		$order->delete( true );
+	}
+
+	/**
+	 * @testdox Should return error when order is not refundable.
+	 */
+	public function test_validate_preview_line_items_order_not_refundable(): void {
+		$order = $this->create_order_with_taxes( array(), 50.00 );
+		$order->set_status( OrderStatus::CANCELLED );
+		$order->save();
+
+		$items = $order->get_items( 'line_item' );
+		$item  = reset( $items );
+
+		$result = $this->data_utils->validate_preview_line_items(
+			array( array( 'line_item_id' => $item->get_id(), 'quantity' => 1 ) ),
+			$order
+		);
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertEquals( 'order_not_refundable', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should build refund preview with correct tax extraction.
+	 */
+	public function test_build_refund_preview_with_tax(): void {
+		$tax_rate_id = WC_Tax::_insert_tax_rate( array(
+			'tax_rate_country' => 'US', 'tax_rate_state' => '', 'tax_rate' => '10.0000',
+			'tax_rate_name' => 'VAT', 'tax_rate_priority' => '1', 'tax_rate_compound' => '0',
+			'tax_rate_shipping' => '1', 'tax_rate_order' => '1', 'tax_rate_class' => '',
+		) );
+
+		$order = $this->create_order_with_taxes( array( $tax_rate_id ), 100.00 );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$items  = $order->get_items( 'line_item' );
+		$item   = reset( $items );
+		$result = $this->data_utils->build_refund_preview(
+			$order,
+			array( array( 'line_item_id' => $item->get_id(), 'quantity' => 1 ) )
+		);
+
+		$this->assertEquals( '100.00', $result['subtotal'] );
+		$this->assertEquals( '10.00', $result['tax'] );
+		$this->assertEquals( '110.00', $result['total'] );
+		$this->assertArrayHasKey( 'breakdown', $result );
+		$this->assertArrayHasKey( 'max_refundable', $result );
+		$this->assertCount( 1, $result['breakdown']['products']['items'] );
+		$this->assertArrayHasKey( 'name', $result['breakdown']['products']['items'][0] );
+		$this->assertArrayHasKey( 'product_id', $result['breakdown']['products']['items'][0] );
 	}
 
 	/**

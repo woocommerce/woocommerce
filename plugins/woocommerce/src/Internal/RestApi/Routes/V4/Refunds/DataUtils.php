@@ -12,9 +12,12 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\NumberUtil;
-use WP_Error;
 use WC_Order;
+use WC_Order_Item_Fee;
+use WC_Order_Item_Product;
+use WC_Order_Item_Shipping;
 use WC_Tax;
+use WP_Error;
 
 /**
  * Helper methods for the REST API.
@@ -118,7 +121,7 @@ class DataUtils {
 	 * @param array $line_item_taxes The taxes to convert.
 	 * @return array The converted taxes.
 	 */
-	private function convert_line_item_taxes_to_internal_format( $line_item_taxes ) {
+	protected function convert_line_item_taxes_to_internal_format( $line_item_taxes ) {
 		$prepared_taxes = array();
 
 		foreach ( $line_item_taxes as $line_item_tax ) {
@@ -254,7 +257,7 @@ class DataUtils {
 	 * @param array $calculated_taxes Taxes keyed by tax ID with amounts.
 	 * @return array Schema format with id and refund_total keys.
 	 */
-	private function convert_proportional_taxes_to_schema_format( array $calculated_taxes ): array {
+	protected function convert_proportional_taxes_to_schema_format( array $calculated_taxes ): array {
 		$result = array();
 		foreach ( $calculated_taxes as $tax_id => $amount ) {
 			$result[] = array(
@@ -272,7 +275,7 @@ class DataUtils {
 	 * @param array    $tax_ids Array of tax rate IDs that apply to an item.
 	 * @return array Tax rates array formatted for WC_Tax::calc_*_tax() methods.
 	 */
-	private function build_tax_rates_array( WC_Order $order, array $tax_ids ): array {
+	protected function build_tax_rates_array( WC_Order $order, array $tax_ids ): array {
 		$tax_rates = array();
 		$tax_items = $order->get_items( OrderItemType::TAX );
 
@@ -290,6 +293,199 @@ class DataUtils {
 		}
 
 		return $tax_rates;
+	}
+
+	/**
+	 * Compute the tax-inclusive refund total for a line item at a given quantity.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item     The order item.
+	 * @param int                                                            $quantity The quantity to refund.
+	 * @return float The tax-inclusive refund total.
+	 */
+	public function compute_line_item_refund_total( $item, int $quantity ): float {
+		$price_decimals = wc_get_price_decimals();
+
+		if ( $item instanceof WC_Order_Item_Product ) {
+			$original_qty = $item->get_quantity();
+			if ( 0 === $original_qty ) {
+				return 0.0;
+			}
+			$unit_price_with_tax = ( (float) $item->get_total() + (float) $item->get_total_tax() ) / $original_qty;
+			return NumberUtil::round( $unit_price_with_tax * $quantity, $price_decimals );
+		}
+
+		return NumberUtil::round( (float) $item->get_total() + (float) $item->get_total_tax(), $price_decimals );
+	}
+
+	/**
+	 * Build a refund preview showing authoritative totals and breakdowns.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param WC_Order $order      The order being previewed for refund.
+	 * @param array    $line_items Array of line items with 'line_item_id' and 'quantity' keys.
+	 * @return array The structured preview response.
+	 */
+	public function build_refund_preview( WC_Order $order, array $line_items ): array {
+		$price_decimals = wc_get_price_decimals();
+		$products_items = array();
+		$shipping_items = array();
+		$fees_items     = array();
+
+		foreach ( $line_items as $line_item ) {
+			$item = $order->get_item( $line_item['line_item_id'] );
+			if ( ! $item ) {
+				continue;
+			}
+
+			/** @var WC_Order_Item_Product|WC_Order_Item_Shipping|WC_Order_Item_Fee $item */
+			$refund_total_with_tax = $this->compute_line_item_refund_total( $item, $line_item['quantity'] );
+			$subtotal              = $refund_total_with_tax;
+			$tax                   = 0.0;
+
+			$original_taxes = $item->get_taxes();
+			$tax_totals     = array_filter(
+				$original_taxes['total'] ?? array(),
+				function ( $amount ) {
+					return is_numeric( $amount ) && $amount > 0;
+				}
+			);
+
+			if ( ! empty( $tax_totals ) ) {
+				$tax_rates        = $this->build_tax_rates_array( $order, array_keys( $tax_totals ) );
+				$calculated_taxes = WC_Tax::calc_inclusive_tax( $refund_total_with_tax, $tax_rates );
+				$calculated_taxes = array_map(
+					function ( $t ) use ( $price_decimals ) {
+						return NumberUtil::round( $t, $price_decimals );
+					},
+					$calculated_taxes
+				);
+				$tax      = NumberUtil::round( array_sum( $calculated_taxes ), $price_decimals );
+				$subtotal = NumberUtil::round( $refund_total_with_tax - $tax, $price_decimals );
+			}
+
+			$item_data = array(
+				'id'       => $line_item['line_item_id'],
+				'quantity' => $line_item['quantity'],
+				'subtotal' => wc_format_decimal( $subtotal, $price_decimals ),
+				'tax'      => wc_format_decimal( $tax, $price_decimals ),
+				'total'    => wc_format_decimal( $refund_total_with_tax, $price_decimals ),
+			);
+
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$item_data['name']         = $item->get_name();
+				$item_data['product_id']   = $item->get_product_id();
+				$item_data['variation_id'] = $item->get_variation_id();
+				$products_items[]          = $item_data;
+			} elseif ( $item instanceof WC_Order_Item_Shipping ) {
+				$item_data['name'] = $item->get_name();
+				$shipping_items[]  = $item_data;
+			} elseif ( $item instanceof WC_Order_Item_Fee ) {
+				$item_data['name'] = $item->get_name();
+				$fees_items[]      = $item_data;
+			}
+		}
+
+		$build_section = function ( array $items ) use ( $price_decimals ): array {
+			$s = 0.0;
+			$t = 0.0;
+			$g = 0.0;
+			foreach ( $items as $i ) {
+				$s += (float) $i['subtotal'];
+				$t += (float) $i['tax'];
+				$g += (float) $i['total'];
+			}
+			return array(
+				'items'    => $items,
+				'subtotal' => wc_format_decimal( $s, $price_decimals ),
+				'tax'      => wc_format_decimal( $t, $price_decimals ),
+				'total'    => wc_format_decimal( $g, $price_decimals ),
+			);
+		};
+
+		$ps = $build_section( $products_items );
+		$ss = $build_section( $shipping_items );
+		$fs = $build_section( $fees_items );
+
+		return array(
+			'breakdown'      => array( 'products' => $ps, 'shipping' => $ss, 'fees' => $fs ),
+			'subtotal'       => wc_format_decimal( (float) $ps['subtotal'] + (float) $ss['subtotal'] + (float) $fs['subtotal'], $price_decimals ),
+			'tax'            => wc_format_decimal( (float) $ps['tax'] + (float) $ss['tax'] + (float) $fs['tax'], $price_decimals ),
+			'total'          => wc_format_decimal( (float) $ps['total'] + (float) $ss['total'] + (float) $fs['total'], $price_decimals ),
+			'max_refundable' => wc_format_decimal( $order->get_remaining_refund_amount(), $price_decimals ),
+		);
+	}
+
+	/**
+	 * Validate line items for a preview request.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array    $line_items The line items to validate.
+	 * @param WC_Order $order      The order object.
+	 * @return true|WP_Error True on success, WP_Error on failure.
+	 */
+	public function validate_preview_line_items( array $line_items, WC_Order $order ) {
+		if ( empty( $line_items ) ) {
+			return new WP_Error( 'invalid_line_item', __( 'At least one line item is required.', 'woocommerce' ) );
+		}
+
+		if ( ! in_array( $order->get_status(), self::REFUNDABLE_STATUSES, true ) ) {
+			return new WP_Error( 'order_not_refundable', __( 'This order cannot be refunded.', 'woocommerce' ) );
+		}
+
+		if ( (float) $order->get_remaining_refund_amount() <= 0 ) {
+			return new WP_Error( 'order_not_refundable', __( 'This order has already been fully refunded.', 'woocommerce' ) );
+		}
+
+		$refund_data = $this->compute_refunded_quantities_and_totals( $order );
+
+		foreach ( $line_items as $line_item ) {
+			$line_item_id = $line_item['line_item_id'] ?? null;
+			if ( ! $line_item_id ) {
+				return new WP_Error( 'invalid_line_item', __( 'Line item ID is required.', 'woocommerce' ) );
+			}
+
+			$item = $order->get_item( $line_item_id );
+			if ( ! $item || $item->get_order_id() !== $order->get_id() ) {
+				return new WP_Error( 'invalid_line_item', __( 'Line item not found.', 'woocommerce' ) );
+			}
+
+			if ( ! $item instanceof WC_Order_Item_Product && ! $item instanceof WC_Order_Item_Fee && ! $item instanceof WC_Order_Item_Shipping ) {
+				return new WP_Error( 'invalid_line_item', __( 'Line item is not a product, fee, or shipping line.', 'woocommerce' ) );
+			}
+
+			$quantity = $line_item['quantity'] ?? 0;
+
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$remaining_qty = $item->get_quantity() + ( $refund_data['qtys'][ $line_item_id ] ?? 0 );
+				if ( $quantity > $remaining_qty ) {
+					return new WP_Error(
+						'quantity_exceeds_refundable',
+						sprintf(
+							/* translators: %d: remaining refundable quantity */
+							__( 'Requested quantity exceeds remaining refundable quantity (%d).', 'woocommerce' ),
+							$remaining_qty
+						)
+					);
+				}
+			}
+
+			if ( $item instanceof WC_Order_Item_Shipping || $item instanceof WC_Order_Item_Fee ) {
+				$refunded_total  = $refund_data['totals'][ $line_item_id ] ?? 0.0;
+				$remaining_total = (float) $item->get_total() - $refunded_total;
+				if ( $remaining_total <= 0 ) {
+					return new WP_Error(
+						'quantity_exceeds_refundable',
+						__( 'This line item has already been fully refunded.', 'woocommerce' )
+					);
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**

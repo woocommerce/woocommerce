@@ -5,6 +5,7 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Controller as RefundsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundPreviewSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\Schema\RefundSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\CollectionQuery;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Refunds\DataUtils;
@@ -119,13 +120,14 @@ class WC_REST_Refunds_V4_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		// Create schema instances with dependency injection.
 		$this->refund_schema = new RefundSchema();
+		$preview_schema      = new RefundPreviewSchema();
 
 		// Create utils instances.
 		$collection_query = new CollectionQuery();
 		$data_utils       = new DataUtils();
 
 		$this->endpoint = new RefundsController();
-		$this->endpoint->init( $this->refund_schema, $collection_query, $data_utils );
+		$this->endpoint->init( $this->refund_schema, $preview_schema, $collection_query, $data_utils );
 
 		$this->user_id = wp_insert_user(
 			array(
