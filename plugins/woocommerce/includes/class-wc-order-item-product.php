@@ -103,8 +103,15 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$product_id = absint( $value );
 		$this->set_prop( 'product_id', $product_id );
 
-		if ( null !== $this->product && ( ! $this->product || $this->product->get_id() !== $product_id ) ) {
-			$this->product = null;
+		if ( null !== $this->product ) {
+			// Cached instance invalidation: match the cached product identity against the dispatched ID.
+			$cached_product_id = null;
+			if ( $this->product ) {
+				$cached_product_id = $this->product->is_type( ProductType::VARIATION ) ? $this->product->get_parent_id() : $this->product->get_id();
+			}
+			if ( ! $this->product || $cached_product_id !== $value ) {
+				$this->product = null;
+			}
 		}
 	}
 
@@ -125,8 +132,15 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$variation_id = absint( $value );
 		$this->set_prop( 'variation_id', $variation_id );
 
-		if ( null !== $this->product && ( ! $this->product || $this->product->get_id() !== $variation_id ) ) {
-			$this->product = null;
+		if ( null !== $this->product ) {
+			// Cached instance invalidation: match the cached product identity against the dispatched ID.
+			$cached_variation_id = null;
+			if ( $this->product ) {
+				$cached_variation_id = $this->product->is_type( ProductType::VARIATION ) ? $this->product->get_id() : 0;
+			}
+			if ( ! $this->product || $cached_variation_id !== $value ) {
+				$this->product = null;
+			}
 		}
 	}
 
