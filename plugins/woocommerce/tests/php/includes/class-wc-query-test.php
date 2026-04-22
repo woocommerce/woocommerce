@@ -260,14 +260,19 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		$this->assertIsArray( $tax_query, 'Tax query should be an array after WC_Query merges its clause.' );
 		$this->assertContains( $existing_clause, $tax_query, 'Pre-existing tax_query clause should survive the merge.' );
 
-		$visibility_clause_present = false;
+		$product_visibility_terms = wc_get_product_visibility_term_ids();
+		$exclude_term_id          = (int) $product_visibility_terms['exclude-from-search'];
+		$visibility_clause        = null;
 		foreach ( $tax_query as $clause ) {
 			if ( is_array( $clause ) && isset( $clause['taxonomy'] ) && 'product_visibility' === $clause['taxonomy'] ) {
-				$visibility_clause_present = true;
+				$visibility_clause = $clause;
 				break;
 			}
 		}
-		$this->assertTrue( $visibility_clause_present, 'WC_Query should append the product_visibility exclusion clause to the existing tax_query.' );
+		$this->assertNotNull( $visibility_clause, 'WC_Query should append the product_visibility exclusion clause to the existing tax_query.' );
+		$this->assertSame( 'term_taxonomy_id', $visibility_clause['field'], 'Visibility clause should match by term_taxonomy_id.' );
+		$this->assertSame( array( $exclude_term_id ), $visibility_clause['terms'], 'Visibility clause should target the exclude-from-search term.' );
+		$this->assertSame( 'NOT IN', $visibility_clause['operator'], 'Visibility clause should use the NOT IN operator.' );
 
 		remove_action( 'pre_get_posts', $hook, 5 );
 		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
