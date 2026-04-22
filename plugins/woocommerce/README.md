@@ -1,3 +1,5 @@
+> https://radicalupdates.wordpress.com/2026/04/20/woocommerce-increase-checkout-throughput-under-cold-cache-peak-load/
+
 # [![WooCommerce](https://woocommerce.com/wp-content/themes/woo/images/logo-woocommerce@2x.png 'WooCommerce')](https://woocommerce.com/)
 
 [![License](https://poser.pugx.org/woocommerce/woocommerce/license 'License')](https://packagist.org/packages/woocommerce/woocommerce)
