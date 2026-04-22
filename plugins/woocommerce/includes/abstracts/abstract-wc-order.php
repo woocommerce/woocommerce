@@ -959,8 +959,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 					if ( $this instanceof \WC_Order ) {
 						// Order model compositions: inject the order instance.
-						$items = array_filter( $read_items, static fn( $item ) => $item instanceof WC_Order_Item );
-						array_walk( $items, fn( $item ) => $item->set_order( $this ) );
+						$order_items = array_filter( $read_items, static fn( $item ) => $item instanceof WC_Order_Item );
+						array_walk( $order_items, fn( $item ) => $item->set_order( $this ) );
 					}
 
 					$this->items[ $group ] = $read_items;
