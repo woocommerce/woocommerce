@@ -68,12 +68,15 @@ const Edit = ( props: EditProps ) => {
 					ariaLabel: value,
 					value: key,
 					selected: index === 0,
-					count,
+					...( showCounts && { count } ),
 					type: 'status',
+					// Keep count for filtering even if not shown
+					_count: count,
 				};
 			} )
-			.filter( ( item ) => ! hideEmpty || item.count > 0 );
-	}, [ stockStatusOptions, filteredCounts, hideEmpty ] );
+			.filter( ( item ) => ! hideEmpty || item._count > 0 )
+			.map( ( { _count, ...item } ) => item );
+	}, [ stockStatusOptions, filteredCounts, hideEmpty, showCounts ] );
 
 	return (
 		<div { ...innerBlocksProps }>
@@ -87,7 +90,6 @@ const Edit = ( props: EditProps ) => {
 							selectAction: 'toggleFilter',
 							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-							showCounts,
 						},
 					} }
 				>

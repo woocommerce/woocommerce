@@ -77,19 +77,14 @@ const PriceSliderEdit = ( {
 		return <>{ __( 'Loading…', 'woocommerce' ) }</>;
 	}
 
-	const {
-		min: minRange,
-		max: maxRange,
-		currentMin: minPrice,
-		currentMax: maxPrice,
-	} = rangeInput;
+	const { min, max, currentMin, currentMax } = rangeInput;
 	const formattedMinPrice = formatPrice(
-		minPrice,
+		currentMin,
 		getCurrency( { minorUnit: 0 } )
 	);
 
 	const formattedMaxPrice = formatPrice(
-		maxPrice,
+		currentMax,
 		getCurrency( { minorUnit: 0 } )
 	);
 
@@ -255,16 +250,16 @@ const PriceSliderEdit = ( {
 							<input
 								type="range"
 								className="min"
-								min={ minRange }
-								max={ maxRange }
-								defaultValue={ minPrice }
+								min={ min }
+								max={ max }
+								defaultValue={ currentMin }
 							/>
 							<input
 								type="range"
 								className="max"
-								min={ minRange }
-								max={ maxRange }
-								defaultValue={ maxPrice }
+								min={ min }
+								max={ max }
+								defaultValue={ currentMax }
 							/>
 						</div>
 						<div className="wc-block-product-filter-price-slider__right text">
