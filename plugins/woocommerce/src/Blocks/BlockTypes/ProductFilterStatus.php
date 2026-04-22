@@ -112,6 +112,7 @@ final class ProductFilterStatus extends AbstractBlock {
 		$filter_options = array_map(
 			function ( $item ) use ( $stock_statuses, $selected_stock_statuses, $show_counts ) {
 				$option = array(
+					'id'       => 'status-' . $item['status'],
 					'label'    => $stock_statuses[ $item['status'] ],
 					'value'    => $item['status'],
 					'selected' => in_array( $item['status'], $selected_stock_statuses, true ),
