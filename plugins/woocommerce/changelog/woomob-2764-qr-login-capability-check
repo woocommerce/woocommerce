@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Gate the mobile-app QR login token endpoint on the `manage_woocommerce` capability instead of the internal WordPress.com linkage check.

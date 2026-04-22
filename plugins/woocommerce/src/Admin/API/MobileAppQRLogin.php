@@ -14,10 +14,12 @@ defined( 'ABSPATH' ) || exit;
  * REST API controller for QR code direct login.
  *
  * Provides two endpoints:
- * 1. Token generation (authenticated) - creates a short-lived token displayed as QR code
- * 2. Token exchange (unauthenticated) - exchanges the token for an Application Password
+ * 1. Token generation (authenticated) - creates a short-lived token displayed as QR code.
+ * 2. Token exchange (unauthenticated) - exchanges the token for an Application Password.
  *
- * Only available for users with a linked WordPress.com account (wpcom_user_id meta).
+ * Token generation is available to any user with the `manage_woocommerce` capability
+ * (typically administrators and shop managers). A linked WordPress.com account is no
+ * longer required.
  *
  * @internal
  * @extends WC_REST_Data_Controller
@@ -67,7 +69,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * Register routes.
 	 */
 	public function register_routes() {
-		// Generate a QR login token (requires authentication).
+		// Generate a QR login token (requires authentication and `manage_woocommerce` capability).
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/qr-login-token',
@@ -106,13 +108,28 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Check if the current user has a linked WordPress.com account.
+	 * Check whether the current user can generate a QR login token.
 	 *
-	 * @return bool
+	 * Requires the `manage_woocommerce` capability, which covers administrators and
+	 * shop managers out of the box. The check is deliberately explicit (not routed
+	 * through `wc_rest_check_manager_permissions()`) so it cannot be loosened by the
+	 * `woocommerce_rest_check_permissions` filter that other Admin API endpoints share.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request The REST request (unused).
+	 * @return \WP_Error|bool True if the user has the required capability, WP_Error otherwise.
 	 */
-	private function is_wpcom_authenticated_user() {
-		$wpcom_user_id = get_user_meta( get_current_user_id(), 'wpcom_user_id', true );
-		return ! empty( $wpcom_user_id );
+	public function get_items_permissions_check( $request ) {
+		unset( $request ); // Parameter required by WP REST contract but unused here.
+
+		if ( ! current_user_can( 'manage_woocommerce' ) ) {
+			return new \WP_Error(
+				'woocommerce_rest_cannot_view',
+				__( 'Sorry, you are not allowed to generate a mobile app QR login token.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
+		return true;
 	}
 
 	/**
@@ -180,13 +197,16 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	/**
 	 * Generate a QR login token.
 	 *
-	 * Creates a short-lived one-time token that can be exchanged for
-	 * an Application Password by the mobile app.
+	 * Creates a short-lived one-time token that can be exchanged for an Application
+	 * Password by the mobile app. The caller is assumed to have already passed the
+	 * `manage_woocommerce` capability check in `get_items_permissions_check()`.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function generate_token( $request ) {
+		unset( $request ); // Parameter required by WP REST contract but unused here.
+
 		// Check HTTPS.
 		if ( ! is_ssl() ) {
 			return new \WP_Error(
@@ -202,15 +222,6 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 				'application_passwords_unavailable',
 				__( 'Application Passwords are not available on this site.', 'woocommerce' ),
 				array( 'status' => 501 )
-			);
-		}
-
-		// Check user has linked WPCOM account.
-		if ( ! $this->is_wpcom_authenticated_user() ) {
-			return new \WP_Error(
-				'wpcom_account_required',
-				__( 'QR login is only available for users with a linked WordPress.com account.', 'woocommerce' ),
-				array( 'status' => 403 )
 			);
 		}
 
