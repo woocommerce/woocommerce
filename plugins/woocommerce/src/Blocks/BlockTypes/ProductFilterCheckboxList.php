@@ -54,11 +54,17 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 			)
 		);
 
+		$display_limit      = 15;
+		$has_more_items     = count( $context_items ) > $display_limit;
 		$wrapper_attributes = array(
 			'data-wp-interactive' => $store_namespace,
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => wp_json_encode(
-				array( 'items' => $context_items ),
+				array(
+					'items'        => $context_items,
+					'displayLimit' => $display_limit,
+					'showingAll'   => false,
+				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
 			'class'               => esc_attr( $classes ),
@@ -83,7 +89,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 				<div class="wc-block-product-filter-checkbox-list__items">
 					<?php if ( $dynamic_items ) : ?>
 						<template
-							data-wp-each--item="context.items"
+							data-wp-each--item="state.displayedItems"
 							data-wp-each-key="context.item.id"
 						>
 							<div class="wc-block-product-filter-checkbox-list__item">
@@ -114,7 +120,10 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 							</div>
 						</template>
 					<?php endif; ?>
-					<?php foreach ( $context_items as $item ) { ?>
+					<?php
+					$displayed_items = $dynamic_items ? array_slice( $context_items, 0, $display_limit ) : $context_items;
+					foreach ( $displayed_items as $item ) {
+						?>
 						<div
 							class="wc-block-product-filter-checkbox-list__item"
 							<?php if ( $dynamic_items ) : ?>
@@ -154,6 +163,15 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 						</div>
 					<?php } ?>
 				</div>
+				<?php if ( $dynamic_items && $has_more_items ) : ?>
+					<button
+						class="wc-block-product-filter-checkbox-list__show-more"
+						data-wp-on--click="actions.showAll"
+						data-wp-bind--hidden="!state.hasMoreItems"
+					>
+						<?php esc_html_e( 'Show more...', 'woocommerce' ); ?>
+					</button>
+				<?php endif; ?>
 			</fieldset>
 		</div>
 		<?php
