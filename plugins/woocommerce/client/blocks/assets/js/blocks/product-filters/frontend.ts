@@ -45,6 +45,7 @@ function unselectFilter() {
 }
 
 type FilterItem = {
+	id: string;
 	label: string;
 	ariaLabel?: string;
 	value: string;
@@ -52,9 +53,10 @@ type FilterItem = {
 	count: number;
 	type: string;
 	attributeQueryType?: 'and' | 'or' | undefined;
-	id?: number;
+	termId?: number;
 	parent?: number;
 	depth?: number;
+	hidden?: boolean;
 };
 
 export type ActiveFilterItem = Pick<
@@ -68,6 +70,7 @@ export type ProductFiltersContext = {
 	isOverlayOpened: boolean;
 	params: Record< string, string >;
 	activeFilters: ActiveFilterItem[];
+	items?: FilterItem[];
 	item: FilterItem;
 	activeLabelTemplate: string;
 	filterType: string;
@@ -146,26 +149,9 @@ const productFiltersStore = {
 					filter.type === item.type && filter.value === item.value
 			);
 		},
-		get displayedItems() {
-			const context = getContext< ProductFiltersContext >();
-			const { items, showingAll, displayLimit } = context as ProductFiltersContext & {
-				items?: FilterItem[];
-				showingAll?: boolean;
-				displayLimit?: number;
-			};
-			if ( ! items ) return [];
-			if ( showingAll || ! displayLimit ) return items;
-			return items.slice( 0, displayLimit );
-		},
-		get hasMoreItems() {
-			const context = getContext< ProductFiltersContext >();
-			const { items, showingAll, displayLimit } = context as ProductFiltersContext & {
-				items?: FilterItem[];
-				showingAll?: boolean;
-				displayLimit?: number;
-			};
-			if ( ! items || ! displayLimit ) return false;
-			return ! showingAll && items.length > displayLimit;
+		get hasHiddenItems() {
+			const { items } = getContext< ProductFiltersContext >();
+			return items?.some( ( item ) => item.hidden ) ?? false;
 		},
 	},
 	actions: {
@@ -211,10 +197,10 @@ const productFiltersStore = {
 			actions.navigate();
 		},
 		showAll: () => {
-			const context = getContext< ProductFiltersContext >() as ProductFiltersContext & {
-				showingAll?: boolean;
-			};
-			context.showingAll = true;
+			const { items } = getContext< ProductFiltersContext >();
+			items?.forEach( ( item ) => {
+				item.hidden = false;
+			} );
 		},
 		// TODO: Remove the hardcoded type once https://github.com/woocommerce/gutenberg/pull/8 is merged.
 		*navigate(): Generator {
