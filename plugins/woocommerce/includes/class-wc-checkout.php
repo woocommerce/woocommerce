@@ -558,7 +558,7 @@ class WC_Checkout {
 						'tax_class'    => $product->get_tax_class(),
 						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
-						// 'product'      => $product, // Order model compositions: inject the product instance; causes tests regressions.
+						'product'      => $product, // Order model compositions: inject the product instance.
 					)
 				);
 			}
