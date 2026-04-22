@@ -10,6 +10,7 @@
  * @since    3.0.0
  */
 
+use Automattic\WooCommerce\Enums\CouponDiscountType;
 use Automattic\WooCommerce\Utilities\StringUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -445,7 +446,7 @@ class WC_REST_Coupons_V1_Controller extends WC_REST_Posts_Controller {
 				'discount_type' => array(
 					'description' => __( 'Determines the type of discount that will be applied.', 'woocommerce' ),
 					'type'        => 'string',
-					'default'     => 'fixed_cart',
+					'default'     => CouponDiscountType::FIXED_CART,
 					'enum'        => array_keys( wc_get_coupon_types() ),
 					'context'     => array( 'view', 'edit' ),
 				),
