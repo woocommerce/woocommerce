@@ -32,15 +32,15 @@ class ProductFilterPriceSlider extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( is_admin() || wp_doing_ajax() || empty( $block->context['filterData'] ) || empty( $block->context['filterData']['price'] ) ) {
+		if ( is_admin() || wp_doing_ajax() || empty( $block->context['woocommerce/rangeInput'] ) ) {
 			return '';
 		}
 
-		$price_data = $block->context['filterData']['price'];
-		$min_price  = $price_data['minPrice'];
-		$max_price  = $price_data['maxPrice'];
-		$min_range  = $price_data['minRange'];
-		$max_range  = $price_data['maxRange'];
+		$range_data = $block->context['woocommerce/rangeInput'];
+		$min_price  = $range_data['currentMin'];
+		$max_price  = $range_data['currentMax'];
+		$min_range  = $range_data['min'];
+		$max_range  = $range_data['max'];
 
 		if ( $min_range === $max_range ) {
 			return;

@@ -31,7 +31,9 @@ final class ProductFilterActive extends AbstractBlock {
 		$active_filters = $block->context['activeFilters'];
 
 		$filter_context = array(
-			'items' => $active_filters,
+			'activeFilters'  => $active_filters,
+			'removeAction'   => 'removeFilter',
+			'storeNamespace' => 'woocommerce/product-filters',
 		);
 
 		$wrapper_attributes = array(
@@ -68,7 +70,7 @@ final class ProductFilterActive extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/activeFilters' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''
