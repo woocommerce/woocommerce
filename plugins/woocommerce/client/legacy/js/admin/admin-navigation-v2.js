@@ -300,7 +300,7 @@
 	 * How long to wait before collapsing a flyout after the cursor leaves it.
 	 * Gives users time to overshoot and come back without the menu snapping shut.
 	 */
-	var HOVER_CLOSE_DELAY = 450;
+	var HOVER_CLOSE_DELAY = 600;
 
 	/**
 	 * Bind mouseenter/mouseleave handlers that toggle `className` on delegated
