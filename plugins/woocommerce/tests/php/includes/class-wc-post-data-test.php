@@ -116,4 +116,50 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 		remove_action( 'woocommerce_product_published', $callback );
 		wp_delete_post( $post_id, true );
 	}
+
+	/**
+	 * @testdox Should fire woocommerce_product_published when a product variation transitions to publish status.
+	 */
+	public function test_transition_post_status_fires_product_published_action_for_variation(): void {
+		$variation = new WC_Product_Variation();
+		$variation->set_status( 'draft' );
+		$variation->save();
+
+		$published_ids = array();
+		$callback      = function ( $product_id ) use ( &$published_ids ) {
+			$published_ids[] = $product_id;
+		};
+		add_action( 'woocommerce_product_published', $callback );
+
+		$post = get_post( $variation->get_id() );
+		WC_Post_Data::transition_post_status( 'publish', 'draft', $post );
+
+		$this->assertContains( $variation->get_id(), $published_ids, 'woocommerce_product_published should fire when a variation transitions to publish' );
+
+		remove_action( 'woocommerce_product_published', $callback );
+		$variation->delete( true );
+	}
+
+	/**
+	 * @testdox Should fire woocommerce_product_published when a scheduled product transitions from future to publish.
+	 */
+	public function test_transition_post_status_fires_product_published_action_on_scheduled_publish(): void {
+		$product = \WC_Helper_Product::create_simple_product( false );
+		$product->set_status( 'future' );
+		$product->save();
+
+		$published_ids = array();
+		$callback      = function ( $product_id ) use ( &$published_ids ) {
+			$published_ids[] = $product_id;
+		};
+		add_action( 'woocommerce_product_published', $callback );
+
+		$post = get_post( $product->get_id() );
+		WC_Post_Data::transition_post_status( 'publish', 'future', $post );
+
+		$this->assertContains( $product->get_id(), $published_ids, 'woocommerce_product_published should fire when a scheduled product transitions from future to publish' );
+
+		remove_action( 'woocommerce_product_published', $callback );
+		$product->delete( true );
+	}
 }

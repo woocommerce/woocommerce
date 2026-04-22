@@ -148,12 +148,12 @@ class WC_Post_Data {
 			self::delete_product_query_transients();
 		}
 
-		if ( ProductStatus::PUBLISH === $new_status && ProductStatus::PUBLISH !== $old_status && 'product' === $post->post_type ) {
+		if ( ProductStatus::PUBLISH === $new_status && ProductStatus::PUBLISH !== $old_status && in_array( $post->post_type, array( 'product', 'product_variation' ), true ) ) {
 			/**
-			 * Fires when a product transitions to published status.
+			 * Fires when a product or product variation transitions to published status.
 			 *
 			 * @since 10.7.0
-			 * @param int $product_id The product ID.
+			 * @param int $product_id The product or variation ID.
 			 */
 			do_action( 'woocommerce_product_published', $post->ID );
 		}
