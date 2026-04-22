@@ -47,8 +47,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$context_items = array_values(
 			array_map(
 				function ( $item ) {
-					$item['id']        = $item['type'] . '-' . $item['value'];
-					$item['ariaLabel'] = $this->get_aria_label( $item );
+					$item['id'] = $item['type'] . '-' . $item['value'];
 					return $item;
 				},
 				$items
@@ -132,7 +131,9 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 										id="<?php echo esc_attr( $item['id'] ); ?>"
 										class="wc-block-product-filter-checkbox-list__input"
 										type="checkbox"
-										aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
+										<?php if ( ! empty( $item['ariaLabel'] ) ) : ?>
+											aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
+										<?php endif; ?>
 										data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
 										value="<?php echo esc_attr( $item['value'] ); ?>"
 										data-wp-bind--checked="state.isFilterSelected"
@@ -166,30 +167,5 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 */
 	protected function get_block_type_style() {
 		return null;
-	}
-
-	/**
-	 * Get aria label for filter item.
-	 *
-	 * @param array $item Filter item.
-	 *
-	 * @return string Aria label.
-	 */
-	private function get_aria_label( $item ) {
-		if ( isset( $item['count'] ) ) {
-			return sprintf(
-				/* translators: %1$s: Product filter name, %2$d: Number of products */
-				_n(
-					'%1$s (%2$d product)',
-					'%1$s (%2$d products)',
-					$item['count'],
-					'woocommerce'
-				),
-				$item['ariaLabel'] ?? $item['label'],
-				$item['count']
-			);
-		}
-
-		return $item['ariaLabel'] ?? $item['label'];
 	}
 }
