@@ -29,6 +29,15 @@ A minimal, installable demonstration of the [WooCommerce Modernised Settings SDK
 
 With the flag on, the tab renders via the React `DataForm` path. Toggle the flag off and reload to see the same tab fall back to the legacy form.
 
+## The two-class pattern
+
+The example demonstrates how a `WC_Settings_Page` subclass pairs with a `ReactSettingsPageInterface` implementation to participate in modernised rendering:
+
+- `Modern_Settings_Example_Tab` — the legacy page class at `includes/class-modern-settings-example-tab.php`. Defines fields the same way any pre-10.8 `WC_Settings_Page` subclass does. Overrides `get_react_settings_page()` to return its React-settings companion.
+- `Modern_Settings_Example_React_Page` — the React-settings companion at `includes/class-modern-settings-example-react-page.php`. Implements `ReactSettingsPageInterface`. Contributes empty defaults in this example because every field on the tab uses a natively-supported type.
+
+A page that needs custom field types, custom type aliases, or server-side option synthesis extends this pattern by filling in the interface methods on the companion class.
+
 ## Layout
 
 ```text
@@ -36,6 +45,7 @@ modern-settings-example/
 ├── README.md
 ├── modern-settings-example.php
 └── includes/
+    ├── class-modern-settings-example-react-page.php
     └── class-modern-settings-example-tab.php
 ```
 

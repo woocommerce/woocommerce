@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Modern_Settings_Example;
 
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
 use WC_Settings_Page;
 
 defined( 'ABSPATH' ) || exit;
@@ -90,5 +91,13 @@ class Modern_Settings_Example_Tab extends WC_Settings_Page {
 				'id'   => 'mse_general_options',
 			),
 		);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function get_react_settings_page(): ?ReactSettingsPageInterface {
+		require_once __DIR__ . '/class-modern-settings-example-react-page.php';
+		return new \Modern_Settings_Example\Modern_Settings_Example_React_Page();
 	}
 }
