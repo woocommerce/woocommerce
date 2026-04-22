@@ -134,6 +134,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 										<?php endif; ?>
 										data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
 										value="<?php echo esc_attr( $item['value'] ); ?>"
+										<?php checked( ! empty( $item['selected'] ) ); ?>
 										data-wp-bind--checked="context.item.selected"
 									>
 									<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
