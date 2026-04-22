@@ -286,15 +286,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Add/save items.
 		foreach ( $this->items as $item_group => $items ) {
-			if ( $items && is_array( $items ) ) {
-				$is_order = $this instanceof \WC_Order;
-				$order    = $is_order ? wc_get_order( $this->get_id() ) : null;
-				foreach ( array_filter( $items ) as $item_key => $item ) {
+			if ( is_array( $items ) ) {
+				$items = array_filter( $items );
+				foreach ( $items as $item_key => $item ) {
 					$item->set_order_id( $this->get_id() );
-					// Order model compositions: inject fresh order instance.
-					if ( $is_order ) {
-						$item->set_order( $order );
-					}
 
 					$item_id = $item->save();
 
