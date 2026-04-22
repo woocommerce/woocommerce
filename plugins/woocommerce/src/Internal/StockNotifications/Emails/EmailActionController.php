@@ -155,10 +155,6 @@ class EmailActionController {
 	private function get_notification_to_be_processed( int $notification_id ): ?Notification {
 		$notification = Factory::get_notification( (int) $notification_id );
 
-		if ( ! $notification ) {
-			return null;
-		}
-
-		return $notification;
+		return $notification instanceof Notification ? $notification : null;
 	}
 }

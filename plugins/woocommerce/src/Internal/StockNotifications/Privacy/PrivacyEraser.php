@@ -83,7 +83,7 @@ class PrivacyEraser extends \WC_Abstract_Privacy {
 				$notification->get_product_id()
 			);
 			$response['items_removed'] = true;
-		}
+		}//end foreach
 
 		return $response;
 	}

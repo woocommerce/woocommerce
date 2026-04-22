@@ -25,6 +25,7 @@ Chronological, one entry per non-obvious choice. Format: date — decision, then
 `Notification::get_verification_key()` and `Notification::get_unsubscribe_key()` both wrote to the same `email_link_action_key` meta, distinguishing verification vs. unsubscribe by the presence of a `:` in the stored value (verification stored `timestamp:hash`, unsubscribe stored `hash`). `EmailActionController::validate_and_maybe_process_request()` sniffed the stored format to decide which action to run.
 
 **New design:**
+
 - Verification hash → `verification_action_key` meta (format `timestamp:hash`).
 - Unsubscribe hash → `unsubscribe_action_key` meta (format `hash`).
 - Outgoing verification + unsubscribe URLs now include an explicit `email_link_action=verify|unsubscribe` query param.
@@ -85,4 +86,4 @@ Things explicitly parked for later. Cross-reference before starting sibling work
 
 Holding tank for things we need product/team decisions on. Empty = nothing blocked on others right now.
 
-_(none open)_
+None open.
