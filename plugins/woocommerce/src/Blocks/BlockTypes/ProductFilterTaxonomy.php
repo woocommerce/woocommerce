@@ -212,7 +212,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		);
 
 		$show_counts     = $block_attributes['showCounts'] ?? false;
-		$display_limit   = 3;
+		$display_limit   = 15;
 		$filter_context  = array(
 			'items'          => array(),
 			'selectionMode'  => 'multiple',
