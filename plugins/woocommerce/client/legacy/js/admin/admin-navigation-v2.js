@@ -294,16 +294,18 @@
 	}
 
 	/**
-	 * Normalize an anchor href to a path+query we can compare to toAdminUrl()
-	 * output. Strips protocol/host and decodes the `&#038;` / `&amp;` that
-	 * esc_url produces in rendered hrefs.
+	 * Canonicalize either a rendered-in-DOM href or a toAdminUrl() output to
+	 * the same form (an `admin.php?page=…` or `edit.php?…` fragment with no
+	 * protocol, host, or leading `/wp-admin/`). Also decodes `&#038;` / `&amp;`
+	 * that esc_url emits on rendered hrefs.
 	 */
-	function normalizeHref( href ) {
+	function canonicalUrl( href ) {
 		if ( ! href ) {
 			return '';
 		}
 		return href
 			.replace( /^https?:\/\/[^/]+/, '' )
+			.replace( /^\/+wp-admin\//, '' )
 			.replace( /&#038;/g, '&' )
 			.replace( /&amp;/g, '&' );
 	}
@@ -322,23 +324,29 @@
 
 		var byParent = buildByParent( tree );
 
-		// Map each flyout item's canonical href back to its tree slug so we
-		// can match by URL regardless of whether the tree slug equals its URL
-		// (Marketing's slug is `woocommerce-marketing` but its href points at
-		// `admin.php?page=wc-admin&path=/marketing` via the `url` override).
-		var hrefToSlug = {};
+		// Build a canonical-URL → tree-slug map. When two tree nodes canonicalize
+		// to the same URL (e.g. Marketing parent's `url` override and its
+		// Overview child's slug both produce the same URL), prefer the node
+		// that has grandchildren so the cascade shows up on the right row.
+		var urlToSlug = {};
 		Object.keys( tree ).forEach( function ( slug ) {
 			var target = tree[ slug ].url || slug;
-			hrefToSlug[ toAdminUrl( target ) ] = slug;
+			var key    = canonicalUrl( toAdminUrl( target ) );
+			var existing = urlToSlug[ key ];
+			var thisHasKids = ( ( byParent[ slug ] || [] ).length ) > 0;
+			var prevHasKids = existing && ( ( byParent[ existing ] || [] ).length ) > 0;
+			if ( ! existing || ( thisHasKids && ! prevHasKids ) ) {
+				urlToSlug[ key ] = slug;
+			}
 		} );
 
 		var $items = $( '#toplevel_page_woocommerce > .wp-submenu > li' ).not( '.wp-submenu-head' );
 		$items.each( function () {
 			var $li  = $( this );
 			var $a   = $li.find( '> a' ).first();
-			var href = normalizeHref( $a.attr( 'href' ) || '' );
+			var href = canonicalUrl( $a.attr( 'href' ) || '' );
 
-			var treeSlug = hrefToSlug[ href ];
+			var treeSlug = urlToSlug[ href ];
 			if ( ! treeSlug ) {
 				return;
 			}
