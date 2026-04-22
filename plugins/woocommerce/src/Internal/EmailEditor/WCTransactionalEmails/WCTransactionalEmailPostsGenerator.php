@@ -222,7 +222,9 @@ class WCTransactionalEmailPostsGenerator {
 		 * @param \WC_Email $email The email object.
 		 * @since 10.7.0
 		 */
-		return (string) apply_filters( 'woocommerce_email_block_template_html', $template_html, $email );
+		$filtered_template_html = apply_filters( 'woocommerce_email_block_template_html', $template_html, $email );
+
+		return is_string( $filtered_template_html ) ? $filtered_template_html : $template_html;
 	}
 
 	/**
@@ -358,7 +360,9 @@ class WCTransactionalEmailPostsGenerator {
 		 * @param string    $email_type The email type identifier (e.g., 'customer_processing_order').
 		 * @param \WC_Email $email      The WooCommerce email object.
 		 */
-		return apply_filters( 'woocommerce_email_content_post_data', $post_data, $email_type, $email );
+		$filtered_post_data = apply_filters( 'woocommerce_email_content_post_data', $post_data, $email_type, $email );
+
+		return is_array( $filtered_post_data ) ? $filtered_post_data : $post_data;
 	}
 
 	/**

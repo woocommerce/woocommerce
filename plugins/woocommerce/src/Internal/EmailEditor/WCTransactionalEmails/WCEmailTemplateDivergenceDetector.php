@@ -208,7 +208,7 @@ class WCEmailTemplateDivergenceDetector {
 		$current_post_hash  = sha1( (string) ( $stamps['post_content'] ?? '' ) );
 		$stored_source_hash = (string) ( $stamps['stored_source_hash'] ?? '' );
 
-		if ( '' === $stored_source_hash ) {
+		if ( ! self::is_sha1_hash( $stored_source_hash ) ) {
 			return null;
 		}
 
@@ -246,6 +246,22 @@ class WCEmailTemplateDivergenceDetector {
 		}
 
 		return self::$logger;
+	}
+
+	/**
+	 * Validate that a string is shaped like a SHA-1 hex digest.
+	 *
+	 * `_wc_email_template_source_hash` is produced by `sha1()` (40 hex chars), but as
+	 * persisted post meta it is theoretically reachable from DB migrations, direct
+	 * `update_post_meta` calls, or misbehaving extensions. Any non-SHA-1 value would
+	 * otherwise be compared byte-for-byte against real hashes and always report
+	 * `core_updated_customized`, so we short-circuit instead.
+	 *
+	 * @param string $hash Candidate hash value.
+	 * @return bool True when the value is a 40-character hex string.
+	 */
+	private static function is_sha1_hash( string $hash ): bool {
+		return 40 === strlen( $hash ) && ctype_xdigit( $hash );
 	}
 
 	/**
