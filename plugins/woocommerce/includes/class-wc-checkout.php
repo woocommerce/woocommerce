@@ -554,11 +554,11 @@ class WC_Checkout {
 			if ( $product ) {
 				$item->set_props(
 					array(
-						'product'      => $product, // Order model compositions: inject the product instance.
 						'name'         => $product->get_name(),
 						'tax_class'    => $product->get_tax_class(),
 						'product_id'   => $product->is_type( ProductType::VARIATION ) ? $product->get_parent_id() : $product->get_id(),
 						'variation_id' => $product->is_type( ProductType::VARIATION ) ? $product->get_id() : 0,
+						// Order model compositions: injecting the product instance causing tests regression, hence skipped.
 					)
 				);
 			}
