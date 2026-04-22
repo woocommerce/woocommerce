@@ -37,14 +37,53 @@
 		return '/wp-admin/admin.php?page=' + target;
 	}
 
-	function currentSlug() {
-		var params = new URLSearchParams( window.location.search );
-		var page   = params.get( 'page' ) || '';
-		var path   = params.get( 'path' ) || '';
+	/**
+	 * Resolve the current URL to the most specific tree slug that matches.
+	 * Tries the compound forms (page + tab, page + path, post_type CPT) first
+	 * so a tab-level page like ?page=wc-settings&tab=general highlights the
+	 * tab entry, not the parent Settings entry.
+	 */
+	function currentSlug( tree ) {
+		var params   = new URLSearchParams( window.location.search );
+		var page     = params.get( 'page' )      || '';
+		var path     = params.get( 'path' )      || '';
+		var tab      = params.get( 'tab' )       || '';
+		var postType = params.get( 'post_type' ) || '';
+
+		var candidates = [];
 		if ( page && path ) {
-			return page + '&path=' + path;
+			candidates.push( page + '&path=' + path );
 		}
-		return page;
+		if ( page && tab ) {
+			candidates.push( page + '&tab=' + tab );
+		}
+		if ( page ) {
+			candidates.push( page );
+		}
+		if ( postType ) {
+			candidates.push( 'edit.php?post_type=' + postType );
+		}
+
+		for ( var i = 0; i < candidates.length; i++ ) {
+			if ( tree[ candidates[ i ] ] ) {
+				return candidates[ i ];
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Walk the parent chain starting from `slug` and return a Set of all
+	 * ancestor slugs (inclusive of `slug` itself).
+	 */
+	function ancestorSet( tree, slug ) {
+		var set = new Set();
+		var walk = slug;
+		while ( walk && tree[ walk ] ) {
+			set.add( walk );
+			walk = tree[ walk ].parent;
+		}
+		return set;
 	}
 
 	function buildByParent( tree ) {
@@ -67,19 +106,29 @@
 
 	/**
 	 * Build a WP-native rail <li> for one tree node. Returns a jQuery element.
+	 *
+	 * @param node      Tree node (with .slug added).
+	 * @param byParent  Parent-indexed children map.
+	 * @param current   Current-page slug or null.
+	 * @param ancestors Set of slugs on the current-page chain.
 	 */
-	function buildRailItem( node, byParent, current ) {
-		var kids       = byParent[ node.slug ] || [];
-		var icon       = node.icon || 'dashicons-admin-generic';
-		var isCurrent  = node.slug === current;
-		var hasKids    = kids.length > 0;
+	function buildRailItem( node, byParent, current, ancestors ) {
+		var kids         = byParent[ node.slug ] || [];
+		var icon         = node.icon || 'dashicons-admin-generic';
+		var isCurrent    = node.slug === current;
+		var hasCurrent   = ! isCurrent && ancestors.has( node.slug );
+		var hasKids      = kids.length > 0;
 
 		var liClasses = [ 'menu-top', 'menu-icon-' + cssSlug( node.slug ), 'wc-nav-v2-item' ];
 		var aClasses  = [ 'menu-top' ];
 
-		if ( isCurrent ) {
-			liClasses.push( 'current', 'wp-has-current-submenu', 'wp-menu-open' );
-			aClasses.push( 'current', 'wp-has-current-submenu' );
+		if ( isCurrent || hasCurrent ) {
+			liClasses.push( 'wp-has-current-submenu', 'wp-menu-open' );
+			aClasses.push( 'wp-has-current-submenu' );
+			if ( isCurrent ) {
+				liClasses.push( 'current' );
+				aClasses.push( 'current' );
+			}
 		} else if ( hasKids ) {
 			liClasses.push( 'wp-has-submenu', 'wp-not-current-submenu' );
 			aClasses.push( 'wp-has-submenu', 'wp-not-current-submenu' );
@@ -121,6 +170,7 @@
 				}
 				if ( kidIsCurrent ) {
 					$kLi.addClass( 'current' );
+					$kA.addClass( 'current' );
 				}
 				$kLi.append( $kA );
 				$ul.append( $kLi );
@@ -168,9 +218,10 @@
 			return;
 		}
 
-		var byParent = buildByParent( tree );
-		var current  = currentSlug();
-		var roots    = byParent.woocommerce || [];
+		var byParent  = buildByParent( tree );
+		var current   = currentSlug( tree );
+		var ancestors = ancestorSet( tree, current );
+		var roots     = byParent.woocommerce || [];
 
 		// Preserve the collapse-menu button at the end if present.
 		var $collapse = $adminmenu.find( '#collapse-menu' ).detach();
@@ -178,15 +229,35 @@
 		$adminmenu.empty();
 		$adminmenu.append( buildBackItem() );
 		roots.forEach( function ( node ) {
-			$adminmenu.append( buildRailItem( node, byParent, current ) );
+			$adminmenu.append( buildRailItem( node, byParent, current, ancestors ) );
 		} );
 
-		// Mark last rail item so WP styling (.menu-top-last) applies.
+		// Mark first/last rail items so WP styling (.menu-top-first/.menu-top-last) applies.
+		$adminmenu.find( '> li.wc-nav-v2-item' ).first().addClass( 'menu-top-first' );
 		$adminmenu.find( '> li.wc-nav-v2-item' ).last().addClass( 'menu-top-last' );
 
 		if ( $collapse.length ) {
 			$adminmenu.append( $collapse );
 		}
+
+		// WP's common.js hoverIntent was bound to the native rail before we
+		// replaced it, so our injected items have no hover handler. Rebind
+		// WP's expected behaviour: add/remove `opensub` on hover and when
+		// focus enters/leaves the flyout. admin-menu.css keys off `opensub`
+		// to show the flyout.
+		$adminmenu
+			.on( 'mouseenter.wcnavv2', '> li.wp-has-submenu, > li.wp-has-current-submenu', function () {
+				$( this ).addClass( 'opensub' );
+			} )
+			.on( 'mouseleave.wcnavv2', '> li.wp-has-submenu, > li.wp-has-current-submenu', function () {
+				$( this ).removeClass( 'opensub' );
+			} )
+			.on( 'focus.wcnavv2', '.wp-submenu a', function () {
+				$( this ).closest( 'li.menu-top' ).addClass( 'opensub' );
+			} )
+			.on( 'blur.wcnavv2', '.wp-submenu a', function () {
+				$( this ).closest( 'li.menu-top' ).removeClass( 'opensub' );
+			} );
 	}
 
 	/**
