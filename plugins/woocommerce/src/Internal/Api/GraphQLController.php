@@ -26,12 +26,12 @@ use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\QueryDepth;
  */
 class GraphQLController {
 	/**
-	 * Maximum nesting depth allowed in a GraphQL query.
+	 * Default nesting-depth limit applied when the option is unset or non-positive.
 	 *
-	 * Queries exceeding this depth are rejected during validation, before any
-	 * resolver runs. See {@see self::get_max_query_depth()} for the accessor.
+	 * Queries exceeding the configured limit are rejected during validation,
+	 * before any resolver runs. See {@see self::get_max_query_depth()} for the accessor.
 	 */
-	private const MAX_QUERY_DEPTH = 15;
+	public const DEFAULT_MAX_QUERY_DEPTH = 15;
 
 	/**
 	 * Maximum computed complexity score allowed for a GraphQL query.
@@ -69,11 +69,13 @@ class GraphQLController {
 	/**
 	 * The maximum nesting depth allowed in a GraphQL query.
 	 *
-	 * Exposed as a method so the limit can become configurable — e.g. via a
-	 * filter or store option — without requiring call-site changes.
+	 * Reads the {@see Main::OPTION_MAX_QUERY_DEPTH} store option; falls back
+	 * to {@see self::DEFAULT_MAX_QUERY_DEPTH} when the option is unset, empty,
+	 * or non-positive.
 	 */
 	public static function get_max_query_depth(): int {
-		return self::MAX_QUERY_DEPTH;
+		$value = (int) get_option( Main::OPTION_MAX_QUERY_DEPTH, self::DEFAULT_MAX_QUERY_DEPTH );
+		return $value > 0 ? $value : self::DEFAULT_MAX_QUERY_DEPTH;
 	}
 
 	/**
@@ -499,19 +501,28 @@ class GraphQLController {
 	}
 
 	/**
-	 * Compute the maximum nesting depth of the executing operation.
+	 * Compute the maximum nesting depth of the executing operation, under two
+	 * different metrics:
 	 *
-	 * Field selections add one level; inline fragments do not. Named-fragment
-	 * spreads are not expanded here — the depth returned is therefore a lower
-	 * bound when spreads are present. The webonyx QueryDepth validation rule
-	 * (which does expand spreads) remains the authoritative gate; this helper
-	 * only produces the metric surfaced in the debug extensions.
+	 * - `query`: only fields whose own selection set is non-empty count toward
+	 *   depth. This is the number directly comparable to the "Maximum query
+	 *   depth" setting's limit, and matches what webonyx's QueryDepth
+	 *   validation rule measures for the enforcement decision.
+	 * - `total`: counts every field in the deepest chain, leaves included.
+	 *   Useful as a shape metric when inspecting a query.
+	 *
+	 * Inline fragments pass through without incrementing either metric.
+	 * Named-fragment spreads are not expanded here, so both numbers are lower
+	 * bounds when spreads are present. The webonyx QueryDepth validation rule
+	 * (which does expand spreads) remains the authoritative gate.
 	 *
 	 * @param DocumentNode $document       The parsed GraphQL document.
 	 * @param ?string      $operation_name The requested operation name, if any.
+	 * @return array{query: int, total: int}
 	 */
-	private function compute_query_depth( DocumentNode $document, ?string $operation_name ): int {
-		$max = 0;
+	private function compute_query_depth( DocumentNode $document, ?string $operation_name ): array {
+		$query = 0;
+		$total = 0;
 		foreach ( $document->definitions as $definition ) {
 			if ( ! $definition instanceof OperationDefinitionNode ) {
 				continue;
@@ -521,19 +532,52 @@ class GraphQLController {
 				continue;
 			}
 
-			$max = max( $max, $this->walk_depth( $definition->selectionSet, 0 ) );
+			$query = max( $query, $this->walk_depth_query( $definition->selectionSet, 0 ) );
+			$total = max( $total, $this->walk_depth_total( $definition->selectionSet, 0 ) );
+		}
+
+		return array(
+			'query' => $query,
+			'total' => $total,
+		);
+	}
+
+	/**
+	 * Walk a selection set counting only fields with child selections, matching
+	 * webonyx's QueryDepth rule so the returned number is directly comparable
+	 * to the configured "Maximum query depth" limit.
+	 *
+	 * @param ?SelectionSetNode $selection_set The selection set to walk.
+	 * @param int               $depth         The depth at which fields in this selection set sit.
+	 */
+	private function walk_depth_query( ?SelectionSetNode $selection_set, int $depth ): int {
+		if ( null === $selection_set ) {
+			return 0;
+		}
+
+		$max = 0;
+		foreach ( $selection_set->selections as $selection ) {
+			if ( $selection instanceof FieldNode ) {
+				if ( null !== $selection->selectionSet ) {
+					$max = max( $max, $depth, $this->walk_depth_query( $selection->selectionSet, $depth + 1 ) );
+				}
+			} elseif ( $selection instanceof InlineFragmentNode ) {
+				$max = max( $max, $this->walk_depth_query( $selection->selectionSet, $depth ) );
+			}
 		}
 
 		return $max;
 	}
 
 	/**
-	 * Recursively walk a selection set and return the maximum depth reached.
+	 * Walk a selection set counting every field in the deepest chain, leaves
+	 * included. Produces the "shape" metric surfaced alongside the enforcement
+	 * metric in debug output.
 	 *
 	 * @param ?SelectionSetNode $selection_set The selection set to walk, or null for a leaf.
 	 * @param int               $depth         The depth of the selection set's parent.
 	 */
-	private function walk_depth( ?SelectionSetNode $selection_set, int $depth ): int {
+	private function walk_depth_total( ?SelectionSetNode $selection_set, int $depth ): int {
 		if ( null === $selection_set ) {
 			return $depth;
 		}
@@ -541,9 +585,9 @@ class GraphQLController {
 		$max = $depth;
 		foreach ( $selection_set->selections as $selection ) {
 			if ( $selection instanceof FieldNode ) {
-				$max = max( $max, $this->walk_depth( $selection->selectionSet, $depth + 1 ) );
+				$max = max( $max, $this->walk_depth_total( $selection->selectionSet, $depth + 1 ) );
 			} elseif ( $selection instanceof InlineFragmentNode ) {
-				$max = max( $max, $this->walk_depth( $selection->selectionSet, $depth ) );
+				$max = max( $max, $this->walk_depth_total( $selection->selectionSet, $depth ) );
 			}
 		}
 

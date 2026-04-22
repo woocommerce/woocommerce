@@ -28,6 +28,13 @@ class Main {
 	public const OPTION_GET_ENDPOINT_ENABLED = 'woocommerce_graphql_get_endpoint_enabled';
 
 	/**
+	 * Option name for the "Maximum query depth" setting.
+	 *
+	 * Caps how deep the selection tree of a GraphQL query may nest.
+	 */
+	public const OPTION_MAX_QUERY_DEPTH = 'woocommerce_graphql_max_query_depth';
+
+	/**
 	 * Cached result of the feature-enabled check, null until first evaluated.
 	 *
 	 * @var ?bool

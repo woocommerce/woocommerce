@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Api;
 
+use Automattic\WooCommerce\Internal\Api\GraphQLController;
 use Automattic\WooCommerce\Internal\Api\Main;
 use Automattic\WooCommerce\Internal\Api\Settings;
 use WC_Unit_Test_Case;
@@ -71,5 +72,21 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( Main::OPTION_GET_ENDPOINT_ENABLED, $by_id );
 		$this->assertSame( 'checkbox', $by_id[ Main::OPTION_GET_ENDPOINT_ENABLED ]['type'] );
 		$this->assertSame( 'yes', $by_id[ Main::OPTION_GET_ENDPOINT_ENABLED ]['default'] );
+	}
+
+	/**
+	 * @testdox add_settings defines the max query depth field with min=1 and the default constant as default.
+	 */
+	public function test_add_settings_defines_max_query_depth_field(): void {
+		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
+		$by_id  = array_column( $fields, null, 'id' );
+
+		$this->assertArrayHasKey( Main::OPTION_MAX_QUERY_DEPTH, $by_id );
+		$this->assertSame( 'number', $by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['type'] );
+		$this->assertSame(
+			(string) GraphQLController::DEFAULT_MAX_QUERY_DEPTH,
+			$by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['default']
+		);
+		$this->assertSame( '1', $by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['custom_attributes']['min'] );
 	}
 }
