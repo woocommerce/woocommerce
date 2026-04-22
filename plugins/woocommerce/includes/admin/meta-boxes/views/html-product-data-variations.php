@@ -212,15 +212,15 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
 					</button>
 				</header>
-				<article class="woocommerce-usage-modal__wrapper">
-					<div class="woocommerce-usage-modal__message">
+				<article>
+					<div>
 						<span><?php esc_html_e( 'Add price to all variations that don\'t have a price', 'woocommerce' ); ?> (<?php echo esc_attr( get_woocommerce_currency_symbol() ); ?> <?php echo esc_textarea( get_woocommerce_currency() ); ?>)</span>
 						<input type="text" class="components-text-control__input wc_input_variations_price"/>
 					</div>
 				</article>
 				<footer>
 					<div class="inner">
-						<div class="woocommerce-usage-modal__actions">
+						<div>
 							<button class="modal-clos button components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
 							<button class="modal-close button components-button add_variations_price_button button-primary" disabled><?php esc_html_e( 'Add prices', 'woocommerce' ); ?></button>
 						</div>
