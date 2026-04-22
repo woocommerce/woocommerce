@@ -234,7 +234,6 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 	 * @return void
 	 */
 	public function set_order( $order ) {
-		return;
 		if ( ! ( $order instanceof \WC_Order ) ) {
 			$this->error( 'order_item_invalid_order', __( 'Invalid order', 'woocommerce' ) );
 		}
