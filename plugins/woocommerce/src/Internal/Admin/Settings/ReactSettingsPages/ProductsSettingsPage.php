@@ -16,13 +16,14 @@ defined( 'ABSPATH' ) || exit;
 /**
  * React-settings contract for the Products tab.
  *
- * Ports weight-unit, dimension-unit, product-type, and shop-page option
- * synthesis from ReactSettingsSchema's private get_product_field_options()
- * plus its helpers get_unit_options() and get_page_options().
+ * Owns weight-unit, dimension-unit, product-type, and shop-page option
+ * synthesis. Logic was ported in 10.8.0 from what used to be
+ * `ReactSettingsSchema::get_product_field_options()` (and its helpers
+ * `get_unit_options()` / `get_page_options()`), which were removed when
+ * the transformer switched from firing `woocommerce_react_settings_*`
+ * filters to consulting `ReactSettingsPageInterface`.
  *
  * @since 10.8.0
- *
- * @see \Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsSchema::get_product_field_options()
  */
 final class ProductsSettingsPage implements ReactSettingsPageInterface {
 
@@ -62,8 +63,6 @@ final class ProductsSettingsPage implements ReactSettingsPageInterface {
 	 * Load the unit list for a given bucket from WC's i18n/units.php and narrow it
 	 * via the caller-supplied valid-keys filter.
 	 *
-	 * Ported from ReactSettingsSchema::get_unit_options().
-	 *
 	 * @param string $bucket Either 'weight' or 'dimensions'.
 	 * @param string $filter Filter name that returns the array of valid unit keys.
 	 * @return array<string, string>
@@ -102,8 +101,6 @@ final class ProductsSettingsPage implements ReactSettingsPageInterface {
 
 	/**
 	 * Build a page list for the shop-page select with a leading "Select a page…" placeholder.
-	 *
-	 * Ported from ReactSettingsSchema::get_page_options().
 	 *
 	 * Return type annotates `array<int|string, string>` because PHP silently coerces
 	 * numeric string keys (page IDs) back to ints when assigned as array keys.

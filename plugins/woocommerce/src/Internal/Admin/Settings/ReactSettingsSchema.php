@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -134,6 +135,11 @@ class ReactSettingsSchema {
 	/**
 	 * Get normalized supported field types for React settings.
 	 *
+	 * Merges the transformer's built-in native types with any extras
+	 * contributed by the settings page's `ReactSettingsPageInterface`
+	 * implementation (`get_extra_supported_types()`). When the page has
+	 * not opted in (no interface), only defaults are returned.
+	 *
 	 * @param string $tab Tab id.
 	 * @param string $section Section id.
 	 * @param array  $settings_definitions Settings definitions.
@@ -142,7 +148,9 @@ class ReactSettingsSchema {
 	 * @since 10.8.0
 	 */
 	public static function get_supported_types( string $tab, string $section, array $settings_definitions, $settings_page ): array {
-		$default_types = array(
+		unset( $tab, $settings_definitions );
+
+		$supported_types = array(
 			'text',
 			'number',
 			'select',
@@ -165,31 +173,22 @@ class ReactSettingsSchema {
 			'single_select_page_with_search',
 			'info',
 		);
-		/**
-		 * Filter supported React settings field types.
-		 *
-		 * @since 10.8.0
-		 *
-		 * @param array  $supported_types Supported normalized field types.
-		 * @param string $tab Tab id.
-		 * @param string $section Section id.
-		 * @param array  $settings_definitions Settings definitions for the tab/section.
-		 * @param mixed  $settings_page Settings page instance.
-		 */
-		$supported_types = apply_filters(
-			'woocommerce_react_settings_supported_types',
-			$default_types,
-			$tab,
-			$section,
-			$settings_definitions,
-			$settings_page
-		);
+
+		$interface = self::resolve_react_settings_page_interface( $settings_page );
+		if ( null !== $interface ) {
+			$supported_types = array_merge( $supported_types, $interface->get_extra_supported_types( $section ) );
+		}
 
 		return array_values( array_unique( array_filter( (array) $supported_types ) ) );
 	}
 
 	/**
 	 * Get a type map for normalizing WooCommerce settings types.
+	 *
+	 * Merges the transformer's built-in aliases with any extras contributed
+	 * by the settings page's `ReactSettingsPageInterface` implementation
+	 * (`get_extra_type_map()`). When the page has not opted in (no interface),
+	 * only defaults are returned.
 	 *
 	 * @param string $tab Tab id.
 	 * @param string $section Section id.
@@ -199,32 +198,20 @@ class ReactSettingsSchema {
 	 * @since 10.8.0
 	 */
 	public static function get_type_map( string $tab, string $section, array $settings_definitions, $settings_page ): array {
-		$default_map = array(
+		unset( $tab, $settings_definitions );
+
+		$type_map = array(
 			'single_select_country'  => 'select',
 			'multi_select_countries' => 'multiselect',
 			'single_select_page'     => 'select',
 		);
-		/**
-		 * Filter the field type map for React settings.
-		 *
-		 * @since 10.8.0
-		 *
-		 * @param array  $type_map Map of WooCommerce field types to normalized types.
-		 * @param string $tab Tab id.
-		 * @param string $section Section id.
-		 * @param array  $settings_definitions Settings definitions for the tab/section.
-		 * @param mixed  $settings_page Settings page instance.
-		 */
-		$type_map = apply_filters(
-			'woocommerce_react_settings_type_map',
-			$default_map,
-			$tab,
-			$section,
-			$settings_definitions,
-			$settings_page
-		);
 
-		return is_array( $type_map ) ? $type_map : $default_map;
+		$interface = self::resolve_react_settings_page_interface( $settings_page );
+		if ( null !== $interface ) {
+			$type_map = array_merge( $type_map, $interface->get_extra_type_map( $section ) );
+		}
+
+		return $type_map;
 	}
 
 	/**
@@ -248,7 +235,7 @@ class ReactSettingsSchema {
 	/**
 	 * Core unsupported-fields scan. Takes pre-computed type-map and supported-types
 	 * arrays so callers that already have them (e.g. `get_screen_render_context()`)
-	 * can skip re-firing the `woocommerce_react_settings_*` filters.
+	 * can skip re-querying the page's `ReactSettingsPageInterface`.
 	 *
 	 * @param array $settings_definitions Settings definitions.
 	 * @param array $type_map             Pre-resolved type map.
@@ -350,14 +337,26 @@ class ReactSettingsSchema {
 	 */
 	public static function get_screen_render_context( string $tab, string $section, array $settings_definitions, $settings_page ): array {
 		$is_opted_out       = self::is_opted_out( $tab, $section, $settings_definitions, $settings_page );
+		$interface          = self::resolve_react_settings_page_interface( $settings_page );
 		$unsupported_fields = array();
 		$should_render      = false;
 		$response           = null;
 
-		if ( ! $is_opted_out ) {
-			// Resolve the filter-driven maps once per render; internal helpers
-			// below reuse them so we don't re-fire `woocommerce_react_settings_*`
-			// up to 2 + N times per request (where N is the field count).
+		// Render gate:
+		//   1. Caller has already verified the `modern-settings` feature flag.
+		//   2. The page must opt in by returning a non-null interface from
+		//      WC_Settings_Page::get_react_settings_page().
+		//   3. No unsupported fields in the section.
+		//   4. The `woocommerce_react_settings_opt_out` filter does not veto.
+		//
+		// Rule 2 stays distinct from rule 4 — `is_opted_out` in the returned
+		// plan continues to reflect the filter decision only. Callers
+		// (WC_Settings_Page::output()) rely on that distinction to decide
+		// whether to surface the legacy-fallback warning.
+		if ( ! $is_opted_out && null !== $interface ) {
+			// Resolve the per-render maps once; internal helpers below reuse
+			// them so we don't re-query the interface up to 2 + N times per
+			// request (where N is the field count).
 			$type_map           = self::get_type_map( $tab, $section, $settings_definitions, $settings_page );
 			$supported_types    = self::get_supported_types( $tab, $section, $settings_definitions, $settings_page );
 			$unsupported_fields = self::find_unsupported_fields( $settings_definitions, $type_map, $supported_types );
@@ -406,9 +405,10 @@ class ReactSettingsSchema {
 
 	/**
 	 * Core response builder. Takes a pre-resolved `$type_map` so callers that
-	 * already have one (e.g. `get_screen_render_context()`) can skip re-firing
-	 * the `woocommerce_react_settings_type_map` filter — otherwise it would
-	 * fire once per field via `transform_setting_to_field()`.
+	 * already have one (e.g. `get_screen_render_context()`) can skip
+	 * re-resolving it — otherwise the page's
+	 * `ReactSettingsPageInterface::get_extra_type_map()` would be invoked
+	 * once per field via `transform_setting_to_field()`.
 	 *
 	 * @param string $tab Tab id.
 	 * @param string $section Section id.
@@ -463,7 +463,7 @@ class ReactSettingsSchema {
 				$current_group = self::get_default_group();
 			}
 
-			$field = self::transform_setting_to_field( $tab, $setting, $type_map );
+			$field = self::transform_setting_to_field( $tab, $section, $setting, $type_map, $settings_page );
 			if ( $field ) {
 				$current_group['fields'][] = $field;
 				$values[ $field['id'] ]    = self::get_field_value( $setting, $field['type'] );
@@ -500,12 +500,16 @@ class ReactSettingsSchema {
 	 * Transform a WooCommerce setting into a React field.
 	 *
 	 * @param string $tab Tab id.
+	 * @param string $section Section id.
 	 * @param array  $setting WooCommerce setting array.
 	 * @param array  $type_map Pre-resolved type map.
+	 * @param mixed  $settings_page Settings page instance.
 	 * @return array|null
 	 * @since 10.8.0
 	 */
-	private static function transform_setting_to_field( string $tab, array $setting, array $type_map ): ?array {
+	private static function transform_setting_to_field( string $tab, string $section, array $setting, array $type_map, $settings_page ): ?array {
+		unset( $tab );
+
 		$setting_id   = $setting['id'] ?? '';
 		$setting_type = $setting['type'] ?? 'text';
 		$field_type   = $type_map[ $setting_type ] ?? $setting_type;
@@ -529,7 +533,7 @@ class ReactSettingsSchema {
 			'desc'  => $desc,
 		);
 
-		$options = self::get_field_options( $tab, $setting, $field_type );
+		$options = self::get_field_options( $section, $setting, $field_type, $settings_page );
 		if ( ! empty( $options ) ) {
 			$field['options'] = $options;
 		}
@@ -540,12 +544,24 @@ class ReactSettingsSchema {
 	/**
 	 * Get field options for supported select/multiselect fields.
 	 *
+	 * Resolution order (first hit wins, but see `$interface_options` null
+	 * semantics below):
+	 *   1. Inline `$setting['options']` from the field definition.
+	 *   2. Built-in page-list synthesis for `single_select_page_with_search`
+	 *      when no inline options are supplied.
+	 *   3. Per-tab options synthesised by the page's
+	 *      `ReactSettingsPageInterface::get_field_options()` method. The
+	 *      interface can override steps 1 and 2 by returning a non-null array;
+	 *      returning `null` falls through to whatever steps 1/2 produced.
+	 *
+	 * @param string $section Section id.
 	 * @param array  $setting Setting definition.
 	 * @param string $normalized_type Normalized field type.
+	 * @param mixed  $settings_page Settings page instance.
 	 * @return array
 	 * @since 10.8.0
 	 */
-	private static function get_field_options( string $tab, array $setting, string $normalized_type ): array {
+	private static function get_field_options( string $section, array $setting, string $normalized_type, $settings_page ): array {
 		if ( ! in_array( $normalized_type, self::OPTION_TYPES, true ) ) {
 			return array();
 		}
@@ -559,7 +575,7 @@ class ReactSettingsSchema {
 		// rely on a server-side AJAX search at the legacy renderer level. To
 		// keep the React combobox honest, synthesise the page list from
 		// `get_pages()` honouring any `args.exclude` value when no options
-		// have been supplied. The filter below can still override or augment.
+		// have been supplied. The page's interface below can still override.
 		$raw_type = isset( $setting['type'] ) && is_string( $setting['type'] ) ? $setting['type'] : '';
 		if ( empty( $options ) && 'single_select_page_with_search' === $raw_type && function_exists( 'get_pages' ) ) {
 			$query_args = array(
@@ -585,204 +601,40 @@ class ReactSettingsSchema {
 		}
 
 		$setting_id = isset( $setting['id'] ) && is_scalar( $setting['id'] ) ? (string) $setting['id'] : '';
-		if ( empty( $options ) && '' !== $setting_id ) {
-			$options = self::get_default_field_options( $tab, $setting_id );
+
+		// Per-page option synthesis. `null` means "no opinion" — keep whatever
+		// inline/synthesized options we already have. An empty array is a real
+		// override that suppresses options entirely; guarding on `null !==` (not
+		// `! empty()`) preserves that distinction.
+		$interface = self::resolve_react_settings_page_interface( $settings_page );
+		if ( null !== $interface && '' !== $setting_id ) {
+			$interface_options = $interface->get_field_options( $setting_id, $setting, $section );
+			if ( null !== $interface_options ) {
+				$options = $interface_options;
+			}
 		}
 
-		/**
-		 * Filter field options for a specific field.
-		 *
-		 * Allows tab-specific callers to inject options at response time for
-		 * fields that don't embed a static options array in their definition
-		 * (for example, currency lists, country lists, or dynamic page lists).
-		 *
-		 * @since 10.8.0
-		 *
-		 * @param array  $options         Current options array (associative label map or list of option arrays).
-		 * @param string $field_id        Setting field ID.
-		 * @param array  $setting         Raw setting definition.
-		 * @param string $normalized_type Normalized field type (e.g. 'select', 'multiselect').
-		 */
-		$options = apply_filters(
-			'woocommerce_react_settings_field_options',
-			$options,
-			$setting_id,
-			$setting,
-			$normalized_type
-		);
-
-		return self::normalize_options( is_array( $options ) ? $options : array() );
+		return self::normalize_options( $options );
 	}
 
 	/**
-	 * Get built-in options for known WooCommerce settings fields.
+	 * Resolve the ReactSettingsPageInterface provided by a WC_Settings_Page, if any.
 	 *
-	 * @param string $tab Settings tab id.
-	 * @param string $field_id Setting field id.
-	 * @return array
+	 * Pages that have not opted in (base class default) return null from
+	 * `get_react_settings_page()`; legacy `$settings_page` values that aren't
+	 * objects or don't expose the method are treated the same.
+	 *
+	 * @param mixed $settings_page Settings-page instance (loose type to match callers).
+	 * @return ReactSettingsPageInterface|null
 	 */
-	private static function get_default_field_options( string $tab, string $field_id ): array {
-		switch ( $tab ) {
-			case 'general':
-				return self::get_general_field_options( $field_id );
-			case 'products':
-				return self::get_product_field_options( $field_id );
-			default:
-				return array();
-		}
-	}
-
-	/**
-	 * Get built-in options for general settings fields.
-	 *
-	 * @param string $field_id Setting field id.
-	 * @return array
-	 */
-	private static function get_general_field_options( string $field_id ): array {
-		switch ( $field_id ) {
-			case 'woocommerce_currency':
-				if ( ! function_exists( 'get_woocommerce_currencies' ) || ! function_exists( 'get_woocommerce_currency_symbol' ) ) {
-					return array();
-				}
-
-				$currencies = get_woocommerce_currencies();
-				$generated  = array();
-
-				foreach ( $currencies as $code => $name ) {
-					$label              = wp_specialchars_decode( (string) $name );
-					$symbol             = wp_specialchars_decode( (string) get_woocommerce_currency_symbol( $code ) );
-					$generated[ $code ] = $label . ' (' . $symbol . ') — ' . $code;
-				}
-
-				return $generated;
-
-			case 'woocommerce_default_country':
-				if ( ! function_exists( 'WC' ) ) {
-					return array();
-				}
-
-				$countries = WC()->countries->get_countries();
-				$states    = WC()->countries->get_states();
-				$generated = array();
-
-				foreach ( $countries as $country_code => $country_name ) {
-					$country_states = $states[ $country_code ] ?? array();
-
-					if ( empty( $country_states ) ) {
-						$generated[ $country_code ] = $country_name;
-						continue;
-					}
-
-					foreach ( $country_states as $state_code => $state_name ) {
-						$generated[ $country_code . ':' . $state_code ] = $country_name . ' — ' . $state_name;
-					}
-				}
-
-				return $generated;
-
-			case 'woocommerce_all_except_countries':
-			case 'woocommerce_specific_allowed_countries':
-			case 'woocommerce_specific_ship_to_countries':
-				if ( ! function_exists( 'WC' ) ) {
-					return array();
-				}
-
-				return WC()->countries->get_countries();
-
-			default:
-				return array();
-		}
-	}
-
-	/**
-	 * Get built-in options for product settings fields.
-	 *
-	 * @param string $field_id Setting field id.
-	 * @return array
-	 */
-	private static function get_product_field_options( string $field_id ): array {
-		switch ( $field_id ) {
-			case 'woocommerce_weight_unit':
-				return self::get_unit_options( 'weight', 'woocommerce_weight_units' );
-
-			case 'woocommerce_dimension_unit':
-				return self::get_unit_options( 'dimensions', 'woocommerce_dimension_units' );
-
-			case 'woocommerce_product_type':
-				if ( ! function_exists( 'wc_get_product_types' ) ) {
-					return array();
-				}
-
-				$product_types = wc_get_product_types();
-				return is_array( $product_types ) ? $product_types : array();
-
-			case 'woocommerce_shop_page_id':
-				return self::get_page_options();
-
-			default:
-				return array();
-		}
-	}
-
-	/**
-	 * Get options for a weight/dimension unit field.
-	 *
-	 * Loads the canonical `code => label` map from `i18n/units.php` (the same
-	 * source `I18nUtil::get_weight_unit_label()` / `get_dimensions_unit_label()`
-	 * read from) and filters the key set through the given filter so we stay in
-	 * sync with the v4 Products controller's `validate_setting_value()` check.
-	 *
-	 * @param string $bucket Either 'weight' or 'dimensions'.
-	 * @param string $filter Filter name for the valid-keys list.
-	 * @return array<string, string>
-	 */
-	private static function get_unit_options( string $bucket, string $filter ): array {
-		if ( ! function_exists( 'WC' ) ) {
-			return array();
+	private static function resolve_react_settings_page_interface( $settings_page ): ?ReactSettingsPageInterface {
+		if ( ! is_object( $settings_page ) || ! method_exists( $settings_page, 'get_react_settings_page' ) ) {
+			return null;
 		}
 
-		$units = include WC()->plugin_path() . '/i18n/units.php';
-		if ( ! is_array( $units ) || empty( $units[ $bucket ] ) ) {
-			return array();
-		}
+		$interface = $settings_page->get_react_settings_page();
 
-		$valid_keys = apply_filters( $filter, array_keys( $units[ $bucket ] ) );
-
-		return is_array( $valid_keys )
-			? array_intersect_key( $units[ $bucket ], array_flip( $valid_keys ) )
-			: $units[ $bucket ];
-	}
-
-	/**
-	 * Get options for page selection fields.
-	 *
-	 * @return array
-	 */
-	private static function get_page_options(): array {
-		if ( ! function_exists( 'get_pages' ) ) {
-			return array();
-		}
-
-		$pages   = get_pages(
-			array(
-				'sort_column' => 'menu_order',
-				'sort_order'  => 'ASC',
-				'post_status' => array( 'publish', 'private', 'draft' ),
-			)
-		);
-		$options = array(
-			'' => __( 'Select a page…', 'woocommerce' ),
-		);
-
-		if ( ! is_array( $pages ) ) {
-			return $options;
-		}
-
-		foreach ( $pages as $page ) {
-			$options[ (string) $page->ID ] = wp_strip_all_tags( $page->post_title );
-		}
-
-		return $options;
+		return $interface instanceof ReactSettingsPageInterface ? $interface : null;
 	}
 
 	/**

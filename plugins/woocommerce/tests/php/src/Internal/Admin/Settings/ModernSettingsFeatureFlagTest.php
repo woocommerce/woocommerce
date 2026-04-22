@@ -4,6 +4,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Admin\Settings;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
 use ReflectionMethod;
 use WC_Settings_Page;
 use WC_Unit_Test_Case;
@@ -272,6 +273,31 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 						'id'   => 'wcprd_3489_group',
 					),
 				);
+			}
+
+			/**
+			 * Opt this test page into modern rendering via the 10.8 interface.
+			 *
+			 * The SDK gate now requires a non-null ReactSettingsPageInterface from
+			 * get_react_settings_page() before any tab renders modern — the flag
+			 * alone is not sufficient.
+			 *
+			 * @return ReactSettingsPageInterface|null
+			 */
+			public function get_react_settings_page(): ?ReactSettingsPageInterface {
+				return new class() implements ReactSettingsPageInterface {
+					public function get_extra_type_map( string $section ): array {
+						return array();
+					}
+
+					public function get_extra_supported_types( string $section ): array {
+						return array();
+					}
+
+					public function get_field_options( string $field_id, array $field, string $section ): ?array {
+						return null;
+					}
+				};
 			}
 		};
 	}

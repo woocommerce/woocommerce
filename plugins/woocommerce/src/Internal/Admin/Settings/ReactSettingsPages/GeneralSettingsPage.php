@@ -17,8 +17,11 @@ defined( 'ABSPATH' ) || exit;
  * React-settings contract for the General tab.
  *
  * Supplies server-side option synthesis for the currency dropdown and the
- * country/state picker, which ship without inline `options` arrays. Ported
- * from ReactSettingsSchema's private get_general_field_options() helper.
+ * country/state picker, which ship without inline `options` arrays. Logic
+ * was ported in 10.8.0 from what used to be
+ * `ReactSettingsSchema::get_general_field_options()`, which was removed
+ * when the transformer switched from firing `woocommerce_react_settings_*`
+ * filters to consulting `ReactSettingsPageInterface`.
  *
  * @since 10.8.0
  */

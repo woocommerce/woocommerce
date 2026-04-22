@@ -11,13 +11,18 @@ This document explains how the React settings system renders settings pages by d
 
 ## Overview
 
-React settings render for a `WC_Settings_Page` subclass when the `modern-settings` feature flag is enabled. Rendering falls back to legacy settings when unsupported field types are detected or when a page opts out via the filter below.
+React settings render for a `WC_Settings_Page` subclass when **all** of these are true:
+
+1. The `modern-settings` feature flag is enabled.
+2. The page opts in by returning a non-null `ReactSettingsPageInterface` from `WC_Settings_Page::get_react_settings_page()` (base default is `null`).
+3. No unsupported field types are detected in the section.
+4. The `woocommerce_react_settings_opt_out` filter doesn't veto the render.
 
 ## Server-side hooks
 
 ### Opt out a settings page
 
-Use this filter to prevent React rendering for a specific tab/section:
+Use this filter to prevent React rendering for a specific tab/section (surviving filter; useful for third-party runtime vetoes):
 
 ```php
 add_filter(
@@ -33,31 +38,40 @@ add_filter(
 );
 ```
 
-### Register supported field types and type mappings
+### Extend supported field types and type mappings
 
-Use these filters to expand supported React field types or normalize custom WooCommerce field types:
+Pages participate in the modernised renderer by returning an instance of `ReactSettingsPageInterface` from `WC_Settings_Page::get_react_settings_page()`. The interface exposes three extension points:
 
 ```php
-add_filter(
-    'woocommerce_react_settings_supported_types',
-    function( $types, $tab, $section ) {
-        $types[] = 'hello_text';
-        return $types;
-    },
-    10,
-    3
-);
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
 
-add_filter(
-    'woocommerce_react_settings_type_map',
-    function( $map, $tab, $section ) {
-        $map['hello_text'] = 'hello_text';
-        return $map;
-    },
-    10,
-    3
-);
+final class MyReactSettingsPage implements ReactSettingsPageInterface {
+    public function get_extra_type_map( string $section ): array {
+        // Map a custom WooCommerce field type to a normalized renderer type.
+        return array( 'hello_text' => 'text' );
+    }
+
+    public function get_extra_supported_types( string $section ): array {
+        // Declare a custom renderer type that ships its own JS transformer.
+        return array( 'hello_text' );
+    }
+
+    public function get_field_options( string $field_id, array $field, string $section ): ?array {
+        // Return null to let inline options pass through; return an array to override.
+        return null;
+    }
+}
 ```
+
+The per-tab `WC_Settings_Page` subclass then returns this implementation:
+
+```php
+public function get_react_settings_page(): ?ReactSettingsPageInterface {
+    return wc_get_container()->get( MyReactSettingsPage::class );
+}
+```
+
+The `woocommerce_react_settings_supported_types`, `woocommerce_react_settings_type_map`, and `woocommerce_react_settings_field_options` filters were **removed in 10.8.0** in favour of this interface — they did not participate in any third-party API contract. The `woocommerce_react_settings_opt_out` filter (above) is retained.
 
 ## Client-side registry
 

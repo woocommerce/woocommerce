@@ -145,7 +145,7 @@ class SettingsPageFallbackNoticeTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'legacy_alias', $message, 'Message should name the second unsupported field original type.' );
 		$this->assertStringContainsString( 'text', $message, 'Message should name the second unsupported field normalized type.' );
 		$this->assertStringContainsString( 'registerFieldTypeTransformer', $message, 'Message should guide authors towards the transformer API.' );
-		$this->assertStringContainsString( 'woocommerce_react_settings_supported_types', $message, 'Message should mention the supported-types filter.' );
+		$this->assertStringContainsString( 'ReactSettingsPageInterface::get_extra_supported_types', $message, 'Message should point at the interface opt-in for adding supported types.' );
 	}
 
 	/**

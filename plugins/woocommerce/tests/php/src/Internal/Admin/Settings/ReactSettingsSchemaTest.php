@@ -4,8 +4,10 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Admin\Settings;
 
 use Automattic\WooCommerce\Internal\Admin\Settings;
+use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Settings\ReactSettingsSchema;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\General\Schema\GeneralSettingsSchema;
+use WC_Settings_Page;
 use WC_Unit_Test_Case;
 use WP_REST_Request;
 
@@ -35,14 +37,7 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	 * @testdox Returns a render plan with payload metadata for a supported settings screen.
 	 */
 	public function test_get_screen_render_context_returns_payload_for_supported_screen() {
-		$settings_page = new class() {
-			/**
-			 * @return string
-			 */
-			public function get_label() {
-				return 'General';
-			}
-		};
+		$settings_page = $this->make_page_with_interface( 'general', 'General', $this->make_noop_interface() );
 
 		update_option( 'setting_one', 'saved_value' );
 
@@ -79,6 +74,8 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	 * @testdox Returns unsupported fields in the render plan for a legacy fallback screen.
 	 */
 	public function test_get_screen_render_context_returns_unsupported_fields_for_legacy_fallback() {
+		$settings_page = $this->make_page_with_interface( 'general', 'General', $this->make_noop_interface() );
+
 		$settings = array(
 			array(
 				'type' => 'title',
@@ -94,7 +91,7 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		$plan = ReactSettingsSchema::get_screen_render_context( 'general', '', $settings, null );
+		$plan = ReactSettingsSchema::get_screen_render_context( 'general', '', $settings, $settings_page );
 
 		$this->assertFalse( $plan['is_opted_out'] );
 		$this->assertFalse( $plan['should_render'] );
@@ -115,24 +112,6 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Applies supported types filters.
-	 */
-	public function test_get_supported_types_applies_filter() {
-		$filter = static function ( $types ) {
-			$types[] = 'custom_type';
-			return $types;
-		};
-
-		add_filter( 'woocommerce_react_settings_supported_types', $filter );
-
-		$types = ReactSettingsSchema::get_supported_types( 'general', '', array(), null );
-
-		remove_filter( 'woocommerce_react_settings_supported_types', $filter );
-
-		$this->assertContains( 'custom_type', $types );
-	}
-
-	/**
 	 * @testdox Returns default type map values.
 	 */
 	public function test_get_type_map_returns_defaults() {
@@ -143,40 +122,19 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Applies type map filters.
-	 */
-	public function test_get_type_map_applies_filter() {
-		$filter = static function () {
-			return array(
-				'custom_wc_type' => 'text',
-			);
-		};
-
-		add_filter( 'woocommerce_react_settings_type_map', $filter );
-
-		$type_map = ReactSettingsSchema::get_type_map( 'general', '', array(), null );
-
-		remove_filter( 'woocommerce_react_settings_type_map', $filter );
-
-		$this->assertSame( 'text', $type_map['custom_wc_type'] );
-	}
-
-	/**
 	 * @testdox Returns unsupported fields with normalized types.
 	 */
 	public function test_get_unsupported_fields_returns_expected_payload() {
-		$supported_filter = static function () {
-			return array( 'text', 'select' );
-		};
-
-		$type_map_filter = static function () {
-			return array(
-				'custom_wc_type' => 'text',
-			);
-		};
-
-		add_filter( 'woocommerce_react_settings_supported_types', $supported_filter );
-		add_filter( 'woocommerce_react_settings_type_map', $type_map_filter );
+		// Drive the type-map extension via a scripted page interface — the
+		// legacy `woocommerce_react_settings_type_map` filter was retired in
+		// 10.8.0 and coverage of that filter's wiring now lives in the
+		// dedicated ReactSettingsPageInterfaceTest.
+		$interface     = $this->make_interface_returning(
+			array( 'custom_wc_type' => 'text' ),
+			array(),
+			null
+		);
+		$settings_page = $this->make_page_with_interface( 'general', 'General', $interface );
 
 		$settings = array(
 			array(
@@ -193,7 +151,7 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 			),
 			array(
 				'id'   => 'unsupported_field',
-				'type' => 'checkbox',
+				'type' => 'completely_unknown_type',
 			),
 			array(
 				'id'   => 'empty_type_field',
@@ -205,10 +163,7 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		$unsupported = ReactSettingsSchema::get_unsupported_fields( 'general', '', $settings, null );
-
-		remove_filter( 'woocommerce_react_settings_supported_types', $supported_filter );
-		remove_filter( 'woocommerce_react_settings_type_map', $type_map_filter );
+		$unsupported = ReactSettingsSchema::get_unsupported_fields( 'general', '', $settings, $settings_page );
 
 		$this->assertCount( 2, $unsupported );
 		$this->assertSame( 'unsupported_field', $unsupported[0]['id'] );
@@ -269,52 +224,9 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Injects field options via the tab-specific filter hook.
+	 * @testdox Does not generate built-in options for pages without an interface.
 	 */
-	public function test_build_response_applies_field_options_filter() {
-		$filter = static function ( $options, $field_id ) {
-			if ( 'tab_specific_field' === $field_id ) {
-				return array(
-					'alpha' => 'Alpha',
-					'beta'  => 'Beta',
-				);
-			}
-			return $options;
-		};
-
-		add_filter( 'woocommerce_react_settings_field_options', $filter, 10, 2 );
-
-		$settings = array(
-			array(
-				'type'  => 'title',
-				'id'    => 'group_one',
-				'title' => 'Group one',
-			),
-			array(
-				'id'   => 'tab_specific_field',
-				'type' => 'select',
-			),
-			array(
-				'type' => 'sectionend',
-				'id'   => 'group_one',
-			),
-		);
-
-		$response = ReactSettingsSchema::build_response( 'custom_tab', '', $settings, null );
-
-		remove_filter( 'woocommerce_react_settings_field_options', $filter, 10 );
-
-		$fields = $response['groups']['group_one']['fields'];
-		$this->assertNotEmpty( $fields );
-		$this->assertArrayHasKey( 'options', $fields[0] );
-		$this->assertSame( 'Alpha', $fields[0]['options']['alpha'] );
-		$this->assertSame( 'Beta', $fields[0]['options']['beta'] );
-	}
-
-	/**
-	 * @testdox Does not generate built-in options for unknown tabs.
-	 */
-	public function test_build_response_does_not_generate_country_options_for_unknown_tab() {
+	public function test_build_response_does_not_generate_options_for_page_without_interface() {
 		$settings = array(
 			array(
 				'type'  => 'title',
@@ -336,35 +248,6 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 		$fields = $response['groups']['group_one']['fields'];
 		$this->assertNotEmpty( $fields );
 		$this->assertArrayNotHasKey( 'options', $fields[0] );
-	}
-
-	/**
-	 * @testdox Generates built-in country options for known general settings fields.
-	 */
-	public function test_build_response_generates_country_options_for_general_settings_fields() {
-		$settings = array(
-			array(
-				'type'  => 'title',
-				'id'    => 'group_one',
-				'title' => 'Group one',
-			),
-			array(
-				'id'   => 'woocommerce_specific_allowed_countries',
-				'type' => 'multi_select_countries',
-			),
-			array(
-				'type' => 'sectionend',
-				'id'   => 'group_one',
-			),
-		);
-
-		$response  = ReactSettingsSchema::build_response( 'general', '', $settings, null );
-		$fields    = $response['groups']['group_one']['fields'];
-		$options   = $fields[0]['options'];
-		$countries = WC()->countries->get_countries();
-
-		$this->assertNotEmpty( $options );
-		$this->assertSame( $countries['US'], $options['US'] );
 	}
 
 	/**
@@ -738,5 +621,124 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 		$options = $response['groups']['page_group']['fields'][0]['options'];
 		$this->assertArrayHasKey( (string) $keep_id, $options );
 		$this->assertArrayNotHasKey( (string) $exclude_id, $options, 'args.exclude entries must be filtered out of the synthesised page list.' );
+	}
+
+	/**
+	 * Build a no-op ReactSettingsPageInterface implementation.
+	 *
+	 * Pages using this fake expose no extra types, no extra aliases, and defer
+	 * to the transformer's built-in option handling for every field.
+	 */
+	private function make_noop_interface(): ReactSettingsPageInterface {
+		return $this->make_interface_returning( array(), array(), null );
+	}
+
+	/**
+	 * Build a scripted ReactSettingsPageInterface with the supplied return values.
+	 *
+	 * @param array<string, string>                                $type_map      Extra type-map entries.
+	 * @param array<int, string>                                   $supported     Extra supported types.
+	 * @param array<int, array{label: string, value: string}>|null $field_options Field-options return value (null = fall through).
+	 */
+	private function make_interface_returning( array $type_map, array $supported, ?array $field_options ): ReactSettingsPageInterface {
+		return new class( $type_map, $supported, $field_options ) implements ReactSettingsPageInterface {
+			/**
+			 * Extra type-map entries scripted for the fake page.
+			 *
+			 * @var array<string, string>
+			 */
+			private array $type_map;
+
+			/**
+			 * Extra supported-type entries scripted for the fake page.
+			 *
+			 * @var array<int, string>
+			 */
+			private array $supported;
+
+			/**
+			 * Field-options scripted return value. Null means fall through.
+			 *
+			 * @var array<int, array{label: string, value: string}>|null
+			 */
+			private ?array $field_options;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param array      $type_map      Type-map entries.
+			 * @param array      $supported     Supported-type entries.
+			 * @param array|null $field_options Field-options return value.
+			 */
+			public function __construct( array $type_map, array $supported, ?array $field_options ) {
+				$this->type_map      = $type_map;
+				$this->supported     = $supported;
+				$this->field_options = $field_options;
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			public function get_extra_type_map( string $section ): array {
+				return $this->type_map;
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			public function get_extra_supported_types( string $section ): array {
+				return $this->supported;
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			public function get_field_options( string $field_id, array $field, string $section ): ?array {
+				return $this->field_options;
+			}
+		};
+	}
+
+	/**
+	 * Build an anonymous WC_Settings_Page subclass that returns the supplied
+	 * interface from get_react_settings_page().
+	 *
+	 * @param string                     $tab_id    Tab id (exposed via `$this->id`).
+	 * @param string                     $label     Tab label (exposed via `$this->label`).
+	 * @param ReactSettingsPageInterface $interface Scripted interface.
+	 */
+	private function make_page_with_interface( string $tab_id, string $label, ReactSettingsPageInterface $interface ): WC_Settings_Page {
+		return new class( $tab_id, $label, $interface ) extends WC_Settings_Page {
+			/**
+			 * Scripted interface instance.
+			 *
+			 * @var ReactSettingsPageInterface
+			 */
+			private ReactSettingsPageInterface $iface;
+
+			/**
+			 * Constructor.
+			 *
+			 * @param string                     $tab_id    Tab id.
+			 * @param string                     $label     Tab label.
+			 * @param ReactSettingsPageInterface $interface Scripted interface.
+			 */
+			public function __construct( string $tab_id, string $label, ReactSettingsPageInterface $interface ) {
+				$this->id    = $tab_id;
+				$this->label = $label;
+				$this->iface = $interface;
+				// Intentionally skip parent::__construct() so this bare subclass
+				// does not register hooks against the global settings pipeline.
+			}
+
+			/**
+			 * Return the scripted interface instance.
+			 *
+			 * @return ReactSettingsPageInterface|null
+			 */
+			public function get_react_settings_page(): ?ReactSettingsPageInterface {
+				return $this->iface;
+			}
+		};
 	}
 }
