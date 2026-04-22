@@ -47,10 +47,16 @@ return array(
 		'title'    => __( 'Customers', 'woocommerce' ),
 		'position' => 50,
 	),
+	// Keep `woocommerce-marketing` as the tree slug so hoisted children
+	// ($submenu['woocommerce-marketing']) attach correctly, but override the
+	// click-through URL to the real wc-admin React route — the `woocommerce-
+	// marketing` slug itself is a placeholder registered with a null callback
+	// and errors on direct load.
 	'woocommerce-marketing'                                                  => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Marketing', 'woocommerce' ),
 		'position' => 60,
+		'url'      => 'admin.php?page=wc-admin&path=/marketing',
 	),
 	'wc-settings'                                                            => array(
 		'parent'   => 'woocommerce',

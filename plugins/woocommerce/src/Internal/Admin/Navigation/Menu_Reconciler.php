@@ -199,6 +199,16 @@ class Menu_Reconciler {
 			return;
 		}
 
+		// Index the original entries by slug so we can preserve them verbatim
+		// (with their capability + hookname bindings that WP's access-check
+		// logic depends on) when reordering.
+		$original_by_slug = array();
+		foreach ( $submenu['woocommerce'] as $entry ) {
+			if ( isset( $entry[2] ) ) {
+				$original_by_slug[ $entry[2] ] = $entry;
+			}
+		}
+
 		$children = array_filter(
 			$tree,
 			static fn( $node ) => 'woocommerce' === ( $node['parent'] ?? null ) && empty( $node['hidden'] )
@@ -210,30 +220,30 @@ class Menu_Reconciler {
 
 		$submenu['woocommerce'] = array();
 		foreach ( $children as $slug => $node ) {
-			$submenu['woocommerce'][] = array(
-				$node['title'],                    // menu title.
-				$node['capability'] ?? 'read',     // capability.
-				$this->slug_to_menu_url( $slug ),  // slug / URL.
-				$node['title'],                    // page title.
-			);
-		}
-	}
+			// A tree node can override its click-through URL via the `url`
+			// field when the slug itself is a placeholder that won't load
+			// directly (e.g. `woocommerce-marketing` → `wc-admin&path=/marketing`).
+			$effective_slug = $node['url'] ?? $slug;
 
-	/**
-	 * Convert a tree slug into a URL suitable for WP's $submenu[2] field.
-	 *
-	 * Tree slugs can be plain (`wc-settings`), query fragments
-	 * (`edit.php?post_type=product`), or WC-Admin paths
-	 * (`wc-admin&path=/analytics/overview`).
-	 *
-	 * @param string $slug Tree slug.
-	 * @return string
-	 */
-	private function slug_to_menu_url( string $slug ): string {
-		if ( str_contains( $slug, '?' ) ) {
-			return $slug;
+			if ( isset( $original_by_slug[ $effective_slug ] ) ) {
+				$entry    = $original_by_slug[ $effective_slug ];
+				$entry[0] = $node['title'];
+				$submenu['woocommerce'][] = $entry;
+			} elseif ( isset( $original_by_slug[ $slug ] ) && ! isset( $node['url'] ) ) {
+				$entry    = $original_by_slug[ $slug ];
+				$entry[0] = $node['title'];
+				$submenu['woocommerce'][] = $entry;
+			} else {
+				// Synthesized entry. Use $effective_slug so the rendered link
+				// points at a URL that actually loads.
+				$submenu['woocommerce'][] = array(
+					$node['title'],
+					$node['capability'] ?? 'read',
+					$effective_slug,
+					$node['title'],
+				);
+			}
 		}
-		return 'admin.php?page=' . $slug;
 	}
 
 	/**

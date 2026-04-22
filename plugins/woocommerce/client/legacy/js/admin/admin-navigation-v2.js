@@ -85,10 +85,12 @@
 					if ( kid.hidden ) {
 						return;
 					}
+					// Use the url override if present (placeholder slug → real URL).
+					var target = kid.url || kid.slug;
 					var kidHref = '/wp-admin/' + (
-						kid.slug.indexOf( '?' ) >= 0 || kid.slug.indexOf( '&' ) >= 0
-							? ( kid.slug.indexOf( '?' ) >= 0 ? kid.slug : 'admin.php?page=' + kid.slug )
-							: 'admin.php?page=' + kid.slug
+						target.indexOf( '?' ) >= 0
+							? target
+							: 'admin.php?page=' + target
 					);
 					$nested.append(
 						$( '<li></li>' ).append(

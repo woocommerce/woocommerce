@@ -107,8 +107,10 @@ class Renderer {
 			$classes[] = 'wc-nav-v2-breadcrumb';
 		}
 
+		$href = $this->slug_to_url( $node['url'] ?? $slug );
+
 		echo '<li class="' . esc_attr( implode( ' ', $classes ) ) . '">';
-		echo '<a href="' . esc_url( $this->slug_to_url( $slug ) ) . '" class="menu-top">';
+		echo '<a href="' . esc_url( $href ) . '" class="menu-top">';
 		if ( ! empty( $node['icon'] ) ) {
 			echo '<div class="wp-menu-image dashicons-before ' . esc_attr( $node['icon'] ) . '" aria-hidden="true"><br></div>';
 		}
@@ -120,8 +122,9 @@ class Renderer {
 			echo '<li class="wp-submenu-head" aria-hidden="true">' . esc_html( $node['title'] ) . '</li>';
 			foreach ( $children as $child ) {
 				$child_current = ( $child['slug'] === $current ) ? ' class="current"' : '';
+				$child_href    = $this->slug_to_url( $child['url'] ?? $child['slug'] );
 				echo '<li' . $child_current . '>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-				echo '<a href="' . esc_url( $this->slug_to_url( $child['slug'] ) ) . '">' . esc_html( $child['title'] ) . '</a>';
+				echo '<a href="' . esc_url( $child_href ) . '">' . esc_html( $child['title'] ) . '</a>';
 				echo '</li>';
 			}
 			echo '</ul>';
