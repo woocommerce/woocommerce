@@ -22,6 +22,7 @@ export interface SelectableItemsContext< T = unknown > {
 	storeNamespace: string;
 	groupLabel?: string;
 	dynamicItems?: boolean;
+	isLoading?: boolean;
 }
 
 export type SelectableItemsBlockContext< T = unknown > = {

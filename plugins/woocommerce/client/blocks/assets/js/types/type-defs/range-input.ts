@@ -6,6 +6,7 @@ export interface RangeInputContext {
 	step?: number;
 	changeAction: string;
 	storeNamespace: string;
+	isLoading?: boolean;
 }
 
 export type RangeInputBlockContext = {

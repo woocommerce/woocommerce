@@ -120,6 +120,7 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 					.sort( ( a, b ) => b.rating - a.rating )
 					.filter( ( { rating } ) => rating >= minimumRating )
 					.map( ( { rating, count }, index ) => ( {
+						id: `rating-${ rating }`,
 						label: <RatingStars key={ rating } stars={ rating } />,
 						ariaLabel: sprintf(
 							/* translators: %d: rating value. Example: Rated 4 out of 5. */
