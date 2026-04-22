@@ -56,7 +56,8 @@ const PriceSliderEdit = ( {
 		customSlider,
 	} = attributes;
 
-	const { isLoading, price } = context.filterData;
+	const rangeInput = context[ 'woocommerce/rangeInput' ];
+	const { isLoading } = rangeInput ?? {};
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-price-slider', {
@@ -72,15 +73,16 @@ const PriceSliderEdit = ( {
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 
-	if ( isLoading ) {
+	if ( isLoading || ! rangeInput ) {
 		return <>{ __( 'Loading…', 'woocommerce' ) }</>;
 	}
 
-	if ( ! price ) {
-		return null;
-	}
-
-	const { minPrice, maxPrice, minRange, maxRange } = price;
+	const {
+		min: minRange,
+		max: maxRange,
+		currentMin: minPrice,
+		currentMax: maxPrice,
+	} = rangeInput;
 	const formattedMinPrice = formatPrice(
 		minPrice,
 		getCurrency( { minorUnit: 0 } )
