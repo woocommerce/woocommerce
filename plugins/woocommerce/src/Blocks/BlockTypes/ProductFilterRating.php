@@ -128,6 +128,7 @@ final class ProductFilterRating extends AbstractBlock {
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => __( 'Rating', 'woocommerce' ),
 			'showCounts'     => $attributes['showCounts'] ?? false,
+			'dynamicItems'   => false,
 		);
 
 		$wrapper_attributes = array(
