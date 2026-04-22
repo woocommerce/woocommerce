@@ -8,6 +8,7 @@
  * @version 2.1.0
  */
 
+use Automattic\WooCommerce\Enums\DimensionUnit;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 
@@ -126,32 +127,32 @@ function wc_get_dimension( $dimension, $to_unit, $from_unit = '' ) {
 	// Unify all units to cm first.
 	if ( $from_unit !== $to_unit ) {
 		switch ( $from_unit ) {
-			case 'in':
+			case DimensionUnit::INCHES:
 				$dimension *= 2.54;
 				break;
-			case 'm':
+			case DimensionUnit::METERS:
 				$dimension *= 100;
 				break;
-			case 'mm':
+			case DimensionUnit::MILLIMETERS:
 				$dimension *= 0.1;
 				break;
-			case 'yd':
+			case DimensionUnit::YARDS:
 				$dimension *= 91.44;
 				break;
 		}
 
 		// Output desired unit.
 		switch ( $to_unit ) {
-			case 'in':
+			case DimensionUnit::INCHES:
 				$dimension *= 0.3937;
 				break;
-			case 'm':
+			case DimensionUnit::METERS:
 				$dimension *= 0.01;
 				break;
-			case 'mm':
+			case DimensionUnit::MILLIMETERS:
 				$dimension *= 10;
 				break;
-			case 'yd':
+			case DimensionUnit::YARDS:
 				$dimension *= 0.010936133;
 				break;
 		}
