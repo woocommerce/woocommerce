@@ -170,8 +170,8 @@ class WCEmailTemplateDivergenceDetector {
 					)
 				);
 				continue;
-			}
-		}
+			}//end try
+		}//end foreach
 	}
 
 	/**
@@ -201,7 +201,8 @@ class WCEmailTemplateDivergenceDetector {
 	 * @since 10.8.0
 	 */
 	public static function classify_post( int $post_id, \WC_Email $email, array $stamps ): ?string {
-		unset( $post_id ); // Surface in the signature for future instrumentation; no current use.
+		// $post_id is surfaced in the signature for future instrumentation and log context; no current use.
+		unset( $post_id );
 
 		$current_core_hash  = sha1( WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email ) );
 		$current_post_hash  = sha1( (string) ( $stamps['post_content'] ?? '' ) );
