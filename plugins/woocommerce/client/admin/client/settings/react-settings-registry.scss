@@ -1,0 +1,9 @@
+/**
+ * Thin wrapper so webpack's SCSS pipeline handles the modern-settings SDK's
+ * pre-built stylesheet. The admin-client webpack config does not handle bare
+ * `.css` imports from workspace packages; SCSS loader does via `@import`.
+ *
+ * Mirrors the pattern used by `client/settings-email/style.scss` for
+ * `@wordpress/dataviews/build-style/style.css`.
+ */
+@import "@woocommerce/modern-settings-sdk/build-style/style.css";

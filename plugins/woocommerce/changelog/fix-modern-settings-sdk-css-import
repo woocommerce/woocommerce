@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix admin-client webpack build failure caused by a direct `.css` import from `@woocommerce/modern-settings-sdk` — re-import via an SCSS shim so the SCSS pipeline handles it.

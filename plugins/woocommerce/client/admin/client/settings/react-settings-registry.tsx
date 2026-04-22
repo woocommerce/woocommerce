@@ -10,7 +10,7 @@ import {
 	type FieldTransformer,
 	type RowConfigurations,
 } from '@woocommerce/modern-settings-sdk';
-import '@woocommerce/modern-settings-sdk/build-style/style.css';
+import './react-settings-registry.scss';
 
 /**
  * Internal dependencies
