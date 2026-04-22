@@ -29,7 +29,8 @@ class AbilitiesRegistry {
 	 */
 	private function init_abilities(): void {
 		AbilitiesCategories::init();
-		AbilitiesRestBridge::init();
+		// Pattern B (semantic) — experimental. See SemanticAbilitiesBridge.
+		SemanticAbilitiesBridge::init();
 	}
 
 	/**
