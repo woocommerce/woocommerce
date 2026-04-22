@@ -75,7 +75,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Order items will be stored here, sometimes before they persist in the DB.
 	 *
 	 * @since 3.0.0
-	 * @var array<string, \WC_Order_Item[]>
+	 * @var array<string, array<\WC_Order_Item>>
 	 */
 	protected $items = array();
 

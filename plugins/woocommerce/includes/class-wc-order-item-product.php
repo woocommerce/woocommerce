@@ -407,6 +407,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function get_product() {
 		// Refresh/instantiate/cache cycle for the product instance.
+		// TBD: extract into experimental wc_get_product ( get_changes, get_date_modified -> allocate new instance ) caching feature.
 		if ( $this->product ) {
 			$product_id  = $this->product->get_id();
 			$modified_at = $this->product->get_date_modified();
