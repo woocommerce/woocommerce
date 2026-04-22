@@ -66,7 +66,7 @@ class Tree_Builder {
 
 			$auto_pos = 2000;
 			foreach ( $raw_submenu[ $slug ] as $entry ) {
-				$child_slug = $entry[2] ?? null;
+				$child_slug = isset( $entry[2] ) ? self::normalize_slug( $entry[2] ) : null;
 				if ( null === $child_slug ) {
 					continue;
 				}
@@ -91,6 +91,19 @@ class Tree_Builder {
 			}
 		}
 		return $tree;
+	}
+
+	/**
+	 * Normalize a menu slug: decode HTML entities (so `&amp;` becomes `&`)
+	 * and trim whitespace. WP internals sometimes store submenu slugs with
+	 * `&amp;` encoded — we want clean raw slugs in the tree so Context
+	 * matching and JS rendering work consistently.
+	 *
+	 * @param string $slug Raw slug.
+	 * @return string
+	 */
+	public static function normalize_slug( string $slug ): string {
+		return trim( html_entity_decode( $slug, ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 	}
 
 	/**
@@ -230,7 +243,7 @@ class Tree_Builder {
 
 		$auto_position = 1000;
 		foreach ( $raw_submenu['woocommerce'] as $entry ) {
-			$slug = $entry[2] ?? null;
+			$slug = isset( $entry[2] ) ? self::normalize_slug( $entry[2] ) : null;
 			if ( null === $slug || isset( $default_tree[ $slug ] ) || isset( $tree[ $slug ] ) ) {
 				continue;
 			}

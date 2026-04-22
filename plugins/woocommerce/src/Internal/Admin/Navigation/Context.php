@@ -30,35 +30,80 @@ final class Context {
 	/**
 	 * Return the tree slug that best matches the current request, or null.
 	 *
+	 * Tree slugs take several forms — a plain page slug (`wc-settings`), a
+	 * query-string fragment (`wc-settings&tab=general`, `wc-admin&path=/...`)
+	 * or a full URL path+query (`edit-tags.php?taxonomy=product_brand&post_type=product`,
+	 * `post-new.php?post_type=product`). For each slug we parse out its
+	 * expected `$pagenow` and required query-parameter map, then find the
+	 * tree node whose expectations all match the current request. When
+	 * multiple slugs match, the most specific (most required params) wins.
+	 *
 	 * @param array $tree Final tree.
 	 * @return string|null
 	 */
 	public static function resolve_current_slug( array $tree ): ?string {
+		global $pagenow;
+
+		$current_pagenow = $pagenow ?: 'admin.php';
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$page      = isset( $_GET['page'] )      ? sanitize_text_field( wp_unslash( $_GET['page'] ) )      : '';
-		$post_type = isset( $_GET['post_type'] ) ? sanitize_text_field( wp_unslash( $_GET['post_type'] ) ) : '';
-		$path      = isset( $_GET['path'] )      ? sanitize_text_field( wp_unslash( $_GET['path'] ) )      : '';
+		$current_params = isset( $_GET ) ? wp_unslash( $_GET ) : array();
 		// phpcs:enable
 
-		if ( '' !== $page ) {
-			if ( isset( $tree[ $page ] ) ) {
-				return $page;
+		$best       = null;
+		$best_specs = -1;
+
+		foreach ( $tree as $slug => $node ) {
+			if ( null === ( $node['parent'] ?? null ) ) {
+				// Skip the Woo root itself — it isn't a navigable page.
+				continue;
 			}
-			if ( 'wc-admin' === $page && '' !== $path ) {
-				$candidate = 'wc-admin&path=' . $path;
-				if ( isset( $tree[ $candidate ] ) ) {
-					return $candidate;
+
+			list( $path, $expected_params ) = self::decompose_slug( $slug );
+			if ( $current_pagenow !== $path ) {
+				continue;
+			}
+
+			$matched = true;
+			foreach ( $expected_params as $key => $value ) {
+				if ( ! isset( $current_params[ $key ] ) || (string) $current_params[ $key ] !== (string) $value ) {
+					$matched = false;
+					break;
 				}
 			}
-		}
+			if ( ! $matched ) {
+				continue;
+			}
 
-		if ( '' !== $post_type ) {
-			$candidate = 'edit.php?post_type=' . $post_type;
-			if ( isset( $tree[ $candidate ] ) ) {
-				return $candidate;
+			$specificity = count( $expected_params );
+			if ( $specificity > $best_specs ) {
+				$best       = $slug;
+				$best_specs = $specificity;
 			}
 		}
 
-		return null;
+		return $best;
+	}
+
+	/**
+	 * Split a tree slug into ( pagenow, params ).
+	 *
+	 * - `wc-settings`            → ( 'admin.php', [ 'page' => 'wc-settings' ] )
+	 * - `wc-settings&tab=general`→ ( 'admin.php', [ 'page' => 'wc-settings', 'tab' => 'general' ] )
+	 * - `edit.php?post_type=X`   → ( 'edit.php',  [ 'post_type' => 'X' ] )
+	 *
+	 * @param string $slug Tree slug.
+	 * @return array{0:string,1:array<string,string>}
+	 */
+	private static function decompose_slug( string $slug ): array {
+		if ( str_contains( $slug, '?' ) ) {
+			list( $path, $query ) = explode( '?', $slug, 2 );
+		} else {
+			$path  = 'admin.php';
+			$query = 'page=' . $slug;
+		}
+
+		$params = array();
+		parse_str( $query, $params );
+		return array( $path, $params );
 	}
 }

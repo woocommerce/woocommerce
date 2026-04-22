@@ -38,38 +38,61 @@
 	}
 
 	/**
-	 * Resolve the current URL to the most specific tree slug that matches.
-	 * Tries the compound forms (page + tab, page + path, post_type CPT) first
-	 * so a tab-level page like ?page=wc-settings&tab=general highlights the
-	 * tab entry, not the parent Settings entry.
+	 * Split a tree slug into ( pagenow, params ). Mirrors Context::decompose_slug().
+	 */
+	function decomposeSlug( slug ) {
+		var path, query;
+		if ( slug.indexOf( '?' ) >= 0 ) {
+			var parts = slug.split( '?' );
+			path  = parts[ 0 ];
+			query = parts.slice( 1 ).join( '?' );
+		} else {
+			path  = 'admin.php';
+			query = 'page=' + slug;
+		}
+		var params = {};
+		query.split( '&' ).forEach( function ( pair ) {
+			if ( ! pair ) { return; }
+			var kv = pair.split( '=' );
+			params[ decodeURIComponent( kv[ 0 ] ) ] = kv.length > 1 ? decodeURIComponent( kv.slice( 1 ).join( '=' ) ) : '';
+		} );
+		return { path: path, params: params };
+	}
+
+	/**
+	 * Find the tree slug whose (pagenow, params) expectations are all
+	 * satisfied by the current request. Most-specific match wins.
 	 */
 	function currentSlug( tree ) {
-		var params   = new URLSearchParams( window.location.search );
-		var page     = params.get( 'page' )      || '';
-		var path     = params.get( 'path' )      || '';
-		var tab      = params.get( 'tab' )       || '';
-		var postType = params.get( 'post_type' ) || '';
+		var pagenow = window.location.pathname.replace( /^.*\//, '' ) || 'admin.php';
+		var current = {};
+		new URLSearchParams( window.location.search ).forEach( function ( v, k ) {
+			current[ k ] = v;
+		} );
 
-		var candidates = [];
-		if ( page && path ) {
-			candidates.push( page + '&path=' + path );
-		}
-		if ( page && tab ) {
-			candidates.push( page + '&tab=' + tab );
-		}
-		if ( page ) {
-			candidates.push( page );
-		}
-		if ( postType ) {
-			candidates.push( 'edit.php?post_type=' + postType );
-		}
-
-		for ( var i = 0; i < candidates.length; i++ ) {
-			if ( tree[ candidates[ i ] ] ) {
-				return candidates[ i ];
+		var best       = null;
+		var bestSpecs  = -1;
+		Object.keys( tree ).forEach( function ( slug ) {
+			if ( ! tree[ slug ].parent ) {
+				return;
 			}
-		}
-		return null;
+			var d = decomposeSlug( slug );
+			if ( d.path !== pagenow ) {
+				return;
+			}
+			var keys    = Object.keys( d.params );
+			var matched = keys.every( function ( k ) {
+				return current[ k ] !== undefined && String( current[ k ] ) === String( d.params[ k ] );
+			} );
+			if ( ! matched ) {
+				return;
+			}
+			if ( keys.length > bestSpecs ) {
+				best      = slug;
+				bestSpecs = keys.length;
+			}
+		} );
+		return best;
 	}
 
 	/**
