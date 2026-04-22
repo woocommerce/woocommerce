@@ -101,22 +101,28 @@ final class ProductFilterRating extends AbstractBlock {
 		$rating_query           = $filter_params[ self::RATING_FILTER_QUERY_VAR ] ?? '';
 		$selected_rating        = array_filter( array_map( 'absint', explode( ',', $rating_query ) ) );
 
+		$show_counts    = $attributes['showCounts'] ?? false;
 		$filter_options = array_map(
-			function ( $rating ) use ( $selected_rating ) {
+			function ( $rating ) use ( $selected_rating, $show_counts ) {
 				$aria_label = sprintf(
 					/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
 					__( 'Rated %1$d out of 5', 'woocommerce' ),
 					$rating['rating'],
 				);
 
-				return array(
+				$item = array(
 					'label'     => $this->render_rating_label( (int) $rating['rating'] ),
 					'ariaLabel' => $aria_label,
 					'value'     => (string) $rating['rating'],
 					'selected'  => in_array( $rating['rating'], $selected_rating, true ),
-					'count'     => $rating['count'],
 					'type'      => 'rating',
 				);
+
+				if ( $show_counts ) {
+					$item['count'] = $rating['count'];
+				}
+
+				return $item;
 			},
 			$rating_counts_with_min
 		);
@@ -127,7 +133,6 @@ final class ProductFilterRating extends AbstractBlock {
 			'selectAction'   => 'toggleFilter',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => __( 'Rating', 'woocommerce' ),
-			'showCounts'     => $attributes['showCounts'] ?? false,
 			'dynamicItems'   => false,
 		);
 

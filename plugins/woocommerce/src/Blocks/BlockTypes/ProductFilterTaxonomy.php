@@ -211,13 +211,13 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			)
 		);
 
+		$show_counts     = $block_attributes['showCounts'] ?? false;
 		$filter_context  = array(
 			'items'          => array(),
 			'selectionMode'  => 'multiple',
 			'selectAction'   => 'toggleFilter',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => $taxonomy_object->labels->singular_name,
-			'showCounts'     => $block_attributes['showCounts'] ?? false,
 		);
 		$taxonomy_counts = $this->get_taxonomy_term_counts( $block, $taxonomy );
 
@@ -241,7 +241,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			}
 
 			$taxonomy_options = array_map(
-				function ( $term ) use ( $taxonomy_counts, $selected_terms, $taxonomy ) {
+				function ( $term ) use ( $taxonomy_counts, $selected_terms, $taxonomy, $show_counts ) {
 					$term          = (array) $term;
 					$term['count'] = $taxonomy_counts[ $term['term_id'] ] ?? 0;
 
@@ -249,9 +249,12 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 						'label'    => $term['name'],
 						'value'    => $term['slug'],
 						'selected' => in_array( $term['slug'], $selected_terms, true ),
-						'count'    => $term['count'],
 						'type'     => 'taxonomy/' . $taxonomy,
 					);
+
+					if ( $show_counts ) {
+						$option['count'] = $term['count'];
+					}
 
 					if ( is_taxonomy_hierarchical( $taxonomy ) ) {
 						$option['id'] = $term['term_id'];
