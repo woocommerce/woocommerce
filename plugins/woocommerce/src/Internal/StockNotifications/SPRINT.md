@@ -1,0 +1,88 @@
+# BIS Sprint — Running Doc
+
+Working doc for the Back in Stock Notifications sprint on `feature/back-in-stock-notifications`. Captures decisions, deferred items, and things that must happen before the alpha is promoted. Deleted with the rest of the scratch docs at GA time.
+
+Companion files: [`CODERABBIT-TRIAGE.md`](./CODERABBIT-TRIAGE.md) (actionable triage), [`CODERABBIT-TRIAGE-RAW.md`](./CODERABBIT-TRIAGE-RAW.md) (audit trail).
+
+## Pre-merge / pre-ship checklist
+
+Things that must happen before this branch — or any descendant feature work — merges back to trunk for a user-facing release. Tick as resolved.
+
+- [ ] Delete `plugins/woocommerce/src/Internal/StockNotifications/CODERABBIT-TRIAGE.md`
+- [ ] Delete `plugins/woocommerce/src/Internal/StockNotifications/CODERABBIT-TRIAGE-RAW.md`
+- [ ] Delete `plugins/woocommerce/src/Internal/StockNotifications/SPRINT.md` (this file)
+- [ ] Remove or promote the `WOOCOMMERCE_BIS_ALPHA_ENABLED` gate in `plugins/woocommerce/includes/class-woocommerce.php:381` (currently alpha-only; at GA either ship unconditionally or put behind a proper feature flag).
+- [ ] Decide the migration story for any real alpha-site data (likely none, but confirm). Meta-key split in this PR already invalidated in-flight alpha emails — call this out in release notes if any alpha adopters exist.
+- [ ] Audit for remaining CodeRabbit Should-fix / Nice-to-have items that should ship with GA (see [`CODERABBIT-TRIAGE.md`](./CODERABBIT-TRIAGE.md)).
+- [ ] Out-of-BIS-scope but blocking the min-WP narrative: clean up `function_exists( 'wp_fast_hash' )` shims that still exist in `plugins/woocommerce/includes/wc-core-functions.php:1274` and `plugins/woocommerce/includes/class-wc-session-handler.php:311-336`. Not BIS work, but someone should file a follow-up so these don't linger.
+
+## Decisions log
+
+Chronological, one entry per non-obvious choice. Format: date — decision, then why / blast radius.
+
+### 2026-04-22 — Split `email_link_action_key` meta into two, dispatch by explicit URL param
+
+`Notification::get_verification_key()` and `Notification::get_unsubscribe_key()` both wrote to the same `email_link_action_key` meta, distinguishing verification vs. unsubscribe by the presence of a `:` in the stored value (verification stored `timestamp:hash`, unsubscribe stored `hash`). `EmailActionController::validate_and_maybe_process_request()` sniffed the stored format to decide which action to run.
+
+**New design:**
+- Verification hash → `verification_action_key` meta (format `timestamp:hash`).
+- Unsubscribe hash → `unsubscribe_action_key` meta (format `hash`).
+- Outgoing verification + unsubscribe URLs now include an explicit `email_link_action=verify|unsubscribe` query param.
+- Dispatcher switches on that param — no more format sniffing.
+
+**Why:** Shared storage + implicit format-as-discriminator is fragile. A future contributor could break the invariant. Two meta keys + an explicit param is the boring, robust answer CodeRabbit called for.
+
+**Blast radius:** Any verification or unsubscribe URL dispatched from an alpha site before this change no longer matches. Acceptable because the feature is alpha-only behind `WOOCOMMERCE_BIS_ALPHA_ENABLED`; if there are any real alpha adopters they'd need to re-sign up.
+
+### 2026-04-22 — Defer `NotificationEditPage.php:107` verification-email-send bug to RSM-438
+
+CodeRabbit flagged that the admin `send_verification_email` case shows a "Verification email sent to …" success notice without actually dispatching an email. This is one of the 9 Must-fix items from the triage.
+
+**Decision:** Don't fix in isolation — fold into the RSM-438 verification-email-wiring work. Doing it properly requires wiring up the email dispatcher, which is a larger change. A one-line fix here would either mask the underlying missing-send bug or add an incomplete send path we'd rework anyway.
+
+**Blast radius:** Admin action remains misleading in the interim, but only visible in the alpha-flagged path. Triage doc notes the deferral.
+
+### 2026-04-22 — `PrivacyEraser` `set_date_cancelled(time())` instead of `current_time('mysql')`
+
+While adding the `Factory::get_notification()` null guard (same pattern fix as `DataRetentionController`), also changed `$notification->set_date_cancelled( current_time( 'mysql' ) )` to `set_date_cancelled( time() )` to match every other caller of that setter (which pass an integer timestamp). The setter re-parses its input, so a `'mysql'`-format string worked by accident — but was inconsistent.
+
+**Still outstanding on this site:** CodeRabbit also flagged no `is_email()` guard on the incoming email, and no batching for large erase requests. Those are separate Should-fix items — parked for later.
+
+### 2026-04-22 — PHPStan baseline for `PrivacyEraser.php` shrunk by 8 entries
+
+Adding the `if ( $notification instanceof Notification )` guard narrows the type inside the foreach, so 8 baselined `method.nonObject` entries on `PrivacyEraser.php` are no longer needed. Per `AGENTS.md`, the baseline "must never be added to" and "should only shrink over time" — removed the obsolete entries in the same commit that added the guard.
+
+### 2026-04-22 — Chickpea dev env has two SQLite drivers (CLI vs HTTP)
+
+Unrelated to the BIS code itself, but cost an hour of debugging. Captured in detail in user-memory (`reference_chickpea_sqlite.md`), reproduced here because it's load-bearing for anyone else bringing up BIS on a Studio site:
+
+- WP-CLI uses `WP_SQLite_Translator`; HTTP requests use `WP_PDO_MySQL_On_SQLite`.
+- They share one `.sqlite` file but the new driver maintains its own MySQL information-schema mirror.
+- Tables created via CLI `WC_Install::install()` are invisible to HTTP requests until the PDO driver has run a `CREATE TABLE` against them itself.
+- Recovery ritual when the meta tables go missing from the PDO driver's view: drop the two BIS tables, then re-run `WC_Install::install()` from an HTTP request (not WP-CLI).
+
+### 2026-04-22 — `.wp-env.override.json` does not honor `testsPort`
+
+`wp-env` reads `testsPort` from neither `.wp-env.json` nor `.wp-env.override.json` — the generated `docker-compose.yml` uses `${WP_ENV_TESTS_PORT:-8086}`, so you must set the env var at invocation time. On this machine 8888/8086 are held by the sister `woocommerce-monorepo` clone's wp-env, so:
+
+```sh
+WP_ENV_TESTS_PORT=8899 pnpm env:start
+WP_ENV_TESTS_PORT=8899 pnpm --filter=@woocommerce/plugin-woocommerce test:php:env -- --filter '...'
+```
+
+Dev port override (8898) does work from `.wp-env.override.json` — only `testsPort` is broken.
+
+## Deferred / follow-up work
+
+Things explicitly parked for later. Cross-reference before starting sibling work.
+
+- **RSM-438** — verification-email wiring (double-opt-in flow). Absorbs CodeRabbit Must-fix #2 (`NotificationEditPage.php:107` verification-email-send bug) and the "`get_option_or_transient()` fatal" investigation (already downgraded to noise in triage but worth re-confirming during wiring).
+- **11 Should-fix + 16 Nice-to-have CodeRabbit items** remain unresolved. Priority and ownership not yet assigned — see [`CODERABBIT-TRIAGE.md`](./CODERABBIT-TRIAGE.md) for the list.
+- **`is_email()` guard + batching** in `PrivacyEraser::erase_notification_data()` — half-addressed in this PR (null guard + time normalisation); the rest remains Should-fix.
+- **`wp_fast_hash` shim cleanup in core** — out of BIS scope; covered in the pre-ship checklist above.
+
+## Open questions
+
+Holding tank for things we need product/team decisions on. Empty = nothing blocked on others right now.
+
+_(none open)_
