@@ -27,7 +27,7 @@ During the release process, you may encounter CI test failures on release-relate
 2. **Backport test fixes**: If possible, [backport](/docs/contribution/releases/backporting) the relevant test fixes from trunk to the release branch, then re-run the CI workflow.
 3. **Handle complex cases**: If backporting isn't possible due to dependencies or the cause isn't clear, document what you've found and ask for help in the release Slack channel. The "Heart of Gold - Flux" team can assist with resolving CI issues that block release work.
 
-### Something looks wrong in the final release ZIP. Can I start over? {#can-i-start-over-id}
+<h3 id="can-i-start-over-id">Something looks wrong in the final release ZIP. Can I start over?</h3>
 
 If, after downloading and unzipping the generated artifact, something seems off (e.g., missing files, incorrect changelog, or version mismatch), this usually means:
 
@@ -45,8 +45,7 @@ If, after downloading and unzipping the generated artifact, something seems off 
 
 **Once you know which step failed,** re-run only that step as described in the [Building & Publishing guide](/docs/contribution/releases/building-and-publishing). Make sure to run skipped workflows in the correct order and double-check all configuration (version number, release type, etc.) before proceeding.
 
-
-### A serious bug was detected during internal checks / monitoring {#deploy-serious-bug}
+<h3 id="deploy-serious-bug">A serious bug was detected during internal checks / monitoring</h3>
 
 For RC and stable releases, deploying to our staging environment and monitoring for errors is required before the release is made publicly available. If a serious bug is detected during this monitoring period, follow these steps:
 
@@ -59,7 +58,7 @@ For RC and stable releases, deploying to our staging environment and monitoring 
 
 #### How to proceed once the bug fix is merged into the release branch?
 
-1. **Create a new tracking issue** for the new version (e.g., `-rc.2` if the bug was detected during `-rc.1`, or `x.y.2` if detected while monitoring `x.y.1`). Do not reuse the existing tracking issue.
+1. **Create a new tracking issue** for the new version (e.g., `-rc.2` if the bug was detected during `-rc.1`, or `x.y.2` if detected while monitoring `x.y.1`) by running the [`Release: Create Tracking Issue`](https://github.com/woocommerce/woocommerce/actions/workflows/release-create-tracking-issue.yml) workflow. Do not reuse the existing tracking issue.
 2. **Follow the release procedure as normal** for the new version.
 3. **Publish all draft releases** for the affected version series. Even if the prior version wasn't made publicly available, it must be published along with the valid version. Each version will have its own changelog section.
 
@@ -74,7 +73,7 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
    - Merge any auto-generated PRs right away.
 
-### The release needs to be delayed. What should we do? {#release-delay}
+<h3 id="release-delay">The release needs to be delayed. What should we do?</h3>
 
 1. Create an internal Slack thread to communicate with the engineering teams as well as Dev Advocacy. This also provides an opportunity for teams to share any additional context and verify or challenge schedule changes.
 2. Ask Dev Advocacy to communicate the delay publicly.
@@ -82,7 +81,7 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
 
 Remember to not plan the patch release [too close to the weekend](#release-delay-weekend-id).
 
-### The release was delayed. Can we still release after Tuesday? {#release-delay-weekend-id}
+<h3 id="release-delay-weekend-id">The release was delayed. Can we still release after Tuesday?</h3>
 
 In general, avoid releasing after Tuesday, especially close to a weekend.
 

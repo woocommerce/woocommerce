@@ -19,7 +19,7 @@ use Exception;
 use WC_Abstract_Order;
 use WC_Data;
 use WC_Order;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -265,7 +265,14 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	 *
 	 * @var \string[][]
 	 */
-	protected $order_column_mapping = array(
+	/**
+	 * Full set of order columns for the base order data store. Used via self:: to ensure cached
+	 * order data objects always contain the complete column set, even when a subclass overrides
+	 * $order_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_ORDER_COLUMN_MAPPING = array(
 		'id'                   => array(
 			'type' => 'int',
 			'name' => 'id',
@@ -337,11 +344,20 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for billing addresses in wc_address table.
+	 * Table column to WC_Order mapping for wc_orders table.
 	 *
 	 * @var \string[][]
 	 */
-	protected $billing_address_column_mapping = array(
+	protected $order_column_mapping = self::BASE_ORDER_COLUMN_MAPPING;
+
+	/**
+	 * Full set of billing address columns for the base order data store. Used via self:: to
+	 * ensure cached order data objects always contain the complete column set, even when a
+	 * subclass overrides $billing_address_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_BILLING_ADDRESS_COLUMN_MAPPING = array(
 		'id'           => array( 'type' => 'int' ),
 		'order_id'     => array( 'type' => 'int' ),
 		'address_type' => array( 'type' => 'string' ),
@@ -392,11 +408,20 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for shipping addresses in wc_address table.
+	 * Table column to WC_Order mapping for billing addresses in wc_addresses table.
 	 *
 	 * @var \string[][]
 	 */
-	protected $shipping_address_column_mapping = array(
+	protected $billing_address_column_mapping = self::BASE_BILLING_ADDRESS_COLUMN_MAPPING;
+
+	/**
+	 * Full set of shipping address columns for the base order data store. Used via self:: to
+	 * ensure cached order data objects always contain the complete column set, even when a
+	 * subclass overrides $shipping_address_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_SHIPPING_ADDRESS_COLUMN_MAPPING = array(
 		'id'           => array( 'type' => 'int' ),
 		'order_id'     => array( 'type' => 'int' ),
 		'address_type' => array( 'type' => 'string' ),
@@ -444,11 +469,20 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
-	 * Table column to WC_Order mapping for wc_operational_data table.
+	 * Table column to WC_Order mapping for shipping addresses in wc_addresses table.
 	 *
 	 * @var \string[][]
 	 */
-	protected $operational_data_column_mapping = array(
+	protected $shipping_address_column_mapping = self::BASE_SHIPPING_ADDRESS_COLUMN_MAPPING;
+
+	/**
+	 * Full set of operational data columns for the base order data store. Used via self:: to ensure
+	 * cached order data objects always contain the complete column set, even when a subclass
+	 * overrides $operational_data_column_mapping with a subset.
+	 *
+	 * @since 10.8.0
+	 */
+	private const BASE_OPERATIONAL_DATA_COLUMN_MAPPING = array(
 		'id'                          => array( 'type' => 'int' ),
 		'order_id'                    => array( 'type' => 'int' ),
 		'created_via'                 => array(
@@ -518,11 +552,25 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 	);
 
 	/**
+	 * Table column to WC_Order mapping for wc_operational_data table.
+	 *
+	 * @var \string[][]
+	 */
+	protected $operational_data_column_mapping = self::BASE_OPERATIONAL_DATA_COLUMN_MAPPING;
+
+	/**
 	 * Cache variable to store combined mapping.
 	 *
 	 * @var array[][][]
 	 */
 	private $all_order_column_mapping;
+
+	/**
+	 * Cache variable to store combined mapping with full operational data columns.
+	 *
+	 * @var array<string, array<string, array<string, string>>>|null
+	 */
+	private $all_order_column_mapping_for_cache;
 
 	/**
 	 * Return combined mappings for all order tables.
@@ -540,6 +588,30 @@ class OrdersTableDataStore extends \Abstract_WC_Order_Data_Store_CPT implements 
 		}
 
 		return $this->all_order_column_mapping;
+	}
+
+	/**
+	 * Return combined mappings for all order tables, always using the full set of operational
+	 * data columns defined in the base OrdersTableDataStore class. This ensures that cached
+	 * order data objects are complete regardless of which data store subclass populates the
+	 * cache, preventing cross-bleed when different data stores (orders, refunds, subscriptions)
+	 * share the same cache group.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return array<string, array<string, array<string, string>>> Return combined mapping with full operational data columns.
+	 */
+	private function get_all_order_column_mappings_for_cache() {
+		if ( ! isset( $this->all_order_column_mapping_for_cache ) ) {
+			$this->all_order_column_mapping_for_cache = array(
+				'orders'           => self::BASE_ORDER_COLUMN_MAPPING,
+				'billing_address'  => self::BASE_BILLING_ADDRESS_COLUMN_MAPPING,
+				'shipping_address' => self::BASE_SHIPPING_ADDRESS_COLUMN_MAPPING,
+				'operational_data' => self::BASE_OPERATIONAL_DATA_COLUMN_MAPPING,
+			);
+		}
+
+		return $this->all_order_column_mapping_for_cache;
 	}
 
 	/**
@@ -1039,90 +1111,17 @@ WHERE
 	}
 
 	/**
-	 * Get the total tax refunded.
+	 * Returns a prepared SQL JOIN clause for finding refund orders belonging to a given parent order.
 	 *
-	 * @param WC_Order $order Order object.
+	 * Overrides the CPT version to use the HPOS orders table.
 	 *
-	 * @return float
+	 * @since 10.7.0
+	 * @param int $order_id Parent order ID.
+	 * @return string Prepared SQL JOIN fragment.
 	 */
-	public function get_total_tax_refunded( $order ) {
+	protected function get_refund_orders_join_clause( int $order_id ): string {
 		global $wpdb;
-
-		$order_table = self::get_orders_table_name();
-
-		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('tax_amount', 'shipping_tax_amount')",
-				$order->get_id(),
-			)
-		) ?? 0;
-		// phpcs:enable
-
-		return abs( $total );
-	}
-
-	/**
-	 * Get the total shipping tax refunded.
-	 *
-	 * @param WC_Order $order Order object.
-	 *
-	 * @since 10.2.0
-	 * @return float
-	 */
-	public function get_total_shipping_tax_refunded( $order ) {
-		global $wpdb;
-
-		$order_table = self::get_orders_table_name();
-
-		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'tax' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key = 'shipping_tax_amount'",
-				$order->get_id()
-			)
-		) ?? 0;
-		// phpcs:enable
-
-		return abs( $total );
-	}
-
-	/**
-	 * Get the total shipping refunded.
-	 *
-	 * @param  WC_Order $order Order object.
-	 * @return float
-	 */
-	public function get_total_shipping_refunded( $order ) {
-		global $wpdb;
-
-		$order_table = self::get_orders_table_name();
-
-		$total = $wpdb->get_var(
-			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $order_table is hardcoded.
-			$wpdb->prepare(
-				"SELECT SUM( order_itemmeta.meta_value )
-				FROM {$wpdb->prefix}woocommerce_order_itemmeta AS order_itemmeta
-				INNER JOIN $order_table AS orders ON ( orders.type = 'shop_order_refund' AND orders.parent_order_id = %d )
-				INNER JOIN {$wpdb->prefix}woocommerce_order_items AS order_items ON ( order_items.order_id = orders.id AND order_items.order_item_type = 'shipping' )
-				WHERE order_itemmeta.order_item_id = order_items.order_item_id
-				AND order_itemmeta.meta_key IN ('cost')",
-				$order->get_id()
-			)
-		) ?? 0;
-		// phpcs:enable
-
-		return abs( $total );
+		return $wpdb->prepare( '%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id = %d )', self::get_orders_table_name(), 'shop_order_refund', $order_id );
 	}
 
 	/**
@@ -1362,21 +1361,23 @@ WHERE
 			return;
 		}
 
-		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled();
-		if ( $data_sync_enabled ) {
-			// We prefer not syncing-on-read if we are inside a webhook delivery or importing orders, as those events are likely triggered after the order is written
-			// and we don't want to possibly create loops of sync-on-read.
-			$should_sync_on_read = ! doing_action( 'woocommerce_deliver_webhook_async' ) && ! doing_action( 'wc-admin_import_orders' );
+		$data_sync_enabled = $data_synchronizer->data_sync_is_enabled()
+			&& ! doing_action( 'woocommerce_deliver_webhook_async' )
+			&& ! doing_action( 'wc-admin_import_orders' );
 
+		if ( $data_sync_enabled ) {
 			/**
-			 * Allow opportunity to disable sync on read, while keeping sync on write enabled. This adds another step as a large shop progresses from full sync to no sync with HPOS authoritative.
-			 * This filter is only executed if data sync is enabled from settings in the first place as it's meant to be a step between full sync -> no sync, rather than be a control for enabling just the sync on read. Sync on read without sync on write is problematic as any update will reset on the next read, but sync on write without sync on read is fine.
+			 * Filters whether to sync order data from posts on read.
 			 *
-			 * @param bool $read_on_sync_enabled Whether to sync on read.
+			 * Defaults to false because sync-on-read can be dangerous when HPOS is
+			 * authoritative and running correctly, as it allows the posts data store
+			 * to override HPOS data.
+			 *
+			 * @param bool $sync_on_read_enabled Whether to sync on read.
 			 *
 			 * @since 8.1.0
 			 */
-			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', $should_sync_on_read );
+			$data_sync_enabled = apply_filters( 'woocommerce_hpos_enable_sync_on_read', false );
 		}
 
 		$load_posts_for = array_diff( $order_ids, array_merge( self::$reading_order_ids, self::$backfilling_order_ids ) );
@@ -1760,9 +1761,26 @@ WHERE
 	 * @param object             $order_data A row of order data from the database.
 	 */
 	protected function set_order_props_from_data( &$order, $order_data ) {
+		// Uses $this->get_all_order_column_mappings() (not the cache variant) intentionally:
+		// each data store subclass should only attempt to set properties it actually maps.
 		foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mapping ) {
 			foreach ( $column_mapping as $column_name => $prop_details ) {
-				if ( ! isset( $prop_details['name'] ) ) {
+				if ( ! isset( $prop_details['name'] ) || ! is_string( $prop_details['name'] ) ) {
+					continue;
+				}
+				if ( ! property_exists( $order_data, $prop_details['name'] ) ) {
+					$this->error_logger->debug(
+						sprintf(
+							'Property \'%1$s\' (column \'%2$s\' from table group \'%3$s\') missing from data for order %4$d. Order will use default value for this property.',
+							$prop_details['name'],
+							$column_name,
+							$table_name,
+							$order->get_id()
+						),
+						array(
+							'source' => 'hpos-data-cache',
+						)
+					);
 					continue;
 				}
 				$prop_value = $order_data->{$prop_details['name']};
@@ -1894,7 +1912,7 @@ WHERE
 		foreach ( $table_data as $table_datum ) {
 			$id                = $table_datum->{"{$order_table_alias}_id"};
 			$order_data[ $id ] = new \stdClass();
-			foreach ( $this->get_all_order_column_mappings() as $table_name => $column_mappings ) {
+			foreach ( $this->get_all_order_column_mappings_for_cache() as $table_name => $column_mappings ) {
 				$table_alias = $table_aliases[ $table_name ];
 				// This remapping is required to keep the query length small enough to be supported by implementations such as HyperDB (i.e. fetching some tables in join via alias.*, while others via full name). We can revert this commit if HyperDB starts supporting SRTM for query length more than 3076 characters.
 				foreach ( $column_mappings as $field => $map ) {
@@ -2135,7 +2153,7 @@ FROM $order_meta_table
 		$this->set_custom_taxonomies( $order, $default_taxonomies );
 
 		if ( $order->has_cogs() && $this->cogs_is_enabled() ) {
-			$this->save_cogs_data( $order );
+			$this->save_cogs_data( $order, ! $only_changes || array_key_exists( 'cogs_total_value', $changes ) );
 		}
 
 		$this->clear_cached_data( array( $order->get_id() ) );
@@ -2144,10 +2162,11 @@ FROM $order_meta_table
 	/**
 	 * Save the Cost of Goods Sold value of a given order to the database.
 	 *
-	 * @param WC_Abstract_Order $order The order to save the COGS value for.
+	 * @param WC_Abstract_Order $order              The order to save the COGS value for.
+	 * @param bool              $cogs_value_changed Whether the CoGS value was changed through the order object API.
 	 */
-	private function save_cogs_data( WC_Abstract_Order $order ) {
-		$cogs_value = $order->get_cogs_total_value();
+	private function save_cogs_data( WC_Abstract_Order $order, bool $cogs_value_changed ): void {
+		$cogs_value_original = $order->get_cogs_total_value();
 
 		/**
 		 * Filter to customize the Cost of Goods Sold value that gets saved for a given order,
@@ -2155,29 +2174,31 @@ FROM $order_meta_table
 		 *
 		 * @since 9.5.0
 		 *
-		 * @param float|null $cogs_value The value to be written to the database. If returned as null, nothing will be written.
-		 * @param WC_Abstract_Order $item The order for which the value is being saved.
+		 * @param float             $cogs_value The value to be written to the database. If returned as null, nothing will be written.
+		 * @param WC_Abstract_Order $order      The order for which the value is being saved.
 		 */
-		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value, $order );
-		if ( is_null( $cogs_value ) ) {
+		$cogs_value = apply_filters( 'woocommerce_save_order_cogs_value', $cogs_value_original, $order );
+		if ( null === $cogs_value ) {
 			return;
 		}
 
-		$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
-
-		if ( 0.0 === $cogs_value && $existing_meta ) {
-			$existing_meta = current( $existing_meta );
-			$this->data_store_meta->delete_meta( $order, $existing_meta );
-		} elseif ( $existing_meta ) {
+		$sync_meta = $cogs_value_changed || $cogs_value_original !== (float) $cogs_value;
+		if ( $sync_meta ) {
+			$existing_meta = $this->data_store_meta->get_metadata_by_key( $order, '_cogs_total_value' );
+			if ( 0.0 === $cogs_value && $existing_meta ) {
+				$existing_meta = current( $existing_meta );
+				$this->data_store_meta->delete_meta( $order, $existing_meta );
+			} elseif ( $existing_meta ) {
 				$existing_meta        = current( $existing_meta );
 				$existing_meta->key   = '_cogs_total_value';
 				$existing_meta->value = $cogs_value;
 				$this->data_store_meta->update_meta( $order, $existing_meta );
-		} else {
-			$meta        = new \WC_Meta_Data();
-			$meta->key   = '_cogs_total_value';
-			$meta->value = $cogs_value;
-			$this->data_store_meta->add_meta( $order, $meta );
+			} else {
+				$meta        = new \WC_Meta_Data();
+				$meta->key   = '_cogs_total_value';
+				$meta->value = $cogs_value;
+				$this->data_store_meta->add_meta( $order, $meta );
+			}
 		}
 	}
 
@@ -3180,6 +3201,7 @@ FROM $order_meta_table
 			$orders = $query->orders;
 		} else {
 			$orders = WC()->order_factory->get_orders( $query->orders );
+			$this->prime_caches_for_orders( $query->orders, $query_vars );
 		}
 
 		if ( isset( $query_vars['paginate'] ) && $query_vars['paginate'] ) {
@@ -3194,6 +3216,88 @@ FROM $order_meta_table
 	}
 
 	//phpcs:enable Squiz.Commenting, Generic.Commenting
+
+	/**
+	 * Prime caches for a collection of orders. Reduces N+1 queries when iterating over order results.
+	 *
+	 * @param array $order_ids  List of order IDs to prime caches for.
+	 * @param array $query_vars Original query arguments.
+	 * @return void
+	 */
+	public function prime_caches_for_orders( array $order_ids, array $query_vars ): void {
+		$this->prime_order_item_caches_for_orders( $order_ids, $query_vars );
+
+		// The following priming methods only apply to shop_order queries.
+		$order_type = $query_vars['type'] ?? $query_vars['post_type'] ?? '';
+		$order_type = is_array( $order_type ) ? $order_type : array( $order_type );
+		if ( ! in_array( 'shop_order', $order_type, true ) ) {
+			return;
+		}
+
+		$this->prime_refund_caches_for_orders( $order_ids, $query_vars );
+		$this->prime_refund_total_caches_for_orders( $order_ids, $query_vars );
+	}
+
+	/**
+	 * Returns a prepared SQL JOIN clause for finding refund orders belonging to multiple parent orders.
+	 *
+	 * Overrides the CPT version to use the HPOS orders table.
+	 *
+	 * @since 10.7.0
+	 * @param array $order_ids List of order IDs.
+	 * @return string Prepared SQL JOIN fragment.
+	 */
+	protected function get_refund_orders_batch_join_clause( array $order_ids ): string {
+		global $wpdb;
+		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		return $wpdb->prepare( "%i AS refunds ON ( refunds.type = %s AND refunds.parent_order_id IN ( $id_list ) )", self::get_orders_table_name(), 'shop_order_refund' );
+	}
+
+	/**
+	 * Returns the column name on the refund table alias (`refunds`) that holds the parent order ID.
+	 *
+	 * @since 10.7.0
+	 * @return string Column reference.
+	 */
+	protected function get_refund_parent_column(): string {
+		return 'refunds.parent_order_id';
+	}
+
+	/**
+	 * Query total refunded amounts per order in a batch.
+	 *
+	 * Overrides the CPT version to read directly from the HPOS orders table
+	 * rather than joining postmeta.
+	 *
+	 * @since 10.7.0
+	 * @param array $order_ids List of order IDs.
+	 * @return array<int, float> Map of order_id => refund total.
+	 */
+	protected function get_batch_refund_totals( array $order_ids ): array {
+		global $wpdb;
+
+		$id_list = implode( ', ', array_map( 'absint', $order_ids ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- $id_list is sanitized via absint above.
+		$refund_totals = $wpdb->get_results(
+			$wpdb->prepare(
+				"SELECT parent_order_id AS order_id, SUM( total_amount ) AS total
+				FROM %i
+				WHERE type = 'shop_order_refund' AND parent_order_id IN ( $id_list )
+				GROUP BY parent_order_id",
+				self::get_orders_table_name()
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$totals_by_order = array();
+		foreach ( $refund_totals as $row ) {
+			$totals_by_order[ $row->order_id ] = -1 * floatval( $row->total );
+		}
+
+		return $totals_by_order;
+	}
 
 	/**
 	 * Get the SQL needed to create all the tables needed for the custom orders table feature.
@@ -3239,6 +3343,7 @@ CREATE TABLE $orders_table_name (
 	KEY customer_id_billing_email (customer_id, billing_email({$composite_customer_id_email_length})),
 	KEY customer_id_status (customer_id, status),
 	KEY billing_email (billing_email($max_index_length)),
+	KEY transaction_id (transaction_id(20)),
 	KEY type_status_date (type, status, date_created_gmt),
 	KEY parent_order_id (parent_order_id),
 	KEY date_updated (date_updated_gmt)
@@ -3290,7 +3395,7 @@ CREATE TABLE $meta_table (
 	order_id bigint(20) unsigned null,
 	meta_key varchar(255),
 	meta_value text null,
-	KEY meta_key_value (meta_key(100), meta_value($composite_meta_value_index_length)),
+	KEY meta_key_value (meta_key(100)),
 	KEY order_id_meta_key_meta_value (order_id, meta_key(100), meta_value($composite_meta_value_index_length))
 ) $collate;
 ";

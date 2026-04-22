@@ -5,10 +5,7 @@ import { useDispatch } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { external } from '@wordpress/icons';
 // eslint-disable-next-line @woocommerce/dependency-group
-import {
-	// @ts-expect-error Type for PluginPreviewMenuItem is missing in @types/wordpress__editor
-	PluginPreviewMenuItem,
-} from '@wordpress/editor';
+import { PluginPreviewMenuItem } from '@wordpress/editor';
 
 /**
  * Internal dependencies

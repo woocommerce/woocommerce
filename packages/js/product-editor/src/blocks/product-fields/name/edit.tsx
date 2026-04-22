@@ -21,9 +21,6 @@ import {
 	Tooltip,
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	useEntityProp,
 	useEntityId,
@@ -48,8 +45,6 @@ export function NameBlockEdit( {
 }: ProductEditorBlockEditProps< NameBlockAttributes > ) {
 	const blockProps = useWooBlockProps( attributes );
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { editEntityRecord, saveEntityRecord } = useDispatch( 'core' );
 
 	const { hasEdit } = useProductEdits();
@@ -58,9 +53,9 @@ export function NameBlockEdit( {
 		useState( false );
 
 	const productId = useEntityId( 'postType', 'product' );
-	const product = useSelect(
+	// @ts-expect-error getEditedEntityRecord's curried form strips its generic, returning a wide entity union; Product is the correct narrow type.
+	const product: Product = useSelect(
 		( select ) =>
-			// @ts-expect-error getEditedEntityRecord is not typed correctly because we are overriding the type definition. https://github.com/woocommerce/woocommerce/blob/eeaf58e20064d837412d6c455e69cc5a5e2678b4/packages/js/product-editor/typings/index.d.ts#L15-L35
 			select( coreStore ).getEditedEntityRecord(
 				'postType',
 				'product',
@@ -229,8 +224,6 @@ export function NameBlockEdit( {
 						onCancel={ () => setShowProductLinkEditModal( false ) }
 						onSaved={ () => setShowProductLinkEditModal( false ) }
 						saveHandler={ async ( updatedSlug ) => {
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore
 							const { slug, permalink }: Product =
 								await saveEntityRecord( 'postType', 'product', {
 									id: product.id,

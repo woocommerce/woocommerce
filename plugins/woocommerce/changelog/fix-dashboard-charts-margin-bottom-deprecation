@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add __nextHasNoMarginBottom prop to dashboard-charts interval SelectControl to resolve deprecation warning.

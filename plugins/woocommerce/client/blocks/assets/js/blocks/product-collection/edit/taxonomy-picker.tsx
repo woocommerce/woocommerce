@@ -160,7 +160,6 @@ const TaxonomyPicker = ( props: TaxonomyPickerProps ) => {
 		<div { ...blockProps }>
 			<Placeholder
 				icon={
-					// @ts-expect-error Icon types are incomplete
 					<Icon
 						icon={ getIconForCollection( attributes.collection ) }
 						className="block-editor-block-icon"

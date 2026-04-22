@@ -21,6 +21,7 @@ const config: Config = {
 	projectName: 'woocommerce', // Usually your repo name.
 
 	onBrokenLinks: 'throw',
+	onBrokenAnchors: 'warn',
 	markdown: {
 		hooks: {
 			onBrokenMarkdownLinks: 'warn',
@@ -103,6 +104,11 @@ const config: Config = {
 					type: 'docSidebar',
 					sidebarId: 'cliSidebar',
 					label: 'CLI',
+				},
+				{
+					type: 'docSidebar',
+					sidebarId: 'marketplaceSidebar',
+					label: 'Marketplace',
 				},
 				{
 					href: 'https://developer.woocommerce.com/',
@@ -198,8 +204,8 @@ const config: Config = {
 				<div class="docusaurus-footer-for-automattic">
 					<a href="https://automattic.com/">
 						An
-						<img src="img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
-						<img src="img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" />
+						<img src="/docs/img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
+						<img src="/docs/img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" />
 						Creation</a>
 				</div>`,
 		},

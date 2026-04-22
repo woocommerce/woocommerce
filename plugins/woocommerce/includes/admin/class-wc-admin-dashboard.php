@@ -143,8 +143,9 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 				'wc-status-widget-async',
 				'wc_status_widget_params',
 				array(
-					'ajax_url' => admin_url( 'admin-ajax.php' ),
-					'security' => wp_create_nonce( 'wc-status-widget' ),
+					'ajax_url'      => admin_url( 'admin-ajax.php' ),
+					'security'      => wp_create_nonce( 'wc-status-widget' ),
+					'error_message' => esc_html__( 'Error loading widget', 'woocommerce' ),
 				)
 			);
 
@@ -474,10 +475,87 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 		}
 
 		/**
-		 * Recent reviews widget.
+		 * Recent reviews widget: placeholder.
 		 */
 		public function recent_reviews() {
-			$this->legacy_recent_reviews();
+			$suffix  = Constants::is_true( 'SCRIPT_DEBUG' ) ? '' : '.min';
+			$version = Constants::get_constant( 'WC_VERSION' );
+
+			wp_enqueue_script( 'wc-recent-reviews-widget-async', WC()->plugin_url() . '/assets/js/admin/wc-recent-reviews-widget-async' . $suffix . '.js', array( 'jquery' ), $version, true );
+			wp_localize_script(
+				'wc-recent-reviews-widget-async',
+				'wc_recent_reviews_widget_params',
+				array(
+					'ajax_url'      => admin_url( 'admin-ajax.php' ),
+					'security'      => wp_create_nonce( 'wc-recent-reviews-widget' ),
+					'error_message' => esc_html__( 'Error loading widget', 'woocommerce' ),
+				)
+			);
+
+			// Display loading placeholder.
+			echo '<div id="wc-recent-reviews-widget-loading" class="wc-recent-reviews-widget-loading">';
+			echo '<p>' . esc_html__( 'Loading reviews data...', 'woocommerce' ) . ' <span class="spinner is-active"></span></p>';
+			echo '</div>';
+			echo '<div id="wc-recent-reviews-widget-content" style="display:none;"></div>';
+		}
+
+		/**
+		 * Recent reviews widget: content.
+		 */
+		public function recent_reviews_content(): void {
+			// Backward compatibility mode: if any of the checked below hooks are in use, use the legacy implementation.
+			$has_legacy_query_filter         = has_filter( 'woocommerce_report_recent_reviews_query_from' );
+			$has_legacy_product_title_filter = has_filter( 'woocommerce_admin_dashboard_recent_reviews' );
+			$use_legacy_implementation       = $has_legacy_query_filter || $has_legacy_product_title_filter;
+			if ( $use_legacy_implementation ) {
+				if ( $has_legacy_query_filter ) {
+					wc_deprecated_hook( 'woocommerce_report_recent_reviews_query_from', '10.5.0' );
+				}
+				if ( $has_legacy_product_title_filter ) {
+					wc_deprecated_hook( 'woocommerce_admin_dashboard_recent_reviews', '10.5.0', 'dashboard-widget-reviews.php template' );
+				}
+				$this->legacy_recent_reviews();
+
+				return;
+			}
+
+			// Optimized version of the widget: faster SQL queries and templates-based rendering for customization.
+			/** @var \WP_Comment[] $comments */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+			$comments = get_comments(
+				array(
+					'type'                      => 'review',
+					'status'                    => 'approve',
+					'parent'                    => 0,
+					'number'                    => 25,
+					'update_comment_post_cache' => true,
+				)
+			);
+			$comments = array_filter(
+				$comments,
+				static fn( \WP_Comment $comment ) => current_user_can( 'read_product', $comment->comment_post_ID ) && ! post_password_required( (int) $comment->comment_post_ID )
+			);
+			if ( $comments ) {
+				echo '<ul>';
+				$count_rendered = 0;
+				foreach ( $comments as $comment ) {
+					$product = wc_get_product( $comment->comment_post_ID );
+					if ( $product ) {
+						wc_get_template(
+							'dashboard-widget-reviews.php',
+							array(
+								'product' => $product,
+								'comment' => $comment,
+							)
+						);
+						if ( 5 === ++$count_rendered ) {
+							break;
+						}
+					}
+				}
+				echo '</ul>';
+			} else {
+				echo '<p>' . esc_html__( 'There are no product reviews yet.', 'woocommerce' ) . '</p>';
+			}
 		}
 
 		/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix order status text wrapping vertically when Gutenberg plugin is active by adding white-space: nowrap to prevent inherited word-break styles from affecting grid min-content sizing

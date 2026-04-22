@@ -28,6 +28,7 @@ jest.mock(
 			}
 			return { state: {} };
 		} ),
+		withSyncEvent: jest.fn( ( fn ) => fn ),
 	} ),
 	{ virtual: true }
 );

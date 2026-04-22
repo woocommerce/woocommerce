@@ -168,7 +168,7 @@ class WC_Notes_Run_Db_Update {
 		);
 
 		// Check if the note needs to be updated (e.g. expired nonce or different note type stored in the previous run).
-		if ( Note::E_WC_ADMIN_NOTE_UNACTIONED === $note->get_status() && self::note_up_to_date( $note, $update_url, wp_list_pluck( $note_actions, 'name' ) ) ) {
+		if ( ! $note->get_is_deleted() && Note::E_WC_ADMIN_NOTE_UNACTIONED === $note->get_status() && self::note_up_to_date( $note, $update_url, wp_list_pluck( $note_actions, 'name' ) ) ) {
 			return $note;
 		}
 
@@ -176,7 +176,7 @@ class WC_Notes_Run_Db_Update {
 		$note->set_content(
 			__( 'WooCommerce has been updated! To keep things running smoothly, we have to update your database to the newest version.', 'woocommerce' )
 			/* translators: %1$s: opening <a> tag %2$s: closing </a> tag*/
-			. sprintf( ' ' . esc_html__( 'The database update process runs in the background and may take a little while, so please be patient. Advanced users can alternatively update via %1$sWP CLI%2$s.', 'woocommerce' ), '<a href="https://github.com/woocommerce/woocommerce/wiki/Upgrading-the-database-using-WP-CLI">', '</a>' )
+			. sprintf( ' ' . esc_html__( 'The database update process runs in the background and may take a little while, so please be patient. Advanced users can alternatively update via %1$sWP CLI%2$s.', 'woocommerce' ), '<a href="https://developer.woocommerce.com/docs/wc-cli/wc-cli-examples/#upgrading-the-database-using-wp-cli">', '</a>' )
 		);
 		$note->set_type( Note::E_WC_ADMIN_NOTE_UPDATE );
 		$note->set_name( self::NOTE_NAME );
@@ -185,6 +185,7 @@ class WC_Notes_Run_Db_Update {
 		// In case db version is out of sync with WC version or during the next update, the notice needs to show up again,
 		// so set it to unactioned.
 		$note->set_status( Note::E_WC_ADMIN_NOTE_UNACTIONED );
+		$note->set_is_deleted( false );
 
 		// Set new actions.
 		$note->clear_actions();
@@ -214,6 +215,8 @@ class WC_Notes_Run_Db_Update {
 
 		$note->set_title( __( 'WooCommerce database update in progress', 'woocommerce' ) );
 		$note->set_content( __( 'WooCommerce is updating the database in the background. The database update process may take a little while, so please be patient.', 'woocommerce' ) );
+
+		$note->set_is_deleted( false );
 
 		$note->clear_actions();
 		$note->add_action(
@@ -263,6 +266,8 @@ class WC_Notes_Run_Db_Update {
 
 		$note->set_title( __( 'WooCommerce database update done', 'woocommerce' ) );
 		$note->set_content( __( 'WooCommerce database update complete. Thank you for updating to the latest version!', 'woocommerce' ) );
+
+		$note->set_is_deleted( false );
 
 		$note->clear_actions();
 		foreach ( $note_actions as $note_action ) {
@@ -345,5 +350,4 @@ class WC_Notes_Run_Db_Update {
 			}
 		}
 	}
-
 }

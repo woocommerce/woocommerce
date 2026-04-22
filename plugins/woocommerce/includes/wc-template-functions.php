@@ -13,8 +13,7 @@ use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\PaymentGatewayFeature;
 use Automattic\WooCommerce\Enums\ProductType;
-use Automattic\WooCommerce\Internal\DataStores\Fulfillments\FulfillmentsDataStore;
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 use Automattic\WooCommerce\Internal\Utilities\HtmlSanitizer;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -2030,7 +2029,9 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 			return;
 		}
 
-		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$child_ids = $product->get_children();
+		_prime_post_caches( $child_ids );
+		$products = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
 
 		if ( $products ) {
 			wc_get_template(
@@ -2367,7 +2368,7 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 		$related_products    = array();
 		$related_product_ids = wc_get_related_products( $product->get_id(), $args['posts_per_page'], $product->get_upsell_ids() );
 		if ( ! empty( $related_product_ids ) ) {
-			// Optimization: reduce the number of SQLs needed to populate product objects.
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $related_product_ids );
 
 			// Get visible related products then sort them at random, then handle orderby.
@@ -2375,7 +2376,7 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 			$related_products = wc_products_array_orderby( $related_products, $args['orderby'], $args['order'] );
 			/** @var WC_Product[] $related_products */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 
-			// Optimization: reduce the number of SQLs needed to fetch images when rendering.
+			// Prime caches to reduce future queries.
 			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $related_products ) ) );
 		}
 		$args['related_products'] = $related_products;
@@ -2432,7 +2433,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		$upsells    = array();
 		$upsell_ids = $product->get_upsell_ids();
 		if ( ! empty( $upsell_ids ) ) {
-			// Optimization: reduce the number of SQLs needed to populate product objects.
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $upsell_ids );
 
 			// Get visible upsells then sort them at random, then limit result set.
@@ -2440,7 +2441,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 			$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
 			/** @var WC_Product[] $upsells */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 
-			// Optimization: reduce the number of SQLs needed to fetch images when rendering.
+			// Prime caches to reduce future queries.
 			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $upsells ) ) );
 		}
 
@@ -2514,9 +2515,14 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		}
 
 		// Get visible cross sells then sort them at random.
-		$cross_sells = isset( WC()->cart )
-			? array_filter( array_map( 'wc_get_product', WC()->cart->get_cross_sells() ), 'wc_products_array_filter_visible' )
-			: array();
+		$cross_sells    = array();
+		$cross_sell_ids = isset( WC()->cart ) ? WC()->cart->get_cross_sells() : array();
+		if ( ! empty( $cross_sell_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $cross_sell_ids );
+
+			$cross_sells = array_filter( array_map( 'wc_get_product', $cross_sell_ids ), 'wc_products_array_filter_visible' );
+		}
 
 		wc_set_loop_prop( 'name', 'cross-sells' );
 		wc_set_loop_prop( 'columns', apply_filters( 'woocommerce_cross_sells_columns', $columns ) );
@@ -2533,6 +2539,11 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		 */
 		$limit       = intval( apply_filters( 'woocommerce_cross_sells_total', $limit ) );
 		$cross_sells = $limit > 0 ? array_slice( $cross_sells, 0, $limit ) : $cross_sells;
+
+		if ( ! empty( $cross_sells ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $cross_sells ) ) );
+		}
 
 		wc_get_template(
 			'cart/cross-sells.php',
@@ -3038,10 +3049,22 @@ if ( ! function_exists( 'woocommerce_order_details_table' ) ) {
 		$template = 'order/order-details.php';
 
 		if ( FeaturesUtil::feature_is_enabled( 'fulfillments' ) ) {
-			$fulfillment_data_store = wc_get_container()->get( FulfillmentsDataStore::class );
-			$fulfillments           = $fulfillment_data_store->read_fulfillments( WC_Order::class, $order_id );
-			if ( ! empty( $fulfillments ) ) {
-				$template = 'order/order-details-fulfillments.php';
+			try {
+				/**
+				 * Fulfillments data store.
+				 *
+				 * @var \Automattic\WooCommerce\Admin\Features\Fulfillments\DataStore\FulfillmentsDataStore $fulfillment_data_store
+				 */
+				$fulfillment_data_store = \WC_Data_Store::load( 'order-fulfillment' );
+				$fulfillments           = $fulfillment_data_store->read_fulfillments( WC_Order::class, $order_id );
+				if ( ! empty( $fulfillments ) ) {
+					$template = 'order/order-details-fulfillments.php';
+				}
+			} catch ( \Throwable $e ) {
+				wc_get_logger()->error(
+					sprintf( 'Failed to load fulfillments for order %s: %s', $order_id, $e->getMessage() ),
+					array( 'source' => 'fulfillments' )
+				);
 			}
 		}
 
@@ -3107,7 +3130,7 @@ if ( ! function_exists( 'woocommerce_order_again_button' ) ) {
 		 * @param array $statuses_for_reordering Array of valid order statuses for reordering.
 		 */
 		$statuses_for_reordering = apply_filters( 'woocommerce_valid_order_statuses_for_order_again', array( OrderStatus::COMPLETED ) );
-		if ( ! $order || ! $order->has_status( $statuses_for_reordering ) || ! is_user_logged_in() ) {
+		if ( ! $order || ! $order->has_status( $statuses_for_reordering ) || ! is_user_logged_in() || is_order_received_page() ) {
 			return;
 		}
 

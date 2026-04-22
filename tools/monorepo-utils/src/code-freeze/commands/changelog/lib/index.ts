@@ -188,6 +188,9 @@ export const updateReleaseBranchChangelogs = async (
 
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 
@@ -273,9 +276,10 @@ export const updateReleaseBranchChangelogs = async (
 			};
 		}
 		Logger.notice( `Creating PR for ${ branch }` );
-		const warningMessage = noEntriesWritten
-			? '> [!CAUTION]\n> No entries were written to the changelog. You will be required to manually add a changelog entry before releasing.\n\n'
-			: '';
+		const warningMessage =
+			noEntriesWritten && ! options.appendChangelog
+				? '> [!CAUTION]\n> No entries were written to the changelog. You will be required to manually add a changelog entry before releasing.\n\n'
+				: '';
 		const pullRequest = await createPullRequest( {
 			owner,
 			name,
@@ -283,7 +287,7 @@ export const updateReleaseBranchChangelogs = async (
 			body: `${ warningMessage }This pull request was automatically generated to prepare the changelog for ${ version }`,
 			head: branch,
 			base: releaseBranch,
-			reviewers: [ githubActor ],
+			reviewers: githubActor ? [ githubActor ] : [],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -349,6 +353,9 @@ export const updateBranchChangelog = async (
 	Logger.notice( `Deleting changelogs from trunk ${ tmpRepoPath }` );
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 
@@ -401,7 +408,7 @@ export const updateBranchChangelog = async (
 			}`,
 			head: branch,
 			base: releaseBranch,
-			reviewers: [ githubActor ],
+			reviewers: githubActor ? [ githubActor ] : [],
 		} );
 		Logger.notice( `Pull request created: ${ pullRequest.html_url }` );
 
@@ -474,6 +481,9 @@ async function getTrunkWooCommerceVersion(
 ): Promise< string | null > {
 	const git = simpleGit( {
 		baseDir: tmpRepoPath,
+		unsafe: {
+			allowUnsafeHooksPath: true,
+		},
 		config: [ 'core.hooksPath=/dev/null' ],
 	} );
 

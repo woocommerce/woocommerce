@@ -970,6 +970,14 @@ ul.wc-tabs {
 		}
 	}
 
+    // PayPal logo in payment methods list on classic checkout page, more specific selector for precedence over general theme styles.
+	ul.wc_payment_methods li.payment_method_paypal img {
+		max-height: 24px;
+		vertical-align: middle;
+		float: right;
+		margin: 0;
+	}
+
 	.woocommerce-thankyou-order-received {
 		margin-top: 0;
 	}

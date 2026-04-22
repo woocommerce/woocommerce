@@ -11,8 +11,6 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
-use Automattic\WooCommerce\Internal\FraudProtection\CheckoutEventTracker;
-use Automattic\WooCommerce\Internal\FraudProtection\FraudProtectionController;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -959,8 +957,17 @@ class WC_Checkout {
 				$errors->add( 'shipping', __( 'Please enter an address to continue.', 'woocommerce' ) );
 			} elseif ( ! in_array( $shipping_country, array_keys( WC()->countries->get_shipping_countries() ), true ) ) {
 				if ( WC()->countries->country_exists( $shipping_country ) ) {
-					/* translators: %s: shipping location (prefix e.g. 'to' + ISO 3166-1 alpha-2 country code) */
-					$errors->add( 'shipping', sprintf( __( 'Unfortunately <strong>we do not ship %s</strong>. Please enter an alternative shipping address.', 'woocommerce' ), WC()->countries->shipping_to_prefix( $shipping_country ) . ' ' . $shipping_country ) );
+					$countries             = WC()->countries->get_countries();
+					$shipping_country_name = $countries[ $shipping_country ] ?? $shipping_country;
+					$errors->add(
+						'shipping',
+						sprintf(
+							/* translators: %1$s: shipping location prefix 'to' or 'to the', %2$s: shipping location country name */
+							__( 'Unfortunately, <strong>we do not ship %1$s %2$s</strong>. Please enter an alternative shipping address.', 'woocommerce' ),
+							WC()->countries->shipping_to_prefix( $shipping_country ),
+							$shipping_country_name
+						)
+					);
 				}
 			} else {
 				$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
@@ -1102,15 +1109,6 @@ class WC_Checkout {
 				true
 			);
 
-			// Track successful order placement.
-			if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() ) {
-				$fp_order = wc_get_order( $order_id );
-				if ( $fp_order instanceof \WC_Order ) {
-					wc_get_container()->get( CheckoutEventTracker::class )
-						->track_order_placed( $order_id, $fp_order );
-				}
-			}
-
 			if ( ! wp_doing_ajax() ) {
 				// phpcs:ignore WordPress.Security.SafeRedirect.wp_redirect_wp_redirect
 				wp_redirect( $result['redirect'] );
@@ -1141,12 +1139,6 @@ class WC_Checkout {
 			),
 			true
 		);
-
-		// Track successful order placement.
-		if ( wc_get_container()->get( FraudProtectionController::class )->feature_is_enabled() && $order instanceof \WC_Order ) {
-			wc_get_container()->get( CheckoutEventTracker::class )
-				->track_order_placed( $order_id, $order );
-		}
 
 		if ( ! wp_doing_ajax() ) {
 			wp_safe_redirect(

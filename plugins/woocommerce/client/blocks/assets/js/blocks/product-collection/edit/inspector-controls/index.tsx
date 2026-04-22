@@ -34,6 +34,7 @@ import {
 import useCarouselLayoutAdjustments from './use-carousel-layout-adjustments';
 import useEmailPaginationAdjustments from './use-email-pagination-adjustments';
 import useEmailColumnAdjustments from './use-email-column-adjustments';
+import useEmailHeadingAdjustments from './use-email-heading-adjustments';
 import DefaultQueryOrderByControl from './order-by-control/default-query-order-by-control';
 import CustomQueryOrderByControl from './order-by-control/custom-query-order-by-control';
 import OnSaleControl from './on-sale-control';
@@ -89,6 +90,7 @@ const ProductCollectionInspectorControls = (
 	useCarouselLayoutAdjustments( clientId, attributes );
 	useEmailPaginationAdjustments( clientId, attributes );
 	useEmailColumnAdjustments( attributes, setAttributes );
+	useEmailHeadingAdjustments( clientId );
 
 	const showCustomQueryControls = inherit === false;
 	const showInheritQueryControl =

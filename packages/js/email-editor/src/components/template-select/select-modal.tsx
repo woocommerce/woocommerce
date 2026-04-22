@@ -103,12 +103,18 @@ function SelectTemplateBody( {
 	}, [ displayCategories, selectedCategory ] );
 
 	return (
-		<div className="block-editor-block-patterns-explorer">
-			<TemplateCategoriesListSidebar
-				templateCategories={ displayCategories }
-				selectedCategory={ selectedCategory }
-				onClickCategory={ handleCategorySelection }
-			/>
+		<div
+			className={ `block-editor-block-patterns-explorer${
+				displayCategories.length === 0 ? ' no-sidebar' : ''
+			}` }
+		>
+			{ displayCategories.length > 0 && (
+				<TemplateCategoriesListSidebar
+					templateCategories={ displayCategories }
+					selectedCategory={ selectedCategory }
+					onClickCategory={ handleCategorySelection }
+				/>
+			) }
 
 			<TemplateList
 				templates={ templates }

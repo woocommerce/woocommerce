@@ -31,6 +31,8 @@ export type Subscription = {
 	subscription_installed: boolean;
 	subscription_available: boolean;
 	is_installable: boolean;
+	included_in_host_plan?: boolean;
+	is_agency?: boolean;
 	is_shared: boolean;
 	owner_email: boolean;
 	has_changelog: boolean;

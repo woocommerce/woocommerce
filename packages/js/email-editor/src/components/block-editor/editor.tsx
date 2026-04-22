@@ -9,16 +9,25 @@ import { CommandMenu, store as commandsStore } from '@wordpress/commands';
 import { PluginArea } from '@wordpress/plugins';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
-	AutosaveMonitor,
-	// @ts-expect-error Type is missing in @types/wordpress__editor
+	AutosaveMonitor as _AutosaveMonitor,
 	LocalAutosaveMonitor,
 	UnsavedChangesWarning,
-	// @ts-expect-error Type is missing in @types/wordpress__editor
-	EditorKeyboardShortcutsRegister,
+	EditorKeyboardShortcutsRegister as _EditorKeyboardShortcutsRegister,
 	ErrorBoundary,
 	PostLockedModal,
 	store as editorStore,
 } from '@wordpress/editor';
+
+// Upstream types are inaccurate: AutosaveMonitor's default export is typed as
+// `unknown` and EditorKeyboardShortcutsRegister returns DOM `Element` instead
+// of `JSX.Element`. Cast them so they are usable as JSX components.
+const AutosaveMonitor = _AutosaveMonitor as unknown as React.ComponentType<
+	Record< string, never >
+>;
+const EditorKeyboardShortcutsRegister =
+	_EditorKeyboardShortcutsRegister as unknown as React.ComponentType<
+		Record< string, never >
+	>;
 
 /**
  * Internal dependencies
@@ -45,6 +54,13 @@ export function InnerEditor( {
 	postType: initialPostType,
 	settings,
 	contentRef,
+	customSavePanel,
+}: {
+	postId: number | string;
+	postType: string;
+	settings: Record< string, unknown >;
+	contentRef?: React.Ref< HTMLDivElement > | null;
+	customSavePanel?: React.ReactElement;
 } ) {
 	const {
 		currentPost,
@@ -100,9 +116,12 @@ export function InnerEditor( {
 		};
 	}, [] );
 
-	const { isFullScreenForced, displaySendEmailButton } = settings;
+	const {
+		isFullScreenForced,
+		displaySendEmailButton,
+		disableSnackbarNotices,
+	} = settings;
 
-	// @ts-expect-error Type is missing in @types/wordpress__editor
 	const { removeEditorPanel } = useDispatch( editorStore );
 	useEffect( () => {
 		removeEditorPanel( 'post-status' );
@@ -144,16 +163,19 @@ export function InnerEditor( {
 			</div>
 		);
 	}
+	// In WordPress 6.8 WooCommerce commands are registered because Core does
+	// not mount the global CommandMenu. Use that as a signal to render our own
+	// CommandMenu fallback. Core loads it starting in WordPress 6.9.
+	const isWordPress68 = allCommands.every( ( { name } ) =>
+		name.includes( 'woocommerce' )
+	);
 
 	recordEventOnce( 'editor_layout_loaded' );
 	return (
 		<SlotFillProvider>
-			{ /* @ts-expect-error canCopyContent is missing in @types/wordpress__editor */ }
 			<ErrorBoundary canCopyContent>
-				{ /* The CommandMenu is not needed if the commands are registered. The CommandMenu can be removed after we drop support for WP 6.8. */ }
-				{ ( ! allCommands || allCommands.length === 0 ) && (
-					<CommandMenu />
-				) }
+				{ /* Keep this fallback only for WordPress 6.8. Core mounts the CommandMenu in 6.9+. */ }
+				{ isWordPress68 && <CommandMenu /> }
 				<Editor
 					postId={ currentPost.postId }
 					postType={ currentPost.postType }
@@ -161,6 +183,7 @@ export function InnerEditor( {
 					templateId={ template && template.id }
 					contentRef={ contentRef }
 					styles={ styles } // This is needed for BC for Gutenberg below v22
+					customSavePanel={ customSavePanel }
 				>
 					<AutosaveMonitor />
 					<LocalAutosaveMonitor />
@@ -184,7 +207,11 @@ export function InnerEditor( {
 						<SettingsPanel />
 					) }
 					{ displaySendEmailButton && <PublishSave /> }
-					<EditorNotices />
+					<EditorNotices
+						disableSnackbarNotices={
+							disableSnackbarNotices as boolean | undefined
+						}
+					/>
 					<BlockCompatibilityWarnings />
 					<PluginArea scope="woocommerce-email-editor" />
 				</Editor>
