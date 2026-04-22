@@ -96,6 +96,7 @@ const Edit = ( props: EditProps ) => {
 					return true;
 				} )
 				.map( ( term, index ) => ( {
+					id: term.id.toString(),
 					label: term.name,
 					value: term.id.toString(),
 					selected: index === 0,
