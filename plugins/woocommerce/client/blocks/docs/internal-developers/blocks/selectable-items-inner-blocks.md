@@ -218,25 +218,25 @@ import type { ReactNode } from 'react';
 
 /**
  * Context protocol for selectable item lists.
- * 
+ *
  * @see docs/internal-developers/blocks/store-agnostic-inner-blocks.md
  */
 export interface SelectableItemsContext {
   /** Items to render */
   items: SelectableItem[];
-  
+
   /** Selection behavior */
   selectionMode: 'single' | 'multiple';
-  
+
   /** Action name the inner block should call on selection */
   selectAction: string;
-  
+
   /** Parent's Interactivity API store namespace */
   storeNamespace: string;
-  
+
   /** Screen reader label for the group (rendered as fieldset legend) */
   groupLabel?: string;
-  
+
   /** Use data-wp-each for dynamic item rendering (default: true).
    *  Set to false for static item lists (rating, stock) that don't need
    *  show-more and may contain HTML labels. */
@@ -252,34 +252,34 @@ export type SelectableItem = (
 ) & {
   /** Value for selection/submission */
   value: string;
-  
+
   /** Current selection state */
   selected?: boolean;
-  
+
   /** Product count (filters) */
   count?: number;
-  
+
   /** Whether item can be selected */
   disabled?: boolean;
-  
+
   /** Type discriminator (e.g., 'attribute/color') */
   type?: string;
-  
+
   /** Swatch color (hex, e.g., "#FF0000") */
   color?: string;
-  
+
   /** Swatch image URL */
   image?: string;
-  
+
   /** Term/attribute ID */
   id?: number;
-  
+
   /** Parent term ID for nested taxonomies */
   parent?: number;
-  
+
   /** Nesting depth for hierarchical display */
   depth?: number;
-  
+
   /** Menu order for sorting */
   menuOrder?: number;
 
@@ -297,7 +297,7 @@ class ProductFilterAttribute extends AbstractBlock {
 
     protected function render( $attributes, $content, $block ) {
         $show_counts = $attributes['showCounts'] ?? false;
-        
+
         /** @var SelectableItemsContext $context */
         $context = [
             // Items include 'count' only when $show_counts is true
@@ -355,115 +355,6 @@ parameters:
         dynamicItems?: bool
       }
     '''
-```
-
----
-
-# Examples
-
-These examples show valid context objects that conform to the protocol.
-
-## Color Filter (multi-select with swatches)
-
-```php
-$context = [
-    'items' => [
-        [
-            'label'    => 'Red',
-            'value'    => 'red',
-            'selected' => false,
-            'count'    => 5,  // Include count to show it
-            'color'    => '#FF0000',
-        ],
-        [
-            'label'    => 'Blue',
-            'value'    => 'blue',
-            'selected' => true,
-            'count'    => 3,
-            'color'    => '#0000FF',
-            'image'    => 'blue-pattern.jpg',  // Can have both color and image
-        ],
-    ],
-    'selectionMode'  => 'multiple',
-    'selectAction'   => 'toggleFilter',
-    'storeNamespace' => 'woocommerce/product-filters',
-    'groupLabel'     => 'Filter by Color',
-];
-```
-
-## Size Filter (multi-select, text-only)
-
-```php
-$context = [
-    'items' => [
-        ['label' => 'Small',  'value' => 'small',  'selected' => false, 'count' => 8],
-        ['label' => 'Medium', 'value' => 'medium', 'selected' => true,  'count' => 12],
-        ['label' => 'Large',  'value' => 'large',  'selected' => false, 'count' => 6],
-        // No color/image - renders as text chips
-    ],
-    'selectionMode'  => 'multiple',
-    'selectAction'   => 'toggleFilter',
-    'storeNamespace' => 'woocommerce/product-filters',
-    'groupLabel'     => 'Filter by Size',
-];
-```
-
-## Variation Selector (single-select with disabled)
-
-```php
-$context = [
-    'items' => [
-        // No count field = no count shown
-        ['label' => 'Red',   'value' => 'red',   'selected' => true,  'color' => '#FF0000'],
-        ['label' => 'Blue',  'value' => 'blue',  'selected' => false, 'color' => '#0000FF'],
-        ['label' => 'Green', 'value' => 'green', 'selected' => false, 'color' => '#00FF00', 'disabled' => true],
-    ],
-    'selectionMode'  => 'single',
-    'selectAction'   => 'setAttribute',
-    'storeNamespace' => 'woocommerce/add-to-cart-with-options',
-    'groupLabel'     => 'Select Color',
-];
-```
-
-## Hierarchical Taxonomy (nested categories)
-
-```php
-$context = [
-    'items' => [
-        ['label' => 'Clothing', 'value' => 'clothing', 'id' => 10, 'parent' => 0, 'depth' => 0, 'count' => 50],
-        ['label' => 'T-Shirts', 'value' => 't-shirts', 'id' => 11, 'parent' => 10, 'depth' => 1, 'count' => 20],
-        ['label' => 'Hoodies',  'value' => 'hoodies',  'id' => 12, 'parent' => 10, 'depth' => 1, 'count' => 15],
-    ],
-    'selectionMode'  => 'multiple',
-    'selectAction'   => 'toggleFilter',
-    'storeNamespace' => 'woocommerce/product-filters',
-    'groupLabel'     => 'Filter by Category',
-];
-```
-
-## Rating Filter (HTML label, static items)
-
-```php
-// PHP renders the stars SVG as label.
-// dynamicItems: false means no data-wp-each, keeping HTML labels intact.
-$context = [
-    'items' => [
-        [
-            'label'     => '<svg>★★★★★</svg>',  // Rendered as HTML
-            'ariaLabel' => '5 stars',            // Required when label is not plain text
-            'value'     => '5',
-            'selected'  => false,
-            'count'     => 12,  // Include count to show it
-            'type'      => 'rating',
-        ],
-        // ...
-    ],
-    'selectionMode'  => 'multiple',
-    'selectAction'   => 'toggleFilter',
-    'storeNamespace' => 'woocommerce/product-filters',
-    'groupLabel'     => 'Filter by Rating',
-    'dynamicItems'   => false,  // Static list, keeps HTML labels
-];
 ```
 
 ---
@@ -541,7 +432,7 @@ protected function render( $attributes, $content, $block ) {
                             data-wp-bind--aria-label="context.item.ariaLabel"
                             data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
                             data-wp-bind--value="context.item.value"
-                            data-wp-bind--checked="state.isFilterSelected"
+                            data-wp-bind--checked="context.item.selected"
                         >
                         <span data-wp-text="context.item.label"></span>
                         <span data-wp-bind--hidden="!context.item.count">
@@ -561,7 +452,7 @@ protected function render( $attributes, $content, $block ) {
                             aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
                             data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
                             value="<?php echo esc_attr( $item['value'] ); ?>"
-                            data-wp-bind--checked="state.isFilterSelected"
+                            data-wp-bind--checked="context.item.selected"
                         >
                         <span><?php echo esc_html( $item['label'] ); ?></span>
                         <?php if ( isset( $item['count'] ) ) : ?>
@@ -583,7 +474,7 @@ Key points:
 - **`data-wp-each-child`** items provide server-side HTML before JS hydration
 - **`array_values()`** is required — input arrays may have non-sequential keys (e.g. taxonomy term IDs), which causes `json_encode` to produce a JSON object instead of array
 - **`data-wp-text`** for labels (not `data-wp-html` — that directive does not exist in the Interactivity API)
-- **`state.isFilterSelected`** and other state getters come from the parent store via namespace delegation
+- **`context.item.selected`** reflects current selection state — parent updates this when selection changes
 
 ### Static Items Mode (`dynamicItems: false`)
 
@@ -620,11 +511,11 @@ Parent blocks provide the protocol context to their inner blocks.
 ### Filter Example (ProductFilterAttribute.php)
 ```php
 class ProductFilterAttribute extends AbstractBlock {
-    
+
     protected function render($attributes, $content, $block) {
         // ... existing filter logic to get items ...
         $show_counts = $attributes['showCounts'] ?? false;
-        
+
         // Transform filter items to standardized context
         $selectable_context = [
             'items'          => $this->transform_to_selectable_items($filter_items, $attribute_name, $show_counts),
@@ -633,10 +524,10 @@ class ProductFilterAttribute extends AbstractBlock {
             'storeNamespace' => 'woocommerce/product-filters',
             'groupLabel'     => $attribute_label,
         ];
-        
+
         // Provide context to inner blocks
         $block->context['woocommerce/selectableItems'] = $selectable_context;
-        
+
         // Render inner blocks
         return sprintf(
             '<div %s>%s</div>',
@@ -646,249 +537,5 @@ class ProductFilterAttribute extends AbstractBlock {
             $content
         );
     }
-    
-    private function transform_to_selectable_items(array $filter_items, string $attribute_name, bool $show_counts): array {
-        // Get presentation data once, keyed by slug
-        $presentation = $this->get_presentation_data($attribute_name);
-        
-        return array_map(function($item) use ($presentation, $show_counts) {
-            $result = [
-                'label'    => $item['label'],
-                'value'    => $item['value'],
-                'selected' => $item['selected'] ?? false,
-                'type'     => $item['type'] ?? null,
-            ];
-            
-            // Include count only when showCounts is true
-            if ($show_counts) {
-                $result['count'] = $item['count'] ?? 0;
-            }
-            
-            // Bundle presentation data directly on item
-            if (isset($presentation[$item['value']])) {
-                $result['color'] = $presentation[$item['value']]['color'] ?? null;
-                $result['image'] = $presentation[$item['value']]['image'] ?? null;
-            }
-            
-            return $result;
-        }, $filter_items);
-    }
-    
-    /**
-     * Get visual presentation data from term meta.
-     */
-    private function get_presentation_data(string $attribute_name): array {
-        $presentation = [];
-        $terms = get_terms(['taxonomy' => 'pa_' . $attribute_name, 'hide_empty' => false]);
-        
-        foreach ($terms as $term) {
-            $color = get_term_meta($term->term_id, 'color', true);
-            $image = get_term_meta($term->term_id, 'image', true);
-            
-            if ($color || $image) {
-                $presentation[$term->slug] = [
-                    'color' => $color ?: null,
-                    'image' => $image ?: null,
-                ];
-            }
-        }
-        
-        return $presentation;
-    }
 }
 ```
-
-### Variation Selector Example (VariationSelectorAttribute.php)
-```php
-class VariationSelectorAttribute extends AbstractBlock {
-    
-    protected function render($attributes, $content, $block) {
-        // ... existing variation logic to get terms ...
-        
-        // Transform attribute terms to standardized context
-        $selectable_context = [
-            'items'          => $this->transform_to_selectable_items($attribute_terms, $attribute_name),
-            'selectionMode'  => 'single',
-            'selectAction'   => 'setAttribute',
-            'storeNamespace' => 'woocommerce/add-to-cart-with-options',
-            'groupLabel'     => $attribute_label,
-            // Items have no 'count' field — counts won't be shown
-        ];
-        
-        // Provide context to inner blocks
-        $block->context['woocommerce/selectableItems'] = $selectable_context;
-        
-        return sprintf(
-            '<div %s>%s</div>',
-            get_block_wrapper_attributes([
-                'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
-            ]),
-            $content
-        );
-    }
-    
-    private function transform_to_selectable_items(array $terms, string $attribute_name): array {
-        // Get presentation data once
-        $presentation = $this->get_presentation_data($attribute_name);
-        
-        return array_map(function($term) use ($presentation) {
-            $result = [
-                'label'    => $term['label'],
-                'value'    => $term['value'],
-                'selected' => $term['isSelected'] ?? false,
-                'disabled' => $term['isDisabled'] ?? false,
-            ];
-            
-            // Bundle presentation data directly on item
-            if (isset($presentation[$term['value']])) {
-                $result['color'] = $presentation[$term['value']]['color'] ?? null;
-                $result['image'] = $presentation[$term['value']]['image'] ?? null;
-            }
-            
-            return $result;
-        }, $terms);
-    }
-    
-    /**
-     * Get visual presentation data from term meta.
-     * Same source as filters - ensures visual consistency.
-     */
-    private function get_presentation_data(string $attribute_name): array {
-        $presentation = [];
-        $terms = get_terms(['taxonomy' => 'pa_' . $attribute_name, 'hide_empty' => false]);
-        
-        foreach ($terms as $term) {
-            $color = get_term_meta($term->term_id, 'color', true);
-            $image = get_term_meta($term->term_id, 'image', true);
-            
-            if ($color || $image) {
-                $presentation[$term->slug] = [
-                    'color' => $color ?: null,
-                    'image' => $image ?: null,
-                ];
-            }
-        }
-        
-        return $presentation;
-    }
-}
-```
-
----
-
-# Display Styles
-
-The protocol supports multiple display styles as separate inner blocks, all consuming the same context:
-
-| Block Name | Renders As | Use Case |
-|------------|-----------|----------|
-| `woocommerce/selectable-chips` | Button chips | Compact, multi-select |
-| `woocommerce/selectable-pills` | Radio/checkbox pills | Traditional form style |
-| `woocommerce/selectable-swatches` | Color boxes / images | Visual attributes |
-| `woocommerce/selectable-dropdown` | Select element | Space-constrained |
-| `woocommerce/selectable-list` | Checkbox list | Detailed with counts |
-
-Each variant:
-1. Reads the `woocommerce/selectableItems` context in `render()`
-2. Renders items with its own HTML/styling
-3. Works in any parent that provides the protocol context
-
-## Swatch Rendering Example
-
-Presentation data is bundled on items - direct property access:
-
-**Rendering a single swatch item:**
-```php
-private function render_item(array $item, string $selection_mode, bool $show_counts): string {
-    $has_color = !empty($item['color']);
-    $has_image = !empty($item['image']);
-    
-    $swatch_content = '';
-    
-    if ($has_color) {
-        $swatch_content = sprintf(
-            '<span class="wc-block-swatch__color" style="background-color: %s;" aria-hidden="true"></span>',
-            esc_attr($item['color'])
-        );
-    } elseif ($has_image) {
-        $swatch_content = sprintf(
-            '<img class="wc-block-swatch__image" src="%s" alt="" aria-hidden="true" />',
-            esc_url($item['image'])
-        );
-    } else {
-        // No visual data - render as text chip fallback
-        $swatch_content = sprintf(
-            '<span class="wc-block-swatch__text">%s</span>',
-            esc_html($item['label'])
-        );
-    }
-    
-    $input_type = $selection_mode === 'single' ? 'radio' : 'checkbox';
-    $label = is_string($item['label']) ? $item['label'] : ($item['ariaLabel'] ?? '');
-    
-    return sprintf(
-        '<label class="wc-block-swatch %s %s">
-            <input 
-                type="%s" 
-                value="%s"
-                data-wp-bind--checked="state.isSelected"
-                data-wp-bind--disabled="state.isDisabled"
-                data-wp-on--change="actions.handleSelect"
-                data-wp-context=\'%s\'
-            />
-            %s
-            <span class="wc-block-swatch__label">%s</span>
-            %s
-        </label>',
-        $item['selected'] ? 'is-selected' : '',
-        $item['disabled'] ? 'is-disabled' : '',
-        $input_type,
-        esc_attr($item['value']),
-        wp_json_encode(['item' => $item]),
-        $swatch_content,
-        esc_html($label),
-        $show_counts && isset($item['count']) ? '<span class="wc-block-swatch__count">(' . $item['count'] . ')</span>' : ''
-    );
-}
-```
-
----
-
-# Migration Path
-
-### Phase 1: Create New Blocks
-1. Create `SelectableSwatches` block implementing the protocol
-2. Test inside both filter and variation selector parents
-
-### Phase 2: Refactor Existing Blocks
-1. Update `ProductFilterChips` to read from the protocol context
-2. Update `ProductFilterCheckboxList` similarly
-3. Update `VariationSelectorAttributeOptions` to provide standardized context
-4. Deprecate direct store references in inner blocks
-
-### Phase 3: Unify
-1. Both filter and variation selector use same inner block set
-2. `displayStyle` attribute in both parents selects which inner block renders
-3. Single source of truth for selectable item UI
-
----
-
-# Benefits
-
-1. **True Reusability**: Same inner block works in any parent providing the protocol
-2. **Consistent UX**: Swatches look/behave identically across features
-3. **Easier Maintenance**: Fix once, works everywhere
-4. **Extensibility**: New display styles are just new inner blocks consuming the protocol
-5. **Type Safety**: Protocol defined in both TypeScript and PHP catches mismatches at build time
-
----
-
-# Resolved Questions
-
-1. **Swatch data source**: Presentation data (color/image) is **bundled directly on items**. Parent blocks fetch term meta and merge during `transform_to_selectable_items()`. Direct access: `$item['color']`.
-
-2. **Item type alignment**: `SelectableItem` extends `FilterOptionItem` with `color`, `image`, and `disabled`. Backward compatible.
-
-3. **Bundled vs separate presentation**: Bundled is simpler - one data structure, direct property access. Size items just don't have `color`/`image` set.
-
-4. **Protocol enforcement**: Use this document (D) as source of truth, with TypeScript types (B) and PHP interface (C) for build-time enforcement in each language.

@@ -34,14 +34,17 @@ function selectFilter() {
 	newActiveFilters.push( newActiveFilter );
 
 	context.activeFilters = newActiveFilters;
+	context.item.selected = true;
 }
 
 function unselectFilter() {
-	const { item } = getContext< ProductFiltersContext >();
+	const context = getContext< ProductFiltersContext >();
+	const { item } = context;
 	actions.removeActiveFiltersBy(
 		( activeFilter ) =>
 			activeFilter.type === item.type && activeFilter.value === item.value
 	);
+	context.item.selected = false;
 }
 
 type FilterItem = {
@@ -141,14 +144,6 @@ const productFiltersStore = {
 					uid: `${ item.type }/${ item.value }`,
 				} ) );
 		},
-		get isFilterSelected() {
-			const { activeFilters, item } =
-				getContext< ProductFiltersContext >();
-			return activeFilters.some(
-				( filter ) =>
-					filter.type === item.type && filter.value === item.value
-			);
-		},
 		get hasHiddenItems() {
 			const { items } = getContext< ProductFiltersContext >();
 			return items?.some( ( item ) => item.hidden ) ?? false;
@@ -189,7 +184,8 @@ const productFiltersStore = {
 			);
 		},
 		toggleFilter: () => {
-			if ( state.isFilterSelected ) {
+			const { item } = getContext< ProductFiltersContext >();
+			if ( item.selected ) {
 				unselectFilter();
 			} else {
 				selectFilter();

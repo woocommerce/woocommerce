@@ -97,7 +97,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											data-wp-bind--aria-label="context.item.ariaLabel"
 											data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
 											data-wp-bind--value="context.item.value"
-											data-wp-bind--checked="state.isFilterSelected"
+											data-wp-bind--checked="context.item.selected"
 										>
 										<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 									</span>
@@ -134,7 +134,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 										<?php endif; ?>
 										data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
 										value="<?php echo esc_attr( $item['value'] ); ?>"
-										data-wp-bind--checked="state.isFilterSelected"
+										data-wp-bind--checked="context.item.selected"
 									>
 									<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</span>
