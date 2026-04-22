@@ -191,9 +191,14 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Sitewide search continues to return regular posts and pages alongside the product visibility filter.
+	 * @testdox Sitewide search excludes hidden products while continuing to return regular posts.
 	 */
-	public function test_search_includes_non_product_post_types() {
+	public function test_search_excludes_hidden_products_but_keeps_other_post_types() {
+		$hidden_product = WC_Helper_Product::create_simple_product();
+		$hidden_product->set_name( 'Search Hidden Companion Product' );
+		$hidden_product->set_catalog_visibility( 'hidden' );
+		$hidden_product->save();
+
 		$post_id = wp_insert_post(
 			array(
 				'post_type'    => 'post',
@@ -215,9 +220,57 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 		$found_ids = wp_list_pluck( $query->posts, 'ID' );
 
 		$this->assertContains( $post_id, $found_ids, 'Regular posts should still appear in sitewide search results' );
+		$this->assertNotContains( $hidden_product->get_id(), $found_ids, 'Hidden products should be filtered out of sitewide search results' );
 
 		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		wp_delete_post( $post_id, true );
+		$hidden_product->delete( true );
+	}
+
+	/**
+	 * @testdox A tax_query set by another plugin or hook before WC_Query's pre_get_posts survives the visibility merge.
+	 */
+	public function test_search_preserves_existing_tax_query() {
+		$existing_clause = array(
+			'taxonomy' => 'category',
+			'field'    => 'slug',
+			'terms'    => array( 'uncategorized' ),
+		);
+
+		// Hook at priority 5 so it runs before WC_Query::pre_get_posts (default priority 10).
+		$hook = function ( $q ) use ( $existing_clause ) {
+			if ( $q->is_search() ) {
+				$q->set( 'tax_query', array( $existing_clause ) );
+			}
+		};
+		add_action( 'pre_get_posts', $hook, 5 );
+
+		global $wp_the_query, $wp_query;
+		$previous_wp_the_query = $wp_the_query;
+		$previous_wp_query     = $wp_query;
+
+		$query        = new WP_Query();
+		$wp_the_query = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		$query->query( array( 's' => 'Search' ) );
+
+		$tax_query = $query->get( 'tax_query' );
+		$this->assertIsArray( $tax_query, 'Tax query should be an array after WC_Query merges its clause.' );
+		$this->assertContains( $existing_clause, $tax_query, 'Pre-existing tax_query clause should survive the merge.' );
+
+		$visibility_clause_present = false;
+		foreach ( $tax_query as $clause ) {
+			if ( is_array( $clause ) && isset( $clause['taxonomy'] ) && 'product_visibility' === $clause['taxonomy'] ) {
+				$visibility_clause_present = true;
+				break;
+			}
+		}
+		$this->assertTrue( $visibility_clause_present, 'WC_Query should append the product_visibility exclusion clause to the existing tax_query.' );
+
+		remove_action( 'pre_get_posts', $hook, 5 );
+		$wp_the_query = $previous_wp_the_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$wp_query     = $previous_wp_query; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 	}
 }
