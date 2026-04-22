@@ -564,7 +564,7 @@ class WC_Checkout {
 			if ( $item instanceof WC_Order_Item_Product ) {
 				$item->set_order( $order ); // Earlier order instance injection aiming set_backorder_meta logic.
 				// if ( $product ) {
-				// 	$item->set_product( $product );
+				// 	$item->set_product( $product ); causes regressions in tests
 				// }
 			}
 
