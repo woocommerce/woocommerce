@@ -234,7 +234,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 
 		$attribute_id = wc_create_attribute(
 			array(
-				'name' => 'Color',
+				'name' => 'Visual Color',
 				'type' => 'wc-visual',
 			)
 		);
