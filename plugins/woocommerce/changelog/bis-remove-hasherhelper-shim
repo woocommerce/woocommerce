@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Remove pre-WP-6.8 hashing compatibility shim in StockNotifications now that WooCommerce requires WordPress 6.8.
