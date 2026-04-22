@@ -35,6 +35,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$show_counts     = $block_context['showCounts'] ?? false;
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
 		$select_action   = $block_context['selectAction'] ?? 'toggleFilter';
+		$dynamic_items   = $block_context['dynamicItems'] ?? true;
 		$classes         = '';
 		$style           = '';
 
@@ -85,42 +86,46 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
 				<div class="wc-block-product-filter-checkbox-list__items">
-					<template
-						data-wp-each--item="context.items"
-						data-wp-each-key="context.item.id"
-					>
-						<div class="wc-block-product-filter-checkbox-list__item">
-							<label
-								class="wc-block-product-filter-checkbox-list__label"
-								data-wp-bind--for="context.item.id"
-							>
-								<span class="wc-block-product-filter-checkbox-list__input-wrapper">
-									<input
-										class="wc-block-product-filter-checkbox-list__input"
-										type="checkbox"
-										data-wp-bind--id="context.item.id"
-										data-wp-bind--aria-label="context.item.ariaLabel"
-										data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
-										data-wp-bind--value="context.item.value"
-										data-wp-bind--checked="state.isFilterSelected"
-									>
-									<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								</span>
-								<span class="wc-block-product-filter-checkbox-list__text-wrapper">
-									<span class="wc-block-product-filter-checkbox-list__text" data-wp-text="context.item.label"></span>
-									<span
-										class="wc-block-product-filter-checkbox-list__count"
-										data-wp-bind--hidden="!context.showCounts"
-									>(<span data-wp-text="context.item.count"></span>)</span>
-								</span>
-							</label>
-						</div>
-					</template>
+					<?php if ( $dynamic_items ) : ?>
+						<template
+							data-wp-each--item="context.items"
+							data-wp-each-key="context.item.id"
+						>
+							<div class="wc-block-product-filter-checkbox-list__item">
+								<label
+									class="wc-block-product-filter-checkbox-list__label"
+									data-wp-bind--for="context.item.id"
+								>
+									<span class="wc-block-product-filter-checkbox-list__input-wrapper">
+										<input
+											class="wc-block-product-filter-checkbox-list__input"
+											type="checkbox"
+											data-wp-bind--id="context.item.id"
+											data-wp-bind--aria-label="context.item.ariaLabel"
+											data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
+											data-wp-bind--value="context.item.value"
+											data-wp-bind--checked="state.isFilterSelected"
+										>
+										<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									</span>
+									<span class="wc-block-product-filter-checkbox-list__text-wrapper">
+										<span class="wc-block-product-filter-checkbox-list__text" data-wp-text="context.item.label"></span>
+										<span
+											class="wc-block-product-filter-checkbox-list__count"
+											data-wp-bind--hidden="!context.showCounts"
+										>(<span data-wp-text="context.item.count"></span>)</span>
+									</span>
+								</label>
+							</div>
+						</template>
+					<?php endif; ?>
 					<?php foreach ( $context_items as $item ) { ?>
 						<div
 							class="wc-block-product-filter-checkbox-list__item"
-							data-wp-each-child
-							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( $dynamic_items ) : ?>
+								data-wp-each-child
+								<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php endif; ?>
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"
