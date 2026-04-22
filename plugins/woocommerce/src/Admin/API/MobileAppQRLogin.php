@@ -196,12 +196,16 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * Validate that the configured site URL is HTTPS and return it.
 	 *
 	 * `is_ssl()` only tells us the current REQUEST is HTTPS — it says nothing about
-	 * the canonical site URL WordPress hands out. Behind a misconfigured proxy (or
-	 * after a half-completed HTTPS migration where `siteurl` was never updated),
-	 * `get_site_url()` can still return an `http://…` URL even when `is_ssl()` is
-	 * true. That URL is what the mobile app uses for the token-exchange POST, so
-	 * handing back `http://` would let the token + resulting Application Password
-	 * travel in cleartext — the exact risk the HTTPS gate is supposed to prevent.
+	 * the canonical site URL WordPress is configured to advertise. `get_site_url()`
+	 * itself is also insufficient because it passes its result through
+	 * `set_url_scheme()`, which rewrites the scheme to match `is_ssl()` — so
+	 * `get_site_url()` will return `https://…` whenever the request happens to be
+	 * HTTPS, masking a stale `http://` `siteurl` option underneath. We therefore
+	 * check the RAW stored option, which is what reflects admin configuration
+	 * and what shows up in reset-password emails, webhooks, canonical redirects,
+	 * etc. If that is `http://`, a misconfigured proxy that terminated TLS before
+	 * reaching PHP could still cause this endpoint to hand the mobile app a cleartext
+	 * site URL for the token-exchange POST.
 	 *
 	 * We deliberately reject (rather than silently normalizing to `https://`)
 	 * because:
@@ -214,10 +218,12 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return string|\WP_Error The HTTPS site URL, or a WP_Error if it is not HTTPS.
 	 */
 	private function get_secure_site_url() {
-		$site_url = get_site_url();
-		$scheme   = wp_parse_url( $site_url, PHP_URL_SCHEME );
+		// Raw option: what the admin actually configured, before `set_url_scheme()`
+		// inside `get_site_url()` normalizes it based on the current request's scheme.
+		$raw_site_url = get_option( 'siteurl' );
+		$raw_scheme   = is_string( $raw_site_url ) ? wp_parse_url( $raw_site_url, PHP_URL_SCHEME ) : null;
 
-		if ( 'https' !== $scheme ) {
+		if ( 'https' !== $raw_scheme ) {
 			return new \WP_Error(
 				'insecure_site_url',
 				__( 'QR login cannot be used because the site URL is not configured for HTTPS. Please update the WordPress Address (URL) in Settings → General to use https://.', 'woocommerce' ),
@@ -225,7 +231,9 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		return $site_url;
+		// Use get_site_url() for the returned value so any scheme normalization or
+		// filtering that WordPress applies downstream is preserved.
+		return get_site_url();
 	}
 
 	/**
