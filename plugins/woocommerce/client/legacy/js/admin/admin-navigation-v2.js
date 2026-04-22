@@ -149,7 +149,7 @@
 				.append( '<br>' )
 		);
 		$a.append(
-			$( '<div></div>' ).addClass( 'wp-menu-name' ).text( 'WordPress' )
+			$( '<div></div>' ).addClass( 'wp-menu-name' ).text( 'Back' )
 		);
 		$li.append( $a );
 		return $li;
