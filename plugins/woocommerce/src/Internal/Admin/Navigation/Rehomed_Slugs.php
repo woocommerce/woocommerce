@@ -35,4 +35,22 @@ final class Rehomed_Slugs {
 		'woocommerce-payments',
 		'klaviyo_settings',
 	);
+
+	/**
+	 * WC-internal submenu slugs that we don't want surfaced in the rail.
+	 *
+	 * These are either legacy redirects or duplicates of items already in
+	 * the default tree. Auto-attach skips them so the rail doesn't end up
+	 * with two "Orders" / two "Extensions" entries, etc.
+	 */
+	public const AUTO_ATTACH_EXCLUDE = array(
+		// Pre-HPOS Orders — HPOS (`wc-orders`) is the default tree entry.
+		'edit.php?post_type=shop_order',
+		// Legacy redirect page.
+		'coupons-moved',
+		// Legacy reports page (deprecated).
+		'wc-reports',
+		// Modern Extensions page — duplicate of the classic `wc-addons` entry.
+		'wc-admin&path=/extensions',
+	);
 }

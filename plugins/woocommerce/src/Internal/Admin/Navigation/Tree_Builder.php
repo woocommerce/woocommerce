@@ -214,6 +214,20 @@ class Tree_Builder {
 			return $tree;
 		}
 
+		// Normalize the titles of items already attached to the woocommerce root
+		// so we can skip auto-attach candidates with the same visible label
+		// (prevents "Orders/Orders" / "Extensions/Extensions" from surfacing
+		// WC's internal legacy redirects alongside default-tree entries).
+		$existing_titles = array();
+		foreach ( $tree as $existing_slug => $node ) {
+			if ( 'woocommerce' === ( $node['parent'] ?? null ) ) {
+				$key = strtolower( trim( (string) ( $node['title'] ?? '' ) ) );
+				if ( '' !== $key ) {
+					$existing_titles[ $key ] = true;
+				}
+			}
+		}
+
 		$auto_position = 1000;
 		foreach ( $raw_submenu['woocommerce'] as $entry ) {
 			$slug = $entry[2] ?? null;
@@ -221,14 +235,27 @@ class Tree_Builder {
 				continue;
 			}
 
+			// Known WC-internal legacy / redirect / duplicate slugs — never surface.
+			if ( in_array( $slug, Rehomed_Slugs::AUTO_ATTACH_EXCLUDE, true ) ) {
+				continue;
+			}
+
+			$title     = $this->clean_title( $entry[0] ?? $slug );
+			$title_key = strtolower( trim( $title ) );
+			if ( '' !== $title_key && isset( $existing_titles[ $title_key ] ) ) {
+				// Another item with the same title is already attached — skip dupe.
+				continue;
+			}
+
 			$tree[ $slug ] = array(
 				'parent'     => 'woocommerce',
-				'title'      => $this->clean_title( $entry[0] ?? $slug ),
+				'title'      => $title,
 				'position'   => $auto_position,
 				'source'     => 'auto',
 				'capability' => $entry[1] ?? 'read',
 			);
-			$auto_position += 10;
+			$existing_titles[ $title_key ] = true;
+			$auto_position                += 10;
 		}
 
 		return $tree;
