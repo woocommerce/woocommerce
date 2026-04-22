@@ -61,7 +61,10 @@
 		}
 	}
 
-	&:hover > .wc-nav-v2-subflyout,
+	// JS toggles .wc-nav-v2-subopen with a ~450ms close delay (hover-intent
+	// style) so users can correct mid-motion when moving between the parent
+	// flyout item and the nested cascade. :focus-within covers keyboard nav.
+	&.wc-nav-v2-subopen > .wc-nav-v2-subflyout,
 	&:focus-within > .wc-nav-v2-subflyout {
 		display: block;
 	}

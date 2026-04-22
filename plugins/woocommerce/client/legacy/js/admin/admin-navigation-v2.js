@@ -279,21 +279,70 @@
 
 		// WP's common.js hoverIntent was bound to the native rail before we
 		// replaced it, so our injected items have no hover handler. Rebind
-		// WP's expected behaviour: add/remove `opensub` on hover and when
-		// focus enters/leaves the flyout. admin-menu.css keys off `opensub`
-		// to show the flyout.
+		// WP's expected behaviour: add/remove `opensub` on hover (with a
+		// close delay so a small off-menu overshoot doesn't snap the flyout
+		// shut) and when focus enters/leaves the flyout.
+		bindDelayedHover(
+			$adminmenu,
+			'> li.wp-has-submenu, > li.wp-has-current-submenu',
+			'opensub'
+		);
 		$adminmenu
-			.on( 'mouseenter.wcnavv2', '> li.wp-has-submenu, > li.wp-has-current-submenu', function () {
-				$( this ).addClass( 'opensub' );
-			} )
-			.on( 'mouseleave.wcnavv2', '> li.wp-has-submenu, > li.wp-has-current-submenu', function () {
-				$( this ).removeClass( 'opensub' );
-			} )
 			.on( 'focus.wcnavv2', '.wp-submenu a', function () {
 				$( this ).closest( 'li.menu-top' ).addClass( 'opensub' );
 			} )
 			.on( 'blur.wcnavv2', '.wp-submenu a', function () {
 				$( this ).closest( 'li.menu-top' ).removeClass( 'opensub' );
+			} );
+	}
+
+	/**
+	 * How long to wait before collapsing a flyout after the cursor leaves it.
+	 * Gives users time to overshoot and come back without the menu snapping shut.
+	 */
+	var HOVER_CLOSE_DELAY = 450;
+
+	/**
+	 * Bind mouseenter/mouseleave handlers that toggle `className` on delegated
+	 * target items, with a HOVER_CLOSE_DELAY timeout before removing the class.
+	 * Re-entering any matched target (or any descendant's flyout) during the
+	 * delay cancels the close.
+	 *
+	 * @param {jQuery} $root           Root element to delegate from.
+	 * @param {string} targetSelector  Matched items that can open the flyout.
+	 * @param {string} className       Class added to open, removed on close.
+	 */
+	function bindDelayedHover( $root, targetSelector, className ) {
+		var closeTimers = new Map();
+
+		function open( el ) {
+			var t = closeTimers.get( el );
+			if ( t ) {
+				clearTimeout( t );
+				closeTimers.delete( el );
+			}
+			el.classList.add( className );
+		}
+
+		function scheduleClose( el ) {
+			if ( closeTimers.has( el ) ) {
+				return;
+			}
+			closeTimers.set(
+				el,
+				setTimeout( function () {
+					el.classList.remove( className );
+					closeTimers.delete( el );
+				}, HOVER_CLOSE_DELAY )
+			);
+		}
+
+		$root
+			.on( 'mouseenter.wcnavv2delay', targetSelector, function () {
+				open( this );
+			} )
+			.on( 'mouseleave.wcnavv2delay', targetSelector, function () {
+				scheduleClose( this );
 			} );
 	}
 
@@ -376,6 +425,16 @@
 			} );
 			$li.append( $nested );
 		} );
+
+		// JS-driven hover open/close on the second-level cascade, with the
+		// same HOVER_CLOSE_DELAY forgiveness used by the rail submenus.
+		// The SCSS now keys show/hide on `.wc-nav-v2-subopen` (+ :focus-within
+		// for keyboard).
+		bindDelayedHover(
+			$( '#toplevel_page_woocommerce' ),
+			'.wp-submenu li.wc-nav-v2-has-subflyout',
+			'wc-nav-v2-subopen'
+		);
 	}
 
 	$( function () {
