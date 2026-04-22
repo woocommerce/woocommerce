@@ -39,7 +39,9 @@ export type WPError = {
  * have stable codes to match against.
  */
 export function friendlyEmailSendError( wpError: WPError ): string {
-	const { code, message } = wpError;
+	// apiFetch can reject with non-WPError shapes (native TypeError, wrapped middleware errors); unshaped errors fall through to the generic fallback.
+	const code = wpError?.code ?? '';
+	const message = wpError?.message ?? '';
 
 	// Covers both WP core (rest_cookie_invalid_nonce) and Woo's own
 	// EmailPreviewRestController check (invalid_nonce).
