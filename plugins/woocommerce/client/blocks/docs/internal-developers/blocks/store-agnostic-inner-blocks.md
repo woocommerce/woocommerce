@@ -112,6 +112,7 @@ The context object that parents MUST provide.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `showCounts` | `boolean` | `false` | Show product counts next to items (filters) |
+| `dynamicItems` | `boolean` | `true` | Use `data-wp-each` for dynamic item rendering. Set to `false` for static item lists (rating, stock status) that don't need show-more and may contain HTML labels. |
 
 ## SelectableItem
 
@@ -239,6 +240,11 @@ export interface SelectableItemsContext {
   
   /** Show product counts next to items (filters) */
   showCounts?: boolean;
+  
+  /** Use data-wp-each for dynamic item rendering (default: true).
+   *  Set to false for static item lists (rating, stock) that don't need
+   *  show-more and may contain HTML labels. */
+  dynamicItems?: boolean;
 }
 
 /**
@@ -348,7 +354,8 @@ parameters:
         selectAction: string,
         storeNamespace: string,
         groupLabel?: string,
-        showCounts?: bool
+        showCounts?: bool,
+        dynamicItems?: bool
       }
     '''
 ```
@@ -440,10 +447,11 @@ $context = [
 ];
 ```
 
-## Rating Filter (ReactNode label)
+## Rating Filter (HTML label, static items)
 
 ```php
-// PHP renders the stars SVG as label
+// PHP renders the stars SVG as label.
+// dynamicItems: false means no data-wp-each, keeping HTML labels intact.
 $context = [
     'items' => [
         [
@@ -461,6 +469,7 @@ $context = [
     'storeNamespace' => 'woocommerce/product-filters',
     'groupLabel'     => 'Filter by Rating',
     'showCounts'     => true,
+    'dynamicItems'   => false,  // Static list, no show-more, keeps HTML labels
 ];
 ```
 
@@ -587,6 +596,32 @@ Key points:
 - **`array_values()`** is required — input arrays may have non-sequential keys (e.g. taxonomy term IDs), which causes `json_encode` to produce a JSON object instead of array
 - **`data-wp-text`** for labels (not `data-wp-html` — that directive does not exist in the Interactivity API)
 - **`state.isFilterSelected`** and other state getters come from the parent store via namespace delegation
+
+### Static Items Mode (`dynamicItems: false`)
+
+When parent sets `dynamicItems: false`, inner blocks skip the `data-wp-each` template and `data-wp-each-child` attributes. Items are rendered with plain PHP `foreach` only:
+
+```php
+$dynamic_items = $block_context['dynamicItems'] ?? true;
+
+// Only render template if dynamic
+if ( $dynamic_items ) {
+    // <template data-wp-each--item="context.items">...</template>
+}
+
+// Foreach items - conditionally add data-wp-each-child
+foreach ( $context_items as $item ) {
+    $attrs = $dynamic_items
+        ? 'data-wp-each-child ' . wp_interactivity_data_wp_context( array( 'item' => $item ) )
+        : '';
+    // Render item with $attrs
+}
+```
+
+Use `dynamicItems: false` when:
+- Items are a small fixed set (rating stars, stock statuses)
+- No show-more functionality needed
+- Labels contain HTML (SVG, icons) that `data-wp-text` can't render
 
 Reference implementation: `ProductFilterCheckboxList.php`, `ProductFilterChips.php`
 
