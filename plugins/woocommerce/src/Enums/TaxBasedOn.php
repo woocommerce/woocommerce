@@ -10,7 +10,7 @@ namespace Automattic\WooCommerce\Enums;
  *
  * @since 10.8.0
  */
-class TaxBasedOn {
+final class TaxBasedOn {
 	/**
 	 * Tax is calculated based on the customer's shipping address.
 	 *
