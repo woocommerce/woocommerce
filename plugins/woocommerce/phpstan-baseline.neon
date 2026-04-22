@@ -71101,54 +71101,6 @@ parameters:
 			path: src/Internal/StockNotifications/NotificationQuery.php
 
 		-
-			message: '#^Cannot call method get_product_id\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_cancellation_source\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_date_cancelled\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_status\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_user_email\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_user_id\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method update_meta_data\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Privacy\\PrivacyEraser\:\:register_erasers_exporters\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
