@@ -470,6 +470,13 @@ class WC_Checkout {
 			// Save the order.
 			$order_id = $order->save();
 
+			// Defense-in-depth: if the cart still has items but the persisted order has none,
+			// the save silently dropped line items (e.g. a $wpdb->insert() returning false).
+			// Bail out so the caller can retry rather than completing a paid-but-empty order.
+			if ( WC()->cart->get_cart_contents_count() > 0 && 0 === count( $order->get_items() ) ) {
+				throw new Exception( __( 'Order items could not be saved. Please try again.', 'woocommerce' ) );
+			}
+
 			/**
 			 * Action hook fired after an order is created used to add custom meta to the order.
 			 *

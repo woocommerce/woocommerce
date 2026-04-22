@@ -88,6 +88,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected $items_to_delete = array();
 
 	/**
+	 * Bulk order item types scheduled for deletion on save().
+	 *
+	 * Populated by remove_order_items() and processed by save_items(), so that deletion
+	 * happens atomically alongside persistence of any replacement items. 'all' means
+	 * every type should be removed and supersedes any per-type entries.
+	 *
+	 * @since 10.8.0
+	 * @var array<string>
+	 */
+	protected $item_types_to_bulk_delete = array();
+
+	/**
 	 * Stores meta in cache for future reads.
 	 *
 	 * A group must be set to to enable caching.
@@ -277,6 +289,18 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 */
 	protected function save_items() {
 		$items_changed = false;
+
+		if ( ! empty( $this->item_types_to_bulk_delete ) ) {
+			if ( in_array( 'all', $this->item_types_to_bulk_delete, true ) ) {
+				$this->data_store->delete_items( $this );
+			} else {
+				foreach ( array_unique( $this->item_types_to_bulk_delete ) as $type ) {
+					$this->data_store->delete_items( $this, $type );
+				}
+			}
+			$this->item_types_to_bulk_delete = array();
+			$items_changed                   = true;
+		}
 
 		foreach ( $this->items_to_delete as $item ) {
 			$item->delete();
@@ -868,6 +892,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Remove all line items (products, coupons, shipping, taxes) from the order.
 	 *
+	 * The items are cleared from the in-memory order immediately, but the database
+	 * deletion is deferred until the next call to save(). This keeps the checkout
+	 * "resume order" flow atomic: if anything between here and save() throws, the
+	 * previously persisted items remain intact in the database.
+	 *
 	 * @param string $type Order item type. Default null.
 	 * @return void
 	 */
@@ -883,19 +912,28 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 */
 		do_action( 'woocommerce_remove_order_items', $this, $type );
 		if ( ! empty( $type ) ) {
-			$this->data_store->delete_items( $this, $type );
+			$this->item_types_to_bulk_delete[] = $type;
 
 			$group = $this->type_to_group( $type );
 
 			if ( $group ) {
-				unset( $this->items[ $group ] );
+				// Set to an empty array (rather than unset) so that subsequent get_items() calls
+				// return the in-memory "removed" state without re-reading the still-present rows
+				// from the data store.
+				$this->items[ $group ] = array();
 			}
 		} else {
-			$this->data_store->delete_items( $this );
-			$this->items = array();
+			$this->item_types_to_bulk_delete = array( 'all' );
+			foreach ( array_unique( $this->item_types_to_group ) as $group ) {
+				$this->items[ $group ] = array();
+			}
 		}
 		/**
 		 * Trigger action after removing all order line items.
+		 *
+		 * Note: as of WooCommerce 10.8.0, this hook fires before the items are
+		 * deleted from the database. Removal is committed during the next save()
+		 * call so that it happens atomically with any replacement items.
 		 *
 		 * @param  WC_Order  $this  The current order object.
 		 * @param  string $type Order item type. Default null.

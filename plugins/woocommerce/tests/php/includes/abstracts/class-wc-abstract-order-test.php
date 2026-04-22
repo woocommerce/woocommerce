@@ -635,4 +635,125 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		};
 		// phpcs:enable Squiz.Commenting
 	}
+
+	/**
+	 * @testdox Should defer bulk item deletion until save() is called.
+	 */
+	public function test_remove_order_items_defers_db_deletion_until_save() {
+		$order    = WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		$this->assertGreaterThan( 0, count( wc_get_order( $order_id )->get_items() ), 'Precondition: order should have line items in the DB.' );
+		$this->assertGreaterThan( 0, count( wc_get_order( $order_id )->get_items( 'shipping' ) ), 'Precondition: order should have shipping items in the DB.' );
+
+		$order->remove_order_items();
+
+		$reloaded_before_save = wc_get_order( $order_id );
+		$this->assertNotEmpty( $reloaded_before_save->get_items(), 'Line items should still be present in the DB before save().' );
+		$this->assertNotEmpty( $reloaded_before_save->get_items( 'shipping' ), 'Shipping items should still be present in the DB before save().' );
+
+		$order->save();
+
+		$reloaded_after_save = wc_get_order( $order_id );
+		$this->assertCount( 0, $reloaded_after_save->get_items(), 'Line items should be removed from the DB after save().' );
+		$this->assertCount( 0, $reloaded_after_save->get_items( 'shipping' ), 'Shipping items should be removed from the DB after save().' );
+	}
+
+	/**
+	 * @testdox Should keep original items in the DB if save() never runs after remove_order_items().
+	 */
+	public function test_remove_order_items_preserves_db_items_if_save_not_called() {
+		$order    = WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		$original_line_item_ids = array_keys( $order->get_items() );
+		$original_shipping_ids  = array_keys( $order->get_items( 'shipping' ) );
+
+		$order->remove_order_items();
+
+		unset( $order );
+		wp_cache_flush();
+
+		$reloaded = wc_get_order( $order_id );
+		$this->assertSame(
+			$original_line_item_ids,
+			array_keys( $reloaded->get_items() ),
+			'Line items should remain intact when remove_order_items() is not followed by save().'
+		);
+		$this->assertSame(
+			$original_shipping_ids,
+			array_keys( $reloaded->get_items( 'shipping' ) ),
+			'Shipping items should remain intact when remove_order_items() is not followed by save().'
+		);
+	}
+
+	/**
+	 * @testdox Should only remove items of the requested type when a type is passed.
+	 */
+	public function test_remove_order_items_by_type_defers_db_deletion() {
+		$order    = WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		$order->remove_order_items( 'line_item' );
+
+		$before_save = wc_get_order( $order_id );
+		$this->assertNotEmpty( $before_save->get_items(), 'Line items should still be in the DB before save().' );
+		$this->assertNotEmpty( $before_save->get_items( 'shipping' ), 'Shipping items should still be in the DB before save().' );
+
+		$order->save();
+
+		$after_save = wc_get_order( $order_id );
+		$this->assertCount( 0, $after_save->get_items(), 'Line items should be removed after save().' );
+		$this->assertNotEmpty( $after_save->get_items( 'shipping' ), 'Shipping items should not be removed when only line_item was requested.' );
+	}
+
+	/**
+	 * @testdox Should still fire the remove/removed order items action hooks when deletion is deferred.
+	 */
+	public function test_remove_order_items_action_hooks_still_fire() {
+		$order = WC_Helper_Order::create_order();
+
+		$pre_calls    = array();
+		$post_calls   = array();
+		$expected_log = array(
+			array(
+				'order_id' => $order->get_id(),
+				'type'     => 'line_item',
+			),
+		);
+
+		$pre_callback  = function ( $fired_order, $type ) use ( &$pre_calls ) {
+			$pre_calls[] = array(
+				'order_id' => $fired_order->get_id(),
+				'type'     => $type,
+			);
+		};
+		$post_callback = function ( $fired_order, $type ) use ( &$post_calls ) {
+			$post_calls[] = array(
+				'order_id' => $fired_order->get_id(),
+				'type'     => $type,
+			);
+		};
+
+		add_action( 'woocommerce_remove_order_items', $pre_callback, 10, 2 );
+		add_action( 'woocommerce_removed_order_items', $post_callback, 10, 2 );
+
+		try {
+			$order->remove_order_items( 'line_item' );
+		} finally {
+			remove_action( 'woocommerce_remove_order_items', $pre_callback, 10 );
+			remove_action( 'woocommerce_removed_order_items', $post_callback, 10 );
+		}
+
+		$this->assertSame(
+			$expected_log,
+			$pre_calls,
+			'woocommerce_remove_order_items should fire once with the requested type.'
+		);
+		$this->assertSame(
+			$expected_log,
+			$post_calls,
+			'woocommerce_removed_order_items should fire once with the requested type.'
+		);
+	}
 }
