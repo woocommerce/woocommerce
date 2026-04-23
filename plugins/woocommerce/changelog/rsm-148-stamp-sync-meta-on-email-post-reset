@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Refresh sync meta (version, source hash, synced-at, status=in_sync) on woo_email posts when a REST update saves content that matches the current core template render, treating the save as a merchant reset.
