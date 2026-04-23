@@ -271,13 +271,23 @@ class WCEmailTemplateSyncBackfill {
 				self::$is_backfilling = false;
 			}
 
-			if ( is_wp_error( $updated ) || ! $updated ) {
+			// With `$wp_error = true`, every `wp_update_post()` / `wp_insert_post()`
+			// failure path returns `WP_Error` (the `0` return is reserved for the
+			// `$wp_error = false` path). The outer `\Throwable` catch in `run()`
+			// can't see a returned `WP_Error`, so we handle it here. This
+			// migration is one-shot (the `woocommerce_db_version` fence flips on
+			// completion), so an unstamped post would be orphaned — the detector
+			// skips posts without a source hash with a recurring warning. Instead,
+			// fall back to Case C semantics: stamp with the canonical hash but
+			// flag the post as `core_updated_customized` so it surfaces for
+			// merchant review.
+			if ( is_wp_error( $updated ) ) {
 				$status_for_stamp = WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED;
 				self::get_logger()->warning(
 					sprintf(
 						'Email template sync backfill: Case B content rewrite failed for post %d (%s); stamping as core_updated_customized so the post surfaces for merchant review.',
 						$post_id,
-						is_wp_error( $updated ) ? $updated->get_error_message() : 'wp_update_post returned 0'
+						$updated->get_error_message()
 					),
 					array(
 						'post_id' => $post_id,
