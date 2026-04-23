@@ -18,6 +18,13 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	protected $block_name = 'product-filter-checkbox-list';
 
 	/**
+	 * Default number of items to show before "Show more" button.
+	 *
+	 * @var int
+	 */
+	const DISPLAY_LIMIT = 15;
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -33,7 +40,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$block_context   = $block->context['woocommerce/selectableItems'];
 		$items           = $block_context['items'] ?? array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
-		$dynamic_items   = $block_context['dynamicItems'] ?? true;
+		$display_limit   = self::DISPLAY_LIMIT;
 		$classes         = '';
 		$style           = '';
 
@@ -43,17 +50,8 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 			$style   = $tags->get_attribute( 'style' );
 		}
 
-		$visible_items = array_values(
-			array_filter(
-				$items,
-				function ( $item ) {
-					return empty( $item['hidden'] );
-				}
-			)
-		);
-
 		$wrapper_attributes = array(
-			'data-wp-interactive' => 'checkboxliststore',
+			'data-wp-interactive' => 'woocommerce/product-filter-checkbox-list',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'class'               => esc_attr( $classes ),
 		);
@@ -63,62 +61,36 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
 		}
 
-		$checkbox_svg = '<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">'
+		$checkbox_svg   = '<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">'
 			. '<path d="M9.25 1.19922L3.75 6.69922L1 3.94922" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
 			. '</svg>';
+		$has_more_items = count( $items ) > $display_limit;
+		$hidden_count   = max( 0, count( $items ) - $display_limit );
 
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<fieldset data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>">
+			<fieldset>
 				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
-				<div class="wc-block-product-filter-checkbox-list__items">
-					<?php if ( $dynamic_items ) : ?>
-						<template
-							data-wp-each--item="context.items"
-							data-wp-each-key="context.item.id"
-						>
-							<div
-								class="wc-block-product-filter-checkbox-list__item"
-								data-wp-bind--hidden="context.item.hidden"
-							>
-								<label
-									class="wc-block-product-filter-checkbox-list__label"
-									data-wp-bind--for="context.item.id"
-									data-wp-on--click="checkboxliststore::actions."
-								>
-									<span class="wc-block-product-filter-checkbox-list__input-wrapper">
-										<input
-											class="wc-block-product-filter-checkbox-list__input"
-											type="checkbox"
-											data-wp-bind--id="context.item.id"
-											data-wp-bind--aria-label="context.item.ariaLabel"
-											data-wp-on--change="actions.toggle"
-											data-wp-bind--value="context.item.value"
-											data-wp-bind--checked="state.isSelected"
-										>
-										<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-									</span>
-									<span class="wc-block-product-filter-checkbox-list__text-wrapper">
-										<span class="wc-block-product-filter-checkbox-list__text" data-wp-text="context.item.label"></span>
-										<span
-											class="wc-block-product-filter-checkbox-list__count"
-											data-wp-bind--hidden="!context.item.count"
-										> (<span data-wp-text="context.item.count"></span>)</span>
-									</span>
-								</label>
-							</div>
-						</template>
-					<?php endif; ?>
-					<?php foreach ( $visible_items as $item ) { ?>
+				<div
+					class="wc-block-product-filter-checkbox-list__items"
+					data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
+				>
+					<?php
+					$index = 0;
+					foreach ( $items as $item ) :
+						$is_hidden = $index >= $display_limit;
+						++$index;
+						?>
 						<div
 							class="wc-block-product-filter-checkbox-list__item"
-							<?php if ( $dynamic_items ) : ?>
-								data-wp-each-child
-							<?php endif; ?>
 							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( $is_hidden ) : ?>
+								hidden
+								data-wp-bind--hidden="!state.isExpanded"
+							<?php endif; ?>
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"
@@ -141,18 +113,34 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 								</span>
 								<span class="wc-block-product-filter-checkbox-list__text-wrapper">
 									<span class="wc-block-product-filter-checkbox-list__text">
-										<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										<?php echo wp_kses_post( $item['label'] ); ?>
 									</span>
 									<?php if ( isset( $item['count'] ) ) : ?>
 										<span class="wc-block-product-filter-checkbox-list__count">
-											 (<?php echo esc_html( $item['count'] ); ?>)
+											(<?php echo esc_html( $item['count'] ); ?>)
 										</span>
 									<?php endif; ?>
 								</span>
 							</label>
 						</div>
-					<?php } ?>
+					<?php endforeach; ?>
 				</div>
+				<?php if ( $has_more_items ) : ?>
+					<div class="wc-block-product-filter-checkbox-list__show-more">
+						<button
+							type="button"
+							class="wc-block-product-filter-checkbox-list__show-more-button"
+							data-wp-on--click="actions.toggleShowMore"
+							data-wp-text="state.showMoreLabel"
+							data-wp-bind--hidden="state.isExpanded"
+						>
+							<?php
+							/* translators: %d: number of hidden items */
+							echo esc_html( sprintf( __( 'Show %d more', 'woocommerce' ), $hidden_count ) );
+							?>
+						</button>
+					</div>
+				<?php endif; ?>
 			</fieldset>
 		</div>
 		<?php
