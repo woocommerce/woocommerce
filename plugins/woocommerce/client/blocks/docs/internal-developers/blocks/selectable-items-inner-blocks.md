@@ -90,13 +90,13 @@ Inner blocks receive the protocol data through `$block->context['woocommerce/sel
 
 ## SelectableItemsContext
 
-The context object that parents MUST provide.
+The context object that parents MUST provide. Typed as `SelectableItemsContext<T>` where `T` is the extra fields the parent adds to each item (default: `unknown`).
 
 ### Core Fields (Required)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `items` | `SelectableItem[]` | **Yes** | Items to render |
+| `items` | `SelectableItem<T>[]` | **Yes** | Items to render |
 | `selectionMode` | `'single' \| 'multiple'` | **Yes** | Selection behavior |
 | `selectAction` | `string` | **Yes** | Action name to call on selection |
 | `storeNamespace` | `string` | **Yes** | Parent's Interactivity API store |
@@ -112,33 +112,40 @@ The context object that parents MUST provide.
 | Field | Type | Default | Description |
 |-------|------|---------|-------------|
 | `dynamicItems` | `boolean` | `true` | Use `data-wp-each` for dynamic item rendering. Set to `false` for static item lists (rating, stock status) that don't need show-more and may contain HTML labels. |
+| `isLoading` | `boolean` | `false` | Parent is fetching items. Inner blocks show skeleton/loading state. |
 
 ## SelectableItem
+
+`SelectableItem<T = unknown>` — base fields plus an optional generic extension `T` for domain-specific data.
 
 Each item in the `items` array MUST have:
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
+| `id` | `string` | **Yes** | Unique identifier used as `data-wp-each-key`. Format: `"{type}-{value}"` e.g. `"attribute-red"` |
 | `label` | `string \| ReactNode` | **Yes** | Display text (ReactNode for custom rendering) |
 | `value` | `string` | **Yes** | Value for selection/submission |
+| `ariaLabel` | `string` | Conditional | **Required** if `label` is ReactNode |
 | `selected` | `boolean` | No | Current selection state (default: false) |
 | `disabled` | `boolean` | No | Whether item can be selected (default: false) |
-| `ariaLabel` | `string` | Conditional | **Required** if `label` is ReactNode |
+| `hidden` | `boolean` | No | Whether item is hidden (default: false) |
+| `type` | `string` | No | Type discriminator (e.g., `"attribute/color"`) |
 
-Each item MAY have:
+Extra fields go in `T`. For product filters, `T = FilterItemFields`:
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `count` | `number` | Product count. Presence controls visibility — omit to hide counts. |
-| `color` | `string` | Hex color for swatches (e.g., "#FF0000") |
-| `image` | `string` | Image URL for swatches |
-| `type` | `string` | Type discriminator (e.g., "attribute/color") |
-| `id` | `number` | Term/attribute ID |
-| `parent` | `number` | Parent term ID (hierarchical) |
-| `depth` | `number` | Nesting depth (hierarchical) |
-| `menuOrder` | `number` | Sort order |
+```typescript
+type FilterItemFields = {
+  count: number;
+  termId?: number;
+  parent?: number;
+  depth?: number;
+  menuOrder?: number;
+};
 
-Items are extensible — extensions can add arbitrary fields (e.g. `badge`, `tooltip`, `rating`) and consume them in custom inner blocks. Built-in inner blocks ignore unknown fields.
+type FilterOptionItem = SelectableItem<FilterItemFields>;
+```
+
+Inner blocks typed against a specific `T` access extra fields type-safely. Built-in inner blocks ignore unknown fields.
 
 ## Callback Contract
 
@@ -156,52 +163,40 @@ Inner blocks SHOULD:
 
 1. Render `<input type="radio">` when `selectionMode === 'single'`
 2. Render `<input type="checkbox">` when `selectionMode === 'multiple'`
-3. Show counts when `item.count` exists
-4. Render color swatch when `item.color` exists
-5. Render image swatch when `item.image` exists (fallback if no color)
-6. Render text-only when neither `color` nor `image` exists
-7. Apply disabled styling when `item.disabled === true`
-8. Use `groupLabel` for fieldset legend (screen reader accessible)
+3. Apply disabled styling when `item.disabled === true`
+4. Skip (hide) items when `item.hidden === true`
+5. Use `groupLabel` for fieldset legend (screen reader accessible)
+6. Show skeleton/loading UI when `isLoading === true`
+
+Inner blocks typed against `FilterItemFields` MAY additionally:
+
+7. Show counts when `item.count` exists
 
 ---
 
 # Design Rationale
 
-## Bundled Presentation Data
+## Generic Extension Pattern
 
-Presentation data (color, image) is bundled directly on items, not in a separate map:
+`SelectableItem<T>` uses a generic parameter instead of a flat union of optional fields:
 
-- One data structure to build and consume
-- Direct property access: `item.color` instead of `presentation[item.value].color`
-- Aligns with existing `FilterOptionItem` pattern
-- Optional fields are simply null/undefined when not applicable
+- Base fields are shared by all consumers (id, label, value, selected, disabled, hidden, type)
+- Domain-specific fields live in `T` — typed, not untyped `[key: string]: unknown`
+- Filter blocks use `FilterOptionItem = SelectableItem<FilterItemFields>` with count, parent, depth, etc.
+- A variation selector would use `SelectableItem<{ price?: string; stockStatus?: string }>` etc.
+- TypeScript enforces correct shape at each call site with no extra runtime cost
 
 ## Backward Compatibility
 
-`SelectableItem` extends the existing `FilterOptionItem` shape:
+`SelectableItem<T>` replaces the old flat `FilterOptionItem`. Key changes:
 
-**Current `FilterOptionItem`** (from `product-filters/types.ts`):
-```typescript
-type FilterOptionItem = (
-  | { label: string; ariaLabel?: string; }
-  | { label: ReactNode; ariaLabel: string; }
-) & {
-  value: string;
-  selected?: boolean;
-  count: number;
-  id?: number;
-  parent?: number;
-  depth?: number;
-  menuOrder?: number;
-};
-```
-
-**`SelectableItem` additions:**
-- `count` becomes optional (variation selector doesn't need it)
-- `disabled` added (for unavailable variations)
-- `color` added (for swatches)
-- `image` added (for swatches)
-- `type` added (type discriminator)
+| Old `FilterOptionItem` | New `SelectableItem<FilterItemFields>` |
+|------------------------|----------------------------------------|
+| `id?: number` (optional, number) | `id: string` (required, string — used as `data-wp-each-key`) |
+| `count: number` (required) | `count: number` in `FilterItemFields` (required for filters, absent for other consumers) |
+| No `disabled` | `disabled?: boolean` on base type |
+| No `hidden` | `hidden?: boolean` on base type |
+| No `type` | `type?: string` on base type |
 
 ---
 
@@ -216,75 +211,55 @@ Location: `assets/js/types/type-defs/selectable-items.ts`
 ```typescript
 import type { ReactNode } from 'react';
 
-/**
- * Context protocol for selectable item lists.
- *
- * @see docs/internal-developers/blocks/store-agnostic-inner-blocks.md
- */
-export interface SelectableItemsContext {
-  /** Items to render */
-  items: SelectableItem[];
+export type SelectableItem< T = unknown > = (
+	| { label: string; ariaLabel?: string }
+	| { label: ReactNode; ariaLabel: string }
+) & {
+	/** Unique key for data-wp-each. Format: "{type}-{value}" */
+	id: string;
+	value: string;
+	selected?: boolean;
+	disabled?: boolean;
+	hidden?: boolean;
+	type?: string;
+} & T;
 
-  /** Selection behavior */
-  selectionMode: 'single' | 'multiple';
-
-  /** Action name the inner block should call on selection */
-  selectAction: string;
-
-  /** Parent's Interactivity API store namespace */
-  storeNamespace: string;
-
-  /** Screen reader label for the group (rendered as fieldset legend) */
-  groupLabel?: string;
-
-  /** Use data-wp-each for dynamic item rendering (default: true).
-   *  Set to false for static item lists (rating, stock) that don't need
-   *  show-more and may contain HTML labels. */
-  dynamicItems?: boolean;
+export interface SelectableItemsContext< T = unknown > {
+	items: SelectableItem< T >[];
+	selectionMode: 'single' | 'multiple';
+	selectAction: string;
+	storeNamespace: string;
+	groupLabel?: string;
+	dynamicItems?: boolean;
+	isLoading?: boolean;
 }
 
-/**
- * Selectable item - extends FilterOptionItem with presentation fields.
- */
-export type SelectableItem = (
-  | { label: string; ariaLabel?: string; }
-  | { label: ReactNode; ariaLabel: string; }
-) & {
-  /** Value for selection/submission */
-  value: string;
+export type SelectableItemsBlockContext< T = unknown > = {
+	'woocommerce/selectableItems': SelectableItemsContext< T >;
+};
+```
 
-  /** Current selection state */
-  selected?: boolean;
+Filter blocks extend with `FilterItemFields` (from `product-filters/types.ts`):
 
-  /** Product count (filters) */
-  count?: number;
+```typescript
+export type FilterItemFields = {
+	count: number;
+	termId?: number;
+	parent?: number;
+	depth?: number;
+	menuOrder?: number;
+};
 
-  /** Whether item can be selected */
-  disabled?: boolean;
+export type FilterOptionItem = SelectableItem< FilterItemFields >;
+```
 
-  /** Type discriminator (e.g., 'attribute/color') */
-  type?: string;
+Inner blocks are typed via `SelectableItemsBlockContext<FilterItemFields>`:
 
-  /** Swatch color (hex, e.g., "#FF0000") */
-  color?: string;
-
-  /** Swatch image URL */
-  image?: string;
-
-  /** Term/attribute ID */
-  id?: number;
-
-  /** Parent term ID for nested taxonomies */
-  parent?: number;
-
-  /** Nesting depth for hierarchical display */
-  depth?: number;
-
-  /** Menu order for sorting */
-  menuOrder?: number;
-
-  /** Extensions can add arbitrary display fields */
-  [key: string]: unknown;
+```typescript
+// In checkbox-list/types.ts or chips/types.ts
+export type EditProps = BlockEditProps< BlockAttributes > & {
+	context: SelectableItemsBlockContext< FilterItemFields >;
+	// ...color props
 };
 ```
 
@@ -330,19 +305,31 @@ parameters:
   typeAliases:
     SelectableItem: '''
       array{
+        id: string,
         label: string,
         value: string,
+        ariaLabel?: string,
         selected?: bool,
         disabled?: bool,
-        count?: int,
-        color?: string,
-        image?: string,
+        hidden?: bool,
+        type?: string
+      }
+    '''
+    FilterSelectableItem: '''
+      array{
+        id: string,
+        label: string,
+        value: string,
+        ariaLabel?: string,
+        selected?: bool,
+        disabled?: bool,
+        hidden?: bool,
         type?: string,
-        id?: int,
+        count: int,
+        termId?: int,
         parent?: int,
         depth?: int,
-        menuOrder?: int,
-        ariaLabel?: string
+        menuOrder?: int
       }
     '''
     SelectableItemsContext: '''
@@ -352,7 +339,8 @@ parameters:
         selectAction: string,
         storeNamespace: string,
         groupLabel?: string,
-        dynamicItems?: bool
+        dynamicItems?: bool,
+        isLoading?: bool
       }
     '''
 ```
