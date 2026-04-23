@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Replace the jQuery synthetic-submit workaround on the variable-product Back in Stock Notifications sign-up with a real accessible `<form>`, declaratively synced to the selected variation. Behind the `WOOCOMMERCE_BIS_ALPHA_ENABLED` alpha gate.
