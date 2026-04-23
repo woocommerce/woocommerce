@@ -89,10 +89,10 @@ if ( $show_downloads ) {
 			?>
 		</tbody>
 
-		<?php
-		if ( ! empty( $actions ) ) :
-			?>
 		<tfoot>
+			<?php
+			if ( ! empty( $actions ) ) :
+				?>
 			<tr>
 				<th class="order-actions--heading"><?php esc_html_e( 'Actions', 'woocommerce' ); ?>:</th>
 				<td>
@@ -112,9 +112,7 @@ if ( $show_downloads ) {
 						?>
 					</td>
 				</tr>
-			</tfoot>
-			<?php endif ?>
-		<tfoot>
+			<?php endif; ?>
 			<?php
 			foreach ( $order->get_order_item_totals() as $key => $total ) {
 				?>
