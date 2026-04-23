@@ -185,5 +185,4 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 		$_GET[ NotificationManagementService::RESEND_QUERY_ARG ] = (string) $notification_id;
 		$_GET['_wpnonce']                                        = wp_create_nonce( NotificationManagementService::RESEND_NONCE_ACTION );
 	}
-
 }
