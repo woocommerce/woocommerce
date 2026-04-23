@@ -390,7 +390,7 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 						} }
 					>
 						{ __(
-							'A unique code will be generated for each recipient at send time.',
+							'A coupon code will be automatically generated at send time.',
 							'woocommerce'
 						) }
 					</div>
