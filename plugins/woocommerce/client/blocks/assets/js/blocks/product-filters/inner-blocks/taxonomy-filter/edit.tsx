@@ -22,7 +22,8 @@ import { termOptionsPreview } from './constants';
 import { EditProps } from './types';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
-import type { FilterOptionItem } from '../../types';
+import type { FilterOptionItem, FilterItemFields } from '../../types';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { getTaxonomyLabel } from './utils';
@@ -298,10 +299,9 @@ const Edit = ( props: EditProps ) => {
 									? termOptionsPreview
 									: termOptions,
 							selectionMode: 'multiple' as const,
-							selectAction: 'toggleFilter',
 							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-						},
+						} satisfies SelectableItemsContext< FilterItemFields >,
 					} }
 				>
 					{ children }

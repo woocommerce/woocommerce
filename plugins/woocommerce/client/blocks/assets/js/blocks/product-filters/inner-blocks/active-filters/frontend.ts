@@ -7,21 +7,34 @@ import { store, getContext, getConfig } from '@wordpress/interactivity';
  * Internal dependencies
  */
 import type {
-	ActiveFilterItem,
 	ProductFiltersContext,
 	ProductFiltersStore,
 } from '../../frontend';
+import type {
+	RemovableItem,
+	RemovableItemsParentStore,
+} from '../../../../types/type-defs/removable-items';
 
-type ActiveFiltersContext = {
-	item: ActiveFilterItem;
+type RemovableItemContext = {
+	item: RemovableItem;
 };
 
 const activeFiltersStore = {
 	state: {
-		get removeActiveFilterLabel() {
-			const { item } = getContext< ActiveFiltersContext >();
+		get items() {
+			const { activeFilters } = getContext< ProductFiltersContext >();
+			return activeFilters
+				.filter( ( f ) => !! f.value )
+				.map( ( f ) => ( {
+					type: f.type,
+					value: f.value,
+					label: f.activeLabel,
+				} ) );
+		},
+		get removeItemLabel() {
+			const { item } = getContext< RemovableItemContext >();
 			const { removeLabelTemplate } = getConfig();
-			return removeLabelTemplate.replace( '{{label}}', item.activeLabel );
+			return removeLabelTemplate.replace( '{{label}}', item.label );
 		},
 		get hasActiveFilters() {
 			const { activeFilters } = getContext< ProductFiltersContext >();
@@ -29,13 +42,13 @@ const activeFiltersStore = {
 		},
 	},
 	actions: {
-		removeAllActiveFilters: () => {
+		removeAll: () => {
 			const context = getContext< ProductFiltersContext >();
 			context.activeFilters = [];
 			actions.navigate();
 		},
-		removeActiveFilter: () => {
-			const { item } = getContext< ActiveFiltersContext >();
+		remove: () => {
+			const { item } = getContext< RemovableItemContext >();
 			actions.removeActiveFiltersBy(
 				( filter ) =>
 					filter.value === item.value && filter.type === item.type
@@ -44,6 +57,9 @@ const activeFiltersStore = {
 		},
 	},
 };
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _removableItemsContract = activeFiltersStore satisfies RemovableItemsParentStore;
 
 const { actions } = store< ProductFiltersStore & typeof activeFiltersStore >(
 	'woocommerce/product-filters',

@@ -7,6 +7,7 @@ import * as iAPI from '@wordpress/interactivity';
  * Internal dependencies
  */
 import { decodeHtmlEntities } from '../../utils/html-entities';
+import type { SelectableItemsParentStore } from '../../types/type-defs/selectable-items';
 
 const { getContext, store, getServerContext, getConfig } = iAPI;
 
@@ -148,6 +149,15 @@ const productFiltersStore = {
 			const { items } = getContext< ProductFiltersContext >();
 			return items?.some( ( item ) => item.hidden ) ?? false;
 		},
+		get isSelected() {
+			const { item, activeFilters } =
+				getContext< ProductFiltersContext >();
+			if ( ! item ) return false;
+			return activeFilters.some(
+				( filter ) =>
+					filter.type === item.type && filter.value === item.value
+			);
+		},
 	},
 	actions: {
 		openOverlay: () => {
@@ -183,9 +193,13 @@ const productFiltersStore = {
 				( item ) => ! callback( item )
 			);
 		},
-		toggleFilter: () => {
-			const { item } = getContext< ProductFiltersContext >();
-			if ( item.selected ) {
+		toggle: () => {
+			const { item, activeFilters } =
+				getContext< ProductFiltersContext >();
+			const isSelected = activeFilters.some(
+				( f ) => f.type === item.type && f.value === item.value
+			);
+			if ( isSelected ) {
 				unselectFilter();
 			} else {
 				selectFilter();
@@ -255,6 +269,11 @@ const productFiltersStore = {
 };
 
 export type ProductFiltersStore = typeof productFiltersStore;
+
+// Compile-time enforcement of the selectable-items parent contract.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _productFiltersStoreContract =
+	productFiltersStore satisfies SelectableItemsParentStore;
 
 const { state, actions } = store< ProductFiltersStore >(
 	BLOCK_NAME,

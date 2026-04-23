@@ -30,9 +30,19 @@ final class ProductFilterActive extends AbstractBlock {
 
 		$active_filters = $block->context['activeFilters'];
 
+		$removable_items = array_map(
+			function ( $item ) {
+				return array(
+					'type'  => $item['type'] ?? '',
+					'value' => $item['value'] ?? '',
+					'label' => $item['activeLabel'] ?? ( $item['label'] ?? '' ),
+				);
+			},
+			$active_filters
+		);
+
 		$filter_context = array(
-			'activeFilters'  => $active_filters,
-			'removeAction'   => 'removeFilter',
+			'items'          => $removable_items,
 			'storeNamespace' => 'woocommerce/product-filters',
 		);
 
@@ -70,7 +80,7 @@ final class ProductFilterActive extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/activeFilters' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerce/removableItems' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''
