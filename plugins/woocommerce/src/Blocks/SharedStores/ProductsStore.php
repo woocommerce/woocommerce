@@ -112,7 +112,7 @@ class ProductsStore {
 		wp_interactivity_state(
 			self::$store_namespace,
 			array(
-				'mainProductInContext'     => function () {
+				'mainProductInContext'      => function () {
 					$context    = wp_interactivity_get_context();
 					$state      = wp_interactivity_state( self::$store_namespace );
 					$product_id = ! empty( $context )
@@ -138,7 +138,7 @@ class ProductsStore {
 
 					return $state['productVariations'][ $variation_id ] ?? null;
 				},
-				'productInContext'  => function () {
+				'productInContext'          => function () {
 					$state    = wp_interactivity_state( self::$store_namespace );
 					$selected = $state['productVariationInContext'] instanceof \Closure
 						? $state['productVariationInContext']()
