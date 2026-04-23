@@ -43,6 +43,15 @@ class GraphQLController {
 	private const MAX_QUERY_COMPLEXITY = 1000;
 
 	/**
+	 * Default path (relative to /wp-json/) at which the GraphQL route is registered.
+	 *
+	 * Used as the fallback when the {@see Main::OPTION_ENDPOINT_URL} option is
+	 * unset or was stored in an invalid form. See {@see self::get_endpoint_url()}
+	 * for the accessor.
+	 */
+	public const DEFAULT_ENDPOINT_URL = 'wc/graphql';
+
+	/**
 	 * Cached GraphQL schema instance.
 	 *
 	 * @var ?Schema
@@ -87,14 +96,48 @@ class GraphQLController {
 	}
 
 	/**
+	 * The path (relative to /wp-json/) at which the GraphQL route is registered.
+	 *
+	 * Reads the {@see Main::OPTION_ENDPOINT_URL} store option; falls back to
+	 * {@see self::DEFAULT_ENDPOINT_URL} when the option is unset, empty, or
+	 * stored in a form that cannot be split into a namespace and a route (at
+	 * least two path segments). The UI already validates on save, so this
+	 * defense-in-depth guard only fires for CLI-set option values.
+	 */
+	public static function get_endpoint_url(): string {
+		$value = trim( (string) get_option( Main::OPTION_ENDPOINT_URL, self::DEFAULT_ENDPOINT_URL ), '/' );
+		if ( '' === $value || false === strpos( $value, '/' ) ) {
+			return self::DEFAULT_ENDPOINT_URL;
+		}
+		return $value;
+	}
+
+	/**
+	 * Split the endpoint URL into the `[namespace, route]` pair that
+	 * register_rest_route() expects.
+	 *
+	 * The last path segment becomes the route; everything before it becomes
+	 * the namespace. E.g. `wc/v4/graphql` → `['wc/v4', '/graphql']`.
+	 *
+	 * @return array{0: string, 1: string}
+	 */
+	private static function split_endpoint_url(): array {
+		$parts     = explode( '/', self::get_endpoint_url() );
+		$route     = '/' . array_pop( $parts );
+		$namespace = implode( '/', $parts );
+		return array( $namespace, $route );
+	}
+
+	/**
 	 * Register the GraphQL REST route.
 	 */
 	public function register(): void {
-		$methods = Main::is_get_endpoint_enabled() ? array( 'GET', 'POST' ) : array( 'POST' );
+		$methods                   = Main::is_get_endpoint_enabled() ? array( 'GET', 'POST' ) : array( 'POST' );
+		list( $namespace, $route ) = self::split_endpoint_url();
 
 		register_rest_route(
-			'wc',
-			'/graphql',
+			$namespace,
+			$route,
 			array(
 				'methods'             => $methods,
 				'callback'            => array( $this, 'handle_request' ),

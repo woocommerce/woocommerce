@@ -28,6 +28,13 @@ class Main {
 	public const OPTION_GET_ENDPOINT_ENABLED = 'woocommerce_graphql_get_endpoint_enabled';
 
 	/**
+	 * Option name for the "Endpoint URL" setting.
+	 *
+	 * Path (relative to /wp-json/) at which the GraphQL route is registered.
+	 */
+	public const OPTION_ENDPOINT_URL = 'woocommerce_graphql_endpoint_url';
+
+	/**
 	 * Cached result of the feature-enabled check, null until first evaluated.
 	 *
 	 * @var ?bool
