@@ -27,6 +27,15 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Clean up filters registered by tests so global state doesn't leak.
+	 */
+	public function tearDown(): void {
+		remove_filter( 'woocommerce_get_sections_advanced', array( $this->sut, 'add_section' ) );
+		remove_filter( 'woocommerce_get_settings_advanced', array( $this->sut, 'add_settings' ), 10 );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox register hooks add_section and add_settings into WooCommerce's advanced settings filters.
 	 */
 	public function test_register_hooks_both_advanced_filters(): void {
@@ -53,7 +62,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox add_settings defines the GET endpoint checkbox with a 'no' default.
+	 * @testdox add_settings defines the GET endpoint checkbox with a 'yes' default.
 	 */
 	public function test_add_settings_defines_get_endpoint_checkbox(): void {
 		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
