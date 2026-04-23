@@ -55,20 +55,33 @@ export const options = {
 	},
 	thresholds: {
 		// Aggregate thresholds across all requests.
-		http_req_duration: [ 'p(50)<200', 'p(90)<1000', 'p(95)<1500', 'p(99.9)<3000' ],
-		http_req_failed:   [ 'rate<0.01' ],
+		http_req_duration: [
+			'p(50)<200',
+			'p(90)<1000',
+			'p(95)<1500',
+			'p(99.9)<3000',
+		],
+		http_req_failed: [ 'rate<0.01' ],
 
 		// Per-request thresholds: cart workflow.
-		'http_req_duration{name:Shopper - wc-ajax=add_to_cart}':             [ 'p(95)<500' ],
-		'http_req_duration{name:Shopper - wc-ajax=get_refreshed_fragments}': [ 'p(95)<200' ],
-		'http_req_duration{name:Shopper - View Cart}':                       [ 'p(95)<500' ],
+		'http_req_duration{name:Shopper - wc-ajax=add_to_cart}': [
+			'p(95)<500',
+		],
+		'http_req_duration{name:Shopper - wc-ajax=get_refreshed_fragments}': [
+			'p(95)<200',
+		],
+		'http_req_duration{name:Shopper - View Cart}': [ 'p(95)<500' ],
 
 		// Per-request thresholds: checkout workflow.
-		'http_req_duration{name:Shopper - View Checkout}':             [ 'p(95)<1000' ],
-		'http_req_duration{name:Shopper - Login to Checkout}':         [ 'p(95)<750' ],
-		'http_req_duration{name:Shopper - Store API update-customer}': [ 'p(95)<500' ],
-		'http_req_duration{name:Shopper - Store API checkout}':        [ 'p(95)<3000' ],
-		'http_req_duration{name:Shopper - Order Received}':            [ 'p(95)<1000' ],
+		'http_req_duration{name:Shopper - View Checkout}': [ 'p(95)<1000' ],
+		'http_req_duration{name:Shopper - Login to Checkout}': [ 'p(95)<750' ],
+		'http_req_duration{name:Shopper - Store API update-customer}': [
+			'p(95)<500',
+		],
+		'http_req_duration{name:Shopper - Store API checkout}': [
+			'p(95)<3000',
+		],
+		'http_req_duration{name:Shopper - Order Received}': [ 'p(95)<1000' ],
 	},
 };
 
