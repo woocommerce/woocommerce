@@ -44,7 +44,7 @@ export function homePage() {
 			'is status 200': ( r ) => r.status === 200,
 			[ `title is: "${ STORE_NAME }"` ]: ( r ) =>
 				r.html().find( 'head title' ).text() === STORE_NAME,
-			'footer contains: Built with WooCommerce': ( r ) =>
+			'footer contains: Powered by WordPress': ( r ) =>
 				r.html().find( 'body footer' ).text().includes( FOOTER_TEXT ),
 		} );
 	} );

@@ -55,7 +55,7 @@ export function searchProduct() {
 				},
 			"body contains: 'Search results' title": ( r ) =>
 				r.body.includes( 'Search results:' ),
-			'footer contains: Built with WooCommerce': ( r ) =>
+			'footer contains: Powered by WordPress': ( r ) =>
 				r.html().find( 'body footer' ).text().includes( FOOTER_TEXT ),
 		} );
 	} );
