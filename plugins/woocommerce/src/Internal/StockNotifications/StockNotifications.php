@@ -11,6 +11,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Privacy\PrivacyEraser;
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\AsyncTasks\NotificationsProcessor;
 use Automattic\WooCommerce\Internal\StockNotifications\Admin\AdminManager;
+use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\ProductPageIntegration;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\FormHandlerService;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\NotificationManagementService;
@@ -57,6 +58,7 @@ class StockNotifications {
 		$container->get( ProductPageIntegration::class );
 		$container->get( FormHandlerService::class );
 		$container->get( NotificationManagementService::class );
+		$container->get( MyAccountEndpoint::class );
 
 		if ( is_admin() ) {
 			$container->get( AdminManager::class );
