@@ -16,6 +16,28 @@ use WP_REST_Request;
  */
 class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 	/**
+	 * Force `ReactSettingsSchema::is_runtime_environment_supported()` true for
+	 * the lifetime of each test. The WP-6.8-runtime gate is exercised by a
+	 * dedicated test below; every other test class-wide assumes a compatible
+	 * runtime so it can focus on schema/rendering logic.
+	 *
+	 * TODO: Remove the filter handling here once the gate itself is removed
+	 * (see `ReactSettingsSchema::is_runtime_environment_supported()`).
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		add_filter( 'woocommerce_modern_settings_runtime_supported', '__return_true' );
+	}
+
+	/**
+	 * Tear down.
+	 */
+	public function tearDown(): void {
+		remove_filter( 'woocommerce_modern_settings_runtime_supported', '__return_true' );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox Returns payload path with default section.
 	 */
 	public function test_get_payload_path_uses_default_section() {
@@ -98,6 +120,41 @@ class ReactSettingsSchemaTest extends WC_Unit_Test_Case {
 		$this->assertNull( $plan['response'] );
 		$this->assertCount( 1, $plan['unsupported_fields'] );
 		$this->assertSame( 'unsupported_field', $plan['unsupported_fields'][0]['id'] );
+	}
+
+	/**
+	 * @testdox Marks the runtime as unsupported and skips render when the WP dataviews runtime probe returns false.
+	 */
+	public function test_get_screen_render_context_marks_runtime_unsupported_and_skips_render() {
+		remove_filter( 'woocommerce_modern_settings_runtime_supported', '__return_true' );
+		add_filter( 'woocommerce_modern_settings_runtime_supported', '__return_false' );
+
+		$settings_page = $this->make_page_with_interface( 'general', 'General', $this->make_noop_interface() );
+
+		$settings = array(
+			array(
+				'type' => 'title',
+				'id'   => 'group_one',
+			),
+			array(
+				'id'   => 'setting_one',
+				'type' => 'text',
+			),
+			array(
+				'type' => 'sectionend',
+				'id'   => 'group_one',
+			),
+		);
+
+		$plan = ReactSettingsSchema::get_screen_render_context( 'general', '', $settings, $settings_page );
+
+		remove_filter( 'woocommerce_modern_settings_runtime_supported', '__return_false' );
+
+		$this->assertArrayHasKey( 'runtime_unsupported', $plan );
+		$this->assertTrue( $plan['runtime_unsupported'], 'Plan must mark runtime_unsupported when the probe returns false.' );
+		$this->assertFalse( $plan['should_render'], 'Plan must skip render when runtime is unsupported.' );
+		$this->assertNull( $plan['response'], 'No response payload should be built when runtime is unsupported.' );
+		$this->assertCount( 0, $plan['unsupported_fields'], 'Runtime-unsupported is independent of unsupported_fields; the list must stay empty.' );
 	}
 
 	/**

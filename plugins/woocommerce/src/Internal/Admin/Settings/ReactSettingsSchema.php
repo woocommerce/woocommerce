@@ -75,6 +75,44 @@ class ReactSettingsSchema {
 	}
 
 	/**
+	 * Whether the running WordPress version ships a runtime compatible with the
+	 * modernised settings SDK.
+	 *
+	 * The SDK bundles `@wordpress/dataviews` inline; that bundled dataviews
+	 * relies on private APIs from `@wordpress/components` that only line up with
+	 * the components version shipped in WordPress 6.8+. On older WP the
+	 * bundled edit controls resolve to `undefined` and the mount renders blank.
+	 *
+	 * We use the presence of the `wp-dataviews` script handle as the probe
+	 * because it is exactly coincident with the components upgrade (both arrive
+	 * in WP 6.8) and is robust to point-release backports.
+	 *
+	 * TODO: Remove this gate once WooCommerce's minimum WP version reaches 6.8
+	 * — at that point `@wordpress/dataviews` can move to an external dependency
+	 * and this helper becomes dead code.
+	 *
+	 * @since 10.8.0
+	 * @return bool
+	 */
+	public static function is_runtime_environment_supported(): bool {
+		/**
+		 * Filter the result of the modernised settings SDK runtime environment
+		 * probe. Primarily an override hook for unit tests and sites that have
+		 * polyfilled `wp-dataviews` outside core — do not filter this on
+		 * production without a working dataviews runtime in place.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param bool $supported Whether the runtime environment is compatible
+		 *                        with the modernised settings SDK.
+		 */
+		return (bool) apply_filters(
+			'woocommerce_modern_settings_runtime_supported',
+			wp_script_is( 'wp-dataviews', 'registered' )
+		);
+	}
+
+	/**
 	 * Get the payload path for a settings tab/section.
 	 *
 	 * @param string $tab Tab id.
@@ -321,6 +359,7 @@ class ReactSettingsSchema {
 	 * @param mixed  $settings_page Settings page instance.
 	 * @return array{
 	 *     is_opted_out: bool,
+	 *     runtime_unsupported: bool,
 	 *     unsupported_fields: array<int, array{id: string, type: string, normalized_type: string}>,
 	 *     should_render: bool,
 	 *     mount_id: string,
@@ -336,11 +375,12 @@ class ReactSettingsSchema {
 	 * @since 10.8.0
 	 */
 	public static function get_screen_render_context( string $tab, string $section, array $settings_definitions, $settings_page ): array {
-		$is_opted_out       = self::is_opted_out( $tab, $section, $settings_definitions, $settings_page );
-		$interface          = self::resolve_react_settings_page_interface( $settings_page );
-		$unsupported_fields = array();
-		$should_render      = false;
-		$response           = null;
+		$is_opted_out        = self::is_opted_out( $tab, $section, $settings_definitions, $settings_page );
+		$interface           = self::resolve_react_settings_page_interface( $settings_page );
+		$runtime_unsupported = ! self::is_runtime_environment_supported();
+		$unsupported_fields  = array();
+		$should_render       = false;
+		$response            = null;
 
 		// Render gate:
 		//   1. Caller has already verified the `modern-settings` feature flag.
@@ -348,12 +388,14 @@ class ReactSettingsSchema {
 		//      WC_Settings_Page::get_react_settings_page().
 		//   3. No unsupported fields in the section.
 		//   4. The `woocommerce_react_settings_opt_out` filter does not veto.
+		//   5. The running WP version ships a dataviews-compatible components
+		//      runtime (see self::is_runtime_environment_supported()).
 		//
 		// Rule 2 stays distinct from rule 4 — `is_opted_out` in the returned
 		// plan continues to reflect the filter decision only. Callers
 		// (WC_Settings_Page::output()) rely on that distinction to decide
 		// whether to surface the legacy-fallback warning.
-		if ( ! $is_opted_out && null !== $interface ) {
+		if ( ! $is_opted_out && ! $runtime_unsupported && null !== $interface ) {
 			// Resolve the per-render maps once; internal helpers below reuse
 			// them so we don't re-query the interface up to 2 + N times per
 			// request (where N is the field count).
@@ -368,12 +410,13 @@ class ReactSettingsSchema {
 		}
 
 		return array(
-			'is_opted_out'       => $is_opted_out,
-			'unsupported_fields' => $unsupported_fields,
-			'should_render'      => $should_render,
-			'mount_id'           => self::get_mount_id( $tab, $section ),
-			'payload_path'       => self::get_payload_path( $tab, $section ),
-			'response'           => $response,
+			'is_opted_out'        => $is_opted_out,
+			'runtime_unsupported' => $runtime_unsupported,
+			'unsupported_fields'  => $unsupported_fields,
+			'should_render'       => $should_render,
+			'mount_id'            => self::get_mount_id( $tab, $section ),
+			'payload_path'        => self::get_payload_path( $tab, $section ),
+			'response'            => $response,
 		);
 	}
 

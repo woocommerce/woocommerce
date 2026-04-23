@@ -540,7 +540,11 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 					}
 
 					if ( ! $render_plan['is_opted_out'] ) {
-						$this->warn_legacy_settings_fallback( $tab, $section_id, $render_plan['unsupported_fields'] );
+						if ( $render_plan['runtime_unsupported'] ) {
+							$this->warn_runtime_unsupported_fallback( $tab, $section_id );
+						} else {
+							$this->warn_legacy_settings_fallback( $tab, $section_id, $render_plan['unsupported_fields'] );
+						}
 					}
 				}
 			}
@@ -598,6 +602,31 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 				$tab,
 				$normalized_section,
 				implode( ', ', $field_descriptions )
+			);
+
+			wc_doing_it_wrong( __METHOD__, $message, '10.8.0' );
+		}
+
+		/**
+		 * Warn that the modernised settings SDK fell back to legacy rendering
+		 * because the running WordPress version is too old for the bundled
+		 * `@wordpress/dataviews` runtime.
+		 *
+		 * Paired with `ReactSettingsSchema::is_runtime_environment_supported()`;
+		 * see that method for the rationale and removal plan.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param string $tab     Tab id.
+		 * @param string $section Section id. Empty string is normalised to `default`.
+		 */
+		protected function warn_runtime_unsupported_fallback( string $tab, string $section ): void {
+			$normalized_section = '' === $section ? 'default' : $section;
+
+			$message = sprintf(
+				'WooCommerce modernised settings fell back to legacy rendering on tab "%1$s", section "%2$s" because the running WordPress version does not ship a compatible wp-dataviews runtime (requires WP 6.8+).',
+				$tab,
+				$normalized_section
 			);
 
 			wc_doing_it_wrong( __METHOD__, $message, '10.8.0' );
