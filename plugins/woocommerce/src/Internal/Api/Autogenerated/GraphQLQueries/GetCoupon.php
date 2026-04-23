@@ -36,7 +36,7 @@ class GetCoupon {
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
 		Utils::check_current_user_can( 'read_private_shop_coupons' );
 
-		$command = wc_get_container()->get( GetCouponCommand::class );
+		$command = \Automattic\WooCommerce\Api\Container::get( GetCouponCommand::class );
 
 		$execute_args = array();
 		if ( array_key_exists( 'id', $args ) ) {

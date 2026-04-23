@@ -71,7 +71,7 @@ class ListProducts {
 		Utils::check_current_user_can( 'manage_woocommerce' );
 		Utils::check_current_user_can( 'edit_products' );
 
-		$command = wc_get_container()->get( ListProductsCommand::class );
+		$command = \Automattic\WooCommerce\Api\Container::get( ListProductsCommand::class );
 
 		$execute_args               = array();
 		$execute_args['pagination'] = Utils::create_pagination_params( $args );

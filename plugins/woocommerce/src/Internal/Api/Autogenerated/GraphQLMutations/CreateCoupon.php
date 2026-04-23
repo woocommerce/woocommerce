@@ -31,7 +31,7 @@ class CreateCoupon {
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
 		Utils::check_current_user_can( 'manage_woocommerce' );
 
-		$command = wc_get_container()->get( CreateCouponCommand::class );
+		$command = \Automattic\WooCommerce\Api\Container::get( CreateCouponCommand::class );
 
 		$execute_args = array();
 		if ( array_key_exists( 'input', $args ) ) {

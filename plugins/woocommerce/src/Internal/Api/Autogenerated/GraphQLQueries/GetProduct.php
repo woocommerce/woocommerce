@@ -28,7 +28,7 @@ class GetProduct {
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
-		$command = wc_get_container()->get( GetProductCommand::class );
+		$command = \Automattic\WooCommerce\Api\Container::get( GetProductCommand::class );
 
 		$execute_args = array();
 		if ( array_key_exists( 'id', $args ) ) {

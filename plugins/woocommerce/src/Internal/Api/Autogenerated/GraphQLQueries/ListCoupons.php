@@ -53,7 +53,7 @@ class ListCoupons {
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
 		Utils::check_current_user_can( 'read_private_shop_coupons' );
 
-		$command = wc_get_container()->get( ListCouponsCommand::class );
+		$command = \Automattic\WooCommerce\Api\Container::get( ListCouponsCommand::class );
 
 		$execute_args               = array();
 		$execute_args['pagination'] = Utils::create_pagination_params( $args );

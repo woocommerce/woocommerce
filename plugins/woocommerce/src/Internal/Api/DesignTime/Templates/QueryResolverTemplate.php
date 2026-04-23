@@ -87,7 +87,11 @@ class <?php echo $class_name; ?> {
 <?php endforeach; ?>
 
 <?php endif; ?>
-		$command = wc_get_container()->get( <?php echo $command_alias; ?>::class );
+<?php if ( null !== $container_fqcn ) : ?>
+		$command = \<?php echo $container_fqcn; ?>::get( <?php echo $command_alias; ?>::class );
+<?php else : ?>
+		$command = new <?php echo $command_alias; ?>();
+<?php endif; ?>
 
 		$execute_args = array();
 <?php

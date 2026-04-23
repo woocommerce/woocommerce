@@ -43,7 +43,7 @@ class DeleteProduct {
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
 		Utils::check_current_user_can( 'manage_woocommerce' );
 
-		$command = wc_get_container()->get( DeleteProductCommand::class );
+		$command = \Automattic\WooCommerce\Api\Container::get( DeleteProductCommand::class );
 
 		$execute_args = array();
 		if ( array_key_exists( 'id', $args ) ) {
