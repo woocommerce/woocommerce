@@ -623,4 +623,271 @@ CREATE TABLE $meta_table_name (
 
 		return $results;
 	}
+
+	/**
+	 * Get overall totals across all notifications.
+	 *
+	 * @param string $since_gmt Optional lower bound date (GMT, Y-m-d H:i:s) for date_created_gmt. Empty for no bound.
+	 * @return array{
+	 *     total_signups:int,
+	 *     active_signups:int,
+	 *     pending_signups:int,
+	 *     notifications_sent:int,
+	 *     cancelled:int
+	 * }
+	 */
+	public function get_totals( string $since_gmt = '' ): array {
+		global $wpdb;
+
+		$table = $this->get_table_name();
+		$where = '';
+		$args  = array( $table );
+
+		if ( $since_gmt ) {
+			$where  = 'WHERE date_created_gmt >= %s';
+			$args[] = $since_gmt;
+		}
+
+		$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			"SELECT
+				COUNT(id) AS total_signups,
+				SUM(CASE WHEN status = %s THEN 1 ELSE 0 END) AS active_signups,
+				SUM(CASE WHEN status = %s THEN 1 ELSE 0 END) AS pending_signups,
+				SUM(CASE WHEN status = %s THEN 1 ELSE 0 END) AS notifications_sent,
+				SUM(CASE WHEN status = %s THEN 1 ELSE 0 END) AS cancelled
+			FROM %i $where", // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			array_merge(
+				array(
+					NotificationStatus::ACTIVE,
+					NotificationStatus::PENDING,
+					NotificationStatus::SENT,
+					NotificationStatus::CANCELLED,
+				),
+				$args
+			)
+		);
+
+		$row = $wpdb->get_row( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		if ( ! $row ) {
+			return array(
+				'total_signups'      => 0,
+				'active_signups'     => 0,
+				'pending_signups'    => 0,
+				'notifications_sent' => 0,
+				'cancelled'          => 0,
+			);
+		}
+
+		return array(
+			'total_signups'      => (int) $row['total_signups'],
+			'active_signups'     => (int) $row['active_signups'],
+			'pending_signups'    => (int) $row['pending_signups'],
+			'notifications_sent' => (int) $row['notifications_sent'],
+			'cancelled'          => (int) $row['cancelled'],
+		);
+	}
+
+	/**
+	 * Per-product aggregated counts, paginated.
+	 *
+	 * @param int $per_page Items per page (1-100).
+	 * @param int $page     Page number (1-based).
+	 * @return array{
+	 *     rows: array<int,array{product_id:int,total_signups:int,active_signups:int,notifications_sent:int,cancelled:int}>,
+	 *     total: int
+	 * }
+	 */
+	public function get_per_product_summary( int $per_page = 25, int $page = 1 ): array {
+		global $wpdb;
+
+		$per_page = max( 1, min( 100, $per_page ) );
+		$page     = max( 1, $page );
+		$offset   = ( $page - 1 ) * $per_page;
+
+		$table = $this->get_table_name();
+
+		// Total number of distinct products.
+		$total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				'SELECT COUNT(DISTINCT product_id) FROM %i',
+				$table
+			)
+		);
+
+		$sql = $wpdb->prepare( // phpcs:ignore WordPress.DB.PreparedSQLPlaceholders.ReplacementsWrongNumber
+			'SELECT
+				product_id,
+				COUNT(id) AS total_signups,
+				SUM(CASE WHEN status = %s THEN 1 ELSE 0 END) AS active_signups,
+				SUM(CASE WHEN status = %s THEN 1 ELSE 0 END) AS notifications_sent,
+				SUM(CASE WHEN status = %s THEN 1 ELSE 0 END) AS cancelled
+			FROM %i
+			GROUP BY product_id
+			ORDER BY active_signups DESC, total_signups DESC, product_id ASC
+			LIMIT %d OFFSET %d',
+			array(
+				NotificationStatus::ACTIVE,
+				NotificationStatus::SENT,
+				NotificationStatus::CANCELLED,
+				$table,
+				$per_page,
+				$offset,
+			)
+		);
+
+		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows    = array();
+		if ( is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$rows[] = array(
+					'product_id'         => (int) $row['product_id'],
+					'total_signups'      => (int) $row['total_signups'],
+					'active_signups'     => (int) $row['active_signups'],
+					'notifications_sent' => (int) $row['notifications_sent'],
+					'cancelled'          => (int) $row['cancelled'],
+				);
+			}
+		}
+
+		return array(
+			'rows'  => $rows,
+			'total' => $total,
+		);
+	}
+
+	/**
+	 * Get daily counts of signups and notifications sent over a window.
+	 *
+	 * @param string $start_gmt Start date (inclusive), GMT, Y-m-d.
+	 * @param string $end_gmt   End date (inclusive), GMT, Y-m-d.
+	 * @return array<int,array{date:string,signups:int,notifications_sent:int}>
+	 *         Sparse array of dated rows; caller can fill zero-days if needed.
+	 */
+	public function get_timeseries( string $start_gmt, string $end_gmt ): array {
+		global $wpdb;
+
+		$table = $this->get_table_name();
+
+		// Signups per day.
+		$signups_sql = $wpdb->prepare(
+			'SELECT DATE(date_created_gmt) AS d, COUNT(id) AS c
+			FROM %i
+			WHERE date_created_gmt >= %s AND date_created_gmt < DATE_ADD(%s, INTERVAL 1 DAY)
+			GROUP BY DATE(date_created_gmt)',
+			array( $table, $start_gmt . ' 00:00:00', $end_gmt )
+		);
+		$signup_rows = $wpdb->get_results( $signups_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		// Notifications sent per day (date_notified_gmt populated once status -> sent).
+		$sent_sql  = $wpdb->prepare(
+			'SELECT DATE(date_notified_gmt) AS d, COUNT(id) AS c
+			FROM %i
+			WHERE date_notified_gmt IS NOT NULL
+				AND date_notified_gmt >= %s
+				AND date_notified_gmt < DATE_ADD(%s, INTERVAL 1 DAY)
+			GROUP BY DATE(date_notified_gmt)',
+			array( $table, $start_gmt . ' 00:00:00', $end_gmt )
+		);
+		$sent_rows = $wpdb->get_results( $sent_sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+		$buckets = array();
+		foreach ( (array) $signup_rows as $row ) {
+			$date                        = (string) $row['d'];
+			$buckets[ $date ]            = $buckets[ $date ] ?? array(
+				'date'               => $date,
+				'signups'            => 0,
+				'notifications_sent' => 0,
+			);
+			$buckets[ $date ]['signups'] = (int) $row['c'];
+		}
+		foreach ( (array) $sent_rows as $row ) {
+			$date                                   = (string) $row['d'];
+			$buckets[ $date ]                       = $buckets[ $date ] ?? array(
+				'date'               => $date,
+				'signups'            => 0,
+				'notifications_sent' => 0,
+			);
+			$buckets[ $date ]['notifications_sent'] = (int) $row['c'];
+		}
+
+		ksort( $buckets );
+		return array_values( $buckets );
+	}
+
+	/**
+	 * Get top-demand products by active signups.
+	 *
+	 * @param int $limit Maximum number of rows to return (1-50).
+	 * @return array<int,array{product_id:int,active_signups:int,total_signups:int}>
+	 */
+	public function get_top_demand( int $limit = 10 ): array {
+		global $wpdb;
+
+		$limit = max( 1, min( 50, $limit ) );
+		$table = $this->get_table_name();
+
+		$sql = $wpdb->prepare(
+			'SELECT
+				product_id,
+				SUM(CASE WHEN status = %s THEN 1 ELSE 0 END) AS active_signups,
+				COUNT(id) AS total_signups
+			FROM %i
+			GROUP BY product_id
+			HAVING active_signups > 0
+			ORDER BY active_signups DESC, total_signups DESC, product_id ASC
+			LIMIT %d',
+			array( NotificationStatus::ACTIVE, $table, $limit )
+		);
+
+		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows    = array();
+		if ( is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$rows[] = array(
+					'product_id'     => (int) $row['product_id'],
+					'active_signups' => (int) $row['active_signups'],
+					'total_signups'  => (int) $row['total_signups'],
+				);
+			}
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Get the most recently dispatched notifications.
+	 *
+	 * @param int $limit Maximum rows to return (1-50).
+	 * @return array<int,array{id:int,product_id:int,user_email:string,date_notified_gmt:string}>
+	 */
+	public function get_recent_activity( int $limit = 10 ): array {
+		global $wpdb;
+
+		$limit = max( 1, min( 50, $limit ) );
+		$table = $this->get_table_name();
+
+		$sql = $wpdb->prepare(
+			'SELECT id, product_id, user_email, date_notified_gmt
+			FROM %i
+			WHERE date_notified_gmt IS NOT NULL
+			ORDER BY date_notified_gmt DESC, id DESC
+			LIMIT %d',
+			array( $table, $limit )
+		);
+
+		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows    = array();
+		if ( is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$rows[] = array(
+					'id'                => (int) $row['id'],
+					'product_id'        => (int) $row['product_id'],
+					'user_email'        => (string) $row['user_email'],
+					'date_notified_gmt' => (string) $row['date_notified_gmt'],
+				);
+			}
+		}
+
+		return $rows;
+	}
 }

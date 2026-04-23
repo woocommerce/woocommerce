@@ -49,4 +49,56 @@ class NotificationQuery {
 	public static function notification_exists_by_user_id( int $product_id, int $user_id ): bool {
 		return \WC_Data_Store::load( 'stock_notification' )->notification_exists_by_user_id( $product_id, $user_id );
 	}
+
+	/**
+	 * Get aggregated totals for all notifications.
+	 *
+	 * @param string $since_gmt Optional lower bound for date_created_gmt (Y-m-d H:i:s GMT). Empty = all-time.
+	 * @return array{total_signups:int,active_signups:int,pending_signups:int,notifications_sent:int,cancelled:int}
+	 */
+	public static function get_totals( string $since_gmt = '' ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_totals( $since_gmt );
+	}
+
+	/**
+	 * Per-product aggregated counts, paginated.
+	 *
+	 * @param int $per_page Items per page (1-100).
+	 * @param int $page     1-based page number.
+	 * @return array{rows:array<int,array<string,int>>,total:int}
+	 */
+	public static function get_per_product_summary( int $per_page = 25, int $page = 1 ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_per_product_summary( $per_page, $page );
+	}
+
+	/**
+	 * Daily counts of signups and notifications_sent over a window.
+	 *
+	 * @param string $start_gmt Y-m-d inclusive lower bound.
+	 * @param string $end_gmt   Y-m-d inclusive upper bound.
+	 * @return array<int,array{date:string,signups:int,notifications_sent:int}>
+	 */
+	public static function get_timeseries( string $start_gmt, string $end_gmt ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_timeseries( $start_gmt, $end_gmt );
+	}
+
+	/**
+	 * Top-demand products by active signups.
+	 *
+	 * @param int $limit Maximum rows to return (1-50).
+	 * @return array<int,array{product_id:int,active_signups:int,total_signups:int}>
+	 */
+	public static function get_top_demand( int $limit = 10 ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_top_demand( $limit );
+	}
+
+	/**
+	 * Most recently dispatched notifications.
+	 *
+	 * @param int $limit Maximum rows to return (1-50).
+	 * @return array<int,array{id:int,product_id:int,user_email:string,date_notified_gmt:string}>
+	 */
+	public static function get_recent_activity( int $limit = 10 ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_recent_activity( $limit );
+	}
 }
