@@ -21,9 +21,20 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Set up before each test.
+	 *
+	 * Skips on PHP < 8.1 because the settings fields reference
+	 * GraphQLController constants, and that class uses PHP 8.0+ syntax that
+	 * cannot be parsed on 7.4. In production the class is only loaded after
+	 * {@see Main::is_enabled()} gates on PHP 8.1+; these tests replicate the
+	 * same gate so the autoload never triggers a parse error.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		if ( PHP_VERSION_ID < 80100 ) {
+			$this->markTestSkipped( 'GraphQL settings tests require PHP 8.1+.' );
+		}
+
 		$this->sut = new Settings();
 	}
 
