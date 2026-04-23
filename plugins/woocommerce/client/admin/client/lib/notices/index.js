@@ -20,46 +20,37 @@ function isSilentNetworkFailure( response ) {
 		return false;
 	}
 
-	// Browser-thrown fetch error — no useful payload.
 	if ( response instanceof TypeError ) {
 		return true;
 	}
 
-	// Defensive: rejection without a message, errors array, or code.
-	// If the browser is offline at request time, navigator.onLine is a
-	// reliable hint.
-	const hasMessage =
-		typeof response === 'object' &&
-		response !== null &&
-		'message' in response &&
-		response.message;
-	const hasErrors =
-		typeof response === 'object' &&
-		response !== null &&
-		'errors' in response &&
-		response.errors &&
-		Object.keys( response.errors ).length;
-
-	if (
-		! hasMessage &&
-		! hasErrors &&
-		typeof window !== 'undefined' &&
-		window.navigator?.onLine === false
-	) {
-		return true;
+	if ( typeof response !== 'object' ) {
+		return false;
 	}
 
-	return false;
+	// Any of these properties means the API returned a structured error;
+	// fall through to the existing handling below so the merchant sees the
+	// real message rather than a generic offline copy.
+	const hasStructuredPayload =
+		( 'message' in response && response.message ) ||
+		( 'errors' in response &&
+			response.errors &&
+			Object.keys( response.errors ).length ) ||
+		'code' in response ||
+		'error_data' in response;
+
+	return (
+		! hasStructuredPayload &&
+		typeof window !== 'undefined' &&
+		window.navigator?.onLine === false
+	);
 }
 
 export function createNoticesFromResponse( response ) {
 	const { createNotice } = dispatch( 'core/notices' );
 
 	if ( isSilentNetworkFailure( response ) ) {
-		// Surface a clear notice instead of letting the failure disappear.
-		// String matches Gutenberg's existing offline copy so translators
-		// don't have to retranslate and the merchant experience stays
-		// consistent across editors.
+		// String matches Gutenberg's existing offline copy — reuses their translations.
 		createNotice(
 			'error',
 			__( 'Updating failed. You are probably offline.', 'woocommerce' )

@@ -15,8 +15,23 @@ jest.mock( '@wordpress/data', () => ( {
 } ) );
 
 describe( 'createNoticesFromResponse', () => {
+	let originalOnLine;
+
+	beforeAll( () => {
+		originalOnLine = Object.getOwnPropertyDescriptor(
+			window.navigator,
+			'onLine'
+		);
+	} );
+
 	beforeEach( () => {
 		jest.clearAllMocks();
+	} );
+
+	afterEach( () => {
+		if ( originalOnLine ) {
+			Object.defineProperty( window.navigator, 'onLine', originalOnLine );
+		}
 	} );
 
 	const { createNotice } = dispatch( 'core/notices' );
@@ -79,10 +94,6 @@ describe( 'createNoticesFromResponse', () => {
 	} );
 
 	test( 'should surface a friendly offline notice for an empty rejection while navigator is offline', () => {
-		const originalOnLine = Object.getOwnPropertyDescriptor(
-			window.navigator,
-			'onLine'
-		);
 		Object.defineProperty( window.navigator, 'onLine', {
 			configurable: true,
 			value: false,
@@ -93,9 +104,6 @@ describe( 'createNoticesFromResponse', () => {
 			'error',
 			'Updating failed. You are probably offline.'
 		);
-
-		if ( originalOnLine ) {
-			Object.defineProperty( window.navigator, 'onLine', originalOnLine );
-		}
+		// afterEach restores navigator.onLine.
 	} );
 } );

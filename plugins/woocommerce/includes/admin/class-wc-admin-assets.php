@@ -466,16 +466,11 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
 
-				// Reuse WordPress core's offline handling (Heartbeat +
-				// wp-autosave) on Woo admin screens that don't already have
-				// it. Classic post-type edit pages and wc-admin React pages
-				// are skipped — the former gets it from edit-form-advanced.php,
-				// and Gutenberg-derived screens surface their own offline
-				// notice on save.
-				$screen_base      = $screen ? $screen->base : '';
+				// Pair the #lost-connection-notice markup with core's autosave script.
+				// See render_lost_connection_notice() for scoping rationale.
 				$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
 					&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
-				if ( 'post' !== $screen_base && ! $is_wc_admin_page ) {
+				if ( 'post' !== $screen->base && ! $is_wc_admin_page ) {
 					wp_enqueue_script( 'autosave' );
 				}
 
