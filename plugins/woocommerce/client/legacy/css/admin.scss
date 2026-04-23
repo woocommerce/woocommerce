@@ -8364,6 +8364,26 @@ table.bar_chart {
 		.button.button-large {
 			min-height: 0;
 		}
+
+		// Adopt WP 7.0 secondary outline: theme-color border and 2px radius.
+		.wc-action-button {
+			border-color: var(--wp-admin-theme-color);
+
+			&:hover,
+			&:focus {
+				border-color: var(--wp-admin-theme-color);
+			}
+
+			&:first-child {
+				border-top-left-radius: 2px !important;
+				border-bottom-left-radius: 2px !important;
+			}
+
+			&:last-child {
+				border-top-right-radius: 2px !important;
+				border-bottom-right-radius: 2px !important;
+			}
+		}
 	}
 
 	// Action button groups.
