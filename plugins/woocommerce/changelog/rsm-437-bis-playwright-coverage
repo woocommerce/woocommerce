@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add Playwright e2e coverage for the Back in Stock Notifications alpha: signup form rendering, double opt-in verify/confirmation email flow, back-in-stock email dispatch with UTM assertions, and admin list + resend/cancel management.
