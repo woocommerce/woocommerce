@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render number, email, and url fields via public @wordpress/components InputControl instead of dataviews' built-in form controls, matching the pattern already used for checkbox/toggle/text/select.

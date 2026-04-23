@@ -262,7 +262,7 @@ describe( 'field transformers', () => {
 		expect( getByText( 'Custom field' ) ).toBeInTheDocument();
 	} );
 
-	it( 'transforms email fields to native DataForm email type', () => {
+	it( 'renders email input and writes back via onChange', () => {
 		const transformed = baseFieldTransformer( {
 			id: 'email_field',
 			label: 'Email',
@@ -270,7 +270,34 @@ describe( 'field transformers', () => {
 		} );
 
 		expect( transformed.type ).toBe( 'email' );
-		expect( transformed.Edit ).toBeUndefined();
+
+		const Edit = transformed.Edit as React.ComponentType< EditProps >;
+		const onChange = jest.fn();
+		const field = buildField( transformed, 'email_field' );
+		render(
+			<Edit
+				data={ { email_field: 'old@example.com' } }
+				field={ field }
+				onChange={ onChange }
+			/>
+		);
+
+		const input = document.querySelector(
+			'input[type="email"]'
+		) as HTMLInputElement | null;
+		expect( input ).not.toBeNull();
+		expect( input?.getAttribute( 'autocomplete' ) ).toBe( 'email' );
+		expect( input?.value ).toBe( 'old@example.com' );
+
+		if ( input ) {
+			fireEvent.change( input, {
+				target: { value: 'new@example.com' },
+			} );
+		}
+
+		expect( onChange ).toHaveBeenCalledWith( {
+			email_field: 'new@example.com',
+		} );
 	} );
 
 	it( 'validates URL values via isValid on url fields', () => {

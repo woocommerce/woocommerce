@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render the modernised settings SDK's number, email, and url fields via public @wordpress/components InputControl. Pairs with the previous checkbox/toggle/text/select fix to keep the React path working on WP versions shipping @wordpress/components < 30.4.

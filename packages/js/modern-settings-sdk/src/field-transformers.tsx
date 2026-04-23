@@ -358,9 +358,23 @@ export const baseFieldTransformer = (
 			return applySafeEdit( field );
 		}
 		case 'number': {
+			const NumberEdit = ( props: DataFormEditProps ) => (
+				<InputControl
+					__next40pxDefaultSize
+					type="number"
+					label={ baseField.label }
+					hideLabelFromVision={ props.hideLabelFromVision }
+					help={ baseField.description }
+					value={ readFieldValue( props.data, props.field ) }
+					onChange={ ( next?: string ) =>
+						writeFieldValue( props, next ?? '' )
+					}
+				/>
+			);
 			const field = {
 				...baseField,
 				type: 'integer',
+				Edit: NumberEdit,
 			};
 			return applySafeEdit( field );
 		}
@@ -502,18 +516,46 @@ export const baseFieldTransformer = (
 			return applySafeEdit( field );
 		}
 		case 'email': {
-			// DataViews 11.1.0 renders an HTML5 email input natively for `type: 'email'`.
+			const EmailEdit = ( props: DataFormEditProps ) => (
+				<InputControl
+					__next40pxDefaultSize
+					type="email"
+					autoComplete="email"
+					label={ baseField.label }
+					hideLabelFromVision={ props.hideLabelFromVision }
+					help={ baseField.description }
+					value={ readFieldValue( props.data, props.field ) }
+					onChange={ ( next?: string ) =>
+						writeFieldValue( props, next ?? '' )
+					}
+				/>
+			);
 			const field = {
 				...baseField,
 				type: 'email',
+				Edit: EmailEdit,
 			};
 			return applySafeEdit( field );
 		}
 		case 'url': {
-			// Reuse the native text input but validate that the value is a URL.
+			const UrlEdit = ( props: DataFormEditProps ) => (
+				<InputControl
+					__next40pxDefaultSize
+					type="url"
+					autoComplete="url"
+					label={ baseField.label }
+					hideLabelFromVision={ props.hideLabelFromVision }
+					help={ baseField.description }
+					value={ readFieldValue( props.data, props.field ) }
+					onChange={ ( next?: string ) =>
+						writeFieldValue( props, next ?? '' )
+					}
+				/>
+			);
 			const field = {
 				...baseField,
 				type: 'text',
+				Edit: UrlEdit,
 				isValid: ( value: unknown ) => {
 					if ( typeof value !== 'string' || value === '' ) {
 						return true;
