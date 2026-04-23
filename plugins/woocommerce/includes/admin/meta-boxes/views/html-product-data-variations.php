@@ -205,7 +205,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 <script type="text/template" id="tmpl-wc-modal-set-price-variations">
 	<div class="wc-backbone-modal wc-backbone-modal-set-price-variations">
 		<div class="wc-backbone-modal-content">
-			<div class="wc-backbone-modal-main" role="document">
+			<section class="wc-backbone-modal-main" role="main">
 				<header class="wc-backbone-modal-header">
 					<h1><?php esc_html_e( 'Set variation prices', 'woocommerce' ); ?></h1>
 					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
@@ -226,7 +226,7 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 						</div>
 					</div>
 				</footer>
-			</div>
+			</section>
 		</div>
 	</div>
 	<div class="wc-backbone-modal-backdrop modal-close"></div>
