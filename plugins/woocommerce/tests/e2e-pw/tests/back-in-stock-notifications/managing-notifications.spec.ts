@@ -1,7 +1,12 @@
 /**
  * Internal dependencies
  */
-import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import {
+	expect,
+	request,
+	tags,
+	test as baseTest,
+} from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_OPTIONS,
@@ -27,7 +32,7 @@ test.describe(
 	() => {
 		test.use( { storageState: ADMIN_STATE_PATH } );
 
-		test.beforeEach( async ( { baseURL, request } ) => {
+		test.beforeEach( async ( { baseURL } ) => {
 			await setBISOptions( request, baseURL!, {
 				allowSignups: true,
 				doubleOptIn: true,
@@ -35,7 +40,7 @@ test.describe(
 			} );
 		} );
 
-		test.afterEach( async ( { baseURL, request } ) => {
+		test.afterEach( async ( { baseURL } ) => {
 			for ( const option of Object.values( BIS_OPTIONS ) ) {
 				await deleteOption( request, baseURL!, option );
 			}
@@ -49,7 +54,12 @@ test.describe(
 
 			// Sign up as a guest (uses a fresh context; storageState on this spec
 			// is admin, so we explicitly open a guest context for the signup).
-			const guestContext = await page.context().browser()!.newContext();
+			const guestContext = await page
+				.context()
+				.browser()!
+				.newContext( {
+					storageState: { cookies: [], origins: [] },
+				} );
 			const guestPage = await guestContext.newPage();
 			await guestPage.goto( product.permalink );
 			await signUpOnProductPage( guestPage, { email } );
@@ -69,7 +79,12 @@ test.describe(
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-admin-resend-pending' );
 
-			const guestContext = await page.context().browser()!.newContext();
+			const guestContext = await page
+				.context()
+				.browser()!
+				.newContext( {
+					storageState: { cookies: [], origins: [] },
+				} );
 			const guestPage = await guestContext.newPage();
 			await guestPage.goto( product.permalink );
 			await signUpOnProductPage( guestPage, { email } );
@@ -118,7 +133,6 @@ test.describe(
 		test( 'Resend verification is not offered for notifications that are already active', async ( {
 			page,
 			product,
-			request,
 			baseURL,
 		} ) => {
 			// Flip to single opt-in so the signup goes straight to ACTIVE.
@@ -126,7 +140,12 @@ test.describe(
 
 			const email = uniqueGuestEmail( 'bis-admin-active' );
 
-			const guestContext = await page.context().browser()!.newContext();
+			const guestContext = await page
+				.context()
+				.browser()!
+				.newContext( {
+					storageState: { cookies: [], origins: [] },
+				} );
 			const guestPage = await guestContext.newPage();
 			await guestPage.goto( product.permalink );
 			await signUpOnProductPage( guestPage, { email } );
@@ -156,13 +175,23 @@ test.describe(
 			).toBe( false );
 		} );
 
-		test( 'admin Cancel action marks a pending notification as Cancelled', async ( {
+		test( 'admin Cancel action marks an active notification as Cancelled', async ( {
 			page,
 			product,
+			baseURL,
 		} ) => {
+			// Flip to single opt-in so the signup goes straight to ACTIVE.
+			// The Cancel action is only available on ACTIVE / SENT rows.
+			await setBISOptions( request, baseURL!, { doubleOptIn: false } );
+
 			const email = uniqueGuestEmail( 'bis-admin-cancel' );
 
-			const guestContext = await page.context().browser()!.newContext();
+			const guestContext = await page
+				.context()
+				.browser()!
+				.newContext( {
+					storageState: { cookies: [], origins: [] },
+				} );
 			const guestPage = await guestContext.newPage();
 			await guestPage.goto( product.permalink );
 			await signUpOnProductPage( guestPage, { email } );

@@ -197,11 +197,16 @@ export async function getLinkFromEmailBody(
 	const modalContent = page.locator(
 		'#wp-mail-logging-modal-content-body-content'
 	);
-	const iframe = modalContent.locator( 'iframe' ).contentFrame();
+	await expect( modalContent ).toBeVisible();
+
+	const iframe = page.frameLocator(
+		'#wp-mail-logging-modal-content-body-content iframe'
+	);
+	// Wait until iframe content is attached and has anchors rendered.
+	await iframe.locator( 'a' ).first().waitFor( { state: 'attached' } );
 
 	const href = await iframe
 		.locator( 'a' )
-		.filter( { hasNotText: '' } )
 		.evaluateAll( ( anchors, pattern ) => {
 			const regex = new RegExp( pattern );
 			for ( const a of anchors as HTMLAnchorElement[] ) {

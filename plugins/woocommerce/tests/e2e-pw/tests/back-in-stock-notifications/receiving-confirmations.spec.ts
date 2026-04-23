@@ -1,7 +1,18 @@
 /**
+ * External dependencies
+ */
+import type { Page } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
-import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import {
+	expect,
+	request,
+	tags,
+	test as baseTest,
+} from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_OPTIONS,
 	createOutOfStockProduct,
@@ -21,11 +32,30 @@ const test = baseTest.extend( {
 	},
 } );
 
+/**
+ * Submit the PDP signup form as a logged-out guest, regardless of the test's storageState.
+ */
+async function signUpAsGuest(
+	page: Page,
+	permalink: string,
+	email: string
+): Promise< void > {
+	const guestContext = await page.context().browser()!.newContext( {
+		storageState: { cookies: [], origins: [] },
+	} );
+	const guestPage = await guestContext.newPage();
+	await guestPage.goto( permalink );
+	await signUpOnProductPage( guestPage, { email } );
+	await guestContext.close();
+}
+
 test.describe(
 	'Back in Stock Notifications — receiving confirmations',
 	{ tag: [ tags.SERVICES ] },
 	() => {
-		test.beforeEach( async ( { baseURL, request } ) => {
+		test.use( { storageState: ADMIN_STATE_PATH } );
+
+		test.beforeEach( async ( { baseURL } ) => {
 			await setBISOptions( request, baseURL!, {
 				allowSignups: true,
 				doubleOptIn: true,
@@ -33,7 +63,7 @@ test.describe(
 			} );
 		} );
 
-		test.afterEach( async ( { baseURL, request } ) => {
+		test.afterEach( async ( { baseURL } ) => {
 			for ( const option of Object.values( BIS_OPTIONS ) ) {
 				await deleteOption( request, baseURL!, option );
 			}
@@ -45,8 +75,7 @@ test.describe(
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-confirm-verify' );
 
-			await page.goto( product.permalink );
-			await signUpOnProductPage( page, { email } );
+			await signUpAsGuest( page, product.permalink, email );
 
 			const emailRow = await expectEmail(
 				page,
@@ -85,8 +114,7 @@ test.describe(
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-confirm-verified' );
 
-			await page.goto( product.permalink );
-			await signUpOnProductPage( page, { email } );
+			await signUpAsGuest( page, product.permalink, email );
 
 			const verifyLink = await getLinkFromEmailBody(
 				page,
@@ -127,8 +155,7 @@ test.describe(
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-confirm-unsub' );
 
-			await page.goto( product.permalink );
-			await signUpOnProductPage( page, { email } );
+			await signUpAsGuest( page, product.permalink, email );
 
 			const verifyLink = await getLinkFromEmailBody(
 				page,

@@ -1,8 +1,16 @@
 /**
  * Internal dependencies
  */
-import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
-import { CUSTOMER_STATE_PATH } from '../../playwright.config';
+import {
+	expect,
+	request,
+	tags,
+	test as baseTest,
+} from '../../fixtures/fixtures';
+import {
+	ADMIN_STATE_PATH,
+	CUSTOMER_STATE_PATH,
+} from '../../playwright.config';
 import {
 	BIS_OPTIONS,
 	createOutOfStockProduct,
@@ -25,7 +33,7 @@ test.describe(
 	'Back in Stock Notifications — signing up',
 	{ tag: [ tags.SERVICES ] },
 	() => {
-		test.afterEach( async ( { baseURL, request } ) => {
+		test.afterEach( async ( { baseURL } ) => {
 			for ( const option of Object.values( BIS_OPTIONS ) ) {
 				await deleteOption( request, baseURL!, option );
 			}
@@ -34,7 +42,7 @@ test.describe(
 		test.describe( 'Logged-in customer, single opt-in', () => {
 			test.use( { storageState: CUSTOMER_STATE_PATH } );
 
-			test.beforeEach( async ( { baseURL, request } ) => {
+			test.beforeEach( async ( { baseURL } ) => {
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					doubleOptIn: false,
@@ -83,7 +91,13 @@ test.describe(
 				await page.goto( product.permalink );
 				await signUpOnProductPage( page );
 
+				// Submitting the form a second time (the "already joined"
+				// notice only renders as a form-submit response; the cached
+				// state shown on page reload is behind the off-by-default
+				// `woocommerce_customer_stock_notifications_personalization_enabled`
+				// filter).
 				await page.goto( product.permalink );
+				await signUpOnProductPage( page );
 				await expect(
 					page.getByText( /You have already joined this waitlist/i )
 				).toBeVisible();
@@ -91,7 +105,7 @@ test.describe(
 		} );
 
 		test.describe( 'Guest — single opt-in', () => {
-			test.beforeEach( async ( { baseURL, request } ) => {
+			test.beforeEach( async ( { baseURL } ) => {
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					doubleOptIn: false,
@@ -115,7 +129,7 @@ test.describe(
 		} );
 
 		test.describe( 'Guest — double opt-in', () => {
-			test.beforeEach( async ( { baseURL, request } ) => {
+			test.beforeEach( async ( { baseURL } ) => {
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					doubleOptIn: true,
@@ -126,22 +140,30 @@ test.describe(
 			test( 'submitting signup dispatches a verification email', async ( {
 				page,
 				product,
+				browser,
 			} ) => {
 				const email = uniqueGuestEmail( 'bis-guest-double' );
 
 				await page.goto( product.permalink );
 				await signUpOnProductPage( page, { email } );
 
+				// Switch to an admin context to inspect the mail log —
+				// WP Mail Logging is an admin-only screen.
+				const adminContext = await browser.newContext( {
+					storageState: ADMIN_STATE_PATH,
+				} );
+				const adminPage = await adminContext.newPage();
 				await expectEmail(
-					page,
+					adminPage,
 					email,
 					/Join the "[^"]+" waitlist\./
 				);
+				await adminContext.close();
 			} );
 		} );
 
 		test.describe( 'Guest — requires account', () => {
-			test.beforeEach( async ( { baseURL, request } ) => {
+			test.beforeEach( async ( { baseURL } ) => {
 				await setBISOptions( request, baseURL!, {
 					allowSignups: true,
 					requireAccount: true,

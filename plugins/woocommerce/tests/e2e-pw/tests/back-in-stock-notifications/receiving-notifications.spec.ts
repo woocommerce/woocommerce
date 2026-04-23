@@ -1,7 +1,18 @@
 /**
+ * External dependencies
+ */
+import type { Page } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
-import { expect, tags, test as baseTest } from '../../fixtures/fixtures';
+import {
+	expect,
+	request,
+	tags,
+	test as baseTest,
+} from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_OPTIONS,
 	createOutOfStockProduct,
@@ -23,11 +34,27 @@ const test = baseTest.extend( {
 	},
 } );
 
+async function signUpAsGuest(
+	page: Page,
+	permalink: string,
+	email: string
+): Promise< void > {
+	const guestContext = await page.context().browser()!.newContext( {
+		storageState: { cookies: [], origins: [] },
+	} );
+	const guestPage = await guestContext.newPage();
+	await guestPage.goto( permalink );
+	await signUpOnProductPage( guestPage, { email } );
+	await guestContext.close();
+}
+
 test.describe(
 	'Back in Stock Notifications — receiving back-in-stock emails',
 	{ tag: [ tags.SERVICES ] },
 	() => {
-		test.beforeEach( async ( { baseURL, request } ) => {
+		test.use( { storageState: ADMIN_STATE_PATH } );
+
+		test.beforeEach( async ( { baseURL } ) => {
 			// Single opt-in so the notification becomes ACTIVE immediately
 			// (no verify step), which is what the back-in-stock dispatch needs.
 			await setBISOptions( request, baseURL!, {
@@ -37,7 +64,7 @@ test.describe(
 			} );
 		} );
 
-		test.afterEach( async ( { baseURL, request } ) => {
+		test.afterEach( async ( { baseURL } ) => {
 			for ( const option of Object.values( BIS_OPTIONS ) ) {
 				await deleteOption( request, baseURL!, option );
 			}
@@ -50,8 +77,7 @@ test.describe(
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-restock' );
 
-			await page.goto( product.permalink );
-			await signUpOnProductPage( page, { email } );
+			await signUpAsGuest( page, product.permalink, email );
 
 			await restockProduct( restApi, product.id );
 
@@ -85,8 +111,7 @@ test.describe(
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-restock-unsub' );
 
-			await page.goto( product.permalink );
-			await signUpOnProductPage( page, { email } );
+			await signUpAsGuest( page, product.permalink, email );
 
 			await restockProduct( restApi, product.id );
 			await triggerStockNotificationsBatch( page );
