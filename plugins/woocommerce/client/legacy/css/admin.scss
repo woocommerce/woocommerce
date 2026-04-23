@@ -8543,8 +8543,8 @@ table.bar_chart {
 	// ourselves, scoped to Woo editor screens, as a bridge until Core unifies
 	// this.
 	//
-	// TODO: Remove these rules when Core rounds editor .postbox containers.
-	// Upstream proposal: https://core.trac.wordpress.org/ticket/TBA
+	// TODO: Remove these rules when Core rounds editor .postbox containers
+	// (upstream Trac ticket to be filed).
 	&.post-type-product,
 	&.post-type-shop_order,
 	&.post-type-shop_coupon,
