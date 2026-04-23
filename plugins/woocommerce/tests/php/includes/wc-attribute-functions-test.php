@@ -250,7 +250,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		} finally {
 			switch_theme( 'twentytwentyfour' );
 			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
-		}
+		}//end try
 	}
 
 	public function get_attribute_names_and_slugs() {
