@@ -250,16 +250,22 @@ describe( 'useUpdateBodyMargin', () => {
 
 		render( <TestComponent /> );
 
-		// Simulate rapid resize events — hook should debounce them.
+		// Fire multiple rapid resize events without advancing timers.
+		// Each resize resets the 200ms debounce timer.
 		act( () => {
 			window.dispatchEvent( new Event( 'resize' ) );
 			window.dispatchEvent( new Event( 'resize' ) );
 			window.dispatchEvent( new Event( 'resize' ) );
-			jest.advanceTimersByTime( 200 );
 		} );
 
-		// Should only set margin once
+		// Before the debounce window elapses, margin should not yet be set.
 		const wpBody = document.querySelector( '#wpbody' );
+		expect( wpBody.style.marginTop ).toBe( '' );
+
+		// After advancing past the debounce window, margin is applied once.
+		act( () => {
+			jest.advanceTimersByTime( 200 );
+		} );
 		expect( wpBody.style.marginTop ).toBe( '100px' );
 	} );
 } );

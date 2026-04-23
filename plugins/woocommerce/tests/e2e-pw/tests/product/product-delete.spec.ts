@@ -35,9 +35,6 @@ const test = baseTest.extend( {
 			}
 		}
 	},
-	page: async ( { page }, use ) => {
-		await use( page );
-	},
 } );
 
 test( 'can delete a product from edit view', async ( { page, product } ) => {

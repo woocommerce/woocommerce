@@ -35,9 +35,6 @@ const productAttributes = [
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	page: async ( { page }, use ) => {
-		await use( page );
-	},
 	product: async ( { restApi }, use ) => {
 		let product = getFakeProduct( { type: 'variable' } );
 
