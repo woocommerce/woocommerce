@@ -24,8 +24,10 @@ respective feature tickets:
 
 ## Prerequisites
 
-- BIS is gated behind the `WOOCOMMERCE_BIS_ALPHA_ENABLED` PHP constant, which is
-  set to `true` for the tests env via `plugins/woocommerce/.wp-env.json`. If you
-  bring the env up manually, ensure the constant is defined.
+- BIS is gated by the `customer_stock_notifications` feature toggle (WooCommerce
+  → Settings → Advanced → Features → Experimental), enabled for the tests env
+  via `plugins/woocommerce/tests/e2e-pw/bin/test-env-setup.sh`. If you bring
+  the env up manually, set `woocommerce_feature_customer_stock_notifications_enabled`
+  to `'yes'`.
 - The tests assume the WP Mail Logging plugin is installed and active (it is,
   via `.wp-env.json` tests plugins list).
