@@ -8362,7 +8362,7 @@ table.bar_chart {
 	// Order preview action buttons.
 	.wc-order-preview footer {
 		.button.button-large {
-			min-height: 0;
+			min-height: 32px;
 		}
 
 		// Adopt WP 7.0 secondary outline: theme-color border and 2px radius.
@@ -8386,9 +8386,9 @@ table.bar_chart {
 		}
 	}
 
-	// Action button groups.
+	// Action button groups: adopt WP 7.0 compact 32px height.
 	.wc-action-button-group .wc-action-button {
-		min-height: 0 !important;
+		min-height: 32px !important;
 	}
 
 	// Order actions: select + button overflow container due to WP 7.0 select margins.
