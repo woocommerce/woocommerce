@@ -8561,6 +8561,15 @@ table.bar_chart {
 			overflow: visible;
 		}
 	}
+
+	// Align the product description editor with the meta boxes below it.
+	// #normal-sortables adds 4px of padding around postboxes, which #post-body-content
+	// doesn't, so the description editor ends up 8px wider than neighbouring postboxes
+	// on WP 7.0 (where the radius makes the misalignment visible).
+	&.post-type-product #postdivrich.woocommerce-product-description {
+		margin-left: 4px;
+		margin-right: 4px;
+	}
 }
 
 /**
@@ -9174,10 +9183,6 @@ table.bar_chart {
 #postdivrich.woocommerce-product-description {
 	margin-top: 20px;
 	margin-bottom: 0px;
-	// Match the 4px padding that #normal-sortables adds around postboxes,
-	// so the description editor aligns with the meta boxes below it.
-	margin-left: 4px;
-	margin-right: 4px;
 
 	.wp-editor-tools {
 		background: none;
