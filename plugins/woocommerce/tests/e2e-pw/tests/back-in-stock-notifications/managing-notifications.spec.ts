@@ -117,21 +117,36 @@ test.describe(
 				)
 				.selectOption( 'send_verification_email' );
 			await page
-				.getByRole( 'button', { name: /Update|Save|Apply/i } )
-				.first()
+				.getByRole( 'button', { name: 'Update', exact: true } )
 				.click();
 
 			await expect(
-				page.getByText(
-					new RegExp(
-						`Verification email sent to "${ email.replace(
-							/[.*+?^${}()|[\]\\]/g,
-							'\\$&'
-						) }"`,
-						'i'
-					)
-				)
+				page.getByText( `Verification email sent to "${ email }"` )
 			).toBeVisible();
+
+			// Assert a second verify email actually landed in the log — the
+			// admin success notice alone would pass even if dispatch regressed.
+			await page.goto(
+				`wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
+					email
+				) }&orderby=timestamp&order=desc`
+			);
+			await expect(
+				page
+					.getByRole( 'row' )
+					.filter( {
+						has: page.getByRole( 'cell', {
+							name: email,
+							exact: true,
+						} ),
+					} )
+					.filter( {
+						has: page.getByRole( 'cell', {
+							name: /Join the "[^"]+" waitlist\./,
+							exact: true,
+						} ),
+					} )
+			).toHaveCount( 2 );
 		} );
 
 		test( 'Resend verification is not offered for notifications that are already active', async ( {
@@ -201,8 +216,7 @@ test.describe(
 				)
 				.selectOption( 'cancel_notification' );
 			await page
-				.getByRole( 'button', { name: /Update|Save|Apply/i } )
-				.first()
+				.getByRole( 'button', { name: 'Update', exact: true } )
 				.click();
 
 			await page.goto(
