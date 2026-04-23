@@ -34,13 +34,14 @@ class GraphQLController {
 	public const DEFAULT_MAX_QUERY_DEPTH = 15;
 
 	/**
-	 * Maximum computed complexity score allowed for a GraphQL query.
+	 * Default complexity-score limit applied when the option is unset or non-positive.
 	 *
 	 * Complexity is the sum of per-field scores; connection fields multiply
-	 * their child score by the requested page size. Queries exceeding this
-	 * score are rejected during validation. See {@see self::get_max_query_complexity()}.
+	 * their child score by the requested page size. Queries exceeding the
+	 * configured limit are rejected during validation. See
+	 * {@see self::get_max_query_complexity()} for the accessor.
 	 */
-	private const MAX_QUERY_COMPLEXITY = 1000;
+	public const DEFAULT_MAX_QUERY_COMPLEXITY = 1000;
 
 	/**
 	 * Cached GraphQL schema instance.
@@ -81,11 +82,13 @@ class GraphQLController {
 	/**
 	 * The maximum computed complexity score allowed for a GraphQL query.
 	 *
-	 * Exposed as a method so the limit can become configurable — e.g. via a
-	 * filter or store option — without requiring call-site changes.
+	 * Reads the {@see Main::OPTION_MAX_QUERY_COMPLEXITY} store option; falls
+	 * back to {@see self::DEFAULT_MAX_QUERY_COMPLEXITY} when the option is
+	 * unset, empty, or non-positive.
 	 */
 	public static function get_max_query_complexity(): int {
-		return self::MAX_QUERY_COMPLEXITY;
+		$value = (int) get_option( Main::OPTION_MAX_QUERY_COMPLEXITY, self::DEFAULT_MAX_QUERY_COMPLEXITY );
+		return $value > 0 ? $value : self::DEFAULT_MAX_QUERY_COMPLEXITY;
 	}
 
 	/**

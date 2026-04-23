@@ -35,6 +35,14 @@ class Main {
 	public const OPTION_MAX_QUERY_DEPTH = 'woocommerce_graphql_max_query_depth';
 
 	/**
+	 * Option name for the "Maximum query complexity" setting.
+	 *
+	 * Caps the computed complexity score of a GraphQL query — connection
+	 * fields multiply their children's cost by the requested page size.
+	 */
+	public const OPTION_MAX_QUERY_COMPLEXITY = 'woocommerce_graphql_max_query_complexity';
+
+	/**
 	 * Cached result of the feature-enabled check, null until first evaluated.
 	 *
 	 * @var ?bool
