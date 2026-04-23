@@ -35,4 +35,14 @@ wp-env run tests-cli wp theme install storefront --activate
 wp-env run tests-cli wp config set DISABLE_WP_CRON true --raw --type=constant
 wp-env run tests-cli wp config set WP_HTTP_BLOCK_EXTERNAL true --raw --type=constant
 
+# Remove container-level strains for cleaner performance metrics: OPcache.
+docker exec -u root "$(docker ps --filter name=tests-wordpress --format '{{.Names}}' | head -1)" bash -c \
+    "printf '[opcache]\nopcache.enable=1\nopcache.memory_consumption=256\nopcache.max_accelerated_files=20000\nopcache.validate_timestamps=1\nopcache.revalidate_freq=0\n' > /usr/local/etc/php/conf.d/perf-opcache.ini"
+docker restart "$(docker ps --filter name=tests-wordpress --format '{{.Names}}' | head -1)"
+
+# Remove container-level strains for cleaner performance metrics: DB buffer and connections pool.
+docker exec -u root "$(docker ps --filter name=tests-mysql --format '{{.Names}}')" bash -c "printf '[mysqld]\ninnodb_buffer_pool_size=1073741824\ninnodb_flush_log_at_trx_commit=2\n' > /etc/mysql/conf.d/perf-tuning.cnf"
+docker restart "$(docker ps --filter name=tests-mysql --format '{{.Names}}')"
+_timeout=30; until docker exec "$(docker ps --filter name=tests-mysql --format '{{.Names}}')" mariadb -u root -ppassword -e "SELECT 1" &>/dev/null || [ $((_timeout--)) -eq 0 ]; do sleep 0.5; done
+
 echo "Success! Your E2E Test Environment is now ready."
