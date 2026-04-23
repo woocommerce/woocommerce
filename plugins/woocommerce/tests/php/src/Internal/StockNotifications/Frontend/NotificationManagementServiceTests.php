@@ -43,6 +43,10 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 		// assertion in test_resend_request_rejects_invalid_nonce is meaningful.
 		wc_clear_notices();
 
+		// Clear any notices left by earlier tests in the suite so the silent-drop
+		// assertion in test_resend_request_rejects_invalid_nonce is meaningful.
+		wc_clear_notices();
+
 		$this->email_manager = $this->createMock( EmailManager::class );
 		$this->sut           = new NotificationManagementService();
 		$this->sut->init( $this->email_manager );
