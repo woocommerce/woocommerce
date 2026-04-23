@@ -35,8 +35,9 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Short-circuit wp_safe_redirect() so it does not try to emit headers in a test context.
-		add_filter( 'wp_redirect', '__return_empty_string' );
+		// Intercept redirects so headers aren't emitted, and throw so the trailing `exit;`
+		// in production code never runs during the test.
+		add_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 
 		$this->email_manager = $this->createMock( EmailManager::class );
 		$this->sut           = new NotificationManagementService();
@@ -47,15 +48,29 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'wp_redirect', '__return_empty_string' );
+		remove_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 
 		unset( $_GET['_wpnonce'], $_GET[ NotificationManagementService::RESEND_QUERY_ARG ] );
 
+		// DELETE rather than TRUNCATE so the outer WP_UnitTestCase transaction can still roll back.
+		// TRUNCATE is DDL and implicitly commits the surrounding transaction.
 		global $wpdb;
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notifications" );
-		$wpdb->query( "TRUNCATE TABLE {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
+		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
 
 		parent::tearDown();
+	}
+
+	/**
+	 * `wp_redirect` filter callback that throws so the SUT's trailing `exit;`
+	 * never executes and the test can still assert state after the method.
+	 *
+	 * @param string $location Redirect target.
+	 * @return never
+	 * @throws \RuntimeException Always.
+	 */
+	public function intercept_redirect( string $location ): void {
+		throw new \RuntimeException( 'wp_redirect intercepted: ' . esc_url_raw( $location ) );
 	}
 
 	/**
@@ -89,10 +104,46 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 				)
 			);
 
-		$this->sut->maybe_process_resend_request();
+		// The SUT redirects (and would `exit`) at the end of the happy path; the redirect filter
+		// throws so we can assert side effects instead of actually halting.
+		try {
+			$this->sut->maybe_process_resend_request();
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
 
 		$reloaded = Factory::get_notification( $notification->get_id() );
 		$this->assertNotEmpty( $reloaded->get_meta( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META ) );
+	}
+
+	/**
+	 * @testdox Should persist the rate-limit timestamp before dispatching the email (TOCTOU guard).
+	 */
+	public function test_resend_request_writes_rate_limit_timestamp_before_sending_email() {
+		$notification    = $this->build_pending_notification();
+		$notification_id = $notification->get_id();
+
+		$this->seed_resend_request( $notification_id );
+
+		$this->email_manager
+			->expects( $this->once() )
+			->method( 'send_verify_email' )
+			->willReturnCallback(
+				function () use ( $notification_id ) {
+					// At the moment the email would be dispatched, the rate-limit timestamp must
+					// already be persisted so a concurrent request can't pass the rate-limit check.
+					$reloaded = Factory::get_notification( $notification_id );
+					$this->assertNotEmpty( $reloaded->get_meta( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META ) );
+				}
+			);
+
+		try {
+			$this->sut->maybe_process_resend_request();
+			$this->fail( 'Expected redirect to be intercepted via exception.' );
+		} catch ( \RuntimeException $e ) {
+			$this->assertStringContainsString( 'wp_redirect intercepted', $e->getMessage() );
+		}
 	}
 
 	/**
@@ -109,6 +160,7 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 			->expects( $this->never() )
 			->method( 'send_verify_email' );
 
+		$this->expectException( \RuntimeException::class );
 		$this->sut->maybe_process_resend_request();
 	}
 
@@ -129,11 +181,12 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 			->expects( $this->never() )
 			->method( 'send_verify_email' );
 
+		$this->expectException( \RuntimeException::class );
 		$this->sut->maybe_process_resend_request();
 	}
 
 	/**
-	 * @testdox Should silently drop the request when the nonce is invalid.
+	 * @testdox Should silently drop the request when the nonce is invalid — no email, no redirect, no meta write, no notice.
 	 */
 	public function test_resend_request_rejects_invalid_nonce() {
 		$notification = $this->build_pending_notification();
@@ -145,7 +198,13 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 			->expects( $this->never() )
 			->method( 'send_verify_email' );
 
+		// Invalid nonce must return before reaching the redirect path.
 		$this->sut->maybe_process_resend_request();
+
+		// Silent drop: no rate-limit meta written, no notice queued, no session cookie primed.
+		$reloaded = Factory::get_notification( $notification->get_id() );
+		$this->assertSame( '', (string) $reloaded->get_meta( NotificationManagementService::LAST_VERIFY_EMAIL_SENT_META ) );
+		$this->assertEmpty( wc_get_notices() );
 	}
 
 	/**

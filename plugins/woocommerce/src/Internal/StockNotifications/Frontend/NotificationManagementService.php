@@ -77,6 +77,17 @@ class NotificationManagementService {
 	 * Handle the resend-verification request if the current request carries one.
 	 */
 	public function maybe_process_resend_request(): void {
+		// Only run on frontend GET requests — skip admin, POST, CLI, etc. before doing any nonce/DB work.
+		if ( is_admin() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotValidated, WordPress.Security.NonceVerification.Recommended
+		$method = isset( $_SERVER['REQUEST_METHOD'] ) ? strtoupper( sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) ) : 'GET';
+		if ( 'GET' !== $method ) {
+			return;
+		}
+
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! isset( $_GET[ self::RESEND_QUERY_ARG ] ) ) {
 			return;
@@ -109,23 +120,27 @@ class NotificationManagementService {
 		if ( NotificationStatus::PENDING !== $notification->get_status() ) {
 			wc_add_notice( esc_html__( 'This notification is already verified or cancelled.', 'woocommerce' ), 'error' );
 			wp_safe_redirect( $redirect_url );
-			return;
+			exit;
 		}
 
 		$last_sent_at = (int) $notification->get_meta( self::LAST_VERIFY_EMAIL_SENT_META );
 		if ( $last_sent_at > 0 && ( time() - $last_sent_at ) < self::RESEND_RATE_LIMIT_SECONDS ) {
 			wc_add_notice( esc_html__( 'Please wait a moment before requesting another verification email.', 'woocommerce' ), 'notice' );
 			wp_safe_redirect( $redirect_url );
-			return;
+			exit;
 		}
 
-		$this->email_manager->send_verify_email( $notification );
+		// Persist the rate-limit timestamp before dispatching the email so two near-simultaneous
+		// requests can't both pass the rate-limit check and trigger duplicate sends.
 		$notification->update_meta_data( self::LAST_VERIFY_EMAIL_SENT_META, (string) time() );
 		$notification->save();
+
+		$this->email_manager->send_verify_email( $notification );
 
 		/* translators: %s user email. */
 		wc_add_notice( sprintf( esc_html__( 'Verification email sent to %s.', 'woocommerce' ), $notification->get_user_email() ), 'success' );
 		wp_safe_redirect( $redirect_url );
+		exit;
 	}
 
 	/**
