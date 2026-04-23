@@ -9,11 +9,11 @@ import {
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalNumberControl as NumberControl,
 } from '@wordpress/components';
-import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
+import { getSetting } from '@woocommerce/settings';
 import type { CouponCodeAttributes } from '../types';
 
 interface GeneralSettingsProps {

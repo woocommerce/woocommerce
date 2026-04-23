@@ -8,16 +8,16 @@ import {
 	Button,
 	ComboboxControl,
 	Spinner,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControl as ToggleGroupControl,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 } from '@wordpress/components';
 import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import type { CSSProperties } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { applyFilters } from '@wordpress/hooks';
 import { dispatch } from '@wordpress/data';
+// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+import { __experimentalToggleGroupControl as ToggleGroupControl } from '@wordpress/components';
+// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
+import { __experimentalToggleGroupControlOption as ToggleGroupControlOption } from '@wordpress/components';
 
 /**
  * Internal dependencies

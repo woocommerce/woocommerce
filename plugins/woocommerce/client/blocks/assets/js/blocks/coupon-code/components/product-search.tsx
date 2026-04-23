@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { FormTokenField } from '@wordpress/components';
 import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import apiFetch from '@wordpress/api-fetch';
