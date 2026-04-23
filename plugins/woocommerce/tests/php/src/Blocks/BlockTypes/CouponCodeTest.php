@@ -78,7 +78,12 @@ class CouponCodeTest extends \WP_UnitTestCase {
 		$result = $this->mock->call_render( array( 'source' => 'existing' ) );
 		$this->assertSame( '', $result );
 
-		$result = $this->mock->call_render( array( 'source' => 'existing', 'couponCode' => '' ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => '',
+			)
+		);
 		$this->assertSame( '', $result );
 	}
 
@@ -86,7 +91,12 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	 * Test that render returns HTML when coupon code is provided.
 	 */
 	public function test_render_returns_html_with_coupon_code(): void {
-		$result = $this->mock->call_render( array( 'source' => 'existing', 'couponCode' => 'TESTCODE' ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => 'TESTCODE',
+			)
+		);
 
 		$this->assertStringContainsString( 'TESTCODE', $result );
 		$this->assertStringContainsString( 'woocommerce-coupon-code', $result );
@@ -97,7 +107,12 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	 * Test that coupon code is properly escaped in output.
 	 */
 	public function test_render_escapes_coupon_code(): void {
-		$result = $this->mock->call_render( array( 'source' => 'existing', 'couponCode' => '<script>alert("xss")</script>' ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => '<script>alert("xss")</script>',
+			)
+		);
 
 		$this->assertStringNotContainsString( '<script>', $result );
 		$this->assertStringContainsString( '&lt;script&gt;', $result );
@@ -222,7 +237,12 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	 * Test render output contains proper table structure for email compatibility.
 	 */
 	public function test_render_contains_email_table_structure(): void {
-		$result = $this->mock->call_render( array( 'source' => 'existing', 'couponCode' => 'TESTCODE' ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => 'TESTCODE',
+			)
+		);
 
 		$this->assertStringContainsString( '<table', $result );
 		$this->assertStringContainsString( '</table>', $result );
@@ -253,10 +273,20 @@ class CouponCodeTest extends \WP_UnitTestCase {
 	 * Test that non-string coupon code values are handled.
 	 */
 	public function test_render_handles_non_string_coupon_code(): void {
-		$result = $this->mock->call_render( array( 'source' => 'existing', 'couponCode' => 12345 ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => 12345,
+			)
+		);
 		$this->assertSame( '', $result );
 
-		$result = $this->mock->call_render( array( 'source' => 'existing', 'couponCode' => array( 'code' ) ) );
+		$result = $this->mock->call_render(
+			array(
+				'source'     => 'existing',
+				'couponCode' => array( 'code' ),
+			)
+		);
 		$this->assertSame( '', $result );
 	}
 
