@@ -470,7 +470,7 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				// See render_lost_connection_notice() for scoping rationale.
 				$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
 					&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
-				if ( 'post' !== $screen->base && ! $is_wc_admin_page ) {
+				if ( 'post' !== ( $screen->base ?? '' ) && ! $is_wc_admin_page ) {
 					wp_enqueue_script( 'autosave' );
 				}
 
