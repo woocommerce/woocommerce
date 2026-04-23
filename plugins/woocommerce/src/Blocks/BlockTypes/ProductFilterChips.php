@@ -101,7 +101,7 @@ final class ProductFilterChips extends AbstractBlock {
 						>
 							<span class="wc-block-product-filter-chips__label">
 								<span class="wc-block-product-filter-chips__text">
-									<?php echo wp_kses_post( $item['label'] ); ?>
+									<?php echo wp_kses( $item['label'], $this->get_allowed_label_html() ); ?>
 								</span>
 								<?php if ( isset( $item['count'] ) ) : ?>
 									<span class="wc-block-product-filter-chips__count">
@@ -130,5 +130,34 @@ final class ProductFilterChips extends AbstractBlock {
 		</div>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get allowed HTML for item labels, including SVG for rating stars.
+	 *
+	 * @return array Allowed HTML elements and attributes.
+	 */
+	private function get_allowed_label_html() {
+		return array_merge(
+			wp_kses_allowed_html( 'post' ),
+			array(
+				'svg'  => array(
+					'class'      => true,
+					'xmlns'      => true,
+					'width'      => true,
+					'height'     => true,
+					'viewbox'    => true,
+					'fill'       => true,
+					'aria-label' => true,
+				),
+				'path' => array(
+					'd'            => true,
+					'fill'         => true,
+					'stroke'       => true,
+					'stroke-width' => true,
+					'transform'    => true,
+				),
+			)
+		);
 	}
 }
