@@ -98,7 +98,6 @@ The context object that parents MUST provide. Typed as `SelectableItemsContext<T
 |-------|------|----------|-------------|
 | `items` | `SelectableItem<T>[]` | **Yes** | Items to render |
 | `selectionMode` | `'single' \| 'multiple'` | **Yes** | Selection behavior |
-| `selectAction` | `string` | **Yes** | Action name to call on selection |
 | `storeNamespace` | `string` | **Yes** | Parent's Interactivity API store |
 
 ### Accessibility Fields (Optional)
@@ -147,15 +146,40 @@ type FilterOptionItem = SelectableItem<FilterItemFields>;
 
 Inner blocks typed against a specific `T` access extra fields type-safely. Built-in inner blocks ignore unknown fields.
 
-## Callback Contract
+## Parent Store Requirements
 
-When user selects an item, inner block MUST:
+The store registered under `storeNamespace` MUST expose:
 
-1. Get `storeNamespace` and `selectAction` from context
-2. Call `store(storeNamespace).actions[selectAction](item)`
-3. Pass the full `SelectableItem` object to the action
+| Name | Kind | Contract |
+|------|------|----------|
+| `state.isSelected` | getter | Returns `boolean` for the current `getContext().item` derived from parent's domain state (active filters, chosen variation, etc.). |
+| `actions.toggle` | action | Toggles selection for the current `getContext().item`. No args — reads item from context. Mutates parent's SSOT (e.g. `activeFilters`). |
 
-Parent's action handler receives the item and handles business logic.
+Fixed names (not configurable). Inner blocks bind `data-wp-bind--checked="state.isSelected"` and call `actions.toggle`. Item iteration uses `context.items` (raw, PHP-rendered).
+
+Enforcement via TypeScript contract:
+
+```typescript
+import type { SelectableItemsParentStore } from '../../types/type-defs/selectable-items';
+
+const myStore = {
+	state: { get items() { /* ... */ }, /* ... */ },
+	actions: { toggle: () => { /* ... */ }, /* ... */ },
+};
+
+// Compile-time check — TS error if `state.isSelected` or `actions.toggle` is missing/wrong-shaped.
+myStore satisfies SelectableItemsParentStore;
+```
+
+## Selection State Model
+
+- **SSOT** lives in parent's domain state (e.g. `context.activeFilters` for filters).
+- **`context.items`** holds the raw input list (PHP-rendered into context). Inner blocks iterate this.
+- **`item.selected`** on raw items is only a PHP SSR hint (matches SSOT at render time). Never the JS binding source.
+- **`state.isSelected`** getter reads `getContext().item` + SSOT → returns boolean. Reactive — SSOT changes propagate automatically to all bindings.
+- **`actions.toggle`** mutates SSOT only. Never touches raw `item.selected`.
+
+External mutations (active-filter removal, cross-block sync) flow through automatically: mutate `activeFilters` → every `state.isSelected` binding re-evaluates → checkboxes update across all blocks. Works for both dynamic (`data-wp-each`) and static (`foreach`-rendered) item lists.
 
 ## Rendering Rules
 
@@ -227,7 +251,6 @@ export type SelectableItem< T = unknown > = (
 export interface SelectableItemsContext< T = unknown > {
 	items: SelectableItem< T >[];
 	selectionMode: 'single' | 'multiple';
-	selectAction: string;
 	storeNamespace: string;
 	groupLabel?: string;
 	dynamicItems?: boolean;
@@ -278,7 +301,6 @@ class ProductFilterAttribute extends AbstractBlock {
             // Items include 'count' only when $show_counts is true
             'items'          => $this->transform_to_selectable_items( $filter_items, $show_counts ),
             'selectionMode'  => 'multiple',
-            'selectAction'   => 'toggleFilter',
             'storeNamespace' => 'woocommerce/product-filters',
             'groupLabel'     => $attributes['label'] ?? '',
         ];
@@ -336,7 +358,6 @@ parameters:
       array{
         items: list<SelectableItem>,
         selectionMode: 'single'|'multiple',
-        selectAction: string,
         storeNamespace: string,
         groupLabel?: string,
         dynamicItems?: bool,
@@ -351,7 +372,7 @@ parameters:
 
 ## Implementing as Inner Block (Consumer)
 
-Inner blocks consume the protocol. They have **no store of their own** — they reuse the parent's store via `storeNamespace` from context and render items using `data-wp-each`.
+Inner blocks consume the protocol. For items rendering they reuse the parent's store via `storeNamespace` from context and render items using `data-wp-each`.
 
 **block.json**
 ```json
@@ -364,11 +385,48 @@ Inner blocks consume the protocol. They have **no store of their own** — they 
 }
 ```
 
-**frontend.ts** — Inner blocks need no frontend JS. All actions are delegated to the parent store.
-```typescript
-// No store needed. Actions (toggleFilter, showAll, etc.) are provided
-// by the parent store via storeNamespace context.
+**frontend.ts** — Inner blocks need no frontend JS for selection. Selection action (`actions.toggle`) and selection getter (`state.isSelected`) are provided by the parent store.
+
+### Optional: Inner Block Own Store
+
+Inner blocks MAY register their own Interactivity store for **block-local UI state** (show-more toggle, local focus, animation flags, etc.) that the parent doesn't need to know about.
+
+Pattern validated:
+
+1. Outer wrapper uses the inner block's own namespace via `data-wp-interactive="<own-ns>"`.
+2. The region that renders items (where `data-wp-each` lives) switches back to the parent namespace via a nested `data-wp-interactive="<parent-ns>"` — so `state.isSelected` and `actions.toggle` resolve against the parent store.
+3. Block-local directives (`data-wp-on--click="actions.myLocalAction"`, `data-wp-bind--hidden="state.myLocalState"`) outside the items region resolve against the inner block's own store.
+
+```html
+<div data-wp-interactive="woocommerce/product-filter-checkbox-list">
+  <!-- own-namespace region: block-local UI -->
+  <button data-wp-on--click="actions.toggleShowMore">Show more</button>
+
+  <!-- switch to parent namespace for items + selection -->
+  <div data-wp-interactive="woocommerce/product-filters">
+    <template data-wp-each--item="context.items" ...>
+      <input
+        data-wp-on--change="actions.toggle"
+        data-wp-bind--checked="state.isSelected"
+      >
+    </template>
+  </div>
+</div>
 ```
+
+```typescript
+// frontend.ts
+import { store } from '@wordpress/interactivity';
+
+store( 'woocommerce/product-filter-checkbox-list', {
+  state: { /* block-local */ },
+  actions: { /* block-local */ },
+}, { lock: true } );
+```
+
+**Why nesting is required inside the items region:** `data-wp-context` is namespace-scoped. `data-wp-each` populates `context.item` under the current namespace. Parent's `actions.toggle` and `state.isSelected` getter call `getContext()` without a namespace argument — which defaults to the action's own store namespace. If items were rendered under the inner block's namespace, parent action/getter would read an empty context and fail. Cross-namespace references via `namespace::` syntax don't fix this because `getContext()` inside the parent action still defaults to the parent namespace.
+
+**When to add own store:** only if there's genuinely block-local state. Otherwise skip `frontend.ts` entirely.
 
 **PHP Renderer** — Uses `data-wp-each` template with `data-wp-each-child` SSR fallback.
 ```php
@@ -380,7 +438,6 @@ protected function render( $attributes, $content, $block ) {
     $block_context   = $block->context['woocommerce/selectableItems'];
     $items           = $block_context['items'] ?? array();
     $store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
-    $select_action   = $block_context['selectAction'] ?? 'toggleFilter';
 
     // Pre-compute id and ariaLabel, re-index with array_values
     // to guarantee JSON array (not object) for data-wp-each.
@@ -418,9 +475,9 @@ protected function render( $attributes, $content, $block ) {
                             type="checkbox"
                             data-wp-bind--id="context.item.id"
                             data-wp-bind--aria-label="context.item.ariaLabel"
-                            data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
+                            data-wp-on--change="actions.toggle"
                             data-wp-bind--value="context.item.value"
-                            data-wp-bind--checked="context.item.selected"
+                            data-wp-bind--checked="state.isSelected"
                         >
                         <span data-wp-text="context.item.label"></span>
                         <span data-wp-bind--hidden="!context.item.count">
@@ -438,9 +495,9 @@ protected function render( $attributes, $content, $block ) {
                             type="checkbox"
                             id="<?php echo esc_attr( $item['id'] ); ?>"
                             aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
-                            data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
+                            data-wp-on--change="actions.toggle"
                             value="<?php echo esc_attr( $item['value'] ); ?>"
-                            data-wp-bind--checked="context.item.selected"
+                            data-wp-bind--checked="state.isSelected"
                         >
                         <span><?php echo esc_html( $item['label'] ); ?></span>
                         <?php if ( isset( $item['count'] ) ) : ?>
@@ -458,37 +515,43 @@ protected function render( $attributes, $content, $block ) {
 
 Key points:
 - **`data-wp-interactive`** is set to `$store_namespace` (the parent's store), not a block-specific store
-- **`data-wp-each--item`** iterates `context.items` and sets `context.item` per iteration
-- **`data-wp-each-child`** items provide server-side HTML before JS hydration
+- **`data-wp-each--item`** iterates `context.items` (raw PHP-rendered list) and sets `context.item` per iteration
+- **`data-wp-each-child`** items provide server-side HTML before JS hydration; use raw `context.items` from PHP for SSR fallback
 - **`array_values()`** is required — input arrays may have non-sequential keys (e.g. taxonomy term IDs), which causes `json_encode` to produce a JSON object instead of array
 - **`data-wp-text`** for labels (not `data-wp-html` — that directive does not exist in the Interactivity API)
-- **`context.item.selected`** reflects current selection state — parent updates this when selection changes
+- **`state.isSelected`** reflects current selection reactively — parent's getter reads `context.item` + SSOT on each evaluation
 
 ### Static Items Mode (`dynamicItems: false`)
 
-When parent sets `dynamicItems: false`, inner blocks skip the `data-wp-each` template and `data-wp-each-child` attributes. Items are rendered with plain PHP `foreach` only:
+When parent sets `dynamicItems: false`, inner blocks skip the `data-wp-each` template and `data-wp-each-child` attributes. Items are rendered with plain PHP `foreach`. **Per-item `data-wp-context` is still emitted** so `state.isSelected` (which reads `getContext().item`) remains reactive:
 
 ```php
 $dynamic_items = $block_context['dynamicItems'] ?? true;
 
-// Only render template if dynamic
+// Only render client-side template if dynamic
 if ( $dynamic_items ) {
     // <template data-wp-each--item="context.items">...</template>
 }
 
-// Foreach items - conditionally add data-wp-each-child
-foreach ( $context_items as $item ) {
-    $attrs = $dynamic_items
-        ? 'data-wp-each-child ' . wp_interactivity_data_wp_context( array( 'item' => $item ) )
-        : '';
-    // Render item with $attrs
-}
+foreach ( $context_items as $item ) { ?>
+    <div
+        class="..."
+        <?php if ( $dynamic_items ) : ?>
+            data-wp-each-child
+        <?php endif; ?>
+        <?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); ?>
+    >
+        <!-- render item, bind `state.isSelected` for selection -->
+    </div>
+<?php }
 ```
 
 Use `dynamicItems: false` when:
 - Items are a small fixed set (rating stars, stock statuses)
 - No show-more functionality needed
 - Labels contain HTML (SVG, icons) that `data-wp-text` can't render
+
+Why per-item context is unconditional: `actions.toggle` and `state.isSelected` both call `getContext().item`. Without `data-wp-context` on each item wrapper, clicks fire against an undefined item. Set it whether dynamic or static.
 
 Reference implementation: `ProductFilterCheckboxList.php`, `ProductFilterChips.php`
 
@@ -508,7 +571,6 @@ class ProductFilterAttribute extends AbstractBlock {
         $selectable_context = [
             'items'          => $this->transform_to_selectable_items($filter_items, $attribute_name, $show_counts),
             'selectionMode'  => 'multiple',
-            'selectAction'   => 'toggleFilter',
             'storeNamespace' => 'woocommerce/product-filters',
             'groupLabel'     => $attribute_label,
         ];

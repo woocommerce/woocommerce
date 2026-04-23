@@ -216,7 +216,6 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		$filter_context  = array(
 			'items'          => array(),
 			'selectionMode'  => 'multiple',
-			'selectAction'   => 'toggleFilter',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => $taxonomy_object->labels->singular_name,
 		);

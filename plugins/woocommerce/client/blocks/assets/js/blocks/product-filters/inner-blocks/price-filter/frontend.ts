@@ -9,6 +9,7 @@ import * as iAPI from '@wordpress/interactivity';
  */
 import { ProductFiltersContext, ProductFiltersStore } from '../../frontend';
 import { formatPrice, getCurrency } from '../../utils/price-currency';
+import type { RangeInputParentStore } from '../../../../types/type-defs/range-input';
 
 const { store, getContext, getServerContext, getConfig } = iAPI;
 
@@ -160,11 +161,11 @@ const productFilterPriceStore = {
 				context.activeFilters.push( newActivePriceFilter );
 			}
 		},
-		setMinPrice: ( e: HTMLElementEvent< HTMLInputElement > ) => {
+		setMin: ( e: HTMLElementEvent< HTMLInputElement > ) => {
 			const price = parseInt( e.target.value, 10 );
 			actions.setPrice( 'min', price );
 		},
-		setMaxPrice: ( e: HTMLElementEvent< HTMLInputElement > ) => {
+		setMax: ( e: HTMLElementEvent< HTMLInputElement > ) => {
 			const price = parseInt( e.target.value, 10 );
 			actions.setPrice( 'max', price );
 		},
@@ -172,6 +173,9 @@ const productFilterPriceStore = {
 };
 
 export type ProductFilterPriceStore = typeof productFilterPriceStore;
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _rangeInputContract = productFilterPriceStore satisfies RangeInputParentStore;
 
 const { state, actions } = store<
 	ProductFiltersStore & ProductFilterPriceStore
