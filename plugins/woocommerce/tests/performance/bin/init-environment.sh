@@ -35,14 +35,12 @@ wp-env run tests-cli wp theme install storefront --activate
 wp-env run tests-cli wp config set DISABLE_WP_CRON true --raw --type=constant
 wp-env run tests-cli wp config set WP_HTTP_BLOCK_EXTERNAL true --raw --type=constant
 
-# Enable OPcache for performance testing: reduces per-request PHP compilation overhead.
+# Remove container-level strains for cleaner performance metrics: OPcache.
 docker exec -u root "$(docker ps --filter name=tests-wordpress --format '{{.Names}}' | head -1)" bash -c \
     "printf '[opcache]\nopcache.enable=1\nopcache.memory_consumption=256\nopcache.max_accelerated_files=20000\nopcache.validate_timestamps=1\nopcache.revalidate_freq=0\n' > /usr/local/etc/php/conf.d/perf-opcache.ini"
 docker restart "$(docker ps --filter name=tests-wordpress --format '{{.Names}}' | head -1)"
-# until docker exec "$(docker ps --filter name=tests-wordpress --format '{{.Names}}' | head -1)" curl -sf http://localhost:8086/wp-login.php -o /dev/null; do sleep 0.5; done
 
-# Tune MariaDB for performance testing: larger buffer pool, relaxed fsync, more connections.
-# innodb_flush_log_at_trx_commit=2 reduces fsync-per-commit overhead, acceptable for perf testing (not production).
+# Remove container-level strains for cleaner performance metrics: DB buffer and connections pool.
 docker exec -u root "$(docker ps --filter name=tests-mysql --format '{{.Names}}')" bash -c "printf '[mysqld]\ninnodb_buffer_pool_size=1073741824\ninnodb_flush_log_at_trx_commit=2\nmax_connections=300\n' > /etc/mysql/conf.d/perf-tuning.cnf"
 docker restart "$(docker ps --filter name=tests-mysql --format '{{.Names}}')"
 until docker exec "$(docker ps --filter name=tests-mysql --format '{{.Names}}')" mariadb -u root -ppassword -e "SELECT 1" &>/dev/null; do sleep 0.5; done
