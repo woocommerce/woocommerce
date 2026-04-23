@@ -205,6 +205,24 @@ abstract class GraphQLController {
 					$formatted['extensions']['code'] = $client_safe ? 'BAD_USER_INPUT' : 'INTERNAL_ERROR';
 				}
 
+				// SerializationError (thrown during schema-type coercion, e.g. when
+				// a resolver returns an Int that doesn't fit 32 bits) extends
+				// \Exception rather than webonyx's ClientAware Error, so it lands
+				// in the INTERNAL_ERROR bucket above. Its message is actually
+				// client-actionable ("value out of range — send smaller inputs"),
+				// so promote it to BAD_USER_INPUT when it shows up anywhere in
+				// the previous-exception chain.
+				if ( 'BAD_USER_INPUT' !== ( $formatted['extensions']['code'] ?? null ) ) {
+					$cursor = $error;
+					while ( $cursor instanceof \Throwable ) {
+						if ( $cursor instanceof \Automattic\WooCommerce\Vendor\GraphQL\Error\SerializationError ) {
+							$formatted['extensions']['code'] = 'BAD_USER_INPUT';
+							break;
+						}
+						$cursor = $cursor->getPrevious();
+					}
+				}
+
 				if ( $debug_mode ) {
 					$chain = $this->extract_previous_chain( $error );
 					if ( ! empty( $chain ) ) {
