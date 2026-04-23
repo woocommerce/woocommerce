@@ -30,11 +30,7 @@ describe( 'createNoticesFromResponse', () => {
 
 	afterEach( () => {
 		if ( originalOnLine ) {
-			Object.defineProperty(
-				window.navigator,
-				'onLine',
-				originalOnLine
-			);
+			Object.defineProperty( window.navigator, 'onLine', originalOnLine );
 		} else {
 			// When `onLine` lives on the prototype (e.g. jsdom), the own
 			// descriptor is undefined. Delete any own override a test
