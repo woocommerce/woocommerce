@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render checkbox, toggle, text, and select fields via public @wordpress/components controls instead of dataviews' built-in form controls, which require @wordpress/components private APIs that are not available in the WordPress versions WooCommerce currently supports.

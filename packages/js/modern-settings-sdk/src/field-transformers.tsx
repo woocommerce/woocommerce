@@ -6,11 +6,14 @@ import { __ } from '@wordpress/i18n';
 import { decodeEntities } from '@wordpress/html-entities';
 import {
 	BaseControl,
+	CheckboxControl,
 	ColorPicker,
 	ComboboxControl,
 	DatePicker,
 	DateTimePicker,
+	SelectControl,
 	TextareaControl,
+	ToggleControl,
 	__experimentalInputControl as InputControl,
 } from '@wordpress/components';
 
@@ -328,10 +331,29 @@ export const baseFieldTransformer = (
 
 	switch ( setting.type ) {
 		case 'select': {
+			const options = parseOptions( setting.options );
+			const SelectEdit = ( props: DataFormEditProps ) => (
+				<SelectControl
+					__next40pxDefaultSize
+					__nextHasNoMarginBottom
+					label={ baseField.label }
+					help={ baseField.description }
+					hideLabelFromVision={ props.hideLabelFromVision }
+					value={ readFieldValue( props.data, props.field ) }
+					options={ options.map( ( option ) => ( {
+						label: option.label,
+						value: option.value,
+					} ) ) }
+					onChange={ ( next?: string ) =>
+						writeFieldValue( props, next ?? '' )
+					}
+				/>
+			);
 			const field = {
 				...baseField,
 				type: 'select',
-				elements: parseOptions( setting.options ),
+				elements: options,
+				Edit: SelectEdit,
 			};
 			return applySafeEdit( field );
 		}
@@ -343,9 +365,31 @@ export const baseFieldTransformer = (
 			return applySafeEdit( field );
 		}
 		case 'checkbox': {
+			const CheckboxEdit = ( props: DataFormEditProps ) => {
+				const checked = Boolean(
+					props.field.getValue( { item: props.data } )
+				);
+				return (
+					<CheckboxControl
+						__nextHasNoMarginBottom
+						label={ baseField.label }
+						help={ baseField.description }
+						checked={ checked }
+						onChange={ ( next: boolean ) =>
+							props.onChange(
+								props.field.setValue( {
+									item: props.data,
+									value: next,
+								} )
+							)
+						}
+					/>
+				);
+			};
 			const field = {
 				...baseField,
 				type: 'boolean',
+				Edit: CheckboxEdit,
 				getValue: ( { item }: { item: Record< string, unknown > } ) => {
 					const value = item[ setting.id ];
 					return value === 'yes' || value === true;
@@ -375,17 +419,52 @@ export const baseFieldTransformer = (
 			return applySafeEdit( field );
 		}
 		case 'text': {
+			const TextEdit = ( props: DataFormEditProps ) => (
+				<InputControl
+					__next40pxDefaultSize
+					type="text"
+					label={ baseField.label }
+					hideLabelFromVision={ props.hideLabelFromVision }
+					help={ baseField.description }
+					value={ readFieldValue( props.data, props.field ) }
+					onChange={ ( next?: string ) =>
+						writeFieldValue( props, next ?? '' )
+					}
+				/>
+			);
 			const field = {
 				...baseField,
 				type: 'text',
+				Edit: TextEdit,
 			};
 			return applySafeEdit( field );
 		}
 		case 'toggle': {
+			const ToggleEdit = ( props: DataFormEditProps ) => {
+				const checked = Boolean(
+					props.field.getValue( { item: props.data } )
+				);
+				return (
+					<ToggleControl
+						__nextHasNoMarginBottom
+						label={ baseField.label }
+						help={ baseField.description }
+						checked={ checked }
+						onChange={ ( next: boolean ) =>
+							props.onChange(
+								props.field.setValue( {
+									item: props.data,
+									value: next,
+								} )
+							)
+						}
+					/>
+				);
+			};
 			const field = {
 				...baseField,
 				type: 'boolean',
-				Edit: 'toggle',
+				Edit: ToggleEdit,
 				getValue: ( { item }: { item: Record< string, unknown > } ) => {
 					const value = item[ setting.id ];
 					return value === 'yes' || value === true;

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render the modernised settings SDK's checkbox, toggle, text, and select fields via public @wordpress/components controls, sidestepping dataviews' private-API-dependent built-ins. Without this the React mount on the flag-on settings tabs rendered blank with "Element type is invalid" errors on every WP version shipping @wordpress/components < 30.4.
