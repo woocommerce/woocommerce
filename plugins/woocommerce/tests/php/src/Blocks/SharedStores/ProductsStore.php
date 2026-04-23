@@ -301,18 +301,18 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		$this->assertTrue( $flag->getValue(), 'getters_registered should remain true.' );
 
 		$state = wp_interactivity_state( $this->store_namespace );
-		$this->assertArrayHasKey( 'product', $state );
-		$this->assertArrayHasKey( 'selectedVariation', $state );
+		$this->assertArrayHasKey( 'mainProductInContext', $state );
+		$this->assertArrayHasKey( 'productVariationInContext', $state );
 		$this->assertArrayHasKey( 'productInContext', $state );
-		$this->assertInstanceOf( \Closure::class, $state['product'] );
-		$this->assertInstanceOf( \Closure::class, $state['selectedVariation'] );
+		$this->assertInstanceOf( \Closure::class, $state['mainProductInContext'] );
+		$this->assertInstanceOf( \Closure::class, $state['productVariationInContext'] );
 		$this->assertInstanceOf( \Closure::class, $state['productInContext'] );
 
 		$product->delete( true );
 	}
 
 	/**
-	 * @testdox state.product resolves to the hydrated product matching state.productId.
+	 * @testdox state.mainProductInContext resolves to the hydrated product matching state.productId.
 	 */
 	public function test_product_getter_reads_from_state(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
@@ -327,7 +327,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		);
 
 		$state   = wp_interactivity_state( $this->store_namespace );
-		$closure = $state['product'];
+		$closure = $state['mainProductInContext'];
 		$this->assertInstanceOf( \Closure::class, $closure );
 
 		$resolved = $closure();
@@ -339,7 +339,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox state.selectedVariation resolves to the hydrated variation matching state.variationId.
+	 * @testdox state.productVariationInContext resolves to the hydrated variation matching state.variationId.
 	 */
 	public function test_selected_variation_getter_reads_from_state(): void {
 		$this->setExpectedIncorrectUsage( 'WP_Interactivity_API::get_context' );
@@ -356,7 +356,7 @@ class ProductsStore extends \WC_Unit_Test_Case {
 		);
 
 		$state   = wp_interactivity_state( $this->store_namespace );
-		$closure = $state['selectedVariation'];
+		$closure = $state['productVariationInContext'];
 		$this->assertInstanceOf( \Closure::class, $closure );
 
 		$resolved = $closure();
@@ -386,8 +386,8 @@ class ProductsStore extends \WC_Unit_Test_Case {
 
 		$this->assertInstanceOf(
 			\Closure::class,
-			$state['selectedVariation'],
-			'selectedVariation should still be a Closure at the point productInContext unwraps it.'
+			$state['productVariationInContext'],
+			'productVariationInContext should still be a Closure at the point productInContext unwraps it.'
 		);
 
 		$resolved = $state['productInContext']();
