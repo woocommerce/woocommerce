@@ -16,8 +16,9 @@ use InvalidArgumentException;
  *   methods below, each keyed by ID.
  * - Selection (`productId`, `variationId`) — set by callers via
  *   `wp_interactivity_state` (global) or `data-wp-context` (per-element) —
- *   plus the derived getters (`product`, `selectedVariation`,
- *   `productInContext`) registered by `register_getters()`.
+ *   plus the derived getters (`mainProductInContext`,
+ *   `productVariationInContext`, `productInContext`) registered by
+ *   `register_getters()`.
  *
  * The derived getters are mirrored in the JS store
  * (client/blocks/assets/js/base/stores/woocommerce/products.ts) so that
@@ -93,8 +94,9 @@ class ProductsStore {
 	 *
 	 * These closures mirror the JS getters in
 	 * client/blocks/assets/js/base/stores/woocommerce/products.ts so that
-	 * directives referencing state.product / state.selectedVariation /
-	 * state.productInContext resolve during SSR. Because they read from
+	 * directives referencing state.mainProductInContext /
+	 * state.productVariationInContext / state.productInContext resolve
+	 * during SSR. Because they read from
 	 * wp_interactivity_state() at call time, they only need to be
 	 * registered once regardless of how many products are added.
 	 *
@@ -110,7 +112,7 @@ class ProductsStore {
 		wp_interactivity_state(
 			self::$store_namespace,
 			array(
-				'product'           => function () {
+				'mainProductInContext'     => function () {
 					$context    = wp_interactivity_get_context();
 					$state      = wp_interactivity_state( self::$store_namespace );
 					$product_id = ! empty( $context )
@@ -123,7 +125,7 @@ class ProductsStore {
 
 					return $state['products'][ $product_id ] ?? null;
 				},
-				'selectedVariation' => function () {
+				'productVariationInContext' => function () {
 					$context      = wp_interactivity_get_context();
 					$state        = wp_interactivity_state( self::$store_namespace );
 					$variation_id = ! empty( $context )
@@ -138,17 +140,17 @@ class ProductsStore {
 				},
 				'productInContext'  => function () {
 					$state    = wp_interactivity_state( self::$store_namespace );
-					$selected = $state['selectedVariation'] instanceof \Closure
-						? $state['selectedVariation']()
-						: $state['selectedVariation'];
+					$selected = $state['productVariationInContext'] instanceof \Closure
+						? $state['productVariationInContext']()
+						: $state['productVariationInContext'];
 
 					if ( $selected ) {
 						return $selected;
 					}
 
-					return $state['product'] instanceof \Closure
-						? $state['product']()
-						: $state['product'];
+					return $state['mainProductInContext'] instanceof \Closure
+						? $state['mainProductInContext']()
+						: $state['mainProductInContext'];
 				},
 			)
 		);

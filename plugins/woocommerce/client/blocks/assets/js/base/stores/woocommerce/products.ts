@@ -6,11 +6,6 @@ import type { ProductResponseItem } from '@woocommerce/types';
 import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 
 /**
- * Internal dependencies
- */
-import { findMatchingVariation } from '../../utils/variations/attribute-matching';
-
-/**
  * Per-element selection for the current product/variation.
  *
  * The "current" product can be set in two ways:
@@ -44,12 +39,15 @@ export type ProductsStoreState = {
 	 */
 	productVariations: Record< number, ProductResponseItem >;
 	/**
-	 * Look up a product by ID, resolving to the matching variation for
-	 * variable products when selectedAttributes are provided.
+	 * Look up a product by ID. If the ID exists in `productVariations`,
+	 * returns the variation directly (ignoring `selectedAttributes`).
+	 * Otherwise looks in `products`: for variable products with
+	 * `selectedAttributes`, returns the matching variation or `null`;
+	 * for all other cases returns the product itself.
 	 */
-	findProductVariation: ( args: {
+	findProduct: ( args: {
 		id: number;
-		selectedAttributes?: SelectedAttributes[];
+		selectedAttributes?: SelectedAttributes[] | null;
 	} ) => ProductResponseItem | null;
 	/**
 	 * The current product ID from state or per-element context.
@@ -64,16 +62,17 @@ export type ProductsStoreState = {
 	 * (e.g. the variable product "Hoodie"), never a variation.
 	 * Resolves productId from per-block context when available.
 	 */
-	product: ProductResponseItem | null;
+	mainProductInContext: ProductResponseItem | null;
 	/**
 	 * The currently selected variation, or null if none is selected.
 	 * For simple/grouped products, this is always null.
 	 */
-	selectedVariation: ProductResponseItem | null;
+	productVariationInContext: ProductResponseItem | null;
 	/**
-	 * The resolved product for the current context: `selectedVariation`
-	 * if one is set, otherwise the main `product`. This is the property
-	 * most blocks should bind to — use `product` / `selectedVariation`
+	 * The resolved product for the current context:
+	 * `productVariationInContext` if one is set, otherwise
+	 * `mainProductInContext`. This is the property most blocks should
+	 * bind to — use `mainProductInContext` / `productVariationInContext`
 	 * explicitly only when the distinction matters.
 	 *
 	 * Blocks can bind directly to properties, e.g.:
@@ -94,6 +93,15 @@ export type ProductsStore = {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
+const normalizeAttributeName = ( name: string ): string =>
+	name
+		.replace( /^attribute_(pa_)?/, '' )
+		.replace( /-/g, ' ' )
+		.toLowerCase();
+
+const attributeNamesMatch = ( a: string, b: string ): boolean =>
+	normalizeAttributeName( a ) === normalizeAttributeName( b );
+
 /**
  * The woocommerce/products store.
  *
@@ -112,13 +120,18 @@ const { state: productsState } = store< ProductsStore >(
 		state: {
 			products: {},
 			productVariations: {},
-			findProductVariation( {
+			findProduct( {
 				id,
 				selectedAttributes,
 			}: {
 				id: number;
-				selectedAttributes?: SelectedAttributes[];
+				selectedAttributes?: SelectedAttributes[] | null;
 			} ): ProductResponseItem | null {
+				const variation = productsState.productVariations[ id ];
+				if ( variation ) {
+					return variation;
+				}
+
 				const product = productsState.products[ id ];
 
 				if ( ! product ) {
@@ -126,29 +139,44 @@ const { state: productsState } = store< ProductsStore >(
 				}
 
 				if (
-					product.type === 'variable' &&
-					selectedAttributes?.length
+					product.type !== 'variable' ||
+					! selectedAttributes?.length
 				) {
-					const matchedVariation = findMatchingVariation(
-						product,
-						selectedAttributes
-					);
-
-					if ( ! matchedVariation ) {
-						return null;
-					}
-
-					return (
-						productsState.productVariations[
-							matchedVariation.id
-						] ?? null
-					);
+					return product;
 				}
 
-				return product;
+				const matchedVariation = product.variations?.find( ( v ) =>
+					v.attributes.every( ( attr ) => {
+						const selectedAttr = selectedAttributes.find(
+							( selected ) =>
+								attributeNamesMatch(
+									attr.name,
+									selected.attribute
+								)
+						);
+
+						if ( attr.value === null ) {
+							return (
+								selectedAttr !== undefined &&
+								selectedAttr.value !== null
+							);
+						}
+
+						return selectedAttr?.value === attr.value;
+					} )
+				);
+
+				if ( ! matchedVariation ) {
+					return null;
+				}
+
+				return (
+					productsState.productVariations[ matchedVariation.id ] ??
+					null
+				);
 			},
 
-			get product(): ProductResponseItem | null {
+			get mainProductInContext(): ProductResponseItem | null {
 				const context = getContext< ProductContext >(
 					'woocommerce/products'
 				);
@@ -162,7 +190,7 @@ const { state: productsState } = store< ProductsStore >(
 				return productsState.products[ productId ] ?? null;
 			},
 
-			get selectedVariation(): ProductResponseItem | null {
+			get productVariationInContext(): ProductResponseItem | null {
 				const context = getContext< ProductContext >(
 					'woocommerce/products'
 				);
@@ -176,7 +204,10 @@ const { state: productsState } = store< ProductsStore >(
 			},
 
 			get productInContext(): ProductResponseItem | null {
-				return productsState.selectedVariation || productsState.product;
+				return (
+					productsState.productVariationInContext ||
+					productsState.mainProductInContext
+				);
 			},
 		},
 	},
