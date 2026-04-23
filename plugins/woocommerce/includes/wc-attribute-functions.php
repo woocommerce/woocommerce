@@ -281,7 +281,8 @@ function wc_get_attribute_types() {
 }
 
 /**
- * Check if there are custom attribute types.
+ * Check if there are attribute types different than the default `select` type.
+ * Note: `wc-visual` is considered a custom attribute type.
  *
  * @since  3.3.2
  * @return bool True if there are custom types, otherwise false.
