@@ -98,7 +98,8 @@ Dev port override (8898) does work from `.wp-env.override.json` — only `testsP
 
 Things explicitly parked for later. Cross-reference before starting sibling work.
 
-- **RSM-438** — verification-email wiring (double-opt-in flow). Absorbs CodeRabbit Must-fix #2 (`NotificationEditPage.php:107` verification-email-send bug) and the "`get_option_or_transient()` fatal" investigation (already downgraded to noise in triage but worth re-confirming during wiring).
+- **RSM-438** — verification-email wiring (double-opt-in flow). Absorbs CodeRabbit Must-fix #2 (`NotificationEditPage.php:107` verification-email-send bug) and the "`get_option_or_transient()` fatal" investigation (already downgraded to noise in triage but worth re-confirming during wiring). **Status 2026-04-23:** landed on `rsm-438-wire-in-verification-and-confirmation-emails`, browser-verified end-to-end on chickpea.
+- **Guest signup notices never render.** Surfaced while browser-testing RSM-438: `FormHandlerService::handle_signup()` calls `wc_add_notice()` for all signup outcomes but never calls `WC()->session->set_customer_session_cookie( true )`, so for logged-out visitors — which is most of the signup surface — the success / "already joined + Resend verification" / error notices get written to a session that has no cookie and are discarded at request end. `EmailActionController` has the cookie-priming guard inline; `FormHandlerService` needs the same. Not RSM-438 scope but should be a Should-fix before GA.
 - **11 Should-fix + 16 Nice-to-have CodeRabbit items** remain unresolved. Priority and ownership not yet assigned — see [`CODERABBIT-TRIAGE.md`](./CODERABBIT-TRIAGE.md) for the list.
 - **`is_email()` guard + batching** in `PrivacyEraser::erase_notification_data()` — half-addressed in this PR (null guard + time normalisation); the rest remains Should-fix.
 - **`wp_fast_hash` shim cleanup in core** — out of BIS scope; covered in the pre-ship checklist above.
