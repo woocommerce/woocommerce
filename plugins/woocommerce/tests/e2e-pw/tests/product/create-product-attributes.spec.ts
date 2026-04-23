@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	WC_API_PATH,
-	WC_ADMIN_API_PATH,
-} from '@woocommerce/e2e-utils-playwright';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 import type { Page } from '@playwright/test';
 
 /**
@@ -38,11 +35,7 @@ const productAttributes = [
 
 const test = baseTest.extend( {
 	storageState: ADMIN_STATE_PATH,
-	page: async ( { page, restApi }, use ) => {
-		await restApi.put( `${ WC_ADMIN_API_PATH }/options`, {
-			woocommerce_task_list_reminder_bar_hidden: 'yes',
-		} );
-
+	page: async ( { page }, use ) => {
 		await use( page );
 	},
 	product: async ( { restApi }, use ) => {

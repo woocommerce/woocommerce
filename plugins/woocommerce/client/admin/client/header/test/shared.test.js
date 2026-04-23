@@ -67,15 +67,6 @@ jest.mock( '@woocommerce/admin-layout', () => ( {
 	},
 } ) );
 
-jest.mock( '../../task-lists/reminder-bar', () => ( {
-	TasksReminderBar: ( { taskListId } ) => (
-		<div
-			data-testid="tasks-reminder-bar"
-			data-task-list-id={ taskListId }
-		/>
-	),
-} ) );
-
 describe( 'getPageTitle', () => {
 	test( 'should get page title as the last item if section length is less than 3', () => {
 		const sections = [ 'Payments' ];
@@ -146,14 +137,13 @@ describe( 'useUpdateBodyMargin', () => {
 		const headerElement = { current: { clientHeight: 100 } };
 		const headerItemSlot = { fills: [] };
 
-		// Create a test component to use the hook
+		// Create a test component to use the hook.
+		// The hook's useLayoutEffect triggers updateBodyMargin on mount.
 		const TestComponent = () => {
-			const updateMargin = useUpdateBodyMargin( {
+			useUpdateBodyMargin( {
 				headerElement,
 				headerItemSlot,
 			} );
-			// Call the function to verify it works
-			updateMargin();
 			return null;
 		};
 
@@ -224,14 +214,13 @@ describe( 'useUpdateBodyMargin', () => {
 		const headerElement = { current: null };
 		const headerItemSlot = { fills: [] };
 
-		// Create a test component to use the hook
+		// Create a test component to use the hook.
+		// The hook's useLayoutEffect triggers updateBodyMargin on mount.
 		const TestComponent = () => {
-			const updateMargin = useUpdateBodyMargin( {
+			useUpdateBodyMargin( {
 				headerElement,
 				headerItemSlot,
 			} );
-			// Call the function to verify it doesn't throw errors
-			updateMargin();
 			return null;
 		};
 
@@ -246,30 +235,26 @@ describe( 'useUpdateBodyMargin', () => {
 		expect( true ).toBe( true );
 	} );
 
-	test( 'should debounce multiple calls', () => {
+	test( 'should debounce multiple rapid resizes', () => {
 		// Create a mock ref with clientHeight
 		const headerElement = { current: { clientHeight: 100 } };
 		const headerItemSlot = { fills: [] };
 
-		// Create a test component to use the hook
 		const TestComponent = () => {
-			const updateMargin = useUpdateBodyMargin( {
+			useUpdateBodyMargin( {
 				headerElement,
 				headerItemSlot,
 			} );
-
-			// Call updateBodyMargin multiple times
-			updateMargin();
-			updateMargin();
-			updateMargin();
-
 			return null;
 		};
 
 		render( <TestComponent /> );
 
-		// Fast-forward timers to trigger the debounced function
+		// Simulate rapid resize events — hook should debounce them.
 		act( () => {
+			window.dispatchEvent( new Event( 'resize' ) );
+			window.dispatchEvent( new Event( 'resize' ) );
+			window.dispatchEvent( new Event( 'resize' ) );
 			jest.advanceTimersByTime( 200 );
 		} );
 
@@ -299,7 +284,6 @@ describe( 'BaseHeader', () => {
 		const props = {
 			isEmbedded: false,
 			query: {},
-			showReminderBar: false,
 			sections: [ 'WooCommerce' ],
 			leftAlign: true,
 		};
@@ -313,31 +297,6 @@ describe( 'BaseHeader', () => {
 
 		// Check page title
 		expect( header.textContent ).toBe( 'WooCommerce' );
-
-		// Check reminder bar is not rendered
-		expect(
-			screen.queryByTestId( 'tasks-reminder-bar' )
-		).not.toBeInTheDocument();
-	} );
-
-	test( 'should render with reminder bar when showReminderBar is true', () => {
-		const props = {
-			isEmbedded: false,
-			query: {},
-			showReminderBar: true,
-			sections: [ 'WooCommerce' ],
-		};
-
-		render( <BaseHeader { ...props } /> );
-
-		// Check reminder bar is rendered
-		expect(
-			screen.getByTestId( 'tasks-reminder-bar' )
-		).toBeInTheDocument();
-		expect( screen.getByTestId( 'tasks-reminder-bar' ) ).toHaveAttribute(
-			'data-task-list-id',
-			'setup'
-		);
 	} );
 
 	test( 'should render with is-scrolled class when isScrolled is true', () => {
@@ -347,7 +306,6 @@ describe( 'BaseHeader', () => {
 		const props = {
 			isEmbedded: false,
 			query: {},
-			showReminderBar: false,
 			sections: [ 'WooCommerce' ],
 		};
 
@@ -364,7 +322,6 @@ describe( 'BaseHeader', () => {
 		const props = {
 			isEmbedded: false,
 			query: {},
-			showReminderBar: false,
 			sections: [ 'WooCommerce' ],
 			leftAlign: false,
 		};
@@ -390,7 +347,6 @@ describe( 'BaseHeader', () => {
 		const props = {
 			isEmbedded: false,
 			query: {},
-			showReminderBar: false,
 			sections: [ 'WooCommerce' ],
 		};
 
@@ -404,7 +360,6 @@ describe( 'BaseHeader', () => {
 		const props = {
 			isEmbedded: true,
 			query: { page: 'wc-admin' },
-			showReminderBar: false,
 			sections: [ 'WooCommerce' ],
 		};
 
@@ -433,7 +388,6 @@ describe( 'BaseHeader', () => {
 		const props = {
 			isEmbedded: false,
 			query: {},
-			showReminderBar: false,
 			sections: [ 'WooCommerce' ],
 			children: <div data-testid="child-component">Child Component</div>,
 		};

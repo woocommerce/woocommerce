@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Remove the task list reminder bar from WooCommerce admin. The Finish setup entry in the activity panel remains as a quieter, non-obstructive alternative.
