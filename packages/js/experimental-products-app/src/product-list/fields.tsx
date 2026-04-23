@@ -33,9 +33,6 @@ import { fieldExtensions as productStatusFieldExtensions } from '../fields/produ
 import { fieldExtensions as regularPriceFieldExtensions } from '../fields/regular_price/field';
 import { fieldExtensions as salePriceFieldExtensions } from '../fields/sale_price/field';
 import { fieldExtensions as scheduleSaleFieldExtensions } from '../fields/schedule_sale/field';
-import { fieldExtensions as seoDescriptionFieldExtensions } from '../fields/seo_description/field';
-import { fieldExtensions as seoPreviewFieldExtensions } from '../fields/seo_preview/field';
-import { fieldExtensions as seoTitleFieldExtensions } from '../fields/seo_title/field';
 import { fieldExtensions as shippingClassFieldExtensions } from '../fields/shipping_class/field';
 import { fieldExtensions as shippingSummaryFieldExtensions } from '../fields/shipping_summary/field';
 import { fieldExtensions as shortDescriptionFieldExtensions } from '../fields/short_description/field';
@@ -47,7 +44,6 @@ import { fieldExtensions as taxStatusFieldExtensions } from '../fields/tax_statu
 import type { ProductEntityRecord } from '../fields/types';
 import { fieldExtensions as upsellIdsFieldExtensions } from '../fields/upsell_ids/field';
 import { fieldExtensions as visibilitySummaryFieldExtensions } from '../fields/visibility_summary/field';
-import { fieldExtensions as visibleInPosFieldExtensions } from '../fields/visible_in_pos/field';
 import { fieldExtensions as weightFieldExtensions } from '../fields/weight/field';
 import { fieldExtensions as widthFieldExtensions } from '../fields/width/field';
 
@@ -97,59 +93,50 @@ const PRODUCT_LIST_FIELD_IDS = [
 	'seo_title',
 	'seo_description',
 	'seo_preview',
-	'visible_in_pos',
 ] as const;
 
-type ProductListFieldId = ( typeof PRODUCT_LIST_FIELD_IDS )[ number ];
-
-const PRODUCT_LIST_FIELD_EXTENSIONS: Record<
-	ProductListFieldId,
-	ProductFieldExtensions
-> = {
-	name: nameFieldExtensions,
-	short_description: shortDescriptionFieldExtensions,
-	description: descriptionFieldExtensions,
-	images: imagesFieldExtensions,
-	images_count: imagesCountFieldExtensions,
-	product_status: productStatusFieldExtensions,
-	sku: skuFieldExtensions,
-	price: priceFieldExtensions as ProductFieldExtensions,
-	regular_price: regularPriceFieldExtensions,
-	sale_price: salePriceFieldExtensions,
-	schedule_sale: scheduleSaleFieldExtensions,
-	date_on_sale_from: dateOnSaleFromFieldExtensions,
-	date_on_sale_to: dateOnSaleToFieldExtensions,
-	on_sale: onSaleFieldExtensions,
-	price_summary: priceSummaryFieldExtensions,
-	stock: stockFieldExtensions,
-	stock_quantity: stockQuantityFieldExtensions,
-	manage_stock: manageStockFieldExtensions,
-	inventory_summary: inventorySummaryFieldExtensions,
-	categories: categoriesFieldExtensions,
-	tags: tagsFieldExtensions,
-	organization_summary: organizationSummaryFieldExtensions,
-	featured: featuredFieldExtensions,
-	catalog_visibility: catalogVisibilityFieldExtensions,
-	visibility_summary: visibilitySummaryFieldExtensions,
-	downloadable: downloadableFieldExtensions,
-	downloadable_count: downloadableCountFieldExtensions,
-	external_url: externalUrlFieldExtensions,
-	button_text: buttonTextFieldExtensions,
-	weight: weightFieldExtensions,
-	length: lengthFieldExtensions,
-	width: widthFieldExtensions,
-	height: heightFieldExtensions,
-	shipping_class: shippingClassFieldExtensions,
-	shipping_summary: shippingSummaryFieldExtensions,
-	tax_status: taxStatusFieldExtensions,
-	upsell_ids: upsellIdsFieldExtensions,
-	cross_sell_ids: crossSellIdsFieldExtensions,
-	linked_products_count: linkedProductsCountFieldExtensions,
-	seo_title: seoTitleFieldExtensions,
-	seo_description: seoDescriptionFieldExtensions,
-	seo_preview: seoPreviewFieldExtensions,
-	visible_in_pos: visibleInPosFieldExtensions,
-};
+const PRODUCT_LIST_FIELD_EXTENSIONS: Record< string, ProductFieldExtensions > =
+	{
+		name: nameFieldExtensions,
+		short_description: shortDescriptionFieldExtensions,
+		description: descriptionFieldExtensions,
+		images: imagesFieldExtensions,
+		images_count: imagesCountFieldExtensions,
+		product_status: productStatusFieldExtensions,
+		sku: skuFieldExtensions,
+		price: priceFieldExtensions as ProductFieldExtensions,
+		regular_price: regularPriceFieldExtensions,
+		sale_price: salePriceFieldExtensions,
+		schedule_sale: scheduleSaleFieldExtensions,
+		date_on_sale_from: dateOnSaleFromFieldExtensions,
+		date_on_sale_to: dateOnSaleToFieldExtensions,
+		on_sale: onSaleFieldExtensions,
+		price_summary: priceSummaryFieldExtensions,
+		stock: stockFieldExtensions,
+		stock_quantity: stockQuantityFieldExtensions,
+		manage_stock: manageStockFieldExtensions,
+		inventory_summary: inventorySummaryFieldExtensions,
+		categories: categoriesFieldExtensions,
+		tags: tagsFieldExtensions,
+		organization_summary: organizationSummaryFieldExtensions,
+		featured: featuredFieldExtensions,
+		catalog_visibility: catalogVisibilityFieldExtensions,
+		visibility_summary: visibilitySummaryFieldExtensions,
+		downloadable: downloadableFieldExtensions,
+		downloadable_count: downloadableCountFieldExtensions,
+		external_url: externalUrlFieldExtensions,
+		button_text: buttonTextFieldExtensions,
+		weight: weightFieldExtensions,
+		length: lengthFieldExtensions,
+		width: widthFieldExtensions,
+		height: heightFieldExtensions,
+		shipping_class: shippingClassFieldExtensions,
+		shipping_summary: shippingSummaryFieldExtensions,
+		tax_status: taxStatusFieldExtensions,
+		upsell_ids: upsellIdsFieldExtensions,
+		cross_sell_ids: crossSellIdsFieldExtensions,
+		linked_products_count: linkedProductsCountFieldExtensions,
+	};
 
 export const productFields: ProductField[] = PRODUCT_LIST_FIELD_IDS.map(
 	( id ) => ( {
