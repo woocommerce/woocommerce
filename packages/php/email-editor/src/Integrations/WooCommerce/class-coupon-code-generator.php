@@ -64,8 +64,8 @@ class Coupon_Code_Generator {
 
 			$coupon->set_free_shipping( ! empty( $attrs['freeShipping'] ) );
 
-			$coupon->set_minimum_amount( (string) ( $attrs['minimumAmount'] ?? '' ) );
-			$coupon->set_maximum_amount( (string) ( $attrs['maximumAmount'] ?? '' ) );
+			$coupon->set_minimum_amount( (float) ( $attrs['minimumAmount'] ?? 0 ) );
+			$coupon->set_maximum_amount( (float) ( $attrs['maximumAmount'] ?? 0 ) );
 			$coupon->set_individual_use( ! empty( $attrs['individualUse'] ) );
 			$coupon->set_exclude_sale_items( ! empty( $attrs['excludeSaleItems'] ) );
 
@@ -86,8 +86,10 @@ class Coupon_Code_Generator {
 
 			$coupon->set_email_restrictions( array_unique( array_filter( $email_restrictions ) ) );
 
-			$coupon->set_usage_limit( (int) ( $attrs['usageLimit'] ?? 0 ) );
-			$coupon->set_usage_limit_per_user( (int) ( $attrs['usageLimitPerUser'] ?? 0 ) );
+			$usage_limit          = $attrs['usageLimit'] ?? 0;
+			$usage_limit_per_user = $attrs['usageLimitPerUser'] ?? 0;
+			$coupon->set_usage_limit( is_numeric( $usage_limit ) ? (int) $usage_limit : 0 );
+			$coupon->set_usage_limit_per_user( is_numeric( $usage_limit_per_user ) ? (int) $usage_limit_per_user : 0 );
 
 			$coupon->set_description(
 				__( 'Auto-generated coupon by WooCommerce Email Editor', 'woocommerce' )
@@ -146,8 +148,12 @@ class Coupon_Code_Generator {
 	 */
 	private function extract_ids( array $items ): array {
 		return array_map(
-			function ( $item ) {
-				return (int) ( is_array( $item ) ? ( $item['id'] ?? 0 ) : 0 );
+			function ( $item ): int {
+				if ( ! is_array( $item ) ) {
+					return 0;
+				}
+				$id = $item['id'] ?? 0;
+				return is_numeric( $id ) ? (int) $id : 0;
 			},
 			$items
 		);

@@ -87,40 +87,42 @@ export function ProductSearch( {
 	const tokenValues = value.map( ( item ) => item.title );
 
 	return (
-		<FormTokenField
-			label={ label }
-			value={ tokenValues }
-			suggestions={ suggestions }
-			onInputChange={ ( query ) => {
-				if ( debounceRef.current ) {
-					clearTimeout( debounceRef.current );
-				}
-				debounceRef.current = setTimeout( () => {
-					search( query );
-				}, 300 );
-			} }
-			onChange={ ( tokens ) => {
-				const items: Item[] = tokens
-					.map( ( token ) => {
-						const existing = value.find(
-							( v ) => v.title === token
-						);
-						if ( existing ) {
-							return existing;
-						}
-						const result = searchResults.find(
-							( r ) => r.name === token
-						);
-						if ( result ) {
-							return { id: result.id, title: result.name };
-						}
-						return null;
-					} )
-					.filter( ( item ): item is Item => item !== null );
-				onChange( items );
-			} }
-			__experimentalExpandOnFocus
-			__next40pxDefaultSize
-		/>
+		<div style={ { marginBottom: '24px' } }>
+			<FormTokenField
+				label={ label }
+				value={ tokenValues }
+				suggestions={ suggestions }
+				onInputChange={ ( query ) => {
+					if ( debounceRef.current ) {
+						clearTimeout( debounceRef.current );
+					}
+					debounceRef.current = setTimeout( () => {
+						search( query );
+					}, 300 );
+				} }
+				onChange={ ( tokens ) => {
+					const items: Item[] = tokens
+						.map( ( token ) => {
+							const existing = value.find(
+								( v ) => v.title === token
+							);
+							if ( existing ) {
+								return existing;
+							}
+							const result = searchResults.find(
+								( r ) => r.name === token
+							);
+							if ( result ) {
+								return { id: result.id, title: result.name };
+							}
+							return null;
+						} )
+						.filter( ( item ): item is Item => item !== null );
+					onChange( items );
+				} }
+				__experimentalExpandOnFocus
+				__next40pxDefaultSize
+			/>
+		</div>
 	);
 }
