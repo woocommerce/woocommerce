@@ -40,7 +40,8 @@ export function DeprecatedSave( props: {
 	attributes: Record< string, unknown >;
 } ): JSX.Element {
 	const { attributes } = props;
-	const couponCode = attributes.couponCode as string;
+	const couponCode =
+		typeof attributes.couponCode === 'string' ? attributes.couponCode : '';
 
 	const blockProps = useBlockProps.save();
 

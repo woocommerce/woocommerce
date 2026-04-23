@@ -75,7 +75,7 @@ class CouponCode extends AbstractBlock {
 	 *
 	 * @param array $attributes Block attributes.
 	 */
-	protected function enqueue_data( array $attributes = [] ): void {
+	protected function enqueue_data( array $attributes = array() ): void {
 		parent::enqueue_data( $attributes );
 
 		if ( ! $this->asset_data_registry->exists( 'couponTypes' ) && function_exists( 'wc_get_coupon_types' ) ) {
