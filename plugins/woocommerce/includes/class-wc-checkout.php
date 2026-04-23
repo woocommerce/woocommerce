@@ -472,9 +472,14 @@ class WC_Checkout {
 
 			// Defense-in-depth: if the cart still has items but the persisted order has none,
 			// the save silently dropped line items (e.g. a $wpdb->insert() returning false).
-			// Bail out so the caller can retry rather than completing a paid-but-empty order.
-			if ( WC()->cart->get_cart_contents_count() > 0 && 0 === count( $order->get_items() ) ) {
-				throw new Exception( __( 'Order items could not be saved. Please try again.', 'woocommerce' ) );
+			// Re-read the order from the data store so we check DB state, not the in-memory
+			// copy that save_items() populated. Bail out so the caller can retry rather than
+			// completing a paid-but-empty order.
+			if ( WC()->cart->get_cart_contents_count() > 0 ) {
+				$persisted_order = wc_get_order( $order_id );
+				if ( ! $persisted_order || 0 === count( $persisted_order->get_items() ) ) {
+					throw new Exception( __( 'Order items could not be saved. Please try again.', 'woocommerce' ) );
+				}
 			}
 
 			/**
