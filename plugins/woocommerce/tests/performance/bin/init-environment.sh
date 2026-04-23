@@ -39,7 +39,7 @@ wp-env run tests-cli wp config set WP_HTTP_BLOCK_EXTERNAL true --raw --type=cons
 _wp_container="$(docker ps --filter name=tests-wordpress --format '{{.Names}}' | head -1)"
 _db_container="$(docker ps --filter name=tests-mysql --format '{{.Names}}' | head -1)"
 if [ -z "$_wp_container" ] || [ -z "$_db_container" ]; then
-    echo "Error: wp-env containers not found. Run 'wp-env start' first." >&2
+    echo "Error: wp-env containers not found. Run 'pnpm env:perf' first." >&2
     exit 1
 fi
 
