@@ -108,6 +108,55 @@ class WCTransactionalEmailPostsGenerator {
 	}
 
 	/**
+	 * Resolve the block template name for the given email.
+	 *
+	 * Returns `$email->template_block` when set, otherwise derives it from
+	 * `$email->template_plain` by replacing the `plain` segment with `block`
+	 * (e.g. `emails/plain/customer-invoice.php` becomes `emails/block/customer-invoice.php`).
+	 *
+	 * @param \WC_Email $email The email object.
+	 * @return string The block template name, or an empty string if none can be resolved.
+	 *
+	 * @since 10.8.0
+	 */
+	public static function resolve_block_template_name( $email ): string {
+		if ( ! empty( $email->template_block ) ) {
+			return (string) $email->template_block;
+		}
+
+		$template_plain = (string) $email->template_plain;
+		if ( '' === $template_plain ) {
+			return '';
+		}
+
+		return str_replace( 'plain', 'block', $template_plain );
+	}
+
+	/**
+	 * Resolve the absolute path of the block template for the given email.
+	 *
+	 * Uses {@see self::resolve_block_template_name()} for name resolution and then
+	 * delegates to `wc_locate_template()` so theme overrides are honored.
+	 *
+	 * @param \WC_Email $email The email object.
+	 * @return string The absolute template path, or an empty string if none can be resolved.
+	 *
+	 * @since 10.8.0
+	 */
+	public static function resolve_block_template_path( $email ): string {
+		$template_name = self::resolve_block_template_name( $email );
+		if ( '' === $template_name ) {
+			return '';
+		}
+
+		return (string) wc_locate_template(
+			$template_name,
+			'',
+			(string) $email->template_base
+		);
+	}
+
+	/**
 	 * Get the email template for the given email.
 	 *
 	 * Looks for the initial email block content in plugins/woocommerce/templates/emails/block.
@@ -116,14 +165,14 @@ class WCTransactionalEmailPostsGenerator {
 	 * @return string The email template.
 	 */
 	public function get_email_template( $email ) {
-		$template_name = ! empty( $email->template_block ) ? $email->template_block : str_replace( 'plain', 'block', $email->template_plain );
+		$template_name = self::resolve_block_template_name( $email );
 
 		try {
 			$template_html = wc_get_template_html(
 				$template_name,
 				array(),
 				'',
-				$email->template_base ?? ''
+				(string) $email->template_base
 			);
 		} catch ( \Exception $e ) {
 			// wc_get_template_html() uses ob_start(), so we need to clean the output buffer if an exception is thrown.
@@ -289,6 +338,17 @@ class WCTransactionalEmailPostsGenerator {
 		 * @param \WC_Email $email_data The WooCommerce email object.
 		 */
 		$post_data = apply_filters( 'woocommerce_email_content_post_data', $post_data, $email_type, $email_data );
+
+		// Sync meta stamp for emails participating in template update propagation.
+		$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( (string) $email_data->id );
+		if ( null !== $sync_config ) {
+			if ( ! isset( $post_data['meta_input'] ) || ! is_array( $post_data['meta_input'] ) ) {
+				$post_data['meta_input'] = array();
+			}
+			$post_data['meta_input']['_wc_email_template_version']     = (string) $sync_config['version'];
+			$post_data['meta_input']['_wc_email_template_source_hash'] = sha1( (string) ( $post_data['post_content'] ?? '' ) );
+			$post_data['meta_input']['_wc_email_last_synced_at']       = gmdate( 'Y-m-d H:i:s' );
+		}
 
 		$post_id = wp_insert_post( $post_data, true );
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Encapsulate product lookup table refresh behind a dedicated public method
