@@ -84,8 +84,8 @@ class WC_Admin_Taxonomies {
 				add_action( $taxonomy . '_pre_add_form', array( $this, 'product_attribute_description' ) );
 				add_action( $taxonomy . '_add_form_fields', array( $this, 'add_product_attribute_term_fields' ) );
 				add_action( $taxonomy . '_edit_form_fields', array( $this, 'edit_product_attribute_term_fields' ), 10, 1 );
-				add_filter( "manage_edit-{$taxonomy}_columns", array( $this, 'add_product_attribute_term_columns' ) );
-				add_filter( "manage_{$taxonomy}_custom_column", array( $this, 'render_product_attribute_term_columns' ), 10, 3 );
+				add_filter( "manage_edit-{$taxonomy}_columns", array( $this, 'add_term_color_columns' ) );
+				add_filter( "manage_{$taxonomy}_custom_column", array( $this, 'render_term_color_column' ), 10, 3 );
 			}
 		}
 
@@ -316,6 +316,8 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @return bool
+	 *
+	 * @internal
 	 */
 	private function is_visual_product_attribute_taxonomy( $taxonomy ) {
 		if ( ! taxonomy_is_product_attribute( $taxonomy ) ) {
@@ -338,6 +340,8 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @param string $taxonomy Taxonomy slug.
 	 * @return void
+	 *
+	 * @internal
 	 */
 	public function add_product_attribute_term_fields( $taxonomy ) {
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
@@ -356,6 +360,8 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @param WP_Term $term Current term.
 	 * @return void
+	 *
+	 * @internal
 	 */
 	public function edit_product_attribute_term_fields( $term ) {
 		if ( ! $this->is_visual_product_attribute_taxonomy( $term->taxonomy ) ) {
@@ -446,8 +452,10 @@ class WC_Admin_Taxonomies {
 	 *
 	 * @param array $columns Existing columns.
 	 * @return array
+	 *
+	 * @internal
 	 */
-	public function add_product_attribute_term_columns( $columns ) {
+	public function add_term_color_columns( $columns ) {
 		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return $columns;
@@ -469,14 +477,16 @@ class WC_Admin_Taxonomies {
 	}
 
 	/**
-	 * Render custom columns for product attribute terms.
+	 * Render color column for product attribute terms.
 	 *
 	 * @param string $columns Existing columns HTML.
 	 * @param string $column  Current column key.
 	 * @param int    $term_id Term ID.
 	 * @return string
+	 *
+	 * @internal
 	 */
-	public function render_product_attribute_term_columns( $columns, $column, $term_id ) {
+	public function render_term_color_column( $columns, $column, $term_id ) {
 		if ( 'color' !== $column ) {
 			return $columns;
 		}
@@ -499,7 +509,7 @@ class WC_Admin_Taxonomies {
 		}
 
 		$swatch = sprintf(
-			'<span class="wc-color-swatch" style="background-color:%s;" aria-hidden="true"></span>',
+			'<span class="wc-admin-color-swatch" style="background-color:%s;" aria-hidden="true"></span>',
 			esc_attr( $color_value )
 		);
 
@@ -624,9 +634,13 @@ class WC_Admin_Taxonomies {
 			return;
 		}
 
+		$handle = 'wc-admin-taxonomies';
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
+		wp_enqueue_script( $handle );
+
 		// Ensure the tooltip is displayed when the image column is disabled on product categories.
 		wp_add_inline_script(
-			$this->register_admin_footer_script_handle(),
+			$handle,
 			sprintf(
 				"(function() {
 					'use strict';
@@ -649,6 +663,8 @@ class WC_Admin_Taxonomies {
 	 * Admin footer scripts for visual attribute taxonomy screens.
 	 *
 	 * @return void
+	 *
+	 * @internal
 	 */
 	public function scripts_at_visual_attribute_screen_footer() {
 		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
@@ -656,8 +672,11 @@ class WC_Admin_Taxonomies {
 			return;
 		}
 
+		$handle = 'wc-admin-visual-attribute';
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
+		wp_enqueue_script( $handle );
 		wp_add_inline_script(
-			$this->register_admin_footer_script_handle(),
+			$handle,
 			"(function() {
 				'use strict';
 				const addFormColor = document.querySelector('.form-field.term-color-wrap');
@@ -673,19 +692,6 @@ class WC_Admin_Taxonomies {
 				}
 			})();"
 		);
-	}
-
-	/**
-	 * Register and enqueue the shared admin footer script handle.
-	 *
-	 * @return string
-	 */
-	private function register_admin_footer_script_handle() {
-		$handle = 'wc-admin-taxonomies';
-		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
-		wp_enqueue_script( $handle );
-
-		return $handle;
 	}
 }
 

@@ -215,15 +215,6 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'menu_order', $attribute->order_by, 'Any invalid property changes will be reset to their defaults.' );
 	}
 
-	public function get_attribute_names_and_slugs() {
-		return array(
-			array( 'Dash Me', 'dash-me' ),
-			array( '', '' ),
-			array( 'pa_SubStr', 'substr' ),
-			array( 'ĂnîC°Dę', 'anicde' ),
-		);
-	}
-
 	/**
 	 * Test visual attribute type registration and persistence.
 	 */
@@ -251,5 +242,14 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertArrayNotHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should not be available in classic themes without a visual attribute.' );
 
 		switch_theme( 'twentytwentyfour' );
+	}
+
+	public function get_attribute_names_and_slugs() {
+		return array(
+			array( 'Dash Me', 'dash-me' ),
+			array( '', '' ),
+			array( 'pa_SubStr', 'substr' ),
+			array( 'ĂnîC°Dę', 'anicde' ),
+		);
 	}
 }
