@@ -1424,7 +1424,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				 * @param string        $code   Coupon code.
 				 * @param WC_Order      $this   Order instance.
 				 */
-				do_action( 'woocommerce_removed_coupon', $code, $this );
+				do_action( 'woocommerce_order_removed_coupon', $code, $this );
 
 				return true;
 			}
