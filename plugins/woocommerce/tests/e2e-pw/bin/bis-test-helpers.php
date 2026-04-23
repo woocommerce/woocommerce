@@ -1,5 +1,4 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Plugin Name: Back in Stock Notifications — e2e test helpers
  * Description: Small utilities scoped to the BIS Playwright specs.
@@ -11,6 +10,8 @@ declare( strict_types = 1 );
  *
  * @package Automattic\WooCommerce\E2EPlaywright
  */
+
+declare( strict_types=1 );
 
 add_filter(
 	'woocommerce_customer_stock_notifications_first_batch_delay',
