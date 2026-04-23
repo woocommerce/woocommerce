@@ -46,4 +46,23 @@ class UtmHelperTests extends \WC_Unit_Test_Case {
 	public function test_add_email_utm_params_returns_empty_for_empty_input() {
 		$this->assertSame( '', UtmHelper::add_email_utm_params( '' ) );
 	}
+
+	/**
+	 * @testdox Should sanitize the medium argument so only URL-safe characters land in the outbound URL.
+	 */
+	public function test_add_email_utm_params_sanitizes_medium() {
+		$url = UtmHelper::add_email_utm_params( 'https://shop.example.com/', 'Weird Medium!' );
+
+		// sanitize_key() lowercases and strips spaces / punctuation.
+		$this->assertStringContainsString( 'utm_medium=weirdmedium', $url );
+	}
+
+	/**
+	 * @testdox Should fall back to the default medium when sanitization strips everything.
+	 */
+	public function test_add_email_utm_params_falls_back_to_default_medium_on_empty_sanitized_value() {
+		$url = UtmHelper::add_email_utm_params( 'https://shop.example.com/', '!!!' );
+
+		$this->assertStringContainsString( 'utm_medium=email', $url );
+	}
 }

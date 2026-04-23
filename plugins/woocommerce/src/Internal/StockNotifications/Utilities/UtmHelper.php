@@ -9,6 +9,8 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Utilities;
  *
  * Centralizes the `utm_source` / `utm_medium` values so order attribution stays consistent
  * across all three email types (verify, verified, back-in-stock).
+ *
+ * @internal
  */
 class UtmHelper {
 
@@ -34,10 +36,18 @@ class UtmHelper {
 			return $url;
 		}
 
+		// Defensive: lock down the medium to a safe URL-friendly slug, falling back to the default
+		// if sanitization strips everything. Prevents any future caller from piping user-controlled
+		// input into the outbound tracking URL.
+		$sanitized_medium = sanitize_key( $medium );
+		if ( '' === $sanitized_medium ) {
+			$sanitized_medium = self::UTM_MEDIUM_EMAIL;
+		}
+
 		return add_query_arg(
 			array(
 				'utm_source' => self::UTM_SOURCE,
-				'utm_medium' => $medium,
+				'utm_medium' => $sanitized_medium,
 			),
 			$url
 		);
