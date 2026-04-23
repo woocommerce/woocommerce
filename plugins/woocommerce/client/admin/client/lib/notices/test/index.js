@@ -30,7 +30,16 @@ describe( 'createNoticesFromResponse', () => {
 
 	afterEach( () => {
 		if ( originalOnLine ) {
-			Object.defineProperty( window.navigator, 'onLine', originalOnLine );
+			Object.defineProperty(
+				window.navigator,
+				'onLine',
+				originalOnLine
+			);
+		} else {
+			// When `onLine` lives on the prototype (e.g. jsdom), the own
+			// descriptor is undefined. Delete any own override a test
+			// defined so inherited prototype behavior is restored.
+			delete window.navigator.onLine;
 		}
 	} );
 
@@ -91,6 +100,7 @@ describe( 'createNoticesFromResponse', () => {
 			'error',
 			'Updating failed. You are probably offline.'
 		);
+		expect( createNotice ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	test( 'should surface a friendly offline notice for an empty rejection while navigator is offline', () => {
@@ -104,6 +114,7 @@ describe( 'createNoticesFromResponse', () => {
 			'error',
 			'Updating failed. You are probably offline.'
 		);
+		expect( createNotice ).toHaveBeenCalledTimes( 1 );
 		// afterEach restores navigator.onLine.
 	} );
 } );
