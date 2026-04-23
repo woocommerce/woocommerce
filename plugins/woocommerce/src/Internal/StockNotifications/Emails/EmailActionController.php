@@ -140,6 +140,12 @@ class EmailActionController {
 	 */
 	private function process_verification_action( Notification $notification, string $action_key ): void {
 		if ( $notification->check_verification_key( $action_key ) ) {
+			// Guard against re-hits of a still-valid verification URL (double-click, email prefetch,
+			// link-scanner bots). Without this, each hit would re-dispatch the verified email.
+			if ( NotificationStatus::ACTIVE === $notification->get_status() ) {
+				return;
+			}
+
 			$notification->set_status( NotificationStatus::ACTIVE );
 			$notification->set_date_confirmed( time() );
 			$notification->save();

@@ -115,6 +115,30 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should only dispatch the verified email once when the same verification URL is hit repeatedly.
+	 */
+	public function test_verified_email_sent_only_once_on_repeated_verification_hits() {
+		$product      = WC_Helper_Product::create_simple_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_status( NotificationStatus::PENDING );
+		$notification->set_user_email( 'test@example.com' );
+		$key = time() . ':' . wp_fast_hash( 'test' );
+		$notification->update_meta_data( 'verification_action_key', $key );
+		$id = $notification->save();
+
+		$this->email_manager
+			->expects( $this->once() )
+			->method( 'send_verified_email' );
+
+		// First hit transitions PENDING -> ACTIVE and dispatches the verified email.
+		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+
+		// Second hit (double-click, email prefetch, bot) must short-circuit without re-dispatch.
+		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+	}
+
+	/**
 	 * @testdox Should set notification status to cancelled and cancellation source to user on unsubscribe.
 	 */
 	public function test_process_unsubscribe_action_sets_status_cancelled() {
