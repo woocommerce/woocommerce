@@ -2,15 +2,10 @@
  * External dependencies
  */
 import { QRCodeSVG } from 'qrcode.react';
-import React, {
-	createInterpolateElement,
-	useEffect,
-	useRef,
-} from '@wordpress/element';
+import React, { useEffect, useRef } from '@wordpress/element';
 import { Button, Spinner } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
-import { Link } from '@woocommerce/components';
 
 /**
  * Internal dependencies
@@ -124,28 +119,6 @@ export const QRDirectLoginCode = () => {
 						formatTime( secondsRemaining )
 					) }
 				</p>
-				<div>
-					{ createInterpolateElement(
-						__(
-							'Any troubles signing in? Check out the <link>FAQ</link>.',
-							'woocommerce'
-						),
-						{
-							link: (
-								<Link
-									href="https://woocommerce.com/document/android-ios-apps-login-help-faq/"
-									target="_blank"
-									type="external"
-									onClick={ () => {
-										recordEvent(
-											'onboarding_app_login_faq_click'
-										);
-									} }
-								/>
-							),
-						}
-					) }
-				</div>
 			</div>
 		);
 	}
