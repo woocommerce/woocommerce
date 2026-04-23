@@ -339,6 +339,17 @@ class WCTransactionalEmailPostsGenerator {
 		 */
 		$post_data = apply_filters( 'woocommerce_email_content_post_data', $post_data, $email_type, $email_data );
 
+		// Sync meta stamp for emails participating in template update propagation.
+		$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( (string) $email_data->id );
+		if ( null !== $sync_config ) {
+			if ( ! isset( $post_data['meta_input'] ) || ! is_array( $post_data['meta_input'] ) ) {
+				$post_data['meta_input'] = array();
+			}
+			$post_data['meta_input']['_wc_email_template_version']     = (string) $sync_config['version'];
+			$post_data['meta_input']['_wc_email_template_source_hash'] = sha1( (string) ( $post_data['post_content'] ?? '' ) );
+			$post_data['meta_input']['_wc_email_last_synced_at']       = gmdate( 'Y-m-d H:i:s' );
+		}
+
 		$post_id = wp_insert_post( $post_data, true );
 
 		if ( is_wp_error( $post_id ) ) {
