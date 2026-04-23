@@ -57,7 +57,7 @@ class Main {
 	 * HTTP methods to accept.
 	 */
 	public static function is_get_endpoint_enabled(): bool {
-		return wc_string_to_bool( get_option( self::OPTION_GET_ENDPOINT_ENABLED, 'no' ) );
+		return wc_string_to_bool( get_option( self::OPTION_GET_ENDPOINT_ENABLED, 'yes' ) );
 	}
 
 	/**

@@ -61,6 +61,6 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( Main::OPTION_GET_ENDPOINT_ENABLED, $by_id );
 		$this->assertSame( 'checkbox', $by_id[ Main::OPTION_GET_ENDPOINT_ENABLED ]['type'] );
-		$this->assertSame( 'no', $by_id[ Main::OPTION_GET_ENDPOINT_ENABLED ]['default'] );
+		$this->assertSame( 'yes', $by_id[ Main::OPTION_GET_ENDPOINT_ENABLED ]['default'] );
 	}
 }

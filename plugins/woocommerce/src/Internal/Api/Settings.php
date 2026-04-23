@@ -57,9 +57,9 @@ class Settings {
 			),
 			array(
 				'title'   => __( 'Enable GET endpoint', 'woocommerce' ),
-				'desc'    => __( 'Allow GraphQL queries over GET in addition to POST.', 'woocommerce' ),
+				'desc'    => __( 'Allow GraphQL queries over GET in addition to POST', 'woocommerce' ),
 				'id'      => Main::OPTION_GET_ENDPOINT_ENABLED,
-				'default' => 'no',
+				'default' => 'yes',
 				'type'    => 'checkbox',
 			),
 			array(
