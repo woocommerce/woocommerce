@@ -21,15 +21,52 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Captured `wp_mail()` recipients.
+	 *
+	 * @var array<string,bool>
+	 */
+	private $sent_to = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		// Short-circuit `wp_mail()` so the tests never attempt a real SMTP handoff.
+		// Returning a non-null value from `pre_wp_mail` signals WP core to skip the actual send.
+		add_filter( 'pre_wp_mail', array( $this, 'capture_pre_wp_mail' ), 10, 2 );
+
 		$this->sut = new EmailManager();
 		$this->sut->init();
 
 		// Boot the mailer so email classes are registered.
 		WC()->mailer();
+	}
+
+	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		remove_filter( 'pre_wp_mail', array( $this, 'capture_pre_wp_mail' ), 10 );
+		$this->sent_to = array();
+		parent::tearDown();
+	}
+
+	/**
+	 * `pre_wp_mail` filter: record the recipient and short-circuit the actual send.
+	 *
+	 * @param bool|null $short_circuit Null means "keep going", non-null short-circuits.
+	 * @param array     $atts          Mail arguments.
+	 * @return bool
+	 */
+	public function capture_pre_wp_mail( $short_circuit, $atts ): bool {
+		unset( $short_circuit );
+		$recipients = is_array( $atts['to'] ?? null ) ? $atts['to'] : array( $atts['to'] ?? '' );
+		foreach ( $recipients as $recipient ) {
+			$this->sent_to[ $recipient ] = true;
+		}
+		return true;
 	}
 
 	/**
@@ -44,7 +81,7 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should set the verify email object to the given notification when send_verify_email is called.
+	 * @testdox Should dispatch the verify email to the notification's user email when send_verify_email is called.
 	 */
 	public function test_send_verify_email_prepares_verify_email_for_notification() {
 		$notification = $this->build_notification();
@@ -54,10 +91,12 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$emails = WC()->mailer()->get_emails();
 		$verify = $emails['WC_Email_Customer_Stock_Notification_Verify'];
 		$this->assertSame( $notification->get_user_email(), $verify->get_recipient() );
+		// Behavior assertion: the trigger path actually dispatched mail to the expected recipient.
+		$this->assertArrayHasKey( $notification->get_user_email(), $this->sent_to );
 	}
 
 	/**
-	 * @testdox Should set the verified email object to the given notification when send_verified_email is called.
+	 * @testdox Should dispatch the verified email to the notification's user email when send_verified_email is called.
 	 */
 	public function test_send_verified_email_prepares_verified_email_for_notification() {
 		$notification = $this->build_notification();
@@ -67,6 +106,8 @@ class EmailManagerTests extends \WC_Unit_Test_Case {
 		$emails   = WC()->mailer()->get_emails();
 		$verified = $emails['WC_Email_Customer_Stock_Notification_Verified'];
 		$this->assertSame( $notification->get_user_email(), $verified->get_recipient() );
+		// Behavior assertion: the trigger path actually dispatched mail to the expected recipient.
+		$this->assertArrayHasKey( $notification->get_user_email(), $this->sent_to );
 	}
 
 	/**
