@@ -212,6 +212,26 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A nonce minted for notification A must not validate for notification B.
+	 */
+	public function test_resend_request_rejects_cross_notification_nonce_replay() {
+		$victim    = $this->build_pending_notification();
+		$attacker  = $this->build_pending_notification();
+
+		// Attacker mints a valid nonce for their own notification and replays it on the victim's id.
+		$_GET[ NotificationManagementService::RESEND_QUERY_ARG ] = (string) $victim->get_id();
+		$_GET['_wpnonce']                                        = wp_create_nonce(
+			NotificationManagementService::RESEND_NONCE_ACTION . '_' . $attacker->get_id()
+		);
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verify_email' );
+
+		$this->sut->maybe_process_resend_request();
+	}
+
+	/**
 	 * @testdox Should be a no-op when the request does not carry the resend query arg.
 	 */
 	public function test_resend_request_noop_without_query_arg() {
@@ -246,6 +266,6 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 	 */
 	private function seed_resend_request( int $notification_id ): void {
 		$_GET[ NotificationManagementService::RESEND_QUERY_ARG ] = (string) $notification_id;
-		$_GET['_wpnonce']                                        = wp_create_nonce( NotificationManagementService::RESEND_NONCE_ACTION );
+		$_GET['_wpnonce']                                        = wp_create_nonce( NotificationManagementService::RESEND_NONCE_ACTION . '_' . $notification_id );
 	}
 }

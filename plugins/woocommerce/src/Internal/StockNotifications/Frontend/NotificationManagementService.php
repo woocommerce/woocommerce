@@ -70,7 +70,7 @@ class NotificationManagementService {
 			$notification->get_product_permalink()
 		);
 
-		return wp_nonce_url( $url, self::RESEND_NONCE_ACTION );
+		return wp_nonce_url( $url, self::RESEND_NONCE_ACTION . '_' . $notification->get_id() );
 	}
 
 	/**
@@ -97,11 +97,13 @@ class NotificationManagementService {
 		$notification_id = absint( wp_unslash( $_GET[ self::RESEND_QUERY_ARG ] ) );
 		$nonce           = isset( $_GET['_wpnonce'] ) ? sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ) : '';
 
-		if ( ! wp_verify_nonce( $nonce, self::RESEND_NONCE_ACTION ) ) {
+		if ( empty( $notification_id ) ) {
 			return;
 		}
 
-		if ( empty( $notification_id ) ) {
+		// Scope the nonce per-notification so one valid resend URL cannot be replayed
+		// across the notification id query arg to trigger emails for other customers.
+		if ( ! wp_verify_nonce( $nonce, self::RESEND_NONCE_ACTION . '_' . $notification_id ) ) {
 			return;
 		}
 
