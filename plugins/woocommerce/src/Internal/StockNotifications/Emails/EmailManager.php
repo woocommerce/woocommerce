@@ -38,9 +38,6 @@ class EmailManager {
 		// Setup email hooks & handlers.
 		add_filter( 'woocommerce_email_classes', array( $this, 'email_classes' ) );
 
-		// Add "transactional" emails.
-		add_action( 'woocommerce_email_actions', array( $this, 'add_transactional_emails' ) );
-
 		// Setup styles.
 		add_filter( 'woocommerce_email_styles', array( $this, 'add_stylesheets' ), 10, 2 );
 
@@ -68,29 +65,6 @@ class EmailManager {
 		$emails['WC_Email_Customer_Stock_Notification_Verified'] = new CustomerStockNotificationVerifiedEmail();
 
 		return $emails;
-	}
-
-	/**
-	 * Adds transactional emails.
-	 *
-	 * Stock notifications are sent via a custom AS job.
-	 * Additionally, two transactional emails are dispatched during the signup and verification processes,
-	 * which need to be included in the actions array to support deferred email functionality.
-	 *
-	 * @hook woocommerce_defer_transactional_emails
-	 *
-	 * @param array $actions The list of actions.
-	 * @return array
-	 */
-	public function add_transactional_emails( $actions ) {
-		if ( ! is_array( $actions ) ) {
-			return $actions;
-		}
-
-		$actions[] = 'woocommerce_customer_stock_notification_verify';
-		$actions[] = 'woocommerce_customer_stock_notification_verified';
-
-		return $actions;
 	}
 
 	/**
@@ -279,9 +253,35 @@ class EmailManager {
 	 * @return void
 	 */
 	public function send_stock_notification_email( Notification $notification ) {
-		$emails = WC()->mailer()->get_emails();
-		if ( isset( $emails['WC_Email_Customer_Stock_Notification'] ) ) {
-			$emails['WC_Email_Customer_Stock_Notification']->trigger( $notification );
+		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Stock_Notification'] ?? null;
+		if ( $email instanceof CustomerStockNotificationEmail ) {
+			$email->trigger( $notification );
+		}
+	}
+
+	/**
+	 * Send the double opt-in verification email for a stock notification.
+	 *
+	 * @param Notification $notification The notification object.
+	 * @return void
+	 */
+	public function send_verify_email( Notification $notification ) {
+		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Stock_Notification_Verify'] ?? null;
+		if ( $email instanceof CustomerStockNotificationVerifyEmail ) {
+			$email->trigger( $notification );
+		}
+	}
+
+	/**
+	 * Send the sign-up confirmation email for a stock notification.
+	 *
+	 * @param Notification $notification The notification object.
+	 * @return void
+	 */
+	public function send_verified_email( Notification $notification ) {
+		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Stock_Notification_Verified'] ?? null;
+		if ( $email instanceof CustomerStockNotificationVerifiedEmail ) {
+			$email->trigger( $notification );
 		}
 	}
 }

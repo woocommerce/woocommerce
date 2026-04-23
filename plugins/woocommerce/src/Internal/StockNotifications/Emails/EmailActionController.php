@@ -17,6 +17,14 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
  * @package Automattic\WooCommerce\Internal\StockNotifications\Emails
  */
 class EmailActionController {
+
+	/**
+	 * Email manager.
+	 *
+	 * @var EmailManager
+	 */
+	private EmailManager $email_manager;
+
 	/**
 	 * Action token for verifying (double opt-in) a pending notification sign-up.
 	 *
@@ -40,6 +48,17 @@ class EmailActionController {
 	 */
 	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'maybe_process_email_action' ) );
+	}
+
+	/**
+	 * Init the service.
+	 *
+	 * @internal
+	 *
+	 * @param EmailManager $email_manager The email manager.
+	 */
+	final public function init( EmailManager $email_manager ): void {
+		$this->email_manager = $email_manager;
 	}
 
 	/**
@@ -124,6 +143,8 @@ class EmailActionController {
 			$notification->set_status( NotificationStatus::ACTIVE );
 			$notification->set_date_confirmed( time() );
 			$notification->save();
+
+			$this->email_manager->send_verified_email( $notification );
 
 			// We need a cookie-based session for notices to work on frontend pages.
 			if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
