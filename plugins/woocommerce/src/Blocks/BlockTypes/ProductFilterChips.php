@@ -33,7 +33,6 @@ final class ProductFilterChips extends AbstractBlock {
 		$block_context   = $block->context['woocommerce/selectableItems'];
 		$items           = $block_context['items'] ?? array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
-		$select_action   = $block_context['selectAction'] ?? 'toggleFilter';
 		$dynamic_items   = $block_context['dynamicItems'] ?? true;
 		$classes         = '';
 		$style           = '';
@@ -84,9 +83,9 @@ final class ProductFilterChips extends AbstractBlock {
 								role="checkbox"
 								data-wp-bind--id="context.item.id"
 								data-wp-bind--aria-label="context.item.ariaLabel"
-								data-wp-on--click="actions.<?php echo esc_attr( $select_action ); ?>"
+								data-wp-on--click="actions.toggle"
 								data-wp-bind--value="context.item.value"
-								data-wp-bind--aria-checked="context.item.selected"
+								data-wp-bind--aria-checked="state.isSelected"
 							>
 								<span class="wc-block-product-filter-chips__label">
 									<span class="wc-block-product-filter-chips__text" data-wp-text="context.item.label"></span>
@@ -107,14 +106,14 @@ final class ProductFilterChips extends AbstractBlock {
 							<?php if ( ! empty( $item['ariaLabel'] ) ) : ?>
 								aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
 							<?php endif; ?>
-							data-wp-on--click="actions.<?php echo esc_attr( $select_action ); ?>"
+							data-wp-on--click="actions.toggle"
 							value="<?php echo esc_attr( $item['value'] ); ?>"
 							aria-checked="<?php echo ! empty( $item['selected'] ) ? 'true' : 'false'; ?>"
-							data-wp-bind--aria-checked="context.item.selected"
+							data-wp-bind--aria-checked="state.isSelected"
 							<?php if ( $dynamic_items ) : ?>
 								data-wp-each-child
-								<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<?php endif; ?>
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						>
 							<span class="wc-block-product-filter-chips__label">
 								<span class="wc-block-product-filter-chips__text">

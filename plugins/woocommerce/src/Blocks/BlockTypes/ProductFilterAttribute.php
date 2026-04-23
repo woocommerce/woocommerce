@@ -189,7 +189,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 		$filter_context = array(
 			'items'          => array(),
 			'selectionMode'  => $block_attributes['selectType'] ?? 'multiple',
-			'selectAction'   => 'toggleFilter',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => $product_attribute->name,
 		);

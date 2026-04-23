@@ -131,7 +131,6 @@ final class ProductFilterStatus extends AbstractBlock {
 		$filter_context = array(
 			'items'          => array_values( $filter_options ),
 			'selectionMode'  => 'multiple',
-			'selectAction'   => 'toggleFilter',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => __( 'Status', 'woocommerce' ),
 			'dynamicItems'   => false,

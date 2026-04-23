@@ -33,7 +33,6 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$block_context   = $block->context['woocommerce/selectableItems'];
 		$items           = $block_context['items'] ?? array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
-		$select_action   = $block_context['selectAction'] ?? 'toggleFilter';
 		$dynamic_items   = $block_context['dynamicItems'] ?? true;
 		$classes         = '';
 		$style           = '';
@@ -54,7 +53,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		);
 
 		$wrapper_attributes = array(
-			'data-wp-interactive' => $store_namespace,
+			'data-wp-interactive' => 'checkboxliststore',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'class'               => esc_attr( $classes ),
 		);
@@ -71,7 +70,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<fieldset>
+			<fieldset data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>">
 				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
@@ -88,6 +87,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 								<label
 									class="wc-block-product-filter-checkbox-list__label"
 									data-wp-bind--for="context.item.id"
+									data-wp-on--click="checkboxliststore::actions."
 								>
 									<span class="wc-block-product-filter-checkbox-list__input-wrapper">
 										<input
@@ -95,9 +95,9 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											type="checkbox"
 											data-wp-bind--id="context.item.id"
 											data-wp-bind--aria-label="context.item.ariaLabel"
-											data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
+											data-wp-on--change="actions.toggle"
 											data-wp-bind--value="context.item.value"
-											data-wp-bind--checked="context.item.selected"
+											data-wp-bind--checked="state.isSelected"
 										>
 										<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 									</span>
@@ -117,8 +117,8 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 							class="wc-block-product-filter-checkbox-list__item"
 							<?php if ( $dynamic_items ) : ?>
 								data-wp-each-child
-								<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<?php endif; ?>
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"
@@ -132,10 +132,10 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 										<?php if ( ! empty( $item['ariaLabel'] ) ) : ?>
 											aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
 										<?php endif; ?>
-										data-wp-on--change="actions.<?php echo esc_attr( $select_action ); ?>"
+										data-wp-on--change="actions.toggle"
 										value="<?php echo esc_attr( $item['value'] ); ?>"
 										<?php checked( ! empty( $item['selected'] ) ); ?>
-										data-wp-bind--checked="context.item.selected"
+										data-wp-bind--checked="state.isSelected"
 									>
 									<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</span>

@@ -29,6 +29,8 @@ import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
 import { Notice } from '../../components/notice';
 import type { Attributes } from './types';
+import type { FilterItemFields } from '../../types';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import RatingStars from './components/rating-stars';
 
@@ -188,11 +190,10 @@ const RatingFilterEdit = ( props: BlockEditProps< Attributes > ) => {
 								'woocommerce/selectableItems': {
 									items: displayedOptions,
 									selectionMode: 'multiple' as const,
-									selectAction: 'toggleFilter',
 									storeNamespace:
 										'woocommerce/product-filters',
 									isLoading,
-								},
+								} satisfies SelectableItemsContext< FilterItemFields >,
 							} }
 						>
 							{ children }

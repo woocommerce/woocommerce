@@ -131,7 +131,6 @@ final class ProductFilterRating extends AbstractBlock {
 		$filter_context = array(
 			'items'          => $filter_options,
 			'selectionMode'  => 'multiple',
-			'selectAction'   => 'toggleFilter',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => __( 'Rating', 'woocommerce' ),
 			'dynamicItems'   => false,
