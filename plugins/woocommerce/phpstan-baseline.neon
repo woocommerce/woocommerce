@@ -6307,12 +6307,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-product-data-variations.php
 
 		-
-			message: '#^Variable \$modal_title might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/meta-boxes/views/html-product-data-variations.php
-
-		-
 			message: '#^Variable \$product_object might not be defined\.$#'
 			identifier: variable.undefined
 			count: 2
