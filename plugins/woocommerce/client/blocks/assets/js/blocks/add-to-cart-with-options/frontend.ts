@@ -167,7 +167,8 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 				const inputElement = quantitySelectorContext?.inputElement;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				const { product: productFromStore } = productsState;
+				const { mainProductInContext: productFromStore } =
+					productsState;
 				const variationIds =
 					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
 
@@ -201,7 +202,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					};
 				}
 
-				if ( productsState.product?.type === 'grouped' ) {
+				if ( productsState.mainProductInContext?.type === 'grouped' ) {
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );

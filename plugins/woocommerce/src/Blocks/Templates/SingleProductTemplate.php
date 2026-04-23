@@ -92,7 +92,7 @@ class SingleProductTemplate extends AbstractTemplate {
 				ProductsStore::load_product( $consent, $product->get_id() );
 
 				// Set the current product context. The derived state
-				// closures (product, selectedVariation, productInContext)
+				// closures (mainProductInContext, productVariationInContext, productInContext)
 				// are registered by ProductsStore::register_state().
 				wp_interactivity_state(
 					'woocommerce/products',

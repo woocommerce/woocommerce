@@ -70,7 +70,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 				const hasInvalidQuantity = Object.entries(
 					context.quantity
 				).some( ( [ id, qty ] ) => {
-					const product = productsState.findProductVariation( {
+					const product = productsState.findProduct( {
 						id: Number( id ),
 						selectedAttributes: context.selectedAttributes,
 					} );
@@ -104,7 +104,7 @@ const { actions } = store< GroupedProductAddToCartWithOptionsStore >(
 						continue;
 					}
 
-					const product = productsState.findProductVariation( {
+					const product = productsState.findProduct( {
 						id: Number( childProductId ),
 						selectedAttributes,
 					} );

@@ -24,7 +24,6 @@ import {
 	normalizeAttributeName,
 	attributeNamesMatch,
 	getVariationAttributeValue,
-	findMatchingVariation,
 } from '../../../base/utils/variations/attribute-matching';
 import setStyles from './set-styles';
 
@@ -93,7 +92,7 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const { product } = productsState;
+	const { mainProductInContext: product } = productsState;
 
 	if ( ! product?.variations?.length ) {
 		return false;
@@ -332,7 +331,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { product } = productsState;
+				const { mainProductInContext: product } = productsState;
 				if ( ! product ) {
 					return;
 				}
@@ -399,17 +398,17 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} );
 			},
 			setSelectedVariationId: () => {
-				const { product } = productsState;
+				const { mainProductInContext: product } = productsState;
 
 				if ( ! product?.variations?.length ) {
 					return;
 				}
 
 				const { selectedAttributes } = getContext< Context >();
-				const matchedVariation = findMatchingVariation(
-					product,
-					selectedAttributes
-				);
+				const matchedVariation = productsState.findProduct( {
+					id: product.id,
+					selectedAttributes,
+				} );
 
 				const variationId = matchedVariation?.id ?? null;
 				const productContext = getContext< {
@@ -425,17 +424,17 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const { product } = productsState;
+				const { mainProductInContext: product } = productsState;
 
 				if ( ! product?.variations?.length ) {
 					return;
 				}
 
 				const { selectedAttributes } = getContext< Context >();
-				const matchedVariation = findMatchingVariation(
-					product,
-					selectedAttributes
-				);
+				const matchedVariation = productsState.findProduct( {
+					id: product.id,
+					selectedAttributes,
+				} );
 
 				const { errorMessages } = getConfig();
 
@@ -481,7 +480,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedVariation: variation } = productsState;
+				const { productVariationInContext: variation } = productsState;
 
 				if ( ! variation ) {
 					return;

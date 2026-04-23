@@ -208,7 +208,7 @@ const productCollectionStore = {
 			const { collection } =
 				getContext< ProductCollectionStoreContext >();
 
-			const productId = productsState.product?.id;
+			const productId = productsState.mainProductInContext?.id;
 
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );
