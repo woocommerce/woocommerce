@@ -21,9 +21,19 @@ class GraphQLControllerTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * Set up before each test.
+	 *
+	 * Skips on PHP < 8.1 because GraphQLController uses PHP 8.0+ syntax in its
+	 * source file (named arguments). In production the class is only loaded
+	 * after {@see Main::is_enabled()} gates on PHP 8.1+; these tests bypass
+	 * that gate by hitting the DI container directly, so we replicate it here.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		if ( PHP_VERSION_ID < 80100 ) {
+			$this->markTestSkipped( 'GraphQLController requires PHP 8.1+.' );
+		}
+
 		$this->sut = wc_get_container()->get( GraphQLController::class );
 	}
 
