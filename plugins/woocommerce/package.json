@@ -22,6 +22,8 @@
 		"build:project:copy-assets:email-editor": "rsync -avhW --checksum --delete --quiet ../../packages/php/email-editor/src/ packages/email-editor/src",
 		"build:project:copy-assets:blueprint": "rsync -avhW --checksum --delete --quiet ../../packages/php/blueprint/src/ packages/blueprint/src",
 		"build:project:actualize-translation-domains": "wireit",
+		"build:api": "php src/Internal/Api/DesignTime/Scripts/build-api.php",
+		"build:api:check": "php src/Internal/Api/DesignTime/Scripts/check-api-staleness.php",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"env:destroy": "pnpm wp-env destroy",
@@ -99,6 +101,9 @@
 		"wp-env": "wp-env"
 	},
 	"lint-staged": {
+		"src/Api/**/*.php": [
+			"php src/Internal/Api/DesignTime/Scripts/check-api-staleness.php"
+		],
 		"*.php": [
 			"php -d display_errors=1 -l",
 			"composer run-script lint-staged"

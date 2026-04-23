@@ -1,0 +1,21 @@
+{
+	"extends": "../internal-ts-config/tsconfig-cjs.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "build",
+		"noCheck": false,
+		"resolveJsonModule": true,
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		]
+	},
+	"include": [
+		"typings/**/*",
+		"src/**/*"
+	],
+	"exclude": [
+		"**/test/**",
+		"**/stories/**"
+	]
+}
