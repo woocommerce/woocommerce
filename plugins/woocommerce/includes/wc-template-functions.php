@@ -3013,6 +3013,12 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 				$image        = $image_data[0];
 				$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
 				$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+
+				// Use actual image dimensions when uncropped (height is empty).
+				if ( empty( $dimensions['height'] ) && isset( $image_data[1] ) && isset( $image_data[2] ) ) {
+					$dimensions['width']  = $image_data[1];
+					$dimensions['height'] = $image_data[2];
+				}
 			} else {
 				$image        = wc_placeholder_img_src();
 				$image_srcset = false;
