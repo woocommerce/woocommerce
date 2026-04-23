@@ -216,7 +216,9 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_USE_TRANSACTIONS', false );
 
 		// Enable Back In Stock alpha during tests.
-		define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+			define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+		}
 
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );
