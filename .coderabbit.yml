@@ -1,4 +1,9 @@
 reviews:
+    auto_review:
+        base_branches:
+            - "trunk"
+            - "feature/.*"
+            - "rsm-.*"
     assess_linked_issues: false
     collapse_walkthrough: true
     high_level_summary: false
