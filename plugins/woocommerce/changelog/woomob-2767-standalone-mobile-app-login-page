@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add a new standalone wc-admin page at /mobile-app-login for merchants who already have the Woo mobile app installed and want to sign in via QR code scan.
