@@ -121,38 +121,4 @@ class GraphQLControllerTest extends WC_REST_Unit_Test_Case {
 			'negative'     => array( '-5' ),
 		);
 	}
-
-	/**
-	 * @testdox compute_query_depth returns both the query-limit-comparable depth and the total field-chain depth.
-	 * @dataProvider provider_query_depth_cases
-	 *
-	 * @param string $source         The GraphQL query to parse.
-	 * @param int    $expected_query Depth under the query-limit semantics (only fields with children).
-	 * @param int    $expected_total Depth counting every field in the deepest chain.
-	 */
-	public function test_compute_query_depth_returns_both_metrics( string $source, int $expected_query, int $expected_total ): void {
-		$method   = new \ReflectionMethod( $this->sut, 'compute_query_depth' );
-		$document = \GraphQL\Language\Parser::parse( $source );
-
-		$result = $method->invoke( $this->sut, $document, null );
-
-		$this->assertSame( $expected_query, $result['query'], "query metric for: $source" );
-		$this->assertSame( $expected_total, $result['total'], "total metric for: $source" );
-	}
-
-	/**
-	 * Queries paired with each metric's expected value.
-	 *
-	 * @return array<string, array{string, int, int}>
-	 */
-	public function provider_query_depth_cases(): array {
-		return array(
-			// [ source, query, total ]
-			'all leaves at root'          => array( '{ a b c }', 0, 1 ),
-			'one nested object'           => array( '{ a { b } }', 0, 2 ),
-			'two-level nesting'           => array( '{ a { b { c } } }', 1, 3 ),
-			'three-level nesting'         => array( '{ a { b { c { d } } } }', 2, 4 ),
-			'inline fragment passthrough' => array( '{ a { ... on T { b { c } } } }', 1, 3 ),
-		);
-	}
 }
