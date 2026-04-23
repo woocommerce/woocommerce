@@ -2,10 +2,7 @@
  * External dependencies
  */
 import type { APIRequest, Page } from '@playwright/test';
-import {
-	WC_API_PATH,
-	type ApiClient,
-} from '@woocommerce/e2e-utils-playwright';
+import { WC_API_PATH, type ApiClient } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -30,9 +27,13 @@ export const BIS_OPTIONS = {
 /**
  * Configure the BIS feature options for a test. Omitted keys are left untouched.
  *
- * @param {APIRequest} request Playwright request fixture.
- * @param {string}     baseURL Test site base URL.
- * @param {object}     options BIS option toggles.
+ * @param {APIRequest} request                       Playwright request fixture.
+ * @param {string}     baseURL                       Test site base URL.
+ * @param {Object}     options                       BIS option toggles.
+ * @param {boolean}    [options.allowSignups]        Whether the signup form is rendered on product pages.
+ * @param {boolean}    [options.doubleOptIn]         Whether signups require email verification before activating.
+ * @param {boolean}    [options.requireAccount]      Whether signups are limited to logged-in users.
+ * @param {boolean}    [options.createAccountOnSignup] Whether a new account is created for guest signups.
  */
 export async function setBISOptions(
 	request: APIRequest,
@@ -44,8 +45,12 @@ export async function setBISOptions(
 		createAccountOnSignup?: boolean;
 	}
 ): Promise< void > {
-	const toYesNo = ( v: boolean | undefined ) =>
-		v === undefined ? undefined : v ? 'yes' : 'no';
+	const toYesNo = ( v: boolean | undefined ): string | undefined => {
+		if ( v === undefined ) {
+			return undefined;
+		}
+		return v ? 'yes' : 'no';
+	};
 
 	const entries: Array< [ string, string | undefined ] > = [
 		[ BIS_OPTIONS.allowSignups, toYesNo( options.allowSignups ) ],
@@ -67,8 +72,10 @@ export async function setBISOptions(
 /**
  * Return a handle to an out-of-stock product. Caller is responsible for calling cleanup().
  *
- * @param {APIRequestContext} restApi WP REST client.
- * @param {object}            opts    Product shape.
+ * @param {ApiClient} restApi        WP REST client.
+ * @param {Object}    [opts]         Product shape.
+ * @param {string}    [opts.type]    Product type (`simple` or `variable`). Defaults to `simple`.
+ * @param {string}    [opts.namePrefix] Prefix used to build a unique product name.
  */
 export async function createOutOfStockProduct(
 	restApi: ApiClient,
@@ -133,8 +140,10 @@ export async function restockProduct(
 /**
  * Submit the PDP sign-up form. Caller must already have the product page loaded.
  *
- * @param {Page}   page Playwright page on the product detail.
- * @param {object} opts Fill options.
+ * @param {Page}    page                    Playwright page on the product detail.
+ * @param {Object}  [opts]                  Fill options.
+ * @param {string}  [opts.email]            Email address to enter (guest flow only; logged-in PDP hides the field).
+ * @param {boolean} [opts.tickOptInCheckbox] Tick the privacy opt-in checkbox before submitting.
  */
 export async function signUpOnProductPage(
 	page: Page,

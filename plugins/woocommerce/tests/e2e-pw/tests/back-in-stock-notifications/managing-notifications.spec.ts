@@ -1,4 +1,9 @@
 /**
+ * External dependencies
+ */
+import type { Browser } from '@playwright/test';
+
+/**
  * Internal dependencies
  */
 import {
@@ -26,6 +31,27 @@ const test = baseTest.extend( {
 	},
 } );
 
+/**
+ * Submit the PDP signup form as a logged-out guest, regardless of the test's storageState.
+ *
+ * @param {Browser} browser   The test's browser fixture.
+ * @param {string}  permalink The product permalink.
+ * @param {string}  email     The guest's email address.
+ */
+async function signUpAsGuest(
+	browser: Browser,
+	permalink: string,
+	email: string
+): Promise< void > {
+	const guestContext = await browser.newContext( {
+		storageState: { cookies: [], origins: [] },
+	} );
+	const guestPage = await guestContext.newPage();
+	await guestPage.goto( permalink );
+	await signUpOnProductPage( guestPage, { email } );
+	await guestContext.close();
+}
+
 test.describe(
 	'Back in Stock Notifications — admin management',
 	{ tag: [ tags.SERVICES ] },
@@ -49,21 +75,11 @@ test.describe(
 		test( 'notifications list renders a signup row filtered by product', async ( {
 			page,
 			product,
+			browser,
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-admin-list' );
 
-			// Sign up as a guest (uses a fresh context; storageState on this spec
-			// is admin, so we explicitly open a guest context for the signup).
-			const guestContext = await page
-				.context()
-				.browser()!
-				.newContext( {
-					storageState: { cookies: [], origins: [] },
-				} );
-			const guestPage = await guestContext.newPage();
-			await guestPage.goto( product.permalink );
-			await signUpOnProductPage( guestPage, { email } );
-			await guestContext.close();
+			await signUpAsGuest( browser, product.permalink, email );
 
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
@@ -76,26 +92,14 @@ test.describe(
 		test( 'Resend verification email on a pending notification dispatches a new verify email', async ( {
 			page,
 			product,
+			browser,
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-admin-resend-pending' );
 
-			const guestContext = await page
-				.context()
-				.browser()!
-				.newContext( {
-					storageState: { cookies: [], origins: [] },
-				} );
-			const guestPage = await guestContext.newPage();
-			await guestPage.goto( product.permalink );
-			await signUpOnProductPage( guestPage, { email } );
-			await guestContext.close();
+			await signUpAsGuest( browser, product.permalink, email );
 
 			// Wait for the initial verify email so we can count a new one later.
-			await expectEmail(
-				page,
-				email,
-				/Join the "[^"]+" waitlist\./
-			);
+			await expectEmail( page, email, /Join the "[^"]+" waitlist\./ );
 
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
@@ -134,22 +138,14 @@ test.describe(
 			page,
 			product,
 			baseURL,
+			browser,
 		} ) => {
 			// Flip to single opt-in so the signup goes straight to ACTIVE.
 			await setBISOptions( request, baseURL!, { doubleOptIn: false } );
 
 			const email = uniqueGuestEmail( 'bis-admin-active' );
 
-			const guestContext = await page
-				.context()
-				.browser()!
-				.newContext( {
-					storageState: { cookies: [], origins: [] },
-				} );
-			const guestPage = await guestContext.newPage();
-			await guestPage.goto( product.permalink );
-			await signUpOnProductPage( guestPage, { email } );
-			await guestContext.close();
+			await signUpAsGuest( browser, product.permalink, email );
 
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
@@ -179,6 +175,7 @@ test.describe(
 			page,
 			product,
 			baseURL,
+			browser,
 		} ) => {
 			// Flip to single opt-in so the signup goes straight to ACTIVE.
 			// The Cancel action is only available on ACTIVE / SENT rows.
@@ -186,16 +183,7 @@ test.describe(
 
 			const email = uniqueGuestEmail( 'bis-admin-cancel' );
 
-			const guestContext = await page
-				.context()
-				.browser()!
-				.newContext( {
-					storageState: { cookies: [], origins: [] },
-				} );
-			const guestPage = await guestContext.newPage();
-			await guestPage.goto( product.permalink );
-			await signUpOnProductPage( guestPage, { email } );
-			await guestContext.close();
+			await signUpAsGuest( browser, product.permalink, email );
 
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`

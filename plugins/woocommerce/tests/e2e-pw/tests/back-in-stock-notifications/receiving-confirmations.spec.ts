@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Page } from '@playwright/test';
+import type { Browser } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -34,13 +34,17 @@ const test = baseTest.extend( {
 
 /**
  * Submit the PDP signup form as a logged-out guest, regardless of the test's storageState.
+ *
+ * @param {Browser} browser   The test's browser fixture.
+ * @param {string}  permalink The product permalink.
+ * @param {string}  email     The guest's email address.
  */
 async function signUpAsGuest(
-	page: Page,
+	browser: Browser,
 	permalink: string,
 	email: string
 ): Promise< void > {
-	const guestContext = await page.context().browser()!.newContext( {
+	const guestContext = await browser.newContext( {
 		storageState: { cookies: [], origins: [] },
 	} );
 	const guestPage = await guestContext.newPage();
@@ -72,10 +76,11 @@ test.describe(
 		test( 'double-opt-in signup dispatches verify email with UTM params', async ( {
 			page,
 			product,
+			browser,
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-confirm-verify' );
 
-			await signUpAsGuest( page, product.permalink, email );
+			await signUpAsGuest( browser, product.permalink, email );
 
 			const emailRow = await expectEmail(
 				page,
@@ -111,10 +116,11 @@ test.describe(
 		test( 'clicking the verify link dispatches the confirmation email with UTM on unsubscribe link', async ( {
 			page,
 			product,
+			browser,
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-confirm-verified' );
 
-			await signUpAsGuest( page, product.permalink, email );
+			await signUpAsGuest( browser, product.permalink, email );
 
 			const verifyLink = await getLinkFromEmailBody(
 				page,
@@ -152,10 +158,11 @@ test.describe(
 		test( 'following the unsubscribe link cancels the notification', async ( {
 			page,
 			product,
+			browser,
 		} ) => {
 			const email = uniqueGuestEmail( 'bis-confirm-unsub' );
 
-			await signUpAsGuest( page, product.permalink, email );
+			await signUpAsGuest( browser, product.permalink, email );
 
 			const verifyLink = await getLinkFromEmailBody(
 				page,
