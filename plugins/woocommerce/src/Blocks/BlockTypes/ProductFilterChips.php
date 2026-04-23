@@ -18,6 +18,13 @@ final class ProductFilterChips extends AbstractBlock {
 	protected $block_name = 'product-filter-chips';
 
 	/**
+	 * Default number of items to show before "Show more" button.
+	 *
+	 * @var int
+	 */
+	const DISPLAY_LIMIT = 15;
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -33,7 +40,7 @@ final class ProductFilterChips extends AbstractBlock {
 		$block_context   = $block->context['woocommerce/selectableItems'];
 		$items           = $block_context['items'] ?? array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
-		$dynamic_items   = $block_context['dynamicItems'] ?? true;
+		$display_limit   = self::DISPLAY_LIMIT;
 		$classes         = '';
 		$style           = '';
 
@@ -43,17 +50,8 @@ final class ProductFilterChips extends AbstractBlock {
 			$style   = $tags->get_attribute( 'style' );
 		}
 
-		$visible_items = array_values(
-			array_filter(
-				$items,
-				function ( $item ) {
-					return empty( $item['hidden'] );
-				}
-			)
-		);
-
 		$wrapper_attributes = array(
-			'data-wp-interactive' => $store_namespace,
+			'data-wp-interactive' => 'woocommerce/product-filter-chips',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'class'               => esc_attr( $classes ),
 		);
@@ -63,6 +61,9 @@ final class ProductFilterChips extends AbstractBlock {
 			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
 		}
 
+		$has_more_items = count( $items ) > $display_limit;
+		$hidden_count   = max( 0, count( $items ) - $display_limit );
+
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
@@ -70,34 +71,16 @@ final class ProductFilterChips extends AbstractBlock {
 				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
-				<div class="wc-block-product-filter-chips__items">
-					<?php if ( $dynamic_items ) : ?>
-						<template
-							data-wp-each--item="context.items"
-							data-wp-each-key="context.item.id"
-						>
-							<button
-								class="wc-block-product-filter-chips__item"
-								data-wp-bind--hidden="context.item.hidden"
-								type="button"
-								role="checkbox"
-								data-wp-bind--id="context.item.id"
-								data-wp-bind--aria-label="context.item.ariaLabel"
-								data-wp-on--click="actions.toggle"
-								data-wp-bind--value="context.item.value"
-								data-wp-bind--aria-checked="state.isSelected"
-							>
-								<span class="wc-block-product-filter-chips__label">
-									<span class="wc-block-product-filter-chips__text" data-wp-text="context.item.label"></span>
-									<span
-										class="wc-block-product-filter-chips__count"
-										data-wp-bind--hidden="!context.item.count"
-									> (<span data-wp-text="context.item.count"></span>)</span>
-								</span>
-							</button>
-						</template>
-					<?php endif; ?>
-					<?php foreach ( $visible_items as $item ) { ?>
+				<div
+					class="wc-block-product-filter-chips__items"
+					data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
+				>
+					<?php
+					$index = 0;
+					foreach ( $items as $item ) :
+						$is_hidden = $index >= $display_limit;
+						++$index;
+						?>
 						<button
 							class="wc-block-product-filter-chips__item"
 							type="button"
@@ -110,23 +93,38 @@ final class ProductFilterChips extends AbstractBlock {
 							value="<?php echo esc_attr( $item['value'] ); ?>"
 							aria-checked="<?php echo ! empty( $item['selected'] ) ? 'true' : 'false'; ?>"
 							data-wp-bind--aria-checked="state.isSelected"
-							<?php if ( $dynamic_items ) : ?>
-								data-wp-each-child
-							<?php endif; ?>
 							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php if ( $is_hidden ) : ?>
+								hidden
+								data-wp-bind--hidden="!state.isExpanded"
+							<?php endif; ?>
 						>
 							<span class="wc-block-product-filter-chips__label">
 								<span class="wc-block-product-filter-chips__text">
-									<?php echo $item['label']; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+									<?php echo wp_kses_post( $item['label'] ); ?>
 								</span>
 								<?php if ( isset( $item['count'] ) ) : ?>
 									<span class="wc-block-product-filter-chips__count">
-										 (<?php echo esc_html( $item['count'] ); ?>)
+										(<?php echo esc_html( $item['count'] ); ?>)
 									</span>
 								<?php endif; ?>
 							</span>
 						</button>
-					<?php } ?>
+					<?php endforeach; ?>
+					<?php if ( $has_more_items ) : ?>
+						<button
+							type="button"
+							class="wc-block-product-filter-chips__show-more"
+							data-wp-on--click="woocommerce/product-filter-chips::actions.toggleShowMore"
+							data-wp-text="woocommerce/product-filter-chips::state.showMoreLabel"
+							data-wp-bind--hidden="woocommerce/product-filter-chips::state.isExpanded"
+						>
+							<?php
+							/* translators: %d: number of hidden items */
+							echo esc_html( sprintf( __( '+%d more', 'woocommerce' ), $hidden_count ) );
+							?>
+						</button>
+					<?php endif; ?>
 				</div>
 			</fieldset>
 		</div>
