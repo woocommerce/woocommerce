@@ -1417,6 +1417,15 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$coupon_object->decrease_usage_count( $this->get_user_id() );
 				$this->recalculate_coupons();
 
+				/**
+				 * Action hook fired when a coupon is removed from an order.
+				 *
+				 * @since 10.8.0
+				 * @param string        $code   Coupon code.
+				 * @param WC_Order      $this   Order instance.
+				 */
+				do_action( 'woocommerce_removed_coupon', $code, $this );
+
 				return true;
 			}
 		}
