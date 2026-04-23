@@ -120,7 +120,6 @@ export function ProductSearch( {
 				onChange( items );
 			} }
 			__experimentalExpandOnFocus
-			__nextHasNoMarginBottom
 			__next40pxDefaultSize
 		/>
 	);
