@@ -39,7 +39,12 @@ export const options = {
 		},
 	},
 	thresholds: {
-		http_req_duration: [ 'p(90)<1000', 'p(95)<1500', 'p(99.9)<3000' ],
+		http_req_duration: [
+			'p(50)<200',
+			'p(90)<1000',
+			'p(95)<1500',
+			'p(99.9)<3000',
+		],
 		http_req_failed: [ 'rate<0.01' ],
 	},
 };
