@@ -116,11 +116,13 @@ class NotificationPreferencesService {
 	 * @since 10.8.0
 	 */
 	public function migrate( array $data, int $from_version ): array {
+		// Parameter reserved for future schema migrations.
+		unset( $from_version );
+
 		$preferences = isset( $data['preferences'] ) && is_array( $data['preferences'] )
 			? $data['preferences']
 			: $this->get_defaults();
 
-		// Future schema bumps add cases here (e.g. `if ( $from_version < 2 ) { ... }`).
 		// For v1 the envelope shape is stable; we only normalize the version tag.
 
 		return array(

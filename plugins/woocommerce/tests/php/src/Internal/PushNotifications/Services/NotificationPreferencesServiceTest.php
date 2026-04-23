@@ -72,7 +72,13 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should write the versioned envelope to user meta on save.
 	 */
 	public function test_save_preferences_updates_user_meta(): void {
-		$this->sut->save_preferences( $this->user_id, array( 'store_order' => false, 'store_review' => false ) );
+		$this->sut->save_preferences(
+			$this->user_id,
+			array(
+				'store_order'  => false,
+				'store_review' => false,
+			)
+		);
 
 		$stored = get_user_meta( $this->user_id, NotificationPreferencesService::META_KEY, true );
 
@@ -88,7 +94,13 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 	 * @testdox Should merge partial saves with previously stored preferences.
 	 */
 	public function test_save_preferences_merges_with_existing(): void {
-		$this->sut->save_preferences( $this->user_id, array( 'store_order' => false, 'store_review' => false ) );
+		$this->sut->save_preferences(
+			$this->user_id,
+			array(
+				'store_order'  => false,
+				'store_review' => false,
+			)
+		);
 
 		$this->sut->save_preferences( $this->user_id, array( 'store_review' => true ) );
 

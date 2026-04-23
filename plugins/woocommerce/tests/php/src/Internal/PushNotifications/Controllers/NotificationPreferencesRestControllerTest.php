@@ -189,7 +189,13 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		wc_get_container()
 			->get( NotificationPreferencesService::class )
-			->save_preferences( $this->user_id, array( 'store_order' => false, 'store_review' => false ) );
+			->save_preferences(
+				$this->user_id,
+				array(
+					'store_order'  => false,
+					'store_review' => false,
+				)
+			);
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
 		$request->set_param( 'store_review', true );
@@ -217,7 +223,10 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 		$preferences_controller->register();
 		$push_token_controller->register();
 
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Triggering an existing filter from RestApiControllerBase, not defining one.
 		$namespaces = apply_filters( 'woocommerce_rest_api_get_rest_namespaces', array( 'wc/v3' => array() ) );
+
+		$this->assertArrayHasKey( 'wc/v3', $namespaces );
 
 		$registered_classes = array_values( $namespaces['wc/v3'] );
 
