@@ -1,21 +1,28 @@
 /**
  * External dependencies
  */
-import type { BlockConfiguration } from '@wordpress/blocks';
 import { registerBlockType } from '@wordpress/blocks';
 
 /**
  * Internal dependencies
  */
 import Edit from './edit';
-import { Save } from './save';
-import type { CouponCodeAttributes } from './types';
+import { Save, DeprecatedSave } from './save';
 import metadata from './block.json';
 
-registerBlockType(
-	metadata as unknown as BlockConfiguration< CouponCodeAttributes >,
-	{
-		edit: Edit,
-		save: Save,
-	}
-);
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+registerBlockType( metadata as any, {
+	edit: Edit,
+	save: Save,
+	deprecated: [
+		{
+			attributes: {
+				couponCode: {
+					type: 'string' as const,
+					default: '',
+				},
+			},
+			save: DeprecatedSave,
+		},
+	],
+} );

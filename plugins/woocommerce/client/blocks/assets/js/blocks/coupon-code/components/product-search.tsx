@@ -75,6 +75,9 @@ export function ProductSearch( {
 
 	useEffect( () => {
 		return () => {
+			if ( debounceRef.current ) {
+				clearTimeout( debounceRef.current );
+			}
 			if ( abortRef.current ) {
 				abortRef.current.abort();
 			}

@@ -328,7 +328,7 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 								setAttributes( {
 									source: 'existing',
 								} );
-							} else {
+							} else if ( value === 'createNew' ) {
 								setAttributes( {
 									source: 'createNew',
 									couponCode: '',
