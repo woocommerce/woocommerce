@@ -8,16 +8,13 @@ import {
 	Button,
 	ComboboxControl,
 	Spinner,
+	SelectControl,
 } from '@wordpress/components';
 import { useState, useEffect, useCallback, useRef } from '@wordpress/element';
 import type { CSSProperties } from 'react';
 import apiFetch from '@wordpress/api-fetch';
 import { applyFilters } from '@wordpress/hooks';
 import { dispatch } from '@wordpress/data';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-import { __experimentalToggleGroupControl as ToggleGroupControl } from '@wordpress/components';
-// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-import { __experimentalToggleGroupControlOption as ToggleGroupControlOption } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -319,35 +316,34 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 					title={ __( 'Coupon source', 'woocommerce' ) }
 					initialOpen={ true }
 				>
-					<ToggleGroupControl
+					<SelectControl
 						label={ __( 'Coupon source', 'woocommerce' ) }
 						hideLabelFromVision
 						value={ source }
-						onChange={ ( value: string | number | undefined ) => {
+						options={ [
+							{
+								value: 'createNew',
+								label: __( 'Create new', 'woocommerce' ),
+							},
+							{
+								value: 'existing',
+								label: __( 'Use existing', 'woocommerce' ),
+							},
+						] }
+						onChange={ ( value ) => {
 							if ( value === 'existing' ) {
 								setAttributes( {
 									source: 'existing',
 								} );
-							} else if ( value === 'createNew' ) {
+							} else {
 								setAttributes( {
 									source: 'createNew',
 									couponCode: '',
 								} );
 							}
 						} }
-						isBlock
 						__nextHasNoMarginBottom
-						__next40pxDefaultSize
-					>
-						<ToggleGroupControlOption
-							value="createNew"
-							label={ __( 'Create new', 'woocommerce' ) }
-						/>
-						<ToggleGroupControlOption
-							value="existing"
-							label={ __( 'Use existing', 'woocommerce' ) }
-						/>
-					</ToggleGroupControl>
+					/>
 				</PanelBody>
 
 				{ source === 'createNew' && (

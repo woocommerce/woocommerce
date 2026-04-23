@@ -5,15 +5,14 @@ import { __ } from '@wordpress/i18n';
 import {
 	PanelBody,
 	SelectControl,
+	TextControl,
 	ToggleControl,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalNumberControl as NumberControl,
 } from '@wordpress/components';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
  */
-import { getSetting } from '@woocommerce/settings';
 import type { CouponCodeAttributes } from '../types';
 
 interface GeneralSettingsProps {
@@ -60,39 +59,41 @@ export function GeneralSettings( {
 			title={ __( 'General', 'woocommerce' ) }
 			initialOpen={ true }
 		>
-			{ couponTypeOptions.length > 0 && (
-				<SelectControl
-					label={ __( 'Discount type', 'woocommerce' ) }
-					value={ attributes.discountType }
-					options={ couponTypeOptions }
-					onChange={ ( value ) =>
-						setAttributes( { discountType: value } )
-					}
-					__nextHasNoMarginBottom
-				/>
-			) }
-			<NumberControl
+			<SelectControl
+				label={ __( 'Discount type', 'woocommerce' ) }
+				value={ attributes.discountType }
+				options={ couponTypeOptions }
+				onChange={ ( value ) =>
+					setAttributes( { discountType: value } )
+				}
+				__nextHasNoMarginBottom
+			/>
+			<TextControl
 				label={ __( 'Amount', 'woocommerce' ) }
-				value={ attributes.amount }
+				value={ String( attributes.amount ) }
+				type="number"
 				min={ 0 }
 				max={ amountMax }
-				onChange={ ( value: string | undefined ) =>
+				onChange={ ( value ) =>
 					setAttributes( {
 						amount: Math.min( Number( value ) || 0, amountMax ),
 					} )
 				}
+				__nextHasNoMarginBottom
 				__next40pxDefaultSize
 			/>
-			<NumberControl
+			<TextControl
 				label={ __( 'Expires (days after send)', 'woocommerce' ) }
 				help={ __( 'Set to 0 for no expiry.', 'woocommerce' ) }
-				value={ attributes.expiryDay }
+				value={ String( attributes.expiryDay ) }
+				type="number"
 				min={ 0 }
-				onChange={ ( value: string | undefined ) =>
+				onChange={ ( value ) =>
 					setAttributes( {
 						expiryDay: Number( value ) || 0,
 					} )
 				}
+				__nextHasNoMarginBottom
 				__next40pxDefaultSize
 			/>
 			<ToggleControl

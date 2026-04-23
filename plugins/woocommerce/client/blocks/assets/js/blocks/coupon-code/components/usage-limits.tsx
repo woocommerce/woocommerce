@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	PanelBody,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
-	__experimentalNumberControl as NumberControl,
-} from '@wordpress/components';
+import { PanelBody, TextControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -27,34 +23,38 @@ export function UsageLimits( {
 			title={ __( 'Usage limits', 'woocommerce' ) }
 			initialOpen={ false }
 		>
-			<NumberControl
+			<TextControl
 				label={ __( 'Usage limit per coupon', 'woocommerce' ) }
 				help={ __(
 					'How many times this coupon can be used before it is void. Set to 0 for unlimited.',
 					'woocommerce'
 				) }
-				value={ attributes.usageLimit }
+				value={ String( attributes.usageLimit ) }
+				type="number"
 				min={ 0 }
-				onChange={ ( value: string | undefined ) =>
+				onChange={ ( value ) =>
 					setAttributes( {
 						usageLimit: Number( value ) || 0,
 					} )
 				}
+				__nextHasNoMarginBottom
 				__next40pxDefaultSize
 			/>
-			<NumberControl
+			<TextControl
 				label={ __( 'Usage limit per user', 'woocommerce' ) }
 				help={ __(
 					'How many times this coupon can be used by an individual user. Set to 0 for unlimited.',
 					'woocommerce'
 				) }
-				value={ attributes.usageLimitPerUser }
+				value={ String( attributes.usageLimitPerUser ) }
+				type="number"
 				min={ 0 }
-				onChange={ ( value: string | undefined ) =>
+				onChange={ ( value ) =>
 					setAttributes( {
 						usageLimitPerUser: Number( value ) || 0,
 					} )
 				}
+				__nextHasNoMarginBottom
 				__next40pxDefaultSize
 			/>
 		</PanelBody>
