@@ -39,6 +39,10 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 		// in production code never runs during the test.
 		add_filter( 'wp_redirect', array( $this, 'intercept_redirect' ) );
 
+		// Clear any notices left by earlier tests in the suite so the silent-drop
+		// assertion in test_resend_request_rejects_invalid_nonce is meaningful.
+		wc_clear_notices();
+
 		$this->email_manager = $this->createMock( EmailManager::class );
 		$this->sut           = new NotificationManagementService();
 		$this->sut->init( $this->email_manager );
