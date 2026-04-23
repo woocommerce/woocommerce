@@ -7,10 +7,7 @@ import {
 	tags,
 	test as baseTest,
 } from '../../fixtures/fixtures';
-import {
-	ADMIN_STATE_PATH,
-	CUSTOMER_STATE_PATH,
-} from '../../playwright.config';
+import { ADMIN_STATE_PATH, CUSTOMER_STATE_PATH } from '../../playwright.config';
 import {
 	BIS_OPTIONS,
 	createOutOfStockProduct,
