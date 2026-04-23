@@ -215,8 +215,8 @@ class NotificationManagementServiceTests extends \WC_Unit_Test_Case {
 	 * @testdox A nonce minted for notification A must not validate for notification B.
 	 */
 	public function test_resend_request_rejects_cross_notification_nonce_replay() {
-		$victim    = $this->build_pending_notification();
-		$attacker  = $this->build_pending_notification();
+		$victim   = $this->build_pending_notification();
+		$attacker = $this->build_pending_notification();
 
 		// Attacker mints a valid nonce for their own notification and replays it on the victim's id.
 		$_GET[ NotificationManagementService::RESEND_QUERY_ARG ] = (string) $victim->get_id();
