@@ -1,12 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	createElement,
-	createContext,
-	useState,
-	useContext,
-} from '@wordpress/element';
+import { createContext, useState, useContext } from '@wordpress/element';
 
 type NewNavigationContextType = {
 	showNewNavigation: boolean;

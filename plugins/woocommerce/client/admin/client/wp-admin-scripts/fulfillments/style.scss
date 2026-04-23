@@ -308,12 +308,22 @@
 	}
 }
 
+.woocommerce-fulfillment-notification-content {
+	display: flex;
+	flex-direction: column;
+	width: 100%;
+}
+
 .woocommerce-fulfillment-description {
 	font-size: 12px;
 	line-height: 16px;
 	font-weight: 400;
 	color: var(--wc-admin-subtext, #767676);
 	margin: 0;
+}
+
+.woocommerce-fulfillment-customer-note {
+	margin-top: 16px;
 }
 
 .woocommerce-fulfillment-description-button {

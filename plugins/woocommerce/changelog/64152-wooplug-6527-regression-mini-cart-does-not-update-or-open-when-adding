@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Mini-cart does not update or open when adding through legacy events
