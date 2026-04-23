@@ -53,6 +53,18 @@ class WC_Order_Factory {
 			return $order;
 		} catch ( Exception $e ) {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
+			wc_get_logger()->error(
+				sprintf(
+					/* translators: %s: Error message. */
+					__( 'Exception caught in %s: %s', 'woocommerce' ),
+					__FUNCTION__,
+					$e->getMessage()
+				),
+				array(
+					'source' => 'get_order',
+					'order_id' => $order_id,
+				)
+			);
 			return false;
 		}
 	}
