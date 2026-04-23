@@ -116,9 +116,14 @@ test.describe(
 					'select[name="wc_customer_stock_notification_action"]'
 				)
 				.selectOption( 'send_verification_email' );
-			await page
-				.getByRole( 'button', { name: 'Update', exact: true } )
-				.click();
+			// Scroll into view so the product-thumbnail overlay on narrow CI
+			// viewports can't intercept the click.
+			const updateButton = page.getByRole( 'button', {
+				name: 'Update',
+				exact: true,
+			} );
+			await updateButton.scrollIntoViewIfNeeded();
+			await updateButton.click();
 
 			await expect(
 				page.getByText( `Verification email sent to "${ email }"` )
@@ -215,9 +220,14 @@ test.describe(
 					'select[name="wc_customer_stock_notification_action"]'
 				)
 				.selectOption( 'cancel_notification' );
-			await page
-				.getByRole( 'button', { name: 'Update', exact: true } )
-				.click();
+			// Scroll into view so the product-thumbnail overlay on narrow CI
+			// viewports can't intercept the click.
+			const updateButton = page.getByRole( 'button', {
+				name: 'Update',
+				exact: true,
+			} );
+			await updateButton.scrollIntoViewIfNeeded();
+			await updateButton.click();
 
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
