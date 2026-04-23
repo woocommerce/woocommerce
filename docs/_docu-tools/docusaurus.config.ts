@@ -204,8 +204,8 @@ const config: Config = {
 				<div class="docusaurus-footer-for-automattic">
 					<a href="https://automattic.com/">
 						An
-						<img src="/docs/img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
-						<img src="/docs/img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" />
+						<img src="/img/automattic.svg" alt="Automattic" class="automattic-logo automattic-logo-light" />
+						<img src="/img/automattic_dark.svg" alt="Automattic" class="automattic-logo automattic-logo-dark" />
 						Creation</a>
 				</div>`,
 		},
