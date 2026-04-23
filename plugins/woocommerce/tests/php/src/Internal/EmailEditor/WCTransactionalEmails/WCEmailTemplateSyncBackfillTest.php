@@ -180,6 +180,74 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Case B rewrite failure: wp_update_post() returns a WP_Error (silent
+	 * failure because `$wp_error = true`). The migration is one-shot — the
+	 * `woocommerce_db_version` fence flips on completion and this callback
+	 * never runs again — so the post cannot be left unstamped (the detector
+	 * would skip it with a recurring warning forever). Instead, the post must
+	 * still be stamped, but with Case C semantics so it surfaces for merchant
+	 * review rather than being silently marked in_sync over stale content.
+	 *
+	 * Expectation when the rewrite fails:
+	 *   - post_content is preserved (legacy body, because the rewrite failed).
+	 *   - source_hash = sha1(canonical) (same stamp a real Case C writes, so
+	 *     the detector's "core has not moved" branch returns null and does not
+	 *     overwrite the status on the next sweep).
+	 *   - status = core_updated_customized (so the post is visible in the
+	 *     divergence UI as needing merchant attention).
+	 *   - version + last_synced_at stamps are still written (no orphan posts).
+	 */
+	public function test_case_b_falls_back_to_core_updated_customized_when_rewrite_fails(): void {
+		$email_id = 'wc_test_backfill_case_b_rewrite_failure';
+		$email    = $this->register_fixture_email( $email_id );
+
+		$canonical   = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+		$legacy_body = "<!-- wp:paragraph -->\n<p>Legacy content from an older core version.</p>\n<!-- /wp:paragraph -->";
+
+		$post_id = $this->create_unstamped_post( $email_id, $legacy_body, true );
+
+		// Force wp_update_post() to return a WP_Error during the Case B rewrite.
+		// `wp_insert_post_empty_content` short-circuits both wp_insert_post and
+		// wp_update_post (the latter delegates to the former), and because the
+		// backfill passes `$wp_error = true`, we get a WP_Error back rather
+		// than an exception — exactly the silent-failure path we're testing.
+		add_filter( 'wp_insert_post_empty_content', '__return_true' );
+		try {
+			WCEmailTemplateSyncBackfill::run();
+		} finally {
+			remove_filter( 'wp_insert_post_empty_content', '__return_true' );
+		}
+
+		$post_after = $this->require_post( $post_id );
+
+		$this->assertSame(
+			$legacy_body,
+			(string) $post_after->post_content,
+			'post_content must be preserved when the Case B rewrite fails.'
+		);
+		$this->assertSame(
+			sha1( $canonical ),
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'Source hash must still stamp sha1(canonical) so the detector treats it the same as a real Case C on the next sweep.'
+		);
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'A failed Case B rewrite must downgrade status to core_updated_customized so the post surfaces for merchant review.'
+		);
+		$this->assertNotSame(
+			'',
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ),
+			'Version stamp must still be written on rewrite failure — leaving posts unstamped would orphan them permanently.'
+		);
+		$this->assertNotSame(
+			'',
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ),
+			'Last-synced stamp must still be written on rewrite failure — leaving posts unstamped would orphan them permanently.'
+		);
+	}
+
+	/**
 	 * Pure-function coverage for `classify()`. Exercises the timestamp truth
 	 * table the classifier is contracted to handle — without depending on
 	 * wp_insert_post()'s date normalisation or MySQL sql_mode behaviour.

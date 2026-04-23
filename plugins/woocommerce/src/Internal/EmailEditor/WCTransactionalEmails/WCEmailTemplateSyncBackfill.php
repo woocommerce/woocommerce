@@ -254,10 +254,13 @@ class WCEmailTemplateSyncBackfill {
 	 * @param \WC_Email $email                  The registered email instance (used to resolve template path for the version stamp).
 	 */
 	private static function apply_case_to_post( int $post_id, string $case_id, string $canonical_post_content, string $current_core_hash, \WC_Email $email ): void {
+		$version          = self::resolve_version_for_email( $email );
+		$status_for_stamp = self::status_for_case( $case_id );
+
 		if ( self::CASE_B === $case_id ) {
 			self::$is_backfilling = true;
 			try {
-				wp_update_post(
+				$updated = wp_update_post(
 					array(
 						'ID'           => $post_id,
 						'post_content' => $canonical_post_content,
@@ -267,14 +270,27 @@ class WCEmailTemplateSyncBackfill {
 			} finally {
 				self::$is_backfilling = false;
 			}
-		}
 
-		$version = self::resolve_version_for_email( $email );
+			if ( is_wp_error( $updated ) || ! $updated ) {
+				$status_for_stamp = WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED;
+				self::get_logger()->warning(
+					sprintf(
+						'Email template sync backfill: Case B content rewrite failed for post %d (%s); stamping as core_updated_customized so the post surfaces for merchant review.',
+						$post_id,
+						is_wp_error( $updated ) ? $updated->get_error_message() : 'wp_update_post returned 0'
+					),
+					array(
+						'post_id' => $post_id,
+						'context' => 'email_template_sync_backfill',
+					)
+				);
+			}
+		}//end if
 
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $version );
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $current_core_hash );
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, gmdate( 'Y-m-d H:i:s' ) );
-		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, self::status_for_case( $case_id ) );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $status_for_stamp );
 	}
 
 	/**
