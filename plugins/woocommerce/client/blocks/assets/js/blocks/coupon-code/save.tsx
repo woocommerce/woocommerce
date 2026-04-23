@@ -8,6 +8,8 @@ import { useBlockProps } from '@wordpress/block-editor';
  */
 import type { BlockSaveProps } from './types';
 
+const COUPON_CODE_PLACEHOLDER = 'XXXX-XXXXXX-XXXX';
+
 /**
  * Save component for the Coupon Code block.
  *
@@ -16,13 +18,17 @@ import type { BlockSaveProps } from './types';
  */
 export function Save( props: BlockSaveProps ): JSX.Element {
 	const { attributes } = props;
-	const couponCode = attributes.couponCode as string;
+	const source = attributes.source ?? 'createNew';
+	const displayCode =
+		source === 'createNew'
+			? COUPON_CODE_PLACEHOLDER
+			: attributes.couponCode;
 
 	const blockProps = useBlockProps.save();
 
 	return (
 		<div { ...blockProps }>
-			{ couponCode && <strong>{ couponCode }</strong> }
+			{ displayCode && <strong>{ displayCode }</strong> }
 		</div>
 	);
 }
