@@ -5,6 +5,11 @@
 		"module": "esnext",
 		"moduleResolution": "node",
 		"baseUrl": ".",
+		"paths": {
+			"@woocommerce/e2e-utils": [
+				"../../client/blocks/tests/e2e/utils"
+			]
+		},
 		"esModuleInterop": true,
 		"allowSyntheticDefaultImports": true,
 		"resolveJsonModule": true,

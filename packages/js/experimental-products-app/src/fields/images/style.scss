@@ -1,0 +1,149 @@
+@use "@wordpress/base-styles/variables";
+
+.woocommerce-fields-control__featured-image {
+	display: grid;
+	gap: 10px;
+	grid-template-columns: repeat( auto-fill, 108px );
+	grid-template-rows: repeat( auto-fill, 108px );
+}
+
+.woocommerce-fields-controls__featured-image-uploaded-images {
+	display: contents;
+}
+
+.woocommerce-fields-controls__image-wrapper {
+	position: relative;
+	width: 100%;
+	height: 100%;
+	border-radius: var( --wpds-border-radius-lg );
+	display: flex;
+	box-sizing: border-box;
+	transform-origin: 0 0;
+	touch-action: manipulation;
+}
+
+.woocommerce-fields-controls__image-wrapper.is-dragging {
+	transform-origin: 50% 50%;
+
+	.is-keyboard-dragging & {
+		transform-origin: 0 0;
+	}
+
+	.woocommerce-fields-controls__image-drag-handle-container {
+		opacity: 1;
+		z-index: 2;
+	}
+
+	.woocommerce-fields-controls__image-overlay {
+		opacity: 1;
+		background-color: rgba( 0, 0, 0, 0.5 );
+	}
+}
+
+.woocommerce-fields-controls__image-wrapper.is-featured {
+	grid-column: span 2;
+	grid-row: span 2;
+}
+
+.woocommerce-fields-controls__image-overlay {
+	position: absolute;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: rgba( 0, 0, 0, 0.3 );
+	border-radius: var( --wpds-border-radius-lg );
+	z-index: 1;
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
+	pointer-events: none;
+}
+
+.woocommerce-fields-controls__image-drag-handle-container {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate( -50%, -50% );
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
+	pointer-events: none;
+	z-index: 1;
+
+	&:has( .woocommerce-fields-controls__image-drag-handle:focus ) {
+		opacity: 1;
+	}
+}
+
+.woocommerce-fields-controls__image-drag-handle {
+	pointer-events: auto;
+	cursor: grab;
+	color: #fff;
+	border-radius: 3px;
+	background: transparent;
+
+	svg {
+		fill: #fff;
+	}
+
+	&:active {
+		cursor: grabbing;
+	}
+
+	&:hover {
+		border: none;
+	}
+}
+
+.woocommerce-fields-controls__image-remove-button {
+	position: absolute;
+	top: calc( 2 * var( --wpds-dimension-base ) );
+	right: calc( 2 * var( --wpds-dimension-base ) );
+	border-radius: 50%;
+	border: 1px solid var( --wpds-color-stroke-interactive-neutral );
+	background-color: var( --wpds-color-bg-surface-neutral-strong );
+	overflow: hidden;
+	width: variables.$button-size-small;
+	height: variables.$button-size-small;
+	opacity: 0;
+	transition: opacity 0.2s ease-in-out;
+	z-index: 1;
+}
+
+.woocommerce-fields-controls__image-wrapper {
+	&:hover,
+	&:focus-within {
+		.woocommerce-fields-controls__image-drag-handle-container,
+		.woocommerce-fields-controls__image-remove-button {
+			opacity: 1;
+		}
+
+		.woocommerce-fields-controls__image-overlay {
+			opacity: 1;
+		}
+	}
+}
+
+.woocommerce-fields-controls__image-wrapper img {
+	position: relative;
+	object-fit: cover;
+	border-radius: var( --wpds-border-radius-lg );
+	width: 100%;
+	height: 100%;
+}
+
+.woocommerce-fields-control__featured-image-actions {
+	width: 108px;
+	height: 108px;
+	border: 1px dashed var( --wpds-color-stroke-interactive-neutral );
+	border-radius: var( --wpds-border-radius-lg );
+
+	button {
+		width: 100%;
+		height: 100%;
+		cursor: pointer;
+		border-radius: var( --wpds-border-radius-lg );
+	}
+}
