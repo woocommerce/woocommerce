@@ -76,7 +76,7 @@ export function cart() {
 				`Cart – ${ STORE_NAME }`,
 			"body does not contain: 'your cart is currently empty'": ( r ) =>
 				! r.body.includes( 'Your cart is currently empty.' ),
-			'footer contains: Powered by WordPress': ( r ) =>
+			'footer contains: Built with WooCommerce': ( r ) =>
 				r.html().find( 'body footer' ).text().includes( FOOTER_TEXT ),
 		} );
 	} );

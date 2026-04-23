@@ -55,7 +55,7 @@ export function singleProduct() {
 			},
 			'body contains: product SKU': ( r ) =>
 				r.body.includes( `class="sku">${ product_sku }` ),
-			'footer contains: Powered by WordPress': ( r ) =>
+			'footer contains: Built with WooCommerce': ( r ) =>
 				r.html().find( 'body footer' ).text().includes( FOOTER_TEXT ),
 		} );
 	} );
