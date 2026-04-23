@@ -196,11 +196,11 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 	 *
 	 * @dataProvider provide_classify_scenarios
 	 *
-	 * @param string   $scenario          Human-readable label surfaced by PHPUnit.
-	 * @param array    $row_fields        Fields to seed on the \stdClass row.
-	 * @param string   $post_content      Post content to hash.
-	 * @param string   $canonical_content Canonical core content to hash.
-	 * @param string   $expected_case     One of WCEmailTemplateSyncBackfill::CASE_A|B|C.
+	 * @param string $scenario          Human-readable label surfaced by PHPUnit.
+	 * @param array  $row_fields        Fields to seed on the \stdClass row.
+	 * @param string $post_content      Post content to hash.
+	 * @param string $canonical_content Canonical core content to hash.
+	 * @param string $expected_case     One of WCEmailTemplateSyncBackfill::CASE_A|B|C.
 	 */
 	public function test_classify_truth_table( string $scenario, array $row_fields, string $post_content, string $canonical_content, string $expected_case ): void {
 		$row               = (object) array_merge( array( 'post_content' => $post_content ), $row_fields );
@@ -219,17 +219,17 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 	 * @return array<string, array{0:string,1:array<string,string>,2:string,3:string,4:string}>
 	 */
 	public function provide_classify_scenarios(): array {
-		$canonical       = '<!-- wp:paragraph --><p>Canonical core.</p><!-- /wp:paragraph -->';
-		$merchant_edit   = '<!-- wp:paragraph --><p>Merchant edit.</p><!-- /wp:paragraph -->';
-		$created_at      = '2023-01-01 00:00:00';
-		$edited_at       = '2024-06-15 12:34:56';
-		$zero_date       = '0000-00-00 00:00:00';
-		$case_a          = WCEmailTemplateSyncBackfill::CASE_A;
-		$case_b          = WCEmailTemplateSyncBackfill::CASE_B;
-		$case_c          = WCEmailTemplateSyncBackfill::CASE_C;
+		$canonical     = '<!-- wp:paragraph --><p>Canonical core.</p><!-- /wp:paragraph -->';
+		$merchant_edit = '<!-- wp:paragraph --><p>Merchant edit.</p><!-- /wp:paragraph -->';
+		$created_at    = '2023-01-01 00:00:00';
+		$edited_at     = '2024-06-15 12:34:56';
+		$zero_date     = '0000-00-00 00:00:00';
+		$case_a        = WCEmailTemplateSyncBackfill::CASE_A;
+		$case_b        = WCEmailTemplateSyncBackfill::CASE_B;
+		$case_c        = WCEmailTemplateSyncBackfill::CASE_C;
 
 		return array(
-			'Case A: content matches core (short-circuits before timestamps)'                                     => array(
+			'Case A: content matches core (short-circuits before timestamps)' => array(
 				'Case A short-circuit',
 				array(
 					'post_date'         => $created_at,
@@ -241,7 +241,7 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 				$canonical,
 				$case_a,
 			),
-			'Case B: GMT pair valid and equal (never edited)'                                                     => array(
+			'Case B: GMT pair valid and equal (never edited)' => array(
 				'GMT valid + equal -> never edited',
 				array(
 					'post_date'         => $created_at,
@@ -253,7 +253,7 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 				$canonical,
 				$case_b,
 			),
-			'Case C: GMT pair valid and differs (edited)'                                                         => array(
+			'Case C: GMT pair valid and differs (edited)' => array(
 				'GMT valid + differs -> edited',
 				array(
 					'post_date'         => $created_at,
@@ -265,7 +265,7 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 				$canonical,
 				$case_c,
 			),
-			'Case B via fallback: both GMT zero, local pair equal (never edited)'                                 => array(
+			'Case B via fallback: both GMT zero, local pair equal (never edited)' => array(
 				'GMT zero + local equal -> fallback to local -> never edited',
 				array(
 					'post_date'         => $created_at,
@@ -289,7 +289,7 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 				$canonical,
 				$case_c,
 			),
-			'Case B via OR: GMT pair differs but local pair is equal (legacy never-edited signal)'                => array(
+			'Case B via OR: GMT pair differs but local pair is equal (legacy never-edited signal)' => array(
 				'GMT differs + local equal -> OR resolves to never edited',
 				array(
 					'post_date'         => $created_at,
