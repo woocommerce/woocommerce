@@ -1,4 +1,5 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Plugin Name: Back in Stock Notifications — e2e test helpers
  * Description: Small utilities scoped to the BIS Playwright specs.
