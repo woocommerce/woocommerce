@@ -8536,6 +8536,15 @@ table.bar_chart {
 
 	// Align editor meta box border-radius with WP 7.0's dashboard widgets (8px).
 	// Product, order (CPT + HPOS), and coupon editor screens.
+	//
+	// BRIDGE: WP 7.0 rounded dashboard widgets but left editor .postbox square,
+	// creating an inconsistency (dashboard widgets vs. Posts/Pages/Media/Woo
+	// editors all use the same .postbox class). We're applying the radius
+	// ourselves, scoped to Woo editor screens, as a bridge until Core unifies
+	// this.
+	//
+	// TODO: Remove these rules when Core rounds editor .postbox containers.
+	// Upstream proposal: https://core.trac.wordpress.org/ticket/TBA
 	&.post-type-product,
 	&.post-type-shop_order,
 	&.post-type-shop_coupon,
