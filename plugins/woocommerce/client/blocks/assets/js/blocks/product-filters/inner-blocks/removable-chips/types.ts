@@ -6,7 +6,7 @@ import { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { ActiveFiltersBlockContext } from '../../../../types/type-defs/active-filters';
+import type { RemovableItemsBlockContext } from '../../../../types/type-defs/removable-items';
 
 export type Color = {
 	slug?: string;
@@ -30,7 +30,7 @@ export type BlockAttributes = {
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
 	style: Record< string, string >;
-	context: ActiveFiltersBlockContext;
+	context: RemovableItemsBlockContext;
 	chipText: Color;
 	setChipText: ( value: string ) => void;
 	chipBackground: Color;

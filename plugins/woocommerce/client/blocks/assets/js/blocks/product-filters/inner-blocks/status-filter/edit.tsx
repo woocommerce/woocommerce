@@ -17,6 +17,8 @@ import { getSetting } from '@woocommerce/settings';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Inspector } from './inspector';
 import type { EditProps } from './types';
+import type { FilterItemFields } from '../../types';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 
 const Edit = ( props: EditProps ) => {
 	const { showCounts, hideEmpty } = props.attributes;
@@ -87,10 +89,9 @@ const Edit = ( props: EditProps ) => {
 						'woocommerce/selectableItems': {
 							items,
 							selectionMode: 'multiple' as const,
-							selectAction: 'toggleFilter',
 							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-						},
+						} satisfies SelectableItemsContext< FilterItemFields >,
 					} }
 				>
 					{ children }

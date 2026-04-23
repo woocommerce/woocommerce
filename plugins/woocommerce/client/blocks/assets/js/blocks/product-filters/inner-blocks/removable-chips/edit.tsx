@@ -44,8 +44,8 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	} = props;
 	const { customChipText, customChipBackground, customChipBorder, layout } =
 		attributes;
-	const activeFiltersContext = context[ 'woocommerce/activeFilters' ];
-	const { activeFilters } = activeFiltersContext ?? {};
+	const removableItemsContext = context[ 'woocommerce/removableItems' ];
+	const { items } = removableItemsContext ?? {};
 
 	// Extract attributes from block layout
 	const layoutBlockSupport = getBlockSupport( name, 'layout' );
@@ -104,13 +104,13 @@ const Edit = ( props: EditProps ): JSX.Element => {
 				</ToolbarGroup>
 			</BlockControls>
 			<ul className="wc-block-product-filter-removable-chips__items">
-				{ activeFilters?.map( ( item, index ) => (
+				{ items?.map( ( item, index ) => (
 					<li
 						key={ index }
 						className="wc-block-product-filter-removable-chips__item"
 					>
 						<span className="wc-block-product-filter-removable-chips__label">
-							{ item.type + ': ' + item.activeLabel }
+							{ item.type + ': ' + item.label }
 						</span>
 						<button className="wc-block-product-filter-removable-chips__remove">
 							<Icon
@@ -120,7 +120,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 							/>
 							<Label
 								screenReaderLabel={ removeText(
-									item.type + ': ' + item.activeLabel
+									item.type + ': ' + item.label
 								) }
 							/>
 						</button>

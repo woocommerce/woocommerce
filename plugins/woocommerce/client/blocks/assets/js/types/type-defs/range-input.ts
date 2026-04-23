@@ -4,7 +4,6 @@ export interface RangeInputContext {
 	currentMin: number;
 	currentMax: number;
 	step?: number;
-	changeAction: string;
 	storeNamespace: string;
 	isLoading?: boolean;
 }
@@ -12,3 +11,19 @@ export interface RangeInputContext {
 export type RangeInputBlockContext = {
 	'woocommerce/rangeInput': RangeInputContext;
 };
+
+/**
+ * Contract every parent store referenced by `storeNamespace` MUST satisfy.
+ * Use with `satisfies` to get compile-time enforcement:
+ *
+ *   myRangeStore satisfies RangeInputParentStore;
+ *
+ * Inner blocks call `actions.setMin` / `actions.setMax` on input change.
+ * The parent derives its own semantics (currency, step, labels) from `context.min`/`max` etc.
+ */
+export interface RangeInputParentStore {
+	actions: {
+		setMin: ( event: Event ) => void;
+		setMax: ( event: Event ) => void;
+	};
+}
