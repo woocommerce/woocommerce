@@ -220,7 +220,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_visual_attribute_type() {
 		$enable_visual_attribute_feature = function ( $features ) {
-			$features[] = 'wc-visual-attributes';
+			$features[] = 'wc-visual-attribute';
 			return array_unique( $features );
 		};
 

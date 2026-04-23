@@ -259,7 +259,7 @@ function wc_get_attribute_types() {
 
 	$allow_visual_attribute_type =
 		wp_is_block_theme() &&
-		\Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'wc-visual-attributes' );
+		\Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'wc-visual-attribute' );
 
 	// If the store already has some visual attributes, let's allow them even
 	// if the current theme is not a block theme.
