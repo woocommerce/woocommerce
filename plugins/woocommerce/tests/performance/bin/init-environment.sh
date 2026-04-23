@@ -41,8 +41,8 @@ docker exec -u root "$(docker ps --filter name=tests-wordpress --format '{{.Name
 docker restart "$(docker ps --filter name=tests-wordpress --format '{{.Names}}' | head -1)"
 
 # Remove container-level strains for cleaner performance metrics: DB buffer and connections pool.
-docker exec -u root "$(docker ps --filter name=tests-mysql --format '{{.Names}}')" bash -c "printf '[mysqld]\ninnodb_buffer_pool_size=1073741824\ninnodb_flush_log_at_trx_commit=2\nmax_connections=300\n' > /etc/mysql/conf.d/perf-tuning.cnf"
+docker exec -u root "$(docker ps --filter name=tests-mysql --format '{{.Names}}')" bash -c "printf '[mysqld]\ninnodb_buffer_pool_size=1073741824\ninnodb_flush_log_at_trx_commit=2\n' > /etc/mysql/conf.d/perf-tuning.cnf"
 docker restart "$(docker ps --filter name=tests-mysql --format '{{.Names}}')"
-until docker exec "$(docker ps --filter name=tests-mysql --format '{{.Names}}')" mariadb -u root -ppassword -e "SELECT 1" &>/dev/null; do sleep 0.5; done
+_timeout=30; until docker exec "$(docker ps --filter name=tests-mysql --format '{{.Names}}')" mariadb -u root -ppassword -e "SELECT 1" &>/dev/null || [ $((_timeout--)) -eq 0 ]; do sleep 0.5; done
 
 echo "Success! Your E2E Test Environment is now ready."
