@@ -90,11 +90,13 @@ class GraphQLController {
 	 * Register the GraphQL REST route.
 	 */
 	public function register(): void {
+		$methods = Main::is_get_endpoint_enabled() ? array( 'GET', 'POST' ) : array( 'POST' );
+
 		register_rest_route(
 			'wc',
 			'/graphql',
 			array(
-				'methods'             => array( 'GET', 'POST' ),
+				'methods'             => $methods,
 				'callback'            => array( $this, 'handle_request' ),
 				// Auth is handled per-query/mutation.
 				'permission_callback' => '__return_true',
