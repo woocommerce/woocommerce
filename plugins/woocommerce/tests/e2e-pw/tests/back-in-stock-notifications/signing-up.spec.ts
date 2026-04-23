@@ -88,6 +88,14 @@ test.describe(
 				await page.goto( product.permalink );
 				await signUpOnProductPage( page );
 
+				// Wait for the first submission to finish so the re-navigation
+				// below can't race it.
+				await expect(
+					page.getByText(
+						/You have successfully signed up|You have already joined this waitlist/i
+					)
+				).toBeVisible();
+
 				// Submitting the form a second time (the "already joined"
 				// notice only renders as a form-submit response; the cached
 				// state shown on page reload is behind the off-by-default
