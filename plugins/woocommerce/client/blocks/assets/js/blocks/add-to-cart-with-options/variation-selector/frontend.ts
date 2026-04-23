@@ -405,10 +405,14 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				const { selectedAttributes } = getContext< Context >();
-				const matchedVariation = productsState.findProduct( {
+				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,
 				} );
+				// findProduct returns the parent when no variation
+				// matches — only accept an actual variation.
+				const matchedVariation =
+					result && result.id !== product.id ? result : null;
 
 				const variationId = matchedVariation?.id ?? null;
 				const productContext = getContext< {
@@ -431,10 +435,14 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				const { selectedAttributes } = getContext< Context >();
-				const matchedVariation = productsState.findProduct( {
+				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,
 				} );
+				// findProduct returns the parent when no variation
+				// matches — only accept an actual variation.
+				const matchedVariation =
+					result && result.id !== product.id ? result : null;
 
 				const { errorMessages } = getConfig();
 
