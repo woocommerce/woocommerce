@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix CES snackbar icon rendering as broken text glyph and drop hardcoded wrapper sizing so Gutenberg's Snackbar layout controls placement.
