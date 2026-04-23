@@ -23,6 +23,12 @@ registerBlockType( metadata as any, {
 				},
 			},
 			save: DeprecatedSave,
+			migrate( attributes: Record< string, unknown > ) {
+				return {
+					...attributes,
+					source: 'existing' as const,
+				};
+			},
 		},
 	],
 } );

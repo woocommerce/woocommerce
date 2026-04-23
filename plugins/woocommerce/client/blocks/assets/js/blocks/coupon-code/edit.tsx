@@ -331,16 +331,12 @@ export default function Edit( props: BlockEditProps ): JSX.Element {
 							},
 						] }
 						onChange={ ( value ) => {
-							if ( value === 'existing' ) {
-								setAttributes( {
-									source: 'existing',
-								} );
-							} else {
-								setAttributes( {
-									source: 'createNew',
-									couponCode: '',
-								} );
-							}
+							setAttributes( {
+								source:
+									value === 'existing'
+										? 'existing'
+										: 'createNew',
+							} );
 						} }
 						__nextHasNoMarginBottom
 					/>

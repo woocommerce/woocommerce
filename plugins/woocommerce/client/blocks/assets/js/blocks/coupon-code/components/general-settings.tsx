@@ -26,9 +26,9 @@ interface CouponType {
 }
 
 const DEFAULT_COUPON_TYPES: Record< string, string > = {
-	percent: 'Percentage discount',
-	fixed_cart: 'Fixed cart discount',
-	fixed_product: 'Fixed product discount',
+	percent: __( 'Percentage discount', 'woocommerce' ),
+	fixed_cart: __( 'Fixed cart discount', 'woocommerce' ),
+	fixed_product: __( 'Fixed product discount', 'woocommerce' ),
 };
 
 function getCouponTypeOptions(): CouponType[] {
@@ -63,9 +63,13 @@ export function GeneralSettings( {
 				label={ __( 'Discount type', 'woocommerce' ) }
 				value={ attributes.discountType }
 				options={ couponTypeOptions }
-				onChange={ ( value ) =>
-					setAttributes( { discountType: value } )
-				}
+				onChange={ ( value ) => {
+					const newMax = getAmountMax( value );
+					setAttributes( {
+						discountType: value,
+						amount: Math.min( attributes.amount, newMax ),
+					} );
+				} }
 				__nextHasNoMarginBottom
 			/>
 			<TextControl
