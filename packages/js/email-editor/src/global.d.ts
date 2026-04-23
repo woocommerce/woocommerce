@@ -13,3 +13,9 @@ interface Window {
 		current_post_id: string;
 	};
 }
+
+// Text domain used by `__()`, `_x()`, `_n()`, `_nx()` calls inside this package.
+// Consumers must replace this identifier with their own text domain string at
+// bundle time via `webpack.DefinePlugin` (or an equivalent). See
+// `development.md` for a build configuration example.
+declare const __i18n_text_domain__: string;

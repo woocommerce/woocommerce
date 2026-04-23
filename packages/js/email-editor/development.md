@@ -10,6 +10,32 @@ pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:admin
 
 ---
 
+## Translation text domain
+
+Translation function calls inside the package (`__()`, `_x()`, `_n()`, `_nx()`) use the `__i18n_text_domain__` identifier as the text domain argument instead of a hardcoded string literal. This lets each consumer of the package (WooCommerce, MailPoet, or any other plugin) substitute its own text domain at bundle time and extract strings under that domain with `wp i18n make-pot`.
+
+Consumers **must** replace the identifier with a string literal during their own build — typically with [`webpack.DefinePlugin`](https://webpack.js.org/plugins/define-plugin/):
+
+```js
+// consumer webpack.config.js
+const webpack = require( 'webpack' );
+
+module.exports = {
+	// …
+	plugins: [
+		new webpack.DefinePlugin( {
+			__i18n_text_domain__: JSON.stringify( 'your-text-domain' ),
+		} ),
+	],
+};
+```
+
+If the identifier is not replaced at bundle time, consumers will hit a runtime `ReferenceError` when the bundle is executed in the browser, because `__i18n_text_domain__` is declared as an ambient global with no runtime default.
+
+String extraction happens against the built consumer bundle (not the package source), so `wp i18n make-pot` picks up the substituted literal domain and extracts strings correctly for the consumer's translation workflow.
+
+---
+
 ## Running Tests
 
 ### JavaScript Component Tests
