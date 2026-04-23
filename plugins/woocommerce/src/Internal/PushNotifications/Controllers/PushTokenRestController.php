@@ -45,14 +45,18 @@ class PushTokenRestController extends RestApiControllerBase {
 	protected string $rest_base = 'push-tokens';
 
 	/**
-	 * Get the WooCommerce REST API namespace for the class.
+	 * Class identifier used by `woocommerce_rest_api_get_rest_namespaces`.
+	 *
+	 * Intentionally distinct from the URL `$route_namespace` — the filter keys
+	 * one class per value here, so sharing the value with sibling controllers
+	 * in the same module would overwrite them.
 	 *
 	 * @since 10.6.0
 	 *
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
-		return $this->route_namespace;
+		return 'wc-push-notifications-push-tokens';
 	}
 
 	/**
@@ -64,7 +68,7 @@ class PushTokenRestController extends RestApiControllerBase {
 	 */
 	public function register_routes(): void {
 		register_rest_route(
-			$this->get_rest_api_namespace(),
+			$this->route_namespace,
 			$this->rest_base,
 			array(
 				array(
@@ -102,7 +106,7 @@ class PushTokenRestController extends RestApiControllerBase {
 		);
 
 		register_rest_route(
-			$this->get_rest_api_namespace(),
+			$this->route_namespace,
 			$this->rest_base . '/(?P<id>[\d]+)',
 			array(
 				array(
