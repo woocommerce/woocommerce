@@ -219,29 +219,39 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 * Test visual attribute type registration and persistence.
 	 */
 	public function test_wc_visual_attribute_type() {
-		switch_theme( 'twentytwentyfour' );
+		$original_theme = wp_get_theme()->get_stylesheet();
+		$attribute_id   = null;
 
-		$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in block themes.' );
+		try {
+			switch_theme( 'twentytwentyfour' );
 
-		$attribute_id = wc_create_attribute(
-			array(
-				'name' => 'Visual Color',
-				'type' => 'wc-visual',
-			)
-		);
+			$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in block themes.' );
 
-		$this->assertIsInt( $attribute_id );
-		$this->assertEquals( 'wc-visual', wc_get_attribute( $attribute_id )->type, 'The attribute type should be `wc-visual` in block themes.' );
+			$attribute_id = wc_create_attribute(
+				array(
+					'name' => 'Visual Color',
+					'type' => 'wc-visual',
+				)
+			);
 
-		switch_theme( 'storefront' );
-		$this->assertEquals( 'wc-visual', wc_get_attribute( $attribute_id )->type, 'The attribute type should be `wc-visual` in classic themes.' );
-		$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in classic themes with a visual attribute.' );
+			$this->assertIsInt( $attribute_id );
+			$this->assertEquals( 'wc-visual', wc_get_attribute( $attribute_id )->type, 'The attribute type should be `wc-visual` in block themes.' );
 
-		wc_delete_attribute( $attribute_id );
+			switch_theme( 'storefront' );
+			$this->assertEquals( 'wc-visual', wc_get_attribute( $attribute_id )->type, 'The attribute type should be `wc-visual` in classic themes.' );
+			$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in classic themes with a visual attribute.' );
 
-		$this->assertArrayNotHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should not be available in classic themes without a visual attribute.' );
+			wc_delete_attribute( $attribute_id );
+			$attribute_id = null;
 
-		switch_theme( 'twentytwentyfour' );
+			$this->assertArrayNotHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should not be available in classic themes without a visual attribute.' );
+		} finally {
+			if ( is_int( $attribute_id ) ) {
+				wc_delete_attribute( $attribute_id );
+			}
+
+			switch_theme( $original_theme );
+		}//end try
 	}
 
 	public function get_attribute_names_and_slugs() {
