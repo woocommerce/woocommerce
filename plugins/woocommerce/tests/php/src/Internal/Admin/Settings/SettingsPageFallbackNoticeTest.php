@@ -185,40 +185,4 @@ class SettingsPageFallbackNoticeTest extends WC_Unit_Test_Case {
 			'No notice should be raised when there are no unsupported fields.'
 		);
 	}
-
-	/**
-	 * Invoke the protected warn_runtime_unsupported_fallback() via reflection.
-	 *
-	 * @param string $tab     Tab id.
-	 * @param string $section Section id.
-	 */
-	private function invoke_warn_runtime( string $tab, string $section ): void {
-		$method = new ReflectionMethod( WC_Settings_Page::class, 'warn_runtime_unsupported_fallback' );
-		$method->setAccessible( true );
-		$method->invoke( $this->sut, $tab, $section );
-	}
-
-	/**
-	 * @testdox Should raise wc_doing_it_wrong attributed to warn_runtime_unsupported_fallback() when the WP dataviews runtime is missing.
-	 */
-	public function test_raises_doing_it_wrong_for_runtime_unsupported_fallback(): void {
-		$this->setExpectedIncorrectUsage( 'WC_Settings_Page::warn_runtime_unsupported_fallback' );
-
-		$this->invoke_warn_runtime( 'general', '' );
-
-		$this->assertArrayHasKey(
-			'WC_Settings_Page::warn_runtime_unsupported_fallback',
-			$this->captured_messages,
-			'Runtime-unsupported notice should be attributed to warn_runtime_unsupported_fallback().'
-		);
-
-		$messages = $this->captured_messages['WC_Settings_Page::warn_runtime_unsupported_fallback'] ?? array();
-		$this->assertNotEmpty( $messages );
-		$message = $messages[0];
-
-		$this->assertStringContainsString( 'tab "general"', $message, 'Message should name the tab.' );
-		$this->assertStringContainsString( 'section "default"', $message, 'Empty section should be normalised to "default".' );
-		$this->assertStringContainsString( 'wp-dataviews', $message, 'Message should name the missing script handle so the nudge is actionable.' );
-		$this->assertStringContainsString( '6.8', $message, 'Message should name the minimum WP version that ships a compatible runtime.' );
-	}
 }

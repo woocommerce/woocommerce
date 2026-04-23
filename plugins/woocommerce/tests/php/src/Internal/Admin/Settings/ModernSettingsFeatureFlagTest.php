@@ -84,23 +84,12 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->disable_filter = function ( $features ) {
 			return array_values( array_diff( (array) $features, array( 'modern-settings' ) ) );
 		};
-
-		// The runtime-environment gate requires a WP dataviews runtime at 6.8+;
-		// the test env doesn't register that script handle, so force the probe
-		// to "supported" so the flag-on cases can exercise the React mount
-		// path. Dedicated coverage for the unsupported path lives in
-		// ReactSettingsSchemaTest::test_get_screen_render_context_marks_runtime_unsupported_and_skips_render().
-		// TODO: Remove once the gate itself is removed
-		// (see ReactSettingsSchema::is_runtime_environment_supported()).
-		add_filter( 'woocommerce_modern_settings_runtime_supported', '__return_true' );
 	}
 
 	/**
 	 * Tear down test fixtures.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_modern_settings_runtime_supported', '__return_true' );
-
 		if ( null !== $this->enable_filter ) {
 			remove_filter( 'woocommerce_admin_features', $this->enable_filter );
 		}
