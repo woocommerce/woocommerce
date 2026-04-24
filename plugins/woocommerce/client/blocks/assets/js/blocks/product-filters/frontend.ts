@@ -13,15 +13,15 @@ const { getContext, store, getServerContext, getConfig } = iAPI;
 
 const BLOCK_NAME = 'woocommerce/product-filters';
 
-function selectFilter() {
+function selectFilter( item: FilterItem ) {
 	const context = getContext< ProductFiltersContext >();
 	const newActiveFilter = {
-		value: context.item.value,
-		type: context.item.type,
-		attributeQueryType: context.item.attributeQueryType,
+		value: item.value,
+		type: item.type,
+		attributeQueryType: item.attributeQueryType,
 		activeLabel: context.activeLabelTemplate.replace(
 			'{{label}}',
-			context.item?.ariaLabel || context.item.label
+			item?.ariaLabel || item.label
 		),
 	};
 	const newActiveFilters = context.activeFilters.filter(
@@ -35,17 +35,13 @@ function selectFilter() {
 	newActiveFilters.push( newActiveFilter );
 
 	context.activeFilters = newActiveFilters;
-	context.item.selected = true;
 }
 
-function unselectFilter() {
-	const context = getContext< ProductFiltersContext >();
-	const { item } = context;
+function unselectFilter( item: FilterItem ) {
 	actions.removeActiveFiltersBy(
 		( activeFilter ) =>
 			activeFilter.type === item.type && activeFilter.value === item.value
 	);
-	context.item.selected = false;
 }
 
 type FilterItem = {
@@ -60,7 +56,6 @@ type FilterItem = {
 	termId?: number;
 	parent?: number;
 	depth?: number;
-	hidden?: boolean;
 };
 
 export type ActiveFilterItem = Pick<
@@ -145,18 +140,26 @@ const productFiltersStore = {
 					uid: `${ item.type }/${ item.value }`,
 				} ) );
 		},
-		get hasHiddenItems() {
-			const { items } = getContext< ProductFiltersContext >();
-			return items?.some( ( item ) => item.hidden ) ?? false;
-		},
-		get isSelected() {
-			const { item, activeFilters } =
+		get selectableItems() {
+			// Items are server-owned (narrow on every navigation); read
+			// from server context so they refresh post-navigation.
+			// `getContext()` soft-merges and would keep the stale client
+			// snapshot.
+			const server = getServerContext
+				? getServerContext< ProductFiltersContext >()
+				: getContext< ProductFiltersContext >();
+			const { activeFilters } =
 				getContext< ProductFiltersContext >();
-			if ( ! item ) return false;
-			return activeFilters.some(
-				( filter ) =>
-					filter.type === item.type && filter.value === item.value
-			);
+			const items = server.items;
+			if ( ! items ) return [];
+			return items.map( ( item ) => ( {
+				...item,
+				selected: activeFilters.some(
+					( filter ) =>
+						filter.type === item.type &&
+						filter.value === item.value
+				),
+			} ) );
 		},
 	},
 	actions: {
@@ -193,24 +196,21 @@ const productFiltersStore = {
 				( item ) => ! callback( item )
 			);
 		},
-		toggle: () => {
-			const { item, activeFilters } =
-				getContext< ProductFiltersContext >();
-			const isSelected = activeFilters.some(
-				( f ) => f.type === item.type && f.value === item.value
+		toggle: ( itemArg?: unknown ) => {
+			const context = getContext< ProductFiltersContext >();
+			const targetItem =
+				( itemArg as FilterItem | undefined ) ?? context.item;
+			if ( ! targetItem ) return;
+			const isSelected = context.activeFilters.some(
+				( f ) =>
+					f.type === targetItem.type && f.value === targetItem.value
 			);
 			if ( isSelected ) {
-				unselectFilter();
+				unselectFilter( targetItem );
 			} else {
-				selectFilter();
+				selectFilter( targetItem );
 			}
 			actions.navigate();
-		},
-		showAll: () => {
-			const { items } = getContext< ProductFiltersContext >();
-			items?.forEach( ( item ) => {
-				item.hidden = false;
-			} );
 		},
 		// TODO: Remove the hardcoded type once https://github.com/woocommerce/gutenberg/pull/8 is merged.
 		*navigate(): Generator {

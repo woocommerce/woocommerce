@@ -104,18 +104,19 @@ final class ProductFilterRating extends AbstractBlock {
 		$show_counts    = $attributes['showCounts'] ?? false;
 		$filter_options = array_map(
 			function ( $rating ) use ( $selected_rating, $show_counts ) {
-				$aria_label = sprintf(
+				$rating_value = (int) $rating['rating'];
+				$aria_label   = sprintf(
 					/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
 					__( 'Rated %1$d out of 5', 'woocommerce' ),
-					$rating['rating'],
+					$rating_value,
 				);
 
 				$item = array(
-					'id'        => 'rating-' . $rating['rating'],
-					'label'     => $this->render_rating_label( (int) $rating['rating'] ),
+					'id'        => 'rating-' . $rating_value,
+					'label'     => '',
 					'ariaLabel' => $aria_label,
-					'value'     => (string) $rating['rating'],
-					'selected'  => in_array( $rating['rating'], $selected_rating, true ),
+					'value'     => (string) $rating_value,
+					'selected'  => in_array( $rating_value, $selected_rating, true ),
 					'type'      => 'rating',
 				);
 
@@ -133,7 +134,7 @@ final class ProductFilterRating extends AbstractBlock {
 			'selectionMode'  => 'multiple',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => __( 'Rating', 'woocommerce' ),
-			'dynamicItems'   => false,
+			'filterType'     => 'rating',
 		);
 
 		$wrapper_attributes = array(
@@ -144,6 +145,7 @@ final class ProductFilterRating extends AbstractBlock {
 					/* translators: {{label}} is the rating filter item label. */
 					'activeLabelTemplate' => __( 'Rating: {{label}}', 'woocommerce' ),
 					'filterType'          => 'rating',
+					'items'               => $filter_options,
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
@@ -166,45 +168,6 @@ final class ProductFilterRating extends AbstractBlock {
 				''
 			)
 		);
-	}
-
-	/**
-	 * Render the rating label.
-	 *
-	 * @param int $rating The rating to render.
-	 * @return string|false
-	 */
-	private function render_rating_label( $rating ) {
-		$view_box_width = $rating * 24;
-
-		$rating_label = sprintf(
-			/* translators: %1$d is referring to rating value. Example: Rated 4 out of 5. */
-			__( 'Rated %1$d out of 5', 'woocommerce' ),
-			$rating,
-		);
-
-		ob_start();
-		?>
-			<svg
-				width="<?php echo esc_attr( $view_box_width ); ?>"
-				height="24"
-				viewBox="0 0 <?php echo esc_attr( $view_box_width ); ?> 24"
-				fill="currentColor"
-				aria-label="<?php echo esc_attr( $rating_label ); ?>"
-			>
-				<?php
-				for ( $i = 0; $i < $rating; $i++ ) {
-					?>
-					<path
-						d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"
-						transform="translate(<?php echo esc_attr( $i * 24 ); ?>, 0)"
-					/>
-					<?php
-				}
-				?>
-			</svg>
-		<?php
-		return ob_get_clean();
 	}
 
 	/**

@@ -53,6 +53,13 @@ final class ProductFilterChips extends AbstractBlock {
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filter-chips',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context'     => wp_json_encode(
+				array(
+					'storeNamespace' => $store_namespace,
+					'displayLimit'   => $display_limit,
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
 			'class'               => esc_attr( $classes ),
 		);
 
@@ -71,15 +78,43 @@ final class ProductFilterChips extends AbstractBlock {
 				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
-				<div
-					class="wc-block-product-filter-chips__items"
-					data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
-				>
+				<div class="wc-block-product-filter-chips__items">
+					<template
+						data-wp-each--item="state.items"
+						data-wp-each-key="context.item.id"
+					>
+						<button
+							class="wc-block-product-filter-chips__item"
+							type="button"
+							role="checkbox"
+							data-wp-bind--id="context.item.id"
+							data-wp-bind--aria-label="context.item.ariaLabel"
+							data-wp-bind--value="context.item.value"
+							data-wp-bind--aria-checked="context.item.selected"
+							data-wp-bind--hidden="context.item.hidden"
+							data-wp-on--click="actions.toggle"
+						>
+							<span class="wc-block-product-filter-chips__label">
+								<span
+									class="wc-block-product-filter-chips__text"
+									data-wp-text="context.item.label"
+								></span>
+								<span
+									class="wc-block-product-filter-chips__count"
+									data-wp-bind--hidden="!context.item.count"
+								>
+									(<span data-wp-text="context.item.count"></span>)
+								</span>
+							</span>
+						</button>
+					</template>
 					<?php
-					$index = 0;
-					foreach ( $items as $item ) :
-						$is_hidden = $index >= $display_limit;
-						++$index;
+					$visible_items = array_slice( $items, 0, $display_limit, true );
+					foreach ( $visible_items as $item ) :
+						$context_item = array_merge(
+							$item,
+							array( 'hidden' => false )
+						);
 						?>
 						<button
 							class="wc-block-product-filter-chips__item"
@@ -89,19 +124,17 @@ final class ProductFilterChips extends AbstractBlock {
 							<?php if ( ! empty( $item['ariaLabel'] ) ) : ?>
 								aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
 							<?php endif; ?>
-							data-wp-on--click="actions.toggle"
 							value="<?php echo esc_attr( $item['value'] ); ?>"
 							aria-checked="<?php echo ! empty( $item['selected'] ) ? 'true' : 'false'; ?>"
-							data-wp-bind--aria-checked="state.isSelected"
-							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							<?php if ( $is_hidden ) : ?>
-								hidden
-								data-wp-bind--hidden="!state.isExpanded"
-							<?php endif; ?>
+							data-wp-each-child
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $context_item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							data-wp-bind--aria-checked="context.item.selected"
+							data-wp-bind--hidden="context.item.hidden"
+							data-wp-on--click="actions.toggle"
 						>
 							<span class="wc-block-product-filter-chips__label">
 								<span class="wc-block-product-filter-chips__text">
-									<?php echo wp_kses( $item['label'], $this->get_allowed_label_html() ); ?>
+									<?php echo esc_html( $item['label'] ); ?>
 								</span>
 								<?php if ( isset( $item['count'] ) ) : ?>
 									<span class="wc-block-product-filter-chips__count">
@@ -111,53 +144,23 @@ final class ProductFilterChips extends AbstractBlock {
 							</span>
 						</button>
 					<?php endforeach; ?>
-					<?php if ( $has_more_items ) : ?>
-						<button
-							type="button"
-							class="wc-block-product-filter-chips__show-more"
-							data-wp-on--click="woocommerce/product-filter-chips::actions.toggleShowMore"
-							data-wp-text="woocommerce/product-filter-chips::state.showMoreLabel"
-							data-wp-bind--hidden="woocommerce/product-filter-chips::state.isExpanded"
-						>
-							<?php
-							/* translators: %d: number of hidden items */
-							echo esc_html( sprintf( __( '+%d more', 'woocommerce' ), $hidden_count ) );
-							?>
-						</button>
-					<?php endif; ?>
 				</div>
+				<?php if ( $has_more_items ) : ?>
+					<button
+						type="button"
+						class="wc-block-product-filter-chips__show-more"
+						data-wp-on--click="actions.showAll"
+						data-wp-bind--hidden="state.isExpanded"
+					>
+						<?php
+						/* translators: %d: number of hidden items */
+						echo esc_html( sprintf( __( '+%d more', 'woocommerce' ), $hidden_count ) );
+						?>
+					</button>
+				<?php endif; ?>
 			</fieldset>
 		</div>
 		<?php
 		return ob_get_clean();
-	}
-
-	/**
-	 * Get allowed HTML for item labels, including SVG for rating stars.
-	 *
-	 * @return array Allowed HTML elements and attributes.
-	 */
-	private function get_allowed_label_html() {
-		return array_merge(
-			wp_kses_allowed_html( 'post' ),
-			array(
-				'svg'  => array(
-					'class'      => true,
-					'xmlns'      => true,
-					'width'      => true,
-					'height'     => true,
-					'viewbox'    => true,
-					'fill'       => true,
-					'aria-label' => true,
-				),
-				'path' => array(
-					'd'            => true,
-					'fill'         => true,
-					'stroke'       => true,
-					'stroke-width' => true,
-					'transform'    => true,
-				),
-			)
-		);
 	}
 }

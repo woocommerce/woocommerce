@@ -11,17 +11,27 @@ export type SelectableItem< T = unknown > = (
 	value: string;
 	selected?: boolean;
 	disabled?: boolean;
-	hidden?: boolean;
 	type?: string;
 } & T;
+
+/**
+ * Runtime shape of items yielded by the parent's `state.selectableItems`
+ * getter. Parent derives `selected` from SSOT.
+ */
+export type DerivedSelectableItem< T = unknown > = SelectableItem< T >;
 
 export interface SelectableItemsContext< T = unknown > {
 	items: SelectableItem< T >[];
 	selectionMode: 'single' | 'multiple';
 	storeNamespace: string;
 	groupLabel?: string;
-	dynamicItems?: boolean;
 	isLoading?: boolean;
+	/**
+	 * Domain discriminator that inner blocks can use to vary presentation
+	 * (e.g. `'rating'` unlocks star rendering in `checkbox-list`). Values
+	 * are parent-defined strings; unknown values fall back to text.
+	 */
+	filterType?: string;
 }
 
 export type SelectableItemsBlockContext< T = unknown > = {
@@ -30,18 +40,23 @@ export type SelectableItemsBlockContext< T = unknown > = {
 
 /**
  * Contract every parent store referenced by `storeNamespace` MUST satisfy.
- * Use with `satisfies` to get compile-time enforcement:
+ * Use with `satisfies` for compile-time enforcement:
  *
  *   productFiltersStore satisfies SelectableItemsParentStore;
  *
- * The `items` getter must return objects that at minimum satisfy `SelectableItem`.
- * Extra domain fields on items are fine — the contract only enforces the shared base.
+ * `state.selectableItems` returns items with `selected` + `index` derived.
+ * `actions.toggle` reads `getContext().item` (set by `data-wp-each` in items region).
  */
 export interface SelectableItemsParentStore {
 	state: {
-		isSelected: boolean;
+		selectableItems: readonly DerivedSelectableItem[];
 	};
 	actions: {
-		toggle: () => void;
+		/**
+		 * Toggles selection for an item. Accepts an explicit `item`
+		 * argument for cross-store proxying; when omitted, falls back to
+		 * `getContext().item`.
+		 */
+		toggle: ( item?: SelectableItem ) => void;
 	};
 }

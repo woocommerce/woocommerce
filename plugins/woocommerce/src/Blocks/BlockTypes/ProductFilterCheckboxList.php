@@ -22,7 +22,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 *
 	 * @var int
 	 */
-	const DISPLAY_LIMIT = 15;
+	const DISPLAY_LIMIT = 5;
 
 	/**
 	 * Render the block.
@@ -40,7 +40,9 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$block_context   = $block->context['woocommerce/selectableItems'];
 		$items           = $block_context['items'] ?? array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
+		$filter_type     = $block_context['filterType'] ?? '';
 		$display_limit   = self::DISPLAY_LIMIT;
+		$is_rating       = 'rating' === $filter_type;
 		$classes         = '';
 		$style           = '';
 
@@ -53,6 +55,13 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filter-checkbox-list',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
+			'data-wp-context'     => wp_json_encode(
+				array(
+					'storeNamespace' => $store_namespace,
+					'displayLimit'   => $display_limit,
+				),
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
 			'class'               => esc_attr( $classes ),
 		);
 
@@ -64,6 +73,14 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		$checkbox_svg   = '<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg">'
 			. '<path d="M9.25 1.19922L3.75 6.69922L1 3.94922" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>'
 			. '</svg>';
+		$star_path      = '<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>';
+		$stars_svg      = '<svg class="wc-block-product-filter-checkbox-list__stars-svg" width="120" height="24" viewBox="0 0 120 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">'
+			. $star_path
+			. '<g transform="translate(24, 0)">' . $star_path . '</g>'
+			. '<g transform="translate(48, 0)">' . $star_path . '</g>'
+			. '<g transform="translate(72, 0)">' . $star_path . '</g>'
+			. '<g transform="translate(96, 0)">' . $star_path . '</g>'
+			. '</svg>';
 		$has_more_items = count( $items ) > $display_limit;
 		$hidden_count   = max( 0, count( $items ) - $display_limit );
 
@@ -74,23 +91,69 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
-				<div
-					class="wc-block-product-filter-checkbox-list__items"
-					data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
-				>
+				<div class="wc-block-product-filter-checkbox-list__items">
+					<template
+						data-wp-each--item="state.items"
+						data-wp-each-key="context.item.id"
+					>
+						<div
+							class="wc-block-product-filter-checkbox-list__item"
+							data-wp-bind--hidden="context.item.hidden"
+						>
+							<label
+								class="wc-block-product-filter-checkbox-list__label"
+								data-wp-bind--for="context.item.id"
+							>
+								<span class="wc-block-product-filter-checkbox-list__input-wrapper">
+									<input
+										class="wc-block-product-filter-checkbox-list__input"
+										type="checkbox"
+										data-wp-bind--id="context.item.id"
+										data-wp-bind--aria-label="context.item.ariaLabel"
+										data-wp-bind--value="context.item.value"
+										data-wp-bind--checked="context.item.selected"
+										data-wp-on--change="actions.toggle"
+									>
+									<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</span>
+								<span class="wc-block-product-filter-checkbox-list__text-wrapper">
+									<?php if ( $is_rating ) : ?>
+										<span
+											class="wc-block-product-filter-checkbox-list__stars"
+											data-wp-bind--aria-label="context.item.ariaLabel"
+											data-wp-bind--style="state.ratingStyle"
+										>
+											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										</span>
+									<?php else : ?>
+										<span
+											class="wc-block-product-filter-checkbox-list__text"
+											data-wp-text="context.item.label"
+										></span>
+									<?php endif; ?>
+									<span
+										class="wc-block-product-filter-checkbox-list__count"
+										data-wp-bind--hidden="!context.item.count"
+									>
+										(<span data-wp-text="context.item.count"></span>)
+									</span>
+								</span>
+							</label>
+						</div>
+					</template>
 					<?php
-					$index = 0;
-					foreach ( $items as $item ) :
-						$is_hidden = $index >= $display_limit;
-						++$index;
+					$visible_items = array_slice( $items, 0, $display_limit, true );
+					foreach ( $visible_items as $item ) :
+						$context_item = array_merge(
+							$item,
+							array( 'hidden' => false )
+						);
 						?>
 						<div
 							class="wc-block-product-filter-checkbox-list__item"
-							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							<?php if ( $is_hidden ) : ?>
-								hidden
-								data-wp-bind--hidden="!state.isExpanded"
-							<?php endif; ?>
+							data-wp-each-child
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $context_item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							data-wp-bind--hidden="context.item.hidden"
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"
@@ -104,17 +167,29 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 										<?php if ( ! empty( $item['ariaLabel'] ) ) : ?>
 											aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
 										<?php endif; ?>
-										data-wp-on--change="actions.toggle"
 										value="<?php echo esc_attr( $item['value'] ); ?>"
 										<?php checked( ! empty( $item['selected'] ) ); ?>
-										data-wp-bind--checked="state.isSelected"
+										data-wp-bind--checked="context.item.selected"
+										data-wp-on--change="actions.toggle"
 									>
 									<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 								</span>
 								<span class="wc-block-product-filter-checkbox-list__text-wrapper">
-									<span class="wc-block-product-filter-checkbox-list__text">
-										<?php echo wp_kses( $item['label'], $this->get_allowed_label_html() ); ?>
-									</span>
+									<?php if ( $is_rating ) : ?>
+										<?php $rating_style = sprintf( 'width: %s%%', ( (int) $item['value'] ) * 20 ); ?>
+										<span
+											class="wc-block-product-filter-checkbox-list__stars"
+											aria-label="<?php echo esc_attr( $item['ariaLabel'] ?? '' ); ?>"
+											style="<?php echo esc_attr( $rating_style ); ?>"
+											data-wp-bind--style="state.ratingStyle"
+										>
+											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										</span>
+									<?php else : ?>
+										<span class="wc-block-product-filter-checkbox-list__text">
+											<?php echo esc_html( $item['label'] ); ?>
+										</span>
+									<?php endif; ?>
 									<?php if ( isset( $item['count'] ) ) : ?>
 										<span class="wc-block-product-filter-checkbox-list__count">
 											(<?php echo esc_html( $item['count'] ); ?>)
@@ -130,8 +205,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 						<button
 							type="button"
 							class="wc-block-product-filter-checkbox-list__show-more-button"
-							data-wp-on--click="actions.toggleShowMore"
-							data-wp-text="state.showMoreLabel"
+							data-wp-on--click="actions.showAll"
 							data-wp-bind--hidden="state.isExpanded"
 						>
 							<?php
@@ -154,34 +228,5 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 */
 	protected function get_block_type_style() {
 		return null;
-	}
-
-	/**
-	 * Get allowed HTML for item labels, including SVG for rating stars.
-	 *
-	 * @return array Allowed HTML elements and attributes.
-	 */
-	private function get_allowed_label_html() {
-		return array_merge(
-			wp_kses_allowed_html( 'post' ),
-			array(
-				'svg'  => array(
-					'class'      => true,
-					'xmlns'      => true,
-					'width'      => true,
-					'height'     => true,
-					'viewbox'    => true,
-					'fill'       => true,
-					'aria-label' => true,
-				),
-				'path' => array(
-					'd'            => true,
-					'fill'         => true,
-					'stroke'       => true,
-					'stroke-width' => true,
-					'transform'    => true,
-				),
-			)
-		);
 	}
 }
