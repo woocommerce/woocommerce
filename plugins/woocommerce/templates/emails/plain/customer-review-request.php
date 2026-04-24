@@ -21,9 +21,10 @@ echo "=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n";
 echo esc_html( wp_strip_all_tags( $email_heading ) );
 echo "\n=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=-=\n\n";
 
-if ( ! empty( $order->get_billing_first_name() ) ) {
+$first_name = $order instanceof WC_Order ? $order->get_billing_first_name() : '';
+if ( ! empty( $first_name ) ) {
 	/* translators: %s: Customer first name */
-	echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $order->get_billing_first_name() ) ) . "\n\n";
+	echo sprintf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $first_name ) ) . "\n\n";
 } else {
 	echo esc_html__( 'Hi,', 'woocommerce' ) . "\n\n";
 }
@@ -35,13 +36,18 @@ if ( ! empty( $review_order_url ) ) {
 	echo esc_url( $review_order_url ) . "\n\n";
 }
 
-printf(
-	/* translators: 1: order number, 2: order date */
-	esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' ),
-	esc_html( $order->get_order_number() ),
-	esc_html( wc_format_datetime( $order->get_date_created() ) )
-);
-echo "\n\n----------------------------------------\n\n";
+if ( $order instanceof WC_Order ) {
+	$date_created = $order->get_date_created();
+	printf(
+		/* translators: 1: order number, 2: order date */
+		esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' ),
+		esc_html( $order->get_order_number() ),
+		esc_html( $date_created ? wc_format_datetime( $date_created ) : '' )
+	);
+	echo "\n\n";
+}
+
+echo "----------------------------------------\n\n";
 
 /**
  * Show user-defined additional content - this is set in each email's settings.
