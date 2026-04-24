@@ -55,13 +55,12 @@ class WC_Order_Factory {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
 			wc_get_logger()->error(
 				sprintf(
-					/* translators: 1: Function name 2: Error message */
-					__( 'Exception caught in %1$s: %2$s', 'woocommerce' ),
+					'Exception caught in %1$s: %2$s',
 					__FUNCTION__,
 					$e->getMessage()
 				),
 				array(
-					'source' => 'get_order',
+					'source'   => 'get_order',
 					'order_id' => $order_id,
 				)
 			);
