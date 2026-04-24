@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.1.0
+ * @version 10.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -40,17 +40,27 @@ do_action( 'woocommerce_before_cart' ); ?>
 			foreach ( WC()->cart->get_cart() as $cart_item_key => $cart_item ) {
 				$_product   = apply_filters( 'woocommerce_cart_item_product', $cart_item['data'], $cart_item, $cart_item_key );
 				$product_id = apply_filters( 'woocommerce_cart_item_product_id', $cart_item['product_id'], $cart_item, $cart_item_key );
+
 				/**
-				 * Filter the product name.
+				 * Filter whether this cart item is visible in the cart.
 				 *
 				 * @since 2.1.0
-				 * @param string $product_name Name of the product in the cart.
-				 * @param array $cart_item The product in the cart.
-				 * @param string $cart_item_key Key for the product in the cart.
+				 * @param bool   $visible     Whether the cart item is visible. Default true.
+				 * @param array  $cart_item     The cart item data.
+				 * @param string $cart_item_key The cart item key.
 				 */
-				$product_name = apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key );
+				$visible = apply_filters( 'woocommerce_cart_item_visible', true, $cart_item, $cart_item_key );
 
-				if ( $_product && $_product->exists() && $cart_item['quantity'] > 0 && apply_filters( 'woocommerce_cart_item_visible', true, $cart_item, $cart_item_key ) ) {
+				if ( $_product instanceof WC_Product && $_product->exists() && $cart_item['quantity'] > 0 && $visible ) {
+					/**
+					 * Filter the product name.
+					 *
+					 * @since 2.1.0
+					 * @param string $product_name Name of the product in the cart.
+					 * @param array $cart_item The product in the cart.
+					 * @param string $cart_item_key Key for the product in the cart.
+					 */
+					$product_name      = apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key );
 					$product_permalink = apply_filters( 'woocommerce_cart_item_permalink', $_product->is_visible() ? $_product->get_permalink( $cart_item ) : '', $cart_item, $cart_item_key );
 					?>
 					<tr class="woocommerce-cart-form__cart-item <?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?>">
