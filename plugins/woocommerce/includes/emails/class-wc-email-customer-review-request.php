@@ -139,8 +139,12 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 		/**
 		 * Get the URL of the per-order Review Order page for this email's order.
 		 *
-		 * Mirrors the pay-for-order URL shape. The endpoint itself is registered in
-		 * a later milestone; until then the URL is a feature-flagged 404 by design.
+		 * Mirrors the pay-for-order URL shape. The endpoint itself is registered
+		 * in a later milestone; until then the URL is a feature-flagged 404 by
+		 * design. `wc_get_endpoint_url()` is used so plain-permalink stores get
+		 * a valid query-arg URL rather than an invalid concatenation.
+		 *
+		 * @todo Register the `review-order` endpoint (Linear WOOPLUG-6592).
 		 *
 		 * @since  10.8.0
 		 * @return string
@@ -150,12 +154,8 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 				return '';
 			}
 
-			$base = trailingslashit( wc_get_checkout_url() );
-			$url  = add_query_arg(
-				'key',
-				$this->object->get_order_key(),
-				$base . 'review-order/' . $this->object->get_id() . '/'
-			);
+			$endpoint_url = wc_get_endpoint_url( 'review-order', (string) $this->object->get_id(), wc_get_checkout_url() );
+			$url          = add_query_arg( 'key', $this->object->get_order_key(), $endpoint_url );
 
 			/**
 			 * Filter the Review Order URL that the review-request email links to.
@@ -242,8 +242,11 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 		 * merchants can change how long to wait before asking for a review.
 		 */
 		public function init_form_fields(): void {
-			/* translators: %s: list of placeholders */
-			$placeholder_text  = sprintf( __( 'Available placeholders: %s', 'woocommerce' ), '<code>' . esc_html( implode( '</code>, <code>', array_keys( $this->placeholders ) ) ) . '</code>' );
+			$placeholder_text = sprintf(
+				/* translators: %s: list of placeholders */
+				__( 'Available placeholders: %s', 'woocommerce' ),
+				'<code>' . implode( '</code>, <code>', array_map( 'esc_html', array_keys( $this->placeholders ) ) ) . '</code>'
+			);
 			$this->form_fields = array(
 				'enabled'            => array(
 					'title'   => __( 'Enable/Disable', 'woocommerce' ),

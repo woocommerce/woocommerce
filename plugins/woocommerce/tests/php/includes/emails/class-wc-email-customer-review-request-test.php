@@ -82,7 +82,7 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Review Order URL mirrors the pay-for-order shape and carries the order key.
+	 * @testdox Review Order URL references the review-order endpoint and carries the order key.
 	 */
 	public function test_review_order_url_shape(): void {
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
@@ -90,7 +90,12 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 
 		$url = $this->sut->get_review_order_url();
 
-		$this->assertStringContainsString( 'review-order/' . $order->get_id() . '/', $url );
+		// wc_get_endpoint_url renders as "review-order/{id}/" on pretty permalinks
+		// and "review-order={id}" on plain permalinks — accept either.
+		$this->assertMatchesRegularExpression(
+			'#review-order[/=]' . $order->get_id() . '#',
+			$url
+		);
 		$this->assertStringContainsString( 'key=' . $order->get_order_key(), $url );
 	}
 
