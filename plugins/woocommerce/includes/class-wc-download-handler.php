@@ -310,7 +310,7 @@ class WC_Download_Handler {
 			);
 		}
 
-		$wp_content_dir_relative = str_replace( ABSPATH, '', WP_CONTENT_DIR );
+		$wp_content_dir_relative = ( 0 === strpos( WP_CONTENT_DIR, ABSPATH ) ) ? substr( WP_CONTENT_DIR, strlen( ABSPATH ) ) : WP_CONTENT_DIR;
 		$wp_content_dirname     = ( $wp_content_dir_relative !== WP_CONTENT_DIR ) ? '/' . $wp_content_dir_relative : null;
 
 		// See if path needs an abspath prepended to work.
