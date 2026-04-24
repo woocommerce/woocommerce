@@ -63,13 +63,19 @@ type SettingsFieldComponentProps = {
 		description?: string;
 		value?: string | number | boolean | string[] | null;
 		options?: Array< { label: string; value: string } >;
+		fields?: SettingsFieldComponentProps['field'][];
 		component?: string;
 		placeholder?: string;
 		disabled?: boolean;
 		customAttributes?: Record< string, string | number | boolean >;
 	};
 	value: string | number | boolean | string[] | null;
+	values: Record< string, string | number | boolean | string[] | null >;
 	onChange: ( value: string | number | boolean | string[] | null ) => void;
+	onFieldChange: (
+		fieldId: string,
+		value: string | number | boolean | string[] | null
+	) => void;
 	context: {
 		page: string;
 		section?: string;
@@ -78,6 +84,8 @@ type SettingsFieldComponentProps = {
 ```
 
 Call `onChange()` with the next field value. The SDK handles hidden input serialization for the field's save adapter.
+
+For compound fields, read child values from `values[ child.id ]` and call `onFieldChange( child.id, nextValue )`. The SDK serializes hidden inputs for each child field, so the component does not need to create compatibility inputs or duplicate PHP save behavior.
 
 ## Example component
 
@@ -117,6 +125,36 @@ export const PaymentMethodPicker = ( {
 					</label>
 				);
 			} ) }
+		</fieldset>
+	);
+};
+```
+
+## Compound component example
+
+```tsx
+import { CheckboxControl } from '@wordpress/components';
+import type { SettingsFieldComponentProps } from '@woocommerce/modern-settings-sdk';
+
+export const ExpressCheckoutLocations = ( {
+	field,
+	values,
+	onFieldChange,
+}: SettingsFieldComponentProps ) => {
+	return (
+		<fieldset>
+			<legend>{ field.label }</legend>
+			{ field.fields?.map( ( childField ) => (
+				<CheckboxControl
+					key={ childField.id }
+					label={ childField.label }
+					checked={ values[ childField.id ] === true }
+					onChange={ ( checked ) =>
+						onFieldChange( childField.id, checked )
+					}
+					__nextHasNoMarginBottom
+				/>
+			) ) }
 		</fieldset>
 	);
 };

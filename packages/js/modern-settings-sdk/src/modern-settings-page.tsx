@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { Button } from '@wordpress/components';
-import { createElement, useMemo, useState } from '@wordpress/element';
+import { createElement, RawHTML, useMemo, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 /**
@@ -12,6 +12,8 @@ import { HiddenInputs } from './hidden-inputs';
 import { NativeSettingsField } from './native-fields';
 import { resolveFieldComponent } from './registry';
 import type {
+	ModernSettingsField,
+	ModernSettingsGroup,
 	ModernSettingsSchema,
 	SettingsFieldContext,
 	SettingsValue,
@@ -22,11 +24,15 @@ type Values = Record< string, SettingsValue >;
 const getInitialValues = ( schema: ModernSettingsSchema ): Values => {
 	const values: Values = {};
 
+	const addFieldValue = ( field: ModernSettingsField ) => {
+		values[ field.id ] =
+			typeof field.value === 'undefined' ? '' : field.value;
+
+		( field.fields || [] ).forEach( addFieldValue );
+	};
+
 	Object.values( schema.groups ).forEach( ( group ) => {
-		group.fields.forEach( ( field ) => {
-			values[ field.id ] =
-				typeof field.value === 'undefined' ? '' : field.value;
-		} );
+		group.fields.forEach( addFieldValue );
 	} );
 
 	return values;
@@ -34,6 +40,46 @@ const getInitialValues = ( schema: ModernSettingsSchema ): Values => {
 
 const getFieldTypeClassName = ( type: string ) =>
 	`wc-modern-settings__field--${ type.replace( /[^a-z0-9_-]/gi, '-' ) }`;
+
+const getActionVariant = ( variant?: string ) =>
+	( [ 'primary', 'secondary', 'tertiary', 'link' ].includes( variant || '' )
+		? variant
+		: 'secondary' ) as 'primary' | 'secondary' | 'tertiary' | 'link';
+
+const GroupHeader = ( { group }: { group: ModernSettingsGroup } ) => {
+	const hasHeaderContent =
+		group.title || group.description || ( group.actions || [] ).length > 0;
+
+	if ( ! hasHeaderContent ) {
+		return null;
+	}
+
+	return (
+		<div className="wc-modern-settings__group-header">
+			{ group.title ? <h2>{ group.title }</h2> : null }
+			{ group.description ? (
+				<div className="wc-modern-settings__group-description">
+					<RawHTML>{ group.description }</RawHTML>
+				</div>
+			) : null }
+			{ group.actions && group.actions.length > 0 ? (
+				<div className="wc-modern-settings__group-actions">
+					{ group.actions.map( ( action ) => (
+						<Button
+							key={ action.id }
+							variant={ getActionVariant( action.variant ) }
+							href={ action.href }
+							target={ action.target }
+							rel={ action.rel }
+						>
+							{ action.label }
+						</Button>
+					) ) }
+				</div>
+			) : null }
+		</div>
+	);
+};
 
 export const ModernSettingsPage = ( {
 	schema,
@@ -56,52 +102,53 @@ export const ModernSettingsPage = ( {
 		[ page, schema.id, schema.section, section ]
 	);
 
+	const setFieldValue = ( fieldId: string, nextValue: SettingsValue ) => {
+		setValues( ( currentValues ) => ( {
+			...currentValues,
+			[ fieldId ]: nextValue,
+		} ) );
+		setIsDirty( true );
+	};
+
+	const renderField = ( field: ModernSettingsField ) => {
+		const FieldComponent =
+			resolveFieldComponent( field, context ) || NativeSettingsField;
+		const value = values[ field.id ];
+
+		return (
+			<div
+				className={ [
+					'wc-modern-settings__field',
+					getFieldTypeClassName( field.type ),
+				].join( ' ' ) }
+				key={ field.id }
+			>
+				<FieldComponent
+					field={ field }
+					value={ value }
+					values={ values }
+					context={ context }
+					onChange={ ( nextValue: SettingsValue ) =>
+						setFieldValue( field.id, nextValue )
+					}
+					onFieldChange={ setFieldValue }
+				/>
+				<HiddenInputs
+					field={ field }
+					value={ value }
+					values={ values }
+				/>
+			</div>
+		);
+	};
+
 	return (
 		<div className="wc-modern-settings">
 			{ Object.values( schema.groups ).map( ( group ) => (
 				<section className="wc-modern-settings__group" key={ group.id }>
-					<div className="wc-modern-settings__group-header">
-						{ group.title ? <h2>{ group.title }</h2> : null }
-						{ group.description ? (
-							<p>{ group.description }</p>
-						) : null }
-					</div>
+					<GroupHeader group={ group } />
 					<div className="wc-modern-settings__group-panel">
-						{ group.fields.map( ( field ) => {
-							const FieldComponent =
-								resolveFieldComponent( field, context ) ||
-								NativeSettingsField;
-							const value = values[ field.id ];
-
-							return (
-								<div
-									className={ [
-										'wc-modern-settings__field',
-										getFieldTypeClassName( field.type ),
-									].join( ' ' ) }
-									key={ field.id }
-								>
-									<FieldComponent
-										field={ field }
-										value={ value }
-										context={ context }
-										onChange={ (
-											nextValue: SettingsValue
-										) => {
-											setValues( {
-												...values,
-												[ field.id ]: nextValue,
-											} );
-											setIsDirty( true );
-										} }
-									/>
-									<HiddenInputs
-										field={ field }
-										value={ value }
-									/>
-								</div>
-							);
-						} ) }
+						{ group.fields.map( renderField ) }
 					</div>
 				</section>
 			) ) }

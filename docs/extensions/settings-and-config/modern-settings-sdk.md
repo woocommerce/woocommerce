@@ -158,6 +158,62 @@ array(
 )
 ```
 
+## Rich group descriptions and actions
+
+Group title rows can include sanitized description markup and structured header actions. Use this for contextual links such as documentation or secondary actions that belong to the whole group, rather than creating a display-only custom field.
+
+```php
+array(
+	'id'      => 'my_plugin_checkout',
+	'type'    => 'title',
+	'title'   => __( 'Checkout experience', 'my-plugin' ),
+	'desc'    => sprintf(
+		/* translators: %s: documentation link */
+		__( 'Choose where customers can use express payment methods. %s', 'my-plugin' ),
+		'<a href="https://example.com/docs">' . esc_html__( 'Learn more', 'my-plugin' ) . '</a>'
+	),
+	'actions' => array(
+		array(
+			'id'      => 'manage',
+			'label'   => __( 'Manage locations', 'my-plugin' ),
+			'href'    => admin_url( 'admin.php?page=wc-settings&tab=shipping' ),
+			'variant' => 'secondary',
+		),
+	),
+)
+```
+
+Descriptions are sanitized with `wp_kses_post()`. Actions are structured data with `id`, `label`, `href`, optional `variant`, optional `target`, and optional `rel`.
+
+## Compound settings
+
+Use a compound field when one visual panel controls more than one persisted setting. The parent field provides the panel and optional custom component. Child fields keep their own ids, values, and `form_post` save names.
+
+```php
+array(
+	'id'        => 'my_plugin_express_checkout_panel',
+	'title'     => __( 'Express checkout locations', 'my-plugin' ),
+	'type'      => 'compound',
+	'component' => 'my-plugin/express-checkout-locations',
+	'fields'    => array(
+		array(
+			'id'         => 'my_plugin_express_cart',
+			'title'      => __( 'Cart', 'my-plugin' ),
+			'type'       => 'checkbox',
+			'field_name' => 'my_plugin_settings[express_cart]',
+		),
+		array(
+			'id'         => 'my_plugin_express_checkout',
+			'title'      => __( 'Checkout', 'my-plugin' ),
+			'type'       => 'checkbox',
+			'field_name' => 'my_plugin_settings[express_checkout]',
+		),
+	),
+)
+```
+
+The compound parent does not submit a value by default. Its child fields submit through the normal `form_post` hidden-input behavior, so existing PHP save and validation logic remains the persistence boundary.
+
 ## Reference migration in WooCommerce core
 
 The Products settings page is the Core reference migration. With `modern-settings` enabled, the Products tab renders through the modern SDK. With the flag disabled, it renders through the existing legacy settings UI.

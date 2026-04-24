@@ -17,6 +17,7 @@ export type ModernSettingsField = {
 	description?: string;
 	value?: SettingsValue;
 	options?: ModernSettingsOption[];
+	fields?: ModernSettingsField[];
 	component?: string;
 	placeholder?: string;
 	disabled?: boolean;
@@ -24,10 +25,20 @@ export type ModernSettingsField = {
 	save?: ModernSettingsSaveSchema;
 };
 
+export type ModernSettingsGroupAction = {
+	id: string;
+	label: string;
+	href: string;
+	variant?: 'primary' | 'secondary' | 'tertiary' | 'link' | string;
+	target?: string;
+	rel?: string;
+};
+
 export type ModernSettingsGroup = {
 	id: string;
 	title?: string;
 	description?: string;
+	actions?: ModernSettingsGroupAction[];
 	fields: ModernSettingsField[];
 };
 
@@ -46,7 +57,9 @@ export type SettingsFieldContext = {
 export type SettingsFieldComponentProps = {
 	field: ModernSettingsField;
 	value: SettingsValue;
+	values: Record< string, SettingsValue >;
 	onChange: ( value: SettingsValue ) => void;
+	onFieldChange: ( fieldId: string, value: SettingsValue ) => void;
 	context: SettingsFieldContext;
 };
 

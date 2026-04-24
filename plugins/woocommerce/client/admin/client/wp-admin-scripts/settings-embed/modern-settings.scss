@@ -171,12 +171,27 @@ body.woocommerce_page_wc-settings.woocommerce-modern-settings-page {
 			margin: 0;
 		}
 
-		p {
+		.wc-modern-settings__group-description {
 			color: #505050;
 			font-size: 14px;
 			line-height: 20px;
 			margin: 4px 0 0;
 			max-width: 240px;
+
+			p {
+				margin: 0 0 8px;
+			}
+
+			p:last-child {
+				margin-bottom: 0;
+			}
+		}
+
+		.wc-modern-settings__group-actions {
+			display: flex;
+			flex-wrap: wrap;
+			gap: 8px;
+			margin-top: 16px;
 		}
 	}
 
@@ -196,6 +211,29 @@ body.woocommerce_page_wc-settings.woocommerce-modern-settings-page {
 	.wc-modern-settings__field {
 		margin: 0;
 		width: 100%;
+	}
+
+	.wc-modern-settings__compound {
+		border: 0;
+		margin: 0;
+		padding: 0;
+
+		legend {
+			color: #1e1e1e;
+			font-size: 13px;
+			font-weight: 500;
+			line-height: 20px;
+			margin: 0 0 16px;
+			padding: 0;
+		}
+	}
+
+	.wc-modern-settings__compound-field {
+		margin-top: 16px;
+	}
+
+	.wc-modern-settings__compound-field:first-of-type {
+		margin-top: 0;
 	}
 
 	.wc-modern-settings__actions {

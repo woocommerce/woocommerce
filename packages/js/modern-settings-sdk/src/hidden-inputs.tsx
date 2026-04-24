@@ -9,6 +9,8 @@ import { createElement, Fragment } from '@wordpress/element';
 import { warn } from './diagnostics';
 import type { ModernSettingsField, SettingsValue } from './types';
 
+type Values = Record< string, SettingsValue >;
+
 type HiddenInput = {
 	name: string;
 	value: string;
@@ -67,15 +69,40 @@ export const getHiddenInputs = (
 	];
 };
 
+export const getHiddenInputsForField = (
+	field: ModernSettingsField,
+	values: Values
+): HiddenInput[] => {
+	let inputs: HiddenInput[] = [];
+
+	if ( ! field.fields || field.fields.length === 0 ) {
+		inputs = getHiddenInputs( field, values[ field.id ] );
+	} else if ( field.save?.adapter === 'form_post' ) {
+		inputs = getHiddenInputs( field, values[ field.id ] );
+	}
+
+	return [
+		...inputs,
+		...( field.fields || [] ).flatMap( ( childField ) =>
+			getHiddenInputsForField( childField, values )
+		),
+	];
+};
+
 export const HiddenInputs = ( {
 	field,
 	value,
+	values,
 }: {
 	field: ModernSettingsField;
 	value: SettingsValue;
+	values?: Values;
 } ) => (
 	<>
-		{ getHiddenInputs( field, value ).map( ( input, index ) => (
+		{ ( values
+			? getHiddenInputsForField( field, values )
+			: getHiddenInputs( field, value )
+		).map( ( input, index ) => (
 			<input
 				key={ `${ input.name }-${ index }` }
 				type="hidden"

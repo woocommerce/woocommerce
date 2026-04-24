@@ -81,6 +81,105 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * It preserves sanitized group description markup and header actions.
+	 */
+	public function test_from_legacy_settings_preserves_group_description_and_actions(): void {
+		$schema = ModernSettingsSchema::from_legacy_settings(
+			'test',
+			'advanced',
+			'Test settings',
+			array(
+				array(
+					'id'      => 'group',
+					'type'    => 'title',
+					'title'   => 'Group',
+					'desc'    => 'Read the <a href="https://woocommerce.com">documentation</a><script>alert("x")</script>.',
+					'actions' => array(
+						array(
+							'id'      => 'learn-more',
+							'label'   => 'Learn more',
+							'href'    => 'https://woocommerce.com/documentation',
+							'variant' => 'secondary',
+							'target'  => '_blank',
+							'rel'     => 'noopener noreferrer',
+						),
+					),
+				),
+			)
+		);
+
+		$group = $schema['groups']['group'];
+
+		$this->assertSame( 'Read the <a href="https://woocommerce.com">documentation</a>alert("x").', $group['description'] );
+		$this->assertSame(
+			array(
+				array(
+					'id'      => 'learn-more',
+					'label'   => 'Learn more',
+					'href'    => 'https://woocommerce.com/documentation',
+					'variant' => 'secondary',
+					'target'  => '_blank',
+					'rel'     => 'noopener noreferrer',
+				),
+			),
+			$group['actions']
+		);
+	}
+
+	/**
+	 * It supports compound fields that contain multiple persisted child settings.
+	 */
+	public function test_from_legacy_settings_preserves_compound_child_fields(): void {
+		update_option( 'woocommerce_gateway_enabled', 'yes' );
+		update_option( 'woocommerce_gateway_locations', array( 'cart', 'checkout' ) );
+
+		$schema = ModernSettingsSchema::from_legacy_settings(
+			'test',
+			'advanced',
+			'Test settings',
+			array(
+				array(
+					'id'     => 'gateway_panel',
+					'type'   => 'compound',
+					'title'  => 'Gateway panel',
+					'fields' => array(
+						array(
+							'id'    => 'woocommerce_gateway_enabled',
+							'type'  => 'checkbox',
+							'desc'  => 'Enable gateway',
+							'title' => 'Enabled',
+						),
+						array(
+							'id'      => 'woocommerce_gateway_locations',
+							'type'    => 'multiselect',
+							'title'   => 'Locations',
+							'options' => array(
+								'cart'     => 'Cart',
+								'checkout' => 'Checkout',
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$field = $schema['groups']['default']['fields'][0];
+
+		$this->assertSame( 'compound', $field['type'] );
+		$this->assertSame( array( 'adapter' => 'none' ), $field['save'] );
+		$this->assertCount( 2, $field['fields'] );
+		$this->assertSame( true, $field['fields'][0]['value'] );
+		$this->assertSame( array( 'cart', 'checkout' ), $field['fields'][1]['value'] );
+		$this->assertSame(
+			array(
+				'adapter' => 'form_post',
+				'name'    => 'woocommerce_gateway_locations',
+			),
+			$field['fields'][1]['save']
+		);
+	}
+
+	/**
 	 * It uses checkbox descriptions as labels and desc_tip as help text.
 	 */
 	public function test_from_legacy_settings_uses_checkbox_desc_as_label(): void {
