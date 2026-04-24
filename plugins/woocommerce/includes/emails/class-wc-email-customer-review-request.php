@@ -59,12 +59,6 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 			// Trigger fires from Action Scheduler. Scheduling itself lives in the review-request scheduler class.
 			add_action( 'woocommerce_send_review_request', array( $this, 'trigger' ), 10, 1 );
 
-			// Block email editor integration: the default block content template
-			// has no branch for this email, so without this our body never renders
-			// on sites with the block editor feature enabled.
-			add_action( 'woocommerce_email_general_block_content', array( $this, 'block_content' ), 10, 3 );
-			add_filter( 'woocommerce_emails_general_block_content_emails_without_order_details', array( $this, 'exclude_from_order_details' ) );
-
 			// Call parent constructor.
 			parent::__construct();
 
@@ -236,52 +230,6 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 					'email'              => $this,
 				)
 			);
-		}
-
-		/**
-		 * Render the block-editor body for this email.
-		 *
-		 * Hooked into `woocommerce_email_general_block_content`. Delegates to the
-		 * dedicated block template so all markup stays in `templates/emails/`.
-		 *
-		 * @internal
-		 *
-		 * @param bool     $sent_to_admin Whether the email is being sent to an admin.
-		 * @param bool     $plain_text    Whether the email is being sent as plain text.
-		 * @param WC_Email $email         The email object currently rendering.
-		 * @return void
-		 */
-		public function block_content( $sent_to_admin, $plain_text, $email ): void {
-			if ( $this->id !== $email->id ) {
-				return;
-			}
-
-			wc_get_template(
-				'emails/block/customer-review-request.php',
-				array(
-					'order'            => $this->object,
-					'review_order_url' => $this->get_review_order_url(),
-					'sent_to_admin'    => $sent_to_admin,
-					'plain_text'       => $plain_text,
-					'email'            => $email,
-				)
-			);
-		}
-
-		/**
-		 * Exclude this email from the default block-content order-details injection.
-		 *
-		 * The Figma design renders only a compact "Order #N (date)" meta line, not
-		 * the full order details table, so we opt out of the shared table block.
-		 *
-		 * @internal
-		 *
-		 * @param array $emails Email ids currently excluded from order-details.
-		 * @return array
-		 */
-		public function exclude_from_order_details( $emails ): array {
-			$emails[] = $this->id;
-			return $emails;
 		}
 
 		/**

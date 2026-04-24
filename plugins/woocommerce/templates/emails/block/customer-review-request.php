@@ -2,11 +2,6 @@
 /**
  * Customer review request email (initial block content)
  *
- * Rendered inside the block-editor email shell via the
- * `woocommerce_email_general_block_content` action. The block editor supplies
- * the outer email chrome (header, footer, styling); this template outputs only
- * the body: greeting, body copy, CTA button and order meta line.
- *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
@@ -20,42 +15,36 @@
  * @version 10.8.0
  */
 
+use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
+
 defined( 'ABSPATH' ) || exit;
 
-$first_name = $order instanceof WC_Order ? $order->get_billing_first_name() : '';
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- removed to prevent empty new lines.
+// phpcs:disable Squiz.PHP.EmbeddedPhp.ContentAfterEnd -- removed to prevent empty new lines.
 ?>
 
-<p>
-<?php
-if ( ! empty( $first_name ) ) {
+<!-- wp:heading -->
+<h2 class="wp-block-heading"> <?php echo esc_html__( 'Rate your recent purchases', 'woocommerce' ); ?> </h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph -->
+<p><?php
 	/* translators: %s: Customer first name */
-	printf( esc_html__( 'Hi %s,', 'woocommerce' ), esc_html( $first_name ) );
-} else {
-	esc_html_e( 'Hi,', 'woocommerce' );
-}
-?>
-</p>
+	printf( esc_html__( 'Hi %s,', 'woocommerce' ), '<!--[woocommerce/customer-first-name]-->' );
+?></p>
+<!-- /wp:paragraph -->
 
-<p><?php esc_html_e( 'We\'d love to know what you thought of the products you ordered. Your review helps other shoppers make better decisions and helps us improve.', 'woocommerce' ); ?></p>
+<!-- wp:paragraph -->
+<p> <?php echo esc_html__( 'We’d love to know what you thought of the products you ordered. Your review helps other shoppers make better decisions and helps us improve.', 'woocommerce' ); ?> </p>
+<!-- /wp:paragraph -->
 
-<?php if ( ! empty( $review_order_url ) ) : ?>
-<p style="margin: 16px 0;">
-	<a href="<?php echo esc_url( $review_order_url ); ?>" style="display: inline-block; padding: 6px 12px; background-color: #3858e9; color: #ffffff; text-decoration: none; border-radius: 2px; font-size: 13px; line-height: 20px; font-weight: 600;">
-		<?php esc_html_e( 'Leave a review', 'woocommerce' ); ?>
-	</a>
-</p>
-<?php endif; ?>
+<!-- wp:woocommerce/email-content {"lock":{"move":false,"remove":true}} -->
+<div class="wp-block-woocommerce-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
+<!-- /wp:woocommerce/email-content -->
 
-<?php if ( $order instanceof WC_Order ) : ?>
-<p style="font-size: 12px; line-height: 16px; color: #4d4d4d; margin-top: 16px;">
-	<?php
-	$date_created = $order->get_date_created();
-	printf(
-		/* translators: 1: order number, 2: order date */
-		esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' ),
-		esc_html( $order->get_order_number() ),
-		esc_html( $date_created ? wc_format_datetime( $date_created ) : '' )
-	);
-	?>
-</p>
-<?php endif; ?>
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center"><?php
+	/* translators: %s: Store admin email */
+	printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
+?></p>
+<!-- /wp:paragraph -->
