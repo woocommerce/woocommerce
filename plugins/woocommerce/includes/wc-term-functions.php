@@ -538,7 +538,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		$count = apply_filters( 'woocommerce_term_recount_product_count', $count, $term_id, $taxonomy->name );
 
 		// Update the count.
-		update_term_meta( $term_id, 'product_count_' . $taxonomy->name, $count );
+		update_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
 	}
 
 	delete_transient( 'wc_term_counts' );
