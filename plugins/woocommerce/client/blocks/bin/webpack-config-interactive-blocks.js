@@ -50,6 +50,8 @@ const entries = {
 		'./assets/js/base/stores/woocommerce/product-data.ts',
 	'@woocommerce/stores/woocommerce/products':
 		'./assets/js/base/stores/woocommerce/products.ts',
+	'@woocommerce/stores/woocommerce/saved-for-later':
+		'./assets/js/base/stores/woocommerce/saved-for-later.ts',
 };
 
 module.exports = {

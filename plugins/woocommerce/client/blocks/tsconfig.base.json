@@ -130,6 +130,9 @@
 			"@woocommerce/stores/woocommerce/products": [
 				"assets/js/base/stores/woocommerce/products"
 			],
+			"@woocommerce/stores/woocommerce/saved-for-later": [
+				"assets/js/base/stores/woocommerce/saved-for-later"
+			],
 			"@woocommerce/type-defs/*": [
 				"assets/js/types/type-defs/*"
 			],

@@ -56,6 +56,8 @@ class SchemaController {
 				Schemas\V1\ProductCollectionDataSchema::IDENTIFIER => Schemas\V1\ProductCollectionDataSchema::class,
 				Schemas\V1\ProductReviewSchema::IDENTIFIER => Schemas\V1\ProductReviewSchema::class,
 				Schemas\V1\PatternsSchema::IDENTIFIER      => Schemas\V1\PatternsSchema::class,
+				Schemas\V1\SavedListItemSchema::IDENTIFIER => Schemas\V1\SavedListItemSchema::class,
+				Schemas\V1\SavedListSchema::IDENTIFIER     => Schemas\V1\SavedListSchema::class,
 				Schemas\V1\Agentic\CheckoutSessionSchema::IDENTIFIER => Schemas\V1\Agentic\CheckoutSessionSchema::class,
 			],
 		];

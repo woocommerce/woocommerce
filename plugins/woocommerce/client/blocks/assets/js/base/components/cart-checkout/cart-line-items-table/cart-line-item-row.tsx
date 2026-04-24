@@ -4,6 +4,7 @@
 import clsx from 'clsx';
 import { __, sprintf } from '@wordpress/i18n';
 import { speak } from '@wordpress/a11y';
+import apiFetch from '@wordpress/api-fetch';
 import QuantitySelector from '@woocommerce/base-components/quantity-selector';
 import ProductPrice from '@woocommerce/base-components/product-price';
 import ProductName from '@woocommerce/base-components/product-name';
@@ -17,7 +18,7 @@ import {
 	applyCheckoutFilter,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
-import { forwardRef, useMemo } from '@wordpress/element';
+import { forwardRef, useMemo, useState } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
 import { objectHasProp, Currency } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
@@ -118,6 +119,8 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 		const { quantity, setItemQuantity, removeItem, isPendingDelete } =
 			useStoreCartItemQuantity( lineItem );
 		const { dispatchStoreEvent } = useStoreEvents();
+		const [ isSavingForLater, setIsSavingForLater ] = useState( false );
+		const isLoggedIn = ( getSetting( 'currentUserId', 0 ) as number ) > 0;
 
 		// Prepare props to pass to the applyCheckoutFilter filter.
 		// We need to pluck out receiveCart.
@@ -339,6 +342,65 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 								</button>
 							) }
 						</div>
+						{ isLoggedIn && (
+							<button
+								type="button"
+								className="wc-block-cart-item__save-for-later-link"
+								disabled={ isPendingDelete || isSavingForLater }
+								onClick={ async () => {
+									setIsSavingForLater( true );
+									try {
+										// Server-side: copy the cart item's data into the user's
+										// saved-for-later list. This endpoint is additive only —
+										// the cart removal is handled client-side below so the
+										// cart store's optimistic UI stays the source of truth.
+										const savedItem = await apiFetch( {
+											path: '/wc/store/v1/saved-lists/save-for-later/items',
+											method: 'POST',
+											data: {
+												cart_item_key: lineItem.key,
+											},
+										} );
+
+										// Notify the saved-for-later Interactivity API store so
+										// any iAPI-driven UI reading from its state stays in sync.
+										// We cross the React → iAPI boundary via a DOM event
+										// because `@wordpress/interactivity` isn't available in
+										// the cart/checkout bundle as a resolvable package.
+										window.dispatchEvent(
+											new CustomEvent(
+												'wc-blocks_save_for_later_added',
+												{ detail: savedItem }
+											)
+										);
+
+										onRemove();
+										await removeItem();
+										dispatchStoreEvent(
+											'cart-remove-item',
+											{
+												product: lineItem,
+												quantity,
+											}
+										);
+										speak(
+											sprintf(
+												/* translators: %s refers to the item name that was saved for later. */
+												__(
+													'%s has been saved for later.',
+													'woocommerce'
+												),
+												name
+											)
+										);
+									} catch ( error ) {
+										setIsSavingForLater( false );
+									}
+								} }
+							>
+								{ __( 'Save for later', 'woocommerce' ) }
+							</button>
+						) }
 					</div>
 				</td>
 				<td className="wc-block-cart-item__total">

@@ -465,6 +465,7 @@ final class BlockTypesController {
 			'ProductCategory',
 			'ProductCollection\Controller',
 			'ProductCollection\NoResults',
+			'ProductCollection\SavedItem',
 			'ProductFilters',
 			'ProductFilterStatus',
 			'ProductFilterPrice',

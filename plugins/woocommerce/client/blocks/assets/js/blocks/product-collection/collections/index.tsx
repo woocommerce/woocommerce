@@ -24,6 +24,7 @@ import byCategory from './by-category';
 import byTag from './by-tag';
 import byBrand from './by-brand';
 import cartContents from './cart-contents';
+import savedForLater from './saved-for-later';
 
 // Order in here is reflected in the Collection Chooser in Editor.
 const collections: BlockVariation[] = [
@@ -40,6 +41,7 @@ const collections: BlockVariation[] = [
 	related,
 	upsells,
 	crossSells,
+	savedForLater,
 ];
 
 // Email-only collections

@@ -135,6 +135,7 @@ const coreModules = [
 	'@woocommerce/stores/woocommerce/cart',
 	'@woocommerce/stores/woocommerce/product-context',
 	'@woocommerce/stores/woocommerce/product-data',
+	'@woocommerce/stores/woocommerce/saved-for-later',
 	'@woocommerce/tracks',
 	'@woocommerce/data',
 	'@woocommerce/customer-effort-score',

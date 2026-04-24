@@ -194,6 +194,7 @@ export enum CoreCollectionNames {
 	BY_TAG = 'woocommerce/product-collection/by-tag',
 	BY_BRAND = 'woocommerce/product-collection/by-brand',
 	CART_CONTENTS = 'woocommerce/product-collection/cart-contents',
+	SAVED_FOR_LATER = 'woocommerce/product-collection/saved-for-later',
 }
 
 export enum CoreFilterNames {

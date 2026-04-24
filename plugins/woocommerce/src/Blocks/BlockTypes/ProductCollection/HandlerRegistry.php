@@ -4,6 +4,8 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Blocks\BlockTypes\ProductCollection;
 
 use Automattic\WooCommerce\Enums\OrderItemType;
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
+use Automattic\WooCommerce\StoreApi\Utilities\SavedListsStore;
 use InvalidArgumentException;
 
 /**
@@ -392,7 +394,89 @@ class HandlerRegistry {
 				return $collection_args;
 			}
 		);
+
+		$this->register_collection_handlers(
+			'woocommerce/product-collection/saved-for-later',
+			function ( $collection_args ) {
+				$ids = $collection_args['savedForLaterProductIds'] ?? array();
+				if ( empty( $ids ) ) {
+					return array( 'post__in' => array( -1 ) );
+				}
+				return array(
+					'post__in' => $ids,
+					'orderby'  => 'post__in',
+				);
+			},
+			function ( $collection_args, $query ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				$items                                      = $this->get_saved_for_later_items();
+				$collection_args['savedForLaterProductIds'] = array_values(
+					array_map(
+						function ( $item ) {
+							return (int) ( $item['product_id'] ?? 0 );
+						},
+						$items
+					)
+				);
+				$this->seed_saved_for_later_interactivity_state( $items );
+				return $collection_args;
+			},
+			function ( $collection_args, $query, $request ) { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+				$items                                      = $this->get_saved_for_later_items();
+				$collection_args['savedForLaterProductIds'] = array_values(
+					array_map(
+						function ( $item ) {
+							return (int) ( $item['product_id'] ?? 0 );
+						},
+						$items
+					)
+				);
+				return $collection_args;
+			}
+		);
 		return $this->collection_handler_store;
+	}
+
+	/**
+	 * Read the current user's save-for-later items, or an empty array if the user is not logged in.
+	 *
+	 * @return array<string, array<string, mixed>>
+	 */
+	private function get_saved_for_later_items(): array {
+		if ( ! is_user_logged_in() ) {
+			return array();
+		}
+
+		try {
+			$store = new SavedListsStore();
+			return $store->get_items( SavedListsStore::SAVE_FOR_LATER );
+		} catch ( RouteException $e ) {
+			return array();
+		}
+	}
+
+	/**
+	 * Expose the current user's save-for-later items to the Interactivity API, keyed by product ID.
+	 * Consumed by inner blocks (saved-item-details, saved-item-add-to-cart) during frontend render.
+	 *
+	 * @param array<string, array<string, mixed>> $items Stored saved-for-later items.
+	 */
+	private function seed_saved_for_later_interactivity_state( array $items ): void {
+		$by_product_id = array();
+		foreach ( $items as $item ) {
+			$product_id                   = (int) ( $item['product_id'] ?? 0 );
+			$by_product_id[ $product_id ] = array(
+				'key'         => (string) ( $item['key'] ?? '' ),
+				'productId'   => $product_id,
+				'variationId' => (int) ( $item['variation_id'] ?? 0 ),
+				'quantity'    => (int) ( $item['quantity'] ?? 0 ),
+				'variation'   => (array) ( $item['variation'] ?? array() ),
+			);
+		}
+
+		wp_interactivity_state(
+			'woocommerce/save-for-later',
+			array( 'items' => $by_product_id )
+		);
 	}
 
 	/**

@@ -1,0 +1,31 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/product-collection-saved-item",
+	"title": "Saved Item",
+	"category": "woocommerce",
+	"description": "Displays the saved variation, quantity, and a Move to cart button for a product in the Save for Later list.",
+	"textdomain": "woocommerce",
+	"keywords": [ "Product Collection", "Save for Later" ],
+	"usesContext": [ "postId", "queryId" ],
+	"ancestor": [ "woocommerce/product-template" ],
+	"supports": {
+		"interactivity": true,
+		"align": false,
+		"reusable": false,
+		"html": false,
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true,
+			"__experimentalFontFamily": true,
+			"__experimentalFontWeight": true,
+			"__experimentalDefaultControls": {
+				"fontSize": true
+			}
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true
+		}
+	}
+}
