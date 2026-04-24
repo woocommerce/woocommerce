@@ -28,19 +28,19 @@ Use this store when an interactive block needs to read product fields (price, SK
 
 ```text
 PHP                                                  Client
-┌───────────────────────────────────┐               ┌────────────────────────────┐
-│ ProductsStore::load_product()     │               │ store<ProductsStore>(      │
-│ ProductsStore::load_variations()  │  populates    │   'woocommerce/products'   │
-│ ProductsStore::load_purchasable_  │──────────────▶│ )                          │
-│   child_products()                │               │                            │
-└────────────┬──────────────────────┘               │ state.products             │
-             │                                      │ state.productVariations    │
-             ▼                                      │                            │
-   wp_interactivity_state(                          │ Derived getters:               │
-     'woocommerce/products',                        │ • state.mainProductInContext    │
-     [ 'products' => ..., ... ]                     │ • state.productVariationInContext│
-   )                                                │ • state.productInContext        │
-                                                    └────────────┬───────────────────┘
+┌───────────────────────────────────┐               ┌───────────────────────────────────┐
+│ ProductsStore::load_product()     │               │ store<ProductsStore>(             │
+│ ProductsStore::load_variations()  │  populates    │   'woocommerce/products'          │
+│ ProductsStore::load_purchasable_  │──────────────▶│ )                                 │
+│   child_products()                │               │                                   │
+└────────────┬──────────────────────┘               │ state.products                    │
+             │                                      │ state.productVariations           │
+             ▼                                      │                                   │
+   wp_interactivity_state(                          │ Derived getters:                  │
+     'woocommerce/products',                        │ • state.mainProductInContext      │
+     [ 'products' => ..., ... ]                     │ • state.productVariationInContext │
+   )                                                │ • state.productInContext          │
+                                                    └─────────────────┬─────────────────┘
                                                                  │
  Selection (one of):                                             ▼
  • Global: wp_interactivity_state(..., [        Directives bound in markup:
@@ -59,15 +59,15 @@ Derived getters mirror each other in JS (`products.ts`) and PHP (`ProductsStore:
 
 ### State reference
 
-| Property                    | Type                                                          | Origin                    | Notes                                                                                                              |
-| --------------------------- | ------------------------------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| `products`                  | `Record<number, ProductResponseItem>`                         | Populated from PHP        | Keyed by product ID.                                                                                               |
-| `productVariations`         | `Record<number, ProductResponseItem>`                         | Populated from PHP        | Keyed by variation ID.                                                                                             |
-| `productId`                 | `number`                                                      | Populated / local context | Current product ID.                                                                                                |
-| `variationId`               | `number \| null`                                              | Populated / local context | Current variation ID, or `null`.                                                                                   |
-| `mainProductInContext`      | `ProductResponseItem \| null`                                 | Derived                   | The top-level product for the current context. Always the parent product, **never** a variation.                   |
-| `productVariationInContext` | `ProductResponseItem \| null`                                 | Derived                   | Currently selected variation, or `null` for simple/grouped/non-selected.                                           |
-| `productInContext`          | `ProductResponseItem \| null`                                 | Derived                   | `productVariationInContext ?? mainProductInContext`. Bind to this in the common case.                              |
+| Property                    | Type                                                          | Origin                    | Notes                                                                                                                                                                                                                         |
+| --------------------------- | ------------------------------------------------------------- | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `products`                  | `Record<number, ProductResponseItem>`                         | Populated from PHP        | Keyed by product ID.                                                                                                                                                                                                          |
+| `productVariations`         | `Record<number, ProductResponseItem>`                         | Populated from PHP        | Keyed by variation ID.                                                                                                                                                                                                        |
+| `productId`                 | `number`                                                      | Populated / local context | Current product ID.                                                                                                                                                                                                           |
+| `variationId`               | `number \| null`                                              | Populated / local context | Current variation ID, or `null`.                                                                                                                                                                                              |
+| `mainProductInContext`      | `ProductResponseItem \| null`                                 | Derived                   | The top-level product for the current context. Always the parent product, **never** a variation.                                                                                                                              |
+| `productVariationInContext` | `ProductResponseItem \| null`                                 | Derived                   | Currently selected variation, or `null` for simple/grouped/non-selected.                                                                                                                                                      |
+| `productInContext`          | `ProductResponseItem \| null`                                 | Derived                   | `productVariationInContext ?? mainProductInContext`. Bind to this in the common case.                                                                                                                                         |
 | `findProduct`               | `({ id, selectedAttributes }) => ProductResponseItem \| null` | Function                  | If `id` is a variation ID, returns it directly. For variable products with `selectedAttributes`, resolves to the matching variation. For any other product type (simple, grouped, external, etc.), returns the product as-is. |
 
 ### Populating state (PHP)
