@@ -120,3 +120,20 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
 	width: 120px;
 	height: 24px;
 }
+
+.wc-block-product-filter-checkbox-list__show-more-button {
+	appearance: none;
+	background: transparent;
+	border: 0;
+	padding: 0;
+	font: inherit;
+	font-size: 0.875em;
+	color: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+
+	&:hover,
+	&:focus {
+		text-decoration: none;
+	}
+}

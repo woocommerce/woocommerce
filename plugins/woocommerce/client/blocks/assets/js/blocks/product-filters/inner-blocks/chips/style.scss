@@ -72,3 +72,20 @@
 .wc-block-product-filter-chips__count {
 	white-space: nowrap;
 }
+
+.wc-block-product-filter-chips__show-more {
+	appearance: none;
+	background: transparent;
+	border: 0;
+	padding: 0;
+	font: inherit;
+	font-size: 0.875em;
+	color: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+
+	&:hover,
+	&:focus {
+		text-decoration: none;
+	}
+}
