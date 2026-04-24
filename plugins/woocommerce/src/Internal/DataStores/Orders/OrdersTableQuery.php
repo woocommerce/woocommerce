@@ -32,13 +32,6 @@ class OrdersTableQuery {
 	public const REGEX_SHORTHAND_DATES = '/([^.<>]*)(>=|<=|>|<|\.\.\.)([^.<>]+)/';
 
 	/**
-	 * Highest possible unsigned bigint value (unsigned bigints being the type of the `id` column).
-	 *
-	 * This is deliberately held as a string, rather than a numeric type, for inclusion within queries.
-	 */
-	private const MYSQL_MAX_UNSIGNED_BIGINT = '18446744073709551615';
-
-	/**
 	 * Names of all COT tables (orders, addresses, operational_data, meta) in the form 'table_id' => 'table name'.
 	 *
 	 * @var array
@@ -857,8 +850,19 @@ class OrdersTableQuery {
 
 		if ( ! empty( $this->limits ) && count( $this->limits ) === 2 ) {
 			list( $offset, $row_count ) = $this->limits;
-			$row_count                  = -1 === $row_count ? self::MYSQL_MAX_UNSIGNED_BIGINT : (int) $row_count;
-			$limits                     = 'LIMIT ' . (int) $offset . ', ' . $row_count;
+			$offset                     = (int) $offset;
+
+			if ( -1 === $row_count ) {
+				// For "unlimited" (-1) queries, mirror WP_Query's nopaging behavior and
+				// omit the LIMIT clause. When an offset is specified, MySQL requires a
+				// row count, so emit PHP_INT_MAX — portable across MySQL (well below
+				// its unsigned bigint max) and SQLite (its signed 64-bit max).
+				if ( $offset > 0 ) {
+					$limits = 'LIMIT ' . $offset . ', ' . PHP_INT_MAX;
+				}
+			} else {
+				$limits = 'LIMIT ' . $offset . ', ' . (int) $row_count;
+			}
 		}
 
 		// GROUP BY.
