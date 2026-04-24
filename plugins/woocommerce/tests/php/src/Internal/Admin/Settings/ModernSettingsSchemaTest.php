@@ -61,6 +61,10 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 					'type'      => 'multiselect',
 					'title'     => 'Component field',
 					'component' => 'test/component',
+					'custom_attributes' => array(
+						'min'  => 1,
+						'step' => 1,
+					),
 					'options'   => array(
 						'a' => 'Option A',
 					),
@@ -72,7 +76,58 @@ class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 'array', $field['type'] );
 		$this->assertSame( 'test/component', $field['component'] );
+		$this->assertSame( array( 'min' => 1, 'step' => 1 ), $field['customAttributes'] );
 		$this->assertSame( array( array( 'label' => 'Option A', 'value' => 'a' ) ), $field['options'] );
+	}
+
+	/**
+	 * It uses checkbox descriptions as labels and desc_tip as help text.
+	 */
+	public function test_from_legacy_settings_uses_checkbox_desc_as_label(): void {
+		$schema = ModernSettingsSchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'       => 'woocommerce_test_checkbox',
+					'type'     => 'checkbox',
+					'title'    => 'Checkbox row',
+					'desc'     => 'Enable the test option',
+					'desc_tip' => 'This is help text.',
+				),
+			)
+		);
+
+		$field = $schema['groups']['default']['fields'][0];
+
+		$this->assertSame( 'Enable the test option', $field['label'] );
+		$this->assertSame( 'This is help text.', $field['description'] );
+	}
+
+	/**
+	 * It does not render boolean desc_tip values as help text.
+	 */
+	public function test_from_legacy_settings_ignores_boolean_desc_tip(): void {
+		$schema = ModernSettingsSchema::from_legacy_settings(
+			'test',
+			'',
+			'Test settings',
+			array(
+				array(
+					'id'       => 'woocommerce_test_select',
+					'type'     => 'select',
+					'title'    => 'Select field',
+					'desc'     => 'Select help text.',
+					'desc_tip' => true,
+					'options'  => array(
+						'a' => 'Option A',
+					),
+				),
+			)
+		);
+
+		$this->assertSame( 'Select help text.', $schema['groups']['default']['fields'][0]['description'] );
 	}
 
 	/**

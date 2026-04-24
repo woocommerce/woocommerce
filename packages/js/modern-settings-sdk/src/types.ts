@@ -20,6 +20,7 @@ export type ModernSettingsField = {
 	component?: string;
 	placeholder?: string;
 	disabled?: boolean;
+	customAttributes?: Record< string, string | number | boolean >;
 	save?: ModernSettingsSaveSchema;
 };
 

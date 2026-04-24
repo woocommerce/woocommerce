@@ -7,6 +7,8 @@
  */
 
 use Automattic\WooCommerce\Utilities\I18nUtil;
+use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPageInterface;
+use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPages\ProductsSettingsPageAdapter;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
@@ -37,6 +39,16 @@ class WC_Settings_Products extends WC_Settings_Page {
 	 * @var string
 	 */
 	public $icon = 'box';
+
+	/**
+	 * Get the modern settings page adapter for this settings page.
+	 *
+	 * @since 10.8.0
+	 * @return ModernSettingsPageInterface|null
+	 */
+	public function get_modern_settings_page(): ?ModernSettingsPageInterface {
+		return new ProductsSettingsPageAdapter( $this );
+	}
 
 	/**
 	 * Get own sections.

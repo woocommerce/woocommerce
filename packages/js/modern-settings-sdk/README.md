@@ -2,6 +2,8 @@
 
 React utilities for WooCommerce settings pages that opt in to the modern settings renderer.
 
+For the full integration guide, see [Modern settings SDK](../../../docs/extensions/settings-and-config/modern-settings-sdk.md).
+
 ## Usage
 
 PHP settings pages continue to register through `WC_Settings_Page`. A page opts in by returning a modern settings adapter from `get_modern_settings_page()`. The adapter provides the canonical schema, save adapter, and any script handles that must load before the React app mounts.

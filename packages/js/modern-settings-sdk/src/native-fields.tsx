@@ -8,7 +8,7 @@ import {
 	TextControl,
 	TextareaControl,
 } from '@wordpress/components';
-import { createElement } from '@wordpress/element';
+import { createElement, RawHTML } from '@wordpress/element';
 
 /**
  * Internal dependencies
@@ -24,7 +24,8 @@ type TextInputType =
 	| 'time'
 	| 'email'
 	| 'url'
-	| 'tel';
+	| 'tel'
+	| 'number';
 
 const textInputTypes: TextInputType[] = [
 	'text',
@@ -35,6 +36,7 @@ const textInputTypes: TextInputType[] = [
 	'email',
 	'url',
 	'tel',
+	'number',
 ];
 
 const toStringValue = ( value: SettingsValue ) =>
@@ -42,6 +44,11 @@ const toStringValue = ( value: SettingsValue ) =>
 
 const isTextInputType = ( type: string ): type is TextInputType =>
 	textInputTypes.includes( type as TextInputType );
+
+const getHelp = ( description?: string ) =>
+	description ? (
+		<span dangerouslySetInnerHTML={ { __html: description } } />
+	) : undefined;
 
 export const NativeSettingsField = ( {
 	field,
@@ -52,7 +59,9 @@ export const NativeSettingsField = ( {
 		return (
 			<div id={ field.id }>
 				<strong>{ field.label }</strong>
-				{ field.description ? <p>{ field.description }</p> : null }
+				{ field.description ? (
+					<RawHTML>{ field.description }</RawHTML>
+				) : null }
 			</div>
 		);
 	}
@@ -61,7 +70,7 @@ export const NativeSettingsField = ( {
 		return (
 			<CheckboxControl
 				label={ field.label }
-				help={ field.description }
+				help={ getHelp( field.description ) }
 				checked={ value === true || value === 'yes' || value === '1' }
 				disabled={ field.disabled }
 				onChange={ onChange }
@@ -74,7 +83,7 @@ export const NativeSettingsField = ( {
 		return (
 			<TextareaControl
 				label={ field.label }
-				help={ field.description }
+				help={ getHelp( field.description ) }
 				value={ toStringValue( value ) }
 				placeholder={ field.placeholder }
 				disabled={ field.disabled }
@@ -88,7 +97,7 @@ export const NativeSettingsField = ( {
 		return (
 			<SelectControl
 				label={ field.label }
-				help={ field.description }
+				help={ getHelp( field.description ) }
 				value={ toStringValue( value ) }
 				options={ field.options || [] }
 				disabled={ field.disabled }
@@ -106,7 +115,7 @@ export const NativeSettingsField = ( {
 			<BaseControl
 				id={ field.id }
 				label={ field.label }
-				help={ field.description }
+				help={ getHelp( field.description ) }
 				__nextHasNoMarginBottom
 			>
 				<select
@@ -137,13 +146,14 @@ export const NativeSettingsField = ( {
 			<TextControl
 				type={ field.type }
 				label={ field.label }
-				help={ field.description }
+				help={ getHelp( field.description ) }
 				value={ toStringValue( value ) }
 				placeholder={ field.placeholder }
 				disabled={ field.disabled }
 				onChange={ onChange }
 				__next40pxDefaultSize
 				__nextHasNoMarginBottom
+				{ ...field.customAttributes }
 			/>
 		);
 	}
@@ -153,7 +163,7 @@ export const NativeSettingsField = ( {
 	return (
 		<TextControl
 			label={ field.label }
-			help={ field.description }
+			help={ getHelp( field.description ) }
 			value={ toStringValue( value ) }
 			disabled={ field.disabled }
 			onChange={ onChange }

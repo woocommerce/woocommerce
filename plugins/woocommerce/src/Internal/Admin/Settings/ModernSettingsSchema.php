@@ -124,17 +124,21 @@ class ModernSettingsSchema {
 		$canonical_type = self::normalize_type( $type );
 		$field          = array(
 			'id'          => $id,
-			'label'       => isset( $setting['title'] ) && is_scalar( $setting['title'] ) ? html_entity_decode( (string) $setting['title'] ) : $id,
+			'label'       => self::get_field_label( $setting, $id, $type ),
 			'type'        => $canonical_type,
-			'description' => isset( $setting['desc'] ) && is_scalar( $setting['desc'] ) ? (string) $setting['desc'] : '',
+			'description' => self::get_field_description( $setting, $type ),
 			'value'       => self::get_field_value( $setting, $canonical_type ),
 			'save'        => self::get_save_schema( $setting, $default_save_adapter ),
 		);
 
-		foreach ( array( 'component', 'placeholder', 'disabled', 'custom_attributes' ) as $key ) {
+		foreach ( array( 'component', 'placeholder', 'disabled' ) as $key ) {
 			if ( array_key_exists( $key, $setting ) ) {
 				$field[ $key ] = $setting[ $key ];
 			}
+		}
+
+		if ( isset( $setting['custom_attributes'] ) && is_array( $setting['custom_attributes'] ) ) {
+			$field['customAttributes'] = self::get_custom_attributes( $setting['custom_attributes'] );
 		}
 
 		$options = self::get_options( $setting );
@@ -148,6 +152,47 @@ class ModernSettingsSchema {
 		}
 
 		return $field;
+	}
+
+	/**
+	 * Get a field label.
+	 *
+	 * @param array  $setting Legacy field definition.
+	 * @param string $id Field id.
+	 * @param string $type Raw field type.
+	 * @return string
+	 */
+	private static function get_field_label( array $setting, string $id, string $type ): string {
+		if ( 'checkbox' === $type && isset( $setting['desc'] ) && is_scalar( $setting['desc'] ) && '' !== (string) $setting['desc'] ) {
+			return wp_strip_all_tags( html_entity_decode( (string) $setting['desc'] ) );
+		}
+
+		foreach ( array( 'title', 'name' ) as $key ) {
+			if ( isset( $setting[ $key ] ) && is_scalar( $setting[ $key ] ) && '' !== (string) $setting[ $key ] ) {
+				return wp_strip_all_tags( html_entity_decode( (string) $setting[ $key ] ) );
+			}
+		}
+
+		return $id;
+	}
+
+	/**
+	 * Get a field description.
+	 *
+	 * @param array  $setting Legacy field definition.
+	 * @param string $type Raw field type.
+	 * @return string
+	 */
+	private static function get_field_description( array $setting, string $type ): string {
+		if ( isset( $setting['desc_tip'] ) && is_string( $setting['desc_tip'] ) && '' !== $setting['desc_tip'] ) {
+			return wp_kses_post( (string) $setting['desc_tip'] );
+		}
+
+		if ( 'checkbox' === $type ) {
+			return '';
+		}
+
+		return isset( $setting['desc'] ) && is_scalar( $setting['desc'] ) ? wp_kses_post( (string) $setting['desc'] ) : '';
 	}
 
 	/**
@@ -253,6 +298,26 @@ class ModernSettingsSchema {
 		}
 
 		return $options;
+	}
+
+	/**
+	 * Normalize custom attributes for React controls.
+	 *
+	 * @param array $custom_attributes Raw custom attributes.
+	 * @return array
+	 */
+	private static function get_custom_attributes( array $custom_attributes ): array {
+		$attributes = array();
+
+		foreach ( $custom_attributes as $attribute => $value ) {
+			if ( ! is_scalar( $value ) ) {
+				continue;
+			}
+
+			$attributes[ (string) $attribute ] = $value;
+		}
+
+		return $attributes;
 	}
 
 	/**
