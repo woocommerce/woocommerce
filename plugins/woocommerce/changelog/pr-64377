@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Pass item to woocommerce_hidden_order_itemmeta filter.
