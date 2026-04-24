@@ -55,7 +55,7 @@ final class ProductFilterRemovableChips extends AbstractBlock {
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<ul class="wc-block-product-filter-removable-chips__items">
 				<template
-					data-wp-each--item="state.items"
+					data-wp-each--item="state.removableItems"
 					data-wp-each-key="context.item.value"
 				>
 					<li class="wc-block-product-filter-removable-chips__item">

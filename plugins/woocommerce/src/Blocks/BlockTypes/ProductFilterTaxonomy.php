@@ -212,7 +212,6 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		);
 
 		$show_counts     = $block_attributes['showCounts'] ?? false;
-		$display_limit   = 15;
 		$filter_context  = array(
 			'items'          => array(),
 			'selectionMode'  => 'multiple',
@@ -240,9 +239,8 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 				$selected_terms = array_filter( array_map( 'sanitize_title', explode( ',', $filter_params[ $param_key ] ) ) );
 			}
 
-			$index            = 0;
 			$taxonomy_options = array_map(
-				function ( $term ) use ( $taxonomy_counts, $selected_terms, $taxonomy, $show_counts, $display_limit, &$index ) {
+				function ( $term ) use ( $taxonomy_counts, $selected_terms, $taxonomy, $show_counts ) {
 					$term          = (array) $term;
 					$term['count'] = $taxonomy_counts[ $term['term_id'] ] ?? 0;
 
@@ -270,12 +268,6 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 						}
 					}
 
-					if ( $index >= $display_limit ) {
-						$option['hidden'] = true;
-					}
-
-					++$index;
-
 					return $option;
 				},
 				$taxonomy_terms
@@ -284,7 +276,6 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			$filter_context['items'] = array_values( $taxonomy_options );
 		}
 
-		$has_hidden_items   = count( $filter_context['items'] ) > $display_limit;
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_block_type() ),
@@ -303,16 +294,8 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
 
-		$show_more_button = '';
-		if ( $has_hidden_items ) {
-			$show_more_button = sprintf(
-				'<button class="wc-block-product-filter__show-more" data-wp-on--click="actions.showAll" data-wp-bind--hidden="!state.hasHiddenItems">%s</button>',
-				esc_html__( 'Show more...', 'woocommerce' )
-			);
-		}
-
 		return sprintf(
-			'<div %1$s>%2$s%3$s</div>',
+			'<div %1$s>%2$s</div>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
@@ -321,8 +304,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 					return $carry;
 				},
 				''
-			),
-			$show_more_button
+			)
 		);
 	}
 
