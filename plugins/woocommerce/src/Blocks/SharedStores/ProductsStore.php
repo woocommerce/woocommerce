@@ -115,8 +115,8 @@ class ProductsStore {
 				'mainProductInContext'      => function () {
 					$context    = wp_interactivity_get_context();
 					$state      = wp_interactivity_state( self::$store_namespace );
-					$product_id = ! empty( $context )
-						? ( $context['productId'] ?? null )
+					$product_id = array_key_exists( 'productId', $context )
+						? $context['productId']
 						: ( $state['productId'] ?? null );
 
 					if ( ! $product_id ) {
@@ -128,8 +128,8 @@ class ProductsStore {
 				'productVariationInContext' => function () {
 					$context      = wp_interactivity_get_context();
 					$state        = wp_interactivity_state( self::$store_namespace );
-					$variation_id = ! empty( $context )
-						? ( $context['variationId'] ?? null )
+					$variation_id = array_key_exists( 'variationId', $context )
+						? $context['variationId']
 						: ( $state['variationId'] ?? null );
 
 					if ( ! $variation_id ) {

@@ -658,10 +658,21 @@ describe( 'woocommerce/products store – product context derived state', () => 
 			);
 		} );
 
-		it( 'productVariationInContext does not fall back to state when context variationId is null but context exists', () => {
+		it( 'productVariationInContext falls back to state when context exists but does not define variationId', () => {
 			expect( mockRegisteredStore ).not.toBeNull();
 
 			mockContext = { productId: 42 };
+			mockRegisteredStore!.state.variationId = 99;
+
+			expect( mockRegisteredStore!.state.productVariationInContext ).toBe(
+				mockVariation
+			);
+		} );
+
+		it( 'productVariationInContext does not fall back to state when context explicitly sets variationId to null', () => {
+			expect( mockRegisteredStore ).not.toBeNull();
+
+			mockContext = { productId: 42, variationId: null };
 			mockRegisteredStore!.state.variationId = 99;
 
 			expect( mockRegisteredStore!.state.productVariationInContext ).toBe(

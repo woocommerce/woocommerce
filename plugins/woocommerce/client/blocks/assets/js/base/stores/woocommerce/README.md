@@ -68,7 +68,7 @@ Derived getters mirror each other in JS (`products.ts`) and PHP (`ProductsStore:
 | `mainProductInContext`      | `ProductResponseItem \| null`                                 | Derived                   | The top-level product for the current context. Always the parent product, **never** a variation.                   |
 | `productVariationInContext` | `ProductResponseItem \| null`                                 | Derived                   | Currently selected variation, or `null` for simple/grouped/non-selected.                                           |
 | `productInContext`          | `ProductResponseItem \| null`                                 | Derived                   | `productVariationInContext ?? mainProductInContext`. Bind to this in the common case.                              |
-| `findProduct`               | `({ id, selectedAttributes }) => ProductResponseItem \| null` | Function                  | If `id` is a variation ID, returns it directly. Otherwise resolves a variable product + attributes to a variation. |
+| `findProduct`               | `({ id, selectedAttributes }) => ProductResponseItem \| null` | Function                  | If `id` is a variation ID, returns it directly. For variable products with `selectedAttributes`, resolves to the matching variation. For any other product type (simple, grouped, external, etc.), returns the product as-is. |
 
 ### Populating state (PHP)
 
@@ -135,7 +135,7 @@ if ( $product ) {
 
 Set `productId` / `variationId` on a wrapper element via `data-wp-context`. Use this whenever the same block type can appear multiple times on a page for different products (product loops, grouped product children, variations).
 
-From `SingleProduct.php`:
+Use `wp_interactivity_data_wp_context()` to generate the properly encoded attribute. From `SingleProduct.php`:
 
 ```php
 wc_interactivity_api_load_product(
@@ -143,25 +143,19 @@ wc_interactivity_api_load_product(
     $product->get_id()
 );
 
-$interactivity_context = array(
+$context = array(
     'productId'   => $product->get_id(),
     'variationId' => null,
 );
 
-$html = new \WP_HTML_Tag_Processor( $content );
-if ( $html->next_tag( array( 'tag_name' => 'div' ) ) ) {
-    $html->set_attribute( 'data-wp-interactive', $this->get_full_block_name() );
-    $html->set_attribute(
-        'data-wp-context',
-        'woocommerce/products::' . wp_json_encode(
-            $interactivity_context,
-            JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-        )
-    );
-}
+printf(
+    '<div data-wp-interactive="woocommerce/single-product" %s>%s</div>',
+    wp_interactivity_data_wp_context( $context, 'woocommerce/products' ),
+    $content
+);
 ```
 
-The `woocommerce/products::` prefix on `data-wp-context` is what binds that context object to the `woocommerce/products` store; the JS store's `getContext< ProductContext >( 'woocommerce/products' )` calls read from it.
+The second argument to `wp_interactivity_data_wp_context` (`'woocommerce/products'`) namespaces the context to the `woocommerce/products` store; the JS store's `getContext< ProductContext >( 'woocommerce/products' )` calls read from it.
 
 ### Reading product data in a block
 
@@ -212,7 +206,7 @@ if ( ! product ) {
 
 #### Resolving a variation by attributes
 
-Use `state.findProduct({ id, selectedAttributes })` when you have a product or variation ID. If the ID is a variation, it returns it directly. Otherwise, when `selectedAttributes` is provided for a variable product, it resolves to the matching variation.
+Use `state.findProduct({ id, selectedAttributes })` when you have a product or variation ID. If the ID is a variation, it returns it directly. For variable products with `selectedAttributes`, it resolves to the matching variation. For any other product type (simple, grouped, external, etc.), it returns the product as-is.
 
 From `base/utils/variations/does-cart-item-match-attributes.ts`:
 
@@ -228,7 +222,7 @@ const productAttributes =
 	productsState.products[ parentProductId ]?.attributes ?? [];
 ```
 
-For variable products, `findProduct` returns `null` when no variation matches; for simple products it returns the product itself.
+For variable products, `findProduct` returns `null` when no variation matches the given attributes. For simple, grouped, external, or any other non-variable product type, it returns the product itself.
 
 ### Patterns and pitfalls
 

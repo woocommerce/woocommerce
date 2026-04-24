@@ -20,7 +20,6 @@ const universalLock =
 
 interface Context {
 	addToCartText: string;
-	productType: string;
 	groupedProductIds?: number[];
 	displayViewCart: boolean;
 	quantityToAdd: number;
@@ -95,7 +94,6 @@ const productButtonStore = {
 				animationStatus,
 				tempQuantity,
 				addToCartText,
-				productType,
 				groupedProductIds,
 				hasPressedButton,
 				inTheCartText,
@@ -110,7 +108,7 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.quantity;
 
-			if ( productType === 'grouped' ) {
+			if ( productsState.productInContext?.type === 'grouped' ) {
 				const groupedProductIdsInCart = groupedProductIds?.map(
 					( productId ) => {
 						const product = wooState.findItemInCart( {
