@@ -22,7 +22,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 *
 	 * @var int
 	 */
-	const DISPLAY_LIMIT = 5;
+	const DISPLAY_LIMIT = 15;
 
 	/**
 	 * Render the block.
@@ -54,7 +54,6 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filter-checkbox-list',
-			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => wp_json_encode(
 				array(
 					'storeNamespace' => $store_namespace,
@@ -91,69 +90,20 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
-				<div class="wc-block-product-filter-checkbox-list__items">
-					<template
-						data-wp-each--item="state.items"
-						data-wp-each-key="context.item.id"
-					>
-						<div
-							class="wc-block-product-filter-checkbox-list__item"
-							data-wp-bind--hidden="context.item.hidden"
-						>
-							<label
-								class="wc-block-product-filter-checkbox-list__label"
-								data-wp-bind--for="context.item.id"
-							>
-								<span class="wc-block-product-filter-checkbox-list__input-wrapper">
-									<input
-										class="wc-block-product-filter-checkbox-list__input"
-										type="checkbox"
-										data-wp-bind--id="context.item.id"
-										data-wp-bind--aria-label="context.item.ariaLabel"
-										data-wp-bind--value="context.item.value"
-										data-wp-bind--checked="context.item.selected"
-										data-wp-on--change="actions.toggle"
-									>
-									<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-								</span>
-								<span class="wc-block-product-filter-checkbox-list__text-wrapper">
-									<?php if ( $is_rating ) : ?>
-										<span
-											class="wc-block-product-filter-checkbox-list__stars"
-											data-wp-bind--aria-label="context.item.ariaLabel"
-											data-wp-bind--style="state.ratingStyle"
-										>
-											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-										</span>
-									<?php else : ?>
-										<span
-											class="wc-block-product-filter-checkbox-list__text"
-											data-wp-text="context.item.label"
-										></span>
-									<?php endif; ?>
-									<span
-										class="wc-block-product-filter-checkbox-list__count"
-										data-wp-bind--hidden="!context.item.count"
-									>
-										(<span data-wp-text="context.item.count"></span>)
-									</span>
-								</span>
-							</label>
-						</div>
-					</template>
+				<div
+					class="wc-block-product-filter-checkbox-list__items"
+					data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
+				>
 					<?php
 					$visible_items = array_slice( $items, 0, $display_limit, true );
-					foreach ( $visible_items as $item ) :
-						$context_item = array_merge(
-							$item,
-							array( 'hidden' => false )
-						);
+					foreach ( $visible_items as $index => $item ) :
+						$context_item = array_merge( $item, array( 'index' => $index ) );
 						?>
 						<div
 							class="wc-block-product-filter-checkbox-list__item"
 							data-wp-each-child
 							<?php echo wp_interactivity_data_wp_context( array( 'item' => $context_item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							data-wp-bind--hidden="context.item.hidden"
+							data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden"
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"
@@ -181,7 +131,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											class="wc-block-product-filter-checkbox-list__stars"
 											aria-label="<?php echo esc_attr( $item['ariaLabel'] ?? '' ); ?>"
 											style="<?php echo esc_attr( $rating_style ); ?>"
-											data-wp-bind--style="state.ratingStyle"
+											data-wp-bind--style="woocommerce/product-filter-checkbox-list::state.ratingStyle"
 										>
 											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</span>
@@ -199,6 +149,55 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 							</label>
 						</div>
 					<?php endforeach; ?>
+					<template
+						data-wp-each--item="state.selectableItems"
+						data-wp-each-key="context.item.id"
+					>
+						<div
+							class="wc-block-product-filter-checkbox-list__item"
+							data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden"
+						>
+							<label
+								class="wc-block-product-filter-checkbox-list__label"
+								data-wp-bind--for="context.item.id"
+							>
+								<span class="wc-block-product-filter-checkbox-list__input-wrapper">
+									<input
+										class="wc-block-product-filter-checkbox-list__input"
+										type="checkbox"
+										data-wp-bind--id="context.item.id"
+										data-wp-bind--aria-label="context.item.ariaLabel"
+										data-wp-bind--value="context.item.value"
+										data-wp-bind--checked="context.item.selected"
+										data-wp-on--change="actions.toggle"
+									>
+									<?php echo $checkbox_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+								</span>
+								<span class="wc-block-product-filter-checkbox-list__text-wrapper">
+									<?php if ( $is_rating ) : ?>
+										<span
+											class="wc-block-product-filter-checkbox-list__stars"
+											data-wp-bind--aria-label="context.item.ariaLabel"
+											data-wp-bind--style="woocommerce/product-filter-checkbox-list::state.ratingStyle"
+										>
+											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+										</span>
+									<?php else : ?>
+										<span
+											class="wc-block-product-filter-checkbox-list__text"
+											data-wp-text="context.item.label"
+										></span>
+									<?php endif; ?>
+									<span
+										class="wc-block-product-filter-checkbox-list__count"
+										data-wp-bind--hidden="!context.item.count"
+									>
+										(<span data-wp-text="context.item.count"></span>)
+									</span>
+								</span>
+							</label>
+						</div>
+					</template>
 				</div>
 				<?php if ( $has_more_items ) : ?>
 					<div class="wc-block-product-filter-checkbox-list__show-more">
