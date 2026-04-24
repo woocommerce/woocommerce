@@ -96,6 +96,35 @@ class ApiBuilder {
 		);
 	}
 
+	/**
+	 * Turn-key entry point for a sibling plugin's `bin/build-api.php` script.
+	 *
+	 * Given the plugin root and namespace prefix, requires the plugin's own
+	 * composer autoloader, parses `--no-linter` out of `$argv`, configures an
+	 * ApiBuilder via {@see self::for_plugin()}, and runs the build. Writes a
+	 * clear error to STDERR and exits non-zero on the two common failure
+	 * modes (missing plugin autoloader, builder call fails).
+	 *
+	 * Keeps the plugin-side script tiny: after locating WooCommerce and
+	 * requiring WooCommerce's own autoloader, the plugin only needs to call
+	 * this method with its own root path and namespace prefix.
+	 *
+	 * @param string $plugin_root      Absolute path to the plugin repository root.
+	 * @param string $namespace_prefix Top-level PSR-4 namespace the plugin publishes under.
+	 */
+	public static function run_for_plugin( string $plugin_root, string $namespace_prefix ): void {
+		if ( ! is_file( $plugin_root . '/vendor/autoload.php' ) ) {
+			fwrite( STDERR, "Plugin autoloader not found at {$plugin_root}/vendor/autoload.php. Run `composer install` in the plugin root first.\n" );
+			exit( 1 );
+		}
+		require_once $plugin_root . '/vendor/autoload.php';
+
+		$argv        = $GLOBALS['argv'] ?? array();
+		$skip_linter = in_array( '--no-linter', $argv, true );
+
+		self::for_plugin( $plugin_root, $namespace_prefix )->build( $skip_linter );
+	}
+
 	/** @var array<string, array{class: \ReflectionClass|\ReflectionEnum, kind: string, ignored: bool}> */
 	private array $classes = array();
 
