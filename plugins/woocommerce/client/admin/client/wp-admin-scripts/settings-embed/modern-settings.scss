@@ -213,29 +213,6 @@ body.woocommerce_page_wc-settings.woocommerce-modern-settings-page {
 		width: 100%;
 	}
 
-	.wc-modern-settings__compound {
-		border: 0;
-		margin: 0;
-		padding: 0;
-
-		legend {
-			color: #1e1e1e;
-			font-size: 13px;
-			font-weight: 500;
-			line-height: 20px;
-			margin: 0 0 16px;
-			padding: 0;
-		}
-	}
-
-	.wc-modern-settings__compound-field {
-		margin-top: 16px;
-	}
-
-	.wc-modern-settings__compound-field:first-of-type {
-		margin-top: 0;
-	}
-
 	.wc-modern-settings__actions {
 		margin-left: calc(var(--wc-modern-settings-sidebar-width) + 24px);
 	}

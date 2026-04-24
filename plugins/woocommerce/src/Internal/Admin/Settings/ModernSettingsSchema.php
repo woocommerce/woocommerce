@@ -132,20 +132,6 @@ class ModernSettingsSchema {
 			'save'        => self::get_save_schema( $setting, $default_save_adapter ),
 		);
 
-		if ( isset( $setting['fields'] ) && is_array( $setting['fields'] ) ) {
-			$field['fields'] = array();
-			foreach ( $setting['fields'] as $child_setting ) {
-				if ( ! is_array( $child_setting ) ) {
-					continue;
-				}
-
-				$child_field = self::transform_legacy_field( $child_setting, $default_save_adapter );
-				if ( $child_field ) {
-					$field['fields'][] = $child_field;
-				}
-			}
-		}
-
 		foreach ( array( 'component', 'placeholder', 'disabled' ) as $key ) {
 			if ( array_key_exists( $key, $setting ) ) {
 				$field[ $key ] = $setting[ $key ];
@@ -273,10 +259,6 @@ class ModernSettingsSchema {
 	private static function get_save_schema( array $setting, string $default_save_adapter ): array {
 		if ( isset( $setting['save'] ) && is_array( $setting['save'] ) ) {
 			return $setting['save'];
-		}
-
-		if ( isset( $setting['fields'] ) && is_array( $setting['fields'] ) ) {
-			return array( 'adapter' => 'none' );
 		}
 
 		if ( isset( $setting['is_option'] ) && false === $setting['is_option'] ) {

@@ -17,7 +17,6 @@ export type ModernSettingsField = {
 	description?: string;
 	value?: SettingsValue;
 	options?: ModernSettingsOption[];
-	fields?: ModernSettingsField[];
 	component?: string;
 	placeholder?: string;
 	disabled?: boolean;
@@ -57,9 +56,7 @@ export type SettingsFieldContext = {
 export type SettingsFieldComponentProps = {
 	field: ModernSettingsField;
 	value: SettingsValue;
-	values: Record< string, SettingsValue >;
 	onChange: ( value: SettingsValue ) => void;
-	onFieldChange: ( fieldId: string, value: SettingsValue ) => void;
 	context: SettingsFieldContext;
 };
 

@@ -185,35 +185,6 @@ array(
 
 Descriptions are sanitized with `wp_kses_post()`. Actions are structured data with `id`, `label`, `href`, optional `variant`, optional `target`, and optional `rel`.
 
-## Compound settings
-
-Use a compound field when one visual panel controls more than one persisted setting. The parent field provides the panel and optional custom component. Child fields keep their own ids, values, and `form_post` save names.
-
-```php
-array(
-	'id'        => 'my_plugin_express_checkout_panel',
-	'title'     => __( 'Express checkout locations', 'my-plugin' ),
-	'type'      => 'compound',
-	'component' => 'my-plugin/express-checkout-locations',
-	'fields'    => array(
-		array(
-			'id'         => 'my_plugin_express_cart',
-			'title'      => __( 'Cart', 'my-plugin' ),
-			'type'       => 'checkbox',
-			'field_name' => 'my_plugin_settings[express_cart]',
-		),
-		array(
-			'id'         => 'my_plugin_express_checkout',
-			'title'      => __( 'Checkout', 'my-plugin' ),
-			'type'       => 'checkbox',
-			'field_name' => 'my_plugin_settings[express_checkout]',
-		),
-	),
-)
-```
-
-The compound parent does not submit a value by default. Its child fields submit through the normal `form_post` hidden-input behavior, so existing PHP save and validation logic remains the persistence boundary.
-
 ## Reference migration in WooCommerce core
 
 The Products settings page is the Core reference migration. With `modern-settings` enabled, the Products tab renders through the modern SDK. With the flag disabled, it renders through the existing legacy settings UI.

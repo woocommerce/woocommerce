@@ -54,38 +54,7 @@ export const NativeSettingsField = ( {
 	field,
 	value,
 	onChange,
-	values,
-	onFieldChange,
-	context,
 }: SettingsFieldComponentProps ) => {
-	if ( field.type === 'compound' || ( field.fields || [] ).length > 0 ) {
-		return (
-			<fieldset className="wc-modern-settings__compound">
-				{ field.label ? <legend>{ field.label }</legend> : null }
-				{ field.description ? (
-					<RawHTML>{ field.description }</RawHTML>
-				) : null }
-				{ ( field.fields || [] ).map( ( childField ) => (
-					<div
-						className="wc-modern-settings__compound-field"
-						key={ childField.id }
-					>
-						<NativeSettingsField
-							field={ childField }
-							value={ values[ childField.id ] }
-							values={ values }
-							context={ context }
-							onChange={ ( nextValue ) =>
-								onFieldChange( childField.id, nextValue )
-							}
-							onFieldChange={ onFieldChange }
-						/>
-					</div>
-				) ) }
-			</fieldset>
-		);
-	}
-
 	if ( field.type === 'info' ) {
 		return (
 			<div className="wc-modern-settings__info" id={ field.id }>

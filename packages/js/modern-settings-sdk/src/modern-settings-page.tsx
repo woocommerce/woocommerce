@@ -12,7 +12,6 @@ import { HiddenInputs } from './hidden-inputs';
 import { NativeSettingsField } from './native-fields';
 import { resolveFieldComponent } from './registry';
 import type {
-	ModernSettingsField,
 	ModernSettingsGroup,
 	ModernSettingsSchema,
 	SettingsFieldContext,
@@ -24,15 +23,11 @@ type Values = Record< string, SettingsValue >;
 const getInitialValues = ( schema: ModernSettingsSchema ): Values => {
 	const values: Values = {};
 
-	const addFieldValue = ( field: ModernSettingsField ) => {
-		values[ field.id ] =
-			typeof field.value === 'undefined' ? '' : field.value;
-
-		( field.fields || [] ).forEach( addFieldValue );
-	};
-
 	Object.values( schema.groups ).forEach( ( group ) => {
-		group.fields.forEach( addFieldValue );
+		group.fields.forEach( ( field ) => {
+			values[ field.id ] =
+				typeof field.value === 'undefined' ? '' : field.value;
+		} );
 	} );
 
 	return values;
@@ -102,53 +97,47 @@ export const ModernSettingsPage = ( {
 		[ page, schema.id, schema.section, section ]
 	);
 
-	const setFieldValue = ( fieldId: string, nextValue: SettingsValue ) => {
-		setValues( ( currentValues ) => ( {
-			...currentValues,
-			[ fieldId ]: nextValue,
-		} ) );
-		setIsDirty( true );
-	};
-
-	const renderField = ( field: ModernSettingsField ) => {
-		const FieldComponent =
-			resolveFieldComponent( field, context ) || NativeSettingsField;
-		const value = values[ field.id ];
-
-		return (
-			<div
-				className={ [
-					'wc-modern-settings__field',
-					getFieldTypeClassName( field.type ),
-				].join( ' ' ) }
-				key={ field.id }
-			>
-				<FieldComponent
-					field={ field }
-					value={ value }
-					values={ values }
-					context={ context }
-					onChange={ ( nextValue: SettingsValue ) =>
-						setFieldValue( field.id, nextValue )
-					}
-					onFieldChange={ setFieldValue }
-				/>
-				<HiddenInputs
-					field={ field }
-					value={ value }
-					values={ values }
-				/>
-			</div>
-		);
-	};
-
 	return (
 		<div className="wc-modern-settings">
 			{ Object.values( schema.groups ).map( ( group ) => (
 				<section className="wc-modern-settings__group" key={ group.id }>
 					<GroupHeader group={ group } />
 					<div className="wc-modern-settings__group-panel">
-						{ group.fields.map( renderField ) }
+						{ group.fields.map( ( field ) => {
+							const FieldComponent =
+								resolveFieldComponent( field, context ) ||
+								NativeSettingsField;
+							const value = values[ field.id ];
+
+							return (
+								<div
+									className={ [
+										'wc-modern-settings__field',
+										getFieldTypeClassName( field.type ),
+									].join( ' ' ) }
+									key={ field.id }
+								>
+									<FieldComponent
+										field={ field }
+										value={ value }
+										context={ context }
+										onChange={ (
+											nextValue: SettingsValue
+										) => {
+											setValues( {
+												...values,
+												[ field.id ]: nextValue,
+											} );
+											setIsDirty( true );
+										} }
+									/>
+									<HiddenInputs
+										field={ field }
+										value={ value }
+									/>
+								</div>
+							);
+						} ) }
 					</div>
 				</section>
 			) ) }
