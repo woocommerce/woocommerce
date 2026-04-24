@@ -235,22 +235,19 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 	 * @return string
 	 */
 	public static function get_order_preview_item_html( $order ) {
-		$hidden_order_itemmeta = apply_filters(
-			'woocommerce_hidden_order_itemmeta',
-			array(
-				'_qty',
-				'_tax_class',
-				'_product_id',
-				'_variation_id',
-				'_line_subtotal',
-				'_line_subtotal_tax',
-				'_line_total',
-				'_line_tax',
-				'method_id',
-				'cost',
-				'_reduced_stock',
-				'_restock_refunded_items',
-			)
+		$default_hidden_order_itemmeta = array(
+			'_qty',
+			'_tax_class',
+			'_product_id',
+			'_variation_id',
+			'_line_subtotal',
+			'_line_subtotal_tax',
+			'_line_total',
+			'_line_tax',
+			'method_id',
+			'cost',
+			'_reduced_stock',
+			'_restock_refunded_items',
 		);
 
 		$line_items = apply_filters( 'woocommerce_admin_order_preview_line_items', $order->get_items(), $order );
@@ -325,6 +322,12 @@ class WC_Admin_List_Table_Orders extends WC_Admin_List_Table {
 							$html .= '<table cellspacing="0" class="wc-order-item-meta">';
 
 							foreach ( $meta_data as $meta_id => $meta ) {
+								$hidden_order_itemmeta = apply_filters(
+									'woocommerce_hidden_order_itemmeta',
+									$default_hidden_order_itemmeta,
+									$item
+								);
+
 								if ( in_array( $meta->key, $hidden_order_itemmeta, true ) ) {
 									continue;
 								}
