@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Browser } from '@playwright/test';
+import type { Browser, Page } from '@playwright/test';
 
 /**
  * Internal dependencies
@@ -58,9 +58,7 @@ async function signUpAsGuest(
  * Scrolling into view first is required on narrow CI viewports where the
  * product-thumbnail overlay can otherwise intercept the click.
  */
-async function submitNotificationEditForm(
-	page: import( '@playwright/test' ).Page
-): Promise< void > {
+async function submitNotificationEditForm( page: Page ): Promise< void > {
 	const updateButton = page.getByRole( 'button', {
 		name: 'Update',
 		exact: true,
