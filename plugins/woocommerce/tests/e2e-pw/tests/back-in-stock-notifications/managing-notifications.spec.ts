@@ -110,7 +110,10 @@ test.describe(
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
 			await expect( row ).toHaveCount( 1 );
-			const editLink = row.getByRole( 'link', { name: /Edit/i } );
+			const editLink = row.getByRole( 'link', {
+				name: 'Edit',
+				exact: true,
+			} );
 			await editLink.click();
 
 			await page
@@ -176,7 +179,9 @@ test.describe(
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
 			await expect( row ).toHaveCount( 1 );
-			await row.getByRole( 'link', { name: /Edit/i } ).click();
+			await row
+				.getByRole( 'link', { name: 'Edit', exact: true } )
+				.click();
 
 			const options = await page
 				.locator(
@@ -213,7 +218,9 @@ test.describe(
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
 			await expect( row ).toHaveCount( 1 );
-			await row.getByRole( 'link', { name: /Edit/i } ).click();
+			await row
+				.getByRole( 'link', { name: 'Edit', exact: true } )
+				.click();
 
 			await page
 				.locator(
