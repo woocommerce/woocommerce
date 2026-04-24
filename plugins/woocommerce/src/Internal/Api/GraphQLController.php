@@ -504,11 +504,12 @@ class GraphQLController {
 	 * Compute the maximum nesting depth of the executing operation, under two
 	 * different metrics:
 	 *
-	 * - `query`: only fields whose own selection set is non-empty count toward
-	 *   depth. This is the number directly comparable to the "Maximum query
-	 *   depth" setting's limit, and matches what webonyx's QueryDepth
-	 *   validation rule measures for the enforcement decision.
-	 * - `total`: counts every field in the deepest chain, leaves included.
+	 * - `tree_only`: only fields whose own selection set is non-empty count
+	 *   toward depth; leaves are excluded. This is the number directly
+	 *   comparable to the "Maximum query depth" setting's limit, and matches
+	 *   what webonyx's QueryDepth validation rule measures for the enforcement
+	 *   decision.
+	 * - `in_depth`: counts every field in the deepest chain, leaves included.
 	 *   Useful as a shape metric when inspecting a query.
 	 *
 	 * Inline fragments pass through without incrementing either metric.
@@ -518,11 +519,11 @@ class GraphQLController {
 	 *
 	 * @param DocumentNode $document       The parsed GraphQL document.
 	 * @param ?string      $operation_name The requested operation name, if any.
-	 * @return array{query: int, total: int}
+	 * @return array{tree_only: int, in_depth: int}
 	 */
 	private function compute_query_depth( DocumentNode $document, ?string $operation_name ): array {
-		$query = 0;
-		$total = 0;
+		$tree_only = 0;
+		$in_depth  = 0;
 		foreach ( $document->definitions as $definition ) {
 			if ( ! $definition instanceof OperationDefinitionNode ) {
 				continue;
@@ -532,13 +533,13 @@ class GraphQLController {
 				continue;
 			}
 
-			$query = max( $query, $this->walk_depth_query( $definition->selectionSet, 0 ) );
-			$total = max( $total, $this->walk_depth_total( $definition->selectionSet, 0 ) );
+			$tree_only = max( $tree_only, $this->walk_depth_tree_only( $definition->selectionSet, 0 ) );
+			$in_depth  = max( $in_depth, $this->walk_depth_in_depth( $definition->selectionSet, 0 ) );
 		}
 
 		return array(
-			'query' => $query,
-			'total' => $total,
+			'tree_only' => $tree_only,
+			'in_depth'  => $in_depth,
 		);
 	}
 
@@ -550,7 +551,7 @@ class GraphQLController {
 	 * @param ?SelectionSetNode $selection_set The selection set to walk.
 	 * @param int               $depth         The depth at which fields in this selection set sit.
 	 */
-	private function walk_depth_query( ?SelectionSetNode $selection_set, int $depth ): int {
+	private function walk_depth_tree_only( ?SelectionSetNode $selection_set, int $depth ): int {
 		if ( null === $selection_set ) {
 			return 0;
 		}
@@ -559,10 +560,10 @@ class GraphQLController {
 		foreach ( $selection_set->selections as $selection ) {
 			if ( $selection instanceof FieldNode ) {
 				if ( null !== $selection->selectionSet ) {
-					$max = max( $max, $depth, $this->walk_depth_query( $selection->selectionSet, $depth + 1 ) );
+					$max = max( $max, $depth, $this->walk_depth_tree_only( $selection->selectionSet, $depth + 1 ) );
 				}
 			} elseif ( $selection instanceof InlineFragmentNode ) {
-				$max = max( $max, $this->walk_depth_query( $selection->selectionSet, $depth ) );
+				$max = max( $max, $this->walk_depth_tree_only( $selection->selectionSet, $depth ) );
 			}
 		}
 
@@ -577,7 +578,7 @@ class GraphQLController {
 	 * @param ?SelectionSetNode $selection_set The selection set to walk, or null for a leaf.
 	 * @param int               $depth         The depth of the selection set's parent.
 	 */
-	private function walk_depth_total( ?SelectionSetNode $selection_set, int $depth ): int {
+	private function walk_depth_in_depth( ?SelectionSetNode $selection_set, int $depth ): int {
 		if ( null === $selection_set ) {
 			return $depth;
 		}
@@ -585,9 +586,9 @@ class GraphQLController {
 		$max = $depth;
 		foreach ( $selection_set->selections as $selection ) {
 			if ( $selection instanceof FieldNode ) {
-				$max = max( $max, $this->walk_depth_total( $selection->selectionSet, $depth + 1 ) );
+				$max = max( $max, $this->walk_depth_in_depth( $selection->selectionSet, $depth + 1 ) );
 			} elseif ( $selection instanceof InlineFragmentNode ) {
-				$max = max( $max, $this->walk_depth_total( $selection->selectionSet, $depth ) );
+				$max = max( $max, $this->walk_depth_in_depth( $selection->selectionSet, $depth ) );
 			}
 		}
 
