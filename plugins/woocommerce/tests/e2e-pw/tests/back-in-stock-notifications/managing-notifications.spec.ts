@@ -104,11 +104,13 @@ test.describe(
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
 			);
-			const editLink = page
+			// Surface cross-test bleed (duplicate rows for the same email/product)
+			// as an explicit failure instead of silently picking one via .first().
+			const row = page
 				.getByRole( 'row' )
-				.filter( { has: page.getByText( email, { exact: true } ) } )
-				.getByRole( 'link', { name: /Edit/i } )
-				.first();
+				.filter( { has: page.getByText( email, { exact: true } ) } );
+			await expect( row ).toHaveCount( 1 );
+			const editLink = row.getByRole( 'link', { name: /Edit/i } );
 			await editLink.click();
 
 			await page
@@ -170,12 +172,11 @@ test.describe(
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
 			);
-			await page
+			const row = page
 				.getByRole( 'row' )
-				.filter( { has: page.getByText( email, { exact: true } ) } )
-				.getByRole( 'link', { name: /Edit/i } )
-				.first()
-				.click();
+				.filter( { has: page.getByText( email, { exact: true } ) } );
+			await expect( row ).toHaveCount( 1 );
+			await row.getByRole( 'link', { name: /Edit/i } ).click();
 
 			const options = await page
 				.locator(
@@ -208,12 +209,11 @@ test.describe(
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
 			);
-			await page
+			const row = page
 				.getByRole( 'row' )
-				.filter( { has: page.getByText( email, { exact: true } ) } )
-				.getByRole( 'link', { name: /Edit/i } )
-				.first()
-				.click();
+				.filter( { has: page.getByText( email, { exact: true } ) } );
+			await expect( row ).toHaveCount( 1 );
+			await row.getByRole( 'link', { name: /Edit/i } ).click();
 
 			await page
 				.locator(

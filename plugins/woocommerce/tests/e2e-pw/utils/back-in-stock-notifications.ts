@@ -90,7 +90,9 @@ export async function createOutOfStockProduct(
 	cleanup: () => Promise< void >;
 } > {
 	const { type = 'simple', namePrefix = 'BIS Test Product' } = opts;
-	const name = `${ namePrefix } ${ Date.now() }`;
+	// Append a random suffix so parallel workers don't collide on the product name,
+	// which would break the row-scoped selectors in the admin list-table specs.
+	const name = `${ namePrefix } ${ Date.now() }-${ Math.floor( Math.random() * 1e6 ) }`;
 
 	const response = await restApi.post< {
 		id: number;
@@ -216,15 +218,18 @@ export async function getLinkFromEmailBody(
 
 	const href = await iframe
 		.locator( 'a' )
-		.evaluateAll( ( anchors, pattern ) => {
-			const regex = new RegExp( pattern );
-			for ( const a of anchors as HTMLAnchorElement[] ) {
-				if ( regex.test( a.href ) ) {
-					return a.href;
+		.evaluateAll(
+			( anchors, { source, flags } ) => {
+				const regex = new RegExp( source, flags );
+				for ( const a of anchors as HTMLAnchorElement[] ) {
+					if ( regex.test( a.href ) ) {
+						return a.href;
+					}
 				}
-			}
-			return null;
-		}, hrefPattern.source );
+				return null;
+			},
+			{ source: hrefPattern.source, flags: hrefPattern.flags }
+		);
 
 	if ( ! href ) {
 		throw new Error(

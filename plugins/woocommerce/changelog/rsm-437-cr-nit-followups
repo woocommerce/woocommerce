@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Tighten BIS e2e helpers: unique product names across parallel workers, preserve RegExp flags when evaluating anchor links in the mail-log iframe, and surface duplicate list-table rows as explicit failures.
