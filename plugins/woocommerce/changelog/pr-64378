@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add woocommerce_product_stock_query filter to get_query_for_stock.
