@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add addressCardName checkout filter to allow extensions to modify the name displayed in the Checkout Block address card summary.

@@ -11,6 +11,7 @@ import {
 } from '@woocommerce/types';
 import { getSetting } from '@woocommerce/settings';
 import { formatAddress } from '@woocommerce/blocks/checkout/utils';
+import { applyCheckoutFilter } from '@woocommerce/blocks-checkout';
 import { Button } from '@ariakit/react';
 import { decodeEntities } from '@wordpress/html-entities';
 import clsx from 'clsx';
@@ -55,6 +56,12 @@ const AddressCard = ( { address, onEdit, target, isExpanded }: Props ) => {
 	const { name: formattedName, address: formattedAddress } =
 		getFormattedAddress( address );
 
+	const filteredName = applyCheckoutFilter< string >( {
+		filterName: 'addressCardName',
+		defaultValue: formattedName,
+		arg: { address },
+	} );
+
 	const label =
 		target === 'shipping'
 			? __( 'Edit shipping address', 'woocommerce' )
@@ -76,7 +83,7 @@ const AddressCard = ( { address, onEdit, target, isExpanded }: Props ) => {
 						'wc-block-components-address-card__address-section--primary'
 					) }
 				>
-					{ decodeEntities( formattedName ) }
+					{ decodeEntities( filteredName ) }
 				</span>
 				<span
 					className={ clsx(
