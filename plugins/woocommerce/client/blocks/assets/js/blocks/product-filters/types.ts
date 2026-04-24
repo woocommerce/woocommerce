@@ -17,9 +17,30 @@ export type FilterItemFields = {
 	parent?: number;
 	depth?: number;
 	menuOrder?: number;
+	attributeQueryType?: 'and' | 'or';
 };
 
 export type FilterOptionItem = SelectableItem< FilterItemFields >;
+
+// ----------------------------------------
+// Parent store context + active-filter shape
+// ----------------------------------------
+export type ActiveFilterItem = {
+	type: string;
+	value: string;
+	attributeQueryType?: 'and' | 'or';
+	activeLabel: string;
+};
+
+export type ProductFiltersContext = {
+	isOverlayOpened: boolean;
+	params: Record< string, string >;
+	activeFilters: ActiveFilterItem[];
+	items?: FilterOptionItem[];
+	item: FilterOptionItem;
+	activeLabelTemplate: string;
+	filterType: string;
+};
 
 // ----------------------------------------
 // Block props

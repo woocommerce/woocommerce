@@ -16,9 +16,13 @@ export type SelectableItem< T = unknown > = (
 
 /**
  * Runtime shape of items yielded by the parent's `state.selectableItems`
- * getter. Parent derives `selected` from SSOT.
+ * getter. Parent derives `selected` from SSOT and `index` from position
+ * so inner blocks can branch on it (e.g. show-more visibility in
+ * `checkbox-list`).
  */
-export type DerivedSelectableItem< T = unknown > = SelectableItem< T >;
+export type DerivedSelectableItem< T = unknown > = SelectableItem< T > & {
+	index: number;
+};
 
 export interface SelectableItemsContext< T = unknown > {
 	items: SelectableItem< T >[];
@@ -47,9 +51,9 @@ export type SelectableItemsBlockContext< T = unknown > = {
  * `state.selectableItems` returns items with `selected` + `index` derived.
  * `actions.toggle` reads `getContext().item` (set by `data-wp-each` in items region).
  */
-export interface SelectableItemsParentStore {
+export interface SelectableItemsParentStore< T = unknown > {
 	state: {
-		selectableItems: readonly DerivedSelectableItem[];
+		selectableItems: readonly DerivedSelectableItem< T >[];
 	};
 	actions: {
 		/** Toggles selection for the current `getContext().item`. */
