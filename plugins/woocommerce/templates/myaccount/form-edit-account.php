@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.5.0
+ * @version 10.8.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -58,6 +58,15 @@ do_action( 'woocommerce_before_edit_account_form' );
 		 * @since 8.7.0
 		 */
 		do_action( 'woocommerce_edit_account_form_fields' );
+	?>
+
+	<?php
+		/**
+		 * Hook before the password change section.
+		 *
+		 * @since 10.8.0
+		 */
+		do_action( 'woocommerce_edit_account_form_before_password' );
 	?>
 
 	<fieldset>
