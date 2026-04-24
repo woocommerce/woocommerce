@@ -137,6 +137,7 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			add_action( 'woocommerce_settings_' . $this->id, array( $this, 'output' ) );
 			add_action( 'woocommerce_settings_save_' . $this->id, array( $this, 'save' ) );
 			add_action( 'woocommerce_admin_field_add_settings_slot', array( $this, 'add_settings_slot' ) );
+			add_filter( 'admin_body_class', array( $this, 'add_modern_settings_body_class' ) );
 		}
 
 		/**
@@ -170,6 +171,32 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function get_modern_settings_page(): ?ModernSettingsPageInterface {
 			return null;
+		}
+
+		/**
+		 * Add a body class for settings pages rendered through the modern settings SDK.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param string $classes The existing body classes for the admin area.
+		 * @return string The modified body classes for the admin area.
+		 */
+		public function add_modern_settings_body_class( $classes ) {
+			global $current_tab;
+
+			if ( ! is_string( $classes ) || $this->id !== $current_tab ) {
+				return $classes;
+			}
+
+			if ( ! Features::is_enabled( 'modern-settings' ) || ! $this->get_modern_settings_page() instanceof ModernSettingsPageInterface ) {
+				return $classes;
+			}
+
+			if ( str_contains( $classes, 'woocommerce-modern-settings-page' ) ) {
+				return $classes;
+			}
+
+			return "$classes woocommerce-modern-settings-page";
 		}
 
 		/**
