@@ -84,6 +84,33 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_entry_count reflects the number of rows written to the feed.
+	 */
+	public function test_get_entry_count_reflects_added_entries() {
+		$feed = new JsonFileFeed( 'test-feed' );
+		$this->assertSame( 0, $feed->get_entry_count() );
+
+		$feed->start();
+		$this->assertSame( 0, $feed->get_entry_count() );
+
+		$feed->add_entry( array( 'name' => 'First' ) );
+		$feed->add_entry( array( 'name' => 'Second' ) );
+		$this->assertSame( 2, $feed->get_entry_count() );
+
+		$feed->end();
+		$this->assertSame( 2, $feed->get_entry_count() );
+	}
+
+	/**
+	 * Test that add_entry does not count entries added before start().
+	 */
+	public function test_get_entry_count_ignores_entries_added_before_start() {
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->add_entry( array( 'name' => 'dropped' ) );
+		$this->assertSame( 0, $feed->get_entry_count() );
+	}
+
+	/**
 	 * Test that get_file_url returns null if feed is not completed.
 	 */
 	public function test_get_file_url_returns_null_if_not_completed() {
