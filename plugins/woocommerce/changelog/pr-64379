@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add woocommerce_checkout_cart_item_meta_after action hook.
