@@ -53,4 +53,4 @@ The WooCommerce Code Reference is a comprehensive documentation of the WooCommer
 
 The WooCommerce Code Reference is a comprehensive documentation of the internal WooCommerce Classes, API, and functions. It is a great resource for developers to learn about the WooCommerce functionality and how to extend it.
 
-Explore the [WooCommerce Code Reference](https://developer.wordpress.org/reference/classes/woocommerce/) documentation.
+Explore the [WooCommerce Code Reference](https://woocommerce.github.io/code-reference/) documentation.

@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Caches\OrderCache;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
+use Automattic\WooCommerce\Enums\TaxBasedOn;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\Customers\SearchService as CustomersSearchService;
 use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
@@ -1769,17 +1770,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected function get_tax_location( $args = array() ) {
 		$tax_based_on = get_option( 'woocommerce_tax_based_on' );
 
-		if ( 'shipping' === $tax_based_on && ! $this->get_shipping_country() ) {
-			$tax_based_on = 'billing';
+		if ( TaxBasedOn::SHIPPING === $tax_based_on && ! $this->get_shipping_country() ) {
+			$tax_based_on = TaxBasedOn::BILLING;
 		}
 
 		$args = wp_parse_args(
 			$args,
 			array(
-				'country'  => 'billing' === $tax_based_on ? $this->get_billing_country() : $this->get_shipping_country(),
-				'state'    => 'billing' === $tax_based_on ? $this->get_billing_state() : $this->get_shipping_state(),
-				'postcode' => 'billing' === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
-				'city'     => 'billing' === $tax_based_on ? $this->get_billing_city() : $this->get_shipping_city(),
+				'country'  => TaxBasedOn::BILLING === $tax_based_on ? $this->get_billing_country() : $this->get_shipping_country(),
+				'state'    => TaxBasedOn::BILLING === $tax_based_on ? $this->get_billing_state() : $this->get_shipping_state(),
+				'postcode' => TaxBasedOn::BILLING === $tax_based_on ? $this->get_billing_postcode() : $this->get_shipping_postcode(),
+				'city'     => TaxBasedOn::BILLING === $tax_based_on ? $this->get_billing_city() : $this->get_shipping_city(),
 			)
 		);
 
@@ -1803,11 +1804,11 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		// Set shop base address as a tax location if order has local pickup shipping method.
 		if ( $apply_base_tax && count( array_intersect( $shipping_method_ids, $local_pickup_methods ) ) > 0 ) {
-			$tax_based_on = 'base';
+			$tax_based_on = TaxBasedOn::BASE;
 		}
 
 		// Default to base.
-		if ( 'base' === $tax_based_on || empty( $args['country'] ) ) {
+		if ( TaxBasedOn::BASE === $tax_based_on || empty( $args['country'] ) ) {
 			$args['country']  = WC()->countries->get_base_country();
 			$args['state']    = WC()->countries->get_base_state();
 			$args['postcode'] = WC()->countries->get_base_postcode();

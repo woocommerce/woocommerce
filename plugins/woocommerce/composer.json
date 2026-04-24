@@ -92,7 +92,8 @@
 	"autoload": {
 		"exclude-from-classmap": [
 			"includes/legacy",
-			"includes/libraries"
+			"includes/libraries",
+			"src/Internal/Api/DesignTime"
 		],
 		"classmap": [
 			"includes/rest-api"
