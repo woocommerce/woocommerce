@@ -38,11 +38,8 @@ defined( 'ABSPATH' ) || exit;
 
 <!-- wp:paragraph -->
 <p><?php
-	/* translators: 1: order number, 2: order date */
-	printf(
-		esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' ),
-		'<!--[woocommerce/order-number]-->',
-		'<!--[woocommerce/order-date]-->'
-	);
-	?></p>
+/* translators: 1: order number, 2: order date */
+$order_meta_format = esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' );
+printf( $order_meta_format, '<!--[woocommerce/order-number]-->', '<!--[woocommerce/order-date]-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $order_meta_format is escaped above; personalization tokens are literal HTML comments.
+?></p>
 <!-- /wp:paragraph -->
