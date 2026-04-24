@@ -92,7 +92,9 @@ export async function createOutOfStockProduct(
 	const { type = 'simple', namePrefix = 'BIS Test Product' } = opts;
 	// Append a random suffix so parallel workers don't collide on the product name,
 	// which would break the row-scoped selectors in the admin list-table specs.
-	const name = `${ namePrefix } ${ Date.now() }-${ Math.floor( Math.random() * 1e6 ) }`;
+	const name = `${ namePrefix } ${ Date.now() }-${ Math.floor(
+		Math.random() * 1e6
+	) }`;
 
 	const response = await restApi.post< {
 		id: number;
@@ -216,20 +218,18 @@ export async function getLinkFromEmailBody(
 	// Wait until iframe content is attached and has anchors rendered.
 	await iframe.locator( 'a' ).first().waitFor( { state: 'attached' } );
 
-	const href = await iframe
-		.locator( 'a' )
-		.evaluateAll(
-			( anchors, { source, flags } ) => {
-				const regex = new RegExp( source, flags );
-				for ( const a of anchors as HTMLAnchorElement[] ) {
-					if ( regex.test( a.href ) ) {
-						return a.href;
-					}
+	const href = await iframe.locator( 'a' ).evaluateAll(
+		( anchors, { source, flags } ) => {
+			const regex = new RegExp( source, flags );
+			for ( const a of anchors as HTMLAnchorElement[] ) {
+				if ( regex.test( a.href ) ) {
+					return a.href;
 				}
-				return null;
-			},
-			{ source: hrefPattern.source, flags: hrefPattern.flags }
-		);
+			}
+			return null;
+		},
+		{ source: hrefPattern.source, flags: hrefPattern.flags }
+	);
 
 	if ( ! href ) {
 		throw new Error(

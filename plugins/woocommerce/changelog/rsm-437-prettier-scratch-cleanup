@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Format BIS e2e helpers with project prettier config and remove sprint scratch docs that were still sitting in src/Internal/StockNotifications on this branch.
