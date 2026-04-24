@@ -123,7 +123,7 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 		 * @return string
 		 */
 		public function get_default_heading() {
-			return __( 'Review your order', 'woocommerce' );
+			return __( 'Rate your recent purchases', 'woocommerce' );
 		}
 
 		/**

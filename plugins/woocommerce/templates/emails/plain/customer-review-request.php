@@ -28,36 +28,20 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 	echo esc_html__( 'Hi,', 'woocommerce' ) . "\n\n";
 }
 
-printf(
-	/* translators: %s: order date */
-	esc_html__( 'Thanks again for your order on %s. We\'d love to hear what you think of the products you received.', 'woocommerce' ),
-	esc_html( wc_format_datetime( $order->get_date_created() ) )
-);
-echo "\n\n";
-
-echo esc_html__( 'Leaving a review takes about a minute, and it helps other shoppers a lot.', 'woocommerce' ) . "\n\n";
+echo esc_html__( 'We\'d love to know what you thought of the products you ordered. Your review helps other shoppers make better decisions and helps us improve.', 'woocommerce' ) . "\n\n";
 
 if ( ! empty( $review_order_url ) ) {
-	echo esc_html__( 'Review your products:', 'woocommerce' ) . "\n";
+	echo esc_html__( 'Leave a review:', 'woocommerce' ) . "\n";
 	echo esc_url( $review_order_url ) . "\n\n";
 }
 
-echo "----------------------------------------\n\n";
-
-/**
- * Hook for the woocommerce_email_order_details.
- *
- * @param WC_Order $order         The order object.
- * @param bool     $sent_to_admin Whether the email is sent to admin.
- * @param bool     $plain_text    Whether the email is plain text.
- * @param WC_Email $email         The email object.
- * @since 2.5.0
- *
- * @hooked WC_Emails::order_details() Shows the order details table.
- */
-do_action( 'woocommerce_email_order_details', $order, $sent_to_admin, $plain_text, $email );
-
-echo "\n----------------------------------------\n\n";
+printf(
+	/* translators: 1: order number, 2: order date */
+	esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' ),
+	esc_html( $order->get_order_number() ),
+	esc_html( wc_format_datetime( $order->get_date_created() ) )
+);
+echo "\n\n----------------------------------------\n\n";
 
 /**
  * Show user-defined additional content - this is set in each email's settings.
