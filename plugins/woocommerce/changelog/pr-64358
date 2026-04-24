@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+De-duplicate tfoot blocks in order/order-details email templates.
