@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a customer-facing unsubscribe link to the Review request transactional email. Clicking it opts the customer out for that order and, for logged-in customers, across all future orders.
