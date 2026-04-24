@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Backfill template sync metadata onto pre-existing block email posts during upgrade so the divergence detector can classify legacy installs safely.
