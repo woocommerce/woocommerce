@@ -57,7 +57,7 @@ export const NativeSettingsField = ( {
 }: SettingsFieldComponentProps ) => {
 	if ( field.type === 'info' ) {
 		return (
-			<div id={ field.id }>
+			<div className="wc-modern-settings__info" id={ field.id }>
 				<strong>{ field.label }</strong>
 				{ field.description ? (
 					<RawHTML>{ field.description }</RawHTML>
@@ -69,6 +69,7 @@ export const NativeSettingsField = ( {
 	if ( field.type === 'checkbox' ) {
 		return (
 			<CheckboxControl
+				className="wc-modern-settings__control"
 				label={ field.label }
 				help={ getHelp( field.description ) }
 				checked={ value === true || value === 'yes' || value === '1' }
@@ -82,6 +83,7 @@ export const NativeSettingsField = ( {
 	if ( field.type === 'textarea' ) {
 		return (
 			<TextareaControl
+				className="wc-modern-settings__control"
 				label={ field.label }
 				help={ getHelp( field.description ) }
 				value={ toStringValue( value ) }
@@ -96,6 +98,7 @@ export const NativeSettingsField = ( {
 	if ( field.type === 'select' || field.type === 'radio' ) {
 		return (
 			<SelectControl
+				className="wc-modern-settings__control"
 				label={ field.label }
 				help={ getHelp( field.description ) }
 				value={ toStringValue( value ) }
@@ -113,6 +116,7 @@ export const NativeSettingsField = ( {
 
 		return (
 			<BaseControl
+				className="wc-modern-settings__control"
 				id={ field.id }
 				label={ field.label }
 				help={ getHelp( field.description ) }
@@ -144,6 +148,7 @@ export const NativeSettingsField = ( {
 	if ( isTextInputType( field.type ) ) {
 		return (
 			<TextControl
+				className="wc-modern-settings__control"
 				type={ field.type }
 				label={ field.label }
 				help={ getHelp( field.description ) }
@@ -162,6 +167,7 @@ export const NativeSettingsField = ( {
 
 	return (
 		<TextControl
+			className="wc-modern-settings__control"
 			label={ field.label }
 			help={ getHelp( field.description ) }
 			value={ toStringValue( value ) }

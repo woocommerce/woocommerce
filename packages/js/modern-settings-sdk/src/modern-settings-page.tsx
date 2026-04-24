@@ -32,6 +32,9 @@ const getInitialValues = ( schema: ModernSettingsSchema ): Values => {
 	return values;
 };
 
+const getFieldTypeClassName = ( type: string ) =>
+	`wc-modern-settings__field--${ type.replace( /[^a-z0-9_-]/gi, '-' ) }`;
+
 export const ModernSettingsPage = ( {
 	schema,
 	page,
@@ -57,46 +60,62 @@ export const ModernSettingsPage = ( {
 		<div className="wc-modern-settings">
 			{ Object.values( schema.groups ).map( ( group ) => (
 				<section className="wc-modern-settings__group" key={ group.id }>
-					{ group.title ? <h2>{ group.title }</h2> : null }
-					{ group.description ? <p>{ group.description }</p> : null }
-					{ group.fields.map( ( field ) => {
-						const FieldComponent =
-							resolveFieldComponent( field, context ) ||
-							NativeSettingsField;
-						const value = values[ field.id ];
+					<div className="wc-modern-settings__group-header">
+						{ group.title ? <h2>{ group.title }</h2> : null }
+						{ group.description ? (
+							<p>{ group.description }</p>
+						) : null }
+					</div>
+					<div className="wc-modern-settings__group-panel">
+						{ group.fields.map( ( field ) => {
+							const FieldComponent =
+								resolveFieldComponent( field, context ) ||
+								NativeSettingsField;
+							const value = values[ field.id ];
 
-						return (
-							<div
-								className="wc-modern-settings__field"
-								key={ field.id }
-							>
-								<FieldComponent
-									field={ field }
-									value={ value }
-									context={ context }
-									onChange={ ( nextValue: SettingsValue ) => {
-										setValues( {
-											...values,
-											[ field.id ]: nextValue,
-										} );
-										setIsDirty( true );
-									} }
-								/>
-								<HiddenInputs field={ field } value={ value } />
-							</div>
-						);
-					} ) }
+							return (
+								<div
+									className={ [
+										'wc-modern-settings__field',
+										getFieldTypeClassName( field.type ),
+									].join( ' ' ) }
+									key={ field.id }
+								>
+									<FieldComponent
+										field={ field }
+										value={ value }
+										context={ context }
+										onChange={ (
+											nextValue: SettingsValue
+										) => {
+											setValues( {
+												...values,
+												[ field.id ]: nextValue,
+											} );
+											setIsDirty( true );
+										} }
+									/>
+									<HiddenInputs
+										field={ field }
+										value={ value }
+									/>
+								</div>
+							);
+						} ) }
+					</div>
 				</section>
 			) ) }
-			<Button
-				variant="primary"
-				type="submit"
-				name="save"
-				value={ __( 'Save changes', 'woocommerce' ) }
-				disabled={ ! isDirty }
-			>
-				{ __( 'Save changes', 'woocommerce' ) }
-			</Button>
+			<div className="wc-modern-settings__actions">
+				<Button
+					variant="primary"
+					type="submit"
+					name="save"
+					value={ __( 'Save changes', 'woocommerce' ) }
+					disabled={ ! isDirty }
+				>
+					{ __( 'Save changes', 'woocommerce' ) }
+				</Button>
+			</div>
 		</div>
 	);
 };

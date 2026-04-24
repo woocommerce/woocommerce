@@ -1,0 +1,209 @@
+.woocommerce_page_wc-settings {
+	.wc-modern-settings {
+		--wc-modern-settings-panel-width: 681px;
+		--wc-modern-settings-sidebar-width: 278px;
+
+		box-sizing: border-box;
+		color: #1e1e1e;
+		font-size: 13px;
+		line-height: 20px;
+		margin: 24px 0;
+		max-width: calc(
+			var(--wc-modern-settings-sidebar-width) +
+				var(--wc-modern-settings-panel-width) + 24px
+		);
+
+		* {
+			box-sizing: border-box;
+		}
+	}
+
+	.wc-modern-settings__group {
+		align-items: flex-start;
+		display: flex;
+		gap: 24px;
+		margin: 0 0 48px;
+	}
+
+	.wc-modern-settings__group-header {
+		flex: 0 0 var(--wc-modern-settings-sidebar-width);
+		max-width: var(--wc-modern-settings-sidebar-width);
+		min-width: 0;
+
+		h2 {
+			color: #070707;
+			font-size: 16px;
+			font-weight: 600;
+			line-height: 24px;
+			margin: 0;
+		}
+
+		p {
+			color: #505050;
+			font-size: 14px;
+			line-height: 20px;
+			margin: 4px 0 0;
+			max-width: 240px;
+		}
+	}
+
+	.wc-modern-settings__group-panel {
+		background: #fff;
+		border: 1px solid #e0e0e0;
+		border-radius: 4px;
+		display: flex;
+		flex: 0 1 var(--wc-modern-settings-panel-width);
+		flex-direction: column;
+		gap: 16px;
+		max-width: var(--wc-modern-settings-panel-width);
+		padding: 24px;
+		width: 100%;
+	}
+
+	.wc-modern-settings__field {
+		margin: 0;
+		width: 100%;
+	}
+
+	.wc-modern-settings__actions {
+		margin-left: calc(var(--wc-modern-settings-sidebar-width) + 24px);
+	}
+
+	.wc-modern-settings__info {
+		background: #f0f0f1;
+		border-radius: 4px;
+		color: #505050;
+		font-size: 13px;
+		line-height: 20px;
+		padding: 16px;
+
+		strong {
+			color: #1e1e1e;
+			display: block;
+			font-weight: 500;
+			margin-bottom: 4px;
+		}
+
+		p {
+			margin: 0;
+		}
+	}
+
+	.wc-modern-settings__control.components-base-control {
+		margin-bottom: 0;
+		width: 100%;
+	}
+
+	.wc-modern-settings__control {
+		.components-base-control__field {
+			margin-bottom: 0;
+		}
+
+		.components-base-control__label {
+			color: #1e1e1e;
+			display: block;
+			font-size: 11px;
+			font-weight: 500;
+			line-height: 16px;
+			margin: 0 0 8px;
+			text-transform: uppercase;
+		}
+
+		.components-base-control__help {
+			color: #505050;
+			font-size: 12px;
+			line-height: 16px;
+			margin: 8px 0 0;
+		}
+	}
+
+	.wc-modern-settings__control input[type="text"],
+	.wc-modern-settings__control input[type="password"],
+	.wc-modern-settings__control input[type="datetime-local"],
+	.wc-modern-settings__control input[type="date"],
+	.wc-modern-settings__control input[type="time"],
+	.wc-modern-settings__control input[type="email"],
+	.wc-modern-settings__control input[type="url"],
+	.wc-modern-settings__control input[type="tel"],
+	.wc-modern-settings__control input[type="number"],
+	.wc-modern-settings__control select,
+	.wc-modern-settings__control textarea {
+		border-color: #949494;
+		border-radius: 2px;
+		color: #1e1e1e;
+		font-size: 13px;
+		line-height: 20px;
+		margin: 0;
+		max-width: none;
+		min-height: 40px;
+		width: 100%;
+	}
+
+	.wc-modern-settings__control input[type="text"],
+	.wc-modern-settings__control input[type="password"],
+	.wc-modern-settings__control input[type="datetime-local"],
+	.wc-modern-settings__control input[type="date"],
+	.wc-modern-settings__control input[type="time"],
+	.wc-modern-settings__control input[type="email"],
+	.wc-modern-settings__control input[type="url"],
+	.wc-modern-settings__control input[type="tel"],
+	.wc-modern-settings__control input[type="number"],
+	.wc-modern-settings__control select {
+		padding: 8px 12px;
+	}
+
+	.wc-modern-settings__control textarea {
+		padding: 10px 12px;
+	}
+
+	.wc-modern-settings__field--checkbox {
+		.components-base-control__field {
+			align-items: flex-start;
+			display: flex;
+			gap: 12px;
+		}
+
+		.components-h-stack {
+			align-items: flex-start;
+			gap: 12px;
+		}
+
+		.components-checkbox-control__input-container {
+			flex: 0 0 auto;
+			margin: 0;
+		}
+
+		.components-checkbox-control__label {
+			color: #1e1e1e;
+			font-size: 13px;
+			line-height: 20px;
+		}
+
+		.components-base-control__help {
+			margin-left: 32px;
+		}
+	}
+
+	@media (max-width: 960px) {
+		.wc-modern-settings {
+			max-width: none;
+		}
+
+		.wc-modern-settings__group {
+			display: block;
+		}
+
+		.wc-modern-settings__group-header {
+			margin-bottom: 16px;
+			max-width: none;
+		}
+
+		.wc-modern-settings__group-panel {
+			max-width: none;
+		}
+
+		.wc-modern-settings__actions {
+			margin-left: 0;
+		}
+	}
+}

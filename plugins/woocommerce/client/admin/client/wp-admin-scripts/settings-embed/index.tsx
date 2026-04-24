@@ -10,6 +10,7 @@ import { createRoot } from '@wordpress/element';
 /**
  * Internal dependencies
  */
+import './modern-settings.scss';
 import { isFeatureEnabled } from '~/utils/features';
 import {
 	SettingsPaymentsBacsWrapper,
