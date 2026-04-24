@@ -377,6 +377,16 @@ class WC_Shortcode_My_Account {
 		do_action( 'password_reset', $user, $new_pass );
 
 		wp_set_password( $new_pass, $user->ID );
+
+		/**
+		 * Fires after the user's password has been reset via WooCommerce.
+		 *
+		 * This provides parity with WordPress core's reset_password() function.
+		 *
+		 * @since 10.8.0
+		 * @param WP_User $user The user.
+		 */
+		do_action( 'after_password_reset', $user );
 		update_user_meta( $user->ID, 'default_password_nag', false );
 		self::set_reset_password_cookie();
 		wc_set_customer_auth_cookie( $user->ID );
