@@ -40,7 +40,7 @@ Jest does not run through webpack, so `DefinePlugin` does not apply to unit test
 
 ```js
 // jest.setup.js / global-mocks.js
-global.__i18n_text_domain__ = 'your-text-domain';
+globalThis.__i18n_text_domain__ = 'your-text-domain';
 ```
 
 ---

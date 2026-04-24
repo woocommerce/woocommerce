@@ -235,6 +235,34 @@ pnpm run test:js                            # runs JS component test using Jest
 
 ### Dependencies
 
+#### Text domain
+
+Translation function calls (`__()`, `_x()`, `_n()`, `_nx()`) in this package use the `__i18n_text_domain__` identifier as their text domain argument rather than a hardcoded string literal, so each consumer plugin can extract and translate strings under its own text domain.
+
+**Consumers must substitute the identifier with a string literal at bundle time**, typically with [`webpack.DefinePlugin`](https://webpack.js.org/plugins/define-plugin/):
+
+```js
+// consumer webpack.config.js
+const webpack = require( 'webpack' );
+
+module.exports = {
+    // …
+    plugins: [
+        new webpack.DefinePlugin( {
+            __i18n_text_domain__: JSON.stringify( 'your-text-domain' ),
+        } ),
+    ],
+};
+```
+
+Without this substitution the bundle will throw `ReferenceError: __i18n_text_domain__ is not defined` at runtime, because the identifier is declared as an ambient global with no runtime default.
+
+For Jest (or any non-webpack test runner), set the identifier on the global in the consumer's test setup file:
+
+```js
+globalThis.__i18n_text_domain__ = 'your-text-domain';
+```
+
 #### Global Styles Engine
 
 A of 1.4.3 the email editor package depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
