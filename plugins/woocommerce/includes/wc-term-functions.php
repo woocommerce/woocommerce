@@ -525,10 +525,20 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 
 		// Get the count.
 		// phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-		$count = $wpdb->get_var( implode( ' ', $term_query ) );
+		$count = absint( $wpdb->get_var( implode( ' ', $term_query ) ) );
+
+		/**
+		 * Filter the product count for a term before it is saved.
+		 *
+		 * @since 10.8.0
+		 * @param int    $count    The product count for the term.
+		 * @param int    $term_id  The term ID.
+		 * @param string $taxonomy The taxonomy name.
+		 */
+		$count = apply_filters( 'woocommerce_term_recount_product_count', $count, $term_id, $taxonomy->name );
 
 		// Update the count.
-		update_term_meta( $term_id, 'product_count_' . $taxonomy->name, absint( $count ) );
+		update_term_meta( $term_id, 'product_count_' . $taxonomy->name, $count );
 	}
 
 	delete_transient( 'wc_term_counts' );
