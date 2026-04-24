@@ -15,8 +15,6 @@
  * @version 10.8.0
  */
 
-use Automattic\WooCommerce\Internal\EmailEditor\BlockEmailRenderer;
-
 defined( 'ABSPATH' ) || exit;
 
 // phpcs:disable Squiz.PHP.EmbeddedPhp.ContentBeforeOpen -- removed to prevent empty new lines.
@@ -38,13 +36,13 @@ defined( 'ABSPATH' ) || exit;
 <p> <?php echo esc_html__( 'We’d love to know what you thought of the products you ordered. Your review helps other shoppers make better decisions and helps us improve.', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
-<!-- wp:woocommerce/email-content {"lock":{"move":false,"remove":true}} -->
-<div class="wp-block-woocommerce-email-content"> <?php echo esc_html( BlockEmailRenderer::WOO_EMAIL_CONTENT_PLACEHOLDER ); ?> </div>
-<!-- /wp:woocommerce/email-content -->
-
-<!-- wp:paragraph {"align":"center"} -->
-<p class="has-text-align-center"><?php
-	/* translators: %s: Store admin email */
-	printf( esc_html__( 'Thanks again! If you need any help with your order, please contact us at %s.', 'woocommerce' ), '<!--[woocommerce/store-email]-->' );
-?></p>
+<!-- wp:paragraph -->
+<p><?php
+	/* translators: 1: order number, 2: order date */
+	printf(
+		esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' ),
+		'<!--[woocommerce/order-number]-->',
+		'<!--[woocommerce/order-date]-->'
+	);
+	?></p>
 <!-- /wp:paragraph -->
