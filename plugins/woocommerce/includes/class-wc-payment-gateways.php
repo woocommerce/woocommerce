@@ -325,7 +325,7 @@ class WC_Payment_Gateways {
 		$_available_gateways = array();
 
 		foreach ( $this->payment_gateways as $gateway ) {
-			if ( 'yes' === $gateway->enabled && $gateway->is_available() ) {
+			if ( $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				} elseif ( $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHOD ) || $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
