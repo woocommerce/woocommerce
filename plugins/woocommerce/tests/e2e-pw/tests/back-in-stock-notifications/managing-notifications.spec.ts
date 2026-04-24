@@ -110,11 +110,9 @@ test.describe(
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
 			await expect( row ).toHaveCount( 1 );
-			const editLink = row.getByRole( 'link', {
-				name: 'Edit',
-				exact: true,
-			} );
-			await editLink.click();
+			// Scope to the row-actions Edit anchor (span.edit > a) so we don't
+			// also match the title column's "Edit" aria-labelled link.
+			await row.locator( 'span.edit a' ).click();
 
 			await page
 				.locator(
@@ -179,9 +177,9 @@ test.describe(
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
 			await expect( row ).toHaveCount( 1 );
-			await row
-				.getByRole( 'link', { name: 'Edit', exact: true } )
-				.click();
+			// Scope to the row-actions Edit anchor (span.edit > a) so we don't
+			// also match the title column's "Edit" aria-labelled link.
+			await row.locator( 'span.edit a' ).click();
 
 			const options = await page
 				.locator(
@@ -218,9 +216,9 @@ test.describe(
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
 			await expect( row ).toHaveCount( 1 );
-			await row
-				.getByRole( 'link', { name: 'Edit', exact: true } )
-				.click();
+			// Scope to the row-actions Edit anchor (span.edit > a) so we don't
+			// also match the title column's "Edit" aria-labelled link.
+			await row.locator( 'span.edit a' ).click();
 
 			await page
 				.locator(
