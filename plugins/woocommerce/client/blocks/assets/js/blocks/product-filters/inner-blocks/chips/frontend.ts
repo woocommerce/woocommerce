@@ -14,7 +14,7 @@ type ChipsContext = {
 };
 
 type ParentItemContext = {
-	item?: DerivedSelectableItem & { index?: number };
+	item?: DerivedSelectableItem;
 };
 
 type ChipsStore = {
@@ -39,9 +39,7 @@ const { state }: ChipsStore = store< ChipsStore >(
 				const parentCtx =
 					getContext< ParentItemContext >( storeNamespace );
 				if ( ! parentCtx.item ) return false;
-				const { index } = parentCtx.item;
-				if ( typeof index !== 'number' ) return false;
-				return index >= displayLimit;
+				return parentCtx.item.index >= displayLimit;
 			},
 		},
 		actions: {

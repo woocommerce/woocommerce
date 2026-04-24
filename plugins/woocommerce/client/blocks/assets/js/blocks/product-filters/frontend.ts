@@ -8,22 +8,30 @@ import * as iAPI from '@wordpress/interactivity';
  */
 import { decodeHtmlEntities } from '../../utils/html-entities';
 import type { SelectableItemsParentStore } from '../../types/type-defs/selectable-items';
+import type {
+	ActiveFilterItem,
+	FilterItemFields,
+	FilterOptionItem,
+	ProductFiltersContext,
+} from './types';
+
+export type { ActiveFilterItem, ProductFiltersContext };
 
 const { getContext, store, getServerContext, getConfig } = iAPI;
 
 const BLOCK_NAME = 'woocommerce/product-filters';
 
-function selectFilter( item: FilterItem ) {
+function selectFilter( item: FilterOptionItem ) {
 	const context = getContext< ProductFiltersContext >();
-	const newActiveFilter = {
+	const label = ( item.ariaLabel ?? item.label ) as string;
+	const newActiveFilter: ActiveFilterItem = {
 		value: item.value,
-		type: item.type,
-		attributeQueryType: item.attributeQueryType,
-		activeLabel: context.activeLabelTemplate.replace(
-			'{{label}}',
-			item?.ariaLabel || item.label
-		),
+		type: item.type ?? '',
+		activeLabel: context.activeLabelTemplate.replace( '{{label}}', label ),
 	};
+	if ( item.attributeQueryType ) {
+		newActiveFilter.attributeQueryType = item.attributeQueryType;
+	}
 	const newActiveFilters = context.activeFilters.filter(
 		( activeFilter ) =>
 			! (
@@ -37,43 +45,12 @@ function selectFilter( item: FilterItem ) {
 	context.activeFilters = newActiveFilters;
 }
 
-function unselectFilter( item: FilterItem ) {
+function unselectFilter( item: FilterOptionItem ) {
 	actions.removeActiveFiltersBy(
 		( activeFilter ) =>
 			activeFilter.type === item.type && activeFilter.value === item.value
 	);
 }
-
-type FilterItem = {
-	id: string;
-	label: string;
-	ariaLabel?: string;
-	value: string;
-	selected: boolean;
-	count: number;
-	type: string;
-	attributeQueryType?: 'and' | 'or' | undefined;
-	termId?: number;
-	parent?: number;
-	depth?: number;
-};
-
-export type ActiveFilterItem = Pick<
-	FilterItem,
-	'type' | 'value' | 'attributeQueryType'
-> & {
-	activeLabel: string;
-};
-
-export type ProductFiltersContext = {
-	isOverlayOpened: boolean;
-	params: Record< string, string >;
-	activeFilters: ActiveFilterItem[];
-	items?: FilterItem[];
-	item: FilterItem;
-	activeLabelTemplate: string;
-	filterType: string;
-};
 
 const productFiltersStore = {
 	state: {
@@ -269,7 +246,7 @@ export type ProductFiltersStore = typeof productFiltersStore;
 // Compile-time enforcement of the selectable-items parent contract.
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const _productFiltersStoreContract =
-	productFiltersStore satisfies SelectableItemsParentStore;
+	productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
 
 const { state, actions } = store< ProductFiltersStore >(
 	BLOCK_NAME,
