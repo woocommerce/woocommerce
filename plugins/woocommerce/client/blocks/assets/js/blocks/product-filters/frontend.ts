@@ -148,16 +148,14 @@ const productFiltersStore = {
 			const server = getServerContext
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
-			const { activeFilters } =
-				getContext< ProductFiltersContext >();
 			const items = server.items;
 			if ( ! items ) return [];
-			return items.map( ( item ) => ( {
+			return items.map( ( item, index ) => ( {
 				...item,
-				selected: activeFilters.some(
+				index,
+				selected: state.activeFilters.some(
 					( filter ) =>
-						filter.type === item.type &&
-						filter.value === item.value
+						filter.type === item.type && filter.value === item.value
 				),
 			} ) );
 		},
@@ -196,19 +194,17 @@ const productFiltersStore = {
 				( item ) => ! callback( item )
 			);
 		},
-		toggle: ( itemArg?: unknown ) => {
+		toggle: () => {
 			const context = getContext< ProductFiltersContext >();
-			const targetItem =
-				( itemArg as FilterItem | undefined ) ?? context.item;
-			if ( ! targetItem ) return;
+			const { item } = context;
+			if ( ! item ) return;
 			const isSelected = context.activeFilters.some(
-				( f ) =>
-					f.type === targetItem.type && f.value === targetItem.value
+				( f ) => f.type === item.type && f.value === item.value
 			);
 			if ( isSelected ) {
-				unselectFilter( targetItem );
+				unselectFilter( item );
 			} else {
-				selectFilter( targetItem );
+				selectFilter( item );
 			}
 			actions.navigate();
 		},

@@ -52,7 +52,6 @@ final class ProductFilterChips extends AbstractBlock {
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filter-chips',
-			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'data-wp-context'     => wp_json_encode(
 				array(
 					'storeNamespace' => $store_namespace,
@@ -78,9 +77,45 @@ final class ProductFilterChips extends AbstractBlock {
 				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
-				<div class="wc-block-product-filter-chips__items">
+				<div
+					class="wc-block-product-filter-chips__items"
+					data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
+				>
+					<?php
+					$visible_items = array_slice( $items, 0, $display_limit, true );
+					foreach ( $visible_items as $index => $item ) :
+						$context_item = array_merge( $item, array( 'index' => $index ) );
+						?>
+						<button
+							class="wc-block-product-filter-chips__item"
+							type="button"
+							role="checkbox"
+							id="<?php echo esc_attr( $item['id'] ); ?>"
+							<?php if ( ! empty( $item['ariaLabel'] ) ) : ?>
+								aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
+							<?php endif; ?>
+							value="<?php echo esc_attr( $item['value'] ); ?>"
+							aria-checked="<?php echo ! empty( $item['selected'] ) ? 'true' : 'false'; ?>"
+							data-wp-each-child
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $context_item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							data-wp-bind--aria-checked="context.item.selected"
+							data-wp-bind--hidden="woocommerce/product-filter-chips::state.itemHidden"
+							data-wp-on--click="actions.toggle"
+						>
+							<span class="wc-block-product-filter-chips__label">
+								<span class="wc-block-product-filter-chips__text">
+									<?php echo esc_html( $item['label'] ); ?>
+								</span>
+								<?php if ( isset( $item['count'] ) ) : ?>
+									<span class="wc-block-product-filter-chips__count">
+										(<?php echo esc_html( $item['count'] ); ?>)
+									</span>
+								<?php endif; ?>
+							</span>
+						</button>
+					<?php endforeach; ?>
 					<template
-						data-wp-each--item="state.items"
+						data-wp-each--item="state.selectableItems"
 						data-wp-each-key="context.item.id"
 					>
 						<button
@@ -91,7 +126,7 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-bind--aria-label="context.item.ariaLabel"
 							data-wp-bind--value="context.item.value"
 							data-wp-bind--aria-checked="context.item.selected"
-							data-wp-bind--hidden="context.item.hidden"
+							data-wp-bind--hidden="woocommerce/product-filter-chips::state.itemHidden"
 							data-wp-on--click="actions.toggle"
 						>
 							<span class="wc-block-product-filter-chips__label">
@@ -108,42 +143,6 @@ final class ProductFilterChips extends AbstractBlock {
 							</span>
 						</button>
 					</template>
-					<?php
-					$visible_items = array_slice( $items, 0, $display_limit, true );
-					foreach ( $visible_items as $item ) :
-						$context_item = array_merge(
-							$item,
-							array( 'hidden' => false )
-						);
-						?>
-						<button
-							class="wc-block-product-filter-chips__item"
-							type="button"
-							role="checkbox"
-							id="<?php echo esc_attr( $item['id'] ); ?>"
-							<?php if ( ! empty( $item['ariaLabel'] ) ) : ?>
-								aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"
-							<?php endif; ?>
-							value="<?php echo esc_attr( $item['value'] ); ?>"
-							aria-checked="<?php echo ! empty( $item['selected'] ) ? 'true' : 'false'; ?>"
-							data-wp-each-child
-							<?php echo wp_interactivity_data_wp_context( array( 'item' => $context_item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							data-wp-bind--aria-checked="context.item.selected"
-							data-wp-bind--hidden="context.item.hidden"
-							data-wp-on--click="actions.toggle"
-						>
-							<span class="wc-block-product-filter-chips__label">
-								<span class="wc-block-product-filter-chips__text">
-									<?php echo esc_html( $item['label'] ); ?>
-								</span>
-								<?php if ( isset( $item['count'] ) ) : ?>
-									<span class="wc-block-product-filter-chips__count">
-										(<?php echo esc_html( $item['count'] ); ?>)
-									</span>
-								<?php endif; ?>
-							</span>
-						</button>
-					<?php endforeach; ?>
 				</div>
 				<?php if ( $has_more_items ) : ?>
 					<button

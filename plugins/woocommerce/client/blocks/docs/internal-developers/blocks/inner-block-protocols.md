@@ -48,9 +48,9 @@ All three protocols follow these rules:
 - **Fixed action & getter names** (not configurable via context fields) — inner blocks hardcode them
 - **TS contract interface** (`*ParentStore`) — parents assert conformance via `satisfies`
 - **Items-carrying contexts** (`selectableItems`, `removableItems`) — parent exposes items via a protocol-named getter (`state.selectableItems`, `state.removableItems`). Generic `state.items` is intentionally avoided so multiple protocols can coexist on the same store namespace without collision
-- **Inner store mirrors parent via dynamic `storeNamespace`** — inner block's own store exposes `state.items` and `actions.toggle`/`remove` that forward to `store(storeNamespace).state.<protocol>Items` / `actions.*`, passing `getContext().item` explicitly when needed. All template directives resolve in the inner namespace, keeping a single `data-wp-interactive` scope (required for `data-wp-each` hydration to work)
+- **Nested `data-wp-interactive`** — inner blocks keep an outer scope under their own namespace (show-more and other presentational state) and nest an inner region under the parent namespace for `data-wp-each` + selection bindings. Presentational bindings on iterated items use cross-namespace `::` syntax back to the inner store (e.g. `data-wp-bind--hidden="<own-ns>::state.itemHidden"`). Inner store reads iteration context via `getContext(storeNamespace)` — no hardcoded parent reference
 - **SSR fallback via `data-wp-each-child`** — PHP renders the initially visible items (first `displayLimit`) once with `data-wp-each-child`, each carrying its own `data-wp-context` + live bindings so hydration wires them up. The template handles the remaining items client-side
-- **Inner block owns show-more** — default `displayLimit = 15`. Inner block derives per-item `hidden` in its `state.items` wrapper and renders the show-more button. Parent never knows about show-more
+- **Inner block owns show-more** — default `displayLimit = 15`. Inner block exposes `state.itemHidden` (reads iteration `context.item.index` via cross-namespace `getContext(storeNamespace)`) and renders the show-more button. Parent never knows about show-more
 
 ## Enforcement via TypeScript `satisfies`
 
@@ -174,12 +174,12 @@ The store registered under `storeNamespace` MUST expose:
 
 | Name | Kind | Contract |
 |------|------|----------|
-| `state.selectableItems` | getter | Returns iterable of items with `selected: boolean` derived. Items come from parent's own context (`getContext().items`). Reactive — re-evaluates on SSOT changes. |
+| `state.selectableItems` | getter | Returns iterable of items with `selected: boolean` and `index: number` derived. Items come from `getServerContext().items` (so they refresh after navigation) merged with the client SSOT (`activeFilters`). Reactive — re-evaluates when SSOT changes. |
 | `actions.toggle` | action | Toggles selection for the target item. Accepts an optional `item` argument (used when an inner block proxies the call via its own store); when omitted, falls back to `getContext().item`. Mutates parent's SSOT (e.g. `activeFilters`). |
 
 Fixed names (not configurable). The getter is `selectableItems` (not `items`) to avoid colliding with other protocols (`removableItems`, etc.) when multiple protocols live on the same store namespace.
 
-Inner blocks do NOT bind this getter directly. They expose a local `state.items` that proxies the parent via `store(storeNamespace).state.selectableItems`, and iterate via `data-wp-each--item="state.items"` under the inner block's own namespace. See _Inner Block Own Store_ below.
+Inner blocks iterate this getter directly via `data-wp-each--item="state.selectableItems"` inside a region that nests `data-wp-interactive="<parent-ns>"` (so `context.item` is set under the parent namespace, matching where `actions.toggle` and `context.item.selected` expect it). See _Inner Block Own Store_ below.
 
 Enforcement via TypeScript contract:
 
@@ -198,9 +198,9 @@ myStore satisfies SelectableItemsParentStore;
 ## Selection State Model
 
 - **SSOT** lives in parent's domain state (e.g. `context.activeFilters` for filters).
-- **Items rendered via `data-wp-each`** iterating the inner block's `state.items` (which wraps `parent.state.selectableItems` and adds inner-block-local fields like `hidden`). PHP `foreach` with `data-wp-each-child` provides an SSR fallback for the items visible on first paint (first `displayLimit`); the rest are rendered client-side via the template.
+- **Items rendered via `data-wp-each`** iterating the parent's `state.selectableItems` inside a nested-namespace region. PHP `foreach` with `data-wp-each-child` + per-item `data-wp-context` (including `index`) provides an SSR fallback for the items visible on first paint (first `displayLimit`); the rest are rendered client-side via the template.
 - **`item.selected`** on raw items (in `getContext().items`) is only a PHP SSR hint. Parent's `state.selectableItems` re-derives `selected` from SSOT for the live binding source.
-- **`actions.toggle`** mutates SSOT only. Never touches raw `item.selected`. When invoked via an inner-store proxy, the proxy passes `getContext().item` explicitly.
+- **`actions.toggle`** mutates SSOT only. Never touches raw `item.selected`. It reads `getContext().item` which is set by `data-wp-each` under the parent namespace (the items region switches to the parent namespace precisely so this works).
 
 External mutations (active-filter removal, cross-block sync) flow through automatically: mutate `activeFilters` → `state.selectableItems` re-evaluates → every `context.item.selected` binding updates across all blocks.
 
@@ -267,7 +267,16 @@ export type SelectableItem< T = unknown > = (
 	selected?: boolean;
 	disabled?: boolean;
 	type?: string;
+	labelType?: 'text' | 'stars';
 } & T;
+
+/**
+ * Runtime shape of items yielded by the parent's `state.selectableItems`
+ * getter. Parent derives `selected` from SSOT and `index` from position.
+ */
+export type DerivedSelectableItem< T = unknown > = SelectableItem< T > & {
+	index: number;
+};
 
 export interface SelectableItemsContext< T = unknown > {
 	items: SelectableItem< T >[];
@@ -275,11 +284,21 @@ export interface SelectableItemsContext< T = unknown > {
 	storeNamespace: string;
 	groupLabel?: string;
 	isLoading?: boolean;
+	filterType?: string;
 }
 
 export type SelectableItemsBlockContext< T = unknown > = {
 	'woocommerce/selectableItems': SelectableItemsContext< T >;
 };
+
+export interface SelectableItemsParentStore {
+	state: {
+		selectableItems: readonly DerivedSelectableItem[];
+	};
+	actions: {
+		toggle: () => void;
+	};
+}
 ```
 
 Filter blocks extend with `FilterItemFields` (from `product-filters/types.ts`):
@@ -406,20 +425,22 @@ Inner blocks consume the protocol. They render items using a `data-wp-each` temp
 
 ### Inner Block Own Store
 
-Inner blocks own all UI-facing bindings. The parent never learns about inner-block UI concerns (show-more, per-item visibility, rendering variants). To stay parent-agnostic, the inner store mirrors the parent contract dynamically via `storeNamespace` held in its own `data-wp-context`:
+Inner blocks own presentational state (show-more toggle, per-item visibility, rendering variants). The parent store never learns about inner-block UI concerns. Two patterns are supported depending on how much control the inner block needs over items:
 
-- **`state.items`** (inner) wraps `store(storeNamespace).state.selectableItems` and adds inner-block-local fields. For example, `hidden` is derived from `isExpanded` plus the iteration index provided by `.map((item, index) => ...)`.
-- **`actions.toggle`** (inner) reads `getContext().item` and forwards it to `store(storeNamespace).actions.toggle(item)`.
-- **`state.isExpanded`** / **`actions.showAll`** are purely local.
+**A. Direct (recommended default)** — iterate the parent's `state.selectableItems` via a nested `data-wp-interactive="<parent-ns>"` on the items region. `context.item` is set under the parent namespace, so `actions.toggle` and `context.item.selected` resolve directly. Presentational bindings use cross-namespace `::` back to the inner store. Simplest to reason about; reactive out of the box. Used by `checkbox-list` and `chips`.
 
-Because every directive in the inner block template resolves under the inner namespace, a single `data-wp-interactive` scope is enough — no nested scope switching, no cross-namespace `::` syntax, and hydration works cleanly.
+**B. Mirror** — inner store exposes its own `state.items` that wraps `store(storeNamespace).state.selectableItems` (mapping in extra fields like `hidden`) and its own `actions.toggle` that forwards to the parent. The whole template stays under the inner namespace — no nested scope switching. Choose this when the inner block needs to derive per-iteration data that doesn't belong to the parent contract (custom grouping, pre-sorting, enriched item shapes), or when binding values must resolve without cross-namespace syntax. Cross-store reactivity still works because signals chain through `store(ns).state.x`, but the extra indirection is the trade-off.
 
-Pattern:
+Both patterns share the same outer wrapper and protocol plumbing. The walkthrough below uses pattern **A** (direct):
 
-1. Outer wrapper uses `data-wp-interactive="<own-ns>"` with `data-wp-context='{"storeNamespace":"<parent-ns>","displayLimit":15}'`.
-2. Template iterates the inner store's `state.items`. `data-wp-each` sets `context.item` under the inner namespace.
-3. Bindings read `context.item.selected`, `context.item.hidden`, etc. — fields derived by the inner store's wrapper.
-4. PHP emits a `foreach` SSR fallback for the first `displayLimit` items with `data-wp-each-child` + per-item `data-wp-context`. The remaining items are rendered client-side by the template (hidden by default until show-more is toggled).
+- The **outer wrapper** runs in the inner namespace and carries `data-wp-context` with `storeNamespace` + `displayLimit` so the inner store can read them at runtime.
+- The **items region** nests a `data-wp-interactive="<parent-ns>"` so `data-wp-each--item="state.selectableItems"`, `data-wp-on--change="actions.toggle"`, and `data-wp-bind--checked="context.item.selected"` all resolve in the parent store (no cross-namespace syntax inside the iteration, `context.item` is set under the parent namespace which is what `state.selectableItems` and `actions.toggle` expect).
+- **Presentational bindings** that belong to the inner block use cross-namespace syntax back to the inner store: `data-wp-bind--hidden="<own-ns>::state.itemHidden"`, `data-wp-bind--style="<own-ns>::state.ratingStyle"`.
+- The **show-more button** lives outside the items region — under the inner namespace — and binds `data-wp-on--click="actions.showAll"` + `data-wp-bind--hidden="state.isExpanded"` directly.
+
+The inner store derives per-item fields from the iteration `context.item` provided by `data-wp-each`. Since that context is in the parent namespace, the inner getter uses dynamic `getContext(storeNamespace)` — no hardcoded parent reference, keeping the inner block reusable against any parent store.
+
+If pattern **B** (mirror) is chosen, the items region stays under the inner namespace (no nested `data-wp-interactive`), template iterates `data-wp-each--item="state.items"` (inner store), bindings read `context.item.selected` / `context.item.hidden` (fields added by the inner mirror), and the inner store defines `actions.toggle` that forwards to `store(storeNamespace).actions.toggle(item)`. Parent contract `actions.toggle` can accept an optional `item` argument when it expects to be invoked via a mirror. Other sections below stay the same.
 
 ```html
 <div
@@ -427,9 +448,10 @@ Pattern:
   data-wp-context='{"storeNamespace":"woocommerce/product-filters","displayLimit":15}'
 >
   <fieldset>
-    <div class="items">
-      <template data-wp-each--item="state.items" data-wp-each-key="context.item.id">
-        <div data-wp-bind--hidden="context.item.hidden">
+    <!-- Items region: nested into the parent namespace so wp-each + actions resolve to the parent. -->
+    <div data-wp-interactive="woocommerce/product-filters">
+      <template data-wp-each--item="state.selectableItems" data-wp-each-key="context.item.id">
+        <div data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden">
           <input
             data-wp-bind--checked="context.item.selected"
             data-wp-on--change="actions.toggle"
@@ -437,9 +459,12 @@ Pattern:
           <span data-wp-text="context.item.label"></span>
         </div>
       </template>
-      <!-- foreach SSR fallback below: first N items only, with data-wp-each-child -->
+      <!-- foreach SSR fallback below: first N items only, with data-wp-each-child + per-item data-wp-context including `index`. -->
     </div>
-    <button data-wp-on--click="actions.showAll" data-wp-bind--hidden="state.isExpanded">
+    <button
+      data-wp-on--click="actions.showAll"
+      data-wp-bind--hidden="state.isExpanded"
+    >
       Show more
     </button>
   </fieldset>
@@ -449,53 +474,46 @@ Pattern:
 ```typescript
 // frontend.ts
 import { store, getContext } from '@wordpress/interactivity';
-import type {
-    SelectableItem,
-    SelectableItemsParentStore,
-} from '../../../../types/type-defs/selectable-items';
+import type { DerivedSelectableItem } from '../../../../types/type-defs/selectable-items';
 
 type CheckboxListContext = {
     storeNamespace: string;
     displayLimit: number;
-    item?: SelectableItem;
+};
+
+type ParentItemContext = {
+    item?: DerivedSelectableItem;
 };
 
 const { state } = store( 'woocommerce/product-filter-checkbox-list', {
     state: {
         isExpanded: false,
-        get items() {
+        get itemHidden(): boolean {
+            if ( state.isExpanded ) return false;
             const { storeNamespace, displayLimit } =
                 getContext< CheckboxListContext >();
-            return store< SelectableItemsParentStore >(
-                storeNamespace
-            ).state.selectableItems.map( ( item, index ) => ( {
-                ...item,
-                hidden:
-                    ! state.isExpanded && index >= displayLimit,
-            } ) );
+            // Cross-namespace context read: pulls the wp-each iteration
+            // `context.item` (stored under the parent ns) without
+            // hardcoding the parent namespace.
+            const parentCtx =
+                getContext< ParentItemContext >( storeNamespace );
+            if ( ! parentCtx.item ) return false;
+            return parentCtx.item.index >= displayLimit;
         },
     },
     actions: {
         showAll() {
             state.isExpanded = true;
         },
-        toggle() {
-            const { storeNamespace, item } =
-                getContext< CheckboxListContext >();
-            if ( ! item ) return;
-            store< SelectableItemsParentStore >(
-                storeNamespace
-            ).actions.toggle( item );
-        },
     },
 }, { lock: true } );
 ```
 
-**Why single-scope:** the original design nested `data-wp-interactive` (inner → parent → inner) to resolve `state.selectableItems` in the parent namespace. That broke `data-wp-each` hydration in practice. Mirroring the parent contract through the inner store lets every directive resolve in one namespace, which preserves wp-each reconciliation and keeps the SSR items interactive post-hydration.
+**Why nested namespaces:** `data-wp-each` stores `context.item` under the namespace active at the `<template>` element. Parent's `actions.toggle` and `context.item.selected` resolve under the parent namespace, so the items region must switch to it. Presentational bindings (`itemHidden`, `ratingStyle`) live in the inner store and use cross-namespace `::` syntax to read iteration context through `getContext(storeNamespace)`.
 
 **Why protocol-specific getter names (`selectableItems` / `removableItems`):** multiple protocols frequently share the same store namespace (e.g. `woocommerce/product-filters` hosts both the selectable-items store and the active-filters removable-items store). A generic `state.items` name collides across protocols and silently overrides. Protocol-aligned names (`selectableItems`, `removableItems`) make both live on the same store without interference.
 
-**PHP Renderer** — Template for `data-wp-each` plus `foreach` for SSR of the first `displayLimit` items.
+**PHP Renderer** — Template for `data-wp-each` plus `foreach` for SSR of the first `displayLimit` items. Each SSR item carries its `index` in `data-wp-context` so the inner store's `itemHidden` getter can decide visibility on hydration.
 ```php
 protected function render( $attributes, $content, $block ) {
     if ( empty( $block->context['woocommerce/selectableItems'] ) ) {
@@ -507,6 +525,7 @@ protected function render( $attributes, $content, $block ) {
     $store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
     $display_limit   = 15;
     $visible_items   = array_slice( $items, 0, $display_limit, true );
+    $has_more_items  = count( $items ) > $display_limit;
 
     $wrapper_attributes = array(
         'data-wp-interactive' => 'woocommerce/product-filter-checkbox-list',
@@ -520,9 +539,9 @@ protected function render( $attributes, $content, $block ) {
     ?>
     <div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); ?>>
         <fieldset>
-            <div class="items">
-                <template data-wp-each--item="state.items" data-wp-each-key="context.item.id">
-                    <div data-wp-bind--hidden="context.item.hidden">
+            <div data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>">
+                <template data-wp-each--item="state.selectableItems" data-wp-each-key="context.item.id">
+                    <div data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden">
                         <input
                             type="checkbox"
                             data-wp-bind--id="context.item.id"
@@ -533,13 +552,13 @@ protected function render( $attributes, $content, $block ) {
                         <span data-wp-text="context.item.label"></span>
                     </div>
                 </template>
-                <?php foreach ( $visible_items as $item ) :
-                    $context_item = array_merge( $item, array( 'hidden' => false ) );
+                <?php foreach ( $visible_items as $index => $item ) :
+                    $context_item = array_merge( $item, array( 'index' => $index ) );
                     ?>
                     <div
                         data-wp-each-child
                         <?php echo wp_interactivity_data_wp_context( array( 'item' => $context_item ) ); ?>
-                        data-wp-bind--hidden="context.item.hidden"
+                        data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden"
                     >
                         <input
                             type="checkbox"
@@ -553,7 +572,7 @@ protected function render( $attributes, $content, $block ) {
                     </div>
                 <?php endforeach; ?>
             </div>
-            <?php if ( count( $items ) > $display_limit ) : ?>
+            <?php if ( $has_more_items ) : ?>
                 <button
                     data-wp-on--click="actions.showAll"
                     data-wp-bind--hidden="state.isExpanded"
@@ -570,8 +589,8 @@ protected function render( $attributes, $content, $block ) {
 
 Key points:
 - **`data-wp-each` template + `foreach` SSR fallback for first `displayLimit` items** — the template renders the rest client-side, so the initial HTML stays small while the full list is still available post-hydration
-- **Per-item `data-wp-context` on SSR items** — hydration attaches live bindings (`checked`, `hidden`, `toggle`) to the exact DOM wp-each reconciles; without the per-item context the first `displayLimit` items would not be interactive
-- **Single `data-wp-interactive` scope** — everything resolves in the inner namespace; inner store mirrors parent via `storeNamespace`
+- **Per-item `data-wp-context` on SSR items includes `index`** — the inner store's `state.itemHidden` reads it via `getContext(storeNamespace).item.index` to decide visibility; hydration then attaches live bindings (`checked`, `hidden`, `toggle`) to the exact DOM wp-each reconciles
+- **Nested `data-wp-interactive`** — outer wrapper under the inner namespace, items region switches to the parent namespace so wp-each + parent selection bindings resolve there; presentational bindings (`itemHidden`, `ratingStyle`) use cross-namespace `::` back to the inner store
 - **`filterType` discriminator** — inner block can branch rendering (e.g. stars for `'rating'`) without leaking presentation into the parent store
 
 Reference implementation: `ProductFilterCheckboxList.php`, `ProductFilterChips.php`, `checkbox-list/frontend.ts`, `chips/frontend.ts`
