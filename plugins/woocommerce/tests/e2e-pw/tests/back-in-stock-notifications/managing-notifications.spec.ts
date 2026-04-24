@@ -52,6 +52,23 @@ async function signUpAsGuest(
 	await guestContext.close();
 }
 
+/**
+ * Click the notification edit-form "Update" button.
+ *
+ * Scrolling into view first is required on narrow CI viewports where the
+ * product-thumbnail overlay can otherwise intercept the click.
+ */
+async function submitNotificationEditForm(
+	page: import( '@playwright/test' ).Page
+): Promise< void > {
+	const updateButton = page.getByRole( 'button', {
+		name: 'Update',
+		exact: true,
+	} );
+	await updateButton.scrollIntoViewIfNeeded();
+	await updateButton.click();
+}
+
 test.describe(
 	'Back in Stock Notifications — admin management',
 	{ tag: [ tags.SERVICES ] },
@@ -120,14 +137,7 @@ test.describe(
 					'select[name="wc_customer_stock_notification_action"]'
 				)
 				.selectOption( 'send_verification_email' );
-			// Scroll into view so the product-thumbnail overlay on narrow CI
-			// viewports can't intercept the click.
-			const updateButton = page.getByRole( 'button', {
-				name: 'Update',
-				exact: true,
-			} );
-			await updateButton.scrollIntoViewIfNeeded();
-			await updateButton.click();
+			await submitNotificationEditForm( page );
 
 			await expect(
 				page.getByText( `Verification email sent to "${ email }"` )
@@ -135,27 +145,32 @@ test.describe(
 
 			// Assert a second verify email actually landed in the log — the
 			// admin success notice alone would pass even if dispatch regressed.
-			await page.goto(
-				`wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
-					email
-				) }&orderby=timestamp&order=desc`
-			);
-			await expect(
-				page
-					.getByRole( 'row' )
-					.filter( {
-						has: page.getByRole( 'cell', {
-							name: email,
-							exact: true,
-						} ),
-					} )
-					.filter( {
-						has: page.getByRole( 'cell', {
-							name: /Join the "[^"]+" waitlist\./,
-							exact: true,
-						} ),
-					} )
-			).toHaveCount( 2 );
+			// Poll across reloads because Playwright's auto-retry doesn't
+			// refresh the mail-log page and the second email lands
+			// asynchronously via Action Scheduler.
+			const mailLogUrl = `wp-admin/tools.php?page=wpml_plugin_log&search[place]=receiver&search[term]=${ encodeURIComponent(
+				email
+			) }&orderby=timestamp&order=desc`;
+			await expect( async () => {
+				await page.goto( mailLogUrl );
+				await expect(
+					page
+						.getByRole( 'row' )
+						.filter( {
+							has: page.getByRole( 'cell', {
+								name: email,
+								exact: true,
+							} ),
+						} )
+						.filter( {
+							// `exact: true` is a no-op when `name` is a RegExp — Playwright
+							// only applies it to string matchers.
+							has: page.getByRole( 'cell', {
+								name: /Join the "[^"]+" waitlist\./,
+							} ),
+						} )
+				).toHaveCount( 2 );
+			} ).toPass();
 		} );
 
 		test( 'Resend verification is not offered for notifications that are already active', async ( {
@@ -228,14 +243,7 @@ test.describe(
 					'select[name="wc_customer_stock_notification_action"]'
 				)
 				.selectOption( 'cancel_notification' );
-			// Scroll into view so the product-thumbnail overlay on narrow CI
-			// viewports can't intercept the click.
-			const updateButton = page.getByRole( 'button', {
-				name: 'Update',
-				exact: true,
-			} );
-			await updateButton.scrollIntoViewIfNeeded();
-			await updateButton.click();
+			await submitNotificationEditForm( page );
 
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
