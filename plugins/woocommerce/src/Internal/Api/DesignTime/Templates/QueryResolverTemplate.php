@@ -45,18 +45,22 @@ use Automattic\WooCommerce\Internal\Api\Utils;
 // the generated file would fail to compile ("Cannot use ... because the name
 // is already in use").
 $reserved_short_names = array( $command_alias, 'QueryInfoExtractor', 'Utils', 'ResolveInfo', 'Type' );
-$use_statements       = array_values(
+// PHP class-name resolution (including `use`) is case-insensitive, so the
+// collision check has to be too — a caller-supplied `Foo\resolveinfo` would
+// otherwise slip past and fail at compile time of the generated file.
+$reserved_short_names_lower = array_map( 'strtolower', $reserved_short_names );
+$use_statements             = array_values(
 	array_filter(
 		$use_statements,
-		static function ( $use ) use ( $reserved_short_names ) {
-		$as_pos = stripos( $use, ' as ' );
-		if ( false !== $as_pos ) {
-			$short = trim( substr( $use, $as_pos + 4 ) );
-		} else {
-			$sep_pos = strrpos( $use, '\\' );
-			$short   = false !== $sep_pos ? substr( $use, $sep_pos + 1 ) : $use;
-		}
-		return ! in_array( $short, $reserved_short_names, true );
+		static function ( $use ) use ( $reserved_short_names_lower ) {
+			$as_pos = stripos( $use, ' as ' );
+			if ( false !== $as_pos ) {
+				$short = trim( substr( $use, $as_pos + 4 ) );
+			} else {
+				$sep_pos = strrpos( $use, '\\' );
+				$short   = false !== $sep_pos ? substr( $use, $sep_pos + 1 ) : $use;
+			}
+			return ! in_array( strtolower( $short ), $reserved_short_names_lower, true );
 		}
 	)
 );
