@@ -15,6 +15,8 @@ namespace Automattic\WooCommerce\Internal\Api;
  */
 class GraphQLEndpointRegistrar {
 	/**
+	 * Capture the arguments of a single register_graphql_endpoint() call.
+	 *
 	 * @param string   $controller_class_name Fully-qualified name of a concrete GraphQLController subclass.
 	 * @param string   $route_namespace       REST namespace passed to register_rest_route().
 	 * @param string   $route                 REST route path passed to register_rest_route().

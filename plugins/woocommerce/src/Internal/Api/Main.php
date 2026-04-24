@@ -211,6 +211,8 @@ class Main {
 	 * file at the conventional path. Otherwise return the argument unchanged so
 	 * it's used as a class FQCN.
 	 *
+	 * @param string $arg Either a plugin root directory or a controller class FQCN.
+	 *
 	 * @throws \InvalidArgumentException If the argument is a directory but the
 	 *                                   generated controller file is missing or
 	 *                                   doesn't declare a PHP namespace.
@@ -225,17 +227,19 @@ class Main {
 			throw new \InvalidArgumentException(
 				sprintf(
 					'Expected a generated GraphQL controller at %s, but the file does not exist. Run the plugin\'s API build script first, or pass an explicit controller class name.',
-					$controller_file
+					esc_html( $controller_file )
 				)
 			);
 		}
 
 		// The generated controller always declares its namespace near the top
-		// of the file; reading the first few KB is more than enough.
+		// of the file; reading the first few KB is more than enough. Reading a
+		// local file — not a URL — so wp_remote_get() does not apply here.
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$head = file_get_contents( $controller_file, false, null, 0, 4096 );
 		if ( false === $head || ! preg_match( '/^\s*namespace\s+([^;\s]+)\s*;/m', $head, $matches ) ) {
 			throw new \InvalidArgumentException(
-				sprintf( 'Could not determine the PHP namespace of the controller at %s.', $controller_file )
+				sprintf( 'Could not determine the PHP namespace of the controller at %s.', esc_html( $controller_file ) )
 			);
 		}
 
@@ -243,6 +247,10 @@ class Main {
 	}
 
 	/**
+	 * Assert that a class name resolves to a concrete GraphQLController subclass.
+	 *
+	 * @param string $controller_class_name Fully-qualified name of the class to validate.
+	 *
 	 * @throws \InvalidArgumentException If $controller_class_name does not extend GraphQLController.
 	 */
 	private static function assert_is_controller_subclass( string $controller_class_name ): void {
@@ -250,8 +258,8 @@ class Main {
 			throw new \InvalidArgumentException(
 				sprintf(
 					'Class "%s" must extend %s.',
-					$controller_class_name,
-					GraphQLController::class
+					esc_html( $controller_class_name ),
+					esc_html( GraphQLController::class )
 				)
 			);
 		}
