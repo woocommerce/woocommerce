@@ -130,4 +130,25 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		$updated_notification = Factory::get_notification( $id );
 		$this->assertEquals( NotificationStatus::PENDING, $updated_notification->get_status() );
 	}
+
+	/**
+	 * An empty \$action is a caller-side bug (missing argument) that must
+	 * short-circuit before the switch; asserted separately from the
+	 * unknown-token branch, which takes the `default:` debug-log path.
+	 */
+	public function test_process_action_with_empty_action_early_returns() {
+		$product      = WC_Helper_Product::create_simple_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_status( NotificationStatus::PENDING );
+		$notification->set_user_email( 'test@example.com' );
+		$notification->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( 'test' ) );
+		$id = $notification->save();
+
+		$controller = new EmailActionController();
+		$controller->validate_and_maybe_process_request( $id, 'test', '' );
+
+		$updated_notification = Factory::get_notification( $id );
+		$this->assertEquals( NotificationStatus::PENDING, $updated_notification->get_status() );
+	}
 }
