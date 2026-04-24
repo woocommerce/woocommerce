@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix JS TypeError when product excerpt metabox is removed.
