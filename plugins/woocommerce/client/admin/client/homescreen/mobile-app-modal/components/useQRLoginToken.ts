@@ -42,6 +42,8 @@ export const useQRLoginToken = ( {
 	const expiresAtRef = useRef< number >( 0 );
 	const onReadyRef = useRef( onReady );
 	const onErrorRef = useRef( onError );
+	const isMountedRef = useRef( true );
+	const requestIdRef = useRef( 0 );
 
 	onReadyRef.current = onReady;
 	onErrorRef.current = onError;
@@ -59,6 +61,10 @@ export const useQRLoginToken = ( {
 			expiresAtRef.current = expiresAt;
 
 			const updateRemaining = () => {
+				if ( ! isMountedRef.current ) {
+					return;
+				}
+
 				const remaining = Math.max(
 					0,
 					Math.floor( expiresAtRef.current - Date.now() / 1000 )
@@ -79,6 +85,13 @@ export const useQRLoginToken = ( {
 	);
 
 	const fetchToken = useCallback( async () => {
+		const requestId = requestIdRef.current + 1;
+		requestIdRef.current = requestId;
+
+		clearTimer();
+		expiresAtRef.current = 0;
+		setQrUrl( null );
+		setSecondsRemaining( 0 );
 		setState( QRLoginTokenStates.LOADING );
 		setErrorMessage( null );
 
@@ -87,6 +100,13 @@ export const useQRLoginToken = ( {
 				path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-token`,
 				method: 'POST',
 			} );
+
+			if (
+				! isMountedRef.current ||
+				requestId !== requestIdRef.current
+			) {
+				return;
+			}
 
 			if (
 				! response ||
@@ -108,6 +128,18 @@ export const useQRLoginToken = ( {
 			startCountdown( response.expires_at );
 			onReadyRef.current?.();
 		} catch ( error: unknown ) {
+			if (
+				! isMountedRef.current ||
+				requestId !== requestIdRef.current
+			) {
+				return;
+			}
+
+			clearTimer();
+			expiresAtRef.current = 0;
+			setQrUrl( null );
+			setSecondsRemaining( 0 );
+
 			const err = error as { code?: string; message?: string };
 			const errorCode = err.code || 'unknown_error';
 			let nextErrorMessage: string;
@@ -153,11 +185,17 @@ export const useQRLoginToken = ( {
 			setState( QRLoginTokenStates.ERROR );
 			onErrorRef.current?.( errorCode );
 		}
-	}, [ startCountdown ] );
+	}, [ clearTimer, startCountdown ] );
 
 	// Cleanup timer on unmount.
 	useEffect( () => {
-		return () => clearTimer();
+		isMountedRef.current = true;
+
+		return () => {
+			isMountedRef.current = false;
+			requestIdRef.current += 1;
+			clearTimer();
+		};
 	}, [ clearTimer ] );
 
 	return {

@@ -268,16 +268,59 @@ describe( 'useQRLoginToken', () => {
 		expect( mockApiFetch ).toHaveBeenCalledTimes( 2 );
 	} );
 
-	it( 'does not set state after unmount during LOADING', async () => {
+	it( 'failed refetch clears the previous token and keeps the error visible', async () => {
+		const firstResponse = buildResponse( 5 );
+		mockApiFetch.mockResolvedValueOnce( firstResponse );
+
+		const { result } = renderHook( () => useQRLoginToken() );
+
+		await act( async () => {
+			await result.current.fetchToken();
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.READY );
+		expect( result.current.qrUrl ).toBe( firstResponse.qr_url );
+		expect( result.current.secondsRemaining ).toBe( 5 );
+
+		mockApiFetch.mockRejectedValueOnce( {
+			code: 'rate_limit_exceeded',
+			message: 'Too many requests',
+		} );
+
+		let refetchPromise: Promise< void > | undefined;
+		act( () => {
+			refetchPromise = result.current.refreshToken();
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.LOADING );
+		expect( result.current.qrUrl ).toBeNull();
+		expect( result.current.secondsRemaining ).toBe( 0 );
+
+		await act( async () => {
+			await refetchPromise;
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.ERROR );
+		expect( result.current.qrUrl ).toBeNull();
+		expect( result.current.secondsRemaining ).toBe( 0 );
+		expect( result.current.errorMessage ).toMatch(
+			/Too many QR login requests/i
+		);
+
+		act( () => {
+			jest.advanceTimersByTime( 5000 );
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.ERROR );
+	} );
+
+	it( 'does not start a countdown after unmount during LOADING', async () => {
 		let resolveFetch: ( value: unknown ) => void = () => undefined;
 		const pendingResponse = new Promise( ( resolve ) => {
 			resolveFetch = resolve;
 		} );
 		mockApiFetch.mockReturnValueOnce( pendingResponse );
-
-		const warnSpy = jest
-			.spyOn( console, 'error' )
-			.mockImplementation( () => undefined );
+		const setIntervalSpy = jest.spyOn( global, 'setInterval' );
 
 		const { result, unmount } = renderHook( () => useQRLoginToken() );
 
@@ -297,16 +340,9 @@ describe( 'useQRLoginToken', () => {
 			await pendingResponse;
 		} );
 
-		const unmountedWarnings = warnSpy.mock.calls.filter( ( args ) =>
-			args.some(
-				( arg ) =>
-					typeof arg === 'string' &&
-					arg.includes( 'unmounted component' )
-			)
-		);
-		expect( unmountedWarnings ).toHaveLength( 0 );
+		expect( setIntervalSpy ).not.toHaveBeenCalled();
 
-		warnSpy.mockRestore();
+		setIntervalSpy.mockRestore();
 	} );
 
 	it( 'cleans up the countdown interval on unmount', async () => {
