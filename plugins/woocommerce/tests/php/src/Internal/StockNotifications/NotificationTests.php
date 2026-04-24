@@ -220,7 +220,7 @@ class NotificationTests extends \WC_Unit_Test_Case {
 		$notification->save();
 
 		// Save a custom key.
-		$key = time() - Config::get_verification_expiration_time_threshold() - 1 . ':' . wp_fast_hash( 'test' );
+		$key = ( time() - Config::get_verification_expiration_time_threshold() - 1 ) . ':' . wp_fast_hash( 'test' );
 		$notification->update_meta_data( 'verification_action_key', $key );
 		$notification->save();
 

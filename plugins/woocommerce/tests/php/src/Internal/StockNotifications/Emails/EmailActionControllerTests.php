@@ -103,11 +103,12 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	public function test_process_action_with_missing_notification_id_handles_gracefully() {
 		$controller = new EmailActionController();
 
-		// Should not throw or emit a notice — the guard in
-		// validate_and_maybe_process_request catches the empty id.
-		$controller->validate_and_maybe_process_request( 0, 'any-key', 'verify' );
+		// The guard in validate_and_maybe_process_request short-circuits when
+		// the id is 0; no side-effect to assert, so suppress PHPUnit's risky
+		// warning without a no-op assertion.
+		$this->expectNotToPerformAssertions();
 
-		$this->assertTrue( true );
+		$controller->validate_and_maybe_process_request( 0, 'any-key', 'verify' );
 	}
 
 	/**

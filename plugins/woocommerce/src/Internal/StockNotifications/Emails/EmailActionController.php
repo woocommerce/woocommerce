@@ -73,6 +73,14 @@ class EmailActionController {
 			return;
 		}
 
+		// An empty $action means the caller omitted the routing argument — a
+		// programming error, not a mis-routed email. Return silently so the
+		// debug branch in the switch is reserved for genuinely-unknown
+		// tokens arriving in the wild.
+		if ( '' === $action ) {
+			return;
+		}
+
 		$notification = $this->get_notification_to_be_processed( $notification_id );
 
 		if ( ! $notification ) {
@@ -137,6 +145,7 @@ class EmailActionController {
 			 */
 			$url = apply_filters( 'woocommerce_customer_stock_notification_verified_redirect_url', get_permalink( wc_get_page_id( 'shop' ) ) );
 			wp_safe_redirect( $url );
+			exit;
 		}
 	}
 
@@ -174,6 +183,7 @@ class EmailActionController {
 			 */
 			$url = apply_filters( 'woocommerce_customer_stock_notification_unsubscribe_redirect_url', get_permalink( wc_get_page_id( 'shop' ) ) );
 			wp_safe_redirect( $url );
+			exit;
 		}
 	}
 
