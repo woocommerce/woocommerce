@@ -25,7 +25,7 @@ class WC_Payment_Gateways {
 	/**
 	 * Payment gateway classes.
 	 *
-	 * @var array
+	 * @var WC_Payment_Gateway[]
 	 */
 	public $payment_gateways = array();
 
@@ -319,13 +319,13 @@ class WC_Payment_Gateways {
 	 * may try to rely on the existence of a WC session - a valid thing to do,
 	 * and cause fatal errors when the session is not available.
 	 *
-	 * @return array The available payment gateways.
+	 * @return WC_Payment_Gateway[] The available payment gateways.
 	 */
 	public function get_available_payment_gateways() {
 		$_available_gateways = array();
 
 		foreach ( $this->payment_gateways as $gateway ) {
-			if ( $gateway->is_available() ) {
+			if ( 'yes' === $gateway->enabled && $gateway->is_available() ) {
 				if ( ! is_add_payment_method_page() ) {
 					$_available_gateways[ $gateway->id ] = $gateway;
 				} elseif ( $gateway->supports( PaymentGatewayFeature::ADD_PAYMENT_METHOD ) || $gateway->supports( PaymentGatewayFeature::TOKENIZATION ) ) {
