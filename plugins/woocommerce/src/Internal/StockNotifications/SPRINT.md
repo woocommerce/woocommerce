@@ -11,10 +11,10 @@ Things that must happen before this branch — or any descendant feature work �
 - [ ] Delete `plugins/woocommerce/src/Internal/StockNotifications/CODERABBIT-TRIAGE.md`
 - [ ] Delete `plugins/woocommerce/src/Internal/StockNotifications/CODERABBIT-TRIAGE-RAW.md`
 - [ ] Delete `plugins/woocommerce/src/Internal/StockNotifications/SPRINT.md` (this file)
-- [ ] Remove or promote the `WOOCOMMERCE_BIS_ALPHA_ENABLED` gate in `plugins/woocommerce/includes/class-woocommerce.php:381` (currently alpha-only; at GA either ship unconditionally or put behind a proper feature flag).
+- [ ] Remove or promote the `WOOCOMMERCE_BIS_ALPHA_ENABLED` gate in `WC_Woocommerce::init_hooks()` (currently alpha-only — at GA either ship unconditionally or put behind a proper feature flag).
 - [ ] Decide the migration story for any real alpha-site data (likely none, but confirm). Meta-key split in this PR already invalidated in-flight alpha emails — call this out in release notes if any alpha adopters exist.
 - [ ] Audit for remaining CodeRabbit Should-fix / Nice-to-have items that should ship with GA (see [`CODERABBIT-TRIAGE.md`](./CODERABBIT-TRIAGE.md)).
-- [ ] Out-of-BIS-scope but blocking the min-WP narrative: clean up `function_exists( 'wp_fast_hash' )` shims that still exist in `plugins/woocommerce/includes/wc-core-functions.php:1274` and `plugins/woocommerce/includes/class-wc-session-handler.php:311-336`. Not BIS work, but someone should file a follow-up so these don't linger.
+- [ ] Out-of-BIS-scope but blocking the min-WP narrative: clean up the `function_exists( 'wp_fast_hash' )` shims still present in `wc-core-functions.php` and `WC_Session_Handler`. Not BIS work, but someone should file a follow-up so these don't linger.
 - [ ] **Playwright e2e coverage.** The alpha ships with zero browser-level tests. Tracked in [RSM-437](https://linear.app/a8c/issue/RSM-437/refine-e2e-tests-for-updated-dom) — port PRs #53641 and #55836 to the current alpha (option slug + shortcode + selector updates). Scheduled Days 9-10 of the sprint. Full context in the decision log below.
 
 ## Decisions log
@@ -36,7 +36,7 @@ Chronological, one entry per non-obvious choice. Format: date — decision, then
 
 **Blast radius:** Any verification or unsubscribe URL dispatched from an alpha site before this change no longer matches. Acceptable because the feature is alpha-only behind `WOOCOMMERCE_BIS_ALPHA_ENABLED`; if there are any real alpha adopters they'd need to re-sign up.
 
-### 2026-04-22 — Defer `NotificationEditPage.php:107` verification-email-send bug to RSM-438
+### 2026-04-22 — Defer `NotificationEditPage::maybe_process_action()` verification-email-send bug to RSM-438
 
 CodeRabbit flagged that the admin `send_verification_email` case shows a "Verification email sent to …" success notice without actually dispatching an email. This is one of the 9 Must-fix items from the triage.
 
@@ -96,7 +96,7 @@ Dev port override (8898) does work from `.wp-env.override.json` — only `testsP
 
 Things explicitly parked for later. Cross-reference before starting sibling work.
 
-- **RSM-438** — verification-email wiring (double-opt-in flow). Absorbs CodeRabbit Must-fix #2 (`NotificationEditPage.php:107` verification-email-send bug) and the "`get_option_or_transient()` fatal" investigation (already downgraded to noise in triage but worth re-confirming during wiring).
+- **RSM-438** — verification-email wiring (double-opt-in flow). Absorbs CodeRabbit Must-fix #2 (the `NotificationEditPage::maybe_process_action()` verification-email-send bug) and the "`get_option_or_transient()` fatal" investigation (already downgraded to noise in triage but worth re-confirming during wiring).
 - **11 Should-fix + 16 Nice-to-have CodeRabbit items** remain unresolved. Priority and ownership not yet assigned — see [`CODERABBIT-TRIAGE.md`](./CODERABBIT-TRIAGE.md) for the list.
 - **`is_email()` guard + batching** in `PrivacyEraser::erase_notification_data()` — half-addressed in this PR (null guard + time normalisation); the rest remains Should-fix.
 - **`wp_fast_hash` shim cleanup in core** — out of BIS scope; covered in the pre-ship checklist above.

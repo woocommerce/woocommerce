@@ -1,5 +1,7 @@
 # BIS Alpha — CodeRabbit Triage
 
+> **Pre-GA scratchpad.** This doc is intentionally shipped inside `src/Internal/` to keep triage state close to the code it audits during the alpha sprint. It's listed in the SPRINT.md pre-GA checklist for deletion before the feature ships unconditionally — do not treat it as reference documentation.
+
 Source: PR #59947 (merged 2025-08-20). 52 CodeRabbit line comments.
 Generated: 2026-04-22 via automated triage against current trunk (branch `feature/back-in-stock-notifications`).
 
@@ -94,7 +96,7 @@ Of the 11 items flagged in the handoff as "already identified must-fixes", this 
 
 ## Uncertainty notes
 
-No items required a "can't verify" placeholder. Each of the 52 comments was read against the current code at the exact line range it pointed to. The only judgement calls are:
+Every one of the 52 comments was verified against the current code at the line range it pointed to, so no entry above is a "can't-verify" placeholder. Two entries are worth calling out explicitly:
 
-- HasherHelper (Should-fix): whether to treat a pre-WP-6.8 compat shim as shippable depends on the min-WP bump decision, which is a team call rather than a code call.
-- PrivacyEraser `current_time('mysql')` vs `time()` (Should-fix): this is not what CodeRabbit flagged directly, but it surfaced while verifying their error-handling comment. Including under the same entry for convenience.
+- **HasherHelper (Should-fix).** Shippability depends on the min-WP bump decision (pre-WP-6.8 compat shim), which is a team call rather than a code call.
+- **PrivacyEraser `current_time('mysql')` vs `time()` (Should-fix).** CodeRabbit didn't flag this directly; it surfaced while verifying their error-handling comment. Filed under the same entry for convenience rather than as a separate row.
