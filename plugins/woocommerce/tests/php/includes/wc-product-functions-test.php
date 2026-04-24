@@ -371,6 +371,174 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Action Scheduler events are scheduled when sale date meta is written directly via update_post_meta.
+	 */
+	public function test_wc_schedule_product_sale_events_on_direct_meta_write() {
+		$future_start = time() + 3600;
+		$future_end   = time() + 86400;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->save();
+
+		// Verify no sale events are scheduled yet.
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'No start action should be scheduled before meta write'
+		);
+
+		// Write sale date meta directly, bypassing WooCommerce CRUD.
+		update_post_meta( $product->get_id(), '_sale_price_dates_from', $future_start );
+		update_post_meta( $product->get_id(), '_sale_price_dates_to', $future_end );
+
+		// Check that AS actions were scheduled via the meta hook.
+		$start_action = as_next_scheduled_action(
+			'wc_product_start_scheduled_sale',
+			array( 'product_id' => $product->get_id() ),
+			'woocommerce-sales'
+		);
+		$end_action   = as_next_scheduled_action(
+			'wc_product_end_scheduled_sale',
+			array( 'product_id' => $product->get_id() ),
+			'woocommerce-sales'
+		);
+
+		$this->assertNotFalse( $start_action, 'Start sale action should be scheduled after direct meta write' );
+		$this->assertNotFalse( $end_action, 'End sale action should be scheduled after direct meta write' );
+	}
+
+	/**
+	 * @testDox Action Scheduler events are scheduled for product variations when sale date meta is written directly.
+	 */
+	public function test_wc_schedule_product_sale_events_on_direct_meta_write_for_variation() {
+		$future_start = time() + 3600;
+		$future_end   = time() + 86400;
+
+		$product      = WC_Helper_Product::create_variation_product();
+		$variations   = $product->get_children();
+		$variation_id = $variations[0];
+
+		$variation = wc_get_product( $variation_id );
+		$variation->set_sale_price( 5 );
+		$variation->save();
+
+		// Write sale date meta directly on the variation.
+		update_post_meta( $variation_id, '_sale_price_dates_from', $future_start );
+		update_post_meta( $variation_id, '_sale_price_dates_to', $future_end );
+
+		$start_action = as_next_scheduled_action(
+			'wc_product_start_scheduled_sale',
+			array( 'product_id' => $variation_id ),
+			'woocommerce-sales'
+		);
+
+		$this->assertNotFalse( $start_action, 'Start sale action should be scheduled for variation after direct meta write' );
+	}
+
+	/**
+	 * @testDox Scheduled sale events are cleared when sale date meta is deleted.
+	 */
+	public function test_wc_schedule_product_sale_events_cleared_on_meta_delete() {
+		$future_start = time() + 3600;
+		$future_end   = time() + 86400;
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( 100 );
+		$product->set_regular_price( 100 );
+		$product->set_sale_price( 50 );
+		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $future_start ) );
+		$product->set_date_on_sale_to( gmdate( 'Y-m-d H:i:s', $future_end ) );
+		$product->save();
+
+		// Sanity check: events are scheduled.
+		$this->assertNotFalse(
+			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'Start action should be scheduled after save'
+		);
+
+		// Delete sale date meta directly, bypassing WooCommerce CRUD.
+		delete_post_meta( $product->get_id(), '_sale_price_dates_from' );
+		delete_post_meta( $product->get_id(), '_sale_price_dates_to' );
+
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'Start action should be cleared after sale date meta is deleted'
+		);
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_end_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'End action should be cleared after sale date meta is deleted'
+		);
+	}
+
+	/**
+	 * @testDox Meta hook does not reschedule when sale date meta is written from inside the AS sale start handler.
+	 */
+	public function test_wc_schedule_sale_events_meta_hook_skips_when_inside_as_start_handler() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$writer = function ( $pid ) {
+			update_post_meta( $pid, '_sale_price_dates_from', time() + 3600 );
+		};
+		add_action( 'wc_product_start_scheduled_sale', $writer, 1, 1 );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'wc_product_start_scheduled_sale', $product->get_id() );
+
+		remove_action( 'wc_product_start_scheduled_sale', $writer, 1 );
+
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'Meta-hook scheduling should be suppressed while inside the AS sale start handler'
+		);
+	}
+
+	/**
+	 * @testDox Meta hook does not reschedule when sale date meta is written from inside the AS sale end handler.
+	 */
+	public function test_wc_schedule_sale_events_meta_hook_skips_when_inside_as_end_handler() {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$writer = function ( $pid ) {
+			update_post_meta( $pid, '_sale_price_dates_to', time() + 3600 );
+		};
+		add_action( 'wc_product_end_scheduled_sale', $writer, 1, 1 );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment
+		do_action( 'wc_product_end_scheduled_sale', $product->get_id() );
+
+		remove_action( 'wc_product_end_scheduled_sale', $writer, 1 );
+
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_end_scheduled_sale', array( 'product_id' => $product->get_id() ), 'woocommerce-sales' ),
+			'Meta-hook scheduling should be suppressed while inside the AS sale end handler'
+		);
+	}
+
+	/**
+	 * @testDox Direct meta write on non-product post types does not schedule sale events.
+	 */
+	public function test_wc_schedule_sale_events_ignores_non_product_post_types() {
+		$future_start = time() + 3600;
+
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Not a product',
+				'post_type'   => 'post',
+				'post_status' => 'publish',
+			)
+		);
+
+		update_post_meta( $post_id, '_sale_price_dates_from', $future_start );
+
+		$this->assertFalse(
+			as_next_scheduled_action( 'wc_product_start_scheduled_sale', array( 'product_id' => $post_id ), 'woocommerce-sales' ),
+			'Sale events should not be scheduled for non-product post types'
+		);
+	}
+
+	/**
 	 * @testdox Guest order uses billing address tax rate when woocommerce_adjust_non_base_location_prices is false.
 	 */
 	public function test_wc_get_price_excluding_tax_guest_order_uses_billing_address() {
