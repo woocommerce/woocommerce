@@ -40,7 +40,7 @@ final class ProductFilterClearButton extends AbstractBlock {
 		if (
 			is_admin() ||
 			wp_doing_ajax() ||
-			empty( $block->context['filterData'] )
+			empty( $block->context['woocommerce/removableItems'] )
 		) {
 			return '';
 		}
