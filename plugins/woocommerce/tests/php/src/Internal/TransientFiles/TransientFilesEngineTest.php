@@ -353,7 +353,7 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	public function test_get_public_url() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_site_url' => fn( $blog_id, $path) => 'http://example.com' . $path,
+				'home_url' => fn( $path = '' ) => 'http://example.com' . $path,
 			)
 		);
 
