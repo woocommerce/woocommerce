@@ -18,7 +18,7 @@ declare(strict_types=1);
 
 namespace <?php echo $namespace; ?>;
 
-use Automattic\WooCommerce\Vendor\GraphQL\Type\Schema;
+use Automattic\WooCommerce\Internal\Api\Schema\Schema;
 
 class GraphQLController extends \Automattic\WooCommerce\Internal\Api\GraphQLController {
 	protected function build_schema(): Schema {

@@ -41,14 +41,14 @@ use Automattic\WooCommerce\Internal\Api\Utils;
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;
 <?php endforeach; ?>
-use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ResolveInfo;
-use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\Type;
+use Automattic\WooCommerce\Internal\Api\Schema\ResolveInfo;
+use Automattic\WooCommerce\Internal\Api\Schema\Type;
 
 class <?php echo $class_name; ?> {
 	public static function get_field_definition(): array {
 		return array(
 <?php if ( $scalar_return ) : ?>
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ObjectType(array(
+			'type' => Type::nonNull(new \Automattic\WooCommerce\Internal\Api\Schema\ObjectType(array(
 				'name' => '<?php echo $class_name; ?>Result',
 				'fields' => array(
 					'result' => array( 'type' => <?php echo $return_type_expr; ?> ),
@@ -130,7 +130,7 @@ foreach ( $execute_params as $param ) :
 			'_preauthorized' => <?php echo $preauthorized_expr; ?>,
 <?php endif; ?>
 		) ) ) {
-			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
+			throw new \Automattic\WooCommerce\Internal\Api\Schema\Error(
 				'You do not have permission to perform this action.',
 				extensions: array( 'code' => 'UNAUTHORIZED' )
 			);

@@ -24,8 +24,8 @@ namespace <?php echo $namespace; ?>;
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;
 <?php endforeach; ?>
-use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\InterfaceType;
-use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\Type;
+use Automattic\WooCommerce\Internal\Api\Schema\InterfaceType;
+use Automattic\WooCommerce\Internal\Api\Schema\Type;
 
 class <?php echo $class_name; ?> {
 	private static ?InterfaceType $instance = null;
