@@ -232,10 +232,12 @@ test.describe(
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
 			);
-			const row = page
+			const refreshedRow = page
 				.getByRole( 'row' )
 				.filter( { has: page.getByText( email, { exact: true } ) } );
-			await expect( row.getByText( /Cancelled/i ) ).toBeVisible();
+			await expect(
+				refreshedRow.getByText( /Cancelled/i )
+			).toBeVisible();
 		} );
 	}
 );
