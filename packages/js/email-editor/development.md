@@ -34,6 +34,15 @@ If the identifier is not replaced at bundle time, consumers will hit a runtime `
 
 String extraction happens against the built consumer bundle (not the package source), so `wp i18n make-pot` picks up the substituted literal domain and extracts strings correctly for the consumer's translation workflow.
 
+### Jest tests
+
+Jest does not run through webpack, so `DefinePlugin` does not apply to unit tests that import from this package. Define the identifier in the consumer's Jest setup file:
+
+```js
+// jest.setup.js / global-mocks.js
+global.__i18n_text_domain__ = 'your-text-domain';
+```
+
 ---
 
 ## Running Tests
