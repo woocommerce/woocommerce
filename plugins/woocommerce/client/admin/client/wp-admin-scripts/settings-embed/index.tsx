@@ -30,6 +30,7 @@ import { registerSettingsEmailImageUrlFill } from '~/settings-email/settings-ema
 import { registerSettingsEmailPreviewFill } from '~/settings-email/settings-email-preview-slotfill';
 import { registerSettingsEmailFeedbackFill } from '~/settings-email/settings-email-feedback-slotfill';
 import { registerSettingsEmailListingFill } from '~/settings-email/settings-email-listing-slotfill';
+import { registerModernSettingsScreens } from '~/settings/modern-settings-registry';
 
 const renderPaymentsSettings = () => {
 	const pages = [
@@ -87,6 +88,8 @@ const registerSlotFills = () => {
 	if ( isFeatureEnabled( 'block_email_editor' ) ) {
 		registerSettingsEmailListingFill();
 	}
+
+	registerModernSettingsScreens();
 
 	registerSettingsEmailColorPaletteFill();
 	registerSettingsEmailFeedbackFill();

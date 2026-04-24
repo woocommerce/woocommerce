@@ -60,6 +60,7 @@ const wcAdminPackages = [
 	'product-editor',
 	'sanitize',
 	'settings-editor',
+	'modern-settings-sdk',
 	'remote-logging',
 	'email-editor',
 ];

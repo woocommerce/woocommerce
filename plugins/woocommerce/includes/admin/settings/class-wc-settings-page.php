@@ -9,6 +9,7 @@
 declare( strict_types = 1);
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPageInterface;
 
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -156,6 +157,19 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 		 */
 		public function get_label() {
 			return $this->label;
+		}
+
+		/**
+		 * Get the modern settings page adapter for this settings page.
+		 *
+		 * Settings pages can override this to opt in to the modern settings renderer
+		 * while retaining the classic WooCommerce settings page route and save flow.
+		 *
+		 * @since 10.8.0
+		 * @return ModernSettingsPageInterface|null
+		 */
+		public function get_modern_settings_page(): ?ModernSettingsPageInterface {
+			return null;
 		}
 
 		/**
@@ -504,6 +518,25 @@ if ( ! class_exists( 'WC_Settings_Page', false ) ) :
 			}
 
 			global $current_section;
+
+			$modern_settings_page = $this->get_modern_settings_page();
+			if ( Features::is_enabled( 'modern-settings' ) && $modern_settings_page instanceof ModernSettingsPageInterface ) {
+				foreach ( $modern_settings_page->get_script_handles( $current_section ) as $script_handle ) {
+					if ( is_string( $script_handle ) && '' !== $script_handle ) {
+						wp_enqueue_script( $script_handle );
+					}
+				}
+
+				$GLOBALS['hide_save_button'] = true;
+
+				printf(
+					'<div id="%1$s" data-wc-modern-settings="1" data-wc-settings-page="%2$s" data-wc-settings-section="%3$s"></div>',
+					esc_attr( 'wc_settings_modern_' . sanitize_html_class( $this->id ) . '_' . sanitize_html_class( '' === $current_section ? 'default' : $current_section ) ),
+					esc_attr( $modern_settings_page->get_page_id() ),
+					esc_attr( $current_section )
+				);
+				return;
+			}
 
 			// We can't use "get_settings_for_section" here
 			// for compatibility with derived classes overriding "get_settings".

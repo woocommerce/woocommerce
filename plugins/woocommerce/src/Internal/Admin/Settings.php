@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Admin\API\Reports\Orders\DataStore as OrdersDataStore
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Admin\PluginsHelper;
+use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPageInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Marketplace_Suggestions;
@@ -221,6 +222,7 @@ class Settings {
 		//phpcs:ignore
 		$settings['variationTitleAttributesSeparator'] = apply_filters( 'woocommerce_product_variation_title_attributes_separator', ' - ', new \WC_Product() );
 
+		$settings = $this->add_modern_settings_schema( $settings );
 		if ( ! empty( $preload_data_endpoints ) ) {
 			$settings['dataEndpoints'] = isset( $settings['dataEndpoints'] )
 				? $settings['dataEndpoints']
@@ -398,5 +400,88 @@ class Settings {
 			}
 		}
 		return $settings;
+	}
+
+	/**
+	 * Add the modern settings schema for the current classic settings page.
+	 *
+	 * @param array $settings Array of component settings.
+	 * @return array
+	 */
+	private function add_modern_settings_schema( array $settings ): array {
+		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'modern-settings' ) ) {
+			return $settings;
+		}
+
+		$modern_settings_page = $this->get_current_modern_settings_page();
+		if ( ! $modern_settings_page ) {
+			return $settings;
+		}
+
+		$section     = $this->get_current_settings_section();
+		$section_key = '' === $section ? 'default' : $section;
+		$page_id     = $modern_settings_page->get_page_id();
+
+		if ( ! isset( $settings['modernSettings'] ) || ! is_array( $settings['modernSettings'] ) ) {
+			$settings['modernSettings'] = array();
+		}
+		if ( ! isset( $settings['modernSettings'][ $page_id ] ) || ! is_array( $settings['modernSettings'][ $page_id ] ) ) {
+			$settings['modernSettings'][ $page_id ] = array();
+		}
+
+		$settings['modernSettings'][ $page_id ][ $section_key ] = $modern_settings_page->get_schema( $section );
+
+		return $settings;
+	}
+
+	/**
+	 * Get the modern settings adapter for the current settings tab.
+	 *
+	 * @return ModernSettingsPageInterface|null
+	 */
+	private function get_current_modern_settings_page(): ?ModernSettingsPageInterface {
+		if ( ! class_exists( '\WC_Admin_Settings' ) ) {
+			return null;
+		}
+
+		$current_tab = $this->get_current_settings_tab();
+		foreach ( \WC_Admin_Settings::get_settings_pages() as $settings_page ) {
+			if ( ! $settings_page instanceof \WC_Settings_Page || $settings_page->get_id() !== $current_tab ) {
+				continue;
+			}
+
+			$modern_settings_page = $settings_page->get_modern_settings_page();
+			return $modern_settings_page instanceof ModernSettingsPageInterface ? $modern_settings_page : null;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the current WooCommerce settings tab.
+	 *
+	 * @return string
+	 */
+	private function get_current_settings_tab(): string {
+		if ( ! isset( $_GET['tab'] ) ) {
+			return 'general';
+		}
+
+		$tab = wp_unslash( $_GET['tab'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return is_string( $tab ) ? sanitize_title( $tab ) : 'general';
+	}
+
+	/**
+	 * Get the current WooCommerce settings section.
+	 *
+	 * @return string
+	 */
+	private function get_current_settings_section(): string {
+		if ( ! isset( $_GET['section'] ) ) {
+			return '';
+		}
+
+		$section = wp_unslash( $_GET['section'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return is_string( $section ) ? sanitize_title( $section ) : '';
 	}
 }

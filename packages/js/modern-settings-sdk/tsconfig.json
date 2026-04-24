@@ -1,0 +1,14 @@
+{
+	"extends": "@woocommerce/internal-ts-config/tsconfig.json",
+	"compilerOptions": {
+		"rootDir": "src",
+		"noCheck": false,
+		"outDir": "build-module",
+		"declaration": true,
+		"declarationMap": true,
+		"declarationDir": "./build-types",
+		"typeRoots": [ "./node_modules/@types" ]
+	},
+	"include": [ "src/**/*" ],
+	"exclude": [ "**/test/**" ]
+}

@@ -9,6 +9,7 @@ use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
 use Automattic\WooCommerce\Internal\Admin\Loader;
+use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPageInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 /**
  * WCAdminAssets Class.
@@ -252,7 +253,7 @@ class WCAdminAssets {
 		wp_enqueue_style( 'wc-onboarding' );
 
 		if ( PageController::is_settings_page() ) {
-			$this->register_script( 'wp-admin-scripts', 'settings-embed', true );
+			$this->register_script( 'wp-admin-scripts', 'settings-embed', true, $this->get_modern_settings_script_dependencies() );
 			$this->register_style( 'settings-embed', 'style', array( 'wp-components' ) );
 		}
 
@@ -325,6 +326,7 @@ class WCAdminAssets {
 			'wc-experimental-products-app',
 			'wc-product-editor',
 			'wc-settings-editor',
+			'wc-modern-settings-sdk',
 			'wc-remote-logging',
 			'wc-sanitize',
 		);
@@ -443,6 +445,85 @@ class WCAdminAssets {
 			);
 			wp_style_add_data( $handle, 'rtl', 'replace' );
 		}
+	}
+
+	/**
+	 * Get extension script handles that must load before the settings embed app mounts.
+	 *
+	 * @return array
+	 */
+	private function get_modern_settings_script_dependencies(): array {
+		if ( ! PageController::is_settings_page() || ! Features::is_enabled( 'modern-settings' ) ) {
+			return array();
+		}
+
+		$modern_settings_page = $this->get_current_modern_settings_page();
+		if ( ! $modern_settings_page ) {
+			return array();
+		}
+
+		$dependencies = array_merge(
+			array( 'wc-modern-settings-sdk' ),
+			array_filter(
+				$modern_settings_page->get_script_handles( $this->get_current_settings_section() ),
+				static function ( string $script_handle ): bool {
+					return '' !== $script_handle;
+				}
+			)
+		);
+
+		return array_values( array_unique( $dependencies ) );
+	}
+
+	/**
+	 * Get the modern settings adapter for the current settings tab.
+	 *
+	 * @return ModernSettingsPageInterface|null
+	 */
+	private function get_current_modern_settings_page(): ?ModernSettingsPageInterface {
+		if ( ! class_exists( '\WC_Admin_Settings' ) ) {
+			return null;
+		}
+
+		$current_tab = $this->get_current_settings_tab();
+		foreach ( \WC_Admin_Settings::get_settings_pages() as $settings_page ) {
+			if ( ! $settings_page instanceof \WC_Settings_Page || $settings_page->get_id() !== $current_tab ) {
+				continue;
+			}
+
+			$modern_settings_page = $settings_page->get_modern_settings_page();
+			return $modern_settings_page instanceof ModernSettingsPageInterface ? $modern_settings_page : null;
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the current WooCommerce settings tab.
+	 *
+	 * @return string
+	 */
+	private function get_current_settings_tab(): string {
+		if ( ! isset( $_GET['tab'] ) ) {
+			return 'general';
+		}
+
+		$tab = wp_unslash( $_GET['tab'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return is_string( $tab ) ? sanitize_title( $tab ) : 'general';
+	}
+
+	/**
+	 * Get the current WooCommerce settings section.
+	 *
+	 * @return string
+	 */
+	private function get_current_settings_section(): string {
+		if ( ! isset( $_GET['section'] ) ) {
+			return '';
+		}
+
+		$section = wp_unslash( $_GET['section'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		return is_string( $section ) ? sanitize_title( $section ) : '';
 	}
 
 	/**

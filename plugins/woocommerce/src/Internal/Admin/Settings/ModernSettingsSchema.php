@@ -1,0 +1,272 @@
+<?php
+/**
+ * Modern settings schema builder.
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\Admin\Settings;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Builds the canonical settings schema consumed by the modern settings renderer.
+ *
+ * @since 10.8.0
+ */
+class ModernSettingsSchema {
+
+	/**
+	 * Default group id for fields before the first title marker.
+	 *
+	 * @var string
+	 */
+	private const DEFAULT_GROUP_ID = 'default';
+
+	/**
+	 * Build a schema from a legacy WC settings array.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string $page_id Settings page id.
+	 * @param string $section Section id. Empty string means the default section.
+	 * @param string $title Page title.
+	 * @param array  $settings Legacy settings definitions.
+	 * @param string $default_save_adapter Default save adapter.
+	 * @return array
+	 */
+	public static function from_legacy_settings( string $page_id, string $section, string $title, array $settings, string $default_save_adapter = 'form_post' ): array {
+		$groups        = array();
+		$current_group = null;
+		$current_id    = null;
+		$group_index   = 0;
+
+		foreach ( $settings as $setting ) {
+			$type = isset( $setting['type'] ) && is_string( $setting['type'] ) ? $setting['type'] : 'text';
+
+			if ( 'title' === $type ) {
+				if ( $current_group && $current_id ) {
+					$groups[ $current_id ] = $current_group;
+				}
+
+				$current_id    = isset( $setting['id'] ) && is_scalar( $setting['id'] ) && '' !== (string) $setting['id']
+					? (string) $setting['id']
+					: 'group_' . $group_index;
+				$current_group = array(
+					'id'          => $current_id,
+					'title'       => isset( $setting['title'] ) && is_scalar( $setting['title'] ) ? html_entity_decode( (string) $setting['title'] ) : '',
+					'description' => isset( $setting['desc'] ) && is_scalar( $setting['desc'] ) ? (string) $setting['desc'] : '',
+					'order'       => isset( $setting['order'] ) ? (int) $setting['order'] : $group_index,
+					'fields'      => array(),
+				);
+				++$group_index;
+				continue;
+			}
+
+			if ( 'sectionend' === $type ) {
+				if ( $current_group && $current_id ) {
+					$groups[ $current_id ] = $current_group;
+				}
+				$current_group = null;
+				$current_id    = null;
+				continue;
+			}
+
+			if ( empty( $setting['id'] ) ) {
+				continue;
+			}
+
+			if ( ! $current_group ) {
+				$current_id    = self::DEFAULT_GROUP_ID;
+				$current_group = self::get_default_group( $group_index );
+				++$group_index;
+			}
+
+			$field = self::transform_legacy_field( $setting, $default_save_adapter );
+			if ( $field ) {
+				$current_group['fields'][] = $field;
+			}
+		}
+
+		if ( $current_group && $current_id ) {
+			$groups[ $current_id ] = $current_group;
+		}
+
+		uasort(
+			$groups,
+			static function ( array $a, array $b ): int {
+				return ( $a['order'] ?? 999 ) <=> ( $b['order'] ?? 999 );
+			}
+		);
+
+		return array(
+			'id'      => $page_id,
+			'title'   => html_entity_decode( $title ),
+			'section' => '' === $section ? self::DEFAULT_GROUP_ID : $section,
+			'groups'  => $groups,
+		);
+	}
+
+	/**
+	 * Transform a legacy field into the canonical schema.
+	 *
+	 * @param array  $setting Legacy field definition.
+	 * @param string $default_save_adapter Default save adapter.
+	 * @return array|null
+	 */
+	private static function transform_legacy_field( array $setting, string $default_save_adapter ): ?array {
+		$id   = isset( $setting['id'] ) && is_scalar( $setting['id'] ) ? (string) $setting['id'] : '';
+		$type = isset( $setting['type'] ) && is_string( $setting['type'] ) ? $setting['type'] : 'text';
+		if ( '' === $id ) {
+			return null;
+		}
+
+		$canonical_type = self::normalize_type( $type );
+		$field          = array(
+			'id'          => $id,
+			'label'       => isset( $setting['title'] ) && is_scalar( $setting['title'] ) ? html_entity_decode( (string) $setting['title'] ) : $id,
+			'type'        => $canonical_type,
+			'description' => isset( $setting['desc'] ) && is_scalar( $setting['desc'] ) ? (string) $setting['desc'] : '',
+			'value'       => self::get_field_value( $setting, $canonical_type ),
+			'save'        => self::get_save_schema( $setting, $default_save_adapter ),
+		);
+
+		foreach ( array( 'component', 'placeholder', 'disabled', 'custom_attributes' ) as $key ) {
+			if ( array_key_exists( $key, $setting ) ) {
+				$field[ $key ] = $setting[ $key ];
+			}
+		}
+
+		$options = self::get_options( $setting );
+		if ( ! empty( $options ) ) {
+			$field['options'] = $options;
+		}
+
+		if ( 'info' === $type && '' === $field['description'] && isset( $setting['text'] ) && is_scalar( $setting['text'] ) ) {
+			$field['description'] = (string) $setting['text'];
+			$field['save']        = array( 'adapter' => 'none' );
+		}
+
+		return $field;
+	}
+
+	/**
+	 * Normalize legacy field type.
+	 *
+	 * @param string $type Legacy field type.
+	 * @return string
+	 */
+	private static function normalize_type( string $type ): string {
+		$type_map = array(
+			'multiselect'            => 'array',
+			'multi_select_countries' => 'array',
+			'single_select_country'  => 'select',
+			'single_select_page'     => 'select',
+		);
+
+		return $type_map[ $type ] ?? $type;
+	}
+
+	/**
+	 * Get a field value.
+	 *
+	 * @param array  $setting Legacy field definition.
+	 * @param string $type Canonical field type.
+	 * @return mixed
+	 */
+	private static function get_field_value( array $setting, string $type ) {
+		if ( array_key_exists( 'value', $setting ) ) {
+			return self::normalize_value( $setting['value'], $type );
+		}
+
+		$default = $setting['default'] ?? '';
+		$value   = \WC_Admin_Settings::get_option( (string) $setting['id'], $default );
+
+		return self::normalize_value( $value, $type );
+	}
+
+	/**
+	 * Normalize a value for the canonical schema.
+	 *
+	 * @param mixed  $value Field value.
+	 * @param string $type Canonical type.
+	 * @return mixed
+	 */
+	private static function normalize_value( $value, string $type ) {
+		switch ( $type ) {
+			case 'array':
+				return is_array( $value ) ? array_values( $value ) : array();
+			case 'checkbox':
+				return function_exists( 'wc_string_to_bool' ) ? wc_string_to_bool( $value ) : (bool) $value;
+			default:
+				return $value;
+		}
+	}
+
+	/**
+	 * Get a field save schema.
+	 *
+	 * @param array  $setting Legacy field definition.
+	 * @param string $default_save_adapter Default save adapter.
+	 * @return array
+	 */
+	private static function get_save_schema( array $setting, string $default_save_adapter ): array {
+		if ( isset( $setting['save'] ) && is_array( $setting['save'] ) ) {
+			return $setting['save'];
+		}
+
+		if ( isset( $setting['is_option'] ) && false === $setting['is_option'] ) {
+			return array( 'adapter' => 'none' );
+		}
+
+		$field_name = isset( $setting['field_name'] ) && is_scalar( $setting['field_name'] )
+			? (string) $setting['field_name']
+			: (string) $setting['id'];
+
+		return array(
+			'adapter' => $default_save_adapter,
+			'name'    => $field_name,
+		);
+	}
+
+	/**
+	 * Normalize field options.
+	 *
+	 * @param array $setting Legacy field definition.
+	 * @return array
+	 */
+	private static function get_options( array $setting ): array {
+		if ( ! isset( $setting['options'] ) || ! is_array( $setting['options'] ) ) {
+			return array();
+		}
+
+		$options = array();
+		foreach ( $setting['options'] as $value => $label ) {
+			if ( ! is_scalar( $label ) && null !== $label ) {
+				continue;
+			}
+
+			$options[] = array(
+				'label' => is_scalar( $label ) ? html_entity_decode( (string) $label ) : '',
+				'value' => (string) $value,
+			);
+		}
+
+		return $options;
+	}
+
+	/**
+	 * Get the default group.
+	 *
+	 * @return array
+	 */
+	private static function get_default_group( int $order ): array {
+		return array(
+			'id'          => self::DEFAULT_GROUP_ID,
+			'title'       => '',
+			'description' => '',
+			'order'       => $order,
+			'fields'      => array(),
+		);
+	}
+}
