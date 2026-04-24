@@ -324,6 +324,15 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function exchange_token( $request ) {
+		// Refuse to return credentials over a non-HTTPS request.
+		if ( ! is_ssl() ) {
+			return new \WP_Error(
+				'ssl_required',
+				__( 'QR login requires an HTTPS connection.', 'woocommerce' ),
+				array( 'status' => 403 )
+			);
+		}
+
 		// Check rate limit.
 		if ( ! $this->check_exchange_rate_limit() ) {
 			return new \WP_Error(
@@ -375,6 +384,15 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 				'user_not_found',
 				__( 'User associated with this token no longer exists.', 'woocommerce' ),
 				array( 'status' => 404 )
+			);
+		}
+
+		// Application Passwords may have been disabled after the token was minted.
+		if ( ! $this->are_application_passwords_available() ) {
+			return new \WP_Error(
+				'application_passwords_unavailable',
+				__( 'Application Passwords are not available on this site.', 'woocommerce' ),
+				array( 'status' => 501 )
 			);
 		}
 

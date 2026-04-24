@@ -346,6 +346,22 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Token exchange fails with ssl_required when the current request is not over HTTPS.
+	 */
+	public function test_exchange_token_requires_https(): void {
+		wp_set_current_user( $this->admin_id );
+		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+
+		wp_set_current_user( 0 );
+		$this->force_https( false );
+		$response = $this->dispatch_exchange( $plaintext );
+
+		$this->assertSame( 403, $response->get_status() );
+		$this->assertSame( 'ssl_required', $response->get_data()['code'] );
+		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+	}
+
+	/**
 	 * @testdox Token generation fails with 501 when Application Passwords are disabled site-wide.
 	 */
 	public function test_generate_token_requires_application_passwords_available(): void {
@@ -358,6 +374,27 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 			$this->assertSame( 501, $response->get_status() );
 			$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
+		} finally {
+			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
+		}
+	}
+
+	/**
+	 * @testdox Token exchange fails when Application Passwords were disabled after token generation.
+	 */
+	public function test_exchange_token_requires_application_passwords_available(): void {
+		wp_set_current_user( $this->admin_id );
+		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+
+		add_filter( 'wp_is_application_passwords_available', '__return_false' );
+
+		try {
+			wp_set_current_user( 0 );
+			$response = $this->dispatch_exchange( $plaintext );
+
+			$this->assertSame( 501, $response->get_status() );
+			$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
+			$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
 		} finally {
 			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
 		}
