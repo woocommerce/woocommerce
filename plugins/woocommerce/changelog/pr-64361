@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add woocommerce_removed_coupon action hook to WC_Order for parity with WC_Cart.
