@@ -81,6 +81,22 @@ if ( $additional_content ) {
 	echo $email_improvements_enabled ? '</td></tr></table>' : '';
 }
 
+if ( ! empty( $unsubscribe_url ) ) :
+	$unsubscribe_link_tag = sprintf(
+		'<a href="%1$s">%2$s</a>',
+		esc_url( $unsubscribe_url ),
+		esc_html__( 'click here to unsubscribe', 'woocommerce' )
+	);
+	?>
+	<p style="font-size: 12px; line-height: 16px; color: #4d4d4d; margin-top: 16px;">
+	<?php
+	/* translators: %s: unsubscribe link */
+	echo wp_kses_post( sprintf( __( 'Don\'t want to receive these emails? %s.', 'woocommerce' ), $unsubscribe_link_tag ) );
+	?>
+	</p>
+<?php endif; ?>
+
+<?php
 /**
  * Hook for the woocommerce_email_footer.
  *

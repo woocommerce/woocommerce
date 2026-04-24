@@ -5,6 +5,7 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Internal\Email\ReviewRequestUnsubscribeController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -166,6 +167,55 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 		}
 
 		/**
+		 * Get the one-click unsubscribe URL for this email's order.
+		 *
+		 * Lazily generates and persists a secret key the first time the URL is
+		 * requested, then returns a tokenised URL that `ReviewRequestUnsubscribeController`
+		 * can validate. Mirrors the Stock Notifications unsubscribe-key pattern.
+		 *
+		 * Only returned for orders that belong to a registered customer. Guest
+		 * orders return an empty string, which keeps the unsubscribe link out
+		 * of the email template for them.
+		 *
+		 * @since  10.8.0
+		 * @return string Empty string when there is no bound order or the order is a guest order.
+		 */
+		public function get_unsubscribe_url(): string {
+			if ( ! ( $this->object instanceof WC_Order ) ) {
+				return '';
+			}
+
+			if ( ! $this->object->get_customer_id() ) {
+				return '';
+			}
+
+			$key = (string) $this->object->get_meta( ReviewRequestUnsubscribeController::UNSUBSCRIBE_KEY_META );
+			if ( '' === $key ) {
+				$key = wp_generate_password( 32, false );
+				$this->object->update_meta_data( ReviewRequestUnsubscribeController::UNSUBSCRIBE_KEY_META, $key );
+				$this->object->save();
+			}
+
+			$url = add_query_arg(
+				array(
+					ReviewRequestUnsubscribeController::QUERY_ARG_ORDER => $this->object->get_id(),
+					ReviewRequestUnsubscribeController::QUERY_ARG_KEY   => $key,
+				),
+				home_url( '/' )
+			);
+
+			/**
+			 * Filter the unsubscribe URL included in the review-request email.
+			 *
+			 * @param string   $url   The tokenised unsubscribe URL.
+			 * @param WC_Order $order The order object.
+			 *
+			 * @since 10.8.0
+			 */
+			return (string) apply_filters( 'woocommerce_review_request_unsubscribe_url', $url, $this->object );
+		}
+
+		/**
 		 * Return the configured send delay in seconds, filterable.
 		 *
 		 * The stored `delay_days` option is clamped to the supported range before
@@ -204,6 +254,7 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 					'order'              => $this->object,
 					'email_heading'      => $this->get_heading(),
 					'review_order_url'   => $this->get_review_order_url(),
+					'unsubscribe_url'    => $this->get_unsubscribe_url(),
 					'additional_content' => $this->get_additional_content(),
 					'sent_to_admin'      => false,
 					'plain_text'         => false,
@@ -224,6 +275,7 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 					'order'              => $this->object,
 					'email_heading'      => $this->get_heading(),
 					'review_order_url'   => $this->get_review_order_url(),
+					'unsubscribe_url'    => $this->get_unsubscribe_url(),
 					'additional_content' => $this->get_additional_content(),
 					'sent_to_admin'      => false,
 					'plain_text'         => true,
