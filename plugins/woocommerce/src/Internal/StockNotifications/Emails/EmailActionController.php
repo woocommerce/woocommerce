@@ -18,6 +18,22 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
  */
 class EmailActionController {
 	/**
+	 * Action token for verifying (double opt-in) a pending notification sign-up.
+	 *
+	 * Must match the `email_link_action` query param produced by the verify
+	 * email template.
+	 */
+	public const ACTION_VERIFY = 'verify';
+
+	/**
+	 * Action token for unsubscribing an active notification sign-up.
+	 *
+	 * Must match the `email_link_action` query param produced by the "back in
+	 * stock" and confirmation email templates.
+	 */
+	public const ACTION_UNSUBSCRIBE = 'unsubscribe';
+
+	/**
 	 * EmailActionController constructor.
 	 *
 	 * Initializes the controller by adding actions to process verification and unsubscribe actions from requests.
@@ -64,13 +80,28 @@ class EmailActionController {
 		}
 
 		switch ( $action ) {
-			case 'verify':
+			case self::ACTION_VERIFY:
 				$this->process_verification_action( $notification, $email_link_action_key );
 				break;
-			case 'unsubscribe':
+			case self::ACTION_UNSUBSCRIBE:
 				$this->process_unsubscribe_action( $notification, $email_link_action_key );
 				break;
-		}
+			default:
+				// Unknown action — silently drop in production, log in debug so
+				// mis-routed email links surface during alpha testing rather
+				// than no-op'ing invisibly.
+				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+					wc_get_logger()->debug(
+						sprintf(
+							'Unknown email_link_action "%s" for notification %d',
+							$action,
+							$notification->get_id()
+						),
+						array( 'source' => 'stock-notifications' )
+					);
+				}
+				break;
+		}//end switch
 	}
 
 	/**

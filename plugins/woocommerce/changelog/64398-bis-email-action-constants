@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Extract BIS email-link action tokens into EmailActionController constants and add a debug log path for unknown actions.
