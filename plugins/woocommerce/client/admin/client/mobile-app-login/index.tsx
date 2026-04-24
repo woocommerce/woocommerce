@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Button, Card, CardBody } from '@wordpress/components';
-import { useEffect, useState } from '@wordpress/element';
+import { Card, CardBody } from '@wordpress/components';
+import { useEffect } from '@wordpress/element';
 import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
@@ -37,21 +37,9 @@ const FAQ_URL =
  * structural rewrite.
  */
 export const MobileAppLoginPage = () => {
-	// Forces `<QRDirectLoginCode />` to remount when the merchant clicks
-	// "Refresh code". Because the QR component owns its own token lifecycle
-	// via `useQRLoginToken`, a fresh mount is the simplest way to trigger a
-	// new token fetch without forking the component or reaching into its
-	// internals.
-	const [ refreshKey, setRefreshKey ] = useState( 0 );
-
 	useEffect( () => {
 		recordEvent( 'mobile_app_qr_login_page_viewed' );
 	}, [] );
-
-	const handleRefreshClick = () => {
-		recordEvent( 'mobile_app_qr_login_page_refresh_clicked' );
-		setRefreshKey( ( value ) => value + 1 );
-	};
 
 	return (
 		<div className="woocommerce-mobile-app-login">
@@ -73,16 +61,7 @@ export const MobileAppLoginPage = () => {
 					</p>
 
 					<div className="woocommerce-mobile-app-login__qr">
-						<QRDirectLoginCode key={ refreshKey } />
-					</div>
-
-					<div className="woocommerce-mobile-app-login__actions">
-						<Button
-							variant="secondary"
-							onClick={ handleRefreshClick }
-						>
-							{ __( 'Refresh code', 'woocommerce' ) }
-						</Button>
+						<QRDirectLoginCode />
 					</div>
 
 					{ /*

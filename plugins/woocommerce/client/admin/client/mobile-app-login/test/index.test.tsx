@@ -85,9 +85,7 @@ describe( 'MobileAppLoginPage', () => {
 		);
 	} );
 
-	it( 'remounts the QR component on refresh to force a new token fetch', () => {
-		// Tracks `fetchToken` calls across all hook instances — every mount
-		// of `<QRDirectLoginCode />` runs its own `fetchToken` on mount.
+	it( 'does not offer a manual refresh while a QR code is still valid', () => {
 		const fetchToken = jest.fn();
 		mockedUseQRLoginToken.mockReturnValue( {
 			...makeReadyState(),
@@ -100,14 +98,29 @@ describe( 'MobileAppLoginPage', () => {
 		// initial `useEffect`).
 		expect( fetchToken ).toHaveBeenCalledTimes( 1 );
 
+		expect(
+			screen.queryByRole( 'button', { name: /Refresh code/i } )
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'lets the shared QR component generate a new code after expiry', () => {
+		const refreshToken = jest.fn();
+		mockedUseQRLoginToken.mockReturnValue( {
+			state: QRLoginTokenStates.EXPIRED,
+			qrUrl: null,
+			secondsRemaining: 0,
+			errorMessage: null,
+			fetchToken: jest.fn(),
+			refreshToken,
+		} );
+
+		render( <MobileAppLoginPage /> );
+
 		fireEvent.click(
-			screen.getByRole( 'button', { name: /Refresh code/i } )
+			screen.getByRole( 'button', { name: /Generate new code/i } )
 		);
 
-		// Clicking refresh should remount the QR component, which runs its
-		// initial-fetch effect again. Two total calls is the behavioural
-		// signal that the refresh actually triggers a new token.
-		expect( fetchToken ).toHaveBeenCalledTimes( 2 );
+		expect( refreshToken ).toHaveBeenCalledTimes( 1 );
 	} );
 
 	it( 'does not render the magic-link button (regression guard — modal-only feature)', () => {
@@ -141,15 +154,15 @@ describe( 'MobileAppLoginPage', () => {
 
 		render( <MobileAppLoginPage /> );
 
-		// The heading and the refresh button are static shell — they must
-		// still render even when the QR surfaces an error from the backend.
+		// The heading and FAQ link are static shell — they must still render
+		// even when the QR surfaces an error from the backend.
 		expect(
 			screen.getByRole( 'heading', {
 				name: /Sign in to the Woo mobile app/i,
 			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'button', { name: /Refresh code/i } )
+			screen.getByRole( 'link', { name: /troubleshooting guide/i } )
 		).toBeInTheDocument();
 
 		// Error text from the hook leaks through the shared component.

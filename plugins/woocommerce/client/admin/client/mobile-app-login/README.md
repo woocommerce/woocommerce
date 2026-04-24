@@ -29,13 +29,13 @@ structural rewrite.
   `client/admin/client/homescreen/mobile-app-modal/components/QRDirectLoginCode.tsx`
   renders the QR, countdown, and in-QR FAQ link.
 - `useQRLoginToken` from
-  `client/admin/client/homescreen/mobile-app-modal/components/useQRLoginToken.ts`
+  `client/admin/client/homescreen/mobile-app-modal/components/useQRLoginToken.tsx`
   owns the token lifecycle — it is consumed indirectly by
   `<QRDirectLoginCode />`.
 
-Neither file is modified by this page. The "Refresh code" button forces a
-remount of `<QRDirectLoginCode />` via a `key` prop, which triggers a fresh
-token fetch without forking the component.
+Neither file is modified by this page. The shared QR component only allows a
+manual retry after it reaches an error or expired state, so the page does not
+mint parallel valid login tokens while a QR code is still live.
 
 ## What this page does not do
 
