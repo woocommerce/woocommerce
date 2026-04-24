@@ -87,7 +87,10 @@ abstract class GraphQLController {
 	 * Register the GraphQL REST route.
 	 */
 	public function register(): void {
-		$methods = Main::is_get_endpoint_enabled() ? array( 'GET', 'POST' ) : array( 'POST' );
+		$methods = Main::filter_methods_against_settings( array( 'GET', 'POST' ) );
+		if ( empty( $methods ) ) {
+			return;
+		}
 
 		register_rest_route(
 			'wc',

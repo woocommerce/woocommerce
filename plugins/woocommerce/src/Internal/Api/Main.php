@@ -61,6 +61,29 @@ class Main {
 	}
 
 	/**
+	 * Apply the GraphQL-scoped site settings to a caller-declared list of HTTP
+	 * methods.
+	 *
+	 * Centralises the "what verbs does the admin actually allow on a GraphQL
+	 * endpoint" rule so both WooCommerce core's own endpoint and every sibling
+	 * plugin endpoint applied through {@see self::register_graphql_endpoint()}
+	 * honour the same settings.
+	 *
+	 * Currently the only rule is: if the GET endpoint has been disabled in the
+	 * GraphQL settings section, strip GET from the list.
+	 *
+	 * @param string[] $methods HTTP methods the caller declared.
+	 * @return string[] Possibly narrowed list — may be empty, in which case the
+	 *                 caller should skip the route registration entirely.
+	 */
+	public static function filter_methods_against_settings( array $methods ): array {
+		if ( ! self::is_get_endpoint_enabled() ) {
+			$methods = array_values( array_diff( $methods, array( 'GET' ) ) );
+		}
+		return $methods;
+	}
+
+	/**
 	 * Register the GraphQL endpoint when the feature is active.
 	 *
 	 * When the feature is off this is a no-op. Classes in the public

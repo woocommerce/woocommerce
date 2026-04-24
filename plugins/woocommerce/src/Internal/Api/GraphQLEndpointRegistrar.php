@@ -30,17 +30,29 @@ class GraphQLEndpointRegistrar {
 	/**
 	 * Hook callback for rest_api_init. Instantiates the controller and
 	 * registers the REST route.
+	 *
+	 * The caller-declared methods are narrowed by
+	 * {@see Main::filter_methods_against_settings()} so plugin endpoints honour
+	 * the same site-wide settings (e.g. the GET-endpoint toggle) as
+	 * WooCommerce core's `/wc/graphql`. If the filter empties the list the
+	 * endpoint is not registered.
 	 */
 	public function handle_rest_api_init(): void {
+		$methods = Main::filter_methods_against_settings( $this->methods );
+		if ( empty( $methods ) ) {
+			return;
+		}
+
 		$controller = Main::instantiate_graphql_controller( $this->controller_class_name );
 		if ( null === $controller ) {
 			return;
 		}
+
 		register_rest_route(
 			$this->route_namespace,
 			$this->route,
 			array(
-				'methods'             => $this->methods,
+				'methods'             => $methods,
 				'callback'            => array( $controller, 'handle_request' ),
 				// Auth is handled per-query/mutation.
 				'permission_callback' => '__return_true',
