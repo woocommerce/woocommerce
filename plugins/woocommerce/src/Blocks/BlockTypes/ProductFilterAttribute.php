@@ -185,7 +185,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 		}
 
 		$show_counts    = $block_attributes['showCounts'] ?? false;
-		$display_limit  = 15;
 		$filter_context = array(
 			'items'          => array(),
 			'selectionMode'  => $block_attributes['selectType'] ?? 'multiple',
@@ -194,9 +193,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
-			$index             = 0;
 			$attribute_options = array_map(
-				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts, $display_limit, &$index ) {
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 
@@ -214,12 +212,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 						$item['count'] = $term['count'];
 					}
 
-					if ( $index >= $display_limit ) {
-						$item['hidden'] = true;
-					}
-
-					++$index;
-
 					return $item;
 				},
 				$attribute_terms
@@ -228,7 +220,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 			$filter_context['items'] = array_values( $attribute_options );
 		}
 
-		$has_hidden_items   = count( $filter_context['items'] ) > $display_limit;
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
@@ -247,16 +238,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 			$wrapper_attributes['class']  = 'wc-block-product-filter--hidden';
 		}
 
-		$show_more_button = '';
-		if ( $has_hidden_items ) {
-			$show_more_button = sprintf(
-				'<button class="wc-block-product-filter__show-more" data-wp-on--click="actions.showAll" data-wp-bind--hidden="!state.hasHiddenItems">%s</button>',
-				esc_html__( 'Show more...', 'woocommerce' )
-			);
-		}
-
 		return sprintf(
-			'<div %1$s>%2$s%3$s</div>',
+			'<div %1$s>%2$s</div>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
@@ -265,8 +248,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 					return $carry;
 				},
 				''
-			),
-			$show_more_button
+			)
 		);
 	}
 

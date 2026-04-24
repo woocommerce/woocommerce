@@ -24,7 +24,7 @@ export type RemovableItemsBlockContext = {
  */
 export interface RemovableItemsParentStore {
 	state: {
-		items: readonly RemovableItem[];
+		removableItems: readonly RemovableItem[];
 	};
 	actions: {
 		remove: () => void;

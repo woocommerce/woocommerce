@@ -1,32 +1,63 @@
 /**
  * External dependencies
  */
-import { store, getConfig } from '@wordpress/interactivity';
+import { store, getContext } from '@wordpress/interactivity';
+
+/**
+ * Internal dependencies
+ */
+import type {
+	DerivedSelectableItem,
+	SelectableItem,
+	SelectableItemsParentStore,
+} from '../../../../types/type-defs/selectable-items';
+
+type ChipsContext = {
+	storeNamespace: string;
+	displayLimit: number;
+	item?: DerivedSelectableItem;
+};
+
+type ChipsItem = DerivedSelectableItem & { hidden: boolean };
 
 type ChipsStore = {
 	state: {
 		isExpanded: boolean;
-		showMoreLabel: string;
+		items: readonly ChipsItem[];
 	};
 	actions: {
-		toggleShowMore: () => void;
+		showAll: () => void;
+		toggle: () => void;
 	};
 };
 
-const chipsStore = store< ChipsStore >(
+const { state }: ChipsStore = store< ChipsStore >(
 	'woocommerce/product-filter-chips',
 	{
 		state: {
 			isExpanded: false,
-			get showMoreLabel() {
-				const { showMoreLabel, showLessLabel } = getConfig();
-				return this.isExpanded ? showLessLabel : showMoreLabel;
+			get items(): readonly ChipsItem[] {
+				const { storeNamespace, displayLimit } =
+					getContext< ChipsContext >();
+				return store< SelectableItemsParentStore >(
+					storeNamespace
+				).state.selectableItems.map( ( item, index ) => ( {
+					...item,
+					hidden:
+						! state.isExpanded && index >= displayLimit,
+				} ) );
 			},
 		},
 		actions: {
-			toggleShowMore() {
-				const ctx = this as unknown as ChipsStore[ 'state' ];
-				ctx.isExpanded = ! ctx.isExpanded;
+			showAll() {
+				state.isExpanded = true;
+			},
+			toggle() {
+				const { storeNamespace, item } = getContext< ChipsContext >();
+				if ( ! item ) return;
+				store< SelectableItemsParentStore >(
+					storeNamespace
+				).actions.toggle( item as SelectableItem );
 			},
 		},
 	},
@@ -34,4 +65,4 @@ const chipsStore = store< ChipsStore >(
 );
 
 export type { ChipsStore };
-export { chipsStore };
+export { state as chipsState };
