@@ -59,7 +59,8 @@ const activeFiltersStore = {
 };
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _removableItemsContract = activeFiltersStore satisfies RemovableItemsParentStore;
+const _removableItemsContract =
+	activeFiltersStore satisfies RemovableItemsParentStore;
 
 const { actions } = store< ProductFiltersStore & typeof activeFiltersStore >(
 	'woocommerce/product-filters',
