@@ -133,7 +133,6 @@ final class ProductFilterStatus extends AbstractBlock {
 			'selectionMode'  => 'multiple',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => __( 'Status', 'woocommerce' ),
-			'dynamicItems'   => false,
 		);
 
 		$wrapper_attributes = array(
@@ -144,6 +143,7 @@ final class ProductFilterStatus extends AbstractBlock {
 					/* translators: {{label}} is the status filter item label. */
 					'activeLabelTemplate' => __( 'Status: {{label}}', 'woocommerce' ),
 					'filterType'          => 'status',
+					'items'               => $filter_context['items'],
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),

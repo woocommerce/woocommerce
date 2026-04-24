@@ -1,32 +1,70 @@
 /**
  * External dependencies
  */
-import { store, getConfig } from '@wordpress/interactivity';
+import { store, getContext } from '@wordpress/interactivity';
+
+/**
+ * Internal dependencies
+ */
+import type {
+	DerivedSelectableItem,
+	SelectableItem,
+	SelectableItemsParentStore,
+} from '../../../../types/type-defs/selectable-items';
+
+type CheckboxListContext = {
+	storeNamespace: string;
+	displayLimit: number;
+	item?: DerivedSelectableItem;
+};
+
+type CheckboxListItem = DerivedSelectableItem & { hidden: boolean };
 
 type CheckboxListStore = {
 	state: {
 		isExpanded: boolean;
-		showMoreLabel: string;
+		items: readonly CheckboxListItem[];
+		ratingStyle: string;
 	};
 	actions: {
-		toggleShowMore: () => void;
+		showAll: () => void;
+		toggle: () => void;
 	};
 };
 
-const checkboxListStore = store< CheckboxListStore >(
+const { state }: CheckboxListStore = store< CheckboxListStore >(
 	'woocommerce/product-filter-checkbox-list',
 	{
 		state: {
 			isExpanded: false,
-			get showMoreLabel() {
-				const { showMoreLabel, showLessLabel } = getConfig();
-				return this.isExpanded ? showLessLabel : showMoreLabel;
+			get items(): readonly CheckboxListItem[] {
+				const { storeNamespace, displayLimit } =
+					getContext< CheckboxListContext >();
+				return store< SelectableItemsParentStore >(
+					storeNamespace
+				).state.selectableItems.map( ( item, index ) => ( {
+					...item,
+					hidden:
+						! state.isExpanded && index >= displayLimit,
+				} ) );
+			},
+			get ratingStyle() {
+				const { item } = getContext< CheckboxListContext >();
+				if ( ! item ) return '';
+				return `width: ${ Number( item.value ) * 20 }%`;
 			},
 		},
 		actions: {
-			toggleShowMore() {
-				const ctx = this as unknown as CheckboxListStore[ 'state' ];
-				ctx.isExpanded = ! ctx.isExpanded;
+			showAll() {
+				state.isExpanded = true;
+			},
+			toggle() {
+				const { storeNamespace, item } =
+					getContext< CheckboxListContext >();
+				if ( ! item ) return;
+				store< SelectableItemsParentStore >(
+					storeNamespace
+				).actions.toggle( item as SelectableItem );
 			},
 		},
 	},
@@ -34,4 +72,4 @@ const checkboxListStore = store< CheckboxListStore >(
 );
 
 export type { CheckboxListStore };
-export { checkboxListStore };
+export { state as checkboxListState };

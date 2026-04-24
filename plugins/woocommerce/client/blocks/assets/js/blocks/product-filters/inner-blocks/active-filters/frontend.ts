@@ -21,7 +21,7 @@ type RemovableItemContext = {
 
 const activeFiltersStore = {
 	state: {
-		get items() {
+		get removableItems() {
 			const { activeFilters } = getContext< ProductFiltersContext >();
 			return activeFilters
 				.filter( ( f ) => !! f.value )
