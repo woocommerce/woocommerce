@@ -236,8 +236,13 @@ describe( 'useUpdateBodyMargin', () => {
 	} );
 
 	test( 'should debounce multiple rapid resizes', () => {
-		// Create a mock ref with clientHeight
-		const headerElement = { current: { clientHeight: 100 } };
+		// Spy on clientHeight reads so we can assert the debounced update
+		// runs exactly once, not once per resize event.
+		const clientHeightGetter = jest.fn( () => 100 );
+		const headerElement = { current: {} };
+		Object.defineProperty( headerElement.current, 'clientHeight', {
+			get: clientHeightGetter,
+		} );
 		const headerItemSlot = { fills: [] };
 
 		const TestComponent = () => {
@@ -258,15 +263,19 @@ describe( 'useUpdateBodyMargin', () => {
 			window.dispatchEvent( new Event( 'resize' ) );
 		} );
 
-		// Before the debounce window elapses, margin should not yet be set.
+		// Before the debounce window elapses, nothing should have run yet:
+		// margin should not be set and clientHeight should not have been read.
 		const wpBody = document.querySelector( '#wpbody' );
 		expect( wpBody.style.marginTop ).toBe( '' );
+		expect( clientHeightGetter ).not.toHaveBeenCalled();
 
-		// After advancing past the debounce window, margin is applied once.
+		// After advancing past the debounce window, margin is applied once
+		// and clientHeight is read exactly once — proving coalescence.
 		act( () => {
 			jest.advanceTimersByTime( 200 );
 		} );
 		expect( wpBody.style.marginTop ).toBe( '100px' );
+		expect( clientHeightGetter ).toHaveBeenCalledTimes( 1 );
 	} );
 } );
 
