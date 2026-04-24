@@ -52,11 +52,7 @@ export interface SelectableItemsParentStore {
 		selectableItems: readonly DerivedSelectableItem[];
 	};
 	actions: {
-		/**
-		 * Toggles selection for an item. Accepts an explicit `item`
-		 * argument for cross-store proxying; when omitted, falls back to
-		 * `getContext().item`.
-		 */
-		toggle: ( item?: SelectableItem ) => void;
+		/** Toggles selection for the current `getContext().item`. */
+		toggle: () => void;
 	};
 }

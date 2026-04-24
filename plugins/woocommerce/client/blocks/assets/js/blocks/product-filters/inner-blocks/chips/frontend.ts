@@ -6,28 +6,24 @@ import { store, getContext } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type {
-	DerivedSelectableItem,
-	SelectableItem,
-	SelectableItemsParentStore,
-} from '../../../../types/type-defs/selectable-items';
+import type { DerivedSelectableItem } from '../../../../types/type-defs/selectable-items';
 
 type ChipsContext = {
 	storeNamespace: string;
 	displayLimit: number;
-	item?: DerivedSelectableItem;
 };
 
-type ChipsItem = DerivedSelectableItem & { hidden: boolean };
+type ParentItemContext = {
+	item?: DerivedSelectableItem & { index?: number };
+};
 
 type ChipsStore = {
 	state: {
 		isExpanded: boolean;
-		items: readonly ChipsItem[];
+		itemHidden: boolean;
 	};
 	actions: {
 		showAll: () => void;
-		toggle: () => void;
 	};
 };
 
@@ -36,28 +32,21 @@ const { state }: ChipsStore = store< ChipsStore >(
 	{
 		state: {
 			isExpanded: false,
-			get items(): readonly ChipsItem[] {
+			get itemHidden(): boolean {
+				if ( state.isExpanded ) return false;
 				const { storeNamespace, displayLimit } =
 					getContext< ChipsContext >();
-				return store< SelectableItemsParentStore >(
-					storeNamespace
-				).state.selectableItems.map( ( item, index ) => ( {
-					...item,
-					hidden:
-						! state.isExpanded && index >= displayLimit,
-				} ) );
+				const parentCtx =
+					getContext< ParentItemContext >( storeNamespace );
+				if ( ! parentCtx.item ) return false;
+				const { index } = parentCtx.item;
+				if ( typeof index !== 'number' ) return false;
+				return index >= displayLimit;
 			},
 		},
 		actions: {
 			showAll() {
 				state.isExpanded = true;
-			},
-			toggle() {
-				const { storeNamespace, item } = getContext< ChipsContext >();
-				if ( ! item ) return;
-				store< SelectableItemsParentStore >(
-					storeNamespace
-				).actions.toggle( item as SelectableItem );
 			},
 		},
 	},
