@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add debug group to WP_CLI::debug calls in CLIRunner.
