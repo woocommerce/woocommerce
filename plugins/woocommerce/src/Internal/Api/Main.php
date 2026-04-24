@@ -147,8 +147,12 @@ class Main {
 	/**
 	 * Register a GraphQL REST endpoint backed by a plugin-provided controller subclass.
 	 *
-	 * May be called at any point in the request lifecycle, regardless of whether
-	 * `rest_api_init` has already fired or not.
+	 * May be called at any time up to and including the `rest_api_init` hook:
+	 * if called earlier, registration is deferred to that hook; if called from
+	 * inside another plugin's `rest_api_init` handler, registration happens
+	 * immediately. Calls made after `rest_api_init` has already completed
+	 * register a REST route that WP_REST_Server won't honour on the current
+	 * request — callers should avoid deferring registration past bootstrap.
 	 *
 	 * When the feature flag is off or PHP is < 8.1 this is a silent no-op.
 	 *
@@ -237,13 +241,66 @@ class Main {
 		// local file — not a URL — so wp_remote_get() does not apply here.
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents
 		$head = file_get_contents( $controller_file, false, null, 0, 4096 );
-		if ( false === $head || ! preg_match( '/^\s*namespace\s+([^;\s]+)\s*;/m', $head, $matches ) ) {
+		if ( false === $head ) {
+			throw new \InvalidArgumentException(
+				sprintf( 'Could not read the controller file at %s.', esc_html( $controller_file ) )
+			);
+		}
+
+		$namespace = self::extract_namespace_from_php_source( $head );
+		if ( null === $namespace ) {
 			throw new \InvalidArgumentException(
 				sprintf( 'Could not determine the PHP namespace of the controller at %s.', esc_html( $controller_file ) )
 			);
 		}
 
-		return trim( $matches[1] ) . '\\GraphQLController';
+		return $namespace . '\\GraphQLController';
+	}
+
+	/**
+	 * Extract an unbracketed `namespace …;` declaration from a PHP source fragment.
+	 *
+	 * Uses PHP's tokenizer rather than a regex so the parse isn't fooled by
+	 * declarations inside heredocs, comments, or bracketed-namespace syntax,
+	 * and continues to work if the generator's output format changes
+	 * (e.g. attributes before the declaration, single-line `<?php namespace`).
+	 *
+	 * @param string $source PHP source code.
+	 * @return ?string The namespace FQN without leading or trailing separator, or null if none found.
+	 */
+	private static function extract_namespace_from_php_source( string $source ): ?string {
+		$tokens = token_get_all( $source );
+		$count  = count( $tokens );
+		for ( $i = 0; $i < $count; $i++ ) {
+			if ( ! is_array( $tokens[ $i ] ) || T_NAMESPACE !== $tokens[ $i ][0] ) {
+				continue;
+			}
+			$namespace = '';
+			for ( $j = $i + 1; $j < $count; $j++ ) {
+				$token = $tokens[ $j ];
+				if ( is_array( $token ) ) {
+					// T_NAME_QUALIFIED and T_NAME_FULLY_QUALIFIED exist on PHP 8+ and already
+					// contain the full namespace path; T_STRING / T_NS_SEPARATOR are the
+					// equivalent pieces on older versions.
+					if ( in_array( $token[0], array( T_STRING, T_NS_SEPARATOR ), true )
+						|| ( defined( 'T_NAME_QUALIFIED' ) && T_NAME_QUALIFIED === $token[0] )
+						|| ( defined( 'T_NAME_FULLY_QUALIFIED' ) && T_NAME_FULLY_QUALIFIED === $token[0] ) ) {
+						$namespace .= $token[1];
+						continue;
+					}
+					if ( T_WHITESPACE === $token[0] ) {
+						continue;
+					}
+				}
+				// Single-character tokens `;` (unbracketed namespace) and `{` (bracketed) end the declaration.
+				break;
+			}
+			$namespace = trim( $namespace, '\\' );
+			if ( '' !== $namespace ) {
+				return $namespace;
+			}
+		}
+		return null;
 	}
 
 	/**
@@ -251,9 +308,20 @@ class Main {
 	 *
 	 * @param string $controller_class_name Fully-qualified name of the class to validate.
 	 *
-	 * @throws \InvalidArgumentException If $controller_class_name does not extend GraphQLController.
+	 * @throws \InvalidArgumentException If the class cannot be autoloaded, or does not extend GraphQLController.
 	 */
 	private static function assert_is_controller_subclass( string $controller_class_name ): void {
+		// Differentiate "class does not exist" (typo / stale autoloader) from
+		// "class exists but is not a subclass" — is_subclass_of() collapses
+		// both into false, which is confusing when debugging a bootstrap typo.
+		if ( ! class_exists( $controller_class_name ) ) {
+			throw new \InvalidArgumentException(
+				sprintf(
+					'GraphQL controller class "%s" does not exist or is not autoloadable. Check the spelling, or run `composer dump-autoload` if it was added since the last autoloader regeneration.',
+					esc_html( $controller_class_name )
+				)
+			);
+		}
 		if ( ! is_subclass_of( $controller_class_name, GraphQLController::class ) ) {
 			throw new \InvalidArgumentException(
 				sprintf(

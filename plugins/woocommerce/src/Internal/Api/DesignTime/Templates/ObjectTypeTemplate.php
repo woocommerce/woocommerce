@@ -29,6 +29,29 @@ foreach ( $fields as $f ) {
 		break;
 	}
 }
+// Drop any caller-supplied import whose effective short name would collide
+// with one of the hardcoded imports emitted below, otherwise the generated
+// file wouldn't compile ("Cannot use ... because the name is already in use").
+$reserved_short_names = array( 'ObjectType', 'Type' );
+if ( $has_paginated_connection ) {
+	$reserved_short_names[] = 'Connection';
+	$reserved_short_names[] = 'Utils';
+}
+$use_statements = array_values(
+	array_filter(
+		$use_statements,
+		static function ( $use ) use ( $reserved_short_names ) {
+		$as_pos = stripos( $use, ' as ' );
+		if ( false !== $as_pos ) {
+			$short = trim( substr( $use, $as_pos + 4 ) );
+		} else {
+			$sep_pos = strrpos( $use, '\\' );
+			$short   = false !== $sep_pos ? substr( $use, $sep_pos + 1 ) : $use;
+		}
+		return ! in_array( $short, $reserved_short_names, true );
+		}
+	)
+);
 ?>
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;

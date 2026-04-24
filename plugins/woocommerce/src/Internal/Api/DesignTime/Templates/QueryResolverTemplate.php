@@ -20,7 +20,8 @@
  * @var ?array $authorize_param_names - if non-null, the authorize() method param names (subset of execute params)
  * @var bool   $has_preauthorized - true when authorize() declares a bool $_preauthorized infrastructure param
  * @var string $preauthorized_expr - PHP expression that evaluates to the $_preauthorized bool at runtime
- * @var bool   $scalar_return - true when execute() returns a scalar (bool, int, float, string)
+ * @var bool    $scalar_return - true when execute() returns a scalar (bool, int, float, string)
+ * @var ?string $container_fqcn - FQCN of a user-provided container with static get(string): object; null for direct `new` instantiation
  */
 
 $escaped_description = addslashes( $description );
@@ -38,6 +39,28 @@ namespace <?php echo $namespace; ?>;
 use <?php echo $command_fqcn; ?> as <?php echo $command_alias; ?>;
 use Automattic\WooCommerce\Internal\Api\QueryInfoExtractor;
 use Automattic\WooCommerce\Internal\Api\Utils;
+<?php
+// Drop any caller-supplied import whose effective short name would collide
+// with one of the imports emitted unconditionally above and below, otherwise
+// the generated file would fail to compile ("Cannot use ... because the name
+// is already in use").
+$reserved_short_names = array( $command_alias, 'QueryInfoExtractor', 'Utils', 'ResolveInfo', 'Type' );
+$use_statements       = array_values(
+	array_filter(
+		$use_statements,
+		static function ( $use ) use ( $reserved_short_names ) {
+		$as_pos = stripos( $use, ' as ' );
+		if ( false !== $as_pos ) {
+			$short = trim( substr( $use, $as_pos + 4 ) );
+		} else {
+			$sep_pos = strrpos( $use, '\\' );
+			$short   = false !== $sep_pos ? substr( $use, $sep_pos + 1 ) : $use;
+		}
+		return ! in_array( $short, $reserved_short_names, true );
+		}
+	)
+);
+?>
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;
 <?php endforeach; ?>

@@ -18,7 +18,7 @@ namespace Automattic\WooCommerce\Api;
  * resolvers through it. When no such class is present, resolvers fall back to
  * `new $command_class()`.
  */
-class Container {
+final class Container {
 	/**
 	 * Resolve a command class to an instance.
 	 *
