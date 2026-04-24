@@ -45,8 +45,7 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 				return index >= displayLimit;
 			},
 			get ratingStyle(): string {
-				const { storeNamespace } =
-					getContext< CheckboxListContext >();
+				const { storeNamespace } = getContext< CheckboxListContext >();
 				const parentCtx =
 					getContext< ParentItemContext >( storeNamespace );
 				if ( ! parentCtx.item ) return '';
