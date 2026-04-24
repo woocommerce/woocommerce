@@ -40,7 +40,6 @@ export function CustomerEffortScoreConsole( { label } ) {
 			onNoticeShownCallback={ onNoticeShown }
 			onNoticeDismissedCallback={ onNoticeDismissed }
 			onModalShownCallback={ onModalShown }
-			icon={ <span aria-hidden="true">✏️</span> }
         />
     );
 };

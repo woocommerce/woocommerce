@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Move the celebration emoji out of the first-product CES snackbar title string into the icon slot so the snackbar shows a single, properly-aligned icon instead of two icons side by side.

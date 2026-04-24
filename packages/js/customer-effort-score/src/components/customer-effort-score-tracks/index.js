@@ -164,7 +164,7 @@ function _CustomerEffortScoreTracks( {
 			onNoticeDismissedCallback={ onNoticeDismissed }
 			onModalShownCallback={ onModalShown }
 			onModalDismissedCallback={ onModalDismissed }
-			icon={ <span aria-hidden="true">{ icon || '✏️' }</span> }
+			icon={ icon ? <span aria-hidden="true">{ icon }</span> : undefined }
 		/>
 	);
 }
