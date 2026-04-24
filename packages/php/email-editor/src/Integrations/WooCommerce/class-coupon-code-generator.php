@@ -9,6 +9,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
+use Automattic\WooCommerce\EmailEditor\Integrations\WooCommerce\Renderer\Blocks\Coupon_Code;
 
 /**
  * Generates WooCommerce coupons at email send time for the coupon-code block.
@@ -21,6 +22,11 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
  * to add features like per-subscriber restriction or coupon persistence.
  */
 class Coupon_Code_Generator {
+
+	/**
+	 * Maximum number of retries for generating a unique coupon code.
+	 */
+	const MAX_CODE_RETRIES = 5;
 
 	/**
 	 * Initialize the generator by registering the filter hook.
@@ -42,13 +48,17 @@ class Coupon_Code_Generator {
 			return $coupon_code;
 		}
 
+		if ( $rendering_context->get( 'is_user_preview' ) ) {
+			return Coupon_Code::COUPON_CODE_PLACEHOLDER;
+		}
+
 		if ( ! function_exists( 'wc_get_coupon_types' ) || ! class_exists( 'WC_Coupon' ) ) {
 			return '';
 		}
 
 		try {
 			$coupon = new \WC_Coupon();
-			$coupon->set_code( $this->generate_random_code() );
+			$coupon->set_code( $this->generate_unique_code() );
 
 			$discount_type = $this->validate_discount_type( $attrs['discountType'] ?? 'percent' );
 			$coupon->set_discount_type( $discount_type );
@@ -74,17 +84,14 @@ class Coupon_Code_Generator {
 			$coupon->set_product_categories( $this->extract_ids( $attrs['productCategoryIds'] ?? array() ) );
 			$coupon->set_excluded_product_categories( $this->extract_ids( $attrs['excludedProductCategoryIds'] ?? array() ) );
 
-			$email_restrictions = array();
-			if ( ! empty( $attrs['emailRestrictions'] ) ) {
-				$email_restrictions = array_map( 'trim', explode( ',', $attrs['emailRestrictions'] ) );
-			}
+			$email_restrictions = $this->parse_email_restrictions( $attrs['emailRestrictions'] ?? '' );
 
 			$recipient = $rendering_context->get_recipient_email();
-			if ( $recipient ) {
+			if ( $recipient && is_email( $recipient ) ) {
 				$email_restrictions[] = $recipient;
 			}
 
-			$coupon->set_email_restrictions( array_unique( array_filter( $email_restrictions ) ) );
+			$coupon->set_email_restrictions( array_unique( $email_restrictions ) );
 
 			$usage_limit          = $attrs['usageLimit'] ?? 0;
 			$usage_limit_per_user = $attrs['usageLimitPerUser'] ?? 0;
@@ -99,8 +106,35 @@ class Coupon_Code_Generator {
 
 			return $coupon->get_code();
 		} catch ( \Exception $e ) {
+			wc_get_logger()->error(
+				'Coupon auto-generation failed: ' . $e->getMessage(),
+				array( 'source' => 'email-editor-coupon-generator' )
+			);
 			return '';
 		}
+	}
+
+	/**
+	 * Parse and validate email restrictions string.
+	 *
+	 * @param mixed $raw Raw email restrictions value (comma-separated string).
+	 * @return array Array of valid email addresses.
+	 */
+	private function parse_email_restrictions( $raw ): array {
+		if ( ! is_string( $raw ) || '' === $raw ) {
+			return array();
+		}
+
+		$emails = array_map( 'trim', explode( ',', $raw ) );
+
+		return array_values(
+			array_filter(
+				$emails,
+				function ( string $email ): bool {
+					return (bool) is_email( $email );
+				}
+			)
+		);
 	}
 
 	/**
@@ -112,6 +146,24 @@ class Coupon_Code_Generator {
 	private function validate_discount_type( string $type ): string {
 		$valid_types = array_keys( wc_get_coupon_types() );
 		return in_array( $type, $valid_types, true ) ? $type : 'percent';
+	}
+
+	/**
+	 * Generate a unique random coupon code, retrying on collision.
+	 *
+	 * @return string A unique coupon code.
+	 * @throws \RuntimeException When a unique code cannot be generated after max retries.
+	 */
+	private function generate_unique_code(): string {
+		for ( $i = 0; $i < self::MAX_CODE_RETRIES; $i++ ) {
+			$code     = $this->generate_random_code();
+			$existing = wc_get_coupon_id_by_code( $code );
+			if ( ! $existing ) {
+				return $code;
+			}
+		}
+		// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- exception message, not rendered output.
+		throw new \RuntimeException( 'Failed to generate a unique coupon code.' );
 	}
 
 	/**

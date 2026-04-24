@@ -32,11 +32,10 @@ const DEFAULT_COUPON_TYPES: Record< string, string > = {
 };
 
 function getCouponTypeOptions(): CouponType[] {
-	const types =
-		( getSetting< Record< string, string > >(
-			'couponTypes',
-			null
-		) as Record< string, string > | null ) ?? DEFAULT_COUPON_TYPES;
+	const types = getSetting( 'couponTypes', DEFAULT_COUPON_TYPES ) as Record<
+		string,
+		string
+	>;
 	return Object.entries( types ).map( ( [ value, label ] ) => ( {
 		value,
 		label,
