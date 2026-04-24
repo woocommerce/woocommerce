@@ -58,6 +58,14 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A negative stored delay_days clamps to MIN_DELAY_DAYS rather than flipping positive.
+	 */
+	public function test_delay_days_clamps_negative_to_minimum(): void {
+		$this->sut->update_option( 'delay_days', '-5' );
+		$this->assertSame( 1 * DAY_IN_SECONDS, $this->sut->get_delay_seconds() );
+	}
+
+	/**
 	 * @testdox The woocommerce_review_request_delay_seconds filter wins over the admin setting.
 	 */
 	public function test_delay_seconds_filter_overrides_setting(): void {
@@ -130,6 +138,29 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 		$emails = WC()->mailer()->get_emails();
 
 		$this->assertArrayHasKey( 'WC_Email_Customer_Review_Request', $emails );
+	}
+
+	/**
+	 * @testdox Calling trigger() with an invalid order id after a valid call does not dispatch to the previous recipient.
+	 */
+	public function test_trigger_clears_state_on_invalid_order(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		// First call populates recipient + placeholders from a valid order.
+		$this->sut->trigger( $order->get_id() );
+
+		// Second call with an invalid id should not fall through with the previous state.
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		$this->sut->trigger( 0 );
+		$after = count( $mailer->mock_sent );
+
+		$this->assertSame( $before, $after, 'trigger() must not send to the previous order\'s recipient when called with an invalid id.' );
+		$this->assertSame( '', $this->sut->recipient );
+		$this->assertFalse( $this->sut->object );
 	}
 
 	/**

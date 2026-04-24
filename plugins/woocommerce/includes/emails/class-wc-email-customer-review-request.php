@@ -82,6 +82,13 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 		public function trigger( $order_id ): void {
 			$this->setup_locale();
 
+			// Reset state from any previous invocation so a call with an invalid
+			// order id cannot re-use the previous recipient / placeholders.
+			$this->object                         = false;
+			$this->recipient                      = '';
+			$this->placeholders['{order_date}']   = '';
+			$this->placeholders['{order_number}'] = '';
+
 			$order = $order_id ? wc_get_order( $order_id ) : false;
 
 			if ( $order instanceof WC_Order ) {
@@ -173,7 +180,9 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 		 * @return int Delay in seconds.
 		 */
 		public function get_delay_seconds() {
-			$delay_days = absint( $this->get_option( 'delay_days', self::DEFAULT_DELAY_DAYS ) );
+			// Use (int) rather than absint() so a negative stored value clamps
+			// to MIN_DELAY_DAYS rather than flipping positive.
+			$delay_days = (int) $this->get_option( 'delay_days', self::DEFAULT_DELAY_DAYS );
 			$delay_days = max( self::MIN_DELAY_DAYS, min( self::MAX_DELAY_DAYS, $delay_days ) );
 
 			/**
