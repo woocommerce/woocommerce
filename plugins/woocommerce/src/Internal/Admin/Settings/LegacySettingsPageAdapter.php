@@ -7,17 +7,19 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings;
 
+use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface as PublicModernSettingsPageInterface;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Adapts a WC_Settings_Page instance into the modern settings page contract.
  *
- * Extensions can use this class directly for simple native-field migrations, or
- * subclass it to add component metadata, script handles, or custom save behavior.
+ * Internal implementation of the legacy settings adapter. Extensions should use
+ * Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter.
  *
  * @since 10.8.0
  */
-class LegacySettingsPageAdapter implements ModernSettingsPageInterface {
+class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 
 	/**
 	 * Legacy settings page.

@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPages;
 
-use Automattic\WooCommerce\Internal\Admin\Settings\LegacySettingsPageAdapter;
+use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
 
 defined( 'ABSPATH' ) || exit;
 

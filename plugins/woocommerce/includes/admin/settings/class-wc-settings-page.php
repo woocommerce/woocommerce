@@ -9,7 +9,7 @@
 declare( strict_types = 1);
 
 use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPageInterface;
+use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface;
 
 
 if ( ! defined( 'ABSPATH' ) ) {

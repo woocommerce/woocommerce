@@ -6,9 +6,9 @@ sidebar_position: 5
 
 # Modern settings SDK
 
-The modern settings SDK is an experimental, opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
+The modern settings SDK is an opt-in path for rendering WooCommerce settings pages with React while keeping the existing `WC_Settings_Page` registration and save flow.
 
-The first implementation is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. React owns field rendering and client-side interaction.
+It is designed for extension authors who want to migrate incrementally. PHP still owns page registration, settings schema, permissions, script dependencies, and persistence. React owns field rendering and client-side interaction.
 
 ## Status
 
@@ -16,7 +16,7 @@ The first implementation is designed for extension authors who want to migrate i
 -   With the flag disabled, settings pages keep the legacy PHP renderer.
 -   With the flag enabled, a settings page still has to opt in explicitly.
 -   Saves use the existing WooCommerce settings form POST flow by default.
--   The API is intended for integration testing and feedback before wider adoption.
+-   The public PHP API is available under `Automattic\WooCommerce\Admin\Settings`.
 
 ## Enable the feature flag
 
@@ -41,8 +41,8 @@ For pages that only need native fields, use `LegacySettingsPageAdapter`:
 
 ```php
 <?php
-use Automattic\WooCommerce\Internal\Admin\Settings\LegacySettingsPageAdapter;
-use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPageInterface;
+use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
+use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface;
 
 class My_Plugin_Settings_Page extends WC_Settings_Page {
 	public function __construct() {
@@ -125,7 +125,7 @@ Custom component scripts must load before the settings app mounts. Return their 
 
 ```php
 <?php
-use Automattic\WooCommerce\Internal\Admin\Settings\LegacySettingsPageAdapter;
+use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
 
 final class My_Plugin_Modern_Settings_Page extends LegacySettingsPageAdapter {
 	public function get_script_handles( string $section ): array {
@@ -138,7 +138,7 @@ The settings embed script depends on the SDK and these handles only for the opte
 
 ## Save adapters
 
-The first SDK version supports two save adapters:
+The SDK supports two save adapters:
 
 | Adapter     | Behavior                                                             |
 | ----------- | -------------------------------------------------------------------- |
@@ -158,9 +158,9 @@ array(
 )
 ```
 
-## Proof of concept in WooCommerce core
+## Reference migration in WooCommerce core
 
-The Products settings page is opted in as the first Core proof of concept. With `modern-settings` enabled, the Products tab renders through the modern SDK. With the flag disabled, it renders through the existing legacy settings UI.
+The Products settings page is the Core reference migration. With `modern-settings` enabled, the Products tab renders through the modern SDK. With the flag disabled, it renders through the existing legacy settings UI.
 
 Use this page to verify the native migration path before testing a plugin-specific page such as WooPayments.
 

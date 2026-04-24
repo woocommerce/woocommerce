@@ -167,7 +167,7 @@ Register your script in WordPress and return its handle from the modern settings
 
 ```php
 <?php
-use Automattic\WooCommerce\Internal\Admin\Settings\LegacySettingsPageAdapter;
+use Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter;
 
 final class My_Plugin_Modern_Settings_Page extends LegacySettingsPageAdapter {
 	public function get_script_handles( string $section ): array {

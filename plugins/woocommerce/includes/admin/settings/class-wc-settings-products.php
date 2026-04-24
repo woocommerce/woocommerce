@@ -6,9 +6,9 @@
  * @version 2.4.0
  */
 
-use Automattic\WooCommerce\Utilities\I18nUtil;
-use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPageInterface;
+use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPages\ProductsSettingsPageAdapter;
+use Automattic\WooCommerce\Utilities\I18nUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;

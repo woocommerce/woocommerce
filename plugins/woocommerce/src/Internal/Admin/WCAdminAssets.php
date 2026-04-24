@@ -8,8 +8,8 @@ namespace Automattic\WooCommerce\Internal\Admin;
 use _WP_Dependency;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Admin\PageController;
+use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface;
 use Automattic\WooCommerce\Internal\Admin\Loader;
-use Automattic\WooCommerce\Internal\Admin\Settings\ModernSettingsPageInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 /**
  * WCAdminAssets Class.
