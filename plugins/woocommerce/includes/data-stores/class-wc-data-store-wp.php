@@ -108,6 +108,16 @@ class WC_Data_Store_WP {
 	 * @return mixed|void
 	 */
 	public function filter_raw_meta_data( &$object, $raw_meta_data ) {
+		// Ensure $raw_meta_data is always an array. With HPOS data caching enabled,
+		// cache cross-contamination between orders, refunds, and subscriptions can
+		// cause a single stdClass to be passed instead of the expected array of stdClass.
+		// See: https://github.com/woocommerce/woocommerce/issues/64219
+		if ( $raw_meta_data instanceof stdClass ) {
+			$raw_meta_data = array( $raw_meta_data );
+		} elseif ( ! is_array( $raw_meta_data ) ) {
+			$raw_meta_data = array();
+		}
+
 		$this->internal_meta_keys = array_unique(
 			array_merge(
 				array_map(

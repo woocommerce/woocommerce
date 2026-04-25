@@ -1488,10 +1488,16 @@ WHERE
 			'_billing_address_index',
 			'_shipping_address_index',
 		);
+
+		// Ensure $raw_meta_data is iterable before filtering.
+		if ( ! is_array( $raw_meta_data ) ) {
+			$raw_meta_data = array();
+		}
+
 		$allowed_meta       = array_filter(
 			$raw_meta_data,
 			function ( $meta ) use ( $allowed_keys ) {
-				return in_array( $meta->meta_key, $allowed_keys, true );
+				return is_object( $meta ) && isset( $meta->meta_key ) && in_array( $meta->meta_key, $allowed_keys, true );
 			}
 		);
 
