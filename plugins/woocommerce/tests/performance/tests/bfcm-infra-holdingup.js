@@ -12,7 +12,7 @@ import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-log
 // stay well below the spike zone (~10–20/150), so median and p(90) reflect actual
 // server-side processing time rather than queue wait time.
 //
-// Contrast with bfcm.js, which runs at the saturation ceiling (0.8/s) where Apache
+// Contrast with bfcm-infra-hammered.js, which runs at the saturation ceiling (0.8/s) where Apache
 // dominates and only p(50) / update-customer median are reliable signals.
 //
 // Stable signals at this load level (all reliable):
@@ -23,9 +23,6 @@ import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-log
 //   - Order Received p(90)      — downstream of checkout; sensitive to order creation overhead.
 //   - order completion rate     — should approach 100%; any drop indicates a correctness issue.
 //   - http_req_failed           — should be near zero; meaningful signal (not spike noise).
-//
-// How to run:
-//   k6 run plugins/woocommerce/tests/performance/tests/checkout-db-perf.js
 //
 // Requires a clean Apache baseline — restart the WordPress container between runs:
 //   bash plugins/woocommerce/tests/performance/utils/init-environment.sh
@@ -39,7 +36,7 @@ export const options = {
 	// - Total: 2/10s guest + 1/10s customer = 0.3 checkout/s.
 	// - Apache workers stay at ~10–20/150; no spike zone, no request queuing.
 	// - At this rate all iterations complete; dropped_iterations should be near zero.
-	// - See bfcm.js for the saturation ceiling profile and its measurement limitations.
+	// - See bfcm-infra-hammered.js for the saturation ceiling profile and its measurement limitations.
 	scenarios: {
 		// Guest checkout: 60% of checkouts.
 		checkout_guest: {
@@ -50,9 +47,9 @@ export const options = {
 			preAllocatedVUs: 3,
 			maxVUs: 6,
 			stages: [
-				{ duration: '2m', target: 2 }, // Ramp to peak.
+				{ duration: '4m', target: 2 }, // Ramp to peak.
 				{ duration: '8m', target: 2 }, // Sustain peak.
-				{ duration: '1m', target: 0 }, // Ramp down.
+				{ duration: '2m', target: 0 }, // Ramp down.
 			],
 		},
 		// Authenticated checkout: 40% of checkouts.
@@ -64,31 +61,35 @@ export const options = {
 			preAllocatedVUs: 2,
 			maxVUs: 4,
 			stages: [
-				{ duration: '2m', target: 1 }, // Ramp to peak.
+				{ duration: '4m', target: 1 }, // Ramp to peak.
 				{ duration: '8m', target: 1 }, // Sustain peak.
-				{ duration: '1m', target: 0 }, // Ramp down.
+				{ duration: '2m', target: 0 }, // Ramp down.
 			],
 		},
 	},
 	thresholds: {
 		// Aggregate thresholds across all requests.
-		http_req_duration: [
-			'p(50)<200',
-			'p(90)<500',
-			'p(95)<1000',
-		],
+		http_req_duration: [ 'p(50)<200', 'p(90)<500', 'p(95)<1000' ],
 		http_req_failed: [ 'rate<0.01' ],
 
 		// Per-request thresholds: cart workflow.
-		'http_req_duration{name:Shopper - wc-ajax=add_to_cart}': [ 'p(95)<500' ],
-		'http_req_duration{name:Shopper - wc-ajax=get_refreshed_fragments}': [ 'p(95)<200' ],
+		'http_req_duration{name:Shopper - wc-ajax=add_to_cart}': [
+			'p(95)<500',
+		],
+		'http_req_duration{name:Shopper - wc-ajax=get_refreshed_fragments}': [
+			'p(95)<200',
+		],
 		'http_req_duration{name:Shopper - View Cart}': [ 'p(95)<500' ],
 
 		// Per-request thresholds: checkout workflow.
 		'http_req_duration{name:Shopper - View Checkout}': [ 'p(95)<500' ],
 		'http_req_duration{name:Shopper - Login to Checkout}': [ 'p(95)<500' ],
-		'http_req_duration{name:Shopper - Store API update-customer}': [ 'p(95)<200' ],
-		'http_req_duration{name:Shopper - Store API checkout}': [ 'p(95)<1000' ],
+		'http_req_duration{name:Shopper - Store API update-customer}': [
+			'p(95)<200',
+		],
+		'http_req_duration{name:Shopper - Store API checkout}': [
+			'p(95)<1000',
+		],
 		'http_req_duration{name:Shopper - Order Received}': [ 'p(95)<500' ],
 	},
 };
