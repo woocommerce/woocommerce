@@ -629,6 +629,11 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 	}
 
+	/**
+	 * Get a data store instance with taxes_influence_price() exposed as public.
+	 *
+	 * @return object Data store with public taxes_influence_price method.
+	 */
 	private function get_data_store_with_public_taxes_influence_price(): object {
 		// phpcs:disable Generic.CodeAnalysis, Squiz.Commenting
 		return new class() extends WC_Product_Variable_Data_Store_CPT {
