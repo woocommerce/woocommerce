@@ -1450,19 +1450,30 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->apply_coupon( $coupon->get_code() );
 		$this->assertContains( $coupon->get_code(), WC()->cart->get_applied_coupons() );
 
-		// Delete the coupon directly from database, simulating admin deletion
-		// while the cart session still references it.
-		wp_delete_post( $coupon->get_id(), true );
+		// Prime the code→ID lookup cache, then delete the post via raw SQL to
+		// bypass WooCommerce's cache-invalidation hooks. This reproduces the
+		// stale-cache scenario from persistent object caches (Redis/Memcached).
+		$coupon_id   = $coupon->get_id();
+		$coupon_code = $coupon->get_code();
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( $coupon_code ) );
 
-		// Clean the in-memory coupon cache so the next lookup has to hit the DB.
-		wp_cache_delete( $coupon->get_id(), 'posts' );
-		wp_cache_delete( $coupon->get_id(), 'post_meta' );
+		global $wpdb;
+		$wpdb->delete( $wpdb->posts, array( 'ID' => $coupon_id ), array( '%d' ) );
+		$wpdb->delete( $wpdb->postmeta, array( 'post_id' => $coupon_id ), array( '%d' ) );
+		clean_post_cache( $coupon_id );
+
+		// Verify the lookup still returns the now-stale ID (cache not flushed).
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( $coupon_code ) );
 
 		// check_cart_coupons should NOT throw a fatal error.
 		WC()->cart->check_cart_coupons();
 
 		// The invalid coupon should have been removed from the cart.
 		$this->assertNotContains( $coupon->get_code(), WC()->cart->get_applied_coupons() );
+
+		// An error notice should be raised for the user.
+		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+		$this->assertNotEmpty( $error_notices, 'Error notice should be queued when a deleted coupon is removed from the cart.' );
 
 		// Cleanup.
 		WC()->cart->empty_cart();
