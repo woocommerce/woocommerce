@@ -182,8 +182,10 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( wp_parse_url( $permalink, PHP_URL_PATH ), $url );
 
 		// URL should NOT contain arbitrary query params from the current request.
-		$_SERVER['REQUEST_URI'] = '/shop/?utm_source=google&gclid=123';;
+		$original_request_uri = $_SERVER['REQUEST_URI'];
+		$_SERVER['REQUEST_URI'] = '/shop/?utm_source=google&gclid=123';
 		$url2 = $this->product->add_to_cart_url();
+		$_SERVER['REQUEST_URI'] = $original_request_uri;
 		$this->assertStringNotContainsString( 'utm_source', $url2 );
 		$this->assertStringNotContainsString( 'gclid', $url2 );
 	}
