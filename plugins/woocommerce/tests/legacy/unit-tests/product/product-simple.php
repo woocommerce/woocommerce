@@ -169,6 +169,26 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test add_to_cart_url() always returns product permalink based URL.
+	 *
+	 * @since 9.9.0
+	 */
+	public function test_add_to_cart_url_returns_product_permalink() {
+		$permalink = $this->product->get_permalink();
+		$url       = $this->product->add_to_cart_url();
+
+		// URL should contain the product permalink as base, not the current request URI.
+		$this->assertStringContainsString( 'add-to-cart=' . $this->product->get_id(), $url );
+		$this->assertStringContainsString( wp_parse_url( $permalink, PHP_URL_PATH ), $url );
+
+		// URL should NOT contain arbitrary query params from the current request.
+		$_SERVER['REQUEST_URI'] = '/shop/?utm_source=google&gclid=123';;
+		$url2 = $this->product->add_to_cart_url();
+		$this->assertStringNotContainsString( 'utm_source', $url2 );
+		$this->assertStringNotContainsString( 'gclid', $url2 );
+	}
+
+	/**
 	 * Test backorders_require_notification().
 	 *
 	 * @since 2.3
