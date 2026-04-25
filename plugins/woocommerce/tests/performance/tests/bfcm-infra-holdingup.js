@@ -15,21 +15,29 @@ import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-log
 // Contrast with bfcm-infra-hammered.js, which runs at the saturation ceiling (0.8/s) where Apache
 // dominates and only p(50) / update-customer median are reliable signals.
 //
-// Stable signals at this load level (all reliable):
-//   - Store API checkout med    — most sensitive to order-path optimizations (DB writes, order creation).
-//   - Store API checkout p(90)  — tail latency; not capped by 60s timeouts at sub-saturation.
-//   - update-customer med       — checkout address persistence path.
-//   - update-customer p(90)     — reliable here (no Apache queuing to inflate tail).
-//   - Order Received p(90)      — downstream of checkout; sensitive to order creation overhead.
-//   - order completion rate     — should approach 100%; any drop indicates a correctness issue.
-//   - http_req_failed           — should be near zero; meaningful signal (not spike noise).
+// All signals below are stable at this load level (validated across 3-run sets, April 2026):
+//
+//   - p(50) overall             — baseline ~77ms (±1ms); reflects fast-path latency; minimal variation.
+//   - Store API checkout med    — baseline ~472ms (±67ms); most sensitive to order-path optimizations
+//                                 (DB writes, order creation); stable here unlike at saturation.
+//   - Store API checkout p(90)  — baseline ~2.99s (±1.73s); noisier than median due to occasional
+//                                 outliers (WP-cron, cache misses); directionally reliable across 3+ runs.
+//   - update-customer med       — baseline ~65ms (±1ms); tightest signal; checkout address persistence path.
+//   - update-customer p(90)     — baseline ~77ms (±5ms); reliable here (no Apache queuing to inflate tail).
+//   - Order Received p(90)      — baseline ~121ms (±7ms); downstream of checkout; stable.
+//   - order completion rate     — baseline 100%; any drop below 100% indicates a correctness regression.
+//   - http_req_failed           — baseline 0%; meaningful signal here (not spike noise as in hammered.js).
+//   - dropped_iterations        — baseline ~3; near-zero confirms sub-saturation; spike = VU config issue.
+//
+// Note: Store API checkout p(95) fails the 1000ms threshold in both baseline and less-writes sets
+// (range 2.5–4.8s) due to infrequent outlier requests. This threshold is aspirational; watch the
+// median and p(90) for directional signals, not p(95).
 //
 // Requires a clean Apache baseline — restart the WordPress container between runs:
 //   bash plugins/woocommerce/tests/performance/utils/init-environment.sh
 //
 // Comparing runs: a single run is sufficient for directional confidence at this load level.
-// Run 2–3 times if you want variance bounds. All thresholds below should pass cleanly;
-// a regression shows as a threshold failure or a measurable median increase.
+// Run 2–3 times if you want variance bounds on noisy signals (checkout p(90)).
 
 export const options = {
 	// Sub-saturation profile (M4 Pro, wp-env defaults):

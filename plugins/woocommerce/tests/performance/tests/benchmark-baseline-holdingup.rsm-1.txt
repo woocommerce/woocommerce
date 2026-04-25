@@ -1,0 +1,264 @@
+--- Run 1 ---
+
+  █ THRESHOLDS 
+
+    http_req_duration
+    ✓ 'p(50)<200' p(50)=76.83ms
+    ✓ 'p(90)<500' p(90)=400.89ms
+    ✓ 'p(95)<1000' p(95)=452.83ms
+
+      {name:Shopper - Login to Checkout}
+      ✓ 'p(95)<500' p(95)=352.6ms
+
+      {name:Shopper - Order Received}
+      ✓ 'p(95)<500' p(95)=142.22ms
+
+      {name:Shopper - Store API checkout}
+      ✗ 'p(95)<1000' p(95)=4s
+
+      {name:Shopper - Store API update-customer}
+      ✓ 'p(95)<200' p(95)=128.41ms
+
+      {name:Shopper - View Cart}
+      ✓ 'p(95)<500' p(95)=115.76ms
+
+      {name:Shopper - View Checkout}
+      ✓ 'p(95)<500' p(95)=116.32ms
+
+      {name:Shopper - wc-ajax=add_to_cart}
+      ✓ 'p(95)<500' p(95)=93.52ms
+
+      {name:Shopper - wc-ajax=get_refreshed_fragments}
+      ✓ 'p(95)<200' p(95)=0s
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 4257    4.994949/s
+    checks_succeeded...: 100.00% 4257 out of 4257
+    checks_failed......: 0.00%   0 out of 4257
+
+    ✓ url query is status 200
+    ✓ url query response matches retrieved product data sku
+    ✓ is status 200
+    ✓ title is: "Cart – WooCommerce Core E2E Test Suite"
+    ✓ body does not contain: 'your cart is currently empty'
+    ✓ footer contains: Built with WooCommerce
+    ✓ title is: "Checkout – WooCommerce Core E2E Test Suite"
+    ✓ body contains: wp-block-woocommerce-checkout
+    ✓ body contains: order_id
+    ✓ title is: "Order received – WooCommerce Core E2E Test Suite"
+    ✓ body contains: Thank you. Your order has been received.
+
+    HTTP
+    http_req_duration......................................: avg=178.5ms  min=35.14ms med=76.83ms  max=9.45s    p(90)=400.89ms p(95)=452.83ms
+      { expected_response:true }...........................: avg=178.5ms  min=35.14ms med=76.83ms  max=9.45s    p(90)=400.89ms p(95)=452.83ms
+      { name:Shopper - Login to Checkout }.................: avg=149.46ms min=72.76ms med=103.43ms max=1.92s    p(90)=149.82ms p(95)=352.6ms 
+      { name:Shopper - Order Received }....................: avg=119.15ms min=66.27ms med=96.73ms  max=2.41s    p(90)=117.88ms p(95)=142.22ms
+      { name:Shopper - Store API checkout }................: avg=880.58ms min=338.4ms med=444.33ms max=9.45s    p(90)=2.32s    p(95)=4s      
+      { name:Shopper - Store API update-customer }.........: avg=69.23ms  min=39.24ms med=64.85ms  max=290.44ms p(90)=78.4ms   p(95)=128.41ms
+      { name:Shopper - View Cart }.........................: avg=117.09ms min=47.84ms med=79.06ms  max=4.69s    p(90)=111.32ms p(95)=115.76ms
+      { name:Shopper - View Checkout }.....................: avg=84.1ms   min=47.9ms  med=78.75ms  max=685.81ms p(90)=109.98ms p(95)=116.32ms
+      { name:Shopper - wc-ajax=add_to_cart }...............: avg=103.49ms min=49.48ms med=67.71ms  max=2.47s    p(90)=79.78ms  p(95)=93.52ms 
+      { name:Shopper - wc-ajax=get_refreshed_fragments }...: avg=0s       min=0s      med=0s       max=0s       p(90)=0s       p(95)=0s      
+    http_req_failed........................................: 0.00%  0 out of 2277
+    http_reqs..............................................: 2277   2.671717/s
+
+    EXECUTION
+    dropped_iterations.....................................: 2      0.002347/s
+    iteration_duration.....................................: avg=11.27s   min=3.23s   med=11.13s   max=25.19s   p(90)=15.54s   p(95)=17.09s  
+    iterations.............................................: 220    0.258137/s
+    vus....................................................: 1      min=0         max=6
+    vus_max................................................: 7      min=5         max=7
+
+    NETWORK
+    data_received..........................................: 195 MB 229 kB/s
+    data_sent..............................................: 1.8 MB 2.1 kB/s
+
+
+
+
+running (14m12.3s), 00/07 VUs, 220 complete and 0 interrupted iterations
+checkout_customer ✓ [======================================] 0/3 VUs  14m0s  0.02 iters/s
+checkout_guest    ✓ [======================================] 0/4 VUs  14m0s  0.03 iters/s
+ERRO[0852] thresholds on metrics 'http_req_duration{name:Shopper - Store API checkout}' have been crossed 
+
+--- Run 2 ---
+
+ █ THRESHOLDS 
+
+    http_req_duration
+    ✓ 'p(50)<200' p(50)=77.57ms
+    ✓ 'p(90)<500' p(90)=438.62ms
+    ✓ 'p(95)<1000' p(95)=505.62ms
+
+      {name:Shopper - Login to Checkout}
+      ✓ 'p(95)<500' p(95)=296.33ms
+
+      {name:Shopper - Order Received}
+      ✓ 'p(95)<500' p(95)=262.29ms
+
+      {name:Shopper - Store API checkout}
+      ✗ 'p(95)<1000' p(95)=4.76s
+
+      {name:Shopper - Store API update-customer}
+      ✓ 'p(95)<200' p(95)=195.87ms
+
+      {name:Shopper - View Cart}
+      ✓ 'p(95)<500' p(95)=132.27ms
+
+      {name:Shopper - View Checkout}
+      ✓ 'p(95)<500' p(95)=117.83ms
+
+      {name:Shopper - wc-ajax=add_to_cart}
+      ✗ 'p(95)<500' p(95)=1.62s
+
+      {name:Shopper - wc-ajax=get_refreshed_fragments}
+      ✓ 'p(95)<200' p(95)=0s
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 4218    4.973716/s
+    checks_succeeded...: 100.00% 4218 out of 4218
+    checks_failed......: 0.00%   0 out of 4218
+
+    ✓ url query is status 200
+    ✓ url query response matches retrieved product data sku
+    ✓ is status 200
+    ✓ title is: "Cart – WooCommerce Core E2E Test Suite"
+    ✓ body does not contain: 'your cart is currently empty'
+    ✓ footer contains: Built with WooCommerce
+    ✓ title is: "Checkout – WooCommerce Core E2E Test Suite"
+    ✓ body contains: wp-block-woocommerce-checkout
+    ✓ body contains: order_id
+    ✓ title is: "Order received – WooCommerce Core E2E Test Suite"
+    ✓ body contains: Thank you. Your order has been received.
+
+    HTTP
+    http_req_duration......................................: avg=231.89ms min=35.32ms  med=77.57ms  max=9.79s   p(90)=438.62ms p(95)=505.62ms
+      { expected_response:true }...........................: avg=231.89ms min=35.32ms  med=77.57ms  max=9.79s   p(90)=438.62ms p(95)=505.62ms
+      { name:Shopper - Login to Checkout }.................: avg=126.86ms min=72.86ms  med=104.76ms max=618.6ms p(90)=234.19ms p(95)=296.33ms
+      { name:Shopper - Order Received }....................: avg=150.58ms min=65.97ms  med=96.82ms  max=3.37s   p(90)=124.87ms p(95)=262.29ms
+      { name:Shopper - Store API checkout }................: avg=1.17s    min=333.56ms med=461.16ms max=9.79s   p(90)=4.05s    p(95)=4.76s   
+      { name:Shopper - Store API update-customer }.........: avg=82.35ms  min=38.57ms  med=66.01ms  max=1.37s   p(90)=77.99ms  p(95)=195.87ms
+      { name:Shopper - View Cart }.........................: avg=103.64ms min=47.47ms  med=79.1ms   max=2.49s   p(90)=112.06ms p(95)=132.27ms
+      { name:Shopper - View Checkout }.....................: avg=94.92ms  min=47.04ms  med=79.44ms  max=3.93s   p(90)=110.68ms p(95)=117.83ms
+      { name:Shopper - wc-ajax=add_to_cart }...............: avg=251.89ms min=49.51ms  med=69.28ms  max=5.69s   p(90)=91.78ms  p(95)=1.62s   
+      { name:Shopper - wc-ajax=get_refreshed_fragments }...: avg=0s       min=0s       med=0s       max=0s      p(90)=0s       p(95)=0s      
+    http_req_failed........................................: 0.00%  0 out of 2256
+    http_reqs..............................................: 2256   2.660195/s
+
+    EXECUTION
+    dropped_iterations.....................................: 3      0.003537/s
+    iteration_duration.....................................: avg=11.85s   min=2.02s    med=11.43s   max=24.49s  p(90)=16.29s   p(95)=18.11s  
+    iterations.............................................: 218    0.257058/s
+    vus....................................................: 1      min=0         max=7
+    vus_max................................................: 8      min=5         max=8
+
+    NETWORK
+    data_received..........................................: 193 MB 228 kB/s
+    data_sent..............................................: 1.8 MB 2.1 kB/s
+
+
+
+
+running (14m08.1s), 00/08 VUs, 218 complete and 0 interrupted iterations
+checkout_customer ✓ [======================================] 0/3 VUs  14m0s  0.02 iters/s
+checkout_guest    ✓ [======================================] 0/5 VUs  14m0s  0.03 iters/s
+ERRO[0848] thresholds on metrics 'http_req_duration{name:Shopper - Store API checkout}, http_req_duration{name:Shopper - wc-ajax=add_to_cart}' have been crossed 
+
+--- Run 3 ---
+
+  █ THRESHOLDS 
+
+    http_req_duration
+    ✓ 'p(50)<200' p(50)=76.74ms
+    ✓ 'p(90)<500' p(90)=464.77ms
+    ✓ 'p(95)<1000' p(95)=528.43ms
+
+      {name:Shopper - Login to Checkout}
+      ✓ 'p(95)<500' p(95)=256.37ms
+
+      {name:Shopper - Order Received}
+      ✓ 'p(95)<500' p(95)=145.13ms
+
+      {name:Shopper - Store API checkout}
+      ✗ 'p(95)<1000' p(95)=2.86s
+
+      {name:Shopper - Store API update-customer}
+      ✓ 'p(95)<200' p(95)=155.33ms
+
+      {name:Shopper - View Cart}
+      ✓ 'p(95)<500' p(95)=118.26ms
+
+      {name:Shopper - View Checkout}
+      ✓ 'p(95)<500' p(95)=111.23ms
+
+      {name:Shopper - wc-ajax=add_to_cart}
+      ✓ 'p(95)<500' p(95)=178.1ms
+
+      {name:Shopper - wc-ajax=get_refreshed_fragments}
+      ✓ 'p(95)<200' p(95)=0s
+
+    http_req_failed
+    ✓ 'rate<0.01' rate=0.00%
+
+
+  █ TOTAL RESULTS 
+
+    checks_total.......: 4238    4.960596/s
+    checks_succeeded...: 100.00% 4238 out of 4238
+    checks_failed......: 0.00%   0 out of 4238
+
+    ✓ url query is status 200
+    ✓ url query response matches retrieved product data sku
+    ✓ is status 200
+    ✓ title is: "Cart – WooCommerce Core E2E Test Suite"
+    ✓ body does not contain: 'your cart is currently empty'
+    ✓ footer contains: Built with WooCommerce
+    ✓ title is: "Checkout – WooCommerce Core E2E Test Suite"
+    ✓ body contains: wp-block-woocommerce-checkout
+    ✓ body contains: order_id
+    ✓ title is: "Order received – WooCommerce Core E2E Test Suite"
+    ✓ body contains: Thank you. Your order has been received.
+
+    HTTP
+    http_req_duration......................................: avg=192.93ms min=34.21ms  med=76.74ms  max=10.52s  p(90)=464.77ms p(95)=528.43ms
+      { expected_response:true }...........................: avg=192.93ms min=34.21ms  med=76.74ms  max=10.52s  p(90)=464.77ms p(95)=528.43ms
+      { name:Shopper - Login to Checkout }.................: avg=146.66ms min=71.24ms  med=103.14ms max=2.56s   p(90)=163.75ms p(95)=256.37ms
+      { name:Shopper - Order Received }....................: avg=131.6ms  min=66.16ms  med=95.74ms  max=2.14s   p(90)=120.89ms p(95)=145.13ms
+      { name:Shopper - Store API checkout }................: avg=961.17ms min=331.48ms med=510.89ms max=10.52s  p(90)=2.59s    p(95)=2.86s   
+      { name:Shopper - Store API update-customer }.........: avg=97.22ms  min=39.24ms  med=65.36ms  max=2.04s   p(90)=73.16ms  p(95)=155.33ms
+      { name:Shopper - View Cart }.........................: avg=112.87ms min=47.13ms  med=79.22ms  max=5.19s   p(90)=110.92ms p(95)=118.26ms
+      { name:Shopper - View Checkout }.....................: avg=80.44ms  min=45ms     med=79ms     max=410.7ms p(90)=101.29ms p(95)=111.23ms
+      { name:Shopper - wc-ajax=add_to_cart }...............: avg=148.25ms min=48.53ms  med=68.3ms   max=2.79s   p(90)=84.83ms  p(95)=178.1ms 
+      { name:Shopper - wc-ajax=get_refreshed_fragments }...: avg=0s       min=0s       med=0s       max=0s      p(90)=0s       p(95)=0s      
+    http_req_failed........................................: 0.00%  0 out of 2267
+    http_reqs..............................................: 2267   2.653533/s
+
+    EXECUTION
+    dropped_iterations.....................................: 3      0.003512/s
+    iteration_duration.....................................: avg=11.5s    min=3.05s    med=11.12s   max=27.1s   p(90)=16.28s   p(95)=17.68s  
+    iterations.............................................: 219    0.25634/s
+    vus....................................................: 1      min=0         max=6
+    vus_max................................................: 8      min=5         max=8
+
+    NETWORK
+    data_received..........................................: 194 MB 227 kB/s
+    data_sent..............................................: 1.8 MB 2.1 kB/s
+
+
+
+
+running (14m14.3s), 00/08 VUs, 219 complete and 0 interrupted iterations
+checkout_customer ✓ [======================================] 0/3 VUs  14m0s  0.02 iters/s
+checkout_guest    ✓ [======================================] 0/5 VUs  14m0s  0.03 iters/s
+ERRO[0854] thresholds on metrics 'http_req_duration{name:Shopper - Store API checkout}' have been crossed 
+
