@@ -529,6 +529,9 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		WC()->customer->set_is_vat_exempt( true );
 		$this->assertTrue( $extended_data_store->taxes_influence_price( $product ) );
 
+		// Restore default state to avoid leaking into other tests.
+		WC()->customer->set_is_vat_exempt( false );
+
 		remove_filter( 'wc_tax_enabled', '__return_true' );
 		remove_filter( 'woocommerce_product_is_taxable', '__return_true' );
 		remove_filter( 'woocommerce_matched_rates', array( $this, '__return_rates' ) );
