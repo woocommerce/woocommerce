@@ -800,10 +800,17 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function check_cart_coupons() {
 		foreach ( $this->get_applied_coupons() as $code ) {
-			$coupon = new WC_Coupon( $code );
+			try {
+				$coupon = new WC_Coupon( $code );
 
-			if ( ! $coupon->is_valid() ) {
-				$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
+				if ( ! $coupon->is_valid() ) {
+					$coupon->add_coupon_message( WC_Coupon::E_WC_COUPON_INVALID_REMOVED );
+					$this->remove_coupon( $code );
+				}
+			} catch ( Exception $e ) {
+				// Coupon may have been deleted or is otherwise invalid (e.g. cache
+				// stale after deletion on Redis-enabled sites). Remove it gracefully.
+				wc_add_notice( __( 'Sorry, it seems the coupon you applied is no longer available. It has been removed from your cart.', 'woocommerce' ), 'error' );
 				$this->remove_coupon( $code );
 			}
 		}

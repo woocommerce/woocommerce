@@ -1416,4 +1416,56 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$variation->delete( true );
 		$product->delete( true );
 	}
+
+	/**
+	 * Test check_cart_coupons handles deleted coupons gracefully.
+	 *
+	 * When a coupon has been applied to the cart but subsequently deleted from
+	 * the database (while stale data persists in a persistent object cache like
+	 * Redis), check_cart_coupons should remove the coupon gracefully instead of
+	 * throwing an uncaught fatal error.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/34066
+	 */
+	public function test_check_cart_coupons_handles_deleted_coupon_gracefully() {
+		$fixtures = new FixtureData();
+
+		// Create a product and add to cart.
+		$product = $fixtures->get_simple_product(
+			array(
+				'regular_price' => '10',
+			)
+		);
+
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id() );
+
+		// Create and apply a coupon.
+		$coupon = $fixtures->get_coupon(
+			array(
+				'amount'        => '5',
+				'discount_type' => 'fixed_cart',
+			)
+		);
+		WC()->cart->apply_coupon( $coupon->get_code() );
+		$this->assertContains( $coupon->get_code(), WC()->cart->get_applied_coupons() );
+
+		// Delete the coupon directly from database, simulating admin deletion
+		// while the cart session still references it.
+		wp_delete_post( $coupon->get_id(), true );
+
+		// Clean the in-memory coupon cache so the next lookup has to hit the DB.
+		wp_cache_delete( $coupon->get_id(), 'posts' );
+		wp_cache_delete( $coupon->get_id(), 'post_meta' );
+
+		// check_cart_coupons should NOT throw a fatal error.
+		WC()->cart->check_cart_coupons();
+
+		// The invalid coupon should have been removed from the cart.
+		$this->assertNotContains( $coupon->get_code(), WC()->cart->get_applied_coupons() );
+
+		// Cleanup.
+		WC()->cart->empty_cart();
+		$product->delete( true );
+	}
 }
