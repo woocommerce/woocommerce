@@ -11,7 +11,6 @@ use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
-use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRestStamper;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
@@ -60,13 +59,6 @@ class Integration {
 	 * @var \WC_Email
 	 */
 	private \WC_Email $wc_email_instance;
-
-	/**
-	 * Stamps sync meta on woo_email posts when a REST update matches the core template render.
-	 *
-	 * @var WCEmailTemplateSyncRestStamper
-	 */
-	private WCEmailTemplateSyncRestStamper $sync_rest_stamper;
 
 	/**
 	 * Constructor.
@@ -139,10 +131,6 @@ class Integration {
 			$first_email_key         = array_key_first( $registered_emails );
 			$this->wc_email_instance = $registered_emails[ $first_email_key ];
 		}
-
-		$this->sync_rest_stamper = new WCEmailTemplateSyncRestStamper(
-			WCTransactionalEmailPostsManager::get_instance()
-		);
 	}
 
 	/**
@@ -161,7 +149,6 @@ class Integration {
 		add_action( 'rest_api_init', array( $this->email_api_controller, 'register_routes' ) );
 		add_action( 'woocommerce_updated', array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 20 );
 		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 10 );
-		add_action( 'rest_after_insert_woo_email', array( $this->sync_rest_stamper, 'maybe_stamp_after_rest_update' ), 10, 3 );
 	}
 
 	/**
