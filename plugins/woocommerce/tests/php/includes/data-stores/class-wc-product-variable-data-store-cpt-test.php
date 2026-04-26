@@ -503,6 +503,9 @@ class WC_Product_Variable_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 		sort( $actual_hashes );
 		$this->assertEquals( $expected_hashes, $actual_hashes );
 
+		// Restore default state to avoid leaking into subsequent tests.
+		WC()->customer->set_is_vat_exempt( false );
+
 		remove_filter( 'wc_tax_enabled', $tax_enabled ? '__return_true' : '__return_false' );
 		remove_filter( 'woocommerce_product_is_taxable', $taxable_product ? '__return_true' : '__return_false' );
 		remove_filter( 'woocommerce_matched_rates', $tax_has_rates ? array( $this, '__return_rates' ) : '__return_empty_array' );
