@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Cap cached filter combinations to limit transient growth from bot enumeration.

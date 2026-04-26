@@ -211,7 +211,7 @@
 		"readline-sync": "^1.4.10",
 		"replace": "^1.2.2",
 		"rimraf": "5.0.5",
-		"rtlcss": "^2.6.2",
+		"rtlcss": "4.3.x",
 		"sass": "^1.69.5",
 		"sass-loader": "10.5.x",
 		"stylelint": "^14.16.1",

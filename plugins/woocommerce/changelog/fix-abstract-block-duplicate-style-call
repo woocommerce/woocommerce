@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Avoid duplicate `get_block_type_style()` call in `AbstractBlock::register_block_type()` by caching the result in a local variable.
