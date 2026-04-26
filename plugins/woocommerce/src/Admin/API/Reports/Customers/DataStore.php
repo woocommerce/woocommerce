@@ -691,20 +691,26 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Returns a data object and format object of the customers data coming from the order.
 	 *
-	 * @param object      $order         WC_Order where we get customer info from.
+	 * @param \WC_Order   $order         WC_Order where we get customer info from.
 	 * @param object|null $customer_user WC_Customer registered customer WP user.
 	 * @return array ($data, $format)
 	 */
 	public static function get_customer_order_data_and_format( $order, $customer_user = null ) {
 		$data   = array(
-			'first_name'       => $order->get_customer_first_name(),
-			'last_name'        => $order->get_customer_last_name(),
+			'first_name'       => method_exists( $order, 'get_customer_first_name' )
+				? $order->get_customer_first_name()
+				: $order->get_billing_first_name( 'edit' ),
+			'last_name'        => method_exists( $order, 'get_customer_last_name' )
+				? $order->get_customer_last_name()
+				: $order->get_billing_last_name( 'edit' ),
 			'email'            => $order->get_billing_email( 'edit' ),
 			'city'             => $order->get_billing_city( 'edit' ),
 			'state'            => $order->get_billing_state( 'edit' ),
 			'postcode'         => $order->get_billing_postcode( 'edit' ),
 			'country'          => $order->get_billing_country( 'edit' ),
-			'date_last_active' => gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() ),
+			'date_last_active' => $order->get_date_created( 'edit' )
+				? gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() )
+				: gmdate( 'Y-m-d H:i:s' ),
 		);
 		$format = array(
 			'%s',

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix fatal error when DataStore::get_or_create_customer_from_order() receives a plain WC_Order instead of the Overrides\Order subclass, by adding method_exists() fallback for get_customer_first_name/get_customer_last_name.
