@@ -115,59 +115,13 @@ class QuantitySelector extends AbstractBlock {
 
 		$product_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $product );
 
-		wp_interactivity_config(
-			'woocommerce',
-			array(
-				'products' => array(
-					$product->get_id() => array(
-						'min'  => $product_quantity_constraints['min'],
-						'max'  => $product_quantity_constraints['max'],
-						'step' => $product_quantity_constraints['step'],
-					),
-				),
-			)
-		);
-
 		if ( $product->is_type( ProductType::VARIABLE ) ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
 
-			$variations_data           = $product->get_available_variations( 'objects' );
-			$formatted_variations_data = array();
-			foreach ( $variations_data as $variation ) {
-				$variation_quantity_constraints = AddToCartWithOptionsUtils::get_product_quantity_constraints( $variation );
-				$variation_data                 = array();
-
-				// Only add variation data if it's different than the defaults.
-				if ( 1 !== $variation_quantity_constraints['min'] ) {
-					$variation_data['min'] = $variation_quantity_constraints['min'];
-				}
-				if ( null !== $variation_quantity_constraints['max'] ) {
-					$variation_data['max'] = $variation_quantity_constraints['max'];
-				}
-				if ( 1 !== $variation_quantity_constraints['step'] ) {
-					$variation_data['step'] = $variation_quantity_constraints['step'];
-				}
-				if ( $variation->is_sold_individually() ) {
-					$variation_data['sold_individually'] = true;
-				}
-				$formatted_variations_data[ $variation->get_id() ] = $variation_data;
-			}
-
-			wp_interactivity_config(
-				'woocommerce',
-				array(
-					'products' => array(
-						$product->get_id() => array(
-							'variations' => $formatted_variations_data,
-						),
-					),
-				)
-			);
-
 			$wrapper_attributes['data-wp-bind--hidden'] = 'woocommerce/add-to-cart-with-options-quantity-selector::!state.allowsQuantityChange';
-			$input_attributes['data-wp-bind--min']      = 'woocommerce/product-elements::state.productData.min';
-			$input_attributes['data-wp-bind--max']      = 'woocommerce/product-elements::state.productData.max';
-			$input_attributes['data-wp-bind--step']     = 'woocommerce/product-elements::state.productData.step';
+			$input_attributes['data-wp-bind--min']      = 'woocommerce/products::state.productInContext.add_to_cart.minimum';
+			$input_attributes['data-wp-bind--max']      = 'woocommerce/products::state.productInContext.add_to_cart.maximum';
+			$input_attributes['data-wp-bind--step']     = 'woocommerce/products::state.productInContext.add_to_cart.multiple_of';
 			$input_attributes['data-wp-watch']          = 'woocommerce/add-to-cart-with-options::callbacks.watchQuantityConstraints';
 		}
 
