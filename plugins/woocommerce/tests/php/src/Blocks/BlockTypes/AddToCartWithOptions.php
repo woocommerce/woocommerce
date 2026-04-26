@@ -471,6 +471,48 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that the VariationSelectorAttribute block returns empty string
+	 * for non-variable products (simple, grouped, external) to prevent
+	 * a fatal error from calling get_variation_attributes() on unsupported
+	 * product types.
+	 *
+	 * @covers VariationSelectorAttribute::render
+	 */
+	public function test_variation_selector_attribute_returns_empty_for_non_variable_products() {
+		global $product;
+
+		$block_markup = '<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute /-->';
+
+		// Test with a simple product.
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$simple_product->save();
+
+		$product = $simple_product;
+		$markup  = do_blocks( $block_markup );
+
+		$this->assertSame( '', $markup, 'VariationSelectorAttribute should return empty string for simple products.' );
+
+		// Test with a grouped product.
+		$grouped_product = new \WC_Product_Grouped();
+		$grouped_product->save();
+
+		$product = $grouped_product;
+		$markup  = do_blocks( $block_markup );
+
+		$this->assertSame( '', $markup, 'VariationSelectorAttribute should return empty string for grouped products.' );
+
+		// Test with an external product.
+		$external_product = new \WC_Product_External();
+		$external_product->save();
+
+		$product = $external_product;
+		$markup  = do_blocks( $block_markup );
+
+		$this->assertSame( '', $markup, 'VariationSelectorAttribute should return empty string for external products.' );
+	}
+
+	/**
 	 * Tests that the quantity selector and its steppers are hidden when
 	 * a filter sets min and max quantity to the same value for a product.
 	 */
