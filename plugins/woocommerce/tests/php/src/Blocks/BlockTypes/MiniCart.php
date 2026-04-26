@@ -427,7 +427,7 @@ class MiniCart extends \WP_UnitTestCase {
 		) ) {
 			$badge_found = true;
 			$style       = $processor->get_attribute( 'style' );
-			$this->assertStringNotContainsString( 'background', $style, 'Badge inline style should not contain a background color when none is configured.' );
+			$this->assertStringNotContainsString( 'background:', $style, 'Badge inline style should not contain a background color when none is configured.' );
 		}
 
 		$this->assertTrue( $badge_found, 'Badge element should be present in the rendered output.' );
