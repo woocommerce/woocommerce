@@ -1,0 +1,4 @@
+Significance: minor
+Type: performance
+
+Optimized the order and customer save workflows during checkout using StoreAPI.

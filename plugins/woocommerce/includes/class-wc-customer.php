@@ -1266,4 +1266,23 @@ class WC_Customer extends WC_Legacy_Customer {
 	public function set_is_paying_customer( $is_paying_customer ) {
 		$this->set_prop( 'is_paying_customer', (bool) $is_paying_customer );
 	}
+
+	/**
+	 * Overrides the save method to guard against saves with no data changed.
+	 *
+	 * @since 10.9.0
+	 * @return int
+	 */
+	public function save() {
+		if ( $this->get_id() ) {
+			$meta_data     = $this->meta_data ?? array();
+			$props_changed = ! empty( $this->password ) || ! empty( $this->changes );
+			$state_changed = $props_changed || ! empty( array_filter( $meta_data, static fn( $meta ) => ! $meta->id || ! empty( $meta->get_changes() ) ) );
+			if ( ! $state_changed ) {
+				return $this->get_id();
+			}
+		}
+
+		return parent::save();
+	}
 }
