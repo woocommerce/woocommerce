@@ -35,4 +35,29 @@ wp-env run tests-cli wp theme install storefront --activate
 wp-env run tests-cli wp config set DISABLE_WP_CRON true --raw --type=constant
 wp-env run tests-cli wp config set WP_HTTP_BLOCK_EXTERNAL true --raw --type=constant
 
+# Resolve container names once; fail loudly if wp-env is not running.
+_wp_container="$(docker ps --filter name=tests-wordpress --format '{{.Names}}' | head -1)"
+_db_container="$(docker ps --filter name=tests-mysql --format '{{.Names}}' | head -1)"
+if [ -z "$_wp_container" ] || [ -z "$_db_container" ]; then
+    echo "Error: wp-env containers not found. Run 'pnpm env:perf' first." >&2
+    exit 1
+fi
+
+# Remove container-level strains for cleaner performance metrics: OPcache.
+docker exec -u root "$_wp_container" bash -c \
+    "printf '[opcache]\nopcache.enable=1\nopcache.memory_consumption=256\nopcache.max_accelerated_files=20000\nopcache.validate_timestamps=1\nopcache.revalidate_freq=0\n' > /usr/local/etc/php/conf.d/perf-opcache.ini"
+docker restart "$_wp_container"
+
+# Remove container-level strains for cleaner performance metrics: DB buffer and connections pool.
+docker exec -u root "$_db_container" bash -c "printf '[mysqld]\ninnodb_buffer_pool_size=1073741824\ninnodb_flush_log_at_trx_commit=2\n' > /etc/mysql/conf.d/perf-tuning.cnf"
+docker restart "$_db_container"
+_deadline=$((SECONDS + 30))
+until docker exec "$_db_container" mariadb -u root -ppassword -e "SELECT 1" &>/dev/null; do
+    if [ $SECONDS -ge $_deadline ]; then
+        echo "Error: MariaDB did not become ready within 30 seconds." >&2
+        exit 1
+    fi
+    sleep 0.5
+done
+
 echo "Success! Your E2E Test Environment is now ready."
