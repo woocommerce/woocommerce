@@ -152,7 +152,7 @@ class WC_Post_Data {
 			/**
 			 * Fires when a product or product variation transitions to published status.
 			 *
-			 * @since 10.7.0
+			 * @since 10.8.0
 			 * @param int $product_id The product or variation ID.
 			 */
 			do_action( 'woocommerce_product_published', $post->ID );
