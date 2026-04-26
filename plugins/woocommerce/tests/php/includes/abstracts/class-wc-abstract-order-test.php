@@ -306,6 +306,46 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test remove_coupon fires woocommerce_order_removed_coupon hook with WC_Coupon object.
+	 */
+	public function test_remove_coupon_fires_order_removed_coupon_hook() {
+		$coupon_code = 'remove_hook_test';
+		$coupon      = WC_Helper_Coupon::create_coupon( $coupon_code );
+		$order       = WC_Helper_Order::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$order->apply_coupon( $coupon_code );
+		$this->assertCount( 1, $order->get_items( 'coupon' ) );
+
+		$hook_fired   = false;
+		$hook_coupon  = null;
+		$hook_order   = null;
+
+		add_action(
+			'woocommerce_order_removed_coupon',
+			function ( $coupon_obj, $order_obj ) use ( &$hook_fired, &$hook_coupon, &$hook_order ) {
+				$hook_fired  = true;
+				$hook_coupon = $coupon_obj;
+				$hook_order  = $order_obj;
+			},
+			10,
+			2
+		);
+
+		$result = $order->remove_coupon( $coupon_code );
+
+		$this->assertTrue( $result );
+		$this->assertTrue( $hook_fired, 'woocommerce_order_removed_coupon hook did not fire.' );
+		$this->assertInstanceOf( WC_Coupon::class, $hook_coupon, 'First parameter should be a WC_Coupon instance.' );
+		$this->assertEquals( $coupon->get_code(), $hook_coupon->get_code(), 'Hook coupon code should match.' );
+		$this->assertSame( $order, $hook_order, 'Second parameter should be the same WC_Order instance.' );
+		$this->assertCount( 0, $order->get_items( 'coupon' ) );
+
+		remove_all_actions( 'woocommerce_order_removed_coupon' );
+	}
+
+	/**
 	 * Test for get_discount_to_display which must return a value
 	 * with and without tax whatever the setting of the options.
 	 *
