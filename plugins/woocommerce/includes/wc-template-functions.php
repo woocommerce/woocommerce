@@ -4723,3 +4723,137 @@ function wc_get_quantity_input_args( $args, $product = null ) {
 
 	return $args;
 }
+
+/**
+ * Get the most recent existing review for a product by a given email address.
+ *
+ * Queries WordPress comments of type 'review' matching the product and author
+ * email. Returns the most recent match (any approval status) or null.
+ *
+ * @since 10.8.0
+ *
+ * @param int    $product_id   Product ID.
+ * @param string $author_email Reviewer email address.
+ * @return WP_Comment|null The most recent review comment, or null if none found.
+ */
+function wc_get_order_product_existing_review( int $product_id, string $author_email ): ?WP_Comment {
+	if ( ! $product_id || '' === $author_email ) {
+		return null;
+	}
+
+	$reviews = get_comments(
+		array(
+			'post_id'      => $product_id,
+			'author_email' => $author_email,
+			'type'         => 'review',
+			'status'       => 'all',
+			'number'       => 1,
+			'orderby'      => 'comment_date_gmt',
+			'order'        => 'DESC',
+		)
+	);
+
+	if ( ! empty( $reviews ) && $reviews[0] instanceof WP_Comment ) {
+		return $reviews[0];
+	}
+
+	return null;
+}
+
+/**
+ * Determine whether a product has already been reviewed by the order's customer.
+ *
+ * Wraps wc_get_order_product_existing_review() with a filterable boolean result
+ * so third-party code can override the detection logic.
+ *
+ * @since 10.8.0
+ *
+ * @param int      $product_id     Product ID.
+ * @param WC_Order $order          Order object.
+ * @param string   $customer_email Customer email address.
+ * @return bool True if the product has an existing review from this customer.
+ */
+function wc_order_item_is_already_reviewed( int $product_id, WC_Order $order, string $customer_email ): bool {
+	$existing = wc_get_order_product_existing_review( $product_id, $customer_email );
+
+	$is_reviewed = null !== $existing;
+
+	/**
+	 * Filters whether an order item's product has already been reviewed by this customer.
+	 *
+	 * Return true to render the locked "Reviewed" row instead of the review form,
+	 * or false to show the form even if a review exists.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param bool     $is_reviewed    Whether a review already exists.
+	 * @param int      $product_id     Product ID.
+	 * @param WC_Order $order          Order object.
+	 * @param string   $customer_email Customer email address.
+	 */
+	return (bool) apply_filters( 'woocommerce_review_order_item_already_reviewed', $is_reviewed, $product_id, $order, $customer_email );
+}
+
+/**
+ * Build enriched review item data for each line item in an order.
+ *
+ * For each product line item, determines:
+ * - Whether reviews are open on the product (comments_open).
+ * - Whether the customer has already reviewed this product.
+ * - The existing review object (if any).
+ *
+ * Items where reviews are disabled (comments_open is false) are excluded.
+ *
+ * @since 10.8.0
+ *
+ * @param WC_Order $order          Order object.
+ * @param string   $customer_email Customer email address.
+ * @return array<int, array{
+ *     product_id:   int,
+ *     product:      WC_Product|null,
+ *     is_reviewed:  bool,
+ *     review:       WP_Comment|null,
+ *     rating:       int,
+ *     review_body:  string,
+ *     product_url:  string,
+ *     product_name: string,
+ * }> Array of review item data, keyed by product ID.
+ */
+function wc_get_order_review_items_data( WC_Order $order, string $customer_email ): array {
+	$items = array();
+
+	foreach ( $order->get_items() as $item ) {
+		if ( ! $item instanceof WC_Order_Item_Product ) {
+			continue;
+		}
+
+		$product_id = $item->get_product_id();
+
+		// Skip products that already have an entry (avoid duplicates from quantity > 1).
+		if ( isset( $items[ $product_id ] ) ) {
+			continue;
+		}
+
+		// Skip products where reviews are disabled.
+		if ( ! comments_open( $product_id ) ) {
+			continue;
+		}
+
+		$product     = $item->get_product();
+		$is_reviewed = wc_order_item_is_already_reviewed( $product_id, $order, $customer_email );
+		$review      = $is_reviewed ? wc_get_order_product_existing_review( $product_id, $customer_email ) : null;
+
+		$items[ $product_id ] = array(
+			'product_id'   => $product_id,
+			'product'      => $product instanceof WC_Product ? $product : null,
+			'is_reviewed'  => $is_reviewed,
+			'review'       => $review,
+			'rating'       => $review ? (int) get_comment_meta( $review->comment_ID, 'rating', true ) : 0,
+			'review_body'  => $review ? $review->comment_content : '',
+			'product_url'  => $product instanceof WC_Product ? $product->get_permalink() : '',
+			'product_name' => $item->get_name(),
+		);
+	}//end foreach
+
+	return $items;
+}
