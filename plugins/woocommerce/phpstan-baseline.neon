@@ -53272,15 +53272,9 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
 		-
-			message: '#^If condition is always false\.$#'
-			identifier: if.alwaysFalse
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
 			message: '#^Left side of && is always false\.$#'
 			identifier: booleanAnd.leftAlwaysFalse
-			count: 2
+			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
 		-
@@ -53340,12 +53334,6 @@ parameters:
 		-
 			message: '#^Parameter \$request of method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\Controller\:\:update_rest_query_in_editor\(\) has invalid type Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductCollection\\WP_REST_Request\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
-
-		-
-			message: '#^Variable \$parsed_block on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
 			count: 1
 			path: src/Blocks/BlockTypes/ProductCollection/Controller.php
 
