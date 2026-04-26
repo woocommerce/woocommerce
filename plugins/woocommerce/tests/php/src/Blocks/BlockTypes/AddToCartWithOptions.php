@@ -480,36 +480,42 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	 */
 	public function test_variation_selector_attribute_returns_empty_for_non_variable_products() {
 		global $product;
+		$original_product = $product;
 
 		$block_markup = '<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute /-->';
 
-		// Test with a simple product.
-		$simple_product = new \WC_Product_Simple();
-		$simple_product->set_regular_price( 10 );
-		$simple_product->save();
+		try {
+			// Test with a missing/invalid product context.
+			$product = null;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string when the global product is null.' );
 
-		$product = $simple_product;
-		$markup  = do_blocks( $block_markup );
+			$product = false;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string when the global product is false.' );
 
-		$this->assertSame( '', $markup, 'VariationSelectorAttribute should return empty string for simple products.' );
+			// Test with a simple product.
+			$simple_product = new \WC_Product_Simple();
+			$simple_product->set_regular_price( 10 );
+			$simple_product->save();
 
-		// Test with a grouped product.
-		$grouped_product = new \WC_Product_Grouped();
-		$grouped_product->save();
+			$product = $simple_product;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for simple products.' );
 
-		$product = $grouped_product;
-		$markup  = do_blocks( $block_markup );
+			// Test with a grouped product.
+			$grouped_product = new \WC_Product_Grouped();
+			$grouped_product->save();
 
-		$this->assertSame( '', $markup, 'VariationSelectorAttribute should return empty string for grouped products.' );
+			$product = $grouped_product;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for grouped products.' );
 
-		// Test with an external product.
-		$external_product = new \WC_Product_External();
-		$external_product->save();
+			// Test with an external product.
+			$external_product = new \WC_Product_External();
+			$external_product->save();
 
-		$product = $external_product;
-		$markup  = do_blocks( $block_markup );
-
-		$this->assertSame( '', $markup, 'VariationSelectorAttribute should return empty string for external products.' );
+			$product = $external_product;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for external products.' );
+		} finally {
+			$product = $original_product;
+		}
 	}
 
 	/**
