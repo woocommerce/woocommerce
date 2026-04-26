@@ -28,9 +28,6 @@ import {
 } from './mutation-batcher';
 
 export type WooCommerceConfig = {
-	products?: {
-		[ productId: number ]: ProductData;
-	};
 	messages?: {
 		addedToCartText?: string;
 	};
@@ -58,38 +55,6 @@ export type ClientCartItem = Omit<
 	quantity?: number;
 	/** Optional: add this delta to current quantity instead of setting absolute quantity */
 	quantityToAdd?: number;
-};
-
-export type VariationData = {
-	attributes: Record< string, string >;
-	is_in_stock: boolean;
-	sold_individually: boolean;
-	price_html?: string;
-	image_id?: number;
-	availability?: string;
-	variation_description?: string;
-	sku?: string;
-	weight?: string;
-	dimensions?: string;
-	min?: number;
-	max?: number;
-	step?: number;
-};
-
-export type ProductData = {
-	type: string;
-	is_in_stock: boolean;
-	sold_individually: boolean;
-	price_html?: string;
-	image_id?: number;
-	availability?: string;
-	sku?: string;
-	weight?: string;
-	dimensions?: string;
-	min?: number;
-	max?: number;
-	step?: number;
-	variations?: Record< number, VariationData >;
 };
 
 type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
