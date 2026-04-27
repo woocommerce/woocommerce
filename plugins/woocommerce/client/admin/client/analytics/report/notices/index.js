@@ -172,15 +172,6 @@ export default function NoticesReport() {
 							value: notificationsTotals.today
 								?.notifications_sent,
 						},
-						{
-							key: 'queued',
-							label: __( 'Queued', 'woocommerce' ),
-							value:
-								( notificationsTotals.all_time
-									?.active_signups || 0 ) +
-								( notificationsTotals.all_time
-									?.pending_signups || 0 ),
-						},
 					] }
 				/>
 				<SummaryCard
