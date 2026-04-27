@@ -18,22 +18,6 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
  */
 class EmailActionController {
 	/**
-	 * Action token for verifying (double opt-in) a pending notification sign-up.
-	 *
-	 * Must match the `email_link_action` query param produced by the verify
-	 * email template.
-	 */
-	public const ACTION_VERIFY = 'verify';
-
-	/**
-	 * Action token for unsubscribing an active notification sign-up.
-	 *
-	 * Must match the `email_link_action` query param produced by the "back in
-	 * stock" and confirmation email templates.
-	 */
-	public const ACTION_UNSUBSCRIBE = 'unsubscribe';
-
-	/**
 	 * EmailActionController constructor.
 	 *
 	 * Initializes the controller by adding actions to process verification and unsubscribe actions from requests.
@@ -73,14 +57,6 @@ class EmailActionController {
 			return;
 		}
 
-		// An empty $action means the caller omitted the routing argument — a
-		// programming error, not a mis-routed email. Return silently so the
-		// debug branch in the switch is reserved for genuinely-unknown
-		// tokens arriving in the wild.
-		if ( '' === $action ) {
-			return;
-		}
-
 		$notification = $this->get_notification_to_be_processed( $notification_id );
 
 		if ( ! $notification ) {
@@ -88,28 +64,13 @@ class EmailActionController {
 		}
 
 		switch ( $action ) {
-			case self::ACTION_VERIFY:
+			case 'verify':
 				$this->process_verification_action( $notification, $email_link_action_key );
 				break;
-			case self::ACTION_UNSUBSCRIBE:
+			case 'unsubscribe':
 				$this->process_unsubscribe_action( $notification, $email_link_action_key );
 				break;
-			default:
-				// Unknown action — silently drop in production, log in debug so
-				// mis-routed email links surface during alpha testing rather
-				// than no-op'ing invisibly.
-				if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-					wc_get_logger()->debug(
-						sprintf(
-							'Unknown email_link_action "%s" for notification %d',
-							$action,
-							$notification->get_id()
-						),
-						array( 'source' => 'stock-notifications' )
-					);
-				}
-				break;
-		}//end switch
+		}
 	}
 
 	/**
@@ -145,7 +106,6 @@ class EmailActionController {
 			 */
 			$url = apply_filters( 'woocommerce_customer_stock_notification_verified_redirect_url', get_permalink( wc_get_page_id( 'shop' ) ) );
 			wp_safe_redirect( $url );
-			exit;
 		}
 	}
 
@@ -183,7 +143,6 @@ class EmailActionController {
 			 */
 			$url = apply_filters( 'woocommerce_customer_stock_notification_unsubscribe_redirect_url', get_permalink( wc_get_page_id( 'shop' ) ) );
 			wp_safe_redirect( $url );
-			exit;
 		}
 	}
 

@@ -30,6 +30,9 @@ wp-env run tests-cli wp plugin activate process-waiting-actions
 echo -e 'Activate Test Helper APIs utility plugin \n'
 wp-env run tests-cli wp plugin activate test-helper-apis
 
+echo -e 'Activate Back in Stock Notifications e2e helpers \n'
+wp-env run tests-cli wp plugin activate bis-test-helpers
+
 echo -e 'Install Plugin-check utility plugin \n'
 wp-env run tests-cli wp plugin install plugin-check --activate
 

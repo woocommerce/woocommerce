@@ -215,8 +215,7 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
 
-		// Default Back In Stock alpha to enabled during tests when no
-		// per-suite override has been set.
+		// Enable Back In Stock alpha during tests.
 		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
 			define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
 		}
