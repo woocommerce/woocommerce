@@ -17,11 +17,11 @@ class Utils {
 	 *
 	 * @param string $capability A WordPress capability slug.
 	 *
-	 * @throws \GraphQL\Error\Error When the current user lacks the capability.
+	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error When the current user lacks the capability.
 	 */
 	public static function check_current_user_can( string $capability ): void {
 		if ( ! current_user_can( $capability ) ) {
-			throw new \GraphQL\Error\Error(
+			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
 				'You do not have permission to perform this action.',
 				extensions: array( 'code' => 'UNAUTHORIZED' )
 			);
@@ -60,7 +60,7 @@ class Utils {
 	 * @param array $args The GraphQL field arguments.
 	 *
 	 * @return \Automattic\WooCommerce\Api\Pagination\PaginationParams
-	 * @throws \GraphQL\Error\Error When a pagination value is out of range.
+	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error When a pagination value is out of range.
 	 */
 	public static function create_pagination_params( array $args ): \Automattic\WooCommerce\Api\Pagination\PaginationParams {
 		return self::create_input(
@@ -84,14 +84,14 @@ class Utils {
 	 * @param callable $factory A callable that returns the constructed object.
 	 *
 	 * @return mixed The return value of the factory.
-	 * @throws \GraphQL\Error\Error When the factory throws InvalidArgumentException.
+	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error When the factory throws InvalidArgumentException.
 	 */
 	public static function create_input( callable $factory ): mixed {
 		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
 		try {
 			return $factory();
 		} catch ( \InvalidArgumentException $e ) {
-			throw new \GraphQL\Error\Error(
+			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
 				$e->getMessage(),
 				extensions: array( 'code' => 'INVALID_ARGUMENT' )
 			);
@@ -107,7 +107,7 @@ class Utils {
 	 * @param array  $execute_args Named arguments to pass to execute().
 	 *
 	 * @return mixed The return value of execute().
-	 * @throws \GraphQL\Error\Error On any exception from the command.
+	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error On any exception from the command.
 	 */
 	public static function execute_command( object $command, array $execute_args ): mixed {
 		return self::translate_exceptions(
@@ -129,7 +129,7 @@ class Utils {
 	 * @param array  $authorize_args Named arguments to pass to authorize().
 	 *
 	 * @return bool The return value of authorize().
-	 * @throws \GraphQL\Error\Error On any exception from the authorize method.
+	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error On any exception from the authorize method.
 	 */
 	public static function authorize_command( object $command, array $authorize_args ): bool {
 		return self::translate_exceptions(
@@ -154,7 +154,7 @@ class Utils {
 	 * @param callable $operation Callable to invoke.
 	 *
 	 * @return mixed The return value of the callable.
-	 * @throws \GraphQL\Error\Error On any exception from the callable.
+	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error On any exception from the callable.
 	 */
 	public static function translate_exceptions( callable $operation ): mixed {
 		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
@@ -165,7 +165,7 @@ class Utils {
 			// getErrorCode() can't be silently overridden by an extensions
 			// entry keyed 'code'. The invariant "the code on the wire
 			// equals ApiException::getErrorCode()" is worth enforcing.
-			throw new \GraphQL\Error\Error(
+			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
 				$e->getMessage(),
 				extensions: array_merge(
 					$e->getExtensions(),
@@ -173,12 +173,12 @@ class Utils {
 				)
 			);
 		} catch ( \InvalidArgumentException $e ) {
-			throw new \GraphQL\Error\Error(
+			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
 				$e->getMessage(),
 				extensions: array( 'code' => 'INVALID_ARGUMENT' )
 			);
 		} catch ( \Throwable $e ) {
-			throw new \GraphQL\Error\Error(
+			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
 				'An unexpected error occurred.',
 				previous: $e,
 				extensions: array( 'code' => 'INTERNAL_ERROR' )

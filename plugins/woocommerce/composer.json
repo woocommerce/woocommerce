@@ -53,7 +53,6 @@
 		"composer/installers": "^1.9",
 		"maxmind-db/reader": "^1.11",
 		"opis/json-schema": "*",
-		"webonyx/graphql-php": "^15.31",
 		"woocommerce/action-scheduler": "3.9.3",
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "*",
@@ -110,7 +109,8 @@
 			"src/StoreApi/deprecated.php",
 			"src/StoreApi/functions.php",
 			"src/Blocks/Domain/Services/functions.php",
-			"src/Deprecated.php"
+			"src/Deprecated.php",
+			"src/Internal/Api/Schema/aliases.php"
 		]
 	},
 	"autoload-dev": {
