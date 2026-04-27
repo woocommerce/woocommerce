@@ -515,7 +515,7 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for external products.' );
 		} finally {
 			$product = $original_product;
-		}
+		}//end try
 	}
 
 	/**
