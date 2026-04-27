@@ -4265,7 +4265,7 @@ table.wc_shipping {
 /**
 * New Shipping Settings Refresh Modal Styles
 **/
-
+.wc-backbone-modal-add-attribute-term,
 .wc-backbone-modal-add-shipping-method,
 .wc-backbone-modal-shipping-method-settings,
 .wc-shipping-class-modal {
@@ -4406,6 +4406,7 @@ table.wc_shipping {
 		}
 	}
 
+	.wc-add-attribute-term-fields,
 	.wc-shipping-zone-method-fields {
 
 		& > label {
@@ -4536,6 +4537,26 @@ table.wc_shipping {
 		animation-timeline: auto;
 		animation-range-start: normal;
 		color: #757575;
+	}
+}
+
+.wc-backbone-modal-add-attribute-term.wc-backbone-modal {
+	.wc-backbone-modal-content {
+		min-width: auto;
+		max-width: 400px;
+	}
+
+	input[type="text"] {
+		display: block;
+		font-size: 13px;
+		line-height: 16px;
+		margin: 6px 0;
+		padding: 12px;
+		width: 100%;
+	}
+
+	.wc-backbone-modal-main footer {
+		border-top: none;
 	}
 }
 
