@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a written assessment (RSM-673) of where the Back in Stock Notifications alpha should and shouldn't integrate with the paid Product Bundles, Subscriptions, and Pre-Orders extensions. Doc-only; behind the `WOOCOMMERCE_BIS_ALPHA_ENABLED` alpha gate.
