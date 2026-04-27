@@ -107,10 +107,17 @@ class QueryCache {
 	/**
 	 * Retrieve a cached DocumentNode by hash.
 	 *
+	 * Returns false unconditionally when the ObjectCache toggle is off so the
+	 * caller falls through to a fresh parse on every request.
+	 *
 	 * @param string $hash The SHA-256 hash.
 	 * @return DocumentNode|false
 	 */
 	private function get_cached_document( string $hash ) {
+		if ( ! Main::is_object_cache_enabled() ) {
+			return false;
+		}
+
 		$cached = wp_cache_get( $this->build_cache_key( $hash ), self::CACHE_GROUP );
 		if ( false === $cached || ! is_array( $cached ) ) {
 			return false;
@@ -135,7 +142,9 @@ class QueryCache {
 			return $this->error_response( 'GraphQL syntax error: ' . $e->getMessage(), 'GRAPHQL_PARSE_ERROR' );
 		}
 
-		wp_cache_set( $this->build_cache_key( $hash ), $document->toArray(), self::CACHE_GROUP, self::get_cache_ttl() );
+		if ( Main::is_object_cache_enabled() ) {
+			wp_cache_set( $this->build_cache_key( $hash ), $document->toArray(), self::CACHE_GROUP, self::get_cache_ttl() );
+		}
 
 		return $document;
 	}

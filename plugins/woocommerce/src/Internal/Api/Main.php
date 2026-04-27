@@ -28,6 +28,14 @@ class Main {
 	public const OPTION_GET_ENDPOINT_ENABLED = 'woocommerce_graphql_get_endpoint_enabled';
 
 	/**
+	 * Option name for the "ObjectCache-based caching" setting.
+	 *
+	 * When disabled, {@see QueryCache} parses every incoming query without
+	 * touching the WP object cache.
+	 */
+	public const OPTION_OBJECT_CACHE_ENABLED = 'woocommerce_graphql_object_cache_enabled';
+
+	/**
 	 * Cached result of the feature-enabled check, null until first evaluated.
 	 *
 	 * @var ?bool
@@ -58,6 +66,16 @@ class Main {
 	 */
 	public static function is_get_endpoint_enabled(): bool {
 		return wc_string_to_bool( get_option( self::OPTION_GET_ENDPOINT_ENABLED, 'yes' ) );
+	}
+
+	/**
+	 * Whether the ObjectCache-backed query cache is enabled.
+	 *
+	 * Defaults to true. When false, {@see QueryCache} bypasses the WP object
+	 * cache entirely and parses every query on each request.
+	 */
+	public static function is_object_cache_enabled(): bool {
+		return wc_string_to_bool( get_option( self::OPTION_OBJECT_CACHE_ENABLED, 'yes' ) );
 	}
 
 	/**

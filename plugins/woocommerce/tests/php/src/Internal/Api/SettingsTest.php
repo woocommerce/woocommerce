@@ -72,4 +72,16 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'checkbox', $by_id[ Main::OPTION_GET_ENDPOINT_ENABLED ]['type'] );
 		$this->assertSame( 'yes', $by_id[ Main::OPTION_GET_ENDPOINT_ENABLED ]['default'] );
 	}
+
+	/**
+	 * @testdox add_settings defines the ObjectCache checkbox with a 'yes' default.
+	 */
+	public function test_add_settings_defines_object_cache_checkbox(): void {
+		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
+		$by_id  = array_column( $fields, null, 'id' );
+
+		$this->assertArrayHasKey( Main::OPTION_OBJECT_CACHE_ENABLED, $by_id );
+		$this->assertSame( 'checkbox', $by_id[ Main::OPTION_OBJECT_CACHE_ENABLED ]['type'] );
+		$this->assertSame( 'yes', $by_id[ Main::OPTION_OBJECT_CACHE_ENABLED ]['default'] );
+	}
 }

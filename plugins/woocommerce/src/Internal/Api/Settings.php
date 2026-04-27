@@ -63,6 +63,13 @@ class Settings {
 				'type'    => 'checkbox',
 			),
 			array(
+				'title'   => __( 'Enable ObjectCache-based caching', 'woocommerce' ),
+				'desc'    => __( 'Cache parsed queries in the WP object cache', 'woocommerce' ),
+				'id'      => Main::OPTION_OBJECT_CACHE_ENABLED,
+				'default' => 'yes',
+				'type'    => 'checkbox',
+			),
+			array(
 				'type' => 'sectionend',
 				'id'   => 'woocommerce_graphql_options',
 			),
