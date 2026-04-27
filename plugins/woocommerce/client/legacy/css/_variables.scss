@@ -25,8 +25,8 @@ $contentbg:         #fff !default;                                     // Conten
 $subtext:           #767676 !default;                                  // small, breadcrumbs etc
 
 // Brand link color mapped from Figma design tokens (#3858e9).
-// Meets WCAG-AA for normal (small) text with a contrast ratio of 8.53:1 on white backgrounds.
-// Suitable for regular text sizes like 12px non-bold.
+// Contrast ratio against white is ~6.85:1, which meets WCAG-AA for normal text
+// (≥ 4.5:1) but not AAA (≥ 7:1).
 $brand:             #3858e9 !default;
 
 // export vars as CSS vars
