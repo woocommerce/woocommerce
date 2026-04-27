@@ -115,7 +115,7 @@ class Settings {
 		}
 
 		foreach ( $parts as $part ) {
-			if ( '' === $part || ! preg_match( '/^[A-Za-z0-9_\-]+$/', $part ) ) {
+			if ( '' === $part || ! preg_match( GraphQLController::ENDPOINT_URL_SEGMENT_PATTERN, $part ) ) {
 				\WC_Admin_Settings::add_error(
 					sprintf(
 						/* translators: %s: the invalid path segment */

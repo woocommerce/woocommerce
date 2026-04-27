@@ -134,9 +134,12 @@ class GraphQLControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function provider_invalid_endpoint_url_values(): array {
 		return array(
-			'empty string'   => array( '' ),
-			'slashes only'   => array( '///' ),
-			'single segment' => array( 'graphql' ),
+			'empty string'         => array( '' ),
+			'slashes only'         => array( '///' ),
+			'single segment'       => array( 'graphql' ),
+			'empty middle segment' => array( 'wc//graphql' ),
+			'invalid character'    => array( 'wc/graph*ql' ),
+			'space in segment'     => array( 'wc/my graphql' ),
 		);
 	}
 }
