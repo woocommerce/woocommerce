@@ -2,22 +2,18 @@
  * External dependencies
  */
 import { DataViews, View } from '@wordpress/dataviews';
-import {
-	useState,
-	useMemo,
-	useCallback,
-	useEffect,
-	Fragment,
-} from '@wordpress/element';
-import { ProductQuery, productsStore } from '@woocommerce/data';
+import { useState, useMemo, useCallback, useEffect } from '@wordpress/element';
+import { ProductQuery } from '@woocommerce/data';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import { store as coreStore } from '@wordpress/core-data';
+import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import clsx from 'clsx';
-import { Button } from '@wordpress/components';
+import { Button, Stack } from '@wordpress/ui';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 import { Page } from '@wordpress/admin-ui';
+import { addQueryArgs } from '@wordpress/url';
+import { getAdminLink } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -29,7 +25,7 @@ import {
 	DEFAULT_PRODUCT_TABLE_LAYOUT,
 	DEFAULT_PRODUCT_TABLE_VIEW,
 } from './layouts';
-import { useEditProductAction } from '../dataviews-actions';
+import { useProductActions } from '../dataviews-actions';
 
 const { usePostActions } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
@@ -79,11 +75,7 @@ function getItemId( item: ProductEntityRecord ) {
 	return item.id.toString();
 }
 
-export default function ProductList( {
-	subTitle,
-	className,
-	hideTitleFromUI = false,
-}: ProductListProps ) {
+export default function ProductList( { className }: ProductListProps ) {
 	const history = useHistory();
 	const location = useLocation();
 	const {
@@ -133,19 +125,14 @@ export default function ProductList( {
 		[ history, location.params ]
 	);
 
-	// TODO: Use the Woo data store to get all the products, as this doesn't contain all the product data.
-	const { records, totalCount, isLoading } = useSelect(
-		( select ) => {
-			// @ts-expect-error - The productsStore doesn't have types yet.
-			const { getProducts, getProductsTotalCount, isResolving } =
-				select( productsStore );
-			return {
-				records: getProducts( queryParams ) as ProductEntityRecord[],
-				totalCount: getProductsTotalCount( queryParams ),
-				isLoading: isResolving( 'getProducts', [ queryParams ] ),
-			};
-		},
-		[ queryParams ]
+	const {
+		records,
+		totalItems: totalCount,
+		isResolving: isLoading,
+	} = useEntityRecords< ProductEntityRecord >(
+		'root',
+		'product',
+		queryParams
 	);
 
 	const paginationInfo = useMemo(
@@ -158,14 +145,10 @@ export default function ProductList( {
 		[ totalCount, view.perPage ]
 	);
 
-	const { labels, canCreateRecord } = useSelect(
+	const { canCreateRecord } = useSelect(
 		( select ) => {
-			const { getPostType, canUser } = select( coreStore );
-			const postTypeData:
-				| { labels: Record< string, string > }
-				| undefined = getPostType( postType );
+			const { canUser } = select( coreStore );
 			return {
-				labels: postTypeData?.labels,
 				canCreateRecord: canUser( 'create', {
 					kind: 'postType',
 					name: postType,
@@ -179,36 +162,74 @@ export default function ProductList( {
 		postType,
 		context: 'list',
 	} );
-	const editAction = useEditProductAction( { postType } );
+	const productActions = useProductActions();
 	const actions = useMemo(
-		() => [ editAction, ...postTypeActions ],
-		[ postTypeActions, editAction ]
+		() => [
+			...productActions,
+			...postTypeActions.filter(
+				( { id }: { id: string } ) => id !== 'view-post'
+			),
+		],
+		[ postTypeActions, productActions ]
 	);
 
 	const classes = clsx( 'edit-site-page', className );
 
-	const pageActions = ! hideTitleFromUI && (
-		<Fragment>
-			{ labels?.add_new_item && canCreateRecord && (
-				<Button
-					variant="primary"
-					disabled={ true }
-					__next40pxDefaultSize
-				>
-					{ labels.add_new_item }
-				</Button>
-			) }
-		</Fragment>
+	const pageActions = (
+		<Stack gap="lg">
+			<Button
+				size="compact"
+				variant="outline"
+				onClick={ () =>
+					( window.location.href = getAdminLink(
+						addQueryArgs( 'edit.php', {
+							post_type: 'product',
+							page: 'product_exporter',
+						} )
+					) )
+				}
+			>
+				{ __( 'Export', 'woocommerce' ) }
+			</Button>
+			<Button
+				size="compact"
+				onClick={ () =>
+					( window.location.href = getAdminLink(
+						addQueryArgs( 'edit.php', {
+							post_type: 'product',
+							page: 'product_importer',
+						} )
+					) )
+				}
+				variant="outline"
+			>
+				{ __( 'Import', 'woocommerce' ) }
+			</Button>
+			<Button
+				size="compact"
+				disabled={ canCreateRecord === false }
+				onClick={ () =>
+					( window.location.href = getAdminLink(
+						addQueryArgs( 'post-new.php', {
+							post_type: 'product',
+						} )
+					) )
+				}
+			>
+				{ __( 'Add new product', 'woocommerce' ) }
+			</Button>
+		</Stack>
 	);
 
 	return (
 		<Page
 			className={ classes }
 			ariaLabel={ __( 'Products', 'woocommerce' ) }
-			title={
-				hideTitleFromUI ? undefined : __( 'Products', 'woocommerce' )
-			}
-			subTitle={ hideTitleFromUI ? undefined : subTitle }
+			subTitle={ __(
+				'Add, edit, and manage the products you sell in your store',
+				'woocommerce'
+			) }
+			title={ __( 'Products', 'woocommerce' ) }
 			actions={ pageActions }
 		>
 			<DataViews
