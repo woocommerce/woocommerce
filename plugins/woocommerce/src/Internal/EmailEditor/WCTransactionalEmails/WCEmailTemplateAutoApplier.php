@@ -215,16 +215,15 @@ class WCEmailTemplateAutoApplier {
 	 * batch (acceptance criterion). Status meta is never mutated by this method
 	 * on failure — the next sweep re-classifies.
 	 *
-	 * Returns `false` always (one-shot, no AS retry — same convention as
-	 * {@see WCEmailTemplateSyncBackfill::run()}).
-	 *
-	 * @return bool Always false.
+	 * Declared `void` because Action Scheduler async-action callbacks discard
+	 * the return value; a return type would just be noise (and trip PHPStan's
+	 * `return.void` rule on `add_action`).
 	 *
 	 * @since 10.8.0
 	 */
-	public static function run(): bool {
+	public static function run(): void {
 		if ( 'yes' !== get_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION ) ) {
-			return false;
+			return;
 		}
 
 		$candidate_ids = get_posts(
@@ -244,7 +243,7 @@ class WCEmailTemplateAutoApplier {
 		);
 
 		if ( empty( $candidate_ids ) ) {
-			return false;
+			return;
 		}
 
 		$registry      = WCEmailTemplateSyncRegistry::get_sync_enabled_emails();
@@ -284,8 +283,6 @@ class WCEmailTemplateAutoApplier {
 				continue;
 			}
 		}
-
-		return false;
 	}
 
 	/**
