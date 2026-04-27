@@ -24,7 +24,8 @@
 			"themes": [],
 			"config": {
 				"WP_TESTS_DOMAIN": "localhost",
-				"ALTERNATE_WP_CRON": false
+				"ALTERNATE_WP_CRON": false,
+				"WOOCOMMERCE_BIS_ALPHA_ENABLED": true
 			},
 			"mappings": {
 				"wp-cli.yml": "./tests/wp-cli.yml",

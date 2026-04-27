@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Rate-limit the Back in Stock Notifications sign-up endpoint per-IP and per-email address to defend against abuse. Defaults to 5 sign-ups per IP and 3 per email per 10-minute window, both filterable. Behind the `WOOCOMMERCE_BIS_ALPHA_ENABLED` alpha gate.
