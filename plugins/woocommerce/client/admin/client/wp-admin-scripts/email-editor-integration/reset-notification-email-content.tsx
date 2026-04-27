@@ -104,9 +104,16 @@ const getResetNotificationEmailContentAction = () => {
 
 								try {
 									const response = ( await apiFetch( {
-										path: `/woocommerce-email-editor/v1/emails/${ item.id }/default-content`,
+										path: `/woocommerce-email-editor/v1/emails/${ item.id }/reset`,
+										method: 'POST',
 									} ) ) as { content: string };
 
+									// Server has already persisted post_content + sync meta.
+									// Sync the editor's in-memory state so the user sees the
+									// reset content without a page reload. The trailing
+									// saveEditedEntityRecord is a content no-op (matches what
+									// the server just wrote) but keeps core-data's dirty
+									// tracking in a consistent state.
 									const blocks = parse(
 										response.content || ''
 									);

@@ -38,6 +38,58 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_command_palette_assets' ) );
+			add_action( 'admin_notices', array( $this, 'render_lost_connection_notice' ) );
+		}
+
+		/**
+		 * Render WordPress core's #lost-connection-notice markup on Woo admin
+		 * screens that don't already get it for free.
+		 *
+		 * WP core renders this element on classic post-type edit pages (via
+		 * edit-form-advanced.php), and wp-autosave.js toggles it in response
+		 * to Heartbeat events. By echoing the same markup here and enqueueing
+		 * the `autosave` script (see admin_scripts()), Woo admin screens
+		 * inherit the same offline awareness without any new copy, styling,
+		 * or behavior.
+		 *
+		 * Translation strings use the 'default' text domain so WP core's
+		 * existing translations apply.
+		 *
+		 * Skipped on:
+		 * - Classic post-type edit screens (WP core already renders the notice).
+		 * - wc-admin React pages (they use their own layout rather than the
+		 *   standard admin_notices position).
+		 *
+		 * @return void
+		 */
+		public function render_lost_connection_notice() {
+			$screen = get_current_screen();
+			if ( ! $screen ) {
+				return;
+			}
+
+			if ( 'post' === $screen->base ) {
+				return;
+			}
+
+			$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
+				&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
+			if ( $is_wc_admin_page ) {
+				return;
+			}
+
+			if ( ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
+				return;
+			}
+			?>
+			<div id="lost-connection-notice" class="notice error hidden">
+				<p>
+					<span class="spinner"></span>
+					<strong><?php esc_html_e( 'Connection lost.' ); /* phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- Reusing WP core translation. */ ?></strong>
+					<?php esc_html_e( 'Saving has been disabled until you are reconnected.' ); /* phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- Reusing WP core translation. */ ?>
+				</p>
+			</div>
+			<?php
 		}
 
 		/**
@@ -413,6 +465,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'iris' );
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
+
+				// Pair the #lost-connection-notice markup with core's autosave script.
+				// See render_lost_connection_notice() for scoping rationale.
+				$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
+					&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
+				if ( 'post' !== ( $screen->base ?? '' ) && ! $is_wc_admin_page ) {
+					wp_enqueue_script( 'autosave' );
+				}
 
 				wp_enqueue_script( 'jquery-ui-sortable' );
 				wp_enqueue_script( 'jquery-ui-autocomplete' );

@@ -144,11 +144,13 @@ jQuery( function ( $ ) {
 				$( 'input#_virtual' ).prop( 'checked', false );
 			}
 
-			const cogs_field_tip = $( '._cogs_value_field' ).find( '.woocommerce-help-tip' );
+			const cogs_field_tip = $( '._cogs_value_field' ).find(
+				'.woocommerce-help-tip'
+			);
 			const cogs_field_tip_text =
-				'variable' === select_val ?
-					woocommerce_admin_meta_boxes.cogs_value_tooltip_variable_products :
-					woocommerce_admin_meta_boxes.cogs_value_tooltip_simple_products;
+				'variable' === select_val
+					? woocommerce_admin_meta_boxes.cogs_value_tooltip_variable_products
+					: woocommerce_admin_meta_boxes.cogs_value_tooltip_simple_products;
 			$( cogs_field_tip ).attr( 'aria-label', cogs_field_tip_text );
 			$( cogs_field_tip ).tipTip( {
 				attribute: 'aria-label',
@@ -191,16 +193,16 @@ jQuery( function ( $ ) {
 		$( '#tiptip_holder' ).removeAttr( 'style' );
 		$( '#tiptip_arrow' ).removeAttr( 'style' );
 		$( '.woocommerce-product-type-tip' )
-		.attr( 'tabindex', '0' )
-		.attr( 'aria-label', $( '<div />' ).html( content ).text() ) // Remove HTML tags.
-		.tipTip( {
-			attribute: 'data-tip',
-			content: content,
-			fadeIn: 50,
-			fadeOut: 50,
-			delay: 200,
-			keepAlive: true,
-		} );
+			.attr( 'tabindex', '0' )
+			.attr( 'aria-label', $( '<div />' ).html( content ).text() ) // Remove HTML tags.
+			.tipTip( {
+				attribute: 'data-tip',
+				content: content,
+				fadeIn: 50,
+				fadeOut: 50,
+				delay: 200,
+				keepAlive: true,
+			} );
 	}
 
 	function get_product_tip_content( product_type ) {
@@ -259,7 +261,9 @@ jQuery( function ( $ ) {
 		$( '.hide_if_' + product_type, context ).hide();
 
 		// POS visibility - requires combination of type AND downloadable status.
-		var is_pos_supported = ( product_type === 'simple' || product_type === 'variable' ) && ! is_downloadable;
+		var is_pos_supported =
+			( product_type === 'simple' || product_type === 'variable' ) &&
+			! is_downloadable;
 		if ( is_pos_supported ) {
 			$( '#pos_visibility_supported', context ).show();
 			$( '#pos_visibility_unsupported', context ).hide();
@@ -435,18 +439,22 @@ jQuery( function ( $ ) {
 	const $product_attributes = $( '.product_attributes' );
 	if ( $product_attributes.length === 1 ) {
 		// When the attributes tab is shown, add an empty attribute to be filled out by the user.
-		$( '#product_attributes' ).on( 'woocommerce_tab_shown', function() {
+		$( '#product_attributes' ).on( 'woocommerce_tab_shown', function () {
 			remove_blank_custom_attribute_if_no_other_attributes();
 
-			const woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
+			const woocommerce_attribute_items = $product_attributes
+				.find( '.woocommerce_attribute' )
+				.get();
 
 			// If the product has no attributes, add an empty attribute to be filled out by the user.
-			if ( woocommerce_attribute_items.length === 0  ) {
+			if ( woocommerce_attribute_items.length === 0 ) {
 				add_custom_attribute_to_list();
 			}
 		} );
 
-		const woocommerce_attribute_items = $product_attributes.find( '.woocommerce_attribute' ).get();
+		const woocommerce_attribute_items = $product_attributes
+			.find( '.woocommerce_attribute' )
+			.get();
 
 		// Sort the attributes by their position.
 		woocommerce_attribute_items.sort( function ( a, b ) {
@@ -477,6 +485,7 @@ jQuery( function ( $ ) {
 	}
 
 	var selectedAttributes = [];
+	var currentAttributeTermCreationContext = null;
 	$( '.product_attributes .woocommerce_attribute' ).each( function (
 		index,
 		el
@@ -491,13 +500,17 @@ jQuery( function ( $ ) {
 				.attr( 'disabled', 'disabled' );
 		}
 
-		if ( 'undefined' === $(el).attr( 'data-taxonomy' ) ||
-			false === $(el).attr( 'data-taxonomy' ) ||
-			'' === $(el).attr( 'data-taxonomy' ) ) {
-			add_placeholder_to_attribute_values_field( $(el) );
+		if (
+			'undefined' === $( el ).attr( 'data-taxonomy' ) ||
+			false === $( el ).attr( 'data-taxonomy' ) ||
+			'' === $( el ).attr( 'data-taxonomy' )
+		) {
+			add_placeholder_to_attribute_values_field( $( el ) );
 
-			$( '.woocommerce_attribute input.woocommerce_attribute_used_for_variations' ).on( 'change', function() {
-				add_placeholder_to_attribute_values_field( $(el) );
+			$(
+				'.woocommerce_attribute input.woocommerce_attribute_used_for_variations'
+			).on( 'change', function () {
+				add_placeholder_to_attribute_values_field( $( el ) );
 			} );
 		}
 	} );
@@ -552,15 +565,27 @@ jQuery( function ( $ ) {
 	}
 
 	function add_placeholder_to_attribute_values_field( $attributeListItem ) {
+		var $used_for_variations_checkbox = $attributeListItem.find(
+			'input.woocommerce_attribute_used_for_variations'
+		);
 
-		var $used_for_variations_checkbox = $attributeListItem.find( 'input.woocommerce_attribute_used_for_variations' );
-
-		if ( $used_for_variations_checkbox.length && $used_for_variations_checkbox.is( ':checked' ) ) {
-			$attributeListItem.find( 'textarea' )
-				.attr( 'placeholder', woocommerce_admin_meta_boxes.i18n_attributes_used_for_variations_placeholder );
+		if (
+			$used_for_variations_checkbox.length &&
+			$used_for_variations_checkbox.is( ':checked' )
+		) {
+			$attributeListItem
+				.find( 'textarea' )
+				.attr(
+					'placeholder',
+					woocommerce_admin_meta_boxes.i18n_attributes_used_for_variations_placeholder
+				);
 		} else {
-			$attributeListItem.find( 'textarea' )
-				.attr( 'placeholder', woocommerce_admin_meta_boxes.i18n_attributes_default_placeholder );
+			$attributeListItem
+				.find( 'textarea' )
+				.attr(
+					'placeholder',
+					woocommerce_admin_meta_boxes.i18n_attributes_default_placeholder
+				);
 		}
 	}
 
@@ -601,8 +626,12 @@ jQuery( function ( $ ) {
 			if ( 'undefined' === typeof globalAttributeId ) {
 				add_placeholder_to_attribute_values_field( $attributeListItem );
 
-				$( '.woocommerce_attribute input.woocommerce_attribute_used_for_variations' ).on( 'change', function() {
-					add_placeholder_to_attribute_values_field( $(this).closest( '.woocommerce_attribute' ) );
+				$(
+					'.woocommerce_attribute input.woocommerce_attribute_used_for_variations'
+				).on( 'change', function () {
+					add_placeholder_to_attribute_values_field(
+						$( this ).closest( '.woocommerce_attribute' )
+					);
 				} );
 			}
 
@@ -616,7 +645,9 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			alert( woocommerce_admin_meta_boxes.i18n_add_attribute_error_notice );
+			alert(
+				woocommerce_admin_meta_boxes.i18n_add_attribute_error_notice
+			);
 			throw error;
 		} finally {
 			unblock_attributes_tab_container();
@@ -663,14 +694,17 @@ jQuery( function ( $ ) {
 
 	// Handle the Attributes onboarding dismissible notice.
 	// If users dismiss the notice, never show it again.
-	if ( localStorage.getItem('attributes-notice-dismissed' ) ) {
+	if ( localStorage.getItem( 'attributes-notice-dismissed' ) ) {
 		$( '#product_attributes .notice' ).hide();
 	}
 
-	$( '#product_attributes .notice.woocommerce-message button' ).on( 'click', function( e ) {
-		$( '#product_attributes .notice' ).hide();
-		localStorage.setItem( 'attributes-notice-dismissed', 'true');
-	} );
+	$( '#product_attributes .notice.woocommerce-message button' ).on(
+		'click',
+		function ( e ) {
+			$( '#product_attributes .notice' ).hide();
+			localStorage.setItem( 'attributes-notice-dismissed', 'true' );
+		}
+	);
 
 	$( 'select.wc-attribute-search' ).on( 'select2:select', function ( e ) {
 		const attributeId = e && e.params && e.params.data && e.params.data.id;
@@ -861,12 +895,143 @@ jQuery( function ( $ ) {
 		},
 	} );
 
+	$( document.body ).on(
+		'wc_backbone_modal_loaded',
+		function ( event, target ) {
+			if ( 'wc-modal-add-attribute-term' !== target ) {
+				return;
+			}
+
+			const modal = document.querySelector(
+				'.wc-backbone-modal-add-attribute-term'
+			);
+
+			if ( ! modal ) {
+				return;
+			}
+
+			const termInput = modal.querySelector(
+				'#wc-modal-add-attribute-term-input'
+			);
+			if ( termInput ) {
+				termInput.focus();
+			}
+
+			const form = modal.querySelector( '.wc-add-attribute-term-fields' );
+			if ( form ) {
+				form.addEventListener( 'submit', ( submitEvent ) => {
+					submitEvent.preventDefault();
+
+					const submitButton = modal.querySelector( '#btn-ok' );
+					if ( submitButton && ! submitButton.disabled ) {
+						submitButton.click();
+					}
+				} );
+			}
+		}
+	);
+
+	$( document.body ).on(
+		'wc_backbone_modal_validation',
+		function ( event, target, postedData ) {
+			if ( 'wc-modal-add-attribute-term' !== target ) {
+				return;
+			}
+
+			const modal = document.querySelector(
+				'.wc-backbone-modal-add-attribute-term'
+			);
+
+			if ( ! modal ) {
+				return;
+			}
+
+			const submitButton = modal.querySelector( '#btn-ok' );
+
+			if ( ! submitButton ) {
+				return;
+			}
+
+			const termName =
+				postedData && postedData.term ? postedData.term.trim() : '';
+			const hasValue = termName.length > 0;
+
+			submitButton.disabled = ! hasValue;
+		}
+	);
+
+	$( document.body ).on(
+		'wc_backbone_modal_response',
+		function ( event, target, postedData ) {
+			if ( 'wc-modal-add-attribute-term' !== target ) {
+				return;
+			}
+
+			if (
+				! currentAttributeTermCreationContext ||
+				! currentAttributeTermCreationContext.wrapper ||
+				! currentAttributeTermCreationContext.attribute
+			) {
+				$( '.product_attributes' ).unblock();
+				return;
+			}
+
+			const termName =
+				postedData && postedData.term ? postedData.term.trim() : '';
+
+			if ( ! termName ) {
+				$( '.product_attributes' ).unblock();
+				return;
+			}
+
+			const wrapper = currentAttributeTermCreationContext.wrapper;
+			const data = {
+				action: 'woocommerce_add_new_attribute',
+				taxonomy: currentAttributeTermCreationContext.attribute,
+				term: termName,
+				security: woocommerce_admin_meta_boxes.add_attribute_nonce,
+			};
+
+			$.post(
+				woocommerce_admin_meta_boxes.ajax_url,
+				data,
+				function ( response ) {
+					if ( response.error ) {
+						// Error.
+						window.alert( response.error );
+					} else if ( response.slug ) {
+						// Success.
+						const select = wrapper.querySelector(
+							'select.attribute_values'
+						);
+						if ( select ) {
+							const option = document.createElement( 'option' );
+							option.value = String( response.term_id );
+							option.selected = true;
+							option.textContent = response.name;
+							select.appendChild( option );
+
+							// Trigger change event natively.
+							const changeEvent = new Event( 'change', {
+								bubbles: true,
+							} );
+							select.dispatchEvent( changeEvent );
+						}
+					}
+
+					$( '.product_attributes' ).unblock();
+					currentAttributeTermCreationContext = null;
+				}
+			);
+		}
+	);
+
 	// Add a new attribute (via ajax).
 	$( '.product_attributes' ).on(
 		'click',
 		'button.add_new_attribute',
 		function ( event ) {
-			// prevent form submission but allow event propagation
+			// Prevent form submission but allow event propagation.
 			event.preventDefault();
 
 			$( '.product_attributes' ).block( {
@@ -877,49 +1042,33 @@ jQuery( function ( $ ) {
 				},
 			} );
 
-			var $wrapper = $( this ).closest( '.woocommerce_attribute' );
-			var attribute = $wrapper.data( 'taxonomy' );
-			var new_attribute_name = window.prompt(
-				woocommerce_admin_meta_boxes.new_attribute_prompt
-			);
+			const wrapper = this.closest( '.woocommerce_attribute' );
+			const attribute = wrapper ? wrapper.dataset.taxonomy : '';
 
-			if ( new_attribute_name ) {
-				var data = {
-					action: 'woocommerce_add_new_attribute',
-					taxonomy: attribute,
-					term: new_attribute_name,
-					security: woocommerce_admin_meta_boxes.add_attribute_nonce,
-				};
+			currentAttributeTermCreationContext = {
+				wrapper,
+				attribute,
+			};
 
-				$.post(
-					woocommerce_admin_meta_boxes.ajax_url,
-					data,
-					function ( response ) {
-						if ( response.error ) {
-							// Error.
-							window.alert( response.error );
-						} else if ( response.slug ) {
-							// Success.
-							$wrapper
-								.find( 'select.attribute_values' )
-								.append(
-									'<option value="' +
-										response.term_id +
-										'" selected="selected">' +
-										response.name +
-										'</option>'
-								);
-							$wrapper
-								.find( 'select.attribute_values' )
-								.trigger( 'change' );
-						}
+			$( this ).WCBackboneModal( {
+				template: 'wc-modal-add-attribute-term',
+			} );
+		}
+	);
 
-						$( '.product_attributes' ).unblock();
-					}
-				);
-			} else {
-				$( '.product_attributes' ).unblock();
+	$( document.body ).on(
+		'wc_backbone_modal_before_remove',
+		function ( event, target, postedData, submitButtonCalled ) {
+			if ( 'wc-modal-add-attribute-term' !== target ) {
+				return;
 			}
+
+			if ( submitButtonCalled ) {
+				return;
+			}
+
+			$( '.product_attributes' ).unblock();
+			currentAttributeTermCreationContext = null;
 		}
 	);
 
@@ -1280,8 +1429,9 @@ jQuery( function ( $ ) {
 
 	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
 	const setProductImageLink = $( '#set-post-thumbnail' );
-	const tooltipMarkup =
-		`<span class="woocommerce-help-tip" tabindex="0" aria-label="${ woocommerce_admin_meta_boxes.i18n_product_image_tip }"></span>`;
+	const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${
+		woocommerce_admin_meta_boxes.i18n_product_image_tip
+	}"></span>`;
 	const tooltipData = {
 		attribute: 'data-tip',
 		content: woocommerce_admin_meta_boxes.i18n_product_image_tip,
