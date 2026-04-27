@@ -100,12 +100,24 @@ class RestController extends \WC_REST_Controller {
 					'callback'            => array( $this, 'get_top_demand' ),
 					'permission_callback' => array( $this, 'check_permission' ),
 					'args'                => array(
-						'limit' => array(
+						'limit'   => array(
 							'description' => __( 'Maximum number of products to return.', 'woocommerce' ),
 							'type'        => 'integer',
 							'default'     => 10,
 							'minimum'     => 1,
 							'maximum'     => 50,
+						),
+						'sort_by' => array(
+							'description' => __( 'Ranking metric.', 'woocommerce' ),
+							'type'        => 'string',
+							'default'     => 'active_signups',
+							'enum'        => array( 'active_signups', 'period_signups', 'most_overdue' ),
+						),
+						'window'  => array(
+							'description' => __( 'Time window for the period_signups sort. Ignored for other sort_by values.', 'woocommerce' ),
+							'type'        => 'string',
+							'default'     => 'month',
+							'enum'        => array( 'week', 'month', 'quarter' ),
 						),
 					),
 				),
@@ -169,21 +181,29 @@ class RestController extends \WC_REST_Controller {
 		$per_page = (int) $request->get_param( 'per_page' );
 		$page     = (int) $request->get_param( 'page' );
 
-		$all_time         = NotificationQuery::get_totals();
-		$one_week_ago_gmt = gmdate( 'Y-m-d H:i:s', time() - ( 7 * DAY_IN_SECONDS ) );
-		$this_week        = NotificationQuery::get_totals( $one_week_ago_gmt );
-		$per_product      = NotificationQuery::get_per_product_summary( $per_page, $page );
+		$now           = time();
+		$today_gmt     = gmdate( 'Y-m-d 00:00:00', $now );
+		$one_week_ago  = gmdate( 'Y-m-d H:i:s', $now - ( 7 * DAY_IN_SECONDS ) );
+		$one_month_ago = gmdate( 'Y-m-d H:i:s', $now - ( 30 * DAY_IN_SECONDS ) );
+
+		$all_time    = NotificationQuery::get_totals();
+		$this_month  = NotificationQuery::get_totals( $one_month_ago );
+		$this_week   = NotificationQuery::get_totals( $one_week_ago );
+		$today       = NotificationQuery::get_totals( $today_gmt );
+		$per_product = NotificationQuery::get_per_product_summary( $per_page, $page );
 
 		$response = rest_ensure_response(
 			array(
-				'totals'    => array(
-					'all_time'  => $all_time,
-					'this_week' => $this_week,
+				'totals'   => array(
+					'all_time'   => $all_time,
+					'this_month' => $this_month,
+					'this_week'  => $this_week,
+					'today'      => $today,
 				),
-				'products'  => $this->prepare_product_rows( $per_product['rows'] ),
-				'page'      => $page,
-				'per_page'  => $per_page,
-				'total'     => $per_product['total'],
+				'products' => $this->prepare_product_rows( $per_product['rows'] ),
+				'page'     => $page,
+				'per_page' => $per_page,
+				'total'    => $per_product['total'],
 			)
 		);
 
@@ -242,14 +262,51 @@ class RestController extends \WC_REST_Controller {
 	 * @return \WP_REST_Response
 	 */
 	public function get_top_demand( \WP_REST_Request $request ): \WP_REST_Response {
-		$limit = (int) $request->get_param( 'limit' );
-		$rows  = NotificationQuery::get_top_demand( $limit );
+		$limit   = (int) $request->get_param( 'limit' );
+		$sort_by = (string) $request->get_param( 'sort_by' );
+		$window  = (string) $request->get_param( 'window' );
+
+		switch ( $sort_by ) {
+			case 'most_overdue':
+				$rows = NotificationQuery::get_most_overdue( $limit );
+				break;
+
+			case 'period_signups':
+				$rows = NotificationQuery::get_top_signups_in_window(
+					$limit,
+					$this->window_to_since_gmt( $window )
+				);
+				break;
+
+			case 'active_signups':
+			default:
+				$rows = NotificationQuery::get_top_demand( $limit );
+				break;
+		}
 
 		return rest_ensure_response(
 			array(
-				'rows' => $this->prepare_product_rows( $rows ),
+				'rows'    => $this->prepare_product_rows( $rows ),
+				'sort_by' => $sort_by,
+				'window'  => 'period_signups' === $sort_by ? $window : null,
 			)
 		);
+	}
+
+	/**
+	 * Translate a window slug into a `since_gmt` lower bound.
+	 *
+	 * @param string $window One of 'week', 'month', 'quarter'.
+	 * @return string GMT datetime in `Y-m-d H:i:s` format.
+	 */
+	protected function window_to_since_gmt( string $window ): string {
+		$days = array(
+			'week'    => 7,
+			'month'   => 30,
+			'quarter' => 90,
+		);
+		$d    = $days[ $window ] ?? 30;
+		return gmdate( 'Y-m-d H:i:s', time() - ( $d * DAY_IN_SECONDS ) );
 	}
 
 	/**

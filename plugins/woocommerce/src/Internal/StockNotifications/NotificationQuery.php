@@ -101,4 +101,30 @@ class NotificationQuery {
 	public static function get_recent_activity( int $limit = 10 ): array {
 		return \WC_Data_Store::load( 'stock_notification' )->get_recent_activity( $limit );
 	}
+
+	/**
+	 * Top products by sign-ups created within a window.
+	 *
+	 * Drives the "Most signed-up" leaderboard's Week / Month / Quarter toggle.
+	 *
+	 * @param int    $limit     Maximum rows to return (1-50).
+	 * @param string $since_gmt Lower bound for date_created_gmt (Y-m-d H:i:s GMT).
+	 * @return array<int,array{product_id:int,signups:int}>
+	 */
+	public static function get_top_signups_in_window( int $limit, string $since_gmt ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_top_signups_in_window( $limit, $since_gmt );
+	}
+
+	/**
+	 * Products ranked by oldest active sign-up (i.e. how long customers
+	 * have been waiting for restock).
+	 *
+	 * Drives the "Most overdue" leaderboard.
+	 *
+	 * @param int $limit Maximum rows to return (1-50).
+	 * @return array<int,array{product_id:int,days_overdue:int,active_signups:int}>
+	 */
+	public static function get_most_overdue( int $limit = 10 ): array {
+		return \WC_Data_Store::load( 'stock_notification' )->get_most_overdue( $limit );
+	}
 }

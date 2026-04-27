@@ -890,4 +890,93 @@ CREATE TABLE $meta_table_name (
 
 		return $rows;
 	}
+
+	/**
+	 * Top products by sign-ups created within a window.
+	 *
+	 * Counts every sign-up (any status) whose `date_created_gmt` falls inside
+	 * `[since_gmt, now)`. Drives "Most signed-up" with the Week/Month/Quarter
+	 * toggle.
+	 *
+	 * @param int    $limit     Maximum number of rows to return (1-50).
+	 * @param string $since_gmt Lower bound `date_created_gmt` (Y-m-d H:i:s GMT).
+	 * @return array<int,array{product_id:int,signups:int}>
+	 */
+	public function get_top_signups_in_window( int $limit, string $since_gmt ): array {
+		global $wpdb;
+
+		$limit = max( 1, min( 50, $limit ) );
+		$table = $this->get_table_name();
+
+		$sql = $wpdb->prepare(
+			'SELECT product_id, COUNT(id) AS signups
+			FROM %i
+			WHERE date_created_gmt >= %s
+			GROUP BY product_id
+			ORDER BY signups DESC, product_id ASC
+			LIMIT %d',
+			array( $table, $since_gmt, $limit )
+		);
+
+		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows    = array();
+		if ( is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$rows[] = array(
+					'product_id' => (int) $row['product_id'],
+					'signups'    => (int) $row['signups'],
+				);
+			}
+		}
+
+		return $rows;
+	}
+
+	/**
+	 * Products ranked by their oldest unfulfilled sign-up.
+	 *
+	 * Active + pending sign-ups are considered "waiting"; the oldest one per
+	 * product determines that product's days-overdue. Drives "Most overdue".
+	 *
+	 * @param int $limit Maximum number of rows to return (1-50).
+	 * @return array<int,array{product_id:int,days_overdue:int,active_signups:int}>
+	 */
+	public function get_most_overdue( int $limit = 10 ): array {
+		global $wpdb;
+
+		$limit = max( 1, min( 50, $limit ) );
+		$table = $this->get_table_name();
+
+		$sql = $wpdb->prepare(
+			'SELECT
+				product_id,
+				DATEDIFF(UTC_TIMESTAMP(), MIN(date_created_gmt)) AS days_overdue,
+				COUNT(id) AS active_signups
+			FROM %i
+			WHERE status IN (%s, %s)
+			GROUP BY product_id
+			ORDER BY days_overdue DESC, product_id ASC
+			LIMIT %d',
+			array(
+				$table,
+				NotificationStatus::ACTIVE,
+				NotificationStatus::PENDING,
+				$limit,
+			)
+		);
+
+		$results = $wpdb->get_results( $sql, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+		$rows    = array();
+		if ( is_array( $results ) ) {
+			foreach ( $results as $row ) {
+				$rows[] = array(
+					'product_id'     => (int) $row['product_id'],
+					'days_overdue'   => (int) $row['days_overdue'],
+					'active_signups' => (int) $row['active_signups'],
+				);
+			}
+		}
+
+		return $rows;
+	}
 }
