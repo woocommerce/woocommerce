@@ -319,4 +319,161 @@ class RestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertContains( $response->get_status(), array( 401, 403 ) );
 	}
+
+	/**
+	 * Summary endpoint exposes today and this_month windows alongside the
+	 * existing all_time and this_week buckets.
+	 */
+	public function test_summary_exposes_today_and_this_month_buckets(): void {
+		wp_set_current_user( $this->admin_user );
+
+		// One signup today, one 10 days ago, one 60 days ago.
+		$now = time();
+		$this->seed_notification(
+			array(
+				'product_id'   => 401,
+				'user_id'      => 41,
+				'status'       => NotificationStatus::ACTIVE,
+				'date_created' => gmdate( 'Y-m-d H:i:s', $now ),
+			)
+		);
+		$this->seed_notification(
+			array(
+				'product_id'   => 401,
+				'user_id'      => 42,
+				'status'       => NotificationStatus::ACTIVE,
+				'date_created' => gmdate( 'Y-m-d H:i:s', $now - ( 10 * DAY_IN_SECONDS ) ),
+			)
+		);
+		$this->seed_notification(
+			array(
+				'product_id'   => 401,
+				'user_id'      => 43,
+				'status'       => NotificationStatus::ACTIVE,
+				'date_created' => gmdate( 'Y-m-d H:i:s', $now - ( 60 * DAY_IN_SECONDS ) ),
+			)
+		);
+
+		$request  = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/summary' );
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+
+		$totals = $response->get_data()['totals'];
+		$this->assertArrayHasKey( 'today', $totals );
+		$this->assertArrayHasKey( 'this_month', $totals );
+		$this->assertArrayHasKey( 'this_week', $totals );
+		$this->assertArrayHasKey( 'all_time', $totals );
+
+		$this->assertSame( 1, $totals['today']['total_signups'] );
+		$this->assertSame( 2, $totals['this_month']['total_signups'] );
+		$this->assertSame( 3, $totals['all_time']['total_signups'] );
+	}
+
+	/**
+	 * `/top-demand?sort_by=most_overdue` ranks products by their oldest unfulfilled
+	 * sign-up.
+	 */
+	public function test_top_demand_most_overdue_orders_by_oldest_signup(): void {
+		wp_set_current_user( $this->admin_user );
+
+		$now = time();
+
+		// Product 501: oldest signup 30 days ago.
+		$this->seed_notification(
+			array(
+				'product_id'   => 501,
+				'user_id'      => 51,
+				'status'       => NotificationStatus::ACTIVE,
+				'date_created' => gmdate( 'Y-m-d H:i:s', $now - ( 30 * DAY_IN_SECONDS ) ),
+			)
+		);
+
+		// Product 502: oldest signup 60 days ago.
+		$this->seed_notification(
+			array(
+				'product_id'   => 502,
+				'user_id'      => 52,
+				'status'       => NotificationStatus::ACTIVE,
+				'date_created' => gmdate( 'Y-m-d H:i:s', $now - ( 60 * DAY_IN_SECONDS ) ),
+			)
+		);
+
+		$request = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/top-demand' );
+		$request->set_param( 'sort_by', 'most_overdue' );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+
+		$rows = $response->get_data()['rows'];
+		$this->assertSame( 502, $rows[0]['product_id'] );
+		$this->assertSame( 501, $rows[1]['product_id'] );
+		$this->assertGreaterThan(
+			$rows[1]['days_overdue'],
+			$rows[0]['days_overdue']
+		);
+	}
+
+	/**
+	 * `/top-demand?sort_by=period_signups&window=week` only counts sign-ups
+	 * created inside the requested window.
+	 */
+	public function test_top_demand_period_signups_filters_by_window(): void {
+		wp_set_current_user( $this->admin_user );
+
+		$now = time();
+
+		// Product 601: 2 signups in the last 3 days, 5 signups 60 days ago.
+		for ( $i = 0; $i < 2; $i++ ) {
+			$this->seed_notification(
+				array(
+					'product_id'   => 601,
+					'user_id'      => 600 + $i,
+					'status'       => NotificationStatus::ACTIVE,
+					'date_created' => gmdate( 'Y-m-d H:i:s', $now - ( 3 * DAY_IN_SECONDS ) ),
+				)
+			);
+		}
+		for ( $i = 0; $i < 5; $i++ ) {
+			$this->seed_notification(
+				array(
+					'product_id'   => 601,
+					'user_id'      => 700 + $i,
+					'status'       => NotificationStatus::ACTIVE,
+					'date_created' => gmdate( 'Y-m-d H:i:s', $now - ( 60 * DAY_IN_SECONDS ) ),
+				)
+			);
+		}
+
+		// Product 602: 4 signups in the last 3 days, 0 older.
+		for ( $i = 0; $i < 4; $i++ ) {
+			$this->seed_notification(
+				array(
+					'product_id'   => 602,
+					'user_id'      => 800 + $i,
+					'status'       => NotificationStatus::ACTIVE,
+					'date_created' => gmdate( 'Y-m-d H:i:s', $now - ( 3 * DAY_IN_SECONDS ) ),
+				)
+			);
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wc-analytics/back-in-stock/top-demand' );
+		$request->set_param( 'sort_by', 'period_signups' );
+		$request->set_param( 'window', 'week' );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertSame( 200, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 'period_signups', $data['sort_by'] );
+		$this->assertSame( 'week', $data['window'] );
+
+		$rows = $data['rows'];
+		// Inside the week window, product 602 should rank above product 601
+		// (4 vs 2 signups), and 601's older 60-day signups must not leak into
+		// the count.
+		$this->assertSame( 602, $rows[0]['product_id'] );
+		$this->assertSame( 4, $rows[0]['signups'] );
+		$this->assertSame( 601, $rows[1]['product_id'] );
+		$this->assertSame( 2, $rows[1]['signups'] );
+	}
 }
