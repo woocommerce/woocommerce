@@ -78,9 +78,9 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox resolve returns PERSISTED_QUERY_NOT_FOUND for an APQ hash-only request when the toggle is off, even if a cache entry was previously written.
+	 * @testdox APQ hash-only requests resolve from the cache regardless of the ObjectCache toggle.
 	 */
-	public function test_apq_hash_only_returns_not_found_when_toggle_off(): void {
+	public function test_apq_hash_only_resolves_when_toggle_off(): void {
 		update_option( Main::OPTION_OBJECT_CACHE_ENABLED, 'yes' );
 		$query = '{ __typename }';
 		$hash  = hash( 'sha256', $query );
@@ -96,8 +96,7 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 			array( 'persistedQuery' => array( 'version' => 1, 'sha256Hash' => $hash ) )
 		);
 
-		$this->assertIsArray( $result );
-		$this->assertSame( 'PERSISTED_QUERY_NOT_FOUND', $result['errors'][0]['extensions']['code'] );
+		$this->assertInstanceOf( DocumentNode::class, $result );
 	}
 
 	/**

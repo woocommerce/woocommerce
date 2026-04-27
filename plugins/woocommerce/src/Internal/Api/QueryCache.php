@@ -61,6 +61,11 @@ class QueryCache {
 			return $this->error_response( 'No query provided.', 'BAD_REQUEST' );
 		}
 
+		// APQ keeps using the cache; it has its own settings toggle.
+		if ( ! Main::is_object_cache_enabled() ) {
+			return $this->parse( $query );
+		}
+
 		$hash = hash( 'sha256', $query );
 		$doc  = $this->get_cached_document( $hash );
 		if ( false !== $doc ) {
@@ -107,23 +112,31 @@ class QueryCache {
 	/**
 	 * Retrieve a cached DocumentNode by hash.
 	 *
-	 * Returns false unconditionally when the ObjectCache toggle is off so the
-	 * caller falls through to a fresh parse on every request.
-	 *
 	 * @param string $hash The SHA-256 hash.
 	 * @return DocumentNode|false
 	 */
 	private function get_cached_document( string $hash ) {
-		if ( ! Main::is_object_cache_enabled() ) {
-			return false;
-		}
-
 		$cached = wp_cache_get( $this->build_cache_key( $hash ), self::CACHE_GROUP );
 		if ( false === $cached || ! is_array( $cached ) ) {
 			return false;
 		}
 
 		return AST::fromArray( $cached );
+	}
+
+	/**
+	 * Parse a query and return the DocumentNode, or a GraphQL-shaped error
+	 * array if the query has a syntax error.
+	 *
+	 * @param string $query The GraphQL query string.
+	 * @return DocumentNode|array
+	 */
+	private function parse( string $query ) {
+		try {
+			return Parser::parse( $query, array( 'noLocation' => true ) );
+		} catch ( \Automattic\WooCommerce\Vendor\GraphQL\Error\SyntaxError $e ) {
+			return $this->error_response( 'GraphQL syntax error: ' . $e->getMessage(), 'GRAPHQL_PARSE_ERROR' );
+		}
 	}
 
 	/**
@@ -136,15 +149,12 @@ class QueryCache {
 	 * @return DocumentNode|array
 	 */
 	private function parse_and_cache( string $query, string $hash ) {
-		try {
-			$document = Parser::parse( $query, array( 'noLocation' => true ) );
-		} catch ( \Automattic\WooCommerce\Vendor\GraphQL\Error\SyntaxError $e ) {
-			return $this->error_response( 'GraphQL syntax error: ' . $e->getMessage(), 'GRAPHQL_PARSE_ERROR' );
+		$document = $this->parse( $query );
+		if ( ! $document instanceof DocumentNode ) {
+			return $document;
 		}
 
-		if ( Main::is_object_cache_enabled() ) {
-			wp_cache_set( $this->build_cache_key( $hash ), $document->toArray(), self::CACHE_GROUP, self::get_cache_ttl() );
-		}
+		wp_cache_set( $this->build_cache_key( $hash ), $document->toArray(), self::CACHE_GROUP, self::get_cache_ttl() );
 
 		return $document;
 	}
