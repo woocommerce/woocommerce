@@ -60,8 +60,9 @@ class WC_Order_Factory {
 					$e->getMessage()
 				),
 				array(
-					'source'   => 'get_order',
-					'order_id' => $order_id,
+					'source'    => 'get_order',
+					'order_id'  => $order_id,
+					'exception' => $e,
 				)
 			);
 			return false;
