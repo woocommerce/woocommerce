@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix a `_load_textdomain_just_in_time` notice for the `woocommerce` domain on WordPress 6.7+ caused by the new dual code / GraphQL API checking its feature flag too early during plugin load.

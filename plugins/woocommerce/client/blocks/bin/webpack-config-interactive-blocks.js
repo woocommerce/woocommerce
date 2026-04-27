@@ -44,10 +44,6 @@ const entries = {
 		'./assets/js/base/stores/woocommerce/cart.ts',
 	'@woocommerce/stores/store-notices':
 		'./assets/js/base/stores/store-notices.ts',
-	'@woocommerce/stores/woocommerce/product-context':
-		'./assets/js/base/stores/woocommerce/product-context.ts',
-	'@woocommerce/stores/woocommerce/product-data':
-		'./assets/js/base/stores/woocommerce/product-data.ts',
 	'@woocommerce/stores/woocommerce/products':
 		'./assets/js/base/stores/woocommerce/products.ts',
 };
