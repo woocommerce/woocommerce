@@ -201,9 +201,10 @@ test.describe( 'WooCommerce Email Settings', () => {
 		await expect( sendButton ).toBeEnabled();
 		await sendButton.click();
 
-		// Wait for the message, because sending will fail in test environment
+		// Sending fails in the test env (no mail server); the backend returns
+		// `woocommerce_rest_email_preview_not_sent`, which hits the generic fallback in friendlyEmailSendError.
 		const message = modal.locator(
-			'text=Error sending test email. Please try again.'
+			"text=Couldn't send the test email. Check your email settings and try again."
 		);
 		await expect( message ).toBeVisible();
 	} );

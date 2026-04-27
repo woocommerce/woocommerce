@@ -40,15 +40,6 @@ export function CustomerEffortScoreConsole( { label } ) {
 			onNoticeShownCallback={ onNoticeShown }
 			onNoticeDismissedCallback={ onNoticeDismissed }
 			onModalShownCallback={ onModalShown }
-			icon={
-				<span
-					style={ { height: 21, width: 21 } }
-					role="img"
-					aria-label="Pencil icon"
-				>
-					✏️
-				</span>
-			}
         />
     );
 };

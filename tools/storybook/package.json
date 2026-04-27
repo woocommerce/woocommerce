@@ -20,7 +20,7 @@
 		"preinstall": "npx only-allow pnpm"
 	},
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"bugs": {
 		"url": "https://github.com/woocommerce/woocommerce/issues"

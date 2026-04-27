@@ -1,26 +1,18 @@
 /**
  * External dependencies
  */
-import {
-	getElement,
-	store,
-	getContext,
-	getConfig,
-} from '@wordpress/interactivity';
-import '@woocommerce/stores/woocommerce/product-data';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
-import type {
-	ProductData,
-	WooCommerceConfig,
-} from '@woocommerce/stores/woocommerce/cart';
+import { getElement, store, getContext } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+import type { ProductResponseItem } from '@woocommerce/types';
 import { sanitizeHTML } from '@woocommerce/sanitize';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
@@ -48,53 +40,25 @@ const ALLOWED_ATTR = [
 	'aria-hidden',
 ];
 
-export type Context = {
-	productElementKey:
-		| 'price_html'
-		| 'availability'
-		| 'sku'
-		| 'weight'
-		| 'dimensions';
+type Context = {
+	productElementKey: keyof ProductResponseItem;
 };
 
-const productElementStore = store(
+store(
 	'woocommerce/product-elements',
 	{
-		state: {
-			get productData(): ProductData | undefined {
-				if ( ! productDataState?.productId ) {
-					return undefined;
-				}
-
-				const { products } = getConfig(
-					'woocommerce'
-				) as WooCommerceConfig;
-
-				if ( ! products ) {
-					return undefined;
-				}
-
-				return (
-					products?.[ productDataState.productId ]?.variations?.[
-						productDataState?.variationId || 0
-					] || products?.[ productDataState.productId ]
-				);
-			},
-		},
 		callbacks: {
 			updateValue: () => {
 				const element = getElement();
+				const product = productsState.productInContext;
 
-				if ( ! element.ref || ! productDataState?.productId ) {
+				if ( ! element.ref || ! product ) {
 					return;
 				}
 
 				const { productElementKey } = getContext< Context >();
 
-				const productElementHtml =
-					productElementStore?.state?.productData?.[
-						productElementKey
-					];
+				const productElementHtml = product[ productElementKey ];
 
 				if ( typeof productElementHtml === 'string' ) {
 					element.ref.innerHTML = sanitizeHTML( productElementHtml, {
@@ -107,5 +71,3 @@ const productElementStore = store(
 	},
 	{ lock: true }
 );
-
-export type ProductElementStore = typeof productElementStore;

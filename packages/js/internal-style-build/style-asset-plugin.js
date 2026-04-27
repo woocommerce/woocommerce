@@ -11,12 +11,7 @@
  * External dependencies
  */
 const path = require( 'path' );
-const webpack = require( 'webpack' );
 const json2php = require( 'json2php' );
-const { createHash } = webpack.util;
-
-const { RawSource } = webpack.sources;
-const { AsyncDependenciesBlock } = webpack;
 
 class AssetDataPlugin {
 	constructor( options ) {
@@ -46,6 +41,9 @@ class AssetDataPlugin {
 	}
 
 	apply( compiler ) {
+		const { createHash } = compiler.webpack.util;
+		const { RawSource } = compiler.webpack.sources;
+
 		compiler.hooks.thisCompilation.tap(
 			this.constructor.name,
 			( compilation ) => {
@@ -55,14 +53,14 @@ class AssetDataPlugin {
 						stage: compiler.webpack.Compilation
 							.PROCESS_ASSETS_STAGE_ANALYSE,
 					},
-					() => this.addAssets( compilation )
+					() => this.addAssets( compilation, createHash, RawSource )
 				);
 			}
 		);
 	}
 
 	/** @param {webpack.Compilation} compilation */
-	addAssets( compilation ) {
+	addAssets( compilation, createHash, RawSource ) {
 		const {
 			combineAssets,
 			combinedOutputFile,
@@ -162,58 +160,6 @@ class AssetDataPlugin {
 				this.stringify( combinedAssetsData )
 			);
 		}
-	}
-
-	/**
-	 * Can we trace a line of static dependencies from an entry to a module
-	 *
-	 * @param {webpack.Compilation}       compilation
-	 * @param {webpack.DependenciesBlock} block
-	 *
-	 * @return {boolean} True if there is a static import path to the root
-	 */
-	static hasStaticDependencyPathToRoot( compilation, block ) {
-		const incomingConnections = [
-			...compilation.moduleGraph.getIncomingConnections( block ),
-		].filter(
-			( connection ) =>
-				// Library connections don't have a dependency, this is a root
-				connection.dependency &&
-				// Entry dependencies are another root
-				connection.dependency.constructor.name !== 'EntryDependency'
-		);
-
-		// If we don't have non-entry, non-library incoming connections,
-		// we've reached a root of
-		if ( ! incomingConnections.length ) {
-			return true;
-		}
-
-		const staticDependentModules = incomingConnections.flatMap(
-			( connection ) => {
-				const { dependency } = connection;
-				const parentBlock =
-					compilation.moduleGraph.getParentBlock( dependency );
-
-				return parentBlock.constructor.name !==
-					AsyncDependenciesBlock.name
-					? [ compilation.moduleGraph.getParentModule( dependency ) ]
-					: [];
-			}
-		);
-
-		// All the dependencies were Async, the module was reached via a dynamic import
-		if ( ! staticDependentModules.length ) {
-			return false;
-		}
-
-		// Continue to explore any static dependencies
-		return staticDependentModules.some( ( parentStaticDependentModule ) =>
-			AssetDataPlugin.hasStaticDependencyPathToRoot(
-				compilation,
-				parentStaticDependentModule
-			)
-		);
 	}
 }
 

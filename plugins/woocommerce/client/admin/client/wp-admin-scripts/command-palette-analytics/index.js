@@ -3,17 +3,15 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { chartBar } from '@wordpress/icons';
-import { useEffect } from '@wordpress/element';
-import { registerPlugin } from '@wordpress/plugins';
+import domReady from '@wordpress/dom-ready';
 import { addQueryArgs } from '@wordpress/url';
-import { useSelect } from '@wordpress/data';
 
 /**
  * Internal dependencies
  */
 import { registerCommandWithTracking } from '../command-palette/register-command-with-tracking';
 
-const registerWooCommerceAnalyticsCommand = ( { label, path, origin } ) => {
+const registerWooCommerceAnalyticsCommand = ( { label, path } ) => {
 	registerCommandWithTracking( {
 		name: `woocommerce${ path }`,
 		label: sprintf(
@@ -28,40 +26,22 @@ const registerWooCommerceAnalyticsCommand = ( { label, path, origin } ) => {
 				path,
 			} );
 		},
-		origin,
 	} );
 };
 
-const WooCommerceAnalyticsCommands = () => {
-	const { editedPostType } = useSelect( ( select ) => {
-		const editor = select( 'core/editor' );
-		return {
-			editedPostType: editor?.getCurrentPostType?.() ?? null,
-		};
-	} );
-	const origin = editedPostType ? editedPostType + '-editor' : null;
+domReady( () => {
+	if (
+		window.hasOwnProperty( 'wcCommandPaletteAnalytics' ) &&
+		window.wcCommandPaletteAnalytics.hasOwnProperty( 'reports' ) &&
+		Array.isArray( window.wcCommandPaletteAnalytics.reports )
+	) {
+		const analyticsReports = window.wcCommandPaletteAnalytics.reports;
 
-	useEffect( () => {
-		if (
-			window.hasOwnProperty( 'wcCommandPaletteAnalytics' ) &&
-			window.wcCommandPaletteAnalytics.hasOwnProperty( 'reports' ) &&
-			Array.isArray( window.wcCommandPaletteAnalytics.reports )
-		) {
-			const analyticsReports = window.wcCommandPaletteAnalytics.reports;
-
-			analyticsReports.forEach( ( analyticsReport ) => {
-				registerWooCommerceAnalyticsCommand( {
-					label: analyticsReport.title,
-					path: analyticsReport.path,
-					origin,
-				} );
+		analyticsReports.forEach( ( analyticsReport ) => {
+			registerWooCommerceAnalyticsCommand( {
+				label: analyticsReport.title,
+				path: analyticsReport.path,
 			} );
-		}
-	}, [ origin ] );
-
-	return null;
-};
-
-registerPlugin( 'woocommerce-analytics-commands-registration', {
-	render: WooCommerceAnalyticsCommands,
+		} );
+	}
 } );

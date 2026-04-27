@@ -92,7 +92,7 @@ class ProductTemplate extends AbstractBlock {
 
 			// Get an instance of the current Post Template block.
 			$block_instance = $block->parsed_block;
-			$product_id     = get_the_ID();
+			$product_id     = (int) get_the_ID();
 
 			// Set the block name to one that does not correspond to an existing registered block.
 			// This ensures that for the inner instances of the Post Template block, we do not render any block supports.
@@ -116,13 +116,22 @@ class ProductTemplate extends AbstractBlock {
 				)
 			)->render( array( 'dynamic' => false ) );
 
-			$context = array(
-				'productId' => $product_id,
+			// Load product into the shared products store.
+			wc_interactivity_api_load_product(
+				'I acknowledge that using experimental APIs means my theme or plugin will inevitably break in the next version of WooCommerce',
+				$product_id
+			);
+			$product_context_directive = wp_interactivity_data_wp_context(
+				array(
+					'productId'   => $product_id,
+					'variationId' => null,
+				),
+				'woocommerce/products'
 			);
 
 			$li_directives = '
 				data-wp-interactive="woocommerce/product-collection"
-				data-wp-context=\'' . wp_json_encode( $context, JSON_NUMERIC_CHECK | JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) . '\'
+				' . $product_context_directive . '
 				data-wp-key="product-item-' . $product_id . '"
 			';
 

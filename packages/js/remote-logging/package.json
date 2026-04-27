@@ -5,7 +5,7 @@
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"keywords": [
 		"wordpress",
@@ -62,7 +62,7 @@
 		"@babel/core": "7.25.7",
 		"@types/debug": "^4.1.12",
 		"@types/jest": "29.5.x",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-ts-config": "workspace:*",

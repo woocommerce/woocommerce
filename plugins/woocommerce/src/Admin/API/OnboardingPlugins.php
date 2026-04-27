@@ -241,7 +241,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_update',
-				__( 'Sorry, you cannot manage plugins.', 'woocommerce' ),
+				__( 'You do not have permissions to manage plugins. Please contact your site administrator.', 'woocommerce' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}
@@ -258,7 +258,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 		if ( ! current_user_can( 'install_plugins' ) || ! current_user_can( 'activate_plugins' ) ) {
 			return new WP_Error(
 				'woocommerce_rest_cannot_update',
-				__( 'Sorry, you cannot manage plugins.', 'woocommerce' ),
+				__( 'You do not have permissions to manage plugins. Please contact your site administrator.', 'woocommerce' ),
 				array( 'status' => rest_authorization_required_code() )
 			);
 		}

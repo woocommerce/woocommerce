@@ -6,7 +6,6 @@ const path = require( 'path' );
 const fs = require( 'fs' );
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
-const MomentTimezoneDataPlugin = require( 'moment-timezone-data-webpack-plugin' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
 
@@ -14,7 +13,6 @@ const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin
  * Internal dependencies
  */
 const CustomTemplatedPathPlugin = require( './bin/custom-templated-path-webpack-plugin' );
-const FilesystemCacheWarningsPlugin = require( './bin/filesystem-cache-warnings-webpack-plugin.js' );
 const UnminifyWebpackPlugin = require( './bin/unminify-webpack-plugin.js' );
 const {
 	webpackConfig: styleConfig,
@@ -49,6 +47,7 @@ const wcAdminPackages = [
 	'currency',
 	'customer-effort-score',
 	'date',
+	'experimental-products-app',
 	'experimental',
 	'explat',
 	'navigation',
@@ -88,26 +87,31 @@ const webpackConfig = {
 	performance: {
 		hints: false,
 	},
-	cache: ( isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK )
-		? { type: 'memory' }
-		: {
-				type: 'filesystem',
-				cacheDirectory: path.resolve(
-					__dirname,
-					`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
-				),
-				buildDependencies: {
-					config: [
-						__filename,
-						require.resolve( './bin/custom-templated-path-webpack-plugin' ),
-						require.resolve( './bin/unminify-webpack-plugin' ),
-						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin/src/index' ),
-						require.resolve( '@woocommerce/internal-style-build' ),
-						require.resolve( '@woocommerce/internal-style-build/webpack-rtl-plugin' ),
-						require.resolve( '@woocommerce/internal-style-build/style-asset-plugin' ),
-					],
-				},
-		  },
+	cache:
+		isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK
+			? { type: 'memory' }
+			: {
+					type: 'filesystem',
+					cacheDirectory: path.resolve(
+						__dirname,
+						`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
+					),
+					buildDependencies: {
+						config: [
+							__filename,
+							path.resolve(
+								__dirname,
+								'../../../../pnpm-lock.yaml'
+							),
+							require.resolve(
+								'@woocommerce/dependency-extraction-webpack-plugin'
+							),
+							require.resolve(
+								'@woocommerce/internal-style-build'
+							),
+						],
+					},
+			  },
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
@@ -240,6 +244,10 @@ const webpackConfig = {
 			new WooCommerceDependencyExtractionWebpackPlugin( {
 				requestToExternal( request ) {
 					switch ( request ) {
+						case 'moment-timezone':
+							// Use WordPress core's window.moment (which includes moment-timezone)
+							// instead of bundling a stripped copy.
+							return 'moment';
 						case 'react/jsx-runtime':
 						case 'react/jsx-dev-runtime':
 							// @wordpress/dependency-extraction-webpack-plugin version bump related, which added 'react-jsx-runtime' dependency.
@@ -253,6 +261,14 @@ const webpackConfig = {
 					}
 
 					if ( request.startsWith( '@wordpress/dataviews' ) ) {
+						return null;
+					}
+
+					if ( request.startsWith( '@wordpress/theme' ) ) {
+						return null;
+					}
+
+					if ( request.startsWith( '@wordpress/ui' ) ) {
 						return null;
 					}
 
@@ -272,12 +288,12 @@ const webpackConfig = {
 						return null;
 					}
 				},
+				requestToHandle( request ) {
+					if ( request === 'moment-timezone' ) {
+						return 'moment';
+					}
+				},
 			} ),
-		// Reduces data for moment-timezone.
-		new MomentTimezoneDataPlugin( {
-			// This strips out timezone data before the year 2000 to make a smaller file.
-			startYear: 2000,
-		} ),
 		process.env.ANALYZE && new BundleAnalyzerPlugin(),
 		// We only want to generate unminified files in the development phase.
 		WC_ADMIN_PHASE === 'development' &&
@@ -286,8 +302,6 @@ const webpackConfig = {
 				test: /\.js($|\?)/i,
 				mainEntry: 'app/index.min.js',
 			} ),
-		// Suppress file system cache warnings (unsupported serialization related).
-		new FilesystemCacheWarningsPlugin(),
 	].filter( Boolean ),
 	optimization: {
 		minimize: NODE_ENV !== 'development',
