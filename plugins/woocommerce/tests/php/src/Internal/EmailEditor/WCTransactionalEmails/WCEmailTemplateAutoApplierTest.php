@@ -333,6 +333,48 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * When wp_update_post() fails the atom must roll back so neither post_content
+	 * nor any of the four sync meta keys are modified. The current behaviour of
+	 * the pre-refactor reset endpoint short-circuits before the meta writes; the
+	 * transaction makes the all-or-nothing guarantee explicit.
+	 */
+	public function test_apply_to_post_rolls_back_on_wp_update_post_failure(): void {
+		$email_id = 'wc_test_auto_apply_rollback';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+
+		$pre_call_content = (string) get_post( $post_id )->post_content;
+		$pre_call_meta    = array(
+			'source_hash'    => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'version'        => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ),
+			'last_synced_at' => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ),
+			'status'         => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+		);
+
+		// Force wp_update_post to fail by short-circuiting it through the
+		// 'wp_insert_post_empty_content' filter — when this returns true,
+		// wp_update_post returns WP_Error('empty_content').
+		add_filter( 'wp_insert_post_empty_content', '__return_true' );
+
+		try {
+			$result = WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
+		} finally {
+			remove_filter( 'wp_insert_post_empty_content', '__return_true' );
+		}
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+
+		clean_post_cache( $post_id );
+		$this->assertSame( $pre_call_content, (string) get_post( $post_id )->post_content );
+		$this->assertSame( $pre_call_meta['source_hash'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ) );
+		$this->assertSame( $pre_call_meta['version'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ) );
+		$this->assertSame( $pre_call_meta['last_synced_at'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ) );
+		$this->assertSame( $pre_call_meta['status'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ) );
+	}
+
+	/**
 	 * Build a WC_Email stub backed by the third-party-with-version.php fixture, inject it
 	 * into WC_Emails::$emails, and opt the email ID into the block-editor filter so the
 	 * sync registry picks it up.
