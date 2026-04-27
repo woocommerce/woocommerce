@@ -15,7 +15,6 @@ use Automattic\WooCommerce\Vendor\GraphQL\Type\Schema;
 use Automattic\WooCommerce\Vendor\GraphQL\Error\DebugFlag;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\DocumentValidator;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\DisableIntrospection;
-use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\QueryDepth;
 
 /**
  * Handles incoming GraphQL requests over the WooCommerce REST API.
@@ -175,7 +174,7 @@ abstract class GraphQLController {
 		// be surfaced in the debug extensions after execution.
 		$complexity_rule    = new QueryComplexityRule( self::get_max_query_complexity() );
 		$validation_rules   = array_values( DocumentValidator::allRules() );
-		$validation_rules[] = new QueryDepth( self::get_max_query_depth() );
+		$validation_rules[] = new QueryDepthRule( self::get_max_query_depth() );
 		$validation_rules[] = $complexity_rule;
 		if ( ! $this->is_introspection_allowed( $request ) ) {
 			$validation_rules[] = new DisableIntrospection( DisableIntrospection::ENABLED );
