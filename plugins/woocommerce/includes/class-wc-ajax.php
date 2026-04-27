@@ -1827,8 +1827,8 @@ class WC_AJAX {
 
 				if ( $managing_stock ) {
 					$stock_amount = $product_object->get_stock_quantity();
-					/* Translators: %d stock amount */
-					$stock_parts[] = sprintf( __( 'Stock: %d', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
+					/* Translators: %s stock amount */
+					$stock_parts[] = sprintf( __( 'Stock: %s', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
 				}
 
 				$stock_status = $product_object->get_stock_status();
