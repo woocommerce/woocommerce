@@ -28,25 +28,15 @@ class Main {
 	public const OPTION_GET_ENDPOINT_ENABLED = 'woocommerce_graphql_get_endpoint_enabled';
 
 	/**
-	 * Cached result of the feature-enabled check, null until first evaluated.
-	 *
-	 * @var ?bool
-	 */
-	private static ?bool $enabled = null;
-
-	/**
 	 * Check whether the Dual Code & GraphQL API feature is active.
 	 *
 	 * Requires PHP 8.1+ and the dual_code_graphql_api feature flag to be
-	 * enabled. The result is cached for the lifetime of the request.
+	 * enabled.
 	 *
 	 * @return bool
 	 */
 	public static function is_enabled(): bool {
-		if ( null === self::$enabled ) {
-			self::$enabled = PHP_VERSION_ID >= 80100 && FeaturesUtil::feature_is_enabled( self::FEATURE_SLUG );
-		}
-		return self::$enabled;
+		return PHP_VERSION_ID >= 80100 && FeaturesUtil::feature_is_enabled( self::FEATURE_SLUG );
 	}
 
 	/**

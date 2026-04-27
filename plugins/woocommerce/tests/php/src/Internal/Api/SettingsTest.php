@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Api;
 
 use Automattic\WooCommerce\Internal\Api\Main;
 use Automattic\WooCommerce\Internal\Api\Settings;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Unit_Test_Case;
 
 /**
@@ -23,6 +24,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		$this->enable_or_disable_feature( true );
 		$this->sut = new Settings();
 	}
 
@@ -30,9 +32,20 @@ class SettingsTest extends WC_Unit_Test_Case {
 	 * Clean up filters registered by tests so global state doesn't leak.
 	 */
 	public function tearDown(): void {
-		remove_filter( 'woocommerce_get_sections_advanced', array( $this->sut, 'add_section' ) );
-		remove_filter( 'woocommerce_get_settings_advanced', array( $this->sut, 'add_settings' ), 10 );
+		$this->enable_or_disable_feature( false );
 		parent::tearDown();
+	}
+
+	/**
+	 * Enable or disable the GraphQL API feature.
+	 *
+	 * @param bool $enable True to enable, false to disable.
+	 */
+	private function enable_or_disable_feature( bool $enable ): void {
+		update_option(
+			wc_get_container()->get( FeaturesController::class )->feature_enable_option_name( 'dual_code_graphql_api' ),
+			$enable ? 'yes' : 'no'
+		);
 	}
 
 	/**
