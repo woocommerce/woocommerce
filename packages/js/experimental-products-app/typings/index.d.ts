@@ -8,10 +8,9 @@ declare module '@woocommerce/settings' {
 		thousandSeparator?: string;
 	};
 	export declare function getAdminLink( path: string ): string;
-	export declare function getSetting< T >(
+	export function getSetting< T >(
 		name: string,
 		fallback?: unknown,
-		filter = ( val: unknown, fb: unknown ) =>
-			typeof val !== 'undefined' ? val : fb
+		filter?: ( val: unknown, fb: unknown ) => unknown
 	): T;
 }
