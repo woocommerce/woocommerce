@@ -51514,12 +51514,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/GroupedProductSelector.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/QuantitySelector.php
-
-		-
 			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:get_product_from_context\(\) expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block given\.$#'
 			identifier: argument.type
 			count: 1
@@ -54616,12 +54610,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductResultsCount.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -54685,12 +54673,6 @@ parameters:
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 2
-			path: src/Blocks/BlockTypes/ProductSpecifications.php
-
-		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
 			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
 		-
