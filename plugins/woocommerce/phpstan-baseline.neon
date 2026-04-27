@@ -64783,12 +64783,6 @@ parameters:
 			path: src/Internal/EmailEditor/EmailApiController.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\EmailEditor\\EmailApiController\:\:\$post_manager \(Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\|null\) is never assigned null so it can be removed from the property type\.$#'
-			identifier: property.unusedType
-			count: 1
-			path: src/Internal/EmailEditor/EmailApiController.php
-
-		-
 			message: '#^PHPDoc type array of property Automattic\\WooCommerce\\Internal\\EmailEditor\\EmailPatterns\\WooEmailContentPattern\:\:\$template_types is not covariant with PHPDoc type array\<string\> of overridden property Automattic\\WooCommerce\\EmailEditor\\Engine\\Patterns\\Abstract_Pattern\:\:\$template_types\.$#'
 			identifier: property.phpDocType
 			count: 1
