@@ -252,6 +252,87 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * apply_to_post() with require_uncustomized=false must overwrite a modified
+	 * post unconditionally — no hash gate. This is the reset-endpoint contract.
+	 */
+	public function test_apply_to_post_without_require_uncustomized_overwrites_modified_post(): void {
+		$email_id = 'wc_test_auto_apply_reset_overwrites_modified';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => '<p>Merchant-edited content that the reset must overwrite</p>',
+			)
+		);
+
+		$expected_canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post(
+			$email,
+			$post_id,
+			array( 'require_uncustomized' => false )
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertSame( $expected_canonical, $result['content'] );
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $result['status'] );
+
+		$this->assertSame( $expected_canonical, (string) get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * apply_to_post() with require_uncustomized=false on a non-sync-enabled email
+	 * must rewrite content but stamp NO meta. Return shape carries null for the
+	 * four sync fields. BC contract from the pre-RSM-139 reset endpoint.
+	 */
+	public function test_apply_to_post_for_non_sync_enabled_email_with_require_uncustomized_false(): void {
+		$email_id = 'wc_test_auto_apply_reset_non_sync_enabled';
+		$email    = $this->register_fixture_email( $email_id );
+
+		// Generate a post via direct post insert (bypass the generator's RSM-137 stamping)
+		// so the post has no sync meta to begin with — closest analogue to a non-sync-enabled
+		// email's persisted state.
+		$post_id = wp_insert_post(
+			array(
+				'post_type'    => \Automattic\WooCommerce\Internal\EmailEditor\Integration::EMAIL_POST_TYPE,
+				'post_status'  => 'publish',
+				'post_name'    => $email_id,
+				'post_title'   => 'Non-sync-enabled fixture',
+				'post_content' => '<p>Initial non-canonical content</p>',
+			)
+		);
+		$this->assertIsInt( $post_id );
+
+		// Drop the email out of the registry so apply_to_post sees null sync_config.
+		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
+		WCEmailTemplateSyncRegistry::reset_cache();
+
+		$expected_canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post(
+			$email,
+			$post_id,
+			array( 'require_uncustomized' => false )
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'content', $result );
+		$this->assertSame( $expected_canonical, $result['content'] );
+		$this->assertNull( $result['version'] );
+		$this->assertNull( $result['source_hash'] );
+		$this->assertNull( $result['synced_at'] );
+		$this->assertNull( $result['status'] );
+
+		$this->assertSame( $expected_canonical, (string) get_post( $post_id )->post_content );
+		$this->assertSame( '', (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ) );
+		$this->assertSame( '', (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ) );
+	}
+
+	/**
 	 * Build a WC_Email stub backed by the third-party-with-version.php fixture, inject it
 	 * into WC_Emails::$emails, and opt the email ID into the block-editor filter so the
 	 * sync registry picks it up.
