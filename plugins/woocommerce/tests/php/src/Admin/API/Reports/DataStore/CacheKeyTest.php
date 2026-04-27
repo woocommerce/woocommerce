@@ -69,12 +69,14 @@ class CacheKeyTest extends WC_Unit_Test_Case {
 	public function test_get_cache_key_does_not_modify_original_params(): void {
 		$store = new CustomersDataStore();
 
-		$dt = new \DateTime( '2026-04-27 12:00:00.123456' );
-		$params = array( 'before' => $dt );
+		$original = new \DateTime( '2026-04-27 12:00:00.123456', new \DateTimeZone( 'UTC' ) );
+		$params   = array( 'before' => clone $original );
 
 		$this->invoke_get_cache_key( $store, $params );
 
-		$this->assertInstanceOf( \DateTime::class, $params['before'], 'DateTime object in original params should remain unchanged.' );
+		$this->assertInstanceOf( \DateTime::class, $params['before'], 'DateTime object in original params should remain a DateTime.' );
+		$this->assertSame( $original->getTimestamp(), $params['before']->getTimestamp(), 'DateTime timestamp should not be mutated.' );
+		$this->assertSame( $original->getTimezone()->getName(), $params['before']->getTimezone()->getName(), 'DateTime timezone should not be mutated.' );
 	}
 
 	/**
