@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { createElement } from '@wordpress/element';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 
 /**
@@ -9,9 +8,6 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
  */
 import { unlock } from './lock-unlock';
 import ProductList from './product-list';
-import ProductEdit from './product-edit';
-import DataViewsSidebarContent from './sidebar-dataviews';
-import SidebarNavigationScreen from './sidebar-navigation-screen';
 
 const { useLocation } = unlock( routerPrivateApis );
 
@@ -33,35 +29,18 @@ export type Route = {
 
 export default function useLayoutAreas() {
 	const { params = {} } = useLocation();
-	const {
-		postType = 'product',
-		layout = 'table',
-		canvas,
-		quickEdit: showQuickEdit,
-		postId,
-	} = params;
+	const { postType = 'product', canvas, quickEdit: showQuickEdit } = params;
 	// Products list.
 	if ( [ 'product' ].includes( postType ) ) {
-		const isListLayout = layout === 'list' || ! layout;
 		return {
 			key: 'products-list',
 			areas: {
-				sidebar: (
-					<SidebarNavigationScreen
-						title={ 'Products' }
-						isRoot
-						content={ <DataViewsSidebarContent /> }
-					/>
-				),
 				content: <ProductList />,
 				preview: false,
 				mobile: <ProductList postType={ postType } />,
-				edit: showQuickEdit && (
-					<ProductEdit postType={ postType } postId={ postId } />
-				),
 			},
 			widths: {
-				edit: showQuickEdit && ! isListLayout ? 380 : undefined,
+				edit: showQuickEdit ? 380 : undefined,
 			},
 		};
 	}

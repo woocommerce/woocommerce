@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment, useRef } from '@wordpress/element';
 import {
 	useViewportMatch,
 	useResizeObserver,
@@ -21,7 +20,6 @@ import {
  * Internal dependencies
  */
 import SidebarContent from './sidebar';
-import SiteHub from './site-hub';
 import { Route } from './router';
 import { unlock } from './lock-unlock';
 
@@ -36,7 +34,6 @@ type LayoutProps = {
 
 export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 	const [ fullResizer ] = useResizeObserver();
-	const toggleRef = useRef< HTMLAnchorElement >( null );
 	const isMobileViewport = useViewportMatch( 'medium', '<' );
 	const disableMotion = useReducedMotion();
 
@@ -74,10 +71,6 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 										} }
 										className="edit-site-layout__sidebar"
 									>
-										<SiteHub
-											ref={ toggleRef }
-											isTransparent={ false }
-										/>
 										<SidebarContent routeKey={ routeKey }>
 											{ areas.sidebar }
 										</SidebarContent>

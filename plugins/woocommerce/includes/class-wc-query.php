@@ -414,6 +414,25 @@ class WC_Query {
 			}
 		} elseif ( ! $q->is_post_type_archive( 'product' ) && ! $q->is_tax( get_object_taxonomies( 'product' ) ) ) {
 			// Only apply to product categories, the product post archive, the shop page, product tags, and product attribute taxonomies.
+			if ( $q->is_search() ) {
+				// Exclude products flagged as hidden from search (catalog_visibility = hidden or catalog).
+				// Applied inline rather than via get_tax_query() to avoid pulling in layered nav filters
+				// and the woocommerce_product_query_tax_query hook, which are scoped to product archives.
+				$product_visibility_terms = wc_get_product_visibility_term_ids();
+				$exclude_term_id          = isset( $product_visibility_terms['exclude-from-search'] ) ? (int) $product_visibility_terms['exclude-from-search'] : 0;
+
+				if ( $exclude_term_id > 0 ) {
+					$existing_tax_query   = $q->get( 'tax_query' );
+					$existing_tax_query   = is_array( $existing_tax_query ) ? $existing_tax_query : array();
+					$existing_tax_query[] = array(
+						'taxonomy' => 'product_visibility',
+						'field'    => 'term_taxonomy_id',
+						'terms'    => array( $exclude_term_id ),
+						'operator' => 'NOT IN',
+					);
+					$q->set( 'tax_query', $existing_tax_query );
+				}
+			}
 			return;
 		}
 

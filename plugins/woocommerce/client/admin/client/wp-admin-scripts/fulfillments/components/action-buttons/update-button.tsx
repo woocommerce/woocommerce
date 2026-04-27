@@ -24,7 +24,13 @@ export default function UpdateButton( {
 	setError: ( message: string | null ) => void;
 } ) {
 	const { setIsEditing } = useFulfillmentDrawerContext();
-	const { order, fulfillment, notifyCustomer } = useFulfillmentContext();
+	const {
+		order,
+		fulfillment,
+		notifyCustomer,
+		customerNote,
+		setCustomerNote,
+	} = useFulfillmentContext();
 	const { updateFulfillment } = useDispatch( FulfillmentStore );
 	const [ isExecuting, setIsExecuting ] = useState< boolean >( false );
 	const descriptionId = useInstanceId(
@@ -49,11 +55,17 @@ export default function UpdateButton( {
 
 		setError( null );
 		setIsExecuting( true );
-		await updateFulfillment( order.id, fulfillment, notifyCustomer );
+		await updateFulfillment(
+			order.id,
+			fulfillment,
+			notifyCustomer,
+			notifyCustomer ? customerNote : ''
+		);
 		const error = select( FulfillmentStore ).getError( order.id );
 		if ( error ) {
 			setError( error );
 		} else {
+			setCustomerNote( '' );
 			refreshOrderFulfillmentStatus( order.id );
 			setIsEditing( false );
 		}
