@@ -472,6 +472,309 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * run() must apply only to posts whose status meta is core_updated_uncustomized,
+	 * leaving in_sync and core_updated_customized posts untouched.
+	 */
+	public function test_run_applies_to_every_uncustomized_post(): void {
+		// 3 posts, each with a distinct fixture email so each registers in the registry.
+		$uncustomized_post_id = $this->generate_stamped_post( 'wc_test_run_uncustomized' );
+		$customized_post_id   = $this->generate_stamped_post( 'wc_test_run_customized' );
+		$in_sync_post_id      = $this->generate_stamped_post( 'wc_test_run_in_sync' );
+
+		update_post_meta(
+			$uncustomized_post_id,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED
+		);
+		update_post_meta(
+			$customized_post_id,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED
+		);
+		update_post_meta(
+			$in_sync_post_id,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC
+		);
+
+		$content_before_customized = (string) get_post( $customized_post_id )->post_content;
+		$content_before_in_sync    = (string) get_post( $in_sync_post_id )->post_content;
+
+		WCEmailTemplateAutoApplier::run();
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $uncustomized_post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Uncustomized post must flip to in_sync after run().'
+		);
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
+			(string) get_post_meta( $customized_post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Customized post status must be untouched.'
+		);
+		$this->assertSame( $content_before_customized, (string) get_post( $customized_post_id )->post_content );
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $in_sync_post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
+		$this->assertSame( $content_before_in_sync, (string) get_post( $in_sync_post_id )->post_content );
+	}
+
+	/**
+	 * One bad post must not break the rest of the batch. The atom failure is
+	 * logged at error severity with context=email_template_auto_applier.
+	 */
+	public function test_run_logs_and_continues_when_one_post_fails(): void {
+		$failing_post_id = $this->generate_stamped_post( 'wc_test_run_failure_isolation_fail' );
+		$good_post_id    = $this->generate_stamped_post( 'wc_test_run_failure_isolation_good' );
+
+		update_post_meta( $failing_post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED );
+		update_post_meta( $good_post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED );
+
+		// Force wp_update_post to fail for the FIRST post only by toggling the filter
+		// on/off based on which post ID is being saved.
+		add_filter(
+			'wp_insert_post_empty_content',
+			static function ( $maybe_empty, $postarr ) use ( $failing_post_id ) {
+				return ( ( (int) ( $postarr['ID'] ?? 0 ) ) === $failing_post_id ) ? true : $maybe_empty;
+			},
+			10,
+			2
+		);
+
+		$captured = array();
+		WCEmailTemplateAutoApplier::set_logger( $this->build_recording_logger( $captured ) );
+
+		try {
+			WCEmailTemplateAutoApplier::run();
+		} finally {
+			remove_all_filters( 'wp_insert_post_empty_content' );
+		}
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+			(string) get_post_meta( $failing_post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Failing post status must be untouched (no rewrite happened).'
+		);
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $good_post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Good post must still be applied despite the prior failure.'
+		);
+
+		$error_logs = array_filter(
+			$captured,
+			static fn( array $entry ) => 'error' === $entry['level']
+				&& ( $entry['context']['context'] ?? '' ) === 'email_template_auto_applier'
+		);
+		$this->assertCount( 1, $error_logs, 'Exactly one error log entry must be emitted for the failing post.' );
+	}
+
+	/**
+	 * If the post was modified since stamping (race window between sweep and AS job),
+	 * run() must skip it at info severity, leave content/meta untouched, and not
+	 * roll the status meta back.
+	 */
+	public function test_run_skips_post_with_post_modified_since_stamp_at_info_severity(): void {
+		$post_id = $this->generate_stamped_post( 'wc_test_run_race_safety' );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED );
+
+		// Simulate merchant edit during the AS lag window.
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => '<p>Merchant-edited content during AS lag</p>',
+			)
+		);
+
+		$captured = array();
+		WCEmailTemplateAutoApplier::set_logger( $this->build_recording_logger( $captured ) );
+
+		WCEmailTemplateAutoApplier::run();
+
+		$this->assertSame( '<p>Merchant-edited content during AS lag</p>', (string) get_post( $post_id )->post_content );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Status must remain core_updated_uncustomized so the next sweep can re-classify.'
+		);
+
+		$info_logs = array_filter(
+			$captured,
+			static fn( array $entry ) => 'info' === $entry['level']
+				&& ( $entry['context']['context'] ?? '' ) === 'email_template_auto_applier'
+		);
+		$this->assertCount( 1, $info_logs, 'Race outcome must be logged at info severity.' );
+
+		$error_logs = array_filter( $captured, static fn( array $entry ) => 'error' === $entry['level'] );
+		$this->assertCount( 0, $error_logs, 'Race outcome must NOT log at error severity.' );
+	}
+
+	/**
+	 * run() with no candidates must be a no-op.
+	 */
+	public function test_run_is_a_no_op_when_no_uncustomized_posts_exist(): void {
+		$post_id = $this->generate_stamped_post( 'wc_test_run_no_op' );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC );
+
+		$content_before = (string) get_post( $post_id )->post_content;
+
+		$write_count = 0;
+		$counter     = static function ( $check, int $object_id, string $meta_key ) use ( &$write_count ) {
+			unset( $object_id, $meta_key );
+			++$write_count;
+			return $check;
+		};
+		add_filter( 'update_post_metadata', $counter, 10, 3 );
+
+		try {
+			WCEmailTemplateAutoApplier::run();
+		} finally {
+			remove_filter( 'update_post_metadata', $counter, 10 );
+		}
+
+		$this->assertSame( 0, $write_count, 'No meta writes must occur when there are no candidates.' );
+		$this->assertSame( $content_before, (string) get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * Two consecutive run() calls on the same state — the first applies and flips
+	 * status to in_sync, the second writes zero rows. (Acceptance criterion.)
+	 */
+	public function test_run_is_idempotent_across_repeat_invocations(): void {
+		$post_id = $this->generate_stamped_post( 'wc_test_run_idempotency' );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED );
+
+		WCEmailTemplateAutoApplier::run();
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
+
+		$write_count = 0;
+		$counter     = static function ( $check ) use ( &$write_count ) {
+			++$write_count;
+			return $check;
+		};
+		add_filter( 'update_post_metadata', $counter, 10, 1 );
+		add_filter( 'wp_insert_post_data', $counter, 10, 1 );
+
+		try {
+			WCEmailTemplateAutoApplier::run();
+		} finally {
+			remove_filter( 'update_post_metadata', $counter, 10 );
+			remove_filter( 'wp_insert_post_data', $counter, 10 );
+		}
+
+		$this->assertSame( 0, $write_count, 'Second run must write zero rows.' );
+	}
+
+	/**
+	 * run() must short-circuit when BACKFILL_COMPLETE_OPTION is not 'yes', even if
+	 * core_updated_uncustomized posts exist in the DB.
+	 */
+	public function test_run_respects_backfill_complete_option_gate(): void {
+		$post_id = $this->generate_stamped_post( 'wc_test_run_backfill_gate' );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED );
+
+		update_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION, 'no' );
+
+		$content_before = (string) get_post( $post_id )->post_content;
+
+		WCEmailTemplateAutoApplier::run();
+
+		$this->assertSame( $content_before, (string) get_post( $post_id )->post_content );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
+	}
+
+	/**
+	 * Posts whose registered email is no longer in the sync registry at run time
+	 * must be skipped silently — no log, no write. (Plugin deactivated mid-cycle.)
+	 */
+	public function test_run_skips_posts_for_deactivated_email_plugins(): void {
+		$post_id = $this->generate_stamped_post( 'wc_test_run_deactivated' );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED );
+
+		$content_before = (string) get_post( $post_id )->post_content;
+
+		// Drop the email out of the registry.
+		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
+		WCEmailTemplateSyncRegistry::reset_cache();
+
+		$captured = array();
+		WCEmailTemplateAutoApplier::set_logger( $this->build_recording_logger( $captured ) );
+
+		WCEmailTemplateAutoApplier::run();
+
+		$this->assertSame( $content_before, (string) get_post( $post_id )->post_content );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
+		$this->assertSame( array(), $captured, 'Deactivated-plugin skip must be silent (no log emission).' );
+	}
+
+	/**
+	 * Build a recording logger that captures every call into a flat array. Each entry
+	 * is shaped: [ 'level' => 'info'|'warning'|'error', 'message' => string, 'context' => array ].
+	 *
+	 * @param array<int, array<string, mixed>> $sink Reference to the array that will receive entries.
+	 * @return \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger_Interface
+	 */
+	private function build_recording_logger( array &$sink ): \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger_Interface {
+		return new class( $sink ) implements \Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger_Interface {
+			/** @var array<int, array<string, mixed>> */
+			private array $sink;
+
+			public function __construct( array &$sink ) {
+				$this->sink = &$sink;
+			}
+
+			public function emergency( string $message, array $context = array() ): void {
+				$this->capture( 'emergency', $message, $context );
+			}
+			public function alert( string $message, array $context = array() ): void {
+				$this->capture( 'alert', $message, $context );
+			}
+			public function critical( string $message, array $context = array() ): void {
+				$this->capture( 'critical', $message, $context );
+			}
+			public function error( string $message, array $context = array() ): void {
+				$this->capture( 'error', $message, $context );
+			}
+			public function warning( string $message, array $context = array() ): void {
+				$this->capture( 'warning', $message, $context );
+			}
+			public function notice( string $message, array $context = array() ): void {
+				$this->capture( 'notice', $message, $context );
+			}
+			public function info( string $message, array $context = array() ): void {
+				$this->capture( 'info', $message, $context );
+			}
+			public function debug( string $message, array $context = array() ): void {
+				$this->capture( 'debug', $message, $context );
+			}
+			public function log( string $level, string $message, array $context = array() ): void {
+				$this->capture( $level, $message, $context );
+			}
+
+			private function capture( string $level, string $message, array $context ): void {
+				$this->sink[] = array(
+					'level'   => $level,
+					'message' => $message,
+					'context' => $context,
+				);
+			}
+		};
+	}
+
+	/**
 	 * Build a WC_Email stub backed by the third-party-with-version.php fixture, inject it
 	 * into WC_Emails::$emails, and opt the email ID into the block-editor filter so the
 	 * sync registry picks it up.

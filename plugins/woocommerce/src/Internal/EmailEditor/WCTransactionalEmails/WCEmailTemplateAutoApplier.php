@@ -208,6 +208,126 @@ class WCEmailTemplateAutoApplier {
 	}
 
 	/**
+	 * Action Scheduler callback. Apply the canonical core render to every
+	 * `woo_email` post whose status meta is `core_updated_uncustomized`.
+	 *
+	 * Per-post `try`/`catch` ensures one bad post never breaks the rest of the
+	 * batch (acceptance criterion). Status meta is never mutated by this method
+	 * on failure — the next sweep re-classifies.
+	 *
+	 * Returns `false` always (one-shot, no AS retry — same convention as
+	 * {@see WCEmailTemplateSyncBackfill::run()}).
+	 *
+	 * @return bool Always false.
+	 *
+	 * @since 10.8.0
+	 */
+	public static function run(): bool {
+		if ( 'yes' !== get_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION ) ) {
+			return false;
+		}
+
+		$candidate_ids = get_posts(
+			array(
+				'post_type'      => \Automattic\WooCommerce\Internal\EmailEditor\Integration::EMAIL_POST_TYPE,
+				'post_status'    => 'publish',
+				'posts_per_page' => -1,
+				'fields'         => 'ids',
+				'no_found_rows'  => true,
+				'meta_query'     => array(  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded set; sync-registered emails only.
+					array(
+						'key'   => WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+						'value' => WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+					),
+				),
+			)
+		);
+
+		if ( empty( $candidate_ids ) ) {
+			return false;
+		}
+
+		$registry      = WCEmailTemplateSyncRegistry::get_sync_enabled_emails();
+		$posts_manager = WCTransactionalEmailPostsManager::get_instance();
+		$emails_by_id  = $posts_manager->get_emails_by_id();
+
+		foreach ( $candidate_ids as $post_id ) {
+			$post_id = (int) $post_id;
+			try {
+				$email_id = (string) $posts_manager->get_email_type_from_post_id( $post_id );
+				if ( '' === $email_id || ! isset( $registry[ $email_id ] ) ) {
+					continue;
+				}
+
+				$email = $emails_by_id[ $email_id ] ?? null;
+				if ( ! $email instanceof \WC_Email ) {
+					continue;
+				}
+
+				$result = self::apply_to_post( $email, $post_id );
+
+				if ( is_wp_error( $result ) ) {
+					self::log_apply_error( $result, $post_id, $email_id );
+				}
+			} catch ( \Throwable $e ) {
+				self::get_logger()->error(
+					sprintf(
+						'Email template auto-apply failed for post %d: %s',
+						$post_id,
+						$e->getMessage()
+					),
+					array(
+						'post_id' => $post_id,
+						'context' => 'email_template_auto_applier',
+					)
+				);
+				continue;
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Map a per-post `WP_Error` from {@see self::apply_to_post()} to the right
+	 * log severity and emit it.
+	 *
+	 * `post_modified_since_stamp` is the expected race outcome (merchant edit in
+	 * the AS lag window) and is logged at `info`. Everything else is at `warning`
+	 * or `error` so it surfaces in the default WC log UI.
+	 *
+	 * @param \WP_Error $error    The error returned by apply_to_post.
+	 * @param int       $post_id  Post ID being processed.
+	 * @param string    $email_id Email ID being processed.
+	 */
+	private static function log_apply_error( \WP_Error $error, int $post_id, string $email_id ): void {
+		$message = sprintf(
+			'Email template auto-apply skipped post %d for email "%s": %s',
+			$post_id,
+			$email_id,
+			$error->get_error_message()
+		);
+
+		$context = array(
+			'post_id'  => $post_id,
+			'email_id' => $email_id,
+			'context'  => 'email_template_auto_applier',
+		);
+
+		switch ( $error->get_error_code() ) {
+			case 'post_modified_since_stamp':
+				self::get_logger()->info( $message, $context );
+				return;
+			case 'no_stored_hash':
+			case 'not_sync_enabled':
+				self::get_logger()->warning( $message, $context );
+				return;
+			default:
+				self::get_logger()->error( $message, $context );
+		}
+	}
+
+	/**
 	 * Whether the auto-applier is currently rewriting a post.
 	 *
 	 * Future `save_post` listeners (RSM-143, RSM-145) should consult this flag
