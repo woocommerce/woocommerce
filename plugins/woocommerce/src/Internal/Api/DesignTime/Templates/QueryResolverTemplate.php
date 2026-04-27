@@ -20,7 +20,8 @@
  * @var ?array $authorize_param_names - if non-null, the authorize() method param names (subset of execute params)
  * @var bool   $has_preauthorized - true when authorize() declares a bool $_preauthorized infrastructure param
  * @var string $preauthorized_expr - PHP expression that evaluates to the $_preauthorized bool at runtime
- * @var bool   $scalar_return - true when execute() returns a scalar (bool, int, float, string)
+ * @var bool    $scalar_return - true when execute() returns a scalar (bool, int, float, string)
+ * @var ?string $container_fqcn - FQCN of a user-provided container with static get(string): object; null for direct `new` instantiation
  */
 
 $escaped_description = addslashes( $description );
@@ -38,17 +39,43 @@ namespace <?php echo $namespace; ?>;
 use <?php echo $command_fqcn; ?> as <?php echo $command_alias; ?>;
 use Automattic\WooCommerce\Internal\Api\QueryInfoExtractor;
 use Automattic\WooCommerce\Internal\Api\Utils;
+<?php
+// Drop any caller-supplied import whose effective short name would collide
+// with one of the imports emitted unconditionally above and below, otherwise
+// the generated file would fail to compile ("Cannot use ... because the name
+// is already in use").
+$reserved_short_names = array( $command_alias, 'QueryInfoExtractor', 'Utils', 'ResolveInfo', 'Type' );
+// PHP class-name resolution (including `use`) is case-insensitive, so the
+// collision check has to be too — a caller-supplied `Foo\resolveinfo` would
+// otherwise slip past and fail at compile time of the generated file.
+$reserved_short_names_lower = array_map( 'strtolower', $reserved_short_names );
+$use_statements             = array_values(
+	array_filter(
+		$use_statements,
+		static function ( $use ) use ( $reserved_short_names_lower ) {
+			$as_pos = stripos( $use, ' as ' );
+			if ( false !== $as_pos ) {
+				$short = trim( substr( $use, $as_pos + 4 ) );
+			} else {
+				$sep_pos = strrpos( $use, '\\' );
+				$short   = false !== $sep_pos ? substr( $use, $sep_pos + 1 ) : $use;
+			}
+			return ! in_array( strtolower( $short ), $reserved_short_names_lower, true );
+		}
+	)
+);
+?>
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;
 <?php endforeach; ?>
-use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ResolveInfo;
-use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\Type;
+use Automattic\WooCommerce\Internal\Api\Schema\ResolveInfo;
+use Automattic\WooCommerce\Internal\Api\Schema\Type;
 
 class <?php echo $class_name; ?> {
 	public static function get_field_definition(): array {
 		return array(
 <?php if ( $scalar_return ) : ?>
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ObjectType(array(
+			'type' => Type::nonNull(new \Automattic\WooCommerce\Internal\Api\Schema\ObjectType(array(
 				'name' => '<?php echo $class_name; ?>Result',
 				'fields' => array(
 					'result' => array( 'type' => <?php echo $return_type_expr; ?> ),
@@ -87,7 +114,11 @@ class <?php echo $class_name; ?> {
 <?php endforeach; ?>
 
 <?php endif; ?>
-		$command = wc_get_container()->get( <?php echo $command_alias; ?>::class );
+<?php if ( null !== $container_fqcn ) : ?>
+		$command = \<?php echo $container_fqcn; ?>::get( <?php echo $command_alias; ?>::class );
+<?php else : ?>
+		$command = new <?php echo $command_alias; ?>();
+<?php endif; ?>
 
 		$execute_args = array();
 <?php
@@ -126,7 +157,7 @@ foreach ( $execute_params as $param ) :
 			'_preauthorized' => <?php echo $preauthorized_expr; ?>,
 <?php endif; ?>
 		) ) ) {
-			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
+			throw new \Automattic\WooCommerce\Internal\Api\Schema\Error(
 				'You do not have permission to perform this action.',
 				extensions: array( 'code' => 'UNAUTHORIZED' )
 			);

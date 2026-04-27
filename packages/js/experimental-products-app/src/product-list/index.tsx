@@ -3,14 +3,13 @@
  */
 import { DataViews, View } from '@wordpress/dataviews';
 import {
-	createElement,
 	useState,
 	useMemo,
 	useCallback,
 	useEffect,
 	Fragment,
 } from '@wordpress/element';
-import { Product, ProductQuery, productsStore } from '@woocommerce/data';
+import { ProductQuery, productsStore } from '@woocommerce/data';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as coreStore } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
@@ -24,7 +23,12 @@ import { Page } from '@wordpress/admin-ui';
  * Internal dependencies
  */
 import { unlock } from '../lock-unlock';
+import type { ProductEntityRecord } from '../fields/types';
 import { productFields } from './fields';
+import {
+	DEFAULT_PRODUCT_TABLE_LAYOUT,
+	DEFAULT_PRODUCT_TABLE_VIEW,
+} from './layouts';
 import { useEditProductAction } from '../dataviews-actions';
 
 const { usePostActions } = unlock( editorPrivateApis );
@@ -37,16 +41,14 @@ export type ProductListProps = {
 	postType?: string;
 };
 
-const PAGE_SIZE = 25;
-const EMPTY_ARRAY: Product[] = [];
+const PAGE_SIZE = 20;
+const EMPTY_ARRAY: ProductEntityRecord[] = [];
 const DEFAULT_LAYOUTS = {
-	table: {} as const,
+	table: DEFAULT_PRODUCT_TABLE_LAYOUT,
 };
 const DEFAULT_VIEW: View = {
-	type: 'table',
+	...DEFAULT_PRODUCT_TABLE_VIEW,
 	page: 1,
-	perPage: PAGE_SIZE,
-	fields: [ 'name', 'sku', 'status', 'date' ],
 };
 
 /**
@@ -73,7 +75,7 @@ function useView( postType: string ): [ View, ( view: View ) => void ] {
 	return [ view, setView ];
 }
 
-function getItemId( item: Product ) {
+function getItemId( item: ProductEntityRecord ) {
 	return item.id.toString();
 }
 
@@ -96,7 +98,10 @@ export default function ProductList( {
 	const queryParams = useMemo( () => {
 		const filters: Partial< ProductQuery > = {};
 		view.filters?.forEach( ( filter ) => {
-			if ( filter.field === 'status' ) {
+			if (
+				filter.field === 'status' ||
+				filter.field === 'product_status'
+			) {
 				filters.status = Array.isArray( filter.value )
 					? filter.value.join( ',' )
 					: filter.value;
@@ -135,7 +140,7 @@ export default function ProductList( {
 			const { getProducts, getProductsTotalCount, isResolving } =
 				select( productsStore );
 			return {
-				records: getProducts( queryParams ) as Product[],
+				records: getProducts( queryParams ) as ProductEntityRecord[],
 				totalCount: getProductsTotalCount( queryParams ),
 				isLoading: isResolving( 'getProducts', [ queryParams ] ),
 			};
