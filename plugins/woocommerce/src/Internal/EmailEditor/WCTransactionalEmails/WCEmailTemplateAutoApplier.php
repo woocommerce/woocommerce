@@ -28,12 +28,18 @@ class WCEmailTemplateAutoApplier {
 	/**
 	 * Action Scheduler hook name for the batched auto-apply runner.
 	 *
+	 * Internal AS plumbing — not intended for extension consumption. To react to
+	 * the upgrade-time signal, hook {@see 'woocommerce_email_template_divergence_sweep_complete'}
+	 * instead.
+	 *
 	 * @var string
 	 */
 	public const AUTO_APPLY_AS_HOOK = 'woocommerce_email_template_auto_apply_uncustomized';
 
 	/**
 	 * Action Scheduler group for the batched auto-apply runner.
+	 *
+	 * Internal AS plumbing — not intended for extension consumption.
 	 *
 	 * @var string
 	 */
@@ -69,7 +75,10 @@ class WCEmailTemplateAutoApplier {
 	 *     `null` for the four sync fields (BC contract with the pre-RSM-139 reset endpoint).
 	 *
 	 * Atomicity: the post update plus the four meta writes run inside a single
-	 * `START TRANSACTION` block, so a partial failure rolls back cleanly.
+	 * `START TRANSACTION` block, so a partial failure rolls back cleanly. Note
+	 * that third-party callbacks on `save_post`, `post_updated`, and
+	 * `wp_after_insert_post` fire inside this transaction; any `$wpdb` writes
+	 * they perform participate in the rollback if a later step fails.
 	 *
 	 * @param \WC_Email $email   The transactional email instance.
 	 * @param int       $post_id The post ID.
