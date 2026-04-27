@@ -710,6 +710,12 @@ class Analytics {
 				'path'   => '/analytics/stock',
 			) : null,
 			array(
+				'id'     => 'woocommerce-analytics-notices',
+				'title'  => __( 'Stock Notifications', 'woocommerce' ),
+				'parent' => 'woocommerce-analytics',
+				'path'   => '/analytics/notices',
+			),
+			array(
 				'id'     => 'woocommerce-analytics-customers',
 				'title'  => __( 'Customers', 'woocommerce' ),
 				'parent' => 'woocommerce',

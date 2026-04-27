@@ -1,0 +1,109 @@
+.bis-notices-report__row {
+	display: grid;
+	gap: $gap;
+	margin-bottom: $gap-large;
+	// Cards size to their own content rather than stretching to match the
+	// tallest card in the row.
+	align-items: start;
+
+	&.is-summary {
+		grid-template-columns: repeat( 2, minmax( 0, 1fr ) );
+	}
+
+	&.is-leaderboards {
+		grid-template-columns: repeat( 3, minmax( 0, 1fr ) );
+	}
+
+	@media ( max-width: 960px ) {
+		grid-template-columns: 1fr;
+	}
+}
+
+.bis-notices-report__summary-card {
+	// Reset the h2 default margin so vertical title spacing comes purely from
+	// the CardHeader padding — avoids fighting two layers of spacing.
+	.components-card__header {
+		padding-top: $gap;
+		padding-bottom: $gap;
+
+		h2 {
+			margin: 0;
+		}
+	}
+
+	.bis-notices-report__chart-wrap {
+		padding: 0 $gap-large $gap-large;
+		// Outer clip catches anything the inner override misses.
+		overflow: hidden;
+
+		// `.d3-base` forces `overflow-x: auto` regardless of whether the
+		// SVG actually overflows, which always renders a gratuitous
+		// horizontal scrollbar. Force it off and hide platform
+		// scrollbar pseudo-elements as a fallback for any browser that
+		// disagrees.
+		.d3-base {
+			overflow-x: hidden !important;
+			scrollbar-width: none;
+
+			&::-webkit-scrollbar {
+				display: none;
+			}
+		}
+	}
+
+	.bis-notices-report__metrics {
+		display: flex;
+		// Off-scale (75px); $gap-largest (40px) is the nearest on-scale step.
+		gap: 75px;
+		flex-wrap: wrap;
+		list-style: none;
+		margin: 0;
+		padding: $gap-large $gap-large $gap;
+	}
+
+	.bis-notices-report__metric {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		margin: 0;
+		gap: 6px;
+	}
+
+	.bis-notices-report__metric-label {
+		color: $gray-700;
+	}
+
+	.bis-notices-report__metric-value {
+		color: $gray-900;
+	}
+}
+
+.bis-notices-report__section-title {
+	font-size: 16px;
+	font-weight: 600;
+	margin: 0 0 $gap;
+}
+
+// TableCard's default rule stretches `.woocommerce-table__actions > div` to
+// `width: 100%`, which pushes the ToggleGroupControl into a full-width row.
+// Force it back to natural width and right-aligned within the header column.
+//
+// CardHeader is a 3-column grid (`auto 1fr auto`); without explicit
+// placement the actions div lands in column 2 (the 1fr filler), which leaves
+// it inset from the right edge by whatever padding the inline-flex container
+// adds. Pin it to column 3 (the auto-sized rightmost column) so it sits flush
+// against the CardHeader's right padding.
+.bis-notices-report__row.is-leaderboards .woocommerce-table__actions {
+	grid-column: 3;
+
+	> div {
+		width: auto;
+	}
+}
+
+// TableCard always renders a CardFooter (with Pagination, even when all rows
+// fit on one page). For these fixed-size leaderboards we don't need it, and
+// the empty footer just adds dead space below the last row.
+.bis-notices-report__row.is-leaderboards .components-card__footer {
+	display: none;
+}
