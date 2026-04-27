@@ -46,7 +46,7 @@
 		"json2php": "^0.0.7",
 		"mini-css-extract-plugin": "2.9.x",
 		"postcss-loader": "4.3.x",
-		"rtlcss": "^4.3.0",
+		"rtlcss": "4.3.x",
 		"sass-loader": "10.5.x",
 		"webpack-remove-empty-scripts": "1.0.x"
 	},
