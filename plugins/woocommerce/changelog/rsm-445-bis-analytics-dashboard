@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add an admin analytics dashboard for the Back in Stock Notifications alpha at WooCommerce → Analytics → Stock Notifications. Two summary cards (Notifications, Sign-Ups) and three product leaderboards (Most wanted, Most overdue, Most signed-up with Week/Month/Quarter toggle), backed by `/wc-analytics/back-in-stock/{summary,timeseries,top-demand,recent}` REST endpoints. Behind the `WOOCOMMERCE_BIS_ALPHA_ENABLED` alpha gate.
