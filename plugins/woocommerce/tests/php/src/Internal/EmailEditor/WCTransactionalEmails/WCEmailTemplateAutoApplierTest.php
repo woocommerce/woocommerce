@@ -375,6 +375,40 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * is_auto_applying() must read true while wp_update_post is running inside the
+	 * atom and false again once apply_to_post returns. Verified by hooking save_post
+	 * (which fires from inside wp_update_post) and capturing the flag value there.
+	 */
+	public function test_apply_to_post_sets_is_auto_applying_flag_during_write(): void {
+		$email_id = 'wc_test_auto_apply_reentrancy_flag';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+
+		$captured_during_save = null;
+		$listener             = static function () use ( &$captured_during_save ): void {
+			$captured_during_save = WCEmailTemplateAutoApplier::is_auto_applying();
+		};
+		add_action( 'save_post', $listener );
+
+		// Drive the auto-applier path via the require_uncustomized=false branch so
+		// we don't have to manufacture a core-template change here.
+		try {
+			WCEmailTemplateAutoApplier::apply_to_post(
+				$email,
+				$post_id,
+				array( 'require_uncustomized' => false )
+			);
+		} finally {
+			remove_action( 'save_post', $listener );
+		}
+
+		$this->assertTrue( $captured_during_save, 'is_auto_applying() must read true inside the write block.' );
+		$this->assertFalse( WCEmailTemplateAutoApplier::is_auto_applying(), 'is_auto_applying() must read false after apply_to_post returns.' );
+	}
+
+	/**
 	 * Build a WC_Email stub backed by the third-party-with-version.php fixture, inject it
 	 * into WC_Emails::$emails, and opt the email ID into the block-editor filter so the
 	 * sync registry picks it up.
