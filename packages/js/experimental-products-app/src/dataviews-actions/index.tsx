@@ -11,6 +11,7 @@ import type { Action } from '@wordpress/dataviews';
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../fields/types';
+import { useMemo } from 'react';
 
 export const editAction = (): Action< ProductEntityRecord > => ( {
 	id: 'edit-product',
@@ -59,4 +60,5 @@ export const viewAction = (): Action< ProductEntityRecord > => ( {
 	},
 } );
 
-export const useProductActions = () => [ editAction(), viewAction() ];
+export const useProductActions = () =>
+	useMemo( () => [ editAction(), viewAction() ], [] );
