@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { useMemo } from '@wordpress/element';
 import { edit, external } from '@wordpress/icons';
 import { __, _x } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
