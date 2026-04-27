@@ -55,7 +55,7 @@ class WC_Order_Factory {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
 			wc_get_logger()->error(
 				sprintf(
-					'Exception caught in %1$s: %2$s',
+					'Exception caught in %s: %s',
 					__FUNCTION__,
 					$e->getMessage()
 				),
@@ -65,7 +65,7 @@ class WC_Order_Factory {
 				)
 			);
 			return false;
-		}
+		}//end try
 	}
 
 	/**
