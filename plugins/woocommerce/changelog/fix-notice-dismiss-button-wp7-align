@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Adopt WP 7.0 notice-dismiss button sizing in base styles, removing version-gated override.
