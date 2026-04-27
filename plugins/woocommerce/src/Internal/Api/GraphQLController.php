@@ -18,7 +18,6 @@ use Automattic\WooCommerce\Vendor\GraphQL\Type\Schema;
 use Automattic\WooCommerce\Vendor\GraphQL\Error\DebugFlag;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\DocumentValidator;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\DisableIntrospection;
-use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\QueryComplexity;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\QueryDepth;
 
 /**
@@ -172,9 +171,9 @@ class GraphQLController {
 		$schema = $this->get_schema();
 
 		// 6. Build validation rules.
-		// A single QueryComplexity instance is kept so its computed score can
+		// A single complexity-rule instance is kept so its computed score can
 		// be surfaced in the debug extensions after execution.
-		$complexity_rule    = new QueryComplexity( self::get_max_query_complexity() );
+		$complexity_rule    = new QueryComplexityRule( self::get_max_query_complexity() );
 		$validation_rules   = array_values( DocumentValidator::allRules() );
 		$validation_rules[] = new QueryDepth( self::get_max_query_depth() );
 		$validation_rules[] = $complexity_rule;
