@@ -1,45 +1,64 @@
 /**
  * External dependencies
  */
+import { edit, external } from '@wordpress/icons';
+import { __, _x } from '@wordpress/i18n';
+import { addQueryArgs } from '@wordpress/url';
+import { getAdminLink } from '@woocommerce/settings';
+import type { Action } from '@wordpress/dataviews';
 import { useMemo } from '@wordpress/element';
-import { edit } from '@wordpress/icons';
-import { privateApis as routerPrivateApis } from '@wordpress/router';
-import { __ } from '@wordpress/i18n';
-import { Product } from '@woocommerce/data';
 
 /**
  * Internal dependencies
  */
-import { unlock } from '../lock-unlock';
+import type { ProductEntityRecord } from '../fields/types';
 
-const { useHistory, useLocation } = unlock( routerPrivateApis );
+export const editAction = (): Action< ProductEntityRecord > => ( {
+	id: 'edit-product',
+	label: __( 'Edit', 'woocommerce' ),
+	isPrimary: true,
+	icon: edit,
+	isEligible( product ) {
+		return product.status !== 'trash';
+	},
+	callback( items, { onActionPerformed } ) {
+		const product = items[ 0 ];
 
-export const useEditProductAction = ( { postType }: { postType: string } ) => {
-	const history = useHistory();
-	const location = useLocation();
-	return useMemo(
-		() => ( {
-			id: 'edit-product',
-			label: __( 'Edit', 'woocommerce' ),
-			isPrimary: true,
-			icon: edit,
-			supportsBulk: true,
-			isEligible( product: Product ) {
-				if ( product.status === 'trash' ) {
-					return false;
-				}
-				return true;
-			},
-			callback( items: Product[] ) {
-				const product = items[ 0 ];
-				history.push( {
-					...location.params,
-					postId: product.id,
-					postType,
-					quickEdit: true,
-				} );
-			},
-		} ),
-		[ history, location.params ]
-	);
-};
+		if ( product ) {
+			window.location.href = getAdminLink(
+				addQueryArgs( 'post.php', {
+					post: product.id,
+					action: 'edit',
+				} )
+			);
+		}
+
+		if ( onActionPerformed ) {
+			onActionPerformed( items );
+		}
+	},
+} );
+
+export const viewAction = (): Action< ProductEntityRecord > => ( {
+	id: 'view-product',
+	label: _x( 'View', 'verb', 'woocommerce' ),
+	isPrimary: true,
+	icon: external,
+	isEligible( product ) {
+		return product.status !== 'trash' && !! product.permalink;
+	},
+	callback( items, { onActionPerformed } ) {
+		const product = items[ 0 ];
+
+		if ( product?.permalink ) {
+			window.open( product.permalink, '_blank' );
+		}
+
+		if ( onActionPerformed ) {
+			onActionPerformed( items );
+		}
+	},
+} );
+
+export const useProductActions = () =>
+	useMemo( () => [ editAction(), viewAction() ], [] );

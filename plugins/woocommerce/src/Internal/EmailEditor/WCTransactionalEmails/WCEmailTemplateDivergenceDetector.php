@@ -32,7 +32,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  */
 class WCEmailTemplateDivergenceDetector {
 	/**
-	 * Option written by the RSM-149 backfill to signal that every existing `woo_email`
+	 * Option written by the WCEmailTemplateSyncBackfill backfill to signal that every existing `woo_email`
 	 * post has been stamped with the RSM-137 sync meta. The detector refuses to run
 	 * until this flag flips to `yes` — otherwise legacy posts would be evaluated with
 	 * no stored hash and silently skipped, giving a misleadingly quiet sweep.
@@ -53,7 +53,23 @@ class WCEmailTemplateDivergenceDetector {
 	 *
 	 * @var string
 	 */
-	private const SOURCE_HASH_META_KEY = '_wc_email_template_source_hash';
+	public const SOURCE_HASH_META_KEY = '_wc_email_template_source_hash';
+
+	/**
+	 * Post meta key storing the version of the block template the post was stamped
+	 * against. Written by the generator and by the RSM-149 backfill.
+	 *
+	 * @var string
+	 */
+	public const VERSION_META_KEY = '_wc_email_template_version';
+
+	/**
+	 * Post meta key storing the UTC timestamp (Y-m-d H:i:s) of the last sync stamp.
+	 * Written by the generator and by the RSM-149 backfill.
+	 *
+	 * @var string
+	 */
+	public const LAST_SYNCED_AT_META_KEY = '_wc_email_last_synced_at';
 
 	/**
 	 * Classification outcomes.
@@ -94,15 +110,8 @@ class WCEmailTemplateDivergenceDetector {
 			return;
 		}
 
-		$wc_emails = \WC_Emails::instance();
-		/**
-		 * WooCommerce Transactional Emails instance.
-		 *
-		 * @var \WC_Email[]
-		 */
-		$all_emails       = $wc_emails->get_emails();
 		$posts_manager    = WCTransactionalEmailPostsManager::get_instance();
-		$canonical_emails = self::index_emails_by_id( $all_emails );
+		$canonical_emails = $posts_manager->get_emails_by_id();
 
 		foreach ( $registry as $email_id => $_config ) {
 			try {
@@ -262,23 +271,5 @@ class WCEmailTemplateDivergenceDetector {
 	 */
 	private static function is_sha1_hash( string $hash ): bool {
 		return 40 === strlen( $hash ) && ctype_xdigit( $hash );
-	}
-
-	/**
-	 * Build an `email_id => WC_Email` lookup from the list returned by
-	 * `WC_Emails::get_emails()` (which is keyed by class name).
-	 *
-	 * @param array<string, \WC_Email> $all_emails Registered WC_Email instances keyed by class.
-	 * @return array<string, \WC_Email>
-	 */
-	private static function index_emails_by_id( array $all_emails ): array {
-		$indexed = array();
-		foreach ( $all_emails as $email ) {
-			if ( $email instanceof \WC_Email && is_string( $email->id ) && '' !== $email->id ) {
-				$indexed[ $email->id ] = $email;
-			}
-		}
-
-		return $indexed;
 	}
 }
