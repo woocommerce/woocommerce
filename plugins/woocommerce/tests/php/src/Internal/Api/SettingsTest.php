@@ -149,4 +149,20 @@ class SettingsTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame( '1', $by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['custom_attributes']['min'] );
 	}
+
+	/**
+	 * @testdox add_settings defines the max query complexity field with min=1 and the default constant as default.
+	 */
+	public function test_add_settings_defines_max_query_complexity_field(): void {
+		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
+		$by_id  = array_column( $fields, null, 'id' );
+
+		$this->assertArrayHasKey( Main::OPTION_MAX_QUERY_COMPLEXITY, $by_id );
+		$this->assertSame( 'number', $by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['type'] );
+		$this->assertSame(
+			(string) GraphQLController::DEFAULT_MAX_QUERY_COMPLEXITY,
+			$by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['default']
+		);
+		$this->assertSame( '1', $by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['custom_attributes']['min'] );
+	}
 }
