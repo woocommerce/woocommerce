@@ -145,6 +145,113 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * apply_to_post() with require_uncustomized=true must return a WP_Error and
+	 * leave the post untouched when the merchant has edited it since stamping.
+	 */
+	public function test_apply_to_post_with_require_uncustomized_returns_wp_error_when_post_modified(): void {
+		$email_id = 'wc_test_auto_apply_modified_since_stamp';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+
+		// Simulate a merchant edit: rewrite post_content directly so its hash no longer
+		// matches the stored stamp, but leave the meta keys in place.
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => '<p>Merchant-edited content</p>',
+			)
+		);
+
+		$pre_call_meta = array(
+			'source_hash'    => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'version'        => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ),
+			'last_synced_at' => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ),
+		);
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'post_modified_since_stamp', $result->get_error_code() );
+
+		$post = get_post( $post_id );
+		$this->assertSame( '<p>Merchant-edited content</p>', (string) $post->post_content, 'Atom must not rewrite content when hash gate fails.' );
+
+		$this->assertSame( $pre_call_meta['source_hash'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ) );
+		$this->assertSame( $pre_call_meta['version'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ) );
+		$this->assertSame( $pre_call_meta['last_synced_at'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ) );
+	}
+
+	/**
+	 * apply_to_post() must return WP_Error('no_stored_hash') when the source-hash
+	 * meta is missing, even if the post itself looks valid.
+	 */
+	public function test_apply_to_post_returns_wp_error_when_no_stored_hash(): void {
+		$email_id = 'wc_test_auto_apply_no_stored_hash';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+
+		delete_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY );
+		$pre_call_content = (string) get_post( $post_id )->post_content;
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'no_stored_hash', $result->get_error_code() );
+
+		$this->assertSame( $pre_call_content, (string) get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * apply_to_post() with require_uncustomized=true on a non-sync-enabled email
+	 * must return WP_Error('not_sync_enabled') and not write anything.
+	 */
+	public function test_apply_to_post_for_non_sync_enabled_email_with_require_uncustomized_true(): void {
+		$email_id = 'wc_test_auto_apply_non_sync_enabled_strict';
+
+		// Generate a stamped post, then nuke its registry membership so the email is
+		// no longer sync-enabled at apply time. Using a registry-cache reset keeps the
+		// post itself intact (with all four meta keys) so we can assert no writes.
+		$post_id = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+
+		// Drop the email out of the block-editor opt-in filter for the rest of the test.
+		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
+		WCEmailTemplateSyncRegistry::reset_cache();
+
+		$pre_call_content = (string) get_post( $post_id )->post_content;
+		$pre_call_status  = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true );
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'not_sync_enabled', $result->get_error_code() );
+
+		$this->assertSame( $pre_call_content, (string) get_post( $post_id )->post_content );
+		$this->assertSame( $pre_call_status, (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ) );
+	}
+
+	/**
+	 * apply_to_post() must return WP_Error('post_not_found') when the post ID
+	 * doesn't resolve to a woo_email post.
+	 */
+	public function test_apply_to_post_returns_wp_error_when_post_not_found(): void {
+		// Register a sync-enabled fixture email but do NOT generate a post for it.
+		$email_id = 'wc_test_auto_apply_post_not_found';
+		$email    = $this->register_fixture_email( $email_id );
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post( $email, 999999999 );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'post_not_found', $result->get_error_code() );
+	}
+
+	/**
 	 * Build a WC_Email stub backed by the third-party-with-version.php fixture, inject it
 	 * into WC_Emails::$emails, and opt the email ID into the block-editor filter so the
 	 * sync registry picks it up.
