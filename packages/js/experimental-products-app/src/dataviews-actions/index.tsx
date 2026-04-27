@@ -6,12 +6,12 @@ import { __, _x } from '@wordpress/i18n';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
 import type { Action } from '@wordpress/dataviews';
+import { useMemo } from '@wordpress/element';
 
 /**
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../fields/types';
-import { useMemo } from 'react';
 
 export const editAction = (): Action< ProductEntityRecord > => ( {
 	id: 'edit-product',
