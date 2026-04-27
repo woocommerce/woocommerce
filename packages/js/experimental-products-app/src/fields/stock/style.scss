@@ -1,0 +1,14 @@
+.woocommerce-fields-field__stock {
+	display: flex;
+	gap: 5px;
+
+	.woocommerce-fields-field__stock-label {
+		&--outofstock {
+			color: #cc1818;
+		}
+
+		&--onbackorder {
+			color: #ffa500;
+		}
+	}
+}

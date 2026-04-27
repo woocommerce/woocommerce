@@ -51514,12 +51514,6 @@ parameters:
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/GroupedProductSelector.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/QuantitySelector.php
-
-		-
 			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:get_product_from_context\(\) expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block given\.$#'
 			identifier: argument.type
 			count: 1
@@ -54616,12 +54610,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductResultsCount.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -54685,12 +54673,6 @@ parameters:
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 2
-			path: src/Blocks/BlockTypes/ProductSpecifications.php
-
-		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
 			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
 		-
@@ -64243,12 +64225,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Parameter \#2 \$property_name of function property_exists expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Parameter \#3 \$default_value of static method Automattic\\WooCommerce\\Utilities\\ArrayUtil\:\:get_value_or_default\(\) expects null, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -64807,12 +64783,6 @@ parameters:
 			path: src/Internal/EmailEditor/EmailApiController.php
 
 		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\EmailEditor\\EmailApiController\:\:\$post_manager \(Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\|null\) is never assigned null so it can be removed from the property type\.$#'
-			identifier: property.unusedType
-			count: 1
-			path: src/Internal/EmailEditor/EmailApiController.php
-
-		-
 			message: '#^PHPDoc type array of property Automattic\\WooCommerce\\Internal\\EmailEditor\\EmailPatterns\\WooEmailContentPattern\:\:\$template_types is not covariant with PHPDoc type array\<string\> of overridden property Automattic\\WooCommerce\\EmailEditor\\Engine\\Patterns\\Abstract_Pattern\:\:\$template_types\.$#'
 			identifier: property.phpDocType
 			count: 1
@@ -64941,12 +64911,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsGenerator\:\:initialize\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
-
-		-
-			message: '#^Property WC_Email\:\:\$template_base \(string\) on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.property
 			count: 1
 			path: src/Internal/EmailEditor/WCTransactionalEmails/WCTransactionalEmailPostsGenerator.php
 
