@@ -51,6 +51,10 @@ const NoticesReport = lazy( () =>
 );
 
 const manageStock = getAdminSetting( 'manageStock', 'no' );
+const stockNotificationsAlphaEnabled = !! getAdminSetting(
+	'stockNotifications',
+	{}
+).alphaEnabled;
 const REPORTS_FILTER = 'woocommerce_admin_reports_list';
 
 const getReports = () => {
@@ -126,14 +130,16 @@ const getReports = () => {
 			title: __( 'Customers', 'woocommerce' ),
 			component: CustomersReport,
 		},
-		{
-			report: 'notices',
-			title: __( 'Stock Notifications', 'woocommerce' ),
-			component: NoticesReport,
-			navArgs: {
-				id: 'woocommerce-analytics-notices',
-			},
-		},
+		stockNotificationsAlphaEnabled
+			? {
+					report: 'notices',
+					title: __( 'Stock Notifications', 'woocommerce' ),
+					component: NoticesReport,
+					navArgs: {
+						id: 'woocommerce-analytics-notices',
+					},
+			  }
+			: null,
 		{
 			report: 'downloads',
 			title: __( 'Downloads', 'woocommerce' ),

@@ -5,6 +5,7 @@
 
 namespace Automattic\WooCommerce\Internal\Admin;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\API\Reports\Cache;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -709,12 +710,12 @@ class Analytics {
 				'parent' => 'woocommerce-analytics',
 				'path'   => '/analytics/stock',
 			) : null,
-			array(
+			Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ? array(
 				'id'     => 'woocommerce-analytics-notices',
 				'title'  => __( 'Stock Notifications', 'woocommerce' ),
 				'parent' => 'woocommerce-analytics',
 				'path'   => '/analytics/notices',
-			),
+			) : null,
 			array(
 				'id'     => 'woocommerce-analytics-customers',
 				'title'  => __( 'Customers', 'woocommerce' ),
