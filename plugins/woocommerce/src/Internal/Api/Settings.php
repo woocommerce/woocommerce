@@ -32,7 +32,9 @@ class Settings {
 	 * @return array
 	 */
 	public function add_section( array $sections ): array {
-		$sections[ self::SECTION_ID ] = __( 'GraphQL', 'woocommerce' );
+		if ( Main::is_enabled() ) {
+			$sections[ self::SECTION_ID ] = __( 'GraphQL', 'woocommerce' );
+		}
 		return $sections;
 	}
 
@@ -44,7 +46,7 @@ class Settings {
 	 * @return array
 	 */
 	public function add_settings( array $settings, string $section_id ): array {
-		if ( self::SECTION_ID !== $section_id ) {
+		if ( self::SECTION_ID !== $section_id || ! Main::is_enabled() ) {
 			return $settings;
 		}
 

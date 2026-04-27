@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Migrate all interactive blocks from the old `woocommerce/product-data` store to the new `woocommerce/products` store.
