@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add a Back in Stock Notifications data point to the WC Tracker snapshot so merchants who opt into tracking contribute aggregate feature-activation + adoption metrics. No PII, no per-product breakdown. Behind the `WOOCOMMERCE_BIS_ALPHA_ENABLED` alpha gate.

@@ -15,6 +15,30 @@ class NotificationQuery {
 	 * @return array The notifications.
 	 */
 	public static function get_notifications( array $args ): array {
+		return self::run_query( $args );
+	}
+
+	/**
+	 * Count notifications matching the given filters.
+	 *
+	 * Wraps the data store's count-mode query with a strict int return so callers
+	 * that only need a row count don't need to load and count an array of rows.
+	 *
+	 * @param array $args Filter args (same shape as get_notifications, minus `return`).
+	 * @return int Matching row count.
+	 */
+	public static function count_notifications( array $args = array() ): int {
+		$args['return'] = 'count';
+		return (int) self::run_query( $args );
+	}
+
+	/**
+	 * Delegate to the stock_notification data store's query method.
+	 *
+	 * @param array $args The query arguments.
+	 * @return mixed Rows or row count, depending on $args['return'].
+	 */
+	private static function run_query( array $args ) {
 		return \WC_Data_Store::load( 'stock_notification' )->query( $args );
 	}
 
