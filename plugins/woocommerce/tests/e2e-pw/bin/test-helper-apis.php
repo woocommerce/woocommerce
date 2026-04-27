@@ -64,6 +64,36 @@ function register_helper_api() {
 			'permission_callback' => 'is_allowed',
 		)
 	);
+
+	register_rest_route(
+		'e2e-bis',
+		'/rate-limiter/reset',
+		array(
+			'methods'             => 'POST',
+			'callback'            => 'bis_reset_rate_limiter',
+			'permission_callback' => 'is_allowed',
+		)
+	);
+
+	register_rest_route(
+		'e2e-bis',
+		'/notifications/count',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'bis_get_notification_count',
+			'permission_callback' => 'is_allowed',
+			'args'                => array(
+				'product_id' => array(
+					'required'          => true,
+					'type'              => 'integer',
+					'sanitize_callback' => 'absint',
+					'validate_callback' => static function ( $value ) {
+						return is_numeric( $value ) && (int) $value > 0;
+					},
+				),
+			),
+		)
+	);
 }
 
 add_action( 'rest_api_init', 'register_helper_api' );
@@ -107,6 +137,30 @@ function enable_experimental_features( $features ) {
 }
 
 add_filter( 'woocommerce_admin_get_feature_config', 'enable_experimental_features' );
+
+// Pin BIS signup rate-limiter thresholds to known low values for the e2e
+// suite. The rate-limiting spec has matching IP_LIMIT/EMAIL_LIMIT constants;
+// these named pins make the contract explicit so the spec can't drift
+// silently if the production defaults are tuned upstream.
+/**
+ * Pin the BIS per-IP signup threshold for e2e tests.
+ *
+ * @return int
+ */
+function bis_test_max_per_ip(): int {
+	return 5;
+}
+add_filter( 'woocommerce_bis_signup_rate_limit_max_per_ip', 'bis_test_max_per_ip' );
+
+/**
+ * Pin the BIS per-email signup threshold for e2e tests.
+ *
+ * @return int
+ */
+function bis_test_max_per_email(): int {
+	return 3;
+}
+add_filter( 'woocommerce_bis_signup_rate_limit_max_per_email', 'bis_test_max_per_email' );
 
 /**
  * Update a WordPress option.
@@ -197,4 +251,65 @@ function activate_theme( WP_REST_Request $request ) {
 	} else {
 		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' does not exist." ), 400 );
 	}
+}
+
+/**
+ * Reset the Back-in-Stock Notifications sign-up rate-limit counters.
+ *
+ * Accepts either a JSON body with an optional `ip` and/or `email` key to reset
+ * a specific scope, or no body to wipe all counter transients.
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response
+ */
+function bis_reset_rate_limiter( WP_REST_Request $request ) {
+	$ip_prefix    = \Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupRateLimiter::IP_PREFIX;
+	$email_prefix = \Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupRateLimiter::EMAIL_PREFIX;
+
+	$body = json_decode( $request->get_body(), true );
+	if ( is_array( $body ) && ( ! empty( $body['ip'] ) || ! empty( $body['email'] ) ) ) {
+		if ( ! empty( $body['ip'] ) ) {
+			delete_transient( $ip_prefix . md5( trim( (string) $body['ip'] ) ) );
+		}
+		if ( ! empty( $body['email'] ) ) {
+			delete_transient( $email_prefix . md5( strtolower( trim( (string) $body['email'] ) ) ) );
+		}
+
+		return new WP_REST_Response( array( 'message' => 'BIS rate-limiter counters reset for scope.' ), 200 );
+	}
+
+	// Collect every BIS rate-limit transient name, then hand each to delete_transient()
+	// so both the options-table row and the object cache are invalidated — avoids the
+	// blast radius of wp_cache_flush() on parallel e2e runs.
+	global $wpdb;
+	$transient_names = array();
+	foreach ( array( $ip_prefix, $email_prefix ) as $prefix ) {
+		$like  = $wpdb->esc_like( '_transient_' . $prefix ) . '%';
+		$names = $wpdb->get_col( $wpdb->prepare( "SELECT option_name FROM {$wpdb->options} WHERE option_name LIKE %s", $like ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery
+		foreach ( $names as $name ) {
+			$transient_names[] = preg_replace( '/^_transient_/', '', $name );
+		}
+	}
+	foreach ( array_unique( $transient_names ) as $transient ) {
+		delete_transient( $transient );
+	}
+
+	return new WP_REST_Response( array( 'message' => 'All BIS rate-limiter counters reset.' ), 200 );
+}
+
+/**
+ * Return the number of Back-in-Stock notifications stored for a product.
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response
+ */
+function bis_get_notification_count( WP_REST_Request $request ) {
+	// product_id is required + validated at the route level, so the callback just trusts the sanitized value.
+	$product_id = (int) $request->get_param( 'product_id' );
+
+	global $wpdb;
+	$table = $wpdb->prefix . 'wc_stock_notifications';
+	$count = (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$table} WHERE product_id = %d", $product_id ) ); // phpcs:ignore WordPress.DB.DirectDatabaseQuery,WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+	return new WP_REST_Response( array( 'count' => $count ), 200 );
 }

@@ -458,7 +458,7 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_verification_key( string $key ): bool {
-		$action_key = (string) $this->get_meta( 'verification_action_key' );
+		$action_key = $this->get_meta( 'verification_action_key' );
 
 		if ( ! str_contains( $action_key, ':' ) ) {
 			return false;
@@ -498,11 +498,11 @@ class Notification extends \WC_Data {
 	 * @return bool True if the key is valid, false otherwise.
 	 */
 	public function check_unsubscribe_key( string $key ): bool {
-		$stored = (string) $this->get_meta( 'unsubscribe_action_key' );
-		if ( '' === $stored ) {
+		$hash = $this->get_meta( 'unsubscribe_action_key' );
+		if ( ! is_string( $hash ) || '' === $hash ) {
 			return false;
 		}
-		return wp_verify_fast_hash( $key, $stored );
+		return wp_verify_fast_hash( $key, $hash );
 	}
 
 	/**
