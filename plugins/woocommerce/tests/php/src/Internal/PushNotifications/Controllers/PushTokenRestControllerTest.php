@@ -4,18 +4,15 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Controllers;
 
-use Automattic\Jetpack\Connection\Manager as JetpackConnectionManager;
-use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\PushTokensDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenInvalidDataException;
 use Automattic\WooCommerce\Internal\PushNotifications\Exceptions\PushTokenNotFoundException;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use Exception;
 use RuntimeException;
-use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
 use WC_Data_Exception;
 use WC_REST_Unit_Test_Case;
@@ -29,6 +26,8 @@ use WP_REST_Request;
  * @package WooCommerce\Tests\PushNotifications
  */
 class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
+	use PushNotificationsTestTrait;
+
 	/**
 	 * Shop manager user ID for testing.
 	 *
@@ -56,16 +55,6 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 	 * @var int
 	 */
 	private $subscriber_id;
-
-	/**
-	 * @var JetpackConnectionManager|MockObject
-	 */
-	private $jetpack_connection_manager_mock;
-
-	/**
-	 * @var FeaturesController|MockObject
-	 */
-	private $features_controller_mock;
 
 	/**
 	 * Set up test.
@@ -1310,67 +1299,6 @@ class PushTokenRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 'woocommerce_internal_error', $result->get_error_code() );
 		$this->assertEquals( 'Internal server error', $result->get_error_message() );
 		$this->assertEquals( WP_Http::INTERNAL_SERVER_ERROR, $result->get_error_data()['status'] );
-	}
-
-	/**
-	 * Sets up the Jetpack connection manager mocking, and ensures the
-	 * PushNotifications class state is reset so `should_be_enabled` calculates
-	 * this from scratch.
-	 *
-	 * @param bool $is_connected Whether the manager should report Jetpack is
-	 * connected or not.
-	 */
-	private function mock_jetpack_connection_manager_is_connected( bool $is_connected = true ) {
-		$this->jetpack_connection_manager_mock = $this
-			->getMockBuilder( JetpackConnectionManager::class )
-			->disableOriginalConstructor()
-			->onlyMethods( array( 'is_connected' ) )
-			->getMock();
-
-		wc_get_container()->get( LegacyProxy::class )->register_class_mocks(
-			array( JetpackConnectionManager::class => $this->jetpack_connection_manager_mock )
-		);
-
-		$this->jetpack_connection_manager_mock
-			->expects( $this->any() )
-			->method( 'is_connected' )
-			->willReturn( $is_connected );
-
-		$this->reset_push_notifications_cache();
-	}
-
-	/**
-	 * Sets up the FeaturesController mock to enable push_notifications feature.
-	 */
-	private function set_up_features_controller_mock() {
-		$this->features_controller_mock = $this
-			->getMockBuilder( FeaturesController::class )
-			->disableOriginalConstructor()
-			->onlyMethods( array( 'feature_is_enabled' ) )
-			->getMock();
-
-		$this->features_controller_mock
-			->method( 'feature_is_enabled' )
-			->willReturnCallback(
-				function ( $feature_id ) {
-					return PushNotifications::FEATURE_NAME === $feature_id;
-				}
-			);
-
-		wc_get_container()->replace( FeaturesController::class, $this->features_controller_mock );
-	}
-
-	/**
-	 * Resets the cached enablement state on the container's PushNotifications
-	 * instance.
-	 */
-	private function reset_push_notifications_cache() {
-		$push_notifications = wc_get_container()->get( PushNotifications::class );
-		$reflection         = new ReflectionClass( $push_notifications );
-		$property           = $reflection->getProperty( 'enabled' );
-
-		$property->setAccessible( true );
-		$property->setValue( $push_notifications, null );
 	}
 
 	/**
