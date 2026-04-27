@@ -56,4 +56,21 @@ final class ProductStatus {
 	 * @var string
 	 */
 	public const FUTURE = 'future';
+
+	/**
+	 * Returns all product status values.
+	 *
+	 * @return string[]
+	 */
+	public static function get_all(): array {
+		return array(
+			self::AUTO_DRAFT,
+			self::DRAFT,
+			self::PENDING,
+			self::PRIVATE,
+			self::PUBLISH,
+			self::TRASH,
+			self::FUTURE,
+		);
+	}
 }

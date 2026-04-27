@@ -42,4 +42,19 @@ final class ProductType {
 	 * @var string
 	 */
 	public const VARIATION = 'variation';
+
+	/**
+	 * Returns all product type values.
+	 *
+	 * @return string[]
+	 */
+	public static function get_all(): array {
+		return array(
+			self::SIMPLE,
+			self::VARIABLE,
+			self::GROUPED,
+			self::EXTERNAL,
+			self::VARIATION,
+		);
+	}
 }

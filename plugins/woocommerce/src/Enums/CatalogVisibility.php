@@ -29,4 +29,18 @@ final class CatalogVisibility {
 	 * Product is invisible on both shop and search results, but can still be accessed directly.
 	 */
 	public const HIDDEN = 'hidden';
+
+	/**
+	 * Returns all catalog visibility values.
+	 *
+	 * @return string[]
+	 */
+	public static function get_all(): array {
+		return array(
+			self::VISIBLE,
+			self::CATALOG,
+			self::SEARCH,
+			self::HIDDEN,
+		);
+	}
 }
