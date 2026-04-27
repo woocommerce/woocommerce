@@ -9,6 +9,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\CLI\Migrator\Platforms\Shopify;
 
+use Automattic\WooCommerce\Enums\WeightUnit;
 use Automattic\WooCommerce\Internal\CLI\Migrator\Interfaces\PlatformMapperInterface;
 
 defined( 'ABSPATH' ) || exit;
@@ -298,7 +299,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 
 		$store_weight_unit = get_option( 'woocommerce_weight_unit' );
 
-		if ( 'lbs' === $store_weight_unit ) {
+		if ( WeightUnit::POUNDS === $store_weight_unit ) {
 			$store_weight_unit = 'lb';
 		}
 
