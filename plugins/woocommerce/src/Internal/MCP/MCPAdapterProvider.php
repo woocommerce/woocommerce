@@ -167,8 +167,7 @@ class MCPAdapterProvider {
 		$mcp_abilities = array_filter(
 			$all_abilities_ids,
 			static function ( $ability_id ) {
-				// Include WooCommerce abilities by default.
-				$include = str_starts_with( $ability_id, 'woocommerce/' );
+				$include = self::should_include_ability_by_default( $ability_id );
 
 				// Allow filter to override inclusion decision.
 				/**
@@ -185,6 +184,36 @@ class MCPAdapterProvider {
 
 		// Re-index array.
 		return array_values( $mcp_abilities );
+	}
+
+	/**
+	 * Check if an ability should be included in the default WooCommerce MCP surface.
+	 *
+	 * Existing WooCommerce MCP consumers expect the REST-derived ability surface on
+	 * the default endpoint. Keep the historical namespace fallback for abilities
+	 * that do not carry projection metadata, but allow new ability registrations to
+	 * opt out explicitly so semantic/domain abilities can coexist without changing
+	 * the legacy MCP tool list.
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @return bool Whether to include the ability by default.
+	 */
+	private static function should_include_ability_by_default( string $ability_id ): bool {
+		if ( ! str_starts_with( $ability_id, 'woocommerce/' ) ) {
+			return false;
+		}
+
+		if ( function_exists( 'wp_get_ability' ) ) {
+			$ability = wp_get_ability( $ability_id );
+			if ( $ability && method_exists( $ability, 'get_meta_item' ) ) {
+				$explicit_exposure = $ability->get_meta_item( 'woocommerce_mcp_expose', null );
+				if ( null !== $explicit_exposure ) {
+					return (bool) $explicit_exposure;
+				}
+			}
+		}
+
+		return true;
 	}
 
 	/**
