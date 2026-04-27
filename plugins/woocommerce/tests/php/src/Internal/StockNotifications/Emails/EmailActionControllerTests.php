@@ -16,42 +16,53 @@ use WC_Helper_Product;
 class EmailActionControllerTests extends \WC_Unit_Test_Case {
 
 	/**
-	 * Test that verification action is sets notification status to active.
+	 * Persist a notification with a single action-key meta entry.
+	 *
+	 * @param string $status     Initial NotificationStatus value to set on the notification.
+	 * @param string $meta_key   Meta key to store the action key under (e.g. 'verification_action_key').
+	 * @param string $stored_key Already-formatted key value (caller hashes/timestamps as needed).
+	 * @return int Saved notification id.
 	 */
-	public function test_process_verification_action_sets_status_active() {
+	private function arrange_notification( string $status, string $meta_key, string $stored_key ): int {
 		$product      = WC_Helper_Product::create_simple_product();
 		$notification = new Notification();
 		$notification->set_product_id( $product->get_id() );
-		$notification->set_status( NotificationStatus::PENDING );
+		$notification->set_status( $status );
 		$notification->set_user_email( 'test@example.com' );
-		$key = time() . ':' . wp_fast_hash( 'test' );
-		$notification->update_meta_data( 'verification_action_key', $key );
-		$id = $notification->save();
+		$notification->update_meta_data( $meta_key, $stored_key );
+		return $notification->save();
+	}
 
-		$controller = new EmailActionController();
-		$controller->validate_and_maybe_process_request( $id, 'test', 'verify' );
-		$updated_notification = Factory::get_notification( $id );
-		$this->assertEquals( NotificationStatus::ACTIVE, $updated_notification->get_status() );
+	/**
+	 * Test that verification action is sets notification status to active.
+	 */
+	public function test_process_verification_action_sets_status_active() {
+		$id = $this->arrange_notification(
+			NotificationStatus::PENDING,
+			'verification_action_key',
+			time() . ':' . wp_fast_hash( 'test' )
+		);
+
+		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'test', 'verify' );
+
+		$this->assertEquals( NotificationStatus::ACTIVE, Factory::get_notification( $id )->get_status() );
 	}
 
 	/**
 	 * Test that unsubscribe action sets notification status to cancelled, and sets cancellation source to user.
 	 */
 	public function test_process_unsubscribe_action_sets_status_cancelled() {
-		$product      = WC_Helper_Product::create_simple_product();
-		$notification = new Notification();
-		$notification->set_product_id( $product->get_id() );
-		$notification->set_status( NotificationStatus::ACTIVE );
-		$notification->set_user_email( 'test@example.com' );
-		$key = wp_fast_hash( 'test' );
-		$notification->update_meta_data( 'unsubscribe_action_key', $key );
-		$id = $notification->save();
+		$id = $this->arrange_notification(
+			NotificationStatus::ACTIVE,
+			'unsubscribe_action_key',
+			wp_fast_hash( 'test' )
+		);
 
-		$controller = new EmailActionController();
-		$controller->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
-		$updated_notification = Factory::get_notification( $id );
-		$this->assertEquals( NotificationStatus::CANCELLED, $updated_notification->get_status() );
-		$this->assertEquals( NotificationCancellationSource::USER, $updated_notification->get_cancellation_source() );
+		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+
+		$updated = Factory::get_notification( $id );
+		$this->assertEquals( NotificationStatus::CANCELLED, $updated->get_status() );
+		$this->assertEquals( NotificationCancellationSource::USER, $updated->get_cancellation_source() );
 	}
 
 	/**
@@ -59,19 +70,15 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 * leave the notification untouched.
 	 */
 	public function test_process_verification_action_with_invalid_key_leaves_status_pending() {
-		$product      = WC_Helper_Product::create_simple_product();
-		$notification = new Notification();
-		$notification->set_product_id( $product->get_id() );
-		$notification->set_status( NotificationStatus::PENDING );
-		$notification->set_user_email( 'test@example.com' );
-		$notification->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( 'real-key' ) );
-		$id = $notification->save();
+		$id = $this->arrange_notification(
+			NotificationStatus::PENDING,
+			'verification_action_key',
+			time() . ':' . wp_fast_hash( 'real-key' )
+		);
 
-		$controller = new EmailActionController();
-		$controller->validate_and_maybe_process_request( $id, 'wrong-key', 'verify' );
+		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'wrong-key', 'verify' );
 
-		$updated_notification = Factory::get_notification( $id );
-		$this->assertEquals( NotificationStatus::PENDING, $updated_notification->get_status() );
+		$this->assertEquals( NotificationStatus::PENDING, Factory::get_notification( $id )->get_status() );
 	}
 
 	/**
@@ -79,21 +86,17 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 * verification key must not cancel the notification.
 	 */
 	public function test_process_unsubscribe_action_with_only_verification_key_does_not_cancel() {
-		$product      = WC_Helper_Product::create_simple_product();
-		$notification = new Notification();
-		$notification->set_product_id( $product->get_id() );
-		$notification->set_status( NotificationStatus::ACTIVE );
-		$notification->set_user_email( 'test@example.com' );
 		// Only a verification key is stored — the unsubscribe_action_key meta
 		// is deliberately empty to simulate a mis-routed link.
-		$notification->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( 'test' ) );
-		$id = $notification->save();
+		$id = $this->arrange_notification(
+			NotificationStatus::ACTIVE,
+			'verification_action_key',
+			time() . ':' . wp_fast_hash( 'test' )
+		);
 
-		$controller = new EmailActionController();
-		$controller->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
 
-		$updated_notification = Factory::get_notification( $id );
-		$this->assertEquals( NotificationStatus::ACTIVE, $updated_notification->get_status() );
+		$this->assertEquals( NotificationStatus::ACTIVE, Factory::get_notification( $id )->get_status() );
 	}
 
 	/**
@@ -101,14 +104,12 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 * error.
 	 */
 	public function test_process_action_with_missing_notification_id_handles_gracefully() {
-		$controller = new EmailActionController();
-
 		// The guard in validate_and_maybe_process_request short-circuits when
 		// the id is 0; no side-effect to assert, so suppress PHPUnit's risky
 		// warning without a no-op assertion.
 		$this->expectNotToPerformAssertions();
 
-		$controller->validate_and_maybe_process_request( 0, 'any-key', 'verify' );
+		( new EmailActionController() )->validate_and_maybe_process_request( 0, 'any-key', 'verify' );
 	}
 
 	/**
@@ -116,19 +117,15 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 * or unsubscribe code paths.
 	 */
 	public function test_process_action_with_unknown_token_does_not_mutate_notification() {
-		$product      = WC_Helper_Product::create_simple_product();
-		$notification = new Notification();
-		$notification->set_product_id( $product->get_id() );
-		$notification->set_status( NotificationStatus::PENDING );
-		$notification->set_user_email( 'test@example.com' );
-		$notification->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( 'test' ) );
-		$id = $notification->save();
+		$id = $this->arrange_notification(
+			NotificationStatus::PENDING,
+			'verification_action_key',
+			time() . ':' . wp_fast_hash( 'test' )
+		);
 
-		$controller = new EmailActionController();
-		$controller->validate_and_maybe_process_request( $id, 'test', 'bogus-action' );
+		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'test', 'bogus-action' );
 
-		$updated_notification = Factory::get_notification( $id );
-		$this->assertEquals( NotificationStatus::PENDING, $updated_notification->get_status() );
+		$this->assertEquals( NotificationStatus::PENDING, Factory::get_notification( $id )->get_status() );
 	}
 
 	/**
@@ -137,18 +134,14 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	 * unknown-token branch, which takes the `default:` debug-log path.
 	 */
 	public function test_process_action_with_empty_action_early_returns() {
-		$product      = WC_Helper_Product::create_simple_product();
-		$notification = new Notification();
-		$notification->set_product_id( $product->get_id() );
-		$notification->set_status( NotificationStatus::PENDING );
-		$notification->set_user_email( 'test@example.com' );
-		$notification->update_meta_data( 'verification_action_key', time() . ':' . wp_fast_hash( 'test' ) );
-		$id = $notification->save();
+		$id = $this->arrange_notification(
+			NotificationStatus::PENDING,
+			'verification_action_key',
+			time() . ':' . wp_fast_hash( 'test' )
+		);
 
-		$controller = new EmailActionController();
-		$controller->validate_and_maybe_process_request( $id, 'test', '' );
+		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'test', '' );
 
-		$updated_notification = Factory::get_notification( $id );
-		$this->assertEquals( NotificationStatus::PENDING, $updated_notification->get_status() );
+		$this->assertEquals( NotificationStatus::PENDING, Factory::get_notification( $id )->get_status() );
 	}
 }

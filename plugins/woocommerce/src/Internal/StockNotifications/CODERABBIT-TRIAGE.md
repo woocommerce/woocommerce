@@ -88,7 +88,7 @@ Not actionable — false-positives, design decisions explicitly justified by the
 
 ## Reconciliation with handoff brief
 
-Of the 11 items flagged in the handoff as "already identified must-fixes", this triage keeps:
+Of the 12 items flagged in the handoff as "already identified must-fixes", this triage keeps:
 
 - **9** as Must-fix: NotificationEditPage:80, NotificationEditPage:107, Notification:488/518/525 (shared meta key), Config:91, NotificationsProcessor:171, DataRetentionController:87, html-admin-notification-create:139/141 (the 103 occurrence is not separately flagged by CodeRabbit but is the same bug), customer-stock-notification-verified:58.
 - **2** downgraded: HasherHelper fallback (moved to Should-fix — the compat shim works; the "right" fix is a min-WP decision) and CustomerStockNotificationVerifyEmail:179 `siteurl` vs `home_url()` (moved to Should-fix, treated here under the verify-email template / EmailActionController group — CodeRabbit did not directly comment on that line).
