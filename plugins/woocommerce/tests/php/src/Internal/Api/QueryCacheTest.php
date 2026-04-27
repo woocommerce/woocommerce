@@ -78,34 +78,10 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox APQ hash-only requests resolve from the cache regardless of the ObjectCache toggle.
-	 */
-	public function test_apq_hash_only_resolves_when_toggle_off(): void {
-		update_option( Main::OPTION_OBJECT_CACHE_ENABLED, 'yes' );
-		$query = '{ __typename }';
-		$hash  = hash( 'sha256', $query );
-		$this->sut->resolve(
-			$query,
-			array( 'persistedQuery' => array( 'version' => 1, 'sha256Hash' => $hash ) )
-		);
-
-		update_option( Main::OPTION_OBJECT_CACHE_ENABLED, 'no' );
-
-		$result = $this->sut->resolve(
-			null,
-			array( 'persistedQuery' => array( 'version' => 1, 'sha256Hash' => $hash ) )
-		);
-
-		$this->assertInstanceOf( DocumentNode::class, $result );
-	}
-
-	/**
-	 * Build the QueryCache cache key for a query string, mirroring the private
-	 * key construction used inside QueryCache.
+	 * Build the QueryCache cache key for a query string. Prefix kept in sync
+	 * with QueryCache::CACHE_KEY_PREFIX.
 	 */
 	private function cache_key_for( string $query ): string {
-		$reflection = new \ReflectionClass( QueryCache::class );
-		$prefix     = $reflection->getReflectionConstant( 'CACHE_KEY_PREFIX' )->getValue();
-		return $prefix . hash( 'sha256', $query );
+		return 'graphql_ast_v15_' . hash( 'sha256', $query );
 	}
 }

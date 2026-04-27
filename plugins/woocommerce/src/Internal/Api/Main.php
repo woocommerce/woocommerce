@@ -29,9 +29,6 @@ class Main {
 
 	/**
 	 * Option name for the "ObjectCache-based caching" setting.
-	 *
-	 * Controls the parsed-AST cache used by {@see QueryCache} for standard
-	 * (non-APQ) requests. APQ has its own settings toggle.
 	 */
 	public const OPTION_OBJECT_CACHE_ENABLED = 'woocommerce_graphql_object_cache_enabled';
 
@@ -69,10 +66,9 @@ class Main {
 	}
 
 	/**
-	 * Whether the ObjectCache-backed query cache is enabled for standard
-	 * (non-APQ) requests.
+	 * Whether the ObjectCache-backed query cache is enabled.
 	 *
-	 * Defaults to true. APQ requests are unaffected by this option.
+	 * Defaults to true.
 	 */
 	public static function is_object_cache_enabled(): bool {
 		return wc_string_to_bool( get_option( self::OPTION_OBJECT_CACHE_ENABLED, 'yes' ) );
