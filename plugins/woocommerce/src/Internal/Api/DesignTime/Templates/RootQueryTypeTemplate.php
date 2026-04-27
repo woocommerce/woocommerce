@@ -17,7 +17,7 @@ namespace <?php echo $namespace; ?>;
 <?php foreach ( $queries as $query ) : ?>
 use <?php echo $query['fqcn']; ?>;
 <?php endforeach; ?>
-use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ObjectType;
+use Automattic\WooCommerce\Internal\Api\Schema\ObjectType;
 
 class RootQueryType {
 	private static ?ObjectType $instance = null;
