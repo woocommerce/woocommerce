@@ -922,6 +922,11 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	}
 
 	a.woocommerce-message-close {
+		// WP 7.0 changes .notice-dismiss to display:flex, width/height:24px.
+		// Woo notices carry visible text so we keep the float-based layout.
+		display: inline;
+		width: auto;
+		height: auto;
 		position: static;
 		float: right;
 		padding: 0 15px 10px 28px;
@@ -929,6 +934,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		font-size: 13px;
 		line-height: 1.23076923;
 		text-decoration: none;
+		color: #1e1e1e;
 
 		&::before {
 			position: relative;
@@ -8552,15 +8558,6 @@ table.bar_chart {
 	// Restore WP 7.0's padding so the dismiss button aligns correctly.
 	&.woocommerce-embed-page .notice {
 		padding: 8px 12px;
-	}
-
-	// WP 7.0 sets display:flex, width:24px, height:24px on .notice-dismiss.
-	// Reset these so the floated .woocommerce-message-close layout still works.
-	.woocommerce-message a.woocommerce-message-close {
-		display: inline;
-		width: auto;
-		height: auto;
-		color: #1e1e1e;
 	}
 
 	// Align editor meta box border-radius with WP 7.0's dashboard widgets (8px).
