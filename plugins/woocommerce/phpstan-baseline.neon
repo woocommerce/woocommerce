@@ -8721,13 +8721,13 @@ parameters:
 		-
 			message: '#^Cannot call method get_formatted_name\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
 			message: '#^Cannot call method get_id\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 4
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8805,7 +8805,7 @@ parameters:
 		-
 			message: '#^Cannot call method managing_stock\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/class-wc-ajax.php
 
 		-
