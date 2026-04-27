@@ -43,13 +43,6 @@ class Main {
 	public const OPTION_MAX_QUERY_COMPLEXITY = 'woocommerce_graphql_max_query_complexity';
 
 	/**
-	 * Cached result of the feature-enabled check, null until first evaluated.
-	 *
-	 * @var ?bool
-	 */
-	private static ?bool $enabled = null;
-
-	/**
 	 * Check whether the Dual Code & GraphQL API feature is active.
 	 *
 	 * Requires PHP 8.1+ and the dual_code_graphql_api feature flag to be
