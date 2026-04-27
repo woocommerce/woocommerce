@@ -40,9 +40,9 @@ class InstallJPAndWCSPluginsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should not invoke the install path for users without the install_plugins capability (e.g. shop_manager).
+	 * @testdox Should throw when triggered by a user without the install_plugins capability (e.g. shop_manager).
 	 */
-	public function test_install_jp_and_wcs_plugins_skips_when_user_lacks_install_plugins_cap(): void {
+	public function test_install_jp_and_wcs_plugins_throws_when_user_lacks_install_plugins_cap(): void {
 		$shop_manager_id = self::factory()->user->create( array( 'role' => 'shop_manager' ) );
 		wp_set_current_user( $shop_manager_id );
 
@@ -54,15 +54,12 @@ class InstallJPAndWCSPluginsTest extends WC_Unit_Test_Case {
 		$note = new Note();
 		$note->set_name( InstallJPAndWCSPlugins::NOTE_NAME );
 
-		// Cap check must short-circuit before reaching install_and_activate_plugin().
-		// If the cap check is missing, execution falls through to a call into
-		// OnboardingPlugins::install_plugin() which does not exist and raises an Error.
-		$this->sut->install_jp_and_wcs_plugins( $note );
+		// The handler must throw — a silent return would let Notes::trigger_note_action()
+		// continue and persist E_WC_ADMIN_NOTE_ACTIONED on the note despite no install
+		// running.
+		$this->expectException( \Exception::class );
 
-		$this->assertTrue(
-			true,
-			'Handler must short-circuit without error for users lacking install_plugins.'
-		);
+		$this->sut->install_jp_and_wcs_plugins( $note );
 	}
 
 	/**

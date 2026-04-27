@@ -107,10 +107,16 @@ class InstallJPAndWCSPlugins {
 
 		// The route-level permission check on `POST /wc-analytics/admin/notes/.../action/...`
 		// only requires `manage_woocommerce`, which `shop_manager` satisfies. Plugin install
-		// requires the dedicated `install_plugins` capability — gate per-handler to mirror
-		// `WooCommercePayments::install_on_action()`.
+		// requires the dedicated `install_plugins` capability — gate per-handler.
+		//
+		// Throwing (rather than returning silently) prevents `Notes::trigger_note_action()`
+		// from persisting the action's `E_WC_ADMIN_NOTE_ACTIONED` status after this hook
+		// returns: the exception aborts the REST callback before `$note->save()` runs, so
+		// the note stays in the inbox for unauthorized users.
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return;
+			throw new \Exception(
+				esc_html__( 'Sorry, you are not allowed to install plugins.', 'woocommerce' )
+			);
 		}
 
 		$this->install_and_activate_plugin( 'jetpack' );
