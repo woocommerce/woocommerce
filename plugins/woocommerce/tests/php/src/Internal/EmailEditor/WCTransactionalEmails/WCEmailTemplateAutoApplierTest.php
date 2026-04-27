@@ -4,6 +4,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
@@ -718,6 +719,41 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
 		);
 		$this->assertSame( array(), $captured, 'Deactivated-plugin skip must be silent (no log emission).' );
+	}
+
+	/**
+	 * Firing the divergence-sweep completion action must trigger the auto-applier
+	 * to enqueue an AS job. This locks in the wiring that lives in
+	 * Integration::register_hooks().
+	 */
+	public function test_detector_sweep_complete_action_triggers_schedule(): void {
+		// The unit-test bootstrap does not run Integration::initialize() (which calls
+		// register_hooks()). Force it for this single test so the wiring under test
+		// is actually present on the global hook table.
+		wc_get_container()->get( Integration::class )->initialize();
+
+		as_unschedule_all_actions(
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK,
+			array(),
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_GROUP
+		);
+
+		do_action( 'woocommerce_email_template_divergence_sweep_complete' );
+
+		$this->assertTrue(
+			(bool) as_has_scheduled_action(
+				WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK,
+				array(),
+				WCEmailTemplateAutoApplier::AUTO_APPLY_AS_GROUP
+			),
+			'Integration::register_hooks() must wire schedule() to the divergence-sweep completion action.'
+		);
+
+		as_unschedule_all_actions(
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK,
+			array(),
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_GROUP
+		);
 	}
 
 	/**
