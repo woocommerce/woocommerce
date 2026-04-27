@@ -6,6 +6,9 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 
 defined( 'ABSPATH' ) || exit;
 
+use WC_Data_Exception;
+use WP_Http;
+
 /**
  * Manages per-user push notification preferences.
  *
@@ -71,11 +74,13 @@ class NotificationPreferencesService {
 	 * @param int                 $user_id     The user ID.
 	 * @param array<string, bool> $preferences Partial preferences to merge over existing values.
 	 *
-	 * @return bool True when the user meta value changed, false otherwise.
+	 * @return array<string, bool> The merged, sanitized preferences map after the save.
+	 *
+	 * @throws WC_Data_Exception When the user meta write fails for a non-no-op reason.
 	 *
 	 * @since 10.8.0
 	 */
-	public function save_preferences( int $user_id, array $preferences ): bool {
+	public function save_preferences( int $user_id, array $preferences ): array {
 		$current = $this->get_preferences( $user_id );
 		$merged  = $this->sanitize( array_merge( $current, $preferences ) );
 
@@ -84,7 +89,29 @@ class NotificationPreferencesService {
 			'preferences'    => $merged,
 		);
 
-		return (bool) update_user_meta( $user_id, self::META_KEY, $envelope );
+		// Skip the write when the stored envelope already matches. This avoids
+		// the ambiguous `false` return from update_user_meta() that means
+		// either "value unchanged" or "DB write failed" — by short-circuiting
+		// the no-op case, a `false` from the call below unambiguously means
+		// the write itself failed and we can surface it.
+		$stored = get_user_meta( $user_id, self::META_KEY, true );
+		if ( $stored === $envelope ) {
+			return $merged;
+		}
+
+		$result = update_user_meta( $user_id, self::META_KEY, $envelope );
+
+		if ( false === $result ) {
+			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			throw new WC_Data_Exception(
+				'woocommerce_push_notification_preferences_save_failed',
+				'Failed to save push notification preferences.',
+				WP_Http::INTERNAL_SERVER_ERROR
+			);
+			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		}
+
+		return $merged;
 	}
 
 	/**

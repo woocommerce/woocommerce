@@ -9,6 +9,9 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Exception;
+use WC_Data_Exception;
 use WP_Error;
 use WP_Http;
 use WP_REST_Request;
@@ -111,12 +114,16 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 		$service = wc_get_container()->get( NotificationPreferencesService::class );
 		$input   = array_intersect_key( $request->get_params(), $service->get_defaults() );
 
-		$service->save_preferences( get_current_user_id(), array_map( 'boolval', $input ) );
+		try {
+			$merged = $service->save_preferences(
+				get_current_user_id(),
+				array_map( 'boolval', $input )
+			);
+		} catch ( Exception $e ) {
+			return $this->convert_exception_to_wp_error( $e );
+		}
 
-		return new WP_REST_Response(
-			$service->get_preferences( get_current_user_id() ),
-			WP_Http::OK
-		);
+		return new WP_REST_Response( $merged, WP_Http::OK );
 	}
 
 	/**
@@ -178,5 +185,43 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Convert an exception thrown by the service into a WP_Error suitable for
+	 * the REST response.
+	 *
+	 * Mirrors PushTokenRestController::convert_exception_to_wp_error: surface
+	 * domain-specific WC_Data_Exception details for client-recoverable failures
+	 * (non-500 codes), and log + return a generic internal-error response for
+	 * 500-level / unknown failures.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param Exception $e The exception to convert.
+	 * @return WP_Error
+	 */
+	private function convert_exception_to_wp_error( Exception $e ): WP_Error {
+		if (
+			$e instanceof WC_Data_Exception
+			&& $e->getCode() !== WP_Http::INTERNAL_SERVER_ERROR
+		) {
+			return new WP_Error(
+				$e->getErrorCode(),
+				$e->getMessage(),
+				$e->getErrorData()
+			);
+		}
+
+		wc_get_container()
+			->get( LegacyProxy::class )
+			->call_function( 'wc_get_logger' )
+			->error( (string) $e->getMessage(), array( 'source' => PushNotifications::FEATURE_NAME ) );
+
+		return new WP_Error(
+			'woocommerce_internal_error',
+			'Internal server error',
+			array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
+		);
 	}
 }

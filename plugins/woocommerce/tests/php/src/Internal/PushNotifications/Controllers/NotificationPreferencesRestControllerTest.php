@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPrefe
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use PHPUnit\Framework\MockObject\MockObject;
 use ReflectionClass;
+use WC_Data_Exception;
 use WC_REST_Unit_Test_Case;
 use WP_Http;
 use WP_REST_Request;
@@ -207,6 +208,42 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertFalse( $data['store_order'] );
 		$this->assertTrue( $data['store_review'] );
+	}
+
+	/**
+	 * @testdox POST should return a 500 when the service throws a persistence error.
+	 */
+	public function test_post_preferences_returns_500_when_service_throws() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+
+		$service_mock = $this->createMock( NotificationPreferencesService::class );
+		$service_mock->method( 'get_defaults' )->willReturn(
+			array(
+				'store_order'  => true,
+				'store_review' => true,
+			)
+		);
+		$service_mock->method( 'save_preferences' )->willThrowException(
+			new WC_Data_Exception(
+				'woocommerce_push_notification_preferences_save_failed',
+				'Failed to save push notification preferences.',
+				WP_Http::INTERNAL_SERVER_ERROR
+			)
+		);
+
+		wc_get_container()->replace( NotificationPreferencesService::class, $service_mock );
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
+		$request->set_param( 'store_review', false );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::INTERNAL_SERVER_ERROR, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_internal_error', $data['code'] );
 	}
 
 	/**

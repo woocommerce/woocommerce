@@ -69,10 +69,10 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should write the versioned envelope to user meta on save.
+	 * @testdox Should write the versioned envelope to user meta on save and return the merged map.
 	 */
 	public function test_save_preferences_updates_user_meta(): void {
-		$this->sut->save_preferences(
+		$result = $this->sut->save_preferences(
 			$this->user_id,
 			array(
 				'store_order'  => false,
@@ -80,6 +80,14 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
+		// Return value: the merged preferences map.
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'store_order', $result );
+		$this->assertFalse( $result['store_order'] );
+		$this->assertArrayHasKey( 'store_review', $result );
+		$this->assertFalse( $result['store_review'] );
+
+		// Stored envelope shape on disk.
 		$stored = get_user_meta( $this->user_id, NotificationPreferencesService::META_KEY, true );
 
 		$this->assertIsArray( $stored );
@@ -91,7 +99,7 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should merge partial saves with previously stored preferences.
+	 * @testdox Should merge partial saves with previously stored preferences and return the merged map.
 	 */
 	public function test_save_preferences_merges_with_existing(): void {
 		$this->sut->save_preferences(
@@ -102,12 +110,12 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->sut->save_preferences( $this->user_id, array( 'store_review' => true ) );
+		$result = $this->sut->save_preferences( $this->user_id, array( 'store_review' => true ) );
 
-		$preferences = $this->sut->get_preferences( $this->user_id );
-
-		$this->assertFalse( $preferences['store_order'] );
-		$this->assertTrue( $preferences['store_review'] );
+		$this->assertArrayHasKey( 'store_order', $result );
+		$this->assertFalse( $result['store_order'] );
+		$this->assertArrayHasKey( 'store_review', $result );
+		$this->assertTrue( $result['store_review'] );
 	}
 
 	/**
@@ -133,10 +141,10 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should drop unknown preference keys on save.
+	 * @testdox Should drop unknown preference keys on save (in both return value and storage).
 	 */
 	public function test_save_preferences_drops_unknown_keys(): void {
-		$this->sut->save_preferences(
+		$result = $this->sut->save_preferences(
 			$this->user_id,
 			array(
 				'store_order'          => false,
@@ -144,12 +152,12 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$preferences = $this->sut->get_preferences( $this->user_id );
-		$stored      = get_user_meta( $this->user_id, NotificationPreferencesService::META_KEY, true );
+		$stored = get_user_meta( $this->user_id, NotificationPreferencesService::META_KEY, true );
 
-		$this->assertArrayNotHasKey( 'store_abandoned_cart', $preferences );
+		$this->assertArrayNotHasKey( 'store_abandoned_cart', $result );
 		$this->assertArrayNotHasKey( 'store_abandoned_cart', $stored['preferences'] );
-		$this->assertFalse( $preferences['store_order'] );
+		$this->assertArrayHasKey( 'store_order', $result );
+		$this->assertFalse( $result['store_order'] );
 	}
 
 	/**
