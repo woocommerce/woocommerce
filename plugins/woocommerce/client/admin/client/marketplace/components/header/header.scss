@@ -69,11 +69,11 @@
 .woocommerce-marketplace__header-meta {
 	grid-area: mktpl-meta;
 	justify-self: end;
-	padding-top: 10px;
+	margin-top: 15px;
 
 	@media screen and (max-width: $breakpoint-large) {
 		margin-right: $content-spacing-large;
-		padding: 0;
+		margin-top: 0;
 	}
 
 	@media screen and (max-width: $breakpoint-medium) {
