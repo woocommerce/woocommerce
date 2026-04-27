@@ -1,13 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	StrictMode,
-	Suspense,
-	createElement,
-	createRoot,
-	lazy,
-} from '@wordpress/element';
+import { StrictMode, Suspense, createRoot, lazy } from '@wordpress/element';
 import {
 	Root,
 	// @ts-expect-error missing types.

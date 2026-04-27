@@ -164,15 +164,7 @@ function _CustomerEffortScoreTracks( {
 			onNoticeDismissedCallback={ onNoticeDismissed }
 			onModalShownCallback={ onModalShown }
 			onModalDismissedCallback={ onModalDismissed }
-			icon={
-				<span
-					style={ { height: 21, width: 21 } }
-					role="img"
-					aria-label={ __( 'Pencil icon', 'woocommerce' ) }
-				>
-					{ icon || '✏' }
-				</span>
-			}
+			icon={ icon ? <span aria-hidden="true">{ icon }</span> : undefined }
 		/>
 	);
 }

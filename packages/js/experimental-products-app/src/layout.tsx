@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { createElement, Fragment } from '@wordpress/element';
 import {
 	useViewportMatch,
 	useResizeObserver,
