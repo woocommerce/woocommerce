@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Detect divergence between generated block email posts and their source templates after plugin updates, classifying each post as in-sync, core-updated-uncustomized, or core-updated-customized.

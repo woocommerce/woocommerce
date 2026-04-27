@@ -80,4 +80,5 @@ module.exports = {
 		],
 	},
 	StyleAssetPlugin,
+	WebpackRTLPlugin,
 };

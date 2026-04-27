@@ -67,7 +67,7 @@
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
 		"@woocommerce/internal-ts-config": "workspace:*",
-		"@wordpress/browserslist-config": "catalog:wp-min",
+		"@wordpress/browserslist-config": "next",
 		"css-loader": "6.11.x",
 		"eslint": "^8.55.0",
 		"jest": "29.5.x",

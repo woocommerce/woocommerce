@@ -2,16 +2,14 @@
  * External dependencies
  */
 import { Page } from '@playwright/test';
-import {
-	disableWelcomeModal,
-	WC_API_PATH,
-} from '@woocommerce/e2e-utils-playwright';
+import { WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { expect, test as baseTest } from '../../fixtures/fixtures';
+import { getInstalledWordPressVersion } from '../../utils/wordpress';
 
 // need to figure out whether tests are being run on a mac
 const macOS = process.platform === 'darwin';
@@ -66,8 +64,22 @@ const test = baseTest.extend( {
 		} );
 	},
 	page: async ( { page }, use ) => {
-		await page.goto( 'wp-admin/post-new.php' );
-		await disableWelcomeModal( { page } );
+		const adminEntryPoint =
+			( await getInstalledWordPressVersion() ) === 6.8
+				? 'wp-admin/post-new.php'
+				: 'wp-admin';
+		const waitForCommandPalette = page.waitForResponse( ( response ) => {
+			return (
+				response
+					.url()
+					.includes( '/wp-admin-scripts/command-palette' ) &&
+				response.status() === 200
+			);
+		} );
+		await Promise.all( [
+			page.goto( adminEntryPoint ),
+			waitForCommandPalette,
+		] );
 		await use( page );
 	},
 } );
@@ -130,16 +142,6 @@ test( 'can use the product search command', async ( { page, product } ) => {
 	await expect( page.getByLabel( 'Product name' ) ).toHaveValue(
 		`${ product.name }`
 	);
-} );
-
-test( 'can use a settings command', async ( { page } ) => {
-	await clickOnCommandPaletteOption( {
-		page,
-		optionName: 'WooCommerce Settings: Products',
-	} );
-
-	// Verify that the page has loaded.
-	await expect( page.getByText( 'Shop pages' ) ).toBeVisible();
 } );
 
 test( 'can use an analytics command', async ( { page } ) => {

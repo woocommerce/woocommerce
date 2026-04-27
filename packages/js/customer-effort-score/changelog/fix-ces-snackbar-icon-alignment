@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Drop the default pencil icon from CES snackbars so they render without cross-platform glyph rendering issues and alignment quirks; callers can still pass an explicit icon when needed.
