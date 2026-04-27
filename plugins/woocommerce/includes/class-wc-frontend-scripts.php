@@ -77,29 +77,22 @@ class WC_Frontend_Scripts {
 		$styles = apply_filters(
 			'woocommerce_enqueue_styles',
 			array(
-				'woocommerce-layout'       => array(
+				'woocommerce-layout'      => array(
 					'src'     => self::get_asset_url( 'assets/css/woocommerce-layout.css' ),
 					'deps'    => '',
 					'version' => $version,
 					'media'   => 'all',
 					'has_rtl' => true,
 				),
-				'woocommerce-smallscreen'  => array(
+				'woocommerce-smallscreen' => array(
 					'src'     => self::get_asset_url( 'assets/css/woocommerce-smallscreen.css' ),
 					'deps'    => 'woocommerce-layout',
 					'version' => $version,
 					'media'   => 'only screen and (max-width: ' . apply_filters( 'woocommerce_style_smallscreen_breakpoint', '768px' ) . ')',
 					'has_rtl' => true,
 				),
-				'woocommerce-general'      => array(
+				'woocommerce-general'     => array(
 					'src'     => self::get_asset_url( 'assets/css/woocommerce.css' ),
-					'deps'    => '',
-					'version' => $version,
-					'media'   => 'all',
-					'has_rtl' => true,
-				),
-				'woocommerce-order-review' => array(
-					'src'     => self::get_asset_url( 'assets/css/order-review.css' ),
 					'deps'    => '',
 					'version' => $version,
 					'media'   => 'all',
@@ -572,13 +565,20 @@ class WC_Frontend_Scripts {
 					$args['has_rtl'] = false;
 				}
 
-				// Only load order review styles on the view-order page.
-				if ( 'woocommerce-order-review' === $handle && ! ( is_account_page() && is_wc_endpoint_url( 'view-order' ) ) ) {
-					continue;
-				}
-
 				self::enqueue_style( $handle, $args['src'], $args['deps'], $args['version'], $args['media'], $args['has_rtl'] );
 			}
+		}
+
+		// Endpoint-scoped: only load on My Account -> View Order.
+		if ( is_account_page() && is_wc_endpoint_url( 'view-order' ) ) {
+			self::enqueue_style(
+				'woocommerce-order-review',
+				self::get_asset_url( 'assets/css/order-review.css' ),
+				array(),
+				Constants::get_constant( 'WC_VERSION' ),
+				'all',
+				true
+			);
 		}
 
 		// Placeholder style.

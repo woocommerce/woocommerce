@@ -83,7 +83,7 @@
 	/**
 	 * Review row (pending review)
 	 */
-	tr.wc-order-review-item {
+	.wc-order-review-item {
 		border-bottom: 1px solid darken($secondary, 8%);
 
 		td {
@@ -237,7 +237,7 @@
 	 * Visually de-emphasises rows the customer has already reviewed so that
 	 * pending items stand out.
 	 */
-	tr.wc-order-review-item--reviewed {
+	.wc-order-review-item--reviewed {
 		background-color: rgba(0, 0, 0, 0.025);
 
 		.wc-order-review-item__name {
@@ -285,15 +285,18 @@
 			}
 		}
 
-		tr.wc-order-review-item {
+		.wc-order-review-item {
 			display: block;
 			border-bottom: 1px solid darken($secondary, 8%);
 			padding: 1em 0;
 
 			// Stack all cells vertically.
-			td {
+			&__product,
+			&__rating,
+			&__body,
+			&__status {
 				display: block;
-				width: 100% !important;
+				width: 100%;
 				padding: 0.25em 0;
 				text-align: left;
 			}
