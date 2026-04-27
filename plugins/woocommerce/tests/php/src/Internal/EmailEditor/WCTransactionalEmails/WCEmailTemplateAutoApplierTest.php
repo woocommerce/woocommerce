@@ -409,6 +409,69 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * schedule() must enqueue an async Action Scheduler action under the
+	 * dedicated email-editor group.
+	 */
+	public function test_schedule_enqueues_action_scheduler_job(): void {
+		// Make sure no leftover action exists from a previous test or session.
+		as_unschedule_all_actions(
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK,
+			array(),
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_GROUP
+		);
+
+		WCEmailTemplateAutoApplier::schedule();
+
+		$this->assertTrue(
+			(bool) as_has_scheduled_action(
+				WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK,
+				array(),
+				WCEmailTemplateAutoApplier::AUTO_APPLY_AS_GROUP
+			)
+		);
+
+		// Cleanup so subsequent tests start with a clean queue.
+		as_unschedule_all_actions(
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK,
+			array(),
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_GROUP
+		);
+	}
+
+	/**
+	 * Calling schedule() twice in the same request (e.g. once from
+	 * woocommerce_updated and once from BACKFILL_COMPLETE_ACTION) must not
+	 * enqueue two pending actions.
+	 */
+	public function test_schedule_does_not_double_enqueue(): void {
+		as_unschedule_all_actions(
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK,
+			array(),
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_GROUP
+		);
+
+		WCEmailTemplateAutoApplier::schedule();
+		WCEmailTemplateAutoApplier::schedule();
+
+		$pending = as_get_scheduled_actions(
+			array(
+				'hook'   => WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK,
+				'group'  => WCEmailTemplateAutoApplier::AUTO_APPLY_AS_GROUP,
+				'status' => \ActionScheduler_Store::STATUS_PENDING,
+			),
+			'ids'
+		);
+
+		$this->assertCount( 1, $pending, 'schedule() must guard against double-enqueueing.' );
+
+		as_unschedule_all_actions(
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK,
+			array(),
+			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_GROUP
+		);
+	}
+
+	/**
 	 * Build a WC_Email stub backed by the third-party-with-version.php fixture, inject it
 	 * into WC_Emails::$emails, and opt the email ID into the block-editor filter so the
 	 * sync registry picks it up.

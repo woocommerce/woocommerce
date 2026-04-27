@@ -190,6 +190,24 @@ class WCEmailTemplateAutoApplier {
 	}
 
 	/**
+	 * Enqueue the batched auto-apply runner as an Action Scheduler async action.
+	 *
+	 * Hooked to {@see 'woocommerce_email_template_divergence_sweep_complete'}. The
+	 * `as_has_scheduled_action()` short-circuit guards against double-enqueueing
+	 * when the detector sweep runs twice in one request — once on
+	 * `woocommerce_updated`, once on `BACKFILL_COMPLETE_ACTION`.
+	 *
+	 * @since 10.8.0
+	 */
+	public static function schedule(): void {
+		if ( as_has_scheduled_action( self::AUTO_APPLY_AS_HOOK, array(), self::AUTO_APPLY_AS_GROUP ) ) {
+			return;
+		}
+
+		as_enqueue_async_action( self::AUTO_APPLY_AS_HOOK, array(), self::AUTO_APPLY_AS_GROUP );
+	}
+
+	/**
 	 * Whether the auto-applier is currently rewriting a post.
 	 *
 	 * Future `save_post` listeners (RSM-143, RSM-145) should consult this flag
