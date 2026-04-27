@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Move Back in Stock Notifications documentation out of the in-tree sprint scratch directory and into the published `docs/features/back-in-stock-notifications/` tree (merchant user guide + developer extending reference). Delete the leftover sprint scratch markdown. Behind the `WOOCOMMERCE_BIS_ALPHA_ENABLED` alpha gate.
