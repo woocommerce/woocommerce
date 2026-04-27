@@ -1,0 +1,336 @@
+/**
+ * order-review.scss
+ * Styles for the "Review your order" front-end experience.
+ *
+ * Figma design tokens are mapped to WooCommerce CSS custom properties so that
+ * themes can override individual values without forking this file.
+ *
+ * Typography is intentionally theme-driven (no font-family override) because
+ * the Figma spec calls for the active theme's typeface, not SF Pro.
+ *
+ * @since 10.8.0
+ */
+
+/**
+ * Imports
+ */
+@import 'variables';
+
+/**
+ * Figma → CSS custom property mapping.
+ *
+ * Token reference (from Figma):
+ *   Brand link          #3858e9  → --wc-brand-color    (defined in _variables.scss)
+ *   Neutral foreground  #1e1e1e  → --wc-or-color-foreground
+ *   Muted text (dark)   #4d4d4d  → --wc-or-color-muted
+ *   Muted text (light)  #6d6d6d  → --wc-or-color-subtle
+ *   Input stroke        #898989  → --wc-or-color-border
+ *   Corner radius       2px      → --wc-or-border-radius
+ *   Font scale          32 / 20 / 15 / 13 / 12 px
+ */
+:root {
+	// Neutral foreground — primary text on white backgrounds.
+	--wc-or-color-foreground: #1e1e1e;
+
+	// Muted — secondary labels, timestamps.
+	--wc-or-color-muted: #4d4d4d;
+
+	// Subtle — placeholder text, disabled state cues.
+	--wc-or-color-subtle: #6d6d6d;
+
+	// Input stroke — textarea, text input borders.
+	--wc-or-color-border: #898989;
+
+	// Corner radius — pills, badges, inputs.
+	--wc-or-border-radius: 2px;
+
+	// Typographic scale (px values mirror Figma; use em/rem in components).
+	--wc-or-font-size-xl: 2rem;      // 32px — section headings
+	--wc-or-font-size-lg: 1.25rem;   // 20px — product names
+	--wc-or-font-size-md: 0.9375rem; // 15px — body / excerpt
+	--wc-or-font-size-sm: 0.8125rem; // 13px — labels, badge text
+	--wc-or-font-size-xs: 0.75rem;   // 12px — fine print, helper text
+}
+
+/**
+ * Order Review — shared table
+ *
+ * The review form is rendered as a <table> inside a .woocommerce wrapper.
+ * Each product row is a <tr class="wc-order-review-item">, with four <td>s:
+ *   1. __product  — thumbnail + product name
+ *   2. __rating   — interactive star picker (pending) / static stars (reviewed)
+ *   3. __body     — review textarea (pending) / review excerpt (reviewed)
+ *   4. __status   — submit button (pending) / "Reviewed" badge + view link (reviewed)
+ */
+.woocommerce {
+
+	table.wc-order-review-table {
+		width: 100%;
+		border-collapse: collapse;
+		color: var(--wc-or-color-foreground);
+		font-size: var(--wc-or-font-size-md);
+
+		thead th {
+			font-size: var(--wc-or-font-size-sm);
+			font-weight: 600;
+			color: var(--wc-or-color-muted);
+			padding: 0.5em 0.75em;
+			text-align: left;
+			border-bottom: 1px solid var(--wc-or-color-border);
+		}
+	}
+
+	/**
+	 * Review row (pending review)
+	 */
+	tr.wc-order-review-item {
+		border-bottom: 1px solid darken($secondary, 8%);
+
+		td {
+			padding: 1em 0.75em;
+			vertical-align: top;
+		}
+
+		// ----- Column 1: Product -------------------------------------------
+		&__product {
+			width: 30%;
+		}
+
+		&__thumbnail {
+			display: block;
+			width: 64px;
+			height: 64px;
+			object-fit: cover;
+			border-radius: var(--wc-or-border-radius);
+			margin-bottom: 0.5em;
+		}
+
+		&__name {
+			display: block;
+			font-size: var(--wc-or-font-size-lg);
+			font-weight: 600;
+			color: var(--wc-or-color-foreground);
+			text-decoration: none;
+			line-height: 1.3;
+
+			a {
+				color: inherit;
+				text-decoration: none;
+
+				&:hover,
+				&:focus {
+					color: var(--wc-brand-color);
+					text-decoration: underline;
+				}
+			}
+		}
+
+		// ----- Column 2: Rating --------------------------------------------
+		&__rating {
+			width: 15%;
+			text-align: center;
+		}
+
+		// Static star display (already-reviewed rows).
+		&__stars {
+			display: inline-block;
+			line-height: 1;
+
+			// wc_get_rating_html() outputs a .star-rating span.
+			.star-rating {
+				float: none;
+				display: inline-block;
+				font-size: 1.25em;
+			}
+		}
+
+		// ----- Column 3: Review body / textarea ----------------------------
+		&__body {
+			width: 35%;
+		}
+
+		&__textarea {
+			width: 100%;
+			min-height: 80px;
+			padding: 0.5em 0.75em;
+			font-size: var(--wc-or-font-size-md);
+			font-family: inherit;
+			color: var(--wc-or-color-foreground);
+			border: 1px solid var(--wc-or-color-border);
+			border-radius: var(--wc-or-border-radius);
+			resize: vertical;
+			box-sizing: border-box;
+			transition: border-color 0.15s ease;
+
+			&:focus {
+				outline: 2px solid var(--wc-brand-color);
+				outline-offset: 1px;
+				border-color: var(--wc-brand-color);
+			}
+
+			&::placeholder {
+				color: var(--wc-or-color-subtle);
+			}
+		}
+
+		&__excerpt {
+			font-size: var(--wc-or-font-size-md);
+			color: var(--wc-or-color-muted);
+			margin: 0;
+			line-height: 1.5;
+		}
+
+		// ----- Column 4: Status / action -----------------------------------
+		&__status {
+			width: 20%;
+			text-align: center;
+		}
+
+		/**
+		 * "Reviewed" badge — displayed when a product already has a review.
+		 *
+		 * Uses the neutral foreground palette; not a success-green so that it
+		 * remains accessible on themes with non-white backgrounds.
+		 */
+		&__badge {
+			display: inline-block;
+			padding: 0.25em 0.625em;
+			font-size: var(--wc-or-font-size-xs);
+			font-weight: 600;
+			line-height: 1.4;
+			border-radius: var(--wc-or-border-radius);
+			text-transform: uppercase;
+			letter-spacing: 0.04em;
+
+			&--reviewed {
+				background: $secondary;
+				color: var(--wc-or-color-muted);
+				border: 1px solid darken($secondary, 10%);
+			}
+		}
+
+		&__view-link {
+			display: block;
+			margin-top: 0.5em;
+			font-size: var(--wc-or-font-size-xs);
+			color: var(--wc-brand-color);
+			text-decoration: none;
+
+			&:hover,
+			&:focus {
+				text-decoration: underline;
+			}
+		}
+
+		// Submit button inherits WC button styles; just ensure block display.
+		&__submit.button {
+			display: block;
+			width: 100%;
+			text-align: center;
+			box-sizing: border-box;
+		}
+	}
+
+	/**
+	 * Already-reviewed row modifier
+	 *
+	 * Visually de-emphasises rows the customer has already reviewed so that
+	 * pending items stand out.
+	 */
+	tr.wc-order-review-item--reviewed {
+		background-color: rgba(0, 0, 0, 0.025);
+
+		.wc-order-review-item__name {
+			font-size: var(--wc-or-font-size-md);
+			font-weight: normal;
+			color: var(--wc-or-color-muted);
+		}
+	}
+
+	/**
+	 * Section heading above the table.
+	 */
+	.wc-order-review-heading {
+		font-size: var(--wc-or-font-size-xl);
+		font-weight: 700;
+		color: var(--wc-or-color-foreground);
+		margin: 0 0 1em;
+		line-height: 1.2;
+	}
+}
+
+/**
+ * Responsive layout — narrow viewports (< 600px)
+ *
+ * Below 600px the four-column table collapses into a vertical card layout:
+ *   product → rating → textarea/excerpt → status/button (full-width).
+ *
+ * The breakpoint is intentionally 600px (not WC's standard 768px) to match
+ * the Figma spec for this specific component.
+ */
+@media only screen and (max-width: 600px) {
+
+	.woocommerce {
+
+		table.wc-order-review-table {
+
+			// Hide table column headers; each cell is self-labelling via
+			// data-title attributes or visible labels.
+			thead {
+				display: none;
+			}
+
+			tbody {
+				display: block;
+			}
+		}
+
+		tr.wc-order-review-item {
+			display: block;
+			border-bottom: 1px solid darken($secondary, 8%);
+			padding: 1em 0;
+
+			// Stack all cells vertically.
+			td {
+				display: block;
+				width: 100% !important;
+				padding: 0.25em 0;
+				text-align: left;
+			}
+
+			// Product column — inline thumbnail + name on small screens.
+			&__product {
+				display: flex;
+				align-items: center;
+				gap: 0.75em;
+			}
+
+			&__thumbnail {
+				flex-shrink: 0;
+				margin-bottom: 0;
+			}
+
+			// Rating — left-align stars.
+			&__rating {
+				text-align: left;
+				padding-top: 0.5em;
+			}
+
+			// Textarea — full height on mobile.
+			&__textarea {
+				min-height: 100px;
+			}
+
+			// Status / submit — full-width button.
+			&__status {
+				text-align: left;
+			}
+
+			&__submit.button {
+				width: 100%;
+				display: block;
+				box-sizing: border-box;
+			}
+		}
+	}
+}

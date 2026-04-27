@@ -42,4 +42,7 @@ $subtext:           #767676 !default;                                  // small,
 	--wc-form-border-color: rgba(32, 7, 7, 0.8);
 	--wc-form-border-radius: 4px;
 	--wc-form-border-width: 1px;
+	// Brand link color mapped from Figma design tokens (#3858e9).
+	// Meets WCAG-AA for large text and UI components on white backgrounds.
+	--wc-brand-color: #3858e9;
 }

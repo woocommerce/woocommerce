@@ -1,0 +1,5 @@
+---
+type: enhancement
+significance: patch
+message: Map Figma design tokens to WC CSS vars and add responsive layout for order review
+---
