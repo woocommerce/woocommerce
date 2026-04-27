@@ -99,6 +99,8 @@ class InstallJPAndWCSPlugins {
 	 * being clicked in the admin note.
 	 *
 	 * @param Note $note The note being actioned.
+	 *
+	 * @throws \Exception When the current user lacks the `install_plugins` capability.
 	 */
 	public function install_jp_and_wcs_plugins( $note ) {
 		if ( self::NOTE_NAME !== $note->get_name() ) {
