@@ -27,17 +27,22 @@ class QueryCache {
 	private const CACHE_KEY_PREFIX = 'graphql_ast_v15_';
 
 	/**
-	 * Time-to-live (in seconds) for a cached parsed query.
+	 * Default time-to-live (in seconds) applied when the option is unset or non-positive.
 	 *
 	 * See {@see self::get_cache_ttl()} for the accessor.
 	 */
-	private const CACHE_TTL = DAY_IN_SECONDS;
+	public const DEFAULT_CACHE_TTL = DAY_IN_SECONDS;
 
 	/**
 	 * The time-to-live (in seconds) for a cached parsed query.
+	 *
+	 * Reads the {@see Main::OPTION_QUERY_CACHE_TTL} store option; falls back
+	 * to {@see self::DEFAULT_CACHE_TTL} when the option is unset, empty, or
+	 * non-positive.
 	 */
 	public static function get_cache_ttl(): int {
-		return self::CACHE_TTL;
+		$value = (int) get_option( Main::OPTION_QUERY_CACHE_TTL, self::DEFAULT_CACHE_TTL );
+		return $value > 0 ? $value : self::DEFAULT_CACHE_TTL;
 	}
 
 	/**

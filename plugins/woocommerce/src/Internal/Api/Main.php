@@ -43,6 +43,14 @@ class Main {
 	public const OPTION_MAX_QUERY_COMPLEXITY = 'woocommerce_graphql_max_query_complexity';
 
 	/**
+	 * Option name for the "Parsed query cache TTL" setting.
+	 *
+	 * Time-to-live (in seconds) applied to parsed-query AST entries written
+	 * to the WP object cache by both the standard-query and APQ paths.
+	 */
+	public const OPTION_QUERY_CACHE_TTL = 'woocommerce_graphql_query_cache_ttl';
+
+	/**
 	 * Check whether the Dual Code & GraphQL API feature is active.
 	 *
 	 * Requires PHP 8.1+ and the dual_code_graphql_api feature flag to be

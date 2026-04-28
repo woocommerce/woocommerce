@@ -81,6 +81,14 @@ class Settings {
 				'custom_attributes' => array( 'min' => '1' ),
 			),
 			array(
+				'title'             => __( 'Parsed query cache TTL', 'woocommerce' ),
+				'desc'              => __( 'Time in seconds before cached parsed queries expire.', 'woocommerce' ),
+				'id'                => Main::OPTION_QUERY_CACHE_TTL,
+				'default'           => (string) QueryCache::DEFAULT_CACHE_TTL,
+				'type'              => 'number',
+				'custom_attributes' => array( 'min' => '1' ),
+			),
+			array(
 				'type' => 'sectionend',
 				'id'   => 'woocommerce_graphql_options',
 			),
