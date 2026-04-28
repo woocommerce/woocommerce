@@ -38,7 +38,9 @@ class Settings {
 	 * @return array
 	 */
 	public function add_section( array $sections ): array {
-		$sections[ self::SECTION_ID ] = __( 'GraphQL', 'woocommerce' );
+		if ( Main::is_enabled() ) {
+			$sections[ self::SECTION_ID ] = __( 'GraphQL', 'woocommerce' );
+		}
 		return $sections;
 	}
 
@@ -50,7 +52,7 @@ class Settings {
 	 * @return array
 	 */
 	public function add_settings( array $settings, string $section_id ): array {
-		if ( self::SECTION_ID !== $section_id ) {
+		if ( self::SECTION_ID !== $section_id || ! Main::is_enabled() ) {
 			return $settings;
 		}
 
@@ -67,6 +69,22 @@ class Settings {
 				'id'      => Main::OPTION_GET_ENDPOINT_ENABLED,
 				'default' => 'yes',
 				'type'    => 'checkbox',
+			),
+			array(
+				'title'             => __( 'Maximum query depth', 'woocommerce' ),
+				'desc'              => __( 'Reject queries whose selection nesting exceeds this depth.', 'woocommerce' ),
+				'id'                => Main::OPTION_MAX_QUERY_DEPTH,
+				'default'           => (string) GraphQLController::DEFAULT_MAX_QUERY_DEPTH,
+				'type'              => 'number',
+				'custom_attributes' => array( 'min' => '1' ),
+			),
+			array(
+				'title'             => __( 'Maximum query complexity', 'woocommerce' ),
+				'desc'              => __( 'Reject queries whose computed complexity score exceeds this value.', 'woocommerce' ),
+				'id'                => Main::OPTION_MAX_QUERY_COMPLEXITY,
+				'default'           => (string) GraphQLController::DEFAULT_MAX_QUERY_COMPLEXITY,
+				'type'              => 'number',
+				'custom_attributes' => array( 'min' => '1' ),
 			),
 			array(
 				'title'    => __( 'Endpoint URL', 'woocommerce' ),

@@ -4275,7 +4275,7 @@ table.wc_shipping {
 	color: #1e1e1e;
 
 	&.wc-backbone-modal .wc-backbone-modal-content {
-		border-radius: 8px;
+		border-radius: var(--wc-card-border-radius, 8px);
 		border-top: 8px solid transparent;
 		border-bottom: 8px solid transparent;
 		max-width: 600px;
@@ -8561,6 +8561,43 @@ table.bar_chart {
 		width: auto;
 		height: auto;
 		color: #1e1e1e;
+	}
+
+	// Align editor meta box border-radius with WP 7.0's dashboard widgets (8px).
+	// Product, order (CPT + HPOS), and coupon editor screens.
+	//
+	// BRIDGE: WP 7.0 rounded dashboard widgets but left editor .postbox square,
+	// creating an inconsistency (dashboard widgets vs. Posts/Pages/Media/Woo
+	// editors all use the same .postbox class). We're applying the radius
+	// ourselves, scoped to Woo editor screens, as a bridge until Core unifies
+	// this.
+	//
+	// TODO: Remove these rules when Core rounds editor .postbox containers
+	// (upstream Trac ticket to be filed).
+	&.post-type-product,
+	&.post-type-shop_order,
+	&.post-type-shop_coupon,
+	&.woocommerce_page_wc-orders {
+		.postbox,
+		#postdivrich {
+			border-radius: var(--wc-card-border-radius, 8px);
+			overflow: hidden; // Clip internal elements (tab sidebar, action bars) to rounded corners.
+		}
+
+		// Inner collapsible panels (attributes, variations) should stay square.
+		.wc-metabox.postbox {
+			border-radius: 0;
+			overflow: visible;
+		}
+	}
+
+	// Align the product description editor with the meta boxes below it.
+	// #normal-sortables adds 4px of padding around postboxes, which #post-body-content
+	// doesn't, so the description editor ends up 8px wider than neighbouring postboxes
+	// on WP 7.0 (where the radius makes the misalignment visible).
+	&.post-type-product #postdivrich.woocommerce-product-description {
+		margin-left: 4px;
+		margin-right: 4px;
 	}
 }
 
