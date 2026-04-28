@@ -112,7 +112,7 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It exposes modern shell breadcrumbs and section navigation metadata from legacy settings pages.
+	 * It exposes section navigation metadata from legacy settings pages.
 	 */
 	public function test_legacy_adapter_adds_shell_navigation_metadata(): void {
 		$page    = $this->get_modern_settings_page_with_sections();
@@ -120,7 +120,7 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 		$schema  = $adapter->get_schema( '' );
 
 		$this->assertSame( 'Modern settings flag test', $schema['shell']['title'] );
-		$this->assertSame( 'Settings', $schema['shell']['breadcrumbs'][0]['label'] );
+		$this->assertArrayNotHasKey( 'breadcrumbs', $schema['shell'] );
 		$this->assertArrayNotHasKey( 'navigation', $schema['shell'] );
 		$this->assertSame( 'General', $schema['shell']['sectionNavigation'][0]['label'] );
 		$this->assertTrue( $schema['shell']['sectionNavigation'][0]['active'] );

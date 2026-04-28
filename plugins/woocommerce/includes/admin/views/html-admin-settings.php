@@ -107,7 +107,7 @@ $marketplace_links = array(
 <div class="wrap woocommerce">
 	<?php do_action( 'woocommerce_before_settings_' . $current_tab ); ?>
 	<form method="<?php echo esc_attr( apply_filters( 'woocommerce_settings_form_method_tab_' . $current_tab, 'post' ) ); ?>" id="mainform" action="" enctype="multipart/form-data">
-		<?php if ( ! $hide_nav && ! $is_modern_settings_page ) : ?>
+		<?php if ( ! $hide_nav ) : ?>
 			<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 				<?php
 

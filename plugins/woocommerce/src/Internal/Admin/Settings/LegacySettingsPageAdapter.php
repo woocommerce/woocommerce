@@ -58,12 +58,6 @@ class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 			$this->get_save_adapter( $section )
 		);
 
-		$schema['shell']['breadcrumbs']       = array(
-			array(
-				'label' => __( 'Settings', 'woocommerce' ),
-				'href'  => admin_url( 'admin.php?page=wc-settings' ),
-			),
-		);
 		$schema['shell']['sectionNavigation'] = $this->get_section_navigation( $section );
 
 		return $schema;

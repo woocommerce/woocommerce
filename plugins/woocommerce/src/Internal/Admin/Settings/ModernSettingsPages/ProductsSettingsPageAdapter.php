@@ -24,6 +24,8 @@ final class ProductsSettingsPageAdapter extends LegacySettingsPageAdapter {
 	public function get_schema( string $section ): array {
 		$schema = parent::get_schema( $section );
 
+		$schema['shell']['title'] = __( 'Product settings', 'woocommerce' );
+
 		if ( '' === $section ) {
 			$schema = $this->with_field_options(
 				$schema,
