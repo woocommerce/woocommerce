@@ -18,7 +18,7 @@
 		"test:js": "wp-scripts test-unit-js --config jest.config.json"
 	},
 	"devDependencies": {
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"@wordpress/scripts": "^30.23.0",
 		"autoprefixer": "9.8.6",

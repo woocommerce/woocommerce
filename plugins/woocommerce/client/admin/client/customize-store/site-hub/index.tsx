@@ -116,7 +116,7 @@ export const SiteHub = forwardRef<
 									delay: 0.1,
 								} }
 							>
-								{ decodeEntities( siteTitle ) }
+								{ decodeEntities( siteTitle ?? '' ) }
 							</motion.div>
 						</AnimatePresence>
 					) }

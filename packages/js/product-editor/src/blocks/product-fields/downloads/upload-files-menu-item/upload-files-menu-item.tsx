@@ -27,17 +27,20 @@ export function UploadFilesMenuItem( {
 	function handleFormFileUploadChange(
 		event: ChangeEvent< HTMLInputElement >
 	) {
-		const filesList = event.currentTarget.files as FileList;
+		const filesList = Array.from( event.currentTarget.files ?? [] );
 
 		uploadMedia( {
 			allowedTypes,
 			filesList,
 			maxUploadFileSize: resolvedMaxUploadFileSize,
-			onFileChange: onUploadSuccess,
-			onError: onUploadError,
-			additionalData: {
-				type: 'downloadable_product',
-			},
+			// onFileChange expects Partial<Attachment>[] but our callback uses Attachment[].
+			onFileChange: onUploadSuccess as unknown as (
+				attachments: Partial<
+					import('@wordpress/media-utils').Attachment
+				>[]
+			) => void,
+			// Native OnErrorHandler expects (error: Error) => void, but our callback uses a richer type.
+			onError: onUploadError as unknown as ( error: Error ) => void,
 		} );
 	}
 

@@ -9,9 +9,6 @@ import { InnerBlocks } from '@wordpress/block-editor';
 import { useWooBlockProps } from '@woocommerce/block-templates';
 import { DisplayState } from '@woocommerce/components';
 import { Product } from '@woocommerce/data';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityId } from '@wordpress/core-data';
 
 /**
@@ -39,8 +36,7 @@ export function Edit( {
 
 	const displayBlocks = useSelect(
 		( select ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
+			// @ts-expect-error getEditedEntityRecord's curried form strips its generic, returning a wide entity union; Product is the correct narrow type.
 			const product: Product = select( 'core' ).getEditedEntityRecord(
 				'postType',
 				postType,
@@ -48,6 +44,7 @@ export function Edit( {
 			);
 
 			for ( const [ prop, values ] of Object.entries( mustMatch ) ) {
+				// @ts-expect-error Indexing Product with a dynamic string key is not supported until @woocommerce/data's Product type adds an index signature.
 				if ( ! values.includes( product[ prop ] ) ) {
 					return false;
 				}
