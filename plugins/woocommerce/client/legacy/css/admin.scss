@@ -8388,12 +8388,8 @@ table.bar_chart {
 
 		// Adopt WP 7.0 secondary outline: theme-color border and 2px radius.
 		.wc-action-button {
+			min-height: 32px !important;
 			border-color: var(--wp-admin-theme-color);
-
-			&:hover,
-			&:focus {
-				border-color: var(--wp-admin-theme-color);
-			}
 
 			&:first-child {
 				border-top-left-radius: 2px !important;
@@ -8405,11 +8401,6 @@ table.bar_chart {
 				border-bottom-right-radius: 2px !important;
 			}
 		}
-	}
-
-	// Action button groups: adopt WP 7.0 compact 32px height.
-	.wc-action-button-group .wc-action-button {
-		min-height: 32px !important;
 	}
 
 	// Order actions: select + button overflow container due to WP 7.0 select margins.
