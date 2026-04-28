@@ -239,7 +239,7 @@ pnpm run test:js                            # runs JS component test using Jest
 
 Translation function calls (`__()`, `_x()`, `_n()`, `_nx()`) in this package use the `__i18n_text_domain__` identifier as their text domain argument rather than a hardcoded string literal, so each consumer plugin can extract and translate strings under its own text domain.
 
-**Consumers must substitute the identifier with a string literal at bundle time**, typically with [`webpack.DefinePlugin`](https://webpack.js.org/plugins/define-plugin/):
+If the identifier is not substituted at bundle time, the package falls back to `'woocommerce'` at runtime so the editor still loads — strings then resolve under the `woocommerce` text domain (matching the package's pre-1.11 behaviour, where the domain was hardcoded). To extract and translate strings under a different text domain, consumers should substitute the identifier at bundle time, typically with [`webpack.DefinePlugin`](https://webpack.js.org/plugins/define-plugin/):
 
 ```js
 // consumer webpack.config.js
@@ -255,9 +255,7 @@ module.exports = {
 };
 ```
 
-Without this substitution the bundle will throw `ReferenceError: __i18n_text_domain__ is not defined` at runtime, because the identifier is declared as an ambient global with no runtime default.
-
-For Jest (or any non-webpack test runner), set the identifier on the global in the consumer's test setup file:
+For Jest (or any non-webpack test runner), the runtime fallback applies, so unit tests will see strings under the `woocommerce` domain by default. Set the identifier on the global in the consumer's test setup file to override:
 
 ```js
 globalThis.__i18n_text_domain__ = 'your-text-domain';

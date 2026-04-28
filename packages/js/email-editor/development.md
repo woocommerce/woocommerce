@@ -14,7 +14,7 @@ pnpm --filter='@woocommerce/plugin-woocommerce' watch:build:admin
 
 Translation function calls inside the package (`__()`, `_x()`, `_n()`, `_nx()`) use the `__i18n_text_domain__` identifier as the text domain argument instead of a hardcoded string literal. This lets each consumer of the package (WooCommerce, MailPoet, or any other plugin) substitute its own text domain at bundle time and extract strings under that domain with `wp i18n make-pot`.
 
-Consumers **must** replace the identifier with a string literal during their own build — typically with [`webpack.DefinePlugin`](https://webpack.js.org/plugins/define-plugin/):
+If the identifier is not substituted, the package falls back to `'woocommerce'` at runtime (assigned in `src/index.ts`) so the editor still loads and renders with English strings — matching the package's pre-1.11 behaviour. Consumers that want their own translations to apply **should** replace the identifier with a string literal during their own build, typically with [`webpack.DefinePlugin`](https://webpack.js.org/plugins/define-plugin/):
 
 ```js
 // consumer webpack.config.js
@@ -30,13 +30,11 @@ module.exports = {
 };
 ```
 
-If the identifier is not replaced at bundle time, consumers will hit a runtime `ReferenceError` when the bundle is executed in the browser, because `__i18n_text_domain__` is declared as an ambient global with no runtime default.
-
-String extraction happens against the built consumer bundle (not the package source), so `wp i18n make-pot` picks up the substituted literal domain and extracts strings correctly for the consumer's translation workflow.
+String extraction happens against the built consumer bundle (not the package source), so `wp i18n make-pot` picks up the substituted literal domain and extracts strings correctly for the consumer's translation workflow. Without the substitution, strings stay under the `woocommerce` domain at runtime and `wp i18n make-pot` won't extract them under the consumer's own domain — translators won't be able to translate them under that domain even though the editor still works.
 
 ### Jest tests
 
-Jest does not run through webpack, so `DefinePlugin` does not apply to unit tests that import from this package. Define the identifier in the consumer's Jest setup file:
+Jest does not run through webpack, so `DefinePlugin` does not apply to unit tests that import from this package. Either rely on the runtime fallback (strings will use `woocommerce`) or define the identifier explicitly in the consumer's Jest setup file:
 
 ```js
 // jest.setup.js / global-mocks.js
