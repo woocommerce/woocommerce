@@ -158,12 +158,9 @@ describe( 'product list actions', () => {
 	it( 'moves products to trash through coreStore root/product and refreshes the query', async () => {
 		deleteEntityRecord.mockResolvedValue( { id: 12 } );
 
-		await getCallbackAction( moveToTrashAction( { query } ) ).callback(
-			[ product ],
-			{
-				onActionPerformed,
-			}
-		);
+		await getCallbackAction( moveToTrashAction() ).callback( [ product ], {
+			onActionPerformed,
+		} );
 
 		expect( deleteEntityRecord ).toHaveBeenCalledWith(
 			'root',
