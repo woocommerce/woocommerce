@@ -194,4 +194,32 @@ class GraphQLControllerDebugModeTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 400, $response->get_status() );
 		$this->assertSame( 'BAD_USER_INPUT', $response->get_data()['errors'][0]['extensions']['code'] ?? null );
 	}
+
+	/**
+	 * @testdox debug mode stays off for an authenticated low-privilege user even with `_debug=1`.
+	 *
+	 * Skipped when the test environment is local (`wp_get_environment_type()`
+	 * returns `'local'` or the site URL host is `localhost` / `127.0.0.1`),
+	 * because in that case `is_local_environment()` short-circuits the
+	 * admin/_debug gate and the test can't tell the two paths apart.
+	 */
+	public function test_debug_mode_is_off_for_low_privilege_user_with_debug_param(): void {
+		$reflection = new \ReflectionClass( $this->sut );
+		$is_local   = $reflection->getMethod( 'is_local_environment' );
+		$is_local->setAccessible( true );
+		if ( $is_local->invoke( $this->sut ) ) {
+			$this->markTestSkipped( 'is_local_environment() returns true in this environment; the non-admin debug gate is not exercisable.' );
+		}
+
+		$editor = self::factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor );
+
+		$response = $this->sut->handle_request(
+			$this->post_request( array( 'query' => '{ greeting { result } }' ), true )
+		);
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'debug', $data['extensions'] ?? array() );
+	}
 }

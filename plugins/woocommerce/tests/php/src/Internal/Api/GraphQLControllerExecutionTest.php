@@ -365,4 +365,54 @@ class GraphQLControllerExecutionTest extends WC_REST_Unit_Test_Case {
 			$mutation_response->get_data()['errors'][0]['extensions']['code'] ?? null
 		);
 	}
+
+	/**
+	 * @testdox a wrong-type field argument is rejected as BAD_USER_INPUT (HTTP 400).
+	 */
+	public function test_handle_request_field_arg_type_mismatch_is_bad_user_input(): void {
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$response = $this->sut->handle_request(
+			$this->post_request( array( 'query' => '{ widget(id: "not-an-int") { id } }' ) )
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'BAD_USER_INPUT', $response->get_data()['errors'][0]['extensions']['code'] ?? null );
+	}
+
+	/**
+	 * @testdox a missing required field argument is rejected as BAD_USER_INPUT (HTTP 400).
+	 */
+	public function test_handle_request_missing_required_arg_is_bad_user_input(): void {
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$response = $this->sut->handle_request(
+			$this->post_request( array( 'query' => '{ widget { id } }' ) )
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'BAD_USER_INPUT', $response->get_data()['errors'][0]['extensions']['code'] ?? null );
+	}
+
+	/**
+	 * @testdox a variable whose value doesn't match its declared type is rejected as BAD_USER_INPUT.
+	 */
+	public function test_handle_request_variable_type_mismatch_is_bad_user_input(): void {
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$response = $this->sut->handle_request(
+			$this->post_request(
+				array(
+					'query'     => 'query Q($id: Int!) { widget(id: $id) { id } }',
+					'variables' => array( 'id' => 'not-an-int' ),
+				)
+			)
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'BAD_USER_INPUT', $response->get_data()['errors'][0]['extensions']['code'] ?? null );
+	}
 }
