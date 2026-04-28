@@ -175,7 +175,8 @@ const productFilterPriceStore = {
 export type ProductFilterPriceStore = typeof productFilterPriceStore;
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _rangeInputContract = productFilterPriceStore satisfies RangeInputParentStore;
+const _rangeInputContract =
+	productFilterPriceStore satisfies RangeInputParentStore;
 
 const { state, actions } = store<
 	ProductFiltersStore & ProductFilterPriceStore

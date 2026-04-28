@@ -218,7 +218,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			);
 
 			$filter_context['items'] = array_values( $attribute_options );
-		}
+		}//end if
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',
