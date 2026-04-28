@@ -27,17 +27,50 @@ export const QRLoginTokenStates = {
 	LOADING: 'loading',
 	READY: 'ready',
 	EXPIRED: 'expired',
+	CONSUMED: 'consumed',
+	REVOKED: 'revoked',
 	ERROR: 'error',
 } as const;
 
 export type QRLoginTokenState =
 	( typeof QRLoginTokenStates )[ keyof typeof QRLoginTokenStates ];
 
+/**
+ * Whitelisted device-info shape returned by the status endpoint after a
+ * successful exchange. The mobile app fills this in on the exchange request;
+ * older clients omit it, in which case all fields are absent and the UI falls
+ * back to generic copy. Mirrors `MobileAppQRLogin::DEVICE_PAYLOAD_KEYS`.
+ */
+export type QRLoginDeviceInfo = {
+	os?: string;
+	os_version?: string;
+	model?: string;
+	app_version?: string;
+};
+
 type QRLoginTokenResponse = {
 	qr_url: string;
 	expires_at: number;
 	ttl: number;
 };
+
+type QRLoginStatusResponse =
+	| { status: 'pending'; expires_at: number }
+	| {
+			status: 'consumed';
+			consumed_at: number;
+			ap_uuid: string;
+			ap_name: string | null;
+			device: QRLoginDeviceInfo;
+	  }
+	| { status: 'expired' };
+
+/**
+ * Polling cadence for the status endpoint while the QR is on screen. ~2.5s
+ * gives the merchant near-instant feedback after scanning without hammering
+ * the backend; the per-user rate limit on the status endpoint allows ~24/min.
+ */
+const STATUS_POLL_INTERVAL_MS = 2500;
 
 type UseQRLoginTokenOptions = {
 	onReady?: () => void;
@@ -65,7 +98,18 @@ export const useQRLoginToken = ( {
 	// reliably reference the failure mode regardless of how the message was
 	// rendered.
 	const [ errorCode, setErrorCode ] = useState< string | null >( null );
+	const [ deviceInfo, setDeviceInfo ] = useState< QRLoginDeviceInfo | null >(
+		null
+	);
+	const [ apUuid, setApUuid ] = useState< string | null >( null );
 	const timerRef = useRef< ReturnType< typeof setInterval > | null >( null );
+	// Plaintext token kept in a ref (not state) so it never causes re-renders
+	// and never leaves the hook closure. The status-polling and revoke calls
+	// need it server-side; the consumer only ever sees state transitions.
+	const tokenRef = useRef< string | null >( null );
+	const pollTimerRef = useRef< ReturnType< typeof setInterval > | null >(
+		null
+	);
 	const expiresAtRef = useRef< number >( 0 );
 	const onReadyRef = useRef( onReady );
 	const onErrorRef = useRef( onError );
@@ -79,6 +123,13 @@ export const useQRLoginToken = ( {
 		if ( timerRef.current ) {
 			clearInterval( timerRef.current );
 			timerRef.current = null;
+		}
+	}, [] );
+
+	const clearPollTimer = useCallback( () => {
+		if ( pollTimerRef.current ) {
+			clearInterval( pollTimerRef.current );
+			pollTimerRef.current = null;
 		}
 	}, [] );
 
@@ -100,22 +151,97 @@ export const useQRLoginToken = ( {
 
 				if ( remaining <= 0 ) {
 					clearTimer();
+					clearPollTimer();
 					setState( QRLoginTokenStates.EXPIRED );
 					setQrUrl( null );
+					tokenRef.current = null;
 				}
 			};
 
 			updateRemaining();
 			timerRef.current = setInterval( updateRemaining, 1000 );
 		},
-		[ clearTimer ]
+		[ clearTimer, clearPollTimer ]
 	);
+
+	/**
+	 * Extract the plaintext token from the deep link returned by
+	 * `qr-login-token`. Robust against future query-string ordering changes.
+	 * Returns `null` if the URL doesn't carry a token (defensive).
+	 */
+	const extractTokenFromQrUrl = ( deepLink: string ): string | null => {
+		const queryStart = deepLink.indexOf( '?' );
+		if ( queryStart === -1 ) {
+			return null;
+		}
+		const params = new URLSearchParams( deepLink.slice( queryStart + 1 ) );
+		const token = params.get( 'token' );
+		return token ? token : null;
+	};
+
+	/**
+	 * Poll the status endpoint while the QR is on screen, stop as soon as the
+	 * server reports the token has been consumed (mobile app exchanged it for
+	 * an Application Password) so the UI can transition to the confirmation
+	 * panel within a couple of seconds of the user scanning. Called from the
+	 * effect below when state flips to READY and a plaintext token is in scope.
+	 */
+	const pollStatus = useCallback( async () => {
+		const token = tokenRef.current;
+		if ( ! token || ! isMountedRef.current ) {
+			return;
+		}
+
+		try {
+			const response = await apiFetch< QRLoginStatusResponse >( {
+				path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-status?token=${ encodeURIComponent(
+					token
+				) }`,
+				method: 'GET',
+			} );
+
+			if ( ! isMountedRef.current ) {
+				return;
+			}
+
+			if ( response.status === 'consumed' ) {
+				clearTimer();
+				clearPollTimer();
+				setQrUrl( null );
+				setApUuid( response.ap_uuid );
+				setDeviceInfo( response.device || null );
+				setState( QRLoginTokenStates.CONSUMED );
+				tokenRef.current = null;
+			}
+			// `pending` and `expired` are no-ops here — the countdown timer
+			// drives the EXPIRED transition; we just keep polling on `pending`.
+		} catch {
+			// Swallow polling errors. A transient 500/429 should not break the
+			// QR flow — the next tick will retry, and the countdown will
+			// eventually push us to EXPIRED.
+		}
+	}, [ clearTimer, clearPollTimer ] );
+
+	const startStatusPolling = useCallback( () => {
+		clearPollTimer();
+		// First tick fires immediately so a fast-scanning merchant gets the
+		// confirmation panel without waiting a full interval.
+		pollStatus();
+		pollTimerRef.current = setInterval(
+			pollStatus,
+			STATUS_POLL_INTERVAL_MS
+		);
+	}, [ clearPollTimer, pollStatus ] );
 
 	const fetchToken = useCallback( async () => {
 		const requestId = requestIdRef.current + 1;
 		requestIdRef.current = requestId;
 
 		clearTimer();
+		clearPollTimer();
+		tokenRef.current = null;
+		setApUuid( null );
+		setDeviceInfo( null );
 		expiresAtRef.current = 0;
 		setQrUrl( null );
 		setSecondsRemaining( 0 );
@@ -151,10 +277,18 @@ export const useQRLoginToken = ( {
 				);
 			}
 
+			tokenRef.current = extractTokenFromQrUrl( response.qr_url );
 			setQrUrl( response.qr_url );
 			setState( QRLoginTokenStates.READY );
 			startCountdown( response.expires_at );
 			onReadyRef.current?.();
+			// Kick off the poll loop only once we actually have a token to
+			// poll for. If the URL was malformed and we couldn't extract one,
+			// the QR still renders, we just won't transition to CONSUMED
+			// until the next refresh.
+			if ( tokenRef.current ) {
+				startStatusPolling();
+			}
 		} catch ( error: unknown ) {
 			if (
 				! isMountedRef.current ||
@@ -164,6 +298,8 @@ export const useQRLoginToken = ( {
 			}
 
 			clearTimer();
+			clearPollTimer();
+			tokenRef.current = null;
 			expiresAtRef.current = 0;
 			setQrUrl( null );
 			setSecondsRemaining( 0 );
@@ -225,18 +361,59 @@ export const useQRLoginToken = ( {
 			setState( QRLoginTokenStates.ERROR );
 			onErrorRef.current?.( nextErrorCode ?? 'unknown_error' );
 		}
-	}, [ clearTimer, startCountdown ] );
+	}, [ clearTimer, clearPollTimer, startCountdown, startStatusPolling ] );
 
-	// Cleanup timer on unmount.
+	/**
+	 * Revoke the Application Password issued by the most recent successful
+	 * exchange. Only meaningful when state === CONSUMED — earlier states
+	 * have no AP yet, REVOKED is a no-op, and EXPIRED means the consumed
+	 * record may already be gone from the server.
+	 */
+	const revoke = useCallback( async () => {
+		if ( ! apUuid ) {
+			return;
+		}
+
+		try {
+			await apiFetch( {
+				path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-revoke`,
+				method: 'DELETE',
+				data: { uuid: apUuid },
+			} );
+
+			if ( ! isMountedRef.current ) {
+				return;
+			}
+
+			setState( QRLoginTokenStates.REVOKED );
+		} catch ( error: unknown ) {
+			if ( ! isMountedRef.current ) {
+				return;
+			}
+
+			const err = error as { message?: string };
+			setErrorMessage(
+				err.message ||
+					__(
+						'Failed to revoke access. Please try again or remove the application password manually under Users → Profile.',
+						'woocommerce'
+					)
+			);
+		}
+	}, [ apUuid ] );
+
+	// Cleanup timers + polling on unmount.
 	useEffect( () => {
 		isMountedRef.current = true;
 
 		return () => {
 			isMountedRef.current = false;
 			requestIdRef.current += 1;
+			tokenRef.current = null;
 			clearTimer();
+			clearPollTimer();
 		};
-	}, [ clearTimer ] );
+	}, [ clearTimer, clearPollTimer ] );
 
 	return {
 		state,
@@ -244,7 +421,10 @@ export const useQRLoginToken = ( {
 		secondsRemaining,
 		errorMessage,
 		errorCode,
+		deviceInfo,
+		apUuid,
 		fetchToken,
 		refreshToken: fetchToken,
+		revoke,
 	};
 };

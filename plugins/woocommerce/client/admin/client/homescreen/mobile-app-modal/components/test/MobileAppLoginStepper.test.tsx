@@ -33,8 +33,11 @@ const readyTokenState = {
 	qrUrl: 'woocommerce://qr-login?token=abc&siteUrl=https%3A%2F%2Fexample.test',
 	secondsRemaining: 300,
 	errorMessage: null,
+	deviceInfo: null,
+	apUuid: null,
 	fetchToken: jest.fn(),
 	refreshToken: jest.fn(),
+	revoke: jest.fn(),
 };
 
 const errorTokenState = {
@@ -42,8 +45,11 @@ const errorTokenState = {
 	qrUrl: null,
 	secondsRemaining: 0,
 	errorMessage: 'QR login requires an HTTPS connection.',
+	deviceInfo: null,
+	apUuid: null,
 	fetchToken: jest.fn(),
 	refreshToken: jest.fn(),
+	revoke: jest.fn(),
 };
 
 const baseProps = {

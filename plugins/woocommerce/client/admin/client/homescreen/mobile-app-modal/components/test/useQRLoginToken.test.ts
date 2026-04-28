@@ -293,7 +293,21 @@ describe( 'useQRLoginToken', () => {
 		expect( result.current.state ).toBe( QRLoginTokenStates.READY );
 		expect( result.current.qrUrl ).toBe( secondResponse.qr_url );
 		expect( result.current.secondsRemaining ).toBe( TTL_SECONDS );
-		expect( mockApiFetch ).toHaveBeenCalledTimes( 2 );
+		// Count only the token-generation POSTs. The hook now also polls the
+		// status endpoint after each successful generate, so total apiFetch
+		// calls > 2 — but exactly two were token POSTs.
+		const tokenGenerateCalls = mockApiFetch.mock.calls.filter(
+			( [ args ] ) =>
+				typeof args === 'object' &&
+				args !== null &&
+				'path' in args &&
+				typeof ( args as { path: string } ).path === 'string' &&
+				( args as { path: string } ).path.includes(
+					'qr-login-token'
+				) &&
+				( args as { method?: string } ).method === 'POST'
+		);
+		expect( tokenGenerateCalls ).toHaveLength( 2 );
 	} );
 
 	it( 'failed refetch clears the previous token and keeps the error visible', async () => {

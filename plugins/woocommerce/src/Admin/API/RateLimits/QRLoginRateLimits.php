@@ -46,6 +46,16 @@ class QRLoginRateLimits extends WC_Rate_Limiter {
 	const BUCKET_VALID_EXCHANGE = 'exc_token';
 
 	/**
+	 * Status polling bucket.
+	 */
+	const BUCKET_STATUS = 'sta';
+
+	/**
+	 * Revoke endpoint bucket.
+	 */
+	const BUCKET_REVOKE = 'rev';
+
+	/**
 	 * Prefix for QR login rate-limit rows.
 	 */
 	const KEY_PREFIX = 'qr_login_';
@@ -152,6 +162,16 @@ class QRLoginRateLimits extends WC_Rate_Limiter {
 			case self::BUCKET_VALID_EXCHANGE:
 				return array(
 					'limit'   => MobileAppQRLogin::MAX_EXCHANGE_ATTEMPTS,
+					'seconds' => 15 * MINUTE_IN_SECONDS,
+				);
+			case self::BUCKET_STATUS:
+				return array(
+					'limit'   => MobileAppQRLogin::MAX_STATUS_CHECKS_PER_WINDOW,
+					'seconds' => 15 * MINUTE_IN_SECONDS,
+				);
+			case self::BUCKET_REVOKE:
+				return array(
+					'limit'   => MobileAppQRLogin::MAX_REVOKE_ATTEMPTS,
 					'seconds' => 15 * MINUTE_IN_SECONDS,
 				);
 		}
