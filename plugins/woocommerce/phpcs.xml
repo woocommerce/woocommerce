@@ -17,6 +17,8 @@
 	<exclude-pattern>*/vendor/*</exclude-pattern>
 	<exclude-pattern>lib/</exclude-pattern>
 	<exclude-pattern>php-stubs/</exclude-pattern>
+	<!-- GraphQL test fixtures used only by unit tests. -->
+	<exclude-pattern>tests/php/src/Internal/Api/Fixtures/</exclude-pattern>
 
 	<!-- Only check PHP files. -->
 	<arg name="extensions" value="php" />

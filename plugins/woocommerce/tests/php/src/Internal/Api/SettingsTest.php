@@ -165,4 +165,37 @@ class SettingsTest extends WC_Unit_Test_Case {
 		);
 		$this->assertSame( '1', $by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['custom_attributes']['min'] );
 	}
+
+	/**
+	 * @testdox add_settings returns the original settings unchanged when the section id does not match.
+	 */
+	public function test_add_settings_passes_through_for_other_sections(): void {
+		$existing = array( array( 'id' => 'placeholder' ) );
+
+		$result = $this->sut->add_settings( $existing, 'some_other_section' );
+
+		$this->assertSame( $existing, $result );
+	}
+
+	/**
+	 * @testdox add_section returns sections unchanged when the feature is disabled.
+	 */
+	public function test_add_section_does_not_register_when_feature_is_off(): void {
+		$this->enable_or_disable_feature( false );
+
+		$result = $this->sut->add_section( array( 'features' => 'Features' ) );
+
+		$this->assertArrayNotHasKey( Settings::SECTION_ID, $result );
+	}
+
+	/**
+	 * @testdox add_settings returns settings unchanged when the feature is disabled.
+	 */
+	public function test_add_settings_does_not_register_when_feature_is_off(): void {
+		$this->enable_or_disable_feature( false );
+
+		$result = $this->sut->add_settings( array(), Settings::SECTION_ID );
+
+		$this->assertSame( array(), $result );
+	}
 }
