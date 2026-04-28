@@ -8644,6 +8644,26 @@ table.bar_chart {
 	#wc-shipping-zone-region-picker-root .woocommerce-tree-select-control .components-base-control {
 		border-radius: 2px;
 	}
+
+	// Product / Coupon Data panel labels: vertically centre with 40px inputs.
+	// Skip checkbox and radio rows — their controls are ~16px, so the taller
+	// line-height pushes the label below them instead of aligning with it.
+	.woocommerce_options_panel .form-field:not(:has(input[type="checkbox"], input[type="radio"])) label,
+	.woocommerce_options_panel .form-field:not(:has(input[type="checkbox"], input[type="radio"])) legend {
+		line-height: 40px;
+	}
+
+	// Help-tip icon: vertical-align middle aligns to text baseline, not line-box middle,
+	// so it lands near the top of the 40px row. Push down to visual centre — but
+	// skip checkbox/radio rows, whose inputs are still ~16px and don't need the offset.
+	.woocommerce_options_panel .form-field:not(:has(input[type="checkbox"], input[type="radio"])) .woocommerce-help-tip {
+		margin-top: 12px;
+	}
+
+	// Checkbox/radio rows: small nudge so the help-tip visually centres with the control.
+	.woocommerce_options_panel .form-field:has(input[type="checkbox"], input[type="radio"]) .woocommerce-help-tip {
+		margin-bottom: 3px;
+	}
 }
 
 /**
