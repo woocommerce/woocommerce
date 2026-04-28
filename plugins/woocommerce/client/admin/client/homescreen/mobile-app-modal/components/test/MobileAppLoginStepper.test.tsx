@@ -54,9 +54,11 @@ const errorTokenState = {
 
 const baseProps = {
 	step: 'second' as const,
+	signInResult: null,
 	completeInstallationStepHandler: jest.fn(),
 	sendMagicLinkHandler: jest.fn(),
 	sendMagicLinkStatus: SendMagicLinkStates.INIT,
+	onSignedIn: jest.fn(),
 };
 
 describe( 'MobileAppLoginStepper', () => {

@@ -10,9 +10,24 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { useQRLoginToken, QRLoginTokenStates } from './useQRLoginToken';
+import {
+	useQRLoginToken,
+	QRLoginTokenStates,
+	type QRLoginDeviceInfo,
+} from './useQRLoginToken';
 import { QRLoginConsumedPanel } from './QRLoginConsumedPanel';
 import { QRLoginRevokedPanel } from './QRLoginRevokedPanel';
+
+/**
+ * Snapshot the parent receives via `onConsumed`. Just the fields the parent
+ * needs to render the third stepper step — `revoke` is not exposed because
+ * the stepper uses its own `useRevokeQRLoginAccess` hook to keep the success
+ * step self-contained after the QR component is unmounted.
+ */
+export type QRLoginConsumedSnapshot = {
+	deviceInfo: QRLoginDeviceInfo | null;
+	apUuid: string | null;
+};
 
 type QRDirectLoginCodeProps = {
 	/**
@@ -21,10 +36,27 @@ type QRDirectLoginCodeProps = {
 	 * page) or close themselves (e.g. the homescreen modal).
 	 */
 	onDone?: () => void;
+	/**
+	 * Fires once the internal token state transitions to CONSUMED. Used by
+	 * the homescreen modal stepper to advance to its third step. Standalone
+	 * surfaces can leave this prop unset and the inline `QRLoginConsumedPanel`
+	 * keeps its existing behavior.
+	 */
+	onConsumed?: ( snapshot: QRLoginConsumedSnapshot ) => void;
+	/**
+	 * When `true`, the component returns `null` for the CONSUMED and REVOKED
+	 * states so the parent surface can render its own confirmation UI. Used
+	 * by the stepper, which renders the third-step success panel itself.
+	 * Default `false` preserves the existing inline-panel rendering for the
+	 * standalone `/mobile-app-login` page.
+	 */
+	suppressInlinePanels?: boolean;
 };
 
 export const QRDirectLoginCode = ( {
 	onDone,
+	onConsumed,
+	suppressInlinePanels = false,
 }: QRDirectLoginCodeProps = {} ) => {
 	// Tracks whether _displayed has already fired for this mount so that
 	// subsequent successful refreshes (which re-enter the READY state) only
@@ -37,6 +69,7 @@ export const QRDirectLoginCode = ( {
 		secondsRemaining,
 		errorMessage,
 		deviceInfo,
+		apUuid,
 		fetchToken,
 		refreshToken,
 		revoke,
@@ -58,6 +91,15 @@ export const QRDirectLoginCode = ( {
 	useEffect( () => {
 		fetchToken();
 	}, [ fetchToken ] );
+
+	// Bubble the consumed snapshot up to the parent so it can advance its
+	// own stepper to the third step. Standalone surfaces don't pass
+	// `onConsumed` and keep using the inline `QRLoginConsumedPanel`.
+	useEffect( () => {
+		if ( state === QRLoginTokenStates.CONSUMED && onConsumed ) {
+			onConsumed( { deviceInfo, apUuid } );
+		}
+	}, [ state, deviceInfo, apUuid, onConsumed ] );
 
 	const formatTime = ( seconds: number ) => {
 		const mins = Math.floor( seconds / 60 );
@@ -119,6 +161,9 @@ export const QRDirectLoginCode = ( {
 	}
 
 	if ( state === QRLoginTokenStates.CONSUMED ) {
+		if ( suppressInlinePanels ) {
+			return null;
+		}
 		return (
 			<QRLoginConsumedPanel
 				deviceInfo={ deviceInfo }
@@ -129,6 +174,9 @@ export const QRDirectLoginCode = ( {
 	}
 
 	if ( state === QRLoginTokenStates.REVOKED ) {
+		if ( suppressInlinePanels ) {
+			return null;
+		}
 		return <QRLoginRevokedPanel onDone={ onDone } />;
 	}
 

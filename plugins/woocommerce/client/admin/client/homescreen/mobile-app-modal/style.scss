@@ -238,6 +238,90 @@ button.components-button.send-magic-link-button {
 	}
 }
 
+// Step 3 — sign-in success panel.
+// Mirrors the rest of the modal: 24px / 16px vertical rhythm, body copy in
+// the same #50575e neutral as the help paragraph above the QR, and the
+// existing #007cba primary blue for the revoke CTA so it reads as a deliberate
+// destructive action without departing from the brand palette.
+.qr-login-success-step {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	margin-top: 8px;
+
+	.qr-login-success-step__heading {
+		font-size: 22px;
+		font-weight: 600;
+		line-height: 1.25;
+		margin: 0 0 8px;
+		color: #1e1e1e;
+	}
+
+	.qr-login-success-step__description {
+		font-size: 14px;
+		line-height: 1.5;
+		color: #50575e;
+		margin: 0;
+		max-width: 32em;
+	}
+
+	.qr-login-success-step__device {
+		font-size: 14px;
+		line-height: 1.5;
+		color: #50575e;
+		margin: 0 0 16px;
+	}
+
+	.qr-login-success-step__challenge {
+		font-size: 14px;
+		font-weight: 500;
+		line-height: 1.5;
+		color: #1e1e1e;
+		margin: 0 0 8px;
+	}
+
+	button.components-button.qr-login-success-step__revoke-button {
+		background: #007cba;
+		color: #fff;
+
+		&:hover:not(:disabled),
+		&:focus:not(:disabled) {
+			background: #005a87;
+			color: #fff;
+		}
+	}
+
+	.qr-login-success-step__error {
+		margin: 12px 0 0;
+		color: #cc1818;
+		font-size: 13px;
+		line-height: 1.4;
+	}
+}
+
+// Confirmation modal — keep the action row right-aligned (Cancel | Revoke)
+// and reuse the same blue for the destructive primary so it visually echoes
+// the trigger that opened the dialog.
+.components-modal__frame.qr-login-success-step__confirm-modal {
+	.qr-login-success-step__confirm-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		margin-top: 16px;
+	}
+
+	button.components-button.qr-login-success-step__confirm-revoke-button {
+		background: #007cba;
+		color: #fff;
+
+		&:hover:not(:disabled),
+		&:focus:not(:disabled) {
+			background: #005a87;
+			color: #fff;
+		}
+	}
+}
+
 .email-sent-modal-body {
 	padding-block: 40px;
 	padding-inline: 56px;

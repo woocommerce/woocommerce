@@ -40,11 +40,14 @@ export type QRLoginTokenState =
  * successful exchange. The mobile app fills this in on the exchange request;
  * older clients omit it, in which case all fields are absent and the UI falls
  * back to generic copy. Mirrors `MobileAppQRLogin::DEVICE_PAYLOAD_KEYS`.
+ *
+ * `brand` is Android-only (`Build.BRAND`); iOS clients leave it absent.
  */
 export type QRLoginDeviceInfo = {
 	os?: string;
 	os_version?: string;
 	model?: string;
+	brand?: string;
 	app_version?: string;
 };
 
