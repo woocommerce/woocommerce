@@ -992,6 +992,10 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		}
 	}
 
+	article {
+		padding-bottom: 2em;
+	}
+
 	input[type="text"] {
 		display: block;
 		font-size: 13px;
@@ -7857,7 +7861,7 @@ table.bar_chart {
 }
 
 .wc-backbone-modal-main {
-	padding-bottom: 60px;
+	padding-bottom: calc( 1.5rem + 40px );
 
 	header,
 	article {
