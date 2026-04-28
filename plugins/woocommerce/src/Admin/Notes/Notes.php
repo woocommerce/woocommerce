@@ -63,7 +63,6 @@ class Notes {
 				$notes[ $note_id ]['date_created']  = $note->get_date_created( $context );
 				$notes[ $note_id ]['date_reminder'] = $note->get_date_reminder( $context );
 				$notes[ $note_id ]['actions']       = $note->get_actions( $context );
-				// `layout` and `image` are deprecated; emit fixed values to keep the response shape stable for one cycle.
 				$notes[ $note_id ]['layout']        = 'plain';
 				$notes[ $note_id ]['image']         = '';
 				$notes[ $note_id ]['is_deleted']    = $note->get_is_deleted( $context );
