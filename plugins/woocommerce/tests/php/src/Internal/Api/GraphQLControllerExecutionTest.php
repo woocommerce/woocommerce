@@ -331,4 +331,38 @@ class GraphQLControllerExecutionTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 500, $response->get_status() );
 		$this->assertSame( 'CUSTOM_FAILURE', $response->get_data()['errors'][0]['extensions']['code'] ?? null );
 	}
+
+	/**
+	 * @testdox handle_request honours operationName when deciding whether to reject a mutation over GET.
+	 */
+	public function test_handle_request_uses_operation_name_for_mutation_check(): void {
+		$multi_op = 'query GetIt { greeting { result } } mutation DoIt { increment(value: 1) { result } }';
+
+		// Picking the query operation must NOT trip the mutation-over-GET guard.
+		$query_response = $this->sut->handle_request(
+			$this->get_request(
+				array(
+					'query'         => $multi_op,
+					'operationName' => 'GetIt',
+				)
+			)
+		);
+		$this->assertSame( 200, $query_response->get_status() );
+		$this->assertSame( 'Hello, world!', $query_response->get_data()['data']['greeting']['result'] ?? null );
+
+		// Picking the mutation operation in the same document MUST be rejected.
+		$mutation_response = $this->sut->handle_request(
+			$this->get_request(
+				array(
+					'query'         => $multi_op,
+					'operationName' => 'DoIt',
+				)
+			)
+		);
+		$this->assertSame( 405, $mutation_response->get_status() );
+		$this->assertSame(
+			'METHOD_NOT_ALLOWED',
+			$mutation_response->get_data()['errors'][0]['extensions']['code'] ?? null
+		);
+	}
 }
