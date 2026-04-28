@@ -361,9 +361,11 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response The updated fulfillment, or an error if the request fails.
 	 */
 	public function update_fulfillment( WP_REST_Request $request ): WP_REST_Response {
-		$order_id        = (int) $request->get_param( 'order_id' );
-		$fulfillment_id  = (int) $request->get_param( 'fulfillment_id' );
-		$notify_customer = (bool) $request->get_param( 'notify_customer' );
+		$order_id          = (int) $request->get_param( 'order_id' );
+		$fulfillment_id    = (int) $request->get_param( 'fulfillment_id' );
+		$notify_customer   = (bool) $request->get_param( 'notify_customer' );
+		$customer_note_raw = $request->get_param( 'customer_note' );
+		$customer_note     = is_string( $customer_note_raw ) ? $customer_note_raw : '';
 
 		$order = wc_get_order( $order_id );
 		if ( ! $order ) {
@@ -431,9 +433,15 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					/**
 					 * Trigger the fulfillment updated notification on updating a fulfillment.
 					 *
+					 * @param int                        $order_id      The order ID.
+					 * @param Fulfillment                $fulfillment   The fulfillment object.
+					 * @param \WC_Order|\WC_Order_Refund|false $order    The order object.
+					 * @param string                     $customer_note Optional customer note from the merchant.
+					 *
 					 * @since 10.1.0
+					 * @since 10.8.0 Added $customer_note parameter.
 					 */
-					do_action( 'woocommerce_fulfillment_updated_notification', $order_id, $fulfillment, wc_get_order( $order_id ) );
+					do_action( 'woocommerce_fulfillment_updated_notification', $order_id, $fulfillment, $order, $customer_note );
 					FulfillmentsTracker::track_fulfillment_notification_sent( 'fulfillment_updated', $fulfillment->get_id(), $order_id );
 				}
 			}
@@ -1155,7 +1163,17 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 					'required'    => false,
 					'context'     => array( 'view', 'edit' ),
 				),
-			)
+			),
+			! $is_create ? array(
+				'customer_note' => array(
+					'description'       => __( 'A note from the merchant to include in the customer notification email. Basic HTML (links, bold, italic) is preserved; scripts and unsafe markup are stripped.', 'woocommerce' ),
+					'type'              => 'string',
+					'default'           => '',
+					'required'          => false,
+					'sanitize_callback' => 'wp_kses_post',
+					'context'           => array( 'edit' ),
+				),
+			) : array()
 		);
 	}
 

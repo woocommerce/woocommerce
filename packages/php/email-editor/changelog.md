@@ -2,6 +2,14 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.12.0](https://github.com/woocommerce/email-editor/releases/tag/2.12.0) - 2026-04-27 
+
+-   Patch - Fix button border-radius mismatch between email editor preview and rendered output. [#64060]
+-   Patch - Fix email editor styling regressions: logo/title font competition, inconsistent bold in order totals, and incorrect content indentation in block emails. [#63974]
+-   Patch - Resolve preset variable references in Spacing_Preprocessor container padding to fix padding mismatch for template-level blocks in email previews. Extract shared Preset_Variable_Resolver utility to eliminate duplicated resolution logic across Content_Renderer, Blocks_Width_Preprocessor, Spacing_Preprocessor, and Theme_Controller. [#64071]
+-   Minor - Add auto-generation mode to the coupon code email block, allowing users to configure coupon rules that generate unique codes at send time. [#64342]
+-   Minor - Add full-width alignment support for product image block, enable wide/full alignment options in editor settings, and fix invalid align="full" HTML attribute in image renderers [#63839]
+
 ## [2.11.0](https://github.com/woocommerce/email-editor/releases/tag/2.11.0) - 2026-04-06 
 
 -   Patch - Fix double margin-top applied to buttons and list blocks in rendered emails. [#63790]

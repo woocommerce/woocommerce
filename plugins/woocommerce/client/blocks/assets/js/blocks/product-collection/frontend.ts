@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { store, getElement, getContext } from '@wordpress/interactivity';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
@@ -13,9 +14,17 @@ import {
 import { CoreCollectionNames } from './types';
 import './style.scss';
 
+// Stores are locked to prevent 3PD usage until the API is stable.
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
+	{},
+	{ lock: universalLock }
+);
+
 export type ProductCollectionStoreContext = {
-	// Available on the <li/> product element and deeper
-	productId?: number;
 	isPrefetchNextOrPreviousLink: string;
 	collection: CoreCollectionNames;
 	// Next/Previous Buttons block context
@@ -196,8 +205,10 @@ const productCollectionStore = {
 			}
 		},
 		*viewProduct() {
-			const { collection, productId } =
+			const { collection } =
 				getContext< ProductCollectionStoreContext >();
+
+			const productId = productsState.productInContext?.id;
 
 			if ( productId ) {
 				triggerViewedProductEvent( { collection, productId } );
