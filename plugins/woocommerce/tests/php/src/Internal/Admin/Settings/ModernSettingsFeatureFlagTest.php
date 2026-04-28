@@ -68,7 +68,6 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings_feature' ) );
 		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_modern_settings_feature' ) );
-		remove_filter( 'woocommerce_settings_tabs_array', array( $this, 'provide_modern_settings_tabs' ), 20 );
 
 		parent::tearDown();
 	}
@@ -113,27 +112,16 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * It exposes modern shell navigation metadata from legacy settings pages.
+	 * It exposes modern shell breadcrumbs and section navigation metadata from legacy settings pages.
 	 */
 	public function test_legacy_adapter_adds_shell_navigation_metadata(): void {
-		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'provide_modern_settings_tabs' ), 20 );
-
 		$page    = $this->get_modern_settings_page_with_sections();
 		$adapter = new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $page );
 		$schema  = $adapter->get_schema( '' );
 
-		$active_page_navigation = array_values(
-			array_filter(
-				$schema['shell']['navigation'],
-				static function ( array $item ): bool {
-					return ! empty( $item['active'] );
-				}
-			)
-		);
-
-		$this->assertSame( 'Settings', $schema['shell']['title'] );
-		$this->assertSame( 'modern_settings_flag_test', $active_page_navigation[0]['id'] );
-		$this->assertSame( 'advanced', $schema['shell']['navigation'][ count( $schema['shell']['navigation'] ) - 1 ]['id'] );
+		$this->assertSame( 'Modern settings flag test', $schema['shell']['title'] );
+		$this->assertSame( 'Settings', $schema['shell']['breadcrumbs'][0]['label'] );
+		$this->assertArrayNotHasKey( 'navigation', $schema['shell'] );
 		$this->assertSame( 'General', $schema['shell']['sectionNavigation'][0]['label'] );
 		$this->assertTrue( $schema['shell']['sectionNavigation'][0]['active'] );
 		$this->assertSame( 'inventory', $schema['shell']['sectionNavigation'][1]['id'] );
@@ -217,23 +205,6 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	 */
 	public function disable_modern_settings_feature( array $features ): array {
 		return array_values( array_diff( $features, array( 'modern-settings' ) ) );
-	}
-
-	/**
-	 * Provide settings tabs for modern shell navigation assertions.
-	 *
-	 * @param array $tabs Settings tabs.
-	 * @return array
-	 */
-	public function provide_modern_settings_tabs( array $tabs ): array {
-		return array_merge(
-			$tabs,
-			array(
-				'general'                   => 'General',
-				'modern_settings_flag_test' => 'Modern settings flag test',
-				'advanced'                  => 'Advanced',
-			)
-		);
 	}
 
 	/**

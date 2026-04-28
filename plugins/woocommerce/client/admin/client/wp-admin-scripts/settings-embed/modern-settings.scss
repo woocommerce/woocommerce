@@ -8,6 +8,14 @@ body.woocommerce_page_wc-settings.woocommerce-modern-settings-page {
 		background-color: #fff;
 	}
 
+	#wpbody {
+		margin-top: 0;
+	}
+
+	.woocommerce-layout__header {
+		display: none;
+	}
+
 	#mainform {
 		padding: 0 48px 48px;
 	}

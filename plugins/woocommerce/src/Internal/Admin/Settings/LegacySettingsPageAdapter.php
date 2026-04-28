@@ -58,38 +58,15 @@ class LegacySettingsPageAdapter implements PublicModernSettingsPageInterface {
 			$this->get_save_adapter( $section )
 		);
 
-		$schema['shell']['title']             = __( 'Settings', 'woocommerce' );
-		$schema['shell']['navigation']        = $this->get_page_navigation();
+		$schema['shell']['breadcrumbs']       = array(
+			array(
+				'label' => __( 'Settings', 'woocommerce' ),
+				'href'  => admin_url( 'admin.php?page=wc-settings' ),
+			),
+		);
 		$schema['shell']['sectionNavigation'] = $this->get_section_navigation( $section );
 
 		return $schema;
-	}
-
-	/**
-	 * Get primary settings page navigation for the modern shell.
-	 *
-	 * @return array<int, array{id: string, label: string, href: string, active: bool}>
-	 */
-	private function get_page_navigation(): array {
-		$tabs = apply_filters( 'woocommerce_settings_tabs_array', array() );
-
-		if ( array_key_exists( 'advanced', $tabs ) ) {
-			$advanced = $tabs['advanced'];
-			unset( $tabs['advanced'] );
-			$tabs['advanced'] = $advanced;
-		}
-
-		$navigation = array();
-		foreach ( $tabs as $slug => $label ) {
-			$navigation[] = array(
-				'id'     => (string) $slug,
-				'label'  => wp_strip_all_tags( html_entity_decode( (string) $label ) ),
-				'href'   => admin_url( 'admin.php?page=wc-settings&tab=' . sanitize_title( (string) $slug ) ),
-				'active' => $this->settings_page->get_id() === (string) $slug,
-			);
-		}
-
-		return $navigation;
 	}
 
 	/**
