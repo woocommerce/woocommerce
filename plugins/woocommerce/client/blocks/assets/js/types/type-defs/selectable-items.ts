@@ -38,9 +38,11 @@ export interface SelectableItemsContext< T = unknown > {
 	filterType?: string;
 }
 
+/* eslint-disable @typescript-eslint/naming-convention -- WordPress block context key format */
 export type SelectableItemsBlockContext< T = unknown > = {
 	'woocommerce/selectableItems': SelectableItemsContext< T >;
 };
+/* eslint-enable @typescript-eslint/naming-convention */
 
 /**
  * Contract every parent store referenced by `storeNamespace` MUST satisfy.
