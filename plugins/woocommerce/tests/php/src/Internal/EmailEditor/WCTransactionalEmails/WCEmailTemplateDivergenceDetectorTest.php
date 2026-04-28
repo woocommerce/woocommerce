@@ -223,7 +223,7 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		$email_id = 'wc_test_divergence_completion_action';
 		$this->generate_stamped_post( $email_id );
 
-		$fired = 0;
+		$fired    = 0;
 		$listener = static function () use ( &$fired ): void {
 			++$fired;
 		};

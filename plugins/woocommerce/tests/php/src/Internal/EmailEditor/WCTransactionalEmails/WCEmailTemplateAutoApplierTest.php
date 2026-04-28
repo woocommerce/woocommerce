@@ -89,8 +89,8 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	 * @return array
 	 */
 	public function whitelist_email_page_template( $templates ): array {
-		$templates                       = is_array( $templates ) ? $templates : array();
-		$templates['wooemailtemplate']   = 'Woo Email Template';
+		$templates                     = is_array( $templates ) ? $templates : array();
+		$templates['wooemailtemplate'] = 'Woo Email Template';
 		return $templates;
 	}
 
@@ -737,6 +737,12 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 			WCEmailTemplateAutoApplier::AUTO_APPLY_AS_GROUP
 		);
 
+		/**
+		 * Trigger the production hook the auto-applier listens to; the assertions
+		 * below confirm `Integration::register_hooks()` routes it to `schedule()`.
+		 *
+		 * @since 10.8.0
+		 */
 		do_action( 'woocommerce_email_template_divergence_sweep_complete' );
 
 		$this->assertTrue(
@@ -767,38 +773,93 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 			/** @var array<int, array<string, mixed>> */
 			private array $sink;
 
+			/**
+			 * @param array<int, array<string, mixed>> $sink Reference to the array that will receive entries.
+			 */
 			public function __construct( array &$sink ) {
 				$this->sink = &$sink;
 			}
 
+			/**
+			 * @param string               $message The log message.
+			 * @param array<string, mixed> $context The log context.
+			 */
 			public function emergency( string $message, array $context = array() ): void {
 				$this->capture( 'emergency', $message, $context );
 			}
+
+			/**
+			 * @param string               $message The log message.
+			 * @param array<string, mixed> $context The log context.
+			 */
 			public function alert( string $message, array $context = array() ): void {
 				$this->capture( 'alert', $message, $context );
 			}
+
+			/**
+			 * @param string               $message The log message.
+			 * @param array<string, mixed> $context The log context.
+			 */
 			public function critical( string $message, array $context = array() ): void {
 				$this->capture( 'critical', $message, $context );
 			}
+
+			/**
+			 * @param string               $message The log message.
+			 * @param array<string, mixed> $context The log context.
+			 */
 			public function error( string $message, array $context = array() ): void {
 				$this->capture( 'error', $message, $context );
 			}
+
+			/**
+			 * @param string               $message The log message.
+			 * @param array<string, mixed> $context The log context.
+			 */
 			public function warning( string $message, array $context = array() ): void {
 				$this->capture( 'warning', $message, $context );
 			}
+
+			/**
+			 * @param string               $message The log message.
+			 * @param array<string, mixed> $context The log context.
+			 */
 			public function notice( string $message, array $context = array() ): void {
 				$this->capture( 'notice', $message, $context );
 			}
+
+			/**
+			 * @param string               $message The log message.
+			 * @param array<string, mixed> $context The log context.
+			 */
 			public function info( string $message, array $context = array() ): void {
 				$this->capture( 'info', $message, $context );
 			}
+
+			/**
+			 * @param string               $message The log message.
+			 * @param array<string, mixed> $context The log context.
+			 */
 			public function debug( string $message, array $context = array() ): void {
 				$this->capture( 'debug', $message, $context );
 			}
+
+			/**
+			 * @param string               $level   The log level.
+			 * @param string               $message The log message.
+			 * @param array<string, mixed> $context The log context.
+			 */
 			public function log( string $level, string $message, array $context = array() ): void {
 				$this->capture( $level, $message, $context );
 			}
 
+			/**
+			 * Append a captured log call to the sink.
+			 *
+			 * @param string               $level   The log level.
+			 * @param string               $message The log message.
+			 * @param array<string, mixed> $context The log context.
+			 */
 			private function capture( string $level, string $message, array $context ): void {
 				$this->sink[] = array(
 					'level'   => $level,

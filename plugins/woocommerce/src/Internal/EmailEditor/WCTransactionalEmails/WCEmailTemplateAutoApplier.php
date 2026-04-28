@@ -139,7 +139,7 @@ class WCEmailTemplateAutoApplier {
 					)
 				);
 			}
-		}
+		}//end if
 
 		$canonical   = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
 		$source_hash = null;
@@ -174,7 +174,7 @@ class WCEmailTemplateAutoApplier {
 			}
 		} finally {
 			self::$is_auto_applying = false;
-		}
+		}//end try
 
 		return array(
 			'content'     => $canonical,
@@ -277,8 +277,8 @@ class WCEmailTemplateAutoApplier {
 					)
 				);
 				continue;
-			}
-		}
+			}//end try
+		}//end foreach
 	}
 
 	/**
