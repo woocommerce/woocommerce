@@ -21,15 +21,22 @@ describe( 'buildProductListQuery', () => {
 		filters: [],
 	} as View;
 
+	it( 'maps the base view query params', () => {
+		expect( buildProductListQuery( baseView ) ).toEqual(
+			expect.objectContaining( {
+				per_page: 25,
+				page: 3,
+				order: 'asc',
+				orderby: 'title',
+				search_name_or_sku: 'hoodie',
+			} )
+		);
+	} );
+
 	it( 'maps supported filters to the v4 product query', () => {
 		const query = buildProductListQuery( {
 			...baseView,
 			filters: [
-				{
-					field: 'product_status',
-					operator: 'isAny',
-					value: [ 'draft', 'publish' ],
-				},
 				{
 					field: 'type',
 					operator: 'isAny',
@@ -55,12 +62,6 @@ describe( 'buildProductListQuery', () => {
 
 		expect( query ).toEqual(
 			expect.objectContaining( {
-				per_page: 25,
-				page: 3,
-				order: 'asc',
-				orderby: 'title',
-				search_name_or_sku: 'hoodie',
-				include_status: [ 'draft', 'publish' ],
 				include_types: [ 'simple', 'variable' ],
 				category: '12,13',
 				stock_status: 'outofstock',
@@ -70,15 +71,10 @@ describe( 'buildProductListQuery', () => {
 		);
 	} );
 
-	it( 'maps exclusion filters for statuses, types, and categories', () => {
+	it( 'maps exclusion filters for supported types and categories', () => {
 		const query = buildProductListQuery( {
 			...baseView,
 			filters: [
-				{
-					field: 'status',
-					operator: 'isNone',
-					value: [ 'trash' ],
-				},
 				{
 					field: 'type',
 					operator: 'isNone',
@@ -92,7 +88,6 @@ describe( 'buildProductListQuery', () => {
 			],
 		} as View );
 
-		expect( query.exclude_status ).toEqual( [ 'trash' ] );
 		expect( query.exclude_types ).toEqual( [ 'grouped' ] );
 		expect( query.exclude_category ).toEqual( [ 9, 11 ] );
 	} );
