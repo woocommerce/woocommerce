@@ -138,6 +138,19 @@ function getSelectionFromPostId( postId?: string ) {
 	return postId?.split( ',' ).filter( Boolean ) ?? [];
 }
 
+function getProductEditorUrl( productId: ProductEntityRecord[ 'id' ] ) {
+	return getAdminLink(
+		addQueryArgs( 'post.php', {
+			post: productId,
+			action: 'edit',
+		} )
+	);
+}
+
+function isProductEditorAccessible( item: ProductEntityRecord ) {
+	return item.status !== 'trash';
+}
+
 export default function ProductList( { className }: ProductListProps ) {
 	const history = useHistory();
 	const location = useLocation();
@@ -369,6 +382,20 @@ export default function ProductList( { className }: ProductListProps ) {
 				getItemId={ getItemId }
 				selection={ selection }
 				defaultLayouts={ DEFAULT_LAYOUTS }
+				isItemClickable={ isProductEditorAccessible }
+				renderItemLink={ ( { item, ...props } ) => (
+					<a
+						{ ...props }
+						href={ getAdminLink(
+							addQueryArgs( 'post.php', {
+								post: item.id,
+								action: 'edit',
+							} )
+						) }
+					>
+						{ props.children }
+					</a>
+				) }
 			>
 				<Stack
 					direction="row"
