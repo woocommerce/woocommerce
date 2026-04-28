@@ -98,6 +98,33 @@ class Controller extends AbstractController {
 				'schema' => array( $this, 'get_item_schema' ),
 			)
 		);
+
+		// Send test email endpoint.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/(?P<email_id>[\w-]+)/test',
+			array(
+				'args' => array(
+					'email_id' => array(
+						'description' => __( 'Email template ID.', 'woocommerce' ),
+						'type'        => 'string',
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'send_test_email' ),
+					'permission_callback' => array( $this, 'send_test_permissions_check' ),
+					'args'                => array(
+						'send_to' => array(
+							'description'       => __( 'Recipient email address. Defaults to the site admin email.', 'woocommerce' ),
+							'type'              => 'string',
+							'format'            => 'email',
+							'sanitize_callback' => 'sanitize_email',
+						),
+					),
+				),
+			)
+		);
 	}
 
 	/**
@@ -289,6 +316,137 @@ class Controller extends AbstractController {
 				$e->getMessage(),
 				array( 'status' => 500 )
 			);
+		}
+	}
+
+	/**
+	 * Check permissions for sending a test email.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return bool|WP_Error
+	 */
+	public function send_test_permissions_check( $request ) {
+		if ( ! wc_rest_check_manager_permissions( 'settings', 'edit' ) ) {
+			return new WP_Error(
+				'rest_forbidden',
+				__( 'Sorry, you are not allowed to send test emails.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+		return true;
+	}
+
+	/**
+	 * Send a test version of the email to a specified address.
+	 *
+	 * @param WP_REST_Request $request Full details about the request.
+	 * @return WP_REST_Response|WP_Error
+	 */
+	public function send_test_email( $request ) {
+		$email_id = $request['email_id'];
+		$email    = $this->get_email_by_id( $email_id );
+
+		if ( ! $email ) {
+			return new WP_Error(
+				'woocommerce_rest_email_not_found',
+				__( 'Email template not found.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$send_to = ! empty( $request->get_param( 'send_to' ) )
+			? sanitize_email( $request->get_param( 'send_to' ) )
+			: get_bloginfo( 'admin_email' );
+
+		if ( ! is_email( $send_to ) ) {
+			return new WP_Error(
+				'rest_invalid_param',
+				__( 'Invalid recipient email address.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$this->setup_test_email_object( $email );
+
+		$email->setup_locale();
+
+		/* translators: %s: original email subject */
+		$subject = sprintf( __( '[Test] %s', 'woocommerce' ), $email->get_subject() );
+
+		$sent = $email->send(
+			$send_to,
+			$subject,
+			$email->get_content(),
+			$email->get_headers(),
+			$email->get_attachments()
+		);
+
+		$email->restore_locale();
+
+		if ( ! $sent ) {
+			return new WP_Error(
+				'woocommerce_rest_email_send_test_failed',
+				__( 'Failed to send test email. Please check your email delivery configuration.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return rest_ensure_response(
+			array(
+				'send_to' => $send_to,
+				'subject' => $subject,
+			)
+		);
+	}
+
+	/**
+	 * Populate the email object with sample data so it renders correctly in test sends.
+	 *
+	 * Most WC emails expect an order as their object; account-related emails expect a customer.
+	 * When no sample data is available the email is still sent but may render with empty fields.
+	 *
+	 * @param \WC_Email $email Email instance to set up.
+	 * @return void
+	 */
+	private function setup_test_email_object( \WC_Email $email ): void {
+		if ( ! is_null( $email->object ) ) {
+			return;
+		}
+
+		// Account emails need a WC_Customer object.
+		if ( in_array( $email->id, array( 'customer_new_account', 'customer_reset_password' ), true ) ) {
+			$user = wp_get_current_user();
+			if ( $user->ID ) {
+				$email->object = new \WC_Customer( $user->ID );
+			}
+			return;
+		}
+
+		// For all other emails (order-based), use the most recent order.
+		$orders = wc_get_orders(
+			array(
+				'limit'   => 1,
+				'orderby' => 'date',
+				'order'   => 'DESC',
+				'status'  => 'any',
+			)
+		);
+
+		if ( empty( $orders ) ) {
+			return;
+		}
+
+		$order         = $orders[0];
+		$email->object = $order;
+
+		if ( isset( $email->placeholders['{order_date}'] ) ) {
+			$email->placeholders['{order_date}'] = wc_format_datetime( $order->get_date_created() );
+		}
+		if ( isset( $email->placeholders['{order_number}'] ) ) {
+			$email->placeholders['{order_number}'] = $order->get_order_number();
+		}
+		if ( isset( $email->placeholders['{order_billing_full_name}'] ) ) {
+			$email->placeholders['{order_billing_full_name}'] = $order->get_formatted_billing_full_name();
 		}
 	}
 

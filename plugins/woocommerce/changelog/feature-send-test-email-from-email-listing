@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add "Send test email" action to the WooCommerce email listing, allowing admins to send a test version of any transactional email directly from the settings page.
