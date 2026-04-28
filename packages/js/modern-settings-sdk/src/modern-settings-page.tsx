@@ -1,7 +1,14 @@
+/* eslint-disable @wordpress/no-unsafe-wp-apis */
 /**
  * External dependencies
  */
-import { Button, Notice } from '@wordpress/components';
+import {
+	Button,
+	Notice,
+	__experimentalHeading as Heading,
+	__experimentalHStack as HStack,
+	__experimentalVStack as VStack,
+} from '@wordpress/components';
 import {
 	createElement,
 	RawHTML,
@@ -195,7 +202,11 @@ const ShellHeader = ( {
 		saveStrategy.adapter === 'form_post' ? 'submit' : 'button';
 
 	return (
-		<header className="wc-modern-settings-shell__header">
+		<VStack
+			className="wc-modern-settings-shell__header woocommerce-site-page-header"
+			as="header"
+			spacing={ 0 }
+		>
 			{ shell.breadcrumbs && shell.breadcrumbs.length > 0 ? (
 				<nav
 					className="wc-modern-settings-shell__breadcrumbs"
@@ -217,8 +228,18 @@ const ShellHeader = ( {
 					) ) }
 				</nav>
 			) : null }
-			<div className="wc-modern-settings-shell__title-row">
-				{ title ? <h1>{ title }</h1> : null }
+			<HStack className="wc-modern-settings-shell__title-row woocommerce-site-page-header__page-title">
+				{ title ? (
+					<Heading
+						as="h1"
+						level={ 3 }
+						weight={ 500 }
+						className="wc-modern-settings-shell__title woocommerce-site-page-header__title"
+						truncate
+					>
+						{ title }
+					</Heading>
+				) : null }
 				{ showSaveButton ? (
 					<Button
 						variant="primary"
@@ -236,7 +257,7 @@ const ShellHeader = ( {
 						{ __( 'Save changes', 'woocommerce' ) }
 					</Button>
 				) : null }
-			</div>
+			</HStack>
 			{ NavigationComponent ? (
 				<div className="wc-modern-settings-shell__navigation">
 					<NavigationComponent
@@ -247,7 +268,7 @@ const ShellHeader = ( {
 					/>
 				</div>
 			) : null }
-		</header>
+		</VStack>
 	);
 };
 
