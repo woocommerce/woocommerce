@@ -7847,9 +7847,13 @@ table.bar_chart {
 @media screen and (max-width: 782px) {
 	.wc-backbone-modal .wc-backbone-modal-content {
 		border-radius: 0;
+		transform: none;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		min-width: auto;
 		width: 100%;
-		height: 100%;
-		min-width: 100%;
 	}
 }
 
