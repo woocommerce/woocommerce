@@ -25,12 +25,12 @@ trait PushNotificationsTestTrait {
 	/**
 	 * @var JetpackConnectionManager|MockObject|null
 	 */
-	private $jetpack_connection_manager_mock;
+	protected $jetpack_connection_manager_mock;
 
 	/**
 	 * @var FeaturesController|MockObject|null
 	 */
-	private $features_controller_mock;
+	protected $features_controller_mock;
 
 	/**
 	 * Mocks the JetpackConnectionManager so its `is_connected()` returns the
@@ -39,7 +39,7 @@ trait PushNotificationsTestTrait {
 	 *
 	 * @param bool $is_connected Whether the manager should report Jetpack is connected.
 	 */
-	private function mock_jetpack_connection_manager_is_connected( bool $is_connected = true ) {
+	protected function mock_jetpack_connection_manager_is_connected( bool $is_connected = true ) {
 		$this->jetpack_connection_manager_mock = $this
 			->getMockBuilder( JetpackConnectionManager::class )
 			->disableOriginalConstructor()
@@ -62,7 +62,7 @@ trait PushNotificationsTestTrait {
 	 * Sets up the FeaturesController mock so the `push_notifications` feature
 	 * reports as enabled (and only that feature).
 	 */
-	private function set_up_features_controller_mock() {
+	protected function set_up_features_controller_mock() {
 		$this->features_controller_mock = $this
 			->getMockBuilder( FeaturesController::class )
 			->disableOriginalConstructor()
@@ -84,7 +84,7 @@ trait PushNotificationsTestTrait {
 	 * Resets the cached enablement state on the container's PushNotifications
 	 * instance so subsequent `should_be_enabled()` calls re-evaluate.
 	 */
-	private function reset_push_notifications_cache() {
+	protected function reset_push_notifications_cache() {
 		$push_notifications = wc_get_container()->get( PushNotifications::class );
 		$reflection         = new ReflectionClass( $push_notifications );
 		$property           = $reflection->getProperty( 'enabled' );
