@@ -217,7 +217,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test visual attribute type registration and persistence.
-	 * 
+	 *
 	 * @testdox Should have the `wc-visual` attribute type registered in block themes.
 	 */
 	public function test_wc_visual_attribute_type() {
