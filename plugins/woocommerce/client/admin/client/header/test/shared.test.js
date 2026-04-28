@@ -236,6 +236,12 @@ describe( 'useUpdateBodyMargin', () => {
 	} );
 
 	test( 'should debounce multiple rapid resizes', () => {
+		// NOTE: This test couples to the hook's mount-time behavior.
+		// useUpdateBodyMargin's initial measurement runs through the same
+		// 200ms debounce path, so clientHeight is not read until timers
+		// advance. If a future refactor switches to a synchronous mount-time
+		// measurement, the pre-advance assertion below will need updating.
+
 		// Spy on clientHeight reads so we can assert the debounced update
 		// runs exactly once, not once per resize event.
 		const clientHeightGetter = jest.fn( () => 100 );
