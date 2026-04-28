@@ -13,8 +13,6 @@ import {
 	__experimentalUseVariationSwitcher as useVariationSwitcher,
 } from '@woocommerce/product-editor';
 import { recordEvent } from '@woocommerce/tracks';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
 // eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityId, useEntityProp } from '@wordpress/core-data';
 

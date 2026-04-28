@@ -25,7 +25,6 @@ jobs:
         name: 'Setup WooCommerce Monorepo'
         with:
           install: 'code-analyzer...'
-          build: 'code-analyzer'
           pull-package-deps: 'code-analyzer'
 
       - name: 'Analyze'

@@ -44,6 +44,10 @@ describe( 'SearchListControl', () => {
 			/>
 		);
 		expect( component ).toMatchSnapshot();
+
+		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+		// opt out of without changing the visual output.
+		expect( console ).toHaveWarned();
 	} );
 
 	test( 'should render a search box and list of options with a custom className', () => {

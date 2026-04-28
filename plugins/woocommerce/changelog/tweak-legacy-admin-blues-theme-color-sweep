@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Replace remaining hardcoded admin blues in legacy Select2 and address autocomplete stylesheets with var(--wp-admin-theme-color) so borders and hover/focus states adopt the merchant's admin color scheme.
