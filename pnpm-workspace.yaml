@@ -9,6 +9,7 @@ catalogs:
         '@types/wordpress__edit-post': 8.4.2
         '@types/wordpress__viewport': 5.5.3
         '@wordpress/a11y': 4.19.1
+        '@wordpress/admin-ui': 1.12.0
         '@wordpress/api-fetch': 7.19.2
         '@wordpress/base-styles': 5.19.1
         '@wordpress/blob': 4.19.1

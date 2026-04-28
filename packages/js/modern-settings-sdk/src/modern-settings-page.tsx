@@ -1,14 +1,8 @@
-/* eslint-disable @wordpress/no-unsafe-wp-apis */
 /**
  * External dependencies
  */
-import {
-	Button,
-	Notice,
-	__experimentalHeading as Heading,
-	__experimentalHStack as HStack,
-	__experimentalVStack as VStack,
-} from '@wordpress/components';
+import { Page } from '@wordpress/admin-ui';
+import { Button, Notice } from '@wordpress/components';
 import {
 	createElement,
 	RawHTML,
@@ -18,6 +12,7 @@ import {
 	useState,
 } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -182,6 +177,7 @@ const ShellHeader = ( {
 	isSaving,
 	saveStrategy,
 	onSave,
+	children,
 }: {
 	schema: ModernSettingsSchema;
 	context: SettingsFieldContext;
@@ -191,6 +187,7 @@ const ShellHeader = ( {
 	isSaving: boolean;
 	saveStrategy: ModernSettingsSaveStrategy;
 	onSave: () => void;
+	children: ReactNode;
 } ) => {
 	const shell = schema.shell || {};
 	const title = shell.title || schema.title;
@@ -206,63 +203,52 @@ const ShellHeader = ( {
 	const saveButtonType =
 		saveStrategy.adapter === 'form_post' ? 'submit' : 'button';
 
-	return (
-		<VStack
-			className="wc-modern-settings-shell__header woocommerce-site-page-header"
-			as="header"
-			spacing={ 0 }
+	const breadcrumbs =
+		shell.breadcrumbs && shell.breadcrumbs.length > 0 ? (
+			<nav
+				className="wc-modern-settings-shell__breadcrumbs"
+				aria-label={ __( 'Breadcrumbs', 'woocommerce' ) }
+			>
+				{ shell.breadcrumbs.map( ( breadcrumb, index ) => (
+					<span
+						className="wc-modern-settings-shell__breadcrumb"
+						key={ `${ breadcrumb.label }-${ index }` }
+					>
+						{ breadcrumb.href ? (
+							<a href={ breadcrumb.href }>{ breadcrumb.label }</a>
+						) : (
+							<span>{ breadcrumb.label }</span>
+						) }
+					</span>
+				) ) }
+			</nav>
+		) : undefined;
+
+	const actions = showSaveButton ? (
+		<Button
+			variant="primary"
+			type={ saveButtonType }
+			name="save"
+			value={ __( 'Save changes', 'woocommerce' ) }
+			disabled={ ! isDirty || isSaving }
+			isBusy={ isSaving }
+			onClick={
+				saveStrategy.adapter === 'form_post' ? undefined : onSave
+			}
 		>
-			{ shell.breadcrumbs && shell.breadcrumbs.length > 0 ? (
-				<nav
-					className="wc-modern-settings-shell__breadcrumbs"
-					aria-label={ __( 'Breadcrumbs', 'woocommerce' ) }
-				>
-					{ shell.breadcrumbs.map( ( breadcrumb, index ) => (
-						<span
-							className="wc-modern-settings-shell__breadcrumb"
-							key={ `${ breadcrumb.label }-${ index }` }
-						>
-							{ breadcrumb.href ? (
-								<a href={ breadcrumb.href }>
-									{ breadcrumb.label }
-								</a>
-							) : (
-								<span>{ breadcrumb.label }</span>
-							) }
-						</span>
-					) ) }
-				</nav>
-			) : null }
-			<HStack className="wc-modern-settings-shell__title-row woocommerce-site-page-header__page-title">
-				{ title ? (
-					<Heading
-						as="h1"
-						level={ 3 }
-						weight={ 500 }
-						className="wc-modern-settings-shell__title woocommerce-site-page-header__title"
-						truncate
-					>
-						{ title }
-					</Heading>
-				) : null }
-				{ showSaveButton ? (
-					<Button
-						variant="primary"
-						type={ saveButtonType }
-						name="save"
-						value={ __( 'Save changes', 'woocommerce' ) }
-						disabled={ ! isDirty || isSaving }
-						isBusy={ isSaving }
-						onClick={
-							saveStrategy.adapter === 'form_post'
-								? undefined
-								: onSave
-						}
-					>
-						{ __( 'Save changes', 'woocommerce' ) }
-					</Button>
-				) : null }
-			</HStack>
+			{ __( 'Save changes', 'woocommerce' ) }
+		</Button>
+	) : undefined;
+
+	return (
+		<Page
+			className="wc-modern-settings-shell"
+			headingLevel={ 1 }
+			title={ title }
+			breadcrumbs={ breadcrumbs }
+			actions={ actions }
+			showSidebarToggle={ false }
+		>
 			{ hasNavigation ? (
 				<div className="wc-modern-settings-shell__navigation">
 					{ shell.navigation && shell.navigation.length > 0 ? (
@@ -319,7 +305,8 @@ const ShellHeader = ( {
 					) : null }
 				</div>
 			) : null }
-		</VStack>
+			{ children }
+		</Page>
 	);
 };
 
@@ -484,17 +471,16 @@ export const ModernSettingsPage = ( {
 		saveStrategy.adapter === 'form_post' ? getAllFields( schema ) : [];
 
 	return (
-		<div className="wc-modern-settings-shell">
-			<ShellHeader
-				schema={ schema }
-				context={ context }
-				values={ values }
-				initialValues={ initialValues }
-				isDirty={ isDirty }
-				isSaving={ isSaving }
-				saveStrategy={ saveStrategy }
-				onSave={ handleCustomSave }
-			/>
+		<ShellHeader
+			schema={ schema }
+			context={ context }
+			values={ values }
+			initialValues={ initialValues }
+			isDirty={ isDirty }
+			isSaving={ isSaving }
+			saveStrategy={ saveStrategy }
+			onSave={ handleCustomSave }
+		>
 			{ saveNotice ? (
 				<Notice
 					className="wc-modern-settings-shell__notice"
@@ -557,6 +543,6 @@ export const ModernSettingsPage = ( {
 					) ) }
 				</div>
 			) : null }
-		</div>
+		</ShellHeader>
 	);
 };

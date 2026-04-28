@@ -2247,6 +2247,9 @@ importers:
 
   packages/js/modern-settings-sdk:
     dependencies:
+      '@wordpress/admin-ui':
+        specifier: catalog:wp-min
+        version: 1.12.0(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(date-fns@3.6.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/components':
         specifier: catalog:wp-min
         version: 29.5.4(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -3631,6 +3634,9 @@ importers:
       '@wordpress/a11y':
         specifier: catalog:wp-min
         version: 4.19.1
+      '@wordpress/admin-ui':
+        specifier: catalog:wp-min
+        version: 1.12.0(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(date-fns@3.6.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/api-fetch':
         specifier: catalog:wp-min
         version: 7.19.2
