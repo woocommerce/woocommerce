@@ -197,6 +197,11 @@ const ShellHeader = ( {
 	const NavigationComponent = shell.navigationComponent
 		? resolveRegionComponent( shell.navigationComponent, context )
 		: undefined;
+	const hasNavigation = Boolean(
+		( shell.navigation && shell.navigation.length > 0 ) ||
+			( shell.sectionNavigation && shell.sectionNavigation.length > 0 ) ||
+			NavigationComponent
+	);
 	const showSaveButton = saveStrategy.adapter !== 'none';
 	const saveButtonType =
 		saveStrategy.adapter === 'form_post' ? 'submit' : 'button';
@@ -258,14 +263,60 @@ const ShellHeader = ( {
 					</Button>
 				) : null }
 			</HStack>
-			{ NavigationComponent ? (
+			{ hasNavigation ? (
 				<div className="wc-modern-settings-shell__navigation">
-					<NavigationComponent
-						values={ values }
-						initialValues={ initialValues }
-						context={ context }
-						schema={ schema }
-					/>
+					{ shell.navigation && shell.navigation.length > 0 ? (
+						<nav
+							className="wc-modern-settings-shell__tabs wc-modern-settings-shell__tabs--primary"
+							aria-label={ __( 'Settings pages', 'woocommerce' ) }
+						>
+							{ shell.navigation.map( ( item ) => (
+								<a
+									className={
+										item.active
+											? 'wc-modern-settings-shell__tab is-active'
+											: 'wc-modern-settings-shell__tab'
+									}
+									href={ item.href }
+									key={ item.id }
+								>
+									{ item.label }
+								</a>
+							) ) }
+						</nav>
+					) : null }
+					{ shell.sectionNavigation &&
+					shell.sectionNavigation.length > 0 ? (
+						<nav
+							className="wc-modern-settings-shell__tabs wc-modern-settings-shell__tabs--secondary"
+							aria-label={ __(
+								'Settings sections',
+								'woocommerce'
+							) }
+						>
+							{ shell.sectionNavigation.map( ( item ) => (
+								<a
+									className={
+										item.active
+											? 'wc-modern-settings-shell__tab is-active'
+											: 'wc-modern-settings-shell__tab'
+									}
+									href={ item.href }
+									key={ item.id }
+								>
+									{ item.label }
+								</a>
+							) ) }
+						</nav>
+					) : null }
+					{ NavigationComponent ? (
+						<NavigationComponent
+							values={ values }
+							initialValues={ initialValues }
+							context={ context }
+							schema={ schema }
+						/>
+					) : null }
 				</div>
 			) : null }
 		</VStack>

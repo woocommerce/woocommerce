@@ -10,6 +10,7 @@
 // phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Settings\ModernSettingsPageInterface;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -36,7 +37,19 @@ if ( ! $tab_exists ) {
 	exit;
 }
 
-$hide_nav = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
+$hide_nav                = 'checkout' === $current_tab && in_array( $current_section, array( 'offline', 'bacs', 'cheque', 'cod' ), true );
+$is_modern_settings_page = false;
+
+if ( Features::is_enabled( 'modern-settings' ) ) {
+	foreach ( WC_Admin_Settings::get_settings_pages() as $settings_page ) {
+		if ( ! $settings_page instanceof WC_Settings_Page || $settings_page->get_id() !== $current_tab ) {
+			continue;
+		}
+
+		$is_modern_settings_page = $settings_page->get_modern_settings_page() instanceof ModernSettingsPageInterface;
+		break;
+	}
+}
 
 // Move 'Advanced' to the last.
 if ( array_key_exists( 'advanced', $tabs ) ) {
@@ -94,7 +107,7 @@ $marketplace_links = array(
 <div class="wrap woocommerce">
 	<?php do_action( 'woocommerce_before_settings_' . $current_tab ); ?>
 	<form method="<?php echo esc_attr( apply_filters( 'woocommerce_settings_form_method_tab_' . $current_tab, 'post' ) ); ?>" id="mainform" action="" enctype="multipart/form-data">
-		<?php if ( ! $hide_nav ) : ?>
+		<?php if ( ! $hide_nav && ! $is_modern_settings_page ) : ?>
 			<nav class="nav-tab-wrapper woo-nav-tab-wrapper">
 				<?php
 
@@ -114,12 +127,14 @@ $marketplace_links = array(
 		<?php endif; ?>
 			<h1 class="screen-reader-text"><?php echo esc_html( $current_tab_label ); ?></h1>
 			<?php
+			if ( ! $is_modern_settings_page ) {
 				do_action( 'woocommerce_sections_' . $current_tab );
+			}
 
-				WC_Admin_Settings::show_messages();
+			WC_Admin_Settings::show_messages();
 
-				do_action( 'woocommerce_settings_' . $current_tab );
-				do_action( 'woocommerce_settings_tabs_' . $current_tab ); // @deprecated 3.4.0 hook.
+			do_action( 'woocommerce_settings_' . $current_tab );
+			do_action( 'woocommerce_settings_tabs_' . $current_tab );
 			?>
 			<p class="submit">
 				<?php if ( empty( $GLOBALS['hide_save_button'] ) ) : ?>

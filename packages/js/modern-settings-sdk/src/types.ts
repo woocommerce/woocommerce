@@ -54,9 +54,18 @@ export type ModernSettingsShellBreadcrumb = {
 	href?: string;
 };
 
+export type ModernSettingsShellNavigationItem = {
+	id: string;
+	label: string;
+	href: string;
+	active?: boolean;
+};
+
 export type ModernSettingsShell = {
 	title?: string;
 	breadcrumbs?: ModernSettingsShellBreadcrumb[];
+	navigation?: ModernSettingsShellNavigationItem[];
+	sectionNavigation?: ModernSettingsShellNavigationItem[];
 	navigationComponent?: string;
 };
 

@@ -68,6 +68,7 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_admin_features', array( $this, 'enable_modern_settings_feature' ) );
 		remove_filter( 'woocommerce_admin_features', array( $this, 'disable_modern_settings_feature' ) );
+		remove_filter( 'woocommerce_settings_tabs_array', array( $this, 'provide_modern_settings_tabs' ), 20 );
 
 		parent::tearDown();
 	}
@@ -109,6 +110,33 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'data-wc-settings-page="modern_settings_flag_test"', $output );
 		$this->assertStringNotContainsString( 'name="woocommerce_modern_settings_flag_test"', $output );
 		$this->assertTrue( $GLOBALS['hide_save_button'] );
+	}
+
+	/**
+	 * It exposes modern shell navigation metadata from legacy settings pages.
+	 */
+	public function test_legacy_adapter_adds_shell_navigation_metadata(): void {
+		add_filter( 'woocommerce_settings_tabs_array', array( $this, 'provide_modern_settings_tabs' ), 20 );
+
+		$page    = $this->get_modern_settings_page_with_sections();
+		$adapter = new \Automattic\WooCommerce\Admin\Settings\LegacySettingsPageAdapter( $page );
+		$schema  = $adapter->get_schema( '' );
+
+		$active_page_navigation = array_values(
+			array_filter(
+				$schema['shell']['navigation'],
+				static function ( array $item ): bool {
+					return ! empty( $item['active'] );
+				}
+			)
+		);
+
+		$this->assertSame( 'Settings', $schema['shell']['title'] );
+		$this->assertSame( 'modern_settings_flag_test', $active_page_navigation[0]['id'] );
+		$this->assertSame( 'advanced', $schema['shell']['navigation'][ count( $schema['shell']['navigation'] ) - 1 ]['id'] );
+		$this->assertSame( 'General', $schema['shell']['sectionNavigation'][0]['label'] );
+		$this->assertTrue( $schema['shell']['sectionNavigation'][0]['active'] );
+		$this->assertSame( 'inventory', $schema['shell']['sectionNavigation'][1]['id'] );
 	}
 
 	/**
@@ -192,6 +220,23 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Provide settings tabs for modern shell navigation assertions.
+	 *
+	 * @param array $tabs Settings tabs.
+	 * @return array
+	 */
+	public function provide_modern_settings_tabs( array $tabs ): array {
+		return array_merge(
+			$tabs,
+			array(
+				'general'                   => 'General',
+				'modern_settings_flag_test' => 'Modern settings flag test',
+				'advanced'                  => 'Advanced',
+			)
+		);
+	}
+
+	/**
 	 * Build a settings page that opts into the modern renderer.
 	 *
 	 * @return \WC_Settings_Page
@@ -227,6 +272,35 @@ class ModernSettingsFeatureFlagTest extends WC_Unit_Test_Case {
 						'type'  => 'text',
 						'title' => 'Modern settings flag test',
 					),
+				);
+			}
+		};
+	}
+
+	/**
+	 * Build a settings page with multiple sections.
+	 *
+	 * @return \WC_Settings_Page
+	 */
+	private function get_modern_settings_page_with_sections(): \WC_Settings_Page {
+		return new class() extends \WC_Settings_Page {
+			/**
+			 * Constructor.
+			 */
+			public function __construct() {
+				$this->id    = 'modern_settings_flag_test';
+				$this->label = 'Modern settings flag test';
+			}
+
+			/**
+			 * Get sections for this test page.
+			 *
+			 * @return array
+			 */
+			protected function get_own_sections() {
+				return array(
+					''          => 'General',
+					'inventory' => 'Inventory',
 				);
 			}
 		};

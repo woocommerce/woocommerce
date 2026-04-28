@@ -8,9 +8,21 @@ import { createElement, createRoot } from '@wordpress/element';
  */
 import { getAdminSetting } from '~/utils/admin-settings';
 
+type ModernSettingsNavigationItem = {
+	id: string;
+	label: string;
+	href: string;
+	active?: boolean;
+};
+
 type ModernSettingsSchema = {
 	id: string;
 	section?: string;
+	shell?: {
+		title?: string;
+		navigation?: ModernSettingsNavigationItem[];
+		sectionNavigation?: ModernSettingsNavigationItem[];
+	};
 	groups: Record< string, unknown >;
 };
 
