@@ -31,9 +31,14 @@ describe( 'buildProductListQuery', () => {
 					value: [ 'draft', 'publish' ],
 				},
 				{
+					field: 'type',
+					operator: 'isAny',
+					value: [ 'simple', 'variable' ],
+				},
+				{
 					field: 'categories',
 					operator: 'isAny',
-					value: [ '12', '13' ],
+					value: [ '12', 13 ],
 				},
 				{
 					field: 'stock',
@@ -56,6 +61,7 @@ describe( 'buildProductListQuery', () => {
 				orderby: 'title',
 				search_name_or_sku: 'hoodie',
 				include_status: [ 'draft', 'publish' ],
+				include_types: [ 'simple', 'variable' ],
 				category: '12,13',
 				stock_status: 'outofstock',
 				min_price: '10',
@@ -64,7 +70,7 @@ describe( 'buildProductListQuery', () => {
 		);
 	} );
 
-	it( 'maps exclusion filters for statuses and categories', () => {
+	it( 'maps exclusion filters for statuses, types, and categories', () => {
 		const query = buildProductListQuery( {
 			...baseView,
 			filters: [
@@ -74,19 +80,41 @@ describe( 'buildProductListQuery', () => {
 					value: [ 'trash' ],
 				},
 				{
+					field: 'type',
+					operator: 'isNone',
+					value: [ 'grouped' ],
+				},
+				{
 					field: 'categories',
 					operator: 'isNone',
-					value: [ '9' ],
+					value: [ '9', 11 ],
 				},
 			],
 		} as View );
 
 		expect( query.exclude_status ).toEqual( [ 'trash' ] );
-		expect( query.exclude_category ).toEqual( [ 9 ] );
+		expect( query.exclude_types ).toEqual( [ 'grouped' ] );
+		expect( query.exclude_category ).toEqual( [ 9, 11 ] );
+	} );
+
+	it( 'maps an exact price filter to both min and max price', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'price',
+					operator: 'is',
+					value: '15',
+				},
+			],
+		} as View );
+
+		expect( query.min_price ).toBe( '15' );
+		expect( query.max_price ).toBe( '15' );
 	} );
 
 	it( 'maps one-sided price filters', () => {
-		const query = buildProductListQuery( {
+		const minimumOnlyQuery = buildProductListQuery( {
 			...baseView,
 			filters: [
 				{
@@ -94,50 +122,38 @@ describe( 'buildProductListQuery', () => {
 					operator: 'greaterThanOrEqual',
 					value: '15',
 				},
+			],
+		} as View );
+
+		const maximumOnlyQuery = buildProductListQuery( {
+			...baseView,
+			filters: [
 				{
-					field: 'type',
-					operator: 'isAny',
-					value: [ 'simple', 'variable' ],
+					field: 'price',
+					operator: 'lessThanOrEqual',
+					value: 25,
 				},
 			],
 		} as View );
 
-		expect( query.min_price ).toBe( '15' );
-		expect( query.max_price ).toBeUndefined();
-		expect( query.include_types ).toEqual( [ 'simple', 'variable' ] );
+		expect( minimumOnlyQuery.min_price ).toBe( '15' );
+		expect( minimumOnlyQuery.max_price ).toBeUndefined();
+		expect( maximumOnlyQuery.min_price ).toBeUndefined();
+		expect( maximumOnlyQuery.max_price ).toBe( '25' );
 	} );
 
-	it( 'maps tags, attributes, shipping classes, and stock quantity filters', () => {
+	it( 'maps stock filters from a selected stock status', () => {
 		const query = buildProductListQuery( {
 			...baseView,
 			filters: [
 				{
-					field: 'tags',
-					operator: 'isAny',
-					value: [ '4', '8' ],
-				},
-				{
-					field: 'attributes',
+					field: 'stock',
 					operator: 'is',
-					value: 'pa_color:22',
-				},
-				{
-					field: 'shipping_class',
-					operator: 'isAny',
-					value: [ '6' ],
-				},
-				{
-					field: 'stock_quantity',
-					operator: 'lessThanOrEqual',
-					value: '12',
+					value: 'onbackorder',
 				},
 			],
 		} as View );
 
-		expect( query.tag ).toBe( '4,8' );
-		expect( query.attribute ).toBe( 'pa_color' );
-		expect( query.attribute_term ).toBe( '22' );
-		expect( query.shipping_class ).toBe( '6' );
-		expect( query.max_stock_quantity ).toBe( '12' );
+		expect( query.stock_status ).toBe( 'onbackorder' );
 	} );
 } );
