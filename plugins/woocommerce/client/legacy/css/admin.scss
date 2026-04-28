@@ -8365,6 +8365,23 @@ table.bar_chart {
 		}
 	}
 
+	// Order edit address Select2: escape legacy 32px override at admin.scss:2019
+	// so Country/State selects match the 40px WP 7.0 input height of their sibling
+	// fields. Selector mirrors the legacy structure exactly (#order_data
+	// .order_data_column div.edit_address ...) to outrank it on specificity (1,5,1).
+	#order_data .order_data_column div.edit_address .select2-container .select2-selection--single {
+		height: 40px;
+
+		.select2-selection__rendered {
+			line-height: 38px;
+			padding: 0 12px; // Match WP 7.0 native input padding.
+		}
+
+		.select2-selection__arrow {
+			height: 38px;
+		}
+	}
+
 	// Table action icon buttons: prevent WP 7.0 min-height from stretching them.
 	.widefat {
 		.column-wc_actions {
