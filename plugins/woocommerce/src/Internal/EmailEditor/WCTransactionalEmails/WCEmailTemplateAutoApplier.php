@@ -115,6 +115,7 @@ class WCEmailTemplateAutoApplier {
 			);
 		}
 
+		$stored_source_hash = '';
 		if ( $require_uncustomized ) {
 			$stored_source_hash = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true );
 			if ( '' === $stored_source_hash || ! self::is_sha1_hash( $stored_source_hash ) ) {
@@ -123,18 +124,6 @@ class WCEmailTemplateAutoApplier {
 					sprintf(
 						/* translators: %d: post ID */
 						__( 'Post %d has no stored source hash; cannot safely auto-apply.', 'woocommerce' ),
-						$post_id
-					)
-				);
-			}
-
-			$current_post_hash = sha1( (string) $post->post_content );
-			if ( $current_post_hash !== $stored_source_hash ) {
-				return new \WP_Error(
-					'post_modified_since_stamp',
-					sprintf(
-						/* translators: %d: post ID */
-						__( 'Post %d has been modified since the last sync stamp; skipping auto-apply.', 'woocommerce' ),
 						$post_id
 					)
 				);
@@ -149,6 +138,27 @@ class WCEmailTemplateAutoApplier {
 
 		self::$is_auto_applying = true;
 		try {
+			// Re-hash post_content immediately before the write to minimise the
+			// TOCTOU gap between the snapshot and wp_update_post. The first $post
+			// load above is too early — `compute_canonical_post_content` runs in
+			// between and yields the window where a merchant save could otherwise
+			// be silently overwritten.
+			if ( $require_uncustomized ) {
+				$latest_post = get_post( $post_id );
+				if ( ! $latest_post instanceof \WP_Post
+					|| sha1( (string) $latest_post->post_content ) !== $stored_source_hash
+				) {
+					return new \WP_Error(
+						'post_modified_since_stamp',
+						sprintf(
+							/* translators: %d: post ID */
+							__( 'Post %d has been modified since the last sync stamp; skipping auto-apply.', 'woocommerce' ),
+							$post_id
+						)
+					);
+				}
+			}
+
 			$updated = wp_update_post(
 				array(
 					'ID'           => $post_id,
