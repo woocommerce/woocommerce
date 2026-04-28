@@ -41,9 +41,16 @@ function getStringValues( value: unknown ): string[] {
 }
 
 function getNumericValues( value: unknown ): number[] {
-	return getStringValues( value )
-		.map( ( item ) => Number( item ) )
-		.filter( Number.isFinite );
+	const values = Array.isArray( value ) ? value : [ value ];
+	return values.map( ( item ) => {
+		if ( typeof item === 'number' ) {
+			return item;
+		}
+		if ( typeof item === 'string' ) {
+			return Number( item );
+		}
+		return Number.NaN;
+	} );
 }
 
 function getPriceValue( value: unknown ): string | undefined {
