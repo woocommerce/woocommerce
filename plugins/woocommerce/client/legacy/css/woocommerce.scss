@@ -435,6 +435,21 @@ p.demo_store,
 				}
 			}
 
+			// When the variations form is immediately followed by a BIS form
+			// (out-of-stock variation case), tighten the gap so the BIS form
+			// sits as close to the variation selectors as the add-to-cart
+			// button does on in-stock variations. `.woocommerce-variation`
+			// also gets `margin-bottom: var(--wp--style--block-gap)` from
+			// woocommerce-blocktheme.scss in block themes, so it's overridden
+			// here too.
+			&:has(+ .wc_bis_form) {
+				.variations,
+				.single_variation_wrap,
+				.single_variation_wrap .woocommerce-variation {
+					margin: 0;
+				}
+			}
+
 			.woocommerce-variation-description p {
 				margin-bottom: 1em;
 			}
@@ -1214,6 +1229,19 @@ p.demo_store,
 
 		&.hidden {
 			display: none;
+		}
+
+		// On variable products the form sits directly under the variation
+		// selectors (which already carry their own bottom spacing); collapse
+		// the form's top margin and the heading's default margins so it sits
+		// flush, mirroring how the add-to-cart button sits on in-stock
+		// variations.
+		&--variable {
+			margin-top: 0;
+
+			.wc_bis_form__heading {
+				margin: 0;
+			}
 		}
 
 		&__form-row {

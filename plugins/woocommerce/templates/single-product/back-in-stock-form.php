@@ -22,14 +22,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-$heading_id = 'wc_bis_form_heading_' . absint( $product_id );
-$status_id  = 'wc_bis_form_status_' . absint( $product_id );
+$heading_id          = 'wc_bis_form_heading_' . absint( $product_id );
+$status_id           = 'wc_bis_form_status_' . absint( $product_id );
+$is_variable_product = ! empty( $is_variable_product );
+
+$form_classes  = 'wc_bis_form';
+$form_classes .= $is_variable_product ? ' wc_bis_form--variable' : '';
+$form_classes .= $is_visible ? '' : ' hidden';
 
 ?>
 <form
 	method="post"
 	novalidate
-	class="wc_bis_form<?php echo $is_visible ? '' : ' hidden'; ?>"
+	class="<?php echo esc_attr( $form_classes ); ?>"
 	data-bis-product-id="<?php echo absint( $product_id ); ?>"
 	data-available-text="<?php echo esc_attr_x( 'Back in stock notification signup is available for the selected option.', 'back in stock form', 'woocommerce' ); ?>"
 	aria-labelledby="<?php echo esc_attr( $heading_id ); ?>"

@@ -32,8 +32,24 @@
 
 		self.$formProductInput = self.$form.find( 'input[name="wc_bis_product_id"]' );
 
+		// Default attributes (set in admin) can pre-match a variation on the
+		// initial `check_variations` call — that fires `show_variation` for it
+		// before the customer has touched anything. We don't want to auto-pop
+		// the BIS form open in that case. Treat the form as actively engaged
+		// only after a real interaction, OR when the URL already deep-links
+		// to a specific variation via `attribute_*` query params.
+		self.userInteracted = /(?:^|[?&])attribute_/.test( window.location.search );
+
 		// Variation Events.
 		self.$variationsForm.off( '.wc-bis-form' );
+		self.$variationsForm.on(
+			'pointerdown.wc-bis-form keydown.wc-bis-form',
+			'.variations select, .reset_variations',
+			{ bisForm: self },
+			function( event ) {
+				event.data.bisForm.userInteracted = true;
+			}
+		);
 		self.$variationsForm.on( 'found_variation.wc-bis-form', { bisForm: self }, self.onFoundVariation );
 		self.$variationsForm.on( 'show_variation.wc-bis-form', { bisForm: self }, self.onShowVariation );
 		self.$variationsForm.on( 'reset_data.wc-bis-form', { bisForm: self }, self.onResetData );
@@ -67,7 +83,14 @@
 	 * @param {Object} variation The variation object.
 	 */
 	BISFormManager.prototype.onShowVariation = function( event, variation ) {
-		var form    = event.data.bisForm;
+		var form = event.data.bisForm;
+
+		// Ignore the initial auto-match driven by default attributes; the
+		// form should only surface in response to deliberate selection.
+		if ( ! form.userInteracted ) {
+			return;
+		}
+
 		var visible = ! variation.is_in_stock || ! variation.is_purchasable;
 
 		if ( ! variation.variation_is_active || ! variation.variation_is_visible ) {
@@ -87,7 +110,13 @@
 		var form = event.data.bisForm;
 		form.$formProductInput.val( form.product_id ).trigger( 'change' );
 		form.clearVariationAttributes();
-		form.setVisible( false );
+
+		// Don't override the PHP-rendered initial state when the customer
+		// hasn't engaged yet (e.g. the all-OOS-variations parent fallback,
+		// where the server intentionally renders the form visible).
+		if ( form.userInteracted ) {
+			form.setVisible( false );
+		}
 	};
 
 	/**
