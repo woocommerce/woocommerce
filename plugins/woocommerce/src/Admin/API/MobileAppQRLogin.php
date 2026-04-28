@@ -103,9 +103,13 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * Whitelisted keys for the optional `device` payload sent by the mobile app
 	 * on the exchange call. Anything outside this set is dropped before storage.
 	 *
+	 * `brand` is Android-only (`Build.BRAND`, e.g. "google", "samsung"); iOS
+	 * doesn't have a direct analogue and clients that don't have the field
+	 * just leave it absent.
+	 *
 	 * @var string[]
 	 */
-	const DEVICE_PAYLOAD_KEYS = array( 'os', 'os_version', 'model', 'app_version' );
+	const DEVICE_PAYLOAD_KEYS = array( 'os', 'os_version', 'model', 'brand', 'app_version' );
 
 	/**
 	 * Maximum length (chars) for any individual sanitized device-payload field.
@@ -159,6 +163,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 								'os'          => array( 'type' => 'string' ),
 								'os_version'  => array( 'type' => 'string' ),
 								'model'       => array( 'type' => 'string' ),
+								'brand'       => array( 'type' => 'string' ),
 								'app_version' => array( 'type' => 'string' ),
 							),
 						),
