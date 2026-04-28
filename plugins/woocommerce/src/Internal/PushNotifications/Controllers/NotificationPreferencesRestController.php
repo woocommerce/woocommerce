@@ -8,10 +8,9 @@ defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
+use Automattic\WooCommerce\Internal\PushNotifications\Traits\ConvertsExceptionsToWpError;
 use Automattic\WooCommerce\Internal\RestApiControllerBase;
-use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
-use WC_Data_Exception;
 use WP_Error;
 use WP_Http;
 use WP_REST_Request;
@@ -25,6 +24,8 @@ use WP_REST_Server;
  * @since 10.8.0
  */
 class NotificationPreferencesRestController extends RestApiControllerBase {
+	use ConvertsExceptionsToWpError;
+
 	/**
 	 * The root namespace for the JSON REST API endpoints.
 	 *
@@ -179,41 +180,5 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 		}
 
 		return $args;
-	}
-
-	/**
-	 * Convert an exception thrown by the service into a WP_Error suitable for
-	 * the REST response.
-	 *
-	 * Mirrors PushTokenRestController::convert_exception_to_wp_error: surface
-	 * domain-specific WC_Data_Exception details for client-recoverable failures
-	 * (non-500 codes), and log + return a generic internal-error response for
-	 * 500-level / unknown failures.
-	 *
-	 * @param Exception $e The exception to convert.
-	 * @return WP_Error
-	 */
-	private function convert_exception_to_wp_error( Exception $e ): WP_Error {
-		if (
-			$e instanceof WC_Data_Exception
-			&& $e->getCode() !== WP_Http::INTERNAL_SERVER_ERROR
-		) {
-			return new WP_Error(
-				$e->getErrorCode(),
-				$e->getMessage(),
-				$e->getErrorData()
-			);
-		}
-
-		wc_get_container()
-			->get( LegacyProxy::class )
-			->call_function( 'wc_get_logger' )
-			->error( (string) $e->getMessage(), array( 'source' => PushNotifications::FEATURE_NAME ) );
-
-		return new WP_Error(
-			'woocommerce_internal_error',
-			'Internal server error',
-			array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
-		);
 	}
 }
