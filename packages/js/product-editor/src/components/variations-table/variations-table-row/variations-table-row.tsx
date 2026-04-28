@@ -155,8 +155,6 @@ export function VariationsTableRow( {
 							) }
 							icon={ variation.image ? undefined : plus }
 							iconSize={ variation.image ? undefined : 16 }
-							// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-							// @ts-ignore this exists in the props but is not typed
 							size="compact"
 							onClick={ toggleHandler(
 								'image',

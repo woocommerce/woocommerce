@@ -37,7 +37,59 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 			add_action( 'admin_init', array( $this, 'register_scripts' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_styles' ) );
 			add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
-			add_action( 'enqueue_block_editor_assets', array( $this, 'enqueue_block_editor_assets' ) );
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_command_palette_assets' ) );
+			add_action( 'admin_notices', array( $this, 'render_lost_connection_notice' ) );
+		}
+
+		/**
+		 * Render WordPress core's #lost-connection-notice markup on Woo admin
+		 * screens that don't already get it for free.
+		 *
+		 * WP core renders this element on classic post-type edit pages (via
+		 * edit-form-advanced.php), and wp-autosave.js toggles it in response
+		 * to Heartbeat events. By echoing the same markup here and enqueueing
+		 * the `autosave` script (see admin_scripts()), Woo admin screens
+		 * inherit the same offline awareness without any new copy, styling,
+		 * or behavior.
+		 *
+		 * Translation strings use the 'default' text domain so WP core's
+		 * existing translations apply.
+		 *
+		 * Skipped on:
+		 * - Classic post-type edit screens (WP core already renders the notice).
+		 * - wc-admin React pages (they use their own layout rather than the
+		 *   standard admin_notices position).
+		 *
+		 * @return void
+		 */
+		public function render_lost_connection_notice() {
+			$screen = get_current_screen();
+			if ( ! $screen ) {
+				return;
+			}
+
+			if ( 'post' === $screen->base ) {
+				return;
+			}
+
+			$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
+				&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
+			if ( $is_wc_admin_page ) {
+				return;
+			}
+
+			if ( ! in_array( $screen->id, wc_get_screen_ids(), true ) ) {
+				return;
+			}
+			?>
+			<div id="lost-connection-notice" class="notice error hidden">
+				<p>
+					<span class="spinner"></span>
+					<strong><?php esc_html_e( 'Connection lost.' ); /* phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- Reusing WP core translation. */ ?></strong>
+					<?php esc_html_e( 'Saving has been disabled until you are reconnected.' ); /* phpcs:ignore WordPress.WP.I18n.MissingArgDomain -- Reusing WP core translation. */ ?>
+				</p>
+			</div>
+			<?php
 		}
 
 		/**
@@ -413,6 +465,14 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 				wp_enqueue_script( 'iris' );
 				wp_enqueue_script( 'woocommerce_admin' );
 				wp_enqueue_script( 'wc-enhanced-select' );
+
+				// Pair the #lost-connection-notice markup with core's autosave script.
+				// See render_lost_connection_notice() for scoping rationale.
+				$is_wc_admin_page = class_exists( '\Automattic\WooCommerce\Admin\PageController' )
+					&& \Automattic\WooCommerce\Admin\PageController::is_admin_page();
+				if ( 'post' !== ( $screen->base ?? '' ) && ! $is_wc_admin_page ) {
+					wp_enqueue_script( 'autosave' );
+				}
 
 				wp_enqueue_script( 'jquery-ui-sortable' );
 				wp_enqueue_script( 'jquery-ui-autocomplete' );
@@ -813,12 +873,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		}
 
 		/**
-		 * Enqueue a script in the block editor.
+		 * Enqueue a script in WordPress admin.
 		 * Similar to `WCAdminAssets::register_script()` but without enqueuing unnecessary dependencies.
 		 *
 		 * @return void
 		 */
-		private function enqueue_block_editor_script( $script_path_name, $script_name ) {
+		private function enqueue_script( string $script_path_name, string $script_name ) {
 			$script_assets_filename = WCAdminAssets::get_script_asset_filename( $script_path_name, $script_name );
 			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER .  $script_path_name . '/' . $script_assets_filename;
 
@@ -832,36 +892,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 		}
 
 		/**
-		 * Enqueue block editor assets.
+		 * Enqueue command palette assets.
 		 *
 		 * @return void
 		 */
-		public function enqueue_block_editor_assets() {
-			$settings_tabs = apply_filters('woocommerce_settings_tabs_array', []);
-
-			if ( is_array( $settings_tabs ) && count( $settings_tabs ) > 0  ) {
-				$formatted_settings_tabs = array();
-				foreach ($settings_tabs as $key => $label) {
-					if (
-						is_string( $key ) && $key !== "" &&
-						is_string( $label ) && $label !== ""
-					) {
-						$formatted_settings_tabs[] = array(
-							'key'   => $key,
-							'label' => wp_strip_all_tags( $label ),
-						);
-					}
-				}
-
-				self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette' );
-				wp_localize_script(
-					'wc-admin-command-palette',
-					'wcCommandPaletteSettings',
-					array(
-						'settingsTabs'    => $formatted_settings_tabs,
-					)
-				);
-			}
+		public function enqueue_command_palette_assets() {
+			$this->enqueue_script( 'wp-admin-scripts', 'command-palette' );
 
 			$admin_features_disabled = apply_filters( 'woocommerce_admin_disabled', false );
 			if ( ! $admin_features_disabled ) {
@@ -886,12 +922,12 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					}, $analytics_reports );
 					$formatted_analytics_reports = array_filter( $formatted_analytics_reports, 'is_array' );
 
-					self::enqueue_block_editor_script( 'wp-admin-scripts', 'command-palette-analytics' );
+					$this->enqueue_script( 'wp-admin-scripts', 'command-palette-analytics' );
 					wp_localize_script(
 						'wc-admin-command-palette-analytics',
 						'wcCommandPaletteAnalytics',
 						array(
-							'reports'    => $formatted_analytics_reports,
+							'reports' => $formatted_analytics_reports,
 						)
 					);
 				}

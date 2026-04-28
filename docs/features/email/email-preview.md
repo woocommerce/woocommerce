@@ -5,8 +5,6 @@ sidebar_label: Email preview integration
 
 # Email Preview Integration
 
-<!-- markdownlint-disable MD024 -->
-
 ## Overview
 
 WooCommerce's Email Preview feature allows you to preview email templates using dummy data (i.e., it doesn't use the actual data from the database). This means that extensions registering new email types need to integrate with the email preview system to properly showcase their emails. 

@@ -105,10 +105,15 @@ class Utils {
 	 *     @type int  $productId  Product ID for context-specific behavior.
 	 *     @type bool $allowZero  Whether to allow zero quantity.
 	 * }
+	 * @param bool   $set_product_context Whether to set a local woocommerce/products context on the wrapper.
+	 *                                    Only needed when the quantity input belongs to a different product than
+	 *                                    the one provided by the inherited context (e.g. child items in grouped products).
+	 *                                    Setting this unnecessarily shadows the parent context and prevents
+	 *                                    variationId updates from propagating.
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array() ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array(), $set_product_context = false ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		global $product;
 
@@ -144,19 +149,24 @@ class Utils {
 			$wrapper_attributes
 		);
 
-		$context_attribute = wp_interactivity_data_wp_context(
-			wp_parse_args(
-				$context,
-				array(
-					'productId' => $product instanceof \WC_Product ? $product->get_id() : 0,
-				)
-			)
-		);
+		$context_attribute = wp_interactivity_data_wp_context( $context );
+
+		$product_context_directive = '';
+		if ( $set_product_context && $product instanceof \WC_Product ) {
+			$product_context = array(
+				'productId'   => $product->get_id(),
+				'variationId' => null,
+			);
+
+			// This should use `wp_interactivity_data_wp_context` as well, but it currently doesn't support unique IDs.
+			$product_context_directive = 'data-wp-context---products="woocommerce/products::' . esc_attr( (string) wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) ) . '"';
+		}
 
 		return sprintf(
-			'<div %1$s %2$s>%3$s</div>',
+			'<div %1$s %2$s %3$s>%4$s</div>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$context_attribute,
+			$product_context_directive,
 			$quantity_html
 		);
 	}

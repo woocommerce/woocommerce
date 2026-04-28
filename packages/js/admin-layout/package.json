@@ -54,8 +54,8 @@
 	},
 	"dependencies": {
 		"@woocommerce/components": "workspace:*",
-		"@wordpress/components": "wp-6.6",
-		"@wordpress/element": "wp-6.6"
+		"@wordpress/components": "catalog:wp-min",
+		"@wordpress/element": "catalog:wp-min"
 	},
 	"devDependencies": {
 		"@types/react": "18.3.x",
@@ -159,6 +159,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/components/build",
 				"node_modules/@woocommerce/components/build-module",
 				"node_modules/@woocommerce/components/build-style",

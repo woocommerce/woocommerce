@@ -167,6 +167,7 @@ body {
 
 #template_header_image img {
 	width: <?php echo esc_attr( $logo_image_width ); ?>px;
+	margin-<?php echo is_rtl() ? 'left' : 'right'; ?>: 0;
 }
 
 .email-logo-text {
