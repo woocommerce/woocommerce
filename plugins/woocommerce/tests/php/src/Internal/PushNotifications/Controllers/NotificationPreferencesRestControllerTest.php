@@ -213,10 +213,13 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 				'store_review' => true,
 			)
 		);
+		$internal_code    = 'woocommerce_push_notification_preferences_save_failed';
+		$internal_message = 'Failed to save push notification preferences.';
+
 		$service_mock->method( 'save_preferences' )->willThrowException(
 			new WC_Data_Exception(
-				'woocommerce_push_notification_preferences_save_failed',
-				'Failed to save push notification preferences.',
+				$internal_code,
+				$internal_message,
 				WP_Http::INTERNAL_SERVER_ERROR
 			)
 		);
@@ -233,6 +236,12 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 		$data = $response->get_data();
 		$this->assertArrayHasKey( 'code', $data );
 		$this->assertSame( 'woocommerce_internal_error', $data['code'] );
+
+		// Internal exception details must not be leaked to API clients.
+		$this->assertNotSame( $internal_code, $data['code'] );
+		$serialized = wp_json_encode( $data );
+		$this->assertStringNotContainsString( $internal_code, (string) $serialized );
+		$this->assertStringNotContainsString( $internal_message, (string) $serialized );
 	}
 
 	/**
