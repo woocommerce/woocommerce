@@ -708,9 +708,9 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should still fire the remove/removed order items action hooks when deletion is deferred.
+	 * @testdox Pre-hook fires immediately and post-hook fires after the deferred DB delete during save.
 	 */
-	public function test_remove_order_items_action_hooks_still_fire() {
+	public function test_remove_order_items_action_hooks_fire_at_correct_times() {
 		$order = WC_Helper_Order::create_order();
 
 		$pre_calls    = array();
@@ -740,20 +740,103 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 
 		try {
 			$order->remove_order_items( 'line_item' );
+
+			$this->assertSame(
+				$expected_log,
+				$pre_calls,
+				'woocommerce_remove_order_items should fire once when removal is requested.'
+			);
+			$this->assertSame(
+				array(),
+				$post_calls,
+				'woocommerce_removed_order_items should not fire until the deferred DB delete runs in save().'
+			);
+
+			$order->save();
+
+			$this->assertSame(
+				$expected_log,
+				$post_calls,
+				'woocommerce_removed_order_items should fire once with the requested type after save() commits the delete.'
+			);
 		} finally {
 			remove_action( 'woocommerce_remove_order_items', $pre_callback, 10 );
+			remove_action( 'woocommerce_removed_order_items', $post_callback, 10 );
+		}//end try
+	}
+
+	/**
+	 * @testdox Post-hook fires once with null type after save() commits a full removal.
+	 */
+	public function test_remove_order_items_post_hook_for_all_types_fires_with_null_after_save() {
+		$order = WC_Helper_Order::create_order();
+
+		$post_calls    = array();
+		$post_callback = function ( $fired_order, $type ) use ( &$post_calls ) {
+			$post_calls[] = array(
+				'order_id' => $fired_order->get_id(),
+				'type'     => $type,
+			);
+		};
+
+		add_action( 'woocommerce_removed_order_items', $post_callback, 10, 2 );
+
+		try {
+			$order->remove_order_items();
+
+			$this->assertSame( array(), $post_calls, 'Post-hook should not fire before save().' );
+
+			$order->save();
+		} finally {
 			remove_action( 'woocommerce_removed_order_items', $post_callback, 10 );
 		}
 
 		$this->assertSame(
-			$expected_log,
-			$pre_calls,
-			'woocommerce_remove_order_items should fire once with the requested type.'
-		);
-		$this->assertSame(
-			$expected_log,
+			array(
+				array(
+					'order_id' => $order->get_id(),
+					'type'     => null,
+				),
+			),
 			$post_calls,
-			'woocommerce_removed_order_items should fire once with the requested type.'
+			'Post-hook should fire once with a null type after a full remove_order_items() commits in save().'
+		);
+	}
+
+	/**
+	 * @testdox Should retain queued item types when a post-hook callback throws so a subsequent save() can drain them.
+	 */
+	public function test_save_items_preserves_queued_types_when_post_hook_throws() {
+		$order    = WC_Helper_Order::create_order();
+		$order_id = $order->get_id();
+
+		$order->remove_order_items( 'line_item' );
+		$order->remove_order_items( 'shipping' );
+
+		$hook_calls = array();
+		$callback   = function ( $fired_order, $type ) use ( &$hook_calls ) {
+			$hook_calls[] = $type;
+			if ( 'line_item' === $type ) {
+				throw new RuntimeException( 'simulated hook failure' );
+			}
+		};
+
+		add_action( 'woocommerce_removed_order_items', $callback, 10, 2 );
+
+		try {
+			$order->save();
+			$order->save();
+		} finally {
+			remove_action( 'woocommerce_removed_order_items', $callback, 10 );
+		}
+
+		$reloaded = wc_get_order( $order_id );
+		$this->assertCount( 0, $reloaded->get_items(), 'Line items should be removed from the DB across the two saves.' );
+		$this->assertCount( 0, $reloaded->get_items( 'shipping' ), 'Shipping items should be removed from the DB on the retry save after the first hook threw.' );
+		$this->assertSame(
+			array( 'line_item', 'shipping' ),
+			$hook_calls,
+			'Post-hook should fire for each type exactly once across the two saves, even though the first call threw.'
 		);
 	}
 }

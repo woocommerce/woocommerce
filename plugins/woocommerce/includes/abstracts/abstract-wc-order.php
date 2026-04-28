@@ -91,14 +91,26 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	/**
 	 * Bulk order item types scheduled for deletion on save().
 	 *
-	 * Populated by remove_order_items() and processed by save_items(), so that deletion
-	 * happens atomically alongside persistence of any replacement items. 'all' means
-	 * every type should be removed and supersedes any per-type entries.
+	 * Populated by remove_order_items() with a specific item type and processed by
+	 * save_items(), so that deletion happens atomically alongside persistence of any
+	 * replacement items. Superseded by $bulk_delete_all_items_pending, which removes
+	 * every item type.
 	 *
 	 * @since 10.8.0
 	 * @var array<string>
 	 */
 	protected $item_types_to_bulk_delete = array();
+
+	/**
+	 * Whether every order item type should be deleted on the next save().
+	 *
+	 * Set by remove_order_items() when called with no type (so every item type
+	 * should be removed). Processed and reset in save_items().
+	 *
+	 * @since 10.8.0
+	 * @var bool
+	 */
+	protected $bulk_delete_all_items_pending = false;
 
 	/**
 	 * Stores meta in cache for future reads.
@@ -291,17 +303,45 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	protected function save_items() {
 		$items_changed = false;
 
-		if ( ! empty( $this->item_types_to_bulk_delete ) ) {
-			if ( in_array( 'all', $this->item_types_to_bulk_delete, true ) ) {
-				$this->data_store->delete_items( $this );
-			} else {
-				foreach ( array_unique( $this->item_types_to_bulk_delete ) as $type ) {
-					$this->data_store->delete_items( $this, $type );
-				}
-			}
-			$this->item_types_to_bulk_delete = array();
-			$items_changed                   = true;
-		}
+		if ( $this->bulk_delete_all_items_pending ) {
+			$this->data_store->delete_items( $this );
+			$this->bulk_delete_all_items_pending = false;
+			$this->item_types_to_bulk_delete     = array();
+			$items_changed                       = true;
+
+			/**
+			 * Trigger action after removing all order line items from the database.
+			 *
+			 * @param  WC_Order  $this  The current order object.
+			 * @param  string $type Order item type. Default null.
+			 *
+			 * @since 7.8.0
+			 */
+			do_action( 'woocommerce_removed_order_items', $this, null );
+		} elseif ( ! empty( $this->item_types_to_bulk_delete ) ) {
+			// Drain the queue one type at a time, dropping each entry only after delete_items() succeeds.
+			// If a delete or hook callback throws, save()'s catch handles it and any types that have not
+			// yet been processed remain queued for the next save() rather than being silently lost.
+			foreach ( array_values( array_unique( $this->item_types_to_bulk_delete ) ) as $type ) {
+				$this->data_store->delete_items( $this, $type );
+				$items_changed                   = true;
+				$this->item_types_to_bulk_delete = array_values(
+					array_filter(
+						$this->item_types_to_bulk_delete,
+						static function ( $pending ) use ( $type ) {
+							return $pending !== $type;
+						}
+					)
+				);
+
+				/**
+				 * This action is documented above.
+				 *
+				 * @since 7.8.0
+				 */
+				do_action( 'woocommerce_removed_order_items', $this, $type );
+			}//end foreach
+		}//end if
 
 		foreach ( $this->items_to_delete as $item ) {
 			$item->delete();
@@ -924,24 +964,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				$this->items[ $group ] = array();
 			}
 		} else {
-			$this->item_types_to_bulk_delete = array( 'all' );
+			$this->bulk_delete_all_items_pending = true;
+			$this->item_types_to_bulk_delete     = array();
 			foreach ( array_unique( $this->item_types_to_group ) as $group ) {
 				$this->items[ $group ] = array();
 			}
 		}
-		/**
-		 * Trigger action after removing all order line items.
-		 *
-		 * Note: as of WooCommerce 10.8.0, this hook fires before the items are
-		 * deleted from the database. Removal is committed during the next save()
-		 * call so that it happens atomically with any replacement items.
-		 *
-		 * @param  WC_Order  $this  The current order object.
-		 * @param  string $type Order item type. Default null.
-		 *
-		 * @since 7.8.0
-		 */
-		do_action( 'woocommerce_removed_order_items', $this, $type );
 	}
 
 	/**
