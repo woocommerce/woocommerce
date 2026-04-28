@@ -21,10 +21,10 @@ body.woocommerce_page_wc-settings.woocommerce-modern-settings-page {
 		background: #fff;
 		border-bottom: 1px solid #f0f0f0;
 		display: flex;
-		flex-wrap: nowrap;
+		flex-wrap: wrap;
 		gap: 0;
 		margin: 0 -48px;
-		overflow-x: auto;
+		overflow-x: visible;
 		padding: 0 48px;
 
 		&:not(.wp-clearfix)::after {
