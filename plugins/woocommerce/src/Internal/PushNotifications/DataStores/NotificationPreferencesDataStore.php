@@ -46,6 +46,8 @@ class NotificationPreferencesDataStore {
 	 *
 	 * @return array|null Envelope with `schema_version` and `preferences` keys, or null if unstored.
 	 *
+	 * @throws WC_Data_Exception When persisting a migrated envelope fails.
+	 *
 	 * @since 10.8.0
 	 */
 	public function read( int $user_id ): ?array {
@@ -59,7 +61,7 @@ class NotificationPreferencesDataStore {
 
 		if ( $stored_version < self::CURRENT_SCHEMA_VERSION ) {
 			$stored = $this->migrate( $stored, $stored_version );
-			Users::update_site_user_meta( $user_id, self::META_KEY, $stored );
+			$this->write( $user_id, $stored );
 		}
 
 		return $stored;
