@@ -1,25 +1,12 @@
 /**
  * External dependencies
  */
-import type { View } from '@wordpress/dataviews';
+import type { Filter, View } from '@wordpress/dataviews';
 import type {
 	ProductQuery,
 	ProductStatus,
 	ProductType,
 } from '@woocommerce/data';
-
-type ExtendedOperator =
-	| NonNullable< View[ 'filters' ] >[ number ][ 'operator' ]
-	| 'between'
-	| 'greaterThanOrEqual'
-	| 'lessThanOrEqual';
-
-type ProductListFilter = Omit<
-	NonNullable< View[ 'filters' ] >[ number ],
-	'operator'
-> & {
-	operator: ExtendedOperator;
-};
 
 export type ProductListQuery = ProductQuery & {
 	search_name_or_sku?: string;
@@ -54,9 +41,16 @@ function getStringValues( value: unknown ): string[] {
 }
 
 function getNumericValues( value: unknown ): number[] {
-	return getStringValues( value )
-		.map( ( item ) => Number( item ) )
-		.filter( Number.isFinite );
+	const values = Array.isArray( value ) ? value : [ value ];
+	return values.map( ( item ) => {
+		if ( typeof item === 'number' ) {
+			return item;
+		}
+		if ( typeof item === 'string' ) {
+			return Number( item );
+		}
+		return Number.NaN;
+	} );
 }
 
 function getPriceValue( value: unknown ): string | undefined {
@@ -71,35 +65,7 @@ function getPriceValue( value: unknown ): string | undefined {
 	return undefined;
 }
 
-function getAttributeFilters( value: unknown ) {
-	return getStringValues( value )
-		.map( ( item ) => {
-			const [ taxonomy, termId ] = item.split( ':' );
-			const parsedTermId = Number( termId );
-
-			if ( ! taxonomy || ! Number.isFinite( parsedTermId ) ) {
-				return null;
-			}
-
-			return {
-				taxonomy,
-				termId: parsedTermId,
-			};
-		} )
-		.filter(
-			(
-				item
-			): item is {
-				taxonomy: string;
-				termId: number;
-			} => item !== null
-		);
-}
-
-function applyStatusFilter(
-	query: ProductListQuery,
-	filter: ProductListFilter
-) {
+function applyStatusFilter( query: ProductListQuery, filter: Filter ) {
 	const values = getStringValues( filter.value ) as ProductStatus[];
 
 	if ( values.length === 0 ) {
@@ -114,7 +80,7 @@ function applyStatusFilter(
 	query.include_status = values;
 }
 
-function applyTypeFilter( query: ProductListQuery, filter: ProductListFilter ) {
+function applyTypeFilter( query: ProductListQuery, filter: Filter ) {
 	const values = getStringValues( filter.value ) as ProductType[];
 
 	if ( values.length === 0 ) {
@@ -129,10 +95,7 @@ function applyTypeFilter( query: ProductListQuery, filter: ProductListFilter ) {
 	query.include_types = values;
 }
 
-function applyCategoryFilter(
-	query: ProductListQuery,
-	filter: ProductListFilter
-) {
+function applyCategoryFilter( query: ProductListQuery, filter: Filter ) {
 	const values = getNumericValues( filter.value );
 
 	if ( values.length === 0 ) {
@@ -147,29 +110,7 @@ function applyCategoryFilter(
 	query.category = values.join( ',' );
 }
 
-function applyTagFilter( query: ProductListQuery, filter: ProductListFilter ) {
-	const values = getNumericValues( filter.value );
-
-	if ( values.length > 0 ) {
-		query.tag = values.join( ',' );
-	}
-}
-
-function applyShippingClassFilter(
-	query: ProductListQuery,
-	filter: ProductListFilter
-) {
-	const values = getNumericValues( filter.value );
-
-	if ( values.length > 0 ) {
-		query.shipping_class = values.join( ',' );
-	}
-}
-
-function applyStockFilter(
-	query: ProductListQuery,
-	filter: ProductListFilter
-) {
+function applyStockFilter( query: ProductListQuery, filter: Filter ) {
 	const [ stockStatus ] = getStringValues( filter.value );
 
 	if ( stockStatus ) {
@@ -177,36 +118,7 @@ function applyStockFilter(
 	}
 }
 
-function applyAttributeFilter(
-	query: ProductListQuery,
-	filter: ProductListFilter
-) {
-	const attributes = getAttributeFilters( filter.value );
-
-	if ( attributes.length === 0 ) {
-		return;
-	}
-
-	const [ firstAttribute ] = attributes;
-
-	if ( ! firstAttribute ) {
-		return;
-	}
-
-	const matchingAttributes = attributes.filter(
-		( attribute ) => attribute.taxonomy === firstAttribute.taxonomy
-	);
-
-	query.attribute = firstAttribute.taxonomy;
-	query.attribute_term = matchingAttributes
-		.map( ( attribute ) => attribute.termId )
-		.join( ',' );
-}
-
-function applyPriceFilter(
-	query: ProductListQuery,
-	filter: ProductListFilter
-) {
+function applyPriceFilter( query: ProductListQuery, filter: Filter ) {
 	if ( filter.operator === 'between' && Array.isArray( filter.value ) ) {
 		const [ minPrice, maxPrice ] = filter.value;
 		query.min_price = getPriceValue( minPrice );
@@ -234,37 +146,6 @@ function applyPriceFilter(
 	query.max_price = price;
 }
 
-function applyStockQuantityFilter(
-	query: ProductListQuery,
-	filter: ProductListFilter
-) {
-	if ( filter.operator === 'between' && Array.isArray( filter.value ) ) {
-		const [ minStockQuantity, maxStockQuantity ] = filter.value;
-		query.min_stock_quantity = getPriceValue( minStockQuantity );
-		query.max_stock_quantity = getPriceValue( maxStockQuantity );
-		return;
-	}
-
-	const stockQuantity = getPriceValue( filter.value );
-
-	if ( ! stockQuantity ) {
-		return;
-	}
-
-	if ( filter.operator === 'greaterThanOrEqual' ) {
-		query.min_stock_quantity = stockQuantity;
-		return;
-	}
-
-	if ( filter.operator === 'lessThanOrEqual' ) {
-		query.max_stock_quantity = stockQuantity;
-		return;
-	}
-
-	query.min_stock_quantity = stockQuantity;
-	query.max_stock_quantity = stockQuantity;
-}
-
 export function buildProductListQuery( view: View ): ProductListQuery {
 	const query: ProductListQuery = {
 		per_page: view.perPage,
@@ -290,23 +171,11 @@ export function buildProductListQuery( view: View ): ProductListQuery {
 			case 'categories':
 				applyCategoryFilter( query, filter );
 				break;
-			case 'tags':
-				applyTagFilter( query, filter );
-				break;
-			case 'shipping_class':
-				applyShippingClassFilter( query, filter );
-				break;
-			case 'attributes':
-				applyAttributeFilter( query, filter );
-				break;
 			case 'stock':
 				applyStockFilter( query, filter );
 				break;
 			case 'price':
 				applyPriceFilter( query, filter );
-				break;
-			case 'stock_quantity':
-				applyStockQuantityFilter( query, filter );
 				break;
 		}
 	} );
