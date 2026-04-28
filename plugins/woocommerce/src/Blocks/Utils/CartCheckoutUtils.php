@@ -309,7 +309,7 @@ class CartCheckoutUtils {
 	 *
 	 * @return bool true if the template has out of sync content.
 	 */
-	public static function is_overriden_by_custom_template_content( string $block ): bool {
+	public static function is_overridden_by_custom_template_content( string $block ): bool {
 
 		$block = str_replace( 'woocommerce/', '', $block );
 
