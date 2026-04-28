@@ -1,0 +1,57 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"apiVersion": 3,
+	"name": "woocommerce/shopper-collection",
+	"version": "1.0.0",
+	"title": "Shopper Collection",
+	"description": "Display a collection curated by the shopper, such as items they've saved for later.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce", "Save for Later", "Wishlist", "Shopper Collection" ],
+	"textdomain": "woocommerce",
+	"attributes": {
+		"listName": {
+			"type": "string",
+			"default": "save-for-later"
+		},
+		"showQuantity": {
+			"type": "boolean",
+			"default": true
+		},
+		"showVariation": {
+			"type": "boolean",
+			"default": true
+		},
+		"showSavedDate": {
+			"type": "boolean",
+			"default": false
+		}
+	},
+	"supports": {
+		 "align": [ "wide", "full" ],
+		"interactivity": true,
+		"html": false,
+		"reusable": false,
+		"layout": {
+			"default": {
+				"type": "grid",
+				"columnCount": 3
+			},
+			"allowEditing": true
+		},
+		"spacing": {
+			"margin": true,
+			"padding": true,
+			"blockGap": true
+		},
+		"typography": {
+			"fontSize": true,
+			"lineHeight": true
+		},
+		"color": {
+			"text": true,
+			"background": true
+		}
+	},
+	"viewScriptModule": "woocommerce/shopper-collection",
+	"style": "file:../woocommerce/shopper-collection-style.css"
+}
