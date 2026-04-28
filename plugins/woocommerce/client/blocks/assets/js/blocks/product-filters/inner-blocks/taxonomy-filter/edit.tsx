@@ -153,9 +153,15 @@ const Edit = ( props: EditProps ) => {
 	useEffect( () => {
 		if ( isPreview ) {
 			// In preview mode, use the preview data directly
-			setTermOptions(
-				sortFilterOptions( [ ...termOptionsPreview ], sortOrder )
-			);
+			const previewItems = termOptionsPreview.map( ( item ) => {
+				if ( showCounts ) {
+					return item;
+				}
+				// Strip count when showCounts is false
+				const { count, ...rest } = item;
+				return rest;
+			} );
+			setTermOptions( sortFilterOptions( previewItems, sortOrder ) );
 			setIsOptionsLoading( false );
 			return;
 		}
