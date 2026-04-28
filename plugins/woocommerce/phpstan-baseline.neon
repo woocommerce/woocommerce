@@ -8721,13 +8721,13 @@ parameters:
 		-
 			message: '#^Cannot call method get_formatted_name\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
 			message: '#^Cannot call method get_id\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 4
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8767,12 +8767,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot call method get_stock_quantity\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot call method get_total\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -8782,12 +8776,6 @@ parameters:
 			message: '#^Cannot call method get_total_refunded\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method get_type\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8805,7 +8793,7 @@ parameters:
 		-
 			message: '#^Cannot call method managing_stock\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8995,12 +8983,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Parameter \#1 \$product of function wc_products_array_filter_readable expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Parameter \#1 \$product_object of function wc_render_invalid_variation_notice expects WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -9140,12 +9122,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$postcodes of static method WC_Tax\:\:_update_tax_rate_postcodes\(\) expects string, array\<string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Parameter \#2 \$product of function wc_format_stock_quantity_for_display expects WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-ajax.php

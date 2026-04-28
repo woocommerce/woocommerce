@@ -28,16 +28,24 @@ class Main {
 	public const OPTION_GET_ENDPOINT_ENABLED = 'woocommerce_graphql_get_endpoint_enabled';
 
 	/**
+	 * Option name for the "Maximum query depth" setting.
+	 *
+	 * Caps how deep the selection tree of a GraphQL query may nest.
+	 */
+	public const OPTION_MAX_QUERY_DEPTH = 'woocommerce_graphql_max_query_depth';
+
+	/**
+	 * Option name for the "Maximum query complexity" setting.
+	 *
+	 * Caps the computed complexity score of a GraphQL query — connection
+	 * fields multiply their children's cost by the requested page size.
+	 */
+	public const OPTION_MAX_QUERY_COMPLEXITY = 'woocommerce_graphql_max_query_complexity';
+
+	/**
 	 * Option name for the "ObjectCache-based caching" setting.
 	 */
 	public const OPTION_OBJECT_CACHE_ENABLED = 'woocommerce_graphql_object_cache_enabled';
-
-	/**
-	 * Cached result of the feature-enabled check, null until first evaluated.
-	 *
-	 * @var ?bool
-	 */
-	private static ?bool $enabled = null;
 
 	/**
 	 * Check whether the Dual Code & GraphQL API feature is active.
