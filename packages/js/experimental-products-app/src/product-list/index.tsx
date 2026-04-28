@@ -216,7 +216,9 @@ export default function ProductList( { className }: ProductListProps ) {
 		postType,
 		context: 'list',
 	} );
-	const productActions = useProductActions();
+	const productActions = useProductActions( {
+		query: queryParams,
+	} );
 	const actions = useMemo(
 		() => [
 			...productActions,
