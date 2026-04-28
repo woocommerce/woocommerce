@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\NotificationPreferencesDataStore;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
 
 /**
  * Manages per-user push notification preferences.
@@ -100,15 +101,16 @@ class NotificationPreferencesService {
 	/**
 	 * Return the default preferences for a new user.
 	 *
+	 * The keyset is derived from `Notification::NOTIFICATION_CLASSES` so that
+	 * adding a new notification type automatically opts it into preferences
+	 * with `true` as the default — no parallel list to keep in sync.
+	 *
 	 * @return array<string, bool> Flat defaults map.
 	 *
 	 * @since 10.8.0
 	 */
 	public function get_defaults(): array {
-		return array(
-			'store_order'  => true,
-			'store_review' => true,
-		);
+		return array_fill_keys( array_keys( Notification::NOTIFICATION_CLASSES ), true );
 	}
 
 	/**
