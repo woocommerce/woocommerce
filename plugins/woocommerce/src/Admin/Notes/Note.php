@@ -79,6 +79,8 @@ class Note extends \WC_Data {
 		} elseif ( is_object( $data ) && ! empty( $data->note_id ) ) {
 			$this->set_id( $data->note_id );
 			unset( $data->icon ); // Icons are deprecated.
+			// `image` and `layout` are deprecated — skip them so set_props doesn't dispatch to the deprecated setters.
+			unset( $data->image, $data->layout );
 			$this->set_props( (array) $data );
 			$this->set_object_read( true );
 		} else {
