@@ -1,4 +1,5 @@
 import type { store } from '@wordpress/notices';
+import type { ReactElement } from 'react';
 /**
  * Fix WordPress notices store types.
  * createSuccessNotice and createErrorNotice return void, not Promise.
@@ -10,11 +11,11 @@ interface NoticeOptions {
 	isDismissible?: boolean;
 	duration?: number;
 	actions?: Array< {
-		label: string | React.ReactElement;
+		label: string | ReactElement;
 		onClick?: () => void;
 		url?: string;
 	} >;
-	icon?: React.ReactElement;
+	icon?: ReactElement;
 	explicitDismiss?: boolean;
 	onDismiss?: () => void;
 	speak?: boolean;
