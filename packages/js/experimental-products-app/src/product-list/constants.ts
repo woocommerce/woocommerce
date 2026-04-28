@@ -30,7 +30,6 @@ export const PRODUCT_LIST_TAB_VALUES = [
 	'all',
 	'publish',
 	'draft',
-	'pending',
 	'trash',
 ] as const;
 

@@ -162,18 +162,21 @@ export default function ProductList( { className }: ProductListProps ) {
 		hasResolved,
 	} = useSelect(
 		( select ) => {
-			const { getEntityRecords, isResolving, hasFinishedResolution } =
-				select( coreStore );
+			const {
+				getEntityRecords,
+				isResolving,
+				hasFinishedResolution,
+				getEntityRecordsTotalItems,
+			} = select( coreStore );
 			return {
 				records: getEntityRecords< ProductEntityRecord >(
 					'root',
 					'product',
 					queryParams
 				),
-				totalItems: getEntityRecords( 'root', 'product', {
+				totalItems: getEntityRecordsTotalItems( 'root', 'product', {
 					...queryParams,
-					per_page: -1,
-				} )?.length,
+				} ),
 				isResolving: isResolving( 'getEntityRecords', [
 					'root',
 					'product',

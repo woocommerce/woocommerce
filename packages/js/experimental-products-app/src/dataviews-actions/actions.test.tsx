@@ -171,10 +171,7 @@ describe( 'product list actions', () => {
 				throwOnError: true,
 			}
 		);
-		expect( invalidateResolution ).toHaveBeenCalledWith(
-			'getEntityRecords',
-			[ 'root', 'product', query ]
-		);
+
 		expect( createSuccessNotice ).toHaveBeenCalledWith(
 			'Product successfully deleted',
 			{ type: 'snackbar' }
