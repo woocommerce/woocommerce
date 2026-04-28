@@ -111,14 +111,10 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 	 * @return WP_REST_Response|WP_Error
 	 */
 	public function update_preferences( WP_REST_Request $request ) {
-		$service = wc_get_container()->get( NotificationPreferencesService::class );
-		$input   = array_intersect_key( $request->get_params(), $service->get_defaults() );
-
 		try {
-			$merged = $service->save_preferences(
-				get_current_user_id(),
-				array_map( 'boolval', $input )
-			);
+			$merged = wc_get_container()
+				->get( NotificationPreferencesService::class )
+				->save_preferences( get_current_user_id(), $request->get_params() );
 		} catch ( Exception $e ) {
 			return $this->convert_exception_to_wp_error( $e );
 		}
