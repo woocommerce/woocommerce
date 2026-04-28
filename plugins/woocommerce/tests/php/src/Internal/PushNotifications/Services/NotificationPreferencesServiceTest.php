@@ -4,11 +4,17 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\Services;
 
+use Automattic\WooCommerce\Internal\PushNotifications\DataStores\NotificationPreferencesDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
+use PHPUnit\Framework\MockObject\MockObject;
+use WC_Data_Exception;
 use WC_Unit_Test_Case;
+use WP_Http;
 
 /**
  * Tests for the NotificationPreferencesService class.
+ *
+ * @covers \Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService
  */
 class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 
@@ -20,11 +26,18 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
-	 * A test user ID.
+	 * Mocked data store.
+	 *
+	 * @var NotificationPreferencesDataStore|MockObject
+	 */
+	private $data_store;
+
+	/**
+	 * An arbitrary test user ID.
 	 *
 	 * @var int
 	 */
-	private int $user_id;
+	private int $user_id = 42;
 
 	/**
 	 * Set up test fixtures.
@@ -32,33 +45,32 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut     = new NotificationPreferencesService();
-		$this->user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		$this->data_store = $this->createMock( NotificationPreferencesDataStore::class );
+		$this->sut        = new NotificationPreferencesService();
+		$this->sut->init( $this->data_store );
 	}
 
 	/**
-	 * Clean up user meta between tests.
+	 * @testdox Should return defaults when the data store has no envelope for the user.
 	 */
-	public function tearDown(): void {
-		delete_user_meta( $this->user_id, NotificationPreferencesService::META_KEY );
-		wp_delete_user( $this->user_id );
-		parent::tearDown();
-	}
+	public function test_get_preferences_returns_defaults_when_data_store_returns_null(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
 
-	/**
-	 * @testdox Should return defaults when the user has no stored preferences.
-	 */
-	public function test_get_preferences_returns_defaults_for_new_user(): void {
 		$preferences = $this->sut->get_preferences( $this->user_id );
 
 		$this->assertSame( $this->sut->get_defaults(), $preferences );
 	}
 
 	/**
-	 * @testdox Should return previously saved preferences, overlaid on defaults.
+	 * @testdox Should overlay stored preferences on top of defaults.
 	 */
-	public function test_get_preferences_returns_saved_preferences(): void {
-		$this->sut->save_preferences( $this->user_id, array( 'store_order' => false ) );
+	public function test_get_preferences_returns_saved_preferences_overlaid_on_defaults(): void {
+		$this->data_store->method( 'read' )->willReturn(
+			array(
+				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
+				'preferences'    => array( 'store_order' => false ),
+			)
+		);
 
 		$preferences = $this->sut->get_preferences( $this->user_id );
 
@@ -69,9 +81,54 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should write the versioned envelope to user meta on save and return the merged map.
+	 * @testdox Should fall back to defaults when the stored envelope has empty preferences.
+	 *
+	 * This is the path the data-store hits after a malformed-input migration: the stored envelope
+	 * has `preferences => array()`. The service should fill in defaults rather than return an
+	 * empty preferences map.
 	 */
-	public function test_save_preferences_updates_user_meta(): void {
+	public function test_get_preferences_overlays_defaults_when_stored_preferences_is_empty(): void {
+		$this->data_store->method( 'read' )->willReturn(
+			array(
+				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
+				'preferences'    => array(),
+			)
+		);
+
+		$preferences = $this->sut->get_preferences( $this->user_id );
+
+		$this->assertSame( $this->sut->get_defaults(), $preferences );
+	}
+
+	/**
+	 * @testdox Should write the merged envelope to the data store on save.
+	 */
+	public function test_save_preferences_calls_data_store_with_correctly_built_envelope(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$this->data_store
+			->expects( $this->once() )
+			->method( 'write' )
+			->with(
+				$this->user_id,
+				array(
+					'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
+					'preferences'    => array(
+						'store_order'  => false,
+						'store_review' => true,
+					),
+				)
+			);
+
+		$this->sut->save_preferences( $this->user_id, array( 'store_order' => false ) );
+	}
+
+	/**
+	 * @testdox Should return the merged preferences map after save.
+	 */
+	public function test_save_preferences_returns_merged_map(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
 		$result = $this->sut->save_preferences(
 			$this->user_id,
 			array(
@@ -80,70 +137,50 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Return value: the merged preferences map.
-		$this->assertIsArray( $result );
 		$this->assertArrayHasKey( 'store_order', $result );
 		$this->assertFalse( $result['store_order'] );
 		$this->assertArrayHasKey( 'store_review', $result );
 		$this->assertFalse( $result['store_review'] );
-
-		// Stored envelope shape on disk.
-		$stored = get_user_meta( $this->user_id, NotificationPreferencesService::META_KEY, true );
-
-		$this->assertIsArray( $stored );
-		$this->assertArrayHasKey( 'schema_version', $stored );
-		$this->assertSame( NotificationPreferencesService::CURRENT_SCHEMA_VERSION, $stored['schema_version'] );
-		$this->assertArrayHasKey( 'preferences', $stored );
-		$this->assertFalse( $stored['preferences']['store_order'] );
-		$this->assertFalse( $stored['preferences']['store_review'] );
 	}
 
 	/**
-	 * @testdox Should merge partial saves with previously stored preferences and return the merged map.
+	 * @testdox Should merge a partial save with previously stored preferences.
 	 */
-	public function test_save_preferences_merges_with_existing(): void {
-		$this->sut->save_preferences(
-			$this->user_id,
+	public function test_save_preferences_merges_with_existing_preferences(): void {
+		$this->data_store->method( 'read' )->willReturn(
 			array(
-				'store_order'  => false,
-				'store_review' => false,
+				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
+				'preferences'    => array(
+					'store_order'  => false,
+					'store_review' => false,
+				),
 			)
 		);
 
 		$result = $this->sut->save_preferences( $this->user_id, array( 'store_review' => true ) );
 
-		$this->assertArrayHasKey( 'store_order', $result );
 		$this->assertFalse( $result['store_order'] );
-		$this->assertArrayHasKey( 'store_review', $result );
 		$this->assertTrue( $result['store_review'] );
 	}
 
 	/**
-	 * @testdox Should upgrade an older envelope to the current schema version on read.
-	 */
-	public function test_migration_upgrades_schema_version(): void {
-		update_user_meta(
-			$this->user_id,
-			NotificationPreferencesService::META_KEY,
-			array(
-				'schema_version' => 0,
-				'preferences'    => array( 'store_order' => false ),
-			)
-		);
-
-		$preferences = $this->sut->get_preferences( $this->user_id );
-
-		$stored = get_user_meta( $this->user_id, NotificationPreferencesService::META_KEY, true );
-		$this->assertSame( NotificationPreferencesService::CURRENT_SCHEMA_VERSION, $stored['schema_version'] );
-		$this->assertFalse( $preferences['store_order'] );
-		$this->assertArrayHasKey( 'store_review', $preferences );
-		$this->assertTrue( $preferences['store_review'] );
-	}
-
-	/**
-	 * @testdox Should drop unknown preference keys on save (in both return value and storage).
+	 * @testdox Should drop unknown preference keys before writing.
 	 */
 	public function test_save_preferences_drops_unknown_keys(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$this->data_store
+			->expects( $this->once() )
+			->method( 'write' )
+			->with(
+				$this->user_id,
+				$this->callback(
+					function ( $envelope ) {
+						return ! array_key_exists( 'store_abandoned_cart', $envelope['preferences'] );
+					}
+				)
+			);
+
 		$result = $this->sut->save_preferences(
 			$this->user_id,
 			array(
@@ -152,30 +189,25 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$stored = get_user_meta( $this->user_id, NotificationPreferencesService::META_KEY, true );
-
 		$this->assertArrayNotHasKey( 'store_abandoned_cart', $result );
-		$this->assertArrayNotHasKey( 'store_abandoned_cart', $stored['preferences'] );
-		$this->assertArrayHasKey( 'store_order', $result );
-		$this->assertFalse( $result['store_order'] );
 	}
 
 	/**
-	 * @testdox Should fall back to defaults when a migrated envelope has a malformed preferences value.
+	 * @testdox Should propagate WC_Data_Exception thrown by the data store.
 	 */
-	public function test_migrate_falls_back_to_defaults_for_malformed_preferences(): void {
-		update_user_meta(
-			$this->user_id,
-			NotificationPreferencesService::META_KEY,
-			array(
-				'schema_version' => 0,
-				'preferences'    => 'corrupted',
+	public function test_save_preferences_propagates_data_store_exception(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+		$this->data_store->method( 'write' )->willThrowException(
+			new WC_Data_Exception(
+				'woocommerce_push_notification_preferences_save_failed',
+				'Failed to save push notification preferences.',
+				WP_Http::INTERNAL_SERVER_ERROR
 			)
 		);
 
-		$preferences = $this->sut->get_preferences( $this->user_id );
+		$this->expectException( WC_Data_Exception::class );
 
-		$this->assertSame( $this->sut->get_defaults(), $preferences );
+		$this->sut->save_preferences( $this->user_id, array( 'store_order' => false ) );
 	}
 
 	/**

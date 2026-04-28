@@ -6,37 +6,44 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\Services;
 
 defined( 'ABSPATH' ) || exit;
 
-use WC_Data_Exception;
-use WP_Http;
+use Automattic\WooCommerce\Internal\PushNotifications\DataStores\NotificationPreferencesDataStore;
 
 /**
  * Manages per-user push notification preferences.
  *
- * Preferences are stored in user meta under a single versioned envelope,
- * enabling forward-compatible schema migrations without losing merchant choices.
+ * Owns the domain logic — the default preference values and how arbitrary
+ * input is sanitized — and delegates persistence to
+ * `NotificationPreferencesDataStore`.
  *
  * @since 10.8.0
  */
 class NotificationPreferencesService {
 	/**
-	 * User meta key under which the preferences envelope is stored.
+	 * The data store used for persistence.
+	 *
+	 * @var NotificationPreferencesDataStore
 	 */
-	const META_KEY = 'wc_push_notification_preferences';
+	private NotificationPreferencesDataStore $data_store;
 
 	/**
-	 * Current preferences schema version.
+	 * Initialize injected dependencies.
 	 *
-	 * Bump when the `preferences` shape changes, and add a corresponding
-	 * branch to `migrate()`.
+	 * @internal
+	 *
+	 * @param NotificationPreferencesDataStore $data_store The data store.
+	 *
+	 * @since 10.8.0
 	 */
-	const CURRENT_SCHEMA_VERSION = 1;
+	final public function init( NotificationPreferencesDataStore $data_store ): void {
+		$this->data_store = $data_store;
+	}
 
 	/**
 	 * Retrieve a user's notification preferences.
 	 *
-	 * Falls back to defaults for users with no stored preferences. If the
-	 * stored envelope is older than the current schema version, it is migrated
-	 * and persisted before being returned.
+	 * Falls back to defaults for users with no stored preferences. Stored
+	 * preferences are overlaid on top of the defaults so that any newer keys
+	 * not yet on disk are filled in.
 	 *
 	 * @param int $user_id The user ID.
 	 *
@@ -45,38 +52,32 @@ class NotificationPreferencesService {
 	 * @since 10.8.0
 	 */
 	public function get_preferences( int $user_id ): array {
-		$stored = get_user_meta( $user_id, self::META_KEY, true );
+		$envelope = $this->data_store->read( $user_id );
 
-		if ( ! is_array( $stored ) || empty( $stored ) ) {
+		if ( null === $envelope ) {
 			return $this->get_defaults();
 		}
 
-		$stored_version = isset( $stored['schema_version'] ) ? (int) $stored['schema_version'] : 0;
-
-		if ( $stored_version < self::CURRENT_SCHEMA_VERSION ) {
-			$stored = $this->migrate( $stored, $stored_version );
-			update_user_meta( $user_id, self::META_KEY, $stored );
-		}
-
-		$preferences = isset( $stored['preferences'] ) && is_array( $stored['preferences'] )
-			? $stored['preferences']
+		$stored = isset( $envelope['preferences'] ) && is_array( $envelope['preferences'] )
+			? $envelope['preferences']
 			: array();
 
-		return $this->sanitize( array_merge( $this->get_defaults(), $preferences ) );
+		return $this->sanitize( array_merge( $this->get_defaults(), $stored ) );
 	}
 
 	/**
 	 * Persist a partial update to a user's notification preferences.
 	 *
 	 * Unknown preference keys are dropped; values are coerced to boolean.
-	 * The merged result is stored inside the current versioned envelope.
+	 * The merged result is wrapped in the current versioned envelope and
+	 * handed to the data store.
 	 *
 	 * @param int                 $user_id     The user ID.
 	 * @param array<string, bool> $preferences Partial preferences to merge over existing values.
 	 *
 	 * @return array<string, bool> The merged, sanitized preferences map after the save.
 	 *
-	 * @throws WC_Data_Exception When the user meta write fails for a non-no-op reason.
+	 * @throws \WC_Data_Exception Propagated from the data store on real persistence failure.
 	 *
 	 * @since 10.8.0
 	 */
@@ -84,32 +85,14 @@ class NotificationPreferencesService {
 		$current = $this->get_preferences( $user_id );
 		$merged  = $this->sanitize( array_merge( $current, $preferences ) );
 
-		$envelope = array(
-			'schema_version' => self::CURRENT_SCHEMA_VERSION,
-			'preferences'    => $merged,
+		// Data store throws WC_Data_Exception on real failure; let it propagate.
+		$this->data_store->write(
+			$user_id,
+			array(
+				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
+				'preferences'    => $merged,
+			)
 		);
-
-		// Skip the write when the stored envelope already matches. This avoids
-		// the ambiguous `false` return from update_user_meta() that means
-		// either "value unchanged" or "DB write failed" — by short-circuiting
-		// the no-op case, a `false` from the call below unambiguously means
-		// the write itself failed and we can surface it.
-		$stored = get_user_meta( $user_id, self::META_KEY, true );
-		if ( $stored === $envelope ) {
-			return $merged;
-		}
-
-		$result = update_user_meta( $user_id, self::META_KEY, $envelope );
-
-		if ( false === $result ) {
-			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped
-			throw new WC_Data_Exception(
-				'woocommerce_push_notification_preferences_save_failed',
-				'Failed to save push notification preferences.',
-				WP_Http::INTERNAL_SERVER_ERROR
-			);
-			// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
-		}
 
 		return $merged;
 	}
@@ -125,36 +108,6 @@ class NotificationPreferencesService {
 		return array(
 			'store_order'  => true,
 			'store_review' => true,
-		);
-	}
-
-	/**
-	 * Migrate a stored preferences envelope up to the current schema version.
-	 *
-	 * Intended to be a pure transformation: callers are responsible for
-	 * persisting the returned envelope if needed. Missing or malformed
-	 * `preferences` entries are replaced with defaults.
-	 *
-	 * @param array $data         The stored envelope (expected keys: `schema_version`, `preferences`).
-	 * @param int   $from_version The schema version currently on disk.
-	 *
-	 * @return array The envelope upgraded to `self::CURRENT_SCHEMA_VERSION`.
-	 *
-	 * @since 10.8.0
-	 */
-	public function migrate( array $data, int $from_version ): array {
-		// Parameter reserved for future schema migrations.
-		unset( $from_version );
-
-		$preferences = isset( $data['preferences'] ) && is_array( $data['preferences'] )
-			? $data['preferences']
-			: $this->get_defaults();
-
-		// For v1 the envelope shape is stable; we only normalize the version tag.
-
-		return array(
-			'schema_version' => self::CURRENT_SCHEMA_VERSION,
-			'preferences'    => $preferences,
 		);
 	}
 
