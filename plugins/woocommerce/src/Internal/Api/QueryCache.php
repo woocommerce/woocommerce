@@ -52,7 +52,10 @@ class QueryCache {
 	public function resolve( ?string $query, array $extensions ) {
 		$apq = $extensions['persistedQuery'] ?? null;
 
-		if ( is_array( $apq ) && 1 === ( $apq['version'] ?? null ) && ! empty( $apq['sha256Hash'] ) ) {
+		if ( Main::is_apq_enabled()
+			&& is_array( $apq )
+			&& 1 === ( $apq['version'] ?? null )
+			&& ! empty( $apq['sha256Hash'] ) ) {
 			return $this->resolve_apq( $query, $apq['sha256Hash'] );
 		}
 

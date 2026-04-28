@@ -65,6 +65,13 @@ class Settings {
 				'type'    => 'checkbox',
 			),
 			array(
+				'title'   => __( 'Enable APQ caching', 'woocommerce' ),
+				'desc'    => __( 'Cache parsed queries using the Apollo Automatic Persisted Queries protocol', 'woocommerce' ),
+				'id'      => Main::OPTION_APQ_ENABLED,
+				'default' => 'yes',
+				'type'    => 'checkbox',
+			),
+			array(
 				'type' => 'sectionend',
 				'id'   => 'woocommerce_graphql_options',
 			),
