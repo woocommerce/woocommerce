@@ -334,12 +334,11 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * When wp_update_post() fails the atom must roll back so neither post_content
-	 * nor any of the four sync meta keys are modified. The current behaviour of
-	 * the pre-refactor reset endpoint short-circuits before the meta writes; the
-	 * transaction makes the all-or-nothing guarantee explicit.
+	 * When wp_update_post() fails the atom must short-circuit before the meta
+	 * writes, so neither post_content nor any of the four sync meta keys are
+	 * modified. Matches the pre-RSM-139 reset endpoint contract.
 	 */
-	public function test_apply_to_post_rolls_back_on_wp_update_post_failure(): void {
+	public function test_apply_to_post_returns_wp_error_when_wp_update_post_fails(): void {
 		$email_id = 'wc_test_auto_apply_rollback';
 		$post_id  = $this->generate_stamped_post( $email_id );
 

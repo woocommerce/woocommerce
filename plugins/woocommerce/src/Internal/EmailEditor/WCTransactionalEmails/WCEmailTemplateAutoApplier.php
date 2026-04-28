@@ -74,11 +74,9 @@ class WCEmailTemplateAutoApplier {
 	 *     Non-sync-enabled emails receive a content-only reset and the return shape carries
 	 *     `null` for the four sync fields (BC contract with the pre-RSM-139 reset endpoint).
 	 *
-	 * Atomicity: the post update plus the four meta writes run inside a single
-	 * `START TRANSACTION` block, so a partial failure rolls back cleanly. Note
-	 * that third-party callbacks on `save_post`, `post_updated`, and
-	 * `wp_after_insert_post` fire inside this transaction; any `$wpdb` writes
-	 * they perform participate in the rollback if a later step fails.
+	 * The four meta writes are skipped entirely if `wp_update_post` fails, so a
+	 * `WP_Error` return leaves the post and existing meta untouched. Matches the
+	 * pre-RSM-139 reset endpoint shape (see PR #64355 review on `2fa660b3b9`).
 	 *
 	 * @param \WC_Email $email   The transactional email instance.
 	 * @param int       $post_id The post ID.
@@ -143,13 +141,13 @@ class WCEmailTemplateAutoApplier {
 			}
 		}
 
-		global $wpdb;
-
-		$canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+		$canonical   = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+		$source_hash = null;
+		$synced_at   = null;
+		$status      = null;
+		$version     = null;
 
 		self::$is_auto_applying = true;
-		$wpdb->query( 'START TRANSACTION' );
-
 		try {
 			$updated = wp_update_post(
 				array(
@@ -160,14 +158,8 @@ class WCEmailTemplateAutoApplier {
 			);
 
 			if ( is_wp_error( $updated ) ) {
-				$wpdb->query( 'ROLLBACK' );
 				return $updated;
 			}
-
-			$source_hash = null;
-			$synced_at   = null;
-			$status      = null;
-			$version     = null;
 
 			if ( null !== $sync_config ) {
 				$source_hash = sha1( $canonical );
@@ -180,11 +172,6 @@ class WCEmailTemplateAutoApplier {
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $synced_at );
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $status );
 			}
-
-			$wpdb->query( 'COMMIT' );
-		} catch ( \Throwable $e ) {
-			$wpdb->query( 'ROLLBACK' );
-			throw $e;
 		} finally {
 			self::$is_auto_applying = false;
 		}

@@ -527,9 +527,9 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should leave post and sync meta untouched when wp_update_post fails (transaction rollback BC).
+	 * @testdox Should leave post and sync meta untouched when wp_update_post fails.
 	 */
-	public function test_reset_response_rolls_back_when_wp_update_post_fails(): void {
+	public function test_reset_response_returns_wp_error_when_wp_update_post_fails(): void {
 		$email_type = 'customer_new_account';
 
 		$generator = new WCTransactionalEmailPostsGenerator();
