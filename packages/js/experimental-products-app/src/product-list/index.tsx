@@ -140,18 +140,28 @@ export default function ProductList( { className }: ProductListProps ) {
 		postType,
 		context: 'list',
 	} );
-	const productActions = useProductActions();
+	const productActions = useProductActions( {
+		query: queryParams,
+	} );
 	const actions = useMemo(
 		() => [
 			...productActions,
 			...postTypeActions.filter(
-				( { id }: { id: string } ) => id !== 'view-post'
+				( { id }: { id: string } ) =>
+					! [
+						'edit-post',
+						'view-post',
+						'duplicate-post',
+						'delete-post',
+						'move-to-trash',
+						'permanently-delete-post',
+					].includes( id )
 			),
 		],
 		[ postTypeActions, productActions ]
 	);
 
-	const classes = clsx( 'edit-site-page', className );
+	const classes = clsx( 'woocommerce-product-list', className );
 
 	const pageActions = (
 		<Stack gap="lg">
