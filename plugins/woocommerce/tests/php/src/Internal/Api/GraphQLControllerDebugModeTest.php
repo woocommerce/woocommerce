@@ -31,10 +31,6 @@ class GraphQLControllerDebugModeTest extends WC_REST_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		if ( PHP_VERSION_ID < 80100 ) {
-			$this->markTestSkipped( 'GraphQL infrastructure requires PHP 8.1+.' );
-		}
-
 		wp_cache_flush();
 		DummyStore::reset();
 		DummyContainer::reset();

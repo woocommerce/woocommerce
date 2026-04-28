@@ -132,7 +132,8 @@
 					"command": "test:php:env",
 					"shardingArguments": [
 						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-main",
+						"--testsuite=wc-phpunit-graphql-infra"
 					],
 					"onlyForDependencies": [],
 					"changes": [
@@ -162,7 +163,8 @@
 					"command": "test:php:legacy-mini-cart",
 					"shardingArguments": [
 						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-main",
+						"--testsuite=wc-phpunit-graphql-infra"
 					],
 					"onlyForDependencies": [],
 					"changes": [
@@ -592,7 +594,8 @@
 					"command": "test:php:env:hpos-off",
 					"shardingArguments": [
 						"--testsuite=wc-phpunit-legacy",
-						"--testsuite=wc-phpunit-main"
+						"--testsuite=wc-phpunit-main",
+						"--testsuite=wc-phpunit-graphql-infra"
 					],
 					"onlyForDependencies": [],
 					"changes": [
