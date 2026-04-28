@@ -54,7 +54,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filter-checkbox-list',
-			'data-wp-context'     => wp_json_encode(
+			'data-wp-context'     => (string) wp_json_encode(
 				array(
 					'storeNamespace' => $store_namespace,
 					'displayLimit'   => $display_limit,
