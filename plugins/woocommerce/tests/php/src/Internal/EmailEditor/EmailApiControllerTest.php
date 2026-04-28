@@ -6,6 +6,8 @@ namespace Automattic\WooCommerce\Tests\Internal\EmailEditor;
 
 use Automattic\WooCommerce\Internal\EmailEditor\EmailApiController;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 
@@ -63,6 +65,9 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		parent::tearDown();
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 		delete_option( 'woocommerce_' . $this->email_type . '_settings' );
+		remove_all_filters( 'woocommerce_transactional_emails_for_block_editor' );
+		WCEmailTemplateSyncRegistry::reset_cache();
+		delete_transient( 'wc_email_editor_initial_templates_generated' );
 	}
 
 	/**
@@ -337,5 +342,239 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 200, $result->get_status() );
 		$this->assertArrayHasKey( 'content', $result->get_data() );
 		$this->assertSame( '<!-- wp:paragraph --><p>Default content</p><!-- /wp:paragraph -->', $result->get_data()['content'] );
+	}
+
+	/**
+	 * @testdox Should reset post content to canonical core render and refresh sync meta.
+	 */
+	public function test_reset_response_overwrites_post_content_and_stamps_sync_meta(): void {
+		$email_type = 'customer_new_account';
+
+		$generator = new WCTransactionalEmailPostsGenerator();
+		$generator->init_default_transactional_emails();
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$post_manager->clear_caches();
+		$post_manager->delete_email_template( $email_type );
+		WCEmailTemplateSyncRegistry::reset_cache();
+
+		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
+		$this->assertIsInt( $post_id );
+
+		// Simulate merchant customisation that diverges from the core render.
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => '<!-- wp:paragraph --><p>Customized by merchant</p><!-- /wp:paragraph -->',
+			)
+		);
+
+		// Backdate the synced_at stamp so we can assert the endpoint refreshes it.
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, '2000-01-01 00:00:00' );
+		// Force a non-in_sync status so we can assert the endpoint resets it.
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/emails/' . $post_id . '/reset' );
+		$request->set_param( 'id', $post_id );
+
+		$result = $this->email_api_controller->reset_response( $request );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
+		$this->assertSame( 200, $result->get_status() );
+
+		$email = $this->resolve_wc_email( $email_type );
+		$this->assertNotNull( $email );
+		$expected_canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		$response_data = $result->get_data();
+		$this->assertSame( $expected_canonical, $response_data['content'], 'Response content must equal canonical core render.' );
+		$this->assertSame( sha1( $expected_canonical ), $response_data['source_hash'], 'Response source_hash must equal sha1(canonical).' );
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $response_data['status'], 'Response status must be in_sync.' );
+		$this->assertNotEmpty( $response_data['version'], 'Response version must be populated.' );
+		$this->assertMatchesRegularExpression( '/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/', $response_data['synced_at'], 'Response synced_at must be a GMT timestamp.' );
+
+		$persisted_post = get_post( $post_id );
+		$this->assertSame( $expected_canonical, $persisted_post->post_content, 'Persisted post_content must equal canonical core render.' );
+
+		$this->assertSame(
+			$response_data['version'],
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ),
+			'Persisted version meta must match response.'
+		);
+		$this->assertSame(
+			$response_data['source_hash'],
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'Persisted source_hash meta must match response.'
+		);
+		$this->assertSame(
+			$response_data['synced_at'],
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ),
+			'Persisted synced_at meta must match response.'
+		);
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Persisted status meta must be set to in_sync.'
+		);
+	}
+
+	/**
+	 * @testdox Should return 404 when reset post ID has no associated email type.
+	 */
+	public function test_reset_response_returns_404_for_unknown_post(): void {
+		$unassociated_post = $this->factory()->post->create_and_get(
+			array(
+				'post_title'  => 'Unknown Email',
+				'post_name'   => 'unknown_email_for_reset',
+				'post_type'   => Integration::EMAIL_POST_TYPE,
+				'post_status' => 'draft',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/emails/' . $unassociated_post->ID . '/reset' );
+		$request->set_param( 'id', $unassociated_post->ID );
+
+		$result = $this->email_api_controller->reset_response( $request );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'woocommerce_email_not_found', $result->get_error_code() );
+		$this->assertSame( 404, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Should reset content but skip meta stamping for emails absent from the sync registry.
+	 */
+	public function test_reset_response_resets_content_without_meta_for_non_sync_enabled_email(): void {
+		$email_type = 'customer_new_account';
+
+		$generator = new WCTransactionalEmailPostsGenerator();
+		$generator->init_default_transactional_emails();
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$post_manager->clear_caches();
+		$post_manager->delete_email_template( $email_type );
+
+		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
+		$this->assertIsInt( $post_id );
+
+		// Capture meta stamped at generation time so we can assert it is unchanged after reset.
+		$baseline_version     = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true );
+		$baseline_source_hash = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true );
+		$baseline_synced_at   = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true );
+
+		// Simulate a customised post so the content reset is observable.
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => '<!-- wp:paragraph --><p>Customised by merchant</p><!-- /wp:paragraph -->',
+			)
+		);
+
+		// Forcibly empty the registry so the email is not sync-enabled.
+		WCEmailTemplateSyncRegistry::reset_cache();
+		add_filter( 'woocommerce_transactional_emails_for_block_editor', '__return_empty_array' );
+
+		$request = new \WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/emails/' . $post_id . '/reset' );
+		$request->set_param( 'id', $post_id );
+
+		$result = $this->email_api_controller->reset_response( $request );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
+		$this->assertSame( 200, $result->get_status() );
+
+		$email = $this->resolve_wc_email( $email_type );
+		$this->assertNotNull( $email );
+		$expected_canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		$response_data = $result->get_data();
+		$this->assertSame( $expected_canonical, $response_data['content'], 'Response content must equal canonical core render.' );
+		$this->assertNull( $response_data['version'], 'Response version must be null for non-sync-enabled emails.' );
+		$this->assertNull( $response_data['source_hash'], 'Response source_hash must be null for non-sync-enabled emails.' );
+		$this->assertNull( $response_data['synced_at'], 'Response synced_at must be null for non-sync-enabled emails.' );
+		$this->assertNull( $response_data['status'], 'Response status must be null for non-sync-enabled emails.' );
+
+		$this->assertSame(
+			$expected_canonical,
+			(string) get_post_field( 'post_content', $post_id ),
+			'post_content must be reset to canonical render even when the email is not sync-enabled.'
+		);
+
+		// Stamping must NOT have run. Meta values stay at whatever the generator wrote at creation time.
+		$this->assertSame(
+			$baseline_version,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ),
+			'_wc_email_template_version must not be touched when the email is not sync-enabled.'
+		);
+		$this->assertSame(
+			$baseline_source_hash,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'_wc_email_template_source_hash must not be touched when the email is not sync-enabled.'
+		);
+		$this->assertSame(
+			$baseline_synced_at,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ),
+			'_wc_email_last_synced_at must not be touched when the email is not sync-enabled.'
+		);
+		$this->assertSame(
+			'',
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'_wc_email_template_status must not be set when the email is not sync-enabled.'
+		);
+	}
+
+	/**
+	 * @testdox Should return 500 when controller has not been initialized.
+	 */
+	public function test_reset_response_returns_500_when_uninitialized(): void {
+		$controller = new EmailApiController();
+		// Intentionally skip init() to leave dependencies null.
+
+		$request = new \WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/emails/0/reset' );
+		$request->set_param( 'id', 0 );
+
+		$result = $controller->reset_response( $request );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'woocommerce_email_editor_not_initialized', $result->get_error_code() );
+		$this->assertSame( 500, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Should register a POST /reset route alongside the existing default-content route.
+	 */
+	public function test_register_routes_registers_reset_endpoint(): void {
+		$rest_server = rest_get_server();
+		$this->email_api_controller->register_routes();
+
+		$routes = $rest_server->get_routes();
+		$this->assertArrayHasKey( '/woocommerce-email-editor/v1/emails/(?P<id>\d+)/reset', $routes );
+
+		$reset_route_handlers = $routes['/woocommerce-email-editor/v1/emails/(?P<id>\d+)/reset'];
+		$methods              = array();
+		foreach ( $reset_route_handlers as $handler ) {
+			foreach ( array_keys( $handler['methods'] ) as $method ) {
+				$methods[ $method ] = true;
+			}
+		}
+		$this->assertArrayHasKey( 'POST', $methods, 'Reset endpoint must accept POST.' );
+	}
+
+	/**
+	 * Helper: resolve a WC_Email instance by email type ID.
+	 *
+	 * @param string $email_type Email type ID.
+	 * @return \WC_Email|null
+	 */
+	private function resolve_wc_email( string $email_type ): ?\WC_Email {
+		foreach ( WC()->mailer()->get_emails() as $email ) {
+			if ( $email->id === $email_type ) {
+				return $email;
+			}
+		}
+		return null;
 	}
 }
