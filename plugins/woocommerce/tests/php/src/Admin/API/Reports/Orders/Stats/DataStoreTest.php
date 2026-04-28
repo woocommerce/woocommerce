@@ -72,9 +72,9 @@ class DataStoreTest extends WC_Unit_Test_Case {
 		$remaining = (float) wc_format_decimal( $order->get_total() - $order->get_total_refunded() );
 		$refund    = wc_create_refund(
 			array(
-				'order_id'     => $order->get_id(),
-				'amount'       => $remaining,
-				'line_items'   => array(),
+				'order_id'   => $order->get_id(),
+				'amount'     => $remaining,
+				'line_items' => array(),
 			)
 		);
 
@@ -86,7 +86,7 @@ class DataStoreTest extends WC_Unit_Test_Case {
 				$wpdb->prefix . 'wc_orders_meta',
 				array(
 					'order_id' => $refund->get_id(),
-					'meta_key' => '_refund_type',
+					'meta_key' => '_refund_type', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Test fixture: clear refund type meta.
 				),
 				array( '%d', '%s' )
 			);
@@ -111,9 +111,9 @@ class DataStoreTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$expected_net = -1 * ( (float) $order->get_total() - (float) $order->get_total_tax() - (float) $order->get_shipping_total() );
+		$expected_net = -1 * ( $order->get_total() - $order->get_total_tax() - $order->get_shipping_total() );
 
-		$this->assertEqualsWithDelta( $expected_net, (float) $net_total, 0.02 );
+		$this->assertEqualsWithDelta( $expected_net, $net_total, 0.02 );
 
 		WC_Helper_Order::delete_order( $order->get_id() );
 	}
