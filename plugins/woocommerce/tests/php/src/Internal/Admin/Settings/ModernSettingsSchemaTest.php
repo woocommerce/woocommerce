@@ -18,6 +18,30 @@ use WC_Unit_Test_Case;
 class ModernSettingsSchemaTest extends WC_Unit_Test_Case {
 
 	/**
+	 * @testdox It includes page-level save and shell metadata.
+	 */
+	public function test_from_legacy_settings_includes_page_save_and_shell_metadata(): void {
+		$schema = ModernSettingsSchema::from_legacy_settings(
+			'test',
+			'',
+			'Test &amp; settings',
+			array(),
+			'none'
+		);
+
+		$this->assertSame(
+			array( 'adapter' => 'none' ),
+			$schema['save'],
+			'The page-level save strategy should use the provided default adapter.'
+		);
+		$this->assertSame(
+			array( 'title' => 'Test & settings' ),
+			$schema['shell'],
+			'The shell title should use the decoded page title.'
+		);
+	}
+
+	/**
 	 * It groups fields that appear before the first title marker.
 	 */
 	public function test_from_legacy_settings_creates_default_group_for_fields_before_title(): void {

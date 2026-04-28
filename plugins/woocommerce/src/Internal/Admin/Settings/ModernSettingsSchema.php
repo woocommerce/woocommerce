@@ -100,10 +100,18 @@ class ModernSettingsSchema {
 			}
 		);
 
+		$decoded_title = html_entity_decode( $title );
+
 		return array(
 			'id'      => $page_id,
-			'title'   => html_entity_decode( $title ),
+			'title'   => $decoded_title,
 			'section' => '' === $section ? self::DEFAULT_GROUP_ID : $section,
+			'save'    => array(
+				'adapter' => $default_save_adapter,
+			),
+			'shell'   => array(
+				'title' => $decoded_title,
+			),
 			'groups'  => $groups,
 		);
 	}
