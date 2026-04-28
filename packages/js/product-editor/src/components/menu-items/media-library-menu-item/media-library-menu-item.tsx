@@ -19,10 +19,12 @@ export function MediaLibraryMenuItem( {
 	info,
 	...props
 }: MediaLibraryMenuItemProps ) {
+	// eslint-disable-next-line @typescript-eslint/no-explicit-any
+	const mediaUploadProps = props as any;
 	return (
 		<MediaUpload
-			{ ...props }
-			render={ ( { open } ) => (
+			{ ...mediaUploadProps }
+			render={ ( { open }: { open: () => void } ) => (
 				<MenuItem
 					icon={ icon ?? media }
 					iconPosition={ iconPosition ?? 'left' }

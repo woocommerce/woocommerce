@@ -7,9 +7,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import { recordEvent } from '@woocommerce/tracks';
 import { ReactNode } from 'react';
 import { sanitizeHTML } from '@woocommerce/sanitize';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp, useEntityId } from '@wordpress/core-data';
 
 /**
@@ -107,8 +104,6 @@ export function Edit( {
 			<ToggleControl
 				label={ label }
 				checked={ isChecked() }
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore disabled prop exists
 				disabled={ disabled }
 				onChange={ handleChange }
 				help={ help }

@@ -11,16 +11,8 @@ FilesystemCacheWarningsPlugin.prototype.apply = function ( compiler ) {
 				type === 'warn' &&
 				name === 'webpack.cache.PackFileCacheStrategy'
 			) {
-				return (
-					args[ 0 ]?.includes?.(
-						'No serializer registered for ModuleExternalInitFragment'
-					) ||
-					args[ 0 ]?.includes?.(
-						'No serializer registered for ExternalModule'
-					) ||
-					args[ 0 ]?.includes?.(
-						'No serializer registered for Warning'
-					)
+				return args[ 0 ]?.includes?.(
+					'No serializer registered for Warning'
 				);
 			}
 		}

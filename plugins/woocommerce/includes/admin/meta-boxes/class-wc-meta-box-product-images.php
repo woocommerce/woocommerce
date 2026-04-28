@@ -43,6 +43,9 @@ class WC_Meta_Box_Product_Images {
 				$updated_gallery_ids = array();
 
 				if ( ! empty( $attachments ) ) {
+					// Prime caches to reduce future queries.
+					_prime_post_caches( $attachments );
+
 					foreach ( $attachments as $attachment_id ) {
 						$attachment = wp_get_attachment_image( $attachment_id, 'thumbnail' );
 

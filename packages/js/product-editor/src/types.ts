@@ -15,7 +15,7 @@ export type ProductTemplate = {
 	productData: Partial< Product >;
 };
 
-export interface ProductEditorContext {
+export interface ProductEditorContext extends Record< string, unknown > {
 	postId: number;
 	postType: string;
 	selectedTab: string | null;

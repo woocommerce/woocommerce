@@ -142,7 +142,6 @@ export class BlockRegistrationManager {
 				unsubscribe();
 
 				// getEditedPostSlug may return string or number so we cast it to string.
-				// @ts-expect-error getEditedPostSlug is not typed
 				const postSlug = String( editorSelectors.getEditedPostSlug() );
 
 				// Set initial template ID
@@ -156,7 +155,6 @@ export class BlockRegistrationManager {
 					const previousTemplateId = this.currentTemplateId;
 					this.currentTemplateId =
 						// getEditedPostSlug may return string or number so we cast it to string.
-						// @ts-expect-error getEditedPostSlug is not typed
 						String( editorSelectors.getEditedPostSlug() );
 
 					if ( previousTemplateId !== this.currentTemplateId ) {
