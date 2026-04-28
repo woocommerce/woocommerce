@@ -36,12 +36,13 @@
 	}
 
 	&__actions {
+		align-items: center;
 		display: flex;
+		flex-wrap: wrap;
 		gap: 0.75em;
 		margin-top: 0.5em;
 	}
 
-	&__move,
 	&__remove {
 		appearance: none;
 		background: none;

@@ -507,6 +507,7 @@ final class BlockTypesController {
 			'ReviewsByProduct',
 			'RelatedProducts',
 			'ShopperCollection',
+			'ShopperCollectionCartButton',
 			'SingleProduct',
 			'StockFilter',
 			'PageContentWrapper',

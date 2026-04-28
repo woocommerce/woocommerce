@@ -136,13 +136,15 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 							{ item.quantity }
 						</span>
 						<div className="wc-block-shopper-collection-item__actions">
-							<button
-								type="button"
-								className="wc-block-shopper-collection-item__move"
-								disabled
-							>
-								{ __( 'Move to cart', 'woocommerce' ) }
-							</button>
+							<div className="wp-block-button wc-block-components-product-button wc-block-shopper-collection-cart-button">
+								<button
+									type="button"
+									className="wp-block-button__link wp-element-button wc-block-components-product-button__button"
+									disabled
+								>
+									{ __( 'Move to cart', 'woocommerce' ) }
+								</button>
+							</div>
 							<button
 								type="button"
 								className="wc-block-shopper-collection-item__remove"
