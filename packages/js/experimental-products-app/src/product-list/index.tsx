@@ -12,6 +12,7 @@ import { privateApis as editorPrivateApis } from '@wordpress/editor';
 import { Page } from '@wordpress/admin-ui';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -36,7 +37,6 @@ import {
 	isProductEditorAccessible,
 } from './utils';
 import { useProductActions } from '../dataviews-actions';
-import { __ } from '@wordpress/i18n';
 
 const { usePostActions } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
@@ -216,9 +216,7 @@ export default function ProductList( { className }: ProductListProps ) {
 		postType,
 		context: 'list',
 	} );
-	const productActions = useProductActions( {
-		query: queryParams,
-	} );
+	const productActions = useProductActions();
 	const actions = useMemo(
 		() => [
 			...productActions,

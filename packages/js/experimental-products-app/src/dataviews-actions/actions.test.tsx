@@ -8,7 +8,7 @@ import type { Action } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
-import { duplicateProductAction, moveToTrashAction } from './index';
+import { duplicateProductAction, moveToTrashAction } from './actions';
 import type { ProductEntityRecord } from '../fields/types';
 import type { ProductListQuery } from '../product-list/query';
 
