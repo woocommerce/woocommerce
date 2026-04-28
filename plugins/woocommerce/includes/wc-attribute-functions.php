@@ -303,7 +303,7 @@ function wc_has_custom_attribute_types() {
 function wc_get_attribute_type_label( $type ) {
 	$types = wc_get_attribute_types();
 
-	return isset( $types[ $type ] ) ? $types[ $type ] : __( 'Select', 'woocommerce' );
+	return isset( $types[ $type ] ) ? $types[ $type ] : __( 'Text', 'woocommerce' );
 }
 
 /**
