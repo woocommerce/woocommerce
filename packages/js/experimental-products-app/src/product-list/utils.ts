@@ -40,7 +40,6 @@ export function getStatusForProductListTab(
 	switch ( tab ) {
 		case 'publish':
 		case 'draft':
-		case 'pending':
 		case 'trash':
 			return tab;
 		default:

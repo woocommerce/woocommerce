@@ -10,7 +10,6 @@ import type { Action } from '@wordpress/dataviews';
  */
 import { duplicateProductAction, moveToTrashAction } from './actions';
 import type { ProductEntityRecord } from '../fields/types';
-import type { ProductListQuery } from '../product-list/query';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
@@ -59,10 +58,6 @@ function getCallbackAction( action: Action< ProductEntityRecord > ) {
 }
 
 describe( 'product list actions', () => {
-	const query: ProductListQuery = {
-		page: 1,
-		per_page: 20,
-	};
 	const product = {
 		id: 12,
 		status: 'draft',
