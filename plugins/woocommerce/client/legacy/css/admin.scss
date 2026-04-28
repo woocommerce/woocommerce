@@ -7996,9 +7996,10 @@ table.bar_chart {
 		z-index: 100;
 		padding: 1em 2em 1.5em;
 
-		.inner {
-			text-align: right;
-			line-height: 23px;
+		.wc-backbone-modal-buttons {
+			display: flex;
+			justify-content: end;
+			gap: 8px;
 
 			.button {
 				margin-bottom: 0;

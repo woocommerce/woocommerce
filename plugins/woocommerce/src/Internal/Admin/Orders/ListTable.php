@@ -1751,7 +1751,7 @@ class ListTable extends WP_List_Table {
 						</article>
 						<# if ( data.actions_html || data.is_editable ) { #>
 						<footer>
-							<div class="inner">
+							<div class="wc-backbone-modal-buttons">
 								{{{ data.actions_html }}}
 
 								<# if ( data.is_editable ) { #>

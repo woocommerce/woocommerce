@@ -219,11 +219,9 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 					</div>
 				</article>
 				<footer>
-					<div class="inner">
-						<div>
-							<button class="modal-close button components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
-							<button class="modal-close button components-button add_variations_price_button button-primary" disabled><?php esc_html_e( 'Add prices', 'woocommerce' ); ?></button>
-						</div>
+					<div class="wc-backbone-modal-buttons">
+						<button class="modal-close button components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+						<button class="modal-close button components-button add_variations_price_button button-primary" disabled><?php esc_html_e( 'Add prices', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>
