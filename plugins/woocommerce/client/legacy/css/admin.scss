@@ -993,7 +993,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	}
 
 	article {
-		padding-bottom: 2em;
+		padding-bottom: 1em 2em 2em;
 	}
 
 	input[type="text"] {
@@ -3343,11 +3343,6 @@ ul.wc_coupon_list_block {
 	}
 
 	footer {
-		.wc-action-button-group {
-			display: inline-block;
-			float: left;
-		}
-
 		.button.button-large {
 			margin-left: 10px;
 			height: auto;
@@ -3361,29 +3356,10 @@ ul.wc_coupon_list_block {
 }
 
 .wc-action-button-group {
-	vertical-align: middle;
-	line-height: 26px;
-	text-align: left;
-
-	label {
-		margin-right: 6px;
-		cursor: default;
-		font-weight: bold;
-		line-height: 28px;
-	}
-
-	.wc-action-button-group__items {
-		display: inline-flex;
-		flex-flow: row wrap;
-		align-content: flex-start;
-		justify-content: flex-start;
-	}
-
 	.wc-action-button {
 		margin: 0 0 0 -1px !important;
 		border: 1px solid #ccc;
 		border-radius: 0 !important;
-		float: none;
 		height: auto;
 		z-index: 1;
 		position: relative;
@@ -3416,26 +3392,6 @@ ul.wc_coupon_list_block {
 @media screen and (max-width: 782px) {
 	.woocommerce_page_wc-orders #order-search-filter {
 		display: none;
-	}
-
-	.wc-order-preview footer {
-		.wc-action-button-group .wc-action-button-group__items {
-			display: flex;
-		}
-
-		.wc-action-button-group {
-			float: none;
-			display: block;
-			margin-bottom: 4px;
-		}
-
-		.button.button-large {
-			width: 100%;
-			float: none;
-			text-align: center;
-			margin: 0;
-			display: block;
-		}
 	}
 
 	.woocommerce_page_wc-orders .wc-orders-list-table.wp-list-table,
@@ -4286,8 +4242,6 @@ table.wc_shipping {
 
 	.wc-backbone-modal-main footer {
 		.inner {
-			display: flex;
-			justify-content: space-between;
 			flex-direction: row-reverse;
 		}
 
@@ -7987,8 +7941,14 @@ table.bar_chart {
 		z-index: 100;
 		padding: 1em 2em 1.5em;
 
+		.inner {
+			display: flex;
+			justify-content: space-between;
+		}
+
 		.wc-backbone-modal-buttons {
 			display: flex;
+			align-items: end;
 			justify-content: end;
 			gap: 8px;
 
@@ -8343,11 +8303,6 @@ table.bar_chart {
 		.button.button-large {
 			min-height: 0;
 		}
-	}
-
-	// Action button groups.
-	.wc-action-button-group .wc-action-button {
-		min-height: 0 !important;
 	}
 
 	// Order actions: select + button overflow container due to WP 7.0 select margins.
