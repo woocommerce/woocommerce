@@ -21,9 +21,6 @@ import { useWooBlockProps } from '@woocommerce/block-templates';
 import type { ProductStatus, Product } from '@woocommerce/data';
 import { getNewPath } from '@woocommerce/navigation';
 import { recordEvent } from '@woocommerce/tracks';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityId, useEntityProp } from '@wordpress/core-data';
 
 /**
@@ -52,6 +49,7 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const { getProductErrorMessageAndProps } = useErrorHandler();
 
+	// @ts-expect-error getEditorSettings's return type is the generic Object; productTemplates/productTemplate are WooCommerce additions injected at runtime.
 	const { productTemplates, productTemplate: selectedProductTemplate } =
 		useSelect( ( select ) => {
 			const { getEditorSettings } = select( 'core/editor' );
@@ -86,8 +84,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 	);
 
 	const { validate } = useValidations< Product >();
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { editEntityRecord, saveEditedEntityRecord, saveEntityRecord } =
 		useDispatch( 'core' );
 	const { createSuccessNotice, createErrorNotice } =
@@ -120,8 +116,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 
 	const { isSaving } = useSelect(
 		( select ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {
@@ -293,8 +287,6 @@ export function ProductDetailsSectionDescriptionBlockEdit( {
 						},
 					],
 				},
-				// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-				// @ts-ignore
 				{
 					throwOnError: true,
 				}

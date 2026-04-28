@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Add translatable “(incl. tax)” / “(excl. tax)” labels to product price fields depending on WooCommerce tax settings.

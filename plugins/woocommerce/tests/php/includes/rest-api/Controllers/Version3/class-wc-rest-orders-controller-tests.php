@@ -6,6 +6,7 @@ use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableControlle
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 
 /**
  * class WC_REST_Orders_Controller_Tests.
@@ -14,6 +15,7 @@ use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
 	use CogsAwareUnitTestSuiteTrait;
+	use MetaDataAssertionTrait;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -921,5 +923,21 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$item->set_quantity( $quantity );
 		$item->save();
 		$order->add_item( $item );
+	}
+
+	/**
+	 * @testdox Updating an order with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order( $this->user );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $order->get_id() ) );
 	}
 }

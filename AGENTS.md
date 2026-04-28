@@ -95,7 +95,7 @@ pnpm --filter=@woocommerce/plugin-woocommerce lint:php:changes
 composer exec -- phpstan analyse path/to/modified/File.php --memory-limit=2G
 ```
 
-PHPStan failures often indicate the need to update the baseline file (`phpstan-baseline.neon`). If your fix resolves a previously baselined error, remove the corresponding entry from the baseline.
+**PHPStan Baseline Policy:** The baseline file (`phpstan-baseline.neon`) must never be added to. It should only shrink over time as existing errors are naturally resolved by code changes. If PHPStan reports a new error, fix it in the code rather than adding it to the baseline. If your fix resolves a previously baselined error, remove the corresponding entry from the baseline.
 
 ### Pre-push Checks
 

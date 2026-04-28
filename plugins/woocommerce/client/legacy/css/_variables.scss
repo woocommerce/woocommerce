@@ -24,6 +24,9 @@ $highlightext:      desaturate(lighten($highlight, 80%), 18%) !default;  // Text
 $contentbg:         #fff !default;                                     // Content BG - Tabs (active state)
 $subtext:           #767676 !default;                                  // small, breadcrumbs etc
 
+// Border radius tokens — mirrors WP Design System naming.
+$radius-s:          2px !default;                                      // Small radius: inputs, buttons, selects.
+
 // export vars as CSS vars
 :root {
 	--woocommerce: #{$woocommerce};
@@ -42,4 +45,6 @@ $subtext:           #767676 !default;                                  // small,
 	--wc-form-border-color: rgba(32, 7, 7, 0.8);
 	--wc-form-border-radius: 4px;
 	--wc-form-border-width: 1px;
+	// Matches WP 7.0 $radius-l token (used on dashboard widgets).
+	--wc-card-border-radius: 8px;
 }
