@@ -988,14 +988,13 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	/**
 	 * Render and dispatch the sign-in notification email.
 	 *
-	 * Uses `wp_mail()` directly (no `WC_Email` subclass) because this is a
-	 * one-shot transactional notification, not part of the configurable WC
-	 * email surface. We wrap the body in `WC()->mailer()->wrap_message()`
-	 * when available so the visual shell matches other WC mails; if the
-	 * mailer isn't initialized (e.g. very early bootstrap), we fall back to
-	 * the bare HTML.
+	 * Uses `wp_mail()` directly with our own minimal HTML shell rather than
+	 * `WC()->mailer()->wrap_message()` — the WC wrapper auto-prepends a small
+	 * site-name header that duplicates the subject line shown by most clients
+	 * and constrains the body width. Owning the wrapper lets us deliver one
+	 * coherent layout.
 	 *
-	 * @param \WP_User                                                                   $user            Recipient.
+	 * @param \WP_User                                                                                                  $user            Recipient.
 	 * @param array{consumed_at: int, user_id: int, ap_uuid: string, ap_name: string, device: array<string, string>} $consumed_record The consumed record.
 	 * @return void
 	 */
@@ -1008,16 +1007,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		/* translators: %s: site name. */
 		$subject = sprintf( __( 'A new device signed in to %s', 'woocommerce' ), $site_name );
 
-		$body_html = $this->render_sign_in_notification_email_body( $user, $consumed_record, $site_name );
-
-		// Prefer the WC mailer's HTML wrapper for visual consistency. Falls
-		// back to bare HTML when the mailer isn't ready (rare in REST flow).
-		if ( function_exists( 'WC' ) && WC() && method_exists( WC(), 'mailer' ) ) {
-			$mailer = WC()->mailer();
-			if ( $mailer && method_exists( $mailer, 'wrap_message' ) ) {
-				$body_html = $mailer->wrap_message( $subject, $body_html );
-			}
-		}
+		$body_html = $this->render_sign_in_notification_email_body( $user, $consumed_record, $site_name, $subject );
 
 		wp_mail(
 			$user->user_email,
@@ -1028,22 +1018,18 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Render the HTML body of the sign-in notification email.
+	 * Render the full HTML email document for the sign-in notification.
 	 *
-	 * Pulled out so the partial can be rendered in isolation in tests, and so
-	 * future template tweaks live in one place. Uses the site's configured
-	 * timezone for the timestamp so it matches what the merchant sees in
-	 * wp-admin elsewhere.
-	 *
-	 * @param \WP_User                                                                   $user            Recipient.
+	 * @param \WP_User                                                                                                  $user            Recipient.
 	 * @param array{consumed_at: int, user_id: int, ap_uuid: string, ap_name: string, device: array<string, string>} $consumed_record The consumed record.
-	 * @param string                                                                     $site_name       Decoded site name (passed in to avoid double-decoding).
-	 * @return string Rendered HTML.
+	 * @param string                                                                                                    $site_name       Decoded site name (passed in to avoid double-decoding).
+	 * @param string                                                                                                    $subject         Email subject; rendered as the in-body heading.
+	 * @return string Rendered HTML document.
 	 */
-	private function render_sign_in_notification_email_body( \WP_User $user, array $consumed_record, string $site_name ): string {
-		$device       = $consumed_record['device'] ?? array();
-		$consumed_at  = isset( $consumed_record['consumed_at'] ) ? (int) $consumed_record['consumed_at'] : time();
-		$ap_name      = $consumed_record['ap_name'] ?? '';
+	private function render_sign_in_notification_email_body( \WP_User $user, array $consumed_record, string $site_name, string $subject ): string {
+		$device           = $consumed_record['device'] ?? array();
+		$consumed_at      = isset( $consumed_record['consumed_at'] ) ? (int) $consumed_record['consumed_at'] : time();
+		$ap_name          = $consumed_record['ap_name'] ?? '';
 		$applications_url = admin_url( 'profile.php#application-passwords-section' );
 
 		ob_start();
