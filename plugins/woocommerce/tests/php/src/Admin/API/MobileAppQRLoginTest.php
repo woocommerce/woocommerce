@@ -1352,4 +1352,139 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
 	}
+
+	// -----------------------------------------------------------------------
+	// Sign-in notification email (Task 6).
+	// -----------------------------------------------------------------------
+
+	/**
+	 * Capture wp_mail() calls into a local array via the `pre_wp_mail` filter.
+	 *
+	 * The filter must return a non-null value to short-circuit the actual
+	 * mail send, so we return `true`. The captured atts include `to`,
+	 * `subject`, `message`, and `headers`. Caller must remove the filter via
+	 * the returned remover closure.
+	 *
+	 * @return array{captures: array<int, array<string, mixed>>, remove: callable}
+	 */
+	private function capture_wp_mail(): array {
+		$captures = array();
+
+		$capture = static function ( $return, $atts ) use ( &$captures ) {
+			unset( $return );
+			$captures[] = is_array( $atts ) ? $atts : array();
+			return true;
+		};
+
+		add_filter( 'pre_wp_mail', $capture, 10, 2 );
+
+		$remove = static function () use ( $capture ) {
+			remove_filter( 'pre_wp_mail', $capture, 10 );
+		};
+
+		return array(
+			'captures' => &$captures,
+			'remove'   => $remove,
+		);
+	}
+
+	/**
+	 * @testdox Successful exchange dispatches a sign-in notification email to the user that minted the token.
+	 */
+	public function test_exchange_token_dispatches_sign_in_notification_email(): void {
+		$capture = $this->capture_wp_mail();
+
+		try {
+			wp_set_current_user( $this->admin_id );
+			$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+			wp_set_current_user( 0 );
+
+			$response = $this->dispatch_exchange(
+				$plaintext,
+				array(
+					'os'          => 'iOS',
+					'os_version'  => '17.5',
+					'model'       => 'iPhone 15',
+					'app_version' => '24.7.0',
+				)
+			);
+			$this->assertSame( 200, $response->get_status() );
+
+			$this->assertCount( 1, $capture['captures'], 'Exactly one email should be sent on a successful exchange.' );
+			$mail = $capture['captures'][0];
+
+			$admin_user = get_userdata( $this->admin_id );
+			$this->assertSame( $admin_user->user_email, $mail['to'] );
+
+			$this->assertStringContainsString(
+				get_bloginfo( 'name' ),
+				(string) $mail['subject'],
+				'Subject should reference the site name so a merchant managing multiple stores can disambiguate.'
+			);
+
+			$body = (string) $mail['message'];
+			$this->assertStringContainsString( 'iPhone 15', $body, 'Email body should surface the device model.' );
+			$this->assertStringContainsString( 'iOS 17.5', $body, 'Email body should surface the OS version.' );
+			$this->assertStringContainsString( '24.7.0', $body, 'Email body should surface the app version.' );
+			$this->assertStringContainsString( 'application-passwords', $body, 'Email body should link to the AP management screen.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox The sign-in notification email can be suppressed via the woocommerce_qr_login_should_send_signin_email filter.
+	 */
+	public function test_sign_in_notification_email_can_be_suppressed_via_filter(): void {
+		$capture   = $this->capture_wp_mail();
+		$suppress  = static fn () => false;
+		add_filter( 'woocommerce_qr_login_should_send_signin_email', $suppress );
+
+		try {
+			wp_set_current_user( $this->admin_id );
+			$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+			wp_set_current_user( 0 );
+
+			$response = $this->dispatch_exchange(
+				$plaintext,
+				array( 'os' => 'iOS', 'model' => 'iPhone 15' )
+			);
+			$this->assertSame( 200, $response->get_status() );
+
+			$this->assertCount(
+				0,
+				$capture['captures'],
+				'Filter returning false must suppress the email send entirely.'
+			);
+		} finally {
+			remove_filter( 'woocommerce_qr_login_should_send_signin_email', $suppress );
+			$capture['remove']();
+		}
+	}
+
+	/**
+	 * @testdox Sign-in notification email falls back to a generic device line when the mobile app sends no device payload.
+	 */
+	public function test_sign_in_notification_email_handles_missing_device_payload(): void {
+		$capture = $this->capture_wp_mail();
+
+		try {
+			wp_set_current_user( $this->admin_id );
+			$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+			wp_set_current_user( 0 );
+
+			$response = $this->dispatch_exchange( $plaintext );
+			$this->assertSame( 200, $response->get_status() );
+
+			$this->assertCount( 1, $capture['captures'] );
+			$body = (string) $capture['captures'][0]['message'];
+
+			// With no device payload the headline should still render
+			// without "undefined" / empty interpolation artifacts.
+			$this->assertStringNotContainsString( 'undefined', $body );
+			$this->assertStringNotContainsString( '· ·', $body, 'No empty separators when device fields are missing.' );
+		} finally {
+			$capture['remove']();
+		}
+	}
 }

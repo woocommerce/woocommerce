@@ -666,20 +666,27 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// from "QR shown" to "Signed in successfully on {device}" and surface
 		// a revoke button. Same TTL as the original token transient — there's
 		// no value in keeping this record longer than the modal that polls it.
+		$consumed_record = array(
+			'consumed_at' => time(),
+			'user_id'     => $user_id,
+			'ap_uuid'     => $item['uuid'],
+			'ap_name'     => $item['name'],
+			'device'      => $device,
+		);
 		set_transient(
 			self::CONSUMED_TRANSIENT_PREFIX . $token_hash,
-			array(
-				'consumed_at' => time(),
-				'user_id'     => $user_id,
-				'ap_uuid'     => $item['uuid'],
-				'ap_name'     => $item['name'],
-				'device'      => $device,
-			),
+			$consumed_record,
 			self::TOKEN_TTL
 		);
 
 		delete_transient( $key );
 		$this->release_token_exchange_claim( $token_hash );
+
+		// Notify the merchant out-of-band so they're aware of a fresh sign-in
+		// even when they aren't currently looking at wc-admin. Wrapped in a
+		// try/catch + filter to keep the exchange path uninterrupted if the
+		// site's mailer is misconfigured.
+		$this->maybe_send_sign_in_notification_email( $user, $consumed_record );
 
 		return rest_ensure_response(
 			array(
@@ -929,5 +936,120 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 */
 	private function check_revoke_rate_limit( $user_id ) {
 		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_REVOKE, (string) $user_id );
+	}
+
+	/**
+	 * Send the merchant a transactional email summarizing a successful QR
+	 * sign-in, unless they (or a site owner) opt out via the
+	 * `woocommerce_qr_login_should_send_signin_email` filter.
+	 *
+	 * Wrapped so a misconfigured mailer cannot break the exchange path —
+	 * exceptions are caught silently. We deliberately do not block the API
+	 * response on email delivery; the merchant already saw the confirmation
+	 * UI in wc-admin (Task 5).
+	 *
+	 * @param \WP_User                                                                   $user            The user who minted the token (recipient).
+	 * @param array{consumed_at: int, user_id: int, ap_uuid: string, ap_name: string, device: array<string, string>} $consumed_record The record we just persisted to the consumed transient.
+	 * @return void
+	 */
+	private function maybe_send_sign_in_notification_email( \WP_User $user, array $consumed_record ): void {
+		/**
+		 * Filter whether to send the QR sign-in notification email.
+		 *
+		 * Default: true. Return false to suppress the send for a specific
+		 * user, environment (e.g. staging), or test run.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool                                                                       $should_send     Whether to send the email.
+		 * @param \WP_User                                                                   $user            The user who minted the QR token.
+		 * @param array{consumed_at: int, user_id: int, ap_uuid: string, ap_name: string, device: array<string, string>} $consumed_record The consumed record about to be emailed.
+		 */
+		$should_send = (bool) apply_filters(
+			'woocommerce_qr_login_should_send_signin_email',
+			true,
+			$user,
+			$consumed_record
+		);
+
+		if ( ! $should_send ) {
+			return;
+		}
+
+		try {
+			$this->send_sign_in_notification_email( $user, $consumed_record );
+		} catch ( \Exception $e ) {
+			// Swallow — the API response is the source of truth for the
+			// merchant; the email is best-effort.
+			unset( $e );
+		}
+	}
+
+	/**
+	 * Render and dispatch the sign-in notification email.
+	 *
+	 * Uses `wp_mail()` directly (no `WC_Email` subclass) because this is a
+	 * one-shot transactional notification, not part of the configurable WC
+	 * email surface. We wrap the body in `WC()->mailer()->wrap_message()`
+	 * when available so the visual shell matches other WC mails; if the
+	 * mailer isn't initialized (e.g. very early bootstrap), we fall back to
+	 * the bare HTML.
+	 *
+	 * @param \WP_User                                                                   $user            Recipient.
+	 * @param array{consumed_at: int, user_id: int, ap_uuid: string, ap_name: string, device: array<string, string>} $consumed_record The consumed record.
+	 * @return void
+	 */
+	private function send_sign_in_notification_email( \WP_User $user, array $consumed_record ): void {
+		$site_name = wp_specialchars_decode(
+			(string) get_bloginfo( 'name' ),
+			ENT_QUOTES
+		);
+
+		/* translators: %s: site name. */
+		$subject = sprintf( __( 'A new device signed in to %s', 'woocommerce' ), $site_name );
+
+		$body_html = $this->render_sign_in_notification_email_body( $user, $consumed_record, $site_name );
+
+		// Prefer the WC mailer's HTML wrapper for visual consistency. Falls
+		// back to bare HTML when the mailer isn't ready (rare in REST flow).
+		if ( function_exists( 'WC' ) && WC() && method_exists( WC(), 'mailer' ) ) {
+			$mailer = WC()->mailer();
+			if ( $mailer && method_exists( $mailer, 'wrap_message' ) ) {
+				$body_html = $mailer->wrap_message( $subject, $body_html );
+			}
+		}
+
+		wp_mail(
+			$user->user_email,
+			$subject,
+			$body_html,
+			array( 'Content-Type: text/html; charset=UTF-8' )
+		);
+	}
+
+	/**
+	 * Render the HTML body of the sign-in notification email.
+	 *
+	 * Pulled out so the partial can be rendered in isolation in tests, and so
+	 * future template tweaks live in one place. Uses the site's configured
+	 * timezone for the timestamp so it matches what the merchant sees in
+	 * wp-admin elsewhere.
+	 *
+	 * @param \WP_User                                                                   $user            Recipient.
+	 * @param array{consumed_at: int, user_id: int, ap_uuid: string, ap_name: string, device: array<string, string>} $consumed_record The consumed record.
+	 * @param string                                                                     $site_name       Decoded site name (passed in to avoid double-decoding).
+	 * @return string Rendered HTML.
+	 */
+	private function render_sign_in_notification_email_body( \WP_User $user, array $consumed_record, string $site_name ): string {
+		$device       = $consumed_record['device'] ?? array();
+		$consumed_at  = isset( $consumed_record['consumed_at'] ) ? (int) $consumed_record['consumed_at'] : time();
+		$ap_name      = $consumed_record['ap_name'] ?? '';
+		$applications_url = admin_url( 'profile.php#application-passwords-section' );
+
+		ob_start();
+		include __DIR__ . '/views/mobile-app-qr-login-signin-email.php';
+		$html = ob_get_clean();
+
+		return is_string( $html ) ? $html : '';
 	}
 }
