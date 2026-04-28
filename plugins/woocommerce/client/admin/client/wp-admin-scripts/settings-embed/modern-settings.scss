@@ -210,7 +210,7 @@ body.woocommerce_page_wc-settings.woocommerce-modern-settings-page {
 		color: #1e1e1e;
 		font-size: 13px;
 		line-height: 20px;
-		margin: 0 48px 48px;
+		margin: 48px 48px;
 		max-width: calc(var(--wc-modern-settings-sidebar-width) + var(--wc-modern-settings-panel-width) + 24px);
 	}
 
@@ -434,7 +434,7 @@ body.woocommerce_page_wc-settings.woocommerce-modern-settings-page {
 		}
 
 		.wc-modern-settings {
-			margin: 0 24px 32px;
+			margin: 32px 24px;
 			max-width: none;
 		}
 
