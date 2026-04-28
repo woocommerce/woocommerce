@@ -159,8 +159,6 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 	 * Boolean preference keys are derived from the service's defaults map so
 	 * this stays in lock-step with the list of supported notification types.
 	 *
-	 * @since 10.8.0
-	 *
 	 * @return array<string, array<string, mixed>>
 	 */
 	private function get_args(): array {
@@ -191,8 +189,6 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 	 * domain-specific WC_Data_Exception details for client-recoverable failures
 	 * (non-500 codes), and log + return a generic internal-error response for
 	 * 500-level / unknown failures.
-	 *
-	 * @since 10.8.0
 	 *
 	 * @param Exception $e The exception to convert.
 	 * @return WP_Error
