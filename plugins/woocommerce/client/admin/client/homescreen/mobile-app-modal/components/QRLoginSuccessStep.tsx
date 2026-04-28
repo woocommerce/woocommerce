@@ -49,6 +49,11 @@ const buildHeadline = ( device: QRLoginDeviceInfo | null ): string => {
  * Build a single-line subline summarising the device the merchant signed in
  * with. Skips any field the mobile app didn't send so older clients don't
  * render `· undefined` artifacts.
+ *
+ * The model (and brand) deliberately do NOT appear here — they're already
+ * shown in the headline above ("Signed in successfully on {model}"), and
+ * the user feedback was clear that we should not duplicate that fact in
+ * the subline.
  */
 const buildSubline = ( device: QRLoginDeviceInfo | null ): string => {
 	if ( ! device ) {
@@ -63,16 +68,6 @@ const buildSubline = ( device: QRLoginDeviceInfo | null ): string => {
 				? `${ device.os } ${ device.os_version }`
 				: device.os
 		);
-	}
-
-	if ( device.brand && device.model ) {
-		// Capitalise common Android brand strings ("google" → "Google") for
-		// the merchant-facing label without forcing a translation.
-		const brand =
-			device.brand.charAt( 0 ).toUpperCase() + device.brand.slice( 1 );
-		parts.push( `${ brand } ${ device.model }` );
-	} else if ( device.brand ) {
-		parts.push( device.brand );
 	}
 
 	if ( device.app_version ) {

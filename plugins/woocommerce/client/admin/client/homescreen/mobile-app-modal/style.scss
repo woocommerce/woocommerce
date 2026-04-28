@@ -238,6 +238,51 @@ button.components-button.send-magic-link-button {
 	}
 }
 
+// QR + meta column layout while the code is on screen (READY state only).
+// We avoid scoping these rules to `.woocommerce-qr-direct-login` itself so the LOADING /
+// EXPIRED / ERROR states keep their default stacked layout.
+.woocommerce-qr-direct-login.woocommerce-qr-direct-login--ready {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 24px;
+	flex-wrap: wrap;
+
+	.woocommerce-qr-direct-login__qr {
+		flex: 0 0 auto;
+		display: flex;
+	}
+
+	.woocommerce-qr-direct-login__meta {
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+		min-width: 0;
+	}
+
+	.woocommerce-qr-direct-login__timer {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.5;
+		color: #1e1e1e;
+	}
+
+	button.components-button.woocommerce-qr-direct-login__renew {
+		padding: 0;
+		height: auto;
+		font-size: 13px;
+		line-height: 1.5;
+		color: #007cba;
+
+		&:hover:not(:disabled),
+		&:focus:not(:disabled) {
+			color: #005a87;
+		}
+	}
+}
+
 // Step 3 — sign-in success panel.
 // Mirrors the rest of the modal: 24px / 16px vertical rhythm, body copy in
 // the same #50575e neutral as the help paragraph above the QR, and the
@@ -249,12 +294,16 @@ button.components-button.send-magic-link-button {
 	align-items: flex-start;
 	margin-top: 8px;
 
+	// Headline matches the step-2 description size (14px) per UX feedback —
+	// the stepper already provides a large step label above, so a giant
+	// in-step heading was redundant. Slightly bolder + darker to give it
+	// presence without competing with the stepper label.
 	.qr-login-success-step__heading {
-		font-size: 22px;
+		font-size: 14px;
 		font-weight: 600;
-		line-height: 1.25;
-		margin: 0 0 8px;
-		color: #1e1e1e;
+		line-height: 1.5;
+		margin: 0 0 4px;
+		color: #1d2327;
 	}
 
 	.qr-login-success-step__description {
@@ -266,17 +315,17 @@ button.components-button.send-magic-link-button {
 	}
 
 	.qr-login-success-step__device {
-		font-size: 14px;
+		font-size: 13px;
 		line-height: 1.5;
 		color: #50575e;
 		margin: 0 0 16px;
 	}
 
 	.qr-login-success-step__challenge {
-		font-size: 14px;
+		font-size: 13px;
 		font-weight: 500;
 		line-height: 1.5;
-		color: #1e1e1e;
+		color: #1d2327;
 		margin: 0 0 8px;
 	}
 
