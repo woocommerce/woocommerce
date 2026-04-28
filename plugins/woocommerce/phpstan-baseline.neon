@@ -49432,12 +49432,6 @@ parameters:
 			path: src/Admin/RemoteInboxNotifications/SpecRunner.php
 
 		-
-			message: '#^Cannot call method set_layout\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/RemoteInboxNotifications/SpecRunner.php
-
-		-
 			message: '#^Cannot call method set_name\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
 			count: 1
