@@ -363,7 +363,7 @@ class PluginsHelper {
 
 				$install_error_message = sprintf(
 				/* translators: %s: plugin slug (example: woocommerce-services) */
-					__( 'The requested plugin `%s` could not be installed. Upgrader install failed.', 'woocommerce' ),
+					__( 'We couldn\'t install `%s`. Try again, or install it manually. If it keeps failing, contact your host.', 'woocommerce' ),
 					$slug
 				);
 				$errors->add(

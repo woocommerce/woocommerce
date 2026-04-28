@@ -3,7 +3,6 @@
  */
 import { DataViews, View } from '@wordpress/dataviews';
 import { useState, useMemo, useCallback, useEffect } from '@wordpress/element';
-import { ProductQuery } from '@woocommerce/data';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
@@ -25,6 +24,7 @@ import {
 	DEFAULT_PRODUCT_TABLE_LAYOUT,
 	DEFAULT_PRODUCT_TABLE_VIEW,
 } from './layouts';
+import { buildProductListQuery } from './query';
 import { useProductActions } from '../dataviews-actions';
 
 const { usePostActions } = unlock( editorPrivateApis );
@@ -87,32 +87,10 @@ export default function ProductList( { className }: ProductListProps ) {
 	const [ selection, setSelection ] = useState( [ postId ] );
 	const [ view, setView ] = useView( postType );
 
-	const queryParams = useMemo( () => {
-		const filters: Partial< ProductQuery > = {};
-		view.filters?.forEach( ( filter ) => {
-			if (
-				filter.field === 'status' ||
-				filter.field === 'product_status'
-			) {
-				filters.status = Array.isArray( filter.value )
-					? filter.value.join( ',' )
-					: filter.value;
-			}
-		} );
-		const orderby =
-			view.sort?.field === 'name'
-				? 'title'
-				: ( view.sort?.field as ProductQuery[ 'orderby' ] );
-
-		return {
-			per_page: view.perPage,
-			page: view.page,
-			order: view.sort?.direction,
-			orderby,
-			search: view.search,
-			...filters,
-		};
-	}, [ view ] );
+	const queryParams = useMemo(
+		() => buildProductListQuery( view ),
+		[ view ]
+	);
 
 	const onChangeSelection = useCallback(
 		( items: string[] ) => {
@@ -162,18 +140,28 @@ export default function ProductList( { className }: ProductListProps ) {
 		postType,
 		context: 'list',
 	} );
-	const productActions = useProductActions();
+	const productActions = useProductActions( {
+		query: queryParams,
+	} );
 	const actions = useMemo(
 		() => [
 			...productActions,
 			...postTypeActions.filter(
-				( { id }: { id: string } ) => id !== 'view-post'
+				( { id }: { id: string } ) =>
+					! [
+						'edit-post',
+						'view-post',
+						'duplicate-post',
+						'delete-post',
+						'move-to-trash',
+						'permanently-delete-post',
+					].includes( id )
 			),
 		],
 		[ postTypeActions, productActions ]
 	);
 
-	const classes = clsx( 'edit-site-page', className );
+	const classes = clsx( 'woocommerce-product-list', className );
 
 	const pageActions = (
 		<Stack gap="lg">

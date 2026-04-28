@@ -42,6 +42,7 @@ import { fieldExtensions as stockQuantityFieldExtensions } from '../fields/stock
 import { fieldExtensions as tagsFieldExtensions } from '../fields/tags/field';
 import { fieldExtensions as taxStatusFieldExtensions } from '../fields/tax_status/field';
 import type { ProductEntityRecord } from '../fields/types';
+import { fieldExtensions as typeFieldExtensions } from '../fields/type/field';
 import { fieldExtensions as upsellIdsFieldExtensions } from '../fields/upsell_ids/field';
 import { fieldExtensions as visibilitySummaryFieldExtensions } from '../fields/visibility_summary/field';
 import { fieldExtensions as weightFieldExtensions } from '../fields/weight/field';
@@ -73,6 +74,7 @@ const PRODUCT_LIST_FIELD_IDS = [
 	'categories',
 	'tags',
 	'organization_summary',
+	'type',
 	'featured',
 	'catalog_visibility',
 	'visibility_summary',
@@ -119,6 +121,7 @@ const PRODUCT_LIST_FIELD_EXTENSIONS: Record< string, ProductFieldExtensions > =
 		categories: categoriesFieldExtensions,
 		tags: tagsFieldExtensions,
 		organization_summary: organizationSummaryFieldExtensions,
+		type: typeFieldExtensions,
 		featured: featuredFieldExtensions,
 		catalog_visibility: catalogVisibilityFieldExtensions,
 		visibility_summary: visibilitySummaryFieldExtensions,
