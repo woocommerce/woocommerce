@@ -7844,19 +7844,6 @@ table.bar_chart {
 	}
 }
 
-@media screen and (max-width: 782px) {
-	.wc-backbone-modal .wc-backbone-modal-content {
-		border-radius: 0;
-		transform: none;
-		left: 0;
-		right: 0;
-		top: 0;
-		bottom: 0;
-		min-width: auto;
-		width: 100%;
-	}
-}
-
 .wc-backbone-modal-backdrop {
 	position: fixed;
 	top: 0;
@@ -8005,6 +7992,22 @@ table.bar_chart {
 				margin-bottom: 0;
 			}
 		}
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.wc-backbone-modal .wc-backbone-modal-content {
+		border-radius: 0;
+		transform: none;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		min-width: auto;
+		width: 100%;
+	}
+	.wc-backbone-modal-main .wc-backbone-modal-header .modal-close-link {
+		border-radius: 0;
 	}
 }
 
