@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\PushNotifications\DataStores;
 
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\NotificationPreferencesDataStore;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use WC_Unit_Test_Case;
 
 /**
@@ -42,7 +43,7 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 	 * Clean up user meta and the test user between tests.
 	 */
 	public function tearDown(): void {
-		delete_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
+		Users::delete_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
 		wp_delete_user( $this->user_id );
 		parent::tearDown();
 	}
@@ -66,7 +67,7 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 			),
 		);
 
-		update_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY, $envelope );
+		Users::update_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY, $envelope );
 
 		$result = $this->sut->read( $this->user_id );
 
@@ -83,7 +84,7 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 	 * @testdox Should migrate an older envelope on read and persist the upgraded version.
 	 */
 	public function test_read_migrates_old_envelope_and_persists_upgrade(): void {
-		update_user_meta(
+		Users::update_site_user_meta(
 			$this->user_id,
 			NotificationPreferencesDataStore::META_KEY,
 			array(
@@ -100,7 +101,7 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 		$this->assertFalse( $result['preferences']['store_order'] );
 
 		// And the upgrade was persisted back to user meta.
-		$stored = get_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY, true );
+		$stored = Users::get_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
 		$this->assertSame( NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION, $stored['schema_version'] );
 	}
 
@@ -135,7 +136,7 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 
 		$this->sut->write( $this->user_id, $envelope );
 
-		$stored = get_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY, true );
+		$stored = Users::get_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
 		$this->assertSame( $envelope, $stored );
 	}
 
@@ -158,7 +159,7 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 		$this->sut->write( $this->user_id, $envelope );
 		$this->sut->write( $this->user_id, $envelope );
 
-		$stored = get_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY, true );
+		$stored = Users::get_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
 		$this->assertSame( $envelope, $stored );
 	}
 }

@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Internal\PushNotifications\DataStores;
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use WC_Data_Exception;
 use WP_Http;
 
@@ -13,8 +14,10 @@ use WP_Http;
  * Persistence layer for per-user push notification preferences.
  *
  * Stores a single versioned envelope per user under the `wc_push_notification_preferences`
- * user meta key. Owns schema migration on read and surfaces real DB write failures via
- * `WC_Data_Exception`.
+ * user meta key. The key is automatically scoped to the current site by `Users::*_site_user_meta`,
+ * which prefixes the underlying meta key with the blog ID so preferences set on one site in a
+ * multisite network do not leak to other sites the same user belongs to. Owns schema migration
+ * on read and surfaces real DB write failures via `WC_Data_Exception`.
  *
  * @since 10.8.0
  */
@@ -46,7 +49,7 @@ class NotificationPreferencesDataStore {
 	 * @since 10.8.0
 	 */
 	public function read( int $user_id ): ?array {
-		$stored = get_user_meta( $user_id, self::META_KEY, true );
+		$stored = Users::get_site_user_meta( $user_id, self::META_KEY );
 
 		if ( ! is_array( $stored ) || empty( $stored ) ) {
 			return null;
@@ -56,7 +59,7 @@ class NotificationPreferencesDataStore {
 
 		if ( $stored_version < self::CURRENT_SCHEMA_VERSION ) {
 			$stored = $this->migrate( $stored, $stored_version );
-			update_user_meta( $user_id, self::META_KEY, $stored );
+			Users::update_site_user_meta( $user_id, self::META_KEY, $stored );
 		}
 
 		return $stored;
@@ -84,12 +87,12 @@ class NotificationPreferencesDataStore {
 		// either "value unchanged" or "DB write failed" — by short-circuiting
 		// the no-op case, a `false` from the call below unambiguously means
 		// the write itself failed and we can surface it.
-		$stored = get_user_meta( $user_id, self::META_KEY, true );
+		$stored = Users::get_site_user_meta( $user_id, self::META_KEY );
 		if ( $stored === $envelope ) {
 			return;
 		}
 
-		$result = update_user_meta( $user_id, self::META_KEY, $envelope );
+		$result = Users::update_site_user_meta( $user_id, self::META_KEY, $envelope );
 
 		if ( false === $result ) {
 			// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped

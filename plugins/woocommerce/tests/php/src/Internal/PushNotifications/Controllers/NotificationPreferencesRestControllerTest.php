@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Controllers\NotificationPr
 use Automattic\WooCommerce\Internal\PushNotifications\Controllers\PushTokenRestController;
 use Automattic\WooCommerce\Internal\PushNotifications\DataStores\NotificationPreferencesDataStore;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
+use Automattic\WooCommerce\Internal\Utilities\Users;
 use Automattic\WooCommerce\Tests\Internal\PushNotifications\Helpers\PushNotificationsTestTrait;
 use WC_Data_Exception;
 use WC_REST_Unit_Test_Case;
@@ -57,7 +58,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
 
-		delete_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
+		Users::delete_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
 		wp_delete_user( $this->user_id );
 		wp_delete_user( $this->subscriber_id );
 
@@ -130,7 +131,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( WP_Http::OK, $response->get_status() );
 
-		$stored = get_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY, true );
+		$stored = Users::get_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
 		$this->assertIsArray( $stored );
 		$this->assertFalse( $stored['preferences']['store_order'] );
 		$this->assertFalse( $stored['preferences']['store_review'] );
@@ -165,7 +166,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( WP_Http::OK, $response->get_status() );
 
-		$stored = get_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY, true );
+		$stored = Users::get_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
 		$this->assertFalse( $stored['preferences']['store_order'] );
 	}
 
