@@ -80,6 +80,8 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 	/**
 	 * Build the QueryCache cache key for a query string. Prefix kept in sync
 	 * with QueryCache::CACHE_KEY_PREFIX.
+	 *
+	 * @param string $query The GraphQL query string.
 	 */
 	private function cache_key_for( string $query ): string {
 		return 'graphql_ast_v15_' . hash( 'sha256', $query );
