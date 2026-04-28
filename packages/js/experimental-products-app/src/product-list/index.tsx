@@ -4,15 +4,16 @@
 import { DataViews, View } from '@wordpress/dataviews';
 import { useState, useMemo, useCallback, useEffect } from '@wordpress/element';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
+import { store as coreStore } from '@wordpress/core-data';
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
 import clsx from 'clsx';
-import { Button, Stack } from '@wordpress/ui';
+import { Button, Stack, Tabs } from '@wordpress/ui';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 import { Page } from '@wordpress/admin-ui';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
+import type { ProductStatus } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -47,6 +48,38 @@ const DEFAULT_VIEW: View = {
 	page: 1,
 };
 
+const PRODUCT_LIST_TAB_VALUES = [
+	'all',
+	'publish',
+	'draft',
+	'pending',
+	'trash',
+] as const;
+
+type StatusTab = ( typeof PRODUCT_LIST_TAB_VALUES )[ number ];
+
+const PRODUCT_LIST_TABS: Array< {
+	value: StatusTab;
+	label: string;
+} > = [
+	{
+		value: 'all',
+		label: __( 'All', 'woocommerce' ),
+	},
+	{
+		value: 'publish',
+		label: __( 'Published', 'woocommerce' ),
+	},
+	{
+		value: 'draft',
+		label: __( 'Draft', 'woocommerce' ),
+	},
+	{
+		value: 'trash',
+		label: __( 'Trash', 'woocommerce' ),
+	},
+];
+
 /**
  * This function abstracts working with default & custom views by
  * providing a [ state, setState ] tuple based on the URL parameters.
@@ -75,6 +108,36 @@ function getItemId( item: ProductEntityRecord ) {
 	return item.id.toString();
 }
 
+function isProductListTabValue( value: string ): value is StatusTab {
+	return PRODUCT_LIST_TAB_VALUES.includes( value as StatusTab );
+}
+
+function getProductListTab( value?: string ): StatusTab {
+	if ( value && isProductListTabValue( value ) ) {
+		return value;
+	}
+
+	return 'all';
+}
+
+function getStatusForProductListTab(
+	tab: StatusTab
+): ProductStatus | undefined {
+	switch ( tab ) {
+		case 'publish':
+		case 'draft':
+		case 'pending':
+		case 'trash':
+			return tab;
+		default:
+			return undefined;
+	}
+}
+
+function getSelectionFromPostId( postId?: string ) {
+	return postId?.split( ',' ).filter( Boolean ) ?? [];
+}
+
 export default function ProductList( { className }: ProductListProps ) {
 	const history = useHistory();
 	const location = useLocation();
@@ -84,33 +147,108 @@ export default function ProductList( { className }: ProductListProps ) {
 		isCustom,
 		activeView = 'all',
 	} = location.params;
-	const [ selection, setSelection ] = useState( [ postId ] );
+	const selectedTabFromLocation = getProductListTab( activeView );
+	const [ selectedTab, setSelectedTab ] = useState( selectedTabFromLocation );
+	const [ selection, setSelection ] = useState( () =>
+		getSelectionFromPostId( postId )
+	);
 	const [ view, setView ] = useView( postType );
 
-	const queryParams = useMemo(
-		() => buildProductListQuery( view ),
-		[ view ]
-	);
+	useEffect( () => {
+		setSelectedTab( selectedTabFromLocation );
+	}, [ selectedTabFromLocation ] );
+
+	useEffect( () => {
+		setSelection( getSelectionFromPostId( postId ) );
+	}, [ postId ] );
+
+	const queryParams = useMemo( () => {
+		const query = buildProductListQuery( view );
+		const productStatus = getStatusForProductListTab( selectedTab );
+
+		if ( productStatus ) {
+			query.status = productStatus;
+		}
+
+		return query;
+	}, [ selectedTab, view ] );
 
 	const onChangeSelection = useCallback(
 		( items: string[] ) => {
 			setSelection( items );
-			history.push( {
-				...location.params,
-				postId: items.join( ',' ),
-			} );
+
+			const nextParams = { ...location.params };
+
+			if ( items.length > 0 ) {
+				nextParams.postId = items.join( ',' );
+			} else {
+				delete nextParams.postId;
+			}
+
+			history.push( nextParams );
 		},
 		[ history, location.params ]
+	);
+
+	const onChangeTab = useCallback(
+		( value: string | null ) => {
+			if ( ! value ) {
+				return;
+			}
+
+			const nextTab = getProductListTab( value );
+
+			if ( nextTab === selectedTab ) {
+				return;
+			}
+
+			setSelectedTab( nextTab );
+			setSelection( [] );
+
+			const nextParams = {
+				...location.params,
+				activeView: nextTab,
+			};
+
+			delete nextParams.postId;
+
+			history.push( nextParams );
+		},
+		[ history, location.params, selectedTab ]
 	);
 
 	const {
 		records,
 		totalItems: totalCount,
 		isResolving: isLoading,
-	} = useEntityRecords< ProductEntityRecord >(
-		'root',
-		'product',
-		queryParams
+		hasResolved,
+	} = useSelect(
+		( select ) => {
+			const { getEntityRecords, isResolving, hasFinishedResolution } =
+				select( coreStore );
+			return {
+				records: getEntityRecords< ProductEntityRecord >(
+					'root',
+					'product',
+					queryParams
+				),
+				totalItems: getEntityRecords( 'root', 'product', {
+					...queryParams,
+					per_page: -1,
+				} )?.length,
+				isResolving: isResolving( 'getEntityRecords', [
+					'root',
+					'product',
+					queryParams,
+				] ),
+				hasResolved: hasFinishedResolution( 'getEntityRecords', [
+					'root',
+					'product',
+					queryParams,
+				] ),
+			};
+		},
+		[ queryParams ]
 	);
 
 	const paginationInfo = useMemo(
@@ -140,9 +278,7 @@ export default function ProductList( { className }: ProductListProps ) {
 		postType,
 		context: 'list',
 	} );
-	const productActions = useProductActions( {
-		query: queryParams,
-	} );
+	const productActions = useProductActions();
 	const actions = useMemo(
 		() => [
 			...productActions,
@@ -225,7 +361,7 @@ export default function ProductList( { className }: ProductListProps ) {
 				paginationInfo={ paginationInfo }
 				fields={ productFields }
 				data={ records || EMPTY_ARRAY }
-				isLoading={ isLoading }
+				isLoading={ isLoading && ! hasResolved }
 				view={ view }
 				actions={ actions }
 				onChangeView={ setView }
@@ -233,7 +369,45 @@ export default function ProductList( { className }: ProductListProps ) {
 				getItemId={ getItemId }
 				selection={ selection }
 				defaultLayouts={ DEFAULT_LAYOUTS }
-			/>
+			>
+				<Stack
+					direction="row"
+					align="center"
+					justify="space-between"
+					gap="sm"
+					className="woocommerce-product-list__toolbar"
+				>
+					<Tabs.Root
+						value={ selectedTab }
+						onValueChange={ onChangeTab }
+					>
+						<Tabs.List
+							variant="minimal"
+							aria-label={ __(
+								'Filter products by status',
+								'woocommerce'
+							) }
+						>
+							{ PRODUCT_LIST_TABS.map( ( tab ) => (
+								<Tabs.Tab key={ tab.value } value={ tab.value }>
+									{ tab.label }
+								</Tabs.Tab>
+							) ) }
+						</Tabs.List>
+					</Tabs.Root>
+					<Stack direction="row" align="center" gap="xs">
+						<DataViews.Search
+							label={ __( 'Search products', 'woocommerce' ) }
+						/>
+						<DataViews.FiltersToggle />
+						<DataViews.LayoutSwitcher />
+						<DataViews.ViewConfig />
+					</Stack>
+				</Stack>
+				<DataViews.FiltersToggled />
+				<DataViews.Layout />
+				<DataViews.Footer />
+			</DataViews>
 		</Page>
 	);
 }
