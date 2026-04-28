@@ -5,7 +5,7 @@
 This document defines the **context protocol pattern** used by WooCommerce blocks to let reusable inner blocks work with any parent store. Three concrete protocols exist today:
 
 | Context Key | Purpose | Inner Blocks |
-|-------------|---------|--------------|
+| --- | --- | --- |
 | `woocommerce/selectableItems` | Select/deselect items (filters, variations) | checkbox-list, chips |
 | `woocommerce/removableItems` | Remove individual items (active filters) | removable-chips |
 | `woocommerce/rangeInput` | Numeric range input (price, slider) | price-slider |
@@ -20,7 +20,7 @@ WooCommerce blocks need reusable UI components (chips, swatches, pills, sliders)
 
 Inner blocks become **presentational** — they read a standardized context protocol and call parent-provided actions instead of directly referencing a specific store.
 
-```
+```text
 ┌─────────────────────────────────────────────────────────┐
 │  Protocol Specification (this document)                 │
 │  └── Defines the contract both sides must follow        │
@@ -67,11 +67,11 @@ Missing method/getter → compile error. No runtime cost.
 
 ---
 
-# Protocol: Selectable Items
+## Protocol: Selectable Items
 
-## Context Key
+### Context Key
 
-```
+```text
 woocommerce/selectableItems
 ```
 
@@ -92,7 +92,7 @@ In the editor, parent blocks use `BlockContextProvider` to pass the same data:
 </BlockContextProvider>
 ```
 
-### Inner block.json (consumer)
+#### Inner block.json (consumer)
 
 Inner blocks declare the context key they consume via `usesContext`, and which parents they can be nested inside via `ancestor`:
 
@@ -111,39 +111,39 @@ Inner blocks declare the context key they consume via `usesContext`, and which p
 
 Inner blocks receive the protocol data through `$block->context['woocommerce/selectableItems']` in PHP.
 
-## SelectableItemsContext
+### SelectableItemsContext
 
 The context object that parents MUST provide. Typed as `SelectableItemsContext<T>` where `T` is the extra fields the parent adds to each item (default: `unknown`).
 
-### Core Fields (Required)
+#### Core Fields (Required)
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
+| --- | --- | --- | --- |
 | `items` | `SelectableItem<T>[]` | **Yes** | Items to render |
 | `selectionMode` | `'single' \| 'multiple'` | **Yes** | Selection behavior |
 | `storeNamespace` | `string` | **Yes** | Parent's Interactivity API store |
 
-### Accessibility Fields (Optional)
+#### Accessibility Fields (Optional)
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
+| --- | --- | --- | --- |
 | `groupLabel` | `string` | No | Screen reader label for the group. Rendered as `<legend>` in fieldset. Example: "Filter by Color" |
 
-### Presentation Fields (Optional)
+#### Presentation Fields (Optional)
 
 | Field | Type | Default | Description |
-|-------|------|---------|-------------|
+| --- | --- | --- | --- |
 | `isLoading` | `boolean` | `false` | Parent is fetching items. Inner blocks show skeleton/loading state. |
 | `filterType` | `string` | `undefined` | Domain discriminator that inner blocks may use to vary presentation. For example, `'rating'` unlocks star rendering in `checkbox-list`. Values are parent-defined; unknown values fall back to text. |
 
-## SelectableItem
+### SelectableItem
 
 `SelectableItem<T = unknown>` — base fields plus an optional generic extension `T` for domain-specific data.
 
 Each item in the `items` array MUST have:
 
 | Field | Type | Required | Description |
-|-------|------|----------|-------------|
+| --- | --- | --- | --- |
 | `id` | `string` | **Yes** | Unique identifier for DOM element id. Format: `"{type}-{value}"` e.g. `"attribute-red"` |
 | `label` | `string \| HTML` | **Yes** | Display text or HTML (swatches, rating stars). HTML labels are emitted by the SSR `foreach` and preserved by `data-wp-each` via stable keys. |
 | `value` | `string` | **Yes** | Value for selection/submission |
@@ -168,12 +168,12 @@ type FilterOptionItem = SelectableItem<FilterItemFields>;
 
 Inner blocks typed against a specific `T` access extra fields type-safely. Built-in inner blocks ignore unknown fields.
 
-## Parent Store Requirements
+### Parent Store Requirements
 
 The store registered under `storeNamespace` MUST expose:
 
 | Name | Kind | Contract |
-|------|------|----------|
+| --- | --- | --- |
 | `state.selectableItems` | getter | Returns iterable of items with `selected: boolean` and `index: number` derived. Items come from `getServerContext().items` (so they refresh after navigation) merged with the client SSOT (`activeFilters`). Reactive — re-evaluates when SSOT changes. |
 | `actions.toggle` | action | Toggles selection for the target item. Accepts an optional `item` argument (used when an inner block proxies the call via its own store); when omitted, falls back to `getContext().item`. Mutates parent's SSOT (e.g. `activeFilters`). |
 
@@ -195,7 +195,7 @@ const myStore = {
 myStore satisfies SelectableItemsParentStore;
 ```
 
-## Selection State Model
+### Selection State Model
 
 - **SSOT** lives in parent's domain state (e.g. `context.activeFilters` for filters).
 - **Items rendered via `data-wp-each`** iterating the parent's `state.selectableItems` inside a nested-namespace region. PHP `foreach` with `data-wp-each-child` + per-item `data-wp-context` (including `index`) provides an SSR fallback for the items visible on first paint (first `displayLimit`); the rest are rendered client-side via the template.
@@ -204,7 +204,7 @@ myStore satisfies SelectableItemsParentStore;
 
 External mutations (active-filter removal, cross-block sync) flow through automatically: mutate `activeFilters` → `state.selectableItems` re-evaluates → every `context.item.selected` binding updates across all blocks.
 
-## Rendering Rules
+### Rendering Rules
 
 Inner blocks SHOULD:
 
@@ -217,13 +217,13 @@ Inner blocks SHOULD:
 
 Inner blocks typed against `FilterItemFields` MAY additionally:
 
-7. Show counts when `item.count` exists
+1. Show counts when `item.count` exists
 
 ---
 
-# Design Rationale
+## Design Rationale
 
-## Generic Extension Pattern
+### Generic Extension Pattern
 
 `SelectableItem<T>` uses a generic parameter instead of a flat union of optional fields:
 
@@ -233,12 +233,12 @@ Inner blocks typed against `FilterItemFields` MAY additionally:
 - A variation selector would use `SelectableItem<{ price?: string; stockStatus?: string }>` etc.
 - TypeScript enforces correct shape at each call site with no extra runtime cost
 
-## Backward Compatibility
+### Backward Compatibility
 
 `SelectableItem<T>` replaces the old flat `FilterOptionItem`. Key changes:
 
 | Old `FilterOptionItem` | New `SelectableItem<FilterItemFields>` |
-|------------------------|----------------------------------------|
+| --- | --- |
 | `id?: number` (optional, number) | `id: string` (required, string — used for DOM element id) |
 | `count: number` (required) | `count: number` in `FilterItemFields` (required for filters, absent for other consumers) |
 | No `disabled` | `disabled?: boolean` on base type |
@@ -246,11 +246,11 @@ Inner blocks typed against `FilterItemFields` MAY additionally:
 
 ---
 
-# Type Definitions
+## Type Definitions
 
 This section provides copy-paste-ready type definitions for both TypeScript and PHP. These definitions enforce the protocol specification above.
 
-## TypeScript
+### TypeScript
 
 Location: `assets/js/types/type-defs/selectable-items.ts`
 
@@ -325,7 +325,7 @@ export type EditProps = BlockEditProps< BlockAttributes > & {
 };
 ```
 
-## PHP
+### PHP
 
 No base class or trait needed — parent blocks set `$block->context` directly. PHPStan type aliases (defined below) enforce the structure at CI time.
 
@@ -357,7 +357,7 @@ class ProductFilterAttribute extends AbstractBlock {
 }
 ```
 
-## PHPStan Type (for static analysis)
+#### PHPStan Type (for static analysis)
 
 Add to `phpstan-baseline.neon` or a types file:
 
@@ -404,13 +404,14 @@ parameters:
 
 ---
 
-# Implementation Guide
+## Implementation Guide
 
-## Implementing as Inner Block (Consumer)
+### Implementing as Inner Block (Consumer)
 
 Inner blocks consume the protocol. They render items using a `data-wp-each` template plus a PHP `foreach` SSR fallback, and reuse the parent's store via `storeNamespace` from context for selection bindings.
 
-**block.json**
+block.json:
+
 ```json
 {
   "name": "woocommerce/product-filter-checkbox-list",
@@ -423,7 +424,7 @@ Inner blocks consume the protocol. They render items using a `data-wp-each` temp
 
 **frontend.ts** — Inner blocks need no frontend JS for selection. Selection action (`actions.toggle`) and live `context.item.selected` binding are provided by the parent store.
 
-### Inner Block Own Store
+#### Inner Block Own Store
 
 Inner blocks own presentational state (show-more toggle, per-item visibility, rendering variants). The parent store never learns about inner-block UI concerns. Two patterns are supported depending on how much control the inner block needs over items:
 
@@ -514,6 +515,7 @@ const { state } = store( 'woocommerce/product-filter-checkbox-list', {
 **Why protocol-specific getter names (`selectableItems` / `removableItems`):** multiple protocols frequently share the same store namespace (e.g. `woocommerce/product-filters` hosts both the selectable-items store and the active-filters removable-items store). A generic `state.items` name collides across protocols and silently overrides. Protocol-aligned names (`selectableItems`, `removableItems`) make both live on the same store without interference.
 
 **PHP Renderer** — Template for `data-wp-each` plus `foreach` for SSR of the first `displayLimit` items. Each SSR item carries its `index` in `data-wp-context` so the inner store's `itemHidden` getter can decide visibility on hydration.
+
 ```php
 protected function render( $attributes, $content, $block ) {
     if ( empty( $block->context['woocommerce/selectableItems'] ) ) {
@@ -588,6 +590,7 @@ protected function render( $attributes, $content, $block ) {
 ```
 
 Key points:
+
 - **`data-wp-each` template + `foreach` SSR fallback for first `displayLimit` items** — the template renders the rest client-side, so the initial HTML stays small while the full list is still available post-hydration
 - **Per-item `data-wp-context` on SSR items includes `index`** — the inner store's `state.itemHidden` reads it via `getContext(storeNamespace).item.index` to decide visibility; hydration then attaches live bindings (`checked`, `hidden`, `toggle`) to the exact DOM wp-each reconciles
 - **Nested `data-wp-interactive`** — outer wrapper under the inner namespace, items region switches to the parent namespace so wp-each + parent selection bindings resolve there; presentational bindings (`itemHidden`, `ratingStyle`) use cross-namespace `::` back to the inner store
@@ -595,11 +598,12 @@ Key points:
 
 Reference implementation: `ProductFilterCheckboxList.php`, `ProductFilterChips.php`, `checkbox-list/frontend.ts`, `chips/frontend.ts`
 
-## Implementing as Parent Block (Provider)
+### Implementing as Parent Block (Provider)
 
 Parent blocks provide the protocol context to their inner blocks.
 
-### Filter Example (ProductFilterAttribute.php)
+#### Filter Example (ProductFilterAttribute.php)
+
 ```php
 class ProductFilterAttribute extends AbstractBlock {
 
@@ -632,13 +636,13 @@ class ProductFilterAttribute extends AbstractBlock {
 
 ---
 
-# Protocol: Removable Items
+## Protocol: Removable Items
 
 Context key: `woocommerce/removableItems`
 
 Used for lists of items that can be removed individually (active filter chips) with a "clear all" control.
 
-## Context Shape
+### Context Shape
 
 ```typescript
 export interface RemovableItem {
@@ -653,7 +657,7 @@ export interface RemovableItemsContext {
 }
 ```
 
-## Parent Store Requirements
+### Parent Store Requirements
 
 ```typescript
 export interface RemovableItemsParentStore {
@@ -671,9 +675,10 @@ The getter is `removableItems` (not `items`) for the same reason `selectableItem
 
 Parents assert: `myStore satisfies RemovableItemsParentStore;`
 
-## Rendering Pattern
+### Rendering Pattern
 
 Inner block (`removable-chips`):
+
 - Wrap in `data-wp-interactive="<storeNamespace>"`
 - Iterate `state.removableItems` via `data-wp-each` for reactive rendering (items can be added/removed dynamically)
 - SSR fallback: `foreach` over `context.items` with per-item `data-wp-context` and `data-wp-each-child`
@@ -684,13 +689,13 @@ Reference implementation: `ProductFilterRemovableChips.php`, `ProductFilterClear
 
 ---
 
-# Protocol: Range Input
+## Protocol: Range Input
 
 Context key: `woocommerce/rangeInput`
 
 Used for two-ended numeric range controls (price slider, generic range).
 
-## Context Shape
+### Context Shape
 
 ```typescript
 export interface RangeInputContext {
@@ -704,7 +709,7 @@ export interface RangeInputContext {
 }
 ```
 
-## Parent Store Requirements
+### Parent Store Requirements
 
 ```typescript
 export interface RangeInputParentStore {
@@ -717,9 +722,10 @@ export interface RangeInputParentStore {
 
 Generic names (`setMin`/`setMax`) — not price-specific — so the protocol can host non-price range inputs in the future. Parents assert: `myStore satisfies RangeInputParentStore;`
 
-## Rendering Pattern
+### Rendering Pattern
 
 Inner block (`price-slider`):
+
 - Wrap in `data-wp-interactive="<storeNamespace>"`
 - Two `<input type="range">`, one per bound
 - Min input: `data-wp-on--input="actions.setMin"`, `data-wp-bind--value="state.<minGetter>"` (parent decides getter — e.g. `state.minPrice`)
