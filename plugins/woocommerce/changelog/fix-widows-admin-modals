@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Prevent widows in store alerts, shipping banner modal, and cart modal body copy with text-wrap: pretty.

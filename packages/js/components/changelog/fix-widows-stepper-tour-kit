@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Prevent widows in stepper and tour kit description copy with text-wrap: pretty.
