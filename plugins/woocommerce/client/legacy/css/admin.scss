@@ -4272,54 +4272,15 @@ table.wc_shipping {
 .wc-backbone-modal-add-shipping-method,
 .wc-backbone-modal-shipping-method-settings,
 .wc-shipping-class-modal {
-	font-size: 13px;
-	font-weight: 400;
-	line-height: 16px;
-	color: #1e1e1e;
-
 	&.wc-backbone-modal .wc-backbone-modal-content {
-		border-top: 8px solid transparent;
-		border-bottom: 8px solid transparent;
 		max-width: 600px;
-
-		@media screen and (max-width: 782px) {
-			border-radius: none;
-			border-top: none;
-			border-bottom: none;
-		}
-	}
-
-	.wc-backbone-modal-main article {
-		padding: 0 32px 32px 32px;
-	}
-
-	.wc-backbone-modal-main header {
-		padding: 20px 32px;
-	}
-
-	.wc-backbone-modal-main footer {
-		padding: 20px 32px 12px 32px;
 	}
 
 	.wc-backbone-modal-main .wc-backbone-modal-header h1 {
 		font-weight: 400;
 	}
 
-	.wc-backbone-modal-main .wc-backbone-modal-header {
-		font-size: 20px;
-		line-height: 28px;
-
-		.modal-close-link {
-			border-left: none;
-
-			&:hover {
-				background-color: #fff;
-			}
-		}
-	}
 	.wc-backbone-modal-main footer {
-		border-top: 1px solid #E0E0E0;
-
 		.inner {
 			display: flex;
 			justify-content: space-between;
@@ -7876,10 +7837,6 @@ table.bar_chart {
 		article {
 			overflow: auto;
 		}
-	}
-
-	&.wc-backbone-modal-shipping-method-settings .wc-backbone-modal-content {
-		min-width: 500px;
 	}
 
 	&.wc-backbone-modal-add-shipping-method .wc-backbone-modal-content article {
