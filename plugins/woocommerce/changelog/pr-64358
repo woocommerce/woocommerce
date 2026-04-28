@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-De-duplicate tfoot blocks in order/order-details email templates.
+Remove duplicate tfoot elements in the My Account order details template.
