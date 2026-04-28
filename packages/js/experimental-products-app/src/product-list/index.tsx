@@ -74,15 +74,15 @@ export default function ProductList( { className }: ProductListProps ) {
 	const { navigate } = useHistory();
 	const location = useLocation();
 	const currentQuery = useMemo(
-		() => ( location.query || {} ) as Record< string, string >,
+		() =>
+			( location.query || {} ) as {
+				postId?: string;
+				activeView?: string;
+				postType?: string;
+			},
 		[ location.query ]
 	);
-	const {
-		postId,
-		postType = 'product',
-		isCustom,
-		activeView = 'all',
-	} = currentQuery;
+	const { postId, postType = 'product', activeView = 'all' } = currentQuery;
 	const selectedTabFromLocation = getProductListTab( activeView );
 	const [ selectedTab, setSelectedTab ] = useState( selectedTabFromLocation );
 	const [ selection, setSelection ] = useState( () =>
@@ -147,6 +147,8 @@ export default function ProductList( { className }: ProductListProps ) {
 				...currentQuery,
 				activeView: nextTab,
 			};
+
+			delete nextParams.postId;
 
 			navigate(
 				getProductListNavigationPath( location.path, nextParams )
@@ -298,7 +300,7 @@ export default function ProductList( { className }: ProductListProps ) {
 			actions={ pageActions }
 		>
 			<DataViews
-				key={ activeView + isCustom }
+				key={ activeView }
 				paginationInfo={ paginationInfo }
 				fields={ productFields }
 				data={ records || EMPTY_ARRAY }
