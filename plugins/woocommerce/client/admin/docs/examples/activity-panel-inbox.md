@@ -110,8 +110,6 @@ class WooCommerce_Activity_Panel_Inbox_Example_Plugin_One {
 		$note->set_type( Note::E_WC_ADMIN_NOTE_INFORMATIONAL );
 		$note->set_name( self::NOTE_NAME );
 		$note->set_source( 'wapi-example-plugin-one' );
-		$note->set_layout('plain');
-		$note->set_image('');
 		// This example has two actions. A note can have 0 or 1 as well.
 		$note->add_action(
 			'settings',
