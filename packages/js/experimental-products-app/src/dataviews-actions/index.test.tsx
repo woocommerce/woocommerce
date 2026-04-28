@@ -45,6 +45,8 @@ jest.mock( '@woocommerce/settings', () => ( {
 	getAdminLink: jest.fn( ( path ) => path ),
 } ) );
 
+const mockedApiFetch = jest.mocked( apiFetch );
+
 function getCallbackAction( action: Action< ProductEntityRecord > ) {
 	return action as Action< ProductEntityRecord > & {
 		callback: (
@@ -102,7 +104,7 @@ describe( 'product list actions', () => {
 			...product,
 			id: 99,
 		} as ProductEntityRecord;
-		( apiFetch as jest.Mock ).mockResolvedValue( duplicatedProduct );
+		mockedApiFetch.mockResolvedValue( duplicatedProduct );
 
 		await getCallbackAction( duplicateProductAction() ).callback(
 			[ product ],
@@ -133,9 +135,7 @@ describe( 'product list actions', () => {
 	} );
 
 	it( 'shows an error notice when duplication fails', async () => {
-		( apiFetch as jest.Mock ).mockRejectedValueOnce(
-			new Error( 'Duplicate failed' )
-		);
+		mockedApiFetch.mockRejectedValueOnce( new Error( 'Duplicate failed' ) );
 
 		await getCallbackAction( duplicateProductAction() ).callback(
 			[ product ],
