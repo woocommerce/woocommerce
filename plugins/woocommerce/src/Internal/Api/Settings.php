@@ -65,6 +65,22 @@ class Settings {
 				'type'    => 'checkbox',
 			),
 			array(
+				'title'             => __( 'Maximum query depth', 'woocommerce' ),
+				'desc'              => __( 'Reject queries whose selection nesting exceeds this depth.', 'woocommerce' ),
+				'id'                => Main::OPTION_MAX_QUERY_DEPTH,
+				'default'           => (string) GraphQLController::DEFAULT_MAX_QUERY_DEPTH,
+				'type'              => 'number',
+				'custom_attributes' => array( 'min' => '1' ),
+			),
+			array(
+				'title'             => __( 'Maximum query complexity', 'woocommerce' ),
+				'desc'              => __( 'Reject queries whose computed complexity score exceeds this value.', 'woocommerce' ),
+				'id'                => Main::OPTION_MAX_QUERY_COMPLEXITY,
+				'default'           => (string) GraphQLController::DEFAULT_MAX_QUERY_COMPLEXITY,
+				'type'              => 'number',
+				'custom_attributes' => array( 'min' => '1' ),
+			),
+			array(
 				'type' => 'sectionend',
 				'id'   => 'woocommerce_graphql_options',
 			),
