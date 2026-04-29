@@ -2,10 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import {
-	useBlockProps,
-	InspectorControls,
-} from '@wordpress/block-editor';
+import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, SelectControl } from '@wordpress/components';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 
@@ -85,9 +82,7 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody
-					title={ __( 'Collection settings', 'woocommerce' ) }
-				>
+				<PanelBody title={ __( 'Collection settings', 'woocommerce' ) }>
 					<SelectControl
 						label={ __( 'List', 'woocommerce' ) }
 						help={ __(
@@ -114,7 +109,10 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 						className="wc-block-shopper-collection-item"
 					>
 						<div className="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
-							<a href="#preview" onClick={ ( e ) => e.preventDefault() }>
+							<a
+								href="#preview"
+								onClick={ ( e ) => e.preventDefault() }
+							>
 								<img src={ PLACEHOLDER_IMG_SRC } alt="" />
 							</a>
 							<div className="wc-block-components-product-image__inner-container">
