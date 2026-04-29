@@ -15,45 +15,54 @@
 	flex-direction: column;
 	gap: 0.25em;
 
-	&__image {
-		aspect-ratio: 1 / 1;
-		background: rgba(0, 0, 0, 0.05);
-		border-radius: 4px;
-		display: block;
-		height: auto;
-		object-fit: cover;
-		width: 100%;
+	// Image and price visual styling come from the shared atomic classes
+	// (wc-block-components-product-image / -price) loaded by the global
+	// wc-blocks stylesheet — no per-element rules needed here.
+
+	// Title spacing/line-height matches Product Collection's default
+	// product-title attributes (level: 2, margin: 0 0 0.75rem, line-height: 1.4).
+	// We target wp-block-post-title (core's post-title class) because the
+	// editor preview mirrors PC's editor render, which uses core/post-title.
+	.wp-block-post-title {
+		line-height: 1.4;
+		margin: 0 0 0.75rem;
 	}
 
-	&__name {
-		font-weight: 600;
-	}
-
+	// Variation and quantity have no atomic equivalent in Product Collection,
+	// so we own their styling. Center-aligned and small to mirror the rest
+	// of the row (price + button use the WP `has-small-font-size` preset).
 	&__variation,
 	&__quantity {
 		color: rgba(0, 0, 0, 0.7);
-		font-size: 0.875em;
+		display: block;
+		font-size: var(--wp--preset--font-size--small, 0.875em);
+		text-align: center;
 	}
 
-	&__actions {
-		align-items: center;
-		display: flex;
-		flex-wrap: wrap;
-		gap: 0.75em;
-		margin-top: 0.5em;
-	}
-
+	// Remove button overlays the image (mirrors Product Collection's
+	// sale-badge slot — top-right corner inside the product-image wrapper).
+	// Positioned absolute with align-self: flex-end so the parent's
+	// __inner-container flex layout pushes it to the right edge.
 	&__remove {
+		align-self: flex-end;
 		appearance: none;
-		background: none;
+		background: rgba(0, 0, 0, 0.65);
 		border: 0;
+		border-radius: 999px;
+		color: #fff;
 		cursor: pointer;
-		padding: 0;
-		text-decoration: underline;
+		font-size: var(--wp--preset--font-size--small, 0.75em);
+		line-height: 1;
+		padding: 0.4em 0.75em;
+		z-index: 10;
 
 		&[disabled] {
 			cursor: not-allowed;
-			opacity: 0.6;
+			opacity: 0.7;
+		}
+
+		&:hover:not([disabled]) {
+			background: rgba(0, 0, 0, 0.85);
 		}
 	}
 }

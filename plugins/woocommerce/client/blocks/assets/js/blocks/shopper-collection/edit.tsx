@@ -116,41 +116,48 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 						key={ item.key }
 						className="wc-block-shopper-collection-item"
 					>
-						<img
-							className="wc-block-shopper-collection-item__image"
-							src={ PLACEHOLDER_IMG_SRC }
-							alt=""
-						/>
-						<span className="wc-block-shopper-collection-item__name">
-							{ item.name }
-						</span>
+						<div className="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
+							<a href="#preview" onClick={ ( e ) => e.preventDefault() }>
+								<img src={ PLACEHOLDER_IMG_SRC } alt="" />
+							</a>
+							<div className="wc-block-components-product-image__inner-container">
+								<button
+									type="button"
+									className="wc-block-shopper-collection-item__remove"
+									disabled
+								>
+									{ __( 'Remove', 'woocommerce' ) }
+								</button>
+							</div>
+						</div>
+						<h2 className="wp-block-post-title has-text-align-center has-medium-font-size">
+							<a
+								href="#preview"
+								onClick={ ( e ) => e.preventDefault() }
+							>
+								{ item.name }
+							</a>
+						</h2>
 						{ item.variation && (
 							<span className="wc-block-shopper-collection-item__variation">
 								{ item.variation }
 							</span>
 						) }
-						<span className="wc-block-shopper-collection-item__price">
-							{ item.price }
-						</span>
+						<div className="price wc-block-components-product-price has-text-align-center has-small-font-size">
+							<span className="wc-block-components-product-price__value">
+								{ item.price }
+							</span>
+						</div>
 						<span className="wc-block-shopper-collection-item__quantity">
 							{ item.quantity }
 						</span>
-						<div className="wc-block-shopper-collection-item__actions">
-							<div className="wp-block-button wc-block-components-product-button wc-block-shopper-collection-cart-button">
-								<button
-									type="button"
-									className="wp-block-button__link wp-element-button wc-block-components-product-button__button"
-									disabled
-								>
-									{ __( 'Move to cart', 'woocommerce' ) }
-								</button>
-							</div>
+						<div className="wp-block-button wc-block-components-product-button">
 							<button
 								type="button"
-								className="wc-block-shopper-collection-item__remove"
+								className="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
 								disabled
 							>
-								{ __( 'Remove', 'woocommerce' ) }
+								{ __( 'Move to cart', 'woocommerce' ) }
 							</button>
 						</div>
 					</li>
