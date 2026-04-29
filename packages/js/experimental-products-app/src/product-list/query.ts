@@ -8,9 +8,9 @@ import type {
 	ProductType,
 } from '@woocommerce/data';
 
-export type ProductListQuery = ProductQuery & {
+export type ProductListQuery = Omit< ProductQuery, 'status' > & {
+	status?: ProductStatus | ProductStatus[];
 	search_name_or_sku?: string;
-	include_status?: ProductStatus[];
 	exclude_status?: ProductStatus[];
 	include_types?: ProductType[];
 	exclude_types?: ProductType[];
@@ -77,7 +77,7 @@ function applyStatusFilter( query: ProductListQuery, filter: Filter ) {
 		return;
 	}
 
-	query.include_status = values;
+	query.status = values.length === 1 ? values[ 0 ] : values;
 }
 
 function applyTypeFilter( query: ProductListQuery, filter: Filter ) {

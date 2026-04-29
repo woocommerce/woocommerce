@@ -83,7 +83,7 @@ const CategorySection = ( {
 											>
 												{ __(
 													'Insert',
-													'woocommerce'
+													__i18n_text_domain__
 												) }
 											</Button>
 											{ canSetURL && isURLTag && (
@@ -101,12 +101,15 @@ const CategorySection = ( {
 												>
 													{ __(
 														'Set as URL',
-														'woocommerce'
+														__i18n_text_domain__
 													) }
 												</Button>
 											) }
 											{ category ===
-												__( 'Link', 'woocommerce' ) &&
+												__(
+													'Link',
+													__i18n_text_domain__
+												) &&
 												canInsertLink && (
 													<>
 														<Button
@@ -120,7 +123,7 @@ const CategorySection = ( {
 														>
 															{ __(
 																'Insert as link',
-																'woocommerce'
+																__i18n_text_domain__
 															) }
 														</Button>
 													</>
