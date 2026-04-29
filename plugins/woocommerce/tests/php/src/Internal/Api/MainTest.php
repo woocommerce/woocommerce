@@ -228,22 +228,26 @@ class MainTest extends WC_Unit_Test_Case {
 	 * @testdox handle_rest_api_init_for_core registers the /wc/graphql route when the feature is enabled.
 	 */
 	public function test_handle_rest_api_init_for_core_registers_route_when_enabled(): void {
-		// Make sure the route isn't already registered from a prior bootstrap.
-		$server = rest_get_server();
-		$routes = $server->get_routes();
-		if ( isset( $routes['/wc/graphql'] ) ) {
-			// Force reset by reflection so we can observe registration deterministically.
-			$reflection = new \ReflectionClass( $server );
-			$prop       = $reflection->getProperty( 'endpoints' );
-			$prop->setAccessible( true );
-			$endpoints = $prop->getValue( $server );
+		// Snapshot the original endpoints so we can restore them after the test,
+		// regardless of what the SUT does to the shared WP_REST_Server.
+		$server              = rest_get_server();
+		$reflection          = new \ReflectionClass( $server );
+		$prop                = $reflection->getProperty( 'endpoints' );
+		$prop->setAccessible( true );
+		$original_endpoints  = $prop->getValue( $server );
+
+		try {
+			// Force reset so we can observe registration deterministically.
+			$endpoints = $original_endpoints;
 			unset( $endpoints['/wc/graphql'] );
 			$prop->setValue( $server, $endpoints );
+
+			Main::handle_rest_api_init_for_core();
+
+			$this->assertArrayHasKey( '/wc/graphql', rest_get_server()->get_routes() );
+		} finally {
+			$prop->setValue( $server, $original_endpoints );
 		}
-
-		Main::handle_rest_api_init_for_core();
-
-		$this->assertArrayHasKey( '/wc/graphql', rest_get_server()->get_routes() );
 	}
 
 	/**
@@ -252,19 +256,25 @@ class MainTest extends WC_Unit_Test_Case {
 	public function test_handle_rest_api_init_for_core_is_noop_when_disabled(): void {
 		$this->enable_or_disable_feature( false );
 
-		// Reset the routes container so any pre-existing registration isn't
-		// mistaken for a fresh call.
-		$server     = rest_get_server();
-		$reflection = new \ReflectionClass( $server );
-		$prop       = $reflection->getProperty( 'endpoints' );
+		// Snapshot the original endpoints so we can restore them after the test.
+		// Without this, removing /wc/graphql here would leak into later tests.
+		$server              = rest_get_server();
+		$reflection          = new \ReflectionClass( $server );
+		$prop                = $reflection->getProperty( 'endpoints' );
 		$prop->setAccessible( true );
-		$endpoints = $prop->getValue( $server );
-		unset( $endpoints['/wc/graphql'] );
-		$prop->setValue( $server, $endpoints );
+		$original_endpoints  = $prop->getValue( $server );
 
-		Main::handle_rest_api_init_for_core();
+		try {
+			$endpoints = $original_endpoints;
+			unset( $endpoints['/wc/graphql'] );
+			$prop->setValue( $server, $endpoints );
 
-		$this->assertArrayNotHasKey( '/wc/graphql', rest_get_server()->get_routes() );
+			Main::handle_rest_api_init_for_core();
+
+			$this->assertArrayNotHasKey( '/wc/graphql', rest_get_server()->get_routes() );
+		} finally {
+			$prop->setValue( $server, $original_endpoints );
+		}
 	}
 
 	/**
