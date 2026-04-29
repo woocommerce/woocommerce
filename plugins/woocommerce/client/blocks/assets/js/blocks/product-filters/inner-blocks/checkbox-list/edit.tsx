@@ -49,8 +49,8 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		customOptionElement,
 		customLabelElement,
 	} = attributes;
-	const selectableItems = context[ 'woocommerce/selectableItems' ];
-	const { isLoading, items } = selectableItems;
+	const { isLoading = false, items } =
+		context[ 'woocommerce/selectableItems' ] ?? {};
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const blockProps = useBlockProps( {
