@@ -91,7 +91,7 @@ canMakePayment( {
 } )
 ```
 
-`canMakePayment` returns a boolean value. If your gateway needs to perform async initialization to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: [`Cash on delivery`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/client/blocks/assets/js/extensions/payment-methods/cod/index.js)); or for payment methods to control whether they are available depending on other conditions.
+`canMakePayment` returns a boolean value. If your gateway needs to perform async initialization to determine availability, you can return a promise (resolving to boolean). This allows a payment method to be hidden based on the cart, e.g. if the cart has physical/shippable products (example: [`Cash on delivery`](https://github.com/woocommerce/woocommerce/blob/df02d62e2d41e9007da44cb87fea2b7a9551f55c/plugins/woocommerce/client/blocks/assets/js/extensions/payment-methods/cod/index.js#L46-L73)); or for payment methods to control whether they are available depending on other conditions.
 
 `canMakePayment` only runs on the frontend of the Store. In editor context, rather than use `canMakePayment`, the editor will assume the payment method is available (true) so that the defined `edit` component is shown to the merchant.
 
