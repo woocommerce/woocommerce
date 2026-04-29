@@ -133,22 +133,9 @@ export default function ProductEdit( { productIds }: ProductEditProps ) {
 		[ selectedProductIds ]
 	);
 
-	const { editEntityRecord, saveEditedEntityRecord } = useDispatch(
-		coreStore
-	) as {
-		editEntityRecord: (
-			kind: string,
-			name: string,
-			recordId: number,
-			edits: Partial< ProductEntityRecord >
-		) => void;
-		saveEditedEntityRecord: (
-			kind: string,
-			name: string,
-			recordId: number,
-			options?: { throwOnError?: boolean }
-		) => Promise< ProductEntityRecord >;
-	};
+	const { editEntityRecord, saveEditedEntityRecord } =
+		useDispatch( coreStore );
+
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
 

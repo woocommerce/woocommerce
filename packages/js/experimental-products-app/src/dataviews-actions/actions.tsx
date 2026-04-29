@@ -23,7 +23,7 @@ import { getProductListNavigationPath } from '../product-list/utils';
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
 type EditActionOptions = {
-	navigate?: ( path: string ) => void;
+	navigate: ( path: string ) => void;
 	path?: string;
 	query?: Record< string, string | undefined >;
 };
@@ -122,7 +122,7 @@ export const editAction = ( {
 	navigate,
 	path = '/',
 	query = {},
-}: EditActionOptions = {} ): Action< ProductEntityRecord > => ( {
+}: EditActionOptions ): Action< ProductEntityRecord > => ( {
 	id: 'edit-product',
 	label: __( 'Edit', 'woocommerce' ),
 	isPrimary: true,
@@ -134,16 +134,7 @@ export const editAction = ( {
 		const product = items[ 0 ];
 
 		if ( product ) {
-			if ( navigate ) {
-				navigate( getQuickEditPath( path, query, product.id ) );
-			} else {
-				window.location.href = getAdminLink(
-					addQueryArgs( 'post.php', {
-						post: product.id,
-						action: 'edit',
-					} )
-				);
-			}
+			navigate( getQuickEditPath( path, query, product.id ) );
 		}
 
 		if ( onActionPerformed ) {
