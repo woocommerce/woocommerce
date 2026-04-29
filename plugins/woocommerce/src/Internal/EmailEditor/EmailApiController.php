@@ -509,19 +509,37 @@ class EmailApiController {
 					'readonly'    => true,
 				),
 				'added_blocks'       => array(
-					'description' => __( 'Localized labels of blocks that would be added to the merchant post if the update were applied (in core, not in post).', 'woocommerce' ),
+					'description' => __( 'Blocks that would be added to the merchant post if the update were applied (in core, not in post). `path` is the core-side index path through the parsed block tree.', 'woocommerce' ),
 					'type'        => 'array',
-					'items'       => array( 'type' => 'string' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'label' => array( 'type' => 'string' ),
+							'path'  => array(
+								'type'  => 'array',
+								'items' => array( 'type' => array( 'integer', 'string' ) ),
+							),
+						),
+					),
 					'readonly'    => true,
 				),
 				'removed_blocks'     => array(
-					'description' => __( 'Localized labels of blocks that would be removed from the merchant post if the update were applied (in post, not in core).', 'woocommerce' ),
+					'description' => __( 'Blocks that would be removed from the merchant post if the update were applied (in post, not in core). `path` is the post-side index path through the parsed block tree.', 'woocommerce' ),
 					'type'        => 'array',
-					'items'       => array( 'type' => 'string' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'label' => array( 'type' => 'string' ),
+							'path'  => array(
+								'type'  => 'array',
+								'items' => array( 'type' => array( 'integer', 'string' ) ),
+							),
+						),
+					),
 					'readonly'    => true,
 				),
 				'copy_changes'       => array(
-					'description' => __( 'Block-level copy edits, truncated to 120 chars per side. `before` is the merchant\'s current text; `after` is the canonical core text.', 'woocommerce' ),
+					'description' => __( 'Block-level copy edits, truncated to 120 chars per side. `before` is the merchant\'s current text; `after` is the canonical core text. `path` is the post-side index path.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'       => 'object',
@@ -531,18 +549,26 @@ class EmailApiController {
 							'after'      => array( 'type' => 'string' ),
 							'occurrence' => array( 'type' => 'integer' ),
 							'total'      => array( 'type' => 'integer' ),
+							'path'       => array(
+								'type'  => 'array',
+								'items' => array( 'type' => array( 'integer', 'string' ) ),
+							),
 						),
 					),
 					'readonly'    => true,
 				),
 				'structural_changes' => array(
-					'description' => __( 'Structural deltas (reorder / nest) between the two trees.', 'woocommerce' ),
+					'description' => __( 'Structural deltas (reorder / nest) between the two trees. `path` is omitted on `kind: "reorder"` entries.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
 							'kind'        => array( 'type' => 'string' ),
 							'description' => array( 'type' => 'string' ),
+							'path'        => array(
+								'type'  => 'array',
+								'items' => array( 'type' => array( 'integer', 'string' ) ),
+							),
 						),
 					),
 					'readonly'    => true,
@@ -575,6 +601,14 @@ class EmailApiController {
 	 * 404 path mirrors {@see self::get_default_content_response()} — when the
 	 * email type cannot be resolved from the post ID, the post is either
 	 * non-existent or not a `woo_email`.
+	 *
+	 * The 200 path differs for valid posts that are NOT in
+	 * {@see WCEmailTemplateSyncRegistry}: `default-content` returns the
+	 * canonical content; `change-summary` returns a fallback payload with
+	 * `is_fallback: true` and a generic release-notes line because no
+	 * registered version is available to diff against. Consumers gating on
+	 * `is_fallback` should treat that case as "no actionable summary,"
+	 * regardless of HTTP status.
 	 *
 	 * @param WP_REST_Request $request The REST request.
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request

@@ -15,8 +15,8 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  * (e.g. `woo/email-content` → `woocommerce/email-content`) → run an LCS over
  * the resulting block-name sequences → classify the residue as added /
  * removed / copy / structural. Result is cached in a transient keyed on the
- * combined post + core content hashes plus locale, so any merchant edit or
- * core bump invalidates automatically.
+ * post ID, the post and core content hashes, and the active locale, so any
+ * merchant edit or core bump invalidates automatically.
  *
  * Hash input parity with {@see WCTransactionalEmailPostsGenerator::compute_canonical_post_content()}
  * is guaranteed by construction — both sides route through the same canonical
@@ -99,11 +99,11 @@ class WCEmailTemplateChangeSummary {
 	 *
 	 * - `version_from`        — `string`     — `_wc_email_template_version` meta on the post (may be empty).
 	 * - `version_to`          — `string`     — registry-side current version.
-	 * - `added_blocks`        — `string[]`   — labels of blocks that would be added to the post by applying (in core, not in post).
-	 * - `removed_blocks`      — `string[]`   — labels of blocks that would be removed from the post by applying (in post, not in core).
-	 * - `copy_changes`        — `array<int, array{block:string, before:string, after:string, occurrence:int, total:int}>`.
-	 *                           `before` is the merchant's current text; `after` is the canonical core text.
-	 * - `structural_changes`  — `array<int, array{kind:string, description:string}>`.
+	 * - `added_blocks`        — `array<int, array{label:string, path:array<int|string>}>` — blocks that would be added to the post by applying (in core, not in post). `path` is the core-side index path.
+	 * - `removed_blocks`      — `array<int, array{label:string, path:array<int|string>}>` — blocks that would be removed from the post by applying (in post, not in core). `path` is the post-side index path.
+	 * - `copy_changes`        — `array<int, array{block:string, before:string, after:string, occurrence:int, total:int, path:array<int|string>}>`.
+	 *                           `before` is the merchant's current text; `after` is the canonical core text. `path` is the post-side index path.
+	 * - `structural_changes`  — `array<int, array{kind:string, description:string, path?:array<int|string>}>` — `path` is omitted for `kind: 'reorder'` entries.
 	 * - `summary_lines`       — `string[]`   — pre-localized one-liners ready to render.
 	 * - `is_fallback`         — `bool`       — true when the diff could not be produced.
 	 * - `cache_hit`           — `bool`       — diagnostic.
@@ -343,8 +343,12 @@ class WCEmailTemplateChangeSummary {
 	}
 
 	/**
-	 * DFS-flatten a `parse_blocks()` result into an ordered sequence of leaf
-	 * descriptors. Skips null-name entries (raw HTML wrappers between blocks).
+	 * DFS-flatten a `parse_blocks()` result into an ordered sequence of node
+	 * descriptors (DFS pre-order: parent emitted before its children).
+	 * Structural wrapper blocks (`core/group`, `core/columns`, …) are included
+	 * in the output — the diff classifier inspects them via
+	 * {@see self::STRUCTURAL_BLOCK_NAMES}. Null-name entries (raw HTML wrappers
+	 * between blocks) are skipped.
 	 *
 	 * @param array<int|string, array<string, mixed>> $blocks      Output of `parse_blocks()`.
 	 * @param array<int|string>                       $path        Current index path from root.
@@ -402,10 +406,24 @@ class WCEmailTemplateChangeSummary {
 	/**
 	 * Diff two flattened record sequences.
 	 *
+	 * Each `added_blocks` / `removed_blocks` / `copy_changes` / `structural_changes`
+	 * entry carries a `path` field — the index path through the parsed block
+	 * tree on the side where the relevant block exists:
+	 *
+	 * - `added_blocks[].path`        — core-side path (where it would land if applied).
+	 * - `removed_blocks[].path`      — post-side path (where it currently sits).
+	 * - `copy_changes[].path`        — post-side path (the merchant's renderable surface).
+	 * - `structural_changes[].path`  — post-side for matched-pair moves; the
+	 *                                  unmatched side for wrapper additions/removals;
+	 *                                  omitted for `kind: 'reorder'` entries (no single block).
+	 *
+	 * RSM-143's selective-merge UI uses `path` to map per-block "Keep yours /
+	 * Use core" choices back to specific blocks during merge.
+	 *
 	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $core_records Core side.
 	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $post_records Post side.
 	 *
-	 * @return array{added_blocks:string[], removed_blocks:string[], copy_changes:array<int, array<string, mixed>>, structural_changes:array<int, array<string, mixed>>}
+	 * @return array{added_blocks:array<int, array<string, mixed>>, removed_blocks:array<int, array<string, mixed>>, copy_changes:array<int, array<string, mixed>>, structural_changes:array<int, array<string, mixed>>}
 	 */
 	private static function diff_records( array $core_records, array $post_records ): array {
 		$core_names = array_map( static fn( array $r ): string => $r['name'], $core_records );
@@ -429,73 +447,18 @@ class WCEmailTemplateChangeSummary {
 		// (in core, not in post). `removed_blocks` = blocks the merchant would
 		// lose by applying the update (in post, not in core). Same direction as
 		// `before` (yours) / `after` (core) on copy_changes.
-		foreach ( $core_records as $i => $rec ) {
-			if ( isset( $matched_core[ $i ] ) ) {
-				continue;
-			}
-			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
-				$structural_changes[] = array(
-					'kind'        => 'nest',
-					'description' => sprintf(
-						/* translators: %s: block name */
-						__( 'Added %s wrapper', 'woocommerce' ),
-						self::block_label( $rec['name'] )
-					),
-				);
-				continue;
-			}
-			$added_blocks[] = self::block_label( $rec['name'] );
-		}
+		//
+		// Pass order: matched pairs first, then unmatched. The matched-pair
+		// pass collects parent-name pairs whose mismatch will already produce
+		// a "Moved %1$s into %2$s" entry, so the unmatched-pass can suppress
+		// the redundant "Added/Removed %s wrapper" entry that would otherwise
+		// describe the same physical edit twice.
 
-		foreach ( $post_records as $i => $rec ) {
-			if ( isset( $matched_post[ $i ] ) ) {
-				continue;
-			}
-			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
-				$structural_changes[] = array(
-					'kind'        => 'nest',
-					'description' => sprintf(
-						/* translators: %s: block name */
-						__( 'Removed %s wrapper', 'woocommerce' ),
-						self::block_label( $rec['name'] )
-					),
-				);
-				continue;
-			}
-			$removed_blocks[] = self::block_label( $rec['name'] );
-		}
-
-		// Reorder pass: pair like-named entries between added and removed and
-		// reclassify them as a `reorder` structural change. LCS only matches
-		// in-order, so an actual reorder of matched blocks lands here as
-		// add+remove pairs.
-		$added_counts   = array_count_values( $added_blocks );
-		$removed_counts = array_count_values( $removed_blocks );
-		foreach ( $added_counts as $label => $a_count ) {
-			$r_count = $removed_counts[ $label ] ?? 0;
-			$pairs   = (int) min( $a_count, $r_count );
-			if ( $pairs <= 0 ) {
-				continue;
-			}
-			for ( $i = 0; $i < $pairs; $i++ ) {
-				$structural_changes[] = array(
-					'kind'        => 'reorder',
-					'description' => sprintf(
-						/* translators: %s: block name */
-						__( 'Reordered %s', 'woocommerce' ),
-						(string) $label
-					),
-				);
-			}
-			$added_counts[ $label ]   = $a_count - $pairs;
-			$removed_counts[ $label ] = $r_count - $pairs;
-		}
-		$added_blocks   = self::expand_counts( $added_counts );
-		$removed_blocks = self::expand_counts( $removed_counts );
-
-		// Classify matched pairs.
-		$core_name_counts = array_count_values( $core_names );
-		$occurrence_index = array();
+		// Pass 1: classify matched pairs.
+		$core_name_counts     = array_count_values( $core_names );
+		$occurrence_index     = array();
+		$matched_core_parents = array();
+		$matched_post_parents = array();
 		foreach ( $matches as $pair ) {
 			$core   = $core_records[ $pair[0] ];
 			$post_r = $post_records[ $pair[1] ];
@@ -516,7 +479,14 @@ class WCEmailTemplateChangeSummary {
 						$label,
 						null === $core['parent_name'] ? __( 'top level', 'woocommerce' ) : self::block_label( $core['parent_name'] )
 					),
+					'path'        => $post_r['path'],
 				);
+				if ( null !== $post_r['parent_name'] ) {
+					$matched_post_parents[ $post_r['parent_name'] ] = true;
+				}
+				if ( null !== $core['parent_name'] ) {
+					$matched_core_parents[ $core['parent_name'] ] = true;
+				}
 			}
 
 			if ( $core['inner_text'] !== $post_r['inner_text'] ) {
@@ -529,9 +499,100 @@ class WCEmailTemplateChangeSummary {
 					'after'      => self::truncate_text( $core['inner_text'] ),
 					'occurrence' => $occurrence_index[ $name ],
 					'total'      => $total,
+					'path'       => $post_r['path'],
 				);
 			}
 		}//end foreach
+
+		// Pass 2: classify unmatched core. Skip wrapper entry if a matched
+		// pair already names this wrapper as its core-side parent — that
+		// matched pair's "Moved into" entry covers the same physical edit.
+		foreach ( $core_records as $i => $rec ) {
+			if ( isset( $matched_core[ $i ] ) ) {
+				continue;
+			}
+			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
+				if ( isset( $matched_core_parents[ $rec['name'] ] ) ) {
+					continue;
+				}
+				$structural_changes[] = array(
+					'kind'        => 'nest',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Added %s wrapper', 'woocommerce' ),
+						self::block_label( $rec['name'] )
+					),
+					'path'        => $rec['path'],
+				);
+				continue;
+			}
+			$added_blocks[] = array(
+				'label' => self::block_label( $rec['name'] ),
+				'path'  => $rec['path'],
+			);
+		}//end foreach
+
+		// Pass 3: classify unmatched post, with the same wrapper suppression.
+		foreach ( $post_records as $i => $rec ) {
+			if ( isset( $matched_post[ $i ] ) ) {
+				continue;
+			}
+			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
+				if ( isset( $matched_post_parents[ $rec['name'] ] ) ) {
+					continue;
+				}
+				$structural_changes[] = array(
+					'kind'        => 'nest',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Removed %s wrapper', 'woocommerce' ),
+						self::block_label( $rec['name'] )
+					),
+					'path'        => $rec['path'],
+				);
+				continue;
+			}
+			$removed_blocks[] = array(
+				'label' => self::block_label( $rec['name'] ),
+				'path'  => $rec['path'],
+			);
+		}//end foreach
+
+		// Reorder pass: pair like-labelled entries between added and removed
+		// and reclassify them as a `reorder` structural change. LCS only
+		// matches in-order, so an actual reorder of matched blocks lands here
+		// as add+remove pairs. Reorder entries omit `path` because they
+		// describe a structural fact, not a single block.
+		$added_label_indices   = array();
+		$removed_label_indices = array();
+		foreach ( $added_blocks as $i => $entry ) {
+			$added_label_indices[ $entry['label'] ][] = $i;
+		}
+		foreach ( $removed_blocks as $i => $entry ) {
+			$removed_label_indices[ $entry['label'] ][] = $i;
+		}
+
+		$dropped_added   = array();
+		$dropped_removed = array();
+		foreach ( $added_label_indices as $label => $a_indices ) {
+			$r_indices = $removed_label_indices[ $label ] ?? array();
+			$pairs     = (int) min( count( $a_indices ), count( $r_indices ) );
+			for ( $i = 0; $i < $pairs; $i++ ) {
+				$structural_changes[] = array(
+					'kind'        => 'reorder',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Reordered %s', 'woocommerce' ),
+						(string) $label
+					),
+				);
+
+				$dropped_added[ $a_indices[ $i ] ]   = true;
+				$dropped_removed[ $r_indices[ $i ] ] = true;
+			}
+		}
+		$added_blocks   = self::reject_indices( $added_blocks, $dropped_added );
+		$removed_blocks = self::reject_indices( $removed_blocks, $dropped_removed );
 
 		return array(
 			'added_blocks'       => $added_blocks,
@@ -542,17 +603,20 @@ class WCEmailTemplateChangeSummary {
 	}
 
 	/**
-	 * Expand a label-count map back into a flat list. Used after the reorder
-	 * pass to rebuild added/removed arrays without the paired entries.
+	 * Drop entries at the given indices and return a re-indexed list. Used by
+	 * the reorder pass to remove paired entries from added/removed without
+	 * losing the rich shape of the survivors.
 	 *
-	 * @param array<string, int> $counts Map of label → count.
-	 * @return string[]
+	 * @param array<int, array<string, mixed>> $entries Source list.
+	 * @param array<int, true>                 $drop    Indices to drop.
+	 *
+	 * @return array<int, array<string, mixed>>
 	 */
-	private static function expand_counts( array $counts ): array {
+	private static function reject_indices( array $entries, array $drop ): array {
 		$out = array();
-		foreach ( $counts as $label => $count ) {
-			for ( $i = 0; $i < (int) $count; $i++ ) {
-				$out[] = (string) $label;
+		foreach ( $entries as $i => $entry ) {
+			if ( ! isset( $drop[ $i ] ) ) {
+				$out[] = $entry;
 			}
 		}
 		return $out;
@@ -717,16 +781,18 @@ class WCEmailTemplateChangeSummary {
 
 	/**
 	 * Render the structured payload into pre-localized one-liners, using a
-	 * fixed string catalog. The "(N of M)" disambiguator only fires when a
-	 * block label appears more than once on the matched side.
+	 * fixed string catalog. The "N of M" position-and-total disambiguator
+	 * (e.g. "Updated wording in Paragraph 1 of 2") only fires when a block
+	 * label appears more than once on the matched side.
 	 *
-	 * @param array{added_blocks:string[], removed_blocks:string[], copy_changes:array<int, array<string, mixed>>, structural_changes:array<int, array<string, mixed>>} $structured Diff output.
+	 * @param array{added_blocks:array<int, array<string, mixed>>, removed_blocks:array<int, array<string, mixed>>, copy_changes:array<int, array<string, mixed>>, structural_changes:array<int, array<string, mixed>>} $structured Diff output.
 	 * @return string[]
 	 */
 	private static function to_summary_lines( array $structured ): array {
 		$lines = array();
 
-		$added_counts = array_count_values( $structured['added_blocks'] );
+		$added_labels = array_map( static fn( array $e ): string => (string) ( $e['label'] ?? '' ), $structured['added_blocks'] );
+		$added_counts = array_count_values( array_filter( $added_labels, static fn( string $l ): bool => '' !== $l ) );
 		foreach ( $added_counts as $label => $count ) {
 			$count = (int) $count;
 			if ( 1 === $count ) {
@@ -745,7 +811,8 @@ class WCEmailTemplateChangeSummary {
 			}
 		}
 
-		$removed_counts = array_count_values( $structured['removed_blocks'] );
+		$removed_labels = array_map( static fn( array $e ): string => (string) ( $e['label'] ?? '' ), $structured['removed_blocks'] );
+		$removed_counts = array_count_values( array_filter( $removed_labels, static fn( string $l ): bool => '' !== $l ) );
 		foreach ( $removed_counts as $label => $count ) {
 			$count = (int) $count;
 			if ( 1 === $count ) {

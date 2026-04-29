@@ -99,12 +99,22 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 
 		// Yours → core convention: applying would REMOVE the merchant's image
 		// (it's in their post, not in core) and ADD the goodbye paragraph
-		// (it's in core, not in their post).
+		// (it's in core, not in their post). Each entry carries a `path`.
 		$this->assertArrayHasKey( 'removed_blocks', $result );
-		$this->assertContains( 'Image', $result['removed_blocks'] );
+		$this->assertContains( 'Image', array_column( $result['removed_blocks'], 'label' ) );
 
 		$this->assertArrayHasKey( 'added_blocks', $result );
-		$this->assertContains( 'Paragraph', $result['added_blocks'] );
+		$this->assertContains( 'Paragraph', array_column( $result['added_blocks'], 'label' ) );
+
+		// Path field present on every rich entry.
+		foreach ( $result['removed_blocks'] as $entry ) {
+			$this->assertArrayHasKey( 'path', $entry );
+			$this->assertIsArray( $entry['path'] );
+		}
+		foreach ( $result['added_blocks'] as $entry ) {
+			$this->assertArrayHasKey( 'path', $entry );
+			$this->assertIsArray( $entry['path'] );
+		}
 
 		$this->assertArrayHasKey( 'copy_changes', $result );
 		$this->assertCount( 1, $result['copy_changes'] );
@@ -112,6 +122,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 		// `before` = merchant's current post; `after` = canonical core text.
 		$this->assertSame( 'Edited line.', $result['copy_changes'][0]['before'] );
 		$this->assertSame( 'Original line.', $result['copy_changes'][0]['after'] );
+		$this->assertArrayHasKey( 'path', $result['copy_changes'][0] );
+		$this->assertIsArray( $result['copy_changes'][0]['path'] );
 
 		$this->assertArrayHasKey( 'summary_lines', $result );
 		$this->assertNotEmpty( $result['summary_lines'] );
@@ -166,12 +178,53 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 		$result = WCEmailTemplateChangeSummary::summarize( $post_id );
 
 		$this->assertFalse( $result['is_fallback'] );
-		$this->assertNotContains( 'Paragraph', $result['added_blocks'] );
-		$this->assertNotContains( 'Paragraph', $result['removed_blocks'] );
+		$this->assertNotContains( 'Paragraph', array_column( $result['added_blocks'], 'label' ) );
+		$this->assertNotContains( 'Paragraph', array_column( $result['removed_blocks'], 'label' ) );
 
 		$this->assertNotEmpty( $result['structural_changes'] );
 		$kinds = array_map( static fn( $c ): string => (string) ( $c['kind'] ?? '' ), $result['structural_changes'] );
 		$this->assertContains( 'nest', $kinds );
+
+		// Wrapper-suppression rule: every matched paragraph emits a "Moved
+		// Paragraph into top level" entry; the bare "Removed Group wrapper"
+		// entry is suppressed because the matched-pair entries already cover
+		// the same physical edit.
+		$descriptions = array_map( static fn( $c ): string => (string) ( $c['description'] ?? '' ), $result['structural_changes'] );
+		foreach ( $descriptions as $description ) {
+			$this->assertStringNotContainsString( 'Group wrapper', $description, 'Group wrapper entry must be suppressed when matched pairs cover the move.' );
+		}
+	}
+
+	/**
+	 * Wrapper suppression must not over-suppress: when the unmatched
+	 * structural block has no matched pair pointing at it as a parent, the
+	 * wrapper entry is the only place the change shows up and must be kept.
+	 *
+	 * Fixture: post wraps a Heading (different name from core's Paragraph) in
+	 * a Group. LCS finds no matches. Group has no matched-pair child with
+	 * parent=Group, so its "Removed Group wrapper" entry must remain.
+	 */
+	public function test_summarize_keeps_wrapper_entry_when_no_matched_pair_covers_it(): void {
+		$email_id = 'change_summary_wrapper_keep';
+		$this->register_fixture_email( $email_id );
+
+		$core_content = "<!-- wp:paragraph -->\n<p>Core paragraph.</p>\n<!-- /wp:paragraph -->";
+		$post_content = "<!-- wp:group -->\n<div class=\"wp-block-group\">"
+			. "<!-- wp:heading -->\n<h2>Merchant heading.</h2>\n<!-- /wp:heading -->"
+			. "</div>\n<!-- /wp:group -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		$result = WCEmailTemplateChangeSummary::summarize( $post_id );
+
+		$this->assertFalse( $result['is_fallback'] );
+		$descriptions = array_map( static fn( $c ): string => (string) ( $c['description'] ?? '' ), $result['structural_changes'] );
+		$this->assertContains(
+			'Removed Group wrapper',
+			$descriptions,
+			'Group wrapper entry must NOT be suppressed when no matched pair points at Group as a parent.'
+		);
 	}
 
 	/**
@@ -208,7 +261,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 		// Yours → core convention: the inserted heading is in the post but not
 		// in core, so applying would REMOVE it.
 		$this->assertCount( 1, $result['removed_blocks'], 'Only the inserted heading should be reported.' );
-		$this->assertSame( 'Heading', $result['removed_blocks'][0] );
+		$this->assertSame( 'Heading', $result['removed_blocks'][0]['label'] );
+		$this->assertIsArray( $result['removed_blocks'][0]['path'] );
 		$this->assertEmpty( $result['added_blocks'] );
 		$this->assertEmpty( $result['copy_changes'], 'No spurious copy_changes should cascade through indices 2..6.' );
 	}
