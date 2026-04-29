@@ -227,7 +227,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 
 			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
 			switch_theme( $original_theme );
-		}
+		}//end try
 	}
 
 	/**

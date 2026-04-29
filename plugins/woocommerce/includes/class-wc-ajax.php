@@ -802,9 +802,9 @@ class WC_AJAX {
 							'slug'    => $term->slug,
 						)
 					);
-				}
-			}
-		}
+				}//end if
+			}//end if
+		}//end if
 		wp_die( -1 );
 	}
 
