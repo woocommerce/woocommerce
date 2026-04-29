@@ -30,15 +30,24 @@ final class ProductFilterActive extends AbstractBlock {
 
 		$active_filters = $block->context['activeFilters'];
 
-		$removable_items = array_map(
-			function ( $item ) {
-				return array(
-					'type'  => $item['type'] ?? '',
-					'value' => $item['value'] ?? '',
-					'label' => $item['activeLabel'] ?? ( $item['label'] ?? '' ),
-				);
-			},
-			$active_filters
+		$removable_items = array_values(
+			array_filter(
+				array_map(
+					function ( $item ) {
+						$type  = $item['type'] ?? '';
+						$value = $item['value'] ?? '';
+						if ( '' === $type || '' === $value ) {
+							return null;
+						}
+						return array(
+							'type'  => $type,
+							'value' => $value,
+							'label' => $item['activeLabel'] ?? ( $item['label'] ?? '' ),
+						);
+					},
+					$active_filters
+				)
+			)
 		);
 
 		$filter_context = array(

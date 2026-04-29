@@ -192,4 +192,9 @@
 	&:hover {
 		text-decoration: none;
 	}
+
+	&:focus {
+		outline: 1px dotted currentColor;
+		outline-offset: 2px;
+	}
 }

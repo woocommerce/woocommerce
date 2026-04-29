@@ -43,7 +43,7 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		$max_range  = $range_data['max'];
 
 		if ( $min_range === $max_range ) {
-			return;
+			return '';
 		}
 
 		$classes = '';
