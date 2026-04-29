@@ -406,7 +406,7 @@ class WCEmailTemplateChangeSummary {
 		$core_names = array_map( static fn( array $r ): string => $r['name'], $core_records );
 		$post_names = array_map( static fn( array $r ): string => $r['name'], $post_records );
 
-		$matches = self::lcs_matches( $core_names, $post_names );
+		$matches = self::lcs_matches( $core_records, $post_records );
 
 		$matched_core = array();
 		$matched_post = array();
@@ -555,11 +555,29 @@ class WCEmailTemplateChangeSummary {
 	}
 
 	/**
-	 * Compute LCS over two name sequences. Returns the matched pairs as
-	 * (core_index, post_index) tuples in increasing order on both axes.
+	 * Bonus weight per name match used to tiebreak by text similarity. Must be
+	 * small enough that cardinality always dominates: with sequences up to ~100
+	 * blocks long, the total accumulated bonus is bounded by 0.1 — well under
+	 * the +1.0 contribution of an extra name match.
+	 */
+	private const LCS_SIMILARITY_BONUS = 0.001;
+
+	/**
+	 * Compute LCS over two flattened record sequences with text similarity as
+	 * a tiebreaker. Returns matched pairs as `(core_index, post_index)` tuples
+	 * in increasing order on both axes.
 	 *
-	 * @param string[] $a First sequence (core).
-	 * @param string[] $b Second sequence (post).
+	 * Cardinality (number of name matches) is the primary criterion. When two
+	 * alignments tie on cardinality — common on uniform block-name runs like
+	 * `paragraph × N` — the diagonal score adds a tiny bonus proportional to
+	 * the Jaccard word similarity of the two records' inner text. The bonus is
+	 * bounded so it can never trade a name match for a similarity gain. Net
+	 * effect: when the merchant edits an existing paragraph, the LCS pairs
+	 * their edited version with core's original (high word overlap) instead of
+	 * with an unrelated paragraph that happens to be in the right position.
+	 *
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $a Core records.
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $b Post records.
 	 *
 	 * @return array<int, array{0:int, 1:int}>
 	 */
@@ -570,26 +588,50 @@ class WCEmailTemplateChangeSummary {
 			return array();
 		}
 
-		$dp = array_fill( 0, $n + 1, array_fill( 0, $m + 1, 0 ) );
+		$dp = array_fill( 0, $n + 1, array_fill( 0, $m + 1, 0.0 ) );
 		for ( $i = 1; $i <= $n; $i++ ) {
 			for ( $j = 1; $j <= $m; $j++ ) {
-				if ( $a[ $i - 1 ] === $b[ $j - 1 ] ) {
-					$dp[ $i ][ $j ] = $dp[ $i - 1 ][ $j - 1 ] + 1;
+				$up   = $dp[ $i - 1 ][ $j ];
+				$left = $dp[ $i ][ $j - 1 ];
+				if ( $a[ $i - 1 ]['name'] === $b[ $j - 1 ]['name'] ) {
+					$bonus = self::LCS_SIMILARITY_BONUS * self::similarity_score(
+						$a[ $i - 1 ]['inner_text'],
+						$b[ $j - 1 ]['inner_text']
+					);
+					// Must compare against `up` and `left` even when names
+					// match: the bonus on the diagonal can be smaller than
+					// bonuses already accumulated in `up` / `left`. Taking the
+					// diagonal unconditionally would discard a higher-scoring
+					// alignment found via a different path. Cardinality is
+					// preserved because the max bonus per match is far below
+					// 1.0, so the diagonal still wins whenever it adds a new
+					// name match.
+					$diagonal       = $dp[ $i - 1 ][ $j - 1 ] + 1.0 + $bonus;
+					$dp[ $i ][ $j ] = max( $diagonal, $up, $left );
 				} else {
-					$dp[ $i ][ $j ] = max( $dp[ $i - 1 ][ $j ], $dp[ $i ][ $j - 1 ] );
+					$dp[ $i ][ $j ] = max( $up, $left );
 				}
-			}
-		}
+			}//end for
+		}//end for
 
 		$pairs = array();
 		$i     = $n;
 		$j     = $m;
 		while ( $i > 0 && $j > 0 ) {
-			if ( $a[ $i - 1 ] === $b[ $j - 1 ] ) {
-				$pairs[] = array( $i - 1, $j - 1 );
-				--$i;
-				--$j;
-			} elseif ( $dp[ $i - 1 ][ $j ] >= $dp[ $i ][ $j - 1 ] ) {
+			if ( $a[ $i - 1 ]['name'] === $b[ $j - 1 ]['name'] ) {
+				$bonus          = self::LCS_SIMILARITY_BONUS * self::similarity_score(
+					$a[ $i - 1 ]['inner_text'],
+					$b[ $j - 1 ]['inner_text']
+				);
+				$diagonal_score = $dp[ $i - 1 ][ $j - 1 ] + 1.0 + $bonus;
+				if ( abs( $dp[ $i ][ $j ] - $diagonal_score ) < 1e-9 ) {
+					$pairs[] = array( $i - 1, $j - 1 );
+					--$i;
+					--$j;
+					continue;
+				}
+			}
+			if ( $dp[ $i - 1 ][ $j ] >= $dp[ $i ][ $j - 1 ] ) {
 				--$i;
 			} else {
 				--$j;
@@ -597,6 +639,38 @@ class WCEmailTemplateChangeSummary {
 		}
 
 		return array_reverse( $pairs );
+	}
+
+	/**
+	 * Jaccard word-set similarity in [0.0, 1.0]. Used purely as an LCS
+	 * tiebreaker, so robustness is more important than linguistic accuracy:
+	 * lowercase + split on whitespace + intersect-over-union of the resulting
+	 * word sets. Two empty strings score 1.0 (treated as identical).
+	 *
+	 * @param string $a First text.
+	 * @param string $b Second text.
+	 */
+	private static function similarity_score( string $a, string $b ): float {
+		$a = trim( $a );
+		$b = trim( $b );
+		if ( '' === $a && '' === $b ) {
+			return 1.0;
+		}
+		if ( '' === $a || '' === $b ) {
+			return 0.0;
+		}
+
+		$split_a = preg_split( '/\s+/', strtolower( $a ), -1, PREG_SPLIT_NO_EMPTY );
+		$split_b = preg_split( '/\s+/', strtolower( $b ), -1, PREG_SPLIT_NO_EMPTY );
+		$words_a = array_unique( false === $split_a ? array() : $split_a );
+		$words_b = array_unique( false === $split_b ? array() : $split_b );
+		if ( empty( $words_a ) && empty( $words_b ) ) {
+			return 1.0;
+		}
+
+		$intersect = count( array_intersect( $words_a, $words_b ) );
+		$union     = count( array_unique( array_merge( $words_a, $words_b ) ) );
+		return $union > 0 ? $intersect / $union : 0.0;
 	}
 
 	/**
@@ -693,8 +767,8 @@ class WCEmailTemplateChangeSummary {
 
 			if ( $total > 1 ) {
 				$lines[] = sprintf(
-					/* translators: 1: block name; 2: occurrence number; 3: total occurrences */
-					__( 'Updated wording in %1$s (%2$d of %3$d)', 'woocommerce' ),
+					/* translators: 1: block name (e.g. "Paragraph"); 2: position of the edited block (e.g. 1); 3: total blocks of that type in the template (e.g. 2). Reads as "Updated wording in Paragraph 1 of 2". */
+					__( 'Updated wording in %1$s %2$d of %3$d', 'woocommerce' ),
 					$label,
 					$occurrence,
 					$total

@@ -214,6 +214,49 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Similarity-scored LCS picks the text-similar pairing when names tie.
+	 *
+	 * Without similarity scoring, name-only LCS over a uniform paragraph run
+	 * can pair the merchant's edited paragraph with an unrelated one in the
+	 * post, attributing the wrong "before" / "after" to the copy_change. With
+	 * the bonus, the LCS prefers the pairing where matched pairs share the
+	 * most words.
+	 */
+	public function test_summarize_prefers_text_similar_pairing_in_uniform_block_runs(): void {
+		$email_id = 'change_summary_similarity';
+		$this->register_fixture_email( $email_id );
+
+		$core_content = "<!-- wp:heading -->\n<h2>Welcome</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>You have received a new order from a customer.</p>\n<!-- /wp:paragraph -->";
+
+		// Merchant kept core's paragraph (with a small "Nice." prefix) and
+		// added two unrelated paragraphs after it. Without similarity scoring,
+		// LCS could pair the matched core Paragraph with any of the three
+		// post Paragraphs by name alone — typically the last one.
+		$post_content = "<!-- wp:heading -->\n<h2>Welcome</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Nice. You have received a new order from a customer.</p>\n<!-- /wp:paragraph -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Random promotional text.</p>\n<!-- /wp:paragraph -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Some other unrelated note.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		$result = WCEmailTemplateChangeSummary::summarize( $post_id );
+
+		$this->assertFalse( $result['is_fallback'] );
+		$this->assertCount( 1, $result['copy_changes'], 'Exactly one paragraph should be matched and flagged as a copy_change.' );
+		// The matched paragraph must be the high-similarity pairing — the
+		// merchant's "Nice. You have received..." against core's "You have
+		// received...". Bare position-based LCS would have paired core's
+		// paragraph with the third post paragraph and put "Some other
+		// unrelated note." in `before`.
+		$this->assertSame( 'Nice. You have received a new order from a customer.', $result['copy_changes'][0]['before'] );
+		$this->assertSame( 'You have received a new order from a customer.', $result['copy_changes'][0]['after'] );
+		// The two truly unrelated paragraphs should be the unmatched ones.
+		$this->assertCount( 2, $result['removed_blocks'] );
+	}
+
+	/**
 	 * Summary-inversion guard: a heavily one-sided expansion (5+ added, 0
 	 * removed, 0 copy, ≥1.5x core size) trips the guard and falls back.
 	 */
