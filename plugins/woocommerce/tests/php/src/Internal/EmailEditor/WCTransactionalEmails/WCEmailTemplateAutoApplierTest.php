@@ -721,6 +721,82 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The candidate query must accept any non-trash post status — generated
+	 * woo_email posts default to `publish` but third-party flows may move them
+	 * to `draft` / `private` / `pending` / `future` and those must not be
+	 * silently skipped.
+	 *
+	 * @dataProvider provider_non_trash_post_statuses
+	 *
+	 * @param string $post_status Post status to stamp on the candidate.
+	 */
+	public function test_run_applies_to_candidate_regardless_of_non_trash_post_status( string $post_status ): void {
+		global $wpdb;
+
+		$post_id = $this->generate_stamped_post( 'wc_test_run_status_' . $post_status );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED );
+
+		// Flip status via a direct UPDATE: wp_update_post calls map_meta_cap, which
+		// emits a _doing_it_wrong notice in the unit-test bootstrap because the
+		// woo_email post type is not registered there (Integration::initialize() is
+		// not run). The candidate query is the surface under test; status flipping
+		// is incidental.
+		$wpdb->update( $wpdb->posts, array( 'post_status' => $post_status ), array( 'ID' => $post_id ) );
+		clean_post_cache( $post_id );
+
+		WCEmailTemplateAutoApplier::run();
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			"Auto-applier must process candidates whose post_status is {$post_status}."
+		);
+	}
+
+	/**
+	 * Data provider for {@see self::test_run_applies_to_candidate_regardless_of_non_trash_post_status()}.
+	 *
+	 * `pending` is intentionally omitted: WP's `wp_update_post` invokes
+	 * `map_meta_cap('publish_post', ...)` for any write touching a pending post,
+	 * which emits a _doing_it_wrong notice in the unit-test bootstrap because the
+	 * `woo_email` post type is not registered there. Pending isn't a realistic
+	 * status for transactional email templates anyway.
+	 *
+	 * @return array<string, array<int, string>>
+	 */
+	public function provider_non_trash_post_statuses(): array {
+		return array(
+			'draft'   => array( 'draft' ),
+			'private' => array( 'private' ),
+			'future'  => array( 'future' ),
+		);
+	}
+
+	/**
+	 * Trashed posts must NOT be picked up by the candidate query — the WP_Query
+	 * `post_status=any` clause already excludes the trash bucket and we want to
+	 * lock that in.
+	 */
+	public function test_run_skips_trashed_posts(): void {
+		$post_id = $this->generate_stamped_post( 'wc_test_run_trashed' );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED );
+
+		wp_trash_post( $post_id );
+		clean_post_cache( $post_id );
+
+		$content_before = (string) get_post( $post_id )->post_content;
+
+		WCEmailTemplateAutoApplier::run();
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Trashed posts must not have their status flipped by the auto-applier.'
+		);
+		$this->assertSame( $content_before, (string) get_post( $post_id )->post_content );
+	}
+
+	/**
 	 * Firing the divergence-sweep completion action must trigger the auto-applier
 	 * to enqueue an AS job. This locks in the wiring that lives in
 	 * Integration::register_hooks().

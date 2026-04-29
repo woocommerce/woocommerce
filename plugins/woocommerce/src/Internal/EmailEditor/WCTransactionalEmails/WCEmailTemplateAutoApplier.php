@@ -39,11 +39,14 @@ class WCEmailTemplateAutoApplier {
 	/**
 	 * Action Scheduler group for the batched auto-apply runner.
 	 *
-	 * Internal AS plumbing — not intended for extension consumption.
+	 * Internal AS plumbing — not intended for extension consumption. The
+	 * `woocommerce-email-editor` namespace is reserved for the standalone email
+	 * editor package; integration glue lives under
+	 * `woocommerce-email-editor-integration` to keep the boundary explicit.
 	 *
 	 * @var string
 	 */
-	public const AUTO_APPLY_AS_GROUP = 'woocommerce-email-editor';
+	public const AUTO_APPLY_AS_GROUP = 'woocommerce-email-editor-integration';
 
 	/**
 	 * Re-entrancy flag set while the atom rewrites a post.
@@ -232,10 +235,13 @@ class WCEmailTemplateAutoApplier {
 			return;
 		}
 
+		// `post_status=any` includes draft / private / pending / future and
+		// excludes trash / auto-draft / inherit — anything not in the trash bucket
+		// is fair game for auto-apply.
 		$candidate_ids = get_posts(
 			array(
 				'post_type'      => \Automattic\WooCommerce\Internal\EmailEditor\Integration::EMAIL_POST_TYPE,
-				'post_status'    => 'publish',
+				'post_status'    => 'any',
 				'posts_per_page' => -1,
 				'fields'         => 'ids',
 				'no_found_rows'  => true,
