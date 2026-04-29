@@ -350,13 +350,20 @@ class WCEmailTemplateChangeSummary {
 	 * {@see self::STRUCTURAL_BLOCK_NAMES}. Null-name entries (raw HTML wrappers
 	 * between blocks) are skipped.
 	 *
+	 * Public so the RSM-143 selective-merge engine
+	 * ({@see WCEmailTemplateSelectiveApplier}) can reuse this and
+	 * {@see self::lcs_matches()} to align matched pairs without duplicating the
+	 * algorithm. Internal namespace-bounded; not part of any external contract.
+	 *
+	 * @internal
+	 *
 	 * @param array<int|string, array<string, mixed>> $blocks      Output of `parse_blocks()`.
 	 * @param array<int|string>                       $path        Current index path from root.
 	 * @param string|null                             $parent_name Normalized parent block name, null at root.
 	 *
 	 * @return array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}>
 	 */
-	private static function flatten_blocks( array $blocks, array $path = array(), ?string $parent_name = null ): array {
+	public static function flatten_blocks( array $blocks, array $path = array(), ?string $parent_name = null ): array {
 		$records = array();
 		foreach ( $blocks as $idx => $block ) {
 			if ( ! is_array( $block ) || null === ( $block['blockName'] ?? null ) ) {
@@ -657,12 +664,18 @@ class WCEmailTemplateChangeSummary {
 	 * their edited version with core's original (high word overlap) instead of
 	 * with an unrelated paragraph that happens to be in the right position.
 	 *
+	 * Public so {@see WCEmailTemplateSelectiveApplier} can reuse the same
+	 * matched-pair alignment when applying merchant choices. Internal-namespace
+	 * bounded; not part of any external contract.
+	 *
+	 * @internal
+	 *
 	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $a Core records.
 	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $b Post records.
 	 *
 	 * @return array<int, array{0:int, 1:int}>
 	 */
-	private static function lcs_matches( array $a, array $b ): array {
+	public static function lcs_matches( array $a, array $b ): array {
 		$n = count( $a );
 		$m = count( $b );
 		if ( 0 === $n || 0 === $m ) {
