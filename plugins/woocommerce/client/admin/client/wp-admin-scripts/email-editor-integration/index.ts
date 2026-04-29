@@ -5,6 +5,7 @@
  */
 import { addFilter, addAction } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
+import { registerPlugin } from '@wordpress/plugins';
 import {
 	initializeEditor,
 	registerEntityAction,
@@ -18,6 +19,7 @@ import { modifyTemplateSidebar } from './templates';
 import { modifySidebar } from './sidebar_settings';
 import { registerEmailValidationRules } from './email-validation';
 import getResetNotificationEmailContentAction from './reset-notification-email-content';
+import { ReviewUpdatePlugin } from './review-update-plugin';
 
 import './style.scss';
 
@@ -72,6 +74,15 @@ addFilter( 'woocommerce_email_editor_create_coupon_handler', NAME_SPACE, () => {
 modifySidebar();
 modifyTemplateSidebar();
 registerEmailValidationRules();
+
+// Register the review-update plugin (RSM-143). Mounts an interim trigger
+// button into the email actions slot and renders the review drawer when
+// clicked. RSM-141 will replace the interim trigger with the design's
+// floating editor banner.
+registerPlugin( 'woocommerce-email-editor-review-update', {
+	scope: 'woocommerce-email-editor',
+	render: ReviewUpdatePlugin,
+} );
 
 /**
  * Register the reset notification email content entity action for the woo_email post type.
