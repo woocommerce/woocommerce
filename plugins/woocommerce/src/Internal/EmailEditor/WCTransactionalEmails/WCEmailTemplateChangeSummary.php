@@ -166,20 +166,25 @@ class WCEmailTemplateChangeSummary {
 		$post_hash = sha1( $post_content );
 		$core_hash = sha1( $core_content );
 
-		if ( $post_hash === $core_hash ) {
-			$payload                  = self::empty_payload();
-			$payload['version_from']  = $version_from;
-			$payload['version_to']    = $version_to;
-			$payload['summary_lines'] = array( __( 'No visible changes since this template was last applied.', 'woocommerce' ) );
-			$payload['is_fallback']   = true;
-			return $payload;
-		}
-
 		$cache_key = self::cache_key( $post_id, $post_hash, $core_hash, self::current_locale() );
 		$cached    = get_transient( $cache_key );
 		if ( is_array( $cached ) ) {
 			$cached['cache_hit'] = true;
 			return $cached;
+		}
+
+		// In-sync zero-result: post and core hash to the same content. Successful
+		// diff with no deltas. `is_fallback` stays false (the docblock contract:
+		// fallback = "diff could not be produced," not "diff produced no
+		// changes"). Empty `summary_lines` lets consumers detect the no-op state
+		// by emptiness alone — they construct any "you're up to date" copy
+		// themselves.
+		if ( $post_hash === $core_hash ) {
+			$payload                 = self::empty_payload();
+			$payload['version_from'] = $version_from;
+			$payload['version_to']   = $version_to;
+			self::write_cache( $cache_key, $payload );
+			return $payload;
 		}
 
 		$post_records = self::flatten_blocks( parse_blocks( $post_content ) );
@@ -404,7 +409,6 @@ class WCEmailTemplateChangeSummary {
 	 */
 	private static function diff_records( array $core_records, array $post_records ): array {
 		$core_names = array_map( static fn( array $r ): string => $r['name'], $core_records );
-		$post_names = array_map( static fn( array $r ): string => $r['name'], $post_records );
 
 		$matches = self::lcs_matches( $core_records, $post_records );
 

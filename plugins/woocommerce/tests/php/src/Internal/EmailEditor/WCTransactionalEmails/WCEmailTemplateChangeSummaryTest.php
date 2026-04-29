@@ -316,10 +316,14 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Identical post and core content emits the "no visible changes" line and
-	 * is_fallback: true.
+	 * Identical post and core content returns a successful zero-result: empty
+	 * structured arrays, empty summary_lines, is_fallback: false.
+	 *
+	 * `is_fallback` is reserved for "diff could not be produced." A no-op is a
+	 * successful result — consumers detect it by the absence of deltas and
+	 * render any "you're up to date" copy themselves.
 	 */
-	public function test_summarize_returns_no_changes_when_post_equals_core(): void {
+	public function test_summarize_returns_empty_payload_when_post_equals_core(): void {
 		$email_id = 'change_summary_identical';
 		$this->register_fixture_email( $email_id );
 
@@ -330,11 +334,35 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 
 		$result = WCEmailTemplateChangeSummary::summarize( $post_id );
 
-		$this->assertTrue( $result['is_fallback'] );
-		$this->assertSame(
-			array( __( 'No visible changes since this template was last applied.', 'woocommerce' ) ),
-			$result['summary_lines']
-		);
+		$this->assertFalse( $result['is_fallback'] );
+		$this->assertSame( array(), $result['summary_lines'] );
+		$this->assertSame( array(), $result['added_blocks'] );
+		$this->assertSame( array(), $result['removed_blocks'] );
+		$this->assertSame( array(), $result['copy_changes'] );
+		$this->assertSame( array(), $result['structural_changes'] );
+	}
+
+	/**
+	 * The in-sync zero-result is cached like every other path. Second call for
+	 * the same content reports cache_hit: true.
+	 */
+	public function test_summarize_caches_in_sync_zero_result(): void {
+		$email_id = 'change_summary_in_sync_cache';
+		$this->register_fixture_email( $email_id );
+
+		$content = "<!-- wp:paragraph -->\n<p>Same on both sides.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $content );
+		$post_id = $this->create_woo_email_post( $email_id, $content );
+
+		$first = WCEmailTemplateChangeSummary::summarize( $post_id );
+		$this->assertFalse( $first['cache_hit'] );
+		$this->assertFalse( $first['is_fallback'] );
+
+		$second = WCEmailTemplateChangeSummary::summarize( $post_id );
+		$this->assertTrue( $second['cache_hit'] );
+		$this->assertFalse( $second['is_fallback'] );
+		$this->assertSame( array(), $second['summary_lines'] );
 	}
 
 	/**
