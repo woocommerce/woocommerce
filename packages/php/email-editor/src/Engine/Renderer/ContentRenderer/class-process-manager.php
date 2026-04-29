@@ -78,11 +78,12 @@ class Process_Manager {
 	 * @param array                                                                                                               $parsed_blocks Parsed blocks.
 	 * @param array{contentSize: string, wideSize?: string, allowEditing?: bool, allowCustomContentAndWideSize?: bool}            $layout Layout.
 	 * @param array{spacing: array{padding: array{bottom: string, left?: string, right?: string, top: string}, blockGap: string}} $styles Styles.
+	 * @param Rendering_Context|null                                                                                              $rendering_context Rendering context.
 	 * @return array
 	 */
-	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
+	public function preprocess( array $parsed_blocks, array $layout, array $styles, ?Rendering_Context $rendering_context = null ): array {
 		foreach ( $this->preprocessors as $preprocessor ) {
-			$parsed_blocks = $preprocessor->preprocess( $parsed_blocks, $layout, $styles );
+			$parsed_blocks = $preprocessor->preprocess( $parsed_blocks, $layout, $styles, $rendering_context );
 		}
 		return $parsed_blocks;
 	}

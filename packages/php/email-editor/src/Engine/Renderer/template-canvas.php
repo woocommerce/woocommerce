@@ -19,9 +19,15 @@ declare(strict_types = 1);
  * @var string $template_html The email template HTML content
  * @var string $meta_robots Meta robots tag content
  * @var array{contentSize: string} $layout Layout configuration
+ * @var Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context $rendering_context Rendering context
  */
+ob_start();
+language_attributes();
+$language_attributes = (string) ob_get_clean();
+$language_attributes = trim( (string) preg_replace( '/\s?dir=(["\']).*?\1/i', '', $language_attributes ) );
+$language_attributes = trim( $language_attributes . ' dir="' . esc_attr( $rendering_context->get_text_direction() ) . '"' );
 ?><!DOCTYPE html>
-<html <?php language_attributes(); ?>>
+<html <?php echo $language_attributes; ?>>
 <head>
 	<title><?php echo esc_html( $subject ); ?></title>
 	<meta charset="<?php bloginfo( 'charset' ); ?>" />

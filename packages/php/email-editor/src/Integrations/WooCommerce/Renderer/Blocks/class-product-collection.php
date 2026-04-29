@@ -173,7 +173,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 
 			foreach ( $row_products as $col_index => $product ) {
 				$cell_style  = 'width: 50%; vertical-align: top; padding: 0;';
-				$cell_style .= 0 === $col_index ? ' padding-right: 10px;' : ' padding-left: 10px;';
+				$cell_style .= 0 === $col_index ? ' padding-' . $rendering_context->get_end_side() . ': 10px;' : ' padding-' . $rendering_context->get_start_side() . ': 10px;';
 
 				$content .= sprintf(
 					'<td style="%s">%s</td>',
@@ -184,7 +184,7 @@ class Product_Collection extends Abstract_Product_Block_Renderer {
 
 			// If odd number of products, add empty cell to complete the row.
 			if ( 1 === count( $row_products ) ) {
-				$content .= '<td style="width: 50%; vertical-align: top; padding: 0; padding-left: 10px;"></td>';
+				$content .= '<td style="width: 50%; vertical-align: top; padding: 0; padding-' . esc_attr( $rendering_context->get_start_side() ) . ': 10px;"></td>';
 			}
 
 			$content .= '</tr>';

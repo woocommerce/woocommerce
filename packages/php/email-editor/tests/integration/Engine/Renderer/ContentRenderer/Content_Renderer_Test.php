@@ -91,6 +91,91 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test render_without_css_inline applies email context once per content render.
+	 */
+	public function testRenderWithoutCssInlineAppliesEmailContextOnce(): void {
+		$email_post_id = $this->factory->post->create(
+			array(
+				'post_content' => '<!-- wp:test/context-block /--><!-- wp:test/context-block /-->',
+			)
+		);
+		$email_post    = get_post( $email_post_id );
+		$this->assertInstanceOf( \WP_Post::class, $email_post );
+
+		$seen_contexts = array();
+		register_block_type(
+			'test/context-block',
+			array(
+				'render_email_callback' => function ( $block_content, $parsed_block, Rendering_Context $context ) use ( &$seen_contexts ) {
+					$seen_contexts[] = array(
+						'direction' => $context->get_text_direction(),
+						'custom'    => $context->get( 'custom_key' ),
+					);
+					return '<p>' . esc_html( $context->get_text_direction() ) . '</p>';
+				},
+			)
+		);
+		$filter_calls  = 0;
+		$context_filter = function () use ( &$filter_calls ) {
+			++$filter_calls;
+			return array(
+				'is_rtl'     => true,
+				'custom_key' => 'preserved',
+			);
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+
+		try {
+			$template          = new \WP_Block_Template();
+			$template->id      = 'template-id';
+			$template->content = '<!-- wp:post-content /-->';
+			$this->renderer->render_without_css_inline( $email_post, $template );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+			\WP_Block_Type_Registry::get_instance()->unregister( 'test/context-block' );
+		}
+
+		$this->assertSame( 1, $filter_calls );
+		$this->assertCount( 2, $seen_contexts );
+		$this->assertSame(
+			array(
+				array(
+					'direction' => 'rtl',
+					'custom'    => 'preserved',
+				),
+				array(
+					'direction' => 'rtl',
+					'custom'    => 'preserved',
+				),
+			),
+			$seen_contexts
+		);
+	}
+
+	/**
+	 * Test render applies email context once per content render.
+	 */
+	public function testRenderAppliesEmailContextOnce(): void {
+		$filter_calls  = 0;
+		$context_filter = function () use ( &$filter_calls ) {
+			++$filter_calls;
+			return array( 'is_rtl' => true );
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+
+		try {
+			$template          = new \WP_Block_Template();
+			$template->id      = 'template-id';
+			$template->content = '<!-- wp:post-content /-->';
+			$this->renderer->render( $this->email_post, $template );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+		}
+
+		$this->assertSame( 1, $filter_calls );
+	}
+
+	/**
 	 * Test it collects content styles without inlining them.
 	 */
 	public function testItCollectsContentStyles(): void {

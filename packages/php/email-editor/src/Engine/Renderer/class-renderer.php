@@ -109,13 +109,15 @@ class Renderer {
 	 * @param string   $template_slug Optional block template slug used for cases when email doesn't have associated template.
 	 * @return array
 	 */
-	public function render( \WP_Post $post, string $subject, string $pre_header, string $language, string $meta_robots = '', string $template_slug = '' ): array { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	public function render( \WP_Post $post, string $subject, string $pre_header, string $language, string $meta_robots = '', string $template_slug = '' ): array {
 		if ( ! $template_slug ) {
 			$template_slug = get_page_template_slug( $post ) ? get_page_template_slug( $post ) : 'email-general';
 		}
 		/** @var \WP_Block_Template $template */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 		$template = $this->templates->get_block_template( $template_slug );
 
+		$rendering_context = $this->content_renderer->create_rendering_context( $language );
+		$this->content_renderer->set_rendering_context( $rendering_context );
 		$email_styles   = $this->theme_controller->get_styles();
 		$content_result = $this->content_renderer->render_without_css_inline( $post, $template );
 		$template_html  = $content_result['html'];
@@ -136,8 +138,17 @@ class Renderer {
 				'font-family'      => $email_styles['typography']['fontFamily'] ?? 'inherit',
 				'line-height'      => $email_styles['typography']['lineHeight'] ?? '1.5',
 				'font-size'        => $email_styles['typography']['fontSize'] ?? 'inherit',
+				'direction'        => $rendering_context->get_text_direction(),
+				'text-align'       => $rendering_context->get_default_text_align(),
 			),
 			'body, .email_layout_wrapper'
+		);
+		$template_styles .= WP_Style_Engine::compile_css(
+			array(
+				'direction'  => $rendering_context->get_text_direction(),
+				'text-align' => $rendering_context->get_default_text_align(),
+			),
+			'.email_content_wrapper, .email_preheader'
 		);
 		$template_styles .= '.email_layout_wrapper { box-sizing: border-box;}';
 		$template_styles .= file_get_contents( __DIR__ . '/' . self::TEMPLATE_STYLES_FILE );

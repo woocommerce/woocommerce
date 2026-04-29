@@ -11,6 +11,7 @@ The email rendering system includes **Core Blocks Integration** that provides de
 -   [Renderer Classes](#renderer-classes)
     -   [Renderer](#renderer)
     -   [Content_Renderer](#content_renderer)
+-   [Rendering Direction](#rendering-direction)
 -   [Core Blocks Integration](#core-blocks-integration)
 -   [Table Wrapper Helper](#table-wrapper-helper)
 -   [Styles Helper](#styles-helper)
@@ -183,6 +184,26 @@ $result      = $content_renderer->render_without_css_inline( $post, $template );
 $html        = $result['html'];
 $styles      = $result['styles'];
 ```
+
+## Rendering Direction
+
+Full email rendering resolves text direction once per render and shares it with the template shell, preprocessors, and block renderers.
+
+Integrations can pass an optional boolean `is_rtl` value through the `woocommerce_email_editor_rendering_email_context` filter:
+
+```php
+add_filter(
+    'woocommerce_email_editor_rendering_email_context',
+    function ( array $context ): array {
+        $context['is_rtl'] = true;
+        return $context;
+    }
+);
+```
+
+When `is_rtl` is explicitly `true`, the rendered email uses RTL direction. When it is explicitly `false`, the rendered email uses LTR direction even if the `$language` argument is an RTL language. Non-boolean values are ignored.
+
+When `is_rtl` is absent, `Renderer::render()` falls back to the `$language` argument using a conservative RTL primary-language allow-list, then defaults to LTR when the language is empty or not recognized. Direct `Content_Renderer` callers do not have a language argument, so they use explicit filtered `is_rtl` when present and otherwise default to LTR.
 
 ## Core Blocks Integration
 

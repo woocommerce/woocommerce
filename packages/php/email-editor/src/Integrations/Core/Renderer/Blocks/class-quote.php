@@ -71,7 +71,8 @@ class Quote extends Abstract_Block_Renderer {
 				$citation_content,
 				$citation_styles['css'],
 			),
-			$parsed_block['email_attrs'] ?? array()
+			$parsed_block['email_attrs'] ?? array(),
+			$rendering_context
 		);
 	}
 
@@ -96,6 +97,16 @@ class Quote extends Abstract_Block_Renderer {
 
 		// Layout, background, borders need to be on the outer table element.
 		$table_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color', 'text-align' ) );
+		if ( $rendering_context->is_rtl() && empty( $block_attributes['style']['border'] ) && empty( $block_attributes['borderColor'] ) ) {
+			$table_styles = Styles_Helper::extend_block_styles(
+				$table_styles,
+				array(
+					'border-color' => 'currentColor',
+					'border-style' => 'solid',
+					'border-width' => '0 1px 0 0',
+				)
+			);
+		}
 		$table_styles = Styles_Helper::extend_block_styles(
 			$table_styles,
 			array(
