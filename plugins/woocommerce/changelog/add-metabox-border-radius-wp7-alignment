@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Add 8px border-radius to editor meta boxes and product description to align with WP 7.0 dashboard widget styling

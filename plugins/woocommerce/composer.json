@@ -109,7 +109,8 @@
 			"src/StoreApi/deprecated.php",
 			"src/StoreApi/functions.php",
 			"src/Blocks/Domain/Services/functions.php",
-			"src/Deprecated.php"
+			"src/Deprecated.php",
+			"src/Internal/Api/Schema/aliases.php"
 		]
 	},
 	"autoload-dev": {
