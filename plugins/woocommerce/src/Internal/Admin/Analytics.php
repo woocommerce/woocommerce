@@ -397,16 +397,16 @@ class Analytics {
 			return;
 		}
 
-		$tool_class        = self::FULL_REFUND_FIX_DATA_TOOL_ID;
-		$nonce             = wp_create_nonce( 'woocommerce_refund_fix_check' );
-		$ajax_url          = admin_url( 'admin-ajax.php' );
-		$label_check       = __( 'Check', 'woocommerce' );
-		$label_working     = __( 'Checking…', 'woocommerce' );
-		$msg_needs_fix     = __( 'Your store has orders that need fixing.', 'woocommerce' );
-		$msg_no_fix        = __( 'No affected orders found.', 'woocommerce' );
+		$tool_class         = self::FULL_REFUND_FIX_DATA_TOOL_ID;
+		$nonce              = wp_create_nonce( 'woocommerce_refund_fix_check' );
+		$ajax_url           = admin_url( 'admin-ajax.php' );
+		$label_check        = __( 'Check', 'woocommerce' );
+		$label_working      = __( 'Checking…', 'woocommerce' );
+		$msg_needs_fix      = __( 'Your store has orders that need fixing.', 'woocommerce' );
+		$msg_no_fix         = __( 'No affected orders found.', 'woocommerce' );
 		$label_disable_tool = __( 'Disable tool', 'woocommerce' );
-		$msg_in_progress   = __( 'A fix is already in progress, please check back later.', 'woocommerce' );
-		$msg_error         = __( 'Check failed, please try again.', 'woocommerce' );
+		$msg_in_progress    = __( 'A fix is already in progress, please check back later.', 'woocommerce' );
+		$msg_error          = __( 'Check failed, please try again.', 'woocommerce' );
 		?>
 		<script type="text/javascript">
 		( function() {
