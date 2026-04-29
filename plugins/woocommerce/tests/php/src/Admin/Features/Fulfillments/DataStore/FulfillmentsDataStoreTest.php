@@ -188,6 +188,25 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that the date setters reject malformed and whitespace-only inputs
+	 * instead of silently storing a normalized but unintended value.
+	 */
+	public function test_setters_reject_malformed_date_input() {
+		$fulfillment = new Fulfillment();
+
+		// PHP's DateTime would silently roll Feb 30 into March; setter must reject it.
+		$fulfillment->set_date_fulfilled( '2025-02-30 10:00:00' );
+		$this->assertNull( $fulfillment->get_date_fulfilled() );
+
+		// Whitespace-only input must not be parsed as "now".
+		$fulfillment->set_date_updated( '   ' );
+		$this->assertNull( $fulfillment->get_date_updated() );
+
+		$fulfillment->set_date_deleted( 'not a date' );
+		$this->assertNull( $fulfillment->get_date_deleted() );
+	}
+
+	/**
 	 * Tests that the data store persists datetimes as UTC even when the site
 	 * timezone is not UTC, and that the value survives a DB round-trip unchanged.
 	 */

@@ -365,12 +365,19 @@ class Fulfillment extends \WC_Data {
 	 * @return string|null UTC datetime string, or null for empty/invalid input.
 	 */
 	private function normalize_date_to_utc( ?string $date ): ?string {
+		$date = null === $date ? null : trim( $date );
 		if ( null === $date || '' === $date ) {
 			return null;
 		}
 		try {
 			// The second DateTimeZone is used only when the string has no explicit zone.
 			$datetime = new \DateTime( $date, wp_timezone() );
+			// DateTime silently normalizes invalid calendar dates (e.g. Feb 30 -> Mar 2);
+			// reject those so callers don't persist a different date than the user supplied.
+			$parse_errors = \DateTime::getLastErrors();
+			if ( false !== $parse_errors && ( $parse_errors['warning_count'] > 0 || $parse_errors['error_count'] > 0 ) ) {
+				return null;
+			}
 			$datetime->setTimezone( new \DateTimeZone( 'UTC' ) );
 			return $datetime->format( 'Y-m-d H:i:s' );
 		} catch ( \Exception $e ) {

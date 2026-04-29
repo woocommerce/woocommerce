@@ -278,7 +278,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 			$params      = $request->get_json_params();
 			$fulfillment->set_props( $params );
 			if ( isset( $params['meta_data'] ) ) {
-				MetaDataUtil::update( $params['meta_data'], $fulfillment, 0 );
+				$this->apply_request_meta_data( $params['meta_data'], $fulfillment );
 			}
 			$fulfillment->set_entity_type( WC_Order::class );
 			$fulfillment->set_entity_id( "$order_id" );
@@ -405,8 +405,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 			if ( isset( $request->get_json_params()['meta_data'] ) ) {
 				$meta_data       = $request->get_json_params()['meta_data'];
-				$normalized_keys = is_array( $meta_data ) ? array_column( MetaDataUtil::normalize( $meta_data, 0 ), 'key' ) : array();
-				MetaDataUtil::update( $meta_data, $fulfillment, 0 );
+				$normalized_keys = $this->apply_request_meta_data( $meta_data, $fulfillment );
 
 				// Remove meta keys not in the request. Skip if all entries were malformed
 				// (non-empty input but no valid keys), to avoid accidental data loss.
@@ -564,7 +563,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		}
 
 		return new WP_REST_Response(
-			$fulfillment->get_raw_meta_data(),
+			$this->prepare_meta_data_for_response( $fulfillment->get_raw_meta_data() ),
 			WP_Http::OK
 		);
 	}
@@ -587,8 +586,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 
 			// Update the meta data keys that exist in the request.
 			$meta_data       = $request->get_json_params()['meta_data'];
-			$normalized_keys = is_array( $meta_data ) ? array_column( MetaDataUtil::normalize( $meta_data, 0 ), 'key' ) : array();
-			MetaDataUtil::update( $meta_data, $fulfillment, 0 );
+			$normalized_keys = $this->apply_request_meta_data( $meta_data, $fulfillment );
 
 			// Remove meta keys not in the request. Skip if all entries were malformed
 			// (non-empty input but no valid keys), to avoid accidental data loss.
@@ -616,7 +614,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		}
 
 		return new WP_REST_Response(
-			$fulfillment->get_raw_meta_data(),
+			$this->prepare_meta_data_for_response( $fulfillment->get_raw_meta_data() ),
 			WP_Http::OK
 		);
 	}
@@ -655,7 +653,7 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		}
 
 		return new WP_REST_Response(
-			$fulfillment->get_raw_meta_data(),
+			$this->prepare_meta_data_for_response( $fulfillment->get_raw_meta_data() ),
 			WP_Http::OK
 		);
 	}
@@ -1327,6 +1325,34 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 	}
 
 	/**
+	 * Apply request-supplied meta data to a fulfillment, routing `_date_fulfilled`
+	 * through {@see Fulfillment::set_date_fulfilled()} so the UTC normalization
+	 * contract is preserved regardless of input path.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param mixed       $meta_data   Raw meta data from the request (non-array values are ignored).
+	 * @param Fulfillment $fulfillment Target fulfillment.
+	 * @return array<int, string> Normalized meta keys present in the request.
+	 */
+	private function apply_request_meta_data( $meta_data, Fulfillment $fulfillment ): array {
+		if ( ! is_array( $meta_data ) ) {
+			return array();
+		}
+
+		$normalized = MetaDataUtil::normalize( $meta_data, 0 );
+		foreach ( $normalized as $meta ) {
+			if ( '_date_fulfilled' === $meta['key'] && is_string( $meta['value'] ) ) {
+				$fulfillment->set_date_fulfilled( $meta['value'] );
+				continue;
+			}
+			$fulfillment->update_meta_data( $meta['key'], $meta['value'], $meta['id'] );
+		}
+
+		return array_column( $normalized, 'key' );
+	}
+
+	/**
 	 * Format the fulfillment raw data for a REST response by converting every
 	 * UTC-stored datetime field into an ISO 8601 string with explicit 'Z' suffix.
 	 *
@@ -1339,15 +1365,30 @@ class OrderFulfillmentsRestController extends RestApiControllerBase {
 		$raw_data['date_deleted'] = $this->format_utc_date_iso8601( $raw_data['date_deleted'] ?? null );
 
 		if ( isset( $raw_data['meta_data'] ) && is_array( $raw_data['meta_data'] ) ) {
-			foreach ( $raw_data['meta_data'] as &$meta ) {
-				if ( is_array( $meta ) && isset( $meta['key'], $meta['value'] ) && '_date_fulfilled' === $meta['key'] && is_string( $meta['value'] ) ) {
-					$meta['value'] = $this->format_utc_date_iso8601( $meta['value'] );
-				}
-			}
-			unset( $meta );
+			$raw_data['meta_data'] = $this->prepare_meta_data_for_response( $raw_data['meta_data'] );
 		}
 
 		return $raw_data;
+	}
+
+	/**
+	 * Format `_date_fulfilled` entries in a meta data array as ISO 8601 with 'Z'
+	 * suffix. All other entries pass through unchanged.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array<int, mixed> $meta_data Raw meta data array.
+	 * @return array<int, mixed>
+	 */
+	private function prepare_meta_data_for_response( array $meta_data ): array {
+		foreach ( $meta_data as &$meta ) {
+			if ( is_array( $meta ) && isset( $meta['key'], $meta['value'] ) && '_date_fulfilled' === $meta['key'] && is_string( $meta['value'] ) ) {
+				$meta['value'] = $this->format_utc_date_iso8601( $meta['value'] );
+			}
+		}
+		unset( $meta );
+
+		return $meta_data;
 	}
 
 	/**
