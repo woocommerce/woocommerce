@@ -613,6 +613,18 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 			),
+			'customer_stock_notifications'       => array(
+				'name'                         => __( 'Back in Stock Notifications (alpha)', 'woocommerce' ),
+				'description'                  => __(
+					'Allow customers to sign up to receive an email when an out-of-stock product is back in stock. Alpha — interfaces, data, and behavior may change.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {

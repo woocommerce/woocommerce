@@ -32,14 +32,13 @@ use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
-use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
+use Automattic\WooCommerce\Utilities\{FeaturesUtil, LoggingUtil, TimeUtil};
 use Automattic\WooCommerce\Internal\Logging\RemoteLogger;
 use Automattic\WooCommerce\Caches\OrderCountCacheService;
 use Automattic\WooCommerce\Internal\Caches\ProductVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\OrdersVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\Caches\TaxRateVersionStringInvalidator;
 use Automattic\WooCommerce\Internal\StockNotifications\StockNotifications;
-use Automattic\Jetpack\Constants;
 
 /**
  * Main WooCommerce Class.
@@ -378,7 +377,7 @@ final class WooCommerce {
 		$container->get( TaxRateVersionStringInvalidator::class );
 
 		// Feature flags.
-		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+		if ( FeaturesUtil::feature_is_enabled( 'customer_stock_notifications' ) ) {
 			$container->get( StockNotifications::class );
 		}
 
