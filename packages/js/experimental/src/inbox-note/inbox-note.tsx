@@ -36,6 +36,10 @@ type InboxNote = {
 	is_deleted: boolean;
 	type: string;
 	is_read: boolean;
+	/** @deprecated No longer rendered. Will be removed in a future release. */
+	layout?: string;
+	/** @deprecated No longer rendered. Will be removed in a future release. */
+	image?: string;
 };
 
 type InboxNoteProps = {

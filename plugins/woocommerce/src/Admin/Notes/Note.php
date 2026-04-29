@@ -336,7 +336,7 @@ class Note extends \WC_Data {
 	 * @return string
 	 */
 	public function get_layout( $context = 'view' ) {
-		_deprecated_function( __METHOD__, '10.8.0' );
+		wc_deprecated_function( __METHOD__, '10.8.0' );
 		return $this->get_prop( 'layout', $context );
 	}
 
@@ -349,7 +349,7 @@ class Note extends \WC_Data {
 	 * @return string
 	 */
 	public function get_image( $context = 'view' ) {
-		_deprecated_function( __METHOD__, '10.8.0' );
+		wc_deprecated_function( __METHOD__, '10.8.0' );
 		return $this->get_prop( 'image', $context );
 	}
 
@@ -601,12 +601,12 @@ class Note extends \WC_Data {
 	 * @param string $layout Note layout.
 	 */
 	public function set_layout( $layout ) {
-		_deprecated_function( __METHOD__, '10.8.0' );
+		wc_deprecated_function( __METHOD__, '10.8.0' );
 
 		// 'thumbnail' was previously a valid value but is no longer rendered. Coerce it to 'plain'
 		// so existing callers don't break, and surface a deprecation warning so they update.
 		if ( 'thumbnail' === $layout ) {
-			_deprecated_argument( __METHOD__, '10.8.0', "The 'thumbnail' layout is no longer supported; coerced to 'plain'." );
+			wc_deprecated_argument( __METHOD__, '10.8.0', "The 'thumbnail' layout is no longer supported; coerced to 'plain'." );
 			$layout = 'plain';
 		}
 
@@ -629,7 +629,7 @@ class Note extends \WC_Data {
 	 * @param string $image Note image.
 	 */
 	public function set_image( $image ) {
-		_deprecated_function( __METHOD__, '10.8.0' );
+		wc_deprecated_function( __METHOD__, '10.8.0' );
 		$this->set_prop( 'image', $image );
 	}
 

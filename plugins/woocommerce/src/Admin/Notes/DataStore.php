@@ -120,7 +120,6 @@ class DataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Inter
 			$note->set_is_snoozable( (bool) $note_row->is_snoozable );
 			$note->set_is_deleted( (bool) $note_row->is_deleted );
 			isset( $note_row->is_read ) && $note->set_is_read( (bool) $note_row->is_read );
-			// `layout` and `image` are deprecated; defaults from Note::set_defaults() apply.
 			$this->read_actions( $note );
 			$note->set_object_read( true );
 
