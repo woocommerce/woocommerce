@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Api;
 
+use Automattic\WooCommerce\Internal\Api\GraphQLController;
 use Automattic\WooCommerce\Internal\Api\Main;
 use Automattic\WooCommerce\Internal\Api\Settings;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -21,10 +22,21 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Set up before each test.
+	 *
+	 * Skips on PHP < 8.1 because the settings fields reference
+	 * GraphQLController constants, and that class uses PHP 8.0+ syntax that
+	 * cannot be parsed on 7.4. In production the class is only loaded after
+	 * {@see Main::is_enabled()} gates on PHP 8.1+; these tests replicate the
+	 * same gate so the autoload never triggers a parse error.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 		$this->enable_or_disable_feature( true );
+
+		if ( PHP_VERSION_ID < 80100 ) {
+			$this->markTestSkipped( 'GraphQL settings tests require PHP 8.1+.' );
+		}
+
 		$this->sut = new Settings();
 	}
 
@@ -120,5 +132,37 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$result = $this->sut->add_settings( $input, Settings::SECTION_ID );
 
 		$this->assertSame( $input, $result );
+	}
+
+	/**
+	 * @testdox add_settings defines the max query depth field with min=1 and the default constant as default.
+	 */
+	public function test_add_settings_defines_max_query_depth_field(): void {
+		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
+		$by_id  = array_column( $fields, null, 'id' );
+
+		$this->assertArrayHasKey( Main::OPTION_MAX_QUERY_DEPTH, $by_id );
+		$this->assertSame( 'number', $by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['type'] );
+		$this->assertSame(
+			(string) GraphQLController::DEFAULT_MAX_QUERY_DEPTH,
+			$by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['default']
+		);
+		$this->assertSame( '1', $by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['custom_attributes']['min'] );
+	}
+
+	/**
+	 * @testdox add_settings defines the max query complexity field with min=1 and the default constant as default.
+	 */
+	public function test_add_settings_defines_max_query_complexity_field(): void {
+		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
+		$by_id  = array_column( $fields, null, 'id' );
+
+		$this->assertArrayHasKey( Main::OPTION_MAX_QUERY_COMPLEXITY, $by_id );
+		$this->assertSame( 'number', $by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['type'] );
+		$this->assertSame(
+			(string) GraphQLController::DEFAULT_MAX_QUERY_COMPLEXITY,
+			$by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['default']
+		);
+		$this->assertSame( '1', $by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['custom_attributes']['min'] );
 	}
 }

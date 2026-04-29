@@ -63,8 +63,8 @@ class Notes {
 				$notes[ $note_id ]['date_created']  = $note->get_date_created( $context );
 				$notes[ $note_id ]['date_reminder'] = $note->get_date_reminder( $context );
 				$notes[ $note_id ]['actions']       = $note->get_actions( $context );
-				$notes[ $note_id ]['layout']        = $note->get_layout( $context );
-				$notes[ $note_id ]['image']         = $note->get_image( $context );
+				$notes[ $note_id ]['layout']        = 'plain';
+				$notes[ $note_id ]['image']         = '';
 				$notes[ $note_id ]['is_deleted']    = $note->get_is_deleted( $context );
 			} catch ( \Exception $e ) {
 				wc_caught_exception( $e, __CLASS__ . '::' . __FUNCTION__, array( $note_id ) );

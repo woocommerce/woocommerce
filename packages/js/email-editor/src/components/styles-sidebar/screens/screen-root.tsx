@@ -50,7 +50,10 @@ export function ScreenRoot(): JSX.Element {
 								<HStack justify="flex-start">
 									<Icon icon={ typography } size={ 24 } />
 									<FlexItem>
-										{ __( 'Typography', 'woocommerce' ) }
+										{ __(
+											'Typography',
+											__i18n_text_domain__
+										) }
 									</FlexItem>
 								</HStack>
 							</Item>
@@ -68,7 +71,7 @@ export function ScreenRoot(): JSX.Element {
 								<HStack justify="flex-start">
 									<Icon icon={ color } size={ 24 } />
 									<FlexItem>
-										{ __( 'Colors', 'woocommerce' ) }
+										{ __( 'Colors', __i18n_text_domain__ ) }
 									</FlexItem>
 								</HStack>
 							</Item>
@@ -86,7 +89,7 @@ export function ScreenRoot(): JSX.Element {
 								<HStack justify="flex-start">
 									<Icon icon={ layout } size={ 24 } />
 									<FlexItem>
-										{ __( 'Layout', 'woocommerce' ) }
+										{ __( 'Layout', __i18n_text_domain__ ) }
 									</FlexItem>
 								</HStack>
 							</Item>
