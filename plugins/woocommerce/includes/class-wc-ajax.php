@@ -787,7 +787,7 @@ class WC_AJAX {
 					);
 				} else {
 					if ( self::is_visual_product_attribute_taxonomy( $taxonomy ) && isset( $_POST['term_color'] ) ) {
-						$color_value = sanitize_hex_color( wp_unslash( $_POST['term_color'] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+						$color_value = sanitize_hex_color( wp_unslash( $_POST['term_color'] ) );
 
 						if ( $color_value ) {
 							update_term_meta( $result['term_id'], 'color', $color_value );
