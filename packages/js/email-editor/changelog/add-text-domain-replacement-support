@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Let consumers replace the `__i18n_text_domain__` identifier at bundle time (e.g. via `webpack.DefinePlugin`) so translation strings extract and translate under the consumer's own text domain. Falls back to `'woocommerce'` at runtime when the identifier isn't substituted, preserving the package's pre-1.11 behaviour.
