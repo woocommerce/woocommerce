@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add server-side POST /woocommerce-email-editor/v1/emails/{id}/reset endpoint that atomically rewrites a woo_email post to its current core template render and stamps sync meta (version, source hash, synced-at, status=in_sync).

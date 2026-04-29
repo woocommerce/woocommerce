@@ -7,10 +7,8 @@ import {
 	useReducedMotion,
 } from '@wordpress/compose';
 import { __ } from '@wordpress/i18n';
-import {
-	EditorSnackbars,
-	privateApis as editorPrivateApis,
-} from '@wordpress/editor';
+import { privateApis as editorPrivateApis } from '@wordpress/editor';
+import { SnackbarNotices } from '@wordpress/notices';
 import {
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,
@@ -79,7 +77,7 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 							</NavigableRegion>
 						) }
 
-					<EditorSnackbars />
+					<SnackbarNotices className="product_page_woocommerce-products-dashboard-snackbar" />
 
 					{ ! isMobileViewport && areas.content && (
 						<div

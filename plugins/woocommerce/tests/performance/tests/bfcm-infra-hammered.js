@@ -9,24 +9,29 @@ import { checkoutCustomerLogin } from '../requests/shopper/checkout-customer-log
 // This test runs at the environment's saturation ceiling — thresholds will fail by design.
 // Use the following metrics to detect regressions (numbers go up) or improvements (numbers go down):
 //
-//   STABLE SIGNALS — not dominated by Apache spike timing; reliable across single runs:
-//   - http_req_duration p(50)   — baseline 101ms; fast-path latency; reflects requests completing before Apache queues up;
-//                                 regressions surface here first; not materially affected by spike minutes.
-//   - Store API checkout med    — baseline 1.03s; most sensitive to checkout-path optimizations (DB writes, order creation);
-//                                 p(90)/p(95) are capped at 60s during spike minutes — use median, not tail percentiles.
-//   - update-customer med       — baseline 66ms; p(90) baseline 2.65s; checkout address persistence path.
-//   - Order Received p(90)      — baseline 1.19s; downstream of checkout; sensitive to order creation overhead.
-//   - order completion rate     — baseline 73% ('body contains: order_id' check; 176/239 attempts); proportion of flows
-//                                 that reach order received; more stable than http_req_failed when Apache varies run-to-run.
+//   STABLE SIGNALS — low run-to-run variance (validated across 3-run sets); reliable within a single run:
+//   - http_req_duration p(50)   — baseline ~102ms (±13ms across 3 runs); fast-path latency; reflects requests
+//                                 completing before Apache queues up; regressions surface here first.
+//   - update-customer med       — baseline ~68ms (±4ms across 3 runs); tightest signal available; checkout
+//                                 address persistence path; not materially affected by spike minutes.
 //
-//   NOISY SIGNALS — dominated by which minute the Apache spike hits; compare trends across multiple runs, not single pairs:
-//   - http_req_failed rate      — baseline 4.05%; spikes when Apache worker pool exhausts; volatile run-to-run.
-//   - dropped_iterations        — baseline 278; K6 drops iterations when VU pool exhausts due to slow Apache; volatile.
-//   - iteration_duration avg    — baseline 52.26s; pulled up by spike minutes; use as trend indicator, not per-run comparison.
-//   - Store API checkout avg    — baseline 16.26s; dragged by 60s timeout outliers during spike minutes; median is more reliable.
+//   MODERATELY STABLE — lower variance than noisy signals; compare 3+ runs for directional confidence:
+//   - order completion rate     — baseline ~73% ('body contains: order_id' check); proportion of flows that
+//                                 reach order received; 8% run-to-run variance in baseline set; more stable
+//                                 than http_req_failed but still sensitive to overall load conditions.
 //
-// A PR that reduces DB queries or checkout overhead will move stable signals in the right direction even
-// if the test still "fails" thresholds — less failing is a measurable win. Baseline is as of April 2026.
+//   NOISY SIGNALS — dominated by which minute the Apache spike hits; never compare single runs:
+//   - Store API checkout med    — 3x swings within baseline set alone (346ms–1.21s); spike timing determines
+//                                 whether requests queue before/after median; use avg as trend only.
+//   - Order Received p(90)      — 10x swings (160ms–2.58s); spike-minute timing dominant.
+//   - update-customer p(90)     — 2–3x swings (2.94s–6.73s); tail dominated by queuing during spike minutes.
+//   - http_req_failed rate      — baseline 4–9% across runs; spikes when Apache worker pool exhausts; volatile.
+//   - dropped_iterations        — baseline ~310; K6 drops iterations when VU pool exhausts; volatile.
+//   - iteration_duration avg    — pulled up by spike minutes; use as trend indicator, not per-run comparison.
+//   - Store API checkout avg    — dragged by 60s timeout outliers during spike minutes; median no better.
+//
+// A PR that reduces DB queries or checkout overhead will move stable signals in the right direction even  if the test
+// still "fails" thresholds — less failing is a measurable win. Baselines validated April 2026 across 3-run sets.
 
 export const options = {
 	// Saturation profile (M4 Pro, wp-env defaults):
