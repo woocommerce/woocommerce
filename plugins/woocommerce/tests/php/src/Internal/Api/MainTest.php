@@ -196,15 +196,32 @@ class MainTest extends WC_Unit_Test_Case {
 	 * @testdox register also bootstraps Settings — its filter hooks become active.
 	 */
 	public function test_register_bootstraps_settings(): void {
+		// Snapshot the existing hook state so unrelated callbacks attached
+		// elsewhere in the test process aren't dropped by remove_all_filters().
+		$saved_sections = $GLOBALS['wp_filter']['woocommerce_get_sections_advanced'] ?? null;
+		$saved_settings = $GLOBALS['wp_filter']['woocommerce_get_settings_advanced'] ?? null;
+
 		remove_all_filters( 'woocommerce_get_sections_advanced' );
 		remove_all_filters( 'woocommerce_get_settings_advanced' );
 
-		Main::register();
+		try {
+			Main::register();
 
-		$this->assertNotFalse( has_filter( 'woocommerce_get_sections_advanced' ) );
-		$this->assertNotFalse( has_filter( 'woocommerce_get_settings_advanced' ) );
-
-		remove_action( 'rest_api_init', array( Main::class, 'handle_rest_api_init_for_core' ) );
+			$this->assertNotFalse( has_filter( 'woocommerce_get_sections_advanced' ) );
+			$this->assertNotFalse( has_filter( 'woocommerce_get_settings_advanced' ) );
+		} finally {
+			if ( null === $saved_sections ) {
+				unset( $GLOBALS['wp_filter']['woocommerce_get_sections_advanced'] );
+			} else {
+				$GLOBALS['wp_filter']['woocommerce_get_sections_advanced'] = $saved_sections;
+			}
+			if ( null === $saved_settings ) {
+				unset( $GLOBALS['wp_filter']['woocommerce_get_settings_advanced'] );
+			} else {
+				$GLOBALS['wp_filter']['woocommerce_get_settings_advanced'] = $saved_settings;
+			}
+			remove_action( 'rest_api_init', array( Main::class, 'handle_rest_api_init_for_core' ) );
+		}
 	}
 
 	/**
