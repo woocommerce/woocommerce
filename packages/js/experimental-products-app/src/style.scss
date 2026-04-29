@@ -5,7 +5,7 @@
 @import "@wordpress/base-styles/mixins";
 
 .product_page_woocommerce-products-dashboard {
-	background-color: unset;
+	background-color: red;
 	@import "./fields/components/list-item/style.scss";
 	@import "./fields/downloadable/style.scss";
 	@import "./fields/images/style.scss";
@@ -22,7 +22,7 @@
 }
 
 .woocommerce-product-list__toolbar {
-	padding: 0 var(--wpds-dimension-padding-2xl, 24px);
+	padding: 0;
 }
 
 .woocommerce-product-list .dataviews-wrapper {
