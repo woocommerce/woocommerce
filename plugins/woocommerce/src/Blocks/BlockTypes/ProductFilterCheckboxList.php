@@ -188,15 +188,14 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											data-wp-text="context.item.label"
 										></span>
 									<?php endif; ?>
-									<span
-										class="wc-block-product-filter-checkbox-list__count"
-										data-wp-bind--hidden="!context.item.count"
-									>
-										(<span data-wp-text="context.item.count"></span>)
+										<span
+											class="wc-block-product-filter-checkbox-list__count"
+											data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemCountHidden"
+											data-wp-text="woocommerce/product-filter-checkbox-list::state.itemCountText"
+										></span>
 									</span>
-								</span>
-							</label>
-						</div>
+								</label>
+							</div>
 					</template>
 				</div>
 				<?php if ( $has_more_items ) : ?>

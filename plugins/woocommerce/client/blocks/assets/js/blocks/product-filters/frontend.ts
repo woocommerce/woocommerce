@@ -21,13 +21,36 @@ const { getContext, store, getServerContext, getConfig } = iAPI;
 
 const BLOCK_NAME = 'woocommerce/product-filters';
 
-function selectFilter( item: FilterOptionItem ) {
+type ValidFilterOptionItem = FilterOptionItem & {
+	type: string;
+	value: string;
+};
+
+function isValidFilterOptionItem(
+	item: FilterOptionItem
+): item is ValidFilterOptionItem {
+	return (
+		typeof item.type === 'string' &&
+		item.type.length > 0 &&
+		typeof item.value === 'string' &&
+		item.value.length > 0
+	);
+}
+
+function getFilterLabel( item: ValidFilterOptionItem ): string {
+	const label = item.ariaLabel ?? item.label;
+	return typeof label === 'string' && label.length > 0 ? label : item.value;
+}
+
+function selectFilter( item: ValidFilterOptionItem ) {
 	const context = getContext< ProductFiltersContext >();
-	const label = ( item.ariaLabel ?? item.label ) as string;
 	const newActiveFilter: ActiveFilterItem = {
 		value: item.value,
-		type: item.type ?? '',
-		activeLabel: context.activeLabelTemplate.replace( '{{label}}', label ),
+		type: item.type,
+		activeLabel: context.activeLabelTemplate.replace(
+			'{{label}}',
+			getFilterLabel( item )
+		),
 	};
 	if ( item.attributeQueryType ) {
 		newActiveFilter.attributeQueryType = item.attributeQueryType;
@@ -45,7 +68,7 @@ function selectFilter( item: FilterOptionItem ) {
 	context.activeFilters = newActiveFilters;
 }
 
-function unselectFilter( item: FilterOptionItem ) {
+function unselectFilter( item: ValidFilterOptionItem ) {
 	actions.removeActiveFiltersBy(
 		( activeFilter ) =>
 			activeFilter.type === item.type && activeFilter.value === item.value
@@ -126,7 +149,7 @@ const productFiltersStore = {
 				? getServerContext< ProductFiltersContext >()
 				: getContext< ProductFiltersContext >();
 			const items = server.items;
-			if ( ! items ) return [];
+			if ( ! Array.isArray( items ) ) return [];
 			return items.map( ( item, index ) => ( {
 				...item,
 				index,
@@ -174,7 +197,7 @@ const productFiltersStore = {
 		toggle: () => {
 			const context = getContext< ProductFiltersContext >();
 			const { item } = context;
-			if ( ! item ) return;
+			if ( ! item || ! isValidFilterOptionItem( item ) ) return;
 			const isSelected = context.activeFilters.some(
 				( f ) => f.type === item.type && f.value === item.value
 			);
