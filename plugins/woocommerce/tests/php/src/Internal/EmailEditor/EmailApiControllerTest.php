@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\EmailEditor;
 
 use Automattic\WooCommerce\Internal\EmailEditor\EmailApiController;
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateChangeSummary;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
@@ -587,6 +588,86 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( \WP_Error::class, $result );
 		$this->assertSame( 'woocommerce_email_editor_not_initialized', $result->get_error_code() );
 		$this->assertSame( 500, $result->get_error_data()['status'] );
+	}
+
+	/**
+	 * @testdox Should return a structured change-summary payload for a divergent woo_email post.
+	 */
+	public function test_change_summary_route_returns_structured_payload(): void {
+		$email_type = 'customer_new_account';
+
+		$generator = new WCTransactionalEmailPostsGenerator();
+		$generator->init_default_transactional_emails();
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$post_manager->clear_caches();
+		$post_manager->delete_email_template( $email_type );
+		WCEmailTemplateSyncRegistry::reset_cache();
+		WCEmailTemplateChangeSummary::reset_cache();
+
+		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
+		$this->assertIsInt( $post_id );
+
+		// Diverge the post from the canonical render so the summary has something to say.
+		wp_update_post(
+			array(
+				'ID'           => $post_id,
+				'post_content' => "<!-- wp:paragraph -->\n<p>Merchant-edited paragraph.</p>\n<!-- /wp:paragraph -->",
+			)
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/woocommerce-email-editor/v1/emails/' . $post_id . '/change-summary' );
+		$request->set_param( 'id', $post_id );
+
+		$result = $this->email_api_controller->get_change_summary_response( $request );
+
+		$this->assertInstanceOf( \WP_REST_Response::class, $result );
+		$this->assertSame( 200, $result->get_status() );
+
+		$data = $result->get_data();
+		$this->assertIsArray( $data );
+
+		foreach (
+			array(
+				'version_from',
+				'version_to',
+				'added_blocks',
+				'removed_blocks',
+				'copy_changes',
+				'structural_changes',
+				'summary_lines',
+				'is_fallback',
+				'cache_hit',
+			) as $key
+		) {
+			$this->assertArrayHasKey( $key, $data, "Response payload must include `$key`." );
+		}
+
+		$this->assertNotEmpty( $data['version_to'], 'version_to must be populated from the registry.' );
+		$this->assertIsArray( $data['summary_lines'] );
+	}
+
+	/**
+	 * @testdox Should return 404 from the change-summary route when no email matches the post.
+	 */
+	public function test_change_summary_route_returns_404_for_unknown_post(): void {
+		$unassociated_post = $this->factory()->post->create_and_get(
+			array(
+				'post_title'  => 'Unknown Email',
+				'post_name'   => 'unknown_email_for_change_summary',
+				'post_type'   => Integration::EMAIL_POST_TYPE,
+				'post_status' => 'draft',
+			)
+		);
+
+		$request = new \WP_REST_Request( 'GET', '/woocommerce-email-editor/v1/emails/' . $unassociated_post->ID . '/change-summary' );
+		$request->set_param( 'id', $unassociated_post->ID );
+
+		$result = $this->email_api_controller->get_change_summary_response( $request );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'woocommerce_email_not_found', $result->get_error_code() );
+		$this->assertSame( 404, $result->get_error_data()['status'] );
 	}
 
 	/**

@@ -1,0 +1,713 @@
+<?php
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
+
+use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger_Interface;
+use Automattic\WooCommerce\Internal\EmailEditor\Logger;
+
+/**
+ * Produces a localized summary of differences between a merchant's `woo_email`
+ * post content and the current canonical core render of the same email.
+ *
+ * Algorithm: DFS-flatten both block trees → normalize known namespace aliases
+ * (e.g. `woo/email-content` → `woocommerce/email-content`) → run an LCS over
+ * the resulting block-name sequences → classify the residue as added /
+ * removed / copy / structural. Result is cached in a transient keyed on the
+ * combined post + core content hashes plus locale, so any merchant edit or
+ * core bump invalidates automatically.
+ *
+ * Hash input parity with {@see WCTransactionalEmailPostsGenerator::compute_canonical_post_content()}
+ * is guaranteed by construction — both sides route through the same canonical
+ * render, identical to the divergence detector.
+ *
+ * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
+ * @since 10.8.0
+ */
+class WCEmailTemplateChangeSummary {
+	/**
+	 * Transient TTL.
+	 *
+	 * Long-lived because the cache key is content-hash-bound; production
+	 * invalidation is automatic on any post or core change.
+	 */
+	private const CACHE_TTL = DAY_IN_SECONDS;
+
+	/**
+	 * Maximum length of each side of a copy change, in characters.
+	 */
+	private const COPY_TRUNCATE_CHARS = 120;
+
+	/**
+	 * Summary-inversion guard: minimum number of unmatched additions (with no
+	 * removals or copy changes and a heavily larger post) before we refuse to
+	 * confidently attribute the diff to "core changed."
+	 */
+	private const INVERSION_GUARD_ADDED_THRESHOLD = 5;
+
+	/**
+	 * Summary-inversion guard: minimum post-to-core record-count ratio.
+	 */
+	private const INVERSION_GUARD_RATIO = 1.5;
+
+	/**
+	 * Block-name aliases. Used to fold known namespace renames into a single
+	 * identity so the diff doesn't surface them as add+remove pairs.
+	 *
+	 * Keep this map intentionally small — extend only when a real alias is
+	 * observed in the wild.
+	 *
+	 * @var array<string,string>
+	 */
+	private const BLOCK_NAME_ALIASES = array(
+		'woo/email-content' => 'woocommerce/email-content',
+	);
+
+	/**
+	 * Block names that act purely as structural wrappers in email templates.
+	 * When one of these appears unmatched on a single side it is reported as a
+	 * `nest` structural change rather than as an `added_blocks`/`removed_blocks`
+	 * entry.
+	 *
+	 * @var array<string,bool>
+	 */
+	private const STRUCTURAL_BLOCK_NAMES = array(
+		'core/group'   => true,
+		'core/columns' => true,
+		'core/column'  => true,
+		'core/row'     => true,
+	);
+
+	/**
+	 * Logger instance. Lazily instantiated on first use; overridable for tests.
+	 *
+	 * @var Email_Editor_Logger_Interface|null
+	 */
+	private static $logger = null;
+
+	/**
+	 * Produce a structured + localized summary of differences between the
+	 * merchant's `woo_email` post and the current canonical core render.
+	 *
+	 * Returned payload shape (documented for callers; typed as
+	 * `array<string, mixed>` so internal helpers can return through it
+	 * without expanding every union into the signature):
+	 *
+	 * - `version_from`        — `string`     — `_wc_email_template_version` meta on the post (may be empty).
+	 * - `version_to`          — `string`     — registry-side current version.
+	 * - `added_blocks`        — `string[]`   — localized labels of unmatched post blocks.
+	 * - `removed_blocks`      — `string[]`   — localized labels of unmatched core blocks.
+	 * - `copy_changes`        — `array<int, array{block:string, before:string, after:string, occurrence:int, total:int}>`.
+	 * - `structural_changes`  — `array<int, array{kind:string, description:string}>`.
+	 * - `summary_lines`       — `string[]`   — pre-localized one-liners ready to render.
+	 * - `is_fallback`         — `bool`       — true when the diff could not be produced.
+	 * - `cache_hit`           — `bool`       — diagnostic.
+	 *
+	 * @param int $post_id The `woo_email` post ID.
+	 *
+	 * @return array<string, mixed>
+	 *
+	 * @since 10.8.0
+	 */
+	public static function summarize( int $post_id ): array {
+		$post = get_post( $post_id );
+		if ( ! $post instanceof \WP_Post ) {
+			return self::fallback_payload( '', '' );
+		}
+
+		$posts_manager = WCTransactionalEmailPostsManager::get_instance();
+		$email_id      = $posts_manager->get_email_type_from_post_id( $post_id );
+		if ( ! is_string( $email_id ) || '' === $email_id ) {
+			return self::fallback_payload( '', '' );
+		}
+
+		$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( $email_id );
+		if ( null === $sync_config ) {
+			return self::fallback_payload( '', '' );
+		}
+
+		$emails = $posts_manager->get_emails_by_id();
+		$email  = $emails[ $email_id ] ?? null;
+		if ( ! $email instanceof \WC_Email ) {
+			return self::fallback_payload( '', (string) $sync_config['version'] );
+		}
+
+		$post_content = (string) $post->post_content;
+
+		try {
+			$core_content = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+		} catch ( \Throwable $e ) {
+			self::get_logger()->error(
+				sprintf(
+					'Email template change summary failed to compute canonical content for email "%s": %s',
+					$email_id,
+					$e->getMessage()
+				),
+				array(
+					'email_id' => $email_id,
+					'post_id'  => $post_id,
+					'context'  => 'email_template_change_summary',
+				)
+			);
+			return self::fallback_payload(
+				(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ),
+				(string) $sync_config['version']
+			);
+		}
+
+		$version_from = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true );
+		$version_to   = (string) $sync_config['version'];
+
+		$post_hash = sha1( $post_content );
+		$core_hash = sha1( $core_content );
+
+		if ( $post_hash === $core_hash ) {
+			$payload                  = self::empty_payload();
+			$payload['version_from']  = $version_from;
+			$payload['version_to']    = $version_to;
+			$payload['summary_lines'] = array( __( 'No visible changes since this template was last applied.', 'woocommerce' ) );
+			$payload['is_fallback']   = true;
+			return $payload;
+		}
+
+		$cache_key = self::cache_key( $post_id, $post_hash, $core_hash, self::current_locale() );
+		$cached    = get_transient( $cache_key );
+		if ( is_array( $cached ) ) {
+			$cached['cache_hit'] = true;
+			return $cached;
+		}
+
+		$post_records = self::flatten_blocks( parse_blocks( $post_content ) );
+		$core_records = self::flatten_blocks( parse_blocks( $core_content ) );
+
+		if ( empty( $post_records ) || empty( $core_records ) ) {
+			return self::fallback_payload( $version_from, $version_to );
+		}
+
+		$structured = self::diff_records( $core_records, $post_records );
+
+		// Summary-inversion guard: a heavily one-sided expansion looks like
+		// merchant work attributed to core. Without a stored old-core hash to
+		// disambiguate, fall back to the release-notes line.
+		$post_total = count( $post_records );
+		$core_total = count( $core_records );
+		if (
+			0 === count( $structured['removed_blocks'] )
+			&& 0 === count( $structured['copy_changes'] )
+			&& count( $structured['added_blocks'] ) >= self::INVERSION_GUARD_ADDED_THRESHOLD
+			&& $post_total >= ( self::INVERSION_GUARD_RATIO * $core_total )
+		) {
+			$payload = self::fallback_payload( $version_from, $version_to );
+			self::write_cache( $cache_key, $payload );
+			return $payload;
+		}
+
+		$summary_lines = self::to_summary_lines( $structured );
+
+		$payload = array(
+			'version_from'       => $version_from,
+			'version_to'         => $version_to,
+			'added_blocks'       => $structured['added_blocks'],
+			'removed_blocks'     => $structured['removed_blocks'],
+			'copy_changes'       => $structured['copy_changes'],
+			'structural_changes' => $structured['structural_changes'],
+			'summary_lines'      => $summary_lines,
+			'is_fallback'        => false,
+			'cache_hit'          => false,
+		);
+
+		self::write_cache( $cache_key, $payload );
+
+		return $payload;
+	}
+
+	/**
+	 * Drop every cached change-summary transient. Test-only — production
+	 * invalidation is automatic via the content-hash key.
+	 *
+	 * @internal
+	 *
+	 * @since 10.8.0
+	 */
+	public static function reset_cache(): void {
+		global $wpdb;
+
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name LIKE %s OR option_name LIKE %s",
+				$wpdb->esc_like( '_transient_wc_email_change_summary_' ) . '%',
+				$wpdb->esc_like( '_transient_timeout_wc_email_change_summary_' ) . '%'
+			)
+		);
+	}
+
+	/**
+	 * Override the logger implementation. Intended for tests only.
+	 *
+	 * @internal
+	 *
+	 * @param Email_Editor_Logger_Interface|null $logger The logger implementation, or null to restore the default.
+	 */
+	public static function set_logger( ?Email_Editor_Logger_Interface $logger ): void {
+		self::$logger = $logger;
+	}
+
+	/**
+	 * Empty payload skeleton.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private static function empty_payload(): array {
+		return array(
+			'version_from'       => '',
+			'version_to'         => '',
+			'added_blocks'       => array(),
+			'removed_blocks'     => array(),
+			'copy_changes'       => array(),
+			'structural_changes' => array(),
+			'summary_lines'      => array(),
+			'is_fallback'        => false,
+			'cache_hit'          => false,
+		);
+	}
+
+	/**
+	 * Build the standard fallback payload (release-notes line).
+	 *
+	 * @param string $version_from Stored version stamp on the post (may be empty).
+	 * @param string $version_to   Registry-side current version.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private static function fallback_payload( string $version_from, string $version_to ): array {
+		$payload                  = self::empty_payload();
+		$payload['version_from']  = $version_from;
+		$payload['version_to']    = $version_to;
+		$payload['summary_lines'] = array( __( 'Template updated — see release notes.', 'woocommerce' ) );
+		$payload['is_fallback']   = true;
+		return $payload;
+	}
+
+	/**
+	 * Write a payload to the transient cache, pre-stamping `cache_hit` so any
+	 * subsequent read is honest about its origin.
+	 *
+	 * @param string               $cache_key Transient key.
+	 * @param array<string, mixed> $payload   The payload to cache.
+	 */
+	private static function write_cache( string $cache_key, array $payload ): void {
+		$to_cache              = $payload;
+		$to_cache['cache_hit'] = true;
+		set_transient( $cache_key, $to_cache, self::CACHE_TTL );
+	}
+
+	/**
+	 * Resolve the active locale for cache-keying. User locale wins so that
+	 * different admins on the same site each see their own translation.
+	 */
+	private static function current_locale(): string {
+		$user_locale = function_exists( 'get_user_locale' ) ? (string) get_user_locale() : '';
+		return '' !== $user_locale ? $user_locale : (string) get_locale();
+	}
+
+	/**
+	 * Compute the transient key.
+	 *
+	 * Hash composite is md5-wrapped to keep `option_name` (with the
+	 * `_transient_` prefix) well under WP's 191-char limit.
+	 *
+	 * @param int    $post_id   The `woo_email` post ID.
+	 * @param string $post_hash sha1 of the persisted post content.
+	 * @param string $core_hash sha1 of the canonical core render.
+	 * @param string $locale    Active locale.
+	 */
+	private static function cache_key( int $post_id, string $post_hash, string $core_hash, string $locale ): string {
+		return sprintf(
+			'wc_email_change_summary_%d_%s',
+			$post_id,
+			md5( $post_hash . '|' . $core_hash . '|' . $locale )
+		);
+	}
+
+	/**
+	 * DFS-flatten a `parse_blocks()` result into an ordered sequence of leaf
+	 * descriptors. Skips null-name entries (raw HTML wrappers between blocks).
+	 *
+	 * @param array<int|string, array<string, mixed>> $blocks      Output of `parse_blocks()`.
+	 * @param array<int|string>                       $path        Current index path from root.
+	 * @param string|null                             $parent_name Normalized parent block name, null at root.
+	 *
+	 * @return array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}>
+	 */
+	private static function flatten_blocks( array $blocks, array $path = array(), ?string $parent_name = null ): array {
+		$records = array();
+		foreach ( $blocks as $idx => $block ) {
+			if ( ! is_array( $block ) || null === ( $block['blockName'] ?? null ) ) {
+				continue;
+			}
+			$name         = self::normalize_block_name( (string) $block['blockName'] );
+			$current_path = array_merge( $path, array( $idx ) );
+
+			$records[] = array(
+				'path'        => $current_path,
+				'parent_name' => $parent_name,
+				'name'        => $name,
+				'inner_text'  => self::clean_inner_text( (string) ( $block['innerHTML'] ?? '' ) ),
+			);
+
+			if ( ! empty( $block['innerBlocks'] ) && is_array( $block['innerBlocks'] ) ) {
+				$records = array_merge(
+					$records,
+					self::flatten_blocks( $block['innerBlocks'], $current_path, $name )
+				);
+			}
+		}//end foreach
+		return $records;
+	}
+
+	/**
+	 * Apply the namespace-alias map.
+	 *
+	 * @param string $name Raw block name from `parse_blocks()`.
+	 */
+	private static function normalize_block_name( string $name ): string {
+		return self::BLOCK_NAME_ALIASES[ $name ] ?? $name;
+	}
+
+	/**
+	 * Strip tags and collapse whitespace. Used as the basis for copy-change
+	 * comparison — semantic content only, no markup-shape noise.
+	 *
+	 * @param string $html Raw `innerHTML` string from a parsed block.
+	 */
+	private static function clean_inner_text( string $html ): string {
+		$stripped  = wp_strip_all_tags( $html );
+		$collapsed = preg_replace( '/\s+/', ' ', (string) $stripped );
+		return trim( (string) $collapsed );
+	}
+
+	/**
+	 * Diff two flattened record sequences.
+	 *
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $core_records Core side.
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $post_records Post side.
+	 *
+	 * @return array{added_blocks:string[], removed_blocks:string[], copy_changes:array<int, array<string, mixed>>, structural_changes:array<int, array<string, mixed>>}
+	 */
+	private static function diff_records( array $core_records, array $post_records ): array {
+		$core_names = array_map( static fn( array $r ): string => $r['name'], $core_records );
+		$post_names = array_map( static fn( array $r ): string => $r['name'], $post_records );
+
+		$matches = self::lcs_matches( $core_names, $post_names );
+
+		$matched_core = array();
+		$matched_post = array();
+		foreach ( $matches as $pair ) {
+			$matched_core[ $pair[0] ] = true;
+			$matched_post[ $pair[1] ] = true;
+		}
+
+		$added_blocks       = array();
+		$removed_blocks     = array();
+		$copy_changes       = array();
+		$structural_changes = array();
+
+		foreach ( $core_records as $i => $rec ) {
+			if ( isset( $matched_core[ $i ] ) ) {
+				continue;
+			}
+			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
+				$structural_changes[] = array(
+					'kind'        => 'nest',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Removed %s wrapper', 'woocommerce' ),
+						self::block_label( $rec['name'] )
+					),
+				);
+				continue;
+			}
+			$removed_blocks[] = self::block_label( $rec['name'] );
+		}
+
+		foreach ( $post_records as $i => $rec ) {
+			if ( isset( $matched_post[ $i ] ) ) {
+				continue;
+			}
+			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
+				$structural_changes[] = array(
+					'kind'        => 'nest',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Added %s wrapper', 'woocommerce' ),
+						self::block_label( $rec['name'] )
+					),
+				);
+				continue;
+			}
+			$added_blocks[] = self::block_label( $rec['name'] );
+		}
+
+		// Reorder pass: pair like-named entries between added and removed and
+		// reclassify them as a `reorder` structural change. LCS only matches
+		// in-order, so an actual reorder of matched blocks lands here as
+		// add+remove pairs.
+		$added_counts   = array_count_values( $added_blocks );
+		$removed_counts = array_count_values( $removed_blocks );
+		foreach ( $added_counts as $label => $a_count ) {
+			$r_count = $removed_counts[ $label ] ?? 0;
+			$pairs   = (int) min( $a_count, $r_count );
+			if ( $pairs <= 0 ) {
+				continue;
+			}
+			for ( $i = 0; $i < $pairs; $i++ ) {
+				$structural_changes[] = array(
+					'kind'        => 'reorder',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Reordered %s', 'woocommerce' ),
+						(string) $label
+					),
+				);
+			}
+			$added_counts[ $label ]   = $a_count - $pairs;
+			$removed_counts[ $label ] = $r_count - $pairs;
+		}
+		$added_blocks   = self::expand_counts( $added_counts );
+		$removed_blocks = self::expand_counts( $removed_counts );
+
+		// Classify matched pairs.
+		$core_name_counts = array_count_values( $core_names );
+		$occurrence_index = array();
+		foreach ( $matches as $pair ) {
+			$core   = $core_records[ $pair[0] ];
+			$post_r = $post_records[ $pair[1] ];
+			$name   = $core['name'];
+			$label  = self::block_label( $name );
+
+			$occurrence_index[ $name ] = ( $occurrence_index[ $name ] ?? 0 ) + 1;
+			$total                     = (int) ( $core_name_counts[ $name ] ?? 1 );
+
+			if ( $core['parent_name'] !== $post_r['parent_name'] ) {
+				$structural_changes[] = array(
+					'kind'        => 'nest',
+					'description' => sprintf(
+						/* translators: 1: block name; 2: parent block name */
+						__( 'Moved %1$s into %2$s', 'woocommerce' ),
+						$label,
+						null === $post_r['parent_name'] ? __( 'top level', 'woocommerce' ) : self::block_label( $post_r['parent_name'] )
+					),
+				);
+			}
+
+			if ( $core['inner_text'] !== $post_r['inner_text'] ) {
+				$copy_changes[] = array(
+					'block'      => $label,
+					'before'     => self::truncate_text( $core['inner_text'] ),
+					'after'      => self::truncate_text( $post_r['inner_text'] ),
+					'occurrence' => $occurrence_index[ $name ],
+					'total'      => $total,
+				);
+			}
+		}//end foreach
+
+		return array(
+			'added_blocks'       => $added_blocks,
+			'removed_blocks'     => $removed_blocks,
+			'copy_changes'       => $copy_changes,
+			'structural_changes' => $structural_changes,
+		);
+	}
+
+	/**
+	 * Expand a label-count map back into a flat list. Used after the reorder
+	 * pass to rebuild added/removed arrays without the paired entries.
+	 *
+	 * @param array<string, int> $counts Map of label → count.
+	 * @return string[]
+	 */
+	private static function expand_counts( array $counts ): array {
+		$out = array();
+		foreach ( $counts as $label => $count ) {
+			for ( $i = 0; $i < (int) $count; $i++ ) {
+				$out[] = (string) $label;
+			}
+		}
+		return $out;
+	}
+
+	/**
+	 * Compute LCS over two name sequences. Returns the matched pairs as
+	 * (core_index, post_index) tuples in increasing order on both axes.
+	 *
+	 * @param string[] $a First sequence (core).
+	 * @param string[] $b Second sequence (post).
+	 *
+	 * @return array<int, array{0:int, 1:int}>
+	 */
+	private static function lcs_matches( array $a, array $b ): array {
+		$n = count( $a );
+		$m = count( $b );
+		if ( 0 === $n || 0 === $m ) {
+			return array();
+		}
+
+		$dp = array_fill( 0, $n + 1, array_fill( 0, $m + 1, 0 ) );
+		for ( $i = 1; $i <= $n; $i++ ) {
+			for ( $j = 1; $j <= $m; $j++ ) {
+				if ( $a[ $i - 1 ] === $b[ $j - 1 ] ) {
+					$dp[ $i ][ $j ] = $dp[ $i - 1 ][ $j - 1 ] + 1;
+				} else {
+					$dp[ $i ][ $j ] = max( $dp[ $i - 1 ][ $j ], $dp[ $i ][ $j - 1 ] );
+				}
+			}
+		}
+
+		$pairs = array();
+		$i     = $n;
+		$j     = $m;
+		while ( $i > 0 && $j > 0 ) {
+			if ( $a[ $i - 1 ] === $b[ $j - 1 ] ) {
+				$pairs[] = array( $i - 1, $j - 1 );
+				--$i;
+				--$j;
+			} elseif ( $dp[ $i - 1 ][ $j ] >= $dp[ $i ][ $j - 1 ] ) {
+				--$i;
+			} else {
+				--$j;
+			}
+		}
+
+		return array_reverse( $pairs );
+	}
+
+	/**
+	 * Convert a normalized block name into a human-readable label. Used for
+	 * both structured payload entries and the localized catalog.
+	 *
+	 * `core/heading` → `Heading`; `woocommerce/email-content` → `Email content`.
+	 *
+	 * @param string $normalized_name Normalized block name.
+	 */
+	private static function block_label( string $normalized_name ): string {
+		$bare = preg_replace( '#^[a-z0-9\-]+/#', '', $normalized_name );
+		$bare = (string) $bare;
+		$bare = str_replace( array( '-', '_' ), ' ', $bare );
+		$bare = trim( $bare );
+		if ( '' === $bare ) {
+			return $normalized_name;
+		}
+		return ucfirst( $bare );
+	}
+
+	/**
+	 * UTF-8-safe truncation to {@see self::COPY_TRUNCATE_CHARS}.
+	 *
+	 * @param string $text Cleaned inner-text candidate.
+	 */
+	private static function truncate_text( string $text ): string {
+		$limit = self::COPY_TRUNCATE_CHARS;
+		if ( function_exists( 'mb_strlen' ) && function_exists( 'mb_substr' ) ) {
+			if ( mb_strlen( $text ) <= $limit ) {
+				return $text;
+			}
+			return rtrim( mb_substr( $text, 0, $limit ) ) . '…';
+		}
+		if ( strlen( $text ) <= $limit ) {
+			return $text;
+		}
+		return rtrim( substr( $text, 0, $limit ) ) . '…';
+	}
+
+	/**
+	 * Render the structured payload into pre-localized one-liners, using a
+	 * fixed string catalog. The "(N of M)" disambiguator only fires when a
+	 * block label appears more than once on the matched side.
+	 *
+	 * @param array{added_blocks:string[], removed_blocks:string[], copy_changes:array<int, array<string, mixed>>, structural_changes:array<int, array<string, mixed>>} $structured Diff output.
+	 * @return string[]
+	 */
+	private static function to_summary_lines( array $structured ): array {
+		$lines = array();
+
+		$added_counts = array_count_values( $structured['added_blocks'] );
+		foreach ( $added_counts as $label => $count ) {
+			$count = (int) $count;
+			if ( 1 === $count ) {
+				$lines[] = sprintf(
+					/* translators: %s: block name */
+					__( 'Added a %s block', 'woocommerce' ),
+					(string) $label
+				);
+			} else {
+				$lines[] = sprintf(
+					/* translators: 1: number of blocks added; 2: block name */
+					__( 'Added %1$d %2$s blocks', 'woocommerce' ),
+					$count,
+					(string) $label
+				);
+			}
+		}
+
+		$removed_counts = array_count_values( $structured['removed_blocks'] );
+		foreach ( $removed_counts as $label => $count ) {
+			$count = (int) $count;
+			if ( 1 === $count ) {
+				$lines[] = sprintf(
+					/* translators: %s: block name */
+					__( 'Removed a %s block', 'woocommerce' ),
+					(string) $label
+				);
+			} else {
+				$lines[] = sprintf(
+					/* translators: 1: number of blocks removed; 2: block name */
+					__( 'Removed %1$d %2$s blocks', 'woocommerce' ),
+					$count,
+					(string) $label
+				);
+			}
+		}
+
+		foreach ( $structured['copy_changes'] as $change ) {
+			$label      = (string) ( $change['block'] ?? '' );
+			$occurrence = (int) ( $change['occurrence'] ?? 1 );
+			$total      = (int) ( $change['total'] ?? 1 );
+
+			if ( $total > 1 ) {
+				$lines[] = sprintf(
+					/* translators: 1: block name; 2: occurrence number; 3: total occurrences */
+					__( 'Updated wording in %1$s (%2$d of %3$d)', 'woocommerce' ),
+					$label,
+					$occurrence,
+					$total
+				);
+			} else {
+				$lines[] = sprintf(
+					/* translators: %s: block name */
+					__( 'Updated wording in %s', 'woocommerce' ),
+					$label
+				);
+			}
+		}//end foreach
+
+		foreach ( $structured['structural_changes'] as $change ) {
+			$desc = (string) ( $change['description'] ?? '' );
+			if ( '' !== $desc ) {
+				$lines[] = $desc;
+			}
+		}
+
+		return $lines;
+	}
+
+	/**
+	 * Return the logger instance, lazily creating it the first time.
+	 */
+	private static function get_logger(): Email_Editor_Logger_Interface {
+		if ( null === self::$logger ) {
+			self::$logger = new Logger( wc_get_logger() );
+		}
+		return self::$logger;
+	}
+}
