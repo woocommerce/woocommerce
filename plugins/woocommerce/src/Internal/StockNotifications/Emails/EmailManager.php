@@ -279,7 +279,9 @@ class EmailManager {
 	 * @return void
 	 */
 	public function send_stock_notification_email( Notification $notification ) {
-		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Stock_Notification'] ?? null;
+		$emails = WC()->mailer()->get_emails();
+		$email  = $emails['WC_Email_Customer_Stock_Notification'] ?? null;
+
 		if ( $email instanceof CustomerStockNotificationEmail ) {
 			$email->trigger( $notification );
 		}
@@ -292,7 +294,9 @@ class EmailManager {
 	 * @return void
 	 */
 	public function send_verify_email( Notification $notification ) {
-		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Stock_Notification_Verify'] ?? null;
+		$emails = WC()->mailer()->get_emails();
+		$email  = $emails['WC_Email_Customer_Stock_Notification_Verify'] ?? null;
+
 		if ( $email instanceof CustomerStockNotificationVerifyEmail ) {
 			$email->trigger( $notification );
 		}
@@ -305,7 +309,9 @@ class EmailManager {
 	 * @return void
 	 */
 	public function send_verified_email( Notification $notification ) {
-		$email = WC()->mailer()->get_emails()['WC_Email_Customer_Stock_Notification_Verified'] ?? null;
+		$emails = WC()->mailer()->get_emails();
+		$email  = $emails['WC_Email_Customer_Stock_Notification_Verified'] ?? null;
+
 		if ( $email instanceof CustomerStockNotificationVerifiedEmail ) {
 			$email->trigger( $notification );
 		}
