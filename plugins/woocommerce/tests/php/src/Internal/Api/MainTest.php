@@ -165,7 +165,7 @@ class MainTest extends WC_Unit_Test_Case {
 	 * @testdox register_graphql_endpoint rejects directories that don't contain a generated controller.
 	 */
 	public function test_register_graphql_endpoint_rejects_directory_without_controller(): void {
-		$tmp = sys_get_temp_dir() . '/wc-graphql-no-controller';
+		$tmp = sys_get_temp_dir() . '/wc-graphql-no-controller-' . uniqid();
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
 		mkdir( $tmp, 0755, true );
 
