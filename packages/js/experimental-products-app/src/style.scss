@@ -20,3 +20,11 @@
 .woocommerce-product-list {
 	height: 85vh;
 }
+
+.woocommerce-product-list__toolbar {
+	padding: 0 var(--wpds-dimension-padding-2xl, 24px);
+}
+
+.woocommerce-product-list .dataviews-wrapper {
+	height: 100%;
+}

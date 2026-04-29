@@ -35,7 +35,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$attribute_taxonomy->attribute_type = 'select';
 				}
 
-				if ( 'select' === $attribute_taxonomy->attribute_type ) {
+				if (
+					'select' === $attribute_taxonomy->attribute_type ||
+					'wc-visual' === $attribute_taxonomy->attribute_type
+				) {
 					$attribute_orderby = ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name';
 					/**
 					* Filter the length (number of terms) rendered in the list.
