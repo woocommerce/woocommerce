@@ -55,7 +55,32 @@ export const useRevokeQRLoginAccess = () => {
 				return;
 			}
 
-			const err = error as { message?: string };
+			const err = error as {
+				code?: string;
+				message?: string;
+				data?: { status?: number };
+			};
+
+			// Same rate-limit detection as useQRLoginToken: our own
+			// `rate_limit_exceeded`, the upstream edge limiter's HTML 429
+			// (apiFetch reports as `invalid_json`), or any explicit 429
+			// status. All three resolve to the same merchant-facing message.
+			const httpStatus = err.data?.status;
+			const isRateLimited =
+				err.code === 'rate_limit_exceeded' ||
+				err.code === 'invalid_json' ||
+				httpStatus === 429;
+
+			if ( isRateLimited ) {
+				setErrorMessage(
+					__(
+						"You're sending requests too quickly. Please wait a moment and try again.",
+						'woocommerce'
+					)
+				);
+				return;
+			}
+
 			setErrorMessage(
 				err.message ||
 					__(

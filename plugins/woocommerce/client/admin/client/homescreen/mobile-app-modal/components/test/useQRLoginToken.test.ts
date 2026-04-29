@@ -48,7 +48,7 @@ const expectedErrorMessages: Array< {
 	},
 	{
 		code: 'rate_limit_exceeded',
-		message: /Too many QR login requests/i,
+		message: /requested QR login codes too quickly/i,
 	},
 ];
 
@@ -310,6 +310,51 @@ describe( 'useQRLoginToken', () => {
 		expect( tokenGenerateCalls ).toHaveLength( 2 );
 	} );
 
+	// Cloudflare/VIP/etc. edge rate-limiters return an HTML 429 page;
+	// apiFetch surfaces that as `invalid_json` because the body isn't
+	// parseable. We collapse it onto the same merchant-facing message as
+	// our own rate-limit code so the user gets a clear next step instead
+	// of "The response is not a valid JSON response."
+	it( 'maps an upstream HTML 429 (apiFetch invalid_json) to the rate-limited message', async () => {
+		mockApiFetch.mockRejectedValueOnce( {
+			code: 'invalid_json',
+			message: 'The response is not a valid JSON response.',
+		} );
+
+		const { result } = renderHook( () => useQRLoginToken() );
+
+		await act( async () => {
+			await result.current.fetchToken();
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.ERROR );
+		expect( result.current.errorMessage ).toMatch(
+			/requested QR login codes too quickly/i
+		);
+		// The raw "not a valid JSON response" message should never be
+		// surfaced to the merchant.
+		expect( result.current.errorMessage ).not.toMatch( /JSON/i );
+	} );
+
+	it( 'maps an explicit HTTP 429 status to the rate-limited message', async () => {
+		mockApiFetch.mockRejectedValueOnce( {
+			code: 'unexpected_code',
+			message: 'whatever',
+			data: { status: 429 },
+		} );
+
+		const { result } = renderHook( () => useQRLoginToken() );
+
+		await act( async () => {
+			await result.current.fetchToken();
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.ERROR );
+		expect( result.current.errorMessage ).toMatch(
+			/requested QR login codes too quickly/i
+		);
+	} );
+
 	it( 'failed refetch clears the previous token and keeps the error visible', async () => {
 		const firstResponse = buildResponse( 5 );
 		mockApiFetch.mockResolvedValueOnce( firstResponse );
@@ -346,7 +391,7 @@ describe( 'useQRLoginToken', () => {
 		expect( result.current.qrUrl ).toBeNull();
 		expect( result.current.secondsRemaining ).toBe( 0 );
 		expect( result.current.errorMessage ).toMatch(
-			/Too many QR login requests/i
+			/requested QR login codes too quickly/i
 		);
 
 		act( () => {

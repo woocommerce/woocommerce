@@ -307,56 +307,71 @@ export const useQRLoginToken = ( {
 			setQrUrl( null );
 			setSecondsRemaining( 0 );
 
-			const err = error as { code?: string; message?: string };
+			const err = error as {
+				code?: string;
+				message?: string;
+				data?: { status?: number };
+			};
 			const nextErrorCode = err.code ?? null;
 			let nextErrorMessage: ReactNode;
 
-			switch ( nextErrorCode ) {
-				case 'woocommerce_rest_cannot_view':
-					// The endpoint requires the `manage_woocommerce`
-					// capability; surface a clear, actionable message
-					// rather than the generic REST wording.
-					nextErrorMessage = __(
-						'You do not have permission to generate a QR login code. Ask a site administrator for help.',
-						'woocommerce'
-					);
-					break;
-				case 'ssl_required':
-					nextErrorMessage = __(
-						'QR login requires an HTTPS connection.',
-						'woocommerce'
-					);
-					break;
-				case 'application_passwords_unavailable':
-					nextErrorMessage = createInterpolateElement(
-						__(
-							'Application passwords are disabled on this site, so QR login is unavailable. Find more about application passwords <link>here</link>.',
-							'woocommerce'
-						),
-						{
-							link: (
-								<Link
-									href={ APPLICATION_PASSWORDS_DOCS_URL }
-									target="_blank"
-									type="external"
-								/>
-							),
-						}
-					);
-					break;
-				case 'rate_limit_exceeded':
-					nextErrorMessage = __(
-						'Too many QR login requests. Please try again in a few minutes.',
-						'woocommerce'
-					);
-					break;
-				default:
-					nextErrorMessage =
-						err.message ||
-						__(
-							'Failed to generate QR login code. Please try again.',
+			// Edge rate-limiters (Cloudflare, VIP, etc.) return an HTML 429
+			// page, and apiFetch surfaces that as `invalid_json`. Treat our
+			// own code, an explicit HTTP 429, and that parse failure as the
+			// same merchant-facing "wait a moment" state.
+			const httpStatus = err.data?.status;
+			const isRateLimited =
+				nextErrorCode === 'rate_limit_exceeded' ||
+				nextErrorCode === 'invalid_json' ||
+				httpStatus === 429;
+
+			if ( isRateLimited ) {
+				nextErrorMessage = __(
+					"You've requested QR login codes too quickly. Please wait a moment and try again.",
+					'woocommerce'
+				);
+			} else {
+				switch ( nextErrorCode ) {
+					case 'woocommerce_rest_cannot_view':
+						// The endpoint requires the `manage_woocommerce`
+						// capability; surface a clear, actionable message
+						// rather than the generic REST wording.
+						nextErrorMessage = __(
+							'You do not have permission to generate a QR login code. Ask a site administrator for help.',
 							'woocommerce'
 						);
+						break;
+					case 'ssl_required':
+						nextErrorMessage = __(
+							'QR login requires an HTTPS connection.',
+							'woocommerce'
+						);
+						break;
+					case 'application_passwords_unavailable':
+						nextErrorMessage = createInterpolateElement(
+							__(
+								'Application passwords are disabled on this site, so QR login is unavailable. Find more about application passwords <link>here</link>.',
+								'woocommerce'
+							),
+							{
+								link: (
+									<Link
+										href={ APPLICATION_PASSWORDS_DOCS_URL }
+										target="_blank"
+										type="external"
+									/>
+								),
+							}
+						);
+						break;
+					default:
+						nextErrorMessage =
+							err.message ||
+							__(
+								'Failed to generate QR login code. Please try again.',
+								'woocommerce'
+							);
+				}
 			}
 
 			setErrorCode( nextErrorCode );
