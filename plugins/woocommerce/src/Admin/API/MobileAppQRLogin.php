@@ -182,6 +182,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		);
 
 		// Exchange a QR login token for Application Password (no authentication required).
+		// The device payload is captured at /qr-login-scan time and sourced from the
+		// approved record — the exchange call only needs the token + grant nonce.
 		register_rest_route(
 			$this->namespace,
 			'/' . $this->rest_base . '/qr-login-exchange',
@@ -191,24 +193,21 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 					'callback'            => array( $this, 'exchange_token' ),
 					'permission_callback' => '__return_true',
 					'args'                => array(
-						'token'  => array(
+						'token'          => array(
 							'required'          => true,
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
-						'device' => array(
-							'required'   => false,
-							'type'       => 'object',
-							// Sanitization happens inside the callback via
-							// `sanitize_device_payload()`; we accept any object
-							// shape here and whitelist server-side.
-							'properties' => array(
-								'os'          => array( 'type' => 'string' ),
-								'os_version'  => array( 'type' => 'string' ),
-								'model'       => array( 'type' => 'string' ),
-								'brand'       => array( 'type' => 'string' ),
-								'app_version' => array( 'type' => 'string' ),
-							),
+						// Soft-required: the handler enforces presence + validity
+						// via constant-time comparison and returns a clear
+						// `invalid_exchange_grant` 412 if missing. We don't make
+						// it `required: true` at the schema layer because that
+						// would short-circuit earlier checks (HTTPS, invalid
+						// token, rate limit) with a generic WP validation 400
+						// before our diagnostic responses can fire.
+						'exchange_grant' => array(
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
 						),
 					),
 				),
@@ -272,13 +271,21 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 					'callback'            => array( $this, 'scan_token' ),
 					'permission_callback' => '__return_true',
 					'args'                => array(
-						'token'                     => array(
+						'token'                    => array(
 							'required'          => true,
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
-						'device'                    => array(
-							'required'   => false,
+						// The device payload is required: it shows up in the
+						// merchant's "match this number" device card, in the
+						// Application Password name, and in the sign-in
+						// notification email. Mobile clients always have these
+						// fields available from the platform SDK (Build.MODEL,
+						// UIDevice.current.model, etc.), so requiring the
+						// payload at the protocol level keeps every downstream
+						// surface honest.
+						'device'                   => array(
+							'required'   => true,
 							'type'       => 'object',
 							'properties' => array(
 								'os'          => array( 'type' => 'string' ),
@@ -288,10 +295,13 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 								'app_version' => array( 'type' => 'string' ),
 							),
 						),
-						'supports_number_matching'  => array(
-							'required' => false,
+						// Capability flag the mobile app sets to advertise that
+						// it implements the number-matching protocol. Reserved
+						// for future protocol bumps that might gate behavior on
+						// further capability bits.
+						'supports_number_matching' => array(
+							'required' => true,
 							'type'     => 'boolean',
-							'default'  => false,
 						),
 					),
 				),
@@ -734,20 +744,10 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		}
 
 		// Number-matching enforcement: exchange must be preceded by /scan +
-		// /approve. If the merchant's mobile app is from before Task 7, it
-		// hits exchange directly without going through scan, so the record
-		// is still in `pending` — return 426 Upgrade Required so the app
-		// can prompt for an update.
+		// /approve. Anything other than `approved` (including `pending` —
+		// scan was skipped — and `scanned` — scan completed but merchant
+		// didn't tap a number yet) is a hard 412.
 		$current_state = isset( $token_data['state'] ) ? (string) $token_data['state'] : self::STATE_PENDING;
-
-		if ( self::STATE_PENDING === $current_state ) {
-			$this->release_token_exchange_claim( $token_hash );
-			return new \WP_Error(
-				'mobile_app_update_required',
-				__( 'This Woo mobile app version is no longer supported for QR sign-in. Please update the app and try again.', 'woocommerce' ),
-				array( 'status' => 426 )
-			);
-		}
 
 		if ( self::STATE_APPROVED !== $current_state ) {
 			delete_transient( $key );
@@ -811,17 +811,13 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// Prefer the device payload submitted to /scan (already sanitized into
-		// the challenge record). Fall back to the request body if for some
-		// reason the scan record didn't capture it. Either source is run
-		// through the whitelist again so we never trust pre-stored data
-		// blindly.
-		$device_source = array();
-		if ( isset( $token_data['challenge']['device'] ) && is_array( $token_data['challenge']['device'] ) ) {
-			$device_source = $token_data['challenge']['device'];
-		} elseif ( null !== $request->get_param( 'device' ) ) {
-			$device_source = (array) $request->get_param( 'device' );
-		}
+		// Source the device payload from the scan record. /qr-login-scan
+		// requires a device object, so by the time we reach `approved` it's
+		// guaranteed present. Re-sanitize defensively in case the transient
+		// was tampered with at the storage layer.
+		$device_source = isset( $token_data['challenge']['device'] ) && is_array( $token_data['challenge']['device'] )
+			? $token_data['challenge']['device']
+			: array();
 		$device = $this->sanitize_device_payload( $device_source );
 
 		// Create an Application Password for the mobile app. The name is
@@ -1132,18 +1128,12 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$model = isset( $device['model'] ) ? trim( $device['model'] ) : '';
 		$os    = isset( $device['os'] ) ? trim( $device['os'] ) : '';
 
-		$descriptor = '';
-		if ( '' !== $model ) {
-			$descriptor = $model;
-		} elseif ( '' !== $os ) {
-			$descriptor = $os;
-		}
-
-		if ( '' === $descriptor ) {
-			// Legacy fallback — preserves the existing AP name format for
-			// older app versions that don't send a device payload.
-			return __( 'WooCommerce Mobile App (QR Login)', 'woocommerce' );
-		}
+		// Prefer model (e.g. "iPhone 15", "Pixel 10"); fall back to the OS
+		// label if a particular device build returns an empty MODEL string.
+		// Both fields come from the platform SDK on the mobile side and are
+		// effectively always populated, but defending against an empty model
+		// is cheaper than chasing the edge case at runtime.
+		$descriptor = '' !== $model ? $model : $os;
 
 		// Use the site's configured timezone so the date the merchant sees in
 		// the AP list matches what they'd see in the rest of wp-admin.
