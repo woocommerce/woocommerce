@@ -52,7 +52,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		customSelectedChipBackground,
 		customSelectedChipBorder,
 	} = attributes;
-	const { isLoading = false, items } =
+	const { isLoading = false, items = [] } =
 		context[ 'woocommerce/selectableItems' ] ?? {};
 
 	const blockProps = useBlockProps( {

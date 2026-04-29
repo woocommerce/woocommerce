@@ -71,7 +71,7 @@ final class ProductFilterActive extends AbstractBlock {
 		wp_interactivity_state(
 			'woocommerce/product-filters',
 			array(
-				'hasActiveFilters' => ! empty( $active_filters ),
+				'hasActiveFilters' => ! empty( $removable_items ),
 			),
 		);
 

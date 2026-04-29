@@ -49,7 +49,7 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		customOptionElement,
 		customLabelElement,
 	} = attributes;
-	const { isLoading = false, items } =
+	const { isLoading = false, items = [] } =
 		context[ 'woocommerce/selectableItems' ] ?? {};
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
