@@ -55,9 +55,9 @@ class ShopperListTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_by_slug should auto-create saved-for-later on first read.
+	 * @testdox get_by_slug should return an in-memory saved-for-later list on first read without persisting it.
 	 */
-	public function test_load_auto_creates_save_for_later(): void {
+	public function test_load_returns_in_memory_save_for_later_without_persisting(): void {
 		$list = ShopperList::get_by_slug( 'saved-for-later', $this->user_id );
 
 		$this->assertInstanceOf( ShopperList::class, $list );
@@ -65,7 +65,19 @@ class ShopperListTests extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $list->get_items() );
 
 		$persisted = Users::get_site_user_meta( $this->user_id, ShopperList::META_KEY_PREFIX . 'saved-for-later' );
-		$this->assertIsArray( $persisted, 'Auto-created list should be persisted to user meta.' );
+		$this->assertSame( '', $persisted, 'Empty saved-for-later should not be persisted until the first add.' );
+	}
+
+	/**
+	 * @testdox saved-for-later should be persisted lazily on the first add_item()+save().
+	 */
+	public function test_save_for_later_is_persisted_on_first_add(): void {
+		$list = ShopperList::get_by_slug( 'saved-for-later', $this->user_id );
+		$list->add_item( $this->make_item() );
+		$list->save();
+
+		$persisted = Users::get_site_user_meta( $this->user_id, ShopperList::META_KEY_PREFIX . 'saved-for-later' );
+		$this->assertIsArray( $persisted );
 	}
 
 	/**

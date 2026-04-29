@@ -110,9 +110,9 @@ class ShopperList {
 			);
 		}
 
-		// Auto-create saved-for-later when necessary.
+		// Return an in-memory saved-for-later list; it's persisted lazily on the first add_item()+save().
 		if ( 'saved-for-later' === $slug ) {
-			$list = new self(
+			return new self(
 				$user_id,
 				'saved-for-later',
 				'Saved for Later',
@@ -120,8 +120,6 @@ class ShopperList {
 				current_time( 'mysql', true ),
 				array()
 			);
-			$list->save();
-			return $list;
 		}
 
 		return false;
