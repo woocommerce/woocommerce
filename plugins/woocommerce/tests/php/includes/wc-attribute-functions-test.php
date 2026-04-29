@@ -224,6 +224,12 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$original_theme = wp_get_theme()->get_stylesheet();
 		$attribute_id   = null;
 
+		$enable_visual_attribute_feature = function ( $features ) {
+			$features[] = 'wc-visual-attribute';
+			return array_unique( $features );
+		};
+
+		add_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
 		try {
 			switch_theme( 'twentytwentyfour' );
 
@@ -252,6 +258,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 				wc_delete_attribute( $attribute_id );
 			}
 
+			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
 			switch_theme( $original_theme );
 		}//end try
 	}
