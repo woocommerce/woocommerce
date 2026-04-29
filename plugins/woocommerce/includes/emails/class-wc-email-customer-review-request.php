@@ -66,7 +66,6 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 			$this->description = __( 'Review request emails are sent to customers a few days after their order is complete, inviting them to leave reviews for the products they purchased.', 'woocommerce' );
 
 			if ( $this->block_email_editor_enabled ) {
-				$this->title       = __( 'Review request', 'woocommerce' );
 				$this->description = __( 'Invites customers to review the products from their completed order.', 'woocommerce' );
 			}
 		}

@@ -49,10 +49,8 @@ if ( ! empty( $order->get_billing_first_name() ) ) {
 <p><?php esc_html_e( 'We’d love to know what you thought of the products you ordered. Your review helps other shoppers make better decisions and helps us improve.', 'woocommerce' ); ?></p>
 
 <?php if ( ! empty( $review_order_url ) ) : ?>
-<p style="margin: 16px 0;">
-	<a href="<?php echo esc_url( $review_order_url ); ?>" style="display: inline-block; padding: 6px 12px; background-color: #3858e9; color: #ffffff; text-decoration: none; border-radius: 2px; font-size: 13px; line-height: 20px; font-weight: 600;">
-		<?php esc_html_e( 'Leave a review', 'woocommerce' ); ?>
-	</a>
+<p>
+	<a href="<?php echo esc_url( $review_order_url ); ?>"><?php esc_html_e( 'Leave a review', 'woocommerce' ); ?></a>
 </p>
 <?php endif; ?>
 <?php echo $email_improvements_enabled ? '</div>' : ''; ?>
