@@ -410,9 +410,7 @@ class WC_Post_Data {
 
 				break;
 			case 'shop_coupon':
-				$code   = get_post_field( 'post_title', $id );
-				$hashed = md5( wc_strtolower( $code ) );
-				wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed, 'coupons' );
+				self::delete_coupon_code_lookup_cache( $id );
 				break;
 			case 'shop_order':
 			case DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE:
@@ -479,10 +477,20 @@ class WC_Post_Data {
 		} elseif ( 'product_variation' === $post_type ) {
 			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $id );
 		} elseif ( 'shop_coupon' === $post_type ) {
-			$code   = get_post_field( 'post_title', $id );
-			$hashed = md5( wc_strtolower( $code ) );
-			wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed, 'coupons' );
+			self::delete_coupon_code_lookup_cache( $id );
 		}
+	}
+
+	/**
+	 * Delete the coupon code-to-ID lookup cache entry for a coupon post.
+	 *
+	 * @param int $id Coupon post ID.
+	 * @return void
+	 */
+	private static function delete_coupon_code_lookup_cache( $id ) {
+		$code   = get_post_field( 'post_title', $id );
+		$hashed = md5( wc_strtolower( $code ) );
+		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed, 'coupons' );
 	}
 
 	/**
