@@ -614,9 +614,9 @@ class FeaturesController {
 				'disable_ui'                   => false,
 			),
 			'customer_stock_notifications'       => array(
-				'name'                         => __( 'Back in Stock Notifications (alpha)', 'woocommerce' ),
+				'name'                         => __( 'Back in Stock Notifications', 'woocommerce' ),
 				'description'                  => __(
-					'Allow customers to sign up to receive an email when an out-of-stock product is back in stock. Alpha — interfaces, data, and behavior may change.',
+					'Allow customers to sign up to receive an email when an out-of-stock product is back in stock.',
 					'woocommerce'
 				),
 				'enabled_by_default'           => false,
