@@ -29,18 +29,12 @@ final class ShopperCollection extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$list_name      = isset( $attributes['listName'] ) && is_string( $attributes['listName'] )
+		$list_name = isset( $attributes['listName'] ) && is_string( $attributes['listName'] )
 			? sanitize_key( $attributes['listName'] )
 			: 'save-for-later';
-		$show_quantity  = ! empty( $attributes['showQuantity'] );
-		$show_variation = ! empty( $attributes['showVariation'] );
-		$show_saved_at  = ! empty( $attributes['showSavedDate'] );
 
 		$context = array(
-			'listName'      => $list_name,
-			'showQuantity'  => $show_quantity,
-			'showVariation' => $show_variation,
-			'showSavedDate' => $show_saved_at,
+			'listName' => $list_name,
 		);
 
 		$context_json = (string) wp_json_encode(

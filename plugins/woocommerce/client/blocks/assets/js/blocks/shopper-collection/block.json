@@ -12,18 +12,6 @@
 		"listName": {
 			"type": "string",
 			"default": "save-for-later"
-		},
-		"showQuantity": {
-			"type": "boolean",
-			"default": true
-		},
-		"showVariation": {
-			"type": "boolean",
-			"default": true
-		},
-		"showSavedDate": {
-			"type": "boolean",
-			"default": false
 		}
 	},
 	"supports": {

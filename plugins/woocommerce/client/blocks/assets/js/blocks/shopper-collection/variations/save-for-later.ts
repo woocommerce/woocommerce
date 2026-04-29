@@ -18,9 +18,6 @@ registerBlockVariation( 'woocommerce/shopper-collection', {
 	scope: [ 'inserter', 'block' ],
 	attributes: {
 		listName: 'save-for-later',
-		showQuantity: true,
-		showVariation: true,
-		showSavedDate: false,
 	},
 	isActive: [ 'listName' ],
 } );

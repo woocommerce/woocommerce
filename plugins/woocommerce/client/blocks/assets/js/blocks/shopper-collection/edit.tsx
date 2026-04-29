@@ -11,9 +11,6 @@ import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 
 interface ShopperCollectionAttributes {
 	listName: string;
-	showQuantity: boolean;
-	showVariation: boolean;
-	showSavedDate: boolean;
 	layout?: {
 		type?: string;
 		columnCount?: number;
