@@ -157,7 +157,8 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 	/**
 	 * Get the accepted arguments for the POST request.
 	 *
-	 * Boolean preference keys are derived from the service's defaults map so
+	 * Each preference is an object so future sub-fields can be added without
+	 * a schema-version bump. Keys are derived from the service's defaults so
 	 * this stays in lock-step with the list of supported notification types.
 	 *
 	 * @return array<string, array<string, mixed>>
@@ -170,10 +171,16 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 			$args[ $key ] = array(
 				'description'       => sprintf(
 					/* translators: %s: notification preference key (e.g. store_order). */
-					__( 'Enable the %s push notification type.', 'woocommerce' ),
+					__( 'Preferences for the %s push notification type.', 'woocommerce' ),
 					$key
 				),
-				'type'              => 'boolean',
+				'type'              => 'object',
+				'properties'        => array(
+					'enabled' => array(
+						'type'        => 'boolean',
+						'description' => __( 'Whether this notification type is enabled.', 'woocommerce' ),
+					),
+				),
 				'required'          => false,
 				'validate_callback' => 'rest_validate_request_arg',
 			);

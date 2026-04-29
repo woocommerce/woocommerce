@@ -48,7 +48,7 @@ class NotificationPreferencesService {
 	 *
 	 * @param int $user_id The user ID.
 	 *
-	 * @return array<string, bool> Flat preferences map (preference key => enabled).
+	 * @return array<string, array<string, mixed>> Map of preference key => sub-options.
 	 *
 	 * @since 10.8.0
 	 */
@@ -69,14 +69,14 @@ class NotificationPreferencesService {
 	/**
 	 * Persist a partial update to a user's notification preferences.
 	 *
-	 * Unknown preference keys are dropped; values are coerced to boolean.
+	 * Unknown top-level keys and unknown sub-fields per key are dropped.
 	 * The merged result is wrapped in the current versioned envelope and
 	 * handed to the data store.
 	 *
-	 * @param int                 $user_id     The user ID.
-	 * @param array<string, bool> $preferences Partial preferences to merge over existing values.
+	 * @param int                                 $user_id     The user ID.
+	 * @param array<string, array<string, mixed>> $preferences Partial preferences to merge over existing values.
 	 *
-	 * @return array<string, bool> The merged, sanitized preferences map after the save.
+	 * @return array<string, array<string, mixed>> The merged, sanitized preferences map after the save.
 	 *
 	 * @throws \WC_Data_Exception Propagated from the data store on real persistence failure.
 	 *
@@ -101,33 +101,71 @@ class NotificationPreferencesService {
 	/**
 	 * Return the default preferences for a new user.
 	 *
-	 * The keyset is derived from `Notification::NOTIFICATION_CLASSES` so that
-	 * adding a new notification type automatically opts it into preferences
-	 * with `true` as the default — no parallel list to keep in sync.
+	 * Each preference is a small object so future fields (thresholds, sub-toggles)
+	 * can be added without bumping the schema version. The keyset is derived from
+	 * `Notification::NOTIFICATION_CLASSES` so adding a new notification type
+	 * automatically opts it into preferences — no parallel list to keep in sync.
 	 *
-	 * @return array<string, bool> Flat defaults map.
+	 * @return array<string, array<string, mixed>> Map of preference key => default sub-options.
 	 *
 	 * @since 10.8.0
 	 */
 	public function get_defaults(): array {
-		return array_fill_keys( array_keys( Notification::NOTIFICATION_CLASSES ), true );
+		$defaults = array();
+		foreach ( array_keys( Notification::NOTIFICATION_CLASSES ) as $type ) {
+			$defaults[ $type ] = array( 'enabled' => true );
+		}
+		return $defaults;
 	}
 
 	/**
-	 * Drop unknown keys and coerce values to boolean.
+	 * Drop unknown top-level keys and unknown sub-fields per key, coercing
+	 * known sub-fields to their expected types.
 	 *
 	 * @param array $preferences Arbitrary preferences map.
 	 *
-	 * @return array<string, bool> Sanitized preferences restricted to known default keys.
+	 * @return array<string, array<string, mixed>> Sanitized preferences.
 	 */
 	private function sanitize( array $preferences ): array {
 		$allowed   = $this->get_defaults();
 		$sanitized = array();
 
-		foreach ( $allowed as $key => $default ) {
-			$sanitized[ $key ] = array_key_exists( $key, $preferences )
-				? (bool) $preferences[ $key ]
-				: $default;
+		foreach ( $allowed as $key => $default_shape ) {
+			$value             = $preferences[ $key ] ?? array();
+			$value             = is_array( $value ) ? $value : array();
+			$sanitized[ $key ] = $this->sanitize_value( $key, $value, $default_shape );
+		}
+
+		return $sanitized;
+	}
+
+	/**
+	 * Apply per-key sanitization to a single preference's sub-options.
+	 *
+	 * Unknown sub-keys are dropped; missing sub-keys fall back to their default.
+	 * Today only `enabled` is recognized; future preference types extend this method
+	 * (or its dispatch) to validate their additional sub-fields.
+	 *
+	 * @param string               $key           Preference key (e.g. `store_order`).
+	 * @param array                $value         Submitted sub-options for the key.
+	 * @param array<string, mixed> $default_shape Default sub-options for the key.
+	 *
+	 * @return array<string, mixed>
+	 */
+	private function sanitize_value( string $key, array $value, array $default_shape ): array {
+		// Reserved for per-key dispatch when sub-fields are added.
+		unset( $key );
+
+		$sanitized = array();
+
+		foreach ( $default_shape as $sub_key => $sub_default ) {
+			if ( 'enabled' === $sub_key ) {
+				$sanitized[ $sub_key ] = array_key_exists( $sub_key, $value )
+					? (bool) $value[ $sub_key ]
+					: (bool) $sub_default;
+				continue;
+			}
+			// Future sub-fields (thresholds, sub-toggles) extend this switch.
 		}
 
 		return $sanitized;

@@ -62,8 +62,8 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 		$envelope = array(
 			'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
 			'preferences'    => array(
-				'store_order'  => false,
-				'store_review' => true,
+				'store_order'  => array( 'enabled' => false ),
+				'store_review' => array( 'enabled' => true ),
 			),
 		);
 
@@ -75,9 +75,9 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 		$this->assertSame( NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION, $result['schema_version'] );
 		$this->assertArrayHasKey( 'preferences', $result );
 		$this->assertArrayHasKey( 'store_order', $result['preferences'] );
-		$this->assertFalse( $result['preferences']['store_order'] );
+		$this->assertFalse( $result['preferences']['store_order']['enabled'] );
 		$this->assertArrayHasKey( 'store_review', $result['preferences'] );
-		$this->assertTrue( $result['preferences']['store_review'] );
+		$this->assertTrue( $result['preferences']['store_review']['enabled'] );
 	}
 
 	/**
@@ -89,7 +89,9 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 			NotificationPreferencesDataStore::META_KEY,
 			array(
 				'schema_version' => 0,
-				'preferences'    => array( 'store_order' => false ),
+				'preferences'    => array(
+					'store_order' => array( 'enabled' => false ),
+				),
 			)
 		);
 
@@ -98,7 +100,7 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 		// Returned envelope is at current version.
 		$this->assertSame( NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION, $result['schema_version'] );
 		$this->assertArrayHasKey( 'store_order', $result['preferences'] );
-		$this->assertFalse( $result['preferences']['store_order'] );
+		$this->assertFalse( $result['preferences']['store_order']['enabled'] );
 
 		// And the upgrade was persisted back to user meta.
 		$stored = Users::get_site_user_meta( $this->user_id, NotificationPreferencesDataStore::META_KEY );
@@ -129,8 +131,8 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 		$envelope = array(
 			'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
 			'preferences'    => array(
-				'store_order'  => false,
-				'store_review' => false,
+				'store_order'  => array( 'enabled' => false ),
+				'store_review' => array( 'enabled' => false ),
 			),
 		);
 
@@ -151,8 +153,8 @@ class NotificationPreferencesDataStoreTest extends WC_Unit_Test_Case {
 		$envelope = array(
 			'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
 			'preferences'    => array(
-				'store_order'  => true,
-				'store_review' => true,
+				'store_order'  => array( 'enabled' => true ),
+				'store_review' => array( 'enabled' => true ),
 			),
 		);
 

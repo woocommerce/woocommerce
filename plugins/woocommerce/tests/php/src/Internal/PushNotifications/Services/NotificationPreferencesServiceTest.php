@@ -68,24 +68,25 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 		$this->data_store->method( 'read' )->willReturn(
 			array(
 				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
-				'preferences'    => array( 'store_order' => false ),
+				'preferences'    => array(
+					'store_order' => array( 'enabled' => false ),
+				),
 			)
 		);
 
 		$preferences = $this->sut->get_preferences( $this->user_id );
 
 		$this->assertArrayHasKey( 'store_order', $preferences );
-		$this->assertFalse( $preferences['store_order'] );
+		$this->assertArrayHasKey( 'enabled', $preferences['store_order'] );
+		$this->assertFalse( $preferences['store_order']['enabled'] );
+
 		$this->assertArrayHasKey( 'store_review', $preferences );
-		$this->assertTrue( $preferences['store_review'] );
+		$this->assertArrayHasKey( 'enabled', $preferences['store_review'] );
+		$this->assertTrue( $preferences['store_review']['enabled'] );
 	}
 
 	/**
 	 * @testdox Should fall back to defaults when the stored envelope has empty preferences.
-	 *
-	 * This is the path the data-store hits after a malformed-input migration: the stored envelope
-	 * has `preferences => array()`. The service should fill in defaults rather than return an
-	 * empty preferences map.
 	 */
 	public function test_get_preferences_overlays_defaults_when_stored_preferences_is_empty(): void {
 		$this->data_store->method( 'read' )->willReturn(
@@ -111,16 +112,19 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 			->method( 'write' )
 			->with(
 				$this->user_id,
-				array(
-					'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
-					'preferences'    => array(
-						'store_order'  => false,
-						'store_review' => true,
-					),
+				$this->callback(
+					function ( $envelope ) {
+						return NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION === $envelope['schema_version']
+							&& false === $envelope['preferences']['store_order']['enabled']
+							&& true === $envelope['preferences']['store_review']['enabled'];
+					}
 				)
 			);
 
-		$this->sut->save_preferences( $this->user_id, array( 'store_order' => false ) );
+		$this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'enabled' => false ) )
+		);
 	}
 
 	/**
@@ -132,15 +136,15 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 		$result = $this->sut->save_preferences(
 			$this->user_id,
 			array(
-				'store_order'  => false,
-				'store_review' => false,
+				'store_order'  => array( 'enabled' => false ),
+				'store_review' => array( 'enabled' => false ),
 			)
 		);
 
 		$this->assertArrayHasKey( 'store_order', $result );
-		$this->assertFalse( $result['store_order'] );
+		$this->assertFalse( $result['store_order']['enabled'] );
 		$this->assertArrayHasKey( 'store_review', $result );
-		$this->assertFalse( $result['store_review'] );
+		$this->assertFalse( $result['store_review']['enabled'] );
 	}
 
 	/**
@@ -151,20 +155,23 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 			array(
 				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
 				'preferences'    => array(
-					'store_order'  => false,
-					'store_review' => false,
+					'store_order'  => array( 'enabled' => false ),
+					'store_review' => array( 'enabled' => false ),
 				),
 			)
 		);
 
-		$result = $this->sut->save_preferences( $this->user_id, array( 'store_review' => true ) );
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_review' => array( 'enabled' => true ) )
+		);
 
-		$this->assertFalse( $result['store_order'] );
-		$this->assertTrue( $result['store_review'] );
+		$this->assertFalse( $result['store_order']['enabled'] );
+		$this->assertTrue( $result['store_review']['enabled'] );
 	}
 
 	/**
-	 * @testdox Should drop unknown preference keys before writing.
+	 * @testdox Should drop unknown top-level preference keys before writing.
 	 */
 	public function test_save_preferences_drops_unknown_keys(): void {
 		$this->data_store->method( 'read' )->willReturn( null );
@@ -184,12 +191,33 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 		$result = $this->sut->save_preferences(
 			$this->user_id,
 			array(
-				'store_order'          => false,
-				'store_abandoned_cart' => true,
+				'store_order'          => array( 'enabled' => false ),
+				'store_abandoned_cart' => array( 'enabled' => true ),
 			)
 		);
 
 		$this->assertArrayNotHasKey( 'store_abandoned_cart', $result );
+	}
+
+	/**
+	 * @testdox Should drop unknown sub-fields within a known preference before writing.
+	 */
+	public function test_save_preferences_drops_unknown_sub_fields(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array(
+				'store_order' => array(
+					'enabled'        => true,
+					'future_unknown' => 'should be dropped',
+				),
+			)
+		);
+
+		$this->assertArrayHasKey( 'store_order', $result );
+		$this->assertArrayHasKey( 'enabled', $result['store_order'] );
+		$this->assertArrayNotHasKey( 'future_unknown', $result['store_order'] );
 	}
 
 	/**
@@ -207,11 +235,14 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 
 		$this->expectException( WC_Data_Exception::class );
 
-		$this->sut->save_preferences( $this->user_id, array( 'store_order' => false ) );
+		$this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'enabled' => false ) )
+		);
 	}
 
 	/**
-	 * @testdox Should include every known notification type in the defaults.
+	 * @testdox Should return a nested-object default for every known notification type.
 	 */
 	public function test_get_defaults_includes_all_notification_types(): void {
 		$defaults = $this->sut->get_defaults();
@@ -220,8 +251,10 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'store_order', $defaults );
 		$this->assertArrayHasKey( 'store_review', $defaults );
 
-		foreach ( $defaults as $value ) {
-			$this->assertIsBool( $value );
+		foreach ( $defaults as $type => $shape ) {
+			$this->assertIsArray( $shape, "Default for {$type} should be an object/array." );
+			$this->assertArrayHasKey( 'enabled', $shape, "Default for {$type} should have an `enabled` sub-field." );
+			$this->assertIsBool( $shape['enabled'] );
 		}
 	}
 }
