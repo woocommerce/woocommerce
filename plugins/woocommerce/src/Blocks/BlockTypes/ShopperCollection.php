@@ -29,19 +29,6 @@ final class ShopperCollection extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$list_name = isset( $attributes['listName'] ) && is_string( $attributes['listName'] )
-			? sanitize_key( $attributes['listName'] )
-			: 'save-for-later';
-
-		$context = array(
-			'listName' => $list_name,
-		);
-
-		$context_json = (string) wp_json_encode(
-			$context,
-			JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
-		);
-
 		$column_count = isset( $attributes['layout']['columnCount'] ) && is_numeric( $attributes['layout']['columnCount'] )
 			? max( 1, (int) $attributes['layout']['columnCount'] )
 			: 3;
@@ -49,7 +36,7 @@ final class ShopperCollection extends AbstractBlock {
 		$wrapper_attributes = array(
 			'class'               => 'wc-block-shopper-collection',
 			'data-wp-interactive' => 'woocommerce',
-			'data-wp-context'     => $context_json,
+			'data-wp-context'     => '{}',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'style'               => sprintf( '--wc-shopper-collection-columns:%d;', $column_count ),
 		);
