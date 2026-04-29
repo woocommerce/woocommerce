@@ -109,7 +109,7 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
 
 .wc-block-product-filter-checkbox-list__stars {
 	display: inline-block;
-	height: 24px;
+	height: 1.55em;
 	line-height: 0;
 	overflow: hidden;
 	color: var(--wc-product-filter-checkbox-list-label-element, currentColor);
@@ -117,8 +117,8 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
 
 .wc-block-product-filter-checkbox-list__stars-svg {
 	display: block;
-	width: 120px;
-	height: 24px;
+	width: auto;
+	height: 1.55em;
 }
 
 .wc-block-product-filter-checkbox-list__show-more-button {

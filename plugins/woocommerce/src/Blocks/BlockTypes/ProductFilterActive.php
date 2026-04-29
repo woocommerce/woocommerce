@@ -28,21 +28,27 @@ final class ProductFilterActive extends AbstractBlock {
 			return $content;
 		}
 
-		$active_filters = $block->context['activeFilters'];
+		$active_filters = is_array( $block->context['activeFilters'] )
+			? $block->context['activeFilters']
+			: array();
 
 		$removable_items = array_values(
 			array_filter(
 				array_map(
 					function ( $item ) {
-						$type  = $item['type'] ?? '';
-						$value = $item['value'] ?? '';
+						if ( ! is_array( $item ) ) {
+							return null;
+						}
+						$type  = (string) ( $item['type'] ?? '' );
+						$value = (string) ( $item['value'] ?? '' );
+						$label = (string) ( $item['activeLabel'] ?? ( $item['label'] ?? '' ) );
 						if ( '' === $type || '' === $value ) {
 							return null;
 						}
 						return array(
 							'type'  => $type,
 							'value' => $value,
-							'label' => $item['activeLabel'] ?? ( $item['label'] ?? '' ),
+							'label' => $label,
 						);
 					},
 					$active_filters

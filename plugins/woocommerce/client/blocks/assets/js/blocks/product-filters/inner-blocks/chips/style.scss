@@ -27,7 +27,7 @@
 	&:hover {
 		background-color: color-mix(
 			in srgb,
-			var(--wp--preset--color--contrast) 10%,
+			var(--wp--preset--color--contrast, currentColor) 10%,
 			transparent
 		);
 	}
@@ -44,9 +44,9 @@
 }
 
 .wc-block-product-filter-chips__item[aria-checked="true"] {
-	background: var(--wp--preset--color--contrast);
-	color: var(--wp--preset--color--base);
-	border-color: var(--wp--preset--color--contrast);
+	background: var(--wp--preset--color--contrast, currentColor);
+	color: var(--wp--preset--color--base, Canvas);
+	border-color: var(--wp--preset--color--contrast, currentColor);
 
 	.has-selected-chip-text-color & {
 		color: var(--wc-product-filter-chips-selected-text);

@@ -44,7 +44,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 				$term_slugs                          = array_map( 'sanitize_title', explode( ',', $params[ $param_key ] ) );
 				$active_taxonomies[ $taxonomy_slug ] = $term_slugs;
 				$all_term_slugs                      = array_merge( $all_term_slugs, $term_slugs );
-			}
+			}//end if
 		}
 
 		if ( empty( $active_taxonomies ) ) {
@@ -72,7 +72,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 					'value'       => $term->slug,
 					'activeLabel' => $taxonomy_object->labels->singular_name . ': ' . $term->name,
 				);
-			}
+			}//end if
 		}
 
 		return $items;
@@ -211,7 +211,6 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			)
 		);
 
-		$show_counts     = $block_attributes['showCounts'] ?? false;
 		$filter_context  = array(
 			'items'          => array(),
 			'selectionMode'  => 'multiple',
@@ -239,6 +238,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 				$selected_terms = array_filter( array_map( 'sanitize_title', explode( ',', $filter_params[ $param_key ] ) ) );
 			}
 
+			$show_counts      = $block_attributes['showCounts'] ?? false;
 			$taxonomy_options = array_map(
 				function ( $term ) use ( $taxonomy_counts, $selected_terms, $taxonomy, $show_counts ) {
 					$term          = (array) $term;
@@ -274,7 +274,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			);
 
 			$filter_context['items'] = array_values( $taxonomy_options );
-		}
+		}//end if
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',
@@ -351,7 +351,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 			}
 
 			return $this->sort_terms_by_criteria( $terms, $orderby, $order, $taxonomy_counts );
-		}
+		}//end if
 
 		return $this->get_hierarchical_terms( $taxonomy, $taxonomy_counts, $hide_empty, $orderby, $order );
 	}
@@ -444,8 +444,8 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 		foreach ( $terms as $term ) {
 			if ( ! empty( $term['children'] ) ) {
 				$term['children'] = $this->sort_terms_by_criteria( $term['children'], $orderby, $order, $taxonomy_counts );
-			}
-		}
+			}//end if
+		}//end foreach
 		$sorted = $this->sort_terms_by_criteria( $terms, $orderby, $order, $taxonomy_counts );
 		return $sorted;
 	}
@@ -494,7 +494,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 				$this->flatten_terms_list( $term['children'], $result, $visited_ids, $depth + 1 );
 				unset( $result[ $term_id ]['children'] );
 			}
-		}
+		}//end foreach
 	}
 
 	/**
@@ -567,7 +567,7 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 					default:
 						$comparison = strcasecmp( $a->name, $b->name );
 						break;
-				}
+				}//end switch
 
 				return $comparison * $sort_order;
 			}

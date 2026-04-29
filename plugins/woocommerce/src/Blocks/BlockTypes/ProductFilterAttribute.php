@@ -184,7 +184,6 @@ final class ProductFilterAttribute extends AbstractBlock {
 			$selected_terms = array_filter( explode( ',', $filter_params[ $filter_param_key ] ) );
 		}
 
-		$show_counts    = $block_attributes['showCounts'] ?? false;
 		$filter_context = array(
 			'items'          => array(),
 			'selectionMode'  => $block_attributes['selectType'] ?? 'multiple',
@@ -193,6 +192,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
+			$show_counts       = $block_attributes['showCounts'] ?? false;
 			$attribute_options = array_map(
 				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts ) {
 					$term          = (array) $term;
