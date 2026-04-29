@@ -70453,12 +70453,6 @@ parameters:
 			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\NotificationsProcessor\:\:\$logger \(Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger\) does not accept WC_Logger_Interface\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -70469,12 +70463,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
-			message: '#^Cannot call method delete\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/DataRetentionController.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\DataRetentionController\:\:clear_daily_task\(\) has no return type specified\.$#'
@@ -70657,39 +70645,9 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/EmailActionController.php
 
 		-
-			message: '#^Cannot call method get_meta\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
 			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailActionController\:\:get_notification_to_be_processed\(\) never returns null so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailActionController\:\:get_notification_to_be_processed\(\) should return Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|null but returns Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailActionController\:\:get_notification_to_be_processed\(\) should return Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|null but returns false\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^PHPDoc tag @return with type Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|false is not subtype of native type Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|null\.$#'
-			identifier: return.phpDocType
-			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailActionController.php
 
 		-
@@ -71039,54 +70997,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/Internal/StockNotifications/NotificationQuery.php
-
-		-
-			message: '#^Cannot call method get_product_id\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_cancellation_source\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_date_cancelled\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_status\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_user_email\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_user_id\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method update_meta_data\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Privacy\\PrivacyEraser\:\:register_erasers_exporters\(\) has no return type specified\.$#'
