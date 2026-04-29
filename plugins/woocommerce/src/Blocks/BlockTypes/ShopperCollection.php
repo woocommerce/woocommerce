@@ -53,6 +53,7 @@ final class ShopperCollection extends AbstractBlock {
 			: 3;
 
 		$wrapper_attributes = array(
+			'class'               => 'wc-block-shopper-collection',
 			'data-wp-interactive' => 'woocommerce',
 			'data-wp-context'     => $context_json,
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),

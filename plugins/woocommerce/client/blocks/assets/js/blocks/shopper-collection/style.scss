@@ -1,3 +1,6 @@
+// The block IS the grid. supports.layout's `columnCount` attribute drives
+// our --wc-shopper-collection-columns CSS variable (set inline on the wrapper
+// in both editor preview and PHP render). No nested grids, no inner blocks.
 .wc-block-shopper-collection {
 	display: grid;
 	gap: var(--wp--style--block-gap, 1.5em);
