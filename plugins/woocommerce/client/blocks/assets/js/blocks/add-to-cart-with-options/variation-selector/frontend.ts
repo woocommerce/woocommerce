@@ -39,6 +39,7 @@ type Option = {
 
 type SelectableItemForVariation = DerivedSelectableItem & {
 	isSelected?: boolean;
+	attributeName?: string;
 };
 
 type Context = AddToCartWithOptionsStoreContext & {
@@ -263,9 +264,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			get selectableItems(): readonly DerivedSelectableItem[] {
 				const context = getContext< Context >();
 				const { options, selectedAttributes, name } = context;
+
 				if ( ! options ) {
 					return [];
 				}
+
 				return options.map( ( opt, index ) => ( {
 					id: `variation-attr-${ opt.value }`,
 					label: opt.label,
@@ -422,10 +425,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 			},
 			toggle() {
 				const context = getContext< Context >();
-				const { item, name, selectedAttributes } = context;
+				const { item, selectedAttributes } = context;
 				if ( ! item ) {
 					return;
 				}
+
+				// Read attribute name from item (set by PHP) since intermediate
+				// block namespaces can break context inheritance from our wrapper.
+				const name = item.attributeName ?? context.name;
+
 				const isSelected = selectedAttributes.some(
 					( attr ) =>
 						attributeNamesMatch( attr.attribute, name ) &&

@@ -82,14 +82,19 @@ class VariationSelectorAttribute extends AbstractBlock {
 		$attribute_id = 'wc_product_attribute_' . uniqid();
 
 		// Build selectableItems context per inner block protocol.
+		// Include attributeName on each item so toggle action can access it
+		// even when intermediate block namespaces break context inheritance.
+		// Use wc_attribute_label() for consistency with Pills block format.
+		$attribute_label = wc_attribute_label( $attribute_name );
 		$selectable_items = array_values(
 			array_map(
-				function ( $term ) use ( $attribute_name ) {
+				function ( $term ) use ( $attribute_label ) {
 					return array(
-						'id'       => 'variation-attr-' . sanitize_title( $term['value'] ),
-						'label'    => $term['label'],
-						'value'    => $term['value'],
-						'selected' => $term['isSelected'],
+						'id'            => 'variation-attr-' . sanitize_title( $term['value'] ),
+						'label'         => $term['label'],
+						'value'         => $term['value'],
+						'selected'      => $term['isSelected'],
+						'attributeName' => $attribute_label,
 					);
 				},
 				$attribute_terms
@@ -113,9 +118,32 @@ class VariationSelectorAttribute extends AbstractBlock {
 			),
 		);
 
-		// Render the inner blocks of the Variation Selector Item Template block with `dynamic` set to `false`
-		// to prevent calling `render_callback` and ensure that no wrapper markup is included.
-		return $block_content;
+		// Find default selected value for init callback.
+		$selected_value = null;
+		foreach ( $selectable_items as $item ) {
+			if ( ! empty( $item['selected'] ) ) {
+				$selected_value = $item['value'];
+				break;
+			}
+		}
+
+		// Wrap with context for Interactivity API so inner blocks (Chips) can
+		// read options via getContext().options - same as pills/dropdown use.
+		// Also call setDefaultSelectedAttribute to populate selectedAttributes.
+		return sprintf(
+			'<div data-wp-interactive="woocommerce/add-to-cart-with-options" data-wp-init="callbacks.setDefaultSelectedAttribute" data-wp-context="%s">%s</div>',
+			esc_attr(
+				wp_json_encode(
+					array(
+						'options'       => $selectable_items,
+						'name'          => wc_attribute_label( $attribute_name ),
+						'selectedValue' => $selected_value,
+					),
+					JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+				)
+			),
+			$block_content
+		);
 	}
 
 	/**
