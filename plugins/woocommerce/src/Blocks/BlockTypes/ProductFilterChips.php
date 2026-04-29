@@ -38,7 +38,7 @@ final class ProductFilterChips extends AbstractBlock {
 		}
 
 		$block_context   = $block->context['woocommerce/selectableItems'];
-		$items           = $block_context['items'] ?? array();
+		$items           = is_array( $block_context['items'] ?? null ) ? $block_context['items'] : array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
 		$display_limit   = self::DISPLAY_LIMIT;
 		$classes         = '';
@@ -69,6 +69,14 @@ final class ProductFilterChips extends AbstractBlock {
 
 		$has_more_items = count( $items ) > $display_limit;
 		$hidden_count   = max( 0, count( $items ) - $display_limit );
+		$show_counts    = false;
+
+		foreach ( $items as $item ) {
+			if ( is_array( $item ) && array_key_exists( 'count', $item ) ) {
+				$show_counts = true;
+				break;
+			}
+		}
 
 		ob_start();
 		?>
@@ -134,14 +142,14 @@ final class ProductFilterChips extends AbstractBlock {
 									class="wc-block-product-filter-chips__text"
 									data-wp-text="context.item.label"
 								></span>
-									<span
-										class="wc-block-product-filter-chips__count"
-										data-wp-bind--hidden="woocommerce/product-filter-chips::state.itemCountHidden"
-										data-wp-text="woocommerce/product-filter-chips::state.itemCountText"
-									></span>
-								</span>
-							</button>
-						</template>
+								<?php if ( $show_counts ) : ?>
+									<span class="wc-block-product-filter-chips__count">
+										(<span data-wp-text="context.item.count"></span>)
+									</span>
+								<?php endif; ?>
+							</span>
+						</button>
+					</template>
 				</div>
 				<?php if ( $has_more_items ) : ?>
 					<button
