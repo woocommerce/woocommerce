@@ -55,17 +55,16 @@ export type ProductListProps = {
  * Consumers use the provided tuple to work with state
  * and don't have to deal with the specifics of default & custom views.
  *
- * @param {string} postType Post type to retrieve default views for.
  * @return {Array} The [ state, setState ] tuple.
  */
-function useView( postType: string ): [ View, ( view: View ) => void ] {
+function useView(): [ View, ( view: View ) => void ] {
 	const { query: { activeView = 'all' } = {} } = useLocation();
 	const [ view, setView ] = useState< View >( DEFAULT_VIEW );
 
-	// When activeView or isCustom URL parameters change, reset the view.
+	// When activeView URL parameter changes, reset the view.
 	useEffect( () => {
 		setView( DEFAULT_VIEW );
-	}, [ activeView, postType ] );
+	}, [ activeView ] );
 
 	return [ view, setView ];
 }
@@ -88,7 +87,7 @@ export default function ProductList( { className }: ProductListProps ) {
 	const [ selection, setSelection ] = useState( () =>
 		getSelectionFromPostId( postId )
 	);
-	const [ view, setView ] = useView( postType );
+	const [ view, setView ] = useView();
 
 	useEffect( () => {
 		setSelectedTab( selectedTabFromLocation );
@@ -334,6 +333,7 @@ export default function ProductList( { className }: ProductListProps ) {
 					gap="sm"
 					className="woocommerce-product-list__toolbar"
 				>
+					{ /* Tabs component should not be used: https://github.com/woocommerce/woocommerce/issues/64478 */ }
 					<Tabs.Root
 						value={ selectedTab }
 						onValueChange={ onChangeTab }
