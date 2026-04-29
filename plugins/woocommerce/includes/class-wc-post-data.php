@@ -488,7 +488,7 @@ class WC_Post_Data {
 	 * @return void
 	 */
 	private static function delete_coupon_code_lookup_cache( $id ) {
-		$code   = get_post_field( 'post_title', $id );
+		$code   = get_post_field( 'post_title', $id, 'raw' );
 		$hashed = md5( wc_strtolower( $code ) );
 		wp_cache_delete( WC_Cache_Helper::get_cache_prefix( 'coupons' ) . 'coupon_id_from_code_' . $hashed, 'coupons' );
 	}
