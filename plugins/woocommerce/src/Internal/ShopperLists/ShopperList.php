@@ -135,8 +135,10 @@ class ShopperList {
 	 */
 	public static function get_all_for_user( ?int $user_id = null ): array {
 		// For now, only saved-for-later exists.
-		return array(
-			'saved-for-later' => self::get_by_slug( 'saved-for-later', $user_id )
+		return array_filter(
+			array(
+				'saved-for-later' => self::get_by_slug( 'saved-for-later', $user_id ),
+			)
 		);
 	}
 
