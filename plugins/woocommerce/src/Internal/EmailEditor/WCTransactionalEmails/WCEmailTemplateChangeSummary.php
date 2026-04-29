@@ -40,11 +40,11 @@ class WCEmailTemplateChangeSummary {
 	private const COPY_TRUNCATE_CHARS = 120;
 
 	/**
-	 * Summary-inversion guard: minimum number of unmatched additions (with no
-	 * removals or copy changes and a heavily larger post) before we refuse to
+	 * Summary-inversion guard: minimum count of post-side unmatched blocks
+	 * (with no copy changes and a heavily larger post) before we refuse to
 	 * confidently attribute the diff to "core changed."
 	 */
-	private const INVERSION_GUARD_ADDED_THRESHOLD = 5;
+	private const INVERSION_GUARD_THRESHOLD = 5;
 
 	/**
 	 * Summary-inversion guard: minimum post-to-core record-count ratio.
@@ -94,11 +94,15 @@ class WCEmailTemplateChangeSummary {
 	 * `array<string, mixed>` so internal helpers can return through it
 	 * without expanding every union into the signature):
 	 *
+	 * All deltas are framed as "what would happen if the merchant applied the
+	 * update," i.e. the "yours" → "core" direction:
+	 *
 	 * - `version_from`        — `string`     — `_wc_email_template_version` meta on the post (may be empty).
 	 * - `version_to`          — `string`     — registry-side current version.
-	 * - `added_blocks`        — `string[]`   — localized labels of unmatched post blocks.
-	 * - `removed_blocks`      — `string[]`   — localized labels of unmatched core blocks.
+	 * - `added_blocks`        — `string[]`   — labels of blocks that would be added to the post by applying (in core, not in post).
+	 * - `removed_blocks`      — `string[]`   — labels of blocks that would be removed from the post by applying (in post, not in core).
 	 * - `copy_changes`        — `array<int, array{block:string, before:string, after:string, occurrence:int, total:int}>`.
+	 *                           `before` is the merchant's current text; `after` is the canonical core text.
 	 * - `structural_changes`  — `array<int, array{kind:string, description:string}>`.
 	 * - `summary_lines`       — `string[]`   — pre-localized one-liners ready to render.
 	 * - `is_fallback`         — `bool`       — true when the diff could not be produced.
@@ -187,15 +191,18 @@ class WCEmailTemplateChangeSummary {
 
 		$structured = self::diff_records( $core_records, $post_records );
 
-		// Summary-inversion guard: a heavily one-sided expansion looks like
-		// merchant work attributed to core. Without a stored old-core hash to
-		// disambiguate, fall back to the release-notes line.
+		// Summary-inversion guard: a heavily one-sided expansion on the post
+		// side looks like merchant work attributed to core. Without a stored
+		// old-core hash to disambiguate, fall back to the release-notes line.
+		// Under the "yours → core" convention, post-side unmatched blocks land
+		// in `removed_blocks` (would be removed by applying), so that's the
+		// signal we count here.
 		$post_total = count( $post_records );
 		$core_total = count( $core_records );
 		if (
-			0 === count( $structured['removed_blocks'] )
+			0 === count( $structured['added_blocks'] )
 			&& 0 === count( $structured['copy_changes'] )
-			&& count( $structured['added_blocks'] ) >= self::INVERSION_GUARD_ADDED_THRESHOLD
+			&& count( $structured['removed_blocks'] ) >= self::INVERSION_GUARD_THRESHOLD
 			&& $post_total >= ( self::INVERSION_GUARD_RATIO * $core_total )
 		) {
 			$payload = self::fallback_payload( $version_from, $version_to );
@@ -413,26 +420,13 @@ class WCEmailTemplateChangeSummary {
 		$copy_changes       = array();
 		$structural_changes = array();
 
+		// `added_blocks` / `removed_blocks` follow the "yours → core" convention:
+		// `added_blocks` = blocks the merchant would gain by applying the update
+		// (in core, not in post). `removed_blocks` = blocks the merchant would
+		// lose by applying the update (in post, not in core). Same direction as
+		// `before` (yours) / `after` (core) on copy_changes.
 		foreach ( $core_records as $i => $rec ) {
 			if ( isset( $matched_core[ $i ] ) ) {
-				continue;
-			}
-			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
-				$structural_changes[] = array(
-					'kind'        => 'nest',
-					'description' => sprintf(
-						/* translators: %s: block name */
-						__( 'Removed %s wrapper', 'woocommerce' ),
-						self::block_label( $rec['name'] )
-					),
-				);
-				continue;
-			}
-			$removed_blocks[] = self::block_label( $rec['name'] );
-		}
-
-		foreach ( $post_records as $i => $rec ) {
-			if ( isset( $matched_post[ $i ] ) ) {
 				continue;
 			}
 			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
@@ -447,6 +441,24 @@ class WCEmailTemplateChangeSummary {
 				continue;
 			}
 			$added_blocks[] = self::block_label( $rec['name'] );
+		}
+
+		foreach ( $post_records as $i => $rec ) {
+			if ( isset( $matched_post[ $i ] ) ) {
+				continue;
+			}
+			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
+				$structural_changes[] = array(
+					'kind'        => 'nest',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Removed %s wrapper', 'woocommerce' ),
+						self::block_label( $rec['name'] )
+					),
+				);
+				continue;
+			}
+			$removed_blocks[] = self::block_label( $rec['name'] );
 		}
 
 		// Reorder pass: pair like-named entries between added and removed and
@@ -490,22 +502,27 @@ class WCEmailTemplateChangeSummary {
 			$total                     = (int) ( $core_name_counts[ $name ] ?? 1 );
 
 			if ( $core['parent_name'] !== $post_r['parent_name'] ) {
+				// Destination is core's parent (where the block would land after
+				// applying the update), not post's (where it currently sits).
 				$structural_changes[] = array(
 					'kind'        => 'nest',
 					'description' => sprintf(
 						/* translators: 1: block name; 2: parent block name */
 						__( 'Moved %1$s into %2$s', 'woocommerce' ),
 						$label,
-						null === $post_r['parent_name'] ? __( 'top level', 'woocommerce' ) : self::block_label( $post_r['parent_name'] )
+						null === $core['parent_name'] ? __( 'top level', 'woocommerce' ) : self::block_label( $core['parent_name'] )
 					),
 				);
 			}
 
 			if ( $core['inner_text'] !== $post_r['inner_text'] ) {
+				// `before` = merchant's current text (what they have now), `after` = canonical
+				// core text (what they would get if they applied the update). Matches the
+				// design's "yours" → "core" diff convention.
 				$copy_changes[] = array(
 					'block'      => $label,
-					'before'     => self::truncate_text( $core['inner_text'] ),
-					'after'      => self::truncate_text( $post_r['inner_text'] ),
+					'before'     => self::truncate_text( $post_r['inner_text'] ),
+					'after'      => self::truncate_text( $core['inner_text'] ),
 					'occurrence' => $occurrence_index[ $name ],
 					'total'      => $total,
 				);

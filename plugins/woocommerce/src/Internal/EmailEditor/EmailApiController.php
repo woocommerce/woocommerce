@@ -509,19 +509,19 @@ class EmailApiController {
 					'readonly'    => true,
 				),
 				'added_blocks'       => array(
-					'description' => __( 'Localized labels of blocks present in the merchant post but not in the canonical core render.', 'woocommerce' ),
+					'description' => __( 'Localized labels of blocks that would be added to the merchant post if the update were applied (in core, not in post).', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array( 'type' => 'string' ),
 					'readonly'    => true,
 				),
 				'removed_blocks'     => array(
-					'description' => __( 'Localized labels of blocks present in the canonical core render but not in the merchant post.', 'woocommerce' ),
+					'description' => __( 'Localized labels of blocks that would be removed from the merchant post if the update were applied (in post, not in core).', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array( 'type' => 'string' ),
 					'readonly'    => true,
 				),
 				'copy_changes'       => array(
-					'description' => __( 'Block-level copy edits between the canonical render and the merchant post, truncated to 120 chars per side.', 'woocommerce' ),
+					'description' => __( 'Block-level copy edits, truncated to 120 chars per side. `before` is the merchant\'s current text; `after` is the canonical core text.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'       => 'object',

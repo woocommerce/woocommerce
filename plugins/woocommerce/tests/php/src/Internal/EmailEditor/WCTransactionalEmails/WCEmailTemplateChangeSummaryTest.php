@@ -97,22 +97,25 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'is_fallback', $result );
 		$this->assertFalse( $result['is_fallback'] );
 
-		$this->assertArrayHasKey( 'added_blocks', $result );
-		$this->assertContains( 'Image', $result['added_blocks'] );
-
+		// Yours → core convention: applying would REMOVE the merchant's image
+		// (it's in their post, not in core) and ADD the goodbye paragraph
+		// (it's in core, not in their post).
 		$this->assertArrayHasKey( 'removed_blocks', $result );
-		// One paragraph removed (the goodbye block), one paragraph copy-edited.
-		$this->assertContains( 'Paragraph', $result['removed_blocks'] );
+		$this->assertContains( 'Image', $result['removed_blocks'] );
+
+		$this->assertArrayHasKey( 'added_blocks', $result );
+		$this->assertContains( 'Paragraph', $result['added_blocks'] );
 
 		$this->assertArrayHasKey( 'copy_changes', $result );
 		$this->assertCount( 1, $result['copy_changes'] );
 		$this->assertSame( 'Paragraph', $result['copy_changes'][0]['block'] );
-		$this->assertSame( 'Original line.', $result['copy_changes'][0]['before'] );
-		$this->assertSame( 'Edited line.', $result['copy_changes'][0]['after'] );
+		// `before` = merchant's current post; `after` = canonical core text.
+		$this->assertSame( 'Edited line.', $result['copy_changes'][0]['before'] );
+		$this->assertSame( 'Original line.', $result['copy_changes'][0]['after'] );
 
 		$this->assertArrayHasKey( 'summary_lines', $result );
 		$this->assertNotEmpty( $result['summary_lines'] );
-		$this->assertContains( 'Added a Image block', $result['summary_lines'] );
+		$this->assertContains( 'Removed a Image block', $result['summary_lines'] );
 	}
 
 	/**
@@ -202,9 +205,11 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 		$result = WCEmailTemplateChangeSummary::summarize( $post_id );
 
 		$this->assertFalse( $result['is_fallback'] );
-		$this->assertCount( 1, $result['added_blocks'], 'Only the inserted heading should be reported.' );
-		$this->assertSame( 'Heading', $result['added_blocks'][0] );
-		$this->assertEmpty( $result['removed_blocks'] );
+		// Yours → core convention: the inserted heading is in the post but not
+		// in core, so applying would REMOVE it.
+		$this->assertCount( 1, $result['removed_blocks'], 'Only the inserted heading should be reported.' );
+		$this->assertSame( 'Heading', $result['removed_blocks'][0] );
+		$this->assertEmpty( $result['added_blocks'] );
 		$this->assertEmpty( $result['copy_changes'], 'No spurious copy_changes should cascade through indices 2..6.' );
 	}
 
