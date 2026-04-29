@@ -203,9 +203,9 @@ class MCPAdapterProvider {
 			return false;
 		}
 
-		if ( function_exists( 'wp_get_ability' ) ) {
+		if ( function_exists( 'wp_get_ability' ) && function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
 			$ability = wp_get_ability( $ability_id );
-			if ( $ability && method_exists( $ability, 'get_meta_item' ) ) {
+			if ( $ability ) {
 				$explicit_exposure = $ability->get_meta_item( 'woocommerce_mcp_expose', null );
 				if ( null !== $explicit_exposure ) {
 					return (bool) $explicit_exposure;

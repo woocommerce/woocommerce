@@ -433,7 +433,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 		$this->ensure_test_ability_category( 'woocommerce-rest' );
 
-		wp_register_ability(
+		$ability = wp_register_ability(
 			$ability_id,
 			array(
 				'label'               => 'Test ability',
@@ -456,6 +456,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			)
 		);
 
+		$this->assertNotNull( $ability, 'Test ability should register successfully.' );
 		$this->registered_ability_ids[] = $ability_id;
 	}
 
