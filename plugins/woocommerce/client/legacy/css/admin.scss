@@ -1000,6 +1000,12 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		padding: 12px;
 		width: 100%;
 	}
+
+	input[type="color"] {
+		display: block;
+		margin: 6px 0;
+		width: 100%;
+	}
 }
 
 /**
