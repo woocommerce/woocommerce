@@ -144,7 +144,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$visual_term_id      = 0;
 		$text_term_id        = 0;
 		$suffix              = (string) wp_rand( 1000, 9999 );
-		$administrator_role  = get_role( 'administrator' );
 
 		$enable_visual_attribute_feature = function ( $features ) {
 			$features[] = 'wc-visual-attribute';
