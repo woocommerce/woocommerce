@@ -1479,4 +1479,61 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		$product->delete( true );
 	}
+
+	/**
+	 * Test that deleting a coupon via wp_delete_post clears the code-to-ID lookup cache.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/34066
+	 */
+	public function test_wp_delete_post_clears_coupon_code_cache() {
+		$fixtures = new FixtureData();
+
+		$coupon = $fixtures->get_coupon(
+			array(
+				'amount'        => '5',
+				'discount_type' => 'fixed_cart',
+			)
+		);
+		$coupon_id   = $coupon->get_id();
+		$coupon_code = $coupon->get_code();
+
+		// Prime the lookup cache.
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( $coupon_code ) );
+
+		// Delete via wp_delete_post (the path that previously missed cache invalidation).
+		wp_delete_post( $coupon_id, true );
+
+		// The lookup cache should now be cleared.
+		$this->assertSame( 0, wc_get_coupon_id_by_code( $coupon_code ) );
+	}
+
+	/**
+	 * Test that trashing a coupon clears the code-to-ID lookup cache.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/34066
+	 */
+	public function test_trash_post_clears_coupon_code_cache() {
+		$fixtures = new FixtureData();
+
+		$coupon = $fixtures->get_coupon(
+			array(
+				'amount'        => '5',
+				'discount_type' => 'fixed_cart',
+			)
+		);
+		$coupon_id   = $coupon->get_id();
+		$coupon_code = $coupon->get_code();
+
+		// Prime the lookup cache.
+		$this->assertSame( $coupon_id, wc_get_coupon_id_by_code( $coupon_code ) );
+
+		// Trash the coupon.
+		wp_trash_post( $coupon_id );
+
+		// The lookup cache should now be cleared.
+		$this->assertSame( 0, wc_get_coupon_id_by_code( $coupon_code ) );
+
+		// Cleanup.
+		wp_delete_post( $coupon_id, true );
+	}
 }
