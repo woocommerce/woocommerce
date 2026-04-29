@@ -151,6 +151,7 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$routes = $this->server->get_routes();
 		$this->assertArrayHasKey( '/wc/v4/settings/emails', $routes );
 		$this->assertArrayHasKey( '/wc/v4/settings/emails/(?P<email_id>[\w-]+)', $routes );
+		$this->assertArrayHasKey( '/wc/v4/settings/emails/(?P<email_id>[\w-]+)/test', $routes );
 	}
 
 	/**
@@ -654,6 +655,98 @@ class EmailsSettingsControllerTest extends WC_REST_Unit_Test_Case {
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test that send_test_email returns 401 when not authenticated.
+	 */
+	public function test_send_test_email_without_permission_returns_401() {
+		wp_set_current_user( 0 );
+		$request  = new WP_REST_Request( 'POST', '/wc/v4/settings/emails/' . self::SAMPLE_EMAIL_ID . '/test' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 401, $response->get_status() );
+	}
+
+	/**
+	 * Test that send_test_email returns 404 for an unknown email ID.
+	 */
+	public function test_send_test_email_with_invalid_email_id_returns_404() {
+		wp_set_current_user( $this->user_id );
+		$request  = new WP_REST_Request( 'POST', '/wc/v4/settings/emails/nonexistent_email_id/test' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 404, $response->get_status() );
+	}
+
+	/**
+	 * Test that send_test_email returns 400 for an invalid recipient address.
+	 */
+	public function test_send_test_email_with_invalid_send_to_returns_400() {
+		wp_set_current_user( $this->user_id );
+		$request = new WP_REST_Request( 'POST', '/wc/v4/settings/emails/' . self::SAMPLE_EMAIL_ID . '/test' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'send_to' => 'not-a-valid-email' ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
+	 * Test that send_test_email succeeds and returns the recipient and subject.
+	 */
+	public function test_send_test_email_success_returns_send_to_and_subject() {
+		wp_set_current_user( $this->user_id );
+		$send_to = 'test-recipient@example.com';
+		$request = new WP_REST_Request( 'POST', '/wc/v4/settings/emails/' . self::SAMPLE_EMAIL_ID . '/test' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'send_to' => $send_to ) ) );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'send_to', $data );
+		$this->assertArrayHasKey( 'subject', $data );
+		$this->assertEquals( $send_to, $data['send_to'] );
+		$this->assertStringContainsString( '[Test]', $data['subject'] );
+	}
+
+	/**
+	 * Test that send_test_email returns 500 when mail delivery fails.
+	 */
+	public function test_send_test_email_returns_500_when_delivery_fails() {
+		wp_set_current_user( $this->user_id );
+
+		add_filter(
+			'woocommerce_mail_callback',
+			function () {
+				return function () {
+					return false;
+				};
+			}
+		);
+
+		$request = new WP_REST_Request( 'POST', '/wc/v4/settings/emails/' . self::SAMPLE_EMAIL_ID . '/test' );
+		$request->set_header( 'Content-Type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'send_to' => 'test@example.com' ) ) );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 500, $response->get_status() );
+
+		remove_all_filters( 'woocommerce_mail_callback' );
+	}
+
+	/**
+	 * Test that send_test_email defaults to admin email when send_to is omitted.
+	 */
+	public function test_send_test_email_defaults_to_admin_email() {
+		wp_set_current_user( $this->user_id );
+		$request  = new WP_REST_Request( 'POST', '/wc/v4/settings/emails/' . self::SAMPLE_EMAIL_ID . '/test' );
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( get_bloginfo( 'admin_email' ), $data['send_to'] );
 	}
 
 	/**

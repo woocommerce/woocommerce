@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix "Send test email" for customer_new_account and customer_reset_password: use WP_User instead of WC_Customer and populate all template-required properties (user_login, set_password_url, reset_key) so the email renders correctly.

@@ -402,7 +402,7 @@ class Controller extends AbstractController {
 	/**
 	 * Populate the email object with sample data so it renders correctly in test sends.
 	 *
-	 * Most WC emails expect an order as their object; account-related emails expect a customer.
+	 * Most WC emails expect an order as their object; account-related emails expect a WP_User.
 	 * When no sample data is available the email is still sent but may render with empty fields.
 	 *
 	 * @param \WC_Email $email Email instance to set up.
@@ -413,11 +413,32 @@ class Controller extends AbstractController {
 			return;
 		}
 
-		// Account emails need a WC_Customer object.
-		if ( in_array( $email->id, array( 'customer_new_account', 'customer_reset_password' ), true ) ) {
-			$user = wp_get_current_user();
+		$user = wp_get_current_user();
+
+		// New-account email expects a WP_User and uses user_login / set_password_url in its template.
+		if ( 'customer_new_account' === $email->id ) {
 			if ( $user->ID ) {
-				$email->object = new \WC_Customer( $user->ID );
+				$email->object           = $user;
+				$email->user_login       = $user->user_login;
+				$email->user_email       = $user->user_email;
+				$email->recipient        = $user->user_email;
+				$email->user_pass        = '';
+				$email->password_generated = false;
+				// Use the lost-password page as a safe placeholder; no real reset key is generated.
+				$email->set_password_url = wc_get_account_endpoint_url( 'lost-password' );
+			}
+			return;
+		}
+
+		// Reset-password email expects a WP_User and uses user_login / reset_key in its template.
+		if ( 'customer_reset_password' === $email->id ) {
+			if ( $user->ID ) {
+				$email->object     = $user;
+				$email->user_id    = $user->ID;
+				$email->user_login = $user->user_login;
+				$email->user_email = $user->user_email;
+				$email->recipient  = $user->user_email;
+				$email->reset_key  = '';
 			}
 			return;
 		}
