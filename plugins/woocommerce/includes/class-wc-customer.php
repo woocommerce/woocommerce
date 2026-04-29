@@ -1274,11 +1274,15 @@ class WC_Customer extends WC_Legacy_Customer {
 	 * @return int
 	 */
 	public function save() {
-		if ( $this->get_id() ) {
+		$customer_id = $this->get_id();
+		if ( $customer_id ) {
 			$meta_data     = $this->meta_data ?? array();
 			$props_changed = ! empty( $this->password ) || ! empty( $this->changes );
 			$state_changed = $props_changed || ! empty( array_filter( $meta_data, static fn( $meta ) => ! $meta->id || ! empty( $meta->get_changes() ) ) );
 			if ( ! $state_changed ) {
+				// Backward compatibility: e.g. '( new WC_Customer( $customer_id ) )->save()' as means to trigger integrations.
+				do_action( 'woocommerce_update_customer', $customer_id, $this );
+
 				return $this->get_id();
 			}
 		}
