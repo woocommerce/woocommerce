@@ -80,11 +80,9 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 					</form>
 				</article>
 				<footer>
-					<div class="inner">
-						<div>
-							<button class="modal-close button button-large"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
-							<button id="btn-ok" disabled class="button button-primary button-large"><?php esc_html_e( 'OK', 'woocommerce' ); ?></button>
-						</div>
+					<div class="wc-backbone-modal-buttons">
+						<button class="modal-close button button-large"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+						<button id="btn-ok" disabled class="button button-primary button-large"><?php esc_html_e( 'OK', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
 			</section>

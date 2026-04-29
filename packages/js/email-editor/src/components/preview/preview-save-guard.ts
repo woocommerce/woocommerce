@@ -44,7 +44,7 @@ export const PreviewSaveGuard = () => {
 			'warning',
 			__(
 				'You have unsaved changes. Please save the post before previewing.',
-				'woocommerce'
+				__i18n_text_domain__
 			),
 			{
 				context: 'email-editor',
