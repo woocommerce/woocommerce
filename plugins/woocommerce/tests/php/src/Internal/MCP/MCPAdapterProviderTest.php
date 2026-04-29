@@ -285,6 +285,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	public function test_get_woocommerce_mcp_abilities_respects_explicit_exposure_metadata() {
 		$legacy_ability   = 'woocommerce/test-legacy-rest';
 		$semantic_ability = 'woocommerce/test-semantic';
+		$invalid_ability  = 'woocommerce/test-invalid-exposure';
 
 		$this->register_test_ability(
 			$legacy_ability,
@@ -300,6 +301,13 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 				'woocommerce_mcp_projection' => 'semantic-flat-experimental',
 			)
 		);
+		$this->register_test_ability(
+			$invalid_ability,
+			array(
+				'woocommerce_mcp_expose'     => 'false',
+				'woocommerce_mcp_projection' => 'legacy-rest',
+			)
+		);
 
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
@@ -307,6 +315,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 				array(
 					$legacy_ability,
 					$semantic_ability,
+					$invalid_ability,
 				)
 			);
 
@@ -317,6 +326,50 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$result = $method->invoke( $this->sut );
 
 		$this->assertEquals( array( $legacy_ability ), $result, 'Should include legacy projection abilities and exclude semantic abilities from the default MCP surface.' );
+	}
+
+	/**
+	 * Test projection metadata controls the default MCP surface when exposure metadata is absent.
+	 */
+	public function test_get_woocommerce_mcp_abilities_respects_projection_metadata_without_explicit_exposure() {
+		$legacy_ability      = 'woocommerce/test-projected-legacy-rest';
+		$semantic_ability    = 'woocommerce/test-projected-semantic';
+		$unprojected_ability = 'woocommerce/test-unprojected';
+
+		$this->register_test_ability(
+			$legacy_ability,
+			array(
+				'woocommerce_mcp_projection' => 'legacy-rest',
+			)
+		);
+		$this->register_test_ability(
+			$semantic_ability,
+			array(
+				'woocommerce_mcp_projection' => 'semantic-flat-experimental',
+			)
+		);
+		$this->register_test_ability(
+			$unprojected_ability,
+			array()
+		);
+
+		$this->mock_abilities_registry
+			->method( 'get_abilities_ids' )
+			->willReturn(
+				array(
+					$legacy_ability,
+					$semantic_ability,
+					$unprojected_ability,
+				)
+			);
+
+		$reflection = new \ReflectionClass( $this->sut );
+		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->sut );
+
+		$this->assertEquals( array( $legacy_ability, $unprojected_ability ), $result, 'Should include legacy and unprojected WooCommerce abilities while excluding non-legacy projections.' );
 	}
 
 	/**

@@ -191,9 +191,9 @@ class MCPAdapterProvider {
 	 *
 	 * Existing WooCommerce MCP consumers expect the REST-derived ability surface on
 	 * the default endpoint. Keep the historical namespace fallback for abilities
-	 * that do not carry projection metadata, but allow new ability registrations to
-	 * opt out explicitly so semantic/domain abilities can coexist without changing
-	 * the legacy MCP tool list.
+	 * that do not carry projection metadata, but require projected abilities to
+	 * target the legacy REST surface explicitly so semantic/domain abilities can
+	 * coexist without changing the legacy MCP tool list.
 	 *
 	 * @param string $ability_id Ability ID.
 	 * @return bool Whether to include the ability by default.
@@ -208,7 +208,12 @@ class MCPAdapterProvider {
 			if ( $ability ) {
 				$explicit_exposure = $ability->get_meta_item( 'woocommerce_mcp_expose', null );
 				if ( null !== $explicit_exposure ) {
-					return (bool) $explicit_exposure;
+					return true === $explicit_exposure;
+				}
+
+				$projection = $ability->get_meta_item( 'woocommerce_mcp_projection', null );
+				if ( null !== $projection ) {
+					return 'legacy-rest' === $projection;
 				}
 			}
 		}
