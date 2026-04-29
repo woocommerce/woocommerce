@@ -94,10 +94,7 @@ function ProductEditForm( {
 		editableFields,
 		mergedData
 	);
-	const mixedFieldIds = getMixedProductEditFieldIds(
-		visibleFields,
-		selectedProducts
-	);
+
 	const form = {
 		type: 'regular' as const,
 		labelPosition: 'top' as const,
