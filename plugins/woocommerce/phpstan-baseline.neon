@@ -7,24 +7,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 5
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 6
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
 			message: '#^Argument of an invalid type array\<WC_Meta_Data\>\|null supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -13049,12 +13031,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-order-item-tax.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-order-item.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$key\.$#'
@@ -26153,24 +26129,6 @@ parameters:
 			identifier: offsetAssign.valueType
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-refunds-v2-controller.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
 
 		-
 			message: '#^Call to an undefined method WC_Data\:\:calculate_totals\(\)\.$#'
@@ -43444,18 +43402,6 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Controller.php
 
 		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Admin/API/Reports/Orders/DataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Admin/API/Reports/Orders/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\DataStore\:\:add_sql_query_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -46472,24 +46418,6 @@ parameters:
 			identifier: assign.propertyType
 			count: 1
 			path: src/Admin/Features/Features.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
 
 		-
 			message: '#^Parameter \#2 \$meta \(WC_Meta_Data\) of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\DataStore\\FulfillmentsDataStore\:\:add_meta\(\) should be compatible with parameter \$meta \(stdClass\) of method WC_Data_Store_WP\:\:add_meta\(\)$#'
@@ -60544,18 +60472,6 @@ parameters:
 			path: src/Internal/Admin/Orders/MetaBoxes/CustomMetaBox.php
 
 		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Internal/Admin/Orders/MetaBoxes/OrderAttribution.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/MetaBoxes/OrderAttribution.php
-
-		-
 			message: '#^Cannot access property \$labels on WP_Taxonomy\|false\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -63754,24 +63670,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 3
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_address\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -64409,24 +64307,6 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$meta_data\.$#'
@@ -65705,18 +65585,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Orders/OrderAttributionBlocksController.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Internal/Orders/OrderAttributionController.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Orders/OrderAttributionController.php
 
 		-
 			message: '#^Callback expects 2 parameters, \$accepted_args is set to 10\.$#'
@@ -72602,12 +72470,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_route_post_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
 			path: src/StoreApi/Routes/V1/Checkout.php
