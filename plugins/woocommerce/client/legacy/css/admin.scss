@@ -992,6 +992,11 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		padding-bottom: 2em;
 	}
 
+	label:not(:first-child) {
+		display: block;
+		margin-top: 1.5em;
+	}
+
 	input[type="text"] {
 		display: block;
 		font-size: 13px;
