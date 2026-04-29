@@ -51,6 +51,27 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	const REVOKE_ENDPOINT = '/wc-admin/mobile-app/qr-login-revoke';
 
 	/**
+	 * Number-match scan endpoint (Task 7).
+	 *
+	 * @var string
+	 */
+	const SCAN_ENDPOINT = '/wc-admin/mobile-app/qr-login-scan';
+
+	/**
+	 * Number-match approve endpoint (Task 7).
+	 *
+	 * @var string
+	 */
+	const APPROVE_ENDPOINT = '/wc-admin/mobile-app/qr-login-approve';
+
+	/**
+	 * Mobile-side session-status polling endpoint (Task 7).
+	 *
+	 * @var string
+	 */
+	const SESSION_STATUS_ENDPOINT = '/wc-admin/mobile-app/qr-login-session-status';
+
+	/**
 	 * Administrator user ID.
 	 *
 	 * @var int
@@ -268,6 +289,11 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
+		// Remove Task 7 session-id to token-hash mapping transients written by /qr-login-scan.
+		$wpdb->query(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_\\_wc\\_qr\\_login\\_session\\_%' ESCAPE '\\\\' OR option_name LIKE '\\_transient\\_timeout\\_\\_wc\\_qr\\_login\\_session\\_%' ESCAPE '\\\\'"
+		);
+
 		wp_cache_flush();
 	}
 
@@ -362,9 +388,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 *
 	 * @param string|null                $token  Token to exchange. Null omits the parameter.
 	 * @param array<string, string>|null $device Optional device payload to send.
+	 * @param string|null                $grant  Optional `exchange_grant` nonce returned by /qr-login-approve.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch_exchange( ?string $token, ?array $device = null ): \WP_REST_Response {
+	private function dispatch_exchange( ?string $token, ?array $device = null, ?string $grant = null ): \WP_REST_Response {
 		$request = new WP_REST_Request( 'POST', self::EXCHANGE_ENDPOINT );
 		if ( null !== $token ) {
 			$request->set_param( 'token', $token );
@@ -372,7 +399,97 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		if ( null !== $device ) {
 			$request->set_param( 'device', $device );
 		}
+		if ( null !== $grant ) {
+			$request->set_param( 'exchange_grant', $grant );
+		}
 		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Issue a POST to the /qr-login-scan endpoint (Task 7).
+	 *
+	 * @param string|null                $token                     Token to scan.
+	 * @param array<string, string>|null $device                    Optional device payload.
+	 * @param bool                       $supports_number_matching  Capability flag (defaults true so happy-path tests don't have to set it).
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_scan( ?string $token, ?array $device = null, bool $supports_number_matching = true ): \WP_REST_Response {
+		$request = new WP_REST_Request( 'POST', self::SCAN_ENDPOINT );
+		if ( null !== $token ) {
+			$request->set_param( 'token', $token );
+		}
+		if ( null !== $device ) {
+			$request->set_param( 'device', $device );
+		}
+		$request->set_param( 'supports_number_matching', $supports_number_matching );
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Issue a POST to the /qr-login-approve endpoint (Task 7).
+	 *
+	 * @param string|null $token  Token to approve.
+	 * @param string|null $choice Number the merchant tapped on wc-admin.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_approve( ?string $token, ?string $choice ): \WP_REST_Response {
+		$request = new WP_REST_Request( 'POST', self::APPROVE_ENDPOINT );
+		if ( null !== $token ) {
+			$request->set_param( 'token', $token );
+		}
+		if ( null !== $choice ) {
+			$request->set_param( 'choice', $choice );
+		}
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Issue a GET to the /qr-login-session-status endpoint (Task 7).
+	 *
+	 * @param string|null $session_id The session id from /qr-login-scan.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_session_status( ?string $session_id ): \WP_REST_Response {
+		$request = new WP_REST_Request( 'GET', self::SESSION_STATUS_ENDPOINT );
+		if ( null !== $session_id ) {
+			$request->set_param( 'session_id', $session_id );
+		}
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Helper: do the full pre-exchange flow (scan + approve) and return the
+	 * data needed to call /qr-login-exchange. Existing happy-path tests that
+	 * predate the number-matching step (Task 5/6) call this so they don't
+	 * have to be rewritten end-to-end.
+	 *
+	 * @param string                     $plaintext Token from /qr-login-token.
+	 * @param array<string, string>|null $device    Optional device payload.
+	 * @return array{session_id: string, exchange_grant: string}
+	 */
+	private function complete_pre_exchange_flow( string $plaintext, ?array $device = null ): array {
+		// Mobile-side scan (unauthenticated).
+		wp_set_current_user( 0 );
+		$scan_response = $this->dispatch_scan( $plaintext, $device );
+		$this->assertSame( 200, $scan_response->get_status(), 'Pre-exchange helper expected /scan to succeed.' );
+		$scan_data = $scan_response->get_data();
+
+		// Merchant-side approve (auth required).
+		wp_set_current_user( $this->admin_id );
+		$approve_response = $this->dispatch_approve( $plaintext, $scan_data['real_number'] );
+		$this->assertSame( 200, $approve_response->get_status(), 'Pre-exchange helper expected /approve to succeed.' );
+
+		// Mobile-side session-status to retrieve the grant.
+		wp_set_current_user( 0 );
+		$session_response = $this->dispatch_session_status( $scan_data['session_id'] );
+		$this->assertSame( 200, $session_response->get_status(), 'Pre-exchange helper expected /session-status to succeed.' );
+		$session_data = $session_response->get_data();
+		$this->assertArrayHasKey( 'exchange_grant', $session_data, 'session-status should return the grant once approved.' );
+
+		return array(
+			'session_id'     => $scan_data['session_id'],
+			'exchange_grant' => $session_data['exchange_grant'],
+		);
 	}
 
 	/**
@@ -550,14 +667,14 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Token exchange fails when Application Passwords were disabled after token generation.
 	 */
 	public function test_exchange_token_requires_application_passwords_available(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+		// Pre-exchange flow runs while AP is still available.
+		$prep = $this->prepare_exchange_token();
 
+		// Disable APs only for the exchange itself.
 		add_filter( 'wp_is_application_passwords_available', '__return_false' );
 
 		try {
-			wp_set_current_user( 0 );
-			$response = $this->dispatch_exchange( $plaintext );
+			$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 
 			$this->assertSame( 501, $response->get_status() );
 			$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
@@ -681,12 +798,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Token exchange returns Application Password credentials on the happy path.
 	 */
 	public function test_exchange_token_happy_path(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+		$prep = $this->prepare_exchange_token();
 
 		// Unauthenticated exchange (as the mobile app would perform it).
-		wp_set_current_user( 0 );
-		$response = $this->dispatch_exchange( $plaintext );
+		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
@@ -723,16 +838,15 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Token exchange rejects tokens whose stored expires_at is in the past with token_expired.
 	 */
 	public function test_exchange_token_rejects_expired_token(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+		$prep = $this->prepare_exchange_token();
 
-		$transient_key            = $this->token_transient_key( $plaintext );
+		// Force the stored expires_at into the past, then try to exchange.
+		$transient_key            = $this->token_transient_key( $prep['plaintext'] );
 		$token_data               = get_transient( $transient_key );
 		$token_data['expires_at'] = time() - 60;
 		set_transient( $transient_key, $token_data, MobileAppQRLogin::TOKEN_TTL );
 
-		wp_set_current_user( 0 );
-		$response = $this->dispatch_exchange( $plaintext );
+		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 
 		$this->assertSame( 401, $response->get_status() );
 		$this->assertSame( 'token_expired', $response->get_data()['code'] );
@@ -742,12 +856,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Tokens are single-use and the second exchange attempt fails with invalid_token.
 	 */
 	public function test_exchange_token_is_single_use(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+		$prep = $this->prepare_exchange_token();
 
-		wp_set_current_user( 0 );
-		$first  = $this->dispatch_exchange( $plaintext );
-		$second = $this->dispatch_exchange( $plaintext );
+		$first  = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$second = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 
 		$this->assertSame( 200, $first->get_status() );
 		$this->assertSame( 401, $second->get_status() );
@@ -800,14 +912,13 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_exchange_token_rejects_missing_user(): void {
 		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+		$prep = $this->prepare_exchange_token();
 
 		wp_delete_user( $this->admin_id );
 		// Avoid double-delete in tearDown().
 		$this->admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 
-		wp_set_current_user( 0 );
-		$response = $this->dispatch_exchange( $plaintext );
+		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 
 		$this->assertSame( 404, $response->get_status() );
 		$this->assertSame( 'user_not_found', $response->get_data()['code'] );
@@ -817,8 +928,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Token exchange surfaces application_password_failed with status 500 when Application Password creation fails.
 	 */
 	public function test_exchange_token_handles_application_password_creation_failure(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+		$prep = $this->prepare_exchange_token();
 
 		$deny_meta = function ( $check, $object_id, $meta_key ) {
 			unset( $object_id );
@@ -830,8 +940,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'update_user_metadata', $deny_meta, 10, 3 );
 
 		try {
-			wp_set_current_user( 0 );
-			$response = $this->dispatch_exchange( $plaintext );
+			$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 
 			$this->assertSame( 500, $response->get_status() );
 			$this->assertSame( 'application_password_failed', $response->get_data()['code'] );
@@ -1009,11 +1118,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox The exchange-token response exposes the documented fields on success.
 	 */
 	public function test_exchange_response_schema(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
-
-		wp_set_current_user( 0 );
-		$data = $this->dispatch_exchange( $plaintext )->get_data();
+		$prep = $this->prepare_exchange_token();
+		$data = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] )->get_data();
 
 		$this->assertEqualsCanonicalizing(
 			array( 'success', 'user_login', 'user_email', 'user_id', 'site_url', 'application_password', 'uuid' ),
@@ -1059,24 +1165,48 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Generate a token AND complete the scan + approve handshake so the
+	 * token is ready for /qr-login-exchange. Returns the plaintext token
+	 * plus the `exchange_grant` nonce required by the exchange call.
+	 *
+	 * Use this in tests that exercise the exchange-side behaviour
+	 * (consumed transient, AP creation, email dispatch, etc.) without
+	 * caring about the number-matching details.
+	 *
+	 * @param array<string, string>|null $device Optional device payload to thread through scan.
+	 * @return array{plaintext: string, exchange_grant: string}
+	 */
+	private function prepare_exchange_token( ?array $device = null ): array {
+		$plaintext = $this->generate_token_as_admin();
+		$flow      = $this->complete_pre_exchange_flow( $plaintext, $device );
+
+		// Leave the test in unauthenticated state — the mobile app calls
+		// /qr-login-exchange without a logged-in cookie.
+		wp_set_current_user( 0 );
+
+		return array(
+			'plaintext'      => $plaintext,
+			'exchange_grant' => $flow['exchange_grant'],
+		);
+	}
+
+	/**
 	 * @testdox Successful exchange persists a consumed-status transient keyed by the same hash as the token.
 	 */
 	public function test_exchange_token_persists_consumed_status(): void {
-		$plaintext = $this->generate_token_as_admin();
-
-		$response = $this->dispatch_exchange(
-			$plaintext,
-			array(
-				'os'          => 'Android',
-				'os_version'  => '14',
-				'model'       => 'Pixel 8 Pro',
-				'brand'       => 'google',
-				'app_version' => '24.7.0',
-			)
+		$device = array(
+			'os'          => 'Android',
+			'os_version'  => '14',
+			'model'       => 'Pixel 8 Pro',
+			'brand'       => 'google',
+			'app_version' => '24.7.0',
 		);
+		$prep   = $this->prepare_exchange_token( $device );
+
+		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 		$this->assertSame( 200, $response->get_status() );
 
-		$consumed = get_transient( MobileAppQRLogin::CONSUMED_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
+		$consumed = get_transient( MobileAppQRLogin::CONSUMED_TRANSIENT_PREFIX . hash( 'sha256', $prep['plaintext'] ) );
 		$this->assertIsArray( $consumed, 'A consumed-status transient should be written on successful exchange.' );
 		$this->assertArrayHasKey( 'consumed_at', $consumed );
 		$this->assertArrayHasKey( 'user_id', $consumed );
@@ -1101,10 +1231,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Exchange with a device payload uses the model and date in the Application Password name.
 	 */
 	public function test_exchange_token_with_device_payload_sets_descriptive_ap_name(): void {
-		$plaintext = $this->generate_token_as_admin();
-
-		$response = $this->dispatch_exchange(
-			$plaintext,
+		$prep = $this->prepare_exchange_token(
 			array(
 				'os'          => 'iOS',
 				'os_version'  => '17.5',
@@ -1112,6 +1239,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 				'app_version' => '24.7.0',
 			)
 		);
+
+		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 		$this->assertSame( 200, $response->get_status() );
 
 		$aps = WP_Application_Passwords::get_user_application_passwords( $this->admin_id );
@@ -1127,9 +1256,9 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Exchange without a device payload falls back to the legacy AP name so older app clients keep working.
 	 */
 	public function test_exchange_token_falls_back_to_default_ap_name_without_device(): void {
-		$plaintext = $this->generate_token_as_admin();
+		$prep = $this->prepare_exchange_token();
 
-		$response = $this->dispatch_exchange( $plaintext );
+		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 		$this->assertSame( 200, $response->get_status() );
 
 		$aps = WP_Application_Passwords::get_user_application_passwords( $this->admin_id );
@@ -1145,14 +1274,11 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Exchange whitelists device-payload keys, drops anything outside the whitelist, and caps each field at 64 characters.
 	 */
 	public function test_exchange_token_sanitizes_device_fields(): void {
-		$plaintext = $this->generate_token_as_admin();
-
 		$long = str_repeat( 'A', 100 );
 		// `os` carries an HTML tag (must be stripped by sanitize_text_field),
 		// `model` is over the 64-char cap, `rogue_field` is outside the
 		// whitelist and must be dropped before storage.
-		$this->dispatch_exchange(
-			$plaintext,
+		$prep = $this->prepare_exchange_token(
 			array(
 				'os'          => 'iOS<script>',
 				'os_version'  => '17.5',
@@ -1162,7 +1288,9 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$consumed = get_transient( MobileAppQRLogin::CONSUMED_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
+		$this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+
+		$consumed = get_transient( MobileAppQRLogin::CONSUMED_TRANSIENT_PREFIX . hash( 'sha256', $prep['plaintext'] ) );
 		$this->assertIsArray( $consumed );
 		$this->assertSame( 'iOS', $consumed['device']['os'], 'sanitize_text_field should strip tags.' );
 		$this->assertSame( str_repeat( 'A', 64 ), $consumed['device']['model'], 'Each field is capped at 64 chars.' );
@@ -1197,10 +1325,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Status endpoint returns consumed with the device payload after a successful exchange.
 	 */
 	public function test_get_status_returns_consumed_with_device_info(): void {
-		$plaintext = $this->generate_token_as_admin();
-
-		$exchange = $this->dispatch_exchange(
-			$plaintext,
+		$prep = $this->prepare_exchange_token(
 			array(
 				'os'          => 'Android',
 				'os_version'  => '14',
@@ -1208,10 +1333,12 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 				'app_version' => '24.7.0',
 			)
 		);
+
+		$exchange = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 		$this->assertSame( 200, $exchange->get_status() );
 
 		wp_set_current_user( $this->admin_id );
-		$response = $this->dispatch_status( $plaintext );
+		$response = $this->dispatch_status( $prep['plaintext'] );
 
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
@@ -1252,19 +1379,18 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_status_rejects_other_users(): void {
 		// Admin mints + exchanges the token.
-		$plaintext = $this->generate_token_as_admin();
-		$this->dispatch_exchange(
-			$plaintext,
+		$prep = $this->prepare_exchange_token(
 			array(
 				'os'    => 'iOS',
 				'model' => 'iPhone 15',
 			)
 		);
+		$this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 
 		// A different shop manager polls the same token. Token guess is
 		// astronomical, but cross-user reads must still be opaque.
 		wp_set_current_user( $this->shop_manager_id );
-		$response = $this->dispatch_status( $plaintext );
+		$response = $this->dispatch_status( $prep['plaintext'] );
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'expired', $response->get_data()['status'] );
@@ -1289,14 +1415,13 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Revoke endpoint deletes the Application Password issued by a successful exchange.
 	 */
 	public function test_revoke_password_happy_path(): void {
-		$plaintext = $this->generate_token_as_admin();
-		$exchange  = $this->dispatch_exchange(
-			$plaintext,
+		$prep     = $this->prepare_exchange_token(
 			array(
 				'os'    => 'iOS',
 				'model' => 'iPhone 15',
 			)
 		);
+		$exchange = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 		$this->assertSame( 200, $exchange->get_status() );
 		$uuid = $exchange->get_data()['uuid'];
 
@@ -1320,15 +1445,14 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_revoke_password_rejects_when_uuid_belongs_to_another_user(): void {
 		// Admin mints + exchanges. AP belongs to admin.
-		$plaintext = $this->generate_token_as_admin();
-		$exchange  = $this->dispatch_exchange(
-			$plaintext,
+		$prep     = $this->prepare_exchange_token(
 			array(
 				'os'    => 'iOS',
 				'model' => 'iPhone 15',
 			)
 		);
-		$uuid      = $exchange->get_data()['uuid'];
+		$exchange = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$uuid     = $exchange->get_data()['uuid'];
 
 		// Shop manager tries to revoke admin's AP. This must fail with 404 —
 		// we don't even leak that the AP exists.
@@ -1395,12 +1519,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$capture = $this->capture_wp_mail();
 
 		try {
-			wp_set_current_user( $this->admin_id );
-			$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
-			wp_set_current_user( 0 );
-
-			$response = $this->dispatch_exchange(
-				$plaintext,
+			$prep = $this->prepare_exchange_token(
 				array(
 					'os'          => 'iOS',
 					'os_version'  => '17.5',
@@ -1408,6 +1527,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 					'app_version' => '24.7.0',
 				)
 			);
+
+			$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 			$this->assertSame( 200, $response->get_status() );
 
 			$this->assertCount( 1, $capture['captures'], 'Exactly one email should be sent on a successful exchange.' );
@@ -1441,17 +1562,13 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'woocommerce_qr_login_should_send_signin_email', $suppress );
 
 		try {
-			wp_set_current_user( $this->admin_id );
-			$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
-			wp_set_current_user( 0 );
-
-			$response = $this->dispatch_exchange(
-				$plaintext,
+			$prep     = $this->prepare_exchange_token(
 				array(
 					'os'    => 'iOS',
 					'model' => 'iPhone 15',
 				)
 			);
+			$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 			$this->assertSame( 200, $response->get_status() );
 
 			$this->assertCount(
@@ -1472,11 +1589,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$capture = $this->capture_wp_mail();
 
 		try {
-			wp_set_current_user( $this->admin_id );
-			$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
-			wp_set_current_user( 0 );
-
-			$response = $this->dispatch_exchange( $plaintext );
+			$prep     = $this->prepare_exchange_token();
+			$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
 			$this->assertSame( 200, $response->get_status() );
 
 			$this->assertCount( 1, $capture['captures'] );
@@ -1489,5 +1603,279 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		} finally {
 			$capture['remove']();
 		}//end try
+	}
+
+	// ---------------------------------------------------------------------
+	// Task 7 — number-matching state machine.
+	// ---------------------------------------------------------------------
+
+	/**
+	 * @testdox Scan endpoint transitions a pending token to scanned and returns a session_id + real_number.
+	 */
+	public function test_scan_transitions_pending_to_scanned(): void {
+		$plaintext = $this->generate_token_as_admin();
+		wp_set_current_user( 0 );
+
+		$response = $this->dispatch_scan(
+			$plaintext,
+			array( 'os' => 'Android', 'model' => 'Pixel 10', 'app_version' => '24.7.0' )
+		);
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		$this->assertArrayHasKey( 'session_id', $data );
+		$this->assertNotEmpty( $data['session_id'] );
+		$this->assertArrayHasKey( 'real_number', $data );
+		$this->assertMatchesRegularExpression( '/^\d{3}$/', (string) $data['real_number'], 'Real number must be 3 digits, zero-padded.' );
+		$this->assertArrayHasKey( 'expires_in', $data );
+		$this->assertSame( MobileAppQRLogin::CHALLENGE_TTL, $data['expires_in'] );
+
+		// Underlying transient is now in the scanned state with the device payload threaded through.
+		$record = get_transient( MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
+		$this->assertIsArray( $record );
+		$this->assertSame( MobileAppQRLogin::STATE_SCANNED, $record['state'] );
+		$this->assertSame( 'Pixel 10', $record['challenge']['device']['model'] ?? null );
+	}
+
+	/**
+	 * @testdox Scan endpoint returns 426 Upgrade Required when the mobile app omits the supports_number_matching capability flag.
+	 */
+	public function test_scan_rejects_when_capability_flag_missing(): void {
+		$plaintext = $this->generate_token_as_admin();
+		wp_set_current_user( 0 );
+
+		// Simulate a pre-Task-7 mobile app that doesn't send the flag.
+		$response = $this->dispatch_scan( $plaintext, null, false );
+
+		$this->assertSame( 426, $response->get_status() );
+		$this->assertSame( 'mobile_app_update_required', $response->get_data()['code'] );
+
+		// Token state must remain pending — a legacy scan must not mutate the record.
+		$record = get_transient( MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
+		$this->assertSame( MobileAppQRLogin::STATE_PENDING, $record['state'] );
+	}
+
+	/**
+	 * @testdox Scan endpoint returns 409 when called on a token that was already scanned.
+	 */
+	public function test_scan_rejects_already_scanned_token(): void {
+		$plaintext = $this->generate_token_as_admin();
+		wp_set_current_user( 0 );
+		$this->assertSame( 200, $this->dispatch_scan( $plaintext )->get_status() );
+
+		// A second scan must fail — once scanned, only /approve can move the state.
+		$response = $this->dispatch_scan( $plaintext );
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'qr_login_already_scanned', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Approve endpoint mints an exchange_grant when the merchant taps the correct number.
+	 */
+	public function test_approve_correct_choice_marks_approved_and_emits_grant(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data = $this->dispatch_scan( $plaintext )->get_data();
+
+		wp_set_current_user( $this->admin_id );
+		$response = $this->dispatch_approve( $plaintext, $scan_data['real_number'] );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $response->get_data()['state'] );
+
+		$record = get_transient( MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
+		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $record['state'] );
+		$this->assertNotEmpty( $record['exchange_grant'] );
+		$this->assertSame( MobileAppQRLogin::EXCHANGE_GRANT_BYTES * 2, strlen( (string) $record['exchange_grant'] ), 'Grant should be hex-encoded random_bytes — 2 chars per byte.' );
+	}
+
+	/**
+	 * @testdox Approve endpoint terminates the session with rejected when the merchant taps a wrong number.
+	 */
+	public function test_approve_wrong_choice_marks_rejected(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data = $this->dispatch_scan( $plaintext )->get_data();
+
+		// Pick something that definitely isn't the real number — distractors
+		// are guaranteed to differ from the real one by ≥ 100, so subtracting
+		// 100 from the real (mod 1000) gives us a guaranteed-wrong value.
+		$wrong = str_pad( (string) ( ( ( (int) $scan_data['real_number'] ) + 500 ) % 1000 ), 3, '0', STR_PAD_LEFT );
+
+		wp_set_current_user( $this->admin_id );
+		$response = $this->dispatch_approve( $plaintext, $wrong );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( MobileAppQRLogin::STATE_REJECTED, $response->get_data()['state'] );
+
+		// Token transient is now in terminal rejected state — no exchange_grant ever issued.
+		$record = get_transient( MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
+		$this->assertSame( MobileAppQRLogin::STATE_REJECTED, $record['state'] );
+		$this->assertArrayNotHasKey( 'exchange_grant', $record, 'Wrong-pick must never mint a grant — that is the entire point of the security guarantee.' );
+	}
+
+	/**
+	 * @testdox Approve endpoint rejects another user trying to approve someone else's scanned token.
+	 */
+	public function test_approve_rejects_other_user(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data = $this->dispatch_scan( $plaintext )->get_data();
+
+		// A second administrator who is also `manage_woocommerce`-capable
+		// must still be rejected — this is not "permission denied", it's
+		// "this token doesn't belong to you, full stop".
+		$other_admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		try {
+			wp_set_current_user( $other_admin_id );
+			$response = $this->dispatch_approve( $plaintext, $scan_data['real_number'] );
+
+			$this->assertSame( 401, $response->get_status() );
+			$this->assertSame( 'invalid_token', $response->get_data()['code'] );
+
+			// Even with the right number, a stranger must not move the token to approved.
+			$record = get_transient( MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
+			$this->assertSame( MobileAppQRLogin::STATE_SCANNED, $record['state'] );
+		} finally {
+			wp_delete_user( $other_admin_id );
+		}
+	}
+
+	/**
+	 * @testdox Exchange endpoint returns 412 when the QR session has not been approved (no number-match step completed).
+	 */
+	public function test_exchange_requires_approved_state(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$this->dispatch_scan( $plaintext );
+		// Note: deliberately skipping /approve — token is still in scanned, not approved.
+
+		$response = $this->dispatch_exchange( $plaintext, null, 'any-grant-here-doesnt-matter' );
+
+		$this->assertSame( 412, $response->get_status() );
+		$this->assertSame( 'qr_login_not_approved', $response->get_data()['code'] );
+		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ), 'No AP must be issued without approval.' );
+	}
+
+	/**
+	 * @testdox Exchange endpoint returns 426 Upgrade Required when a legacy mobile client hits exchange directly without scan/approve.
+	 */
+	public function test_exchange_legacy_client_returns_426_upgrade_required(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		// Skip /scan and /approve entirely — token stays in pending (the
+		// legacy path: mobile app posts straight to /exchange).
+		wp_set_current_user( 0 );
+		$response = $this->dispatch_exchange( $plaintext );
+
+		$this->assertSame( 426, $response->get_status() );
+		$this->assertSame( 'mobile_app_update_required', $response->get_data()['code'] );
+		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ), 'Legacy clients must not be able to mint APs after Task 7.' );
+	}
+
+	/**
+	 * @testdox Exchange endpoint returns 412 when the exchange_grant nonce does not match the one minted at approve time.
+	 */
+	public function test_exchange_requires_valid_grant_nonce(): void {
+		$prep = $this->prepare_exchange_token();
+
+		$response = $this->dispatch_exchange( $prep['plaintext'], null, str_repeat( 'a', strlen( $prep['exchange_grant'] ) ) );
+
+		$this->assertSame( 412, $response->get_status() );
+		$this->assertSame( 'invalid_exchange_grant', $response->get_data()['code'] );
+		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ), 'Grant mismatch must not produce an AP.' );
+
+		// Also: that one mismatched attempt has burned the token (delete_transient on grant fail) — no replay.
+		$record = get_transient( MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $prep['plaintext'] ) );
+		$this->assertFalse( $record, 'Grant mismatch must delete the token transient — single-use semantics.' );
+	}
+
+	/**
+	 * @testdox Status endpoint returns a 3-element shuffled candidate triple (real + 2 distractors) while in scanned state and never reveals which one is real.
+	 */
+	public function test_status_endpoint_returns_shuffled_triple_in_scanned(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data   = $this->dispatch_scan( $plaintext )->get_data();
+		$real_number = (string) $scan_data['real_number'];
+
+		wp_set_current_user( $this->admin_id );
+		$response = $this->dispatch_status( $plaintext );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+
+		$this->assertSame( MobileAppQRLogin::STATE_SCANNED, $data['status'] );
+		$this->assertCount( 3, $data['numbers'] );
+		foreach ( $data['numbers'] as $candidate ) {
+			$this->assertMatchesRegularExpression( '/^\d{3}$/', (string) $candidate );
+		}
+		$this->assertContains( $real_number, $data['numbers'], 'The shuffled triple must include the real number.' );
+
+		// Status response must NOT expose any field that flags which one is real.
+		$flat = wp_json_encode( $data );
+		$this->assertStringNotContainsString( '"real"', (string) $flat, 'Status payload must not contain a `real` field — that would defeat the entire shoulder-surf protection.' );
+	}
+
+	/**
+	 * @testdox Session-status endpoint returns the exchange_grant once the merchant has approved the number-match.
+	 */
+	public function test_session_status_returns_grant_when_approved(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data = $this->dispatch_scan( $plaintext )->get_data();
+
+		// Before approval — session-status returns scanned, no grant.
+		$pre = $this->dispatch_session_status( $scan_data['session_id'] );
+		$this->assertSame( 200, $pre->get_status() );
+		$this->assertSame( MobileAppQRLogin::STATE_SCANNED, $pre->get_data()['state'] );
+		$this->assertArrayNotHasKey( 'exchange_grant', $pre->get_data() );
+
+		// Approve.
+		wp_set_current_user( $this->admin_id );
+		$this->dispatch_approve( $plaintext, $scan_data['real_number'] );
+
+		// After approval — session-status returns approved + exchange_grant.
+		wp_set_current_user( 0 );
+		$post = $this->dispatch_session_status( $scan_data['session_id'] );
+		$this->assertSame( 200, $post->get_status() );
+		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $post->get_data()['state'] );
+		$this->assertNotEmpty( $post->get_data()['exchange_grant'] );
+	}
+
+	/**
+	 * @testdox Distractor distinctness invariant — across many challenge generations, every triple has all values ≥ 100 apart.
+	 */
+	public function test_distractor_distinctness_invariant(): void {
+		// Direct invocation via reflection so we don't have to fire 200
+		// /qr-login-scan requests (which would hit the rate limiter at 10/IP).
+		$controller = new MobileAppQRLogin();
+		$reflection = new \ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'generate_challenge_numbers' );
+		$method->setAccessible( true );
+
+		for ( $i = 0; $i < 200; $i++ ) {
+			$challenge = $method->invoke( $controller );
+			$values    = array_map( 'intval', array_merge( array( $challenge['real'] ), $challenge['distractors'] ) );
+			$this->assertCount( 3, $values, 'Challenge generator must always return 1 real + 2 distractors.' );
+
+			$count = count( $values );
+			for ( $a = 0; $a < $count; $a++ ) {
+				for ( $b = $a + 1; $b < $count; $b++ ) {
+					$this->assertGreaterThanOrEqual(
+						100,
+						abs( $values[ $a ] - $values[ $b ] ),
+						sprintf( 'Iteration #%d: %d vs %d are < 100 apart — would let a partial-read leak fingerprint the real number.', $i, $values[ $a ], $values[ $b ] )
+					);
+				}
+			}
+		}
 	}
 }

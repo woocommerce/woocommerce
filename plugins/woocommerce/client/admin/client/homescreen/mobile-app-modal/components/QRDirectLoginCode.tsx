@@ -17,6 +17,7 @@ import {
 } from './useQRLoginToken';
 import { QRLoginConsumedPanel } from './QRLoginConsumedPanel';
 import { QRLoginRevokedPanel } from './QRLoginRevokedPanel';
+import { QRLoginNumberMatchStep } from './QRLoginNumberMatchStep';
 
 /**
  * Snapshot the parent receives via `onConsumed`. Just the fields the parent
@@ -70,6 +71,9 @@ export const QRDirectLoginCode = ( {
 		errorMessage,
 		deviceInfo,
 		apUuid,
+		candidateNumbers,
+		challengeExpiresAt,
+		chooseNumber,
 		fetchToken,
 		refreshToken,
 		revoke,
@@ -155,6 +159,61 @@ export const QRDirectLoginCode = ( {
 					} }
 				>
 					{ __( 'Generate new code', 'woocommerce' ) }
+				</Button>
+			</div>
+		);
+	}
+
+	// Task 7 — number-matching states.
+	if ( state === QRLoginTokenStates.SCANNED && candidateNumbers ) {
+		return (
+			<QRLoginNumberMatchStep
+				numbers={ candidateNumbers }
+				deviceInfo={ deviceInfo }
+				challengeExpiresAt={ challengeExpiresAt }
+				onChooseNumber={ chooseNumber }
+			/>
+		);
+	}
+
+	if ( state === QRLoginTokenStates.APPROVED ) {
+		return (
+			<div
+				className="woocommerce-qr-direct-login woocommerce-qr-direct-login--approved"
+				role="status"
+				aria-live="polite"
+			>
+				<Spinner />
+				<p>
+					{ __(
+						'Confirmed. Finishing sign-in on your phone…',
+						'woocommerce'
+					) }
+				</p>
+			</div>
+		);
+	}
+
+	if ( state === QRLoginTokenStates.REJECTED ) {
+		return (
+			<div
+				className="woocommerce-qr-direct-login woocommerce-qr-direct-login--rejected"
+				role="alert"
+			>
+				<p>
+					{ __(
+						'Sign-in denied. For your security, this attempt has been cancelled.',
+						'woocommerce'
+					) }
+				</p>
+				<Button
+					variant="secondary"
+					onClick={ () => {
+						recordEvent( 'mobile_app_qr_direct_login_refreshed' );
+						refreshToken();
+					} }
+				>
+					{ __( 'Start over', 'woocommerce' ) }
 				</Button>
 			</div>
 		);

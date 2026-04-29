@@ -56,6 +56,21 @@ class QRLoginRateLimits extends WC_Rate_Limiter {
 	const BUCKET_REVOKE = 'rev';
 
 	/**
+	 * Scan endpoint bucket.
+	 */
+	const BUCKET_SCAN = 'scn';
+
+	/**
+	 * Approval endpoint bucket.
+	 */
+	const BUCKET_APPROVE = 'apr';
+
+	/**
+	 * Session-status polling bucket.
+	 */
+	const BUCKET_SESSION_STATUS = 'ss';
+
+	/**
 	 * Prefix for QR login rate-limit rows.
 	 */
 	const KEY_PREFIX = 'qr_login_';
@@ -172,6 +187,21 @@ class QRLoginRateLimits extends WC_Rate_Limiter {
 			case self::BUCKET_REVOKE:
 				return array(
 					'limit'   => MobileAppQRLogin::MAX_REVOKE_ATTEMPTS,
+					'seconds' => 15 * MINUTE_IN_SECONDS,
+				);
+			case self::BUCKET_SCAN:
+				return array(
+					'limit'   => MobileAppQRLogin::MAX_SCAN_PER_WINDOW,
+					'seconds' => 15 * MINUTE_IN_SECONDS,
+				);
+			case self::BUCKET_APPROVE:
+				return array(
+					'limit'   => MobileAppQRLogin::MAX_APPROVE_PER_WINDOW,
+					'seconds' => 15 * MINUTE_IN_SECONDS,
+				);
+			case self::BUCKET_SESSION_STATUS:
+				return array(
+					'limit'   => MobileAppQRLogin::MAX_SESSION_STATUS_PER_WINDOW,
 					'seconds' => 15 * MINUTE_IN_SECONDS,
 				);
 		}
