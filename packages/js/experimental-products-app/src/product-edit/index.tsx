@@ -34,6 +34,16 @@ type ProductEditProps = {
 	productIds?: number[];
 };
 
+type ProductEditFormProps = {
+	editableFields: ReturnType< typeof getProductEditFields >;
+	hasEdits: boolean;
+	isSaving: boolean;
+	onChange: ( changes: Partial< ProductEntityRecord > ) => void;
+	onClose: () => void;
+	onSave: () => void;
+	selectedProducts: ProductEntityRecord[];
+};
+
 function getSaveNoticeMessage( successCount: number, failedCount: number ) {
 	if ( failedCount === 0 ) {
 		if ( successCount === 1 ) {
@@ -70,83 +80,16 @@ function getSaveNoticeMessage( successCount: number, failedCount: number ) {
 	);
 }
 
-export default function ProductEdit( { productIds }: ProductEditProps ) {
-	const { navigate } = useHistory();
-	const { path, query = {} } = useLocation();
-	const selectedProductIdsFromRoute = getSelectionFromPostId( query.postId )
-		.map( ( postId ) => parseInt( postId, 10 ) )
-		.filter( Number.isFinite );
-	const selectedProductIds = productIds ?? selectedProductIdsFromRoute;
-	const [ isSaving, setIsSaving ] = useState( false );
-	const editableFields = getProductEditFields( productFields );
-	const { selectedProducts, isResolving, hasResolved, hasEdits } = useSelect(
-		( select ) => {
-			if ( selectedProductIds.length === 0 ) {
-				return {
-					selectedProducts: [],
-					isResolving: false,
-					hasResolved: true,
-					hasEdits: false,
-				};
-			}
-
-			const coreSelect = select( coreStore );
-			const products = selectedProductIds
-				.map(
-					( productId ) =>
-						coreSelect.getEditedEntityRecord(
-							'root',
-							'product',
-							productId
-						) as unknown as ProductEntityRecord | undefined
-				)
-				.filter(
-					( product ): product is ProductEntityRecord =>
-						product !== undefined
-				);
-
-			return {
-				selectedProducts: products,
-				isResolving: selectedProductIds.some( ( productId ) =>
-					coreSelect.isResolving( 'getEditedEntityRecord', [
-						'root',
-						'product',
-						productId,
-					] )
-				),
-				hasResolved: selectedProductIds.every( ( productId ) =>
-					coreSelect.hasFinishedResolution( 'getEditedEntityRecord', [
-						'root',
-						'product',
-						productId,
-					] )
-				),
-				hasEdits: selectedProductIds.some( ( productId ) =>
-					coreSelect.hasEditsForEntityRecord(
-						'root',
-						'product',
-						productId
-					)
-				),
-			};
-		},
-		[ selectedProductIds ]
-	);
-
-	const { editEntityRecord, saveEditedEntityRecord } =
-		useDispatch( coreStore );
-
-	const { createSuccessNotice, createErrorNotice } =
-		useDispatch( noticesStore );
-
-	const isReady =
-		selectedProductIds.length === 0 ||
-		( hasResolved &&
-			selectedProducts.length === selectedProductIds.length &&
-			! isResolving );
-	const mergedData = isReady
-		? buildMergedProductEditData( selectedProducts )
-		: ( {} as ProductEntityRecord );
+function ProductEditForm( {
+	editableFields,
+	hasEdits,
+	isSaving,
+	onChange,
+	onClose,
+	onSave,
+	selectedProducts,
+}: ProductEditFormProps ) {
+	const mergedData = buildMergedProductEditData( selectedProducts );
 	const visibleFields = getVisibleProductEditFields(
 		editableFields,
 		mergedData
@@ -160,8 +103,141 @@ export default function ProductEdit( { productIds }: ProductEditProps ) {
 		labelPosition: 'top' as const,
 		fields: visibleFields.map( ( field ) => field.id ),
 	};
-	const title =
-		selectedProducts[ 0 ]?.name || __( 'Quick edit', 'woocommerce' );
+
+	return (
+		<>
+			<div className="woocommerce-product-edit__form">
+				<DataForm
+					data={ mergedData }
+					fields={ visibleFields }
+					form={ form }
+					onChange={ onChange }
+				/>
+			</div>
+			<div className="woocommerce-product-edit__footer">
+				<Button
+					variant="tertiary"
+					onClick={ onClose }
+					disabled={ isSaving }
+				>
+					{ __( 'Cancel', 'woocommerce' ) }
+				</Button>
+				<Button
+					variant="primary"
+					onClick={ onSave }
+					isBusy={ isSaving }
+					disabled={ isSaving || ! hasEdits }
+				>
+					{ __( 'Save', 'woocommerce' ) }
+				</Button>
+			</div>
+		</>
+	);
+}
+
+export default function ProductEdit( { productIds }: ProductEditProps ) {
+	const { navigate } = useHistory();
+	const { path, query = {} } = useLocation();
+	const requestedProductIdsFromRoute = getSelectionFromPostId( query.postId )
+		.map( ( postId ) => Number( postId ) )
+		.filter( ( postId ) => Number.isSafeInteger( postId ) && postId > 0 );
+	const requestedProductIds = productIds ?? requestedProductIdsFromRoute;
+
+	const [ isSaving, setIsSaving ] = useState( false );
+	const editableFields = getProductEditFields( productFields );
+	const {
+		selectedProducts,
+		selectedProductIds,
+		isResolving,
+		hasResolved,
+		hasMissingProducts,
+		hasEdits,
+	} = useSelect(
+		( select ) => {
+			if ( requestedProductIds.length === 0 ) {
+				return {
+					selectedProducts: [],
+					selectedProductIds: [],
+					isResolving: false,
+					hasResolved: true,
+					hasMissingProducts: false,
+					hasEdits: false,
+				};
+			}
+
+			const coreSelect = select( coreStore );
+			const productResults = requestedProductIds.map( ( productId ) => {
+				const resolutionArgs = [ 'root', 'product', productId ];
+
+				return {
+					productId,
+					record: coreSelect.getEditedEntityRecord(
+						'root',
+						'product',
+						productId
+					) as unknown as ProductEntityRecord | false | undefined,
+					isResolving: coreSelect.isResolving(
+						'getEditedEntityRecord',
+						resolutionArgs
+					),
+					hasFinishedResolution: coreSelect.hasFinishedResolution(
+						'getEditedEntityRecord',
+						resolutionArgs
+					),
+				};
+			} );
+			const products = productResults
+				.map( ( { record } ) => record )
+				.filter(
+					( product ): product is ProductEntityRecord =>
+						product !== undefined && product !== false
+				);
+			const validSelectedProductIds = products.map(
+				( product ) => product.id
+			);
+
+			return {
+				selectedProducts: products,
+				selectedProductIds: validSelectedProductIds,
+				isResolving: productResults.some(
+					( result ) =>
+						result.isResolving || ! result.hasFinishedResolution
+				),
+				hasResolved: productResults.every(
+					( result ) => result.hasFinishedResolution
+				),
+				hasMissingProducts: productResults.some(
+					( result ) =>
+						result.hasFinishedResolution && result.record === false
+				),
+				hasEdits: validSelectedProductIds.some( ( productId ) =>
+					coreSelect.hasEditsForEntityRecord(
+						'root',
+						'product',
+						productId
+					)
+				),
+			};
+		},
+		[ requestedProductIds ]
+	);
+
+	const { editEntityRecord, saveEditedEntityRecord } =
+		useDispatch( coreStore );
+
+	const { createSuccessNotice, createErrorNotice } =
+		useDispatch( noticesStore );
+
+	const hasNoRequestedProducts = requestedProductIds.length === 0;
+	const isReady =
+		hasResolved &&
+		! isResolving &&
+		! hasMissingProducts &&
+		selectedProducts.length === requestedProductIds.length &&
+		selectedProducts.length > 0;
+	const title = isReady
+		? selectedProducts[ 0 ]?.name || __( 'Quick edit', 'woocommerce' )
+		: __( 'Quick edit', 'woocommerce' );
 
 	const onChange = useCallback(
 		( changes: Partial< ProductEntityRecord > ) => {
@@ -239,7 +315,7 @@ export default function ProductEdit( { productIds }: ProductEditProps ) {
 				/>
 			</div>
 
-			{ selectedProductIds.length === 0 && (
+			{ hasNoRequestedProducts && (
 				<div className="woocommerce-product-edit__empty-state">
 					<p>
 						{ __(
@@ -250,48 +326,35 @@ export default function ProductEdit( { productIds }: ProductEditProps ) {
 				</div>
 			) }
 
-			{ selectedProductIds.length > 0 && ! isReady && (
+			{ ! hasNoRequestedProducts && isResolving && (
 				<div className="woocommerce-product-edit__loading">
 					<Spinner />
 				</div>
 			) }
 
-			{ selectedProductIds.length > 0 && isReady && (
-				<>
-					{ mixedFieldIds.length > 0 && (
-						<p className="woocommerce-product-edit__mixed-values">
+			{ ! hasNoRequestedProducts &&
+				! isResolving &&
+				hasMissingProducts && (
+					<div className="woocommerce-product-edit__empty-state">
+						<p>
 							{ __(
-								'Some selected products have different values. Those fields appear blank until you change them.',
+								'Select one or more products to edit them here.',
 								'woocommerce'
 							) }
 						</p>
-					) }
-					<div className="woocommerce-product-edit__form">
-						<DataForm
-							data={ mergedData }
-							fields={ visibleFields }
-							form={ form }
-							onChange={ onChange }
-						/>
 					</div>
-					<div className="woocommerce-product-edit__footer">
-						<Button
-							variant="tertiary"
-							onClick={ onClose }
-							disabled={ isSaving }
-						>
-							{ __( 'Cancel', 'woocommerce' ) }
-						</Button>
-						<Button
-							variant="primary"
-							onClick={ onSave }
-							isBusy={ isSaving }
-							disabled={ isSaving || ! hasEdits }
-						>
-							{ __( 'Save', 'woocommerce' ) }
-						</Button>
-					</div>
-				</>
+				) }
+
+			{ isReady && (
+				<ProductEditForm
+					editableFields={ editableFields }
+					hasEdits={ hasEdits }
+					isSaving={ isSaving }
+					onChange={ onChange }
+					onClose={ onClose }
+					onSave={ onSave }
+					selectedProducts={ selectedProducts }
+				/>
 			) }
 		</div>
 	);
