@@ -26,11 +26,19 @@ import {
 	getVariationAttributeValue,
 } from '../../../base/utils/variations/attribute-matching';
 import setStyles from './set-styles';
+import type {
+	DerivedSelectableItem,
+	SelectableItemsParentStore,
+} from '../../../types/type-defs/selectable-items';
 
 type Option = {
 	value: string;
 	label: string;
 	isSelected: boolean;
+};
+
+type SelectableItemForVariation = DerivedSelectableItem & {
+	isSelected?: boolean;
 };
 
 type Context = AddToCartWithOptionsStoreContext & {
@@ -39,6 +47,7 @@ type Context = AddToCartWithOptionsStoreContext & {
 	option: Option;
 	options: Option[];
 	autoselect: boolean;
+	item?: SelectableItemForVariation;
 };
 
 // Set selected pill styles for proper contrast.
@@ -186,31 +195,34 @@ const getProductAttributesAndOptions = (
 };
 
 export type VariableProductAddToCartWithOptionsStore =
-	AddToCartWithOptionsStore & {
-		state: {
-			selectedAttributes: SelectedAttributes[];
-			isOptionSelected: boolean;
-			isOptionDisabled: boolean;
+	AddToCartWithOptionsStore &
+		SelectableItemsParentStore & {
+			state: {
+				selectedAttributes: SelectedAttributes[];
+				isOptionSelected: boolean;
+				isOptionDisabled: boolean;
+				selectableItems: readonly DerivedSelectableItem[];
+			};
+			actions: {
+				setAttribute: ( attribute: string, value: string ) => void;
+				removeAttribute: ( attribute: string ) => void;
+				handlePillClick: () => void;
+				handleDropdownChange: (
+					event: ChangeEvent< HTMLSelectElement >
+				) => void;
+				autoselectAttributes: ( args: {
+					includedAttributes?: string[];
+					excludedAttributes?: string[];
+				} ) => void;
+				toggle: () => void;
+			};
+			callbacks: {
+				setDefaultSelectedAttribute: () => void;
+				setSelectedVariationId: () => void;
+				validateVariation: () => void;
+				watchQuantityConstraints: () => void;
+			};
 		};
-		actions: {
-			setAttribute: ( attribute: string, value: string ) => void;
-			removeAttribute: ( attribute: string ) => void;
-			handlePillClick: () => void;
-			handleDropdownChange: (
-				event: ChangeEvent< HTMLSelectElement >
-			) => void;
-			autoselectAttributes: ( args: {
-				includedAttributes?: string[];
-				excludedAttributes?: string[];
-			} ) => void;
-		};
-		callbacks: {
-			setDefaultSelectedAttribute: () => void;
-			setSelectedVariationId: () => void;
-			validateVariation: () => void;
-			watchQuantityConstraints: () => void;
-		};
-	};
 
 const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	'woocommerce/add-to-cart-with-options',
@@ -247,6 +259,29 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					attributeValue: option.value,
 					selectedAttributes,
 				} );
+			},
+			get selectableItems(): readonly DerivedSelectableItem[] {
+				const context = getContext< Context >();
+				const { options, selectedAttributes, name } = context;
+				if ( ! options ) {
+					return [];
+				}
+				return options.map( ( opt, index ) => ( {
+					id: `variation-attr-${ opt.value }`,
+					label: opt.label,
+					value: opt.value,
+					selected: selectedAttributes.some(
+						( attr ) =>
+							attributeNamesMatch( attr.attribute, name ) &&
+							attr.value === opt.value
+					),
+					disabled: ! isAttributeValueValid( {
+						attributeName: name,
+						attributeValue: opt.value,
+						selectedAttributes,
+					} ),
+					index,
+				} ) );
 			},
 		},
 		actions: {
@@ -384,6 +419,26 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						}
 					}
 				);
+			},
+			toggle() {
+				const context = getContext< Context >();
+				const { item, name, selectedAttributes } = context;
+				if ( ! item ) {
+					return;
+				}
+				const isSelected = selectedAttributes.some(
+					( attr ) =>
+						attributeNamesMatch( attr.attribute, name ) &&
+						attr.value === item.value
+				);
+				const newValue = isSelected ? '' : item.value;
+				context.selectedValue = newValue;
+				actions.setAttribute( name, newValue );
+				if ( newValue !== '' ) {
+					actions.autoselectAttributes( {
+						excludedAttributes: [ name ],
+					} );
+				}
 			},
 		},
 		callbacks: {

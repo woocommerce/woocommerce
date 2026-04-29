@@ -79,12 +79,37 @@ class VariationSelectorAttribute extends AbstractBlock {
 			return '';
 		}
 
+		$attribute_id = 'wc_product_attribute_' . uniqid();
+
+		// Build selectableItems context per inner block protocol.
+		$selectable_items = array_values(
+			array_map(
+				function ( $term ) use ( $attribute_name ) {
+					return array(
+						'id'       => 'variation-attr-' . sanitize_title( $term['value'] ),
+						'label'    => $term['label'],
+						'value'    => $term['value'],
+						'selected' => $term['isSelected'],
+					);
+				},
+				$attribute_terms
+			)
+		);
+
+		$selectable_items_context = array(
+			'items'          => $selectable_items,
+			'selectionMode'  => 'single',
+			'storeNamespace' => 'woocommerce/add-to-cart-with-options',
+			'groupLabel'     => wc_attribute_label( $attribute_name ),
+		);
+
 		$block_content = AddToCartWithOptionsUtils::render_block_with_context(
 			$block,
 			array(
-				'woocommerce/attributeId'    => 'wc_product_attribute_' . uniqid(),
-				'woocommerce/attributeName'  => $attribute_name,
-				'woocommerce/attributeTerms' => $attribute_terms,
+				'woocommerce/attributeId'     => $attribute_id,
+				'woocommerce/attributeName'   => $attribute_name,
+				'woocommerce/attributeTerms'  => $attribute_terms,
+				'woocommerce/selectableItems' => $selectable_items_context,
 			),
 		);
 
@@ -166,7 +191,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 				},
 				$attribute_terms,
 			);
-		}
+		}//end if
 
 		return $items;
 	}

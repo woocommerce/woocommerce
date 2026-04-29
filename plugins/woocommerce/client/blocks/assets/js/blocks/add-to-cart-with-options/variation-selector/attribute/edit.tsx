@@ -1,12 +1,13 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
+import { useState, useMemo } from '@wordpress/element';
 import {
 	useBlockProps,
 	useInnerBlocksProps,
 	store as blockEditorStore,
 	__experimentalUseBlockPreview as useBlockPreview,
+	BlockContextProvider,
 } from '@wordpress/block-editor';
 import { BlockInstance, type BlockEditProps } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
@@ -15,11 +16,13 @@ import {
 	useProductDataContext,
 } from '@woocommerce/shared-context';
 import { isProductResponseItem } from '@woocommerce/entities';
+import type { ProductResponseAttributeItem } from '@woocommerce/types';
 
 /**
  * Internal dependencies
  */
 import { DEFAULT_ATTRIBUTES } from './constants';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 
 interface Attributes {
 	className?: string;
@@ -29,9 +32,15 @@ type AttributeItemProps = {
 	blocks: BlockInstance[];
 	isSelected: boolean;
 	onSelect(): void;
+	attribute: ProductResponseAttributeItem;
 };
 
-function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
+function AttributeItem( {
+	blocks,
+	isSelected,
+	onSelect,
+	attribute,
+}: AttributeItemProps ) {
 	const blockPreviewProps = useBlockPreview( {
 		blocks,
 	} );
@@ -40,8 +49,25 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 		{ templateLock: 'insert' }
 	);
 
+	const selectableItemsContext = useMemo< SelectableItemsContext >( () => {
+		const items = attribute.terms.map( ( term, index ) => ( {
+			id: `variation-attr-${ term.slug }`,
+			label: term.name,
+			value: term.slug,
+			selected: index === 0,
+		} ) );
+		return {
+			items,
+			selectionMode: 'single' as const,
+			storeNamespace: 'woocommerce/add-to-cart-with-options',
+			groupLabel: attribute.name,
+		};
+	}, [ attribute ] );
+
 	return (
-		<>
+		<BlockContextProvider
+			value={ { 'woocommerce/selectableItems': selectableItemsContext } }
+		>
 			{ isSelected ? <div { ...innerBlocksProps } /> : <></> }
 
 			<div
@@ -56,7 +82,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 					onKeyDown={ onSelect }
 				/>
 			</div>
-		</>
+		</BlockContextProvider>
 	);
 }
 
@@ -105,6 +131,7 @@ export default function AttributeItemTemplateEdit(
 						onSelect={ () =>
 							setSelectedAttributeItem( attribute.id )
 						}
+						attribute={ attribute }
 					/>
 				</CustomDataProvider>
 			) ) }
