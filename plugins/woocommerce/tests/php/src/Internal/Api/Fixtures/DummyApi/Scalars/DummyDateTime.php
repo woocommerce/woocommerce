@@ -12,17 +12,20 @@ use Automattic\WooCommerce\Api\Attributes\Description;
 #[Description( 'An ISO 8601 encoded date/time string used by the dummy API' )]
 class DummyDateTime {
 	public static function serialize( mixed $value ): string {
-		if ( $value instanceof \DateTimeInterface ) {
-			return $value->format( \DateTimeInterface::ATOM );
+		if ( ! $value instanceof \DateTimeInterface ) {
+			throw new \InvalidArgumentException( 'DummyDateTime::serialize() expects a DateTimeInterface instance.' );
 		}
-		return (string) $value;
+		return $value->format( \DateTimeInterface::ATOM );
 	}
 
 	public static function parse( string $value ): \DateTimeImmutable {
-		try {
-			return new \DateTimeImmutable( $value );
-		} catch ( \Exception $e ) {
-			throw new \InvalidArgumentException( 'Invalid ISO 8601 date/time: ' . $e->getMessage(), 0, $e );
+		// Reject anything that is not a strict ATOM-formatted string. PHP's
+		// free-form date parser would otherwise accept inputs like
+		// '2024-06-15 08:30:00' which the scalar's contract disallows.
+		$date = \DateTimeImmutable::createFromFormat( \DateTimeInterface::ATOM, $value );
+		if ( false === $date || $date->format( \DateTimeInterface::ATOM ) !== $value ) {
+			throw new \InvalidArgumentException( 'Invalid ISO 8601 date/time.' );
 		}
+		return $date;
 	}
 }

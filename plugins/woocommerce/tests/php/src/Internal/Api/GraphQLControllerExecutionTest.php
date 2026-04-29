@@ -319,7 +319,7 @@ class GraphQLControllerExecutionTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_request returns 401 when a resolver throws inside execute_command.
+	 * @testdox handle_request falls back to HTTP 500 for resolver errors with no entry in the controller's status map.
 	 */
 	public function test_handle_request_translates_failing_query_errors(): void {
 		$response = $this->sut->handle_request(

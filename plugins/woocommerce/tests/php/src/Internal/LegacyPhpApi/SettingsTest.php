@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Tests\Internal\LegacyPhpApi;
 
+use Automattic\WooCommerce\Internal\Api\Main;
 use Automattic\WooCommerce\Internal\Api\Settings;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use WC_Unit_Test_Case;
@@ -19,8 +20,8 @@ use WC_Unit_Test_Case;
  * gracefully degrade to a no-op when {@see Main::is_enabled()} returns false.
  *
  * `Settings.php` and `Main.php` are intentionally PHP 7.4-parseable, and the
- * `Main::is_enabled()` short-circuit prevents the methods from ever reaching
- * the lines that reference PHP 8.1+ classes such as `GraphQLController`.
+ * {@see Main::is_enabled()} short-circuit prevents the methods from ever
+ * reaching the lines that reference PHP 8.1+ classes such as `GraphQLController`.
  */
 class SettingsTest extends WC_Unit_Test_Case {
 	/**

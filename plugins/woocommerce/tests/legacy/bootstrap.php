@@ -197,7 +197,7 @@ class WC_Unit_Tests_Bootstrap {
 			}
 		}
 
-		echo 'Not running GraphQL infrastructure tests. To execute these, use --testsuite=wc-phpunit-graphql-infra/wc-phpunit-full.' . PHP_EOL;
+		echo 'Not running GraphQL infrastructure tests. To execute these, use --testsuite=wc-phpunit-graphql-infra or wc-phpunit-full.' . PHP_EOL;
 	}
 
 	/**
