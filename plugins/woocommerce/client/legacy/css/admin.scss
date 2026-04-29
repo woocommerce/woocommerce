@@ -912,10 +912,6 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	position: relative;
 	overflow: hidden;
 
-	&.updated {
-		border-left-color: var(--wp-admin-theme-color, $woocommerce) !important;
-	}
-
 	a.skip,
 	a.docs {
 		text-decoration: none !important;
