@@ -69,14 +69,8 @@ final class ProductFilterChips extends AbstractBlock {
 
 		$has_more_items = count( $items ) > $display_limit;
 		$hidden_count   = max( 0, count( $items ) - $display_limit );
-		$show_counts    = false;
-
-		foreach ( $items as $item ) {
-			if ( is_array( $item ) && array_key_exists( 'count', $item ) ) {
-				$show_counts = true;
-				break;
-			}
-		}
+		$first_item     = reset( $items );
+		$show_counts    = is_array( $first_item ) && array_key_exists( 'count', $first_item );
 
 		ob_start();
 		?>
