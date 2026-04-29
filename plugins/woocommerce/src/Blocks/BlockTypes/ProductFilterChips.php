@@ -134,15 +134,14 @@ final class ProductFilterChips extends AbstractBlock {
 									class="wc-block-product-filter-chips__text"
 									data-wp-text="context.item.label"
 								></span>
-								<span
-									class="wc-block-product-filter-chips__count"
-									data-wp-bind--hidden="!context.item.count"
-								>
-									(<span data-wp-text="context.item.count"></span>)
+									<span
+										class="wc-block-product-filter-chips__count"
+										data-wp-bind--hidden="woocommerce/product-filter-chips::state.itemCountHidden"
+										data-wp-text="woocommerce/product-filter-chips::state.itemCountText"
+									></span>
 								</span>
-							</span>
-						</button>
-					</template>
+							</button>
+						</template>
 				</div>
 				<?php if ( $has_more_items ) : ?>
 					<button

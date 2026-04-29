@@ -49,8 +49,11 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		customOptionElement,
 		customLabelElement,
 	} = attributes;
-	const { isLoading = false, items = [] } =
-		context[ 'woocommerce/selectableItems' ] ?? {};
+	const selectableItems = context?.[ 'woocommerce/selectableItems' ] ?? {};
+	const isLoading = selectableItems.isLoading ?? false;
+	const items = Array.isArray( selectableItems.items )
+		? selectableItems.items
+		: [];
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const blockProps = useBlockProps( {
@@ -75,10 +78,6 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 			</div>
 		) );
 	}, [] );
-
-	if ( ! items ) {
-		return <></>;
-	}
 
 	const threshold = 15;
 	const isLongList = items.length > threshold;
