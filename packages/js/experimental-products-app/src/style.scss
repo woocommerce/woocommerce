@@ -119,8 +119,7 @@
 	border-bottom: 1px solid var(--wp-components-color-gray-100, #f0f0f0);
 }
 
-.woocommerce-product-edit__form
-	.dataforms-layouts-regular__field:last-child {
+.woocommerce-product-edit__form .dataforms-layouts-regular__field:last-child {
 	padding-bottom: 0;
 	border-bottom: 0;
 }
