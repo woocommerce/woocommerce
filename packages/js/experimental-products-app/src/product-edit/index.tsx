@@ -29,10 +29,6 @@ import {
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
-type ProductEditProps = {
-	productIds?: number[];
-};
-
 type ProductEditFormProps = {
 	editableFields: ReturnType< typeof getProductEditFields >;
 	hasEdits: boolean;
@@ -131,13 +127,15 @@ function ProductEditForm( {
 	);
 }
 
-export default function ProductEdit( { productIds }: ProductEditProps ) {
+export default function ProductEdit() {
 	const { navigate } = useHistory();
 	const { path, query = {} } = useLocation();
 	const requestedProductIdsFromRoute = getSelectionFromPostId( query.postId )
 		.map( ( postId ) => Number( postId ) )
 		.filter( ( postId ) => Number.isSafeInteger( postId ) && postId > 0 );
-	const requestedProductIds = productIds ?? requestedProductIdsFromRoute;
+	const requestedProductIds = Array.from(
+		new Set( requestedProductIdsFromRoute )
+	);
 
 	const [ isSaving, setIsSaving ] = useState( false );
 	const editableFields = getProductEditFields( productFields );
@@ -231,9 +229,20 @@ export default function ProductEdit( { productIds }: ProductEditProps ) {
 		! hasMissingProducts &&
 		selectedProducts.length === requestedProductIds.length &&
 		selectedProducts.length > 0;
-	const title = isReady
-		? selectedProducts[ 0 ]?.name || __( 'Quick edit', 'woocommerce' )
-		: __( 'Quick edit', 'woocommerce' );
+
+	let title = __( 'Quick edit', 'woocommerce' );
+
+	if ( isReady ) {
+		if ( selectedProducts.length === 1 ) {
+			title = selectedProducts[ 0 ]?.name || title;
+		} else {
+			title = sprintf(
+				/* translators: %d number of selected products. */
+				__( 'Edit %d products', 'woocommerce' ),
+				selectedProducts.length
+			);
+		}
+	}
 
 	const onChange = useCallback(
 		( changes: Partial< ProductEntityRecord > ) => {
