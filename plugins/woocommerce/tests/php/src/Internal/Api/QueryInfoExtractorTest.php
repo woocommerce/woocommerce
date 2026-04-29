@@ -18,13 +18,13 @@ use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\OperationDefinitionNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\SelectionSetNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\Parser;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ResolveInfo;
-use WP_UnitTestCase;
+use WC_Unit_Test_Case;
 
 /**
  * Tests for {@see QueryInfoExtractor}. These exercise the AST → query-info
  * tree transformation that mappers consume to skip work for unselected fields.
  */
-class QueryInfoExtractorTest extends WP_UnitTestCase {
+class QueryInfoExtractorTest extends WC_Unit_Test_Case {
 	/**
 	 * Parse a GraphQL operation and return the top-level FieldNode plus the
 	 * fragment-definition map that ResolveInfo would expose.

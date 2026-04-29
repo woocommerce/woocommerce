@@ -13,14 +13,14 @@ use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ListOfType;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\NonNull;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\StringType;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\Type as WebonyxType;
-use WP_UnitTestCase;
+use WC_Unit_Test_Case;
 
 /**
  * Tests for the {@see Type} static facade. Each scalar accessor must return
  * the matching webonyx singleton, and the modifiers must produce wrappers
  * around the supplied inner type.
  */
-class TypeTest extends WP_UnitTestCase {
+class TypeTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox int() returns the webonyx Int singleton.
 	 */

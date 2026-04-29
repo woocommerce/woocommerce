@@ -20,14 +20,14 @@ use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\InputObjectType as Web
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\InterfaceType as WebonyxInterfaceType;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ObjectType as WebonyxObjectType;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Schema as WebonyxSchema;
-use WP_UnitTestCase;
+use WC_Unit_Test_Case;
 
 /**
  * Smoke tests for the no-op subclasses in the Schema/ surface. Each subclass
  * must extend its webonyx counterpart and accept the same configuration
  * payload, since generated code constructs them with webonyx-shaped configs.
  */
-class SubclassesTest extends WP_UnitTestCase {
+class SubclassesTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox ObjectType extends the webonyx ObjectType.
 	 */

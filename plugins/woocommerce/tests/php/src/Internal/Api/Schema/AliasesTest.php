@@ -8,7 +8,7 @@ use Automattic\WooCommerce\Internal\Api\Schema\AST\StringValueNode as AliasedStr
 use Automattic\WooCommerce\Internal\Api\Schema\ResolveInfo as AliasedResolveInfo;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\StringValueNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ResolveInfo;
-use WP_UnitTestCase;
+use WC_Unit_Test_Case;
 
 /**
  * Tests that the `aliases.php` bootstrap registers the surface aliases.
@@ -18,7 +18,7 @@ use WP_UnitTestCase;
  * instances. If the alias is broken, every resolver's `resolve()` parameter
  * type-hint check fails at request time.
  */
-class AliasesTest extends WP_UnitTestCase {
+class AliasesTest extends WC_Unit_Test_Case {
 	/**
 	 * @testdox the ResolveInfo alias resolves to the webonyx ResolveInfo class.
 	 */

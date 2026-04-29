@@ -6,14 +6,14 @@ namespace Automattic\WooCommerce\Tests\Internal\Api;
 
 use Automattic\WooCommerce\Internal\Api\QueryCache;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\DocumentNode;
-use WP_UnitTestCase;
+use WC_Unit_Test_Case;
 
 /**
  * Tests for {@see QueryCache} — the AST cache backing both the
  * standard "parse + cache" path and the Apollo Automatic Persisted Queries
  * (APQ) protocol used by clients that send a hash instead of the full query.
  */
-class QueryCacheTest extends WP_UnitTestCase {
+class QueryCacheTest extends WC_Unit_Test_Case {
 	/**
 	 * The system under test.
 	 *
