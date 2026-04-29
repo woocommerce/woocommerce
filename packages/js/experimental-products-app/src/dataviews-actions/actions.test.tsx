@@ -8,9 +8,8 @@ import type { Action } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
-import { duplicateProductAction, moveToTrashAction } from './index';
+import { duplicateProductAction, moveToTrashAction } from './actions';
 import type { ProductEntityRecord } from '../fields/types';
-import type { ProductListQuery } from '../product-list/query';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
@@ -59,10 +58,6 @@ function getCallbackAction( action: Action< ProductEntityRecord > ) {
 }
 
 describe( 'product list actions', () => {
-	const query: ProductListQuery = {
-		page: 1,
-		per_page: 20,
-	};
 	const product = {
 		id: 12,
 		status: 'draft',
@@ -158,12 +153,9 @@ describe( 'product list actions', () => {
 	it( 'moves products to trash through coreStore root/product and refreshes the query', async () => {
 		deleteEntityRecord.mockResolvedValue( { id: 12 } );
 
-		await getCallbackAction( moveToTrashAction( { query } ) ).callback(
-			[ product ],
-			{
-				onActionPerformed,
-			}
-		);
+		await getCallbackAction( moveToTrashAction() ).callback( [ product ], {
+			onActionPerformed,
+		} );
 
 		expect( deleteEntityRecord ).toHaveBeenCalledWith(
 			'root',
@@ -174,10 +166,7 @@ describe( 'product list actions', () => {
 				throwOnError: true,
 			}
 		);
-		expect( invalidateResolution ).toHaveBeenCalledWith(
-			'getEntityRecords',
-			[ 'root', 'product', query ]
-		);
+
 		expect( createSuccessNotice ).toHaveBeenCalledWith(
 			'Product successfully deleted',
 			{ type: 'snackbar' }

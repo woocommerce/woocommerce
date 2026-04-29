@@ -912,10 +912,6 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	position: relative;
 	overflow: hidden;
 
-	&.updated {
-		border-left-color: var(--wp-admin-theme-color, $woocommerce) !important;
-	}
-
 	a.skip,
 	a.docs {
 		text-decoration: none !important;
@@ -979,26 +975,30 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	}
 }
 
-.woocommerce-set-price-variations {
-	.woocommerce-usage-modal__wrapper {
-		.woocommerce-usage-modal__message {
-			height: 60px;
-			flex-wrap: wrap;
-			display: flex;
-			> span {
-				padding-bottom: 16px;
-			}
+/**
+ * Product editor modals
+ */
+.wc-backbone-modal-set-price-variations.wc-backbone-modal,
+.wc-backbone-modal-add-attribute-term.wc-backbone-modal {
+	@media screen and (min-width: 783px) {
+		.wc-backbone-modal-content {
+			max-width: 400px;
+			min-width: auto;
+			width: 100%;
 		}
-		.woocommerce-usage-modal__actions {
-			display: flex;
-			justify-content: flex-end;
-			margin-top: 20px;
-			> button {
-				margin-left: 16px;
-				width: auto;
-				display: unset;
-			}
-		}
+	}
+
+	article {
+		padding-bottom: 2em;
+	}
+
+	input[type="text"] {
+		display: block;
+		font-size: 13px;
+		line-height: 16px;
+		margin: 6px 0;
+		padding: 12px;
+		width: 100%;
 	}
 }
 
@@ -2262,6 +2262,8 @@ ul.wc_coupon_list_block {
 }
 
 #woocommerce-order-items .woocommerce_order_items_wrapper, .wc-order-preview-table-wrapper {
+	padding-bottom: 1.5em;
+
 	small.refunded {
 		display: block;
 		color: red;
@@ -3271,7 +3273,13 @@ ul.wc_coupon_list_block {
 
 		td:first-child,
 		th:first-child {
+			padding-left: 2em;
 			text-align: left;
+		}
+
+		td:last-child,
+		th:last-child {
+			padding-right: 2em;
 		}
 
 		th {
@@ -3305,7 +3313,7 @@ ul.wc_coupon_list_block {
 
 	.wc-order-preview-addresses {
 		overflow: hidden;
-		padding-bottom: 1.5em;
+		padding: 0 0.5em 1.5em;
 
 		.wc-order-preview-address,
 		.wc-order-preview-note {
@@ -3331,15 +3339,8 @@ ul.wc_coupon_list_block {
 	}
 
 	footer {
-		.wc-action-button-group {
-			display: inline-block;
-			float: left;
-		}
-
 		.button.button-large {
 			margin-left: 10px;
-			padding: 0 10px !important;
-			line-height: 28px;
 			height: auto;
 			display: inline-block;
 		}
@@ -3351,31 +3352,10 @@ ul.wc_coupon_list_block {
 }
 
 .wc-action-button-group {
-	vertical-align: middle;
-	line-height: 26px;
-	text-align: left;
-
-	label {
-		margin-right: 6px;
-		cursor: default;
-		font-weight: bold;
-		line-height: 28px;
-	}
-
-	.wc-action-button-group__items {
-		display: inline-flex;
-		flex-flow: row wrap;
-		align-content: flex-start;
-		justify-content: flex-start;
-	}
-
 	.wc-action-button {
 		margin: 0 0 0 -1px !important;
 		border: 1px solid #ccc;
-		padding: 0 10px !important;
 		border-radius: 0 !important;
-		float: none;
-		line-height: 28px;
 		height: auto;
 		z-index: 1;
 		position: relative;
@@ -3408,26 +3388,6 @@ ul.wc_coupon_list_block {
 @media screen and (max-width: 782px) {
 	.woocommerce_page_wc-orders #order-search-filter {
 		display: none;
-	}
-
-	.wc-order-preview footer {
-		.wc-action-button-group .wc-action-button-group__items {
-			display: flex;
-		}
-
-		.wc-action-button-group {
-			float: none;
-			display: block;
-			margin-bottom: 4px;
-		}
-
-		.button.button-large {
-			width: 100%;
-			float: none;
-			text-align: center;
-			margin: 0;
-			display: block;
-		}
 	}
 
 	.woocommerce_page_wc-orders .wc-orders-list-table.wp-list-table,
@@ -4265,66 +4225,19 @@ table.wc_shipping {
 /**
 * New Shipping Settings Refresh Modal Styles
 **/
-.wc-backbone-modal-add-attribute-term,
 .wc-backbone-modal-add-shipping-method,
 .wc-backbone-modal-shipping-method-settings,
 .wc-shipping-class-modal {
-	font-size: 13px;
-	font-weight: 400;
-	line-height: 16px;
-	color: #1e1e1e;
-
 	&.wc-backbone-modal .wc-backbone-modal-content {
-		border-radius: var(--wc-card-border-radius, 8px);
-		border-top: 8px solid transparent;
-		border-bottom: 8px solid transparent;
 		max-width: 600px;
-
-		@media screen and (max-width: 782px) {
-			border-radius: none;
-			border-top: none;
-			border-bottom: none;
-		}
-	}
-
-	.wc-backbone-modal-main article {
-		padding: 0 32px 32px 32px;
-	}
-
-	.wc-backbone-modal-main header{
-		padding: 20px 32px;
-	}
-
-	.wc-backbone-modal-main footer {
-		padding: 20px 32px 12px 32px;
 	}
 
 	.wc-backbone-modal-main .wc-backbone-modal-header h1 {
 		font-weight: 400;
 	}
 
-	.wc-backbone-modal-main .wc-backbone-modal-header {
-		background-color: #fff;
-		border-bottom: none;
-		font-size: 20px;
-		line-height: 28px;
-
-		.modal-close-link {
-			border-left: none;
-
-			&:hover {
-				background-color: #fff;
-			}
-		}
-	}
 	.wc-backbone-modal-main footer {
-		box-shadow: none;
-		border-top: 1px solid #E0E0E0;
-		background-color: #fff;
-
 		.inner {
-			display: flex;
-			justify-content: space-between;
 			flex-direction: row-reverse;
 		}
 
@@ -4406,7 +4319,6 @@ table.wc_shipping {
 		}
 	}
 
-	.wc-add-attribute-term-fields,
 	.wc-shipping-zone-method-fields {
 
 		& > label {
@@ -4538,30 +4450,6 @@ table.wc_shipping {
 		animation-range-start: normal;
 		color: #757575;
 	}
-}
-
-.wc-backbone-modal-add-attribute-term.wc-backbone-modal {
-	.wc-backbone-modal-content {
-		min-width: auto;
-		max-width: 400px;
-	}
-
-	input[type="text"] {
-		display: block;
-		font-size: 13px;
-		line-height: 16px;
-		margin: 6px 0;
-		padding: 12px;
-		width: 100%;
-	}
-
-	.wc-backbone-modal-main footer {
-		border-top: none;
-	}
-}
-
-.wc-backbone-modal-add-shipping-method .wc-backbone-modal-main article {
-	padding: 0 32px 50px 32px;
 }
 
 table {
@@ -7886,6 +7774,7 @@ table.bar_chart {
 	}
 
 	.wc-backbone-modal-content {
+		border-radius: var(--wc-card-border-radius, 8px);
 		position: fixed;
 		background: #fff;
 		z-index: 100000;
@@ -7901,24 +7790,12 @@ table.bar_chart {
 		}
 	}
 
-	&.wc-backbone-modal-shipping-method-settings .wc-backbone-modal-content {
-		min-width: 500px;
-	}
-
 	&.wc-backbone-modal-add-shipping-method .wc-backbone-modal-content article {
 		min-height: 180px
 	}
 
 	.select2-container {
 		width: 100% !important;
-	}
-}
-
-@media screen and (max-width: 782px) {
-	.wc-backbone-modal .wc-backbone-modal-content {
-		width: 100%;
-		height: 100%;
-		min-width: 100%;
 	}
 }
 
@@ -7935,7 +7812,7 @@ table.bar_chart {
 }
 
 .wc-backbone-modal-main {
-	padding-bottom: 55px;
+	padding-bottom: calc( 1.5rem + 40px );
 
 	header,
 	article {
@@ -7945,18 +7822,17 @@ table.bar_chart {
 
 	.wc-backbone-modal-header {
 		height: auto;
-		background: #fcfcfc;
-		padding: 1em 1.5em;
-		border-bottom: 1px solid #ddd;
+		padding: 1.25em 2em 1em;
 
 		h1 {
 			margin: 0;
 			font-size: 18px;
-			font-weight: 700;
+			font-weight: 400;
 			line-height: 1.5em;
 		}
 
 		.modal-close-link {
+			border-radius: 0 var(--wc-card-border-radius, 8px) 0 0;
 			cursor: pointer;
 			color: #777;
 			height: 54px;
@@ -7967,7 +7843,6 @@ table.bar_chart {
 			right: 0;
 			text-align: center;
 			border: 0;
-			border-left: 1px solid #ddd;
 			background-color: transparent;
 			transition: color 0.1s ease-in-out, background 0.1s ease-in-out;
 
@@ -7993,7 +7868,7 @@ table.bar_chart {
 	}
 
 	article {
-		padding: 1.5em;
+		padding: 1em 2em 1.5em;
 
 		p {
 			margin: 1.5em 0;
@@ -8061,19 +7936,39 @@ table.bar_chart {
 		right: 0;
 		bottom: 0;
 		z-index: 100;
-		padding: 1em 1.5em;
-		background: #fcfcfc;
-		border-top: 1px solid #dfdfdf;
-		box-shadow: 0 -4px 4px -4px rgba(0, 0, 0, 0.1);
+		padding: 1em 2em 1.5em;
 
 		.inner {
-			text-align: right;
-			line-height: 23px;
+			display: flex;
+			justify-content: space-between;
+		}
+
+		.wc-backbone-modal-buttons {
+			display: flex;
+			align-items: end;
+			justify-content: end;
+			gap: 8px;
 
 			.button {
 				margin-bottom: 0;
 			}
 		}
+	}
+}
+
+@media screen and (max-width: 782px) {
+	.wc-backbone-modal .wc-backbone-modal-content {
+		border-radius: 0;
+		transform: none;
+		left: 0;
+		right: 0;
+		top: 0;
+		bottom: 0;
+		min-width: auto;
+		width: 100%;
+	}
+	.wc-backbone-modal-main .wc-backbone-modal-header .modal-close-link {
+		border-radius: 0;
 	}
 }
 
@@ -8423,11 +8318,6 @@ table.bar_chart {
 		}
 	}
 
-	// Action button groups.
-	.wc-action-button-group .wc-action-button {
-		min-height: 0 !important;
-	}
-
 	// Order actions: select + button overflow container due to WP 7.0 select margins.
 	.order_actions {
 		#actions select {
@@ -8607,8 +8497,8 @@ table.bar_chart {
 	// ourselves, scoped to Woo editor screens, as a bridge until Core unifies
 	// this.
 	//
-	// TODO: Remove these rules when Core rounds editor .postbox containers
-	// (upstream Trac ticket to be filed).
+	// TODO: Remove these rules when Core rounds editor .postbox containers.
+	// Upstream proposal: https://core.trac.wordpress.org/ticket/65142
 	&.post-type-product,
 	&.post-type-shop_order,
 	&.post-type-shop_coupon,
@@ -9696,4 +9586,13 @@ body.woocommerce-settings-payments-section_legacy {
 	}
 }
 
-
+.wc-admin-color-swatch {
+	display: inline-block;
+	vertical-align: middle;
+	vertical-align: center;
+	border: 1px solid #7e8993;
+	border-radius: 2px;
+	margin-right: 6px;
+	width: 12px;
+	height: 12px;
+}
