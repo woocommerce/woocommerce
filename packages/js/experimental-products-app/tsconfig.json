@@ -10,9 +10,16 @@
 		"resolveJsonModule": true,
 		"jsx": "react-jsx",
 		"jsxFactory": null,
-		"jsxFragmentFactory": null
+		"jsxFragmentFactory": null,
+		"typeRoots": [
+			"./typings",
+			"./node_modules/@types"
+		]
 	},
-	"include": [ "src/**/*" ],
+	"include": [
+		"typings/**/*",
+		"src/**/*"
+	],
 	"exclude": [
 		"**/test/**",
 		"**/stories/**",

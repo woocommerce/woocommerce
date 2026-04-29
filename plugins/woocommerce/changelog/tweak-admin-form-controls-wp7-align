@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Align settings page input padding, Select2 single/multi-select text padding and border-radius, and shipping zone name/regions controls with WordPress 7.0 native form-control sizing.

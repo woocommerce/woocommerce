@@ -1,10 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	CURRENCY,
-	// @ts-expect-error - The CURRENCY object doesn't have types yet.
-} from '@woocommerce/settings';
+import { CURRENCY } from '@woocommerce/settings';
 
 type CurrencyObject = {
 	code: string;

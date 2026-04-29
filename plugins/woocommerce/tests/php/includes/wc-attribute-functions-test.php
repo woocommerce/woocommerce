@@ -217,8 +217,13 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Test visual attribute type registration and persistence.
+	 *
+	 * @testdox Should have the `wc-visual` attribute type registered in block themes.
 	 */
 	public function test_wc_visual_attribute_type() {
+		$original_theme = wp_get_theme()->get_stylesheet();
+		$attribute_id   = null;
+
 		$enable_visual_attribute_feature = function ( $features ) {
 			$features[] = 'wc-visual-attribute';
 			return array_unique( $features );
@@ -245,11 +250,16 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in classic themes with a visual attribute.' );
 
 			wc_delete_attribute( $attribute_id );
+			$attribute_id = null;
 
 			$this->assertArrayNotHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should not be available in classic themes without a visual attribute.' );
 		} finally {
-			switch_theme( 'twentytwentyfour' );
+			if ( is_int( $attribute_id ) ) {
+				wc_delete_attribute( $attribute_id );
+			}
+
 			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
+			switch_theme( $original_theme );
 		}//end try
 	}
 

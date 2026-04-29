@@ -398,8 +398,6 @@ class WC_Admin_Taxonomies {
 
 			if ( $color_value ) {
 				update_term_meta( $term_id, 'color', $color_value );
-			} else {
-				delete_term_meta( $term_id, 'color' );
 			}
 		}
 	}

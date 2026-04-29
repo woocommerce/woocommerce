@@ -67,7 +67,7 @@ const DefaultBackButtonContent = () => {
 			whileTap="tap"
 		>
 			<Button
-				label={ __( 'Close editor', 'woocommerce' ) }
+				label={ __( 'Close editor', __i18n_text_domain__ ) }
 				showTooltip
 				tooltipPosition="middle right"
 				onClick={ () => {
