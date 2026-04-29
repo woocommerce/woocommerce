@@ -23,7 +23,6 @@ import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
 import {
 	buildMergedProductEditData,
-	getMixedProductEditFieldIds,
 	getProductEditFields,
 	getVisibleProductEditFields,
 } from './utils';
