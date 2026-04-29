@@ -127,7 +127,7 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'summary_lines', $result );
 		$this->assertNotEmpty( $result['summary_lines'] );
-		$this->assertContains( 'Removed a Image block', $result['summary_lines'] );
+		$this->assertContains( 'Removed Image block', $result['summary_lines'] );
 	}
 
 	/**
@@ -193,6 +193,45 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 		foreach ( $descriptions as $description ) {
 			$this->assertStringNotContainsString( 'Group wrapper', $description, 'Group wrapper entry must be suppressed when matched pairs cover the move.' );
 		}
+	}
+
+	/**
+	 * Reorder pairing must group by normalized block name, not by humanized
+	 * label. Two distinct namespaces (e.g. `vendor-a/header` and
+	 * `vendor-b/header`) both produce the label `Header`; pairing on label
+	 * would falsely emit a single `Reordered Header` entry instead of one
+	 * add + one remove.
+	 *
+	 * Fixture: core has a single `vendor-a/header`. Post has a single
+	 * `vendor-b/header`. Different blocks under the same humanized label.
+	 * Expected: one add + one remove, no reorder entry.
+	 */
+	public function test_summarize_reorder_pairs_by_normalized_name_not_humanized_label(): void {
+		$email_id = 'change_summary_namespace_collision';
+		$this->register_fixture_email( $email_id );
+
+		$core_content = '<!-- wp:vendor-a/header --><div class="wp-block-vendor-a-header">Vendor A header.</div><!-- /wp:vendor-a/header -->';
+		$post_content = '<!-- wp:vendor-b/header --><div class="wp-block-vendor-b-header">Vendor B header.</div><!-- /wp:vendor-b/header -->';
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		$result = WCEmailTemplateChangeSummary::summarize( $post_id );
+
+		$this->assertFalse( $result['is_fallback'] );
+		$this->assertCount( 1, $result['added_blocks'], 'vendor-a/header is in core but not in post — should land in added_blocks.' );
+		$this->assertCount( 1, $result['removed_blocks'], 'vendor-b/header is in post but not in core — should land in removed_blocks.' );
+
+		// Each entry should expose the raw normalized name alongside the label.
+		$this->assertSame( 'vendor-a/header', $result['added_blocks'][0]['name'] );
+		$this->assertSame( 'Header', $result['added_blocks'][0]['label'] );
+		$this->assertSame( 'vendor-b/header', $result['removed_blocks'][0]['name'] );
+		$this->assertSame( 'Header', $result['removed_blocks'][0]['label'] );
+
+		// No `reorder` structural change must be emitted — the two blocks
+		// share a label but not a name.
+		$kinds = array_map( static fn( $c ): string => (string) ( $c['kind'] ?? '' ), $result['structural_changes'] );
+		$this->assertNotContains( 'reorder', $kinds, 'Different namespaces sharing a label must NOT collapse into a reorder pairing.' );
 	}
 
 	/**

@@ -509,11 +509,12 @@ class EmailApiController {
 					'readonly'    => true,
 				),
 				'added_blocks'       => array(
-					'description' => __( 'Blocks that would be added to the merchant post if the update were applied (in core, not in post). `path` is the core-side index path through the parsed block tree.', 'woocommerce' ),
+					'description' => __( 'Blocks that would be added to the merchant post if the update were applied (in core, not in post). `name` is the post-alias-normalized block name (e.g. `core/heading`); `label` is its humanized form for display; `path` is the core-side index path through the parsed block tree.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
+							'name'  => array( 'type' => 'string' ),
 							'label' => array( 'type' => 'string' ),
 							'path'  => array(
 								'type'  => 'array',
@@ -524,11 +525,12 @@ class EmailApiController {
 					'readonly'    => true,
 				),
 				'removed_blocks'     => array(
-					'description' => __( 'Blocks that would be removed from the merchant post if the update were applied (in post, not in core). `path` is the post-side index path through the parsed block tree.', 'woocommerce' ),
+					'description' => __( 'Blocks that would be removed from the merchant post if the update were applied (in post, not in core). Same fields as `added_blocks`; `path` is the post-side index path.', 'woocommerce' ),
 					'type'        => 'array',
 					'items'       => array(
 						'type'       => 'object',
 						'properties' => array(
+							'name'  => array( 'type' => 'string' ),
 							'label' => array( 'type' => 'string' ),
 							'path'  => array(
 								'type'  => 'array',

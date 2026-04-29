@@ -99,8 +99,8 @@ class WCEmailTemplateChangeSummary {
 	 *
 	 * - `version_from`        — `string`     — `_wc_email_template_version` meta on the post (may be empty).
 	 * - `version_to`          — `string`     — registry-side current version.
-	 * - `added_blocks`        — `array<int, array{label:string, path:array<int|string>}>` — blocks that would be added to the post by applying (in core, not in post). `path` is the core-side index path.
-	 * - `removed_blocks`      — `array<int, array{label:string, path:array<int|string>}>` — blocks that would be removed from the post by applying (in post, not in core). `path` is the post-side index path.
+	 * - `added_blocks`        — `array<int, array{name:string, label:string, path:array<int|string>}>` — blocks that would be added to the post by applying (in core, not in post). `name` is the post-alias-normalized block name (e.g. `core/heading`); `label` is its humanized form for display; `path` is the core-side index path.
+	 * - `removed_blocks`      — `array<int, array{name:string, label:string, path:array<int|string>}>` — blocks that would be removed from the post by applying (in post, not in core). Same field semantics as `added_blocks`; `path` is the post-side index path.
 	 * - `copy_changes`        — `array<int, array{block:string, before:string, after:string, occurrence:int, total:int, path:array<int|string>}>`.
 	 *                           `before` is the merchant's current text; `after` is the canonical core text. `path` is the post-side index path.
 	 * - `structural_changes`  — `array<int, array{kind:string, description:string, path?:array<int|string>}>` — `path` is omitted for `kind: 'reorder'` entries.
@@ -527,6 +527,7 @@ class WCEmailTemplateChangeSummary {
 				continue;
 			}
 			$added_blocks[] = array(
+				'name'  => $rec['name'],
 				'label' => self::block_label( $rec['name'] ),
 				'path'  => $rec['path'],
 			);
@@ -553,44 +554,56 @@ class WCEmailTemplateChangeSummary {
 				continue;
 			}
 			$removed_blocks[] = array(
+				'name'  => $rec['name'],
 				'label' => self::block_label( $rec['name'] ),
 				'path'  => $rec['path'],
 			);
 		}//end foreach
 
-		// Reorder pass: pair like-labelled entries between added and removed
+		// Reorder pass: pair like-named entries between added and removed
 		// and reclassify them as a `reorder` structural change. LCS only
 		// matches in-order, so an actual reorder of matched blocks lands here
 		// as add+remove pairs. Reorder entries omit `path` because they
 		// describe a structural fact, not a single block.
-		$added_label_indices   = array();
-		$removed_label_indices = array();
+		//
+		// Pairing keys on the normalized block name (e.g. `core/heading`),
+		// not the humanized label. Two distinct namespaces — say
+		// `vendor-a/header` and `vendor-b/header` — both produce the label
+		// `Header` after `block_label()` strips the namespace; pairing on
+		// label would falsely emit a single `Reordered Header` entry instead
+		// of one add + one remove.
+		$added_name_indices   = array();
+		$removed_name_indices = array();
 		foreach ( $added_blocks as $i => $entry ) {
-			$added_label_indices[ $entry['label'] ][] = $i;
+			$added_name_indices[ (string) $entry['name'] ][] = $i;
 		}
 		foreach ( $removed_blocks as $i => $entry ) {
-			$removed_label_indices[ $entry['label'] ][] = $i;
+			$removed_name_indices[ (string) $entry['name'] ][] = $i;
 		}
 
 		$dropped_added   = array();
 		$dropped_removed = array();
-		foreach ( $added_label_indices as $label => $a_indices ) {
-			$r_indices = $removed_label_indices[ $label ] ?? array();
+		foreach ( $added_name_indices as $name => $a_indices ) {
+			$r_indices = $removed_name_indices[ $name ] ?? array();
 			$pairs     = (int) min( count( $a_indices ), count( $r_indices ) );
+			if ( 0 === $pairs ) {
+				continue;
+			}
+			$label = self::block_label( (string) $name );
 			for ( $i = 0; $i < $pairs; $i++ ) {
 				$structural_changes[] = array(
 					'kind'        => 'reorder',
 					'description' => sprintf(
 						/* translators: %s: block name */
 						__( 'Reordered %s', 'woocommerce' ),
-						(string) $label
+						$label
 					),
 				);
 
 				$dropped_added[ $a_indices[ $i ] ]   = true;
 				$dropped_removed[ $r_indices[ $i ] ] = true;
 			}
-		}
+		}//end foreach
 		$added_blocks   = self::reject_indices( $added_blocks, $dropped_added );
 		$removed_blocks = self::reject_indices( $removed_blocks, $dropped_removed );
 
@@ -715,6 +728,11 @@ class WCEmailTemplateChangeSummary {
 	 * lowercase + split on whitespace + intersect-over-union of the resulting
 	 * word sets. Two empty strings score 1.0 (treated as identical).
 	 *
+	 * Lowercasing goes through `wc_strtolower()` (mb-aware with an ASCII
+	 * fallback), not `strtolower()` — the latter is ASCII-only and would
+	 * leave accented / Cyrillic / Greek characters uppercase, killing
+	 * word-overlap matches on translated email templates.
+	 *
 	 * @param string $a First text.
 	 * @param string $b Second text.
 	 */
@@ -728,8 +746,8 @@ class WCEmailTemplateChangeSummary {
 			return 0.0;
 		}
 
-		$split_a = preg_split( '/\s+/', strtolower( $a ), -1, PREG_SPLIT_NO_EMPTY );
-		$split_b = preg_split( '/\s+/', strtolower( $b ), -1, PREG_SPLIT_NO_EMPTY );
+		$split_a = preg_split( '/\s+/', wc_strtolower( $a ), -1, PREG_SPLIT_NO_EMPTY );
+		$split_b = preg_split( '/\s+/', wc_strtolower( $b ), -1, PREG_SPLIT_NO_EMPTY );
 		$words_a = array_unique( false === $split_a ? array() : $split_a );
 		$words_b = array_unique( false === $split_b ? array() : $split_b );
 		if ( empty( $words_a ) && empty( $words_b ) ) {
@@ -791,6 +809,12 @@ class WCEmailTemplateChangeSummary {
 	private static function to_summary_lines( array $structured ): array {
 		$lines = array();
 
+		// Singular form drops the indefinite article ("Added Image block" rather
+		// than "Added a Image block") because English a/an depends on phonetics
+		// the catalog can't infer at format time, and many target locales have no
+		// equivalent article at all. Plural already reads "Added 3 Image blocks"
+		// without an article, so dropping it in singular keeps both forms
+		// stylistically consistent.
 		$added_labels = array_map( static fn( array $e ): string => (string) ( $e['label'] ?? '' ), $structured['added_blocks'] );
 		$added_counts = array_count_values( array_filter( $added_labels, static fn( string $l ): bool => '' !== $l ) );
 		foreach ( $added_counts as $label => $count ) {
@@ -798,7 +822,7 @@ class WCEmailTemplateChangeSummary {
 			if ( 1 === $count ) {
 				$lines[] = sprintf(
 					/* translators: %s: block name */
-					__( 'Added a %s block', 'woocommerce' ),
+					__( 'Added %s block', 'woocommerce' ),
 					(string) $label
 				);
 			} else {
@@ -818,7 +842,7 @@ class WCEmailTemplateChangeSummary {
 			if ( 1 === $count ) {
 				$lines[] = sprintf(
 					/* translators: %s: block name */
-					__( 'Removed a %s block', 'woocommerce' ),
+					__( 'Removed %s block', 'woocommerce' ),
 					(string) $label
 				);
 			} else {
