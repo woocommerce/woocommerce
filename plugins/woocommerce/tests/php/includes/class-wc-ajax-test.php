@@ -121,7 +121,17 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
-	 * @group ajax
+	 * Skip the current test on PHP 8.1 and higher.
+	 * TODO: Remove this method and its usages once WordPress is compatible with PHP 8.1. Please note that there are multiple copies of this method.
+	 */
+	protected function skip_on_php_8_1() {
+		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
+			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
+		}
+	}
+
+	/**
+	 * Test to verify that term color is saved in AJAX calls, but only for terms belonging to a visual attribute.
 	 *
 	 * @testdox Should save term color only when adding visual attribute terms via AJAX.
 	 */
@@ -248,16 +258,6 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		);
 
 		return $taxonomy;
-	}
-
-	/**
-	 * Skip the current test on PHP 8.1 and higher.
-	 * TODO: Remove this method and its usages once WordPress is compatible with PHP 8.1. Please note that there are multiple copies of this method.
-	 */
-	protected function skip_on_php_8_1() {
-		if ( version_compare( PHP_VERSION, '8.1', '>=' ) ) {
-			$this->markTestSkipped( 'Waiting for WordPress compatibility with PHP 8.1' );
-		}
 	}
 
 	/**
