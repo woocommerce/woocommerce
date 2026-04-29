@@ -38,7 +38,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 		}
 
 		$block_context   = $block->context['woocommerce/selectableItems'];
-		$items           = $block_context['items'] ?? array();
+		$items           = is_array( $block_context['items'] ?? null ) ? $block_context['items'] : array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
 		$filter_type     = $block_context['filterType'] ?? '';
 		$display_limit   = self::DISPLAY_LIMIT;
@@ -82,6 +82,14 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 			. '</svg>';
 		$has_more_items = count( $items ) > $display_limit;
 		$hidden_count   = max( 0, count( $items ) - $display_limit );
+		$show_counts    = false;
+
+		foreach ( $items as $item ) {
+			if ( is_array( $item ) && array_key_exists( 'count', $item ) ) {
+				$show_counts = true;
+				break;
+			}
+		}
 
 		ob_start();
 		?>
@@ -188,14 +196,14 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											data-wp-text="context.item.label"
 										></span>
 									<?php endif; ?>
-										<span
-											class="wc-block-product-filter-checkbox-list__count"
-											data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemCountHidden"
-											data-wp-text="woocommerce/product-filter-checkbox-list::state.itemCountText"
-										></span>
-									</span>
-								</label>
-							</div>
+									<?php if ( $show_counts ) : ?>
+										<span class="wc-block-product-filter-checkbox-list__count">
+											(<span data-wp-text="context.item.count"></span>)
+										</span>
+									<?php endif; ?>
+								</span>
+							</label>
+						</div>
 					</template>
 				</div>
 				<?php if ( $has_more_items ) : ?>
