@@ -8721,13 +8721,13 @@ parameters:
 		-
 			message: '#^Cannot call method get_formatted_name\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
 			message: '#^Cannot call method get_id\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 4
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8767,12 +8767,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot call method get_stock_quantity\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot call method get_total\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -8782,12 +8776,6 @@ parameters:
 			message: '#^Cannot call method get_total_refunded\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method get_type\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8805,7 +8793,7 @@ parameters:
 		-
 			message: '#^Cannot call method managing_stock\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8995,12 +8983,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Parameter \#1 \$product of function wc_products_array_filter_readable expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Parameter \#1 \$product_object of function wc_render_invalid_variation_notice expects WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -9140,12 +9122,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$postcodes of static method WC_Tax\:\:_update_tax_rate_postcodes\(\) expects string, array\<string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Parameter \#2 \$product of function wc_format_stock_quantity_for_display expects WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-ajax.php
@@ -49456,12 +49432,6 @@ parameters:
 			path: src/Admin/RemoteInboxNotifications/SpecRunner.php
 
 		-
-			message: '#^Cannot call method set_layout\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/RemoteInboxNotifications/SpecRunner.php
-
-		-
 			message: '#^Cannot call method set_name\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -51512,12 +51482,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/AddToCartWithOptions/GroupedProductSelector.php
-
-		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/AddToCartWithOptions/QuantitySelector.php
 
 		-
 			message: '#^Parameter \#1 \$block of static method Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\Utils\:\:get_product_from_context\(\) expects WP_Block, Automattic\\WooCommerce\\Blocks\\BlockTypes\\AddToCartWithOptions\\WP_Block given\.$#'
@@ -54616,12 +54580,6 @@ parameters:
 			path: src/Blocks/BlockTypes/ProductResultsCount.php
 
 		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductSKU.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductSKU\:\:get_block_type_uses_context\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -54685,12 +54643,6 @@ parameters:
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 2
-			path: src/Blocks/BlockTypes/ProductSpecifications.php
-
-		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
-			count: 1
 			path: src/Blocks/BlockTypes/ProductSpecifications.php
 
 		-
@@ -64798,12 +64750,6 @@ parameters:
 			message: '#^Cannot call method get_email_type_from_post_id\(\) on Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\|null\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: src/Internal/EmailEditor/EmailApiController.php
-
-		-
-			message: '#^Property Automattic\\WooCommerce\\Internal\\EmailEditor\\EmailApiController\:\:\$post_manager \(Automattic\\WooCommerce\\Internal\\EmailEditor\\WCTransactionalEmails\\WCTransactionalEmailPostsManager\|null\) is never assigned null so it can be removed from the property type\.$#'
-			identifier: property.unusedType
-			count: 1
 			path: src/Internal/EmailEditor/EmailApiController.php
 
 		-

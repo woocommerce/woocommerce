@@ -246,7 +246,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	}
 
 	.addons-button {
-		border-radius: 3px;
+		border-radius: $radius-s;
 		cursor: pointer;
 		display: block;
 		height: 37px;
@@ -911,10 +911,6 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 .woocommerce-message {
 	position: relative;
 	overflow: hidden;
-
-	&.updated {
-		border-left-color: var(--wp-admin-theme-color, $woocommerce) !important;
-	}
 
 	a.skip,
 	a.docs {
@@ -4275,7 +4271,7 @@ table.wc_shipping {
 	color: #1e1e1e;
 
 	&.wc-backbone-modal .wc-backbone-modal-content {
-		border-radius: 8px;
+		border-radius: var(--wc-card-border-radius, 8px);
 		border-top: 8px solid transparent;
 		border-bottom: 8px solid transparent;
 		max-width: 600px;
@@ -5399,6 +5395,7 @@ img.help_tip {
 			display: inline-block;
 			width: 26px;
 			border: 1px solid #ddd;
+			border-radius: $radius-s;
 			font-size: 14px;
 		}
 
@@ -5502,7 +5499,6 @@ img.help_tip {
 				height: 30px;
 				box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.2);
 				font-size: 16px;
-				border-radius: 4px;
 				margin-right: 3px;
 
 				@media only screen and (max-width: 782px) {
@@ -6407,6 +6403,7 @@ img.help_tip {
 		input {
 			width: 30.75%;
 			margin-right: 3.8%;
+			border-radius: $radius-s;
 		}
 
 		.last {
@@ -8227,6 +8224,7 @@ table.bar_chart {
 		.select2-selection--single {
 			height: 30px;
 			border-color: #7e8993;
+			border-radius: $radius-s;
 
 			@media only screen and (max-width: 782px) {
 				height: 40px;
@@ -8276,7 +8274,7 @@ table.bar_chart {
 		.select2-selection--multiple {
 			min-height: 30px;
 			border-color: #7e8993;
-			border-radius: 4px;
+			border-radius: $radius-s;
 		}
 
 		.select2-search--inline .select2-search__field {
@@ -8325,11 +8323,27 @@ table.bar_chart {
 		padding: 6px 8px;
 	}
 
+	// Adopt WP 7.0 12px horizontal padding on settings inputs.
+	.woocommerce table.form-table {
+		input[type="text"],
+		input[type="email"],
+		input[type="number"],
+		input[type="password"],
+		input[type="datetime-local"],
+		input[type="date"],
+		input[type="time"],
+		input[type="week"],
+		input[type="url"],
+		input[type="tel"],
+		input.regular-input {
+			padding: 0 12px;
+		}
+	}
+
 	// Colour picker swatch: match WP 7.0 input height (40px).
 	.woocommerce table.form-table .colorpickpreview {
 		height: 40px;
 		width: 40px;
-		border-radius: 2px;
 		box-sizing: border-box;
 	}
 
@@ -8337,10 +8351,10 @@ table.bar_chart {
 	.select2-container {
 		.select2-selection--single {
 			height: 40px; // Match WP 7.0 native select height.
-			border-radius: 2px; // Match WP 7.0 native select border-radius.
 
 			.select2-selection__rendered {
 				line-height: 38px;
+				padding: 0 12px; // Match WP 7.0 native input padding so text aligns with sibling inputs.
 			}
 
 			.select2-selection__arrow {
@@ -8350,6 +8364,7 @@ table.bar_chart {
 
 		.select2-selection--multiple {
 			min-height: 40px;
+			border-radius: 2px; // Match WP 7.0 native select border-radius.
 
 			.select2-selection__rendered {
 				display: block;
@@ -8362,6 +8377,23 @@ table.bar_chart {
 
 		.select2-search--inline .select2-search__field {
 			min-height: 38px;
+		}
+	}
+
+	// Order edit address Select2: escape legacy 32px override at admin.scss:2019
+	// so Country/State selects match the 40px WP 7.0 input height of their sibling
+	// fields. Selector mirrors the legacy structure exactly (#order_data
+	// .order_data_column div.edit_address ...) to outrank it on specificity (1,5,1).
+	#order_data .order_data_column div.edit_address .select2-container .select2-selection--single {
+		height: 40px;
+
+		.select2-selection__rendered {
+			line-height: 38px;
+			padding: 0 12px; // Match WP 7.0 native input padding.
+		}
+
+		.select2-selection__arrow {
+			height: 38px;
 		}
 	}
 
@@ -8458,7 +8490,6 @@ table.bar_chart {
 
 		.dimensions_field .wrap {
 			width: 55%; // Wider to compensate for increased padding.
-			border-radius: 2px; // Match WP 7.0 input border-radius.
 		}
 	}
 
@@ -8561,6 +8592,73 @@ table.bar_chart {
 		width: auto;
 		height: auto;
 		color: #1e1e1e;
+	}
+
+	// Align editor meta box border-radius with WP 7.0's dashboard widgets (8px).
+	// Product, order (CPT + HPOS), and coupon editor screens.
+	//
+	// BRIDGE: WP 7.0 rounded dashboard widgets but left editor .postbox square,
+	// creating an inconsistency (dashboard widgets vs. Posts/Pages/Media/Woo
+	// editors all use the same .postbox class). We're applying the radius
+	// ourselves, scoped to Woo editor screens, as a bridge until Core unifies
+	// this.
+	//
+	// TODO: Remove these rules when Core rounds editor .postbox containers
+	// (upstream Trac ticket to be filed).
+	&.post-type-product,
+	&.post-type-shop_order,
+	&.post-type-shop_coupon,
+	&.woocommerce_page_wc-orders {
+		.postbox,
+		#postdivrich {
+			border-radius: var(--wc-card-border-radius, 8px);
+			overflow: hidden; // Clip internal elements (tab sidebar, action bars) to rounded corners.
+		}
+
+		// Inner collapsible panels (attributes, variations) should stay square.
+		.wc-metabox.postbox {
+			border-radius: 0;
+			overflow: visible;
+		}
+	}
+
+	// Align the product description editor with the meta boxes below it.
+	// #normal-sortables adds 4px of padding around postboxes, which #post-body-content
+	// doesn't, so the description editor ends up 8px wider than neighbouring postboxes
+	// on WP 7.0 (where the radius makes the misalignment visible).
+	&.post-type-product #postdivrich.woocommerce-product-description {
+		margin-left: 4px;
+		margin-right: 4px;
+	}
+
+	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
+	.wc-shipping-zone-settings #zone_name {
+		padding: 0 12px;
+	}
+
+	// Zone regions TreeSelectControl: match WP 7.0 native select border-radius.
+	#wc-shipping-zone-region-picker-root .woocommerce-tree-select-control .components-base-control {
+		border-radius: 2px;
+	}
+
+	// Product / Coupon Data panel labels: vertically centre with 40px inputs.
+	// Skip checkbox and radio rows — their controls are ~16px, so the taller
+	// line-height pushes the label below them instead of aligning with it.
+	.woocommerce_options_panel .form-field:not(:has(input[type="checkbox"], input[type="radio"])) label,
+	.woocommerce_options_panel .form-field:not(:has(input[type="checkbox"], input[type="radio"])) legend {
+		line-height: 40px;
+	}
+
+	// Help-tip icon: vertical-align middle aligns to text baseline, not line-box middle,
+	// so it lands near the top of the 40px row. Push down to visual centre — but
+	// skip checkbox/radio rows, whose inputs are still ~16px and don't need the offset.
+	.woocommerce_options_panel .form-field:not(:has(input[type="checkbox"], input[type="radio"])) .woocommerce-help-tip {
+		margin-top: 12px;
+	}
+
+	// Checkbox/radio rows: small nudge so the help-tip visually centres with the control.
+	.woocommerce_options_panel .form-field:has(input[type="checkbox"], input[type="radio"]) .woocommerce-help-tip {
+		margin-bottom: 3px;
 	}
 }
 

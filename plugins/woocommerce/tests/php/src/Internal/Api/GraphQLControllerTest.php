@@ -41,10 +41,12 @@ class GraphQLControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Clean up the GET endpoint option between tests.
+	 * Clean up GraphQL options between tests.
 	 */
 	public function tearDown(): void {
 		delete_option( Main::OPTION_GET_ENDPOINT_ENABLED );
+		delete_option( Main::OPTION_MAX_QUERY_DEPTH );
+		delete_option( Main::OPTION_MAX_QUERY_COMPLEXITY );
 		parent::tearDown();
 	}
 
@@ -76,5 +78,84 @@ class GraphQLControllerTest extends WC_REST_Unit_Test_Case {
 		$methods = $handlers[0]['methods'];
 		$this->assertTrue( $methods['GET'] ?? false );
 		$this->assertTrue( $methods['POST'] ?? false );
+	}
+
+	/**
+	 * @testdox get_max_query_depth returns the default when the option is unset.
+	 */
+	public function test_get_max_query_depth_returns_default_when_option_unset(): void {
+		delete_option( Main::OPTION_MAX_QUERY_DEPTH );
+		$this->assertSame(
+			GraphQLController::DEFAULT_MAX_QUERY_DEPTH,
+			GraphQLController::get_max_query_depth()
+		);
+	}
+
+	/**
+	 * @testdox get_max_query_depth returns the option value when it is a positive integer.
+	 */
+	public function test_get_max_query_depth_returns_option_value_when_positive(): void {
+		update_option( Main::OPTION_MAX_QUERY_DEPTH, '7' );
+		$this->assertSame( 7, GraphQLController::get_max_query_depth() );
+	}
+
+	/**
+	 * @testdox get_max_query_depth falls back to the default when the option is empty, zero, or negative.
+	 * @dataProvider provider_non_positive_option_values
+	 *
+	 * @param string $value The non-positive option value.
+	 */
+	public function test_get_max_query_depth_falls_back_on_non_positive( string $value ): void {
+		update_option( Main::OPTION_MAX_QUERY_DEPTH, $value );
+		$this->assertSame(
+			GraphQLController::DEFAULT_MAX_QUERY_DEPTH,
+			GraphQLController::get_max_query_depth()
+		);
+	}
+
+	/**
+	 * @testdox get_max_query_complexity returns the default when the option is unset.
+	 */
+	public function test_get_max_query_complexity_returns_default_when_option_unset(): void {
+		delete_option( Main::OPTION_MAX_QUERY_COMPLEXITY );
+		$this->assertSame(
+			GraphQLController::DEFAULT_MAX_QUERY_COMPLEXITY,
+			GraphQLController::get_max_query_complexity()
+		);
+	}
+
+	/**
+	 * @testdox get_max_query_complexity returns the option value when it is a positive integer.
+	 */
+	public function test_get_max_query_complexity_returns_option_value_when_positive(): void {
+		update_option( Main::OPTION_MAX_QUERY_COMPLEXITY, '500' );
+		$this->assertSame( 500, GraphQLController::get_max_query_complexity() );
+	}
+
+	/**
+	 * @testdox get_max_query_complexity falls back to the default when the option is empty, zero, or negative.
+	 * @dataProvider provider_non_positive_option_values
+	 *
+	 * @param string $value The non-positive option value.
+	 */
+	public function test_get_max_query_complexity_falls_back_on_non_positive( string $value ): void {
+		update_option( Main::OPTION_MAX_QUERY_COMPLEXITY, $value );
+		$this->assertSame(
+			GraphQLController::DEFAULT_MAX_QUERY_COMPLEXITY,
+			GraphQLController::get_max_query_complexity()
+		);
+	}
+
+	/**
+	 * Non-positive values that the getters should replace with the default.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_non_positive_option_values(): array {
+		return array(
+			'empty string' => array( '' ),
+			'zero'         => array( '0' ),
+			'negative'     => array( '-5' ),
+		);
 	}
 }
