@@ -213,6 +213,7 @@ class MainTest extends WC_Unit_Test_Case {
 			$this->assertNotFalse( has_filter( 'woocommerce_get_sections_advanced' ) );
 			$this->assertNotFalse( has_filter( 'woocommerce_get_settings_advanced' ) );
 		} finally {
+			// phpcs:disable WordPress.WP.GlobalVariablesOverride.Prohibited -- restoring the snapshot taken above.
 			if ( null === $saved_sections ) {
 				unset( $GLOBALS['wp_filter']['woocommerce_get_sections_advanced'] );
 			} else {
@@ -223,6 +224,7 @@ class MainTest extends WC_Unit_Test_Case {
 			} else {
 				$GLOBALS['wp_filter']['woocommerce_get_settings_advanced'] = $saved_settings;
 			}
+			// phpcs:enable WordPress.WP.GlobalVariablesOverride.Prohibited
 			remove_action( 'rest_api_init', array( Main::class, 'handle_rest_api_init_for_core' ) );
 		}
 	}
@@ -239,11 +241,11 @@ class MainTest extends WC_Unit_Test_Case {
 
 		// Snapshot the original endpoints so we can restore them after the test,
 		// regardless of what the SUT does to the shared WP_REST_Server.
-		$server              = rest_get_server();
-		$reflection          = new \ReflectionClass( $server );
-		$prop                = $reflection->getProperty( 'endpoints' );
+		$server     = rest_get_server();
+		$reflection = new \ReflectionClass( $server );
+		$prop       = $reflection->getProperty( 'endpoints' );
 		$prop->setAccessible( true );
-		$original_endpoints  = $prop->getValue( $server );
+		$original_endpoints = $prop->getValue( $server );
 
 		try {
 			// Force reset so we can observe registration deterministically.
@@ -267,11 +269,11 @@ class MainTest extends WC_Unit_Test_Case {
 
 		// Snapshot the original endpoints so we can restore them after the test.
 		// Without this, removing /wc/graphql here would leak into later tests.
-		$server              = rest_get_server();
-		$reflection          = new \ReflectionClass( $server );
-		$prop                = $reflection->getProperty( 'endpoints' );
+		$server     = rest_get_server();
+		$reflection = new \ReflectionClass( $server );
+		$prop       = $reflection->getProperty( 'endpoints' );
 		$prop->setAccessible( true );
-		$original_endpoints  = $prop->getValue( $server );
+		$original_endpoints = $prop->getValue( $server );
 
 		try {
 			$endpoints = $original_endpoints;
