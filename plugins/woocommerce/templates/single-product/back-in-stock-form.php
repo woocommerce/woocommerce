@@ -24,6 +24,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $heading_id          = 'wc_bis_form_heading_' . absint( $product_id );
 $status_id           = 'wc_bis_form_status_' . absint( $product_id );
+$is_block_context    = ! empty( $is_block_context );
 $is_variable_product = ! empty( $is_variable_product );
 
 $form_classes  = 'wc_bis_form';
@@ -38,6 +39,10 @@ $form_classes .= $is_visible ? '' : ' hidden';
 	data-bis-product-id="<?php echo absint( $product_id ); ?>"
 	data-available-text="<?php echo esc_attr_x( 'Back in stock notification signup is available for the selected option.', 'back in stock form', 'woocommerce' ); ?>"
 	aria-labelledby="<?php echo esc_attr( $heading_id ); ?>"
+	<?php if ( $is_block_context ) : ?>
+	data-wp-interactive="woocommerce/back-in-stock-form"
+	data-wp-class--hidden="!state.shouldShow"
+	<?php endif; ?>
 >
 	<h3 id="<?php echo esc_attr( $heading_id ); ?>" class="wc_bis_form__heading">
 		<?php echo wp_kses_post( __( 'Want to be notified when this product is back in stock?', 'woocommerce' ) ); ?>
@@ -85,5 +90,12 @@ $form_classes .= $is_visible ? '' : ' hidden';
 
 	<?php wp_nonce_field( 'wc_bis_signup', 'wc_bis_nonce' ); ?>
 
-	<input type="hidden" name="wc_bis_product_id" value="<?php echo absint( $product_id ); ?>" />
+	<input
+		type="hidden"
+		name="wc_bis_product_id"
+		value="<?php echo absint( $product_id ); ?>"
+		<?php if ( $is_block_context ) : ?>
+		data-wp-bind--value="state.targetProductId"
+		<?php endif; ?>
+	/>
 </form>

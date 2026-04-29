@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Render the BIS signup form outside the woocommerce/add-to-cart-with-options block wrapper and wire its visibility to the block's IAPI-driven variation state so block-themed stores get a working Back in Stock signup form.

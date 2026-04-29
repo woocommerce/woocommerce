@@ -1222,58 +1222,73 @@ p.demo_store,
 
 	/**
 	 * Back in stock form
+	 *
+	 * Hoisted out of `.woocommerce` via `@at-root` because the form is also
+	 * rendered as a sibling of the AddToCartWithOptions block in block themes,
+	 * where there's no `.woocommerce` ancestor to scope these rules to.
 	 */
-	.wc_bis_form {
-		margin: 2em 0;
-		padding: 0;
+	@at-root {
+		.wc_bis_form {
+			margin: 2em 0;
+			padding: 0;
 
-		&.hidden {
-			display: none;
-		}
+			&.hidden {
+				display: none;
+			}
 
-		// On variable products the form sits directly under the variation
-		// selectors (which already carry their own bottom spacing); collapse
-		// the form's top margin and the heading's default margins so it sits
-		// flush, mirroring how the add-to-cart button sits on in-stock
-		// variations.
-		&--variable {
-			margin-top: 0;
+			// Specificity bump (`.wc_bis_form.wc_bis_form--variable`) is
+			// needed to win over block-layout rules like
+			// `.is-layout-flow > * + * { margin-block-start: var(--wp--style--block-gap) }`.
+			&.wc_bis_form--variable {
+				margin-top: 0;
+				margin-block-start: 0;
 
-			.wc_bis_form__heading {
-				margin: 0;
+				.wc_bis_form__heading {
+					margin: 0;
+				}
+			}
+
+			&__form-row {
+				display: flex;
+				flex-wrap: wrap;
+				flex-direction: row;
+				align-items: center;
+				justify-content: flex-start;
+				gap: 0.7em;
+				margin: .7em 0;
+			}
+
+			&__input {
+				box-sizing: border-box;
+				width: auto;
+				white-space: nowrap;
+			}
+
+			&__button {
+				box-sizing: border-box;
+				white-space: nowrap;
+			}
+
+			&__checkbox {
+				font-size: var(--wp--preset--font-size--small, .7em);
+				display: block;
 			}
 		}
 
-		&__form-row {
-			display: flex;
-			flex-wrap: wrap;
-			flex-direction: row;
-			align-items: center;
-			justify-content: flex-start;
-			gap: 0.7em;
-			margin: .7em 0;
+		:where(.wc_bis_form__input, .wc_bis_form__button) {
+			padding: .9rem 1.1rem;
+			line-height: 1;
 		}
 
-		&__input {
-			box-sizing: border-box;
-			width: auto;
-			white-space: nowrap;
+		// In the AddToCartWithOptions block, `.single_variation_wrap` only
+		// holds hidden inputs (height 0) but still inherits
+		// `margin-block-start: var(--wp--style--block-gap)` from
+		// `.is-layout-flow > * + *` on the block form, leaving a phantom gap
+		// before whatever follows (notably the BIS form). Specificity 0,2,0
+		// beats the 0,1,0 layout rule.
+		.wp-block-add-to-cart-with-options .single_variation_wrap {
+			margin: 0;
 		}
-
-		&__button {
-			box-sizing: border-box;
-			white-space: nowrap;
-		}
-
-		&__checkbox {
-			font-size: var(--wp--preset--font-size--small, .7em);
-			display: block;
-		}
-	}
-
-	:where(.wc_bis_form__input, .wc_bis_form__button) {
-		padding: .9rem 1.1rem;
-		line-height: 1;
 	}
 
 	/**
