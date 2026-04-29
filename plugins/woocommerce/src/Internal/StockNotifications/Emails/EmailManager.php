@@ -38,6 +38,9 @@ class EmailManager {
 		// Setup email hooks & handlers.
 		add_filter( 'woocommerce_email_classes', array( $this, 'email_classes' ) );
 
+		// Add "transactional" emails.
+		add_action( 'woocommerce_email_actions', array( $this, 'add_transactional_emails' ) );
+
 		// Setup styles.
 		add_filter( 'woocommerce_email_styles', array( $this, 'add_stylesheets' ), 10, 2 );
 
@@ -65,6 +68,29 @@ class EmailManager {
 		$emails['WC_Email_Customer_Stock_Notification_Verified'] = new CustomerStockNotificationVerifiedEmail();
 
 		return $emails;
+	}
+
+	/**
+	 * Adds transactional emails.
+	 *
+	 * Stock notifications are sent via a custom AS job.
+	 * Additionally, two transactional emails are dispatched during the signup and verification processes,
+	 * which need to be included in the actions array to support deferred email functionality.
+	 *
+	 * @hook woocommerce_defer_transactional_emails
+	 *
+	 * @param array $actions The list of actions.
+	 * @return array
+	 */
+	public function add_transactional_emails( $actions ) {
+		if ( ! is_array( $actions ) ) {
+			return $actions;
+		}
+
+		$actions[] = 'woocommerce_customer_stock_notification_verify';
+		$actions[] = 'woocommerce_customer_stock_notification_verified';
+
+		return $actions;
 	}
 
 	/**

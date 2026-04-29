@@ -70519,6 +70519,12 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/EmailManager.php
 
 		-
+			message: '#^Action callback returns array but should not return anything\.$#'
+			identifier: return.void
+			count: 1
+			path: src/Internal/StockNotifications/Emails/EmailManager.php
+
+		-
 			message: '#^Call to an undefined method WC_Email\:\:prepare_email\(\)\.$#'
 			identifier: method.notFound
 			count: 1
