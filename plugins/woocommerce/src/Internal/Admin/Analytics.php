@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore as OrderStatsDataStore;
+use Automattic\WooCommerce\Internal\Admin\Schedulers\OrdersScheduler;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 
 /**
@@ -259,10 +260,10 @@ class Analytics {
 	/**
 	 * Process one batch of refund orders for the analytics fix.
 	 *
-	 * Fetches up to 1,000 orders with incorrect refund stats (cursor-based so
-	 * concurrent imports cannot shift the result window) and schedules a data
-	 * re-import for each. Schedules itself for the next cursor position when the
-	 * batch is full, stopping automatically once no more rows are found.
+	 * Fetches up to 100 orders with incorrect refund stats (cursor-based so
+	 * concurrent imports cannot shift the result window) and re-imports each
+	 * directly. Schedules itself for the next cursor position when the batch is
+	 * full, stopping automatically once no more rows are found.
 	 *
 	 * @since 10.8.0
 	 *
@@ -285,7 +286,7 @@ class Analytics {
 					AND (parent_stats.shipping_total > 0 OR parent_stats.tax_total > 0)
 					AND order_stats.order_id > %d
 				ORDER BY order_stats.order_id ASC
-				LIMIT 1000",
+				LIMIT 100",
 				$min_order_id
 			)
 		);
@@ -295,16 +296,10 @@ class Analytics {
 		}
 
 		foreach ( $refunded_orders as $refunded_order ) {
-			/**
-			 * Trigger an action to schedule the data import for old refunded order items.
-			 *
-			 * @param int $order_id The ID of the order to be synced.
-			 * @since 10.8.0
-			 */
-			do_action( 'woocommerce_schedule_import', intval( $refunded_order->order_id ) );
+			OrdersScheduler::import( intval( $refunded_order->order_id ) );
 		}
 
-		if ( count( $refunded_orders ) >= 1000 ) {
+		if ( count( $refunded_orders ) >= 100 ) {
 			$last_order_id = intval( end( $refunded_orders )->order_id );
 			WC()->queue()->schedule_single(
 				time() + 5,
