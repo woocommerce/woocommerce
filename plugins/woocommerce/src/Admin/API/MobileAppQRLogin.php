@@ -119,6 +119,49 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	const DEVICE_FIELD_MAX_LENGTH = 64;
 
 	/**
+	 * State machine values for the per-token record. Every state change goes
+	 * through `transition_state()` which atomically validates the source state
+	 * and writes the destination — no ad-hoc transient writes elsewhere.
+	 */
+	const STATE_PENDING   = 'pending';
+	const STATE_SCANNED   = 'scanned';
+	const STATE_APPROVED  = 'approved';
+	const STATE_REJECTED  = 'rejected';
+	const STATE_EXPIRED   = 'expired';
+	const STATE_CONSUMED  = 'consumed';
+
+	/**
+	 * Pick window after the app scans a QR (seconds). The merchant has this
+	 * long to tap the matching number on wc-admin before the session
+	 * auto-rejects. Short enough to limit replay; long enough for a confused
+	 * user to read the phone, find their browser, and click.
+	 */
+	const CHALLENGE_TTL = 90;
+
+	/**
+	 * Length (bytes pre-bin2hex) of the exchange-grant nonce minted on
+	 * approval. The grant gates the final `/qr-login-exchange` call so an
+	 * attacker who learned the token can't race the legit app to exchange
+	 * after approval. 32 bytes = 64 hex chars = 256 bits of entropy.
+	 */
+	const EXCHANGE_GRANT_BYTES = 32;
+
+	/**
+	 * Transient prefix mapping `session_id` → `token_hash` so the mobile-side
+	 * `/qr-login-session-status` poll can resolve a session id back to the
+	 * underlying token record without exposing the original token to the
+	 * polling channel.
+	 */
+	const SESSION_TRANSIENT_PREFIX = '_wc_qr_login_session_';
+
+	/**
+	 * Rate limits for the new Task-7 endpoints.
+	 */
+	const MAX_SCAN_PER_WINDOW            = 10;   // per IP per 15 min.
+	const MAX_APPROVE_PER_WINDOW         = 20;   // per user per 15 min.
+	const MAX_SESSION_STATUS_PER_WINDOW  = 60;   // per session id per 15 min — accounts for ~2-s polling × 90 s.
+
+	/**
 	 * Register routes.
 	 *
 	 * @return void
@@ -207,6 +250,97 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(
 						'uuid' => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		// Mobile app reports the QR was scanned. Server generates the
+		// number-match challenge and returns the *real* number to the app
+		// only. Public — token + capability flag are the auth.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/qr-login-scan',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'scan_token' ),
+					'permission_callback' => '__return_true',
+					'args'                => array(
+						'token'                     => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'device'                    => array(
+							'required'   => false,
+							'type'       => 'object',
+							'properties' => array(
+								'os'          => array( 'type' => 'string' ),
+								'os_version'  => array( 'type' => 'string' ),
+								'model'       => array( 'type' => 'string' ),
+								'brand'       => array( 'type' => 'string' ),
+								'app_version' => array( 'type' => 'string' ),
+							),
+						),
+						'supports_number_matching'  => array(
+							'required' => false,
+							'type'     => 'boolean',
+							'default'  => false,
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		// Merchant taps a number on wc-admin. Server validates against the
+		// stored real number with hash_equals; correct → approved, wrong →
+		// rejected (terminal, no retry).
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/qr-login-approve',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'approve_token' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'token'  => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'choice' => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		// Mobile app polls this with the session id returned from /scan.
+		// While in `scanned` we say so; on `approved` we hand over the
+		// short-lived `exchange_grant` nonce required by the final
+		// /qr-login-exchange call.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/qr-login-session-status',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_session_status' ),
+					'permission_callback' => '__return_true',
+					'args'                => array(
+						'session_id' => array(
 							'required'          => true,
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
@@ -463,10 +597,17 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// Generate a cryptographically secure token.
 		$token      = wp_generate_password( 64, false );
 		$token_hash = hash( 'sha256', $token );
-		$expires_at = time() + self::TOKEN_TTL;
+		$now        = time();
+		$expires_at = $now + self::TOKEN_TTL;
 
-		// Store token data as a transient.
+		// Structured state-machine record. Subsequent transitions
+		// (scan/approve/exchange/revoke) all flow through `transition_state()`
+		// which validates the source state atomically — no ad-hoc transient
+		// writes elsewhere.
 		$token_data = array(
+			'state'      => self::STATE_PENDING,
+			'created_at' => $now,
+			'state_at'   => $now,
 			'user_id'    => get_current_user_id(),
 			'site_url'   => $site_url,
 			'expires_at' => $expires_at,
@@ -582,13 +723,56 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		}
 
 		// Validate token hasn't expired (belt and suspenders with transient TTL).
-		if ( time() > $token_data['expires_at'] ) {
+		if ( ! empty( $token_data['expires_at'] ) && time() > $token_data['expires_at'] ) {
 			delete_transient( $key );
 			$this->release_token_exchange_claim( $token_hash );
 			return new \WP_Error(
 				'token_expired',
 				__( 'QR login token has expired.', 'woocommerce' ),
 				array( 'status' => 401 )
+			);
+		}
+
+		// Number-matching enforcement: exchange must be preceded by /scan +
+		// /approve. If the merchant's mobile app is from before Task 7, it
+		// hits exchange directly without going through scan, so the record
+		// is still in `pending` — return 426 Upgrade Required so the app
+		// can prompt for an update.
+		$current_state = isset( $token_data['state'] ) ? (string) $token_data['state'] : self::STATE_PENDING;
+
+		if ( self::STATE_PENDING === $current_state ) {
+			$this->release_token_exchange_claim( $token_hash );
+			return new \WP_Error(
+				'mobile_app_update_required',
+				__( 'This Woo mobile app version is no longer supported for QR sign-in. Please update the app and try again.', 'woocommerce' ),
+				array( 'status' => 426 )
+			);
+		}
+
+		if ( self::STATE_APPROVED !== $current_state ) {
+			delete_transient( $key );
+			$this->release_token_exchange_claim( $token_hash );
+			return new \WP_Error(
+				'qr_login_not_approved',
+				__( 'This QR login session has not been approved.', 'woocommerce' ),
+				array( 'status' => 412 )
+			);
+		}
+
+		// Constant-time grant comparison. The grant is bound to this token
+		// at /approve time and only handed back to the polling app via
+		// /session-status, so an attacker who somehow learned the token
+		// can't race the legit app to exchange after approval.
+		$submitted_grant = (string) $request->get_param( 'exchange_grant' );
+		$stored_grant    = isset( $token_data['exchange_grant'] ) ? (string) $token_data['exchange_grant'] : '';
+
+		if ( '' === $stored_grant || ! hash_equals( $stored_grant, $submitted_grant ) ) {
+			delete_transient( $key );
+			$this->release_token_exchange_claim( $token_hash );
+			return new \WP_Error(
+				'invalid_exchange_grant',
+				__( 'Invalid exchange grant for this QR login session.', 'woocommerce' ),
+				array( 'status' => 412 )
 			);
 		}
 
@@ -627,10 +811,18 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// Whitelist + sanitize the optional `device` payload. Older app versions
-		// don't send this; missing/empty is fine — falls back to the default AP
-		// name and an empty `device` array on the consumed record.
-		$device = $this->sanitize_device_payload( $request->get_param( 'device' ) );
+		// Prefer the device payload submitted to /scan (already sanitized into
+		// the challenge record). Fall back to the request body if for some
+		// reason the scan record didn't capture it. Either source is run
+		// through the whitelist again so we never trust pre-stored data
+		// blindly.
+		$device_source = array();
+		if ( isset( $token_data['challenge']['device'] ) && is_array( $token_data['challenge']['device'] ) ) {
+			$device_source = $token_data['challenge']['device'];
+		} elseif ( null !== $request->get_param( 'device' ) ) {
+			$device_source = (array) $request->get_param( 'device' );
+		}
+		$device = $this->sanitize_device_payload( $device_source );
 
 		// Create an Application Password for the mobile app. The name is
 		// descriptive (e.g. "Woo Mobile · iPhone 15 · 2026-04-28") so the user
@@ -681,6 +873,15 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		delete_transient( $key );
 		$this->release_token_exchange_claim( $token_hash );
+
+		// Also clean up the session-id → token-hash mapping so the mobile
+		// app's session-status poll terminates with the final approved/grant
+		// payload it just consumed.
+		if ( ! empty( $token_data['challenge']['session_id'] ) ) {
+			delete_transient(
+				self::SESSION_TRANSIENT_PREFIX . hash( 'sha256', (string) $token_data['challenge']['session_id'] )
+			);
+		}
 
 		// Notify the merchant out-of-band so they're aware of a fresh sign-in
 		// even when they aren't currently looking at wc-admin. Wrapped in a
@@ -737,21 +938,19 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$token_hash = hash( 'sha256', $token );
 
-		// Consumed lookup first — once a token has been exchanged we want the
-		// poll to immediately reflect that state, even though the original
-		// token transient was deleted by `exchange_token()`.
+		// Consumed lookup first — once a token has been exchanged the main
+		// transient is deleted, but we keep a one-way breadcrumb at the
+		// `_wc_qr_login_consumed_` key so the polling client (which still
+		// has the plaintext token) can render the success panel.
 		$consumed = get_transient( self::CONSUMED_TRANSIENT_PREFIX . $token_hash );
 		if ( is_array( $consumed ) ) {
-			// Defense in depth: only the user who minted the token can see its
-			// consumed details. We hide the record from cross-user reads to
-			// avoid leaking that a given token has been used.
 			if ( ! isset( $consumed['user_id'] ) || (int) $consumed['user_id'] !== (int) $user_id ) {
 				return rest_ensure_response( array( 'status' => 'expired' ) );
 			}
 
 			return rest_ensure_response(
 				array(
-					'status'      => 'consumed',
+					'status'      => self::STATE_CONSUMED,
 					'consumed_at' => isset( $consumed['consumed_at'] ) ? (int) $consumed['consumed_at'] : null,
 					'ap_uuid'     => isset( $consumed['ap_uuid'] ) ? (string) $consumed['ap_uuid'] : null,
 					'ap_name'     => isset( $consumed['ap_name'] ) ? (string) $consumed['ap_name'] : null,
@@ -760,22 +959,58 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		$pending = get_transient( self::TOKEN_TRANSIENT_PREFIX . $token_hash );
-		if ( is_array( $pending ) ) {
-			// Same defense-in-depth ownership check.
-			if ( ! isset( $pending['user_id'] ) || (int) $pending['user_id'] !== (int) $user_id ) {
-				return rest_ensure_response( array( 'status' => 'expired' ) );
-			}
+		$record = get_transient( self::TOKEN_TRANSIENT_PREFIX . $token_hash );
+		if ( ! is_array( $record ) ) {
+			return rest_ensure_response( array( 'status' => self::STATE_EXPIRED ) );
+		}
+
+		// Cross-user defense in depth — same as before.
+		if ( ! isset( $record['user_id'] ) || (int) $record['user_id'] !== (int) $user_id ) {
+			return rest_ensure_response( array( 'status' => self::STATE_EXPIRED ) );
+		}
+
+		$state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
+
+		// While in `scanned`, surface the shuffled candidate triple and the
+		// device that scanned so wc-admin can render the matching UI. The
+		// REAL number is never returned via this endpoint — only the
+		// shuffled triple of (real + 2 distractors) is, so an XSS / hostile
+		// extension can't read which one is correct from JS state.
+		if ( self::STATE_SCANNED === $state ) {
+			$challenge = isset( $record['challenge'] ) && is_array( $record['challenge'] ) ? $record['challenge'] : array();
+			$numbers   = $this->shuffled_candidate_numbers( $challenge );
 
 			return rest_ensure_response(
 				array(
-					'status'     => 'pending',
-					'expires_at' => isset( $pending['expires_at'] ) ? (int) $pending['expires_at'] : null,
+					'status'  => self::STATE_SCANNED,
+					'numbers' => $numbers,
+					'device'  => isset( $challenge['device'] ) && is_array( $challenge['device'] ) ? $challenge['device'] : array(),
+					'expires_at' => isset( $challenge['expires_at'] ) ? (int) $challenge['expires_at'] : null,
 				)
 			);
 		}
 
-		return rest_ensure_response( array( 'status' => 'expired' ) );
+		// Rejected / expired states are terminal — surface them directly so
+		// wc-admin can render the "Login denied" terminal screen.
+		if ( in_array( $state, array( self::STATE_REJECTED, self::STATE_EXPIRED ), true ) ) {
+			return rest_ensure_response( array( 'status' => $state ) );
+		}
+
+		// Approved (post-tap, pre-exchange) — surface so a wc-admin tab that
+		// reloaded between approve and exchange shows the "Signing in…"
+		// transitional state rather than going back to the QR.
+		if ( self::STATE_APPROVED === $state ) {
+			return rest_ensure_response( array( 'status' => self::STATE_APPROVED ) );
+		}
+
+		// Pending: same shape as before, plus the new `state` field for
+		// clients that want to switch on it directly.
+		return rest_ensure_response(
+			array(
+				'status'     => self::STATE_PENDING,
+				'expires_at' => isset( $record['expires_at'] ) ? (int) $record['expires_at'] : null,
+			)
+		);
 	}
 
 	/**
@@ -936,6 +1171,338 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 */
 	private function check_revoke_rate_limit( $user_id ) {
 		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_REVOKE, (string) $user_id );
+	}
+
+	/**
+	 * Mobile app reports the QR was scanned. Generates the number-match
+	 * challenge, marks the state as `scanned`, and returns the *real* number
+	 * + a session id back to the app. Public — the token is the auth.
+	 *
+	 * Hard-break compat: clients that don't send `supports_number_matching`
+	 * get 426 Upgrade Required. The Android Task 7 PR adds the flag; older
+	 * apps in the wild see a clear "update required" error.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function scan_token( $request ) {
+		if ( ! is_ssl() ) {
+			return new \WP_Error(
+				'ssl_required',
+				__( 'QR login requires an HTTPS connection.', 'woocommerce' ),
+				array( 'status' => 403 )
+			);
+		}
+
+		if ( ! $this->check_scan_rate_limit() ) {
+			return new \WP_Error(
+				'rate_limit_exceeded',
+				__( 'Too many QR login scans. Please try again later.', 'woocommerce' ),
+				array( 'status' => 429 )
+			);
+		}
+
+		if ( true !== (bool) $request->get_param( 'supports_number_matching' ) ) {
+			return new \WP_Error(
+				'mobile_app_update_required',
+				__( 'This Woo mobile app version is no longer supported for QR sign-in. Please update the app and try again.', 'woocommerce' ),
+				array( 'status' => 426 )
+			);
+		}
+
+		$token      = (string) $request->get_param( 'token' );
+		$token_hash = hash( 'sha256', $token );
+		$key        = self::TOKEN_TRANSIENT_PREFIX . $token_hash;
+
+		$record = get_transient( $key );
+		if ( ! is_array( $record ) ) {
+			return new \WP_Error(
+				'invalid_token',
+				__( 'Invalid or expired QR login token.', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		$current_state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
+		if ( self::STATE_PENDING !== $current_state ) {
+			return new \WP_Error(
+				'qr_login_already_scanned',
+				__( 'This QR login session is no longer accepting scans.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		$challenge_numbers = $this->generate_challenge_numbers();
+		$session_id        = wp_generate_uuid4();
+		$now               = time();
+
+		$record['state']     = self::STATE_SCANNED;
+		$record['state_at']  = $now;
+		$record['challenge'] = array(
+			'real'        => $challenge_numbers['real'],
+			'distractors' => $challenge_numbers['distractors'],
+			'session_id'  => $session_id,
+			'expires_at'  => $now + self::CHALLENGE_TTL,
+			'device'      => $this->sanitize_device_payload( $request->get_param( 'device' ) ),
+		);
+
+		// Re-use whatever ttl the original transient had left. Capped to
+		// CHALLENGE_TTL because the user has at most that long to pick.
+		$ttl_left = max( 30, ( isset( $record['expires_at'] ) ? (int) $record['expires_at'] - $now : self::CHALLENGE_TTL ) );
+		set_transient( $key, $record, min( $ttl_left, self::CHALLENGE_TTL + 30 ) );
+
+		// Sibling transient that resolves session_id → token_hash for the
+		// app's session-status poll. Stored hashed so the session id isn't
+		// directly indexable in wp_options.
+		set_transient(
+			self::SESSION_TRANSIENT_PREFIX . hash( 'sha256', $session_id ),
+			$token_hash,
+			self::CHALLENGE_TTL + 30
+		);
+
+		return rest_ensure_response(
+			array(
+				'session_id'  => $session_id,
+				'real_number' => $challenge_numbers['real'],
+				'expires_in'  => self::CHALLENGE_TTL,
+			)
+		);
+	}
+
+	/**
+	 * Merchant taps a number on wc-admin. Server validates against the
+	 * stored real number with `hash_equals()` (constant-time). Correct →
+	 * `approved` + mints `exchange_grant`. Wrong → `rejected` (terminal,
+	 * security event logged). One-strike: no retry.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function approve_token( $request ) {
+		$user_id = get_current_user_id();
+
+		if ( ! $this->check_approve_rate_limit( $user_id ) ) {
+			return new \WP_Error(
+				'rate_limit_exceeded',
+				__( 'Too many QR login approval attempts. Please try again later.', 'woocommerce' ),
+				array( 'status' => 429 )
+			);
+		}
+
+		$token      = (string) $request->get_param( 'token' );
+		$token_hash = hash( 'sha256', $token );
+		$key        = self::TOKEN_TRANSIENT_PREFIX . $token_hash;
+
+		$record = get_transient( $key );
+		if ( ! is_array( $record ) ) {
+			return new \WP_Error(
+				'invalid_token',
+				__( 'Invalid or expired QR login token.', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		// Same cross-user defense as get_status — only the user that minted
+		// the token can approve it.
+		if ( ! isset( $record['user_id'] ) || (int) $record['user_id'] !== (int) $user_id ) {
+			return new \WP_Error(
+				'invalid_token',
+				__( 'Invalid or expired QR login token.', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		$current_state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
+		if ( self::STATE_SCANNED !== $current_state ) {
+			return new \WP_Error(
+				'qr_login_not_scanned',
+				__( 'This QR login session is not waiting for approval.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		// Challenge expiry — the merchant has 90 s after scan to pick.
+		if ( ! empty( $record['challenge']['expires_at'] ) && time() > (int) $record['challenge']['expires_at'] ) {
+			$record['state']    = self::STATE_EXPIRED;
+			$record['state_at'] = time();
+			set_transient( $key, $record, 60 );
+			return new \WP_Error(
+				'qr_login_expired',
+				__( 'The QR login challenge has expired. Please generate a new code.', 'woocommerce' ),
+				array( 'status' => 410 )
+			);
+		}
+
+		$choice = (string) $request->get_param( 'choice' );
+		$real   = isset( $record['challenge']['real'] ) ? (string) $record['challenge']['real'] : '';
+
+		// Constant-time compare. Defends against PHP string-comparison fast
+		// paths that can leak prefix-matching info via timing.
+		if ( '' === $real || ! hash_equals( $real, $choice ) ) {
+			$record['state']    = self::STATE_REJECTED;
+			$record['state_at'] = time();
+			set_transient( $key, $record, 60 );
+
+			wc_get_logger()->warning(
+				'QR login number-match rejected — wrong choice submitted',
+				array(
+					'source'   => 'qr-login-security',
+					'user_id'  => (int) $user_id,
+					'ip'       => $this->get_client_ip(),
+					'device'   => isset( $record['challenge']['device'] ) ? $record['challenge']['device'] : array(),
+				)
+			);
+
+			return rest_ensure_response( array( 'state' => self::STATE_REJECTED ) );
+		}
+
+		$record['state']          = self::STATE_APPROVED;
+		$record['state_at']       = time();
+		$record['exchange_grant'] = bin2hex( random_bytes( self::EXCHANGE_GRANT_BYTES ) );
+		set_transient( $key, $record, max( 30, ( isset( $record['expires_at'] ) ? (int) $record['expires_at'] - time() : self::CHALLENGE_TTL ) ) );
+
+		return rest_ensure_response( array( 'state' => self::STATE_APPROVED ) );
+	}
+
+	/**
+	 * Mobile app polls this with the session id from /scan. Returns the
+	 * current state of the underlying token, plus — when state is
+	 * `approved` — the `exchange_grant` nonce required by /qr-login-exchange.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_session_status( $request ) {
+		$session_id = (string) $request->get_param( 'session_id' );
+
+		if ( ! $this->check_session_status_rate_limit( $session_id ) ) {
+			return new \WP_Error(
+				'rate_limit_exceeded',
+				__( 'Too many QR login session-status checks. Please try again later.', 'woocommerce' ),
+				array( 'status' => 429 )
+			);
+		}
+
+		$token_hash = get_transient( self::SESSION_TRANSIENT_PREFIX . hash( 'sha256', $session_id ) );
+		if ( ! is_string( $token_hash ) || '' === $token_hash ) {
+			// Either the session never existed or it has expired. Either way,
+			// surface as expired to the polling app.
+			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
+		}
+
+		$record = get_transient( self::TOKEN_TRANSIENT_PREFIX . $token_hash );
+		if ( ! is_array( $record ) ) {
+			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
+		}
+
+		$state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
+
+		$response = array( 'state' => $state );
+
+		if ( self::STATE_APPROVED === $state && ! empty( $record['exchange_grant'] ) ) {
+			$response['exchange_grant'] = (string) $record['exchange_grant'];
+		}
+
+		return rest_ensure_response( $response );
+	}
+
+	/**
+	 * Generate a 1-real + 2-distractor number triple for the match
+	 * challenge. Distractors must differ from the real number and from each
+	 * other by ≥ 100 — defends against a partial-read leak fingerprinting
+	 * the real one (no `042` vs `043` near-misses).
+	 *
+	 * Uses `random_int()` (CSPRNG-backed) rather than `wp_rand()`, which can
+	 * fall back to mt_rand() and is predictable.
+	 *
+	 * @return array{real: string, distractors: array<int, string>}
+	 */
+	private function generate_challenge_numbers(): array {
+		$real        = random_int( 0, 999 );
+		$distractors = array();
+
+		// At most a few iterations needed in practice; cap defensively in
+		// case a freak rng run keeps colliding.
+		$attempts = 0;
+		while ( count( $distractors ) < 2 && $attempts < 100 ) {
+			++$attempts;
+			$candidate = random_int( 0, 999 );
+			if ( $candidate === $real ) {
+				continue;
+			}
+			if ( abs( $candidate - $real ) < 100 ) {
+				continue;
+			}
+			if ( ! empty( $distractors ) && abs( $candidate - $distractors[0] ) < 100 ) {
+				continue;
+			}
+			$distractors[] = $candidate;
+		}
+
+		return array(
+			'real'        => str_pad( (string) $real, 3, '0', STR_PAD_LEFT ),
+			'distractors' => array_map(
+				static function ( $n ) {
+					return str_pad( (string) $n, 3, '0', STR_PAD_LEFT );
+				},
+				$distractors
+			),
+		);
+	}
+
+	/**
+	 * Build the shuffled candidate triple returned by `/qr-login-status`
+	 * while in the `scanned` state. The order is randomised on every call
+	 * so the position of the real number can't be inferred from cache keys
+	 * or repeat polls.
+	 *
+	 * @param array<string, mixed> $challenge The challenge payload from the token record.
+	 * @return array<int, string>
+	 */
+	private function shuffled_candidate_numbers( array $challenge ): array {
+		$real        = isset( $challenge['real'] ) ? (string) $challenge['real'] : '';
+		$distractors = isset( $challenge['distractors'] ) && is_array( $challenge['distractors'] )
+			? array_map( 'strval', $challenge['distractors'] )
+			: array();
+
+		$candidates = array_merge( array( $real ), $distractors );
+
+		// `shuffle()` uses mt_rand which is fine here — we don't need
+		// cryptographic randomness for ordering, only "not predictable to a
+		// passive observer of polling traffic". Each poll calls shuffle()
+		// fresh, so an attacker reading repeat poll responses learns nothing.
+		shuffle( $candidates );
+
+		return $candidates;
+	}
+
+	/**
+	 * Per-IP rate limit on /qr-login-scan.
+	 *
+	 * @return bool True if within rate limit.
+	 */
+	private function check_scan_rate_limit() {
+		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_SCAN, $this->get_client_ip() );
+	}
+
+	/**
+	 * Per-user rate limit on /qr-login-approve.
+	 *
+	 * @param int $user_id The user ID.
+	 * @return bool True if within rate limit.
+	 */
+	private function check_approve_rate_limit( $user_id ) {
+		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_APPROVE, (string) $user_id );
+	}
+
+	/**
+	 * Per-session rate limit on /qr-login-session-status.
+	 *
+	 * @param string $session_id The session ID.
+	 * @return bool True if within rate limit.
+	 */
+	private function check_session_status_rate_limit( $session_id ) {
+		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_SESSION_STATUS, $session_id );
 	}
 
 	/**

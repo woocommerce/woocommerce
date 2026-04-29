@@ -455,4 +455,171 @@ describe( 'useQRLoginToken', () => {
 		expect( clearIntervalSpy ).toHaveBeenCalled();
 		clearIntervalSpy.mockRestore();
 	} );
+
+	// -----------------------------------------------------------------
+	// Task 7 — number-matching state transitions.
+	// -----------------------------------------------------------------
+
+	/**
+	 * The status endpoint returns the new `scanned` shape once the mobile
+	 * app has called /qr-login-scan. The hook should switch to the SCANNED
+	 * state, surface the shuffled candidate triple + device info, and
+	 * record the challenge expiry so the number-match step can render its
+	 * own 90-s countdown.
+	 */
+	it( 'transitions READY → SCANNED on a scanned status payload and surfaces the candidate triple', async () => {
+		// First call: token mint. Second call onward: status polls. The hook
+		// fires its first poll synchronously after the token mint resolves
+		// (no setInterval delay) so by the time the act() block flushes the
+		// fetchToken promise, the poll's microtask has already flipped state
+		// to SCANNED — that's the intentional UX (instant feedback).
+		mockApiFetch
+			.mockResolvedValueOnce( buildResponse() )
+			.mockResolvedValue( {
+				status: 'scanned',
+				numbers: [ '317', '042', '589' ],
+				device: {
+					os: 'Android',
+					os_version: '16',
+					model: 'Pixel 10',
+					app_version: '24.7.0',
+				},
+				expires_at: NOW_SECONDS + 90,
+			} );
+
+		const { result } = renderHook( () => useQRLoginToken() );
+
+		await act( async () => {
+			await result.current.fetchToken();
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.SCANNED );
+		expect( result.current.candidateNumbers ).toEqual( [
+			'317',
+			'042',
+			'589',
+		] );
+		expect( result.current.deviceInfo ).toMatchObject( {
+			model: 'Pixel 10',
+			os: 'Android',
+		} );
+		expect( result.current.challengeExpiresAt ).toBe( NOW_SECONDS + 90 );
+	} );
+
+	/**
+	 * `chooseNumber` posts to /qr-login-approve. On `approved` the hook
+	 * flips to APPROVED locally so the UI advances without waiting on the
+	 * next status-poll tick. Tiles should be cleared so a re-render can't
+	 * accidentally show stale candidates.
+	 */
+	it( 'chooseNumber → approved flips state to APPROVED and clears candidates', async () => {
+		mockApiFetch
+			.mockResolvedValueOnce( buildResponse() )
+			.mockResolvedValueOnce( {
+				status: 'scanned',
+				numbers: [ '317', '042', '589' ],
+				device: { model: 'Pixel 10' },
+				expires_at: NOW_SECONDS + 90,
+			} );
+
+		const { result } = renderHook( () => useQRLoginToken() );
+
+		await act( async () => {
+			await result.current.fetchToken();
+		} );
+
+		await act( async () => {
+			jest.advanceTimersByTime( 2600 );
+			await Promise.resolve();
+		} );
+		expect( result.current.state ).toBe( QRLoginTokenStates.SCANNED );
+
+		// Now stub the approve response.
+		mockApiFetch.mockResolvedValueOnce( { state: 'approved' } );
+
+		await act( async () => {
+			await result.current.chooseNumber( '042' );
+		} );
+
+		expect( mockApiFetch ).toHaveBeenLastCalledWith( {
+			path: '/wc-admin/mobile-app/qr-login-approve',
+			method: 'POST',
+			data: { token: 'abc', choice: '042' },
+		} );
+		expect( result.current.state ).toBe( QRLoginTokenStates.APPROVED );
+		expect( result.current.candidateNumbers ).toBeNull();
+	} );
+
+	/**
+	 * Wrong pick → server returns `rejected`. The hook must terminate the
+	 * session (clear the token ref so subsequent operations no-op) and
+	 * surface the REJECTED state so the UI can render the terminal screen.
+	 */
+	it( 'chooseNumber → rejected flips state to REJECTED and clears the token', async () => {
+		mockApiFetch
+			.mockResolvedValueOnce( buildResponse() )
+			.mockResolvedValueOnce( {
+				status: 'scanned',
+				numbers: [ '317', '042', '589' ],
+				device: {},
+				expires_at: NOW_SECONDS + 90,
+			} );
+
+		const { result } = renderHook( () => useQRLoginToken() );
+
+		await act( async () => {
+			await result.current.fetchToken();
+		} );
+		await act( async () => {
+			jest.advanceTimersByTime( 2600 );
+			await Promise.resolve();
+		} );
+
+		mockApiFetch.mockResolvedValueOnce( { state: 'rejected' } );
+
+		await act( async () => {
+			await result.current.chooseNumber( '317' );
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.REJECTED );
+		expect( result.current.candidateNumbers ).toBeNull();
+	} );
+
+	/**
+	 * Approve responding 410 (challenge expired between scan and tap) is a
+	 * race we want to surface as REJECTED so the user sees the same
+	 * terminal "start over" screen rather than a misleading network error.
+	 */
+	it( 'chooseNumber → 410 expired surfaces REJECTED', async () => {
+		mockApiFetch
+			.mockResolvedValueOnce( buildResponse() )
+			.mockResolvedValueOnce( {
+				status: 'scanned',
+				numbers: [ '317', '042', '589' ],
+				device: {},
+				expires_at: NOW_SECONDS + 90,
+			} );
+
+		const { result } = renderHook( () => useQRLoginToken() );
+
+		await act( async () => {
+			await result.current.fetchToken();
+		} );
+		await act( async () => {
+			jest.advanceTimersByTime( 2600 );
+			await Promise.resolve();
+		} );
+
+		mockApiFetch.mockRejectedValueOnce( {
+			code: 'qr_login_expired',
+			data: { status: 410 },
+			message: 'expired',
+		} );
+
+		await act( async () => {
+			await result.current.chooseNumber( '042' );
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.REJECTED );
+	} );
 } );
