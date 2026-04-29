@@ -116,9 +116,6 @@ const blocks = {
 		customDir: 'reviews/reviews-by-product',
 	},
 	'shopper-collection': {},
-	'shopper-collection-cart-button': {
-		customDir: 'shopper-collection/inner-blocks/cart-button',
-	},
 	'single-product': {},
 	'stock-filter': {},
 	'store-notices': {},
