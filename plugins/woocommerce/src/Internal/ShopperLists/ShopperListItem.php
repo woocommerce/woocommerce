@@ -5,9 +5,6 @@ namespace Automattic\WooCommerce\Internal\ShopperLists;
 
 /**
  * A single saved item within a shopper list.
- *
- * Identity is the deterministic md5 of product + variation + item_data, so
- * adding the same payload twice always lands in the same slot (idempotent UPSERT).
  */
 class ShopperListItem {
 	/**
@@ -74,7 +71,7 @@ class ShopperListItem {
 	private $price_at_save;
 
 	/**
-	 * Construct from already-validated values. Use the static factories instead.
+	 * Private constructor. Use the static factories to obtain concrete instances.
 	 *
 	 * @param string $key                   Storage key (md5 of identity tuple).
 	 * @param int    $product_id            Product ID.
@@ -136,15 +133,15 @@ class ShopperListItem {
 	 * @return self|null Null if the underlying product can't be resolved.
 	 */
 	public static function from_product( int $product_or_variation_id, array $variation = array(), array $item_data = array() ): ?self {
-		$product = $product_or_variation_id > 0 ? wc_get_product( $product_or_variation_id ) : false;
-
-		if ( ! $product instanceof \WC_Product ) {
+		$product = wc_get_product( absint( $product_or_variation_id ) );
+		if ( ! $product ) {
 			return null;
 		}
 
 		$variation_id = $product->is_type( 'variation' ) ? $product->get_id() : 0;
-		$product_id   = $variation_id > 0 ? $product->get_parent_id() : $product->get_id();
+		$product_id   = $variation_id ? $product->get_parent_id() : $product->get_id();
 
+		// Quantity is hardcoded to 1 for now.
 		return new self(
 			self::generate_key( $product_id, $variation_id, $variation, $item_data ),
 			$product_id,
@@ -161,21 +158,21 @@ class ShopperListItem {
 	/**
 	 * Storage key — also used as the response identifier.
 	 */
-	public function key(): string {
+	public function get_key(): string {
 		return $this->key;
 	}
 
 	/**
 	 * Product ID at save time.
 	 */
-	public function product_id(): int {
+	public function get_product_id(): int {
 		return $this->product_id;
 	}
 
 	/**
 	 * Variation ID at save time, or 0 for non-variable products.
 	 */
-	public function variation_id(): int {
+	public function get_variation_id(): int {
 		return $this->variation_id;
 	}
 
@@ -208,7 +205,7 @@ class ShopperListItem {
 	private static function generate_key( int $product_id, int $variation_id, array $variation, array $item_data ): string {
 		$id_parts = array( $product_id );
 
-		if ( $variation_id > 0 ) {
+		if ( $variation_id ) {
 			$id_parts[] = $variation_id;
 		}
 

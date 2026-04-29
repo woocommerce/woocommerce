@@ -57,7 +57,7 @@ class ShopperList {
 	private $items;
 
 	/**
-	 * Construct from already-validated values. Use the static factories instead.
+	 * Private constructor. Use the static factories to obtain concrete instances.
 	 *
 	 * @param int                            $user_id          Owning user ID.
 	 * @param string                         $slug             List slug.
@@ -83,7 +83,7 @@ class ShopperList {
 	}
 
 	/**
-	 * Load a list by slug. Auto-creates saved-for-later. Returns false for any other list that doesn't exist.
+	 * Load a list by slug. Returns false for any other list that doesn't exist.
 	 *
 	 * @throws \RuntimeException When the stored data is corrupt (non-array meta value).
 	 *
@@ -92,8 +92,8 @@ class ShopperList {
 	 * @return self|false
 	 */
 	public static function get_by_slug( string $slug, ?int $user_id = null ) {
-		$user_id = null === $user_id ? get_current_user_id() : $user_id;
-		if ( $user_id <= 0 ) {
+		$user_id = absint( $user_id ? $user_id : get_current_user_id() );
+		if ( ! $user_id ) {
 			return false;
 		}
 
@@ -103,14 +103,14 @@ class ShopperList {
 			return self::from_array( $stored, $user_id );
 		}
 
-		// Anything other than the empty default means a row exists but isn't an array — corruption.
+		// Anything other than the empty default means a row exists but isn't an array, signaling corrupt data.
 		if ( '' !== $stored && false !== $stored && null !== $stored ) {
 			throw new \RuntimeException(
 				esc_html( sprintf( 'Corrupt shopper list data for user %d list %s', $user_id, $slug ) )
 			);
 		}
 
-		// Empty default — list doesn't exist. Auto-create saved-for-later only.
+		// Auto-create saved-for-later when necessary.
 		if ( 'saved-for-later' === $slug ) {
 			$list = new self(
 				$user_id,
@@ -134,8 +134,10 @@ class ShopperList {
 	 * @return array<string, self>
 	 */
 	public static function get_all_for_user( ?int $user_id = null ): array {
-		$sfl = self::get_by_slug( 'saved-for-later', $user_id );
-		return $sfl ? array( 'saved-for-later' => $sfl ) : array();
+		// For now, only saved-for-later exists.
+		return array(
+			'saved-for-later' => self::get_by_slug( 'saved-for-later', $user_id )
+		);
 	}
 
 	/**
@@ -151,7 +153,7 @@ class ShopperList {
 	 * @param ShopperListItem $item Item to add.
 	 */
 	public function add_item( ShopperListItem $item ): void {
-		$this->items[ $item->key() ] = $item;
+		$this->items[ $item->get_key() ] = $item;
 	}
 
 	/**

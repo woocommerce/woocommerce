@@ -115,7 +115,6 @@ class ShopperListItems extends AbstractRoute {
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
 		$list = ShopperList::get_by_slug( (string) $request['slug'] );
-
 		if ( ! $list ) {
 			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Shopper list not found.', 'woocommerce' ), 404 );
 		}
@@ -152,7 +151,6 @@ class ShopperListItems extends AbstractRoute {
 		[ $lookup_id, $variation, $item_data ] = $this->resolve_item_payload( $request );
 
 		$item = ShopperListItem::from_product( $lookup_id, $variation, $item_data );
-
 		if ( ! $item ) {
 			throw new RouteException( 'woocommerce_rest_shopper_list_unknown_product', esc_html__( 'No product exists for the supplied item.', 'woocommerce' ), 404 );
 		}
@@ -182,39 +180,39 @@ class ShopperListItems extends AbstractRoute {
 		$cart_item_key = (string) $request->get_param( 'cart_item_key' );
 
 		if ( $cart_item_key ) {
-			$cart = wc()->cart;
+			$cart = WC()->cart;
 			if ( ! $cart instanceof \WC_Cart || empty( $cart->cart_contents[ $cart_item_key ] ) ) {
 				throw new RouteException( 'woocommerce_rest_shopper_list_invalid_cart_item_key', esc_html__( 'No cart item exists for the supplied key.', 'woocommerce' ), 404 );
 			}
 
 			$line            = $cart->cart_contents[ $cart_item_key ];
-			$product_id      = (int) ( $line['product_id'] ?? 0 );
-			$variation_id    = (int) ( $line['variation_id'] ?? 0 );
+			$product_id      = absint( $line['product_id'] ?? 0 );
+			$variation_id    = absint( $line['variation_id'] ?? 0 );
 			$variation_attrs = isset( $line['variation'] ) && is_array( $line['variation'] ) ? $line['variation'] : array();
 
 			return array(
-				$variation_id > 0 ? $variation_id : $product_id,
+				$variation_id ? $variation_id : $product_id,
 				$variation_attrs,
 				$this->extract_custom_cart_item_data( $line ),
 			);
 		}
 
-		$product_id = (int) $request->get_param( 'product_id' );
-		if ( $product_id <= 0 ) {
+		$product_id = absint( $request->get_param( 'product_id' ) );
+		if ( ! $product_id ) {
 			throw new RouteException( 'woocommerce_rest_shopper_list_missing_item_input', esc_html__( 'Provide cart_item_key or product_id.', 'woocommerce' ), 400 );
 		}
 
-		$variation_id = (int) $request->get_param( 'variation_id' );
+		$variation_id = absint( $request->get_param( 'variation_id' ) );
 
 		return array(
-			$variation_id > 0 ? $variation_id : $product_id,
+			$variation_id ? $variation_id : $product_id,
 			(array) $request->get_param( 'variation' ),
 			(array) $request->get_param( 'item_data' ),
 		);
 	}
 
 	/**
-	 * Strip the WC_Product and line totals from a cart line, leaving only serialisable custom fields.
+	 * Strip the WC_Product and line totals from a cart line, leaving only serializable custom fields.
 	 *
 	 * @param array $cart_item Cart item array.
 	 */
@@ -236,18 +234,11 @@ class ShopperListItems extends AbstractRoute {
 	 * @param ShopperListItem[] $items Items.
 	 */
 	private function prime_product_caches_for_items( array $items ): void {
-		$ids = array();
-		foreach ( $items as $item ) {
-			$id = $item->variation_id() > 0 ? $item->variation_id() : $item->product_id();
-			if ( $id > 0 ) {
-				$ids[] = $id;
-			}
-		}
+		$ids = array_map(
+			fn( $item ) => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
+			$items
+		);
 
-		if ( empty( $ids ) ) {
-			return;
-		}
-
-		_prime_post_caches( array_values( array_unique( $ids ) ) );
+		_prime_post_caches( array_unique( $ids ) );
 	}
 }

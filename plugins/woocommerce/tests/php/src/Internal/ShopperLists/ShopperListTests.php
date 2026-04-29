@@ -115,7 +115,7 @@ class ShopperListTests extends WC_Unit_Test_Case {
 
 		$reloaded = ShopperList::get_by_slug( 'saved-for-later', $this->user_id );
 		$this->assertCount( 1, $reloaded->get_items() );
-		$this->assertNotNull( $reloaded->find_item( $item->key() ) );
+		$this->assertNotNull( $reloaded->find_item( $item->get_key() ) );
 	}
 
 	/**
@@ -142,7 +142,7 @@ class ShopperListTests extends WC_Unit_Test_Case {
 		$list->save();
 
 		$reloaded = ShopperList::get_by_slug( 'saved-for-later', $this->user_id );
-		$this->assertTrue( $reloaded->remove_item( $item->key() ) );
+		$this->assertTrue( $reloaded->remove_item( $item->get_key() ) );
 		$reloaded->save();
 
 		$this->assertSame( array(), ShopperList::get_by_slug( 'saved-for-later', $this->user_id )->get_items() );

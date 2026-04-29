@@ -86,8 +86,8 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 			)
 		);
 
-		$this->assertSame( $first->key(), $second->key(), 'Same inputs must produce the same key.' );
-		$this->assertNotSame( $first->key(), $noted->key(), 'Different item_data must produce different keys.' );
+		$this->assertSame( $first->get_key(), $second->get_key(), 'Same inputs must produce the same key.' );
+		$this->assertNotSame( $first->get_key(), $noted->get_key(), 'Different item_data must produce different keys.' );
 	}
 
 	/**
