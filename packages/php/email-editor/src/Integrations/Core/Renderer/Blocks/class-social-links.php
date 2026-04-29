@@ -212,8 +212,9 @@ class Social_Links extends Abstract_Block_Renderer {
 	/**
 	 * Gets the block wrapper.
 	 *
-	 * @param string $block_content The block content.
-	 * @param array  $parsed_block The parsed block.
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return string The block wrapper HTML.
 	 */
 	private function get_block_wrapper( $block_content, $parsed_block, Rendering_Context $rendering_context ) {
@@ -250,8 +251,9 @@ class Social_Links extends Abstract_Block_Renderer {
 	 * Adjusts the block content.
 	 * Returns css classes and styles compatible with email clients.
 	 *
-	 * @param string $block_content The block content.
-	 * @param array  $parsed_block The parsed block.
+	 * @param string            $block_content The block content.
+	 * @param array             $parsed_block The parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
 	 * @return array The adjusted block content.
 	 */
 	private function adjust_block_content( $block_content, $parsed_block, Rendering_Context $rendering_context ) {
@@ -259,7 +261,7 @@ class Social_Links extends Abstract_Block_Renderer {
 		$block_attributes = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
-				'style'     => array(),
+				'style' => array(),
 			)
 		);
 		$html             = new \WP_HTML_Tag_Processor( $block_content );

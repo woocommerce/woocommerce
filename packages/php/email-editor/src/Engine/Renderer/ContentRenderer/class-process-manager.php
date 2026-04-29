@@ -13,6 +13,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postproce
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Postprocessors\Variables_Postprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Blocks_Width_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Cleanup_Preprocessor;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Context_Aware_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Spacing_Preprocessor;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors\Typography_Preprocessor;
@@ -83,7 +84,9 @@ class Process_Manager {
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles, ?Rendering_Context $rendering_context = null ): array {
 		foreach ( $this->preprocessors as $preprocessor ) {
-			$parsed_blocks = $preprocessor->preprocess( $parsed_blocks, $layout, $styles, $rendering_context );
+			$parsed_blocks = $preprocessor instanceof Context_Aware_Preprocessor
+				? $preprocessor->preprocess_with_context( $parsed_blocks, $layout, $styles, $rendering_context )
+				: $preprocessor->preprocess( $parsed_blocks, $layout, $styles );
 		}
 		return $parsed_blocks;
 	}

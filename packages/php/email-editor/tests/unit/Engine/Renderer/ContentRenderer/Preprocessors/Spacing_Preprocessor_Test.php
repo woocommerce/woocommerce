@@ -298,7 +298,7 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 			),
 		);
 
-		$result        = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles, $context );
+		$result        = $this->preprocessor->preprocess_with_context( $blocks, $this->layout, $this->styles, $context );
 		$second_column = $result[0]['innerBlocks'][1];
 
 		$this->assertArrayNotHasKey( 'padding-left', $second_column['email_attrs'] );

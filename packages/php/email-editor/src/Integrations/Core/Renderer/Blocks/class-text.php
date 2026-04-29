@@ -34,7 +34,7 @@ class Text extends Abstract_Block_Renderer {
 		$block_attributes     = wp_parse_args(
 			$parsed_block['attrs'] ?? array(),
 			array(
-				'style'     => array(),
+				'style' => array(),
 			)
 		);
 		$html                 = new \WP_HTML_Tag_Processor( $block_content );

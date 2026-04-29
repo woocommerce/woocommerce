@@ -171,7 +171,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it applies the rendering email context filter once per full render.
 	 */
 	public function testItAppliesRenderingContextFilterOncePerRender(): void {
-		$filter_calls  = 0;
+		$filter_calls   = 0;
 		$context_filter = function () use ( &$filter_calls ) {
 			++$filter_calls;
 			return array( 'is_rtl' => true );
@@ -192,7 +192,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test base template CSS resets both physical flex padding sides on mobile.
 	 */
 	public function testTemplateCssResetsBothFlexGapSides(): void {
-		$template_styles = (string) file_get_contents( __DIR__ . '/../../../../src/Engine/Renderer/template-canvas.css' );
+		$template_styles = (string) file_get_contents( __DIR__ . '/../../../../src/Engine/Renderer/template-canvas.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local fixture file.
 
 		$this->assertStringContainsString( 'padding-left: 0 !important;', $template_styles );
 		$this->assertStringContainsString( 'padding-right: 0 !important;', $template_styles );

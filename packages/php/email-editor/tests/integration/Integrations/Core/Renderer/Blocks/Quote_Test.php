@@ -93,10 +93,10 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test it preserves authored quote borders in RTL.
 	 */
 	public function testItPreservesAuthoredQuoteBorderInRtl(): void {
-		$theme_controller       = $this->di_container->get( Theme_Controller::class );
-		$rtl_context            = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
-		$parsed_quote           = $this->parsed_quote;
-		$parsed_quote['attrs']  = array(
+		$theme_controller      = $this->di_container->get( Theme_Controller::class );
+		$rtl_context           = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+		$parsed_quote          = $this->parsed_quote;
+		$parsed_quote['attrs'] = array(
 			'style' => array(
 				'border' => array(
 					'width' => '0 0 0 2px',
@@ -110,6 +110,30 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'border-width:0 0 0 2px;', $rendered );
 		$this->assertStringContainsString( 'border-style:dashed;', $rendered );
 		$this->assertStringNotContainsString( 'border-width:0 1px 0 0;', $rendered );
+	}
+
+	/**
+	 * Test it preserves explicit authored quote alignment in RTL.
+	 */
+	public function testItPreservesAuthoredQuoteAlignmentInRtl(): void {
+		$theme_controller = $this->di_container->get( Theme_Controller::class );
+		$rtl_context      = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+		$expected_borders = array(
+			'left'   => 'border-width:0 0 0 1px;',
+			'center' => 'border-width:0;',
+			'right'  => 'border-width:0 1px 0 0;',
+		);
+
+		foreach ( array( 'left', 'center', 'right' ) as $alignment ) {
+			$parsed_quote                       = $this->parsed_quote;
+			$parsed_quote['attrs']['textAlign'] = $alignment;
+			$content                            = '<blockquote class="wp-block-quote has-text-align-' . $alignment . '"></blockquote>';
+			$rendered                           = $this->quote_renderer->render( $content, $parsed_quote, $rtl_context );
+
+			$this->assertStringContainsString( 'text-align:' . $alignment . ';', $rendered );
+			$this->assertStringContainsString( 'has-text-align-' . $alignment, $rendered );
+			$this->assertStringContainsString( $expected_borders[ $alignment ], $rendered );
+		}
 	}
 
 	/**

@@ -8,8 +8,6 @@
 declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors;
 
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
-
 use Automattic\WooCommerce\EmailEditor\Engine\Settings_Controller;
 
 /**
@@ -51,10 +49,9 @@ class Typography_Preprocessor implements Preprocessor {
 	 * @param array                                                                                                               $parsed_blocks Parsed blocks of the email.
 	 * @param array{contentSize: string}                                                                                          $layout Layout of the email.
 	 * @param array{spacing: array{padding: array{bottom: string, left?: string, right?: string, top: string}, blockGap: string}} $styles Styles of the email.
-	 * @param Rendering_Context|null                                                                                              $rendering_context Rendering context.
 	 * @return array
 	 */
-	public function preprocess( array $parsed_blocks, array $layout, array $styles, ?Rendering_Context $rendering_context = null ): array { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
 		foreach ( $parsed_blocks as $key => $block ) {
 			$block = $this->preprocess_parent( $block );
 			// Set defaults from theme - this needs to be done on top level blocks only.

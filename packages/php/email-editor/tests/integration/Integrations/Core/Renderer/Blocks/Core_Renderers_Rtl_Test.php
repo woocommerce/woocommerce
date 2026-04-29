@@ -29,7 +29,7 @@ class Core_Renderers_Rtl_Test extends \Email_Editor_Integration_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->di_container->get( Email_Editor::class )->initialize();
-		$theme_controller = $this->di_container->get( Theme_Controller::class );
+		$theme_controller  = $this->di_container->get( Theme_Controller::class );
 		$this->rtl_context = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
 	}
 
@@ -66,7 +66,7 @@ class Core_Renderers_Rtl_Test extends \Email_Editor_Integration_Test_Case {
 			),
 			$this->rtl_context
 		);
-		$column_rendered = $column->render(
+		$column_rendered  = $column->render(
 			'<div class="wp-block-column">Column</div>',
 			array(
 				'blockName'   => 'core/column',
@@ -172,6 +172,7 @@ class Core_Renderers_Rtl_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'align="right"', $rendered );
 		$this->assertStringContainsString( 'padding-right: 17px', $rendered );
 		$this->assertStringContainsString( 'padding-left: 17px', $rendered );
+		$this->assertOuterSpacerAligned( $rendered, 'right' );
 	}
 
 	/**
@@ -215,5 +216,19 @@ class Core_Renderers_Rtl_Test extends \Email_Editor_Integration_Test_Case {
 		);
 
 		$this->assertStringContainsString( 'align="right"', $rendered );
+		$this->assertOuterSpacerAligned( $rendered, 'right' );
+	}
+
+	/**
+	 * Assert that the outer spacer wrapper uses the expected alignment.
+	 *
+	 * @param string $rendered Rendered HTML.
+	 * @param string $alignment Expected alignment.
+	 */
+	private function assertOuterSpacerAligned( string $rendered, string $alignment ): void {
+		$this->assertMatchesRegularExpression(
+			'/<table[^>]*align="' . preg_quote( $alignment, '/' ) . '"[^>]*>.*email-block-layout/s',
+			$rendered
+		);
 	}
 }

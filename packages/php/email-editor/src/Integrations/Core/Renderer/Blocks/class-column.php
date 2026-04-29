@@ -24,7 +24,7 @@ class Column extends Abstract_Block_Renderer {
 	 * @param string $content Content.
 	 * @param array  $email_attrs Email attributes.
 	 */
-	protected function add_spacer( $content, $email_attrs, ?Rendering_Context $rendering_context = null ): string {
+	protected function add_spacer( $content, $email_attrs ): string {
 		return $content;
 	}
 

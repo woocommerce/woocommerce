@@ -437,9 +437,10 @@ class Embed extends Abstract_Block_Renderer {
 		);
 
 		// Wrap with spacer if we have email attributes.
-		return $this->add_spacer(
+		return $this->add_spacer_with_context(
 			$link_html,
-			$parsed_block['email_attrs'] ?? array()
+			$parsed_block['email_attrs'] ?? array(),
+			$rendering_context
 		);
 	}
 
@@ -954,7 +955,7 @@ class Embed extends Abstract_Block_Renderer {
 			)
 		);
 
-		return $this->add_spacer(
+		return $this->add_spacer_with_context(
 			$outlook_wrapped,
 			$parsed_block['email_attrs'] ?? array(),
 			$rendering_context
@@ -1003,7 +1004,7 @@ class Embed extends Abstract_Block_Renderer {
 			)
 		);
 
-		return $this->add_spacer(
+		return $this->add_spacer_with_context(
 			$outlook_wrapped,
 			$parsed_block['email_attrs'] ?? array(),
 			$rendering_context

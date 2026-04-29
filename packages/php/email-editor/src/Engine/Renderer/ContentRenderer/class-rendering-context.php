@@ -47,6 +47,7 @@ class Rendering_Context {
 	 *
 	 * @param WP_Theme_JSON        $theme_json Theme Json used in the email.
 	 * @param array<string, mixed> $email_context Email-specific context data.
+	 * @param string|null          $language Email language.
 	 */
 	public function __construct( WP_Theme_JSON $theme_json, array $email_context = array(), ?string $language = null ) {
 		$this->theme_json    = $theme_json;

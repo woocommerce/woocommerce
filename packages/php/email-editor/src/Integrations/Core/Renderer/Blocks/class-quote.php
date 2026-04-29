@@ -65,7 +65,7 @@ class Quote extends Abstract_Block_Renderer {
 		$citation_styles = Styles_Helper::get_block_styles( $parsed_block['attrs'], $rendering_context, array( 'text-align' ) );
 		$citation_styles = Styles_Helper::extend_block_styles( $citation_styles, array( 'margin' => "{$margin_top} 0px 0px 0px" ) );
 
-		return $this->add_spacer(
+		return $this->add_spacer_with_context(
 			sprintf(
 				'<p style="%2$s"><cite class="email-block-quote-citation" style="display: block; margin: 0;">%1$s</cite></p>',
 				$citation_content,
@@ -97,13 +97,25 @@ class Quote extends Abstract_Block_Renderer {
 
 		// Layout, background, borders need to be on the outer table element.
 		$table_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color', 'text-align' ) );
-		if ( $rendering_context->is_rtl() && empty( $block_attributes['style']['border'] ) && empty( $block_attributes['borderColor'] ) ) {
-			$table_styles = Styles_Helper::extend_block_styles(
+		if ( $rendering_context->is_rtl() && ! $this->has_authored_border( $block_attributes ) ) {
+			$authored_alignment = $this->get_authored_alignment( $block_attributes, $original_classname );
+			$border_width       = array(
+				'left'   => '0 0 0 1px',
+				'center' => '0',
+				'right'  => '0 1px 0 0',
+			)[ $authored_alignment ?? 'right' ];
+			$table_styles       = Styles_Helper::extend_block_styles(
 				$table_styles,
-				array(
-					'border-color' => 'currentColor',
-					'border-style' => 'solid',
-					'border-width' => '0 1px 0 0',
+				array_filter(
+					array(
+						'border-color'  => 'currentColor',
+						'border-style'  => 'solid',
+						'border-width'  => $border_width,
+						'border-inline' => 'center' === $authored_alignment ? '0' : null,
+					),
+					static function ( $value ) {
+						return null !== $value;
+					}
 				)
 			);
 		}
@@ -131,5 +143,37 @@ class Quote extends Abstract_Block_Renderer {
 		);
 
 		return Table_Wrapper_Helper::render_table_wrapper( '{quote_content}{citation_content}', $table_attrs, $cell_attrs );
+	}
+
+	/**
+	 * Get explicit quote alignment when authored.
+	 *
+	 * @param array  $block_attributes Block attributes.
+	 * @param string $original_classname Original quote classes.
+	 * @return string|null
+	 */
+	private function get_authored_alignment( array $block_attributes, string $original_classname ): ?string {
+		foreach ( array( 'textAlign', 'align' ) as $attribute_name ) {
+			$alignment = $block_attributes[ $attribute_name ] ?? null;
+			if ( in_array( $alignment, array( 'left', 'center', 'right' ), true ) ) {
+				return $alignment;
+			}
+		}
+
+		if ( preg_match( '/(^|\\s)has-text-align-(left|center|right)(\\s|$)/', $original_classname, $matches ) ) {
+			return $matches[2];
+		}
+
+		return null;
+	}
+
+	/**
+	 * Check whether quote border was explicitly authored.
+	 *
+	 * @param array $block_attributes Block attributes.
+	 * @return bool
+	 */
+	private function has_authored_border( array $block_attributes ): bool {
+		return ! empty( $block_attributes['style']['border'] ) || ! empty( $block_attributes['borderColor'] );
 	}
 }

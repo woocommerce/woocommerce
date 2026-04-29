@@ -51,7 +51,7 @@ class Audio extends Abstract_Block_Renderer {
 			return '';
 		}
 
-		return $this->add_spacer( $rendered_content, $parsed_block['email_attrs'] ?? array() );
+		return $this->add_spacer_with_context( $rendered_content, $parsed_block['email_attrs'] ?? array(), $rendering_context );
 	}
 	/**
 	 * Renders the audio block content as an audio player for email.

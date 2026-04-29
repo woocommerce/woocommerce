@@ -15,7 +15,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering
  * This preprocessor is responsible for setting default spacing values for blocks.
  * In the early development phase, we are setting only margin-top for blocks that are not first or last in the columns block.
  */
-class Spacing_Preprocessor implements Preprocessor {
+class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	/**
 	 * Cached post-content block names to avoid repeated apply_filters calls.
 	 *
@@ -29,10 +29,22 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @param array $parsed_blocks Parsed blocks.
 	 * @param array $layout Layout.
 	 * @param array $styles Styles.
+	 * @return array
+	 */
+	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
+		return $this->preprocess_with_context( $parsed_blocks, $layout, $styles );
+	}
+
+	/**
+	 * Preprocesses the parsed blocks with rendering context.
+	 *
+	 * @param array                  $parsed_blocks Parsed blocks.
+	 * @param array                  $layout Layout.
+	 * @param array                  $styles Styles.
 	 * @param Rendering_Context|null $rendering_context Rendering context.
 	 * @return array
 	 */
-	public function preprocess( array $parsed_blocks, array $layout, array $styles, ?Rendering_Context $rendering_context = null ): array {
+	public function preprocess_with_context( array $parsed_blocks, array $layout, array $styles, ?Rendering_Context $rendering_context = null ): array {
 		$root_padding      = $this->get_root_padding( $styles );
 		$container_padding = $styles['__container_padding'] ?? array();
 		$variables_map     = $styles['__variables_map'] ?? array();

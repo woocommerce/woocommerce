@@ -280,20 +280,20 @@ $table_html = Table_Wrapper_Helper::render_table_wrapper(
 
 ```html
 <table
-    border="0"
-    cellpadding="0"
-    cellspacing="0"
-    role="presentation"
-    width="100%"
-    style="max-width: 600px;"
+	border="0"
+	cellpadding="0"
+	cellspacing="0"
+	role="presentation"
+	width="100%"
+	style="max-width: 600px;"
 >
-    <tbody>
-        <tr style="background-color: #f0f0f0;">
-            <td align="center" style="padding: 20px;">
-                <p>Email content here</p>
-            </td>
-        </tr>
-    </tbody>
+	<tbody>
+		<tr style="background-color: #f0f0f0;">
+			<td align="center" style="padding: 20px;">
+				<p>Email content here</p>
+			</td>
+		</tr>
+	</tbody>
 </table>
 ```
 

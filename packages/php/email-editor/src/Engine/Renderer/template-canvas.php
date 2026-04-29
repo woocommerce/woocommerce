@@ -38,7 +38,7 @@ $language_attributes = trim( $language_attributes . ' dir="' . esc_attr( $render
 	<?php echo $meta_robots; ?>
 	<!-- Forced Styles -->
 </head>
-<body>
+<body dir="<?php echo esc_attr( $rendering_context->get_text_direction() ); ?>">
 	<!--[if mso | IE]><table align="center" role="presentation" border="0" cellpadding="0" cellspacing="0" width="<?php echo esc_attr( $layout['contentSize'] ); ?>" style="width:<?php echo esc_attr( $layout['contentSize'] ); ?>"><tr><td><![endif]-->
 	<div class="email_layout_wrapper" style="max-width: <?php echo esc_attr( $layout['contentSize'] ); ?>">
 		<table width="100%" border="0" cellpadding="0" cellspacing="0" role="presentation">

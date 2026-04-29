@@ -9,8 +9,6 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
-use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
-
 /**
  * This class sets the width of the blocks based on the layout width or column count.
  * The final width in pixels is stored in the email_attrs array because we would like to avoid changing the original attributes.
@@ -22,10 +20,9 @@ class Blocks_Width_Preprocessor implements Preprocessor {
 	 * @param array                                                                                                               $parsed_blocks Parsed blocks of the email.
 	 * @param array{contentSize: string}                                                                                          $layout Layout of the email.
 	 * @param array{spacing: array{padding: array{bottom: string, left?: string, right?: string, top: string}, blockGap: string}} $styles Styles of the email.
-	 * @param Rendering_Context|null                                                                                              $rendering_context Rendering context.
 	 * @return array
 	 */
-	public function preprocess( array $parsed_blocks, array $layout, array $styles, ?Rendering_Context $rendering_context = null ): array { // phpcs:ignore VariableAnalysis.CodeAnalysis.VariableAnalysis.UnusedVariable
+	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
 		// Root padding is distributed to individual blocks by Spacing_Preprocessor
 		// (which runs before this preprocessor). Zero it out here so we don't
 		// double-subtract: each block's width is reduced only if the block

@@ -19,7 +19,7 @@ use Automattic\WooCommerce\EmailEditor\Integrations\Utils\Styles_Helper;
 class Columns extends Abstract_Block_Renderer {
 	/**
 	 * Renders the block content.
- * BlockGap spacing is handled by Spacing_Preprocessor which sets physical padding on column children.
+	 * BlockGap spacing is handled by Spacing_Preprocessor which sets physical padding on column children.
 	 *
 	 * @param string            $block_content Block content.
 	 * @param array             $parsed_block Parsed block.

@@ -99,7 +99,8 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				'post_content' => '<!-- wp:test/context-block /--><!-- wp:test/context-block /-->',
 			)
 		);
-		$email_post    = get_post( $email_post_id );
+		$this->assertIsInt( $email_post_id );
+		$email_post = get_post( $email_post_id );
 		$this->assertInstanceOf( \WP_Post::class, $email_post );
 
 		$seen_contexts = array();
@@ -115,7 +116,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 				},
 			)
 		);
-		$filter_calls  = 0;
+		$filter_calls   = 0;
 		$context_filter = function () use ( &$filter_calls ) {
 			++$filter_calls;
 			return array(
@@ -156,7 +157,7 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	 * Test render applies email context once per content render.
 	 */
 	public function testRenderAppliesEmailContextOnce(): void {
-		$filter_calls  = 0;
+		$filter_calls   = 0;
 		$context_filter = function () use ( &$filter_calls ) {
 			++$filter_calls;
 			return array( 'is_rtl' => true );

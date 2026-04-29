@@ -88,7 +88,7 @@ class Product_Button extends Abstract_Product_Block_Renderer {
 			}
 		}
 
-		$block_attributes = array_replace_recursive(
+		$block_attributes              = array_replace_recursive(
 			array(
 				'textColor'       => '#ffffff',
 				'backgroundColor' => '#000000',
