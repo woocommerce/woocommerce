@@ -197,8 +197,8 @@ class Analytics {
 	/**
 	 * Register the full refund fix data tool on the WooCommerce > Status > Tools page.
 	 *
-	 * The Fix button is disabled by default and only enabled via JS after clicking
-	 * Check confirms there are affected orders.
+	 * The Fix button is disabled by default (via the PHP 'disabled' field). JS enables it
+	 * only after a Check confirms there are affected orders to fix.
 	 *
 	 * @since 10.8.0
 	 *
@@ -208,9 +208,8 @@ class Analytics {
 	public function register_full_refund_fix_data_tool( $debug_tools ) {
 		$desc = __( 'This tool will fix the full refund data used in WooCommerce Analytics and re-import all the refunded historical data.', 'woocommerce' );
 
-		$disabled = false;
+		$disabled = true;
 		if ( OrderUtil::uses_new_full_refund_data() || ( isset( $_GET['wc_refund_fix_action'] ) && 'disable' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) ) {
-			$disabled = true;
 			$desc .= '<br />' . sprintf(
 				'<strong class="red">%1$s</strong> %2$s',
 				__( 'Note:', 'woocommerce' ),
@@ -294,7 +293,6 @@ class Analytics {
 		if ( ! $refunded_orders ) {
 			return;
 		}
-		Cache::invalidate();
 
 		foreach ( $refunded_orders as $refunded_order ) {
 			/**
@@ -345,6 +343,16 @@ class Analytics {
 				AND (parent_stats.shipping_total > 0 OR parent_stats.tax_total > 0)
 			LIMIT 1"
 		);
+
+		if ( $wpdb->last_error ) {
+			wp_send_json_error(
+				array(
+					'code'    => 'db_error',
+					'message' => $wpdb->last_error,
+				),
+				500
+			);
+		}
 
 		$fix_in_progress = ! empty(
 			as_get_scheduled_actions(
@@ -398,7 +406,7 @@ class Analytics {
 		$nonce             = wp_create_nonce( 'woocommerce_refund_fix_check' );
 		$ajax_url          = admin_url( 'admin-ajax.php' );
 		$label_check       = __( 'Check', 'woocommerce' );
-		$label_working     = __( 'Checking\u2026', 'woocommerce' );
+		$label_working     = __( 'Checking…', 'woocommerce' );
 		$msg_needs_fix     = __( 'Your store has orders that need fixing.', 'woocommerce' );
 		$msg_no_fix        = __( 'No affected orders found.', 'woocommerce' );
 		$label_disable_tool = __( 'Disable tool', 'woocommerce' );
@@ -407,23 +415,29 @@ class Analytics {
 		?>
 		<script type="text/javascript">
 		( function() {
-			var toolRow = document.querySelector( 'tr.<?php echo esc_js( $tool_class ); ?>' );
+			const toolRow = document.querySelector( 'tr.<?php echo esc_js( $tool_class ); ?>' );
 			if ( ! toolRow ) {
 				return;
 			}
-			var actionCell = toolRow.querySelector( 'td.run-tool' );
+			const actionCell = toolRow.querySelector( 'td.run-tool' );
 			if ( ! actionCell ) {
 				return;
 			}
 
-			var statusSpan = document.createElement( 'span' );
+			const statusSpan = document.createElement( 'span' );
 			statusSpan.style.cssText = 'display:block;margin-top:6px;';
+			statusSpan.setAttribute( 'aria-live', 'polite' );
+			statusSpan.setAttribute( 'role', 'status' );
 
-			var checkBtn = document.createElement( 'button' );
+			const checkBtn = document.createElement( 'button' );
 			checkBtn.type = 'button';
 			checkBtn.className = 'button button-secondary';
 			checkBtn.style.marginRight = '8px';
 			checkBtn.textContent = <?php echo wp_json_encode( $label_check ); ?>;
+
+			const fixBtn = actionCell.querySelector( 'input[type=submit]' );
+			const originalFixLabel = fixBtn ? fixBtn.value : '';
+			const toolForm = document.getElementById( 'form_<?php echo esc_js( $tool_class ); ?>' );
 
 			checkBtn.addEventListener( 'click', function() {
 				checkBtn.disabled = true;
@@ -431,7 +445,7 @@ class Analytics {
 				statusSpan.textContent = '';
 				statusSpan.style.color = '';
 
-				var data = new FormData();
+				const data = new FormData();
 				data.append( 'action', 'woocommerce_check_refund_fix_needed' );
 				data.append( 'nonce', <?php echo wp_json_encode( $nonce ); ?> );
 
@@ -451,7 +465,7 @@ class Analytics {
 									fixBtn.value = originalFixLabel;
 									fixBtn.disabled = false;
 								}
-								var existingFlag = toolForm ? toolForm.querySelector( 'input[name="wc_refund_fix_action"]' ) : null;
+								const existingFlag = toolForm ? toolForm.querySelector( 'input[name="wc_refund_fix_action"]' ) : null;
 								if ( existingFlag ) {
 									existingFlag.parentNode.removeChild( existingFlag );
 								}
@@ -463,7 +477,7 @@ class Analytics {
 									fixBtn.disabled = false;
 								}
 								if ( toolForm && ! toolForm.querySelector( 'input[name="wc_refund_fix_action"]' ) ) {
-									var flagInput = document.createElement( 'input' );
+									const flagInput = document.createElement( 'input' );
 									flagInput.type = 'hidden';
 									flagInput.name = 'wc_refund_fix_action';
 									flagInput.value = 'disable';
@@ -471,7 +485,7 @@ class Analytics {
 								}
 							}
 						} else {
-							statusSpan.textContent = <?php echo wp_json_encode( $msg_error ); ?>;
+							statusSpan.textContent = ( json.data && json.data.message ) ? json.data.message : <?php echo wp_json_encode( $msg_error ); ?>;
 							statusSpan.style.color = '#d63638';
 						}
 					} )
@@ -483,12 +497,7 @@ class Analytics {
 					} );
 			} );
 
-			var fixBtn = actionCell.querySelector( 'input[type=submit]' );
-			var originalFixLabel = fixBtn ? fixBtn.value : '';
-			var toolForm = document.getElementById( 'form_<?php echo esc_js( $tool_class ); ?>' );
-
 			if ( fixBtn ) {
-				fixBtn.disabled = true;
 				actionCell.insertBefore( checkBtn, fixBtn );
 			} else {
 				actionCell.appendChild( checkBtn );
