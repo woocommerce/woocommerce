@@ -386,18 +386,14 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Issue a POST to the token-exchange endpoint.
 	 *
-	 * @param string|null                $token  Token to exchange. Null omits the parameter.
-	 * @param array<string, string>|null $device Optional device payload to send.
-	 * @param string|null                $grant  Optional `exchange_grant` nonce returned by /qr-login-approve.
+	 * @param string|null $token Token to exchange. Null omits the parameter.
+	 * @param string|null $grant Optional `exchange_grant` nonce returned by /qr-login-approve.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch_exchange( ?string $token, ?array $device = null, ?string $grant = null ): \WP_REST_Response {
+	private function dispatch_exchange( ?string $token, ?string $grant = null ): \WP_REST_Response {
 		$request = new WP_REST_Request( 'POST', self::EXCHANGE_ENDPOINT );
 		if ( null !== $token ) {
 			$request->set_param( 'token', $token );
-		}
-		if ( null !== $device ) {
-			$request->set_param( 'device', $device );
 		}
 		if ( null !== $grant ) {
 			$request->set_param( 'exchange_grant', $grant );
@@ -418,9 +414,19 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		if ( null !== $token ) {
 			$request->set_param( 'token', $token );
 		}
-		if ( null !== $device ) {
-			$request->set_param( 'device', $device );
+		// /qr-login-scan now requires `device` at the schema level. Default to
+		// a generic Android-like payload when callers don't supply one — most
+		// existing tests don't care about the device contents, just that the
+		// scan/approve flow advances the state machine.
+		if ( null === $device ) {
+			$device = array(
+				'os'          => 'Android',
+				'os_version'  => '16',
+				'model'       => 'Test Device',
+				'app_version' => '24.7.0',
+			);
 		}
+		$request->set_param( 'device', $device );
 		$request->set_param( 'supports_number_matching', $supports_number_matching );
 		return $this->server->dispatch( $request );
 	}
@@ -463,11 +469,25 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * predate the number-matching step (Task 5/6) call this so they don't
 	 * have to be rewritten end-to-end.
 	 *
+	 * Falls back to a generic device payload when none is supplied — the
+	 * /qr-login-scan endpoint requires `device` and `supports_number_matching`,
+	 * so tests that don't care about the device contents still need *something*
+	 * to thread through the scan call.
+	 *
 	 * @param string                     $plaintext Token from /qr-login-token.
 	 * @param array<string, string>|null $device    Optional device payload.
 	 * @return array{session_id: string, exchange_grant: string}
 	 */
 	private function complete_pre_exchange_flow( string $plaintext, ?array $device = null ): array {
+		if ( null === $device ) {
+			$device = array(
+				'os'          => 'Android',
+				'os_version'  => '16',
+				'model'       => 'Test Device',
+				'app_version' => '24.7.0',
+			);
+		}
+
 		// Mobile-side scan (unauthenticated).
 		wp_set_current_user( 0 );
 		$scan_response = $this->dispatch_scan( $plaintext, $device );
@@ -674,7 +694,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'wp_is_application_passwords_available', '__return_false' );
 
 		try {
-			$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 			$this->assertSame( 501, $response->get_status() );
 			$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
@@ -801,7 +821,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$prep = $this->prepare_exchange_token();
 
 		// Unauthenticated exchange (as the mobile app would perform it).
-		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
@@ -846,7 +866,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$token_data['expires_at'] = time() - 60;
 		set_transient( $transient_key, $token_data, MobileAppQRLogin::TOKEN_TTL );
 
-		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 		$this->assertSame( 401, $response->get_status() );
 		$this->assertSame( 'token_expired', $response->get_data()['code'] );
@@ -858,8 +878,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	public function test_exchange_token_is_single_use(): void {
 		$prep = $this->prepare_exchange_token();
 
-		$first  = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
-		$second = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$first  = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+		$second = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 		$this->assertSame( 200, $first->get_status() );
 		$this->assertSame( 401, $second->get_status() );
@@ -918,7 +938,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		// Avoid double-delete in tearDown().
 		$this->admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
 
-		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 		$this->assertSame( 404, $response->get_status() );
 		$this->assertSame( 'user_not_found', $response->get_data()['code'] );
@@ -940,7 +960,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		add_filter( 'update_user_metadata', $deny_meta, 10, 3 );
 
 		try {
-			$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 			$this->assertSame( 500, $response->get_status() );
 			$this->assertSame( 'application_password_failed', $response->get_data()['code'] );
@@ -1119,7 +1139,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_exchange_response_schema(): void {
 		$prep = $this->prepare_exchange_token();
-		$data = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] )->get_data();
+		$data = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] )->get_data();
 
 		$this->assertEqualsCanonicalizing(
 			array( 'success', 'user_login', 'user_email', 'user_id', 'site_url', 'application_password', 'uuid' ),
@@ -1203,7 +1223,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		);
 		$prep   = $this->prepare_exchange_token( $device );
 
-		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 		$this->assertSame( 200, $response->get_status() );
 
 		$consumed = get_transient( MobileAppQRLogin::CONSUMED_TRANSIENT_PREFIX . hash( 'sha256', $prep['plaintext'] ) );
@@ -1240,7 +1260,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 		$this->assertSame( 200, $response->get_status() );
 
 		$aps = WP_Application_Passwords::get_user_application_passwords( $this->admin_id );
@@ -1249,24 +1269,6 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			'#^Woo Mobile · iPhone 15 · \d{4}-\d{2}-\d{2}$#u',
 			$aps[0]['name'],
 			'AP name should be "Woo Mobile · {model} · {YYYY-MM-DD}".'
-		);
-	}
-
-	/**
-	 * @testdox Exchange without a device payload falls back to the legacy AP name so older app clients keep working.
-	 */
-	public function test_exchange_token_falls_back_to_default_ap_name_without_device(): void {
-		$prep = $this->prepare_exchange_token();
-
-		$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
-		$this->assertSame( 200, $response->get_status() );
-
-		$aps = WP_Application_Passwords::get_user_application_passwords( $this->admin_id );
-		$this->assertCount( 1, $aps );
-		$this->assertSame(
-			'WooCommerce Mobile App (QR Login)',
-			$aps[0]['name'],
-			'Without a device payload the AP name should keep the existing literal so the change is invisible to older mobile clients.'
 		);
 	}
 
@@ -1288,7 +1290,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 		$consumed = get_transient( MobileAppQRLogin::CONSUMED_TRANSIENT_PREFIX . hash( 'sha256', $prep['plaintext'] ) );
 		$this->assertIsArray( $consumed );
@@ -1334,7 +1336,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			)
 		);
 
-		$exchange = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$exchange = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 		$this->assertSame( 200, $exchange->get_status() );
 
 		wp_set_current_user( $this->admin_id );
@@ -1385,7 +1387,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 				'model' => 'iPhone 15',
 			)
 		);
-		$this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 		// A different shop manager polls the same token. Token guess is
 		// astronomical, but cross-user reads must still be opaque.
@@ -1421,7 +1423,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 				'model' => 'iPhone 15',
 			)
 		);
-		$exchange = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$exchange = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 		$this->assertSame( 200, $exchange->get_status() );
 		$uuid = $exchange->get_data()['uuid'];
 
@@ -1451,7 +1453,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 				'model' => 'iPhone 15',
 			)
 		);
-		$exchange = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+		$exchange = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 		$uuid     = $exchange->get_data()['uuid'];
 
 		// Shop manager tries to revoke admin's AP. This must fail with 404 —
@@ -1528,7 +1530,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 				)
 			);
 
-			$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 			$this->assertSame( 200, $response->get_status() );
 
 			$this->assertCount( 1, $capture['captures'], 'Exactly one email should be sent on a successful exchange.' );
@@ -1568,7 +1570,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 					'model' => 'iPhone 15',
 				)
 			);
-			$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
+			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 			$this->assertSame( 200, $response->get_status() );
 
 			$this->assertCount(
@@ -1582,28 +1584,6 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		}
 	}
 
-	/**
-	 * @testdox Sign-in notification email falls back to a generic device line when the mobile app sends no device payload.
-	 */
-	public function test_sign_in_notification_email_handles_missing_device_payload(): void {
-		$capture = $this->capture_wp_mail();
-
-		try {
-			$prep     = $this->prepare_exchange_token();
-			$response = $this->dispatch_exchange( $prep['plaintext'], null, $prep['exchange_grant'] );
-			$this->assertSame( 200, $response->get_status() );
-
-			$this->assertCount( 1, $capture['captures'] );
-			$body = (string) $capture['captures'][0]['message'];
-
-			// With no device payload the headline should still render
-			// without "undefined" / empty interpolation artifacts.
-			$this->assertStringNotContainsString( 'undefined', $body );
-			$this->assertStringNotContainsString( '· ·', $body, 'No empty separators when device fields are missing.' );
-		} finally {
-			$capture['remove']();
-		}//end try
-	}
 
 	// ---------------------------------------------------------------------
 	// Task 7 — number-matching state machine.
@@ -1755,7 +1735,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->dispatch_scan( $plaintext );
 		// Note: deliberately skipping /approve — token is still in scanned, not approved.
 
-		$response = $this->dispatch_exchange( $plaintext, null, 'any-grant-here-doesnt-matter' );
+		$response = $this->dispatch_exchange( $plaintext, 'any-grant-here-doesnt-matter' );
 
 		$this->assertSame( 412, $response->get_status() );
 		$this->assertSame( 'qr_login_not_approved', $response->get_data()['code'] );
@@ -1763,19 +1743,20 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Exchange endpoint returns 426 Upgrade Required when a legacy mobile client hits exchange directly without scan/approve.
+	 * @testdox Exchange endpoint returns 412 when the merchant skipped /qr-login-scan entirely (token still in pending state).
 	 */
-	public function test_exchange_legacy_client_returns_426_upgrade_required(): void {
+	public function test_exchange_rejects_token_that_skipped_scan(): void {
 		$plaintext = $this->generate_token_as_admin();
 
-		// Skip /scan and /approve entirely — token stays in pending (the
-		// legacy path: mobile app posts straight to /exchange).
+		// Skip /scan and /approve entirely — token stays in pending. The
+		// state-machine guard collapses both this and the "scanned but not
+		// approved" case into a single 412 qr_login_not_approved response.
 		wp_set_current_user( 0 );
-		$response = $this->dispatch_exchange( $plaintext );
+		$response = $this->dispatch_exchange( $plaintext, 'irrelevant-grant' );
 
-		$this->assertSame( 426, $response->get_status() );
-		$this->assertSame( 'mobile_app_update_required', $response->get_data()['code'] );
-		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ), 'Legacy clients must not be able to mint APs after Task 7.' );
+		$this->assertSame( 412, $response->get_status() );
+		$this->assertSame( 'qr_login_not_approved', $response->get_data()['code'] );
+		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ), 'Skipping scan must not be a path to mint an AP.' );
 	}
 
 	/**
@@ -1784,7 +1765,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	public function test_exchange_requires_valid_grant_nonce(): void {
 		$prep = $this->prepare_exchange_token();
 
-		$response = $this->dispatch_exchange( $prep['plaintext'], null, str_repeat( 'a', strlen( $prep['exchange_grant'] ) ) );
+		$response = $this->dispatch_exchange( $prep['plaintext'], str_repeat( 'a', strlen( $prep['exchange_grant'] ) ) );
 
 		$this->assertSame( 412, $response->get_status() );
 		$this->assertSame( 'invalid_exchange_grant', $response->get_data()['code'] );

@@ -9,10 +9,10 @@ import { sprintf, __ } from '@wordpress/i18n';
 import type { QRLoginDeviceInfo } from './useQRLoginToken';
 
 /**
- * Build the headline shown after a successful sign-in. Prefers the device
- * model when the mobile app sent one; falls back to the OS, then to a
- * device-agnostic line for older mobile clients that don't send a device
- * payload.
+ * Build the headline shown after a successful sign-in. The Task 7
+ * `/qr-login-scan` endpoint requires a device payload, so by the time we
+ * render we should have at least an OS label. The null guard covers brief
+ * React state handoff renders, not protocol compatibility.
  */
 export const buildQRLoginDeviceHeadline = (
 	device: QRLoginDeviceInfo | null
