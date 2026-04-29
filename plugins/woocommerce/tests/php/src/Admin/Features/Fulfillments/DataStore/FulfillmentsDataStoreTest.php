@@ -184,7 +184,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		} finally {
 			update_option( 'timezone_string', $original_timezone );
 			update_option( 'gmt_offset', $original_offset );
-		}
+		}//end try
 	}
 
 	/**
@@ -254,7 +254,7 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		} finally {
 			update_option( 'timezone_string', $original_timezone );
 			update_option( 'gmt_offset', $original_offset );
-		}
+		}//end try
 	}
 
 	/**

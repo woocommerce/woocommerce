@@ -145,7 +145,7 @@ class FulfillmentSchema extends AbstractSchema {
 			'is_fulfilled' => $fulfillment->get_is_fulfilled(),
 			'date_updated' => $this->format_utc_iso8601( $date_updated ),
 			'date_deleted' => $this->format_utc_iso8601( $date_deleted ),
-			'meta_data'    => $fulfillment->get_meta_data(),
+			'meta_data'    => $this->prepare_meta_data_for_response( $fulfillment->get_raw_meta_data() ),
 		);
 	}
 
@@ -162,5 +162,26 @@ class FulfillmentSchema extends AbstractSchema {
 		}
 		$formatted = wc_rest_prepare_date_response( $date );
 		return null === $formatted ? null : $formatted . 'Z';
+	}
+
+	/**
+	 * Format `_date_fulfilled` entries in a meta data array as ISO 8601 with 'Z'
+	 * suffix so V4 clients see the same UTC contract as V3 instead of the raw
+	 * 'Y-m-d H:i:s' storage form. Other entries pass through unchanged.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param array<int, mixed> $meta_data Raw meta data array.
+	 * @return array<int, mixed>
+	 */
+	private function prepare_meta_data_for_response( array $meta_data ): array {
+		foreach ( $meta_data as &$meta ) {
+			if ( is_array( $meta ) && isset( $meta['key'], $meta['value'] ) && '_date_fulfilled' === $meta['key'] && is_string( $meta['value'] ) ) {
+				$meta['value'] = $this->format_utc_iso8601( $meta['value'] );
+			}
+		}
+		unset( $meta );
+
+		return $meta_data;
 	}
 }
