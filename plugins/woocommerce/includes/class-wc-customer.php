@@ -1281,7 +1281,7 @@ class WC_Customer extends WC_Legacy_Customer {
 			$state_changed = $props_changed || ! empty( array_filter( $meta_data, static fn( $meta ) => ! $meta->id || ! empty( $meta->get_changes() ) ) );
 			if ( ! $state_changed ) {
 				// Backward compatibility: e.g. '( new WC_Customer( $customer_id ) )->save()' as means to trigger integrations.
-				do_action( 'woocommerce_update_customer', $customer_id, $this );
+				do_action( 'woocommerce_update_customer', $customer_id, $this ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.HookCommentWrongStyle
 
 				return $this->get_id();
 			}
