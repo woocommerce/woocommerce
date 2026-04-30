@@ -1,4 +1,4 @@
 Significance: minor
 Type: add
 
-Add the `review-order` checkout endpoint and a tokenized landing page skeleton for the Customer Review Request feature, plus the public `wc_get_review_order_url()` helper. The page is read-only; form controls land in a follow-up.
+Add a top-level `/review-order/{id}/?key={order_key}` endpoint and a tokenised, read-only landing page for the Customer Review Request feature, plus the public `wc_get_review_order_url()` helper. The page is read-only; form controls land in a follow-up.
