@@ -71,13 +71,16 @@ class Analytics {
 		add_filter( 'woocommerce_admin_get_user_data_fields', array( $this, 'add_user_data_fields' ) );
 		add_action( 'admin_menu', array( $this, 'register_pages' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_cache_clear_tool' ) );
-		add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
 		add_filter( 'woocommerce_debug_tools', array( $this, 'register_regenerate_order_fulfillment_status_tool' ), 12 );
 
-		if ( ! OrderUtil::uses_new_full_refund_data() ) {
+		// Always register the batch hook so in-flight jobs survive after the legacy
+		// flag is cleared (clearing happens before the first batch is queued).
+		add_action( 'woocommerce_analytics_refund_fix_batch', array( $this, 'process_refund_fix_batch' ) );
+
+		if ( $this->should_show_refund_fix_tool() ) {
+			add_filter( 'woocommerce_debug_tools', array( $this, 'register_full_refund_fix_data_tool' ) );
 			add_action( 'admin_footer', array( $this, 'output_refund_fix_tool_js' ) );
 			add_action( 'wp_ajax_woocommerce_check_refund_fix_needed', array( $this, 'ajax_check_refund_fix_needed' ) );
-			add_action( 'woocommerce_analytics_refund_fix_batch', array( $this, 'process_refund_fix_batch' ) );
 		}
 	}
 
@@ -196,6 +199,22 @@ class Analytics {
 	}
 
 	/**
+	 * Whether the full refund fix tool should be shown to the merchant.
+	 *
+	 * Returns true when the store still has legacy refund data OR when the fix was
+	 * recently queued and the merchant has not yet dismissed the tool. New stores
+	 * (where the option was never set) never see the tool.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @return bool
+	 */
+	private function should_show_refund_fix_tool(): bool {
+		return ! OrderUtil::uses_new_full_refund_data()
+			|| 'yes' === get_option( 'woocommerce_analytics_show_old_refund_data_tool' );
+	}
+
+	/**
 	 * Register the full refund fix data tool on the WooCommerce > Status > Tools page.
 	 *
 	 * The Fix button is disabled by default (via the PHP 'disabled' field). JS enables it
@@ -210,8 +229,10 @@ class Analytics {
 		$desc = __( 'This tool will fix the full refund data used in WooCommerce Analytics and re-import all the refunded historical data.', 'woocommerce' );
 
 		$disabled = true;
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified by WooCommerce tools framework.
-		if ( OrderUtil::uses_new_full_refund_data() || ( isset( $_GET['wc_refund_fix_action'] ) && 'disable' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) ) {
+		// Show the "already fixed" note only on genuinely new stores (data was never
+		// migrated). When the fix was just queued the show-tool option is still set,
+		// so we suppress the note there to avoid confusing the merchant mid-repair.
+		if ( OrderUtil::uses_new_full_refund_data() && 'yes' !== get_option( 'woocommerce_analytics_show_old_refund_data_tool' ) ) {
 			$desc .= '<br />' . sprintf(
 				'<strong class="red">%1$s</strong> %2$s',
 				__( 'Note:', 'woocommerce' ),
@@ -245,8 +266,15 @@ class Analytics {
 		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Nonce verified by WooCommerce tools framework.
 		if ( isset( $_GET['wc_refund_fix_action'] ) && 'disable' === sanitize_key( $_GET['wc_refund_fix_action'] ) ) {
 			delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
-			return __( 'Tool disabled. No affected orders were found.', 'woocommerce' );
+			delete_option( 'woocommerce_analytics_show_old_refund_data_tool' );
+			return __( 'Tool dismissed.', 'woocommerce' );
 		}
+
+		// Clear the legacy flag before queuing so that every batch job runs with
+		// the corrected full-refund import logic (uses_new_full_refund_data() → true).
+		// Set the show-tool option so the tool stays visible until the merchant dismisses it.
+		delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
+		update_option( 'woocommerce_analytics_show_old_refund_data_tool', 'yes' );
 
 		WC()->queue()->schedule_single(
 			time(),
@@ -293,6 +321,9 @@ class Analytics {
 		);
 
 		if ( ! $refunded_orders ) {
+			if ( $wpdb->last_error ) {
+				throw new \Exception( $wpdb->last_error ); // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
+			}
 			return;
 		}
 
