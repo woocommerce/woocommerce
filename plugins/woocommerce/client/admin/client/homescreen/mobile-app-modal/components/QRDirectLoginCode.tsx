@@ -72,9 +72,7 @@ export const QRDirectLoginCode = () => {
 				<Button
 					variant="secondary"
 					onClick={ () => {
-						recordEvent(
-							'mobile_app_qr_direct_login_refreshed'
-						);
+						recordEvent( 'mobile_app_qr_direct_login_refreshed' );
 						refreshToken();
 					} }
 				>
