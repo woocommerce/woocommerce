@@ -120,7 +120,7 @@ class SignupService {
 			}
 
 			if ( NotificationStatus::PENDING === $notification->get_status() ) {
-				if ( Config::requires_double_opt_in() ) {
+				if ( $this->should_require_double_opt_in( $user_id ) ) {
 					return new SignupResult( self::SIGNUP_ALREADY_JOINED_DOUBLE_OPT_IN, $notification );
 				}
 
@@ -146,6 +146,8 @@ class SignupService {
 			$user_id         = $account_created ? $account_created : $user_id;
 		}
 
+		$requires_double_opt_in = $this->should_require_double_opt_in( $user_id );
+
 		$notification = new Notification();
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->set_product_id( $product_id );
@@ -156,7 +158,7 @@ class SignupService {
 			$notification->update_meta_data( 'posted_attributes', $posted_attributes );
 		}
 
-		if ( Config::requires_double_opt_in() ) {
+		if ( $requires_double_opt_in ) {
 			$notification->set_status( NotificationStatus::PENDING );
 		}
 
@@ -174,12 +176,12 @@ class SignupService {
 		 */
 		do_action( 'woocommerce_customer_stock_notifications_signup', $notification );
 
-		if ( Config::requires_double_opt_in() && NotificationStatus::PENDING === $notification->get_status() ) {
+		if ( $requires_double_opt_in && NotificationStatus::PENDING === $notification->get_status() ) {
 			$this->email_manager->send_verify_email( $notification );
 		}
 
 		$signup_code = self::SIGNUP_SUCCESS;
-		if ( Config::requires_double_opt_in() ) {
+		if ( $requires_double_opt_in ) {
 			$signup_code = $account_created
 				? self::SIGNUP_SUCCESS_ACCOUNT_CREATED_DOUBLE_OPT_IN
 				: self::SIGNUP_SUCCESS_DOUBLE_OPT_IN;
@@ -187,6 +189,35 @@ class SignupService {
 			$signup_code = self::SIGNUP_SUCCESS_ACCOUNT_CREATED;
 		}
 		return new SignupResult( $signup_code, $notification );
+	}
+
+	/**
+	 * Whether the signup should go through the double opt-in flow.
+	 *
+	 * Logged-in users are treated as already-verified — they confirmed their
+	 * email at account registration and the signup form pulls the email from
+	 * their profile (no chance to enter someone else's). Asking them to
+	 * verify again per stock-notification signup is friction without a
+	 * security benefit. The site-wide `requires_double_opt_in()` setting
+	 * still governs anonymous signups.
+	 *
+	 * @param int $user_id The signing-up user id (0 for anonymous).
+	 * @return bool
+	 */
+	private function should_require_double_opt_in( int $user_id ): bool {
+		$required = Config::requires_double_opt_in() && empty( $user_id );
+
+		/**
+		 * Filter whether to require double opt-in for a stock-notification signup.
+		 *
+		 * Default: site-wide `requires_double_opt_in()` setting AND signup is anonymous.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool $required Whether to require double opt-in for this signup.
+		 * @param int  $user_id  The signing-up user id (0 for anonymous).
+		 */
+		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_signup_requires_double_opt_in', $required, $user_id );
 	}
 
 	/**

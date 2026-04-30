@@ -106,6 +106,28 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should NOT send the verify email when the signup is from a logged-in user, even with double opt-in enabled site-wide.
+	 */
+	public function test_verify_email_not_sent_for_logged_in_user_even_when_double_opt_in_required() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
+
+		$product = $this->create_out_of_stock_product();
+		$user_id = $this->factory->user->create( array( 'role' => 'customer', 'user_email' => 'logged-in@example.com' ) );
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verify_email' );
+
+		$result = $this->sut->signup( $product->get_id(), $user_id, 'logged-in@example.com' );
+
+		$this->assertInstanceOf( \Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupResult::class, $result );
+		$this->assertSame( \Automattic\WooCommerce\Internal\StockNotifications\Frontend\SignupService::SIGNUP_SUCCESS, $result->get_code() );
+		$notification = $result->get_notification();
+		$this->assertInstanceOf( Notification::class, $notification );
+		$this->assertSame( NotificationStatus::ACTIVE, $notification->get_status() );
+	}
+
+	/**
 	 * Create an out-of-stock simple product for signup.
 	 *
 	 * @return \WC_Product_Simple
