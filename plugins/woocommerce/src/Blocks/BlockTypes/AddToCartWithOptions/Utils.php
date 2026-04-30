@@ -129,9 +129,8 @@ class Utils {
 			// as multiple context directives are not supported in the same
 			// element in WordPress 6.8. Once WooCommerce drops support for
 			// WordPress 6.8, this code can be refactored.
-			if ( $processor->next_tag( array( 'tag_name' => 'div' ) ) ) {
-				$processor->set_attribute( 'data-wp-context', $products_context );
-			}
+			$processor->next_tag( array( 'tag_name' => 'div', 'class_name' => 'quantity' ) );
+			$processor->set_attribute( 'data-wp-context', $products_context );
 		}
 
 		if (
