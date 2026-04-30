@@ -755,8 +755,8 @@ class WC_Cart extends WC_Legacy_Cart {
 		$quantities = array();
 
 		foreach ( $this->get_cart() as $values ) {
-			$product = $values['data'];
-			$quantities[ $product->get_stock_managed_by_id() ] = isset( $quantities[ $product->get_stock_managed_by_id() ] ) ? $quantities[ $product->get_stock_managed_by_id() ] + $values['quantity'] : $values['quantity'];
+			$managed_by_id                = $values['data']->get_stock_managed_by_id();
+			$quantities[ $managed_by_id ] = $values['quantity'] + ( $quantities[ $managed_by_id ] ?? 0 );
 		}
 
 		return $quantities;
