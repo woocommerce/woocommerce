@@ -242,6 +242,23 @@ class DefaultShippingPartners {
 						),
 					),
 				),
+				'layout_row'              => array(
+					'image'    => $asset_base_url . 'wcs-column.svg',
+					'features' => array(
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Buy postage when you need it', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Print labels at home', 'woocommerce' ),
+						),
+						array(
+							'icon'        => $check_icon,
+							'description' => __( 'Discounted USPS, UPS, and DHL rates', 'woocommerce' ),
+						),
+					),
+				),
 				'learn_more_link'         => 'https://woocommerce.com/products/shipping/',
 				'is_visible'              => array(
 					self::get_rules_for_countries( array( 'US' ) ),
@@ -255,7 +272,7 @@ class DefaultShippingPartners {
 						),
 					),
 				),
-				'available_layouts'       => array( 'column' ),
+				'available_layouts'       => array( 'row', 'column' ),
 				'countries_where_primary' => array( 'US' ),
 			),
 		);
