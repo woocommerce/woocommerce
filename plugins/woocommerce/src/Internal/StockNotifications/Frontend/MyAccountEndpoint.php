@@ -26,7 +26,7 @@ class MyAccountEndpoint {
 	 *
 	 * Matches the slug used in the menu filter, rewrite endpoint, and template hook.
 	 */
-	public const ENDPOINT = 'back-in-stock-notifications';
+	public const ENDPOINT = 'stock-notifications';
 
 	/**
 	 * Query argument triggered by the cancel form post.
@@ -57,7 +57,7 @@ class MyAccountEndpoint {
 	}
 
 	/**
-	 * Register the `back-in-stock-notifications` rewrite endpoint / query var.
+	 * Register the `stock-notifications` rewrite endpoint / query var.
 	 *
 	 * Hooking `woocommerce_get_query_vars` wires us into {@see \WC_Query::add_endpoints()}
 	 * so WordPress registers the rewrite rule and our slug lands in `$wp->query_vars`.
@@ -136,12 +136,12 @@ class MyAccountEndpoint {
 	/**
 	 * Render the endpoint template.
 	 *
-	 * Hooked to `woocommerce_account_back-in-stock-notifications_endpoint`, mirroring
+	 * Hooked to `woocommerce_account_stock-notifications_endpoint`, mirroring
 	 * how `woocommerce_account_downloads` and `woocommerce_account_orders` hook up.
 	 *
 	 * @param string|int $current_page The current page number passed by WC (the value
 	 *                                 captured from the rewrite endpoint, e.g. `2` for
-	 *                                 `/my-account/back-in-stock-notifications/2/`). Empty
+	 *                                 `/my-account/stock-notifications/2/`). Empty
 	 *                                 string when no page is in the URL.
 	 */
 	public function render_endpoint( $current_page = 1 ): void {
@@ -160,7 +160,7 @@ class MyAccountEndpoint {
 		$page = $this->get_current_user_notifications_page( $current_page, $per_page );
 
 		\wc_get_template(
-			'myaccount/back-in-stock-notifications.php',
+			'myaccount/stock-notifications.php',
 			array(
 				'notifications' => $page['notifications'],
 				'has_items'     => ! empty( $page['notifications'] ),
@@ -196,7 +196,7 @@ class MyAccountEndpoint {
 		}
 
 		/**
-		 * Filter the notification statuses shown on the My Account back-in-stock-notifications screen.
+		 * Filter the notification statuses shown on the My Account stock-notifications screen.
 		 *
 		 * Defaults to PENDING + ACTIVE — the statuses the customer can act on. SENT
 		 * notifications are deliberately hidden because the email has already been
@@ -251,7 +251,7 @@ class MyAccountEndpoint {
 	 * Intercept a cancel POST to flip a notification to `cancelled`.
 	 *
 	 * Guards:
-	 * - Must be on the My Account > back-in-stock-notifications endpoint.
+	 * - Must be on the My Account > stock-notifications endpoint.
 	 * - Must be authenticated.
 	 * - Nonce must be scoped to the specific notification id ({@see ::get_cancel_nonce_action()}).
 	 * - The notification must belong to the current user.

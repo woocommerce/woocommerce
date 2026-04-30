@@ -4,7 +4,7 @@
  *
  * Shows the current user's back in stock notifications on the account page.
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/back-in-stock-notifications.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/myaccount/stock-notifications.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to
@@ -101,7 +101,7 @@ do_action( 'woocommerce_before_account_back_in_stock_notifications', $has_items 
 		$format = $pretty ? '%#%/' : '?' . MyAccountEndpoint::ENDPOINT . '=%#%';
 		$base   = $pretty ? trailingslashit( $endpoint_url ) . '%_%' : $endpoint_url . '%_%';
 		?>
-		<nav class="woocommerce-pagination woocommerce-back-in-stock-notifications-pagination" aria-label="<?php esc_attr_e( 'Back in stock notifications pagination', 'woocommerce' ); ?>">
+		<nav class="woocommerce-pagination woocommerce-back-in-stock-notifications-pagination" aria-label="<?php esc_attr_e( 'Stock notifications pagination', 'woocommerce' ); ?>">
 			<?php
 			echo paginate_links( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				array(
