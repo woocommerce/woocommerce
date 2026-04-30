@@ -14,7 +14,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.8.0
+ * @version 10.9.0
  *
  * @var array $notifications Array of Notification objects for the current user.
  * @var bool  $has_items     Whether there are any notifications to render.
@@ -35,13 +35,6 @@ $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_
  * @param bool $has_items Whether there are any notifications to render.
  */
 do_action( 'woocommerce_before_account_back_in_stock_notifications', $has_items );
-
-$status_labels = array(
-	NotificationStatus::PENDING   => __( 'Pending', 'woocommerce' ),
-	NotificationStatus::ACTIVE    => __( 'Active', 'woocommerce' ),
-	NotificationStatus::SENT      => __( 'Sent', 'woocommerce' ),
-	NotificationStatus::CANCELLED => __( 'Cancelled', 'woocommerce' ),
-);
 ?>
 
 <?php if ( $has_items ) : ?>
@@ -51,7 +44,6 @@ $status_labels = array(
 			<tr>
 				<th scope="col" class="woocommerce-back-in-stock-notifications-table__header woocommerce-back-in-stock-notifications-table__header-product"><?php esc_html_e( 'Product', 'woocommerce' ); ?></th>
 				<th scope="col" class="woocommerce-back-in-stock-notifications-table__header woocommerce-back-in-stock-notifications-table__header-variation"><?php esc_html_e( 'Variation', 'woocommerce' ); ?></th>
-				<th scope="col" class="woocommerce-back-in-stock-notifications-table__header woocommerce-back-in-stock-notifications-table__header-status"><?php esc_html_e( 'Status', 'woocommerce' ); ?></th>
 				<th scope="col" class="woocommerce-back-in-stock-notifications-table__header woocommerce-back-in-stock-notifications-table__header-date"><?php esc_html_e( 'Date signed up', 'woocommerce' ); ?></th>
 				<th scope="col" class="woocommerce-back-in-stock-notifications-table__header woocommerce-back-in-stock-notifications-table__header-actions"><?php esc_html_e( 'Actions', 'woocommerce' ); ?></th>
 			</tr>
@@ -60,7 +52,6 @@ $status_labels = array(
 		<?php foreach ( $notifications as $notification ) : ?>
 			<?php
 			$status       = (string) $notification->get_status();
-			$status_label = isset( $status_labels[ $status ] ) ? $status_labels[ $status ] : $status;
 			$product_name = $notification->get_product_name();
 			$permalink    = $notification->get_product_permalink();
 			$variation    = $notification->get_product_formatted_variation_list( true );
@@ -80,9 +71,6 @@ $status_labels = array(
 				</td>
 				<td class="woocommerce-back-in-stock-notifications-table__cell woocommerce-back-in-stock-notifications-table__cell-variation" data-title="<?php esc_attr_e( 'Variation', 'woocommerce' ); ?>">
 					<?php echo '' !== $variation ? esc_html( $variation ) : '&mdash;'; ?>
-				</td>
-				<td class="woocommerce-back-in-stock-notifications-table__cell woocommerce-back-in-stock-notifications-table__cell-status" data-title="<?php esc_attr_e( 'Status', 'woocommerce' ); ?>">
-					<?php echo esc_html( $status_label ); ?>
 				</td>
 				<td class="woocommerce-back-in-stock-notifications-table__cell woocommerce-back-in-stock-notifications-table__cell-date" data-title="<?php esc_attr_e( 'Date signed up', 'woocommerce' ); ?>">
 					<?php if ( $date_created ) : ?>
