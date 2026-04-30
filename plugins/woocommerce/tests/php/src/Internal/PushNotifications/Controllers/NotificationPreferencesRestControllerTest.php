@@ -46,10 +46,17 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 		$this->set_up_features_controller_mock();
 		$this->reset_push_notifications_cache();
 
-		( new NotificationPreferencesRestController() )->register_routes();
-
 		$this->user_id       = $this->factory->user->create( array( 'role' => 'shop_manager' ) );
 		$this->subscriber_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+	}
+
+	/**
+	 * Register the controller's routes using the container so init() auto-wires the service
+	 * and push-notifications dependencies. Tests call this after setting up any container
+	 * mocks they need (e.g. replacing the service) so the resolved controller picks them up.
+	 */
+	private function register_routes(): void {
+		wc_get_container()->get( NotificationPreferencesRestController::class )->register_routes();
 	}
 
 	/**
@@ -73,6 +80,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_get_preferences_requires_authentication() {
 		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
 
 		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/preferences' );
 		$response = $this->server->dispatch( $request );
@@ -86,6 +94,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_get_preferences_rejects_users_without_role() {
 		wp_set_current_user( $this->subscriber_id );
 		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
 
 		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/preferences' );
 		$response = $this->server->dispatch( $request );
@@ -99,6 +108,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_get_preferences_returns_user_preferences() {
 		wp_set_current_user( $this->user_id );
 		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
 
 		wc_get_container()
 			->get( NotificationPreferencesService::class )
@@ -125,6 +135,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_post_preferences_updates_settings() {
 		wp_set_current_user( $this->user_id );
 		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
 		$request->set_param( 'store_order', array( 'enabled' => false ) );
@@ -146,6 +157,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_post_preferences_rejects_non_object_value() {
 		wp_set_current_user( $this->user_id );
 		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
 		$request->set_param( 'store_order', 'not-an-object' );
@@ -161,6 +173,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_post_preferences_rejects_non_boolean_enabled() {
 		wp_set_current_user( $this->user_id );
 		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
 		$request->set_param( 'store_order', array( 'enabled' => 'not-a-boolean' ) );
@@ -176,6 +189,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_patch_preferences_updates_settings() {
 		wp_set_current_user( $this->user_id );
 		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
 
 		$request = new WP_REST_Request( 'PATCH', '/wc-push-notifications/preferences' );
 		$request->set_param( 'store_order', array( 'enabled' => false ) );
@@ -194,6 +208,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	public function test_post_preferences_returns_merged_result() {
 		wp_set_current_user( $this->user_id );
 		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
 
 		wc_get_container()
 			->get( NotificationPreferencesService::class )
@@ -243,6 +258,7 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 		);
 
 		wc_get_container()->replace( NotificationPreferencesService::class, $service_mock );
+		$this->register_routes();
 
 		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
 		$request->set_param( 'store_review', array( 'enabled' => false ) );

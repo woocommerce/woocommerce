@@ -41,6 +41,38 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 	protected string $rest_base = 'preferences';
 
 	/**
+	 * The notification preferences service.
+	 *
+	 * @var NotificationPreferencesService
+	 */
+	private NotificationPreferencesService $preferences_service;
+
+	/**
+	 * The push notifications module enablement gate.
+	 *
+	 * @var PushNotifications
+	 */
+	private PushNotifications $push_notifications;
+
+	/**
+	 * Initialize injected dependencies.
+	 *
+	 * @internal
+	 *
+	 * @param NotificationPreferencesService $preferences_service The preferences service.
+	 * @param PushNotifications              $push_notifications  The push notifications module.
+	 *
+	 * @since 10.8.0
+	 */
+	final public function init(
+		NotificationPreferencesService $preferences_service,
+		PushNotifications $push_notifications
+	): void {
+		$this->preferences_service = $preferences_service;
+		$this->push_notifications  = $push_notifications;
+	}
+
+	/**
 	 * Class identifier used by `woocommerce_rest_api_get_rest_namespaces`.
 	 *
 	 * Intentionally distinct from the URL `$route_namespace` — the filter keys
@@ -94,9 +126,7 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 	public function get_preferences( WP_REST_Request $request ) {
 		unset( $request );
 
-		$preferences = wc_get_container()
-			->get( NotificationPreferencesService::class )
-			->get_preferences( get_current_user_id() );
+		$preferences = $this->preferences_service->get_preferences( get_current_user_id() );
 
 		return new WP_REST_Response( $preferences, WP_Http::OK );
 	}
@@ -113,9 +143,10 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 	 */
 	public function update_preferences( WP_REST_Request $request ) {
 		try {
-			$merged = wc_get_container()
-				->get( NotificationPreferencesService::class )
-				->save_preferences( get_current_user_id(), $request->get_params() );
+			$merged = $this->preferences_service->save_preferences(
+				get_current_user_id(),
+				$request->get_params()
+			);
 		} catch ( Exception $e ) {
 			return $this->convert_exception_to_wp_error( $e );
 		}
@@ -141,7 +172,7 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 			);
 		}
 
-		if ( ! wc_get_container()->get( PushNotifications::class )->should_be_enabled() ) {
+		if ( ! $this->push_notifications->should_be_enabled() ) {
 			return false;
 		}
 
@@ -165,7 +196,7 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 	 */
 	private function get_args(): array {
 		$args     = array();
-		$defaults = wc_get_container()->get( NotificationPreferencesService::class )->get_defaults();
+		$defaults = $this->preferences_service->get_defaults();
 
 		foreach ( array_keys( $defaults ) as $key ) {
 			$args[ $key ] = array(
