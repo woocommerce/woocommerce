@@ -195,9 +195,28 @@ class MyAccountEndpoint {
 			);
 		}
 
+		/**
+		 * Filter the notification statuses shown on the My Account back-in-stock-notifications screen.
+		 *
+		 * Defaults to PENDING + ACTIVE — the statuses the customer can act on. SENT
+		 * notifications are deliberately hidden because the email has already been
+		 * dispatched and the row is just noise; CANCELLED is hidden for the same
+		 * reason. Merchants who want a full history can build their own view via
+		 * {@see NotificationQuery::get_notifications()}.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param string[] $statuses List of {@see NotificationStatus} values to include.
+		 */
+		$statuses = (array) apply_filters(
+			'woocommerce_account_back_in_stock_notifications_statuses',
+			array( NotificationStatus::PENDING, NotificationStatus::ACTIVE )
+		);
+
 		$total_items = NotificationQuery::count_notifications(
 			array(
 				'user_id' => $user_id,
+				'status'  => $statuses,
 			)
 		);
 
@@ -212,6 +231,7 @@ class MyAccountEndpoint {
 		$notifications = $total_items > 0 ? NotificationQuery::get_notifications(
 			array(
 				'user_id'  => $user_id,
+				'status'   => $statuses,
 				'order_by' => array( 'id' => 'DESC' ),
 				'return'   => 'objects',
 				'limit'    => $per_page,
