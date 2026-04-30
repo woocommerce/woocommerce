@@ -327,6 +327,7 @@ class WCAdminAssets {
 			'wc-settings-editor',
 			'wc-remote-logging',
 			'wc-sanitize',
+			'wc-variations-classic',
 		);
 
 		$scripts_map = array(
@@ -344,6 +345,7 @@ class WCAdminAssets {
 			'wc-experimental',
 			'wc-navigation',
 			'wc-product-editor',
+			'wc-variations-classic',
 			WC_ADMIN_APP,
 		);
 
@@ -404,6 +406,9 @@ class WCAdminAssets {
 			),
 			array(
 				'handle' => 'wc-settings-editor',
+			),
+			array(
+				'handle' => 'wc-variations-classic',
 			),
 			array(
 				'handle' => 'wc-customer-effort-score',
