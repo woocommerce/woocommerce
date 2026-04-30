@@ -1,9 +1,78 @@
 /**
  * Review Order page styles.
  *
- * Currently scoped to the accessible star-rating control. M4's design-token
- * pass (WOOPLUG-6597) will fold these into the broader review-order layout.
+ * The design-token / responsive pass (WOOPLUG-6597) is the dedicated polish
+ * issue and will tighten these styles further.
  */
+
+.woocommerce-review-order {
+
+	&__items {
+		list-style: none;
+		padding: 0;
+		margin: 0 0 24px;
+	}
+
+	&__item {
+		padding: 24px 0;
+		border-top: 1px solid currentColor;
+		border-color: rgba(0, 0, 0, 0.1);
+
+		&:first-child {
+			border-top: 0;
+			padding-top: 0;
+		}
+	}
+
+	&__item-title {
+		margin: 0 0 12px;
+		font-weight: 600;
+	}
+
+	&__item-row {
+		display: flex;
+		gap: 24px;
+		align-items: flex-start;
+	}
+
+	&__item-image {
+		flex: 0 0 120px;
+		max-width: 120px;
+	}
+
+	&__item-fields {
+		flex: 1 1 auto;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 12px;
+	}
+
+	&__item-rating-label,
+	&__item-review-label {
+		display: block;
+		margin: 0 0 4px;
+		font-weight: 500;
+	}
+
+	&__item-review-textarea {
+		width: 100%;
+		min-height: 96px;
+		resize: vertical;
+		font: inherit;
+		padding: 8px 12px;
+		box-sizing: border-box;
+	}
+
+	&__actions {
+		margin-top: 24px;
+	}
+
+	&__submit[disabled] {
+		opacity: 0.5;
+		cursor: not-allowed;
+	}
+}
 
 .woocommerce-star-rating {
 	display: inline-flex;
