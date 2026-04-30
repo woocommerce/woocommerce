@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Prevent widows in inbox note and task list body copy with text-wrap: pretty.
