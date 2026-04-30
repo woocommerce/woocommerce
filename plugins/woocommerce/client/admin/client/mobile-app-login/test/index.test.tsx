@@ -77,11 +77,13 @@ describe( 'MobileAppLoginPage', () => {
 		expect( screen.getByText( /Code expires in/i ) ).toBeInTheDocument();
 	} );
 
-	it( 'renders the troubleshooting FAQ link pointing at the help doc', () => {
+	it( 'renders the FAQ link pointing at the help doc', () => {
 		render( <MobileAppLoginPage /> );
 
+		// Copy synced with the homescreen modal so both surfaces share the
+		// same wording ("Any troubles signing in? Check out the FAQ.").
 		const faqLink = screen.getByRole( 'link', {
-			name: /troubleshooting guide/i,
+			name: /FAQ/i,
 		} );
 		expect( faqLink ).toHaveAttribute(
 			'href',
@@ -174,7 +176,7 @@ describe( 'MobileAppLoginPage', () => {
 			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'link', { name: /troubleshooting guide/i } )
+			screen.getByRole( 'link', { name: /FAQ/i } )
 		).toBeInTheDocument();
 
 		// Error text from the hook leaks through the shared component.

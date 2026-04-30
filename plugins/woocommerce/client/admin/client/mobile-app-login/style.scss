@@ -1,3 +1,8 @@
+// Shared QR-direct-login layout rules. Imported from the modal package so
+// the standalone page renders the QR + number-match / approved / rejected
+// states identically to the modal.
+@import "../homescreen/mobile-app-modal/components/qr-direct-login";
+
 .woocommerce-mobile-app-login {
 	display: flex;
 	justify-content: center;
@@ -18,11 +23,19 @@
 		padding: $gap-largest;
 	}
 
-	&__brand {
-		display: block;
-		width: 95px;
-		height: 26px;
+	// Real Woo wordmark at the top of the card. Matches the 91×24 SVG from
+	// `~/core-profiler/components/navigation/woologo`.
+	&__logo {
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		margin: 0 auto $gap;
+		line-height: 0;
+
+		svg {
+			width: 91px;
+			height: 24px;
+		}
 	}
 
 	&__heading {
@@ -47,7 +60,7 @@
 
 		// Centre the QR + meta column as a unit on this single-column page.
 		// The component itself uses a horizontal flex layout in the READY
-		// state (QR on the left, timer + renew on the right) — we just
+		// state (QR on the left, timer + renew on the right), we just
 		// re-anchor that whole row to the centre here.
 		.woocommerce-qr-direct-login {
 			display: flex;
@@ -68,9 +81,16 @@
 	}
 
 	&__faq {
+		margin-top: $gap-large;
+		padding-top: 16px;
+		border-top: 1px solid #f0f0f0;
 		color: $gray-700;
 		font-size: 13px;
 		line-height: 1.5;
-		margin: 0;
+		text-align: center;
+
+		a {
+			color: #007cba;
+		}
 	}
 }
