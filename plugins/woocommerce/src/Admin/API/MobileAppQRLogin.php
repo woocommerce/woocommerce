@@ -917,6 +917,12 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_status( $request ) {
+		// Defeat any intermediary cache (Cloudflare, NGINX micro-cache, browser, edge proxy)
+		// that might pin this GET to its first response. Polling endpoints are by definition
+		// state-bearing — every tick must see the live transient. Returning a stale `scanned`
+		// response forever is exactly the symptom we'd see if the cache pins the first hit.
+		nocache_headers();
+
 		$user_id = get_current_user_id();
 
 		if ( ! $this->check_status_rate_limit( $user_id ) ) {
@@ -1357,7 +1363,34 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$record['state']          = self::STATE_APPROVED;
 		$record['state_at']       = time();
 		$record['exchange_grant'] = bin2hex( random_bytes( self::EXCHANGE_GRANT_BYTES ) );
-		set_transient( $key, $record, max( 30, ( isset( $record['expires_at'] ) ? (int) $record['expires_at'] - time() : self::CHALLENGE_TTL ) ) );
+		$ttl                      = max(
+			30,
+			isset( $record['expires_at'] ) ? (int) $record['expires_at'] - time() : self::CHALLENGE_TTL
+		);
+
+		// Belt and suspenders: write twice, deleting first to defeat any object-cache
+		// stale-read or filter-shadowing weirdness. set_transient is normally idempotent
+		// but a rare class of object-cache misconfigurations holds onto the previous
+		// `scanned` value even after a fresh write — clearing first guarantees the next
+		// `get_transient` returns the post-approval record.
+		delete_transient( $key );
+		$ok = set_transient( $key, $record, $ttl );
+
+		// Read-back verification for diagnostic logs. If the transient layer is busted,
+		// surface it loudly to wc_get_logger so the support flow has something concrete
+		// to look at instead of "approve seems to silently fail".
+		$readback       = get_transient( $key );
+		$readback_state = is_array( $readback ) && isset( $readback['state'] ) ? (string) $readback['state'] : 'missing';
+
+		wc_get_logger()->info(
+			'QR login approve: transient committed',
+			array(
+				'source'         => 'qr-login',
+				'set_ok'         => (bool) $ok,
+				'ttl'            => $ttl,
+				'readback_state' => $readback_state,
+			)
+		);
 
 		return rest_ensure_response( array( 'state' => self::STATE_APPROVED ) );
 	}
@@ -1371,6 +1404,13 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return \WP_REST_Response|\WP_Error
 	 */
 	public function get_session_status( $request ) {
+		// Defeat any intermediary cache (Cloudflare, NGINX micro-cache, OkHttp's shared
+		// cache, edge proxy) that might pin this GET to its first response. Polling
+		// endpoints are by definition state-bearing — every tick must see the live
+		// transient. Returning a stale `scanned` response forever is exactly the
+		// symptom we see if the cache pins the first hit.
+		nocache_headers();
+
 		$session_id = (string) $request->get_param( 'session_id' );
 
 		if ( ! $this->check_session_status_rate_limit( $session_id ) ) {
@@ -1390,10 +1430,24 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$record = get_transient( self::TOKEN_TRANSIENT_PREFIX . $token_hash );
 		if ( ! is_array( $record ) ) {
+			wc_get_logger()->info(
+				'QR login session-status: token transient missing',
+				array( 'source' => 'qr-login', 'token_hash_short' => substr( (string) $token_hash, 0, 8 ) )
+			);
 			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
 		}
 
 		$state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
+
+		wc_get_logger()->debug(
+			'QR login session-status: read',
+			array(
+				'source'           => 'qr-login',
+				'state'            => $state,
+				'has_grant'        => ! empty( $record['exchange_grant'] ),
+				'token_hash_short' => substr( (string) $token_hash, 0, 8 ),
+			)
+		);
 
 		$response = array( 'state' => $state );
 
