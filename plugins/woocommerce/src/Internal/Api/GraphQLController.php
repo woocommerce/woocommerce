@@ -39,6 +39,24 @@ abstract class GraphQLController {
 	public const DEFAULT_MAX_QUERY_COMPLEXITY = 1000;
 
 	/**
+	 * Default path (relative to /wp-json/) at which the GraphQL route is registered.
+	 *
+	 * Used as the fallback when the {@see Main::OPTION_ENDPOINT_URL} option is
+	 * unset or was stored in an invalid form. See {@see self::get_endpoint_url()}
+	 * for the accessor.
+	 */
+	public const DEFAULT_ENDPOINT_URL = 'wc/graphql';
+
+	/**
+	 * Regex matching one valid path segment of the endpoint URL.
+	 *
+	 * Constrained to the character class WordPress REST routes accept
+	 * (alphanumerics, underscores, hyphens). Shared with {@see Settings::sanitize_endpoint_url()}
+	 * so the UI sanitizer and the controller-side fallback stay in lockstep.
+	 */
+	public const ENDPOINT_URL_SEGMENT_PATTERN = '/^[A-Za-z0-9_\-]+$/';
+
+	/**
 	 * Cached GraphQL schema instance.
 	 *
 	 * @var ?Schema
@@ -87,6 +105,65 @@ abstract class GraphQLController {
 	}
 
 	/**
+	 * The path (relative to /wp-json/) at which the GraphQL route is registered.
+	 *
+	 * Reads the {@see Main::OPTION_ENDPOINT_URL} store option; falls back to
+	 * {@see self::DEFAULT_ENDPOINT_URL} when the option is unset, empty, or
+	 * fails {@see self::is_valid_endpoint_url()}. The UI already validates on
+	 * save, so this defense-in-depth guard only fires for CLI-set option values.
+	 */
+	public static function get_endpoint_url(): string {
+		$value = trim( (string) get_option( Main::OPTION_ENDPOINT_URL, self::DEFAULT_ENDPOINT_URL ), '/' );
+		if ( ! self::is_valid_endpoint_url( $value ) ) {
+			return self::DEFAULT_ENDPOINT_URL;
+		}
+		return $value;
+	}
+
+	/**
+	 * Whether a value is a valid endpoint URL.
+	 *
+	 * Requires at least two non-empty path segments (so register_rest_route()
+	 * has both a namespace and a route), each matching
+	 * {@see self::ENDPOINT_URL_SEGMENT_PATTERN}. Mirrors the rules enforced on
+	 * save by {@see Settings::sanitize_endpoint_url()}, so values that bypass
+	 * the UI (e.g. CLI-set options) get the same treatment.
+	 *
+	 * @param string $value Endpoint URL with surrounding slashes already stripped.
+	 */
+	private static function is_valid_endpoint_url( string $value ): bool {
+		if ( '' === $value ) {
+			return false;
+		}
+		$parts = explode( '/', $value );
+		if ( count( $parts ) < 2 ) {
+			return false;
+		}
+		foreach ( $parts as $part ) {
+			if ( '' === $part || ! preg_match( self::ENDPOINT_URL_SEGMENT_PATTERN, $part ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Split the endpoint URL into the `[namespace, route]` pair that
+	 * register_rest_route() expects.
+	 *
+	 * The last path segment becomes the route; everything before it becomes
+	 * the namespace. E.g. `wc/v4/graphql` → `['wc/v4', '/graphql']`.
+	 *
+	 * @return array{0: string, 1: string}
+	 */
+	private static function split_endpoint_url(): array {
+		$parts     = explode( '/', self::get_endpoint_url() );
+		$route     = '/' . array_pop( $parts );
+		$namespace = implode( '/', $parts );
+		return array( $namespace, $route );
+	}
+
+	/**
 	 * Register the GraphQL REST route.
 	 */
 	public function register(): void {
@@ -94,10 +171,11 @@ abstract class GraphQLController {
 		if ( empty( $methods ) ) {
 			return;
 		}
+		list( $namespace, $route ) = self::split_endpoint_url();
 
 		register_rest_route(
-			'wc',
-			'/graphql',
+			$namespace,
+			$route,
 			array(
 				'methods'             => $methods,
 				'callback'            => array( $this, 'handle_request' ),

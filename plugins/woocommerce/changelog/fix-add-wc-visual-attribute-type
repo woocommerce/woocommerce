@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add wc-visual attribute type to allow setting colors for attributes

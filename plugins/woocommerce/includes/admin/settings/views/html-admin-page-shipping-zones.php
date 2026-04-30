@@ -147,7 +147,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</form>
 				</article>
 				<footer>
-					<div class="inner">
+					<div class="wc-backbone-modal-buttons">
 						<button id="btn-ok" class="button button-primary button-large"><?php _e( 'Add shipping method', 'woocommerce' ); ?></button>
 					</div>
 				</footer>
