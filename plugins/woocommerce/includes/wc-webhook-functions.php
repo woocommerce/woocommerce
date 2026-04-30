@@ -123,7 +123,14 @@ function wc_is_webhook_valid_topic( $topic ) {
 	$default_resources = array( 'coupon', 'customer', 'order', 'product' );
 	$default_events    = array( 'created', 'updated', 'deleted', 'restored', 'published' );
 
+	/**
+	 * Filters the list of valid webhook resources.
+	 *
+	 * @since 2.2.0
+	 * @param array $valid_resources Array of valid webhook resources.
+	 */
 	$valid_resources = apply_filters( 'woocommerce_valid_webhook_resources', $default_resources );
+
 	/**
 	 * Filters the list of valid webhook events.
 	 *
@@ -147,10 +154,21 @@ function wc_is_webhook_valid_topic( $topic ) {
 	// hook. Pairs without one (e.g. `order.published`, `customer.restored`) save
 	// as Active webhooks but never deliver, so reject them at create time.
 	$default_topics = array(
-		'coupon.created', 'coupon.updated', 'coupon.deleted', 'coupon.restored',
-		'customer.created', 'customer.updated', 'customer.deleted',
-		'order.created', 'order.updated', 'order.deleted', 'order.restored',
-		'product.created', 'product.updated', 'product.deleted', 'product.restored',
+		'coupon.created',
+		'coupon.updated',
+		'coupon.deleted',
+		'coupon.restored',
+		'customer.created',
+		'customer.updated',
+		'customer.deleted',
+		'order.created',
+		'order.updated',
+		'order.deleted',
+		'order.restored',
+		'product.created',
+		'product.updated',
+		'product.deleted',
+		'product.restored',
 		'product.published',
 	);
 
