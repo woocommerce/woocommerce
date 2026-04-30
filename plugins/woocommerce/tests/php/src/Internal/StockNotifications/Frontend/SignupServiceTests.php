@@ -112,7 +112,12 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
 
 		$product = $this->create_out_of_stock_product();
-		$user_id = $this->factory->user->create( array( 'role' => 'customer', 'user_email' => 'logged-in@example.com' ) );
+		$user_id = $this->factory->user->create(
+			array(
+				'role'       => 'customer',
+				'user_email' => 'logged-in@example.com',
+			)
+		);
 
 		$this->email_manager
 			->expects( $this->never() )
