@@ -141,17 +141,120 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 		$this->assertNotNull( $fulfillment->get_date_fulfilled() );
 
 		// Set a known fixed date_fulfilled to make the assertion deterministic.
-		$fixed_date = '2025-01-15 10:30:00';
-		$fulfillment->set_date_fulfilled( $fixed_date );
+		// Pass an explicit UTC marker so the setter's timezone normalization is a no-op.
+		$fulfillment->set_date_fulfilled( '2025-01-15 10:30:00 UTC' );
 		$fulfillment->set_entity_id( '456' );
 		$this->data_store->update( $fulfillment );
 
-		// Verify in-memory value is preserved.
-		$this->assertEquals( $fixed_date, $fulfillment->get_date_fulfilled() );
+		// Verify in-memory value is the normalized UTC 'Y-m-d H:i:s' form.
+		$this->assertEquals( '2025-01-15 10:30:00', $fulfillment->get_date_fulfilled() );
 
 		// Verify persisted value matches after reloading from DB.
 		$read_fulfillment = new Fulfillment( $fulfillment->get_id() );
-		$this->assertEquals( $fixed_date, $read_fulfillment->get_date_fulfilled() );
+		$this->assertEquals( '2025-01-15 10:30:00', $read_fulfillment->get_date_fulfilled() );
+	}
+
+	/**
+	 * Tests that setters normalize datetime inputs to UTC regardless of the site timezone.
+	 */
+	public function test_setters_normalize_to_utc_under_non_utc_site_timezone() {
+		$original_timezone = get_option( 'timezone_string' );
+		$original_offset   = get_option( 'gmt_offset' );
+
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+		update_option( 'gmt_offset', '' );
+
+		try {
+			$fulfillment = new Fulfillment();
+
+			// A bare MySQL string is interpreted as site-local (LA, UTC-8 in January).
+			$fulfillment->set_date_fulfilled( '2025-01-15 10:30:00' );
+			$this->assertSame( '2025-01-15 18:30:00', $fulfillment->get_date_fulfilled() );
+
+			// An ISO string with explicit Z is respected as UTC.
+			$fulfillment->set_date_fulfilled( '2025-01-15T10:30:00Z' );
+			$this->assertSame( '2025-01-15 10:30:00', $fulfillment->get_date_fulfilled() );
+
+			// The same normalization applies to date_updated and date_deleted setters.
+			$fulfillment->set_date_updated( '2025-01-15 10:30:00' );
+			$this->assertSame( '2025-01-15 18:30:00', $fulfillment->get_date_updated() );
+
+			$fulfillment->set_date_deleted( '2025-01-15T10:30:00+00:00' );
+			$this->assertSame( '2025-01-15 10:30:00', $fulfillment->get_date_deleted() );
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+			update_option( 'gmt_offset', $original_offset );
+		}//end try
+	}
+
+	/**
+	 * Tests that the date setters reject malformed and whitespace-only inputs
+	 * instead of silently storing a normalized but unintended value.
+	 */
+	public function test_setters_reject_malformed_date_input() {
+		$fulfillment = new Fulfillment();
+
+		// PHP's DateTime would silently roll Feb 30 into March; setter must reject it.
+		$fulfillment->set_date_fulfilled( '2025-02-30 10:00:00' );
+		$this->assertNull( $fulfillment->get_date_fulfilled() );
+
+		// Whitespace-only input must not be parsed as "now".
+		$fulfillment->set_date_updated( '   ' );
+		$this->assertNull( $fulfillment->get_date_updated() );
+
+		$fulfillment->set_date_deleted( 'not a date' );
+		$this->assertNull( $fulfillment->get_date_deleted() );
+	}
+
+	/**
+	 * Tests that the data store persists datetimes as UTC even when the site
+	 * timezone is not UTC, and that the value survives a DB round-trip unchanged.
+	 */
+	public function test_data_store_persists_dates_in_utc_under_non_utc_site_timezone() {
+		$original_timezone = get_option( 'timezone_string' );
+		$original_offset   = get_option( 'gmt_offset' );
+
+		update_option( 'timezone_string', 'America/Los_Angeles' );
+		update_option( 'gmt_offset', '' );
+
+		try {
+			$fulfillment = new Fulfillment();
+			$fulfillment->set_entity_type( 'order-fulfillment' );
+			$fulfillment->set_entity_id( '789' );
+			$fulfillment->set_status( 'fulfilled' );
+			$fulfillment->set_items(
+				array(
+					array(
+						'item_id' => 1,
+						'qty'     => 1,
+					),
+				)
+			);
+
+			$before_utc = gmdate( 'Y-m-d H:i:s' );
+			$this->data_store->create( $fulfillment );
+			$after_utc = gmdate( 'Y-m-d H:i:s' );
+
+			// Persisted date_updated should be a UTC value within the create window.
+			$stored_date_updated = $fulfillment->get_date_updated();
+			$this->assertNotNull( $stored_date_updated );
+			$this->assertGreaterThanOrEqual( $before_utc, $stored_date_updated );
+			$this->assertLessThanOrEqual( $after_utc, $stored_date_updated );
+
+			// Same for date_fulfilled (set automatically on create when is_fulfilled=true).
+			$stored_date_fulfilled = $fulfillment->get_date_fulfilled();
+			$this->assertNotNull( $stored_date_fulfilled );
+			$this->assertGreaterThanOrEqual( $before_utc, $stored_date_fulfilled );
+			$this->assertLessThanOrEqual( $after_utc, $stored_date_fulfilled );
+
+			// Values must survive a DB round-trip unchanged (no re-normalization on read).
+			$read_fulfillment = new Fulfillment( $fulfillment->get_id() );
+			$this->assertSame( $stored_date_updated, $read_fulfillment->get_date_updated() );
+			$this->assertSame( $stored_date_fulfilled, $read_fulfillment->get_date_fulfilled() );
+		} finally {
+			update_option( 'timezone_string', $original_timezone );
+			update_option( 'gmt_offset', $original_offset );
+		}//end try
 	}
 
 	/**
