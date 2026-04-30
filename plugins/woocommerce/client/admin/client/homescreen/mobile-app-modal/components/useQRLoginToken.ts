@@ -75,6 +75,21 @@ export const useQRLoginToken = () => {
 				method: 'POST',
 			} );
 
+			if (
+				! response ||
+				typeof response.qr_url !== 'string' ||
+				response.qr_url.length === 0 ||
+				! Number.isFinite( response.expires_at ) ||
+				response.expires_at <= Date.now() / 1000
+			) {
+				throw new Error(
+					__(
+						'Failed to generate QR login code. Please try again.',
+						'woocommerce'
+					)
+				);
+			}
+
 			setQrUrl( response.qr_url );
 			setState( QRLoginTokenStates.READY );
 			startCountdown( response.expires_at );
@@ -82,14 +97,7 @@ export const useQRLoginToken = () => {
 			setState( QRLoginTokenStates.ERROR );
 
 			const err = error as { code?: string; message?: string };
-			if ( err.code === 'wpcom_account_required' ) {
-				setErrorMessage(
-					__(
-						'QR login is only available for WordPress.com connected accounts.',
-						'woocommerce'
-					)
-				);
-			} else if ( err.code === 'rate_limit_exceeded' ) {
+			if ( err.code === 'rate_limit_exceeded' ) {
 				setErrorMessage(
 					__(
 						'Too many requests. Please try again in a few minutes.',
