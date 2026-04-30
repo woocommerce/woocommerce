@@ -53,42 +53,39 @@ const ShippingRecommendations = () => {
 	const [ pluginsBeingSetup, , handleInstall, handleActivate ] =
 		useInstallPlugin();
 
-	const {
-		activePlugins,
-		installedPlugins,
-		countryCode,
-		isSellingDigitalProductsOnly,
-	} = useSelect( ( select ) => {
-		const settings = select( settingsStore ).getSettings( 'general' );
+	const { installedPlugins, countryCode, isSellingDigitalProductsOnly } =
+		useSelect( ( select ) => {
+			const settings = select( settingsStore ).getSettings( 'general' );
 
-		const { getActivePlugins, getInstalledPlugins } =
-			select( pluginsStore );
+			const { getInstalledPlugins } = select( pluginsStore );
 
-		const profileItems =
-			select( onboardingStore ).getProfileItems().product_types;
+			const profileItems =
+				select( onboardingStore ).getProfileItems().product_types;
 
-		return {
-			activePlugins: getActivePlugins(),
-			installedPlugins: getInstalledPlugins(),
-			countryCode: getCountryCode(
-				settings.general?.woocommerce_default_country
-			),
-			isSellingDigitalProductsOnly:
-				profileItems?.length === 1 && profileItems[ 0 ] === 'downloads',
-		};
-	}, [] );
+			return {
+				installedPlugins: getInstalledPlugins(),
+				countryCode: getCountryCode(
+					settings.general?.woocommerce_default_country
+				),
+				isSellingDigitalProductsOnly:
+					profileItems?.length === 1 &&
+					profileItems[ 0 ] === 'downloads',
+			};
+		}, [] );
 
 	const normalizedCountry = countryCode ?? '';
 
 	const extensionsForCountry =
 		COUNTRY_EXTENSIONS_MAP[ normalizedCountry ] ?? [];
 
+	// Render every country-mapped recommendation regardless of which partner
+	// is already installed: the settings page is meant to surface alternatives
+	// the merchant can evaluate and switch to. The onboarding wizard keeps a
+	// narrower selection because installing every option there at once is not
+	// desired during initial setup.
 	const visibleExtensions = isSellingDigitalProductsOnly
 		? []
-		: extensionsForCountry.filter(
-				( ext ) =>
-					! activePlugins.includes( EXTENSION_PLUGIN_SLUGS[ ext ] )
-		  );
+		: extensionsForCountry;
 
 	const visiblePluginSlugs = visibleExtensions
 		.map( ( ext ) => EXTENSION_PLUGIN_SLUGS[ ext ] )
