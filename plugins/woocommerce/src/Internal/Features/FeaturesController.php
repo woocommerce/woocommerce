@@ -602,7 +602,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
-			ProductCacheController::FEATURE_NAME => array(
+			ProductCacheController::FEATURE_NAME       => array(
 				'name'                         => __( 'Cache Product Objects', 'woocommerce' ),
 				'description'                  => __(
 					'[Performance] Speeds up your store by caching product objects during each request, preventing duplicate product loads. Can improve page load times on product-heavy pages.',
@@ -612,6 +612,18 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
+			),
+			'product_variations_classic_redesign' => array(
+				'name'                         => __( 'Variations classic redesign', 'woocommerce' ),
+				'description'                  => __(
+					'Enable the modern DataViews-based Variations tab in the classic product editor.',
+					'woocommerce'
+				),
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
 		);
 
