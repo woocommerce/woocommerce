@@ -1429,9 +1429,8 @@ jQuery( function ( $ ) {
 
 	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
 	const setProductImageLink = $( '#set-post-thumbnail' );
-	const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${
-		woocommerce_admin_meta_boxes.i18n_product_image_tip
-	}"></span>`;
+	const tooltipMarkup = $( '<span class="woocommerce-help-tip" tabindex="0"></span>' )
+		.attr( 'aria-label', woocommerce_admin_meta_boxes.i18n_product_image_tip );
 	const tooltipData = {
 		attribute: 'data-tip',
 		content: woocommerce_admin_meta_boxes.i18n_product_image_tip,
