@@ -203,23 +203,28 @@ $arrow_img_url          = WC_ADMIN_IMAGES_FOLDER_URL . '/product_data/no-variati
 	</div>
 </div>
 <script type="text/template" id="tmpl-wc-modal-set-price-variations">
-	<div class="wc-backbone-modal">
+	<div class="wc-backbone-modal wc-backbone-modal-set-price-variations">
 		<div class="wc-backbone-modal-content">
-			<div class="components-modal__content woocommerce-set-price-variations" role="document">
-				<div class="components-modal__header">
-					<h2><?php echo esc_attr( $modal_title ); ?></h2>
-				</div>
-				<div class="woocommerce-usage-modal__wrapper">
-					<div class="woocommerce-usage-modal__message">
+			<section class="wc-backbone-modal-main" role="main">
+				<header class="wc-backbone-modal-header">
+					<h1><?php esc_html_e( 'Set variation prices', 'woocommerce' ); ?></h1>
+					<button class="modal-close modal-close-link dashicons dashicons-no-alt">
+						<span class="screen-reader-text"><?php esc_html_e( 'Close modal panel', 'woocommerce' ); ?></span>
+					</button>
+				</header>
+				<article>
+					<div>
 						<span><?php esc_html_e( 'Add price to all variations that don\'t have a price', 'woocommerce' ); ?> (<?php echo esc_attr( get_woocommerce_currency_symbol() ); ?> <?php echo esc_textarea( get_woocommerce_currency() ); ?>)</span>
 						<input type="text" class="components-text-control__input wc_input_variations_price"/>
 					</div>
-					<div class="woocommerce-usage-modal__actions">
-						<button class="modal-close components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+				</article>
+				<footer>
+					<div class="wc-backbone-modal-buttons">
+						<button class="modal-close button components-button is-secondary"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
 						<button class="modal-close button components-button add_variations_price_button button-primary" disabled><?php esc_html_e( 'Add prices', 'woocommerce' ); ?></button>
 					</div>
-				</div>
-			</div>
+				</footer>
+			</section>
 		</div>
 	</div>
 	<div class="wc-backbone-modal-backdrop modal-close"></div>

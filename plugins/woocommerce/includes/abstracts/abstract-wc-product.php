@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
+use Automattic\WooCommerce\Internal\Caches\StaleObjectAttribution;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore as ProductAttributesLookupDataStore;
 
@@ -33,6 +34,7 @@ require_once WC_ABSPATH . 'includes/legacy/abstract-wc-legacy-product.php';
  */
 class WC_Product extends WC_Abstract_Legacy_Product {
 	use CogsAwareTrait;
+	use StaleObjectAttribution;
 
 	/**
 	 * This is the name of this object type.
@@ -146,6 +148,8 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		if ( $this->get_id() > 0 ) {
 			$this->data_store->read( $this );
 		}
+
+		$this->_woocommerce_object_instantiated();
 	}
 
 	/**

@@ -28,6 +28,41 @@ class Main {
 	public const OPTION_GET_ENDPOINT_ENABLED = 'woocommerce_graphql_get_endpoint_enabled';
 
 	/**
+	 * Option name for the "Enable APQ caching" setting.
+	 *
+	 * When disabled, the persistedQuery extension is ignored and requests are
+	 * treated as standard queries.
+	 */
+	public const OPTION_APQ_ENABLED = 'woocommerce_graphql_apq_enabled';
+
+	/**
+	 * Option name for the "Endpoint URL" setting.
+	 *
+	 * Path (relative to /wp-json/) at which the GraphQL route is registered.
+	 */
+	public const OPTION_ENDPOINT_URL = 'woocommerce_graphql_endpoint_url';
+
+	/**
+	 * Option name for the "Maximum query depth" setting.
+	 *
+	 * Caps how deep the selection tree of a GraphQL query may nest.
+	 */
+	public const OPTION_MAX_QUERY_DEPTH = 'woocommerce_graphql_max_query_depth';
+
+	/**
+	 * Option name for the "Maximum query complexity" setting.
+	 *
+	 * Caps the computed complexity score of a GraphQL query — connection
+	 * fields multiply their children's cost by the requested page size.
+	 */
+	public const OPTION_MAX_QUERY_COMPLEXITY = 'woocommerce_graphql_max_query_complexity';
+
+	/**
+	 * Option name for the "ObjectCache-based caching" setting.
+	 */
+	public const OPTION_OBJECT_CACHE_ENABLED = 'woocommerce_graphql_object_cache_enabled';
+
+	/**
 	 * Check whether the Dual Code & GraphQL API feature is active.
 	 *
 	 * Requires PHP 8.1+ and the dual_code_graphql_api feature flag to be
@@ -48,6 +83,25 @@ class Main {
 	 */
 	public static function is_get_endpoint_enabled(): bool {
 		return wc_string_to_bool( get_option( self::OPTION_GET_ENDPOINT_ENABLED, 'yes' ) );
+	}
+
+	/**
+	 * Whether the Apollo Automatic Persisted Queries (APQ) protocol is enabled.
+	 *
+	 * Defaults to true. When disabled, the `persistedQuery` request extension
+	 * is ignored and requests are processed as standard (non-persisted) queries.
+	 */
+	public static function is_apq_enabled(): bool {
+		return wc_string_to_bool( get_option( self::OPTION_APQ_ENABLED, 'yes' ) );
+	}
+
+	/**
+	 * Whether the ObjectCache-backed query cache is enabled.
+	 *
+	 * Defaults to true.
+	 */
+	public static function is_object_cache_enabled(): bool {
+		return wc_string_to_bool( get_option( self::OPTION_OBJECT_CACHE_ENABLED, 'yes' ) );
 	}
 
 	/**

@@ -1,4 +1,23 @@
 /**
+ * Runtime fallback for the `__i18n_text_domain__` identifier (see `global.d.ts`).
+ *
+ * Consumers are expected to substitute this identifier with their own text
+ * domain at bundle time via `webpack.DefinePlugin` (see `development.md`).
+ * When the substitution is not configured, this assigns `'woocommerce'` to
+ * the global so `__()` / `_x()` / `_n()` / `_nx()` calls inside the package
+ * don't throw `ReferenceError` at runtime — strings then resolve under the
+ * `woocommerce` text domain (matching the package's pre-1.11 behaviour).
+ *
+ * When `DefinePlugin` is configured the typeof check is statically replaced
+ * with `typeof "<consumer-domain>" === 'undefined'`, which evaluates to
+ * `false`, so the assignment is dead-code-eliminated by the consumer's
+ * minifier and has zero runtime cost.
+ */
+if ( typeof __i18n_text_domain__ === 'undefined' ) {
+	window.__i18n_text_domain__ = 'woocommerce';
+}
+
+/**
  * Internal dependencies
  */
 import { initialize } from './editor';

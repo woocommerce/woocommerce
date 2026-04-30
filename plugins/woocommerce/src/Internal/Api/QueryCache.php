@@ -50,15 +50,25 @@ class QueryCache {
 	 * @return DocumentNode|array
 	 */
 	public function resolve( ?string $query, array $extensions ) {
-		$apq = $extensions['persistedQuery'] ?? null;
+		$apq      = $extensions['persistedQuery'] ?? null;
+		$apq_hash = is_array( $apq ) ? ( $apq['sha256Hash'] ?? null ) : null;
 
-		if ( is_array( $apq ) && 1 === ( $apq['version'] ?? null ) && ! empty( $apq['sha256Hash'] ) ) {
-			return $this->resolve_apq( $query, $apq['sha256Hash'] );
+		if ( Main::is_apq_enabled()
+			&& is_array( $apq )
+			&& 1 === ( $apq['version'] ?? null )
+			&& is_string( $apq_hash )
+			&& '' !== $apq_hash ) {
+			return $this->resolve_apq( $query, $apq_hash );
 		}
 
 		// Standard query — no APQ.
 		if ( empty( $query ) ) {
 			return $this->error_response( 'No query provided.', 'BAD_REQUEST' );
+		}
+
+		// APQ keeps using the cache; it has its own settings toggle.
+		if ( ! Main::is_object_cache_enabled() ) {
+			return $this->parse( $query );
 		}
 
 		$hash = hash( 'sha256', $query );
@@ -120,6 +130,21 @@ class QueryCache {
 	}
 
 	/**
+	 * Parse a query and return the DocumentNode, or a GraphQL-shaped error
+	 * array if the query has a syntax error.
+	 *
+	 * @param string $query The GraphQL query string.
+	 * @return DocumentNode|array
+	 */
+	private function parse( string $query ) {
+		try {
+			return Parser::parse( $query, array( 'noLocation' => true ) );
+		} catch ( \Automattic\WooCommerce\Vendor\GraphQL\Error\SyntaxError $e ) {
+			return $this->error_response( 'GraphQL syntax error: ' . $e->getMessage(), 'GRAPHQL_PARSE_ERROR' );
+		}
+	}
+
+	/**
 	 * Parse a query, cache the resulting AST, and return the DocumentNode.
 	 *
 	 * Returns an error array if the query has a syntax error.
@@ -129,10 +154,9 @@ class QueryCache {
 	 * @return DocumentNode|array
 	 */
 	private function parse_and_cache( string $query, string $hash ) {
-		try {
-			$document = Parser::parse( $query, array( 'noLocation' => true ) );
-		} catch ( \Automattic\WooCommerce\Vendor\GraphQL\Error\SyntaxError $e ) {
-			return $this->error_response( 'GraphQL syntax error: ' . $e->getMessage(), 'GRAPHQL_PARSE_ERROR' );
+		$document = $this->parse( $query );
+		if ( ! $document instanceof DocumentNode ) {
+			return $document;
 		}
 
 		wp_cache_set( $this->build_cache_key( $hash ), $document->toArray(), self::CACHE_GROUP, self::get_cache_ttl() );
