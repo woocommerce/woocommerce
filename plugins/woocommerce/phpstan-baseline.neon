@@ -70513,12 +70513,6 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/EmailManager.php
 
 		-
-			message: '#^Call to an undefined method WC_Email\:\:trigger\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailManager.php
-
-		-
 			message: '#^Parameter \$email of method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailManager\:\:add_stylesheets\(\) has invalid type Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\WC_Email\.$#'
 			identifier: class.notFound
 			count: 1
