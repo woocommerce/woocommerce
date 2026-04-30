@@ -346,8 +346,6 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// The persisted record must be untouched: same post type, no added customer_note.
 		$this->assertSame( 'shop_test', get_post_type( $post_id ) );
 		$this->assertSame( '', (string) get_post_meta( $post_id, '_customer_note', true ) );
-
-		unregister_post_type( 'shop_test' );
 	}
 
 	/**
@@ -939,5 +937,13 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $order->get_id() ) );
+	}
+
+	/**
+	 * Tear down test environment.
+	 */
+	public function tearDown(): void {
+		unregister_post_type( 'shop_test' );
+		parent::tearDown();
 	}
 }
