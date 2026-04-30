@@ -1,0 +1,42 @@
+{
+	"$schema": "https://playground.wordpress.net/blueprint-schema.json",
+	"landingPage": "/wp-admin/edit.php?post_type=product",
+	"preferredVersions": {
+		"php": "8.2",
+		"wp": "latest"
+	},
+	"features": {
+		"networking": true
+	},
+	"steps": [
+		{
+			"step": "login",
+			"username": "admin",
+			"password": "password"
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "url",
+				"url": "https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip"
+			},
+			"options": {
+				"activate": true
+			}
+		},
+		{
+			"step": "installPlugin",
+			"pluginData": {
+				"resource": "wordpress.org/plugins",
+				"slug": "gutenberg"
+			},
+			"options": {
+				"activate": true
+			}
+		},
+		{
+			"step": "runPHP",
+			"code": "<?php require '/wordpress/wp-load.php'; delete_transient( '_wc_activation_redirect' ); update_option( 'woocommerce_onboarding_profile', array( 'skipped' => true ) ); update_option( 'woocommerce_feature_product_variations_classic_redesign_enabled', 'yes' ); if ( 0 === wp_count_posts( 'product' )->publish ) { if ( ! class_exists( '\\Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks' ) ) { require_once WC_ABSPATH . 'src/Admin/API/OnboardingTasks.php'; } $import = \\Automattic\\WooCommerce\\Admin\\API\\OnboardingTasks::import_sample_products_from_csv( WC_ABSPATH . 'sample-data/sample_products.csv' ); if ( is_wp_error( $import ) ) { wp_die( esc_html( $import->get_error_message() ) ); } }"
+		}
+	]
+}
