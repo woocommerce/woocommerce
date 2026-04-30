@@ -59,6 +59,14 @@ const Edit = ( props: EditProps ) => {
 
 	const items = useMemo( () => {
 		return Object.entries( stockStatusOptions )
+			.filter( ( [ key ] ) => {
+				if ( ! hideEmpty ) return true;
+				const count =
+					filteredCounts?.stock_status_counts?.find(
+						( item ) => item.status === key
+					)?.count ?? 0;
+				return count > 0;
+			} )
 			.map( ( [ key, value ], index ) => {
 				const count =
 					filteredCounts?.stock_status_counts?.find(
@@ -72,12 +80,8 @@ const Edit = ( props: EditProps ) => {
 					selected: index === 0,
 					...( showCounts && { count } ),
 					type: 'status',
-					// Keep count for filtering even if not shown
-					_count: count,
 				};
-			} )
-			.filter( ( item ) => ! hideEmpty || item._count > 0 )
-			.map( ( { _count, ...item } ) => item );
+			} );
 	}, [ stockStatusOptions, filteredCounts, hideEmpty, showCounts ] );
 
 	return (
