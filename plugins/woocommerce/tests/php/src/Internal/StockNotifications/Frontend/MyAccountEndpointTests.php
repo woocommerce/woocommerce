@@ -230,7 +230,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * The menu filter adds the Back in stock notifications item.
+	 * The menu filter adds the Stock notifications item.
 	 */
 	public function test_menu_item_is_registered(): void {
 		$endpoint = new MyAccountEndpoint();
@@ -246,7 +246,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertArrayHasKey( MyAccountEndpoint::ENDPOINT, $items );
-		$this->assertSame( 'Back in stock notifications', $items[ MyAccountEndpoint::ENDPOINT ] );
+		$this->assertSame( 'Stock notifications', $items[ MyAccountEndpoint::ENDPOINT ] );
 
 		// Order preserved: after downloads, logout stays last.
 		$keys = array_keys( $items );
