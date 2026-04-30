@@ -84,7 +84,7 @@ test.describe(
 					// The page renders the expected heading.
 					await expect(
 						page.getByRole( 'heading', {
-							name: 'Back in stock notifications',
+							name: 'Stock notifications',
 						} )
 					).toBeVisible();
 
@@ -171,7 +171,7 @@ test.describe(
 					// The refresh after the POST lands us back on the same tab.
 					await expect(
 						page.getByRole( 'heading', {
-							name: 'Back in stock notifications',
+							name: 'Stock notifications',
 						} )
 					).toBeVisible();
 
@@ -210,7 +210,7 @@ test.describe(
 
 				await expect(
 					page.getByRole( 'heading', {
-						name: 'Back in stock notifications',
+						name: 'Stock notifications',
 					} )
 				).toBeVisible();
 

@@ -14,7 +14,7 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\NotificationQuery;
 
 /**
- * Registers the "Back in stock notifications" My Account endpoint and handles
+ * Registers the "Stock notifications" My Account endpoint and handles
  * the cancel action for customer-owned notifications.
  *
  * @internal
@@ -89,7 +89,7 @@ class MyAccountEndpoint {
 		}
 
 		$new_item = array(
-			self::ENDPOINT => __( 'Back in stock notifications', 'woocommerce' ),
+			self::ENDPOINT => __( 'Stock notifications', 'woocommerce' ),
 		);
 
 		// Try to slot it in right after Downloads so it sits with the other lists.
@@ -123,7 +123,7 @@ class MyAccountEndpoint {
 	 */
 	public function filter_endpoint_title( $title ) {
 		unset( $title ); // Avoid parameter not used PHPCS errors.
-		return __( 'Back in stock notifications', 'woocommerce' );
+		return __( 'Stock notifications', 'woocommerce' );
 	}
 
 	/**
