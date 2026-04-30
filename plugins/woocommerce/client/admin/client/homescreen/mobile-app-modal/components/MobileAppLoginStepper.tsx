@@ -182,7 +182,6 @@ export const MobileAppLoginStepper = ( {
 					description: '',
 					content: (
 						<QRLoginSuccessStep
-							deviceInfo={ signInResult?.deviceInfo ?? null }
 							apUuid={ signInResult?.apUuid ?? null }
 						/>
 					),

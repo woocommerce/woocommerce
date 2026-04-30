@@ -119,9 +119,9 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	const DEVICE_FIELD_MAX_LENGTH = 64;
 
 	/**
-	 * State machine values for the per-token record. Every state change goes
-	 * through `transition_state()` which atomically validates the source state
-	 * and writes the destination — no ad-hoc transient writes elsewhere.
+	 * State machine values for the per-token record. Transitions are gated
+	 * by an explicit `current_state` check at the top of each handler
+	 * (scan/approve/exchange) so the only writers are the handlers themselves.
 	 */
 	const STATE_PENDING   = 'pending';
 	const STATE_SCANNED   = 'scanned';
@@ -611,9 +611,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$expires_at = $now + self::TOKEN_TTL;
 
 		// Structured state-machine record. Subsequent transitions
-		// (scan/approve/exchange/revoke) all flow through `transition_state()`
-		// which validates the source state atomically — no ad-hoc transient
-		// writes elsewhere.
+		// (scan/approve/exchange) gate themselves on the current state at the
+		// top of each handler.
 		$token_data = array(
 			'state'      => self::STATE_PENDING,
 			'created_at' => $now,
@@ -1368,29 +1367,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			isset( $record['expires_at'] ) ? (int) $record['expires_at'] - time() : self::CHALLENGE_TTL
 		);
 
-		// Belt and suspenders: write twice, deleting first to defeat any object-cache
-		// stale-read or filter-shadowing weirdness. set_transient is normally idempotent
-		// but a rare class of object-cache misconfigurations holds onto the previous
-		// `scanned` value even after a fresh write — clearing first guarantees the next
-		// `get_transient` returns the post-approval record.
-		delete_transient( $key );
-		$ok = set_transient( $key, $record, $ttl );
-
-		// Read-back verification for diagnostic logs. If the transient layer is busted,
-		// surface it loudly to wc_get_logger so the support flow has something concrete
-		// to look at instead of "approve seems to silently fail".
-		$readback       = get_transient( $key );
-		$readback_state = is_array( $readback ) && isset( $readback['state'] ) ? (string) $readback['state'] : 'missing';
-
-		wc_get_logger()->info(
-			'QR login approve: transient committed',
-			array(
-				'source'         => 'qr-login',
-				'set_ok'         => (bool) $ok,
-				'ttl'            => $ttl,
-				'readback_state' => $readback_state,
-			)
-		);
+		set_transient( $key, $record, $ttl );
 
 		return rest_ensure_response( array( 'state' => self::STATE_APPROVED ) );
 	}
@@ -1430,25 +1407,10 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$record = get_transient( self::TOKEN_TRANSIENT_PREFIX . $token_hash );
 		if ( ! is_array( $record ) ) {
-			wc_get_logger()->info(
-				'QR login session-status: token transient missing',
-				array( 'source' => 'qr-login', 'token_hash_short' => substr( (string) $token_hash, 0, 8 ) )
-			);
 			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
 		}
 
-		$state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
-
-		wc_get_logger()->debug(
-			'QR login session-status: read',
-			array(
-				'source'           => 'qr-login',
-				'state'            => $state,
-				'has_grant'        => ! empty( $record['exchange_grant'] ),
-				'token_hash_short' => substr( (string) $token_hash, 0, 8 ),
-			)
-		);
-
+		$state    = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
 		$response = array( 'state' => $state );
 
 		if ( self::STATE_APPROVED === $state && ! empty( $record['exchange_grant'] ) ) {
