@@ -3,7 +3,7 @@
  */
 import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/components';
+import { Button } from '@wordpress/ui';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { EmailActionsFill } from '@woocommerce/email-editor';
@@ -97,9 +97,9 @@ export const ReviewUpdatePlugin = () => {
 			{ showTrigger && (
 				<EmailActionsFill>
 					<Button
-						variant="secondary"
+						variant="outline"
+						tone="neutral"
 						onClick={ () => setIsDrawerOpen( true ) }
-						__next40pxDefaultSize
 					>
 						{ __( 'Review template update', 'woocommerce' ) }
 					</Button>
@@ -109,7 +109,7 @@ export const ReviewUpdatePlugin = () => {
 				postId={ postId }
 				emailTitle={ emailTitle }
 				isOpen={ isDrawerOpen }
-				onClose={ () => setIsDrawerOpen( false ) }
+				onOpenChange={ setIsDrawerOpen }
 			/>
 		</>
 	);
