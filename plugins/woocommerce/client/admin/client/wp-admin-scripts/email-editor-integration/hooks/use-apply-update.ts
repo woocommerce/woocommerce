@@ -4,10 +4,9 @@
 import { useCallback, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import apiFetch from '@wordpress/api-fetch';
-import { useDispatch } from '@wordpress/data';
+import { select, useDispatch } from '@wordpress/data';
 import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore } from '@wordpress/core-data';
-import { parse, serialize } from '@wordpress/blocks';
 
 /**
  * Shape of an entry on the `choices` array sent to /apply.
@@ -52,33 +51,51 @@ interface UseApplyUpdateResult {
  * content (so the canvas reflects the apply without a page reload), and
  * surfaces the migrated alias list in the snackbar copy when applicable.
  *
- * Mirrors the post-write sync pattern from
- * `reset-notification-email-content.tsx` (parse → editEntityRecord →
- * saveEditedEntityRecord) so dirty tracking stays consistent with what
- * the server just persisted.
+ * Sync uses `receiveEntityRecords` to push the server's freshly-saved
+ * content straight into core-data's cache. The reducer auto-clears any
+ * matching pending edits, so no follow-up `saveEditedEntityRecord`
+ * round-trip is needed.
  *
  * @param postId The `woo_email` post ID.
  */
 export function useApplyUpdate( postId: number | null ): UseApplyUpdateResult {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
-	const { editEntityRecord, saveEditedEntityRecord } =
-		useDispatch( coreStore );
+	const { receiveEntityRecords } = useDispatch( coreStore );
 	const [ isApplying, setIsApplying ] = useState< boolean >( false );
 
 	const syncEditorState = useCallback(
-		async ( content: string ) => {
+		( content: string ) => {
 			if ( ! postId ) {
 				return;
 			}
-			const blocks = parse( content || '' );
-			await editEntityRecord( 'postType', 'woo_email', postId, {
-				blocks,
-				content: serialize( blocks ),
-			} );
-			await saveEditedEntityRecord( 'postType', 'woo_email', postId, {} );
+			// Read the current canonical record so the patched record we
+			// hand to `receiveEntityRecords` keeps every other field
+			// (title, status, meta, …) intact. Only `content.raw` changes.
+			const current = select( coreStore ).getEntityRecord(
+				'postType',
+				'woo_email',
+				postId
+			) as { content?: { raw?: string } } | undefined;
+			if ( ! current ) {
+				return;
+			}
+			receiveEntityRecords(
+				'postType',
+				'woo_email',
+				[
+					{
+						...current,
+						content: { ...current.content, raw: content },
+					},
+				],
+				undefined,
+				false,
+				undefined,
+				undefined
+			);
 		},
-		[ postId, editEntityRecord, saveEditedEntityRecord ]
+		[ postId, receiveEntityRecords ]
 	);
 
 	const undo = useCallback(
@@ -93,7 +110,7 @@ export function useApplyUpdate( postId: number | null ): UseApplyUpdateResult {
 					data: { revision_id: revisionId },
 				} ) ) as UndoResponse;
 
-				await syncEditorState( res.restored_content );
+				syncEditorState( res.restored_content );
 
 				createSuccessNotice( __( 'Update reverted.', 'woocommerce' ), {
 					type: 'snackbar',
@@ -122,7 +139,7 @@ export function useApplyUpdate( postId: number | null ): UseApplyUpdateResult {
 					data: { choices },
 				} ) ) as ApplyResponse;
 
-				await syncEditorState( res.merged_content );
+				syncEditorState( res.merged_content );
 
 				createSuccessNotice( __( 'Update applied.', 'woocommerce' ), {
 					type: 'snackbar',
