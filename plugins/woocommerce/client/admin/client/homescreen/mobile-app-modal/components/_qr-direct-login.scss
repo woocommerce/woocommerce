@@ -1,10 +1,9 @@
-// Shared <QRDirectLoginCode /> styles.
-//
-// Imported by both the homescreen mobile-app modal (`mobile-app-modal/style.scss`)
-// and the standalone wc-admin page (`mobile-app-login/style.scss`) so the QR /
-// number-match / approved / rejected layouts render identically on either
-// surface. Modal-only panels (success step, revoke confirmation) stay in the
-// modal stylesheet — they aren't rendered by the standalone page.
+// Shared <QRDirectLoginCode /> styles. Imported by both the homescreen
+// mobile-app modal (`mobile-app-modal/style.scss`) and the standalone
+// wc-admin page (`mobile-app-login/style.scss`) so the QR / number-match /
+// approved / rejected layouts render identically on either surface.
+// Modal-only panels (success step, revoke confirmation) stay in the modal
+// stylesheet — they aren't rendered by the standalone page.
 
 // QR + meta column layout while the code is on screen (READY state only).
 // We avoid scoping these rules to `.woocommerce-qr-direct-login` itself so the LOADING /

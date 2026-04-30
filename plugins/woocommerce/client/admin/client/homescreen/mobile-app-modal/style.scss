@@ -241,7 +241,7 @@ button.components-button.send-magic-link-button {
 // Shared `<QRDirectLoginCode />` rules live in the partial below. They are
 // reused by the standalone wc-admin page (`client/mobile-app-login`) so both
 // surfaces render the same QR / number-match / approved / rejected layouts.
-@import './components/qr-direct-login';
+@import "./components/qr-direct-login.scss";
 
 // FAQ paragraph that sits below the stepper / QR block. Adds the breathing
 // room and the thin grey divider so the link doesn't visually collide with
