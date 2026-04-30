@@ -1,0 +1,58 @@
+@import "@wordpress/dataviews/build-style/style.css";
+
+.wc-variations-classic {
+	&__toolbar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: var( --wpds-dimension-gap-sm, 8px );
+		padding: var( --wpds-dimension-padding-sm, 8px ) 0;
+	}
+
+	&__toolbar-end {
+		display: flex;
+		align-items: center;
+		gap: var( --wpds-dimension-gap-xs, 4px );
+	}
+
+	&__variant-cell {
+		display: flex;
+		align-items: center;
+		gap: var( --wpds-dimension-gap-sm, 8px );
+	}
+
+	&__variant-image {
+		border-radius: var( --wpds-border-radius-xs, 4px );
+		object-fit: cover;
+		flex-shrink: 0;
+	}
+
+	&__price {
+		del {
+			margin-right: var( --wpds-dimension-gap-xs, 4px );
+			color: var( --wpds-color-fg-content-neutral-weak, #757575 );
+		}
+
+		ins {
+			text-decoration: none;
+		}
+
+		&--empty {
+			color: var( --wpds-color-fg-content-neutral-weak, #757575 );
+		}
+	}
+
+	&__stock {
+		&--instock {
+			color: var( --wpds-color-fg-content-success, #00a32a );
+		}
+
+		&--outofstock {
+			color: var( --wpds-color-fg-content-error, #d63638 );
+		}
+
+		&--onbackorder {
+			color: var( --wpds-color-fg-content-warning, #dba617 );
+		}
+	}
+}
