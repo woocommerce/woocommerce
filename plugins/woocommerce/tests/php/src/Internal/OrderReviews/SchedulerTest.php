@@ -1,20 +1,20 @@
 <?php
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Tests\Internal\Email;
+namespace Automattic\WooCommerce\Tests\Internal\OrderReviews;
 
-use Automattic\WooCommerce\Internal\Email\ReviewRequestScheduler;
+use Automattic\WooCommerce\Internal\OrderReviews\Scheduler;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use WC_Email_Customer_Review_Request;
 use WC_Order;
 use WC_Unit_Test_Case;
 
 /**
- * ReviewRequestScheduler test.
+ * Scheduler test.
  *
- * @covers \Automattic\WooCommerce\Internal\Email\ReviewRequestScheduler
+ * @covers \Automattic\WooCommerce\Internal\OrderReviews\Scheduler
  */
-class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
+class SchedulerTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Prepare the mailer and enable the review-request email.
@@ -47,8 +47,8 @@ class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
 
 		$order->update_status( 'completed' );
 
-		$this->assertTrue( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order->get_id() ) ) );
-		$this->assertNotEmpty( wc_get_order( $order->get_id() )->get_meta( ReviewRequestScheduler::SCHEDULED_META_KEY ) );
+		$this->assertTrue( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+		$this->assertNotEmpty( wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY ) );
 	}
 
 	/**
@@ -62,7 +62,7 @@ class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
 		$before = time();
 		$order->update_status( 'completed' );
 
-		$when = (int) wc_get_order( $order->get_id() )->get_meta( ReviewRequestScheduler::SCHEDULED_META_KEY );
+		$when = (int) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
 
 		// Allow a few seconds of wall-clock drift during the test.
 		$expected = $before + ( 3 * DAY_IN_SECONDS );
@@ -79,8 +79,8 @@ class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
 		$order = $this->create_pending_order();
 		$order->update_status( 'completed' );
 
-		$this->assertFalse( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order->get_id() ) ) );
-		$this->assertEmpty( wc_get_order( $order->get_id() )->get_meta( ReviewRequestScheduler::SCHEDULED_META_KEY ) );
+		$this->assertFalse( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY ) );
 	}
 
 	/**
@@ -89,12 +89,12 @@ class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
 	public function test_is_idempotent(): void {
 		$order = $this->create_pending_order();
 		$order->update_status( 'completed' );
-		$first = (int) wc_get_order( $order->get_id() )->get_meta( ReviewRequestScheduler::SCHEDULED_META_KEY );
+		$first = (int) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
 
 		// Simulate a second completed-notification firing (e.g. status toggled back and forth).
 		sleep( 1 );
 		do_action( 'woocommerce_order_status_completed', $order->get_id() ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- existing core hook, fired here only to simulate a duplicate transition in the test.
-		$second = (int) wc_get_order( $order->get_id() )->get_meta( ReviewRequestScheduler::SCHEDULED_META_KEY );
+		$second = (int) wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY );
 
 		$this->assertSame( $first, $second, 'Scheduled-at meta should not change on re-completion.' );
 	}
@@ -108,7 +108,7 @@ class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
 		$order = $this->create_pending_order();
 		$order->update_status( 'completed' );
 
-		$this->assertFalse( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+		$this->assertFalse( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
 	}
 
 	/**
@@ -121,12 +121,12 @@ class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
 	public function test_status_transition_cancels_pending_action( string $new_status ): void {
 		$order = $this->create_pending_order();
 		$order->update_status( 'completed' );
-		$this->assertTrue( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+		$this->assertTrue( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
 
 		$order->update_status( $new_status );
 
-		$this->assertFalse( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order->get_id() ) ) );
-		$this->assertEmpty( wc_get_order( $order->get_id() )->get_meta( ReviewRequestScheduler::SCHEDULED_META_KEY ) );
+		$this->assertFalse( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+		$this->assertEmpty( wc_get_order( $order->get_id() )->get_meta( Scheduler::SCHEDULED_META_KEY ) );
 	}
 
 	/**
@@ -147,12 +147,12 @@ class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
 	public function test_trashing_order_cancels_pending_action(): void {
 		$order = $this->create_pending_order();
 		$order->update_status( 'completed' );
-		$this->assertTrue( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+		$this->assertTrue( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
 
 		// A non-forced delete routes through the order data store's trash path.
 		$order->delete( false );
 
-		$this->assertFalse( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order->get_id() ) ) );
+		$this->assertFalse( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order->get_id() ) ) );
 	}
 
 	/**
@@ -162,11 +162,11 @@ class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
 		$order = $this->create_pending_order();
 		$order->update_status( 'completed' );
 		$order_id = $order->get_id();
-		$this->assertTrue( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order_id ) ) );
+		$this->assertTrue( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order_id ) ) );
 
 		$order->delete( true );
 
-		$this->assertFalse( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order_id ) ) );
+		$this->assertFalse( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order_id ) ) );
 	}
 
 	/**
@@ -178,15 +178,15 @@ class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
 		$order = $this->create_pending_order();
 		$order->update_status( 'completed' );
 		$order_id = $order->get_id();
-		$this->assertTrue( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order_id ) ) );
+		$this->assertTrue( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order_id ) ) );
 
 		// Simulate an out-of-sync state: meta cleared while the action is still pending.
-		$order->delete_meta_data( ReviewRequestScheduler::SCHEDULED_META_KEY );
+		$order->delete_meta_data( Scheduler::SCHEDULED_META_KEY );
 		$order->save();
 
 		$order->update_status( 'cancelled' );
 
-		$this->assertFalse( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order_id ) ) );
+		$this->assertFalse( (bool) as_next_scheduled_action( Scheduler::ACTION_HOOK, array( $order_id ) ) );
 	}
 
 	/**

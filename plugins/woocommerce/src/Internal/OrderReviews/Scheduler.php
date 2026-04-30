@@ -1,11 +1,11 @@
 <?php
 /**
- * ReviewRequestScheduler class file.
+ * Scheduler class file.
  */
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Internal\Email;
+namespace Automattic\WooCommerce\Internal\OrderReviews;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WC_Email_Customer_Review_Request;
@@ -23,7 +23,7 @@ use WC_Order;
  *
  * @since 10.8.0
  */
-class ReviewRequestScheduler implements RegisterHooksInterface {
+class Scheduler implements RegisterHooksInterface {
 
 	/**
 	 * Action Scheduler hook fired when the configured delay elapses. The
