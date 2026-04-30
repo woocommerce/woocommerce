@@ -115,7 +115,7 @@ class ShopperList {
 			return new self(
 				$user_id,
 				'saved-for-later',
-				'Saved for Later',
+				__( 'Saved for later', 'woocommerce' ),
 				false,
 				current_time( 'mysql', true ),
 				array()
