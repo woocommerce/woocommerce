@@ -6,12 +6,12 @@
 	"title": "Shopper Collection",
 	"description": "Display a collection curated by the shopper, such as items they've saved for later.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce", "Save for Later", "Wishlist", "Shopper Collection" ],
+	"keywords": [ "WooCommerce", "Saved for Later", "Wishlist", "Shopper Collection" ],
 	"textdomain": "woocommerce",
 	"attributes": {
 		"listName": {
 			"type": "string",
-			"default": "save-for-later"
+			"default": "saved-for-later"
 		}
 	},
 	"supports": {

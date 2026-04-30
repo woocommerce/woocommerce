@@ -1,4 +1,4 @@
 /**
  * Internal dependencies
  */
-import './save-for-later';
+import './saved-for-later';

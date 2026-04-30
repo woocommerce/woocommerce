@@ -7,7 +7,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
 /**
  * Shopper Collection block.
  *
- * Renders a collection curated by the shopper (e.g. Save for Later). The data
+ * Renders a collection curated by the shopper (e.g. Saved for Later). The data
  * source and frontend interactivity are wired in follow-up tasks; this class
  * is the structural backbone that registers the block and outputs the
  * server-side container the iAPI store will hydrate.

@@ -92,8 +92,8 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 						value={ listName }
 						options={ [
 							{
-								label: __( 'Save for Later', 'woocommerce' ),
-								value: 'save-for-later',
+								label: __( 'Saved for Later', 'woocommerce' ),
+								value: 'saved-for-later',
 							},
 						] }
 						onChange={ ( value: string ) =>
