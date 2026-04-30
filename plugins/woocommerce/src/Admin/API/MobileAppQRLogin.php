@@ -1226,11 +1226,19 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$session_id        = wp_generate_uuid4();
 		$now               = time();
 
+		// Shuffle the candidate triple ONCE at scan time and persist the chosen ordering so
+		// every subsequent /qr-login-status poll returns the same array. Re-shuffling per-poll
+		// would make the wc-admin tile order flicker every 2.5 s — terrible UX, and makes the
+		// merchant doubt they're reading the right number.
+		$candidates = array_merge( array( $challenge_numbers['real'] ), $challenge_numbers['distractors'] );
+		shuffle( $candidates );
+
 		$record['state']     = self::STATE_SCANNED;
 		$record['state_at']  = $now;
 		$record['challenge'] = array(
 			'real'        => $challenge_numbers['real'],
 			'distractors' => $challenge_numbers['distractors'],
+			'shuffled'    => $candidates,
 			'session_id'  => $session_id,
 			'expires_at'  => $now + self::CHALLENGE_TTL,
 			'device'      => $this->sanitize_device_payload( $request->get_param( 'device' ) ),
@@ -1442,27 +1450,27 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 	/**
 	 * Build the shuffled candidate triple returned by `/qr-login-status`
-	 * while in the `scanned` state. The order is randomised on every call
-	 * so the position of the real number can't be inferred from cache keys
-	 * or repeat polls.
+	 * while in the `scanned` state. The order is fixed at scan time (in
+	 * `scan_token`) and stored in `challenge.shuffled` so every poll returns
+	 * the same array — re-shuffling per-poll caused visible tile flicker on
+	 * wc-admin. Falls back to building + shuffling on the fly for any token
+	 * record that predates the persisted-shuffle change.
 	 *
 	 * @param array<string, mixed> $challenge The challenge payload from the token record.
 	 * @return array<int, string>
 	 */
 	private function shuffled_candidate_numbers( array $challenge ): array {
+		if ( isset( $challenge['shuffled'] ) && is_array( $challenge['shuffled'] ) ) {
+			return array_map( 'strval', $challenge['shuffled'] );
+		}
+
 		$real        = isset( $challenge['real'] ) ? (string) $challenge['real'] : '';
 		$distractors = isset( $challenge['distractors'] ) && is_array( $challenge['distractors'] )
 			? array_map( 'strval', $challenge['distractors'] )
 			: array();
 
 		$candidates = array_merge( array( $real ), $distractors );
-
-		// `shuffle()` uses mt_rand which is fine here — we don't need
-		// cryptographic randomness for ordering, only "not predictable to a
-		// passive observer of polling traffic". Each poll calls shuffle()
-		// fresh, so an attacker reading repeat poll responses learns nothing.
 		shuffle( $candidates );
-
 		return $candidates;
 	}
 
