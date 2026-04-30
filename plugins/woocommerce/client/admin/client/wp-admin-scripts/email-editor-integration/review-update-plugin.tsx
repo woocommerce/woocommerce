@@ -1,22 +1,18 @@
 /**
  * External dependencies
  */
-import { useState } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
-import { Button } from '@wordpress/ui';
-import { useSelect } from '@wordpress/data';
+import { useDispatch, useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
-import { EmailActionsFill } from '@woocommerce/email-editor';
 
 /**
  * Internal dependencies
  */
 import { ReviewDrawer } from './review-drawer';
-import { useChangeSummary } from './hooks/use-change-summary';
+import { STORE_NAME } from './store';
 
 /** Extract a human-readable title from a core-data post entity. */
 function extractTitle( post: { title: unknown } ): string {
-	const title = post.title;
+	const { title } = post;
 	if ( typeof title === 'string' ) {
 		return title;
 	}
@@ -32,17 +28,26 @@ function extractTitle( post: { title: unknown } ): string {
 }
 
 /**
- * Mounts the "Review template update" trigger button into the email
- * actions slot and renders the review drawer when clicked.
+ * Mounts the review drawer into the WooCommerce email editor's plugin
+ * scope. The drawer's open / close state lives in the
+ * `woocommerce/email-editor-integration` store, so any other surface
+ * can open it via:
  *
- * Interim trigger — RSM-141 will replace this button with the design's
- * floating editor banner. Until then, this gives end-to-end testability.
+ * ```
+ * wp.data.dispatch( 'woocommerce/email-editor-integration' )
+ *   .openReviewDrawer();
+ * ```
  *
- * The button only appears when the change-summary reports at least one
- * delta and is not in fallback mode.
+ * RSM-141 will wire the dispatch to the design's floating editor
+ * banner. Until then, opening the drawer for testing happens from the
+ * browser console using the same dispatch call.
  */
 export const ReviewUpdatePlugin = () => {
-	const [ isDrawerOpen, setIsDrawerOpen ] = useState< boolean >( false );
+	const { setReviewDrawerOpen } = useDispatch( STORE_NAME );
+	const isDrawerOpen = useSelect(
+		( select ) => select( STORE_NAME ).isReviewDrawerOpen(),
+		[]
+	);
 
 	// Resolve the current woo_email post ID. The block editor's core/editor
 	// store exposes it via getCurrentPostId(); we typecheck loosely because
@@ -73,44 +78,16 @@ export const ReviewUpdatePlugin = () => {
 			? extractTitle( post as { title: unknown } )
 			: '';
 
-	// Cheaply prefetch the summary so the button visibility tracks reality.
-	// `enabled` stays true so we keep a fresh summary cached (the backend
-	// transient invalidates on any post edit).
-	const { summary } = useChangeSummary( postId, true );
-
-	const totalChanges = summary
-		? summary.copy_changes.length +
-		  summary.added_blocks.length +
-		  summary.removed_blocks.length +
-		  summary.structural_changes.length
-		: 0;
-
-	const showTrigger =
-		summary !== null && ! summary.is_fallback && totalChanges > 0;
-
 	if ( ! postId ) {
 		return null;
 	}
 
 	return (
-		<>
-			{ showTrigger && (
-				<EmailActionsFill>
-					<Button
-						variant="outline"
-						tone="neutral"
-						onClick={ () => setIsDrawerOpen( true ) }
-					>
-						{ __( 'Review template update', 'woocommerce' ) }
-					</Button>
-				</EmailActionsFill>
-			) }
-			<ReviewDrawer
-				postId={ postId }
-				emailTitle={ emailTitle }
-				isOpen={ isDrawerOpen }
-				onOpenChange={ setIsDrawerOpen }
-			/>
-		</>
+		<ReviewDrawer
+			postId={ postId }
+			emailTitle={ emailTitle }
+			isOpen={ isDrawerOpen }
+			onOpenChange={ setReviewDrawerOpen }
+		/>
 	);
 };

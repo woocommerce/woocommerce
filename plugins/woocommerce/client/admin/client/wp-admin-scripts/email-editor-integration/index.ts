@@ -20,6 +20,7 @@ import { modifySidebar } from './sidebar_settings';
 import { registerEmailValidationRules } from './email-validation';
 import getResetNotificationEmailContentAction from './reset-notification-email-content';
 import { ReviewUpdatePlugin } from './review-update-plugin';
+import { registerStore as registerIntegrationStore } from './store';
 
 import './style.scss';
 
@@ -71,14 +72,21 @@ addFilter( 'woocommerce_email_editor_create_coupon_handler', NAME_SPACE, () => {
 	};
 } );
 
+// Register the integration's @wordpress/data store before any plugin
+// renders, so consumers (review drawer, future RSM-141 banner, etc.)
+// can dispatch into it from anywhere.
+registerIntegrationStore();
+
 modifySidebar();
 modifyTemplateSidebar();
 registerEmailValidationRules();
 
-// Register the review-update plugin (RSM-143). Mounts an interim trigger
-// button into the email actions slot and renders the review drawer when
-// clicked. RSM-141 will replace the interim trigger with the design's
-// floating editor banner.
+// Register the review-update plugin (RSM-143). Mounts the review drawer
+// into the email editor — its open / close state is driven by the
+// `woocommerce/email-editor-integration` store, so any other surface
+// (RSM-141 banner, list-page row action, browser console) can open it
+// via `wp.data.dispatch( 'woocommerce/email-editor-integration' )
+// .openReviewDrawer()`.
 registerPlugin( 'woocommerce-email-editor-review-update', {
 	scope: 'woocommerce-email-editor',
 	render: ReviewUpdatePlugin,
