@@ -24,7 +24,6 @@
  * @var int   $per_page      Notifications shown per page.
  */
 
-use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
 use Automattic\WooCommerce\Internal\StockNotifications\Frontend\MyAccountEndpoint;
 
 defined( 'ABSPATH' ) || exit;
@@ -55,15 +54,12 @@ do_action( 'woocommerce_before_account_back_in_stock_notifications', $has_items 
 		<tbody>
 		<?php foreach ( $notifications as $notification ) : ?>
 			<?php
-			$status       = (string) $notification->get_status();
 			$product_name = $notification->get_product_name();
 			$permalink    = $notification->get_product_permalink();
 			$variation    = $notification->get_product_formatted_variation_list( true );
 			$date_created = $notification->get_date_created();
-			$is_cancelled = NotificationStatus::CANCELLED === $status;
-			$is_sent      = NotificationStatus::SENT === $status;
 			?>
-			<tr class="woocommerce-back-in-stock-notifications-table__row woocommerce-back-in-stock-notifications-table__row--status-<?php echo esc_attr( $status ); ?>">
+			<tr class="woocommerce-back-in-stock-notifications-table__row woocommerce-back-in-stock-notifications-table__row--status-<?php echo esc_attr( (string) $notification->get_status() ); ?>">
 				<td class="woocommerce-back-in-stock-notifications-table__cell woocommerce-back-in-stock-notifications-table__cell-product" data-title="<?php esc_attr_e( 'Product', 'woocommerce' ); ?>">
 					<?php if ( '' !== $product_name && '' !== $permalink ) : ?>
 						<a href="<?php echo esc_url( $permalink ); ?>"><?php echo esc_html( $product_name ); ?></a>
@@ -84,16 +80,12 @@ do_action( 'woocommerce_before_account_back_in_stock_notifications', $has_items 
 					<?php endif; ?>
 				</td>
 				<td class="woocommerce-back-in-stock-notifications-table__cell woocommerce-back-in-stock-notifications-table__cell-actions" data-title="<?php esc_attr_e( 'Actions', 'woocommerce' ); ?>">
-					<?php if ( $is_cancelled || $is_sent ) : ?>
-						<button type="button" class="woocommerce-button button<?php echo esc_attr( $wp_button_class ); ?>" disabled><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
-					<?php else : ?>
-						<form method="post" action="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="woocommerce-back-in-stock-notifications-cancel-form">
-							<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::CANCEL_ACTION ); ?>" value="1" />
-							<input type="hidden" name="notification_id" value="<?php echo esc_attr( (string) $notification->get_id() ); ?>" />
-							<?php wp_nonce_field( MyAccountEndpoint::get_cancel_nonce_action( (int) $notification->get_id() ) ); ?>
-							<button type="submit" class="woocommerce-button button<?php echo esc_attr( $wp_button_class ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
-						</form>
-					<?php endif; ?>
+					<form method="post" action="<?php echo esc_url( wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) ) ); ?>" class="woocommerce-back-in-stock-notifications-cancel-form">
+						<input type="hidden" name="<?php echo esc_attr( MyAccountEndpoint::CANCEL_ACTION ); ?>" value="1" />
+						<input type="hidden" name="notification_id" value="<?php echo esc_attr( (string) $notification->get_id() ); ?>" />
+						<?php wp_nonce_field( MyAccountEndpoint::get_cancel_nonce_action( (int) $notification->get_id() ) ); ?>
+						<button type="submit" class="woocommerce-button button<?php echo esc_attr( $wp_button_class ); ?>"><?php esc_html_e( 'Cancel', 'woocommerce' ); ?></button>
+					</form>
 				</td>
 			</tr>
 		<?php endforeach; ?>

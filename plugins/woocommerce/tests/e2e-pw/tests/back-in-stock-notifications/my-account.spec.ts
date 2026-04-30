@@ -104,25 +104,16 @@ test.describe(
 						} )
 					).toBeVisible();
 
-					// Exactly one active status cell + one pending status cell.
-					await expect(
-						table.getByRole( 'cell', {
-							name: 'Active',
-							exact: true,
-						} )
-					).toHaveCount( 1 );
-					await expect(
-						table.getByRole( 'cell', {
-							name: 'Pending',
-							exact: true,
-						} )
-					).toHaveCount( 1 );
+					// Exactly two rows — both signups are PENDING/ACTIVE so neither is filtered out.
+					await expect( table.locator( 'tbody tr' ) ).toHaveCount(
+						2
+					);
 				} finally {
 					await secondProduct.cleanup();
 				}
 			} );
 
-			test( 'cancel click on a pending notification moves it to cancelled', async ( {
+			test( 'cancel click removes the row from the My Account list', async ( {
 				page,
 				baseURL,
 				restApi,
@@ -154,12 +145,6 @@ test.describe(
 							} ),
 						} );
 					await expect( row ).toBeVisible();
-					await expect(
-						row.getByRole( 'cell', {
-							name: 'Pending',
-							exact: true,
-						} )
-					).toBeVisible();
 
 					await row.getByRole( 'button', { name: 'Cancel' } ).click();
 
@@ -170,25 +155,18 @@ test.describe(
 						} )
 					).toBeVisible();
 
-					// The row is now cancelled with a disabled Cancel button.
-					const updatedRow = page
-						.locator(
-							'.woocommerce-back-in-stock-notifications-table tbody tr'
+					// The cancelled row is filtered out — only PENDING/ACTIVE rows render.
+					await expect( row ).toHaveCount( 0 );
+
+					// And a notice confirms the cancellation.
+					await expect(
+						page.getByText(
+							new RegExp(
+								`back in stock notification.*${ pendingProduct.name }.*cancelled`,
+								'i'
+							)
 						)
-						.filter( {
-							has: page.getByRole( 'link', {
-								name: new RegExp( pendingProduct.name, 'i' ),
-							} ),
-						} );
-					await expect(
-						updatedRow.getByRole( 'cell', {
-							name: 'Cancelled',
-							exact: true,
-						} )
 					).toBeVisible();
-					await expect(
-						updatedRow.getByRole( 'button', { name: 'Cancel' } )
-					).toBeDisabled();
 				} finally {
 					await pendingProduct.cleanup();
 				}

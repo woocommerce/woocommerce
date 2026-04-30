@@ -149,6 +149,26 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * SENT and CANCELLED notifications are filtered out — only ACTIVE/PENDING render in the My Account view.
+	 */
+	public function test_get_current_user_notifications_page_excludes_sent_and_cancelled(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+
+		$active    = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+		$pending   = $this->create_notification( $user_id, NotificationStatus::PENDING );
+		$this->create_notification( $user_id, NotificationStatus::SENT );
+		$this->create_notification( $user_id, NotificationStatus::CANCELLED );
+
+		$endpoint = new MyAccountEndpoint();
+		$page     = $endpoint->get_current_user_notifications_page( 1, MyAccountEndpoint::DEFAULT_PER_PAGE );
+
+		$this->assertSame( 2, $page['total_items'] );
+		$visible_ids = array_map( static fn ( $n ) => $n->get_id(), $page['notifications'] );
+		$this->assertEqualsCanonicalizing( array( $active->get_id(), $pending->get_id() ), $visible_ids );
+	}
+
+	/**
 	 * Out-of-range page numbers clamp to the last page so a stale link doesn't render an empty table.
 	 */
 	public function test_get_current_user_notifications_page_clamps_out_of_range(): void {
