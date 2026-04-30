@@ -177,19 +177,25 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Get the client IP address.
+	 * Get the client IP address used as the per-IP rate-limit key.
+	 *
+	 * Uses `REMOTE_ADDR` exclusively. We intentionally do not honor
+	 * `HTTP_X_FORWARDED_FOR` here: the exchange endpoint is unauthenticated, and
+	 * without a project-wide trusted-proxy list we cannot tell a legitimate
+	 * proxy header from an attacker-supplied one. Trusting the first XFF value
+	 * would let any client choose a fresh rate-limit bucket per request and
+	 * bypass the per-IP cap. On sites behind a CDN/load balancer that all
+	 * clients share, REMOTE_ADDR is the proxy IP — those deployments will
+	 * effectively share a single bucket, which is acceptable given the limit
+	 * (10/15 min) and the per-user generation cap enforced separately.
 	 *
 	 * @return string
 	 */
 	private function get_client_ip() {
-		$ip = '';
-		if ( ! empty( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
-			$ips = explode( ',', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
-			$ip  = trim( $ips[0] );
-		} elseif ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
-			$ip = sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
+		if ( ! empty( $_SERVER['REMOTE_ADDR'] ) ) {
+			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		}
-		return $ip;
+		return '';
 	}
 
 	/**
@@ -351,9 +357,27 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			return $site_url;
 		}
 
-		$token      = $request->get_param( 'token' );
+		// Defensive sanitize even though the REST `sanitize_callback` already
+		// did so — guards against future refactors that bypass the callback.
+		$token      = sanitize_text_field( (string) $request->get_param( 'token' ) );
 		$token_hash = hash( 'sha256', $token );
 		$key        = self::TOKEN_TRANSIENT_PREFIX . $token_hash;
+
+		// Atomically claim the token before reading it. `wp_cache_add()` is
+		// SETNX-equivalent on Redis/Memcached — i.e. essentially every
+		// production WooCommerce host — so concurrent exchanges of the same
+		// token race here and exactly one wins. Without this, two requests can
+		// both `get_transient()` before either `delete_transient()` runs and
+		// each ends up minting a fresh Application Password from the same QR.
+		// The claim entry expires alongside the token TTL; no explicit cleanup.
+		$claim_key = $key . '_claimed';
+		if ( ! wp_cache_add( $claim_key, 1, '', self::TOKEN_TTL ) ) {
+			return new \WP_Error(
+				'invalid_token',
+				__( 'Invalid or expired QR login token.', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
 
 		// Retrieve and immediately delete the token (one-time use).
 		$token_data = get_transient( $key );
