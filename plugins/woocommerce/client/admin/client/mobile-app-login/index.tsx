@@ -12,7 +12,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { QRDirectLoginCode } from '~/homescreen/mobile-app-modal/components/QRDirectLoginCode';
-import { WC_ASSET_URL } from '~/utils/admin-settings';
+import WooLogo from '~/core-profiler/components/navigation/woologo';
 import './style.scss';
 
 /**
@@ -46,12 +46,12 @@ export const MobileAppLoginPage = () => {
 		<div className="woocommerce-mobile-app-login">
 			<Card className="woocommerce-mobile-app-login__card">
 				<CardBody className="woocommerce-mobile-app-login__body">
-					<img
-						className="woocommerce-mobile-app-login__brand"
-						src={ `${ WC_ASSET_URL }images/woo-logo.svg` }
-						alt=""
+					<div
+						className="woocommerce-mobile-app-login__logo"
 						aria-hidden="true"
-					/>
+					>
+						<WooLogo />
+					</div>
 					<h1 className="woocommerce-mobile-app-login__heading">
 						{ __( 'Sign in to the Woo mobile app', 'woocommerce' ) }
 					</h1>
@@ -81,7 +81,7 @@ export const MobileAppLoginPage = () => {
 					<p className="woocommerce-mobile-app-login__faq">
 						{ interpolateComponents( {
 							mixedString: __(
-								'Having trouble? Check our {{link}}troubleshooting guide{{/link}}.',
+								'Any troubles signing in? Check out the {{link}}FAQ{{/link}}.',
 								'woocommerce'
 							),
 							components: {

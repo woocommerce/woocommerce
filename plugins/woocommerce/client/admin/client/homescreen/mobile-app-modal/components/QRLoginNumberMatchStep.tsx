@@ -97,6 +97,12 @@ export const QRLoginNumberMatchStep = ( {
 	onChooseNumber,
 }: QRLoginNumberMatchStepProps ) => {
 	const [ inFlight, setInFlight ] = useState( false );
+	// Tracks which choice is currently being submitted so we can render the
+	// busy state only on the tapped tile (or the cancel link). Empty-string
+	// sentinel matches the cancel path; null means nothing is in flight.
+	const [ pendingChoice, setPendingChoice ] = useState< string | null >(
+		null
+	);
 	const [ secondsRemaining, setSecondsRemaining ] = useState< number >( () =>
 		Math.max( 0, Math.floor( challengeExpiresAt - Date.now() / 1000 ) )
 	);
@@ -136,6 +142,7 @@ export const QRLoginNumberMatchStep = ( {
 		}
 
 		setInFlight( true );
+		setPendingChoice( choice );
 		recordEvent( 'mobile_app_qr_login_number_match_chosen' );
 
 		try {
@@ -146,6 +153,7 @@ export const QRLoginNumberMatchStep = ( {
 			// defensive — it matters only if the request errors out without
 			// a state transition.
 			setInFlight( false );
+			setPendingChoice( null );
 		}
 	};
 
@@ -176,23 +184,34 @@ export const QRLoginNumberMatchStep = ( {
 				role="group"
 				aria-label={ __( 'Number-match candidates', 'woocommerce' ) }
 			>
-				{ numbers.map( ( candidate, index ) => (
-					<Button
-						key={ `${ candidate }-${ index }` }
-						variant="secondary"
-						className="woocommerce-qr-direct-login__number-tile"
-						disabled={ tilesDisabled }
-						aria-disabled={ tilesDisabled }
-						aria-label={ sprintf(
-							/* translators: %s: 3-digit candidate number. */
-							__( 'Confirm with the number %s', 'woocommerce' ),
-							candidate
-						) }
-						onClick={ () => handleChoose( candidate ) }
-					>
-						{ candidate }
-					</Button>
-				) ) }
+				{ numbers.map( ( candidate, index ) => {
+					// Only the tile that was tapped shows the busy state.
+					// the other two stay disabled but un-spinnered so the
+					// merchant can see which one is being submitted.
+					const isThisTilePending =
+						inFlight && pendingChoice === candidate;
+					return (
+						<Button
+							key={ `${ candidate }-${ index }` }
+							variant="secondary"
+							className="woocommerce-qr-direct-login__number-tile"
+							disabled={ tilesDisabled }
+							aria-disabled={ tilesDisabled }
+							isBusy={ isThisTilePending }
+							aria-label={ sprintf(
+								/* translators: %s: 3-digit candidate number. */
+								__(
+									'Confirm with the number %s',
+									'woocommerce'
+								),
+								candidate
+							) }
+							onClick={ () => handleChoose( candidate ) }
+						>
+							{ candidate }
+						</Button>
+					);
+				} ) }
 			</div>
 
 			<p
@@ -212,6 +231,7 @@ export const QRLoginNumberMatchStep = ( {
 				variant="link"
 				className="woocommerce-qr-direct-login__match-cancel"
 				disabled={ inFlight }
+				isBusy={ inFlight && pendingChoice === '' }
 				onClick={ () => {
 					recordEvent( 'mobile_app_qr_login_number_match_cancelled' );
 					// Empty string is treated by the server as a non-matching
@@ -219,10 +239,12 @@ export const QRLoginNumberMatchStep = ( {
 					handleChoose( '' );
 				} }
 			>
-				{ __(
-					"I don't recognise this device — cancel",
-					'woocommerce'
-				) }
+				{ inFlight && pendingChoice === ''
+					? __( 'Cancelling…', 'woocommerce' )
+					: __(
+							"I don't recognise this device — cancel",
+							'woocommerce'
+					  ) }
 			</Button>
 		</div>
 	);
