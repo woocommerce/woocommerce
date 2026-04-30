@@ -355,11 +355,13 @@ class Checkout extends AbstractCartRoute {
 		 * Create (or update) Draft Order and process request data.
 		 */
 		$this->create_or_update_draft_order( $request );
+		// Order save-point: 1.
 
 		/**
 		 * Persist additional fields, order notes and payment method for order.
 		 */
 		$this->update_order_from_request( $request );
+		// Order save-point: 2.
 
 		if ( $request->get_param( '__experimental_calc_totals' ) ) {
 			/**
@@ -378,8 +380,6 @@ class Checkout extends AbstractCartRoute {
 			$this->cart_controller->validate_cart();
 		}
 
-		$this->order->save();
-
 		return $this->prepare_item_for_response(
 			(object) [
 				'order' => wc_get_order( $this->order ),
@@ -392,6 +392,29 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Process an order.
 	 *
+	 * @throws RouteException On error.
+	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	protected function get_route_post_response( \WP_REST_Request $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
+		try {
+			return $this->process_order( $request );
+		} catch ( \Throwable $exception ) {
+			if ( $this->order ) {
+				// The optimistic order save bounced back, persist the order as it is to preserve the intermediate state.
+				try {
+					$this->order->save();
+				} catch ( \Throwable $save_exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+					// Ignore the save exception, the root cause will be bubbled up via re-throwing $exception.
+				}
+			}
+			throw $exception;
+		}
+	}
+
+	/**
+	 * Process an order based on optimistic save approach to minimize the number of order saves.
+	 *
 	 * 1. Obtain Draft Order
 	 * 2. Process Request
 	 * 3. Process Customer
@@ -399,12 +422,10 @@ class Checkout extends AbstractCartRoute {
 	 * 5. Process Payment
 	 *
 	 * @throws RouteException On error.
-	 *
-	 * @param \WP_REST_Request $request Request object.
-	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
 	 * @return \WP_REST_Response|\WP_Error
 	 */
-	protected function get_route_post_response( \WP_REST_Request $request ) {
+	private function process_order( \WP_REST_Request $request ) { // phpcs:ignore Squiz.Commenting.FunctionComment.IncorrectTypeHint
 		wc_log_order_step( '[Store API #1] Place Order flow initiated', null, false, true );
 
 		$validation_callback = $this->validate_callback( $request );
@@ -440,16 +461,19 @@ class Checkout extends AbstractCartRoute {
 		 * uses the up-to-date customer address.
 		 */
 		$this->update_customer_from_request( $request );
+		// Customer save-point: 1 (session-stored).
 		wc_log_order_step( '[Store API #3] Updated customer data from request' );
 
 		/**
 		 * Create (or update) Draft Order and process request data.
 		 */
 		$this->create_or_update_draft_order( $request );
+		// Order save-point: 1.
 		wc_log_order_step( '[Store API #4] Created/Updated draft order', array( 'order_object' => $this->order ) );
-		$this->update_order_from_request( $request );
+		$this->update_order_from_request( $request, false );
 		wc_log_order_step( '[Store API #5] Updated order with posted data', array( 'order_object' => $this->order ) );
 		$this->process_customer( $request );
+		// Customer save-point: 2 (db-stored; optional, guest -> customer transition or customer data has changed).
 		wc_log_order_step( '[Store API #6] Created and/or persisted customer data from order', array( 'order_object' => $this->order ) );
 
 		/**
@@ -522,13 +546,10 @@ class Checkout extends AbstractCartRoute {
 			'This action was deprecated in WooCommerce Blocks version 7.2.0. Please use woocommerce_store_api_checkout_order_processed instead.'
 		);
 
-		// Set the order status to 'pending' as an initial step.
-		// This allows the order to proceed towards completion. The hook
-		// 'woocommerce_store_api_checkout_order_processed' (fired below) can be used
-		// to set a custom status *after* this point.
-		// If payment isn't needed, the custom status is kept. If payment is needed,
-		// the payment gateway's statuses take precedence.
+		// Set initial status to 'pending'; woocommerce_store_api_checkout_order_processed (fired below) can override it.
+		// Custom statuses are preserved when no payment is needed; payment gateway statuses take precedence otherwise.
 		$this->order->update_status( 'pending' );
+		// Order save-point: 2.
 
 		/**
 		 * Fires before an order is processed by the Checkout Block/Store API.
@@ -645,7 +666,6 @@ class Checkout extends AbstractCartRoute {
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
 			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
-
 		} else {
 			$this->order_controller->update_order_from_cart( $this->order, true );
 			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
@@ -868,12 +888,10 @@ class Checkout extends AbstractCartRoute {
 
 			// Associate customer with the order.
 			$this->order->set_customer_id( $customer_id );
-			$this->order->save();
 
 			// Set the customer auth cookie.
 			wc_set_customer_auth_cookie( $customer_id );
 			wc_log_order_step( '[Store API #6::process_customer] Created new customer', array( 'customer_id' => $customer_id ) );
-
 		}
 
 		// Persist customer address data to account.
