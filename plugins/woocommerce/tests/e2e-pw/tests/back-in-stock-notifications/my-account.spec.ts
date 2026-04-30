@@ -78,7 +78,7 @@ test.describe(
 					await signUpOnProductPage( page );
 
 					await page.goto(
-						'my-account/back-in-stock-notifications/'
+						'my-account/stock-notifications/'
 					);
 
 					// The page renders the expected heading.
@@ -132,7 +132,7 @@ test.describe(
 					await signUpOnProductPage( page );
 
 					await page.goto(
-						'my-account/back-in-stock-notifications/'
+						'my-account/stock-notifications/'
 					);
 
 					const row = page
@@ -179,7 +179,7 @@ test.describe(
 			test( 'renders the empty state and a catalog link', async ( {
 				page,
 			} ) => {
-				await page.goto( 'my-account/back-in-stock-notifications/' );
+				await page.goto( 'my-account/stock-notifications/' );
 
 				await expect(
 					page.getByRole( 'heading', {
@@ -209,7 +209,7 @@ test.describe(
 			test.use( { storageState: { cookies: [], origins: [] } } );
 
 			test( 'is redirected to the login form', async ( { page } ) => {
-				await page.goto( 'my-account/back-in-stock-notifications/' );
+				await page.goto( 'my-account/stock-notifications/' );
 
 				// Standard WC behaviour: unauthenticated account endpoints show
 				// the login form on the My Account page.
