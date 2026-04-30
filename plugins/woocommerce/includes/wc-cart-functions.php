@@ -524,9 +524,10 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 			/**
 			 * Filters the default shipping method for a package.
 			 *
-			 * This filter is documented in wc_get_default_shipping_method_for_package().
-			 *
-			 * @since 10.8.0
+			 * @since 3.2.0
+			 * @param string $default Default shipping method.
+			 * @param array  $rates   Shipping rates.
+			 * @param string $chosen_method Chosen method id.
 			 */
 			return (string) apply_filters( 'woocommerce_shipping_chosen_method', $default, $package['rates'], $chosen_method );
 		}

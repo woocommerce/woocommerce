@@ -7,8 +7,6 @@
 
 declare( strict_types = 1 );
 
-use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
-
 /**
  * Tests for wc_get_default_shipping_method_for_package().
  */
