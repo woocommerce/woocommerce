@@ -32,6 +32,14 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test environment.
+	 */
+	public function tearDown(): void {
+		unregister_post_type( 'shop_test' );
+		parent::tearDown();
+	}
+
+	/**
 	 * Get all expected fields.
 	 *
 	 * @param bool $with_cogs_enabled True to return the fields expected when the Cost of Goods Sold feature is enabled.
@@ -346,6 +354,38 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// The persisted record must be untouched: same post type, no added customer_note.
 		$this->assertSame( 'shop_test', get_post_type( $post_id ) );
 		$this->assertSame( '', (string) get_post_meta( $post_id, '_customer_note', true ) );
+	}
+
+	/**
+	 * PUT against an ID belonging to a non 'shop_order' WC order type must be rejected when
+	 * the row lives in the orders table under HPOS.
+	 */
+	public function test_update_rejects_refund_id_hpos(): void {
+		$this->toggle_cot_feature_and_usage( true );
+		
+		// A refund (type 'shop_order_refund') is used because it's a real in-core order type that shares the same table as orders.
+		$order  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 10,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		$this->assertSame( 'shop_order_refund', \Automattic\WooCommerce\Utilities\OrderUtil::get_order_type( $refund->get_id() ) );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $refund->get_id() );
+		$request->set_body_params( array( 'customer_note' => 'should not apply' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $data['code'] );
+
+		// The persisted record must be untouched: type still 'shop_order_refund'.
+		$this->assertSame( 'shop_order_refund', \Automattic\WooCommerce\Utilities\OrderUtil::get_order_type( $refund->get_id() ) );
 	}
 
 	/**
@@ -937,13 +977,5 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$this->assertEquals( 200, $response->get_status() );
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $order->get_id() ) );
-	}
-
-	/**
-	 * Tear down test environment.
-	 */
-	public function tearDown(): void {
-		unregister_post_type( 'shop_test' );
-		parent::tearDown();
 	}
 }
