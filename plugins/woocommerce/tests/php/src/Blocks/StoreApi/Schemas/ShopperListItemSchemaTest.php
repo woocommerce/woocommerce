@@ -126,6 +126,6 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $response['images'], 'No images should be returned for missing products' );
 		$this->assertNull( $response['prices'], 'Live prices should be null for missing products' );
 		$this->assertSame( 'Snapshot Title', $response['product_title_at_save'] );
-		$this->assertSame( '12.50', $response['price_at_save'] );
+		$this->assertSame( '1250', $response['price_at_save'], 'price_at_save should be formatted via prepare_money_response (smallest unit)' );
 	}
 }

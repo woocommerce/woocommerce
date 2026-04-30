@@ -216,6 +216,8 @@ class ShopperListItemSchema extends AbstractSchema {
 		$product      = $product_id ? wc_get_product( $product_id ) : false;
 		$has_product  = $product instanceof \WC_Product;
 
+		$price_at_save = $item['price_at_save'] ?? '';
+
 		$response = array(
 			'key'                   => $item['key'] ?? '',
 			'id'                    => $product_id,
@@ -226,7 +228,7 @@ class ShopperListItemSchema extends AbstractSchema {
 			'item_data'             => isset( $item['item_data'] ) && is_array( $item['item_data'] ) ? $item['item_data'] : array(),
 			'date_added_gmt'        => wc_rest_prepare_date_response( $item['date_added_gmt'] ?? current_time( 'mysql', true ) ),
 			'product_title_at_save' => $item['product_title_at_save'] ?? '',
-			'price_at_save'         => $item['price_at_save'] ?? '',
+			'price_at_save'         => '' === $price_at_save ? '' : $this->prepare_money_response( $price_at_save, wc_get_price_decimals() ),
 		);
 
 		$variation_data = isset( $item['variation'] ) && is_array( $item['variation'] ) ? $item['variation'] : array();
@@ -238,7 +240,7 @@ class ShopperListItemSchema extends AbstractSchema {
 			$response['variation'] = $this->format_variation_data( $variation_data, $product );
 			$response['prices']    = (object) $this->get_prices( $product );
 		} else {
-			$response['name']      = $item['product_title_at_save'] ?? '';
+			$response['name']      = $this->prepare_html_response( (string) ( $item['product_title_at_save'] ?? '' ) );
 			$response['permalink'] = '';
 			$response['images']    = array();
 			$response['variation'] = $this->format_variation_data( $variation_data, null );
