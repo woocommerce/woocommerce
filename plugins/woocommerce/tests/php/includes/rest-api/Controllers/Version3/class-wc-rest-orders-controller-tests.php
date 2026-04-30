@@ -362,7 +362,7 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_update_rejects_refund_id_hpos(): void {
 		$this->toggle_cot_feature_and_usage( true );
-		
+
 		// A refund (type 'shop_order_refund') is used because it's a real in-core order type that shares the same table as orders.
 		$order  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$refund = wc_create_refund(
