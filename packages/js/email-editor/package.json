@@ -1,6 +1,6 @@
 {
 	"name": "@woocommerce/email-editor",
-	"version": "1.10.1",
+	"version": "2.0.0",
 	"description": "Gutenberg based email editor that is used in WooCommerce emails.",
 	"author": "Automattic",
 	"license": "GPL-2.0-or-later",
@@ -110,7 +110,7 @@
 		"@types/jest": "29.5.x",
 		"@types/js-cookie": "^3.0.2",
 		"@types/lodash": "^4.14.180",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@types/react": "18.3.x",
 		"@types/react-dom": "18.3.x",
 		"@types/wordpress__block-editor": "catalog:wp-min",

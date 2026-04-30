@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Update the Blueprint settings error notice background to match the WordPress 7.0 admin notice spec (#fcf0f0).

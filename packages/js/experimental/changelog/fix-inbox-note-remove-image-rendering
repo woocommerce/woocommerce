@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop rendering thumbnail images in inbox notes. Drop `image` and `layout` from the InboxNoteCard prop type and remove the `.thumbnail` and `.banner` styles.

@@ -10,7 +10,7 @@
 		"data"
 	],
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"homepage": "https://github.com/woocommerce/woocommerce/tree/trunk/packages/js/data/README.md",
 	"repository": {
@@ -80,7 +80,7 @@
 		"@types/jest": "29.5.x",
 		"@types/lodash": "^4.14.202",
 		"@types/md5": "^2.3.5",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@types/qs": "^6.9.10",
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",

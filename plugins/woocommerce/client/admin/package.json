@@ -128,7 +128,7 @@
 		"@types/debug": "4.1.12",
 		"@types/jest": "29.5.x",
 		"@types/lodash": "^4.14.202",
-		"@types/node": "20.x.x",
+		"@types/node": "^24.1.0",
 		"@types/qs": "^6.9.10",
 		"@types/react": "18.3.x",
 		"@types/react-router-dom": "^5.3.3",
@@ -150,6 +150,7 @@
 		"@woocommerce/dependency-extraction-webpack-plugin": "workspace:*",
 		"@woocommerce/email-editor": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
+		"@woocommerce/experimental-products-app": "workspace:*",
 		"@woocommerce/experimental": "workspace:*",
 		"@woocommerce/explat": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
@@ -165,9 +166,9 @@
 		"@wordpress/babel-preset-default": "next",
 		"@wordpress/block-editor": "catalog:wp-min",
 		"@wordpress/browserslist-config": "next",
-		"@wordpress/jest-preset-default": "^8.5.2",
-		"@wordpress/postcss-plugins-preset": "^1.6.0",
-		"@wordpress/postcss-themes": "^1.0.5",
+		"@wordpress/jest-preset-default": "next",
+		"@wordpress/postcss-plugins-preset": "next",
+		"@wordpress/postcss-themes": "next",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/stylelint-config": "^21.36.0",
 		"@xstate/inspect": "0.8.0",
@@ -197,7 +198,6 @@
 		"mini-css-extract-plugin": "2.9.x",
 		"moment": "^2.29.4",
 		"moment-timezone": "^0.5.43",
-		"moment-timezone-data-webpack-plugin": "1.5.x",
 		"node-watch": "^0.7.4",
 		"postcss": "8.4.x",
 		"postcss-color-function": "^4.1.0",
@@ -211,7 +211,7 @@
 		"readline-sync": "^1.4.10",
 		"replace": "^1.2.2",
 		"rimraf": "5.0.5",
-		"rtlcss": "^2.6.2",
+		"rtlcss": "4.3.x",
 		"sass": "^1.69.5",
 		"sass-loader": "10.5.x",
 		"stylelint": "^14.16.1",
@@ -229,7 +229,7 @@
 		"@wordpress/data": "^10.0.2"
 	},
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"config": {
 		"ci": {
@@ -355,6 +355,10 @@
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
 				"node_modules/@woocommerce/eslint-plugin/index.js",
+				"node_modules/@woocommerce/experimental-products-app/build",
+				"node_modules/@woocommerce/experimental-products-app/build-module",
+				"node_modules/@woocommerce/experimental-products-app/build-style",
+				"node_modules/@woocommerce/experimental-products-app/build-types",
 				"node_modules/@woocommerce/experimental/build",
 				"node_modules/@woocommerce/experimental/build-module",
 				"node_modules/@woocommerce/experimental/build-style",
