@@ -43,13 +43,6 @@ class ShopperListItem {
 	private $quantity;
 
 	/**
-	 * Custom item data captured at save time (extension fields).
-	 *
-	 * @var array
-	 */
-	private $item_data;
-
-	/**
 	 * MySQL DATETIME the item was saved, in GMT.
 	 *
 	 * @var string
@@ -78,7 +71,6 @@ class ShopperListItem {
 	 * @param int    $variation_id          Variation ID, or 0.
 	 * @param array  $variation             Variation attributes.
 	 * @param int    $quantity              Saved quantity.
-	 * @param array  $item_data             Custom item data.
 	 * @param string $date_added_gmt        MySQL DATETIME, GMT.
 	 * @param string $product_title_at_save Title snapshot.
 	 * @param string $price_at_save         Price snapshot.
@@ -89,7 +81,6 @@ class ShopperListItem {
 		int $variation_id,
 		array $variation,
 		int $quantity,
-		array $item_data,
 		string $date_added_gmt,
 		string $product_title_at_save,
 		string $price_at_save
@@ -99,7 +90,6 @@ class ShopperListItem {
 		$this->variation_id          = $variation_id;
 		$this->variation             = $variation;
 		$this->quantity              = $quantity;
-		$this->item_data             = $item_data;
 		$this->date_added_gmt        = $date_added_gmt;
 		$this->product_title_at_save = $product_title_at_save;
 		$this->price_at_save         = $price_at_save;
@@ -117,7 +107,6 @@ class ShopperListItem {
 			$data['variation_id'] ?? 0,
 			isset( $data['variation'] ) && is_array( $data['variation'] ) ? $data['variation'] : array(),
 			$data['quantity'] ?? 1,
-			isset( $data['item_data'] ) && is_array( $data['item_data'] ) ? $data['item_data'] : array(),
 			$data['date_added_gmt'] ?? '',
 			$data['product_title_at_save'] ?? '',
 			$data['price_at_save'] ?? ''
@@ -129,11 +118,10 @@ class ShopperListItem {
 	 *
 	 * @param int   $product_or_variation_id Product or variation ID.
 	 * @param array $variation               Variation attributes keyed by attribute name.
-	 * @param array $item_data               Custom item data.
 	 * @param int   $quantity                Saved quantity. Coerced to a minimum of 1.
 	 * @return self|null Null if the underlying product can't be resolved.
 	 */
-	public static function from_product( int $product_or_variation_id, array $variation = array(), array $item_data = array(), int $quantity = 1 ): ?self {
+	public static function from_product( int $product_or_variation_id, array $variation = array(), int $quantity = 1 ): ?self {
 		$product = wc_get_product( absint( $product_or_variation_id ) );
 		if ( ! $product ) {
 			return null;
@@ -143,12 +131,11 @@ class ShopperListItem {
 		$product_id   = $variation_id ? $product->get_parent_id() : $product->get_id();
 
 		return new self(
-			self::generate_key( $product_id, $variation_id, $variation, $item_data ),
+			self::generate_key( $product_id, $variation_id, $variation ),
 			$product_id,
 			$variation_id,
 			$variation,
 			max( 1, $quantity ),
-			$item_data,
 			current_time( 'mysql', true ),
 			$product->get_title(),
 			$product->get_price()
@@ -186,7 +173,6 @@ class ShopperListItem {
 			'variation_id'          => $this->variation_id,
 			'variation'             => $this->variation,
 			'quantity'              => $this->quantity,
-			'item_data'             => $this->item_data,
 			'date_added_gmt'        => $this->date_added_gmt,
 			'product_title_at_save' => $this->product_title_at_save,
 			'price_at_save'         => $this->price_at_save,
@@ -195,14 +181,14 @@ class ShopperListItem {
 
 	/**
 	 * Compute a deterministic item key. Mirrors WC_Cart::generate_cart_id() so the same
-	 * product+variation+item_data always hashes to the same key.
+	 * product+variation always hashes to the same key, regardless of the input key order
+	 * for variation attributes.
 	 *
 	 * @param int   $product_id   Product ID.
 	 * @param int   $variation_id Variation ID, or 0.
 	 * @param array $variation    Variation attributes.
-	 * @param array $item_data    Custom item data.
 	 */
-	private static function generate_key( int $product_id, int $variation_id, array $variation, array $item_data ): string {
+	private static function generate_key( int $product_id, int $variation_id, array $variation ): string {
 		$id_parts = array( $product_id );
 
 		if ( $variation_id ) {
@@ -210,22 +196,12 @@ class ShopperListItem {
 		}
 
 		if ( ! empty( $variation ) ) {
+			ksort( $variation );
 			$variation_key = '';
 			foreach ( $variation as $k => $v ) {
 				$variation_key .= trim( (string) $k ) . trim( (string) $v );
 			}
 			$id_parts[] = $variation_key;
-		}
-
-		if ( ! empty( $item_data ) ) {
-			$item_data_key = '';
-			foreach ( $item_data as $k => $v ) {
-				if ( is_array( $v ) || is_object( $v ) ) {
-					$v = http_build_query( (array) $v );
-				}
-				$item_data_key .= trim( (string) $k ) . trim( (string) $v );
-			}
-			$id_parts[] = $item_data_key;
 		}
 
 		return md5( implode( '_', $id_parts ) );

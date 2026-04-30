@@ -80,7 +80,6 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 			'variation_id'          => $variation_id,
 			'variation'             => $variation,
 			'quantity'              => 1,
-			'item_data'             => array(),
 			'date_added_gmt'        => '2024-04-25 03:20:00',
 			'product_title_at_save' => $title,
 			'price_at_save'         => $price,

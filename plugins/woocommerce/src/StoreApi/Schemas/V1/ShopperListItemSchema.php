@@ -173,15 +173,6 @@ class ShopperListItemSchema extends AbstractSchema {
 					)
 				),
 			),
-			'item_data'             => array(
-				'description' => __( 'Custom item data captured at save time (extension fields).', 'woocommerce' ),
-				'type'        => 'array',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-				'items'       => array(
-					'type' => 'object',
-				),
-			),
 			'date_added_gmt'        => array(
 				'description' => __( 'The date the item was saved, as GMT.', 'woocommerce' ),
 				'type'        => 'string',
@@ -225,7 +216,6 @@ class ShopperListItemSchema extends AbstractSchema {
 			'variation_id'          => $item['variation_id'] ?? 0,
 			'quantity'              => $item['quantity'] ?? 1,
 			'product_exists'        => $has_product,
-			'item_data'             => isset( $item['item_data'] ) && is_array( $item['item_data'] ) ? $item['item_data'] : array(),
 			'date_added_gmt'        => wc_rest_prepare_date_response( $item['date_added_gmt'] ?? current_time( 'mysql', true ) ),
 			'product_title_at_save' => $item['product_title_at_save'] ?? '',
 			'price_at_save'         => '' === $price_at_save ? '' : $this->prepare_money_response( $price_at_save, wc_get_price_decimals() ),

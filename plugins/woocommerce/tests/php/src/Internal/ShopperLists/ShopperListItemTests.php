@@ -40,27 +40,16 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox from_product should build an item from a live product, snapshotting title/price and persisting item_data.
+	 * @testdox from_product should build an item from a live product, snapshotting title/price.
 	 */
 	public function test_from_product_builds_item_from_live_product(): void {
-		$item = ShopperListItem::from_product(
-			$this->product->get_id(),
-			array(),
-			array(
-				array(
-					'key'   => 'source',
-					'value' => 'manual',
-				),
-			),
-			3
-		);
+		$item = ShopperListItem::from_product( $this->product->get_id(), array(), 3 );
 
 		$this->assertInstanceOf( ShopperListItem::class, $item );
 		$arr = $item->to_array();
 		$this->assertSame( $this->product->get_title(), $arr['product_title_at_save'] );
 		$this->assertSame( (string) $this->product->get_price(), $arr['price_at_save'] );
 		$this->assertSame( 3, $arr['quantity'], 'Quantity should reflect the value passed to from_product.' );
-		$this->assertSame( 'manual', $arr['item_data'][0]['value'] );
 	}
 
 	/**
@@ -71,7 +60,7 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( ShopperListItem::class, $default );
 		$this->assertSame( 1, $default->to_array()['quantity'] );
 
-		$zero = ShopperListItem::from_product( $this->product->get_id(), array(), array(), 0 );
+		$zero = ShopperListItem::from_product( $this->product->get_id(), array(), 0 );
 		$this->assertInstanceOf( ShopperListItem::class, $zero );
 		$this->assertSame( 1, $zero->to_array()['quantity'] );
 	}
@@ -84,24 +73,37 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The same product+item_data should always produce the same key, and different item_data should produce different keys.
+	 * @testdox Same product+variation should always produce the same key, regardless of variation key order.
 	 */
-	public function test_key_is_deterministic_and_varies_by_inputs(): void {
-		$first  = ShopperListItem::from_product( $this->product->get_id() );
-		$second = ShopperListItem::from_product( $this->product->get_id() );
-		$noted  = ShopperListItem::from_product(
-			$this->product->get_id(),
-			array(),
+	public function test_key_is_stable_under_variation_reordering(): void {
+		$id    = $this->product->get_id();
+		$first = ShopperListItem::from_product(
+			$id,
 			array(
-				array(
-					'key'   => 'note',
-					'value' => 'gift',
-				),
+				'attribute_size'  => 'L',
+				'attribute_color' => 'red',
+			)
+		);
+		$other = ShopperListItem::from_product(
+			$id,
+			array(
+				'attribute_color' => 'red',
+				'attribute_size'  => 'L',
 			)
 		);
 
-		$this->assertSame( $first->get_key(), $second->get_key(), 'Same inputs must produce the same key.' );
-		$this->assertNotSame( $first->get_key(), $noted->get_key(), 'Different item_data must produce different keys.' );
+		$this->assertSame( $first->get_key(), $other->get_key(), 'Variation attribute order must not affect the key.' );
+	}
+
+	/**
+	 * @testdox Different variation values should produce different keys.
+	 */
+	public function test_key_varies_with_variation_values(): void {
+		$id  = $this->product->get_id();
+		$red = ShopperListItem::from_product( $id, array( 'attribute_color' => 'red' ) );
+		$blu = ShopperListItem::from_product( $id, array( 'attribute_color' => 'blue' ) );
+
+		$this->assertNotSame( $red->get_key(), $blu->get_key(), 'Different variation values must produce different keys.' );
 	}
 
 	/**

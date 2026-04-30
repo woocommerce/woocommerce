@@ -204,12 +204,6 @@ class ShopperLists extends ControllerTestCase {
 			array(
 				'product_id' => $this->product->get_id(),
 				'quantity'   => 2,
-				'item_data'  => array(
-					array(
-						'key'   => 'source',
-						'value' => 'manual',
-					),
-				),
 			)
 		);
 		$data     = $response->get_data();
@@ -218,7 +212,6 @@ class ShopperLists extends ControllerTestCase {
 		$this->assertCount( 1, $data['items'] );
 		$this->assertSame( $this->product->get_id(), $data['items'][0]['product_id'] );
 		$this->assertSame( 2, $data['items'][0]['quantity'], 'Posted quantity should be honored.' );
-		$this->assertSame( 'manual', $data['items'][0]['item_data'][0]['value'] );
 	}
 
 	/**

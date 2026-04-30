@@ -97,10 +97,6 @@ class ShopperListItems extends AbstractRoute {
 						'description' => __( 'Quantity for the saved item.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
-					'item_data'     => array(
-						'description' => __( 'Custom item data captured with the saved item.', 'woocommerce' ),
-						'type'        => 'array',
-					),
 				),
 			),
 			'schema' => array( $this->schema, 'get_public_item_schema' ),
@@ -153,9 +149,9 @@ class ShopperListItems extends AbstractRoute {
 			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Shopper list not found.', 'woocommerce' ), 404 );
 		}
 
-		[ $lookup_id, $variation, $item_data, $quantity ] = $this->resolve_item_payload( $request );
+		[ $lookup_id, $variation, $quantity ] = $this->resolve_item_payload( $request );
 
-		$item = ShopperListItem::from_product( $lookup_id, $variation, $item_data, $quantity );
+		$item = ShopperListItem::from_product( $lookup_id, $variation, $quantity );
 		if ( ! $item ) {
 			throw new RouteException( 'woocommerce_rest_shopper_list_unknown_product', esc_html__( 'No product exists for the supplied item.', 'woocommerce' ), 404 );
 		}
@@ -189,9 +185,9 @@ class ShopperListItems extends AbstractRoute {
 	}
 
 	/**
-	 * Resolve the POST input into a uniform payload (product lookup id, variation, item_data).
+	 * Resolve the POST input into a uniform payload (product lookup id, variation, quantity).
 	 *
-	 * Accepts either an existing cart_item_key, or direct product_id/variation_id/variation/item_data.
+	 * Accepts either an existing cart_item_key, or direct product_id/variation_id/variation.
 	 *
 	 * @throws RouteException When neither a cart_item_key nor a product_id is supplied, or the cart_item_key is unknown.
 	 *
@@ -199,7 +195,7 @@ class ShopperListItems extends AbstractRoute {
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
-	 * @return array{0:int,1:array,2:array,3:int} `[ lookup_id, variation, item_data, quantity ]`.
+	 * @return array{0:int,1:array,2:int} `[ lookup_id, variation, quantity ]`.
 	 */
 	private function resolve_item_payload( \WP_REST_Request $request ): array {
 		$cart_item_key = (string) $request->get_param( 'cart_item_key' );
@@ -218,7 +214,6 @@ class ShopperListItems extends AbstractRoute {
 			return array(
 				$variation_id ? $variation_id : $product_id,
 				$variation_attrs,
-				$this->extract_custom_cart_item_data( $line ),
 				absint( $line['quantity'] ?? 1 ),
 			);
 		}
@@ -233,26 +228,8 @@ class ShopperListItems extends AbstractRoute {
 		return array(
 			$variation_id ? $variation_id : $product_id,
 			(array) $request->get_param( 'variation' ),
-			(array) $request->get_param( 'item_data' ),
 			absint( $request->get_param( 'quantity' ) ),
 		);
-	}
-
-	/**
-	 * Strip the WC_Product and line totals from a cart line, leaving only serializable custom fields.
-	 *
-	 * @param array $cart_item Cart item array.
-	 */
-	private function extract_custom_cart_item_data( array $cart_item ): array {
-		$skip = array( 'data', 'data_hash', 'product_id', 'variation_id', 'variation', 'quantity', 'key', 'line_subtotal', 'line_subtotal_tax', 'line_total', 'line_tax', 'line_tax_data' );
-		$data = array();
-		foreach ( $cart_item as $k => $v ) {
-			if ( in_array( $k, $skip, true ) ) {
-				continue;
-			}
-			$data[ $k ] = $v;
-		}
-		return $data;
 	}
 
 	/**
