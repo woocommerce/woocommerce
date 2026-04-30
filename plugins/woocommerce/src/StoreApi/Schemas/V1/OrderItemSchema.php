@@ -78,7 +78,6 @@ class OrderItemSchema extends ItemSchema {
 			$product_properties['sku']                = $product->get_sku();
 			$product_properties['permalink']          = $product->get_permalink();
 			$product_properties['catalog_visibility'] = $product->get_catalog_visibility();
-			$product_properties['prices']             = $this->prepare_order_item_price_response( $order_item, $product, get_option( 'woocommerce_tax_display_cart' ) );
 			$product_properties['sold_individually']  = $product->is_sold_individually();
 			$product_properties['images']             = $this->get_images( $product );
 
@@ -88,6 +87,10 @@ class OrderItemSchema extends ItemSchema {
 				$product_properties['variation'] = $this->get_variation_data_from_order_item( $order_item, $product );
 			}
 		}
+
+		// Always compute prices from order item data so historical order prices
+		// remain accurate even when the product is deleted or its price changes.
+		$product_properties['prices'] = $this->prepare_order_item_price_response( $order_item, get_option( 'woocommerce_tax_display_cart' ) );
 
 		return [
 			'key'                  => $order->get_order_key(),
@@ -122,14 +125,16 @@ class OrderItemSchema extends ItemSchema {
 	 * instead of the product's current live prices.
 	 *
 	 * This ensures that historical order data is not affected by subsequent
-	 * price changes (e.g., sales) on the product.
+	 * price changes (e.g., sales) on the product, and that prices are still
+	 * available even when the product has been deleted.
 	 *
 	 * @param \WC_Order_Item_Product $order_item      Order item instance.
-	 * @param \WC_Product            $product         Product instance.
 	 * @param string                 $tax_display_mode If returned prices are incl or excl of tax.
 	 * @return array
+	 *
+	 * @since 10.9.0
 	 */
-	protected function prepare_order_item_price_response( \WC_Order_Item_Product $order_item, \WC_Product $product, $tax_display_mode = '' ) {
+	protected function prepare_order_item_price_response( \WC_Order_Item_Product $order_item, $tax_display_mode = '' ) {
 		$tax_display_mode = $this->get_tax_display_mode( $tax_display_mode );
 		$price_decimals   = wc_get_price_decimals();
 		$quantity         = $order_item->get_quantity();

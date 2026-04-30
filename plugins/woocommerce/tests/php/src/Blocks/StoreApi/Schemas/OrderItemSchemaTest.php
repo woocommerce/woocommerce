@@ -463,14 +463,23 @@ class OrderItemSchemaTest extends TestCase {
 		$prices_before = (array) $result_before['prices'];
 		$prices_after  = (array) $result_after['prices'];
 
+		// Verify price keys exist.
+		$this->assertArrayHasKey( 'price', $prices_after );
+		$this->assertArrayHasKey( 'regular_price', $prices_after );
+		$this->assertArrayHasKey( 'sale_price', $prices_after );
+
 		// The per-unit price should be $20 (from order data), not $10 (current sale price).
+		$this->assertEquals( '2000', $prices_after['price'], 'Unit price should be 20.00 (stored as cents in minor unit)' );
+		$this->assertEquals( '2000', $prices_after['regular_price'], 'Regular price should be 20.00 from order data' );
+		$this->assertEquals( '2000', $prices_after['sale_price'], 'Sale price field should be 20.00 from order data' );
+
 		$this->assertEquals( $prices_before['price'], $prices_after['price'], 'Price should not change when product goes on sale' );
 		$this->assertEquals( $prices_before['regular_price'], $prices_after['regular_price'], 'Regular price should not change when product goes on sale' );
 		$this->assertEquals( $prices_before['sale_price'], $prices_after['sale_price'], 'Sale price field should not change when product goes on sale' );
 
 		// The totals should also reflect the original $20/unit price.
 		$totals = (array) $result_after['totals'];
-		$this->assertEquals( '40.00', $totals['line_subtotal'], 'Line subtotal should be 40.00 (2 x $20)' );
+		$this->assertEquals( '4000', $totals['line_subtotal'], 'Line subtotal should be 40.00 (2 x $20)' );
 
 		// Cleanup.
 		$order->delete( true );
