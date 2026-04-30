@@ -51,7 +51,9 @@ class ShopperLists extends AbstractRoute {
 			array(
 				'methods'             => \WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'get_response' ),
-				'permission_callback' => 'is_user_logged_in',
+				'permission_callback' => function () {
+					return is_user_logged_in();
+				},
 				'args'                => array(
 					'context' => $this->get_context_param( array( 'default' => 'view' ) ),
 				),

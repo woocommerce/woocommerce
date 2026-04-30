@@ -64,7 +64,9 @@ class ShopperListItemsByKey extends AbstractRoute {
 			array(
 				'methods'             => \WP_REST_Server::DELETABLE,
 				'callback'            => array( $this, 'get_response' ),
-				'permission_callback' => 'is_user_logged_in',
+				'permission_callback' => function () {
+					return is_user_logged_in();
+				},
 			),
 			'schema' => array( $this->schema, 'get_public_item_schema' ),
 		);
