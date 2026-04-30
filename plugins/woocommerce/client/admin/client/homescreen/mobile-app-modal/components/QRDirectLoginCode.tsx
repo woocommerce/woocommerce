@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { QRCodeSVG } from 'qrcode.react';
-import React, { useEffect } from '@wordpress/element';
+import React, { useEffect, useRef } from '@wordpress/element';
 import { Button, Spinner } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import interpolateComponents from '@automattic/interpolate-components';
@@ -26,8 +26,21 @@ export const QRDirectLoginCode = () => {
 
 	useEffect( () => {
 		fetchToken();
-		recordEvent( 'mobile_app_qr_direct_login_displayed' );
 	}, [ fetchToken ] );
+
+	// Fire the displayed event only once a QR code is actually shown, so
+	// funnel analysis (display → scan → login) doesn't conflate users who
+	// only ever saw LOADING/ERROR with users who saw a real code.
+	const displayedTrackedRef = useRef( false );
+	useEffect( () => {
+		if (
+			state === QRLoginTokenStates.READY &&
+			! displayedTrackedRef.current
+		) {
+			displayedTrackedRef.current = true;
+			recordEvent( 'mobile_app_qr_direct_login_displayed' );
+		}
+	}, [ state ] );
 
 	const formatTime = ( seconds: number ) => {
 		const mins = Math.floor( seconds / 60 );
@@ -39,7 +52,9 @@ export const QRDirectLoginCode = () => {
 		return (
 			<div className="qr-direct-login">
 				<Spinner />
-				<p>{ __( 'Generating secure login code…', 'woocommerce' ) }</p>
+				<p role="status" aria-live="polite">
+					{ __( 'Generating secure login code…', 'woocommerce' ) }
+				</p>
 			</div>
 		);
 	}
@@ -47,8 +62,22 @@ export const QRDirectLoginCode = () => {
 	if ( state === QRLoginTokenStates.ERROR ) {
 		return (
 			<div className="qr-direct-login">
-				<p className="qr-direct-login__error">{ errorMessage }</p>
-				<Button variant="secondary" onClick={ refreshToken }>
+				<p
+					className="qr-direct-login__error"
+					role="status"
+					aria-live="polite"
+				>
+					{ errorMessage }
+				</p>
+				<Button
+					variant="secondary"
+					onClick={ () => {
+						recordEvent(
+							'mobile_app_qr_direct_login_refreshed'
+						);
+						refreshToken();
+					} }
+				>
 					{ __( 'Try again', 'woocommerce' ) }
 				</Button>
 			</div>
@@ -58,7 +87,9 @@ export const QRDirectLoginCode = () => {
 	if ( state === QRLoginTokenStates.EXPIRED ) {
 		return (
 			<div className="qr-direct-login">
-				<p>{ __( 'The login code has expired.', 'woocommerce' ) }</p>
+				<p role="status" aria-live="polite">
+					{ __( 'The login code has expired.', 'woocommerce' ) }
+				</p>
 				<Button
 					variant="secondary"
 					onClick={ () => {
@@ -76,7 +107,9 @@ export const QRDirectLoginCode = () => {
 		return (
 			<div className="qr-direct-login">
 				<QRCodeSVG value={ qrUrl } size={ 140 } />
-				<p className="qr-direct-login__timer">
+				{ /* Countdown stays outside any live region so screen readers
+				     don't re-announce it every second. */ }
+				<p className="qr-direct-login__timer" aria-live="off">
 					{ sprintf(
 						/* translators: %s: time remaining in M:SS format */
 						__( 'Code expires in %s', 'woocommerce' ),
