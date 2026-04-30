@@ -1,0 +1,4 @@
+Significance: minor
+Type: tweak
+
+Skip the Back in Stock Notifications double opt-in flow for logged-in customers — they go straight to ACTIVE regardless of the site-wide require_double_opt_in setting. Anonymous signups still go through the verify-email flow as before.
