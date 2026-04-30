@@ -416,6 +416,20 @@ class WC_Product_Variable extends WC_Product {
 		if ( ! $variation instanceof WC_Product_Variation ) {
 			return false;
 		}
+
+		$variation_gallery_image_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+		$variation_gallery_html      = '';
+
+		if ( ! empty( $variation_gallery_image_ids ) ) {
+			$variation_gallery_html = wc_get_product_gallery_html(
+				$this,
+				array_merge(
+					array_filter( array( $variation->get_image_id() ) ),
+					$variation_gallery_image_ids
+				)
+			);
+		}
+
 		// See if prices should be shown for each variation after selection.
 		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
 
@@ -429,6 +443,8 @@ class WC_Product_Variable extends WC_Product {
 				'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
 				'display_price'         => wc_get_price_to_display( $variation ),
 				'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
+				'gallery_image_ids'     => $variation_gallery_image_ids,
+				'gallery_images_html'   => $variation_gallery_html,
 				'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
 				'image_id'              => $variation->get_image_id(),
 				'is_downloadable'       => $variation->is_downloadable(),

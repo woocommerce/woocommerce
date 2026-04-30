@@ -17,6 +17,8 @@ import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
  */
 import type { ProductGalleryContext } from './types';
 import { checkOverflow } from './utils';
+import { subscribeLegacyJQueryFormVariations } from './legacy-jquery-form';
+import { SELECTORS, CLASSES } from './constants';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -29,6 +31,149 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 	isDisabledPrevious: imageIndex === 0,
 	isDisabledNext: imageIndex === totalImages - 1,
 } );
+
+type VariationImageSet = {
+	image_id?: number;
+	image_ids?: number[];
+};
+
+type ProductImageSet = VariationImageSet & {
+	variations?: Record< number, VariationImageSet >;
+};
+
+type ProductGalleryConfig = WooCommerceConfig & {
+	products?: Record< string, ProductImageSet >;
+};
+
+/** Read the `products` map from the WooCommerce iAPI config (or `{}`). */
+const getConfiguredProducts = () =>
+	( getConfig( 'woocommerce' ) as ProductGalleryConfig )?.products || {};
+
+const getProductImageSet = ( productId: string | number ) =>
+	getConfiguredProducts()?.[ String( productId ) ];
+
+/**
+ * Find a variation by matching its featured `image_id` against the given
+ * `currentImageId`. Used as a fallback when the form doesn't expose a
+ * `variation_id` directly (early stages of legacy form lifecycle).
+ */
+const getVariationImageSetByCurrentImage = (
+	productImageSet: ProductImageSet,
+	currentImageId: number
+) =>
+	Object.values( productImageSet.variations || {} ).find(
+		( variation ) => variation.image_id === currentImageId
+	);
+
+/**
+ * Pick the image to surface as selected after a visible-set change.
+ * Prefers the caller's request when it's still in the new set; otherwise
+ * falls back to the first image, or `-1` when the set is empty.
+ */
+const pickSelectedImageId = (
+	imageData: number[],
+	requestedId: number | undefined
+): number => {
+	if ( requestedId !== undefined && imageData.includes( requestedId ) ) {
+		return requestedId;
+	}
+	return imageData[ 0 ] ?? -1;
+};
+
+/** Recompute arrow disabled flags for an image set + selected slot. */
+const computeArrowsState = ( imageData: number[], selectedImageId: number ) => {
+	const index = imageData.indexOf( selectedImageId );
+	if ( index < 0 ) {
+		return { isDisabledPrevious: true, isDisabledNext: true };
+	}
+	return getArrowsState( index, imageData.length );
+};
+
+/** Scroll both the large viewer and the thumbnail strip to the given image. */
+const scrollImageEverywhereIntoView = ( imageId: number ) => {
+	scrollImageIntoView( imageId );
+	scrollThumbnailIntoView( imageId );
+};
+
+/**
+ * Mutate the gallery's reactive context to reflect a new visible image
+ * set. Empty input restores `defaultImageData` (the parent product's
+ * gallery). Also recomputes arrow states and scrolls the active slot
+ * into view.
+ */
+const updateVisibleImageSet = (
+	imageIds: number[],
+	selectedImageId?: number
+) => {
+	const context = getContext();
+	const nextImageData = imageIds.length ? imageIds : context.defaultImageData;
+	const nextSelectedImageId = pickSelectedImageId(
+		nextImageData,
+		selectedImageId
+	);
+	const arrowsState = computeArrowsState(
+		nextImageData,
+		nextSelectedImageId
+	);
+
+	context.imageData = nextImageData;
+	context.selectedImageId = nextSelectedImageId;
+	context.hideNextPreviousButtons = nextImageData.length <= 1;
+	context.isDisabledPrevious = arrowsState.isDisabledPrevious;
+	context.isDisabledNext = arrowsState.isDisabledNext;
+
+	if ( nextSelectedImageId !== -1 ) {
+		scrollImageEverywhereIntoView( nextSelectedImageId );
+	}
+};
+
+/**
+ * Toggle the `hidden` attribute on the closest gallery wrapper based on
+ * whether the element's `data-image-id` is in the current `imageData`.
+ * Bound via `data-wp-watch` so it re-runs reactively on context change.
+ */
+const toggleImageVisibility = ( element: HTMLElement ) => {
+	const imageIdValue = element.getAttribute( 'data-image-id' );
+	if ( ! imageIdValue ) {
+		return;
+	}
+
+	const imageId = Number.parseInt( imageIdValue, 10 );
+	const { imageData } = getContext();
+	const isVisible = imageData.includes( imageId );
+	const closestWrapper = element.closest(
+		`${ SELECTORS.largeImageWrapper }, ${ SELECTORS.thumbnail }`
+	) as HTMLElement | null;
+	const visibilityTarget = closestWrapper || element;
+
+	visibilityTarget.hidden = ! isVisible;
+	element.setAttribute( 'aria-hidden', isVisible ? 'false' : 'true' );
+};
+
+/**
+ * Apply the active-thumbnail class and tabIndex when the element's
+ * image is both visible and the currently selected image; otherwise
+ * remove them.
+ */
+const toggleActiveThumbnailAttributes = ( element: HTMLElement ) => {
+	const imageIdValue = element.getAttribute( 'data-image-id' );
+	if ( ! imageIdValue ) {
+		return;
+	}
+
+	const { imageData, selectedImageId } = getContext();
+	const imageId = Number.parseInt( imageIdValue, 10 );
+	const isVisible = imageData.includes( imageId );
+
+	if ( isVisible && selectedImageId === imageId ) {
+		element.classList.add( CLASSES.activeThumbnail );
+		element.setAttribute( 'tabIndex', '0' );
+		return;
+	}
+
+	element.classList.remove( CLASSES.activeThumbnail );
+	element.setAttribute( 'tabIndex', '-1' );
+};
 
 /**
  * Scrolls the image into view for the main image.
@@ -52,9 +197,7 @@ const scrollImageIntoView = ( imageId: number ) => {
 		return;
 	}
 
-	const galleryContainer = element.closest(
-		'.wp-block-woocommerce-product-gallery'
-	);
+	const galleryContainer = element.closest( SELECTORS.galleryContainer );
 
 	if ( ! galleryContainer ) {
 		return;
@@ -62,7 +205,7 @@ const scrollImageIntoView = ( imageId: number ) => {
 
 	// Find the scrollable container for the viewer gallery
 	const scrollableContainer = galleryContainer.querySelector(
-		'.wc-block-product-gallery-large-image__container'
+		SELECTORS.largeImageContainer
 	);
 
 	if ( ! scrollableContainer ) {
@@ -70,7 +213,7 @@ const scrollImageIntoView = ( imageId: number ) => {
 	}
 
 	const imageElement = scrollableContainer.querySelector(
-		`img[data-image-id="${ imageId }"]`
+		SELECTORS.imgByImageId( imageId )
 	);
 
 	if ( imageElement ) {
@@ -110,16 +253,14 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	}
 
 	// Find the closest gallery container
-	const galleryContainer = element.closest(
-		'.wp-block-woocommerce-product-gallery'
-	);
+	const galleryContainer = element.closest( SELECTORS.galleryContainer );
 
 	if ( ! galleryContainer ) {
 		return;
 	}
 
 	const thumbnailElement = galleryContainer.querySelector(
-		`.wc-block-product-gallery-thumbnails__thumbnail img[data-image-id="${ imageId }"]`
+		`${ SELECTORS.thumbnail } ${ SELECTORS.imgByImageId( imageId ) }`
 	);
 
 	if ( ! thumbnailElement ) {
@@ -128,16 +269,14 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 
 	// Find the thumbnail scrollable container
 	const scrollContainer = thumbnailElement.closest(
-		'.wc-block-product-gallery-thumbnails__scrollable'
+		SELECTORS.thumbnailsScrollable
 	);
 
 	if ( ! scrollContainer ) {
 		return;
 	}
 
-	const thumbnail = thumbnailElement.closest(
-		'.wc-block-product-gallery-thumbnails__thumbnail'
-	);
+	const thumbnail = thumbnailElement.closest( SELECTORS.thumbnail );
 
 	if ( ! thumbnail ) {
 		return;
@@ -187,6 +326,9 @@ const productGallery = {
 		selectImage: ( newImageIndex: number ) => {
 			const context = getContext();
 			const { imageData } = context;
+			if ( newImageIndex < 0 || newImageIndex >= imageData.length ) {
+				return;
+			}
 
 			const imageId = imageData[ newImageIndex ];
 			const { isDisabledPrevious, isDisabledNext } = getArrowsState(
@@ -203,6 +345,12 @@ const productGallery = {
 				scrollThumbnailIntoView( imageId );
 			}
 		},
+		setImageData: ( imageIds: number[], selectedImageId?: number ) => {
+			updateVisibleImageSet( imageIds, selectedImageId );
+		},
+		resetImageData: () => {
+			updateVisibleImageSet( [] );
+		},
 		selectCurrentImage: ( event?: MouseEvent ) => {
 			if ( event ) {
 				event.stopPropagation();
@@ -218,6 +366,9 @@ const productGallery = {
 			const imageId = parseInt( imageIdValue, 10 );
 			const { imageData } = getContext();
 			const newImageIndex = imageData.indexOf( imageId );
+			if ( newImageIndex < 0 ) {
+				return;
+			}
 			actions.selectImage( newImageIndex );
 		},
 		selectNextImage: ( event?: MouseEvent ) => {
@@ -313,16 +464,12 @@ const productGallery = {
 			event?.preventDefault();
 			const context = getContext();
 			context.isDialogOpen = true;
-			document.body.classList.add(
-				'wc-block-product-gallery-dialog-open'
-			);
+			document.body.classList.add( CLASSES.dialogOpenBody );
 		} ),
 		closeDialog: () => {
 			const context = getContext();
 			context.isDialogOpen = false;
-			document.body.classList.remove(
-				'wc-block-product-gallery-dialog-open'
-			);
+			document.body.classList.remove( CLASSES.dialogOpenBody );
 		},
 		onTouchStart: ( event: TouchEvent ) => {
 			const context = getContext();
@@ -400,11 +547,11 @@ const productGallery = {
 
 			if ( element ) {
 				const galleryContainer = element.closest(
-					'.wp-block-woocommerce-product-gallery'
+					SELECTORS.galleryContainer
 				);
 				if ( galleryContainer ) {
 					const selectedImage = galleryContainer.querySelector(
-						`img[data-image-id="${ selectedImageId }"]`
+						SELECTORS.imgByImageId( selectedImageId )
 					) as HTMLElement;
 					if ( selectedImage ) {
 						selectedImage.focus( { preventScroll: true } );
@@ -427,93 +574,129 @@ const productGallery = {
 		},
 	},
 	callbacks: {
+		/**
+		 * Sync the gallery to the blockified Add to Cart + Options block's
+		 * variation state. Bound via `data-wp-watch`, so it re-runs whenever
+		 * `productDataState.variationId` changes.
+		 */
 		listenToProductDataChanges: () => {
 			const productId = productDataState?.productId;
 			if ( ! productId ) {
 				return;
 			}
 
-			const { products } = getConfig(
-				'woocommerce'
-			) as WooCommerceConfig;
-
-			const productData =
-				products?.[ productId ]?.variations?.[
-					productDataState?.variationId || 0
-				] || products?.[ productId ];
-
-			const imageId = productData?.image_id;
-			if ( ! imageId ) {
+			const productImageSet = getProductImageSet( productId );
+			if ( ! productImageSet ) {
 				return;
 			}
 
-			const { imageData } = getContext();
-			const imageIndex = imageData.indexOf( imageId );
+			const variationImageSet =
+				productImageSet.variations?.[
+					productDataState?.variationId || 0
+				];
 
-			if ( imageIndex >= 0 ) {
-				actions.selectImage( imageIndex );
+			if ( variationImageSet?.image_ids?.length ) {
+				actions.setImageData(
+					variationImageSet.image_ids,
+					variationImageSet.image_id
+				);
+				return;
 			}
+
+			actions.resetImageData();
 		},
+		/**
+		 * Subscribe the gallery to the legacy classic Add to Cart form's
+		 * variation events. Prefers jQuery `found_variation` / `reset_data`
+		 * when jQuery is present; falls back to a MutationObserver on the
+		 * form's `current-image` attribute. Returns a teardown function.
+		 */
 		watchForChangesOnAddToCartForm: () => {
 			const context = getContext();
-			const variableProductCartForm = document.querySelector(
-				`form[data-product_id="${ context.productId }"]`
-			);
+			const $form = document.querySelector(
+				SELECTORS.cartFormForProduct( context.productId )
+			) as HTMLElement | null;
 
-			if ( ! variableProductCartForm ) {
+			if ( ! $form ) {
 				return;
 			}
 
-			const selectFirstImage = () =>
-				withScope( () => actions.selectImage( 0 ) );
+			const productImageSet = getProductImageSet( context.productId );
+			const syncFormVariationGallery = withScope( () => {
+				if ( ! productImageSet ) {
+					actions.resetImageData();
+					return;
+				}
 
-			const observer = new MutationObserver(
-				withScope( function ( mutations ) {
-					for ( const mutation of mutations ) {
-						const { imageData } = getContext();
+				const $variationIdInput = $form.querySelector(
+					SELECTORS.legacyVariationIdInput
+				) as HTMLInputElement | null;
+				const currentVariationId = Number.parseInt(
+					$variationIdInput?.value || '0',
+					10
+				);
+				const currentImageId = Number.parseInt(
+					$form.getAttribute( 'current-image' ) || '0',
+					10
+				);
+				const variationImageSet =
+					productImageSet.variations?.[ currentVariationId ] ||
+					getVariationImageSetByCurrentImage(
+						productImageSet,
+						currentImageId
+					);
 
-						const mutationTarget = mutation.target as HTMLElement;
-						const currentImageAttribute =
-							mutationTarget.getAttribute( 'current-image' );
-						const currentImageId = currentImageAttribute
-							? parseInt( currentImageAttribute, 10 )
-							: null;
-						if (
-							mutation.type === 'attributes' &&
-							currentImageId &&
-							imageData.includes( currentImageId )
-						) {
-							const nextImageIndex =
-								imageData.indexOf( currentImageId );
+				if ( variationImageSet?.image_ids?.length ) {
+					actions.setImageData(
+						variationImageSet.image_ids,
+						currentImageId || variationImageSet.image_id
+					);
+					return;
+				}
 
-							actions.selectImage( nextImageIndex );
-						} else {
-							actions.selectImage( 0 );
-						}
-					}
-				} )
-			);
-
-			observer.observe( variableProductCartForm, {
-				attributes: true,
+				actions.resetImageData();
 			} );
 
-			const clearVariationsLink = document.querySelector(
-				'.wp-block-add-to-cart-form .reset_variations'
-			);
+			const teardownJQuery = subscribeLegacyJQueryFormVariations( $form, {
+				onVariationFound: ( imageIds, featuredImageId ) =>
+					actions.setImageData( imageIds, featuredImageId ),
+				onVariationReset: () => actions.resetImageData(),
+			} );
 
-			if ( clearVariationsLink ) {
-				clearVariationsLink.addEventListener(
-					'click',
-					selectFirstImage
-				);
+			if ( teardownJQuery ) {
+				syncFormVariationGallery();
+				return teardownJQuery;
 			}
+
+			// MutationObserver fallback for environments without jQuery.
+			const observer = new MutationObserver(
+				withScope( () => syncFormVariationGallery() )
+			);
+			const $clearVariationsLink = $form.querySelector(
+				SELECTORS.legacyResetVariations
+			);
+			const syncOnChange = withScope( () => syncFormVariationGallery() );
+			const resetGallery = withScope( () => actions.resetImageData() );
+
+			observer.observe( $form, {
+				attributes: true,
+				attributeFilter: [ 'current-image' ],
+			} );
+			$form.addEventListener( 'change', syncOnChange );
+			$clearVariationsLink?.addEventListener( 'click', resetGallery );
+
+			syncFormVariationGallery();
 
 			return () => {
 				observer.disconnect();
-				document.removeEventListener( 'click', selectFirstImage );
+				$form.removeEventListener( 'change', syncOnChange );
+				$clearVariationsLink?.removeEventListener(
+					'click',
+					resetGallery
+				);
 			};
 		},
+		/** When the dialog opens, focus it and center the active image vertically. */
 		dialogStateChange: () => {
 			const { selectedImageId, isDialogOpen } = getContext();
 			const { ref: dialogRef } = getElement() || {};
@@ -521,7 +704,7 @@ const productGallery = {
 			if ( isDialogOpen && dialogRef instanceof HTMLElement ) {
 				dialogRef.focus();
 				const selectedImage = dialogRef.querySelector(
-					`[data-image-id="${ selectedImageId }"]`
+					SELECTORS.elementByImageId( selectedImageId )
 				);
 
 				if (
@@ -538,28 +721,26 @@ const productGallery = {
 				}
 			}
 		},
-		toggleActiveThumbnailAttributes: () => {
+		/** Per-image `data-wp-watch` callback that toggles visibility from `imageData`. */
+		toggleImageVisibility: () => {
 			const element = getElement()?.ref as HTMLElement;
-			if ( ! element ) return false;
-
-			const imageIdValue = element.getAttribute( 'data-image-id' );
-			if ( ! imageIdValue ) return false;
-
-			const { selectedImageId } = getContext();
-			const imageId = Number( imageIdValue );
-
-			if ( selectedImageId === imageId ) {
-				element.classList.add(
-					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
-				);
-				element.setAttribute( 'tabIndex', '0' );
-			} else {
-				element.classList.remove(
-					'wc-block-product-gallery-thumbnails__thumbnail__image--is-active'
-				);
-				element.setAttribute( 'tabIndex', '-1' );
+			if ( ! element ) {
+				return false;
 			}
+
+			toggleImageVisibility( element );
 		},
+		/** Per-thumbnail callback that updates both visibility and the active-state class. */
+		syncThumbnailState: () => {
+			const element = getElement()?.ref as HTMLElement;
+			if ( ! element ) {
+				return false;
+			}
+
+			toggleImageVisibility( element );
+			toggleActiveThumbnailAttributes( element );
+		},
+		/** Set up a ResizeObserver on the thumbnails strip so overflow flags stay in sync. */
 		initResizeObserver: () => {
 			const scrollableElement = getElement()?.ref;
 			if ( ! scrollableElement ) {

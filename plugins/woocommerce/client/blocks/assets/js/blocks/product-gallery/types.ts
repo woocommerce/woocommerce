@@ -17,6 +17,7 @@ export interface ProductGalleryContext {
 	touchStartX: number;
 	touchCurrentX: number;
 	isDragging: boolean;
+	defaultImageData: number[];
 	imageData: number[];
 	thumbnailsOverflow: {
 		top: boolean;

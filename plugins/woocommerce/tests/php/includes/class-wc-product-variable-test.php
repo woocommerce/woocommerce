@@ -162,4 +162,44 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$this->assertIsBool( $has_purchasable_variations );
 		$this->assertFalse( $has_purchasable_variations );
 	}
+
+	/**
+	 * @testdox 'get_available_variation' exposes typed variation gallery image IDs.
+	 */
+	public function test_get_available_variation_includes_gallery_image_ids() {
+		$product   = WC_Helper_Product::create_variation_product();
+		$variation = wc_get_product( $product->get_children()[0] );
+		$image_id  = wp_insert_attachment(
+			array(
+				'post_title'     => 'Variation Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$image_ids = array(
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 1',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 2',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+		);
+
+		$variation->set_image_id( $image_id );
+		$variation->set_gallery_image_ids( $image_ids );
+		$variation->save();
+
+		$available_variation = $product->get_available_variation( $variation );
+
+		$this->assertSame( $image_ids, $available_variation['gallery_image_ids'] );
+		$this->assertNotEmpty( $available_variation['gallery_images_html'] );
+	}
 }

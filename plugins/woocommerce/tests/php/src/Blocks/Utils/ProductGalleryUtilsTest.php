@@ -63,6 +63,28 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		$variable_product->set_gallery_image_ids( $gallery_image_ids );
 		$variable_product->save();
 
+		$variation_gallery_image_ids = array(
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 1',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 2',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+		);
+
+		if ( isset( $variation ) ) {
+			$variation->set_gallery_image_ids( $variation_gallery_image_ids );
+			$variation->save();
+		}
+
 		$image_data = ProductGalleryUtils::get_product_gallery_image_data( $variable_product, 'woocommerce_thumbnail' );
 
 		// Assert that $image_data is a non-empty array.
@@ -81,6 +103,9 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		// Assert that the child product image is included in the image data array.
 		$ids = array_column( $image_data, 'id' );
 		$this->assertContains( $variation_image_id, $ids );
+		foreach ( $variation_gallery_image_ids as $variation_gallery_image_id ) {
+			$this->assertContains( $variation_gallery_image_id, $ids );
+		}
 
 		// Clean up.
 		$variable_product->delete( true );
@@ -88,6 +113,9 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		wp_delete_attachment( $variation_image_id, true );
 		foreach ( $gallery_image_ids as $gallery_image_id ) {
 			wp_delete_attachment( $gallery_image_id, true );
+		}
+		foreach ( $variation_gallery_image_ids as $variation_gallery_image_id ) {
+			wp_delete_attachment( $variation_gallery_image_id, true );
 		}
 	}
 }

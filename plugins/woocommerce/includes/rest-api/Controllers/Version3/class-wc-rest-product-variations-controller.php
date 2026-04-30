@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Enums\ProductTaxStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
+use Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
@@ -155,6 +156,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			'shipping_class'        => $object->get_shipping_class(),
 			'shipping_class_id'     => $object->get_shipping_class_id(),
 			'image'                 => $this->get_image( $object, $context ),
+			'gallery_image_ids'     => $object instanceof WC_Product ? array_map( 'intval', $object->get_gallery_image_ids() ) : array(),
 			'attributes'            => $this->get_attributes( $object ),
 			'menu_order'            => $object->get_menu_order(),
 			'meta_data'             => $object->get_meta_data(),
@@ -224,6 +226,11 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 			} else {
 				$variation->set_image_id( '' );
 			}
+		}
+
+		if ( isset( $request['gallery_image_ids'] ) && $variation instanceof WC_Product_Variation ) {
+			$variation->set_gallery_image_ids( wp_parse_id_list( $request['gallery_image_ids'] ) );
+			LegacyVariationGalleryCompatibility::mark_core_managed( $variation );
 		}
 
 		// Virtual variation.
@@ -820,6 +827,15 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 							'type'        => 'string',
 							'context'     => array( 'view', 'edit' ),
 						),
+					),
+				),
+				'gallery_image_ids'     => array(
+					'description' => __( 'Variation gallery image IDs, excluding the featured image (which is set via "image"). Mirrors how galleries work on parent products.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'    => 'integer',
+						'minimum' => 1,
 					),
 				),
 				'attributes'            => array(

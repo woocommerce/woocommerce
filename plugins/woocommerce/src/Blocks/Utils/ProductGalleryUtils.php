@@ -117,18 +117,10 @@ class ProductGalleryUtils {
 
 		try {
 			if ( $product->is_type( 'variable' ) ) {
-				$variations = $product->get_children();
-				if ( ! empty( $variations ) ) {
-					_prime_post_caches( $variations );
-				}
-				foreach ( $variations as $variation_id ) {
-					$variation = wc_get_product( $variation_id );
-					if ( $variation ) {
-						$variation_image_id = $variation->get_image_id();
-						if ( ! empty( $variation_image_id ) && ! in_array( strval( $variation_image_id ), $variation_image_ids, true ) ) {
-							$variation_image_ids[] = strval( $variation_image_id );
-						}
-					}
+				$variation_gallery_data = self::get_product_variation_gallery_data( $product );
+
+				foreach ( $variation_gallery_data as $variation_data ) {
+					$variation_image_ids = array_merge( $variation_image_ids, $variation_data['image_ids'] );
 				}
 			}
 		} catch ( \Exception $e ) {
@@ -136,7 +128,96 @@ class ProductGalleryUtils {
 			error_log( 'Error getting product variation image IDs: ' . $e->getMessage() );
 		}
 
-		return $variation_image_ids;
+		$unique_int_ids = array_unique( array_map( 'intval', $variation_image_ids ) );
+
+		return array_values( array_map( 'strval', $unique_int_ids ) );
+	}
+
+	/**
+	 * Get variation gallery data keyed by variation ID.
+	 *
+	 * @param \WC_Product $product The product object to retrieve variation gallery data for.
+	 * @return array<int, array<string, mixed>> Variation gallery data.
+	 */
+	public static function get_product_variation_gallery_data( $product ) {
+		$variation_gallery_data = array();
+
+		if ( ! $product instanceof \WC_Product ) {
+			wc_doing_it_wrong( __FUNCTION__, __( 'Invalid product object.', 'woocommerce' ), '10.8.0' );
+			return $variation_gallery_data;
+		}
+
+		if ( ! $product->is_type( 'variable' ) ) {
+			return $variation_gallery_data;
+		}
+
+		$variations = $product->get_children();
+		if ( ! empty( $variations ) ) {
+			// Bulk-load posts + postmeta into WP's object cache.
+			_prime_post_caches( $variations );
+		}
+
+		foreach ( $variations as $variation_id ) {
+			$variation_id = (int) $variation_id;
+			$entry        = self::build_variation_gallery_entry( $variation_id );
+
+			if ( null !== $entry ) {
+				$variation_gallery_data[ $variation_id ] = $entry;
+			}
+		}
+
+		return $variation_gallery_data;
+	}
+
+	/**
+	 * Build the gallery payload for a single variation, or null when the
+	 * variation has no images or isn't a real variation.
+	 *
+	 * Extracted so {@see self::get_product_variation_gallery_data()} reads as
+	 * "fetch + prime + project" without inlining the projection details.
+	 *
+	 * @param int $variation_id Variation post ID.
+	 * @return array<string, mixed>|null
+	 */
+	private static function build_variation_gallery_entry( int $variation_id ): ?array {
+		$variation = wc_get_product( $variation_id );
+
+		if ( ! $variation instanceof \WC_Product_Variation ) {
+			return null;
+		}
+
+		$image_ids = self::get_variation_gallery_image_ids( $variation );
+
+		if ( empty( $image_ids ) ) {
+			return null;
+		}
+
+		return array(
+			'image_id'  => (int) $variation->get_image_id(),
+			'image_ids' => $image_ids,
+		);
+	}
+
+	/**
+	 * Get all image IDs relevant to a variation gallery.
+	 *
+	 * @param \WC_Product_Variation $variation The variation object.
+	 * @return array<int> Variation image IDs.
+	 */
+	public static function get_variation_gallery_image_ids( \WC_Product_Variation $variation ) {
+		$image_ids           = array();
+		$variation_image_id  = (int) $variation->get_image_id();
+		$gallery_image_ids   = array_map( 'intval', $variation->get_gallery_image_ids() );
+
+		if ( $variation_image_id ) {
+			$image_ids[] = $variation_image_id;
+		}
+
+		if ( ! empty( $gallery_image_ids ) ) {
+			$image_ids = array_merge( $image_ids, $gallery_image_ids );
+		}
+
+		return array_values( array_unique( $image_ids ) );
 	}
 
 	/**

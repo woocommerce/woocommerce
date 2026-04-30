@@ -7,6 +7,7 @@
 
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
+use Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility;
 
 /**
  * Class WC_Core_Functions_Test
@@ -322,5 +323,142 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
 		$this->assertFalse( get_option( 'woocommerce_analytics_immediate_import' ) );
+	}
+
+	/**
+	 * @testdox Migration copies legacy variation gallery meta into the core gallery prop and disables fallback.
+	 */
+	public function test_migrate_legacy_variation_gallery_meta_copies_legacy_gallery_and_disables_fallback(): void {
+		$variation_id = $this->create_variation();
+		$image_ids    = array(
+			$this->create_attachment( 'Legacy gallery image 1' ),
+			$this->create_attachment( 'Legacy gallery image 2' ),
+		);
+
+		update_post_meta( $variation_id, '_wc_additional_variation_images', implode( ',', $image_ids ) );
+
+		$this->assertFalse( wc_update_1080_migrate_legacy_variation_gallery_meta() );
+
+		$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
+		$this->assertSame( $image_ids, wc_get_product( $variation_id )->get_gallery_image_ids() );
+		$this->assertSame( implode( ',', $image_ids ), get_post_meta( $variation_id, '_product_image_gallery', true ) );
+	}
+
+	/**
+	 * @testdox Migration preserves existing core variation gallery values while disabling fallback.
+	 */
+	public function test_migrate_legacy_variation_gallery_meta_preserves_existing_core_gallery(): void {
+		$variation_id        = $this->create_variation();
+		$core_gallery_ids    = array(
+			$this->create_attachment( 'Core gallery image 1' ),
+			$this->create_attachment( 'Core gallery image 2' ),
+		);
+		$legacy_gallery_ids  = array(
+			$this->create_attachment( 'Legacy gallery image 1' ),
+			$this->create_attachment( 'Legacy gallery image 2' ),
+		);
+
+		update_post_meta( $variation_id, '_product_image_gallery', implode( ',', $core_gallery_ids ) );
+		update_post_meta( $variation_id, '_wc_additional_variation_images', implode( ',', $legacy_gallery_ids ) );
+
+		$this->assertFalse( wc_update_1080_migrate_legacy_variation_gallery_meta() );
+
+		$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
+		$this->assertSame( $core_gallery_ids, wc_get_product( $variation_id )->get_gallery_image_ids( 'edit' ) );
+		$this->assertSame( implode( ',', $core_gallery_ids ), get_post_meta( $variation_id, '_product_image_gallery', true ) );
+	}
+
+	/**
+	 * @testdox Migration disables fallback for malformed legacy variation gallery meta without writing invalid core values.
+	 */
+	public function test_migrate_legacy_variation_gallery_meta_disables_fallback_for_malformed_legacy_meta(): void {
+		$variation_id = $this->create_variation();
+
+		update_post_meta( $variation_id, '_wc_additional_variation_images', 'not-an-id' );
+
+		$this->assertFalse( wc_update_1080_migrate_legacy_variation_gallery_meta() );
+
+		$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
+		$this->assertSame( '', get_post_meta( $variation_id, '_product_image_gallery', true ) );
+		$this->assertSame( array(), wc_get_product( $variation_id )->get_gallery_image_ids() );
+	}
+
+	/**
+	 * @testdox Migration batches legacy variation gallery rows and requeues until complete.
+	 */
+	public function test_migrate_legacy_variation_gallery_meta_batches_updates(): void {
+		global $wpdb;
+
+		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_wc_additional_variation_images' ) );
+		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_product_image_gallery' ) );
+		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => LegacyVariationGalleryCompatibility::get_core_managed_meta_key() ) );
+
+		$variation_ids = array();
+
+		for ( $index = 0; $index < 251; ++$index ) {
+			$variation_id    = $this->create_variation_post();
+			$variation_ids[] = $variation_id;
+			update_post_meta( $variation_id, '_wc_additional_variation_images', (string) ( $index + 1 ) );
+		}
+
+		$this->assertTrue( wc_update_1080_migrate_legacy_variation_gallery_meta() );
+
+		$processed_after_first_batch = 0;
+
+		foreach ( $variation_ids as $variation_id ) {
+			if ( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) ) {
+				++$processed_after_first_batch;
+			}
+		}
+
+		$this->assertSame( 250, $processed_after_first_batch );
+		$this->assertFalse( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( end( $variation_ids ) ) );
+
+		$this->assertFalse( wc_update_1080_migrate_legacy_variation_gallery_meta() );
+
+		foreach ( $variation_ids as $variation_id ) {
+			$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
+		}
+	}
+
+	/**
+	 * Create a variation for testing.
+	 *
+	 * @return int
+	 */
+	private function create_variation(): int {
+		$product = WC_Helper_Product::create_variation_product();
+
+		return (int) $product->get_children()[0];
+	}
+
+	/**
+	 * Create a bare variation post for migration batching tests.
+	 *
+	 * @return int
+	 */
+	private function create_variation_post(): int {
+		return self::factory()->post->create(
+			array(
+				'post_type'   => 'product_variation',
+				'post_status' => 'publish',
+			)
+		);
+	}
+
+	/**
+	 * Create a test attachment.
+	 *
+	 * @param string $title Attachment title.
+	 * @return int
+	 */
+	private function create_attachment( string $title ): int {
+		return wp_insert_attachment(
+			array(
+				'post_title'     => $title,
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
 	}
 }
