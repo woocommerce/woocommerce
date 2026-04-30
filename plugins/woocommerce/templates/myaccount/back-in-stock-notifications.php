@@ -16,8 +16,12 @@
  * @package WooCommerce\Templates
  * @version 10.9.0
  *
- * @var array $notifications Array of Notification objects for the current user.
+ * @var array $notifications Array of Notification objects for the current user (one page).
  * @var bool  $has_items     Whether there are any notifications to render.
+ * @var int   $current_page  1-indexed current page number.
+ * @var int   $total_pages   Total number of pages of notifications.
+ * @var int   $total_items   Total number of notifications across all pages.
+ * @var int   $per_page      Notifications shown per page.
  */
 
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationStatus;
@@ -95,6 +99,32 @@ do_action( 'woocommerce_before_account_back_in_stock_notifications', $has_items 
 		<?php endforeach; ?>
 		</tbody>
 	</table>
+
+	<?php if ( $total_pages > 1 ) : ?>
+		<?php
+		$endpoint_url = wc_get_endpoint_url( MyAccountEndpoint::ENDPOINT, '', wc_get_page_permalink( 'myaccount' ) );
+		// `format` uses %#% as the page-number placeholder; WC's pretty endpoints
+		// rewrite to `<endpoint>/<page>/`, ugly fallback uses ?<endpoint>=<page>.
+		$pretty = get_option( 'permalink_structure' );
+		$format = $pretty ? '%#%/' : '?' . MyAccountEndpoint::ENDPOINT . '=%#%';
+		$base   = $pretty ? trailingslashit( $endpoint_url ) . '%_%' : $endpoint_url . '%_%';
+		?>
+		<nav class="woocommerce-pagination woocommerce-back-in-stock-notifications-pagination" aria-label="<?php esc_attr_e( 'Back in stock notifications pagination', 'woocommerce' ); ?>">
+			<?php
+			echo paginate_links( // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+				array(
+					'base'      => $base,
+					'format'    => $format,
+					'current'   => $current_page,
+					'total'     => $total_pages,
+					'prev_text' => esc_html_x( '&larr; Previous', 'pagination', 'woocommerce' ),
+					'next_text' => esc_html_x( 'Next &rarr;', 'pagination', 'woocommerce' ),
+					'type'      => 'list',
+				)
+			);
+			?>
+		</nav>
+	<?php endif; ?>
 
 <?php else : ?>
 

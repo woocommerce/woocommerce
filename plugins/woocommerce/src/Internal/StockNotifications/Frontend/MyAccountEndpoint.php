@@ -127,50 +127,104 @@ class MyAccountEndpoint {
 	}
 
 	/**
+	 * Default page size when none is provided.
+	 *
+	 * @var int
+	 */
+	public const DEFAULT_PER_PAGE = 10;
+
+	/**
 	 * Render the endpoint template.
 	 *
 	 * Hooked to `woocommerce_account_back-in-stock-notifications_endpoint`, mirroring
 	 * how `woocommerce_account_downloads` and `woocommerce_account_orders` hook up.
+	 *
+	 * @param string|int $current_page The current page number passed by WC (the value
+	 *                                 captured from the rewrite endpoint, e.g. `2` for
+	 *                                 `/my-account/back-in-stock-notifications/2/`). Empty
+	 *                                 string when no page is in the URL.
 	 */
-	public function render_endpoint(): void {
-		$notifications = $this->get_current_user_notifications();
+	public function render_endpoint( $current_page = 1 ): void {
+		$current_page = max( 1, (int) $current_page );
+
+		/**
+		 * Filter the per-page count for the My Account stock-notifications table.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param int $per_page Number of notifications shown per page. Default {@see self::DEFAULT_PER_PAGE}.
+		 */
+		$per_page = (int) apply_filters( 'woocommerce_account_back_in_stock_notifications_per_page', self::DEFAULT_PER_PAGE );
+		$per_page = max( 1, $per_page );
+
+		$page = $this->get_current_user_notifications_page( $current_page, $per_page );
 
 		\wc_get_template(
 			'myaccount/back-in-stock-notifications.php',
 			array(
-				'notifications' => $notifications,
-				'has_items'     => ! empty( $notifications ),
+				'notifications' => $page['notifications'],
+				'has_items'     => ! empty( $page['notifications'] ),
+				'current_page'  => $page['current_page'],
+				'total_pages'   => $page['total_pages'],
+				'total_items'   => $page['total_items'],
+				'per_page'      => $per_page,
 			)
 		);
 	}
 
 	/**
-	 * Return the current user's notifications, newest first.
+	 * Return one page of the current user's notifications, newest first.
 	 *
 	 * Always scopes to `get_current_user_id()` — the caller is never trusted.
 	 *
-	 * @return array<Notification>
+	 * @param int $current_page 1-indexed page number.
+	 * @param int $per_page     Page size.
+	 * @return array{notifications:array<Notification>, current_page:int, total_pages:int, total_items:int}
 	 */
-	public function get_current_user_notifications(): array {
+	public function get_current_user_notifications_page( int $current_page, int $per_page ): array {
+		$current_page = max( 1, $current_page );
+		$per_page     = max( 1, $per_page );
+
 		$user_id = get_current_user_id();
 		if ( $user_id <= 0 ) {
-			return array();
+			return array(
+				'notifications' => array(),
+				'current_page'  => 1,
+				'total_pages'   => 0,
+				'total_items'   => 0,
+			);
 		}
 
-		$notifications = NotificationQuery::get_notifications(
+		$total_items = NotificationQuery::count_notifications(
+			array(
+				'user_id' => $user_id,
+			)
+		);
+
+		$total_pages = (int) ceil( $total_items / $per_page );
+
+		// Clamp out-of-range pages to the last available page so a stale link
+		// doesn't render an empty table.
+		if ( $total_items > 0 && $current_page > $total_pages ) {
+			$current_page = $total_pages;
+		}
+
+		$notifications = $total_items > 0 ? NotificationQuery::get_notifications(
 			array(
 				'user_id'  => $user_id,
 				'order_by' => array( 'id' => 'DESC' ),
 				'return'   => 'objects',
-				'limit'    => -1,
+				'limit'    => $per_page,
+				'offset'   => ( $current_page - 1 ) * $per_page,
 			)
+		) : array();
+
+		return array(
+			'notifications' => $notifications,
+			'current_page'  => $current_page,
+			'total_pages'   => $total_pages,
+			'total_items'   => $total_items,
 		);
-
-		if ( ! is_array( $notifications ) ) {
-			return array();
-		}
-
-		return $notifications;
 	}
 
 	/**
@@ -213,7 +267,7 @@ class MyAccountEndpoint {
 		}
 
 		$notification = Factory::get_notification( $notification_id );
-		if ( ! $notification ) {
+		if ( ! $notification instanceof Notification ) {
 			return;
 		}
 
