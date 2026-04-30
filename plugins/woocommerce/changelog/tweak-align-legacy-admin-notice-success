@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Remove a border-left-color override on Woo's legacy admin notice container so "updated" notices inherit WordPress 7.0's success palette instead of the admin theme color.

@@ -246,7 +246,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 	}
 
 	.addons-button {
-		border-radius: 3px;
+		border-radius: 2px;
 		cursor: pointer;
 		display: block;
 		height: 37px;
@@ -911,10 +911,6 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 .woocommerce-message {
 	position: relative;
 	overflow: hidden;
-
-	&.updated {
-		border-left-color: var(--wp-admin-theme-color, $woocommerce) !important;
-	}
 
 	a.skip,
 	a.docs {
@@ -8325,6 +8321,23 @@ table.bar_chart {
 		padding: 6px 8px;
 	}
 
+	// Adopt WP 7.0 12px horizontal padding on settings inputs.
+	.woocommerce table.form-table {
+		input[type="text"],
+		input[type="email"],
+		input[type="number"],
+		input[type="password"],
+		input[type="datetime-local"],
+		input[type="date"],
+		input[type="time"],
+		input[type="week"],
+		input[type="url"],
+		input[type="tel"],
+		input.regular-input {
+			padding: 0 12px;
+		}
+	}
+
 	// Colour picker swatch: match WP 7.0 input height (40px).
 	.woocommerce table.form-table .colorpickpreview {
 		height: 40px;
@@ -8341,6 +8354,7 @@ table.bar_chart {
 
 			.select2-selection__rendered {
 				line-height: 38px;
+				padding: 0 12px; // Match WP 7.0 native input padding so text aligns with sibling inputs.
 			}
 
 			.select2-selection__arrow {
@@ -8350,6 +8364,7 @@ table.bar_chart {
 
 		.select2-selection--multiple {
 			min-height: 40px;
+			border-radius: 2px; // Match WP 7.0 native select border-radius.
 
 			.select2-selection__rendered {
 				display: block;
@@ -8362,6 +8377,23 @@ table.bar_chart {
 
 		.select2-search--inline .select2-search__field {
 			min-height: 38px;
+		}
+	}
+
+	// Order edit address Select2: escape legacy 32px override at admin.scss:2019
+	// so Country/State selects match the 40px WP 7.0 input height of their sibling
+	// fields. Selector mirrors the legacy structure exactly (#order_data
+	// .order_data_column div.edit_address ...) to outrank it on specificity (1,5,1).
+	#order_data .order_data_column div.edit_address .select2-container .select2-selection--single {
+		height: 40px;
+
+		.select2-selection__rendered {
+			line-height: 38px;
+			padding: 0 12px; // Match WP 7.0 native input padding.
+		}
+
+		.select2-selection__arrow {
+			height: 38px;
 		}
 	}
 
@@ -8598,6 +8630,16 @@ table.bar_chart {
 	&.post-type-product #postdivrich.woocommerce-product-description {
 		margin-left: 4px;
 		margin-right: 4px;
+	}
+
+	// Shipping zone name input: ID selector in the base rule outranks the form-table override above.
+	.wc-shipping-zone-settings #zone_name {
+		padding: 0 12px;
+	}
+
+	// Zone regions TreeSelectControl: match WP 7.0 native select border-radius.
+	#wc-shipping-zone-region-picker-root .woocommerce-tree-select-control .components-base-control {
+		border-radius: 2px;
 	}
 }
 
