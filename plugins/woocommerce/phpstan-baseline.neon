@@ -56776,27 +56776,9 @@ parameters:
 			path: src/Caching/WPCacheEngine.php
 
 		-
-			message: '#^@param Automattic\\WooCommerce\\Checkout\\Helpers\\WC_Order \$order does not accept actual type of parameter\: WC_Order\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Checkout\\Helpers\\WC_Order_Item_Product \$item does not accept actual type of parameter\: WC_Order_Item\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_query_for_stock\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
-			identifier: method.notFound
-			count: 2
 			path: src/Checkout/Helpers/ReserveStock.php
 
 		-
