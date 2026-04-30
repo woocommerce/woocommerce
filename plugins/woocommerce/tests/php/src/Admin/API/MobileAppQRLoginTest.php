@@ -1277,9 +1277,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function test_exchange_token_sanitizes_device_fields(): void {
 		$long = str_repeat( 'A', 100 );
-		// `os` carries an HTML tag (must be stripped by sanitize_text_field),
-		// `model` is over the 64-char cap, `rogue_field` is outside the
-		// whitelist and must be dropped before storage.
+
+		// Each value asserts a different sanitization invariant: tags stripped
+		// by sanitize_text_field, length capped at 64, and unknown keys
+		// dropped (whitelist enforcement).
 		$prep = $this->prepare_exchange_token(
 			array(
 				'os'          => 'iOS<script>',
@@ -1581,7 +1582,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		} finally {
 			remove_filter( 'woocommerce_qr_login_should_send_signin_email', $suppress );
 			$capture['remove']();
-		}
+		}//end try
 	}
 
 
@@ -1598,7 +1599,11 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		$response = $this->dispatch_scan(
 			$plaintext,
-			array( 'os' => 'Android', 'model' => 'Pixel 10', 'app_version' => '24.7.0' )
+			array(
+				'os'          => 'Android',
+				'model'       => 'Pixel 10',
+				'app_version' => '24.7.0',
+			)
 		);
 
 		$this->assertSame( 200, $response->get_status() );

@@ -1,7 +1,7 @@
 // Shared QR-direct-login layout rules. Imported from the modal package so
 // the standalone page renders the QR + number-match / approved / rejected
 // states identically to the modal.
-@import "../homescreen/mobile-app-modal/components/qr-direct-login";
+@import "../homescreen/mobile-app-modal/components/qr-direct-login.scss";
 
 .woocommerce-mobile-app-login {
 	display: flex;
