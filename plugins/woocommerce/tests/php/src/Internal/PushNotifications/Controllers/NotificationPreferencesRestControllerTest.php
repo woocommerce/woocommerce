@@ -279,6 +279,99 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox POST should reject non-numeric min_amount via the REST validation layer.
+	 */
+	public function test_post_preferences_rejects_non_numeric_min_amount() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
+		$request->set_param( 'store_order', array( 'min_amount' => 'not-a-number' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::BAD_REQUEST, $response->get_status() );
+	}
+
+	/**
+	 * @testdox POST should reject non-positive min_amount via the REST validation layer.
+	 *
+	 * @testWith [-10]
+	 *           [0]
+	 *
+	 * @param int|float $value The invalid value.
+	 */
+	public function test_post_preferences_rejects_non_positive_min_amount( $value ) {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
+		$request->set_param( 'store_order', array( 'min_amount' => $value ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::BAD_REQUEST, $response->get_status() );
+	}
+
+	/**
+	 * @testdox POST should accept a positive min_amount and persist it.
+	 */
+	public function test_post_preferences_accepts_valid_min_amount() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
+		$request->set_param( 'store_order', array( 'min_amount' => 100 ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 100.0, $data['store_order']['min_amount'] );
+	}
+
+	/**
+	 * @testdox POST should accept null min_amount and persist it.
+	 */
+	public function test_post_preferences_accepts_null_min_amount() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
+		$request->set_param( 'store_order', array( 'min_amount' => null ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertNull( $data['store_order']['min_amount'] );
+	}
+
+	/**
+	 * @testdox GET should include a null min_amount in store_order by default.
+	 */
+	public function test_get_preferences_includes_min_amount_in_store_order() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/preferences' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'min_amount', $data['store_order'] );
+		$this->assertNull( $data['store_order']['min_amount'] );
+	}
+
+	/**
 	 * @testdox Should not collide with PushTokenRestController on the WC REST namespaces filter.
 	 *
 	 * Both controllers share the URL route namespace `wc-push-notifications`, but they must use

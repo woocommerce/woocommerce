@@ -198,7 +198,23 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 		$args     = array();
 		$defaults = $this->preferences_service->get_defaults();
 
-		foreach ( array_keys( $defaults ) as $key ) {
+		foreach ( $defaults as $key => $shape ) {
+			$properties = array(
+				'enabled' => array(
+					'type'        => 'boolean',
+					'description' => __( 'Whether this notification type is enabled.', 'woocommerce' ),
+				),
+			);
+
+			if ( array_key_exists( 'min_amount', $shape ) ) {
+				$properties['min_amount'] = array(
+					'type'             => array( 'number', 'null' ),
+					'minimum'          => 0,
+					'exclusiveMinimum' => true,
+					'description'      => __( 'Minimum order amount required to trigger this notification, or null to disable the threshold.', 'woocommerce' ),
+				);
+			}
+
 			$args[ $key ] = array(
 				'description'       => sprintf(
 					/* translators: %s: notification preference key (e.g. store_order). */
@@ -206,16 +222,11 @@ class NotificationPreferencesRestController extends RestApiControllerBase {
 					$key
 				),
 				'type'              => 'object',
-				'properties'        => array(
-					'enabled' => array(
-						'type'        => 'boolean',
-						'description' => __( 'Whether this notification type is enabled.', 'woocommerce' ),
-					),
-				),
+				'properties'        => $properties,
 				'required'          => false,
 				'validate_callback' => 'rest_validate_request_arg',
 			);
-		}
+		}//end foreach
 
 		return $args;
 	}
