@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Product Filter: Elements inner block — a chips-style filter that themes attribute terms (water, fire, earth, tree, metal) with animated selected states.

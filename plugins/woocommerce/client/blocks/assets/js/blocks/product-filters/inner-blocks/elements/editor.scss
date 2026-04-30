@@ -1,0 +1,6 @@
+.wc-block-product-filter-elements.is-loading {
+	.wc-block-product-filter-elements__item {
+		@include placeholder();
+		min-height: 64px;
+	}
+}

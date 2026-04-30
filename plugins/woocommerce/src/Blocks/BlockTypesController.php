@@ -400,6 +400,7 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
+			'ProductFilterElements',
 			'ProductFilterTaxonomy',
 
 			// Keep hidden legacy filter blocks for backward compatibility.
@@ -476,6 +477,7 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
+			'ProductFilterElements',
 			'ProductFilterTaxonomy',
 			'ProductGallery',
 			'ProductGalleryLargeImage',

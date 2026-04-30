@@ -149,6 +149,9 @@ const blocks = {
 	'product-filter-chips': {
 		customDir: 'product-filters/inner-blocks/chips',
 	},
+	'product-filter-elements': {
+		customDir: 'product-filters/inner-blocks/elements',
+	},
 	'product-filter-price-slider': {
 		customDir: 'product-filters/inner-blocks/price-slider',
 	},

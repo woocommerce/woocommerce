@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-elements",
+	"title": "Elements",
+	"description": "Display filter options as elemental cards (water, fire, earth, tree, metal).",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"ancestor": [
+		"woocommerce/product-filter-attribute"
+	],
+	"supports": {
+		"interactivity": true
+	},
+	"usesContext": [ "woocommerce/selectableItems" ],
+	"attributes": {},
+	"viewScriptModule": "woocommerce/product-filter-elements",
+	"style": "file:../woocommerce/product-filter-elements-style.css",
+	"editorStyle": "file:../woocommerce/product-filter-elements-editor.css"
+}
