@@ -189,6 +189,25 @@ class Content_Renderer {
 	}
 
 	/**
+	 * Get the current rendering context without creating a fallback context.
+	 *
+	 * @return Rendering_Context|null
+	 */
+	public function get_current_rendering_context(): ?Rendering_Context {
+		return $this->rendering_context;
+	}
+
+	/**
+	 * Restore a previously active rendering context.
+	 *
+	 * @param Rendering_Context|null $rendering_context Rendering context.
+	 * @return void
+	 */
+	public function restore_rendering_context( ?Rendering_Context $rendering_context ): void {
+		$this->rendering_context = $rendering_context;
+	}
+
+	/**
 	 * Render the content with inlined CSS styles.
 	 *
 	 * @param WP_Post           $post Post object.

@@ -190,6 +190,7 @@ class Rendering_Context_Test extends \Email_Editor_Unit_Test {
 
 		$this->assertTrue( ( new Rendering_Context( $theme_json, array(), 'he_IL' ) )->is_rtl() );
 		$this->assertTrue( ( new Rendering_Context( $theme_json, array(), 'fa-IR' ) )->is_rtl() );
+		$this->assertTrue( ( new Rendering_Context( $theme_json, array(), 'ckb_IR' ) )->is_rtl() );
 		$this->assertFalse( ( new Rendering_Context( $theme_json, array(), 'en_US' ) )->is_rtl() );
 		$this->assertFalse( ( new Rendering_Context( $theme_json, array(), 'unknown' ) )->is_rtl() );
 	}

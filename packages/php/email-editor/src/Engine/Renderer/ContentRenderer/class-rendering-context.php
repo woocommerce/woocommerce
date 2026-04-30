@@ -202,6 +202,7 @@ class Rendering_Context {
 				'ar',
 				'arc',
 				'azb',
+				'ckb',
 				'dv',
 				'fa',
 				'he',

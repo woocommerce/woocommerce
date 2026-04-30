@@ -199,6 +199,30 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test render restores a previously active rendering context.
+	 */
+	public function testRenderRestoresPreviousRenderingContext(): void {
+		$content_renderer_property = new \ReflectionProperty( Renderer::class, 'content_renderer' );
+		$content_renderer_property->setAccessible( true );
+		$content_renderer = $content_renderer_property->getValue( $this->renderer );
+		$this->assertInstanceOf( \Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer::class, $content_renderer );
+
+		$previous_context = new \Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context(
+			$this->createMock( \WP_Theme_JSON::class ),
+			array( 'is_rtl' => true ),
+			'ar_SA'
+		);
+		$content_renderer->set_rendering_context( $previous_context );
+
+		try {
+			$this->renderer->render( $this->email_post, 'Subject', '', 'en_US' );
+			$this->assertSame( $previous_context, $content_renderer->get_current_rendering_context() );
+		} finally {
+			$content_renderer->restore_rendering_context( null );
+		}
+	}
+
+	/**
 	 * Test base template CSS resets both physical flex padding sides on mobile.
 	 */
 	public function testTemplateCssResetsBothFlexGapSides(): void {

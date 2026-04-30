@@ -117,62 +117,67 @@ class Renderer {
 		/** @var \WP_Block_Template $template */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 		$template = $this->templates->get_block_template( $template_slug );
 
-		$rendering_context = $this->content_renderer->create_rendering_context( $language, $post, $template );
-		$this->content_renderer->set_rendering_context( $rendering_context );
-		$email_styles   = $this->theme_controller->get_styles();
-		$content_result = $this->content_renderer->render_without_css_inline( $post, $template );
-		$template_html  = $content_result['html'];
-		$content_styles = $content_result['styles'];
-		$layout         = $this->theme_controller->get_layout_settings();
+		$previous_rendering_context = $this->content_renderer->get_current_rendering_context();
+		try {
+			$rendering_context = $this->content_renderer->create_rendering_context( $language, $post, $template );
+			$this->content_renderer->set_rendering_context( $rendering_context );
+			$email_styles   = $this->theme_controller->get_styles();
+			$content_result = $this->content_renderer->render_without_css_inline( $post, $template );
+			$template_html  = $content_result['html'];
+			$content_styles = $content_result['styles'];
+			$layout         = $this->theme_controller->get_layout_settings();
 
-		ob_start();
-		include self::TEMPLATE_FILE;
-		$rendered_template = (string) ob_get_clean();
+			ob_start();
+			include self::TEMPLATE_FILE;
+			$rendered_template = (string) ob_get_clean();
 
-		$template_styles  =
-		WP_Style_Engine::compile_css(
-			array(
-				'background-color' => $email_styles['color']['background'] ?? 'inherit',
-				'color'            => $email_styles['color']['text'] ?? 'inherit',
-				'padding-top'      => $email_styles['spacing']['padding']['top'] ?? '0px',
-				'padding-bottom'   => $email_styles['spacing']['padding']['bottom'] ?? '0px',
-				'font-family'      => $email_styles['typography']['fontFamily'] ?? 'inherit',
-				'line-height'      => $email_styles['typography']['lineHeight'] ?? '1.5',
-				'font-size'        => $email_styles['typography']['fontSize'] ?? 'inherit',
-				'direction'        => $rendering_context->get_text_direction(),
-				'text-align'       => $rendering_context->get_default_text_align(),
-			),
-			'body, .email_layout_wrapper'
-		);
-		$template_styles .= WP_Style_Engine::compile_css(
-			array(
-				'direction'  => $rendering_context->get_text_direction(),
-				'text-align' => $rendering_context->get_default_text_align(),
-			),
-			'.email_content_wrapper, .email_preheader'
-		);
-		$template_styles .= '.email_layout_wrapper { box-sizing: border-box;}';
-		$template_styles .= file_get_contents( __DIR__ . '/' . self::TEMPLATE_STYLES_FILE );
-		$template_styles  = wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_renderer_styles', $template_styles, $post ) );
+			$template_styles  =
+			WP_Style_Engine::compile_css(
+				array(
+					'background-color' => $email_styles['color']['background'] ?? 'inherit',
+					'color'            => $email_styles['color']['text'] ?? 'inherit',
+					'padding-top'      => $email_styles['spacing']['padding']['top'] ?? '0px',
+					'padding-bottom'   => $email_styles['spacing']['padding']['bottom'] ?? '0px',
+					'font-family'      => $email_styles['typography']['fontFamily'] ?? 'inherit',
+					'line-height'      => $email_styles['typography']['lineHeight'] ?? '1.5',
+					'font-size'        => $email_styles['typography']['fontSize'] ?? 'inherit',
+					'direction'        => $rendering_context->get_text_direction(),
+					'text-align'       => $rendering_context->get_default_text_align(),
+				),
+				'body, .email_layout_wrapper'
+			);
+			$template_styles .= WP_Style_Engine::compile_css(
+				array(
+					'direction'  => $rendering_context->get_text_direction(),
+					'text-align' => $rendering_context->get_default_text_align(),
+				),
+				'.email_content_wrapper, .email_preheader'
+			);
+			$template_styles .= '.email_layout_wrapper { box-sizing: border-box;}';
+			$template_styles .= file_get_contents( __DIR__ . '/' . self::TEMPLATE_STYLES_FILE );
+			$template_styles  = wp_strip_all_tags( (string) apply_filters( 'woocommerce_email_renderer_styles', $template_styles, $post ) );
 
-		// Single CSS inlining pass: combine content and template styles, then inline all at once.
-		$all_styles        = '<style>' . $template_styles . $content_styles . '</style>';
-		$rendered_template = $this->inline_css_styles( $all_styles . $rendered_template );
+			// Single CSS inlining pass: combine content and template styles, then inline all at once.
+			$all_styles        = '<style>' . $template_styles . $content_styles . '</style>';
+			$rendered_template = $this->inline_css_styles( $all_styles . $rendered_template );
 
-		// Postprocess after CSS inlining (border normalization, CSS variable replacement, etc.).
-		$rendered_template = $this->process_manager->postprocess( $rendered_template );
-		$rendered_template = $this->apply_html_attributes( $rendered_template, $rendering_context );
+			// Postprocess after CSS inlining (border normalization, CSS variable replacement, etc.).
+			$rendered_template = $this->process_manager->postprocess( $rendered_template );
+			$rendered_template = $this->apply_html_attributes( $rendered_template, $rendering_context );
 
-		// This is a workaround to support link :hover in some clients. Ideally we would remove the ability to set :hover
-		// however this is not possible using the color panel from Gutenberg.
-		if ( isset( $email_styles['elements']['link'][':hover']['color']['text'] ) ) {
-			$rendered_template = str_replace( '<!-- Forced Styles -->', '<style>a:hover { color: ' . esc_attr( $email_styles['elements']['link'][':hover']['color']['text'] ) . ' !important; }</style>', $rendered_template );
+			// This is a workaround to support link :hover in some clients. Ideally we would remove the ability to set :hover
+			// however this is not possible using the color panel from Gutenberg.
+			if ( isset( $email_styles['elements']['link'][':hover']['color']['text'] ) ) {
+				$rendered_template = str_replace( '<!-- Forced Styles -->', '<style>a:hover { color: ' . esc_attr( $email_styles['elements']['link'][':hover']['color']['text'] ) . ' !important; }</style>', $rendered_template );
+			}
+
+			return array(
+				'html' => $rendered_template,
+				'text' => $this->render_text_version( $rendered_template ),
+			);
+		} finally {
+			$this->content_renderer->restore_rendering_context( $previous_rendering_context );
 		}
-
-		return array(
-			'html' => $rendered_template,
-			'text' => $this->render_text_version( $rendered_template ),
-		);
 	}
 
 	/**
