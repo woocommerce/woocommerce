@@ -118,8 +118,13 @@ class Settings {
 	public function sanitize_endpoint_url( $value, array $option, $raw_value ): string {
 		unset( $value, $option );
 
-		$normalized = trim( (string) $raw_value, '/' );
-		$fallback   = (string) get_option( Main::OPTION_ENDPOINT_URL, GraphQLController::DEFAULT_ENDPOINT_URL );
+		$fallback = (string) get_option( Main::OPTION_ENDPOINT_URL, GraphQLController::DEFAULT_ENDPOINT_URL );
+
+		if ( ! is_string( $raw_value ) ) {
+			return $fallback;
+		}
+
+		$normalized = trim( $raw_value, '/' );
 
 		if ( '' === $normalized ) {
 			\WC_Admin_Settings::add_error( __( 'GraphQL endpoint URL cannot be empty.', 'woocommerce' ) );
