@@ -35,7 +35,7 @@ final class ShopperCollection extends AbstractBlock {
 
 		$wrapper_attributes = array(
 			'class'               => 'wc-block-shopper-collection',
-			'data-wp-interactive' => 'woocommerce',
+			'data-wp-interactive' => 'woocommerce/shopper-collections',
 			'data-wp-context'     => '{}',
 			'data-wp-key'         => wp_unique_prefixed_id( $this->get_full_block_name() ),
 			'style'               => sprintf( '--wc-shopper-collection-columns:%d;', $column_count ),
