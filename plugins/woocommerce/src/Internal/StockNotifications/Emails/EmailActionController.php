@@ -150,6 +150,18 @@ class EmailActionController {
 			$notification->set_date_confirmed( time() );
 			$notification->save();
 
+			/**
+			 * Action: woocommerce_customer_stock_notifications_verified
+			 *
+			 * Fires after a stock-notification signup has been verified via the
+			 * double opt-in email link. Mirrors `woocommerce_customer_stock_notifications_signup`.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param Notification $notification The notification.
+			 */
+			do_action( 'woocommerce_customer_stock_notifications_verified', $notification );
+
 			$this->email_manager->send_verified_email( $notification );
 
 			// We need a cookie-based session for notices to work on frontend pages.
