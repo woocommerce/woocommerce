@@ -126,10 +126,34 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			'wc_create_attribute should return a numeric id on success.'
 		);
 
-		$ids[] = wc_create_attribute( array( 'name' => str_repeat( 'n', 28 ) ) );
+		$ids[] = wc_create_attribute( array( 'name' => str_repeat( 'n', 29 ) ) );
 		$this->assertIsInt(
 			end( $ids ),
-			'Attribute creation should succeed when its slug is 28 characters long.'
+			'Attribute creation should succeed when its 29-byte slug fits in the 32-byte taxonomy limit (with the "pa_" prefix).'
+		);
+
+		// 14-char Cyrillic slug = 28 bytes; with 'pa_' prefix = 31 bytes (within the 32-byte WP taxonomy limit).
+		$ids[] = wc_create_attribute(
+			array(
+				'slug' => 'абвгдежзиклмно',
+				'name' => 'OK Cyrillic',
+			)
+		);
+		$this->assertIsInt(
+			end( $ids ),
+			'Attribute creation should succeed for a 14-character Cyrillic slug (28 bytes).'
+		);
+
+		// 9-char Chinese slug = 27 bytes; with 'pa_' prefix = 30 bytes (within the limit).
+		$ids[] = wc_create_attribute(
+			array(
+				'slug' => '尺寸大小颜色品牌型',
+				'name' => 'OK Chinese',
+			)
+		);
+		$this->assertIsInt(
+			end( $ids ),
+			'Attribute creation should succeed for a 9-character Chinese slug (27 bytes).'
 		);
 
 		$err = wc_create_attribute( array() );
@@ -139,11 +163,37 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			'Attributes should not be allowed to be created without specifying a name.'
 		);
 
-		$err = wc_create_attribute( array( 'name' => str_repeat( 'n', 29 ) ) );
+		$err = wc_create_attribute( array( 'name' => str_repeat( 'n', 30 ) ) );
 		$this->assertEquals(
 			'invalid_product_attribute_slug_too_long',
 			$err->get_error_code(),
-			'Attribute slugs should not be allowed to be over 28 characters long.'
+			'Attribute slugs whose prefixed taxonomy name (pa_<slug>) exceeds 32 bytes should be rejected.'
+		);
+
+		// 15-char Cyrillic slug = 30 bytes; with 'pa_' prefix = 33 bytes — must be rejected.
+		$err = wc_create_attribute(
+			array(
+				'slug' => 'абвгдежзиклмноп',
+				'name' => 'Too long Cyrillic',
+			)
+		);
+		$this->assertEquals(
+			'invalid_product_attribute_slug_too_long',
+			$err->get_error_code(),
+			'A 15-character Cyrillic slug (30 bytes) should be rejected because pa_<slug> exceeds 32 bytes.'
+		);
+
+		// 10-char Chinese slug = 30 bytes; with 'pa_' prefix = 33 bytes — must be rejected.
+		$err = wc_create_attribute(
+			array(
+				'slug' => '尺寸大小颜色品牌型号',
+				'name' => 'Too long Chinese',
+			)
+		);
+		$this->assertEquals(
+			'invalid_product_attribute_slug_too_long',
+			$err->get_error_code(),
+			'A 10-character Chinese slug (30 bytes) should be rejected because pa_<slug> exceeds 32 bytes.'
 		);
 
 		$err = wc_create_attribute( array( 'name' => 'Cat' ) );

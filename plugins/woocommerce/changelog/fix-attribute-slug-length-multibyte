@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Use mb_strlen for attribute slug length validation to correctly handle multibyte characters like Cyrillic.
+Reject attribute slugs whose taxonomy name (with the "pa_" prefix) exceeds WordPress's 32-byte limit, instead of incorrectly counting characters. This lets users create attributes with multibyte slugs (Cyrillic, Chinese, etc.) that fit within the limit.

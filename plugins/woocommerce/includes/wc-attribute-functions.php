@@ -487,10 +487,21 @@ function wc_create_attribute( $args ) {
 		$slug = preg_replace( '/^pa\_/', '', wc_sanitize_taxonomy_name( $args['slug'] ) );
 	}
 
-	// Validate slug.
-	if ( mb_strlen( $slug ) > 28 ) {
-		/* translators: %s: attribute slug */
-		return new WP_Error( 'invalid_product_attribute_slug_too_long', sprintf( __( 'Slug "%s" is too long (28 characters max). Shorten it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
+	// Validate slug. WordPress's register_taxonomy() rejects taxonomy names longer than
+	// 32 bytes (see wp-includes/taxonomy.php), and WooCommerce prefixes attribute slugs
+	// with 'pa_'. Multibyte characters (Cyrillic, Chinese, etc.) consume 2-4 bytes each.
+	if ( strlen( 'pa_' . $slug ) > 32 ) {
+		return new WP_Error(
+			'invalid_product_attribute_slug_too_long',
+			sprintf(
+				/* translators: 1: attribute slug, 2: byte count of the prefixed slug, 3: byte limit */
+				__( 'Slug "%1$s" is too long (%2$d bytes used; %3$d max, including the "pa_" prefix). Multibyte characters count as multiple bytes.', 'woocommerce' ),
+				$slug,
+				strlen( 'pa_' . $slug ),
+				32
+			),
+			array( 'status' => 400 )
+		);
 	} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
 		/* translators: %s: attribute slug */
 		return new WP_Error( 'invalid_product_attribute_slug_reserved_name', sprintf( __( 'Slug "%s" is not allowed because it is a reserved term. Change it, please.', 'woocommerce' ), $slug ), array( 'status' => 400 ) );
