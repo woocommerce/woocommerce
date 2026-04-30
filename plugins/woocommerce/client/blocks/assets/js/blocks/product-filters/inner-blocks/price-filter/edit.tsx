@@ -30,7 +30,7 @@ const Edit = () => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						'woocommerce/rangeInput': {
+						'woocommerceRangeInput': {
 							...getPriceFilterData( data ),
 							isLoading,
 						},

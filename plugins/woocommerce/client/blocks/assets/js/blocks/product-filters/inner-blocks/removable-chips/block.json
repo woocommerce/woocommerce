@@ -19,7 +19,7 @@
 		},
 		"interactivity": true
 	},
-	"usesContext": [ "queryId", "woocommerce/removableItems" ],
+	"usesContext": [ "queryId", "woocommerceRemovableItems" ],
 	"attributes": {
 		"chipText": {
 			"type": "string"

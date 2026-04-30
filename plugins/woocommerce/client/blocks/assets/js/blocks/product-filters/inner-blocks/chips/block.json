@@ -15,7 +15,7 @@
 	"supports": {
 		"interactivity": true
 	},
-	"usesContext": [ "woocommerce/selectableItems" ],
+	"usesContext": [ "woocommerceSelectableItems" ],
 	"attributes": {
 		"chipText": {
 			"type": "string"

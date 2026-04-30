@@ -8,11 +8,9 @@ export interface RangeInputContext {
 	isLoading?: boolean;
 }
 
-/* eslint-disable @typescript-eslint/naming-convention -- WordPress block context key format */
 export type RangeInputBlockContext = {
-	'woocommerce/rangeInput': RangeInputContext;
+	woocommerceRangeInput: RangeInputContext;
 };
-/* eslint-enable @typescript-eslint/naming-convention */
 
 /**
  * Contract every parent store referenced by `storeNamespace` MUST satisfy.

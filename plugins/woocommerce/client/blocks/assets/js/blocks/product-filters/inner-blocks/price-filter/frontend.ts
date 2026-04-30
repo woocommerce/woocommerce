@@ -171,13 +171,9 @@ const productFilterPriceStore = {
 			actions.setPrice( 'max', price );
 		},
 	},
-};
+} satisfies RangeInputParentStore;
 
 export type ProductFilterPriceStore = typeof productFilterPriceStore;
-
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _rangeInputContract =
-	productFilterPriceStore satisfies RangeInputParentStore;
 
 const { state, actions } = store<
 	ProductFiltersStore & ProductFilterPriceStore
