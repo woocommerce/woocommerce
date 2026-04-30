@@ -77,7 +77,7 @@ class NotificationEditPage {
 			case 'cancel_notification':
 				$notification->set_status( NotificationStatus::CANCELLED );
 				$notification->set_date_cancelled( time() );
-				$notification->set_date_notified( NotificationCancellationSource::ADMIN );
+				$notification->set_cancellation_source( NotificationCancellationSource::ADMIN );
 				$result = $notification->save();
 				if ( is_wp_error( $result ) ) {
 					$notice_message = $result->get_error_message();

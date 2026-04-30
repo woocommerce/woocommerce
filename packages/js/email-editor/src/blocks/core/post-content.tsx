@@ -13,11 +13,11 @@ function Placeholder( { layoutClassNames } ) {
 	const blockProps = useBlockProps( { className: layoutClassNames } );
 	return (
 		<div { ...blockProps }>
-			<p>{ __( 'This is the Content block.', 'woocommerce' ) }</p>
+			<p>{ __( 'This is the Content block.', __i18n_text_domain__ ) }</p>
 			<p>
 				{ __(
 					'It will display all the blocks in the email content, which might be only simple text paragraphs. You can enrich your message with images, incorporate data through tables, explore different layout designs with columns, or use any other block type.',
-					'woocommerce'
+					__i18n_text_domain__
 				) }
 			</p>
 		</div>
