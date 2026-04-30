@@ -7,7 +7,8 @@ import * as iAPI from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import { ProductFiltersContext, ProductFiltersStore } from '../../frontend';
+import type { ProductFiltersContext } from '../../types';
+import type { ProductFiltersStore } from '../../frontend';
 import { formatPrice, getCurrency } from '../../utils/price-currency';
 import type { RangeInputParentStore } from '../../../../types/type-defs/range-input';
 

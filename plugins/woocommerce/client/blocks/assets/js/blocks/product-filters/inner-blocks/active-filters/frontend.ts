@@ -6,10 +6,8 @@ import { store, getContext, getConfig } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type {
-	ProductFiltersContext,
-	ProductFiltersStore,
-} from '../../frontend';
+import type { ProductFiltersContext } from '../../types';
+import type { ProductFiltersStore } from '../../frontend';
 import type {
 	RemovableItem,
 	RemovableItemsParentStore,

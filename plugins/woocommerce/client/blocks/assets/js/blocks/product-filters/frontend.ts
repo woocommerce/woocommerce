@@ -15,8 +15,6 @@ import type {
 	ProductFiltersContext,
 } from './types';
 
-export type { ActiveFilterItem, ProductFiltersContext };
-
 const { getContext, store, getServerContext, getConfig } = iAPI;
 
 const BLOCK_NAME = 'woocommerce/product-filters';
@@ -262,14 +260,9 @@ const productFiltersStore = {
 			}
 		},
 	},
-};
+} satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;
-
-// Compile-time enforcement of the selectable-items parent contract.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _productFiltersStoreContract =
-	productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
 
 const { state, actions } = store< ProductFiltersStore >(
 	BLOCK_NAME,
