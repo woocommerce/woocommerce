@@ -1,0 +1,290 @@
+.wc-block-product-filter-gold-miner {
+	position: relative;
+	width: 100%;
+	user-select: none;
+	overflow: hidden;
+	border-radius: 8px;
+	border: 2px solid #8b6914;
+}
+
+.wc-block-product-filter-gold-miner__sky {
+	position: relative;
+	height: 80px;
+	background: linear-gradient(180deg, #87ceeb 0%, #b8e4f9 60%, #d4a574 100%);
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: flex-start;
+	padding-top: 8px;
+	cursor: pointer;
+}
+
+.wc-block-product-filter-gold-miner__miner {
+	position: relative;
+	width: 100%;
+	display: flex;
+	justify-content: center;
+	z-index: 10;
+}
+
+.wc-block-product-filter-gold-miner__claw-pivot {
+	position: relative;
+	width: 40px;
+	height: 20px;
+	background: #5a3e1b;
+	border-radius: 4px 4px 0 0;
+	display: flex;
+	justify-content: center;
+
+	&::before {
+		content: "⛏️";
+		position: absolute;
+		top: -16px;
+		font-size: 20px;
+	}
+}
+
+.wc-block-product-filter-gold-miner__claw-arm {
+	position: absolute;
+	top: 100%;
+	left: 50%;
+	width: 3px;
+	height: 30px;
+	background: linear-gradient(180deg, #333 0%, #666 100%);
+	transform-origin: top center;
+	transform: rotate(0deg);
+	transition: none;
+	z-index: 5;
+	margin-left: -1.5px;
+}
+
+.wc-block-product-filter-gold-miner__claw-hook {
+	position: absolute;
+	bottom: -8px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 0;
+	height: 0;
+	border-left: 8px solid transparent;
+	border-right: 8px solid transparent;
+	border-top: 12px solid #8b8b8b;
+
+	&::before,
+	&::after {
+		content: "";
+		position: absolute;
+		bottom: 4px;
+		width: 3px;
+		height: 10px;
+		background: #8b8b8b;
+		border-radius: 0 0 2px 2px;
+	}
+
+	&::before {
+		left: -6px;
+		transform: rotate(-20deg);
+	}
+
+	&::after {
+		right: -6px;
+		transform: rotate(20deg);
+	}
+
+	&.has-nugget {
+		&::before,
+		&::after {
+			transform: rotate(0deg);
+		}
+
+		&::after {
+			animation: nugget-glow 0.5s ease-in-out infinite alternate;
+		}
+	}
+}
+
+.wc-block-product-filter-gold-miner__instruction {
+	position: absolute;
+	bottom: 4px;
+	font-size: 11px;
+	color: #5a3e1b;
+	font-weight: 600;
+	opacity: 0.8;
+	pointer-events: none;
+}
+
+.wc-block-product-filter-gold-miner__ground {
+	position: relative;
+	height: 220px;
+	background: linear-gradient(180deg, #c4943a 0%, #8b6914 30%, #6b4f0e 60%, #4a3508 100%);
+	overflow: hidden;
+
+	&::before {
+		content: "";
+		position: absolute;
+		top: 0;
+		left: 0;
+		right: 0;
+		height: 4px;
+		background: linear-gradient(180deg, #90753b, transparent);
+		z-index: 2;
+	}
+}
+
+.wc-block-product-filter-gold-miner__nugget {
+	position: absolute;
+	cursor: pointer;
+	transition: transform 0.15s ease, filter 0.3s ease;
+	z-index: 3;
+
+	&:hover {
+		transform: scale(1.15);
+		filter: brightness(1.2);
+	}
+
+	&::before {
+		content: "";
+		display: block;
+		border-radius: 40% 50% 45% 55%;
+		background: radial-gradient(ellipse at 35% 35%, #fff6a3, #ffd700 40%, #daa520 70%, #b8860b 100%);
+		box-shadow:
+			0 2px 6px rgba(0, 0, 0, 0.4),
+			inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+			0 0 12px rgba(255, 215, 0, 0.4);
+	}
+
+	&--small::before {
+		width: 20px;
+		height: 18px;
+	}
+
+	&--medium::before {
+		width: 30px;
+		height: 26px;
+	}
+
+	&--large::before {
+		width: 42px;
+		height: 36px;
+	}
+
+	&--loading {
+		&::before {
+			background: rgba(255, 255, 255, 0.15);
+			box-shadow: none;
+			animation: nugget-loading 1.5s ease-in-out infinite;
+			width: 30px;
+			height: 26px;
+		}
+	}
+
+	&.is-selected {
+		&::before {
+			background: radial-gradient(ellipse at 35% 35%, #c0ffc0, #4caf50 40%, #388e3c 70%, #2e7d32 100%);
+			box-shadow:
+				0 2px 6px rgba(0, 0, 0, 0.4),
+				inset 0 -2px 4px rgba(0, 0, 0, 0.2),
+				0 0 16px rgba(76, 175, 80, 0.6);
+		}
+
+		&::after {
+			content: "✓";
+			position: absolute;
+			top: 50%;
+			left: 50%;
+			transform: translate(-50%, -50%);
+			color: white;
+			font-size: 14px;
+			font-weight: bold;
+			text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+			z-index: 1;
+		}
+	}
+
+	&.is-grabbed {
+		opacity: 0.5;
+		transform: scale(0.9);
+	}
+}
+
+.wc-block-product-filter-gold-miner__nugget-label {
+	position: absolute;
+	bottom: -18px;
+	left: 50%;
+	transform: translateX(-50%);
+	font-size: 10px;
+	color: #f0e0c0;
+	white-space: nowrap;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
+	font-weight: 600;
+	pointer-events: none;
+}
+
+.wc-block-product-filter-gold-miner__nugget-input {
+	position: absolute;
+	opacity: 0;
+	pointer-events: none;
+	width: 0;
+	height: 0;
+}
+
+.wc-block-product-filter-gold-miner__items {
+	position: relative;
+	width: 100%;
+	height: 100%;
+}
+
+.wc-block-product-filter-gold-miner__show-more {
+	position: absolute;
+	bottom: 8px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 10;
+}
+
+.wc-block-product-filter-gold-miner__show-more-button {
+	background: rgba(255, 215, 0, 0.9);
+	border: 2px solid #8b6914;
+	border-radius: 16px;
+	padding: 4px 16px;
+	font-size: 12px;
+	font-weight: 600;
+	color: #4a3508;
+	cursor: pointer;
+	transition: background 0.2s;
+
+	&:hover {
+		background: rgba(255, 215, 0, 1);
+	}
+}
+
+.wc-block-product-filter-gold-miner__score {
+	position: absolute;
+	top: 8px;
+	right: 12px;
+	font-size: 13px;
+	font-weight: bold;
+	color: #ffd700;
+	text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+	z-index: 4;
+}
+
+@keyframes nugget-loading {
+	0%,
+	100% {
+		opacity: 0.3;
+	}
+
+	50% {
+		opacity: 0.6;
+	}
+}
+
+@keyframes nugget-glow {
+	from {
+		filter: brightness(1);
+	}
+
+	to {
+		filter: brightness(1.4);
+	}
+}

@@ -1,0 +1,23 @@
+{
+	"$schema": "https://schemas.wp.org/trunk/block.json",
+	"name": "woocommerce/product-filter-gold-miner",
+	"title": "Gold Miner",
+	"description": "Display filter options as gold nuggets in a Gold Miner game.",
+	"category": "woocommerce",
+	"keywords": [ "WooCommerce" ],
+	"textdomain": "woocommerce",
+	"apiVersion": 3,
+	"ancestor": [
+		"woocommerce/product-filter-attribute",
+		"woocommerce/product-filter-status",
+		"woocommerce/product-filter-taxonomy",
+		"woocommerce/product-filter-rating"
+	],
+	"supports": {
+		"interactivity": true
+	},
+	"usesContext": [ "woocommerce/selectableItems" ],
+	"attributes": {},
+	"viewScriptModule": "woocommerce/product-filter-gold-miner",
+	"style": "file:../woocommerce/product-filter-gold-miner-style.css"
+}
