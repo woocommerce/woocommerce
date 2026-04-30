@@ -347,19 +347,17 @@ class FulfillmentsRenderer {
 			<tr>
 				<th class="woocommerce-table__shipment-info shipment-info" style="font-weight: normal;">
 				<?php
+				// Use the UTC fulfilled date when available; fall back to date_updated.
+				$shipment_date_utc = $fulfillment->get_date_fulfilled()
+					?? $fulfillment->get_date_updated();
+				// Append ' UTC' so strtotime treats the stored value as UTC, then render in the site's timezone.
+				$shipment_timestamp  = $shipment_date_utc ? strtotime( $shipment_date_utc . ' UTC' ) : false;
+				$shipment_date_local = false !== $shipment_timestamp ? wp_date( 'F j, Y', $shipment_timestamp ) : '';
 				printf(
 					/* translators: %1$s is the shipment index, %2$s is the shipment date */
 					wp_kses( __( '<b>Shipment %1$s</b> was shipped on <b>%2$s</b>', 'woocommerce' ), 'b' ),
 					intval( $index ) + 1,
-					esc_html(
-						gmdate(
-							'F j, Y',
-							strtotime(
-								$fulfillment->get_date_fulfilled() // Get the fulfilled date.
-								?? $fulfillment->get_date_updated() // Fallback to the updated date if fulfilled date is not set.
-							)
-						)
-					)
+					esc_html( (string) $shipment_date_local )
 				);
 				?>
 				</th>

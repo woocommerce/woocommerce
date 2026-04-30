@@ -30,6 +30,7 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 			array( true, wc_is_webhook_valid_topic( 'product.updated' ) ),
 			array( true, wc_is_webhook_valid_topic( 'product.deleted' ) ),
 			array( true, wc_is_webhook_valid_topic( 'product.restored' ) ),
+			array( true, wc_is_webhook_valid_topic( 'product.published' ) ),
 			array( true, wc_is_webhook_valid_topic( 'order.created' ) ),
 			array( true, wc_is_webhook_valid_topic( 'order.updated' ) ),
 			array( true, wc_is_webhook_valid_topic( 'order.deleted' ) ),
