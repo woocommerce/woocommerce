@@ -210,7 +210,7 @@ Inner blocks SHOULD:
 
 1. Render `<input type="radio">` when `selectionMode === 'single'`
 2. Render `<input type="checkbox">` when `selectionMode === 'multiple'`
-3. Apply disabled styling when `item.disabled === true`
+3. Set `disabled` attribute and apply reduced-opacity styling when `item.disabled === true`
 4. Use `groupLabel` for fieldset legend (screen reader accessible)
 5. Show skeleton/loading UI when `isLoading === true`
 6. Show items up to `displayLimit` (default 15), render show-more button when exceeded
@@ -267,7 +267,6 @@ export type SelectableItem< T = unknown > = (
 	selected?: boolean;
 	disabled?: boolean;
 	type?: string;
-	labelType?: 'text' | 'stars';
 } & T;
 
 /**

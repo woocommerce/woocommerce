@@ -64,6 +64,22 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:focus {
 	);
 }
 
+input[type="checkbox"].wc-block-product-filter-checkbox-list__input:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+
+	+ .wc-block-product-filter-checkbox-list__mark {
+		opacity: 0.5;
+	}
+}
+
+.wc-block-product-filter-checkbox-list__label:has(
+		input.wc-block-product-filter-checkbox-list__input:disabled
+	) {
+	opacity: 0.5;
+	cursor: not-allowed;
+}
+
 svg.wc-block-product-filter-checkbox-list__mark {
 	box-sizing: border-box;
 	display: none;

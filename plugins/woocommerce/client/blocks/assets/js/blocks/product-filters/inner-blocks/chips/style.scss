@@ -59,6 +59,15 @@
 	}
 }
 
+.wc-block-product-filter-chips__item:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+
+	&:hover {
+		background: transparent;
+	}
+}
+
 :where(.wc-block-product-filter-chips__label) {
 	display: inline-flex;
 	align-items: center;
