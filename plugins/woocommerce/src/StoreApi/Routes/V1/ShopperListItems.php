@@ -153,9 +153,9 @@ class ShopperListItems extends AbstractRoute {
 			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Shopper list not found.', 'woocommerce' ), 404 );
 		}
 
-		[ $lookup_id, $variation, $item_data ] = $this->resolve_item_payload( $request );
+		[ $lookup_id, $variation, $item_data, $quantity ] = $this->resolve_item_payload( $request );
 
-		$item = ShopperListItem::from_product( $lookup_id, $variation, $item_data );
+		$item = ShopperListItem::from_product( $lookup_id, $variation, $item_data, $quantity );
 		if ( ! $item ) {
 			throw new RouteException( 'woocommerce_rest_shopper_list_unknown_product', esc_html__( 'No product exists for the supplied item.', 'woocommerce' ), 404 );
 		}
@@ -199,7 +199,7 @@ class ShopperListItems extends AbstractRoute {
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
 	 *
-	 * @return array{0:int,1:array,2:array} `[ lookup_id, variation, item_data ]`.
+	 * @return array{0:int,1:array,2:array,3:int} `[ lookup_id, variation, item_data, quantity ]`.
 	 */
 	private function resolve_item_payload( \WP_REST_Request $request ): array {
 		$cart_item_key = (string) $request->get_param( 'cart_item_key' );
@@ -219,6 +219,7 @@ class ShopperListItems extends AbstractRoute {
 				$variation_id ? $variation_id : $product_id,
 				$variation_attrs,
 				$this->extract_custom_cart_item_data( $line ),
+				absint( $line['quantity'] ?? 1 ),
 			);
 		}
 
@@ -233,6 +234,7 @@ class ShopperListItems extends AbstractRoute {
 			$variation_id ? $variation_id : $product_id,
 			(array) $request->get_param( 'variation' ),
 			(array) $request->get_param( 'item_data' ),
+			absint( $request->get_param( 'quantity' ) ),
 		);
 	}
 

@@ -51,15 +51,29 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 					'key'   => 'source',
 					'value' => 'manual',
 				),
-			)
+			),
+			3
 		);
 
 		$this->assertInstanceOf( ShopperListItem::class, $item );
 		$arr = $item->to_array();
 		$this->assertSame( $this->product->get_title(), $arr['product_title_at_save'] );
 		$this->assertSame( (string) $this->product->get_price(), $arr['price_at_save'] );
-		$this->assertSame( 1, $arr['quantity'], 'Quantity is hardcoded to 1 in v1.' );
+		$this->assertSame( 3, $arr['quantity'], 'Quantity should reflect the value passed to from_product.' );
 		$this->assertSame( 'manual', $arr['item_data'][0]['value'] );
+	}
+
+	/**
+	 * @testdox from_product should default quantity to 1 and coerce zero/negative values up to 1.
+	 */
+	public function test_from_product_normalizes_quantity_floor(): void {
+		$default = ShopperListItem::from_product( $this->product->get_id() );
+		$this->assertInstanceOf( ShopperListItem::class, $default );
+		$this->assertSame( 1, $default->to_array()['quantity'] );
+
+		$zero = ShopperListItem::from_product( $this->product->get_id(), array(), array(), 0 );
+		$this->assertInstanceOf( ShopperListItem::class, $zero );
+		$this->assertSame( 1, $zero->to_array()['quantity'] );
 	}
 
 	/**

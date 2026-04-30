@@ -175,7 +175,7 @@ class ShopperLists extends ControllerTestCase {
 		$this->assertSame( 1, $data['item_count'] );
 		$this->assertCount( 1, $data['items'] );
 		$this->assertSame( $this->product->get_id(), $data['items'][0]['product_id'] );
-		$this->assertSame( 1, $data['items'][0]['quantity'], 'Stored quantity should be normalized to 1 in v1.' );
+		$this->assertSame( 1, $data['items'][0]['quantity'], 'Saved quantity should mirror the cart line quantity.' );
 		$this->assertTrue( $data['items'][0]['product_exists'] );
 		$this->assertSame( $this->product->get_title(), $data['items'][0]['name'] );
 		$this->assertNotEmpty( wc()->cart->cart_contents, 'Cart should still contain the line — POST is additive only.' );
@@ -217,7 +217,7 @@ class ShopperLists extends ControllerTestCase {
 		$this->assertEquals( 201, $response->get_status() );
 		$this->assertCount( 1, $data['items'] );
 		$this->assertSame( $this->product->get_id(), $data['items'][0]['product_id'] );
-		$this->assertSame( 1, $data['items'][0]['quantity'], 'Stored quantity should be normalized to 1 in v1.' );
+		$this->assertSame( 2, $data['items'][0]['quantity'], 'Posted quantity should be honored.' );
 		$this->assertSame( 'manual', $data['items'][0]['item_data'][0]['value'] );
 	}
 

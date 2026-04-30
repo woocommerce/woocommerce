@@ -130,9 +130,10 @@ class ShopperListItem {
 	 * @param int   $product_or_variation_id Product or variation ID.
 	 * @param array $variation               Variation attributes keyed by attribute name.
 	 * @param array $item_data               Custom item data.
+	 * @param int   $quantity                Saved quantity. Coerced to a minimum of 1.
 	 * @return self|null Null if the underlying product can't be resolved.
 	 */
-	public static function from_product( int $product_or_variation_id, array $variation = array(), array $item_data = array() ): ?self {
+	public static function from_product( int $product_or_variation_id, array $variation = array(), array $item_data = array(), int $quantity = 1 ): ?self {
 		$product = wc_get_product( absint( $product_or_variation_id ) );
 		if ( ! $product ) {
 			return null;
@@ -141,13 +142,12 @@ class ShopperListItem {
 		$variation_id = $product->is_type( 'variation' ) ? $product->get_id() : 0;
 		$product_id   = $variation_id ? $product->get_parent_id() : $product->get_id();
 
-		// Quantity is hardcoded to 1 for now.
 		return new self(
 			self::generate_key( $product_id, $variation_id, $variation, $item_data ),
 			$product_id,
 			$variation_id,
 			$variation,
-			1,
+			max( 1, $quantity ),
 			$item_data,
 			current_time( 'mysql', true ),
 			$product->get_title(),
