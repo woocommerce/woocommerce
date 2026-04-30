@@ -37,12 +37,6 @@ class ShopperListSchema extends AbstractSchema {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'name'             => array(
-				'description' => __( 'Human-readable list name.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
 			'is_public'        => array(
 				'description' => __( 'Whether the list is shareable.', 'woocommerce' ),
 				'type'        => 'boolean',
@@ -76,7 +70,6 @@ class ShopperListSchema extends AbstractSchema {
 
 		return array(
 			'slug'             => $shopper_list['slug'] ?? '',
-			'name'             => $shopper_list['name'] ?? '',
 			'is_public'        => $shopper_list['is_public'] ?? false,
 			'date_created_gmt' => wc_rest_prepare_date_response( $shopper_list['date_created_gmt'] ?? current_time( 'mysql', true ) ),
 			'item_count'       => count( $items ),

@@ -29,13 +29,6 @@ class ShopperList {
 	private $slug;
 
 	/**
-	 * List name.
-	 *
-	 * @var string
-	 */
-	private $name;
-
-	/**
 	 * Whether the list is public.
 	 *
 	 * @var bool
@@ -61,7 +54,6 @@ class ShopperList {
 	 *
 	 * @param int                            $user_id          Owning user ID.
 	 * @param string                         $slug             List slug.
-	 * @param string                         $name             Human-readable name.
 	 * @param bool                           $is_public        Whether the list is shareable.
 	 * @param string                         $date_created_gmt MySQL DATETIME, GMT.
 	 * @param array<string, ShopperListItem> $items            Items keyed by storage key.
@@ -69,14 +61,12 @@ class ShopperList {
 	private function __construct(
 		int $user_id,
 		string $slug,
-		string $name,
 		bool $is_public,
 		string $date_created_gmt,
 		array $items
 	) {
 		$this->user_id          = $user_id;
 		$this->slug             = $slug;
-		$this->name             = $name;
 		$this->is_public        = $is_public;
 		$this->date_created_gmt = $date_created_gmt;
 		$this->items            = $items;
@@ -115,7 +105,6 @@ class ShopperList {
 			return new self(
 				$user_id,
 				'saved-for-later',
-				__( 'Saved for later', 'woocommerce' ),
 				false,
 				current_time( 'mysql', true ),
 				array()
@@ -209,7 +198,6 @@ class ShopperList {
 
 		return array(
 			'slug'             => $this->slug,
-			'name'             => $this->name,
 			'is_public'        => $this->is_public,
 			'date_created_gmt' => $this->date_created_gmt,
 			'items'            => $items_array,
@@ -235,7 +223,6 @@ class ShopperList {
 		return new self(
 			$user_id,
 			$data['slug'] ?? '',
-			$data['name'] ?? '',
 			$data['is_public'] ?? false,
 			$data['date_created_gmt'] ?? current_time( 'mysql', true ),
 			$items
