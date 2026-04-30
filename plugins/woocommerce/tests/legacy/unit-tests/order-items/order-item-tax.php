@@ -67,5 +67,8 @@ class WC_Tests_Order_Item_Tax extends WC_Unit_Test_Case {
 
 		$item->set_label( 'VAT 15%' );
 		$this->assertEquals( 'VAT 15%', $item->get_label() );
+
+		$item->set_label( '<b>%15 KDV</b>' );
+		$this->assertEquals( '%15 KDV', $item->get_label() );
 	}
 }
