@@ -186,6 +186,7 @@ class CustomerStockNotificationEmail extends WC_Email {
 			'button_link'      => $button_link,
 			'unsubscribe_link' => add_query_arg(
 				array(
+					'email_link_action'     => EmailActionController::ACTION_UNSUBSCRIBE,
 					'email_link_action_key' => $unsubscribe_key,
 					'notification_id'       => $notification->get_id(),
 				),

@@ -1349,7 +1349,7 @@ class OrdersTableQuery {
 		$order   = $this->sanitize_order( $this->args['order'] ?? '' );
 		$orderby = $this->sanitize_order_orderby( $this->args['orderby'] ?? 'none' );
 
-		// Set orderby to an empty array by default. This will also be used if sanitize_order_orderby recieved "none".
+		// Set orderby to an empty array by default. This will also be used if sanitize_order_orderby received "none".
 		$this->orderby = array();
 
 		if ( 'include' === $orderby || 'post__in' === $orderby ) {

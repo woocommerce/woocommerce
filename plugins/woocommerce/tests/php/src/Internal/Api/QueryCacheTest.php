@@ -1,0 +1,163 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Automattic\WooCommerce\Tests\Internal\Api;
+
+use Automattic\WooCommerce\Internal\Api\QueryCache;
+use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\DocumentNode;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for {@see QueryCache} — the AST cache backing both the
+ * standard "parse + cache" path and the Apollo Automatic Persisted Queries
+ * (APQ) protocol used by clients that send a hash instead of the full query.
+ */
+class QueryCacheTest extends WC_Unit_Test_Case {
+	/**
+	 * The system under test.
+	 *
+	 * @var QueryCache
+	 */
+	private QueryCache $sut;
+
+	/**
+	 * Set up.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		wp_cache_flush();
+		$this->sut = new QueryCache();
+	}
+
+	/**
+	 * Tear down.
+	 */
+	public function tearDown(): void {
+		wp_cache_flush();
+		parent::tearDown();
+	}
+
+	/**
+	 * @testdox resolve parses a plain query and returns a DocumentNode.
+	 */
+	public function test_resolve_parses_a_plain_query(): void {
+		$result = $this->sut->resolve( '{ widget { id } }', array() );
+
+		$this->assertInstanceOf( DocumentNode::class, $result );
+	}
+
+	/**
+	 * @testdox resolve returns the cached AST on the second call for the same query.
+	 */
+	public function test_resolve_returns_cached_document_on_second_call(): void {
+		$first  = $this->sut->resolve( '{ widget { id } }', array() );
+		$second = $this->sut->resolve( '{ widget { id } }', array() );
+
+		$this->assertInstanceOf( DocumentNode::class, $first );
+		$this->assertInstanceOf( DocumentNode::class, $second );
+		// Distinct instances are fine; both must represent the same parsed query.
+		$this->assertEquals( $first->toArray(), $second->toArray() );
+	}
+
+	/**
+	 * @testdox resolve returns a BAD_REQUEST error when called with a null query and no APQ.
+	 */
+	public function test_resolve_rejects_null_query_without_apq(): void {
+		$result = $this->sut->resolve( null, array() );
+
+		$this->assertIsArray( $result );
+		$this->assertArrayHasKey( 'errors', $result );
+		$this->assertSame( 'No query provided.', $result['errors'][0]['message'] ?? null );
+		$this->assertSame( 'BAD_REQUEST', $result['errors'][0]['extensions']['code'] ?? null );
+	}
+
+	/**
+	 * @testdox resolve surfaces a syntax error as GRAPHQL_PARSE_ERROR.
+	 */
+	public function test_resolve_returns_parse_error_for_invalid_syntax(): void {
+		$result = $this->sut->resolve( '{ widget { id', array() );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'GRAPHQL_PARSE_ERROR', $result['errors'][0]['extensions']['code'] ?? null );
+	}
+
+	/**
+	 * @testdox apq registers a query when both the query and matching hash are provided.
+	 */
+	public function test_apq_registers_when_query_and_matching_hash_are_provided(): void {
+		$query      = '{ widget { id } }';
+		$hash       = hash( 'sha256', $query );
+		$extensions = array(
+			'persistedQuery' => array(
+				'version'    => 1,
+				'sha256Hash' => $hash,
+			),
+		);
+
+		$first = $this->sut->resolve( $query, $extensions );
+		$this->assertInstanceOf( DocumentNode::class, $first );
+
+		// Subsequent hash-only request must hit the cache.
+		$second = $this->sut->resolve( null, $extensions );
+		$this->assertInstanceOf( DocumentNode::class, $second );
+	}
+
+	/**
+	 * @testdox apq returns PERSISTED_QUERY_HASH_MISMATCH when the supplied hash doesn't match the query.
+	 */
+	public function test_apq_rejects_query_when_hash_does_not_match(): void {
+		$extensions = array(
+			'persistedQuery' => array(
+				'version'    => 1,
+				'sha256Hash' => str_repeat( 'a', 64 ),
+			),
+		);
+
+		$result = $this->sut->resolve( '{ widget { id } }', $extensions );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'PERSISTED_QUERY_HASH_MISMATCH', $result['errors'][0]['extensions']['code'] ?? null );
+	}
+
+	/**
+	 * @testdox apq returns PERSISTED_QUERY_NOT_FOUND when the hash is unknown.
+	 */
+	public function test_apq_returns_not_found_when_hash_is_unknown(): void {
+		$extensions = array(
+			'persistedQuery' => array(
+				'version'    => 1,
+				'sha256Hash' => str_repeat( 'b', 64 ),
+			),
+		);
+
+		$result = $this->sut->resolve( null, $extensions );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'PERSISTED_QUERY_NOT_FOUND', $result['errors'][0]['extensions']['code'] ?? null );
+	}
+
+	/**
+	 * @testdox apq is ignored when the version is not 1 — falls through to the standard path.
+	 */
+	public function test_apq_falls_through_when_version_is_not_one(): void {
+		$extensions = array(
+			'persistedQuery' => array(
+				'version'    => 2,
+				'sha256Hash' => str_repeat( 'c', 64 ),
+			),
+		);
+
+		$result = $this->sut->resolve( '{ widget { id } }', $extensions );
+
+		$this->assertInstanceOf( DocumentNode::class, $result );
+	}
+
+	/**
+	 * @testdox get_cache_ttl exposes the configured TTL.
+	 */
+	public function test_get_cache_ttl_is_a_day(): void {
+		$this->assertSame( DAY_IN_SECONDS, QueryCache::get_cache_ttl() );
+	}
+}
