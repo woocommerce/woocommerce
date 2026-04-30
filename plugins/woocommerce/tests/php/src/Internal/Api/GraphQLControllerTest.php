@@ -45,6 +45,7 @@ class GraphQLControllerTest extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		delete_option( Main::OPTION_GET_ENDPOINT_ENABLED );
+		delete_option( Main::OPTION_ENDPOINT_URL );
 		delete_option( Main::OPTION_MAX_QUERY_DEPTH );
 		delete_option( Main::OPTION_MAX_QUERY_COMPLEXITY );
 		parent::tearDown();
@@ -78,6 +79,70 @@ class GraphQLControllerTest extends WC_REST_Unit_Test_Case {
 		$methods = $handlers[0]['methods'];
 		$this->assertTrue( $methods['GET'] ?? false );
 		$this->assertTrue( $methods['POST'] ?? false );
+	}
+
+	/**
+	 * @testdox get_endpoint_url returns the default when the option is unset.
+	 */
+	public function test_get_endpoint_url_returns_default_when_option_unset(): void {
+		delete_option( Main::OPTION_ENDPOINT_URL );
+		$this->assertSame( GraphQLController::DEFAULT_ENDPOINT_URL, GraphQLController::get_endpoint_url() );
+	}
+
+	/**
+	 * @testdox get_endpoint_url returns the stored option value when it is well-formed.
+	 */
+	public function test_get_endpoint_url_returns_option_value_when_valid(): void {
+		update_option( Main::OPTION_ENDPOINT_URL, 'wc/v4/graphql' );
+		$this->assertSame( 'wc/v4/graphql', GraphQLController::get_endpoint_url() );
+	}
+
+	/**
+	 * @testdox get_endpoint_url strips surrounding slashes from the stored option.
+	 */
+	public function test_get_endpoint_url_strips_surrounding_slashes(): void {
+		update_option( Main::OPTION_ENDPOINT_URL, '/wc/v4/graphql/' );
+		$this->assertSame( 'wc/v4/graphql', GraphQLController::get_endpoint_url() );
+	}
+
+	/**
+	 * @testdox get_endpoint_url falls back to the default when the option has fewer than two segments.
+	 * @dataProvider provider_invalid_endpoint_url_values
+	 *
+	 * @param string $value The invalid option value.
+	 */
+	public function test_get_endpoint_url_falls_back_on_invalid( string $value ): void {
+		update_option( Main::OPTION_ENDPOINT_URL, $value );
+		$this->assertSame( GraphQLController::DEFAULT_ENDPOINT_URL, GraphQLController::get_endpoint_url() );
+	}
+
+	/**
+	 * @testdox register uses the configured endpoint URL when the option is set.
+	 */
+	public function test_register_uses_configured_endpoint_url(): void {
+		update_option( Main::OPTION_ENDPOINT_URL, 'wc/v4/graphql' );
+
+		$this->sut->register();
+
+		$routes = rest_get_server()->get_routes();
+		$this->assertArrayHasKey( '/wc/v4/graphql', $routes, 'The configured endpoint URL should be registered.' );
+		$this->assertArrayNotHasKey( '/wc/graphql', $routes, 'The default endpoint URL should not be registered when a custom one is set.' );
+	}
+
+	/**
+	 * Invalid values that the getter should replace with the default.
+	 *
+	 * @return array<string, array{string}>
+	 */
+	public function provider_invalid_endpoint_url_values(): array {
+		return array(
+			'empty string'         => array( '' ),
+			'slashes only'         => array( '///' ),
+			'single segment'       => array( 'graphql' ),
+			'empty middle segment' => array( 'wc//graphql' ),
+			'invalid character'    => array( 'wc/graph*ql' ),
+			'space in segment'     => array( 'wc/my graphql' ),
+		);
 	}
 
 	/**

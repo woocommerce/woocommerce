@@ -527,6 +527,52 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should leave post and sync meta untouched when wp_update_post fails.
+	 */
+	public function test_reset_response_returns_wp_error_when_wp_update_post_fails(): void {
+		$email_type = 'customer_new_account';
+
+		$generator = new WCTransactionalEmailPostsGenerator();
+		$generator->init_default_transactional_emails();
+
+		$post_manager = WCTransactionalEmailPostsManager::get_instance();
+		$post_manager->clear_caches();
+		$post_manager->delete_email_template( $email_type );
+		WCEmailTemplateSyncRegistry::reset_cache();
+
+		$post_id = $generator->generate_email_template_if_not_exists( $email_type );
+		$this->assertIsInt( $post_id );
+
+		$pre_call_content = (string) get_post( $post_id )->post_content;
+		$pre_call_meta    = array(
+			'version'        => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ),
+			'source_hash'    => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'last_synced_at' => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ),
+			'status'         => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+		);
+
+		add_filter( 'wp_insert_post_empty_content', '__return_true' );
+
+		$request = new \WP_REST_Request( 'POST', '/woocommerce-email-editor/v1/emails/' . $post_id . '/reset' );
+		$request->set_param( 'id', $post_id );
+
+		$result = $this->email_api_controller->reset_response( $request );
+
+		remove_filter( 'wp_insert_post_empty_content', '__return_true' );
+
+		$this->assertInstanceOf( \WP_Error::class, $result );
+		$this->assertSame( 'woocommerce_email_reset_failed', $result->get_error_code() );
+		$this->assertSame( 500, $result->get_error_data()['status'] );
+
+		clean_post_cache( $post_id );
+		$this->assertSame( $pre_call_content, (string) get_post( $post_id )->post_content, 'post_content must be untouched after wp_update_post failure.' );
+		$this->assertSame( $pre_call_meta['version'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ) );
+		$this->assertSame( $pre_call_meta['source_hash'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ) );
+		$this->assertSame( $pre_call_meta['last_synced_at'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ) );
+		$this->assertSame( $pre_call_meta['status'], (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ) );
+	}
+
+	/**
 	 * @testdox Should return 500 when controller has not been initialized.
 	 */
 	public function test_reset_response_returns_500_when_uninitialized(): void {

@@ -4,27 +4,38 @@
 import { DataViews, View } from '@wordpress/dataviews';
 import { useState, useMemo, useCallback, useEffect } from '@wordpress/element';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import { store as coreStore, useEntityRecords } from '@wordpress/core-data';
-import { __ } from '@wordpress/i18n';
+import { store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import clsx from 'clsx';
-import { Button, Stack } from '@wordpress/ui';
+import { Button, Stack, Tabs } from '@wordpress/ui';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 import { Page } from '@wordpress/admin-ui';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
  */
 import { unlock } from '../lock-unlock';
 import type { ProductEntityRecord } from '../fields/types';
-import { productFields } from './fields';
 import {
-	DEFAULT_PRODUCT_TABLE_LAYOUT,
-	DEFAULT_PRODUCT_TABLE_VIEW,
-} from './layouts';
+	DEFAULT_LAYOUTS,
+	DEFAULT_VIEW,
+	EMPTY_ARRAY,
+	PAGE_SIZE,
+	PRODUCT_LIST_TABS,
+} from './constants';
+import { productFields } from './fields';
 import { buildProductListQuery } from './query';
+import {
+	getItemId,
+	getProductListNavigationPath,
+	getProductListTab,
+	getSelectionFromPostId,
+	getStatusForProductListTab,
+	isProductEditorAccessible,
+} from './utils';
 import { useProductActions } from '../dataviews-actions';
 
 const { usePostActions } = unlock( editorPrivateApis );
@@ -37,16 +48,6 @@ export type ProductListProps = {
 	postType?: string;
 };
 
-const PAGE_SIZE = 20;
-const EMPTY_ARRAY: ProductEntityRecord[] = [];
-const DEFAULT_LAYOUTS = {
-	table: DEFAULT_PRODUCT_TABLE_LAYOUT,
-};
-const DEFAULT_VIEW: View = {
-	...DEFAULT_PRODUCT_TABLE_VIEW,
-	page: 1,
-};
-
 /**
  * This function abstracts working with default & custom views by
  * providing a [ state, setState ] tuple based on the URL parameters.
@@ -54,63 +55,142 @@ const DEFAULT_VIEW: View = {
  * Consumers use the provided tuple to work with state
  * and don't have to deal with the specifics of default & custom views.
  *
- * @param {string} postType Post type to retrieve default views for.
  * @return {Array} The [ state, setState ] tuple.
  */
-function useView( postType: string ): [ View, ( view: View ) => void ] {
-	const {
-		params: { activeView = 'all', isCustom = 'false' },
-	} = useLocation();
+function useView(): [ View, ( view: View ) => void ] {
+	const { query: { activeView = 'all' } = {} } = useLocation();
 	const [ view, setView ] = useState< View >( DEFAULT_VIEW );
 
-	// When activeView or isCustom URL parameters change, reset the view.
+	// When activeView URL parameter changes, reset the view.
 	useEffect( () => {
 		setView( DEFAULT_VIEW );
-	}, [ activeView, isCustom, postType ] );
+	}, [ activeView ] );
 
 	return [ view, setView ];
 }
 
-function getItemId( item: ProductEntityRecord ) {
-	return item.id.toString();
-}
-
 export default function ProductList( { className }: ProductListProps ) {
-	const history = useHistory();
+	const { navigate } = useHistory();
 	const location = useLocation();
-	const {
-		postId,
-		postType = 'product',
-		isCustom,
-		activeView = 'all',
-	} = location.params;
-	const [ selection, setSelection ] = useState( [ postId ] );
-	const [ view, setView ] = useView( postType );
-
-	const queryParams = useMemo(
-		() => buildProductListQuery( view ),
-		[ view ]
+	const currentQuery = useMemo(
+		() =>
+			( location.query || {} ) as {
+				postId?: string;
+				activeView?: string;
+				postType?: string;
+			},
+		[ location.query ]
 	);
+	const { postId, postType = 'product', activeView = 'all' } = currentQuery;
+	const selectedTabFromLocation = getProductListTab( activeView );
+	const [ selectedTab, setSelectedTab ] = useState( selectedTabFromLocation );
+	const [ selection, setSelection ] = useState( () =>
+		getSelectionFromPostId( postId )
+	);
+	const [ view, setView ] = useView();
+
+	useEffect( () => {
+		setSelectedTab( selectedTabFromLocation );
+	}, [ selectedTabFromLocation ] );
+
+	useEffect( () => {
+		setSelection( getSelectionFromPostId( postId ) );
+	}, [ postId ] );
+
+	const queryParams = useMemo( () => {
+		const query = buildProductListQuery( view );
+		const productStatus = getStatusForProductListTab( selectedTab );
+
+		if ( productStatus ) {
+			query.status = productStatus;
+		}
+
+		return query;
+	}, [ selectedTab, view ] );
 
 	const onChangeSelection = useCallback(
 		( items: string[] ) => {
 			setSelection( items );
-			history.push( {
-				...location.params,
-				postId: items.join( ',' ),
-			} );
+
+			const nextParams = { ...currentQuery };
+
+			if ( items.length > 0 ) {
+				nextParams.postId = items.join( ',' );
+			} else {
+				delete nextParams.postId;
+			}
+
+			navigate(
+				getProductListNavigationPath( location.path, nextParams )
+			);
 		},
-		[ history, location.params ]
+		[ currentQuery, navigate, location.path ]
+	);
+
+	const onChangeTab = useCallback(
+		( value: string | null ) => {
+			if ( ! value ) {
+				return;
+			}
+
+			const nextTab = getProductListTab( value );
+
+			if ( nextTab === selectedTab ) {
+				return;
+			}
+
+			setSelectedTab( nextTab );
+			setSelection( [] );
+
+			const nextParams = {
+				...currentQuery,
+				activeView: nextTab,
+			};
+
+			delete nextParams.postId;
+
+			navigate(
+				getProductListNavigationPath( location.path, nextParams )
+			);
+		},
+		[ currentQuery, navigate, location.path, selectedTab ]
 	);
 
 	const {
 		records,
 		totalItems: totalCount,
 		isResolving: isLoading,
-	} = useEntityRecords< ProductEntityRecord >(
-		'root',
-		'product',
-		queryParams
+		hasResolved,
+	} = useSelect(
+		( select ) => {
+			const {
+				getEntityRecords,
+				isResolving,
+				hasFinishedResolution,
+				getEntityRecordsTotalItems,
+			} = select( coreStore );
+			return {
+				records: getEntityRecords< ProductEntityRecord >(
+					'root',
+					'product',
+					queryParams
+				),
+				totalItems: getEntityRecordsTotalItems( 'root', 'product', {
+					...queryParams,
+				} ),
+				isResolving: isResolving( 'getEntityRecords', [
+					'root',
+					'product',
+					queryParams,
+				] ),
+				hasResolved: hasFinishedResolution( 'getEntityRecords', [
+					'root',
+					'product',
+					queryParams,
+				] ),
+			};
+		},
+		[ queryParams ]
 	);
 
 	const paginationInfo = useMemo(
@@ -140,9 +220,7 @@ export default function ProductList( { className }: ProductListProps ) {
 		postType,
 		context: 'list',
 	} );
-	const productActions = useProductActions( {
-		query: queryParams,
-	} );
+	const productActions = useProductActions();
 	const actions = useMemo(
 		() => [
 			...productActions,
@@ -221,11 +299,11 @@ export default function ProductList( { className }: ProductListProps ) {
 			actions={ pageActions }
 		>
 			<DataViews
-				key={ activeView + isCustom }
+				key={ activeView }
 				paginationInfo={ paginationInfo }
 				fields={ productFields }
 				data={ records || EMPTY_ARRAY }
-				isLoading={ isLoading }
+				isLoading={ isLoading && ! hasResolved }
 				view={ view }
 				actions={ actions }
 				onChangeView={ setView }
@@ -233,7 +311,60 @@ export default function ProductList( { className }: ProductListProps ) {
 				getItemId={ getItemId }
 				selection={ selection }
 				defaultLayouts={ DEFAULT_LAYOUTS }
-			/>
+				isItemClickable={ isProductEditorAccessible }
+				renderItemLink={ ( { item, ...props } ) => (
+					<a
+						{ ...props }
+						href={ getAdminLink(
+							addQueryArgs( 'post.php', {
+								post: item.id,
+								action: 'edit',
+							} )
+						) }
+					>
+						{ props.children }
+					</a>
+				) }
+			>
+				<Stack
+					direction="row"
+					align="center"
+					justify="space-between"
+					gap="sm"
+					className="woocommerce-product-list__toolbar"
+				>
+					{ /* Tabs component should not be used: https://github.com/woocommerce/woocommerce/issues/64478 */ }
+					<Tabs.Root
+						value={ selectedTab }
+						onValueChange={ onChangeTab }
+					>
+						<Tabs.List
+							variant="minimal"
+							aria-label={ __(
+								'Filter products by status',
+								'woocommerce'
+							) }
+						>
+							{ PRODUCT_LIST_TABS.map( ( tab ) => (
+								<Tabs.Tab key={ tab.value } value={ tab.value }>
+									{ tab.label }
+								</Tabs.Tab>
+							) ) }
+						</Tabs.List>
+					</Tabs.Root>
+					<Stack direction="row" align="center" gap="xs">
+						<DataViews.Search
+							label={ __( 'Search products', 'woocommerce' ) }
+						/>
+						<DataViews.FiltersToggle />
+						<DataViews.LayoutSwitcher />
+						<DataViews.ViewConfig />
+					</Stack>
+				</Stack>
+				<DataViews.FiltersToggled />
+				<DataViews.Layout />
+				<DataViews.Footer />
+			</DataViews>
 		</Page>
 	);
 }
