@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\OrderReviews;
 
+use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Order;
 use WP_Post;
@@ -251,6 +252,10 @@ class Endpoint {
 			$this->render_404();
 			exit;
 		}
+
+		// template_redirect fires after wp_enqueue_scripts but before
+		// wp_head, so styles registered here are still output in <head>.
+		$this->enqueue_assets();
 	}
 
 	/**
@@ -397,6 +402,32 @@ class Endpoint {
 		}
 
 		return true;
+	}
+
+	/**
+	 * Enqueue the JS and CSS that progressively enhance the page.
+	 *
+	 * Both files live under `client/legacy/` and are built into
+	 * `assets/{js|css}/` by the classic-assets pipeline.
+	 */
+	private function enqueue_assets(): void {
+		$plugin_url = untrailingslashit( plugins_url( '', WC_PLUGIN_FILE ) );
+		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+
+		wp_enqueue_style(
+			'wc-order-review',
+			$plugin_url . '/assets/css/order-review.css',
+			array(),
+			Constants::get_constant( 'WC_VERSION' )
+		);
+
+		wp_enqueue_script(
+			'wc-order-review',
+			$plugin_url . '/assets/js/frontend/order-review' . $suffix . '.js',
+			array(),
+			Constants::get_constant( 'WC_VERSION' ),
+			true
+		);
 	}
 
 	/**
