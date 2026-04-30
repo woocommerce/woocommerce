@@ -154,6 +154,17 @@ function wc_is_webhook_valid_topic( $topic ) {
 		'product.published',
 	);
 
+	/**
+	 * Filters the list of default-resource + default-event webhook topics that
+	 * pass validation. Use this filter to register additional default/default
+	 * pairs that have delivery hooks wired via `woocommerce_webhook_topic_hooks`
+	 * or `woocommerce_webhook_hooks`.
+	 *
+	 * @since 10.9.0
+	 * @param string[] $default_topics Array of `<resource>.<event>` topic strings.
+	 */
+	$default_topics = apply_filters( 'woocommerce_valid_webhook_default_topics', $default_topics );
+
 	return in_array( $topic, $default_topics, true );
 }
 
