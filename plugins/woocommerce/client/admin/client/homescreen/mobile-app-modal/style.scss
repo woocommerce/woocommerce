@@ -405,10 +405,9 @@ button.components-button.send-magic-link-button {
 	align-items: flex-start;
 	margin-top: 8px;
 
-	// Headline matches the step-2 description size (14px) per UX feedback —
-	// the stepper already provides a large step label above, so a giant
-	// in-step heading was redundant. Slightly bolder + darker to give it
-	// presence without competing with the stepper label.
+	// "Heading" + "description" are reused only by the post-revoke "Access
+	// revoked" panel; the inline success copy was dropped because the
+	// stepper label already conveys success.
 	.qr-login-success-step__heading {
 		font-size: 14px;
 		font-weight: 600;
@@ -425,11 +424,13 @@ button.components-button.send-magic-link-button {
 		max-width: 32em;
 	}
 
-	.qr-login-success-step__device {
-		font-size: 13px;
-		line-height: 1.5;
-		color: $gray-700;
-		margin: 0 0 16px;
+	// "It wasn't you?" prompt + "Revoke access" CTA on the same row to make
+	// better use of the horizontal space the stepper layout already gives us.
+	.qr-login-success-step__revoke-row {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 12px;
 	}
 
 	.qr-login-success-step__challenge {
@@ -437,7 +438,7 @@ button.components-button.send-magic-link-button {
 		font-weight: 500;
 		line-height: 1.5;
 		color: $gray-900;
-		margin: 0 0 8px;
+		margin: 0;
 	}
 
 	.qr-login-success-step__error {
