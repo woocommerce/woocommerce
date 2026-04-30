@@ -123,15 +123,15 @@ class Utils {
 				'variationId' => null,
 			);
 
-			$products_context = 'woocommerce/products::' . esc_attr( (string) wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ) );
+			$products_context = 'woocommerce/products::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
 
 			// This moves the `woocommerce/products` context to a nested `div`,
 			// as multiple context directives are not supported in the same
 			// element in WordPress 6.8. Once WooCommerce drops support for
 			// WordPress 6.8, this code can be refactored.
-			$processor->next_tag( array( 'tag_name' => 'div' ) );
-			$processor->set_attribute( 'data-wp-context', $products_context );
-			$quantity_html = $processor->get_updated_html();
+			if ( $processor->next_tag( array( 'tag_name' => 'div' ) ) ) {
+				$processor->set_attribute( 'data-wp-context', $products_context );
+			}
 		}
 
 		if (
