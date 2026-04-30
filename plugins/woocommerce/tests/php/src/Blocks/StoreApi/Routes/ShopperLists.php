@@ -156,7 +156,7 @@ class ShopperLists extends ControllerTestCase {
 	}
 
 	/**
-	 * Test POST /shopper-lists/saved-for-later/items with a real cart_item_key.
+	 * Test POST /shopper-lists/saved-for-later/items with a real cart_item_key returns the full list.
 	 */
 	public function test_post_item_via_cart_item_key() {
 		wp_set_current_user( $this->customer_id );
@@ -171,10 +171,13 @@ class ShopperLists extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 201, $response->get_status() );
-		$this->assertSame( $this->product->get_id(), $data['product_id'] );
-		$this->assertSame( 1, $data['quantity'], 'Stored quantity should be normalized to 1 in v1.' );
-		$this->assertTrue( $data['product_exists'] );
-		$this->assertSame( $this->product->get_title(), $data['name'] );
+		$this->assertSame( 'saved-for-later', $data['slug'] );
+		$this->assertSame( 1, $data['item_count'] );
+		$this->assertCount( 1, $data['items'] );
+		$this->assertSame( $this->product->get_id(), $data['items'][0]['product_id'] );
+		$this->assertSame( 1, $data['items'][0]['quantity'], 'Stored quantity should be normalized to 1 in v1.' );
+		$this->assertTrue( $data['items'][0]['product_exists'] );
+		$this->assertSame( $this->product->get_title(), $data['items'][0]['name'] );
 		$this->assertNotEmpty( wc()->cart->cart_contents, 'Cart should still contain the line — POST is additive only.' );
 	}
 
@@ -190,7 +193,7 @@ class ShopperLists extends ControllerTestCase {
 	}
 
 	/**
-	 * Test POST /shopper-lists/saved-for-later/items via direct product payload.
+	 * Test POST /shopper-lists/saved-for-later/items via direct product payload returns the full list.
 	 */
 	public function test_post_item_via_manual_product_payload() {
 		wp_set_current_user( $this->customer_id );
@@ -212,9 +215,10 @@ class ShopperLists extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 201, $response->get_status() );
-		$this->assertSame( $this->product->get_id(), $data['product_id'] );
-		$this->assertSame( 1, $data['quantity'], 'Stored quantity should be normalized to 1 in v1.' );
-		$this->assertSame( 'manual', $data['item_data'][0]['value'] );
+		$this->assertCount( 1, $data['items'] );
+		$this->assertSame( $this->product->get_id(), $data['items'][0]['product_id'] );
+		$this->assertSame( 1, $data['items'][0]['quantity'], 'Stored quantity should be normalized to 1 in v1.' );
+		$this->assertSame( 'manual', $data['items'][0]['item_data'][0]['value'] );
 	}
 
 	/**
@@ -260,10 +264,9 @@ class ShopperLists extends ControllerTestCase {
 
 		$this->assertEquals( 201, $first->get_status() );
 		$this->assertEquals( 201, $second->get_status() );
-		$this->assertSame( $first->get_data()['key'], $second->get_data()['key'] );
-
-		$items_response = $this->dispatch( 'GET', '/wc/store/v1/shopper-lists/saved-for-later/items' );
-		$this->assertCount( 1, $items_response->get_data(), 'Same cart line should not produce a duplicate row.' );
+		$this->assertSame( 1, $first->get_data()['item_count'] );
+		$this->assertSame( 1, $second->get_data()['item_count'], 'Same cart line should not produce a duplicate row.' );
+		$this->assertSame( $first->get_data()['items'][0]['key'], $second->get_data()['items'][0]['key'] );
 	}
 
 	/**
@@ -282,21 +285,22 @@ class ShopperLists extends ControllerTestCase {
 	}
 
 	/**
-	 * Test that DELETE removes the item and returns 204.
+	 * Test that DELETE removes the item and returns the full list with the remaining items.
 	 */
 	public function test_delete_item_removes_item() {
 		wp_set_current_user( $this->customer_id );
 		$cart_item_key = $this->add_product_to_cart();
 
 		$created = $this->dispatch( 'POST', '/wc/store/v1/shopper-lists/saved-for-later/items', array( 'cart_item_key' => $cart_item_key ) );
-		$key     = $created->get_data()['key'];
+		$key     = $created->get_data()['items'][0]['key'];
 
 		$response = $this->dispatch( 'DELETE', '/wc/store/v1/shopper-lists/saved-for-later/items/' . $key );
+		$data     = $response->get_data();
 
-		$this->assertEquals( 204, $response->get_status() );
-
-		$items_response = $this->dispatch( 'GET', '/wc/store/v1/shopper-lists/saved-for-later/items' );
-		$this->assertCount( 0, $items_response->get_data() );
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 'saved-for-later', $data['slug'] );
+		$this->assertSame( 0, $data['item_count'] );
+		$this->assertCount( 0, $data['items'] );
 	}
 
 	/**
