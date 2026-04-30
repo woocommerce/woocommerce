@@ -33,11 +33,11 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( empty( $block->context['woocommerce/selectableItems'] ) ) {
+		if ( empty( $block->context['woocommerceSelectableItems'] ) ) {
 			return '';
 		}
 
-		$block_context   = $block->context['woocommerce/selectableItems'];
+		$block_context   = $block->context['woocommerceSelectableItems'];
 		$items           = is_array( $block_context['items'] ?? null ) ? $block_context['items'] : array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
 		$filter_type     = $block_context['filterType'] ?? '';

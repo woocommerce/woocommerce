@@ -9,11 +9,9 @@ export interface RemovableItemsContext {
 	storeNamespace: string;
 }
 
-/* eslint-disable @typescript-eslint/naming-convention -- WordPress block context key format */
 export type RemovableItemsBlockContext = {
-	'woocommerce/removableItems': RemovableItemsContext;
+	woocommerceRemovableItems: RemovableItemsContext;
 };
-/* eslint-enable @typescript-eslint/naming-convention */
 
 /**
  * Contract every parent store referenced by `storeNamespace` MUST satisfy.
