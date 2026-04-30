@@ -2,10 +2,10 @@
 /**
  * REST API Mobile App QR Login controller.
  *
- * Handles requests to generate and exchange QR login tokens for direct mobile app
- * authentication via Application Passwords. Token generation is available to any
- * user with the manage_woocommerce capability (typically administrators and shop
- * managers); a linked WordPress.com account is no longer required.
+ * Handles requests to generate and exchange QR login tokens for direct mobile
+ * app authentication via Application Passwords. Token generation is gated on
+ * the `manage_woocommerce` capability (administrators and shop managers by
+ * default).
  */
 
 declare( strict_types=1 );
@@ -59,6 +59,13 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * Max exchange attempts per IP per 15-minute window.
 	 */
 	const MAX_EXCHANGE_ATTEMPTS = 10;
+
+	/**
+	 * Stable Application Passwords `app_id` for credentials issued by this
+	 * flow. Lets administrators identify QR-issued credentials in the
+	 * Application Passwords screen and revoke them in bulk.
+	 */
+	const APP_ID = '0b540e2f-86b7-4b8a-8e0c-f61e9bfbde59';
 
 	/**
 	 * Register routes.
@@ -424,14 +431,23 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$app_password_result = \WP_Application_Passwords::create_new_application_password(
 			$user_id,
 			array(
-				'name' => __( 'WooCommerce Mobile App (QR Login)', 'woocommerce' ),
+				'name'   => __( 'WooCommerce Mobile App (QR Login)', 'woocommerce' ),
+				'app_id' => self::APP_ID,
 			)
 		);
 
 		if ( is_wp_error( $app_password_result ) ) {
+			wc_get_logger()->error(
+				sprintf(
+					'QR login: failed to create Application Password for user %d: %s',
+					$user_id,
+					$app_password_result->get_error_message()
+				),
+				array( 'source' => 'mobile-app-qr-login' )
+			);
 			return new \WP_Error(
 				'application_password_failed',
-				$app_password_result->get_error_message(),
+				__( 'Could not create a mobile-app credential. Please try again, or contact your site administrator.', 'woocommerce' ),
 				array( 'status' => 500 )
 			);
 		}

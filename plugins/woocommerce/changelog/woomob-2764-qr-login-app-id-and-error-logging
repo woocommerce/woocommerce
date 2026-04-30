@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Tag mobile-app QR login Application Passwords with a stable `app_id` so they can be identified or bulk-revoked from the Application Passwords screen, and surface a localized user-facing message (with logging) when AP creation fails instead of returning the raw underlying error.
