@@ -73,7 +73,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		$notification = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
 
 		$endpoint = new MyAccountEndpoint();
-		$results  = $endpoint->get_current_user_notifications();
+		$results  = $endpoint->get_current_user_notifications_page( 1, MyAccountEndpoint::DEFAULT_PER_PAGE )['notifications'];
 
 		$this->assertCount( 1, $results );
 		$this->assertSame( $notification->get_id(), $results[0]->get_id() );
@@ -92,7 +92,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 
 		\wp_set_current_user( $user_b );
 		$endpoint = new MyAccountEndpoint();
-		$results  = $endpoint->get_current_user_notifications();
+		$results  = $endpoint->get_current_user_notifications_page( 1, MyAccountEndpoint::DEFAULT_PER_PAGE )['notifications'];
 
 		$this->assertCount( 1, $results );
 		$this->assertSame( $b_notification->get_id(), $results[0]->get_id() );
@@ -105,7 +105,7 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		\wp_set_current_user( 0 );
 
 		$endpoint = new MyAccountEndpoint();
-		$results  = $endpoint->get_current_user_notifications();
+		$results  = $endpoint->get_current_user_notifications_page( 1, MyAccountEndpoint::DEFAULT_PER_PAGE )['notifications'];
 
 		$this->assertSame( array(), $results );
 	}
@@ -118,9 +118,53 @@ class MyAccountEndpointTests extends \WC_Unit_Test_Case {
 		\wp_set_current_user( $user_id );
 
 		$endpoint = new MyAccountEndpoint();
-		$results  = $endpoint->get_current_user_notifications();
+		$results  = $endpoint->get_current_user_notifications_page( 1, MyAccountEndpoint::DEFAULT_PER_PAGE )['notifications'];
 
 		$this->assertSame( array(), $results );
+	}
+
+	/**
+	 * Page size is honoured and total counts reflect the full set, not just the page.
+	 */
+	public function test_get_current_user_notifications_page_paginates(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+
+		// 7 notifications, fetch page 2 with per_page=3 → expect rows 4-6.
+		$created = array();
+		for ( $i = 0; $i < 7; $i++ ) {
+			$created[] = $this->create_notification( $user_id, NotificationStatus::ACTIVE );
+		}
+		// `id` DESC ordering — newest-first — so page 1 = ids[6..4], page 2 = ids[3..1], page 3 = id[0].
+		$ids_desc = array_reverse( array_map( static fn ( $n ) => $n->get_id(), $created ) );
+
+		$endpoint = new MyAccountEndpoint();
+		$page     = $endpoint->get_current_user_notifications_page( 2, 3 );
+
+		$this->assertSame( 7, $page['total_items'] );
+		$this->assertSame( 3, $page['total_pages'] );
+		$this->assertSame( 2, $page['current_page'] );
+		$this->assertCount( 3, $page['notifications'] );
+		$this->assertSame( array_slice( $ids_desc, 3, 3 ), array_map( static fn ( $n ) => $n->get_id(), $page['notifications'] ) );
+	}
+
+	/**
+	 * Out-of-range page numbers clamp to the last page so a stale link doesn't render an empty table.
+	 */
+	public function test_get_current_user_notifications_page_clamps_out_of_range(): void {
+		$user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
+		\wp_set_current_user( $user_id );
+
+		for ( $i = 0; $i < 5; $i++ ) {
+			$this->create_notification( $user_id, NotificationStatus::ACTIVE );
+		}
+
+		$endpoint = new MyAccountEndpoint();
+		// Per-page 2 → 3 pages exist (rows 1-2, 3-4, 5). Asking for page 99 should clamp to 3.
+		$page     = $endpoint->get_current_user_notifications_page( 99, 2 );
+
+		$this->assertSame( 3, $page['current_page'] );
+		$this->assertCount( 1, $page['notifications'] );
 	}
 
 	/**

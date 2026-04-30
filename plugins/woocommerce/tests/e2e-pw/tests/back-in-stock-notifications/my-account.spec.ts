@@ -133,12 +133,9 @@ test.describe(
 					allowSignups: true,
 					doubleOptIn: true,
 				} );
-				const pendingProduct = await createOutOfStockProduct(
-					restApi,
-					{
-						namePrefix: 'BIS MyAccount Cancel',
-					}
-				);
+				const pendingProduct = await createOutOfStockProduct( restApi, {
+					namePrefix: 'BIS MyAccount Cancel',
+				} );
 				try {
 					await page.goto( pendingProduct.permalink );
 					await signUpOnProductPage( page );
@@ -164,9 +161,7 @@ test.describe(
 						} )
 					).toBeVisible();
 
-					await row
-						.getByRole( 'button', { name: 'Cancel' } )
-						.click();
+					await row.getByRole( 'button', { name: 'Cancel' } ).click();
 
 					// The refresh after the POST lands us back on the same tab.
 					await expect(
