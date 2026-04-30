@@ -50,10 +50,15 @@ class QueryCache {
 	 * @return DocumentNode|array
 	 */
 	public function resolve( ?string $query, array $extensions ) {
-		$apq = $extensions['persistedQuery'] ?? null;
+		$apq      = $extensions['persistedQuery'] ?? null;
+		$apq_hash = is_array( $apq ) ? ( $apq['sha256Hash'] ?? null ) : null;
 
-		if ( is_array( $apq ) && 1 === ( $apq['version'] ?? null ) && ! empty( $apq['sha256Hash'] ) ) {
-			return $this->resolve_apq( $query, $apq['sha256Hash'] );
+		if ( Main::is_apq_enabled()
+			&& is_array( $apq )
+			&& 1 === ( $apq['version'] ?? null )
+			&& is_string( $apq_hash )
+			&& '' !== $apq_hash ) {
+			return $this->resolve_apq( $query, $apq_hash );
 		}
 
 		// Standard query — no APQ.

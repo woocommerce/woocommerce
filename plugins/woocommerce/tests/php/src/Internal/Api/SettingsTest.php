@@ -96,6 +96,22 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox add_settings defines the APQ checkbox with a 'yes' default (PHP 8.1+).
+	 */
+	public function test_add_settings_defines_apq_checkbox(): void {
+		if ( PHP_VERSION_ID < 80100 ) {
+			$this->markTestSkipped( 'GraphQL settings require PHP 8.1+.' );
+		}
+
+		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
+		$by_id  = array_column( $fields, null, 'id' );
+
+		$this->assertArrayHasKey( Main::OPTION_APQ_ENABLED, $by_id );
+		$this->assertSame( 'checkbox', $by_id[ Main::OPTION_APQ_ENABLED ]['type'] );
+		$this->assertSame( 'yes', $by_id[ Main::OPTION_APQ_ENABLED ]['default'] );
+	}
+
+	/**
 	 * @testdox add_settings defines the endpoint URL text field with the default constant as default.
 	 */
 	public function test_add_settings_defines_endpoint_url_field(): void {

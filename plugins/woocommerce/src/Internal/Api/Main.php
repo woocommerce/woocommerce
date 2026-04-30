@@ -28,6 +28,14 @@ class Main {
 	public const OPTION_GET_ENDPOINT_ENABLED = 'woocommerce_graphql_get_endpoint_enabled';
 
 	/**
+	 * Option name for the "Enable APQ caching" setting.
+	 *
+	 * When disabled, the persistedQuery extension is ignored and requests are
+	 * treated as standard queries.
+	 */
+	public const OPTION_APQ_ENABLED = 'woocommerce_graphql_apq_enabled';
+
+	/**
 	 * Option name for the "Endpoint URL" setting.
 	 *
 	 * Path (relative to /wp-json/) at which the GraphQL route is registered.
@@ -75,6 +83,16 @@ class Main {
 	 */
 	public static function is_get_endpoint_enabled(): bool {
 		return wc_string_to_bool( get_option( self::OPTION_GET_ENDPOINT_ENABLED, 'yes' ) );
+	}
+
+	/**
+	 * Whether the Apollo Automatic Persisted Queries (APQ) protocol is enabled.
+	 *
+	 * Defaults to true. When disabled, the `persistedQuery` request extension
+	 * is ignored and requests are processed as standard (non-persisted) queries.
+	 */
+	public static function is_apq_enabled(): bool {
+		return wc_string_to_bool( get_option( self::OPTION_APQ_ENABLED, 'yes' ) );
 	}
 
 	/**
