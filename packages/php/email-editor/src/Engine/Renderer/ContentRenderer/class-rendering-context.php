@@ -141,6 +141,15 @@ class Rendering_Context {
 	}
 
 	/**
+	 * Get the email language.
+	 *
+	 * @return string|null
+	 */
+	public function get_language(): ?string {
+		return $this->language;
+	}
+
+	/**
 	 * Get the user ID from the email context.
 	 *
 	 * @return int|null The user ID if available, null otherwise.

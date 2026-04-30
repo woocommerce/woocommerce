@@ -177,6 +177,32 @@ class Content_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test render_without_css_inline passes current post and template to email context filter.
+	 */
+	public function testRenderWithoutCssInlinePassesPostAndTemplateToContextFilter(): void {
+		$template          = new \WP_Block_Template();
+		$template->id      = 'template-id';
+		$template->content = '<!-- wp:post-content /-->';
+
+		$filter_calls   = 0;
+		$context_filter = function ( array $email_context, ?\WP_Post $post, ?\WP_Block_Template $received_template ) use ( &$filter_calls, $template ): array {
+			++$filter_calls;
+			$this->assertSame( $this->email_post->ID, $post instanceof \WP_Post ? $post->ID : null );
+			$this->assertSame( $template, $received_template );
+			return $email_context;
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter, 10, 3 );
+
+		try {
+			$this->renderer->render_without_css_inline( $this->email_post, $template );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+		}
+
+		$this->assertSame( 1, $filter_calls );
+	}
+
+	/**
 	 * Test it collects content styles without inlining them.
 	 */
 	public function testItCollectsContentStyles(): void {

@@ -117,7 +117,7 @@ class Renderer {
 		/** @var \WP_Block_Template $template */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort -- used for phpstan
 		$template = $this->templates->get_block_template( $template_slug );
 
-		$rendering_context = $this->content_renderer->create_rendering_context( $language );
+		$rendering_context = $this->content_renderer->create_rendering_context( $language, $post, $template );
 		$this->content_renderer->set_rendering_context( $rendering_context );
 		$email_styles   = $this->theme_controller->get_styles();
 		$content_result = $this->content_renderer->render_without_css_inline( $post, $template );
@@ -198,9 +198,9 @@ class Renderer {
 			return $template;
 		}
 
-		$language = get_bloginfo( 'language' );
+		$language = $rendering_context->get_language();
 		if ( $language ) {
-			$processor->set_attribute( 'lang', $language );
+			$processor->set_attribute( 'lang', str_replace( '_', '-', $language ) );
 		}
 		$processor->set_attribute( 'dir', $rendering_context->get_text_direction() );
 

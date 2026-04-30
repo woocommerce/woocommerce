@@ -218,8 +218,15 @@ class Quote extends Abstract_Block_Renderer {
 			}
 		}
 
-		if ( preg_match( '/(^|\\s)has-text-align-(left|center|right)(\\s|$)/', $original_classname, $matches ) ) {
-			return $matches[2];
+		foreach ( wp_parse_list( $original_classname ) as $class_name ) {
+			if ( 0 !== strpos( $class_name, 'has-text-align-' ) ) {
+				continue;
+			}
+
+			$alignment = substr( $class_name, strlen( 'has-text-align-' ) );
+			if ( in_array( $alignment, array( 'left', 'center', 'right' ), true ) ) {
+				return $alignment;
+			}
 		}
 
 		return null;

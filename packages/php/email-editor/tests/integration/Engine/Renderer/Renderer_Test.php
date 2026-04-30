@@ -133,6 +133,7 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItRendersRtlDirectionFromLanguage(): void {
 		$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'ar_SA' );
 
+		$this->assertStringContainsString( 'lang="ar-SA"', $rendered['html'] );
 		$this->assertStringContainsString( 'dir="rtl"', $rendered['html'] );
 		$this->assertStringContainsString( 'direction: rtl', $rendered['html'] );
 		$this->assertStringContainsString( 'text-align: right', $rendered['html'] );

@@ -214,7 +214,7 @@ class Content_Renderer {
 	 */
 	public function render_without_css_inline( WP_Post $post, WP_Block_Template $template ): array {
 		if ( null === $this->rendering_context ) {
-			$this->rendering_context = $this->create_rendering_context();
+			$this->rendering_context = $this->create_rendering_context( null, $post, $template );
 		}
 
 		$this->set_template_globals( $post, $template );
@@ -541,10 +541,12 @@ class Content_Renderer {
 	/**
 	 * Create a rendering context from filtered email context.
 	 *
-	 * @param string|null $language Optional email language.
+	 * @param string|null            $language Optional email language.
+	 * @param WP_Post|null           $post Optional email post.
+	 * @param WP_Block_Template|null $template Optional block template.
 	 * @return Rendering_Context
 	 */
-	public function create_rendering_context( ?string $language = null ): Rendering_Context {
+	public function create_rendering_context( ?string $language = null, ?WP_Post $post = null, ?WP_Block_Template $template = null ): Rendering_Context {
 		/**
 		 * Filter the email-specific context data passed to block renderers.
 		 *
@@ -565,8 +567,10 @@ class Content_Renderer {
 		 *     @type string $email_type      The type of email being rendered.
 		 *     @type bool   $is_rtl          Optional. Whether this email render should use RTL direction.
 		 * }
+		 * @param WP_Post|null           $post     Email post being rendered.
+		 * @param WP_Block_Template|null $template Block template being rendered.
 		 */
-		$email_context = apply_filters( 'woocommerce_email_editor_rendering_email_context', array() );
+		$email_context = apply_filters( 'woocommerce_email_editor_rendering_email_context', array(), $post, $template );
 		if ( ! is_array( $email_context ) ) {
 			$email_context = array();
 		}
