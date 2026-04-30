@@ -33,11 +33,12 @@ const mapWpModules = [
 	'@wordpress/private-apis',
 	'@wordpress/core-data',
 	'@wordpress/components',
+	'@wordpress/html-entities',
 ];
 const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
 	try {
 		// Excluding mappings for imports with suffixes like /build/index.js so that we can import the build/index.js file directly.
-		acc[ `^${ module }$` ] = require.resolve( module );
+		acc[ `^${ module }$` ] = require.resolve( module, { paths: [ process.cwd() ] } );
 	} catch ( error ) {
 		// If the module is not found, no need to add it to the mapper.
 	}

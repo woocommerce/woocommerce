@@ -19,9 +19,6 @@ import {
 import { recordEvent } from '@woocommerce/tracks';
 import { Link } from '@woocommerce/components';
 import { getAdminLink } from '@woocommerce/settings';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore No types for this exist yet.
-// eslint-disable-next-line @woocommerce/dependency-group
 import { useEntityProp, useEntityId } from '@wordpress/core-data';
 
 /**

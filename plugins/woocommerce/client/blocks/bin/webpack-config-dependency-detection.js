@@ -53,7 +53,6 @@ module.exports = {
 									},
 								},
 							],
-							'@babel/preset-typescript',
 						],
 						cacheDirectory: BABEL_CACHE_DIR,
 						cacheCompression: false,

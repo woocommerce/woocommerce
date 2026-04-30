@@ -1,7 +1,11 @@
 /**
  * External dependencies
  */
-import { parse, synchronizeBlocksWithTemplate } from '@wordpress/blocks';
+import {
+	BlockInstance,
+	parse,
+	synchronizeBlocksWithTemplate,
+} from '@wordpress/blocks';
 import {
 	createElement,
 	useMemo,
@@ -19,27 +23,16 @@ import { store as keyboardShortcutsStore } from '@wordpress/keyboard-shortcuts';
 import { Product } from '@woocommerce/data';
 import { getPath, getQuery } from '@woocommerce/navigation';
 import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
 	BlockContextProvider,
 	BlockEditorKeyboardShortcuts,
 	BlockEditorProvider,
 	BlockList,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore No types for this exist yet.
+	// @ts-expect-error BlockTools is not exported from @wordpress/block-editor's public types.
 	BlockTools,
 	ObserveTyping,
 } from '@wordpress/block-editor';
-// It doesn't seem to notice the External dependency block when @ts-ignore is added.
 // eslint-disable-next-line @woocommerce/dependency-group
-import {
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore store should be included.
-	useEntityBlockEditor,
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore store should be included.
-	useEntityRecord,
-} from '@wordpress/core-data';
+import { useEntityBlockEditor, useEntityRecord } from '@wordpress/core-data';
 
 /**
  * Internal dependencies
@@ -163,8 +156,7 @@ export function BlockEditor( {
 					}: {
 						onError: ( message: string ) => void;
 					} ) {
-						// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-						// @ts-ignore No types for this exist yet.
+						// @ts-expect-error uploadMedia's upstream UploadMediaArgs type rejects undefined for wpAllowedMimeTypes, but the runtime accepts it.
 						uploadMedia( {
 							wpAllowedMimeTypes:
 								settingsGlobal.allowedMimeTypes || undefined,
@@ -208,12 +200,17 @@ export function BlockEditor( {
 		hasResolved ? getLayoutTemplateId( productTemplate, postType ) : null
 	);
 
+	type BlockChangeHandler = (
+		blocks: BlockInstance[],
+		options?: Record< string, unknown >
+	) => void;
 	const [ blocks, onInput, onChange ] = useEntityBlockEditor(
 		'postType',
 		postType,
 		// useEntityBlockEditor will not try to fetch the product if productId is falsy.
+		// @ts-expect-error useEntityBlockEditor's upstream types declare id as string, but the REST API uses number.
 		{ id: productId !== -1 ? productId : 0 }
-	);
+	) as [ BlockInstance[], BlockChangeHandler, BlockChangeHandler ];
 
 	// Pull the product templates from the store.
 	const productForms = useSelect( ( sel ) => {
@@ -306,8 +303,6 @@ export function BlockEditor( {
 		setIsEditorLoading( isEditorLoading );
 	}, [ isEditorLoading, setIsEditorLoading ] );
 
-	// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-	// @ts-ignore
 	const { editEntityRecord } = useDispatch( 'core' );
 
 	useEffect( function maybeSetProductTemplateFromURL() {
@@ -357,7 +352,7 @@ export function BlockEditor( {
 					}
 					title={ __( 'Edit description', 'woocommerce' ) }
 					name={
-						product.name === 'AUTO-DRAFT'
+						! product?.name || product.name === 'AUTO-DRAFT'
 							? __( '(no product name)', 'woocommerce' )
 							: product.name
 					}
@@ -376,8 +371,7 @@ export function BlockEditor( {
 					settings={ settings }
 					useSubRegistry={ false }
 				>
-					{ /* eslint-disable-next-line @typescript-eslint/ban-ts-comment */ }
-					{ /* @ts-ignore No types for this exist yet. */ }
+					{ /* @ts-expect-error BlockEditorKeyboardShortcuts.Register is not exposed on the component's public types. */ }
 					<BlockEditorKeyboardShortcuts.Register />
 					<BlockTools>
 						<ObserveTyping>

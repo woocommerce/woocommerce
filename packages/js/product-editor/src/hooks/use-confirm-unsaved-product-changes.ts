@@ -19,8 +19,6 @@ export function useConfirmUnsavedProductChanges(
 	const { hasEdits } = useProductEdits( productType );
 	const { isSaving } = useSelect(
 		( select ) => {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore
 			const { isSavingEntityRecord } = select( 'core' );
 
 			return {

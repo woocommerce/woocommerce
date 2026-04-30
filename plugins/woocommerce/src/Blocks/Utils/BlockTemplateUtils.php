@@ -308,9 +308,6 @@ class BlockTemplateUtils {
 			'product-search-results.html',
 			'single-product.html',
 			'taxonomy-product_attribute.html',
-			'taxonomy-product_brand.html',
-			'taxonomy-product_cat.html',
-			'taxonomy-product_tag.html',
 		);
 
 		if ( Features::is_enabled( 'launch-your-store' ) ) {

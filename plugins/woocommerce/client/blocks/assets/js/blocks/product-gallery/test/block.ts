@@ -233,5 +233,9 @@ describe( 'Product Gallery Block', () => {
 
 		// Check that the heights match
 		expect( thumbnailHeight ).toBe( viewerHeight );
+
+		// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+		// opt out of without changing the visual output.
+		expect( console ).toHaveWarned();
 	} );
 } );
