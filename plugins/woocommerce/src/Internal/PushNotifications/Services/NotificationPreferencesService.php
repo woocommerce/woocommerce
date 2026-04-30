@@ -63,7 +63,7 @@ class NotificationPreferencesService {
 			? $envelope['preferences']
 			: array();
 
-		return $this->sanitize( array_merge( $this->get_defaults(), $stored ) );
+		return $this->sanitize( array_replace_recursive( $this->get_defaults(), $stored ) );
 	}
 
 	/**
@@ -84,7 +84,7 @@ class NotificationPreferencesService {
 	 */
 	public function save_preferences( int $user_id, array $preferences ): array {
 		$current = $this->get_preferences( $user_id );
-		$merged  = $this->sanitize( array_merge( $current, $preferences ) );
+		$merged  = $this->sanitize( array_replace_recursive( $current, $preferences ) );
 
 		// Data store throws WC_Data_Exception on real failure; let it propagate.
 		$this->data_store->write(
@@ -152,7 +152,7 @@ class NotificationPreferencesService {
 	 *
 	 * @return array<string, mixed>
 	 */
-	private function sanitize_value( string $key, array $value, array $default_shape ): array {
+	protected function sanitize_value( string $key, array $value, array $default_shape ): array {
 		// Reserved for per-key dispatch when sub-fields are added.
 		unset( $key );
 

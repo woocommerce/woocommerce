@@ -242,6 +242,97 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should perform a deep merge so partial updates preserve unrelated sub-fields.
+	 *
+	 * Locks in the contract for forward-compatible sub-fields. When stored preferences contain
+	 * multiple sub-fields per pref (e.g. RSM-1550's `min_amount` alongside `enabled`), a partial
+	 * update that only sends one sub-field must not clobber the others. With a shallow merge
+	 * (`array_merge`), the entire sub-object is replaced; with a deep merge
+	 * (`array_replace_recursive`), only the specified sub-fields are overridden.
+	 *
+	 * Today's schema only has `enabled` per pref, so the bug is invisible. This test extends
+	 * the schema via an anonymous subclass to exercise the multi-sub-field case the future
+	 * tickets rely on.
+	 */
+	public function test_save_preferences_deep_merges_partial_updates(): void {
+		$service = new class() extends NotificationPreferencesService {
+			/**
+			 * Extended schema for the test: a second sub-field alongside `enabled`.
+			 *
+			 * @return array<string, array<string, mixed>>
+			 */
+			public function get_defaults(): array {
+				return array(
+					'store_order' => array(
+						'enabled'    => true,
+						'min_amount' => 0,
+					),
+				);
+			}
+
+			/**
+			 * Permissive sanitize for the test: preserve every sub-key in the default shape,
+			 * coercing to the type implied by its default value.
+			 *
+			 * @param string               $key           Preference key.
+			 * @param array                $value         Submitted sub-options.
+			 * @param array<string, mixed> $default_shape Default sub-options.
+			 * @return array<string, mixed>
+			 */
+			protected function sanitize_value( string $key, array $value, array $default_shape ): array {
+				$sanitized = array();
+				foreach ( $default_shape as $sub_key => $sub_default ) {
+					if ( ! array_key_exists( $sub_key, $value ) ) {
+						$sanitized[ $sub_key ] = $sub_default;
+						continue;
+					}
+					if ( is_bool( $sub_default ) ) {
+						$sanitized[ $sub_key ] = (bool) $value[ $sub_key ];
+					} elseif ( is_int( $sub_default ) ) {
+						$sanitized[ $sub_key ] = (int) $value[ $sub_key ];
+					} else {
+						$sanitized[ $sub_key ] = $value[ $sub_key ];
+					}
+				}
+				return $sanitized;
+			}
+		};
+		$service->init( $this->data_store );
+
+		// Stored state already has a non-default `min_amount`.
+		$this->data_store->method( 'read' )->willReturn(
+			array(
+				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
+				'preferences'    => array(
+					'store_order' => array(
+						'enabled'    => true,
+						'min_amount' => 500,
+					),
+				),
+			)
+		);
+
+		// Verify that a partial update of just `enabled` preserves `min_amount`.
+		$this->data_store
+			->expects( $this->once() )
+			->method( 'write' )
+			->with(
+				$this->anything(),
+				$this->callback(
+					function ( $envelope ) {
+						$prefs = $envelope['preferences']['store_order'];
+						return false === $prefs['enabled'] && 500 === $prefs['min_amount'];
+					}
+				)
+			);
+
+		$service->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'enabled' => false ) )
+		);
+	}
+
+	/**
 	 * @testdox Should return a nested-object default for every known notification type.
 	 */
 	public function test_get_defaults_includes_all_notification_types(): void {
