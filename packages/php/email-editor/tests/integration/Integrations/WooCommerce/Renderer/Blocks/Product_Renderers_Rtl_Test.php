@@ -190,8 +190,22 @@ class Product_Renderers_Rtl_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertIsString( $single_column );
 		$this->assertIsString( $two_column );
 
-		$this->assertMatchesRegularExpression( '/<table[^>]*align="right"[^>]*>.*email-block-layout/s', $single_column );
-		$this->assertMatchesRegularExpression( '/<table[^>]*align="right"[^>]*>.*email-block-layout/s', $two_column );
+		$this->assert_outer_spacer_alignment( $single_column );
+		$this->assert_outer_spacer_alignment( $two_column );
+	}
+
+	/**
+	 * Assert the outer spacer table uses RTL alignment.
+	 *
+	 * @param string $rendered Rendered HTML.
+	 */
+	private function assert_outer_spacer_alignment( string $rendered ): void {
+		$right_aligned_table_position = strpos( $rendered, 'align="right"' );
+		$layout_class_position        = strpos( $rendered, 'email-block-layout' );
+
+		$this->assertNotFalse( $right_aligned_table_position );
+		$this->assertNotFalse( $layout_class_position );
+		$this->assertGreaterThan( $right_aligned_table_position, $layout_class_position );
 	}
 
 	/**

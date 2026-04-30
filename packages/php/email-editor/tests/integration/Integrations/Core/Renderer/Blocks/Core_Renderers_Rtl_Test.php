@@ -104,6 +104,12 @@ class Core_Renderers_Rtl_Test extends \Email_Editor_Integration_Test_Case {
 
 		$rendered = $renderer->render( $content, $block, $this->rtl_context );
 
+		$media_position = strpos( $rendered, 'https://example.com/image.jpg' );
+		$text_position  = strpos( $rendered, '<p>Text</p>' );
+
+		$this->assertNotFalse( $media_position );
+		$this->assertNotFalse( $text_position );
+		$this->assertLessThan( $text_position, $media_position );
 		$this->assertStringContainsString( 'text-align:right;', $rendered );
 		$this->assertStringContainsString( 'align="right"', $rendered );
 	}

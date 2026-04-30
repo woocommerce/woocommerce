@@ -281,7 +281,12 @@ class Rendering_Context {
 		$language = strtolower( str_replace( '_', '-', trim( $language ) ) );
 		$parts    = explode( '-', $language );
 		$primary  = $parts[0] ?? '';
+		$length   = strlen( $primary );
 
-		return preg_match( '/^[a-z]{2,3}$/', $primary ) ? $primary : null;
+		if ( $length < 2 || $length > 3 ) {
+			return null;
+		}
+
+		return strspn( $primary, 'abcdefghijklmnopqrstuvwxyz' ) === $length ? $primary : null;
 	}
 }
