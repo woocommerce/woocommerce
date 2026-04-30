@@ -102,13 +102,13 @@ class ShopperListItemsByKey extends AbstractRoute {
 	/**
 	 * Render a full ShopperList response (metadata + items) for write endpoints.
 	 *
-	 * @param ShopperList $list   List to render.
-	 * @param int         $status HTTP status to set on the response.
+	 * @param ShopperList $shopper_list List to render.
+	 * @param int         $status       HTTP status to set on the response.
 	 *
 	 * @return \WP_REST_Response
 	 */
-	private function prepare_list_response( ShopperList $list, int $status = 200 ): \WP_REST_Response {
-		$items    = array_values( $list->get_items() );
+	private function prepare_list_response( ShopperList $shopper_list, int $status = 200 ): \WP_REST_Response {
+		$items    = array_values( $shopper_list->get_items() );
 		$item_ids = array_map(
 			fn( ShopperListItem $item ) => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(),
 			$items
@@ -116,7 +116,7 @@ class ShopperListItemsByKey extends AbstractRoute {
 		_prime_post_caches( array_unique( $item_ids ) );
 
 		$list_schema       = $this->schema_controller->get( ShopperListSchema::IDENTIFIER );
-		$response          = (array) $list_schema->get_item_response( $list->to_array() );
+		$response          = (array) $list_schema->get_item_response( $shopper_list->to_array() );
 		$response['items'] = array_map(
 			fn( ShopperListItem $item ) => $this->schema->get_item_response( $item->to_array() ),
 			$items
