@@ -417,4 +417,63 @@ class OrderItemSchemaTest extends TestCase {
 		$order->delete( true );
 		$variable_product->delete( true );
 	}
+
+	/**
+	 * Test that prices reflect order item data, not current product prices.
+	 *
+	 * When a product goes on sale after an order was placed, the order item
+	 * prices should still reflect the original price paid at the time of purchase.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/53326
+	 */
+	public function test_get_item_response_prices_use_order_data_not_current_product_price(): void {
+		// Arrange - Create a product at $20.
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '20.00' );
+		$product->set_sale_price( '' );
+		$product->set_price( '20.00' );
+		$product->save();
+
+		// Create an order with this product at $20.
+		$order = new \WC_Order();
+		$order->add_product( $product, 2 );
+		$order->save();
+
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		// Verify the order item was created with the correct price.
+		$this->assertEquals( '40.00', $item->get_subtotal() ); // 2 x $20
+
+		// Act part 1 - Get item response BEFORE price change.
+		$result_before = $this->sut->get_item_response( $item );
+
+		// Now put the product on sale for $10.
+		$product->set_sale_price( '10.00' );
+		$product->set_price( '10.00' );
+		$product->save();
+
+		// Reload the item to get fresh data.
+		$item_after_sale = new \WC_Order_Item_Product( $item->get_id() );
+
+		// Act part 2 - Get item response AFTER price change.
+		$result_after = $this->sut->get_item_response( $item_after_sale );
+
+		// Assert - prices should be the SAME before and after the sale.
+		$prices_before = (array) $result_before['prices'];
+		$prices_after  = (array) $result_after['prices'];
+
+		// The per-unit price should be $20 (from order data), not $10 (current sale price).
+		$this->assertEquals( $prices_before['price'], $prices_after['price'], 'Price should not change when product goes on sale' );
+		$this->assertEquals( $prices_before['regular_price'], $prices_after['regular_price'], 'Regular price should not change when product goes on sale' );
+		$this->assertEquals( $prices_before['sale_price'], $prices_after['sale_price'], 'Sale price field should not change when product goes on sale' );
+
+		// The totals should also reflect the original $20/unit price.
+		$totals = (array) $result_after['totals'];
+		$this->assertEquals( '40.00', $totals['line_subtotal'], 'Line subtotal should be 40.00 (2 x $20)' );
+
+		// Cleanup.
+		$order->delete( true );
+		$product->delete( true );
+	}
 }

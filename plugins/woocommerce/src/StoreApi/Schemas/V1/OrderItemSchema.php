@@ -78,7 +78,7 @@ class OrderItemSchema extends ItemSchema {
 			$product_properties['sku']                = $product->get_sku();
 			$product_properties['permalink']          = $product->get_permalink();
 			$product_properties['catalog_visibility'] = $product->get_catalog_visibility();
-			$product_properties['prices']             = $this->prepare_product_price_response( $product, get_option( 'woocommerce_tax_display_cart' ) );
+			$product_properties['prices']             = $this->prepare_order_item_price_response( $order_item, $product, get_option( 'woocommerce_tax_display_cart' ) );
 			$product_properties['sold_individually']  = $product->is_sold_individually();
 			$product_properties['images']             = $this->get_images( $product );
 
@@ -115,6 +115,56 @@ class OrderItemSchema extends ItemSchema {
 			'totals'               => (object) $this->prepare_currency_response( $this->get_totals( $order_item ) ),
 			'catalog_visibility'   => $product_properties['catalog_visibility'],
 		];
+	}
+
+	/**
+	 * Get an array of pricing data derived from the order item's stored prices
+	 * instead of the product's current live prices.
+	 *
+	 * This ensures that historical order data is not affected by subsequent
+	 * price changes (e.g., sales) on the product.
+	 *
+	 * @param \WC_Order_Item_Product $order_item      Order item instance.
+	 * @param \WC_Product            $product         Product instance.
+	 * @param string                 $tax_display_mode If returned prices are incl or excl of tax.
+	 * @return array
+	 */
+	protected function prepare_order_item_price_response( \WC_Order_Item_Product $order_item, \WC_Product $product, $tax_display_mode = '' ) {
+		$tax_display_mode = $this->get_tax_display_mode( $tax_display_mode );
+		$price_decimals   = wc_get_price_decimals();
+		$quantity         = $order_item->get_quantity();
+
+		// Calculate per-unit price from order item stored data.
+		$line_subtotal     = (float) $order_item->get_subtotal();
+		$line_subtotal_tax = (float) $order_item->get_subtotal_tax();
+
+		$unit_price_excl_tax = $quantity > 0 ? $line_subtotal / $quantity : 0;
+		$unit_price_incl_tax = $quantity > 0 ? ( $line_subtotal + $line_subtotal_tax ) / $quantity : 0;
+
+
+		$unit_price      = 'incl' === $tax_display_mode ? $unit_price_incl_tax : $unit_price_excl_tax;
+
+		// Use order item's unit price for all price fields to maintain consistency
+		// with historical order data.
+		$prices = array(
+			'price'         => $this->prepare_money_response( $unit_price, $price_decimals ),
+			'regular_price' => $this->prepare_money_response( $unit_price, $price_decimals ),
+			'sale_price'    => $this->prepare_money_response( $unit_price, $price_decimals ),
+			'price_range'   => null,
+		);
+
+		$prices = $this->prepare_currency_response( $prices );
+
+		// Add raw prices with higher precision.
+		$rounding_precision = wc_get_rounding_precision();
+		$prices['raw_prices'] = array(
+			'precision'     => $rounding_precision,
+			'price'         => $this->prepare_money_response( $unit_price, $rounding_precision ),
+			'regular_price' => $this->prepare_money_response( $unit_price, $rounding_precision ),
+			'sale_price'    => $this->prepare_money_response( $unit_price, $rounding_precision ),
+		);
+
+		return $prices;
 	}
 
 	/**
