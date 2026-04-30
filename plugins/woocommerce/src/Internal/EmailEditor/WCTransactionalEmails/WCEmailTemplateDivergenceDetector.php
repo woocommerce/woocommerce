@@ -181,6 +181,19 @@ class WCEmailTemplateDivergenceDetector {
 				continue;
 			}//end try
 		}//end foreach
+
+		/**
+		 * Fires once after the post-upgrade divergence sweep finishes classifying
+		 * every sync-registered email post.
+		 *
+		 * Hooked by {@see \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier::schedule()}
+		 * to enqueue the batched auto-apply job for posts classified as
+		 * `core_updated_uncustomized`. Fires unconditionally — auto-applier
+		 * short-circuits when no candidates exist.
+		 *
+		 * @since 10.8.0
+		 */
+		do_action( 'woocommerce_email_template_divergence_sweep_complete' );
 	}
 
 	/**

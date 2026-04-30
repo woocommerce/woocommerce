@@ -9,6 +9,7 @@ use Automattic\WooCommerce\EmailEditor\Engine\Dependency_Check;
 use Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreview;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailPatterns\PatternsController;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesController;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
@@ -149,6 +150,8 @@ class Integration {
 		add_action( 'rest_api_init', array( $this->email_api_controller, 'register_routes' ) );
 		add_action( 'woocommerce_updated', array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 20 );
 		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 10 );
+		add_action( WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK, array( WCEmailTemplateAutoApplier::class, 'run' ), 10 );
+		add_action( 'woocommerce_email_template_divergence_sweep_complete', array( WCEmailTemplateAutoApplier::class, 'schedule' ), 10 );
 	}
 
 	/**

@@ -29,7 +29,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$this->filter_recorder = $this->any();
 
 		$filter_mock = $this->getMockBuilder( stdClass::class )
-			->setMethods( [ '__invoke' ] )
+			->setMethods( array( '__invoke' ) )
 			->getMock();
 		$filter_mock->expects( $this->filter_recorder )
 			->method( '__invoke' )
@@ -55,14 +55,14 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_attribute_taxonomy_ids() {
 		$ids = wc_get_attribute_taxonomy_ids();
-		$this->assertEquals( [], $ids );
+		$this->assertEquals( array(), $ids );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
 			'Filter `woocommerce_attribute_taxonomies` should have been triggered once after fetching all attribute taxonomies.'
 		);
 		$ids = wc_get_attribute_taxonomy_ids();
-		$this->assertEquals( [], $ids );
+		$this->assertEquals( array(), $ids );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
@@ -76,14 +76,14 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_wc_get_attribute_taxonomy_labels() {
 		$labels = wc_get_attribute_taxonomy_labels();
-		$this->assertEquals( [], $labels );
+		$this->assertEquals( array(), $labels );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
 			'Filter `woocommerce_attribute_taxonomies` should have been triggered once after fetching all attribute taxonomies.'
 		);
 		$labels = wc_get_attribute_taxonomy_labels();
-		$this->assertEquals( [], $labels );
+		$this->assertEquals( array(), $labels );
 		$this->assertEquals(
 			1,
 			$this->filter_recorder->getInvocationCount(),
@@ -215,12 +215,60 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'menu_order', $attribute->order_by, 'Any invalid property changes will be reset to their defaults.' );
 	}
 
+	/**
+	 * Test visual attribute type registration and persistence.
+	 *
+	 * @testdox Should have the `wc-visual` attribute type registered in block themes.
+	 */
+	public function test_wc_visual_attribute_type() {
+		$original_theme = wp_get_theme()->get_stylesheet();
+		$attribute_id   = null;
+
+		$enable_visual_attribute_feature = function ( $features ) {
+			$features[] = 'wc-visual-attribute';
+			return array_unique( $features );
+		};
+
+		add_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
+		try {
+			switch_theme( 'twentytwentyfour' );
+
+			$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in block themes.' );
+
+			$attribute_id = wc_create_attribute(
+				array(
+					'name' => 'Visual Color',
+					'type' => 'wc-visual',
+				)
+			);
+
+			$this->assertIsInt( $attribute_id );
+			$this->assertEquals( 'wc-visual', wc_get_attribute( $attribute_id )->type, 'The attribute type should be `wc-visual` in block themes.' );
+
+			switch_theme( 'storefront' );
+			$this->assertEquals( 'wc-visual', wc_get_attribute( $attribute_id )->type, 'The attribute type should be `wc-visual` in classic themes.' );
+			$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in classic themes with a visual attribute.' );
+
+			wc_delete_attribute( $attribute_id );
+			$attribute_id = null;
+
+			$this->assertArrayNotHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should not be available in classic themes without a visual attribute.' );
+		} finally {
+			if ( is_int( $attribute_id ) ) {
+				wc_delete_attribute( $attribute_id );
+			}
+
+			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
+			switch_theme( $original_theme );
+		}//end try
+	}
+
 	public function get_attribute_names_and_slugs() {
-		return [
-			[ 'Dash Me', 'dash-me' ],
-			[ '', '' ],
-			[ 'pa_SubStr', 'substr' ],
-			[ 'ĂnîC°Dę', 'anicde' ],
-		];
+		return array(
+			array( 'Dash Me', 'dash-me' ),
+			array( '', '' ),
+			array( 'pa_SubStr', 'substr' ),
+			array( 'ĂnîC°Dę', 'anicde' ),
+		);
 	}
 }

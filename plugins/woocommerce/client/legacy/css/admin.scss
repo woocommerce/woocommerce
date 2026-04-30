@@ -8497,8 +8497,8 @@ table.bar_chart {
 	// ourselves, scoped to Woo editor screens, as a bridge until Core unifies
 	// this.
 	//
-	// TODO: Remove these rules when Core rounds editor .postbox containers
-	// (upstream Trac ticket to be filed).
+	// TODO: Remove these rules when Core rounds editor .postbox containers.
+	// Upstream proposal: https://core.trac.wordpress.org/ticket/65142
 	&.post-type-product,
 	&.post-type-shop_order,
 	&.post-type-shop_coupon,
@@ -9584,4 +9584,15 @@ body.woocommerce-settings-payments-section_legacy {
 	#wpbody-content {
 		background: #f0f0f1;
 	}
+}
+
+.wc-admin-color-swatch {
+	display: inline-block;
+	vertical-align: middle;
+	vertical-align: center;
+	border: 1px solid #7e8993;
+	border-radius: 2px;
+	margin-right: 6px;
+	width: 12px;
+	height: 12px;
 }

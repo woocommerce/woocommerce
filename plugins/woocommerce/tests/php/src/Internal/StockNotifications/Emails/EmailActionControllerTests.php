@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\StockNotifications\Emails;
 
 use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailActionController;
+use Automattic\WooCommerce\Internal\StockNotifications\Emails\EmailManager;
 use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancellationSource;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
@@ -14,6 +15,30 @@ use WC_Helper_Product;
  * EmailActionControllerTests tests.
  */
 class EmailActionControllerTests extends \WC_Unit_Test_Case {
+
+	/**
+	 * The System Under Test.
+	 *
+	 * @var EmailActionController
+	 */
+	private $sut;
+
+	/**
+	 * Mock email manager.
+	 *
+	 * @var EmailManager&\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $email_manager;
+
+	/**
+	 * Set up test fixtures.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		$this->email_manager = $this->createMock( EmailManager::class );
+		$this->sut           = new EmailActionController();
+		$this->sut->init( $this->email_manager );
+	}
 
 	/**
 	 * Persist a notification with a single action-key meta entry.
@@ -34,7 +59,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that verification action is sets notification status to active.
+	 * @testdox Should set notification status to active when verification key matches.
 	 */
 	public function test_process_verification_action_sets_status_active() {
 		$id = $this->arrange_notification(
@@ -43,13 +68,78 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			time() . ':' . wp_fast_hash( 'test' )
 		);
 
-		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'test', 'verify' );
+		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
 
 		$this->assertEquals( NotificationStatus::ACTIVE, Factory::get_notification( $id )->get_status() );
 	}
 
 	/**
-	 * Test that unsubscribe action sets notification status to cancelled, and sets cancellation source to user.
+	 * @testdox Should send the verified email after a successful verification.
+	 */
+	public function test_verified_email_sent_after_successful_verification() {
+		$id = $this->arrange_notification(
+			NotificationStatus::PENDING,
+			'verification_action_key',
+			time() . ':' . wp_fast_hash( 'test' )
+		);
+
+		$this->email_manager
+			->expects( $this->once() )
+			->method( 'send_verified_email' )
+			->with(
+				$this->callback(
+					static function ( $arg ) use ( $id ) {
+						return $arg instanceof Notification && $arg->get_id() === $id;
+					}
+				)
+			);
+
+		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+	}
+
+	/**
+	 * @testdox Should not send the verified email when the verification key is invalid.
+	 */
+	public function test_verified_email_not_sent_when_verification_key_invalid() {
+		$id = $this->arrange_notification(
+			NotificationStatus::PENDING,
+			'verification_action_key',
+			time() . ':' . wp_fast_hash( 'correct' )
+		);
+
+		$this->email_manager
+			->expects( $this->never() )
+			->method( 'send_verified_email' );
+
+		$this->sut->validate_and_maybe_process_request( $id, 'wrong-key', 'verify' );
+	}
+
+	/**
+	 * @testdox Should only dispatch the verified email once when the same verification URL is hit repeatedly.
+	 */
+	public function test_verified_email_sent_only_once_on_repeated_verification_hits() {
+		$product      = WC_Helper_Product::create_simple_product();
+		$notification = new Notification();
+		$notification->set_product_id( $product->get_id() );
+		$notification->set_status( NotificationStatus::PENDING );
+		$notification->set_user_email( 'test@example.com' );
+		$key = time() . ':' . wp_fast_hash( 'test' );
+		$notification->update_meta_data( 'verification_action_key', $key );
+		$id = $notification->save();
+
+		$this->email_manager
+			->expects( $this->once() )
+			->method( 'send_verified_email' );
+
+		// First hit transitions PENDING -> ACTIVE and dispatches the verified email.
+		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+
+		// Second hit (double-click, email prefetch, bot) must short-circuit without re-dispatch.
+		$this->sut->validate_and_maybe_process_request( $id, 'test', 'verify' );
+	}
+
+	/**
+	 * @testdox Should set notification status to cancelled and cancellation source to user on unsubscribe.
 	 */
 	public function test_process_unsubscribe_action_sets_status_cancelled() {
 		$id = $this->arrange_notification(
@@ -58,7 +148,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			wp_fast_hash( 'test' )
 		);
 
-		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+		$this->sut->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
 
 		$updated = Factory::get_notification( $id );
 		$this->assertEquals( NotificationStatus::CANCELLED, $updated->get_status() );
@@ -76,7 +166,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			time() . ':' . wp_fast_hash( 'real-key' )
 		);
 
-		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'wrong-key', 'verify' );
+		$this->sut->validate_and_maybe_process_request( $id, 'wrong-key', 'verify' );
 
 		$this->assertEquals( NotificationStatus::PENDING, Factory::get_notification( $id )->get_status() );
 	}
@@ -94,7 +184,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			time() . ':' . wp_fast_hash( 'test' )
 		);
 
-		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
+		$this->sut->validate_and_maybe_process_request( $id, 'test', 'unsubscribe' );
 
 		$this->assertEquals( NotificationStatus::ACTIVE, Factory::get_notification( $id )->get_status() );
 	}
@@ -109,7 +199,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 		// warning without a no-op assertion.
 		$this->expectNotToPerformAssertions();
 
-		( new EmailActionController() )->validate_and_maybe_process_request( 0, 'any-key', 'verify' );
+		$this->sut->validate_and_maybe_process_request( 0, 'any-key', 'verify' );
 	}
 
 	/**
@@ -123,7 +213,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			time() . ':' . wp_fast_hash( 'test' )
 		);
 
-		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'test', 'bogus-action' );
+		$this->sut->validate_and_maybe_process_request( $id, 'test', 'bogus-action' );
 
 		$this->assertEquals( NotificationStatus::PENDING, Factory::get_notification( $id )->get_status() );
 	}
@@ -140,7 +230,7 @@ class EmailActionControllerTests extends \WC_Unit_Test_Case {
 			time() . ':' . wp_fast_hash( 'test' )
 		);
 
-		( new EmailActionController() )->validate_and_maybe_process_request( $id, 'test', '' );
+		$this->sut->validate_and_maybe_process_request( $id, 'test', '' );
 
 		$this->assertEquals( NotificationStatus::PENDING, Factory::get_notification( $id )->get_status() );
 	}
