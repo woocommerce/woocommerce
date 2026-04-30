@@ -38,35 +38,12 @@
 }
 
 /*
-	Review drawer (RSM-143). Visual chrome that doesn't ship with the
-	`@wordpress/ui` `Drawer` primitive — the design tokens (uppercase
-	section heading with a colored leading dot, conflict diff colours,
-	tag pills, two-up choice cards) per the handoff at
-	`~/Downloads/IMPLEMENTATION_GUIDE_review_drawer.md` and the static
-	reference in `Review changes flow.html`.
+	Review drawer (RSM-143). Drawer skeleton, typography, badge pills and
+	the segmented choice come from `@wordpress/ui` `Drawer`/`Text`/`Badge`
+	and `@wordpress/components` `ToggleGroupControl`. Only the chrome the
+	primitives don't cover is kept here: dotted section heading, item
+	row layout, the diff colour scheme, and the footer note spacer.
  */
-.woocommerce-review-drawer__popup {
-	color: #1d2327;
-}
-
-.woocommerce-review-drawer__head {
-	padding: 16px 20px;
-	border-bottom: 1px solid #ddd;
-}
-
-.woocommerce-review-drawer__h-title {
-	font-size: 15px;
-	font-weight: 600;
-	color: #1d2327;
-	margin: 0;
-}
-
-.woocommerce-review-drawer__h-sub {
-	font-size: 12px;
-	color: #50575e;
-	margin: 0;
-}
-
 .woocommerce-review-drawer__body {
 	padding: 0;
 }
@@ -115,6 +92,9 @@
 }
 
 .woocommerce-review-drawer__item {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
 	padding: 12px 20px;
 	border-top: 1px solid #f0f0f1;
 
@@ -126,56 +106,11 @@
 .woocommerce-review-drawer__item-h {
 	display: flex;
 	align-items: flex-start;
+	justify-content: space-between;
 	gap: 10px;
-	margin-bottom: 6px;
-}
-
-.woocommerce-review-drawer__item-title {
-	flex: 1;
-	font-size: 13px;
-	font-weight: 600;
-	color: #1d2327;
-}
-
-.woocommerce-review-drawer__item-sub {
-	font-size: 12px;
-	line-height: 1.5;
-	color: #50575e;
-}
-
-.woocommerce-review-drawer__tag {
-	display: inline-flex;
-	align-items: center;
-	height: 18px;
-	padding: 0 6px;
-	border-radius: 2px;
-	font-size: 10px;
-	font-weight: 600;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
-	flex: 0 0 auto;
-}
-
-.woocommerce-review-drawer__tag--conflict {
-	background: #fde6be;
-	color: #6b3a00;
-	border: 1px solid #d0b481;
-}
-
-.woocommerce-review-drawer__tag--apply_core {
-	background: #ecf0fa;
-	color: #1f3eb8;
-	border: 1px solid #c8d4f6;
-}
-
-.woocommerce-review-drawer__tag--keep_yours {
-	background: #f0f0f0;
-	color: #50575e;
-	border: 1px solid #ddd;
 }
 
 .woocommerce-review-drawer__diff {
-	margin-top: 8px;
 	border: 1px solid #f0f0f1;
 	border-radius: 2px;
 	overflow: hidden;
@@ -208,11 +143,25 @@
 	}
 }
 
+.woocommerce-review-drawer__foot-spacer {
+	flex: 1;
+}
+
+/*
+	Keep the Cancel / Apply buttons at their natural width so the label
+	never wraps onto two lines when the count grows (e.g. "Apply (11)").
+	The footer note + spacer absorb the shrinkage instead.
+ */
+.woocommerce-review-drawer__popup footer > button {
+	flex-shrink: 0;
+	white-space: nowrap;
+}
+
 .woocommerce-review-drawer__choice {
 	display: grid;
 	grid-template-columns: 1fr 1fr;
 	gap: 6px;
-	margin-top: 10px;
+	margin-top: 4px;
 }
 
 .woocommerce-review-drawer__choice-card {
@@ -252,22 +201,4 @@
 .woocommerce-review-drawer__choice-hint {
 	font-size: 11px;
 	color: #50575e;
-}
-
-.woocommerce-review-drawer__foot {
-	display: flex;
-	gap: 8px;
-	align-items: center;
-	padding: 14px 20px;
-	border-top: 1px solid #ddd;
-	background: #fcfcfc;
-}
-
-.woocommerce-review-drawer__foot-note {
-	font-size: 11px;
-	color: #50575e;
-}
-
-.woocommerce-review-drawer__foot-spacer {
-	flex: 1;
 }

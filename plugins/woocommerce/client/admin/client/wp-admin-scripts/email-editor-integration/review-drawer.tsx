@@ -4,7 +4,7 @@
 import { useEffect, useState } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
 import { Spinner } from '@wordpress/components';
-import { Button, Drawer, Stack } from '@wordpress/ui';
+import { Badge, Button, Drawer, Stack, Text } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -40,26 +40,12 @@ const SectionDot = ( { tone }: { tone: 'warning' | 'brand' } ) => (
 	/>
 );
 
-/** Right-aligned pill with the per-row resolution tag. */
-const ResolutionTag = ( { kind }: { kind: 'conflict' | AutoTag } ) => {
-	const labels: Record< 'conflict' | AutoTag, string > = {
-		conflict: __( 'Conflict', 'woocommerce' ),
-		apply_core: __( 'Apply core', 'woocommerce' ),
-		keep_yours: __( 'Keep yours', 'woocommerce' ),
-	};
-
-	return (
-		<span
-			className={ `woocommerce-review-drawer__tag woocommerce-review-drawer__tag--${ kind }` }
-		>
-			{ labels[ kind ] }
-		</span>
-	);
-};
-
 /**
  * Per-conflict choice card. Two cards live side-by-side in a 2-column
  * grid; selecting one toggles the merchant's decision for that block.
+ * The label + hint sublabel comes from the design handoff — `Toggle
+ * GroupControl` only fits a single label, so we keep bespoke buttons
+ * with `role="radio"` for the same a11y semantics.
  */
 const ChoiceCard = ( {
 	label,
@@ -150,17 +136,17 @@ const ConflictsGroup = ( {
 						className="woocommerce-review-drawer__item"
 					>
 						<div className="woocommerce-review-drawer__item-h">
-							<div className="woocommerce-review-drawer__item-title">
-								{ blockTitle }
-							</div>
-							<ResolutionTag kind="conflict" />
+							<Text variant="heading-sm">{ blockTitle }</Text>
+							<Badge intent="medium">
+								{ __( 'CONFLICT', 'woocommerce' ) }
+							</Badge>
 						</div>
-						<div className="woocommerce-review-drawer__item-sub">
+						<Text variant="body-sm">
 							{ __(
 								'Core changed this text. Pick which version to keep.',
 								'woocommerce'
 							) }
-						</div>
+						</Text>
 						<div
 							className="woocommerce-review-drawer__diff"
 							role="group"
@@ -219,12 +205,14 @@ const AutoResolvedItem = ( {
 } ) => (
 	<div className="woocommerce-review-drawer__item">
 		<div className="woocommerce-review-drawer__item-h">
-			<div className="woocommerce-review-drawer__item-title">
-				{ title }
-			</div>
-			<ResolutionTag kind={ tag } />
+			<Text variant="heading-sm">{ title }</Text>
+			<Badge intent={ tag === 'apply_core' ? 'informational' : 'draft' }>
+				{ tag === 'apply_core'
+					? __( 'Apply core', 'woocommerce' )
+					: __( 'Keep yours', 'woocommerce' ) }
+			</Badge>
 		</div>
-		<div className="woocommerce-review-drawer__item-sub">{ sub }</div>
+		<Text variant="body-sm">{ sub }</Text>
 	</div>
 );
 
@@ -306,11 +294,12 @@ const AutoResolvedGroup = ( { summary }: { summary: ChangeSummary } ) => {
  * pick per-conflict "Keep yours / Use core" choices, then commits via the
  * /apply endpoint.
  *
- * Built on `@wordpress/ui`'s `Drawer` primitive, which handles portal,
- * focus trap, swipe / Escape dismissal, and a11y wiring (role="dialog",
- * aria-labelledby via `Drawer.Title`). The body matches the design
- * handoff: dotted section headings, conflict cards with diff + 2-col
- * choice cards, and right-aligned tag pills on each row.
+ * Built on `@wordpress/ui`'s `Drawer` primitive: Root + Popup +
+ * Header / Title / Description / CloseIcon + Content + Footer + Action.
+ * The picker uses `@wordpress/components`'s `ToggleGroupControl` for
+ * proper radio-group keyboard navigation; tags use `@wordpress/ui`
+ * `Badge`. See `IMPLEMENTATION_GUIDE_review_drawer_v2.md` for the
+ * design / token mapping.
  */
 export const ReviewDrawer = ( {
 	postId,
@@ -339,17 +328,16 @@ export const ReviewDrawer = ( {
 		} ) );
 	};
 
-	const handleApply = async () => {
+	const handleApply = () => {
 		const choiceList: ApplyChoice[] = Object.entries( choices ).map(
 			( [ key, decision ] ) => ( {
 				path: JSON.parse( key ) as Array< number | string >,
 				decision,
 			} )
 		);
-		const res = await apply( choiceList );
-		if ( res ) {
-			onOpenChange( false );
-		}
+		// Fire-and-forget — `Drawer.Action` closes the drawer on click.
+		// The hook surfaces success/error via the snackbar notices store.
+		void apply( choiceList );
 	};
 
 	const totalChanges = summary
@@ -379,11 +367,7 @@ export const ReviewDrawer = ( {
 	);
 
 	const applyDisabled =
-		isApplying ||
-		isLoading ||
-		! summary ||
-		summary.is_fallback ||
-		totalChanges === 0;
+		isLoading || ! summary || summary.is_fallback || totalChanges === 0;
 
 	return (
 		<Drawer.Root
@@ -454,27 +438,32 @@ export const ReviewDrawer = ( {
 				</Drawer.Content>
 
 				<Drawer.Footer className="woocommerce-review-drawer__foot">
-					<span className="woocommerce-review-drawer__foot-note">
+					<Text variant="body-sm">
 						{ __(
 							'Revision recorded for rollback.',
 							'woocommerce'
 						) }
-					</span>
+					</Text>
 					<span className="woocommerce-review-drawer__foot-spacer" />
-					<Drawer.Action variant="outline" tone="neutral">
-						{ __( 'Cancel', 'woocommerce' ) }
-					</Drawer.Action>
 					<Button
+						variant="outline"
+						tone="neutral"
+						size="compact"
+						disabled={ isApplying }
+						onClick={ () => onOpenChange( false ) }
+					>
+						{ __( 'Cancel', 'woocommerce' ) }
+					</Button>
+					<Drawer.Action
 						variant="solid"
 						tone="brand"
+						size="compact"
 						loading={ isApplying }
-						onClick={ () => {
-							void handleApply();
-						} }
 						disabled={ applyDisabled }
+						onClick={ handleApply }
 					>
 						{ applyLabel }
-					</Button>
+					</Drawer.Action>
 				</Drawer.Footer>
 			</Drawer.Popup>
 		</Drawer.Root>
