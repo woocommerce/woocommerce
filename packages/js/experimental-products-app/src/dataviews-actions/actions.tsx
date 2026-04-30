@@ -16,15 +16,6 @@ import { useMemo } from '@wordpress/element';
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../fields/types';
-import type { ProductListQuery } from '../product-list/query';
-
-type ProductActionsOptions = {
-	query: ProductListQuery;
-};
-
-type ProductActionDependencies = {
-	query: ProductListQuery;
-};
 
 function getErrorMessage( error: unknown ): string {
 	if ( error instanceof Error ) {
@@ -259,9 +250,7 @@ export const duplicateProductAction = (): Action< ProductEntityRecord > => ( {
 	},
 } );
 
-export const moveToTrashAction = (
-	dependencies: ProductActionDependencies
-): Action< ProductEntityRecord > => ( {
+export const moveToTrashAction = (): Action< ProductEntityRecord > => ( {
 	id: 'move-to-trash-product',
 	label: __( 'Move to trash', 'woocommerce' ),
 	supportsBulk: true,
@@ -270,8 +259,7 @@ export const moveToTrashAction = (
 		return product.status !== 'trash';
 	},
 	async callback( items, { onActionPerformed } ) {
-		const { deleteEntityRecord, invalidateResolution } =
-			dispatch( coreStore );
+		const { deleteEntityRecord } = dispatch( coreStore );
 		const { createErrorNotice, createSuccessNotice } =
 			dispatch( noticesStore );
 
@@ -289,11 +277,6 @@ export const moveToTrashAction = (
 		);
 
 		if ( successfulItems.length > 0 ) {
-			await invalidateResolution( 'getEntityRecords', [
-				'root',
-				'product',
-				dependencies.query,
-			] );
 			createSuccessNotice(
 				successfulItems.length === 1
 					? __( 'Product successfully deleted', 'woocommerce' )
@@ -327,14 +310,14 @@ export const moveToTrashAction = (
 	},
 } );
 
-export const useProductActions = ( { query }: ProductActionsOptions ) => {
+export const useProductActions = () => {
 	return useMemo(
 		() => [
 			editAction(),
 			viewAction(),
 			duplicateProductAction(),
-			moveToTrashAction( { query } ),
+			moveToTrashAction(),
 		],
-		[ query ]
+		[]
 	);
 };
