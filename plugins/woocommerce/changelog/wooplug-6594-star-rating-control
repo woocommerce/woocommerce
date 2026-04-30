@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add the accessible 5-star rating control used by the Review Order page. Native radio inputs with keyboard navigation (arrows, Home, End), dynamic caption, and visible focus ring; filterable labels via `woocommerce_review_order_rating_labels`.
