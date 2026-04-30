@@ -23,7 +23,6 @@ const PatternSelectionModal = ( props: {
 	const { clientId, attributes, tracksLocation, closePatternSelectionModal } =
 		props;
 	const { collection } = attributes;
-	// @ts-expect-error Type definitions for this function are missing
 	// https://github.com/DefinitelyTyped/DefinitelyTyped/blob/master/types/wordpress__blocks/store/actions.d.ts
 	const { replaceBlock } = useDispatch( blockEditorStore );
 
@@ -62,7 +61,6 @@ const PatternSelectionModal = ( props: {
 			overlayClassName="wc-blocks-product-collection__modal"
 			title={ __( 'What products do you want to show?', 'woocommerce' ) }
 			onRequestClose={ onCloseModal }
-			// @ts-expect-error Type definitions are missing in the version we are using i.e. 19.1.5,
 			size={ 'large' }
 		>
 			<div className="wc-blocks-product-collection__content">

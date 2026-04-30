@@ -1137,6 +1137,8 @@ function wc_cancel_unpaid_orders() {
 			 *                                 Default is true for orders created via 'checkout'
 			 *                                 or 'store-api', false otherwise.
 			 * @param WC_Order $order          The unpaid order object.
+			 *
+			 * @see WC_Order::payment_complete() Checkout evidence allowlist.
 			 */
 			if ( apply_filters( 'woocommerce_cancel_unpaid_order', in_array( $order->get_created_via(), array( 'checkout', 'store-api' ), true ), $order ) ) {
 				$order->update_status( OrderStatus::CANCELLED, __( 'Unpaid order cancelled - time limit reached.', 'woocommerce' ) );

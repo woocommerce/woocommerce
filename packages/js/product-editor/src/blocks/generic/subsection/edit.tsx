@@ -4,10 +4,7 @@
 import clsx from 'clsx';
 import { createElement } from '@wordpress/element';
 import { useWooBlockProps } from '@woocommerce/block-templates';
-import {
-	// @ts-expect-error no exported member.
-	useInnerBlocksProps,
-} from '@wordpress/block-editor';
+import { useInnerBlocksProps } from '@wordpress/block-editor';
 
 /**
  * Internal dependencies

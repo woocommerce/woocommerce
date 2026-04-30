@@ -80,7 +80,7 @@ class PaymentGatewaySuggestions extends \WC_REST_Data_Controller {
 	 */
 	public function get_permission_check( $request ) {
 		if ( ! current_user_can( 'install_plugins' ) ) {
-			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'Sorry, you cannot manage plugins.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
+			return new \WP_Error( 'woocommerce_rest_cannot_update', __( 'You do not have permissions to manage plugins. Please contact your site administrator.', 'woocommerce' ), array( 'status' => rest_authorization_required_code() ) );
 		}
 		return true;
 	}

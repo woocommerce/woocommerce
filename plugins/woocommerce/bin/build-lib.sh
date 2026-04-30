@@ -26,8 +26,21 @@ output 6 "Building lib package"
 rm -rf lib/packages lib/classes
 mkdir lib/packages lib/classes
 
-# Running update on the lib package will automatically run Mozart
-composer update -d ./lib
+# Prefer `composer install` so pinned versions in lib/composer.lock are respected
+# and routine rebuilds don't silently bump unrelated dependencies. Fall back to
+# `composer update` only when the lock is out of sync with composer.json — i.e. a
+# developer has just added or bumped a package on purpose. Pass --update to force
+# an update (useful to pick up in-range upstream releases without editing composer.json).
+if [ "${1:-}" = "--update" ] || ! composer validate -d ./lib --check-lock --quiet; then
+	composer update -d ./lib
+else
+	composer install -d ./lib
+fi
+
+# Re-apply manual patches that Mozart overwrites on rebuild (see lib/README.md).
+if git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+	git restore lib/packages/Detection/MobileDetect.php 2>/dev/null || true
+fi
 
 output 6 "Updating autoload files"
 

@@ -62,12 +62,6 @@
 		.woocommerce-sortable__handle {
 			display: none;
 		}
-
-		.components-checkbox-control__input[type="checkbox"] {
-			&:not(:checked):not(:focus) {
-				border-color: $gray-600;
-			}
-		}
 	}
 
 	&__notice {
