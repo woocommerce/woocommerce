@@ -87,8 +87,12 @@ add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10,
 /**
  * Check if the given topic is a valid webhook topic, a topic is valid if:
  *
- * + starts with `action.woocommerce_` or `action.wc_`.
- * + it has a valid resource & event.
+ * + starts with `action.woocommerce_` or `action.wc_` (unless explicitly blocked by
+ *   the `$invalid_topics` list below).
+ * + it has a valid resource & event AND (when both are part of the default sets) the
+ *   `<resource>.<event>` pair has a registered hook. Default/default pairs with no
+ *   registered hook (e.g. `order.published`, `customer.restored`) are rejected to
+ *   prevent ghost webhooks that save as Active but never deliver.
  *
  * @since  2.2.0
  * @param  string $topic Webhook topic.
@@ -116,20 +120,41 @@ function wc_is_webhook_valid_topic( $topic ) {
 		return false;
 	}
 
-	$valid_resources = apply_filters( 'woocommerce_valid_webhook_resources', array( 'coupon', 'customer', 'order', 'product' ) );
+	$default_resources = array( 'coupon', 'customer', 'order', 'product' );
+	$default_events    = array( 'created', 'updated', 'deleted', 'restored', 'published' );
+
+	$valid_resources = apply_filters( 'woocommerce_valid_webhook_resources', $default_resources );
 	/**
 	 * Filters the list of valid webhook events.
 	 *
 	 * @since 2.2.0
 	 * @param array $valid_events Array of valid webhook events.
 	 */
-	$valid_events = apply_filters( 'woocommerce_valid_webhook_events', array( 'created', 'updated', 'deleted', 'restored', 'published' ) );
+	$valid_events = apply_filters( 'woocommerce_valid_webhook_events', $default_events );
 
-	if ( in_array( $data[0], $valid_resources, true ) && in_array( $data[1], $valid_events, true ) ) {
+	if ( ! in_array( $data[0], $valid_resources, true ) || ! in_array( $data[1], $valid_events, true ) ) {
+		return false;
+	}
+
+	// Topics that include a filter-added resource or event are accepted; plugins
+	// extending those lists wire delivery themselves (via the
+	// `woocommerce_webhook_topic_hooks` or `woocommerce_webhook_hooks` filters).
+	if ( ! in_array( $data[0], $default_resources, true ) || ! in_array( $data[1], $default_events, true ) ) {
 		return true;
 	}
 
-	return false;
+	// Default-resource + default-event topics must correspond to a registered
+	// hook. Pairs without one (e.g. `order.published`, `customer.restored`) save
+	// as Active webhooks but never deliver, so reject them at create time.
+	$default_topics = array(
+		'coupon.created', 'coupon.updated', 'coupon.deleted', 'coupon.restored',
+		'customer.created', 'customer.updated', 'customer.deleted',
+		'order.created', 'order.updated', 'order.deleted', 'order.restored',
+		'product.created', 'product.updated', 'product.deleted', 'product.restored',
+		'product.published',
+	);
+
+	return in_array( $topic, $default_topics, true );
 }
 
 /**

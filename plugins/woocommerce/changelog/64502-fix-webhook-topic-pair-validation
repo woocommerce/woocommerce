@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix webhook topic validator accepting `<resource>.published` and `customer.restored` topics that have no registered hook, causing webhooks to save as Active but never deliver.

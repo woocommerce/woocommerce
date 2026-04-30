@@ -63,6 +63,43 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Default-resource + default-event topics with no registered hook are rejected,
+	 * to prevent ghost webhooks that save as Active and never deliver (issue #64502).
+	 */
+	public function test_wc_is_webhook_valid_topic_rejects_unregistered_pairs() {
+		$this->assertFalse( wc_is_webhook_valid_topic( 'order.published' ) );
+		$this->assertFalse( wc_is_webhook_valid_topic( 'coupon.published' ) );
+		$this->assertFalse( wc_is_webhook_valid_topic( 'customer.published' ) );
+		$this->assertFalse( wc_is_webhook_valid_topic( 'customer.restored' ) );
+	}
+
+	/**
+	 * Plugins extending the resource/event lists via the marginal-set filters keep
+	 * working: their topics include a custom resource or event, which skips the
+	 * default-pair check.
+	 */
+	public function test_wc_is_webhook_valid_topic_passes_filter_extended_resource_or_event() {
+		$add_event    = function ( $events ) {
+			$events[] = 'refunded';
+			return $events;
+		};
+		$add_resource = function ( $resources ) {
+			$resources[] = 'subscription';
+			return $resources;
+		};
+		add_filter( 'woocommerce_valid_webhook_events', $add_event );
+		add_filter( 'woocommerce_valid_webhook_resources', $add_resource );
+
+		try {
+			$this->assertTrue( wc_is_webhook_valid_topic( 'order.refunded' ) );
+			$this->assertTrue( wc_is_webhook_valid_topic( 'subscription.created' ) );
+		} finally {
+			remove_filter( 'woocommerce_valid_webhook_events', $add_event );
+			remove_filter( 'woocommerce_valid_webhook_resources', $add_resource );
+		}
+	}
+
+	/**
 	 * Data provider for test_wc_is_webhook_valid_status.
 	 *
 	 * @since 3.5.3
