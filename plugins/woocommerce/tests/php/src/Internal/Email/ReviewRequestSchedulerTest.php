@@ -170,6 +170,26 @@ class ReviewRequestSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Cancellation unschedules the action even when the tracking meta is missing.
+	 *
+	 * Guards against an out-of-sync meta value leaving a stray scheduled send.
+	 */
+	public function test_cancellation_unschedules_when_meta_missing(): void {
+		$order = $this->create_pending_order();
+		$order->update_status( 'completed' );
+		$order_id = $order->get_id();
+		$this->assertTrue( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order_id ) ) );
+
+		// Simulate an out-of-sync state: meta cleared while the action is still pending.
+		$order->delete_meta_data( ReviewRequestScheduler::SCHEDULED_META_KEY );
+		$order->save();
+
+		$order->update_status( 'cancelled' );
+
+		$this->assertFalse( (bool) as_next_scheduled_action( ReviewRequestScheduler::ACTION_HOOK, array( $order_id ) ) );
+	}
+
+	/**
 	 * Create an order in a non-completed status so transitioning to completed fires the hook cleanly.
 	 */
 	private function create_pending_order(): WC_Order {

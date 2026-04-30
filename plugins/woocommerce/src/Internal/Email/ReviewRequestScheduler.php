@@ -117,15 +117,13 @@ class ReviewRequestScheduler implements RegisterHooksInterface {
 	 * @param int $order_id The affected order ID.
 	 */
 	public function handle_cancellation( int $order_id ): void {
-		$order = wc_get_order( $order_id );
-
-		if ( $order instanceof WC_Order && ! $order->get_meta( self::SCHEDULED_META_KEY ) ) {
-			return;
-		}
-
+		// Always attempt to unschedule, even when the order or meta is missing,
+		// so an out-of-sync meta value cannot leave a stray scheduled send.
+		// `as_unschedule_action()` is a no-op when no matching action exists.
 		as_unschedule_action( self::ACTION_HOOK, array( $order_id ) );
 
-		if ( $order instanceof WC_Order ) {
+		$order = wc_get_order( $order_id );
+		if ( $order instanceof WC_Order && $order->get_meta( self::SCHEDULED_META_KEY ) ) {
 			$order->delete_meta_data( self::SCHEDULED_META_KEY );
 			$order->save();
 		}
