@@ -110,15 +110,15 @@ class Settings {
 	 * underscores, hyphens). On rejection, adds a settings error message and
 	 * returns the previously stored value so the option is not overwritten.
 	 *
-	 * @param mixed  $value     The sanitized value passed by earlier filters.
-	 * @param array  $option    The option config from add_settings().
-	 * @param string $raw_value The raw value submitted by the form.
+	 * @param mixed $value     The sanitized value passed by earlier filters.
+	 * @param array $option    The option config from add_settings().
+	 * @param mixed $raw_value The raw value submitted by the form. Typed as mixed because POST data can be null or an array (e.g. when the field name is submitted as `name[]`).
 	 * @return string
 	 */
-	public function sanitize_endpoint_url( $value, array $option, string $raw_value ): string {
+	public function sanitize_endpoint_url( $value, array $option, $raw_value ): string {
 		unset( $value, $option );
 
-		$normalized = trim( $raw_value, '/' );
+		$normalized = trim( (string) $raw_value, '/' );
 		$fallback   = (string) get_option( Main::OPTION_ENDPOINT_URL, GraphQLController::DEFAULT_ENDPOINT_URL );
 
 		if ( '' === $normalized ) {

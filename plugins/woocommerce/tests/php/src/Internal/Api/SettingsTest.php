@@ -186,6 +186,32 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox sanitize_endpoint_url falls back to the stored value when the raw input is not a string.
+	 * @dataProvider provider_non_string_endpoint_url_inputs
+	 *
+	 * @param mixed $raw_input The raw submitted value (null, array, etc.).
+	 */
+	public function test_sanitize_endpoint_url_handles_non_string_input( $raw_input ): void {
+		update_option( Main::OPTION_ENDPOINT_URL, 'wc/v4/graphql' );
+
+		$result = $this->sut->sanitize_endpoint_url( null, array(), $raw_input );
+
+		$this->assertSame( 'wc/v4/graphql', $result, 'Non-string input should not overwrite the previously stored value.' );
+	}
+
+	/**
+	 * Non-string raw inputs the sanitize handler may receive from POST data.
+	 *
+	 * @return array<string, array{mixed}>
+	 */
+	public function provider_non_string_endpoint_url_inputs(): array {
+		return array(
+			'null'  => array( null ),
+			'array' => array( array( 'wc/graphql' ) ),
+		);
+	}
+
+	/**
 	 * @testdox add_settings returns the input unchanged on PHP < 8.1.
 	 */
 	public function test_add_settings_is_noop_on_unsupported_php(): void {
