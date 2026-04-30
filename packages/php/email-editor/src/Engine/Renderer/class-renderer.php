@@ -10,6 +10,7 @@ namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer;
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Process_Manager;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 use Automattic\WooCommerce\EmailEditor\Engine\Templates\Templates;
 use Automattic\WooCommerce\EmailEditor\Engine\Theme_Controller;
 use Automattic\WooCommerce\EmailEditor\Engine\PersonalizationTags\Personalization_Tags_Registry;
@@ -160,6 +161,7 @@ class Renderer {
 
 		// Postprocess after CSS inlining (border normalization, CSS variable replacement, etc.).
 		$rendered_template = $this->process_manager->postprocess( $rendered_template );
+		$rendered_template = $this->apply_html_attributes( $rendered_template, $rendering_context );
 
 		// This is a workaround to support link :hover in some clients. Ideally we would remove the ability to set :hover
 		// however this is not possible using the color panel from Gutenberg.
@@ -181,6 +183,28 @@ class Renderer {
 	 */
 	private function inline_css_styles( $template ) {
 		return $this->css_inliner->from_html( $template )->inline_css()->render();
+	}
+
+	/**
+	 * Apply document-level language and direction attributes after CSS inlining.
+	 *
+	 * @param string            $template HTML template.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string
+	 */
+	private function apply_html_attributes( string $template, Rendering_Context $rendering_context ): string {
+		$processor = new \WP_HTML_Tag_Processor( $template );
+		if ( ! $processor->next_tag( array( 'tag_name' => 'html' ) ) ) {
+			return $template;
+		}
+
+		$language = get_bloginfo( 'language' );
+		if ( $language ) {
+			$processor->set_attribute( 'lang', $language );
+		}
+		$processor->set_attribute( 'dir', $rendering_context->get_text_direction() );
+
+		return $processor->get_updated_html();
 	}
 
 	/**

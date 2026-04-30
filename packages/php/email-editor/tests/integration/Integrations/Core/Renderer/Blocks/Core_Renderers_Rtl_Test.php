@@ -232,9 +232,11 @@ class Core_Renderers_Rtl_Test extends \Email_Editor_Integration_Test_Case {
 	 * @param string $alignment Expected alignment.
 	 */
 	private function assertOuterSpacerAligned( string $rendered, string $alignment ): void {
-		$this->assertMatchesRegularExpression(
-			'/<table[^>]*align="' . preg_quote( $alignment, '/' ) . '"[^>]*>.*email-block-layout/s',
-			$rendered
-		);
+		$alignment_position = strpos( $rendered, 'align="' . $alignment . '"' );
+		$layout_position    = strpos( $rendered, 'email-block-layout' );
+
+		$this->assertNotFalse( $alignment_position );
+		$this->assertNotFalse( $layout_position );
+		$this->assertLessThan( $layout_position, $alignment_position );
 	}
 }

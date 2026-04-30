@@ -570,12 +570,6 @@ class Content_Renderer {
 		if ( ! is_array( $email_context ) ) {
 			$email_context = array();
 		}
-			/**
-			 * Filtered email context.
-			 *
-			 * @var array<string, mixed> $email_context
-			 */
-			$email_context = $email_context;
 
 		return new Rendering_Context( $this->theme_controller->get_theme(), $email_context, $language );
 	}

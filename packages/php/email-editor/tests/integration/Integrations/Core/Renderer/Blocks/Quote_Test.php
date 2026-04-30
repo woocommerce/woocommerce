@@ -82,11 +82,15 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItUsesRightDefaultBorderInRtl(): void {
 		$theme_controller = $this->di_container->get( Theme_Controller::class );
 		$rtl_context      = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+		$content          = '<blockquote class="wp-block-quote" style="border-color: currentColor; border-width: 0 0 0 1px; border-left-style: solid;"><p>Quote content</p></blockquote>';
 
-		$rendered = $this->quote_renderer->render( '<p>Quote content</p>', $this->parsed_quote, $rtl_context );
+		$rendered = $this->quote_renderer->render( $content, $this->parsed_quote, $rtl_context );
 
 		$this->assertStringContainsString( 'border-width:0 1px 0 0;', $rendered );
 		$this->assertStringContainsString( 'border-style:solid;', $rendered );
+		$this->assertStringContainsString( 'border-left-style:none;', $rendered );
+		$this->assertStringContainsString( 'border-left-width:0;', $rendered );
+		$this->assertStringContainsString( 'border-right-style:solid;', $rendered );
 	}
 
 	/**

@@ -113,6 +113,15 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	public function testItRendersLtrDirectionByDefault(): void {
 		$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en_US' );
 
+		$html_tag_position = strpos( $rendered['html'], '<html ' );
+		$head_tag_position = strpos( $rendered['html'], '<head>' );
+
+		$this->assertNotFalse( $html_tag_position );
+		$this->assertNotFalse( $head_tag_position );
+		$this->assertLessThan( $head_tag_position, $html_tag_position );
+		$html_opening_tag = substr( $rendered['html'], $html_tag_position, $head_tag_position - $html_tag_position );
+		$this->assertStringContainsString( 'lang="', $html_opening_tag );
+		$this->assertStringContainsString( 'dir="ltr"', $html_opening_tag );
 		$this->assertStringContainsString( 'dir="ltr"', $rendered['html'] );
 		$this->assertStringContainsString( 'direction: ltr', $rendered['html'] );
 		$this->assertStringContainsString( 'text-align: left', $rendered['html'] );

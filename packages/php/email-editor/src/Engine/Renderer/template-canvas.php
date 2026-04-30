@@ -21,9 +21,7 @@ declare(strict_types = 1);
  * @var array{contentSize: string} $layout Layout configuration
  * @var Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context $rendering_context Rendering context
  */
-ob_start();
-language_attributes();
-$language_attributes = (string) ob_get_clean();
+$language_attributes = get_language_attributes();
 $language_attributes = trim( (string) preg_replace( '/\s?dir=(["\']).*?\1/i', '', $language_attributes ) );
 $language_attributes = trim( $language_attributes . ' dir="' . esc_attr( $rendering_context->get_text_direction() ) . '"' );
 ?><!DOCTYPE html>
