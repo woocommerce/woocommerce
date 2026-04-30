@@ -27,8 +27,8 @@ abstract class AbstractTemplateCompatibility {
 
 		add_filter(
 			'template_include',
-			function( $template ) {
-				$this->set_compatibility_layer_flag( $template );
+			function ( $template ) {
+				$this->set_compatibility_layer_flag();
 
 				add_filter(
 					'render_block_data',
@@ -39,7 +39,7 @@ abstract class AbstractTemplateCompatibility {
 						* This hook allows to disable the compatibility layer for the blockified templates.
 						*
 						* @since 7.6.0
-						* @param boolean.
+						* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
 						*/
 						$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
@@ -62,7 +62,7 @@ abstract class AbstractTemplateCompatibility {
 						* This hook allows to disable the compatibility layer for the blockified.
 						*
 						* @since 7.6.0
-						* @param boolean.
+						* @param bool $is_disabled_compatibility_layer Whether the compatibility layer should be disabled.
 						*/
 						$is_disabled_compatibility_layer = apply_filters( 'woocommerce_disable_compatibility_layer', false );
 
@@ -212,7 +212,7 @@ abstract class AbstractTemplateCompatibility {
 	/**
 	 * Check if the current template has a legacy template block.
 	 *
-	 * @return bool
+	 * @return bool True if the current template has a legacy template block, false otherwise.
 	 *
 	 * @internal
 	 */
@@ -234,6 +234,8 @@ abstract class AbstractTemplateCompatibility {
 
 	/**
 	 * Check if the current template has a legacy template block and disable the compatibility layer if it does.
+	 *
+	 * @return void
 	 *
 	 * @internal
 	 */

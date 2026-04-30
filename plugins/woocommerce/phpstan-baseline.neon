@@ -55576,24 +55576,6 @@ parameters:
 			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
 
 		-
-			message: '#^One or more @param tags has an invalid name or invalid syntax\.$#'
-			identifier: phpDoc.parseError
-			count: 2
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean\.\)\: Unexpected token "\.", expected variable at offset 211 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(boolean\.\)\: Unexpected token "\.", expected variable at offset 221 on line 7$#'
-			identifier: phpDoc.parseError
-			count: 1
-			path: src/Blocks/Templates/AbstractTemplateCompatibility.php
-
-		-
 			message: '#^Parameter \$parent_block of method Automattic\\WooCommerce\\Blocks\\Templates\\AbstractTemplateCompatibility\:\:update_render_block_data\(\) has invalid type Automattic\\WooCommerce\\Blocks\\Templates\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
