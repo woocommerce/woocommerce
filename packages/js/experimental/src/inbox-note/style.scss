@@ -120,6 +120,7 @@
 	font-weight: normal;
 	@include font-size( 14 );
 	line-height: 20px;
+	text-wrap: pretty;
 	& > p:first-child {
 		margin-top: 0;
 	}
