@@ -69,14 +69,17 @@ class ItemEligibility {
 			return;
 		}
 
+		// Approved + the customer's own pending review only; spam/trash
+		// shouldn't count and re-block a legitimate new submission.
 		$comments = get_comments(
 			array(
-				'post__in'     => array_values( $product_ids ),
-				'author_email' => $email,
-				'type'         => 'review',
-				'status'       => 'all',
-				'orderby'      => 'comment_date_gmt',
-				'order'        => 'DESC',
+				'post__in'           => array_values( $product_ids ),
+				'author_email'       => $email,
+				'type'               => 'review',
+				'status'             => 'approve',
+				'include_unapproved' => array( $email ),
+				'orderby'            => 'comment_date_gmt',
+				'order'              => 'DESC',
 			)
 		);
 
@@ -176,15 +179,18 @@ class ItemEligibility {
 			return self::$review_cache[ $cache_key ];
 		}
 
+		// Approved + the customer's own pending review only; spam/trash
+		// shouldn't count and re-block a legitimate new submission.
 		$comments = get_comments(
 			array(
-				'post_id'      => $product_id,
-				'author_email' => $email,
-				'type'         => 'review',
-				'status'       => 'all',
-				'number'       => 1,
-				'orderby'      => 'comment_date_gmt',
-				'order'        => 'DESC',
+				'post_id'            => $product_id,
+				'author_email'       => $email,
+				'type'               => 'review',
+				'status'             => 'approve',
+				'include_unapproved' => array( $email ),
+				'number'             => 1,
+				'orderby'            => 'comment_date_gmt',
+				'order'              => 'DESC',
 			)
 		);
 

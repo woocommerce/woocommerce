@@ -200,9 +200,11 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 		};
 		add_filter( 'comments_pre_query', $counter );
 
-		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
-
-		remove_filter( 'comments_pre_query', $counter );
+		try {
+			$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+		} finally {
+			remove_filter( 'comments_pre_query', $counter );
+		}
 
 		$this->assertSame( ItemEligibility::STATUS_REVIEWED, $decision['status'] );
 		$this->assertSame( 0, $call_count, 'describe() should not query when prime() has cached the result.' );

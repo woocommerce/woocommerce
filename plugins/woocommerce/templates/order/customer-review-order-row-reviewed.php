@@ -24,10 +24,13 @@ if ( ! $item instanceof WC_Order_Item_Product || ! $product instanceof WC_Produc
 	return;
 }
 
-$has_review   = isset( $review ) && $review instanceof WP_Comment;
-$product_link = $product->is_visible() ? get_permalink( $product->get_id() ) : '';
-$product_name = $item->get_name();
-$image_html   = $product->get_image( 'woocommerce_thumbnail' );
+$has_review = isset( $review ) && $review instanceof WP_Comment;
+// Reviews attach to the parent product, so link there too rather than to a
+// (possibly non-canonical) variation permalink.
+$parent_product_id = (int) $item->get_product_id();
+$product_link      = $product->is_visible() ? get_permalink( $parent_product_id ) : '';
+$product_name      = $item->get_name();
+$image_html        = $product->get_image( 'woocommerce_thumbnail' );
 
 $rating       = 0;
 $summary      = '';
