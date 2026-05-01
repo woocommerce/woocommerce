@@ -129,8 +129,8 @@ class SubmissionHandler {
 			$row       = is_array( $row ) ? $row : array();
 
 			$rating = isset( $row['rating'] ) ? (int) $row['rating'] : 0;
-			if ( $rating < 1 || $rating > 5 ) {
-				// Skipping a row is allowed (no rating).
+			if ( 0 === $rating ) {
+				// Empty rating means the customer chose to skip this row; allowed.
 				continue;
 			}
 
@@ -143,6 +143,12 @@ class SubmissionHandler {
 				'product_id' => $product_id,
 				'status'     => 'error',
 			);
+
+			if ( $rating < 1 || $rating > 5 ) {
+				$result['error']       = 'invalid_rating';
+				$results[ $row_index ] = $result;
+				continue;
+			}
 
 			if ( ! $product_id || ! $order_item_id || ! isset( $item_index[ $order_item_id ] ) ) {
 				$result['error']       = 'invalid_row';
@@ -219,14 +225,14 @@ class SubmissionHandler {
 			return;
 		}
 
-		// Single grouped lookup instead of one query per product.
+		// Single grouped lookup, fetching the comment objects directly so we
+		// can read comment_post_ID without a follow-up query per row.
 		$comments = get_comments(
 			array(
 				'post__in'     => array_values( $product_ids ),
 				'author_email' => $customer_email,
 				'type'         => 'review',
 				'status'       => 'all',
-				'fields'       => 'ids',
 			)
 		);
 
@@ -235,9 +241,8 @@ class SubmissionHandler {
 		}
 
 		$reviewed_products = array();
-		foreach ( $comments as $comment_id ) {
-			$comment = get_comment( $comment_id );
-			if ( $comment ) {
+		foreach ( $comments as $comment ) {
+			if ( $comment instanceof \WP_Comment ) {
 				$reviewed_products[ (int) $comment->comment_post_ID ] = true;
 			}
 		}

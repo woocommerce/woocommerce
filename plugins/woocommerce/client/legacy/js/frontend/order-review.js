@@ -99,6 +99,10 @@
 			submit.disabled = ! anyChecked;
 		}
 
+		// Expose so initAjaxSubmit can re-run the gate after the request
+		// completes (instead of unconditionally enabling the button).
+		form.syncReviewOrderSubmitGate = syncSubmit;
+
 		form.addEventListener( 'change', function ( event ) {
 			if (
 				event.target &&
@@ -228,7 +232,9 @@
 					);
 				} )
 				.then( function () {
-					if ( submit ) {
+					if ( typeof form.syncReviewOrderSubmitGate === 'function' ) {
+						form.syncReviewOrderSubmitGate();
+					} else if ( submit ) {
 						submit.disabled = false;
 					}
 				} );
