@@ -188,7 +188,8 @@ class ItemEligibility {
 	 * Default callback wired onto `woocommerce_review_order_eligible_items`
 	 * so the page never shows a row for a product the customer no longer
 	 * owns. A line item is considered fully refunded when the absolute
-	 * refunded quantity equals the item's quantity.
+	 * refunded quantity is greater than or equal to the item's ordered
+	 * quantity. Fractional quantities are honoured.
 	 *
 	 * @param WC_Order_Item[] $items Order line items.
 	 * @param WC_Order        $order Order being reviewed.
@@ -202,8 +203,8 @@ class ItemEligibility {
 				continue;
 			}
 
-			$refunded_qty = (int) abs( $order->get_qty_refunded_for_item( $item->get_id() ) );
-			$ordered_qty  = (int) $item->get_quantity();
+			$refunded_qty = (float) abs( (float) $order->get_qty_refunded_for_item( $item->get_id() ) );
+			$ordered_qty  = (float) $item->get_quantity();
 
 			if ( $ordered_qty > 0 && $refunded_qty >= $ordered_qty ) {
 				continue;
