@@ -247,8 +247,14 @@ class SubmissionHandler {
 			return;
 		}
 
+		// Apply the same eligibility filter the page and submission rows use
+		// so refunded items (and any other extension-excluded ones) don't
+		// stay flagged as "missing review" forever.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented on Endpoint::is_authorised().
+		$eligible_items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+
 		$product_ids = array();
-		foreach ( $order->get_items() as $item ) {
+		foreach ( $eligible_items as $item ) {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
 			}
