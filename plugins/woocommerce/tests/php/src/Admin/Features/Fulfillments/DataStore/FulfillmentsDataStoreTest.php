@@ -1127,4 +1127,20 @@ class FulfillmentsDataStoreTest extends \WC_Unit_Test_Case {
 
 		$this->assertSame( 0, $rows_deleted );
 	}
+
+	/**
+	 * @testdox Should return the concrete class name from get_current_class_name.
+	 */
+	public function test_get_current_class_name_returns_concrete_class(): void {
+		$this->assertTrue(
+			method_exists( $this->data_store, 'get_current_class_name' ),
+			'FulfillmentsDataStore should implement get_current_class_name()'
+		);
+
+		$this->assertSame(
+			get_class( $this->data_store ),
+			$this->data_store->get_current_class_name(),
+			'get_current_class_name() should return the concrete class name'
+		);
+	}
 }
