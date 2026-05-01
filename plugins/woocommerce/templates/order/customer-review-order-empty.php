@@ -10,7 +10,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.8.0
+ * @version 10.9.0
  *
  * @var WC_Order $order            Order being reviewed.
  * @var int      $reviewed_count   Number of reviews this customer left on this order.
