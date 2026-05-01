@@ -85,8 +85,19 @@ class Endpoint {
 			return;
 		}
 
+		// Use the full page-permalink path so hierarchical pages
+		// (Review Order page moved under a parent) keep working.
+		$permalink = get_permalink( $page_id );
+		if ( ! is_string( $permalink ) || '' === $permalink ) {
+			return;
+		}
+		$path = trim( (string) wp_make_link_relative( $permalink ), '/' );
+		if ( '' === $path ) {
+			return;
+		}
+
 		add_rewrite_rule(
-			'^' . preg_quote( $page->post_name, '/' ) . '/([0-9]+)/?$',
+			'^' . preg_quote( $path, '/' ) . '/([0-9]+)/?$',
 			'index.php?page_id=' . $page_id . '&' . self::QUERY_VAR . '=$matches[1]',
 			'top'
 		);
@@ -186,14 +197,34 @@ class Endpoint {
 	 * @return string
 	 */
 	public static function get_url( WC_Order $order ): string {
-		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
-		$base    = $page_id > 0 ? get_permalink( $page_id ) : '';
-		if ( ! is_string( $base ) || '' === $base ) {
-			$base = home_url( '/review-order/' );
-		}
+		$page_id   = (int) wc_get_page_id( self::PAGE_KEY );
+		$permalink = $page_id > 0 ? get_permalink( $page_id ) : '';
 
-		$url = trailingslashit( $base ) . (string) $order->get_id() . '/';
-		$url = add_query_arg( 'key', $order->get_order_key(), $url );
+		if ( is_string( $permalink ) && '' !== $permalink && false === strpos( $permalink, '?' ) ) {
+			// Pretty permalinks: append the order id as a path segment.
+			$url = trailingslashit( $permalink ) . (string) $order->get_id() . '/';
+			$url = add_query_arg( 'key', $order->get_order_key(), $url );
+		} elseif ( is_string( $permalink ) && '' !== $permalink ) {
+			// Plain permalinks: page permalink is /?page_id=NNN, so add the
+			// order id as a query var rather than munging the path.
+			$url = add_query_arg(
+				array(
+					self::QUERY_VAR => (string) $order->get_id(),
+					'key'           => $order->get_order_key(),
+				),
+				$permalink
+			);
+		} else {
+			// Page is missing entirely: fall back to a plain-permalink URL
+			// so the link is still resolvable via index.php query vars.
+			$url = add_query_arg(
+				array(
+					self::QUERY_VAR => (string) $order->get_id(),
+					'key'           => $order->get_order_key(),
+				),
+				home_url( '/' )
+			);
+		}//end if
 
 		/**
 		 * Filter the Review Order URL that the review-request email links to.
