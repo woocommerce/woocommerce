@@ -89,17 +89,11 @@ test.describe(
 			const rows = page.locator( '.woocommerce-review-order__item' );
 			await expect( rows ).toHaveCount( products.length );
 
-			// Rate the first product 5 stars.
-			await rows
-				.nth( 0 )
-				.locator( '.woocommerce-star-rating__input[value="5"]' )
-				.check( { force: true } );
+			// Rate the first product 5 stars by clicking the wrapping label.
+			await rows.nth( 0 ).locator( 'label[for$="-5"]' ).click();
 
 			// Rate the second product 4 stars and add review text.
-			await rows
-				.nth( 1 )
-				.locator( '.woocommerce-star-rating__input[value="4"]' )
-				.check( { force: true } );
+			await rows.nth( 1 ).locator( 'label[for$="-4"]' ).click();
 			await rows
 				.nth( 1 )
 				.locator(
@@ -110,9 +104,7 @@ test.describe(
 			// Leave the third product untouched.
 
 			// Submit gate should be enabled now.
-			const submit = page.locator(
-				'.woocommerce-review-order__submit'
-			);
+			const submit = page.locator( '.woocommerce-review-order__submit' );
 			await expect( submit ).toBeEnabled();
 			await Promise.all( [
 				page.waitForResponse(
