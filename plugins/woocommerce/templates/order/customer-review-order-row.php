@@ -44,7 +44,10 @@ $rating_control = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::rend
 <li class="woocommerce-review-order__item" data-row-index="<?php echo esc_attr( (string) $row_index ); ?>">
 	<p class="woocommerce-review-order__item-title">
 		<?php if ( $product_link ) : ?>
-			<a href="<?php echo esc_url( $product_link ); ?>" target="_blank" rel="noopener"><?php echo esc_html( $product_name ); ?></a>
+			<a href="<?php echo esc_url( $product_link ); ?>" target="_blank" rel="noopener noreferrer">
+				<?php echo esc_html( $product_name ); ?>
+				<span class="screen-reader-text"><?php esc_html_e( '(opens in a new tab)', 'woocommerce' ); ?></span>
+			</a>
 		<?php else : ?>
 			<?php echo esc_html( $product_name ); ?>
 		<?php endif; ?>
