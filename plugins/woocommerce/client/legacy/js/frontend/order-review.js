@@ -2,8 +2,8 @@
 /**
  * Progressive enhancement for the Review Order page.
  *
- * Adds keyboard navigation (Left/Right/Up/Down + Home/End + Space/Enter) and a
- * dynamic caption to every `.woocommerce-star-rating` group on the page.
+ * Adds keyboard navigation (Left/Right/Up/Down + Home/End) and a dynamic
+ * caption to every `.woocommerce-star-rating` group on the page.
  * Without this script the underlying native radio inputs still work.
  */
 ( function () {

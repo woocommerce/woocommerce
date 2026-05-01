@@ -411,19 +411,27 @@ class Endpoint {
 	 * `assets/{js|css}/` by the classic-assets pipeline.
 	 */
 	private function enqueue_assets(): void {
-		$plugin_url = untrailingslashit( plugins_url( '', WC_PLUGIN_FILE ) );
-		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$plugin_url  = untrailingslashit( plugins_url( '', WC_PLUGIN_FILE ) );
+		$suffix      = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$style_path  = '/assets/css/order-review.css';
+		$script_path = '/assets/js/frontend/order-review' . $suffix . '.js';
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented in includes/class-wc-frontend-scripts.php.
+		$style_url = (string) apply_filters( 'woocommerce_get_asset_url', $plugin_url . $style_path, $style_path );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented in includes/class-wc-frontend-scripts.php.
+		$script_url = (string) apply_filters( 'woocommerce_get_asset_url', $plugin_url . $script_path, $script_path );
 
 		wp_enqueue_style(
 			'wc-order-review',
-			$plugin_url . '/assets/css/order-review.css',
+			$style_url,
 			array(),
 			Constants::get_constant( 'WC_VERSION' )
 		);
 
 		wp_enqueue_script(
 			'wc-order-review',
-			$plugin_url . '/assets/js/frontend/order-review' . $suffix . '.js',
+			$script_url,
 			array(),
 			Constants::get_constant( 'WC_VERSION' ),
 			true
