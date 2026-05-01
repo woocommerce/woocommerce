@@ -1,4 +1,0 @@
-Significance: minor
-Type: enhancement
-
-Polish the Review Order page to match the Figma design tokens and add a narrow-viewport (<600px) layout that stacks the row vertically and runs the submit button full-width.
