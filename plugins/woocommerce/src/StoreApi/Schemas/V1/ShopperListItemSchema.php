@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
+use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
 
 /**
  * ShopperListItemSchema class.
@@ -14,6 +15,8 @@ use Automattic\WooCommerce\StoreApi\SchemaController;
  * the two states via the `product_exists` boolean.
  */
 class ShopperListItemSchema extends AbstractSchema {
+	use ProductItemTrait;
+
 	/**
 	 * The schema item name.
 	 *
@@ -233,7 +236,7 @@ class ShopperListItemSchema extends AbstractSchema {
 			$response['name']      = $this->prepare_html_response( (string) ( $item['product_title_at_save'] ?? '' ) );
 			$response['permalink'] = '';
 			$response['images']    = array();
-			$response['variation'] = $this->format_variation_data( $variation_data, null );
+			$response['variation'] = array();
 			$response['prices']    = null;
 		}//end if
 
@@ -273,6 +276,9 @@ class ShopperListItemSchema extends AbstractSchema {
 	/**
 	 * Compute live prices for the saved item.
 	 *
+	 * We don't extend ProductSchema because saved items aren't products. The shape
+	 * here is a thin subset of cart-item prices.
+	 *
 	 * @param \WC_Product $product Live product instance.
 	 * @return array
 	 */
@@ -289,58 +295,5 @@ class ShopperListItemSchema extends AbstractSchema {
 				'sale_price'    => '' === $sale_price ? '' : $this->prepare_money_response( $sale_price, $decimals ),
 			)
 		);
-	}
-
-	/**
-	 * Format variation attribute data into [{ raw_attribute, attribute, value }] objects.
-	 *
-	 * Mirrors ProductItemTrait::format_variation_data but works without requiring
-	 * a ProductSchema parent class. Tolerates a null product (tombstone path).
-	 *
-	 * @param array            $variation_data Variation attributes keyed by attribute_*.
-	 * @param \WC_Product|null $product        Live product, or null if missing.
-	 * @return array
-	 */
-	private function format_variation_data( array $variation_data, $product ): array {
-		$return = array();
-
-		foreach ( $variation_data as $key => $value ) {
-			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( (string) $key ) ) );
-
-			if ( taxonomy_exists( $taxonomy ) ) {
-				$term = get_term_by( 'slug', $value, $taxonomy );
-				if ( ! is_wp_error( $term ) && $term && $term->name ) {
-					/**
-					 * Filters the variation option name.
-					 *
-					 * This filter is documented in src/StoreApi/Utilities/ProductItemTrait.php.
-					 *
-					 * @since 10.8.0
-					 */
-					$value = apply_filters( 'woocommerce_variation_option_name', $term->name, $term, $taxonomy, $product );
-				}
-				$label = wc_attribute_label( $taxonomy );
-			} else {
-				/**
-				 * Filters the variation option name.
-				 *
-				 * This filter is documented in src/StoreApi/Utilities/ProductItemTrait.php.
-				 *
-				 * @since 10.8.0
-				 */
-				$value = apply_filters( 'woocommerce_variation_option_name', $value, null, $taxonomy, $product );
-				$label = $product instanceof \WC_Product
-					? wc_attribute_label( str_replace( 'attribute_', '', (string) $key ), $product )
-					: str_replace( 'attribute_', '', (string) $key );
-			}//end if
-
-			$return[] = array(
-				'raw_attribute' => $this->prepare_html_response( (string) $key ),
-				'attribute'     => $this->prepare_html_response( (string) $label ),
-				'value'         => $this->prepare_html_response( (string) $value ),
-			);
-		}//end foreach
-
-		return $return;
 	}
 }
