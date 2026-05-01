@@ -615,8 +615,8 @@ class WC_REST_Product_Attributes_V1_Controller extends WC_REST_Controller {
 				sprintf( __( 'Slug "%s" is too long. Please use a shorter slug.', 'woocommerce' ), $slug ),
 				array(
 					'status'                 => 400,
-					'slug_byte_length'       => $prefixed_slug_byte_length,
-					'slug_byte_length_limit' => 32,
+					'slug_byte_length'       => $prefixed_slug_byte_length - 3,
+					'slug_byte_length_limit' => 29,
 				)
 			);
 		} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
