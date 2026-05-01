@@ -1,5 +1,3 @@
-@use "@wordpress/base-styles/variables";
-
 .woocommerce-fields-control__featured-image {
 	display: grid;
 	gap: 10px;
@@ -105,8 +103,8 @@
 	border: 1px solid var( --wpds-color-stroke-interactive-neutral );
 	background-color: var( --wpds-color-bg-surface-neutral-strong );
 	overflow: hidden;
-	width: variables.$button-size-small;
-	height: variables.$button-size-small;
+	width: $button-size-small;
+	height: $button-size-small;
 	opacity: 0;
 	transition: opacity 0.2s ease-in-out;
 	z-index: 1;

@@ -11,20 +11,16 @@ import type {
 	Store as WooCommerce,
 	SelectedAttributes,
 } from '@woocommerce/stores/woocommerce/cart';
-import '@woocommerce/stores/woocommerce/product-data';
-import '@woocommerce/stores/woocommerce/products';
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
  */
-import { findMatchingVariation } from '../../base/utils/variations/attribute-matching';
 import type { GroupedProductAddToCartWithOptionsStore } from './grouped-product-selector/frontend';
 import type { Context as QuantitySelectorContext } from './quantity-selector/frontend';
 import type { VariableProductAddToCartWithOptionsStore } from './variation-selector/frontend';
-import type { NormalizedProductData, NormalizedVariationData } from './types';
 
 export type Context = {
 	selectedAttributes: SelectedAttributes[];
@@ -61,66 +57,11 @@ const dispatchChangeEvent = ( inputElement: HTMLInputElement ) => {
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
-	{},
-	{ lock: universalLock }
-);
-
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
-
-export const getProductData = (
-	id: number,
-	selectedAttributes: SelectedAttributes[]
-): NormalizedProductData | NormalizedVariationData | null => {
-	const productFromStore = productsState.products[ id ];
-
-	if ( ! productFromStore ) {
-		return null;
-	}
-
-	// Determine which product to use for the response.
-	let product = productFromStore;
-
-	// For variable products with selected attributes, find the matching variation.
-	if (
-		productFromStore.type === 'variable' &&
-		selectedAttributes?.length > 0
-	) {
-		const matchedVariation = findMatchingVariation(
-			productFromStore,
-			selectedAttributes
-		);
-
-		if ( matchedVariation ) {
-			const variation =
-				productsState.productVariations[ matchedVariation.id ];
-			if ( ! variation ) {
-				// Variation was matched but its data isn't in the store.
-				// Return null to prevent using stale parent product data.
-				return null;
-			}
-			product = variation;
-		}
-	}
-
-	const { add_to_cart: addToCart } = product;
-	const maximum = addToCart?.maximum ?? 0;
-
-	return {
-		id: product.id,
-		type: product.type,
-		is_in_stock: product.is_purchasable && product.is_in_stock,
-		sold_individually: product.sold_individually,
-		min: addToCart?.minimum ?? 1,
-		max: maximum > 0 ? maximum : Number.MAX_SAFE_INTEGER,
-		step: addToCart?.multiple_of ?? 1,
-	};
-};
 
 export type AddToCartWithOptionsStore = {
 	state: {
@@ -130,7 +71,6 @@ export type AddToCartWithOptionsStore = {
 		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
-		productData: NormalizedProductData | NormalizedVariationData | null;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -141,12 +81,16 @@ export type AddToCartWithOptionsStore = {
 	};
 };
 
-const { state } = store<
-	AddToCartWithOptionsStore &
-		Partial< GroupedProductAddToCartWithOptionsStore > &
-		Partial< VariableProductAddToCartWithOptionsStore >
->( 'woocommerce/add-to-cart-with-options', {}, { lock: universalLock } );
-const { actions } = store(
+type MergedAddToCartWithOptionsStores = AddToCartWithOptionsStore &
+	Partial< GroupedProductAddToCartWithOptionsStore > &
+	Partial< VariableProductAddToCartWithOptionsStore >;
+
+const { state } = store< MergedAddToCartWithOptionsStores >(
+	'woocommerce/add-to-cart-with-options',
+	{},
+	{ lock: universalLock }
+);
+const { actions } = store< MergedAddToCartWithOptionsStores >(
 	'woocommerce/add-to-cart-with-options',
 	{
 		state: {
@@ -164,16 +108,20 @@ const { actions } = store(
 				return state.validationErrors.length === 0;
 			},
 			get allowsAddingToCart(): boolean {
-				const { productData } = state;
+				const product = productsState.productInContext;
+
+				if ( ! product ) {
+					return false;
+				}
 
 				// For grouped products, the button should always be visible.
 				// Its enabled/disabled state is controlled by isFormValid which
 				// checks whether any child products are selected.
-				if ( productData?.type === 'grouped' ) {
+				if ( product.type === 'grouped' ) {
 					return true;
 				}
 
-				return productData?.is_in_stock ?? true;
+				return product.is_purchasable && product.is_in_stock;
 			},
 			get quantity(): Record< number, number > {
 				const context = getContext< Context >();
@@ -182,14 +130,6 @@ const { actions } = store(
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
-			},
-			get productData() {
-				const { selectedAttributes } = getContext< Context >();
-
-				return getProductData(
-					productDataState.productId,
-					selectedAttributes
-				);
 			},
 		},
 		actions: {
@@ -200,19 +140,14 @@ const { actions } = store(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
-
 				// If selected quantity is invalid, add an error.
-				const productObject = getProductData(
-					productId,
-					selectedAttributes
-				);
+				const product = productsState.productInContext;
 
 				if (
 					value === 0 ||
-					( productObject &&
-						( value < productObject.min ||
-							value > productObject.max ) )
+					( product &&
+						( value < product.add_to_cart.minimum ||
+							value > product.add_to_cart.maximum ) )
 				) {
 					const { errorMessages } = getConfig();
 
@@ -232,8 +167,8 @@ const { actions } = store(
 				const inputElement = quantitySelectorContext?.inputElement;
 				const isValueNaN = Number.isNaN( inputElement?.valueAsNumber );
 
-				// Get variations from the products store.
-				const productFromStore = productsState.products[ productId ];
+				const { mainProductInContext: productFromStore } =
+					productsState;
 				const variationIds =
 					productFromStore?.variations?.map( ( v ) => v.id ) ?? [];
 
@@ -244,20 +179,20 @@ const { actions } = store(
 
 					idsToUpdate.forEach( ( id ) => {
 						if ( isValueNaN ) {
-							// Null the value first before setting the real value to ensure that
-							// a signal update happens.
-							context.quantity[ Number( id ) ] = null;
+							// Modify the value first before setting the real
+							// value to ensure that a signal update happens.
+							context.quantity[ Number( id ) ] = NaN;
 						}
 
 						context.quantity[ Number( id ) ] = value;
 					} );
 				} else {
 					if ( isValueNaN ) {
-						// Null the value first before setting the real value to ensure that
-						// a signal update happens.
+						// Modify the value first before setting the real value
+						// to ensure that a signal update happens.
 						context.quantity = {
 							...context.quantity,
-							[ productId ]: null,
+							[ productId ]: NaN,
 						};
 					}
 
@@ -267,7 +202,7 @@ const { actions } = store(
 					};
 				}
 
-				if ( state.productData?.type === 'grouped' ) {
+				if ( productsState.mainProductInContext?.type === 'grouped' ) {
 					actions.validateGroupedProductQuantity();
 				} else {
 					actions.validateQuantity( productId, value );
@@ -345,25 +280,19 @@ const { actions } = store(
 				// woocommerce store is public.
 				yield import( '@woocommerce/stores/woocommerce/cart' );
 
-				const { selectedAttributes } = getContext< Context >();
+				const product = productsState.productInContext;
 
-				const id =
-					productDataState.variationId || productDataState.productId;
-
-				const productType = productDataState.variationId
-					? 'variation'
-					: getProductData( id, selectedAttributes )?.type;
-
-				if ( ! productType ) {
+				if ( ! product ) {
 					return;
 				}
 
-				if ( productType === 'grouped' ) {
+				if ( product.type === 'grouped' ) {
 					yield actions.batchAddToCart();
 					return;
 				}
 
-				const { quantity } = getContext< Context >();
+				const { quantity, selectedAttributes } =
+					getContext< Context >();
 
 				const { actions: wooActions } = store< WooCommerce >(
 					'woocommerce',
@@ -372,10 +301,10 @@ const { actions } = store(
 				);
 				yield wooActions.addCartItem(
 					{
-						id,
-						quantityToAdd: quantity[ id ],
+						id: product.id,
+						quantityToAdd: quantity[ product.id ],
 						variation: selectedAttributes,
-						type: productType,
+						type: product.type,
 					},
 					{
 						showCartUpdatesNotices: false,
