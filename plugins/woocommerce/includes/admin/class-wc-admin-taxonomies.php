@@ -351,7 +351,7 @@ class WC_Admin_Taxonomies {
 		?>
 		<div class="form-field term-color-wrap">
 			<label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
-			<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="color" value="" />
+			<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="text" value="" />
 		</div>
 		<?php
 	}
@@ -374,7 +374,7 @@ class WC_Admin_Taxonomies {
 		<tr class="form-field term-color-wrap">
 			<th scope="row" valign="top"><label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label></th>
 			<td>
-				<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="color" value="<?php echo esc_attr( $color_value ); ?>" />
+				<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="text" value="<?php echo esc_attr( $color_value ); ?>" />
 			</td>
 		</tr>
 		<?php
@@ -427,6 +427,8 @@ class WC_Admin_Taxonomies {
 
 			if ( $color_value ) {
 				update_term_meta( $term_id, 'color', $color_value );
+			} elseif ( '' === $color_value ) {
+				delete_term_meta( $term_id, 'color' );
 			}
 		}
 	}

@@ -37,7 +37,6 @@ const ColorField = ( { input }: { input: HTMLInputElement } ) => {
 
 	useEffect( () => {
 		input.value = color;
-		input.setAttribute( 'value', color );
 		input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
 		input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
 	}, [ color, input ] );
