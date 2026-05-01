@@ -24,9 +24,9 @@ class WC_Query {
 	public $query_vars = array();
 
 	/**
-	 * Reference to the main product query on the page.
+	 * The query used by the main product loop. Null until set by `product_query()` on the first product archive request.
 	 *
-	 * @var WP_Query
+	 * @var WP_Query|null
 	 */
 	private static $product_query;
 
@@ -958,7 +958,7 @@ class WC_Query {
 	/**
 	 * Get the main query which product queries ran against.
 	 *
-	 * @return WP_Query
+	 * @return WP_Query|null
 	 */
 	public static function get_main_query() {
 		return self::$product_query;
