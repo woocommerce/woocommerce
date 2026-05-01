@@ -229,16 +229,6 @@ class Analytics {
 		$desc = __( 'This tool will fix the full refund data used in WooCommerce Analytics and re-import all the refunded historical data.', 'woocommerce' );
 
 		$disabled = true;
-		// Show the "already fixed" note only on genuinely new stores (data was never
-		// migrated). When the fix was just queued the show-tool option is still set,
-		// so we suppress the note there to avoid confusing the merchant mid-repair.
-		if ( OrderUtil::uses_new_full_refund_data() && 'yes' !== get_option( 'woocommerce_analytics_show_old_refund_data_tool' ) ) {
-			$desc .= '<br />' . sprintf(
-				'<strong class="red">%1$s</strong> %2$s',
-				__( 'Note:', 'woocommerce' ),
-				__( 'Refunds have already been fixed. This tool is not applicable to your store.', 'woocommerce' )
-			);
-		}
 
 		$debug_tools[ self::FULL_REFUND_FIX_DATA_TOOL_ID ] = array(
 			'name'     => __( 'Fix analytics full refund data', 'woocommerce' ),
@@ -268,6 +258,22 @@ class Analytics {
 			delete_option( 'woocommerce_analytics_uses_old_full_refund_data' );
 			delete_option( 'woocommerce_analytics_show_old_refund_data_tool' );
 			return __( 'Tool dismissed.', 'woocommerce' );
+		}
+
+		$already_running = ! empty(
+			as_get_scheduled_actions(
+				array(
+					'hook'     => 'woocommerce_analytics_refund_fix_batch',
+					'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
+					'per_page' => 1,
+					'orderby'  => 'none',
+				),
+				'ids'
+			)
+		);
+
+		if ( $already_running ) {
+			return __( 'A fix is already in progress, please check back later.', 'woocommerce' );
 		}
 
 		// Clear the legacy flag before queuing so that every batch job runs with
@@ -388,18 +394,6 @@ class Analytics {
 					'status'   => array( \ActionScheduler_Store::STATUS_PENDING, \ActionScheduler_Store::STATUS_RUNNING ),
 					'per_page' => 1,
 					'orderby'  => 'none',
-				),
-				'ids'
-			)
-		) || ! empty(
-			as_get_scheduled_actions(
-				array(
-					'hook'             => 'woocommerce_analytics_refund_fix_batch',
-					'status'           => \ActionScheduler_Store::STATUS_COMPLETE,
-					'modified'         => new \DateTime( '-2 minutes', new \DateTimeZone( 'UTC' ) ),
-					'modified_compare' => '>=',
-					'per_page'         => 1,
-					'orderby'          => 'none',
 				),
 				'ids'
 			)
