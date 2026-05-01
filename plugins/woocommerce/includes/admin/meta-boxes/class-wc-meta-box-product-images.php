@@ -13,7 +13,7 @@
 use Automattic\WooCommerce\Enums\ProductType;
 
 if ( ! defined( 'ABSPATH' ) ) {
-	exit; // Exit if accessed directly.
+	exit;
 }
 
 /**
