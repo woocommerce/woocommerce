@@ -21,6 +21,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_review_order_item_already_reviewed' );
+		ItemEligibility::reset_cache();
 		parent::tearDown();
 	}
 
@@ -170,5 +171,59 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 		$this->assertSame( (int) $built['product_id'], $received['product_id'] );
 		$this->assertSame( (int) $built['order']->get_id(), $received['order_id'] );
 		$this->assertSame( 'context@example.test', $received['customer_email'] );
+	}
+
+	/**
+	 * @testdox prime() pre-fills the cache so subsequent describe() calls do not requery.
+	 */
+	public function test_prime_caches_results(): void {
+		$built      = $this->make_order( 'cache@example.test' );
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $built['product_id'],
+				'comment_author'       => 'Cache',
+				'comment_author_email' => 'cache@example.test',
+				'comment_content'      => 'Worked.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		$this->assertNotFalse( $comment_id );
+
+		ItemEligibility::prime( $built['order']->get_items(), $built['order'] );
+
+		// Count get_comments calls during describe(); cache should serve the answer.
+		$call_count = 0;
+		add_filter(
+			'comments_pre_query',
+			static function ( $value ) use ( &$call_count ) {
+				++$call_count;
+				return $value;
+			}
+		);
+
+		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+
+		remove_all_filters( 'comments_pre_query' );
+
+		$this->assertSame( ItemEligibility::STATUS_REVIEWED, $decision['status'] );
+		$this->assertSame( 0, $call_count, 'describe() should not query when prime() has cached the result.' );
+	}
+
+	/**
+	 * @testdox Filter forcing reviewed=true with no comment yields STATUS_REVIEWED with null comment.
+	 */
+	public function test_filter_forced_reviewed_with_no_comment(): void {
+		$built = $this->make_order();
+
+		add_filter(
+			'woocommerce_review_order_item_already_reviewed',
+			'__return_true'
+		);
+
+		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+
+		$this->assertSame( ItemEligibility::STATUS_REVIEWED, $decision['status'] );
+		$this->assertNull( $decision['comment'], 'Filter-only reviewed state should leave comment as null.' );
 	}
 }

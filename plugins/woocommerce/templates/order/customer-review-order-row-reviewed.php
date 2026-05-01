@@ -15,34 +15,41 @@
  * @var WC_Order_Item_Product $item    Order line item.
  * @var WC_Product            $product Product attached to the line item.
  * @var WC_Order              $order   Order being reviewed.
- * @var WP_Comment            $review  The existing review comment.
+ * @var WP_Comment|null       $review  The existing review comment, when one was found.
  */
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! $item instanceof WC_Order_Item_Product || ! $product instanceof WC_Product || ! $review instanceof WP_Comment ) {
+if ( ! $item instanceof WC_Order_Item_Product || ! $product instanceof WC_Product ) {
 	return;
 }
 
+$has_review   = isset( $review ) && $review instanceof WP_Comment;
 $product_link = $product->is_visible() ? get_permalink( $product->get_id() ) : '';
 $product_name = $item->get_name();
 $image_html   = $product->get_image( 'woocommerce_thumbnail' );
 
-$rating = (int) get_comment_meta( (int) $review->comment_ID, 'rating', true );
-if ( $rating < 1 || $rating > 5 ) {
-	$rating = 0;
+$rating       = 0;
+$summary      = '';
+$posted_label = '';
+if ( $has_review ) {
+	$rating_meta = (int) get_comment_meta( (int) $review->comment_ID, 'rating', true );
+	if ( $rating_meta >= 1 && $rating_meta <= 5 ) {
+		$rating = $rating_meta;
+	}
+
+	$summary = wp_trim_words( (string) $review->comment_content, 30, '…' );
+
+	$posted_at_ts   = strtotime( $review->comment_date_gmt . ' UTC' );
+	$posted_at_text = $posted_at_ts ? (string) wp_date( get_option( 'date_format' ), $posted_at_ts ) : '';
+	if ( '' !== $posted_at_text ) {
+		$posted_label = sprintf(
+			/* translators: %s: human-readable date posted, e.g. "March 5, 2026" */
+			esc_html__( 'Reviewed on %s', 'woocommerce' ),
+			esc_html( $posted_at_text )
+		);
+	}
 }
-
-$review_text = (string) $review->comment_content;
-$summary     = wp_trim_words( $review_text, 30, '…' );
-
-$posted_at_ts   = strtotime( $review->comment_date_gmt . ' UTC' );
-$posted_at_text = $posted_at_ts ? (string) wp_date( get_option( 'date_format' ), $posted_at_ts ) : '';
-$posted_label   = sprintf(
-	/* translators: %s: human-readable date posted, e.g. "March 5, 2026" */
-	esc_html__( 'Reviewed on %s', 'woocommerce' ),
-	esc_html( $posted_at_text )
-);
 
 $labels = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::get_labels();
 ?>
@@ -65,9 +72,11 @@ $labels = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::get_labels()
 				<span class="woocommerce-review-order__item-reviewed-badge">
 					<?php esc_html_e( 'Reviewed', 'woocommerce' ); ?>
 				</span>
-				<span class="woocommerce-review-order__item-reviewed-date">
-					<?php echo $posted_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already escaped via esc_html() inside sprintf(). ?>
-				</span>
+				<?php if ( '' !== $posted_label ) : ?>
+					<span class="woocommerce-review-order__item-reviewed-date">
+						<?php echo $posted_label; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- already escaped via esc_html() inside sprintf(). ?>
+					</span>
+				<?php endif; ?>
 			</div>
 
 			<?php

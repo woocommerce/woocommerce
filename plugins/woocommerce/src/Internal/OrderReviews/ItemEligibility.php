@@ -32,6 +32,82 @@ class ItemEligibility {
 	public const STATUS_SKIP     = 'skip';
 
 	/**
+	 * Per-request cache for the "did this email review this product" lookup.
+	 * Keyed by `email|product_id`; value is `WP_Comment|null`.
+	 *
+	 * @var array<string, ?WP_Comment>
+	 */
+	private static array $review_cache = array();
+
+	/**
+	 * Pre-fill the per-request review cache for a set of items in a single query.
+	 *
+	 * Call this from the template before iterating items so each subsequent
+	 * `describe()` call hits the cache instead of running its own
+	 * `get_comments()` query (avoids the N+1 pattern on multi-item orders).
+	 *
+	 * @param iterable<WC_Order_Item_Product|mixed> $items Order line items.
+	 * @param WC_Order                              $order Order being reviewed.
+	 */
+	public static function prime( iterable $items, WC_Order $order ): void {
+		$email = $order->get_billing_email();
+		if ( '' === $email ) {
+			return;
+		}
+
+		$product_ids = array();
+		foreach ( $items as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$pid = $item->get_product_id();
+				if ( $pid ) {
+					$product_ids[ $pid ] = $pid;
+				}
+			}
+		}
+
+		if ( empty( $product_ids ) ) {
+			return;
+		}
+
+		$comments = get_comments(
+			array(
+				'post__in'     => array_values( $product_ids ),
+				'author_email' => $email,
+				'type'         => 'review',
+				'status'       => 'all',
+				'orderby'      => 'comment_date_gmt',
+				'order'        => 'DESC',
+			)
+		);
+
+		// Default every product id to null so describe() doesn't re-query.
+		foreach ( $product_ids as $pid ) {
+			self::$review_cache[ $email . '|' . $pid ] = null;
+		}
+
+		if ( is_array( $comments ) ) {
+			foreach ( $comments as $comment ) {
+				if ( ! $comment instanceof WP_Comment ) {
+					continue;
+				}
+				$cache_key = $email . '|' . (int) $comment->comment_post_ID;
+				if ( null === ( self::$review_cache[ $cache_key ] ?? null ) ) {
+					self::$review_cache[ $cache_key ] = $comment;
+				}
+			}
+		}
+	}
+
+	/**
+	 * Reset the per-request cache. Test helper.
+	 *
+	 * @internal
+	 */
+	public static function reset_cache(): void {
+		self::$review_cache = array();
+	}
+
+	/**
 	 * Describe how an order line item should render on the Review Order page.
 	 *
 	 * @param WC_Order_Item_Product $item  Order line item.
@@ -95,6 +171,11 @@ class ItemEligibility {
 			return null;
 		}
 
+		$cache_key = $email . '|' . $product_id;
+		if ( array_key_exists( $cache_key, self::$review_cache ) ) {
+			return self::$review_cache[ $cache_key ];
+		}
+
 		$comments = get_comments(
 			array(
 				'post_id'      => $product_id,
@@ -108,10 +189,14 @@ class ItemEligibility {
 		);
 
 		if ( ! is_array( $comments ) || empty( $comments ) ) {
+			self::$review_cache[ $cache_key ] = null;
 			return null;
 		}
 
 		$first = reset( $comments );
-		return $first instanceof WP_Comment ? $first : null;
+		$found = $first instanceof WP_Comment ? $first : null;
+
+		self::$review_cache[ $cache_key ] = $found;
+		return $found;
 	}
 }
