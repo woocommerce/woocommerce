@@ -111,8 +111,9 @@ class ShopperListTests extends WC_Unit_Test_Case {
 				'slug'             => self::SAVED_FOR_LATER_SLUG,
 				'date_created_gmt' => '2026-04-01 00:00:00',
 				'items'            => array(
-					$good_item['key']   => $good_item,
-					'broken-row-key' => array( 'variation_id' => 0 ), // missing key + product_id
+					$good_item['key'] => $good_item,
+					// Missing key + product_id.
+					'broken-row-key'  => array( 'variation_id' => 0 ),
 				),
 			)
 		);

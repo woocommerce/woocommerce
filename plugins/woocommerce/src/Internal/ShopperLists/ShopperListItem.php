@@ -98,7 +98,7 @@ class ShopperListItem {
 	/**
 	 * Construct from a stored item array (from user_meta).
 	 *
-	 * @throws \Exception
+	 * @throws \Exception When the stored payload is missing required fields.
 	 *
 	 * @param array $data Stored item record.
 	 */
