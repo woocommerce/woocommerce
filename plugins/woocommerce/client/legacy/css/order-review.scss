@@ -52,6 +52,18 @@
 		min-height: 6em;
 		resize: vertical;
 	}
+
+	@media (max-width: 600px) {
+		&__item-row {
+			flex-direction: column;
+		}
+
+		&__item-image {
+			flex: 0 0 auto;
+			max-width: 240px;
+			width: 100%;
+		}
+	}
 }
 
 .woocommerce-star-rating {
