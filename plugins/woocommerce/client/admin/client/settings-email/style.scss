@@ -360,10 +360,20 @@ $wc-setting-email-width: 634px;
 	}
 }
 
-// RSM-140 — wrapper that pins the custom chip just above the DataView toolbar.
-// Padding matches the DataView toolbar's horizontal alignment.
+// RSM-140 — wrapper that allows the custom chip to overlay the DataView toolbar.
+// Absolute-positioning the chip into the toolbar avoids forking @wordpress/dataviews
+// to add an inline-toolbar slot. Position values are tuned to land just after the
+// search input + filter funnel button — design_handoff_email_update_flow Option B.
+.woocommerce-email-listing {
+	position: relative;
+}
+
 .woocommerce-email-listing > .woocommerce-email-listing-update-chip {
-	margin: $grid-unit-15 $grid-unit-15 0;
+	left: 316px;
+	margin: 0;
+	position: absolute;
+	top: 20px;
+	z-index: 1;
 }
 
 // RSM-140 — "Update available" filter chip in the email list toolbar.
