@@ -25,6 +25,20 @@ if ( ! defined( 'ABSPATH' ) ) {
 class FulfillmentsDataStore extends \WC_Data_Store_WP implements \WC_Object_Data_Store_Interface, FulfillmentsDataStoreInterface {
 
 	/**
+	 * Returns the class name of the current data store.
+	 *
+	 * Third-party plugins (e.g., WP Activity Log) may call this method
+	 * on the raw data store instance for logging purposes.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return string
+	 */
+	public function get_current_class_name(): string {
+		return static::class;
+	}
+
+	/**
 	 * Method to create a new fulfillment in the database.
 	 *
 	 * @param Fulfillment $data The fulfillment object to create.
