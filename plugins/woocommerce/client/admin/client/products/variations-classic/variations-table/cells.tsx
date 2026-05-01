@@ -2,19 +2,21 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { Stack } from '@wordpress/ui';
+import { Tag } from '@woocommerce/components';
+import CurrencyFactory from '@woocommerce/currency';
 
 /**
  * Internal dependencies
  */
+import { CURRENCY } from '~/utils/admin-settings';
 import type { Variation } from '../types';
 
-export function VariantCell( { item }: { item: Variation } ) {
-	const label = item.attributes.length
-		? item.attributes.map( ( a ) => a.option ).join( ' · ' )
-		: __( '(No attributes)', 'woocommerce' );
+const currency = CurrencyFactory( CURRENCY );
 
+export function VariantCell( { item }: { item: Variation } ) {
 	return (
-		<div className="wc-variations-classic__variant-cell">
+		<Stack direction="row" gap="sm" align="center">
 			{ item.image?.src && (
 				<img
 					src={ item.image.src }
@@ -24,10 +26,29 @@ export function VariantCell( { item }: { item: Variation } ) {
 					height={ 36 }
 				/>
 			) }
-			<span className="wc-variations-classic__variant-label">
-				{ label }
+			<span className="wc-variations-classic__variant-id">
+				#{ item.id }
 			</span>
-		</div>
+		</Stack>
+	);
+}
+
+export function ValuesCell( { item }: { item: Variation } ) {
+	if ( ! item.attributes.length ) {
+		return <span className="wc-variations-classic__values--empty">—</span>;
+	}
+
+	return (
+		<Stack direction="row" gap="xs" justify="flex-start" wrap="wrap">
+			{ item.attributes.map( ( attr ) => (
+				<Tag
+					key={ attr.id || attr.name }
+					label={ attr.option }
+					id={ attr.id || attr.name }
+					screenReaderLabel={ attr.option }
+				/>
+			) ) }
+		</Stack>
 	);
 }
 
@@ -46,8 +67,14 @@ export function PriceCell( { item }: { item: Variation } ) {
 
 	return (
 		<span className="wc-variations-classic__price">
-			{ isOnSale && <del>{ item.regular_price }</del> }
-			<ins>{ isOnSale ? item.sale_price : item.regular_price }</ins>
+			{ isOnSale && (
+				<del>{ currency.formatAmount( item.regular_price ) }</del>
+			) }
+			<ins>
+				{ currency.formatAmount(
+					isOnSale ? item.sale_price : item.regular_price
+				) }
+			</ins>
 		</span>
 	);
 }
