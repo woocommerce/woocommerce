@@ -145,17 +145,18 @@ test.describe.serial(
 				submit.click(),
 			] );
 
-			// First two rows should report the success ('--ok') status, not
-			// any other status variant.
+			// First two rows should report a successful submission. Either
+			// '--ok' (auto-approved) or '--pending_moderation' (when the
+			// comment_moderation option is on) counts as success; '--error'
+			// would indicate a real failure. Test environment-agnostic so
+			// it doesn't depend on global comment_moderation state.
+			const successSelector =
+				'.woocommerce-review-order__item-status--ok, .woocommerce-review-order__item-status--pending_moderation';
 			await expect(
-				rows
-					.nth( 0 )
-					.locator( '.woocommerce-review-order__item-status--ok' )
+				rows.nth( 0 ).locator( successSelector )
 			).toBeVisible();
 			await expect(
-				rows
-					.nth( 1 )
-					.locator( '.woocommerce-review-order__item-status--ok' )
+				rows.nth( 1 ).locator( successSelector )
 			).toBeVisible();
 			// Third row was never rated and should have no status note at all.
 			await expect(
