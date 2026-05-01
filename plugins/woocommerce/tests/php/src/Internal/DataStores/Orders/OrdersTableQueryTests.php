@@ -741,4 +741,53 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 			$order->delete( true );
 		}
 	}
+
+	/**
+	 * @testdox Querying orders by customer_note returns only matching orders.
+	 */
+	public function test_query_customer_note(): void {
+		$order1 = new \WC_Order();
+		$order1->set_customer_note( 'Please leave at the door' );
+		$order1->save();
+
+		$order2 = new \WC_Order();
+		$order2->set_customer_note( 'Ring the bell twice' );
+		$order2->save();
+
+		$order3 = new \WC_Order();
+		$order3->save();
+
+		// Exact match returns only the matching order.
+		$query = new OrdersTableQuery(
+			array(
+				'customer_note' => 'Please leave at the door',
+				'return'        => 'ids',
+			)
+		);
+		$this->assertEqualsCanonicalizing( array( $order1->get_id() ), $query->orders );
+
+		// Different note returns the other order.
+		$query = new OrdersTableQuery(
+			array(
+				'customer_note' => 'Ring the bell twice',
+				'return'        => 'ids',
+			)
+		);
+		$this->assertEqualsCanonicalizing( array( $order2->get_id() ), $query->orders );
+
+		// Empty string matches orders with no customer note.
+		$query = new OrdersTableQuery(
+			array(
+				'customer_note' => '',
+				'return'        => 'ids',
+			)
+		);
+		$this->assertContains( $order3->get_id(), $query->orders );
+		$this->assertNotContains( $order1->get_id(), $query->orders );
+		$this->assertNotContains( $order2->get_id(), $query->orders );
+
+		$order1->delete( true );
+		$order2->delete( true );
+		$order3->delete( true );
+	}
 }

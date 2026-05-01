@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix useSelect instability warning for notices in the email editor

@@ -1811,7 +1811,7 @@ class WC_AJAX {
 		foreach ( $ids as $id ) {
 			$product_object = wc_get_product( $id );
 
-			if ( ! wc_products_array_filter_readable( $product_object ) ) {
+			if ( ! $product_object || ! wc_products_array_filter_readable( $product_object ) ) {
 				continue;
 			}
 
@@ -1822,11 +1822,33 @@ class WC_AJAX {
 				continue;
 			}
 
-			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
-				$stock_amount = $product_object->get_stock_quantity();
-				/* Translators: %d stock amount */
-				$formatted_name .= ' &ndash; ' . sprintf( __( 'Stock: %d', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
-			}
+			if ( ! empty( $_GET['display_stock'] ) ) {
+				$stock_parts = array();
+
+				if ( $managing_stock ) {
+					$stock_amount = $product_object->get_stock_quantity();
+					/* Translators: %s stock amount */
+					$stock_parts[] = sprintf( __( 'Stock: %s', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
+				}
+
+				$stock_status = $product_object->get_stock_status();
+				if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
+					$stock_parts[] = __( 'Out of stock', 'woocommerce' );
+				} elseif ( ProductStockStatus::ON_BACKORDER === $stock_status ) {
+					$stock_parts[] = __( 'On backorder', 'woocommerce' );
+				}
+
+				if ( ! empty( $stock_parts ) ) {
+					$formatted_name .= ' (' . implode( ' &ndash; ', $stock_parts ) . ')';
+				}
+
+				$product_status = $product_object->get_status();
+				if ( ProductStatus::PRIVATE === $product_status ) {
+					$formatted_name .= ' (' . __( 'Disabled', 'woocommerce' ) . ')';
+				} elseif ( ProductStatus::DRAFT === $product_status ) {
+					$formatted_name .= ' (' . __( 'Draft', 'woocommerce' ) . ')';
+				}
+			}//end if
 
 			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $formatted_name ) );
 		}
@@ -3872,13 +3894,8 @@ class WC_AJAX {
 		$all_providers = \Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils::get_shipping_providers();
 		$built_in_keys = array();
 		foreach ( $all_providers as $provider ) {
-			if ( is_string( $provider ) && class_exists( $provider ) && is_subclass_of( $provider, \Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider::class ) ) {
-				try {
-					$instance        = wc_get_container()->get( $provider );
-					$built_in_keys[] = $instance->get_key();
-				} catch ( \Throwable $e ) {
-					continue;
-				}
+			if ( ! $provider instanceof \Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\CustomShippingProvider ) {
+				$built_in_keys[] = $provider->get_key();
 			}
 		}
 		$reserved_slug_error = '';
@@ -4057,12 +4074,12 @@ class WC_AJAX {
 			$wpdb->prepare(
 				"SELECT 1 FROM {$fulfillments_table} f
 				INNER JOIN {$meta_table} m ON f.fulfillment_id = m.fulfillment_id
-				WHERE m.meta_key = '_shipping_provider'
+				WHERE m.meta_key = '_shipment_provider'
 				AND m.meta_value = %s
 				AND f.date_deleted IS NULL
 				AND m.date_deleted IS NULL
 				LIMIT 1",
-				$provider_slug
+				wp_json_encode( $provider_slug )
 			)
 		);
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared

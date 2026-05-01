@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Suppress harmless duplicate key database errors logged during WooCommerce table creation on update.

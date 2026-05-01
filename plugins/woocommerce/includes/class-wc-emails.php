@@ -291,6 +291,7 @@ class WC_Emails {
 			'WC_Email_Customer_Processing_Order'     => __DIR__ . '/emails/class-wc-email-customer-processing-order.php',
 			'WC_Email_Customer_Completed_Order'      => __DIR__ . '/emails/class-wc-email-customer-completed-order.php',
 			'WC_Email_Customer_Refunded_Order'       => __DIR__ . '/emails/class-wc-email-customer-refunded-order.php',
+			'WC_Email_Customer_Review_Request'       => __DIR__ . '/emails/class-wc-email-customer-review-request.php',
 			'WC_Email_Customer_Invoice'              => __DIR__ . '/emails/class-wc-email-customer-invoice.php',
 			'WC_Email_Customer_Note'                 => __DIR__ . '/emails/class-wc-email-customer-note.php',
 			'WC_Email_Customer_Reset_Password'       => __DIR__ . '/emails/class-wc-email-customer-reset-password.php',
@@ -393,6 +394,10 @@ class WC_Emails {
 	 * @return string       Email footer text with any replacements done.
 	 */
 	public function replace_placeholders( $text ) {
+		if ( ! is_string( $text ) ) {
+			$text = is_scalar( $text ) ? (string) $text : '';
+		}
+
 		$domain = wp_parse_url( home_url(), PHP_URL_HOST );
 
 		return str_replace(

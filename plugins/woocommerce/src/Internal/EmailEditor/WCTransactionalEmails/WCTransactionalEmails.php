@@ -33,6 +33,7 @@ class WCTransactionalEmails {
 		'customer_refunded_order',
 		'customer_partially_refunded_order',
 		'customer_reset_password',
+		'customer_review_request',
 		'failed_order',
 		'new_order',
 	);
@@ -63,11 +64,11 @@ class WCTransactionalEmails {
 	}
 
 	/**
-	 * Get the Core WooCommerce transactional emails for the block editor.
+	 * Get the core transactional emails.
 	 *
 	 * @return array
 	 */
-	public static function get_transactional_emails() {
+	public static function get_core_transactional_emails() {
 		$emails = self::$core_transactional_emails;
 
 		if ( FeaturesUtil::feature_is_enabled( 'point_of_sale' ) ) {
@@ -83,6 +84,17 @@ class WCTransactionalEmails {
 			);
 			$emails             = array_merge( $emails, $fulfillment_emails );
 		}
+
+		return $emails;
+	}
+
+	/**
+	 * Get the Core WooCommerce transactional emails for the block editor.
+	 *
+	 * @return array
+	 */
+	public static function get_transactional_emails() {
+		$emails = self::get_core_transactional_emails();
 
 		/**
 		 * Filter the transactional emails for the block editor.

@@ -25,9 +25,9 @@ const useEmailHeadingAdjustments = ( clientId: string ) => {
 
 	const { productCollectionBlock } = useSelect(
 		( select ) => ( {
-			productCollectionBlock:
-				// @ts-expect-error getBlock is not typed.
-				select( blockEditorStore ).getBlock( clientId ) as Block | null,
+			productCollectionBlock: select( blockEditorStore ).getBlock(
+				clientId
+			) as Block | null,
 		} ),
 		[ clientId ]
 	);

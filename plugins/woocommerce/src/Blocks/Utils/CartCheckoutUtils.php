@@ -27,13 +27,13 @@ class CartCheckoutUtils {
 	 * This is determined by looking at the global $post object and comparing it to the post ID defined in settings,
 	 * or checking the page contents for a block or shortcode.
 	 *
-	 * This function cannot be used accurately before the `pre_get_posts` action has been run.
+	 * This function cannot be used accurately before the `wp` action has been run.
 	 *
 	 * @param string $page_type The page type to check for.
 	 * @return bool|null
 	 */
 	private static function is_page_type( string $page_type ): ?bool {
-		if ( ! did_action( 'pre_get_posts' ) ) {
+		if ( ! did_action( 'wp' ) ) {
 			return null;
 		}
 

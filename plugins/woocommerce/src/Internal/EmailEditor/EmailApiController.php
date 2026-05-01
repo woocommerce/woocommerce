@@ -5,6 +5,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Validator\Builder;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use WC_Email;
@@ -26,7 +28,7 @@ class EmailApiController {
 	 *
 	 * @var WCTransactionalEmailPostsManager|null
 	 */
-	private ?WCTransactionalEmailPostsManager $post_manager;
+	private ?WCTransactionalEmailPostsManager $post_manager = null;
 
 	/**
 	 * The WooCommerce transactional email posts generator.
@@ -283,6 +285,27 @@ class EmailApiController {
 				'schema'              => array( $this, 'get_default_content_schema' ),
 			)
 		);
+
+		register_rest_route(
+			'woocommerce-email-editor/v1',
+			'/emails/(?P<id>\d+)/reset',
+			array(
+				'methods'             => \WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'reset_response' ),
+				'permission_callback' => function () {
+					return current_user_can( 'manage_woocommerce' );
+				},
+				'args'                => array(
+					'id' => array(
+						'description'       => __( 'The ID of the woo_email post.', 'woocommerce' ),
+						'type'              => 'integer',
+						'required'          => true,
+						'sanitize_callback' => 'absint',
+					),
+				),
+				'schema'              => array( $this, 'get_reset_schema' ),
+			)
+		);
 	}
 
 	/**
@@ -337,5 +360,109 @@ class EmailApiController {
 			array( 'content' => $this->posts_generator->get_email_template( $email ) ),
 			200
 		);
+	}
+
+	/**
+	 * Get the schema for the reset endpoint response.
+	 *
+	 * @return array
+	 */
+	public function get_reset_schema(): array {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'woo_email_reset',
+			'type'       => 'object',
+			'properties' => array(
+				'content'     => array(
+					'description' => __( 'The canonical block content written to the post.', 'woocommerce' ),
+					'type'        => 'string',
+					'readonly'    => true,
+				),
+				'version'     => array(
+					'description' => __( 'The core block template @version stamped on the post, or null when the email is not sync-enabled.', 'woocommerce' ),
+					'type'        => array( 'string', 'null' ),
+					'readonly'    => true,
+				),
+				'source_hash' => array(
+					'description' => __( 'sha1 of the canonical block content stamped on the post, or null when the email is not sync-enabled.', 'woocommerce' ),
+					'type'        => array( 'string', 'null' ),
+					'readonly'    => true,
+				),
+				'synced_at'   => array(
+					'description' => __( 'UTC timestamp when the post was stamped (Y-m-d H:i:s), or null when the email is not sync-enabled.', 'woocommerce' ),
+					'type'        => array( 'string', 'null' ),
+					'readonly'    => true,
+				),
+				'status'      => array(
+					'description' => __( 'The post-reset sync status (in_sync on success for sync-enabled emails, null otherwise).', 'woocommerce' ),
+					'type'        => array( 'string', 'null' ),
+					'readonly'    => true,
+				),
+			),
+		);
+	}
+
+	/**
+	 * Reset a `woo_email` post to its current core template render and (when sync-enabled) stamp sync meta.
+	 *
+	 * Writes the canonical post content (byte-identical to what
+	 * {@see WCTransactionalEmailPostsGenerator} would produce on a fresh recreate). For emails
+	 * that are opted in to template sync (registered in {@see WCEmailTemplateSyncRegistry}),
+	 * also stamps `_wc_email_template_version`, `_wc_email_template_source_hash`,
+	 * `_wc_email_last_synced_at`, and `_wc_email_template_status = in_sync`. Meta writes are
+	 * conditional on the post update succeeding, so a `wp_update_post` failure leaves the
+	 * post — and any pre-existing meta — untouched.
+	 *
+	 * Non-sync-enabled emails (e.g. third-party templates without an `@version` header)
+	 * still receive a successful content reset, just without the meta stamp. This mirrors
+	 * the pre-RSM-148 behaviour where the standalone REST PUT performed the content reset
+	 * and stamping was a separate side effect, preserving backward compatibility.
+	 *
+	 * @param WP_REST_Request $request The REST request.
+	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
+	 * @return WP_REST_Response|WP_Error
+	 *
+	 * @since 10.8.0
+	 */
+	public function reset_response( WP_REST_Request $request ) {
+		if ( ! ( $this->post_manager && $this->posts_generator ) ) {
+			return new WP_Error(
+				'woocommerce_email_editor_not_initialized',
+				__( 'Email editor is not initialized.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		$post_id    = (int) $request->get_param( 'id' );
+		$email_type = $this->post_manager->get_email_type_from_post_id( $post_id );
+		$email      = $this->get_email_by_type( $email_type ?? '' );
+
+		if ( ! $email ) {
+			return new WP_Error(
+				'woocommerce_email_not_found',
+				__( 'No email found for the given post ID.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post(
+			$email,
+			$post_id,
+			array( 'require_uncustomized' => false )
+		);
+
+		if ( is_wp_error( $result ) ) {
+			return new WP_Error(
+				'woocommerce_email_reset_failed',
+				sprintf(
+					/* translators: %s: underlying error message */
+					__( 'Failed to reset email content: %s', 'woocommerce' ),
+					$result->get_error_message()
+				),
+				array( 'status' => 500 )
+			);
+		}
+
+		return new WP_REST_Response( $result, 200 );
 	}
 }

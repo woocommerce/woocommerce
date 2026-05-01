@@ -48,17 +48,19 @@ class NewReviewNotification extends Notification {
 			'timestamp'   => gmdate( 'c' ),
 			'resource_id' => $this->get_resource_id(),
 			'title'       => array(
-				'format' => 'You have a new review! ⭐️',
-			),
-			'message'     => array(
 				/**
 				 * This will be translated in WordPress.com, format:
-				 * 1: reviewer name, 2: product name, 3: comment content
+				 * 1: reviewer name, 2: product name
 				 */
-				'format' => '%1$s left a review on %2$s: %3$s',
+				'format' => '%1$s left a review on %2$s',
 				'args'   => array(
 					wp_strip_all_tags( $comment->comment_author ),
 					wp_strip_all_tags( get_the_title( (int) $comment->comment_post_ID ) ),
+				),
+			),
+			'message'     => array(
+				'format' => '%1$s',
+				'args'   => array(
 					wp_strip_all_tags( $comment->comment_content ),
 				),
 			),
@@ -85,5 +87,14 @@ class NewReviewNotification extends Notification {
 	 */
 	public function write_meta( string $key ): void {
 		WC()->call_function( 'update_comment_meta', $this->get_resource_id(), $key, (string) time() );
+	}
+
+	/**
+	 * {@inheritDoc}
+	 *
+	 * @param string $key The meta key.
+	 */
+	public function delete_meta( string $key ): void {
+		WC()->call_function( 'delete_comment_meta', $this->get_resource_id(), $key );
 	}
 }

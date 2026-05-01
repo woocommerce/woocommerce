@@ -71,7 +71,6 @@ const registerProductsBlock = ( attributes: QueryBlockAttributes ) => {
 let currentTemplateSlug: string | undefined;
 subscribe( () => {
 	const previousTemplateSlug = currentTemplateSlug;
-	// @ts-expect-error getEditedPostSlug is not typed
 	currentTemplateSlug = select( CORE_EDITOR_STORE )?.getEditedPostSlug?.();
 	if ( previousTemplateSlug === currentTemplateSlug ) {
 		return;

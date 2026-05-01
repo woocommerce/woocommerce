@@ -21,6 +21,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
@@ -29,6 +30,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -733,8 +735,8 @@ function wc_update_230_options() {
 	delete_metadata( 'user', 0, '_last_order', '', true );
 
 	// To prevent taxes being hidden when using a default 'no address' in a store with tax inc prices, set the woocommerce_default_customer_address to use the store base address by default.
-	if ( '' === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
-		update_option( 'woocommerce_default_customer_address', 'base' );
+	if ( DefaultCustomerAddress::NO_DEFAULT === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
+		update_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE );
 	}
 }
 
@@ -3458,4 +3460,54 @@ function wc_update_1080_migrate_analytics_import_option(): void {
 	if ( add_option( $new_option, $new_value ) ) {
 		delete_option( $legacy_option );
 	}
+}
+
+/**
+ * Slim the `meta_key_value` index on `wc_orders_meta` by removing the `meta_value` column.
+ *
+ * The original composite index `(meta_key(100), meta_value(82))` overlaps heavily with
+ * `order_id_meta_key_meta_value` and the `meta_value` prefix adds significant storage
+ * overhead with negligible selectivity benefit. All core queries that use this index
+ * filter primarily by `meta_key`.
+ *
+ * @since 10.8.0
+ *
+ * @return void
+ */
+function wc_update_1080_slim_orders_meta_key_index(): void {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'wc_orders_meta';
+	$index_name = 'meta_key_value';
+
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	$index = $wpdb->get_row(
+		$wpdb->prepare(
+			'SHOW INDEX FROM ' . $table_name . ' WHERE Key_name = %s AND Column_name = %s',
+			$index_name,
+			'meta_value'
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+	if ( is_null( $index ) ) {
+		return;
+	}
+
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(100))" );
+}
+
+/**
+ * Backfill sync meta onto pre-existing `woo_email` posts so the template
+ * divergence detector introduced in the same release (RSM-138) can classify
+ * legacy installs safely.
+ *
+ * @since 10.8.0
+ *
+ * @return bool Always false. Once-per-site is enforced by the
+ *              `woocommerce_db_version` fence in `$db_updates`.
+ */
+function wc_update_1080_backfill_email_template_sync_meta(): bool {
+	return WCEmailTemplateSyncBackfill::run();
 }

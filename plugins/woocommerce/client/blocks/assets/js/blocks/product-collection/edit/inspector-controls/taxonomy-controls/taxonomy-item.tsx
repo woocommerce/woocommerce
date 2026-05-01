@@ -73,7 +73,6 @@ const TaxonomyItem = ( { taxonomy, termIds, onChange }: TaxonomyItemProps ) => {
 				return { existingTerms: [], isLoadingExistingTerms: false };
 			}
 
-			// @ts-expect-error hasFinishedResolution is untyped.
 			const { getEntityRecords, hasFinishedResolution } =
 				select( 'core' );
 
