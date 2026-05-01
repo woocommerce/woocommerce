@@ -12,7 +12,11 @@ import { View } from '@wordpress/dataviews/wp'; // eslint-disable-line @woocomme
 /**
  * Internal dependencies
  */
-import { EmailType, EmailStatus } from './settings-email-listing-slotfill';
+import {
+	EmailType,
+	EmailStatus,
+	TemplateStatus,
+} from './settings-email-listing-slotfill';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 type EmailListingRecreateEmailPostResponse = {
@@ -69,10 +73,33 @@ export const useTransactionalEmails = (
 				if ( emailType.manual ) {
 					status = 'manual';
 				}
+
+				// RSM-140: project template-status and template-version meta exposed
+				// as top-level REST fields by the divergence detector. Read-only.
+				const rawStatus = (
+					post as { _wc_email_template_status?: unknown } | null
+				 )?._wc_email_template_status;
+				const templateStatus: TemplateStatus | null =
+					rawStatus === 'in_sync' ||
+					rawStatus === 'core_updated_uncustomized' ||
+					rawStatus === 'core_updated_customized'
+						? rawStatus
+						: null;
+
+				const rawVersion = (
+					post as { _wc_email_template_version?: unknown } | null
+				 )?._wc_email_template_version;
+				const templateVersion: string | null =
+					typeof rawVersion === 'string' && rawVersion.length > 0
+						? rawVersion
+						: null;
+
 				return {
 					...emailType,
 					link: post?.link || '',
 					status: status as EmailStatus,
+					templateStatus,
+					templateVersion,
 				};
 			} ),
 		[ emailTypesData, emailPosts, postIdsMap ]
