@@ -20,7 +20,7 @@ type Order = {
 
 const productPrice = '15.99';
 
-test.describe(
+test.describe.serial(
 	'Customer Review Order page: rate, submit, and verify',
 	{ tag: [ tags.HPOS ] },
 	() => {
@@ -107,11 +107,18 @@ test.describe(
 			const submit = page.locator( '.woocommerce-review-order__submit' );
 			await expect( submit ).toBeEnabled();
 			await Promise.all( [
-				page.waitForResponse(
-					( response ) =>
+				page.waitForResponse( ( response ) => {
+					const request = response.request();
+					const postData = request.postData() ?? '';
+					return (
 						response.url().includes( 'admin-ajax.php' ) &&
-						response.request().method() === 'POST'
-				),
+						request.method() === 'POST' &&
+						postData.includes(
+							'action=woocommerce_submit_order_reviews'
+						) &&
+						response.ok()
+					);
+				} ),
 				submit.click(),
 			] );
 
