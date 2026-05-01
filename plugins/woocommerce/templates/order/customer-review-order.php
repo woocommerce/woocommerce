@@ -73,10 +73,6 @@ $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $orde
 // items below. Without this each describe() call would issue its own query.
 \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prime( $items, $order );
 
-// Single batched lookup of every existing review by this customer for the
-// items below. Without this each describe() call would issue its own query.
-\Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prime( $items, $order );
-
 // Pre-compute one decision per item so we know whether the form has any
 // actionable rows or whether to fall through to the empty-state thank-you.
 $decisions     = array();
@@ -126,15 +122,26 @@ if ( ! $has_form_rows ) {
 			update_meta_cache( 'comment', $comment_ids );
 		}
 
+		// Multiple line items can map to the same review (same parent
+		// product on different variations or quantity-split lines). Count
+		// each underlying comment once so the customer-facing summary
+		// matches what they actually wrote.
+		$counted = array();
 		foreach ( $decisions as $entry ) {
 			$existing_review = $entry['decision']['comment'] ?? null;
-			if ( $existing_review instanceof WP_Comment ) {
-				++$reviewed_count;
-				$rating = (int) get_comment_meta( (int) $existing_review->comment_ID, 'rating', true );
-				if ( $rating > 0 ) {
-					$rating_total += $rating;
-					++$rating_n;
-				}
+			if ( ! $existing_review instanceof WP_Comment ) {
+				continue;
+			}
+			$cid = (int) $existing_review->comment_ID;
+			if ( isset( $counted[ $cid ] ) ) {
+				continue;
+			}
+			$counted[ $cid ] = true;
+			++$reviewed_count;
+			$rating = (int) get_comment_meta( $cid, 'rating', true );
+			if ( $rating > 0 ) {
+				$rating_total += $rating;
+				++$rating_n;
 			}
 		}//end foreach
 	}//end if

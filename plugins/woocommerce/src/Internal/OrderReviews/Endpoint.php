@@ -342,8 +342,12 @@ class Endpoint {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
 			}
-			// describe() handles the get_product() == null case via STATUS_SKIP,
-			// so we don't need to hydrate the product object here.
+			// Mirror the template: a deleted product (get_product() === null)
+			// renders nothing on the page, so it shouldn't keep the order in
+			// the "still has actionable rows" state forever.
+			if ( ! $item->get_product() instanceof \WC_Product ) {
+				continue;
+			}
 			$decision = ItemEligibility::describe( $item, $order );
 			if ( ItemEligibility::STATUS_FORM === $decision['status'] ) {
 				return;
