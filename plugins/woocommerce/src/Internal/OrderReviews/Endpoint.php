@@ -9,10 +9,12 @@ namespace Automattic\WooCommerce\Internal\OrderReviews;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Order;
+use WP_Post;
 
 /**
- * Registers the standalone `/review-order/{id}/?key={order_key}` rewrite and
- * renders the read-only Review Order landing page.
+ * Routes `/review-order/{id}/?key={order_key}` to the WooCommerce-managed
+ * Review Order page and renders the read-only landing page through the
+ * `[woocommerce_review_order]` shortcode.
  *
  * The page is intentionally hosted outside the checkout/my-account family:
  *
@@ -21,8 +23,11 @@ use WC_Order;
  * - It is not a my-account endpoint because the order key is the auth, so
  *   guest customers must be able to reach it without logging in.
  *
- * Any failed gating check renders the theme's 404 template so a leaked or
- * stale link cannot disclose order existence.
+ * The route uses the same wp_posts-backed page pattern as the checkout
+ * page so the active theme owns the page chrome (header, footer, sidebar)
+ * on both classic and block themes; the shortcode only renders the form
+ * body inside `the_content`. Any failed gating check renders the theme's
+ * 404 template so a leaked or stale link cannot disclose order existence.
  *
  * The container auto-calls `init()` after instantiation, which is where
  * the WordPress hooks are registered. Resolution is driven by the
@@ -40,9 +45,14 @@ class Endpoint {
 	public const QUERY_VAR = 'review-order';
 
 	/**
-	 * URL-path prefix this endpoint listens on.
+	 * `wc_get_page_id()` key for the WC-managed Review Order page.
 	 */
-	public const URL_PREFIX = 'review-order';
+	public const PAGE_KEY = 'review_order';
+
+	/**
+	 * Shortcode tag that renders the page body inside the WC page content.
+	 */
+	public const SHORTCODE = 'woocommerce_review_order';
 
 	/**
 	 * Wire the endpoint into WordPress.
@@ -54,16 +64,30 @@ class Endpoint {
 	final public function init(): void {
 		add_action( 'init', array( $this, 'add_rewrite_rule' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_var' ), 0 );
-		add_action( 'template_redirect', array( $this, 'maybe_render' ) );
+		add_action( 'template_redirect', array( $this, 'gate_request' ) );
+		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
 	}
 
 	/**
 	 * Register the rewrite rule for the review-order endpoint.
+	 *
+	 * Maps `/<page-slug>/{id}/` to the WC-managed Review Order page so the
+	 * active theme renders its standard page chrome around the shortcode.
 	 */
 	public function add_rewrite_rule(): void {
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id <= 0 ) {
+			return;
+		}
+
+		$page = get_post( $page_id );
+		if ( ! $page instanceof WP_Post || 'publish' !== $page->post_status ) {
+			return;
+		}
+
 		add_rewrite_rule(
-			'^' . self::URL_PREFIX . '/([0-9]+)/?$',
-			'index.php?' . self::QUERY_VAR . '=$matches[1]',
+			'^' . preg_quote( $page->post_name, '/' ) . '/([0-9]+)/?$',
+			'index.php?page_id=' . $page_id . '&' . self::QUERY_VAR . '=$matches[1]',
 			'top'
 		);
 	}
@@ -80,36 +104,71 @@ class Endpoint {
 	}
 
 	/**
-	 * Decide whether this request hits the review-order endpoint and, if so,
-	 * run the gating checks and render the template.
+	 * Run the gating checks before the page template renders.
+	 *
+	 * Auth failures fall through to a 404 here rather than inside the
+	 * shortcode so the response status is set before any output begins.
+	 * On success the request continues into normal page rendering and the
+	 * shortcode echoes the body inside `the_content`.
 	 */
-	public function maybe_render(): void {
+	public function gate_request(): void {
 		global $wp;
 
 		// Use isset() rather than empty() so the literal "0" doesn't slip
-		// through to normal WP routing; render() then 404s on order_id 0.
+		// through to normal WP routing; the auth check 404s on order_id 0.
 		if ( ! isset( $wp->query_vars[ self::QUERY_VAR ] ) ) {
 			return;
 		}
 
-		$this->render( absint( $wp->query_vars[ self::QUERY_VAR ] ) );
-		exit;
+		$order_id  = absint( $wp->query_vars[ self::QUERY_VAR ] );
+		$order_key = $this->read_order_key();
+		$order     = $order_id ? wc_get_order( $order_id ) : false;
+
+		if ( ! $this->is_authorised( $order, $order_key ) ) {
+			$this->render_404();
+			exit;
+		}
 	}
 
 	/**
-	 * Render the Review Order page or its 404 fallback.
+	 * Render the Review Order page body for the WC-managed page.
 	 *
-	 * Public so tests can drive the gating logic directly without the
-	 * `exit` that lives on the `template_redirect` entry point.
+	 * Called by `the_content` on the page that hosts `[woocommerce_review_order]`.
+	 * Returns an empty string when the request did not arrive through the
+	 * tokenised rewrite, so a logged-in admin previewing the page directly
+	 * sees nothing rather than a partial form.
+	 *
+	 * @return string
+	 */
+	public function render_shortcode(): string {
+		global $wp;
+
+		if ( ! isset( $wp->query_vars[ self::QUERY_VAR ] ) ) {
+			return '';
+		}
+
+		$order_id = absint( $wp->query_vars[ self::QUERY_VAR ] );
+		$order    = $order_id ? wc_get_order( $order_id ) : false;
+		if ( ! $order instanceof WC_Order ) {
+			// gate_request() will already have 404'd; this is defensive.
+			return '';
+		}
+
+		ob_start();
+		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render the Review Order body directly. Public so unit tests can drive
+	 * the rendering path without staging a global request and the rewrite.
 	 *
 	 * @internal
 	 *
 	 * @param int $order_id Order id parsed from the URL.
 	 */
 	public function render( int $order_id ): void {
-		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only landing page; the order key is the auth.
-		$raw_key   = ( isset( $_GET['key'] ) && is_string( $_GET['key'] ) ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : '';
-		$order_key = is_string( $raw_key ) ? $raw_key : '';
+		$order_key = $this->read_order_key();
 		$order     = $order_id ? wc_get_order( $order_id ) : false;
 
 		if ( ! $this->is_authorised( $order, $order_key ) ) {
@@ -117,9 +176,7 @@ class Endpoint {
 			return;
 		}
 
-		get_header();
 		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
-		get_footer();
 	}
 
 	/**
@@ -129,7 +186,13 @@ class Endpoint {
 	 * @return string
 	 */
 	public static function get_url( WC_Order $order ): string {
-		$url = wc_get_endpoint_url( self::QUERY_VAR, (string) $order->get_id(), home_url( '/' ) );
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		$base    = $page_id > 0 ? get_permalink( $page_id ) : '';
+		if ( ! is_string( $base ) || '' === $base ) {
+			$base = home_url( '/review-order/' );
+		}
+
+		$url = trailingslashit( $base ) . (string) $order->get_id() . '/';
 		$url = add_query_arg( 'key', $order->get_order_key(), $url );
 
 		/**
@@ -141,6 +204,17 @@ class Endpoint {
 		 * @param WC_Order $order The order object.
 		 */
 		return (string) apply_filters( 'woocommerce_review_order_url', $url, $order );
+	}
+
+	/**
+	 * Read the order key from the request, sanitised.
+	 *
+	 * @return string
+	 */
+	private function read_order_key(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only landing page; the order key is the auth.
+		$raw = ( isset( $_GET['key'] ) && is_string( $_GET['key'] ) ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : '';
+		return is_string( $raw ) ? $raw : '';
 	}
 
 	/**
