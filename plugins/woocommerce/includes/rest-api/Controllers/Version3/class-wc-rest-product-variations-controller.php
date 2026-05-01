@@ -230,7 +230,13 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		if ( isset( $request['gallery_image_ids'] ) && $variation instanceof WC_Product_Variation ) {
-			$gallery_ids = wp_parse_id_list( $request['gallery_image_ids'] );
+			// Enforce the schema: gallery is disjoint from the featured image.
+			$gallery_ids = array_values(
+				array_diff(
+					wp_parse_id_list( $request['gallery_image_ids'] ),
+					array( (int) $variation->get_image_id() )
+				)
+			);
 			try {
 				$variation->set_gallery_image_ids( $gallery_ids );
 				LegacyVariationGalleryCompatibility::mark_core_managed( $variation );
@@ -239,7 +245,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					VariationGalleryTelemetry::EVENT_SAVE_FAILED,
 					array(
 						'context' => 'rest_v3',
-						'reason'  => $e->getMessage(),
+						'reason'  => get_class( $e ),
 					)
 				);
 				throw $e;

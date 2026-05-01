@@ -44,7 +44,7 @@ class Package {
 	 *
 	 * @internal
 	 */
-	public static function prepare() {
+	public static function prepare(): void {
 	}
 
 	/**
@@ -52,7 +52,7 @@ class Package {
 	 *
 	 * @internal
 	 */
-	final public static function init() {
+	final public static function init(): void {
 		if ( ! self::is_enabled() ) {
 			return;
 		}

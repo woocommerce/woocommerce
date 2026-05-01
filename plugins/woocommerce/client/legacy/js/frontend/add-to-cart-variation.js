@@ -937,6 +937,10 @@
 			return false;
 		}
 
+		// Snapshot the live gallery before we replace it, so the reset path
+		// later restores any post-load mutations themes/extensions made.
+		$form.wc_get_default_product_gallery_html();
+
 		/**
 		 * Notify subscribers that the current gallery DOM is about to be
 		 * removed and replaced.

@@ -32,7 +32,12 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 		add_action( 'woocommerce_admin_process_variation_object', array( $this, 'persist_variation_gallery_field' ), 10, 2 );
 	}
 
-	public function enqueue_assets() {
+	/**
+	 * Enqueue admin assets for the classic variation gallery editor.
+	 *
+	 * @return void
+	 */
+	public function enqueue_assets(): void {
 		if ( ! $this->is_product_edit_screen() ) {
 			return;
 		}
@@ -190,7 +195,7 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 				Telemetry::EVENT_SAVE_FAILED,
 				array(
 					'context' => 'classic_admin',
-					'reason'  => $e->getMessage(),
+					'reason'  => get_class( $e ),
 				)
 			);
 			throw $e;

@@ -402,6 +402,63 @@ jQuery( function ( $ ) {
 		},
 
 		/**
+		 * Read the cached thumbnail/hero `src` for an attachment from the
+		 * existing field DOM. Server-rendered <img> tags carry valid URLs
+		 * even for attachments that haven't been loaded into wp.media's
+		 * client cache (e.g. migrator-imported images), so prefer the DOM
+		 * over `wp.media.attachment(id).attributes`.
+		 *
+		 * @param {jQuery} $field
+		 * @param {number} id
+		 * @return {string}
+		 */
+		getCachedAttachmentUrl( $field, id ) {
+			const $existingThumb = $field.find(
+				SELECTORS.thumb +
+					'[data-attachment_id="' +
+					id +
+					'"] ' +
+					SELECTORS.thumbButton +
+					' img'
+			);
+
+			if ( $existingThumb.length ) {
+				return $existingThumb.attr( 'src' ) || '';
+			}
+
+			const $existingHero = $field.find(
+				SELECTORS.fieldHeroImg + '[data-id="' + id + '"]'
+			);
+
+			if ( $existingHero.length ) {
+				return $existingHero.attr( 'src' ) || '';
+			}
+
+			return '';
+		},
+
+		/**
+		 * Resolve a usable URL for the given attachment, preferring the
+		 * server-rendered DOM and falling back to the media-frame cache
+		 * (which is hydrated for attachments the merchant just selected
+		 * via wp.media).
+		 *
+		 * @param {jQuery}                              $field
+		 * @param {number}                              id
+		 * @param {(json: Object) => string}            pick
+		 * @return {string}
+		 */
+		resolveAttachmentUrl( $field, id, pick ) {
+			const cached = this.getCachedAttachmentUrl( $field, id );
+			if ( cached ) {
+				return cached;
+			}
+
+			const attachment = wp.media.attachment( id );
+			return pick( attachment.attributes || {} );
+		},
+
+		/**
 		 * Re-render the thumbnail list from scratch for the given IDs.
 		 * Caller is responsible for ensuring the IDs are unique and
 		 * non-empty before this is invoked.
@@ -411,17 +468,19 @@ jQuery( function ( $ ) {
 		 */
 		rebuildThumbs( $field, ids ) {
 			const $list = $field.find( SELECTORS.fieldThumbList );
+			const urls = ids.map( ( id ) =>
+				this.resolveAttachmentUrl(
+					$field,
+					id,
+					pickAttachmentThumbnailUrl
+				)
+			);
 
 			$list.empty();
 
 			ids.forEach( ( id, index ) => {
-				const attachment = wp.media.attachment( id );
-				const thumbnailUrl = pickAttachmentThumbnailUrl(
-					attachment.attributes || {}
-				);
-
 				$list.append(
-					this.buildThumbMarkup( id, thumbnailUrl, index === 0 )
+					this.buildThumbMarkup( id, urls[ index ], index === 0 )
 				);
 			} );
 
@@ -546,8 +605,11 @@ jQuery( function ( $ ) {
 		 */
 		setHeroImage( $field, attachmentId, isPrimary ) {
 			const $hero = $field.find( SELECTORS.fieldHero );
-			const attachment = wp.media.attachment( attachmentId );
-			const url = pickAttachmentDisplayUrl( attachment.attributes || {} );
+			const url = this.resolveAttachmentUrl(
+				$field,
+				attachmentId,
+				pickAttachmentDisplayUrl
+			);
 
 			if ( ! url ) {
 				this.setHeroMissingFile( $field, isPrimary );
@@ -773,8 +835,12 @@ jQuery( function ( $ ) {
 				return;
 			}
 
-			const json = wp.media.attachment( primaryId ).attributes || {};
-			const url = pickAttachmentThumbnailUrl( json );
+			const $field = $row.find( SELECTORS.field );
+			const url = this.resolveAttachmentUrl(
+				$field,
+				primaryId,
+				pickAttachmentThumbnailUrl
+			);
 			if ( url ) {
 				$preview.attr( 'src', url );
 			}

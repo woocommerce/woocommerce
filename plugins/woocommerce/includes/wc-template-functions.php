@@ -1903,14 +1903,19 @@ function wc_get_product_gallery_html( $product, $image_ids = null ) {
  * @return string
  */
 function wc_render_product_image_template_for( WC_Product $product ): string {
-	$previous_product   = $GLOBALS['product'] ?? null;
-	$GLOBALS['product'] = $product;
+	$had_previous_product = array_key_exists( 'product', $GLOBALS );
+	$previous_product     = $had_previous_product ? $GLOBALS['product'] : null;
+	$GLOBALS['product']   = $product;
 
-	$html = wc_get_template_html( 'single-product/product-image.php' );
-
-	$GLOBALS['product'] = $previous_product;
-
-	return trim( $html );
+	try {
+		return trim( wc_get_template_html( 'single-product/product-image.php' ) );
+	} finally {
+		if ( $had_previous_product ) {
+			$GLOBALS['product'] = $previous_product;
+		} else {
+			unset( $GLOBALS['product'] );
+		}
+	}
 }
 
 /**

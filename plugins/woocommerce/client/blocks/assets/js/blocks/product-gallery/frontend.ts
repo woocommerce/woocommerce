@@ -366,6 +366,9 @@ const productGallery = {
 			}
 
 			const imageId = parseInt( imageIdValue, 10 );
+			if ( Number.isNaN( imageId ) ) {
+				return;
+			}
 			const context = getContext();
 			const newImageIndex = context.imageData.indexOf( imageId );
 
@@ -609,9 +612,7 @@ const productGallery = {
 			}
 
 			const variationImageSet =
-				productImageSet.variations?.[
-					productsState.variationId || 0
-				];
+				productImageSet.variations?.[ productsState.variationId || 0 ];
 
 			if ( variationImageSet?.image_ids?.length ) {
 				actions.setImageData(
@@ -649,20 +650,30 @@ const productGallery = {
 				const $variationIdInput = $form.querySelector(
 					SELECTORS.legacyVariationIdInput
 				) as HTMLInputElement | null;
+				const hasVariationIdInput = !! $variationIdInput;
 				const currentVariationId = Number.parseInt(
 					$variationIdInput?.value || '0',
 					10
 				);
+
+				// When the form exposes a variation_id input but it's empty,
+				// the merchant cleared the variation — restore the parent
+				// gallery instead of guessing from `current-image`.
+				if ( hasVariationIdInput && ! currentVariationId ) {
+					actions.resetImageData();
+					return;
+				}
+
 				const currentImageId = Number.parseInt(
 					$form.getAttribute( 'current-image' ) || '0',
 					10
 				);
-				const variationImageSet =
-					productImageSet.variations?.[ currentVariationId ] ||
-					getVariationImageSetByCurrentImage(
-						productImageSet,
-						currentImageId
-					);
+				const variationImageSet = hasVariationIdInput
+					? productImageSet.variations?.[ currentVariationId ]
+					: getVariationImageSetByCurrentImage(
+							productImageSet,
+							currentImageId
+					  );
 
 				if ( variationImageSet?.image_ids?.length ) {
 					actions.setImageData(
