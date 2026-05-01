@@ -28,11 +28,23 @@ $shop_url = wc_get_page_permalink( 'shop' );
 <div class="woocommerce-review-order woocommerce-review-order--empty">
 	<div class="woocommerce-review-order__empty-card">
 		<h1 class="woocommerce-review-order__empty-title">
-			<?php esc_html_e( 'Thanks for your reviews!', 'woocommerce' ); ?>
+			<?php
+			if ( $reviewed_count > 0 ) {
+				esc_html_e( 'Thanks for your reviews!', 'woocommerce' );
+			} else {
+				esc_html_e( 'Nothing to review here', 'woocommerce' );
+			}
+			?>
 		</h1>
 
 		<p class="woocommerce-review-order__empty-body">
-			<?php esc_html_e( 'You have nothing left to review on this order. Your feedback helps other shoppers make better decisions.', 'woocommerce' ); ?>
+			<?php
+			if ( $reviewed_count > 0 ) {
+				esc_html_e( 'You have nothing left to review on this order. Your feedback helps other shoppers make better decisions.', 'woocommerce' );
+			} else {
+				esc_html_e( 'There are no products on this order that are open for reviews right now.', 'woocommerce' );
+			}
+			?>
 		</p>
 
 		<?php if ( $reviewed_count > 0 ) : ?>
