@@ -24,9 +24,9 @@ class WC_Query {
 	public $query_vars = array();
 
 	/**
-	 * The query used by the main product loop. Null until set by `product_query()` on the first product archive request.
+	 * Reference to the main product query on the page.
 	 *
-	 * @var WP_Query|null
+	 * @var WP_Query
 	 */
 	private static $product_query;
 
@@ -958,7 +958,7 @@ class WC_Query {
 	/**
 	 * Get the main query which product queries ran against.
 	 *
-	 * @return WP_Query|null
+	 * @return WP_Query
 	 */
 	public static function get_main_query() {
 		return self::$product_query;
@@ -981,6 +981,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public static function get_main_meta_query() {
+		/** @phpstan-ignore-next-line isset.property */
 		if ( ! isset( self::$product_query ) ) {
 			return array();
 		}
@@ -996,6 +997,7 @@ class WC_Query {
 	public static function get_main_search_query_sql() {
 		global $wpdb;
 
+		/** @phpstan-ignore-next-line isset.property */
 		if ( ! isset( self::$product_query ) ) {
 			return '';
 		}
