@@ -1,8 +1,9 @@
 /**
  * Review Order page styles.
  *
- * Currently scoped to the accessible star-rating control. M4's design-token
- * pass (WOOPLUG-6597) will fold these into the broader review-order layout.
+ * Intentionally minimal. The active theme drives typography, color, and
+ * button styling; only the interactive star-rating control needs bespoke
+ * CSS to map radio inputs to SVG stars.
  */
 
 .woocommerce-star-rating {
@@ -29,69 +30,31 @@
 		cursor: pointer;
 		display: inline-flex;
 		padding: 4px;
-		border-radius: 4px;
 		color: currentColor;
 	}
 
 	&__icon {
 		display: block;
-		width: 24px;
-		height: 24px;
+		width: 1.5em;
+		height: 1.5em;
 		fill: currentColor;
 		opacity: 0.3;
 		transition: opacity 100ms ease-in-out;
 	}
 
-	// Light up every star up to (and including) the checked one. Stops at the
-	// next star whose input is checked; modern :has() walks the parent label.
 	@for $i from 1 through 5 {
 		&:has(.woocommerce-star-rating__input:checked[value="#{$i}"]) {
-			.woocommerce-star-rating__star:nth-of-type(-n + #{$i}) {
-				.woocommerce-star-rating__icon {
-					opacity: 1;
-				}
+			.woocommerce-star-rating__star:nth-of-type(-n + #{$i}) .woocommerce-star-rating__icon {
+				opacity: 1;
 			}
 		}
 	}
 
-	// Hover preview: hovered star and every preceding sibling fill in.
-	@for $i from 1 through 5 {
-		&__star:nth-of-type(#{$i}):hover {
-			~ .woocommerce-star-rating__star .woocommerce-star-rating__icon {
-				opacity: 0.3;
-			}
-		}
-	}
-
-	&__star:hover ~ .woocommerce-star-rating__star {
-		.woocommerce-star-rating__icon {
-			opacity: 0.3;
-		}
-	}
-
-	&__star:hover .woocommerce-star-rating__icon {
-		opacity: 1;
-	}
-
-	// While hovering, light up every star to the LEFT of the hovered one.
 	&:hover {
 		.woocommerce-star-rating__star .woocommerce-star-rating__icon {
 			opacity: 0.3;
 		}
 
-		@for $i from 1 through 5 {
-			.woocommerce-star-rating__star:nth-of-type(#{$i}):hover {
-				~ .woocommerce-star-rating__star .woocommerce-star-rating__icon {
-					opacity: 0.3;
-				}
-
-				.woocommerce-star-rating__icon {
-					opacity: 1;
-				}
-			}
-		}
-
-		// Light up everything to the left of the hovered star using :has().
 		@for $i from 1 through 5 {
 			&:has(.woocommerce-star-rating__star:nth-of-type(#{$i}):hover) {
 				.woocommerce-star-rating__star:nth-of-type(-n + #{$i}) .woocommerce-star-rating__icon {
@@ -101,16 +64,13 @@
 		}
 	}
 
-	// Visible focus ring on the wrapping label whenever its input is focused.
 	&__star:has(.woocommerce-star-rating__input:focus-visible) {
 		outline: 2px solid currentColor;
 		outline-offset: 2px;
 	}
 
 	&__caption {
-		margin-left: 8px;
-		font-size: 12px;
-		color: currentColor;
+		margin-left: 0.5em;
 		min-height: 1em;
 		min-width: 4em;
 	}
