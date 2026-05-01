@@ -369,7 +369,7 @@ class WC_Shortcode_My_Account {
 	 *
 	 * @since 9.4.0 This will log the user in after resetting the password/session.
 	 *
-	 * @param object $user     The user.
+	 * @param WP_User $user     The user.
 	 * @param string $new_pass New password for the user in plaintext.
 	 */
 	public static function reset_password( $user, $new_pass ) {
