@@ -359,3 +359,59 @@ $wc-setting-email-width: 634px;
 		margin-bottom: 0;
 	}
 }
+
+// RSM-140 — wrapper that pins the custom chip just above the DataView toolbar.
+// Padding matches the DataView toolbar's horizontal alignment.
+.woocommerce-email-listing > .woocommerce-email-listing-update-chip {
+	margin: $grid-unit-15 $grid-unit-15 0;
+}
+
+// RSM-140 — "Update available" filter chip in the email list toolbar.
+// Visual treatment matches design_handoff_email_update_flow/app.css `.filter-chip`.
+.woocommerce-email-listing-update-chip {
+	align-items: center;
+	background: $white;
+	border: 1px solid #dbdbdb; // --wpds-color-stroke-surface-neutral
+	border-radius: 14px;
+	color: currentColor;
+	cursor: pointer;
+	display: inline-flex;
+	font-size: 12px;
+	font-weight: 500;
+	gap: 6px;
+	height: 28px;
+	padding: 0 10px 0 8px;
+
+	&:hover {
+		background: #f6f7f7;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #3858e9; // --wpds-color-bg-interactive-brand-strong
+		outline-offset: 1px;
+	}
+
+	&.is-active {
+		background: #ecf0fa; // --wpds-color-bg-surface-brand
+		border-color: #3858e9; // --wpds-color-bg-interactive-brand-strong
+		color: #3858e9;
+	}
+
+	.woocommerce-email-listing-update-chip__label {
+		line-height: 1;
+	}
+
+	.woocommerce-email-listing-update-chip__count {
+		align-items: center;
+		background: #3858e9; // --wpds-color-bg-interactive-brand-strong
+		border-radius: 9px;
+		color: $white;
+		display: inline-flex;
+		font-size: 11px;
+		font-weight: 600;
+		height: 18px;
+		justify-content: center;
+		min-width: 18px;
+		padding: 0 5px;
+	}
+}
