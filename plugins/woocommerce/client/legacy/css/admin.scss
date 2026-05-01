@@ -9500,6 +9500,13 @@ body.woocommerce_page_wc-settings {
 		margin-bottom: 15px;
 	}
 
+	&__product-data {
+		img {
+			max-width: 100%;
+			height: auto;
+		}
+	}
+
 	&__form-field {
 		clear: both;
 
