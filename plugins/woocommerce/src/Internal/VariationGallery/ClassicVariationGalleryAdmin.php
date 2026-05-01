@@ -181,9 +181,29 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 		$featured_id = (int) ( $unified_ids[0] ?? 0 );
 		$gallery_ids = array_values( array_slice( $unified_ids, 1 ) );
 
-		$variation->set_image_id( $featured_id );
-		$variation->set_gallery_image_ids( $gallery_ids );
-		LegacyVariationGalleryCompatibility::mark_core_managed( $variation );
+		try {
+			$variation->set_image_id( $featured_id );
+			$variation->set_gallery_image_ids( $gallery_ids );
+			LegacyVariationGalleryCompatibility::mark_core_managed( $variation );
+		} catch ( \Throwable $e ) {
+			Telemetry::record_event(
+				Telemetry::EVENT_SAVE_FAILED,
+				array(
+					'context' => 'classic_admin',
+					'reason'  => $e->getMessage(),
+				)
+			);
+			throw $e;
+		}
+
+		Telemetry::record_event(
+			Telemetry::EVENT_SAVE_SUCCEEDED,
+			array(
+				'context'     => 'classic_admin',
+				'image_count' => count( $unified_ids ),
+				'is_multi'    => count( $unified_ids ) > 1 ? 'yes' : 'no',
+			)
+		);
 	}
 
 	/**

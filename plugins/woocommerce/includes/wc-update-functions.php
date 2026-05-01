@@ -37,6 +37,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
 use Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility;
+use Automattic\WooCommerce\Internal\VariationGallery\Telemetry as VariationGalleryTelemetry;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -3529,7 +3530,18 @@ function wc_update_1090_migrate_legacy_variation_gallery_meta(): bool {
 		LegacyVariationGalleryCompatibility::mark_variation_id_core_managed( $variation_id );
 	}
 
-	return ! empty( $select_variation_ids( 1 ) );
+	$has_more = ! empty( $select_variation_ids( 1 ) );
+
+	if ( ! $has_more ) {
+		VariationGalleryTelemetry::record_event(
+			VariationGalleryTelemetry::EVENT_MIGRATION_COMPLETED,
+			array(
+				'batched_variation_count' => count( $variation_ids ),
+			)
+		);
+	}
+
+	return $has_more;
 }
 
 /**

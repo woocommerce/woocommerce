@@ -13,6 +13,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility;
+use Automattic\WooCommerce\Internal\VariationGallery\Telemetry as VariationGalleryTelemetry;
 use Automattic\WooCommerce\Utilities\I18nUtil;
 use Automattic\WooCommerce\Utilities\MetaDataUtil;
 
@@ -229,8 +230,28 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 		}
 
 		if ( isset( $request['gallery_image_ids'] ) && $variation instanceof WC_Product_Variation ) {
-			$variation->set_gallery_image_ids( wp_parse_id_list( $request['gallery_image_ids'] ) );
-			LegacyVariationGalleryCompatibility::mark_core_managed( $variation );
+			$gallery_ids = wp_parse_id_list( $request['gallery_image_ids'] );
+			try {
+				$variation->set_gallery_image_ids( $gallery_ids );
+				LegacyVariationGalleryCompatibility::mark_core_managed( $variation );
+			} catch ( \Throwable $e ) {
+				VariationGalleryTelemetry::record_event(
+					VariationGalleryTelemetry::EVENT_SAVE_FAILED,
+					array(
+						'context' => 'rest_v3',
+						'reason'  => $e->getMessage(),
+					)
+				);
+				throw $e;
+			}
+			VariationGalleryTelemetry::record_event(
+				VariationGalleryTelemetry::EVENT_SAVE_SUCCEEDED,
+				array(
+					'context'     => 'rest_v3',
+					'image_count' => count( $gallery_ids ),
+					'is_multi'    => count( $gallery_ids ) > 1 ? 'yes' : 'no',
+				)
+			);
 		}
 
 		// Virtual variation.
