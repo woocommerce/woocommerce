@@ -227,7 +227,13 @@
 							'.woocommerce-review-order__item'
 						),
 						function ( row ) {
-							renderRowStatus( row, 'error' );
+							if (
+								row.querySelector(
+									'.woocommerce-star-rating__input:checked'
+								)
+							) {
+								renderRowStatus( row, 'error' );
+							}
 						}
 					);
 				} )
