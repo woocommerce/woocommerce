@@ -6,7 +6,7 @@
  *
  * Renders one product per row: linked title, thumbnail, hidden inputs that
  * tie the submission back to the order item, the accessible star-rating
- * control, and the review textarea. The submission handler lands in M4.
+ * control, and the review textarea.
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
