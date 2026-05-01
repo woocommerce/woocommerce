@@ -337,7 +337,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		update_post_meta( $variation_id, '_wc_additional_variation_images', implode( ',', $image_ids ) );
 
-		$this->assertFalse( wc_update_1080_migrate_legacy_variation_gallery_meta() );
+		$this->assertFalse( wc_update_1090_migrate_legacy_variation_gallery_meta() );
 
 		$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
 		$this->assertSame( $image_ids, wc_get_product( $variation_id )->get_gallery_image_ids() );
@@ -361,7 +361,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		update_post_meta( $variation_id, '_product_image_gallery', implode( ',', $core_gallery_ids ) );
 		update_post_meta( $variation_id, '_wc_additional_variation_images', implode( ',', $legacy_gallery_ids ) );
 
-		$this->assertFalse( wc_update_1080_migrate_legacy_variation_gallery_meta() );
+		$this->assertFalse( wc_update_1090_migrate_legacy_variation_gallery_meta() );
 
 		$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
 		$this->assertSame( $core_gallery_ids, wc_get_product( $variation_id )->get_gallery_image_ids( 'edit' ) );
@@ -376,7 +376,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 
 		update_post_meta( $variation_id, '_wc_additional_variation_images', 'not-an-id' );
 
-		$this->assertFalse( wc_update_1080_migrate_legacy_variation_gallery_meta() );
+		$this->assertFalse( wc_update_1090_migrate_legacy_variation_gallery_meta() );
 
 		$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
 		$this->assertSame( '', get_post_meta( $variation_id, '_product_image_gallery', true ) );
@@ -401,7 +401,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 			update_post_meta( $variation_id, '_wc_additional_variation_images', (string) ( $index + 1 ) );
 		}
 
-		$this->assertTrue( wc_update_1080_migrate_legacy_variation_gallery_meta() );
+		$this->assertTrue( wc_update_1090_migrate_legacy_variation_gallery_meta() );
 
 		$processed_after_first_batch = 0;
 
@@ -414,7 +414,7 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 250, $processed_after_first_batch );
 		$this->assertFalse( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( end( $variation_ids ) ) );
 
-		$this->assertFalse( wc_update_1080_migrate_legacy_variation_gallery_meta() );
+		$this->assertFalse( wc_update_1090_migrate_legacy_variation_gallery_meta() );
 
 		foreach ( $variation_ids as $variation_id ) {
 			$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );

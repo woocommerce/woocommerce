@@ -3480,11 +3480,11 @@ function wc_update_1080_migrate_analytics_import_option(): void {
  * gallery for that variation, regardless of what `_wc_additional_variation_images` still
  * contains.
  *
- * @since 10.8.0
+ * @since 10.9.0
  *
  * @return bool Whether there are pending migration records.
  */
-function wc_update_1080_migrate_legacy_variation_gallery_meta(): bool {
+function wc_update_1090_migrate_legacy_variation_gallery_meta(): bool {
 	global $wpdb;
 
 	$batch_size           = 250;
