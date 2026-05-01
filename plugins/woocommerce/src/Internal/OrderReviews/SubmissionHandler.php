@@ -157,14 +157,23 @@ class SubmissionHandler {
 			}
 
 			$item = $item_index[ $order_item_id ];
-			if ( $item->get_product_id() !== $product_id ) {
+
+			// Variable products: the row template posts the variation id,
+			// while $item->get_product_id() returns the parent. Accept either.
+			$line_product_id   = (int) $item->get_product_id();
+			$line_variation_id = (int) $item->get_variation_id();
+			if ( $product_id !== $line_product_id && $product_id !== $line_variation_id ) {
 				$result['error']       = 'product_mismatch';
 				$results[ $row_index ] = $result;
 				continue;
 			}
 
+			// Reviews always attach to the parent product so they show on the
+			// product page regardless of which variation was bought.
+			$review_post_id = $line_product_id;
+
 			$comment_data = array(
-				'comment_post_ID'      => $product_id,
+				'comment_post_ID'      => $review_post_id,
 				'comment_author'       => '' !== $author_name ? $author_name : __( 'Anonymous', 'woocommerce' ),
 				'comment_author_email' => $author_email,
 				'comment_author_IP'    => $author_ip,
@@ -194,8 +203,9 @@ class SubmissionHandler {
 	}
 
 	/**
-	 * Set the completed-at meta when every eligible item has a verified
-	 * review by this customer (whether posted in this submission or an earlier one).
+	 * Set the completed-at meta when every eligible item has a review by this
+	 * customer (approved or pending moderation), whether posted in this
+	 * submission or an earlier one. Spam/trash comments are excluded.
 	 *
 	 * @param WC_Order $order Order being reviewed.
 	 */
@@ -226,13 +236,15 @@ class SubmissionHandler {
 		}
 
 		// Single grouped lookup, fetching the comment objects directly so we
-		// can read comment_post_ID without a follow-up query per row.
+		// can read comment_post_ID without a follow-up query per row. Limit
+		// to approved + pending-moderation so spam/trash never count as
+		// completion.
 		$comments = get_comments(
 			array(
 				'post__in'     => array_values( $product_ids ),
 				'author_email' => $customer_email,
 				'type'         => 'review',
-				'status'       => 'all',
+				'status'       => array( 'approve', 'hold' ),
 			)
 		);
 
