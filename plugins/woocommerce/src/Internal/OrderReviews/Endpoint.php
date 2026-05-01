@@ -86,7 +86,9 @@ class Endpoint {
 	public function maybe_render(): void {
 		global $wp;
 
-		if ( empty( $wp->query_vars[ self::QUERY_VAR ] ) ) {
+		// Use isset() rather than empty() so the literal "0" doesn't slip
+		// through to normal WP routing; render() then 404s on order_id 0.
+		if ( ! isset( $wp->query_vars[ self::QUERY_VAR ] ) ) {
 			return;
 		}
 
@@ -209,7 +211,6 @@ class Endpoint {
 
 		// Fallback when the active theme has no 404 template: emit a minimal
 		// page so the response body isn't empty.
-		nocache_headers();
 		printf(
 			'<!doctype html><html><head><meta charset="utf-8"><title>%1$s</title></head><body><h1>%1$s</h1></body></html>',
 			esc_html__( 'Page not found', 'woocommerce' )
