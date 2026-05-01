@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Render an empty-state thank-you view on the customer Review Order page when every eligible item is already reviewed.
