@@ -363,13 +363,24 @@ const productGallery = {
 			if ( ! imageIdValue ) {
 				return;
 			}
+
 			const imageId = parseInt( imageIdValue, 10 );
-			const { imageData } = getContext();
-			const newImageIndex = imageData.indexOf( imageId );
-			if ( newImageIndex < 0 ) {
-				return;
+			const context = getContext();
+			const newImageIndex = context.imageData.indexOf( imageId );
+
+			context.selectedImageId = imageId;
+
+			if ( newImageIndex >= 0 ) {
+				const arrowsState = getArrowsState(
+					newImageIndex,
+					context.imageData.length
+				);
+				context.isDisabledPrevious = arrowsState.isDisabledPrevious;
+				context.isDisabledNext = arrowsState.isDisabledNext;
 			}
-			actions.selectImage( newImageIndex );
+
+			scrollImageIntoView( imageId );
+			scrollThumbnailIntoView( imageId );
 		},
 		selectNextImage: ( event?: MouseEvent ) => {
 			if ( event ) {
