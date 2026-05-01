@@ -24,6 +24,8 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		update_option( 'comment_moderation', '0' );
 		remove_all_filters( 'woocommerce_review_order_submitted' );
 		remove_all_filters( 'woocommerce_review_order_eligible_statuses' );
+		remove_all_filters( 'woocommerce_review_order_eligible_items' );
+		remove_all_filters( 'woocommerce_review_order_item_already_reviewed' );
 		remove_all_filters( 'wp_die_ajax_handler' );
 		remove_all_filters( 'wp_send_json_handler' );
 		remove_all_filters( 'wp_doing_ajax' );
@@ -447,5 +449,168 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$response = $this->dispatch();
 
 		$this->assertFalse( $response['success'] );
+	}
+
+	/**
+	 * @testdox A row whose product the customer already reviewed is rejected with already_reviewed; no duplicate comment is created.
+	 */
+	public function test_rejects_row_for_already_reviewed_product(): void {
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$existing_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product_id,
+				'comment_author'       => 'Jane Doe',
+				'comment_author_email' => $order->get_billing_email(),
+				'comment_content'      => 'Already left this one.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		$this->assertNotFalse( $existing_id );
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+					'text'          => 'Trying to stack a duplicate.',
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$this->assertTrue( $response['success'] );
+		$results = $response['data']['results'];
+		$row     = reset( $results );
+		$this->assertSame( 'error', $row['status'] );
+		$this->assertSame( 'already_reviewed', $row['error'] );
+
+		// Confirm no second comment was inserted.
+		$total = (int) get_comments(
+			array(
+				'post_id'      => $product_id,
+				'author_email' => $order->get_billing_email(),
+				'type'         => 'review',
+				'count'        => true,
+				'status'       => 'all',
+			)
+		);
+		$this->assertSame( 1, $total );
+	}
+
+	/**
+	 * @testdox A row whose product has comments closed is rejected with reviews_not_open.
+	 */
+	public function test_rejects_row_when_reviews_disabled_on_product(): void {
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		wp_update_post(
+			array(
+				'ID'             => $product_id,
+				'comment_status' => 'closed',
+			)
+		);
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$results  = $response['data']['results'];
+		$row      = reset( $results );
+		$this->assertSame( 'error', $row['status'] );
+		$this->assertSame( 'reviews_not_open', $row['error'] );
+
+		$total = (int) get_comments(
+			array(
+				'post_id'      => $product_id,
+				'author_email' => $order->get_billing_email(),
+				'type'         => 'review',
+				'count'        => true,
+				'status'       => 'all',
+			)
+		);
+		$this->assertSame( 0, $total );
+	}
+
+	/**
+	 * @testdox A row for a fully-refunded line item is rejected via the eligible-items filter.
+	 */
+	public function test_rejects_row_for_fully_refunded_item(): void {
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		// Stand in for the round-1 default callback that would normally
+		// drop fully-refunded items. The handler uses the same filter, so
+		// dropping the item here mirrors what the WC default does.
+		add_filter(
+			'woocommerce_review_order_eligible_items',
+			static function ( $items, $order_arg ) use ( $item_id ) {
+				unset( $order_arg );
+				$filtered = array();
+				foreach ( $items as $key => $item ) {
+					if ( $item->get_id() !== $item_id ) {
+						$filtered[ $key ] = $item;
+					}
+				}
+				return $filtered;
+			},
+			10,
+			2
+		);
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$results  = $response['data']['results'];
+		$row      = reset( $results );
+		$this->assertSame( 'error', $row['status'] );
+		$this->assertSame( 'invalid_row', $row['error'] );
+
+		remove_all_filters( 'woocommerce_review_order_eligible_items' );
+
+		$total = (int) get_comments(
+			array(
+				'post_id'      => $product_id,
+				'author_email' => $order->get_billing_email(),
+				'type'         => 'review',
+				'count'        => true,
+				'status'       => 'all',
+			)
+		);
+		$this->assertSame( 0, $total );
 	}
 }

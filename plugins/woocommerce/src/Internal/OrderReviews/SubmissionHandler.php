@@ -117,12 +117,16 @@ class SubmissionHandler {
 	 */
 	private function process_rows( WC_Order $order, array $rows_in ): array {
 		$results      = array();
-		$item_index   = $this->index_order_items( $order );
+		$item_index   = $this->index_eligible_order_items( $order );
 		$author_name  = trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() );
 		$author_email = $order->get_billing_email();
 		$author_ip    = $order->get_customer_ip_address();
 		$author_agent = $order->get_customer_user_agent();
 		$require_mod  = (bool) get_option( 'comment_moderation' );
+
+		// Prime the eligibility cache so the per-row describe() calls below
+		// don't issue one already-reviewed query each.
+		ItemEligibility::prime( $item_index, $order );
 
 		foreach ( $rows_in as $row_index => $row ) {
 			$row_index = (int) $row_index;
@@ -150,6 +154,8 @@ class SubmissionHandler {
 				continue;
 			}
 
+			// invalid_row also covers fully-refunded line items: index_eligible_order_items()
+			// runs them through woocommerce_review_order_eligible_items, which strips them.
 			if ( ! $product_id || ! $order_item_id || ! isset( $item_index[ $order_item_id ] ) ) {
 				$result['error']       = 'invalid_row';
 				$results[ $row_index ] = $result;
@@ -171,6 +177,22 @@ class SubmissionHandler {
 			// Reviews always attach to the parent product so they show on the
 			// product page regardless of which variation was bought.
 			$review_post_id = $line_product_id;
+
+			// Mirror the page-side decision so the API and the UI agree:
+			// reject when reviews are disabled on the product (STATUS_SKIP),
+			// or when the customer already left a review for this product
+			// (STATUS_REVIEWED) instead of stacking duplicates.
+			$decision = ItemEligibility::describe( $item, $order );
+			if ( ItemEligibility::STATUS_SKIP === $decision['status'] ) {
+				$result['error']       = 'reviews_not_open';
+				$results[ $row_index ] = $result;
+				continue;
+			}
+			if ( ItemEligibility::STATUS_REVIEWED === $decision['status'] ) {
+				$result['error']       = 'already_reviewed';
+				$results[ $row_index ] = $result;
+				continue;
+			}
 
 			$comment_data = array(
 				'comment_post_ID'      => $review_post_id,
@@ -270,14 +292,20 @@ class SubmissionHandler {
 	}
 
 	/**
-	 * Map order_item_id => `WC_Order_Item_Product` for fast row lookup.
+	 * Map order_item_id => `WC_Order_Item_Product` for fast row lookup,
+	 * filtered through `woocommerce_review_order_eligible_items` so the
+	 * handler agrees with the page on which items are reviewable. The
+	 * default callback excludes fully-refunded items.
 	 *
 	 * @param WC_Order $order Order being reviewed.
 	 * @return array<int, \WC_Order_Item_Product>
 	 */
-	private function index_order_items( WC_Order $order ): array {
+	private function index_eligible_order_items( WC_Order $order ): array {
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented on customer-review-order.php template.
+		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+
 		$index = array();
-		foreach ( $order->get_items() as $item ) {
+		foreach ( $items as $item ) {
 			if ( $item instanceof \WC_Order_Item_Product ) {
 				$index[ $item->get_id() ] = $item;
 			}
