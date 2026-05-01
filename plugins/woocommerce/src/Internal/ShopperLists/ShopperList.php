@@ -65,8 +65,6 @@ class ShopperList {
 	/**
 	 * Load a list by slug. Returns false for any other list that doesn't exist.
 	 *
-	 * @throws \RuntimeException When the stored data is corrupt (non-array meta value).
-	 *
 	 * @param string   $slug List identifier.
 	 * @param int|null $user_id Defaults to the current user.
 	 * @return self|false
@@ -83,14 +81,7 @@ class ShopperList {
 			return self::from_array( $stored, $user_id );
 		}
 
-		// Anything other than the empty default means a row exists but isn't an array, signaling corrupt data.
-		if ( '' !== $stored && false !== $stored && null !== $stored ) {
-			throw new \RuntimeException(
-				esc_html( sprintf( 'Corrupt shopper list data for user %d list %s', $user_id, $slug ) )
-			);
-		}
-
-		// Return an in-memory saved-for-later list; it's persisted lazily on the first add_item()+save().
+		// In-memory saved-for-later; persisted lazily on the first save().
 		if ( 'saved-for-later' === $slug ) {
 			return new self(
 				$user_id,
@@ -205,7 +196,7 @@ class ShopperList {
 	}
 
 	/**
-	 * Build a ShopperList from a stored array (deserialising items into ShopperListItem instances).
+	 * Build a ShopperList from a stored array.
 	 *
 	 * @param array $data    Stored list record.
 	 * @param int   $user_id Owning user ID.
@@ -214,8 +205,14 @@ class ShopperList {
 		$items = array();
 		if ( ! empty( $data['items'] ) && is_array( $data['items'] ) ) {
 			foreach ( $data['items'] as $key => $item_data ) {
-				if ( is_array( $item_data ) ) {
+				if ( ! is_array( $item_data ) ) {
+					continue;
+				}
+
+				try {
 					$items[ (string) $key ] = ShopperListItem::from_array( $item_data );
+				} catch ( \Throwable $e ) {
+					continue;
 				}
 			}
 		}

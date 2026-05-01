@@ -84,17 +84,44 @@ class ShopperListTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_by_slug should throw when the stored data is corrupt.
+	 * @testdox get_by_slug should self-heal saved-for-later when the stored meta is corrupt.
 	 */
-	public function test_load_throws_on_corrupt_data(): void {
+	public function test_load_self_heals_corrupt_saved_for_later(): void {
 		Users::update_site_user_meta(
 			$this->user_id,
 			ShopperList::META_KEY_PREFIX . self::SAVED_FOR_LATER_SLUG,
 			'this-is-not-an-array'
 		);
 
-		$this->expectException( \RuntimeException::class );
-		ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id );
+		$list = ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id );
+
+		$this->assertInstanceOf( ShopperList::class, $list );
+		$this->assertSame( array(), $list->get_items(), 'Corrupt meta must yield an empty in-memory list.' );
+	}
+
+	/**
+	 * @testdox get_by_slug should skip individual corrupt items but still return the rest of the list.
+	 */
+	public function test_load_skips_corrupt_items(): void {
+		$good_item = $this->item->to_array();
+		Users::update_site_user_meta(
+			$this->user_id,
+			ShopperList::META_KEY_PREFIX . self::SAVED_FOR_LATER_SLUG,
+			array(
+				'slug'             => self::SAVED_FOR_LATER_SLUG,
+				'date_created_gmt' => '2026-04-01 00:00:00',
+				'items'            => array(
+					$good_item['key']   => $good_item,
+					'broken-row-key' => array( 'variation_id' => 0 ), // missing key + product_id
+				),
+			)
+		);
+
+		$list = ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id );
+
+		$this->assertInstanceOf( ShopperList::class, $list );
+		$this->assertCount( 1, $list->get_items(), 'Bad rows should be skipped, the rest kept.' );
+		$this->assertNotNull( $list->find_item( $good_item['key'] ) );
 	}
 
 	/**

@@ -98,15 +98,25 @@ class ShopperListItem {
 	/**
 	 * Construct from a stored item array (from user_meta).
 	 *
+	 * @throws \Exception
+	 *
 	 * @param array $data Stored item record.
 	 */
 	public static function from_array( array $data ): self {
+		if (
+			empty( $data['key'] ) || ! is_string( $data['key'] )
+			|| empty( $data['product_id'] ) || ! is_int( $data['product_id'] )
+			|| empty( $data['quantity'] ) || ! is_int( $data['quantity'] )
+		) {
+			throw new \Exception( 'Shopper list item requires "key" (string), "product_id" (int), and "quantity" (int).' );
+		}
+
 		return new self(
-			$data['key'] ?? '',
-			$data['product_id'] ?? 0,
-			$data['variation_id'] ?? 0,
-			isset( $data['variation'] ) && is_array( $data['variation'] ) ? $data['variation'] : array(),
-			$data['quantity'] ?? 1,
+			$data['key'],
+			absint( $data['product_id'] ),
+			absint( $data['variation_id'] ?? 0 ),
+			$data['variation'] ?? array(),
+			absint( $data['quantity'] ),
 			$data['date_added_gmt'] ?? '',
 			$data['product_title_at_save'] ?? '',
 			$data['price_at_save'] ?? ''
