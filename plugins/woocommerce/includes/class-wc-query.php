@@ -981,7 +981,7 @@ class WC_Query {
 	 * @return array
 	 */
 	public static function get_main_meta_query() {
-		if ( ! isset( self::$product_query->query_vars ) ) {
+		if ( ! isset( self::$product_query ) ) {
 			return array();
 		}
 		$args       = self::$product_query->query_vars;
@@ -996,7 +996,7 @@ class WC_Query {
 	public static function get_main_search_query_sql() {
 		global $wpdb;
 
-		if ( ! isset( self::$product_query->query_vars ) ) {
+		if ( ! isset( self::$product_query ) ) {
 			return '';
 		}
 		$args         = self::$product_query->query_vars;
