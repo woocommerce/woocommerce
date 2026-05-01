@@ -476,11 +476,7 @@ class WC_REST_System_Status_Tools_V2_Controller extends WC_REST_Controller {
 
 				delete_transient( 'wc_attribute_taxonomies' );
 
-				if ( method_exists( 'WC_Cache_Helper', 'invalidate_cache_group' ) ) {
-					WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
-				} else {
-					WC_Cache_Helper::incr_cache_prefix( 'woocommerce-attributes' );
-				}
+				WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 				WC_Cache_Helper::get_transient_version( 'shipping', true );
 
