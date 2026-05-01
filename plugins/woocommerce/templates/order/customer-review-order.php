@@ -69,6 +69,10 @@ $meta_parts = array_filter(
  */
 $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 
+// Single batched lookup of every existing review by this customer for the
+// items below. Without this each describe() call would issue its own query.
+\Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prime( $items, $order );
+
 // The Endpoint has already validated the URL key against the order key, so the
 // canonical value on the order is the right thing to echo into the form post.
 $order_key = (string) $order->get_order_key();
@@ -112,6 +116,25 @@ $order_key = (string) $order->get_order_key();
 					}
 					$product = $item->get_product();
 					if ( ! $product instanceof WC_Product ) {
+						continue;
+					}
+
+					$decision = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::describe( $item, $order );
+
+					if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_SKIP === $decision['status'] ) {
+						continue;
+					}
+
+					if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_REVIEWED === $decision['status'] ) {
+						wc_get_template(
+							'order/customer-review-order-row-reviewed.php',
+							array(
+								'item'    => $item,
+								'product' => $product,
+								'order'   => $order,
+								'review'  => $decision['comment'],
+							)
+						);
 						continue;
 					}
 
