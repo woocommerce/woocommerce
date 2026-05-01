@@ -4,12 +4,12 @@
 .wc-variations-classic {
 	// Toolbar padding only — layout handled by Stack from @wordpress/ui.
 	&__toolbar {
-		padding: var( --wpds-dimension-padding-sm, 8px ) 0;
+		padding: var(--wpds-dimension-padding-sm, 8px) 0;
 	}
 
 	// object-fit and border-radius are not provided by ProductImage component.
 	&__variant-image {
-		border-radius: var( --wpds-border-radius-xs, 4px );
+		border-radius: var(--wpds-border-radius-xs, 4px);
 		object-fit: cover;
 		flex-shrink: 0;
 	}
@@ -20,14 +20,14 @@
 	}
 
 	&__values--empty {
-		color: var( --wpds-color-fg-content-neutral-weak, #757575 );
+		color: var(--wpds-color-fg-content-neutral-weak, #757575);
 	}
 
 	// Price display — no WP component for formatted price with sale styling.
 	&__price {
 		del {
-			margin-right: var( --wpds-dimension-gap-xs, 4px );
-			color: var( --wpds-color-fg-content-neutral-weak, #757575 );
+			margin-right: var(--wpds-dimension-gap-xs, 4px);
+			color: var(--wpds-color-fg-content-neutral-weak, #757575);
 		}
 
 		ins {
@@ -35,22 +35,22 @@
 		}
 
 		&--empty {
-			color: var( --wpds-color-fg-content-neutral-weak, #757575 );
+			color: var(--wpds-color-fg-content-neutral-weak, #757575);
 		}
 	}
 
 	// Stock status — no WP component for semantic stock color coding.
 	&__stock {
 		&--instock {
-			color: var( --wpds-color-fg-content-success, #00a32a );
+			color: var(--wpds-color-fg-content-success, #00a32a);
 		}
 
 		&--outofstock {
-			color: var( --wpds-color-fg-content-error, #d63638 );
+			color: var(--wpds-color-fg-content-error, #d63638);
 		}
 
 		&--onbackorder {
-			color: var( --wpds-color-fg-content-warning, #dba617 );
+			color: var(--wpds-color-fg-content-warning, #dba617);
 		}
 	}
 }
