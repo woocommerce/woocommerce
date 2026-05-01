@@ -338,6 +338,10 @@ class WC_AJAX {
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 		$posted_shipping_methods = isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : array();
 
+		if ( isset( $_POST['shipping_method'] ) ) {
+			$chosen_shipping_methods = array();
+		}
+
 		if ( is_array( $posted_shipping_methods ) ) {
 			foreach ( $posted_shipping_methods as $i => $value ) {
 				if ( ! is_string( $value ) ) {
@@ -405,6 +409,10 @@ class WC_AJAX {
 
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 		$posted_shipping_methods = isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : array();
+
+		if ( isset( $_POST['shipping_method'] ) ) {
+			$chosen_shipping_methods = array();
+		}
 
 		if ( is_array( $posted_shipping_methods ) ) {
 			foreach ( $posted_shipping_methods as $i => $value ) {
