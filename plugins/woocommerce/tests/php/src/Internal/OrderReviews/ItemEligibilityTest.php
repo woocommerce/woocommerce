@@ -1,0 +1,174 @@
+<?php
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\OrderReviews;
+
+use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use WC_Helper_Product;
+use WC_Order;
+use WC_Order_Item_Product;
+use WC_Unit_Test_Case;
+
+/**
+ * Tests for ItemEligibility.
+ */
+class ItemEligibilityTest extends WC_Unit_Test_Case {
+
+	/**
+	 * Reset between tests.
+	 */
+	public function tearDown(): void {
+		remove_all_filters( 'woocommerce_review_order_item_already_reviewed' );
+		parent::tearDown();
+	}
+
+	/**
+	 * Build a 1-product completed order.
+	 *
+	 * @param string $email Billing email to set on the order.
+	 * @return array Map with `order`, `item`, and `product_id`.
+	 */
+	private function make_order( string $email = 'jane@example.test' ): array {
+		$order = OrderHelper::create_order();
+		foreach ( $order->get_items() as $line ) {
+			$order->remove_item( $line->get_id() );
+		}
+		$order->set_billing_email( $email );
+		$order->set_status( OrderStatus::COMPLETED );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$items = $order->get_items();
+		$item  = reset( $items );
+
+		return array(
+			'order'      => $order,
+			'item'       => $item,
+			'product_id' => $product->get_id(),
+		);
+	}
+
+	/**
+	 * @testdox Returns `form` when no existing review and comments are open.
+	 */
+	public function test_default_returns_form(): void {
+		$built = $this->make_order();
+
+		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+
+		$this->assertSame( ItemEligibility::STATUS_FORM, $decision['status'] );
+		$this->assertNull( $decision['comment'] );
+	}
+
+	/**
+	 * @testdox Returns `skip` when comments are closed on the product.
+	 */
+	public function test_skip_when_comments_closed(): void {
+		$built = $this->make_order();
+		wp_update_post(
+			array(
+				'ID'             => $built['product_id'],
+				'comment_status' => 'closed',
+			)
+		);
+
+		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+
+		$this->assertSame( ItemEligibility::STATUS_SKIP, $decision['status'] );
+	}
+
+	/**
+	 * @testdox Returns `reviewed` when the customer's email already has a review on the product.
+	 */
+	public function test_reviewed_when_existing_match(): void {
+		$built      = $this->make_order( 'match@example.test' );
+		$comment_id = wp_insert_comment(
+			array(
+				'comment_post_ID'      => $built['product_id'],
+				'comment_author'       => 'Match',
+				'comment_author_email' => 'match@example.test',
+				'comment_content'      => 'Worked great.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		$this->assertNotFalse( $comment_id );
+
+		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+
+		$this->assertSame( ItemEligibility::STATUS_REVIEWED, $decision['status'] );
+		$this->assertNotNull( $decision['comment'] );
+		$this->assertSame( (int) $comment_id, (int) $decision['comment']->comment_ID );
+	}
+
+	/**
+	 * @testdox Reviews on the product by a different email do not lock the row.
+	 */
+	public function test_returns_form_when_review_is_by_another_author(): void {
+		$built = $this->make_order( 'me@example.test' );
+		wp_insert_comment(
+			array(
+				'comment_post_ID'      => $built['product_id'],
+				'comment_author'       => 'Stranger',
+				'comment_author_email' => 'stranger@example.test',
+				'comment_content'      => 'Their review.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+
+		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+
+		$this->assertSame( ItemEligibility::STATUS_FORM, $decision['status'] );
+	}
+
+	/**
+	 * @testdox The filter can override the default decision in either direction.
+	 */
+	public function test_filter_overrides_decision(): void {
+		$built = $this->make_order();
+
+		// No matching review exists, but filter forces reviewed=true.
+		add_filter(
+			'woocommerce_review_order_item_already_reviewed',
+			static function () {
+				return true;
+			}
+		);
+
+		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+		$this->assertSame( ItemEligibility::STATUS_REVIEWED, $decision['status'] );
+	}
+
+	/**
+	 * @testdox Filter receives product_id, order, and customer_email.
+	 */
+	public function test_filter_receives_context(): void {
+		$built    = $this->make_order( 'context@example.test' );
+		$received = array();
+
+		add_filter(
+			'woocommerce_review_order_item_already_reviewed',
+			static function ( $current, $product_id, $order, $customer_email ) use ( &$received ) {
+				$received = array(
+					'product_id'     => (int) $product_id,
+					'order_id'       => $order instanceof WC_Order ? $order->get_id() : 0,
+					'customer_email' => (string) $customer_email,
+				);
+				return $current;
+			},
+			10,
+			4
+		);
+
+		ItemEligibility::describe( $built['item'], $built['order'] );
+
+		$this->assertSame( (int) $built['product_id'], $received['product_id'] );
+		$this->assertSame( (int) $built['order']->get_id(), $received['order_id'] );
+		$this->assertSame( 'context@example.test', $received['customer_email'] );
+	}
+}

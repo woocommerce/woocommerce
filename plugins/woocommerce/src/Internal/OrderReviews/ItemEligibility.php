@@ -1,0 +1,117 @@
+<?php
+/**
+ * ItemEligibility class file.
+ */
+
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Internal\OrderReviews;
+
+use WC_Order;
+use WC_Order_Item_Product;
+use WP_Comment;
+
+/**
+ * Decides how each Review Order line item should be rendered.
+ *
+ * The Review Order template asks this helper for each line item and
+ * dispatches to the appropriate partial:
+ *
+ * - `form`     — render the editable form row (`customer-review-order-row.php`).
+ * - `reviewed` — render the locked "Reviewed" row showing the existing review.
+ * - `skip`     — render nothing (e.g. the product has reviews disabled).
+ *
+ * @internal Just for internal use.
+ *
+ * @since 10.8.0
+ */
+class ItemEligibility {
+
+	public const STATUS_FORM     = 'form';
+	public const STATUS_REVIEWED = 'reviewed';
+	public const STATUS_SKIP     = 'skip';
+
+	/**
+	 * Describe how an order line item should render on the Review Order page.
+	 *
+	 * @param WC_Order_Item_Product $item  Order line item.
+	 * @param WC_Order              $order Order being reviewed.
+	 * @return array{status:string, comment:?WP_Comment, product_id:int}
+	 */
+	public static function describe( WC_Order_Item_Product $item, WC_Order $order ): array {
+		$product_id = $item->get_product_id();
+		$result     = array(
+			'status'     => self::STATUS_FORM,
+			'comment'    => null,
+			'product_id' => $product_id,
+		);
+
+		if ( ! $product_id || ! comments_open( $product_id ) ) {
+			$result['status'] = self::STATUS_SKIP;
+			return $result;
+		}
+
+		$customer_email = $order->get_billing_email();
+		$existing       = self::find_existing_review( $product_id, $customer_email );
+
+		/**
+		 * Filter the "already reviewed" decision for an item on the Review Order page.
+		 *
+		 * Return true to lock the row to the existing-review variant; return
+		 * false to keep the form row even if a matching comment exists.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param bool     $already_reviewed Default decision based on existing comments.
+		 * @param int      $product_id       Product id being inspected.
+		 * @param WC_Order $order            The order being reviewed.
+		 * @param string   $customer_email   Billing email used to match existing reviews.
+		 */
+		$already_reviewed = (bool) apply_filters(
+			'woocommerce_review_order_item_already_reviewed',
+			null !== $existing,
+			$product_id,
+			$order,
+			$customer_email
+		);
+
+		if ( $already_reviewed ) {
+			$result['status']  = self::STATUS_REVIEWED;
+			$result['comment'] = $existing;
+		}
+
+		return $result;
+	}
+
+	/**
+	 * Look up the customer's most recent review for a product, by email.
+	 *
+	 * @param int    $product_id Product id.
+	 * @param string $email      Customer email (from the order).
+	 * @return WP_Comment|null
+	 */
+	private static function find_existing_review( int $product_id, string $email ): ?WP_Comment {
+		if ( '' === $email ) {
+			return null;
+		}
+
+		$comments = get_comments(
+			array(
+				'post_id'      => $product_id,
+				'author_email' => $email,
+				'type'         => 'review',
+				'status'       => 'all',
+				'number'       => 1,
+				'orderby'      => 'comment_date_gmt',
+				'order'        => 'DESC',
+			)
+		);
+
+		if ( ! is_array( $comments ) || empty( $comments ) ) {
+			return null;
+		}
+
+		$first = reset( $comments );
+		return $first instanceof WP_Comment ? $first : null;
+	}
+}
