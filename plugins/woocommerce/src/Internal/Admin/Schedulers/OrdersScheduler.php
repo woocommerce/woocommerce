@@ -443,10 +443,18 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 	 * WordPress's untrashed_post hook, which fires after the status is already
 	 * restored in the DB, so import() reads the correct status.
 	 *
+	 * When HPOS is the authoritative store this hook is redundant: the
+	 * woocommerce_untrash_order callback above has already updated
+	 * wp_wc_order_stats. Skip in that case to avoid a second sync.
+	 *
 	 * @internal
 	 * @param int $post_id Post ID.
 	 */
 	public static function maybe_import_on_post_untrash( $post_id ): void {
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return;
+		}
+
 		if ( ! OrderUtil::is_order( $post_id, array( 'shop_order', 'shop_order_refund' ) ) ) {
 			return;
 		}

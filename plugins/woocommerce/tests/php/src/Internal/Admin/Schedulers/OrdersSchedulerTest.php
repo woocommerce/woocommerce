@@ -526,6 +526,51 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox maybe_import_on_post_untrash is a no-op when HPOS is the authoritative store.
+	 *
+	 * When HPOS is active the woocommerce_untrash_order callback already syncs
+	 * wp_wc_order_stats. The untrashed_post hook then fires for the same order,
+	 * so this handler must early-return to avoid a redundant import().
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/44371
+	 */
+	public function test_maybe_import_on_post_untrash_skips_when_hpos_active(): void {
+		global $wpdb;
+
+		if ( ! \Automattic\WooCommerce\Utilities\OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->markTestSkipped( 'Test requires HPOS to be the authoritative store.' );
+		}
+
+		// Create and import a completed order.
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order_id = $order->get_id();
+		OrdersScheduler::import( $order_id );
+
+		// Plant a sentinel value in wp_wc_order_stats. If maybe_import_on_post_untrash
+		// runs import() despite HPOS being active, the sentinel will be overwritten with
+		// the order's actual status.
+		$wpdb->update(
+			$wpdb->prefix . 'wc_order_stats',
+			array( 'status' => 'wc-sentinel' ),
+			array( 'order_id' => $order_id ),
+			array( '%s' ),
+			array( '%d' )
+		);
+
+		OrdersScheduler::maybe_import_on_post_untrash( $order_id );
+
+		$status_after = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT status FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d",
+				$order_id
+			)
+		);
+		$this->assertSame( 'wc-sentinel', $status_after, 'maybe_import_on_post_untrash should not call import() when HPOS is the authoritative store.' );
+	}
+
+	/**
 	 * Clear any scheduled batch processor actions.
 	 *
 	 * @return void
