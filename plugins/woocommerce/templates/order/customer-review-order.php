@@ -73,6 +73,10 @@ $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $orde
 // items below. Without this each describe() call would issue its own query.
 \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prime( $items, $order );
 
+// Single batched lookup of every existing review by this customer for the
+// items below. Without this each describe() call would issue its own query.
+\Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prime( $items, $order );
+
 // The Endpoint has already validated the URL key against the order key, so the
 // canonical value on the order is the right thing to echo into the form post.
 $order_key = (string) $order->get_order_key();
