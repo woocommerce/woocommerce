@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\OrderReviews;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Order;
 
 /**
@@ -53,11 +54,10 @@ class SubmissionHandler {
 	public function handle(): void {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- nonce is checked below.
 		$order_id = isset( $_POST['order_id'] ) ? absint( $_POST['order_id'] ) : 0;
-		$raw_key  = isset( $_POST['key'] ) && is_string( $_POST['key'] ) ? wp_unslash( $_POST['key'] ) : '';
-		$cleaned  = wc_clean( $raw_key );
-		$key      = is_string( $cleaned ) ? $cleaned : '';
-		$nonce    = isset( $_POST['_wcnonce'] ) && is_string( $_POST['_wcnonce'] ) ? wp_unslash( $_POST['_wcnonce'] ) : '';
-		$rows_in  = isset( $_POST['reviews'] ) && is_array( $_POST['reviews'] ) ? wp_unslash( $_POST['reviews'] ) : array();
+		$key      = isset( $_POST['key'] ) && is_string( $_POST['key'] ) ? sanitize_text_field( wp_unslash( $_POST['key'] ) ) : '';
+		$nonce    = isset( $_POST['_wcnonce'] ) && is_string( $_POST['_wcnonce'] ) ? sanitize_text_field( wp_unslash( $_POST['_wcnonce'] ) ) : '';
+		// Row-level fields are sanitized inside process_rows(); the array as a whole only needs unslashing.
+		$rows_in = isset( $_POST['reviews'] ) && is_array( $_POST['reviews'] ) ? wp_unslash( $_POST['reviews'] ) : array(); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		if ( ! is_string( $nonce ) || ! wp_verify_nonce( $nonce, self::ACTION ) ) {
@@ -75,6 +75,19 @@ class SubmissionHandler {
 
 		// Logged-in user must own the order. Guests with the right key still pass.
 		if ( $order->get_customer_id() && is_user_logged_in() && get_current_user_id() !== $order->get_customer_id() ) {
+			wp_send_json_error( array( 'message' => __( 'Order not found.', 'woocommerce' ) ), 404 );
+		}
+
+		// Reuse the same eligibility filter the page-load endpoint uses so the
+		// submit path can never run on an order whose status no longer permits it.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented on Endpoint::is_authorised().
+		$eligible_statuses = (array) apply_filters(
+			'woocommerce_review_order_eligible_statuses',
+			array( OrderStatus::COMPLETED ),
+			$order
+		);
+
+		if ( ! in_array( $order->get_status(), $eligible_statuses, true ) ) {
 			wp_send_json_error( array( 'message' => __( 'Order not found.', 'woocommerce' ) ), 404 );
 		}
 
@@ -103,13 +116,13 @@ class SubmissionHandler {
 	 * @return array<int, array{product_id:int, status:string, comment_id?:int, error?:string}>
 	 */
 	private function process_rows( WC_Order $order, array $rows_in ): array {
-		$results       = array();
-		$item_index    = $this->index_order_items( $order );
-		$author_name   = trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() );
-		$author_email  = $order->get_billing_email();
-		$author_ip     = $order->get_customer_ip_address();
-		$author_agent  = $order->get_customer_user_agent();
-		$require_mod   = (bool) get_option( 'comment_moderation' );
+		$results      = array();
+		$item_index   = $this->index_order_items( $order );
+		$author_name  = trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() );
+		$author_email = $order->get_billing_email();
+		$author_ip    = $order->get_customer_ip_address();
+		$author_agent = $order->get_customer_user_agent();
+		$require_mod  = (bool) get_option( 'comment_moderation' );
 
 		foreach ( $rows_in as $row_index => $row ) {
 			$row_index = (int) $row_index;
@@ -123,7 +136,8 @@ class SubmissionHandler {
 
 			$product_id    = isset( $row['product_id'] ) ? absint( $row['product_id'] ) : 0;
 			$order_item_id = isset( $row['order_item_id'] ) ? absint( $row['order_item_id'] ) : 0;
-			$text          = isset( $row['text'] ) && is_string( $row['text'] ) ? trim( wp_kses_post( wp_unslash( $row['text'] ) ) ) : '';
+			// $rows_in was already unslashed in handle(); avoid double-unslashing.
+			$text = isset( $row['text'] ) && is_string( $row['text'] ) ? trim( wp_kses_post( $row['text'] ) ) : '';
 
 			$result = array(
 				'product_id' => $product_id,
@@ -131,21 +145,21 @@ class SubmissionHandler {
 			);
 
 			if ( ! $product_id || ! $order_item_id || ! isset( $item_index[ $order_item_id ] ) ) {
-				$result['error'] = 'invalid_row';
+				$result['error']       = 'invalid_row';
 				$results[ $row_index ] = $result;
 				continue;
 			}
 
 			$item = $item_index[ $order_item_id ];
 			if ( $item->get_product_id() !== $product_id ) {
-				$result['error'] = 'product_mismatch';
+				$result['error']       = 'product_mismatch';
 				$results[ $row_index ] = $result;
 				continue;
 			}
 
 			$comment_data = array(
 				'comment_post_ID'      => $product_id,
-				'comment_author'       => $author_name !== '' ? $author_name : __( 'Anonymous', 'woocommerce' ),
+				'comment_author'       => '' !== $author_name ? $author_name : __( 'Anonymous', 'woocommerce' ),
 				'comment_author_email' => $author_email,
 				'comment_author_IP'    => $author_ip,
 				'comment_agent'        => $author_agent,
@@ -157,7 +171,7 @@ class SubmissionHandler {
 
 			$comment_id = wp_insert_comment( wp_slash( $comment_data ) );
 			if ( ! $comment_id ) {
-				$result['error'] = 'insert_failed';
+				$result['error']       = 'insert_failed';
 				$results[ $row_index ] = $result;
 				continue;
 			}
@@ -165,10 +179,10 @@ class SubmissionHandler {
 			add_comment_meta( $comment_id, 'rating', $rating, true );
 			add_comment_meta( $comment_id, 'verified', 1, true );
 
-			$result['comment_id'] = (int) $comment_id;
-			$result['status']     = $require_mod ? 'pending_moderation' : 'ok';
+			$result['comment_id']  = (int) $comment_id;
+			$result['status']      = $require_mod ? 'pending_moderation' : 'ok';
 			$results[ $row_index ] = $result;
-		}
+		}//end foreach
 
 		return $results;
 	}
@@ -180,31 +194,57 @@ class SubmissionHandler {
 	 * @param WC_Order $order Order being reviewed.
 	 */
 	private function maybe_mark_order_complete( WC_Order $order ): void {
+		// Recording the moment the order first became fully reviewed; never overwrite.
+		if ( $order->get_meta( self::COMPLETED_META_KEY ) ) {
+			return;
+		}
+
 		$customer_email = $order->get_billing_email();
 		if ( '' === $customer_email ) {
 			return;
 		}
 
+		$product_ids = array();
 		foreach ( $order->get_items() as $item ) {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
 			}
 			$product_id = $item->get_product_id();
-			if ( ! $product_id ) {
-				continue;
+			if ( $product_id ) {
+				$product_ids[ $product_id ] = $product_id;
 			}
+		}
 
-			$comments = get_comments(
-				array(
-					'post_id'      => $product_id,
-					'author_email' => $customer_email,
-					'type'         => 'review',
-					'count'        => true,
-					'status'       => 'all',
-				)
-			);
+		if ( empty( $product_ids ) ) {
+			return;
+		}
 
-			if ( 0 === (int) $comments ) {
+		// Single grouped lookup instead of one query per product.
+		$comments = get_comments(
+			array(
+				'post__in'     => array_values( $product_ids ),
+				'author_email' => $customer_email,
+				'type'         => 'review',
+				'status'       => 'all',
+				'fields'       => 'ids',
+				'meta_query'   => array(),
+			)
+		);
+
+		if ( ! is_array( $comments ) || empty( $comments ) ) {
+			return;
+		}
+
+		$reviewed_products = array();
+		foreach ( $comments as $comment_id ) {
+			$comment = get_comment( $comment_id );
+			if ( $comment ) {
+				$reviewed_products[ (int) $comment->comment_post_ID ] = true;
+			}
+		}
+
+		foreach ( $product_ids as $product_id ) {
+			if ( empty( $reviewed_products[ $product_id ] ) ) {
 				return;
 			}
 		}

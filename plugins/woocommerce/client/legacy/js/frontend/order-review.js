@@ -134,11 +134,15 @@
 		if ( existing ) {
 			existing.parentNode.removeChild( existing );
 		}
+		var i18n =
+			( window.wcOrderReview && window.wcOrderReview.i18n ) || {};
 		var defaults = {
-			ok: 'Thanks, your review is live.',
+			ok: i18n.ok || 'Thanks, your review is live.',
 			pending_moderation:
+				i18n.pending_moderation ||
 				'Thanks, your review is pending approval.',
-			error: 'Something went wrong, please try again.',
+			error:
+				i18n.error || 'Something went wrong, please try again.',
 		};
 		var note = document.createElement( 'p' );
 		note.className =
