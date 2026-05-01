@@ -68,6 +68,10 @@ $meta_parts = array_filter(
  * @param WC_Order        $order The order being reviewed.
  */
 $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+
+// The Endpoint has already validated the URL key against the order key, so the
+// canonical value on the order is the right thing to echo into the form post.
+$order_key = (string) $order->get_order_key();
 ?>
 <div class="woocommerce-review-order">
 	<p class="woocommerce-review-order__meta">
@@ -87,36 +91,50 @@ $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $orde
 	</p>
 
 	<?php if ( ! empty( $items ) ) : ?>
-		<ul class="woocommerce-review-order__items">
-			<?php foreach ( $items as $item ) : ?>
+		<form
+			class="woocommerce-review-order__form"
+			method="post"
+			novalidate
+		>
+			<input type="hidden" name="order_id" value="<?php echo esc_attr( (string) $order->get_id() ); ?>" />
+			<input type="hidden" name="key" value="<?php echo esc_attr( $order_key ); ?>" />
+			<?php wp_nonce_field( 'woocommerce_submit_order_reviews', '_wcnonce' ); ?>
+
+			<ul class="woocommerce-review-order__items">
 				<?php
-				if ( ! $item instanceof WC_Order_Item_Product ) {
-					continue;
-				}
-				$product = $item->get_product();
-				if ( ! $product instanceof WC_Product ) {
-					continue;
-				}
-				$product_link = $product->is_visible() ? get_permalink( $product->get_id() ) : '';
-				$product_name = $item->get_name();
-				$image_html   = $product->get_image( 'woocommerce_thumbnail' );
+				$row_index = 0;
+				foreach ( $items as $item ) {
+					if ( ! $item instanceof WC_Order_Item_Product ) {
+						continue;
+					}
+					$product = $item->get_product();
+					if ( ! $product instanceof WC_Product ) {
+						continue;
+					}
+
+					wc_get_template(
+						'order/customer-review-order-row.php',
+						array(
+							'item'      => $item,
+							'product'   => $product,
+							'order'     => $order,
+							'row_index' => $row_index,
+						)
+					);
+
+					++$row_index;
+				}//end foreach
 				?>
-				<li class="woocommerce-review-order__item">
-					<p class="woocommerce-review-order__item-title">
-						<?php if ( $product_link ) : ?>
-							<a href="<?php echo esc_url( $product_link ); ?>"><?php echo esc_html( $product_name ); ?></a>
-						<?php else : ?>
-							<?php echo esc_html( $product_name ); ?>
-						<?php endif; ?>
-					</p>
-					<div class="woocommerce-review-order__item-row">
-						<div class="woocommerce-review-order__item-image">
-							<?php echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_image() returns escaped HTML. ?>
-						</div>
-						<div class="woocommerce-review-order__item-form-placeholder"></div>
-					</div>
-				</li>
-			<?php endforeach; ?>
-		</ul>
+			</ul>
+
+			<div class="woocommerce-review-order__actions">
+				<button
+					type="submit"
+					class="woocommerce-review-order__submit button"
+				>
+					<?php esc_html_e( 'Submit reviews', 'woocommerce' ); ?>
+				</button>
+			</div>
+		</form>
 	<?php endif; ?>
 </div>
