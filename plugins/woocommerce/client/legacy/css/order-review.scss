@@ -67,12 +67,11 @@
 	}
 
 	// Locked "Reviewed" row variant: indent the quoted review with a
-	// subtle left rule. Color/typography come from the active theme.
+	// subtle left rule that inherits the theme's text color.
 	&__item-reviewed-text {
 		margin: 0.5em 0 0;
 		padding: 0 0 0 0.75em;
-		border-left: 2px solid currentColor;
-		border-left-color: rgba(0, 0, 0, 0.1);
+		border-left: 2px solid;
 	}
 
 	@media (max-width: 600px) {

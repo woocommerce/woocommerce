@@ -301,7 +301,18 @@ class SubmissionHandler {
 	 * @return array<int, \WC_Order_Item_Product>
 	 */
 	private function index_eligible_order_items( WC_Order $order ): array {
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented on customer-review-order.php template.
+		/**
+		 * Filter the eligible items considered by the Review Order
+		 * submission handler.
+		 *
+		 * Same hook the page uses; documented in
+		 * `templates/order/customer-review-order.php`.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param WC_Order_Item[] $items Order line items.
+		 * @param WC_Order        $order The order being reviewed.
+		 */
 		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 
 		$index = array();
