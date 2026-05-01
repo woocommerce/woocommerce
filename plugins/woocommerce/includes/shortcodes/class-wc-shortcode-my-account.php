@@ -384,7 +384,7 @@ class WC_Shortcode_My_Account {
 		 *
 		 * This provides parity with WordPress core's reset_password() function.
 		 *
-		 * @since 10.8.0
+		 * @since 10.9.0
 		 * @param WP_User $user     The user.
 		 * @param string  $new_pass New user password in plaintext.
 		 */
