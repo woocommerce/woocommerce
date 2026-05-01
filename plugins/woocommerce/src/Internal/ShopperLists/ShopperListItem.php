@@ -164,6 +164,13 @@ class ShopperListItem {
 	}
 
 	/**
+	 * Saved quantity.
+	 */
+	public function get_quantity(): int {
+		return $this->quantity;
+	}
+
+	/**
 	 * Storage / response shape.
 	 */
 	public function to_array(): array {

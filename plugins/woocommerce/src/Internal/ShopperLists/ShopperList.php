@@ -126,12 +126,24 @@ class ShopperList {
 	}
 
 	/**
-	 * Add (or replace by key) an item.
+	 * Add an item, or merge quantities if it already exists.
 	 *
 	 * @param ShopperListItem $item Item to add.
 	 */
 	public function add_item( ShopperListItem $item ): void {
-		$this->items[ $item->get_key() ] = $item;
+		$key = $item->get_key();
+
+		if ( isset( $this->items[ $key ] ) ) {
+			$this->items[ $key ] = ShopperListItem::from_array(
+				array_merge(
+					$this->items[ $key ]->to_array(),
+					array( 'quantity' => $this->items[ $key ]->get_quantity() + $item->get_quantity() )
+				)
+			);
+			return;
+		}
+
+		$this->items[ $key ] = $item;
 	}
 
 	/**

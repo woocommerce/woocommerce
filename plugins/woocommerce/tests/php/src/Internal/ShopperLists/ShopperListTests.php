@@ -98,7 +98,7 @@ class ShopperListTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox add_item/remove_item round-trip through save() and reload, are idempotent, and report unknown keys.
+	 * @testdox add_item/remove_item round-trip through save() and reload, merge quantities for the same key, and report unknown keys.
 	 */
 	public function test_list_item_crud(): void {
 		$list = ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id );
@@ -109,7 +109,10 @@ class ShopperListTests extends WC_Unit_Test_Case {
 
 		$reloaded = ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id );
 		$this->assertCount( 1, $reloaded->get_items(), 'Adding the same item twice must keep a single row.' );
-		$this->assertNotNull( $reloaded->find_item( $this->item->get_key() ) );
+
+		$merged = $reloaded->find_item( $this->item->get_key() );
+		$this->assertNotNull( $merged );
+		$this->assertSame( 2, $merged->get_quantity(), 'Quantities must be summed when the same product+variation is added again.' );
 
 		$this->assertFalse( $reloaded->remove_item( 'nonexistent-key' ), 'remove_item should return false for unknown keys.' );
 		$this->assertTrue( $reloaded->remove_item( $this->item->get_key() ) );
