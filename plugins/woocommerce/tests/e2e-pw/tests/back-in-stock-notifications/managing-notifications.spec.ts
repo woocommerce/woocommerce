@@ -247,6 +247,15 @@ test.describe(
 				.selectOption( 'cancel_notification' );
 			await submitNotificationEditForm( page );
 
+			// Wait for the success notice before navigating away —
+			// `submitNotificationEditForm` only awaits the click event, not
+			// the resulting POST round-trip, so on slower CI runners the
+			// next `page.goto()` was racing the submit and the row was
+			// still ACTIVE by the time the list view loaded.
+			await expect(
+				page.getByText( 'Notification updated.' )
+			).toBeVisible();
+
 			await page.goto(
 				`/wp-admin/admin.php?page=wc-customer-stock-notifications&customer_stock_notifications_product_filter=${ product.id }`
 			);
