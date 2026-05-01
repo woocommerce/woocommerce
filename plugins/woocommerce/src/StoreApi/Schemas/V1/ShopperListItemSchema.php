@@ -5,7 +5,6 @@ namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
-use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
 
 /**
  * ShopperListItemSchema class.
@@ -15,8 +14,6 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
  * the two states via the `product_exists` boolean.
  */
 class ShopperListItemSchema extends AbstractSchema {
-	use ProductItemTrait;
-
 	/**
 	 * The schema item name.
 	 *
@@ -295,5 +292,57 @@ class ShopperListItemSchema extends AbstractSchema {
 				'sale_price'    => '' === $sale_price ? '' : $this->prepare_money_response( $sale_price, $decimals ),
 			)
 		);
+	}
+
+	/**
+	 * Format variation attribute data into [{ raw_attribute, attribute, value }] objects.
+	 *
+	 * Mirrors ProductItemTrait::format_variation_data. We can't `use` the trait directly
+	 * because its sibling `prepare_product_price_response` calls `parent::` (assumes a
+	 * ProductSchema parent). Refactoring the trait to drop that coupling is a follow-up.
+	 *
+	 * @param array       $variation_data Variation attributes keyed by attribute_*.
+	 * @param \WC_Product $product        Live product.
+	 * @return array
+	 */
+	private function format_variation_data( array $variation_data, \WC_Product $product ): array {
+		$return = array();
+
+		foreach ( $variation_data as $key => $value ) {
+			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( (string) $key ) ) );
+
+			if ( taxonomy_exists( $taxonomy ) ) {
+				$term = get_term_by( 'slug', $value, $taxonomy );
+				if ( ! is_wp_error( $term ) && $term && $term->name ) {
+					/**
+					 * Filters the variation option name.
+					 *
+					 * This filter is documented in src/StoreApi/Utilities/ProductItemTrait.php.
+					 *
+					 * @since 10.8.0
+					 */
+					$value = apply_filters( 'woocommerce_variation_option_name', $term->name, $term, $taxonomy, $product );
+				}
+				$label = wc_attribute_label( $taxonomy );
+			} else {
+				/**
+				 * Filters the variation option name.
+				 *
+				 * This filter is documented in src/StoreApi/Utilities/ProductItemTrait.php.
+				 *
+				 * @since 10.8.0
+				 */
+				$value = apply_filters( 'woocommerce_variation_option_name', $value, null, $taxonomy, $product );
+				$label = wc_attribute_label( str_replace( 'attribute_', '', (string) $key ), $product );
+			}//end if
+
+			$return[] = array(
+				'raw_attribute' => $this->prepare_html_response( (string) $key ),
+				'attribute'     => $this->prepare_html_response( (string) $label ),
+				'value'         => $this->prepare_html_response( (string) $value ),
+			);
+		}//end foreach
+
+		return $return;
 	}
 }
