@@ -12,8 +12,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( FeaturesUtil::feature_is_enabled( 'product_variations_classic_redesign' )
-	&& ! ( isset( $_GET['edit_variation'] ) && is_numeric( $_GET['edit_variation'] ) ) ) { // phpcs:ignore WordPress.Security.NonceVerification
+if ( FeaturesUtil::feature_is_enabled( 'product_variations_classic_redesign' ) ) {
 	?>
 	<div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 		<div id="variable_product_options_inner">
