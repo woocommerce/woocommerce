@@ -428,6 +428,8 @@ class Endpoint {
 			array(),
 			Constants::get_constant( 'WC_VERSION' )
 		);
+		// Tell WP to swap to the *-rtl.css variant on RTL sites.
+		wp_style_add_data( 'wc-order-review', 'rtl', 'replace' );
 
 		wp_enqueue_script(
 			'wc-order-review',
