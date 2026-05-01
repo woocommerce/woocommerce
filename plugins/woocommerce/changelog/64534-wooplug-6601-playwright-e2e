@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add Playwright E2E coverage for the Customer Review Order page.
