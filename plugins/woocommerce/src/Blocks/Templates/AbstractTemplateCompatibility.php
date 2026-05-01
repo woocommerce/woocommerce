@@ -240,6 +240,18 @@ abstract class AbstractTemplateCompatibility {
 	 * @internal
 	 */
 	public function set_compatibility_layer_flag() {
+		$has_filter = has_filter( 'woocommerce_disable_compatibility_layer' );
+
+		if ( $has_filter ) {
+			// In #64504 we moved the `woocommerce_disable_compatibility_layer`
+			// filter from `template_redirect` to `template_include` (which runs
+			// later).
+			// We display a `wc_doing_it_wrong()` message if somebody was
+			// hooking into it too early.
+			wc_doing_it_wrong( 'woocommerce_disable_compatibility_layer', 'The `woocommerce_disable_compatibility_layer` filter should be added in `template_include`, after WooCommerce has set the default value based on the resolved template.', '10.9.0' );
+			return;
+		}
+
 		if ( $this->current_template_has_legacy_template_block() ) {
 			add_filter( 'woocommerce_disable_compatibility_layer', '__return_true' );
 		}
