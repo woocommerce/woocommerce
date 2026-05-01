@@ -38,24 +38,29 @@ $shop_url = wc_get_page_permalink( 'shop' );
 		<?php if ( $reviewed_count > 0 ) : ?>
 			<p class="woocommerce-review-order__empty-summary">
 				<?php
-				$rating_text = $average_rating > 0
-					? sprintf(
+				$rating_text = '';
+				if ( $average_rating > 0 ) {
+					$rating_text = sprintf(
 						/* translators: %s: average rating with one decimal, e.g. "4.5" */
 						__( 'average rating %s out of 5', 'woocommerce' ),
 						number_format_i18n( $average_rating, 1 )
-					)
-					: '';
+					);
+				}
+
+				$rating_suffix = '' === $rating_text ? '' : ' (' . $rating_text . ')';
+
+				/* translators: 1: number of reviews 2: average-rating phrase, optional */
+				$summary_template = _n(
+					'You left %1$d review on this order%2$s.',
+					'You left %1$d reviews on this order%2$s.',
+					(int) $reviewed_count,
+					'woocommerce'
+				);
 
 				printf(
-					/* translators: 1: number of reviews 2: average-rating phrase, optional */
-					esc_html( _n(
-						'You left %1$d review on this order%2$s.',
-						'You left %1$d reviews on this order%2$s.',
-						(int) $reviewed_count,
-						'woocommerce'
-					) ),
+					esc_html( $summary_template ),
 					(int) $reviewed_count,
-					$rating_text !== '' ? ' (' . esc_html( $rating_text ) . ')' : ''
+					esc_html( $rating_suffix )
 				);
 				?>
 			</p>
