@@ -7,24 +7,6 @@ parameters:
 			path: includes/abstracts/abstract-wc-data.php
 
 		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 5
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 6
-			path: includes/abstracts/abstract-wc-data.php
-
-		-
 			message: '#^Argument of an invalid type array\<WC_Meta_Data\>\|null supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 1
@@ -6307,12 +6289,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-product-data-variations.php
 
 		-
-			message: '#^Variable \$modal_title might not be defined\.$#'
-			identifier: variable.undefined
-			count: 1
-			path: includes/admin/meta-boxes/views/html-product-data-variations.php
-
-		-
 			message: '#^Variable \$product_object might not be defined\.$#'
 			identifier: variable.undefined
 			count: 2
@@ -8721,13 +8697,13 @@ parameters:
 		-
 			message: '#^Cannot call method get_formatted_name\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 2
+			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
 			message: '#^Cannot call method get_id\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 4
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8767,12 +8743,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot call method get_stock_quantity\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot call method get_total\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -8782,12 +8752,6 @@ parameters:
 			message: '#^Cannot call method get_total_refunded\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method get_type\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8805,7 +8769,7 @@ parameters:
 		-
 			message: '#^Cannot call method managing_stock\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 2
 			path: includes/class-wc-ajax.php
 
 		-
@@ -8995,12 +8959,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Parameter \#1 \$product of function wc_products_array_filter_readable expects WC_Product, WC_Product\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Parameter \#1 \$product_object of function wc_render_invalid_variation_notice expects WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -9140,12 +9098,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#2 \$postcodes of static method WC_Tax\:\:_update_tax_rate_postcodes\(\) expects string, array\<string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Parameter \#2 \$product of function wc_format_stock_quantity_for_display expects WC_Product, WC_Product\|false\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/class-wc-ajax.php
@@ -12835,12 +12787,6 @@ parameters:
 			path: includes/class-wc-order-item-product.php
 
 		-
-			message: '#^Method WC_Order_Item_Product\:\:set_product\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Method WC_Order_Item_Product\:\:set_product_id\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -13079,12 +13025,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: includes/class-wc-order-item-tax.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: includes/class-wc-order-item.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$key\.$#'
@@ -26183,24 +26123,6 @@ parameters:
 			identifier: offsetAssign.valueType
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-order-refunds-v2-controller.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 2
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-orders-v2-controller.php
 
 		-
 			message: '#^Call to an undefined method WC_Data\:\:calculate_totals\(\)\.$#'
@@ -43474,18 +43396,6 @@ parameters:
 			path: src/Admin/API/Reports/Orders/Controller.php
 
 		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Admin/API/Reports/Orders/DataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Admin/API/Reports/Orders/DataStore.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Admin\\API\\Reports\\Orders\\DataStore\:\:add_sql_query_params\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -46504,24 +46414,6 @@ parameters:
 			path: src/Admin/Features/Features.php
 
 		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Admin/Features/Fulfillments/DataStore/FulfillmentsDataStore.php
-
-		-
 			message: '#^Parameter \#2 \$meta \(WC_Meta_Data\) of method Automattic\\WooCommerce\\Admin\\Features\\Fulfillments\\DataStore\\FulfillmentsDataStore\:\:add_meta\(\) should be compatible with parameter \$meta \(stdClass\) of method WC_Data_Store_WP\:\:add_meta\(\)$#'
 			identifier: method.childParameterType
 			count: 1
@@ -49451,12 +49343,6 @@ parameters:
 
 		-
 			message: '#^Cannot call method set_date_created\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Admin/RemoteInboxNotifications/SpecRunner.php
-
-		-
-			message: '#^Cannot call method set_layout\(\) on Automattic\\WooCommerce\\Admin\\Notes\\Note\|true\.$#'
 			identifier: method.nonObject
 			count: 1
 			path: src/Admin/RemoteInboxNotifications/SpecRunner.php
@@ -56890,27 +56776,9 @@ parameters:
 			path: src/Caching/WPCacheEngine.php
 
 		-
-			message: '#^@param Automattic\\WooCommerce\\Checkout\\Helpers\\WC_Order \$order does not accept actual type of parameter\: WC_Order\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Checkout\\Helpers\\WC_Order_Item_Product \$item does not accept actual type of parameter\: WC_Order_Item\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_query_for_stock\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
-			identifier: method.notFound
-			count: 2
 			path: src/Checkout/Helpers/ReserveStock.php
 
 		-
@@ -60580,18 +60448,6 @@ parameters:
 			path: src/Internal/Admin/Orders/MetaBoxes/CustomMetaBox.php
 
 		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Internal/Admin/Orders/MetaBoxes/OrderAttribution.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Admin/Orders/MetaBoxes/OrderAttribution.php
-
-		-
 			message: '#^Cannot access property \$labels on WP_Taxonomy\|false\.$#'
 			identifier: property.nonObject
 			count: 1
@@ -63790,24 +63646,6 @@ parameters:
 			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
 
 		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 3
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Internal/DataStores/Orders/OrdersTableDataStore.php
-
-		-
 			message: '#^Call to an undefined method WC_Abstract_Order\:\:get_address\(\)\.$#'
 			identifier: method.notFound
 			count: 1
@@ -64445,24 +64283,6 @@ parameters:
 			identifier: empty.variable
 			count: 1
 			path: src/Internal/DataStores/Orders/OrdersTableQuery.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/DataStores/Orders/OrdersTableRefundDataStore.php
 
 		-
 			message: '#^Access to an undefined property object\:\:\$meta_data\.$#'
@@ -65741,18 +65561,6 @@ parameters:
 			identifier: missingType.return
 			count: 1
 			path: src/Internal/Orders/OrderAttributionBlocksController.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$key\.$#'
-			identifier: property.notFound
-			count: 2
-			path: src/Internal/Orders/OrderAttributionController.php
-
-		-
-			message: '#^Access to an undefined property WC_Meta_Data\:\:\$value\.$#'
-			identifier: property.notFound
-			count: 1
-			path: src/Internal/Orders/OrderAttributionController.php
 
 		-
 			message: '#^Callback expects 2 parameters, \$accepted_args is set to 10\.$#'
@@ -70489,12 +70297,6 @@ parameters:
 			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
 
 		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
-			count: 1
-			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
 			message: '#^Property Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\NotificationsProcessor\:\:\$logger \(Automattic\\WooCommerce\\Internal\\StockNotifications\\AsyncTasks\\Logger\) does not accept WC_Logger_Interface\.$#'
 			identifier: assign.propertyType
 			count: 1
@@ -70505,12 +70307,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Internal/StockNotifications/AsyncTasks/NotificationsProcessor.php
-
-		-
-			message: '#^Cannot call method delete\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/DataRetentionController.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\DataRetentionController\:\:clear_daily_task\(\) has no return type specified\.$#'
@@ -70693,39 +70489,9 @@ parameters:
 			path: src/Internal/StockNotifications/Emails/EmailActionController.php
 
 		-
-			message: '#^Cannot call method get_meta\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
 			message: '#^Cannot call method get_name\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailActionController\:\:get_notification_to_be_processed\(\) never returns null so it can be removed from the return type\.$#'
-			identifier: return.unusedType
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailActionController\:\:get_notification_to_be_processed\(\) should return Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|null but returns Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|true\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Emails\\EmailActionController\:\:get_notification_to_be_processed\(\) should return Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|null but returns false\.$#'
-			identifier: return.type
-			count: 2
-			path: src/Internal/StockNotifications/Emails/EmailActionController.php
-
-		-
-			message: '#^PHPDoc tag @return with type Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|false is not subtype of native type Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|null\.$#'
-			identifier: return.phpDocType
-			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailActionController.php
 
 		-
@@ -70742,12 +70508,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Email\:\:prepare_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailManager.php
-
-		-
-			message: '#^Call to an undefined method WC_Email\:\:trigger\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailManager.php
@@ -71075,54 +70835,6 @@ parameters:
 			identifier: method.notFound
 			count: 1
 			path: src/Internal/StockNotifications/NotificationQuery.php
-
-		-
-			message: '#^Cannot call method get_product_id\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method save\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_cancellation_source\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_date_cancelled\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_status\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_user_email\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method set_user_id\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
-
-		-
-			message: '#^Cannot call method update_meta_data\(\) on Automattic\\WooCommerce\\Internal\\StockNotifications\\Notification\|bool\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/Internal/StockNotifications/Privacy/PrivacyEraser.php
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\StockNotifications\\Privacy\\PrivacyEraser\:\:register_erasers_exporters\(\) has no return type specified\.$#'
@@ -72728,12 +72440,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
-			identifier: missingType.generics
-			count: 1
-			path: src/StoreApi/Routes/V1/Checkout.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\StoreApi\\Routes\\V1\\Checkout\:\:get_route_post_response\(\) has parameter \$request with generic class WP_REST_Request but does not specify its types\: T$#'
 			identifier: missingType.generics
 			count: 1
 			path: src/StoreApi/Routes/V1/Checkout.php

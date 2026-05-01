@@ -215,6 +215,30 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * The sweep must fire `woocommerce_email_template_divergence_sweep_complete`
+	 * unconditionally at end of run, so downstream listeners (RSM-139 auto-applier)
+	 * can hook the completion event without inspecting detector internals.
+	 */
+	public function test_run_sweep_fires_completion_action(): void {
+		$email_id = 'wc_test_divergence_completion_action';
+		$this->generate_stamped_post( $email_id );
+
+		$fired    = 0;
+		$listener = static function () use ( &$fired ): void {
+			++$fired;
+		};
+		add_action( 'woocommerce_email_template_divergence_sweep_complete', $listener );
+
+		try {
+			WCEmailTemplateDivergenceDetector::run_sweep();
+		} finally {
+			remove_action( 'woocommerce_email_template_divergence_sweep_complete', $listener );
+		}
+
+		$this->assertSame( 1, $fired, 'Completion action must fire exactly once per sweep.' );
+	}
+
+	/**
 	 * Build a WC_Email stub backed by the third-party-with-version.php fixture, inject it
 	 * into WC_Emails::$emails, and opt the email ID into the block-editor filter so the
 	 * sync registry picks it up. Resets the registry cache so subsequent reads see the
