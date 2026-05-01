@@ -4,6 +4,7 @@
 import { useState, useEffect, useCallback } from '@wordpress/element';
 import { DataViews } from '@wordpress/dataviews';
 import { Button, Notice } from '@wordpress/components';
+import { Stack } from '@wordpress/ui';
 import apiFetch from '@wordpress/api-fetch';
 import { __ } from '@wordpress/i18n';
 import type { View, Action } from '@wordpress/dataviews';
@@ -19,7 +20,8 @@ const DEFAULT_VIEW: View = {
 	page: 1,
 	perPage: 20,
 	search: '',
-	fields: [ 'variant', 'price', 'stock' ],
+	fields: [ 'variant', 'values', 'price', 'stock' ],
+	layout: { density: 'compact' },
 };
 
 const EMPTY_ARRAY: Variation[] = [];
@@ -35,6 +37,7 @@ export default function VariationsTable( { productId }: VariationsTableProps ) {
 	const [ isLoading, setIsLoading ] = useState( true );
 	const [ error, setError ] = useState< string | null >( null );
 	const [ view, setView ] = useState< View >( DEFAULT_VIEW );
+	const [ selection, setSelection ] = useState< string[] >( [] );
 
 	const page = view.page ?? 1;
 	const perPage = view.perPage ?? 20;
@@ -85,20 +88,22 @@ export default function VariationsTable( { productId }: VariationsTableProps ) {
 		setView( newView );
 	}, [] );
 
+	const handleChangeSelection = useCallback( ( items: string[] ) => {
+		setSelection( items );
+	}, [] );
+
 	const actions: Action< Variation >[] = [
 		{
-			id: 'edit-legacy',
-			label: __( 'Edit (legacy)', 'woocommerce' ),
+			id: 'edit',
+			label: __( 'Edit', 'woocommerce' ),
 			isPrimary: true,
-			callback: ( items ) => {
-				if ( ! items[ 0 ] ) return;
-				const url = new URL( window.location.href );
-				url.searchParams.set(
-					'edit_variation',
-					String( items[ 0 ].id )
-				);
-				window.location.href = url.toString();
-			},
+			callback: () => {},
+		},
+		{
+			id: 'delete-variation',
+			label: __( 'Delete variation', 'woocommerce' ),
+			supportsBulk: true,
+			callback: () => {},
 		},
 	];
 
@@ -126,13 +131,26 @@ export default function VariationsTable( { productId }: VariationsTableProps ) {
 			getItemId={ ( item: Variation ) => String( item.id ) }
 			defaultLayouts={ { table: {} } }
 			actions={ actions }
-			search
-			searchLabel={ __( 'Search variations', 'woocommerce' ) }
-			header={
-				<Button variant="secondary" disabled>
-					{ __( 'Edit options', 'woocommerce' ) }
-				</Button>
-			}
-		/>
+			selection={ selection }
+			onChangeSelection={ handleChangeSelection }
+		>
+			<Stack
+				direction="row"
+				justify="space-between"
+				className="wc-variations-classic__toolbar"
+			>
+				<DataViews.Search
+					label={ __( 'Search variations', 'woocommerce' ) }
+				/>
+				<Stack direction="row" gap="xs">
+					<DataViews.ViewConfig />
+					<Button variant="secondary" disabled>
+						{ __( 'Edit options', 'woocommerce' ) }
+					</Button>
+				</Stack>
+			</Stack>
+			<DataViews.Layout />
+			<DataViews.Footer />
+		</DataViews>
 	);
 }
