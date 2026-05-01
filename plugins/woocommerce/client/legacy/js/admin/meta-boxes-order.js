@@ -1389,6 +1389,7 @@ jQuery( function ( $ ) {
 				$( 'ul.order_notes' ).prepend( response );
 				$( '#woocommerce-order-notes' ).unblock();
 				$( '#add_order_note' ).val( '' );
+				wp.a11y.speak( woocommerce_admin_meta_boxes.i18n_note_added );
 				window.wcTracks.recordEvent( 'order_edit_add_order_note', {
 					order_id: woocommerce_admin_meta_boxes.post_id,
 					note_type: data.note_type || 'private',
@@ -1419,6 +1420,7 @@ jQuery( function ( $ ) {
 
 				$.post( woocommerce_admin_meta_boxes.ajax_url, data, function() {
 					$( note ).remove();
+					wp.a11y.speak( woocommerce_admin_meta_boxes.i18n_note_deleted );
 				});
 			}
 
