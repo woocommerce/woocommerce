@@ -253,6 +253,13 @@ class Endpoint {
 			exit;
 		}
 
+		// Side effect (persistent write) lives in the controller, not the
+		// view: stamp the no-actionable-rows meta now so the template stays
+		// pure rendering.
+		if ( $order instanceof WC_Order ) {
+			$this->maybe_mark_no_actionable_rows( $order );
+		}
+
 		// template_redirect fires after wp_enqueue_scripts but before
 		// wp_head, so styles registered here are still output in <head>.
 		$this->enqueue_assets();
@@ -304,7 +311,50 @@ class Endpoint {
 			return;
 		}
 
+		// Side effect (persistent write) lives in the controller, not the
+		// view: stamp the no-actionable-rows meta now so the template stays
+		// pure rendering.
+		if ( $order instanceof WC_Order ) {
+			$this->maybe_mark_no_actionable_rows( $order );
+		}
+
 		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
+	}
+
+	/**
+	 * Stamp the order with the no-actionable-rows meta when the Review Order
+	 * page would render the empty-state. Mirrors the SubmissionHandler's
+	 * completion check so back-button visits also record completion.
+	 *
+	 * @param WC_Order $order Order being reviewed.
+	 */
+	private function maybe_mark_no_actionable_rows( WC_Order $order ): void {
+		$completed_meta_key = SubmissionHandler::COMPLETED_META_KEY;
+		if ( $order->get_meta( $completed_meta_key ) ) {
+			return;
+		}
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented on customer-review-order.php template.
+		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+		ItemEligibility::prime( $items, $order );
+
+		foreach ( $items as $item ) {
+			if ( ! $item instanceof \WC_Order_Item_Product ) {
+				continue;
+			}
+			$product = $item->get_product();
+			if ( ! $product instanceof \WC_Product ) {
+				continue;
+			}
+			// At least one actionable row remains; don't stamp.
+			$decision = ItemEligibility::describe( $item, $order );
+			if ( ItemEligibility::STATUS_FORM === $decision['status'] ) {
+				return;
+			}
+		}
+
+		$order->update_meta_data( $completed_meta_key, (string) time() );
+		$order->save();
 	}
 
 	/**

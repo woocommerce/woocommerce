@@ -29,8 +29,13 @@ class SubmissionHandler {
 	public const ACTION = 'woocommerce_submit_order_reviews';
 
 	/**
-	 * Order meta set when every eligible item has been reviewed by the
-	 * matching author.
+	 * Order meta stamped with the time the Review Order page first had no
+	 * actionable rows left.
+	 *
+	 * Set by the submission handler once every eligible item has a verified
+	 * review by this customer, and also by the Endpoint when the page is
+	 * loaded with no actionable rows (e.g. all items are already-reviewed
+	 * or skipped because reviews are disabled on the products).
 	 */
 	public const COMPLETED_META_KEY = '_wc_review_request_completed_at';
 
