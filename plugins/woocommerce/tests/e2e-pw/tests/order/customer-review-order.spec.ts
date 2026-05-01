@@ -62,15 +62,25 @@ test.describe.serial(
 		} );
 
 		test.afterAll( async ( { restApi } ) => {
+			// Best-effort cleanup: a beforeAll() failure may have left
+			// $order or $products partially populated. Swallow per-resource
+			// errors so the original test failure stays visible.
 			for ( const product of products ) {
-				await restApi.delete(
-					`${ WC_API_PATH }/products/${ product.id }`,
-					{ force: true }
-				);
+				try {
+					await restApi.delete(
+						`${ WC_API_PATH }/products/${ product.id }`,
+						{ force: true }
+					);
+				} catch ( _err ) {}
 			}
-			await restApi.delete( `${ WC_API_PATH }/orders/${ order.id }`, {
-				force: true,
-			} );
+			if ( order && order.id ) {
+				try {
+					await restApi.delete(
+						`${ WC_API_PATH }/orders/${ order.id }`,
+						{ force: true }
+					);
+				} catch ( _err ) {}
+			}
 		} );
 
 		test( 'guest customer rates two of three products and submits successfully', async ( {
@@ -135,17 +145,19 @@ test.describe.serial(
 				submit.click(),
 			] );
 
-			// First two rows should report success status.
+			// First two rows should report the success ('--ok') status, not
+			// any other status variant.
 			await expect(
 				rows
 					.nth( 0 )
-					.locator( '.woocommerce-review-order__item-status' )
+					.locator( '.woocommerce-review-order__item-status--ok' )
 			).toBeVisible();
 			await expect(
 				rows
 					.nth( 1 )
-					.locator( '.woocommerce-review-order__item-status' )
+					.locator( '.woocommerce-review-order__item-status--ok' )
 			).toBeVisible();
+			// Third row was never rated and should have no status note at all.
 			await expect(
 				rows
 					.nth( 2 )
