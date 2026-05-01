@@ -2,9 +2,9 @@
 /**
  * Customer Review Order page
  *
- * Read-only landing page surfaced from the Customer Review Request email. The
- * page lists the eligible line items from a completed order so the customer
- * can review what they purchased. The form controls themselves land in M4.
+ * Read-only landing page surfaced from the Customer Review Request email.
+ * Lists the eligible line items from a completed order so the customer can
+ * review what they purchased.
  *
  * This template can be overridden by copying it to yourtheme/woocommerce/order/customer-review-order.php.
  *
@@ -60,7 +60,7 @@ $meta_parts = array_filter(
  * Filter the eligible items rendered on the Review Order page.
  *
  * Defaults to the order's line items. Extensions can use this to hide items
- * that have already been reviewed (M5) or that are otherwise ineligible.
+ * that have already been reviewed or are otherwise ineligible.
  *
  * @since 10.8.0
  *
@@ -113,9 +113,7 @@ $items = apply_filters( 'woocommerce_review_order_eligible_items', $order->get_i
 						<div class="woocommerce-review-order__item-image">
 							<?php echo $image_html; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- get_image() returns escaped HTML. ?>
 						</div>
-						<div class="woocommerce-review-order__item-form-placeholder">
-							<?php esc_html_e( 'Review form coming soon.', 'woocommerce' ); ?>
-						</div>
+						<div class="woocommerce-review-order__item-form-placeholder"></div>
 					</div>
 				</li>
 			<?php endforeach; ?>
