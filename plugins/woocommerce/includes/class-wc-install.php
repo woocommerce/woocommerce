@@ -328,6 +328,7 @@ class WC_Install {
 			'wc_update_1080_migrate_analytics_import_option',
 			'wc_update_1080_slim_orders_meta_key_index',
 			'wc_update_1080_backfill_email_template_sync_meta',
+			'wc_update_1080_remove_task_list_reminder_bar_hidden_option',
 		),
 	);
 

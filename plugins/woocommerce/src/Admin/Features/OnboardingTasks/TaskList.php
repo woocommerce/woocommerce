@@ -28,6 +28,15 @@ class TaskList {
 	const COMPLETED_OPTION = 'woocommerce_task_list_completed_lists';
 
 	/**
+	 * Option name of the dismissed reminder bar option.
+	 *
+	 * @deprecated 10.8.0 The reminder bar feature was removed; this option is no longer used.
+	 *                    Retained as a stub to avoid fatal errors in third-party code that
+	 *                    references the constant.
+	 */
+	const REMINDER_BAR_HIDDEN_OPTION = 'woocommerce_task_list_reminder_bar_hidden';
+
+	/**
 	 * ID.
 	 *
 	 * @var string
@@ -429,5 +438,18 @@ class TaskList {
 			'displayProgressHeader' => $this->display_progress_header,
 			'keepCompletedTaskList' => $this->get_keep_completed_task_list(),
 		);
+	}
+
+	/**
+	 * Possibly remove the task list reminder bar.
+	 *
+	 * @deprecated 10.8.0 The reminder bar feature was removed; this method is now a no-op.
+	 *                    Retained as a stub to avoid fatal errors in third-party code that
+	 *                    references the method.
+	 *
+	 * @return void
+	 */
+	public static function possibly_remove_reminder_bar(): void {
+		wc_deprecated_function( __METHOD__, '10.8.0' );
 	}
 }
