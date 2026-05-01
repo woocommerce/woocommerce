@@ -27,6 +27,25 @@ class EndpointTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 		$this->endpoint = new Endpoint();
+
+		// `Endpoint::get_url()` derives the URL from the WC-managed Review
+		// Order page; tests need that page to exist to exercise the helper.
+		// Test transactions roll the post back between runs but the option
+		// persists, so the existing id may point at a deleted post — recreate
+		// when that's the case.
+		$existing = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+		if ( $existing <= 0 || ! get_post( $existing ) instanceof \WP_Post ) {
+			$page_id = (int) wp_insert_post(
+				array(
+					'post_type'    => 'page',
+					'post_status'  => 'publish',
+					'post_title'   => 'Review your order',
+					'post_name'    => 'review-order',
+					'post_content' => '[woocommerce_review_order]',
+				)
+			);
+			update_option( 'woocommerce_review_order_page_id', $page_id );
+		}
 	}
 
 	/**

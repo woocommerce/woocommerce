@@ -3533,5 +3533,9 @@ function wc_update_1090_create_review_order_page(): void {
 
 	remove_filter( 'woocommerce_create_pages', $only_review_order );
 
-	flush_rewrite_rules( false );
+	// `Endpoint::add_rewrite_rule` runs on init:10; this update routine fires
+	// from WC_Install::check_version on init:5, so flushing here would
+	// persist the rules table without the new /review-order/{id}/ rule.
+	// Defer the flush via an option that the endpoint clears on wp_loaded.
+	update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
 }

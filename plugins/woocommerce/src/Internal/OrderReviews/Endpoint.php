@@ -65,7 +65,25 @@ class Endpoint {
 		add_action( 'init', array( $this, 'add_rewrite_rule' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_var' ), 0 );
 		add_action( 'template_redirect', array( $this, 'gate_request' ) );
+		add_action( 'wp_loaded', array( $this, 'maybe_flush_pending_rewrite' ) );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
+	}
+
+	/**
+	 * Flush rewrite rules once after the 10.9.0 upgrade installs the
+	 * Review Order page.
+	 *
+	 * The 10.9.0 db update runs on `init` priority 5 and only seeds the
+	 * page; `add_rewrite_rule()` doesn't fire until `init` priority 10, so
+	 * the flush has to happen later. `wp_loaded` runs after every `init`
+	 * callback, which is the earliest safe moment.
+	 */
+	public function maybe_flush_pending_rewrite(): void {
+		if ( 'yes' !== get_option( 'woocommerce_review_order_flush_rewrite_pending' ) ) {
+			return;
+		}
+		flush_rewrite_rules( false );
+		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
 	}
 
 	/**
@@ -198,13 +216,15 @@ class Endpoint {
 	 */
 	public static function get_url( WC_Order $order ): string {
 		$page_id   = (int) wc_get_page_id( self::PAGE_KEY );
-		$permalink = $page_id > 0 ? get_permalink( $page_id ) : '';
+		$permalink = (string) ( $page_id > 0 ? get_permalink( $page_id ) : '' );
 
-		if ( is_string( $permalink ) && '' !== $permalink && false === strpos( $permalink, '?' ) ) {
+		if ( '' === $permalink ) {
+			$url = '';
+		} elseif ( false === strpos( $permalink, '?' ) ) {
 			// Pretty permalinks: append the order id as a path segment.
 			$url = trailingslashit( $permalink ) . (string) $order->get_id() . '/';
 			$url = add_query_arg( 'key', $order->get_order_key(), $url );
-		} elseif ( is_string( $permalink ) && '' !== $permalink ) {
+		} else {
 			// Plain permalinks: page permalink is /?page_id=NNN, so add the
 			// order id as a query var rather than munging the path.
 			$url = add_query_arg(
@@ -214,17 +234,7 @@ class Endpoint {
 				),
 				$permalink
 			);
-		} else {
-			// Page is missing entirely: fall back to a plain-permalink URL
-			// so the link is still resolvable via index.php query vars.
-			$url = add_query_arg(
-				array(
-					self::QUERY_VAR => (string) $order->get_id(),
-					'key'           => $order->get_order_key(),
-				),
-				home_url( '/' )
-			);
-		}//end if
+		}
 
 		/**
 		 * Filter the Review Order URL that the review-request email links to.
