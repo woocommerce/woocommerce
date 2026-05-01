@@ -304,6 +304,7 @@ class Analytics {
 	 *
 	 * @param int $min_order_id Exclusive lower bound on order_id; 0 for the first batch.
 	 * @return void
+	 * @throws \Exception On database error so Action Scheduler marks the job as failed.
 	 */
 	public function process_refund_fix_batch( $min_order_id = 0 ): void {
 		global $wpdb;
