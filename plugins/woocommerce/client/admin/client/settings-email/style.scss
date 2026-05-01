@@ -415,3 +415,41 @@ $wc-setting-email-width: 634px;
 		padding: 0 5px;
 	}
 }
+
+// RSM-140 — "Review update" button in the Updates column cell.
+// Visual treatment matches design_handoff_email_update_flow Option B
+// `.upd-cell__btn`: 1px blueberry border, 26px tall, blueberry text,
+// white bg (resting), tinted blueberry bg on hover, no-wrap.
+.woocommerce-email-listing-update-cell-btn {
+	align-items: center;
+	background: $white;
+	border: 1px solid #3858e9; // --wpds-color-bg-interactive-brand-strong
+	border-radius: 2px; // --wpds-border-radius-sm
+	color: #3858e9;
+	cursor: pointer;
+	display: inline-flex;
+	font-size: 12px;
+	font-weight: 500;
+	gap: 6px;
+	height: 26px;
+	padding: 0 10px;
+	white-space: nowrap;
+
+	&:hover {
+		background: #ecf0fa; // --wpds-color-bg-surface-brand
+	}
+
+	&:focus-visible {
+		outline: 2px solid #3858e9;
+		outline-offset: 1px;
+	}
+
+	.woocommerce-email-listing-update-cell-btn__dot {
+		background: #3858e9;
+		border-radius: 50%;
+		display: inline-block;
+		flex-shrink: 0;
+		height: 6px;
+		width: 6px;
+	}
+}
