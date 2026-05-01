@@ -16,7 +16,7 @@ The feature is implemented in the `Automattic\WooCommerce\Internal\OrderReviews`
 | Class | Responsibility |
 | ----- | -------------- |
 | `Scheduler` | Schedules the delayed review-request email via Action Scheduler when an order moves to `completed`, and unschedules it on cancellation, refund, trash, or delete. |
-| `Endpoint` | Registers the standalone `/review-order/{id}/?key={order_key}` rewrite, runs the gating checks (key match, eligible status, customer ownership), and renders the landing-page template. |
+| `Endpoint` | Routes `/review-order/{id}/?key={order_key}` to the WC-managed Review Order page (seeded by `wc_create_pages()` / a 10.9.0 update callback), runs the gating checks (key match, eligible status, customer ownership), and renders the landing-page template through the `[woocommerce_review_order]` shortcode inside the page's content. |
 | `SubmissionHandler` | AJAX handler that consumes the form post. Per-row outcome reporting (`ok`, `pending_moderation`, `error`); honors WordPress's `comment_moderation` option; sets `verified=1` commentmeta on every inserted review. |
 | `ItemEligibility` | Decides per line item whether the row should be a form, a locked "already reviewed" row, or skipped. Provides the default callback that excludes fully-refunded line items. |
 | `StarRating` | Server-side renderer for the accessible 5-star rating control (radio inputs + SVG visuals + caption). |
