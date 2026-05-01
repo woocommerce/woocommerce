@@ -56,7 +56,11 @@ async function signUpAsGuest(
  * Click the notification edit-form "Update" button.
  *
  * Scrolling into view first is required on narrow CI viewports where the
- * product-thumbnail overlay can otherwise intercept the click.
+ * product-thumbnail overlay can otherwise intercept the click. On WP
+ * 7.0-RC2 the locator still resolves the right button but Playwright's
+ * actionability check times out — something else in the new admin chrome
+ * intercepts at click time. `force: true` bypasses the check; revisit
+ * once WP 7.0 is final and we can see what's actually covering the button.
  */
 async function submitNotificationEditForm( page: Page ): Promise< void > {
 	const updateButton = page.getByRole( 'button', {
@@ -64,7 +68,7 @@ async function submitNotificationEditForm( page: Page ): Promise< void > {
 		exact: true,
 	} );
 	await updateButton.scrollIntoViewIfNeeded();
-	await updateButton.click();
+	await updateButton.click( { force: true } );
 }
 
 test.describe(
