@@ -77,6 +77,84 @@ $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $orde
 // items below. Without this each describe() call would issue its own query.
 \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prime( $items, $order );
 
+// Pre-compute one decision per item so we know whether the form has any
+// actionable rows or whether to fall through to the empty-state thank-you.
+$decisions = array();
+foreach ( $items as $item ) {
+	if ( ! $item instanceof WC_Order_Item_Product ) {
+		continue;
+	}
+	$product = $item->get_product();
+	if ( ! $product instanceof WC_Product ) {
+		continue;
+	}
+
+	$decision = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::describe( $item, $order );
+	if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_SKIP === $decision['status'] ) {
+		continue;
+	}
+
+	$decisions[] = array(
+		'item'     => $item,
+		'product'  => $product,
+		'decision' => $decision,
+	);
+}
+
+$has_form_rows = false;
+foreach ( $decisions as $entry ) {
+	if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_FORM === $entry['decision']['status'] ) {
+		$has_form_rows = true;
+		break;
+	}
+}
+
+// Empty-state: no actionable rows remain. The Endpoint already stamped the
+// completion meta before we got here, so this branch is purely the view.
+if ( ! $has_form_rows ) {
+	$customer_email = $order->get_billing_email();
+	$reviewed_count = 0;
+	$rating_total   = 0;
+	$rating_n       = 0;
+
+	if ( '' !== $customer_email ) {
+		$comment_ids = array();
+		foreach ( $decisions as $entry ) {
+			$existing_review = $entry['decision']['comment'] ?? null;
+			if ( $existing_review instanceof WP_Comment ) {
+				$comment_ids[] = (int) $existing_review->comment_ID;
+			}
+		}
+		if ( ! empty( $comment_ids ) ) {
+			update_meta_cache( 'comment', $comment_ids );
+		}
+
+		foreach ( $decisions as $entry ) {
+			$existing_review = $entry['decision']['comment'] ?? null;
+			if ( $existing_review instanceof WP_Comment ) {
+				++$reviewed_count;
+				$rating = (int) get_comment_meta( (int) $existing_review->comment_ID, 'rating', true );
+				if ( $rating > 0 ) {
+					$rating_total += $rating;
+					++$rating_n;
+				}
+			}
+		}//end foreach
+	}//end if
+
+	$average_rating = $rating_n > 0 ? round( $rating_total / $rating_n, 1 ) : 0.0;
+
+	wc_get_template(
+		'order/customer-review-order-empty.php',
+		array(
+			'order'          => $order,
+			'reviewed_count' => $reviewed_count,
+			'average_rating' => $average_rating,
+		)
+	);
+	return;
+}//end if
+
 // The Endpoint has already validated the URL key against the order key, so the
 // canonical value on the order is the right thing to echo into the form post.
 $order_key = (string) $order->get_order_key();
@@ -114,20 +192,10 @@ $order_key = (string) $order->get_order_key();
 			<ul class="woocommerce-review-order__items">
 				<?php
 				$row_index = 0;
-				foreach ( $items as $item ) {
-					if ( ! $item instanceof WC_Order_Item_Product ) {
-						continue;
-					}
-					$product = $item->get_product();
-					if ( ! $product instanceof WC_Product ) {
-						continue;
-					}
-
-					$decision = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::describe( $item, $order );
-
-					if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_SKIP === $decision['status'] ) {
-						continue;
-					}
+				foreach ( $decisions as $entry ) {
+					$item     = $entry['item'];
+					$product  = $entry['product'];
+					$decision = $entry['decision'];
 
 					if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_REVIEWED === $decision['status'] ) {
 						wc_get_template(
