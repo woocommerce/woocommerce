@@ -520,8 +520,8 @@ function wc_create_attribute( $args ) {
 			sprintf( __( 'Slug "%s" is too long. Please use a shorter slug.', 'woocommerce' ), $slug ),
 			array(
 				'status'                 => 400,
-				'slug_byte_length'       => $prefixed_slug_byte_length - 3,
-				'slug_byte_length_limit' => 29,
+				'slug_byte_length'       => $prefixed_slug_byte_length - strlen( 'pa_' ),
+				'slug_byte_length_limit' => 32 - strlen( 'pa_' ),
 			)
 		);
 	} elseif ( wc_check_if_attribute_name_is_reserved( $slug ) ) {
