@@ -53526,7 +53526,7 @@ parameters:
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 2
+			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterActive.php
 
 		-
@@ -53773,12 +53773,6 @@ parameters:
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterPriceSlider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterPriceSlider\:\:render\(\) should return string but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterPriceSlider.php
 
 		-

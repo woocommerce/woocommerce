@@ -24,13 +24,11 @@ final class ProductFilterActive extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( ! isset( $block->context['activeFilters'] ) ) {
+		$active_filters = $block->context['activeFilters'] ?? array();
+
+		if ( ! is_array( $active_filters ) ) {
 			return $content;
 		}
-
-		$active_filters = is_array( $block->context['activeFilters'] )
-			? $block->context['activeFilters']
-			: array();
 
 		$removable_items = array_values(
 			array_filter(

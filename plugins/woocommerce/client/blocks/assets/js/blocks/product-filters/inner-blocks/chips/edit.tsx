@@ -53,7 +53,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		customSelectedChipBorder,
 	} = attributes;
 	const { isLoading = false, items = [] } =
-		context[ 'woocommerceSelectableItems' ] ?? {};
+		context.woocommerceSelectableItems ?? {};
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {

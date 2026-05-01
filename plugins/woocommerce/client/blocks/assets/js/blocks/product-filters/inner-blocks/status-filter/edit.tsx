@@ -90,7 +90,7 @@ const Edit = ( props: EditProps ) => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						'woocommerceSelectableItems': {
+						woocommerceSelectableItems: {
 							items,
 							selectionMode: 'multiple' as const,
 							storeNamespace: 'woocommerce/product-filters',
