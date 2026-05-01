@@ -227,7 +227,6 @@ class SubmissionHandler {
 				'type'         => 'review',
 				'status'       => 'all',
 				'fields'       => 'ids',
-				'meta_query'   => array(),
 			)
 		);
 
