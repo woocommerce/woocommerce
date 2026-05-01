@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Update hardcoded border-radius on three legacy admin custom buttons (addons, setup wizard, helper) from 3–4px to 2px to align with the WordPress 7.0 admin radius.

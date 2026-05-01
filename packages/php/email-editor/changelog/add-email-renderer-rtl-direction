@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add RTL direction support to the PHP email renderer.
