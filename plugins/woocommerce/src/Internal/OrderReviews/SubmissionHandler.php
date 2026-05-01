@@ -310,8 +310,8 @@ class SubmissionHandler {
 		 *
 		 * @since 10.8.0
 		 *
-		 * @param WC_Order_Item[] $items Order line items.
-		 * @param WC_Order        $order The order being reviewed.
+		 * @param \WC_Order_Item[] $items Order line items.
+		 * @param WC_Order         $order The order being reviewed.
 		 */
 		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 
