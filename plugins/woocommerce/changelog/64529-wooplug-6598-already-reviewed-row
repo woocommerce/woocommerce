@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Render already-reviewed items on the Review Order page as a locked row showing the existing rating and a snippet of the review. Filterable via `woocommerce_review_order_item_already_reviewed`.
