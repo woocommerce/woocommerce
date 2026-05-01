@@ -79,7 +79,8 @@ $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $orde
 
 // Pre-compute one decision per item so we know whether the form has any
 // actionable rows or whether to fall through to the empty-state thank-you.
-$decisions = array();
+$decisions     = array();
+$has_form_rows = false;
 foreach ( $items as $item ) {
 	if ( ! $item instanceof WC_Order_Item_Product ) {
 		continue;
@@ -94,20 +95,16 @@ foreach ( $items as $item ) {
 		continue;
 	}
 
+	if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_FORM === $decision['status'] ) {
+		$has_form_rows = true;
+	}
+
 	$decisions[] = array(
 		'item'     => $item,
 		'product'  => $product,
 		'decision' => $decision,
 	);
-}
-
-$has_form_rows = false;
-foreach ( $decisions as $entry ) {
-	if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_FORM === $entry['decision']['status'] ) {
-		$has_form_rows = true;
-		break;
-	}
-}
+}//end foreach
 
 // Empty-state: no actionable rows remain. The Endpoint already stamped the
 // completion meta before we got here, so this branch is purely the view.

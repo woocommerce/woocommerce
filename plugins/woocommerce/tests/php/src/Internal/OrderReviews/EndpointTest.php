@@ -272,8 +272,6 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$fresh = wc_get_order( $order->get_id() );
 		$this->assertNotEmpty( $fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ) );
-
-		ItemEligibility::reset_cache();
 	}
 
 	/**
@@ -296,8 +294,6 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$fresh = wc_get_order( $order->get_id() );
 		$this->assertEmpty( $fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ) );
-
-		ItemEligibility::reset_cache();
 	}
 
 	/**
@@ -316,7 +312,5 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$fresh = wc_get_order( $order->get_id() );
 		$this->assertSame( $preset, (string) $fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ) );
-
-		ItemEligibility::reset_cache();
 	}
 }

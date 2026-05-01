@@ -342,11 +342,8 @@ class Endpoint {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
 			}
-			$product = $item->get_product();
-			if ( ! $product instanceof \WC_Product ) {
-				continue;
-			}
-			// At least one actionable row remains; don't stamp.
+			// describe() handles the get_product() == null case via STATUS_SKIP,
+			// so we don't need to hydrate the product object here.
 			$decision = ItemEligibility::describe( $item, $order );
 			if ( ItemEligibility::STATUS_FORM === $decision['status'] ) {
 				return;
