@@ -186,6 +186,7 @@ jQuery( function ( $ ) {
 
 				$list.sortable( {
 					items: 'li' + SELECTORS.thumb,
+					cancel: '',
 					cursor: 'grabbing',
 					scrollSensitivity: 40,
 					forcePlaceholderSize: true,
