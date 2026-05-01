@@ -215,13 +215,8 @@ class Endpoint {
 	 * @return string
 	 */
 	public static function get_url( WC_Order $order ): string {
-		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
-		$page    = $page_id > 0 ? get_post( $page_id ) : null;
-		// Match the publish check on the rewrite registration: a draft or
-		// private page wouldn't route, so don't emit a URL pointing at it.
-		$permalink = ( $page instanceof WP_Post && 'publish' === $page->post_status )
-			? (string) get_permalink( $page_id )
-			: '';
+		$page_id   = (int) wc_get_page_id( self::PAGE_KEY );
+		$permalink = (string) ( $page_id > 0 ? get_permalink( $page_id ) : '' );
 
 		if ( '' === $permalink ) {
 			$url = '';
