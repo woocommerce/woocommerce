@@ -10,7 +10,6 @@ import { tags, expect, test } from '../../fixtures/fixtures';
 
 type OrderProduct = {
 	id: number;
-	name: string;
 };
 
 type Order = {
@@ -41,7 +40,6 @@ test.describe.serial(
 				);
 				products.push( {
 					id: response.data.id,
-					name: response.data.name,
 				} );
 			}
 
@@ -107,17 +105,32 @@ test.describe.serial(
 			const submit = page.locator( '.woocommerce-review-order__submit' );
 			await expect( submit ).toBeEnabled();
 			await Promise.all( [
-				page.waitForResponse( ( response ) => {
-					const request = response.request();
-					const postData = request.postData() ?? '';
-					return (
-						response.url().includes( 'admin-ajax.php' ) &&
-						request.method() === 'POST' &&
-						postData.includes(
-							'action=woocommerce_submit_order_reviews'
-						) &&
-						response.ok()
-					);
+				// The form posts as FormData (multipart), so request.postData()
+				// is unreliable for action matching. Use the URL + the JSON
+				// payload shape (woocommerce_submit_order_reviews always returns
+				// { success, data: { results } }) to identify the right response.
+				page.waitForResponse( async ( response ) => {
+					if (
+						! response.url().includes( 'admin-ajax.php' ) ||
+						response.request().method() !== 'POST' ||
+						! response.ok()
+					) {
+						return false;
+					}
+					try {
+						const body = await response.json();
+						return (
+							body &&
+							typeof body === 'object' &&
+							body.data &&
+							Object.prototype.hasOwnProperty.call(
+								body.data,
+								'results'
+							)
+						);
+					} catch ( _err ) {
+						return false;
+					}
 				} ),
 				submit.click(),
 			] );
