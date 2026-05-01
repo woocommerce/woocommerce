@@ -190,6 +190,24 @@ export const useTransactionalEmails = (
 		);
 	} );
 
+	// Apply Updates Filter (RSM-140)
+	filteredEmails = filteredEmails.filter( ( email ) => {
+		const updatesFilter = view.filters.find(
+			( filter: View.Filter ) => filter.field === 'updates'
+		);
+		if ( ! updatesFilter || ! updatesFilter.value ) {
+			return true;
+		}
+		const selected = Array.isArray( updatesFilter.value )
+			? ( updatesFilter.value as string[] )
+			: [ updatesFilter.value as string ];
+		const emailValue =
+			email.templateStatus === 'core_updated_customized'
+				? 'available'
+				: 'none';
+		return selected.includes( emailValue );
+	} );
+
 	// Apply pagination
 	const startIndex = ( view.page - 1 ) * view.perPage;
 	const endIndex = startIndex + view.perPage;
