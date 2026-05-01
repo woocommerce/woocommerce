@@ -25,16 +25,17 @@ class StarRating {
 	/**
 	 * Render the rating control. Returns the HTML; does not echo.
 	 *
-	 * @param array{
-	 *     name: string,
-	 *     id_prefix: string,
-	 *     label_id: string,
-	 *     selected?: int|null,
-	 * } $args Render arguments. `name` is the form field name (one per item),
-	 *         `id_prefix` is the prefix used to build unique radio ids,
-	 *         `label_id` is the id of the existing label element that
-	 *         describes the group via `aria-labelledby`, and `selected`
-	 *         optionally pre-selects a value (1-5).
+	 * Required keys in `$args`:
+	 *  - `name` (string): form field name (one per item).
+	 *  - `id_prefix` (string): prefix used to build unique radio ids.
+	 *  - `label_id` (string): id of the existing label element that describes
+	 *    the group via `aria-labelledby`.
+	 *
+	 * Optional:
+	 *  - `selected` (int): pre-selected value 0-5; pass `0` (the default)
+	 *    for no pre-selection.
+	 *
+	 * @param array $args Render arguments. See description for required and optional keys.
 	 * @return string
 	 */
 	public static function render( array $args ): string {
