@@ -9619,19 +9619,20 @@ body.woocommerce-settings-payments-section_legacy {
 	vertical-align: center;
 	border: 1px solid #7e8993;
 	border-radius: 2px;
-	margin-right: 6px;
-	height: 12px;
-	width: 12px;
+	margin-right: 0.5em;
+	height: 1em;
+	width: 1em;
 	position: relative;
-}
 
-.wc-admin-color-swatch-empty-indicator {
-	position: absolute;
-	top: 0;
-	right: 0;
-	bottom: 0;
-	left: 0;
-	background: linear-gradient(to bottom right, transparent 47%, #7e8993 47%, #7e8993 53%, transparent 53%);
+	&.is-empty::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background: linear-gradient(to bottom right, transparent 47%, #7e8993 47%, #7e8993 53%, transparent 53%);
+	}
 }
 
 .wc-admin-visual-attribute-color-picker-trigger {
@@ -9653,7 +9654,6 @@ body.woocommerce-settings-payments-section_legacy {
 		display: block;
 		margin: 2px 0 5px;
 	}
-
 
 	.wc-admin-color-swatch {
 		margin-right: 0;

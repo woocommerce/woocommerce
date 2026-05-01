@@ -393,7 +393,6 @@ class WC_Admin_Taxonomies {
 		}
 
 		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		
 
 		$is_product_editor_screen        = in_array( $screen->id, array( 'product' ), true );
 		$is_visual_attribute_term_screen = 0 === strpos( $screen->id, 'edit-pa_' ) && $this->is_visual_product_attribute_taxonomy( $taxonomy );
@@ -401,7 +400,7 @@ class WC_Admin_Taxonomies {
 		if ( ! $is_product_editor_screen && ! $is_visual_attribute_term_screen ) {
 			return;
 		}
-		
+
 		if ( ! array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
 			return;
 		}

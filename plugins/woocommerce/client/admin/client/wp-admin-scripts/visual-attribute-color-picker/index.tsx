@@ -2,13 +2,7 @@
  * External dependencies
  */
 import { ColorPicker, Popover } from '@wordpress/components';
-import {
-	createRoot,
-	useEffect,
-	useMemo,
-	useRef,
-	useState,
-} from '@wordpress/element';
+import { createRoot, useEffect, useRef, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 
 const INPUT_SELECTOR = 'input.wc-admin-visual-attribute-color-input';
@@ -18,7 +12,7 @@ const EMPTY_COLOR_VALUE = '';
 
 const normalizeColor = ( value: string ) => {
 	if ( ! value ) {
-		return EMPTY_COLOR_VALUE;
+		return '';
 	}
 
 	return value.trim().toLowerCase();
@@ -33,26 +27,13 @@ const getInitialColor = ( input: HTMLInputElement ) => {
 		return attributeValue;
 	}
 
-	const propertyValue = normalizeColor( input.value );
-
-	// Native color inputs report #000000 when empty; treat that implicit value as empty.
-	if ( propertyValue === FALLBACK_COLOR ) {
-		return EMPTY_COLOR_VALUE;
-	}
-
-	return propertyValue;
+	return '';
 };
 
-type ColorFieldProps = {
-	input: HTMLInputElement;
-};
-
-const ColorField = ( { input }: ColorFieldProps ) => {
-	const initialColor = useMemo( () => getInitialColor( input ), [ input ] );
-	const [ color, setColor ] = useState( initialColor );
+const ColorField = ( { input }: { input: HTMLInputElement } ) => {
+	const [ color, setColor ] = useState( () => getInitialColor( input ) );
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 	const triggerRef = useRef< HTMLButtonElement | null >( null );
-	// const hasColorPickerPointerInteraction = useRef( false );
 
 	useEffect( () => {
 		input.value = color;
@@ -82,7 +63,7 @@ const ColorField = ( { input }: ColorFieldProps ) => {
 			<button
 				ref={ triggerRef as never }
 				type="button"
-				className="regular-text wc-admin-visual-attribute-color-picker-trigger"
+				className="wc-admin-visual-attribute-color-picker-trigger"
 				onClick={ () => setIsPopoverVisible( true ) }
 				aria-haspopup="dialog"
 			>
@@ -91,14 +72,8 @@ const ColorField = ( { input }: ColorFieldProps ) => {
 						color ? '' : ' is-empty'
 					}` }
 					style={ color ? { backgroundColor: color } : undefined }
-				>
-					{ ! color && (
-						<span
-							aria-hidden="true"
-							className="wc-admin-color-swatch-empty-indicator"
-						/>
-					) }
-				</span>
+					aria-hidden="true"
+				/>
 				<span>{ displayedColorValue }</span>
 			</button>
 			<button
@@ -117,9 +92,6 @@ const ColorField = ( { input }: ColorFieldProps ) => {
 					<ColorPicker
 						color={ popoverColor }
 						onChange={ handleColorSelection }
-						// onPointerDown={ () => {
-						// 	hasColorPickerPointerInteraction.current = true;
-						// } }
 					/>
 				</Popover>
 			) }
@@ -142,8 +114,8 @@ const mountColorPicker = ( input: HTMLInputElement ) => {
 	const root = createRoot( wrapper );
 	root.render( <ColorField input={ input } /> );
 
+	// Make sure labels associated to the input also trigger the color picker.
 	const associatedLabels = input.labels ? Array.from( input.labels ) : [];
-
 	associatedLabels.forEach( ( labelElement ) => {
 		labelElement.addEventListener( 'click', ( event ) => {
 			event.preventDefault();
