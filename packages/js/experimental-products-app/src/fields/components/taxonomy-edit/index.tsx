@@ -411,18 +411,18 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 					direction="row"
 					align="center"
 					style={ { gap: '12px' } }
-					className="woocommerce-next-taxonomy-edit__option"
+					className="woocommerce-taxonomy-edit__option"
 				>
 					{ suggestionItem.image?.src ? (
 						<img
 							src={ suggestionItem.image.src }
 							alt={ suggestionItem.image.alt ?? '' }
-							className="woocommerce-next-taxonomy-edit__option-thumbnail"
+							className="woocommerce-taxonomy-edit__option-thumbnail"
 						/>
 					) : (
-						<span className="woocommerce-next-taxonomy-edit__option-thumbnail woocommerce-next-taxonomy-edit__option-thumbnail--empty" />
+						<span className="woocommerce-taxonomy-edit__option-thumbnail woocommerce-taxonomy-edit__option-thumbnail--empty" />
 					) }
-					<span className="woocommerce-next-taxonomy-edit__option-label">
+					<span className="woocommerce-taxonomy-edit__option-label">
 						{ suggestionItem.label }
 					</span>
 				</Stack>
@@ -432,7 +432,7 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 	);
 
 	return (
-		<div className="woocommerce-next-taxonomy-edit">
+		<div className="woocommerce-taxonomy-edit">
 			<FormTokenField
 				__next40pxDefaultSize
 				__experimentalAutoSelectFirstMatch

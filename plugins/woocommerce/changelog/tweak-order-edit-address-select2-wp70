@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Align order edit page address Select2 dropdowns (Country/Region, State/County) with WordPress 7.0 input height and padding so they match sibling text inputs.

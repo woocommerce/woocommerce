@@ -6,10 +6,11 @@ import {
 	getContext as getContextFn,
 	getElement,
 	withScope,
-	getConfig,
 	withSyncEvent,
+	getConfig,
 } from '@wordpress/interactivity';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import '@woocommerce/stores/woocommerce/products';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
 
 /**
@@ -304,8 +305,8 @@ const scrollThumbnailIntoView = ( imageId: number ) => {
 	} );
 };
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
@@ -588,22 +589,28 @@ const productGallery = {
 		/**
 		 * Sync the gallery to the blockified Add to Cart + Options block's
 		 * variation state. Bound via `data-wp-watch`, so it re-runs whenever
-		 * `productDataState.variationId` changes.
+		 * `productsState.variationId` changes.
 		 */
 		listenToProductDataChanges: () => {
-			const productId = productDataState?.productId;
-			if ( ! productId ) {
+			// Use `mainProductInContext` (always the parent variable
+			// product) rather than `productInContext`, which resolves to the
+			// active variation when one is selected — `getProductImageSet`
+			// is keyed on the parent's ID. Read `variationId` directly from
+			// the store so this watcher re-fires on variation change.
+			const product = productsState.mainProductInContext;
+
+			if ( ! product ) {
 				return;
 			}
 
-			const productImageSet = getProductImageSet( productId );
+			const productImageSet = getProductImageSet( product.id );
 			if ( ! productImageSet ) {
 				return;
 			}
 
 			const variationImageSet =
 				productImageSet.variations?.[
-					productDataState?.variationId || 0
+					productsState.variationId || 0
 				];
 
 			if ( variationImageSet?.image_ids?.length ) {
