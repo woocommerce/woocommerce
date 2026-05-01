@@ -9,7 +9,7 @@ use WC_Unit_Test_Case;
 /**
  * Tests for the ProductCollection Renderer dimension handling.
  */
-class RendererDimensionsTest extends WC_Unit_Test_Case {
+class RendererDimensions extends WC_Unit_Test_Case {
 
 	/**
 	 * Test that handle_block_dimensions does not throw a warning when fixedWidth is missing.
@@ -55,7 +55,7 @@ class RendererDimensionsTest extends WC_Unit_Test_Case {
 		$block = array(
 			'attrs' => array(
 				'dimensions' => array(
-					'widthType' => 'fixed',
+					'widthType'  => 'fixed',
 					'fixedWidth' => '300px',
 				),
 			),
