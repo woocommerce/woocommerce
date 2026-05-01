@@ -60,7 +60,7 @@ const ShippingRecommendations = () => {
 			const { getInstalledPlugins } = select( pluginsStore );
 
 			const profileItems =
-				select( onboardingStore ).getProfileItems().product_types;
+				select( onboardingStore ).getProfileItems()?.product_types;
 
 			return {
 				installedPlugins: getInstalledPlugins(),
