@@ -20,6 +20,7 @@ const DEFAULT_VIEW: View = {
 	page: 1,
 	perPage: 20,
 	search: '',
+	filters: [],
 	fields: [ 'variant', 'values', 'price', 'stock' ],
 	layout: { density: 'compact' },
 };
@@ -58,6 +59,8 @@ export default function VariationsTable( { productId }: VariationsTableProps ) {
 			params.set( 'search', search );
 		}
 
+		// /wc/v3/products/:id/variations is not registered in core-data; apiFetch
+		// with parse:false is required to read the X-WP-Total pagination header.
 		apiFetch< Response >( {
 			path: `/wc/v3/products/${ productId }/variations?${ params }`,
 			parse: false,
@@ -136,6 +139,7 @@ export default function VariationsTable( { productId }: VariationsTableProps ) {
 		>
 			<Stack
 				direction="row"
+				align="center"
 				justify="space-between"
 				className="wc-variations-classic__toolbar"
 			>
