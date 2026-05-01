@@ -204,6 +204,15 @@ class Endpoint {
 		$template = get_query_template( '404' );
 		if ( ! empty( $template ) && file_exists( $template ) ) {
 			include $template;
+			return;
 		}
+
+		// Fallback when the active theme has no 404 template: emit a minimal
+		// page so the response body isn't empty.
+		nocache_headers();
+		printf(
+			'<!doctype html><html><head><meta charset="utf-8"><title>%1$s</title></head><body><h1>%1$s</h1></body></html>',
+			esc_html__( 'Page not found', 'woocommerce' )
+		);
 	}
 }
