@@ -194,17 +194,15 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 
 		// Count get_comments calls during describe(); cache should serve the answer.
 		$call_count = 0;
-		add_filter(
-			'comments_pre_query',
-			static function ( $value ) use ( &$call_count ) {
-				++$call_count;
-				return $value;
-			}
-		);
+		$counter    = static function ( $value ) use ( &$call_count ) {
+			++$call_count;
+			return $value;
+		};
+		add_filter( 'comments_pre_query', $counter );
 
 		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
 
-		remove_all_filters( 'comments_pre_query' );
+		remove_filter( 'comments_pre_query', $counter );
 
 		$this->assertSame( ItemEligibility::STATUS_REVIEWED, $decision['status'] );
 		$this->assertSame( 0, $call_count, 'describe() should not query when prime() has cached the result.' );
