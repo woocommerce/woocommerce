@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 
 /**
@@ -93,6 +94,7 @@ class WC_Admin_Taxonomies {
 		add_filter( 'wp_terms_checklist_args', array( $this, 'disable_checked_ontop' ) );
 
 		// Admin footer scripts for taxonomy screens.
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_visual_attribute_color_picker_script' ) );
 		add_action( 'admin_footer', array( $this, 'scripts_at_product_cat_screen_footer' ) );
 		add_action( 'admin_footer', array( $this, 'scripts_at_visual_attribute_screen_footer' ) );
 	}
@@ -349,7 +351,7 @@ class WC_Admin_Taxonomies {
 		?>
 		<div class="form-field term-color-wrap">
 			<label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
-			<input name="term_color" id="term_color" type="color" value="" />
+			<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="color" value="" />
 		</div>
 		<?php
 	}
@@ -372,10 +374,39 @@ class WC_Admin_Taxonomies {
 		<tr class="form-field term-color-wrap">
 			<th scope="row" valign="top"><label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label></th>
 			<td>
-				<input name="term_color" id="term_color" type="color" value="<?php echo esc_attr( $color_value ); ?>" />
+				<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="color" value="<?php echo esc_attr( $color_value ); ?>" />
 			</td>
 		</tr>
 		<?php
+	}
+
+	/**
+	 * Enqueue Gutenberg color picker script for visual attribute forms.
+	 *
+	 * @return void
+	 */
+	public function enqueue_visual_attribute_color_picker_script() {
+		$screen = get_current_screen();
+
+		if ( ! $screen ) {
+			return;
+		}
+
+		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		
+
+		$is_product_editor_screen        = in_array( $screen->id, array( 'product' ), true );
+		$is_visual_attribute_term_screen = 0 === strpos( $screen->id, 'edit-pa_' ) && $this->is_visual_product_attribute_taxonomy( $taxonomy );
+
+		if ( ! $is_product_editor_screen && ! $is_visual_attribute_term_screen ) {
+			return;
+		}
+		
+		if ( ! array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
+			return;
+		}
+
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
 	}
 
 	/**
