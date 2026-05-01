@@ -215,8 +215,8 @@ class WC_Admin_Attributes {
 									<label for="attribute_name"><?php esc_html_e( 'Slug', 'woocommerce' ); ?></label>
 								</th>
 								<td>
-									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="28" />
-									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute; must be no more than 28 characters.', 'woocommerce' ); ?></p>
+									<input name="attribute_name" id="attribute_name" type="text" value="<?php echo esc_attr( $att_name ); ?>" maxlength="29" />
+									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute. Keep it short: multibyte characters (such as Cyrillic or Chinese) count as multiple bytes.', 'woocommerce' ); ?></p>
 								</td>
 							</tr>
 							<tr class="form-field form-required">
@@ -433,8 +433,8 @@ class WC_Admin_Attributes {
 
 								<div class="form-field">
 									<label for="attribute_name"><?php esc_html_e( 'Slug', 'woocommerce' ); ?></label>
-									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="28" />
-									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute; must be no more than 28 characters.', 'woocommerce' ); ?></p>
+									<input name="attribute_name" id="attribute_name" type="text" value="" maxlength="29" />
+									<p class="description"><?php esc_html_e( 'Unique slug/reference for the attribute. Keep it short: multibyte characters (such as Cyrillic or Chinese) count as multiple bytes.', 'woocommerce' ); ?></p>
 								</div>
 
 								<div class="form-field">
