@@ -106,7 +106,7 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should NOT send the verify email when the signup is from a logged-in user, even with double opt-in enabled site-wide.
+	 * @testdox Should NOT send the verify email when the signup is from an authenticated user session, even with double opt-in enabled site-wide.
 	 */
 	public function test_verify_email_not_sent_for_logged_in_user_even_when_double_opt_in_required() {
 		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
@@ -118,6 +118,9 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 				'user_email' => 'logged-in@example.com',
 			)
 		);
+		// Establish the auth context — `should_require_double_opt_in()` reads
+		// `is_user_logged_in()`, not the `$user_id` arg.
+		wp_set_current_user( $user_id );
 
 		$this->email_manager
 			->expects( $this->never() )
@@ -130,6 +133,40 @@ class SignupServiceTests extends \WC_Unit_Test_Case {
 		$notification = $result->get_notification();
 		$this->assertInstanceOf( Notification::class, $notification );
 		$this->assertSame( NotificationStatus::ACTIVE, $notification->get_status() );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox Should still send the verify email for an anonymous account-on-signup flow even though `$user_id` becomes non-zero mid-flow.
+	 *
+	 * Regression guard for the auth-context check: `Config::creates_account_on_signup()`
+	 * mints a user mid-flow, leaving `$user_id > 0` by the time the double-opt-in
+	 * decision is made — but the request is still anonymous (`is_user_logged_in()`
+	 * is false), so the signup must still go through the verify-email round-trip.
+	 */
+	public function test_verify_email_still_sent_for_account_on_signup_anonymous_flow() {
+		update_option( 'woocommerce_customer_stock_notifications_require_double_opt_in', 'yes' );
+		update_option( 'woocommerce_customer_stock_notifications_create_account_on_signup', 'yes' );
+
+		$product = $this->create_out_of_stock_product();
+
+		$this->email_manager
+			->expects( $this->once() )
+			->method( 'send_verify_email' )
+			->with(
+				$this->callback(
+					static function ( $arg ) {
+						return $arg instanceof Notification
+							&& NotificationStatus::PENDING === $arg->get_status();
+					}
+				)
+			);
+
+		// Anonymous: no auth context, no $user_id passed in.
+		$this->sut->signup( $product->get_id(), 0, 'fresh-account@example.com' );
+
+		delete_option( 'woocommerce_customer_stock_notifications_create_account_on_signup' );
 	}
 
 	/**

@@ -194,28 +194,45 @@ class SignupService {
 	/**
 	 * Whether the signup should go through the double opt-in flow.
 	 *
-	 * Logged-in users are treated as already-verified — they confirmed their
-	 * email at account registration and the signup form pulls the email from
-	 * their profile (no chance to enter someone else's). Asking them to
-	 * verify again per stock-notification signup is friction without a
-	 * security benefit. The site-wide `requires_double_opt_in()` setting
-	 * still governs anonymous signups.
+	 * Logged-in WordPress users are treated as already-verified — they
+	 * demonstrated email control at account registration (or password reset)
+	 * and the signup form pulls the email from their profile, with no chance
+	 * to type someone else's. Asking them to re-verify per stock-notification
+	 * signup is friction without a security benefit. The site-wide
+	 * `requires_double_opt_in()` setting still governs anonymous signups.
 	 *
-	 * @param int $user_id The signing-up user id (0 for anonymous).
+	 * Note: this checks `is_user_logged_in()`, not the `$user_id` argument
+	 * passed to {@see self::signup()}. The two diverge in two cases that
+	 * matter here:
+	 * - Anonymous signups with `Config::creates_account_on_signup()` enabled
+	 *   resolve a non-zero `$user_id` mid-flow via `create_customer()`. That
+	 *   freshly-minted account has done zero email verification, so it must
+	 *   still go through double opt-in.
+	 * - Programmatic (e.g. cron) callers may pass an arbitrary `$user_id`
+	 *   without an authenticated session. Those callers haven't proved
+	 *   anything about the email's owner either.
+	 *
+	 * @param int $user_id The signing-up user id (0 for anonymous). Passed through
+	 *                     to the filter for context; not used in the default policy.
 	 * @return bool
 	 */
 	private function should_require_double_opt_in( int $user_id ): bool {
-		$required = Config::requires_double_opt_in() && empty( $user_id );
+		$required = Config::requires_double_opt_in() && ! is_user_logged_in();
 
 		/**
 		 * Filter whether to require double opt-in for a stock-notification signup.
 		 *
-		 * Default: site-wide `requires_double_opt_in()` setting AND signup is anonymous.
+		 * Default: site-wide `requires_double_opt_in()` setting AND the request is
+		 * not from a logged-in WP user (i.e. `is_user_logged_in()` returns false).
 		 *
 		 * @since 10.9.0
 		 *
 		 * @param bool $required Whether to require double opt-in for this signup.
-		 * @param int  $user_id  The signing-up user id (0 for anonymous).
+		 * @param int  $user_id  The signing-up user id (0 for anonymous). May be
+		 *                       non-zero even when not logged in (e.g. account-
+		 *                       on-signup or cron callers); the default policy
+		 *                       intentionally ignores this and uses the auth
+		 *                       context instead.
 		 */
 		return (bool) apply_filters( 'woocommerce_customer_stock_notifications_signup_requires_double_opt_in', $required, $user_id );
 	}
