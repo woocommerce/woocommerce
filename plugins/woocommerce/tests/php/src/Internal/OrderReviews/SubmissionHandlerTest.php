@@ -23,6 +23,10 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$_POST = array();
 		update_option( 'comment_moderation', '0' );
 		remove_all_filters( 'woocommerce_review_order_submitted' );
+		remove_all_filters( 'woocommerce_review_order_eligible_statuses' );
+		remove_all_filters( 'wp_die_ajax_handler' );
+		remove_all_filters( 'wp_send_json_handler' );
+		remove_all_filters( 'wp_doing_ajax' );
 		parent::tearDown();
 	}
 
@@ -106,7 +110,8 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		try {
 			$handler->handle();
 		} catch ( WPAjaxDieContinueException $e ) {
-			// Expected — wp_send_json_* calls wp_die().
+			// Expected: wp_send_json_* calls wp_die().
+			unset( $e );
 		}
 		$body = (string) ob_get_clean();
 
@@ -365,5 +370,82 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 
 		$fresh = wc_get_order( $order->get_id() );
 		$this->assertEmpty( $fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ) );
+	}
+
+	/**
+	 * @testdox A successful submission fires the woocommerce_review_order_submitted action with order + per-row results.
+	 */
+	public function test_fires_review_order_submitted_action(): void {
+		$built      = $this->make_order( 1 );
+		$order      = $built['order'];
+		$product_id = $built['product_ids'][0];
+		$item_id    = $built['item_ids'][0];
+
+		$captured = array(
+			'order'   => null,
+			'results' => null,
+			'calls'   => 0,
+		);
+
+		add_action(
+			'woocommerce_review_order_submitted',
+			static function ( $order_arg, $results_arg ) use ( &$captured ) {
+				$captured['order']   = $order_arg;
+				$captured['results'] = $results_arg;
+				++$captured['calls'];
+			},
+			10,
+			2
+		);
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 4,
+				),
+			),
+		);
+
+		$this->dispatch();
+
+		$this->assertSame( 1, $captured['calls'], 'Action should fire exactly once per submission.' );
+		$this->assertInstanceOf( WC_Order::class, $captured['order'] );
+		$this->assertSame( $order->get_id(), $captured['order']->get_id() );
+		$this->assertIsArray( $captured['results'] );
+		$this->assertCount( 1, $captured['results'] );
+		$row = reset( $captured['results'] );
+		$this->assertSame( 'ok', $row['status'] );
+	}
+
+	/**
+	 * @testdox Submissions are rejected when the order's status is no longer eligible.
+	 */
+	public function test_rejects_when_order_status_ineligible(): void {
+		$built = $this->make_order( 1 );
+		$order = $built['order'];
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => 5,
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+
+		$this->assertFalse( $response['success'] );
 	}
 }
