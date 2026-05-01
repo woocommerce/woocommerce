@@ -17,6 +17,14 @@ use Automattic\WooCommerce\Internal\StockNotifications\Notification;
  * @package Automattic\WooCommerce\Internal\StockNotifications\Emails
  */
 class EmailActionController {
+
+	/**
+	 * Email manager.
+	 *
+	 * @var EmailManager
+	 */
+	private EmailManager $email_manager;
+
 	/**
 	 * Action token for verifying (double opt-in) a pending notification sign-up.
 	 *
@@ -40,6 +48,17 @@ class EmailActionController {
 	 */
 	public function __construct() {
 		add_action( 'template_redirect', array( $this, 'maybe_process_email_action' ) );
+	}
+
+	/**
+	 * Init the service.
+	 *
+	 * @internal
+	 *
+	 * @param EmailManager $email_manager The email manager.
+	 */
+	final public function init( EmailManager $email_manager ): void {
+		$this->email_manager = $email_manager;
 	}
 
 	/**
@@ -121,9 +140,29 @@ class EmailActionController {
 	 */
 	private function process_verification_action( Notification $notification, string $action_key ): void {
 		if ( $notification->check_verification_key( $action_key ) ) {
+			// Guard against re-hits of a still-valid verification URL (double-click, email prefetch,
+			// link-scanner bots). Without this, each hit would re-dispatch the verified email.
+			if ( NotificationStatus::ACTIVE === $notification->get_status() ) {
+				return;
+			}
+
 			$notification->set_status( NotificationStatus::ACTIVE );
 			$notification->set_date_confirmed( time() );
 			$notification->save();
+
+			/**
+			 * Action: woocommerce_customer_stock_notifications_verified
+			 *
+			 * Fires after a stock-notification signup has been verified via the
+			 * double opt-in email link. Mirrors `woocommerce_customer_stock_notifications_signup`.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param Notification $notification The notification.
+			 */
+			do_action( 'woocommerce_customer_stock_notifications_verified', $notification );
+
+			$this->email_manager->send_verified_email( $notification );
 
 			// We need a cookie-based session for notices to work on frontend pages.
 			if ( WC()->session instanceof \WC_Session_Handler && ! WC()->session->has_session() ) {
