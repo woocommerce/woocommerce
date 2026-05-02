@@ -160,6 +160,64 @@ class WC_Admin_Attributes {
 	}
 
 	/**
+	 * Output an inline script that shows a live UTF-8 byte count next to the
+	 * slug input and visually warns when the value approaches or exceeds the
+	 * server-side byte limit.
+	 *
+	 * The HTML `maxlength` attribute counts characters, not bytes, so a
+	 * multibyte slug (e.g. Cyrillic, Chinese) can pass the browser's guard
+	 * and still be rejected by `register_taxonomy()`'s 32-byte name limit.
+	 * This counter closes that feedback gap before submission.
+	 */
+	private static function slug_byte_counter_script(): void {
+		$max_bytes = 32 - strlen( 'pa_' );
+		/* translators: 1: current byte count, 2: maximum allowed bytes. */
+		$template = wp_json_encode( __( '%1$d / %2$d bytes', 'woocommerce' ) );
+		?>
+		<script type="text/javascript">
+			( function() {
+				var input = document.getElementById( 'attribute_name' );
+				if ( ! input || ! ( 'TextEncoder' in window ) ) {
+					return;
+				}
+				var wrapper = input.closest( 'td, .form-field' );
+				var description = wrapper ? wrapper.querySelector( 'p.description' ) : null;
+				if ( ! description ) {
+					return;
+				}
+				var maxBytes = <?php echo (int) $max_bytes; ?>;
+				var template = <?php echo $template; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode is JS-safe. ?>;
+				var encoder = new TextEncoder();
+				var counter = document.createElement( 'span' );
+				counter.style.display = 'block';
+				counter.style.marginTop = '4px';
+				description.appendChild( counter );
+				function update() {
+					var bytes = encoder.encode( input.value ).length;
+					if ( 0 === bytes ) {
+						counter.textContent = '';
+						counter.style.color = '';
+						return;
+					}
+					counter.textContent = template
+						.replace( '%1$d', bytes )
+						.replace( '%2$d', maxBytes );
+					if ( bytes > maxBytes ) {
+						counter.style.color = '#d63638';
+					} else if ( bytes >= maxBytes - 3 ) {
+						counter.style.color = '#996800';
+					} else {
+						counter.style.color = '';
+					}
+				}
+				input.addEventListener( 'input', update );
+				update();
+			} )();
+		</script>
+		<?php
+	}
+
+	/**
 	 * Edit Attribute admin panel.
 	 *
 	 * Shows the interface for changing an attributes type between select and text.
@@ -283,6 +341,7 @@ class WC_Admin_Attributes {
 					<p class="submit"><button type="submit" name="save_attribute" id="submit" class="button-primary" value="<?php esc_attr_e( 'Update', 'woocommerce' ); ?>"><?php esc_html_e( 'Update', 'woocommerce' ); ?></button></p>
 					<?php wp_nonce_field( 'woocommerce-save-attribute_' . $edit ); ?>
 				</form>
+				<?php self::slug_byte_counter_script(); ?>
 				<?php
 			}//end if
 			?>
@@ -507,6 +566,7 @@ class WC_Admin_Attributes {
 
 			/* ]]> */
 			</script>
+			<?php self::slug_byte_counter_script(); ?>
 		</div>
 		<?php
 	}
