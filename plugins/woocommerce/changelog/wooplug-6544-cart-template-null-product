@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a fatal error in the cart template when a filter on `woocommerce_cart_item_product` returns a non-product value, by moving the product name lookup inside the existing product validity check.

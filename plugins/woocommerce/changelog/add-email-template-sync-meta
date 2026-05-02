@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Stamp sync meta on generated block email posts (version, source hash, synced-at) for emails whose templates expose a parseable @version header. No runtime behaviour change for emails outside the sync registry.

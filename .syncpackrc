@@ -9,11 +9,12 @@
 	},
 	"versionGroups": [
 		{
-			"label": "Banned dependencies: classnames(->clsx), concurrently(->pnpm), cross-env(->wsl)",
+			"label": "Banned dependencies: classnames(->clsx), concurrently(->pnpm), cross-env(->wsl),@automattic/webpack-rtl-plugin(->internal-style-build)",
 			"dependencies": [
 				"classnames",
 				"concurrently",
-				"cross-env"
+				"cross-env",
+				"@automattic/webpack-rtl-plugin"
 			],
 			"packages": [
 				"**"
@@ -52,8 +53,6 @@
 				"@wordpress/autop",
 				"@wordpress/interactivity",
 				"@wordpress/interactivity-router",
-				"@wordpress/postcss-plugins-preset",
-				"@wordpress/postcss-themes",
 				"@wordpress/prettier-config",
 				"@wordpress/private-apis",
 				"@wordpress/scripts",
@@ -352,11 +351,7 @@
 				"@wordpress/stylelint-config",
 				"@wordpress/scripts",
 				"@wordpress/jest-console",
-				"@wordpress/e2e-test-utils",
-				"@wordpress/jest-preset-default",
-				"@wordpress/postcss-plugins-preset",
-				"@wordpress/custom-templated-path-webpack-plugin",
-				"@wordpress/postcss-themes"
+				"@wordpress/e2e-test-utils"
 			],
 			"packages": [
 				"**"
@@ -376,6 +371,16 @@
 				"@woocommerce/product-editor",
 				"@woocommerce/settings-editor",
 				"@woocommerce/admin-library"
+			],
+			"isIgnored": true
+		},
+		{
+			"label": "Ignore all syncpack rules for experimental-products-app",
+			"dependencies": [
+				"**"
+			],
+			"packages": [
+				"@woocommerce/experimental-products-app"
 			],
 			"isIgnored": true
 		},
@@ -454,7 +459,10 @@
 				"@wordpress/babel-plugin-import-jsx-pragma",
 				"@wordpress/babel-preset-default",
 				"@wordpress/browserslist-config",
-				"@wordpress/dependency-extraction-webpack-plugin"
+				"@wordpress/dependency-extraction-webpack-plugin",
+				"@wordpress/jest-preset-default",
+				"@wordpress/postcss-plugins-preset",
+				"@wordpress/postcss-themes"
 			],
 			"packages": [
 				"**"
@@ -519,6 +527,15 @@
 				"**"
 			],
 			"pinVersion": "8.4.x"
+		},
+		{
+			"dependencies": [
+				"rtlcss"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "4.3.x"
 		},
 		{
 			"dependencies": [

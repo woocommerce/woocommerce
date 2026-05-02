@@ -247,6 +247,32 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * V4 must format `_date_fulfilled` meta as ISO 8601 with 'Z' suffix in
+	 * responses, matching V3 and the storage UTC contract — clients should not
+	 * see the raw 'Y-m-d H:i:s' form.
+	 */
+	public function test_get_fulfillment_formats_date_fulfilled_meta_as_iso8601() {
+		wp_set_current_user( $this->admin_user_id );
+
+		$this->test_fulfillment->set_date_fulfilled( '2025-01-15T10:30:00Z' );
+		$this->test_fulfillment->save();
+
+		$request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $this->test_fulfillment->get_id() );
+		$response = rest_get_server()->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$data           = $response->get_data();
+		$date_fulfilled = null;
+		foreach ( $data['meta_data'] as $meta ) {
+			if ( '_date_fulfilled' === $meta['key'] ) {
+				$date_fulfilled = $meta['value'];
+				break;
+			}
+		}
+		$this->assertSame( '2025-01-15T10:30:00Z', $date_fulfilled );
+	}
+
+	/**
 	 * Test get_fulfillment with invalid ID
 	 */
 	public function test_get_fulfillment_invalid_id() {
