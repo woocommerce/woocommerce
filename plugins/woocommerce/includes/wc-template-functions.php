@@ -816,15 +816,15 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 			);
 
 			// Restore placeholders in keys at every depth, then add to values array.
-			$restore_keys = function ( $array ) use ( &$restore_keys, $replace_chars ) {
+			$restore_keys = function ( $items ) use ( &$restore_keys, $replace_chars ) {
 				$out = array();
-				foreach ( $array as $key => $value ) {
-					$key        = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key );
+				foreach ( $items as $key => $value ) {
+					$key         = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key );
 					$out[ $key ] = is_array( $value ) ? $restore_keys( $value ) : $value;
 				}
 				return $out;
 			};
-			$values = $restore_keys( $parsed_query_string );
+			$values       = $restore_keys( $parsed_query_string );
 		}
 	}
 	$html = '';
