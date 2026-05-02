@@ -36364,12 +36364,6 @@ parameters:
 			path: includes/wc-template-functions.php
 
 		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/wc-template-functions.php
-
-		-
 			message: '#^Property WooCommerce\:\:\$cart \(WC_Cart\) in isset\(\) is not nullable\.$#'
 			identifier: isset.property
 			count: 1
