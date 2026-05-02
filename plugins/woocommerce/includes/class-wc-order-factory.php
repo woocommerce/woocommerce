@@ -53,8 +53,20 @@ class WC_Order_Factory {
 			return $order;
 		} catch ( Exception $e ) {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
+			wc_get_logger()->error(
+				sprintf(
+					'Exception caught in %s: %s',
+					__FUNCTION__,
+					$e->getMessage()
+				),
+				array(
+					'source'    => 'get_order',
+					'order_id'  => $order_id,
+					'exception' => $e,
+				)
+			);
 			return false;
-		}
+		}//end try
 	}
 
 	/**

@@ -1,5 +1,8 @@
+@import "../node_modules/@wordpress/theme/src/prebuilt/css/design-tokens.css";
 @import "@wordpress/components/build-style/style.css";
 @import "@wordpress/dataviews/build-style/style.css";
+@import "@wordpress/admin-ui/build-style/style.css";
+@import "@wordpress/base-styles/mixins";
 
 .product_page_woocommerce-products-dashboard {
 	background-color: unset;
@@ -8,4 +11,20 @@
 	@import "./fields/images/style.scss";
 	@import "./fields/stock/style.scss";
 	@import "./fields/visibility_summary/style.scss";
+}
+
+.product_page_woocommerce-products-dashboard-snackbar {
+	@include snackbar-container;
+}
+
+.woocommerce-product-list {
+	height: 85vh;
+}
+
+.woocommerce-product-list__toolbar {
+	padding: 0 var(--wpds-dimension-padding-2xl, 24px);
+}
+
+.woocommerce-product-list .dataviews-wrapper {
+	height: 100%;
 }
