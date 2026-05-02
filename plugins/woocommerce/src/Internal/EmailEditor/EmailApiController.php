@@ -5,7 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\EmailEditor;
 
 use Automattic\WooCommerce\EmailEditor\Validator\Builder;
-use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
@@ -445,49 +445,24 @@ class EmailApiController {
 			);
 		}
 
-		$canonical   = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
-		$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( (string) $email_type );
-
-		$update_result = wp_update_post(
-			array(
-				'ID'           => $post_id,
-				'post_content' => $canonical,
-			),
-			true
+		$result = WCEmailTemplateAutoApplier::apply_to_post(
+			$email,
+			$post_id,
+			array( 'require_uncustomized' => false )
 		);
 
-		if ( is_wp_error( $update_result ) ) {
+		if ( is_wp_error( $result ) ) {
 			return new WP_Error(
 				'woocommerce_email_reset_failed',
 				sprintf(
 					/* translators: %s: underlying error message */
 					__( 'Failed to reset email content: %s', 'woocommerce' ),
-					$update_result->get_error_message()
+					$result->get_error_message()
 				),
 				array( 'status' => 500 )
 			);
 		}
 
-		$source_hash = null;
-		$synced_at   = null;
-		if ( null !== $sync_config ) {
-			$source_hash = sha1( $canonical );
-			$synced_at   = gmdate( 'Y-m-d H:i:s' );
-			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, (string) $sync_config['version'] );
-			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $source_hash );
-			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $synced_at );
-			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC );
-		}
-
-		return new WP_REST_Response(
-			array(
-				'content'     => $canonical,
-				'version'     => null !== $sync_config ? (string) $sync_config['version'] : null,
-				'source_hash' => $source_hash,
-				'synced_at'   => $synced_at,
-				'status'      => null !== $sync_config ? WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC : null,
-			),
-			200
-		);
+		return new WP_REST_Response( $result, 200 );
 	}
 }
