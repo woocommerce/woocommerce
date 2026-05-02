@@ -25,7 +25,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard_Setup', false ) ) :
 		/**
 		 * Check for task list initialization.
 		 */
-		private $initialized = false;
+		private bool $initialized = false;
 
 		/**
 		 * The task list.
