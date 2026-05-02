@@ -305,6 +305,8 @@ class CartCheckoutUtils {
 	 * Checks if the template overriding the page loads the page content or not.
 	 * Templates by default load the page content, but if that block is deleted the content can get out of sync with the one presented in the page editor.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @param string $block The block to check.
 	 *
 	 * @return bool true if the template has out of sync content.
@@ -324,6 +326,20 @@ class CartCheckoutUtils {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Checks if the template overriding the page loads the page content or not.
+	 * Templates by default load the page content, but if that block is deleted the content can get out of sync with the one presented in the page editor.
+	 *
+	 * @deprecated Use is_overridden_by_custom_template_content() instead.
+	 *
+	 * @param string $block The block to check.
+	 *
+	 * @return bool true if the template has out of sync content.
+	 */
+	public static function is_overriden_by_custom_template_content( string $block ): bool {
+		return self::is_overridden_by_custom_template_content( $block );
 	}
 
 	/**
