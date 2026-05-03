@@ -575,7 +575,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 					'context'     => array( 'view', 'edit' ),
 				),
 				'mpn'                   => array(
-					'description' => __( 'Manufacturer Product Number.', 'woocommerce' ),
+					'description' => __( 'Manufacturer Part Number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),

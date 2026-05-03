@@ -112,9 +112,9 @@ defined( 'ABSPATH' ) || exit;
 						'name'          => "variable_mpn[{$loop}]",
 						'value'         => $variation_object->get_mpn( 'edit' ),
 						'placeholder'   => $variation_object->get_mpn(),
-						'label'         => '<abbr title="' . esc_attr__( 'Manufacturer Product Number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
+						'label'         => '<abbr title="' . esc_attr__( 'Manufacturer Part Number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
 						'desc_tip'      => true,
-						'description'   => __( 'Enter the manufacturer product number for this variation.', 'woocommerce' ),
+						'description'   => __( 'Enter the manufacturer part number for this variation.', 'woocommerce' ),
 						'wrapper_class' => 'form-row',
 					)
 				);

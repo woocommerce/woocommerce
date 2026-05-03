@@ -45,9 +45,9 @@ if ( ! defined( 'ABSPATH' ) ) {
 			array(
 				'id'          => '_mpn',
 				'value'       => $product_object->get_mpn( 'edit' ),
-				'label'       => '<abbr title="' . esc_attr__( 'Manufacturer Product Number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
+				'label'       => '<abbr title="' . esc_attr__( 'Manufacturer Part Number', 'woocommerce' ) . '">' . esc_html__( 'MPN', 'woocommerce' ) . '</abbr>',
 				'desc_tip'    => true,
-				'description' => __( 'Enter the manufacturer product number for this product.', 'woocommerce' ),
+				'description' => __( 'Enter the manufacturer part number for this product.', 'woocommerce' ),
 			)
 		);
 
