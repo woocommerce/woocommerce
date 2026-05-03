@@ -132,7 +132,7 @@ export default function VariationsTable( { productId }: VariationsTableProps ) {
 	}
 
 	return (
-		<>
+		<div className="wc-variations-classic">
 			<DataViews
 				data={ variations }
 				fields={ variationFields }
@@ -172,6 +172,6 @@ export default function VariationsTable( { productId }: VariationsTableProps ) {
 					onClose={ () => setEditingVariation( null ) }
 				/>
 			) }
-		</>
+		</div>
 	);
 }

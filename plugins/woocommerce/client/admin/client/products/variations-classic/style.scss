@@ -9,6 +9,13 @@
 		padding: var(--wpds-dimension-padding-lg, 24px);
 	}
 
+	// DataViews defaults to vertical-align: top, which leaves text cells
+	// stuck at the top when the variant cell's 36px image makes the row taller.
+	// Center every cell so the image, ID, options, price, and stock align.
+	.dataviews-view-table tbody td {
+		vertical-align: middle;
+	}
+
 	// object-fit and border-radius are not provided by ProductImage component.
 	&__variant-image {
 		border: 1px solid var(--wpds-color-stroke-neutral-subtle, #dcdcdc);
