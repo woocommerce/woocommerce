@@ -2,8 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Stack } from '@wordpress/ui';
-import { Tag } from '@woocommerce/components';
+import { useLayoutEffect, useRef, useState } from '@wordpress/element';
+import { Badge, Stack } from '@wordpress/ui';
 import CurrencyFactory from '@woocommerce/currency';
 import { getSetting } from '@woocommerce/settings';
 
@@ -37,22 +37,116 @@ export function VariantCell( { item }: { item: Variation } ) {
 	);
 }
 
-export function ValuesCell( { item }: { item: Variation } ) {
-	if ( ! item.attributes.length ) {
-		return <span className="wc-variations-classic__values--empty">—</span>;
+// Stack gap="xs" resolves to 4px in the WordPress Design System token scale.
+const GAP_PX = 4;
+
+export function VariationOptionsCell( { item }: { item: Variation } ) {
+	const total = item.attributes.length;
+	const containerRef = useRef< HTMLDivElement >( null );
+	const measureRefs = useRef< Array< HTMLSpanElement | null > >( [] );
+	const overflowMeasureRef = useRef< HTMLSpanElement | null >( null );
+	const [ visibleCount, setVisibleCount ] = useState( total );
+
+	useLayoutEffect( () => {
+		const container = containerRef.current;
+		if ( ! container || total === 0 ) {
+			return;
+		}
+
+		const recalc = () => {
+			const containerWidth = container.clientWidth;
+			const widths = measureRefs.current.map(
+				( el ) => el?.offsetWidth ?? 0
+			);
+			const overflowWidth = overflowMeasureRef.current?.offsetWidth ?? 0;
+
+			let allWidth = 0;
+			widths.forEach( ( w, i ) => {
+				allWidth += w + ( i > 0 ? GAP_PX : 0 );
+			} );
+			if ( allWidth <= containerWidth ) {
+				setVisibleCount( total );
+				return;
+			}
+
+			let used = 0;
+			let count = 0;
+			for ( let i = 0; i < widths.length; i++ ) {
+				const add = widths[ i ] + ( i > 0 ? GAP_PX : 0 );
+				const remaining = widths.length - i - 1;
+				const reserve = remaining > 0 ? GAP_PX + overflowWidth : 0;
+				if ( used + add + reserve <= containerWidth ) {
+					used += add;
+					count++;
+				} else {
+					break;
+				}
+			}
+			setVisibleCount( Math.max( count, 0 ) );
+		};
+
+		recalc();
+		const observer = new ResizeObserver( recalc );
+		observer.observe( container );
+		return () => observer.disconnect();
+	}, [ total, item.attributes ] );
+
+	if ( total === 0 ) {
+		return (
+			<span className="wc-variations-classic__variation-options--empty">
+				—
+			</span>
+		);
 	}
 
+	const visible = item.attributes.slice( 0, visibleCount );
+	const hiddenCount = total - visibleCount;
+
 	return (
-		<Stack direction="row" gap="xs" justify="flex-start" wrap="wrap">
-			{ item.attributes.map( ( attr ) => (
-				<Tag
-					key={ attr.id || attr.name }
-					label={ attr.option }
-					id={ attr.id || attr.name }
-					screenReaderLabel={ attr.option }
-				/>
-			) ) }
-		</Stack>
+		<div className="wc-variations-classic__variation-options-cell">
+			{ /* Off-screen measurement layer used to capture each badge's natural width. */ }
+			<div
+				className="wc-variations-classic__variation-options-measure"
+				aria-hidden="true"
+			>
+				{ item.attributes.map( ( attr, i ) => (
+					<Badge
+						key={ `m-${ attr.id || attr.name }` }
+						intent="none"
+						ref={ ( el: HTMLSpanElement | null ) => {
+							measureRefs.current[ i ] = el;
+						} }
+					>
+						{ attr.option }
+					</Badge>
+				) ) }
+				<Badge
+					intent="none"
+					ref={ ( el: HTMLSpanElement | null ) => {
+						overflowMeasureRef.current = el;
+					} }
+				>
+					{ `+${ total }` }
+				</Badge>
+			</div>
+			<Stack
+				ref={ containerRef }
+				direction="row"
+				gap="xs"
+				align="center"
+				justify="flex-start"
+				className="wc-variations-classic__variation-options-row"
+			>
+				{ visible.map( ( attr ) => (
+					<Badge key={ attr.id || attr.name } intent="none">
+						{ attr.option }
+					</Badge>
+				) ) }
+				{ hiddenCount > 0 && (
+					<Badge intent="none">{ `+${ hiddenCount }` }</Badge>
+				) }
+			</Stack>
+		</div>
 	);
 }
 
