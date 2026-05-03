@@ -11,6 +11,7 @@
 
 	// object-fit and border-radius are not provided by ProductImage component.
 	&__variant-image {
+		border: 1px solid var(--wpds-color-stroke-neutral-subtle, #dcdcdc);
 		border-radius: var(--wpds-border-radius-xs, 4px);
 		object-fit: cover;
 		flex-shrink: 0;

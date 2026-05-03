@@ -5,6 +5,7 @@ import { __ } from '@wordpress/i18n';
 import { Stack } from '@wordpress/ui';
 import { Tag } from '@woocommerce/components';
 import CurrencyFactory from '@woocommerce/currency';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -15,12 +16,15 @@ import type { Variation } from '../types';
 const currency = CurrencyFactory( CURRENCY );
 
 export function VariantCell( { item }: { item: Variation } ) {
+	const placeholderSrc = getSetting< string >( 'placeholderImgSrc', '' );
+	const src = item.image?.src || placeholderSrc;
+
 	return (
 		<Stack direction="row" gap="sm" align="center">
-			{ item.image?.src && (
+			{ src && (
 				<img
-					src={ item.image.src }
-					alt={ item.image.alt || '' }
+					src={ src }
+					alt={ item.image?.alt || '' }
 					className="wc-variations-classic__variant-image"
 					width={ 36 }
 					height={ 36 }
