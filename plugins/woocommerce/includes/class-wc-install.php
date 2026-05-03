@@ -310,7 +310,6 @@ class WC_Install {
 			'wc_update_1030_add_comments_date_type_index',
 		),
 		'10.4.0' => array(
-			'wc_update_1040_add_mpn_to_product_lookup_table',
 			'wc_update_1040_add_idx_date_paid_status_parent',
 			'wc_update_1040_cleanup_legacy_ptk_patterns_fetching',
 		),
@@ -330,6 +329,9 @@ class WC_Install {
 			'wc_update_1080_migrate_analytics_import_option',
 			'wc_update_1080_slim_orders_meta_key_index',
 			'wc_update_1080_backfill_email_template_sync_meta',
+		),
+		'10.9.0' => array(
+			'wc_update_1090_add_mpn_to_product_lookup_table',
 		),
 	);
 
@@ -2095,7 +2097,7 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   `product_id` bigint(20) NOT NULL,
   `sku` varchar(100) NULL default '',
   `global_unique_id` varchar(100) NULL default '',
-  `mpn` varchar(100) NULL default '',
+  `mpn` varchar(100) NOT NULL DEFAULT '',
   `virtual` tinyint(1) NULL default 0,
   `downloadable` tinyint(1) NULL default 0,
   `min_price` decimal(19,4) NULL default NULL,
@@ -2115,7 +2117,8 @@ CREATE TABLE {$wpdb->prefix}wc_product_meta_lookup (
   KEY `stock_quantity` (`stock_quantity`),
   KEY `onsale` (`onsale`),
   KEY min_max_price (`min_price`, `max_price`),
-  KEY sku (sku(50))
+  KEY sku (sku(50)),
+  KEY mpn (mpn(50))
 ) $collate;
 CREATE TABLE {$wpdb->prefix}wc_tax_rate_classes (
   tax_rate_class_id bigint(20) unsigned NOT NULL auto_increment,

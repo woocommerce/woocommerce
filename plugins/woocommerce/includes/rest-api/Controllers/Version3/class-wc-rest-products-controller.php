@@ -481,7 +481,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
-		if ( ! empty( $request['sku'] ) || ! empty( $request['search_sku'] ) || ! empty( $request['mpn'] ) || $this->search_name_or_sku_tokens || $this->search_fields_tokens ) {
+		if ( ! empty( $request['sku'] ) || ! empty( $request['search_sku'] ) || ! empty( $request['mpn'] ) || ! empty( $request['search_mpn'] ) || $this->search_name_or_sku_tokens || $this->search_fields_tokens ) {
 			$args['post_type'] = array( 'product', 'product_variation' );
 		} else {
 			$args['post_type'] = $this->post_type;
@@ -569,6 +569,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 		// Only join if we need meta table search.
 		if ( ! $this->search_fields_tokens &&
 			! $this->search_sku_arg_value &&
+			! $this->search_mpn_arg_value &&
 			! ( $this->search_name_or_sku_tokens && wc_product_sku_enabled() ) ) {
 			return $join;
 		}
@@ -1315,7 +1316,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'mpn'                   => array(
-					'description' => __( 'Manufacturer product number.', 'woocommerce' ),
+					'description' => __( 'Manufacturer Product Number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),

@@ -2507,8 +2507,10 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( get_option( 'woocommerce_schema_version', 0 ) >= 920 ) {
 				$product_data['global_unique_id'] = get_post_meta( $id, '_global_unique_id', true );
 			}
-			if ( get_option( 'woocommerce_schema_version', 0 ) >= 1020 ) {
-				$product_data['mpn'] = get_post_meta( $id, '_mpn', true );
+			if ( get_option( 'woocommerce_schema_version', 0 ) >= 1090 ) {
+				$raw_mpn = (string) get_post_meta( $id, '_mpn', true );
+				// Ensure we don't exceed lookup column size (varchar 100).
+				$product_data['mpn'] = function_exists( 'mb_substr' ) ? mb_substr( $raw_mpn, 0, 100 ) : substr( $raw_mpn, 0, 100 );
 			}
 			return $product_data;
 		}

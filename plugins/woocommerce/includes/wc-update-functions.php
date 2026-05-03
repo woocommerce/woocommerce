@@ -3266,24 +3266,28 @@ function wc_update_1000_remove_patterns_toolkit_transient() {
  *
  * @return void
  */
-function wc_update_1040_add_mpn_to_product_lookup_table() {
+function wc_update_1090_add_mpn_to_product_lookup_table() {
 	global $wpdb;
 
 	$table_name = $wpdb->prefix . 'wc_product_meta_lookup';
-	
+
 	// Check if the column already exists.
 	$column_exists = $wpdb->get_var(
 		$wpdb->prepare(
-			"SELECT COUNT(*) FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = %s AND TABLE_NAME = %s AND COLUMN_NAME = 'mpn'",
-			$wpdb->dbname,
-			$table_name
+			"SHOW COLUMNS FROM `{$table_name}` LIKE %s",
+			'mpn'
 		)
 	);
 
 	if ( ! $column_exists ) {
 		// Add the MPN column.
 		$wpdb->query(
-			"ALTER TABLE {$table_name} ADD COLUMN `mpn` varchar(100) NULL default '' AFTER `global_unique_id`"
+			"ALTER TABLE {$table_name} ADD COLUMN `mpn` varchar(100) NOT NULL DEFAULT '' AFTER `global_unique_id`"
+		);
+
+		// Add an index for fast filtering.
+		$wpdb->query(
+			"ALTER TABLE {$table_name} ADD INDEX `mpn` (mpn(50))"
 		);
 	}
 
@@ -3295,6 +3299,7 @@ function wc_update_1040_add_mpn_to_product_lookup_table() {
 		SET lookup.mpn = COALESCE(pm.meta_value, '')
 		"
 	);
+}
 
 /**
  * Add an index to (comment_date_gmt, comment_type, comment_approved, comment_post_ID)

@@ -1940,7 +1940,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 					'context'     => array( 'view', 'edit' ),
 				),
 				'mpn'                   => array(
-					'description' => __( 'Manufacturer product number.', 'woocommerce' ),
+					'description' => __( 'Manufacturer Product Number.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
