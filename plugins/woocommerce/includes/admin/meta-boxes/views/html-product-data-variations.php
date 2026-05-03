@@ -17,29 +17,6 @@ if ( FeaturesUtil::feature_is_enabled( 'product_variations_classic_redesign' ) )
 	<div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 		<div id="variable_product_options_inner">
 			<div id="woocommerce-variations-classic-root"></div>
-			<?php if ( isset( $variation_attributes ) && is_array( $variation_attributes ) && count( $variation_attributes ) > 0 ) : ?>
-				<?php /* Hidden default attribute selects — preserved for the product save handler. */ ?>
-				<div class="toolbar toolbar-variations-defaults" hidden aria-hidden="true">
-					<div class="variations-defaults">
-						<?php foreach ( $variation_attributes as $attribute ) : ?>
-							<?php $selected_value = $default_attributes[ sanitize_title( $attribute->get_name() ) ] ?? ''; ?>
-							<select name="default_attribute_<?php echo esc_attr( sanitize_title( $attribute->get_name() ) ); ?>">
-								<?php /* translators: %s: WooCommerce attribute label */ ?>
-								<option value=""><?php echo esc_html( sprintf( __( 'No default %s&hellip;', 'woocommerce' ), wc_attribute_label( $attribute->get_name() ) ) ); ?></option>
-								<?php if ( $attribute->is_taxonomy() ) : ?>
-									<?php foreach ( $attribute->get_terms() as $option ) : ?>
-										<option <?php selected( $selected_value, $option->slug ); ?> value="<?php echo esc_attr( $option->slug ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option->name, $option, $attribute->get_name(), $product_object ?? null ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?></option>
-									<?php endforeach; ?>
-								<?php else : ?>
-									<?php foreach ( $attribute->get_options() as $option ) : ?>
-										<option <?php selected( $selected_value, $option ); ?> value="<?php echo esc_attr( $option ); ?>"><?php echo esc_html( apply_filters( 'woocommerce_variation_option_name', $option, null, $attribute->get_name(), $product_object ?? null ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?></option>
-									<?php endforeach; ?>
-								<?php endif; ?>
-							</select>
-						<?php endforeach; ?>
-					</div>
-				</div>
-			<?php endif; ?>
 		</div>
 	</div>
 	<?php
