@@ -108,7 +108,7 @@ final class OrderStatus {
 	);
 
 	/**
-	 * Returns all public-facing order status values.
+	 * Returns all order status values defined in this class.
 	 *
 	 * @return string[]
 	 */
@@ -121,6 +121,11 @@ final class OrderStatus {
 			self::PROCESSING,
 			self::REFUNDED,
 			self::CANCELLED,
+			self::TRASH,
+			self::NEW,
+			self::AUTO_DRAFT,
+			self::DRAFT,
+			self::CHECKOUT_DRAFT,
 		);
 	}
 }
