@@ -28,6 +28,7 @@ export function VariationEditModal( {
 			onRequestClose={ onClose }
 		>
 			{ /* TODO: variation edit form */ }
+			<></>
 		</Modal>
 	);
 }
