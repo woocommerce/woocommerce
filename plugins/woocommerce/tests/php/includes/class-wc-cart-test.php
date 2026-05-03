@@ -4,6 +4,8 @@
  *
  * @package WooCommerce\Tests\Cart.
  */
+
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
@@ -28,6 +30,151 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		WC()->cart->empty_cart();
 		WC()->customer->set_is_vat_exempt( false );
 		WC()->session->set( 'wc_notices', null );
+	}
+
+	/**
+	 * @testdox Order Again should enforce sold individually for variable products (no duplicates, qty forced to 1)
+	 */
+	public function test_order_again_enforces_sold_individually_for_variations() {
+		$user_id = $this->factory->user->create();
+		wp_set_current_user( $user_id );
+
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variable_product->set_sold_individually( true );
+		$variable_product->save();
+
+		$variation_ids = $variable_product->get_children();
+		$this->assertNotEmpty( $variation_ids, 'Expected at least one variation.' );
+		$variation_id = (int) $variation_ids[0];
+		$variation    = wc_get_product( $variation_id );
+
+		$this->assertTrue( $variation->is_sold_individually(), 'Variation should be sold individually.' );
+
+		$order = WC_Helper_Order::create_order( $user_id, $variation, array( 'status' => OrderStatus::COMPLETED ) );
+		$this->assertGreaterThan( 0, $order->get_id(), 'Order should be created.' );
+
+		$order_items = $order->get_items();
+		$this->assertNotEmpty( $order_items, 'Order should have at least one item.' );
+		$order_item = array_values( $order_items )[0];
+		foreach ( $variation->get_attributes() as $att_key => $att_val ) {
+			$order_item->add_meta_data( $att_key, $att_val, true );
+		}
+		$order_item->save();
+		$order->save();
+
+		$cart_session = new WC_Cart_Session( WC()->cart );
+		$ref          = new ReflectionClass( WC_Cart_Session::class );
+		$method       = $ref->getMethod( 'populate_cart_from_order' );
+		$method->setAccessible( true );
+		$current_cart = WC()->session->get( 'cart', null );
+		$populated    = $method->invoke( $cart_session, $order->get_id(), $current_cart );
+		WC()->session->set( 'cart', $populated );
+		WC()->cart->set_cart_contents( $populated ? $populated : array() );
+
+		$cart_contents = WC()->cart->get_cart();
+		$this->assertCount( 1, $cart_contents, 'Cart should contain one item after Order Again for sold individually product.' );
+
+		$only_item = array_values( $cart_contents )[0];
+		$this->assertEquals( $variation_id, $only_item['variation_id'], 'Cart item should correspond to the ordered variation.' );
+		$this->assertEquals( 1, $only_item['quantity'], 'Quantity should be forced to 1 for sold individually products.' );
+
+		$available_variations     = $variable_product->get_available_variations();
+		$attributes_for_variation = array();
+		foreach ( $available_variations as $v ) {
+			if ( (int) $v['variation_id'] === $variation_id ) {
+				$attributes_for_variation = $v['attributes'];
+				break;
+			}
+		}
+		$this->assertNotEmpty( $attributes_for_variation, 'Expected to find attributes for variation.' );
+
+		$added = WC()->cart->add_to_cart( $variable_product->get_id(), 1, $variation_id, $attributes_for_variation );
+		$this->assertFalse( $added, 'Adding duplicate sold individually variation should be blocked.' );
+
+		$notices = wc_get_notices();
+		$this->assertArrayHasKey( 'error', $notices );
+		$this->assertNotEmpty( $notices['error'], 'Expected an error notice when adding duplicate sold individually item.' );
+
+		$cart_contents_after = WC()->cart->get_cart();
+		$this->assertCount( 1, $cart_contents_after, 'Cart should still contain one item.' );
+		$only_item_after = array_values( $cart_contents_after )[0];
+		$this->assertEquals( 1, $only_item_after['quantity'], 'Quantity should remain 1.' );
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+		WC_Helper_Product::delete_product( $variable_product->get_id() );
+		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox check_cart_items should reduce quantity to 1 when product is marked as sold individually after being added to cart
+	 */
+	public function test_check_cart_items_reduces_sold_individually_quantity() {
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		$product->set_sold_individually( true );
+		$product->save();
+
+		WC()->session->set( 'wc_notices', null );
+
+		$result = WC()->cart->check_cart_items();
+		$this->assertFalse( $result, 'check_cart_items should return false when fixing sold individually quantity (indicating an issue was found)' );
+
+		$cart_contents_after = WC()->cart->get_cart();
+		$cart_item_after     = array_values( $cart_contents_after )[0];
+		$this->assertEquals( 1, $cart_item_after['quantity'], 'Cart item quantity should be reduced to 1' );
+
+		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+		$this->assertContains(
+			sprintf( 'You can only have 1 %s in your cart.', $product->get_name() ),
+			$error_notices
+		);
+
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Sold individually product with quantity 1 should not trigger an error or get modified by check_cart_items
+	 */
+	public function test_check_cart_items_does_not_modify_sold_individually_quantity_one() {
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 10 );
+		$product->set_sold_individually( true );
+		$product->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$result = WC()->cart->check_cart_items();
+		$this->assertTrue( $result, 'check_cart_items should return true when no issues found' );
+
+		$cart_contents = WC()->cart->get_cart();
+		$cart_item     = array_values( $cart_contents )[0];
+		$this->assertEquals( 1, $cart_item['quantity'], 'Quantity should remain 1' );
+
+		$error_notices = wp_list_pluck( wc_get_notices( 'error' ), 'notice' );
+		$this->assertEmpty( $error_notices, 'No error notices should be added' );
+
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+		$product->delete( true );
 	}
 
 	/**
@@ -332,6 +479,62 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that show_shipping returns true when Local Pickup is enabled,
+	 * even when "Hide shipping costs until an address is entered" is enabled
+	 * and no customer address is set.
+	 *
+	 * This tests the fix for https://github.com/woocommerce/woocommerce/issues/62785
+	 * where Local Pickup would not display in the Block Checkout when a third-party
+	 * plugin called calculate_totals() early with the shortcode cart context.
+	 */
+	public function test_show_shipping_returns_true_with_local_pickup_enabled_and_no_address() {
+		// Save original settings.
+		$default_shipping_cost_requires_address = get_option( 'woocommerce_shipping_cost_requires_address', 'no' );
+		$default_pickup_location_settings       = get_option( 'woocommerce_pickup_location_settings', array() );
+
+		// Enable "Hide shipping costs until an address is entered".
+		update_option( 'woocommerce_shipping_cost_requires_address', 'yes' );
+
+		// Enable Local Pickup.
+		update_option(
+			'woocommerce_pickup_location_settings',
+			array(
+				'enabled' => 'yes',
+				'title'   => 'Pickup',
+			)
+		);
+
+		// Add a product to the cart.
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Clear customer address to simulate a new guest user.
+		WC()->cart->get_customer()->set_shipping_country( '' );
+		WC()->cart->get_customer()->set_shipping_state( '' );
+		WC()->cart->get_customer()->set_shipping_postcode( '' );
+
+		// Test with shortcode context (the bug scenario).
+		WC()->cart->cart_context = 'shortcode';
+		$this->assertTrue(
+			WC()->cart->show_shipping(),
+			'show_shipping() should return true when Local Pickup is enabled, even with shortcode context and no address'
+		);
+
+		// Test with store-api context (should also work).
+		WC()->cart->cart_context = 'store-api';
+		$this->assertTrue(
+			WC()->cart->show_shipping(),
+			'show_shipping() should return true when Local Pickup is enabled with store-api context and no address'
+		);
+
+		// Clean up.
+		update_option( 'woocommerce_shipping_cost_requires_address', $default_shipping_cost_requires_address );
+		update_option( 'woocommerce_pickup_location_settings', $default_pickup_location_settings );
+		$product->delete( true );
+		WC()->cart->cart_context = 'shortcode'; // Reset to default.
+	}
+
+	/**
 	 * Test show_shipping for countries with various state/postcode requirement.
 	 */
 	public function test_show_shipping_for_countries_different_shipping_requirements() {
@@ -588,18 +791,6 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$coupon->delete( true );
 	}
 
-	/**
-	 * @testdox should clear store_api_draft_order from session when cart is empty
-	 */
-	public function test_setting_session_should_clear_store_api_draft_order_when_cart_is_empty() {
-		$cart     = WC()->cart;
-		$order_id = WC_Helper_Order::create_order()->save();
-		WC()->session->set( 'store_api_draft_order', $order_id );
-
-		$cart->set_session();
-
-		$this->assertNull( WC()->session->get( 'store_api_draft_order' ) );
-	}
 
 	/**
 	 * @testdox should not clear store_api_draft_order from session when cart is not empty
@@ -609,7 +800,9 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$product = WC_Helper_Product::create_simple_product();
 
 		$cart->add_to_cart( $product->get_id() );
-		$order_id = WC_Helper_Order::create_order()->save();
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'checkout-draft' );
+		$order_id = $order->save();
 		WC()->session->set( 'store_api_draft_order', $order_id );
 
 		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
@@ -621,20 +814,33 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
 	}
 
+
 	/**
-	 * @testdox should clear store_api_draft_order from session and db when the cart is emptied
+	 * @testdox should NOT delete non-draft orders when clearing store_api_draft_order from session
 	 */
-	public function test_emptying_the_cart_should_clear_store_api_draft_order() {
+	public function test_emptying_cart_should_not_delete_non_draft_orders() {
 		$cart = WC()->cart;
 
-		$order_id = WC_Helper_Order::create_order()->save();
-		WC()->session->set( 'store_api_draft_order', $order_id );
+		// Create a processing order (simulating a completed checkout).
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order_id = $order->save();
 
-		$this->assertEquals( $order_id, WC()->session->get( 'store_api_draft_order' ) );
+		// Simulate stale session data where order ID still exists in session.
+		WC()->session->set( 'store_api_draft_order', $order_id );
 
 		$cart->empty_cart();
 
+		// Session should be cleared.
 		$this->assertNull( WC()->session->get( 'store_api_draft_order' ) );
+
+		// BUT the order should NOT be deleted.
+		$order = wc_get_order( $order_id );
+		$this->assertNotFalse( $order, 'Non-draft order should not be deleted' );
+		$this->assertEquals( 'processing', $order->get_status(), 'Order status should remain unchanged' );
+
+		// Clean up.
+		$order->delete( true );
 	}
 
 	/**
@@ -1017,5 +1223,197 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		// Clean up.
 		$product->delete( true );
 		wp_delete_user( $user_id );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_updated_from_user_request when cart item quantity is updated via form.
+	 */
+	public function test_update_cart_action_fires_update_quantity_action(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		$cart_items    = WC()->cart->get_cart();
+		$cart_item_key = array_key_first( $cart_items );
+
+		$nonce = wp_create_nonce( 'woocommerce-cart' );
+
+		$_POST['_wpnonce']       = $nonce;
+		$_REQUEST['_wpnonce']    = $nonce;
+		$_POST['update_cart']    = 'Update Cart';
+		$_REQUEST['update_cart'] = 'Update Cart';
+		$_POST['cart']           = array(
+			$cart_item_key => array( 'qty' => 5 ),
+		);
+
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $cart_item_key, $quantity, $old_quantity, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'cart_item_key', 'quantity', 'old_quantity', 'cart' );
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		WC_Form_Handler::update_cart_action();
+
+		$this->assertNotEmpty( $captured_args, 'The update quantity action should have been fired' );
+		$this->assertSame( $cart_item_key, $captured_args['cart_item_key'] );
+		$this->assertEquals( 5, $captured_args['quantity'] );
+		$this->assertEquals( 2, $captured_args['old_quantity'] );
+		$this->assertInstanceOf( WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+
+		unset( $_POST['_wpnonce'], $_REQUEST['_wpnonce'], $_POST['update_cart'], $_REQUEST['update_cart'], $_POST['cart'] );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should not fire internal_woocommerce_cart_item_updated_from_user_request when quantity is unchanged.
+	 */
+	public function test_update_cart_action_does_not_fire_update_quantity_action_when_unchanged(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 2 );
+
+		$cart_items    = WC()->cart->get_cart();
+		$cart_item_key = array_key_first( $cart_items );
+
+		$nonce = wp_create_nonce( 'woocommerce-cart' );
+
+		$_POST['_wpnonce']       = $nonce;
+		$_REQUEST['_wpnonce']    = $nonce;
+		$_POST['update_cart']    = 'Update Cart';
+		$_REQUEST['update_cart'] = 'Update Cart';
+		$_POST['cart']           = array(
+			$cart_item_key => array( 'qty' => 2 ),
+		);
+
+		$hook_fired = false;
+		$callback   = function () use ( &$hook_fired ) {
+			$hook_fired = true;
+		};
+
+		add_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback, 10, 4 );
+
+		WC_Form_Handler::update_cart_action();
+
+		$this->assertFalse( $hook_fired, 'The update quantity action should not fire when the quantity is unchanged' );
+
+		remove_action( 'internal_woocommerce_cart_item_updated_from_user_request', $callback );
+
+		unset( $_POST['_wpnonce'], $_REQUEST['_wpnonce'], $_POST['update_cart'], $_REQUEST['update_cart'], $_POST['cart'] );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_removed_from_user_request when cart item is removed via form.
+	 */
+	public function test_update_cart_action_fires_remove_item_action(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$cart_items    = WC()->cart->get_cart();
+		$cart_item_key = array_key_first( $cart_items );
+
+		$nonce = wp_create_nonce( 'woocommerce-cart' );
+
+		$_REQUEST['_wpnonce']    = $nonce;
+		$_GET['remove_item']     = $cart_item_key;
+		$_REQUEST['remove_item'] = $cart_item_key;
+
+		$captured_args = array();
+		// phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+		$callback = function ( $cart_item_key, $cart ) use ( &$captured_args ) {
+			$captured_args = compact( 'cart_item_key', 'cart' );
+		};
+
+		add_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback, 10, 2 );
+
+		WC_Form_Handler::update_cart_action();
+
+		$this->assertNotEmpty( $captured_args, 'The remove item action should have been fired' );
+		$this->assertSame( $cart_item_key, $captured_args['cart_item_key'] );
+		$this->assertInstanceOf( WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback );
+
+		unset( $_REQUEST['_wpnonce'], $_GET['remove_item'], $_REQUEST['remove_item'] );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request when a simple product is added via the shortcode form.
+	 */
+	public function test_add_to_cart_action_fires_cart_item_added_from_user_request(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$_REQUEST['add-to-cart'] = $product->get_id();
+		$_REQUEST['quantity']    = 3;
+		$_POST['quantity']       = 3;
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		WC_Form_Handler::add_to_cart_action( false );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $product->get_id(), $captured_args['product_id'] );
+		$this->assertEquals( 3, $captured_args['quantity'] );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+
+		unset( $_REQUEST['add-to-cart'], $_REQUEST['quantity'], $_POST['quantity'] );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request with the variation ID when a variable product is added via the shortcode form.
+	 */
+	public function test_add_to_cart_action_fires_cart_item_added_from_user_request_for_variable_product(): void {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Variable Product' );
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'color', array( 'blue' ) );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( 10 );
+		$variation->save();
+
+		$_REQUEST['add-to-cart']        = $product->get_id();
+		$_REQUEST['variation_id']       = $variation->get_id();
+		$_REQUEST['quantity']           = 2;
+		$_POST['quantity']              = 2;
+		$_REQUEST['attribute_pa_color'] = 'blue';
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		WC_Form_Handler::add_to_cart_action( false );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
+		$this->assertEquals( 2, $captured_args['quantity'] );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+
+		unset( $_REQUEST['add-to-cart'], $_REQUEST['variation_id'], $_REQUEST['quantity'], $_POST['quantity'], $_REQUEST['attribute_pa_color'] );
+		$variation->delete( true );
+		$product->delete( true );
 	}
 }

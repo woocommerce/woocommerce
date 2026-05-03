@@ -203,8 +203,8 @@ class OrdersTableQuery {
 		$this->args       = $args;
 		$this->query_args = $args; // Keep a copy of the original vars used to initialize the query.
 
-		// TODO: args to be implemented.
-		unset( $this->args['customer_note'], $this->args['name'] );
+		// TODO: 'name' arg (post_name equivalent) is not yet implemented for HPOS.
+		unset( $this->args['name'] );
 
 		$this->build_query();
 		if ( ! $this->maybe_override_query() ) {
@@ -359,7 +359,7 @@ class OrdersTableQuery {
 			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
 			$precision = 'second';
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
-			// For backwards compat (see https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date)
+			// For backwards compat (see https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date)
 			// only YYYY-MM-DD is considered for date values. Timestamps do support second precision.
 			$date      = wc_string_to_datetime( date( 'Y-m-d', strtotime( $date ) ) );
 			$precision = 'day';
@@ -392,7 +392,7 @@ class OrdersTableQuery {
 	private function local_time_to_gmt_date_query( $dates_raw, $operator ) {
 		$result = array();
 
-		// Convert YYYY-MM-DD to UTC timestamp. Per https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date only date is relevant (time is ignored).
+		// Convert YYYY-MM-DD to UTC timestamp. Per https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date only date is relevant (time is ignored).
 		foreach ( $dates_raw as &$raw_date ) {
 			$raw_date = is_numeric( $raw_date ) ? $raw_date : strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
 		}
@@ -508,7 +508,7 @@ class OrdersTableQuery {
 				$date_key = $local_to_gmt_date_keys[ $date_key ];
 
 				if ( ! is_numeric( $dates_raw[0] ) && ( ! isset( $dates_raw[1] ) || ! is_numeric( $dates_raw[1] ) ) ) {
-					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://github.com/woocommerce/woocommerce/wiki/wc_get_orders-and-WC_Order_Query#date.
+					// Only non-numeric args can be considered local time. Timestamps are assumed to be UTC per https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date.
 					$date_queries[] = array_merge(
 						array(
 							'column' => $date_key,
@@ -697,7 +697,13 @@ class OrdersTableQuery {
 			$this->args['status'] = array( $this->args['status'] );
 		}
 
-		if ( in_array( 'any', $this->args['status'], true ) || in_array( 'all', $this->args['status'], true ) ) {
+		if ( empty( $this->args['status'] ) || in_array( 'any', $this->args['status'], true ) ) {
+			// Querying for 'any' status or empty status, filter to valid statuses from wc_get_order_statuses(),
+			// excluding statuses marked as exclude_from_search (e.g. checkout-draft) to match WP_Query behavior.
+			$exclude              = get_post_stati( array( 'exclude_from_search' => true ) );
+			$this->args['status'] = array_diff( $valid_statuses, $exclude );
+		} elseif ( in_array( 'all', $this->args['status'], true ) ) {
+			// Querying for 'all' status does not filter by status at all.
 			$this->args['status'] = array();
 		}
 
@@ -1261,6 +1267,7 @@ class OrdersTableQuery {
 				'discount_tax_amount',
 				'shipping_total_amount',
 				'shipping_tax_amount',
+				'customer_note',
 			),
 			array( $this, 'arg_isset' )
 		);
@@ -1343,7 +1350,7 @@ class OrdersTableQuery {
 		$order   = $this->sanitize_order( $this->args['order'] ?? '' );
 		$orderby = $this->sanitize_order_orderby( $this->args['orderby'] ?? 'none' );
 
-		// Set orderby to an empty array by default. This will also be used if sanitize_order_orderby recieved "none".
+		// Set orderby to an empty array by default. This will also be used if sanitize_order_orderby received "none".
 		$this->orderby = array();
 
 		if ( 'include' === $orderby || 'post__in' === $orderby ) {

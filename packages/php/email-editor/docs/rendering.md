@@ -11,6 +11,7 @@ The email rendering system includes **Core Blocks Integration** that provides de
 -   [Renderer Classes](#renderer-classes)
     -   [Renderer](#renderer)
     -   [Content_Renderer](#content_renderer)
+-   [Rendering Direction](#rendering-direction)
 -   [Core Blocks Integration](#core-blocks-integration)
 -   [Table Wrapper Helper](#table-wrapper-helper)
 -   [Styles Helper](#styles-helper)
@@ -121,23 +122,25 @@ $text_content = $rendered_email['text'];
 
 The `Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer` class is responsible for rendering only the HTML of block template content and a post. The block template has to contain a `core/post-content` block.
 
-**Main Method:**
+**Methods:**
+
+#### `render()`
+
+Returns the rendered HTML content as a string with CSS styles inlined.
 
 ```php
 /**
- * Render the content
+ * Render the content with inlined CSS styles.
  *
  * @param WP_Post           $post Post object.
  * @param WP_Block_Template $template Block template.
- * @return string
+ * @return string Rendered HTML content with inlined styles.
  */
 public function render(
     WP_Post $post,
     WP_Block_Template $template
 ): string
 ```
-
-**Returns:** A string containing the rendered HTML content
 
 **Example Usage:**
 
@@ -147,6 +150,60 @@ $template_id = get_stylesheet() . '//' . $template_slug;
 $template    = get_block_template( $template_id );
 $content     = $content_renderer->render( $post, $template );
 ```
+
+#### `render_without_css_inline()`
+
+Returns both the rendered HTML and collected CSS styles as an array, without inlining the CSS. This is used by the `Renderer` class, which combines these content styles with template styles into a single inlining pass.
+
+```php
+/**
+ * Render the content and collect CSS styles without inlining them.
+ *
+ * @param WP_Post           $post Post object.
+ * @param WP_Block_Template $template Block template.
+ * @return array{html: string, styles: string} Rendered HTML and collected CSS.
+ */
+public function render_without_css_inline(
+    WP_Post $post,
+    WP_Block_Template $template
+): array
+```
+
+**Returns:** An array containing:
+
+-   `html`: The rendered HTML content (without inlined styles)
+-   `styles`: The collected CSS string (without `<style>` wrapper)
+
+**Example Usage:**
+
+```php
+$post        = get_post( $post_id );
+$template_id = get_stylesheet() . '//' . $template_slug;
+$template    = get_block_template( $template_id );
+$result      = $content_renderer->render_without_css_inline( $post, $template );
+$html        = $result['html'];
+$styles      = $result['styles'];
+```
+
+## Rendering Direction
+
+Full email rendering resolves text direction once per render and shares it with the template shell, preprocessors, and block renderers.
+
+Integrations can pass an optional boolean `is_rtl` value through the `woocommerce_email_editor_rendering_email_context` filter:
+
+```php
+add_filter(
+    'woocommerce_email_editor_rendering_email_context',
+    function ( array $context ): array {
+        $context['is_rtl'] = true;
+        return $context;
+    }
+);
+```
+
+When `is_rtl` is explicitly `true`, the rendered email uses RTL direction. When it is explicitly `false`, the rendered email uses LTR direction even if the `$language` argument is an RTL language. Non-boolean values are ignored.
+
+When `is_rtl` is absent, `Renderer::render()` falls back to the `$language` argument using a conservative RTL primary-language allow-list, then defaults to LTR when the language is empty or not recognized. Direct `Content_Renderer` callers do not have a language argument, so they use explicit filtered `is_rtl` when present and otherwise default to LTR.
 
 ## Core Blocks Integration
 
@@ -223,20 +280,20 @@ $table_html = Table_Wrapper_Helper::render_table_wrapper(
 
 ```html
 <table
-    border="0"
-    cellpadding="0"
-    cellspacing="0"
-    role="presentation"
-    width="100%"
-    style="max-width: 600px;"
+	border="0"
+	cellpadding="0"
+	cellspacing="0"
+	role="presentation"
+	width="100%"
+	style="max-width: 600px;"
 >
-    <tbody>
-        <tr style="background-color: #f0f0f0;">
-            <td align="center" style="padding: 20px;">
-                <p>Email content here</p>
-            </td>
-        </tr>
-    </tbody>
+	<tbody>
+		<tr style="background-color: #f0f0f0;">
+			<td align="center" style="padding: 20px;">
+				<p>Email content here</p>
+			</td>
+		</tr>
+	</tbody>
 </table>
 ```
 

@@ -1,4 +1,4 @@
-/* global shippingZoneMethodsLocalizeScript, ajaxurl, WCNumberValidation */
+/* global shippingZoneMethodsLocalizeScript, ajaxurl, WCNumberValidation, WCMaybeModifyDecimal */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
 		var $table          = $( '.wc-shipping-zone-methods' ),
@@ -506,7 +506,17 @@
 
 					priceInputs.each( ( i ) => {
 						const priceInput = $( priceInputs[ i ] );
-						const value = priceInput.attr( 'value' );
+						let value = priceInput.attr( 'value' );
+						// Cost values are saved to the DB with thousands separators stripped and decimal separators converted to a dot.
+						// If value is not a formula, then we need to check for incorrect decimal separator in the value returned
+						// from the DB, and replace it with the correct one before passing it to the localiseMonetaryValue function.
+						// Note: Negative flat rate shipping cost numbers are not supported.
+						try {
+							value = WCMaybeModifyDecimal.maybeModifyDecimal( value, config );
+						} catch ( error ) {
+							// There was an error modifying the decimal, so we leave the original value as-is.
+							return;
+						}
 						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
 						priceInput.attr( 'value', formattedValue );
 					} );

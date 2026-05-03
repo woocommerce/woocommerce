@@ -12,12 +12,13 @@ namespace Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\Schema;
 defined( 'ABSPATH' ) || exit;
 
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\AbstractSchema;
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WP_REST_Request;
-use Automattic\WooCommerce\Internal\Fulfillments\FulfillmentUtils;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentUtils;
 
 /**
  * OrderSchema class.
@@ -143,6 +144,7 @@ class OrderSchema extends AbstractSchema {
 				'default'     => get_woocommerce_currency(),
 				'enum'        => array_keys( get_woocommerce_currencies() ),
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
 			),
 			'currency_symbol'      => array(
 				'description' => __( 'Currency symbol for the currency which can be used to format returned prices.', 'woocommerce' ),
@@ -216,6 +218,18 @@ class OrderSchema extends AbstractSchema {
 			),
 			'total_tax'            => array(
 				'description' => __( 'Sum of all taxes.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
+			'refund_total'         => array(
+				'description' => __( 'Total refund amount for the order.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
+				'readonly'    => true,
+			),
+			'refund_tax'           => array(
+				'description' => __( 'Total refund tax amount for the order.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => self::VIEW_EDIT_EMBED_CONTEXT,
 				'readonly'    => true,
@@ -631,8 +645,16 @@ class OrderSchema extends AbstractSchema {
 			'fulfillment_status'   => FulfillmentUtils::get_order_fulfillment_status( $order ),
 		);
 
+		if ( in_array( 'refund_total', $include_fields, true ) ) {
+			$data['refund_total'] = wc_format_decimal( $order->get_total_refunded(), $dp );
+		}
+
+		if ( in_array( 'refund_tax', $include_fields, true ) ) {
+			$data['refund_tax'] = wc_format_decimal( $order->get_total_tax_refunded(), $dp );
+		}
+
 		if ( in_array( 'line_items', $include_fields, true ) ) {
-			$line_items         = $order->get_items( 'line_item' );
+			$line_items         = $order->get_items( OrderItemType::LINE_ITEM );
 			$data['line_items'] = array();
 			foreach ( $line_items as $line_item ) {
 				$data['line_items'][] = $this->order_item_schema->get_item_response( $line_item, $request );
@@ -640,7 +662,7 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		if ( in_array( 'shipping_lines', $include_fields, true ) ) {
-			$line_items             = $order->get_items( 'shipping' );
+			$line_items             = $order->get_items( OrderItemType::SHIPPING );
 			$data['shipping_lines'] = array();
 			foreach ( $line_items as $line_item ) {
 				$data['shipping_lines'][] = $this->order_shipping_schema->get_item_response( $line_item, $request );
@@ -648,7 +670,7 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		if ( in_array( 'coupon_lines', $include_fields, true ) ) {
-			$line_items           = $order->get_items( 'coupon' );
+			$line_items           = $order->get_items( OrderItemType::COUPON );
 			$data['coupon_lines'] = array();
 			foreach ( $line_items as $line_item ) {
 				$data['coupon_lines'][] = $this->order_coupon_schema->get_item_response( $line_item, $request );
@@ -656,7 +678,7 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		if ( in_array( 'fee_lines', $include_fields, true ) ) {
-			$line_items        = $order->get_items( 'fee' );
+			$line_items        = $order->get_items( OrderItemType::FEE );
 			$data['fee_lines'] = array();
 			foreach ( $line_items as $line_item ) {
 				$data['fee_lines'][] = $this->order_fee_schema->get_item_response( $line_item, $request );
@@ -664,7 +686,7 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		if ( in_array( 'tax_lines', $include_fields, true ) ) {
-			$line_items        = $order->get_items( 'tax' );
+			$line_items        = $order->get_items( OrderItemType::TAX );
 			$data['tax_lines'] = array();
 			foreach ( $line_items as $line_item ) {
 				$data['tax_lines'][] = $this->order_tax_schema->get_item_response( $line_item, $request );
@@ -672,7 +694,7 @@ class OrderSchema extends AbstractSchema {
 		}
 
 		if ( in_array( 'meta_data', $include_fields, true ) ) {
-			$filtered_meta_data = $this->filter_internal_meta_keys( $this->get_meta_data_for_response( $order->get_meta_data(), $request ) );
+			$filtered_meta_data = $this->filter_internal_meta_keys( $order->get_meta_data() );
 			$data['meta_data']  = array();
 			foreach ( $filtered_meta_data as $meta_item ) {
 				$data['meta_data'][] = array(
@@ -712,43 +734,6 @@ class OrderSchema extends AbstractSchema {
 				return ! in_array( $meta->key, $cpt_hidden_keys, true );
 			}
 		);
-		return array_values( $meta_data );
-	}
-
-	/**
-	 * Limit the contents of the meta_data property based on certain request parameters.
-	 *
-	 * Note that if both `include_meta` and `exclude_meta` are present in the request,
-	 * `include_meta` will take precedence.
-	 *
-	 * @param array            $meta_data All of the meta data for an object.
-	 * @param \WP_REST_Request $request   The request.
-	 *
-	 * @return array
-	 */
-	protected function get_meta_data_for_response( $meta_data, $request ) {
-		$include = (array) $request['include_meta'];
-		$exclude = (array) $request['exclude_meta'];
-
-		if ( ! empty( $include ) ) {
-			$meta_data = array_filter(
-				$meta_data,
-				function ( \WC_Meta_Data $item ) use ( $include ) {
-					$data = $item->get_data();
-					return in_array( $data['key'], $include, true );
-				}
-			);
-		} elseif ( ! empty( $exclude ) ) {
-			$meta_data = array_filter(
-				$meta_data,
-				function ( \WC_Meta_Data $item ) use ( $exclude ) {
-					$data = $item->get_data();
-					return ! in_array( $data['key'], $exclude, true );
-				}
-			);
-		}
-
-		// Ensure the array indexes are reset so it doesn't get converted to an object in JSON.
 		return array_values( $meta_data );
 	}
 }

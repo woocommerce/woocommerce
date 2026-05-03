@@ -1,9 +1,3 @@
-:root {
-	/* This value might be overridden in PHP based on the attribute set by the user. */
-	--drawer-width: 480px;
-	--neg-drawer-width: calc(var(--drawer-width) * -1);
-}
-
 $drawer-animation-duration: 0.3s;
 
 @keyframes fadein {
@@ -66,7 +60,7 @@ $drawer-animation-duration: 0.3s;
 }
 
 .wc-block-components-drawer {
-	@include with-translucent-border(0 0 0 1px);
+	border-left: 1px solid $universal-translucent-border-color;
 	background: #fff;
 	display: block;
 	height: 100%;
@@ -157,13 +151,6 @@ $drawer-animation-duration: 0.3s;
 }
 
 .admin-bar .wc-block-components-drawer__content {
-	margin-top: 46px;
-	height: calc(100dvh - 46px);
-}
-
-@media only screen and (min-width: 783px) {
-	.admin-bar .wc-block-components-drawer__content {
-		margin-top: 32px;
-		height: calc(100dvh - 32px);
-	}
+	margin-top: var(--wp-admin--admin-bar--height, 0px);
+	height: calc(100dvh - var(--wp-admin--admin-bar--height, 0px));
 }

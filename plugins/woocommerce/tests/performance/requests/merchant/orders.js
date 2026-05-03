@@ -1,4 +1,3 @@
-/* eslint-disable no-shadow */
 /* eslint-disable import/no-unresolved */
 /**
  * External dependencies
@@ -15,9 +14,7 @@ import {
  */
 import {
 	base_url,
-	hpos_status,
 	admin_orders_base_url,
-	hpos_admin_orders_base_url,
 	think_time_min,
 	think_time_max,
 } from '../../config.js';
@@ -33,23 +30,16 @@ import {
 	commonNonStandardHeaders,
 } from '../../headers.js';
 
-// Change URL if HPOS is enabled and being used
-let admin_orders_base;
-let admin_orders_completed;
-if ( hpos_status === true ) {
-	admin_orders_base = hpos_admin_orders_base_url;
-	admin_orders_completed = 'status=wc-completed';
-} else {
-	admin_orders_base = admin_orders_base_url;
-	admin_orders_completed = 'post_status=wc-completed';
-}
+const admin_orders_base = admin_orders_base_url;
+const admin_orders_completed = 'post_status=wc-completed';
 
 export function orders( includeTests = {} ) {
 	let response;
 	let api_x_wp_nonce;
 	let apiNonceHeader;
 	let heartbeat_nonce;
-	let includedTests = Object.assign( {
+	const includedTests = Object.assign(
+		{
 			completed: true,
 			heartbeat: true,
 			other: true,
@@ -72,8 +62,8 @@ export function orders( includeTests = {} ) {
 		} );
 		check( response, {
 			'is status 200': ( r ) => r.status === 200,
-			"body contains: 'Orders' header": ( response ) =>
-				response.body.includes( 'Orders</h1>' ),
+			"body contains: 'Orders' header": ( r ) =>
+				r.body.includes( 'Orders</h1>' ),
 		} );
 
 		// Correlate nonce values for use in subsequent requests.
@@ -169,7 +159,9 @@ export function orders( includeTests = {} ) {
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 
 	if ( includedTests.completed ) {
@@ -191,12 +183,14 @@ export function orders( includeTests = {} ) {
 			);
 			check( response, {
 				'is status 200': ( r ) => r.status === 200,
-				"body contains: 'Orders' header": ( response ) =>
-					response.body.includes( 'Orders</h1>' ),
+				"body contains: 'Orders' header": ( r ) =>
+					r.body.includes( 'Orders</h1>' ),
 			} );
 		} );
 
-		sleep( randomIntBetween( `${ think_time_min }`, `${ think_time_max }` ) );
+		sleep(
+			randomIntBetween( `${ think_time_min }`, `${ think_time_max }` )
+		);
 	}
 }
 

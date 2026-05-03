@@ -20,10 +20,7 @@ export function getInitialState(): State {
 			isSendingPreviewEmail: false,
 			sendingPreviewStatus: null,
 		},
-		personalizationTags: {
-			list: [],
-			isFetching: false,
-		},
 		contentValidation: undefined,
+		templateSelected: false,
 	};
 }

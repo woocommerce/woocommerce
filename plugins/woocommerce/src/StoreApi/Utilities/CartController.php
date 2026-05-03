@@ -692,13 +692,6 @@ class CartController {
 			);
 		}
 
-		if ( $product->is_sold_individually() && $cart_item['quantity'] > 1 ) {
-			throw new TooManyInCartException(
-				'woocommerce_rest_product_too_many_in_cart',
-				$product->get_name()
-			);
-		}
-
 		if ( ! $product->is_in_stock() ) {
 			throw new OutOfStockException(
 				'woocommerce_rest_product_out_of_stock',
@@ -706,11 +699,17 @@ class CartController {
 			);
 		}
 
-		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
-			$qty_remaining = $this->get_remaining_stock_for_product( $product );
-			$qty_in_cart   = $this->get_product_quantity_in_cart( $product );
+		if ( $cart_item['quantity'] > 1 && $product->is_sold_individually() ) {
+			throw new TooManyInCartException(
+				'woocommerce_rest_product_too_many_in_cart',
+				$product->get_name()
+			);
+		}
 
-			if ( $qty_remaining < $qty_in_cart ) {
+		if ( $product->managing_stock() && ! $product->backorders_allowed() ) {
+			$stock_remaining = $this->get_remaining_stock_for_product( $product );
+			$sold_out        = $stock_remaining <= 0;
+			if ( $sold_out || $stock_remaining < $this->get_product_quantity_in_cart( $product ) ) {
 				throw new PartialOutOfStockException(
 					'woocommerce_rest_product_partially_out_of_stock',
 					$product->get_name()
@@ -905,58 +904,12 @@ class CartController {
 
 		$packages = $cart->get_shipping_packages();
 
-		// Return early if invalid object supplied by the filter or no packages.
-		if ( ! is_array( $packages ) || empty( $packages ) ) {
+		// Return early if no packages.
+		if ( empty( $packages ) ) {
 			return [];
 		}
 
-		// Add extra package data to array.
-		$packages = array_map(
-			function ( $key, $package, $index ) {
-				$package['package_id']   = isset( $package['package_id'] ) ? $package['package_id'] : $key;
-				$package['package_name'] = isset( $package['package_name'] ) ? $package['package_name'] : $this->get_package_name( $package, $index );
-				return $package;
-			},
-			array_keys( $packages ),
-			$packages,
-			range( 1, count( $packages ) )
-		);
-
 		return $calculate_rates ? wc()->shipping()->calculate_shipping( $packages ) : $packages;
-	}
-
-	/**
-	 * Creates a name for a package.
-	 *
-	 * @param array $package Shipping package from WooCommerce.
-	 * @param int   $index Package number.
-	 * @return string
-	 */
-	protected function get_package_name( $package, $index ) {
-		/**
-		 * Filters the shipping package name.
-		 *
-		 * @since 4.3.0
-		 *
-		 * @internal Matches filter name in WooCommerce core.
-		 *
-		 * @param string $shipping_package_name Shipping package name.
-		 * @param string $package_id Shipping package ID.
-		 * @param array $package Shipping package from WooCommerce.
-		 * @return string Shipping package name.
-		 */
-		return apply_filters(
-			'woocommerce_shipping_package_name',
-			$index > 1 ?
-				sprintf(
-					/* translators: %d: shipping package number */
-					_x( 'Shipment %d', 'shipping packages', 'woocommerce' ),
-					$index
-				) :
-				_x( 'Shipment 1', 'shipping packages', 'woocommerce' ),
-			$package['package_id'],
-			$package
-		);
 	}
 
 	/**
@@ -1138,7 +1091,7 @@ class CartController {
 		$product_quantities = $cart->get_cart_item_quantities();
 		$product_id         = $product->get_stock_managed_by_id();
 
-		return isset( $product_quantities[ $product_id ] ) ? $product_quantities[ $product_id ] : 0;
+		return $product_quantities[ $product_id ] ?? 0;
 	}
 
 	/**
@@ -1148,8 +1101,7 @@ class CartController {
 	 * @return int
 	 */
 	protected function get_remaining_stock_for_product( $product ) {
-		$reserve_stock = new ReserveStock();
-		$qty_reserved  = $reserve_stock->get_reserved_stock( $product, $this->get_draft_order_id() );
+		$qty_reserved = ( new ReserveStock() )->get_reserved_stock( $product, $this->get_draft_order_id() );
 
 		return $product->get_stock_quantity() - $qty_reserved;
 	}

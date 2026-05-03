@@ -543,8 +543,22 @@ function wc_recount_after_stock_change( $product_id ) {
 	if ( 'yes' !== get_option( 'woocommerce_hide_out_of_stock_items' ) ) {
 		return;
 	}
+	if ( wp_defer_term_counting() ) {
+		// When deferring term counts, we're using the built in handling of `wp_update_term_count()` to deal with the deferring
+		// and, though, this will cause both the standard and stock based counts to be rerun, it is still more efficient
+		// in cases where deferred term counting was warranted.
+		$product_terms = get_the_terms( $product_id, 'product_cat' );
+		if ( is_array( $product_terms ) ) {
+			wp_update_term_count( array_column( $product_terms, 'term_taxonomy_id' ), 'product_cat' );
+		}
 
-	_wc_recount_terms_by_product( $product_id );
+		$product_terms = get_the_terms( $product_id, 'product_tag' );
+		if ( is_array( $product_terms ) ) {
+			wp_update_term_count( array_column( $product_terms, 'term_taxonomy_id' ), 'product_tag' );
+		}
+	} else {
+		_wc_recount_terms_by_product( $product_id );
+	}
 }
 add_action( 'woocommerce_product_set_stock_status', 'wc_recount_after_stock_change' );
 
@@ -653,14 +667,15 @@ function wc_get_product_visibility_term_ids() {
 		return array();
 	}
 
-	static $term_ids = array();
+	static $term_ids_by_blog = array();
 
-	// The static variable doesn't work well with unit tests.
-	if ( count( $term_ids ) > 0 && ! class_exists( 'WC_Unit_Tests_Bootstrap' ) ) {
-		return $term_ids;
+	$blog_id = get_current_blog_id();
+
+	if ( isset( $term_ids_by_blog[ $blog_id ] ) && ! class_exists( 'WC_Unit_Tests_Bootstrap' ) ) {
+		return $term_ids_by_blog[ $blog_id ];
 	}
 
-	$term_ids = array_map(
+	$term_ids_by_blog[ $blog_id ] = array_map(
 		'absint',
 		wp_parse_args(
 			wp_list_pluck(
@@ -687,7 +702,7 @@ function wc_get_product_visibility_term_ids() {
 		)
 	);
 
-	return $term_ids;
+	return $term_ids_by_blog[ $blog_id ];
 }
 
 /**

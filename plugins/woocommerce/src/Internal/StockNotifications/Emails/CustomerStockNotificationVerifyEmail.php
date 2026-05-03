@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Internal\StockNotifications\Emails;
 use Automattic\WooCommerce\Internal\StockNotifications\Config;
 use Automattic\WooCommerce\Internal\StockNotifications\Notification;
 use Automattic\WooCommerce\Internal\StockNotifications\Factory;
+use Automattic\WooCommerce\Internal\StockNotifications\Utilities\UtmHelper;
 use WC_Email;
 
 /**
@@ -171,12 +172,15 @@ class CustomerStockNotificationVerifyEmail extends WC_Email {
 		return array(
 			'verification_button_text'          => $verification_button_text,
 			'verification_expiration_threshold' => $expiration_threshold_text,
-			'verification_link'                 => add_query_arg(
-				array(
-					'email_link_action_key' => $verification_key,
-					'notification_id'       => $notification->get_id(),
-				),
-				get_option( 'siteurl' )
+			'verification_link'                 => UtmHelper::add_email_utm_params(
+				add_query_arg(
+					array(
+						'email_link_action'     => EmailActionController::ACTION_VERIFY,
+						'email_link_action_key' => $verification_key,
+						'notification_id'       => $notification->get_id(),
+					),
+					get_option( 'siteurl' )
+				)
 			),
 		);
 	}

@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 defined( 'ABSPATH' ) || exit;
@@ -50,7 +51,7 @@ class WC_Settings_General extends WC_Settings_Page {
 		}
 
 		$address_autocomplete_preferred_provider_setting = array();
-		$address_autocomplete_setting_desc_tip           = __( 'Suggest full addresses for customer as they type.', 'woocommerce' );
+		$address_autocomplete_setting_desc_tip           = __( 'Suggest full addresses to customers as they type.', 'woocommerce' );
 
 		// This is in a try because getting the class from the container may fail if the class is not available.
 		// If it fails, these settings should not be shown as the feature is not available.
@@ -61,7 +62,7 @@ class WC_Settings_General extends WC_Settings_Page {
 
 			if ( ! $address_autocomplete_available ) {
 				// translators: %s: WooPayments URL.
-				$address_autocomplete_setting_desc_tip .= ' ' . sprintf( __( 'To use this feature, you need to install an address provider such as <a href="%s">WooPayments</a>.', 'woocommerce' ), 'https://woocommerce.com/products/woocommerce-payments/' );
+				$address_autocomplete_setting_desc_tip .= ' ' . sprintf( __( 'Requires a plugin with predictive address search support (e.g. <a href="%s" target="_blank">WooPayments</a>).', 'woocommerce' ), 'https://woocommerce.com/products/woocommerce-payments/' );
 			}
 
 			$enable_address_autocomplete_setting = array(
@@ -233,14 +234,14 @@ class WC_Settings_General extends WC_Settings_Page {
 					'title'    => __( 'Default customer location', 'woocommerce' ),
 					'id'       => 'woocommerce_default_customer_address',
 					'desc_tip' => __( 'This option determines a customers default location. The MaxMind GeoLite Database will be periodically downloaded to your wp-content directory if using geolocation.', 'woocommerce' ),
-					'default'  => 'base',
+					'default'  => DefaultCustomerAddress::BASE,
 					'type'     => 'select',
 					'class'    => 'wc-enhanced-select',
 					'options'  => array(
-						''                 => __( 'No location by default', 'woocommerce' ),
-						'base'             => __( 'Shop country/region', 'woocommerce' ),
-						'geolocation'      => __( 'Geolocate', 'woocommerce' ),
-						'geolocation_ajax' => __( 'Geolocate (with page caching support)', 'woocommerce' ),
+						DefaultCustomerAddress::NO_DEFAULT => __( 'No location by default', 'woocommerce' ),
+						DefaultCustomerAddress::BASE => __( 'Shop country/region', 'woocommerce' ),
+						DefaultCustomerAddress::GEOLOCATION => __( 'Geolocate', 'woocommerce' ),
+						DefaultCustomerAddress::GEOLOCATION_AJAX => __( 'Geolocate (with page caching support)', 'woocommerce' ),
 					),
 				),
 
@@ -405,11 +406,15 @@ class WC_Settings_General extends WC_Settings_Page {
 	public function output() {
 		parent::output();
 
-		wc_enqueue_js(
+		$handle = 'wc-admin-settings-general';
+		wp_register_script( $handle, '', array(), WC_VERSION, array( 'in_footer' => true ) );
+		wp_enqueue_script( $handle );
+		wp_add_inline_script(
+			$handle,
 			"
-			var preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
-			var autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
-			var preferredProviderRow = null;
+			const preferredProviderInput = document.querySelector( '#woocommerce_address_autocomplete_provider' );
+			const autocompleteEnabledInput = document.querySelector( '#woocommerce_address_autocomplete_enabled' );
+			let preferredProviderRow = null;
 			if ( preferredProviderInput ) {
 				preferredProviderRow = preferredProviderInput.closest( 'tr' );
 			}

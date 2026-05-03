@@ -117,7 +117,7 @@ class BlockPatterns extends \WP_UnitTestCase {
 		$mock_patterns = array(
 			array(
 				'title'   => 'Mock Cached',
-				'source'  => __DIR__ . '/patterns/mock-cached.php',
+				'source'  => 'mock-cached.php',
 				'content' => '',
 			),
 		);
@@ -128,12 +128,16 @@ class BlockPatterns extends \WP_UnitTestCase {
 
 		set_site_transient( 'woocommerce_blocks_patterns', $pattern_data );
 
+		$expected_pattern            = $mock_patterns[0];
+		$expected_pattern['source']  = __DIR__ . '/patterns/mock-cached.php';
+		$expected_pattern['content'] = '';
+
 		$this->pattern_registry
 			->expects( $this->exactly( 1 ) )
 			->method( 'register_block_pattern' )
 			->with(
 				__DIR__ . '/patterns/mock-cached.php',
-				$mock_patterns[0],
+				$expected_pattern,
 			);
 
 		$this->block_patterns->register_block_patterns();

@@ -11,7 +11,7 @@ import { ProductGalleryPage } from './product-gallery.page';
 
 const blockData = {
 	name: 'woocommerce/product-gallery',
-	title: 'Product Gallery (Beta)',
+	title: 'Product Gallery',
 	slug: 'single-product',
 	productPage: '/product/hoodie/',
 };
@@ -67,24 +67,35 @@ const getThumbnailImageIdByNth = async (
 };
 
 test.describe( `${ blockData.name }`, () => {
-	test.beforeEach( async ( { admin, editor, requestUtils } ) => {
-		const template = await requestUtils.createTemplate( 'wp_template', {
-			slug: blockData.slug,
-			title: 'Custom Single Product',
-			content: 'placeholder',
-		} );
+	test.beforeEach(
+		async ( { admin, editor, requestUtils, wpCoreVersion } ) => {
+			const template = await requestUtils.createTemplate( 'wp_template', {
+				slug: blockData.slug,
+				title: 'Custom Single Product',
+				content: 'placeholder',
+			} );
 
-		await admin.visitSiteEditor( {
-			postId: template.id,
-			postType: 'wp_template',
-			canvas: 'edit',
-		} );
+			await admin.visitSiteEditor( {
+				postId: template.id,
+				postType: 'wp_template',
+				canvas: 'edit',
+			} );
 
-		await expect( editor.canvas.getByText( 'placeholder' ) ).toBeVisible();
-	} );
+			// TODO: WP 7.0 compat - Custom HTML block content is inside an iframe
+			// since WP 7.0. Simplify when WP 7.0 is the minimum supported version.
+			const placeholderLocator =
+				wpCoreVersion >= 7
+					? editor.canvas
+							.frameLocator( 'iframe' )
+							.getByText( 'placeholder' )
+					: editor.canvas.getByText( 'placeholder' );
+
+			await expect( placeholderLocator ).toBeVisible();
+		}
+	);
 
 	test.describe( 'with thumbnails', () => {
-		test( 'should have as first thumbnail, the same image that it is visible in the Large Image block', async ( {
+		test( 'should have as first thumbnail, the same image that it is visible in the product block', async ( {
 			page,
 			editor,
 			pageObject,
@@ -97,8 +108,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const visibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const viewerImageId = await pageObject.getViewerImageId();
 
 			const firstImageThumbnailId = await getThumbnailImageIdByNth(
 				0,
@@ -107,7 +117,7 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( visibleLargeImageId ).toBe( firstImageThumbnailId );
+			expect( viewerImageId ).toBe( firstImageThumbnailId );
 		} );
 
 		test( 'should change the image when the user click on a thumbnail image', async ( {
@@ -123,8 +133,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const visibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const viewerImageId = await pageObject.getViewerImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -133,7 +142,7 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( visibleLargeImageId ).not.toBe( secondImageThumbnailId );
+			expect( viewerImageId ).not.toBe( secondImageThumbnailId );
 
 			await (
 				await pageObject.getThumbnailsBlock( {
@@ -145,10 +154,9 @@ test.describe( `${ blockData.name }`, () => {
 				.click();
 
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await pageObject.getVisibleLargeImageId();
+				const newViewerImageId = await pageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( secondImageThumbnailId );
+				expect( newViewerImageId ).toBe( secondImageThumbnailId );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 	} );
@@ -167,8 +175,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const initialVisibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const initialViewerImageId = await pageObject.getViewerImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -177,21 +184,19 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( initialVisibleLargeImageId ).not.toBe(
-				secondImageThumbnailId
-			);
+			expect( initialViewerImageId ).not.toBe( secondImageThumbnailId );
 
 			await pageObject.clickNextButton();
 
-			const nextImageId = await pageObject.getVisibleLargeImageId();
+			const nextImageId = await pageObject.getViewerImageId();
 
 			expect( nextImageId ).toBe( secondImageThumbnailId );
 
 			await pageObject.clickPreviousButton();
 
-			const previousImageId = await pageObject.getVisibleLargeImageId();
+			const previousImageId = await pageObject.getViewerImageId();
 
-			expect( previousImageId ).toBe( initialVisibleLargeImageId );
+			expect( previousImageId ).toBe( initialViewerImageId );
 		} );
 	} );
 
@@ -201,6 +206,8 @@ test.describe( `${ blockData.name }`, () => {
 			editor,
 			pageObject,
 		} ) => {
+			await page.setViewportSize( { width: 800, height: 800 } );
+
 			await pageObject.addProductGalleryBlock( { cleanContent: false } );
 
 			await editor.saveSiteEditorEntities( {
@@ -209,8 +216,7 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const initialVisibleLargeImageId =
-				await pageObject.getVisibleLargeImageId();
+			const initialViewerImageId = await pageObject.getViewerImageId();
 
 			const secondImageThumbnailId = await getThumbnailImageIdByNth(
 				1,
@@ -219,35 +225,32 @@ test.describe( `${ blockData.name }`, () => {
 				} )
 			);
 
-			expect( initialVisibleLargeImageId ).not.toBe(
-				secondImageThumbnailId
-			);
+			expect( initialViewerImageId ).not.toBe( secondImageThumbnailId );
 
 			await pageObject.clickNextButton();
 
-			const nextImageId = await pageObject.getVisibleLargeImageId();
+			const nextImageId = await pageObject.getViewerImageId();
 
 			expect( nextImageId ).toBe( secondImageThumbnailId );
 
-			const largeImageBlock = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
-			await largeImageBlock.click();
+			await viewerBlock.click();
 
 			const dialogImage = page
 				.getByRole( 'dialog' )
 				.locator( `img[data-image-id='${ nextImageId }']` );
 
 			// The image should be in the viewport but it simply doesn't fit fully.
-			await expect( dialogImage ).toBeInViewport( { ratio: 0.75 } );
+			await expect( dialogImage ).toBeInViewport( { ratio: 0.7 } );
 
 			const closePopUpButton = page.locator(
 				'.wc-block-product-gallery-dialog__close-button'
 			);
 			await closePopUpButton.click();
 
-			const singleProductImageId =
-				await pageObject.getVisibleLargeImageId();
+			const singleProductImageId = await pageObject.getViewerImageId();
 
 			expect( singleProductImageId ).toBe( nextImageId );
 		} );
@@ -277,13 +280,13 @@ test.describe( `${ blockData.name }`, () => {
 
 			await page.goto( blockData.productPage );
 
-			const mainImageBlock = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 
-			await mainImageBlock.click();
+			await viewerBlock.click();
 
 			await expect( page.locator( 'dialog' ) ).toBeVisible();
 		} );
@@ -304,11 +307,11 @@ test.describe( `${ blockData.name }`, () => {
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 
-			const mainImageBlock = await pageObject.getMainImageBlock( {
+			const viewerBlock = await pageObject.getViewerBlock( {
 				page: 'frontend',
 			} );
 
-			await mainImageBlock.click();
+			await viewerBlock.click();
 
 			await expect( page.locator( 'dialog' ) ).toBeHidden();
 		} );
@@ -342,7 +345,7 @@ test.describe( `${ blockData.name }`, () => {
 			await expect( productGalleryBlockOption ).toBeHidden();
 		} );
 
-		test( 'should be visible on the post editor in Single Product block', async ( {
+		test( 'on the post editor, block should be in Single Product by default and is visible in inserter', async ( {
 			admin,
 			editor,
 		} ) => {
@@ -350,6 +353,10 @@ test.describe( `${ blockData.name }`, () => {
 			await editor.insertBlockUsingGlobalInserter( 'Product' );
 			await editor.canvas.getByText( 'Album' ).click();
 			await editor.canvas.getByText( 'Done' ).click();
+			// Block should be in Single Product by default.
+			await expect(
+				await editor.getBlockByName( blockData.name )
+			).toHaveCount( 1 );
 			const singleProductBlock = await editor.getBlockByName(
 				'woocommerce/single-product'
 			);
@@ -360,9 +367,10 @@ test.describe( `${ blockData.name }`, () => {
 				{ clientId: singleProductClientId }
 			);
 
+			// Block should be visible in inserter and hence can be inserted in Single Product block.
 			await expect(
 				await editor.getBlockByName( blockData.name )
-			).toHaveCount( 1 );
+			).toHaveCount( 2 );
 		} );
 	} );
 
@@ -382,13 +390,14 @@ test.describe( `${ blockData.name }`, () => {
 
 		// Go back to the Custom Single Product template.
 		await page.getByLabel( 'Open Navigation' ).click();
+
 		await page
 			.getByRole( 'button', { name: 'Custom Single Product' } )
 			.first()
 			.click();
 
 		const productGalleryBlock = editor.canvas.getByLabel(
-			'Block: Product Gallery (Beta)'
+			'Block: Product Gallery'
 		);
 
 		await expect( productGalleryBlock ).toBeVisible();

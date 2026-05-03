@@ -7,6 +7,8 @@
 
 defined( 'ABSPATH' ) || exit;
 
+use Automattic\WooCommerce\Enums\TaxBasedOn;
+
 $settings = array(
 
 	array(
@@ -21,7 +23,7 @@ $settings = array(
 		'id'       => 'woocommerce_prices_include_tax',
 		'default'  => 'no',
 		'type'     => 'radio',
-		'desc_tip' => __( 'This option is important as it will affect how you input prices. Changing it will not update existing products.', 'woocommerce' ),
+		'desc_tip' => __( 'This option is important as it will affect how you input prices. If you select "Yes", enter prices including your base location\'s tax rate, the baseline for tax calculations. Changing this option will not update existing products.', 'woocommerce' ),
 		'options'  => array(
 			'yes' => __( 'Yes, I will enter prices inclusive of tax', 'woocommerce' ),
 			'no'  => __( 'No, I will enter prices exclusive of tax', 'woocommerce' ),
@@ -32,13 +34,13 @@ $settings = array(
 		'title'    => __( 'Calculate tax based on', 'woocommerce' ),
 		'id'       => 'woocommerce_tax_based_on',
 		'desc_tip' => __( 'This option determines which address is used to calculate tax.', 'woocommerce' ),
-		'default'  => 'shipping',
+		'default'  => TaxBasedOn::SHIPPING,
 		'type'     => 'select',
 		'class'    => 'wc-enhanced-select',
 		'options'  => array(
-			'shipping' => __( 'Customer shipping address', 'woocommerce' ),
-			'billing'  => __( 'Customer billing address', 'woocommerce' ),
-			'base'     => __( 'Shop base address', 'woocommerce' ),
+			TaxBasedOn::SHIPPING => __( 'Customer shipping address', 'woocommerce' ),
+			TaxBasedOn::BILLING  => __( 'Customer billing address', 'woocommerce' ),
+			TaxBasedOn::BASE     => __( 'Shop base address', 'woocommerce' ),
 		),
 	),
 

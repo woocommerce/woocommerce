@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { paramCase as kebabCase } from 'change-case';
-import { decodeEntities } from '@wordpress/html-entities';
+import { sanitizeHTML } from '@woocommerce/sanitize';
+
 import type { ProductResponseItemData } from '@woocommerce/types';
 
 /**
@@ -10,9 +11,22 @@ import type { ProductResponseItemData } from '@woocommerce/types';
  */
 import './style.scss';
 
+const CONTENT_TAGS = [ 'a', 'b', 'em', 'i', 'strong', 'br', 'abbr', 'span' ];
+
+const CONTENT_ATTR = [
+	'target',
+	'href',
+	'rel',
+	'name',
+	'download',
+	'class',
+	'title',
+];
+
 interface ProductDetailsProps {
 	details: ProductResponseItemData[];
 }
+
 // Component to display cart item data and variations.
 const ProductDetails = ( {
 	details = [],
@@ -21,51 +35,68 @@ const ProductDetails = ( {
 		return null;
 	}
 
-	details = details.filter( ( detail ) => ! detail.hidden );
+	const filteredDetails = details.filter( ( detail ) => ! detail.hidden );
 
-	if ( details.length === 0 ) {
+	if ( filteredDetails.length === 0 ) {
 		return null;
 	}
 
-	let ParentTag = 'ul' as keyof JSX.IntrinsicElements;
-	let ChildTag = 'li' as keyof JSX.IntrinsicElements;
-
-	if ( details.length === 1 ) {
-		ParentTag = 'div';
-		ChildTag = 'div';
-	}
-
 	return (
-		<ParentTag className="wc-block-components-product-details">
-			{ details.map( ( detail ) => {
+		<div className="wc-block-components-product-details">
+			{ filteredDetails.map( ( detail, index ) => {
 				// Support both `key` and `name` props
 				const name = detail?.key || detail.name || '';
+				// Strip HTML tags from name for CSS class generation
+				const tempDiv = document.createElement( 'div' );
+				tempDiv.innerHTML = name;
+				const nameForClass =
+					tempDiv.textContent || tempDiv.innerText || '';
 				const className =
 					detail?.className ||
-					( name
+					( nameForClass
 						? `wc-block-components-product-details__${ kebabCase(
-								name
+								nameForClass
 						  ) }`
 						: '' );
+
+				const isLast = index === filteredDetails.length - 1;
+
 				return (
-					<ChildTag
+					<span
 						key={ name + ( detail.display || detail.value ) }
 						className={ className }
 					>
 						{ name && (
 							<>
-								<span className="wc-block-components-product-details__name">
-									{ decodeEntities( name ) }:
-								</span>{ ' ' }
+								<span
+									className="wc-block-components-product-details__name"
+									dangerouslySetInnerHTML={ {
+										__html:
+											sanitizeHTML( name, {
+												tags: CONTENT_TAGS,
+												attr: CONTENT_ATTR,
+											} ) + ':',
+									} }
+								/>{ ' ' }
 							</>
 						) }
-						<span className="wc-block-components-product-details__value">
-							{ decodeEntities( detail.display || detail.value ) }
-						</span>
-					</ChildTag>
+						<span
+							className="wc-block-components-product-details__value"
+							dangerouslySetInnerHTML={ {
+								__html: sanitizeHTML(
+									detail.display || detail.value,
+									{
+										tags: CONTENT_TAGS,
+										attr: CONTENT_ATTR,
+									}
+								),
+							} }
+						/>
+						{ ! isLast && <span aria-hidden="true"> / </span> }
+					</span>
 				);
 			} ) }
-		</ParentTag>
+		</div>
 	);
 };
 

@@ -1,0 +1,81 @@
+/**
+ * Analytics Import Status Bar Styles
+ *
+ */
+
+.woocommerce-analytics-import-status-bar-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+
+	&__label {
+		margin: 7px 0 0; // use same margin as filters to they align vertically
+		font-size: 13px;
+		line-height: 20px;
+		color: $gray-900;
+		font-weight: 400;
+	}
+
+	@media screen and ( max-width: $break-large ) {
+		gap: 5px;
+
+		&__label {
+			line-height: 18px;
+			margin-top: 5px;
+		}
+	}
+}
+
+.woocommerce-analytics-import-status-bar {
+	display: flex;
+	align-items: center;
+	border: 1px solid $gray-400;
+	border-radius: 4px;
+	padding: 16px 12px;
+	font-size: 11px;
+	line-height: 20px;
+	font-weight: 400;
+	height: 50px;
+
+	&__content {
+		display: flex;
+		align-items: center;
+		gap: 32px;
+
+
+		@media screen and ( max-width: $break-wide ) {
+			gap: $gap-large;
+		}
+
+		@media screen and ( max-width: $break-large ) {
+			gap: $gap;
+		}
+	}
+
+	&__item {
+		display: flex;
+		flex-direction: column;
+	}
+
+	&__label {
+		color: $gray-700;
+		white-space: nowrap;
+	}
+
+	&__value {
+		color: $gray-900;
+	}
+
+	&__trigger {
+		font-size: 11px;
+		font-weight: 500;
+		line-height: 20px;
+		// Set a fixed width to prevent layout shift during loading
+		width: 88px;
+	}
+
+	.components-spinner {
+		height: 8px;
+		width: 8px;
+	}
+}

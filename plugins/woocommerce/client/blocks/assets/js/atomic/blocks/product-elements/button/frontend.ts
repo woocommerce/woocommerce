@@ -2,14 +2,17 @@
  * External dependencies
  */
 import { store, getContext, useLayoutEffect } from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce/products';
 import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
+import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 
 /**
  * Internal dependencies
  */
-import { doesCartItemMatchAttributes } from '../../../../base/utils/variations/does-cart-item-match-attributes';
-import type { AddToCartWithOptionsStore } from '../../../../blocks/add-to-cart-with-options/frontend';
+import type {
+	Context as AddToCartWithOptionsContext,
+	AddToCartWithOptionsStore,
+} from '../../../../blocks/add-to-cart-with-options/frontend';
 
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
@@ -17,8 +20,6 @@ const universalLock =
 
 interface Context {
 	addToCartText: string;
-	productId: number;
-	productType: string;
 	groupedProductIds?: number[];
 	displayViewCart: boolean;
 	quantityToAdd: number;
@@ -54,8 +55,8 @@ const { state: addToCartWithOptionsState } = store< AddToCartWithOptionsStore >(
 	{ lock: universalLock }
 );
 
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
+const { state: productsState } = store< ProductsStore >(
+	'woocommerce/products',
 	{},
 	{ lock: universalLock }
 );
@@ -63,26 +64,22 @@ const { state: productDataState } = store< ProductDataStore >(
 const productButtonStore = {
 	state: {
 		get quantity(): number {
-			const products = wooState.cart?.items.filter(
-				( item ) => item.id === state.productId
-			);
+			const product = productsState.productInContext;
 
-			if ( products.length === 0 ) {
+			if ( ! product ) {
 				return 0;
 			}
 
-			// Return the product quantity when the item is a non-variable product.
-			if ( products[ 0 ]?.type !== 'variation' ) {
-				return products[ 0 ]?.quantity || 0;
-			}
-
-			const selectedAttributes =
-				addToCartWithOptionsState?.selectedAttributes;
-			const selectedVariableProduct = products.find( ( item ) =>
-				doesCartItemMatchAttributes( item, selectedAttributes )
+			const formContext = getContext< AddToCartWithOptionsContext >(
+				'woocommerce/add-to-cart-with-options'
 			);
 
-			return selectedVariableProduct?.quantity || 0;
+			const item = wooState.findItemInCart( {
+				id: product.id,
+				variation: formContext?.selectedAttributes,
+			} );
+
+			return item?.quantity ?? 0;
 		},
 		get slideInAnimation() {
 			const { animationStatus } = getContext< Context >();
@@ -97,7 +94,6 @@ const productButtonStore = {
 				animationStatus,
 				tempQuantity,
 				addToCartText,
-				productType,
 				groupedProductIds,
 				hasPressedButton,
 				inTheCartText,
@@ -112,12 +108,12 @@ const productButtonStore = {
 				? tempQuantity || 0
 				: state.quantity;
 
-			if ( productType === 'grouped' ) {
+			if ( productsState.productInContext?.type === 'grouped' ) {
 				const groupedProductIdsInCart = groupedProductIds?.map(
 					( productId ) => {
-						const product = wooState.cart?.items.find(
-							( item ) => item.id === productId
-						);
+						const product = wooState.findItemInCart( {
+							id: productId,
+						} );
 						return product?.quantity || 0;
 					}
 				);
@@ -141,20 +137,14 @@ const productButtonStore = {
 			if ( ! displayViewCart ) return false;
 			return state.quantity > 0;
 		},
-		get productId() {
-			const { productId } = getContext< Context >();
-
-			const isDescendantOfAddToCartWithOptions =
-				productId === productDataState?.productId;
-
-			return isDescendantOfAddToCartWithOptions
-				? productDataState?.variationId || productId
-				: productId;
-		},
 	},
 	actions: {
 		*addCartItem(): Generator< unknown, void > {
-			const context = getContext< Context >();
+			const product = productsState.productInContext;
+
+			if ( ! product ) {
+				return;
+			}
 
 			// Todo: Use the module exports instead of `store()` once the
 			// woocommerce store is public.
@@ -166,11 +156,15 @@ const productButtonStore = {
 				{ lock: universalLock }
 			);
 
+			const context = getContext< Context >();
+
+			// Pass quantityToAdd as a delta. The cart store will add this
+			// to the current quantity, ensuring rapid clicks compound correctly.
 			yield actions.addCartItem(
 				{
-					id: state.productId,
-					quantity: state.quantity + context.quantityToAdd,
-					type: context.productType,
+					id: product.id,
+					quantityToAdd: context.quantityToAdd,
+					type: product.type,
 				},
 				{
 					showCartUpdatesNotices: false,

@@ -9,6 +9,7 @@ const ShipmentProviders: ShipmentProvider[] = [
 		label: __( 'Other', 'woocommerce' ),
 		icon: null,
 		value: 'other',
+		url: '',
 	},
 ];
 export default ShipmentProviders;

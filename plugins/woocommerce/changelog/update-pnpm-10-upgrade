@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Upgrade pnpm from 9.15.0 to 10.33.0 with supply chain security settings.

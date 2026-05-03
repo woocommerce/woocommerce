@@ -480,6 +480,7 @@ class DataSynchronizerTests extends \HposTestCase {
 		// Sync enabled and CPT authoritative.
 		update_option( $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, 'yes' );
 		update_option( CustomOrdersTableController::CUSTOM_ORDERS_TABLE_USAGE_ENABLED_OPTION, 'no' );
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
 
 		$order = OrderHelper::create_order();
 		$order->add_meta_data( 'foo', 'bar' );
@@ -503,6 +504,7 @@ class DataSynchronizerTests extends \HposTestCase {
 			'',
 			'Meta data deleted from the CPT datastore should also be deleted from the HPOS datastore.'
 		);
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 
 	/**
@@ -549,6 +551,43 @@ class DataSynchronizerTests extends \HposTestCase {
 		$hpos_order = $legacy_handler->get_order_from_datastore( $legacy_order->get_id(), 'hpos' );
 		$this->assertEquals( $hpos_order->get_meta( 'quux' ), '' );
 
+		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
+	}
+
+	/**
+	 * @testDox When sync-on-read is enabled, orders with placeholder posts are not updated with placeholder data during sync-on-read.
+	 */
+	public function test_sync_on_read_with_placeholder_post() {
+		$this->toggle_cot_authoritative( true );
+		$this->disable_cot_sync();
+
+		$order = new \WC_Order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->set_billing_first_name( 'Duke' );
+		$order->set_billing_last_name( 'Ellington' );
+		$order->save();
+
+		add_filter( 'pre_option_' . $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION, fn() => 'yes', 999 );
+		add_filter( 'woocommerce_hpos_enable_sync_on_read', '__return_true' );
+
+		// Ensure placeholder exists.
+		$this->assertEquals( $this->sut::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order->get_id() ) );
+
+		// Read order to trigger sync-on-read.
+		$order = wc_get_order( $order->get_id() );
+
+		// Ensure values were not updated based on placeholder.
+		$this->assertEquals( 'Duke', $order->get_billing_first_name() );
+		$this->assertEquals( 'Ellington', $order->get_billing_last_name() );
+		$this->assertEquals( OrderStatus::PROCESSING, $order->get_status() );
+
+		// Save order to update placeholder.
+		$order->save();
+
+		// Confirm placeholder has been updated.
+		$this->assertNotEquals( $this->sut::PLACEHOLDER_ORDER_POST_TYPE, get_post_type( $order->get_id() ) );
+
+		remove_all_filters( 'pre_option_' . $this->sut::ORDERS_DATA_SYNC_ENABLED_OPTION );
 		remove_all_filters( 'woocommerce_hpos_enable_sync_on_read' );
 	}
 

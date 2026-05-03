@@ -302,18 +302,21 @@ class LegacyDataHandler {
 		}
 
 		$classname = $order_type['class_name'];
-		$order     = new $classname();
+		/** @var \WC_Order $order */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$order = new $classname();
 		$order->set_id( $order_id );
 
 		// Switch datastore if necessary.
 		$update_data_store_func = function ( $data_store ) {
+			/** @var \WC_Order $this */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 			// Each order object contains a reference to its data store, but this reference is itself
 			// held inside of an instance of WC_Data_Store, so we create that first.
 			$data_store_wrapper = \WC_Data_Store::load( 'order' );
 
 			// Bind $data_store to our WC_Data_Store.
 			( function ( $data_store ) {
-				$this->current_class_name = get_class( $data_store );
+				/** @var \WC_Data_Store $this */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+				$this->current_class_name = (string) get_class( $data_store );
 				$this->instance           = $data_store;
 			} )->call( $data_store_wrapper, $data_store );
 

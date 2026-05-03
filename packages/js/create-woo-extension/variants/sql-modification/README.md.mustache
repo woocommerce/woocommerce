@@ -1,0 +1,96 @@
+# {{title}}
+
+{{#description}}
+{{description}}
+{{/description}}
+
+This is a WooCommerce extension that demonstrates how to modify SQL queries for WooCommerce Analytics reports. It adds multi-currency filtering support to reports.
+
+## Development
+
+### Getting started
+
+1. `npm install` to install dependencies
+2. `npm start` to start the development server
+3. `npm run build` to build the production version
+
+### File Structure
+
+- `src/index.js` - JavaScript filters for UI (dropdowns, table columns, currency formatting)
+- `includes/Admin/Setup.php` - PHP class for script registration and currency settings
+- `{{slug}}.php` - Main plugin file with SQL modification hooks
+
+## Features
+
+This extension demonstrates:
+
+- **Query Argument Filters** - Add custom parameters for caching
+- **JOIN Clause Filters** - Join additional tables to reports
+- **WHERE Clause Filters** - Filter report data by custom criteria
+- **SELECT Clause Filters** - Add custom columns to report data
+- **UI Dropdown Filters** - Add filter dropdowns to report pages
+- **Table Column Modification** - Add columns to report tables
+- **Currency Formatting** - Update currency display per selection
+- **Persisted Queries** - Maintain filter state across report navigation
+
+## How It Works
+
+### Backend (PHP)
+
+The main plugin file registers filters for:
+
+1. **Query Args** - Adds `currency` parameter for proper caching
+2. **JOIN** - Joins `postmeta` table to access order currency
+3. **WHERE** - Filters orders by selected currency
+4. **SELECT** - Adds currency field to query results
+
+### Frontend (JavaScript)
+
+1. Adds a Currency dropdown to all relevant reports
+2. Adds a Currency column to report tables
+3. Persists the currency parameter when navigating
+4. Updates currency formatting based on selection
+
+## Customization
+
+### Adding New Currencies
+
+1. Update the currency options in `includes/Admin/Setup.php`:
+
+```php
+$currencies = array(
+    array(
+        'label' => __( 'Euro', '{{textdomain}}' ),
+        'value' => 'EUR',
+    ),
+    // Add more currencies...
+);
+```
+
+2. Add currency formatting in `src/index.js`:
+
+```javascript
+const currencies = {
+    EUR: {
+        code: 'EUR',
+        symbol: '€',
+        symbolPosition: 'left',
+        thousandSeparator: '.',
+        decimalSeparator: ',',
+        precision: 2,
+    },
+};
+```
+
+### Modifying SQL Queries
+
+Use the filter registration methods in the main plugin class:
+
+- `register_query_arg_filters()` - For caching parameters
+- `register_join_filters()` - For additional table joins
+- `register_where_filters()` - For filtering conditions
+- `register_select_filters()` - For additional columns
+
+## Learn More
+
+For a detailed guide on extending WooCommerce Admin reports, see the [official documentation](https://woocommerce.com/document/extending-woocommerce-admin-reports/).

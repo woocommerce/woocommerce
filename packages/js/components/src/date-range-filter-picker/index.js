@@ -35,6 +35,7 @@ class DateRangeFilterPicker extends Component {
 		if (
 			date &&
 			date._isAMomentObject &&
+			date.isValid() &&
 			typeof date.format === 'function'
 		) {
 			return date.format( format );

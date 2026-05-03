@@ -56,6 +56,14 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		),
 	);
 
+	/**
+	 * The product object is set using set_product or is automatically populated by get_product. This property was introduced
+	 * to reduce the number of wc_get_product calls when working with this class in core and extension workflows.
+	 *
+	 * @var null|false|WC_Product
+	 */
+	private $product;
+
 	/*
 	|--------------------------------------------------------------------------
 	| Setters
@@ -92,7 +100,19 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		if ( $value > 0 && 'product' !== get_post_type( absint( $value ) ) ) {
 			$this->error( 'order_item_product_invalid_product_id', __( 'Invalid product ID', 'woocommerce' ) );
 		}
-		$this->set_prop( 'product_id', absint( $value ) );
+		$product_id = absint( $value );
+		$this->set_prop( 'product_id', $product_id );
+
+		if ( null !== $this->product ) {
+			// Cached instance invalidation: match the cached product identity against the incoming ID.
+			$cached_product_id = null;
+			if ( $this->product ) {
+				$cached_product_id = $this->product->is_type( ProductType::VARIATION ) ? $this->product->get_parent_id() : $this->product->get_id();
+			}
+			if ( ! $this->product || $cached_product_id !== $product_id ) {
+				$this->product = null;
+			}
+		}
 	}
 
 	/**
@@ -102,9 +122,26 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	 */
 	public function set_variation_id( $value ) {
 		if ( $value > 0 && 'product_variation' !== get_post_type( $value ) ) {
-			$this->error( 'order_item_product_invalid_variation_id', __( 'Invalid variation ID', 'woocommerce' ) );
+			$this->error(
+				'order_item_product_invalid_variation_id',
+				__( 'Invalid variation ID', 'woocommerce' ),
+				400,
+				array( 'variation_id' => $value )
+			);
 		}
-		$this->set_prop( 'variation_id', absint( $value ) );
+		$variation_id = absint( $value );
+		$this->set_prop( 'variation_id', $variation_id );
+
+		if ( null !== $this->product ) {
+			// Cached instance invalidation: match the cached product identity against the incoming ID.
+			$cached_variation_id = null;
+			if ( $this->product ) {
+				$cached_variation_id = $this->product->is_type( ProductType::VARIATION ) ? $this->product->get_id() : 0;
+			}
+			if ( ! $this->product || $cached_variation_id !== $variation_id ) {
+				$this->product = null;
+			}
+		}
 	}
 
 	/**
@@ -163,7 +200,11 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Set line taxes and totals for passed in taxes.
 	 *
-	 * @param array $raw_tax_data Raw tax data.
+	 * @since 10.5.0 Handles legacy scalar tax values by converting to arrays.
+	 * When legacy data is detected, attempts to infer tax rate ID from order context.
+	 *
+	 * @param array $raw_tax_data Raw tax data. 'total' and 'subtotal' should be arrays keyed by tax rate ID,
+	 * but scalar values (floats/strings) are accepted for legacy compatibility.
 	 */
 	public function set_taxes( $raw_tax_data ) {
 		$raw_tax_data = maybe_unserialize( $raw_tax_data );
@@ -172,8 +213,38 @@ class WC_Order_Item_Product extends WC_Order_Item {
 			'subtotal' => array(),
 		);
 		if ( ! empty( $raw_tax_data['total'] ) && ! empty( $raw_tax_data['subtotal'] ) ) {
-			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $raw_tax_data['subtotal'] );
-			$tax_data['total']    = array_map( 'wc_format_decimal', $raw_tax_data['total'] );
+			$subtotal = $raw_tax_data['subtotal'];
+			$total    = $raw_tax_data['total'];
+
+			// Handle legacy data where total/subtotal might be floats/strings instead of arrays.
+			// Convert scalar values to array format to preserve the tax amount.
+			$has_legacy_data = ! is_array( $subtotal ) || ! is_array( $total );
+
+			if ( $has_legacy_data ) {
+				$order = $this->get_order();
+				if ( ! is_array( $subtotal ) ) {
+					$subtotal = $this->convert_legacy_tax_value_to_array( $subtotal, $order );
+				}
+				if ( ! is_array( $total ) ) {
+					$total = $this->convert_legacy_tax_value_to_array( $total, $order );
+				}
+				// Log legacy data format for debugging purposes.
+				wc_get_logger()->warning(
+					sprintf(
+						/* translators: %d: order item ID */
+						__( 'Order item #%d contains legacy tax data format. Tax rate ID information is unavailable.', 'woocommerce' ),
+						$this->get_id()
+					),
+					array(
+						'source'        => 'woocommerce-order-item-product',
+						'order_item_id' => $this->get_id(),
+						'order_id'      => $order ? $order->get_id() : 0,
+					)
+				);
+			}
+
+			$tax_data['subtotal'] = array_map( 'wc_format_decimal', $subtotal );
+			$tax_data['total']    = array_map( 'wc_format_decimal', $total );
 
 			// Subtotal cannot be less than total!
 			if ( NumberUtil::array_sum( $tax_data['subtotal'] ) < NumberUtil::array_sum( $tax_data['total'] ) ) {
@@ -205,12 +276,13 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	}
 
 	/**
-	 * Set properties based on passed in product object.
+	 * Aggregate and set properties based on passed in product object.
 	 *
 	 * @param WC_Product $product Product instance.
+	 * @return void
 	 */
 	public function set_product( $product ) {
-		if ( ! is_a( $product, 'WC_Product' ) ) {
+		if ( ! ( $product instanceof \WC_Product ) ) {
 			$this->error( 'order_item_product_invalid_product', __( 'Invalid product', 'woocommerce' ) );
 		}
 		if ( $product->is_type( ProductType::VARIATION ) ) {
@@ -222,6 +294,7 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		}
 		$this->set_name( $product->get_name() );
 		$this->set_tax_class( $product->get_tax_class() );
+		$this->product = $product;
 	}
 
 	/**
@@ -344,21 +417,51 @@ class WC_Order_Item_Product extends WC_Order_Item {
 	/**
 	 * Get the associated product.
 	 *
+	 * @since 10.9.0 returns the same product instance; if the product is updated or deleted, the instance will be re-instantiated.
 	 * @return WC_Product|bool
 	 */
 	public function get_product() {
-		if ( $this->get_variation_id() ) {
-			$product = wc_get_product( $this->get_variation_id() );
-		} else {
-			$product = wc_get_product( $this->get_product_id() );
+		if ( $this->product ) {
+			$reinstantiate = ! ( $this->product instanceof WC_Product ) ||
+				$this->product->_woocommerce_object_is_stale() ||
+				$this->product->_woocommerce_object_is_dirty();
+			if ( $reinstantiate ) {
+				$this->product = null;
+			}
+		}
+		if ( ! $this->product ) {
+			$product_id    = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
+			$this->product = wc_get_product( $product_id );
 		}
 
 		// Backwards compatible filter from WC_Order::get_product_from_item().
+		/** @var WC_Product|false $product */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
+		$product = $this->product;
 		if ( has_filter( 'woocommerce_get_product_from_item' ) ) {
+			/**
+			 * Modifies the product object returned by \WC_Order_Item_Product::get_product.
+			 *
+			 * @since 10.9.0 the method is caching the product object.
+			 * @since 2.7.0 filter introduction.
+			 *
+			 * @param WC_Product|false      $product   Product instance.
+			 * @param WC_Order_Item_Product $line_item Line item instance.
+			 * @param WC_Order              $order     Order Instance.
+			 */
 			$product = apply_filters( 'woocommerce_get_product_from_item', $product, $this, $this->get_order() );
 		}
+		/**
+		 * Modifies the product object returned by \WC_Order_Item_Product::get_product.
+		 *
+		 * @since 10.9.0 the method is caching the product object.
+		 * @since 2.7.0 filter introduction.
+		 *
+		 * @param WC_Product|false      $product   Product instance.
+		 * @param WC_Order_Item_Product $line_item Line item instance.
+		 */
+		$product = apply_filters( 'woocommerce_order_item_product', $product, $this );
 
-		return apply_filters( 'woocommerce_order_item_product', $product, $this );
+		return $product;
 	}
 
 	/**
@@ -392,38 +495,55 @@ class WC_Order_Item_Product extends WC_Order_Item {
 		$order      = $this->get_order();
 		$product_id = $this->get_variation_id() ? $this->get_variation_id() : $this->get_product_id();
 
-		if ( $product && $order && $product->is_downloadable() && $order->is_download_permitted() ) {
-			$email_hash         = function_exists( 'hash' ) ? hash( 'sha256', $order->get_billing_email() ) : sha1( $order->get_billing_email() );
-			$data_store         = WC_Data_Store::load( 'customer-download' );
-			$customer_downloads = $data_store->get_downloads(
-				array(
-					'user_email' => $order->get_billing_email(),
-					'order_id'   => $order->get_id(),
-					'product_id' => $product_id,
-				)
-			);
-			foreach ( $customer_downloads as $customer_download ) {
-				$download_id = $customer_download->get_download_id();
+		if ( ! $product || ! $order || ! $product->is_downloadable() || ! $order->is_download_permitted() ) {
+			return array();
+		}
 
-				if ( $product->has_file( $download_id ) ) {
-					$file                  = $product->get_file( $download_id );
-					$files[ $download_id ] = $file->get_data();
-					$files[ $download_id ]['downloads_remaining'] = $customer_download->get_downloads_remaining();
-					$files[ $download_id ]['access_expires']      = $customer_download->get_access_expires();
-					$files[ $download_id ]['download_url']        = add_query_arg(
-						array(
-							'download_file' => $product_id,
-							'order'         => $order->get_order_key(),
-							'uid'           => $email_hash,
-							'key'           => $download_id,
-						),
-						trailingslashit( home_url() )
-					);
-				}
+		$email_hash         = function_exists( 'hash' ) ? hash( 'sha256', $order->get_billing_email() ) : sha1( $order->get_billing_email() );
+		$data_store         = WC_Data_Store::load( 'customer-download' );
+		$customer_downloads = $data_store->get_downloads(
+			array(
+				'user_email' => $order->get_billing_email(),
+				'order_id'   => $order->get_id(),
+				'product_id' => $product_id,
+			)
+		);
+		foreach ( $customer_downloads as $customer_download ) {
+			$download_id = $customer_download->get_download_id();
+
+			if ( $product->has_file( $download_id ) ) {
+				$file                  = $product->get_file( $download_id );
+				$files[ $download_id ] = $file->get_data();
+				$files[ $download_id ]['downloads_remaining'] = $customer_download->get_downloads_remaining();
+				$files[ $download_id ]['access_expires']      = $customer_download->get_access_expires();
+				$files[ $download_id ]['download_url']        = add_query_arg(
+					array(
+						'download_file' => $product_id,
+						'order'         => $order->get_order_key(),
+						'uid'           => $email_hash,
+						'key'           => $download_id,
+					),
+					trailingslashit( home_url() )
+				);
 			}
 		}
 
-		return apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
+		/**
+		 * Filters the list of downloadable files for an order item.
+		 *
+		 * @since 2.7.0
+		 *
+		 * @param array                 $files Array of downloadable file data.
+		 * @param WC_Order_Item_Product $item  The order item product object.
+		 * @param WC_Order              $order The order object.
+		 */
+		$files = apply_filters( 'woocommerce_get_item_downloads', $files, $this, $order );
+
+		if ( ! is_array( $files ) ) {
+			return array();
+		}
+
+		return $files;
 	}
 
 	/**

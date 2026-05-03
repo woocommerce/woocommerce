@@ -1,10 +1,10 @@
 {
 	"name": "@woocommerce/extend-cart-checkout-block",
-	"version": "1.5.0",
+	"version": "1.5.1",
 	"description": "",
 	"main": "index.js",
 	"engines": {
-		"node": "^20.11.1"
+		"node": "^24.15.0"
 	},
 	"repository": {
 		"type": "git",

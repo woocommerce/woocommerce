@@ -17,7 +17,9 @@ test.describe( 'Test the checkout template', () => {
 			canvas: 'edit',
 			showWelcomeGuide: false,
 		} );
-		const block = editor.canvas.getByLabel( 'Block: Checkout' );
+		const block = editor.canvas.getByLabel( 'Block: Checkout', {
+			exact: true,
+		} );
 		await expect( block ).toBeVisible();
 	} );
 

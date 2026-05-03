@@ -265,4 +265,45 @@ class OrdersTableRefundDataStoreTests extends \WC_Unit_Test_Case {
 		}
 	}
 
+
+	/**
+	 * @testDox  Test that refund hooks are fired as expected.
+	 * @testWith [true]
+	 *           [false]
+	 *
+	 * @param bool $hpos_on_or_off True to test with HPOS on, false to test with HPOS off.
+	 */
+	public function test_refund_hooks( $hpos_on_or_off ) {
+		$this->toggle_cot_authoritative( $hpos_on_or_off );
+
+		$hook_called_count = array();
+		$callback          = function () use ( &$hook_called_count ) {
+			$hook_called_count[ current_action() ] = ( $hook_called_count[ current_action() ] ?? 0 ) + 1;
+		};
+
+		add_action( 'woocommerce_create_refund', $callback );
+
+		$order  = OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $order->get_total(),
+				'line_items' => array(),
+			)
+		);
+
+		add_action( 'woocommerce_update_order_refund', $callback );
+		$refund->set_reason( 'Some reason' );
+		$refund->save();
+
+		$refund->add_meta_data( 'foo', 'bar' );
+		$refund->save();
+
+		remove_action( 'woocommerce_create_refund', $callback );
+		remove_action( 'woocommerce_update_order_refund', $callback );
+
+		$this->assertEquals( 1, $hook_called_count['woocommerce_create_refund'] );
+		$this->assertEquals( 2, $hook_called_count['woocommerce_update_order_refund'] );
+	}
+
 }

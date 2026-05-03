@@ -108,15 +108,7 @@ class BlockPatterns {
 
 		$patterns = $this->get_block_patterns();
 		foreach ( $patterns as $pattern ) {
-			/**
-			 * Handle backward compatibility for pattern source paths.
-			 * Previously, patterns were stored with absolute paths. Now we store relative paths.
-			 * If we encounter a pattern with an absolute path (containing $patterns_path),
-			 * we keep it as is. Otherwise, we construct the full path from the relative source.
-			 *
-			 * Remove the backward compatibility logic in the WooCommerce 10.1 lifecycle: https://github.com/woocommerce/woocommerce/issues/57354.
-			 */
-			$pattern_path      = str_contains( $pattern['source'], $this->patterns_path ) ? $pattern['source'] : $this->patterns_path . '/' . $pattern['source'];
+			$pattern_path      = $this->patterns_path . '/' . $pattern['source'];
 			$pattern['source'] = $pattern_path;
 
 			$content            = $this->load_pattern_content( $pattern_path );

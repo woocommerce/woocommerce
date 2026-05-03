@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Store API products endpoint allowing transient bloat via arbitrary product IDs in the `related` query parameter.

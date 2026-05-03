@@ -8,7 +8,13 @@ import {
 	MenuGroup,
 	MenuItem as OriginalMenuItem,
 } from '@wordpress/components';
-import { Icon, commentAuthorAvatar, external, linkOff } from '@wordpress/icons';
+import {
+	Icon,
+	commentAuthorAvatar,
+	external,
+	linkOff,
+	chevronDown,
+} from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -48,6 +54,7 @@ export default function HeaderAccount( {
 
 	const accountURL = MARKETPLACE_HOST + '/my-dashboard/';
 	const accountOrConnect = isConnected ? accountURL : connectionURL;
+	const isInApp = page === 'wc-addons';
 
 	const avatar = () => {
 		if ( ! isConnected || useDefaultAvatar ) {
@@ -61,6 +68,35 @@ export default function HeaderAccount( {
 				className="woocommerce-marketplace__menu-avatar-image"
 				onError={ () => setUseDefaultAvatar( true ) }
 			/>
+		);
+	};
+
+	const dropdownTrigger = () => {
+		if ( ! isInApp ) {
+			return avatar();
+		}
+
+		return (
+			<span className="woocommerce-marketplace__header-account-trigger">
+				{ avatar() }
+				<span
+					className="woocommerce-marketplace__header-account-trigger__email"
+					title={
+						isConnected
+							? userEmail
+							: __( 'Connect to WooCommerce.com', 'woocommerce' )
+					}
+				>
+					{ isConnected
+						? userEmail
+						: __( 'Connect to WooCommerce.com', 'woocommerce' ) }
+				</span>
+				<Icon
+					icon={ chevronDown }
+					size={ 24 }
+					className="woocommerce-marketplace__header-account-trigger__expand-icon"
+				/>
+			</span>
 		);
 	};
 
@@ -107,7 +143,7 @@ export default function HeaderAccount( {
 		<>
 			<DropdownMenu
 				className="woocommerce-layout__activity-panel-tab woocommerce-marketplace__user-menu"
-				icon={ avatar() }
+				icon={ dropdownTrigger() }
 				label={ __( 'User options', 'woocommerce' ) }
 				toggleProps={ {
 					className: 'woocommerce-layout__activity-panel-tab',
@@ -122,7 +158,11 @@ export default function HeaderAccount( {
 					<>
 						<MenuGroup
 							className="woocommerce-layout__homescreen-display-options"
-							label={ connectionStatusText }
+							label={
+								isInApp && ! isConnected
+									? undefined
+									: connectionStatusText
+							}
 						>
 							<MenuItem
 								className="woocommerce-marketplace__menu-item"

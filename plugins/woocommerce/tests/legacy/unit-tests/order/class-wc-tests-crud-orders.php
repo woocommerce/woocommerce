@@ -16,6 +16,15 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
  * @package WooCommerce\Tests\CRUD
  */
 class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
+	/**
+	 * Tear down the test class.
+	 */
+	public function tearDown(): void {
+		parent::tearDown();
+
+		remove_all_filters( 'wc_get_price_thousand_separator' );
+		remove_all_filters( 'wc_get_price_decimal_separator' );
+	}
 
 	/**
 	 * Test: get_type
@@ -207,6 +216,28 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$object->set_total( '' );
 		$this->assertEquals( 0, $object->get_total() );
+	}
+
+	/**
+	 * Test: get_total_pre_formatted_standard_value
+	 */
+	public function test_get_total_pre_formatted_standard_value() {
+		$object = new WC_Order();
+		$object->set_total( '2,000.00' );
+		$this->assertEquals( 2000, $object->get_total() );
+	}
+
+	/**
+	 * Test: get_total_pre_formatted_eu_value
+	 */
+	public function test_get_total_pre_formatted_eu_value() {
+		// Simulate a price format like 3.567,89.
+		add_filter( 'wc_get_price_thousand_separator', fn() => '.' );
+		add_filter( 'wc_get_price_decimal_separator', fn() => ',' );
+
+		$object = new WC_Order();
+		$object->set_total( '2.000,00' );
+		$this->assertEquals( 2000, $object->get_total() );
 	}
 
 	/**
@@ -908,6 +939,11 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object->save();
 
 		$this->assertTrue( $object->needs_shipping() );
+
+		$physical_product->delete( true );
+		// Reload the order to ensure fresh data.
+		$object = wc_get_order( $object->get_id() );
+		$this->assertFalse( $object->needs_shipping() );
 	}
 
 	/**
@@ -964,6 +1000,9 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$object = new WC_Order();
 		$this->assertFalse( $object->payment_complete() );
 		$object->save();
+		// Set created_via to indicate legitimate checkout session.
+		$object->set_created_via( 'checkout' );
+		$object->save();
 		$this->assertTrue( $object->payment_complete( '12345' ) );
 		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
 		$this->assertEquals( '12345', $object->get_transaction_id() );
@@ -977,6 +1016,8 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 */
 	public function test_payment_complete_error() {
 		$object = new WC_Order();
+		$object->save();
+		$object->set_created_via( 'checkout' );
 		$object->save();
 
 		add_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
@@ -992,6 +1033,221 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Payment complete event failed', $note->content );
 
 		remove_action( 'woocommerce_payment_complete', array( $this, 'throwAnException' ) );
+	}
+
+	/**
+	 * Test: payment_complete blocks orders without checkout evidence
+	 *
+	 * @testdox payment_complete blocks order when no created_via or cart_hash and fires payment_complete_blocked
+	 * @since 10.8.0
+	 */
+	public function test_payment_complete_blocks_orders_without_checkout_evidence() {
+		$object = new WC_Order();
+		$object->save();
+		// No created_via or cart_hash. Payment should be blocked.
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$blocked_action_fired = false;
+		$blocked_action_args  = array();
+		$blocked_callback     = function ( $order_id, $created_via, $cart_hash ) use ( &$blocked_action_fired, &$blocked_action_args ) {
+			$blocked_action_fired = true;
+			$blocked_action_args  = array( $order_id, $created_via, $cart_hash );
+		};
+		add_action( 'woocommerce_payment_complete_blocked', $blocked_callback, 10, 3 );
+
+		$this->assertFalse( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::PENDING, $object->get_status() );
+
+		$this->assertTrue( $blocked_action_fired );
+		$this->assertEquals( $object->get_id(), $blocked_action_args[0] );
+		$this->assertEquals( '', $blocked_action_args[1] );
+		$this->assertEquals( '', $blocked_action_args[2] );
+
+		remove_action( 'woocommerce_payment_complete_blocked', $blocked_callback, 10 );
+
+		// Confirm blocked-payment order note exists.
+		$notes        = wc_get_order_notes(
+			array(
+				'order_id' => $object->get_id(),
+			)
+		);
+		$blocked_note = null;
+		foreach ( $notes as $note ) {
+			if ( strpos( $note->content, 'Payment completion blocked' ) !== false ) {
+				$blocked_note = $note;
+				break;
+			}
+		}
+		$this->assertNotNull( $blocked_note );
+	}
+
+	/**
+	 * Test: payment_complete does not fire woocommerce_pre_payment_complete when blocked
+	 *
+	 * @testdox pre_payment_complete does not fire when payment is blocked for lack of checkout evidence
+	 * @since 10.8.0
+	 */
+	public function test_payment_complete_does_not_fire_pre_payment_complete_when_blocked() {
+		$object = new WC_Order();
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$pre_payment_complete_fired = false;
+		$callback                   = function () use ( &$pre_payment_complete_fired ) {
+			$pre_payment_complete_fired = true;
+		};
+		add_action( 'woocommerce_pre_payment_complete', $callback, 10, 0 );
+
+		$object->payment_complete( '12345' );
+
+		$this->assertFalse( $pre_payment_complete_fired );
+
+		remove_action( 'woocommerce_pre_payment_complete', $callback, 10 );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with created_via checkout
+	 *
+	 * @testdox payment_complete allows order with created_via checkout
+	 * @since 10.8.0
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_checkout() {
+		$object = new WC_Order();
+		$object->set_created_via( 'checkout' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with created_via store-api
+	 *
+	 * @testdox payment_complete allows order with created_via store-api
+	 * @since 10.8.0
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_store_api() {
+		$object = new WC_Order();
+		$object->set_created_via( 'store-api' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with created_via rest-api
+	 *
+	 * @testdox payment_complete allows order with created_via rest-api
+	 * @since 10.8.0
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_rest_api() {
+		$object = new WC_Order();
+		$object->set_created_via( 'rest-api' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with created_via admin
+	 *
+	 * @testdox payment_complete allows order with created_via admin
+	 * @since 10.8.0
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_admin() {
+		$object = new WC_Order();
+		$object->set_created_via( 'admin' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with created_via pos-rest-api
+	 *
+	 * @testdox payment_complete allows order with created_via pos-rest-api
+	 * @since 10.8.0
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_pos_rest_api() {
+		$object = new WC_Order();
+		$object->set_created_via( 'pos-rest-api' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows orders with cart_hash
+	 *
+	 * @testdox payment_complete allows order with cart_hash
+	 * @since 10.8.0
+	 */
+	public function test_payment_complete_allows_orders_with_cart_hash() {
+		$object = new WC_Order();
+		$object->set_cart_hash( 'test-cart-hash-123' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
+	 * Test: payment_complete allows bypass via filter
+	 *
+	 * @testdox payment_complete allows bypass via woocommerce_allow_payment_complete_without_checkout_evidence
+	 * @since 10.8.0
+	 */
+	public function test_payment_complete_allows_bypass_via_filter() {
+		$object = new WC_Order();
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		// Allow this order via bypass filter.
+		$bypass_callback = function ( $allow, $order ) use ( $object ) {
+			return $order->get_id() === $object->get_id();
+		};
+		add_filter( 'woocommerce_allow_payment_complete_without_checkout_evidence', $bypass_callback, 10, 2 );
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+
+		remove_filter( 'woocommerce_allow_payment_complete_without_checkout_evidence', $bypass_callback, 10 );
+	}
+
+	/**
+	 * Test: payment_complete allows custom created_via values via filter
+	 *
+	 * @testdox payment_complete allows custom created_via via woocommerce_payment_complete_allowed_created_via_values
+	 * @since 10.8.0
+	 */
+	public function test_payment_complete_allows_custom_created_via_via_filter() {
+		$object = new WC_Order();
+		$object->set_created_via( 'custom-integration' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		// Allow custom created_via via filter.
+		$created_via_callback = function ( $allowed_values ) {
+			$allowed_values[] = 'custom-integration';
+			return $allowed_values;
+		};
+		add_filter( 'woocommerce_payment_complete_allowed_created_via_values', $created_via_callback, 10, 1 );
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+
+		remove_filter( 'woocommerce_payment_complete_allowed_created_via_values', $created_via_callback, 10 );
 	}
 
 	/**
@@ -2063,5 +2319,46 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 		}
 
 		$this->assertEquals( 110.06, $order->get_total_fees() );
+	}
+
+	/**
+	 * Test that WC_Order::get_total_fees() returns negative values for discount fees.
+	 */
+	public function test_get_total_fees_should_return_negative_fees() {
+		$order = WC_Helper_Order::create_order();
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Discount Fee',
+				'tax_status' => ProductTaxStatus::NONE,
+				'total'      => -10,
+			)
+		);
+		$order->add_item( $fee );
+
+		$this->assertEquals( -10, $order->get_total_fees() );
+	}
+
+	/**
+	 * Test that WC_Order::get_total_fees() correctly sums mixed positive and negative fees.
+	 */
+	public function test_get_total_fees_should_sum_mixed_positive_and_negative_fees() {
+		$order      = WC_Helper_Order::create_order();
+		$fee_totals = array( 25, -10, 5.50 ); // Net: 20.50.
+
+		foreach ( $fee_totals as $total ) {
+			$fee = new WC_Order_Item_Fee();
+			$fee->set_props(
+				array(
+					'name'       => $total < 0 ? 'Discount Fee' : 'Regular Fee',
+					'tax_status' => ProductTaxStatus::NONE,
+					'total'      => $total,
+				)
+			);
+			$order->add_item( $fee );
+		}
+
+		$this->assertEquals( 20.50, $order->get_total_fees() );
 	}
 }

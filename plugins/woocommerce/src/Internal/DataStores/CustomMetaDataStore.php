@@ -204,7 +204,7 @@ abstract class CustomMetaDataStore {
 	 * @param \WC_Data $object Object ID.
 	 * @param string   $meta_key Meta key.
 	 *
-	 * @return \stdClass|bool Metadata object or FALSE if not found.
+	 * @return \stdClass[]|false Metadata object or FALSE if not found.
 	 */
 	public function get_metadata_by_key( &$object, string $meta_key ) {
 		global $wpdb;

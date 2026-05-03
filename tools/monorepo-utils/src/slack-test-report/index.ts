@@ -51,6 +51,11 @@ const program = new Command( 'slack-test-report' )
 		'Path to a JSON config file containing notification rules or settings',
 		''
 	)
+	.option(
+		'--jobs-list <jobsList>',
+		'Comma-separated list of job names to include in the report',
+		''
+	)
 	.action( async ( options ) => {
 		if ( options.reportName === '' ) {
 			Logger.warn(
@@ -108,6 +113,7 @@ const program = new Command( 'slack-test-report' )
 					repository: getEnvVar( 'GITHUB_REPOSITORY', true ),
 					refType: getEnvVar( 'GITHUB_REF_TYPE', true ),
 					refName: getEnvVar( 'GITHUB_REF_NAME', true ),
+					jobsList: options.jobsList,
 				} );
 
 			for ( const channel of channels ) {

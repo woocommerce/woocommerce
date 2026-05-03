@@ -15,9 +15,9 @@ use Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments
 use Automattic\WooCommerce\Internal\Admin\Settings\Payments;
 use Automattic\WooCommerce\Internal\Admin\Settings\Utils;
 use Automattic\WooCommerce\Internal\Logging\SafeGlobalFunctionProxy;
+use Throwable;
 use WC_Abstract_Order;
 use WC_Payment_Gateway;
-use WooCommerce\Admin\Experimental_Abtest;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -122,11 +122,35 @@ class WooPayments extends PaymentGateway {
 				}
 
 				$onboarding_details = $service->get_onboarding_details( $country_code, $rest_controller->get_rest_url_path( 'onboarding' ) );
+				// Merge the onboarding state with the one provided by the service.
 				if ( ! empty( $onboarding_details['state'] ) && is_array( $onboarding_details['state'] ) ) {
-					// Merge the onboarding state with the one provided by the service.
 					$details['onboarding']['state'] = array_merge(
 						$details['onboarding']['state'],
 						$onboarding_details['state']
+					);
+				}
+				// Merge any messages provided by the service.
+				if ( ! empty( $onboarding_details['messages'] ) && is_array( $onboarding_details['messages'] ) ) {
+					if ( ! isset( $details['onboarding']['messages'] ) || ! is_array( $details['onboarding']['messages'] ) ) {
+						$details['onboarding']['messages'] = array();
+					}
+					$details['onboarding']['messages'] = array_merge(
+						$details['onboarding']['messages'],
+						$onboarding_details['messages']
+					);
+				}
+				// The steps provided by the service override any existing steps.
+				if ( ! empty( $onboarding_details['steps'] ) && is_array( $onboarding_details['steps'] ) ) {
+					$details['onboarding']['steps'] = $onboarding_details['steps'];
+				}
+				// Merge any context provided by the service.
+				if ( ! empty( $onboarding_details['context'] ) && is_array( $onboarding_details['context'] ) ) {
+					if ( ! isset( $details['onboarding']['context'] ) || ! is_array( $details['onboarding']['context'] ) ) {
+						$details['onboarding']['context'] = array();
+					}
+					$details['onboarding']['context'] = array_merge(
+						$details['onboarding']['context'],
+						$onboarding_details['context']
 					);
 				}
 			} catch ( \Throwable $e ) {
@@ -164,7 +188,7 @@ class WooPayments extends PaymentGateway {
 
 			// Switch to the native in-context onboarding type if the WooPayments extension its version is compatible.
 			// We need to put back the '.php' extension to construct the plugin filename.
-			$plugin_data = PluginsHelper::get_plugin_data( $extension_suggestion['plugin']['file'] . '.php' );
+			$plugin_data = $this->proxy->call_static( PluginsHelper::class, 'get_plugin_data', $extension_suggestion['plugin']['file'] . '.php' );
 			if ( $plugin_data && ! empty( $plugin_data['Version'] ) &&
 				version_compare( $plugin_data['Version'], PaymentsProviders\WooPayments\WooPaymentsService::EXTENSION_MINIMUM_VERSION, '>=' ) ) {
 
@@ -205,7 +229,7 @@ class WooPayments extends PaymentGateway {
 				$extension_suggestion['onboarding']['_links']['preload'] = array(
 					'href' => rest_url( $rest_controller->get_rest_url_path( 'onboarding/preload' ) ),
 				);
-			} catch ( \Throwable $e ) {
+			} catch ( Throwable $e ) {
 				// If the REST controller is not available, we can't preload the onboarding data.
 				// This is not a critical error, so we just ignore it.
 				// Log so we can investigate.
@@ -219,24 +243,6 @@ class WooPayments extends PaymentGateway {
 		}
 
 		return $extension_suggestion;
-	}
-
-	/**
-	 * Get the current state of the store's WPCOM/Jetpack connection.
-	 *
-	 * @return array The store's WPCOM/Jetpack connection state.
-	 */
-	private function get_wpcom_connection_state(): array {
-		$wpcom_connection_manager = new WPCOM_Connection_Manager( 'woocommerce' );
-		$is_connected             = $wpcom_connection_manager->is_connected();
-		$has_connected_owner      = $wpcom_connection_manager->has_connected_owner();
-
-		return array(
-			'wpcom_has_working_connection' => $is_connected && $has_connected_owner,
-			'wpcom_is_store_connected'     => $is_connected,
-			'wpcom_has_connected_owner'    => $has_connected_owner,
-			'wpcom_is_connection_owner'    => $has_connected_owner && $wpcom_connection_manager->is_connection_owner(),
-		);
 	}
 
 	/**
@@ -271,11 +277,13 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode, false otherwise.
 	 */
 	public function is_in_test_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Payments' ) &&
-			is_callable( '\WC_Payments::mode' ) ) {
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
 
-			$woopayments_mode = \WC_Payments::mode();
-			if ( is_callable( array( $woopayments_mode, 'is_test' ) ) ) {
+			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
+			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_test' ) &&
+				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test' ) ) ) {
+
 				return $woopayments_mode->is_test();
 			}
 		}
@@ -294,16 +302,81 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in dev mode, false otherwise.
 	 */
 	public function is_in_dev_mode( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Payments' ) &&
-			is_callable( '\WC_Payments::mode' ) ) {
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
 
-			$woopayments_mode = \WC_Payments::mode();
-			if ( is_callable( array( $woopayments_mode, 'is_dev' ) ) ) {
+			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
+			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_dev' ) &&
+				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_dev' ) ) ) {
+
 				return $woopayments_mode->is_dev();
 			}
 		}
 
 		return parent::is_in_dev_mode( $payment_gateway );
+	}
+
+	/**
+	 * Check if the payment gateway supports the current store state for onboarding.
+	 *
+	 * Most of the time the current business location should be the main factor, but could also
+	 * consider other store settings like currency.
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 * @param string             $country_code    Optional. The country code for which to check.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return bool|null True if the payment gateway supports onboarding, false otherwise.
+	 *                   If the payment gateway does not provide the information,
+	 *                   we will return null to indicate that we don't know.
+	 */
+	public function is_onboarding_supported( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): ?bool {
+		$is_onboarding_supported = parent::is_onboarding_supported( $payment_gateway, $country_code );
+		if ( ! is_null( $is_onboarding_supported ) ) {
+			return $is_onboarding_supported;
+		}
+
+		// Without a country code to check against, we assume onboarding is supported to avoid blocking the user.
+		if ( empty( $country_code ) ) {
+			return true;
+		}
+
+		// Normalize the country code.
+		$country_code = strtoupper( $country_code );
+
+		// The payment gateway didn't provide the information. We will do it the hard way.
+		$supported_country_codes = $this->get_supported_country_codes();
+		// If we can't get the supported countries, we assume onboarding supported to avoid blocking the user.
+		if ( is_null( $supported_country_codes ) ) {
+			return true;
+		}
+
+		return in_array( $country_code, $supported_country_codes, true );
+	}
+
+	/**
+	 * Get the message to show when the payment gateway does not support onboarding.
+	 *
+	 * @see self::is_onboarding_supported()
+	 *
+	 * @param WC_Payment_Gateway $payment_gateway The payment gateway object.
+	 * @param string             $country_code    Optional. The country code for which to check.
+	 *                                            This should be an ISO 3166-1 alpha-2 country code.
+	 *
+	 * @return string|null The message to show when the payment gateway does not support onboarding,
+	 *                     or null if no specific message should be provided.
+	 */
+	public function get_onboarding_not_supported_message( WC_Payment_Gateway $payment_gateway, string $country_code = '' ): ?string {
+		$message = parent::get_onboarding_not_supported_message( $payment_gateway, $country_code );
+		if ( ! is_null( $message ) ) {
+			return $message;
+		}
+
+		return sprintf(
+			/* translators: %s: WooPayments. */
+			esc_html__( '%s is not supported in the selected business location.', 'woocommerce' ),
+			'WooPayments'
+		);
 	}
 
 	/**
@@ -317,11 +390,13 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the payment gateway is in test mode onboarding, false otherwise.
 	 */
 	public function is_in_test_mode_onboarding( WC_Payment_Gateway $payment_gateway ): bool {
-		if ( class_exists( '\WC_Payments' ) &&
-			is_callable( '\WC_Payments::mode' ) ) {
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments::mode' ) ) {
 
-			$woopayments_mode = \WC_Payments::mode();
-			if ( is_callable( array( $woopayments_mode, 'is_test_mode_onboarding' ) ) ) {
+			$woopayments_mode = $this->proxy->call_static( 'WC_Payments', 'mode' );
+			if ( $this->proxy->call_function( 'method_exists', $woopayments_mode, 'is_test_mode_onboarding' ) &&
+				$this->proxy->call_function( 'is_callable', array( $woopayments_mode, 'is_test_mode_onboarding' ) ) ) {
+
 				return $woopayments_mode->is_test_mode_onboarding();
 			}
 		}
@@ -341,22 +416,18 @@ class WooPayments extends PaymentGateway {
 	 * @return string The onboarding URL for the payment gateway.
 	 */
 	public function get_onboarding_url( WC_Payment_Gateway $payment_gateway, string $return_url = '' ): string {
-		if ( class_exists( '\WC_Payments_Account' ) && is_callable( '\WC_Payments_Account::get_connect_url' ) ) {
-			$connect_url = \WC_Payments_Account::get_connect_url();
+		if ( $this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) &&
+			$this->proxy->call_function( 'is_callable', 'WC_Payments_Account::get_connect_url' ) ) {
+
+			$connect_url = $this->proxy->call_static( 'WC_Payments_Account', 'get_connect_url' );
 		} else {
 			$connect_url = parent::get_onboarding_url( $payment_gateway, $return_url );
 		}
 
-		$query = wp_parse_url( $connect_url, PHP_URL_QUERY );
-		// We expect the URL to have a query string. Bail if it doesn't.
-		if ( empty( $query ) ) {
-			return $connect_url;
-		}
-
 		// Default URL params to set, regardless if they exist.
 		$params = array(
-			'from'                      => defined( '\WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) ? \WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS : 'WCADMIN_PAYMENT_SETTINGS',
-			'source'                    => defined( '\WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) ? \WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE : 'wcadmin-settings-page',
+			'from'                      => Constants::is_defined( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) ? (string) Constants::get_constant( 'WC_Payments_Onboarding_Service::FROM_WCADMIN_PAYMENTS_SETTINGS' ) : 'WCADMIN_PAYMENT_SETTINGS',
+			'source'                    => Constants::is_defined( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) ? (string) Constants::get_constant( 'WC_Payments_Onboarding_Service::SOURCE_WCADMIN_SETTINGS_PAGE' ) : 'wcadmin-settings-page',
 			'redirect_to_settings_page' => 'true',
 		);
 
@@ -405,30 +476,6 @@ class WooPayments extends PaymentGateway {
 			$this->has_orders()
 		) {
 			$live_onboarding = true;
-		}
-
-		// We run an experiment to determine the efficiency of test-account-first onboarding vs straight-to-live onboarding.
-		// If the experiment is active and the store is in the treatment group, we will force live onboarding.
-		// Otherwise, we will do test-account-first onboarding (control group).
-		// Stores that are determined by our routing logic that they should do straight-to-live onboarding
-		// will not be affected by the experiment.
-		if ( ! $live_onboarding ) {
-			$transient_key = 'wc_experiment_failure_woocommerce_payment_settings_onboarding_2025_v1';
-
-			// Try to get cached result first.
-			$cached_result = get_transient( $transient_key );
-
-			// If we have a cache entry that indicates an error, don't enforce anything. Just let the routing logic decide.
-			if ( 'error' !== $cached_result ) {
-				try {
-					if ( Experimental_Abtest::in_treatment( 'woocommerce_payment_settings_onboarding_2025_v1' ) ) {
-						$live_onboarding = true;
-					}
-				} catch ( \Exception $e ) {
-					// If the experiment fails, set a transient to avoid repeated failures.
-					set_transient( $transient_key, 'error', HOUR_IN_SECONDS );
-				}
-			}
 		}
 
 		// If we are doing live onboarding, we don't need to add more to the URL.
@@ -529,9 +576,15 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the account is a test account, false otherwise.
 	 */
 	private function has_test_account(): bool {
-		if ( function_exists( '\wcpay_get_container' ) && class_exists( '\WC_Payments_Account' ) ) {
-			$account_service = \wcpay_get_container()->get( \WC_Payments_Account::class );
-			if ( ! empty( $account_service ) && is_callable( array( $account_service, 'get_account_status_data' ) ) ) {
+		if ( $this->proxy->call_function( 'function_exists', 'wcpay_get_container' ) &&
+			$this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) ) {
+
+			$woopayments_container = $this->proxy->call_function( 'wcpay_get_container' );
+			$account_service       = $woopayments_container->get( 'WC_Payments_Account' );
+			if ( ! empty( $account_service ) &&
+				$this->proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) &&
+				$this->proxy->call_function( 'is_callable', array( $account_service, 'get_account_status_data' ) ) ) {
+
 				$account_status = $account_service->get_account_status_data();
 
 				return ! empty( $account_status['testDrive'] );
@@ -552,9 +605,15 @@ class WooPayments extends PaymentGateway {
 	 * @return bool True if the account is a sandbox account, false otherwise.
 	 */
 	private function has_sandbox_account(): bool {
-		if ( function_exists( '\wcpay_get_container' ) && class_exists( '\WC_Payments_Account' ) ) {
-			$account_service = \wcpay_get_container()->get( \WC_Payments_Account::class );
-			if ( ! empty( $account_service ) && is_callable( array( $account_service, 'get_account_status_data' ) ) ) {
+		if ( $this->proxy->call_function( 'function_exists', 'wcpay_get_container' ) &&
+			$this->proxy->call_function( 'class_exists', 'WC_Payments_Account' ) ) {
+
+			$woopayments_container = $this->proxy->call_function( 'wcpay_get_container' );
+			$account_service       = $woopayments_container->get( 'WC_Payments_Account' );
+			if ( ! empty( $account_service ) &&
+				$this->proxy->call_function( 'method_exists', $account_service, 'get_account_status_data' ) &&
+				$this->proxy->call_function( 'is_callable', array( $account_service, 'get_account_status_data' ) ) ) {
+
 				$account_status = $account_service->get_account_status_data();
 
 				return empty( $account_status['isLive'] ) && empty( $account_status['testDrive'] );
@@ -562,5 +621,73 @@ class WooPayments extends PaymentGateway {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Get the list of supported country codes for WooPayments.
+	 *
+	 * @return array|null The list of supported countries as ISO 3166-1 alpha-2 country codes.
+	 *                    The country codes are normalized in uppercase.
+	 *                    If the list cannot be retrieved, null is returned.
+	 */
+	private function get_supported_country_codes(): ?array {
+		try {
+			if ( $this->proxy->call_function( 'class_exists', 'WC_Payments_Utils' ) &&
+				$this->proxy->call_function( 'is_callable', 'WC_Payments_Utils::supported_countries' ) ) {
+
+				$supported_country_codes = $this->proxy->call_static( 'WC_Payments_Utils', 'supported_countries' );
+				if ( is_array( $supported_country_codes ) ) {
+					return array_unique( array_map( 'strtoupper', array_keys( $supported_country_codes ) ) );
+				}
+			}
+		} catch ( Throwable $e ) {
+			// This is not a critical error, so we just ignore it.
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get the WooPayments supported country codes list: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+				)
+			);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Get the current state of the store's WPCOM/Jetpack connection.
+	 *
+	 * @return array The store's WPCOM/Jetpack connection state.
+	 */
+	private function get_wpcom_connection_state(): array {
+		try {
+			$wpcom_connection_manager = $this->proxy->get_instance_of( WPCOM_Connection_Manager::class, 'woocommerce' );
+		} catch ( \Throwable $e ) {
+			// Log so we can investigate.
+			SafeGlobalFunctionProxy::wc_get_logger()->error(
+				'Failed to get the WPCOM/Jetpack Connection Manager instance: ' . $e->getMessage(),
+				array(
+					'source' => 'settings-payments',
+				)
+			);
+
+			// Assume no connection.
+			return array(
+				'wpcom_has_working_connection' => false,
+				'wpcom_is_store_connected'     => false,
+				'wpcom_has_connected_owner'    => false,
+				'wpcom_is_connection_owner'    => false,
+			);
+		}
+
+		$is_connected        = $wpcom_connection_manager->is_connected();
+		$has_connected_owner = $wpcom_connection_manager->has_connected_owner();
+
+		return array(
+			'wpcom_has_working_connection' => $is_connected && $has_connected_owner,
+			'wpcom_is_store_connected'     => $is_connected,
+			'wpcom_has_connected_owner'    => $has_connected_owner,
+			'wpcom_is_connection_owner'    => $has_connected_owner && $wpcom_connection_manager->is_connection_owner(),
+		);
 	}
 }

@@ -30,6 +30,7 @@ declare global {
 		desc?: string;
 		description?: string;
 		desc_tip?: boolean | string;
+		skip_initial_save?: boolean;
 		default?: string | number | boolean | object;
 		value: string | number | boolean | object;
 		placeholder?: string;

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent page scroll when using arrow keys in EllipsisMenu component

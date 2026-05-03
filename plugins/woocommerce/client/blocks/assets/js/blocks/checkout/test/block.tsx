@@ -43,13 +43,10 @@ import Taxes from '../inner-blocks/checkout-order-summary-taxes/frontend';
 import { defaultCartState } from '../../../data/cart/default-state';
 import Checkout from '../block';
 
-jest.mock( '@wordpress/data', () => {
-	const wpData = jest.requireActual( 'wordpress-data-wp-6-7' );
-	return {
-		__esModule: true,
-		...wpData,
-	};
-} );
+jest.mock( '@wordpress/data', () =>
+	// eslint-disable-next-line @typescript-eslint/no-var-requires -- Must use require due to Jest mock hoisting
+	require( '@woocommerce/blocks-test-utils/mock-editor-store' ).mockWordPressDataWithEditorStore()
+);
 
 jest.mock( '@wordpress/compose', () => ( {
 	...jest.requireActual( '@wordpress/compose' ),
@@ -291,6 +288,7 @@ describe( 'Testing Checkout', () => {
 				} )
 			);
 		} );
+
 		const { rerender } = render( <CheckoutBlock /> );
 
 		await waitFor( () =>
@@ -299,11 +297,7 @@ describe( 'Testing Checkout', () => {
 			).toBeVisible()
 		);
 
-		expect(
-			screen.getByText( 'Toronto ON M4W 1A6', {
-				selector: '.wc-block-components-address-card span',
-			} )
-		).toBeVisible();
+		expect( screen.getByText( /Toronto ON M4W 1A6/ ) ).toBeVisible();
 
 		// Async is needed here despite the IDE warnings. Testing Library gives a warning if not awaited.
 		await act( () =>
@@ -323,9 +317,7 @@ describe( 'Testing Checkout', () => {
 		rerender( <CheckoutBlock /> );
 
 		expect(
-			screen.getByText( 'Hyogo Kobe Address 1 JP', {
-				selector: '.wc-block-components-address-card span',
-			} )
+			screen.getByText( /Hyogo Kobe Address 1 JP/ )
 		).toBeInTheDocument();
 
 		// Testing the default address format
@@ -345,21 +337,9 @@ describe( 'Testing Checkout', () => {
 		);
 		rerender( <CheckoutBlock /> );
 
-		expect(
-			screen.getByText( 'Liverpool', {
-				selector: '.wc-block-components-address-card span',
-			} )
-		).toBeInTheDocument();
-		expect(
-			screen.getByText( 'Merseyside', {
-				selector: '.wc-block-components-address-card span',
-			} )
-		).toBeInTheDocument();
-		expect(
-			screen.getByText( 'L1 0BP', {
-				selector: '.wc-block-components-address-card span',
-			} )
-		).toBeInTheDocument();
+		expect( screen.getByText( /Liverpool/ ) ).toBeInTheDocument();
+		expect( screen.getByText( /Merseyside/ ) ).toBeInTheDocument();
+		expect( screen.getByText( /L1 0BP/ ) ).toBeInTheDocument();
 	} );
 
 	it( 'Renders the billing address card if the address is filled and the cart contains a virtual product', async () => {

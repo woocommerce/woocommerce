@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Adding dependency to avoid invalid types reference in external plugins.

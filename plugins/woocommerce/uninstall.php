@@ -59,6 +59,10 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	if ( null !== $date_type_index_exists ) {
 		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_date_type;" );
 	}
+	$comment_approved_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_approved_type';" );
+	if ( null !== $comment_approved_type_index_exists ) {
+		$wpdb->query( "ALTER TABLE {$wpdb->comments} DROP INDEX woo_idx_comment_approved_type;" );
+	}
 
 	// Roles + caps.
 	WC_Install::remove_roles();

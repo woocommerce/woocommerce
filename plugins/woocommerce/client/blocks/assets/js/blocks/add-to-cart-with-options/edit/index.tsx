@@ -1,11 +1,8 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
 import { useEffect } from '@wordpress/element';
 import { BlockEditProps } from '@wordpress/blocks';
-import { Disabled } from '@wordpress/components';
-import { ProductShortDescriptionSkeleton } from '@woocommerce/base-components/skeleton/patterns/product-short-description';
 import {
 	BlockControls,
 	InspectorControls,
@@ -18,8 +15,10 @@ import { useProduct } from '@woocommerce/entities';
  */
 import ToolbarProductTypeGroup from '../components/toolbar-type-product-selector-group';
 import { DowngradeNotice } from '../components/downgrade-notice';
+import { UpgradeProductImageGallery } from '../components/upgrade-product-image-gallery';
 import { useProductTypeSelector } from '../../../shared/stores/product-type-template-state';
 import { AddToCartWithOptionsEditTemplatePart } from './edit-template-part';
+import { Skeleton } from './skeleton';
 import type { Attributes } from '../types';
 
 const AddToCartOptionsEdit = (
@@ -51,6 +50,7 @@ const AddToCartOptionsEdit = (
 	return (
 		<>
 			<InspectorControls>
+				<UpgradeProductImageGallery />
 				<DowngradeNotice blockClientId={ props?.clientId } />
 			</InspectorControls>
 			<BlockControls>
@@ -62,17 +62,11 @@ const AddToCartOptionsEdit = (
 				/>
 			) : (
 				<div { ...blockProps }>
-					<div className="wp-block-woocommerce-add-to-cart-with-options__skeleton-wrapper">
-						<ProductShortDescriptionSkeleton />
-					</div>
-					<Disabled>
-						<button
-							className={ `alt wp-element-button ${ productType }_add_to_cart_button` }
-						>
-							{ ( product && product.add_to_cart?.single_text ) ||
-								__( 'Add to cart', 'woocommerce' ) }
-						</button>
-					</Disabled>
+					<Skeleton
+						buttonText={ product?.add_to_cart?.single_text }
+						productType={ productType }
+						isLoading={ false }
+					/>
 				</div>
 			) }
 		</>

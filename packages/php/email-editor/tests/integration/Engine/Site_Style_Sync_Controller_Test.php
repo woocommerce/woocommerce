@@ -500,8 +500,10 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$controller = new class() extends Site_Style_Sync_Controller {
 			/**
 			 * Mock sync_site_styles to return empty data.
+			 *
+			 * @param WP_Theme_JSON|null $base_theme Base theme for fallback values.
 			 */
-			public function sync_site_styles(): array {
+			public function sync_site_styles( ?WP_Theme_JSON $base_theme = null ): array {
 				return array();
 			}
 		};
@@ -785,6 +787,69 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 	}
 
 	/**
+	 * Test site theme filter is applied.
+	 */
+	public function test_site_theme_filter_is_applied(): void {
+		// Add filter to override site theme.
+		add_filter(
+			'woocommerce_email_editor_site_theme',
+			function ( $site_theme ) {
+				$new_site_theme = new WP_Theme_JSON(
+					array(
+						'version'  => 3,
+						'settings' => array(
+							'color' => array(
+								'palette' => array(
+									'theme'  => array(
+										array(
+											'slug'  => 'theme-color',
+											'color' => '#00ff00',
+											'name'  => 'Theme Color',
+										),
+									),
+									'custom' => array(
+										array(
+											'slug'  => 'custom-color',
+											'color' => '#ff0000',
+											'name'  => 'Custom Color',
+										),
+									),
+								),
+							),
+						),
+						'styles'   => array(),
+					),
+					'theme'
+				);
+
+				$site_theme->merge( $new_site_theme );
+				return $site_theme;
+			},
+			10,
+			1
+		);
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		// Find colors by slug.
+		$palette      = $synced_data['settings']['color']['palette'];
+		$theme_index  = array_search( 'theme-color', array_column( $palette, 'slug' ), true );
+		$custom_index = array_search( 'custom-color', array_column( $palette, 'slug' ), true );
+
+		// Verify filter was applied.
+		$this->assertNotFalse( $theme_index, 'Theme color should exist in palette' );
+		$this->assertEquals( '#00ff00', $palette[ $theme_index ]['color'] );
+		$this->assertEquals( 'Theme Color', $palette[ $theme_index ]['name'] );
+
+		$this->assertNotFalse( $custom_index, 'Custom color should exist in palette' );
+		$this->assertEquals( '#ff0000', $palette[ $custom_index ]['color'] );
+		$this->assertEquals( 'Custom Color', $palette[ $custom_index ]['name'] );
+
+		// Clean up.
+		remove_all_filters( 'woocommerce_email_editor_site_theme' );
+	}
+
+	/**
 	 * Test reference pointing to non-existing path should result in null.
 	 */
 	public function test_referenced_value_with_invalid_path_returns_null(): void {
@@ -849,5 +914,345 @@ class Site_Style_Sync_Controller_Test extends \Email_Editor_Integration_Test_Cas
 		$this->assertArrayHasKey( 'heading', $synced_data['styles']['elements'] );
 		$this->assertArrayHasKey( 'color', $synced_data['styles']['elements']['heading'] );
 		$this->assertArrayNotHasKey( 'text', $synced_data['styles']['elements']['heading']['color'] );
+	}
+
+	/**
+	 * Data provider for fallback mechanism tests.
+	 *
+	 * @return array Test cases with base theme data, site theme data, and expected assertions.
+	 */
+	public function fallback_data_provider(): array {
+		return array(
+			'global fontSize fallback'     => array(
+				'base_theme' => array(
+					'styles' => array(
+						'typography' => array( 'fontSize' => '16px' ),
+					),
+				),
+				'site_theme' => array(
+					'styles' => array(
+						'typography' => array( 'fontSize' => 'min(calc(var(--wp--custom--spacing-unit) * 2), 2vw)' ),
+					),
+				),
+				'assertions' => array(
+					'path'     => array( 'typography', 'fontSize' ),
+					'expected' => '16px',
+				),
+			),
+			'element-specific h1 fallback' => array(
+				'base_theme' => array(
+					'styles' => array(
+						'typography' => array( 'fontSize' => '16px' ),
+						'elements'   => array(
+							'h1' => array(
+								'typography' => array( 'fontSize' => '40px' ),
+							),
+						),
+					),
+				),
+				'site_theme' => array(
+					'styles' => array(
+						'elements' => array(
+							'h1' => array(
+								'typography' => array( 'fontSize' => 'clamp(var(--min), var(--preferred), var(--max))' ),
+							),
+						),
+					),
+				),
+				'assertions' => array(
+					'path'     => array( 'elements', 'h1', 'typography', 'fontSize' ),
+					'expected' => '40px',
+				),
+			),
+			'blockGap spacing fallback'    => array(
+				'base_theme' => array(
+					'styles' => array(
+						'spacing' => array( 'blockGap' => '16px' ),
+					),
+				),
+				'site_theme' => array(
+					'styles' => array(
+						'spacing' => array( 'blockGap' => 'max(var(--gap-min), var(--gap-preferred))' ),
+					),
+				),
+				'assertions' => array(
+					'path'     => array( 'spacing', 'blockGap' ),
+					'expected' => '16px',
+				),
+			),
+			'padding object with sides'    => array(
+				'base_theme' => array(
+					'styles' => array(
+						'spacing' => array(
+							'padding' => array(
+								'top'    => '20px',
+								'right'  => '20px',
+								'bottom' => '20px',
+								'left'   => '20px',
+							),
+						),
+					),
+				),
+				'site_theme' => array(
+					'styles' => array(
+						'spacing' => array(
+							'padding' => array(
+								'top'    => 'min(var(--padding-top), 5vw)',
+								'right'  => 'min(var(--padding-right), 5vw)',
+								'bottom' => 'min(var(--padding-bottom), 5vw)',
+								'left'   => 'min(var(--padding-left), 5vw)',
+							),
+						),
+					),
+				),
+				'assertions' => array(
+					'path'     => array( 'spacing', 'padding' ),
+					'expected' => array(
+						'top'    => '20px',
+						'right'  => '20px',
+						'bottom' => '20px',
+						'left'   => '20px',
+					),
+				),
+			),
+		);
+	}
+
+	/**
+	 * Test fallback mechanism uses base theme defaults.
+	 *
+	 * @dataProvider fallback_data_provider
+	 *
+	 * @param array $base_theme_styles Base theme styles configuration.
+	 * @param array $site_theme_styles Site theme styles configuration.
+	 * @param array $assertions Expected assertions with path and expected value.
+	 */
+	public function test_fallback_uses_base_theme_defaults( array $base_theme_styles, array $site_theme_styles, array $assertions ): void {
+		// Create base theme.
+		$base_theme_data = array_merge(
+			array(
+				'version'  => 3,
+				'settings' => array(),
+			),
+			$base_theme_styles
+		);
+		$base_theme      = new WP_Theme_JSON( $base_theme_data, 'default' );
+
+		// Create site theme.
+		$site_theme_data = array_merge(
+			array(
+				'version'  => 3,
+				'settings' => array(),
+			),
+			$site_theme_styles
+		);
+		$site_theme      = new WP_Theme_JSON( $site_theme_data );
+
+		// Use reflection to set the site theme.
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $site_theme );
+
+		$synced_data = $this->controller->sync_site_styles( $base_theme );
+
+		// Navigate to the expected path and verify the value.
+		$current = $synced_data['styles'];
+		foreach ( $assertions['path'] as $key ) {
+			$this->assertArrayHasKey( $key, $current );
+			$current = $current[ $key ];
+		}
+		$this->assertEquals( $assertions['expected'], $current );
+	}
+
+	/**
+	 * Test no fallback when base theme is not provided (backwards compatibility).
+	 */
+	public function test_no_fallback_when_base_theme_not_provided(): void {
+		$site_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'typography' => array(
+					'fontSize' => 'min(var(--size), 2vw)',
+				),
+			),
+		);
+		$site_theme      = new WP_Theme_JSON( $site_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $site_theme );
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		$this->assertArrayHasKey( 'typography', $synced_data['styles'] );
+		$this->assertEquals( 'min(var(--size), 2vw)', $synced_data['styles']['typography']['fontSize'] );
+	}
+
+	/**
+	 * Data provider for quoted font family tests.
+	 *
+	 * @return array Test cases with input font family and expected output.
+	 */
+	public function quoted_font_family_data_provider(): array {
+		return array(
+			'double-quoted Inter with fallback'   => array(
+				'"Inter", sans-serif',
+				"Inter, 'Helvetica Neue', Arial, sans-serif",
+			),
+			'double-quoted Arial with fallback'   => array(
+				'"Arial", sans-serif',
+				"Arial, 'Helvetica Neue', Helvetica, sans-serif",
+			),
+			'double-quoted Georgia'               => array(
+				'"Georgia", serif',
+				"Georgia, Times, 'Times New Roman', serif",
+			),
+			'single-quoted Inter with fallback'   => array(
+				"'Inter', sans-serif",
+				"Inter, 'Helvetica Neue', Arial, sans-serif",
+			),
+			'single-quoted Courier New'           => array(
+				"'Courier New', monospace",
+				"'Courier New', Courier, 'Lucida Sans Typewriter', 'Lucida Typewriter', monospace",
+			),
+			'unquoted Inter with fallback'        => array(
+				'Inter, sans-serif',
+				"Inter, 'Helvetica Neue', Arial, sans-serif",
+			),
+			'double-quoted Roboto with fallback'  => array(
+				'"Roboto", sans-serif',
+				"roboto, 'helvetica neue', helvetica, arial, sans-serif",
+			),
+			'double-quoted unknown font defaults' => array(
+				'"SomeCustomFont", sans-serif',
+				"Arial, 'Helvetica Neue', Helvetica, sans-serif",
+			),
+		);
+	}
+
+	/**
+	 * Test convert_to_email_safe_font with quoted font names.
+	 *
+	 * @testdox Should correctly resolve font family when name is wrapped in quotes.
+	 * @dataProvider quoted_font_family_data_provider
+	 *
+	 * @param string $input_font    The input font family string (potentially quoted).
+	 * @param string $expected_font The expected email-safe font family output.
+	 */
+	public function test_convert_to_email_safe_font_with_quoted_names( string $input_font, string $expected_font ): void {
+		$reflection = new \ReflectionClass( $this->controller );
+		$method     = $reflection->getMethod( 'convert_to_email_safe_font' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $this->controller, $input_font );
+		$this->assertEquals( $expected_font, $result, "Font family '$input_font' should resolve to '$expected_font'" );
+	}
+
+	/**
+	 * Test quoted font family resolution through full sync path.
+	 *
+	 * @testdox Should resolve quoted font family through full typography sync path.
+	 */
+	public function test_sync_site_styles_with_quoted_font_family(): void {
+		$mock_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'typography' => array(
+					'fontFamily' => '"Inter", sans-serif',
+					'fontSize'   => '16px',
+				),
+			),
+		);
+
+		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $mock_theme );
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		$this->assertArrayHasKey( 'typography', $synced_data['styles'] );
+		$this->assertEquals(
+			"Inter, 'Helvetica Neue', Arial, sans-serif",
+			$synced_data['styles']['typography']['fontFamily'],
+			'Quoted "Inter" font family should resolve to the Inter email-safe font, not Arial'
+		);
+	}
+
+	/**
+	 * Test quoted font family resolution in element heading styles.
+	 *
+	 * @testdox Should resolve quoted font family in element heading styles.
+	 */
+	public function test_element_styles_with_quoted_font_family(): void {
+		$mock_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'elements' => array(
+					'heading' => array(
+						'typography' => array(
+							'fontFamily' => '"Inter", sans-serif',
+							'fontSize'   => '24px',
+						),
+					),
+				),
+			),
+		);
+
+		$mock_theme = new WP_Theme_JSON( $mock_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $mock_theme );
+
+		$synced_data = $this->controller->sync_site_styles();
+
+		$this->assertArrayHasKey( 'elements', $synced_data['styles'] );
+		$this->assertEquals(
+			"Inter, 'Helvetica Neue', Arial, sans-serif",
+			$synced_data['styles']['elements']['heading']['typography']['fontFamily'],
+			'Quoted "Inter" in heading element should resolve to the Inter email-safe font'
+		);
+	}
+
+	/**
+	 * Test already-valid px values don't use fallback.
+	 */
+	public function test_valid_px_values_dont_use_fallback(): void {
+		$base_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'typography' => array( 'fontSize' => '16px' ),
+			),
+		);
+		$base_theme      = new WP_Theme_JSON( $base_theme_data, 'default' );
+
+		$site_theme_data = array(
+			'version'  => 3,
+			'settings' => array(),
+			'styles'   => array(
+				'typography' => array( 'fontSize' => '24px' ),
+			),
+		);
+		$site_theme      = new WP_Theme_JSON( $site_theme_data );
+
+		$reflection          = new \ReflectionClass( $this->controller );
+		$site_theme_property = $reflection->getProperty( 'site_theme' );
+		$site_theme_property->setAccessible( true );
+		$site_theme_property->setValue( $this->controller, $site_theme );
+
+		$synced_data = $this->controller->sync_site_styles( $base_theme );
+
+		$this->assertArrayHasKey( 'typography', $synced_data['styles'] );
+		$this->assertEquals( '24px', $synced_data['styles']['typography']['fontSize'] );
 	}
 }

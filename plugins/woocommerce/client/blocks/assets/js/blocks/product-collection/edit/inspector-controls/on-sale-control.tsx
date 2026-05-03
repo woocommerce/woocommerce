@@ -4,7 +4,6 @@
 import { __ } from '@wordpress/i18n';
 import {
 	ToggleControl,
-	// @ts-expect-error Using experimental features
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
@@ -34,6 +33,7 @@ const OnSaleControl = ( props: QueryControlProps ) => {
 			resetAllFilter={ deselectCallback }
 		>
 			<ToggleControl
+				__nextHasNoMarginBottom
 				label={ __( 'Show only products on sale', 'woocommerce' ) }
 				checked={ query.woocommerceOnSale || false }
 				onChange={ ( woocommerceOnSale ) => {

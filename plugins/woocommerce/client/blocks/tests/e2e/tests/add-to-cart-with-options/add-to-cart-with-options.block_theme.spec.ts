@@ -36,7 +36,8 @@ const test = base.extend< {
 } );
 
 test.describe( 'Add to Cart + Options Block', () => {
-	test( 'allows switching to 3rd-party product types', async ( {
+	test( 'allows adding 3rd-party product types to cart when using PHP templates', async ( {
+		page,
 		pageObject,
 		editor,
 		requestUtils,
@@ -44,15 +45,44 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-custom-product-type'
 		);
-
-		await pageObject.updateSingleProductTemplate();
-		await pageObject.switchProductType( 'Custom Product Type' );
-
-		const block = editor.canvas.getByLabel(
-			`Block: ${ pageObject.BLOCK_NAME }`
+		const cliOutput = await wpCLI(
+			`wc product create --slug="custom-product" --name="Custom Product" --type="custom" --regular_price=10 --user=1`
 		);
-		const skeleton = block.locator( '.wc-block-components-skeleton' );
-		await expect( skeleton ).toBeVisible();
+		const customProductId = cliOutput.stdout.match( /\d+/g )?.pop();
+
+		await test.step( 'allows switching to 3rd-party product types in the editor', async () => {
+			await pageObject.updateSingleProductTemplate();
+			await pageObject.switchProductType( 'Custom Product Type' );
+
+			const block = editor.canvas.getByLabel(
+				`Block: ${ pageObject.BLOCK_NAME }`
+			);
+			const skeleton = block.locator( '.wc-block-components-skeleton' );
+			await expect( skeleton ).toBeVisible();
+
+			await editor.saveSiteEditorEntities( {
+				isOnlyCurrentEntityDirty: true,
+			} );
+		} );
+
+		await test.step( 'allows interacting with the form in the frontend', async () => {
+			await page.goto( `/?p=${ customProductId }` );
+			const quantityInput = page.getByLabel( 'Product quantity' );
+
+			await expect( quantityInput ).toHaveValue( '1' );
+			await page
+				.getByLabel( 'Increase quantity of Custom Product' )
+				.click();
+
+			await expect( quantityInput ).toHaveValue( '2' );
+			await page.getByRole( 'button', { name: 'Add to cart' } ).click();
+
+			await expect(
+				page
+					.getByRole( 'alert' )
+					.getByText( /have been added to your cart/i )
+			).toBeVisible();
+		} );
 	} );
 
 	test( 'allows adding simple products to cart', async ( {
@@ -86,11 +116,66 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect( addToCartButton ).toHaveText( '4 in cart' );
 	} );
 
+	// This test only applies to the iAPI cart which uses batch requests.
+	// The legacy cart sends individual requests, not batched ones.
+	if ( config.features[ 'experimental-iapi-mini-cart' ] ) {
+		test( 'handles rapid add-to-cart clicks correctly', async ( {
+			page,
+			frontendUtils,
+			miniCartUtils,
+		} ) => {
+			// Go to shop page where iAPI Product Button is used in product listings.
+			await frontendUtils.goToShop();
+
+			// Get the first Add to cart button on the page (Album product).
+			const addToCartButton = page.locator( 'text=Add to cart' ).first();
+			await expect( addToCartButton ).toBeVisible();
+
+			// Click the button 3 times rapidly without waiting between clicks.
+			// This tests that the batching correctly handles optimistic updates
+			// and sends the right quantity to the server (delta, not target).
+			// Without the fix, this would result in 1+2+3=6 items.
+			//
+			// Set up waitForResponse BEFORE the clicks to avoid a race condition.
+			// If we wait after clicks, fast networks may complete the batch
+			// before waitForResponse starts listening, causing the test to hang.
+			const batchPromise = page.waitForResponse(
+				'**/wc/store/v1/batch**'
+			);
+			await addToCartButton.click();
+			await addToCartButton.click();
+			await addToCartButton.click();
+
+			// Wait for all batch requests to complete.
+			await batchPromise;
+
+			// Open mini cart and verify the count.
+			await miniCartUtils.openMiniCart();
+
+			// Check the mini cart shows exactly 3 items.
+			// If the bug were present, it would show 6 (1+2+3).
+			const quantityInput = page.getByLabel(
+				'Quantity of Album in your cart.'
+			);
+			const quantity = await quantityInput.inputValue();
+			const quantityNum = parseInt( quantity, 10 );
+
+			// The quantity should be 3, NOT 6 (which would indicate the bug).
+			// We use a soft assertion to account for any timing edge cases.
+			expect( quantityNum ).toBeLessThanOrEqual( 3 );
+			expect( quantityNum ).toBeGreaterThanOrEqual( 2 );
+
+			// Most importantly, verify it's NOT the buggy value of 6.
+			expect( quantityNum ).not.toBe( 6 );
+		} );
+	}
+
 	test( 'allows adding variable products to cart', async ( {
 		page,
 		pageObject,
 		productGalleryPageObject,
 		editor,
+		wpCoreVersion,
 	} ) => {
 		const variationDescription =
 			'This is the output of the variation description';
@@ -159,12 +244,25 @@ test.describe( 'Add to Cart + Options Block', () => {
 		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
 		const colorGreenOption = page.locator( 'label:has-text("Green")' );
 		const colorRedOption = page.locator( 'label:has-text("Red")' );
+		// We use the Add to Cart + Options class to make sure we don't select
+		// the Add to Cart button from the Related Products block.
 		const addToCartButton = page
-			.getByRole( 'button', { name: 'Add to cart' } )
-			.first();
+			.locator( '.wp-block-add-to-cart-with-options' )
+			.getByRole( 'button', { name: 'Add to cart' } );
 		const productPrice = page
 			.locator( '.wp-block-woocommerce-product-price' )
 			.first();
+		const quantitySelector = page.getByLabel( 'Product quantity' );
+
+		const additionalInfoPanel =
+			wpCoreVersion >= 6.9
+				? page
+						.getByRole( 'button', {
+							name: 'Additional Information',
+						} )
+						.locator( '../..' )
+						.locator( '.wp-block-accordion-panel' )
+				: page.getByLabel( 'Additional Information', { exact: true } );
 
 		await test.step( 'displays an error when attributes are not selected', async () => {
 			await addToCartButton.click();
@@ -183,15 +281,15 @@ test.describe( 'Add to Cart + Options Block', () => {
 				.click();
 			await expect( productPrice ).toHaveText( /\$42.00 – \$45.00.*/ );
 			await expect( page.getByText( '100 in stock' ) ).toBeVisible();
+			await expect( addToCartButton ).toBeVisible();
+			await expect( quantitySelector ).toBeVisible();
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '1.5 lbs' )
+				additionalInfoPanel.getByText( '1.5 lbs' )
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			const visibleImage =
-				await productGalleryPageObject.getVisibleLargeImageId();
+				await productGalleryPageObject.getViewerImageId();
 			expect( visibleImage ).toBe( '34' );
 
 			await colorBlueOption.click();
@@ -199,22 +297,22 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( productPrice ).toHaveText( '$45.00' );
 			await expect( page.getByText( 'Out of stock' ) ).toBeVisible();
+			await expect( addToCartButton ).toBeHidden();
+			await expect( quantitySelector ).toBeHidden();
 			await expect(
 				page.getByText( 'SKU: woo-hoodie-blue' )
 			).toBeVisible();
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '2 lbs' )
+				additionalInfoPanel.getByText( '2 lbs' )
 			).toBeVisible();
 			await expect(
 				page.getByText( variationDescription )
 			).toBeVisible();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '35' );
+				expect( newViewerImageId ).toBe( '35' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -226,16 +324,14 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( page.getByText( 'SKU: woo-hoodie' ) ).toBeVisible();
 			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			await expect(
-				page
-					.getByLabel( 'Additional Information', { exact: true } )
-					.getByText( '1.5 lbs' )
+				additionalInfoPanel.getByText( '1.5 lbs' )
 			).toBeVisible();
 			await expect( page.getByText( variationDescription ) ).toBeHidden();
 			await expect( async () => {
-				const newVisibleLargeImageId =
-					await productGalleryPageObject.getVisibleLargeImageId();
+				const newViewerImageId =
+					await productGalleryPageObject.getViewerImageId();
 
-				expect( newVisibleLargeImageId ).toBe( '34' );
+				expect( newViewerImageId ).toBe( '34' );
 			} ).toPass( { timeout: 1_000 } );
 		} );
 
@@ -263,6 +359,156 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 	} );
 
+	test( 'allows adding variable products that have "any" as a variation attribute', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/v-neck-t-shirt/' );
+
+		// The radio input is visually hidden and, thus, not clickable. That's
+		// why we need to select the <label> instead.
+		const colorBlueOption = page.locator( 'label:has-text("Blue")' );
+		const colorRedOption = page.locator( 'label:has-text("Red")' );
+		const sizeLargeOption = page.locator( 'label:has-text("Large")' );
+
+		await colorBlueOption.click();
+		await sizeLargeOption.click();
+
+		// We use the Add to Cart + Options class to make sure we don't select
+		// the Add to Cart button from the Related Products block.
+		const addToCartButton = page
+			.locator( '.wp-block-add-to-cart-with-options' )
+			.getByRole( 'button', { name: 'Add to cart' } );
+
+		// Note: The button is always enabled for accessibility reasons.
+		// Instead, we check directly for the "disabled" class, which grays
+		// out the button.
+		await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+
+		await addToCartButton.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+
+		await colorRedOption.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+		// Add a second variation (Red + Large).
+		await addToCartButton.click();
+
+		await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+	} );
+
+	test( 'allows adding variable products with custom attribute slugs', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		// Create a global attribute where the slug intentionally differs from the name.
+		const attrOutput = await wpCLI(
+			`wc product_attribute create --name="Taille" --slug="custom-waist" --user=1`
+		);
+		const attrId = attrOutput.stdout.match(
+			/product_attribute\s+(\d+)/
+		)?.[ 1 ];
+
+		// Create terms with custom slugs that also differ from the names.
+		await wpCLI(
+			`wc product_attribute_term create ${ attrId } --name="Petit" --slug="s-m" --user=1`
+		);
+		await wpCLI(
+			`wc product_attribute_term create ${ attrId } --name="Grand" --slug="m-l" --user=1`
+		);
+
+		// Create a variable product using the global attribute.
+		const prodOutput = await wpCLI(
+			`wc product create --user=1 --slug="custom-slug-variable" --name="Custom Slug Variable" --type="variable" --attributes='${ JSON.stringify(
+				[
+					{
+						id: Number( attrId ),
+						visible: true,
+						variation: true,
+						options: [ 'Petit', 'Grand' ],
+					},
+				]
+			) }'`
+		);
+		const productId = prodOutput.stdout.match( /product\s+(\d+)/ )?.[ 1 ];
+
+		// Create a single "Any" variation (empty attributes = matches all terms).
+		await wpCLI(
+			`wc product_variation create "${ productId }" --user=1 --regular_price="19.99" --attributes='[]'`
+		);
+
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await test.step( 'when in pills mode', async () => {
+			await page.goto( '/product/custom-slug-variable/' );
+
+			// Verify the pills show term names (not slugs).
+			const petitOption = page.locator( 'label:has-text("Petit")' );
+			const grandOption = page.locator( 'label:has-text("Grand")' );
+			const addToCartButton = page.getByRole( 'button', {
+				name: 'Add to cart',
+				exact: true,
+			} );
+
+			await expect( petitOption ).toBeEnabled();
+			await expect( grandOption ).toBeEnabled();
+
+			await petitOption.click();
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+			await addToCartButton.click();
+			await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+		} );
+
+		await test.step( 'when in dropdown mode', async () => {
+			await pageObject.updateSingleProductTemplate();
+			await pageObject.setVariationSelectorAttributes( {
+				optionStyle: 'dropdown',
+			} );
+			await editor.saveSiteEditorEntities();
+
+			await page.goto( '/product/custom-slug-variable/' );
+
+			const select = page.getByRole( 'combobox', {
+				name: 'Taille',
+				exact: true,
+			} );
+			const petitOption = page.getByRole( 'option', {
+				name: 'Petit',
+				exact: true,
+			} );
+			const grandOption = page.getByRole( 'option', {
+				name: 'Grand',
+				exact: true,
+			} );
+			const addToCartButton = page.getByRole( 'button', {
+				name: '1 in cart',
+				exact: true,
+			} );
+
+			await expect( petitOption ).toBeEnabled();
+			await expect( grandOption ).toBeEnabled();
+			await select.selectOption( { label: 'Petit' } );
+
+			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+			await addToCartButton.click();
+			await expect( page.getByText( '2 in cart' ) ).toBeVisible();
+		} );
+	} );
+
 	test( 'allows adding grouped products to cart', async ( {
 		page,
 		pageObject,
@@ -283,7 +529,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			isOnlyCurrentEntityDirty: true,
 		} );
 
-		await page.goto( '/logo-collection' );
+		await page.goto( '/product/logo-collection' );
 
 		const addToCartButton = page
 			.getByRole( 'button', { name: 'Add to cart' } )
@@ -370,14 +616,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
-			await addToCartButton.click();
-
-			// Wait for the add to cart request to complete before proceeding.
-			// This prevents a race condition where the subsequent page.reload()
-			// could execute before the product is fully added to the cart.
-			const addToCartRequest = page.waitForResponse(
+			// Set up waitForResponse BEFORE the click to avoid race condition
+			// where page.reload() executes before the cart is updated.
+			const batchPromise = page.waitForResponse(
 				'**/wc/store/v1/batch**'
 			);
+			await addToCartButton.click();
 
 			await expect(
 				page.getByRole( 'button', {
@@ -386,8 +630,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				} )
 			).toBeVisible();
 
-			// Wait for the API response to ensure the DB has been updated.
-			await page.waitForResponse( '**/wp-json/wc/store/v1/cart**' );
+			await batchPromise;
 
 			await expect(
 				page.getByLabel(
@@ -396,8 +639,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 						: '3 items in cart'
 				)
 			).toBeVisible();
-
-			await addToCartRequest;
 		} );
 
 		await test.step( 'if one product succeeds and another fails, optimistic updates are applied and an error is displayed', async () => {
@@ -446,6 +687,93 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 	} );
 
+	test( 'correctly reconciles cart state when adding grouped products multiple times', async ( {
+		page,
+		pageObject,
+		editor,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		await editor.saveSiteEditorEntities( {
+			isOnlyCurrentEntityDirty: true,
+		} );
+
+		await page.goto( '/product/logo-collection' );
+
+		const addToCartButton = page
+			.getByRole( 'button', { name: 'Add to cart' } )
+			.first();
+
+		const increaseBeanie = page
+			.locator(
+				'[data-block-name="woocommerce/add-to-cart-with-options"]'
+			)
+			.getByLabel( 'Increase quantity of Beanie' );
+
+		const increaseTShirt = page
+			.locator(
+				'[data-block-name="woocommerce/add-to-cart-with-options"]'
+			)
+			.getByLabel( 'Increase quantity of T-Shirt' );
+
+		await test.step( 'add two child products to cart', async () => {
+			await increaseBeanie.click();
+			await increaseTShirt.click();
+
+			await addToCartButton.click();
+
+			await expect(
+				page.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+			).toBeVisible();
+
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 2'
+						: '2 items in cart'
+				)
+			).toBeVisible();
+		} );
+
+		await test.step( 'add the same products again without reloading — should update quantities via batcher', async () => {
+			// After the first add, button text changes to "Added to cart".
+			// Quantities still show 1 for each. Adding again means
+			// getNewQuantity returns currentCartQty + inputQty, so
+			// Beanie goes 1→2 and T-Shirt goes 1→2.
+			const addedToCartButton = page
+				.getByRole( 'button', {
+					name: 'Added to cart',
+					exact: true,
+				} )
+				.first();
+
+			await addedToCartButton.click();
+
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 4'
+						: '4 items in cart'
+				)
+			).toBeVisible();
+		} );
+
+		await test.step( 'verify cart state persists after reload', async () => {
+			await page.reload();
+
+			await expect(
+				page.getByLabel(
+					config.features[ 'experimental-iapi-mini-cart' ]
+						? 'Number of items in the cart: 4'
+						: '4 items in cart'
+				)
+			).toBeVisible();
+		} );
+	} );
+
 	test( "doesn't allow selecting invalid variations in pills mode", async ( {
 		page,
 		pageObject,
@@ -477,27 +805,9 @@ test.describe( 'Add to Cart + Options Block', () => {
 		editor,
 	} ) => {
 		await pageObject.updateSingleProductTemplate();
-
-		await pageObject.switchProductType( 'Variable product' );
-
-		await page.getByRole( 'tab', { name: 'Block' } ).click();
-
-		// Verify inner blocks have loaded.
-		await expect(
-			editor.canvas
-				.getByLabel(
-					'Block: Variation Selector: Attribute Options (Beta)'
-				)
-				.first()
-		).toBeVisible();
-
-		const attributeOptionsBlock = await editor.getBlockByName(
-			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
-		);
-		await editor.selectBlocks( attributeOptionsBlock.first() );
-
-		await page.getByRole( 'radio', { name: 'Dropdown' } ).click();
-
+		await pageObject.setVariationSelectorAttributes( {
+			optionStyle: 'dropdown',
+		} );
 		await editor.saveSiteEditorEntities();
 
 		await page.goto( '/product/hoodie/' );
@@ -596,10 +906,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			await test.step( 'verify letters are reset to min value in simple products', async () => {
 				// Playwright doesn't support filling a numeric input with a
-				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// string, but we still want to test this case as users on older/mobile browsers
+				// are able to type letters directly in the input field .
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
@@ -669,9 +982,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await test.step( 'verify letters are reset to min value in variable products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// to type letters directly in the input field in older/mobile browsers.
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
@@ -702,7 +1018,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 				name: 'T-Shirt',
 			} );
 
-			await expect( quantityInput ).toHaveValue( '' );
+			await expect( quantityInput ).toHaveValue( '0' );
 			const increaseQuantityButton = page.getByLabel(
 				'Increase quantity of T-Shirt'
 			);
@@ -760,25 +1076,28 @@ test.describe( 'Add to Cart + Options Block', () => {
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 
-			await test.step( 'verify empty strings are not reset in grouped products', async () => {
+			await test.step( 'verify empty strings are reset to 0 in grouped products', async () => {
 				await quantityInput.fill( '' );
 				await quantityInput.blur();
-				await expect( quantityInput ).toHaveValue( '' );
+				await expect( quantityInput ).toHaveValue( '0' );
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 
-			await test.step( 'verify letters are reset to an empty string in grouped products', async () => {
+			await test.step( 'verify letters are reset to 0 in grouped products', async () => {
 				// Playwright doesn't support filling a numeric input with a
 				// string, but we still want to test this case as users are able
-				// to type letters directly in the input field.
+				// to type letters directly in the input field in older/mobile browsers.
 				await quantityInput.evaluate( ( element: HTMLInputElement ) => {
 					element.value = 'abc';
+					element.dispatchEvent(
+						new InputEvent( 'input', { bubbles: true } )
+					);
 					element.focus();
 					requestAnimationFrame( () => {
 						element.blur();
 					} );
 				} );
-				await expect( quantityInput ).toHaveValue( '' );
+				await expect( quantityInput ).toHaveValue( '0' );
 				await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
 			} );
 		} );
@@ -936,6 +1255,26 @@ test.describe( 'Add to Cart + Options Block', () => {
 		).toBeVisible();
 	} );
 
+	test( 'allows adding variations to cart when inside the Product block', async ( {
+		page,
+		pageObject,
+	} ) => {
+		await pageObject.createPostWithProductBlock(
+			'hoodie',
+			'hoodie-blue-yes'
+		);
+
+		const addToCartButton = page.getByRole( 'button', {
+			name: 'Add to cart',
+		} );
+
+		await addToCartButton.click();
+
+		await expect(
+			page.getByRole( 'button', { name: '1 in cart', exact: true } )
+		).toBeVisible();
+	} );
+
 	test( 'allows adding grouped products to cart when inside the Product block', async ( {
 		page,
 		pageObject,
@@ -957,5 +1296,445 @@ test.describe( 'Add to Cart + Options Block', () => {
 		await expect(
 			page.getByRole( 'button', { name: 'Added to cart', exact: true } )
 		).toBeVisible();
+	} );
+
+	test( 'allows updating the Product Image Gallery block to the Product Gallery block', async ( {
+		page,
+		editor,
+		pageObject,
+	} ) => {
+		await pageObject.updateSingleProductTemplate();
+
+		const addToCartFormBlock = await editor.getBlockByName(
+			pageObject.BLOCK_SLUG
+		);
+		await editor.selectBlocks( addToCartFormBlock );
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
+		).toBeHidden();
+
+		await page
+			.getByRole( 'button', {
+				name: 'Upgrade to the Product Gallery block',
+			} )
+			.click();
+
+		await expect(
+			editor.canvas.getByLabel( 'Block: Product Gallery' )
+		).toBeVisible();
+	} );
+
+	test.describe( 'autoselect behavior', () => {
+		const productSlug = 'autoselect-t-shirt';
+		const productName = 'Autoselect T-shirt';
+		const productPermalink = '/product/' + productSlug;
+		const productPrice = '13.99';
+		const productAttributes: {
+			name: string;
+			options: string[];
+			variation: boolean;
+			visible: boolean;
+		}[] = [
+			{
+				name: 'Type',
+				options: [ 'T-shirt' ],
+				variation: true,
+				visible: true,
+			},
+			{
+				name: 'Color',
+				options: [ 'Red', 'Blue', 'Green' ],
+				variation: true,
+				visible: true,
+			},
+			{
+				name: 'Size',
+				options: [ 'S', 'L', 'XL' ],
+				variation: true,
+				visible: true,
+			},
+		];
+		const productVariations: {
+			attributes: {
+				name: string;
+				option: string;
+			}[];
+		}[] = [
+			{
+				attributes: [
+					{
+						name: 'Type',
+						option: 'T-shirt',
+					},
+					{
+						name: 'Color',
+						option: 'Green',
+					},
+					{
+						name: 'Size',
+						option: 'S',
+					},
+				],
+			},
+			{
+				attributes: [
+					{
+						name: 'Type',
+						option: 'T-shirt',
+					},
+					{
+						name: 'Color',
+						option: 'Red',
+					},
+					{
+						name: 'Size',
+						option: 'L',
+					},
+				],
+			},
+			{
+				attributes: [
+					{
+						name: 'Type',
+						option: 'T-shirt',
+					},
+					{
+						name: 'Color',
+						option: 'Red',
+					},
+					{
+						name: 'Size',
+						option: 'XL',
+					},
+				],
+			},
+			{
+				attributes: [
+					{
+						name: 'Type',
+						option: 'T-shirt',
+					},
+					{
+						name: 'Color',
+						option: 'Blue',
+					},
+					{
+						name: 'Size',
+						option: 'XL',
+					},
+				],
+			},
+		];
+
+		test.beforeEach( async () => {
+			const cliOutput = await wpCLI(
+				`wc product create --user=1 --slug="${ productSlug }" --name="${ productName }" --type="variable" --attributes='${ JSON.stringify(
+					productAttributes
+				) }'`
+			);
+			const match: RegExpMatchArray | null = cliOutput.stdout.match(
+				/Success:\s+Created\s+product\s+(\d+)\.\n?$/
+			);
+			const productId: string | null = match ? match[ 1 ] : null;
+			if ( ! productId ) {
+				throw new Error(
+					`No productId found, cliOutput: ${ JSON.stringify(
+						cliOutput,
+						null,
+						2
+					) }`
+				);
+			}
+
+			for ( const productVariation of productVariations ) {
+				await wpCLI(
+					`wc product_variation create --user=1 "${ productId }" --regular_price="${ productPrice }" --attributes='${ JSON.stringify(
+						productVariation.attributes
+					) }'`
+				);
+			}
+		} );
+
+		for ( const optionStyle of [ 'pills', 'dropdown' ] as (
+			| 'pills'
+			| 'dropdown'
+		 )[] ) {
+			// eslint-disable-next-line playwright/expect-expect
+			test( `${ optionStyle }: Test the autoselect block attribute`, async ( {
+				page,
+				pageObject,
+				editor,
+			} ) => {
+				await pageObject.updateSingleProductTemplate();
+
+				if ( optionStyle === 'pills' ) {
+					await editor.saveSiteEditorEntities( {
+						isOnlyCurrentEntityDirty: true,
+					} );
+				} else {
+					await pageObject.setVariationSelectorAttributes( {
+						optionStyle,
+					} );
+					await editor.saveSiteEditorEntities();
+				}
+
+				await test.step( `${ optionStyle }: Expect NOTHING to be auto-selected (on page load)`, async () => {
+					await page.goto( productPermalink );
+
+					await pageObject.expectVariationSelectorOptions(
+						productAttributes,
+						{ Type: '', Color: '', Size: '' },
+						optionStyle
+					);
+				} );
+
+				await test.step( `${ optionStyle }: Expect attributes to NOT auto-select when user selects something`, async () => {
+					await page.goto( productPermalink );
+
+					await pageObject.selectVariationSelectorOptions(
+						'Color',
+						'Blue',
+						optionStyle
+					);
+
+					// Expect nothing to be auto-selected
+					await pageObject.expectVariationSelectorOptions(
+						productAttributes,
+						{ Type: '', Color: 'Blue', Size: '' },
+						optionStyle
+					);
+				} );
+
+				await test.step( `${ optionStyle }: Set the autoselect setting to true`, async () => {
+					await pageObject.updateSingleProductTemplate();
+					await pageObject.setVariationSelectorAttributes( {
+						optionStyle,
+						autoselect: true,
+					} );
+					await editor.saveSiteEditorEntities();
+				} );
+
+				await test.step( `${ optionStyle }: Expect only the Type attribute to be auto-selected (on page load)`, async () => {
+					await page.goto( productPermalink );
+
+					// Expect the Type attribute to be auto-selected (on page load) to "T-shirt", the rest of the attributes should not be selected.
+					await pageObject.expectVariationSelectorOptions(
+						productAttributes,
+						{ Type: 'T-shirt', Color: '', Size: '' },
+						optionStyle
+					);
+				} );
+
+				await test.step( `${ optionStyle }: Expect attributes to auto-select when user selects something`, async () => {
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", we expect the Type attribute to be auto-selected to "T-shirt", and the Size to "XL".
+					await pageObject.selectVariationSelectorOptions(
+						'Color',
+						'Blue',
+						optionStyle
+					);
+
+					await pageObject.expectVariationSelectorOptions(
+						productAttributes,
+						{ Type: 'T-shirt', Color: 'Blue', Size: 'XL' },
+						optionStyle
+					);
+				} );
+			} );
+			test( `${ optionStyle }: Test the disabledAttributesAction block attribute`, async ( {
+				page,
+				pageObject,
+				editor,
+			} ) => {
+				await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "disable"`, async () => {
+					await pageObject.updateSingleProductTemplate();
+
+					if ( optionStyle === 'pills' ) {
+						await editor.saveSiteEditorEntities( {
+							isOnlyCurrentEntityDirty: true,
+						} );
+					} else {
+						await pageObject.setVariationSelectorAttributes( {
+							optionStyle,
+						} );
+						await editor.saveSiteEditorEntities();
+					}
+				} );
+				await test.step( `${ optionStyle }: Expect invalid options to be disabled (by prop) and visible`, async () => {
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", the only possible Size remaining is "XL".
+					await pageObject.selectVariationSelectorOptions(
+						'Color',
+						'Blue',
+						optionStyle
+					);
+
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).toBeDisabled();
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).not.toHaveAttribute( 'hidden' );
+				} );
+
+				await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "hide"`, async () => {
+					await pageObject.updateSingleProductTemplate();
+					await pageObject.setVariationSelectorAttributes( {
+						optionStyle,
+						disabledAttributesAction: 'hide',
+					} );
+					await editor.saveSiteEditorEntities();
+				} );
+				await test.step( `${ optionStyle }: Expect invalid options to be disabled (by prop) and hidden`, async () => {
+					await page.goto( productPermalink );
+
+					// By setting the Color to "Blue", the only possible Size remaining is "XL".
+					await pageObject.selectVariationSelectorOptions(
+						'Color',
+						'Blue',
+						optionStyle
+					);
+
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).toBeDisabled();
+					await expect(
+						page
+							.getByLabel( 'Size' )
+							.getByText( 'L', { exact: true } )
+					).toBeHidden();
+				} );
+			} );
+			// eslint-disable-next-line playwright/expect-expect
+			test( `${ optionStyle }: Combining autoselect and disabledAttributesAction block attributes should work`, async ( {
+				page,
+				pageObject,
+				editor,
+			} ) => {
+				for ( const disabledAttributesAction of [
+					'disable',
+					'hide',
+				] as ( 'disable' | 'hide' )[] ) {
+					await pageObject.updateSingleProductTemplate();
+
+					await test.step( `${ optionStyle }: Set the disabledAttributesAction block attribute to "${ disabledAttributesAction }"`, async () => {
+						await pageObject.setVariationSelectorAttributes( {
+							autoselect: true,
+							optionStyle,
+							disabledAttributesAction,
+						} );
+						await editor.saveSiteEditorEntities();
+					} );
+					await test.step( `disabledAttributesAction === ${ disabledAttributesAction }: Expect options to be properly auto-selected`, async () => {
+						await page.goto( productPermalink );
+
+						// By selecting the Color to "Blue", the only possible Size remaining is "XL".
+						await pageObject.selectVariationSelectorOptions(
+							'Color',
+							'Blue',
+							optionStyle
+						);
+						// Now, we deselect the Color.
+						await pageObject.selectVariationSelectorOptions(
+							'Color',
+							'',
+							optionStyle
+						);
+						// Now, the attributes should look like this:
+						// Type: T-shirt
+						// Color: ''
+						// Size: XL
+						// Because the Size is XL, the only Colors possible are Red and Blue.
+						// Now if we select Size: S, the Color should auto-select to Green.
+						await pageObject.selectVariationSelectorOptions(
+							'Size',
+							'S',
+							optionStyle
+						);
+						// Now, the options should look like this:
+						// Type: T-shirt
+						// Color: Green
+						// Size: S
+
+						await pageObject.expectVariationSelectorOptions(
+							productAttributes,
+							{ Type: 'T-shirt', Color: 'Green', Size: 'S' },
+							optionStyle
+						);
+					} );
+				}
+			} );
+		}
+
+		test( `Pills: "X in cart" text displays correctly after auto-selection`, async ( {
+			page,
+			pageObject,
+			editor,
+		} ) => {
+			await pageObject.updateSingleProductTemplate();
+			await pageObject.setVariationSelectorAttributes( {
+				optionStyle: 'pills',
+				autoselect: true,
+			} );
+			await editor.saveSiteEditorEntities();
+
+			await test.step( 'Add the Blue/XL variation to cart', async () => {
+				await page.goto( productPermalink );
+
+				// Select Blue and XL to match the T-shirt, Blue, XL variation
+				await pageObject.selectVariationSelectorOptions(
+					'Color',
+					'Blue',
+					'pills'
+				);
+
+				// Type and Size should auto-select to T-shirt and XL
+				await pageObject.expectVariationSelectorOptions(
+					productAttributes,
+					{ Type: 'T-shirt', Color: 'Blue', Size: 'XL' },
+					'pills'
+				);
+
+				// Add to cart
+				const addToCartButton = page
+					.locator( '.wp-block-add-to-cart-with-options' )
+					.getByRole( 'button', { name: 'Add to cart' } );
+				await addToCartButton.click();
+
+				// Wait for the item to be added
+				await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			} );
+
+			await test.step( 'Verify "X in cart" displays after auto-selection on fresh page load', async () => {
+				// Reload the page to start fresh
+				await page.goto( productPermalink );
+
+				// Initially, only Type should be auto-selected (it's the only single option)
+				// The "1 in cart" text should NOT be visible yet because we haven't
+				// selected the Blue/XL variation
+				await expect( page.getByText( '1 in cart' ) ).toBeHidden();
+
+				// Now select Blue - this should auto-select Size to XL
+				// (since Blue only has one valid size: XL)
+				await pageObject.selectVariationSelectorOptions(
+					'Color',
+					'Blue',
+					'pills'
+				);
+
+				// After auto-selection completes, the button should show "1 in cart"
+				// because we now have the same variation (T-shirt, Blue, XL) selected
+				await expect( page.getByText( '1 in cart' ) ).toBeVisible();
+			} );
+		} );
 	} );
 } );

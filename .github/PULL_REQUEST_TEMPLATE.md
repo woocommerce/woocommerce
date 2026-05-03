@@ -37,7 +37,7 @@ Closes # .
 
 <!-- Include detailed instructions on how these changes can be tested. Review and follow the guide for how to write high-quality testing instructions. -->
 
-Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions), include your detailed testing instructions:
+Using the [WooCommerce Testing Instructions Guide](https://developer.woocommerce.com/docs/contribution/testing/writing-high-quality-testing-instructions/), include your detailed testing instructions:
 
 1.
 2.
@@ -51,6 +51,18 @@ Using the [WooCommerce Testing Instructions Guide](https://github.com/woocommerc
 <!-- Include environment details such as hosting type, plugins, theme, store size, store age, and relevant settings. -->
 <!-- Mention any analysis performed, such as assessing potential impacts on environment attributes and other plugins, performance profiling, or LLM/AI-based analysis. -->
 <!-- Within the testing details you provide, please ensure that no sensitive information (such as API keys, passwords, user data, etc.) is included in this public pull request. -->
+
+### Milestone
+
+<!-- DO NOT remove or modify this section (other than to check the box). -->
+
+<!-- milestone-target-selection -->
+- [ ] Automatically assign milestone for the **[next WooCommerce version](../blob/trunk/plugins/woocommerce/woocommerce.php#L6)**
+<!-- /milestone-target-selection -->
+
+> **Note:** Check the box above to have the milestone automatically assigned when merged.
+> Alternatively (e.g. for point releases), manually assign the appropriate milestone.
+
 
 ### Changelog entry
 

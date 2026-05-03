@@ -69,13 +69,13 @@ The copied file will now override the WooCommerce default template file, so you 
 
 ---
 
-**Note** A (desirable) side-effect of your templates being upgrade-safe is that WooCommerce core templates will update, but your custom overrides will not. You may occassionally see notices in your System Status report that says, e.g. "version 3.5.0 is out of date. The core version is 3.7.0". Should that happen, follow the Fixing Outdated WooCommerce Templates guide to bring them in line.
+**Note** A (desirable) side-effect of your templates being upgrade-safe is that WooCommerce core templates will update, but your custom overrides will not. You may occasionally see notices in your System Status report that says, e.g. "version 3.5.0 is out of date. The core version is 3.7.0". Should that happen, follow the Fixing Outdated WooCommerce Templates guide to bring them in line.
 
 ---
 
 ## Declare Theme Support for Custom Templates
 
-If you are a theme developer or using a theme with custom templates, you must declare WooCommerce theme support using the `add_theme_support` function. See [Declaring WooCommerce Support in Themes](https://github.com/woocommerce/woocommerce/wiki/Declaring-WooCommerce-support-in-themes) at GitHub.
+If you are a theme developer or using a theme with custom templates, you must declare WooCommerce theme support using the `add_theme_support` function. See [Declaring WooCommerce Support in Themes](/docs/theming/theme-development/classic-theme-developer-handbook/#declaring-woocommerce-support).
 
 If your theme has `woocommerce.php`, you will be unable to override `woocommerce/archive-product.php` custom template in your theme, as `woocommerce.php` has priority over other template files. This is intended to prevent display issues.
 

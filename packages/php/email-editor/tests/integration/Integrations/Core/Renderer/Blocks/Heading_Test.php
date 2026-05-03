@@ -110,6 +110,31 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it removes inline margin styles (not supported in email renderer).
+	 */
+	public function testItRemovesInlineMarginStyles(): void {
+		$content                        = '<h1 style="margin-top:10px;margin-bottom:12px;">This is Heading 1</h1>';
+		$parsed_heading                 = $this->parsed_heading;
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+		$html     = new \WP_HTML_Tag_Processor( $rendered );
+		$html->next_tag( array( 'tag_name' => 'h1' ) );
+
+		$heading_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $heading_style );
+		$this->assertStringNotContainsString( 'margin', $heading_style );
+
+		// Margin styles should also not leak to the wrapper table cell.
+		$html = new \WP_HTML_Tag_Processor( $rendered );
+		$html->next_tag( array( 'tag_name' => 'td' ) );
+		$table_cell_style = $html->get_attribute( 'style' );
+		$this->assertIsString( $table_cell_style );
+		$this->assertStringNotContainsString( 'margin', $table_cell_style );
+	}
+
+	/**
 	 * Test it uses inherited color from email_attrs when no color is specified
 	 */
 	public function testItUsesInheritedColorFromEmailAttrs(): void {
@@ -164,5 +189,61 @@ class Heading_Test extends \Email_Editor_Integration_Test_Case {
 		$this->assertStringContainsString( 'My Site Title', $rendered );
 		$this->assertStringContainsString( 'font-size:28px;', $rendered );
 		$this->assertStringContainsString( 'font-weight:900;', $rendered );
+	}
+
+	/**
+	 * Test it extracts alignment from has-text-align-center class when no textAlign attribute is set
+	 */
+	public function testItExtractsAlignmentFromHasTextAlignCenterClass(): void {
+		$parsed_heading = $this->parsed_heading;
+		// Ensure no textAlign or align attributes are set.
+		unset( $parsed_heading['attrs']['textAlign'] );
+		unset( $parsed_heading['attrs']['align'] );
+
+		$content                        = '<h1 class="has-text-align-center">Centered heading</h1>';
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:center;', $rendered );
+		$this->assertStringContainsString( 'align="center"', $rendered );
+	}
+
+	/**
+	 * Test it extracts alignment from has-text-align-right class when no textAlign attribute is set
+	 */
+	public function testItExtractsAlignmentFromHasTextAlignRightClass(): void {
+		$parsed_heading = $this->parsed_heading;
+		// Ensure no textAlign or align attributes are set.
+		unset( $parsed_heading['attrs']['textAlign'] );
+		unset( $parsed_heading['attrs']['align'] );
+
+		$content                        = '<h1 class="has-text-align-right">Right aligned heading</h1>';
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+		$this->assertStringContainsString( 'text-align:right;', $rendered );
+		$this->assertStringContainsString( 'align="right"', $rendered );
+	}
+
+	/**
+	 * Test it prioritizes textAlign attribute over has-text-align-* class
+	 */
+	public function testItPrioritizesTextAlignAttributeOverClass(): void {
+		$parsed_heading                       = $this->parsed_heading;
+		$parsed_heading['attrs']['textAlign'] = 'right';
+		unset( $parsed_heading['attrs']['align'] );
+
+		$content                        = '<h1 class="has-text-align-center">Heading with center class but right attribute</h1>';
+		$parsed_heading['innerHTML']    = $content;
+		$parsed_heading['innerContent'] = array( $content );
+
+		$rendered = $this->heading_renderer->render( $content, $parsed_heading, $this->rendering_context );
+		// Should use the attribute, not the class.
+		$this->assertStringContainsString( 'text-align:right;', $rendered );
+		$this->assertStringContainsString( 'align="right"', $rendered );
+		$this->assertStringNotContainsString( 'text-align:center;', $rendered );
+		$this->assertStringNotContainsString( 'align="center"', $rendered );
 	}
 }

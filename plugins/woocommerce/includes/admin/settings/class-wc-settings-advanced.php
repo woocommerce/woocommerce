@@ -5,6 +5,7 @@
  * @package  WooCommerce\Admin
  */
 
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -46,12 +47,18 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 */
 	protected function get_own_sections() {
 		$sections = array(
-			''                => __( 'Page setup', 'woocommerce' ),
-			'keys'            => __( 'REST API', 'woocommerce' ),
-			'webhooks'        => __( 'Webhooks', 'woocommerce' ),
-			'legacy_api'      => __( 'Legacy API', 'woocommerce' ),
-			'woocommerce_com' => __( 'WooCommerce.com', 'woocommerce' ),
+			''     => __( 'Page setup', 'woocommerce' ),
+			'keys' => __( 'REST API keys', 'woocommerce' ),
 		);
+
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		if ( $features_controller->feature_is_enabled( 'rest_api_caching' ) ) {
+			$sections['rest_api_caching'] = __( 'REST API caching', 'woocommerce' );
+		}
+
+		$sections['webhooks']        = __( 'Webhooks', 'woocommerce' );
+		$sections['legacy_api']      = __( 'Legacy API', 'woocommerce' );
+		$sections['woocommerce_com'] = __( 'WooCommerce.com', 'woocommerce' );
 
 		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
 			$sections['blueprint'] = __( 'Blueprint (beta)', 'woocommerce' );
@@ -437,6 +444,73 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			);
 
 		return apply_filters( 'woocommerce_settings_rest_api', $settings );
+	}
+
+	/**
+	 * Get settings for the REST API caching section.
+	 *
+	 * @return array
+	 */
+	protected function get_settings_for_rest_api_caching_section() {
+		$has_object_cache = wp_using_ext_object_cache();
+
+		$settings = array(
+			array(
+				'title' => __( 'REST API response cache', 'woocommerce' ),
+				'type'  => 'title',
+				'desc'  => __( 'These settings control backend caching and cache control headers for REST API responses.', 'woocommerce' ),
+				'id'    => 'rest_api_cache_options',
+			),
+		);
+
+		if ( ! $has_object_cache ) {
+			$settings[] = array(
+				'type'        => 'notice',
+				'id'          => 'rest_api_cache_warning',
+				'notice_type' => 'warning',
+				'text'        => sprintf(
+					/* translators: %1$s and %2$s are opening and closing <a> tags */
+					__( 'Backend caching requires a WordPress object cache plugin (Redis, Memcached, etc.) to be installed and active. %1$sLearn more about object caching%2$s.', 'woocommerce' ),
+					'<a href="https://developer.wordpress.org/reference/classes/wp_object_cache/" target="_blank">',
+					'</a>'
+				),
+			);
+		}
+
+		$backend_caching_setting = array(
+			'title'       => __( 'Enable backend caching', 'woocommerce' ),
+			'desc'        => __( 'Cache REST API responses on the server', 'woocommerce' ),
+			'id'          => 'woocommerce_rest_api_enable_backend_caching',
+			'type'        => 'checkbox',
+			'default'     => 'no',
+			'disabled'    => ! $has_object_cache,
+			'fixed_value' => $has_object_cache ? null : 'no',
+			'desc_tip'    => __( 'Enables responses for REST API endpoints configured as cacheable. Requires an external object cache.<br/>This setting should be enabled only if no other plugins that handle caching are active.', 'woocommerce' ),
+		);
+
+		$settings[] = $backend_caching_setting;
+
+		$settings[] = array(
+			'title'    => __( 'Enable cache control headers', 'woocommerce' ),
+			'desc'     => __( 'Send cache control headers and support 304 Not Modified responses', 'woocommerce' ),
+			'id'       => 'woocommerce_rest_api_enable_cache_headers',
+			'type'     => 'checkbox',
+			'default'  => 'yes',
+			'desc_tip' => __( 'Enables including ETag and Cache-Control headers, and returning 304 Not Modified responses, for REST API endpoints configured as cacheable.', 'woocommerce' ),
+		);
+
+		$settings[] = array(
+			'type' => 'sectionend',
+			'id'   => 'rest_api_cache_options',
+		);
+
+		/**
+		 * Filter REST API cache settings.
+		 *
+		 * @since 10.5.0
+		 * @param array $settings REST API cache settings.
+		 */
+		return apply_filters( 'woocommerce_rest_api_cache_settings', $settings );
 	}
 
 	/**

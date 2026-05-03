@@ -130,11 +130,12 @@ module.exports = function ( grunt ) {
 					],
 				},
 			},
-			// Concatenate number validation utility function with shipping zone methods
+			// Concatenate number validation and maybe modify decimal utility functions with shipping zone methods
 			js: {
 				files: {
 					'<%= dirs.jsDest %>/admin/wc-shipping-zone-methods.js': [
 						'<%= dirs.js %>/admin/utils/number-validation.js',
+						'<%= dirs.js %>/admin/utils/maybe-modify-decimal.js',
 						'<%= dirs.jsDest %>/admin/wc-shipping-zone-methods.js',
 					],
 				},

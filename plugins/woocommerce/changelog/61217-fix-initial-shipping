@@ -1,4 +1,0 @@
-Significance: minor
-Type: fix
-
-Persist the initially selected shipping option in the PayPal payment page.

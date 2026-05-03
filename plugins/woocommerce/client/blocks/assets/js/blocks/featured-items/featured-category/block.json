@@ -10,10 +10,13 @@
 		},
 		"align": [ "wide", "full" ],
 		"ariaLabel": true,
-		"html": false,
 		"color": {
 			"background": true,
 			"text": true
+		},
+		"html": false,
+		"filter": {
+			"duotone": true
 		},
 		"spacing": {
 			"padding": true,
@@ -26,15 +29,14 @@
 			"color": true,
 			"radius": true,
 			"width": true,
+			"__experimentalDefaultControls": {
+				"color": true,
+				"radius": true,
+				"width": true
+			},
 			"__experimentalSkipSerialization": true
 		}
 	},
-	"allowedBlocks": [
-		"woocommerce/category-title",
-		"woocommerce/category-description",
-		"core/heading",
-		"core/buttons"
-	],
 	"attributes": {
 		"alt": {
 			"type": "string",
@@ -96,6 +98,11 @@
 		"previewCategory": {
 			"type": "object",
 			"default": null
+		}
+	},
+	"selectors": {
+		"filter": {
+			"duotone": ".wp-block-woocommerce-featured-category .wc-block-featured-category__background-image"
 		}
 	},
 	"textdomain": "woocommerce",

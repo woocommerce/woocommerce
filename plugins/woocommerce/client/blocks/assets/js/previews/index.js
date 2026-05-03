@@ -1,3 +1,4 @@
+export { previewProductResponseItems } from './product-response-items';
 export { previewProducts } from './products';
 export { previewCart } from './cart';
 export { previewReviews } from './reviews';

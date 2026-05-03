@@ -294,6 +294,10 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['value'] = self::get_option( $value['id'], $value['default'] );
 				}
 
+				if ( ! is_null( $value['fixed_value'] ?? null ) ) {
+					$value['value'] = $value['fixed_value'];
+				}
+
 				// Custom attribute handling.
 				$custom_attributes = array();
 
@@ -334,6 +338,20 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						<?php
 						echo wp_kses_post( wpautop( wptexturize( $value['text'] ) ) );
 						echo '</td></tr>';
+						break;
+
+					// Notice.
+					case 'notice':
+						$notice_type = $value['notice_type'] ?? 'info';
+						$notice_text = $value['text'] ?? '';
+
+						?>
+						</table>
+						<div class="notice notice-<?php echo esc_attr( $notice_type ); ?> inline">
+							<p><?php echo wp_kses_post( $notice_text ); ?></p>
+						</div>
+						<table class="form-table" role="presentation">
+						<?php
 						break;
 
 					// Section Ends.
@@ -966,6 +984,14 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 						break;
 					case 'relative_date_selector':
 						$value = wc_parse_relative_date_option( $raw_value );
+						break;
+					case 'password':
+						// Non-string or absent → null so the option is skipped, not overwritten.
+						// Only trim — no wp_strip_all_tags() or wc_clean() which would corrupt
+						// passwords containing '<' or percent-like sequences.
+						// $raw_value is already wp_unslash()ed upstream, so no stripslashes() needed.
+						// Matches WC_Settings_API::validate_password_field() behavior.
+						$value = is_string( $raw_value ) ? trim( $raw_value ) : null;
 						break;
 					default:
 						$value = wc_clean( $raw_value );

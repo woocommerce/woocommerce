@@ -18,6 +18,7 @@ export const BlockSettings = ( {
 		<InspectorControls>
 			<PanelBody title={ __( 'Style', 'woocommerce' ) }>
 				<ToggleControl
+					__nextHasNoMarginBottom
 					label={ __( 'Show form step numbers', 'woocommerce' ) }
 					checked={ showFormStepNumbers }
 					onChange={ () =>
@@ -27,6 +28,7 @@ export const BlockSettings = ( {
 					}
 				/>
 				<ToggleControl
+					__nextHasNoMarginBottom
 					label={ __( 'Dark mode inputs', 'woocommerce' ) }
 					help={ __(
 						'Inputs styled specifically for use on dark background colors.',

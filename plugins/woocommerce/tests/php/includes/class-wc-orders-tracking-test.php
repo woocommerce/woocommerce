@@ -143,18 +143,12 @@ class WC_Orders_Tracking_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Returns an object mocking what we need from `\WP_Screen`.
+	 * Returns a WP_Screen instance for use in tests.
 	 *
-	 * @return object
+	 * @return \WP_Screen
 	 */
 	private function get_screen_mock() {
-		$screen_mock = $this->getMockBuilder( stdClass::class )->setMethods( array( 'in_admin', 'add_option' ) )->getMock();
-		$screen_mock->method( 'in_admin' )->willReturn( true );
-		foreach ( array( 'id', 'base', 'action', 'post_type' ) as $key ) {
-			$screen_mock->{$key} = '';
-		}
-
-		return $screen_mock;
+		return \WP_Screen::get( '' );
 	}
 
 	/**

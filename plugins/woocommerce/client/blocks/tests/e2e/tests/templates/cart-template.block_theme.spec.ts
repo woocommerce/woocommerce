@@ -18,7 +18,7 @@ test.describe( 'Test the cart template', () => {
 			showWelcomeGuide: false,
 		} );
 		await expect(
-			editor.canvas.getByLabel( 'Block: Title' )
+			editor.canvas.getByLabel( 'Block: Cart', { exact: true } )
 		).toBeVisible();
 	} );
 } );

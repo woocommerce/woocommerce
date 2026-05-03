@@ -139,6 +139,8 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 */
 	public function test_options_are_set() {
 		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
+
 		WC_Install::install();
 
 		$options = array(
@@ -157,6 +159,8 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	 */
 	public function test_woocommerce_admin_installed_action() {
 		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
+
 		WC_Install::install();
 		$this->assertTrue( did_action( 'woocommerce_admin_installed' ) > 0 );
 	}
@@ -192,11 +196,45 @@ class WC_Admin_Tests_Install extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Test scheduled import is set as default for new installations.
+	 *
+	 * @return void
+	 */
+	public function test_enable_analytics_scheduled_import_for_new_installation() {
+		// Ensure the option doesn't exist before testing.
+		delete_option( 'woocommerce_analytics_scheduled_import' );
+
+		// Call the method to set the default.
+		WC_Install::enable_analytics_scheduled_import();
+
+		// Verify the option was set to 'yes'.
+		$this->assertEquals( 'yes', get_option( 'woocommerce_analytics_scheduled_import' ) );
+	}
+
+	/**
+	 * Test scheduled import option is not overwritten if already exists.
+	 *
+	 * @return void
+	 */
+	public function test_enable_analytics_scheduled_import_preserves_existing_value() {
+		// Set the option to 'no' to simulate an existing installation with the option already set.
+		update_option( 'woocommerce_analytics_scheduled_import', 'no' );
+
+		// Call the method which should not overwrite the existing value.
+		WC_Install::enable_analytics_scheduled_import();
+
+		// Verify the option remains 'no' (not overwritten).
+		$this->assertEquals( 'no', get_option( 'woocommerce_analytics_scheduled_import' ) );
+	}
+
+	/**
 	 * Test migrate_options();
 	 * @return void
 	 */
 	public function test_migrate_options() {
 		delete_transient( 'wc_installing' );
+		delete_option( 'wc_installing' );
+
 		WC_Install::install();
 		$this->assertTrue( defined( 'WC_ADMIN_MIGRATING_OPTIONS' ) );
 		$migrated_options = array(

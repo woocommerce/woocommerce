@@ -119,6 +119,8 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 			<InspectorControls>
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ToggleGroupControl
+						__nextHasNoMarginBottom
+						__next40pxDefaultSize
 						className="wc-block-editor-mini-cart__cart-icon-toggle"
 						isBlock
 						label={ __( 'Cart Icon', 'woocommerce' ) }
@@ -143,10 +145,13 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						/>
 					</ToggleGroupControl>
 					<BaseControl
+						__nextHasNoMarginBottom
 						id="wc-block-mini-cart__display-toggle"
 						label={ __( 'Display', 'woocommerce' ) }
 					>
 						<ToggleControl
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
 							label={ __( 'Display total price', 'woocommerce' ) }
 							help={ __(
 								'Toggle to display the total price of products in the shopping cart. If no products have been added, the price will not display.',
@@ -161,6 +166,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						/>
 					</BaseControl>
 					<BaseControl
+						__nextHasNoMarginBottom
 						id="wc-block-mini-cart__product-count-basecontrol"
 						label={ __( 'Show Cart Item Count:', 'woocommerce' ) }
 					>
@@ -200,6 +206,8 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 					</BaseControl>
 					{ isSiteEditor && (
 						<ToggleGroupControl
+							__nextHasNoMarginBottom
+							__next40pxDefaultSize
 							className="wc-block-editor-mini-cart__render-in-cart-and-checkout-toggle"
 							label={ __(
 								'Mini-Cart in cart and checkout pages',
@@ -257,10 +265,12 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 						</>
 					) }
 					<BaseControl
+						__nextHasNoMarginBottom
 						id="wc-block-mini-cart__add-to-cart-behaviour-toggle"
 						label={ __( 'Behavior', 'woocommerce' ) }
 					>
 						<ToggleControl
+							__nextHasNoMarginBottom
 							label={ __(
 								'Open drawer when adding',
 								'woocommerce'
@@ -279,6 +289,7 @@ const Edit = ( { attributes, setAttributes }: Props ): ReactElement => {
 							checked={ addToCartBehaviour === 'open_drawer' }
 						/>
 						<ToggleControl
+							__nextHasNoMarginBottom
 							label={ __(
 								'Navigate to checkout when clicking the Mini-Cart, instead of opening the drawer.',
 								'woocommerce'

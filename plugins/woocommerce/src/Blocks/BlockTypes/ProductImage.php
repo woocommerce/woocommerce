@@ -161,9 +161,13 @@ class ProductImage extends AbstractBlock {
 		}
 
 		$featured_image_id          = (int) $product->get_image_id();
-		$gallery_image_ids          = ProductGalleryUtils::get_all_image_ids( $product );
-		$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
-		$provided_image_id_is_valid = $image_id && in_array( $image_id, $available_image_ids, true );
+		$provided_image_id_is_valid = false;
+
+		if ( $image_id ) {
+			$gallery_image_ids          = ProductGalleryUtils::get_all_image_ids( $product );
+			$available_image_ids        = array_merge( [ $featured_image_id ], $gallery_image_ids );
+			$provided_image_id_is_valid = in_array( $image_id, $available_image_ids, true );
+		}
 
 		$target_image_id = $provided_image_id_is_valid ? $image_id : $featured_image_id;
 
@@ -173,12 +177,39 @@ class ProductImage extends AbstractBlock {
 
 		$alt_text = get_post_meta( $target_image_id, '_wp_attachment_image_alt', true );
 
+		/**
+		 * Filters the loading attribute for product images.
+		 *
+		 * Allowed values are 'lazy', 'eager', and 'auto'. Any other value will result in default browser behavior.
+		 *
+		 * @since 10.6.0
+		 *
+		 * @param string $loading_attr The loading attribute. Default 'lazy'.
+		 * @param int    $image_id     Target image ID.
+		 */
+		$loading_attr = apply_filters(
+			'woocommerce_product_image_loading_attr',
+			'lazy',
+			$target_image_id,
+		);
+
+		$loading_attr    = is_string( $loading_attr ) ? strtolower( trim( $loading_attr ) ) : '';
+		$allowed_loading = array( 'lazy', 'eager', 'auto' );
+
+		if ( ! in_array( $loading_attr, $allowed_loading, true ) ) {
+			$loading_attr = '';
+		}
+
 		$attr = array(
 			'alt'           => empty( $alt_text ) ? $product->get_title() : $alt_text,
 			'data-testid'   => 'product-image',
-			'data-image-id' => $provided_image_id_is_valid ? $image_id : $featured_image_id,
+			'data-image-id' => $target_image_id,
 			'style'         => $image_style,
 		);
+
+		if ( ! empty( $loading_attr ) ) {
+			$attr['loading'] = $loading_attr;
+		}
 
 		return $provided_image_id_is_valid ? wp_get_attachment_image( $image_id, $image_size, false, $attr ) : $product->get_image( $image_size, $attr );
 	}

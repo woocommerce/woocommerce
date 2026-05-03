@@ -187,6 +187,28 @@ jobs:
             :info: *Cherry pick <${{ env.CHERRY_PICK_PR_URL }}|created> (${{ env.BASE_BRANCH }} → `trunk`)* Please ensure <${{ env.CHERRY_PICK_PR_URL }}|this cherry pick> is merged before releasing. Source PR: _<${{ env.SOURCE_PR_URL }}|#${{ env.SOURCE_PR_NUMBER }} - ${{ env.SOURCE_PR_TITLE }}>_.
             ${{ env.ADD_CP_TO_FROZEN_NAG == 'true' && format('\n\nNOTE: This PR might need to be cherry-picked to the frozen release ({0}).', env.NEXT_BRANCH) || '' }}
 
+  handle-skipped:
+    needs: [prepare, cherry-pick, frozen-release-check]
+    runs-on: ubuntu-latest
+    if: ${{ always() && needs.cherry-pick.outputs.status == 'skipped' }}
+    steps:
+      - name: Comment on original PR about skip
+        uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1
+        env:
+          ERROR_MESSAGE: ${{ needs.cherry-pick.outputs.error_message }}
+        with:
+          github-token: ${{ secrets.WC_BOT_PR_CREATE_TOKEN || secrets.GITHUB_TOKEN }}
+          script: |
+            let body = '⚠️ **Cherry-pick to `trunk` was skipped.**\n\n' +
+              '**Reason:** ' + process.env.ERROR_MESSAGE + '\n\n';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: parseInt('${{ needs.prepare.outputs.pr_number }}'),
+              body
+            });
+
   handle-failures:
     needs: [prepare, cherry-pick, frozen-release-check]
     runs-on: ubuntu-latest

@@ -18,7 +18,6 @@ import { WCSBanner } from './components/wcs-banner';
 import { TaskProps, ShippingRecommendationProps } from './types';
 import { redirectToWCSSettings } from './utils';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
-import { isFeatureEnabled } from '~/utils/features';
 
 /**
  * Plugins required to automate shipping.
@@ -157,16 +156,10 @@ export const ShippingRecommendation = ( {
 					'woocommerce'
 				) }
 				eventName="tasklist_shipping_recommendation_visit_marketplace_click"
-				targetUrl={
-					isFeatureEnabled( 'marketplace' )
-						? getAdminLink(
-								'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
-						  )
-						: 'https://woocommerce.com/product-category/woocommerce-extensions/shipping-delivery-and-fulfillment/'
-				}
-				linkType={
-					isFeatureEnabled( 'marketplace' ) ? 'wc-admin' : 'external'
-				}
+				targetUrl={ getAdminLink(
+					'admin.php?page=wc-admin&tab=extensions&path=/extensions&category=shipping-delivery-and-fulfillment'
+				) }
+				linkType="wc-admin"
 			/>
 		</div>
 	);

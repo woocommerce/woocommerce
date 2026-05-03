@@ -1,214 +1,206 @@
 /**
  * External dependencies
  */
-import { expect, test as base } from '@woocommerce/e2e-utils';
-
-/**
- * Internal dependencies
- */
-import { AccordionPage } from './accordion.page';
+import { expect, test } from '@woocommerce/e2e-utils';
 
 const blockData = {
 	slug: 'woocommerce/accordion-group',
 };
 
-const test = base.extend< { pageObject: AccordionPage } >( {
-	pageObject: async (
-		{ page, editor, frontendUtils, requestUtils },
-		use
-	) => {
-		const pageObject = new AccordionPage( {
-			page,
-			editor,
-			frontendUtils,
-			requestUtils,
-		} );
-		await use( pageObject );
+const accordionInnerBlocks = [
+	{
+		name: 'woocommerce/accordion-item',
+		innerBlocks: [
+			{
+				name: 'woocommerce/accordion-header',
+				attributes: {
+					title: 'First Accordion Header',
+				},
+			},
+			{
+				name: 'woocommerce/accordion-panel',
+				innerBlocks: [
+					{
+						name: 'core/paragraph',
+						attributes: {
+							content: 'First accordion content',
+						},
+					},
+				],
+			},
+		],
 	},
-} );
+	{
+		name: 'woocommerce/accordion-item',
+		innerBlocks: [
+			{
+				name: 'woocommerce/accordion-header',
+				attributes: {
+					title: 'Second Accordion Header',
+				},
+			},
+			{
+				name: 'woocommerce/accordion-panel',
+				innerBlocks: [
+					{
+						name: 'core/paragraph',
+						attributes: {
+							content: 'Second accordion content',
+						},
+					},
+				],
+			},
+		],
+	},
+];
 
-test.describe( `${ blockData.slug } Block`, () => {
+test.describe( `${ blockData.slug } Block - Deprecation`, () => {
 	test.beforeEach( async ( { admin } ) => {
 		await admin.createNewPost();
 	} );
 
-	test( 'can be inserted in Post Editor and it is visible on the frontend when feature flag is enabled', async ( {
+	test( 'shows deprecation notice and converts all inner blocks to core accordion on upgrade (WP 6.9+)', async ( {
 		editor,
 		frontendUtils,
+		page,
+		wpCoreVersion,
 	} ) => {
-		await editor.insertBlock( { name: blockData.slug } );
-		const blockLocator = await editor.getBlockByName( blockData.slug );
-		await expect(
-			blockLocator.getByLabel( 'Accordion title' )
-		).toHaveCount( 2 );
-		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion < 6.9,
+			'This test requires WordPress 6.9 or later'
 		);
-		await expect( blockLocatorFrontend.getByRole( 'button' ) ).toHaveCount(
-			2
-		);
-	} );
 
-	test( 'can add title and panel content', async ( {
-		editor,
-		frontendUtils,
-		pageObject,
-	} ) => {
-		await pageObject.insertAccordionGroup( [
-			{
-				title: 'Accordion title 1',
-				content: 'Test paragraph content for first panel',
-			},
-			{
-				title: 'Accordion title 2',
-				content: 'Test paragraph content for second panel',
-			},
-		] );
-		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
-		);
+		// Insert WooCommerce accordion block with inner blocks and content.
+		await editor.insertBlock( {
+			name: blockData.slug,
+			innerBlocks: accordionInnerBlocks,
+		} );
+
+		// Wait for the deprecation notice to appear.
 		await expect(
-			blockLocatorFrontend.getByText( 'Accordion title 1' )
+			editor.canvas.getByText(
+				'This version of the Accordion block is outdated. Upgrade to continue using.'
+			)
+		).toBeVisible();
+
+		// Verify legacy block still renders as expected before upgrade. Save as draft and preview it.
+		await editor.saveDraft();
+		const postId = await page.evaluate( () => {
+			return window.wp.data.select( 'core/editor' ).getCurrentPostId();
+		} );
+		await page.goto( `/?p=${ postId }&preview=true` );
+		const legacyAccordionFrontend = frontendUtils.page.locator(
+			'.wp-block-woocommerce-accordion-group'
+		);
+		await expect( legacyAccordionFrontend ).toBeVisible();
+
+		// Verify legacy accordion has accordion items with buttons.
+		const legacyAccordionButtons =
+			legacyAccordionFrontend.getByRole( 'button' );
+		const legacyItemCount = await legacyAccordionButtons.count();
+		expect( legacyItemCount ).toBe( 2 );
+
+		// Verify the content is visible.
+		await expect(
+			legacyAccordionFrontend.getByText( 'First Accordion Header' )
 		).toBeVisible();
 		await expect(
-			blockLocatorFrontend.getByText( 'Accordion title 2' )
+			legacyAccordionFrontend.getByText( 'Second Accordion Header' )
 		).toBeVisible();
-		await expect(
-			blockLocatorFrontend.getByText(
-				'Test paragraph content for first panel'
-			)
-		).toBeAttached();
-		await expect(
-			blockLocatorFrontend.getByText(
-				'Test paragraph content for second panel'
-			)
-		).toBeAttached();
+
+		// Go back to editor.
+		await page.goBack();
+
+		// Verify upgrade button is displayed.
+		const upgradeButton = editor.canvas.getByRole( 'button', {
+			name: 'Upgrade Block',
+		} );
+		await expect( upgradeButton ).toBeVisible();
+
+		// Click the upgrade button.
+		await upgradeButton.click();
+
+		// Verify the block was converted to core/accordion.
+		const coreAccordion = await editor.getBlockByName( 'core/accordion' );
+		await expect( coreAccordion ).toBeVisible();
+
+		// Verify the WooCommerce accordion block is no longer present.
+		const wooAccordion = editor.canvas.locator(
+			'[data-type="woocommerce/accordion-group"]'
+		);
+		await expect( wooAccordion ).toHaveCount( 0 );
+
+		// Verify all inner blocks are converted correctly.
+		// Check that accordion items exist (woocommerce/accordion-item → core/accordion-item).
+		const coreAccordionItems = editor.canvas.locator(
+			'[data-type="core/accordion-item"]'
+		);
+		const itemCount = await coreAccordionItems.count();
+		expect( itemCount ).toBeGreaterThan( 0 );
+
+		// Check accordion headings (woocommerce/accordion-header → core/accordion-heading).
+		const coreAccordionHeadings = editor.canvas.locator(
+			'[data-type="core/accordion-heading"]'
+		);
+		await expect( coreAccordionHeadings ).toHaveCount( itemCount );
+
+		// Check accordion panels (woocommerce/accordion-panel → core/accordion-panel).
+		const coreAccordionPanels = editor.canvas.locator(
+			'[data-type="core/accordion-panel"]'
+		);
+		await expect( coreAccordionPanels ).toHaveCount( itemCount );
+
+		// Verify no WooCommerce accordion inner blocks remain.
+		const wooAccordionItems = editor.canvas.locator(
+			'[data-type="woocommerce/accordion-item"]'
+		);
+		await expect( wooAccordionItems ).toHaveCount( 0 );
+
+		const wooAccordionHeaders = editor.canvas.locator(
+			'[data-type="woocommerce/accordion-header"]'
+		);
+		await expect( wooAccordionHeaders ).toHaveCount( 0 );
+
+		const wooAccordionPanels = editor.canvas.locator(
+			'[data-type="woocommerce/accordion-panel"]'
+		);
+		await expect( wooAccordionPanels ).toHaveCount( 0 );
+
+		// Publish the post.
+		await editor.publishAndVisitPost();
+
+		// Verify the core accordion block is visible on the frontend.
+		const accordionFrontend = frontendUtils.page.locator(
+			'.wp-block-accordion'
+		);
+		await expect( accordionFrontend ).toBeVisible();
+
+		// Verify accordion buttons are present.
+		const accordionButtons = accordionFrontend.getByRole( 'button' );
+		await expect( accordionButtons ).toHaveCount( itemCount );
 	} );
 
-	test( 'can toggle panel visibility', async ( {
+	test( 'does not show deprecation notice in WordPress 6.8 or earlier', async ( {
 		editor,
-		frontendUtils,
-		pageObject,
+		wpCoreVersion,
 	} ) => {
-		await pageObject.insertAccordionGroup( [
-			{
-				title: 'Accordion title',
-				content: 'Test paragraph content for first panel',
-			},
-			{
-				title: 'Accordion title 2',
-				content: 'Test paragraph content for second panel',
-			},
-		] );
-		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
+		// eslint-disable-next-line playwright/no-skipped-test
+		test.skip(
+			wpCoreVersion >= 6.9,
+			'This test is only for WordPress 6.8 or earlier'
 		);
-		await expect(
-			blockLocatorFrontend.getByText(
-				'Test paragraph content for first panel'
-			)
-		).not.toBeInViewport();
-		await blockLocatorFrontend.getByRole( 'button' ).first().click();
-		await expect(
-			blockLocatorFrontend.getByText(
-				'Test paragraph content for first panel'
-			)
-		).toBeInViewport();
-	} );
 
-	test( 'can set panel to open by default and should close when clicked', async ( {
-		editor,
-		frontendUtils,
-		pageObject,
-	} ) => {
-		await pageObject.insertAccordionGroup( [
-			{
-				title: 'Accordion title',
-				content: 'Test paragraph content 1',
-			},
-			{
-				title: 'Accordion title 2',
-				content: 'Test paragraph content 2',
-			},
-		] );
-		const accordionPanel = await editor.getBlockByName(
-			'woocommerce/accordion-item'
+		// Insert WooCommerce accordion block with inner blocks and content.
+		await editor.insertBlock( {
+			name: blockData.slug,
+			innerBlocks: accordionInnerBlocks,
+		} );
+
+		// Verify deprecation notice is NOT shown.
+		const deprecationNotice = editor.canvas.getByText(
+			'This version of the Accordion block is outdated. Upgrade to continue using.'
 		);
-		await editor.selectBlocks( accordionPanel.first() );
-
-		// Open block settings sidebar and check "Open by default" option
-		await editor.openDocumentSettingsSidebar();
-		await editor.page
-			.getByLabel( 'Settings' )
-			.getByRole( 'checkbox', { name: 'Open by default' } )
-			.check();
-
-		// Publish and visit post and check that the panel is hidden.
-		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
-		);
-		await expect(
-			blockLocatorFrontend.getByText( 'Test paragraph content 1' )
-		).toBeInViewport();
-		await blockLocatorFrontend.getByRole( 'button' ).first().click();
-		await expect(
-			blockLocatorFrontend.getByText( 'Test paragraph content 1' )
-		).not.toBeInViewport();
-	} );
-
-	test( 'can set to auto close when another panel is clicked', async ( {
-		editor,
-		frontendUtils,
-		pageObject,
-	} ) => {
-		await pageObject.insertAccordionGroup( [
-			{
-				title: 'Accordion title 1',
-				content: 'Test paragraph content 1',
-			},
-			{
-				title: 'Accordion title 2',
-				content: 'Test paragraph content 2',
-			},
-			{
-				title: 'Accordion title 3',
-				content: 'Test paragraph content 3',
-			},
-		] );
-		const accordionPanel = await editor.getBlockByName(
-			'woocommerce/accordion-group'
-		);
-		await editor.selectBlocks( accordionPanel.first() );
-
-		// Open block settings sidebar and check "Open by default" option
-		await editor.openDocumentSettingsSidebar();
-		await editor.page
-			.getByLabel( 'Settings' )
-			.getByRole( 'checkbox', {
-				name: 'Auto-close',
-			} )
-			.check();
-
-		// Publish and visit post and check that the panel is hidden.
-		await editor.publishAndVisitPost();
-		const blockLocatorFrontend = await frontendUtils.getBlockByName(
-			blockData.slug
-		);
-		await blockLocatorFrontend.getByRole( 'button' ).first().click();
-		await expect(
-			blockLocatorFrontend.getByText( 'Test paragraph content 1' )
-		).toBeInViewport();
-		await blockLocatorFrontend.getByRole( 'button' ).nth( 1 ).click();
-		await expect(
-			blockLocatorFrontend.getByText( 'Test paragraph content 1' )
-		).not.toBeInViewport();
-		await blockLocatorFrontend.getByRole( 'button' ).nth( 2 ).click();
-		await expect(
-			blockLocatorFrontend.getByText( 'Test paragraph content 2' )
-		).not.toBeInViewport();
+		await expect( deprecationNotice ).toBeHidden();
 	} );
 } );

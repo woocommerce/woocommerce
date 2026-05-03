@@ -81,4 +81,23 @@ class CategoryTitle extends AbstractBlock {
 	protected function get_block_type_uses_context() {
 		return [ 'termId', 'termTaxonomy' ];
 	}
+
+	/**
+	 * Disable the frontend script for this block.
+	 *
+	 * @param string|null $key Data to get, or default to everything.
+	 * @return null
+	 */
+	protected function get_block_type_script( $key = null ) {
+		return null;
+	}
+
+	/**
+	 * Disable the style handle for this block.
+	 *
+	 * @return null
+	 */
+	protected function get_block_type_style() {
+		return null;
+	}
 }

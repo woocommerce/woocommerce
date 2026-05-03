@@ -7,7 +7,6 @@ import { useEditorContext } from '@woocommerce/base-context';
 import {
 	createBlock,
 	getBlockType,
-	// @ts-expect-error Type definitions for this function are missing in Gutenberg
 	createBlocksFromInnerBlocksTemplate,
 	TemplateArray,
 } from '@wordpress/blocks';
@@ -30,7 +29,7 @@ export const useForcedLayout = ( {
 	// An array of registered blocks that may be forced in this particular layout.
 	registeredBlocks: Array< string >;
 	// The default template for the inner blocks in this layout.
-	defaultTemplate: TemplateArray;
+	defaultTemplate?: TemplateArray;
 } ) => {
 	const currentRegisteredBlocks = useRef( registeredBlocks );
 	const currentDefaultTemplate = useRef( defaultTemplate );

@@ -64,6 +64,9 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'id', $schema );
 		$this->assertArrayHasKey( 'user_id', $schema );
 		$this->assertArrayHasKey( 'name', $schema );
+		$this->assertArrayHasKey( 'first_name', $schema );
+		$this->assertArrayHasKey( 'last_name', $schema );
+		$this->assertArrayHasKey( 'email', $schema );
 		$this->assertArrayHasKey( 'username', $schema );
 		$this->assertArrayHasKey( 'country', $schema );
 		$this->assertArrayHasKey( 'city', $schema );
@@ -91,7 +94,7 @@ class WC_Admin_Tests_API_Reports_Customers extends WC_REST_Unit_Test_Case {
 		$data       = $response->get_data();
 		$properties = $data['schema']['properties'];
 
-		$this->assertCount( 15, $properties );
+		$this->assertCount( 18, $properties );
 		$this->assert_report_item_schema( $properties );
 	}
 

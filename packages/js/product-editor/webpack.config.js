@@ -4,7 +4,6 @@
 const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const path = require( 'path' );
 const RemoveEmptyScriptsPlugin = require( 'webpack-remove-empty-scripts' );
-const WebpackRTLPlugin = require( 'webpack-rtl-plugin' );
 
 /**
  * Internal dependencies
@@ -13,6 +12,7 @@ const {
 	webpackConfig,
 	plugin,
 	StyleAssetPlugin,
+	WebpackRTLPlugin,
 } = require( '@woocommerce/internal-style-build' );
 const {
 	blockEntryPoints,
@@ -23,13 +23,20 @@ const {
 const NODE_ENV = process.env.NODE_ENV || 'development';
 
 module.exports = {
-	mode: process.env.NODE_ENV || 'development',
-	cache: ( NODE_ENV !== 'development' && { type: 'memory' } ) || {
+	mode: NODE_ENV,
+	cache: ( process.env.CI && { type: 'memory' } ) || {
 		type: 'filesystem',
 		cacheDirectory: path.resolve(
 			__dirname,
 			'node_modules/.cache/webpack'
 		),
+		buildDependencies: {
+			config: [
+				__filename,
+				path.resolve( __dirname, '../../../pnpm-lock.yaml' ),
+				require.resolve( '@woocommerce/internal-style-build' ),
+			],
+		},
 	},
 	entry: {
 		'build-style': __dirname + '/src/style.scss',
@@ -52,16 +59,7 @@ module.exports = {
 			},
 			chunkFilename: 'chunks/[id].style.css',
 		} ),
-		new WebpackRTLPlugin( {
-			test: /(?<!style)\.css$/,
-			filename: '[name]-rtl.css',
-			minify: NODE_ENV === 'development' ? false : { safe: true },
-		} ),
-		new WebpackRTLPlugin( {
-			test: /style\.css$/,
-			filename: '[name]/style-rtl.css',
-			minify: NODE_ENV === 'development' ? false : { safe: true },
-		} ),
+		new WebpackRTLPlugin(),
 		new CopyWebpackPlugin( {
 			patterns: [
 				{

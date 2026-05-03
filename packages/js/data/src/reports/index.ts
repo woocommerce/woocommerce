@@ -3,7 +3,6 @@
  */
 
 import { createReduxStore, register } from '@wordpress/data';
-import { SelectFromMap } from '@automattic/data-stores';
 
 /**
  * Internal dependencies
@@ -14,7 +13,7 @@ import * as actions from './actions';
 import * as resolvers from './resolvers';
 import controls from '../controls';
 import reducer, { State } from './reducer';
-import { WPDataSelectors } from '../types';
+import { SelectFromMap, WPDataSelectors } from '../types';
 import { PromiseifySelectors } from '../types/promiseify-selectors';
 export * from './types';
 export type { State };
@@ -62,3 +61,9 @@ type RemoveStateParam< F > = F extends (
 ) => infer R // eslint-disable-line @typescript-eslint/no-unused-vars -- Name is used to infer the type to avoid `any`.
 	? T
 	: never;
+
+declare module '@wordpress/data' {
+	interface StoreRegistry {
+		[ STORE_NAME ]: typeof store;
+	}
+}

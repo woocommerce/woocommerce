@@ -212,6 +212,35 @@ class WC_Post_Types {
 			)
 		);
 
+		register_taxonomy(
+			'pos_product_visibility',
+			/**
+			 * Filter the post types that the POS product visibility taxonomy is attached to.
+			 *
+			 * @since 10.5.0
+			 * @param array $post_types Array of post types.
+			 */
+			apply_filters( 'woocommerce_taxonomy_objects_pos_product_visibility', array( 'product', 'product_variation' ) ),
+			/**
+			 * Filter the arguments for the POS product visibility taxonomy.
+			 *
+			 * @since 10.5.0
+			 * @param array $args Array of taxonomy arguments.
+			 */
+			apply_filters(
+				'woocommerce_taxonomy_args_pos_product_visibility',
+				array(
+					'hierarchical'      => false,
+					'show_ui'           => false,
+					'show_in_nav_menus' => false,
+					'query_var'         => false,
+					'rewrite'           => false,
+					'public'            => false,
+					'label'             => _x( 'POS Product visibility', 'Taxonomy name', 'woocommerce' ),
+				)
+			)
+		);
+
 		global $wc_product_attributes;
 
 		$wc_product_attributes = array();
@@ -312,9 +341,13 @@ class WC_Post_Types {
 		}
 
 		// If theme support changes, we may need to flush permalinks since some are changed based on this flag.
-		$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
-		if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
-			update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+		// Skip this check in WP-CLI and cron contexts: themes may not be loaded (e.g. --skip-themes),
+		// which would incorrectly record theme support as "no" and corrupt rewrite rules on the frontend.
+		if ( ! ( defined( 'WP_CLI' ) && WP_CLI ) && ! wp_doing_cron() ) {
+			$theme_support = wc_current_theme_supports_woocommerce_or_fse() ? 'yes' : 'no';
+			if ( get_option( 'current_theme_supports_woocommerce' ) !== $theme_support && update_option( 'current_theme_supports_woocommerce', $theme_support ) ) {
+				update_option( 'woocommerce_queue_flush_rewrite_rules', 'yes' );
+			}
 		}
 
 		register_post_type(

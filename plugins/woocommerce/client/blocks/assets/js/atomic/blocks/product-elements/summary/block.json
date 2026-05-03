@@ -73,6 +73,7 @@
 	},
 	"ancestor": [
 		"woocommerce/all-products",
+		"woocommerce/featured-product",
 		"woocommerce/single-product",
 		"woocommerce/product-template",
 		"core/post-template"

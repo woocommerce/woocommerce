@@ -3,16 +3,15 @@
  */
 import { apiFetch } from '@wordpress/data-controls';
 import { __, _n, sprintf } from '@wordpress/i18n';
-import { DispatchFromMap } from '@automattic/data-stores';
 import { controls } from '@wordpress/data';
 import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import { DispatchFromMap, isRestApiError } from '../types';
 import { STORE_NAME } from './constants';
 import { ACTION_TYPES as TYPES } from './action-types';
 import { WC_ADMIN_NAMESPACE } from '../constants';
-import { isRestApiError } from '../types';
 import {
 	PaypalOnboardingStatus,
 	SelectorKeysWithActions,
@@ -175,7 +174,20 @@ function* handlePluginAPIError(
 ) {
 	let rawErrorMessage;
 
-	if ( isPluginResponseError( plugins, error ) ) {
+	// Check for plugin-management permission errors before generic handling.
+	// Match the specific code so we don't misattribute other 403s
+	// (e.g. nonce or session failures) as permission problems.
+	const isPermissionError =
+		isRestApiError( error ) &&
+		error.code === 'woocommerce_rest_cannot_update' &&
+		( error as { data?: { status?: number } } ).data?.status === 403;
+
+	if ( isPermissionError ) {
+		rawErrorMessage = __(
+			'You do not have permissions to manage plugins. Please contact your site administrator.',
+			'woocommerce'
+		);
+	} else if ( isPluginResponseError( plugins, error ) ) {
 		// Backend error messages are in the form of { plugin-slug: [ error messages ] }.
 		rawErrorMessage = Object.values( error ).join( ', \n' );
 	} else {

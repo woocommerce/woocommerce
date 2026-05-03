@@ -33,6 +33,10 @@ jest.mock( '@woocommerce/settings', () => {
 					},
 				];
 			}
+			if ( key === 'sortableTaxonomies' ) {
+				// Only product_cat supports custom ordering by default
+				return [ 'product_cat' ];
+			}
 			// Use the original getSetting for other keys
 			return originalModule.getSetting( key, defaultValue );
 		} ),
@@ -97,6 +101,10 @@ describe( 'Taxonomy Filter block', () => {
 					/Please select a taxonomy to use this filter!/i
 				)
 			).toBeInTheDocument();
+
+			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+			// opt out of without changing the visual output.
+			expect( console ).toHaveWarned();
 		} );
 
 		test( 'should display taxonomy filter when taxonomy is selected', async () => {
@@ -109,6 +117,10 @@ describe( 'Taxonomy Filter block', () => {
 
 			// Should display the taxonomy label as heading
 			expect( block.getByText( /Category/i ) ).toBeInTheDocument();
+
+			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+			// opt out of without changing the visual output.
+			expect( console ).toHaveWarned();
 		} );
 	} );
 
@@ -169,6 +181,10 @@ describe( 'Taxonomy Filter block', () => {
 
 			expect( sortOrderSelect ).toBeInTheDocument();
 			expect( sortOrderSelect ).toHaveValue( 'count-desc' );
+
+			// wp-6.8: upstream @wordpress/* deprecation warnings that we cannot
+			// opt out of without changing the visual output.
+			expect( console ).toHaveWarned();
 		} );
 
 		test( 'should allow changing sort order when enabled', () => {
@@ -261,6 +277,59 @@ describe( 'Taxonomy Filter block', () => {
 			expect( block.queryAllByText( /\(\d+\)/ ).length ).toBeGreaterThan(
 				0
 			);
+		} );
+	} );
+
+	describe( 'Menu order option visibility', () => {
+		test( 'should show Menu order option for sortable taxonomies (product_cat)', async () => {
+			await setup( { taxonomy: 'product_cat' } );
+			await selectBlock( /Block: Category Filter/i );
+
+			enableControl( 'Sort Order' );
+
+			const sortOrderSelect = screen.getByRole( 'combobox', {
+				name: /Sort Order/i,
+			} );
+
+			// Menu order option should be available for product_cat
+			const options = within( sortOrderSelect ).getAllByRole( 'option' );
+			const optionValues = options.map( ( opt ) => opt.textContent );
+
+			expect( optionValues ).toContain( 'Menu order' );
+		} );
+
+		test( 'should not show Menu order option for non-sortable taxonomies (product_tag)', async () => {
+			await setup( { taxonomy: 'product_tag' } );
+			await selectBlock( /Block: Tag Filter/i );
+
+			enableControl( 'Sort Order' );
+
+			const sortOrderSelect = screen.getByRole( 'combobox', {
+				name: /Sort Order/i,
+			} );
+
+			// Menu order option should NOT be available for product_tag
+			const options = within( sortOrderSelect ).getAllByRole( 'option' );
+			const optionValues = options.map( ( opt ) => opt.textContent );
+
+			expect( optionValues ).not.toContain( 'Menu order' );
+		} );
+
+		test( 'should allow selecting Menu order for sortable taxonomies', async () => {
+			await setup( { taxonomy: 'product_cat' } );
+			await selectBlock( /Block: Category Filter/i );
+
+			enableControl( 'Sort Order' );
+
+			const sortOrderSelect = screen.getByRole( 'combobox', {
+				name: /Sort Order/i,
+			} );
+
+			fireEvent.change( sortOrderSelect, {
+				target: { value: 'menu_order-asc' },
+			} );
+
+			expect( sortOrderSelect ).toHaveValue( 'menu_order-asc' );
 		} );
 	} );
 } );

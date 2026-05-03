@@ -1,15 +1,34 @@
 .wc-block-components-textarea {
-	@include font-size(regular);
+	@include reset-typography();
+	@include font-small-locked;
 	background-color: $input-background-light;
-	border: 1px solid $universal-border-strong;
+	border: 1px solid color-mix(in srgb, $input-text-light 80%, transparent);
 	border-radius: $universal-border-radius;
-	color: $input-text-light;
+	// Use inherit so the placeholder picks up the global text color.
+	// Typed text color is reset below via :not(:placeholder-shown).
+	color: inherit;
 	font-family: inherit;
-	line-height: 1.375; // =22px when font-size is 16px.
 	margin: 0;
-	padding: em($gap-small) $gap;
+	padding: $gap-small;
 	width: 100%;
 	box-sizing: border-box;
+
+	&::placeholder {
+		color: currentColor;
+	}
+
+	// When the user has typed text, use the standard input text color.
+	&:not(:placeholder-shown) {
+		color: $input-text-light;
+	}
+
+	&:focus {
+		background-color: $input-background-light;
+		// Keep border at 1px to prevent layout shift, use box-shadow for the extra
+		// 0.5px thickness
+		border: 1px solid $input-text-light;
+		box-shadow: inset 0 0 0 0.5px $input-text-light;
+	}
 
 	.has-dark-controls & {
 		background-color: $input-background-dark;
@@ -17,7 +36,7 @@
 		color: $input-text-dark;
 
 		&::placeholder {
-			color: $input-placeholder-dark;
+			color: currentColor;
 		}
 	}
 }

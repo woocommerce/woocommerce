@@ -108,4 +108,25 @@ class Cleanup_Preprocessor_Test extends \Email_Editor_Unit_Test {
 		$this->assertEquals( self::PARAGRAPH_BLOCK, $result[1] );
 		$this->assertEquals( self::COLUMNS_BLOCK, $result[2] );
 	}
+
+	/**
+	 * Test it preserves blocks with null blockName but non-empty innerHTML
+	 */
+	public function testItPreservesBlocksWithNullBlockNameButWithInnerHtml(): void {
+		$block_with_content = array(
+			'blockName' => null,
+			'attrs'     => array(),
+			'innerHTML' => '<p>Some content</p>',
+		);
+		$blocks             = array(
+			self::COLUMNS_BLOCK,
+			$block_with_content,
+			self::PARAGRAPH_BLOCK,
+		);
+		$result             = $this->preprocessor->preprocess( $blocks, $this->layout, $this->styles );
+		$this->assertCount( 3, $result );
+		$this->assertEquals( self::COLUMNS_BLOCK, $result[0] );
+		$this->assertEquals( $block_with_content, $result[1] );
+		$this->assertEquals( self::PARAGRAPH_BLOCK, $result[2] );
+	}
 }

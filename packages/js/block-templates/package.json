@@ -37,6 +37,7 @@
 		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
+		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
@@ -52,10 +53,10 @@
 	"dependencies": {
 		"@woocommerce/expression-evaluation": "workspace:*",
 		"@woocommerce/settings": "1.0.0",
-		"@wordpress/block-editor": "wp-6.6",
-		"@wordpress/blocks": "wp-6.6",
-		"@wordpress/core-data": "wp-6.6",
-		"@wordpress/element": "wp-6.6"
+		"@wordpress/block-editor": "catalog:wp-min",
+		"@wordpress/blocks": "catalog:wp-min",
+		"@wordpress/core-data": "catalog:wp-min",
+		"@wordpress/element": "catalog:wp-min"
 	},
 	"devDependencies": {
 		"@babel/core": "7.25.7",
@@ -65,11 +66,12 @@
 		"@types/jest": "29.5.x",
 		"@types/react": "18.3.x",
 		"@types/testing-library__jest-dom": "^5.14.9",
-		"@types/wordpress__block-editor": "7.0.0",
-		"@types/wordpress__blocks": "11.0.7",
+		"@types/wordpress__block-editor": "catalog:wp-min",
+		"@types/wordpress__blocks": "catalog:wp-min",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-style-build": "workspace:*",
+		"@woocommerce/internal-ts-config": "workspace:*",
 		"@wordpress/browserslist-config": "next",
 		"copy-webpack-plugin": "13.0.x",
 		"css-loader": "6.11.x",
@@ -91,7 +93,7 @@
 	},
 	"peerDependencies": {
 		"@types/react": "18.3.x",
-		"@wordpress/data": "wp-6.6",
+		"@wordpress/data": "^10.0.2",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
 	},
@@ -190,6 +192,7 @@
 			"allowUsuallyExcludedPaths": true,
 			"files": [
 				"package.json",
+				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/expression-evaluation/build",
 				"node_modules/@woocommerce/expression-evaluation/build-module",
 				"node_modules/@woocommerce/expression-evaluation/build-types",
@@ -200,7 +203,12 @@
 				"node_modules/@woocommerce/internal-js-tests/build-module",
 				"node_modules/@woocommerce/internal-js-tests/jest-preset.js",
 				"node_modules/@woocommerce/internal-style-build/index.js",
-				"node_modules/@woocommerce/internal-style-build/abstracts"
+				"node_modules/@woocommerce/internal-style-build/webpack-rtl-plugin.js",
+				"node_modules/@woocommerce/internal-style-build/style-asset-plugin.js",
+				"node_modules/@woocommerce/internal-style-build/abstracts",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig.json",
+				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
+				"node_modules/@woocommerce/internal-ts-config/types"
 			]
 		}
 	}

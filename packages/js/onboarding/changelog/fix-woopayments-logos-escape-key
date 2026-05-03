@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add Escape key support to close the WooPaymentsMethodsLogos popover

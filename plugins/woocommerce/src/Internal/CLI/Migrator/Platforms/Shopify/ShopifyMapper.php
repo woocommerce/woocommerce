@@ -246,8 +246,8 @@ class ShopifyMapper implements PlatformMapperInterface {
 		foreach ( $shopify_product->collections->edges as $collection_edge ) {
 			$collection_node = $collection_edge->node;
 			$categories[]    = array(
-				'name' => $collection_node->title,
-				'slug' => $collection_node->handle,
+				'name' => wc_clean( $collection_node->title ),
+				'slug' => sanitize_title( $collection_node->handle ),
 			);
 		}
 
@@ -270,7 +270,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 			$trimmed_tag = trim( $tag );
 			if ( ! empty( $trimmed_tag ) ) {
 				$tags[] = array(
-					'name' => $trimmed_tag,
+					'name' => wc_clean( $trimmed_tag ),
 					'slug' => sanitize_title( $trimmed_tag ),
 				);
 			}
@@ -320,15 +320,6 @@ class ShopifyMapper implements PlatformMapperInterface {
 		return (float) $weight * self::WEIGHT_CONVERSION_FACTORS[ $shopify_unit_key ][ $store_weight_unit ];
 	}
 
-	/**
-	 * Basic sanitization for product description HTML.
-	 *
-	 * @param string $html Raw description HTML.
-	 * @return string Sanitized HTML.
-	 */
-	private function sanitize_product_description( string $html ): string {
-		return trim( $html );
-	}
 
 	/**
 	 * Checks if a specific field should be processed based on constructor args.
@@ -357,10 +348,10 @@ class ShopifyMapper implements PlatformMapperInterface {
 		$basic_data['original_product_id'] = ! empty( $shopify_product->id ) ? basename( $shopify_product->id ) : null;
 
 		// Basic Product Fields.
-		$basic_data['name']              = $shopify_product->title;
-		$basic_data['slug']              = $shopify_product->handle;
-		$basic_data['description']       = $this->sanitize_product_description( $shopify_product->descriptionHtml ?? '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
-		$basic_data['short_description'] = $shopify_product->descriptionPlainSummary ?? ''; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		$basic_data['name']              = wc_clean( $shopify_product->title );
+		$basic_data['slug']              = sanitize_title( $shopify_product->handle );
+		$basic_data['description']       = wp_kses_post( $shopify_product->descriptionHtml ?? '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
+		$basic_data['short_description'] = wp_kses_post( $shopify_product->descriptionPlainSummary ?? '' ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 		$basic_data['status']            = $this->get_woo_product_status( $shopify_product );
 		$basic_data['date_created_gmt']  = $shopify_product->createdAt; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 
@@ -394,7 +385,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 		// Brand (Vendor).
 		$brand_name          = $shopify_product->vendor ?? null;
 		$basic_data['brand'] = $brand_name ? array(
-			'name' => $brand_name,
+			'name' => wc_clean( $brand_name ),
 			'slug' => sanitize_title( $brand_name ),
 		) : null;
 
@@ -424,7 +415,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 			}
 
 			if ( $this->should_process( 'sku' ) ) {
-				$simple_data['sku'] = $variant_node->sku;
+				$simple_data['sku'] = wc_clean( $variant_node->sku );
 			}
 
 			if ( $this->should_process( 'stock' ) ) {
@@ -455,17 +446,25 @@ class ShopifyMapper implements PlatformMapperInterface {
 				$simple_data['cost_of_goods'] = $variant_node->inventoryItem->unitCost->amount; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 			}
 
+			if ( property_exists( $variant_node, 'taxable' ) ) {
+				$simple_data['tax_status'] = $variant_node->taxable ? 'taxable' : 'none';
+			}
+
 			$simple_data['original_variant_id'] = ! empty( $variant_node->id ) ? basename( $variant_node->id ) : null;
 
 		} else {
-			// Defaults for variable or product with no variants.
-			$simple_data['sku']                 = null;
-			$simple_data['regular_price']       = null;
-			$simple_data['sale_price']          = null;
-			$simple_data['stock_quantity']      = null;
-			$simple_data['manage_stock']        = false;
-			$simple_data['stock_status']        = 'instock';
-			$simple_data['weight']              = null;
+			$simple_data['sku']            = null;
+			$simple_data['regular_price']  = null;
+			$simple_data['sale_price']     = null;
+			$simple_data['stock_quantity'] = null;
+			$simple_data['manage_stock']   = false;
+			$simple_data['stock_status']   = 'instock';
+			$simple_data['weight']         = null;
+
+			if ( property_exists( $shopify_product, 'taxable' ) ) {
+				$simple_data['tax_status'] = $shopify_product->taxable ? 'taxable' : 'none';
+			}
+
 			$simple_data['original_variant_id'] = null;
 		}
 
@@ -487,8 +486,8 @@ class ShopifyMapper implements PlatformMapperInterface {
 		if ( $is_variable && property_exists( $shopify_product, 'options' ) && ! empty( $shopify_product->options ) ) {
 			foreach ( $shopify_product->options as $option ) {
 				$variable_data['attributes'][] = array(
-					'name'         => $option->name,
-					'options'      => $option->values,
+					'name'         => wc_clean( $option->name ),
+					'options'      => array_map( 'wc_clean', $option->values ),
 					'position'     => $option->position,
 					'is_visible'   => true,
 					'is_variation' => true,
@@ -515,7 +514,7 @@ class ShopifyMapper implements PlatformMapperInterface {
 				}
 
 				if ( $this->should_process( 'sku' ) ) {
-					$variation_data['sku'] = $variant_node->sku ?? null;
+					$variation_data['sku'] = wc_clean( $variant_node->sku ?? '' );
 				}
 
 				if ( $this->should_process( 'stock' ) ) {
@@ -546,11 +545,15 @@ class ShopifyMapper implements PlatformMapperInterface {
 					$variation_data['cost_of_goods'] = $variant_node->inventoryItem->unitCost->amount; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 				}
 
+				if ( property_exists( $variant_node, 'taxable' ) ) {
+					$variation_data['tax_status'] = $variant_node->taxable ? 'taxable' : 'none';
+				}
+
 				if ( $this->should_process( 'attributes' ) ) {
 					$variation_data['attributes'] = array();
 					if ( ! empty( $variant_node->selectedOptions ) ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- GraphQL uses camelCase.
 						foreach ( $variant_node->selectedOptions as $selectedOption ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase,WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- GraphQL uses camelCase.
-							$variation_data['attributes'][ $selectedOption->name ] = $selectedOption->value; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- GraphQL uses camelCase.
+							$variation_data['attributes'][ wc_clean( $selectedOption->name ) ] = wc_clean( $selectedOption->value ); // phpcs:ignore WordPress.NamingConventions.ValidVariableName.VariableNotSnakeCase -- GraphQL uses camelCase.
 						}
 					}
 				}

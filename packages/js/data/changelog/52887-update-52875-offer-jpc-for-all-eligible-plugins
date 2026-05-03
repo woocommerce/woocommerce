@@ -1,4 +1,0 @@
-Significance: minor
-Type: update
-
-Add requires_jpc field to determine plugins that require JPC

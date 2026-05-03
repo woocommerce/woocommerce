@@ -5,16 +5,15 @@ import { __ } from '@wordpress/i18n';
 import { Button, DropZone, FormFileUpload } from '@wordpress/components';
 import { Fragment, createElement } from 'react';
 import {
-	MediaItem,
+	type Attachment,
 	MediaUpload,
 	uploadMedia as wpUploadMedia,
-	UploadMediaOptions,
 } from '@wordpress/media-utils';
 
 /**
  * Internal dependencies
  */
-import { ErrorType } from './types';
+import type { ErrorType, MediaUploadComponentType } from './types';
 
 const DEFAULT_ALLOWED_MEDIA_TYPES = [ 'image' ];
 
@@ -28,20 +27,18 @@ type MediaUploaderProps = {
 	icon?: JSX.Element;
 	label?: string | JSX.Element;
 	maxUploadFileSize?: number;
-	MediaUploadComponent?: < T extends boolean = false >(
-		props: MediaUpload.Props< T >
-	) => JSX.Element;
+	MediaUploadComponent?: MediaUploadComponentType;
 	multipleSelect?: boolean | string;
 	value?: number | number[];
 	onSelect?: (
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
-		value: ( { id: number } & { [ k: string ]: any } ) | MediaItem[]
+		value: ( { id: number } & { [ k: string ]: any } ) | Attachment[]
 	) => void;
 	onError?: MediaUploaderErrorCallback;
 	onMediaGalleryOpen?: () => void;
-	onUpload?: ( files: MediaItem | MediaItem[] ) => void;
-	onFileUploadChange?: ( files: MediaItem | MediaItem[] ) => void;
-	uploadMedia?: ( options: UploadMediaOptions ) => Promise< void >;
+	onUpload?: ( files: Attachment | Attachment[] ) => void;
+	onFileUploadChange?: ( files: Attachment | Attachment[] ) => void;
+	uploadMedia?: typeof wpUploadMedia;
 	additionalData?: Record< string, unknown >;
 };
 
@@ -72,11 +69,16 @@ export const MediaUploader = ( {
 			onChange={ ( { currentTarget } ) => {
 				uploadMedia( {
 					allowedTypes: allowedMediaTypes,
-					filesList: currentTarget.files as FileList,
+					filesList: Array.from( currentTarget.files ?? [] ),
 					maxUploadFileSize,
-					onError,
+					// Runtime passes UploadError (with code + file), not plain Error.
+					onError: onError as unknown as ( error: Error ) => void,
 					onFileChange( files ) {
-						onFileUploadChange( multiple ? files : files[ 0 ] );
+						onFileUploadChange(
+							multiple
+								? ( files as Attachment[] )
+								: ( files as Attachment[] )[ 0 ]
+						);
 					},
 					additionalData,
 				} );
@@ -107,9 +109,8 @@ export const MediaUploader = ( {
 							value={ value }
 							onSelect={ onSelect }
 							allowedTypes={ allowedMediaTypes }
-							// @ts-expect-error - TODO multiple also accepts string.
 							multiple={ multipleSelect }
-							render={ ( { open } ) =>
+							render={ ( { open }: { open: () => void } ) =>
 								buttonText || buttonProps ? (
 									<Button
 										variant="secondary"
@@ -134,10 +135,17 @@ export const MediaUploader = ( {
 										allowedTypes: allowedMediaTypes,
 										filesList: droppedFiles,
 										maxUploadFileSize,
-										onError,
+										// Runtime passes UploadError (with code + file), not plain Error.
+										onError: onError as unknown as (
+											error: Error
+										) => void,
 										onFileChange( files ) {
 											onUpload(
-												multiple ? files : files[ 0 ]
+												multiple
+													? ( files as Attachment[] )
+													: (
+															files as Attachment[]
+													   )[ 0 ]
 											);
 										},
 										additionalData,

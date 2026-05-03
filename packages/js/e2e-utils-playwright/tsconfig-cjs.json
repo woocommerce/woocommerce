@@ -1,0 +1,10 @@
+{
+	"extends": "../tsconfig-cjs",
+	"compilerOptions": {
+		"rootDir": "src",
+		"outDir": "build",
+		"typeRoots": ["./node_modules/@types"]
+	},
+	"include": ["src/**/*"],
+	"exclude": ["**/test/**"]
+}

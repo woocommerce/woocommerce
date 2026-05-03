@@ -123,14 +123,15 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( '"From" name', 'woocommerce' ),
-					'desc'     => '',
-					'id'       => 'woocommerce_email_from_name',
-					'type'     => 'text',
-					'css'      => 'min-width:400px;',
-					'default'  => esc_attr( get_bloginfo( 'name', 'display' ) ),
-					'autoload' => false,
-					'desc_tip' => true,
+					'title'             => __( '"From" name', 'woocommerce' ),
+					'desc'              => '',
+					'id'                => 'woocommerce_email_from_name',
+					'type'              => 'text',
+					'css'               => 'min-width:400px;',
+					'default'           => esc_attr( get_bloginfo( 'name', 'display' ) ),
+					'autoload'          => false,
+					'desc_tip'          => true,
+					'skip_initial_save' => true,
 				),
 
 				array(
@@ -146,11 +147,56 @@ class WC_Settings_Emails extends WC_Settings_Page {
 					'autoload'          => false,
 					'desc_tip'          => true,
 				),
+			);
+
+		// Add reply-to fields when block email editor is enabled.
+		if ( $block_email_editor_enabled ) {
+			$settings = array_merge(
+				$settings,
+				array(
+					array(
+						'title'    => __( 'Add "Reply-to" email', 'woocommerce' ),
+						'desc'     => __( 'Add a different email address to receive replies.', 'woocommerce' ),
+						'id'       => 'woocommerce_email_reply_to_enabled',
+						'type'     => 'checkbox',
+						'default'  => 'no',
+						'autoload' => false,
+					),
+
+					array(
+						'title'    => __( '"Reply-to" name', 'woocommerce' ),
+						'desc'     => '',
+						'id'       => 'woocommerce_email_reply_to_name',
+						'type'     => 'text',
+						'css'      => 'min-width:400px;',
+						'default'  => '',
+						'autoload' => false,
+						'desc_tip' => true,
+					),
+
+					array(
+						'title'    => __( '"Reply-to" address', 'woocommerce' ),
+						'desc'     => '',
+						'id'       => 'woocommerce_email_reply_to_address',
+						'type'     => 'email',
+						'css'      => 'min-width:400px;',
+						'default'  => '',
+						'autoload' => false,
+						'desc_tip' => true,
+					),
+				)
+			);
+		}
+
+		$settings = array_merge(
+			$settings,
+			array(
 				array(
 					'type' => 'sectionend',
 					'id'   => 'email_options',
 				),
-			);
+			)
+		);
 
 		// If the email editor is enabled the design is handled by the email editor.
 		if ( ! $block_email_editor_enabled ) {
@@ -326,6 +372,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 		// Remove empty elements that depend on the email_improvements feature flag.
 		$settings = array_filter( $settings );
 
+		/**
+		 * Filters the email settings array.
+		 *
+		 * @since 2.1.0
+		 *
+		 * @param array $settings Array of email settings.
+		 */
 		return apply_filters( 'woocommerce_email_settings', $settings );
 	}
 
@@ -421,6 +474,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 				<thead>
 					<tr>
 						<?php
+						/**
+						 * Filters the columns displayed in the email settings table.
+						 *
+						 * @since 2.1.0
+						 *
+						 * @param array $columns Array of column keys and labels.
+						 */
 						$columns = apply_filters(
 							'woocommerce_email_setting_columns',
 							array(
@@ -503,6 +563,13 @@ class WC_Settings_Emails extends WC_Settings_Page {
 										</td>';
 										break;
 									default:
+										/**
+										 * Fires when rendering a custom column in the email settings table.
+										 *
+										 * @since 2.1.0
+										 *
+										 * @param WC_Email $email The email object.
+										 */
 										do_action( 'woocommerce_email_setting_column_' . $key, $email );
 										break;
 								}

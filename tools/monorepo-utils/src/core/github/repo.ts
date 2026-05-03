@@ -8,10 +8,6 @@ import { Endpoints } from '@octokit/types';
  * Internal dependencies
  */
 import { graphqlWithAuth, octokitWithAuth } from './api';
-import {
-	CreatePullRequestEndpointResponse,
-	GetPullRequestEndpointResponse,
-} from './types';
 
 export const getLatestGithubReleaseVersion = async ( options: {
 	owner?: string;
@@ -106,10 +102,7 @@ export const updateIssue = async (
 	updates: {
 		labels?: string[];
 	}
-): Promise<
-	| Endpoints[ 'PATCH /repos/{owner}/{repo}/issues/{issue_number}' ][ 'response' ]
-	| false
-> => {
+) => {
 	const { owner, name } = options;
 
 	try {
@@ -249,16 +242,54 @@ export const addLabelsToIssue = async (
 	);
 };
 
+export const addMilestoneToIssue = async (
+	options: {
+		owner?: string;
+		name?: string;
+	},
+	issueNumber: number,
+	milestoneName: string
+): Promise< void > => {
+	const { owner, name } = options;
+
+	// Try to find milestone by name.
+	const { data } = await octokitWithAuth().request(
+		'GET /repos/{owner}/{repo}/milestones',
+		{
+			owner,
+			repo: name,
+			state: 'all',
+			direction: 'desc',
+			per_page: 100,
+		}
+	);
+
+	const milestone = data.find( ( m ) => m.title === milestoneName );
+
+	if ( milestone ) {
+		await octokitWithAuth().request(
+			'PATCH /repos/{owner}/{repo}/issues/{issue_number}',
+			{
+				owner,
+				repo: name,
+				issue_number: issueNumber,
+				milestone: milestone.number,
+			}
+		);
+	}
+};
+
 /**
- * Create a pull request from branches on Github.
+ * Create a pull request from branches on GitHub.
  *
- * @param {Object} options       pull request options.
- * @param {string} options.head  branch name containing the changes you want to merge.
- * @param {string} options.base  branch name you want the changes pulled into.
- * @param {string} options.owner repository owner.
- * @param {string} options.name  repository name.
- * @param {string} options.title pull request title.
- * @param {string} options.body  pull request body.
+ * @param {Object}   options           pull request options.
+ * @param {string}   options.head      branch name containing the changes you want to merge.
+ * @param {string}   options.base      branch name you want the changes pulled into.
+ * @param {string}   options.owner     repository owner.
+ * @param {string}   options.name      repository name.
+ * @param {string}   options.title     pull request title.
+ * @param {string}   options.body      pull request body.
+ * @param {string[]} options.reviewers list of GitHub usernames to request a review from.
  * @return {Promise<object>}     pull request data.
  */
 export const createPullRequest = async ( options: {
@@ -268,8 +299,9 @@ export const createPullRequest = async ( options: {
 	name: string;
 	title: string;
 	body: string;
-} ): Promise< CreatePullRequestEndpointResponse[ 'data' ] > => {
-	const { head, base, owner, name, title, body } = options;
+	reviewers?: string[];
+} ) => {
+	const { head, base, owner, name, title, body, reviewers } = options;
 	const pullRequest = await octokitWithAuth().request(
 		'POST /repos/{owner}/{repo}/pulls',
 		{
@@ -281,6 +313,22 @@ export const createPullRequest = async ( options: {
 			base,
 		}
 	);
+
+	const filteredReviewers = reviewers?.filter(
+		( reviewer ) => reviewer !== pullRequest.data.user.login
+	);
+
+	if ( filteredReviewers && filteredReviewers.length > 0 ) {
+		await octokitWithAuth().request(
+			'POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers',
+			{
+				owner,
+				repo: name,
+				pull_number: pullRequest.data.number,
+				reviewers: filteredReviewers,
+			}
+		);
+	}
 
 	return pullRequest.data;
 };
@@ -298,7 +346,7 @@ export const getPullRequest = async ( options: {
 	owner: string;
 	name: string;
 	prNumber: string;
-} ): Promise< GetPullRequestEndpointResponse[ 'data' ] > => {
+} ) => {
 	const { owner, name, prNumber } = options;
 	const pr = await octokitWithAuth().request(
 		'GET /repos/{owner}/{repo}/pulls/{pull_number}',
@@ -315,13 +363,16 @@ export const getPullRequest = async ( options: {
 /**
  * Determine if a pull request is coming from a community contribution, i.e., not from a member of the WooCommerce organization.
  *
- * @param {Object} pullRequestData pull request data.
- * @param {string} owner           repository owner.
- * @param {string} name            repository name.
+ * @param {Object} pullRequestData                     pull request data.
+ * @param {Object} pullRequestData.head                head branch info.
+ * @param {Object} pullRequestData.head.repo           head repository info.
+ * @param {string} pullRequestData.head.repo.full_name full repository name (owner/repo).
+ * @param {string} owner                               repository owner.
+ * @param {string} name                                repository name.
  * @return {boolean} if a pull request is coming from a community contribution.
  */
 export const isCommunityPullRequest = (
-	pullRequestData: GetPullRequestEndpointResponse[ 'data' ],
+	pullRequestData: { head: { repo: { full_name: string } } },
 	owner: string,
 	name: string
 ) => {

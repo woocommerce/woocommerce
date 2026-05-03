@@ -10,7 +10,7 @@ import { __ } from '@wordpress/i18n';
  */
 import { useShipmentFormContext } from '../../context/shipment-form-context';
 import ShipmentProviders from '../../data/shipment-providers';
-import { SearchIcon } from '../../utils/icons';
+import { SearchIcon, TruckIcon } from '../../utils/icons';
 
 const ShippingProviderListItem = ( {
 	item,
@@ -25,11 +25,13 @@ const ShippingProviderListItem = ( {
 					item.value,
 			].join( ' ' ) }
 		>
-			{ item.icon && (
-				<div className="woocommerce-fulfillment-shipping-provider-list-item-icon">
+			<div className="woocommerce-fulfillment-shipping-provider-list-item-icon">
+				{ item.icon ? (
 					<img src={ item.icon } alt={ item.label } />
-				</div>
-			) }
+				) : (
+					<TruckIcon />
+				) }
+			</div>
 			<div className="woocommerce-fulfillment-shipping-provider-list-item-label">
 				{ item.label }
 			</div>
@@ -68,6 +70,21 @@ export default function ShipmentManualEntryForm() {
 						value={ trackingNumber }
 						onChange={ ( value: string ) => {
 							setTrackingNumber( value );
+							if (
+								shipmentProvider &&
+								shipmentProvider !== 'other'
+							) {
+								setTrackingUrl(
+									(
+										window.wcFulfillmentSettings.providers[
+											shipmentProvider
+										]?.url ?? ''
+									).replace(
+										/__placeholder__/i,
+										encodeURIComponent( value )
+									)
+								);
+							}
 						} }
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
@@ -86,7 +103,24 @@ export default function ShipmentManualEntryForm() {
 						value={ shipmentProvider }
 						options={ ShipmentProviders }
 						onChange={ ( value ) => {
+							if ( typeof value !== 'string' ) {
+								return;
+							}
+							if ( ! value ) {
+								setTrackingUrl( '' );
+								return;
+							}
 							setShipmentProvider( value as string );
+							setTrackingUrl(
+								(
+									window.wcFulfillmentSettings.providers[
+										value as string
+									]?.url ?? ''
+								).replace(
+									/__placeholder__/i,
+									encodeURIComponent( trackingNumber ?? '' )
+								)
+							);
 						} }
 						__nextHasNoMarginBottom
 					/>

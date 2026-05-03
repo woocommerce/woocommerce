@@ -94,6 +94,25 @@ class WC_Order_Refund_Data_Store_CPT extends Abstract_WC_Order_Data_Store_CPT im
 	}
 
 	/**
+	 * Method to update a refund in the database.
+	 *
+	 * @param \WC_Order_Refund $refund Refund object.
+	 */
+	public function update( &$refund ) {
+		parent::update( $refund );
+
+		/**
+		 * Fires when an order refund is updated.
+		 *
+		 * @since 10.4.0
+		 *
+		 * @param int              $refund_id The order refund ID.
+		 * @param \WC_Order_Refund $refund    The order refund object.
+		 */
+		do_action( 'woocommerce_update_order_refund', $refund->get_id(), $refund );
+	}
+
+	/**
 	 * Helper method that updates all the post meta for an order based on it's settings in the WC_Order class.
 	 *
 	 * @param WC_Order_Refund $refund Refund object.

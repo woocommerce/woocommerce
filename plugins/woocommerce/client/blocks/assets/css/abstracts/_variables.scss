@@ -12,3 +12,4 @@ $gap-smallest: 0.5 * $grid-unit; // 4px
 
 // Standard border radius for forms.
 $universal-border-radius: 4px;
+$universal-translucent-border-color: color-mix(in srgb, currentColor 30%, transparent);

@@ -13,7 +13,6 @@ import AttributeItemTemplateSave from './save';
 
 registerBlockType( metadata, {
 	edit: AttributeItemTemplateEdit,
-	attributes: metadata.attributes,
 	icon: {
 		src: (
 			<Icon

@@ -12,10 +12,7 @@ import { EmailTheme, storeName } from '../store';
 
 export function useUserTheme() {
 	const { globalStylePost } = useSelect( ( select ) => {
-		const post =
-			( select( storeName ).getGlobalEmailStylesPost() as EmailTheme & {
-				id: number;
-			} ) || null;
+		const post = select( storeName ).getGlobalEmailStylesPost() || null;
 		return {
 			globalStylePost: post,
 		};
@@ -27,8 +24,8 @@ export function useUserTheme() {
 				return;
 			}
 			void dispatch( coreStore ).editEntityRecord(
-				'postType',
-				'wp_global_styles',
+				'root',
+				'globalStyles',
 				globalStylePost.id,
 				{
 					styles: newTheme.styles,

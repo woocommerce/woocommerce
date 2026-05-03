@@ -3,7 +3,6 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
-use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -36,7 +35,6 @@ class AddToCartForm extends AbstractBlock {
 
 		return wp_parse_args( $attributes, $defaults );
 	}
-
 
 	/**
 	 * Enqueue assets specific to this block.
@@ -78,14 +76,26 @@ class AddToCartForm extends AbstractBlock {
 		// Regex pattern to match the <input> element with id starting with 'quantity_'.
 		$pattern = '/(<input[^>]*id="quantity_[^"]*"[^>]*\/>)/';
 		// Replacement string to add button AFTER the matched <input> element.
-		/* translators: %s refers to the item name in the cart. */
-		$minus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.removeQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
-		// Replacement string to add button AFTER the matched <input> element.
-		/* translators: %s refers to the item name in the cart. */
-		$plus_button = '$1<button aria-label="' . esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) ) . '" type="button" data-wp-on--click="actions.addQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
-		$new_html    = preg_replace( $pattern, $plus_button, $product_html );
-		$new_html    = preg_replace( $pattern, $minus_button, $new_html );
-		return $new_html;
+		// Use preg_replace_callback to avoid backreference interpretation of $, \ sequences in product names.
+		$new_html = preg_replace_callback(
+			$pattern,
+			function ( $matches ) use ( $product_name ) {
+				/* translators: %s refers to the item name in the cart. */
+				$plus_aria = esc_attr( sprintf( __( 'Increase quantity of %s', 'woocommerce' ), $product_name ) );
+				return $matches[1] . '<button aria-label="' . $plus_aria . '" type="button" data-wp-on--click="actions.increaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--plus">+</button>';
+			},
+			$product_html ?? ''
+		);
+		$new_html = preg_replace_callback(
+			$pattern,
+			function ( $matches ) use ( $product_name ) {
+				/* translators: %s refers to the item name in the cart. */
+				$minus_aria = esc_attr( sprintf( __( 'Reduce quantity of %s', 'woocommerce' ), $product_name ) );
+				return $matches[1] . '<button aria-label="' . $minus_aria . '" type="button" data-wp-on--click="actions.decreaseQuantity" class="wc-block-components-quantity-selector__button wc-block-components-quantity-selector__button--minus">−</button>';
+			},
+			$new_html ?? ''
+		);
+		return $new_html ?? '';
 	}
 
 	/**
@@ -96,19 +106,26 @@ class AddToCartForm extends AbstractBlock {
 	 * @return string The Add to Cart form HTML with classes added.
 	 */
 	private function add_stepper_classes_to_add_to_cart_form_input( $product_html ) {
-		$html = new \WP_HTML_Tag_Processor( $product_html );
+		$processor = new \WP_HTML_Tag_Processor( $product_html );
 
-		// Add classes to the form.
-		while ( $html->next_tag( array( 'class_name' => 'quantity' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector' );
+		while ( $processor->next_tag() ) {
+			if (
+				$processor->get_tag() === 'DIV' &&
+				$processor->has_class( 'quantity' )
+			) {
+				$processor->add_class( 'wc-block-components-quantity-selector' );
+			}
+
+			if (
+				$processor->get_tag() === 'INPUT' &&
+				$processor->get_attribute( 'name' ) === 'quantity' &&
+				$processor->get_attribute( 'type' ) !== 'hidden'
+			) {
+				$processor->add_class( 'wc-block-components-quantity-selector__input' );
+			}
 		}
 
-		$html = new \WP_HTML_Tag_Processor( $html->get_updated_html() );
-		while ( $html->next_tag( array( 'class_name' => 'input-text' ) ) ) {
-			$html->add_class( 'wc-block-components-quantity-selector__input' );
-		}
-
-		return $html->get_updated_html();
+		return $processor->get_updated_html();
 	}
 
 	/**
@@ -223,10 +240,17 @@ class AddToCartForm extends AbstractBlock {
 			return '';
 		}
 
-		$product_name = $product->get_name();
-		$product_html = $is_stepper_style ? $this->add_steppers( $product_html, $product_name ) : $product_html;
+		// If the quantity input is hidden, don't render the stepper buttons and styles.
+		if ( $is_stepper_style && ! Utils::has_visible_quantity_input( $product_html ) ) {
+			$is_stepper_style = false;
+		}
 
-		$product_html       = $is_stepper_style ? $this->add_stepper_classes_to_add_to_cart_form_input( $product_html ) : $product_html;
+		if ( $is_stepper_style ) {
+			$product_name = $product->get_name();
+			$product_html = $this->add_steppers( $product_html, $product_name );
+			$product_html = $this->add_stepper_classes_to_add_to_cart_form_input( $product_html );
+		}
+
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
 		$product_classname = $is_descendent_of_single_product_block ? 'product' : '';

@@ -12,7 +12,6 @@ import AddToCartWithOptionsQuantitySelectorEdit from './edit';
 
 registerBlockType( metadata, {
 	edit: AddToCartWithOptionsQuantitySelectorEdit,
-	attributes: metadata.attributes,
 	icon: {
 		src: (
 			<Icon

@@ -20,7 +20,7 @@ concurrency:
 jobs:
   get-and-validate-release-asset:
     name: Get intended release details
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     outputs:
@@ -30,6 +30,12 @@ jobs:
     steps:
       - name: Check confirmation
         run: |
+          # Log inputs to console.
+          echo "Uploading to WordPress.org: release=${{ inputs.release }}, confirm-update=${{ github.event.inputs.confirm-update }}"
+
+          # Write summary header.
+          echo "📤 Uploading release \`${{ inputs.release }}\` to WordPress.org." >> $GITHUB_STEP_SUMMARY
+
           if [ "${{ github.event.inputs.confirm-update }}" != "true" ]; then
             echo "::error::You must check the confirmation checkbox to proceed."
             exit 1
@@ -132,15 +138,29 @@ jobs:
           fi
 
           if php -r "die( version_compare( '$RELEASE_TAG', '$svn_plugin_version', '>' ) ? 0 : 1 );"; then
+            # Check that the stable tag in the release matches the stable tag in SVN.
+            svn_stable_version=$( svn cat "$SVN_URL/trunk/readme.txt" --username "$SVN_USERNAME" --password "$SVN_PASSWORD" |  grep -oP '(?<=Stable tag: )(.+)' | head -n1 )
+            stable_tag_in_release=$(cat woocommerce/readme.txt | grep -oP '(?<=Stable tag: )(.+)' | head -n1)
+
+            if [[ -z "$svn_stable_version" || $svn_stable_version != $stable_tag_in_release ]]; then
+              echo "::error::Stable tag in SVN ($svn_stable_version) does not match release stable tag ($stable_tag_in_release)."
+              exit 1
+            fi
+
             echo "overwrite_trunk=1" >> "$GITHUB_OUTPUT"
           else
             echo "overwrite_trunk=0" >> "$GITHUB_OUTPUT"
           fi
 
+      - if: ${{ github.repository != 'woocommerce/woocommerce' }}
+        run: |
+          echo "::notice::This is not the 'woocommerce/woocommerce' repository. Commit to WordPress.org SVN will be skipped."
+
   commit:
     name: Commit release to WordPress.org
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     needs: [get-and-validate-release-asset]
+    if: ${{ github.repository == 'woocommerce/woocommerce' }}
     permissions:
       contents: write # Required to fetch draft releases for some reason. See https://github.com/cli/cli/issues/9076#issuecomment-2146148572.
     env:
@@ -213,6 +233,14 @@ jobs:
             --non-interactive \
             --config-option=servers:global:http-timeout=1800
 
+          # Write success to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Release committed to WordPress.org (trunk + tag):" >> $GITHUB_STEP_SUMMARY
+          echo "- [view trunk](https://plugins.trac.wordpress.org/browser/woocommerce/trunk)" >> $GITHUB_STEP_SUMMARY
+          echo "- [view tag](https://plugins.trac.wordpress.org/browser/woocommerce/tags/$RELEASE_TAG)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Validate the release as described in the [release docs](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/)." >> $GITHUB_STEP_SUMMARY
+
       - name: Commit to tag only
         if: ${{ needs.get-and-validate-release-asset.outputs.overwrite_trunk != 1 }}
         working-directory: ./svn
@@ -239,3 +267,9 @@ jobs:
             --no-auth-cache \
             --non-interactive \
             --config-option=servers:global:http-timeout=1800
+
+          # Write success to summary.
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "✅ Release committed to WordPress.org (tag only): [view tag](https://plugins.trac.wordpress.org/browser/woocommerce/tags/$RELEASE_TAG)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⏭️ **Next step:** Validate the release as described in the [release docs](https://developer.woocommerce.com/docs/contribution/releases/building-and-publishing/)." >> $GITHUB_STEP_SUMMARY

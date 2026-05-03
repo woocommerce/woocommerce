@@ -122,19 +122,19 @@ jQuery( function( $ ) {
 					'<p class="stars">\
 						<span role="group" aria-labelledby="comment-form-rating-label">\
 							<a role="radio" tabindex="0" aria-checked="false" class="star-1" href="#">' +
-								wc_single_product_params.i18n_rating_options[0] + 
+								wc_single_product_params.i18n_rating_options[0] +
 							'</a>\
-							<a role="radio" tabindex="-1" aria-checked="false" class="star-2" href="#">' + 
-								wc_single_product_params.i18n_rating_options[1] + 
+							<a role="radio" tabindex="-1" aria-checked="false" class="star-2" href="#">' +
+								wc_single_product_params.i18n_rating_options[1] +
 							'</a>\
-							<a role="radio" tabindex="-1" aria-checked="false" class="star-3" href="#">' + 
-								wc_single_product_params.i18n_rating_options[2] + 
+							<a role="radio" tabindex="-1" aria-checked="false" class="star-3" href="#">' +
+								wc_single_product_params.i18n_rating_options[2] +
 							'</a>\
-							<a role="radio" tabindex="-1" aria-checked="false" class="star-4" href="#">' + 
-								wc_single_product_params.i18n_rating_options[3] + 
+							<a role="radio" tabindex="-1" aria-checked="false" class="star-4" href="#">' +
+								wc_single_product_params.i18n_rating_options[3] +
 							'</a>\
-							<a role="radio" tabindex="-1" aria-checked="false" class="star-5" href="#">' + 
-								wc_single_product_params.i18n_rating_options[4] + 
+							<a role="radio" tabindex="-1" aria-checked="false" class="star-5" href="#">' +
+								wc_single_product_params.i18n_rating_options[4] +
 							'</a>\
 						</span>\
 					</p>'
@@ -182,7 +182,7 @@ jQuery( function( $ ) {
 			if ( ! allDirections.includes( direction ) ) {
 				return;
 			}
-			
+
 			e.preventDefault();
 			e.stopPropagation();
 
@@ -340,7 +340,7 @@ jQuery( function( $ ) {
 				touch: false,
 				callback: function() {
 					var zoomImg = this;
-					
+
 					setTimeout( function() {
 						zoomImg.removeAttribute( 'role' );
 						zoomImg.setAttribute( 'alt', '' );
@@ -377,6 +377,11 @@ jQuery( function( $ ) {
 				'</a>'
 			);
 			this.$target.on( 'click', '.woocommerce-product-gallery__trigger', this.openPhotoswipe );
+			this.$target.on( 'keydown', '.woocommerce-product-gallery__trigger', ( e ) => {
+				if ( e.key === ' ' ) {
+					this.openPhotoswipe( e );
+				}
+			} );
 			this.$target.on( 'click', '.woocommerce-product-gallery__image a', function( e ) {
 				e.preventDefault();
 			});
@@ -477,7 +482,7 @@ jQuery( function( $ ) {
 
 	/**
 	 * Control focus in photoswipe modal.
-	 * 
+	 *
 	 * @param {boolean} trapFocus - Whether to trap focus or not.
 	 */
 	ProductGallery.prototype.trapFocusPhotoswipe = function( trapFocus ) {
@@ -493,7 +498,7 @@ jQuery( function( $ ) {
 			pswp.removeEventListener( 'keydown', this.handlePswpTrapFocus );
 		}
 	};
-	
+
 	/**
 	 * Handle keydown event in photoswipe modal.
 	 */

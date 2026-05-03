@@ -61,6 +61,8 @@ const StockStatusControl = ( props: QueryControlProps ) => {
 			isShownByDefault
 		>
 			<FormTokenField
+				__next40pxDefaultSize
+				__nextHasNoMarginBottom
 				label={ __( 'Stock Status', 'woocommerce' ) }
 				onChange={ ( statusLabels ) => {
 					const woocommerceStockStatus = statusLabels

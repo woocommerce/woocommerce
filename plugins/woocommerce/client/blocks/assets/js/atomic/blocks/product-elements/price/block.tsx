@@ -54,13 +54,13 @@ interface PriceProps {
  * @param fallback    The fallback value if priceString is null/undefined (defaults to "0")
  * @return The price converted to minor units as a string (e.g., "1299")
  */
-const convertAdminPriceToStoreApiFormat = (
+export const convertAdminPriceToStoreApiFormat = (
 	priceString: string | null | undefined,
 	currency: Currency,
 	fallback = '0'
 ) => {
 	const multiplier = 10 ** currency.minorUnit;
-	return (
+	return Math.round(
 		Number.parseFloat( priceString ?? fallback ) * multiplier
 	).toString();
 };
@@ -75,7 +75,6 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		isExperimentalWcRestApiV4Enabled,
 	} = props;
 
-	const styleProps = useStyleProps( props );
 	const { parentName, parentClassName } = useInnerBlockLayoutContext();
 	const { product } = useProductDataContext(
 		/**
@@ -96,9 +95,22 @@ export const Block = ( props: Props ): JSX.Element | null => {
 		parentName ===
 		'woocommerce/add-to-cart-with-options-grouped-product-item';
 
+	// If the block is not a descendant of the All Products block, we are
+	// already printing the styles from the PHP side (in the frontend) and the
+	// `edit.tsx` file (in the editor).
+	const computedStyles = useStyleProps( props );
+	let styleProps = {
+		className: '',
+		style: {},
+	};
+	if ( isDescendentOfAllProductsBlock ) {
+		styleProps = computedStyles;
+	}
+
 	const showPricePreview =
-		isDescendentOfSingleProductTemplate &&
-		! isDescendentOfAddToCartGroupedProductSelectorBlock;
+		( isDescendentOfSingleProductTemplate &&
+			! isDescendentOfAddToCartGroupedProductSelectorBlock ) ||
+		! product;
 
 	const wrapperClassName = clsx(
 		'wc-block-components-product-price',

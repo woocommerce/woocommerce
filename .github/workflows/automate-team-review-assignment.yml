@@ -73,7 +73,7 @@ jobs:
               token: ${{ secrets.PR_ASSIGN_TOKEN }}
 
         - name: Assign reviewers for a teams PR
-          if: ${{ steps.check.outputs.contributor == 'no' && github.event.pull_request.draft == false }}
+          if: ${{ steps.check.outputs.contributor == 'no' && github.event.pull_request.draft == false && ! contains( github.event.pull_request.labels.*.name, 'Release' ) }}
           continue-on-error: ${{ ( github.event.pull_request.head.repo.fork && 'true' ) || 'false' }}
           uses: acq688/Request-Reviewer-For-Team-Action@fca1c60fd0504aef59bdc925f3902c8a2d8bce62 # v1.1
           with:
@@ -130,7 +130,7 @@ jobs:
                   ## Testing Guidelines
                   Hi ${{ env.REVIEWERS }} ${{ env.TEAMS }},
 
-                  Apart from reviewing the code changes, please make sure to **review the testing instructions** ([Guide](https://github.com/woocommerce/woocommerce/wiki/Writing-high-quality-testing-instructions)) and verify that relevant tests (E2E, Unit, Integration, etc.) have been added or updated as needed.
+                  Apart from reviewing the code changes, please make sure to **review the testing instructions** ([Guide](https://developer.woocommerce.com/docs/contribution/testing/writing-high-quality-testing-instructions)) and verify that relevant tests (E2E, Unit, Integration, etc.) have been added or updated as needed.
 
                   **Reminder:** PR reviewers are required to document testing performed. This includes:
                   - 🖼️ **Screenshots or screen recordings**.

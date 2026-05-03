@@ -12,21 +12,24 @@ import {
 } from '@woocommerce/price-format';
 import {
 	applyCheckoutFilter,
+	productPriceScreenReaderValidation,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
-import Dinero from 'dinero.js';
 import { getSetting } from '@woocommerce/settings';
-import { useMemo } from '@wordpress/element';
+import { createInterpolateElement, useMemo } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { CartItem, isString } from '@woocommerce/types';
+import { calculateSaleAmount } from '@woocommerce/base-utils';
+import { dinero, transformScale, toSnapshot } from 'dinero.js';
+import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
 /**
  * Internal dependencies
  */
 import ProductBackorderBadge from '../product-backorder-badge';
 import ProductImage from '../product-image';
-import ProductLowStockBadge from '../product-low-stock-badge';
 import ProductMetadata from '../product-metadata';
+import ProductSaleBadge from '../product-sale-badge';
 
 interface OrderSummaryProps {
 	cartItem: CartItem;
@@ -39,7 +42,6 @@ const OrderSummaryItem = ( {
 }: OrderSummaryProps ): JSX.Element => {
 	const {
 		images,
-		low_stock_remaining: lowStockRemaining,
 		show_backorder_badge: showBackorderBadge,
 		name: initialName,
 		permalink,
@@ -76,34 +78,59 @@ const OrderSummaryItem = ( {
 		arg,
 	} );
 
-	const regularPriceSingle = Dinero( {
-		amount: parseInt( prices.raw_prices.regular_price, 10 ),
-		precision: isString( prices.raw_prices.precision )
-			? parseInt( prices.raw_prices.precision, 10 )
-			: prices.raw_prices.precision,
-	} )
-		.convertPrecision( priceCurrency.minorUnit )
-		.getAmount();
-	const priceSingle = Dinero( {
-		amount: parseInt( prices.raw_prices.price, 10 ),
-		precision: isString( prices.raw_prices.precision )
-			? parseInt( prices.raw_prices.precision, 10 )
-			: prices.raw_prices.precision,
-	} )
-		.convertPrecision( priceCurrency.minorUnit )
-		.getAmount();
+	const rawPrecision = isString( prices.raw_prices.precision )
+		? parseInt( prices.raw_prices.precision, 10 )
+		: prices.raw_prices.precision;
+
+	const regularPriceSingle = toSnapshot(
+		transformScale(
+			dinero( {
+				amount: parseInt( prices.raw_prices.regular_price, 10 ),
+				currency: USD,
+				scale: rawPrecision,
+			} ),
+			priceCurrency.minorUnit
+		)
+	).amount;
+	const priceSingle = toSnapshot(
+		transformScale(
+			dinero( {
+				amount: parseInt( prices.raw_prices.price, 10 ),
+				currency: USD,
+				scale: rawPrecision,
+			} ),
+			priceCurrency.minorUnit
+		)
+	).amount;
 	const totalsCurrency = getCurrencyFromPriceResponse( totals );
 
 	let lineSubtotal = parseInt( totals.line_subtotal, 10 );
 	if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
 		lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 	}
-	const subtotalPrice = Dinero( {
-		amount: lineSubtotal,
-		precision: totalsCurrency.minorUnit,
-	} ).getAmount();
+	const subtotalPrice = toSnapshot(
+		dinero( {
+			amount: lineSubtotal,
+			currency: USD,
+			scale: totalsCurrency.minorUnit,
+		} )
+	).amount;
+
+	const saleAmountSingle = calculateSaleAmount(
+		prices,
+		priceCurrency.minorUnit
+	);
+
 	const subtotalPriceFormat = applyCheckoutFilter( {
 		filterName: 'subtotalPriceFormat',
+		defaultValue: '<price/>',
+		extensions,
+		arg,
+		validation: productPriceValidation,
+	} );
+
+	const saleBadgePriceFormat = applyCheckoutFilter( {
+		filterName: 'saleBadgePriceFormat',
 		defaultValue: '<price/>',
 		extensions,
 		arg,
@@ -118,6 +145,30 @@ const OrderSummaryItem = ( {
 		arg,
 		validation: productPriceValidation,
 	} );
+
+	/* translators: <quantity/>, <productName/> and <price/> are placeholders and should not be translated. */
+	const productPriceScreenReaderDefault = _n(
+		'Total price for <quantity/> <productName/> item: <price/>',
+		'Total price for <quantity/> <productName/> items: <price/>',
+		quantity,
+		'woocommerce'
+	);
+
+	const productPriceScreenReaderFormat = applyCheckoutFilter( {
+		filterName: 'cartItemScreenReaderPrice',
+		defaultValue: productPriceScreenReaderDefault,
+		extensions,
+		arg,
+		validation: productPriceScreenReaderValidation,
+	} );
+
+	const ProductPriceScreenReaderOutput = () => {
+		return createInterpolateElement( productPriceScreenReaderFormat, {
+			quantity: <>{ quantity }</>,
+			productName: <>{ name }</>,
+			price: <>{ formatPrice( subtotalPrice, totalsCurrency ) }</>,
+		} );
+	};
 
 	const cartItemClassNameFilter = applyCheckoutFilter( {
 		filterName: 'cartItemClass',
@@ -175,49 +226,39 @@ const OrderSummaryItem = ( {
 					permalink={ permalink }
 					disabledTagName="h3"
 				/>
-				<ProductPrice
-					currency={ priceCurrency }
-					price={ priceSingle }
-					regularPrice={ regularPriceSingle }
-					className="wc-block-components-order-summary-item__individual-prices"
-					priceClassName="wc-block-components-order-summary-item__individual-price"
-					regularPriceClassName="wc-block-components-order-summary-item__regular-individual-price"
-					format={ subtotalPriceFormat }
-				/>
-				{ showBackorderBadge ? (
-					<ProductBackorderBadge />
-				) : (
-					!! lowStockRemaining && (
-						<ProductLowStockBadge
-							lowStockRemaining={ lowStockRemaining }
-						/>
-					)
-				) }
+				<div className="wc-block-cart-item__prices">
+					<ProductPrice
+						currency={ priceCurrency }
+						price={ priceSingle }
+						regularPrice={ regularPriceSingle }
+						className="wc-block-components-order-summary-item__individual-prices"
+						priceClassName="wc-block-components-order-summary-item__individual-price"
+						regularPriceClassName="wc-block-components-order-summary-item__regular-individual-price"
+						format={ subtotalPriceFormat }
+					/>
+				</div>
+				{ showBackorderBadge && <ProductBackorderBadge /> }
 				<ProductMetadata { ...productMetaProps } />
 			</div>
 			<span className="screen-reader-text">
-				{ sprintf(
-					/* translators: %1$d is the number of items, %2$s is the item name and %3$s is the total price including the currency symbol. */
-					_n(
-						'Total price for %1$d %2$s item: %3$s',
-						'Total price for %1$d %2$s items: %3$s',
-						quantity,
-						'woocommerce'
-					),
-					quantity,
-					name,
-					formatPrice( subtotalPrice, totalsCurrency )
-				) }
+				<ProductPriceScreenReaderOutput />
 			</span>
 			<div
 				className="wc-block-components-order-summary-item__total-price"
 				aria-hidden="true"
 			>
-				<ProductPrice
-					currency={ totalsCurrency }
-					format={ productPriceFormat }
-					price={ subtotalPrice }
-				/>
+				<div className="wc-block-cart-item__total-price-and-sale-badge-wrapper">
+					<ProductPrice
+						currency={ totalsCurrency }
+						format={ productPriceFormat }
+						price={ subtotalPrice }
+					/>
+					<ProductSaleBadge
+						currency={ priceCurrency }
+						saleAmount={ saleAmountSingle * quantity }
+						format={ saleBadgePriceFormat }
+					/>
+				</div>
 			</div>
 		</div>
 	);

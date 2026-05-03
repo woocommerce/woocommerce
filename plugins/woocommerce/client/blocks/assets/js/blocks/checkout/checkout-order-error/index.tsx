@@ -8,6 +8,7 @@ import { Icon } from '@wordpress/icons';
 import { getSetting } from '@woocommerce/settings';
 import { decodeEntities } from '@wordpress/html-entities';
 import { CheckoutResponse } from '@woocommerce/types';
+import { reloadPage } from '@woocommerce/blocks/checkout/utils';
 
 /**
  * Internal dependencies
@@ -114,7 +115,7 @@ const ErrorButton = ( { errorData }: ErrorComponentProps ) => {
 			) : (
 				<button
 					className="wp-block-button__link"
-					onClick={ () => window.location.reload() }
+					onClick={ reloadPage }
 				>
 					{ buttonText }
 				</button>

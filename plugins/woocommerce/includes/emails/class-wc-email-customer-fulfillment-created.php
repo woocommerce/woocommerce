@@ -5,7 +5,7 @@
  * @package WooCommerce\Emails
  */
 
-use Automattic\WooCommerce\Internal\Fulfillments\Fulfillment;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Fulfillment;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -38,7 +38,7 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 			$this->id             = 'customer_fulfillment_created';
 			$this->customer_email = true;
 			$this->title          = __( 'Fulfillment created', 'woocommerce' );
-			$this->email_group    = 'order-processing';
+			$this->email_group    = 'order-updates';
 			$this->template_html  = 'emails/customer-fulfillment-created.php';
 			$this->template_plain = 'emails/plain/customer-fulfillment-created.php';
 			$this->placeholders   = array(
@@ -53,6 +53,8 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 			parent::__construct();
 
 			$this->description = __( 'Fulfillment created emails are sent to the customer when the merchant creates a fulfillment for the order, and marks it as fulfilled. The notification isn’t sent for draft fulfillments.', 'woocommerce' );
+
+			$this->template_block_content = 'emails/block/general-block-content-for-fulfillment-emails.php';
 		}
 
 		/**
@@ -85,12 +87,35 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 		}
 
 		/**
+		 * Get the total quantity of items in the fulfillment.
+		 *
+		 * @return int
+		 */
+		private function get_fulfillment_item_count() {
+			if ( ! $this->fulfillment ) {
+				return 1;
+			}
+
+			return array_reduce(
+				$this->fulfillment->get_items(),
+				function ( int $carry, array $item ) {
+					return $carry + (int) $item['qty'];
+				},
+				0
+			);
+		}
+
+		/**
 		 * Get email subject.
 		 *
 		 * @since  3.1.0
+		 * @since  10.7.0 Added plural form for multi-item fulfillments.
 		 * @return string
 		 */
 		public function get_default_subject() {
+			if ( $this->get_fulfillment_item_count() > 1 ) {
+				return __( 'Items from {site_title} order {order_number} have been fulfilled!', 'woocommerce' );
+			}
 			return __( 'An item from {site_title} order {order_number} has been fulfilled!', 'woocommerce' );
 		}
 
@@ -98,9 +123,13 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 		 * Get email heading.
 		 *
 		 * @since  3.1.0
+		 * @since  10.7.0 Added plural form for multi-item fulfillments.
 		 * @return string
 		 */
 		public function get_default_heading() {
+			if ( $this->get_fulfillment_item_count() > 1 ) {
+				return __( 'Your items are on the way!', 'woocommerce' );
+			}
 			return __( 'Your item is on the way!', 'woocommerce' );
 		}
 
@@ -142,6 +171,25 @@ if ( ! class_exists( 'WC_Email_Customer_Fulfillment_Created', false ) ) :
 					'sent_to_admin'      => false,
 					'plain_text'         => true,
 					'email'              => $this,
+				)
+			);
+		}
+
+		/**
+		 * Get block editor email template content.
+		 *
+		 * @return string
+		 */
+		public function get_block_editor_email_template_content() {
+			$this->maybe_init_fulfillment_for_preview( $this->object );
+			return wc_get_template_html(
+				$this->template_block_content,
+				array(
+					'order'         => $this->object,
+					'fulfillment'   => $this->fulfillment,
+					'sent_to_admin' => false,
+					'plain_text'    => false,
+					'email'         => $this,
 				)
 			);
 		}

@@ -4,7 +4,7 @@
 	white-space: normal;
 	min-height: 1em;
 	padding: $gap-smaller 0 0 0;
-	@include font-size(smaller);
+	@include font-small-locked;
 
 	> p {
 		margin: 0;

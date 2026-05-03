@@ -4,13 +4,12 @@
 import { dispatch } from '@wordpress/data';
 import { __dangerousOptInToUnstableAPIsOnlyForCoreModules } from '@wordpress/private-apis';
 import {
-	// @ts-expect-error No types for privateApis.
 	privateApis as editorPrivateApis,
 	store as editorStore,
 } from '@wordpress/editor';
 // eslint-disable-next-line @woocommerce/dependency-group
 import {
-	// @ts-expect-error No types for privateApis.
+	// @ts-expect-error privateApis is not in the DT types for @wordpress/block-editor.
 	privateApis as blockEditorPrivateApis,
 } from '@wordpress/block-editor';
 
@@ -23,11 +22,6 @@ const { unlock } = __dangerousOptInToUnstableAPIsOnlyForCoreModules(
  * We use the ColorPanel component from the block editor to render the color panel in the style settings sidebar.
  */
 const { ColorPanel: StylesColorPanel } = unlock( blockEditorPrivateApis );
-
-/**
- * The useGlobalStylesOutputWithConfig is used to generate the CSS for the email editor content from the style settings.
- */
-const { useGlobalStylesOutputWithConfig } = unlock( blockEditorPrivateApis );
 
 /**
  * The Editor is the main component for the email editor.
@@ -46,7 +40,6 @@ const { registerEntityAction, unregisterEntityAction } = unlock(
 
 export {
 	StylesColorPanel,
-	useGlobalStylesOutputWithConfig,
 	Editor,
 	FullscreenMode,
 	ViewMoreMenuGroup,

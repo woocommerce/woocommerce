@@ -32,6 +32,7 @@ test.describe( 'Single Product template', () => {
 		await page
 			.getByRole( 'button', { name: 'Single item: Product' } )
 			.click();
+
 		await page
 			.getByPlaceholder( 'Search products' )
 			.fill( testData.productName );
@@ -39,6 +40,8 @@ test.describe( 'Single Product template', () => {
 			.getByRole( 'option', { name: testData.productName } )
 			.click();
 		await page.getByLabel( 'Close', { exact: true } ).click();
+
+		await editor.canvas.locator( 'body' ).waitFor( { timeout: 20000 } );
 
 		// Edit the template.
 		await editor.insertBlock( {

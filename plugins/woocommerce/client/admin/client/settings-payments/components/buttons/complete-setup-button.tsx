@@ -65,6 +65,14 @@ interface CompleteSetupButtonProps {
 	 * Incentive data. If provided, the incentive will be accepted when the button is clicked.
 	 */
 	incentive?: PaymentsProviderIncentive | null;
+	/**
+	 * Whether the button should be disabled.
+	 */
+	disabled?: boolean;
+	/**
+	 * Accessible label for screen readers, especially useful when button is disabled.
+	 */
+	ariaLabel?: string;
 }
 
 /**
@@ -83,6 +91,8 @@ export const CompleteSetupButton = ( {
 	onboardingType,
 	acceptIncentive = () => {},
 	incentive = null,
+	disabled = false,
+	ariaLabel,
 }: CompleteSetupButtonProps ) => {
 	const [ isUpdating, setIsUpdating ] = useState( false );
 	const [ showUpdateModal, setShowUpdateModal ] = useState( false );
@@ -161,8 +171,9 @@ export const CompleteSetupButton = ( {
 				key={ gatewayProvider.id }
 				variant="primary"
 				isBusy={ isUpdating }
-				disabled={ isUpdating || !! installingPlugin }
+				disabled={ disabled || isUpdating || !! installingPlugin }
 				onClick={ completeSetup }
+				aria-label={ ariaLabel }
 			>
 				{ buttonText }
 			</Button>

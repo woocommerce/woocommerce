@@ -14,19 +14,6 @@ jQuery( function ( $ ) {
 		}
 	} );
 
-	// Global accessibility handler for all links with role="button"
-	// This ensures both spacebar and enter keypresses trigger click events, as per ARIA specification
-	document.body.addEventListener( 'keydown', function ( event ) {
-		if ( ! event.target.matches( 'a[role="button"]' ) ) {
-			return;
-		}
-
-		if ( event.key === ' ' || event.key === 'Enter' ) {
-			event.preventDefault();
-			event.target.click();
-		}
-	} );
-
 	var noticeID = $( '.woocommerce-store-notice' ).data( 'noticeId' ) || '',
 		cookieName = 'store_notice' + noticeID;
 
@@ -35,22 +22,31 @@ jQuery( function ( $ ) {
 		$( '.woocommerce-store-notice' ).hide();
 	} else {
 		$( '.woocommerce-store-notice' ).show();
+		/**
+		 * After adding the role="button" attribute to the
+		 * .woocommerce-store-notice__dismiss-link element,
+		 * we need to add the keydown event listener to it.
+		 */
+		function store_notice_keydown_handler( event ) {
+			if ( [ 'Enter', ' ' ].includes( event.key ) ) {
+				event.preventDefault();
+				$( '.woocommerce-store-notice__dismiss-link' ).click();
+			}
+		}
 
 		// Set a cookie and hide the store notice when the dismiss button is clicked
 		function store_notice_click_handler( event ) {
 			Cookies.set( cookieName, 'hidden', { path: '/' } );
 			$( '.woocommerce-store-notice' ).hide();
 			event.preventDefault();
-			$( '.woocommerce-store-notice__dismiss-link' ).off(
-				'click',
-				store_notice_click_handler
-			);
+			$( '.woocommerce-store-notice__dismiss-link' )
+				.off( 'click', store_notice_click_handler )
+				.off( 'keydown', store_notice_keydown_handler );
 		}
 
-		$( '.woocommerce-store-notice__dismiss-link' ).on(
-			'click',
-			store_notice_click_handler
-		);
+		$( '.woocommerce-store-notice__dismiss-link' )
+			.on( 'click', store_notice_click_handler )
+			.on( 'keydown', store_notice_keydown_handler );
 	}
 
 	// Make form field descriptions toggle on focus.
@@ -186,11 +182,33 @@ jQuery( function ( $ ) {
 		} );
 	} );
 
+	// If the "Enable AJAX add to cart buttons on archives" setting is disabled
+	// the add-to-cart.js file won't be loaded, so we need to add the event listener here.
+	if ( typeof wc_add_to_cart_params === 'undefined' ) {
+		$( document.body ).on(
+			'keydown',
+			'.remove_from_cart_button',
+			on_keydown_remove_from_cart
+		);
+	}
+
 	$( document.body ).on(
 		'item_removed_from_classic_cart updated_wc_div',
 		focus_populate_live_region
 	);
 } );
+
+/**
+ * Handle when pressing the Space key on the remove item link.
+ * This is necessary because the link has the role="button" attribute
+ * and needs to act like a button.
+ */
+function on_keydown_remove_from_cart( event ) {
+	if ( event.key === ' ' ) {
+		event.preventDefault();
+		event.currentTarget.click();
+	}
+}
 
 /**
  * Focus on the first notice element on the page.
@@ -229,23 +247,36 @@ function focus_populate_live_region() {
 
 /**
  * Refresh the sorted by live region.
+ *
+ * Skips when the Interactivity API product filters are present on the page,
+ * as those manage the result count updates themselves.
  */
 function refresh_sorted_by_live_region() {
 	var sorted_by_live_region = document.querySelector(
 		'.woocommerce-result-count'
 	);
+	var hasInteractivityFilters = document.querySelector(
+		'[data-wp-interactive="woocommerce/product-filters"]'
+	);
 
-	if ( sorted_by_live_region ) {
-		var text = sorted_by_live_region.innerHTML;
-		sorted_by_live_region.setAttribute( 'aria-hidden', 'true' );
-
-		var sorted_by_live_region_id = setTimeout( function () {
-			sorted_by_live_region.setAttribute( 'aria-hidden', 'false' );
-			sorted_by_live_region.innerHTML = '';
-			sorted_by_live_region.innerHTML = text;
-			clearTimeout( sorted_by_live_region_id );
-		}, 2000 );
+	if (
+		! sorted_by_live_region ||
+		! window.location.search ||
+		hasInteractivityFilters
+	) {
+		return;
 	}
+
+	var text = sorted_by_live_region.innerHTML;
+	sorted_by_live_region.setAttribute( 'role', 'alert' );
+	sorted_by_live_region.setAttribute( 'aria-hidden', 'true' );
+
+	var sorted_by_live_region_id = setTimeout( function () {
+		sorted_by_live_region.setAttribute( 'aria-hidden', 'false' );
+		sorted_by_live_region.innerHTML = '';
+		sorted_by_live_region.innerHTML = text;
+		clearTimeout( sorted_by_live_region_id );
+	}, 2000 );
 }
 
 function on_document_ready() {

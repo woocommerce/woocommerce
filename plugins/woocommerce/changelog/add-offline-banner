@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add an offline banner to WooCommerce admin that appears when the browser loses its connection, and surface a clear notice when save requests fail silently due to network loss.

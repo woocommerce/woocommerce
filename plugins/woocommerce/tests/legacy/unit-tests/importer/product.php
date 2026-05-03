@@ -38,6 +38,13 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 		require_once $bootstrap->plugin_dir . '/includes/import/class-wc-product-csv-importer.php';
 		require_once $bootstrap->plugin_dir . '/includes/admin/importers/class-wc-product-csv-importer-controller.php';
 
+		// Initialize brands classes to register import/export hooks.
+		require_once $bootstrap->plugin_dir . '/includes/class-wc-brands.php';
+		require_once $bootstrap->plugin_dir . '/includes/admin/class-wc-admin-brands.php';
+
+		WC_Brands::init_taxonomy();
+		new WC_Brands_Admin();
+
 		// Callback used by WP_HTTP_TestCase to decide whether to perform HTTP requests or to provide a mocked response.
 		$this->http_responder = array( $this, 'mock_http_responses' );
 		$this->csv_file       = dirname( __FILE__ ) . '/sample.csv';
@@ -88,6 +95,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 			'Regular price'           => 'regular_price',
 			'Categories'              => 'category_ids',
 			'Tags'                    => 'tag_ids',
+			'Brands'                  => 'brand_ids',
 			'Shipping class'          => 'shipping_class_id',
 			'Images'                  => 'images',
 			'Download limit'          => 'download_limit',
@@ -255,6 +263,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'20',
 				'Clothing, Clothing > T-shirts',
 				'',
+				'TopBrand, TopBrand > KidCakes',
 				'',
 				'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_1_front.jpg, http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/T_1_back.jpg',
 				'',
@@ -303,6 +312,7 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 				'5',
 				'Music > Albums, Music',
 				'Woo',
+				'TopBrand > Slice, TopBrand',
 				'',
 				'http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_angle.jpg, http://demo.woothemes.com/woocommerce/wp-content/uploads/sites/56/2013/06/cd_1_flat.jpg',
 				'10',
@@ -659,10 +669,89 @@ class WC_Tests_Product_CSV_Importer extends WC_Unit_Test_Case {
 
 		// Remove fields that depends on product ID or term ID.
 		foreach ( $parsed_data as &$data ) {
-			unset( $data['parent_id'], $data['upsell_ids'], $data['cross_sell_ids'], $data['children'], $data['category_ids'], $data['tag_ids'] );
+			unset( $data['parent_id'], $data['upsell_ids'], $data['cross_sell_ids'], $data['children'], $data['category_ids'], $data['tag_ids'], $data['brand_ids'] );
 		}
 
 		$this->assertEquals( $items, $parsed_data );
+	}
+
+	/**
+	 * Test get_parsed_data with brands.
+	 *
+	 * @since 10.3.5
+	 */
+	public function test_get_parsed_data_brands() {
+
+		// Set admin user to allow term creation.
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$args = array(
+			'mapping' => $this->get_csv_mapped_items(),
+			'parse'   => true,
+		);
+
+		// Expected brand strings for each product from CSV.
+		// Note: Hierarchical terms store only the leaf name, not the full path.
+		$expected_brands = array(
+			array( 'TopBrand', 'KidCakes' ),                  // Woo Logo: "TopBrand, TopBrand > KidCakes".
+			array( 'Slice', 'TopBrand' ),                     // Woo Album #1: "TopBrand > Slice, TopBrand".
+			array( 'Another Brand' ),                         // WooCommerce Product CSV Suite: "Another Brand".
+			array( 'TopBrand', 'KidCakes' ),                  // Ship Your Idea: "TopBrand, TopBrand > KidCakes".
+			array(),                                          // Variation 1: No brands.
+			array(),                                          // Variation 2: No brands.
+			array( 'TopBrand', 'KidCakes', 'Slice' ),         // Best Woo Products: "TopBrand, TopBrand > KidCakes, TopBrand > Slice".
+		);
+
+		$importer    = new WC_Product_CSV_Importer( $this->csv_file, $args );
+		$parsed_data = $importer->get_parsed_data();
+
+		// Verify that each product in parsed_data has the correct brand_ids assigned.
+		foreach ( $parsed_data as $index => $data ) {
+			// Get the expected brand term IDs for this product.
+			$expected_brand_ids = array();
+			foreach ( $expected_brands[ $index ] as $brand_name ) {
+				$brand = get_term_by( 'name', $brand_name, 'product_brand' );
+				if ( $brand && ! is_wp_error( $brand ) ) {
+					$expected_brand_ids[] = $brand->term_id;
+				}
+			}
+
+			// Get actual brand IDs from parsed data.
+			$actual_brand_ids = isset( $data['brand_ids'] ) ? $data['brand_ids'] : array();
+
+			// Ensure it's an array (handle cases where it might be a string).
+			if ( ! is_array( $actual_brand_ids ) ) {
+				$actual_brand_ids = array();
+			}
+
+			// Sort both arrays for consistent comparison.
+			sort( $expected_brand_ids );
+			sort( $actual_brand_ids );
+
+			$this->assertEquals(
+				$expected_brand_ids,
+				$actual_brand_ids,
+				sprintf( 'Product at index %d should have correct brand_ids', $index )
+			);
+		}
+
+		// Verify hierarchical relationships.
+		$topbrand      = get_term_by( 'name', 'TopBrand', 'product_brand' );
+		$kidcakes      = get_term_by( 'name', 'KidCakes', 'product_brand' );
+		$slice         = get_term_by( 'name', 'Slice', 'product_brand' );
+		$another_brand = get_term_by( 'name', 'Another Brand', 'product_brand' );
+
+		// Assert that terms exist.
+		$this->assertNotFalse( $topbrand, 'TopBrand term should exist' );
+		$this->assertNotFalse( $kidcakes, 'KidCakes term should exist' );
+		$this->assertNotFalse( $slice, 'Slice term should exist' );
+		$this->assertNotFalse( $another_brand, 'Another Brand term should exist' );
+
+		// Assert hierarchical relationships: KidCakes and Slice should be children of TopBrand.
+		$this->assertEquals( 0, $topbrand->parent, 'TopBrand should be a top-level term' );
+		$this->assertEquals( $topbrand->term_id, $kidcakes->parent, 'KidCakes should be a child of TopBrand' );
+		$this->assertEquals( $topbrand->term_id, $slice->parent, 'Slice should be a child of TopBrand' );
+		$this->assertEquals( 0, $another_brand->parent, 'Another Brand should be a top-level term' );
 	}
 
 	/**

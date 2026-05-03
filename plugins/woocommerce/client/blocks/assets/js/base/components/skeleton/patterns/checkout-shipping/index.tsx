@@ -16,9 +16,9 @@ export const CheckoutShippingSkeleton = () => {
 			aria-live="polite"
 			aria-label={ __( 'Loading shipping options…', 'woocommerce' ) }
 		>
-			<Skeleton height="22px" width="22px" borderRadius="100%" />
-			<Skeleton height="22px" maxWidth="148px" />
-			<Skeleton height="22px" width="50px" />
+			<Skeleton height="20px" width="20px" borderRadius="100%" />
+			<Skeleton height="20px" maxWidth="148px" />
+			<Skeleton height="20px" width="50px" />
 		</div>
 	);
 };

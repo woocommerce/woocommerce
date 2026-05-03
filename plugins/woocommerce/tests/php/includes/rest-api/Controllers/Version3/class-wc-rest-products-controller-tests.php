@@ -3,6 +3,7 @@
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 
 /**
  * class WC_REST_Products_Controller_Tests.
@@ -10,6 +11,13 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
  */
 class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
+	use MetaDataAssertionTrait;
+
+	/**
+	 * Saves the `woocommerce_hide_out_of_stock_items` option value for restoration after tests that modify it.
+	 * @var mixed
+	 */
+	protected $original_hid_out_of_stock_value;
 
 	/**
 	 * Runs after each test.
@@ -17,6 +25,7 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	public function tearDown(): void {
 		parent::tearDown();
 		$this->disable_cogs_feature();
+		update_option( 'woocommerce_hide_out_of_stock_items', $this->original_hid_out_of_stock_value );
 	}
 
 	/**
@@ -89,6 +98,8 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->user );
+
+		$this->original_hid_out_of_stock_value = get_option( 'woocommerce_hide_out_of_stock_items' );
 	}
 
 	/**
@@ -1878,5 +1889,247 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 
 		$response = $this->server->dispatch( $request );
 		$this->assertEquals( 200, $response->get_status() );
+	}
+
+	/**
+	 * Test that batch create operations update term counts correctly.
+	 *
+	 * Verifies that when creating products via batch operations, the term counts
+	 * are properly updated when hide out of stock is disabled.
+	 */
+	public function test_batch_create_updates_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'no' );
+		$term         = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id      = $term['term_id'];
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'create' => array(
+					array(
+						'name'         => 'Batch Product 1',
+						'type'         => 'simple',
+						'status'       => 'publish',
+						'stock_status' => 'instock',
+						'categories'   => array( array( 'id' => $term_id ) ),
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before + 1, $count_after, 'Batch create should update term count.' );
+	}
+
+	/**
+	 * Test that batch create obeys hide out of stock setting.
+	 *
+	 * Verifies that when creating out of stock products via batch operations,
+	 * the term counts are not increased when hide out of stock is enabled.
+	 */
+	public function test_batch_create_out_of_stock_obeys_hide_setting() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+		$term         = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id      = $term['term_id'];
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$request->set_body_params(
+			array(
+				'create' => array(
+					array(
+						'name'         => 'Batch Product 2',
+						'type'         => 'simple',
+						'status'       => 'publish',
+						'stock_status' => 'outofstock',
+						'categories'   => array( array( 'id' => $term_id ) ),
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before, $count_after, 'Out-of-stock products should not increment count with hide setting ON.' );
+	}
+
+	/**
+	 * Test that batch update of stock status affects term counts.
+	 *
+	 * Verifies that updating product stock status via batch operations properly
+	 * decrements term counts when hide out of stock is enabled.
+	 */
+	public function test_batch_update_stock_status_affects_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
+		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
+		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
+
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$update_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$update_request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'           => $product->get_id(),
+						'stock_status' => 'outofstock',
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $update_request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before - 1, $count_after, 'Term count should decrease after hiding from catalog.' );
+	}
+
+	/**
+	 * Test that batch update of product status affects term counts.
+	 *
+	 * Verifies that updating product status via batch operations properly
+	 * decrements term counts when products are changed to draft status.
+	 */
+	public function test_batch_update_status_affects_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
+		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
+		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
+
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$update_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$update_request->set_body_params(
+			array(
+				'update' => array(
+					array(
+						'id'     => $product->get_id(),
+						'status' => 'draft',
+					),
+				),
+			)
+		);
+		$this->server->dispatch( $update_request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before - 1, $count_after, 'Term count should decrease after hiding from catalog.' );
+	}
+
+	/**
+	 * Test that batch delete operations update term counts.
+	 *
+	 * Verifies that when deleting products via batch operations, the term counts
+	 * are properly decremented immediately.
+	 */
+	public function test_batch_delete_product_updates_term_counts() {
+		update_option( 'woocommerce_hide_out_of_stock_items', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$term    = wp_insert_term( 'BatchTestCategory', 'product_cat' );
+		$term_id = $term['term_id'];
+		wp_set_object_terms( $product->get_id(), $term_id, 'product_cat' );
+		update_post_meta( $product->get_id(), '_stock_status', 'instock' );
+
+		$count_before = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+
+		$delete_request = new WP_REST_Request( 'POST', '/wc/v3/products/batch' );
+		$delete_request->set_body_params( array( 'delete' => array( $product->get_id() ) ) );
+		$this->server->dispatch( $delete_request );
+
+		$count_after = (int) get_term_meta( $term_id, 'product_count_product_cat', true );
+		$this->assertEquals( $count_before - 1, $count_after, 'Batch delete should decrement term count immediately.' );
+	}
+
+	/**
+	 * Test `pos_products_only` filter returns only POS-visible products when true.
+	 */
+	public function test_pos_products_only_true_returns_only_pos_visible_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'pos_products_only', true );
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertNotContains( $hidden_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * Test `pos_products_only` filter returns all products when false.
+	 */
+	public function test_pos_products_only_false_returns_all_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'pos_products_only', false );
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertContains( $hidden_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * Test that omitting `pos_products_only` filter returns all products regardless of visibility in POS.
+	 */
+	public function test_pos_products_only_omitted_returns_all_products() {
+		$visible_product = WC_Helper_Product::create_simple_product();
+		$hidden_product  = WC_Helper_Product::create_simple_product();
+
+		// Mark the hidden product as hidden from POS.
+		wp_set_object_terms( $hidden_product->get_id(), 'pos-hidden', 'pos_product_visibility' );
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		// Do not set pos_products_only parameter.
+
+		$response = $this->server->dispatch( $request );
+		$products = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $products, 'id' );
+		$this->assertContains( $visible_product->get_id(), $product_ids );
+		$this->assertContains( $hidden_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * @testdox Updating a product with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
 	}
 }

@@ -18,7 +18,6 @@ import clsx from 'clsx';
 import { MouseEvent } from 'react';
 import { Button, Popover, ToolbarItem } from '@wordpress/components';
 import PinnedItems from '@wordpress/interface/build-module/components/pinned-items';
-// eslint-disable-next-line @woocommerce/dependency-group
 import {
 	store as preferencesStore,
 	/* @ts-expect-error missing types. */
@@ -27,8 +26,6 @@ import {
 import {
 	NavigableToolbar,
 	store as blockEditorStore,
-	// @ts-expect-error ToolSelector exists in WordPress components.
-	ToolSelector,
 	BlockToolbar,
 } from '@wordpress/block-editor';
 
@@ -57,40 +54,27 @@ export function HeaderToolbar( {
 		useState( true );
 	const isLargeViewport = useViewportMatch( 'medium' );
 	const inserterButton = useRef< HTMLButtonElement | null >( null );
-	const {
-		isInserterEnabled,
-		isTextModeEnabled,
-		hasBlockSelection,
-		hasFixedToolbar,
-	} = useSelect( ( select ) => {
-		const {
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			hasInserterItems,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			getBlockRootClientId,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			getBlockSelectionEnd,
-			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-			// @ts-ignore These selectors are available in the block data store.
-			__unstableGetEditorMode: getEditorMode,
-			// @ts-expect-error These selectors are available in the block data store.
-			getBlockSelectionStart,
-		} = select( blockEditorStore );
-		const { get: getPreference } = select( preferencesStore );
+	const { isInserterEnabled, hasBlockSelection, hasFixedToolbar } = useSelect(
+		( select ) => {
+			const {
+				hasInserterItems,
+				getBlockRootClientId,
+				getBlockSelectionEnd,
+				getBlockSelectionStart,
+			} = select( blockEditorStore );
+			const { get: getPreference } = select( preferencesStore );
 
-		return {
-			isTextModeEnabled: getEditorMode() === 'text',
-			isInserterEnabled: hasInserterItems(
-				getBlockRootClientId( getBlockSelectionEnd() ?? '' ) ??
-					undefined
-			),
-			hasBlockSelection: !! getBlockSelectionStart(),
-			hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
-		};
-	}, [] );
+			return {
+				isInserterEnabled: hasInserterItems(
+					getBlockRootClientId( getBlockSelectionEnd() ?? '' ) ??
+						undefined
+				),
+				hasBlockSelection: !! getBlockSelectionStart(),
+				hasFixedToolbar: getPreference( 'core', 'fixedToolbar' ),
+			};
+		},
+		[]
+	);
 
 	const toggleInserter = useCallback(
 		() => setIsInserterOpened( ! isInserterOpened ),
@@ -107,10 +91,10 @@ export function HeaderToolbar( {
 	return (
 		<div className="woocommerce-iframe-editor__header">
 			<div className="woocommerce-iframe-editor__header-left">
+				{ /* @ts-expect-error NavigableToolbar accepts a variant prop at runtime but it's missing from the public types. */ }
 				<NavigableToolbar
 					className="woocommerce-iframe-editor-document-tools"
 					aria-label={ __( 'Document tools', 'woocommerce' ) }
-					// @ts-expect-error variant prop exists
 					variant="unstyled"
 				>
 					<div className="woocommerce-iframe-editor-document-tools__left">
@@ -136,14 +120,6 @@ export function HeaderToolbar( {
 							aria-expanded={ isInserterOpened }
 							showTooltip
 						/>
-						{ isLargeViewport && (
-							<ToolbarItem
-								as={ ToolSelector }
-								// @ts-expect-error the prop size is passed to the ToolSelector component
-								disabled={ isTextModeEnabled }
-								size="compact"
-							/>
-						) }
 						{ /* @ts-expect-error the prop size is passed to the EditorHistoryUndo component */ }
 						<ToolbarItem as={ EditorHistoryUndo } size="compact" />
 						{ /* @ts-expect-error the prop size is passed to the EditorHistoryRedo component */ }
