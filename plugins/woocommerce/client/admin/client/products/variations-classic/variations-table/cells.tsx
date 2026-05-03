@@ -112,7 +112,7 @@ export function VariationOptionsCell( { item }: { item: Variation } ) {
 				{ item.attributes.map( ( attr, i ) => (
 					<Badge
 						key={ `m-${ attr.id || attr.name }` }
-						intent="none"
+						intent="draft"
 						ref={ ( el: HTMLSpanElement | null ) => {
 							measureRefs.current[ i ] = el;
 						} }
@@ -121,7 +121,7 @@ export function VariationOptionsCell( { item }: { item: Variation } ) {
 					</Badge>
 				) ) }
 				<Badge
-					intent="none"
+					intent="draft"
 					ref={ ( el: HTMLSpanElement | null ) => {
 						overflowMeasureRef.current = el;
 					} }
@@ -138,12 +138,12 @@ export function VariationOptionsCell( { item }: { item: Variation } ) {
 				className="wc-variations-classic__variation-options-row"
 			>
 				{ visible.map( ( attr ) => (
-					<Badge key={ attr.id || attr.name } intent="none">
+					<Badge key={ attr.id || attr.name } intent="draft">
 						{ attr.option }
 					</Badge>
 				) ) }
 				{ hiddenCount > 0 && (
-					<Badge intent="none">{ `+${ hiddenCount }` }</Badge>
+					<Badge intent="draft">{ `+${ hiddenCount }` }</Badge>
 				) }
 			</Stack>
 		</div>
