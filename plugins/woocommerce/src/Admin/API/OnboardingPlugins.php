@@ -396,7 +396,7 @@ class OnboardingPlugins extends WC_REST_Data_Controller {
 			'error_message'     => sprintf(
 			// translators: %s: plugin slug (example: woocommerce-services).
 				__(
-					'The requested plugin `%s` could not be installed. Plugin API call failed.',
+					'We couldn\'t install `%s`. Try again in a few minutes, or install it later from the Extensions page.',
 					'woocommerce'
 				),
 				$slug

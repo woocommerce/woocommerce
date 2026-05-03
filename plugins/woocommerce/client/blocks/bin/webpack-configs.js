@@ -4,6 +4,7 @@
 const path = require( 'path' );
 const fs = require( 'fs' );
 const { paramCase } = require( 'change-case' );
+const webpack = require( 'webpack' );
 const RemoveFilesPlugin = require( './remove-files-webpack-plugin' );
 const MiniCssExtractPlugin = require( 'mini-css-extract-plugin' );
 const ProgressBarPlugin = require( 'progress-bar-webpack-plugin' );
@@ -67,6 +68,12 @@ const getSharedPlugins = ( {
 			outputFormat: ASSET_CHECK ? 'json' : 'php',
 			requestToExternal,
 			requestToHandle,
+		} ),
+		// Substitute the `__i18n_text_domain__` identifier used by the
+		// @woocommerce/email-editor package with the WooCommerce text
+		// domain so strings extract and translate under `woocommerce`.
+		new webpack.DefinePlugin( {
+			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
 		} ),
 		// Suppress file system cache warnings (unsupported serialization related).
 		new FilesystemCacheWarningsPlugin(),

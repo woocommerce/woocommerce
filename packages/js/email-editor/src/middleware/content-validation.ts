@@ -77,7 +77,7 @@ export const initContentValidationMiddleware = () => {
 									new Error(
 										__(
 											'Content validation failed.',
-											'woocommerce'
+											__i18n_text_domain__
 										)
 									)
 								);
