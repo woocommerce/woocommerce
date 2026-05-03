@@ -24,6 +24,9 @@ $highlightext:      desaturate(lighten($highlight, 80%), 18%) !default;  // Text
 $contentbg:         #fff !default;                                     // Content BG - Tabs (active state)
 $subtext:           #767676 !default;                                  // small, breadcrumbs etc
 
+// Border radius tokens — mirrors WP Design System naming.
+$radius-s:          2px !default;                                      // Small radius: inputs, buttons, selects.
+
 // export vars as CSS vars
 :root {
 	--woocommerce: #{$woocommerce};

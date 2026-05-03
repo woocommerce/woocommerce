@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove confusing error notice when shipping tour completion flag fails to save.
