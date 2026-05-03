@@ -7,7 +7,12 @@ import type { Field } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
-import { VariantCell, ValuesCell, PriceCell, StockCell } from './cells';
+import {
+	VariantCell,
+	VariationOptionsCell,
+	PriceCell,
+	StockCell,
+} from './cells';
 import type { Variation } from '../types';
 
 export const variationFields: Field< Variation >[] = [
@@ -20,11 +25,11 @@ export const variationFields: Field< Variation >[] = [
 		enableHiding: false,
 	},
 	{
-		id: 'values',
-		label: __( 'Values', 'woocommerce' ),
+		id: 'variation_options',
+		label: __( 'Options', 'woocommerce' ),
 		getValue: ( { item } ) =>
 			item.attributes.map( ( a ) => a.option ).join( ' ' ),
-		render: ( { item } ) => <ValuesCell item={ item } />,
+		render: ( { item } ) => <VariationOptionsCell item={ item } />,
 		enableSorting: false,
 		enableHiding: false,
 		enableGlobalSearch: true,

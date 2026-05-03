@@ -23,7 +23,7 @@ const DEFAULT_VIEW: View = {
 	search: '',
 	filters: [],
 	titleField: 'variant',
-	fields: [ 'values', 'price', 'stock' ],
+	fields: [ 'variation_options', 'price', 'stock' ],
 	layout: { density: 'compact' },
 };
 
