@@ -3,8 +3,10 @@
 
 .wc-variations-classic {
 	// Toolbar padding only — layout handled by Stack from @wordpress/ui.
+	// Horizontal padding matches the dataviews table cell inset (24px) so
+	// the search field aligns with the first column.
 	&__toolbar {
-		padding: var(--wpds-dimension-padding-sm, 8px) 0;
+		padding: var(--wpds-dimension-padding-lg, 24px);
 	}
 
 	// object-fit and border-radius are not provided by ProductImage component.
