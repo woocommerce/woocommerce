@@ -1,5 +1,7 @@
 # Inner Block Protocols
 
+> **Experimental:** These protocols are internal and subject to change without notice. Block context keys, action names, and type shapes documented here should not be considered a stable public API. They may be renamed, restructured, or removed in future releases.
+
 ## Overview
 
 This document defines the **context protocol pattern** used by WooCommerce blocks to let reusable inner blocks work with any parent store. Three concrete protocols exist today:
