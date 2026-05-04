@@ -255,14 +255,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$links['variations'] = array();
 
 			foreach ( $object->get_children() as $variation_id ) {
-				$variation_url = rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $variation_id ) );
-
-				if ( isset( $request['_fields'] ) ) {
-					$variation_url = add_query_arg( '_fields', implode( ',', wp_parse_list( $request['_fields'] ) ), $variation_url );
-				}
-
 				$links['variations'][] = array(
-					'href'       => $variation_url,
+					'href'       => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $variation_id ) ),
 					'embeddable' => true,
 				);
 			}

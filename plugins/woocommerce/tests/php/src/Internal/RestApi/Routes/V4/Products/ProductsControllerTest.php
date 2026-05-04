@@ -350,30 +350,31 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 		$embedded_variation_ids = wp_list_pluck( $response_data['_embedded']['variations'], 'id' );
 		$this->assertEqualsCanonicalizing( $variation_ids, $embedded_variation_ids );
 
+		foreach ( $response_data['_embedded']['variations'] as $embedded_variation ) {
+			$this->assertArrayHasKey( '_links', $embedded_variation, 'Embedded variations should include REST links.' );
+			$this->assertArrayHasKey( 'self', $embedded_variation['_links'], 'Embedded variations should include a self link.' );
+			$this->assertArrayHasKey( 'up', $embedded_variation['_links'], 'Embedded variations should include a parent product link.' );
+		}
+
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 
 	/**
-	 * @testdox Embedded variation responses respect requested fields.
+	 * @testdox Variation embed links do not propagate parent requested fields.
 	 */
-	public function test_embedded_variation_responses_respect_requested_fields(): void {
+	public function test_variation_embed_links_do_not_propagate_parent_requested_fields(): void {
 		$product = WC_Helper_Product::create_variation_product();
 		$request = new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() );
-		$request->set_param( '_embed', 1 );
 		$request->set_param( '_fields', 'id,name,_links,_embedded' );
 
 		$response = $this->server->dispatch( $request );
 
 		$this->assertEquals( 200, $response->get_status() );
 
-		$response_data      = $this->server->response_to_data( $response, true );
-		$embedded_variation = reset( $response_data['_embedded']['variations'] );
+		$links = $response->get_links();
 
-		$this->assertArrayHasKey( 'id', $embedded_variation );
-		$this->assertArrayHasKey( 'name', $embedded_variation );
-		$this->assertArrayNotHasKey( 'price', $embedded_variation );
-		$this->assertArrayNotHasKey( 'add_to_cart', $embedded_variation );
-		$this->assertArrayNotHasKey( 'meta_data', $embedded_variation );
+		$this->assertArrayHasKey( 'variations', $links );
+		$this->assertStringNotContainsString( '_fields=', $links['variations'][0]['href'] );
 
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
