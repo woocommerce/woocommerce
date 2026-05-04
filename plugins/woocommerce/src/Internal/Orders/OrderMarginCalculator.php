@@ -86,7 +86,7 @@ class OrderMarginCalculator {
 			}
 		}
 
-		return array(
+		$data = array(
 			'net_revenue'  => round( $net_revenue, 4 ),
 			'cogs'         => round( $cogs, 4 ),
 			'gross_profit' => round( $gross_profit, 4 ),
@@ -94,6 +94,16 @@ class OrderMarginCalculator {
 			'cogs_enabled' => $cogs_enabled,
 			'items'        => $items,
 		);
+
+		/**
+		 * Filters the margin data calculated for an order.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param array             $data  The calculated margin data.
+		 * @param WC_Abstract_Order $order The order the data was calculated for.
+		 */
+		return (array) apply_filters( 'woocommerce_order_margin_data', $data, $order );
 	}
 
 	public function get_margin_for_order_item( WC_Order_Item_Product $item, bool $cogs_enabled = true ): array {
