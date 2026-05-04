@@ -153,13 +153,11 @@ describe( 'QRLoginNumberMatchStep', () => {
 		resolveChoice();
 	} );
 
-	it( 'cancel link calls onChooseNumber with the empty-string sentinel', () => {
+	it( 'cancel-login button calls onChooseNumber with the empty-string sentinel', () => {
 		const { onChooseNumber } = renderStep();
 
 		fireEvent.click(
-			screen.getByRole( 'button', {
-				name: /don't recognise this device/i,
-			} )
+			screen.getByRole( 'button', { name: /cancel login/i } )
 		);
 
 		expect( onChooseNumber ).toHaveBeenCalledWith( '' );
