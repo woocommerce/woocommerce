@@ -6,7 +6,6 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperList;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListItem;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
-use Automattic\WooCommerce\StoreApi\Schemas\V1\ShopperListSchema;
 
 /**
  * GET / POST on /shopper-lists/{slug}/items.
@@ -159,29 +158,8 @@ class ShopperListItems extends AbstractRoute {
 		$list->add_item( $item );
 		$list->save();
 
-		return $this->prepare_list_response( $list, 201 );
-	}
-
-	/**
-	 * Render a full ShopperList response (metadata + items) for write endpoints.
-	 *
-	 * @param ShopperList $shopper_list Shopper list to render.
-	 * @param int         $status       HTTP status to set on the response.
-	 *
-	 * @return \WP_REST_Response
-	 */
-	private function prepare_list_response( ShopperList $shopper_list, int $status = 200 ): \WP_REST_Response {
-		$items = array_values( $shopper_list->get_items() );
-		$this->prime_product_caches_for_items( $items );
-
-		$list_schema       = $this->schema_controller->get( ShopperListSchema::IDENTIFIER );
-		$response          = (array) $list_schema->get_item_response( $shopper_list->to_array() );
-		$response['items'] = array_map(
-			fn( ShopperListItem $item ) => $this->schema->get_item_response( $item->to_array() ),
-			$items
-		);
-
-		return new \WP_REST_Response( $response, $status );
+		$saved = $list->find_item( $item->get_key() ) ?? $item;
+		return new \WP_REST_Response( $this->schema->get_item_response( $saved->to_array() ), 201 );
 	}
 
 	/**

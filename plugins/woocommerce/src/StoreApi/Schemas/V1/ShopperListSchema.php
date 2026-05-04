@@ -3,11 +3,13 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
+use Automattic\WooCommerce\StoreApi\SchemaController;
+
 /**
  * ShopperListSchema class.
  *
- * Represents the metadata for a single shopper list. Items are exposed via a
- * separate endpoint and serialised by ShopperListItemSchema.
+ * Represents a single shopper list, including its saved items.
  */
 class ShopperListSchema extends AbstractSchema {
 	/**
@@ -23,6 +25,27 @@ class ShopperListSchema extends AbstractSchema {
 	 * @var string
 	 */
 	const IDENTIFIER = 'shopper-list';
+
+	/**
+	 * Item schema instance.
+	 *
+	 * @var ShopperListItemSchema
+	 */
+	protected $item_schema;
+
+	/**
+	 * Constructor.
+	 *
+	 * @param ExtendSchema     $extend Rest Extending instance.
+	 * @param SchemaController $controller Schema Controller instance.
+	 */
+	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
+		parent::__construct( $extend, $controller );
+		$schema = $this->controller->get( ShopperListItemSchema::IDENTIFIER );
+		if ( $schema instanceof ShopperListItemSchema ) {
+			$this->item_schema = $schema;
+		}
+	}
 
 	/**
 	 * Schema properties.
@@ -50,6 +73,16 @@ class ShopperListSchema extends AbstractSchema {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
+			'items'            => array(
+				'description' => __( 'List of saved items.', 'woocommerce' ),
+				'type'        => 'array',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+				'items'       => array(
+					'type'       => 'object',
+					'properties' => $this->force_schema_readonly( $this->item_schema->get_properties() ),
+				),
+			),
 		);
 	}
 
@@ -62,10 +95,29 @@ class ShopperListSchema extends AbstractSchema {
 	public function get_item_response( $shopper_list ) {
 		$items = isset( $shopper_list['items'] ) && is_array( $shopper_list['items'] ) ? $shopper_list['items'] : array();
 
+		$product_ids = array_filter(
+			array_map(
+				static function ( $item ) {
+					$variation_id = absint( $item['variation_id'] ?? 0 );
+					return $variation_id ? $variation_id : absint( $item['product_id'] ?? 0 );
+				},
+				$items
+			)
+		);
+		if ( ! empty( $product_ids ) ) {
+			_prime_post_caches( array_unique( $product_ids ) );
+		}
+
 		return array(
 			'slug'             => $shopper_list['slug'] ?? '',
 			'date_created_gmt' => wc_rest_prepare_date_response( $shopper_list['date_created_gmt'] ?? current_time( 'mysql', true ) ),
 			'item_count'       => count( $items ),
+			'items'            => array_values(
+				array_map(
+					fn( $item ) => $this->item_schema->get_item_response( $item ),
+					$items
+				)
+			),
 		);
 	}
 }

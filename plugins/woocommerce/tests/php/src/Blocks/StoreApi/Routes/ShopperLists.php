@@ -156,7 +156,7 @@ class ShopperLists extends ControllerTestCase {
 	}
 
 	/**
-	 * Test POST /shopper-lists/saved-for-later/items with a real cart_item_key returns the full list.
+	 * Test POST /shopper-lists/saved-for-later/items with a real cart_item_key returns the saved item.
 	 */
 	public function test_post_item_via_cart_item_key() {
 		wp_set_current_user( $this->customer_id );
@@ -171,13 +171,10 @@ class ShopperLists extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 201, $response->get_status() );
-		$this->assertSame( 'saved-for-later', $data['slug'] );
-		$this->assertSame( 1, $data['item_count'] );
-		$this->assertCount( 1, $data['items'] );
-		$this->assertSame( $this->product->get_id(), $data['items'][0]['product_id'] );
-		$this->assertSame( 1, $data['items'][0]['quantity'], 'Saved quantity should mirror the cart line quantity.' );
-		$this->assertTrue( $data['items'][0]['product_exists'] );
-		$this->assertSame( $this->product->get_title(), $data['items'][0]['name'] );
+		$this->assertSame( $this->product->get_id(), $data['product_id'] );
+		$this->assertSame( 1, $data['quantity'], 'Saved quantity should mirror the cart line quantity.' );
+		$this->assertTrue( $data['product_exists'] );
+		$this->assertSame( $this->product->get_title(), $data['name'] );
 		$this->assertNotEmpty( wc()->cart->cart_contents, 'Cart should still contain the line — POST is additive only.' );
 	}
 
@@ -193,7 +190,7 @@ class ShopperLists extends ControllerTestCase {
 	}
 
 	/**
-	 * Test POST /shopper-lists/saved-for-later/items via direct product payload returns the full list.
+	 * Test POST /shopper-lists/saved-for-later/items via direct product payload returns the saved item.
 	 */
 	public function test_post_item_via_manual_product_payload() {
 		wp_set_current_user( $this->customer_id );
@@ -209,9 +206,8 @@ class ShopperLists extends ControllerTestCase {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 201, $response->get_status() );
-		$this->assertCount( 1, $data['items'] );
-		$this->assertSame( $this->product->get_id(), $data['items'][0]['product_id'] );
-		$this->assertSame( 2, $data['items'][0]['quantity'], 'Posted quantity should be honored.' );
+		$this->assertSame( $this->product->get_id(), $data['product_id'] );
+		$this->assertSame( 2, $data['quantity'], 'Posted quantity should be honored.' );
 	}
 
 	/**
@@ -246,7 +242,7 @@ class ShopperLists extends ControllerTestCase {
 	}
 
 	/**
-	 * Test that adding the same cart line twice does not produce a duplicate row.
+	 * Test that adding the same cart line twice merges quantities into a single row.
 	 */
 	public function test_post_item_is_idempotent_for_same_cart_line() {
 		wp_set_current_user( $this->customer_id );
@@ -257,9 +253,11 @@ class ShopperLists extends ControllerTestCase {
 
 		$this->assertEquals( 201, $first->get_status() );
 		$this->assertEquals( 201, $second->get_status() );
-		$this->assertSame( 1, $first->get_data()['item_count'] );
-		$this->assertSame( 1, $second->get_data()['item_count'], 'Same cart line should not produce a duplicate row.' );
-		$this->assertSame( $first->get_data()['items'][0]['key'], $second->get_data()['items'][0]['key'] );
+		$this->assertSame( $first->get_data()['key'], $second->get_data()['key'], 'Same cart line should resolve to the same item key.' );
+		$this->assertSame( 2, $second->get_data()['quantity'], 'Repeating the same cart line must merge quantities.' );
+
+		$items_response = $this->dispatch( 'GET', '/wc/store/v1/shopper-lists/saved-for-later/items' );
+		$this->assertCount( 1, $items_response->get_data(), 'Same cart line should not produce a duplicate row.' );
 	}
 
 	/**
@@ -278,22 +276,22 @@ class ShopperLists extends ControllerTestCase {
 	}
 
 	/**
-	 * Test that DELETE removes the item and returns the full list with the remaining items.
+	 * Test that DELETE removes the item and returns 204 No Content.
 	 */
 	public function test_delete_item_removes_item() {
 		wp_set_current_user( $this->customer_id );
 		$cart_item_key = $this->add_product_to_cart();
 
 		$created = $this->dispatch( 'POST', '/wc/store/v1/shopper-lists/saved-for-later/items', array( 'cart_item_key' => $cart_item_key ) );
-		$key     = $created->get_data()['items'][0]['key'];
+		$key     = $created->get_data()['key'];
 
 		$response = $this->dispatch( 'DELETE', '/wc/store/v1/shopper-lists/saved-for-later/items/' . $key );
-		$data     = $response->get_data();
 
-		$this->assertEquals( 200, $response->get_status() );
-		$this->assertSame( 'saved-for-later', $data['slug'] );
-		$this->assertSame( 0, $data['item_count'] );
-		$this->assertCount( 0, $data['items'] );
+		$this->assertEquals( 204, $response->get_status() );
+		$this->assertNull( $response->get_data() );
+
+		$items_response = $this->dispatch( 'GET', '/wc/store/v1/shopper-lists/saved-for-later/items' );
+		$this->assertCount( 0, $items_response->get_data(), 'List should be empty after the only item is deleted.' );
 	}
 
 	/**
