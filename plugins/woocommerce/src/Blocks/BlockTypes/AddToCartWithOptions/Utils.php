@@ -143,7 +143,7 @@ class Utils {
 				// processor so the input bindings below still execute.
 				$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 			}
-		}
+		}//end if
 
 		if (
 			$processor->next_tag( 'input' ) &&
