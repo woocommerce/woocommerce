@@ -19,8 +19,7 @@
 
 	&__item {
 		padding: 1.5em 0;
-		border-top: 1px solid currentColor;
-		border-top-color: rgba(0, 0, 0, 0.1);
+		border-top: 1px solid rgba(0, 0, 0, 0.1);
 
 		&:first-child {
 			border-top: 0;

@@ -82,6 +82,11 @@
 	function initSubmitGate( form ) {
 		var submit = form.querySelector( '.woocommerce-review-order__submit' );
 		if ( ! submit ) {
+			if ( window.console && window.console.warn ) {
+				window.console.warn(
+					'Review Order form is missing its submit button (.woocommerce-review-order__submit); the rating-based gate will not run.'
+				);
+			}
 			return;
 		}
 
