@@ -339,6 +339,7 @@ class CartCheckoutUtils {
 	 * @return bool true if the template has out of sync content.
 	 */
 	public static function is_overriden_by_custom_template_content( string $block ): bool {
+		wc_deprecated_function( __METHOD__, '10.9.0', 'is_overridden_by_custom_template_content' );
 		return self::is_overridden_by_custom_template_content( $block );
 	}
 
