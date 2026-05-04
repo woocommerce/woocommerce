@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add OrderMarginCalculator and wc/v3/orders/{id}/margin REST endpoint to calculate gross margin and profitability per order using Cost of Goods Sold data.
