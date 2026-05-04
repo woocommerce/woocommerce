@@ -435,7 +435,7 @@ class WC_Meta_Box_Order_Data {
 								if ( $order->get_formatted_billing_address() ) {
 									echo '<p>' . wp_kses( $order->get_formatted_billing_address(), array( 'br' => array() ) ) . '</p>';
 								} else {
-									echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
+									echo '<p class="none_set">' . esc_html__( 'No billing address set.', 'woocommerce' ) . '</p>';
 								}
 
 								$billing_fields = self::get_billing_fields( $order, 'view' );
@@ -571,7 +571,7 @@ class WC_Meta_Box_Order_Data {
 								if ( $order->get_formatted_shipping_address() ) {
 									echo '<p>' . wp_kses( $order->get_formatted_shipping_address(), array( 'br' => array() ) ) . '</p>';
 								} else {
-									echo '<p class="none_set"><strong>' . esc_html__( 'Address:', 'woocommerce' ) . '</strong> ' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
+									echo '<p class="none_set">' . esc_html__( 'No shipping address set.', 'woocommerce' ) . '</p>';
 								}
 
 								$shipping_fields = self::get_shipping_fields( $order, 'view' );

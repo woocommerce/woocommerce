@@ -1910,8 +1910,8 @@ ul.wc_coupon_list_block {
 	}
 
 	.order_data_column {
-		width: 32%;
-		padding: 0 2% 0 0;
+		width: 31%;
+		padding: 0 3% 0 0;
 		float: left;
 
 		> h3 span {
@@ -1932,8 +1932,22 @@ ul.wc_coupon_list_block {
 			padding: 0 !important;
 		}
 
-		.address strong {
-			display: block;
+		.address {
+			margin-top: 8px;
+
+			p {
+				margin: 0 0 8px;
+				line-height: 1.6;
+				overflow-wrap: anywhere;
+			}
+
+			strong {
+				display: block;
+				margin-bottom: 4px;
+				font-weight: 600;
+				// Inherit default postbox heading color so this matches the
+				// Customer history metabox h4s (Total orders / Total revenue).
+			}
 		}
 
 		.form-field {
@@ -2009,7 +2023,7 @@ ul.wc_coupon_list_block {
 		}
 
 		p.none_set {
-			color: #999;
+			color: $subtext;
 		}
 
 		div.edit_address {
@@ -2043,13 +2057,13 @@ ul.wc_coupon_list_block {
 			margin: 0 0 0 6px;
 			overflow: hidden;
 			position: relative;
-			color: #999;
+			color: $subtext;
 			border: 0;
 			float: right;
 
 			&:hover,
 			&:focus {
-				color: #000;
+				color: var(--wp-admin-theme-color, #007cba);
 			}
 
 			&::after {
@@ -7552,6 +7566,9 @@ table.bar_chart {
 
 			&:first-child {
 				width: 100%;
+				// Reset the base 3% gutter so the full-width first column
+				// doesn't render at 103% and overflow at narrow viewports.
+				padding-right: 0;
 			}
 		}
 	}
