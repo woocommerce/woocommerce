@@ -106,4 +106,31 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 50.0, $result['margin'] );
 		$this->assertTrue( $result['cogs_enabled'] );
 	}
+
+	/**
+	 * Test that COGS is zeroed out when the feature is disabled.
+	 */
+	public function test_get_margin_for_order_zeros_cogs_when_feature_disabled(): void {
+		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( false );
+		$order = $this->make_order( 100.0, 0.0, 60.0 );
+
+		$result = $this->sut->get_margin_for_order( $order );
+
+		$this->assertSame( 0.0, $result['cogs'] );
+		$this->assertSame( 100.0, $result['gross_profit'] );
+		$this->assertSame( 100.0, $result['margin'] );
+		$this->assertFalse( $result['cogs_enabled'] );
+	}
+
+	/**
+	 * Test that margin is 0 when net revenue is zero (no division by zero).
+	 */
+	public function test_get_margin_for_order_returns_zero_margin_when_net_revenue_is_zero(): void {
+		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
+		$order = $this->make_order( 0.0, 0.0, 0.0 );
+
+		$result = $this->sut->get_margin_for_order( $order );
+
+		$this->assertSame( 0.0, $result['margin'] );
+	}
 }
