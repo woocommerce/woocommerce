@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Emit `mobile_app_qr_direct_login_failed` from the QR direct-login modal when the code generation fails, mirroring the existing displayed/refreshed events so funnel analysis has symmetric attribution for the error path.

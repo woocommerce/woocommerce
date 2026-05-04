@@ -42,6 +42,25 @@ export const QRDirectLoginCode = () => {
 		}
 	}, [ state ] );
 
+	// Mirror the displayed-event semantics for ERROR transitions so the funnel
+	// has symmetric attribution: each entry into the error state fires once,
+	// and a successful retry (back to LOADING/READY) re-arms tracking so a
+	// later failure is recorded again.
+	const errorTrackedRef = useRef( false );
+	useEffect( () => {
+		if (
+			state === QRLoginTokenStates.ERROR &&
+			! errorTrackedRef.current
+		) {
+			errorTrackedRef.current = true;
+			recordEvent( 'mobile_app_qr_direct_login_failed', {
+				error_message: errorMessage ?? '',
+			} );
+		} else if ( state !== QRLoginTokenStates.ERROR ) {
+			errorTrackedRef.current = false;
+		}
+	}, [ state, errorMessage ] );
+
 	const formatTime = ( seconds: number ) => {
 		const mins = Math.floor( seconds / 60 );
 		const secs = seconds % 60;
