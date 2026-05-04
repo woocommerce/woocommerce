@@ -57,13 +57,6 @@ class ShopperListItem {
 	private $product_title_at_save;
 
 	/**
-	 * Snapshot of the product price at save time.
-	 *
-	 * @var string
-	 */
-	private $price_at_save;
-
-	/**
 	 * Private constructor. Use the static factories to obtain concrete instances.
 	 *
 	 * @param string $key                   Storage key (md5 of identity tuple).
@@ -73,7 +66,6 @@ class ShopperListItem {
 	 * @param int    $quantity              Saved quantity.
 	 * @param string $date_added_gmt        MySQL DATETIME, GMT.
 	 * @param string $product_title_at_save Title snapshot.
-	 * @param string $price_at_save         Price snapshot.
 	 */
 	private function __construct(
 		string $key,
@@ -82,8 +74,7 @@ class ShopperListItem {
 		array $variation,
 		int $quantity,
 		string $date_added_gmt,
-		string $product_title_at_save,
-		string $price_at_save
+		string $product_title_at_save
 	) {
 		$this->key                   = $key;
 		$this->product_id            = $product_id;
@@ -92,7 +83,6 @@ class ShopperListItem {
 		$this->quantity              = $quantity;
 		$this->date_added_gmt        = $date_added_gmt;
 		$this->product_title_at_save = $product_title_at_save;
-		$this->price_at_save         = $price_at_save;
 	}
 
 	/**
@@ -118,8 +108,7 @@ class ShopperListItem {
 			$data['variation'] ?? array(),
 			absint( $data['quantity'] ),
 			$data['date_added_gmt'] ?? '',
-			$data['product_title_at_save'] ?? '',
-			$data['price_at_save'] ?? ''
+			$data['product_title_at_save'] ?? ''
 		);
 	}
 
@@ -147,8 +136,7 @@ class ShopperListItem {
 			$variation,
 			max( 1, $quantity ),
 			current_time( 'mysql', true ),
-			$product->get_title(),
-			$product->get_price()
+			$product->get_title()
 		);
 	}
 
@@ -192,7 +180,6 @@ class ShopperListItem {
 			'quantity'              => $this->quantity,
 			'date_added_gmt'        => $this->date_added_gmt,
 			'product_title_at_save' => $this->product_title_at_save,
-			'price_at_save'         => $this->price_at_save,
 		);
 	}
 

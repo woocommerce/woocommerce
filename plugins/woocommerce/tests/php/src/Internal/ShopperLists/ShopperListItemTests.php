@@ -40,7 +40,7 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox from_product should build an item from a live product, snapshotting title/price.
+	 * @testdox from_product should build an item from a live product, snapshotting the title.
 	 */
 	public function test_from_product_builds_item_from_live_product(): void {
 		$item = ShopperListItem::from_product( $this->product->get_id(), array(), 3 );
@@ -48,7 +48,6 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( ShopperListItem::class, $item );
 		$arr = $item->to_array();
 		$this->assertSame( $this->product->get_title(), $arr['product_title_at_save'] );
-		$this->assertSame( (string) $this->product->get_price(), $arr['price_at_save'] );
 		$this->assertSame( 3, $arr['quantity'], 'Quantity should reflect the value passed to from_product.' );
 	}
 

@@ -70,10 +70,9 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 	 * @param int    $variation_id Variation ID, or 0.
 	 * @param array  $variation    Variation attributes.
 	 * @param string $title        Title snapshot.
-	 * @param string $price        Price snapshot.
 	 * @return array
 	 */
-	private function build_item( int $product_id, int $variation_id = 0, array $variation = array(), string $title = 'Snapshot Title', string $price = '9.99' ): array {
+	private function build_item( int $product_id, int $variation_id = 0, array $variation = array(), string $title = 'Snapshot Title' ): array {
 		return array(
 			'key'                   => md5( (string) $product_id ),
 			'product_id'            => $product_id,
@@ -82,7 +81,6 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 			'quantity'              => 1,
 			'date_added_gmt'        => '2024-04-25 03:20:00',
 			'product_title_at_save' => $title,
-			'price_at_save'         => $price,
 		);
 	}
 
@@ -98,7 +96,7 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$response = $this->sut->get_item_response( $this->build_item( $product->get_id(), 0, array(), 'Snapshot T-Shirt', '5.00' ) );
+		$response = $this->sut->get_item_response( $this->build_item( $product->get_id(), 0, array(), 'Snapshot T-Shirt' ) );
 
 		$this->assertTrue( $response['product_exists'], 'product_exists must be true when the product still exists' );
 		$this->assertSame( 'Live T-Shirt', $response['name'], 'Live name should be served, not the snapshot' );
@@ -114,7 +112,7 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 	public function test_falls_back_to_snapshot_when_product_missing(): void {
 		$product    = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'About to be Deleted' ) );
 		$product_id = $product->get_id();
-		$item       = $this->build_item( $product_id, 0, array(), 'Snapshot Title', '12.50' );
+		$item       = $this->build_item( $product_id, 0, array(), 'Snapshot Title' );
 		wp_delete_post( $product_id, true );
 
 		$response = $this->sut->get_item_response( $item );
@@ -125,6 +123,5 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $response['images'], 'No images should be returned for missing products' );
 		$this->assertNull( $response['prices'], 'Live prices should be null for missing products' );
 		$this->assertSame( 'Snapshot Title', $response['product_title_at_save'] );
-		$this->assertSame( '1250', $response['price_at_save'], 'price_at_save should be formatted via prepare_money_response (smallest unit)' );
 	}
 }

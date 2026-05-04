@@ -190,12 +190,6 @@ class ShopperListItemSchema extends AbstractSchema {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'price_at_save'         => array(
-				'description' => __( 'Snapshot of the product price taken when the item was saved. Used as the rendered price when product_exists is false.', 'woocommerce' ),
-				'type'        => 'string',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
 		);
 	}
 
@@ -211,8 +205,6 @@ class ShopperListItemSchema extends AbstractSchema {
 		$product      = $product_id ? wc_get_product( $product_id ) : false;
 		$has_product  = $product instanceof \WC_Product;
 
-		$price_at_save = $item['price_at_save'] ?? '';
-
 		$response = array(
 			'key'                   => $item['key'] ?? '',
 			'id'                    => $product_id,
@@ -222,7 +214,6 @@ class ShopperListItemSchema extends AbstractSchema {
 			'product_exists'        => $has_product,
 			'date_added_gmt'        => wc_rest_prepare_date_response( $item['date_added_gmt'] ?? current_time( 'mysql', true ) ),
 			'product_title_at_save' => $item['product_title_at_save'] ?? '',
-			'price_at_save'         => '' === $price_at_save ? '' : $this->prepare_money_response( $price_at_save, wc_get_price_decimals() ),
 		);
 
 		$variation_data = isset( $item['variation'] ) && is_array( $item['variation'] ) ? $item['variation'] : array();
