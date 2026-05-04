@@ -312,6 +312,29 @@ class WC_Admin_Taxonomies {
 	}
 
 	/**
+	 * Check if the current taxonomy should show visual swatch controls.
+	 *
+	 * @param string $taxonomy Taxonomy slug.
+	 * @return bool
+	 *
+	 * @internal
+	 */
+	private function is_visual_product_attribute_taxonomy( $taxonomy ) {
+		if ( ! taxonomy_is_product_attribute( $taxonomy ) ) {
+			return false;
+		}
+
+		if ( ! array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
+			return false;
+		}
+
+		$attribute_id = wc_attribute_taxonomy_id_by_name( $taxonomy );
+		$attribute    = $attribute_id ? wc_get_attribute( $attribute_id ) : null;
+
+		return $attribute && 'wc-visual' === $attribute->type;
+	}
+
+	/**
 	 * Add custom fields for product attribute terms.
 	 *
 	 * @param string $taxonomy Taxonomy slug.
@@ -320,7 +343,7 @@ class WC_Admin_Taxonomies {
 	 * @internal
 	 */
 	public function add_product_attribute_term_fields( $taxonomy ) {
-		if ( ! wc_taxonomy_is_attribute_type( $taxonomy, 'wc-visual' ) ) {
+		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return;
 		}
 		?>
@@ -340,7 +363,7 @@ class WC_Admin_Taxonomies {
 	 * @internal
 	 */
 	public function edit_product_attribute_term_fields( $term ) {
-		if ( ! wc_taxonomy_is_attribute_type( $term->taxonomy, 'wc-visual' ) ) {
+		if ( ! $this->is_visual_product_attribute_taxonomy( $term->taxonomy ) ) {
 			return;
 		}
 
@@ -369,7 +392,7 @@ class WC_Admin_Taxonomies {
 		if ( isset( $_POST['product_cat_thumbnail_id'] ) && 'product_cat' === $taxonomy ) { // WPCS: CSRF ok, input var ok.
 			update_term_meta( $term_id, 'thumbnail_id', absint( $_POST['product_cat_thumbnail_id'] ) ); // WPCS: CSRF ok, input var ok.
 		}
-		if ( wc_taxonomy_is_attribute_type( $taxonomy, 'wc-visual' ) ) {
+		if ( $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			$color_value = isset( $_POST['term_color'] ) ? sanitize_hex_color( wp_unslash( $_POST['term_color'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 
 			if ( $color_value ) {
@@ -431,7 +454,7 @@ class WC_Admin_Taxonomies {
 	 */
 	public function add_term_color_columns( $columns ) {
 		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! wc_taxonomy_is_attribute_type( $taxonomy, 'wc-visual' ) ) {
+		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return $columns;
 		}
 
@@ -466,7 +489,7 @@ class WC_Admin_Taxonomies {
 		}
 
 		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! wc_taxonomy_is_attribute_type( $taxonomy, 'wc-visual' ) ) {
+		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return $columns;
 		}
 
@@ -642,7 +665,7 @@ class WC_Admin_Taxonomies {
 	 */
 	public function scripts_at_visual_attribute_screen_footer() {
 		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		if ( ! wc_taxonomy_is_attribute_type( $taxonomy, 'wc-visual' ) ) {
+		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return;
 		}
 
