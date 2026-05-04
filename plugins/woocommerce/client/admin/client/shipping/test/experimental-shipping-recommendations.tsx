@@ -238,6 +238,47 @@ describe( 'ShippingRecommendations', () => {
 			).toBeInTheDocument();
 			expect( screen.queryByText( 'ShipStation' ) ).toBeInTheDocument();
 		} );
+
+		it( 'should render "Active" pills instead of CTA buttons for partners that are already active', () => {
+			mockSelectForCountry(
+				'US',
+				[
+					'woocommerce-shipping',
+					'woocommerce-shipstation-integration',
+				],
+				{
+					getInstalledPlugins: () => [
+						'woocommerce-shipping',
+						'woocommerce-shipstation-integration',
+					],
+				}
+			);
+			render( <ShippingRecommendations /> );
+
+			expect( screen.queryAllByText( 'Active' ) ).toHaveLength( 2 );
+			expect(
+				screen.queryByRole( 'button', { name: 'Install' } )
+			).not.toBeInTheDocument();
+			expect(
+				screen.queryByRole( 'button', { name: 'Activate' } )
+			).not.toBeInTheDocument();
+		} );
+
+		it( 'should render an "Active" pill only for the active partner and keep CTAs for inactive ones', () => {
+			mockSelectForCountry( 'US', [ 'woocommerce-shipping' ] );
+			render( <ShippingRecommendations /> );
+
+			// WooCommerce Shipping is active → "Active" pill.
+			// ShipStation is neither installed nor active → Install button shown.
+			expect( screen.queryAllByText( 'Active' ) ).toHaveLength( 1 );
+			const installButtons = screen.queryAllByRole( 'button', {
+				name: 'Install',
+			} );
+			expect( installButtons ).toHaveLength( 1 );
+			expect(
+				screen.queryByRole( 'button', { name: 'Activate' } )
+			).not.toBeInTheDocument();
+		} );
 	} );
 
 	describe( 'digital products only', () => {

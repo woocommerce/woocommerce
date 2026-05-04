@@ -53,25 +53,30 @@ const ShippingRecommendations = () => {
 	const [ pluginsBeingSetup, , handleInstall, handleActivate ] =
 		useInstallPlugin();
 
-	const { installedPlugins, countryCode, isSellingDigitalProductsOnly } =
-		useSelect( ( select ) => {
-			const settings = select( settingsStore ).getSettings( 'general' );
+	const {
+		installedPlugins,
+		activePlugins,
+		countryCode,
+		isSellingDigitalProductsOnly,
+	} = useSelect( ( select ) => {
+		const settings = select( settingsStore ).getSettings( 'general' );
 
-			const { getInstalledPlugins } = select( pluginsStore );
+		const { getInstalledPlugins, getActivePlugins } =
+			select( pluginsStore );
 
-			const profileItems =
-				select( onboardingStore ).getProfileItems()?.product_types;
+		const profileItems =
+			select( onboardingStore ).getProfileItems()?.product_types;
 
-			return {
-				installedPlugins: getInstalledPlugins(),
-				countryCode: getCountryCode(
-					settings.general?.woocommerce_default_country
-				),
-				isSellingDigitalProductsOnly:
-					profileItems?.length === 1 &&
-					profileItems[ 0 ] === 'downloads',
-			};
-		}, [] );
+		return {
+			installedPlugins: getInstalledPlugins(),
+			activePlugins: getActivePlugins(),
+			countryCode: getCountryCode(
+				settings.general?.woocommerce_default_country
+			),
+			isSellingDigitalProductsOnly:
+				profileItems?.length === 1 && profileItems[ 0 ] === 'downloads',
+		};
+	}, [] );
 
 	const normalizedCountry = countryCode ?? '';
 
@@ -119,6 +124,9 @@ const ShippingRecommendations = () => {
 					const isPluginInstalled = installedPlugins.includes(
 						EXTENSION_PLUGIN_SLUGS[ ext ]
 					);
+					const isPluginActive = activePlugins.includes(
+						EXTENSION_PLUGIN_SLUGS[ ext ]
+					);
 					const trackingProps = {
 						context: 'settings' as const,
 						country: normalizedCountry,
@@ -130,6 +138,7 @@ const ShippingRecommendations = () => {
 								<WooCommerceShippingItem
 									key={ ext }
 									isPluginInstalled={ isPluginInstalled }
+									isPluginActive={ isPluginActive }
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onInstallClick={ handleInstall }
 									onActivateClick={ handleActivate }
@@ -141,6 +150,7 @@ const ShippingRecommendations = () => {
 								<ShipStationItem
 									key={ ext }
 									isPluginInstalled={ isPluginInstalled }
+									isPluginActive={ isPluginActive }
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onInstallClick={ handleInstall }
 									onActivateClick={ handleActivate }
@@ -152,6 +162,7 @@ const ShippingRecommendations = () => {
 								<PacklinkItem
 									key={ ext }
 									isPluginInstalled={ isPluginInstalled }
+									isPluginActive={ isPluginActive }
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onInstallClick={ handleInstall }
 									onActivateClick={ handleActivate }

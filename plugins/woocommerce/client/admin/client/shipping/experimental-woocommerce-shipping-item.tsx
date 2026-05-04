@@ -23,12 +23,14 @@ export type ShippingPartnerTrackingProps = {
 
 const WooCommerceShippingItem = ( {
 	isPluginInstalled,
+	isPluginActive,
 	onInstallClick,
 	onActivateClick,
 	pluginsBeingSetup,
 	tracking,
 }: {
 	isPluginInstalled: boolean;
+	isPluginActive: boolean;
 	pluginsBeingSetup: Array< string >;
 	onInstallClick: ( slugs: string[] ) => PromiseLike< void >;
 	onActivateClick: ( slugs: string[] ) => PromiseLike< void >;
@@ -104,18 +106,24 @@ const WooCommerceShippingItem = ( {
 				</span>
 			</div>
 			<div className="woocommerce-list__item-after">
-				<Button
-					variant={ isPluginInstalled ? 'primary' : 'secondary' }
-					onClick={ handleClick }
-					isBusy={ pluginsBeingSetup.includes(
-						WOOCOMMERCE_SHIPPING_PLUGIN_SLUG
-					) }
-					disabled={ pluginsBeingSetup.length > 0 }
-				>
-					{ isPluginInstalled
-						? __( 'Activate', 'woocommerce' )
-						: __( 'Install', 'woocommerce' ) }
-				</Button>
+				{ isPluginActive ? (
+					<span className="woocommerce-shipping-plugin-item__active-status">
+						{ __( 'Active', 'woocommerce' ) }
+					</span>
+				) : (
+					<Button
+						variant={ isPluginInstalled ? 'primary' : 'secondary' }
+						onClick={ handleClick }
+						isBusy={ pluginsBeingSetup.includes(
+							WOOCOMMERCE_SHIPPING_PLUGIN_SLUG
+						) }
+						disabled={ pluginsBeingSetup.length > 0 }
+					>
+						{ isPluginInstalled
+							? __( 'Activate', 'woocommerce' )
+							: __( 'Install', 'woocommerce' ) }
+					</Button>
+				) }
 			</div>
 		</div>
 	);
