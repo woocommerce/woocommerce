@@ -200,27 +200,37 @@ class WCEmailTemplateSelectiveApplier {
 				return $updated;
 			}
 
-			// Hash the post_content WordPress actually persisted — `wp_update_post`
-			// runs the `content_save_pre` filter chain, so the in-memory
-			// `$merged_content` may not be byte-identical to what landed in the DB.
-			// `wp_update_post` calls `clean_post_cache` internally, so this hits
-			// fresh data. The classifier later reads `$post->post_content` directly,
-			// so the stored hash MUST match that value to avoid spurious drift.
-			$saved_post  = get_post( $post_id );
-			$saved_body  = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : $merged_content;
-			$source_hash = sha1( $saved_body );
-			$synced_at   = gmdate( 'Y-m-d H:i:s' );
-			$version_to  = (string) $sync_config['version'];
+			$saved_post = get_post( $post_id );
+			$saved_body = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : $merged_content;
+
+			// When merged content diverges from canonical (any keep_yours or
+			// preserved removed-block), stamp sha1(canonical) and hard-stamp
+			// STATUS_CORE_UPDATED_CUSTOMIZED so the auto-applier (which only
+			// acts on STATUS_CORE_UPDATED_UNCUSTOMIZED) can't silently overwrite
+			// the merchant's choice on the next core bump.
+			$is_aligned_with_canonical = ( $merged_content === $core_content );
+			$source_hash               = $is_aligned_with_canonical
+				? sha1( $saved_body )
+				: sha1( $core_content );
+			$synced_at                 = gmdate( 'Y-m-d H:i:s' );
+			$version_to                = (string) $sync_config['version'];
 
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $version_to );
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $source_hash );
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $synced_at );
 
-			// Status is computed from current state, never hard-coded.
-			// `merged_content` may equal canonical core (selective apply with all
-			// `use_core` choices) or differ from it (any `keep_yours` choice or a
-			// preserved removed-block). The classifier returns the right value.
-			WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+			if ( $is_aligned_with_canonical ) {
+				WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+			} else {
+				// reclassify() returns null in this branch (current_core ===
+				// stored, current_post !== stored) and would leave prior status
+				// untouched, so stamp directly.
+				update_post_meta(
+					$post_id,
+					WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+					WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED
+				);
+			}
 		} finally {
 			self::$is_applying = false;
 		}//end try

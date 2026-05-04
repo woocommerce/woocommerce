@@ -467,6 +467,7 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 		$baseline_version     = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true );
 		$baseline_source_hash = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true );
 		$baseline_synced_at   = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true );
+		$baseline_status      = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true );
 
 		// Simulate a customised post so the content reset is observable.
 		wp_update_post(
@@ -522,9 +523,9 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 			'_wc_email_last_synced_at must not be touched when the email is not sync-enabled.'
 		);
 		$this->assertSame(
-			'',
+			$baseline_status,
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
-			'_wc_email_template_status must not be set when the email is not sync-enabled.'
+			'_wc_email_template_status must not be touched when the email is not sync-enabled.'
 		);
 	}
 

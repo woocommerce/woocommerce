@@ -228,6 +228,11 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		$email_id = 'wc_test_divergence_idempotency';
 		$post_id  = $this->generate_stamped_post( $email_id );
 
+		// Clear the status the generator stamped at insert so the first
+		// sweep has classification work to do; otherwise both sweeps are
+		// no-ops and the test loses signal on first-write behaviour.
+		delete_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY );
+
 		$write_count = 0;
 		$counter     = static function ( $check, int $object_id, string $meta_key ) use ( &$write_count, $post_id ) {
 			if ( $object_id === $post_id && WCEmailTemplateDivergenceDetector::STATUS_META_KEY === $meta_key ) {
@@ -260,8 +265,10 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		$email_id = 'wc_test_divergence_missing_hash';
 		$post_id  = $this->generate_stamped_post( $email_id );
 
-		// Simulate a legacy (pre-RSM-137) post by removing the source-hash stamp.
+		// Simulate a legacy (pre-RSM-137) post by removing both the
+		// source-hash and status stamps the modern generator writes.
 		delete_post_meta( $post_id, '_wc_email_template_source_hash' );
+		delete_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY );
 
 		WCEmailTemplateDivergenceDetector::run_sweep();
 

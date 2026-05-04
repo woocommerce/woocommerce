@@ -426,6 +426,12 @@ class WCTransactionalEmailPostsGenerator {
 				WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
 				sha1( $saved_body )
 			);
+			// Freshly generated posts match canonical core by construction.
+			update_post_meta(
+				(int) $post_id,
+				WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+				WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC
+			);
 		}
 
 		$this->template_manager->save_email_template_post_id( $email_type, $post_id );

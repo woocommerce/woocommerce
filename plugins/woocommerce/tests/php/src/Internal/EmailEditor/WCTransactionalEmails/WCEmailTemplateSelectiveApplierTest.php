@@ -305,32 +305,32 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 			$result['version_to'],
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true )
 		);
+		// Empty choices → keep_yours → diverges from canonical → stamp
+		// sha1(canonical), not sha1(merged). See the keep_yours regression
+		// test for the rationale.
 		$this->assertSame(
-			sha1( $result['merged_content'] ),
+			sha1( $core_content ),
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true )
 		);
 		$this->assertMatchesRegularExpression(
 			'/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/',
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true )
 		);
-		// Status is now classifier-derived; this scenario applies with the
-		// default keep_yours decision so merged_content still differs from
-		// canonical core. The classifier therefore returns
-		// `core_updated_uncustomized` (core moved relative to the freshly
-		// written source_hash; post matches that stamp). Previously this
-		// test asserted STATUS_IN_SYNC — that was implicitly testing the
-		// hard-coded stamp bug fixed by routing through reclassify().
 		$this->assertSame(
-			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
 		);
 	}
 
 	/**
-	 * @testdox Should stamp source_hash from the post_content WordPress actually persisted, not the pre-filter in-memory string.
+	 * @testdox Should stamp source_hash from the post_content WordPress actually persisted on a use_core apply.
+	 *
+	 * Pins the saved-content invariant for the `merged_content === $core_content`
+	 * branch. The keep_yours branch deliberately stamps `sha1($core_content)`
+	 * instead — see the keep_yours regression test below.
 	 */
-	public function test_apply_selectively_stamps_source_hash_from_saved_post_content_not_in_memory(): void {
-		$email_id = 'sa_source_hash_after_save';
+	public function test_apply_selectively_use_core_stamps_source_hash_from_saved_post_content(): void {
+		$email_id = 'sa_source_hash_after_save_use_core';
 		$this->register_fixture_email( $email_id );
 
 		$canonical = "<!-- wp:paragraph -->\n<p>Canonical.</p>\n<!-- /wp:paragraph -->";
@@ -339,32 +339,75 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 		$this->use_canonical_content( $email_id, $canonical );
 		$post_id = $this->create_woo_email_post( $email_id, $post_html );
 
-		// Force WP's content-save filter chain to deterministically mutate the
-		// content between in-memory and what lands in the DB. If the applier
-		// hashes the in-memory string, the resulting source_hash will not match
-		// the persisted content — exactly the bug.
+		// content_save_pre mutates the body so saved !== in-memory merged.
 		$mutator = static function ( $content ) {
 			return $content . "\n<!-- filter mutated -->";
 		};
 		add_filter( 'content_save_pre', $mutator, 99 );
 
 		try {
-			$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+			$result = WCEmailTemplateSelectiveApplier::apply_selectively(
+				$post_id,
+				array(
+					array(
+						'path'     => array( 0 ),
+						'decision' => 'use_core',
+					),
+				)
+			);
 			$this->assertIsArray( $result );
 
 			$persisted   = get_post( $post_id );
 			$stored_hash = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true );
 
 			$this->assertInstanceOf( \WP_Post::class, $persisted );
-			$this->assertStringContainsString( '<!-- filter mutated -->', (string) $persisted->post_content, 'Sanity check: the test filter must have actually mutated saved content.' );
+			$this->assertStringContainsString( '<!-- filter mutated -->', (string) $persisted->post_content );
 			$this->assertSame(
 				sha1( (string) $persisted->post_content ),
 				$stored_hash,
-				'Stored source_hash must equal sha1 of the post_content WordPress persisted (post-filter), not the in-memory merged string.'
+				'use_core apply must stamp sha1(persisted post_content), not sha1(in-memory merged).'
 			);
 		} finally {
 			remove_filter( 'content_save_pre', $mutator, 99 );
-		}
+		}//end try
+	}
+
+	/**
+	 * @testdox Should stamp source_hash to sha1(canonical) and status to core_updated_customized when the merchant keeps any of their version.
+	 *
+	 * Regression: stamping sha1(saved post_content) after a keep_yours apply
+	 * made the next divergence sweep see "no merchant edits since sync" →
+	 * STATUS_CORE_UPDATED_UNCUSTOMIZED → auto-applier silently overwrote the
+	 * merchant's customisation on the next core bump.
+	 */
+	public function test_apply_selectively_keep_yours_stamps_canonical_hash_and_customized_status(): void {
+		$email_id = 'sa_keep_yours_canonical_hash';
+		$this->register_fixture_email( $email_id );
+
+		$canonical = "<!-- wp:paragraph -->\n<p>Canonical copy from core.</p>\n<!-- /wp:paragraph -->";
+		$post_html = "<!-- wp:paragraph -->\n<p>Merchant-edited copy.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_html );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+		$this->assertIsArray( $result );
+
+		$persisted     = get_post( $post_id );
+		$stored_hash   = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true );
+		$stored_status = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true );
+
+		$this->assertInstanceOf( \WP_Post::class, $persisted );
+		$this->assertSame( sha1( $canonical ), $stored_hash );
+		$this->assertNotSame(
+			sha1( (string) $persisted->post_content ),
+			$stored_hash,
+			'keep_yours must NOT stamp sha1(saved post_content) — would mis-classify on next core bump.'
+		);
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
+			$stored_status
+		);
 	}
 
 	/**
@@ -618,23 +661,14 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
 		$this->assertIsArray( $result );
 
-		// The reviewer-flagged bug stamped in_sync unconditionally. Status
-		// is now classifier-derived: with empty choices the merged content
-		// equals the merchant's content, the source_hash is rewritten to
-		// sha1(merged), and `classify_post` compares the *new* canonical
-		// hash (still differs from merged) against that stamp. Because the
-		// post matches the just-written stamp, the classifier reports
-		// `core_updated_uncustomized` (core moved; post matches stamp).
-		// The key invariant the bug-regression test pins is "not in_sync".
 		$this->assertNotSame(
 			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
-			'Applying with all keep_yours must not stamp in_sync — the post still differs from canonical.'
+			'keep_yours apply must not stamp in_sync — post still differs from canonical.'
 		);
 		$this->assertSame(
-			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
-			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
-			'Classifier output: stored hash != current canonical → core moved; post matches the just-written stamp → uncustomized.'
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
 		);
 	}
 
