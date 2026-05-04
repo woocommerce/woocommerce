@@ -148,6 +148,75 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Pins the "best-effort, append at closest level" fallback inside
+	 * {@see WCEmailTemplateSelectiveApplier::insert_block_at_path()}: when
+	 * core's path requires descending into an index that doesn't exist on
+	 * the post side at an intermediate depth, the new block is appended at
+	 * that level rather than dropped.
+	 *
+	 * The fallback isn't reachable through `apply_selectively()` end-to-end
+	 * with current fixtures (the public flow's LCS + structural-wrapper
+	 * skip combine to consume the only realistic deep-path scenario), so
+	 * this test reaches into the private helper directly via reflection.
+	 * Reviewer's risk on PR #64497: without a test, a future refactor could
+	 * silently turn the fallback's `$blocks[] = $new_block;` append into a
+	 * drop and no fixture would catch it.
+	 *
+	 * Setup: $blocks = [ Group with empty innerBlocks ]. $path = [ 0, 1, 0 ]
+	 * — top-level idx 0 exists (Group), idx 1 at the inner level does NOT,
+	 * so the recursive walker hits the fallback at depth=1 before reaching
+	 * the leaf. Expectation: the new block lands inside Group's innerBlocks.
+	 *
+	 * @testdox Should append a deeply-nested added block at the closest reachable level when the post tree is shallower than core's insertion path.
+	 */
+	public function test_insert_block_at_path_falls_back_to_closest_level_when_post_is_shallower(): void {
+		$reflection = new \ReflectionClass( WCEmailTemplateSelectiveApplier::class );
+		$method     = $reflection->getMethod( 'insert_block_at_path' );
+		$method->setAccessible( true );
+
+		$post_blocks = array(
+			array(
+				'blockName'    => 'core/group',
+				'attrs'        => array(),
+				'innerBlocks'  => array(),
+				'innerHTML'    => '<div class="wp-block-group"></div>',
+				'innerContent' => array( '<div class="wp-block-group"></div>' ),
+			),
+		);
+		$path        = array( 0, 1, 0 );
+		$new_block   = array(
+			'blockName'    => 'core/paragraph',
+			'attrs'        => array(),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '<p>Deeply nested addition.</p>',
+			'innerContent' => array( '<p>Deeply nested addition.</p>' ),
+		);
+
+		$result = $method->invoke( null, $post_blocks, $path, $new_block );
+
+		$this->assertIsArray( $result );
+		$this->assertCount( 1, $result, 'Top-level shape unchanged: still one Group at the root.' );
+		$this->assertSame( 'core/group', $result[0]['blockName'] );
+
+		$inner = $result[0]['innerBlocks'] ?? array();
+		$this->assertCount(
+			1,
+			$inner,
+			'Fallback must append the new block to the Group\'s innerBlocks rather than dropping it.'
+		);
+		$this->assertSame(
+			'core/paragraph',
+			$inner[0]['blockName'] ?? null,
+			'Appended block must be the paragraph passed in, not anything else.'
+		);
+		$this->assertSame(
+			'<p>Deeply nested addition.</p>',
+			$inner[0]['innerHTML'] ?? null,
+			'Block content must survive the append unchanged.'
+		);
+	}
+
+	/**
 	 * Post has a custom block not in core; merged content still contains it
 	 * (auto-resolved Keep yours — `removed_blocks` are preserved).
 	 */
