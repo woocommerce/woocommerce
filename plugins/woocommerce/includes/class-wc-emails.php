@@ -119,6 +119,7 @@ class WC_Emails {
 				'woocommerce_order_status_failed',
 				'woocommerce_order_fully_refunded',
 				'woocommerce_order_partially_refunded',
+				'woocommerce_send_review_request',
 				'woocommerce_new_customer_note',
 				'woocommerce_created_customer',
 				'woocommerce_payment_gateway_enabled',
