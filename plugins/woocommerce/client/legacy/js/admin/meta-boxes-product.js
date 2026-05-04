@@ -1432,7 +1432,7 @@ jQuery( function ( $ ) {
 	const tooltipMarkup = document.createElement( 'span' );
 	tooltipMarkup.className = 'woocommerce-help-tip';
 	tooltipMarkup.tabIndex = 0;
-	tooltipMarkup.ariaLabel = woocommerce_admin_meta_boxes.i18n_product_image_tip;
+	tooltipMarkup.setAttribute( 'aria-label', woocommerce_admin_meta_boxes.i18n_product_image_tip );
 	const tooltipData = {
 		attribute: 'data-tip',
 		content: woocommerce_admin_meta_boxes.i18n_product_image_tip,
