@@ -61,6 +61,8 @@ final class OrderInternalStatus {
 	/**
 	 * Returns all internal order status values.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @return string[]
 	 */
 	public static function get_all(): array {

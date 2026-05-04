@@ -110,6 +110,8 @@ final class OrderStatus {
 	/**
 	 * Returns all order status values defined in this class.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @return string[]
 	 */
 	public static function get_all(): array {

@@ -33,6 +33,8 @@ final class CatalogVisibility {
 	/**
 	 * Returns all catalog visibility values.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @return string[]
 	 */
 	public static function get_all(): array {

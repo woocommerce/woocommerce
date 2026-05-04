@@ -46,6 +46,8 @@ final class ProductType {
 	/**
 	 * Returns all product type values.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @return string[]
 	 */
 	public static function get_all(): array {
