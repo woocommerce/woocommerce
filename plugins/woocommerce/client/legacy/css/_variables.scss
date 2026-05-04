@@ -27,6 +27,9 @@ $subtext:           #767676 !default;                                  // small,
 // Border radius tokens — mirrors WP Design System naming.
 $radius-s:          2px !default;                                      // Small radius: inputs, buttons, selects.
 
+// Gray scale tokens — mirrors WP Design System naming.
+$gray-200:          #dcdcde !default;                                  // Subtle dividers, postbox metabox separators.
+
 // export vars as CSS vars
 :root {
 	--woocommerce: #{$woocommerce};

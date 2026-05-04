@@ -2101,58 +2101,113 @@ ul.wc_coupon_list_block {
 
 .order_actions {
 	margin: 0;
-	overflow: hidden;
-	zoom: 1;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	list-style: none;
 
 	li {
-		border-top: 1px solid #fff;
-		border-bottom: 1px solid #ddd;
-		padding: 6px 0;
+		border-top: 1px solid $gray-200;
+		padding: 16px 12px;
 		margin: 0;
 		line-height: 1.6em;
-		float: left;
-		width: 50%;
-		text-align: center;
 
-		a {
-			float: none;
-			text-align: center;
-			text-decoration: underline;
+		&:first-child {
+			border-top: 0;
 		}
 
-		&.wide {
-			width: auto;
-			float: none;
-			clear: both;
-			padding: 6px;
-			text-align: left;
-			overflow: hidden;
-		}
+		// Save row: Update / Create primary button stacked above the
+		// destructive "Move to trash" secondary button. Sits beneath the
+		// action dropdown — matches the legacy DOM order so any plugin
+		// hooking woocommerce_order_actions_start (e.g. PayPal Payments,
+		// Mollie) renders above the dropdown as before.
+		&#wc-order-save-action {
+			display: flex;
+			flex-direction: column;
+			gap: 8px;
 
-		#delete-action {
-			line-height: 25px;
-			vertical-align: middle;
-			text-align: left;
-			float: left;
-		}
-
-		.save_order {
-			float: right;
-		}
-
-		&#actions {
-			overflow: hidden;
-
-			.button {
-				width: 24px;
-				box-sizing: border-box;
-				float: right;
+			button.save_order {
+				width: 100%;
+				// Reset the legacy 1px button margin (line 2870) so the
+				// full-width button doesn't overflow on pre-WP 7.0 installs.
+				// The .wc-wp-version-gte-70 block already zeros this on 7.0+.
+				margin: 0;
 			}
 
-			select {
-				width: 225px;
+			// `<div id="delete-action">` is always rendered (preserves the
+			// legacy markup contract for plugin/theme JS that queries it
+			// directly), but is empty when the user lacks `delete_post`.
+			// Without this rule, the empty wrapper still participates in
+			// the flex `gap` and adds 8px of trailing space below Update.
+			#delete-action:empty {
+				display: none;
+			}
+
+			// Style the trash anchor as a destructive secondary button.
+			// Mirrors @wordpress/components Button variant="secondary"
+			// isDestructive — transparent fill with red text and an inset
+			// box-shadow border, darkened on hover/focus, focus ring around
+			// the outside. See Gutenberg packages/components/src/button/
+			// style.scss `.is-destructive.is-secondary` rules.
+			#delete-action a.submitdelete {
+				display: block;
+				width: 100%;
 				box-sizing: border-box;
-				float: left;
+				padding: 0 12px;
+				min-height: 40px;
+				line-height: 38px; // min-height minus 2 × 1px box-shadow inset.
+				border: 0;
+				border-radius: 2px;
+				background: transparent;
+				box-shadow: inset 0 0 0 1px #cc1818; // WP alert-red.
+				color: #cc1818;
+				text-align: center;
+				text-decoration: none;
+				transition: box-shadow 0.1s linear;
+
+				&:hover {
+					color: #710d0d; // WP alert-red darkened.
+					box-shadow: inset 0 0 0 1px #710d0d;
+				}
+
+				&:focus {
+					color: #710d0d;
+					// Inner border + outer focus ring with a 1px white gap,
+					// matching Gutenberg's two-ring destructive focus pattern.
+					box-shadow:
+						inset 0 0 0 1px #710d0d,
+						0 0 0 1.5px #fff,
+						0 0 0 3px #710d0d;
+					outline: 2px solid transparent; // a11y for high-contrast.
+				}
+
+				&:active {
+					color: #710d0d;
+					box-shadow: inset 0 0 0 1px #710d0d;
+				}
+			}
+		}
+
+		// Action row (top): select + Apply button. Replaces the legacy
+		// float layout where the Apply button was forced to width: 24px
+		// (a squished pill) and the select to a hardcoded 225px (overflowed
+		// on narrow sidebars).
+		&#actions {
+			display: flex;
+			gap: 8px;
+			align-items: stretch;
+
+			select {
+				flex: 1;
+				min-width: 0; // prevent flex blow-out on long option labels.
+				box-sizing: border-box;
+			}
+
+			.button {
+				flex-shrink: 0;
+				box-sizing: border-box;
+				// See save_order note above — same legacy 1px margin reset.
+				margin: 0;
 			}
 		}
 	}
@@ -2864,7 +2919,6 @@ ul.wc_coupon_list_block {
 	padding: 0;
 
 	ul.order_actions li {
-		padding: 6px 10px;
 		box-sizing: border-box;
 
 		&:last-child {
@@ -8373,17 +8427,6 @@ table.bar_chart {
 	}
 
 
-	// Order actions: select + button overflow container due to WP 7.0 select margins.
-	.order_actions {
-		#actions select {
-			width: calc(100% - 32px);
-		}
-
-		// Move to trash: make sure it aligns better vertically with 7.0's increased button height.
-		#delete-action {
-			line-height: 35px;
-		}
-	}
 
 	// Order actions reload button: icon line-height must match WP 7.0 button height.
 	.button.wc-reload {
