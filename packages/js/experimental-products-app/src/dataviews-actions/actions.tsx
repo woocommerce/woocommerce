@@ -7,6 +7,7 @@ import { dispatch } from '@wordpress/data';
 import { edit, external, trash } from '@wordpress/icons';
 import { __, _n, _x, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
+import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
 import type { Action } from '@wordpress/dataviews';
@@ -16,6 +17,39 @@ import { useMemo } from '@wordpress/element';
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../fields/types';
+import { unlock } from '../lock-unlock';
+import { getProductListNavigationPath } from '../product-list/utils';
+
+const { useHistory, useLocation } = unlock( routerPrivateApis );
+
+type EditActionOptions = {
+	navigate: ( path: string ) => void;
+	path?: string;
+	query?: Record< string, string | undefined >;
+};
+
+function getQuickEditPath(
+	path: string,
+	query: Record< string, string | undefined >,
+	productId: number
+) {
+	const nextQuery = Object.entries( query ).reduce(
+		( acc, [ key, value ] ) => {
+			if ( typeof value === 'string' ) {
+				acc[ key ] = value;
+			}
+
+			return acc;
+		},
+		{} as Record< string, string >
+	);
+
+	return getProductListNavigationPath( path, {
+		...nextQuery,
+		postId: String( productId ),
+		quickEdit: 'true',
+	} );
+}
 
 function getErrorMessage( error: unknown ): string {
 	if ( error instanceof Error ) {
@@ -84,7 +118,11 @@ function getNoticeFromSettledResults( {
 	};
 }
 
-export const editAction = (): Action< ProductEntityRecord > => ( {
+export const editAction = ( {
+	navigate,
+	path = '/',
+	query = {},
+}: EditActionOptions ): Action< ProductEntityRecord > => ( {
 	id: 'edit-product',
 	label: __( 'Edit', 'woocommerce' ),
 	isPrimary: true,
@@ -96,12 +134,7 @@ export const editAction = (): Action< ProductEntityRecord > => ( {
 		const product = items[ 0 ];
 
 		if ( product ) {
-			window.location.href = getAdminLink(
-				addQueryArgs( 'post.php', {
-					post: product.id,
-					action: 'edit',
-				} )
-			);
+			navigate( getQuickEditPath( path, query, product.id ) );
 		}
 
 		if ( onActionPerformed ) {
@@ -311,13 +344,20 @@ export const moveToTrashAction = (): Action< ProductEntityRecord > => ( {
 } );
 
 export const useProductActions = () => {
+	const { navigate } = useHistory();
+	const { path, query = {} } = useLocation();
+
 	return useMemo(
 		() => [
-			editAction(),
+			editAction( {
+				navigate,
+				path,
+				query,
+			} ),
 			viewAction(),
 			duplicateProductAction(),
 			moveToTrashAction(),
 		],
-		[]
+		[ navigate, path, query ]
 	);
 };
