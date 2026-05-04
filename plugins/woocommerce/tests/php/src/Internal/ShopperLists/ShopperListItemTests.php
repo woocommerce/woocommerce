@@ -76,40 +76,6 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Same product+variation should always produce the same key, regardless of variation key order.
-	 */
-	public function test_key_is_stable_under_variation_reordering(): void {
-		$id    = $this->product->get_id();
-		$first = ShopperListItem::from_product(
-			$id,
-			array(
-				'attribute_size'  => 'L',
-				'attribute_color' => 'red',
-			)
-		);
-		$other = ShopperListItem::from_product(
-			$id,
-			array(
-				'attribute_color' => 'red',
-				'attribute_size'  => 'L',
-			)
-		);
-
-		$this->assertSame( $first->get_key(), $other->get_key(), 'Variation attribute order must not affect the key.' );
-	}
-
-	/**
-	 * @testdox Different variation values should produce different keys.
-	 */
-	public function test_key_varies_with_variation_values(): void {
-		$id  = $this->product->get_id();
-		$red = ShopperListItem::from_product( $id, array( 'attribute_color' => 'red' ) );
-		$blu = ShopperListItem::from_product( $id, array( 'attribute_color' => 'blue' ) );
-
-		$this->assertNotSame( $red->get_key(), $blu->get_key(), 'Different variation values must produce different keys.' );
-	}
-
-	/**
 	 * @testdox to_array round-trips through from_array.
 	 */
 	public function test_round_trips_through_from_array(): void {
@@ -117,5 +83,71 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 		$rebuilt  = ShopperListItem::from_array( $original->to_array() );
 
 		$this->assertSame( $original->to_array(), $rebuilt->to_array() );
+	}
+
+	/**
+	 * @testdox from_product validates the variation array against the variation product, like cart does.
+	 */
+	public function test_from_variation_validates_against_variation_product(): void {
+		$variable = \WC_Helper_Product::create_variation_product();
+
+		$find = function ( array $attrs ) use ( $variable ): int {
+			foreach ( $variable->get_children() as $variation_id ) {
+				$expected = wc_get_product_variation_attributes( (int) $variation_id );
+				if ( empty( array_diff_assoc( $attrs, $expected ) ) ) {
+					return (int) $variation_id;
+				}
+			}
+			$this->fail( 'No variation matched the requested attribute set.' );
+		};
+
+		$all_specific = $find(
+			array(
+				'attribute_pa_size'   => 'huge',
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => '0',
+			)
+		);
+		$any_number   = $find(
+			array(
+				'attribute_pa_size'   => 'huge',
+				'attribute_pa_colour' => 'blue',
+				'attribute_pa_number' => '',
+			)
+		);
+
+		// Specific attrs: server fills them in even when the caller passes nothing.
+		$variation = ShopperListItem::from_product( $all_specific, array() )->to_array()['variation'];
+		$this->assertSame( 'huge', $variation['attribute_pa_size'] );
+		$this->assertSame( 'red', $variation['attribute_pa_colour'] );
+		$this->assertSame( '0', $variation['attribute_pa_number'] );
+
+		// Specific attrs: client value mismatching the variation is rejected.
+		try {
+			ShopperListItem::from_product( $all_specific, array( 'attribute_pa_colour' => 'blue' ) );
+			$this->fail( 'Expected mismatched specific value to throw.' );
+		} catch ( \InvalidArgumentException $e ) {
+			$this->addToAssertionCount( 1 );
+		}
+
+		// "Any" slot: missing client value is rejected.
+		try {
+			ShopperListItem::from_product( $any_number, array() );
+			$this->fail( 'Expected missing any-slot value to throw.' );
+		} catch ( \InvalidArgumentException $e ) {
+			$this->addToAssertionCount( 1 );
+		}
+
+		// "Any" slot: a value present on the parent is accepted and stored.
+		$variation = ShopperListItem::from_product( $any_number, array( 'attribute_pa_number' => '2' ) )->to_array()['variation'];
+		$this->assertSame( '2', $variation['attribute_pa_number'] );
+
+		// "Any" slot: a value not in the parent's slugs is rejected.
+		try {
+			ShopperListItem::from_product( $any_number, array( 'attribute_pa_number' => '99' ) );
+			$this->fail( 'Expected invalid any-slot value to throw.' );
+		} catch ( \InvalidArgumentException $e ) {
+			$this->addToAssertionCount( 1 );
+		}
 	}
 }

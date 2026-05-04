@@ -81,16 +81,28 @@ class ShopperListItems extends AbstractRoute {
 						'type'        => 'string',
 					),
 					'product_id'    => array(
-						'description' => __( 'Product ID to save directly when cart_item_key is not supplied.', 'woocommerce' ),
-						'type'        => 'integer',
-					),
-					'variation_id'  => array(
-						'description' => __( 'Variation ID, when saving a variation product directly.', 'woocommerce' ),
+						'description' => __( 'Product or variation ID to save. Required when cart_item_key is not supplied.', 'woocommerce' ),
 						'type'        => 'integer',
 					),
 					'variation'     => array(
-						'description' => __( 'Variation attributes keyed by attribute name.', 'woocommerce' ),
+						'description' => __( 'Chosen attributes (for variations).', 'woocommerce' ),
 						'type'        => 'array',
+						'context'     => array( 'view', 'edit' ),
+						'items'       => array(
+							'type'       => 'object',
+							'properties' => array(
+								'attribute' => array(
+									'description' => __( 'Variation attribute name.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'value'     => array(
+									'description' => __( 'Variation attribute value.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+							),
+						),
 					),
 					'quantity'      => array(
 						'description' => __( 'Quantity for the saved item.', 'woocommerce' ),
@@ -151,7 +163,11 @@ class ShopperListItems extends AbstractRoute {
 
 		[ $lookup_id, $variation, $quantity ] = $this->resolve_item_payload( $request );
 
-		$item = ShopperListItem::from_product( $lookup_id, $variation, $quantity );
+		try {
+			$item = ShopperListItem::from_product( $lookup_id, $variation, $quantity );
+		} catch ( \InvalidArgumentException $e ) {
+			throw new RouteException( 'woocommerce_rest_shopper_list_invalid_variation', esc_html( $e->getMessage() ), 400 );
+		}
 		if ( ! $item ) {
 			throw new RouteException( 'woocommerce_rest_shopper_list_unknown_product', esc_html__( 'No product exists for the supplied item.', 'woocommerce' ), 404 );
 		}
@@ -202,11 +218,14 @@ class ShopperListItems extends AbstractRoute {
 			throw new RouteException( 'woocommerce_rest_shopper_list_missing_item_input', esc_html__( 'Provide cart_item_key or product_id.', 'woocommerce' ), 400 );
 		}
 
-		$variation_id = absint( $request->get_param( 'variation_id' ) );
+		$variation = wp_list_pluck( (array) $request->get_param( 'variation' ), 'value', 'attribute' );
 
 		return array(
-			$variation_id ? $variation_id : $product_id,
-			(array) $request->get_param( 'variation' ),
+			$product_id,
+			(array) array_combine(
+				array_map( 'wc_variation_attribute_name', array_keys( $variation ) ),
+				array_values( $variation )
+			),
 			absint( $request->get_param( 'quantity' ) ),
 		);
 	}

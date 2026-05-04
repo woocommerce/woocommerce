@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ShopperLists;
 
+use Automattic\WooCommerce\Enums\ProductType;
+
 /**
  * A single saved item within a shopper list.
  */
@@ -115,6 +117,8 @@ class ShopperListItem {
 	/**
 	 * Construct from a product (or variation) ID and optional payload fields.
 	 *
+	 * @throws \InvalidArgumentException When the provided variation attributes do not match the variation product.
+	 *
 	 * @param int   $product_or_variation_id Product or variation ID.
 	 * @param array $variation               Variation attributes keyed by attribute name.
 	 * @param int   $quantity                Saved quantity. Coerced to a minimum of 1.
@@ -126,8 +130,19 @@ class ShopperListItem {
 			return null;
 		}
 
-		$variation_id = $product->is_type( 'variation' ) ? $product->get_id() : 0;
-		$product_id   = $variation_id ? $product->get_parent_id() : $product->get_id();
+		if ( $product->is_type( ProductType::VARIATION ) ) {
+			$variation_id = $product->get_id();
+			$product_id   = $product->get_parent_id();
+			$variation    = self::resolve_variation_attributes( $product, $variation );
+		} elseif ( $product->is_type( ProductType::VARIABLE ) ) {
+			throw new \InvalidArgumentException(
+				esc_html__( 'When saving a variation, product_id must be the variation ID, not the parent product ID.', 'woocommerce' )
+			);
+		} else {
+			$product_id   = $product->get_id();
+			$variation_id = 0;
+			$variation    = array();
+		}
 
 		return new self(
 			self::generate_key( $product_id, $variation_id, $variation ),
@@ -138,6 +153,87 @@ class ShopperListItem {
 			current_time( 'mysql', true ),
 			$product->get_title()
 		);
+	}
+
+	/**
+	 * Resolve and validate the variation attribute array against the variation product.
+	 *
+	 * Mirrors {@see CartController::parse_variation_data()}: specific values come from
+	 * the variation (server-authoritative); "any" slots must be supplied by the caller
+	 * with a value that exists on the parent product.
+	 *
+	 * @throws \InvalidArgumentException When the supplied variation attributes are
+	 *                                   missing required values or don't match the
+	 *                                   variation product.
+	 *
+	 * @param \WC_Product $variation_product     Variation product.
+	 * @param array       $requested_attributes  Variation attributes supplied by the caller, keyed by `attribute_<slug>`.
+	 * @return array
+	 */
+	private static function resolve_variation_attributes( \WC_Product $variation_product, array $requested_attributes ): array {
+		$parent = wc_get_product( $variation_product->get_parent_id() );
+		if ( ! $parent || ! $parent->is_type( ProductType::VARIABLE ) || ! $variation_product->is_type( ProductType::VARIATION ) ) {
+			return array();
+		}
+
+		$result = array();
+
+		$all_attributes       = array_filter( $parent->get_attributes(), fn( $attribute ) => $attribute->get_variation() );
+		$variation_attributes = wc_get_product_variation_attributes( $variation_product->get_id() );
+
+		foreach ( $all_attributes as $name => $attribute ) {
+			$key      = 'attribute_' . $name;
+			$expected = $variation_attributes[ $key ] ?? '';
+
+			// Variation doesn't provide attribute ('any' attribute).
+			if ( '' === $expected ) {
+				if ( ! isset( $requested_attributes[ $key ] ) ) {
+					throw new \InvalidArgumentException(
+						esc_html(
+							sprintf(
+								/* translators: %s: attribute name. */
+								__( 'Attribute "%s" is required.', 'woocommerce' ),
+								$name
+							)
+						)
+					);
+				}
+
+				if ( ! in_array( $requested_attributes[ $key ], $attribute->get_slugs(), true ) ) {
+					throw new \InvalidArgumentException(
+						esc_html(
+							sprintf(
+								/* translators: 1: attribute name, 2: comma-separated allowed values. */
+								__( 'Invalid value posted for "%1$s". Allowed values: %2$s', 'woocommerce' ),
+								$name,
+								implode( ', ', $attribute->get_slugs() )
+							)
+						)
+					);
+				}
+
+				$result[ $key ] = $requested_attributes[ $key ];
+				continue;
+			}//end if
+
+			// Variation provides attribute.
+			if ( isset( $requested_attributes[ $key ] ) && $requested_attributes[ $key ] !== $expected ) {
+				throw new \InvalidArgumentException(
+					esc_html(
+						sprintf(
+							/* translators: 1: attribute name, 2: expected value. */
+							__( 'Invalid value posted for "%1$s". Expected "%2$s".', 'woocommerce' ),
+							$name,
+							$expected
+						)
+					)
+				);
+			}
+
+			$result[ $key ] = $expected;
+		}//end foreach
+
+		return $result;
 	}
 
 	/**
