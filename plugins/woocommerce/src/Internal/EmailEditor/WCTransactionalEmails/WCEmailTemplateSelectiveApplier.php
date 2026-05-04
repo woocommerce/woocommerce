@@ -200,7 +200,15 @@ class WCEmailTemplateSelectiveApplier {
 				return $updated;
 			}
 
-			$source_hash = sha1( $merged_content );
+			// Hash the post_content WordPress actually persisted — `wp_update_post`
+			// runs the `content_save_pre` filter chain, so the in-memory
+			// `$merged_content` may not be byte-identical to what landed in the DB.
+			// `wp_update_post` calls `clean_post_cache` internally, so this hits
+			// fresh data. The classifier later reads `$post->post_content` directly,
+			// so the stored hash MUST match that value to avoid spurious drift.
+			$saved_post  = get_post( $post_id );
+			$saved_body  = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : $merged_content;
+			$source_hash = sha1( $saved_body );
 			$synced_at   = gmdate( 'Y-m-d H:i:s' );
 			$version_to  = (string) $sync_config['version'];
 

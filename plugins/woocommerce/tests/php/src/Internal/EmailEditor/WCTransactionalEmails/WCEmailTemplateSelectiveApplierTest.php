@@ -327,6 +327,47 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stamp source_hash from the post_content WordPress actually persisted, not the pre-filter in-memory string.
+	 */
+	public function test_apply_selectively_stamps_source_hash_from_saved_post_content_not_in_memory(): void {
+		$email_id = 'sa_source_hash_after_save';
+		$this->register_fixture_email( $email_id );
+
+		$canonical = "<!-- wp:paragraph -->\n<p>Canonical.</p>\n<!-- /wp:paragraph -->";
+		$post_html = "<!-- wp:paragraph -->\n<p>Merchant.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_html );
+
+		// Force WP's content-save filter chain to deterministically mutate the
+		// content between in-memory and what lands in the DB. If the applier
+		// hashes the in-memory string, the resulting source_hash will not match
+		// the persisted content — exactly the bug.
+		$mutator = static function ( $content ) {
+			return $content . "\n<!-- filter mutated -->";
+		};
+		add_filter( 'content_save_pre', $mutator, 99 );
+
+		try {
+			$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+			$this->assertIsArray( $result );
+
+			$persisted   = get_post( $post_id );
+			$stored_hash = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true );
+
+			$this->assertInstanceOf( \WP_Post::class, $persisted );
+			$this->assertStringContainsString( '<!-- filter mutated -->', (string) $persisted->post_content, 'Sanity check: the test filter must have actually mutated saved content.' );
+			$this->assertSame(
+				sha1( (string) $persisted->post_content ),
+				$stored_hash,
+				'Stored source_hash must equal sha1 of the post_content WordPress persisted (post-filter), not the in-memory merged string.'
+			);
+		} finally {
+			remove_filter( 'content_save_pre', $mutator, 99 );
+		}
+	}
+
+	/**
 	 * @testdox Should restore post_content and consume the snapshot meta on undo.
 	 *
 	 * Apply → undo round-trip: post_content matches the original and the
