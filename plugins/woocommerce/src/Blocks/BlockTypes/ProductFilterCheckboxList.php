@@ -76,8 +76,12 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 			'<svg class="wc-block-product-filter-checkbox-list__stars-svg" width="120" height="24" viewBox="0 0 120 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">%1$s<g transform="translate(24, 0)">%1$s</g><g transform="translate(48, 0)">%1$s</g><g transform="translate(72, 0)">%1$s</g><g transform="translate(96, 0)">%1$s</g></svg>',
 			$star_path
 		);
-		$has_more_items = count( $items ) > $display_limit;
-		$hidden_count   = max( 0, count( $items ) - $display_limit );
+		$selected_items   = array_filter( $items, fn( $item ) => ! empty( $item['selected'] ) );
+		$unselected_items = array_filter( $items, fn( $item ) => empty( $item['selected'] ) );
+		$remaining_slots  = max( 0, $display_limit - count( $selected_items ) );
+		$visible_items    = $selected_items + array_slice( $unselected_items, 0, $remaining_slots, true );
+		$has_more_items   = count( $items ) > count( $visible_items );
+		$hidden_count     = max( 0, count( $items ) - count( $visible_items ) );
 		$first_item     = reset( $items );
 		$show_counts    = is_array( $first_item ) && array_key_exists( 'count', $first_item );
 
@@ -93,7 +97,6 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 					data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
 				>
 					<?php
-					$visible_items = array_slice( $items, 0, $display_limit, true );
 					foreach ( $visible_items as $index => $item ) :
 						$context_item = array_merge( $item, array( 'index' => $index ) );
 						?>
