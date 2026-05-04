@@ -146,6 +146,14 @@ class Endpoint {
 		// Use isset() rather than empty() so the literal "0" doesn't slip
 		// through to normal WP routing; the auth check 404s on order_id 0.
 		if ( ! isset( $wp->query_vars[ self::QUERY_VAR ] ) ) {
+			// Visiting the host page directly (no order id in the URL) is a
+			// dead end — the shortcode renders nothing and the customer
+			// sees a chrome-only page. Send them to the home page instead.
+			$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+			if ( $page_id > 0 && is_page( $page_id ) ) {
+				wp_safe_redirect( home_url( '/' ) );
+				exit;
+			}
 			return;
 		}
 
