@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a configurable endpoint URL to the GraphQL settings section.

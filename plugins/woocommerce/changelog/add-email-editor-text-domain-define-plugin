@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Define the `__i18n_text_domain__` identifier used by the email editor package as `"woocommerce"` in the admin and blocks webpack builds so strings continue to extract and translate under the `woocommerce` text domain.

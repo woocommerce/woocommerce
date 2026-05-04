@@ -36,12 +36,12 @@ export function RawStylesSidebar(): JSX.Element {
 					target="email-styles-sidebar"
 					icon={ styles }
 				>
-					{ __( 'Email styles', 'woocommerce' ) }
+					{ __( 'Email styles', __i18n_text_domain__ ) }
 				</PluginSidebarMoreMenuItem>
 				<PluginSidebar
 					name="email-styles-sidebar"
 					icon={ styles }
-					title={ __( 'Styles', 'woocommerce' ) }
+					title={ __( 'Styles', __i18n_text_domain__ ) }
 					className="woocommerce-email-editor-styles-panel"
 				>
 					<Navigator initialPath="/">
