@@ -21,6 +21,13 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use MetaDataAssertionTrait;
 
 	/**
+	 * HPOS state captured at setUp so tearDown can restore it.
+	 *
+	 * @var bool
+	 */
+	private $cot_state;
+
+	/**
 	 * Setup our test server, endpoints, and user info.
 	 */
 	public function setUp(): void {
@@ -32,6 +39,9 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->user );
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
 	}
 
 	/**
@@ -39,6 +49,10 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		unregister_post_type( 'shop_test' );
+
+		$this->toggle_cot_feature_and_usage( $this->cot_state );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+
 		parent::tearDown();
 	}
 
