@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix typo: missing apostrophe in 'dont' → 'don't' in BlockHooksTrait comment.
