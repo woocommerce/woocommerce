@@ -206,23 +206,23 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test ability filtering by legacy WooCommerce MCP exposure metadata.
+	 * Test ability filtering by deprecated WooCommerce MCP exposure metadata.
 	 */
-	public function test_get_woocommerce_mcp_abilities_filters_by_legacy_exposure_metadata() {
-		$legacy_products_ability = 'woocommerce/test-legacy-products-a';
-		$legacy_orders_ability   = 'woocommerce/test-legacy-orders-a';
-		$canonical_ability       = 'woocommerce/test-canonical-products-a';
+	public function test_get_woocommerce_mcp_abilities_filters_by_deprecated_endpoint_exposure_metadata() {
+		$deprecated_products_ability = 'woocommerce/test-deprecated-products-a';
+		$deprecated_orders_ability   = 'woocommerce/test-deprecated-orders-a';
+		$canonical_ability           = 'woocommerce/test-canonical-products-a';
 
 		$this->register_test_ability(
-			$legacy_products_ability,
+			$deprecated_products_ability,
 			array(
-				'woocommerce_expose_in_legacy_mcp' => true,
+				'expose_in_deprecated_woocommerce_mcp' => true,
 			)
 		);
 		$this->register_test_ability(
-			$legacy_orders_ability,
+			$deprecated_orders_ability,
 			array(
-				'woocommerce_expose_in_legacy_mcp' => true,
+				'expose_in_deprecated_woocommerce_mcp' => true,
 			)
 		);
 		$this->register_test_ability(
@@ -235,8 +235,8 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			->method( 'get_abilities_ids' )
 			->willReturn(
 				array(
-					$legacy_products_ability,
-					$legacy_orders_ability,
+					$deprecated_products_ability,
+					$deprecated_orders_ability,
 					$canonical_ability,
 				)
 			);
@@ -249,23 +249,23 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$result = $method->invoke( $this->sut );
 
 		$expected = array(
-			$legacy_products_ability,
-			$legacy_orders_ability,
+			$deprecated_products_ability,
+			$deprecated_orders_ability,
 		);
 
-		$this->assertEquals( $expected, $result, 'Should only return abilities explicitly exposed in the legacy WooCommerce MCP surface.' );
+		$this->assertEquals( $expected, $result, 'Should only return abilities explicitly exposed in the deprecated WooCommerce MCP endpoint.' );
 	}
 
 	/**
 	 * Test ability filtering with custom filter.
 	 */
 	public function test_get_woocommerce_mcp_abilities_respects_custom_filter() {
-		$legacy_ability = 'woocommerce/test-custom-filter-legacy';
+		$deprecated_ability = 'woocommerce/test-custom-filter-deprecated';
 
 		$this->register_test_ability(
-			$legacy_ability,
+			$deprecated_ability,
 			array(
-				'woocommerce_expose_in_legacy_mcp' => true,
+				'expose_in_deprecated_woocommerce_mcp' => true,
 			)
 		);
 
@@ -274,7 +274,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			->method( 'get_abilities_ids' )
 			->willReturn(
 				array(
-					$legacy_ability,
+					$deprecated_ability,
 					'custom-plugin/special-action',
 					'other-plugin/normal-action',
 				)
@@ -301,7 +301,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$result = $method->invoke( $this->sut );
 
 		$expected = array(
-			$legacy_ability,
+			$deprecated_ability,
 			'custom-plugin/special-action',
 		);
 
@@ -309,29 +309,29 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test ability exposure metadata controls the default MCP surface.
+	 * Test ability exposure metadata controls the deprecated WooCommerce MCP endpoint.
 	 */
 	public function test_get_woocommerce_mcp_abilities_respects_explicit_exposure_metadata() {
-		$legacy_ability   = 'woocommerce/test-legacy-rest';
-		$semantic_ability = 'woocommerce/test-semantic';
-		$invalid_ability  = 'woocommerce/test-invalid-exposure';
+		$deprecated_ability = 'woocommerce/test-deprecated-rest';
+		$semantic_ability   = 'woocommerce/test-semantic';
+		$invalid_ability    = 'woocommerce/test-invalid-exposure';
 
 		$this->register_test_ability(
-			$legacy_ability,
+			$deprecated_ability,
 			array(
-				'woocommerce_expose_in_legacy_mcp' => true,
+				'expose_in_deprecated_woocommerce_mcp' => true,
 			)
 		);
 		$this->register_test_ability(
 			$semantic_ability,
 			array(
-				'woocommerce_expose_in_legacy_mcp' => false,
+				'expose_in_deprecated_woocommerce_mcp' => false,
 			)
 		);
 		$this->register_test_ability(
 			$invalid_ability,
 			array(
-				'woocommerce_expose_in_legacy_mcp' => 'true',
+				'expose_in_deprecated_woocommerce_mcp' => 'true',
 			)
 		);
 
@@ -339,7 +339,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			->method( 'get_abilities_ids' )
 			->willReturn(
 				array(
-					$legacy_ability,
+					$deprecated_ability,
 					$semantic_ability,
 					$invalid_ability,
 				)
@@ -351,11 +351,11 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 		$result = $method->invoke( $this->sut );
 
-		$this->assertEquals( array( $legacy_ability ), $result, 'Should include only abilities explicitly exposed in the legacy WooCommerce MCP surface.' );
+		$this->assertEquals( array( $deprecated_ability ), $result, 'Should include only abilities explicitly exposed in the deprecated WooCommerce MCP endpoint.' );
 	}
 
 	/**
-	 * Test abilities without legacy exposure metadata are excluded by default.
+	 * Test abilities without deprecated endpoint exposure metadata are excluded by default.
 	 */
 	public function test_get_woocommerce_mcp_abilities_excludes_unmarked_abilities_by_default() {
 		$unmarked_ability = 'woocommerce/test-unmarked';
@@ -379,7 +379,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 		$result = $method->invoke( $this->sut );
 
-		$this->assertEquals( array(), $result, 'Should exclude abilities that are not explicitly exposed in the legacy WooCommerce MCP surface.' );
+		$this->assertEquals( array(), $result, 'Should exclude abilities that are not explicitly exposed in the deprecated WooCommerce MCP endpoint.' );
 	}
 
 	/**
@@ -452,19 +452,19 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	 * Test array re-indexing after filtering.
 	 */
 	public function test_reindexes_array_after_filtering() {
-		$legacy_products_ability = 'woocommerce/test-reindex-products-list';
-		$legacy_orders_ability   = 'woocommerce/test-reindex-orders-get';
+		$deprecated_products_ability = 'woocommerce/test-reindex-products-list';
+		$deprecated_orders_ability   = 'woocommerce/test-reindex-orders-get';
 
 		$this->register_test_ability(
-			$legacy_products_ability,
+			$deprecated_products_ability,
 			array(
-				'woocommerce_expose_in_legacy_mcp' => true,
+				'expose_in_deprecated_woocommerce_mcp' => true,
 			)
 		);
 		$this->register_test_ability(
-			$legacy_orders_ability,
+			$deprecated_orders_ability,
 			array(
-				'woocommerce_expose_in_legacy_mcp' => true,
+				'expose_in_deprecated_woocommerce_mcp' => true,
 			)
 		);
 
@@ -474,9 +474,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			->willReturn(
 				array(
 					'other-plugin/action-1',
-					$legacy_products_ability,
+					$deprecated_products_ability,
 					'another-namespace/action-2',
-					$legacy_orders_ability,
+					$deprecated_orders_ability,
 				)
 			);
 
@@ -491,8 +491,8 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( array( 0, 1 ), array_keys( $result ), 'Should re-index array after filtering' );
 		$this->assertEquals(
 			array(
-				$legacy_products_ability,
-				$legacy_orders_ability,
+				$deprecated_products_ability,
+				$deprecated_orders_ability,
 			),
 			array_values( $result ),
 			'Should maintain correct values after re-indexing'

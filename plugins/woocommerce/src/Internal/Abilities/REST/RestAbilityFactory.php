@@ -66,8 +66,8 @@ class RestAbilityFactory {
 				},
 				'ability_class'       => RestAbility::class,
 				'meta'                => array(
-					'show_in_rest'                     => true,
-					'woocommerce_expose_in_legacy_mcp' => true,
+					'show_in_rest'                         => true,
+					'expose_in_deprecated_woocommerce_mcp' => true,
 				),
 			);
 

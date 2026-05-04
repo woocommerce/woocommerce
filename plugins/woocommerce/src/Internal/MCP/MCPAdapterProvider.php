@@ -187,11 +187,11 @@ class MCPAdapterProvider {
 	}
 
 	/**
-	 * Check if an ability should be included in the default WooCommerce MCP surface.
+	 * Check if an ability should be included in the deprecated WooCommerce MCP endpoint.
 	 *
-	 * Existing WooCommerce MCP consumers expect the REST-derived ability surface on the
-	 * default endpoint. Require abilities to explicitly opt in so semantic/domain
-	 * abilities can coexist without changing the legacy MCP tool list.
+	 * REST-derived abilities can opt in to the deprecated WooCommerce MCP endpoint.
+	 * Require explicit metadata so semantic/domain abilities can use WooCommerce
+	 * namespaces without expanding the deprecated MCP tool list.
 	 *
 	 * @param string $ability_id Ability ID.
 	 * @return bool Whether to include the ability by default.
@@ -200,7 +200,7 @@ class MCPAdapterProvider {
 		if ( function_exists( 'wp_get_ability' ) && function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
 			$ability = wp_get_ability( $ability_id );
 			if ( $ability ) {
-				return true === $ability->get_meta_item( 'woocommerce_expose_in_legacy_mcp', false );
+				return true === $ability->get_meta_item( 'expose_in_deprecated_woocommerce_mcp', false );
 			}
 		}
 
