@@ -244,15 +244,28 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 			'/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}:\d{2}$/',
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true )
 		);
+		// Status is now classifier-derived; this scenario applies with the
+		// default keep_yours decision so merged_content still differs from
+		// canonical core. The classifier therefore returns
+		// `core_updated_uncustomized` (core moved relative to the freshly
+		// written source_hash; post matches that stamp). Previously this
+		// test asserted STATUS_IN_SYNC — that was implicitly testing the
+		// hard-coded stamp bug fixed by routing through reclassify().
 		$this->assertSame(
-			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
 		);
 	}
 
 	/**
-	 * Apply → undo round-trip: post_content matches the original; status meta
-	 * is restored; snapshot meta is consumed.
+	 * @testdox Should restore post_content and consume the snapshot meta on undo.
+	 *
+	 * Apply → undo round-trip: post_content matches the original and the
+	 * snapshot meta is consumed. Status is recomputed by the classifier
+	 * after the restore (see `test_undo_reclassifies_status_after_restoring_snapshot`
+	 * for the core-moved scenario), so this test only pins the
+	 * content-and-snapshot invariants — not a stale "prior status survives"
+	 * assertion that the snapshot used to carry.
 	 */
 	public function test_undo_restores_pre_apply_snapshot(): void {
 		$email_id = 'sa_undo_round_trip';
@@ -263,13 +276,6 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 
 		$this->use_canonical_content( $email_id, $core_content );
 		$post_id = $this->create_woo_email_post( $email_id, $post_content );
-
-		// Pre-stamp a non-in_sync status to verify it's restored.
-		update_post_meta(
-			$post_id,
-			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
-			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED
-		);
 
 		$apply_result = WCEmailTemplateSelectiveApplier::apply_selectively(
 			$post_id,
@@ -292,16 +298,51 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( \WP_Post::class, $persisted );
 		$this->assertSame( $post_content, $persisted->post_content );
 
-		$this->assertSame(
-			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
-			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
-			'Prior status meta must be restored on undo.'
-		);
+		// Status meta must be populated after undo; the precise classifier output is
+		// pinned by `test_undo_reclassifies_status_after_restoring_snapshot`.
+		$this->assertNotEmpty( get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ) );
 
 		$this->assertSame(
 			'',
 			(string) get_post_meta( $post_id, WCEmailTemplateSelectiveApplier::SNAPSHOT_META_KEY, true ),
 			'Snapshot meta must be consumed by undo.'
+		);
+	}
+
+	/**
+	 * @testdox Should reclassify after undo rather than restore the stored prior_status verbatim.
+	 */
+	public function test_undo_reclassifies_status_after_restoring_snapshot(): void {
+		$email_id = 'undo_reclassify';
+		$this->register_fixture_email( $email_id );
+
+		$pre_apply_canonical = "<!-- wp:paragraph -->\n<p>Old canonical.</p>\n<!-- /wp:paragraph -->";
+		$post_html           = "<!-- wp:paragraph -->\n<p>Old canonical.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $pre_apply_canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_html );
+
+		// Stamp a matching source_hash so initial state is in_sync.
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, sha1( $pre_apply_canonical ) );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC );
+
+		// Apply against the same canonical (no real diff — just exercise the path so a snapshot exists).
+		$apply_result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+		$this->assertIsArray( $apply_result );
+
+		// Now mutate the canonical underneath — simulating a core release between apply and undo.
+		$new_canonical = "<!-- wp:paragraph -->\n<p>New canonical from a core release.</p>\n<!-- /wp:paragraph -->";
+		$this->use_canonical_content( $email_id, $new_canonical );
+
+		$undo_result = WCEmailTemplateSelectiveApplier::undo( $post_id, $apply_result['revision_id'] );
+		$this->assertIsArray( $undo_result );
+
+		// After undo, the post is back to its pre-apply content but core has moved.
+		// Classifier output: stored hash != current canonical → core moved; post matches stored hash → uncustomized.
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'undo() must reclassify against current canonical, not blindly restore the snapshot prior_status.'
 		);
 	}
 
@@ -446,6 +487,45 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 		$this->assertInstanceOf( \WP_Post::class, $persisted );
 		$this->assertStringContainsString( 'wp:woocommerce/email-content', $persisted->post_content );
 		$this->assertStringNotContainsString( 'wp:woo/email-content', $persisted->post_content );
+	}
+
+	/**
+	 * @testdox Should NOT stamp STATUS_IN_SYNC after an empty-choices apply when the merged content still differs from canonical.
+	 */
+	public function test_apply_selectively_with_empty_choices_does_not_falsely_stamp_in_sync(): void {
+		$email_id = 'apply_keep_yours_status';
+		$this->register_fixture_email( $email_id );
+
+		$canonical = "<!-- wp:paragraph -->\n<p>Hi there [woocommerce/customer-username],</p>\n<!-- /wp:paragraph -->";
+		$post_html = "<!-- wp:paragraph -->\n<p>Hello, [woocommerce/customer-username]!</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_html );
+
+		// Pre-stamp a stale source_hash so the classifier sees "core moved".
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, sha1( "<!-- wp:paragraph -->\n<p>Old core copy.</p>\n<!-- /wp:paragraph -->" ) );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+		$this->assertIsArray( $result );
+
+		// The reviewer-flagged bug stamped in_sync unconditionally. Status
+		// is now classifier-derived: with empty choices the merged content
+		// equals the merchant's content, the source_hash is rewritten to
+		// sha1(merged), and `classify_post` compares the *new* canonical
+		// hash (still differs from merged) against that stamp. Because the
+		// post matches the just-written stamp, the classifier reports
+		// `core_updated_uncustomized` (core moved; post matches stamp).
+		// The key invariant the bug-regression test pins is "not in_sync".
+		$this->assertNotSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Applying with all keep_yours must not stamp in_sync — the post still differs from canonical.'
+		);
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_UNCUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Classifier output: stored hash != current canonical → core moved; post matches the just-written stamp → uncustomized.'
+		);
 	}
 
 	/**

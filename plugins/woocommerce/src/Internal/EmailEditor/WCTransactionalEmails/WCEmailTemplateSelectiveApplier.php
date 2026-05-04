@@ -42,10 +42,12 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
 class WCEmailTemplateSelectiveApplier {
 	/**
 	 * Post meta key for the single-step pre-apply snapshot. Stores an array
-	 * with `revision_id`, `content`, `snapshot_at` (UTC `Y-m-d H:i:s`), and
-	 * `prior_status` (the value of
-	 * {@see WCEmailTemplateDivergenceDetector::STATUS_META_KEY} at the moment
-	 * of apply, restored on undo).
+	 * with `revision_id`, `content`, and `snapshot_at` (UTC `Y-m-d H:i:s`).
+	 * The snapshot does **not** record the prior status — on undo the status
+	 * is recomputed via
+	 * {@see WCEmailTemplateDivergenceDetector::reclassify()} so it reflects
+	 * the world as it stands at undo time (core may have shipped a release
+	 * since the apply).
 	 *
 	 * @var string
 	 */
@@ -177,10 +179,9 @@ class WCEmailTemplateSelectiveApplier {
 
 		$revision_id = wp_generate_uuid4();
 		$snapshot    = array(
-			'revision_id'  => $revision_id,
-			'content'      => $post_content,
-			'snapshot_at'  => gmdate( 'Y-m-d H:i:s' ),
-			'prior_status' => (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'revision_id' => $revision_id,
+			'content'     => $post_content,
+			'snapshot_at' => gmdate( 'Y-m-d H:i:s' ),
 		);
 		update_post_meta( $post_id, self::SNAPSHOT_META_KEY, $snapshot );
 
@@ -206,7 +207,12 @@ class WCEmailTemplateSelectiveApplier {
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $version_to );
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $source_hash );
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $synced_at );
-			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC );
+
+			// Status is computed from current state, never hard-coded.
+			// `merged_content` may equal canonical core (selective apply with all
+			// `use_core` choices) or differ from it (any `keep_yours` choice or a
+			// preserved removed-block). The classifier returns the right value.
+			WCEmailTemplateDivergenceDetector::reclassify( $post_id );
 		} finally {
 			self::$is_applying = false;
 		}//end try
@@ -285,13 +291,11 @@ class WCEmailTemplateSelectiveApplier {
 				return $updated;
 			}
 
-			// Restore prior status if we recorded one; otherwise leave the
-			// status alone (the apply may have been the first action against
-			// a post with no stamped status).
-			$prior_status = (string) ( $snapshot['prior_status'] ?? '' );
-			if ( '' !== $prior_status ) {
-				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $prior_status );
-			}
+			// The snapshot's prior_status was correct at snapshot time, but
+			// the world may have moved since (core released, canonical
+			// changed). Ask the classifier for the truth against current
+			// state instead of stamping a stale value.
+			WCEmailTemplateDivergenceDetector::reclassify( $post_id );
 
 			delete_post_meta( $post_id, self::SNAPSHOT_META_KEY );
 		} finally {

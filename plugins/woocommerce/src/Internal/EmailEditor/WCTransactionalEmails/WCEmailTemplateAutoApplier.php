@@ -177,13 +177,17 @@ class WCEmailTemplateAutoApplier {
 			if ( null !== $sync_config ) {
 				$source_hash = sha1( $canonical );
 				$synced_at   = gmdate( 'Y-m-d H:i:s' );
-				$status      = WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC;
 				$version     = (string) $sync_config['version'];
 
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $version );
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $source_hash );
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $synced_at );
-				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $status );
+
+				// Status comes from the classifier so all writers stay consistent.
+				// In this path we always write canonical, so the classifier returns
+				// IN_SYNC, but going through the same helper as the selective applier
+				// avoids drift if a future partial-apply path is added here.
+				$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
 			}
 		} finally {
 			self::$is_auto_applying = false;

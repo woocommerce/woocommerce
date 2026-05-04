@@ -5,6 +5,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Logger\Email_Editor_Logger_Interface;
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\Logger;
 
 /**
@@ -42,7 +43,20 @@ class WCEmailTemplateDivergenceDetector {
 	public const BACKFILL_COMPLETE_OPTION = 'woocommerce_email_template_sync_backfill_complete';
 
 	/**
-	 * Post meta key the detector writes.
+	 * Cached classification of "does the post currently differ from the
+	 * canonical core render?". Computed by {@see self::classify_post()}
+	 * and written by {@see self::reclassify()}; read by surfaces that
+	 * filter posts by state (auto-applier targeting, list-page status
+	 * column, sweep optimisation).
+	 *
+	 * **Single writer.** All code paths that mutate `post_content` for a
+	 * `woo_email` post — auto-applier, selective applier, undo — call
+	 * `reclassify()` after the write. Direct `update_post_meta()` against
+	 * this key from any other call site will desync the cache.
+	 *
+	 * **Not the banner / indicator signal.** Whether the merchant has
+	 * reviewed the latest core update is a separate question; that
+	 * answer lives on {@see self::VERSION_META_KEY}.
 	 *
 	 * @var string
 	 */
@@ -56,8 +70,28 @@ class WCEmailTemplateDivergenceDetector {
 	public const SOURCE_HASH_META_KEY = '_wc_email_template_source_hash';
 
 	/**
-	 * Post meta key storing the version of the block template the post was stamped
-	 * against. Written by the generator and by the RSM-149 backfill.
+	 * The canonical core version the merchant most recently reviewed for
+	 * this post — written by every applier path that runs as a deliberate
+	 * merchant action (auto-apply, selective apply with any choices,
+	 * reset-to-default).
+	 *
+	 * **Load-bearing for the "update available" indicator.** RSM-141's
+	 * editor banner and list-page filter chip compare this value against
+	 * {@see WCEmailTemplateSyncRegistry}'s current canonical version for
+	 * the email type:
+	 *
+	 * ```
+	 * $reviewed = (string) get_post_meta( $post_id, self::VERSION_META_KEY, true );
+	 * $current  = (string) ( $sync_registry[ $email_id ]['version'] ?? '' );
+	 * $show_indicator = $current !== '' && version_compare( $reviewed, $current, '<' );
+	 * ```
+	 *
+	 * Distinct from {@see self::STATUS_META_KEY}: the merchant can
+	 * deliberately choose `keep_yours` for every conflict (post still
+	 * differs from canonical → STATUS = core_updated_customized) and
+	 * still have addressed the update for this version (VERSION = current
+	 * → no indicator). Direct merchant edits to post_content do not
+	 * advance this stamp; only review-driven applies do.
 	 *
 	 * @var string
 	 */
@@ -187,62 +221,16 @@ class WCEmailTemplateDivergenceDetector {
 			return;
 		}
 
-		$posts_manager    = WCTransactionalEmailPostsManager::get_instance();
-		$canonical_emails = $posts_manager->get_emails_by_id();
+		$posts_manager = WCTransactionalEmailPostsManager::get_instance();
 
 		foreach ( $registry as $email_id => $_config ) {
 			try {
-				$email = $canonical_emails[ $email_id ] ?? null;
-				if ( ! $email instanceof \WC_Email ) {
-					// Extension providing the email was deactivated; nothing to classify.
-					continue;
-				}
-
 				$post = $posts_manager->get_email_post( (string) $email_id );
 				if ( ! $post instanceof \WP_Post ) {
 					continue;
 				}
 
-				$stored_source_hash = (string) get_post_meta( (int) $post->ID, self::SOURCE_HASH_META_KEY, true );
-				if ( '' === $stored_source_hash ) {
-					// This should not normally occur post-backfill: the generator always stamps
-					// this meta and RSM-149 is supposed to have backfilled pre-existing posts.
-					// Surface at warning so it's visible in the default WC log UI without
-					// requiring operators to lower the email-editor logging threshold.
-					self::get_logger()->warning(
-						sprintf(
-							'Email template divergence sweep skipped post %d for email "%s": no stored source hash.',
-							(int) $post->ID,
-							(string) $email_id
-						),
-						array(
-							'email_id' => (string) $email_id,
-							'post_id'  => (int) $post->ID,
-							'context'  => 'email_template_divergence_detector',
-						)
-					);
-					continue;
-				}
-
-				$status = self::classify_post(
-					(int) $post->ID,
-					$email,
-					array(
-						'post_content'       => (string) $post->post_content,
-						'stored_source_hash' => $stored_source_hash,
-					)
-				);
-
-				if ( null === $status ) {
-					continue;
-				}
-
-				$existing_status = (string) get_post_meta( (int) $post->ID, self::STATUS_META_KEY, true );
-				if ( $existing_status === $status ) {
-					continue;
-				}
-
-				update_post_meta( (int) $post->ID, self::STATUS_META_KEY, $status );
+				self::reclassify( (int) $post->ID );
 			} catch ( \Throwable $e ) {
 				self::get_logger()->error(
 					sprintf(
@@ -321,6 +309,89 @@ class WCEmailTemplateDivergenceDetector {
 		return $current_post_hash === $stored_source_hash
 			? self::STATUS_CORE_UPDATED_UNCUSTOMIZED
 			: self::STATUS_CORE_UPDATED_CUSTOMIZED;
+	}
+
+	/**
+	 * Run the divergence classifier on a single post and stamp the resulting
+	 * status. Used both by {@see self::run_sweep()} and by every code path
+	 * that mutates `post_content` for a `woo_email` post (auto-applier,
+	 * selective applier, undo). Centralising the write here keeps
+	 * {@see self::STATUS_META_KEY} consistent regardless of which writer
+	 * triggered the change.
+	 *
+	 * Returns the stamped status, or `null` when the classifier cannot
+	 * decide (no stored source hash yet, post / email cannot be resolved).
+	 * In the `null` case the meta is left untouched.
+	 *
+	 * @param int $post_id The `woo_email` post ID.
+	 *
+	 * @return string|null One of the STATUS_* constants, or null when no
+	 *                     decision was made.
+	 *
+	 * @since 10.9.0
+	 */
+	public static function reclassify( int $post_id ): ?string {
+		$post = get_post( $post_id );
+		if ( ! $post instanceof \WP_Post || Integration::EMAIL_POST_TYPE !== $post->post_type ) {
+			return null;
+		}
+
+		$posts_manager = WCTransactionalEmailPostsManager::get_instance();
+		$email_id      = (string) $posts_manager->get_email_type_from_post_id( $post_id );
+		if ( '' === $email_id ) {
+			return null;
+		}
+
+		$canonical_emails = $posts_manager->get_emails_by_id();
+		$email            = $canonical_emails[ $email_id ] ?? null;
+		if ( ! $email instanceof \WC_Email ) {
+			return null;
+		}
+
+		$stored_source_hash = (string) get_post_meta( $post_id, self::SOURCE_HASH_META_KEY, true );
+		if ( '' === $stored_source_hash ) {
+			// This should not normally occur post-backfill: the generator always stamps
+			// this meta and RSM-149 is supposed to have backfilled pre-existing posts.
+			// Surface at warning so it's visible in the default WC log UI without
+			// requiring operators to lower the email-editor logging threshold.
+			self::get_logger()->warning(
+				sprintf(
+					'Email template divergence reclassify skipped post %d for email "%s": no stored source hash.',
+					$post_id,
+					$email_id
+				),
+				array(
+					'email_id' => $email_id,
+					'post_id'  => $post_id,
+					'context'  => 'email_template_divergence_detector',
+				)
+			);
+			return null;
+		}
+
+		$status = self::classify_post(
+			$post_id,
+			$email,
+			array(
+				'post_content'       => (string) $post->post_content,
+				'stored_source_hash' => $stored_source_hash,
+			)
+		);
+
+		if ( null === $status ) {
+			return null;
+		}
+
+		// Idempotent write: skip the meta call entirely when the status hasn't shifted,
+		// so successive reclassifies on unchanged state produce zero DB writes (and zero
+		// `update_post_metadata` filter calls observed by tests / observers).
+		$existing_status = (string) get_post_meta( $post_id, self::STATUS_META_KEY, true );
+		if ( $existing_status === $status ) {
+			return $status;
+		}
+
+		update_post_meta( $post_id, self::STATUS_META_KEY, $status );
+		return $status;
 	}
 
 	/**

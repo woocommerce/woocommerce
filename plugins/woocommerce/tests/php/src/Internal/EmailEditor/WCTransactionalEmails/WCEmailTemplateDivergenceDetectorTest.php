@@ -352,6 +352,50 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stamp STATUS_CORE_UPDATED_CUSTOMIZED on a post that differs from canonical core after a stored stamp.
+	 */
+	public function test_reclassify_stamps_customized_when_post_differs_from_canonical(): void {
+		$email_id = 'reclassify_customized';
+		$this->register_fixture_email( $email_id );
+
+		$canonical = "<!-- wp:paragraph -->\n<p>Core paragraph.</p>\n<!-- /wp:paragraph -->";
+		$post_html = "<!-- wp:paragraph -->\n<p>Merchant paragraph.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_html );
+
+		// Pre-stamp source_hash to a prior canonical so the classifier sees "core moved".
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, sha1( "<!-- wp:paragraph -->\n<p>Old core paragraph.</p>\n<!-- /wp:paragraph -->" ) );
+
+		$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED, $status );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
+	}
+
+	/**
+	 * @testdox Should stamp STATUS_IN_SYNC when the post matches the canonical render at the stored stamp.
+	 */
+	public function test_reclassify_stamps_in_sync_when_post_matches_canonical(): void {
+		$email_id = 'reclassify_in_sync';
+		$this->register_fixture_email( $email_id );
+
+		$canonical = "<!-- wp:paragraph -->\n<p>Same on both sides.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $canonical );
+
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, sha1( $canonical ) );
+
+		$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $status );
+	}
+
+	/**
 	 * Build a WC_Email stub backed by the third-party-with-version.php fixture, inject it
 	 * into WC_Emails::$emails, and opt the email ID into the block-editor filter so the
 	 * sync registry picks it up. Resets the registry cache so subsequent reads see the
@@ -425,6 +469,56 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		$this->assertNotSame( '', (string) get_post_meta( $post_id, '_wc_email_last_synced_at', true ) );
 
 		return $post_id;
+	}
+
+	/**
+	 * Hook the canonical content filter so `compute_canonical_post_content()`
+	 * returns the supplied string for the given email_id, bypassing the
+	 * file-rendered template body. Lets tests express "what core would render"
+	 * directly inline.
+	 *
+	 * @param string $email_id The email ID to override content for.
+	 * @param string $content  The canonical content to inject.
+	 */
+	private function use_canonical_content( string $email_id, string $content ): void {
+		add_filter(
+			'woocommerce_email_content_post_data',
+			static function ( array $post_data, string $type ) use ( $email_id, $content ): array {
+				if ( $type === $email_id ) {
+					$post_data['post_content'] = $content;
+				}
+				return $post_data;
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Create a `woo_email` post and associate it with the supplied email_id
+	 * via the canonical option key the manager expects.
+	 *
+	 * @param string $email_id     The email ID to associate.
+	 * @param string $post_content Initial post content.
+	 * @return int Post ID.
+	 */
+	private function create_woo_email_post( string $email_id, string $post_content ): int {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'   => 'Fixture for ' . $email_id,
+				'post_name'    => $email_id,
+				'post_type'    => Integration::EMAIL_POST_TYPE,
+				'post_content' => $post_content,
+				'post_status'  => 'publish',
+			)
+		);
+
+		$this->assertIsInt( $post_id );
+		$this->assertGreaterThan( 0, $post_id );
+
+		$this->posts_manager->save_email_template_post_id( $email_id, $post_id );
+
+		return (int) $post_id;
 	}
 
 	/**
