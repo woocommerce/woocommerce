@@ -27,6 +27,7 @@ class OrderMarginRestController extends RestApiControllerBase {
 	 * Initialize the instance.
 	 *
 	 * @internal
+	 *
 	 * @param OrderMarginCalculator $margin_calculator The instance of OrderMarginCalculator to use.
 	 */
 	final public function init( OrderMarginCalculator $margin_calculator ): void {
@@ -36,6 +37,8 @@ class OrderMarginRestController extends RestApiControllerBase {
 	/**
 	 * Get the WooCommerce REST API namespace for the class.
 	 *
+	 * @since 10.8.0
+	 *
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
@@ -44,6 +47,8 @@ class OrderMarginRestController extends RestApiControllerBase {
 
 	/**
 	 * Register the REST API routes handled by this controller.
+	 *
+	 * @since 10.8.0
 	 */
 	public function register_routes(): void {
 		register_rest_route(
@@ -70,6 +75,8 @@ class OrderMarginRestController extends RestApiControllerBase {
 	/**
 	 * Handle GET wc/v3/orders/{id}/margin.
 	 *
+	 * @since 10.8.0
+	 *
 	 * @param WP_REST_Request $request The incoming request.
 	 * @return array|WP_Error The margin data or an error.
 	 */
@@ -91,6 +98,8 @@ class OrderMarginRestController extends RestApiControllerBase {
 
 	/**
 	 * Get the schema for the order margin response.
+	 *
+	 * @since 10.8.0
 	 *
 	 * @return array
 	 */
