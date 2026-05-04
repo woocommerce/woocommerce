@@ -2,6 +2,15 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.0.0](https://www.npmjs.com/package/@woocommerce/email-editor/v/2.0.0) - 2026-04-29 
+
+-   Minor - Add full-width alignment support for product image block [#63839]
+-   Major [ **BREAKING CHANGE** ] - Remove block-editor, editor, and core-data augmentation blocks from wordpress-modules.ts (now covered by native types). Remove unused @ts-expect-error directives for newly exported symbols. [#64114]
+-   Major [ **BREAKING CHANGE** ] - Update @wordpress/* dependencies to wp-6.8 minimum. Remove @types/wordpress__editor and @types/wordpress__media-utils (native types at wp-6.8). [#64114]
+-   Minor - Improve build time for email-editor by using webpack filesystem cache. [#64082]
+-   Minor - Let consumers replace the `__i18n_text_domain__` identifier at bundle time (e.g. via `webpack.DefinePlugin`) so translation strings extract and translate under the consumer's own text domain. Falls back to `'woocommerce'` at runtime when the identifier isn't substituted, preserving the package's pre-1.11 behaviour. [#64356]
+-   Patch - Monorepo: refresh DependencyExtractionWebpackPlugin for compatibility with filesystem cache, admin build cleanup. [#64111]
+
 ## [1.10.1](https://www.npmjs.com/package/@woocommerce/email-editor/v/1.10.1) - 2026-04-06 
 
 -   Patch - Disable Real-time Collaboration in the email editor [#63770]

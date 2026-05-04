@@ -92,9 +92,6 @@ const PRODUCT_LIST_FIELD_IDS = [
 	'upsell_ids',
 	'cross_sell_ids',
 	'linked_products_count',
-	'seo_title',
-	'seo_description',
-	'seo_preview',
 ] as const;
 
 const PRODUCT_LIST_FIELD_EXTENSIONS: Record< string, ProductFieldExtensions > =

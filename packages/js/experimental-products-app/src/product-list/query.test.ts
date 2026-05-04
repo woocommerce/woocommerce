@@ -38,6 +38,11 @@ describe( 'buildProductListQuery', () => {
 			...baseView,
 			filters: [
 				{
+					field: 'product_status',
+					operator: 'is',
+					value: 'draft',
+				},
+				{
 					field: 'type',
 					operator: 'isAny',
 					value: [ 'simple', 'variable' ],
@@ -62,6 +67,7 @@ describe( 'buildProductListQuery', () => {
 
 		expect( query ).toEqual(
 			expect.objectContaining( {
+				status: 'draft',
 				include_types: [ 'simple', 'variable' ],
 				category: '12,13',
 				stock_status: 'outofstock',
