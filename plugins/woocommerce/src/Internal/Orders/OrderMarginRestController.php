@@ -41,4 +41,29 @@ class OrderMarginRestController extends RestApiControllerBase {
 	protected function get_rest_api_namespace(): string {
 		return 'order-margin';
 	}
+
+	/**
+	 * Register the REST API routes handled by this controller.
+	 */
+	public function register_routes(): void {
+		register_rest_route(
+			$this->route_namespace,
+			'/orders/(?P<id>[\d]+)/margin',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => fn( $request ) => $this->run( $request, 'get_order_margin' ),
+					'permission_callback' => fn( $request ) => $this->check_permission( $request, 'edit_shop_orders' ),
+					'args'                => array(
+						'id' => array(
+							'description' => __( 'Unique identifier of the order.', 'woocommerce' ),
+							'type'        => 'integer',
+							'required'    => true,
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+	}
 }
