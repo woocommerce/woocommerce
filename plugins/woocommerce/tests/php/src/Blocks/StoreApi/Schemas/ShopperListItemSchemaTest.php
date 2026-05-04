@@ -118,10 +118,10 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 		$response = $this->sut->get_item_response( $item );
 
 		$this->assertFalse( $response['product_exists'], 'product_exists must be false when the product is gone' );
-		$this->assertSame( 'Snapshot Title', $response['name'], 'Tombstone name should fall back to product_title_at_save' );
+		$this->assertSame( 'Snapshot Title', $response['name'], 'Tombstone name should fall back to the at-save title snapshot' );
 		$this->assertSame( '', $response['permalink'], 'permalink should be empty in tombstone path' );
 		$this->assertSame( array(), $response['images'], 'No images should be returned for missing products' );
 		$this->assertNull( $response['prices'], 'Live prices should be null for missing products' );
-		$this->assertSame( 'Snapshot Title', $response['product_title_at_save'] );
+		$this->assertArrayNotHasKey( 'product_title_at_save', $response, 'Internal at-save title snapshot should not leak into the public response' );
 	}
 }

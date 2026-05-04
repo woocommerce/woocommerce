@@ -63,56 +63,56 @@ class ShopperListItemSchema extends AbstractSchema {
 	 */
 	public function get_properties() {
 		return array(
-			'key'                   => array(
+			'key'            => array(
 				'description' => __( 'Stable identifier for the saved item within its list.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'id'                    => array(
+			'id'             => array(
 				'description' => __( 'Variation ID if applicable, otherwise product ID.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'product_id'            => array(
+			'product_id'     => array(
 				'description' => __( 'Product ID at the time the item was saved.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'variation_id'          => array(
+			'variation_id'   => array(
 				'description' => __( 'Variation ID at the time the item was saved, or 0 for non-variable products.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'quantity'              => array(
+			'quantity'       => array(
 				'description' => __( 'Quantity of this saved item.', 'woocommerce' ),
 				'type'        => 'integer',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'product_exists'        => array(
+			'product_exists' => array(
 				'description' => __( 'True when the underlying product still exists in the catalog. When false, the row is a tombstone served from at-save snapshot data.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'name'                  => array(
-				'description' => __( 'Product name. Live when product_exists is true; falls back to product_title_at_save otherwise.', 'woocommerce' ),
+			'name'           => array(
+				'description' => __( 'Product name. Live when product_exists is true; falls back to the at-save title snapshot otherwise.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'permalink'             => array(
+			'permalink'      => array(
 				'description' => __( 'Product URL. Empty when the product no longer exists.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'uri',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'images'                => array(
+			'images'         => array(
 				'description' => __( 'List of images for the live product. Empty when the product no longer exists.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
@@ -122,7 +122,7 @@ class ShopperListItemSchema extends AbstractSchema {
 					'properties' => $this->image_attachment_schema->get_properties(),
 				),
 			),
-			'variation'             => array(
+			'variation'      => array(
 				'description' => __( 'Chosen variation attributes, if applicable.', 'woocommerce' ),
 				'type'        => 'array',
 				'context'     => array( 'view', 'edit' ),
@@ -151,7 +151,7 @@ class ShopperListItemSchema extends AbstractSchema {
 					),
 				),
 			),
-			'prices'                => array(
+			'prices'         => array(
 				'description' => __( 'Live product prices. Omitted when the product no longer exists.', 'woocommerce' ),
 				'type'        => array( 'object', 'null' ),
 				'context'     => array( 'view', 'edit' ),
@@ -180,16 +180,10 @@ class ShopperListItemSchema extends AbstractSchema {
 					)
 				),
 			),
-			'date_added_gmt'        => array(
+			'date_added_gmt' => array(
 				'description' => __( 'The date the item was saved, as GMT.', 'woocommerce' ),
 				'type'        => 'string',
 				'format'      => 'date-time',
-				'context'     => array( 'view', 'edit' ),
-				'readonly'    => true,
-			),
-			'product_title_at_save' => array(
-				'description' => __( 'Snapshot of the product title taken when the item was saved. Used as the rendered name when product_exists is false.', 'woocommerce' ),
-				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
@@ -209,14 +203,13 @@ class ShopperListItemSchema extends AbstractSchema {
 		$has_product  = $product instanceof \WC_Product;
 
 		$response = array(
-			'key'                   => $item['key'] ?? '',
-			'id'                    => $product_id,
-			'product_id'            => $item['product_id'] ?? 0,
-			'variation_id'          => $item['variation_id'] ?? 0,
-			'quantity'              => $item['quantity'] ?? 1,
-			'product_exists'        => $has_product,
-			'date_added_gmt'        => wc_rest_prepare_date_response( $item['date_added_gmt'] ?? current_time( 'mysql', true ) ),
-			'product_title_at_save' => $item['product_title_at_save'] ?? '',
+			'key'            => $item['key'] ?? '',
+			'id'             => $product_id,
+			'product_id'     => $item['product_id'] ?? 0,
+			'variation_id'   => $item['variation_id'] ?? 0,
+			'quantity'       => $item['quantity'] ?? 1,
+			'product_exists' => $has_product,
+			'date_added_gmt' => wc_rest_prepare_date_response( $item['date_added_gmt'] ?? current_time( 'mysql', true ) ),
 		);
 
 		$variation_data = isset( $item['variation'] ) && is_array( $item['variation'] ) ? $item['variation'] : array();
