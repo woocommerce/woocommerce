@@ -1,10 +1,10 @@
 /**
  * External dependencies
  */
-import { useEffect, useState } from '@wordpress/element';
+import { createPortal, useEffect, useRef, useState } from '@wordpress/element';
 import { __, sprintf, _n } from '@wordpress/i18n';
-import { Spinner } from '@wordpress/components';
-import { Badge, Button, Drawer, Stack, Text } from '@wordpress/ui';
+import { Button, Spinner } from '@wordpress/components';
+import { closeSmall } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -43,9 +43,9 @@ const SectionDot = ( { tone }: { tone: 'warning' | 'brand' } ) => (
 /**
  * Per-conflict choice card. Two cards live side-by-side in a 2-column
  * grid; selecting one toggles the merchant's decision for that block.
- * The label + hint sublabel comes from the design handoff — `Toggle
- * GroupControl` only fits a single label, so we keep bespoke buttons
- * with `role="radio"` for the same a11y semantics.
+ * The label + hint sublabel comes from the design handoff —
+ * `ToggleGroupControl` only fits a single label, so we keep bespoke
+ * buttons with `role="radio"` for the same a11y semantics.
  */
 const ChoiceCard = ( {
 	label,
@@ -136,17 +136,19 @@ const ConflictsGroup = ( {
 						className="woocommerce-review-drawer__item"
 					>
 						<div className="woocommerce-review-drawer__item-h">
-							<Text variant="heading-sm">{ blockTitle }</Text>
-							<Badge intent="medium">
+							<h4 className="woocommerce-review-drawer__item-title">
+								{ blockTitle }
+							</h4>
+							<span className="woocommerce-review-drawer__tag woocommerce-review-drawer__tag--conflict">
 								{ __( 'Conflict', 'woocommerce' ) }
-							</Badge>
+							</span>
 						</div>
-						<Text variant="body-sm">
+						<p className="woocommerce-review-drawer__item-sub">
 							{ __(
 								'Core changed this text. Pick which version to keep.',
 								'woocommerce'
 							) }
-						</Text>
+						</p>
 						<div
 							className="woocommerce-review-drawer__diff"
 							role="group"
@@ -205,14 +207,21 @@ const AutoResolvedItem = ( {
 } ) => (
 	<div className="woocommerce-review-drawer__item">
 		<div className="woocommerce-review-drawer__item-h">
-			<Text variant="heading-sm">{ title }</Text>
-			<Badge intent={ tag === 'apply_core' ? 'informational' : 'draft' }>
+			<h4 className="woocommerce-review-drawer__item-title">{ title }</h4>
+			<span
+				className={ [
+					'woocommerce-review-drawer__tag',
+					`woocommerce-review-drawer__tag--${
+						tag === 'apply_core' ? 'apply-core' : 'keep-yours'
+					}`,
+				].join( ' ' ) }
+			>
 				{ tag === 'apply_core'
 					? __( 'Apply core', 'woocommerce' )
 					: __( 'Keep yours', 'woocommerce' ) }
-			</Badge>
+			</span>
 		</div>
-		<Text variant="body-sm">{ sub }</Text>
+		<p className="woocommerce-review-drawer__item-sub">{ sub }</p>
 	</div>
 );
 
@@ -294,12 +303,14 @@ const AutoResolvedGroup = ( { summary }: { summary: ChangeSummary } ) => {
  * pick per-conflict "Keep yours / Use core" choices, then commits via the
  * /apply endpoint.
  *
- * Built on `@wordpress/ui`'s `Drawer` primitive: Root + Popup +
- * Header / Title / Description / CloseIcon + Content + Footer + Action.
- * The picker uses `@wordpress/components`'s `ToggleGroupControl` for
- * proper radio-group keyboard navigation; tags use `@wordpress/ui`
- * `Badge`. See `IMPLEMENTATION_GUIDE_review_drawer_v2.md` for the
- * design / token mapping.
+ * Hand-rolled drawer (right-side, 480px, scrim, slide animation, focus
+ * trap, Escape close) rendered via `createPortal` to `document.body` so
+ * the fixed-position panel isn't trapped inside the `display: none`
+ * `<PluginArea scope="woocommerce-email-editor">` wrapper. The choice
+ * picker is the bespoke `ChoiceCard` two-up grid (the design's two-line
+ * label + hint doesn't fit `ToggleGroupControl`'s single-label API);
+ * tag pills and typography are plain `<span>` / `<h*>` / `<p>` styled
+ * via SCSS.
  */
 export const ReviewDrawer = ( {
 	postId,
@@ -307,6 +318,9 @@ export const ReviewDrawer = ( {
 	isOpen,
 	onOpenChange,
 }: Props ) => {
+	const drawerRef = useRef< HTMLDivElement >( null );
+	const previousFocusRef = useRef< HTMLElement | null >( null );
+
 	const [ choices, setChoices ] = useState< ChoiceMap >( {} );
 	const { summary, isLoading, error } = useChangeSummary( postId, isOpen );
 	const { apply, isApplying } = useApplyUpdate( postId );
@@ -318,6 +332,75 @@ export const ReviewDrawer = ( {
 		}
 	}, [ summary ] );
 
+	// Focus management — save the previously focused element on open,
+	// move focus into the panel, restore on close.
+	useEffect( () => {
+		let rafId1: number;
+		let rafId2: number;
+		if ( isOpen ) {
+			const drawerElement = drawerRef.current;
+			if ( drawerElement ) {
+				previousFocusRef.current = drawerElement.ownerDocument
+					.activeElement as HTMLElement;
+				rafId1 = requestAnimationFrame( () => {
+					rafId2 = requestAnimationFrame( () => {
+						drawerElement.focus();
+					} );
+				} );
+			}
+		} else if ( previousFocusRef.current?.isConnected ) {
+			previousFocusRef.current.focus();
+		}
+		return () => {
+			cancelAnimationFrame( rafId1 );
+			cancelAnimationFrame( rafId2 );
+		};
+	}, [ isOpen ] );
+
+	// Escape closes; Tab/Shift+Tab traps inside the drawer.
+	useEffect( () => {
+		const handleKeyDown = ( event: KeyboardEvent ) => {
+			if ( ! isOpen ) {
+				return;
+			}
+			if ( event.key === 'Escape' ) {
+				onOpenChange( false );
+				return;
+			}
+			if ( event.key === 'Tab' ) {
+				const drawerElement = drawerRef.current;
+				if ( ! drawerElement ) {
+					return;
+				}
+				const focusable = drawerElement.querySelectorAll(
+					'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"]):not([disabled])'
+				);
+				if ( focusable.length === 0 ) {
+					return;
+				}
+				const first = focusable[ 0 ] as HTMLElement;
+				const last = focusable[ focusable.length - 1 ] as HTMLElement;
+				const active = drawerElement.ownerDocument
+					.activeElement as HTMLElement;
+				if ( event.shiftKey ) {
+					if ( active === first || active === drawerElement ) {
+						event.preventDefault();
+						last?.focus();
+					}
+				} else if ( active === last ) {
+					event.preventDefault();
+					first?.focus();
+				}
+			}
+		};
+		if ( isOpen ) {
+			document.addEventListener( 'keydown', handleKeyDown );
+		}
+		return () => {
+			document.removeEventListener( 'keydown', handleKeyDown );
+		};
+	}, [ isOpen, onOpenChange ] );
+
 	const setChoice = (
 		path: Array< number | string >,
 		decision: 'keep_yours' | 'use_core'
@@ -328,16 +411,17 @@ export const ReviewDrawer = ( {
 		} ) );
 	};
 
-	const handleApply = () => {
+	const handleApply = async () => {
 		const choiceList: ApplyChoice[] = Object.entries( choices ).map(
 			( [ key, decision ] ) => ( {
 				path: JSON.parse( key ) as Array< number | string >,
 				decision,
 			} )
 		);
-		// Fire-and-forget — `Drawer.Action` closes the drawer on click.
-		// The hook surfaces success/error via the snackbar notices store.
-		void apply( choiceList );
+		const res = await apply( choiceList );
+		if ( res ) {
+			onOpenChange( false );
+		}
 	};
 
 	const totalChanges = summary
@@ -367,105 +451,138 @@ export const ReviewDrawer = ( {
 	);
 
 	const applyDisabled =
-		isLoading || ! summary || summary.is_fallback || totalChanges === 0;
+		isApplying ||
+		isLoading ||
+		! summary ||
+		summary.is_fallback ||
+		totalChanges === 0;
 
-	return (
-		<Drawer.Root
-			open={ isOpen }
-			onOpenChange={ onOpenChange }
-			swipeDirection="right"
-		>
-			<Drawer.Popup
-				size="medium"
-				className="woocommerce-review-drawer__popup"
-			>
-				<Drawer.Header className="woocommerce-review-drawer__head">
-					<Stack direction="column" gap="xs">
-						<Drawer.Title className="woocommerce-review-drawer__h-title">
-							{ __( 'Review template update', 'woocommerce' ) }
-						</Drawer.Title>
-						<Drawer.Description className="woocommerce-review-drawer__h-sub">
-							{ subtitle }
-						</Drawer.Description>
-					</Stack>
-					<Drawer.CloseIcon label={ __( 'Close', 'woocommerce' ) } />
-				</Drawer.Header>
-
-				<Drawer.Content className="woocommerce-review-drawer__body">
-					{ isLoading && (
-						<div
-							role="status"
-							aria-live="polite"
-							aria-label={ __( 'Loading diff', 'woocommerce' ) }
-							className="woocommerce-review-drawer__status"
-						>
-							<Spinner />
-						</div>
-					) }
-
-					{ error && (
-						<div
-							role="alert"
-							className="woocommerce-review-drawer__status"
-						>
-							{ __(
-								'Could not load the change summary.',
-								'woocommerce'
-							) }
-						</div>
-					) }
-
-					{ summary && summary.is_fallback && (
-						<div className="woocommerce-review-drawer__status">
-							{ summary.summary_lines[ 0 ] ??
-								__(
-									'Template updated — see release notes.',
+	return createPortal(
+		<>
+			<div
+				className="woocommerce-review-drawer__overlay"
+				onClick={ () => onOpenChange( false ) }
+				role="presentation"
+				style={ { display: isOpen ? 'block' : 'none' } }
+				aria-hidden={ ! isOpen }
+			/>
+			<div className="woocommerce-review-drawer">
+				<aside
+					ref={ drawerRef }
+					className={ [
+						'woocommerce-review-drawer__panel',
+						isOpen ? 'is-open' : 'is-closed',
+					].join( ' ' ) }
+					role="dialog"
+					aria-modal="true"
+					aria-labelledby="woocommerce-review-drawer-title"
+					aria-hidden={ ! isOpen }
+					tabIndex={ -1 }
+				>
+					<header className="woocommerce-review-drawer__header">
+						<div className="woocommerce-review-drawer__h-stack">
+							<h2
+								id="woocommerce-review-drawer-title"
+								className="woocommerce-review-drawer__title"
+							>
+								{ __(
+									'Review template update',
 									'woocommerce'
 								) }
+							</h2>
+							<p className="woocommerce-review-drawer__subtitle">
+								{ subtitle }
+							</p>
 						</div>
-					) }
+						<Button
+							icon={ closeSmall }
+							label={ __( 'Close', 'woocommerce' ) }
+							onClick={ () => onOpenChange( false ) }
+							className="woocommerce-review-drawer__close"
+						/>
+					</header>
 
-					{ summary && ! summary.is_fallback && (
-						<>
-							<ConflictsGroup
-								conflicts={ summary.copy_changes }
-								choices={ choices }
-								onChoose={ setChoice }
-							/>
-							<AutoResolvedGroup summary={ summary } />
-						</>
-					) }
-				</Drawer.Content>
-
-				<Drawer.Footer className="woocommerce-review-drawer__foot">
-					<Text variant="body-sm">
-						{ __(
-							'Revision recorded for rollback.',
-							'woocommerce'
+					<div className="woocommerce-review-drawer__body">
+						{ isLoading && (
+							<div
+								role="status"
+								aria-live="polite"
+								aria-label={ __(
+									'Loading diff',
+									'woocommerce'
+								) }
+								className="woocommerce-review-drawer__status"
+							>
+								<Spinner />
+							</div>
 						) }
-					</Text>
-					<span className="woocommerce-review-drawer__foot-spacer" />
-					<Button
-						variant="outline"
-						tone="neutral"
-						size="compact"
-						disabled={ isApplying }
-						onClick={ () => onOpenChange( false ) }
-					>
-						{ __( 'Cancel', 'woocommerce' ) }
-					</Button>
-					<Drawer.Action
-						variant="solid"
-						tone="brand"
-						size="compact"
-						loading={ isApplying }
-						disabled={ applyDisabled }
-						onClick={ handleApply }
-					>
-						{ applyLabel }
-					</Drawer.Action>
-				</Drawer.Footer>
-			</Drawer.Popup>
-		</Drawer.Root>
+
+						{ error && (
+							<div
+								role="alert"
+								className="woocommerce-review-drawer__status"
+							>
+								{ __(
+									'Could not load the change summary.',
+									'woocommerce'
+								) }
+							</div>
+						) }
+
+						{ summary && summary.is_fallback && (
+							<div className="woocommerce-review-drawer__status">
+								{ summary.summary_lines[ 0 ] ??
+									__(
+										'Template updated — see release notes.',
+										'woocommerce'
+									) }
+							</div>
+						) }
+
+						{ summary && ! summary.is_fallback && (
+							<>
+								<ConflictsGroup
+									conflicts={ summary.copy_changes }
+									choices={ choices }
+									onChoose={ setChoice }
+								/>
+								<AutoResolvedGroup summary={ summary } />
+							</>
+						) }
+					</div>
+
+					<footer className="woocommerce-review-drawer__footer">
+						<p className="woocommerce-review-drawer__foot-note">
+							{ __(
+								'Revision recorded for rollback.',
+								'woocommerce'
+							) }
+						</p>
+						<div className="woocommerce-review-drawer__footer-actions">
+							<Button
+								variant="tertiary"
+								onClick={ () => onOpenChange( false ) }
+								disabled={ isApplying }
+								__next40pxDefaultSize
+							>
+								{ __( 'Cancel', 'woocommerce' ) }
+							</Button>
+							<Button
+								variant="primary"
+								onClick={ () => {
+									void handleApply();
+								} }
+								disabled={ applyDisabled }
+								isBusy={ isApplying }
+								__next40pxDefaultSize
+							>
+								{ applyLabel }
+							</Button>
+						</div>
+					</footer>
+				</aside>
+			</div>
+		</>,
+		document.body
 	);
 };

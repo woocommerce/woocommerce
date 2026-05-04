@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Stop hard-coding STATUS_IN_SYNC after selective email-template apply when the merchant kept their own version; route the stamp through the divergence classifier so the cached state stays consistent with reality.
