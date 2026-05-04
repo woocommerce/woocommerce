@@ -87,7 +87,7 @@ class RestAbilityFactory {
 					array( 'source' => 'woocommerce-rest-abilities' )
 				);
 			}
-		}//end try
+		}
 	}
 
 	/**
@@ -151,7 +151,7 @@ class RestAbilityFactory {
 					),
 					'required'   => array( 'id' ),
 				);
-		}//end switch
+		}
 
 		// Fallback.
 		return array( 'type' => 'object' );
@@ -226,7 +226,7 @@ class RestAbilityFactory {
 			}
 
 			$properties[ $key ] = $property;
-		}//end foreach
+		}
 
 		$schema = array(
 			'type'       => 'object',
@@ -356,7 +356,7 @@ class RestAbilityFactory {
 				$schema['type'] = $normalized;
 			}
 			return $schema;
-		}//end if
+		}
 
 		// Non-string, non-array type — remove it.
 		unset( $schema['type'] );
@@ -418,11 +418,11 @@ class RestAbilityFactory {
 						'previous' => $schema,
 					),
 				);
-			}//end if
+			}
 
 			// For get, create, update operations.
 			return $schema;
-		}//end if
+		}
 
 		return array( 'type' => 'object' );
 	}

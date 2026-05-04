@@ -147,7 +147,7 @@ class MCPAdapterProvider {
 		} finally {
 			// Re-enable MCP validation immediately after server creation.
 			remove_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
-		}//end try
+		}
 	}
 
 	/**
