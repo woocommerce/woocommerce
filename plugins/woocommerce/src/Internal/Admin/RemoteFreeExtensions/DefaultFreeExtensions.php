@@ -91,7 +91,6 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'woocommerce-services:tax' ),
 						self::get_plugin( 'tiktok-for-business' ),
 						self::get_plugin( 'snapchat-for-woocommerce' ),
-						self::get_plugin( 'facebook-for-woocommerce' ),
 						self::get_plugin( 'reddit-for-woocommerce' ),
 					)
 				),
@@ -595,13 +594,6 @@ class DefaultFreeExtensions {
 				'learn_more_link'  => 'https://woocommerce.com/products/snapchat/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 1,
 			),
-			'facebook-for-woocommerce'            => array(
-				'label'            => __( 'Grow your business with Facebook and Instagram', 'woocommerce' ),
-				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-facebook.svg', WC_PLUGIN_FILE ),
-				'description'      => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/products/facebook/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
-				'install_priority' => 2,
-			),
 			'reddit-for-woocommerce'              => array(
 				'label'            => __( 'Find New Customers with Reddit Ads', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-reddit.svg', WC_PLUGIN_FILE ),
@@ -644,12 +636,12 @@ class DefaultFreeExtensions {
 			self::get_rules_for_wcservices_tax_countries(),
 		);
 
-		// TikTok, Pinterest, and Facebook share a single spot with 1/3 rotation each.
+		// TikTok and Pinterest share a single spot with 1/2 rotation each.
 		$_plugins['tiktok-for-business']['is_visible'] = array(
 			array(
 				'type'        => 'option',
 				'option_name' => 'woocommerce_remote_variant_assignment',
-				'value'       => array( 1, 40 ),
+				'value'       => array( 1, 60 ),
 				'default'     => false,
 				'operation'   => 'range',
 			),
@@ -659,17 +651,7 @@ class DefaultFreeExtensions {
 			array(
 				'type'        => 'option',
 				'option_name' => 'woocommerce_remote_variant_assignment',
-				'value'       => array( 41, 80 ),
-				'default'     => false,
-				'operation'   => 'range',
-			),
-		);
-
-		$_plugins['facebook-for-woocommerce']['is_visible'] = array(
-			array(
-				'type'        => 'option',
-				'option_name' => 'woocommerce_remote_variant_assignment',
-				'value'       => array( 81, 120 ),
+				'value'       => array( 61, 120 ),
 				'default'     => false,
 				'operation'   => 'range',
 			),

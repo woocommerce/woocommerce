@@ -58366,18 +58366,6 @@ parameters:
 			path: src/Internal/Admin/Homescreen.php
 
 		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 2
-			path: src/Internal/Admin/Homescreen.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between ''US'' and ''AR''\|''AT''\|''AU''\|''BE''\|''BR''\|''CA''\|''CL''\|''DE''\|''ES''\|''FR''\|''GB''\|''GT''\|''HK''\|''IT''\|''NL''\|''NZ''\|''PE''\|''SG''\|''UY'' will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
-			count: 1
-			path: src/Internal/Admin/Homescreen.php
-
-		-
 			message: '#^Argument of an invalid type array\|WP_Error supplied for foreach, only iterables are supported\.$#'
 			identifier: foreach.nonIterable
 			count: 2
