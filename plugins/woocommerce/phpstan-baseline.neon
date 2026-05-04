@@ -12787,12 +12787,6 @@ parameters:
 			path: includes/class-wc-order-item-product.php
 
 		-
-			message: '#^Method WC_Order_Item_Product\:\:set_product\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-order-item-product.php
-
-		-
 			message: '#^Method WC_Order_Item_Product\:\:set_product_id\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -18273,7 +18267,7 @@ parameters:
 		-
 			message: '#^Property WooCommerce\:\:\$customer \(WC_Customer\) in empty\(\) is not falsy\.$#'
 			identifier: empty.property
-			count: 2
+			count: 1
 			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
 
 		-
@@ -31978,12 +31972,6 @@ parameters:
 			path: includes/shortcodes/class-wc-shortcode-checkout.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$ID\.$#'
-			identifier: property.notFound
-			count: 3
-			path: includes/shortcodes/class-wc-shortcode-my-account.php
-
-		-
 			message: '#^Constant COOKIEHASH not found\.$#'
 			identifier: constant.notFound
 			count: 4
@@ -32057,12 +32045,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$key of static method WC_Shortcode_My_Account\:\:check_password_reset_key\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-my-account.php
-
-		-
-			message: '#^Parameter \#1 \$user of function wp_password_change_notification expects WP_User, object given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/shortcodes/class-wc-shortcode-my-account.php
@@ -36379,12 +36361,6 @@ parameters:
 			message: '#^Parameter \#2 \$value of function wc_set_loop_prop expects string, int given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/wc-template-functions.php
 
 		-
@@ -56782,27 +56758,9 @@ parameters:
 			path: src/Caching/WPCacheEngine.php
 
 		-
-			message: '#^@param Automattic\\WooCommerce\\Checkout\\Helpers\\WC_Order \$order does not accept actual type of parameter\: WC_Order\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
-			message: '#^@param Automattic\\WooCommerce\\Checkout\\Helpers\\WC_Order_Item_Product \$item does not accept actual type of parameter\: WC_Order_Item\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
 			message: '#^Call to an undefined method WC_Data_Store\:\:get_query_for_stock\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: src/Checkout/Helpers/ReserveStock.php
-
-		-
-			message: '#^Call to an undefined method WC_Order_Item\:\:get_product\(\)\.$#'
-			identifier: method.notFound
-			count: 2
 			path: src/Checkout/Helpers/ReserveStock.php
 
 		-
@@ -70532,12 +70490,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method WC_Email\:\:prepare_email\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Internal/StockNotifications/Emails/EmailManager.php
-
-		-
-			message: '#^Call to an undefined method WC_Email\:\:trigger\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Internal/StockNotifications/Emails/EmailManager.php

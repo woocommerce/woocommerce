@@ -88,6 +88,8 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
+		$this->maybe_announce_skipped_graphql_infra_tests();
+
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
 			define( 'FS_METHOD', 'direct' );
@@ -175,6 +177,27 @@ class WC_Unit_Tests_Bootstrap {
 	private function maybe_initialize_hpos() {
 		$disable_hpos = ! empty( getenv( 'DISABLE_HPOS' ) );
 		\Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::toggle_cot_feature_and_usage( ! $disable_hpos );
+	}
+
+	/**
+	 * Echo a "Not running GraphQL infrastructure tests" message when the
+	 * current invocation does not include the `wc-phpunit-graphql-infra` suite,
+	 * mirroring the "Not running ajax tests" line printed by WP's own bootstrap
+	 * for the `ajax`, `ms-files` and `external-http` groups.
+	 *
+	 * The GraphQL infrastructure tests live in their own suite because they
+	 * require PHP 8.1+ and are excluded from the default suite.
+	 */
+	private function maybe_announce_skipped_graphql_infra_tests() {
+		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
+		foreach ( $argv as $arg ) {
+			if ( 'wc-phpunit-graphql-infra' === $arg || 'wc-phpunit-full' === $arg
+				|| '--testsuite=wc-phpunit-graphql-infra' === $arg || '--testsuite=wc-phpunit-full' === $arg ) {
+				return;
+			}
+		}
+
+		echo 'Not running GraphQL infrastructure tests. To execute these, use --testsuite=wc-phpunit-graphql-infra or wc-phpunit-full.' . PHP_EOL;
 	}
 
 	/**
