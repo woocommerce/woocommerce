@@ -978,10 +978,20 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		try {
 			$this->send_sign_in_notification_email( $user, $consumed_record );
-		} catch ( \Exception $e ) {
-			// Swallow — the API response is the source of truth for the
-			// merchant; the email is best-effort.
-			unset( $e );
+		} catch ( \Throwable $e ) {
+			// Don't surface mailer failures to the exchange response — the
+			// merchant already has the API result, and the email is best-effort.
+			// Log instead so a misconfigured mailer is observable rather than
+			// invisible. Catch \Throwable so an \Error from the mailer also
+			// stays out of the exchange path.
+			wc_get_logger()->warning(
+				sprintf(
+					'QR sign-in notification email failed for user %d: %s',
+					$user->ID,
+					$e->getMessage()
+				),
+				array( 'source' => 'mobile-app-qr-login' )
+			);
 		}
 	}
 
