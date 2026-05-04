@@ -310,15 +310,16 @@ class WC_Download_Handler {
 			);
 		}
 
-		$wp_content_dir_relative = ( 0 === strpos( WP_CONTENT_DIR, ABSPATH ) ) ? substr( WP_CONTENT_DIR, strlen( ABSPATH ) ) : WP_CONTENT_DIR;
-		$wp_content_dirname     = ( $wp_content_dir_relative !== WP_CONTENT_DIR ) ? '/' . $wp_content_dir_relative : null;
+		$wp_content_dirname = ( 0 === strpos( WP_CONTENT_DIR, ABSPATH ) )
+			? '/' . substr( WP_CONTENT_DIR, strlen( ABSPATH ) )
+			: '/wp-content';
 
 		// See if path needs an abspath prepended to work.
 		if ( file_exists( ABSPATH . $file_path ) ) {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
 
-		} elseif ( null !== $wp_content_dirname && 0 === strpos( $file_path, $wp_content_dirname ) ) {
+		} elseif ( 0 === strpos( $file_path, $wp_content_dirname ) ) {
 			$remote_file = false;
 			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, strlen( $wp_content_dirname ) ) );
 
