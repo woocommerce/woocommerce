@@ -140,8 +140,11 @@ class DefaultShippingPartnersTest extends WC_Unit_Test_Case {
 		$this->assertNotEmpty( $row['features'] );
 
 		foreach ( $row['features'] as $feature ) {
+			$this->assertIsArray( $feature );
 			$this->assertArrayHasKey( 'icon', $feature );
+			$this->assertNotEmpty( $feature['icon'] );
 			$this->assertArrayHasKey( 'description', $feature );
+			$this->assertNotEmpty( $feature['description'] );
 		}
 	}
 
