@@ -73,8 +73,8 @@ final class ProductFilterChips extends AbstractBlock {
 		$visible_items    = $selected_items + array_slice( $unselected_items, 0, $remaining_slots, true );
 		$has_more_items   = count( $items ) > count( $visible_items );
 		$hidden_count     = max( 0, count( $items ) - count( $visible_items ) );
-		$first_item     = reset( $items );
-		$show_counts    = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$first_item       = reset( $items );
+		$show_counts      = is_array( $first_item ) && array_key_exists( 'count', $first_item );
 
 		ob_start();
 		?>
