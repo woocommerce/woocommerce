@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Added 'small' to allowed HTML tags, to fix bug that breaks default markup.
+Add `small` to ALLOWED_TAGS to fix price suffix stripped on variable products.
