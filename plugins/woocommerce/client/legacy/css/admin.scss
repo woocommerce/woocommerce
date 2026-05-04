@@ -8314,9 +8314,26 @@ table.bar_chart {
 	// Order preview action buttons.
 	.wc-order-preview footer {
 		.button.button-large {
-			min-height: 0;
+			min-height: 32px;
+		}
+
+		// Adopt WP 7.0 secondary outline: theme-color border and 2px radius.
+		.wc-action-button {
+			min-height: 32px !important;
+			border-color: var(--wp-admin-theme-color);
+
+			&:first-child {
+				border-top-left-radius: 2px !important;
+				border-bottom-left-radius: 2px !important;
+			}
+
+			&:last-child {
+				border-top-right-radius: 2px !important;
+				border-bottom-right-radius: 2px !important;
+			}
 		}
 	}
+
 
 	// Order actions: select + button overflow container due to WP 7.0 select margins.
 	.order_actions {
@@ -8497,8 +8514,8 @@ table.bar_chart {
 	// ourselves, scoped to Woo editor screens, as a bridge until Core unifies
 	// this.
 	//
-	// TODO: Remove these rules when Core rounds editor .postbox containers
-	// (upstream Trac ticket to be filed).
+	// TODO: Remove these rules when Core rounds editor .postbox containers.
+	// Upstream proposal: https://core.trac.wordpress.org/ticket/65142
 	&.post-type-product,
 	&.post-type-shop_order,
 	&.post-type-shop_coupon,
@@ -9584,4 +9601,15 @@ body.woocommerce-settings-payments-section_legacy {
 	#wpbody-content {
 		background: #f0f0f1;
 	}
+}
+
+.wc-admin-color-swatch {
+	display: inline-block;
+	vertical-align: middle;
+	vertical-align: center;
+	border: 1px solid #7e8993;
+	border-radius: 2px;
+	margin-right: 6px;
+	width: 12px;
+	height: 12px;
 }
