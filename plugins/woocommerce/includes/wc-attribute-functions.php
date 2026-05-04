@@ -283,6 +283,31 @@ function wc_get_attribute_types() {
 }
 
 /**
+ * Whether a taxonomy is a global product attribute of a specific type.
+ *
+ * @since 10.9.0
+ * @param string $taxonomy Taxonomy slug (e.g. `pa_color`).
+ * @param string $type     Attribute type slug (e.g. `wc-visual`).
+ * @return bool
+ *
+ * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
+ */
+function wc_taxonomy_is_attribute_type( $taxonomy, $type ) {
+	if ( ! taxonomy_is_product_attribute( $taxonomy ) ) {
+		return false;
+	}
+
+	if ( '' === $type || ! array_key_exists( $type, wc_get_attribute_types() ) ) {
+		return false;
+	}
+
+	$attribute_id = wc_attribute_taxonomy_id_by_name( $taxonomy );
+	$attribute    = $attribute_id ? wc_get_attribute( $attribute_id ) : null;
+
+	return $attribute && $type === $attribute->type;
+}
+
+/**
  * Check if there are attribute types different than the default `select` type.
  * Note: `wc-visual` is considered a custom attribute type.
  *

@@ -263,6 +263,57 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		}//end try
 	}
 
+	/**
+	 * Test wc_taxonomy_is_attribute_type() function.
+	 *
+	 * @testdox wc_taxonomy_is_attribute_type returns true for taxonomies that match the provided product attribute type, false otherwise.
+	 */
+	public function test_wc_taxonomy_is_attribute_type() {
+		$attribute_id = null;
+
+		try {
+			// Product attribute taxonomy.
+			$attribute_id = wc_create_attribute(
+				array(
+					'name' => 'Taxonomy Test',
+					'type' => 'select',
+				)
+			);
+
+			$this->assertIsInt( $attribute_id );
+
+			$this->register_taxonomies_after_attribute_changes();
+
+			$taxonomy = wc_get_attribute( $attribute_id )->slug;
+			$this->assertTrue( taxonomy_is_product_attribute( $taxonomy ), 'Precondition: new global attribute taxonomy is registered for this request.' );
+			$this->assertTrue( wc_taxonomy_is_attribute_type( $taxonomy, 'select' ) );
+			$this->assertFalse( wc_taxonomy_is_attribute_type( $taxonomy, 'wc-visual' ) );
+
+			// Non-product attribute taxonomy.
+			$this->assertFalse( wc_taxonomy_is_attribute_type( 'product_cat', 'select' ) );
+		} finally {
+			if ( is_int( $attribute_id ) ) {
+				wc_delete_attribute( $attribute_id );
+				$this->register_taxonomies_after_attribute_changes();
+			}
+		}//end try
+	}
+
+	/**
+	 * Register taxonomies after attribute changes.
+	 * For WC_Post_Types::register_taxonomies() to run, we need the
+	 * `product_type` taxonomy to be unset.
+	 *
+	 * @return void
+	 */
+	public function register_taxonomies_after_attribute_changes() {
+			global $wp_taxonomies;
+			$old_product_type = $wp_taxonomies['product_type'];
+			unset( $wp_taxonomies['product_type'] );
+			WC_Post_Types::register_taxonomies();
+			$wp_taxonomies['product_type'] = $old_product_type; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+	}
+
 	public function get_attribute_names_and_slugs() {
 		return array(
 			array( 'Dash Me', 'dash-me' ),

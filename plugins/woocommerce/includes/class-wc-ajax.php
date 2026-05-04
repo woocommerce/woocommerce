@@ -741,29 +741,6 @@ class WC_AJAX {
 	}
 
 	/**
-	 * Check if a product attribute taxonomy supports visual term colors.
-	 *
-	 * @param string $taxonomy Taxonomy slug.
-	 * @return bool
-	 *
-	 * @internal
-	 */
-	private static function is_visual_product_attribute_taxonomy( $taxonomy ) {
-		if ( ! taxonomy_exists( $taxonomy ) || ! taxonomy_is_product_attribute( $taxonomy ) ) {
-			return false;
-		}
-
-		if ( ! array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
-			return false;
-		}
-
-		$attribute_id = wc_attribute_taxonomy_id_by_name( $taxonomy );
-		$attribute    = $attribute_id ? wc_get_attribute( $attribute_id ) : null;
-
-		return $attribute && 'wc-visual' === $attribute->type;
-	}
-
-	/**
 	 * Add a new attribute via ajax function.
 	 *
 	 * @return void
@@ -786,7 +763,7 @@ class WC_AJAX {
 						)
 					);
 				} else {
-					if ( self::is_visual_product_attribute_taxonomy( $taxonomy ) && isset( $_POST['term_color'] ) ) {
+					if ( wc_taxonomy_is_attribute_type( $taxonomy, 'wc-visual' ) && isset( $_POST['term_color'] ) ) {
 						$color_value = sanitize_hex_color( wp_unslash( $_POST['term_color'] ) );
 
 						if ( $color_value ) {
