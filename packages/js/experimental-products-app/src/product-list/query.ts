@@ -10,6 +10,7 @@ import type {
 
 export type ProductListQuery = Omit< ProductQuery, 'status' > & {
 	status?: ProductStatus | ProductStatus[];
+	_embed?: boolean | string | string[];
 	search_name_or_sku?: string;
 	exclude_status?: ProductStatus[];
 	include_types?: ProductType[];
@@ -148,6 +149,7 @@ function applyPriceFilter( query: ProductListQuery, filter: Filter ) {
 
 export function buildProductListQuery( view: View ): ProductListQuery {
 	const query: ProductListQuery = {
+		_embed: 'variations',
 		per_page: view.perPage,
 		page: view.page,
 		order: view.sort?.direction,

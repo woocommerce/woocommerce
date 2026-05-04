@@ -31,10 +31,13 @@ import { buildProductListQuery } from './query';
 import {
 	getItemId,
 	getProductListNavigationPath,
+	getProductListItemLevel,
 	getProductListTab,
+	getProductsWithEmbeddedVariations,
 	getSelectionFromPostId,
 	getStatusForProductListTab,
 	isProductEditorAccessible,
+	sortProductsForHierarchy,
 } from './utils';
 import { useProductActions } from '../dataviews-actions';
 
@@ -203,6 +206,14 @@ export default function ProductList( { className }: ProductListProps ) {
 		[ totalCount, view.perPage ]
 	);
 
+	const data = useMemo(
+		() =>
+			sortProductsForHierarchy(
+				getProductsWithEmbeddedVariations( records || EMPTY_ARRAY )
+			),
+		[ records ]
+	);
+
 	const { canCreateRecord } = useSelect(
 		( select ) => {
 			const { canUser } = select( coreStore );
@@ -302,13 +313,14 @@ export default function ProductList( { className }: ProductListProps ) {
 				key={ activeView }
 				paginationInfo={ paginationInfo }
 				fields={ productFields }
-				data={ records || EMPTY_ARRAY }
+				data={ data }
 				isLoading={ isLoading && ! hasResolved }
 				view={ view }
 				actions={ actions }
 				onChangeView={ setView }
 				onChangeSelection={ onChangeSelection }
 				getItemId={ getItemId }
+				getItemLevel={ getProductListItemLevel }
 				selection={ selection }
 				defaultLayouts={ DEFAULT_LAYOUTS }
 				isItemClickable={ isProductEditorAccessible }
