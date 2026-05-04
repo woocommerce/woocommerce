@@ -229,7 +229,15 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Creating product object from request data in preparation for copying.
-		$updated_product    = $this->prepare_object_for_database( $request );
+		$updated_product = $this->prepare_object_for_database( $request );
+		if ( is_wp_error( $updated_product ) ) {
+			return $updated_product;
+		}
+
+		if ( ! $updated_product instanceof \WC_Product ) {
+			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
+		}
+
 		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );
 
 		if ( is_wp_error( $duplicated_product ) ) {
@@ -239,6 +247,36 @@ class Controller extends WC_REST_Products_V2_Controller {
 		$response_data = $duplicated_product->get_data();
 
 		return new WP_REST_Response( $response_data, 200 );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param \WC_Product                         $object  Object data.
+	 * @param WP_REST_Request<array<string,mixed>> $request Request object.
+	 * @return array Links for the given post.
+	 */
+	protected function prepare_links( $object, $request ) {
+		$links = parent::prepare_links( $object, $request );
+
+		if ( $object->is_type( ProductType::VARIABLE ) && $object->has_child() ) {
+			$links['variations'] = array();
+
+			foreach ( $object->get_children() as $variation_id ) {
+				$variation_url = rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $variation_id ) );
+
+				if ( isset( $request['_fields'] ) ) {
+					$variation_url = add_query_arg( '_fields', implode( ',', wp_parse_list( $request['_fields'] ) ), $variation_url );
+				}
+
+				$links['variations'][] = array(
+					'href'       => $variation_url,
+					'embeddable' => true,
+				);
+			}
+		}
+
+		return $links;
 	}
 
 	/**
@@ -1976,7 +2014,74 @@ class Controller extends WC_REST_Products_V2_Controller {
 			'readonly'    => true,
 		);
 
-			return $this->add_additional_fields_schema( $schema );
+		$schema = $this->add_embed_context_to_schema( $schema );
+
+		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Add the embed context to product schema properties available in view context.
+	 *
+	 * @param array $schema Product schema.
+	 * @return array Product schema with embed context support.
+	 */
+	private function add_embed_context_to_schema( array $schema ): array {
+		if ( empty( $schema['properties'] ) || ! is_array( $schema['properties'] ) ) {
+			return $schema;
+		}
+
+		foreach ( $schema['properties'] as $property => $property_schema ) {
+			if ( ! is_array( $property_schema ) ) {
+				continue;
+			}
+
+			if ( in_array( $property, self::SENSITIVE_FIELDS, true ) ) {
+				continue;
+			}
+
+			$schema['properties'][ $property ] = $this->add_embed_context_to_schema_property( $property_schema );
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Add the embed context to a schema property and its nested properties.
+	 *
+	 * @param array $property_schema Schema property.
+	 * @return array Schema property with embed context support.
+	 */
+	private function add_embed_context_to_schema_property( array $property_schema ): array {
+		if (
+			! empty( $property_schema['context'] ) &&
+			is_array( $property_schema['context'] ) &&
+			in_array( 'view', $property_schema['context'], true ) &&
+			! in_array( 'embed', $property_schema['context'], true )
+		) {
+			$property_schema['context'][] = 'embed';
+		}
+
+		if ( ! empty( $property_schema['properties'] ) && is_array( $property_schema['properties'] ) ) {
+			foreach ( $property_schema['properties'] as $property => $nested_property_schema ) {
+				if ( ! is_array( $nested_property_schema ) ) {
+					continue;
+				}
+
+				$property_schema['properties'][ $property ] = $this->add_embed_context_to_schema_property( $nested_property_schema );
+			}
+		}
+
+		if ( ! empty( $property_schema['items']['properties'] ) && is_array( $property_schema['items']['properties'] ) ) {
+			foreach ( $property_schema['items']['properties'] as $property => $nested_property_schema ) {
+				if ( ! is_array( $nested_property_schema ) ) {
+					continue;
+				}
+
+				$property_schema['items']['properties'][ $property ] = $this->add_embed_context_to_schema_property( $nested_property_schema );
+			}
+		}
+
+		return $property_schema;
 	}
 
 	/**
@@ -2272,23 +2377,26 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * (doesn't fire hooks, ensure_response, or add links).
 	 *
 	 * @param WC_Data         $object_data Object data.
-	 * @param WP_REST_Request $request Request object.
-	 * @param string          $context Request context.
+	 * @param WP_REST_Request $request     Request object.
+	 * @param string          $context     Request context.
 	 * @return array Product data to be included in the response.
 	 */
 	protected function prepare_object_for_response_core( $object_data, $request, $context ): array {
 		$data = parent::prepare_object_for_response_core( $object_data, $request, $context );
+		$fields = $this->get_fields_for_response( $request );
 
-		if ( $this->cogs_is_enabled() ) {
+		if ( $this->cogs_is_enabled() && in_array( 'cost_of_goods_sold', $fields, true ) ) {
 			$this->add_cogs_info_to_returned_product_data( $data, $object_data );
 		}
 
-		$data['add_to_cart'] = array(
-			'url'         => $object_data->add_to_cart_url(),
-			'description' => $object_data->add_to_cart_description(),
-			'text'        => $object_data->add_to_cart_text(),
-			'single_text' => $object_data->single_add_to_cart_text(),
-		);
+		if ( in_array( 'add_to_cart', $fields, true ) ) {
+			$data['add_to_cart'] = array(
+				'url'         => $object_data->add_to_cart_url(),
+				'description' => $object_data->add_to_cart_description(),
+				'text'        => $object_data->add_to_cart_text(),
+				'single_text' => $object_data->single_add_to_cart_text(),
+			);
+		}
 
 		$post_type_object = get_post_type_object( 'product' );
 		if ( $post_type_object instanceof \WP_Post_Type && ! current_user_can( $post_type_object->cap->read_private_posts ) ) {
