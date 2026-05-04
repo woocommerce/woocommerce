@@ -711,7 +711,7 @@ class EmailApiController {
 			'type'       => 'object',
 			'properties' => array(
 				'merged_content'     => array(
-					'description' => __( 'The merged block content written to the post.', 'woocommerce' ),
+					'description' => __( 'The merged block content written to the post. May differ from the input `post_content` even when every choice was `keep_yours` — the namespace-alias migration (see `aliases_migrated`) rewrites legacy block names unconditionally.', 'woocommerce' ),
 					'type'        => 'string',
 					'readonly'    => true,
 				),
