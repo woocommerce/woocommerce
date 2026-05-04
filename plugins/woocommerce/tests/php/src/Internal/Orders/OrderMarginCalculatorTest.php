@@ -1,0 +1,75 @@
+<?php
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Tests\Internal\Orders;
+
+use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
+use Automattic\WooCommerce\Internal\Orders\OrderMarginCalculator;
+use WC_Order;
+use WC_Order_Item_Product;
+
+/**
+ * Tests for OrderMarginCalculator.
+ */
+class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
+
+	/**
+	 * The system under test.
+	 *
+	 * @var OrderMarginCalculator
+	 */
+	private OrderMarginCalculator $sut;
+
+	/**
+	 * Mock CostOfGoodsSoldController.
+	 *
+	 * @var CostOfGoodsSoldController|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private $cogs_controller;
+
+	/**
+	 * Set up the test.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+
+		$this->cogs_controller = $this->createMock( CostOfGoodsSoldController::class );
+		$this->sut             = new OrderMarginCalculator();
+		$this->sut->init( $this->cogs_controller );
+	}
+
+	/**
+	 * Creates a mock order with the given financial values.
+	 *
+	 * @param float $subtotal       Order subtotal.
+	 * @param float $discount_total Discount total.
+	 * @param float $cogs_value     COGS total value.
+	 * @return WC_Order|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private function make_order( float $subtotal, float $discount_total, float $cogs_value ) {
+		$order = $this->createMock( WC_Order::class );
+		$order->method( 'get_subtotal' )->willReturn( $subtotal );
+		$order->method( 'get_discount_total' )->willReturn( $discount_total );
+		$order->method( 'get_cogs_total_value' )->willReturn( $cogs_value );
+		$order->method( 'get_items' )->willReturn( array() );
+		return $order;
+	}
+
+	/**
+	 * Creates a mock product line item.
+	 *
+	 * @param float $total      Line item total.
+	 * @param float $cogs_value COGS value for the item.
+	 * @return WC_Order_Item_Product|\PHPUnit\Framework\MockObject\MockObject
+	 */
+	private function make_item( float $total, float $cogs_value ) {
+		$item = $this->createMock( WC_Order_Item_Product::class );
+		$item->method( 'get_id' )->willReturn( 1 );
+		$item->method( 'get_product_id' )->willReturn( 10 );
+		$item->method( 'get_name' )->willReturn( 'Test Product' );
+		$item->method( 'get_quantity' )->willReturn( 1.0 );
+		$item->method( 'get_total' )->willReturn( $total );
+		$item->method( 'get_cogs_value' )->willReturn( $cogs_value );
+		return $item;
+	}
+}
