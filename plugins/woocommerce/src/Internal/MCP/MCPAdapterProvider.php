@@ -153,8 +153,8 @@ class MCPAdapterProvider {
 	/**
 	 * Get WooCommerce abilities for MCP server.
 	 *
-	 * Filters abilities to include only those with 'woocommerce/' namespace by default,
-	 * with a filter to allow inclusion of abilities from other namespaces.
+	 * Filters abilities to include only those explicitly exposed to the deprecated
+	 * WooCommerce MCP endpoint, with a filter to override inclusion decisions.
 	 *
 	 * @return array Array of ability IDs for MCP server.
 	 */
@@ -163,7 +163,7 @@ class MCPAdapterProvider {
 		$abilities_registry = wc_get_container()->get( AbilitiesRegistry::class );
 		$all_abilities_ids  = $abilities_registry->get_abilities_ids();
 
-		// Filter abilities based on namespace and custom filter.
+		// Filter abilities based on deprecated endpoint exposure metadata and custom filter.
 		$mcp_abilities = array_filter(
 			$all_abilities_ids,
 			static function ( $ability_id ) {

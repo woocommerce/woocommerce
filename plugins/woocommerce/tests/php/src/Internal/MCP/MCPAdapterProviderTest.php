@@ -209,51 +209,63 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	 * Test ability filtering by deprecated WooCommerce MCP exposure metadata.
 	 */
 	public function test_get_woocommerce_mcp_abilities_filters_by_deprecated_endpoint_exposure_metadata() {
-		$deprecated_products_ability = 'woocommerce/test-deprecated-products-a';
-		$deprecated_orders_ability   = 'woocommerce/test-deprecated-orders-a';
-		$canonical_ability           = 'woocommerce/test-canonical-products-a';
+		$exposed_woocommerce_ability = 'woocommerce/test-deprecated-products-a';
+		$exposed_external_ability    = 'custom-plugin/test-deprecated-orders-a';
+		$unmarked_ability            = 'woocommerce/test-unmarked';
+		$opted_out_ability           = 'woocommerce/test-opted-out';
+		$invalid_exposure_ability    = 'woocommerce/test-invalid-exposure';
 
 		$this->register_test_ability(
-			$deprecated_products_ability,
+			$exposed_woocommerce_ability,
 			array(
 				'expose_in_deprecated_woocommerce_mcp' => true,
 			)
 		);
 		$this->register_test_ability(
-			$deprecated_orders_ability,
+			$exposed_external_ability,
 			array(
 				'expose_in_deprecated_woocommerce_mcp' => true,
 			)
 		);
 		$this->register_test_ability(
-			$canonical_ability,
+			$unmarked_ability,
 			array()
 		);
+		$this->register_test_ability(
+			$opted_out_ability,
+			array(
+				'expose_in_deprecated_woocommerce_mcp' => false,
+			)
+		);
+		$this->register_test_ability(
+			$invalid_exposure_ability,
+			array(
+				'expose_in_deprecated_woocommerce_mcp' => 'true',
+			)
+		);
 
-		// Mock abilities registry to return test abilities.
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
 			->willReturn(
 				array(
-					$deprecated_products_ability,
-					$deprecated_orders_ability,
-					$canonical_ability,
+					'unregistered-plugin/not-available',
+					$exposed_woocommerce_ability,
+					$unmarked_ability,
+					$exposed_external_ability,
+					$opted_out_ability,
+					$invalid_exposure_ability,
 				)
 			);
 
-		// Use reflection to test the private method.
-		$reflection = new \ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
-		$method->setAccessible( true );
-
-		$result = $method->invoke( $this->sut );
+		$result = $this->get_woocommerce_mcp_abilities();
 
 		$expected = array(
-			$deprecated_products_ability,
-			$deprecated_orders_ability,
+			$exposed_woocommerce_ability,
+			$exposed_external_ability,
 		);
 
 		$this->assertEquals( $expected, $result, 'Should only return abilities explicitly exposed in the deprecated WooCommerce MCP endpoint.' );
+		$this->assertSame( array( 0, 1 ), array_keys( $result ), 'Should re-index array after filtering.' );
 	}
 
 	/**
@@ -284,6 +296,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		add_filter(
 			'woocommerce_mcp_include_ability',
 			function ( $should_include, $ability_id ) {
+				if ( 'woocommerce/test-custom-filter-deprecated' === $ability_id ) {
+					return false;
+				}
 				if ( str_starts_with( $ability_id, 'custom-plugin/' ) ) {
 					return true;
 				}
@@ -293,93 +308,13 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			2
 		);
 
-		// Use reflection to test the private method.
-		$reflection = new \ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
-		$method->setAccessible( true );
-
-		$result = $method->invoke( $this->sut );
+		$result = $this->get_woocommerce_mcp_abilities();
 
 		$expected = array(
-			$deprecated_ability,
 			'custom-plugin/special-action',
 		);
 
 		$this->assertEquals( $expected, $result, 'Should respect custom filter for including abilities' );
-	}
-
-	/**
-	 * Test ability exposure metadata controls the deprecated WooCommerce MCP endpoint.
-	 */
-	public function test_get_woocommerce_mcp_abilities_respects_explicit_exposure_metadata() {
-		$deprecated_ability = 'woocommerce/test-deprecated-rest';
-		$semantic_ability   = 'woocommerce/test-semantic';
-		$invalid_ability    = 'woocommerce/test-invalid-exposure';
-
-		$this->register_test_ability(
-			$deprecated_ability,
-			array(
-				'expose_in_deprecated_woocommerce_mcp' => true,
-			)
-		);
-		$this->register_test_ability(
-			$semantic_ability,
-			array(
-				'expose_in_deprecated_woocommerce_mcp' => false,
-			)
-		);
-		$this->register_test_ability(
-			$invalid_ability,
-			array(
-				'expose_in_deprecated_woocommerce_mcp' => 'true',
-			)
-		);
-
-		$this->mock_abilities_registry
-			->method( 'get_abilities_ids' )
-			->willReturn(
-				array(
-					$deprecated_ability,
-					$semantic_ability,
-					$invalid_ability,
-				)
-			);
-
-		$reflection = new \ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
-		$method->setAccessible( true );
-
-		$result = $method->invoke( $this->sut );
-
-		$this->assertEquals( array( $deprecated_ability ), $result, 'Should include only abilities explicitly exposed in the deprecated WooCommerce MCP endpoint.' );
-	}
-
-	/**
-	 * Test abilities without deprecated endpoint exposure metadata are excluded by default.
-	 */
-	public function test_get_woocommerce_mcp_abilities_excludes_unmarked_abilities_by_default() {
-		$unmarked_ability = 'woocommerce/test-unmarked';
-
-		$this->register_test_ability(
-			$unmarked_ability,
-			array()
-		);
-
-		$this->mock_abilities_registry
-			->method( 'get_abilities_ids' )
-			->willReturn(
-				array(
-					$unmarked_ability,
-				)
-			);
-
-		$reflection = new \ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
-		$method->setAccessible( true );
-
-		$result = $method->invoke( $this->sut );
-
-		$this->assertEquals( array(), $result, 'Should exclude abilities that are not explicitly exposed in the deprecated WooCommerce MCP endpoint.' );
 	}
 
 	/**
@@ -413,21 +348,15 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			->method( 'get_abilities_ids' )
 			->willReturn( array() );
 
-		// Use reflection to test the private method.
-		$reflection = new \ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
-		$method->setAccessible( true );
-
-		$result = $method->invoke( $this->sut );
+		$result = $this->get_woocommerce_mcp_abilities();
 
 		$this->assertEquals( array(), $result, 'Should handle empty abilities array correctly' );
 	}
 
 	/**
-	 * Test that non-woocommerce abilities are filtered out.
+	 * Test that unregistered abilities are filtered out.
 	 */
-	public function test_filters_out_non_woocommerce_abilities() {
-		// Mock abilities registry to return only non-woocommerce abilities.
+	public function test_filters_out_unregistered_abilities() {
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
 			->willReturn(
@@ -438,65 +367,22 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 				)
 			);
 
-		// Use reflection to test the private method.
-		$reflection = new \ReflectionClass( $this->sut );
-		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
-		$method->setAccessible( true );
+		$result = $this->get_woocommerce_mcp_abilities();
 
-		$result = $method->invoke( $this->sut );
-
-		$this->assertEquals( array(), $result, 'Should filter out all non-woocommerce abilities' );
+		$this->assertEquals( array(), $result, 'Should filter out all unregistered abilities.' );
 	}
 
 	/**
-	 * Test array re-indexing after filtering.
+	 * Get WooCommerce MCP abilities through the private provider method.
+	 *
+	 * @return array
 	 */
-	public function test_reindexes_array_after_filtering() {
-		$deprecated_products_ability = 'woocommerce/test-reindex-products-list';
-		$deprecated_orders_ability   = 'woocommerce/test-reindex-orders-get';
-
-		$this->register_test_ability(
-			$deprecated_products_ability,
-			array(
-				'expose_in_deprecated_woocommerce_mcp' => true,
-			)
-		);
-		$this->register_test_ability(
-			$deprecated_orders_ability,
-			array(
-				'expose_in_deprecated_woocommerce_mcp' => true,
-			)
-		);
-
-		// Mock abilities registry to return mixed abilities.
-		$this->mock_abilities_registry
-			->method( 'get_abilities_ids' )
-			->willReturn(
-				array(
-					'other-plugin/action-1',
-					$deprecated_products_ability,
-					'another-namespace/action-2',
-					$deprecated_orders_ability,
-				)
-			);
-
-		// Use reflection to test the private method.
+	private function get_woocommerce_mcp_abilities(): array {
 		$reflection = new \ReflectionClass( $this->sut );
 		$method     = $reflection->getMethod( 'get_woocommerce_mcp_abilities' );
 		$method->setAccessible( true );
 
-		$result = $method->invoke( $this->sut );
-
-		// Check that array is properly re-indexed (keys should be 0, 1).
-		$this->assertEquals( array( 0, 1 ), array_keys( $result ), 'Should re-index array after filtering' );
-		$this->assertEquals(
-			array(
-				$deprecated_products_ability,
-				$deprecated_orders_ability,
-			),
-			array_values( $result ),
-			'Should maintain correct values after re-indexing'
-		);
+		return $method->invoke( $this->sut );
 	}
 
 	/**
