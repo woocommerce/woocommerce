@@ -230,14 +230,6 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		// Creating product object from request data in preparation for copying.
 		$updated_product = $this->prepare_object_for_database( $request );
-		if ( is_wp_error( $updated_product ) ) {
-			return $updated_product;
-		}
-
-		if ( ! $updated_product instanceof \WC_Product ) {
-			return new WP_Error( 'woocommerce_rest_product_invalid_id', __( 'Invalid product ID.', 'woocommerce' ), array( 'status' => 404 ) );
-		}
-
 		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );
 
 		if ( is_wp_error( $duplicated_product ) ) {
