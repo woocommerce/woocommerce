@@ -360,7 +360,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Issue a POST to the token-exchange endpoint.
 	 *
-	 * @param string|null               $token  Token to exchange. Null omits the parameter.
+	 * @param string|null                $token  Token to exchange. Null omits the parameter.
 	 * @param array<string, string>|null $device Optional device payload to send.
 	 * @return \WP_REST_Response
 	 */
@@ -1148,14 +1148,17 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$plaintext = $this->generate_token_as_admin();
 
 		$long = str_repeat( 'A', 100 );
+		// `os` carries an HTML tag (must be stripped by sanitize_text_field),
+		// `model` is over the 64-char cap, `rogue_field` is outside the
+		// whitelist and must be dropped before storage.
 		$this->dispatch_exchange(
 			$plaintext,
 			array(
-				'os'          => 'iOS<script>',         // tags stripped by sanitize_text_field.
+				'os'          => 'iOS<script>',
 				'os_version'  => '17.5',
-				'model'       => $long,                  // capped at 64.
+				'model'       => $long,
 				'app_version' => '24.7.0',
-				'rogue_field' => 'should-be-dropped',    // not in whitelist.
+				'rogue_field' => 'should-be-dropped',
 			)
 		);
 
@@ -1240,7 +1243,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$plaintext = $this->generate_token_as_admin();
 		$this->dispatch_exchange(
 			$plaintext,
-			array( 'os' => 'iOS', 'model' => 'iPhone 15' )
+			array(
+				'os'    => 'iOS',
+				'model' => 'iPhone 15',
+			)
 		);
 
 		// A different shop manager polls the same token. Token guess is
@@ -1274,7 +1280,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$plaintext = $this->generate_token_as_admin();
 		$exchange  = $this->dispatch_exchange(
 			$plaintext,
-			array( 'os' => 'iOS', 'model' => 'iPhone 15' )
+			array(
+				'os'    => 'iOS',
+				'model' => 'iPhone 15',
+			)
 		);
 		$this->assertSame( 200, $exchange->get_status() );
 		$uuid = $exchange->get_data()['uuid'];
@@ -1302,7 +1311,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$plaintext = $this->generate_token_as_admin();
 		$exchange  = $this->dispatch_exchange(
 			$plaintext,
-			array( 'os' => 'iOS', 'model' => 'iPhone 15' )
+			array(
+				'os'    => 'iOS',
+				'model' => 'iPhone 15',
+			)
 		);
 		$uuid = $exchange->get_data()['uuid'];
 

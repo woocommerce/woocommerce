@@ -154,8 +154,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'device' => array(
-							'required' => false,
-							'type'     => 'object',
+							'required'   => false,
+							'type'       => 'object',
 							// Sanitization happens inside the callback via
 							// `sanitize_device_payload()`; we accept any object
 							// shape here and whitelist server-side.
