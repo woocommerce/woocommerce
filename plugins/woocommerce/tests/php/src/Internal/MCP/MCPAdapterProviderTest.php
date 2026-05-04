@@ -206,18 +206,38 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test ability filtering by namespace.
+	 * Test ability filtering by legacy WooCommerce MCP exposure metadata.
 	 */
-	public function test_get_woocommerce_mcp_abilities_filters_by_namespace() {
+	public function test_get_woocommerce_mcp_abilities_filters_by_legacy_exposure_metadata() {
+		$legacy_products_ability = 'woocommerce/test-legacy-products-a';
+		$legacy_orders_ability   = 'woocommerce/test-legacy-orders-a';
+		$canonical_ability       = 'woocommerce/test-canonical-products-a';
+
+		$this->register_test_ability(
+			$legacy_products_ability,
+			array(
+				'woocommerce_expose_in_legacy_mcp' => true,
+			)
+		);
+		$this->register_test_ability(
+			$legacy_orders_ability,
+			array(
+				'woocommerce_expose_in_legacy_mcp' => true,
+			)
+		);
+		$this->register_test_ability(
+			$canonical_ability,
+			array()
+		);
+
 		// Mock abilities registry to return test abilities.
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
 			->willReturn(
 				array(
-					'woocommerce/products-list',
-					'woocommerce/orders-get',
-					'other-plugin/custom-action',
-					'another/namespace/action',
+					$legacy_products_ability,
+					$legacy_orders_ability,
+					$canonical_ability,
 				)
 			);
 
@@ -229,23 +249,32 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$result = $method->invoke( $this->sut );
 
 		$expected = array(
-			'woocommerce/products-list',
-			'woocommerce/orders-get',
+			$legacy_products_ability,
+			$legacy_orders_ability,
 		);
 
-		$this->assertEquals( $expected, $result, 'Should only return woocommerce namespaced abilities' );
+		$this->assertEquals( $expected, $result, 'Should only return abilities explicitly exposed in the legacy WooCommerce MCP surface.' );
 	}
 
 	/**
 	 * Test ability filtering with custom filter.
 	 */
 	public function test_get_woocommerce_mcp_abilities_respects_custom_filter() {
+		$legacy_ability = 'woocommerce/test-custom-filter-legacy';
+
+		$this->register_test_ability(
+			$legacy_ability,
+			array(
+				'woocommerce_expose_in_legacy_mcp' => true,
+			)
+		);
+
 		// Mock abilities registry to return test abilities.
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
 			->willReturn(
 				array(
-					'woocommerce/products-list',
+					$legacy_ability,
 					'custom-plugin/special-action',
 					'other-plugin/normal-action',
 				)
@@ -272,7 +301,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$result = $method->invoke( $this->sut );
 
 		$expected = array(
-			'woocommerce/products-list',
+			$legacy_ability,
 			'custom-plugin/special-action',
 		);
 
@@ -290,22 +319,19 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$this->register_test_ability(
 			$legacy_ability,
 			array(
-				'woocommerce_mcp_expose'     => true,
-				'woocommerce_mcp_projection' => 'legacy-rest',
+				'woocommerce_expose_in_legacy_mcp' => true,
 			)
 		);
 		$this->register_test_ability(
 			$semantic_ability,
 			array(
-				'woocommerce_mcp_expose'     => false,
-				'woocommerce_mcp_projection' => 'semantic-flat-experimental',
+				'woocommerce_expose_in_legacy_mcp' => false,
 			)
 		);
 		$this->register_test_ability(
 			$invalid_ability,
 			array(
-				'woocommerce_mcp_expose'     => 'false',
-				'woocommerce_mcp_projection' => 'legacy-rest',
+				'woocommerce_expose_in_legacy_mcp' => 'true',
 			)
 		);
 
@@ -325,31 +351,17 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 		$result = $method->invoke( $this->sut );
 
-		$this->assertEquals( array( $legacy_ability ), $result, 'Should include legacy projection abilities and exclude semantic abilities from the default MCP surface.' );
+		$this->assertEquals( array( $legacy_ability ), $result, 'Should include only abilities explicitly exposed in the legacy WooCommerce MCP surface.' );
 	}
 
 	/**
-	 * Test projection metadata controls the default MCP surface when exposure metadata is absent.
+	 * Test abilities without legacy exposure metadata are excluded by default.
 	 */
-	public function test_get_woocommerce_mcp_abilities_respects_projection_metadata_without_explicit_exposure() {
-		$legacy_ability      = 'woocommerce/test-projected-legacy-rest';
-		$semantic_ability    = 'woocommerce/test-projected-semantic';
-		$unprojected_ability = 'woocommerce/test-unprojected';
+	public function test_get_woocommerce_mcp_abilities_excludes_unmarked_abilities_by_default() {
+		$unmarked_ability = 'woocommerce/test-unmarked';
 
 		$this->register_test_ability(
-			$legacy_ability,
-			array(
-				'woocommerce_mcp_projection' => 'legacy-rest',
-			)
-		);
-		$this->register_test_ability(
-			$semantic_ability,
-			array(
-				'woocommerce_mcp_projection' => 'semantic-flat-experimental',
-			)
-		);
-		$this->register_test_ability(
-			$unprojected_ability,
+			$unmarked_ability,
 			array()
 		);
 
@@ -357,9 +369,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			->method( 'get_abilities_ids' )
 			->willReturn(
 				array(
-					$legacy_ability,
-					$semantic_ability,
-					$unprojected_ability,
+					$unmarked_ability,
 				)
 			);
 
@@ -369,7 +379,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 		$result = $method->invoke( $this->sut );
 
-		$this->assertEquals( array( $legacy_ability, $unprojected_ability ), $result, 'Should include legacy and unprojected WooCommerce abilities while excluding non-legacy projections.' );
+		$this->assertEquals( array(), $result, 'Should exclude abilities that are not explicitly exposed in the legacy WooCommerce MCP surface.' );
 	}
 
 	/**
@@ -442,15 +452,31 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	 * Test array re-indexing after filtering.
 	 */
 	public function test_reindexes_array_after_filtering() {
+		$legacy_products_ability = 'woocommerce/test-reindex-products-list';
+		$legacy_orders_ability   = 'woocommerce/test-reindex-orders-get';
+
+		$this->register_test_ability(
+			$legacy_products_ability,
+			array(
+				'woocommerce_expose_in_legacy_mcp' => true,
+			)
+		);
+		$this->register_test_ability(
+			$legacy_orders_ability,
+			array(
+				'woocommerce_expose_in_legacy_mcp' => true,
+			)
+		);
+
 		// Mock abilities registry to return mixed abilities.
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
 			->willReturn(
 				array(
 					'other-plugin/action-1',
-					'woocommerce/products-list',
+					$legacy_products_ability,
 					'another-namespace/action-2',
-					'woocommerce/orders-get',
+					$legacy_orders_ability,
 				)
 			);
 
@@ -465,8 +491,8 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( array( 0, 1 ), array_keys( $result ), 'Should re-index array after filtering' );
 		$this->assertEquals(
 			array(
-				'woocommerce/products-list',
-				'woocommerce/orders-get',
+				$legacy_products_ability,
+				$legacy_orders_ability,
 			),
 			array_values( $result ),
 			'Should maintain correct values after re-indexing'
@@ -480,35 +506,42 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	 * @param array  $meta Ability meta.
 	 */
 	private function register_test_ability( string $ability_id, array $meta ): void {
-		global $wp_actions;
-
-		$wp_actions['wp_abilities_api_init'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-
 		$this->ensure_test_ability_category( 'woocommerce-rest' );
 
-		$ability = wp_register_ability(
-			$ability_id,
-			array(
-				'label'               => 'Test ability',
-				'description'         => 'Test ability.',
-				'category'            => 'woocommerce-rest',
-				'input_schema'        => array( 'type' => 'object' ),
-				'output_schema'       => array( 'type' => 'object' ),
-				'execute_callback'    => static function () {
-					return array();
-				},
-				'permission_callback' => static function () {
-					return true;
-				},
-				'meta'                => array_merge(
-					array(
-						'show_in_rest' => true,
-					),
-					$meta
-				),
-			)
-		);
+		$ability  = null;
+		$callback = null;
+		$callback = function () use ( &$ability, $ability_id, $meta, &$callback ) {
+			remove_action( 'wp_abilities_api_init', $callback );
 
+			$ability = wp_register_ability(
+				$ability_id,
+				array(
+					'label'               => 'Test ability',
+					'description'         => 'Test ability.',
+					'category'            => 'woocommerce-rest',
+					'input_schema'        => array( 'type' => 'object' ),
+					'output_schema'       => array( 'type' => 'object' ),
+					'execute_callback'    => static function () {
+						return array();
+					},
+					'permission_callback' => static function () {
+						return true;
+					},
+					'meta'                => array_merge(
+						array(
+							'show_in_rest' => true,
+						),
+						$meta
+					),
+				)
+			);
+		};
+
+		add_action( 'wp_abilities_api_init', $callback );
+		do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		remove_action( 'wp_abilities_api_init', $callback );
+
+		$this->assertNotWPError( $ability, 'Test ability should register successfully.' );
 		$this->assertNotNull( $ability, 'Test ability should register successfully.' );
 		$this->registered_ability_ids[] = $ability_id;
 	}
@@ -519,8 +552,6 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	 * @param string $category_id Ability category ID.
 	 */
 	private function ensure_test_ability_category( string $category_id ): void {
-		global $wp_actions;
-
 		if ( ! function_exists( 'wp_register_ability_category' ) || ! function_exists( 'wp_has_ability_category' ) ) {
 			return;
 		}
@@ -529,16 +560,34 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			return;
 		}
 
-		$wp_actions['wp_abilities_api_categories_init'] = 1; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		$category = null;
+		$callback = null;
+		$callback = function () use ( &$category, $category_id, &$callback ) {
+			remove_action( 'wp_abilities_api_categories_init', $callback );
 
-		wp_register_ability_category(
-			$category_id,
-			array(
-				'label'       => 'WooCommerce REST API',
-				'description' => 'REST API operations for WooCommerce resources.',
-			)
-		);
+			if ( wp_has_ability_category( $category_id ) ) {
+				return;
+			}
 
-		$this->registered_ability_category_ids[] = $category_id;
+			$category = wp_register_ability_category(
+				$category_id,
+				array(
+					'label'       => 'WooCommerce REST API',
+					'description' => 'REST API operations for WooCommerce resources.',
+				)
+			);
+		};
+
+		add_action( 'wp_abilities_api_categories_init', $callback );
+		do_action( 'wp_abilities_api_categories_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		remove_action( 'wp_abilities_api_categories_init', $callback );
+
+		if ( null !== $category ) {
+			$this->assertNotWPError( $category, 'Test ability category should register successfully.' );
+			$this->assertNotNull( $category, 'Test ability category should register successfully.' );
+			$this->registered_ability_category_ids[] = $category_id;
+		}
+
+		$this->assertTrue( wp_has_ability_category( $category_id ), 'Test ability category should be available.' );
 	}
 }

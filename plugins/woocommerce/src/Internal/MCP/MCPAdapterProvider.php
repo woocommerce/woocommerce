@@ -147,7 +147,7 @@ class MCPAdapterProvider {
 		} finally {
 			// Re-enable MCP validation immediately after server creation.
 			remove_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
-		}
+		}//end try
 	}
 
 	/**
@@ -189,36 +189,22 @@ class MCPAdapterProvider {
 	/**
 	 * Check if an ability should be included in the default WooCommerce MCP surface.
 	 *
-	 * Existing WooCommerce MCP consumers expect the REST-derived ability surface on
-	 * the default endpoint. Keep the historical namespace fallback for abilities
-	 * that do not carry projection metadata, but require projected abilities to
-	 * target the legacy REST surface explicitly so semantic/domain abilities can
-	 * coexist without changing the legacy MCP tool list.
+	 * Existing WooCommerce MCP consumers expect the REST-derived ability surface on the
+	 * default endpoint. Require abilities to explicitly opt in so semantic/domain
+	 * abilities can coexist without changing the legacy MCP tool list.
 	 *
 	 * @param string $ability_id Ability ID.
 	 * @return bool Whether to include the ability by default.
 	 */
 	private static function should_include_ability_by_default( string $ability_id ): bool {
-		if ( ! str_starts_with( $ability_id, 'woocommerce/' ) ) {
-			return false;
-		}
-
 		if ( function_exists( 'wp_get_ability' ) && function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
 			$ability = wp_get_ability( $ability_id );
 			if ( $ability ) {
-				$explicit_exposure = $ability->get_meta_item( 'woocommerce_mcp_expose', null );
-				if ( null !== $explicit_exposure ) {
-					return true === $explicit_exposure;
-				}
-
-				$projection = $ability->get_meta_item( 'woocommerce_mcp_projection', null );
-				if ( null !== $projection ) {
-					return 'legacy-rest' === $projection;
-				}
+				return true === $ability->get_meta_item( 'woocommerce_expose_in_legacy_mcp', false );
 			}
 		}
 
-		return true;
+		return false;
 	}
 
 	/**

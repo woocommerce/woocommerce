@@ -66,11 +66,8 @@ class RestAbilityFactory {
 				},
 				'ability_class'       => RestAbility::class,
 				'meta'                => array(
-					'show_in_rest'                  => true,
-					'woocommerce_mcp_expose'        => true,
-					'woocommerce_mcp_projection'    => 'legacy-rest',
-					'woocommerce_ability_source'    => 'rest-controller',
-					'woocommerce_ability_operation' => $ability_config['operation'],
+					'show_in_rest'                     => true,
+					'woocommerce_expose_in_legacy_mcp' => true,
 				),
 			);
 
@@ -90,7 +87,7 @@ class RestAbilityFactory {
 					array( 'source' => 'woocommerce-rest-abilities' )
 				);
 			}
-		}
+		}//end try
 	}
 
 	/**
@@ -154,7 +151,7 @@ class RestAbilityFactory {
 					),
 					'required'   => array( 'id' ),
 				);
-		}
+		}//end switch
 
 		// Fallback.
 		return array( 'type' => 'object' );
@@ -229,7 +226,7 @@ class RestAbilityFactory {
 			}
 
 			$properties[ $key ] = $property;
-		}
+		}//end foreach
 
 		$schema = array(
 			'type'       => 'object',
@@ -359,7 +356,7 @@ class RestAbilityFactory {
 				$schema['type'] = $normalized;
 			}
 			return $schema;
-		}
+		}//end if
 
 		// Non-string, non-array type — remove it.
 		unset( $schema['type'] );
@@ -421,11 +418,11 @@ class RestAbilityFactory {
 						'previous' => $schema,
 					),
 				);
-			}
+			}//end if
 
 			// For get, create, update operations.
 			return $schema;
-		}
+		}//end if
 
 		return array( 'type' => 'object' );
 	}
