@@ -128,7 +128,6 @@ class LegacyVariationGalleryCompatibility implements RegisterHooksInterface {
 	 * @return string
 	 */
 	private function get_legacy_extension_notice_html(): string {
-		// TODO: link to the announcement post when published.
 		$message_html = wpautop(
 			esc_html__( 'Variation galleries are now built into WooCommerce. Your existing images have been migrated, so the Additional Variation Images extension can be deactivated.', 'woocommerce' )
 		);

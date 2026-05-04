@@ -389,9 +389,11 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	public function test_migrate_legacy_variation_gallery_meta_batches_updates(): void {
 		global $wpdb;
 
+		// phpcs:disable WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- Test setup needs to scope deletes by meta_key.
 		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_wc_additional_variation_images' ) );
 		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => '_product_image_gallery' ) );
 		$wpdb->delete( $wpdb->postmeta, array( 'meta_key' => LegacyVariationGalleryCompatibility::get_core_managed_meta_key() ) );
+		// phpcs:enable WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 
 		$variation_ids = array();
 
