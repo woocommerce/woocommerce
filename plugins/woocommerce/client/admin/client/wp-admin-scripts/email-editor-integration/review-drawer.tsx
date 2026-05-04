@@ -138,7 +138,7 @@ const ConflictsGroup = ( {
 						<div className="woocommerce-review-drawer__item-h">
 							<Text variant="heading-sm">{ blockTitle }</Text>
 							<Badge intent="medium">
-								{ __( 'CONFLICT', 'woocommerce' ) }
+								{ __( 'Conflict', 'woocommerce' ) }
 							</Badge>
 						</div>
 						<Text variant="body-sm">
