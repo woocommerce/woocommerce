@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Harden MobileAppQRLogin tests by normalizing every server indicator `is_ssl()` reads (HTTPS, SERVER_PORT, HTTP_X_FORWARDED_PROTO) so leftover globals from earlier tests or the runner cannot make a plain-HTTP scenario appear secure.
