@@ -1,0 +1,3 @@
+significance: patch
+type: fix
+message: Fix categories report filtering when term_id differs from term_taxonomy_id
