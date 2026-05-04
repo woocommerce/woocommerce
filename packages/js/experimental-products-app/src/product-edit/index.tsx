@@ -287,16 +287,18 @@ export default function ProductEdit() {
 				failedCount
 			);
 
-			if ( failedCount === 0 || successfulCount > 0 ) {
-				createSuccessNotice( message, {
+			if ( failedCount > 0 ) {
+				createErrorNotice( message, {
 					type: 'snackbar',
 				} );
 				return;
 			}
 
-			createErrorNotice( message, {
-				type: 'snackbar',
-			} );
+			if ( successfulCount > 0 ) {
+				createSuccessNotice( message, {
+					type: 'snackbar',
+				} );
+			}
 		} finally {
 			setIsSaving( false );
 		}
