@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Schedule sale events when sale date meta is written directly, so sales activate on time for importers and integrations that bypass WooCommerce CRUD.

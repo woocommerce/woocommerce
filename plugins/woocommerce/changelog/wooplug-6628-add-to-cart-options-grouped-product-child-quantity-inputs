@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Add to Cart + Options grouped product child quantity inputs to respect each child product's own constraints on WordPress 6.8
