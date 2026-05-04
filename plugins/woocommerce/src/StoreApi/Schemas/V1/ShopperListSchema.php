@@ -36,15 +36,18 @@ class ShopperListSchema extends AbstractSchema {
 	/**
 	 * Constructor.
 	 *
+	 * @throws \RuntimeException When the ShopperListItemSchema is not registered.
+	 *
 	 * @param ExtendSchema     $extend Rest Extending instance.
 	 * @param SchemaController $controller Schema Controller instance.
 	 */
 	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
 		parent::__construct( $extend, $controller );
 		$schema = $this->controller->get( ShopperListItemSchema::IDENTIFIER );
-		if ( $schema instanceof ShopperListItemSchema ) {
-			$this->item_schema = $schema;
+		if ( ! $schema instanceof ShopperListItemSchema ) {
+			throw new \RuntimeException( 'ShopperListItemSchema is not registered in SchemaController.' );
 		}
+		$this->item_schema = $schema;
 	}
 
 	/**

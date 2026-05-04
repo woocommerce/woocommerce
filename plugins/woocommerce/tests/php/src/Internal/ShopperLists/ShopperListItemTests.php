@@ -62,6 +62,10 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 		$zero = ShopperListItem::from_product( $this->product->get_id(), array(), 0 );
 		$this->assertInstanceOf( ShopperListItem::class, $zero );
 		$this->assertSame( 1, $zero->to_array()['quantity'] );
+
+		$negative = ShopperListItem::from_product( $this->product->get_id(), array(), -5 );
+		$this->assertInstanceOf( ShopperListItem::class, $negative );
+		$this->assertSame( 1, $negative->to_array()['quantity'] );
 	}
 
 	/**

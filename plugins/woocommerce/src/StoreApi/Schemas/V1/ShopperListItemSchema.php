@@ -42,15 +42,18 @@ class ShopperListItemSchema extends AbstractSchema {
 	/**
 	 * Constructor.
 	 *
+	 * @throws \RuntimeException When the ImageAttachmentSchema is not registered.
+	 *
 	 * @param ExtendSchema     $extend Rest Extending instance.
 	 * @param SchemaController $controller Schema Controller instance.
 	 */
 	public function __construct( ExtendSchema $extend, SchemaController $controller ) {
 		parent::__construct( $extend, $controller );
 		$schema = $this->controller->get( ImageAttachmentSchema::IDENTIFIER );
-		if ( $schema instanceof ImageAttachmentSchema ) {
-			$this->image_attachment_schema = $schema;
+		if ( ! $schema instanceof ImageAttachmentSchema ) {
+			throw new \RuntimeException( 'ImageAttachmentSchema is not registered in SchemaController.' );
 		}
+		$this->image_attachment_schema = $schema;
 	}
 
 	/**

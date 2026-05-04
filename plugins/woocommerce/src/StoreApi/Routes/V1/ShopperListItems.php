@@ -95,6 +95,7 @@ class ShopperListItems extends AbstractRoute {
 					'quantity'      => array(
 						'description' => __( 'Quantity for the saved item.', 'woocommerce' ),
 						'type'        => 'integer',
+						'default'     => 1,
 					),
 				),
 			),
