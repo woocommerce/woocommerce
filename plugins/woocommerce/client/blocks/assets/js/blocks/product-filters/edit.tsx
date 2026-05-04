@@ -5,7 +5,7 @@ import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
-import { useState } from '@wordpress/element';
+import { useEffect, useRef, useState } from '@wordpress/element';
 import { filterThreeLines } from '@woocommerce/icons';
 import clsx from 'clsx';
 
@@ -14,6 +14,7 @@ import clsx from 'clsx';
  */
 import './editor.scss';
 import { type BlockAttributes } from './types';
+import { getClosestColor } from './utils/get-closest-color';
 import { getProductFiltersCss } from './utils/get-product-filters-css';
 
 const TEMPLATE: InnerBlockTemplate[] = [
@@ -40,11 +41,34 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { attributes } = props;
 	const { isPreview } = attributes;
 	const [ isOpen, setIsOpen ] = useState( false );
+	const ref = useRef< HTMLDivElement >( null );
+	const [ inheritedColors, setInheritedColors ] = useState<
+		Record< string, string >
+	>( {} );
+
+	useEffect( () => {
+		const el = ref.current;
+		if ( ! el ) return;
+
+		const colors: Record< string, string > = {};
+		const bg = getClosestColor( el, 'backgroundColor' );
+		const fg = getClosestColor( el, 'color' );
+
+		if ( bg ) colors[ '--wc-product-filters-background-color' ] = bg;
+		if ( fg ) colors[ '--wc-product-filters-text-color' ] = fg;
+
+		setInheritedColors( colors );
+	}, [] );
+
 	const blockProps = useBlockProps( {
+		ref,
 		className: clsx( 'wc-block-product-filters', {
 			'is-overlay-opened': isOpen,
 		} ),
-		style: getProductFiltersCss( attributes ),
+		style: {
+			...inheritedColors,
+			...getProductFiltersCss( attributes ),
+		},
 	} );
 
 	return (
