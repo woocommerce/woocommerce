@@ -43,7 +43,7 @@ export const PluginBanner = ( {
 				<div className="plugins-install__plugin-banner-image">
 					<img
 						src={ logo.image }
-						alt={ logo?.alt }
+						alt={ logo.alt ?? logo.label ?? '' }
 						className={ clsx( { 'with-label': logo.label } ) }
 					/>
 					{ logo.label && <div>{ logo.label }</div> }
