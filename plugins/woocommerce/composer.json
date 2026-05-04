@@ -57,7 +57,7 @@
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "*",
 		"wordpress/abilities-api": "^0.4.0",
-		"wordpress/mcp-adapter": "^0.3.0"
+		"wordpress/mcp-adapter": "dev-trunk"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -172,6 +172,9 @@
 				"woocommerce/action-scheduler",
 				"woocommerce/email-editor",
 				"woocommerce/blueprint"
+			],
+			"vendor/{$vendor}/{$name}": [
+				"wordpress/mcp-adapter"
 			]
 		},
 		"scripts-description": {
