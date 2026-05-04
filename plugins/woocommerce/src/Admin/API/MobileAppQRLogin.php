@@ -948,8 +948,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * response on email delivery; the merchant already saw the confirmation
 	 * UI in wc-admin (Task 5).
 	 *
-	 * @param \WP_User                                                                   $user            The user who minted the token (recipient).
-	 * @param array{consumed_at: int, user_id: int, ap_uuid: string, ap_name: string, device: array<string, string>} $consumed_record The record we just persisted to the consumed transient.
+	 * @param \WP_User             $user            The user who minted the token (recipient).
+	 * @param array<string, mixed> $consumed_record The record we just persisted to the consumed transient. Keys: consumed_at (int), user_id (int), ap_uuid (string), ap_name (string), device (array<string, string>).
 	 * @return void
 	 */
 	private function maybe_send_sign_in_notification_email( \WP_User $user, array $consumed_record ): void {
@@ -1004,8 +1004,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * and constrains the body width. Owning the wrapper lets us deliver one
 	 * coherent layout.
 	 *
-	 * @param \WP_User                                                                                                  $user            Recipient.
-	 * @param array{consumed_at: int, user_id: int, ap_uuid: string, ap_name: string, device: array<string, string>} $consumed_record The consumed record.
+	 * @param \WP_User             $user            Recipient.
+	 * @param array<string, mixed> $consumed_record The consumed record (same shape as `maybe_send_sign_in_notification_email`).
 	 * @return void
 	 */
 	private function send_sign_in_notification_email( \WP_User $user, array $consumed_record ): void {
@@ -1030,10 +1030,10 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	/**
 	 * Render the full HTML email document for the sign-in notification.
 	 *
-	 * @param \WP_User                                                                                                  $user            Recipient.
-	 * @param array{consumed_at: int, user_id: int, ap_uuid: string, ap_name: string, device: array<string, string>} $consumed_record The consumed record.
-	 * @param string                                                                                                    $site_name       Decoded site name (passed in to avoid double-decoding).
-	 * @param string                                                                                                    $subject         Email subject; rendered as the in-body heading.
+	 * @param \WP_User             $user            Recipient.
+	 * @param array<string, mixed> $consumed_record The consumed record (same shape as `maybe_send_sign_in_notification_email`).
+	 * @param string               $site_name       Decoded site name (passed in to avoid double-decoding).
+	 * @param string               $subject         Email subject; rendered as the in-body heading.
 	 * @return string Rendered HTML document.
 	 */
 	private function render_sign_in_notification_email_body( \WP_User $user, array $consumed_record, string $site_name, string $subject ): string {

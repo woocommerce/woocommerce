@@ -17,6 +17,8 @@
  * @var string               $applications_url Admin URL to the user's Application Passwords list.
  */
 
+declare( strict_types=1 );
+
 defined( 'ABSPATH' ) || exit;
 
 $device_model      = isset( $device['model'] ) ? trim( (string) $device['model'] ) : '';

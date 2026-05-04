@@ -1370,8 +1370,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	private function capture_wp_mail(): array {
 		$captures = array();
 
-		$capture = static function ( $return, $atts ) use ( &$captures ) {
-			unset( $return );
+		$capture = static function ( $short_circuit, $atts ) use ( &$captures ) {
+			unset( $short_circuit );
 			$captures[] = is_array( $atts ) ? $atts : array();
 			return true;
 		};
@@ -1429,15 +1429,15 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			$this->assertStringContainsString( 'application-passwords', $body, 'Email body should link to the AP management screen.' );
 		} finally {
 			$capture['remove']();
-		}
+		}//end try
 	}
 
 	/**
 	 * @testdox The sign-in notification email can be suppressed via the woocommerce_qr_login_should_send_signin_email filter.
 	 */
 	public function test_sign_in_notification_email_can_be_suppressed_via_filter(): void {
-		$capture   = $this->capture_wp_mail();
-		$suppress  = static fn () => false;
+		$capture  = $this->capture_wp_mail();
+		$suppress = static fn () => false;
 		add_filter( 'woocommerce_qr_login_should_send_signin_email', $suppress );
 
 		try {
@@ -1447,7 +1447,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 			$response = $this->dispatch_exchange(
 				$plaintext,
-				array( 'os' => 'iOS', 'model' => 'iPhone 15' )
+				array(
+					'os'    => 'iOS',
+					'model' => 'iPhone 15',
+				)
 			);
 			$this->assertSame( 200, $response->get_status() );
 
@@ -1485,6 +1488,6 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			$this->assertStringNotContainsString( '· ·', $body, 'No empty separators when device fields are missing.' );
 		} finally {
 			$capture['remove']();
-		}
+		}//end try
 	}
 }
