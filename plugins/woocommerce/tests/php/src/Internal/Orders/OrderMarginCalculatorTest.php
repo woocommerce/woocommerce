@@ -72,4 +72,21 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 		$item->method( 'get_cogs_value' )->willReturn( $cogs_value );
 		return $item;
 	}
+
+	/**
+	 * Test that margin data keys are always present.
+	 */
+	public function test_get_margin_for_order_returns_expected_keys(): void {
+		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
+		$order = $this->make_order( 100.0, 0.0, 60.0 );
+
+		$result = $this->sut->get_margin_for_order( $order );
+
+		$this->assertArrayHasKey( 'net_revenue', $result );
+		$this->assertArrayHasKey( 'cogs', $result );
+		$this->assertArrayHasKey( 'gross_profit', $result );
+		$this->assertArrayHasKey( 'margin', $result );
+		$this->assertArrayHasKey( 'cogs_enabled', $result );
+		$this->assertArrayHasKey( 'items', $result );
+	}
 }
