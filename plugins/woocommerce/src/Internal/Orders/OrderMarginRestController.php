@@ -88,4 +88,100 @@ class OrderMarginRestController extends RestApiControllerBase {
 
 		return $this->margin_calculator->get_margin_for_order( $order );
 	}
+
+	/**
+	 * Get the schema for the order margin response.
+	 *
+	 * @return array
+	 */
+	public function get_public_item_schema(): array {
+		return array(
+			'$schema'    => 'http://json-schema.org/draft-04/schema#',
+			'title'      => 'order-margin',
+			'type'       => 'object',
+			'properties' => array(
+				'net_revenue'  => array(
+					'description' => __( 'Order subtotal minus discounts, excluding tax and shipping.', 'woocommerce' ),
+					'type'        => 'number',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'cogs'         => array(
+					'description' => __( 'Total cost of goods sold for the order.', 'woocommerce' ),
+					'type'        => 'number',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'gross_profit' => array(
+					'description' => __( 'Net revenue minus cost of goods sold.', 'woocommerce' ),
+					'type'        => 'number',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'margin'       => array(
+					'description' => __( 'Gross profit as a percentage of net revenue.', 'woocommerce' ),
+					'type'        => 'number',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'cogs_enabled' => array(
+					'description' => __( 'Whether the Cost of Goods Sold feature is currently enabled.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+				),
+				'items'        => array(
+					'description' => __( 'Per-line-item margin breakdown.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view' ),
+					'readonly'    => true,
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'item_id'      => array(
+								'description' => __( 'Order item ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'readonly'    => true,
+							),
+							'product_id'   => array(
+								'description' => __( 'Product ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'readonly'    => true,
+							),
+							'name'         => array(
+								'description' => __( 'Line item name.', 'woocommerce' ),
+								'type'        => 'string',
+								'readonly'    => true,
+							),
+							'quantity'     => array(
+								'description' => __( 'Quantity ordered.', 'woocommerce' ),
+								'type'        => 'number',
+								'readonly'    => true,
+							),
+							'revenue'      => array(
+								'description' => __( 'Line total after discounts, before tax.', 'woocommerce' ),
+								'type'        => 'number',
+								'readonly'    => true,
+							),
+							'cogs'         => array(
+								'description' => __( 'Cost of goods sold for this line item.', 'woocommerce' ),
+								'type'        => 'number',
+								'readonly'    => true,
+							),
+							'gross_profit' => array(
+								'description' => __( 'Revenue minus cost of goods sold.', 'woocommerce' ),
+								'type'        => 'number',
+								'readonly'    => true,
+							),
+							'margin'       => array(
+								'description' => __( 'Gross profit as a percentage of revenue.', 'woocommerce' ),
+								'type'        => 'number',
+								'readonly'    => true,
+							),
+						),
+					),
+				),
+			),
+		);
+	}
 }
