@@ -1188,7 +1188,7 @@ final class WooCommerce {
 	public function robots_txt( $output ) {
 		$upload_dir   = wp_get_upload_dir();
 		$upload_url   = wp_parse_url( $upload_dir['baseurl'] );
-		$uploads_path = ! empty( $upload_url['path'] ) ? rtrim( $upload_url['path'], '/' ) : '/wp-content/uploads';
+		$uploads_path = ( is_array( $upload_url ) && ! empty( $upload_url['path'] ) ) ? rtrim( $upload_url['path'], '/' ) : '/wp-content/uploads';
 
 		$lines       = preg_split( '/\r\n|\r|\n/', $output );
 		$agent_index = array_search( 'User-agent: *', $lines, true );
