@@ -54,6 +54,48 @@ class OrderMarginCalculator {
 	 * @param bool                  $cogs_enabled Whether the COGS feature is active.
 	 * @return array{item_id: int, product_id: int, name: string, quantity: float, revenue: float, cogs: float, gross_profit: float, margin: float}
 	 */
+	/**
+	 * Get margin data for an entire order.
+	 *
+	 * Returns an associative array with:
+	 * - `net_revenue`   (float) Subtotal minus discounts, excluding tax and shipping.
+	 * - `cogs`          (float) Total cost of goods sold for the order.
+	 * - `gross_profit`  (float) net_revenue minus cogs.
+	 * - `margin`        (float) gross_profit / net_revenue * 100, or 0 when net_revenue is zero.
+	 * - `cogs_enabled`  (bool)  Whether the COGS feature is currently active.
+	 * - `items`         (array) Per-line-item margin data (see get_margin_for_order_item()).
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param WC_Abstract_Order $order The order to calculate margin for.
+	 * @return array{net_revenue: float, cogs: float, gross_profit: float, margin: float, cogs_enabled: bool, items: array}
+	 */
+	public function get_margin_for_order( WC_Abstract_Order $order ): array {
+		$cogs_enabled   = $this->cogs_controller->feature_is_enabled();
+		$subtotal       = (float) $order->get_subtotal();
+		$discount_total = (float) $order->get_discount_total();
+		$net_revenue    = $subtotal - $discount_total;
+		$cogs           = $cogs_enabled ? (float) $order->get_cogs_total_value() : 0.0;
+		$gross_profit   = $net_revenue - $cogs;
+		$margin         = $net_revenue > 0.0 ? ( $gross_profit / $net_revenue ) * 100.0 : 0.0;
+
+		$items = array();
+		foreach ( $order->get_items() as $item ) {
+			if ( $item instanceof WC_Order_Item_Product ) {
+				$items[] = $this->get_margin_for_order_item( $item, $cogs_enabled );
+			}
+		}
+
+		return array(
+			'net_revenue'  => round( $net_revenue, 4 ),
+			'cogs'         => round( $cogs, 4 ),
+			'gross_profit' => round( $gross_profit, 4 ),
+			'margin'       => round( $margin, 2 ),
+			'cogs_enabled' => $cogs_enabled,
+			'items'        => $items,
+		);
+	}
+
 	public function get_margin_for_order_item( WC_Order_Item_Product $item, bool $cogs_enabled = true ): array {
 		$revenue      = (float) $item->get_total();
 		$cogs         = $cogs_enabled ? (float) $item->get_cogs_value() : 0.0;
