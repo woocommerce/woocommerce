@@ -594,13 +594,6 @@ class DefaultFreeExtensions {
 				'learn_more_link'  => 'https://woocommerce.com/products/snapchat/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
 				'install_priority' => 1,
 			),
-			'facebook-for-woocommerce'            => array(
-				'label'            => __( 'Grow your business with Facebook and Instagram', 'woocommerce' ),
-				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-facebook.svg', WC_PLUGIN_FILE ),
-				'description'      => __( 'List products and create ads on Facebook and Instagram.', 'woocommerce' ),
-				'learn_more_link'  => 'https://woocommerce.com/products/facebook/?utm_source=storeprofiler&utm_medium=product&utm_campaign=freefeatures',
-				'install_priority' => 2,
-			),
 			'reddit-for-woocommerce'              => array(
 				'label'            => __( 'Find New Customers with Reddit Ads', 'woocommerce' ),
 				'image_url'        => plugins_url( '/assets/images/core-profiler/logo-reddit.svg', WC_PLUGIN_FILE ),
