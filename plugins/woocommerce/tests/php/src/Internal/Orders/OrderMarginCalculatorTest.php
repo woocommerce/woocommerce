@@ -14,11 +14,11 @@ use WC_Order_Item_Product;
 class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 
 	/**
-	 * The system under test.
+	 * The System Under Test.
 	 *
 	 * @var OrderMarginCalculator
 	 */
-	private OrderMarginCalculator $sut;
+	private $sut;
 
 	/**
 	 * Mock CostOfGoodsSoldController.
@@ -74,7 +74,7 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that margin data keys are always present.
+	 * @testdox Should return all expected margin data keys.
 	 */
 	public function test_get_margin_for_order_returns_expected_keys(): void {
 		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
@@ -91,7 +91,7 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test correct margin calculation when COGS is enabled.
+	 * @testdox Should calculate net revenue, COGS, gross profit, and margin correctly when COGS is enabled.
 	 */
 	public function test_get_margin_for_order_calculates_correctly_when_cogs_enabled(): void {
 		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
@@ -108,7 +108,7 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that COGS is zeroed out when the feature is disabled.
+	 * @testdox Should return zero COGS and full revenue as gross profit when the COGS feature is disabled.
 	 */
 	public function test_get_margin_for_order_zeros_cogs_when_feature_disabled(): void {
 		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( false );
@@ -123,7 +123,7 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that margin is 0 when net revenue is zero (no division by zero).
+	 * @testdox Should return zero margin when net revenue is zero to avoid division by zero.
 	 */
 	public function test_get_margin_for_order_returns_zero_margin_when_net_revenue_is_zero(): void {
 		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
@@ -135,7 +135,7 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that item-level margin is included in the order result.
+	 * @testdox Should include a per-line-item margin breakdown in the order result.
 	 */
 	public function test_get_margin_for_order_includes_item_breakdown(): void {
 		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
@@ -156,12 +156,12 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test per-item margin calculation.
+	 * @testdox Should calculate revenue, COGS, gross profit, and margin correctly for a line item.
 	 */
 	public function test_get_margin_for_order_item_calculates_correctly(): void {
 		// revenue=80, cogs=20 → gross_profit=60 → margin=75%.
 		$item   = $this->make_item( 80.0, 20.0 );
-		$result = $this->sut->get_margin_for_order_item( $item, true );
+		$result = OrderMarginCalculator::get_margin_for_order_item( $item, true );
 
 		$this->assertSame( 80.0, $result['revenue'] );
 		$this->assertSame( 20.0, $result['cogs'] );
@@ -170,11 +170,11 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that item COGS is zeroed when feature is disabled.
+	 * @testdox Should zero item COGS and return full revenue as gross profit when COGS feature is disabled.
 	 */
 	public function test_get_margin_for_order_item_zeros_cogs_when_feature_disabled(): void {
 		$item   = $this->make_item( 80.0, 20.0 );
-		$result = $this->sut->get_margin_for_order_item( $item, false );
+		$result = OrderMarginCalculator::get_margin_for_order_item( $item, false );
 
 		$this->assertSame( 0.0, $result['cogs'] );
 		$this->assertSame( 80.0, $result['gross_profit'] );
@@ -182,7 +182,7 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that the woocommerce_order_margin_data filter is applied.
+	 * @testdox Should apply the woocommerce_order_margin_data filter to the returned data.
 	 */
 	public function test_get_margin_for_order_applies_filter(): void {
 		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
@@ -205,7 +205,7 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that margin rounds correctly to 2 decimal places.
+	 * @testdox Should round margin to two decimal places.
 	 */
 	public function test_get_margin_for_order_rounds_margin_to_two_decimal_places(): void {
 		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
