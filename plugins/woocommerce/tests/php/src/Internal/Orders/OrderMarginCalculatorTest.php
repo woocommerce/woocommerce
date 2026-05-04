@@ -89,4 +89,21 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'cogs_enabled', $result );
 		$this->assertArrayHasKey( 'items', $result );
 	}
+
+	/**
+	 * Test correct margin calculation when COGS is enabled.
+	 */
+	public function test_get_margin_for_order_calculates_correctly_when_cogs_enabled(): void {
+		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
+		// subtotal=100, discount=10 → net_revenue=90; cogs=45 → gross_profit=45; margin=50%.
+		$order = $this->make_order( 100.0, 10.0, 45.0 );
+
+		$result = $this->sut->get_margin_for_order( $order );
+
+		$this->assertSame( 90.0, $result['net_revenue'] );
+		$this->assertSame( 45.0, $result['cogs'] );
+		$this->assertSame( 45.0, $result['gross_profit'] );
+		$this->assertSame( 50.0, $result['margin'] );
+		$this->assertTrue( $result['cogs_enabled'] );
+	}
 }
