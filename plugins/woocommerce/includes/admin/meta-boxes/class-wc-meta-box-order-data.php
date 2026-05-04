@@ -221,7 +221,7 @@ class WC_Meta_Box_Order_Data {
 
 							printf(
 								/* translators: 1: order type 2: order number */
-								esc_html__( '%1$s #%2$s details', 'woocommerce' ),
+								esc_html__( '%1$s #%2$s', 'woocommerce' ),
 								esc_html( $order_type_object->labels->singular_name ),
 								esc_html( $order->get_order_number() )
 							);
@@ -261,7 +261,7 @@ class WC_Meta_Box_Order_Data {
 							if ( $order->get_date_paid() ) {
 								$meta_list[] = sprintf(
 									/* translators: 1: date 2: time */
-									__( 'Paid on %1$s @ %2$s', 'woocommerce' ),
+									__( 'Paid on %1$s at %2$s', 'woocommerce' ),
 									wc_format_datetime( $order->get_date_paid() ),
 									wc_format_datetime( $order->get_date_paid(), get_option( 'time_format' ) )
 								);
@@ -318,7 +318,7 @@ class WC_Meta_Box_Order_Data {
 							$order_date_created_localised = ! is_null( $order->get_date_created() ) ? $order->get_date_created()->getOffsetTimestamp() : '';
 							?>
 							<label for="order_date"><?php esc_html_e( 'Date created:', 'woocommerce' ); ?></label>
-							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
+							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />
 							&lrm;
 							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', $order_date_created_localised ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
 							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', $order_date_created_localised ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />

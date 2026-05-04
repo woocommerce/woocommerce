@@ -1860,12 +1860,9 @@ ul.wc_coupon_list_block {
 
 	h2 {
 		margin: 0;
-		font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
-			"Helvetica Neue", sans-serif;
-		font-size: 21px;
-		font-weight: normal;
-		line-height: 1.2;
-		text-shadow: 1px 1px 1px white;
+		font-size: 20px;
+		font-weight: 600;
+		line-height: 1.3;
 		padding: 0;
 	}
 
@@ -1875,21 +1872,19 @@ ul.wc_coupon_list_block {
 
 	h3,
 	h4 {
-		color: #333;
-		margin: 1.33em 0 0;
+		color: #1e1e1e;
+		margin: 12px 0 0;
 	}
 
 	p {
-		color: #777;
+		color: $subtext;
 	}
 
 	p.order_number {
 		margin: 0;
-		font-family: "HelveticaNeue-Light", "Helvetica Neue Light",
-			"Helvetica Neue", sans-serif;
 		font-weight: normal;
-		line-height: 1.6em;
-		font-size: 16px;
+		line-height: 1.5;
+		font-size: 13px;
 	}
 
 	.order_data_header {
@@ -1925,6 +1920,12 @@ ul.wc_coupon_list_block {
 
 		&:last-child {
 			padding-right: 0;
+		}
+
+		// Breathing room when columns stack at narrow widths.
+		// (No-op on float layouts that fit side-by-side.)
+		&:not(:last-child) {
+			margin-bottom: 24px;
 		}
 
 		p {
@@ -1999,6 +2000,7 @@ ul.wc_coupon_list_block {
 			}
 			input.date-picker {
 				width: 40%;
+				margin-right: 8px;
 			}
 			input.hour,
 			input.minute {
