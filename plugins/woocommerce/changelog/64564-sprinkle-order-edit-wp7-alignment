@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Align the Order Edit meta boxes (order data, addresses, sidebar actions) with WordPress 7.0 admin design conventions.
