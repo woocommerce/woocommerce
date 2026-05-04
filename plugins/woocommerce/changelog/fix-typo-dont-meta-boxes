@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix typo: misplaced apostrophe 'Dont'' → 'Don't' in WC_Admin_Meta_Boxes comment.
