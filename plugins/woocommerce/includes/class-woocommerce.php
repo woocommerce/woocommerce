@@ -405,6 +405,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\ReceiptRendering\ReceiptRenderingRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderActionsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Orders\OrderStatusRestController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\Orders\OrderMarginRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsRestController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\EmailPreview\EmailPreviewRestController::class )->register();
