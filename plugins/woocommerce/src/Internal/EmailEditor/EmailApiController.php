@@ -616,7 +616,7 @@ class EmailApiController {
 	 * @phpstan-param WP_REST_Request<array<string, mixed>> $request
 	 * @return WP_REST_Response|WP_Error
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	public function get_change_summary_response( WP_REST_Request $request ) {
 		if ( ! ( $this->post_manager && $this->posts_generator ) ) {

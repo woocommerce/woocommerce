@@ -23,7 +23,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  * render, identical to the divergence detector.
  *
  * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
- * @since 10.8.0
+ * @since 10.9.0
  */
 class WCEmailTemplateChangeSummary {
 	/**
@@ -112,7 +112,7 @@ class WCEmailTemplateChangeSummary {
 	 *
 	 * @return array<string, mixed>
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	public static function summarize( int $post_id ): array {
 		$post = get_post( $post_id );
@@ -240,7 +240,7 @@ class WCEmailTemplateChangeSummary {
 	 *
 	 * @internal
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	public static function reset_cache(): void {
 		global $wpdb;

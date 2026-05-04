@@ -691,6 +691,32 @@ class EmailApiControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should register a GET /change-summary route alongside the existing default-content route.
+	 */
+	public function test_register_routes_registers_change_summary_endpoint(): void {
+		// `register_rest_route()` warns when called outside `rest_api_init`. The
+		// reset sibling test only avoids the warning because it's the first
+		// caller of `rest_get_server()` in the suite, which lazily fires the
+		// action; this test runs after that, so we opt into the warning.
+		$this->setExpectedIncorrectUsage( 'register_rest_route' );
+
+		$rest_server = rest_get_server();
+		$this->email_api_controller->register_routes();
+
+		$routes = $rest_server->get_routes();
+		$this->assertArrayHasKey( '/woocommerce-email-editor/v1/emails/(?P<id>\d+)/change-summary', $routes );
+
+		$change_summary_route_handlers = $routes['/woocommerce-email-editor/v1/emails/(?P<id>\d+)/change-summary'];
+		$methods                       = array();
+		foreach ( $change_summary_route_handlers as $handler ) {
+			foreach ( array_keys( $handler['methods'] ) as $method ) {
+				$methods[ $method ] = true;
+			}
+		}
+		$this->assertArrayHasKey( 'GET', $methods, 'Change-summary endpoint must accept GET.' );
+	}
+
+	/**
 	 * Helper: resolve a WC_Email instance by email type ID.
 	 *
 	 * @param string $email_type Email type ID.

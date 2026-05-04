@@ -73,6 +73,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	/**
 	 * Mixed-changes happy path: covers added blocks, removed blocks, and copy
 	 * changes against a single fixture in one assertion pass.
+	 *
+	 * @testdox Should return a structured summary covering added, removed, and copy-changed blocks in a single pass.
 	 */
 	public function test_summarize_returns_structured_payload_for_mixed_changes(): void {
 		$email_id = 'change_summary_mixed';
@@ -134,6 +136,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	 * Namespace-alias normalization: post uses `woo/email-content` while core
 	 * uses `woocommerce/email-content`. Should match as the same block, not
 	 * surface as add+remove.
+	 *
+	 * @testdox Should match `woo/email-content` and `woocommerce/email-content` as the same block via namespace-alias normalization.
 	 */
 	public function test_summarize_normalizes_namespace_aliased_blocks(): void {
 		$email_id = 'change_summary_alias';
@@ -159,6 +163,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	 * Depth-asymmetric input: merchant wraps two paragraphs in a Group while
 	 * core stays flat. The flatten-then-LCS pipeline must surface this as a
 	 * structural `nest` change, not as a paragraph add/remove cascade.
+	 *
+	 * @testdox Should surface depth asymmetry as a structural `nest` change rather than a paragraph add/remove cascade.
 	 */
 	public function test_summarize_handles_depth_asymmetry_via_dfs_flatten(): void {
 		$email_id = 'change_summary_nest';
@@ -205,6 +211,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	 * Fixture: core has a single `vendor-a/header`. Post has a single
 	 * `vendor-b/header`. Different blocks under the same humanized label.
 	 * Expected: one add + one remove, no reorder entry.
+	 *
+	 * @testdox Should pair reorder candidates by normalized block name, not by humanized label.
 	 */
 	public function test_summarize_reorder_pairs_by_normalized_name_not_humanized_label(): void {
 		$email_id = 'change_summary_namespace_collision';
@@ -242,6 +250,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	 * Fixture: post wraps a Heading (different name from core's Paragraph) in
 	 * a Group. LCS finds no matches. Group has no matched-pair child with
 	 * parent=Group, so its "Removed Group wrapper" entry must remain.
+	 *
+	 * @testdox Should keep the wrapper structural entry when no matched pair points at it as a parent.
 	 */
 	public function test_summarize_keeps_wrapper_entry_when_no_matched_pair_covers_it(): void {
 		$email_id = 'change_summary_wrapper_keep';
@@ -270,6 +280,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	 * LCS resists the cascade noise that a positional walk would produce on
 	 * uniform paragraph runs: insert a single paragraph at index 1 in a long
 	 * run; only one block should be reported, not the whole tail.
+	 *
+	 * @testdox Should align via LCS so a single inserted block in a uniform run does not cascade into the entire tail.
 	 */
 	public function test_summarize_lcs_alignment_resists_paragraph_run_cascade(): void {
 		$email_id = 'change_summary_cascade';
@@ -314,6 +326,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	 * post, attributing the wrong "before" / "after" to the copy_change. With
 	 * the bonus, the LCS prefers the pairing where matched pairs share the
 	 * most words.
+	 *
+	 * @testdox Should prefer the text-similar pairing in uniform block runs so copy_changes carry the right before/after.
 	 */
 	public function test_summarize_prefers_text_similar_pairing_in_uniform_block_runs(): void {
 		$email_id = 'change_summary_similarity';
@@ -352,6 +366,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	/**
 	 * Summary-inversion guard: a heavily one-sided expansion (5+ added, 0
 	 * removed, 0 copy, ≥1.5x core size) trips the guard and falls back.
+	 *
+	 * @testdox Should fall back to the release-notes summary when the inversion guard trips on a heavily one-sided expansion.
 	 */
 	public function test_summarize_falls_back_on_summary_inversion(): void {
 		$email_id = 'change_summary_inversion';
@@ -387,6 +403,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	/**
 	 * Generic fallback: post outside the registry returns the release-notes
 	 * line and empty structured arrays.
+	 *
+	 * @testdox Should fall back to the release-notes summary for posts outside the sync registry.
 	 */
 	public function test_summarize_falls_back_when_post_is_not_in_registry(): void {
 		// No fixture email registered for this email_id, so the registry gate fails.
@@ -415,6 +433,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	 * `is_fallback` is reserved for "diff could not be produced." A no-op is a
 	 * successful result — consumers detect it by the absence of deltas and
 	 * render any "you're up to date" copy themselves.
+	 *
+	 * @testdox Should return an empty, non-fallback payload when post content equals the canonical core render.
 	 */
 	public function test_summarize_returns_empty_payload_when_post_equals_core(): void {
 		$email_id = 'change_summary_identical';
@@ -438,6 +458,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	/**
 	 * The in-sync zero-result is cached like every other path. Second call for
 	 * the same content reports cache_hit: true.
+	 *
+	 * @testdox Should cache the in-sync zero-result and report cache_hit on the second call.
 	 */
 	public function test_summarize_caches_in_sync_zero_result(): void {
 		$email_id = 'change_summary_in_sync_cache';
@@ -461,6 +483,8 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	/**
 	 * Cache: first call computes and stores; second call with same inputs hits
 	 * the cache; mutating the post invalidates by content hash.
+	 *
+	 * @testdox Should cache by content hash and invalidate when the post content changes.
 	 */
 	public function test_summarize_caches_and_invalidates_on_content_change(): void {
 		$email_id = 'change_summary_cache';
