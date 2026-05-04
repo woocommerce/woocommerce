@@ -29,6 +29,7 @@ class OrderMarginCalculator {
 	 * Initialize the instance.
 	 *
 	 * @internal
+	 *
 	 * @param CostOfGoodsSoldController $cogs_controller The instance of CostOfGoodsSoldController to use.
 	 */
 	final public function init( CostOfGoodsSoldController $cogs_controller ): void {
@@ -36,34 +37,7 @@ class OrderMarginCalculator {
 	}
 
 	/**
-	 * Get margin data for a single product line item.
-	 *
-	 * Returns an associative array with:
-	 * - `item_id`      (int)    The order item ID.
-	 * - `product_id`   (int)    The product ID.
-	 * - `name`         (string) The line item name.
-	 * - `quantity`     (float)  The quantity ordered.
-	 * - `revenue`      (float)  Line total (post-discount, pre-tax).
-	 * - `cogs`         (float)  COGS value for this line item.
-	 * - `gross_profit` (float)  revenue minus cogs.
-	 * - `margin`       (float)  gross_profit / revenue * 100, or 0 when revenue is zero.
-	 *
-	 * @since 10.8.0
-	 *
-	 * @param WC_Order_Item_Product $item         The line item to calculate margin for.
-	 * @param bool                  $cogs_enabled Whether the COGS feature is active.
-	 * @return array{item_id: int, product_id: int, name: string, quantity: float, revenue: float, cogs: float, gross_profit: float, margin: float}
-	 */
-	/**
-	 * Get margin data for an entire order.
-	 *
-	 * Returns an associative array with:
-	 * - `net_revenue`   (float) Subtotal minus discounts, excluding tax and shipping.
-	 * - `cogs`          (float) Total cost of goods sold for the order.
-	 * - `gross_profit`  (float) net_revenue minus cogs.
-	 * - `margin`        (float) gross_profit / net_revenue * 100, or 0 when net_revenue is zero.
-	 * - `cogs_enabled`  (bool)  Whether the COGS feature is currently active.
-	 * - `items`         (array) Per-line-item margin data (see get_margin_for_order_item()).
+	 * Get margin data for an entire order, including a per-line-item breakdown.
 	 *
 	 * @since 10.8.0
 	 *
@@ -82,7 +56,7 @@ class OrderMarginCalculator {
 		$items = array();
 		foreach ( $order->get_items() as $item ) {
 			if ( $item instanceof WC_Order_Item_Product ) {
-				$items[] = $this->get_margin_for_order_item( $item, $cogs_enabled );
+				$items[] = self::get_margin_for_order_item( $item, $cogs_enabled );
 			}
 		}
 
@@ -106,7 +80,16 @@ class OrderMarginCalculator {
 		return (array) apply_filters( 'woocommerce_order_margin_data', $data, $order );
 	}
 
-	public function get_margin_for_order_item( WC_Order_Item_Product $item, bool $cogs_enabled = true ): array {
+	/**
+	 * Get margin data for a single product line item.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param WC_Order_Item_Product $item         The line item to calculate margin for.
+	 * @param bool                  $cogs_enabled Whether the COGS feature is active.
+	 * @return array{item_id: int, product_id: int, name: string, quantity: float, revenue: float, cogs: float, gross_profit: float, margin: float}
+	 */
+	public static function get_margin_for_order_item( WC_Order_Item_Product $item, bool $cogs_enabled = true ): array {
 		$revenue      = (float) $item->get_total();
 		$cogs         = $cogs_enabled ? (float) $item->get_cogs_value() : 0.0;
 		$gross_profit = $revenue - $cogs;
