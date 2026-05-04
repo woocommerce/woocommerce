@@ -125,7 +125,7 @@ class ClassicVariationGalleryAdminTest extends \WC_Unit_Test_Case {
 	 * @testdox Saving an empty variation gallery clears featured + gallery and disables the legacy fallback.
 	 */
 	public function test_saving_empty_variation_gallery_disables_legacy_fallback() {
-		$variation = $this->create_variation();
+		$variation             = $this->create_variation();
 		$pre_existing_featured = $this->create_attachment( 'Pre-existing featured image' );
 		$image_ids             = array(
 			$this->create_attachment( 'Legacy gallery image 1' ),

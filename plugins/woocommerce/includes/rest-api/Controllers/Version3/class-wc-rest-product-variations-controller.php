@@ -195,6 +195,7 @@ class WC_REST_Product_Variations_Controller extends WC_REST_Product_Variations_V
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
 	 * @return WP_Error|WC_Data
+	 * @throws \Throwable When setting gallery_image_ids fails.
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
 		if ( isset( $request['id'] ) ) {

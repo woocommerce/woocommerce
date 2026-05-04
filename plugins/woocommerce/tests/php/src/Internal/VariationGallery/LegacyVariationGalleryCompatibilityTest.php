@@ -43,8 +43,8 @@ class LegacyVariationGalleryCompatibilityTest extends \WC_Unit_Test_Case {
 	 * @testdox Legacy variation gallery meta is ignored when the core gallery already has values.
 	 */
 	public function test_legacy_gallery_meta_is_ignored_when_core_gallery_is_present() {
-		$variation        = $this->create_variation();
-		$core_gallery_ids = array(
+		$variation          = $this->create_variation();
+		$core_gallery_ids   = array(
 			$this->create_attachment( 'Core variation gallery 1' ),
 			$this->create_attachment( 'Core variation gallery 2' ),
 		);

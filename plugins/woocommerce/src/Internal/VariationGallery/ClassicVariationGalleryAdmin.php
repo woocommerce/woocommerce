@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
  * The editor unifies the variation's featured image and gallery into a single
  * ordered list. The legacy single-image slot is hidden visually, and kept
  * in sync with the first gallery image via JS.
- * 
+ *
  * This preserves the existing variation save path while giving merchants
  * one control to manage.
  */
@@ -26,6 +26,11 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 
 	private const STYLE_HANDLE = 'wc-admin-variation-gallery-styles';
 
+	/**
+	 * Register hooks.
+	 *
+	 * @return void
+	 */
 	public function register() {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ), 20 );
 		add_action( 'woocommerce_variation_after_upload_image', array( $this, 'render_variation_gallery_field' ), 10, 3 );
@@ -69,9 +74,12 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 				'announceReorder'  => __( 'Variation gallery order updated.', 'woocommerce' ),
 				'announcePrimary'  => __( 'New primary image set.', 'woocommerce' ),
 				'countZero'        => __( 'No images yet', 'woocommerce' ),
+				/* translators: %d: number of variation gallery images */
 				'countSingular'    => __( '%d image', 'woocommerce' ),
+				/* translators: %d: number of variation gallery images */
 				'countPlural'      => __( '%d images', 'woocommerce' ),
 				'primaryLabel'     => __( 'Primary', 'woocommerce' ),
+				/* translators: %d: gallery image position */
 				'thumbLabel'       => __( 'Show gallery image %d', 'woocommerce' ),
 				'missingFileLabel' => __( 'Attachment file missing', 'woocommerce' ),
 			)
@@ -175,6 +183,7 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 	 * @param WC_Product_Variation $variation Variation being saved.
 	 * @param int                  $index     Variation row index.
 	 * @return void
+	 * @throws \Throwable When setting the variation image or gallery fails.
 	 */
 	public function persist_variation_gallery_field( WC_Product_Variation $variation, int $index ): void {
 		// We verify the variation save nonce before firing `woocommerce_admin_process_variation_object`.
@@ -291,6 +300,9 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 		if ( $is_broken ) {
 			$classes[] = 'is-broken';
 		}
+
+		/* translators: %d attachment ID */
+		$thumb_label = sprintf( __( 'Show gallery image %d', 'woocommerce' ), $image_id );
 		?>
 		<li
 			class="<?php echo esc_attr( implode( ' ', $classes ) ); ?>"
@@ -299,10 +311,7 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 			<button
 				type="button"
 				class="wc-variation-gallery-thumb__button"
-				aria-label="<?php
-					/* translators: %d attachment ID */
-					echo esc_attr( sprintf( __( 'Show gallery image %d', 'woocommerce' ), $image_id ) );
-				?>"
+				aria-label="<?php echo esc_attr( $thumb_label ); ?>"
 			>
 				<?php if ( $is_broken ) : ?>
 					<span class="wc-variation-gallery-thumb__broken" aria-hidden="true">

@@ -161,8 +161,8 @@ class LegacyVariationGalleryCompatibility implements RegisterHooksInterface {
 	 * Use legacy variation gallery meta when the core gallery is empty and the
 	 * variation has not been marked as core-managed.
 	 *
-	 * @param array<mixed>            $gallery_image_ids Gallery image IDs already resolved by core.
-	 * @param WC_Product_Variation    $variation Variation instance.
+	 * @param array<mixed>         $gallery_image_ids Gallery image IDs already resolved by core.
+	 * @param WC_Product_Variation $variation Variation instance.
 	 * @return array<int>
 	 */
 	public function maybe_read_legacy_gallery_image_ids( $gallery_image_ids, WC_Product_Variation $variation ): array {

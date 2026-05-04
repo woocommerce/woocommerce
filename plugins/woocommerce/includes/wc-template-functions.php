@@ -1897,7 +1897,7 @@ function wc_get_product_gallery_html( $product, $image_ids = null ) {
  * global before returning.
  *
  * @since 10.8.0
- * @access private
+ * @internal
  *
  * @param WC_Product $product Product to render.
  * @return string
@@ -1930,16 +1930,16 @@ function wc_render_product_image_template_for( WC_Product $product ): string {
  * render; the template sees the substituted values and is none the wiser.
  *
  * @since 10.8.0
- * @access private
+ * @internal
  *
  * @param WC_Product $product   Product being rendered.
  * @param mixed      $image_ids Image IDs to substitute. Will be normalized.
  * @return string
  */
 function wc_render_product_image_template_for_image_ids( WC_Product $product, $image_ids ): string {
-	$normalized   = array_values( array_unique( array_map( 'intval', array_filter( (array) $image_ids ) ) ) );
-	$featured_id  = $normalized[0] ?? 0;
-	$gallery_ids  = array_slice( $normalized, 1 );
+	$normalized  = array_values( array_unique( array_map( 'intval', array_filter( (array) $image_ids ) ) ) );
+	$featured_id = $normalized[0] ?? 0;
+	$gallery_ids = array_slice( $normalized, 1 );
 
 	$remove_overrides = wc_apply_product_image_overrides( $product, $featured_id, $gallery_ids );
 
@@ -1957,7 +1957,7 @@ function wc_render_product_image_template_for_image_ids( WC_Product $product, $i
  * unaffected.
  *
  * @since 10.8.0
- * @access private
+ * @internal
  *
  * @param WC_Product $product     Product to scope the override to.
  * @param int        $featured_id Image ID to return from get_image_id.

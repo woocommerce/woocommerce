@@ -11,6 +11,9 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 
 defined( 'ABSPATH' ) || exit;
 
+/**
+ * Tracker snapshot + Tracks events for the merged variation gallery feature.
+ */
 class Telemetry implements RegisterHooksInterface {
 
 	public const EVENT_SAVE_SUCCEEDED      = 'variation_gallery_save_succeeded';
@@ -119,8 +122,8 @@ class Telemetry implements RegisterHooksInterface {
 	/**
 	 * Record a Tracks event.
 	 *
-	 * @param string                 $event_name One of the `EVENT_*` class constants.
-	 * @param array<string, mixed>   $properties Event properties to attach.
+	 * @param string               $event_name One of the `EVENT_*` class constants.
+	 * @param array<string, mixed> $properties Event properties to attach.
 	 * @return void
 	 */
 	public static function record_event( string $event_name, array $properties = array() ): void {

@@ -348,12 +348,12 @@ class WC_Update_Functions_Test extends \WC_Unit_Test_Case {
 	 * @testdox Migration preserves existing core variation gallery values while disabling fallback.
 	 */
 	public function test_migrate_legacy_variation_gallery_meta_preserves_existing_core_gallery(): void {
-		$variation_id        = $this->create_variation();
-		$core_gallery_ids    = array(
+		$variation_id       = $this->create_variation();
+		$core_gallery_ids   = array(
 			$this->create_attachment( 'Core gallery image 1' ),
 			$this->create_attachment( 'Core gallery image 2' ),
 		);
-		$legacy_gallery_ids  = array(
+		$legacy_gallery_ids = array(
 			$this->create_attachment( 'Legacy gallery image 1' ),
 			$this->create_attachment( 'Legacy gallery image 2' ),
 		);

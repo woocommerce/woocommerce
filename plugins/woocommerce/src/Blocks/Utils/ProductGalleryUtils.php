@@ -205,9 +205,9 @@ class ProductGalleryUtils {
 	 * @return array<int> Variation image IDs.
 	 */
 	public static function get_variation_gallery_image_ids( \WC_Product_Variation $variation ) {
-		$image_ids           = array();
-		$variation_image_id  = (int) $variation->get_image_id();
-		$gallery_image_ids   = array_map( 'intval', $variation->get_gallery_image_ids() );
+		$image_ids          = array();
+		$variation_image_id = (int) $variation->get_image_id();
+		$gallery_image_ids  = array_map( 'intval', $variation->get_gallery_image_ids() );
 
 		if ( $variation_image_id ) {
 			$image_ids[] = $variation_image_id;
