@@ -91,7 +91,6 @@ class DefaultFreeExtensions {
 						self::get_plugin( 'woocommerce-services:tax' ),
 						self::get_plugin( 'tiktok-for-business' ),
 						self::get_plugin( 'snapchat-for-woocommerce' ),
-						self::get_plugin( 'facebook-for-woocommerce' ),
 						self::get_plugin( 'reddit-for-woocommerce' ),
 					)
 				),
@@ -644,12 +643,12 @@ class DefaultFreeExtensions {
 			self::get_rules_for_wcservices_tax_countries(),
 		);
 
-		// TikTok, Pinterest, and Facebook share a single spot with 1/3 rotation each.
+		// TikTok and Pinterest share a single spot with 1/2 rotation each.
 		$_plugins['tiktok-for-business']['is_visible'] = array(
 			array(
 				'type'        => 'option',
 				'option_name' => 'woocommerce_remote_variant_assignment',
-				'value'       => array( 1, 40 ),
+				'value'       => array( 1, 60 ),
 				'default'     => false,
 				'operation'   => 'range',
 			),
@@ -659,17 +658,7 @@ class DefaultFreeExtensions {
 			array(
 				'type'        => 'option',
 				'option_name' => 'woocommerce_remote_variant_assignment',
-				'value'       => array( 41, 80 ),
-				'default'     => false,
-				'operation'   => 'range',
-			),
-		);
-
-		$_plugins['facebook-for-woocommerce']['is_visible'] = array(
-			array(
-				'type'        => 'option',
-				'option_name' => 'woocommerce_remote_variant_assignment',
-				'value'       => array( 81, 120 ),
+				'value'       => array( 61, 120 ),
 				'default'     => false,
 				'operation'   => 'range',
 			),
