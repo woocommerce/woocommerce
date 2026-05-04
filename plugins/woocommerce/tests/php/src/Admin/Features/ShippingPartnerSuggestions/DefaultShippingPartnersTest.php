@@ -115,4 +115,65 @@ class DefaultShippingPartnersTest extends WC_Unit_Test_Case {
 		self::rmdir( dirname( $shipping_plugin_file_path ) );
 		self::delete_folders( dirname( $shipping_plugin_file_path ) );
 	}
+
+	/**
+	 * Asserts the WooCommerce Shipping spec includes a layout_row block with required fields.
+	 *
+	 * @return void
+	 */
+	public function test_wcshipping_has_layout_row_with_required_fields() {
+		$specs = DefaultShippingPartners::get_all();
+
+		$wcs_spec = null;
+		foreach ( $specs as $spec ) {
+			if ( 'woocommerce-shipping' === $spec['id'] ) {
+				$wcs_spec = $spec;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $wcs_spec, 'WooCommerce Shipping spec not found.' );
+
+		$this->assertArrayHasKey( 'layout_row', $wcs_spec );
+		$row = $wcs_spec['layout_row'];
+
+		$this->assertArrayHasKey( 'image', $row );
+		$this->assertNotEmpty( $row['image'] );
+
+		$this->assertArrayHasKey( 'image_label', $row );
+		$this->assertNotEmpty( $row['image_label'] );
+
+		$this->assertArrayHasKey( 'description', $row );
+		$this->assertNotEmpty( $row['description'] );
+
+		$this->assertArrayHasKey( 'features', $row );
+		$this->assertNotEmpty( $row['features'] );
+
+		foreach ( $row['features'] as $feature ) {
+			$this->assertArrayHasKey( 'icon', $feature );
+			$this->assertArrayHasKey( 'description', $feature );
+		}
+	}
+
+	/**
+	 * Asserts the WooCommerce Shipping spec declares both row and column layouts as available.
+	 *
+	 * @return void
+	 */
+	public function test_wcshipping_available_layouts_includes_row_and_column() {
+		$specs = DefaultShippingPartners::get_all();
+
+		$wcs_spec = null;
+		foreach ( $specs as $spec ) {
+			if ( 'woocommerce-shipping' === $spec['id'] ) {
+				$wcs_spec = $spec;
+				break;
+			}
+		}
+
+		$this->assertNotNull( $wcs_spec, 'WooCommerce Shipping spec not found.' );
+		$this->assertArrayHasKey( 'available_layouts', $wcs_spec );
+		$this->assertContains( 'row', $wcs_spec['available_layouts'] );
+		$this->assertContains( 'column', $wcs_spec['available_layouts'] );
+	}
 }
