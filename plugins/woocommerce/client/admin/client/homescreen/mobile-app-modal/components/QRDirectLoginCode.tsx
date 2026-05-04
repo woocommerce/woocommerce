@@ -48,10 +48,7 @@ export const QRDirectLoginCode = () => {
 	// later failure is recorded again.
 	const errorTrackedRef = useRef( false );
 	useEffect( () => {
-		if (
-			state === QRLoginTokenStates.ERROR &&
-			! errorTrackedRef.current
-		) {
+		if ( state === QRLoginTokenStates.ERROR && ! errorTrackedRef.current ) {
 			errorTrackedRef.current = true;
 			recordEvent( 'mobile_app_qr_direct_login_failed', {
 				error_message: errorMessage ?? '',

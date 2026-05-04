@@ -109,10 +109,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		// Remember existing $_SERVER values so we can restore them in tearDown.
 		// phpcs:disable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Unit-test fixture: values are captured for restoration only, never used for processing.
-		$this->original_https                 = isset( $_SERVER['HTTPS'] ) ? (string) $_SERVER['HTTPS'] : null;
-		$this->original_server_port           = isset( $_SERVER['SERVER_PORT'] ) ? (string) $_SERVER['SERVER_PORT'] : null;
+		$this->original_https                  = isset( $_SERVER['HTTPS'] ) ? (string) $_SERVER['HTTPS'] : null;
+		$this->original_server_port            = isset( $_SERVER['SERVER_PORT'] ) ? (string) $_SERVER['SERVER_PORT'] : null;
 		$this->original_http_x_forwarded_proto = isset( $_SERVER['HTTP_X_FORWARDED_PROTO'] ) ? (string) $_SERVER['HTTP_X_FORWARDED_PROTO'] : null;
-		$this->original_remote_addr           = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : null;
+		$this->original_remote_addr            = isset( $_SERVER['REMOTE_ADDR'] ) ? (string) $_SERVER['REMOTE_ADDR'] : null;
 		// phpcs:enable WordPress.Security.ValidatedSanitizedInput.MissingUnslash, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
 		// Default to HTTPS on for most tests; disable explicitly where needed.
