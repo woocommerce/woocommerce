@@ -2,7 +2,7 @@
  * External dependencies
  */
 import React, { useEffect, useMemo, useState } from '@wordpress/element';
-import { Button } from '@wordpress/components';
+import { Button, Spinner } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
@@ -227,25 +227,33 @@ export const QRLoginNumberMatchStep = ( {
 					  ) }
 			</p>
 
-			<Button
-				variant="link"
-				className="woocommerce-qr-direct-login__match-cancel"
-				disabled={ inFlight }
-				isBusy={ inFlight && pendingChoice === '' }
-				onClick={ () => {
-					recordEvent( 'mobile_app_qr_login_number_match_cancelled' );
-					// Empty string is treated by the server as a non-matching
-					// pick — same one-strike rejection path as a wrong tap.
-					handleChoose( '' );
-				} }
-			>
-				{ inFlight && pendingChoice === ''
-					? __( 'Cancelling…', 'woocommerce' )
-					: __(
-							"I don't recognise this device — cancel",
-							'woocommerce'
-					  ) }
-			</Button>
+			<div className="woocommerce-qr-direct-login__match-cancel-row">
+				<p className="woocommerce-qr-direct-login__match-cancel-text">
+					{ __( "I don't recognise this device", 'woocommerce' ) }
+				</p>
+				<Button
+					variant="secondary"
+					className="woocommerce-qr-direct-login__match-cancel-button"
+					disabled={ inFlight }
+					onClick={ () => {
+						recordEvent(
+							'mobile_app_qr_login_number_match_cancelled'
+						);
+						// Empty string is treated by the server as a non-matching
+						// pick — same one-strike rejection path as a wrong tap.
+						handleChoose( '' );
+					} }
+				>
+					{ inFlight && pendingChoice === '' ? (
+						<>
+							<Spinner />
+							<span>{ __( 'Cancelling…', 'woocommerce' ) }</span>
+						</>
+					) : (
+						__( 'Cancel login', 'woocommerce' )
+					) }
+				</Button>
+			</div>
 		</div>
 	);
 };

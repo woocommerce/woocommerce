@@ -73,7 +73,10 @@
 		display: flex;
 		flex-direction: row;
 		gap: 12px;
-		justify-content: flex-start;
+		// Tiles row centers under the heading. Both surfaces (modal + standalone)
+		// otherwise center every other element in this column, so a left-anchored
+		// row reads as a layout bug.
+		justify-content: center;
 		flex-wrap: wrap;
 	}
 
@@ -115,18 +118,38 @@
 		margin: 0;
 	}
 
-	button.components-button.woocommerce-qr-direct-login__match-cancel {
-		align-self: flex-start;
-		padding: 0;
-		height: auto;
+	// "I don't recognise this device" + outlined "Cancel login" button row.
+	// We pair an explanatory line with a real button rather than rendering a
+	// red underlined link. A bare link doesn't read as the "wrong device,
+	// terminate session" affordance the merchant needs at this point in the
+	// flow, and visually it competes with the three number tiles above.
+	.woocommerce-qr-direct-login__match-cancel-row {
+		display: flex;
+		flex-direction: row;
+		align-items: center;
+		justify-content: center;
+		gap: 12px;
+		flex-wrap: wrap;
+	}
+
+	.woocommerce-qr-direct-login__match-cancel-text {
+		margin: 0;
 		font-size: 13px;
 		line-height: 1.5;
-		color: $alert-red;
-		text-decoration: underline;
+		color: $gray-700;
+	}
 
-		&:hover:not(:disabled),
-		&:focus:not(:disabled) {
-			color: $alert-red;
+	button.components-button.woocommerce-qr-direct-login__match-cancel-button {
+		// Inline spinner + label. The Spinner component renders a small
+		// circle; this gap prevents it from kissing the "Cancelling…" text.
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+
+		// WP's default Spinner has a margin tuned for standalone use. Zero it
+		// so the flex `gap` is the single source of spacing inside the button.
+		.components-spinner {
+			margin: 0;
 		}
 	}
 }
@@ -148,12 +171,14 @@
 	}
 }
 
-// REJECTED terminal state.
+// REJECTED terminal state. The "Sign-in denied" message and the Start over
+// button stack centered to match the rest of the column on both surfaces.
 .woocommerce-qr-direct-login.woocommerce-qr-direct-login--rejected {
 	display: flex;
 	flex-direction: column;
-	align-items: flex-start;
+	align-items: center;
 	gap: 12px;
+	text-align: center;
 
 	p {
 		margin: 0;
