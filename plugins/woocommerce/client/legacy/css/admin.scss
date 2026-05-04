@@ -1959,7 +1959,8 @@ ul.wc_coupon_list_block {
 
 			label {
 				display: block;
-				padding: 0 0 3px;
+				margin-bottom: 4px;
+				color: #1e1e1e;
 			}
 
 			input:not(.checkbox),
@@ -8308,6 +8309,24 @@ table.bar_chart {
 		.select2-selection__rendered {
 			line-height: 38px;
 			padding: 0 12px; // Match WP 7.0 native input padding.
+		}
+
+		.select2-selection__arrow {
+			height: 38px;
+		}
+	}
+
+	// General column Select2s (Status + Customer): same WP 7.0 alignment as
+	// above, but for the form-field-wide selects that live as direct children
+	// of the column (outside of the address edit form Ann's #64389 covered).
+	// `>` direct-child scopes us to General — Billing/Shipping address fields
+	// are nested inside .edit_address and matched by the rule above.
+	#order_data .order_data_column > .form-field-wide .select2-container .select2-selection--single {
+		height: 40px;
+
+		.select2-selection__rendered {
+			line-height: 38px;
+			padding: 0 12px;
 		}
 
 		.select2-selection__arrow {
