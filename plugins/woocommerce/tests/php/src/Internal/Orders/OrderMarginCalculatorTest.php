@@ -180,4 +180,40 @@ class OrderMarginCalculatorTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 80.0, $result['gross_profit'] );
 		$this->assertSame( 100.0, $result['margin'] );
 	}
+
+	/**
+	 * Test that the woocommerce_order_margin_data filter is applied.
+	 */
+	public function test_get_margin_for_order_applies_filter(): void {
+		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
+		$order = $this->make_order( 100.0, 0.0, 50.0 );
+
+		add_filter(
+			'woocommerce_order_margin_data',
+			function ( array $data ) {
+				$data['custom_field'] = 'injected';
+				return $data;
+			}
+		);
+
+		$result = $this->sut->get_margin_for_order( $order );
+
+		remove_all_filters( 'woocommerce_order_margin_data' );
+
+		$this->assertArrayHasKey( 'custom_field', $result );
+		$this->assertSame( 'injected', $result['custom_field'] );
+	}
+
+	/**
+	 * Test that margin rounds correctly to 2 decimal places.
+	 */
+	public function test_get_margin_for_order_rounds_margin_to_two_decimal_places(): void {
+		$this->cogs_controller->method( 'feature_is_enabled' )->willReturn( true );
+		// net_revenue=3, cogs=1 → margin = 66.666...% → rounds to 66.67.
+		$order = $this->make_order( 3.0, 0.0, 1.0 );
+
+		$result = $this->sut->get_margin_for_order( $order );
+
+		$this->assertSame( 66.67, $result['margin'] );
+	}
 }
