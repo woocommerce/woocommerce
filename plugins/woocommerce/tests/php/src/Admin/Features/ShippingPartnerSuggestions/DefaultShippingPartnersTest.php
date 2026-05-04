@@ -122,17 +122,7 @@ class DefaultShippingPartnersTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wcshipping_has_layout_row_with_required_fields() {
-		$specs = DefaultShippingPartners::get_all();
-
-		$wcs_spec = null;
-		foreach ( $specs as $spec ) {
-			if ( 'woocommerce-shipping' === $spec['id'] ) {
-				$wcs_spec = $spec;
-				break;
-			}
-		}
-
-		$this->assertNotNull( $wcs_spec, 'WooCommerce Shipping spec not found.' );
+		$wcs_spec = $this->get_wcshipping_spec();
 
 		$this->assertArrayHasKey( 'layout_row', $wcs_spec );
 		$row = $wcs_spec['layout_row'];
@@ -161,19 +151,27 @@ class DefaultShippingPartnersTest extends WC_Unit_Test_Case {
 	 * @return void
 	 */
 	public function test_wcshipping_available_layouts_includes_row_and_column() {
-		$specs = DefaultShippingPartners::get_all();
+		$wcs_spec = $this->get_wcshipping_spec();
 
-		$wcs_spec = null;
-		foreach ( $specs as $spec ) {
-			if ( 'woocommerce-shipping' === $spec['id'] ) {
-				$wcs_spec = $spec;
-				break;
-			}
-		}
-
-		$this->assertNotNull( $wcs_spec, 'WooCommerce Shipping spec not found.' );
 		$this->assertArrayHasKey( 'available_layouts', $wcs_spec );
 		$this->assertContains( 'row', $wcs_spec['available_layouts'] );
 		$this->assertContains( 'column', $wcs_spec['available_layouts'] );
+	}
+
+	/**
+	 * Returns the WooCommerce Shipping raw spec array, failing the test if not found.
+	 *
+	 * @return array
+	 */
+	private function get_wcshipping_spec(): array {
+		$specs = DefaultShippingPartners::get_all();
+
+		foreach ( $specs as $spec ) {
+			if ( 'woocommerce-shipping' === $spec['id'] ) {
+				return $spec;
+			}
+		}
+
+		$this->fail( 'WooCommerce Shipping spec not found.' );
 	}
 }
