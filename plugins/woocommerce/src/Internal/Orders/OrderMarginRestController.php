@@ -66,4 +66,26 @@ class OrderMarginRestController extends RestApiControllerBase {
 			)
 		);
 	}
+
+	/**
+	 * Handle GET wc/v3/orders/{id}/margin.
+	 *
+	 * @param WP_REST_Request $request The incoming request.
+	 * @return array|WP_Error The margin data or an error.
+	 */
+	protected function get_order_margin( WP_REST_Request $request ) {
+		$order_id = (int) $request->get_param( 'id' );
+		$order    = wc_get_order( $order_id );
+
+		if ( ! $order instanceof WC_Order ) {
+			return new WP_Error(
+				'woocommerce_rest_order_not_found',
+				/* translators: %d: order ID */
+				sprintf( __( 'Order #%d not found.', 'woocommerce' ), $order_id ),
+				array( 'status' => 404 )
+			);
+		}
+
+		return $this->margin_calculator->get_margin_for_order( $order );
+	}
 }
