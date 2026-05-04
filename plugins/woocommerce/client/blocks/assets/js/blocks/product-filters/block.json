@@ -15,7 +15,7 @@
 			"enableContrastChecker": false,
 			"button": true
 		},
-		"multiple": true,
+		"multiple": false,
 		"inserter": true,
 		"interactivity": true,
 		"typography": {

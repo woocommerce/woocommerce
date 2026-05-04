@@ -36,37 +36,15 @@ class VariationDescription extends AbstractBlock {
 			return '';
 		}
 
-		$variations                = $product->get_available_variations( 'objects' );
-		$formatted_variations_data = array();
-		foreach ( $variations as $variation ) {
-			$variation_description = $variation->get_description();
-			if ( is_string( $variation_description ) && ! empty( $variation_description ) ) {
-				$formatted_variations_data[ $variation->get_id() ] = array(
-					'variation_description' => wp_kses_post( wc_format_content( $variation_description ) ),
-				);
-			}
-		}
-
-		wp_interactivity_config(
-			'woocommerce',
-			array(
-				'products' => array(
-					$product->get_id() => array(
-						'variations' => $formatted_variations_data,
-					),
-				),
-			)
-		);
-
 		$context_directive = wp_interactivity_data_wp_context(
 			array(
-				'productElementKey' => 'variation_description',
+				'productElementKey' => 'description',
 			)
 		);
 
 		$wrapper_attributes = array(
 			'data-wp-interactive'  => 'woocommerce/product-elements',
-			'data-wp-bind--hidden' => '!state.productData.variation_description',
+			'data-wp-bind--hidden' => 'woocommerce/products::!state.productVariationInContext.description',
 			'aria-live'            => 'polite',
 			'aria-atomic'          => 'true',
 		);
