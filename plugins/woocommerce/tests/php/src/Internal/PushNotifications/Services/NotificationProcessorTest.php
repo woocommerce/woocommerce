@@ -569,4 +569,38 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 			wc_get_order( $order->get_id() )->get_meta( NotificationProcessor::SENT_META_KEY )
 		);
 	}
+
+	/**
+	 * @testdox Should skip dispatch when the review rating is above the user's max_rating threshold.
+	 */
+	public function test_process_skips_dispatch_when_review_above_max_rating(): void {
+		$product    = WC_Helper_Product::create_simple_product();
+		$comment_id = WC_Helper_Product::create_product_review( $product->get_id() );
+		update_comment_meta( $comment_id, 'rating', 5 );
+
+		$preferences_service = $this->createMock( NotificationPreferencesService::class );
+		$preferences_service->method( 'get_preferences' )->willReturn(
+			array(
+				'store_order'  => array(
+					'enabled'    => true,
+					'min_amount' => null,
+				),
+				'store_review' => array(
+					'enabled'    => true,
+					'max_rating' => 3,
+				),
+			)
+		);
+
+		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service );
+
+		$notification = new NewReviewNotification( $comment_id );
+		$result       = $sut->process( $notification );
+
+		$this->assertTrue( $result );
+		$this->assertNotEmpty( get_comment_meta( $comment_id, NotificationProcessor::SENT_META_KEY, true ) );
+	}
 }
