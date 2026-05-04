@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import { getClosestColor } from './utils/get-closest-color';
 
 export default function setStyles(): void {
