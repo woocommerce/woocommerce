@@ -19,7 +19,7 @@ use WP_User;
  * when the address is linked to an account, or as 'guest' for unrecognised addresses. Failure reasons are captured
  * from wp_mail_failed.
  *
- * @since 10.8.0
+ * @since 10.9.0
  * @internal
  */
 class EmailLogger implements RegisterHooksInterface {
@@ -75,7 +75,7 @@ class EmailLogger implements RegisterHooksInterface {
 		 *
 		 * Return false to skip logging for a particular email or globally.
 		 *
-		 * @since 10.8.0
+		 * @since 10.9.0
 		 *
 		 * @param bool     $enabled  Whether logging is enabled.
 		 * @param string   $email_id The email type ID.
@@ -114,7 +114,7 @@ class EmailLogger implements RegisterHooksInterface {
 		/**
 		 * Filter the context array logged for each transactional email attempt.
 		 *
-		 * @since 10.8.0
+		 * @since 10.9.0
 		 *
 		 * @param array    $context  The context array to be logged.
 		 * @param string   $email_id The email type ID.
