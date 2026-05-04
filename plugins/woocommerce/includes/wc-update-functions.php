@@ -3514,15 +3514,15 @@ function wc_update_1080_backfill_email_template_sync_meta(): bool {
 
 /**
  * Seeds the Review Order page on existing installs so the rewrite rule and
- * helper URL work after upgrading to 10.9.0. Mirrors how
+ * helper URL work after upgrading to 10.8.0. Mirrors how
  * `wc_update_560_create_refund_returns_page` backfilled the refund/returns
  * page when that feature shipped.
  *
- * @since 10.9.0
+ * @since 10.8.0
  *
  * @return void
  */
-function wc_update_1090_create_review_order_page(): void {
+function wc_update_1080_create_review_order_page(): void {
 	$only_review_order = static function ( array $pages ): array {
 		return array_intersect_key( $pages, array_flip( array( 'review_order' ) ) );
 	};
