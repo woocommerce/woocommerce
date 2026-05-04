@@ -54,14 +54,14 @@
 			--wc-product-filters-overlay-background-color,
 			var(
 				--wc-product-filters-background-color,
-				var(--wp--preset--color--base, #fff)
+				var(--wp--preset--color--base, Canvas)
 			)
 		);
 		color: var(
 			--wc-product-filters-overlay-text-color,
 			var(
 				--wc-product-filters-text-color,
-				var(--wp--preset--color--base, #111)
+				var(--wp--preset--color--contrast, CanvasText)
 			)
 		);
 		display: flex !important;
