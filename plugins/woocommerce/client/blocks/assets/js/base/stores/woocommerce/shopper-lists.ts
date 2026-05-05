@@ -198,8 +198,7 @@ const restRequest = async (
 	const contentType = response.headers.get( 'Content-Type' ) || '';
 	// 204 responses can advertise application/json with an empty body, which
 	// would make `response.json()` throw on parse. Read as text first.
-	const rawBody =
-		response.status === 204 ? '' : await response.text();
+	const rawBody = response.status === 204 ? '' : await response.text();
 	const data =
 		rawBody && contentType.includes( 'application/json' )
 			? JSON.parse( rawBody )
