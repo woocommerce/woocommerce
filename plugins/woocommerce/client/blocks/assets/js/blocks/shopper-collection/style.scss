@@ -1,6 +1,5 @@
-// The block IS the grid. supports.layout's `columnCount` attribute drives
-// our --wc-shopper-collection-columns CSS variable (set inline on the wrapper
-// in both editor preview and PHP render). No nested grids, no inner blocks.
+// The block IS the grid; `--wc-shopper-collection-columns` is set inline
+// from the layout.columnCount attribute (editor preview + PHP render).
 .wc-block-shopper-collection {
 	display: grid;
 	gap: var(--wp--style--block-gap, 1.5em);
@@ -18,22 +17,22 @@
 	flex-direction: column;
 	gap: 0.25em;
 
-	// Image and price visual styling come from the shared atomic classes
-	// (wc-block-components-product-image / -price) loaded by the global
-	// wc-blocks stylesheet — no per-element rules needed here.
+	// Schema thumbnails are 300px+; constrain so they fit narrow columns.
+	.wc-block-components-product-image {
+		a,
+		img {
+			display: block;
+			max-width: 100%;
+			height: auto;
+		}
+	}
 
-	// Title spacing/line-height matches Product Collection's default
-	// product-title attributes (level: 2, margin: 0 0 0.75rem, line-height: 1.4).
-	// We target wp-block-post-title (core's post-title class) because the
-	// editor preview mirrors PC's editor render, which uses core/post-title.
+	// Match Product Collection's default product-title look.
 	.wp-block-post-title {
 		line-height: 1.4;
 		margin: 0 0 0.75rem;
 	}
 
-	// Variation and quantity have no atomic equivalent in Product Collection,
-	// so we own their styling. Center-aligned and small to mirror the rest
-	// of the row (price + button use the WP `has-small-font-size` preset).
 	&__variation,
 	&__quantity {
 		color: rgba(0, 0, 0, 0.7);
@@ -42,10 +41,7 @@
 		text-align: center;
 	}
 
-	// Remove button overlays the image (mirrors Product Collection's
-	// sale-badge slot — top-right corner inside the product-image wrapper).
-	// Positioned absolute with align-self: flex-end so the parent's
-	// __inner-container flex layout pushes it to the right edge.
+	// Overlays the image like Product Collection's sale-badge slot.
 	&__remove {
 		align-self: flex-end;
 		appearance: none;
