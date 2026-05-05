@@ -2247,10 +2247,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 		if ( $product->is_downloadable() || 'edit' === $context ) {
 			foreach ( $product->get_downloads() as $file_id => $file ) {
 				$downloads[] = array(
-					'id'                           => $file_id,
+					'id'   => $file_id,
 					// MD5 hash.
-					'name'                         => $file['name'],
-					'file'                         => $file['file'],
+					'name' => $file['name'],
+					'file' => $file['file'],
 				);
 			}
 		}
