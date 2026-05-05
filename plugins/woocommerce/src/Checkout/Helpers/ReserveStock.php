@@ -240,7 +240,7 @@ final class ReserveStock {
 		// error codes, and error messages can vary by database locale. Previously, we matched messages to 'try restarting transaction'.
 		for ( $attempt = 0; $attempt < 3; ++$attempt ) {
 			$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			if ( false === $result ) {
+			if ( false !== $result ) {
 				break;
 			}
 		}
