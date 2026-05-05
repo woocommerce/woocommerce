@@ -179,6 +179,12 @@ class ProductSchema extends AbstractSchema {
 				'context'     => [ 'view', 'edit', 'embed' ],
 				'readonly'    => true,
 			],
+			'view_count'            => [
+				'description' => __( 'Number of times the product page has been viewed.', 'woocommerce' ),
+				'type'        => 'integer',
+				'context'     => [ 'view', 'edit', 'embed' ],
+				'readonly'    => true,
+			],
 			'images'                => [
 				'description' => __( 'List of images.', 'woocommerce' ),
 				'type'        => 'array',
@@ -612,6 +618,7 @@ class ProductSchema extends AbstractSchema {
 			'price_html'            => $this->prepare_html_response( $product->get_price_html() ),
 			'average_rating'        => (string) $product->get_average_rating(),
 			'review_count'          => $product->get_review_count(),
+			'view_count'            => (int) get_post_meta( $product->get_id(), \Automattic\WooCommerce\Internal\ProductViews\ProductViewCountTracker::META_KEY, true ),
 			'images'                => $this->get_images( $product ),
 			'categories'            => $this->get_term_list( $product, 'product_cat' ),
 			'tags'                  => $this->get_term_list( $product, 'product_tag' ),

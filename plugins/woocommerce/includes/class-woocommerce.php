@@ -412,6 +412,8 @@ final class WooCommerce {
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductViews\ProductViewCountTracker::class )->register();
+		$container->get( Automattic\WooCommerce\Internal\ProductViews\ProductViewCountAdminList::class )->register();
 
 		// Code+GraphQL API.
 		Automattic\WooCommerce\Internal\Api\Main::register();
