@@ -40,6 +40,16 @@ class AbilitiesCategories {
 			return;
 		}
 
+		if ( ! function_exists( 'wp_has_ability_category' ) || ! wp_has_ability_category( 'woocommerce' ) ) {
+			wp_register_ability_category(
+				'woocommerce',
+				array(
+					'label'       => __( 'WooCommerce', 'woocommerce' ),
+					'description' => __( 'Canonical WooCommerce store management abilities backed by WooCommerce domain APIs.', 'woocommerce' ),
+				)
+			);
+		}
+
 		wp_register_ability_category(
 			'woocommerce-rest',
 			array(
