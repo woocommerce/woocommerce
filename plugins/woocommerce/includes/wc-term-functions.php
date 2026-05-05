@@ -533,7 +533,7 @@ function _wc_term_recount( $terms, $taxonomy, $callback = true, $terms_are_term_
 		 * @since 10.9.0
 		 * @param int              $count    The product count for the term.
 		 * @param int              $term_id  The term ID.
-		 * @param WP_Taxonomy|null $taxonomy The taxonomy object.
+		 * @param WP_Taxonomy $taxonomy The taxonomy object.
 		 */
 		$count = apply_filters( 'woocommerce_term_recount_product_count', $count, $term_id, $taxonomy );
 
