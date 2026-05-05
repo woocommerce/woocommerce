@@ -64,6 +64,7 @@ const ColorField = ( { input }: { input: HTMLInputElement } ) => {
 				className="wc-admin-visual-attribute-color-picker-trigger"
 				onClick={ () => setIsPopoverVisible( true ) }
 				aria-haspopup="dialog"
+				aria-expanded={ isPopoverVisible }
 			>
 				<span
 					className={ `wc-admin-color-swatch${
