@@ -87,7 +87,7 @@ add_action( 'woocommerce_deliver_webhook_async', 'wc_deliver_webhook_async', 10,
 /**
  * Check if the given topic is a valid webhook topic, a topic is valid if:
  *
- * + starts with `action.woocommerce_` or `action.wc_`.
+ * + starts with `action.` followed by a non-empty action name.
  * + it has a valid resource & event.
  *
  * @since  2.2.0
@@ -105,8 +105,8 @@ function wc_is_webhook_valid_topic( $topic ) {
 		return false;
 	}
 
-	// Custom topics are prefixed with woocommerce_ or wc_ are valid.
-	if ( 0 === strpos( $topic, 'action.woocommerce_' ) || 0 === strpos( $topic, 'action.wc_' ) ) {
+	// Any action topic with a non-empty action name is valid.
+	if ( 0 === strpos( $topic, 'action.' ) && strlen( $topic ) > strlen( 'action.' ) ) {
 		return true;
 	}
 

@@ -26,6 +26,9 @@ class WC_Tests_Webhook_Functions extends WC_Unit_Test_Case {
 		return array(
 			array( true, wc_is_webhook_valid_topic( 'action.woocommerce_add_to_cart' ) ),
 			array( true, wc_is_webhook_valid_topic( 'action.wc_add_to_cart' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.wp_insert_comment' ) ),
+			array( true, wc_is_webhook_valid_topic( 'action.save_post' ) ),
+			array( false, wc_is_webhook_valid_topic( 'action.' ) ),
 			array( true, wc_is_webhook_valid_topic( 'product.created' ) ),
 			array( true, wc_is_webhook_valid_topic( 'product.updated' ) ),
 			array( true, wc_is_webhook_valid_topic( 'product.deleted' ) ),
