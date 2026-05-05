@@ -3,6 +3,7 @@
 /**
  * External dependencies
  */
+import { dispatch } from '@wordpress/data';
 import { addFilter, addAction } from '@wordpress/hooks';
 import { __ } from '@wordpress/i18n';
 import { registerPlugin } from '@wordpress/plugins';
@@ -20,7 +21,10 @@ import { modifySidebar } from './sidebar_settings';
 import { registerEmailValidationRules } from './email-validation';
 import getResetNotificationEmailContentAction from './reset-notification-email-content';
 import { ReviewUpdatePlugin } from './review-update-plugin';
-import { registerStore as registerIntegrationStore } from './store';
+import {
+	registerStore as registerIntegrationStore,
+	STORE_NAME as INTEGRATION_STORE_NAME,
+} from './store';
 
 import './style.scss';
 
@@ -91,6 +95,16 @@ registerPlugin( 'woocommerce-email-editor-review-update', {
 	scope: 'woocommerce-email-editor',
 	render: ReviewUpdatePlugin,
 } );
+
+// Deep-link contract: opens the review drawer when arriving with
+// `?wc_email_review_drawer=1` (set by the email list page's update indicator).
+if (
+	new URLSearchParams( window.location.search ).get(
+		'wc_email_review_drawer'
+	) === '1'
+) {
+	dispatch( INTEGRATION_STORE_NAME ).openReviewDrawer();
+}
 
 /**
  * Register the reset notification email content entity action for the woo_email post type.
