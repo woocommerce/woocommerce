@@ -182,6 +182,23 @@ class EmailPreviewRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the preview send path does not mutate the recipient on the
+	 * EmailPreview singleton. The controller clones before assigning, so a
+	 * subsequent read of get_email()->get_recipient() must not return the
+	 * test address — under long-lived runtimes this would otherwise leak the
+	 * previous tester's address into a later send for a different customer.
+	 */
+	public function test_send_preview_does_not_persist_recipient_on_cached_email() {
+		$email_preview = wc_get_container()->get( EmailPreview::class );
+
+		$request  = $this->get_email_preview_request( EmailPreview::DEFAULT_EMAIL_TYPE, self::EMAIL );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertNotSame( self::EMAIL, $email_preview->get_email()->get_recipient(), 'Recipient must not persist on the cached EmailPreview instance after a preview send.' );
+	}
+
+	/**
 	 * Helper method to simulate a failed email sending.
 	 *
 	 * @return callable
