@@ -56,9 +56,24 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	const MAX_TOKENS_PER_WINDOW = 5;
 
 	/**
-	 * Max exchange attempts per IP per 15-minute window.
+	 * Max exchange attempts per valid token per 15-minute window.
 	 */
 	const MAX_EXCHANGE_ATTEMPTS = 10;
+
+	/**
+	 * Max invalid-token exchange attempts per IP per 15-minute window.
+	 */
+	const MAX_INVALID_EXCHANGE_ATTEMPTS = 100;
+
+	/**
+	 * Broad anonymous exchange abuse guard per IP per 15-minute window.
+	 */
+	const MAX_EXCHANGE_IP_ATTEMPTS = 1000;
+
+	/**
+	 * Option prefix for database-backed atomic token claims.
+	 */
+	const CLAIM_OPTION_PREFIX = '_wc_qr_login_claim_';
 
 	/**
 	 * Stable Application Passwords `app_id` for credentials issued by this
@@ -166,21 +181,59 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Check rate limit for token exchange.
+	 * Check a transient-backed rate limit.
 	 *
+	 * @param string $key The rate-limit transient key.
+	 * @param int    $max_attempts Max attempts within the fixed window.
 	 * @return bool True if within rate limit.
 	 */
-	private function check_exchange_rate_limit() {
-		$ip    = $this->get_client_ip();
-		$key   = self::RATE_LIMIT_PREFIX . 'exc_' . md5( $ip );
+	private function check_rate_limit( $key, $max_attempts ) {
 		$count = (int) get_transient( $key );
 
-		if ( $count >= self::MAX_EXCHANGE_ATTEMPTS ) {
+		if ( $count >= $max_attempts ) {
 			return false;
 		}
 
 		set_transient( $key, $count + 1, 15 * MINUTE_IN_SECONDS );
 		return true;
+	}
+
+	/**
+	 * Broad anonymous abuse guard for token exchange.
+	 *
+	 * This intentionally has a high ceiling. It is only meant to slow obvious
+	 * unauthenticated floods; valid-token and invalid-token traffic use separate
+	 * lower buckets so a few random requests from a shared proxy IP cannot block
+	 * legitimate QR login exchanges.
+	 *
+	 * @return bool True if within rate limit.
+	 */
+	private function check_exchange_ip_rate_limit() {
+		$ip  = $this->get_client_ip();
+		$key = self::RATE_LIMIT_PREFIX . 'exc_ip_' . md5( $ip );
+		return $this->check_rate_limit( $key, self::MAX_EXCHANGE_IP_ATTEMPTS );
+	}
+
+	/**
+	 * Check rate limit for random/nonexistent exchange tokens.
+	 *
+	 * @return bool True if within rate limit.
+	 */
+	private function check_invalid_exchange_rate_limit() {
+		$ip  = $this->get_client_ip();
+		$key = self::RATE_LIMIT_PREFIX . 'exc_invalid_' . md5( $ip );
+		return $this->check_rate_limit( $key, self::MAX_INVALID_EXCHANGE_ATTEMPTS );
+	}
+
+	/**
+	 * Check rate limit for exchange attempts against a valid token.
+	 *
+	 * @param string $token_hash SHA-256 hash of the plaintext token.
+	 * @return bool True if within rate limit.
+	 */
+	private function check_valid_exchange_rate_limit( $token_hash ) {
+		$key = self::RATE_LIMIT_PREFIX . 'exc_token_' . $token_hash;
+		return $this->check_rate_limit( $key, self::MAX_EXCHANGE_ATTEMPTS );
 	}
 
 	/**
@@ -191,10 +244,9 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * without a project-wide trusted-proxy list we cannot tell a legitimate
 	 * proxy header from an attacker-supplied one. Trusting the first XFF value
 	 * would let any client choose a fresh rate-limit bucket per request and
-	 * bypass the per-IP cap. On sites behind a CDN/load balancer that all
-	 * clients share, REMOTE_ADDR is the proxy IP — those deployments will
-	 * effectively share a single bucket, which is acceptable given the limit
-	 * (10/15 min) and the per-user generation cap enforced separately.
+	 * bypass per-IP caps. On sites behind a CDN/load balancer that all clients
+	 * share, REMOTE_ADDR is the proxy IP, so exchange uses broad IP throttling
+	 * only as an abuse guard and relies on token-scoped buckets for security.
 	 *
 	 * @return string
 	 */
@@ -203,6 +255,54 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			return sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) );
 		}
 		return '';
+	}
+
+	/**
+	 * Build the option name used for a token exchange claim.
+	 *
+	 * @param string $token_hash SHA-256 hash of the plaintext token.
+	 * @return string
+	 */
+	private function get_token_claim_key( $token_hash ) {
+		return self::CLAIM_OPTION_PREFIX . $token_hash;
+	}
+
+	/**
+	 * Atomically claim a token for exchange using the options table.
+	 *
+	 * `add_option()` is backed by a unique option_name constraint, so it works
+	 * across PHP workers even on default installs without a persistent object
+	 * cache. Stale claims are cleaned once and retried.
+	 *
+	 * @param string $token_hash SHA-256 hash of the plaintext token.
+	 * @param int    $expires_at Unix timestamp when the token expires.
+	 * @return bool True if the claim was acquired.
+	 */
+	private function claim_token_for_exchange( $token_hash, $expires_at ) {
+		$claim_key        = $this->get_token_claim_key( $token_hash );
+		$claim_expires_at = max( time() + 30, (int) $expires_at );
+
+		if ( add_option( $claim_key, (string) $claim_expires_at, '', false ) ) {
+			return true;
+		}
+
+		$existing_expires_at = (int) get_option( $claim_key, 0 );
+		if ( $existing_expires_at > 0 && $existing_expires_at <= time() ) {
+			delete_option( $claim_key );
+			return add_option( $claim_key, (string) $claim_expires_at, '', false );
+		}
+
+		return false;
+	}
+
+	/**
+	 * Release a token exchange claim.
+	 *
+	 * @param string $token_hash SHA-256 hash of the plaintext token.
+	 * @return void
+	 */
+	private function release_token_exchange_claim( $token_hash ) {
+		delete_option( $this->get_token_claim_key( $token_hash ) );
 	}
 
 	/**
@@ -346,8 +446,10 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// Check rate limit.
-		if ( ! $this->check_exchange_rate_limit() ) {
+		// Broad anonymous abuse guard. Token-specific limits are applied after
+		// token lookup so random invalid requests cannot exhaust the bucket for
+		// legitimate exchanges behind a shared proxy/CDN IP.
+		if ( ! $this->check_exchange_ip_rate_limit() ) {
 			return new \WP_Error(
 				'rate_limit_exceeded',
 				__( 'Too many exchange attempts. Please try again later.', 'woocommerce' ),
@@ -370,15 +472,16 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$token_hash = hash( 'sha256', $token );
 		$key        = self::TOKEN_TRANSIENT_PREFIX . $token_hash;
 
-		// Atomically claim the token before reading it. `wp_cache_add()` is
-		// SETNX-equivalent on Redis/Memcached — i.e. essentially every
-		// production WooCommerce host — so concurrent exchanges of the same
-		// token race here and exactly one wins. Without this, two requests can
-		// both `get_transient()` before either `delete_transient()` runs and
-		// each ends up minting a fresh Application Password from the same QR.
-		// The claim entry expires alongside the token TTL; no explicit cleanup.
-		$claim_key = $key . '_claimed';
-		if ( ! wp_cache_add( $claim_key, 1, '', self::TOKEN_TTL ) ) {
+		$token_data = get_transient( $key );
+		if ( ! is_array( $token_data ) ) {
+			if ( ! $this->check_invalid_exchange_rate_limit() ) {
+				return new \WP_Error(
+					'rate_limit_exceeded',
+					__( 'Too many exchange attempts. Please try again later.', 'woocommerce' ),
+					array( 'status' => 429 )
+				);
+			}
+
 			return new \WP_Error(
 				'invalid_token',
 				__( 'Invalid or expired QR login token.', 'woocommerce' ),
@@ -386,11 +489,27 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// Retrieve and immediately delete the token (one-time use).
-		$token_data = get_transient( $key );
-		delete_transient( $key );
+		if ( ! $this->check_valid_exchange_rate_limit( $token_hash ) ) {
+			return new \WP_Error(
+				'rate_limit_exceeded',
+				__( 'Too many exchange attempts. Please try again later.', 'woocommerce' ),
+				array( 'status' => 429 )
+			);
+		}
 
-		if ( false === $token_data ) {
+		if ( ! $this->claim_token_for_exchange( $token_hash, isset( $token_data['expires_at'] ) ? (int) $token_data['expires_at'] : time() + self::TOKEN_TTL ) ) {
+			return new \WP_Error(
+				'invalid_token',
+				__( 'Invalid or expired QR login token.', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		// Re-read after acquiring the database claim in case another process
+		// consumed or expired the token while this request was waiting.
+		$token_data = get_transient( $key );
+		if ( ! is_array( $token_data ) ) {
+			$this->release_token_exchange_claim( $token_hash );
 			return new \WP_Error(
 				'invalid_token',
 				__( 'Invalid or expired QR login token.', 'woocommerce' ),
@@ -400,6 +519,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		// Validate token hasn't expired (belt and suspenders with transient TTL).
 		if ( time() > $token_data['expires_at'] ) {
+			delete_transient( $key );
+			$this->release_token_exchange_claim( $token_hash );
 			return new \WP_Error(
 				'token_expired',
 				__( 'QR login token has expired.', 'woocommerce' ),
@@ -411,6 +532,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$user    = get_userdata( $user_id );
 
 		if ( ! $user ) {
+			$this->release_token_exchange_claim( $token_hash );
 			return new \WP_Error(
 				'user_not_found',
 				__( 'User associated with this token no longer exists.', 'woocommerce' ),
@@ -420,6 +542,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		// Application Passwords may have been disabled after the token was minted.
 		if ( ! $this->are_application_passwords_available() ) {
+			$this->release_token_exchange_claim( $token_hash );
 			return new \WP_Error(
 				'application_passwords_unavailable',
 				__( 'Application Passwords are not available on this site.', 'woocommerce' ),
@@ -445,6 +568,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 				),
 				array( 'source' => 'mobile-app-qr-login' )
 			);
+			$this->release_token_exchange_claim( $token_hash );
 			return new \WP_Error(
 				'application_password_failed',
 				__( 'Could not create a mobile-app credential. Please try again, or contact your site administrator.', 'woocommerce' ),
@@ -453,6 +577,9 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		}
 
 		list( $new_password, $item ) = $app_password_result;
+
+		delete_transient( $key );
+		$this->release_token_exchange_claim( $token_hash );
 
 		return rest_ensure_response(
 			array(
