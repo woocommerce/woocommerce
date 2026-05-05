@@ -552,12 +552,11 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 				// If an error occurs, we break and save the last successful position.
 				$cursor_date = $order->date_updated_gmt;
 				$cursor_id   = $order->id;
-			} catch ( \Exception $e ) {
-				$logger->error(
-					sprintf( 'Failed to import order %d: %s', $order->id, $e->getMessage() ),
-					$context
-				);
-				break;
+			} catch ( \Throwable $e ) {
+				static::log_import_error( $order->id, $e, $context );
+				update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, $cursor_date, false );
+				update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, $cursor_id, false );
+				throw $e;
 			}
 		}
 

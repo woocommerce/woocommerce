@@ -389,6 +389,40 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox process_pending_batch catches PHP errors thrown during order import.
+	 */
+	public function test_process_pending_batch_catches_throwable_from_order_import(): void {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$cursor_date     = '2000-01-01 00:00:00';
+		$cursor_id       = 0;
+		$throwing_filter = function ( $is_test, $checked_order ) use ( $order ) {
+			if ( $checked_order instanceof \WC_Abstract_Order && $checked_order->get_id() === $order->get_id() ) {
+				throw new \DivisionByZeroError( 'Division by zero' );
+			}
+
+			return $is_test;
+		};
+
+		OrdersScheduler::clear_queued_actions();
+		add_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10, 2 );
+
+		try {
+			OrdersScheduler::process_pending_batch( $cursor_date, $cursor_id );
+			$this->fail( 'Expected DivisionByZeroError to be rethrown.' );
+		} catch ( \DivisionByZeroError $e ) {
+			$this->assertSame( 'Division by zero', $e->getMessage() );
+		} finally {
+			remove_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10 );
+		}
+
+		$this->assertSame( $cursor_date, get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION ) );
+		$this->assertSame( $cursor_id, (int) get_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION ) );
+	}
+
+	/**
 	 * @testdox is_scheduled_import_enabled falls back to legacy option when new option is absent.
 	 */
 	public function test_is_scheduled_import_enabled_falls_back_to_legacy_option(): void {
