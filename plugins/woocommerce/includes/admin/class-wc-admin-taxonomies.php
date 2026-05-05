@@ -85,8 +85,20 @@ class WC_Admin_Taxonomies {
 				add_action( $taxonomy . '_pre_add_form', array( $this, 'product_attribute_description' ) );
 				add_action( $taxonomy . '_add_form_fields', array( $this, 'add_product_attribute_term_fields' ) );
 				add_action( $taxonomy . '_edit_form_fields', array( $this, 'edit_product_attribute_term_fields' ), 10, 1 );
-				add_filter( "manage_edit-{$taxonomy}_columns", array( $this, 'add_term_color_columns' ) );
-				add_filter( "manage_{$taxonomy}_custom_column", array( $this, 'render_term_color_column' ), 10, 3 );
+				add_filter(
+					"manage_edit-{$taxonomy}_columns",
+					function ( $columns ) use ( $taxonomy ) {
+						return $this->add_term_color_columns( $columns, $taxonomy );
+					}
+				);
+				add_filter(
+					"manage_{$taxonomy}_custom_column",
+					function ( $content, $column, $term_id ) use ( $taxonomy ) {
+						return $this->render_term_color_column( $content, $column, $term_id, $taxonomy );
+					},
+					10,
+					3
+				);
 			}
 		}
 
@@ -475,13 +487,13 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Add custom columns for product attribute terms.
 	 *
-	 * @param array $columns Existing columns.
+	 * @param array  $columns  Existing columns.
+	 * @param string $taxonomy Taxonomy slug (bound when the filter is registered).
 	 * @return array
 	 *
 	 * @internal
 	 */
-	public function add_term_color_columns( $columns ) {
-		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	public function add_term_color_columns( $columns, $taxonomy ) {
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return $columns;
 		}
@@ -504,21 +516,21 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Render color column for product attribute terms.
 	 *
-	 * @param string $columns Existing columns HTML.
-	 * @param string $column  Current column key.
-	 * @param int    $term_id Term ID.
+	 * @param string $content  Column output so far (often empty string).
+	 * @param string $column   Current column key.
+	 * @param int    $term_id  Term ID.
+	 * @param string $taxonomy Taxonomy slug (bound when the filter is registered).
 	 * @return string
 	 *
 	 * @internal
 	 */
-	public function render_term_color_column( $columns, $column, $term_id ) {
+	public function render_term_color_column( $content, $column, $term_id, $taxonomy ) {
 		if ( 'color' !== $column ) {
-			return $columns;
+			return $content;
 		}
 
-		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
-			return $columns;
+			return $content;
 		}
 
 		$color_value = get_term_meta( $term_id, 'color', true );
