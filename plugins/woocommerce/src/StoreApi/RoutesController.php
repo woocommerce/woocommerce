@@ -70,6 +70,10 @@ class RoutesController {
 				Routes\V1\Products::IDENTIFIER           => Routes\V1\Products::class,
 				Routes\V1\ProductsById::IDENTIFIER       => Routes\V1\ProductsById::class,
 				Routes\V1\ProductsBySlug::IDENTIFIER     => Routes\V1\ProductsBySlug::class,
+				Routes\V1\ShopperLists::IDENTIFIER       => Routes\V1\ShopperLists::class,
+				Routes\V1\ShopperListsBySlug::IDENTIFIER => Routes\V1\ShopperListsBySlug::class,
+				Routes\V1\ShopperListItems::IDENTIFIER   => Routes\V1\ShopperListItems::class,
+				Routes\V1\ShopperListItemsByKey::IDENTIFIER => Routes\V1\ShopperListItemsByKey::class,
 			],
 			'private' => [
 				// This route should be moved outside of the Store API namespace.
