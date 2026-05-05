@@ -29,13 +29,14 @@ class Package {
 	 * Whether the merged variation gallery feature is enabled for the current
 	 * request.
 	 *
-	 * Returns false during the 10.9 canary period. After 100% rollout this
-	 * method becomes `return true;` (matching Brands' shipped state).
+	 * Reads the same option as the Features toggles, so the `FeaturesController`
+	 * and the merged-package machinery share a single source of truth. Defaults
+	 * to off for the 10.9 canary period.
 	 *
 	 * @return bool
 	 */
 	public static function is_enabled() {
-		return false;
+		return 'yes' === get_option( self::ENABLE_OPTION_NAME, 'no' );
 	}
 
 	/**
