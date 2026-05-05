@@ -29,6 +29,7 @@ const ALLOWED_TAGS = [
 	'bdi',
 	'del',
 	'ins',
+	'small',
 ];
 const ALLOWED_ATTR = [
 	'class',

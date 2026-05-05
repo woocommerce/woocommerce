@@ -114,4 +114,35 @@ class WC_REST_System_Status_Tools_V2_Controller_Test extends WC_REST_Unit_Test_C
 
 		$this->cleanup_data_for_expired_download_permissions_test();
 	}
+
+	/**
+	 * @testdox Clear transients tool clears the wc_attribute_taxonomies transient and invalidates the woocommerce-attributes cache group.
+	 */
+	public function test_execute_tool_clear_transients() {
+		wp_set_current_user( $this->user );
+
+		// Set up the transient to be cleared with a proper attribute taxonomy object.
+		$mock_attribute                  = new stdClass();
+		$mock_attribute->attribute_id    = 123;
+		$mock_attribute->attribute_name  = 'test_attr';
+		$mock_attribute->attribute_label = 'Test Attr';
+		set_transient( 'wc_attribute_taxonomies', array( $mock_attribute ) );
+
+		$prefix_before = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'PUT', '/wc/v2/system_status/tools/clear_transients' ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $response->get_data();
+		$this->assertTrue( $response_data['success'] );
+		$this->assertStringContainsString( 'transients', $response_data['message'], 'Message should mention transients being cleared' );
+
+		// Verify the transient was deleted.
+		$this->assertFalse( get_transient( 'wc_attribute_taxonomies' ) );
+
+		// Verify the woocommerce-attributes cache group was invalidated by checking that the prefix changed.
+		$prefix_after = WC_Cache_Helper::get_cache_prefix( 'woocommerce-attributes' );
+		$this->assertNotEquals( $prefix_before, $prefix_after, 'Cache prefix should have changed after invalidation' );
+	}
 }

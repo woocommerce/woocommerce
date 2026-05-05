@@ -139,8 +139,9 @@ trait CheckoutTrait {
 	 * Update the current order using the posted values from the request.
 	 *
 	 * @param \WP_REST_Request $request Full details about the request.
+	 * @param bool             $persist Whether to persist the changes right away (defaults to true).
 	 */
-	private function update_order_from_request( \WP_REST_Request $request ) {
+	private function update_order_from_request( \WP_REST_Request $request, bool $persist = true ) {
 		$this->order->set_customer_note( wc_sanitize_textarea( $request['customer_note'] ) ?? '' );
 		$payment_method = $this->get_request_payment_method( $request );
 		if ( null !== $payment_method ) {
@@ -201,7 +202,9 @@ trait CheckoutTrait {
 		 */
 		do_action( 'woocommerce_store_api_checkout_update_order_from_request', $this->order, $request );
 
-		$this->order->save();
+		if ( $persist ) {
+			$this->order->save();
+		}
 	}
 
 	/**

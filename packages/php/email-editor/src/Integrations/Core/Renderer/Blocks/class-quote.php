@@ -41,9 +41,67 @@ class Quote extends Abstract_Block_Renderer {
 
 		return str_replace(
 			array( '{quote_content}', '{citation_content}' ),
-			array( $this->get_inner_content( $block_content ), $citation_content ),
+			array( $this->get_quote_content( $block_content, $parsed_block, $rendering_context ), $citation_content ),
 			$this->get_block_wrapper( $block_content, $parsed_block, $rendering_context )
 		);
+	}
+
+	/**
+	 * Get quote content with direction-aware default border overrides.
+	 *
+	 * @param string            $block_content Block content.
+	 * @param array             $parsed_block Parsed block.
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return string
+	 */
+	private function get_quote_content( string $block_content, array $parsed_block, Rendering_Context $rendering_context ): string {
+		$quote_content = $this->get_inner_content( $block_content );
+
+		$original_classname = ( new Dom_Document_Helper( $block_content ) )->get_attribute_value_by_tag_name( 'blockquote', 'class' ) ?? '';
+		$block_attributes   = wp_parse_args(
+			$parsed_block['attrs'] ?? array(),
+			array(
+				'style'       => array(),
+				'borderColor' => '',
+			)
+		);
+
+		if ( ! $rendering_context->is_rtl() || $this->has_authored_border( $block_attributes ) ) {
+			return $quote_content;
+		}
+
+		$authored_alignment = $this->get_authored_alignment( $block_attributes, $original_classname );
+		if ( 'left' === $authored_alignment ) {
+			return $quote_content;
+		}
+
+		$processor = new \WP_HTML_Tag_Processor( $quote_content );
+		if ( ! $processor->next_tag( array( 'tag_name' => 'blockquote' ) ) ) {
+			return $quote_content;
+		}
+
+		$style  = $processor->get_attribute( 'style' );
+		$style  = is_string( $style ) ? rtrim( $style, ';' ) . ';' : '';
+		$style .= \WP_Style_Engine::compile_css(
+			'center' === $authored_alignment
+				? array(
+					'border-left-style'  => 'none',
+					'border-left-width'  => '0',
+					'border-right-style' => 'none',
+					'border-right-width' => '0',
+				)
+				: array(
+					'border-left-style'  => 'none',
+					'border-left-width'  => '0',
+					'border-right-color' => 'currentColor',
+					'border-right-style' => 'solid',
+					'border-right-width' => '1px',
+				),
+			''
+		);
+		$processor->set_attribute( 'style', $style );
+
+		return $processor->get_updated_html();
 	}
 
 	/**
@@ -65,13 +123,14 @@ class Quote extends Abstract_Block_Renderer {
 		$citation_styles = Styles_Helper::get_block_styles( $parsed_block['attrs'], $rendering_context, array( 'text-align' ) );
 		$citation_styles = Styles_Helper::extend_block_styles( $citation_styles, array( 'margin' => "{$margin_top} 0px 0px 0px" ) );
 
-		return $this->add_spacer(
+		return $this->add_spacer_with_context(
 			sprintf(
 				'<p style="%2$s"><cite class="email-block-quote-citation" style="display: block; margin: 0;">%1$s</cite></p>',
 				$citation_content,
 				$citation_styles['css'],
 			),
-			$parsed_block['email_attrs'] ?? array()
+			$parsed_block['email_attrs'] ?? array(),
+			$rendering_context
 		);
 	}
 
@@ -96,6 +155,28 @@ class Quote extends Abstract_Block_Renderer {
 
 		// Layout, background, borders need to be on the outer table element.
 		$table_styles = Styles_Helper::get_block_styles( $block_attributes, $rendering_context, array( 'border', 'background', 'background-color', 'color', 'text-align' ) );
+		if ( $rendering_context->is_rtl() && ! $this->has_authored_border( $block_attributes ) ) {
+			$authored_alignment = $this->get_authored_alignment( $block_attributes, $original_classname );
+			$border_width       = array(
+				'left'   => '0 0 0 1px',
+				'center' => '0',
+				'right'  => '0 1px 0 0',
+			)[ $authored_alignment ?? 'right' ];
+			$table_styles       = Styles_Helper::extend_block_styles(
+				$table_styles,
+				array_filter(
+					array(
+						'border-color'  => 'currentColor',
+						'border-style'  => 'solid',
+						'border-width'  => $border_width,
+						'border-inline' => 'center' === $authored_alignment ? '0' : null,
+					),
+					static function ( $value ) {
+						return null !== $value;
+					}
+				)
+			);
+		}
 		$table_styles = Styles_Helper::extend_block_styles(
 			$table_styles,
 			array(
@@ -120,5 +201,44 @@ class Quote extends Abstract_Block_Renderer {
 		);
 
 		return Table_Wrapper_Helper::render_table_wrapper( '{quote_content}{citation_content}', $table_attrs, $cell_attrs );
+	}
+
+	/**
+	 * Get explicit quote alignment when authored.
+	 *
+	 * @param array  $block_attributes Block attributes.
+	 * @param string $original_classname Original quote classes.
+	 * @return string|null
+	 */
+	private function get_authored_alignment( array $block_attributes, string $original_classname ): ?string {
+		foreach ( array( 'textAlign', 'align' ) as $attribute_name ) {
+			$alignment = $block_attributes[ $attribute_name ] ?? null;
+			if ( in_array( $alignment, array( 'left', 'center', 'right' ), true ) ) {
+				return $alignment;
+			}
+		}
+
+		foreach ( wp_parse_list( $original_classname ) as $class_name ) {
+			if ( 0 !== strpos( $class_name, 'has-text-align-' ) ) {
+				continue;
+			}
+
+			$alignment = substr( $class_name, strlen( 'has-text-align-' ) );
+			if ( in_array( $alignment, array( 'left', 'center', 'right' ), true ) ) {
+				return $alignment;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Check whether quote border was explicitly authored.
+	 *
+	 * @param array $block_attributes Block attributes.
+	 * @return bool
+	 */
+	private function has_authored_border( array $block_attributes ): bool {
+		return ! empty( $block_attributes['style']['border'] ) || ! empty( $block_attributes['borderColor'] );
 	}
 }
