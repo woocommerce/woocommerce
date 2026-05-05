@@ -207,6 +207,7 @@ const Edit = ( props: EditProps ) => {
 									: attributeOptions,
 							isLoading,
 							showCounts,
+							label: attributeObject.label,
 						},
 					} }
 				>

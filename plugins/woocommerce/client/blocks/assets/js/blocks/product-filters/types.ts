@@ -41,6 +41,7 @@ export type FilterBlockContext = {
 			maxRange: number;
 		};
 		showCounts?: boolean;
+		label?: string;
 	};
 };
 

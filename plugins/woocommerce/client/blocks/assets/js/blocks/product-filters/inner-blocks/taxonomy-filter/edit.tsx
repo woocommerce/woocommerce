@@ -298,6 +298,7 @@ const Edit = ( props: EditProps ) => {
 									: termOptions,
 							isLoading,
 							showCounts,
+							label: getTaxonomyLabel( taxonomy ),
 						},
 					} }
 				>

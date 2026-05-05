@@ -85,6 +85,7 @@ const Edit = ( props: EditProps ) => {
 							items,
 							isLoading,
 							showCounts,
+							label: __( 'Status', 'woocommerce' ),
 						},
 					} }
 				>
