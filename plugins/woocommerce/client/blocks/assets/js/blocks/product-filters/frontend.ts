@@ -271,8 +271,6 @@ productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;
 
-setStyles();
-
 const { state, actions } = store< ProductFiltersStore >(
 	BLOCK_NAME,
 	productFiltersStore
