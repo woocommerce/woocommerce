@@ -85,7 +85,11 @@ export const QRLoginUnavailableCard = ( {
 			{ /*
 			   Native <details> intentionally — no extra library, full
 			   keyboard + screen-reader support out of the box, and the
-			   collapsed state keeps the headline scannable.
+			   collapsed state keeps the headline scannable. The
+			   "Open Application Passwords settings" CTA lives inside the
+			   expander too: it is most useful to the merchant only after
+			   they have read the diagnostic context, and folding it under
+			   the disclosure keeps the default state quiet.
 			*/ }
 			<details className="qr-direct-login__why">
 				<summary>
@@ -111,21 +115,24 @@ export const QRLoginUnavailableCard = ( {
 						) }
 					</li>
 				</ul>
-			</details>
 
-			<Button
-				variant="secondary"
-				className="qr-direct-login__open-ap-settings"
-				href={ APPLICATION_PASSWORDS_SETTINGS_PATH }
-				onClick={ () => {
-					recordEvent(
-						'mobile_app_qr_direct_login_open_ap_settings',
-						{ reason: reason ?? 'unknown' }
-					);
-				} }
-			>
-				{ __( 'Open Application Passwords settings', 'woocommerce' ) }
-			</Button>
+				<Button
+					variant="secondary"
+					className="qr-direct-login__open-ap-settings"
+					href={ APPLICATION_PASSWORDS_SETTINGS_PATH }
+					onClick={ () => {
+						recordEvent(
+							'mobile_app_qr_direct_login_open_ap_settings',
+							{ reason: reason ?? 'unknown' }
+						);
+					} }
+				>
+					{ __(
+						'Open Application Passwords settings',
+						'woocommerce'
+					) }
+				</Button>
+			</details>
 		</div>
 	);
 };

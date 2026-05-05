@@ -209,15 +209,15 @@
 		line-height: 1.5;
 		color: #50575e;
 
+		// The summary is the disclosure trigger, not a link — keep it as
+		// regular text colour so it doesn't masquerade as one. The native
+		// arrow marker is enough of an affordance.
 		summary {
 			cursor: pointer;
 			user-select: none;
 			padding: 4px 0;
-			color: #007cba;
-
-			&:hover {
-				color: #005a87;
-			}
+			color: #1d2327;
+			font-weight: 500;
 		}
 
 		ul {
@@ -229,11 +229,15 @@
 		li + li {
 			margin-top: 4px;
 		}
-	}
 
-	button.components-button.qr-direct-login__open-ap-settings {
-		// Center the CTA so it visually anchors the card the same way
-		// "Start over" does in the REJECTED state.
-		align-self: center;
+		// The "Open Application Passwords settings" CTA lives inside the
+		// disclosure (next to the bullet list) rather than below it. Sized
+		// to its label so it reads like an inline action — not a primary
+		// full-width call-to-action.
+		button.components-button.qr-direct-login__open-ap-settings {
+			margin-top: 12px;
+			width: auto;
+			align-self: flex-start;
+		}
 	}
 }
