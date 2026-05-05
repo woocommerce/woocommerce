@@ -56,6 +56,7 @@ final class ProductFilterChips extends AbstractBlock {
 				array(
 					'storeNamespace' => $store_namespace,
 					'displayLimit'   => $display_limit,
+					'isExpanded'     => false,
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
@@ -67,14 +68,11 @@ final class ProductFilterChips extends AbstractBlock {
 			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
 		}
 
-		$selected_items   = array_filter( $items, fn( $item ) => ! empty( $item['selected'] ) );
-		$unselected_items = array_filter( $items, fn( $item ) => empty( $item['selected'] ) );
-		$remaining_slots  = max( 0, $display_limit - count( $selected_items ) );
-		$visible_items    = $selected_items + array_slice( $unselected_items, 0, $remaining_slots, true );
-		$has_more_items   = count( $items ) > count( $visible_items );
-		$hidden_count     = max( 0, count( $items ) - count( $visible_items ) );
-		$first_item       = reset( $items );
-		$show_counts      = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$visible_items  = array_slice( $items, 0, $display_limit, true );
+		$has_more_items = count( $items ) > count( $visible_items );
+		$hidden_count   = max( 0, count( $items ) - count( $visible_items ) );
+		$first_item     = reset( $items );
+		$show_counts    = is_array( $first_item ) && array_key_exists( 'count', $first_item );
 
 		ob_start();
 		?>
@@ -156,7 +154,7 @@ final class ProductFilterChips extends AbstractBlock {
 						type="button"
 						class="wc-block-product-filter-chips__show-more"
 						data-wp-on--click="actions.showAll"
-						data-wp-bind--hidden="state.isExpanded"
+						data-wp-bind--hidden="context.isExpanded"
 					>
 						<?php
 						/* translators: %d: number of hidden items */

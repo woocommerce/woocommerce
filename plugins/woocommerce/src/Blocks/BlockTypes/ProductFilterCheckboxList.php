@@ -58,6 +58,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 				array(
 					'storeNamespace' => $store_namespace,
 					'displayLimit'   => $display_limit,
+					'isExpanded'     => false,
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
@@ -71,19 +72,16 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 
 		$checkbox_svg = '<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.25 1.19922L3.75 6.69922L1 3.94922" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-		$star_path        = '<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>';
-		$stars_svg        = sprintf(
+		$star_path      = '<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>';
+		$stars_svg      = sprintf(
 			'<svg class="wc-block-product-filter-checkbox-list__stars-svg" width="120" height="24" viewBox="0 0 120 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">%1$s<g transform="translate(24, 0)">%1$s</g><g transform="translate(48, 0)">%1$s</g><g transform="translate(72, 0)">%1$s</g><g transform="translate(96, 0)">%1$s</g></svg>',
 			$star_path
 		);
-		$selected_items   = array_filter( $items, fn( $item ) => ! empty( $item['selected'] ) );
-		$unselected_items = array_filter( $items, fn( $item ) => empty( $item['selected'] ) );
-		$remaining_slots  = max( 0, $display_limit - count( $selected_items ) );
-		$visible_items    = $selected_items + array_slice( $unselected_items, 0, $remaining_slots, true );
-		$has_more_items   = count( $items ) > count( $visible_items );
-		$hidden_count     = max( 0, count( $items ) - count( $visible_items ) );
-		$first_item       = reset( $items );
-		$show_counts      = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$visible_items  = array_slice( $items, 0, $display_limit, true );
+		$has_more_items = count( $items ) > count( $visible_items );
+		$hidden_count   = max( 0, count( $items ) - count( $visible_items ) );
+		$first_item     = reset( $items );
+		$show_counts    = is_array( $first_item ) && array_key_exists( 'count', $first_item );
 
 		ob_start();
 		?>
@@ -208,7 +206,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 							type="button"
 							class="wc-block-product-filter-checkbox-list__show-more-button"
 							data-wp-on--click="actions.showAll"
-							data-wp-bind--hidden="state.isExpanded"
+							data-wp-bind--hidden="context.isExpanded"
 						>
 							<?php
 							/* translators: %d: number of hidden items */

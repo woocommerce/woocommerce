@@ -130,7 +130,7 @@ final class ProductFilterRating extends AbstractBlock {
 		);
 
 		$filter_context = array(
-			'items'          => $filter_options,
+			'items'          => array_values( $filter_options ),
 			'selectionMode'  => 'multiple',
 			'storeNamespace' => 'woocommerce/product-filters',
 			'groupLabel'     => __( 'Rating', 'woocommerce' ),
@@ -145,7 +145,7 @@ final class ProductFilterRating extends AbstractBlock {
 					/* translators: {{label}} is the rating filter item label. */
 					'activeLabelTemplate' => __( 'Rating: {{label}}', 'woocommerce' ),
 					'filterType'          => 'rating',
-					'items'               => $filter_options,
+					'items'               => array_values( $filter_options ),
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),

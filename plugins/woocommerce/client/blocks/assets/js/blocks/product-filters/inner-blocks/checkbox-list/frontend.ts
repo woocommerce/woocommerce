@@ -11,6 +11,7 @@ import type { DerivedSelectableItem } from '../../../../types/type-defs/selectab
 type CheckboxListContext = {
 	storeNamespace: string;
 	displayLimit: number;
+	isExpanded: boolean;
 };
 
 type ParentItemContext = {
@@ -19,7 +20,6 @@ type ParentItemContext = {
 
 type CheckboxListStore = {
 	state: {
-		isExpanded: boolean;
 		itemHidden: boolean;
 		ratingStyle: string;
 	};
@@ -39,13 +39,13 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 	'woocommerce/product-filter-checkbox-list',
 	{
 		state: {
-			isExpanded: false,
 			get itemHidden(): boolean {
-				if ( state.isExpanded ) return false;
-				const { storeNamespace, displayLimit } =
+				const { isExpanded, storeNamespace, displayLimit } =
 					getContext< CheckboxListContext >();
+				if ( isExpanded ) return false;
 				const item = getParentItem( storeNamespace );
 				if ( ! item ) return false;
+				if ( item.selected ) return false;
 				return item.index >= displayLimit;
 			},
 			get ratingStyle(): string {
@@ -57,7 +57,8 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 		},
 		actions: {
 			showAll() {
-				state.isExpanded = true;
+				const context = getContext< CheckboxListContext >();
+				context.isExpanded = true;
 			},
 		},
 	},

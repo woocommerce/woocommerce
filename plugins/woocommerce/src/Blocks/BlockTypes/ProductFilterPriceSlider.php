@@ -37,10 +37,10 @@ class ProductFilterPriceSlider extends AbstractBlock {
 		}
 
 		$range_data = $block->context['woocommerceRangeInput'];
-		$min_price  = $range_data['currentMin'];
-		$max_price  = $range_data['currentMax'];
-		$min_range  = $range_data['min'];
-		$max_range  = $range_data['max'];
+		$min_range  = $range_data['min'] ?? 0;
+		$max_range  = $range_data['max'] ?? 0;
+		$min_price  = $range_data['currentMin'] ?? $min_range;
+		$max_price  = $range_data['currentMax'] ?? $max_range;
 
 		if ( $min_range === $max_range ) {
 			return '';

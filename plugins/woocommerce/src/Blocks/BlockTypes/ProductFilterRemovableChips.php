@@ -56,7 +56,7 @@ final class ProductFilterRemovableChips extends AbstractBlock {
 			<ul class="wc-block-product-filter-removable-chips__items">
 				<template
 					data-wp-each--item="state.removableItems"
-					data-wp-each-key="context.item.value"
+					data-wp-each-key="context.item.id"
 				>
 					<li class="wc-block-product-filter-removable-chips__item">
 						<span class="wc-block-product-filter-removable-chips__label" data-wp-text="context.item.label"></span>

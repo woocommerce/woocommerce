@@ -24,6 +24,7 @@ const activeFiltersStore = {
 			return activeFilters
 				.filter( ( f ) => !! f.value )
 				.map( ( f ) => ( {
+					id: f.type + '_' + f.value,
 					type: f.type,
 					value: f.value,
 					label: f.activeLabel,

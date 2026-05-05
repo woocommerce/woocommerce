@@ -360,7 +360,7 @@ class ProductFilterAttribute extends AbstractBlock {
 
 #### PHPStan Type (for static analysis)
 
-Add to `phpstan-baseline.neon` or a types file:
+Add to a dedicated types file (e.g. `phpstan.neon` or a project-level config). Do **not** add type aliases to `phpstan-baseline.neon` — the baseline is reserved for suppressing existing errors:
 
 ```neon
 parameters:
@@ -438,7 +438,7 @@ Both patterns share the same outer wrapper and protocol plumbing. The walkthroug
 - The **outer wrapper** runs in the inner namespace and carries `data-wp-context` with `storeNamespace` + `displayLimit` so the inner store can read them at runtime.
 - The **items region** nests a `data-wp-interactive="<parent-ns>"` so `data-wp-each--item="state.selectableItems"`, `data-wp-on--change="actions.toggle"`, and `data-wp-bind--checked="context.item.selected"` all resolve in the parent store (no cross-namespace syntax inside the iteration, `context.item` is set under the parent namespace which is what `state.selectableItems` and `actions.toggle` expect).
 - **Presentational bindings** that belong to the inner block use cross-namespace syntax back to the inner store: `data-wp-bind--hidden="<own-ns>::state.itemHidden"`, `data-wp-bind--style="<own-ns>::state.ratingStyle"`.
-- The **show-more button** lives outside the items region — under the inner namespace — and binds `data-wp-on--click="actions.showAll"` + `data-wp-bind--hidden="state.isExpanded"` directly.
+- The **show-more button** lives outside the items region — under the inner namespace — and binds `data-wp-on--click="actions.showAll"` + `data-wp-bind--hidden="context.isExpanded"` directly.
 
 The inner store derives per-item fields from the iteration `context.item` provided by `data-wp-each`. Since that context is in the parent namespace, the inner getter uses dynamic `getContext(storeNamespace)` — no hardcoded parent reference, keeping the inner block reusable against any parent store.
 
@@ -465,7 +465,7 @@ If pattern **B** (mirror) is chosen, the items region stays under the inner name
     </div>
     <button
       data-wp-on--click="actions.showAll"
-      data-wp-bind--hidden="state.isExpanded"
+      data-wp-bind--hidden="context.isExpanded"
     >
       Show more
     </button>
@@ -481,6 +481,7 @@ import type { DerivedSelectableItem } from '../../../../types/type-defs/selectab
 type CheckboxListContext = {
     storeNamespace: string;
     displayLimit: number;
+    isExpanded: boolean;
 };
 
 type ParentItemContext = {
@@ -489,11 +490,10 @@ type ParentItemContext = {
 
 const { state } = store( 'woocommerce/product-filter-checkbox-list', {
     state: {
-        isExpanded: false,
         get itemHidden(): boolean {
-            if ( state.isExpanded ) return false;
-            const { storeNamespace, displayLimit } =
+            const { isExpanded, storeNamespace, displayLimit } =
                 getContext< CheckboxListContext >();
+            if ( isExpanded ) return false;
             // Cross-namespace context read: pulls the wp-each iteration
             // `context.item` (stored under the parent ns) without
             // hardcoding the parent namespace.
@@ -505,7 +505,8 @@ const { state } = store( 'woocommerce/product-filter-checkbox-list', {
     },
     actions: {
         showAll() {
-            state.isExpanded = true;
+            const context = getContext< CheckboxListContext >();
+            context.isExpanded = true;
         },
     },
 }, { lock: true } );
@@ -578,7 +579,7 @@ protected function render( $attributes, $content, $block ) {
             <?php if ( $has_more_items ) : ?>
                 <button
                     data-wp-on--click="actions.showAll"
-                    data-wp-bind--hidden="state.isExpanded"
+                    data-wp-bind--hidden="context.isExpanded"
                 >
                     Show more
                 </button>

@@ -37,13 +37,20 @@ final class ProductFilterActive extends AbstractBlock {
 						if ( ! is_array( $item ) ) {
 							return null;
 						}
-						$type  = (string) ( $item['type'] ?? '' );
-						$value = (string) ( $item['value'] ?? '' );
-						$label = (string) ( $item['activeLabel'] ?? ( $item['label'] ?? '' ) );
+						$raw_type  = $item['type'] ?? '';
+						$raw_value = $item['value'] ?? '';
+						$raw_label = $item['activeLabel'] ?? ( $item['label'] ?? '' );
+						if ( ! is_scalar( $raw_type ) || ! is_scalar( $raw_value ) || ! is_scalar( $raw_label ) ) {
+							return null;
+						}
+						$type  = (string) $raw_type;
+						$value = (string) $raw_value;
+						$label = (string) $raw_label;
 						if ( '' === $type || '' === $value ) {
 							return null;
 						}
 						return array(
+							'id'    => $type . '_' . $value,
 							'type'  => $type,
 							'value' => $value,
 							'label' => $label,

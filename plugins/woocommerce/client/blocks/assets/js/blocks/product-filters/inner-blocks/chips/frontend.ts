@@ -11,6 +11,7 @@ import type { DerivedSelectableItem } from '../../../../types/type-defs/selectab
 type ChipsContext = {
 	storeNamespace: string;
 	displayLimit: number;
+	isExpanded: boolean;
 };
 
 type ParentItemContext = {
@@ -19,7 +20,6 @@ type ParentItemContext = {
 
 type ChipsStore = {
 	state: {
-		isExpanded: boolean;
 		itemHidden: boolean;
 	};
 	actions: {
@@ -38,19 +38,20 @@ const { state }: ChipsStore = store< ChipsStore >(
 	'woocommerce/product-filter-chips',
 	{
 		state: {
-			isExpanded: false,
 			get itemHidden(): boolean {
-				if ( state.isExpanded ) return false;
-				const { storeNamespace, displayLimit } =
+				const { isExpanded, storeNamespace, displayLimit } =
 					getContext< ChipsContext >();
+				if ( isExpanded ) return false;
 				const item = getParentItem( storeNamespace );
 				if ( ! item ) return false;
+				if ( item.selected ) return false;
 				return item.index >= displayLimit;
 			},
 		},
 		actions: {
 			showAll() {
-				state.isExpanded = true;
+				const context = getContext< ChipsContext >();
+				context.isExpanded = true;
 			},
 		},
 	},

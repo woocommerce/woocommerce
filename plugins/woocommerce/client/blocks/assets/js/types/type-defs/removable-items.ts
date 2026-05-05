@@ -1,4 +1,5 @@
 export interface RemovableItem {
+	id: string;
 	type: string;
 	value: string;
 	label: string;
