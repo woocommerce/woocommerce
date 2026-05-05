@@ -337,7 +337,29 @@ function wc_get_account_orders_actions( $order ) {
 		unset( $actions['cancel'] );
 	}
 
-	return apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
+	$actions = apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
+
+	// Filter out malformed action entries from third-party extensions.
+	foreach ( $actions as $key => $action ) {
+		if (
+			! is_array( $action ) ||
+			empty( $action['name'] ) ||
+			! is_scalar( $action['name'] ) ||
+			empty( $action['url'] ) ||
+			! is_scalar( $action['url'] )
+		) {
+			unset( $actions[ $key ] );
+			continue;
+		}
+
+		// Ensure aria-label is a valid string; fall back to generating one.
+		if ( empty( $action['aria-label'] ) || ! is_scalar( $action['aria-label'] ) ) {
+			/* translators: %1$s Action name, %2$s Order number. */
+			$actions[ $key ]['aria-label'] = sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $action['name'], $order->get_order_number() );
+		}
+	}
+
+	return $actions;
 }
 
 /**
