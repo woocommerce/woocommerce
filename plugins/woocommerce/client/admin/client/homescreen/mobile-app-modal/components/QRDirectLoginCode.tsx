@@ -11,9 +11,18 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { useQRLoginToken, QRLoginTokenStates } from './useQRLoginToken';
+import { useQRLoginAvailability } from './useQRLoginAvailability';
 import { QRLoginConsumedPanel } from './QRLoginConsumedPanel';
 import { QRLoginRevokedPanel } from './QRLoginRevokedPanel';
 import { QRLoginNumberMatchStep } from './QRLoginNumberMatchStep';
+import { QRLoginUnavailableCard } from './QRLoginUnavailableCard';
+
+/**
+ * Deep-link into wp-admin's Application Passwords section. Reused by the
+ * ERROR-state action when the failure is `application_passwords_unavailable`.
+ */
+const APPLICATION_PASSWORDS_SETTINGS_PATH =
+	'/wp-admin/profile.php#application-passwords-section';
 
 /**
  * Snapshot the parent receives via `onConsumed`. The success step uses its
@@ -58,7 +67,7 @@ export const QRDirectLoginCode = ( {
 	// subsequent successful refreshes (which re-enter the READY state) only
 	// emit _refreshed and don't over-count first-displays in the funnel.
 	const displayedTrackedRef = useRef( false );
-
+	const availability = useQRLoginAvailability();
 	const {
 		state,
 		qrUrl,
@@ -88,8 +97,14 @@ export const QRDirectLoginCode = ( {
 	} );
 
 	useEffect( () => {
+		// Don't even attempt to mint a token until we've heard back from
+		// `/qr-login-availability`. If the feature is unavailable, never
+		// fetch — `<QRLoginUnavailableCard />` owns the rendered state.
+		if ( availability.isLoading || ! availability.available ) {
+			return;
+		}
 		fetchToken();
-	}, [ fetchToken ] );
+	}, [ availability.isLoading, availability.available, fetchToken ] );
 
 	// Bubble the consumed snapshot up to the parent so it can advance its
 	// own stepper to the third step. Standalone surfaces don't pass
@@ -106,6 +121,24 @@ export const QRDirectLoginCode = ( {
 		return `${ mins }:${ secs.toString().padStart( 2, '0' ) }`;
 	};
 
+	// Up-front availability gate — render a brief loading state while the
+	// /qr-login-availability probe resolves, then either the disabled card
+	// (terminal) or fall through to the normal state machine below.
+	if ( availability.isLoading ) {
+		return (
+			<div className="qr-direct-login">
+				<Spinner />
+				<p role="status" aria-live="polite">
+					{ __( 'Checking sign-in availability…', 'woocommerce' ) }
+				</p>
+			</div>
+		);
+	}
+
+	if ( ! availability.available ) {
+		return <QRLoginUnavailableCard reason={ availability.reason } />;
+	}
+
 	if ( state === QRLoginTokenStates.LOADING ) {
 		return (
 			<div className="woocommerce-qr-direct-login">
@@ -118,6 +151,14 @@ export const QRDirectLoginCode = ( {
 	}
 
 	if ( state === QRLoginTokenStates.ERROR ) {
+		// "Try again" only makes sense when retrying could succeed. For
+		// `application_passwords_unavailable` the failure is structural —
+		// nothing about retrying changes the site's AP configuration — so
+		// swap in a one-click shortcut to wp-admin's Application Passwords
+		// settings instead.
+		const isStructuralAPFailure =
+			errorCode === 'application_passwords_unavailable';
+
 		return (
 			<div className="woocommerce-qr-direct-login">
 				<p
@@ -127,15 +168,36 @@ export const QRDirectLoginCode = ( {
 				>
 					{ errorMessage }
 				</p>
-				<Button
-					variant="secondary"
-					onClick={ () => {
-						recordEvent( 'mobile_app_qr_direct_login_refreshed' );
-						refreshToken();
-					} }
-				>
-					{ __( 'Try again', 'woocommerce' ) }
-				</Button>
+				{ isStructuralAPFailure ? (
+					<Button
+						variant="secondary"
+						className="qr-direct-login__open-ap-settings"
+						href={ APPLICATION_PASSWORDS_SETTINGS_PATH }
+						onClick={ () => {
+							recordEvent(
+								'mobile_app_qr_direct_login_open_ap_settings',
+								{ reason: 'error_state' }
+							);
+						} }
+					>
+						{ __(
+							'Open Application Passwords settings',
+							'woocommerce'
+						) }
+					</Button>
+				) : (
+					<Button
+						variant="secondary"
+						onClick={ () => {
+							recordEvent(
+								'mobile_app_qr_direct_login_refreshed'
+							);
+							refreshToken();
+						} }
+					>
+						{ __( 'Try again', 'woocommerce' ) }
+					</Button>
+				) }
 			</div>
 		);
 	}

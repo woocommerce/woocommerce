@@ -187,3 +187,53 @@
 		color: $gray-900;
 	}
 }
+
+// UNAVAILABLE state. Rendered when /qr-login-availability returns
+// `available: false` — typically because a security plugin or a custom
+// filter has disabled application passwords. Stacked column layout matches
+// the other terminal states (REJECTED, EXPIRED) for visual consistency.
+.qr-direct-login.qr-direct-login--unavailable {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 16px;
+
+	.qr-direct-login__unavailable-notice {
+		// The default Notice has a left margin from the WP admin chrome
+		// that doesn't fit inside the modal column — strip it.
+		margin: 0;
+	}
+
+	.qr-direct-login__why {
+		font-size: 13px;
+		line-height: 1.5;
+		color: #50575e;
+
+		summary {
+			cursor: pointer;
+			user-select: none;
+			padding: 4px 0;
+			color: #007cba;
+
+			&:hover {
+				color: #005a87;
+			}
+		}
+
+		ul {
+			margin: 8px 0 0 18px;
+			padding: 0;
+			list-style: disc;
+		}
+
+		li + li {
+			margin-top: 4px;
+		}
+	}
+
+	button.components-button.qr-direct-login__open-ap-settings {
+		// Center the CTA so it visually anchors the card the same way
+		// "Start over" does in the REJECTED state.
+		align-self: center;
+	}
+}
