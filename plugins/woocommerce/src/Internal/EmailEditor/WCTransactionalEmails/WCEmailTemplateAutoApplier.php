@@ -174,14 +174,17 @@ class WCEmailTemplateAutoApplier {
 				return $updated;
 			}
 
+			// Read back the persisted post_content. The `content_save_pre` filter
+			// chain can mutate `$canonical` between the in-memory string and what
+			// lands in the DB, so both the returned `content` field and the
+			// stamped source hash must reflect what the database actually holds.
+			// See the same note in `WCEmailTemplateSelectiveApplier::apply_selectively()`.
+			$saved_post = get_post( $post_id );
+			$saved_body = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : $canonical;
+			$canonical  = $saved_body;
+
 			if ( null !== $sync_config ) {
-				// Hash the post_content WordPress actually persisted — see the same
-				// note in `WCEmailTemplateSelectiveApplier::apply_selectively()`. The
-				// `content_save_pre` filter chain can mutate `$canonical` between the
-				// in-memory string and what lands in the DB.
-				$saved_post  = get_post( $post_id );
-				$saved_body  = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : $canonical;
-				$source_hash = sha1( $saved_body );
+				$source_hash = sha1( $canonical );
 				$synced_at   = gmdate( 'Y-m-d H:i:s' );
 				$version     = (string) $sync_config['version'];
 
