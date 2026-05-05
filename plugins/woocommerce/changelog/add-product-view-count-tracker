@@ -1,0 +1,3 @@
+Significance: minor
+Type: add
+Comment: Add product view count tracker — stores per-product page view counts in post meta, exposes them via the Store API, and adds a sortable Views column to the admin products list
