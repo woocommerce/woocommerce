@@ -31,6 +31,42 @@ const ColorField = ( { input }: { input: HTMLInputElement } ) => {
 	const [ isPopoverVisible, setIsPopoverVisible ] = useState( false );
 	const triggerRef = useRef< HTMLButtonElement | null >( null );
 
+	// Listen to changes in the input field. Because WP core uses jQuery, we
+	// can't listen to native `change` and `input` events. Instead, we override
+	// the `value` property to sync input changes to the color picker.
+	// @see https://github.com/WordPress/wordpress-develop/blob/bd4e3c97903743ab455682f32dbf38d1b38b715a/src/js/_enqueues/admin/tags.js#L194
+	useEffect( () => {
+		const syncColorWithInput = ( nextValue: string ) => {
+			const nextColor = normalizeColor( nextValue );
+
+			setColor( nextColor );
+		};
+		const inputPrototype = HTMLInputElement.prototype;
+		const valueDescriptor = Object.getOwnPropertyDescriptor(
+			inputPrototype,
+			'value'
+		);
+		let hasValueOverride = false;
+
+		if ( valueDescriptor?.get && valueDescriptor.set ) {
+			Object.defineProperty( input, 'value', {
+				...valueDescriptor,
+				configurable: true,
+				set( nextValue: string ) {
+					valueDescriptor.set?.call( this, nextValue );
+					syncColorWithInput( nextValue );
+				},
+			} );
+			hasValueOverride = true;
+		}
+
+		return () => {
+			if ( hasValueOverride ) {
+				delete ( input as { value?: string } ).value;
+			}
+		};
+	}, [ input ] );
+
 	useEffect( () => {
 		if ( normalizeColor( input.value ) === color ) {
 			return;
