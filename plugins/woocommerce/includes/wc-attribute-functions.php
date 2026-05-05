@@ -737,6 +737,7 @@ function wc_delete_attribute( $id ) {
 			foreach ( $terms as $term ) {
 				wp_delete_term( $term->term_id, $taxonomy );
 			}
+			unregister_taxonomy( $taxonomy );
 		}
 
 		/**

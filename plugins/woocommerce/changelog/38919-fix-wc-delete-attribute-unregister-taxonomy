@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix wc_delete_attribute not unregistering the taxonomy, which prevented re-creating an attribute with the same slug in the same request.

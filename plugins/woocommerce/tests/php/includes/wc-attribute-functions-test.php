@@ -170,6 +170,32 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that wc_delete_attribute unregisters the taxonomy so the same slug can be re-created.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/38919
+	 */
+	public function test_wc_delete_attribute_unregisters_taxonomy() {
+		$id = wc_create_attribute( array( 'name' => 'ReproColor', 'slug' => 'reprocolor' ) );
+		$this->assertIsInt( $id, 'Attribute should be created successfully.' );
+
+		$taxonomy = wc_attribute_taxonomy_name( 'reprocolor' );
+
+		// Simulate WooCommerce registering the taxonomy at init (which would have happened in a real request).
+		register_taxonomy( $taxonomy, array( 'product' ) );
+		$this->assertTrue( taxonomy_exists( $taxonomy ), 'Taxonomy should be registered before deletion.' );
+
+		wc_delete_attribute( $id );
+
+		$this->assertFalse( taxonomy_exists( $taxonomy ), 'Taxonomy should be unregistered after wc_delete_attribute.' );
+
+		// Re-creating with the same slug should now succeed (not return a WP_Error).
+		$new_id = wc_create_attribute( array( 'name' => 'ReproColor', 'slug' => 'reprocolor' ) );
+		$this->assertIsInt( $new_id, 'Attribute should be re-creatable with the same slug after deletion.' );
+
+		wc_delete_attribute( $new_id );
+	}
+
+	/**
 	 * Describes the behavior of the wc_update_attribute() function.
 	 *
 	 * @return void
