@@ -12,7 +12,7 @@ The Store API follows REST conventions more strictly than the older `/wc/v3/*` a
 
 **Don't accept POST data via query string.** WordPress's `WP_REST_Request::get_param()` is permissive — it'll find values from any source. That's a debugging convenience, not a design statement. Production clients should send JSON bodies; document the canonical shape in the schema.
 
-**GET must not have a body.** HTTP forbids it (RFC 9110 §9.3.1). Browsers' `fetch()` enforces this; servers and proxies may drop it silently. Filter with the query string.
+**Don't put a body on a GET.** RFC 9110 §9.3.1 leaves GET-body semantics undefined and SHOULD NOT's the practice; servers, proxies, and CDNs are free to reject or ignore the body. Browsers' `fetch()` refuses to send one outright. Filter via the query string instead.
 
 **GET must not have side effects.** Caches, prefetchers, browser history, retries, security scanners — anything that thinks GET is safe will silently repeat the request. Auto-create-on-read patterns are allowed only as in-memory materialisation; persist on the first explicit write, never inside a GET handler.
 
