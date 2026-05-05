@@ -29,6 +29,11 @@ const buildResponse = ( ttl: number = TTL_SECONDS ) => ( {
 // backend no longer returns it after WOOMOB-2764 and the hook no longer
 // branches on it. If it ever shows up again we want it to fall through to
 // the generic message (verified by the `unknown error code` test).
+//
+// `application_passwords_unavailable` is intentionally *not* listed either —
+// its message is a `ReactNode` (it embeds an inline link to the WordPress
+// docs) rather than a plain string, so it has its own dedicated test below
+// that asserts on `errorCode` + structural properties of the message.
 const expectedErrorMessages: Array< {
 	code: string;
 	message: RegExp;
@@ -40,10 +45,6 @@ const expectedErrorMessages: Array< {
 	{
 		code: 'ssl_required',
 		message: /requires an HTTPS connection/i,
-	},
-	{
-		code: 'application_passwords_unavailable',
-		message: /Application passwords are disabled/i,
 	},
 	{
 		code: 'rate_limit_exceeded',
@@ -76,6 +77,7 @@ describe( 'useQRLoginToken', () => {
 		expect( result.current.qrUrl ).toBeNull();
 		expect( result.current.secondsRemaining ).toBe( 0 );
 		expect( result.current.errorMessage ).toBeNull();
+		expect( result.current.errorCode ).toBeNull();
 	} );
 
 	it( 'transitions IDLE → LOADING → READY on successful fetch', async () => {
@@ -159,9 +161,34 @@ describe( 'useQRLoginToken', () => {
 
 			expect( result.current.state ).toBe( QRLoginTokenStates.ERROR );
 			expect( result.current.qrUrl ).toBeNull();
+			expect( result.current.errorCode ).toBe( code );
 			expect( result.current.errorMessage ).toMatch( message );
 		}
 	);
+
+	it( 'surfaces the application_passwords_unavailable case with a ReactNode message + docs link', async () => {
+		mockApiFetch.mockRejectedValue( {
+			code: 'application_passwords_unavailable',
+			message: 'Backend said application_passwords_unavailable',
+		} );
+
+		const { result } = renderHook( () => useQRLoginToken() );
+
+		await act( async () => {
+			await result.current.fetchToken();
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.ERROR );
+		expect( result.current.errorCode ).toBe(
+			'application_passwords_unavailable'
+		);
+		// The message is a ReactNode (interpolated with an inline link), so
+		// we can't `toMatch` against a string. Just confirm it's set and not
+		// null — the rendering surface is `<QRDirectLoginCode />` and the
+		// link visibility is covered there.
+		expect( result.current.errorMessage ).not.toBeNull();
+		expect( typeof result.current.errorMessage ).not.toBe( 'string' );
+	} );
 
 	it( 'falls back to the backend-provided message for unknown error codes', async () => {
 		mockApiFetch.mockRejectedValue( {
@@ -219,6 +246,7 @@ describe( 'useQRLoginToken', () => {
 		} );
 		expect( result.current.state ).toBe( QRLoginTokenStates.LOADING );
 		expect( result.current.errorMessage ).toBeNull();
+		expect( result.current.errorCode ).toBeNull();
 
 		await act( async () => {
 			await retryPromise;
