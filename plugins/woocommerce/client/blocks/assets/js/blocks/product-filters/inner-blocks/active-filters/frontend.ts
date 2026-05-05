@@ -33,7 +33,12 @@ const activeFiltersStore = {
 		get removeItemLabel() {
 			const { item } = getContext< RemovableItemContext >();
 			const { removeLabelTemplate } = getConfig();
-			return removeLabelTemplate.replace( '{{label}}', item.label );
+			const template =
+				typeof removeLabelTemplate === 'string'
+					? removeLabelTemplate
+					: '{{label}}';
+			const label = typeof item?.label === 'string' ? item.label : '';
+			return template.replace( '{{label}}', label );
 		},
 		get hasActiveFilters() {
 			const { activeFilters } = getContext< ProductFiltersContext >();

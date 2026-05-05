@@ -143,7 +143,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 									<?php endif; ?>
 									<?php if ( isset( $item['count'] ) ) : ?>
 										<span class="wc-block-product-filter-checkbox-list__count">
-											(<?php echo esc_html( $item['count'] ); ?>)
+											(<span data-wp-text="context.item.count"><?php echo esc_html( $item['count'] ); ?></span>)
 										</span>
 									<?php endif; ?>
 								</span>
