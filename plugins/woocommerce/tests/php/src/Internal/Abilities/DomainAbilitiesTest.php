@@ -21,9 +21,12 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 	 */
 	private $registered_ability_ids = array(
 		'woocommerce/products-query',
-		'woocommerce/products-manage',
+		'woocommerce/product-create',
+		'woocommerce/product-update',
+		'woocommerce/product-delete',
 		'woocommerce/orders-query',
-		'woocommerce/orders-manage',
+		'woocommerce/order-update-status',
+		'woocommerce/order-add-note',
 	);
 
 	/**
@@ -143,9 +146,19 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test canonical abilities register with MCP metadata for the upstream adapter.
+	 * @testdox Should register canonical abilities with MCP metadata for the upstream adapter.
 	 */
 	public function test_canonical_abilities_register_with_mcp_metadata(): void {
+		$expected_operations = array(
+			'woocommerce/products-query'      => 'query',
+			'woocommerce/product-create'      => 'create',
+			'woocommerce/product-update'      => 'update',
+			'woocommerce/product-delete'      => 'delete',
+			'woocommerce/orders-query'        => 'query',
+			'woocommerce/order-update-status' => 'update-status',
+			'woocommerce/order-add-note'      => 'add-note',
+		);
+
 		foreach ( $this->registered_ability_ids as $ability_id ) {
 			$ability = wp_get_ability( $ability_id );
 
@@ -155,8 +168,13 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 			$meta = $ability->get_meta();
 			$this->assertTrue( $meta['show_in_rest'] );
 			$this->assertSame( 'domain-api', $meta['woocommerce_ability_source'] );
+			$this->assertSame( $expected_operations[ $ability_id ], $meta['woocommerce_ability_operation'] );
 			$this->assertTrue( $meta['mcp']['public'] );
 			$this->assertSame( 'tool', $meta['mcp']['type'] );
+			$this->assertArrayHasKey( 'readonly', $meta['annotations'] );
+			$this->assertArrayHasKey( 'destructive', $meta['annotations'] );
+			$this->assertArrayHasKey( 'idempotent', $meta['annotations'] );
+			$this->assertArrayNotHasKey( 'expose_in_deprecated_woocommerce_mcp', $meta );
 		}
 	}
 
@@ -186,12 +204,11 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test creating and updating a product.
+	 * @testdox Should create and update a product.
 	 */
-	public function test_products_manage_create_and_update(): void {
-		$created = wp_get_ability( 'woocommerce/products-manage' )->execute(
+	public function test_product_create_and_update(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'action'        => 'create',
 				'type'          => 'simple',
 				'name'          => 'Domain Managed Product',
 				'sku'           => 'domain-managed-product',
@@ -203,13 +220,11 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 		$product_id                  = $created['product']['id'];
 		$this->created_product_ids[] = $product_id;
 
-		$this->assertSame( 'create', $created['action'] );
 		$this->assertSame( 'Domain Managed Product', $created['product']['name'] );
 		$this->assertSame( '19.99', $created['product']['regular_price'] );
 
-		$updated = wp_get_ability( 'woocommerce/products-manage' )->execute(
+		$updated = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
-				'action'        => 'update',
 				'id'            => $product_id,
 				'name'          => 'Domain Managed Product Updated',
 				'regular_price' => '24.99',
@@ -217,9 +232,29 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $updated );
-		$this->assertSame( 'update', $updated['action'] );
 		$this->assertSame( 'Domain Managed Product Updated', $updated['product']['name'] );
 		$this->assertSame( '24.99', $updated['product']['regular_price'] );
+	}
+
+	/**
+	 * @testdox Should delete a product.
+	 */
+	public function test_product_delete(): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		$deleted = wp_get_ability( 'woocommerce/product-delete' )->execute(
+			array(
+				'id'    => $product->get_id(),
+				'force' => true,
+			)
+		);
+
+		$this->assertNotWPError( $deleted );
+		$this->assertTrue( $deleted['deleted'] );
+		$this->assertSame( $product->get_id(), $deleted['id'] );
+
+		$this->created_product_ids = array_diff( $this->created_product_ids, array( $product->get_id() ) );
 	}
 
 	/**
@@ -246,34 +281,30 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating order status and adding an order note.
+	 * @testdox Should update order status and add an order note.
 	 */
-	public function test_orders_manage_update_status_and_add_note(): void {
+	public function test_order_update_status_and_add_note(): void {
 		$order                     = \WC_Helper_Order::create_order();
 		$this->created_order_ids[] = $order->get_id();
 
-		$updated = wp_get_ability( 'woocommerce/orders-manage' )->execute(
+		$updated = wp_get_ability( 'woocommerce/order-update-status' )->execute(
 			array(
-				'action' => 'update_status',
 				'id'     => $order->get_id(),
 				'status' => 'processing',
 			)
 		);
 
 		$this->assertNotWPError( $updated );
-		$this->assertSame( 'update_status', $updated['action'] );
 		$this->assertSame( 'processing', $updated['order']['status'] );
 
-		$note = wp_get_ability( 'woocommerce/orders-manage' )->execute(
+		$note = wp_get_ability( 'woocommerce/order-add-note' )->execute(
 			array(
-				'action' => 'add_note',
-				'id'     => $order->get_id(),
-				'note'   => 'Domain ability order note.',
+				'id'   => $order->get_id(),
+				'note' => 'Domain ability order note.',
 			)
 		);
 
 		$this->assertNotWPError( $note );
-		$this->assertSame( 'add_note', $note['action'] );
 		$this->assertGreaterThan( 0, $note['note_id'] );
 	}
 
