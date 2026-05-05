@@ -198,7 +198,11 @@ class EmailLogger implements RegisterHooksInterface {
 		}
 
 		$id = null;
-		if ( method_exists( $wc_object, 'get_id' ) ) {
+		if ( in_array( $type, array( 'order', 'product', 'user' ), true ) ) {
+			// Known WooCommerce / WordPress types with a stable get_id() signature —
+			// skip the reflection round-trip on this hot path.
+			$id = (int) $wc_object->get_id();
+		} elseif ( method_exists( $wc_object, 'get_id' ) ) {
 			try {
 				$method = new \ReflectionMethod( $wc_object, 'get_id' );
 				if ( 0 === $method->getNumberOfRequiredParameters() ) {
