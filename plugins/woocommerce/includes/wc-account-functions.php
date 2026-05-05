@@ -339,23 +339,38 @@ function wc_get_account_orders_actions( $order ) {
 
 	$actions = apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
 
+	if ( ! is_array( $actions ) ) {
+		return array();
+	}
+
 	// Filter out malformed action entries from third-party extensions.
 	foreach ( $actions as $key => $action ) {
 		if (
 			! is_array( $action ) ||
-			empty( $action['name'] ) ||
-			! is_scalar( $action['name'] ) ||
-			empty( $action['url'] ) ||
-			! is_scalar( $action['url'] )
+			! isset( $action['name'], $action['url'] ) ||
+			! is_string( $action['name'] ) ||
+			! is_string( $action['url'] )
 		) {
 			unset( $actions[ $key ] );
 			continue;
 		}
 
-		// Ensure aria-label is a valid string; fall back to generating one.
-		if ( empty( $action['aria-label'] ) || ! is_scalar( $action['aria-label'] ) ) {
+		$action_name = trim( $action['name'] );
+		$action_url  = trim( $action['url'] );
+		if ( '' === $action_name || '' === $action_url ) {
+			unset( $actions[ $key ] );
+			continue;
+		}
+
+		$actions[ $key ]['name'] = $action_name;
+		$actions[ $key ]['url']  = $action_url;
+
+		// Ensure aria-label is a valid non-empty string; fall back to generating one.
+		if ( empty( $action['aria-label'] ) || ! is_string( $action['aria-label'] ) || '' === trim( $action['aria-label'] ) ) {
 			/* translators: %1$s Action name, %2$s Order number. */
-			$actions[ $key ]['aria-label'] = sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $action['name'], $order->get_order_number() );
+			$actions[ $key ]['aria-label'] = sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $action_name, $order->get_order_number() );
+		} else {
+			$actions[ $key ]['aria-label'] = trim( $action['aria-label'] );
 		}
 	}
 
