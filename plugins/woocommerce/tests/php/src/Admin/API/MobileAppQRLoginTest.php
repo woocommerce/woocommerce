@@ -294,6 +294,11 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_\\_wc\\_qr\\_login\\_session\\_%' ESCAPE '\\\\' OR option_name LIKE '\\_transient\\_timeout\\_\\_wc\\_qr\\_login\\_session\\_%' ESCAPE '\\\\'"
 		);
 
+		// Remove database-backed token exchange claims.
+		$wpdb->query(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_wc\\_qr\\_login\\_claim\\_%' ESCAPE '\\\\'"
+		);
+
 		wp_cache_flush();
 	}
 
@@ -699,8 +704,11 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			$this->assertSame( 501, $response->get_status() );
 			$this->assertSame( 'application_passwords_unavailable', $response->get_data()['code'] );
 			$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
-			$this->assertIsArray( get_transient( $this->token_transient_key( $plaintext ) ) );
-			$this->assertFalse( get_option( $this->token_claim_key( $plaintext ), false ) );
+			$this->assertSame(
+				MobileAppQRLogin::STATE_APPROVED,
+				get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
+			);
+			$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
 		} finally {
 			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
 		}
@@ -890,37 +898,36 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox An active database claim blocks a duplicate exchange before an Application Password is created.
 	 */
 	public function test_exchange_token_active_claim_blocks_duplicate_exchange(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
-		$claim_key = $this->token_claim_key( $plaintext );
+		$prep      = $this->prepare_exchange_token();
+		$claim_key = $this->token_claim_key( $prep['plaintext'] );
 
 		$this->assertTrue(
 			add_option( $claim_key, (string) ( time() + MobileAppQRLogin::TOKEN_TTL ), '', false )
 		);
 
-		wp_set_current_user( 0 );
-		$response = $this->dispatch_exchange( $plaintext );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 		$this->assertSame( 401, $response->get_status() );
 		$this->assertSame( 'invalid_token', $response->get_data()['code'] );
 		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
-		$this->assertIsArray( get_transient( $this->token_transient_key( $plaintext ) ) );
+		$this->assertSame(
+			MobileAppQRLogin::STATE_APPROVED,
+			get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
+		);
 	}
 
 	/**
 	 * @testdox A stale database claim is cleaned up and the token can be exchanged.
 	 */
 	public function test_exchange_token_reclaims_stale_claim(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
-		$claim_key = $this->token_claim_key( $plaintext );
+		$prep      = $this->prepare_exchange_token();
+		$claim_key = $this->token_claim_key( $prep['plaintext'] );
 
 		$this->assertTrue(
 			add_option( $claim_key, (string) ( time() - 60 ), '', false )
 		);
 
-		wp_set_current_user( 0 );
-		$response = $this->dispatch_exchange( $plaintext );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertCount( 1, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
@@ -964,13 +971,16 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 			$this->assertSame( 500, $response->get_status() );
 			$this->assertSame( 'application_password_failed', $response->get_data()['code'] );
-			$this->assertIsArray( get_transient( $this->token_transient_key( $plaintext ) ) );
-			$this->assertFalse( get_option( $this->token_claim_key( $plaintext ), false ) );
+			$this->assertSame(
+				MobileAppQRLogin::STATE_APPROVED,
+				get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
+			);
+			$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
 		} finally {
 			remove_filter( 'update_user_metadata', $deny_meta, 10 );
 		}
 
-		$retry = $this->dispatch_exchange( $plaintext );
+		$retry = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 		$this->assertSame( 200, $retry->get_status() );
 		$this->assertCount( 1, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
@@ -1060,10 +1070,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Random invalid exchange attempts do not exhaust a later valid-token exchange from the same IP.
 	 */
 	public function test_invalid_exchange_attempts_do_not_block_valid_token_from_same_ip(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+		$prep = $this->prepare_exchange_token();
 
-		wp_set_current_user( 0 );
 		for ( $i = 0; $i < MobileAppQRLogin::MAX_EXCHANGE_ATTEMPTS; $i++ ) {
 			$this->assertSame( 401, $this->dispatch_exchange( 'random-invalid-' . $i )->get_status() );
 		}
@@ -1072,7 +1080,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			'Invalid-token traffic must not create a broad exchange-IP row.'
 		);
 
-		$response = $this->dispatch_exchange( $plaintext );
+		$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertCount( 1, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
@@ -1086,15 +1094,13 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * @testdox Valid-token exchange attempts are limited per token.
 	 */
 	public function test_valid_exchange_attempts_are_limited_per_token(): void {
-		wp_set_current_user( $this->admin_id );
-		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+		$prep = $this->prepare_exchange_token();
 
 		add_filter( 'wp_is_application_passwords_available', '__return_false' );
 
 		try {
-			wp_set_current_user( 0 );
 			for ( $i = 1; $i <= MobileAppQRLogin::MAX_EXCHANGE_ATTEMPTS; $i++ ) {
-				$response = $this->dispatch_exchange( $plaintext );
+				$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 				$this->assertSame(
 					501,
 					$response->get_status(),
@@ -1102,15 +1108,18 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 				);
 			}
 
-			$response = $this->dispatch_exchange( $plaintext );
+			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
 
 			$this->assertSame( 429, $response->get_status() );
 			$this->assertSame( 'rate_limit_exceeded', $response->get_data()['code'] );
-			$this->assertIsArray( get_transient( $this->token_transient_key( $plaintext ) ) );
-			$this->assertFalse( get_option( $this->token_claim_key( $plaintext ), false ) );
+			$this->assertSame(
+				MobileAppQRLogin::STATE_APPROVED,
+				get_transient( $this->token_transient_key( $prep['plaintext'] ) )['state']
+			);
+			$this->assertFalse( get_option( $this->token_claim_key( $prep['plaintext'] ), false ) );
 		} finally {
 			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
-		}
+		}//end try
 	}
 
 	// -----------------------------------------------------------------------
@@ -1194,7 +1203,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * caring about the number-matching details.
 	 *
 	 * @param array<string, string>|null $device Optional device payload to thread through scan.
-	 * @return array{plaintext: string, exchange_grant: string}
+	 * @return array{plaintext: string, session_id: string, exchange_grant: string}
 	 */
 	private function prepare_exchange_token( ?array $device = null ): array {
 		$plaintext = $this->generate_token_as_admin();
@@ -1206,6 +1215,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		return array(
 			'plaintext'      => $plaintext,
+			'session_id'     => $flow['session_id'],
 			'exchange_grant' => $flow['exchange_grant'],
 		);
 	}
@@ -1745,6 +1755,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 412, $response->get_status() );
 		$this->assertSame( 'qr_login_not_approved', $response->get_data()['code'] );
 		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ), 'No AP must be issued without approval.' );
+
+		$record = get_transient( $this->token_transient_key( $plaintext ) );
+		$this->assertIsArray( $record );
+		$this->assertSame( MobileAppQRLogin::STATE_SCANNED, $record['state'] );
 	}
 
 	/**
@@ -1762,6 +1776,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 412, $response->get_status() );
 		$this->assertSame( 'qr_login_not_approved', $response->get_data()['code'] );
 		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ), 'Skipping scan must not be a path to mint an AP.' );
+
+		$record = get_transient( $this->token_transient_key( $plaintext ) );
+		$this->assertIsArray( $record );
+		$this->assertSame( MobileAppQRLogin::STATE_PENDING, $record['state'] );
 	}
 
 	/**
@@ -1776,9 +1794,40 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 'invalid_exchange_grant', $response->get_data()['code'] );
 		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ), 'Grant mismatch must not produce an AP.' );
 
-		// Also: that one mismatched attempt has burned the token (delete_transient on grant fail) — no replay.
-		$record = get_transient( MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $prep['plaintext'] ) );
-		$this->assertFalse( $record, 'Grant mismatch must delete the token transient — single-use semantics.' );
+		$record = get_transient( $this->token_transient_key( $prep['plaintext'] ) );
+		$this->assertIsArray( $record );
+		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $record['state'] );
+		$this->assertSame( 1, $record['invalid_grant_attempts'] );
+
+		$retry = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+		$this->assertSame( 200, $retry->get_status() );
+		$this->assertCount( 1, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+	}
+
+	/**
+	 * @testdox Repeated invalid exchange grants terminally reject the token after the threshold.
+	 */
+	public function test_exchange_rejects_after_invalid_grant_threshold(): void {
+		$prep = $this->prepare_exchange_token();
+
+		for ( $i = 1; $i <= MobileAppQRLogin::MAX_INVALID_GRANT_ATTEMPTS; $i++ ) {
+			$response = $this->dispatch_exchange(
+				$prep['plaintext'],
+				str_repeat( (string) $i, strlen( $prep['exchange_grant'] ) )
+			);
+			$this->assertSame( 412, $response->get_status() );
+			$this->assertSame( 'invalid_exchange_grant', $response->get_data()['code'] );
+		}
+
+		$record = get_transient( $this->token_transient_key( $prep['plaintext'] ) );
+		$this->assertIsArray( $record );
+		$this->assertSame( MobileAppQRLogin::STATE_REJECTED, $record['state'] );
+		$this->assertSame( MobileAppQRLogin::MAX_INVALID_GRANT_ATTEMPTS, $record['invalid_grant_attempts'] );
+		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+
+		$status = $this->dispatch_session_status( $prep['session_id'] );
+		$this->assertSame( 200, $status->get_status() );
+		$this->assertSame( MobileAppQRLogin::STATE_REJECTED, $status->get_data()['state'] );
 	}
 
 	/**
