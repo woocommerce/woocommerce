@@ -28,6 +28,7 @@ class AbilitiesRegistry {
 	 * Initialize all WooCommerce abilities.
 	 */
 	private function init_abilities(): void {
+		// TODO: Remove the wordpress/abilities-api Composer polyfill when WooCommerce requires WordPress 6.9+.
 		AbilitiesCategories::init();
 		DomainAbilities::init();
 		AbilitiesRestBridge::init();

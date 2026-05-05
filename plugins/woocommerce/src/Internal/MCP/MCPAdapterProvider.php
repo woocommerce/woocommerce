@@ -36,6 +36,32 @@ class MCPAdapterProvider {
 	const MCP_ROUTE = 'mcp';
 
 	/**
+	 * MCP adapter class name.
+	 *
+	 * @var string
+	 */
+	private const MCP_ADAPTER_CLASS = 'WP\MCP\Core\McpAdapter';
+
+	/**
+	 * Number of arguments WooCommerce passes to McpAdapter::create_server().
+	 *
+	 * @var int
+	 */
+	private const CREATE_SERVER_ARGUMENT_COUNT = 10;
+
+	/**
+	 * MCP adapter classes WooCommerce needs at runtime.
+	 *
+	 * @var array<string, string>
+	 */
+	private const REQUIRED_MCP_ADAPTER_CLASSES = array(
+		'WP\MCP\Infrastructure\ErrorHandling\ErrorLogMcpErrorHandler'       => 'MCP error handler',
+		'WP\MCP\Infrastructure\Observability\NullMcpObservabilityHandler'  => 'MCP observability handler',
+		'WP\MCP\Transport\HttpTransport'                                   => 'MCP HTTP transport',
+		'WP\MCP\Transport\Infrastructure\McpTransportContext'              => 'MCP transport context',
+	);
+
+	/**
 	 * Whether MCP adapter is initialized.
 	 *
 	 * @var bool
@@ -68,28 +94,151 @@ class MCPAdapterProvider {
 			return;
 		}
 
-		$this->initialize_mcp_adapter();
+		if ( ! $this->initialize_mcp_adapter() ) {
+			return;
+		}
+
 		$this->register_hooks();
 		$this->initialized = true;
 	}
 
 	/**
 	 * Initialize the MCP adapter.
+	 *
+	 * @return bool Whether the MCP adapter was initialized.
 	 */
-	private function initialize_mcp_adapter(): void {
-		// Check if MCP adapter class exists (should be autoloaded by WooCommerce's composer).
-		if ( ! class_exists( 'WP\MCP\Core\McpAdapter' ) ) {
-			if ( function_exists( 'wc_get_logger' ) ) {
-				wc_get_logger()->warning(
-					'MCP adapter class not found. Skipping MCP initialization.',
-					array( 'source' => 'woocommerce-mcp' )
-				);
-			}
-			return;
+	private function initialize_mcp_adapter(): bool {
+		$compatibility_errors = self::get_mcp_adapter_compatibility_errors();
+
+		if ( ! empty( $compatibility_errors ) ) {
+			$this->log_mcp_adapter_compatibility_errors( $compatibility_errors );
+			return false;
 		}
 
 		// Initialize the MCP adapter instance - this triggers the rest_api_init hook registration.
 		\WP\MCP\Core\McpAdapter::instance();
+
+		return true;
+	}
+
+	/**
+	 * Get MCP adapter compatibility errors for the loaded runtime.
+	 *
+	 * @return array Compatibility error messages.
+	 */
+	public static function get_mcp_adapter_compatibility_errors(): array {
+		return self::get_mcp_adapter_compatibility_errors_for(
+			self::MCP_ADAPTER_CLASS,
+			self::REQUIRED_MCP_ADAPTER_CLASSES,
+			self::CREATE_SERVER_ARGUMENT_COUNT
+		);
+	}
+
+	/**
+	 * Get MCP adapter compatibility errors for a specific adapter API shape.
+	 *
+	 * @param string $adapter_class                MCP adapter class name.
+	 * @param array  $required_classes             Required class names keyed by class and labelled by dependency role.
+	 * @param int    $create_server_argument_count Number of arguments WooCommerce passes to create_server().
+	 * @return array Compatibility error messages.
+	 */
+	private static function get_mcp_adapter_compatibility_errors_for( string $adapter_class, array $required_classes, int $create_server_argument_count ): array {
+		$errors = array();
+
+		if ( ! class_exists( $adapter_class ) ) {
+			$errors[] = sprintf(
+				'MCP adapter class %s was not found.',
+				$adapter_class
+			);
+		} else {
+			$errors = array_merge(
+				$errors,
+				self::get_mcp_adapter_method_compatibility_errors( $adapter_class, $create_server_argument_count )
+			);
+		}
+
+		foreach ( $required_classes as $class_name => $class_description ) {
+			if ( ! class_exists( $class_name ) ) {
+				$errors[] = sprintf(
+					'Required %1$s class %2$s was not found.',
+					$class_description,
+					$class_name
+				);
+			}
+		}
+
+		return $errors;
+	}
+
+	/**
+	 * Get compatibility errors for the MCP adapter methods WooCommerce calls.
+	 *
+	 * @param string $adapter_class                MCP adapter class name.
+	 * @param int    $create_server_argument_count Number of arguments WooCommerce passes to create_server().
+	 * @return array Compatibility error messages.
+	 */
+	private static function get_mcp_adapter_method_compatibility_errors( string $adapter_class, int $create_server_argument_count ): array {
+		$errors = array();
+
+		if ( ! method_exists( $adapter_class, 'instance' ) ) {
+			$errors[] = sprintf(
+				'MCP adapter class %s is missing the instance() method.',
+				$adapter_class
+			);
+		} else {
+			$instance_method = new \ReflectionMethod( $adapter_class, 'instance' );
+			if ( ! $instance_method->isPublic() || ! $instance_method->isStatic() ) {
+				$errors[] = sprintf(
+					'MCP adapter class %s must provide a public static instance() method.',
+					$adapter_class
+				);
+			}
+		}
+
+		if ( ! method_exists( $adapter_class, 'create_server' ) ) {
+			$errors[] = sprintf(
+				'MCP adapter class %s is missing the create_server() method.',
+				$adapter_class
+			);
+			return $errors;
+		}
+
+		$create_server_method = new \ReflectionMethod( $adapter_class, 'create_server' );
+		if ( ! $create_server_method->isPublic() ) {
+			$errors[] = sprintf(
+				'MCP adapter class %s must provide a public create_server() method.',
+				$adapter_class
+			);
+		}
+
+		if (
+			$create_server_method->getNumberOfRequiredParameters() > $create_server_argument_count ||
+			$create_server_method->getNumberOfParameters() < $create_server_argument_count
+		) {
+			$errors[] = sprintf(
+				'MCP adapter class %1$s has an incompatible create_server() signature for WooCommerce. Expected support for %2$d arguments.',
+				$adapter_class,
+				$create_server_argument_count
+			);
+		}
+
+		return $errors;
+	}
+
+	/**
+	 * Log MCP adapter compatibility errors.
+	 *
+	 * @param array $compatibility_errors Compatibility error messages.
+	 */
+	private function log_mcp_adapter_compatibility_errors( array $compatibility_errors ): void {
+		if ( ! function_exists( 'wc_get_logger' ) ) {
+			return;
+		}
+
+		wc_get_logger()->warning(
+			'MCP adapter compatibility check failed. Skipping MCP initialization. ' . implode( ' ', $compatibility_errors ),
+			array( 'source' => 'woocommerce-mcp' )
+		);
 	}
 
 	/**

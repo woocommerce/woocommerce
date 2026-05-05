@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add MCP adapter compatibility checks and note the temporary Abilities API polyfill.

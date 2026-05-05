@@ -9,6 +9,9 @@ namespace Automattic\WooCommerce\Tests\Internal\MCP;
 
 use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
+use Automattic\WooCommerce\Tests\Internal\MCP\Fixtures\CompatibleMcpAdapterForTest;
+use Automattic\WooCommerce\Tests\Internal\MCP\Fixtures\IncompatibleCreateServerMcpAdapterForTest;
+use Automattic\WooCommerce\Tests\Internal\MCP\Fixtures\MissingCreateServerMcpAdapterForTest;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -228,6 +231,59 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should report no MCP adapter compatibility errors for the loaded adapter.
+	 */
+	public function test_mcp_adapter_compatibility_check_passes_for_loaded_adapter() {
+		$errors = MCPAdapterProvider::get_mcp_adapter_compatibility_errors();
+
+		$this->assertEquals( array(), $errors, 'Loaded MCP adapter should provide the API surface WooCommerce requires' );
+	}
+
+	/**
+	 * @testdox Should report missing MCP adapter dependency classes.
+	 */
+	public function test_mcp_adapter_compatibility_check_reports_missing_dependency_classes() {
+		$errors = $this->get_mcp_adapter_compatibility_errors_for(
+			CompatibleMcpAdapterForTest::class,
+			array(
+				'Automattic\\WooCommerce\\Tests\\Internal\\MCP\\MissingMcpDependencyForTest' => 'test dependency',
+			)
+		);
+
+		$this->assertContains(
+			'Required test dependency class Automattic\\WooCommerce\\Tests\\Internal\\MCP\\MissingMcpDependencyForTest was not found.',
+			$errors,
+			'Missing MCP adapter dependency classes should be reported'
+		);
+	}
+
+	/**
+	 * @testdox Should report missing MCP adapter methods.
+	 */
+	public function test_mcp_adapter_compatibility_check_reports_missing_methods() {
+		$errors = $this->get_mcp_adapter_compatibility_errors_for( MissingCreateServerMcpAdapterForTest::class );
+
+		$this->assertContains(
+			'MCP adapter class ' . MissingCreateServerMcpAdapterForTest::class . ' is missing the create_server() method.',
+			$errors,
+			'Missing create_server() should be reported'
+		);
+	}
+
+	/**
+	 * @testdox Should report incompatible MCP adapter method signatures.
+	 */
+	public function test_mcp_adapter_compatibility_check_reports_incompatible_create_server_signature() {
+		$errors = $this->get_mcp_adapter_compatibility_errors_for( IncompatibleCreateServerMcpAdapterForTest::class );
+
+		$this->assertStringContainsString(
+			'incompatible create_server() signature',
+			implode( ' ', $errors ),
+			'Incompatible create_server() signatures should be reported'
+		);
+	}
+
+	/**
 	 * Test initialization state tracking.
 	 */
 	public function test_is_initialized_tracks_state() {
@@ -316,6 +372,25 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 			),
 			array_values( $result ),
 			'Should maintain correct values after re-indexing'
+		);
+	}
+
+	/**
+	 * Get MCP adapter compatibility errors for a test adapter API shape.
+	 *
+	 * @param string $adapter_class    MCP adapter class name.
+	 * @param array  $required_classes Required class names keyed by class and labelled by dependency role.
+	 * @return array Compatibility error messages.
+	 */
+	private function get_mcp_adapter_compatibility_errors_for( string $adapter_class, array $required_classes = array() ): array {
+		$method = new \ReflectionMethod( MCPAdapterProvider::class, 'get_mcp_adapter_compatibility_errors_for' );
+		$method->setAccessible( true );
+
+		return $method->invoke(
+			null,
+			$adapter_class,
+			$required_classes,
+			10
 		);
 	}
 }
