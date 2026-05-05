@@ -1,3 +1,6 @@
+/**
+ * Internal dependencies
+ */
 import type { HTMLElementEvent } from './utils';
 
 export interface RangeInputContext {
