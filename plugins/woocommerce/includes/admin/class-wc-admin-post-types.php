@@ -724,9 +724,16 @@ class WC_Admin_Post_Types {
 					continue;
 				}
 
-				$current = wp_get_object_terms( $post_id, $taxonomy_name, array( 'fields' => 'ids' ) );
-				if ( is_wp_error( $current ) ) {
-					continue;
+				// Prefer the in-memory product getters when available to avoid an extra DB query per product.
+				if ( 'product_cat' === $taxonomy_name ) {
+					$current = $product->get_category_ids();
+				} elseif ( 'product_brand' === $taxonomy_name && method_exists( $product, 'get_brand_ids' ) ) {
+					$current = $product->get_brand_ids();
+				} else {
+					$current = wp_get_object_terms( $post_id, $taxonomy_name, array( 'fields' => 'ids' ) );
+					if ( is_wp_error( $current ) ) {
+						continue;
+					}
 				}
 				$current = array_map( 'absint', $current );
 
@@ -734,6 +741,11 @@ class WC_Admin_Post_Types {
 				$preserved = array_diff( $current, $controllable );
 				$additions = array_intersect( $submitted_ids, $controllable );
 				$new_terms = array_values( array_unique( array_merge( $preserved, $additions ) ) );
+
+				// Skip the write entirely when the term set hasn't changed.
+				if ( count( $new_terms ) === count( $current ) && empty( array_diff( $new_terms, $current ) ) ) {
+					continue;
+				}
 
 				if ( 'product_cat' === $taxonomy_name ) {
 					$product->set_category_ids( $new_terms );
