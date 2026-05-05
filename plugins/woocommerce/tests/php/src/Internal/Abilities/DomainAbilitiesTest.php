@@ -179,7 +179,7 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test querying products by SKU.
+	 * @testdox Should query products by SKU.
 	 */
 	public function test_products_query_by_sku(): void {
 		$product                     = \WC_Helper_Product::create_simple_product(
@@ -258,7 +258,47 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test querying orders by billing email.
+	 * @testdox Should reject product mutations without operation-specific product caps.
+	 */
+	public function test_product_mutations_require_operation_specific_product_caps(): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		wp_set_current_user( $this->create_user_with_caps( array( 'read', 'edit_products' ) ) );
+
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'type' => 'simple',
+				'name' => 'Disallowed Product',
+			)
+		);
+
+		$this->assertWPError( $created );
+		$this->assertSame( 'ability_invalid_permissions', $created->get_error_code() );
+
+		$updated = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Disallowed Product Update',
+			)
+		);
+
+		$this->assertWPError( $updated );
+		$this->assertSame( 'ability_invalid_permissions', $updated->get_error_code() );
+
+		$deleted = wp_get_ability( 'woocommerce/product-delete' )->execute(
+			array(
+				'id'    => $product->get_id(),
+				'force' => true,
+			)
+		);
+
+		$this->assertWPError( $deleted );
+		$this->assertSame( 'ability_invalid_permissions', $deleted->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should query orders by billing email.
 	 */
 	public function test_orders_query_by_billing_email(): void {
 		$order = \WC_Helper_Order::create_order();
@@ -278,6 +318,25 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $order->get_id(), $result['orders'][0]['id'] );
 		$this->assertSame( 'domain-order-query@example.com', $result['orders'][0]['billing_email'] );
 		$this->assertNotEmpty( $result['orders'][0]['line_items'] );
+	}
+
+	/**
+	 * @testdox Should reject order queries without order read caps.
+	 */
+	public function test_orders_query_requires_order_read_caps(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		wp_set_current_user( $this->create_user_with_caps( array( 'read', 'view_woocommerce_reports' ) ) );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id' => $order->get_id(),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
 	}
 
 	/**
@@ -348,5 +407,24 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 		add_action( 'wp_abilities_api_init', $callback );
 		do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
 		remove_action( 'wp_abilities_api_init', $callback );
+	}
+
+	/**
+	 * Create a user with the given primitive capabilities.
+	 *
+	 * @param array $caps Capabilities to grant.
+	 * @return int User ID.
+	 */
+	private function create_user_with_caps( array $caps ): int {
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$user    = get_user_by( 'id', $user_id );
+
+		$this->assertNotFalse( $user );
+
+		foreach ( $caps as $cap ) {
+			$user->add_cap( $cap );
+		}
+
+		return $user_id;
 	}
 }
