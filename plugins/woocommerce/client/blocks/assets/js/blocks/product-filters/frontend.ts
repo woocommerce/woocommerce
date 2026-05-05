@@ -260,7 +260,13 @@ const productFiltersStore = {
 			}
 		},
 	},
-} satisfies SelectableItemsParentStore< FilterItemFields >;
+};
+
+// Validate protocol conformance without rejecting extra store members.
+( {
+	state: { selectableItems: productFiltersStore.state.selectableItems },
+	actions: { toggle: productFiltersStore.actions.toggle },
+} ) satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;
 
