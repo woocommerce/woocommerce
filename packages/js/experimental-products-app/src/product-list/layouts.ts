@@ -10,6 +10,7 @@ export const DEFAULT_PRODUCT_TABLE_FIELDS = [
 	'product_status',
 	'sku',
 	'stock',
+	'categories',
 	'price',
 ] as const;
 

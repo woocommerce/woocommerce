@@ -18267,7 +18267,7 @@ parameters:
 		-
 			message: '#^Property WooCommerce\:\:\$customer \(WC_Customer\) in empty\(\) is not falsy\.$#'
 			identifier: empty.property
-			count: 2
+			count: 1
 			path: includes/data-stores/class-wc-product-variable-data-store-cpt.php
 
 		-
@@ -31972,12 +31972,6 @@ parameters:
 			path: includes/shortcodes/class-wc-shortcode-checkout.php
 
 		-
-			message: '#^Access to an undefined property object\:\:\$ID\.$#'
-			identifier: property.notFound
-			count: 3
-			path: includes/shortcodes/class-wc-shortcode-my-account.php
-
-		-
 			message: '#^Constant COOKIEHASH not found\.$#'
 			identifier: constant.notFound
 			count: 4
@@ -32051,12 +32045,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$key of static method WC_Shortcode_My_Account\:\:check_password_reset_key\(\) expects string, array\|string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/shortcodes/class-wc-shortcode-my-account.php
-
-		-
-			message: '#^Parameter \#1 \$user of function wp_password_change_notification expects WP_User, object given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/shortcodes/class-wc-shortcode-my-account.php
@@ -36373,12 +36361,6 @@ parameters:
 			message: '#^Parameter \#2 \$value of function wc_set_loop_prop expects string, int given\.$#'
 			identifier: argument.type
 			count: 2
-			path: includes/wc-template-functions.php
-
-		-
-			message: '#^Parameter \#3 \$subject of function str_replace expects array\<string\>\|string, int\|string given\.$#'
-			identifier: argument.type
-			count: 1
 			path: includes/wc-template-functions.php
 
 		-
@@ -58380,18 +58362,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\Admin\\Homescreen\:\:update_link_structure\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Internal/Admin/Homescreen.php
-
-		-
-			message: '#^Result of && is always false\.$#'
-			identifier: booleanAnd.alwaysFalse
-			count: 2
-			path: src/Internal/Admin/Homescreen.php
-
-		-
-			message: '#^Strict comparison using \=\=\= between ''US'' and ''AR''\|''AT''\|''AU''\|''BE''\|''BR''\|''CA''\|''CL''\|''DE''\|''ES''\|''FR''\|''GB''\|''GT''\|''HK''\|''IT''\|''NL''\|''NZ''\|''PE''\|''SG''\|''UY'' will always evaluate to false\.$#'
-			identifier: identical.alwaysFalse
 			count: 1
 			path: src/Internal/Admin/Homescreen.php
 
