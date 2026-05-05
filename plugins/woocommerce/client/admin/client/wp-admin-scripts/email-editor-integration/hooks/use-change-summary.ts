@@ -93,10 +93,17 @@ export function useChangeSummary(
 
 	useEffect( () => {
 		if ( ! enabled || ! postId ) {
+			// Reset state so the drawer never renders a previous template's
+			// summary (or keeps Apply enabled) after the post-id changes or
+			// the drawer is re-disabled.
+			setSummary( null );
+			setError( null );
+			setIsLoading( false );
 			return;
 		}
 
 		let cancelled = false;
+		setSummary( null );
 		setIsLoading( true );
 		setError( null );
 
