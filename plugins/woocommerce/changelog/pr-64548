@@ -1,3 +1,4 @@
-significance: patch
-type: fix
-message: Fix categories report filtering when term_id differs from term_taxonomy_id
+Significance: patch
+Type: fix
+
+Fix categories report filtering when term_id differs from term_taxonomy_id
