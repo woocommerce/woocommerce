@@ -401,10 +401,6 @@ class WC_Admin_Taxonomies {
 			return;
 		}
 
-		if ( ! array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
-			return;
-		}
-
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
 	}
 
