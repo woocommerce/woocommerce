@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Unchecking a pre-checked product category (or brand) in the bulk-edit row now actually removes it from the selected products. Previously WP core's append-only flow ignored the uncheck.

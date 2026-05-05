@@ -148,10 +148,10 @@ jQuery(
 			}
 		);
 
-		// Pre-check shared terms in the bulk-edit hierarchical taxonomy checklists.
-		// WP core's setBulk() only handles the built-in `category` taxonomy
-		// (it hardcodes `#category_<id>` and `input[name="post_category[]"]`),
-		// so we replicate it for product_cat, product_brand, etc.
+		// Pre-check shared terms in the bulk-edit hierarchical taxonomy checklists,
+		// and emit hidden trackers so the backend can implement replace-semantics
+		// (uncheck = remove). WP core's setBulk() only handles the built-in
+		// `category` taxonomy and its append-only flow doesn't support unchecking.
 		$( '#wpbody' ).on(
 			'click',
 			'#doaction, #doaction2',
@@ -169,6 +169,9 @@ jQuery(
 				var productIds = $checked.map( function() {
 					return $( this ).val();
 				} ).get();
+
+				// Clear trackers from any previous bulk-edit open.
+				$( '#bulk-edit input.wc-bulk-edit-tax-tracker' ).remove();
 
 				$( '#bulk-edit ul.cat-checklist' ).each( function() {
 					var $checklist = $( this );
@@ -196,7 +199,8 @@ jQuery(
 
 					$checklist.find( 'input[type="checkbox"]' ).each( function() {
 						var $cb = $( this );
-						var count = counts[ $cb.val() ] || 0;
+						var termId = $cb.val();
+						var count = counts[ termId ] || 0;
 						if ( count === productIds.length ) {
 							$cb.prop( 'checked', true ).prop( 'indeterminate', false );
 						} else if ( count > 0 ) {
@@ -204,18 +208,42 @@ jQuery(
 						} else {
 							$cb.prop( 'checked', false ).prop( 'indeterminate', false );
 						}
+
+						// Emit a "seen" tracker so the backend knows this term was rendered
+						// in the form (i.e., unchecking it should remove it from products).
+						$( '<input>', {
+							type: 'hidden',
+							'class': 'wc-bulk-edit-tax-tracker',
+							name: 'bulk_edit_seen_taxonomy[' + taxonomy + '][]',
+							value: termId
+						} ).insertAfter( $cb );
+
+						// Emit an "indeterminate" tracker for partial-overlap terms so the
+						// backend leaves their per-product state alone.
+						if ( $cb.prop( 'indeterminate' ) ) {
+							$( '<input>', {
+								type: 'hidden',
+								'class': 'wc-bulk-edit-tax-tracker wc-bulk-edit-tax-indeterminate',
+								name: 'bulk_edit_indeterminate_taxonomy[' + taxonomy + '][]',
+								value: termId
+							} ).insertAfter( $cb );
+						}
 					} );
 				} );
 			}
 		);
 
-		// Clear indeterminate state when the user toggles a partial-overlap checkbox,
-		// so the visual matches the new checked state.
+		// On user toggle: clear the indeterminate visual + drop the indeterminate tracker
+		// (the user took an explicit position, so the backend should honour it).
 		$( '#wpbody' ).on(
 			'change',
 			'#bulk-edit ul.cat-checklist input[type="checkbox"]',
 			function() {
-				$( this ).prop( 'indeterminate', false );
+				var $cb = $( this );
+				$cb.prop( 'indeterminate', false );
+				$cb.siblings( 'input.wc-bulk-edit-tax-indeterminate' ).filter( function() {
+					return $( this ).val() === $cb.val();
+				} ).remove();
 			}
 		);
 
