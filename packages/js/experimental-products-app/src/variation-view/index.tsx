@@ -40,8 +40,11 @@ export function VariationView( { productId }: VariationViewProps ) {
 		( select ) => {
 			const store = select( experimentalProductVariationsStore );
 			return {
+				// @ts-expect-error missing types.
 				records: store.getProductVariations( query ),
+				// @ts-expect-error missing types.
 				totalItems: store.getProductVariationsTotalCount( query ),
+				// @ts-expect-error missing types.
 				error: store.getProductVariationsError( query ),
 			};
 		},
@@ -123,7 +126,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 					/>
 					<Stack direction="row" gap="xs">
 						<DataViews.ViewConfig />
-						<Button variant="secondary" disabled>
+						<Button disabled>
 							{ __( 'Edit options', 'woocommerce' ) }
 						</Button>
 					</Stack>

@@ -2,10 +2,6 @@
  * External dependencies
  */
 import { StrictMode, Suspense, createRoot, lazy } from '@wordpress/element';
-import {
-	Root,
-	// @ts-expect-error missing types.
-} from 'react-dom/client';
 
 /**
  * Internal dependencies
@@ -30,7 +26,7 @@ const VariationView = lazy( () =>
 export function initializeVariationView(
 	containerId: string,
 	productId: number
-): Root | undefined {
+): void {
 	const target = document.getElementById( containerId );
 
 	if ( ! target ) {
@@ -45,6 +41,4 @@ export function initializeVariationView(
 			</Suspense>
 		</StrictMode>
 	);
-
-	return root;
 }

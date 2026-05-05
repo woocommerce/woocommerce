@@ -19,6 +19,7 @@ export function VariationEditModal( {
 	onClose,
 }: VariationEditModalProps ) {
 	return (
+		// @ts-expect-error missing types.
 		<Modal
 			title={ sprintf(
 				/* translators: %d: variation ID. */

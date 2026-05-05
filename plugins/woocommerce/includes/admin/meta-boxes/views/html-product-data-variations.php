@@ -5,18 +5,19 @@
  * @package WooCommerce\Admin\Metaboxes\Views
  */
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign\Init;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
-use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-if ( FeaturesUtil::feature_is_enabled( 'product_variations_classic_redesign' ) ) {
+if ( Features::exists( Init::FEATURE_ID ) ) {
 	?>
 	<div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 		<div id="variable_product_options_inner">
-			<div id="<?php echo esc_attr( \Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign\Init::ROOT_ID ); ?>"></div>
+			<div id="<?php echo esc_attr( Init::ROOT_ID ); ?>"></div>
 		</div>
 	</div>
 	<?php
