@@ -1717,19 +1717,13 @@ class WC_AJAX {
 					?>
 				</div>
 				<p class="meta">
-					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'y-m-d h:i:s' ) ); ?>">
+					<abbr class="exact-date" title="<?php echo esc_attr( 'system' !== $note->added_by ? sprintf( /* translators: %s: note author */ __( 'Added by %s', 'woocommerce' ), $note->added_by ) : '' ); ?>">
 						<?php
 						/* translators: $1: Date created, $2 Time created */
-						printf( esc_html__( 'added on %1$s at %2$s', 'woocommerce' ), esc_html( $note->date_created->date_i18n( wc_date_format() ) ), esc_html( $note->date_created->date_i18n( wc_time_format() ) ) );
+						printf( esc_html__( '%1$s at %2$s', 'woocommerce' ), esc_html( $note->date_created->date_i18n( wc_date_format() ) ), esc_html( $note->date_created->date_i18n( wc_time_format() ) ) );
 						?>
 					</abbr>
-					<?php
-					if ( 'system' !== $note->added_by ) :
-						/* translators: %s: note author */
-						printf( ' ' . esc_html__( 'by %s', 'woocommerce' ), esc_html( $note->added_by ) );
-					endif;
-					?>
-					<a href="#" class="delete_note" role="button"><?php esc_html_e( 'Delete note', 'woocommerce' ); ?></a>
+					<a href="#" class="delete_note" aria-label="<?php esc_attr_e( 'Delete note', 'woocommerce' ); ?>" role="button"><span class="screen-reader-text"><?php esc_html_e( 'Delete note', 'woocommerce' ); ?></span></a>
 				</p>
 			</li>
 			<?php

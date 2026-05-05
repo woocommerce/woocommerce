@@ -185,6 +185,41 @@ class WC_Meta_Box_Order_Data {
 	}
 
 	/**
+	 * Output just the order status dropdown. Used by the dedicated `woocommerce-order-status` side meta-box.
+	 *
+	 * @param WP_Post|WC_Order $post Post or order object.
+	 */
+	public static function output_status( $post ) {
+		global $theorder;
+
+		OrderUtil::init_theorder_object( $post );
+		$order = $theorder;
+		?>
+		<p class="form-field form-field-wide wc-order-status">
+			<label for="order_status">
+				<?php
+				if ( $order->needs_payment() ) {
+					printf(
+						'<a href="%s">%s</a>',
+						esc_url( $order->get_checkout_payment_url() ),
+						esc_html__( 'Customer payment page &rarr;', 'woocommerce' )
+					);
+				}
+				?>
+			</label>
+			<select id="order_status" name="order_status" class="wc-enhanced-select">
+				<?php
+				$statuses = wc_get_order_statuses();
+				foreach ( $statuses as $status => $status_name ) {
+					echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $order->get_status( 'edit' ), false ) . '>' . esc_html( $status_name ) . '</option>';
+				}
+				?>
+			</select>
+		</p>
+		<?php
+	}
+
+	/**
 	 * Output the metabox.
 	 *
 	 * @param WP_Post|WC_Order $post Post or order object.
@@ -311,107 +346,110 @@ class WC_Meta_Box_Order_Data {
 				?>
 				<div class="order_data_column_container">
 					<div class="order_data_column">
-						<h3><?php esc_html_e( 'General', 'woocommerce' ); ?></h3>
+						<h3>
+							<?php esc_html_e( 'General', 'woocommerce' ); ?>
+							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
+						</h3>
 
-						<p class="form-field form-field-wide">
-							<?php
-							$order_date_created_localised = ! is_null( $order->get_date_created() ) ? $order->get_date_created()->getOffsetTimestamp() : '';
-							?>
-							<label for="order_date"><?php esc_html_e( 'Date created:', 'woocommerce' ); ?></label>
-							<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
-							&lrm;
-							<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', $order_date_created_localised ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
-							<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', $order_date_created_localised ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
-							<input type="hidden" name="order_date_second" value="<?php echo esc_attr( date_i18n( 's', $order_date_created_localised ) ); ?>" />
-						</p>
+						<?php
+						$order_date_created_localised = ! is_null( $order->get_date_created() ) ? $order->get_date_created()->getOffsetTimestamp() : '';
 
-						<p class="form-field form-field-wide wc-order-status">
-							<label for="order_status">
-								<?php
-								esc_html_e( 'Status:', 'woocommerce' );
-								if ( $order->needs_payment() ) {
-									printf(
-										'<a href="%s">%s</a>',
-										esc_url( $order->get_checkout_payment_url() ),
-										esc_html__( 'Customer payment page &rarr;', 'woocommerce' )
-									);
-								}
-								?>
-							</label>
-							<select id="order_status" name="order_status" class="wc-enhanced-select">
-								<?php
-								$statuses = wc_get_order_statuses();
-								foreach ( $statuses as $status => $status_name ) {
-									echo '<option value="' . esc_attr( $status ) . '" ' . selected( $status, 'wc-' . $order->get_status( 'edit' ), false ) . '>' . esc_html( $status_name ) . '</option>';
-								}
-								?>
-							</select>
-						</p>
+						$general_user_string = '';
+						$general_user_id     = '';
+						if ( $order->get_user_id() ) {
+							$general_user_id = absint( $order->get_user_id() );
+							$general_user    = Users::get_user_in_current_site( $general_user_id );
 
-						<p class="form-field form-field-wide wc-customer-user">
-							<!--email_off--> <!-- Disable CloudFlare email obfuscation -->
-							<label for="customer_user">
-								<?php
-								esc_html_e( 'Customer:', 'woocommerce' );
-								if ( $order->get_user_id( 'edit' ) ) {
-									$args = array(
-										'post_status'    => 'all',
-										'post_type'      => 'shop_order',
-										'_customer_user' => $order->get_user_id( 'edit' ),
-									);
-									printf(
-										'<a href="%s">%s</a>',
-										esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
-										' ' . esc_html__( 'View other orders &rarr;', 'woocommerce' )
-									);
-									printf(
-										'<a href="%s">%s</a>',
-										esc_url( add_query_arg( 'user_id', $order->get_user_id( 'edit' ), admin_url( 'user-edit.php' ) ) ),
-										' ' . esc_html__( 'Profile &rarr;', 'woocommerce' )
-									);
-								}
-								?>
-							</label>
-							<?php
-							$user_string = '';
-							$user_id     = '';
-							if ( $order->get_user_id() ) {
-								$user_id = absint( $order->get_user_id() );
-								$user    = Users::get_user_in_current_site( $user_id );
-
-								if ( ! is_wp_error( $user ) ) {
-									$customer = new WC_Customer( $user_id );
-									/* translators: 1: user display name 2: user ID 3: user email */
-									$user_string = sprintf(
+							if ( ! is_wp_error( $general_user ) ) {
+								$general_customer    = new WC_Customer( $general_user_id );
+								$general_user_string = sprintf(
 									/* translators: 1: customer name, 2 customer id, 3: customer email */
-										esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
-										$customer->get_first_name() . ' ' . $customer->get_last_name(),
-										$customer->get_id(),
-										$customer->get_email()
-									);
-								} else {
-									// print customer not available in the current site.
-									$user_string = esc_html__( '(Not available)', 'woocommerce' );
-								}
+									esc_html__( '%1$s (#%2$s &ndash; %3$s)', 'woocommerce' ),
+									$general_customer->get_first_name() . ' ' . $general_customer->get_last_name(),
+									$general_customer->get_id(),
+									$general_customer->get_email()
+								);
+							} else {
+								$general_user_string = esc_html__( '(Not available)', 'woocommerce' );
 							}
-							?>
-							<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
+						}
+						?>
+
+						<div class="address">
+							<p>
+								<strong><?php esc_html_e( 'Date created:', 'woocommerce' ); ?></strong>
 								<?php
-								// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
-								/**
-								 * Filter to customize the display of the currently selected customer for an order in the order edit page.
-								 * This is the same filter used in the ajax call for customer search in the same metabox.
-								 *
-								 * @since 7.2.0 (this instance of the filter)
-								 *
-								 * @param array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order.
-								 */
+								if ( $order_date_created_localised ) {
+									echo esc_html( date_i18n( get_option( 'date_format' ) . ' ' . get_option( 'time_format' ), $order_date_created_localised ) );
+								} else {
+									echo '&mdash;';
+								}
 								?>
-								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $user_string ) ) ) ) ) ); ?></option>
-								<?php // phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
-							</select>
-							<!--/email_off-->
-						</p>
+							</p>
+							<p>
+								<strong><?php esc_html_e( 'Customer:', 'woocommerce' ); ?></strong>
+								<?php
+								if ( $general_user_string ) {
+									echo wp_kses_post( $general_user_string );
+								} else {
+									esc_html_e( 'Guest', 'woocommerce' );
+								}
+								?>
+							</p>
+						</div>
+
+						<div class="edit_address">
+							<p class="form-field form-field-wide">
+								<label for="order_date"><?php esc_html_e( 'Date created:', 'woocommerce' ); ?></label>
+								<input type="text" class="date-picker" name="order_date" maxlength="10" value="<?php echo esc_attr( date_i18n( 'Y-m-d', $order_date_created_localised ) ); ?>" pattern="<?php echo esc_attr( apply_filters( 'woocommerce_date_input_html_pattern', '[0-9]{4}-(0[1-9]|1[012])-(0[1-9]|1[0-9]|2[0-9]|3[01])' ) ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>" />@
+								&lrm;
+								<input type="number" class="hour" placeholder="<?php esc_attr_e( 'h', 'woocommerce' ); ?>" name="order_date_hour" min="0" max="23" step="1" value="<?php echo esc_attr( date_i18n( 'H', $order_date_created_localised ) ); ?>" pattern="([01]?[0-9]{1}|2[0-3]{1})" />:
+								<input type="number" class="minute" placeholder="<?php esc_attr_e( 'm', 'woocommerce' ); ?>" name="order_date_minute" min="0" max="59" step="1" value="<?php echo esc_attr( date_i18n( 'i', $order_date_created_localised ) ); ?>" pattern="[0-5]{1}[0-9]{1}" />
+								<input type="hidden" name="order_date_second" value="<?php echo esc_attr( date_i18n( 's', $order_date_created_localised ) ); ?>" />
+							</p>
+
+							<p class="form-field form-field-wide wc-customer-user">
+								<!--email_off--> <!-- Disable CloudFlare email obfuscation -->
+								<label for="customer_user">
+									<?php
+									esc_html_e( 'Customer:', 'woocommerce' );
+									if ( $order->get_user_id( 'edit' ) ) {
+										$args = array(
+											'post_status'    => 'all',
+											'post_type'      => 'shop_order',
+											'_customer_user' => $order->get_user_id( 'edit' ),
+										);
+										printf(
+											'<a href="%s">%s</a>',
+											esc_url( add_query_arg( $args, admin_url( 'edit.php' ) ) ),
+											' ' . esc_html__( 'View other orders &rarr;', 'woocommerce' )
+										);
+										printf(
+											'<a href="%s">%s</a>',
+											esc_url( add_query_arg( 'user_id', $order->get_user_id( 'edit' ), admin_url( 'user-edit.php' ) ) ),
+											' ' . esc_html__( 'Profile &rarr;', 'woocommerce' )
+										);
+									}
+									?>
+								</label>
+								<select class="wc-customer-search" id="customer_user" name="customer_user" data-placeholder="<?php esc_attr_e( 'Guest', 'woocommerce' ); ?>" data-allow_clear="true">
+									<?php
+									// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment
+									/**
+									 * Filter to customize the display of the currently selected customer for an order in the order edit page.
+									 * This is the same filter used in the ajax call for customer search in the same metabox.
+									 *
+									 * @since 7.2.0 (this instance of the filter)
+									 *
+									 * @param array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order.
+									 */
+									?>
+									<option value="<?php echo esc_attr( $general_user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $general_user_string ) ) ) ) ) ); ?></option>
+									<?php // phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
+								</select>
+								<!--/email_off-->
+							</p>
+						</div>
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
 					<div class="order_data_column">

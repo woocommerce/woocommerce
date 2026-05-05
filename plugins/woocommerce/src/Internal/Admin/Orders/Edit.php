@@ -5,12 +5,14 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
+use WC_Meta_Box_Order_Actions;
 use WC_Order;
 
 /**
@@ -80,8 +82,7 @@ class Edit {
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-notes', sprintf( __( '%s notes', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Notes::output', $screen_id, 'side', 'default' );
 		add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable product permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $screen_id, 'normal', 'default' );
-		/* Translators: %s order type name. */
-		add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s actions', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Actions::output', $screen_id, 'side', 'high' );
+		add_meta_box( 'woocommerce-order-status', __( 'Status', 'woocommerce' ), 'WC_Meta_Box_Order_Data::output_status', $screen_id, 'side', 'high' );
 		self::maybe_register_order_attribution( $screen_id, $title );
 	}
 
@@ -412,6 +413,70 @@ class Edit {
 	}
 
 	/**
+	 * Renders the redesigned order edit header (back link, title, update button, kebab menu).
+	 *
+	 * @param string $page_title Page title to display in the header.
+	 */
+	private function render_order_edit_header( string $page_title ) {
+		$order_id        = $this->order->get_id();
+		$is_new          = OrderStatus::AUTO_DRAFT === $this->order->get_status();
+		$update_label    = $is_new ? __( 'Create order', 'woocommerce' ) : __( 'Update order', 'woocommerce' );
+		$orders_list_url = $this->get_page_controller()->get_base_page_url( $this->order->get_type() );
+
+		$order_actions = WC_Meta_Box_Order_Actions::get_available_order_actions_for_order( $this->order );
+		$can_delete    = current_user_can( 'delete_post', $order_id );
+		$trash_url     = $can_delete ? WC_Meta_Box_Order_Actions::get_trash_or_delete_order_link( $order_id ) : '';
+		$trash_label   = ( ! EMPTY_TRASH_DAYS ) ? __( 'Delete permanently', 'woocommerce' ) : __( 'Move to Trash', 'woocommerce' );
+
+		// @wordpress/icons inline SVGs (24x24).
+		$icon_arrow_left    = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="m14.6 7-1.2-1L8 12l5.4 6 1.2-1-4.6-5z"></path></svg>';
+		$icon_more_vertical = '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M13 19h-2v-2h2v2zm0-6h-2v-2h2v2zm0-6h-2V5h2v2z"></path></svg>';
+		?>
+		<div class="wc-order-edit-header">
+			<a href="<?php echo esc_url( $orders_list_url ); ?>" class="wc-order-edit-header__back">
+				<?php echo $icon_arrow_left; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+				<span><?php esc_html_e( 'Back to orders', 'woocommerce' ); ?></span>
+			</a>
+			<div class="wc-order-edit-header__actions">
+				<button form="order" type="submit" name="save" value="<?php echo esc_attr( $update_label ); ?>" class="button button-primary">
+					<?php echo esc_html( $update_label ); ?>
+				</button>
+				<details class="wc-order-edit-header__menu">
+					<summary aria-label="<?php esc_attr_e( 'More actions', 'woocommerce' ); ?>">
+						<?php echo $icon_more_vertical; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+					</summary>
+					<ul class="wc-order-edit-header__menu-list">
+						<li>
+							<button type="button" class="wc-order-edit-header__customize">
+								<?php esc_html_e( 'Customize page', 'woocommerce' ); ?>
+							</button>
+						</li>
+						<?php if ( ! empty( $order_actions ) || $trash_url ) : ?>
+							<li class="wc-order-edit-header__menu-separator" role="separator"></li>
+						<?php endif; ?>
+						<?php foreach ( $order_actions as $action => $title ) : ?>
+							<li>
+								<button form="order" type="submit" name="wc_order_action" value="<?php echo esc_attr( $action ); ?>">
+									<?php echo esc_html( $title ); ?>
+								</button>
+							</li>
+						<?php endforeach; ?>
+						<?php if ( $trash_url ) : ?>
+							<?php if ( ! empty( $order_actions ) ) : ?>
+								<li class="wc-order-edit-header__menu-separator" role="separator"></li>
+							<?php endif; ?>
+							<li>
+								<a href="<?php echo esc_url( $trash_url ); ?>" class="submitdelete"><?php echo esc_html( $trash_label ); ?></a>
+							</li>
+						<?php endif; ?>
+					</ul>
+				</details>
+			</div>
+		</div>
+		<?php
+	}
+
+	/**
 	 * Helper function to render wrapper start.
 	 *
 	 * @param string $notice Notice to display, if any.
@@ -423,20 +488,14 @@ class Edit {
 		$edit_page_url = $this->get_page_controller()->get_edit_url( $this->order->get_id() );
 		$form_action   = 'edit_order';
 		$referer       = wp_get_referer();
-		$new_page_url  = $this->get_page_controller()->get_new_page_url( $this->order->get_type() );
+		$page_title    = 'new_order' === $this->current_action ? $post_type->labels->add_new_item : $post_type->labels->edit_item;
 
 		?>
 		<div class="wrap">
-		<h1 class="wp-heading-inline">
-			<?php
-			echo 'new_order' === $this->current_action ? esc_html( $post_type->labels->add_new_item ) : esc_html( $post_type->labels->edit_item );
-			?>
+		<?php $this->render_order_edit_header( $page_title ); ?>
+		<h1 class="wp-heading-inline screen-reader-text">
+			<?php echo esc_html( $page_title ); ?>
 		</h1>
-		<?php
-		if ( 'edit_order' === $this->current_action ) {
-			echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action">' . esc_html( $post_type->labels->add_new ) . '</a>';
-		}
-		?>
 		<hr class="wp-header-end">
 
 		<?php

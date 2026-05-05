@@ -202,6 +202,7 @@ jQuery( function( $ ) {
 				// Ajax customer search boxes
 				$( ':input.wc-customer-search' ).filter( ':not(.enhanced)' ).each( function() {
 					var select2_args = {
+						width: '100%',
 						allowClear:  $( this ).data( 'allow_clear' ) ? true : false,
 						placeholder: $( this ).data( 'placeholder' ),
 						minimumInputLength: $( this ).data( 'minimum_input_length' ) ? $( this ).data( 'minimum_input_length' ) : '1',

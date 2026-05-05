@@ -98,7 +98,7 @@ class WC_Meta_Box_Order_Actions {
 	 *
 	 * @return string
 	 */
-	private static function get_trash_or_delete_order_link( int $order_id ): string {
+	public static function get_trash_or_delete_order_link( int $order_id ): string {
 		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
 			$order_type      = wc_get_order( $order_id )->get_type();
 			$order_list_url  = wc_get_container()->get( PageController::class )->get_base_page_url( $order_type );
@@ -207,7 +207,7 @@ class WC_Meta_Box_Order_Actions {
 	 *
 	 * @return array
 	 */
-	private static function get_available_order_actions_for_order( $order ) {
+	public static function get_available_order_actions_for_order( $order ) {
 		$actions = array(
 			'send_order_details'              => __( 'Send order details to customer', 'woocommerce' ),
 			'send_order_details_admin'        => __( 'Resend new order notification', 'woocommerce' ),

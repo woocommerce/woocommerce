@@ -25,9 +25,32 @@ jQuery( function ( $ ) {
 			$( '.js_field-country' ).selectWoo().on( 'change', this.change_country );
 			$( '.js_field-country' ).trigger( 'change', [ true ] );
 			$( document.body ).on( 'change', 'select.js_field-state', this.change_state );
-			$( '#woocommerce-order-actions input, #woocommerce-order-actions a' ).on( 'click', function() {
+			$( '#woocommerce-order-actions input, #woocommerce-order-actions a, .wc-order-edit-header__actions button, .wc-order-edit-header__menu-list a' ).on( 'click', function() {
 				window.onbeforeunload = '';
 			});
+			// Close the order edit header kebab menu when clicking outside of it.
+			// Use the capture phase so we run before any descendant `return false` or
+			// `stopPropagation` swallows the event before it bubbles up to document.
+			document.addEventListener( 'click', function( e ) {
+				var openMenus = document.querySelectorAll( '.wc-order-edit-header__menu[open]' );
+				if ( ! openMenus.length ) {
+					return;
+				}
+				var target = e.target;
+				openMenus.forEach( function( menu ) {
+					if ( ! ( target instanceof Node ) || ! menu.contains( target ) ) {
+						menu.removeAttribute( 'open' );
+					}
+				} );
+			}, true );
+			// Also close on Escape for keyboard users.
+			document.addEventListener( 'keydown', function( e ) {
+				if ( e.key === 'Escape' || e.key === 'Esc' ) {
+					document.querySelectorAll( '.wc-order-edit-header__menu[open]' ).forEach( function( menu ) {
+						menu.removeAttribute( 'open' );
+					} );
+				}
+			} );
 			$( 'a.edit_address' ).on( 'click', this.edit_address );
 			$( 'a.billing-same-as-shipping' ).on( 'click', this.copy_billing_to_shipping );
 			$( 'a.load_customer_billing' ).on( 'click', this.load_billing );
