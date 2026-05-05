@@ -20,14 +20,10 @@ const normalizeColor = ( value: string ) => {
 
 const getInitialColor = ( input: HTMLInputElement ) => {
 	const attributeValue = normalizeColor(
-		input.getAttribute( 'value' ) ?? ''
+		input.value || input.getAttribute( 'value' ) || ''
 	);
 
-	if ( attributeValue ) {
-		return attributeValue;
-	}
-
-	return '';
+	return attributeValue;
 };
 
 const ColorField = ( { input }: { input: HTMLInputElement } ) => {
@@ -36,6 +32,9 @@ const ColorField = ( { input }: { input: HTMLInputElement } ) => {
 	const triggerRef = useRef< HTMLButtonElement | null >( null );
 
 	useEffect( () => {
+		if ( input.value === color ) {
+			return;
+		}
 		input.value = color;
 		input.dispatchEvent( new Event( 'input', { bubbles: true } ) );
 		input.dispatchEvent( new Event( 'change', { bubbles: true } ) );
