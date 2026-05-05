@@ -29,6 +29,7 @@ class AbilitiesRegistry {
 	 */
 	private function init_abilities(): void {
 		AbilitiesCategories::init();
+		DomainAbilities::init();
 		AbilitiesRestBridge::init();
 	}
 

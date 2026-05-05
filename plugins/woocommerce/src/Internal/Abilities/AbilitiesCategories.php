@@ -40,12 +40,22 @@ class AbilitiesCategories {
 			return;
 		}
 
+		if ( ! function_exists( 'wp_has_ability_category' ) || ! wp_has_ability_category( 'woocommerce' ) ) {
+			wp_register_ability_category(
+				'woocommerce',
+				array(
+					'label'       => __( 'WooCommerce', 'woocommerce' ),
+					'description' => __( 'Canonical store management abilities backed by domain APIs.', 'woocommerce' ),
+				)
+			);
+		}
+
 		if ( ! function_exists( 'wp_has_ability_category' ) || ! wp_has_ability_category( 'woocommerce-rest' ) ) {
 			wp_register_ability_category(
 				'woocommerce-rest',
 				array(
 					'label'       => __( 'WooCommerce REST API', 'woocommerce' ),
-					'description' => __( 'REST API operations for WooCommerce resources including products, orders, and other store data.', 'woocommerce' ),
+					'description' => __( 'REST API operations for store resources including products, orders, and other store data.', 'woocommerce' ),
 				)
 			);
 		}
