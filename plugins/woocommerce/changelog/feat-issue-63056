@@ -1,0 +1,4 @@
+Significance: patch
+Type: performance
+
+Refactor ProductCollection QueryBuilder to use QueryClauses for stock, price, attribute, and taxonomy filter queries, replacing slow meta queries with optimised lookup-table SQL.
