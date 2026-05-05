@@ -8,7 +8,7 @@ import { store, getContext } from '@wordpress/interactivity';
  */
 import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
 
-type ItemWithIndex = SelectableItem & { index: number };
+type ItemWithIndex = SelectableItem & { index?: number };
 
 type ChipsContext = {
 	storeNamespace: string;
@@ -45,6 +45,7 @@ const { state }: ChipsStore = store< ChipsStore >(
 				const item = getParentItem( storeNamespace );
 				if ( ! item ) return false;
 				if ( item.selected ) return false;
+				if ( item.index === undefined ) return false;
 				return item.index >= displayLimit;
 			},
 		},
