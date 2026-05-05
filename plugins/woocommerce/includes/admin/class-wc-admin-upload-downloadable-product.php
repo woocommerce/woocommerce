@@ -64,19 +64,20 @@ class WC_Admin_Upload_Downloadable_Product {
 	 */
 	public function update_filename( $full_filename, $ext, $dir ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
-		if ( ! isset( $_POST['type'] ) || ! 'downloadable_product' === $_POST['type'] ) {
-			return $full_filename;
+		if ( isset( $_POST['type'] ) && 'downloadable_product' === $_POST['type'] ) {
+
+			if ( ! strpos( $dir, 'woocommerce_uploads' ) ) {
+				return $full_filename;
+			}
+
+			if ( 'no' === get_option( 'woocommerce_downloads_add_hash_to_filename' ) ) {
+				return $full_filename;
+			}
+
+			return $this->unique_filename( $full_filename, $ext );
 		}
 
-		if ( ! strpos( $dir, 'woocommerce_uploads' ) ) {
-			return $full_filename;
-		}
-
-		if ( 'no' === get_option( 'woocommerce_downloads_add_hash_to_filename' ) ) {
-			return $full_filename;
-		}
-
-		return $this->unique_filename( $full_filename, $ext );
+		return $full_filename;
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 	}
 
