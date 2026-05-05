@@ -304,7 +304,7 @@
 				function () {
 					var global_unique_id = $( this ).val();
 
-					if ( /[^0-9\-]/.test( global_unique_id ) ) {
+					if ( /[^0-9Xx\-]/.test( global_unique_id ) ) {
 						$( document.body ).triggerHandler( 'wc_add_error_tip', [
 							$( this ),
 							'i18n_global_unique_id_error',
@@ -325,7 +325,7 @@
 					var global_unique_id = $( this ).val();
 					$( this ).val(
 						global_unique_id
-							.replace( /[^0-9\-]/g, '' )
+							.replace( /[^0-9Xx\-]/g, '' )
 							.replace( /^-+|-+$/g, '' )
 					);
 
