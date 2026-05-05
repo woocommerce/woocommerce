@@ -67,7 +67,38 @@ class Endpoint {
 		add_action( 'template_redirect', array( $this, 'gate_request' ) );
 		add_action( 'wp_loaded', array( $this, 'maybe_flush_pending_rewrite' ) );
 		add_action( 'transition_post_status', array( $this, 'skip_auto_menu_for_self' ), 9, 3 );
+		add_filter( 'get_pages', array( $this, 'exclude_self_from_page_list' ) );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
+	}
+
+	/**
+	 * Hide the Review Order page from `get_pages()` results.
+	 *
+	 * Block themes' `core/page-list` block (and any classic theme using
+	 * `wp_list_pages()`) calls `get_pages()` to populate its list. Without
+	 * this filter the tokenised landing page would appear in the site
+	 * navigation alongside Cart / Checkout / My account, which is wrong:
+	 * the page is reachable only through the per-order email link.
+	 *
+	 * @param \WP_Post[]|mixed $pages Page objects returned by get_pages().
+	 * @return \WP_Post[]|mixed
+	 */
+	public function exclude_self_from_page_list( $pages ) {
+		if ( ! is_array( $pages ) || empty( $pages ) ) {
+			return $pages;
+		}
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id <= 0 ) {
+			return $pages;
+		}
+		return array_values(
+			array_filter(
+				$pages,
+				static function ( $page ) use ( $page_id ) {
+					return ! ( $page instanceof \WP_Post ) || (int) $page->ID !== $page_id;
+				}
+			)
+		);
 	}
 
 	/**
