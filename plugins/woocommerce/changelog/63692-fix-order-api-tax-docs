@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Clarify tax inclusion/exclusion in Orders REST API schema descriptions and add total_tax field to inline refund data.
