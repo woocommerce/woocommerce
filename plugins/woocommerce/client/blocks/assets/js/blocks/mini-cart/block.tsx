@@ -268,6 +268,9 @@ const MiniCartBlock = ( attributes: Props ): JSX.Element => {
 						iconColor={ iconColor }
 						productCountColor={ productCountColor }
 						productCountVisibility={ productCountVisibility }
+						{ ...( displayStyle === DisplayStyle.ICON_ONLY && {
+							ariaLabel: __( 'Cart', 'woocommerce' ),
+						} ) }
 					/>
 				) }
 				{ displayStyle !== DisplayStyle.ICON_ONLY && (
