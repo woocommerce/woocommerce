@@ -86,6 +86,83 @@ class WCEmailTemplateDivergenceDetector {
 	private static $logger = null;
 
 	/**
+	 * Register `_wc_email_template_status` and `_wc_email_template_version` post meta on
+	 * the `woo_email` post type as REST-readable, server-write-only meta.
+	 *
+	 * Because the `woo_email` post type declares `'custom-fields'` support (see
+	 * {@see Integration::add_email_post_type()}), WP core auto-surfaces every
+	 * `show_in_rest = true` meta key under the standard `meta` property of the
+	 * `wp/v2/woo_email` response — no custom REST field registration is needed.
+	 *
+	 * This is a stable read contract for the email list UI and any downstream consumer
+	 * (extensions, headless admins). Renaming or removing either meta key, or changing
+	 * the meaning of an existing status string value, is a breaking change. Vocabulary
+	 * expansion (adding new status values) is fine.
+	 *
+	 * Hook: `init`.
+	 *
+	 * @return void
+	 *
+	 * @since 10.9.0
+	 */
+	public static function register_meta(): void {
+		register_post_meta(
+			'woo_email',
+			self::STATUS_META_KEY,
+			array(
+				'type'              => 'string',
+				'description'       => 'Classification of this email post relative to the current core template ("in_sync", "core_updated_uncustomized", or "core_updated_customized"). Written server-side by the divergence detector and apply / reset flows; read-only over REST.',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'auth_callback'     => array( self::class, 'rest_meta_auth_read_only' ),
+				'sanitize_callback' => 'sanitize_text_field',
+			)
+		);
+
+		register_post_meta(
+			'woo_email',
+			self::VERSION_META_KEY,
+			array(
+				'type'              => 'string',
+				'description'       => 'Core template version stamp recorded the last time this email post was generated, applied, or reset. Read-only over REST.',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'auth_callback'     => array( self::class, 'rest_meta_auth_read_only' ),
+				'sanitize_callback' => 'sanitize_text_field',
+			)
+		);
+	}
+
+	/**
+	 * REST auth gate for `_wc_email_template_*` meta.
+	 *
+	 * - Read: allowed for users who can edit `woo_email` posts (matches the email-list capability).
+	 * - Write: never allowed via REST. Meta is owned by server-side detection, apply, and reset flows.
+	 *
+	 * Signature follows the `auth_{$object_type}_meta_{$meta_key}` filter contract.
+	 *
+	 * @param bool   $allowed   Whether the request is allowed (current state).
+	 * @param string $meta_key  The meta key in question.
+	 * @param int    $object_id The post ID.
+	 * @param int    $user_id   The current user ID.
+	 * @param string $cap       The capability being requested.
+	 * @param array  $caps      The full set of caps the user must have.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function rest_meta_auth_read_only( $allowed, $meta_key, $object_id, $user_id, $cap, $caps ): bool {
+		unset( $allowed, $meta_key, $caps );
+
+		// Block all writes regardless of caller.
+		if ( in_array( $cap, array( 'edit_post_meta', 'add_post_meta', 'delete_post_meta' ), true ) ) {
+			return false;
+		}
+		// For reads, defer to whether the user can edit the post.
+		return user_can( $user_id, 'edit_post', $object_id );
+	}
+
+	/**
 	 * Run the post-upgrade divergence sweep.
 	 *
 	 * Intended to be hooked on `woocommerce_updated`, which fires once per WC

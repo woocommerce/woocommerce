@@ -4,6 +4,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\WooCommerce\EmailEditor\Bootstrap;
+use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
+use Automattic\WooCommerce\Internal\EmailEditor\Package;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
@@ -50,6 +54,89 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		// stale post_id <-> email_type mappings into subsequent tests.
 		$this->posts_manager->clear_caches();
 		WCEmailTemplateSyncRegistry::reset_cache();
+	}
+
+	/**
+	 * @testdox Should register _wc_email_template_status post meta on woo_email with show_in_rest.
+	 */
+	public function test_registers_template_status_meta_with_show_in_rest(): void {
+		$this->initialize_email_editor_integration();
+
+		$this->assertTrue(
+			registered_meta_key_exists( 'post', WCEmailTemplateDivergenceDetector::STATUS_META_KEY, 'woo_email' ),
+			'Expected _wc_email_template_status to be registered for woo_email.'
+		);
+
+		$args = get_registered_meta_keys( 'post', 'woo_email' )[ WCEmailTemplateDivergenceDetector::STATUS_META_KEY ];
+
+		$this->assertTrue( $args['show_in_rest'], 'Expected show_in_rest = true.' );
+		$this->assertTrue( $args['single'], 'Expected single = true.' );
+		$this->assertSame( 'string', $args['type'] );
+		$this->assertIsCallable( $args['auth_callback'] );
+	}
+
+	/**
+	 * @testdox Should register _wc_email_template_version post meta on woo_email with show_in_rest.
+	 */
+	public function test_registers_template_version_meta_with_show_in_rest(): void {
+		$this->initialize_email_editor_integration();
+
+		$this->assertTrue(
+			registered_meta_key_exists( 'post', WCEmailTemplateDivergenceDetector::VERSION_META_KEY, 'woo_email' ),
+			'Expected _wc_email_template_version to be registered for woo_email.'
+		);
+
+		$args = get_registered_meta_keys( 'post', 'woo_email' )[ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ];
+
+		$this->assertTrue( $args['show_in_rest'], 'Expected show_in_rest = true.' );
+		$this->assertTrue( $args['single'], 'Expected single = true.' );
+		$this->assertSame( 'string', $args['type'] );
+	}
+
+	/**
+	 * @testdox Should deny REST writes to template meta even for administrators.
+	 */
+	public function test_meta_auth_callback_denies_write_via_rest(): void {
+		$admin_user = self::factory()->user->create( array( 'role' => 'administrator' ) );
+
+		$this->assertFalse(
+			WCEmailTemplateDivergenceDetector::rest_meta_auth_read_only( true, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, 0, $admin_user, 'edit_post_meta', array() ),
+			'Even an administrator must not be able to write _wc_email_template_status via REST.'
+		);
+
+		$this->assertFalse(
+			WCEmailTemplateDivergenceDetector::rest_meta_auth_read_only( true, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, 0, $admin_user, 'add_post_meta', array() ),
+			'add_post_meta must be denied via REST.'
+		);
+
+		$this->assertFalse(
+			WCEmailTemplateDivergenceDetector::rest_meta_auth_read_only( true, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, 0, $admin_user, 'delete_post_meta', array() ),
+			'delete_post_meta must be denied via REST.'
+		);
+	}
+
+	/**
+	 * @testdox Should allow REST reads of template meta for users who can edit the post.
+	 */
+	public function test_meta_auth_callback_allows_read_for_capable_user(): void {
+		// Ensure the woo_email post type is registered so user_can( 'edit_post' ) does not
+		// trip a doing-it-wrong notice about the post type being unregistered.
+		$this->initialize_email_editor_integration();
+
+		$admin_user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+
+		$post_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'woo_email',
+				'post_status' => 'publish',
+				'post_author' => $admin_user_id,
+			)
+		);
+
+		$this->assertTrue(
+			WCEmailTemplateDivergenceDetector::rest_meta_auth_read_only( false, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $post_id, $admin_user_id, 'read_post', array() ),
+			'Capable user must be able to read _wc_email_template_status via REST.'
+		);
 	}
 
 	/**
@@ -236,6 +323,32 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( 1, $fired, 'Completion action must fire exactly once per sweep.' );
+	}
+
+	/**
+	 * Force-initialize the EmailEditor Integration and Bootstrap so the production
+	 * `init`-time hooks (notably `WCEmailTemplateDivergenceDetector::register_meta`)
+	 * register on the global hook table, the `woo_email` post type is registered, and
+	 * `init` fires so the meta-registration callback runs. Swallows the doing-it-wrong
+	 * notices that the full chain triggers when re-registering already-registered
+	 * blocks / integrations during a unit-test process; those notices are unrelated
+	 * to the meta-registration wiring under test.
+	 */
+	private function initialize_email_editor_integration(): void {
+		$this->setExpectedIncorrectUsage( 'WP_Block_Type_Registry::register' );
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry::register' );
+
+		add_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		wc_get_container()->get( Package::class )->init();
+		wc_get_container()->get( Integration::class )->initialize();
+		Email_Editor_Container::container()->get( Bootstrap::class )->initialize();
+
+		/**
+		 * Fires once WordPress, all plugins, and the theme are fully loaded and instantiated.
+		 *
+		 * @since 1.5.0
+		 */
+		do_action( 'init' );
 	}
 
 	/**

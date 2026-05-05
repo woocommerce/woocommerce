@@ -148,6 +148,9 @@ class Integration {
 		add_action( 'woocommerce_email_editor_send_preview_email_after_wp_mail', array( $this, 'send_preview_email_after_wp_mail' ), 10 );
 		add_filter( 'woocommerce_email_editor_send_preview_email_subject', array( $this, 'update_email_subject_for_send_preview_email' ), 10, 2 );
 		add_action( 'rest_api_init', array( $this->email_api_controller, 'register_routes' ) );
+		// Priority 11 ensures the email editor's `init` bootstrap (default priority 10)
+		// has registered the `woo_email` post type before we register meta against it.
+		add_action( 'init', array( WCEmailTemplateDivergenceDetector::class, 'register_meta' ), 11 );
 		add_action( 'woocommerce_updated', array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 20 );
 		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 10 );
 		add_action( WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK, array( WCEmailTemplateAutoApplier::class, 'run' ), 10 );
@@ -180,6 +183,7 @@ class Integration {
 						'default-mode' => 'template-locked',
 					),
 					'excerpt',
+					'custom-fields',
 				),
 				'capability_type' => self::EMAIL_POST_TYPE,
 				'capabilities'    => array(
