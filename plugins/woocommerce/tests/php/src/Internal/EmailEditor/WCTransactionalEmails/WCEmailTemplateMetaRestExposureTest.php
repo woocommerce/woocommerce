@@ -53,6 +53,12 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 		wc_get_container()->get( Package::class )->init();
 		wc_get_container()->get( Integration::class )->initialize();
 		Email_Editor_Container::container()->get( Bootstrap::class )->initialize();
+
+		/**
+		 * Fires once WordPress, all plugins, and the theme are fully loaded and instantiated.
+		 *
+		 * @since 1.5.0
+		 */
 		do_action( 'init' );
 
 		parent::setUp();
