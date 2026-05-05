@@ -696,7 +696,7 @@ function get_woocommerce_currency_symbols() {
 			'XPF' => 'XPF',
 			'YER' => '&#xfdfc;',
 			'ZAR' => '&#82;',
-			'ZMW' => 'ZK',
+			'ZMW' => 'ZMW',
 		)
 	);
 

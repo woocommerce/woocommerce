@@ -8263,7 +8263,7 @@ test.describe( 'Data API tests', () => {
 				expect.objectContaining( {
 					code: 'ZMW',
 					name: 'Zambian kwacha',
-					symbol: 'ZK',
+					symbol: 'ZMW',
 					_links: {
 						self: [
 							{

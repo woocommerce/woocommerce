@@ -169,7 +169,7 @@ export const currencies = {
 	XPF: 'CFP franc (XPF) — XPF',
 	YER: 'Yemeni rial (&#xfdfc;) — YER',
 	ZAR: 'South African rand (&#82;) — ZAR',
-	ZMW: 'Zambian kwacha (ZK) — ZMW',
+	ZMW: 'Zambian kwacha (ZMW) — ZMW',
 };
 
 export const externalCurrencies = {
@@ -334,7 +334,7 @@ export const externalCurrencies = {
 	XPF: 'CFP franc (Fr)',
 	YER: 'Yemeni rial (&#xfdfc;)',
 	ZAR: 'South African rand (&#82;)',
-	ZMW: 'Zambian kwacha (ZK)',
+	ZMW: 'Zambian kwacha (ZMW)',
 };
 
 export const stateOptions = {
