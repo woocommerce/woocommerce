@@ -66,14 +66,52 @@ class Endpoint {
 		add_filter( 'query_vars', array( $this, 'add_query_var' ), 0 );
 		add_action( 'template_redirect', array( $this, 'gate_request' ) );
 		add_action( 'wp_loaded', array( $this, 'maybe_flush_pending_rewrite' ) );
+		add_action( 'transition_post_status', array( $this, 'skip_auto_menu_for_self' ), 9, 3 );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
 	}
 
 	/**
-	 * Flush rewrite rules once after the 10.9.0 upgrade installs the
+	 * Keep the Review Order page out of nav menus that have "Auto add new
+	 * top-level pages" enabled.
+	 *
+	 * The page is reachable only through the tokenised URL the email sends
+	 * out; nobody navigates to it from a menu, so it should never appear
+	 * there. WP's `_wp_auto_add_pages_to_menu()` runs on
+	 * `transition_post_status` at priority 10. Detach it just before that
+	 * for our specific page, then restore it on priority 11 so other
+	 * transitions are unaffected.
+	 *
+	 * Compares by slug rather than by stored option id so it also fires on
+	 * the very first install — before `woocommerce_review_order_page_id`
+	 * is written.
+	 *
+	 * @param string   $new_status New post status.
+	 * @param string   $old_status Old post status.
+	 * @param \WP_Post $post       Post object.
+	 */
+	public function skip_auto_menu_for_self( $new_status, $old_status, $post ): void {
+		unset( $new_status, $old_status );
+		if ( ! $post instanceof \WP_Post || 'page' !== $post->post_type ) {
+			return;
+		}
+		if ( 'review-order' !== $post->post_name ) {
+			return;
+		}
+		remove_action( 'transition_post_status', '_wp_auto_add_pages_to_menu', 10 );
+		add_action(
+			'transition_post_status',
+			static function () {
+				add_action( 'transition_post_status', '_wp_auto_add_pages_to_menu', 10, 3 );
+			},
+			11
+		);
+	}
+
+	/**
+	 * Flush rewrite rules once after the 10.8.0 upgrade installs the
 	 * Review Order page.
 	 *
-	 * The 10.9.0 db update runs on `init` priority 5 and only seeds the
+	 * The 10.8.0 db update runs on `init` priority 5 and only seeds the
 	 * page; `add_rewrite_rule()` doesn't fire until `init` priority 10, so
 	 * the flush has to happen later. `wp_loaded` runs after every `init`
 	 * callback, which is the earliest safe moment.
