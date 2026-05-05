@@ -454,8 +454,8 @@ class DomainAbilities {
 				'public' => true,
 				'type'   => 'tool',
 			),
-				'woocommerce_ability_source'    => 'domain-api',
-				'woocommerce_ability_operation' => $operation,
+			'woocommerce_ability_source'    => 'domain-api',
+			'woocommerce_ability_operation' => $operation,
 			'annotations'                   => array(
 				'readonly'    => $is_readonly,
 				'idempotent'  => $idempotent,
