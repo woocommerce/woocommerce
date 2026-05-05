@@ -404,16 +404,20 @@ class WC_Admin_Taxonomies {
 			return;
 		}
 
-		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$is_product_editor_screen = 'product' === $screen->id;
 
-		$is_product_editor_screen        = in_array( $screen->id, array( 'product' ), true );
-		$is_visual_attribute_term_screen = 0 === strpos( $screen->id, 'edit-pa_' ) && $this->is_visual_product_attribute_taxonomy( $taxonomy );
-
-		if ( ! $is_product_editor_screen && ! $is_visual_attribute_term_screen ) {
+		if ( $is_product_editor_screen && array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
 			return;
 		}
 
-		WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
+		$is_attribute_term_screen = 0 === strpos( $screen->id, 'edit-pa_' );
+		$taxonomy                 = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( $is_attribute_term_screen && $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
+			return;
+		}
 	}
 
 	/**
