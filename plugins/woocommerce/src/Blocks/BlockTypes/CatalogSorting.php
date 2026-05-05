@@ -35,6 +35,22 @@ class CatalogSorting extends AbstractBlock {
 			return;
 		}
 
+		// Use WP_HTML_Tag_Processor to inject Interactivity API directives.
+		$processor = new \WP_HTML_Tag_Processor( $catalog_sorting );
+
+		// Find and modify the form element.
+		if ( $processor->next_tag( array( 'tag_name' => 'form' ) ) ) {
+			$processor->set_attribute( 'data-wp-interactive', 'woocommerce/catalog-sorting' );
+			$processor->set_attribute( 'data-wp-on--submit', 'actions.preventSubmit' );
+		}
+
+		// Find and modify the select element.
+		if ( $processor->next_tag( array( 'tag_name' => 'select' ) ) ) {
+			$processor->set_attribute( 'data-wp-on--change', 'actions.handleSortChange' );
+		}
+
+		$catalog_sorting = $processor->get_updated_html();
+
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
@@ -56,14 +72,5 @@ class CatalogSorting extends AbstractBlock {
 			$wrapper_attributes,
 			$catalog_sorting
 		);
-	}
-
-	/**
-	 * Get the frontend script handle for this block type.
-	 *
-	 * @param string $key Data to get, or default to everything.
-	 */
-	protected function get_block_type_script( $key = null ) {
-		return null;
 	}
 }

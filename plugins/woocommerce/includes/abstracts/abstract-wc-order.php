@@ -76,7 +76,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Order items will be stored here, sometimes before they persist in the DB.
 	 *
 	 * @since 3.0.0
-	 * @var array<string, array<int, \WC_Order_Item>>
+	 * @var array<string, array<\WC_Order_Item>>
 	 */
 	protected $items = array();
 
@@ -954,15 +954,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					// on warm post meta caches for products. This addresses scenarios where the order object was not populated during a batch population.
 					if ( 'line_item' === $type && ! empty( $read_items ) ) {
 						$product_ids = array_map( static fn( $item ) => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(), $read_items );
-						$product_ids = array_unique( array_filter( $product_ids ) );
-						_prime_post_caches( $product_ids );
+						_prime_post_caches( array_unique( array_filter( $product_ids ) ) );
 					}
+
+					// Set the back-reference to the parent order on each loaded item.
+					array_walk( $read_items, fn( $item ) => $item instanceof WC_Order_Item && $item->set_order( $this ) );
 
 					$this->items[ $group ] = $read_items;
 				}
 				// Don't use array_merge here because keys are numeric.
 				$items = $items + $this->items[ $group ];
-			}
+			}//end if
 		}
 
 		return apply_filters( 'woocommerce_order_get_items', $items, $this, $types );
@@ -1165,11 +1167,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Set parent.
-		$item->set_order_id( $this->get_id() );
+		$item instanceof WC_Order_Item ? $item->set_order( $this ) : $item->set_order_id( $this->get_id() );
 
 		// Append new row with generated temporary ID.
 		$item_id = $item->get_id();
-
 		if ( $item_id ) {
 			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
