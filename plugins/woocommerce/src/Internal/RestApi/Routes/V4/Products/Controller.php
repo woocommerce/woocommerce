@@ -229,7 +229,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Creating product object from request data in preparation for copying.
-		$updated_product = $this->prepare_object_for_database( $request );
+		$updated_product    = $this->prepare_object_for_database( $request );
 		$duplicated_product = ( new WC_Admin_Duplicate_Product() )->product_duplicate( $updated_product );
 
 		if ( is_wp_error( $duplicated_product ) ) {
@@ -244,17 +244,17 @@ class Controller extends WC_REST_Products_V2_Controller {
 	/**
 	 * Prepare links for the request.
 	 *
-	 * @param \WC_Product                         $object  Object data.
+	 * @param \WC_Product                          $product  Object data.
 	 * @param WP_REST_Request<array<string,mixed>> $request Request object.
 	 * @return array Links for the given post.
 	 */
-	protected function prepare_links( $object, $request ) {
-		$links = parent::prepare_links( $object, $request );
+	protected function prepare_links( $product, $request ) {
+		$links = parent::prepare_links( $product, $request );
 
-		if ( $object->is_type( ProductType::VARIABLE ) && $object->has_child() ) {
+		if ( $product->is_type( ProductType::VARIABLE ) && $product->has_child() ) {
 			$links['variations'] = array();
 
-			foreach ( $object->get_children() as $variation_id ) {
+			foreach ( $product->get_children() as $variation_id ) {
 				$links['variations'][] = array(
 					'href'       => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $variation_id ) ),
 					'embeddable' => true,
@@ -2247,9 +2247,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 		if ( $product->is_downloadable() || 'edit' === $context ) {
 			foreach ( $product->get_downloads() as $file_id => $file ) {
 				$downloads[] = array(
-					'id'   => $file_id, // MD5 hash.
-					'name' => $file['name'],
-					'file' => $file['file'],
+					'id'                           => $file_id,
+					// MD5 hash.
+											'name' => $file['name'],
+					'file'                         => $file['file'],
 				);
 			}
 		}
@@ -2344,7 +2345,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$tags,
 			$exclude_ids,
 			$limit,
-			null // No need to pass the product ID.
+			null
+			// No need to pass the product ID.
 		);
 
 		// When no suggested products are found, return an empty array.
@@ -2368,7 +2370,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * @return array Product data to be included in the response.
 	 */
 	protected function prepare_object_for_response_core( $object_data, $request, $context ): array {
-		$data = parent::prepare_object_for_response_core( $object_data, $request, $context );
+		$data   = parent::prepare_object_for_response_core( $object_data, $request, $context );
 		$fields = $this->get_fields_for_response( $request );
 
 		if ( $this->cogs_is_enabled() && in_array( 'cost_of_goods_sold', $fields, true ) ) {
