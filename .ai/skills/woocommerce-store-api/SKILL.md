@@ -22,9 +22,7 @@ This skill complements `woocommerce-backend-dev` (general PHP conventions) and `
 - [rest-conventions.md](rest-conventions.md) — Path/body/query separation, collection vs item vs action routes, status codes, idempotency.
 - [schema-design.md](schema-design.md) — Schema as public contract, field discipline, response-shape alignment.
 - [variation-handling.md](variation-handling.md) — Server-authoritative variation reconciliation.
-- [tombstones.md](tombstones.md) — Designing for deleted-product paths and snapshot fields.
 - [performance.md](performance.md) — Where to apply cache priming in Store API responses. Cross-links to `woocommerce-performance` for the underlying patterns.
-- [testing.md](testing.md) — Application Password vs cookie-session testing; safe console-based verification.
 
 ## Key principles
 

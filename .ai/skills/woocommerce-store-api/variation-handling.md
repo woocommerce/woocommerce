@@ -12,11 +12,10 @@ A typical Store API request might look like:
 
 Two things are claimed: variation 99 exists, and its colour is blue. **The first is verifiable; the second is not, unless you check.** A client (malicious or buggy) can send `variation_id: 99` with `variation: { color: red }` while variation 99 is actually red — and a route that trusts the client verbatim will store the wrong attributes.
 
-This produces three downstream problems:
+This produces two downstream problems:
 
 1. **Stored data lies.** The persisted row claims red but the variation product says blue. Reads return wrong data.
-2. **Idempotency breaks.** If `generate_key()` hashes the client's attribute payload, two POSTs with different attribute orderings produce different keys for the same logical variation — duplicate rows.
-3. **Tombstones lose meaning.** When the variation is later deleted, the only record of the attributes is the (potentially-wrong) stored payload.
+2. **Idempotency breaks.** If a route hashes the client's attribute payload to produce a storage key, two POSTs with different attribute orderings (or different values for the same logical variation) produce different keys — duplicate rows for the same item.
 
 ## The fix: server-authoritative reconciliation
 
@@ -134,7 +133,7 @@ private static function resolve_variation_attributes(
 
 - **Variation product is the source of truth.** Specific-value attributes are pinned on the variation; the server fills them in. The client's payload is either ignored or validated against the server's value.
 - **"Any" attributes need client input.** A variation that's "Color: blue, Size: any" doesn't know which size the user wants. The client must supply it; the server validates against the parent's allowed slugs.
-- **Variable parents are a misuse signal.** A client that sends the parent product ID rather than a variation ID has confused the contract. Throw rather than silently accepting — the resulting tombstone behaviour would be wrong (the row would have no variation_id and an empty variation array, and no way to recover the user's intent).
+- **Variable parents are a misuse signal.** A client that sends the parent product ID rather than a variation ID has confused the contract. Throw rather than silently accepting — the resulting row would have no `variation_id` and an empty `variation` array, with no way to recover the user's intent.
 
 ## Slug canonicalisation
 

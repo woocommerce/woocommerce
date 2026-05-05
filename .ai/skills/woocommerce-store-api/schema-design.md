@@ -87,7 +87,7 @@ Pick one path. If a snapshot field exists for internal storage, keep it server-s
 
 ### Don't expose internal storage fields
 
-Snapshot/cache/computed fields that exist for the implementation's benefit shouldn't leak. A field whose only purpose is "remember this value for tombstone fallback" doesn't need to be in the response — it's used at response-build time and that's it.
+Snapshot/cache/computed fields that exist for the implementation's benefit shouldn't leak. A field that only powers a server-side fallback doesn't need to be in the response — it's used at response-build time and that's it.
 
 ### Don't expose unstable values
 
@@ -105,7 +105,7 @@ All string fields must run through escaping before output. The Store API has ded
 - `prepare_money_response( $price, $decimals )` — for any monetary value. Produces minor-units integer-strings (e.g. `"1999"` for $19.99 in a 2-decimal currency). This is the canonical Store API money format.
 - `wc_rest_prepare_date_response( $datetime )` — for date fields. Produces ISO-8601 strings.
 
-**Both branches of any conditional path must apply the same sanitisation.** If the live branch escapes `name` via `prepare_html_response()` but the tombstone branch sets it raw, the tombstone branch is an XSS vector. See [tombstones.md](tombstones.md) for the full pattern.
+**Apply the same sanitisation in every code path that produces a field.** If one branch escapes a string via `prepare_html_response()` but a fallback branch sets it raw from storage, the fallback is an XSS vector. Run every branch through the same escapers and formatters, or funnel them through one builder so they can't drift.
 
 **Document units on the schema description.** A field documented as just "Price" is ambiguous. Specify "Price in minor units (e.g. cents)" or "Price as decimal string (e.g. 19.99)" so consumers know how to format.
 
