@@ -1,11 +1,16 @@
 /**
  * External dependencies
  */
-import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
+import {
+	InnerBlocks,
+	useBlockProps,
+	store as blockEditorStore,
+} from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
+import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { filterThreeLines } from '@woocommerce/icons';
 import clsx from 'clsx';
 
@@ -14,8 +19,7 @@ import clsx from 'clsx';
  */
 import './editor.scss';
 import { type BlockAttributes } from './types';
-import { getClosestColor } from './utils/get-closest-color';
-import { getProductFiltersCss } from './utils/get-product-filters-css';
+import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -41,33 +45,44 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { attributes } = props;
 	const { isPreview } = attributes;
 	const [ isOpen, setIsOpen ] = useState( false );
-	const ref = useRef< HTMLDivElement >( null );
-	const [ inheritedColors, setInheritedColors ] = useState<
-		Record< string, string >
-	>( {} );
 
-	useEffect( () => {
-		const el = ref.current;
-		if ( ! el ) return;
-
-		const colors: Record< string, string > = {};
-		const bg = getClosestColor( el, 'backgroundColor' );
-		const fg = getClosestColor( el, 'color' );
-
-		if ( bg ) colors[ '--wc-product-filters-background-color' ] = bg;
-		if ( fg ) colors[ '--wc-product-filters-text-color' ] = fg;
-
-		setInheritedColors( colors );
+	const globalColors = useSelect( ( select ) => {
+		const coreStore = select( 'core' ) as {
+			__experimentalGetCurrentGlobalStylesId: () => string | null;
+			getEditedEntityRecord: (
+				kind: string,
+				name: string,
+				id: string
+			) => Record< string, unknown > | undefined;
+		};
+		const id = coreStore.__experimentalGetCurrentGlobalStylesId();
+		if ( ! id ) return {};
+		const record = coreStore.getEditedEntityRecord(
+			'root',
+			'globalStyles',
+			id
+		) as { styles?: { color?: { background?: string; text?: string } } } | undefined;
+		return record?.styles?.color ?? {};
 	}, [] );
+	const colors = getColorsFromBlockSupports( attributes );
+
+	const blockGap = (
+		attributes as unknown as Record<
+			string,
+			Record< string, Record< string, string > >
+		>
+	 )?.style?.spacing?.blockGap;
 
 	const blockProps = useBlockProps( {
-		ref,
 		className: clsx( 'wc-block-product-filters', {
 			'is-overlay-opened': isOpen,
 		} ),
 		style: {
-			...inheritedColors,
-			...getProductFiltersCss( attributes ),
+			'--wc-product-filters-background-color':
+				colors.backgroundColor || globalColors.background,
+			'--wc-product-filters-text-color':
+				colors.textColor || globalColors.text,
+			'--wc-product-filter-block-spacing': blockGap || undefined,
 		},
 	} );
 

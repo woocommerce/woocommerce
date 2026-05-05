@@ -7,7 +7,6 @@ import * as iAPI from '@wordpress/interactivity';
  * Internal dependencies
  */
 import { decodeHtmlEntities } from '../../utils/html-entities';
-import setStyles from './set-styles';
 import type { SelectableItemsParentStore } from '../../types/type-defs/selectable-items';
 import type {
 	ActiveFilterItem,
@@ -264,8 +263,6 @@ const productFiltersStore = {
 } satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;
-
-setStyles();
 
 const { state, actions } = store< ProductFiltersStore >(
 	BLOCK_NAME,
