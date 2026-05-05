@@ -18,6 +18,8 @@ class DomainAbilities {
 	 * Initialize ability registration.
 	 *
 	 * @internal
+	 *
+	 * @since 10.9.0
 	 */
 	final public static function init(): void {
 		/*
@@ -30,6 +32,8 @@ class DomainAbilities {
 
 	/**
 	 * Register canonical domain abilities.
+	 *
+	 * @since 10.9.0
 	 */
 	public static function register_abilities(): void {
 		if ( ! function_exists( 'wp_register_ability' ) ) {
@@ -65,7 +69,7 @@ class DomainAbilities {
 				'input_schema'        => self::get_products_query_input_schema(),
 				'output_schema'       => self::get_collection_output_schema( 'products' ),
 				'execute_callback'    => array( __CLASS__, 'execute_products_query' ),
-				'permission_callback' => array( __CLASS__, 'can_query_woocommerce' ),
+				'permission_callback' => array( __CLASS__, 'can_query_products' ),
 				'meta'                => self::get_domain_meta( 'query', true, true, false ),
 			)
 		);
@@ -91,7 +95,7 @@ class DomainAbilities {
 				'input_schema'        => self::get_product_create_input_schema(),
 				'output_schema'       => self::get_entity_output_schema( 'product' ),
 				'execute_callback'    => array( __CLASS__, 'execute_product_create' ),
-				'permission_callback' => array( __CLASS__, 'can_manage_products' ),
+				'permission_callback' => array( __CLASS__, 'can_create_product' ),
 				'meta'                => self::get_domain_meta( 'create', false, false, false ),
 			)
 		);
@@ -117,7 +121,7 @@ class DomainAbilities {
 				'input_schema'        => self::get_product_update_input_schema(),
 				'output_schema'       => self::get_entity_output_schema( 'product' ),
 				'execute_callback'    => array( __CLASS__, 'execute_product_update' ),
-				'permission_callback' => array( __CLASS__, 'can_manage_products' ),
+				'permission_callback' => array( __CLASS__, 'can_update_product' ),
 				'meta'                => self::get_domain_meta( 'update', false, false, true ),
 			)
 		);
@@ -143,7 +147,7 @@ class DomainAbilities {
 				'input_schema'        => self::get_product_delete_input_schema(),
 				'output_schema'       => self::get_delete_output_schema(),
 				'execute_callback'    => array( __CLASS__, 'execute_product_delete' ),
-				'permission_callback' => array( __CLASS__, 'can_manage_products' ),
+				'permission_callback' => array( __CLASS__, 'can_delete_product' ),
 				'meta'                => self::get_domain_meta( 'delete', false, false, true ),
 			)
 		);
@@ -169,7 +173,7 @@ class DomainAbilities {
 				'input_schema'        => self::get_orders_query_input_schema(),
 				'output_schema'       => self::get_collection_output_schema( 'orders' ),
 				'execute_callback'    => array( __CLASS__, 'execute_orders_query' ),
-				'permission_callback' => array( __CLASS__, 'can_query_woocommerce' ),
+				'permission_callback' => array( __CLASS__, 'can_query_orders' ),
 				'meta'                => self::get_domain_meta( 'query', true, true, false ),
 			)
 		);
@@ -232,6 +236,8 @@ class DomainAbilities {
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
+	 *
+	 * @since 10.9.0
 	 */
 	public static function execute_products_query( array $input ) {
 		if ( ! empty( $input['id'] ) ) {
@@ -289,6 +295,8 @@ class DomainAbilities {
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
+	 *
+	 * @since 10.9.0
 	 */
 	public static function execute_product_create( array $input ) {
 		$type    = sanitize_key( $input['type'] ?? 'simple' );
@@ -315,6 +323,8 @@ class DomainAbilities {
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
+	 *
+	 * @since 10.9.0
 	 */
 	public static function execute_product_update( array $input ) {
 		$product = self::get_product_from_input( $input );
@@ -336,6 +346,8 @@ class DomainAbilities {
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
+	 *
+	 * @since 10.9.0
 	 */
 	public static function execute_product_delete( array $input ) {
 		$product = self::get_product_from_input( $input );
@@ -358,6 +370,8 @@ class DomainAbilities {
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
+	 *
+	 * @since 10.9.0
 	 */
 	public static function execute_orders_query( array $input ) {
 		$include_line_items = (bool) ( $input['include_line_items'] ?? false );
@@ -431,6 +445,8 @@ class DomainAbilities {
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
+	 *
+	 * @since 10.9.0
 	 */
 	public static function execute_order_update_status( array $input ) {
 		if ( empty( $input['id'] ) ) {
@@ -474,6 +490,8 @@ class DomainAbilities {
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
+	 *
+	 * @since 10.9.0
 	 */
 	public static function execute_order_add_note( array $input ) {
 		if ( empty( $input['id'] ) ) {
@@ -514,30 +532,85 @@ class DomainAbilities {
 	}
 
 	/**
-	 * Check read access for WooCommerce data.
+	 * Check product read access.
 	 *
+	 * @param mixed $input Ability input.
 	 * @return bool
+	 *
+	 * @since 10.9.0
 	 */
-	public static function can_query_woocommerce(): bool {
-		return current_user_can( 'manage_woocommerce' ) || current_user_can( 'view_woocommerce_reports' );
+	public static function can_query_products( $input = array() ): bool {
+		$product_id = self::get_input_id( $input );
+
+		return wc_rest_check_post_permissions( 'product', 'read', $product_id );
 	}
 
 	/**
-	 * Check product management access.
+	 * Check product creation access.
 	 *
+	 * @param mixed $input Ability input.
 	 * @return bool
+	 *
+	 * @since 10.9.0
 	 */
-	public static function can_manage_products(): bool {
-		return current_user_can( 'manage_woocommerce' ) || current_user_can( 'edit_products' );
+	public static function can_create_product( $input = array() ): bool {
+		return wc_rest_check_post_permissions( 'product', 'create' );
+	}
+
+	/**
+	 * Check product update access.
+	 *
+	 * @param mixed $input Ability input.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function can_update_product( $input = array() ): bool {
+		$product_id = self::get_input_id( $input );
+
+		return $product_id > 0 && wc_rest_check_post_permissions( 'product', 'edit', $product_id );
+	}
+
+	/**
+	 * Check product deletion access.
+	 *
+	 * @param mixed $input Ability input.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function can_delete_product( $input = array() ): bool {
+		$product_id = self::get_input_id( $input );
+
+		return $product_id > 0 && wc_rest_check_post_permissions( 'product', 'delete', $product_id );
+	}
+
+	/**
+	 * Check order read access.
+	 *
+	 * @param mixed $input Ability input.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function can_query_orders( $input = array() ): bool {
+		$order_id = self::get_input_id( $input );
+
+		return wc_rest_check_post_permissions( 'shop_order', 'read', $order_id );
 	}
 
 	/**
 	 * Check order management access.
 	 *
+	 * @param mixed $input Ability input.
 	 * @return bool
+	 *
+	 * @since 10.9.0
 	 */
-	public static function can_manage_orders(): bool {
-		return current_user_can( 'manage_woocommerce' ) || current_user_can( 'edit_shop_orders' );
+	public static function can_manage_orders( $input = array() ): bool {
+		$order_id = self::get_input_id( $input );
+
+		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'edit', $order_id );
 	}
 
 	/**
@@ -959,6 +1032,16 @@ class DomainAbilities {
 	 */
 	private static function format_datetime( ?\WC_DateTime $datetime ): ?string {
 		return $datetime ? $datetime->date( DATE_ATOM ) : null;
+	}
+
+	/**
+	 * Get an ID value from ability input.
+	 *
+	 * @param mixed $input Ability input.
+	 * @return int
+	 */
+	private static function get_input_id( $input ): int {
+		return is_array( $input ) && ! empty( $input['id'] ) ? absint( $input['id'] ) : 0;
 	}
 
 	/**
