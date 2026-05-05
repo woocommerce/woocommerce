@@ -377,6 +377,45 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</span>
 		</label>
 
+		<div class="inline-edit-group">
+			<label class="alignleft">
+				<span class="title"><?php esc_html_e( 'Categories', 'woocommerce' ); ?></span>
+				<span class="input-text-wrap">
+					<select class="change_product_cat change_to" name="change_product_cat">
+						<?php
+						$options = array(
+							''  => __( '— No change —', 'woocommerce' ),
+							'1' => __( 'Add to existing categories', 'woocommerce' ),
+							'2' => __( 'Remove from categories', 'woocommerce' ),
+							'3' => __( 'Replace all categories', 'woocommerce' ),
+						);
+						foreach ( $options as $key => $value ) {
+							echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
+						}
+						?>
+					</select>
+				</span>
+			</label>
+			<div class="change-input">
+				<?php
+				$product_categories = get_terms(
+					array(
+						'taxonomy'   => 'product_cat',
+						'hide_empty' => false,
+						'orderby'    => 'name',
+					)
+				);
+				if ( ! is_wp_error( $product_categories ) && ! empty( $product_categories ) ) {
+					echo '<ul class="wc-bulk-edit-category-list">';
+					foreach ( $product_categories as $category ) {
+						echo '<li><label><input type="checkbox" name="product_cat_ids[]" value="' . esc_attr( $category->term_id ) . '" /> ' . esc_html( $category->name ) . '</label></li>';
+					}
+					echo '</ul>';
+				}
+				?>
+			</div>
+		</div>
+
 		<?php do_action( 'woocommerce_product_bulk_edit_end' ); ?>
 
 		<input type="hidden" name="woocommerce_bulk_edit" value="1" />

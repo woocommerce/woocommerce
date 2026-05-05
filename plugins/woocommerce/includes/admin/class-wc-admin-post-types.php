@@ -662,6 +662,25 @@ class WC_Admin_Post_Types {
 			$this->maybe_update_cogs_value( $product, $request_data );
 		}
 
+		// Handle category changes.
+		$change_product_cat = ! empty( $request_data['change_product_cat'] ) ? absint( $request_data['change_product_cat'] ) : 0;
+		if ( $change_product_cat && isset( $request_data['product_cat_ids'] ) ) {
+			$cat_ids = array_map( 'absint', (array) $request_data['product_cat_ids'] );
+			switch ( $change_product_cat ) {
+				case 1: // Add to existing.
+					$current_ids = $product->get_category_ids();
+					$product->set_category_ids( array_unique( array_merge( $current_ids, $cat_ids ) ) );
+					break;
+				case 2: // Remove from existing.
+					$current_ids = $product->get_category_ids();
+					$product->set_category_ids( array_values( array_diff( $current_ids, $cat_ids ) ) );
+					break;
+				case 3: // Replace all.
+					$product->set_category_ids( $cat_ids );
+					break;
+			}
+		}
+
 		$product->save();
 
 		do_action( 'woocommerce_product_bulk_edit_save', $product );
