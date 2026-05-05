@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	InnerBlocks,
-	useBlockProps,
-	store as blockEditorStore,
-} from '@wordpress/block-editor';
+import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
 import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
