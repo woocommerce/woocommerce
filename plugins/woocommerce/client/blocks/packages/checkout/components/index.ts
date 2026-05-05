@@ -19,4 +19,4 @@ export { default as StoreNotice } from '../../components/store-notice';
 export {
 	commonIcons as paymentMethodCommonIcons,
 	getCommonIconProps,
-} from '../../assets/js/base/components/cart-checkout/payment-method-icons/common-icons';
+} from '../../../assets/js/base/components/cart-checkout/payment-method-icons/common-icons';
