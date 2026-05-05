@@ -64,6 +64,27 @@ jobs:
             1. gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,body
             2. gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
 
+            ANALYSIS GUIDELINES
+
+            Title:
+            - Keep to 1-3 sentences
+            - Lead with the user/merchant impact
+            - Avoid internal implementation details (file names, test coverage, etc.)
+            - Write as if for a changelog or newsletter audience
+            - Focus on "what's different now" not "what code changed"
+
+            What Changed:
+            - Describe behavior changes, not file modifications
+            - Focus on what users will see or experience differently
+            - Avoid listing specific files, classes, or internal components
+
+            User Impact:
+            - Think from the merchant's perspective
+            - What problem does this solve for them?
+            - Do they need to take any action?
+            - Will they notice anything different in the admin or frontend?
+            - Consider performance, UX, and workflow impacts
+
             TONE: Clear, accessible, focus on user benefits
 
       - name: Post Feature Highlight Comment
@@ -171,6 +192,33 @@ jobs:
             METHOD
             1. gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,body
             2. gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+
+            ANALYSIS GUIDELINES
+
+            Title:
+            - Keep to 1-3 sentences
+            - Lead with the developer impact
+            - Avoid internal implementation details (file names, test coverage, etc.)
+            - Write as if for a developer changelog audience
+            - Focus on "what's different now" not "what code changed"
+
+            What Changed:
+            - Describe behavior changes, not file modifications
+            - Focus on third-party developers building extensions/plugins
+            - Always mention new or changed hooks/filters with their exact names
+            - Highlight API changes, new endpoints, or data structure changes
+            - Call out breaking changes prominently
+            - Note deprecations and migration paths
+
+            How to Detect:
+            - Help developers identify if their code is affected
+            - Reference specific hook/filter names to search for
+            - Mention affected APIs or class methods
+
+            Actions Needed:
+            - Provide clear migration steps
+            - Identify new extension points they might want to use
+            - Note any deprecation timelines
 
             FOCUS ON:
             - Hook changes (added, removed, signature changes)
