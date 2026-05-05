@@ -54,7 +54,7 @@ class ProductViewCountTracker implements RegisterHooksInterface {
 
 		global $post;
 
-		if ( ! $post || $post->post_type !== 'product' ) {
+		if ( ! $post || 'product' !== $post->post_type ) {
 			return;
 		}
 
