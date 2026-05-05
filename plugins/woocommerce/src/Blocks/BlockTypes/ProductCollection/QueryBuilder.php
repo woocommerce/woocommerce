@@ -117,6 +117,7 @@ class QueryBuilder {
 				'tax_query',
 				'isProductCollection',
 				'priceRange',
+				'productCollectionFilters',
 			)
 		);
 
@@ -453,93 +454,63 @@ class QueryBuilder {
 	}
 
 	/**
-	 * Return a query that filters products by price.
+	 * Build the $chosen_attributes array expected by QueryClauses::add_attribute_clauses()
+	 * from the current URL query vars set by the Attribute Filter block.
+	 *
+	 * Format: [ 'pa_color' => [ 'terms' => ['red', 'blue'], 'query_type' => 'or' ], ... ]
 	 *
 	 * @return array
 	 */
-	private function get_filter_by_price_query() {
-		$min_price = get_query_var( PriceFilter::MIN_PRICE_QUERY_VAR );
-		$max_price = get_query_var( PriceFilter::MAX_PRICE_QUERY_VAR );
+	private function get_chosen_attributes_for_query_clauses(): array {
+		$chosen_attributes = array();
+		$filter_query_args = $this->get_filter_by_attributes_query_vars();
 
-		$max_price_query = empty( $max_price ) ? array() : array(
-			'key'     => '_price',
-			'value'   => $max_price,
-			'compare' => '<=',
-			'type'    => 'numeric',
-		);
+		foreach ( $filter_query_args as $attribute_name => $query_args ) {
+			$attribute_value = get_query_var( $query_args['filter'] );
+			if ( empty( $attribute_value ) ) {
+				continue;
+			}
 
-		$min_price_query = empty( $min_price ) ? array() : array(
-			'key'     => '_price',
-			'value'   => $min_price,
-			'compare' => '>=',
-			'type'    => 'numeric',
-		);
+			$taxonomy   = 'pa_' . $attribute_name;
+			$terms      = array_filter( array_map( 'sanitize_title', explode( ',', $attribute_value ) ) );
+			$query_type = get_query_var( $query_args['query_type'] );
+			$query_type = in_array( $query_type, array( 'and', 'or' ), true ) ? $query_type : 'and';
 
-		if ( empty( $min_price_query ) && empty( $max_price_query ) ) {
-			return array();
+			$chosen_attributes[ $taxonomy ] = array(
+				'terms'      => array_values( $terms ),
+				'query_type' => $query_type,
+			);
 		}
 
-		return array(
-			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			'meta_query' => array(
-				array(
-					'relation' => 'AND',
-					$max_price_query,
-					$min_price_query,
-				),
-			),
-		);
+		return $chosen_attributes;
 	}
 
 	/**
-	 * Return a query that filters products by attributes.
+	 * Build the $chosen_taxonomies array expected by QueryClauses::add_taxonomy_clauses()
+	 * from the current URL query vars set by the Taxonomy Filter block.
+	 *
+	 * Format: [ 'product_cat' => ['t-shirts', 'hoodies'], ... ]
 	 *
 	 * @return array
 	 */
-	private function get_filter_by_attributes_query() {
-		$attributes_filter_query_args = $this->get_filter_by_attributes_query_vars();
+	private function get_chosen_taxonomies_for_query_clauses(): array {
+		$chosen_taxonomies = array();
+		$params_handler    = wc_get_container()->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
+		$taxonomy_params   = $params_handler->get_param( 'taxonomy' );
 
-		$queries = array_reduce(
-			$attributes_filter_query_args,
-			function ( $acc, $query_args ) {
-				$attribute_name       = $query_args['filter'];
-				$attribute_query_type = $query_args['query_type'];
+		foreach ( $taxonomy_params as $taxonomy_slug => $param_key ) {
+			$param_value = get_query_var( $param_key );
+			if ( ! is_string( $param_value ) || empty( $param_value ) ) {
+				continue;
+			}
 
-				$attribute_value = get_query_var( $attribute_name );
-				$attribute_query = get_query_var( $attribute_query_type );
-
-				if ( empty( $attribute_value ) ) {
-					return $acc;
-				}
-
-				// It is necessary explode the value because $attribute_value can be a string with multiple values (e.g. "red,blue").
-				$attribute_value = explode( ',', $attribute_value );
-
-				$acc[] = array(
-					'taxonomy' => str_replace( AttributeFilter::FILTER_QUERY_VAR_PREFIX, 'pa_', $attribute_name ),
-					'field'    => 'slug',
-					'terms'    => $attribute_value,
-					'operator' => 'and' === $attribute_query ? 'AND' : 'IN',
-				);
-
-				return $acc;
-			},
-			array()
-		);
-
-		if ( empty( $queries ) ) {
-			return array();
+			$term_slugs = array_values( array_filter( array_map( 'sanitize_title', explode( ',', $param_value ) ) ) );
+			if ( ! empty( $term_slugs ) ) {
+				$chosen_taxonomies[ $taxonomy_slug ] = $term_slugs;
+			}
 		}
 
-		return array(
-			// phpcs:ignore WordPress.DB.SlowDBQuery
-			'tax_query' => array(
-				array(
-					'relation' => 'AND',
-					$queries,
-				),
-			),
-		);
+		return $chosen_taxonomies;
 	}
 
 	/**
@@ -579,41 +550,6 @@ class QueryBuilder {
 		return $this->attributes_filter_query_args;
 	}
 
-	/**
-	 * Return a query that filters products by stock status.
-	 *
-	 * @return array
-	 */
-	private function get_filter_by_stock_status_query() {
-		$filter_stock_status_values = get_query_var( StockFilter::STOCK_STATUS_QUERY_VAR );
-
-		if ( empty( $filter_stock_status_values ) ) {
-			return array();
-		}
-
-		$filtered_stock_status_values = array_filter(
-			explode( ',', $filter_stock_status_values ),
-			function ( $stock_status ) {
-				return in_array( $stock_status, StockFilter::get_stock_status_query_var_values(), true );
-			}
-		);
-
-		if ( empty( $filtered_stock_status_values ) ) {
-			return array();
-		}
-
-		return array(
-			// Ignoring the warning of not using meta queries.
-			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-			'meta_query' => array(
-				array(
-					'key'      => '_stock_status',
-					'value'    => $filtered_stock_status_values,
-					'operator' => 'IN',
-				),
-			),
-		);
-	}
 
 	/**
 	 * Return a query that filters products by rating.
@@ -654,65 +590,6 @@ class QueryBuilder {
 		);
 	}
 
-	/**
-	 * Return a query that filters products by taxonomy terms.
-	 *
-	 * @since 10.6.0
-	 *
-	 * @return array
-	 */
-	private function get_filter_by_taxonomy_query() {
-
-		$container       = wc_get_container();
-		$params_handler  = $container->get( \Automattic\WooCommerce\Internal\ProductFilters\Params::class );
-		$taxonomy_params = $params_handler->get_param( 'taxonomy' );
-
-		if ( empty( $taxonomy_params ) ) {
-			return array();
-		}
-
-		$tax_queries = array();
-
-		foreach ( $taxonomy_params as $taxonomy_slug => $param_key ) {
-			$param_value = get_query_var( $param_key );
-
-			// Adding is_string check to avoid invalid query parameters for the taxonomy.
-			if ( ! is_string( $param_value ) || empty( $param_value ) ) {
-				continue;
-			}
-
-			// Define $term_values by exploding the string.
-			$term_values = explode( ',', $param_value );
-
-			// Sanitize and filter (removes empty strings).
-			$term_slugs = array_values( array_filter( array_map( 'sanitize_title', $term_values ) ) );
-
-			if ( empty( $term_slugs ) ) {
-				continue;
-			}
-
-			$tax_queries[] = array(
-				'taxonomy' => $taxonomy_slug,
-				'field'    => 'slug',
-				'terms'    => $term_slugs,
-				'operator' => 'IN',
-			);
-		}
-
-		if ( empty( $tax_queries ) ) {
-			return array();
-		}
-
-		return array(
-			// phpcs:ignore WordPress.DB.SlowDBQuery
-			'tax_query' => array(
-				array(
-					'relation' => 'AND',
-					...$tax_queries,
-				),
-			),
-		);
-	}
 
 	/**
 	 * Merge two array recursively but replace the non-array values instead of
@@ -789,11 +666,8 @@ class QueryBuilder {
 	 */
 	private function get_queries_by_applied_filters() {
 		return array(
-			'price_filter'        => $this->get_filter_by_price_query(),
-			'attributes_filter'   => $this->get_filter_by_attributes_query(),
-			'stock_status_filter' => $this->get_filter_by_stock_status_query(),
-			'rating_filter'       => $this->get_filter_by_rating_query(),
-			'taxonomy_filter'     => $this->get_filter_by_taxonomy_query(),
+			'rating_filter'            => $this->get_filter_by_rating_query(),
+			'productCollectionFilters' => true,
 		);
 	}
 
