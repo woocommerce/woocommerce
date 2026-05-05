@@ -19,6 +19,16 @@ import {
 } from './settings-email-listing-slotfill';
 import { getAdminSetting } from '~/utils/admin-settings';
 
+/**
+ * Allowlist of valid template status values. Defined once at module scope so a
+ * future status addition only requires one update site.
+ */
+const VALID_TEMPLATE_STATUSES: readonly TemplateStatus[] = [
+	'in_sync',
+	'core_updated_uncustomized',
+	'core_updated_customized',
+] as const;
+
 type EmailListingRecreateEmailPostResponse = {
 	message: string;
 	post_id: string;
@@ -74,21 +84,22 @@ export const useTransactionalEmails = (
 					status = 'manual';
 				}
 
-				// RSM-140: project template-status and template-version meta exposed
-				// as top-level REST fields by the divergence detector. Read-only.
-				const rawStatus = (
-					post as { _wc_email_template_status?: unknown } | null
-				 )?._wc_email_template_status;
+				// RSM-140: project template-status and template-version meta auto-
+				// surfaced under `meta` in the wp/v2/woo_email REST response (the
+				// post type declares 'custom-fields' support). Read-only.
+				const meta = (
+					post as { meta?: Record< string, unknown > } | null
+				 )?.meta;
+				const rawStatus = meta?._wc_email_template_status;
 				const templateStatus: TemplateStatus | null =
-					rawStatus === 'in_sync' ||
-					rawStatus === 'core_updated_uncustomized' ||
-					rawStatus === 'core_updated_customized'
-						? rawStatus
+					typeof rawStatus === 'string' &&
+					( VALID_TEMPLATE_STATUSES as readonly string[] ).includes(
+						rawStatus
+					)
+						? ( rawStatus as TemplateStatus )
 						: null;
 
-				const rawVersion = (
-					post as { _wc_email_template_version?: unknown } | null
-				 )?._wc_email_template_version;
+				const rawVersion = meta?._wc_email_template_version;
 				const templateVersion: string | null =
 					typeof rawVersion === 'string' && rawVersion.length > 0
 						? rawVersion

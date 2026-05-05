@@ -15,11 +15,11 @@ use WP_REST_Request;
  * REST integration coverage for `_wc_email_template_status` and `_wc_email_template_version`
  * exposure on the `woo_email` post type.
  *
- * The post type does not declare `'custom-fields'` support, so the standard `meta`
- * property of the wp/v2 response is not auto-populated. Instead, both keys are
- * surfaced as top-level read-only fields via `register_rest_field()` (see
- * {@see WCEmailTemplateDivergenceDetector::register_rest_fields()}). This test
- * pins that exposure contract for the email list UI.
+ * Because the `woo_email` post type declares `'custom-fields'` support (see
+ * {@see Integration::add_email_post_type()}), WP core auto-surfaces every
+ * `show_in_rest = true` meta key registered via {@see WCEmailTemplateDivergenceDetector::register_meta()}
+ * under the standard `meta` property of the `wp/v2/woo_email` response. This
+ * test pins that exposure contract for the email list UI.
  *
  * Lives in a sibling class (rather than alongside the unit-level detector tests) so
  * we can extend `WC_REST_Unit_Test_Case` and use the real REST stack.
@@ -56,7 +56,7 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose template status and version as top-level fields in wp/v2/woo_email GET response.
+	 * @testdox Should expose template status and version under `meta` in wp/v2/woo_email GET response.
 	 */
 	public function test_template_status_meta_visible_via_rest_get_post(): void {
 		$admin_user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
@@ -86,33 +86,36 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status(), 'GET wp/v2/woo_email/{id} must succeed for an authenticated administrator.' );
 		$data = $response->get_data();
 
+		$this->assertArrayHasKey( 'meta', $data, 'wp/v2/woo_email response must include a meta property when the post type supports custom-fields.' );
+		$this->assertIsArray( $data['meta'], 'meta property must be an array.' );
+
 		$this->assertArrayHasKey(
 			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
-			$data,
-			'Status field must be exposed at the top level of the wp/v2/woo_email response.'
+			$data['meta'],
+			'Status meta must be auto-surfaced under the meta property of the wp/v2/woo_email response.'
 		);
 		$this->assertSame(
 			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
-			$data[ WCEmailTemplateDivergenceDetector::STATUS_META_KEY ],
-			'Status field value must reflect the stamped post meta.'
+			$data['meta'][ WCEmailTemplateDivergenceDetector::STATUS_META_KEY ],
+			'Status meta value must reflect the stamped post meta.'
 		);
 
 		$this->assertArrayHasKey(
 			WCEmailTemplateDivergenceDetector::VERSION_META_KEY,
-			$data,
-			'Version field must be exposed at the top level of the wp/v2/woo_email response.'
+			$data['meta'],
+			'Version meta must be auto-surfaced under the meta property of the wp/v2/woo_email response.'
 		);
 		$this->assertSame(
 			'9.4.0',
-			$data[ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ],
-			'Version field value must reflect the stamped post meta.'
+			$data['meta'][ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ],
+			'Version meta value must reflect the stamped post meta.'
 		);
 	}
 
 	/**
-	 * @testdox Should return null for top-level fields when no meta is stamped.
+	 * @testdox Should return empty-string meta values when no meta is stamped.
 	 */
-	public function test_template_status_meta_returns_null_when_unstamped(): void {
+	public function test_template_status_meta_returns_empty_when_unstamped(): void {
 		$admin_user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
 		wp_set_current_user( $admin_user_id );
 
@@ -130,16 +133,23 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
 
-		$this->assertArrayHasKey( WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $data );
-		$this->assertNull(
-			$data[ WCEmailTemplateDivergenceDetector::STATUS_META_KEY ],
-			'Unstamped posts must surface a null status (e.g. third-party emails not in the sync registry).'
+		$this->assertArrayHasKey( 'meta', $data );
+		$this->assertIsArray( $data['meta'] );
+
+		// WP core surfaces registered single-string meta with a default empty string when no value is stored.
+		// The JS data hook treats empty/missing/non-matching values as `null` — see VALID_TEMPLATE_STATUSES allowlist.
+		$this->assertArrayHasKey( WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $data['meta'] );
+		$this->assertSame(
+			'',
+			$data['meta'][ WCEmailTemplateDivergenceDetector::STATUS_META_KEY ],
+			'Unstamped posts must surface an empty status (e.g. third-party emails not in the sync registry); the JS data hook normalises this to null.'
 		);
 
-		$this->assertArrayHasKey( WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $data );
-		$this->assertNull(
-			$data[ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ],
-			'Unstamped posts must surface a null version.'
+		$this->assertArrayHasKey( WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $data['meta'] );
+		$this->assertSame(
+			'',
+			$data['meta'][ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ],
+			'Unstamped posts must surface an empty version; the JS data hook normalises this to null.'
 		);
 	}
 }

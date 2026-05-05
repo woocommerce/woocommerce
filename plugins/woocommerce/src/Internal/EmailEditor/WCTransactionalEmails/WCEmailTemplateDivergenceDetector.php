@@ -89,6 +89,11 @@ class WCEmailTemplateDivergenceDetector {
 	 * Register `_wc_email_template_status` and `_wc_email_template_version` post meta on
 	 * the `woo_email` post type as REST-readable, server-write-only meta.
 	 *
+	 * Because the `woo_email` post type declares `'custom-fields'` support (see
+	 * {@see Integration::add_email_post_type()}), WP core auto-surfaces every
+	 * `show_in_rest = true` meta key under the standard `meta` property of the
+	 * `wp/v2/woo_email` response — no custom REST field registration is needed.
+	 *
 	 * This is a stable read contract for the email list UI and any downstream consumer
 	 * (extensions, headless admins). Renaming or removing either meta key, or changing
 	 * the meaning of an existing status string value, is a breaking change. Vocabulary
@@ -155,65 +160,6 @@ class WCEmailTemplateDivergenceDetector {
 		}
 		// For reads, defer to whether the user can edit the post.
 		return user_can( $user_id, 'edit_post', $object_id );
-	}
-
-	/**
-	 * Expose `_wc_email_template_status` and `_wc_email_template_version` as
-	 * top-level read-only fields on the `woo_email` REST response.
-	 *
-	 * Called via `rest_api_init` (REST fields must register late). The values
-	 * are returned at the top level of the response (not under `meta`) because
-	 * the `woo_email` post type does not declare `'custom-fields'` support, so
-	 * WP core's standard `meta` schema property is not auto-populated even when
-	 * individual meta keys are registered with `show_in_rest = true`.
-	 *
-	 * The companion `register_meta()` registration is kept for type validation,
-	 * sanitization, schema documentation, and to ensure the auth callback blocks
-	 * any attempt to write these meta keys via the REST stack.
-	 *
-	 * This is a stable read contract — see `register_meta()` for the public-API
-	 * commitment that backs both meta keys.
-	 *
-	 * @return void
-	 *
-	 * @since 10.9.0
-	 */
-	public static function register_rest_fields(): void {
-		register_rest_field(
-			'woo_email',
-			self::STATUS_META_KEY,
-			array(
-				'schema'       => array(
-					'description' => 'Read-only template divergence classification ("in_sync", "core_updated_uncustomized", or "core_updated_customized") or null when no classification has been recorded yet (e.g. third-party email not opted into the sync registry).',
-					'type'        => array( 'string', 'null' ),
-					'enum'        => array( null, self::STATUS_IN_SYNC, self::STATUS_CORE_UPDATED_UNCUSTOMIZED, self::STATUS_CORE_UPDATED_CUSTOMIZED ),
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'get_callback' => static function ( array $post ): ?string {
-					$value = get_post_meta( (int) $post['id'], self::STATUS_META_KEY, true );
-					return is_string( $value ) && '' !== $value ? $value : null;
-				},
-				// No update_callback — server-write-only.
-			)
-		);
-
-		register_rest_field(
-			'woo_email',
-			self::VERSION_META_KEY,
-			array(
-				'schema'       => array(
-					'description' => 'Read-only stamp of the core template version this woo_email post was last generated, applied, or reset against. Null when no stamp is recorded.',
-					'type'        => array( 'string', 'null' ),
-					'context'     => array( 'view', 'edit' ),
-					'readonly'    => true,
-				),
-				'get_callback' => static function ( array $post ): ?string {
-					$value = get_post_meta( (int) $post['id'], self::VERSION_META_KEY, true );
-					return is_string( $value ) && '' !== $value ? $value : null;
-				},
-			)
-		);
 	}
 
 	/**
