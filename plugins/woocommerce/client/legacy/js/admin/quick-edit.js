@@ -148,6 +148,77 @@ jQuery(
 			}
 		);
 
+		// Pre-check shared terms in the bulk-edit hierarchical taxonomy checklists.
+		// WP core's setBulk() only handles the built-in `category` taxonomy
+		// (it hardcodes `#category_<id>` and `input[name="post_category[]"]`),
+		// so we replicate it for product_cat, product_brand, etc.
+		$( '#wpbody' ).on(
+			'click',
+			'#doaction, #doaction2',
+			function() {
+				var actionSelectName = $( this ).attr( 'id' ).substr( 2 );
+				if ( 'edit' !== $( 'select[name="' + actionSelectName + '"]' ).val() ) {
+					return;
+				}
+
+				var $checked = $( 'tbody th.check-column input[type="checkbox"]:checked' );
+				if ( ! $checked.length ) {
+					return;
+				}
+
+				var productIds = $checked.map( function() {
+					return $( this ).val();
+				} ).get();
+
+				$( '#bulk-edit ul.cat-checklist' ).each( function() {
+					var $checklist = $( this );
+					var taxonomy = '';
+					$.each( ( $checklist.attr( 'class' ) || '' ).split( /\s+/ ), function( _, cls ) {
+						if ( 'cat-checklist' !== cls && '-checklist' === cls.slice( -10 ) ) {
+							taxonomy = cls.slice( 0, -10 );
+							return false;
+						}
+					} );
+					if ( ! taxonomy ) {
+						return;
+					}
+
+					var counts = {};
+					$.each( productIds, function( _, productId ) {
+						var ids = ( $( '#' + taxonomy + '_' + productId ).text() || '' ).split( ',' );
+						$.each( ids, function( _, termId ) {
+							if ( '' === termId ) {
+								return;
+							}
+							counts[ termId ] = ( counts[ termId ] || 0 ) + 1;
+						} );
+					} );
+
+					$checklist.find( 'input[type="checkbox"]' ).each( function() {
+						var $cb = $( this );
+						var count = counts[ $cb.val() ] || 0;
+						if ( count === productIds.length ) {
+							$cb.prop( 'checked', true ).prop( 'indeterminate', false );
+						} else if ( count > 0 ) {
+							$cb.prop( 'checked', false ).prop( 'indeterminate', true );
+						} else {
+							$cb.prop( 'checked', false ).prop( 'indeterminate', false );
+						}
+					} );
+				} );
+			}
+		);
+
+		// Clear indeterminate state when the user toggles a partial-overlap checkbox,
+		// so the visual matches the new checked state.
+		$( '#wpbody' ).on(
+			'change',
+			'#bulk-edit ul.cat-checklist input[type="checkbox"]',
+			function() {
+				$( this ).prop( 'indeterminate', false );
+			}
+		);
+
 		$( '#wpbody' ).on(
 			'change',
 			'#woocommerce-fields-bulk .inline-edit-group .change_to',

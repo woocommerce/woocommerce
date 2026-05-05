@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Pre-check shared product categories (and other hierarchical taxonomies) in the products bulk-edit row when all selected products share them, with indeterminate state for partial overlaps.
