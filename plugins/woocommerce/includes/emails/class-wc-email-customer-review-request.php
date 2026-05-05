@@ -56,8 +56,8 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 				'{order_number}' => '',
 			);
 
-			// Trigger fires from Action Scheduler. Scheduling itself lives in the review-request scheduler class.
-			add_action( 'woocommerce_send_review_request', array( $this, 'trigger' ), 10, 1 );
+			// Trigger fires via WC_Emails' transactional pipeline after Action Scheduler fires `woocommerce_send_review_request`.
+			add_action( 'woocommerce_send_review_request_notification', array( $this, 'trigger' ), 10, 1 );
 
 			// Call parent constructor.
 			parent::__construct();
