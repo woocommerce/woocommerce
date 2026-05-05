@@ -3,11 +3,11 @@
  */
 import { InnerBlocks, useBlockProps } from '@wordpress/block-editor';
 import { BlockEditProps, InnerBlockTemplate } from '@wordpress/blocks';
-import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 import { filterThreeLines } from '@woocommerce/icons';
+import { getSetting } from '@woocommerce/settings';
 import clsx from 'clsx';
 
 /**
@@ -42,24 +42,10 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { isPreview } = attributes;
 	const [ isOpen, setIsOpen ] = useState( false );
 
-	const globalColors = useSelect( ( select ) => {
-		const coreStore = select( 'core' ) as {
-			__experimentalGetCurrentGlobalStylesId: () => string | null;
-			getEditedEntityRecord: (
-				kind: string,
-				name: string,
-				id: string
-			) => Record< string, unknown > | undefined;
-		};
-		const id = coreStore.__experimentalGetCurrentGlobalStylesId();
-		if ( ! id ) return {};
-		const record = coreStore.getEditedEntityRecord(
-			'root',
-			'globalStyles',
-			id
-		) as { styles?: { color?: { background?: string; text?: string } } } | undefined;
-		return record?.styles?.color ?? {};
-	}, [] );
+	const globalColors = getSetting< { background?: string; text?: string } >(
+		'globalStylesColors',
+		{}
+	);
 	const colors = getColorsFromBlockSupports( attributes );
 
 	const blockGap = (
