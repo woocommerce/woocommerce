@@ -94,9 +94,21 @@ class Endpoint {
 		if ( ! $post instanceof \WP_Post || 'page' !== $post->post_type ) {
 			return;
 		}
-		if ( 'review-order' !== $post->post_name ) {
+
+		// Identify the page by stored option id (post-install) or by the
+		// shortcode in its content (during install, before the option
+		// exists). Don't compare $post->post_name to 'review-order' alone:
+		// WP appends -2/-3/... if the slug already exists.
+		$stored_id  = (int) get_option( 'woocommerce_review_order_page_id' );
+		$is_by_id   = $stored_id > 0 && $stored_id === (int) $post->ID;
+		$is_by_slug = '' === $post->post_name
+			? false
+			: ( 'review-order' === $post->post_name || 0 === strpos( $post->post_name, 'review-order-' ) );
+		$is_by_body = false !== strpos( (string) $post->post_content, '[' . self::SHORTCODE . ']' );
+		if ( ! $is_by_id && ! $is_by_slug && ! $is_by_body ) {
 			return;
 		}
+
 		remove_action( 'transition_post_status', '_wp_auto_add_pages_to_menu', 10 );
 		add_action(
 			'transition_post_status',
@@ -181,18 +193,23 @@ class Endpoint {
 	public function gate_request(): void {
 		global $wp;
 
+		// Only act when the request resolves to the WC-managed Review Order
+		// page. A leftover review-order query var on some other page (manual
+		// URL tampering, third-party plugin) shouldn't trigger our auth
+		// path or 404 an unrelated page.
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id <= 0 || ! is_page( $page_id ) ) {
+			return;
+		}
+
 		// Use isset() rather than empty() so the literal "0" doesn't slip
 		// through to normal WP routing; the auth check 404s on order_id 0.
 		if ( ! isset( $wp->query_vars[ self::QUERY_VAR ] ) ) {
 			// Visiting the host page directly (no order id in the URL) is a
 			// dead end — the shortcode renders nothing and the customer
 			// sees a chrome-only page. Send them to the home page instead.
-			$page_id = (int) wc_get_page_id( self::PAGE_KEY );
-			if ( $page_id > 0 && is_page( $page_id ) ) {
-				wp_safe_redirect( home_url( '/' ) );
-				exit;
-			}
-			return;
+			wp_safe_redirect( home_url( '/' ) );
+			exit;
 		}
 
 		$order_id  = absint( $wp->query_vars[ self::QUERY_VAR ] );
