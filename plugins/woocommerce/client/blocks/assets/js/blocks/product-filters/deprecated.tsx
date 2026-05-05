@@ -2,7 +2,6 @@
  * External dependencies
  */
 import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
-import clsx from 'clsx';
 
 /**
  * Internal dependencies
@@ -49,7 +48,7 @@ function getProductFiltersCssV1( attributes: BlockAttributes ) {
 const v1 = {
 	save( { attributes }: { attributes: BlockAttributes } ) {
 		const blockProps = useBlockProps.save( {
-			className: "wc-block-product-filters",
+			className: 'wc-block-product-filters',
 			style: getProductFiltersCssV1( attributes ),
 		} );
 		const innerBlocksProps = useInnerBlocksProps.save( blockProps );

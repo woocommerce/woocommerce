@@ -105,6 +105,7 @@ class ProductFilters extends AbstractBlock {
 		$wrapper_attributes = array(
 			'class'                            => 'wc-block-product-filters',
 			'data-wp-interactive'              => $this->get_full_block_name(),
+			'data-wp-init--colors'             => 'callbacks.initColors',
 			'data-wp-watch--scrolling'         => 'callbacks.scrollLimit',
 			'data-wp-on--keyup'                => 'actions.closeOverlayOnEscape',
 			'data-wp-context'                  => wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
@@ -199,21 +200,11 @@ class ProductFilters extends AbstractBlock {
 		$bg = StyleAttributesUtils::get_background_color_class_and_style( $attributes );
 		if ( ! empty( $bg['value'] ) ) {
 			$styles[] = sprintf( '--wc-product-filters-background-color: %s', $bg['value'] );
-		} else {
-			$global_colors = wp_get_global_styles( array( 'color' ) );
-			if ( ! empty( $global_colors['background'] ) ) {
-				$styles[] = sprintf( '--wc-product-filters-background-color: %s', $global_colors['background'] );
-			}
 		}
 
 		$text = StyleAttributesUtils::get_text_color_class_and_style( $attributes );
 		if ( ! empty( $text['value'] ) ) {
 			$styles[] = sprintf( '--wc-product-filters-text-color: %s', $text['value'] );
-		} else {
-			$global_colors = $global_colors ?? wp_get_global_styles( array( 'color' ) );
-			if ( ! empty( $global_colors['text'] ) ) {
-				$styles[] = sprintf( '--wc-product-filters-text-color: %s', $global_colors['text'] );
-			}
 		}
 
 		$block_gap = $attributes['style']['spacing']['blockGap'] ?? '';
