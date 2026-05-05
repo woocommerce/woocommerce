@@ -37,9 +37,12 @@ class DomainAbilities {
 		}
 
 		self::register_products_query();
-		self::register_products_manage();
+		self::register_product_create();
+		self::register_product_update();
+		self::register_product_delete();
 		self::register_orders_query();
-		self::register_orders_manage();
+		self::register_order_update_status();
+		self::register_order_add_note();
 	}
 
 	/**
@@ -69,27 +72,79 @@ class DomainAbilities {
 	}
 
 	/**
-	 * Register the product management ability.
+	 * Register the product creation ability.
 	 */
-	private static function register_products_manage(): void {
-		if ( self::has_ability( 'woocommerce/products-manage' ) ) {
+	private static function register_product_create(): void {
+		if ( self::has_ability( 'woocommerce/product-create' ) ) {
 			return;
 		}
 
 		wp_register_ability(
-			'woocommerce/products-manage',
+			'woocommerce/product-create',
 			array(
-				'label'               => __( 'Manage Products', 'woocommerce' ),
+				'label'               => __( 'Create Product', 'woocommerce' ),
 				'description'         => __(
-					'Create, update, or delete WooCommerce products using WooCommerce product APIs.',
+					'Create a WooCommerce product using WooCommerce product APIs.',
 					'woocommerce'
 				),
 				'category'            => 'woocommerce',
-				'input_schema'        => self::get_products_manage_input_schema(),
+				'input_schema'        => self::get_product_create_input_schema(),
 				'output_schema'       => self::get_entity_output_schema( 'product' ),
-				'execute_callback'    => array( __CLASS__, 'execute_products_manage' ),
+				'execute_callback'    => array( __CLASS__, 'execute_product_create' ),
 				'permission_callback' => array( __CLASS__, 'can_manage_products' ),
-				'meta'                => self::get_domain_meta( 'manage', false, false, true ),
+				'meta'                => self::get_domain_meta( 'create', false, false, false ),
+			)
+		);
+	}
+
+	/**
+	 * Register the product update ability.
+	 */
+	private static function register_product_update(): void {
+		if ( self::has_ability( 'woocommerce/product-update' ) ) {
+			return;
+		}
+
+		wp_register_ability(
+			'woocommerce/product-update',
+			array(
+				'label'               => __( 'Update Product', 'woocommerce' ),
+				'description'         => __(
+					'Update an existing WooCommerce product using WooCommerce product APIs.',
+					'woocommerce'
+				),
+				'category'            => 'woocommerce',
+				'input_schema'        => self::get_product_update_input_schema(),
+				'output_schema'       => self::get_entity_output_schema( 'product' ),
+				'execute_callback'    => array( __CLASS__, 'execute_product_update' ),
+				'permission_callback' => array( __CLASS__, 'can_manage_products' ),
+				'meta'                => self::get_domain_meta( 'update', false, false, true ),
+			)
+		);
+	}
+
+	/**
+	 * Register the product delete ability.
+	 */
+	private static function register_product_delete(): void {
+		if ( self::has_ability( 'woocommerce/product-delete' ) ) {
+			return;
+		}
+
+		wp_register_ability(
+			'woocommerce/product-delete',
+			array(
+				'label'               => __( 'Delete Product', 'woocommerce' ),
+				'description'         => __(
+					'Delete a WooCommerce product using WooCommerce product APIs.',
+					'woocommerce'
+				),
+				'category'            => 'woocommerce',
+				'input_schema'        => self::get_product_delete_input_schema(),
+				'output_schema'       => self::get_delete_output_schema(),
+				'execute_callback'    => array( __CLASS__, 'execute_product_delete' ),
+				'permission_callback' => array( __CLASS__, 'can_manage_products' ),
+				'meta'                => self::get_domain_meta( 'delete', false, false, true ),
 			)
 		);
 	}
@@ -121,27 +176,53 @@ class DomainAbilities {
 	}
 
 	/**
-	 * Register the order management ability.
+	 * Register the order status update ability.
 	 */
-	private static function register_orders_manage(): void {
-		if ( self::has_ability( 'woocommerce/orders-manage' ) ) {
+	private static function register_order_update_status(): void {
+		if ( self::has_ability( 'woocommerce/order-update-status' ) ) {
 			return;
 		}
 
 		wp_register_ability(
-			'woocommerce/orders-manage',
+			'woocommerce/order-update-status',
 			array(
-				'label'               => __( 'Manage Orders', 'woocommerce' ),
+				'label'               => __( 'Update Order Status', 'woocommerce' ),
 				'description'         => __(
-					'Update WooCommerce order status or add order notes using WooCommerce order APIs.',
+					'Update a WooCommerce order status using WooCommerce order APIs.',
 					'woocommerce'
 				),
 				'category'            => 'woocommerce',
-				'input_schema'        => self::get_orders_manage_input_schema(),
+				'input_schema'        => self::get_order_update_status_input_schema(),
 				'output_schema'       => self::get_entity_output_schema( 'order' ),
-				'execute_callback'    => array( __CLASS__, 'execute_orders_manage' ),
+				'execute_callback'    => array( __CLASS__, 'execute_order_update_status' ),
 				'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
-				'meta'                => self::get_domain_meta( 'manage', false, false, true ),
+				'meta'                => self::get_domain_meta( 'update-status', false, false, true ),
+			)
+		);
+	}
+
+	/**
+	 * Register the order note creation ability.
+	 */
+	private static function register_order_add_note(): void {
+		if ( self::has_ability( 'woocommerce/order-add-note' ) ) {
+			return;
+		}
+
+		wp_register_ability(
+			'woocommerce/order-add-note',
+			array(
+				'label'               => __( 'Add Order Note', 'woocommerce' ),
+				'description'         => __(
+					'Add a note to a WooCommerce order using WooCommerce order APIs.',
+					'woocommerce'
+				),
+				'category'            => 'woocommerce',
+				'input_schema'        => self::get_order_add_note_input_schema(),
+				'output_schema'       => self::get_order_note_output_schema(),
+				'execute_callback'    => array( __CLASS__, 'execute_order_add_note' ),
+				'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
+				'meta'                => self::get_domain_meta( 'add-note', false, false, false ),
 			)
 		);
 	}
@@ -204,71 +285,71 @@ class DomainAbilities {
 	}
 
 	/**
-	 * Manage products.
+	 * Create a product.
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
 	 */
-	public static function execute_products_manage( array $input ) {
-		$action = sanitize_key( $input['action'] ?? '' );
+	public static function execute_product_create( array $input ) {
+		$type    = sanitize_key( $input['type'] ?? 'simple' );
+		$product = wc_get_product_object( $type );
 
-		switch ( $action ) {
-			case 'create':
-				$type    = sanitize_key( $input['type'] ?? 'simple' );
-				$product = wc_get_product_object( $type );
-
-				if ( ! $product ) {
-					return new \WP_Error(
-						'woocommerce_invalid_product_type',
-						__( 'Invalid product type.', 'woocommerce' ),
-						array( 'status' => 400 )
-					);
-				}
-
-				self::set_product_props( $product, $input );
-				$product->save();
-
-				return array(
-					'action'  => 'create',
-					'product' => self::format_product( $product ),
-				);
-
-			case 'update':
-				$product = self::get_product_from_input( $input );
-
-				if ( is_wp_error( $product ) ) {
-					return $product;
-				}
-
-				self::set_product_props( $product, $input );
-				$product->save();
-
-				return array(
-					'action'  => 'update',
-					'product' => self::format_product( $product ),
-				);
-
-			case 'delete':
-				$product = self::get_product_from_input( $input );
-
-				if ( is_wp_error( $product ) ) {
-					return $product;
-				}
-
-				$product_id = $product->get_id();
-				$deleted    = $product->delete( (bool) ( $input['force'] ?? false ) );
-
-				return array(
-					'action'  => 'delete',
-					'deleted' => (bool) $deleted,
-					'id'      => $product_id,
-				);
+		if ( ! $product ) {
+			return new \WP_Error(
+				'woocommerce_invalid_product_type',
+				__( 'Invalid product type.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
 		}
 
-		return new \WP_Error(
-			'woocommerce_invalid_product_action',
-			__( 'Invalid product management action.', 'woocommerce' ),
-			array( 'status' => 400 )
+		self::set_product_props( $product, $input );
+		$product->save();
+
+		return array(
+			'product' => self::format_product( $product ),
+		);
+	}
+
+	/**
+	 * Update a product.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error
+	 */
+	public static function execute_product_update( array $input ) {
+		$product = self::get_product_from_input( $input );
+
+		if ( is_wp_error( $product ) ) {
+			return $product;
+		}
+
+		self::set_product_props( $product, $input );
+		$product->save();
+
+		return array(
+			'product' => self::format_product( $product ),
+		);
+	}
+
+	/**
+	 * Delete a product.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error
+	 */
+	public static function execute_product_delete( array $input ) {
+		$product = self::get_product_from_input( $input );
+
+		if ( is_wp_error( $product ) ) {
+			return $product;
+		}
+
+		$product_id = $product->get_id();
+		$deleted    = $product->delete( (bool) ( $input['force'] ?? false ) );
+
+		return array(
+			'deleted' => (bool) $deleted,
+			'id'      => $product_id,
 		);
 	}
 
@@ -284,7 +365,7 @@ class DomainAbilities {
 		if ( ! empty( $input['id'] ) ) {
 			$order = wc_get_order( absint( $input['id'] ) );
 
-			if ( ! $order ) {
+			if ( ! $order instanceof \WC_Order ) {
 				return new \WP_Error(
 					'woocommerce_order_not_found',
 					__( 'Order not found.', 'woocommerce' ),
@@ -307,6 +388,7 @@ class DomainAbilities {
 			'page'     => $page,
 			'paginate' => true,
 			'return'   => 'objects',
+			'type'     => 'shop_order',
 		);
 
 		foreach ( array( 'status', 'billing_email' ) as $field ) {
@@ -321,6 +403,14 @@ class DomainAbilities {
 
 		$results = wc_get_orders( $args );
 		$orders  = is_object( $results ) && isset( $results->orders ) ? $results->orders : array();
+		$orders  = array_values(
+			array_filter(
+				$orders,
+				static function ( $order ): bool {
+					return $order instanceof \WC_Order;
+				}
+			)
+		);
 		$total   = is_object( $results ) && isset( $results->total ) ? (int) $results->total : count( $orders );
 
 		return array(
@@ -337,12 +427,12 @@ class DomainAbilities {
 	}
 
 	/**
-	 * Manage orders.
+	 * Update an order status.
 	 *
 	 * @param array $input Ability input.
 	 * @return array|\WP_Error
 	 */
-	public static function execute_orders_manage( array $input ) {
+	public static function execute_order_update_status( array $input ) {
 		if ( empty( $input['id'] ) ) {
 			return new \WP_Error(
 				'woocommerce_order_id_required',
@@ -353,7 +443,7 @@ class DomainAbilities {
 
 		$order = wc_get_order( absint( $input['id'] ) );
 
-		if ( ! $order ) {
+		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(
 				'woocommerce_order_not_found',
 				__( 'Order not found.', 'woocommerce' ),
@@ -361,53 +451,65 @@ class DomainAbilities {
 			);
 		}
 
-		$action = sanitize_key( $input['action'] ?? '' );
-
-		switch ( $action ) {
-			case 'update_status':
-				if ( empty( $input['status'] ) ) {
-					return new \WP_Error(
-						'woocommerce_order_status_required',
-						__( 'Order status is required.', 'woocommerce' ),
-						array( 'status' => 400 )
-					);
-				}
-
-				$order->update_status(
-					sanitize_key( $input['status'] ),
-					isset( $input['note'] ) ? wc_clean( wp_unslash( $input['note'] ) ) : ''
-				);
-
-				return array(
-					'action' => 'update_status',
-					'order'  => self::format_order( $order, false ),
-				);
-
-			case 'add_note':
-				if ( empty( $input['note'] ) ) {
-					return new \WP_Error(
-						'woocommerce_order_note_required',
-						__( 'Order note is required.', 'woocommerce' ),
-						array( 'status' => 400 )
-					);
-				}
-
-				$note_id = $order->add_order_note(
-					wc_clean( wp_unslash( $input['note'] ) ),
-					(bool) ( $input['customer_note'] ?? false )
-				);
-
-				return array(
-					'action'  => 'add_note',
-					'note_id' => (int) $note_id,
-					'order'   => self::format_order( $order, false ),
-				);
+		if ( empty( $input['status'] ) ) {
+			return new \WP_Error(
+				'woocommerce_order_status_required',
+				__( 'Order status is required.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
 		}
 
-		return new \WP_Error(
-			'woocommerce_invalid_order_action',
-			__( 'Invalid order management action.', 'woocommerce' ),
-			array( 'status' => 400 )
+		$order->update_status(
+			sanitize_key( $input['status'] ),
+			isset( $input['note'] ) ? self::sanitize_string( $input['note'] ) : ''
+		);
+
+		return array(
+			'order' => self::format_order( $order, false ),
+		);
+	}
+
+	/**
+	 * Add an order note.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error
+	 */
+	public static function execute_order_add_note( array $input ) {
+		if ( empty( $input['id'] ) ) {
+			return new \WP_Error(
+				'woocommerce_order_id_required',
+				__( 'Order ID is required.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$order = wc_get_order( absint( $input['id'] ) );
+
+		if ( ! $order instanceof \WC_Order ) {
+			return new \WP_Error(
+				'woocommerce_order_not_found',
+				__( 'Order not found.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		if ( empty( $input['note'] ) ) {
+			return new \WP_Error(
+				'woocommerce_order_note_required',
+				__( 'Order note is required.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$note_id = $order->add_order_note(
+			self::sanitize_string( $input['note'] ),
+			( (bool) ( $input['customer_note'] ?? false ) ) ? 1 : 0
+		);
+
+		return array(
+			'note_id' => (int) $note_id,
+			'order'   => self::format_order( $order, false ),
 		);
 	}
 
@@ -497,19 +599,14 @@ class DomainAbilities {
 	}
 
 	/**
-	 * Get the products manage input schema.
+	 * Get the product create input schema.
 	 *
 	 * @return array
 	 */
-	private static function get_products_manage_input_schema(): array {
+	private static function get_product_create_input_schema(): array {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'action'            => array(
-					'type' => 'string',
-					'enum' => array( 'create', 'update', 'delete' ),
-				),
-				'id'                => array( 'type' => 'integer' ),
 				'type'              => array( 'type' => 'string' ),
 				'name'              => array( 'type' => 'string' ),
 				'sku'               => array( 'type' => 'string' ),
@@ -523,9 +620,46 @@ class DomainAbilities {
 				'stock_status'      => array( 'type' => 'string' ),
 				'virtual'           => array( 'type' => 'boolean' ),
 				'downloadable'      => array( 'type' => 'boolean' ),
-				'force'             => array( 'type' => 'boolean' ),
 			),
-			'required'             => array( 'action' ),
+			'required'             => array( 'name' ),
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Get the product update input schema.
+	 *
+	 * @return array
+	 */
+	private static function get_product_update_input_schema(): array {
+		$schema               = self::get_product_create_input_schema();
+		$schema['properties'] = array_merge(
+			array(
+				'id' => array( 'type' => 'integer' ),
+			),
+			$schema['properties']
+		);
+		$schema['required']   = array( 'id' );
+
+		return $schema;
+	}
+
+	/**
+	 * Get the product delete input schema.
+	 *
+	 * @return array
+	 */
+	private static function get_product_delete_input_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'id'    => array( 'type' => 'integer' ),
+				'force' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			),
+			'required'             => array( 'id' ),
 			'additionalProperties' => false,
 		);
 	}
@@ -565,24 +699,40 @@ class DomainAbilities {
 	}
 
 	/**
-	 * Get the orders manage input schema.
+	 * Get the order status update input schema.
 	 *
 	 * @return array
 	 */
-	private static function get_orders_manage_input_schema(): array {
+	private static function get_order_update_status_input_schema(): array {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'action'        => array(
-					'type' => 'string',
-					'enum' => array( 'update_status', 'add_note' ),
-				),
-				'id'            => array( 'type' => 'integer' ),
-				'status'        => array( 'type' => 'string' ),
-				'note'          => array( 'type' => 'string' ),
-				'customer_note' => array( 'type' => 'boolean' ),
+				'id'     => array( 'type' => 'integer' ),
+				'status' => array( 'type' => 'string' ),
+				'note'   => array( 'type' => 'string' ),
 			),
-			'required'             => array( 'action', 'id' ),
+			'required'             => array( 'id', 'status' ),
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Get the order note input schema.
+	 *
+	 * @return array
+	 */
+	private static function get_order_add_note_input_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'id'            => array( 'type' => 'integer' ),
+				'note'          => array( 'type' => 'string' ),
+				'customer_note' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			),
+			'required'             => array( 'id', 'note' ),
 			'additionalProperties' => false,
 		);
 	}
@@ -622,14 +772,45 @@ class DomainAbilities {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'action'    => array( 'type' => 'string' ),
 				$entity_key => array(
 					'type'                 => 'object',
 					'additionalProperties' => true,
 				),
-				'deleted'   => array( 'type' => 'boolean' ),
-				'id'        => array( 'type' => 'integer' ),
-				'note_id'   => array( 'type' => 'integer' ),
+			),
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Get a delete output schema.
+	 *
+	 * @return array
+	 */
+	private static function get_delete_output_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'deleted' => array( 'type' => 'boolean' ),
+				'id'      => array( 'type' => 'integer' ),
+			),
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Get an order note output schema.
+	 *
+	 * @return array
+	 */
+	private static function get_order_note_output_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'note_id' => array( 'type' => 'integer' ),
+				'order'   => array(
+					'type'                 => 'object',
+					'additionalProperties' => true,
+				),
 			),
 			'additionalProperties' => false,
 		);
@@ -751,6 +932,10 @@ class DomainAbilities {
 			$data['line_items'] = array();
 
 			foreach ( $order->get_items() as $item ) {
+				if ( ! $item instanceof \WC_Order_Item_Product ) {
+					continue;
+				}
+
 				$data['line_items'][] = array(
 					'id'           => $item->get_id(),
 					'name'         => $item->get_name(),
@@ -784,6 +969,22 @@ class DomainAbilities {
 	 */
 	private static function sanitize_per_page( $value ): int {
 		return min( 100, max( 1, absint( $value ) ) );
+	}
+
+	/**
+	 * Sanitize a scalar string input value.
+	 *
+	 * @param mixed $value Raw input value.
+	 * @return string
+	 */
+	private static function sanitize_string( $value ): string {
+		if ( ! is_scalar( $value ) ) {
+			return '';
+		}
+
+		$clean = wc_clean( wp_unslash( (string) $value ) );
+
+		return is_string( $clean ) ? $clean : '';
 	}
 
 	/**
