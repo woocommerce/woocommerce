@@ -317,7 +317,11 @@ function wc_get_attribute_type_label( $type ) {
  * @return bool
  */
 function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
-	$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
+	$sanitized_attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
+
+	if ( in_array( $sanitized_attribute_name, wc_get_reserved_product_attribute_structural_names(), true ) ) {
+		return true;
+	}
 
 	// Forbidden attribute names.
 	$reserved_terms = array(
@@ -391,9 +395,6 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
 		'tb',
 		'term',
 		'type',
-		'variation',
-		'variation_data',
-		'variation_id',
 		'w',
 		'withcomments',
 		'withoutcomments',
@@ -401,6 +402,20 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
 	);
 
 	return in_array( $attribute_name, $reserved_terms, true );
+}
+
+/**
+ * Get WooCommerce structural keys that cannot be used as product attribute names.
+ *
+ * @since 10.9.0
+ * @return string[]
+ */
+function wc_get_reserved_product_attribute_structural_names() {
+	return array(
+		'variation',
+		'variation_data',
+		'variation_id',
+	);
 }
 
 /**
@@ -414,7 +429,7 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
 function wc_log_product_attribute_name_collision( $attribute_name, $context = array() ) {
 	$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
 
-	if ( '' === $attribute_name || ! wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
+	if ( '' === $attribute_name || ! in_array( $attribute_name, wc_get_reserved_product_attribute_structural_names(), true ) ) {
 		return;
 	}
 

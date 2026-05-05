@@ -105,6 +105,25 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product save should allow custom attributes that only match legacy reserved terms after case normalization.
+	 */
+	public function test_product_save_allows_custom_attribute_name_that_only_matches_legacy_reserved_term_after_case_normalization(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Case-sensitive attribute test' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'Type' );
+		$attribute->set_options( array( 'T-shirt' ) );
+		$attribute->set_visible( true );
+
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$this->assertGreaterThan( 0, $product->get_id() );
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox Product save should leave existing legacy reserved attributes readable when attributes are unchanged.
 	 */
 	public function test_product_save_allows_unchanged_legacy_reserved_attribute_name(): void {

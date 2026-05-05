@@ -459,7 +459,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 			$attribute_name = wc_sanitize_taxonomy_name( $attribute->get_name() );
 
-			if ( ! wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
+			if ( ! in_array( $attribute_name, wc_get_reserved_product_attribute_structural_names(), true ) ) {
 				continue;
 			}
 

@@ -198,6 +198,14 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should preserve legacy case-sensitive checks for non-structural reserved names.
+	 */
+	public function test_wc_check_if_attribute_name_is_reserved_preserves_legacy_case_sensitive_terms(): void {
+		$this->assertTrue( wc_check_if_attribute_name_is_reserved( 'type' ) );
+		$this->assertFalse( wc_check_if_attribute_name_is_reserved( 'Type' ) );
+	}
+
+	/**
 	 * @testdox Should log reserved product attribute collisions under the attribute-collision source.
 	 */
 	public function test_wc_log_product_attribute_name_collision_uses_attribute_collision_source(): void {
@@ -230,6 +238,27 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 					'location'       => 'WC_Attribute_Functions_Test',
 				)
 			);
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $logger_callback );
+		}
+	}
+
+	/**
+	 * @testdox Should only log structural product attribute name collisions.
+	 */
+	public function test_wc_log_product_attribute_name_collision_ignores_non_structural_reserved_names(): void {
+		$mock_logger = $this->getMockBuilder( WC_Logger_Interface::class )->getMock();
+		$mock_logger
+			->expects( $this->never() )
+			->method( 'notice' );
+
+		$logger_callback = static function () use ( $mock_logger ) {
+			return $mock_logger;
+		};
+		add_filter( 'woocommerce_logging_class', $logger_callback );
+
+		try {
+			wc_log_product_attribute_name_collision( 'type' );
 		} finally {
 			remove_filter( 'woocommerce_logging_class', $logger_callback );
 		}
