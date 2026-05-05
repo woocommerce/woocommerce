@@ -541,6 +541,7 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			return;
 		}
 
+		$orders_count    = count( $orders );
 		$processed_count = 0;
 		foreach ( $orders as $order ) {
 			try {
@@ -567,8 +568,9 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 		$elapsed_time = microtime( true ) - $start_time;
 		$logger->info(
 			sprintf(
-				'Batch import completed. Processed: %d orders in %.2f seconds. Cursor: %s (ID: %d)',
+				'Batch import completed. Processed: %d/%d orders in %.2f seconds. Cursor: %s (ID: %d)',
 				$processed_count,
+				$orders_count,
 				$elapsed_time,
 				$cursor_date,
 				$cursor_id
@@ -576,9 +578,10 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 			$context
 		);
 
-		// If we got a full batch, there might be more orders to process.
-		// Schedule immediate next batch.
-		if ( $processed_count === $batch_size ) {
+		// If we fetched a full batch, there might be more orders to process.
+		// Use the fetched count rather than successful count so that skipped
+		// failing orders do not suppress scheduling of the next batch.
+		if ( $orders_count === $batch_size ) {
 			$logger->info( 'Full batch processed, scheduling next batch', $context );
 			self::schedule_action(
 				'process_pending_batch',
