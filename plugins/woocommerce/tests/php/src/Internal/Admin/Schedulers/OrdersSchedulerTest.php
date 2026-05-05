@@ -389,9 +389,9 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox process_pending_batch catches PHP errors thrown during order import.
+	 * @testdox process_pending_batch skips a failing order and advances the cursor past it.
 	 */
-	public function test_process_pending_batch_catches_throwable_from_order_import(): void {
+	public function test_process_pending_batch_skips_failing_order_and_advances_cursor(): void {
 		$order = \WC_Helper_Order::create_order();
 		$order->set_status( 'completed' );
 		$order->save();
@@ -408,18 +408,46 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 
 		OrdersScheduler::clear_queued_actions();
 		add_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10, 2 );
+		OrdersScheduler::process_pending_batch( $cursor_date, $cursor_id );
+		remove_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10 );
 
-		try {
-			OrdersScheduler::process_pending_batch( $cursor_date, $cursor_id );
-			$this->fail( 'Expected DivisionByZeroError to be rethrown.' );
-		} catch ( \DivisionByZeroError $e ) {
-			$this->assertSame( 'Division by zero', $e->getMessage() );
-		} finally {
-			remove_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10 );
-		}
+		// Cursor must advance past the failing order so it is not retried on the next run.
+		$this->assertSame( $order->get_id(), (int) get_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION ) );
+		$this->assertNotSame( $cursor_date, get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION ) );
+	}
 
-		$this->assertSame( $cursor_date, get_option( OrdersScheduler::LAST_PROCESSED_ORDER_DATE_OPTION ) );
-		$this->assertSame( $cursor_id, (int) get_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION ) );
+	/**
+	 * @testdox process_pending_batch advances the cursor to the last-processed order when a later order fails.
+	 */
+	public function test_process_pending_batch_cursor_reflects_last_processed_order_on_partial_failure(): void {
+		// Both orders get the same timestamp in tests; ordering falls back to id ASC,
+		// so order_a (lower ID) is processed before order_b.
+		$order_a = \WC_Helper_Order::create_order();
+		$order_a->set_status( 'completed' );
+		$order_a->save();
+
+		$order_b = \WC_Helper_Order::create_order();
+		$order_b->set_status( 'completed' );
+		$order_b->save();
+
+		$cursor_date     = '2000-01-01 00:00:00';
+		$cursor_id       = 0;
+		$throwing_filter = function ( $is_test, $checked_order ) use ( $order_b ) {
+			if ( $checked_order instanceof \WC_Abstract_Order && $checked_order->get_id() === $order_b->get_id() ) {
+				throw new \DivisionByZeroError( 'Division by zero' );
+			}
+
+			return $is_test;
+		};
+
+		OrdersScheduler::clear_queued_actions();
+		add_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10, 2 );
+		OrdersScheduler::process_pending_batch( $cursor_date, $cursor_id );
+		remove_filter( 'woocommerce_analytics_is_test_order', $throwing_filter, 10 );
+
+		// Cursor should be at order_b (the last order processed, even though it failed),
+		// not at order_a or at the initial position.
+		$this->assertSame( $order_b->get_id(), (int) get_option( OrdersScheduler::LAST_PROCESSED_ORDER_ID_OPTION ) );
 	}
 
 	/**

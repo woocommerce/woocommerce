@@ -549,14 +549,14 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 				// Advance cursor after each successful import. Since orders are sorted by
 				// date ASC, id ASC, we can simply overwrite with the current order's values.
-				// If an error occurs, we break and save the last successful position.
 				$cursor_date = $order->date_updated_gmt;
 				$cursor_id   = $order->id;
 			} catch ( \Throwable $e ) {
+				// Log the failure and advance the cursor past the failing order so that
+				// it is skipped on the next run rather than blocking the entire pipeline.
 				static::log_import_error( $order->id, $e, $context );
-				update_option( self::LAST_PROCESSED_ORDER_DATE_OPTION, $cursor_date, false );
-				update_option( self::LAST_PROCESSED_ORDER_ID_OPTION, $cursor_id, false );
-				throw $e;
+				$cursor_date = $order->date_updated_gmt;
+				$cursor_id   = $order->id;
 			}
 		}
 

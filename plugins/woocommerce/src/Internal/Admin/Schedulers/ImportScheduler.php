@@ -20,6 +20,13 @@ abstract class ImportScheduler implements ImportInterface {
 	const IMPORT_STATS_OPTION = 'woocommerce_admin_import_stats';
 
 	/**
+	 * Scheduler name. Subclasses must override this with a concrete value.
+	 *
+	 * @var string
+	 */
+	public static $name = '';
+
+	/**
 	 * Scheduler traits.
 	 */
 	use SchedulerTraits {
@@ -119,6 +126,7 @@ abstract class ImportScheduler implements ImportInterface {
 	 * @param int|bool $days Number of days to import.
 	 * @param bool     $skip_existing Skip existing records.
 	 * @return void
+	 * @throws \Throwable Re-throws any error from a failed item import after logging diagnostics.
 	 */
 	public static function import_batch( $batch_number, $days, $skip_existing ) {
 		$batch_size = static::get_batch_size( 'import' );
