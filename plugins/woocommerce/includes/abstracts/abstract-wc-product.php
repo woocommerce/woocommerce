@@ -2204,13 +2204,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		$image = '';
 		if ( $this->get_image_id() ) {
 			$image_alt = get_post_meta( $this->get_image_id(), '_wp_attachment_image_alt', true );
-			$attr      = wp_parse_args(
-				$attr,
-				array(
-					'alt' => $image_alt ? $image_alt : $this->get_name(),
-				)
-			);
-			$image     = wp_get_attachment_image( $this->get_image_id(), $size, false, $attr );
+			if ( ! array_key_exists( 'alt', $attr ) ) {
+				$attr['alt'] = $image_alt ? $image_alt : $this->get_name();
+			}
+			$image = wp_get_attachment_image( $this->get_image_id(), $size, false, $attr );
 		} elseif ( $this->get_parent_id() ) {
 			$parent_product = wc_get_product( $this->get_parent_id() );
 			if ( $parent_product ) {

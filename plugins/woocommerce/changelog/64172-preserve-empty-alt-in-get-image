@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix: preserve an explicitly empty 'alt' attribute (alt="") passed to WC_Product::get_image() instead of replacing it with the default alt text, allowing decorative images to be correctly marked per W3C accessibility guidelines.

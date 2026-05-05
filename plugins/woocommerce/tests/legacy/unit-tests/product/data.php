@@ -352,6 +352,52 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: test_get_image_should_preserve_explicitly_empty_alt_with_placeholder.
+	 *
+	 * W3C requires decorative images to have alt="" (present but empty).
+	 * Passing 'alt' => '' must not be stripped by the default-alt logic.
+	 */
+	public function test_get_image_should_preserve_explicitly_empty_alt_with_placeholder() {
+		$product = new WC_Product();
+		$image   = $product->get_image( 'woocommerce_thumbnail', array( 'alt' => '' ) );
+
+		$this->assertStringContainsString( 'alt=""', $image );
+	}
+
+	/**
+	 * Test: test_get_image_should_preserve_explicitly_empty_alt_with_product_image.
+	 *
+	 * Ensures that when a product has an image and alt="" is passed explicitly,
+	 * the rendered img tag still contains alt="" rather than using the default alt.
+	 */
+	public function test_get_image_should_preserve_explicitly_empty_alt_with_product_image() {
+		$product = new WC_Product();
+		$image   = $this->set_product_image( $product );
+		$html    = $product->get_image( 'woocommerce_thumbnail', array( 'alt' => '' ) );
+
+		$this->assertStringContainsString( 'alt=""', $html );
+
+		wp_delete_attachment( $image['id'], true );
+	}
+
+	/**
+	 * Test: test_get_image_should_use_default_alt_when_not_provided.
+	 *
+	 * When no alt is passed the function should fall back to the product name
+	 * (given the image attachment itself has no alt meta set).
+	 */
+	public function test_get_image_should_use_default_alt_when_not_provided() {
+		$product = new WC_Product();
+		$product->set_name( 'Test Alt Product' );
+		$image = $this->set_product_image( $product );
+		$html  = $product->get_image( 'woocommerce_thumbnail' );
+
+		$this->assertStringContainsString( 'alt="Test Alt Product"', $html );
+
+		wp_delete_attachment( $image['id'], true );
+	}
+
+	/**
 	 * Helper method to define a image for a product and return its URL.
 	 *
 	 * @param WC_Product $product Product object.
