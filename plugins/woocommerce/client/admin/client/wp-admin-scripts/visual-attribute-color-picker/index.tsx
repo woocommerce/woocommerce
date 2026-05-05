@@ -95,7 +95,7 @@ const ColorField = ( { input }: { input: HTMLInputElement } ) => {
 	return (
 		<>
 			<button
-				ref={ triggerRef as never }
+				ref={ triggerRef }
 				type="button"
 				className="wc-admin-visual-attribute-color-picker-trigger"
 				onClick={ () => setIsPopoverVisible( true ) }
