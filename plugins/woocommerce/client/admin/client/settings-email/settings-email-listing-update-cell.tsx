@@ -38,6 +38,14 @@ export const UpdatesCell = ( { post }: UpdatesCellProps ) => {
 	}
 
 	const onReviewUpdate = () => {
+		// Defensive guard: EmailType.post_id is typed as string and may be
+		// empty for third-party emails without a generated woo_email post.
+		// The detector should never stamp _wc_email_template_status on such
+		// rows, but mirror the existing `edit` row-action pattern in the
+		// listview rather than rely on that invariant.
+		if ( ! post.post_id ) {
+			return;
+		}
 		window.location.href = getAdminLink(
 			buildEmailEditorReviewUrl( parseInt( post.post_id, 10 ) )
 		);

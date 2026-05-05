@@ -139,4 +139,22 @@ describe( '<UpdatesCell>', () => {
 			/\/wp-admin\/post\.php\?post=123&action=edit&wc_email_review_drawer=1$/
 		);
 	} );
+
+	it( 'does nothing on click when post_id is empty', () => {
+		render(
+			<UpdatesCell
+				post={ {
+					...baseEmail,
+					post_id: '',
+					templateStatus: 'core_updated_customized',
+				} }
+			/>
+		);
+
+		fireEvent.click(
+			screen.getByRole( 'button', { name: /review update/i } )
+		);
+
+		expect( window.location.href ).toBe( '' );
+	} );
 } );
