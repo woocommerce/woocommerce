@@ -384,6 +384,8 @@ class WC_REST_Orders_Controller extends WC_REST_Orders_V2_Controller {
 
 		$schema['properties']['coupon_lines']['items']['properties']['discount']['readonly'] = true;
 
+		$schema['properties']['line_items']['items']['properties']['quantity']['type'] = 'number';
+
 		$schema['properties']['manual_update'] = array(
 			'default'     => false,
 			'description' => __( 'Set the action as manual so that the order note registers as "added by user".', 'woocommerce' ),

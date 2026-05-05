@@ -926,6 +926,51 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Updating a line item quantity with a float value via the REST API is accepted.
+	 */
+	public function test_update_line_item_quantity_with_float_value(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders' );
+		$request->set_body_params(
+			array(
+				'status'     => 'processing',
+				'line_items' => array(
+					array(
+						'product_id' => $product->get_id(),
+						'quantity'   => 1,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+
+		$order_data  = $response->get_data();
+		$order_id    = $order_data['id'];
+		$line_item   = $order_data['line_items'][0];
+		$line_item_id = $line_item['id'];
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order_id );
+		$request->set_body_params(
+			array(
+				'line_items' => array(
+					array(
+						'id'       => $line_item_id,
+						'quantity' => 1.52,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status(), 'Float line item quantity should be accepted by the REST API.' );
+
+		$data = $response->get_data();
+		$this->assertEquals( 1.52, $data['line_items'][0]['quantity'] );
+	}
+
+	/**
 	 * @testdox Updating an order with incomplete meta_data entries does not cause errors.
 	 */
 	public function test_update_meta_data_with_incomplete_entries(): void {
