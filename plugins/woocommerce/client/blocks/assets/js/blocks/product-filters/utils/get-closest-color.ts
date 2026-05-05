@@ -6,7 +6,11 @@ export function getClosestColor(
 		return null;
 	}
 	const color = window.getComputedStyle( element )[ colorType ];
-	if ( color !== 'rgba(0, 0, 0, 0)' && color !== 'transparent' ) {
+	const isFullyTransparent =
+		color === 'transparent' ||
+		( color.startsWith( 'rgba(' ) &&
+			parseFloat( color.split( ',' )[ 3 ] ) === 0 );
+	if ( ! isFullyTransparent ) {
 		const matches = color.match( /\d+/g );
 		if ( ! matches || matches.length < 3 ) {
 			return null;
