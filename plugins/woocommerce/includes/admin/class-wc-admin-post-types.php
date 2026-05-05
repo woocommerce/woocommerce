@@ -730,10 +730,7 @@ class WC_Admin_Post_Types {
 				} elseif ( 'product_brand' === $taxonomy_name && method_exists( $product, 'get_brand_ids' ) ) {
 					$current = $product->get_brand_ids();
 				} else {
-					$current = wp_get_object_terms( $post_id, $taxonomy_name, array( 'fields' => 'ids' ) );
-					if ( is_wp_error( $current ) ) {
-						continue;
-					}
+					$current = wc_get_object_terms( $post_id, $taxonomy_name, 'term_id' );
 				}
 				$current = array_map( 'absint', $current );
 
@@ -742,7 +739,6 @@ class WC_Admin_Post_Types {
 				$additions = array_intersect( $submitted_ids, $controllable );
 				$new_terms = array_values( array_unique( array_merge( $preserved, $additions ) ) );
 
-				// Skip the write entirely when the term set hasn't changed.
 				if ( count( $new_terms ) === count( $current ) && empty( array_diff( $new_terms, $current ) ) ) {
 					continue;
 				}
