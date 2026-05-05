@@ -492,11 +492,11 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		nocache_headers();
 
-		$site_url       = $this->get_secure_site_url();
-		$https_ok       = ! is_wp_error( $site_url );
-		$ap_supported   = function_exists( 'wp_is_application_passwords_supported' )
+		$site_url     = $this->get_secure_site_url();
+		$https_ok     = ! is_wp_error( $site_url );
+		$ap_supported = function_exists( 'wp_is_application_passwords_supported' )
 			&& wp_is_application_passwords_supported();
-		$ap_available   = $this->are_application_passwords_available();
+		$ap_available = $this->are_application_passwords_available();
 
 		$available = $https_ok && $ap_available;
 		$reason    = null;
