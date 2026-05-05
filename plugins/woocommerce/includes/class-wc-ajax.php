@@ -3001,36 +3001,38 @@ class WC_AJAX {
 		// field doesn't end up as 1970-01-01 via strtotime('').
 		$date_from = isset( $data['date_from'] ) ? $data['date_from'] : '';
 		$date_to   = isset( $data['date_to'] ) ? $data['date_to'] : '';
-		$skip_from = '' === $date_from || 'false' === $date_from;
-		$skip_to   = '' === $date_to || 'false' === $date_to;
 
-		if ( $skip_from && $skip_to ) {
+		$start_date = null;
+		if ( '' !== $date_from && 'false' !== $date_from ) {
+			$timestamp = strtotime( wc_clean( $date_from ) );
+			if ( false !== $timestamp ) {
+				$start_date = date( 'Y-m-d 00:00:00', $timestamp ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			}
+		}
+
+		$end_date = null;
+		if ( '' !== $date_to && 'false' !== $date_to ) {
+			$timestamp = strtotime( wc_clean( $date_to ) );
+			if ( false !== $timestamp ) {
+				$end_date = date( 'Y-m-d 23:59:59', $timestamp ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+			}
+		}
+
+		if ( null === $start_date && null === $end_date ) {
 			return;
 		}
 
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
-			$changed   = false;
 
-			if ( ! $skip_from ) {
-				$timestamp_from = strtotime( wc_clean( $date_from ) );
-				if ( false !== $timestamp_from ) {
-					$variation->set_date_on_sale_from( date( 'Y-m-d 00:00:00', $timestamp_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-					$changed = true;
-				}
+			if ( null !== $start_date ) {
+				$variation->set_date_on_sale_from( $start_date );
+			}
+			if ( null !== $end_date ) {
+				$variation->set_date_on_sale_to( $end_date );
 			}
 
-			if ( ! $skip_to ) {
-				$timestamp_to = strtotime( wc_clean( $date_to ) );
-				if ( false !== $timestamp_to ) {
-					$variation->set_date_on_sale_to( date( 'Y-m-d 23:59:59', $timestamp_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-					$changed = true;
-				}
-			}
-
-			if ( $changed ) {
-				$variation->save();
-			}
+			$variation->save();
 		}
 	}
 
