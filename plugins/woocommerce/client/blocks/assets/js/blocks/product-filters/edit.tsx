@@ -16,6 +16,7 @@ import clsx from 'clsx';
 import './editor.scss';
 import { type BlockAttributes } from './types';
 import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
+import { presetToCssVariable } from './utils/preset-to-css-variable';
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -64,7 +65,9 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 				colors.backgroundColor || globalColors.background,
 			'--wc-product-filters-text-color':
 				colors.textColor || globalColors.text,
-			'--wc-product-filter-block-spacing': blockGap || undefined,
+			'--wc-product-filter-block-spacing': blockGap
+				? presetToCssVariable( blockGap )
+				: undefined,
 		},
 	} );
 

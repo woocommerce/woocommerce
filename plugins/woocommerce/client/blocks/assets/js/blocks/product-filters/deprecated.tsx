@@ -9,14 +9,13 @@ import clsx from 'clsx';
  */
 import { type BlockAttributes } from './types';
 import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
+import { presetToCssVariable } from './utils/preset-to-css-variable';
 
 function isObject< T extends Record< string, unknown >, U >(
 	term: T | U
 ): term is NonNullable< T > {
 	return (
-		term !== null &&
-		term instanceof Object &&
-		term.constructor === Object
+		term !== null && term instanceof Object && term.constructor === Object
 	);
 }
 
@@ -25,15 +24,6 @@ function objectHasProp< P extends PropertyKey >(
 	property: P
 ): target is { [ K in P ]: unknown } {
 	return isObject( target ) && property in target;
-}
-
-function presetToCssVariable( preset: string ) {
-	if ( ! preset.includes( ':' ) || ! preset.includes( '|' ) ) {
-		return preset;
-	}
-	return `var(--wp--${ preset
-		.replace( 'var:', '' )
-		.replaceAll( '|', '--' ) })`;
 }
 
 function getProductFiltersCssV1( attributes: BlockAttributes ) {
