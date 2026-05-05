@@ -4,8 +4,9 @@
  * Renders one of two visual states inside the email list's "Updates" column:
  *
  *  - core_updated_customized → "Review update" Button (variant="secondary").
- *    Click navigates to the email post's editor; the editor will detect
- *    the post's templateStatus on mount (RSM-141) and surface its own banner.
+ *    Click navigates to the email post's editor with `?wc_email_review_drawer=1`,
+ *    a stable param contract consumed by RSM-141 (editor banner) to auto-open
+ *    the review drawer.
  *
  *  - any other status (in_sync, core_updated_uncustomized, null/missing meta,
  *    unexpected string) → em-dash placeholder with `aria-label="Up to date"`.
@@ -25,6 +26,7 @@ import { getAdminLink } from '@woocommerce/settings';
  * Internal dependencies
  */
 import type { EmailType } from './settings-email-listing-slotfill';
+import { buildEmailEditorReviewUrl } from './build-email-editor-review-url';
 
 interface UpdatesCellProps {
 	post: EmailType;
@@ -37,7 +39,7 @@ export const UpdatesCell = ( { post }: UpdatesCellProps ) => {
 
 	const onReviewUpdate = () => {
 		window.location.href = getAdminLink(
-			`post.php?post=${ encodeURIComponent( post.post_id ) }&action=edit`
+			buildEmailEditorReviewUrl( parseInt( post.post_id, 10 ) )
 		);
 	};
 
