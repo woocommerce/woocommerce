@@ -121,7 +121,7 @@ describe( '<UpdatesCell>', () => {
 		expect( screen.getByLabelText( /up to date/i ) ).toBeInTheDocument();
 	} );
 
-	it( 'navigates to the editor with wc_email_review_drawer=1 on click', () => {
+	it( 'navigates to the canonical editor URL on click', () => {
 		render(
 			<UpdatesCell
 				post={ {
@@ -135,8 +135,11 @@ describe( '<UpdatesCell>', () => {
 			screen.getByRole( 'button', { name: /review update/i } )
 		);
 
-		expect( window.location.href ).toMatch(
-			/\/wp-admin\/post\.php\?post=123&action=edit&wc_email_review_drawer=1$/
+		expect( window.location.href ).toContain( '/wp-admin/post.php' );
+		expect( window.location.href ).toContain( 'post=123' );
+		expect( window.location.href ).toContain( 'action=edit' );
+		expect( window.location.href ).not.toContain(
+			'wc_email_review_drawer'
 		);
 	} );
 } );

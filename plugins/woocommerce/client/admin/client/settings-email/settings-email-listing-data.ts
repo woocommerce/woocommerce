@@ -105,13 +105,6 @@ export const useTransactionalEmails = (
 		[ emailTypesData, emailPosts, postIdsMap ]
 	);
 
-	// RSM-140: total count of emails with an available update — computed
-	// post-projection but pre-filter so the chip badge doesn't go to 0 once
-	// the user toggles the "updates" filter on.
-	const updateAvailableCount = emails.filter(
-		( email ) => email.templateStatus === 'core_updated_customized'
-	).length;
-
 	// Apply Sort
 	let sortedEmails: EmailType[] = emails;
 	if ( view.sort ) {
@@ -333,7 +326,6 @@ export const useTransactionalEmails = (
 	return {
 		emails: renderedEmails,
 		total: filteredEmails.length,
-		updateAvailableCount,
 		updateEmailEnabledStatus,
 		recreateEmailPost,
 	};

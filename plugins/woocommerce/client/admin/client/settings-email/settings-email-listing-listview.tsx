@@ -17,7 +17,6 @@ import { useTransactionalEmails } from './settings-email-listing-data';
 import { Status, EMAIL_STATUSES } from './settings-email-listing-status';
 import { RecipientsList } from './settings-email-listing-recipients';
 import { UpdatesCell } from './settings-email-listing-update-cell';
-import { UpdateAvailableChip } from './settings-email-listing-update-chip';
 
 export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 	const [ view, setView ] = useState< View >( {
@@ -32,48 +31,8 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 		layout: {},
 	} );
 
-	const {
-		emails,
-		total,
-		updateAvailableCount,
-		updateEmailEnabledStatus,
-		recreateEmailPost,
-	} = useTransactionalEmails( emailTypes, view );
-
-	// RSM-140 — true when the "Updates" filter is currently set to "available".
-	// Handles both the scalar shape (`value: 'available'`) the chip writes and
-	// the array shape that DataView's "+ Add filter" menu may produce.
-	const isUpdateFilterActive = view.filters.some( ( filter: View.Filter ) => {
-		if ( filter.field !== 'updates' ) {
-			return false;
-		}
-		if ( Array.isArray( filter.value ) ) {
-			return ( filter.value as string[] ).includes( 'available' );
-		}
-		return filter.value === 'available';
-	} );
-
-	const toggleUpdateFilter = () => {
-		setView( ( current: View ) => {
-			const filtersWithoutUpdates = current.filters.filter(
-				( filter: View.Filter ) => filter.field !== 'updates'
-			);
-			if ( isUpdateFilterActive ) {
-				return { ...current, filters: filtersWithoutUpdates };
-			}
-			return {
-				...current,
-				filters: [
-					...filtersWithoutUpdates,
-					{
-						field: 'updates',
-						operator: 'is',
-						value: 'available',
-					},
-				],
-			};
-		} );
-	};
+	const { emails, total, updateEmailEnabledStatus, recreateEmailPost } =
+		useTransactionalEmails( emailTypes, view );
 
 	const fields = useMemo( () => {
 		const recipientElements = Array.from(
@@ -166,12 +125,8 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 					},
 				],
 				filterBy: {
-					// RSM-140 — `isPrimary` is intentionally omitted: the
-					// custom <UpdateAvailableChip> below replaces DataView's
-					// auto-rendered chip so the design (sparkle icon, count
-					// badge, hide-at-zero) can be matched. The filter is
-					// still selectable via the "+ Add filter" menu.
 					operators: [ 'is' ],
+					isPrimary: true,
 				},
 				render: ( { item }: { item: EmailType } ) => (
 					<UpdatesCell post={ item } />
@@ -261,33 +216,26 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 	};
 
 	return (
-		<div className="woocommerce-email-listing">
-			<UpdateAvailableChip
-				count={ updateAvailableCount }
-				active={ isUpdateFilterActive }
-				onClick={ toggleUpdateFilter }
-			/>
-			<DataViews
-				view={ view }
-				form={ form }
-				actions={ actions }
-				onChangeView={ setView }
-				fields={ fields }
-				data={ emails ?? [] }
-				paginationInfo={ {
-					totalItems: total,
-					totalPages: Math.ceil( total / view.perPage ),
-				} }
-				defaultLayouts={ {
-					table: {
-						showMedia: false,
-					},
-				} }
-				showLayoutSwitcher={ false }
-				getItemId={ ( item: EmailType ) =>
-					`${ item.id }_${ item?.email_key || '' }`
-				}
-			/>
-		</div>
+		<DataViews
+			view={ view }
+			form={ form }
+			actions={ actions }
+			onChangeView={ setView }
+			fields={ fields }
+			data={ emails ?? [] }
+			paginationInfo={ {
+				totalItems: total,
+				totalPages: Math.ceil( total / view.perPage ),
+			} }
+			defaultLayouts={ {
+				table: {
+					showMedia: false,
+				},
+			} }
+			showLayoutSwitcher={ false }
+			getItemId={ ( item: EmailType ) =>
+				`${ item.id }_${ item?.email_key || '' }`
+			}
+		/>
 	);
 };
