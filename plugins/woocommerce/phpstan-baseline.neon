@@ -8775,7 +8775,7 @@ parameters:
 		-
 			message: '#^Cannot call method save\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
-			count: 8
+			count: 7
 			path: includes/class-wc-ajax.php
 
 		-

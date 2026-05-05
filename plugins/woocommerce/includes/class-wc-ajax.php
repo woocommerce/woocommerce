@@ -3024,6 +3024,9 @@ class WC_AJAX {
 
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
+			if ( ! $variation ) {
+				continue;
+			}
 
 			if ( null !== $start_date ) {
 				$variation->set_date_on_sale_from( $start_date );

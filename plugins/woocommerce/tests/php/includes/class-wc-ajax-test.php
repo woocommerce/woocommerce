@@ -553,6 +553,102 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should leave the existing sale end date untouched when the bulk-action end-date input is empty.
+	 */
+	public function test_variation_bulk_sale_schedule_preserves_end_date_when_input_empty(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_ids    = $variable_product->get_children();
+		$variation        = wc_get_product( $variation_ids[0] );
+
+		$variation->set_date_on_sale_from( '2030-01-01 00:00:00' );
+		$variation->set_date_on_sale_to( '2099-12-31 23:59:59' );
+		$variation->save();
+
+		$run = function ( array $variations, array $data ) {
+			static::variation_bulk_action_variable_sale_schedule( $variations, $data );
+		};
+		$run->call(
+			new WC_AJAX(),
+			array( $variation->get_id() ),
+			array(
+				'date_from' => '2031-06-01',
+				'date_to'   => '',
+			)
+		);
+
+		$reloaded = wc_get_product( $variation->get_id() );
+
+		$this->assertSame(
+			'2031-06-01 00:00:00',
+			$reloaded->get_date_on_sale_from()->date( 'Y-m-d H:i:s' ),
+			'Provided start date should be applied.'
+		);
+		$this->assertSame(
+			'2099-12-31 23:59:59',
+			$reloaded->get_date_on_sale_to()->date( 'Y-m-d H:i:s' ),
+			'Empty end-date input must not coerce to 1970-01-01 (regression: #44498).'
+		);
+	}
+
+	/**
+	 * @testdox Should leave both sale dates untouched when both bulk-action inputs are cancelled or empty.
+	 */
+	public function test_variation_bulk_sale_schedule_no_op_when_both_inputs_skipped(): void {
+		$variable_product = WC_Helper_Product::create_variation_product();
+		$variation_ids    = $variable_product->get_children();
+		$variation        = wc_get_product( $variation_ids[0] );
+
+		$variation->set_date_on_sale_from( '2030-01-01 00:00:00' );
+		$variation->set_date_on_sale_to( '2099-12-31 23:59:59' );
+		$variation->save();
+
+		$run = function ( array $variations, array $data ) {
+			static::variation_bulk_action_variable_sale_schedule( $variations, $data );
+		};
+		$run->call(
+			new WC_AJAX(),
+			array( $variation->get_id() ),
+			array(
+				'date_from' => 'false',
+				'date_to'   => '',
+			)
+		);
+
+		$reloaded = wc_get_product( $variation->get_id() );
+
+		$this->assertSame(
+			'2030-01-01 00:00:00',
+			$reloaded->get_date_on_sale_from()->date( 'Y-m-d H:i:s' ),
+			'Cancelled start date should leave existing value alone.'
+		);
+		$this->assertSame(
+			'2099-12-31 23:59:59',
+			$reloaded->get_date_on_sale_to()->date( 'Y-m-d H:i:s' ),
+			'Empty end date should leave existing value alone.'
+		);
+	}
+
+	/**
+	 * @testdox Should skip variation IDs that no longer exist instead of fatalling.
+	 */
+	public function test_variation_bulk_sale_schedule_skips_invalid_variation_ids(): void {
+		$run = function ( array $variations, array $data ) {
+			static::variation_bulk_action_variable_sale_schedule( $variations, $data );
+		};
+
+		$run->call(
+			new WC_AJAX(),
+			array( PHP_INT_MAX ),
+			array(
+				'date_from' => '2031-06-01',
+				'date_to'   => '2031-12-31',
+			)
+		);
+
+		$this->assertTrue( true, 'Calling with a non-existent variation ID must not throw.' );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
