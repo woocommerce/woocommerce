@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a GraphQL settings section under Advanced with a toggle for the GET endpoint.

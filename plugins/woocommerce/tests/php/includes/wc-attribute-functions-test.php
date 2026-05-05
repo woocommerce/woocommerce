@@ -5,6 +5,8 @@
  * @package WooCommerce\Tests\Functions.
  */
 
+declare( strict_types=1 );
+
 use PHPUnit\Framework\MockObject\Matcher\InvokedRecorder;
 
 /**

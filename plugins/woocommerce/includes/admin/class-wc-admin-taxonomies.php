@@ -324,15 +324,14 @@ class WC_Admin_Taxonomies {
 			return false;
 		}
 
-		$attribute_slug = wc_attribute_taxonomy_slug( $taxonomy );
-
-		foreach ( wc_get_attribute_taxonomies() as $attribute_taxonomy ) {
-			if ( $attribute_slug === $attribute_taxonomy->attribute_name ) {
-				return 'wc-visual' === $attribute_taxonomy->attribute_type;
-			}
+		if ( ! array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
+			return false;
 		}
 
-		return false;
+		$attribute_id = wc_attribute_taxonomy_id_by_name( $taxonomy );
+		$attribute    = $attribute_id ? wc_get_attribute( $attribute_id ) : null;
+
+		return $attribute && 'wc-visual' === $attribute->type;
 	}
 
 	/**
