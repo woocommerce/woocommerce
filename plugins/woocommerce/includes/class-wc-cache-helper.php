@@ -235,7 +235,7 @@ class WC_Cache_Helper {
 	 * delete transients manually.
 	 *
 	 * With external cache however, this isn't possible. Instead, this function is used
-	 * to append a unique string (based on time()) to each transient. When transients
+	 * to append a unique string (based on microtime()) to each transient. When transients
 	 * are invalidated, the transient version will increment and data will be regenerated.
 	 *
 	 * Raised in issue https://github.com/woocommerce/woocommerce/issues/5777.
@@ -243,14 +243,14 @@ class WC_Cache_Helper {
 	 *
 	 * @param  string  $group   Name for the group of transients we need to invalidate.
 	 * @param  boolean $refresh true to force a new version.
-	 * @return string transient version based on time(), 10 digits.
+	 * @return string transient version.
 	 */
 	public static function get_transient_version( $group, $refresh = false ) {
 		$transient_name  = $group . '-transient-version';
 		$transient_value = get_transient( $transient_name );
 
 		if ( false === $transient_value || true === $refresh ) {
-			$transient_value = (string) time();
+			$transient_value = sprintf( '%.6F', microtime( true ) );
 
 			set_transient( $transient_name, $transient_value );
 		}

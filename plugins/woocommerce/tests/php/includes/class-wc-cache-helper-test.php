@@ -8,6 +8,34 @@ declare( strict_types = 1 );
 class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 
 	/**
+	 * @testdox Should refresh transient versions within the same second.
+	 */
+	public function test_get_transient_version_refreshes_within_same_second(): void {
+		$group          = 'test-cache-helper-version';
+		$transient_name = $group . '-transient-version';
+
+		delete_transient( $transient_name );
+
+		$current_time = microtime( true );
+		while ( 0.1 < $current_time - floor( $current_time ) ) {
+			usleep( 1000 );
+			$current_time = microtime( true );
+		}
+
+		$first_version  = WC_Cache_Helper::get_transient_version( $group, true );
+		usleep( 1000 );
+		$second_version = WC_Cache_Helper::get_transient_version( $group, true );
+
+		delete_transient( $transient_name );
+
+		$this->assertNotSame(
+			$first_version,
+			$second_version,
+			'Refreshing a transient version should always create a new cache version.'
+		);
+	}
+
+	/**
 	 * Data provider for test_geolocation_ajax_get_location_hash.
 	 *
 	 * @return array[]
