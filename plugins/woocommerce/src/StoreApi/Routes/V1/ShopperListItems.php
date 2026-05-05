@@ -196,12 +196,16 @@ class ShopperListItems extends AbstractRoute {
 		$cart_item_key = (string) $request->get_param( 'cart_item_key' );
 
 		if ( $cart_item_key ) {
-			$cart = WC()->cart;
-			if ( ! $cart instanceof \WC_Cart || empty( $cart->cart_contents[ $cart_item_key ] ) ) {
+			if ( ! did_action( 'woocommerce_load_cart_from_session' ) || ! wc()->cart ) {
+				wc_load_cart();
+			}
+
+			$cart_contents = wc()->cart->get_cart();
+			if ( empty( $cart_contents[ $cart_item_key ] ) ) {
 				throw new RouteException( 'woocommerce_rest_shopper_list_invalid_cart_item_key', esc_html__( 'No cart item exists for the supplied key.', 'woocommerce' ), 404 );
 			}
 
-			$line            = $cart->cart_contents[ $cart_item_key ];
+			$line            = $cart_contents[ $cart_item_key ];
 			$product_id      = absint( $line['product_id'] ?? 0 );
 			$variation_id    = absint( $line['variation_id'] ?? 0 );
 			$variation_attrs = isset( $line['variation'] ) && is_array( $line['variation'] ) ? $line['variation'] : array();
@@ -211,7 +215,7 @@ class ShopperListItems extends AbstractRoute {
 				$variation_attrs,
 				absint( $line['quantity'] ?? 1 ),
 			);
-		}
+		}//end if
 
 		$product_id = absint( $request->get_param( 'product_id' ) );
 		if ( ! $product_id ) {
