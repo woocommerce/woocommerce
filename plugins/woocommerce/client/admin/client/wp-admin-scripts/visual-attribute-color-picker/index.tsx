@@ -111,13 +111,15 @@ const ColorField = ( { input }: { input: HTMLInputElement } ) => {
 				/>
 				<span>{ displayedColorValue }</span>
 			</button>
-			<button
-				type="button"
-				className="button-link wc-admin-visual-attribute-color-picker-clear"
-				onClick={ clearColor }
-			>
-				{ __( 'Clear', 'woocommerce' ) }
-			</button>
+			{ color && (
+				<button
+					type="button"
+					className="button-link wc-admin-visual-attribute-color-picker-clear"
+					onClick={ clearColor }
+				>
+					{ __( 'Clear', 'woocommerce' ) }
+				</button>
+			) }
 			{ isPopoverVisible && triggerRef.current && (
 				<Popover
 					anchor={ triggerRef.current }
