@@ -1795,12 +1795,6 @@ parameters:
 			path: includes/admin/class-wc-admin-dashboard-setup.php
 
 		-
-			message: '#^Property WC_Admin_Dashboard_Setup\:\:\$initalized has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: includes/admin/class-wc-admin-dashboard-setup.php
-
-		-
 			message: '#^Property WC_Admin_Dashboard_Setup\:\:\$task_list has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
