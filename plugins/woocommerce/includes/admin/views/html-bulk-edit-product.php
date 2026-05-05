@@ -390,7 +390,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 							'3' => __( 'Replace all categories', 'woocommerce' ),
 						);
 						foreach ( $options as $key => $value ) {
-							echo '<option value="' . esc_attr( $key ) . '">' . esc_html( $value ) . '</option>';
+							echo '<option value="' . esc_attr( (string) $key ) . '">' . esc_html( $value ) . '</option>';
 						}
 						?>
 					</select>
@@ -408,9 +408,11 @@ if ( ! defined( 'ABSPATH' ) ) {
 				if ( ! is_wp_error( $product_categories ) && ! empty( $product_categories ) ) {
 					echo '<ul class="wc-bulk-edit-category-list">';
 					foreach ( $product_categories as $category ) {
-						echo '<li><label><input type="checkbox" name="product_cat_ids[]" value="' . esc_attr( $category->term_id ) . '" /> ' . esc_html( $category->name ) . '</label></li>';
+						echo '<li><label><input type="checkbox" name="product_cat_ids[]" value="' . esc_attr( (string) $category->term_id ) . '" /> ' . esc_html( $category->name ) . '</label></li>';
 					}
 					echo '</ul>';
+				} else {
+					echo '<p>' . esc_html__( 'No product categories found.', 'woocommerce' ) . '</p>';
 				}
 				?>
 			</div>
