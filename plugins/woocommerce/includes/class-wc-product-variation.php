@@ -173,6 +173,17 @@ class WC_Product_Variation extends WC_Product_Simple {
 		} elseif ( ! empty( $item_object['variation'] ) && is_array( $item_object['variation'] ) ) {
 			$data = $item_object['variation'];
 		} else {
+			if ( ! empty( $item_object['variation'] ) ) {
+				wc_log_product_attribute_name_collision(
+					'variation',
+					array(
+						'location'     => 'WC_Product_Variation::get_permalink',
+						'product_id'   => $this->get_parent_id(),
+						'variation_id' => $this->get_id(),
+					)
+				);
+			}
+
 			$data = $this->get_variation_attributes();
 		}
 

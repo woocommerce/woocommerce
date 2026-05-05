@@ -317,6 +317,8 @@ function wc_get_attribute_type_label( $type ) {
  * @return bool
  */
 function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
+	$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
+
 	// Forbidden attribute names.
 	$reserved_terms = array(
 		'attachment',
@@ -389,6 +391,9 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
 		'tb',
 		'term',
 		'type',
+		'variation',
+		'variation_data',
+		'variation_id',
 		'w',
 		'withcomments',
 		'withoutcomments',
@@ -396,6 +401,48 @@ function wc_check_if_attribute_name_is_reserved( $attribute_name ) {
 	);
 
 	return in_array( $attribute_name, $reserved_terms, true );
+}
+
+/**
+ * Log a product attribute name collision with a reserved WooCommerce structural key.
+ *
+ * @since 10.9.0
+ * @param string $attribute_name Attribute name.
+ * @param array  $context        Additional log context.
+ * @return void
+ */
+function wc_log_product_attribute_name_collision( $attribute_name, $context = array() ) {
+	$attribute_name = wc_sanitize_taxonomy_name( $attribute_name );
+
+	if ( '' === $attribute_name || ! wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
+		return;
+	}
+
+	$context = array_merge(
+		$context,
+		array(
+			'source'         => 'attribute-collision',
+			'attribute_name' => $attribute_name,
+		)
+	);
+
+	static $logged   = array();
+	$encoded_context = wp_json_encode( $context );
+	$dedupe_key      = md5( false !== $encoded_context ? $encoded_context : maybe_serialize( $context ) );
+
+	if ( isset( $logged[ $dedupe_key ] ) ) {
+		return;
+	}
+
+	$logged[ $dedupe_key ] = true;
+
+	wc_get_logger()->notice(
+		sprintf(
+			'Product attribute "%s" collides with a reserved WooCommerce structural key and may be ignored in variation data.',
+			$attribute_name
+		),
+		$context
+	);
 }
 
 /**

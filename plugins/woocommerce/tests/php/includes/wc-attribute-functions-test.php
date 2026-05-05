@@ -170,6 +170,72 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should treat WooCommerce structural keys as reserved attribute names.
+	 *
+	 * @dataProvider get_woocommerce_reserved_attribute_names
+	 *
+	 * @param string $attribute_name Attribute name to check.
+	 */
+	public function test_wc_check_if_attribute_name_is_reserved_includes_woocommerce_structural_names( string $attribute_name ): void {
+		$this->assertTrue(
+			wc_check_if_attribute_name_is_reserved( $attribute_name ),
+			sprintf( 'Attribute name "%s" should be reserved.', $attribute_name )
+		);
+	}
+
+	/**
+	 * Data provider for WooCommerce structural attribute names.
+	 *
+	 * @return array[]
+	 */
+	public function get_woocommerce_reserved_attribute_names(): array {
+		return array(
+			array( 'variation' ),
+			array( 'Variation' ),
+			array( 'variation_id' ),
+			array( 'variation_data' ),
+		);
+	}
+
+	/**
+	 * @testdox Should log reserved product attribute collisions under the attribute-collision source.
+	 */
+	public function test_wc_log_product_attribute_name_collision_uses_attribute_collision_source(): void {
+		$mock_logger = $this->getMockBuilder( WC_Logger_Interface::class )->getMock();
+		$mock_logger
+			->expects( $this->once() )
+			->method( 'notice' )
+			->with(
+				$this->stringContains( 'variation' ),
+				$this->callback(
+					function ( array $context ): bool {
+						return 'attribute-collision' === $context['source']
+							&& 'variation' === $context['attribute_name']
+							&& 'WC_Attribute_Functions_Test' === $context['location'];
+					}
+				)
+			);
+
+		$logger_callback = static function () use ( $mock_logger ) {
+			return $mock_logger;
+		};
+		add_filter( 'woocommerce_logging_class', $logger_callback );
+
+		try {
+			wc_log_product_attribute_name_collision(
+				'variation',
+				array(
+					'source'         => 'caller-source',
+					'attribute_name' => 'caller_attribute',
+					'location'       => 'WC_Attribute_Functions_Test',
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $logger_callback );
+		}
+	}
+
+	/**
 	 * Describes the behavior of the wc_update_attribute() function.
 	 *
 	 * @return void

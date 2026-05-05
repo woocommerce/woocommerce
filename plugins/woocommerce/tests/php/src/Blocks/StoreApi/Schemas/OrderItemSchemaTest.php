@@ -417,4 +417,46 @@ class OrderItemSchemaTest extends TestCase {
 		$order->delete( true );
 		$variable_product->delete( true );
 	}
+
+	/**
+	 * @testdox Should return an empty variation array and log when variation data is not iterable.
+	 */
+	public function test_format_variation_data_logs_non_iterable_variation_data(): void {
+		$product = new \WC_Product_Simple();
+		$product->set_name( 'Store API product' );
+		$product->save();
+
+		$mock_logger = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$mock_logger
+			->expects( $this->once() )
+			->method( 'notice' )
+			->with(
+				$this->stringContains( 'variation' ),
+				$this->callback(
+					function ( array $context ) use ( $product ): bool {
+						return 'attribute-collision' === $context['source']
+							&& 'variation' === $context['attribute_name']
+							&& $product->get_id() === $context['product_id']
+							&& 'StoreApi\ProductItemTrait::format_variation_data' === $context['location'];
+					}
+				)
+			);
+
+		$logger_callback = static function () use ( $mock_logger ) {
+			return $mock_logger;
+		};
+		add_filter( 'woocommerce_logging_class', $logger_callback );
+
+		try {
+			$method = new \ReflectionMethod( OrderItemSchema::class, 'format_variation_data' );
+			$method->setAccessible( true );
+
+			$result = $method->invoke( $this->sut, 'some-string-value', $product );
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $logger_callback );
+			$product->delete( true );
+		}
+
+		$this->assertSame( array(), $result );
+	}
 }

@@ -4356,31 +4356,53 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 
 	// Variation values are shown only if they are not found in the title as of 3.0.
 	// This is because variation titles display the attributes.
-	if ( $cart_item['data']->is_type( ProductType::VARIATION ) && is_array( $cart_item['variation'] ) ) {
-		foreach ( $cart_item['variation'] as $name => $value ) {
-			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
+	if ( $cart_item['data']->is_type( ProductType::VARIATION ) ) {
+		$variation_data = isset( $cart_item['variation'] ) ? $cart_item['variation'] : null;
 
-			if ( taxonomy_exists( $taxonomy ) ) {
-				// If this is a term slug, get the term's nice name.
-				$term = get_term_by( 'slug', $value, $taxonomy );
-				if ( ! is_wp_error( $term ) && $term && $term->name ) {
-					$value = $term->name;
+		if ( is_array( $variation_data ) ) {
+			foreach ( $variation_data as $name => $value ) {
+				$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
+
+				if ( taxonomy_exists( $taxonomy ) ) {
+					// If this is a term slug, get the term's nice name.
+					$term = get_term_by( 'slug', $value, $taxonomy );
+					if ( ! is_wp_error( $term ) && $term && $term->name ) {
+						$value = $term->name;
+					}
+					$label = wc_attribute_label( $taxonomy );
+				} else {
+					/**
+					 * Filters the variation option name.
+					 *
+					 * @since 2.5.0
+					 *
+					 * @param string     $value   The name to display.
+					 * @param null       $unused  Unused because this is not a variation taxonomy.
+					 * @param string     $taxonomy Taxonomy or product attribute name.
+					 * @param WC_Product $product Product data.
+					 */
+					$value = apply_filters( 'woocommerce_variation_option_name', $value, null, $taxonomy, $cart_item['data'] );
+					$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
 				}
-				$label = wc_attribute_label( $taxonomy );
-			} else {
-				// If this is a custom option slug, get the options name.
-				$value = apply_filters( 'woocommerce_variation_option_name', $value, null, $taxonomy, $cart_item['data'] );
-				$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
-			}
 
-			// Check the nicename against the title.
-			if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
-				continue;
-			}
+				// Check the nicename against the title.
+				if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
+					continue;
+				}
 
-			$item_data[] = array(
-				'key'   => $label,
-				'value' => $value,
+				$item_data[] = array(
+					'key'   => $label,
+					'value' => $value,
+				);
+			}
+		} elseif ( ! empty( $variation_data ) ) {
+			wc_log_product_attribute_name_collision(
+				'variation',
+				array(
+					'location'     => 'wc_get_formatted_cart_item_data',
+					'product_id'   => $cart_item['data']->get_parent_id(),
+					'variation_id' => $cart_item['data']->get_id(),
+				)
 			);
 		}
 	}

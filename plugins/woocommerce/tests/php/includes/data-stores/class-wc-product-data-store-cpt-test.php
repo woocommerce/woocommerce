@@ -76,6 +76,70 @@ class WC_Product_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Product save should reject changed custom attributes using reserved structural names.
+	 */
+	public function test_product_save_rejects_reserved_custom_attribute_name(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Reserved attribute test' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'variation' );
+		$attribute->set_options( array( 'blue' ) );
+		$attribute->set_visible( true );
+
+		$product->set_attributes( array( $attribute ) );
+
+		try {
+			$product->save();
+		} catch ( WC_Data_Exception $exception ) {
+			$error_data = $exception->getErrorData();
+
+			$this->assertSame( 'product_invalid_attribute_name_reserved', $exception->getErrorCode() );
+			$this->assertSame( 400, $exception->getCode() );
+			$this->assertSame( 400, $error_data['status'] );
+			$this->assertSame( 'variation', $error_data['attribute_name'] );
+			return;
+		}
+
+		$this->fail( 'Expected product save to reject reserved custom attribute names.' );
+	}
+
+	/**
+	 * @testdox Product save should leave existing legacy reserved attributes readable when attributes are unchanged.
+	 */
+	public function test_product_save_allows_unchanged_legacy_reserved_attribute_name(): void {
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Legacy reserved attribute test' );
+		$product->save();
+
+		update_post_meta(
+			$product->get_id(),
+			'_product_attributes',
+			array(
+				'variation' => array(
+					'name'         => 'variation',
+					'value'        => 'blue',
+					'position'     => 0,
+					'is_visible'   => 1,
+					'is_variation' => 1,
+					'is_taxonomy'  => 0,
+				),
+			)
+		);
+
+		$legacy_product = wc_get_product( $product->get_id() );
+		$legacy_product->set_name( 'Legacy reserved attribute test updated' );
+		$legacy_product->save();
+
+		$updated_product = wc_get_product( $product->get_id() );
+		$this->assertSame(
+			'Legacy reserved attribute test updated',
+			$updated_product->get_name(),
+			'Existing products with legacy reserved attributes should remain editable when attributes are unchanged.'
+		);
+	}
+
+	/**
 	 * Ensure product rating counts are calculated correctly.
 	 *
 	 * @return void

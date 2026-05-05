@@ -111,12 +111,36 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Ensure get_permalink() handles non-array variation data without fataling.
+	 * Ensure get_permalink() handles non-array variation data without fataling and logs the collision.
 	 *
-	 * @testdox get_permalink() returns a URL without fataling when $item_object['variation'] is a string rather than the expected variation-attributes array.
+	 * @testdox get_permalink() returns a URL and logs when $item_object['variation'] is a string rather than the expected variation-attributes array.
 	 */
 	public function test_get_permalink_handles_non_array_variation_value() {
-		$url = $this->variation->get_permalink( array( 'variation' => 'some-string-value' ) );
+		$mock_logger = $this->getMockBuilder( WC_Logger_Interface::class )->getMock();
+		$mock_logger
+			->expects( $this->once() )
+			->method( 'notice' )
+			->with(
+				$this->stringContains( 'variation' ),
+				$this->callback(
+					function ( array $context ): bool {
+						return 'attribute-collision' === $context['source']
+							&& 'variation' === $context['attribute_name']
+							&& $this->variation->get_id() === $context['variation_id'];
+					}
+				)
+			);
+
+		$logger_callback = static function () use ( $mock_logger ) {
+			return $mock_logger;
+		};
+		add_filter( 'woocommerce_logging_class', $logger_callback );
+
+		try {
+			$url = $this->variation->get_permalink( array( 'variation' => 'some-string-value' ) );
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $logger_callback );
+		}
 
 		$this->assertIsString( $url );
 		$this->assertNotEmpty( $url );

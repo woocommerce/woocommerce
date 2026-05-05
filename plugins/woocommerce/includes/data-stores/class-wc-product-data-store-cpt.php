@@ -203,6 +203,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$product->set_date_created( time() );
 		}
 
+		$this->validate_attribute_names( $product );
+
 		$id = wp_insert_post(
 			apply_filters(
 				'woocommerce_new_product_data',
@@ -320,8 +322,13 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 * @return void
 	 */
 	public function update( &$product ) {
-		$product->save_meta_data();
 		$changes = $product->get_changes();
+
+		if ( array_key_exists( 'attributes', $changes ) ) {
+			$this->validate_attribute_names( $product );
+		}
+
+		$product->save_meta_data();
 
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'description', 'short_description', 'name', 'parent_id', 'reviews_allowed', 'status', 'menu_order', 'date_created', 'date_modified', 'slug', 'post_password' ), array_keys( $changes ) ) ) {
@@ -435,6 +442,41 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	| Additional Methods
 	|--------------------------------------------------------------------------
 	*/
+
+	/**
+	 * Validate product attribute names before persisting them.
+	 *
+	 * @since 10.9.0
+	 * @param WC_Product $product Product object.
+	 * @throws WC_Data_Exception When a custom attribute name is reserved.
+	 * @return void
+	 */
+	protected function validate_attribute_names( WC_Product $product ): void {
+		foreach ( $product->get_attributes( 'edit' ) as $attribute ) {
+			if ( ! $attribute instanceof WC_Product_Attribute || $attribute->is_taxonomy() ) {
+				continue;
+			}
+
+			$attribute_name = wc_sanitize_taxonomy_name( $attribute->get_name() );
+
+			if ( ! wc_check_if_attribute_name_is_reserved( $attribute_name ) ) {
+				continue;
+			}
+
+			throw new WC_Data_Exception(
+				'product_invalid_attribute_name_reserved',
+				sprintf(
+					/* translators: %s: attribute name */
+					esc_html__( 'Product attribute name "%s" is reserved. Use a different name.', 'woocommerce' ),
+					esc_html( $attribute->get_name() )
+				),
+				400,
+				array(
+					'attribute_name' => esc_html( $attribute->get_name() ),
+				)
+			);
+		}
+	}
 
 	/**
 	 * Read product data. Can be overridden by child classes to load other props.

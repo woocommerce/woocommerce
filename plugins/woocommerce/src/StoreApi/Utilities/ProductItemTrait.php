@@ -34,7 +34,7 @@ trait ProductItemTrait {
 	/**
 	 * Format variation data, for example convert slugs such as attribute_pa_size to Size.
 	 *
-	 * @param array       $variation_data Array of data from the cart.
+	 * @param mixed       $variation_data Data from the cart.
 	 * @param \WC_Product $product Product data.
 	 * @return array
 	 */
@@ -42,6 +42,16 @@ trait ProductItemTrait {
 		$return = array();
 
 		if ( ! is_iterable( $variation_data ) ) {
+			if ( ! empty( $variation_data ) ) {
+				wc_log_product_attribute_name_collision(
+					'variation',
+					array(
+						'location'   => 'StoreApi\ProductItemTrait::format_variation_data',
+						'product_id' => $product->get_id(),
+					)
+				);
+			}
+
 			return $return;
 		}
 
