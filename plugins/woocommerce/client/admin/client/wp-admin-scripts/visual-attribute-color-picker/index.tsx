@@ -11,7 +11,7 @@ const FALLBACK_COLOR = '#000000';
 const EMPTY_COLOR_VALUE = '';
 
 const normalizeColor = ( value: string ) => {
-	if ( ! value ) {
+	if ( typeof value !== 'string' || ! value ) {
 		return '';
 	}
 
@@ -32,7 +32,7 @@ const ColorField = ( { input }: { input: HTMLInputElement } ) => {
 	const triggerRef = useRef< HTMLButtonElement | null >( null );
 
 	useEffect( () => {
-		if ( input.value === color ) {
+		if ( normalizeColor( input.value ) === color ) {
 			return;
 		}
 		input.value = color;
