@@ -2206,10 +2206,13 @@ ul.wc_coupon_list_block {
 	}
 
 	.wc-order-totals {
-		float: right;
-		width: 50%;
+		width: 100%;
 		margin: 0;
-		padding: 0;
+		// Right padding visually tuned to align the totals prices with the line
+		// item Total column above. Math is non-obvious because the totals row's
+		// parent (.wc-order-data-row) has its own 2em horizontal padding that
+		// the items table parent does not.
+		padding: 0 34px 0 0;
 		text-align: right;
 
 		.amount {
@@ -2748,17 +2751,17 @@ ul.wc_coupon_list_block {
 	}
 
 	.wc-order-edit-line-item-actions {
-		width: 44px;
+		width: 16px;
 		text-align: right;
 		padding-left: 0;
 		vertical-align: middle;
 
 		a {
 			color: #ccc;
-			display: inline-block;
+			display: block;
 			cursor: pointer;
 			padding: 0;
-			margin: 0 0 6px 12px;
+			margin: 0 0 6px 0;
 			vertical-align: middle;
 			text-decoration: none;
 			line-height: 16px;
@@ -2891,29 +2894,10 @@ ul.wc_coupon_list_block {
 
 #poststuff #woocommerce-order-notes .inside {
 	margin: 0;
-	padding: 20px 12px;
-	display: flex;
-	flex-direction: column;
-	gap: 24px;
+	padding: 0;
 
-	.add_note {
-		padding: 0;
-		display: flex;
-		flex-direction: column;
-		gap: 12px;
-	}
-
-	.add_note__heading {
-		margin: 0;
-		text-transform: uppercase;
-		font-size: 11px;
-		line-height: 16px;
-		font-weight: 500;
-		color: #1e1e1e;
-	}
-
-	.add_note p {
-		margin: 0;
+	ul.order_notes li {
+		padding: 0 10px;
 	}
 
 	button {
@@ -3569,74 +3553,73 @@ ul.wc_coupon_list_block {
 
 /* Order notes */
 ul.order_notes {
-	padding: 0;
-	margin: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 24px;
+	padding: 2px 0 0;
 
 	li {
-		display: flex;
-		flex-direction: column;
-		gap: 8px;
-		margin: 0;
-
 		.note_content {
-			padding: 12px;
-			background: rgba(56, 88, 233, 0.04);
+			padding: 10px;
+			background: #efefef;
 			position: relative;
 
 			p {
 				margin: 0;
 				padding: 0;
 				word-wrap: break-word;
-				font-size: 13px;
-				line-height: 16px;
-				color: #000;
 			}
 		}
 
 		p.meta {
-			padding: 0;
-			color: #757575;
+			padding: 10px;
+			color: #999;
 			margin: 0;
-			font-size: 12px;
-			line-height: 16px;
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			gap: 8px;
+			font-size: 11px;
 
 			.exact-date {
-				border-bottom: 0;
+				border-bottom: 1px dotted #999;
 			}
 		}
 
 		a.delete_note {
-			display: inline-block;
-			width: 24px;
-			height: 24px;
-			flex-shrink: 0;
-			background-color: $red;
-			-webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M12 5.5A2.25 2.25 0 0 0 9.878 7h4.244A2.251 2.251 0 0 0 12 5.5ZM12 4a3.751 3.751 0 0 0-3.675 3H5v1.5h1.27l.818 8.997a2.75 2.75 0 0 0 2.739 2.501h4.347a2.75 2.75 0 0 0 2.738-2.5L17.73 8.5H19V7h-3.325A3.751 3.751 0 0 0 12 4Zm4.224 4.5H7.776l.806 8.861a1.25 1.25 0 0 0 1.245 1.137h4.347a1.25 1.25 0 0 0 1.245-1.137l.805-8.861Z'/%3E%3C/svg%3E");
-			mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' clip-rule='evenodd' d='M12 5.5A2.25 2.25 0 0 0 9.878 7h4.244A2.251 2.251 0 0 0 12 5.5ZM12 4a3.751 3.751 0 0 0-3.675 3H5v1.5h1.27l.818 8.997a2.75 2.75 0 0 0 2.739 2.501h4.347a2.75 2.75 0 0 0 2.738-2.5L17.73 8.5H19V7h-3.325A3.751 3.751 0 0 0 12 4Zm4.224 4.5H7.776l.806 8.861a1.25 1.25 0 0 0 1.245 1.137h4.347a1.25 1.25 0 0 0 1.245-1.137l.805-8.861Z'/%3E%3C/svg%3E");
-			-webkit-mask-repeat: no-repeat;
-			mask-repeat: no-repeat;
-			-webkit-mask-position: center;
-			mask-position: center;
+			color: $red;
+		}
+
+		.note_content::after {
+			content: "";
+			display: block;
+			position: absolute;
+			bottom: -10px;
+			left: 20px;
+			width: 0;
+			height: 0;
+			border-width: 10px 10px 0 0;
+			border-style: solid;
+			border-color: #efefef transparent;
 		}
 	}
 
-	li.system-note .note_content {
-		background: rgba(56, 88, 233, 0.04);
+	li.system-note {
+		.note_content {
+			background: #d7cad2;
+		}
+
+		.note_content::after {
+			border-color: #d7cad2 transparent;
+		}
 	}
 
-	li.customer-note .note_content {
-		background: #fffed6;
+	li.customer-note {
+		.note_content {
+			background: #a7cedc;
+		}
+
+		.note_content::after {
+			border-color: #a7cedc transparent;
+		}
 	}
 }
 
 .add_note {
+	border-top: 1px solid #ddd;
 	padding: 10px 10px 0;
 
 	h4 {
@@ -9692,95 +9675,12 @@ body.woocommerce-settings-payments-section_legacy {
 		margin-left: 4px;
 	}
 
-	// Hide the up/down move arrows in all postbox headers — module reordering is
-	// handled by the "Customize page" flow.
-	#poststuff .handle-order-higher,
-	#poststuff .handle-order-lower {
-		display: none;
-	}
-
-	// Hide the Screen Options tab — module visibility is managed by "Customize page".
-	#screen-options-link-wrap {
-		display: none;
-	}
-
 	// Hide modules removed from the order edit redesign.
 	#woocommerce-order-downloads,
 	#order_custom {
 		display: none;
 	}
 
-	#poststuff .handle-actions.hide-if-no-js {
-		display: flex;
-		align-items: center;
-		padding-right: 4px;
-	}
-
-	// Replace the legacy Dashicon chevron in postbox toggles with the @wordpress/icons
-	// chevronUp / chevronDown SVGs. Uses CSS masks so the color is driven by a WP DS token.
-	#poststuff .postbox .handlediv {
-		width: 36px;
-		height: 36px;
-
-		.toggle-indicator::before {
-			content: "";
-			display: block;
-			width: 20px;
-			height: 20px;
-			margin: 0 auto;
-			background-color: var(--wpds-color-fg-content-neutral, #1e1e1e);
-			// chevronUp (postbox is open).
-			-webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6.5 12.4L12 8l5.5 4.4-.9 1.2L12 10l-4.5 3.6-1-1.2z'/%3E%3C/svg%3E");
-			mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M6.5 12.4L12 8l5.5 4.4-.9 1.2L12 10l-4.5 3.6-1-1.2z'/%3E%3C/svg%3E");
-			-webkit-mask-repeat: no-repeat;
-			mask-repeat: no-repeat;
-			-webkit-mask-position: center;
-			mask-position: center;
-			font: inherit; // Override the dashicons font declaration from core.
-		}
-	}
-
-	#poststuff .postbox.closed .handlediv .toggle-indicator::before {
-		// chevronDown (postbox is closed).
-		-webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z'/%3E%3C/svg%3E");
-		mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M17.5 11.6L12 16l-5.5-4.4.9-1.2L12 14l4.5-3.6 1 1.2z'/%3E%3C/svg%3E");
-	}
-
-	// Replace the legacy Dashicon arrows in handle-order-higher / handle-order-lower
-	// with the @wordpress/icons arrowUp / arrowDown SVGs. Uses CSS masks so the color
-	// is driven by a WP DS token.
-	#poststuff .handle-order-higher .order-higher-indicator::before,
-	#poststuff .handle-order-lower .order-lower-indicator::before {
-		content: "";
-		display: block;
-		width: 20px;
-		height: 20px;
-		margin: 0 auto;
-		padding: 0;
-		background-color: var(--wpds-color-fg-content-neutral, #1e1e1e);
-		-webkit-mask-repeat: no-repeat;
-		mask-repeat: no-repeat;
-		-webkit-mask-position: center;
-		mask-position: center;
-		// arrowUp / arrowDown SVGs fill their viewBox more than chevronUp/Down,
-		// so render the mask at 16px within the 20px box to optically balance
-		// against the chevron toggle.
-		-webkit-mask-size: 18px 18px;
-		mask-size: 18px 18px;
-		font: inherit; // Override the dashicons font declaration from core.
-	}
-
-	#poststuff .handle-order-higher .order-higher-indicator::before {
-		// arrowUp.
-		-webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 3.9 6.5 9.5l1 1 3.8-3.7V20h1.5V6.8l3.7 3.7 1-1z'/%3E%3C/svg%3E");
-		mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='M12 3.9 6.5 9.5l1 1 3.8-3.7V20h1.5V6.8l3.7 3.7 1-1z'/%3E%3C/svg%3E");
-	}
-
-	#poststuff .handle-order-lower .order-lower-indicator::before {
-		// arrowDown.
-		-webkit-mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='m16.5 13.5-3.7 3.7V4h-1.5v13.2l-3.8-3.7-1 1 5.5 5.6 5.5-5.6z'/%3E%3C/svg%3E");
-		mask-image: url("data:image/svg+xml;utf8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Cpath d='m16.5 13.5-3.7 3.7V4h-1.5v13.2l-3.8-3.7-1 1 5.5 5.6 5.5-5.6z'/%3E%3C/svg%3E");
-	}
 }
 
 #poststuff #woocommerce-order-downloads .inside,
@@ -9994,7 +9894,7 @@ body.woocommerce-settings-payments-section_legacy {
 		top: 100%;
 		margin: 4px 0 0;
 		padding: 4px 0;
-		min-width: 220px;
+		min-width: 280px;
 		background: #fff;
 		border: 1px solid #d8d8d8;
 		border-radius: 4px;
@@ -10022,6 +9922,7 @@ body.woocommerce-settings-payments-section_legacy {
 			text-align: left;
 			color: #1e1e1e;
 			text-decoration: none;
+			white-space: nowrap;
 			// WP DS — Body MD with line-height SM (compact menu pattern).
 			font-size: var(--wpds-typography-font-size-md, 13px);
 			line-height: var(--wpds-typography-line-height-sm, 20px);
@@ -10067,5 +9968,103 @@ body.woocommerce-settings-payments-section_legacy {
 	#order_data .order_data_column:not(:last-child)::after {
 		/* Disable vertical dividers when columns wrap. */
 		display: none;
+	}
+}
+
+/**
+ * Address edit "modal" — visual prototype.
+ *
+ * Styles the existing inline `.edit_address` form as a centered overlay
+ * styled to match the WordPress design system Modal. The form fields stay
+ * inside `<form id="order">` in the DOM so the existing PHP save handler
+ * still works untouched; clicking "Update order" inside the modal submits
+ * that form just like the header button.
+ */
+body.wc-edit-address-modal-open {
+	overflow: hidden;
+}
+
+.wc-edit-address-modal-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.7);
+	z-index: 100000;
+}
+
+div.edit_address.is-modal {
+	display: flex !important;
+	flex-direction: column;
+	position: fixed;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	width: 540px;
+	max-width: 90vw;
+	max-height: 85vh;
+	background: #fff;
+	border-radius: 4px;
+	box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+	z-index: 100001;
+	padding: 0;
+	overflow: hidden;
+
+	.edit_address__header {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 16px 24px;
+		border-bottom: 1px solid #ddd;
+		flex-shrink: 0;
+	}
+
+	.edit_address__title {
+		margin: 0;
+		padding: 0;
+		font-size: 17px;
+		font-weight: 500;
+		line-height: 24px;
+		color: #1e1e1e;
+	}
+
+	.edit_address__close {
+		appearance: none;
+		background: transparent;
+		border: 0;
+		padding: 0;
+		width: 36px;
+		height: 36px;
+		font-size: 24px;
+		line-height: 1;
+		color: #1e1e1e;
+		cursor: pointer;
+		border-radius: 4px;
+
+		&:hover,
+		&:focus {
+			background: #f0f0f0;
+			outline: none;
+		}
+	}
+
+	.edit_address__body {
+		flex: 1 1 auto;
+		overflow-y: auto;
+		padding: 24px;
+	}
+
+	.edit_address__footer {
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		gap: 8px;
+		padding: 16px 24px;
+		border-top: 1px solid #ddd;
+		flex-shrink: 0;
+
+		.button {
+			min-height: 36px;
+			padding: 0 16px;
+			border-radius: 4px;
+		}
 	}
 }

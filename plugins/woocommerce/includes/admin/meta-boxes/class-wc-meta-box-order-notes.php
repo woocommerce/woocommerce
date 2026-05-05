@@ -33,12 +33,10 @@ class WC_Meta_Box_Order_Notes {
 		} else {
 			$notes = array();
 		}
-		include __DIR__ . '/views/html-order-notes.php';
 		?>
 		<div class="add_note">
-			<h4 class="add_note__heading"><?php esc_html_e( 'Add a note', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ) ); ?></h4>
 			<p>
-				<label for="add_order_note" class="screen-reader-text"><?php esc_html_e( 'Add note', 'woocommerce' ); ?></label>
+				<label for="add_order_note"><?php esc_html_e( 'Add note', 'woocommerce' ); ?> <?php echo wc_help_tip( __( 'Add a note for your reference, or add a customer note (the user will be notified).', 'woocommerce' ) ); ?></label>
 				<textarea type="text" name="order_note" id="add_order_note" class="input-text" cols="20" rows="5"></textarea>
 			</p>
 			<p>
@@ -47,9 +45,10 @@ class WC_Meta_Box_Order_Notes {
 					<option value=""><?php esc_html_e( 'Private note', 'woocommerce' ); ?></option>
 					<option value="customer"><?php esc_html_e( 'Note to customer', 'woocommerce' ); ?></option>
 				</select>
-				<button type="button" class="add_note button"><?php esc_html_e( 'Save', 'woocommerce' ); ?></button>
+				<button type="button" class="add_note button"><?php esc_html_e( 'Add', 'woocommerce' ); ?></button>
 			</p>
 		</div>
 		<?php
+		include __DIR__ . '/views/html-order-notes.php';
 	}
 }

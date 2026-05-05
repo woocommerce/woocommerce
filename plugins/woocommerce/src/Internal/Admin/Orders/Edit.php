@@ -441,36 +441,30 @@ class Edit {
 				<button form="order" type="submit" name="save" value="<?php echo esc_attr( $update_label ); ?>" class="button button-primary">
 					<?php echo esc_html( $update_label ); ?>
 				</button>
-				<details class="wc-order-edit-header__menu">
-					<summary aria-label="<?php esc_attr_e( 'More actions', 'woocommerce' ); ?>">
-						<?php echo $icon_more_vertical; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					</summary>
-					<ul class="wc-order-edit-header__menu-list">
-						<li>
-							<button type="button" class="wc-order-edit-header__customize">
-								<?php esc_html_e( 'Customize page', 'woocommerce' ); ?>
-							</button>
-						</li>
-						<?php if ( ! empty( $order_actions ) || $trash_url ) : ?>
-							<li class="wc-order-edit-header__menu-separator" role="separator"></li>
-						<?php endif; ?>
-						<?php foreach ( $order_actions as $action => $title ) : ?>
-							<li>
-								<button form="order" type="submit" name="wc_order_action" value="<?php echo esc_attr( $action ); ?>">
-									<?php echo esc_html( $title ); ?>
-								</button>
-							</li>
-						<?php endforeach; ?>
-						<?php if ( $trash_url ) : ?>
-							<?php if ( ! empty( $order_actions ) ) : ?>
-								<li class="wc-order-edit-header__menu-separator" role="separator"></li>
+				<?php if ( ! empty( $order_actions ) || $trash_url ) : ?>
+					<details class="wc-order-edit-header__menu">
+						<summary aria-label="<?php esc_attr_e( 'More actions', 'woocommerce' ); ?>">
+							<?php echo $icon_more_vertical; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						</summary>
+						<ul class="wc-order-edit-header__menu-list">
+							<?php foreach ( $order_actions as $action => $title ) : ?>
+								<li>
+									<button form="order" type="submit" name="wc_order_action" value="<?php echo esc_attr( $action ); ?>">
+										<?php echo esc_html( $title ); ?>
+									</button>
+								</li>
+							<?php endforeach; ?>
+							<?php if ( $trash_url ) : ?>
+								<?php if ( ! empty( $order_actions ) ) : ?>
+									<li class="wc-order-edit-header__menu-separator" role="separator"></li>
+								<?php endif; ?>
+								<li>
+									<a href="<?php echo esc_url( $trash_url ); ?>" class="submitdelete"><?php echo esc_html( $trash_label ); ?></a>
+								</li>
 							<?php endif; ?>
-							<li>
-								<a href="<?php echo esc_url( $trash_url ); ?>" class="submitdelete"><?php echo esc_html( $trash_label ); ?></a>
-							</li>
-						<?php endif; ?>
-					</ul>
-				</details>
+						</ul>
+					</details>
+				<?php endif; ?>
 			</div>
 		</div>
 		<?php

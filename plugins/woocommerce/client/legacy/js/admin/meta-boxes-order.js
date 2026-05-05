@@ -157,26 +157,82 @@ jQuery( function ( $ ) {
 			var $this          = $( this ),
 				$wrapper       = $this.closest( '.order_data_column' ),
 				$edit_address  = $wrapper.find( 'div.edit_address' ),
-				$address       = $wrapper.find( 'div.address' ),
 				$country_input = $edit_address.find( '.js_field-country' ),
 				$state_input   = $edit_address.find( '.js_field-state' ),
-				is_billing     = Boolean( $edit_address.find( 'input[name^="_billing_"]' ).length );
-
-			$address.hide();
-			$this.parent().find( 'a' ).toggle();
+				is_billing     = Boolean( $edit_address.find( 'input[name^="_billing_"]' ).length ),
+				is_shipping    = Boolean( $edit_address.find( 'input[name^="_shipping_"]' ).length );
 
 			if ( ! $country_input.val() ) {
 				$country_input.val( woocommerce_admin_meta_boxes_order.default_country ).trigger( 'change' );
 				$state_input.val( woocommerce_admin_meta_boxes_order.default_state ).trigger( 'change' );
 			}
 
-			$edit_address.show();
+			// Determine modal title.
+			var title;
+			if ( is_billing ) {
+				title = 'Edit billing address';
+			} else if ( is_shipping ) {
+				title = 'Edit shipping address';
+			} else {
+				title = 'Edit order details';
+			}
 
-			var event_name = is_billing ? 'order_edit_billing_address_click' : 'order_edit_shipping_address_click';
-			window.wcTracks.recordEvent( event_name, {
-				order_id: woocommerce_admin_meta_boxes.post_id,
-				status: $( '#order_status' ).val()
+			// Inject modal chrome (header, body wrapper, footer) once. Keeps the
+			// existing form fields where they are in the DOM (still inside <form id="order">),
+			// just visually presents them as a WP DS-style modal.
+			if ( ! $edit_address.find( '.edit_address__header' ).length ) {
+				var $header = $(
+					'<div class="edit_address__header">' +
+						'<h2 class="edit_address__title"></h2>' +
+						'<button type="button" class="edit_address__close" aria-label="Close">' +
+							'<span aria-hidden="true">×</span>' +
+						'</button>' +
+					'</div>'
+				);
+				var $footer = $(
+					'<div class="edit_address__footer">' +
+						'<button type="button" class="button edit_address__cancel">Cancel</button>' +
+						'<button type="submit" name="save" form="order" class="button button-primary edit_address__save">Update order</button>' +
+					'</div>'
+				);
+				var $body = $( '<div class="edit_address__body"></div>' );
+				$edit_address.children().wrapAll( $body );
+				$edit_address.prepend( $header );
+				$edit_address.append( $footer );
+			}
+
+			$edit_address.find( '.edit_address__title' ).text( title );
+
+			// Open modal.
+			$edit_address.addClass( 'is-modal' );
+			$( 'body' ).addClass( 'wc-edit-address-modal-open' );
+
+			// Backdrop.
+			var $backdrop = $( '<div class="wc-edit-address-modal-backdrop"></div>' );
+			$backdrop.appendTo( 'body' );
+
+			var closeModal = function() {
+				$( 'div.edit_address' ).removeClass( 'is-modal' );
+				$( 'body' ).removeClass( 'wc-edit-address-modal-open' );
+				$( '.wc-edit-address-modal-backdrop' ).remove();
+				$( document ).off( 'keydown.wc-edit-address-modal' );
+			};
+
+			$backdrop.on( 'click', closeModal );
+			$edit_address.find( '.edit_address__close, .edit_address__cancel' ).off( 'click.wc-edit-address-modal' ).on( 'click.wc-edit-address-modal', closeModal );
+			$( document ).on( 'keydown.wc-edit-address-modal', function( ev ) {
+				if ( ev.key === 'Escape' ) {
+					closeModal();
+				}
 			} );
+
+			if ( window.wcTracks && window.wcTracks.recordEvent ) {
+				var event_name = is_billing ? 'order_edit_billing_address_click' : 'order_edit_shipping_address_click';
+				window.wcTracks.recordEvent( event_name, {
+					order_id: woocommerce_admin_meta_boxes.post_id,
+					status: $( '#order_status' ).val()
+				} );
+			}
 		},
 
 		change_customer_user: function() {

@@ -27,13 +27,19 @@ defined( 'ABSPATH' ) || exit;
 					?>
 				</div>
 				<p class="meta">
-					<abbr class="exact-date" title="<?php echo esc_attr( 'system' !== $note->added_by ? sprintf( /* translators: %s: note author */ __( 'Added by %s', 'woocommerce' ), $note->added_by ) : '' ); ?>">
+					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'Y-m-d H:i:s' ) ); ?>">
 						<?php
 						/* translators: %1$s: note date %2$s: note time */
 						echo esc_html( sprintf( __( '%1$s at %2$s', 'woocommerce' ), $note->date_created->date_i18n( wc_date_format() ), $note->date_created->date_i18n( wc_time_format() ) ) );
 						?>
 					</abbr>
-					<a href="#" class="delete_note" aria-label="<?php esc_attr_e( 'Delete note', 'woocommerce' ); ?>" role="button"><span class="screen-reader-text"><?php esc_html_e( 'Delete note', 'woocommerce' ); ?></span></a>
+					<?php
+					if ( 'system' !== $note->added_by ) :
+						/* translators: %s: note author */
+						echo esc_html( sprintf( ' ' . __( 'by %s', 'woocommerce' ), $note->added_by ) );
+					endif;
+					?>
+					<a href="#" class="delete_note" role="button"><?php esc_html_e( 'Delete note', 'woocommerce' ); ?></a>
 				</p>
 			</li>
 			<?php
