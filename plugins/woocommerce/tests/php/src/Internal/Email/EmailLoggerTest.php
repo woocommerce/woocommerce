@@ -170,6 +170,25 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Failure message redacts email addresses embedded in the captured wp_mail_failed reason.
+	 */
+	public function test_failure_message_redacts_email_addresses_in_reason(): void {
+		$error = new \WP_Error(
+			'wp_mail_failed',
+			'SMTP Error: Could not send to customer@example.com (rejected by server.example.org).'
+		);
+		$this->sut->capture_mail_error( $error );
+
+		$email = $this->create_mock_email( 'new_order', 'admin@example.com' );
+		$this->sut->handle_woocommerce_email_sent( false, 'new_order', $email );
+
+		$log = $this->captured_logs[0];
+		$this->assertStringNotContainsString( 'customer@example.com', $log['message'], 'Raw recipient address must not appear in the logged message.' );
+		$this->assertStringNotContainsString( 'server.example.org', $log['message'], 'Domain-only host names should be left intact (only address-shaped tokens are redacted).' );
+		$this->assertStringContainsString( '[redacted_email]', $log['message'], 'Redacted addresses should be replaced with the [redacted_email] marker.' );
+	}
+
+	/**
 	 * @testdox Success message does not include an error reason.
 	 */
 	public function test_success_message_has_no_error_reason(): void {

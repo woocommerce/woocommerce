@@ -94,7 +94,7 @@ class EmailLogger implements RegisterHooksInterface {
 		if ( $success ) {
 			$message = sprintf( 'Email "%s"%s sent', $email_id, $object_label );
 		} else {
-			$reason  = $this->last_mail_error ? ': ' . $this->last_mail_error : '';
+			$reason  = $this->last_mail_error ? ': ' . $this->redact_emails( $this->last_mail_error ) : '';
 			$message = sprintf( 'Email "%s"%s failed to send%s', $email_id, $object_label, $reason );
 		}
 
@@ -151,6 +151,26 @@ class EmailLogger implements RegisterHooksInterface {
 		);
 
 		return implode( ', ', $labels );
+	}
+
+	/**
+	 * Replace any email addresses in a log message fragment with `[redacted_email]`.
+	 *
+	 * PHPMailer / SMTP error strings frequently embed the recipient address
+	 * (e.g. "SMTP Error: Could not send to foo@example.com"). Without redaction,
+	 * the address would be written into the log message and — when the database
+	 * log handler is active — surface in WC > Status > Logs to anyone with
+	 * `manage_woocommerce`, defeating the username/`guest` resolution applied
+	 * to the `recipient` context field.
+	 *
+	 * Mirrors the regex used by RemoteLogger::redact_user_data() so the privacy
+	 * posture stays consistent across loggers.
+	 *
+	 * @param string $message The message fragment to scrub.
+	 * @return string The fragment with any email addresses replaced.
+	 */
+	private function redact_emails( string $message ): string {
+		return (string) preg_replace( '/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/', '[redacted_email]', $message );
 	}
 
 	/**
