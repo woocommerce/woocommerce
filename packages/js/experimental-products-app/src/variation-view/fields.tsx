@@ -8,7 +8,6 @@ import type { Field } from '@wordpress/dataviews';
  */
 import { createProductField, type ProductFieldId } from '../fields/registry';
 import type { VariationEntityRecord } from './types';
-import { variationOptionsField } from './variation-options-field';
 
 const REUSED_VARIATION_FIELD_IDS = [
 	'name',
@@ -30,11 +29,6 @@ const REUSED_VARIATION_FIELD_IDS = [
 	'tax_status',
 ] as const satisfies readonly ProductFieldId[];
 
-const reusedVariationFields = REUSED_VARIATION_FIELD_IDS.map(
+export const variationFields = REUSED_VARIATION_FIELD_IDS.map(
 	( id ) => createProductField( id ) as Field< VariationEntityRecord >
 );
-
-export const variationFields: Field< VariationEntityRecord >[] = [
-	variationOptionsField,
-	...reusedVariationFields,
-];
