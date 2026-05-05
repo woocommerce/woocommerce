@@ -14,16 +14,6 @@ export type SelectableItem< T = unknown > = (
 	type?: string;
 } & T;
 
-/**
- * Runtime shape of items yielded by the parent's `state.selectableItems`
- * getter. Parent derives `selected` from SSOT and `index` from position
- * so inner blocks can branch on it (e.g. show-more visibility in
- * `checkbox-list`).
- */
-export type DerivedSelectableItem< T = unknown > = SelectableItem< T > & {
-	index: number;
-};
-
 export interface SelectableItemsContext< T = unknown > {
 	items: SelectableItem< T >[];
 	selectionMode: 'single' | 'multiple';
@@ -44,19 +34,21 @@ export type SelectableItemsBlockContext< T = unknown > = {
 
 /**
  * Contract every parent store referenced by `storeNamespace` MUST satisfy.
- * Use with `satisfies` for compile-time enforcement:
  *
- *   productFiltersStore satisfies SelectableItemsParentStore;
+ * Two consumption patterns:
+ * - **Direct**: inner block iterates `state.selectableItems` under the parent
+ *   namespace via nested `data-wp-interactive`; `data-wp-each` sets
+ *   `context.item` automatically; `toggle()` reads it from context.
+ * - **Mirror**: inner block copies parent items into its own store, iterates
+ *   under its own namespace, and calls `toggle( item )` explicitly.
  *
- * `state.selectableItems` returns items with `selected` + `index` derived.
- * `actions.toggle` reads `getContext().item` (set by `data-wp-each` in items region).
+ * `toggle` accepts an optional item so both patterns work.
  */
 export interface SelectableItemsParentStore< T = unknown > {
 	state: {
-		selectableItems: readonly DerivedSelectableItem< T >[];
+		selectableItems: readonly SelectableItem< T >[];
 	};
 	actions: {
-		/** Toggles selection for the current `getContext().item`. */
-		toggle: () => void;
+		toggle: ( item?: SelectableItem< T > ) => void;
 	};
 }

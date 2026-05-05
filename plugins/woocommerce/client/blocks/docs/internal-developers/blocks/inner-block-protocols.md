@@ -271,14 +271,6 @@ export type SelectableItem< T = unknown > = (
 	type?: string;
 } & T;
 
-/**
- * Runtime shape of items yielded by the parent's `state.selectableItems`
- * getter. Parent derives `selected` from SSOT and `index` from position.
- */
-export type DerivedSelectableItem< T = unknown > = SelectableItem< T > & {
-	index: number;
-};
-
 export interface SelectableItemsContext< T = unknown > {
 	items: SelectableItem< T >[];
 	selectionMode: 'single' | 'multiple';
@@ -292,12 +284,12 @@ export type SelectableItemsBlockContext< T = unknown > = {
 	'woocommerceSelectableItems': SelectableItemsContext< T >;
 };
 
-export interface SelectableItemsParentStore {
+export interface SelectableItemsParentStore< T = unknown > {
 	state: {
-		selectableItems: readonly DerivedSelectableItem[];
+		selectableItems: readonly SelectableItem< T >[];
 	};
 	actions: {
-		toggle: () => void;
+		toggle: ( item?: SelectableItem< T > ) => void;
 	};
 }
 ```
@@ -476,7 +468,9 @@ If pattern **B** (mirror) is chosen, the items region stays under the inner name
 ```typescript
 // frontend.ts
 import { store, getContext } from '@wordpress/interactivity';
-import type { DerivedSelectableItem } from '../../../../types/type-defs/selectable-items';
+import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
+
+type ItemWithIndex = SelectableItem & { index: number };
 
 type CheckboxListContext = {
     storeNamespace: string;
@@ -485,7 +479,7 @@ type CheckboxListContext = {
 };
 
 type ParentItemContext = {
-    item?: DerivedSelectableItem;
+    item?: ItemWithIndex;
 };
 
 const { state } = store( 'woocommerce/product-filter-checkbox-list', {

@@ -57,13 +57,17 @@ const activeFiltersStore = {
 	},
 };
 
-( {
-	state: { removableItems: activeFiltersStore.state.removableItems },
+// Compile-time protocol conformance — uses typeof to avoid invoking getters.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _checkRemovableItems: RemovableItemsParentStore = 0 as unknown as {
+	state: {
+		removableItems: ( typeof activeFiltersStore )[ 'state' ][ 'removableItems' ];
+	};
 	actions: {
-		remove: activeFiltersStore.actions.remove,
-		removeAll: activeFiltersStore.actions.removeAll,
-	},
-} ) satisfies RemovableItemsParentStore;
+		remove: ( typeof activeFiltersStore )[ 'actions' ][ 'remove' ];
+		removeAll: ( typeof activeFiltersStore )[ 'actions' ][ 'removeAll' ];
+	};
+};
 
 const { actions } = store< ProductFiltersStore & typeof activeFiltersStore >(
 	'woocommerce/product-filters',

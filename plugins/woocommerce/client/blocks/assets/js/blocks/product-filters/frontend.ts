@@ -192,9 +192,12 @@ const productFiltersStore = {
 				( item ) => ! callback( item )
 			);
 		},
-		toggle: () => {
+		toggle: ( itemArg?: FilterOptionItem | Event ) => {
 			const context = getContext< ProductFiltersContext >();
-			const { item } = context;
+			const item =
+				itemArg && ! ( itemArg instanceof Event )
+					? itemArg
+					: context.item;
 			if ( ! item || ! isValidFilterOptionItem( item ) ) return;
 			const isSelected = context.activeFilters.some(
 				( f ) => f.type === item.type && f.value === item.value
@@ -262,11 +265,17 @@ const productFiltersStore = {
 	},
 };
 
-// Validate protocol conformance without rejecting extra store members.
-( {
-	state: { selectableItems: productFiltersStore.state.selectableItems },
-	actions: { toggle: productFiltersStore.actions.toggle },
-} ) satisfies SelectableItemsParentStore< FilterItemFields >;
+// Compile-time protocol conformance — uses typeof to avoid invoking getters.
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const _checkSelectableItems: SelectableItemsParentStore< FilterItemFields > =
+	0 as unknown as {
+		state: {
+			selectableItems: ( typeof productFiltersStore )[ 'state' ][ 'selectableItems' ];
+		};
+		actions: {
+			toggle: ( typeof productFiltersStore )[ 'actions' ][ 'toggle' ];
+		};
+	};
 
 export type ProductFiltersStore = typeof productFiltersStore;
 

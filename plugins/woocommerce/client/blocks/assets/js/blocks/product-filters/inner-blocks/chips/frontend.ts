@@ -6,7 +6,9 @@ import { store, getContext } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type { DerivedSelectableItem } from '../../../../types/type-defs/selectable-items';
+import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
+
+type ItemWithIndex = SelectableItem & { index: number };
 
 type ChipsContext = {
 	storeNamespace: string;
@@ -15,7 +17,7 @@ type ChipsContext = {
 };
 
 type ParentItemContext = {
-	item?: DerivedSelectableItem;
+	item?: ItemWithIndex;
 };
 
 type ChipsStore = {
@@ -27,9 +29,7 @@ type ChipsStore = {
 	};
 };
 
-function getParentItem(
-	storeNamespace: string
-): DerivedSelectableItem | undefined {
+function getParentItem( storeNamespace: string ): ItemWithIndex | undefined {
 	const parentCtx = getContext< ParentItemContext >( storeNamespace );
 	return parentCtx.item;
 }
