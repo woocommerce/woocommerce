@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add after_password_reset action hook for parity with WordPress core.

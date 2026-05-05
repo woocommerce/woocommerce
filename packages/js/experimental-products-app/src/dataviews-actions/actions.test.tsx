@@ -4,11 +4,16 @@
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
 import type { Action } from '@wordpress/dataviews';
+import { renderHook } from '@testing-library/react';
 
 /**
  * Internal dependencies
  */
-import { duplicateProductAction, moveToTrashAction } from './actions';
+import {
+	duplicateProductAction,
+	moveToTrashAction,
+	useProductActions,
+} from './actions';
 import type { ProductEntityRecord } from '../fields/types';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
@@ -24,6 +29,20 @@ jest.mock( '@wordpress/data', () => ( {
 jest.mock( '@wordpress/notices', () => ( {
 	store: 'mock-notices-store',
 } ) );
+
+jest.mock( '../lock-unlock', () => {
+	const useHistory = jest.fn();
+	const useLocation = jest.fn();
+
+	return {
+		unlock: jest.fn( () => ( {
+			useHistory,
+			useLocation,
+		} ) ),
+		__mockUseHistory: useHistory,
+		__mockUseLocation: useLocation,
+	};
+} );
 
 jest.mock( '@wordpress/i18n', () => ( {
 	__: jest.fn( ( message ) => message ),
@@ -44,6 +63,11 @@ jest.mock( '@woocommerce/settings', () => ( {
 	getAdminLink: jest.fn( ( path ) => path ),
 } ) );
 
+const { __mockUseHistory: mockUseHistory, __mockUseLocation: mockUseLocation } =
+	jest.requireMock( '../lock-unlock' ) as {
+		__mockUseHistory: jest.Mock;
+		__mockUseLocation: jest.Mock;
+	};
 const mockedApiFetch = jest.mocked( apiFetch );
 
 function getCallbackAction( action: Action< ProductEntityRecord > ) {
@@ -70,9 +94,19 @@ describe( 'product list actions', () => {
 	const createSuccessNotice = jest.fn();
 	const createErrorNotice = jest.fn();
 	const onActionPerformed = jest.fn();
+	const navigate = jest.fn();
 
 	beforeEach( () => {
 		jest.clearAllMocks();
+		mockUseHistory.mockReturnValue( {
+			navigate,
+		} );
+		mockUseLocation.mockReturnValue( {
+			path: '/products',
+			query: {
+				activeView: 'draft',
+			},
+		} );
 
 		( dispatch as jest.Mock ).mockImplementation( ( storeName ) => {
 			if ( storeName === 'mock-core-store' ) {
@@ -92,6 +126,24 @@ describe( 'product list actions', () => {
 
 			return {};
 		} );
+	} );
+
+	it( 'opens quick edit when the Edit action is triggered', () => {
+		const { result } = renderHook( () => useProductActions() );
+		const editProductAction = result.current.find(
+			( action ) => action.id === 'edit-product'
+		);
+
+		expect( editProductAction ).toBeDefined();
+
+		getCallbackAction( editProductAction! ).callback( [ product ], {
+			onActionPerformed,
+		} );
+
+		expect( navigate ).toHaveBeenCalledWith(
+			'/products?activeView=draft&postId=12&quickEdit=true'
+		);
+		expect( onActionPerformed ).toHaveBeenCalledWith( [ product ] );
 	} );
 
 	it( 'duplicates products through the WooCommerce duplicate endpoint', async () => {

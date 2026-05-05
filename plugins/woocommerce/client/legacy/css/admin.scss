@@ -992,12 +992,23 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		padding-bottom: 2em;
 	}
 
+	label:not(:first-child) {
+		display: block;
+		margin-top: 1.5em;
+	}
+
 	input[type="text"] {
 		display: block;
 		font-size: 13px;
 		line-height: 16px;
 		margin: 6px 0;
 		padding: 12px;
+		width: 100%;
+	}
+
+	input[type="color"] {
+		display: block;
+		margin: 6px 0;
 		width: 100%;
 	}
 }
@@ -8314,9 +8325,26 @@ table.bar_chart {
 	// Order preview action buttons.
 	.wc-order-preview footer {
 		.button.button-large {
-			min-height: 0;
+			min-height: 32px;
+		}
+
+		// Adopt WP 7.0 secondary outline: theme-color border and 2px radius.
+		.wc-action-button {
+			min-height: 32px !important;
+			border-color: var(--wp-admin-theme-color);
+
+			&:first-child {
+				border-top-left-radius: 2px !important;
+				border-bottom-left-radius: 2px !important;
+			}
+
+			&:last-child {
+				border-top-right-radius: 2px !important;
+				border-bottom-right-radius: 2px !important;
+			}
 		}
 	}
+
 
 	// Order actions: select + button overflow container due to WP 7.0 select margins.
 	.order_actions {

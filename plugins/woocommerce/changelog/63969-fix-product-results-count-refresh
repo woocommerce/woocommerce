@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix Product Results Count block not updating when filtering products with the Interactivity API.
