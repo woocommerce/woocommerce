@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent reserved product attribute names from colliding with variation data.
