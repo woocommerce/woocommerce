@@ -265,17 +265,9 @@ const productFiltersStore = {
 	},
 };
 
-// Compile-time protocol conformance — uses typeof to avoid invoking getters.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _checkSelectableItems: SelectableItemsParentStore< FilterItemFields > =
-	0 as unknown as {
-		state: {
-			selectableItems: ( typeof productFiltersStore )[ 'state' ][ 'selectableItems' ];
-		};
-		actions: {
-			toggle: ( typeof productFiltersStore )[ 'actions' ][ 'toggle' ];
-		};
-	};
+// Compile-time protocol conformance check.
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+productFiltersStore satisfies SelectableItemsParentStore< FilterItemFields >;
 
 export type ProductFiltersStore = typeof productFiltersStore;
 

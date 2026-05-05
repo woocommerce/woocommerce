@@ -173,14 +173,9 @@ const productFilterPriceStore = {
 	},
 };
 
-// Compile-time protocol conformance — uses typeof to avoid invoking getters.
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-const _checkRangeInput: RangeInputParentStore = 0 as unknown as {
-	actions: {
-		setMin: ( typeof productFilterPriceStore )[ 'actions' ][ 'setMin' ];
-		setMax: ( typeof productFilterPriceStore )[ 'actions' ][ 'setMax' ];
-	};
-};
+// Compile-time protocol conformance check.
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+productFilterPriceStore satisfies RangeInputParentStore;
 
 export type ProductFilterPriceStore = typeof productFilterPriceStore;
 
