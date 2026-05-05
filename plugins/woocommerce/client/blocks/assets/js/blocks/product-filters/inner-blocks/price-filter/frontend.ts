@@ -171,7 +171,14 @@ const productFilterPriceStore = {
 			actions.setPrice( 'max', price );
 		},
 	},
-} satisfies RangeInputParentStore;
+};
+
+( {
+	actions: {
+		setMin: productFilterPriceStore.actions.setMin as ( event: Event ) => void,
+		setMax: productFilterPriceStore.actions.setMax as ( event: Event ) => void,
+	},
+} ) satisfies RangeInputParentStore;
 
 export type ProductFilterPriceStore = typeof productFilterPriceStore;
 

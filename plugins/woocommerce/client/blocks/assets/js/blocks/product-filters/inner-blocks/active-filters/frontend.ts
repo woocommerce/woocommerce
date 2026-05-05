@@ -55,7 +55,15 @@ const activeFiltersStore = {
 			actions.navigate();
 		},
 	},
-} satisfies RemovableItemsParentStore;
+};
+
+( {
+	state: { removableItems: activeFiltersStore.state.removableItems },
+	actions: {
+		remove: activeFiltersStore.actions.remove,
+		removeAll: activeFiltersStore.actions.removeAll,
+	},
+} ) satisfies RemovableItemsParentStore;
 
 const { actions } = store< ProductFiltersStore & typeof activeFiltersStore >(
 	'woocommerce/product-filters',
