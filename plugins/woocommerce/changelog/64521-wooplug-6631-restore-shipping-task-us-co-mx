@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Restore the Shipping task on US, CO, and MX stores by adding them back to the home-screen auto-zone whitelist.
