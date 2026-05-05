@@ -30,6 +30,16 @@ use WP_REST_Request;
 class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 
 	/**
+	 * Previous value of the email editor feature flag, captured in setUp() so we
+	 * can deterministically restore the original state in tearDown() and avoid
+	 * order-dependent failures when other tests touch the same option.
+	 *
+	 * @var string|false|null Either the previous option value (string), `false`
+	 *   when the option did not exist, or `null` before setUp() runs.
+	 */
+	private $previous_feature_flag_value = null;
+
+	/**
 	 * Setup test case.
 	 *
 	 * The bootstrap order matters: WC_REST_Unit_Test_Case::setUp() fires
@@ -38,7 +48,8 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 	 * type's REST routes never get registered and GET wp/v2/woo_email returns 404.
 	 */
 	public function setUp(): void {
-		add_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		$this->previous_feature_flag_value = get_option( 'woocommerce_feature_block_email_editor_enabled', false );
+		update_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
 		wc_get_container()->get( Package::class )->init();
 		wc_get_container()->get( Integration::class )->initialize();
 		Email_Editor_Container::container()->get( Bootstrap::class )->initialize();
@@ -51,7 +62,11 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 	 * Cleanup after test.
 	 */
 	public function tearDown(): void {
-		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
+		if ( false === $this->previous_feature_flag_value ) {
+			delete_option( 'woocommerce_feature_block_email_editor_enabled' );
+		} else {
+			update_option( 'woocommerce_feature_block_email_editor_enabled', $this->previous_feature_flag_value );
+		}
 		parent::tearDown();
 	}
 
