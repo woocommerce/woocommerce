@@ -147,6 +147,11 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	const EXCHANGE_GRANT_BYTES = 32;
 
 	/**
+	 * Invalid exchange grants allowed before the token is terminally rejected.
+	 */
+	const MAX_INVALID_GRANT_ATTEMPTS = 3;
+
+	/**
 	 * Transient prefix mapping `session_id` → `token_hash` so the mobile-side
 	 * `/qr-login-session-status` poll can resolve a session id back to the
 	 * underlying token record without exposing the original token to the
@@ -523,6 +528,35 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
+	 * Get the remaining storage TTL for a token record.
+	 *
+	 * @param array<string, mixed> $token_data Token record.
+	 * @return int Remaining TTL in seconds.
+	 */
+	private function get_token_record_ttl( array $token_data ) {
+		return max(
+			30,
+			isset( $token_data['expires_at'] ) ? (int) $token_data['expires_at'] - time() : self::TOKEN_TTL
+		);
+	}
+
+	/**
+	 * Delete the session-id to token-hash mapping for a token record.
+	 *
+	 * @param array<string, mixed> $token_data Token record.
+	 * @return void
+	 */
+	private function delete_session_mapping_for_record( array $token_data ) {
+		if ( empty( $token_data['challenge']['session_id'] ) ) {
+			return;
+		}
+
+		delete_transient(
+			self::SESSION_TRANSIENT_PREFIX . hash( 'sha256', (string) $token_data['challenge']['session_id'] )
+		);
+	}
+
+	/**
 	 * Validate that the configured site URL is HTTPS and return it.
 	 *
 	 * `is_ssl()` only tells us the current REQUEST is HTTPS — it says nothing about
@@ -744,6 +778,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// Validate token hasn't expired (belt and suspenders with transient TTL).
 		if ( ! empty( $token_data['expires_at'] ) && time() > $token_data['expires_at'] ) {
 			delete_transient( $key );
+			$this->delete_session_mapping_for_record( $token_data );
 			$this->release_token_exchange_claim( $token_hash );
 			return new \WP_Error(
 				'token_expired',
@@ -759,7 +794,6 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$current_state = isset( $token_data['state'] ) ? (string) $token_data['state'] : self::STATE_PENDING;
 
 		if ( self::STATE_APPROVED !== $current_state ) {
-			delete_transient( $key );
 			$this->release_token_exchange_claim( $token_hash );
 			return new \WP_Error(
 				'qr_login_not_approved',
@@ -776,14 +810,34 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$stored_grant    = isset( $token_data['exchange_grant'] ) ? (string) $token_data['exchange_grant'] : '';
 
 		if ( '' === $stored_grant || ! hash_equals( $stored_grant, $submitted_grant ) ) {
-			delete_transient( $key );
+			$invalid_grant_attempts = isset( $token_data['invalid_grant_attempts'] ) ? (int) $token_data['invalid_grant_attempts'] : 0;
+			++$invalid_grant_attempts;
+
+			$token_data['invalid_grant_attempts']          = $invalid_grant_attempts;
+			$token_data['invalid_grant_last_attempted_at'] = time();
+
+			if ( $invalid_grant_attempts >= self::MAX_INVALID_GRANT_ATTEMPTS ) {
+				$token_data['state']    = self::STATE_REJECTED;
+				$token_data['state_at'] = time();
+
+				wc_get_logger()->warning(
+					'QR login rejected after repeated invalid exchange grants',
+					array(
+						'source'  => 'qr-login-security',
+						'user_id' => isset( $token_data['user_id'] ) ? (int) $token_data['user_id'] : 0,
+						'ip'      => $this->get_client_ip(),
+					)
+				);
+			}
+
+			set_transient( $key, $token_data, $this->get_token_record_ttl( $token_data ) );
 			$this->release_token_exchange_claim( $token_hash );
 			return new \WP_Error(
 				'invalid_exchange_grant',
 				__( 'Invalid exchange grant for this QR login session.', 'woocommerce' ),
 				array( 'status' => 412 )
 			);
-		}
+		}//end if
 
 		$user_id = $token_data['user_id'];
 		$user    = get_userdata( $user_id );
@@ -876,17 +930,12 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			self::TOKEN_TTL
 		);
 
+		// One-shot: consume only after the Application Password has been
+		// successfully created and the consumed record is visible to wc-admin's
+		// polling client.
 		delete_transient( $key );
+		$this->delete_session_mapping_for_record( $token_data );
 		$this->release_token_exchange_claim( $token_hash );
-
-		// Also clean up the session-id → token-hash mapping so the mobile
-		// app's session-status poll terminates with the final approved/grant
-		// payload it just consumed.
-		if ( ! empty( $token_data['challenge']['session_id'] ) ) {
-			delete_transient(
-				self::SESSION_TRANSIENT_PREFIX . hash( 'sha256', (string) $token_data['challenge']['session_id'] )
-			);
-		}
 
 		// Notify the merchant out-of-band so they're aware of a fresh sign-in
 		// even when they aren't currently looking at wc-admin. Wrapped in a
