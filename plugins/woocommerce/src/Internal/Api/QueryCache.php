@@ -9,8 +9,13 @@ use Automattic\WooCommerce\Vendor\GraphQL\Language\Parser;
 use Automattic\WooCommerce\Vendor\GraphQL\Utils\AST;
 
 /**
- * Caches parsed GraphQL ASTs in the WP object cache and implements the
- * Apollo Automatic Persisted Queries (APQ) protocol.
+ * Caches parsed GraphQL ASTs and implements the Apollo Automatic Persisted
+ * Queries (APQ) protocol.
+ *
+ * Two backends are supported. OPcache (filesystem) is preferred: parsed ASTs
+ * are written as PHP files so that OPcache serves them from shared memory.
+ * The WP object cache is used as a fallback when OPcache isn't available or
+ * the cache directory isn't writable.
  */
 class QueryCache {
 	/**
@@ -25,6 +30,20 @@ class QueryCache {
 	 * Update this constant when bumping the major version in composer.json.
 	 */
 	private const CACHE_KEY_PREFIX = 'graphql_ast_v15_';
+
+	/**
+	 * Subdirectory (under wp-uploads) for the OPcache-backed file cache.
+	 * The version segment matches {@see self::CACHE_KEY_PREFIX} so a major
+	 * webonyx upgrade naturally orphans the previous version's files.
+	 */
+	private const OPCACHE_DIR_RELATIVE = 'wc-graphql-cache/v15';
+
+	/**
+	 * Cached result of {@see self::is_opcache_usable()} for the current request.
+	 *
+	 * @var ?bool
+	 */
+	private ?bool $opcache_usable = null;
 
 	/**
 	 * Default time-to-live (in seconds) applied when the option is unset or non-positive.
@@ -72,7 +91,7 @@ class QueryCache {
 		}
 
 		// APQ keeps using the cache; it has its own settings toggle.
-		if ( ! Main::is_object_cache_enabled() ) {
+		if ( ! $this->is_caching_enabled() ) {
 			return $this->parse( $query );
 		}
 
@@ -102,16 +121,16 @@ class QueryCache {
 				);
 			}
 
-			$doc = $this->get_cached_document( $apq_hash );
+			$doc = $this->get_cached_document( $apq_hash, true );
 			if ( false !== $doc ) {
 				return $doc;
 			}
 
-			return $this->parse_and_cache( $query, $apq_hash );
+			return $this->parse_and_cache( $query, $apq_hash, true );
 		}
 
 		// Hash-only lookup.
-		$doc = $this->get_cached_document( $apq_hash );
+		$doc = $this->get_cached_document( $apq_hash, true );
 		if ( false !== $doc ) {
 			return $doc;
 		}
@@ -120,18 +139,44 @@ class QueryCache {
 	}
 
 	/**
+	 * Whether at least one cache backend is enabled (and, for OPcache, usable).
+	 *
+	 * Used to short-circuit the standard-query path when neither backend is
+	 * available, so the request is parsed once with no cache lookup overhead.
+	 */
+	private function is_caching_enabled(): bool {
+		return ( Main::is_opcache_enabled() && $this->is_opcache_usable() )
+			|| Main::is_object_cache_enabled();
+	}
+
+	/**
 	 * Retrieve a cached DocumentNode by hash.
 	 *
-	 * @param string $hash The SHA-256 hash.
+	 * Tries OPcache first when enabled and usable, then falls back to the
+	 * WP object cache. APQ requests pass $for_apq=true so the object cache
+	 * is consulted regardless of the standard-query toggle, matching the
+	 * pre-OPcache behaviour where APQ always persisted via the object cache.
+	 *
+	 * @param string $hash    The SHA-256 hash.
+	 * @param bool   $for_apq Whether the lookup is for an APQ request.
 	 * @return DocumentNode|false
 	 */
-	private function get_cached_document( string $hash ) {
-		$cached = wp_cache_get( $this->build_cache_key( $hash ), self::CACHE_GROUP );
-		if ( false === $cached || ! is_array( $cached ) ) {
-			return false;
+	private function get_cached_document( string $hash, bool $for_apq = false ) {
+		if ( Main::is_opcache_enabled() && $this->is_opcache_usable() ) {
+			$doc = $this->read_from_opcache( $hash );
+			if ( false !== $doc ) {
+				return $doc;
+			}
 		}
 
-		return AST::fromArray( $cached );
+		if ( $for_apq || Main::is_object_cache_enabled() ) {
+			$cached = wp_cache_get( $this->build_cache_key( $hash ), self::CACHE_GROUP );
+			if ( is_array( $cached ) ) {
+				return AST::fromArray( $cached );
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -152,19 +197,28 @@ class QueryCache {
 	/**
 	 * Parse a query, cache the resulting AST, and return the DocumentNode.
 	 *
+	 * Writes to OPcache when enabled and usable; otherwise to the object
+	 * cache. APQ requests pass $for_apq=true so the object cache is used
+	 * even when the standard-query toggle is off.
+	 *
 	 * Returns an error array if the query has a syntax error.
 	 *
-	 * @param string $query The GraphQL query string.
-	 * @param string $hash  The SHA-256 hash to cache under.
+	 * @param string $query   The GraphQL query string.
+	 * @param string $hash    The SHA-256 hash to cache under.
+	 * @param bool   $for_apq Whether the request is an APQ registration.
 	 * @return DocumentNode|array
 	 */
-	private function parse_and_cache( string $query, string $hash ) {
+	private function parse_and_cache( string $query, string $hash, bool $for_apq = false ) {
 		$document = $this->parse( $query );
 		if ( ! $document instanceof DocumentNode ) {
 			return $document;
 		}
 
-		wp_cache_set( $this->build_cache_key( $hash ), $document->toArray(), self::CACHE_GROUP, self::get_cache_ttl() );
+		if ( Main::is_opcache_enabled() && $this->is_opcache_usable() ) {
+			$this->write_to_opcache( $hash, $document );
+		} elseif ( $for_apq || Main::is_object_cache_enabled() ) {
+			wp_cache_set( $this->build_cache_key( $hash ), $document->toArray(), self::CACHE_GROUP, self::get_cache_ttl() );
+		}
 
 		return $document;
 	}
@@ -177,6 +231,173 @@ class QueryCache {
 	 */
 	private function build_cache_key( string $hash ): string {
 		return self::CACHE_KEY_PREFIX . $hash;
+	}
+
+	/**
+	 * Whether the OPcache file backend can be used for this request.
+	 *
+	 * Memoised per request: the underlying checks (opcache_get_status,
+	 * filesystem writability) don't change mid-request and are wasteful
+	 * to repeat across the read and write paths.
+	 */
+	private function is_opcache_usable(): bool {
+		if ( null !== $this->opcache_usable ) {
+			return $this->opcache_usable;
+		}
+
+		$this->opcache_usable = $this->compute_is_opcache_usable();
+		return $this->opcache_usable;
+	}
+
+	/**
+	 * Underlying capability check for the OPcache file backend.
+	 *
+	 * Requires the OPcache extension to be loaded and enabled, and the cache
+	 * directory to exist (or be creatable) and be writable.
+	 */
+	private function compute_is_opcache_usable(): bool {
+		if ( ! function_exists( 'opcache_get_status' ) ) {
+			return false;
+		}
+
+		// opcache_get_status() returns false when OPcache is disabled or in
+		// restricted mode (opcache.restrict_api). Suppress the warning that
+		// restricted mode emits — false return is the meaningful signal.
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		$status = @opcache_get_status( false );
+		if ( ! is_array( $status ) || empty( $status['opcache_enabled'] ) ) {
+			return false;
+		}
+
+		return $this->ensure_opcache_dir_writable();
+	}
+
+	/**
+	 * Resolve the directory where OPcache cache files are written.
+	 *
+	 * Defaults to a versioned subdirectory under wp-uploads so it inherits
+	 * the writability guarantees WordPress places on uploads. Filterable
+	 * for tests and unusual hosting layouts.
+	 */
+	private function get_opcache_cache_dir(): string {
+		$upload_dir = wp_get_upload_dir();
+		$default    = trailingslashit( $upload_dir['basedir'] ) . self::OPCACHE_DIR_RELATIVE;
+
+		/**
+		 * Filters the directory where parsed GraphQL ASTs are written for OPcache.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param string $dir Default cache directory under wp-uploads.
+		 */
+		return (string) apply_filters( 'woocommerce_graphql_opcache_cache_dir', $default );
+	}
+
+	/**
+	 * Ensure the OPcache cache directory exists and is writable.
+	 *
+	 * Creates the directory on first use and drops a deny-all .htaccess and
+	 * an empty index.html alongside it. Returns false if creation fails or
+	 * the directory ends up non-writable.
+	 */
+	private function ensure_opcache_dir_writable(): bool {
+		$dir = $this->get_opcache_cache_dir();
+
+		if ( ! is_dir( $dir ) && ! wp_mkdir_p( $dir ) ) {
+			return false;
+		}
+
+		if ( ! is_writable( $dir ) ) {
+			return false;
+		}
+
+		// Best-effort hardening; ignore failures (e.g. read-only permissions).
+		$htaccess = $dir . '/.htaccess';
+		$index    = $dir . '/index.html';
+		if ( ! file_exists( $htaccess ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents, WordPress.PHP.NoSilencedErrors.Discouraged
+			@file_put_contents( $htaccess, "Deny from all\n" );
+		}
+		if ( ! file_exists( $index ) ) {
+			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents, WordPress.PHP.NoSilencedErrors.Discouraged
+			@file_put_contents( $index, '' );
+		}
+
+		return true;
+	}
+
+	/**
+	 * Read a cached DocumentNode from the OPcache file backend.
+	 *
+	 * @param string $hash The SHA-256 hash.
+	 * @return DocumentNode|false
+	 */
+	private function read_from_opcache( string $hash ) {
+		$path = $this->get_opcache_cache_dir() . '/' . $hash . '.php';
+
+		if ( ! is_file( $path ) ) {
+			return false;
+		}
+
+		// File contents are produced by self::write_to_opcache() and only
+		// ever return a primitive array. Suppress include-time warnings to
+		// fail soft on a missing or malformed file; the caller will fall
+		// back to parsing.
+		// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
+		$data = @include $path;
+
+		if ( ! is_array( $data ) ) {
+			return false;
+		}
+
+		try {
+			return AST::fromArray( $data );
+		} catch ( \Throwable ) {
+			return false;
+		}
+	}
+
+	/**
+	 * Persist a parsed AST to the OPcache file backend.
+	 *
+	 * Writes atomically (temp file + rename) so concurrent readers never see
+	 * a partial file, and explicitly invalidates OPcache for the destination
+	 * path so installs running with opcache.validate_timestamps=0 still see
+	 * the new version.
+	 *
+	 * Failures are intentionally silent: the caller already holds a valid
+	 * DocumentNode, and a failed cache write only forfeits the optimisation
+	 * for one request.
+	 *
+	 * @param string       $hash     The SHA-256 hash to cache under.
+	 * @param DocumentNode $document The parsed AST.
+	 */
+	private function write_to_opcache( string $hash, DocumentNode $document ): void {
+		$dir  = $this->get_opcache_cache_dir();
+		$path = $dir . '/' . $hash . '.php';
+		$tmp  = $path . '.' . bin2hex( random_bytes( 8 ) ) . '.tmp';
+
+		$contents = "<?php\nreturn " . var_export( $document->toArray(), true ) . ";\n"; // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_var_export
+
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
+		if ( false === file_put_contents( $tmp, $contents, LOCK_EX ) ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		if ( ! @rename( $tmp, $path ) ) {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
+			@unlink( $tmp );
+			return;
+		}
+
+		if ( function_exists( 'opcache_invalidate' ) ) {
+			opcache_invalidate( $path, true );
+		}
+		if ( function_exists( 'opcache_compile_file' ) ) {
+			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			@opcache_compile_file( $path );
+		}
 	}
 
 	/**
