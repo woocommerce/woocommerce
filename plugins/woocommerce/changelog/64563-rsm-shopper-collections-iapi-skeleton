@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Wire the Shopper Collection block to the shopper-lists Store API via a private Interactivity API store.
