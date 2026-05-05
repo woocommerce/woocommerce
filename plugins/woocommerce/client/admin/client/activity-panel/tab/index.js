@@ -42,7 +42,9 @@ export const Tab = ( {
 			} }
 		>
 			{ icon }
-			{ title }{ ' ' }
+			<span className="woocommerce-layout__activity-panel-tab-title">
+				{ title }
+			</span>
 			{ unread && (
 				<span className="screen-reader-text">
 					{ __( 'unread activity', 'woocommerce' ) }

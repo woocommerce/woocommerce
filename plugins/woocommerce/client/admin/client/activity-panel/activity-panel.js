@@ -5,7 +5,14 @@ import { __ } from '@wordpress/i18n';
 import { lazy, useState, useEffect, useCallback } from '@wordpress/element';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { uniqueId, find } from 'lodash';
-import { Icon, help as helpIcon, external } from '@wordpress/icons';
+import {
+	Icon,
+	help as helpIcon,
+	external,
+	bell,
+	listView,
+	megaphone,
+} from '@wordpress/icons';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { H, Section } from '@woocommerce/components';
 import { onboardingStore, optionsStore, useUser } from '@woocommerce/data';
@@ -21,10 +28,8 @@ import {
  * Internal dependencies
  */
 import './style.scss';
-import { IconFlag } from './icon-flag';
 import { hasUnreadNotes as checkIfHasUnreadNotes } from './unread-indicators';
 import { Tabs } from './tabs';
-import { SetupProgress } from './setup-progress';
 import { DisplayOptions } from './display-options';
 import { Panel } from './panel';
 import {
@@ -37,7 +42,6 @@ import { ABBREVIATED_NOTIFICATION_SLOT_NAME } from './panels/inbox/abbreviated-n
 import { getAdminSetting } from '~/utils/admin-settings';
 import { getUrlParams } from '~/utils';
 import { getSegmentsFromPath } from '~/utils/url-helpers';
-import { FeedbackIcon } from '~/products/images/feedback-icon';
 import { useLaunchYourStore } from '~/launch-your-store';
 import { useTaskListsState } from '~/hooks/use-tasklists-state';
 import HeaderAccount from '../marketplace/components/header-account/header-account';
@@ -236,7 +240,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const activity = {
 			name: 'activity',
 			title: __( 'Activity', 'woocommerce' ),
-			icon: <IconFlag />,
+			icon: <Icon icon={ bell } size={ 18 } />,
 			unread: hasUnreadNotes || hasAbbreviatedNotifications,
 			visible:
 				( isEmbedded || ! isHomescreen ) &&
@@ -248,7 +252,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const feedback = {
 			name: 'feedback',
 			title: __( 'Feedback', 'woocommerce' ),
-			icon: <FeedbackIcon />,
+			icon: <Icon icon={ megaphone } size={ 18 } />,
 			onClick: () => {
 				setCurrentTab( 'feedback' );
 				setIsPanelOpen( true );
@@ -290,14 +294,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const setup = {
 			name: 'setup',
 			title: __( 'Finish setup', 'woocommerce' ),
-			icon: (
-				<SetupProgress
-					setupTasksComplete={ setupTasksCompleteCount }
-					setupCompletePercent={ Math.ceil(
-						( setupTasksCompleteCount / setupTasksCount ) * 100
-					) }
-				/>
-			),
+			icon: <Icon icon={ listView } size={ 18 } />,
 			visible:
 				currentUserCan( 'manage_woocommerce' ) &&
 				! requestingTaskListOptions &&

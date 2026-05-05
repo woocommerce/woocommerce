@@ -1,5 +1,49 @@
+// Activity-panel tabs are icon-only across the floating header — labels
+// ("Activity", "Finish setup", etc.) are still in the DOM for screen readers
+// but visually hidden so the right-side chrome reads as infrastructure
+// rather than content.
+.woocommerce-layout__activity-panel-tab-title {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+// Visually hide wp-admin's original Screen Options + Help button strip — those
+// entry points are consolidated into the Woo floating header as icons. We use
+// the visually-hidden pattern (rather than display:none) so wp-admin's jQuery
+// click handlers on #show-settings-link and #contextual-help-link still fire
+// when our icons proxy a .click() into them.
+.woocommerce-admin-page #screen-meta-links,
+body.woocommerce_page_wc-admin #screen-meta-links {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+	border: 0;
+}
+
+// Chrome-only narrow-bar height (Edit Order, Edit Product, Add Product, etc.).
+// Now that activity-panel tabs are icon-only globally, they fit cleanly in 32px.
+$woo-chrome-only-header-height: 32px;
+
 .woocommerce-layout__header {
-	background: $studio-white;
+	// Match wp-admin's page background so the bar reads as infrastructure
+	// rather than content. Bottom border anchors it visually so it doesn't
+	// look "hanging" against the page below.
+	background: #f0f0f1;
+	border-bottom: 1px solid #dcdcde;
 	box-sizing: border-box;
 	padding: 0;
 	position: fixed;
@@ -39,12 +83,99 @@
 		padding: 0 0 0 $fallback-gutter-large;
 		padding: 0 0 0 $gutter-large;
 		height: $header-height;
-		background: $studio-white;
+		background: transparent;
 		font-weight: 600;
 		font-size: 14px;
 
 		&.woocommerce-layout__header-left-align {
 			flex: 1 auto;
+		}
+	}
+
+	// Spacer that takes up the title's flex space when no h1 renders
+	// (embedded post-type screens), so right-side items stay pinned right.
+	.woocommerce-layout__header-spacer {
+		flex: 1 auto;
+	}
+
+	// Screen Options + Help icon buttons — visually mirror the
+	// activity-panel-tab pattern so bell / list / megaphone / gear / ? all
+	// look identical regardless of which subsystem renders them, including
+	// the blue ::before underline on the active tab.
+	.woocommerce-layout__header-meta-icon {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		position: relative;
+		border: none;
+		outline: none;
+		cursor: pointer;
+		background-color: transparent;
+		height: $header-height;
+		min-width: 50px;
+		color: $gray-700;
+
+		&::before {
+			background-color: var(--wp-admin-theme-color);
+			bottom: 0;
+			content: "";
+			height: 0;
+			opacity: 0;
+			transition-property: height, opacity;
+			transition-duration: 300ms;
+			transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+			left: 0;
+			position: absolute;
+			right: 0;
+		}
+
+		&.is-active {
+			color: $gray-900;
+			box-shadow: none;
+
+			&::before {
+				height: 3px;
+				opacity: 1;
+			}
+		}
+
+		&:hover,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):hover {
+			box-shadow: none;
+			background-color: transparent;
+			color: $gray-900;
+		}
+
+		&:focus,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus {
+			box-shadow: inset -1px -1px 0 $gray-700,
+				inset 1px 1px 0 $gray-700;
+		}
+
+		svg {
+			fill: currentColor;
+		}
+	}
+
+	// Chrome-only treatment: bar collapses to 32px on pages without a title.
+	// Hard height + max-height + overflow:hidden so the wrapper can't be pushed
+	// taller by any naturally-sized child (Finish setup widget, plugin fills, etc.).
+	// Inner activity-panel and meta-icon items also collapse so they fit cleanly.
+	&.is-chrome-only {
+		.woocommerce-layout__header-wrapper {
+			height: $woo-chrome-only-header-height;
+			min-height: $woo-chrome-only-header-height;
+			max-height: $woo-chrome-only-header-height;
+			overflow: hidden;
+		}
+
+		.woocommerce-layout__activity-panel-tabs,
+		.woocommerce-layout__activity-panel-tab,
+		.woocommerce-layout__header-meta-icon {
+			height: $woo-chrome-only-header-height;
+			min-height: $woo-chrome-only-header-height;
+			max-height: $woo-chrome-only-header-height;
 		}
 	}
 }
