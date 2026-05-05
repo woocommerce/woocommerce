@@ -107,9 +107,16 @@ const WooCommerceShippingItem = ( {
 			</div>
 			<div className="woocommerce-list__item-after">
 				{ isPluginActive ? (
-					<span className="woocommerce-shipping-plugin-item__active-status">
+					<Button
+						variant="secondary"
+						aria-disabled="true"
+						aria-label={ __(
+							'WooCommerce Shipping is already active',
+							'woocommerce'
+						) }
+					>
 						{ __( 'Active', 'woocommerce' ) }
-					</span>
+					</Button>
 				) : (
 					<Button
 						variant={ isPluginInstalled ? 'primary' : 'secondary' }
