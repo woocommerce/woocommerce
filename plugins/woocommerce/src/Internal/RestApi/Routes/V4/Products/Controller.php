@@ -2249,7 +2249,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 				$downloads[] = array(
 					'id'                           => $file_id,
 					// MD5 hash.
-											'name' => $file['name'],
+					'name'                         => $file['name'],
 					'file'                         => $file['file'],
 				);
 			}
@@ -2345,8 +2345,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$tags,
 			$exclude_ids,
 			$limit,
-			null
-			// No need to pass the product ID.
+			null // No need to pass the product ID.
 		);
 
 		// When no suggested products are found, return an empty array.
