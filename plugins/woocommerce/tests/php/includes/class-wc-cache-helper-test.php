@@ -22,7 +22,7 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 			$current_time = microtime( true );
 		}
 
-		$first_version  = WC_Cache_Helper::get_transient_version( $group, true );
+		$first_version = WC_Cache_Helper::get_transient_version( $group, true );
 		usleep( 1000 );
 		$second_version = WC_Cache_Helper::get_transient_version( $group, true );
 
