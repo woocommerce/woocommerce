@@ -50,40 +50,38 @@ public function get_item_response( $resource ) {
 
 The route then becomes a one-liner: `return new \WP_REST_Response( $schema->get_item_response( $resource ), 201 );`. No bolting, no drift.
 
-## Schema must match all status paths
+## Schema must match all routes that use it
 
-Different methods on the same route can produce different response shapes. The schema must cover all of them:
+Different routes sharing a schema can return different shapes. The schema must cover all of them. The cart is the established precedent:
 
-- `GET /items` → list of items.
-- `POST /items` → the single newly-added item (status 201).
-- `DELETE /items/{key}` → 204 with empty body — schema not invoked.
-- `GET /` → list metadata; on writes, return the same metadata or split into a write schema.
+- Cart-mutating routes (`CartUpdateItem`, `CartApplyCoupon`, `CartSelectShippingRate`, etc.) all return the full `CartSchema` shape on every successful response. The client gets fresh aggregate state (totals, fees, coupons applied) in one round-trip.
+- Item-collection routes (`CartItems` POST returns the added member, `CartItemsByKey` DELETE returns 204) follow REST collection semantics — the response is the affected member, not the parent.
 
-Common mistake: declaring the GET-list shape on the schema while the POST/DELETE routes return something different. The fix is one of:
+If a route ever returns a shape that the schema doesn't declare, fix it one of three ways:
 
-1. Declare the union shape on one schema (works when fields are additive, e.g., `items: array` only populated on writes).
-2. Use separate schemas for read and write responses (cleaner if the shapes differ structurally).
-3. Have writes return only the new/deleted member, not the parent — collection-add convention. See [rest-conventions.md](rest-conventions.md).
+1. Add the missing field(s) to the schema as additive properties so the union shape is documented and introspectable.
+2. Split into separate schemas for read and write responses if the shapes differ structurally enough that union'ing them would force most fields to be optional.
+3. Reshape the route's response to match an existing pattern (return the parent for state mutations, the member for collection adds). See [rest-conventions.md](rest-conventions.md).
 
-Option 3 is usually best: it keeps each route's schema simple and matches the cart precedent.
+When in doubt, copy the cart's precedent — its response patterns are the most-consumed shapes in the Store API and aligning with them minimises surprise for both reviewers and frontend consumers.
 
 ## Field discipline
 
 ### Don't ship fields with only one possible value
 
-A schema property with a value that's hardcoded forever is dead surface. Examples:
+A schema property whose value is hardcoded forever is dead surface. Examples:
 
-- `is_public: false` shipped with no way to flip it.
-- A `read_only: true` flag where everything is read-only.
-- An `errors: []` array that's always empty.
+- A boolean feature-flag field always returning `false` because the underlying behaviour hasn't shipped.
+- A `read_only: true` field on a resource where every field is read-only.
+- An `errors: []` or `warnings: []` array that's always empty.
 
 Add the field when the underlying behaviour ships. Adding fields is backwards-compatible; removing them is a breaking change.
 
 ### Don't expose two fields representing the same data
 
-Don't ship both `name` (escaped) and `product_title_at_save` (raw) for the same string. The escaped/raw asymmetry is an XSS vector — frontends will read whichever they reach first.
+Don't ship both a sanitized field and its raw counterpart for the same value — e.g., a `name` field run through `prepare_html_response()` alongside a `name_raw` field exposing the same string unescaped. The asymmetry is an XSS vector: frontends read whichever field they reach first, and the unescaped one is reachable.
 
-Pick one path. If a snapshot field exists for internal storage, keep it server-side: use it to populate the public field via the response builder, but don't surface it as its own schema property.
+Pick one. If a raw value is needed internally (e.g., to populate a fallback when the underlying resource is unavailable), keep it server-side: use it to populate the public field via the response builder, but don't surface it as its own schema property.
 
 ### Don't expose internal storage fields
 
@@ -95,7 +93,7 @@ A `date_created_gmt` field that changes on every read until the first write is w
 
 ### Don't accept fields the route ignores
 
-If a route accepts `quantity` but always coerces it to `1`, drop it from the route args. Accepting input the route silently discards is misleading.
+If a route declares an argument that the handler always overrides, ignores, or coerces to a fixed value, drop it from `get_args()`. Accepting input the route silently discards is misleading — clients reading the schema (or the introspection endpoint) reasonably assume their value matters.
 
 ## Sanitisation
 
@@ -138,21 +136,28 @@ if ( ! $product ) {
 
 ## Document non-obvious behaviour
 
-If a field has merge semantics, default values, or interactions with other fields, spell them out in the `description`:
+If a field has merge semantics, sanitisation that affects the stored value, server-side clamping, or interactions with other fields, spell them out in the `description`. `CartUpdateItem` is a real example — its `quantity` arg uses `wc_stock_amount` to sanitize and is bounded by the product's `max_purchase_quantity` server-side:
 
 ```php
 'quantity' => array(
-    'description' => __(
-        'Quantity to save. If an item with the same product/variation already exists, its quantity is replaced with this value.',
-        'woocommerce'
+    'description' => __( 'New quantity of the item in the cart.', 'woocommerce' ),
+    'type'        => 'number',
+    'arg_options' => array(
+        'sanitize_callback' => 'wc_stock_amount',
     ),
-    'type'    => 'integer',
-    'minimum' => 1,
-    'default' => 1,
 ),
 ```
 
-The schema description is what API clients read. It's the only place merge-on-resave, server-authoritative attribute reconciliation, or default-fallback behaviours can be documented for consumers.
+The current description is short. A more honest one would surface the sanitisation and clamping:
+
+```php
+'description' => __(
+    'New quantity of the item in the cart. Values are sanitized via `wc_stock_amount` and clamped against the product\'s `max_purchase_quantity` server-side; the response reflects the value actually applied.',
+    'woocommerce'
+),
+```
+
+The schema description is what API clients read. It's the only place server-side sanitisation, clamping, or other "the value you sent isn't necessarily the value applied" behaviours can be documented for consumers.
 
 ## Anti-patterns to avoid
 
