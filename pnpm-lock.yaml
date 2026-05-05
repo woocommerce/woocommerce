@@ -135,9 +135,6 @@ catalogs:
     '@wordpress/server-side-render':
       specifier: 5.19.4
       version: 5.19.4
-    '@wordpress/ui':
-      specifier: 0.11.0
-      version: 0.11.0
     '@wordpress/url':
       specifier: 4.19.2
       version: 4.19.2
@@ -155,8 +152,6 @@ overrides:
   '@types/react': 18.3.x
   '@typescript-eslint/eslint-plugin': ^5.62.0
   '@typescript-eslint/parser': ^5.62.0
-  eslint-import-resolver-typescript: 3.6.1
-  eslint-import-resolver-webpack: 0.13.11
   eslint-plugin-jsdoc: 39.9.1
   '@wordpress/data-controls>@wordpress/api-fetch': 7.19.2
   '@wordpress/private-apis': ^1.19.1
@@ -3609,8 +3604,8 @@ importers:
         specifier: catalog:wp-min
         version: 4.19.2(react@18.3.1)
       '@wordpress/dataviews':
-        specifier: ^14.2.0
-        version: 14.2.0(@date-fns/tz@1.4.1)(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@14.16.1)
+        specifier: ^4.17.0
+        version: 4.22.0(@emotion/is-prop-valid@1.4.0)(@types/react@18.3.28)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@wordpress/date':
         specifier: catalog:wp-min
         version: 5.19.1
@@ -3662,9 +3657,6 @@ importers:
       '@wordpress/router':
         specifier: 0.7.0
         version: 0.7.0(react@18.3.1)
-      '@wordpress/ui':
-        specifier: catalog:wp-min
-        version: 0.11.0(@date-fns/tz@1.4.1)(@types/react@18.3.28)(date-fns@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@14.16.1)
       '@wordpress/url':
         specifier: catalog:wp-min
         version: 4.19.2
@@ -3967,7 +3959,7 @@ importers:
         specifier: 3.6.1
         version: 3.6.1(@typescript-eslint/parser@5.62.0(eslint@8.57.1)(typescript@5.7.3))(eslint-import-resolver-webpack@0.13.11)(eslint-plugin-import@2.32.0)(eslint@8.57.1)
       eslint-import-resolver-webpack:
-        specifier: 0.13.11
+        specifier: ^0.13.8
         version: 0.13.11(eslint-plugin-import@2.32.0)(webpack@5.97.1)
       eslint-plugin-import:
         specifier: ^2.29.0

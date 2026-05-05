@@ -47,7 +47,6 @@ catalogs:
         '@wordpress/private-apis': ^1.19.1 # Use a caret range to make sure we are using an up-to-date private package list.
         '@wordpress/rich-text': 7.19.2
         '@wordpress/server-side-render': 5.19.4
-        '@wordpress/ui': 0.11.0
         '@wordpress/url': 4.19.2
         '@wordpress/viewport': 6.19.2
         '@wordpress/warning': 3.19.1

@@ -1,0 +1,50 @@
+/**
+ * External dependencies
+ */
+import { StrictMode, Suspense, createRoot, lazy } from '@wordpress/element';
+import {
+	Root,
+	// @ts-expect-error missing types.
+} from 'react-dom/client';
+
+/**
+ * Internal dependencies
+ */
+import './variation-view/style.scss';
+
+const VariationView = lazy( () =>
+	import(
+		/* webpackChunkName: "experimental-products-app-variation-view-main" */
+		'./variation-view'
+	).then( ( module ) => ( {
+		default: module.VariationView,
+	} ) )
+);
+
+/**
+ * Initializes the classic product editor variation view.
+ *
+ * @param {string} containerId DOM element ID.
+ * @param {number} productId   Parent product ID.
+ */
+export function initializeVariationView(
+	containerId: string,
+	productId: number
+): Root | undefined {
+	const target = document.getElementById( containerId );
+
+	if ( ! target ) {
+		return undefined;
+	}
+
+	const root = createRoot( target );
+	root.render(
+		<StrictMode>
+			<Suspense fallback={ null }>
+				<VariationView productId={ productId } />
+			</Suspense>
+		</StrictMode>
+	);
+
+	return root;
+}

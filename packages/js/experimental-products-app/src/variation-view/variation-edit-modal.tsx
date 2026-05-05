@@ -7,12 +7,12 @@ import { Modal } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import type { Variation } from '../types';
+import type { VariationEntityRecord } from './types';
 
-interface VariationEditModalProps {
-	variation: Variation;
+type VariationEditModalProps = {
+	variation: VariationEntityRecord;
 	onClose: () => void;
-}
+};
 
 export function VariationEditModal( {
 	variation,
@@ -21,7 +21,7 @@ export function VariationEditModal( {
 	return (
 		<Modal
 			title={ sprintf(
-				/* translators: %d: variation ID */
+				/* translators: %d: variation ID. */
 				__( 'Edit variation #%d', 'woocommerce' ),
 				variation.id
 			) }

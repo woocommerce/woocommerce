@@ -16,7 +16,7 @@ if ( FeaturesUtil::feature_is_enabled( 'product_variations_classic_redesign' ) )
 	?>
 	<div id="variable_product_options" class="panel wc-metaboxes-wrapper hidden">
 		<div id="variable_product_options_inner">
-			<div id="woocommerce-variations-classic-root"></div>
+			<div id="<?php echo esc_attr( \Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign\Init::ROOT_ID ); ?>"></div>
 		</div>
 	</div>
 	<?php

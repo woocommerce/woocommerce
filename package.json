@@ -72,8 +72,6 @@
 			"@types/react": "18.3.x",
 			"@typescript-eslint/eslint-plugin": "^5.62.0",
 			"@typescript-eslint/parser": "^5.62.0",
-			"eslint-import-resolver-typescript": "3.6.1",
-			"eslint-import-resolver-webpack": "0.13.11",
 			"eslint-plugin-jsdoc": "39.9.1",
 			"@wordpress/data-controls>@wordpress/api-fetch": "catalog:wp-min",
 			"@wordpress/private-apis": "catalog:wp-min",

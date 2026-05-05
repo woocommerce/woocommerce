@@ -7,12 +7,16 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign;
 
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * Loads assets for the product variations classic redesign feature.
  */
 class Init {
+	const SCRIPT_HANDLE = 'wc-experimental-products-app-variation-view';
+	const ROOT_ID       = 'woocommerce-variations-classic-root';
+
 	/**
 	 * Constructor
 	 */
@@ -51,25 +55,61 @@ class Init {
 			return;
 		}
 
-		wp_enqueue_script( 'wc-variations-classic' );
-		wp_enqueue_style( 'wc-variations-classic' );
+		$this->register_variation_view_assets();
+
+		wp_enqueue_script( self::SCRIPT_HANDLE );
+		wp_enqueue_style( self::SCRIPT_HANDLE );
 
 		global $post;
 		$product_id = $post ? $post->ID : 0;
 
 		wp_add_inline_script(
-			'wc-variations-classic',
+			self::SCRIPT_HANDLE,
 			sprintf(
-				'window.wcVariationsClassicSettings = %s;',
-				wp_json_encode(
-					array(
-						'productId' => $product_id,
-						'nonce'     => wp_create_nonce( 'wp_rest' ),
-						'restUrl'   => rest_url( '/' ),
-					)
-				)
+				'window.wc.experimentalProductsAppVariationView.initializeVariationView( %s, %d );',
+				wp_json_encode( self::ROOT_ID ),
+				$product_id
 			),
-			'before'
+			'after'
 		);
+	}
+
+	/**
+	 * Registers variation view assets without loading the full WooCommerce Admin app.
+	 */
+	private function register_variation_view_assets(): void {
+		if ( ! wp_script_is( self::SCRIPT_HANDLE, 'registered' ) ) {
+			$script_assets_filename = WCAdminAssets::get_script_asset_filename( 'wp-admin-scripts', 'experimental-products-app-variation-view' );
+			$script_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'wp-admin-scripts/' . $script_assets_filename;
+
+			wp_register_script(
+				self::SCRIPT_HANDLE,
+				WCAdminAssets::get_url( 'wp-admin-scripts/experimental-products-app-variation-view', 'js' ),
+				$script_assets['dependencies'],
+				WCAdminAssets::get_file_version( 'js', $script_assets['version'] ),
+				true
+			);
+			wp_set_script_translations( self::SCRIPT_HANDLE, 'woocommerce' );
+		}
+
+		if ( ! wp_style_is( self::SCRIPT_HANDLE, 'registered' ) ) {
+			$style_version = WC_VERSION;
+
+			try {
+				$style_assets_filename = WCAdminAssets::get_script_asset_filename( 'experimental-products-app-variation-view', 'style' );
+				$style_assets          = require WC_ADMIN_ABSPATH . WC_ADMIN_DIST_JS_FOLDER . 'experimental-products-app-variation-view/' . $style_assets_filename;
+				$style_version         = $style_assets['version'];
+			} catch ( \Throwable $e ) {
+				$style_version = WC_VERSION;
+			}
+
+			wp_register_style(
+				self::SCRIPT_HANDLE,
+				WCAdminAssets::get_url( 'experimental-products-app-variation-view/style', 'css' ),
+				array(),
+				WCAdminAssets::get_file_version( 'css', $style_version )
+			);
+			wp_style_add_data( self::SCRIPT_HANDLE, 'rtl', 'replace' );
+		}
 	}
 }
