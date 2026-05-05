@@ -2996,24 +2996,41 @@ class WC_AJAX {
 	 * @return void
 	 */
 	private static function variation_bulk_action_variable_sale_schedule( $variations, $data ) {
-		if ( ! isset( $data['date_from'] ) && ! isset( $data['date_to'] ) ) {
+		// The JS sends 'false' (string) when the user cancels a prompt and '' when the
+		// user submits an empty input; treat both as "no value provided" so an empty
+		// field doesn't end up as 1970-01-01 via strtotime('').
+		$date_from = isset( $data['date_from'] ) ? $data['date_from'] : '';
+		$date_to   = isset( $data['date_to'] ) ? $data['date_to'] : '';
+		$skip_from = '' === $date_from || 'false' === $date_from;
+		$skip_to   = '' === $date_to || 'false' === $date_to;
+
+		if ( $skip_from && $skip_to ) {
 			return;
 		}
 
 		foreach ( $variations as $variation_id ) {
 			$variation = wc_get_product( $variation_id );
+			$changed   = false;
 
-			if ( 'false' !== $data['date_from'] ) {
-				$date_on_sale_from = date( 'Y-m-d 00:00:00', strtotime( wc_clean( $data['date_from'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-				$variation->set_date_on_sale_from( $date_on_sale_from );
+			if ( ! $skip_from ) {
+				$timestamp_from = strtotime( wc_clean( $date_from ) );
+				if ( false !== $timestamp_from ) {
+					$variation->set_date_on_sale_from( date( 'Y-m-d 00:00:00', $timestamp_from ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					$changed = true;
+				}
 			}
 
-			if ( 'false' !== $data['date_to'] ) {
-				$date_on_sale_to = date( 'Y-m-d 23:59:59', strtotime( wc_clean( $data['date_to'] ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-				$variation->set_date_on_sale_to( $date_on_sale_to );
+			if ( ! $skip_to ) {
+				$timestamp_to = strtotime( wc_clean( $date_to ) );
+				if ( false !== $timestamp_to ) {
+					$variation->set_date_on_sale_to( date( 'Y-m-d 23:59:59', $timestamp_to ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
+					$changed = true;
+				}
 			}
 
-			$variation->save();
+			if ( $changed ) {
+				$variation->save();
+			}
 		}
 	}
 
