@@ -1187,6 +1187,22 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test: payment_complete allows orders with created_via subscription
+	 *
+	 * @testdox payment_complete allows order with created_via subscription.
+	 * @since 10.9.0
+	 */
+	public function test_payment_complete_allows_orders_with_created_via_subscription() {
+		$object = new WC_Order();
+		$object->set_created_via( 'subscription' );
+		$object->set_status( OrderStatus::PENDING );
+		$object->save();
+
+		$this->assertTrue( $object->payment_complete( '12345' ) );
+		$this->assertEquals( OrderStatus::COMPLETED, $object->get_status() );
+	}
+
+	/**
 	 * Test: payment_complete allows orders with cart_hash
 	 *
 	 * @testdox payment_complete allows order with cart_hash

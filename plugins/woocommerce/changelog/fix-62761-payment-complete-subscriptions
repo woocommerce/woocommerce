@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow WooCommerce Subscriptions renewal orders to complete payment under checkout evidence validation.

@@ -152,7 +152,11 @@ class WC_Order extends WC_Abstract_Order {
 			 * @param WC_Order $order                     Order object.
 			 * @since 10.8.0
 			 */
-			$allowed_created_via_values = apply_filters( 'woocommerce_payment_complete_allowed_created_via_values', array( 'checkout', 'store-api', 'rest-api', 'admin', 'pos-rest-api' ), $this );
+			$allowed_created_via_values = apply_filters(
+				'woocommerce_payment_complete_allowed_created_via_values',
+				array( 'checkout', 'store-api', 'rest-api', 'admin', 'pos-rest-api', 'subscription' ),
+				$this
+			);
 
 			if ( ! empty( $created_via ) && in_array( $created_via, $allowed_created_via_values, true ) ) {
 				$has_checkout_evidence = true;
