@@ -30,5 +30,5 @@ interface AbilityDefinition {
 	 *
 	 * @since 10.9.0
 	 */
-	public static function get_args(): array;
+	public static function get_registration_args(): array;
 }

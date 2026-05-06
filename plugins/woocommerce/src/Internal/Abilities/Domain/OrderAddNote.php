@@ -37,7 +37,7 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 	 *
 	 * @since 10.9.0
 	 */
-	public static function get_args(): array {
+	public static function get_registration_args(): array {
 		return array(
 			'label'               => __( 'Add Order Note', 'woocommerce' ),
 			'description'         => __(

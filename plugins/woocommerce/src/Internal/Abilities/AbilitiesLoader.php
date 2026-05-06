@@ -90,7 +90,7 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			wp_register_ability( $ability_name, $class_name::get_args() );
+			wp_register_ability( $ability_name, $class_name::get_registration_args() );
 		}
 	}
 
@@ -107,7 +107,7 @@ class AbilitiesLoader {
 		 *
 		 * Extensions can append autoloadable classes that implement
 		 * {@see AbilityDefinition}. The loader will call get_name() and
-		 * get_args() on each definition class and register the ability on the
+		 * get_registration_args() on each definition class and register the ability on the
 		 * Abilities API init hook.
 		 *
 		 * @since 10.9.0
