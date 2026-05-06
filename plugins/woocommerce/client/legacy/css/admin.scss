@@ -3037,16 +3037,10 @@ ul.wc_coupon_list_block {
 
 		.wc-order-submit {
 			display: flex;
-			flex-direction: column;
 			gap: 8px;
 
-			.button-primary {
-				width: 100%;
-				justify-content: center;
-			}
-
-			.submitdelete {
-				text-align: center;
+			.button {
+				flex: 1;
 			}
 		}
 	}
