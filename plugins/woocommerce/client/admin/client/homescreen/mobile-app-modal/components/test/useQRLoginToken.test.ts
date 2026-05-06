@@ -504,6 +504,10 @@ describe( 'useQRLoginToken', () => {
 			os: 'Android',
 		} );
 		expect( result.current.challengeExpiresAt ).toBe( NOW_SECONDS + 90 );
+		// Once the scan is in we no longer render the QR — clear the
+		// plaintext-bearing qrUrl from React state so an XSS / malicious
+		// extension can't scrape it from the heap for the rest of the flow.
+		expect( result.current.qrUrl ).toBeNull();
 	} );
 
 	/**

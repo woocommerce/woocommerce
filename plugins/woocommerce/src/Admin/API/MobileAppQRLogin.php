@@ -73,6 +73,13 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	const CLAIM_OPTION_PREFIX = '_wc_qr_login_claim_';
 
 	/**
+	 * Scan-claim option prefix. Independent from `CLAIM_OPTION_PREFIX` so the
+	 * scan and exchange mutexes can't deadlock each other; they protect
+	 * different write windows on the same token record.
+	 */
+	const SCAN_CLAIM_OPTION_PREFIX = '_wc_qr_login_scan_claim_';
+
+	/**
 	 * Stable Application Passwords `app_id` for credentials issued by this
 	 * flow. Lets administrators identify QR-issued credentials in the
 	 * Application Passwords screen and revoke them in bulk.
@@ -370,6 +377,11 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
 						),
+						'token_hash' => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
 					),
 				),
 				'schema' => array( $this, 'get_public_item_schema' ),
@@ -525,6 +537,38 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 */
 	private function release_token_exchange_claim( $token_hash ) {
 		delete_option( $this->get_token_claim_key( $token_hash ) );
+	}
+
+	/**
+	 * Atomically claim a token for scan. Mirrors `claim_token_for_exchange()`
+	 * (same `add_option()` unique-constraint mutex, same staleness recovery)
+	 * but uses its own option key so the scan and exchange windows are
+	 * independent.
+	 *
+	 * Without this, two concurrent `/qr-login-scan` requests both pass the
+	 * `state === pending` gate, both write a fresh challenge, and the last
+	 * writer wins — leaving the loser's session_id silently orphaned and
+	 * pointing at the wrong challenge.
+	 *
+	 * @param string $token_hash SHA-256 hash of the plaintext token.
+	 * @param int    $expires_at Unix timestamp when the token expires.
+	 * @return bool True if the claim was acquired.
+	 */
+	private function claim_token_for_scan( $token_hash, $expires_at ) {
+		$claim_key        = self::SCAN_CLAIM_OPTION_PREFIX . $token_hash;
+		$claim_expires_at = max( time() + 30, (int) $expires_at );
+
+		if ( add_option( $claim_key, (string) $claim_expires_at, '', false ) ) {
+			return true;
+		}
+
+		$existing_expires_at = (int) get_option( $claim_key, 0 );
+		if ( $existing_expires_at > 0 && $existing_expires_at <= time() ) {
+			delete_option( $claim_key );
+			return add_option( $claim_key, (string) $claim_expires_at, '', false );
+		}
+
+		return false;
 	}
 
 	/**
@@ -1277,6 +1321,22 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
+		// Atomic mutex on the read-mutate-write window. Without this, two
+		// concurrent scans both pass the state==pending check below and both
+		// write a new challenge — last writer wins, the loser's session_id
+		// is silently orphaned. The state check is kept as defense-in-depth
+		// for any path that bypasses the claim (e.g. the staleness branch).
+		if ( ! $this->claim_token_for_scan(
+			$token_hash,
+			isset( $record['expires_at'] ) ? (int) $record['expires_at'] : time() + self::TOKEN_TTL
+		) ) {
+			return new \WP_Error(
+				'qr_login_already_scanned',
+				__( 'This QR login session is no longer accepting scans.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
 		$current_state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
 		if ( self::STATE_PENDING !== $current_state ) {
 			return new \WP_Error(
@@ -1447,7 +1507,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// symptom we see if the cache pins the first hit.
 		nocache_headers();
 
-		$session_id = (string) $request->get_param( 'session_id' );
+		$session_id     = (string) $request->get_param( 'session_id' );
+		$submitted_hash = (string) $request->get_param( 'token_hash' );
 
 		if ( ! $this->check_session_status_rate_limit( $session_id ) ) {
 			return new \WP_Error(
@@ -1461,6 +1522,18 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		if ( ! is_string( $token_hash ) || '' === $token_hash ) {
 			// Either the session never existed or it has expired. Either way,
 			// surface as expired to the polling app.
+			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
+		}
+
+		// Bind grant delivery to proof of token knowledge: an attacker who
+		// learns the session_id alone (mobile logs, network capture, debug
+		// output) cannot poll for state transitions and walk away with the
+		// `exchange_grant` the moment the merchant approves. The mobile app
+		// already holds the plaintext token from the QR scan — passing
+		// SHA-256(token) on every poll is essentially free for it.
+		// `hash_equals` for constant-time comparison; `expired` opacity so
+		// we never leak whether the session_id is real or not.
+		if ( ! hash_equals( $token_hash, $submitted_hash ) ) {
 			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
 		}
 
