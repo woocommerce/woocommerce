@@ -229,6 +229,29 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_wp_filesystem_direct' returns an instance whose method is 'direct' when used to write to a known-writable temp dir.
+	 */
+	public function test_get_wp_filesystem_direct_writes_through_native_php(): void {
+		$dir  = sys_get_temp_dir() . '/wc-fsutil-write-' . wp_generate_uuid4();
+		wp_mkdir_p( $dir );
+		$this->temp_dirs[] = $dir;
+
+		$path  = $dir . '/sentinel.txt';
+		$value = 'hello-' . wp_generate_uuid4();
+		try {
+			$wp_fs  = FilesystemUtil::get_wp_filesystem_direct();
+			$result = $wp_fs->put_contents( $path, $value );
+		} finally {
+			if ( file_exists( $path ) ) {
+				$this->temp_files[] = $path;
+			}
+		}
+
+		$this->assertTrue( $result );
+		$this->assertSame( $value, file_get_contents( $path ) );
+	}
+
+	/**
 	 * @testdox 'validate_upload_file_path' returns without throwing for a real file inside ABSPATH.
 	 */
 	public function test_validate_upload_file_path_success(): void {

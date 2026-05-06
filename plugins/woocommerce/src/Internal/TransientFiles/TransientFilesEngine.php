@@ -6,6 +6,7 @@ use \DateTime;
 use \Exception;
 use \InvalidArgumentException;
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\TimeUtil;
 
@@ -108,9 +109,10 @@ class TransientFilesEngine implements RegisterHooksInterface {
 				}
 
 				// Create infrastructure to prevent listing the contents of the transient files directory.
-				require_once ABSPATH . 'wp-admin/includes/file.php';
-				\WP_Filesystem();
-				$wp_filesystem = $this->legacy_proxy->get_global( 'wp_filesystem' );
+				// Use a direct filesystem because this directory lives under wp-content/uploads
+				// and is web-server writable; honoring FS_METHOD here is unnecessary and breaks
+				// when FS_METHOD points at an FTP transport without complete credentials.
+				$wp_filesystem = FilesystemUtil::get_wp_filesystem_direct();
 				$wp_filesystem->put_contents( $transient_files_directory . '/.htaccess', 'deny from all' );
 				$wp_filesystem->put_contents( $transient_files_directory . '/index.html', '' );
 
@@ -158,9 +160,9 @@ class TransientFilesEngine implements RegisterHooksInterface {
 		}
 		$filepath = $transient_files_directory . '/' . $filename;
 
-		require_once ABSPATH . 'wp-admin/includes/file.php';
-		\WP_Filesystem();
-		$wp_filesystem = $this->legacy_proxy->get_global( 'wp_filesystem' );
+		// Use a direct filesystem because the transient files directory is inside
+		// wp-content/uploads and is web-server writable. See get_transient_files_directory().
+		$wp_filesystem = FilesystemUtil::get_wp_filesystem_direct();
 		if ( false === $wp_filesystem->put_contents( $filepath, $file_contents ) ) {
 			throw new Exception( "Can't create file: $filepath" );
 		}

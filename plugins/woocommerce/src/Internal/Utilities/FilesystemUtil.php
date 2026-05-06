@@ -51,15 +51,26 @@ class FilesystemUtil {
 	 * sites where FS_METHOD is set to an FTP-based method without complete
 	 * credentials, even though the target paths are directly writable.
 	 *
+	 * Defensive fallback: WP_Filesystem_Direct has shipped with WordPress core
+	 * since 2.5.0, so under normal conditions this method always returns a
+	 * direct instance. If the class file is somehow unavailable (corrupted
+	 * core install, an unusual non-WP runtime, an aggressive opcache eviction)
+	 * or instantiation throws, fall back to {@see self::get_wp_filesystem()}
+	 * with a _doing_it_wrong notice. Callers in the fallback path may still
+	 * fail on misconfigured FS_METHOD setups, but at least the operation gets
+	 * a chance to succeed instead of immediately fataling on a missing class.
+	 *
 	 * @since 10.9.0
 	 *
-	 * @return WP_Filesystem_Direct
+	 * @return WP_Filesystem_Base Normally a WP_Filesystem_Direct instance.
+	 * @throws Exception If both the direct class and the configured FS_METHOD
+	 *                   filesystem fail to initialize (the fallback path).
 	 */
-	public static function get_wp_filesystem_direct(): WP_Filesystem_Direct {
-		static $direct_filesystem = null;
+	public static function get_wp_filesystem_direct(): WP_Filesystem_Base {
+		static $cached_filesystem = null;
 
-		if ( $direct_filesystem instanceof WP_Filesystem_Direct ) {
-			return $direct_filesystem;
+		if ( $cached_filesystem instanceof WP_Filesystem_Base ) {
+			return $cached_filesystem;
 		}
 
 		if ( ! class_exists( 'WP_Filesystem_Base' ) ) {
@@ -69,9 +80,23 @@ class FilesystemUtil {
 			require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
 		}
 
-		$direct_filesystem = new WP_Filesystem_Direct( null );
+		if ( class_exists( 'WP_Filesystem_Direct' ) ) {
+			try {
+				$cached_filesystem = new WP_Filesystem_Direct( null );
+				return $cached_filesystem;
+			} catch ( \Throwable $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- Fall through to the fallback below.
+			}
+		}
 
-		return $direct_filesystem;
+		_doing_it_wrong(
+			__METHOD__,
+			esc_html__( 'WP_Filesystem_Direct could not be loaded. Falling back to the configured FS_METHOD; operations on the uploads directory may fail if FS_METHOD is misconfigured.', 'woocommerce' ),
+			'10.9.0'
+		);
+
+		$cached_filesystem = self::get_wp_filesystem();
+
+		return $cached_filesystem;
 	}
 
 	/**

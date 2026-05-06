@@ -37,6 +37,7 @@ use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register as Download_Directories;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Synchronize as Download_Directories_Sync;
 use Automattic\WooCommerce\Internal\Utilities\DatabaseUtil;
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
 use Automattic\WooCommerce\Utilities\StringUtil;
 use Automattic\WooCommerce\Blocks\Options as BlockOptions;
 use Automattic\WooCommerce\Blocks\Utils\BlockTemplateUtils;
@@ -2834,17 +2835,21 @@ function wc_update_860_remove_recommended_marketing_plugins_transient() {
  * @return void
  */
 function wc_update_870_prevent_listing_of_transient_files_directory() {
-	global $wp_filesystem;
-
 	$default_transient_files_dir = untrailingslashit( wp_upload_dir()['basedir'] ) . '/woocommerce_transient_files';
 	if ( ! is_dir( $default_transient_files_dir ) ) {
 		return;
 	}
 
-	require_once ABSPATH . 'wp-admin/includes/file.php';
-	\WP_Filesystem();
-	$wp_filesystem->put_contents( $default_transient_files_dir . '/.htaccess', 'deny from all' );
-	$wp_filesystem->put_contents( $default_transient_files_dir . '/index.html', '' );
+	// Use a direct filesystem because the transient files directory is inside
+	// wp-content/uploads and is web-server writable; honoring FS_METHOD here is
+	// unnecessary and breaks when FS_METHOD points at an FTP transport without
+	// complete credentials.
+	try {
+		$wp_filesystem = FilesystemUtil::get_wp_filesystem_direct();
+		$wp_filesystem->put_contents( $default_transient_files_dir . '/.htaccess', 'deny from all' );
+		$wp_filesystem->put_contents( $default_transient_files_dir . '/index.html', '' );
+	} catch ( \Exception $exception ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch -- The migration is best-effort; the directory remains usable without the no-listing files.
+	}
 }
 
 /**
