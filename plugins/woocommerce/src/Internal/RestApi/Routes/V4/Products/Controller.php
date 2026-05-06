@@ -2247,10 +2247,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 		if ( $product->is_downloadable() || 'edit' === $context ) {
 			foreach ( $product->get_downloads() as $file_id => $file ) {
 				$downloads[] = array(
-					'id'   => $file_id,
+					'id'                           => $file_id,
 					// MD5 hash.
-					'name' => $file['name'],
-					'file' => $file['file'],
+											'name' => $file['name'],
+					'file'                         => $file['file'],
 				);
 			}
 		}
@@ -2345,7 +2345,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$tags,
 			$exclude_ids,
 			$limit,
-			null // No need to pass the product ID.
+			null
+			// No need to pass the product ID.
 		);
 
 		// When no suggested products are found, return an empty array.
@@ -2369,23 +2370,21 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * @return array Product data to be included in the response.
 	 */
 	protected function prepare_object_for_response_core( $object_data, $request, $context ): array {
-		$data   = parent::prepare_object_for_response_core( $object_data, $request, $context );
-		$fields = $this->get_fields_for_response( $request );
+		$data = parent::prepare_object_for_response_core( $object_data, $request, $context );
 
-		if ( $this->cogs_is_enabled() && in_array( 'cost_of_goods_sold', $fields, true ) ) {
+		if ( $this->cogs_is_enabled() ) {
 			$this->add_cogs_info_to_returned_product_data( $data, $object_data );
 		}
 
-		if ( in_array( 'add_to_cart', $fields, true ) ) {
-			$data['add_to_cart'] = array(
-				'url'         => $object_data->add_to_cart_url(),
-				'description' => $object_data->add_to_cart_description(),
-				'text'        => $object_data->add_to_cart_text(),
-				'single_text' => $object_data->single_add_to_cart_text(),
-			);
-		}
+		$data['add_to_cart'] = array(
+			'url'         => $object_data->add_to_cart_url(),
+			'description' => $object_data->add_to_cart_description(),
+			'text'        => $object_data->add_to_cart_text(),
+			'single_text' => $object_data->single_add_to_cart_text(),
+		);
 
 		$post_type_object = get_post_type_object( 'product' );
+
 		if ( $post_type_object instanceof \WP_Post_Type && ! current_user_can( $post_type_object->cap->read_private_posts ) ) {
 			foreach ( self::SENSITIVE_FIELDS as $field ) {
 				unset( $data[ $field ] );
