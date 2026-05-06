@@ -74,36 +74,6 @@ function unselectFilter( item: ValidFilterOptionItem ) {
 	);
 }
 
-type FilterItem = {
-	label: string;
-	ariaLabel?: string;
-	value: string;
-	selected: boolean;
-	count: number;
-	type: string;
-	attributeQueryType?: 'and' | 'or' | undefined;
-	id?: number;
-	parent?: number;
-	depth?: number;
-};
-
-export type ActiveFilterItem = Pick<
-	FilterItem,
-	'type' | 'value' | 'attributeQueryType'
-> & {
-	activeLabel: string;
-};
-
-export type ProductFiltersContext = {
-	isOverlayOpened: boolean;
-	params: Record< string, string >;
-	activeFilters: ActiveFilterItem[];
-	item: FilterItem;
-	activeLabelTemplate: string;
-	filterType: string;
-	forcePageReload?: boolean | null;
-};
-
 const productFiltersStore = {
 	state: {
 		get params() {
