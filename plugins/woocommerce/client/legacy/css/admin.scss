@@ -3040,14 +3040,14 @@ ul.wc_coupon_list_block {
 			// Update order (DOM-first) renders on the right so it remains the
 			// first tab stop while the destructive action sits on the left.
 			flex-direction: row-reverse;
-			gap: 8px;
+			gap: 16px;
 
 			.button {
 				flex: 1;
 				display: inline-flex;
 				align-items: center;
 				justify-content: center;
-				min-height: 40px;
+				min-height: 36px;
 			}
 		}
 	}
