@@ -5,11 +5,11 @@
 $wp-admin-page-bg: #f0f0f1; // wp-admin body background grey
 $wp-admin-border: #dcdcde; // wp-admin chrome border colour
 
-// Activity-panel tabs are icon-only across the floating header — labels
-// ("Activity", "Finish setup", etc.) are still in the DOM for screen readers
-// but visually hidden so the right-side chrome reads as infrastructure
-// rather than content.
-.woocommerce-layout__activity-panel-tab-title {
+// Standard visually-hidden pattern — keeps the element in the layout tree
+// (so jQuery delegated handlers still fire on it) but moves it off-screen
+// and clips its rendered area to nothing. Used twice in this file for the
+// activity-panel tab title spans and the wp-admin meta-toggle wraps.
+@mixin visually-hidden {
 	position: absolute;
 	width: 1px;
 	height: 1px;
@@ -20,6 +20,14 @@ $wp-admin-border: #dcdcde; // wp-admin chrome border colour
 	clip: rect(0 0 0 0);
 	clip-path: inset(50%);
 	white-space: nowrap;
+}
+
+// Activity-panel tabs are icon-only across the floating header — labels
+// ("Activity", "Finish setup", etc.) are still in the DOM for screen readers
+// but visually hidden so the right-side chrome reads as infrastructure
+// rather than content.
+.woocommerce-layout__activity-panel-tab-title {
+	@include visually-hidden;
 }
 
 // Hide ONLY the two standard wp-admin meta-toggle wraps (Screen Options +
@@ -40,16 +48,7 @@ $wp-admin-border: #dcdcde; // wp-admin chrome border colour
 body.woocommerce_page_wc-admin:has(.woocommerce-layout__header-meta-icon) {
 	#screen-options-link-wrap,
 	#contextual-help-link-wrap {
-		position: absolute;
-		width: 1px;
-		height: 1px;
-		margin: -1px;
-		padding: 0;
-		border: 0;
-		overflow: hidden;
-		clip: rect(0 0 0 0);
-		clip-path: inset(50%);
-		white-space: nowrap;
+		@include visually-hidden;
 	}
 }
 
