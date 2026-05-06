@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix "Action" webhook topic not saving when a non-WooCommerce action hook (e.g. `wp_insert_comment`) is used.
