@@ -209,7 +209,8 @@ export default function ProductList( { className }: ProductListProps ) {
 		[ records ]
 	);
 	const getItemParentId = useCallback(
-		( item: ProductEntityRecord ) => item.parent_id,
+		( item: ProductEntityRecord ) =>
+			item.parent_id && item.parent_id > 0 ? item.parent_id : undefined,
 		[]
 	);
 
