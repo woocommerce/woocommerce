@@ -196,6 +196,7 @@ export const BaseHeader = ( {
 	// state updates only happen *after* a click has fully settled — never during.
 	useEffect( () => {
 		if ( ! hasScreenOptions && ! hasContextualHelp ) {
+			setActiveMetaIcon( null );
 			return;
 		}
 		const screenOptBtn =
@@ -212,6 +213,7 @@ export const BaseHeader = ( {
 				screenOpen ? 'screen-options' : helpOpen ? 'help' : null
 			);
 		};
+		sync();
 		const observer = new MutationObserver( sync );
 		const opts = {
 			attributes: true,
