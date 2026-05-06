@@ -83,7 +83,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					<td><select id="woocommerce-importer-character-encoding" name="character_encoding">
 							<option value="" selected><?php esc_html_e( 'Autodetect', 'woocommerce' ); ?></option>
 							<?php
-							$encodings = mb_list_encodings();
+							$encodings = function_exists( 'mb_list_encodings' ) ? mb_list_encodings() : array();
 							sort( $encodings, SORT_NATURAL );
 							foreach ( $encodings as $encoding ) {
 								echo '<option>' . esc_html( $encoding ) . '</option>';
