@@ -62,9 +62,9 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 		} ),
 		style: {
 			'--wc-product-filters-background-color':
-				colors.backgroundColor || globalColors.background,
+				colors.backgroundColor || globalColors.background || undefined,
 			'--wc-product-filters-text-color':
-				colors.textColor || globalColors.text,
+				colors.textColor || globalColors.text || undefined,
 			'--wc-product-filter-block-spacing': blockGap
 				? presetToCssVariable( blockGap )
 				: undefined,

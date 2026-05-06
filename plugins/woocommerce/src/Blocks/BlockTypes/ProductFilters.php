@@ -37,7 +37,6 @@ class ProductFilters extends AbstractBlock {
 	 *                           not in the post content on editor load.
 	 */
 	protected function enqueue_data( array $attributes = array() ) {
-		global $pagenow;
 		parent::enqueue_data( $attributes );
 
 		$this->asset_data_registry->add( 'globalStylesColors', wp_get_global_styles( array( 'color' ) ) );
