@@ -220,7 +220,9 @@ class Utils {
 
 	/**
 	 * Whether a method's shape matches the authorization-attribute contract:
-	 * public, non-static, returns bool, takes 0 parameters or 1 nullable parameter.
+	 * public, non-static, returns bool, and takes either 0 parameters or
+	 * exactly 1 typed, non-nullable parameter (the principal — anonymous
+	 * requests use a sentinel non-null principal, so attributes never see null).
 	 *
 	 * Mirrors the build-time `ApiBuilder::validate_attribute_authorize_shape()`
 	 * check so the runtime helper recognises the same set of attributes ApiBuilder
