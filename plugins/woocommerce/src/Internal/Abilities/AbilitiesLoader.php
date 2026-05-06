@@ -7,6 +7,14 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -22,18 +30,19 @@ class AbilitiesLoader {
 	private static bool $initialized = false;
 
 	/**
-	 * Directory containing bundled domain ability definitions.
+	 * Canonical WooCommerce domain ability definition classes.
 	 *
-	 * @var string
+	 * @var array<int, class-string>
 	 */
-	private const DOMAIN_ABILITIES_DIRECTORY = __DIR__ . '/Domain';
-
-	/**
-	 * Namespace containing bundled domain ability definitions.
-	 *
-	 * @var string
-	 */
-	private const DOMAIN_ABILITIES_NAMESPACE = __NAMESPACE__ . '\\Domain\\';
+	private const CORE_ABILITY_DEFINITION_CLASSES = array(
+		OrdersQuery::class,
+		OrderAddNote::class,
+		OrderUpdateStatus::class,
+		ProductsQuery::class,
+		ProductCreate::class,
+		ProductDelete::class,
+		ProductUpdate::class,
+	);
 
 	/**
 	 * Initialize ability registration hooks.
@@ -100,8 +109,6 @@ class AbilitiesLoader {
 	 * @return array<int, class-string>
 	 */
 	private static function get_ability_definition_classes(): array {
-		$classes = self::discover_core_ability_definition_classes();
-
 		/**
 		 * Filter WooCommerce ability definition classes.
 		 *
@@ -114,52 +121,12 @@ class AbilitiesLoader {
 		 *
 		 * @param array<int, class-string> $classes Ability definition class names.
 		 */
-		$classes = apply_filters( 'woocommerce_ability_definition_classes', $classes );
+		$classes = apply_filters( 'woocommerce_ability_definition_classes', self::CORE_ABILITY_DEFINITION_CLASSES );
 
 		if ( ! is_array( $classes ) ) {
 			return array();
 		}
 
 		return array_values( array_unique( array_filter( $classes, 'is_string' ) ) );
-	}
-
-	/**
-	 * Discover bundled WooCommerce ability definition classes from the Domain directory.
-	 *
-	 * @return array<int, class-string>
-	 */
-	private static function discover_core_ability_definition_classes(): array {
-		if ( ! is_dir( self::DOMAIN_ABILITIES_DIRECTORY ) ) {
-			return array();
-		}
-
-		$classes  = array();
-		$iterator = new \RecursiveIteratorIterator(
-			new \RecursiveDirectoryIterator(
-				self::DOMAIN_ABILITIES_DIRECTORY,
-				\FilesystemIterator::SKIP_DOTS
-			)
-		);
-
-		foreach ( $iterator as $file ) {
-			if ( ! $file instanceof \SplFileInfo || 'php' !== $file->getExtension() ) {
-				continue;
-			}
-
-			$relative_path = substr( $file->getPathname(), strlen( self::DOMAIN_ABILITIES_DIRECTORY ) + 1 );
-			$class_name    = self::DOMAIN_ABILITIES_NAMESPACE . str_replace(
-				DIRECTORY_SEPARATOR,
-				'\\',
-				substr( $relative_path, 0, -4 )
-			);
-
-			if ( class_exists( $class_name ) && is_a( $class_name, AbilityDefinition::class, true ) ) {
-				$classes[] = $class_name;
-			}
-		}
-
-		sort( $classes );
-
-		return $classes;
 	}
 }
