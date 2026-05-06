@@ -548,12 +548,11 @@ class DomainAbilities {
 	/**
 	 * Check product creation access.
 	 *
-	 * @param mixed $input Ability input.
 	 * @return bool
 	 *
 	 * @since 10.9.0
 	 */
-	public static function can_create_product( $input = array() ): bool {
+	public static function can_create_product(): bool {
 		return wc_rest_check_post_permissions( 'product', 'create' );
 	}
 
