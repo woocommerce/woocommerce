@@ -16,11 +16,7 @@
 		var inputs = Array.prototype.slice.call(
 			container.querySelectorAll( '.woocommerce-star-rating__input' )
 		);
-		if ( ! inputs.length ) {
-			return;
-		}
-
-		var captionId = container.getAttribute( 'data-caption-id' );
+		var captionId = container.getAttribute( 'aria-describedby' );
 		var caption = captionId ? document.getElementById( captionId ) : null;
 
 		function syncCaption() {

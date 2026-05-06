@@ -411,33 +411,19 @@ class Endpoint {
 	 * `assets/{js|css}/` by the classic-assets pipeline.
 	 */
 	private function enqueue_assets(): void {
-		$plugin_url  = untrailingslashit( plugins_url( '', WC_PLUGIN_FILE ) );
-		$suffix      = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
-		$style_path  = '/assets/css/order-review.css';
-		$script_path = '/assets/js/frontend/order-review' . $suffix . '.js';
+		$plugin_url = untrailingslashit( plugins_url( '', WC_PLUGIN_FILE ) );
+		$suffix     = defined( 'SCRIPT_DEBUG' ) && SCRIPT_DEBUG ? '' : '.min';
+		$version    = Constants::get_constant( 'WC_VERSION' );
+		$asset_url  = static function ( string $path ) use ( $plugin_url ): string {
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented in includes/class-wc-frontend-scripts.php.
+			return (string) apply_filters( 'woocommerce_get_asset_url', $plugin_url . $path, $path );
+		};
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented in includes/class-wc-frontend-scripts.php.
-		$style_url = (string) apply_filters( 'woocommerce_get_asset_url', $plugin_url . $style_path, $style_path );
-
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented in includes/class-wc-frontend-scripts.php.
-		$script_url = (string) apply_filters( 'woocommerce_get_asset_url', $plugin_url . $script_path, $script_path );
-
-		wp_enqueue_style(
-			'wc-order-review',
-			$style_url,
-			array(),
-			Constants::get_constant( 'WC_VERSION' )
-		);
+		wp_enqueue_style( 'wc-order-review', $asset_url( '/assets/css/order-review.css' ), array(), $version );
 		// Tell WP to swap to the *-rtl.css variant on RTL sites.
 		wp_style_add_data( 'wc-order-review', 'rtl', 'replace' );
 
-		wp_enqueue_script(
-			'wc-order-review',
-			$script_url,
-			array(),
-			Constants::get_constant( 'WC_VERSION' ),
-			true
-		);
+		wp_enqueue_script( 'wc-order-review', $asset_url( '/assets/js/frontend/order-review' . $suffix . '.js' ), array(), $version, true );
 	}
 
 	/**

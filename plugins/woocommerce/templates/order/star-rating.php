@@ -30,7 +30,6 @@ $caption_id = $id_prefix . '-caption';
 	role="radiogroup"
 	aria-labelledby="<?php echo esc_attr( $label_id ); ?>"
 	aria-describedby="<?php echo esc_attr( $caption_id ); ?>"
-	data-caption-id="<?php echo esc_attr( $caption_id ); ?>"
 >
 	<?php foreach ( $labels as $value => $label ) : ?>
 		<?php

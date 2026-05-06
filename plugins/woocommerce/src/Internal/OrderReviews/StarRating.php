@@ -42,7 +42,6 @@ class StarRating {
 		$name      = (string) ( $args['name'] ?? '' );
 		$id_prefix = (string) ( $args['id_prefix'] ?? '' );
 		$label_id  = (string) ( $args['label_id'] ?? '' );
-		$selected  = isset( $args['selected'] ) ? (int) $args['selected'] : 0;
 
 		if ( '' === $name || '' === $id_prefix || '' === $label_id ) {
 			return '';
@@ -55,7 +54,7 @@ class StarRating {
 				'name'      => $name,
 				'id_prefix' => $id_prefix,
 				'label_id'  => $label_id,
-				'selected'  => $selected,
+				'selected'  => (int) ( $args['selected'] ?? 0 ),
 				'labels'    => self::get_labels(),
 			)
 		);
@@ -89,19 +88,7 @@ class StarRating {
 		 */
 		$filtered = (array) apply_filters( 'woocommerce_review_order_rating_labels', $labels );
 
-		// Guarantee 1-5 keys are present even after a buggy filter.
-		foreach ( array( 1, 2, 3, 4, 5 ) as $value ) {
-			if ( ! isset( $filtered[ $value ] ) || ! is_string( $filtered[ $value ] ) || '' === $filtered[ $value ] ) {
-				$filtered[ $value ] = $labels[ $value ];
-			}
-		}
-
-		return array(
-			1 => $filtered[1],
-			2 => $filtered[2],
-			3 => $filtered[3],
-			4 => $filtered[4],
-			5 => $filtered[5],
-		);
+		// Keep only known 1-5 keys; fall back to defaults for any the filter dropped.
+		return array_replace( $labels, array_intersect_key( $filtered, $labels ) );
 	}
 }
