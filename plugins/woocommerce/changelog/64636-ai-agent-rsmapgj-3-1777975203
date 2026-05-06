@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve an explicitly empty 'alt' attribute passed to WC_Product::get_image() so decorative product images can render alt="" per W3C accessibility guidance.
