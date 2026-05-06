@@ -151,13 +151,30 @@ class Utils {
 		$direct = self::collect_authorization_instances( $ref );
 		$usages = $direct;
 		if ( empty( $usages ) ) {
-			$sources = array_merge(
+			// No direct attribute — collect from the entire ancestor tree:
+			// the parent chain plus each ancestor's traits and interfaces
+			// (recursively). All inherited sources contribute as peers; the
+			// only thing direct attributes shadow is the inherited tree as a
+			// whole. Mirrors
+			// {@see \Automattic\WooCommerce\Internal\Api\DesignTime\Scripts\ApiBuilder::resolve_authorization()}.
+			$visited = array();
+			$stack   = array_merge(
 				$ref->getParentClass() ? array( $ref->getParentClass() ) : array(),
 				$ref->getTraits(),
 				$ref->getInterfaces(),
 			);
-			foreach ( $sources as $source ) {
-				$usages = array_merge( $usages, self::collect_authorization_instances( $source ) );
+			while ( ! empty( $stack ) ) {
+				$source = array_shift( $stack );
+				$name   = $source->getName();
+				if ( in_array( $name, $visited, true ) ) {
+					continue;
+				}
+				$visited[] = $name;
+				$usages    = array_merge( $usages, self::collect_authorization_instances( $source ) );
+				if ( false !== $source->getParentClass() ) {
+					$stack[] = $source->getParentClass();
+				}
+				$stack = array_merge( $stack, $source->getTraits(), $source->getInterfaces() );
 			}
 		}
 

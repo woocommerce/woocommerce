@@ -18,6 +18,7 @@ use Automattic\WooCommerce\Api\Attributes\RequiredCapability;
 use Automattic\WooCommerce\Api\Attributes\ReturnType;
 use Automattic\WooCommerce\Api\Attributes\ScalarType;
 use Automattic\WooCommerce\Api\Attributes\Unroll;
+use Automattic\WooCommerce\Api\Infrastructure\Principal;
 
 /**
  * Scans the public API classes and generates the GraphQL schema and resolver code.
@@ -182,14 +183,16 @@ class ApiBuilder {
 	/**
 	 * Principal type captured from the detected PrincipalResolver's `resolve_principal()` return type.
 	 *
-	 * The non-null portion of the return type — `'object'` or a class FQCN. Used to type-check
-	 * `_principal` parameters across commands and authorization attributes. `'object'` when no
-	 * PrincipalResolver was detected (the default WP-user resolver returns `?\WP_User`, but plugins
-	 * with no convention class don't have a registered principal type).
+	 * Either `'object'` (when a plugin's resolver explicitly returns `object`) or a class FQCN.
+	 * Used to type-check `_principal` parameters across commands and authorization attributes.
+	 * Defaults to {@see Principal} — the principal class shipped by core that the controller's
+	 * fallback returns when no plugin `PrincipalResolver` is detected — so the build-time check
+	 * matches the runtime payload (a `_principal: WP_User` parameter would otherwise validate
+	 * here but `TypeError` at runtime).
 	 *
 	 * @var string
 	 */
-	private string $principal_type = 'object';
+	private string $principal_type = Principal::class;
 
 	/**
 	 * Map of FQCN => `['takes_principal' => bool]` for every autodiscovered authorization attribute.
@@ -887,14 +890,30 @@ class ApiBuilder {
 
 		$usages = $direct_usages;
 		if ( empty( $usages ) ) {
-			// No direct attribute — inherit from parents, traits, and interfaces.
-			$sources = array_merge(
+			// No direct attribute — collect from the entire ancestor tree:
+			// the parent chain plus each ancestor's traits and interfaces
+			// (recursively). All inherited sources contribute as peers; the
+			// only thing direct attributes shadow is the inherited tree as a
+			// whole. A visited-set guards against trait diamonds and
+			// interface inheritance loops.
+			$visited = array();
+			$stack   = array_merge(
 				$ref->getParentClass() ? array( $ref->getParentClass() ) : array(),
 				$ref->getTraits(),
 				$ref->getInterfaces(),
 			);
-			foreach ( $sources as $source ) {
-				$usages = array_merge( $usages, $this->collect_authorization_usages( $source ) );
+			while ( ! empty( $stack ) ) {
+				$source = array_shift( $stack );
+				$name   = $source->getName();
+				if ( in_array( $name, $visited, true ) ) {
+					continue;
+				}
+				$visited[] = $name;
+				$usages    = array_merge( $usages, $this->collect_authorization_usages( $source ) );
+				if ( false !== $source->getParentClass() ) {
+					$stack[] = $source->getParentClass();
+				}
+				$stack = array_merge( $stack, $source->getTraits(), $source->getInterfaces() );
 			}
 		}
 
@@ -1627,10 +1646,10 @@ class ApiBuilder {
 	 * Whether a declared `_principal` type is compatible with the registered principal type.
 	 *
 	 * Compatibility rules:
-	 *  - `object` is always accepted (catch-all supertype).
-	 *  - When no PrincipalResolver was registered, principal_type defaults to `object`;
-	 *    any object-like class name is accepted (the runtime type is whatever the
-	 *    fallback {@see \Automattic\WooCommerce\Api\Infrastructure\Principal} resolves to).
+	 *  - `object` (the declared parameter type) is always accepted (catch-all supertype).
+	 *  - When the registered principal type is `object` (the plugin's resolver explicitly
+	 *    returned `object`), any object-like class name is accepted; the runtime type is
+	 *    the plugin's responsibility.
 	 *  - Otherwise the declared type must equal the registered principal type. Inheritance-
 	 *    based supertype matching isn't enforced at build time because the principal class
 	 *    (e.g. WP_User) typically isn't autoloadable in the build environment; users that

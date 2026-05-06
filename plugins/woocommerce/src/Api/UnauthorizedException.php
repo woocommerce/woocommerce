@@ -23,7 +23,7 @@ class UnauthorizedException extends ApiException {
 	 * @param ?\Throwable $previous   The previous throwable for chaining.
 	 */
 	public function __construct(
-		string $message = 'You do not have permission to perform this action.',
+		string $message = 'Authentication required.',
 		array $extensions = array(),
 		?\Throwable $previous = null,
 	) {

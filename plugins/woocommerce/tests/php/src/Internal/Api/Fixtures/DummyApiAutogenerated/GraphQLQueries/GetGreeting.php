@@ -56,7 +56,7 @@ class GetGreeting {
 	 * (in that case authorize() on the command is the sole guard, and that
 	 * method should be consulted instead).
 	 */
-	public static function compute_preauthorized( object $principal ): bool {
+	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
 		return true;
 	}
 }
