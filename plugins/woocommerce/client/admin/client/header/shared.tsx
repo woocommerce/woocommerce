@@ -122,16 +122,28 @@ export const BaseHeader = ( {
 	// On embedded pages, suppress the floating-header <h1> only when wp-admin
 	// actually rendered its own <h1> (post-type screens like Edit Product / Edit
 	// Order). On Woo-custom admin pages (Settings, etc.) wp-admin doesn't render
-	// an h1, so the floating header is the only title and must stay. Detect at
-	// mount; the wp-admin <h1> is server-rendered and present before React hydrates.
-	const [ hasWpAdminH1, setHasWpAdminH1 ] = useState( false );
-	// Detect wp-admin's Screen Options + Help button wraps so we only render
-	// the corresponding icons when the underlying entry points exist. (Settings
-	// removes help tabs in PHP; Woo-React-only pages may not have them.)
-	const [ hasScreenOptions, setHasScreenOptions ] = useState( false );
-	const [ hasContextualHelp, setHasContextualHelp ] = useState( false );
-	// Re-run on `query` change so detection stays correct if BaseHeader persists
-	// across client-side route transitions (Home → Settings → Customers, etc.).
+	// an h1, so the floating header is the only title and must stay.
+	//
+	// Lazy initial state reads the DOM synchronously on first render so we
+	// don't get a one-frame duplicate-title flash before useEffect commits.
+	// wp-admin's <h1> + meta-link wraps are server-rendered before React
+	// hydrates, so this is safe. The useEffect below still re-runs on `query`
+	// changes if BaseHeader persists across client-side route transitions.
+	const [ hasWpAdminH1, setHasWpAdminH1 ] = useState( () =>
+		typeof document !== 'undefined'
+			? !! document.querySelector( '.wrap > h1.wp-heading-inline' )
+			: false
+	);
+	const [ hasScreenOptions, setHasScreenOptions ] = useState( () =>
+		typeof document !== 'undefined'
+			? !! document.querySelector( '#screen-options-link-wrap' )
+			: false
+	);
+	const [ hasContextualHelp, setHasContextualHelp ] = useState( () =>
+		typeof document !== 'undefined'
+			? !! document.querySelector( '#contextual-help-link-wrap' )
+			: false
+	);
 	useEffect( () => {
 		setHasWpAdminH1(
 			!! document.querySelector( '.wrap > h1.wp-heading-inline' )
@@ -288,14 +300,12 @@ export const BaseHeader = ( {
 						) }
 						as="h1"
 					>
-						{ decodeEntities(
-							hasPageTitleFills ? (
-								<WooHeaderPageTitle.Slot
-									fillProps={ { isEmbedded, query } }
-								/>
-							) : (
-								getPageTitle( sections )
-							)
+						{ hasPageTitleFills ? (
+							<WooHeaderPageTitle.Slot
+								fillProps={ { isEmbedded, query } }
+							/>
+						) : (
+							decodeEntities( getPageTitle( sections ) )
 						) }
 					</Text>
 				) : (
