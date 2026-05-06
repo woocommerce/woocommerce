@@ -23,13 +23,6 @@ final class ShopperCollection extends AbstractBlock {
 	protected $block_name = 'shopper-collection';
 
 	/**
-	 * Memoised placeholder image URL — looked up at most once per request.
-	 *
-	 * @var string|null
-	 */
-	private ?string $placeholder_img_src = null;
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array     $attributes Block attributes.
@@ -238,10 +231,15 @@ final class ShopperCollection extends AbstractBlock {
 				// Single anchor for both live products and tombstones. For
 				// tombstones `permalink` is empty, so iAPI removes the `href`
 				// attribute and the anchor degrades to non-clickable.
+				// Image and price markup come pre-formatted from the schema
+				// (`image_html`, `price_html`) — `data-wp-watch` callbacks
+				// swap each slot's innerHTML on hydrate / state change so we
+				// don't reimplement WC's `wc_price` / `wp_get_attachment_image`
+				// in JS.
 				?>
 				<div class="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
 					<a data-wp-bind--href="context.listItem.permalink">
-						<img data-wp-bind--src="state.currentItemThumbnail" data-wp-bind--alt="state.currentItemAlt" />
+						<span class="wc-block-shopper-collection-item__image-slot" data-wp-context='{"htmlField":"image_html"}' data-wp-watch="callbacks.updateInnerHtml"></span>
 					</a>
 					<div class="wc-block-components-product-image__inner-container">
 						<button
@@ -258,9 +256,7 @@ final class ShopperCollection extends AbstractBlock {
 					<a data-wp-bind--href="context.listItem.permalink" data-wp-text="state.currentItemDisplayName"></a>
 				</h2>
 				<span class="wc-block-shopper-collection-item__variation" data-wp-bind--hidden="!state.currentItemVariationLabel" data-wp-text="state.currentItemVariationLabel"></span>
-				<div class="price wc-block-components-product-price has-text-align-center has-small-font-size" data-wp-bind--hidden="state.isPriceHidden">
-					<span class="wc-block-components-product-price__value" data-wp-text="state.currentItemFormattedPrice"></span>
-				</div>
+				<div class="price wc-block-components-product-price has-text-align-center has-small-font-size" data-wp-bind--hidden="state.isPriceHidden" data-wp-context='{"htmlField":"price_html"}' data-wp-watch="callbacks.updateInnerHtml"></div>
 				<span class="wc-block-shopper-collection-item__quantity" data-wp-text="state.currentItemQuantityLabel"></span>
 				<?php if ( ! empty( $variation['showAction'] ) ) : ?>
 					<div class="wp-block-button wc-block-components-product-button" data-wp-bind--hidden="state.isMoveToCartHidden">
@@ -307,14 +303,15 @@ final class ShopperCollection extends AbstractBlock {
 		$name            = (string) ( $item['name'] ?? '' );
 		$permalink       = (string) ( $item['permalink'] ?? '' );
 		$quantity        = (int) ( $item['quantity'] ?? 1 );
-		$thumbnail       = $this->get_item_thumbnail( $item );
 		$alt             = html_entity_decode( $name, ENT_QUOTES, 'UTF-8' );
-		$prices          = $product_exists && ! empty( $item['prices'] ) && is_array( $item['prices'] ) ? $item['prices'] : null;
-		$formatted_price = $prices ? $this->format_price_with_currency( $prices ) : '';
+		$image_html      = (string) ( $item['image_html'] ?? '' );
+		$price_html      = (string) ( $item['price_html'] ?? '' );
 		$variation_label = $this->get_variation_label( $item );
 
 		$quantity_label = sprintf( $variation['quantityLabelTemplate'], $quantity );
 		$remove_aria    = sprintf( $variation['removeLabelTemplate'], $alt );
+
+		$is_price_hidden = '' === $price_html;
 
 		$item_class = sprintf(
 			'wc-block-shopper-collection-item wc-block-shopper-collection-item--%s',
@@ -334,15 +331,25 @@ final class ShopperCollection extends AbstractBlock {
 			<?php echo wp_interactivity_data_wp_context( $context ); ?>
 		>
 			<?php
-			// Emit the same single-anchor structure as the `<template>`
-			// so iAPI hydration is a no-op diff. For tombstones the
-			// href is omitted entirely (the anchor degrades to
-			// non-clickable rather than self-linking back to the
-			// current page).
+			// Emit the same structure as the `<template>` so iAPI
+			// hydration is a no-op diff. For tombstones the anchor's
+			// href is omitted (the anchor degrades to non-clickable
+			// rather than self-linking back to the current page).
+			// Image and price markup come pre-formatted from the
+			// schema (`image_html`, `price_html`) and are echoed into
+			// the watcher slots — the JS-side `updateInnerHtml`
+			// callback takes over after hydration to swap the slot's
+			// innerHTML when the row's context.listItem changes.
 			?>
 			<div class="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
 				<a <?php echo $product_exists && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink">
-					<img src="<?php echo esc_url( $thumbnail ); ?>" alt="<?php echo esc_attr( $alt ); ?>" data-wp-bind--src="state.currentItemThumbnail" data-wp-bind--alt="state.currentItemAlt" />
+					<span
+						class="wc-block-shopper-collection-item__image-slot"
+						data-wp-context='{"htmlField":"image_html"}'
+						data-wp-watch="callbacks.updateInnerHtml"
+					>
+						<?php echo wp_kses_post( $image_html ); ?>
+					</span>
 				</a>
 				<div class="wc-block-components-product-image__inner-container">
 					<button
@@ -370,11 +377,19 @@ final class ShopperCollection extends AbstractBlock {
 			<?php if ( '' !== $variation_label ) : ?>
 				<span class="wc-block-shopper-collection-item__variation"><?php echo esc_html( $variation_label ); ?></span>
 			<?php endif; ?>
-			<?php if ( null !== $prices ) : ?>
-				<div class="price wc-block-components-product-price has-text-align-center has-small-font-size">
-					<span class="wc-block-components-product-price__value"><?php echo esc_html( $formatted_price ); ?></span>
-				</div>
-			<?php endif; ?>
+			<div
+				class="price wc-block-components-product-price has-text-align-center has-small-font-size"
+				data-wp-bind--hidden="state.isPriceHidden"
+				data-wp-context='{"htmlField":"price_html"}'
+				data-wp-watch="callbacks.updateInnerHtml"
+				<?php
+				if ( $is_price_hidden ) {
+					echo 'hidden';
+				}
+				?>
+			>
+				<?php echo wp_kses_post( $price_html ); ?>
+			</div>
 			<span class="wc-block-shopper-collection-item__quantity"><?php echo esc_html( $quantity_label ); ?></span>
 			<?php if ( ! empty( $variation['showAction'] ) ) : ?>
 				<?php
@@ -441,25 +456,6 @@ final class ShopperCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Resolve the thumbnail URL for an item, falling back to the
-	 * configured placeholder when no image is available (live products
-	 * with no image and tombstones both use the placeholder).
-	 *
-	 * @param array<string, mixed> $item Schema-shape item.
-	 * @return string
-	 */
-	private function get_item_thumbnail( array $item ): string {
-		$images = $item['images'] ?? array();
-		if ( is_array( $images ) && isset( $images[0]['thumbnail'] ) && is_string( $images[0]['thumbnail'] ) && '' !== $images[0]['thumbnail'] ) {
-			return $images[0]['thumbnail'];
-		}
-		if ( null === $this->placeholder_img_src ) {
-			$this->placeholder_img_src = (string) wc_placeholder_img_src( 'woocommerce_thumbnail' );
-		}
-		return $this->placeholder_img_src;
-	}
-
-	/**
 	 * Build a comma-separated variation label like "Color: Blue, Size: M".
 	 *
 	 * @param array<string, mixed> $item Schema-shape item.
@@ -483,46 +479,6 @@ final class ShopperCollection extends AbstractBlock {
 			$parts[] = $attribute . ': ' . $value;
 		}
 		return implode( ', ', $parts );
-	}
-
-	/**
-	 * Format a schema `prices` object the same way the JS-side
-	 * `formatPriceWithCurrency` does, so SSR output matches what the
-	 * client would render after hydration.
-	 *
-	 * @param array<string, mixed> $prices Schema `prices` object.
-	 * @return string
-	 */
-	private function format_price_with_currency( array $prices ): string {
-		$price_str = isset( $prices['price'] ) ? (string) $prices['price'] : '';
-		if ( '' === $price_str ) {
-			return '';
-		}
-
-		$minor_unit       = isset( $prices['currency_minor_unit'] ) && is_int( $prices['currency_minor_unit'] ) ? $prices['currency_minor_unit'] : 0;
-		$prefix           = isset( $prices['currency_prefix'] ) ? (string) $prices['currency_prefix'] : '';
-		$suffix           = isset( $prices['currency_suffix'] ) ? (string) $prices['currency_suffix'] : '';
-		$decimal_sep      = isset( $prices['currency_decimal_separator'] ) ? (string) $prices['currency_decimal_separator'] : '.';
-		$thousand_sep     = isset( $prices['currency_thousand_separator'] ) ? (string) $prices['currency_thousand_separator'] : ',';
-		$price_int        = (int) $price_str;
-		$divisor          = $minor_unit > 0 ? (int) pow( 10, $minor_unit ) : 1;
-		$decimal_value    = $minor_unit > 0 ? $price_int / $divisor : (float) $price_int;
-		$as_string        = $minor_unit > 0
-			? number_format( $decimal_value, $minor_unit, '.', '' )
-			: (string) $price_int;
-		$parts            = explode( '.', $as_string );
-		$before           = $parts[0];
-		$after            = $parts[1] ?? '';
-		$before_separated = (string) preg_replace( '/\B(?=(\d{3})+(?!\d))/', $thousand_sep, $before );
-
-		$decimal_part = '';
-		if ( '' !== $after ) {
-			$decimal_part = $decimal_sep . str_pad( $after, $minor_unit, '0' );
-		} elseif ( $minor_unit > 0 ) {
-			$decimal_part = $decimal_sep . str_repeat( '0', $minor_unit );
-		}
-
-		return html_entity_decode( $prefix . $before_separated . $decimal_part . $suffix, ENT_QUOTES, 'UTF-8' );
 	}
 
 	/**

@@ -48,6 +48,8 @@ export type RawShopperListItem = {
 	images: ShopperListItemImage[];
 	variation: ShopperListItemVariation[];
 	prices: ShopperListItemPrices | null;
+	price_html: string;
+	image_html: string;
 	date_added_gmt: string;
 };
 

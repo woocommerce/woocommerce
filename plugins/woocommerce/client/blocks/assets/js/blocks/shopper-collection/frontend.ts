@@ -4,6 +4,7 @@
 import {
 	getConfig,
 	getContext,
+	getElement,
 	store,
 	type AsyncAction,
 } from '@wordpress/interactivity';
@@ -11,21 +12,10 @@ import '@woocommerce/stores/woocommerce/shopper-lists';
 import '@woocommerce/stores/woocommerce/cart';
 import type {
 	RawShopperListItem,
-	ShopperListItemPrices,
 	Store as ShopperListsStore,
 } from '@woocommerce/stores/woocommerce/shopper-lists';
-import type {
-	Store as WooCommerce,
-	WooCommerceConfig,
-} from '@woocommerce/stores/woocommerce/cart';
-
-/**
- * Internal dependencies
- */
-import {
-	formatPriceWithCurrency,
-	normalizeCurrencyResponse,
-} from '../../../../packages/prices/utils/currency';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import { sanitizeHTML } from '@woocommerce/sanitize';
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
@@ -33,13 +23,12 @@ const universalLock =
 type ShopperCollectionConfig = {
 	quantityLabelTemplate: string;
 	removeLabelTemplate: string;
-	moveToCartLabel: string;
-	emptyMessage: string;
 };
 
 type BlockContext = {
 	listSlug: string;
 	listItem?: RawShopperListItem;
+	htmlField?: 'price_html' | 'image_html';
 };
 
 type BlockStore = {
@@ -50,19 +39,57 @@ type BlockStore = {
 		isEmpty: boolean;
 		isMoveToCartHidden: boolean;
 		isPriceHidden: boolean;
-		currentItemThumbnail: string;
-		currentItemAlt: string;
 		currentItemDisplayName: string;
 		currentItemQuantityLabel: string;
 		currentItemRemoveLabel: string;
-		currentItemFormattedPrice: string;
 		currentItemVariationLabel: string;
 	};
 	actions: {
 		onClickRemove: () => Generator< unknown, void >;
 		onClickMoveToCart: () => Generator< unknown, void >;
 	};
+	callbacks: {
+		updateInnerHtml: () => void;
+	};
 };
+
+// Allow-list for sanitizing the schema's preformatted strings on innerHTML
+// swap. Covers what `wc_price` (sale/discount markup, currency symbol) and
+// `wp_get_attachment_image` / `wc_placeholder_img` emit (responsive image
+// + dimensions + lazy loading).
+const ALLOWED_TAGS = [
+	'a',
+	'b',
+	'em',
+	'i',
+	'strong',
+	'p',
+	'br',
+	'span',
+	'bdi',
+	'del',
+	'ins',
+	'img',
+	'picture',
+	'source',
+];
+const ALLOWED_ATTR = [
+	'class',
+	'target',
+	'href',
+	'rel',
+	'name',
+	'download',
+	'aria-hidden',
+	'src',
+	'srcset',
+	'sizes',
+	'alt',
+	'width',
+	'height',
+	'loading',
+	'decoding',
+];
 
 const { state: shopperListsState, actions: shopperListsActions } =
 	store< ShopperListsStore >(
@@ -77,24 +104,10 @@ const { state: cartState, actions: cartActions } = store< WooCommerce >(
 	{ lock: universalLock }
 );
 
-const { placeholderImgSrc, currency: defaultCurrency } = getConfig(
-	'woocommerce'
-) as WooCommerceConfig;
-
 const decodeEntities = ( encoded: string ): string => {
 	const txt = document.createElement( 'textarea' );
 	txt.innerHTML = encoded;
 	return txt.value;
-};
-
-const formatPriceFromSchema = (
-	prices: ShopperListItemPrices | null | undefined
-): string => {
-	if ( ! prices || prices.price === '' || ! defaultCurrency ) {
-		return '';
-	}
-	const itemCurrency = normalizeCurrencyResponse( prices, defaultCurrency );
-	return formatPriceWithCurrency( prices.price, itemCurrency );
 };
 
 const formatVariationLabel = ( item: RawShopperListItem ): string => {
@@ -141,14 +154,9 @@ store< BlockStore >(
 				return ! list.isLoading && list.items.length === 0;
 			},
 
-			get hasVariation(): boolean {
-				const { listItem } = getContext< BlockContext >();
-				return !! listItem && listItem.variation.length > 0;
-			},
-
 			get isPriceHidden(): boolean {
 				const { listItem } = getContext< BlockContext >();
-				return ! listItem?.product_exists || ! listItem.prices;
+				return ! listItem?.price_html;
 			},
 
 			get isMoveToCartHidden(): boolean {
@@ -158,20 +166,6 @@ store< BlockStore >(
 				}
 				// Tombstones never have a buyable product.
 				return ! listItem.product_exists;
-			},
-
-			get currentItemThumbnail(): string {
-				const { listItem } = getContext< BlockContext >();
-				return (
-					listItem?.images?.[ 0 ]?.thumbnail ||
-					placeholderImgSrc ||
-					''
-				);
-			},
-
-			get currentItemAlt(): string {
-				const { listItem } = getContext< BlockContext >();
-				return listItem ? decodeEntities( listItem.name ) : '';
 			},
 
 			// `data-wp-text` writes its argument as text-content without
@@ -211,11 +205,6 @@ store< BlockStore >(
 					'%s',
 					decodeEntities( listItem.name )
 				);
-			},
-
-			get currentItemFormattedPrice(): string {
-				const { listItem } = getContext< BlockContext >();
-				return formatPriceFromSchema( listItem?.prices );
 			},
 
 			get currentItemVariationLabel(): string {
@@ -282,6 +271,33 @@ store< BlockStore >(
 				}
 
 				yield shopperListsActions.removeItem( listSlug, listItem.key );
+			},
+		},
+
+		callbacks: {
+			// Single shared innerHTML-swap callback for any slot whose
+			// content is one of the schema's preformatted HTML fields.
+			// Mirrors the atomic product-elements `updateValue` callback:
+			// the watched element carries `data-wp-context='{"htmlField":"price_html"}'`
+			// (or `"image_html"`), and this callback reads that field
+			// off the row's `listItem` and pastes its sanitized HTML into
+			// `element.ref`. PHP renders the same HTML server-side, so
+			// hydration is a no-op when the row's listItem hasn't changed,
+			// and a clean swap when it has (e.g. after Remove shifts the
+			// next item into this slot).
+			updateInnerHtml: () => {
+				const { ref } = getElement();
+				const { listItem, htmlField } = getContext< BlockContext >();
+				if ( ! ref || ! listItem || ! htmlField ) {
+					return;
+				}
+				const html = listItem[ htmlField ];
+				if ( typeof html === 'string' ) {
+					ref.innerHTML = sanitizeHTML( html, {
+						tags: ALLOWED_TAGS,
+						attr: ALLOWED_ATTR,
+					} );
+				}
 			},
 		},
 	},
