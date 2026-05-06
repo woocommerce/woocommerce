@@ -1339,6 +1339,53 @@ class WC_Order_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Saving an order with meta changes (e.g. totals) updates date_modified.
+	 */
+	public function test_saving_order_with_meta_changes_updates_date_modified(): void {
+		$order = WC_Helper_Order::create_order();
+
+		// Set date_modified to a known past time so we can assert it changes.
+		$order->set_date_modified( '2020-01-01 00:00:00' );
+		$order->save();
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( strtotime( '2020-01-01 00:00:00' ), $order->get_date_modified( 'edit' )->getTimestamp(), 'Initial date_modified should be the value we explicitly set.' );
+
+		// Update a meta field (e.g. order total), mirroring what calculate_totals() does.
+		$order->set_total( 999.99 );
+		$order->save();
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertNotEquals( strtotime( '2020-01-01 00:00:00' ), $order->get_date_modified( 'edit' )->getTimestamp(), 'date_modified should be updated when order meta changes.' );
+	}
+
+	/**
+	 * @testdox Updating order items (quantity) via calculate_totals updates the order date_modified.
+	 */
+	public function test_order_item_update_updates_order_date_modified(): void {
+		$order = WC_Helper_Order::create_order();
+
+		// Set date_modified to a known past time so we can assert it changes.
+		$order->set_date_modified( '2020-01-01 00:00:00' );
+		$order->save();
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertEquals( strtotime( '2020-01-01 00:00:00' ), $order->get_date_modified( 'edit' )->getTimestamp(), 'Initial date_modified should be the value we explicitly set.' );
+
+		// Update a line item quantity (mirroring a REST API PUT request).
+		$items = $order->get_items();
+		$item  = reset( $items );
+		$item->set_quantity( 5 );
+		$item->save();
+
+		// calculate_totals() recalculates order totals and calls save() — this is the path used by the REST API.
+		$order->calculate_totals();
+
+		$order = wc_get_order( $order->get_id() );
+		$this->assertNotEquals( strtotime( '2020-01-01 00:00:00' ), $order->get_date_modified( 'edit' )->getTimestamp(), 'date_modified should be updated when order items are changed.' );
+	}
+
+	/**
 	 * @testdox CPT cache priming populates order item meta caches so item access does not trigger additional queries.
 	 */
 	public function test_prime_caches_for_orders_primes_item_meta(): void {

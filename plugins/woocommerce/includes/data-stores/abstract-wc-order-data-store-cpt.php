@@ -226,6 +226,14 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 
 		$changes = $order->get_changes();
 
+		// Always update date_modified when the order is updated, unless it was explicitly set.
+		// This mirrors the behaviour of the HPOS data store and ensures date_modified is updated
+		// when order items or other related data (e.g. totals) change.
+		if ( ! isset( $changes['date_modified'] ) ) {
+			$order->set_date_modified( current_time( 'mysql' ) );
+			$changes = $order->get_changes();
+		}
+
 		// Only update the post when the post data changes.
 		if ( array_intersect( array( 'date_created', 'date_modified', 'status', 'parent_id', 'post_excerpt' ), array_keys( $changes ) ) ) {
 			$post_data = array(
