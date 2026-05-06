@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Cap the admin Order edit screen at 1200px max-width and center it on wide displays.
