@@ -7,6 +7,7 @@ import { __ } from '@wordpress/i18n';
 import { Icon, close } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
 import { filterThreeLines } from '@woocommerce/icons';
+import { getSetting } from '@woocommerce/settings';
 import clsx from 'clsx';
 
 /**
@@ -14,7 +15,8 @@ import clsx from 'clsx';
  */
 import './editor.scss';
 import { type BlockAttributes } from './types';
-import { getProductFiltersCss } from './utils/get-product-filters-css';
+import { getColorsFromBlockSupports } from './utils/get-colors-from-block-supports';
+import { presetToCssVariable } from './utils/preset-to-css-variable';
 
 const TEMPLATE: InnerBlockTemplate[] = [
 	[
@@ -40,11 +42,33 @@ export const Edit = ( props: BlockEditProps< BlockAttributes > ) => {
 	const { attributes } = props;
 	const { isPreview } = attributes;
 	const [ isOpen, setIsOpen ] = useState( false );
+
+	const globalColors = getSetting< { background?: string; text?: string } >(
+		'globalStylesColors',
+		{}
+	);
+	const colors = getColorsFromBlockSupports( attributes );
+
+	const blockGap = (
+		attributes as unknown as Record<
+			string,
+			Record< string, Record< string, string > >
+		>
+	 )?.style?.spacing?.blockGap;
+
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filters', {
 			'is-overlay-opened': isOpen,
 		} ),
-		style: getProductFiltersCss( attributes ),
+		style: {
+			'--wc-product-filters-background-color':
+				colors.backgroundColor || globalColors.background || undefined,
+			'--wc-product-filters-text-color':
+				colors.textColor || globalColors.text || undefined,
+			'--wc-product-filter-block-spacing': blockGap
+				? presetToCssVariable( blockGap )
+				: undefined,
+		},
 	} );
 
 	return (
