@@ -31,13 +31,23 @@ final class ShopperCollection extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		$list_slug = isset( $attributes['listName'] ) && is_string( $attributes['listName'] ) && '' !== $attributes['listName']
-			? sanitize_title( $attributes['listName'] )
-			: 'saved-for-later';
+		// `listName` is declared with a default in block.json, so WP core's
+		// `prepare_attributes_for_render` guarantees it's set as a string by
+		// the time we get here. `sanitize_title` is *not* redundant though:
+		// the schema only enforces `type: string`, and the block editor's
+		// "Edit as HTML" path lets anyone override the attribute with an
+		// arbitrary string. The slug then flows into a REST URL, into the
+		// `data-wp-context` JSON, into `data-wp-key`, and into the
+		// `wc-block-shopper-collection--{slug}` CSS modifier class — so we
+		// normalize it to `[a-z0-9_-]+` here. Empty result falls back to the
+		// declared default.
+		$list_slug = sanitize_title( $attributes['listName'] );
+		if ( '' === $list_slug ) {
+			$list_slug = 'saved-for-later';
+		}
 
-		$column_count = isset( $attributes['layout']['columnCount'] ) && is_numeric( $attributes['layout']['columnCount'] )
-			? max( 1, (int) $attributes['layout']['columnCount'] )
-			: 3;
+		// `layout` comes from `supports.layout`, not a declared attribute, so WP doesn't guarantee every nested key is set — `??` covers a partial layout object.
+		$column_count = max( 1, (int) ( $attributes['layout']['columnCount'] ?? 3 ) );
 
 		$variation = $this->get_variation_config( $list_slug );
 
