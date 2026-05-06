@@ -49,7 +49,7 @@ final class ShopperCollection extends AbstractBlock {
 		// `layout` comes from `supports.layout`, not a declared attribute, so WP doesn't guarantee every nested key is set — `??` covers a partial layout object.
 		$column_count = max( 1, (int) ( $attributes['layout']['columnCount'] ?? 3 ) );
 
-		$variation = $this->get_variation_config( $list_slug );
+		$variation = $this->get_variation_config();
 
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
@@ -143,34 +143,28 @@ final class ShopperCollection extends AbstractBlock {
 	 * behaviour switch that differs across list types so the renderer
 	 * stays generic.
 	 *
-	 * Adding a new list type = add a new entry here. Future variations
-	 * that need behaviours the existing JS actions don't cover should
-	 * also add a new `actions.onClickXyz` in `frontend.ts` and point
-	 * `actionDirective` at it.
+	 * Today only `saved-for-later` exists, so the config is returned
+	 * verbatim. When a second list type lands (Wishlist, Recently
+	 * Viewed, etc.), turn this into a lookup keyed by the list slug
+	 * and add the slug as a parameter. Unknown slugs in that future
+	 * lookup should render the empty state or surface an error rather
+	 * than silently borrow another list type's copy.
 	 *
-	 * Unknown slugs fall back to `saved-for-later` so the block still
-	 * renders, with a generic copy.
-	 *
-	 * @param string $list_slug The list slug.
 	 * @return array<string, mixed>
 	 */
-	private function get_variation_config( string $list_slug ): array {
-		$variations = array(
-			'saved-for-later' => array(
-				'modifierSlug'          => 'saved-for-later',
-				'emptyMessage'          => __( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
-				'removeButtonLabel'     => __( 'Remove', 'woocommerce' ),
-				/* translators: %s: product name. */
-				'removeLabelTemplate'   => __( 'Remove %s from saved items', 'woocommerce' ),
-				/* translators: %d: quantity of saved items. */
-				'quantityLabelTemplate' => __( 'Quantity: %d', 'woocommerce' ),
-				'actionLabel'           => __( 'Move to cart', 'woocommerce' ),
-				'actionDirective'       => 'actions.onClickMoveToCart',
-				'showAction'            => true,
-			),
+	private function get_variation_config(): array {
+		return array(
+			'modifierSlug'          => 'saved-for-later',
+			'emptyMessage'          => __( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
+			'removeButtonLabel'     => __( 'Remove', 'woocommerce' ),
+			/* translators: %s: product name. */
+			'removeLabelTemplate'   => __( 'Remove %s from saved items', 'woocommerce' ),
+			/* translators: %d: quantity of saved items. */
+			'quantityLabelTemplate' => __( 'Quantity: %d', 'woocommerce' ),
+			'actionLabel'           => __( 'Move to cart', 'woocommerce' ),
+			'actionDirective'       => 'actions.onClickMoveToCart',
+			'showAction'            => true,
 		);
-
-		return $variations[ $list_slug ] ?? $variations['saved-for-later'];
 	}
 
 	/**
