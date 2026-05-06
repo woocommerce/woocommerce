@@ -70,7 +70,6 @@ const getEntryPoints = () => {
 		app: './client/index.tsx',
 		embed: './client/embed.tsx',
 		settings: './client/settings/index.js',
-		'experimental-products-app-variation-view': `${ WC_ADMIN_PACKAGES_DIR }/experimental-products-app/src/variation-view-app`,
 	};
 	wcAdminPackages.forEach( ( name ) => {
 		entryPoints[ name ] = `${ WC_ADMIN_PACKAGES_DIR }/${ name }`;
