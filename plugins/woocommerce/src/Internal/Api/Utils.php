@@ -118,6 +118,31 @@ class Utils {
 	}
 
 	/**
+	 * Build the GraphQL error to throw when an authorization check fails.
+	 *
+	 * Distinguishes the two HTTP-correct shapes:
+	 *  - **UNAUTHORIZED (401)** when the principal is anonymous — the caller
+	 *    could plausibly fix it by authenticating, so the response invites
+	 *    re-auth.
+	 *  - **FORBIDDEN (403)** otherwise — the principal is recognised but
+	 *    isn't allowed; re-authenticating wouldn't help.
+	 *
+	 * The "anonymous" check is opt-in by convention: the principal's
+	 * `is_authenticated(): bool` method, when present, decides. Principals
+	 * that don't define it fall through to FORBIDDEN — generated resolvers
+	 * still emit a coded error, just without the 401/403 distinction.
+	 *
+	 * @param object $principal The resolved request principal.
+	 */
+	public static function build_authorization_error( object $principal ): \Automattic\WooCommerce\Internal\Api\Schema\Error {
+		$is_anonymous = method_exists( $principal, 'is_authenticated' ) && ! $principal->is_authenticated();
+		return new \Automattic\WooCommerce\Internal\Api\Schema\Error(
+			$is_anonymous ? 'Authentication required.' : 'You do not have permission to perform this action.',
+			extensions: array( 'code' => $is_anonymous ? 'UNAUTHORIZED' : 'FORBIDDEN' )
+		);
+	}
+
+	/**
 	 * Compute the value `_preauthorized` would carry for the given command and
 	 * principal (the AND of the autodiscovered authorization attributes'
 	 * authorize() outcomes).

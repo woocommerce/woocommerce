@@ -155,14 +155,33 @@ class GraphQLControllerExecutionTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox handle_request maps a denied authorization to HTTP 403.
+	 * @testdox handle_request maps an authenticated-but-denied authorization to HTTP 403.
 	 */
 	public function test_handle_request_maps_authorization_failure_to_403(): void {
-		// `widget` requires manage_options. Anonymous → attribute denies → FORBIDDEN.
+		// `widget` requires manage_options. An editor is authenticated but lacks the
+		// cap → attribute denies → FORBIDDEN/403 (the caller is recognised; re-auth
+		// won't help).
+		$editor = self::factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor );
+
 		$response = $this->sut->handle_request( $this->post_request( array( 'query' => '{ widget(id: 1) { id } }' ) ) );
 
 		$this->assertSame( 403, $response->get_status() );
 		$this->assertSame( 'FORBIDDEN', $response->get_data()['errors'][0]['extensions']['code'] ?? null );
+	}
+
+	/**
+	 * @testdox handle_request maps an anonymous-rejected authorization to HTTP 401.
+	 */
+	public function test_handle_request_maps_anonymous_authorization_failure_to_401(): void {
+		// `widget` requires manage_options. Anonymous caller → attribute denies but
+		// the principal isn't authenticated → UNAUTHORIZED/401 (re-auth might help).
+		wp_set_current_user( 0 );
+
+		$response = $this->sut->handle_request( $this->post_request( array( 'query' => '{ widget(id: 1) { id } }' ) ) );
+
+		$this->assertSame( 401, $response->get_status() );
+		$this->assertSame( 'UNAUTHORIZED', $response->get_data()['errors'][0]['extensions']['code'] ?? null );
 	}
 
 	/**

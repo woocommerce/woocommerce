@@ -42,10 +42,7 @@ class AuthorizeThrowsQuery {
 		if ( ! Utils::authorize_command( $command, array(
 			'kind' => $execute_args['kind'],
 		) ) ) {
-			throw new \Automattic\WooCommerce\Internal\Api\Schema\Error(
-				'You do not have permission to perform this action.',
-				extensions: array( 'code' => 'FORBIDDEN' )
-			);
+			throw Utils::build_authorization_error( $context['principal'] );
 		}
 
 		$result = Utils::execute_command( $command, $execute_args );

@@ -117,10 +117,7 @@ class <?php echo $class_name; ?> {
 		// Standalone authorization gate: no authorize() method on the command,
 		// so the autodiscovered authorization attributes are the sole guard.
 		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
-			throw new \Automattic\WooCommerce\Internal\Api\Schema\Error(
-				'You do not have permission to perform this action.',
-				extensions: array( 'code' => 'FORBIDDEN' )
-			);
+			throw Utils::build_authorization_error( $context['principal'] );
 		}
 
 <?php endif; ?>
@@ -178,10 +175,7 @@ foreach ( $execute_params as $param ) :
 			'_preauthorized' => <?php echo $preauthorized_expr; ?>,
 <?php endif; ?>
 		) ) ) {
-			throw new \Automattic\WooCommerce\Internal\Api\Schema\Error(
-				'You do not have permission to perform this action.',
-				extensions: array( 'code' => 'FORBIDDEN' )
-			);
+			throw Utils::build_authorization_error( $context['principal'] );
 		}
 
 <?php endif; ?>

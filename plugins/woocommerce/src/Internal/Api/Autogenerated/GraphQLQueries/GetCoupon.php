@@ -37,10 +37,7 @@ class GetCoupon {
 		// Standalone authorization gate: no authorize() method on the command,
 		// so the autodiscovered authorization attributes are the sole guard.
 		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
-			throw new \Automattic\WooCommerce\Internal\Api\Schema\Error(
-				'You do not have permission to perform this action.',
-				extensions: array( 'code' => 'FORBIDDEN' )
-			);
+			throw Utils::build_authorization_error( $context['principal'] );
 		}
 
 		$command = \Automattic\WooCommerce\Api\Infrastructure\ClassResolver::resolve_class( GetCouponCommand::class );
