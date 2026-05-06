@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
  * Loads assets for the product variations classic redesign feature.
  */
 class Init {
-	const FEATURE_ID     = 'product-variations-classic-redesign';
+	const FEATURE_ID    = 'product-variations-classic-redesign';
 	const SCRIPT_HANDLE = 'wc-experimental-products-app-variation-view';
 	const SCRIPT_PATH   = 'experimental-products-app-variation-view';
 	const ROOT_ID       = 'woocommerce-variations-classic-root';
