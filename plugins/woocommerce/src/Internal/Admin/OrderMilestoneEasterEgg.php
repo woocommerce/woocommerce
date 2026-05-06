@@ -36,8 +36,8 @@ class OrderMilestoneEasterEgg {
 			return;
 		}
 
-		// Debug preview: ?woo_egg=first|hundred|thousand bypasses the order check when WP_DEBUG is true.
-		$is_debug_preview = defined( 'WP_DEBUG' ) && WP_DEBUG && isset( $_GET['woo_egg'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// Preview: ?woo_egg=first|hundred|thousand lets admins preview any milestone without real orders.
+		$is_debug_preview = current_user_can( 'manage_options' ) && isset( $_GET['woo_egg'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
 		$milestone_map = $is_debug_preview ? array() : $this->get_milestone_map();
 
