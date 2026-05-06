@@ -30,7 +30,8 @@ import { EditProps, isAttributeCounts } from './types';
 import { getAttributeFromId } from './utils';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
-import { FilterOptionItem } from '../../types';
+import { FilterOptionItem, FilterItemFields } from '../../types';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
@@ -96,10 +97,11 @@ const Edit = ( props: EditProps ) => {
 					return true;
 				} )
 				.map( ( term, index ) => ( {
+					id: term.id.toString(),
 					label: term.name,
 					value: term.id.toString(),
 					selected: index === 0,
-					count: term.count,
+					...( showCounts && { count: term.count } ),
 				} ) );
 
 			setAttributeOptions(
@@ -200,14 +202,15 @@ const Edit = ( props: EditProps ) => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						filterData: {
+						woocommerceSelectableItems: {
 							items:
 								attributeOptions.length === 0 && isPreview
 									? attributeOptionsPreview
 									: attributeOptions,
+							selectionMode: 'multiple' as const,
+							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-							showCounts,
-						},
+						} satisfies SelectableItemsContext< FilterItemFields >,
 					} }
 				>
 					{ children }

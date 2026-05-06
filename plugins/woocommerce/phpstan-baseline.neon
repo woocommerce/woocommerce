@@ -53502,7 +53502,7 @@ parameters:
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 2
+			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterActive.php
 
 		-
@@ -53652,7 +53652,7 @@ parameters:
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 5
+			count: 2
 			path: src/Blocks/BlockTypes/ProductFilterChips.php
 
 		-
@@ -53748,13 +53748,7 @@ parameters:
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 3
-			path: src/Blocks/BlockTypes/ProductFilterPriceSlider.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilterPriceSlider\:\:render\(\) should return string but empty return statement found\.$#'
-			identifier: return.empty
-			count: 1
+			count: 2
 			path: src/Blocks/BlockTypes/ProductFilterPriceSlider.php
 
 		-
@@ -53811,17 +53805,6 @@ parameters:
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterRating.php
 
-		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
-		-
-			message: '#^Parameter \#1 \$text of function esc_attr expects string, int\<0, max\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilterRating.php
 
 		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, Closure\(mixed\)\: \(0\|1\) given\.$#'
