@@ -56,11 +56,29 @@ class Init {
 	}
 
 	/**
-	 * Returns true on the HPOS order edit/new screen or the legacy `shop_order` CPT edit/new screen.
+	 * Returns true when the order detail redesign is active on the current screen.
+	 *
+	 * Use this from rendering code paths to decide whether to emit the
+	 * redesigned UI. Combines a screen check with the feature flag check so
+	 * call sites do not need both.
+	 *
+	 * @internal
 	 *
 	 * @return bool
 	 */
-	private static function is_order_edit_screen(): bool {
+	public static function is_enabled(): bool {
+		return self::is_order_edit_screen()
+			&& \Automattic\WooCommerce\Admin\Features\Features::is_enabled( self::FEATURE_ID );
+	}
+
+	/**
+	 * Returns true on the HPOS order edit/new screen or the legacy `shop_order` CPT edit/new screen.
+	 *
+	 * @internal
+	 *
+	 * @return bool
+	 */
+	public static function is_order_edit_screen(): bool {
 		// HPOS edit/new: admin.php?page=wc-orders&action=edit|new.
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		if ( isset( $_GET['page'] ) && 'wc-orders' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) {
