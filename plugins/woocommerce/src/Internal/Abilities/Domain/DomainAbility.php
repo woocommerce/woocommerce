@@ -41,18 +41,16 @@ abstract class DomainAbility {
 	 * Get a collection output schema.
 	 *
 	 * @param string $collection_key Collection property key.
+	 * @param array  $item_schema    JSON schema describing a single item in the collection.
 	 * @return array
 	 */
-	protected static function get_collection_output_schema( string $collection_key ): array {
+	protected static function get_collection_output_schema( string $collection_key, array $item_schema ): array {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
 				$collection_key => array(
 					'type'  => 'array',
-					'items' => array(
-						'type'                 => 'object',
-						'additionalProperties' => true,
-					),
+					'items' => $item_schema,
 				),
 				'total'         => array( 'type' => 'integer' ),
 				'page'          => array( 'type' => 'integer' ),
@@ -65,17 +63,15 @@ abstract class DomainAbility {
 	/**
 	 * Get an entity output schema.
 	 *
-	 * @param string $entity_key Entity property key.
+	 * @param string $entity_key  Entity property key.
+	 * @param array  $item_schema JSON schema describing the entity.
 	 * @return array
 	 */
-	protected static function get_entity_output_schema( string $entity_key ): array {
+	protected static function get_entity_output_schema( string $entity_key, array $item_schema ): array {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				$entity_key => array(
-					'type'                 => 'object',
-					'additionalProperties' => true,
-				),
+				$entity_key => $item_schema,
 			),
 			'additionalProperties' => false,
 		);
@@ -105,15 +101,5 @@ abstract class DomainAbility {
 	 */
 	protected static function get_id_from_input( $input ): int {
 		return is_array( $input ) && ! empty( $input['id'] ) ? absint( $input['id'] ) : 0;
-	}
-
-	/**
-	 * Sanitize a per-page value.
-	 *
-	 * @param mixed $value Raw value.
-	 * @return int
-	 */
-	protected static function sanitize_per_page( $value ): int {
-		return min( 100, max( 1, absint( $value ) ) );
 	}
 }
