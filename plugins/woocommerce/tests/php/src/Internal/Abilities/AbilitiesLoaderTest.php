@@ -201,6 +201,36 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should describe product output primitives using WooCommerce registries.
+	 */
+	public function test_product_output_schema_uses_woocommerce_primitive_constraints(): void {
+		$output_schema = wp_get_ability( 'woocommerce/product-create' )->get_output_schema();
+		$product       = $output_schema['properties']['product']['properties'] ?? array();
+
+		$this->assertSame( 'uri', $product['permalink']['format'] ?? null );
+		$this->assertContains( get_woocommerce_currency(), $product['currency']['enum'] ?? array() );
+		$this->assertSame(
+			array( wc_is_stock_amount_integer() ? 'integer' : 'number', 'null' ),
+			$product['stock_quantity']['type'] ?? null
+		);
+	}
+
+	/**
+	 * @testdox Should describe order output primitives using WooCommerce registries.
+	 */
+	public function test_order_output_schema_uses_woocommerce_primitive_constraints(): void {
+		$output_schema = wp_get_ability( 'woocommerce/orders-query' )->get_output_schema();
+		$order         = $output_schema['properties']['orders']['items']['properties'] ?? array();
+
+		$this->assertContains( 'auto-draft', $order['status']['enum'] ?? array() );
+		$this->assertContains( 'trash', $order['status']['enum'] ?? array() );
+		$this->assertContains( 'checkout-draft', $order['status']['enum'] ?? array() );
+		$this->assertContains( get_woocommerce_currency(), $order['currency']['enum'] ?? array() );
+		$this->assertSame( array( 'string', 'null' ), $order['billing_email']['type'] ?? null );
+		$this->assertSame( 'email', $order['billing_email']['format'] ?? null );
+	}
+
+	/**
 	 * @testdox Should register extension ability classes appended via the loader filter.
 	 */
 	public function test_loader_filter_accepts_valid_extension_classes(): void {
@@ -470,6 +500,43 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should support fractional product stock quantities when WooCommerce is configured for them.
+	 */
+	public function test_product_stock_quantity_schema_allows_fractional_stock_amounts(): void {
+		$this->unregister_domain_abilities();
+		remove_filter( 'woocommerce_stock_amount', 'intval' );
+		add_filter( 'woocommerce_stock_amount', array( $this, 'preserve_fractional_stock_amount' ) );
+
+		try {
+			$this->register_domain_abilities();
+
+			$input_schema  = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+			$output_schema = wp_get_ability( 'woocommerce/product-create' )->get_output_schema();
+
+			$this->assertSame( 'number', $input_schema['properties']['stock_quantity']['type'] ?? null );
+			$this->assertSame(
+				array( 'number', 'null' ),
+				$output_schema['properties']['product']['properties']['stock_quantity']['type'] ?? null
+			);
+
+			$created = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name'           => 'Fractional Stock Product',
+					'manage_stock'   => true,
+					'stock_quantity' => 1.5,
+				)
+			);
+
+			$this->assertNotWPError( $created );
+			$this->created_product_ids[] = $created['product']['id'];
+			$this->assertSame( 1.5, $created['product']['stock_quantity'] );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', array( $this, 'preserve_fractional_stock_amount' ) );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
 	 * @testdox Should update product properties and reflect changes in the response.
 	 */
 	public function test_product_update_changes_props_and_returns_updated_response(): void {
@@ -558,6 +625,25 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $order->get_id(), $result['orders'][0]['id'] );
 		$this->assertNotEmpty( $result['orders'][0]['line_items'] );
 		$this->assertNotEmpty( $result['orders'][0]['currency_symbol'] );
+	}
+
+	/**
+	 * @testdox Should return null for absent billing email values.
+	 */
+	public function test_orders_query_returns_null_for_absent_billing_email(): void {
+		$order = wc_create_order();
+		$this->assertNotWPError( $order );
+		$order->save();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'id' => $order->get_id(),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertNull( $result['orders'][0]['billing_email'] );
 	}
 
 	/**
@@ -712,6 +798,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Unregister canonical domain abilities for this test.
+	 */
+	private function unregister_domain_abilities(): void {
+		foreach ( self::CANONICAL_ABILITY_IDS as $ability_id ) {
+			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
+				wp_unregister_ability( $ability_id );
+			}
+		}
+	}
+
+	/**
 	 * Add the test extension ability definition class.
 	 *
 	 * @param array $classes Ability definition class names.
@@ -721,5 +818,15 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$classes[] = TestExtensionAbilityDefinition::class;
 
 		return $classes;
+	}
+
+	/**
+	 * Preserve fractional stock amounts for filtered stock quantity tests.
+	 *
+	 * @param mixed $amount Stock amount.
+	 * @return float
+	 */
+	public function preserve_fractional_stock_amount( $amount ): float {
+		return (float) $amount;
 	}
 }

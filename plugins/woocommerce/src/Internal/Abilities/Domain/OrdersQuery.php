@@ -185,7 +185,10 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 					'enum' => self::get_allowed_order_status_slugs(),
 				),
 				'customer_id'        => array( 'type' => 'integer' ),
-				'billing_email'      => array( 'type' => 'string' ),
+				'billing_email'      => array(
+					'type'   => 'string',
+					'format' => 'email',
+				),
 				'parent'             => array( 'type' => 'integer' ),
 				'exclude'            => array(
 					'type'  => 'array',

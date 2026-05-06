@@ -40,7 +40,7 @@ trait ProductAbilityTrait {
 					'enum' => self::get_product_mutation_status_slugs(),
 				),
 				'manage_stock'      => array( 'type' => 'boolean' ),
-				'stock_quantity'    => array( 'type' => 'integer' ),
+				'stock_quantity'    => array( 'type' => self::get_product_stock_quantity_schema_type() ),
 				'stock_status'      => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
@@ -149,6 +149,8 @@ trait ProductAbilityTrait {
 	 * @return array
 	 */
 	protected static function format_product_for_response( \WC_Product $product ): array {
+		$stock_quantity = $product->get_stock_quantity();
+
 		return array(
 			'id'                => $product->get_id(),
 			'name'              => $product->get_name(),
@@ -163,7 +165,7 @@ trait ProductAbilityTrait {
 			'regular_price'     => $product->get_regular_price(),
 			'sale_price'        => $product->get_sale_price(),
 			'stock_status'      => $product->get_stock_status(),
-			'stock_quantity'    => null === $product->get_stock_quantity() ? null : (int) $product->get_stock_quantity(),
+			'stock_quantity'    => null === $stock_quantity ? null : wc_stock_amount( $stock_quantity ),
 			'manage_stock'      => (bool) $product->get_manage_stock(),
 			'virtual'           => (bool) $product->get_virtual(),
 			'downloadable'      => (bool) $product->get_downloadable(),
@@ -186,7 +188,10 @@ trait ProductAbilityTrait {
 				'id'                => array( 'type' => 'integer' ),
 				'name'              => array( 'type' => 'string' ),
 				'slug'              => array( 'type' => 'string' ),
-				'permalink'         => array( 'type' => 'string' ),
+				'permalink'         => array(
+					'type'   => 'string',
+					'format' => 'uri',
+				),
 				'type'              => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_types() ),
@@ -196,7 +201,10 @@ trait ProductAbilityTrait {
 					'enum' => self::get_product_mutation_status_slugs(),
 				),
 				'sku'               => array( 'type' => 'string' ),
-				'currency'          => array( 'type' => 'string' ),
+				'currency'          => array(
+					'type' => 'string',
+					'enum' => array_keys( get_woocommerce_currencies() ),
+				),
 				'currency_symbol'   => array( 'type' => 'string' ),
 				'price'             => array( 'type' => 'string' ),
 				'regular_price'     => array( 'type' => 'string' ),
@@ -205,7 +213,9 @@ trait ProductAbilityTrait {
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
-				'stock_quantity'    => array( 'type' => array( 'integer', 'null' ) ),
+				'stock_quantity'    => array(
+					'type' => array( self::get_product_stock_quantity_schema_type(), 'null' ),
+				),
 				'manage_stock'      => array( 'type' => 'boolean' ),
 				'virtual'           => array( 'type' => 'boolean' ),
 				'downloadable'      => array( 'type' => 'boolean' ),
@@ -228,5 +238,17 @@ trait ProductAbilityTrait {
 			),
 			'additionalProperties' => false,
 		);
+	}
+
+	/**
+	 * Get the schema type for product stock quantities.
+	 *
+	 * WooCommerce stock quantities can support fractional values when the
+	 * stock amount filter is configured to return non-integer amounts.
+	 *
+	 * @return string
+	 */
+	protected static function get_product_stock_quantity_schema_type(): string {
+		return wc_is_stock_amount_integer() ? 'integer' : 'number';
 	}
 }

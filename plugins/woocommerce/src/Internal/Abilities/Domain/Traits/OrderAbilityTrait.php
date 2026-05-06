@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
@@ -25,6 +26,22 @@ trait OrderAbilityTrait {
 		return array_map(
 			array( OrderUtil::class, 'remove_status_prefix' ),
 			array_keys( wc_get_order_statuses() )
+		);
+	}
+
+	/**
+	 * Possible order status slugs (without the `wc-` prefix) for ability output.
+	 *
+	 * @return array<int, string>
+	 */
+	protected static function get_order_output_status_slugs(): array {
+		return array_values(
+			array_unique(
+				array_map(
+					array( OrderUtil::class, 'remove_status_prefix' ),
+					array_merge( OrderStatus::get_all(), array_keys( wc_get_order_statuses() ) )
+				)
+			)
 		);
 	}
 
@@ -56,13 +73,19 @@ trait OrderAbilityTrait {
 				'id'                   => array( 'type' => 'integer' ),
 				'status'               => array(
 					'type' => 'string',
-					'enum' => self::get_allowed_order_status_slugs(),
+					'enum' => self::get_order_output_status_slugs(),
 				),
-				'currency'             => array( 'type' => 'string' ),
+				'currency'             => array(
+					'type' => 'string',
+					'enum' => array_keys( get_woocommerce_currencies() ),
+				),
 				'currency_symbol'      => array( 'type' => 'string' ),
 				'total'                => array( 'type' => 'string' ),
 				'customer_id'          => array( 'type' => 'integer' ),
-				'billing_email'        => array( 'type' => 'string' ),
+				'billing_email'        => array(
+					'type'   => array( 'string', 'null' ),
+					'format' => 'email',
+				),
 				'payment_method'       => array( 'type' => 'string' ),
 				'payment_method_title' => array( 'type' => 'string' ),
 				'date_created'         => array(
@@ -138,6 +161,8 @@ trait OrderAbilityTrait {
 	 * @return array
 	 */
 	protected static function format_order_for_response( \WC_Order $order, bool $include_line_items ): array {
+		$billing_email = $order->get_billing_email();
+
 		$data = array(
 			'id'                   => $order->get_id(),
 			'status'               => $order->get_status(),
@@ -145,7 +170,7 @@ trait OrderAbilityTrait {
 			'currency_symbol'      => html_entity_decode( get_woocommerce_currency_symbol( $order->get_currency() ) ),
 			'total'                => $order->get_total(),
 			'customer_id'          => $order->get_customer_id(),
-			'billing_email'        => $order->get_billing_email(),
+			'billing_email'        => '' === $billing_email ? null : $billing_email,
 			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
 			'date_created'         => wc_rest_prepare_date_response( $order->get_date_created(), false ),
