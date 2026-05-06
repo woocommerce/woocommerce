@@ -71,6 +71,7 @@ export type ProductFiltersContext = {
 	item: FilterItem;
 	activeLabelTemplate: string;
 	filterType: string;
+	forcePageReload?: boolean | null;
 };
 
 const productFiltersStore = {
@@ -228,7 +229,15 @@ const productFiltersStore = {
 			}
 
 			const config = getConfig( BLOCK_NAME );
-			if ( config?.forcePageReload ) {
+			// Per-instance context (set when Product Filters is a descendant
+			// of Product Collection) wins over the global config, which is
+			// the fallback for the sibling-block layout.
+			const forcePageReload =
+				typeof context.forcePageReload === 'boolean'
+					? context.forcePageReload
+					: config?.forcePageReload;
+
+			if ( forcePageReload ) {
 				window.location.assign( url.href );
 				return;
 			}

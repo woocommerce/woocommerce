@@ -25,7 +25,7 @@ class ProductFilters extends AbstractBlock {
 	 * @return string[]
 	 */
 	protected function get_block_type_uses_context() {
-		return array( 'postId', 'query', 'queryId' );
+		return array( 'postId', 'query', 'queryId', 'forcePageReload' );
 	}
 
 	/**
@@ -95,8 +95,11 @@ class ProductFilters extends AbstractBlock {
 			''
 		);
 		$interactivity_context = array(
-			'params'        => $filter_params,
-			'activeFilters' => $active_filters,
+			'params'          => $filter_params,
+			'activeFilters'   => $active_filters,
+			// Null when not a descendant of a Product Collection block, so the
+			// frontend can fall back to the global interactivity config.
+			'forcePageReload' => isset( $block->context['forcePageReload'] ) ? (bool) $block->context['forcePageReload'] : null,
 		);
 
 		$classes = '';

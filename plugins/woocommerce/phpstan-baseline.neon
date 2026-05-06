@@ -54150,7 +54150,7 @@ parameters:
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 3
+			count: 5
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
 		-
