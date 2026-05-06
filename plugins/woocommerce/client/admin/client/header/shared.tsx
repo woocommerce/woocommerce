@@ -313,7 +313,7 @@ export const BaseHeader = ( {
 									activeMetaIcon === 'screen-options',
 							}
 						) }
-						label={ __( 'Screen Options', 'woocommerce' ) }
+						label={ __( 'Screen options', 'woocommerce' ) }
 						showTooltip
 						onClick={ () =>
 							triggerMetaIcon(
