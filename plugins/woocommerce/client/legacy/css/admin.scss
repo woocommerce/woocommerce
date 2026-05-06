@@ -3040,7 +3040,7 @@ ul.wc_coupon_list_block {
 			// Update order (DOM-first) renders on the right so it remains the
 			// first tab stop while the destructive action sits on the left.
 			flex-direction: row-reverse;
-			gap: 16px;
+			gap: 12px;
 
 			.button {
 				flex: 1;
