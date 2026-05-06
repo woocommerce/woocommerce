@@ -4,6 +4,10 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\WCTransactionalEmails;
 
+use Automattic\WooCommerce\EmailEditor\Bootstrap;
+use Automattic\WooCommerce\EmailEditor\Email_Editor_Container;
+use Automattic\WooCommerce\Internal\EmailEditor\Integration;
+use Automattic\WooCommerce\Internal\EmailEditor\Package;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
@@ -50,6 +54,89 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		// stale post_id <-> email_type mappings into subsequent tests.
 		$this->posts_manager->clear_caches();
 		WCEmailTemplateSyncRegistry::reset_cache();
+	}
+
+	/**
+	 * @testdox Should register _wc_email_template_status post meta on woo_email with show_in_rest.
+	 */
+	public function test_registers_template_status_meta_with_show_in_rest(): void {
+		$this->initialize_email_editor_integration();
+
+		$this->assertTrue(
+			registered_meta_key_exists( 'post', WCEmailTemplateDivergenceDetector::STATUS_META_KEY, 'woo_email' ),
+			'Expected _wc_email_template_status to be registered for woo_email.'
+		);
+
+		$args = get_registered_meta_keys( 'post', 'woo_email' )[ WCEmailTemplateDivergenceDetector::STATUS_META_KEY ];
+
+		$this->assertTrue( $args['show_in_rest'], 'Expected show_in_rest = true.' );
+		$this->assertTrue( $args['single'], 'Expected single = true.' );
+		$this->assertSame( 'string', $args['type'] );
+		$this->assertIsCallable( $args['auth_callback'] );
+	}
+
+	/**
+	 * @testdox Should register _wc_email_template_version post meta on woo_email with show_in_rest.
+	 */
+	public function test_registers_template_version_meta_with_show_in_rest(): void {
+		$this->initialize_email_editor_integration();
+
+		$this->assertTrue(
+			registered_meta_key_exists( 'post', WCEmailTemplateDivergenceDetector::VERSION_META_KEY, 'woo_email' ),
+			'Expected _wc_email_template_version to be registered for woo_email.'
+		);
+
+		$args = get_registered_meta_keys( 'post', 'woo_email' )[ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ];
+
+		$this->assertTrue( $args['show_in_rest'], 'Expected show_in_rest = true.' );
+		$this->assertTrue( $args['single'], 'Expected single = true.' );
+		$this->assertSame( 'string', $args['type'] );
+	}
+
+	/**
+	 * @testdox Should deny REST writes to template meta even for administrators.
+	 */
+	public function test_meta_auth_callback_denies_write_via_rest(): void {
+		$admin_user = self::factory()->user->create( array( 'role' => 'administrator' ) );
+
+		$this->assertFalse(
+			WCEmailTemplateDivergenceDetector::rest_meta_auth_read_only( true, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, 0, $admin_user, 'edit_post_meta', array() ),
+			'Even an administrator must not be able to write _wc_email_template_status via REST.'
+		);
+
+		$this->assertFalse(
+			WCEmailTemplateDivergenceDetector::rest_meta_auth_read_only( true, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, 0, $admin_user, 'add_post_meta', array() ),
+			'add_post_meta must be denied via REST.'
+		);
+
+		$this->assertFalse(
+			WCEmailTemplateDivergenceDetector::rest_meta_auth_read_only( true, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, 0, $admin_user, 'delete_post_meta', array() ),
+			'delete_post_meta must be denied via REST.'
+		);
+	}
+
+	/**
+	 * @testdox Should allow REST reads of template meta for users who can edit the post.
+	 */
+	public function test_meta_auth_callback_allows_read_for_capable_user(): void {
+		// Ensure the woo_email post type is registered so user_can( 'edit_post' ) does not
+		// trip a doing-it-wrong notice about the post type being unregistered.
+		$this->initialize_email_editor_integration();
+
+		$admin_user_id = self::factory()->user->create( array( 'role' => 'administrator' ) );
+
+		$post_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'woo_email',
+				'post_status' => 'publish',
+				'post_author' => $admin_user_id,
+			)
+		);
+
+		$this->assertTrue(
+			WCEmailTemplateDivergenceDetector::rest_meta_auth_read_only( false, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $post_id, $admin_user_id, 'read_post', array() ),
+			'Capable user must be able to read _wc_email_template_status via REST.'
+		);
 	}
 
 	/**
@@ -141,6 +228,11 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		$email_id = 'wc_test_divergence_idempotency';
 		$post_id  = $this->generate_stamped_post( $email_id );
 
+		// Clear the status the generator stamped at insert so the first
+		// sweep has classification work to do; otherwise both sweeps are
+		// no-ops and the test loses signal on first-write behaviour.
+		delete_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY );
+
 		$write_count = 0;
 		$counter     = static function ( $check, int $object_id, string $meta_key ) use ( &$write_count, $post_id ) {
 			if ( $object_id === $post_id && WCEmailTemplateDivergenceDetector::STATUS_META_KEY === $meta_key ) {
@@ -173,8 +265,10 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		$email_id = 'wc_test_divergence_missing_hash';
 		$post_id  = $this->generate_stamped_post( $email_id );
 
-		// Simulate a legacy (pre-RSM-137) post by removing the source-hash stamp.
+		// Simulate a legacy (pre-RSM-137) post by removing both the
+		// source-hash and status stamps the modern generator writes.
 		delete_post_meta( $post_id, '_wc_email_template_source_hash' );
+		delete_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY );
 
 		WCEmailTemplateDivergenceDetector::run_sweep();
 
@@ -236,6 +330,76 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( 1, $fired, 'Completion action must fire exactly once per sweep.' );
+	}
+
+	/**
+	 * Force-initialize the EmailEditor Integration and Bootstrap so the production
+	 * `init`-time hooks (notably `WCEmailTemplateDivergenceDetector::register_meta`)
+	 * register on the global hook table, the `woo_email` post type is registered, and
+	 * `init` fires so the meta-registration callback runs. Swallows the doing-it-wrong
+	 * notices that the full chain triggers when re-registering already-registered
+	 * blocks / integrations during a unit-test process; those notices are unrelated
+	 * to the meta-registration wiring under test.
+	 */
+	private function initialize_email_editor_integration(): void {
+		$this->setExpectedIncorrectUsage( 'WP_Block_Type_Registry::register' );
+		$this->setExpectedIncorrectUsage( 'Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry::register' );
+
+		add_option( 'woocommerce_feature_block_email_editor_enabled', 'yes' );
+		wc_get_container()->get( Package::class )->init();
+		wc_get_container()->get( Integration::class )->initialize();
+		Email_Editor_Container::container()->get( Bootstrap::class )->initialize();
+
+		/**
+		 * Fires once WordPress, all plugins, and the theme are fully loaded and instantiated.
+		 *
+		 * @since 1.5.0
+		 */
+		do_action( 'init' );
+	}
+
+	/**
+	 * @testdox Should stamp STATUS_CORE_UPDATED_CUSTOMIZED on a post that differs from canonical core after a stored stamp.
+	 */
+	public function test_reclassify_stamps_customized_when_post_differs_from_canonical(): void {
+		$email_id = 'reclassify_customized';
+		$this->register_fixture_email( $email_id );
+
+		$canonical = "<!-- wp:paragraph -->\n<p>Core paragraph.</p>\n<!-- /wp:paragraph -->";
+		$post_html = "<!-- wp:paragraph -->\n<p>Merchant paragraph.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_html );
+
+		// Pre-stamp source_hash to a prior canonical so the classifier sees "core moved".
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, sha1( "<!-- wp:paragraph -->\n<p>Old core paragraph.</p>\n<!-- /wp:paragraph -->" ) );
+
+		$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED, $status );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
+	}
+
+	/**
+	 * @testdox Should stamp STATUS_IN_SYNC when the post matches the canonical render at the stored stamp.
+	 */
+	public function test_reclassify_stamps_in_sync_when_post_matches_canonical(): void {
+		$email_id = 'reclassify_in_sync';
+		$this->register_fixture_email( $email_id );
+
+		$canonical = "<!-- wp:paragraph -->\n<p>Same on both sides.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $canonical );
+
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, sha1( $canonical ) );
+
+		$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $status );
 	}
 
 	/**
@@ -312,6 +476,56 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 		$this->assertNotSame( '', (string) get_post_meta( $post_id, '_wc_email_last_synced_at', true ) );
 
 		return $post_id;
+	}
+
+	/**
+	 * Hook the canonical content filter so `compute_canonical_post_content()`
+	 * returns the supplied string for the given email_id, bypassing the
+	 * file-rendered template body. Lets tests express "what core would render"
+	 * directly inline.
+	 *
+	 * @param string $email_id The email ID to override content for.
+	 * @param string $content  The canonical content to inject.
+	 */
+	private function use_canonical_content( string $email_id, string $content ): void {
+		add_filter(
+			'woocommerce_email_content_post_data',
+			static function ( array $post_data, string $type ) use ( $email_id, $content ): array {
+				if ( $type === $email_id ) {
+					$post_data['post_content'] = $content;
+				}
+				return $post_data;
+			},
+			10,
+			2
+		);
+	}
+
+	/**
+	 * Create a `woo_email` post and associate it with the supplied email_id
+	 * via the canonical option key the manager expects.
+	 *
+	 * @param string $email_id     The email ID to associate.
+	 * @param string $post_content Initial post content.
+	 * @return int Post ID.
+	 */
+	private function create_woo_email_post( string $email_id, string $post_content ): int {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'   => 'Fixture for ' . $email_id,
+				'post_name'    => $email_id,
+				'post_type'    => Integration::EMAIL_POST_TYPE,
+				'post_content' => $post_content,
+				'post_status'  => 'publish',
+			)
+		);
+
+		$this->assertIsInt( $post_id );
+		$this->assertGreaterThan( 0, $post_id );
+
+		$this->posts_manager->save_email_template_post_id( $email_id, $post_id );
+
+		return (int) $post_id;
 	}
 
 	/**

@@ -138,30 +138,11 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 		/**
 		 * Get the URL of the per-order Review Order page for this email's order.
 		 *
-		 * Mirrors the pay-for-order URL shape. `wc_get_endpoint_url()` is used so
-		 * plain-permalink stores get a valid query-arg URL rather than an invalid
-		 * concatenation. The endpoint itself is registered in a later milestone.
-		 *
 		 * @since  10.8.0
 		 * @return string
 		 */
 		public function get_review_order_url() {
-			if ( ! ( $this->object instanceof WC_Order ) ) {
-				return '';
-			}
-
-			$endpoint_url = wc_get_endpoint_url( 'review-order', (string) $this->object->get_id(), wc_get_checkout_url() );
-			$url          = add_query_arg( 'key', $this->object->get_order_key(), $endpoint_url );
-
-			/**
-			 * Filter the Review Order URL that the review-request email links to.
-			 *
-			 * @param string   $url   The review-order URL.
-			 * @param WC_Order $order The order object.
-			 *
-			 * @since 10.8.0
-			 */
-			return (string) apply_filters( 'woocommerce_review_order_url', $url, $this->object );
+			return $this->object instanceof WC_Order ? wc_get_review_order_url( $this->object ) : '';
 		}
 
 		/**

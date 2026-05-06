@@ -19,6 +19,18 @@ export type Recipients = {
 
 export type EmailStatus = 'enabled' | 'disabled' | 'manual';
 
+/**
+ * Classification of an email post relative to the current core template.
+ *
+ * Sourced from `_wc_email_template_status` post meta (RSM-138), auto-surfaced
+ * under `meta` in the `wp/v2/woo_email` REST response. Read-only client-side.
+ * Public REST API contract — see RSM-140 spec § 4.3.
+ */
+export type TemplateStatus =
+	| 'in_sync'
+	| 'core_updated_uncustomized'
+	| 'core_updated_customized';
+
 export type EmailType = {
 	title: string;
 	description: string;
@@ -30,6 +42,8 @@ export type EmailType = {
 	manual: boolean;
 	link?: string;
 	status?: EmailStatus;
+	templateStatus: TemplateStatus | null;
+	templateVersion: string | null;
 };
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
