@@ -28,9 +28,7 @@ class AbilitiesRegistry {
 	 * Initialize all WooCommerce abilities.
 	 */
 	private function init_abilities(): void {
-		AbilitiesCategories::init();
-		DomainAbilities::init();
-		AbilitiesRestBridge::init();
+		AbilitiesLoader::init();
 	}
 
 	/**

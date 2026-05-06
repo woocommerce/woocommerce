@@ -1,0 +1,115 @@
+<?php
+/**
+ * Order add note ability definition file.
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\Abilities\Domain;
+
+use Automattic\WooCommerce\Internal\Abilities\AbilityDefinition;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Registers the WooCommerce order add note ability.
+ */
+class OrderAddNote extends DomainAbility implements AbilityDefinition {
+
+	/**
+	 * Register the ability.
+	 *
+	 * @since 10.9.0
+	 */
+	public static function register(): void {
+		if ( self::has_ability( 'woocommerce/order-add-note' ) ) {
+			return;
+		}
+
+		wp_register_ability(
+			'woocommerce/order-add-note',
+			array(
+				'label'               => __( 'Add Order Note', 'woocommerce' ),
+				'description'         => __(
+					'Add a note to a WooCommerce order using WooCommerce order APIs.',
+					'woocommerce'
+				),
+				'category'            => 'woocommerce',
+				'input_schema'        => self::get_input_schema(),
+				'output_schema'       => self::get_order_note_output_schema(),
+				'execute_callback'    => array( __CLASS__, 'execute' ),
+				'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
+				'meta'                => self::get_domain_meta( 'add-note', false, false, false ),
+			)
+		);
+	}
+
+	/**
+	 * Add an order note.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error
+	 *
+	 * @since 10.9.0
+	 */
+	public static function execute( array $input ) {
+		$order = self::get_order_from_input( $input );
+
+		if ( is_wp_error( $order ) ) {
+			return $order;
+		}
+
+		if ( empty( $input['note'] ) ) {
+			return new \WP_Error(
+				'woocommerce_order_note_required',
+				__( 'Order note is required.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$note_id = $order->add_order_note(
+			self::sanitize_string( $input['note'] ),
+			( (bool) ( $input['customer_note'] ?? false ) ) ? 1 : 0
+		);
+
+		return array(
+			'note_id' => (int) $note_id,
+			'order'   => self::format_order( $order, false ),
+		);
+	}
+
+	/**
+	 * Check order management access.
+	 *
+	 * @param mixed $input Ability input.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function can_manage_orders( $input = array() ): bool {
+		$order_id = self::get_input_id( $input );
+
+		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'edit', $order_id );
+	}
+
+	/**
+	 * Get the ability input schema.
+	 *
+	 * @return array
+	 */
+	private static function get_input_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'id'            => array( 'type' => 'integer' ),
+				'note'          => array( 'type' => 'string' ),
+				'customer_note' => array(
+					'type'    => 'boolean',
+					'default' => false,
+				),
+			),
+			'required'             => array( 'id', 'note' ),
+			'additionalProperties' => false,
+		);
+	}
+}

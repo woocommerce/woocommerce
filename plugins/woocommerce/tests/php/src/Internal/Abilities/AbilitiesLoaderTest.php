@@ -1,18 +1,18 @@
 <?php
 /**
- * DomainAbilitiesTest class file.
+ * AbilitiesLoaderTest class file.
  */
 
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
-use Automattic\WooCommerce\Internal\Abilities\DomainAbilities;
+use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 
 /**
  * Tests for canonical WooCommerce domain abilities.
  */
-class DomainAbilitiesTest extends \WC_Unit_Test_Case {
+class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Ability IDs registered by these tests.
@@ -176,6 +176,21 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'idempotent', $meta['annotations'] );
 			$this->assertArrayNotHasKey( 'expose_in_deprecated_woocommerce_mcp', $meta );
 		}
+	}
+
+	/**
+	 * @testdox Should register extension ability definition classes from the loader filter.
+	 */
+	public function test_abilities_loader_accepts_extension_definition_classes(): void {
+		add_filter( 'woocommerce_ability_definition_classes', array( $this, 'add_test_extension_ability_definition_class' ) );
+		$this->register_domain_abilities();
+		remove_filter( 'woocommerce_ability_definition_classes', array( $this, 'add_test_extension_ability_definition_class' ) );
+
+		$this->registered_ability_ids[] = TestExtensionAbilityDefinition::ABILITY_ID;
+		$ability                        = wp_get_ability( TestExtensionAbilityDefinition::ABILITY_ID );
+
+		$this->assertNotNull( $ability, 'Extension ability should be registered.' );
+		$this->assertSame( 'woocommerce', $ability->get_category() );
 	}
 
 	/**
@@ -402,11 +417,23 @@ class DomainAbilitiesTest extends \WC_Unit_Test_Case {
 	 * Register canonical domain abilities for this test.
 	 */
 	private function register_domain_abilities(): void {
-		$callback = array( DomainAbilities::class, 'register_abilities' );
+		$callback = array( AbilitiesLoader::class, 'register_abilities' );
 
 		add_action( 'wp_abilities_api_init', $callback );
 		do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
 		remove_action( 'wp_abilities_api_init', $callback );
+	}
+
+	/**
+	 * Add the test extension ability definition class.
+	 *
+	 * @param array $classes Ability definition class names.
+	 * @return array
+	 */
+	public function add_test_extension_ability_definition_class( array $classes ): array {
+		$classes[] = TestExtensionAbilityDefinition::class;
+
+		return $classes;
 	}
 
 	/**

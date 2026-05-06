@@ -1,0 +1,94 @@
+<?php
+/**
+ * Product create ability definition file.
+ */
+
+declare( strict_types=1 );
+
+namespace Automattic\WooCommerce\Internal\Abilities\Domain;
+
+use Automattic\WooCommerce\Internal\Abilities\AbilityDefinition;
+
+defined( 'ABSPATH' ) || exit;
+
+/**
+ * Registers the WooCommerce product create ability.
+ */
+class ProductCreate extends DomainAbility implements AbilityDefinition {
+
+	/**
+	 * Register the ability.
+	 *
+	 * @since 10.9.0
+	 */
+	public static function register(): void {
+		if ( self::has_ability( 'woocommerce/product-create' ) ) {
+			return;
+		}
+
+		wp_register_ability(
+			'woocommerce/product-create',
+			array(
+				'label'               => __( 'Create Product', 'woocommerce' ),
+				'description'         => __(
+					'Create a WooCommerce product using WooCommerce product APIs.',
+					'woocommerce'
+				),
+				'category'            => 'woocommerce',
+				'input_schema'        => self::get_input_schema(),
+				'output_schema'       => self::get_entity_output_schema( 'product' ),
+				'execute_callback'    => array( __CLASS__, 'execute' ),
+				'permission_callback' => array( __CLASS__, 'can_create_product' ),
+				'meta'                => self::get_domain_meta( 'create', false, false, false ),
+			)
+		);
+	}
+
+	/**
+	 * Create a product.
+	 *
+	 * @param array $input Ability input.
+	 * @return array|\WP_Error
+	 *
+	 * @since 10.9.0
+	 */
+	public static function execute( array $input ) {
+		$type    = sanitize_key( $input['type'] ?? 'simple' );
+		$product = wc_get_product_object( $type );
+
+		if ( ! $product ) {
+			return new \WP_Error(
+				'woocommerce_invalid_product_type',
+				__( 'Invalid product type.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		self::set_product_props( $product, $input );
+		$product->save();
+
+		return array(
+			'product' => self::format_product( $product ),
+		);
+	}
+
+	/**
+	 * Check product creation access.
+	 *
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function can_create_product(): bool {
+		return wc_rest_check_post_permissions( 'product', 'create' );
+	}
+
+	/**
+	 * Get the ability input schema.
+	 *
+	 * @return array
+	 */
+	private static function get_input_schema(): array {
+		return self::get_product_mutation_input_schema();
+	}
+}
