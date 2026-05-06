@@ -741,6 +741,29 @@ class WC_AJAX {
 	}
 
 	/**
+	 * Check if a product attribute taxonomy supports visual term colors.
+	 *
+	 * @param string $taxonomy Taxonomy slug.
+	 * @return bool
+	 *
+	 * @internal
+	 */
+	private static function is_visual_product_attribute_taxonomy( $taxonomy ) {
+		if ( ! taxonomy_exists( $taxonomy ) || ! taxonomy_is_product_attribute( $taxonomy ) ) {
+			return false;
+		}
+
+		if ( ! array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
+			return false;
+		}
+
+		$attribute_id = wc_attribute_taxonomy_id_by_name( $taxonomy );
+		$attribute    = $attribute_id ? wc_get_attribute( $attribute_id ) : null;
+
+		return $attribute && 'wc-visual' === $attribute->type;
+	}
+
+	/**
 	 * Add a new attribute via ajax function.
 	 *
 	 * @return void
@@ -763,6 +786,14 @@ class WC_AJAX {
 						)
 					);
 				} else {
+					if ( self::is_visual_product_attribute_taxonomy( $taxonomy ) && isset( $_POST['term_color'] ) ) {
+						$color_value = sanitize_hex_color( wp_unslash( $_POST['term_color'] ) );
+
+						if ( $color_value ) {
+							update_term_meta( $result['term_id'], 'color', $color_value );
+						}
+					}
+
 					$term = get_term_by( 'id', $result['term_id'], $taxonomy );
 					wp_send_json(
 						array(
@@ -771,9 +802,9 @@ class WC_AJAX {
 							'slug'    => $term->slug,
 						)
 					);
-				}
-			}
-		}
+				}//end if
+			}//end if
+		}//end if
 		wp_die( -1 );
 	}
 
@@ -1811,7 +1842,7 @@ class WC_AJAX {
 		foreach ( $ids as $id ) {
 			$product_object = wc_get_product( $id );
 
-			if ( ! wc_products_array_filter_readable( $product_object ) ) {
+			if ( ! $product_object || ! wc_products_array_filter_readable( $product_object ) ) {
 				continue;
 			}
 
@@ -1822,11 +1853,33 @@ class WC_AJAX {
 				continue;
 			}
 
-			if ( $managing_stock && ! empty( $_GET['display_stock'] ) ) {
-				$stock_amount = $product_object->get_stock_quantity();
-				/* Translators: %d stock amount */
-				$formatted_name .= ' &ndash; ' . sprintf( __( 'Stock: %d', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
-			}
+			if ( ! empty( $_GET['display_stock'] ) ) {
+				$stock_parts = array();
+
+				if ( $managing_stock ) {
+					$stock_amount = $product_object->get_stock_quantity();
+					/* Translators: %s stock amount */
+					$stock_parts[] = sprintf( __( 'Stock: %s', 'woocommerce' ), wc_format_stock_quantity_for_display( $stock_amount, $product_object ) );
+				}
+
+				$stock_status = $product_object->get_stock_status();
+				if ( ProductStockStatus::OUT_OF_STOCK === $stock_status ) {
+					$stock_parts[] = __( 'Out of stock', 'woocommerce' );
+				} elseif ( ProductStockStatus::ON_BACKORDER === $stock_status ) {
+					$stock_parts[] = __( 'On backorder', 'woocommerce' );
+				}
+
+				if ( ! empty( $stock_parts ) ) {
+					$formatted_name .= ' (' . implode( ' &ndash; ', $stock_parts ) . ')';
+				}
+
+				$product_status = $product_object->get_status();
+				if ( ProductStatus::PRIVATE === $product_status ) {
+					$formatted_name .= ' (' . __( 'Disabled', 'woocommerce' ) . ')';
+				} elseif ( ProductStatus::DRAFT === $product_status ) {
+					$formatted_name .= ' (' . __( 'Draft', 'woocommerce' ) . ')';
+				}
+			}//end if
 
 			$products[ $product_object->get_id() ] = rawurldecode( wp_strip_all_tags( $formatted_name ) );
 		}

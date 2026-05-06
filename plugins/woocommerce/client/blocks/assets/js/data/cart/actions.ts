@@ -18,8 +18,11 @@ export * from './thunks';
 
 /**
  * An action creator that dispatches the plain action responsible for setting the cart data in the store.
+ *
+ * Accepts a `Partial<Cart>` because the reducer merges the response into existing
+ * cart state, supporting both full replacements and targeted updates.
  */
-export function setCartData( cart: Cart ) {
+export function setCartData( cart: Partial< Cart > ) {
 	return {
 		type: types.SET_CART_DATA,
 		response: cart,

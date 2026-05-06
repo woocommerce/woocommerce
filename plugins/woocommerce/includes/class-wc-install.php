@@ -328,6 +328,8 @@ class WC_Install {
 		'10.8.0' => array(
 			'wc_update_1080_migrate_analytics_import_option',
 			'wc_update_1080_slim_orders_meta_key_index',
+			'wc_update_1080_backfill_email_template_sync_meta',
+			'wc_update_1080_create_review_order_page',
 		),
 	);
 
@@ -1156,6 +1158,11 @@ class WC_Install {
 					'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
 					'content' => '<!-- wp:shortcode -->[' . $my_account_shortcode . ']<!-- /wp:shortcode -->',
 				),
+				'review_order'   => array(
+					'name'    => _x( 'review-order', 'Page slug', 'woocommerce' ),
+					'title'   => _x( 'Review your order', 'Page title', 'woocommerce' ),
+					'content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
+				),
 				'refund_returns' => array(
 					'name'        => _x( 'refund_returns', 'Page slug', 'woocommerce' ),
 					'title'       => _x( 'Refund and Returns Policy', 'Page title', 'woocommerce' ),
@@ -1835,7 +1842,9 @@ class WC_Install {
 			}
 		}
 
+		$suppress_errors = $wpdb->suppress_errors( true );
 		$db_delta_result = dbDelta( self::get_schema() );
+		$wpdb->suppress_errors( $suppress_errors );
 
 		$comment_type_index_exists = $wpdb->get_row( "SHOW INDEX FROM {$wpdb->comments} WHERE key_name = 'woo_idx_comment_type'" );
 		if ( null === $comment_type_index_exists ) {

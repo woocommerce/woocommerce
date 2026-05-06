@@ -105,12 +105,45 @@ class Utils {
 	 *     @type int  $productId  Product ID for context-specific behavior.
 	 *     @type bool $allowZero  Whether to allow zero quantity.
 	 * }
+	 * @param bool   $set_product_context Whether to set a local woocommerce/products context on the wrapper.
+	 *                                    Only needed when the quantity input belongs to a different product than
+	 *                                    the one provided by the inherited context (e.g. child items in grouped products).
+	 *                                    Setting this unnecessarily shadows the parent context and prevents
+	 *                                    variationId updates from propagating.
 	 *
 	 * @return string The quantity HTML with interactive wrapper.
 	 */
-	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array() ) {
+	public static function make_quantity_input_interactive( $quantity_html, $wrapper_attributes = array(), $input_attributes = array(), $context = array(), $set_product_context = false ) {
 		$processor = new \WP_HTML_Tag_Processor( $quantity_html );
 		global $product;
+
+		if ( $set_product_context && $product instanceof \WC_Product ) {
+			$product_context = array(
+				'productId'   => $product->get_id(),
+				'variationId' => null,
+			);
+
+			$products_context = 'woocommerce/products::' . wp_json_encode( $product_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP );
+
+			// This moves the `woocommerce/products` context to a nested `div`,
+			// as multiple context directives are not supported in the same
+			// element in WordPress 6.8. Once WooCommerce drops support for
+			// WordPress 6.8, this code can be refactored.
+			if (
+				$processor->next_tag(
+					array(
+						'tag_name'   => 'div',
+						'class_name' => 'quantity',
+					)
+				)
+			) {
+				$processor->set_attribute( 'data-wp-context', $products_context );
+			} else {
+				// If filtered markup omits the `div.quantity`, reinitialize the
+				// processor so the input bindings below still execute.
+				$processor = new \WP_HTML_Tag_Processor( $quantity_html );
+			}
+		}
 
 		if (
 			$processor->next_tag( 'input' ) &&
@@ -144,14 +177,7 @@ class Utils {
 			$wrapper_attributes
 		);
 
-		$context_attribute = wp_interactivity_data_wp_context(
-			wp_parse_args(
-				$context,
-				array(
-					'productId' => $product instanceof \WC_Product ? $product->get_id() : 0,
-				)
-			)
-		);
+		$context_attribute = wp_interactivity_data_wp_context( $context );
 
 		return sprintf(
 			'<div %1$s %2$s>%3$s</div>',

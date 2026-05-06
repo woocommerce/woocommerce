@@ -106,6 +106,10 @@ describe( 'Product block', () => {
 
 		const productPrice = await screen.findByText( '20,00 €' );
 		expect( productPrice ).toBeInTheDocument();
+
+		// wp-6.8: MSW warns about unhandled OPTIONS preflight requests from
+		// @wordpress/core-data in jsdom where there's no real network layer.
+		expect( console ).toHaveWarned();
 	} );
 
 	it( 'should render inner blocks for admins', async () => {

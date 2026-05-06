@@ -219,7 +219,7 @@ class TransientFilesEngine implements RegisterHooksInterface {
 	 * @return string The public URL of the file.
 	 */
 	public function get_public_url( string $filename ) {
-		return $this->legacy_proxy->call_function( 'get_site_url', null, '/wc/file/transient/' . $filename );
+		return $this->legacy_proxy->call_function( 'home_url', '/wc/file/transient/' . $filename );
 	}
 
 	/**

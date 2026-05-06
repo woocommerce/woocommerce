@@ -7,10 +7,7 @@ import {
 	useReducedMotion,
 } from '@wordpress/compose';
 /* eslint-disable @woocommerce/dependency-group */
-import {
-	// @ts-expect-error missing type.
-	EditorSnackbars,
-} from '@wordpress/editor';
+import { EditorSnackbars } from '@wordpress/editor';
 import {
 	__unstableMotion as motion,
 	__unstableAnimatePresence as AnimatePresence,

@@ -1,0 +1,428 @@
+<?php
+/**
+ * Endpoint class file.
+ */
+
+declare( strict_types = 1 );
+
+namespace Automattic\WooCommerce\Internal\OrderReviews;
+
+use Automattic\WooCommerce\Enums\OrderStatus;
+use WC_Order;
+use WP_Post;
+
+/**
+ * Routes `/review-order/{id}/?key={order_key}` to the WooCommerce-managed
+ * Review Order page and renders the read-only landing page through the
+ * `[woocommerce_review_order]` shortcode.
+ *
+ * The page is intentionally hosted outside the checkout/my-account family:
+ *
+ * - It is not a checkout sub-mode like order-pay or order-received; the
+ *   customer is reviewing past purchases, not transacting.
+ * - It is not a my-account endpoint because the order key is the auth, so
+ *   guest customers must be able to reach it without logging in.
+ *
+ * The route uses the same wp_posts-backed page pattern as the checkout
+ * page so the active theme owns the page chrome (header, footer, sidebar)
+ * on both classic and block themes; the shortcode only renders the form
+ * body inside `the_content`. Any failed gating check renders the theme's
+ * 404 template so a leaked or stale link cannot disclose order existence.
+ *
+ * The container auto-calls `init()` after instantiation, which is where
+ * the WordPress hooks are registered. Resolution is driven by the
+ * `OrderReviews` wrapper that lists this class as an `init()` argument.
+ *
+ * @internal Just for internal use.
+ *
+ * @since 10.8.0
+ */
+class Endpoint {
+
+	/**
+	 * Query var that the rewrite rule sets to the order id.
+	 */
+	public const QUERY_VAR = 'review-order';
+
+	/**
+	 * `wc_get_page_id()` key for the WC-managed Review Order page.
+	 */
+	public const PAGE_KEY = 'review_order';
+
+	/**
+	 * Shortcode tag that renders the page body inside the WC page content.
+	 */
+	public const SHORTCODE = 'woocommerce_review_order';
+
+	/**
+	 * Wire the endpoint into WordPress.
+	 *
+	 * Auto-called by the WC dependency container after instantiation.
+	 *
+	 * @internal
+	 */
+	final public function init(): void {
+		add_action( 'init', array( $this, 'add_rewrite_rule' ) );
+		add_filter( 'query_vars', array( $this, 'add_query_var' ), 0 );
+		add_action( 'template_redirect', array( $this, 'gate_request' ) );
+		add_action( 'wp_loaded', array( $this, 'maybe_flush_pending_rewrite' ) );
+		add_action( 'transition_post_status', array( $this, 'skip_auto_menu_for_self' ), 9, 3 );
+		add_filter( 'get_pages', array( $this, 'exclude_self_from_page_list' ) );
+		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
+	}
+
+	/**
+	 * Hide the Review Order page from `get_pages()` results.
+	 *
+	 * Block themes' `core/page-list` block (and any classic theme using
+	 * `wp_list_pages()`) calls `get_pages()` to populate its list. Without
+	 * this filter the tokenised landing page would appear in the site
+	 * navigation alongside Cart / Checkout / My account, which is wrong:
+	 * the page is reachable only through the per-order email link.
+	 *
+	 * @param \WP_Post[]|mixed $pages Page objects returned by get_pages().
+	 * @return \WP_Post[]|mixed
+	 */
+	public function exclude_self_from_page_list( $pages ) {
+		if ( ! is_array( $pages ) || empty( $pages ) ) {
+			return $pages;
+		}
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id <= 0 ) {
+			return $pages;
+		}
+		return array_values(
+			array_filter(
+				$pages,
+				static function ( $page ) use ( $page_id ) {
+					return ! ( $page instanceof \WP_Post ) || (int) $page->ID !== $page_id;
+				}
+			)
+		);
+	}
+
+	/**
+	 * Keep the Review Order page out of nav menus that have "Auto add new
+	 * top-level pages" enabled.
+	 *
+	 * The page is reachable only through the tokenised URL the email sends
+	 * out; nobody navigates to it from a menu, so it should never appear
+	 * there. WP's `_wp_auto_add_pages_to_menu()` runs on
+	 * `transition_post_status` at priority 10. Detach it just before that
+	 * for our specific page, then restore it on priority 11 so other
+	 * transitions are unaffected.
+	 *
+	 * Compares by slug rather than by stored option id so it also fires on
+	 * the very first install — before `woocommerce_review_order_page_id`
+	 * is written.
+	 *
+	 * @param string   $new_status New post status.
+	 * @param string   $old_status Old post status.
+	 * @param \WP_Post $post       Post object.
+	 */
+	public function skip_auto_menu_for_self( $new_status, $old_status, $post ): void {
+		unset( $new_status, $old_status );
+		if ( ! $post instanceof \WP_Post || 'page' !== $post->post_type ) {
+			return;
+		}
+
+		// Identify the page by stored option id (post-install) or by the
+		// shortcode in its content (during install, before the option
+		// exists). Don't compare $post->post_name to 'review-order' alone:
+		// WP appends -2/-3/... if the slug already exists.
+		$stored_id  = (int) get_option( 'woocommerce_review_order_page_id' );
+		$is_by_id   = $stored_id > 0 && $stored_id === (int) $post->ID;
+		$is_by_slug = '' === $post->post_name
+			? false
+			: ( 'review-order' === $post->post_name || 0 === strpos( $post->post_name, 'review-order-' ) );
+		$is_by_body = false !== strpos( (string) $post->post_content, '[' . self::SHORTCODE . ']' );
+		if ( ! $is_by_id && ! $is_by_slug && ! $is_by_body ) {
+			return;
+		}
+
+		remove_action( 'transition_post_status', '_wp_auto_add_pages_to_menu', 10 );
+		add_action(
+			'transition_post_status',
+			static function () {
+				add_action( 'transition_post_status', '_wp_auto_add_pages_to_menu', 10, 3 );
+			},
+			11
+		);
+	}
+
+	/**
+	 * Flush rewrite rules once after the 10.8.0 upgrade installs the
+	 * Review Order page.
+	 *
+	 * The 10.8.0 db update runs on `init` priority 5 and only seeds the
+	 * page; `add_rewrite_rule()` doesn't fire until `init` priority 10, so
+	 * the flush has to happen later. `wp_loaded` runs after every `init`
+	 * callback, which is the earliest safe moment.
+	 */
+	public function maybe_flush_pending_rewrite(): void {
+		if ( 'yes' !== get_option( 'woocommerce_review_order_flush_rewrite_pending' ) ) {
+			return;
+		}
+		flush_rewrite_rules( false );
+		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+	}
+
+	/**
+	 * Register the rewrite rule for the review-order endpoint.
+	 *
+	 * Maps `/<page-slug>/{id}/` to the WC-managed Review Order page so the
+	 * active theme renders its standard page chrome around the shortcode.
+	 */
+	public function add_rewrite_rule(): void {
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id <= 0 ) {
+			return;
+		}
+
+		$page = get_post( $page_id );
+		if ( ! $page instanceof WP_Post || 'publish' !== $page->post_status ) {
+			return;
+		}
+
+		// Use the full page-permalink path so hierarchical pages
+		// (Review Order page moved under a parent) keep working.
+		$permalink = get_permalink( $page_id );
+		if ( ! is_string( $permalink ) || '' === $permalink ) {
+			return;
+		}
+		$path = trim( (string) wp_make_link_relative( $permalink ), '/' );
+		if ( '' === $path ) {
+			return;
+		}
+
+		add_rewrite_rule(
+			'^' . preg_quote( $path, '/' ) . '/([0-9]+)/?$',
+			'index.php?page_id=' . $page_id . '&' . self::QUERY_VAR . '=$matches[1]',
+			'top'
+		);
+	}
+
+	/**
+	 * Allow the query var through `WP::parse_request()`.
+	 *
+	 * @param string[] $vars Query vars.
+	 * @return string[]
+	 */
+	public function add_query_var( array $vars ): array {
+		$vars[] = self::QUERY_VAR;
+		return $vars;
+	}
+
+	/**
+	 * Run the gating checks before the page template renders.
+	 *
+	 * Auth failures fall through to a 404 here rather than inside the
+	 * shortcode so the response status is set before any output begins.
+	 * On success the request continues into normal page rendering and the
+	 * shortcode echoes the body inside `the_content`.
+	 */
+	public function gate_request(): void {
+		global $wp;
+
+		// Only act when the request resolves to the WC-managed Review Order
+		// page. A leftover review-order query var on some other page (manual
+		// URL tampering, third-party plugin) shouldn't trigger our auth
+		// path or 404 an unrelated page.
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id <= 0 || ! is_page( $page_id ) ) {
+			return;
+		}
+
+		// Use isset() rather than empty() so the literal "0" doesn't slip
+		// through to normal WP routing; the auth check 404s on order_id 0.
+		if ( ! isset( $wp->query_vars[ self::QUERY_VAR ] ) ) {
+			// Visiting the host page directly (no order id in the URL) is a
+			// dead end — the shortcode renders nothing and the customer
+			// sees a chrome-only page. Send them to the home page instead.
+			wp_safe_redirect( home_url( '/' ) );
+			exit;
+		}
+
+		$order_id  = absint( $wp->query_vars[ self::QUERY_VAR ] );
+		$order_key = $this->read_order_key();
+		$order     = $order_id ? wc_get_order( $order_id ) : false;
+
+		if ( ! $this->is_authorised( $order, $order_key ) ) {
+			$this->render_404();
+			exit;
+		}
+	}
+
+	/**
+	 * Render the Review Order page body for the WC-managed page.
+	 *
+	 * Called by `the_content` on the page that hosts `[woocommerce_review_order]`.
+	 * Returns an empty string when the request did not arrive through the
+	 * tokenised rewrite, so a logged-in admin previewing the page directly
+	 * sees nothing rather than a partial form.
+	 *
+	 * @return string
+	 */
+	public function render_shortcode(): string {
+		global $wp;
+
+		if ( ! isset( $wp->query_vars[ self::QUERY_VAR ] ) ) {
+			return '';
+		}
+
+		$order_id = absint( $wp->query_vars[ self::QUERY_VAR ] );
+		$order    = $order_id ? wc_get_order( $order_id ) : false;
+		if ( ! $order instanceof WC_Order ) {
+			// gate_request() will already have 404'd; this is defensive.
+			return '';
+		}
+
+		ob_start();
+		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
+		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Render the Review Order body directly. Public so unit tests can drive
+	 * the rendering path without staging a global request and the rewrite.
+	 *
+	 * @internal
+	 *
+	 * @param int $order_id Order id parsed from the URL.
+	 */
+	public function render( int $order_id ): void {
+		$order_key = $this->read_order_key();
+		$order     = $order_id ? wc_get_order( $order_id ) : false;
+
+		if ( ! $this->is_authorised( $order, $order_key ) ) {
+			$this->render_404();
+			return;
+		}
+
+		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
+	}
+
+	/**
+	 * Build the public, tokenised URL for an order's review-order page.
+	 *
+	 * @param WC_Order $order Order to build the URL for.
+	 * @return string
+	 */
+	public static function get_url( WC_Order $order ): string {
+		$page_id   = (int) wc_get_page_id( self::PAGE_KEY );
+		$permalink = (string) ( $page_id > 0 ? get_permalink( $page_id ) : '' );
+
+		if ( '' === $permalink ) {
+			$url = '';
+		} elseif ( false === strpos( $permalink, '?' ) ) {
+			// Pretty permalinks: append the order id as a path segment.
+			$url = trailingslashit( $permalink ) . (string) $order->get_id() . '/';
+			$url = add_query_arg( 'key', $order->get_order_key(), $url );
+		} else {
+			// Plain permalinks: page permalink is /?page_id=NNN, so add the
+			// order id as a query var rather than munging the path.
+			$url = add_query_arg(
+				array(
+					self::QUERY_VAR => (string) $order->get_id(),
+					'key'           => $order->get_order_key(),
+				),
+				$permalink
+			);
+		}
+
+		/**
+		 * Filter the Review Order URL that the review-request email links to.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param string   $url   The review-order URL.
+		 * @param WC_Order $order The order object.
+		 */
+		return (string) apply_filters( 'woocommerce_review_order_url', $url, $order );
+	}
+
+	/**
+	 * Read the order key from the request, sanitised.
+	 *
+	 * @return string
+	 */
+	private function read_order_key(): string {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only landing page; the order key is the auth.
+		$raw = ( isset( $_GET['key'] ) && is_string( $_GET['key'] ) ) ? wc_clean( wp_unslash( $_GET['key'] ) ) : '';
+		return is_string( $raw ) ? $raw : '';
+	}
+
+	/**
+	 * Decide whether the request is allowed to render the page.
+	 *
+	 * @param mixed  $order     The candidate order. Anything other than a `WC_Order` fails.
+	 * @param string $order_key The order key supplied via query arg.
+	 * @return bool
+	 */
+	private function is_authorised( $order, string $order_key ): bool {
+		if ( ! $order instanceof WC_Order ) {
+			return false;
+		}
+
+		if ( '' === $order_key || ! hash_equals( $order->get_order_key(), $order_key ) ) {
+			return false;
+		}
+
+		/**
+		 * Filter the order statuses that are eligible to access the Review Order page.
+		 *
+		 * The scheduler unschedules pending sends on refund/cancel/trash/delete, but
+		 * emails already in the customer's inbox can still be clicked. The route-level
+		 * check blocks those late clicks for orders that have moved out of the
+		 * eligible set.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param string[] $eligible_statuses Status slugs without the `wc-` prefix.
+		 * @param WC_Order $order             The order being reviewed.
+		 */
+		$eligible_statuses = (array) apply_filters(
+			'woocommerce_review_order_eligible_statuses',
+			array( OrderStatus::COMPLETED ),
+			$order
+		);
+
+		if ( ! in_array( $order->get_status(), $eligible_statuses, true ) ) {
+			return false;
+		}
+
+		// Logged-in customer must own the order. Guests with the order key still pass.
+		if ( $order->get_customer_id() && is_user_logged_in() && get_current_user_id() !== $order->get_customer_id() ) {
+			return false;
+		}
+
+		return true;
+	}
+
+	/**
+	 * Mark the current request as a 404 and load the theme's 404 template.
+	 *
+	 * Fails closed on every gating check so a stale or tampered link cannot
+	 * disclose order existence.
+	 */
+	private function render_404(): void {
+		global $wp_query;
+
+		$wp_query->set_404();
+		status_header( 404 );
+		nocache_headers();
+
+		$template = get_query_template( '404' );
+		if ( ! empty( $template ) && file_exists( $template ) ) {
+			include $template;
+			return;
+		}
+
+		// Fallback when the active theme has no 404 template: emit a minimal
+		// page so the response body isn't empty.
+		printf(
+			'<!doctype html><html><head><meta charset="utf-8"><title>%1$s</title></head><body><h1>%1$s</h1></body></html>',
+			esc_html__( 'Page not found', 'woocommerce' )
+		);
+	}
+}

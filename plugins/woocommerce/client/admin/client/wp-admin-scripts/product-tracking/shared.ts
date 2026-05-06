@@ -457,8 +457,7 @@ const attachAddCustomAttributeTracks = () => {
  */
 const attachAddExistingAttributeTracks = () => {
 	window
-		// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-		// @ts-ignore Need to use jQuery to hook up to the select2:select event since the select2 component is jQuery-based
+		// @ts-expect-error jQuery is attached to window by WordPress at runtime but is not declared on the Window type.
 		?.jQuery( 'select.wc-attribute-search' )
 		.on( 'select2:select', function () {
 			recordEvent( 'product_attributes_buttons', {
