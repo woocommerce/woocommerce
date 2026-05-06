@@ -49,11 +49,12 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		foreach ( $this->temp_files as $temp_file ) {
 			if ( file_exists( $temp_file ) ) {
-				unlink( $temp_file );
+				wp_delete_file( $temp_file );
 			}
 		}
 		foreach ( $this->temp_dirs as $temp_dir ) {
 			if ( is_dir( $temp_dir ) ) {
+				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_rmdir -- Test cleanup of an empty directory we created in this process.
 				rmdir( $temp_dir );
 			}
 		}
@@ -248,6 +249,7 @@ class FilesystemUtilTest extends WC_Unit_Test_Case {
 		}
 
 		$this->assertTrue( $result );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local file we just wrote, not a remote URL.
 		$this->assertSame( $value, file_get_contents( $path ) );
 	}
 
