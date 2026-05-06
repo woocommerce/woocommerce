@@ -37,6 +37,10 @@
 			input.dispatchEvent( new window.Event( 'change', { bubbles: true } ) );
 		}
 
+		// DOM order is 5..1 (reversed for the CSS row-reverse layout), so
+		// "next visual star" is the previous DOM input and vice-versa.
+		// Home/End map to visual-leftmost / visual-rightmost = inputs[last] /
+		// inputs[0] in DOM order.
 		inputs.forEach( function ( input, index ) {
 			input.addEventListener( 'change', syncCaption );
 
@@ -45,18 +49,18 @@
 				switch ( event.key ) {
 					case 'ArrowRight':
 					case 'ArrowDown':
-						nextIndex = ( index + 1 ) % inputs.length;
-						break;
-					case 'ArrowLeft':
-					case 'ArrowUp':
 						nextIndex =
 							( index - 1 + inputs.length ) % inputs.length;
 						break;
+					case 'ArrowLeft':
+					case 'ArrowUp':
+						nextIndex = ( index + 1 ) % inputs.length;
+						break;
 					case 'Home':
-						nextIndex = 0;
+						nextIndex = inputs.length - 1;
 						break;
 					case 'End':
-						nextIndex = inputs.length - 1;
+						nextIndex = 0;
 						break;
 					default:
 						return;

@@ -23,7 +23,13 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$caption_id = $id_prefix . '-caption';
+$caption_id      = $id_prefix . '-caption';
+$initial_caption = $selected > 0 && isset( $labels[ $selected ] ) ? $labels[ $selected ] : '';
+
+// Render in reverse (5 first, 1 last) so the visual layout — driven by
+// `flex-direction: row-reverse` — can use ~ sibling selectors for the
+// "fill stars 1..N" effect without depending on `:has()`.
+$reversed = array_reverse( $labels, true );
 ?>
 <div
 	class="woocommerce-star-rating"
@@ -31,21 +37,21 @@ $caption_id = $id_prefix . '-caption';
 	aria-labelledby="<?php echo esc_attr( $label_id ); ?>"
 	aria-describedby="<?php echo esc_attr( $caption_id ); ?>"
 >
-	<?php foreach ( $labels as $value => $label ) : ?>
+	<?php foreach ( $reversed as $value => $label ) : ?>
 		<?php
 		$input_id = $id_prefix . '-' . $value;
 		$checked  = $value === $selected;
 		?>
+		<input
+			class="woocommerce-star-rating__input"
+			type="radio"
+			id="<?php echo esc_attr( $input_id ); ?>"
+			name="<?php echo esc_attr( $name ); ?>"
+			value="<?php echo esc_attr( (string) $value ); ?>"
+			data-label="<?php echo esc_attr( $label ); ?>"
+			<?php checked( $checked ); ?>
+		/>
 		<label class="woocommerce-star-rating__star" for="<?php echo esc_attr( $input_id ); ?>">
-			<input
-				class="woocommerce-star-rating__input"
-				type="radio"
-				id="<?php echo esc_attr( $input_id ); ?>"
-				name="<?php echo esc_attr( $name ); ?>"
-				value="<?php echo esc_attr( (string) $value ); ?>"
-				data-label="<?php echo esc_attr( $label ); ?>"
-				<?php checked( $checked ); ?>
-			/>
 			<span class="screen-reader-text">
 				<?php
 				printf(
@@ -73,7 +79,5 @@ $caption_id = $id_prefix . '-caption';
 		id="<?php echo esc_attr( $caption_id ); ?>"
 		class="woocommerce-star-rating__caption"
 		aria-live="polite"
-	>
-		<?php echo $selected > 0 && isset( $labels[ $selected ] ) ? esc_html( $labels[ $selected ] ) : ''; ?>
-	</span>
+	><?php echo esc_html( $initial_caption ); ?></span>
 </div>

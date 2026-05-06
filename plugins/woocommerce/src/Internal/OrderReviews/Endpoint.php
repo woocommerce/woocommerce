@@ -423,7 +423,16 @@ class Endpoint {
 		// Tell WP to swap to the *-rtl.css variant on RTL sites.
 		wp_style_add_data( 'wc-order-review', 'rtl', 'replace' );
 
-		wp_enqueue_script( 'wc-order-review', $asset_url( '/assets/js/frontend/order-review' . $suffix . '.js' ), array(), $version, true );
+		wp_enqueue_script(
+			'wc-order-review',
+			$asset_url( '/assets/js/frontend/order-review' . $suffix . '.js' ),
+			array(),
+			$version,
+			array(
+				'strategy'  => 'defer',
+				'in_footer' => true,
+			)
+		);
 	}
 
 	/**
