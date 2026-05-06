@@ -7,6 +7,7 @@ use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Exception;
 use WP_Filesystem_Base;
+use WP_Filesystem_Direct;
 
 /**
  * FilesystemUtil class.
@@ -42,6 +43,38 @@ class FilesystemUtil {
 	}
 
 	/**
+	 * Get a direct filesystem instance, bypassing the configured FS_METHOD.
+	 *
+	 * This is appropriate for paths that are guaranteed to be writable by the
+	 * web server process (such as anything inside the uploads directory). Using
+	 * the configured FS_METHOD for those paths is unnecessary and breaks on
+	 * sites where FS_METHOD is set to an FTP-based method without complete
+	 * credentials, even though the target paths are directly writable.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return WP_Filesystem_Direct
+	 */
+	public static function get_wp_filesystem_direct(): WP_Filesystem_Direct {
+		static $direct_filesystem = null;
+
+		if ( $direct_filesystem instanceof WP_Filesystem_Direct ) {
+			return $direct_filesystem;
+		}
+
+		if ( ! class_exists( 'WP_Filesystem_Base' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-base.php';
+		}
+		if ( ! class_exists( 'WP_Filesystem_Direct' ) ) {
+			require_once ABSPATH . 'wp-admin/includes/class-wp-filesystem-direct.php';
+		}
+
+		$direct_filesystem = new WP_Filesystem_Direct( null );
+
+		return $direct_filesystem;
+	}
+
+	/**
 	 * Get the WP filesystem method, with a fallback to 'direct' if no FS_METHOD constant exists and there are not FTP related options/credentials set.
 	 *
 	 * @return string|false The name of the WP filesystem method to use.
@@ -74,6 +107,10 @@ class FilesystemUtil {
 	 * Recursively creates a directory (if it doesn't exist) and adds an empty index.html and a .htaccess to prevent
 	 * directory listing.
 	 *
+	 * Always uses a direct filesystem for the file operations, since the
+	 * caller is responsible for choosing a path that is writable by the web
+	 * server process.
+	 *
 	 * @since 9.3.0
 	 *
 	 * @param string $path Directory to create.
@@ -81,7 +118,7 @@ class FilesystemUtil {
 	 * @throws \Exception In case of error.
 	 */
 	public static function mkdir_p_not_indexable( string $path, bool $allow_file_access = false ): void {
-		$wp_fs = self::get_wp_filesystem();
+		$wp_fs = self::get_wp_filesystem_direct();
 
 		if ( $wp_fs->is_dir( $path ) ) {
 			return;
@@ -181,11 +218,15 @@ class FilesystemUtil {
 	/**
 	 * Validate that a file path is a valid upload path.
 	 *
+	 * Uses a direct filesystem instance rather than honoring FS_METHOD: this
+	 * check only inspects paths under ABSPATH or the uploads directory, both
+	 * of which the web server can read directly.
+	 *
 	 * @param string $path The path to validate.
 	 * @throws \Exception If the file path is not a valid upload path.
 	 */
 	public static function validate_upload_file_path( string $path ): void {
-		$wp_filesystem = self::get_wp_filesystem();
+		$wp_filesystem = self::get_wp_filesystem_direct();
 
 		// File must exist and be readable.
 		$is_valid_file = $wp_filesystem->is_readable( $path );
