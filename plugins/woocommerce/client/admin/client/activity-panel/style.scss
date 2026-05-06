@@ -17,8 +17,8 @@
 	}
 
 	svg {
-		width: 24px;
-		height: 24px;
+		width: 18px;
+		height: 18px;
 
 		&.woocommerce-layout__activity-panel-tab-icon {
 			fill: none;
@@ -106,7 +106,9 @@
 			position: absolute;
 			padding: 1px;
 			background: $alert-red;
-			border: 2px solid $studio-white;
+			// Match floating-header background so the ring around the unread
+			// dot blends in instead of looking like a white pill on grey.
+			border: 2px solid #f0f0f1;
 			width: 4px;
 			height: 4px;
 			display: inline-block;
@@ -130,6 +132,9 @@
 		&:hover,
 		&.components-button:not(:disabled):not([aria-disabled="true"]):hover {
 			box-shadow: none;
+			// Match header-meta-icon hover treatment so all five icons
+			// (bell / list / megaphone / gear / ?) read as one unified group.
+			color: $gray-900;
 
 			&.has-unread::after,
 			&.woocommerce-layout__activity-panel-tab-wordpress-notices::after {
@@ -187,7 +192,8 @@
 	position: absolute;
 	padding: 1px;
 	background: $core-orange;
-	border: 2px solid $studio-white;
+	// Match floating-header background — see note above.
+	border: 2px solid #f0f0f1;
 	width: 4px;
 	height: 4px;
 	display: inline-block;

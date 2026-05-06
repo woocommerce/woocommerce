@@ -151,11 +151,10 @@ export const BaseHeader = ( {
 	>( null );
 
 	// Reverse direction of the tab-group sync: when an activity-panel tab is
-	// clicked AND a wp-admin dropdown is currently open, close the dropdown and
-	// clear our active state. Bail out early when there's nothing to close —
-	// otherwise we'd trigger a no-op setState mid-click and re-render BaseHeader,
-	// which destabilises the activity panel's own tab-switch state and breaks
-	// switching between two activity-panel tabs (e.g. bell ↔ finish setup).
+	// clicked AND a wp-admin dropdown is currently open, close the dropdown.
+	// Deferred via setTimeout so the wp-admin click happens AFTER the
+	// activity-panel's own React handlers have committed their state — otherwise
+	// the cross-system click cascade breaks bell ↔ finish setup tab switching.
 	useEffect( () => {
 		const handler = ( e: Event ) => {
 			const target = e.target as HTMLElement | null;
@@ -164,23 +163,53 @@ export const BaseHeader = ( {
 			) {
 				return;
 			}
-			const screenOptOpen =
-				document.querySelector< HTMLButtonElement >(
-					'#show-settings-link[aria-expanded="true"]'
-				);
-			const helpOpen = document.querySelector< HTMLButtonElement >(
-				'#contextual-help-link[aria-expanded="true"]'
-			);
-			if ( ! screenOptOpen && ! helpOpen ) {
-				return;
-			}
-			screenOptOpen?.click();
-			helpOpen?.click();
-			setActiveMetaIcon( null );
+			setTimeout( () => {
+				document
+					.querySelector< HTMLButtonElement >(
+						'#show-settings-link[aria-expanded="true"]'
+					)
+					?.click();
+				document
+					.querySelector< HTMLButtonElement >(
+						'#contextual-help-link[aria-expanded="true"]'
+					)
+					?.click();
+			}, 0 );
 		};
 		document.addEventListener( 'click', handler, true );
 		return () => document.removeEventListener( 'click', handler, true );
 	}, [] );
+
+	// Keep activeMetaIcon in sync with the actual wp-admin dropdown state by
+	// observing aria-expanded changes on the trigger buttons. This way React
+	// state updates only happen *after* a click has fully settled — never during.
+	useEffect( () => {
+		if ( ! hasScreenOptions && ! hasContextualHelp ) {
+			return;
+		}
+		const screenOptBtn =
+			document.querySelector< HTMLButtonElement >( '#show-settings-link' );
+		const helpBtn = document.querySelector< HTMLButtonElement >(
+			'#contextual-help-link'
+		);
+		const sync = () => {
+			const screenOpen =
+				screenOptBtn?.getAttribute( 'aria-expanded' ) === 'true';
+			const helpOpen =
+				helpBtn?.getAttribute( 'aria-expanded' ) === 'true';
+			setActiveMetaIcon(
+				screenOpen ? 'screen-options' : helpOpen ? 'help' : null
+			);
+		};
+		const observer = new MutationObserver( sync );
+		const opts = {
+			attributes: true,
+			attributeFilter: [ 'aria-expanded' ],
+		};
+		if ( screenOptBtn ) observer.observe( screenOptBtn, opts );
+		if ( helpBtn ) observer.observe( helpBtn, opts );
+		return () => observer.disconnect();
+	}, [ hasScreenOptions, hasContextualHelp ] );
 
 	const triggerMetaIcon = (
 		which: 'screen-options' | 'help',
@@ -192,12 +221,19 @@ export const BaseHeader = ( {
 				'.woocommerce-layout__activity-panel-tab.is-active'
 			)
 			?.click();
-		const trigger =
-			document.querySelector< HTMLButtonElement >( triggerId );
-		trigger?.click();
-		// wp-admin's screen-meta.js sets aria-expanded synchronously after click.
-		const isOpen = trigger?.getAttribute( 'aria-expanded' ) === 'true';
-		setActiveMetaIcon( isOpen ? which : null );
+		// Close the OTHER wp-admin dropdown if open (mutual exclusion between
+		// gear ↔ help).
+		const otherTriggerId =
+			which === 'screen-options'
+				? '#contextual-help-link'
+				: '#show-settings-link';
+		document
+			.querySelector< HTMLButtonElement >(
+				`${ otherTriggerId }[aria-expanded="true"]`
+			)
+			?.click();
+		// Toggle the target dropdown. State syncs via the MutationObserver above.
+		document.querySelector< HTMLButtonElement >( triggerId )?.click();
 	};
 
 	const shouldRenderTitle =
@@ -274,6 +310,7 @@ export const BaseHeader = ( {
 							'Screen Options',
 							'woocommerce'
 						) }
+						title={ __( 'Screen Options', 'woocommerce' ) }
 						onClick={ () =>
 							triggerMetaIcon(
 								'screen-options',
@@ -293,6 +330,7 @@ export const BaseHeader = ( {
 							}
 						) }
 						aria-label={ __( 'Help', 'woocommerce' ) }
+						title={ __( 'Help', 'woocommerce' ) }
 						onClick={ () =>
 							triggerMetaIcon(
 								'help',

@@ -15,23 +15,17 @@
 	white-space: nowrap;
 }
 
-// Visually hide wp-admin's original Screen Options + Help button strip — those
-// entry points are consolidated into the Woo floating header as icons. We use
-// the visually-hidden pattern (rather than display:none) so wp-admin's jQuery
-// click handlers on #show-settings-link and #contextual-help-link still fire
-// when our icons proxy a .click() into them.
+// Collapse wp-admin's original Screen Options + Help button strip — those
+// entry points are consolidated into the Woo floating header as icons.
+// Using height:0 + overflow:hidden (rather than display:none or absolute
+// off-screen) keeps the buttons in the layout tree so wp-admin's jQuery
+// delegated click handlers fire normally when our icons proxy a .click()
+// into #show-settings-link and #contextual-help-link.
 .woocommerce-admin-page #screen-meta-links,
 body.woocommerce_page_wc-admin #screen-meta-links {
-	position: absolute;
-	width: 1px;
-	height: 1px;
-	margin: -1px;
-	padding: 0;
+	height: 0;
 	overflow: hidden;
-	clip: rect(0 0 0 0);
-	clip-path: inset(50%);
-	white-space: nowrap;
-	border: 0;
+	margin: 0;
 }
 
 // Chrome-only narrow-bar height (Edit Order, Edit Product, Add Product, etc.).
