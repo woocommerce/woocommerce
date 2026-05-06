@@ -357,14 +357,10 @@ describe( 'useUpdateBanner — apply / gates / dispatchers (6c)', () => {
 		expect( result.current.applyState ).toBe( 'idle' );
 
 		let applyPromise: Promise< void > = Promise.resolve();
-		// `apply()` does sha1(content) before flipping state to
-		// `'applying'`. Flush microtasks so the state transition
-		// commits before we assert on it.
+		// `apply()` flips to `'applying'` synchronously before the sha1
+		// microtask, so a single microtask flush is enough.
 		await act( async () => {
 			applyPromise = result.current.apply();
-			// Wait for sha1 microtask to settle and the
-			// `setApplyState('applying')` call to commit.
-			await Promise.resolve();
 			await Promise.resolve();
 		} );
 		// In flight.
@@ -385,10 +381,25 @@ describe( 'useUpdateBanner — apply / gates / dispatchers (6c)', () => {
 		expect( result.current.applyState ).toBe( 'applied' );
 	} );
 
-	it( 'apply transitions idle -> applying -> failed when /apply rejects', async () => {
+	it( 'apply transitions idle -> applying -> failed when doApply resolves with null (falsy result treated as failure)', async () => {
 		setUpMocks( {
 			summary: summaryFixture(),
 			apply: jest.fn().mockResolvedValue( null ),
+		} );
+
+		const { result } = renderHook( () => useUpdateBanner() );
+
+		await act( async () => {
+			await result.current.apply();
+		} );
+
+		expect( result.current.applyState ).toBe( 'failed' );
+	} );
+
+	it( 'apply transitions to failed when doApply rejects (so banner can recover)', async () => {
+		setUpMocks( {
+			summary: summaryFixture(),
+			apply: jest.fn().mockRejectedValue( new Error( 'network down' ) ),
 		} );
 
 		const { result } = renderHook( () => useUpdateBanner() );
@@ -521,9 +532,7 @@ describe( 'useUpdateBanner — Tracks (6d)', () => {
 			'woocommerce_block_email_update_dismissed',
 			expect.anything()
 		);
-		expect( dispatchMocks.dismissUpdateBanner ).toHaveBeenCalledWith(
-			42
-		);
+		expect( dispatchMocks.dismissUpdateBanner ).toHaveBeenCalledWith( 42 );
 	} );
 
 	it( '_applied fires on apply success with shared payload + applied_from + auto_resolved + had_customizations', async () => {

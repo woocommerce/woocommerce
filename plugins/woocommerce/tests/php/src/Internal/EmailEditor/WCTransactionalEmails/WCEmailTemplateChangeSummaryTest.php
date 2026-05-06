@@ -508,6 +508,10 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 		$this->assertIsString( $summary['source_hash_to'] );
 		$this->assertNotEmpty( $summary['source_hash_to'] );
 		$this->assertSame( 40, strlen( $summary['source_hash_to'] ) );
+		$this->assertTrue(
+			ctype_xdigit( $summary['source_hash_to'] ),
+			'source_hash_to must be a hex-only sha1 (40 hex chars).'
+		);
 	}
 
 	/**

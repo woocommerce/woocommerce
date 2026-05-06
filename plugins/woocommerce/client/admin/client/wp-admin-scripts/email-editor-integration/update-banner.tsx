@@ -26,8 +26,6 @@ const CHANGES_LIST_ID = 'wc-update-banner-changes';
 
 interface UpdateBannerProps {
 	summary: ChangeSummary | null;
-	isLoadingSummary: boolean;
-	summaryError: Error | null;
 	applyState: ApplyState;
 	canApply: boolean;
 	canReview: boolean;

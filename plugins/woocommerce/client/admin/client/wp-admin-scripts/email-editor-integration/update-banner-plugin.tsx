@@ -69,8 +69,6 @@ export function UpdateBannerPlugin(): JSX.Element | null {
 	return createPortal(
 		<UpdateBanner
 			summary={ banner.summary }
-			isLoadingSummary={ banner.isLoadingSummary }
-			summaryError={ banner.summaryError }
 			applyState={ banner.applyState }
 			canApply={ banner.canApply }
 			canReview={ banner.canReview }

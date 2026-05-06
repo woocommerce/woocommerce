@@ -386,26 +386,37 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 			setApplyState( 'failed' );
 			return;
 		}
-		// Compute `had_customizations` BEFORE the apply round-trip so
-		// the comparison is against the pre-apply content, not the
-		// merged content that core-data caches mid-flight.
-		const contentRaw =
-			( record as { content?: { raw?: string } } ).content?.raw ?? '';
-		const hadCustomizations = sharedPayload.source_hash_from
-			? ( await sha1Hex( contentRaw ) ) !== sharedPayload.source_hash_from
-			: false;
-
+		// Flip to `applying` synchronously so the UI reflects the click
+		// even before the (fast) sha1 microtask + the apply round-trip.
 		setApplyState( 'applying' );
-		const res = await doApply( [] );
-		if ( res ) {
-			setApplyState( 'applied' );
-			recordEvent( 'woocommerce_block_email_update_applied', {
-				...sharedPayload,
-				applied_from: 'editor_banner',
-				auto_resolved: true,
-				had_customizations: hadCustomizations,
-			} );
-		} else {
+		try {
+			// Compute `had_customizations` BEFORE the apply round-trip so
+			// the comparison is against the pre-apply content, not the
+			// merged content that core-data caches mid-flight.
+			const contentRaw =
+				( record as { content?: { raw?: string } } ).content?.raw ?? '';
+			const hadCustomizations = sharedPayload.source_hash_from
+				? ( await sha1Hex( contentRaw ) ) !==
+				  sharedPayload.source_hash_from
+				: false;
+
+			const res = await doApply( [] );
+			if ( res ) {
+				setApplyState( 'applied' );
+				recordEvent( 'woocommerce_block_email_update_applied', {
+					...sharedPayload,
+					applied_from: 'editor_banner',
+					auto_resolved: true,
+					had_customizations: hadCustomizations,
+				} );
+			} else {
+				setApplyState( 'failed' );
+			}
+		} catch {
+			// `doApply` already swallows fetch errors, but `sha1Hex` (Web
+			// Crypto) and any future async work in here can throw — make
+			// sure the banner can recover instead of getting stuck in
+			// `applying`.
 			setApplyState( 'failed' );
 		}
 	}, [ doApply, sharedPayload, record ] );

@@ -203,5 +203,20 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 			$data['meta'][ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ],
 			'Unstamped posts must surface an empty version; the JS data hook normalises this to null.'
 		);
+
+		// WP core surfaces registered string meta with an empty-string default when no value is stored.
+		$this->assertArrayHasKey( WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $data['meta'] );
+		$this->assertSame(
+			'',
+			$data['meta'][ WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY ],
+			'Unstamped posts must surface an empty source hash.'
+		);
+
+		// WP core surfaces registered boolean meta as `false` when no value is stored.
+		$this->assertArrayHasKey( WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, $data['meta'] );
+		$this->assertFalse(
+			$data['meta'][ WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY ],
+			'Unstamped posts must surface false for the backfilled flag.'
+		);
 	}
 }

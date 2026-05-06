@@ -28,8 +28,6 @@ const baseSummary: ChangeSummary = {
 
 interface BannerOverrides {
 	summary?: ChangeSummary | null;
-	isLoadingSummary?: boolean;
-	summaryError?: Error | null;
 	applyState?: ApplyState;
 	canApply?: boolean;
 	canReview?: boolean;
@@ -56,8 +54,6 @@ function renderBanner( overrides: BannerOverrides = {} ) {
 					? baseSummary
 					: overrides.summary
 			}
-			isLoadingSummary={ overrides.isLoadingSummary ?? false }
-			summaryError={ overrides.summaryError ?? null }
 			applyState={ overrides.applyState ?? 'idle' }
 			canApply={ overrides.canApply ?? true }
 			canReview={ overrides.canReview ?? true }
