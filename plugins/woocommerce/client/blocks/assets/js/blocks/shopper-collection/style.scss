@@ -1,6 +1,31 @@
-// The block IS the grid. supports.layout's `columnCount` attribute drives
-// our --wc-shopper-collection-columns CSS variable (set inline on the wrapper
-// in both editor preview and PHP render). No nested grids, no inner blocks.
+// Frontend stylesheet for the Shopper Collection block.
+// Diverges from `editor.scss` because the editor canvas loads the
+// WooCommerce atomic block stylesheet for free (which provides image
+// sizing, the relative/absolute positioning for the remove-button
+// overlay, etc.); the frontend only ships this block's CSS, so anything
+// the layout depends on has to live here. If we add pieces to
+// editor.scss that the frontend also needs, mirror them here too —
+// keep the visual result aligned.
+// TODO: revisit how this block depends on atomic-block CSS. We currently
+// borrow `.wc-block-components-product-image` / `__inner-container` from
+// the product-image atomic block. Product Collection avoids this problem
+// by *rendering* the atomic blocks as inner blocks, so WordPress
+// auto-enqueues their stylesheets — we don't, so we have to handle it
+// ourselves. Three options:
+//   1. (current) Duplicate the rules we need into this file.
+//      Self-contained but drifts if atomic styles change upstream.
+//   2. Enqueue the atomic image stylesheet from ShopperCollection.php
+//      (e.g. `wp_enqueue_style( 'wc-block-product-elements-image' )` —
+//      verify the actual handle in the build). Zero duplication, but
+//      pulls in the whole atomic stylesheet for a few rules.
+//   3. Stop borrowing atomic classes — give our markup its own
+//      block-local classes (e.g. `wc-block-shopper-collection-item__image`,
+//      `__image-link`) and own all the styling. Cleanest ownership, but
+//      requires a small template rewrite.
+// Option 1 is the lightest while we only borrow two classes; switch to
+// option 2 if we end up borrowing more, or option 3 if a future
+// variation needs different image/overlay behaviour.
+
 .wc-block-shopper-collection {
 	display: grid;
 	gap: var(--wp--style--block-gap, 1.5em);
@@ -18,9 +43,34 @@
 	flex-direction: column;
 	gap: 0.25em;
 
-	// Image and price visual styling come from the shared atomic classes
-	// (wc-block-components-product-image / -price) loaded by the global
-	// wc-blocks stylesheet — no per-element rules needed here.
+	// `.wc-block-components-product-image` is normally styled by the
+	// atomic-block stylesheet. Reproduce just enough here so the
+	// image fills its column track and acts as a positioning anchor
+	// for the remove-button overlay.
+	.wc-block-components-product-image {
+		display: block;
+		margin: 0;
+		position: relative;
+
+		img {
+			display: block;
+			height: auto;
+			max-width: 100%;
+			width: 100%;
+		}
+	}
+
+	// The remove button lives inside `__inner-container` which the
+	// atomic stylesheet positions absolutely in the top-right of the
+	// image. Replicate that here so the button overlays rather than
+	// stacking below the thumbnail.
+	.wc-block-components-product-image__inner-container {
+		padding: 0.5em;
+		position: absolute;
+		right: 0;
+		top: 0;
+		z-index: 10;
+	}
 
 	// Title spacing/line-height matches Product Collection's default
 	// product-title attributes (level: 2, margin: 0 0 0.75rem, line-height: 1.4).
@@ -42,12 +92,10 @@
 		text-align: center;
 	}
 
-	// Remove button overlays the image (mirrors Product Collection's
-	// sale-badge slot — top-right corner inside the product-image wrapper).
-	// Positioned absolute with align-self: flex-end so the parent's
-	// __inner-container flex layout pushes it to the right edge.
+	// The remove button is centered inside `__inner-container`, which is
+	// itself absolutely positioned over the image. No alignment hacks
+	// needed here; just style the pill.
 	&__remove {
-		align-self: flex-end;
 		appearance: none;
 		background: rgba(0, 0, 0, 0.65);
 		border: 0;
@@ -57,7 +105,6 @@
 		font-size: var(--wp--preset--font-size--small, 0.75em);
 		line-height: 1;
 		padding: 0.4em 0.75em;
-		z-index: 10;
 
 		&[disabled] {
 			cursor: not-allowed;
@@ -72,6 +119,17 @@
 
 .wc-block-shopper-collection__empty {
 	color: rgba(0, 0, 0, 0.7);
+	grid-column: 1 / -1;
+	padding: 1em 0;
+	text-align: center;
+}
+
+// Error state spans every grid column so it reads as a single alert
+// rather than a badly-sized cell when the collection has a multi-column
+// layout. Same treatment as the empty state above for symmetry.
+.wc-block-shopper-collection__error {
+	color: #b91c1c;
+	grid-column: 1 / -1;
 	padding: 1em 0;
 	text-align: center;
 }

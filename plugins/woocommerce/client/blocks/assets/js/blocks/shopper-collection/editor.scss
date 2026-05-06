@@ -1,0 +1,88 @@
+// The block IS the grid. supports.layout's `columnCount` attribute drives
+// our --wc-shopper-collection-columns CSS variable (set inline on the wrapper
+// in both editor preview and PHP render). No nested grids, no inner blocks.
+.wc-block-shopper-collection {
+	display: grid;
+	gap: var(--wp--style--block-gap, 1.5em);
+	grid-template-columns: repeat(
+		var(--wc-shopper-collection-columns, 3),
+		minmax(0, 1fr)
+	);
+	list-style: none;
+	margin: 0;
+	padding: 0;
+}
+
+.wc-block-shopper-collection-item {
+	display: flex;
+	flex-direction: column;
+	gap: 0.25em;
+
+	// Image and price visual styling come from the shared atomic classes
+	// (wc-block-components-product-image / -price) loaded by the global
+	// wc-blocks stylesheet — no per-element rules needed here.
+
+	// Title spacing/line-height matches Product Collection's default
+	// product-title attributes (level: 2, margin: 0 0 0.75rem, line-height: 1.4).
+	// We target wp-block-post-title (core's post-title class) because the
+	// editor preview mirrors PC's editor render, which uses core/post-title.
+	.wp-block-post-title {
+		line-height: 1.4;
+		margin: 0 0 0.75rem;
+	}
+
+	// Variation and quantity have no atomic equivalent in Product Collection,
+	// so we own their styling. Center-aligned and small to mirror the rest
+	// of the row (price + button use the WP `has-small-font-size` preset).
+	&__variation,
+	&__quantity {
+		color: rgba(0, 0, 0, 0.7);
+		display: block;
+		font-size: var(--wp--preset--font-size--small, 0.875em);
+		text-align: center;
+	}
+
+	// Remove button overlays the image (mirrors Product Collection's
+	// sale-badge slot — top-right corner inside the product-image wrapper).
+	// Positioned absolute with align-self: flex-end so the parent's
+	// __inner-container flex layout pushes it to the right edge.
+	&__remove {
+		align-self: flex-end;
+		appearance: none;
+		background: rgba(0, 0, 0, 0.65);
+		border: 0;
+		border-radius: 999px;
+		color: #fff;
+		cursor: pointer;
+		font-size: var(--wp--preset--font-size--small, 0.75em);
+		line-height: 1;
+		padding: 0.4em 0.75em;
+		z-index: 10;
+
+		&[disabled] {
+			cursor: not-allowed;
+			opacity: 0.7;
+		}
+
+		&:hover:not([disabled]) {
+			background: rgba(0, 0, 0, 0.85);
+		}
+	}
+}
+
+.wc-block-shopper-collection__empty {
+	color: rgba(0, 0, 0, 0.7);
+	grid-column: 1 / -1;
+	padding: 1em 0;
+	text-align: center;
+}
+
+// Error state spans every grid column so it reads as a single alert
+// rather than a badly-sized cell when the collection has a multi-column
+// layout. Same treatment as the empty state above for symmetry.
+.wc-block-shopper-collection__error {
+	color: #b91c1c;
+	grid-column: 1 / -1;
+	padding: 1em 0;
+	text-align: center;
+}
