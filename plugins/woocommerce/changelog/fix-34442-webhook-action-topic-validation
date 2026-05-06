@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix "Action" webhook topic not saving due to overly restrictive topic validation rejecting non-WooCommerce action hooks.
