@@ -9015,7 +9015,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$time of function strtotime expects string, array\|string given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: includes/class-wc-ajax.php
 
 		-

@@ -2996,29 +2996,20 @@ class WC_AJAX {
 	 * @return void
 	 */
 	private static function variation_bulk_action_variable_sale_schedule( $variations, $data ) {
-		// The JS sends 'false' (string) when the user cancels a prompt and '' when the
-		// user submits an empty input; treat both as "no value provided" so an empty
-		// field doesn't end up as 1970-01-01 via strtotime('').
+		/*
+		 * Three-state input handling matches the single-variation editor:
+		 *   'false' (Cancel)             → null  → skip this field
+		 *   ''      (OK with blank input) → ''    → clear this field on every variation
+		 *   parseable date               → string → set this field
+		 * Unparseable non-empty input is treated as skip — we can't infer intent.
+		 */
 		$date_from = isset( $data['date_from'] ) ? $data['date_from'] : '';
 		$date_to   = isset( $data['date_to'] ) ? $data['date_to'] : '';
 
-		$start_date = null;
-		if ( '' !== $date_from && 'false' !== $date_from ) {
-			$timestamp = strtotime( wc_clean( $date_from ) );
-			if ( false !== $timestamp ) {
-				$start_date = date( 'Y-m-d 00:00:00', $timestamp ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-			}
-		}
+		$start_value = self::resolve_variation_bulk_sale_date_input( $date_from, '00:00:00' );
+		$end_value   = self::resolve_variation_bulk_sale_date_input( $date_to, '23:59:59' );
 
-		$end_date = null;
-		if ( '' !== $date_to && 'false' !== $date_to ) {
-			$timestamp = strtotime( wc_clean( $date_to ) );
-			if ( false !== $timestamp ) {
-				$end_date = date( 'Y-m-d 23:59:59', $timestamp ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
-			}
-		}
-
-		if ( null === $start_date && null === $end_date ) {
+		if ( null === $start_value && null === $end_value ) {
 			return;
 		}
 
@@ -3028,15 +3019,36 @@ class WC_AJAX {
 				continue;
 			}
 
-			if ( null !== $start_date ) {
-				$variation->set_date_on_sale_from( $start_date );
+			if ( null !== $start_value ) {
+				$variation->set_date_on_sale_from( $start_value );
 			}
-			if ( null !== $end_date ) {
-				$variation->set_date_on_sale_to( $end_date );
+			if ( null !== $end_value ) {
+				$variation->set_date_on_sale_to( $end_value );
 			}
 
 			$variation->save();
 		}
+	}
+
+	/**
+	 * Resolve a single bulk-edit sale date input into the value to pass to the WC_Product setter.
+	 *
+	 * @param string $input       Raw input as forwarded by the bulk-action JS (`'false'`, `''`, or a date string).
+	 * @param string $time_of_day Time portion to append to a parsed date (`'00:00:00'` for start, `'23:59:59'` for end).
+	 * @return string|null `null` to skip the field, `''` to clear it, or a `Y-m-d H:i:s` string to set it.
+	 */
+	private static function resolve_variation_bulk_sale_date_input( $input, $time_of_day ) {
+		if ( 'false' === $input ) {
+			return null;
+		}
+		if ( '' === $input ) {
+			return '';
+		}
+		$timestamp = strtotime( wc_clean( $input ) );
+		if ( false === $timestamp ) {
+			return null;
+		}
+		return date( 'Y-m-d ' . $time_of_day, $timestamp ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date
 	}
 
 	/**

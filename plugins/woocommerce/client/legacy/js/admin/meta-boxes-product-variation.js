@@ -1337,14 +1337,14 @@ jQuery( function ( $ ) {
 						woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_end
 					);
 
-					// `prompt` returns null on Cancel and "" when OK is pressed with no input;
-					// treat both as "no value provided" so the backend can skip that field
-					// instead of coercing "" to the Unix epoch (1970-01-01).
-					if ( null === data.date_from || '' === data.date_from ) {
+					// `prompt` returns null on Cancel and "" when OK is pressed with no input.
+					// Forward null as the boolean false sentinel ("skip this field"), and
+					// keep "" as-is so the backend can clear the field on every variation.
+					if ( null === data.date_from ) {
 						data.date_from = false;
 					}
 
-					if ( null === data.date_to || '' === data.date_to ) {
+					if ( null === data.date_to ) {
 						data.date_to = false;
 					}
 

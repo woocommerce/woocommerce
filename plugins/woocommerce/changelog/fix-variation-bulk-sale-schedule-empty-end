@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Variation bulk action "Set scheduled sale dates" no longer overwrites the sale end date with 1970-01-01 when the end-date prompt is left empty. Empty input is now treated the same as cancelling the prompt — that field is left untouched on each variation.
+Variation bulk action "Set scheduled sale dates" no longer overwrites the sale end date with 1970-01-01 when the prompt is left empty. Cancelling a prompt now leaves that field's existing value alone, while submitting it blank clears the value on every selected variation — matching what the single-variation editor already does.
