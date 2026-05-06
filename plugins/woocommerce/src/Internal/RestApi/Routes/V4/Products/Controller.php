@@ -2016,6 +2016,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 			return $schema;
 		}
 
+		// WordPress REST embeds cannot be narrowed with _fields. Keep all non-sensitive
+		// view fields embeddable for now; scalability is tracked in https://github.com/woocommerce/woocommerce/issues/64652.
 		foreach ( $schema['properties'] as $property => $property_schema ) {
 			if ( ! is_array( $property_schema ) ) {
 				continue;
