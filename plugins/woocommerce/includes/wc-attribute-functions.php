@@ -211,7 +211,7 @@ function wc_attribute_label( $name, $product = '' ) {
 		}
 	} else {
 		$label = $name;
-	}
+	}//end if
 
 	return apply_filters( 'woocommerce_attribute_label', $label, $name, $product );
 }
@@ -253,16 +253,38 @@ function wc_get_attribute_taxonomy_names() {
  * @return array
  */
 function wc_get_attribute_types() {
+	$attribute_types = array(
+		'select' => __( 'Text', 'woocommerce' ),
+	);
+
+	$allow_visual_attribute_type =
+		wp_is_block_theme() &&
+		\Automattic\WooCommerce\Admin\Features\Features::is_enabled( 'wc-visual-attribute' );
+
+	// If the store already has some visual attributes, let's allow them even
+	// if the current theme is not a block theme.
+	if ( ! $allow_visual_attribute_type ) {
+		foreach ( wc_get_attribute_taxonomies() as $attribute_taxonomy ) {
+			if ( isset( $attribute_taxonomy->attribute_type ) && 'wc-visual' === $attribute_taxonomy->attribute_type ) {
+				$allow_visual_attribute_type = true;
+				break;
+			}
+		}
+	}
+
+	if ( $allow_visual_attribute_type ) {
+		$attribute_types['wc-visual'] = __( 'Color / Image', 'woocommerce' );
+	}
+
 	return (array) apply_filters(
 		'product_attributes_type_selector',
-		array(
-			'select' => __( 'Select', 'woocommerce' ),
-		)
+		$attribute_types
 	);
 }
 
 /**
- * Check if there are custom attribute types.
+ * Check if there are attribute types different than the default `select` type.
+ * Note: `wc-visual` is considered a custom attribute type.
  *
  * @since  3.3.2
  * @return bool True if there are custom types, otherwise false.
@@ -283,7 +305,7 @@ function wc_has_custom_attribute_types() {
 function wc_get_attribute_type_label( $type ) {
 	$types = wc_get_attribute_types();
 
-	return isset( $types[ $type ] ) ? $types[ $type ] : __( 'Select', 'woocommerce' );
+	return isset( $types[ $type ] ) ? $types[ $type ] : __( 'Text', 'woocommerce' );
 }
 
 /**
@@ -621,8 +643,8 @@ function wc_create_attribute( $args ) {
 			if ( isset( $wp_taxonomies[ $old_taxonomy_name ] ) && ! isset( $wp_taxonomies[ $new_taxonomy_name ] ) ) {
 				$wp_taxonomies[ $new_taxonomy_name ] = $wp_taxonomies[ $old_taxonomy_name ]; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			}
-		}
-	}
+		}//end if
+	}//end if
 
 	// Clear cache and flush rewrite rules.
 	wp_schedule_single_event( time(), 'woocommerce_flush_rewrite_rules' );
@@ -730,7 +752,7 @@ function wc_delete_attribute( $id ) {
 		WC_Cache_Helper::invalidate_cache_group( 'woocommerce-attributes' );
 
 		return true;
-	}
+	}//end if
 
 	return false;
 }

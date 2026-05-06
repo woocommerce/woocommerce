@@ -6,7 +6,8 @@ import { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { Color, FilterBlockContext } from '../../types';
+import type { SelectableItemsBlockContext } from '../../../../types/type-defs/selectable-items';
+import type { Color, FilterItemFields } from '../../types';
 
 export type BlockAttributes = {
 	className: string;
@@ -26,7 +27,7 @@ export type BlockAttributes = {
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
 	style: Record< string, string >;
-	context: FilterBlockContext;
+	context: SelectableItemsBlockContext< FilterItemFields >;
 	chipText: Color;
 	setChipText: ( value: string ) => void;
 	chipBackground: Color;

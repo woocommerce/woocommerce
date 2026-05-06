@@ -10,7 +10,6 @@ export const AddNote = () => {
 	const [ hasAdded, setHasAdded ] = useState( false );
 	const [ errorMessage, setErrorMessage ] = useState( false );
 	const [ noteType, setNoteType ] = useState( 'info' );
-	const [ noteLayout, setNoteLayout ] = useState( 'plain' );
 
 	async function triggerAddNote() {
 		setIsAdding( true );
@@ -36,7 +35,6 @@ export const AddNote = () => {
 				data: {
 					name,
 					type: noteType,
-					layout: noteLayout,
 					title,
 				},
 			} );
@@ -50,13 +48,6 @@ export const AddNote = () => {
 
 	function onTypeChange( val ) {
 		setNoteType( val );
-		if ( val !== 'info' ) {
-			setNoteLayout( 'plain' );
-		}
-	}
-
-	function onLayoutChange( val ) {
-		setNoteLayout( val );
 	}
 
 	function getAddNoteDescription() {
@@ -108,17 +99,6 @@ export const AddNote = () => {
 							{ label: 'Email', value: 'email' },
 						] }
 						value={ noteType }
-					/>
-					<SelectControl
-						label="Layout"
-						onChange={ onLayoutChange }
-						labelPosition="side"
-						options={ [
-							{ label: 'Plain', value: 'plain' },
-							{ label: 'Thumbnail', value: 'thumbnail' },
-						] }
-						disabled={ noteType !== 'info' }
-						value={ noteLayout }
 					/>
 				</div>
 				<br />

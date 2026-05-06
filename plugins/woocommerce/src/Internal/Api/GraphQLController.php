@@ -15,29 +15,46 @@ use Automattic\WooCommerce\Vendor\GraphQL\Type\Schema;
 use Automattic\WooCommerce\Vendor\GraphQL\Error\DebugFlag;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\DocumentValidator;
 use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\DisableIntrospection;
-use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\QueryComplexity;
-use Automattic\WooCommerce\Vendor\GraphQL\Validator\Rules\QueryDepth;
 
 /**
  * Handles incoming GraphQL requests over the WooCommerce REST API.
  */
 abstract class GraphQLController {
 	/**
-	 * Maximum nesting depth allowed in a GraphQL query.
+	 * Default nesting-depth limit applied when the option is unset or non-positive.
 	 *
-	 * Queries exceeding this depth are rejected during validation, before any
-	 * resolver runs. See {@see self::get_max_query_depth()} for the accessor.
+	 * Queries exceeding the configured limit are rejected during validation,
+	 * before any resolver runs. See {@see self::get_max_query_depth()} for the accessor.
 	 */
-	private const MAX_QUERY_DEPTH = 15;
+	public const DEFAULT_MAX_QUERY_DEPTH = 15;
 
 	/**
-	 * Maximum computed complexity score allowed for a GraphQL query.
+	 * Default complexity-score limit applied when the option is unset or non-positive.
 	 *
 	 * Complexity is the sum of per-field scores; connection fields multiply
-	 * their child score by the requested page size. Queries exceeding this
-	 * score are rejected during validation. See {@see self::get_max_query_complexity()}.
+	 * their child score by the requested page size. Queries exceeding the
+	 * configured limit are rejected during validation. See
+	 * {@see self::get_max_query_complexity()} for the accessor.
 	 */
-	private const MAX_QUERY_COMPLEXITY = 1000;
+	public const DEFAULT_MAX_QUERY_COMPLEXITY = 1000;
+
+	/**
+	 * Default path (relative to /wp-json/) at which the GraphQL route is registered.
+	 *
+	 * Used as the fallback when the {@see Main::OPTION_ENDPOINT_URL} option is
+	 * unset or was stored in an invalid form. See {@see self::get_endpoint_url()}
+	 * for the accessor.
+	 */
+	public const DEFAULT_ENDPOINT_URL = 'wc/graphql';
+
+	/**
+	 * Regex matching one valid path segment of the endpoint URL.
+	 *
+	 * Constrained to the character class WordPress REST routes accept
+	 * (alphanumerics, underscores, hyphens). Shared with {@see Settings::sanitize_endpoint_url()}
+	 * so the UI sanitizer and the controller-side fallback stay in lockstep.
+	 */
+	public const ENDPOINT_URL_SEGMENT_PATTERN = '/^[A-Za-z0-9_\-]+$/';
 
 	/**
 	 * Cached GraphQL schema instance.
@@ -66,21 +83,84 @@ abstract class GraphQLController {
 	/**
 	 * The maximum nesting depth allowed in a GraphQL query.
 	 *
-	 * Exposed as a method so the limit can become configurable — e.g. via a
-	 * filter or store option — without requiring call-site changes.
+	 * Reads the {@see Main::OPTION_MAX_QUERY_DEPTH} store option; falls back
+	 * to {@see self::DEFAULT_MAX_QUERY_DEPTH} when the option is unset, empty,
+	 * or non-positive.
 	 */
 	public static function get_max_query_depth(): int {
-		return self::MAX_QUERY_DEPTH;
+		$value = (int) get_option( Main::OPTION_MAX_QUERY_DEPTH, self::DEFAULT_MAX_QUERY_DEPTH );
+		return $value > 0 ? $value : self::DEFAULT_MAX_QUERY_DEPTH;
 	}
 
 	/**
 	 * The maximum computed complexity score allowed for a GraphQL query.
 	 *
-	 * Exposed as a method so the limit can become configurable — e.g. via a
-	 * filter or store option — without requiring call-site changes.
+	 * Reads the {@see Main::OPTION_MAX_QUERY_COMPLEXITY} store option; falls
+	 * back to {@see self::DEFAULT_MAX_QUERY_COMPLEXITY} when the option is
+	 * unset, empty, or non-positive.
 	 */
 	public static function get_max_query_complexity(): int {
-		return self::MAX_QUERY_COMPLEXITY;
+		$value = (int) get_option( Main::OPTION_MAX_QUERY_COMPLEXITY, self::DEFAULT_MAX_QUERY_COMPLEXITY );
+		return $value > 0 ? $value : self::DEFAULT_MAX_QUERY_COMPLEXITY;
+	}
+
+	/**
+	 * The path (relative to /wp-json/) at which the GraphQL route is registered.
+	 *
+	 * Reads the {@see Main::OPTION_ENDPOINT_URL} store option; falls back to
+	 * {@see self::DEFAULT_ENDPOINT_URL} when the option is unset, empty, or
+	 * fails {@see self::is_valid_endpoint_url()}. The UI already validates on
+	 * save, so this defense-in-depth guard only fires for CLI-set option values.
+	 */
+	public static function get_endpoint_url(): string {
+		$value = trim( (string) get_option( Main::OPTION_ENDPOINT_URL, self::DEFAULT_ENDPOINT_URL ), '/' );
+		if ( ! self::is_valid_endpoint_url( $value ) ) {
+			return self::DEFAULT_ENDPOINT_URL;
+		}
+		return $value;
+	}
+
+	/**
+	 * Whether a value is a valid endpoint URL.
+	 *
+	 * Requires at least two non-empty path segments (so register_rest_route()
+	 * has both a namespace and a route), each matching
+	 * {@see self::ENDPOINT_URL_SEGMENT_PATTERN}. Mirrors the rules enforced on
+	 * save by {@see Settings::sanitize_endpoint_url()}, so values that bypass
+	 * the UI (e.g. CLI-set options) get the same treatment.
+	 *
+	 * @param string $value Endpoint URL with surrounding slashes already stripped.
+	 */
+	private static function is_valid_endpoint_url( string $value ): bool {
+		if ( '' === $value ) {
+			return false;
+		}
+		$parts = explode( '/', $value );
+		if ( count( $parts ) < 2 ) {
+			return false;
+		}
+		foreach ( $parts as $part ) {
+			if ( '' === $part || ! preg_match( self::ENDPOINT_URL_SEGMENT_PATTERN, $part ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Split the endpoint URL into the `[namespace, route]` pair that
+	 * register_rest_route() expects.
+	 *
+	 * The last path segment becomes the route; everything before it becomes
+	 * the namespace. E.g. `wc/v4/graphql` → `['wc/v4', '/graphql']`.
+	 *
+	 * @return array{0: string, 1: string}
+	 */
+	private static function split_endpoint_url(): array {
+		$parts     = explode( '/', self::get_endpoint_url() );
+		$route     = '/' . array_pop( $parts );
+		$namespace = implode( '/', $parts );
+		return array( $namespace, $route );
 	}
 
 	/**
@@ -91,10 +171,11 @@ abstract class GraphQLController {
 		if ( empty( $methods ) ) {
 			return;
 		}
+		list( $namespace, $route ) = self::split_endpoint_url();
 
 		register_rest_route(
-			'wc',
-			'/graphql',
+			$namespace,
+			$route,
 			array(
 				'methods'             => $methods,
 				'callback'            => array( $this, 'handle_request' ),
@@ -167,11 +248,11 @@ abstract class GraphQLController {
 		$schema = $this->get_schema();
 
 		// 6. Build validation rules.
-		// A single QueryComplexity instance is kept so its computed score can
+		// A single complexity-rule instance is kept so its computed score can
 		// be surfaced in the debug extensions after execution.
-		$complexity_rule    = new QueryComplexity( self::get_max_query_complexity() );
+		$complexity_rule    = new QueryComplexityRule( self::get_max_query_complexity() );
 		$validation_rules   = array_values( DocumentValidator::allRules() );
-		$validation_rules[] = new QueryDepth( self::get_max_query_depth() );
+		$validation_rules[] = new QueryDepthRule( self::get_max_query_depth() );
 		$validation_rules[] = $complexity_rule;
 		if ( ! $this->is_introspection_allowed( $request ) ) {
 			$validation_rules[] = new DisableIntrospection( DisableIntrospection::ENABLED );
@@ -521,19 +602,29 @@ abstract class GraphQLController {
 	}
 
 	/**
-	 * Compute the maximum nesting depth of the executing operation.
+	 * Compute the maximum nesting depth of the executing operation, under two
+	 * different metrics:
 	 *
-	 * Field selections add one level; inline fragments do not. Named-fragment
-	 * spreads are not expanded here — the depth returned is therefore a lower
-	 * bound when spreads are present. The webonyx QueryDepth validation rule
-	 * (which does expand spreads) remains the authoritative gate; this helper
-	 * only produces the metric surfaced in the debug extensions.
+	 * - `tree_only`: only fields whose own selection set is non-empty count
+	 *   toward depth; leaves are excluded. This is the number directly
+	 *   comparable to the "Maximum query depth" setting's limit, and matches
+	 *   what webonyx's QueryDepth validation rule measures for the enforcement
+	 *   decision.
+	 * - `in_depth`: counts every field in the deepest chain, leaves included.
+	 *   Useful as a shape metric when inspecting a query.
+	 *
+	 * Inline fragments pass through without incrementing either metric.
+	 * Named-fragment spreads are not expanded here, so both numbers are lower
+	 * bounds when spreads are present. The webonyx QueryDepth validation rule
+	 * (which does expand spreads) remains the authoritative gate.
 	 *
 	 * @param DocumentNode $document       The parsed GraphQL document.
 	 * @param ?string      $operation_name The requested operation name, if any.
+	 * @return array{tree_only: int, in_depth: int}
 	 */
-	private function compute_query_depth( DocumentNode $document, ?string $operation_name ): int {
-		$max = 0;
+	private function compute_query_depth( DocumentNode $document, ?string $operation_name ): array {
+		$tree_only = 0;
+		$in_depth  = 0;
 		foreach ( $document->definitions as $definition ) {
 			if ( ! $definition instanceof OperationDefinitionNode ) {
 				continue;
@@ -543,19 +634,52 @@ abstract class GraphQLController {
 				continue;
 			}
 
-			$max = max( $max, $this->walk_depth( $definition->selectionSet, 0 ) );
+			$tree_only = max( $tree_only, $this->walk_depth_tree_only( $definition->selectionSet, 0 ) );
+			$in_depth  = max( $in_depth, $this->walk_depth_in_depth( $definition->selectionSet, 0 ) );
+		}
+
+		return array(
+			'tree_only' => $tree_only,
+			'in_depth'  => $in_depth,
+		);
+	}
+
+	/**
+	 * Walk a selection set counting only fields with child selections, matching
+	 * webonyx's QueryDepth rule so the returned number is directly comparable
+	 * to the configured "Maximum query depth" limit.
+	 *
+	 * @param ?SelectionSetNode $selection_set The selection set to walk.
+	 * @param int               $depth         The depth at which fields in this selection set sit.
+	 */
+	private function walk_depth_tree_only( ?SelectionSetNode $selection_set, int $depth ): int {
+		if ( null === $selection_set ) {
+			return 0;
+		}
+
+		$max = 0;
+		foreach ( $selection_set->selections as $selection ) {
+			if ( $selection instanceof FieldNode ) {
+				if ( null !== $selection->selectionSet ) {
+					$max = max( $max, $depth, $this->walk_depth_tree_only( $selection->selectionSet, $depth + 1 ) );
+				}
+			} elseif ( $selection instanceof InlineFragmentNode ) {
+				$max = max( $max, $this->walk_depth_tree_only( $selection->selectionSet, $depth ) );
+			}
 		}
 
 		return $max;
 	}
 
 	/**
-	 * Recursively walk a selection set and return the maximum depth reached.
+	 * Walk a selection set counting every field in the deepest chain, leaves
+	 * included. Produces the "shape" metric surfaced alongside the enforcement
+	 * metric in debug output.
 	 *
 	 * @param ?SelectionSetNode $selection_set The selection set to walk, or null for a leaf.
 	 * @param int               $depth         The depth of the selection set's parent.
 	 */
-	private function walk_depth( ?SelectionSetNode $selection_set, int $depth ): int {
+	private function walk_depth_in_depth( ?SelectionSetNode $selection_set, int $depth ): int {
 		if ( null === $selection_set ) {
 			return $depth;
 		}
@@ -563,9 +687,9 @@ abstract class GraphQLController {
 		$max = $depth;
 		foreach ( $selection_set->selections as $selection ) {
 			if ( $selection instanceof FieldNode ) {
-				$max = max( $max, $this->walk_depth( $selection->selectionSet, $depth + 1 ) );
+				$max = max( $max, $this->walk_depth_in_depth( $selection->selectionSet, $depth + 1 ) );
 			} elseif ( $selection instanceof InlineFragmentNode ) {
-				$max = max( $max, $this->walk_depth( $selection->selectionSet, $depth ) );
+				$max = max( $max, $this->walk_depth_in_depth( $selection->selectionSet, $depth ) );
 			}
 		}
 

@@ -28,6 +28,9 @@ $subtext:           #767676 !default;                                  // small,
 $gray-900:          #1e1e1e !default;                                  // Primary admin text
 $gray-700:          #757575 !default;                                  // Placeholder / secondary admin text
 
+// Border radius tokens — mirrors WP Design System naming.
+$radius-s:          2px !default;                                      // Small radius: inputs, buttons, selects.
+
 // export vars as CSS vars
 :root {
 	--woocommerce: #{$woocommerce};
