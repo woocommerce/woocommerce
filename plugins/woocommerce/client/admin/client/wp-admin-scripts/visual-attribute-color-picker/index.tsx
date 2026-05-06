@@ -142,7 +142,15 @@ const mountColorPicker = ( input: HTMLInputElement ) => {
 	}
 
 	input.dataset.wcColorPickerMounted = '1';
-	input.style.display = 'none';
+	input.style.height = '0';
+	input.style.width = '0';
+	input.style.position = 'absolute';
+	input.style.top = '0';
+	input.style.left = '0';
+	input.style.opacity = '0';
+	input.style.visibility = 'hidden';
+	input.style.pointerEvents = 'none';
+	input.style.userSelect = 'none';
 
 	const wrapper = document.createElement( 'div' );
 	wrapper.className = WRAPPER_CLASS;
