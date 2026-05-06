@@ -1006,9 +1006,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		width: 100%;
 	}
 
-	input[type="color"] {
-		display: block;
-		margin: 6px 0;
+	.wc-admin-visual-attribute-color-picker-trigger {
 		width: 100%;
 	}
 }
@@ -9615,12 +9613,49 @@ body.woocommerce-settings-payments-section_legacy {
 }
 
 .wc-admin-color-swatch {
+	background-color: #fff;
 	display: inline-block;
 	vertical-align: middle;
-	vertical-align: center;
 	border: 1px solid #7e8993;
 	border-radius: 2px;
-	margin-right: 6px;
-	width: 12px;
-	height: 12px;
+	margin-right: 0.5em;
+	height: 1em;
+	width: 1em;
+	position: relative;
+	top: -1px;
+
+	&.is-empty::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background: linear-gradient(to bottom right, transparent 47%, #7e8993 47%, #7e8993 53%, transparent 53%);
+	}
+}
+
+.wc-admin-visual-attribute-color-picker-trigger {
+	width: 95%;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 12px;
+	min-height: 40px;
+	background: #fff;
+	border: 1px solid #949494;
+	border-radius: 2px;
+	text-align: left;
+	font-size: 13px;
+	line-height: 1.4;
+	cursor: pointer;
+
+	+ .wc-admin-visual-attribute-color-picker-clear {
+		display: block;
+		margin: 2px 0 5px;
+	}
+
+	.wc-admin-color-swatch {
+		margin-right: 0;
+	}
 }
