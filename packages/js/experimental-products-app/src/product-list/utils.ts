@@ -22,57 +22,18 @@ export function getItemId( item: ProductEntityRecord ) {
 	return item.id.toString();
 }
 
-export function getProductListItemParentId( item: ProductEntityRecord ) {
-	return item.parent_id && item.parent_id > 0
-		? item.parent_id.toString()
-		: undefined;
-}
-
-export function sortProductsForHierarchy(
-	items: ProductEntityRecord[]
-): ProductEntityRecord[] {
-	const itemIds = new Set( items.map( ( item ) => item.id ) );
-	const childItemsByParentId = new Map< number, ProductEntityRecord[] >();
-
-	items.forEach( ( item ) => {
-		if ( item.parent_id && itemIds.has( item.parent_id ) ) {
-			const childItems = childItemsByParentId.get( item.parent_id ) ?? [];
-
-			childItemsByParentId.set( item.parent_id, [ ...childItems, item ] );
-		}
-	} );
-
-	return items.reduce< ProductEntityRecord[] >( ( sortedItems, item ) => {
-		if ( item.parent_id && itemIds.has( item.parent_id ) ) {
-			return sortedItems;
-		}
-
-		sortedItems.push( item );
-
-		const childItems = childItemsByParentId.get( item.id );
-
-		if ( childItems ) {
-			sortedItems.push( ...childItems );
-		}
-
-		return sortedItems;
-	}, [] );
-}
-
 export function getProductsWithEmbeddedVariations(
 	items: ProductEntityRecord[]
 ): ProductEntityRecord[] {
 	const itemsById = new Map( items.map( ( item ) => [ item.id, item ] ) );
-	const addedIds = new Set< number >();
-	const productsWithVariations: ProductEntityRecord[] = [];
+	const productsWithVariations = new Map< number, ProductEntityRecord >();
 
 	function addItem( item: ProductEntityRecord ) {
-		if ( addedIds.has( item.id ) ) {
+		if ( productsWithVariations.has( item.id ) ) {
 			return;
 		}
 
-		addedIds.add( item.id );
-		productsWithVariations.push( item );
+		productsWithVariations.set( item.id, item );
 	}
 
 	items.forEach( ( item ) => {
@@ -87,9 +48,7 @@ export function getProductsWithEmbeddedVariations(
 		} );
 	} );
 
-	items.forEach( addItem );
-
-	return productsWithVariations;
+	return Array.from( productsWithVariations.values() );
 }
 
 function isProductListTabValue( value: string ): value is StatusTab {

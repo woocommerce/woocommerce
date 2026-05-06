@@ -31,13 +31,11 @@ import { buildProductListQuery } from './query';
 import {
 	getItemId,
 	getProductListNavigationPath,
-	getProductListItemParentId,
 	getProductListTab,
 	getProductsWithEmbeddedVariations,
 	getSelectionFromPostId,
 	getStatusForProductListTab,
 	isProductEditorAccessible,
-	sortProductsForHierarchy,
 } from './utils';
 import { useProductActions } from '../dataviews-actions';
 
@@ -207,11 +205,12 @@ export default function ProductList( { className }: ProductListProps ) {
 	);
 
 	const data = useMemo(
-		() =>
-			sortProductsForHierarchy(
-				getProductsWithEmbeddedVariations( records || EMPTY_ARRAY )
-			),
+		() => getProductsWithEmbeddedVariations( records || EMPTY_ARRAY ),
 		[ records ]
+	);
+	const getItemParentId = useCallback(
+		( item: ProductEntityRecord ) => item.parent_id,
+		[]
 	);
 
 	const { canCreateRecord } = useSelect(
@@ -320,7 +319,7 @@ export default function ProductList( { className }: ProductListProps ) {
 				onChangeView={ setView }
 				onChangeSelection={ onChangeSelection }
 				getItemId={ getItemId }
-				getItemParentId={ getProductListItemParentId }
+				getItemParentId={ getItemParentId }
 				selection={ selection }
 				defaultLayouts={ DEFAULT_LAYOUTS }
 				isItemClickable={ isProductEditorAccessible }

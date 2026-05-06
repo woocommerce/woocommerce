@@ -2,11 +2,7 @@
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../fields/types';
-import {
-	getProductListItemParentId,
-	getProductsWithEmbeddedVariations,
-	sortProductsForHierarchy,
-} from './utils';
+import { getProductsWithEmbeddedVariations } from './utils';
 
 function createProduct(
 	id: number,
@@ -21,41 +17,6 @@ function createProduct(
 }
 
 describe( 'product list utils', () => {
-	describe( 'getProductListItemParentId', () => {
-		it( 'returns the parent product id for variations', () => {
-			expect( getProductListItemParentId( createProduct( 1 ) ) ).toBe(
-				undefined
-			);
-			expect( getProductListItemParentId( createProduct( 2, 1 ) ) ).toBe(
-				'1'
-			);
-			expect( getProductListItemParentId( createProduct( 3, 0 ) ) ).toBe(
-				undefined
-			);
-		} );
-	} );
-
-	describe( 'sortProductsForHierarchy', () => {
-		it( 'moves variations directly under their parent product', () => {
-			const parent = createProduct( 1 );
-			const variation = createProduct( 2, 1 );
-			const otherProduct = createProduct( 3 );
-
-			expect(
-				sortProductsForHierarchy( [ variation, otherProduct, parent ] )
-			).toEqual( [ otherProduct, parent, variation ] );
-		} );
-
-		it( 'keeps orphaned variations in their original position', () => {
-			const variation = createProduct( 2, 1 );
-			const otherProduct = createProduct( 3 );
-
-			expect(
-				sortProductsForHierarchy( [ variation, otherProduct ] )
-			).toEqual( [ variation, otherProduct ] );
-		} );
-	} );
-
 	describe( 'getProductsWithEmbeddedVariations', () => {
 		it( 'adds embedded variations after their parent product', () => {
 			const variation = createProduct( 2, 1 );
