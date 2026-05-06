@@ -15,17 +15,29 @@
 	white-space: nowrap;
 }
 
-// Collapse wp-admin's original Screen Options + Help button strip — those
-// entry points are consolidated into the Woo floating header as icons.
-// Using height:0 + overflow:hidden (rather than display:none or absolute
-// off-screen) keeps the buttons in the layout tree so wp-admin's jQuery
-// delegated click handlers fire normally when our icons proxy a .click()
-// into #show-settings-link and #contextual-help-link.
-.woocommerce-admin-page #screen-meta-links,
-body.woocommerce_page_wc-admin #screen-meta-links {
-	height: 0;
-	overflow: hidden;
-	margin: 0;
+// Hide ONLY the two standard wp-admin meta-toggle wraps (Screen Options +
+// Help) that we proxy via the floating header's gear / ? icons. The parent
+// #screen-meta-links container is left alone so any third-party sibling
+// buttons (the rare plugin that injects its own `.screen-meta-toggle` div
+// directly into the strip) remain visible. Visually-hidden pattern (rather
+// than display:none) keeps the elements in the layout tree so wp-admin's
+// jQuery delegated click handlers still fire when we proxy .click() into
+// #show-settings-link / #contextual-help-link.
+.woocommerce-admin-page,
+body.woocommerce_page_wc-admin {
+	#screen-options-link-wrap,
+	#contextual-help-link-wrap {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		margin: -1px;
+		padding: 0;
+		border: 0;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+		white-space: nowrap;
+	}
 }
 
 // Settings-page polish: the floating header sits directly above Woo's tab
