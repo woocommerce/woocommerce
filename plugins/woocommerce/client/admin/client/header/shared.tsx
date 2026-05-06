@@ -222,18 +222,25 @@ export const BaseHeader = ( {
 			)
 			?.click();
 		// Close the OTHER wp-admin dropdown if open (mutual exclusion between
-		// gear ↔ help).
+		// gear ↔ help). When closing one, defer opening the new one so wp-admin's
+		// jQuery slideUp finishes before slideDown — otherwise the second click
+		// races the first and the new panel never opens.
 		const otherTriggerId =
 			which === 'screen-options'
 				? '#contextual-help-link'
 				: '#show-settings-link';
-		document
-			.querySelector< HTMLButtonElement >(
-				`${ otherTriggerId }[aria-expanded="true"]`
-			)
-			?.click();
-		// Toggle the target dropdown. State syncs via the MutationObserver above.
-		document.querySelector< HTMLButtonElement >( triggerId )?.click();
+		const otherOpen = document.querySelector< HTMLButtonElement >(
+			`${ otherTriggerId }[aria-expanded="true"]`
+		);
+		const openTarget = () =>
+			document.querySelector< HTMLButtonElement >( triggerId )?.click();
+		if ( otherOpen ) {
+			otherOpen.click();
+			// jQuery 'fast' is ~200ms; wait a bit longer for safety.
+			setTimeout( openTarget, 250 );
+		} else {
+			openTarget();
+		}
 	};
 
 	const shouldRenderTitle =
