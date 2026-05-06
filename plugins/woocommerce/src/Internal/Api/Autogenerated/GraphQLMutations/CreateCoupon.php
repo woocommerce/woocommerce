@@ -29,9 +29,16 @@ class CreateCoupon {
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
-		Utils::check_current_user_can( 'manage_woocommerce' );
+		// Standalone authorization gate: no authorize() method on the command,
+		// so the autodiscovered authorization attributes are the sole guard.
+		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
+			throw new \Automattic\WooCommerce\Internal\Api\Schema\Error(
+				'You do not have permission to perform this action.',
+				extensions: array( 'code' => 'FORBIDDEN' )
+			);
+		}
 
-		$command = \Automattic\WooCommerce\Api\Container::get( CreateCouponCommand::class );
+		$command = \Automattic\WooCommerce\Api\Infrastructure\ClassResolver::resolve_class( CreateCouponCommand::class );
 
 		$execute_args = array();
 		if ( array_key_exists( 'input', $args ) ) {
@@ -41,6 +48,21 @@ class CreateCoupon {
 		$result = Utils::execute_command( $command, $execute_args );
 
 		return $result;
+	}
+
+	/**
+	 * Compute the value `_preauthorized` would carry for a given principal —
+	 * the AND of the autodiscovered authorization attributes' authorize()
+	 * outcomes on this command. Single source of truth for both the resolver's
+	 * own gates and external (code-API) callers asking about authorization
+	 * without going through GraphQL execution.
+	 *
+	 * Returns true vacuously when the command has no authorization attributes
+	 * (in that case authorize() on the command is the sole guard, and that
+	 * method should be consulted instead).
+	 */
+	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_woocommerce' ) )->authorize( $principal );
 	}
 
 	private static function convert_create_coupon_input( array $data ): \Automattic\WooCommerce\Api\InputTypes\Coupons\CreateCouponInput {

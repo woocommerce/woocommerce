@@ -31,7 +31,7 @@ class AuthorizeOnlyQuery {
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
-		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Container::get( AuthorizeOnlyQueryCommand::class );
+		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( AuthorizeOnlyQueryCommand::class );
 
 		$execute_args = array();
 		if ( array_key_exists( 'allow', $args ) ) {
@@ -43,12 +43,27 @@ class AuthorizeOnlyQuery {
 		) ) ) {
 			throw new \Automattic\WooCommerce\Internal\Api\Schema\Error(
 				'You do not have permission to perform this action.',
-				extensions: array( 'code' => 'UNAUTHORIZED' )
+				extensions: array( 'code' => 'FORBIDDEN' )
 			);
 		}
 
 		$result = Utils::execute_command( $command, $execute_args );
 
 		return array( 'result' => $result );
+	}
+
+	/**
+	 * Compute the value `_preauthorized` would carry for a given principal —
+	 * the AND of the autodiscovered authorization attributes' authorize()
+	 * outcomes on this command. Single source of truth for both the resolver's
+	 * own gates and external (code-API) callers asking about authorization
+	 * without going through GraphQL execution.
+	 *
+	 * Returns true vacuously when the command has no authorization attributes
+	 * (in that case authorize() on the command is the sole guard, and that
+	 * method should be consulted instead).
+	 */
+	public static function compute_preauthorized( object $principal ): bool {
+		return true;
 	}
 }
