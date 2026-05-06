@@ -8,6 +8,7 @@
  * @version     2.1.0
  */
 
+use Automattic\WooCommerce\Admin\Features\OrderDetailRedesign\Init as OrderDetailRedesignInit;
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Admin\Orders\PageController;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
@@ -58,25 +59,27 @@ class WC_Meta_Box_Order_Actions {
 				<button class="button wc-reload"><span><?php esc_html_e( 'Apply', 'woocommerce' ); ?></span></button>
 			</li>
 
-			<li class="wide">
-				<div id="delete-action">
-					<?php
-					if ( current_user_can( 'delete_post', $order_id ) ) {
+			<?php if ( ! OrderDetailRedesignInit::is_enabled() ) : ?>
+				<li class="wide">
+					<div id="delete-action">
+						<?php
+						if ( current_user_can( 'delete_post', $order_id ) ) {
 
-						if ( ! EMPTY_TRASH_DAYS ) {
-							$delete_text = __( 'Delete permanently', 'woocommerce' );
-						} else {
-							$delete_text = __( 'Move to Trash', 'woocommerce' );
+							if ( ! EMPTY_TRASH_DAYS ) {
+								$delete_text = __( 'Delete permanently', 'woocommerce' );
+							} else {
+								$delete_text = __( 'Move to Trash', 'woocommerce' );
+							}
+							?>
+							<a class="submitdelete deletion" href="<?php echo esc_url( self::get_trash_or_delete_order_link( $order_id ) ); ?>"><?php echo esc_html( $delete_text ); ?></a>
+							<?php
 						}
 						?>
-						<a class="submitdelete deletion" href="<?php echo esc_url( self::get_trash_or_delete_order_link( $order_id ) ); ?>"><?php echo esc_html( $delete_text ); ?></a>
-						<?php
-					}
-					?>
-				</div>
+					</div>
 
-				<button type="submit" class="button save_order button-primary" name="save" value="<?php echo OrderStatus::AUTO_DRAFT === $order->get_status() ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>"><?php echo OrderStatus::AUTO_DRAFT === $order->get_status() ? esc_html__( 'Create', 'woocommerce' ) : esc_html__( 'Update', 'woocommerce' ); ?></button>
-			</li>
+					<button type="submit" class="button save_order button-primary" name="save" value="<?php echo OrderStatus::AUTO_DRAFT === $order->get_status() ? esc_attr__( 'Create', 'woocommerce' ) : esc_attr__( 'Update', 'woocommerce' ); ?>"><?php echo OrderStatus::AUTO_DRAFT === $order->get_status() ? esc_html__( 'Create', 'woocommerce' ) : esc_html__( 'Update', 'woocommerce' ); ?></button>
+				</li>
+			<?php endif; ?>
 
 			<?php
 			/**
