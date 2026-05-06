@@ -94,6 +94,7 @@ final class ShopperCollection extends AbstractBlock {
 		// shopper-collection blocks on the same page would clobber each
 		// other's labels. v1 ships with one collection per page; if we
 		// later need multi-instance, move these into per-block context.
+		// phpcs:disable Generic.Commenting.Todo.TaskFound
 		// TODO: scope these labels per list type once a second variation
 		// (Wishlist, etc.) lands. Two shopper-collection blocks on the
 		// same page would otherwise share one set of templates — the
@@ -103,6 +104,7 @@ final class ShopperCollection extends AbstractBlock {
 		// or namespace the config keys (e.g.
 		// `quantityLabelTemplate.{slug}`) and update the JS getters to
 		// pick the right one off the per-row context.
+		// phpcs:enable Generic.Commenting.Todo.TaskFound
 		wp_interactivity_config(
 			'woocommerce/shopper-collection',
 			array(
@@ -456,12 +458,16 @@ final class ShopperCollection extends AbstractBlock {
 	 * and `data-wp-text="state.errorMessage"` writes the actual server-supplied
 	 * message — surfacing that is more useful than a generic fallback.
 	 *
+	 * phpcs:disable Generic.Commenting.Todo.TaskFound
+	 *
 	 * TODO: replace this in-list error row with a `store-notices` notice
 	 * rendered above the list. Mini-cart's pattern (cart.ts → showNoticeError →
 	 * `@woocommerce/stores/store-notices`) is the right reference: dispatch
 	 * the server message there from the JS catch blocks in shopper-lists.ts
 	 * instead of holding it on `list.error`. That gives users a dismissible,
 	 * stylistically-aligned notice rather than a row tucked into the grid.
+	 *
+	 * phpcs:enable Generic.Commenting.Todo.TaskFound
 	 *
 	 * @return string
 	 */
