@@ -6,7 +6,7 @@ import { store as noticesStore } from '@wordpress/notices';
 import { store as coreStore } from '@wordpress/core-data';
 import { backup } from '@wordpress/icons';
 import { useState } from '@wordpress/element';
-import { useDispatch } from '@wordpress/data';
+import { select, useDispatch } from '@wordpress/data';
 import {
 	Button,
 	__experimentalText as Text,
@@ -14,7 +14,6 @@ import {
 	__experimentalVStack as VStack,
 } from '@wordpress/components';
 import { decodeEntities } from '@wordpress/html-entities';
-import { parse, serialize } from '@wordpress/blocks';
 import apiFetch from '@wordpress/api-fetch';
 
 // eslint-disable-next-line @woocommerce/dependency-group
@@ -70,8 +69,7 @@ const getResetNotificationEmailContentAction = () => {
 			const [ isBusy, setIsBusy ] = useState( false );
 			const { createSuccessNotice, createErrorNotice } =
 				useDispatch( noticesStore );
-			const { editEntityRecord, saveEditedEntityRecord } =
-				useDispatch( coreStore );
+			const { receiveEntityRecords } = useDispatch( coreStore );
 
 			const item = items[ 0 ];
 			const modalTitle = sprintf(
@@ -108,32 +106,40 @@ const getResetNotificationEmailContentAction = () => {
 										method: 'POST',
 									} ) ) as { content: string };
 
-									// Server has already persisted post_content + sync meta.
-									// Sync the editor's in-memory state so the user sees the
-									// reset content without a page reload. The trailing
-									// saveEditedEntityRecord is a content no-op (matches what
-									// the server just wrote) but keeps core-data's dirty
-									// tracking in a consistent state.
-									const blocks = parse(
-										response.content || ''
-									);
-
-									await editEntityRecord(
+									// Server has already persisted post_content + sync
+									// meta. Push the new canonical content into core-data
+									// via `receiveEntityRecords` so the editor refreshes
+									// without a page reload — the reducer auto-clears any
+									// matching pending edits, so no extra REST round-trip
+									// is needed.
+									const current = select(
+										coreStore
+									).getEntityRecord(
 										'postType',
 										item.type,
-										item.id,
-										{
-											blocks,
-											content: serialize( blocks ),
-										}
-									);
-
-									await saveEditedEntityRecord(
-										'postType',
-										item.type,
-										item.id,
-										{}
-									);
+										item.id
+									) as
+										| { content?: { raw?: string } }
+										| undefined;
+									if ( current ) {
+										receiveEntityRecords(
+											'postType',
+											item.type,
+											[
+												{
+													...current,
+													content: {
+														...current.content,
+														raw: response.content,
+													},
+												},
+											],
+											undefined,
+											false,
+											undefined,
+											undefined
+										);
+									}
 
 									const successMessage = sprintf(
 										/* translators: The email's title. */

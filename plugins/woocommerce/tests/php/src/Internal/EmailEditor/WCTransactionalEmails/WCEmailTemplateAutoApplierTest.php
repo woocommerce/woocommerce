@@ -146,6 +146,31 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stamp STATUS_IN_SYNC via the classifier after a successful apply_to_post.
+	 *
+	 * The auto-applier always writes full canonical content, so the classifier
+	 * naturally returns IN_SYNC. This test pins the contract that the stamped
+	 * status comes through the classifier rather than from a hard-coded literal,
+	 * so a future regression that introduces a partial-apply path would trip it.
+	 */
+	public function test_apply_to_post_stamps_status_via_classifier(): void {
+		$email_id = 'auto_applier_classifier_path';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+		$this->assertInstanceOf( \WC_Email::class, $email );
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
+		$this->assertIsArray( $result );
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
+	}
+
+	/**
 	 * apply_to_post() with require_uncustomized=true must return a WP_Error and
 	 * leave the post untouched when the merchant has edited it since stamping.
 	 */

@@ -905,7 +905,7 @@ if ( 0 < $mu_plugins_count ) :
 
 				if ( ! empty( $_page['shortcode'] ) || ! empty( $_page['block'] ) ) {
 					// We check first if, in a blocks theme, the template content does not load the page content.
-					if ( CartCheckoutUtils::is_overriden_by_custom_template_content( $_page['block'] ) ) {
+					if ( CartCheckoutUtils::is_overridden_by_custom_template_content( $_page['block'] ) ) {
 						$additional_info = __( "This page's content is overridden by custom template content", 'woocommerce' );
 					} elseif ( $_page['shortcode_present'] ) {
 						// Always display the shortcode with square brackets for consistency.

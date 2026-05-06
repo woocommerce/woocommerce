@@ -185,31 +185,40 @@ final class ProductFilterAttribute extends AbstractBlock {
 		}
 
 		$filter_context = array(
-			'showCounts' => $block_attributes['showCounts'] ?? false,
-			'items'      => array(),
-			'groupLabel' => $product_attribute->name,
+			'items'          => array(),
+			'selectionMode'  => $block_attributes['selectType'] ?? 'multiple',
+			'storeNamespace' => 'woocommerce/product-filters',
+			'groupLabel'     => $product_attribute->name,
 		);
 
 		if ( ! empty( $attribute_counts ) ) {
+			$show_counts       = $block_attributes['showCounts'] ?? false;
 			$attribute_options = array_map(
-				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute ) {
+				function ( $term ) use ( $block_attributes, $attribute_counts, $selected_terms, $product_attribute, $show_counts ) {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 
-					return array(
+					$type = 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug );
+					$item = array(
+						'id'                 => $type . '-' . $term['slug'],
 						'label'              => $term['name'],
 						'value'              => $term['slug'],
 						'selected'           => in_array( $term['slug'], $selected_terms, true ),
-						'count'              => $term['count'],
-						'type'               => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
+						'type'               => $type,
 						'attributeQueryType' => $block_attributes['queryType'],
 					);
+
+					if ( $show_counts ) {
+						$item['count'] = $term['count'];
+					}
+
+					return $item;
 				},
 				$attribute_terms
 			);
 
-			$filter_context['items'] = $attribute_options;
-		}
+			$filter_context['items'] = array_values( $attribute_options );
+		}//end if
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filters',
@@ -218,6 +227,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 				array(
 					'activeLabelTemplate' => "$product_attribute->name: {{label}}",
 					'filterType'          => 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug ),
+					'items'               => $filter_context['items'],
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
@@ -234,7 +244,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			array_reduce(
 				$block->parsed_block['innerBlocks'],
 				function ( $carry, $parsed_block ) use ( $filter_context ) {
-					$carry .= ( new \WP_Block( $parsed_block, array( 'filterData' => $filter_context ) ) )->render();
+					$carry .= ( new \WP_Block( $parsed_block, array( 'woocommerceSelectableItems' => $filter_context ) ) )->render();
 					return $carry;
 				},
 				''

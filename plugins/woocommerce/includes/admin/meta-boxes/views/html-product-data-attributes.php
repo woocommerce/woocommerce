@@ -77,6 +77,10 @@ $product_attributes = $product_object->get_attributes( 'edit' );
 					<form class="wc-add-attribute-term-fields" action="" method="post">
 						<label for="wc-modal-add-attribute-term-input"><?php esc_html_e( 'Name', 'woocommerce' ); ?></label>
 						<input id="wc-modal-add-attribute-term-input" type="text" name="term" value="" />
+						<# if ( data.isVisualAttribute ) { #>
+							<label for="wc-modal-add-attribute-term-color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
+							<input id="wc-modal-add-attribute-term-color" type="color" name="term_color" value="" />
+						<# } #>
 					</form>
 				</article>
 				<footer>

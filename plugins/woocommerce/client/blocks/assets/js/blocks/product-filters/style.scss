@@ -178,3 +178,23 @@
 .wc-block-product-filter--hidden {
 	display: none;
 }
+
+.wc-block-product-filter__show-more {
+	background: none;
+	border: none;
+	font-family: inherit;
+	margin-top: 0.5em;
+	color: inherit;
+	cursor: pointer;
+	text-decoration: underline;
+	padding: 0;
+
+	&:hover {
+		text-decoration: none;
+	}
+
+	&:focus {
+		outline: 1px dotted currentColor;
+		outline-offset: 2px;
+	}
+}
