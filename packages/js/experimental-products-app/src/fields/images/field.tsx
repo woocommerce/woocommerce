@@ -1,7 +1,6 @@
 /**
  * External dependencies
  */
-import { getSetting } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import { useMemo, useCallback, useState } from '@wordpress/element';
 import { IconButton } from '@wordpress/ui';
@@ -165,9 +164,8 @@ const fieldDefinition = {
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
 	render: ( { item } ) => {
-		const placeholderSrc = getSetting< string >( 'placeholderImgSrc', '' );
 		const featuredImage = item.images?.at( 0 );
-		const src = featuredImage?.src || placeholderSrc;
+		const src = featuredImage?.src;
 
 		if ( ! src ) {
 			return null;
