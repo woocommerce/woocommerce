@@ -291,7 +291,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 					$value['suffix'] = '';
 				}
 				if ( ! isset( $value['value'] ) ) {
-					$value['value'] = self::get_option( $value['id'], $value['default'] );
+					$value['value'] = self::get_option( $value['field_name'], $value['default'] );
 				}
 
 				if ( ! is_null( $value['fixed_value'] ?? null ) ) {
