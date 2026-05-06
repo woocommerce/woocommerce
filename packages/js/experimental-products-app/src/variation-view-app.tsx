@@ -3,11 +3,6 @@
  */
 import { StrictMode, Suspense, createRoot, lazy } from '@wordpress/element';
 
-/**
- * Internal dependencies
- */
-import './variation-view/style.scss';
-
 const VariationView = lazy( () =>
 	import(
 		/* webpackChunkName: "experimental-products-app-variation-view-main" */
