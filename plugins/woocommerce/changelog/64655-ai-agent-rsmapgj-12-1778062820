@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix LogHandlerFileV2 producing invalid JSON log context when backtrace is enabled by removing erroneous stripslashes() call.
