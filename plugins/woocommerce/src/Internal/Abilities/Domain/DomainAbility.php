@@ -15,29 +15,6 @@ defined( 'ABSPATH' ) || exit;
 abstract class DomainAbility {
 
 	/**
-	 * Get common ability metadata.
-	 *
-	 * @param bool   $is_readonly Whether the ability is readonly.
-	 * @param bool   $idempotent  Whether the ability is idempotent.
-	 * @param bool   $destructive Whether the ability can mutate data.
-	 * @return array
-	 */
-	protected static function get_ability_meta( bool $is_readonly, bool $idempotent, bool $destructive ): array {
-		return array(
-			'show_in_rest' => true,
-			'mcp'          => array(
-				'public' => true,
-				'type'   => 'tool',
-			),
-			'annotations'  => array(
-				'readonly'    => $is_readonly,
-				'idempotent'  => $idempotent,
-				'destructive' => $destructive,
-			),
-		);
-	}
-
-	/**
 	 * Get a collection output schema.
 	 *
 	 * @param string $collection_key Collection property key.
