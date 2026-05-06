@@ -70,7 +70,11 @@
 		outline: none;
 		cursor: pointer;
 		background-color: transparent;
-		width: 100%;
+		// Match wp-admin admin-bar item padding so all five icons in the bar
+		// (bell / list / megaphone / gear / ?) sit at the same tight spacing.
+		width: auto;
+		min-width: 0;
+		padding: 0 8px;
 		height: $header-height;
 		color: $gray-700;
 		white-space: nowrap;
@@ -95,7 +99,9 @@
 			box-shadow: none;
 
 			&::before {
-				height: 3px;
+				// 2px to match Gutenberg's TabPanel + Woo's own
+				// nav-tab-active indicator on Settings.
+				height: 2px;
 				opacity: 1;
 			}
 		}
@@ -113,20 +119,14 @@
 			height: 4px;
 			display: inline-block;
 			border-radius: 50%;
-			top: 8px;
-			left: 50%;
-
-			@include breakpoint( "782px-960px" ) {
-				right: 18px;
-				left: initial;
-				margin-left: 0;
-			}
-
-			@include breakpoint( ">960px" ) {
-				right: 28px;
-				left: initial;
-				margin-left: 0;
-			}
+			// Anchor at the top-right of the 18px icon, with a slight overlap
+			// inward so the dot reads as part of the icon rather than next to it.
+			// Button has flex-column + justify-content: center, so the icon's
+			// vertical centre is at 50% of the button. Works at any bar height.
+			top: calc(50% - 9px);
+			left: calc(50% + 2px);
+			right: auto;
+			margin: 0;
 		}
 
 		&:hover,
@@ -142,8 +142,15 @@
 			}
 		}
 
+		// Suppress the inset focus shadow on mouse-click focus (it conflicts
+		// with the blue underline). Keyboard-only focus still shows via
+		// :focus-visible.
 		&:focus,
 		&.components-button:not(:disabled):not([aria-disabled="true"]):focus {
+			box-shadow: none;
+		}
+		&:focus-visible,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus-visible {
 			box-shadow: inset -1px -1px 0 $gray-700, inset 1px 1px 0 $gray-700;
 		}
 
@@ -222,6 +229,13 @@
 }
 
 .woocommerce-layout__activity-panel-wrapper {
+	// Suppress the browser's default focus outline on click focus (the blue
+	// ring with slight rounded corners). Keyboard nav still gets it via
+	// :focus-visible so a11y is preserved.
+	&:focus {
+		outline: none;
+	}
+
 	height: calc(100vh - #{$header-height + $adminbar-height-mobile});
 	background: $gray-100;
 	width: 430px;
@@ -232,7 +246,9 @@
 	@include activity-panel-slide();
 	position: absolute;
 	right: 0;
-	top: 100%;
+	// Clear the floating header's 1px bottom border so it stays visible
+	// when the slide-over panel is open (otherwise the panel covers it).
+	top: calc(100% + 1px);
 	z-index: 1000;
 	overflow-x: hidden;
 	overflow-y: auto;

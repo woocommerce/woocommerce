@@ -125,7 +125,10 @@ $woo-chrome-only-header-height: 32px;
 		cursor: pointer;
 		background-color: transparent;
 		height: $header-height;
-		min-width: 50px;
+		// wp-admin admin-bar items use ~0 8px horizontal padding each side;
+		// match it for a tight, infrastructure-y spacing.
+		min-width: 0;
+		padding: 0 8px;
 		color: $gray-700;
 
 		&::before {
@@ -147,7 +150,9 @@ $woo-chrome-only-header-height: 32px;
 			box-shadow: none;
 
 			&::before {
-				height: 3px;
+				// 2px to match Gutenberg's TabPanel + Woo's own
+				// nav-tab-active indicator on Settings.
+				height: 2px;
 				opacity: 1;
 			}
 		}
@@ -159,8 +164,15 @@ $woo-chrome-only-header-height: 32px;
 			color: $gray-900;
 		}
 
+		// Suppress the inset focus shadow on mouse-click focus (it conflicts
+		// with the blue underline). Keyboard-only focus still shows a ring
+		// via :focus-visible, preserving accessibility.
 		&:focus,
 		&.components-button:not(:disabled):not([aria-disabled="true"]):focus {
+			box-shadow: none;
+		}
+		&:focus-visible,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus-visible {
 			box-shadow: inset -1px -1px 0 $gray-700,
 				inset 1px 1px 0 $gray-700;
 		}
