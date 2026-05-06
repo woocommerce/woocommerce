@@ -593,12 +593,12 @@ test.describe( 'Add to Cart + Options Block', () => {
 				.getByLabel( 'Reduce quantity of Beanie' );
 			await reduceBeanieQuantityButton.click();
 
-			const addToCartButton = page.getByRole( 'button', {
+			const addedToCartButton = page.getByRole( 'button', {
 				name: 'Added to cart',
 				exact: true,
 			} );
 
-			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
+			await expect( addedToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
 			const reduceTShirtQuantityButton = page
 				.locator(
@@ -618,7 +618,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await expect( tShirtQuantityInput ).toHaveValue( '0' );
 			await expect( reduceBeanieQuantityButton ).toBeDisabled();
 			await expect( reduceTShirtQuantityButton ).toBeDisabled();
-			await expect( addToCartButton ).toHaveClass( /\bdisabled\b/ );
+			await expect( addedToCartButton ).toHaveClass( /\bdisabled\b/ );
 		} );
 
 		await test.step( 'products sold individually can be added to cart', async () => {
