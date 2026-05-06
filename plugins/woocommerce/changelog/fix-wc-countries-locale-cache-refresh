@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Fix WC_Countries caching country/state/continent names without refreshing on locale switch; add flush_country_name_cache() and hook it to change_locale action.

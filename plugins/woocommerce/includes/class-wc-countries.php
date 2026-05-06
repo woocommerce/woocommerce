@@ -40,6 +40,37 @@ class WC_Countries {
 	private $geo_cache = array();
 
 	/**
+	 * Constructor.
+	 *
+	 * Registers a hook to flush the country/state/continent name cache whenever
+	 * the active locale is switched, ensuring that translated names always
+	 * reflect the current locale.
+	 *
+	 * @since 10.9.0
+	 */
+	public function __construct() {
+		add_action( 'change_locale', array( $this, 'flush_country_name_cache' ) );
+	}
+
+	/**
+	 * Flush the cache of country, state, and continent names.
+	 *
+	 * Called automatically when the locale changes (via switch_to_locale() or
+	 * restore_current_locale()) so that subsequent calls to get_countries(),
+	 * get_states(), and get_continents() return correctly translated names for
+	 * the active locale.
+	 *
+	 * This method is also public so callers can trigger a manual cache flush
+	 * when needed.
+	 *
+	 * @since 10.9.0
+	 * @return void
+	 */
+	public function flush_country_name_cache() {
+		unset( $this->geo_cache['countries'], $this->geo_cache['states'], $this->geo_cache['continents'] );
+	}
+
+	/**
 	 * Auto-load in-accessible properties on demand.
 	 *
 	 * @param  mixed $key Key.
