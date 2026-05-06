@@ -14,7 +14,7 @@ The customer API allows you to create, view, update, and delete individual, or a
 | -------------------- | --------- | ---------------------------------------------------------------------------------------------------------- |
 | `id`                 | integer   | Unique identifier for the resource. `READ-ONLY`                              |
 | `date_created`       | date-time | The date the customer was created, in the site's timezone. `READ-ONLY`       |
-| `date_created_gmt`   | date-time | The date the order was created, as GMT. `READ-ONLY`                          |
+| `date_created_gmt`   | date-time | The date the customer was created, as GMT. `READ-ONLY`                       |
 | `date_modified`      | date-time | The date the customer was last modified, in the site's timezone. `READ-ONLY` |
 | `date_modified_gmt`  | date-time | The date the customer was last modified, as GMT. `READ-ONLY`                 |
 | `email`              | string    | The email address for the customer. `MANDATORY`                              |
@@ -905,7 +905,7 @@ woocommerce.delete("customers/25", force: true).parsed_response
 #### Available parameters
 | Parameter  |   Type  |                          Description                          |
 |------------|---------|---------------------------------------------------------------|
-| `force`    | string  | Required to be `true`, as resource does not support trashing. |
+| `force`    | boolean | Required to be `true`, as resource does not support trashing. |
 | `reassign` | integer | User ID to reassign posts to.                                 |
 
 ## Batch update customers

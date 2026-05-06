@@ -507,9 +507,9 @@ woocommerce.delete("products/attributes/1", force: true).parsed_response
 </Tabs>
 
 #### Available parameters
-| Parameter |  Type  |                          Description                          |
-|-----------|--------|---------------------------------------------------------------|
-| `force`   | string | Required to be `true`, as resource does not support trashing. |
+| Parameter |  Type   |                          Description                          |
+|-----------|---------|---------------------------------------------------------------|
+| `force`   | boolean | Required to be `true`, as resource does not support trashing. |
 
 ## Batch update product attributes
 This API helps you to batch create, update and delete multiple product attributes.
@@ -646,10 +646,10 @@ print(wcapi.post("products/attributes/batch", data).json())
 data = {
   create: [
     {
-      name: "Round toe"
+      name: "Brand"
     },
     {
-      name: "Flat"
+      name: "Publisher"
     }
   ],
   update: [

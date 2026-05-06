@@ -594,9 +594,9 @@ woocommerce.delete("products/attributes/2/terms/23", force: true).parsed_respons
 </Tabs>
 
 #### Available parameters
-| Parameter |  Type  |                          Description                          |
-|-----------|--------|---------------------------------------------------------------|
-| `force`   | string | Required to be `true`, as resource does not support trashing. |
+| Parameter |  Type   |                          Description                          |
+|-----------|---------|---------------------------------------------------------------|
+| `force`   | boolean | Required to be `true`, as resource does not support trashing. |
 
 ## Batch update attribute terms
 This API helps you to batch create, update and delete multiple product attribute terms.
@@ -811,7 +811,7 @@ woocommerce.post("products/attributes/2/terms/batch", data).parsed_response
       "name": "L",
       "slug": "l",
       "description": "",
-      "menu_order": 5,
+      "menu_order": 6,
       "count": 1,
       "_links": {
         "self": [

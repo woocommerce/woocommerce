@@ -37,7 +37,7 @@ The refunds API allows you to create, view, and delete individual refunds.
 | `product_id`   | integer | Product ID.                                                                                                                                     |
 | `variation_id` | integer | Variation ID, if applicable.                                                                                                                    |
 | `quantity`     | integer | Quantity ordered.                                                                                                                               |
-| `tax_class`    | integer | Tax class of product.                                                                                                                           |
+| `tax_class`    | string  | Tax class of product.                                                                                                                           |
 | `subtotal`     | string  | Line subtotal (before discounts).                                                                                                               |
 | `subtotal_tax` | string  | Line subtotal tax (before discounts). `READ-ONLY`                                                                 |
 | `total`        | string  | Line total (after discounts).                                                                                                                   |
@@ -247,7 +247,7 @@ woocommerce.get("orders/723/refunds/726").parsed_response
 #### Available parameters
 | Parameter | Type   | Description                                       |
 |-----------|--------|---------------------------------------------------|
-| `dp`      | string | Number of decimal points to use in each resource. |
+| `dp`      | integer | Number of decimal points to use in each resource. |
 
 ## List all refunds
 This API helps you to view all the refunds from an order.
@@ -494,4 +494,4 @@ woocommerce.delete("orders/723/refunds/726", force: true).parsed_response
 #### Available parameters
 | Parameter | Type   | Description                                                   |
 |-----------|--------|---------------------------------------------------------------|
-| `force`   | string | Required to be `true`, as resource does not support trashing. |
+| `force`   | boolean | Required to be `true`, as resource does not support trashing. |

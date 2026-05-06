@@ -39,7 +39,7 @@ Delivery is performed using `wp_remote_post()` (HTTP POST) and processed in the 
 * `X-WC-Webhook-Event` - e.g. `updated`.
 * `X-WC-Webhook-Signature` - a base64 encoded HMAC-SHA256 hash of the payload.
 * `X-WC-Webhook-ID` - webhook's post ID.
-* `X-WC-Delivery-ID` - delivery log ID (a comment).
+* `X-WC-Webhook-Delivery-ID` - delivery log ID (a comment).
 
 The payload is JSON encoded and for API resources (coupons, customers, orders, products), the response is exactly the same as if requested via the REST API.
 
@@ -81,11 +81,11 @@ You can find the Webhooks interface going to "WooCommerce" > "Settings" > "API" 
 | `duration`         | string    | The delivery duration, in seconds. `READ-ONLY`                                                               |
 | `summary`          | string    | A friendly summary of the response including the HTTP response code, message, and body. `READ-ONLY`          |
 | `request_url`      | string    | The URL where the webhook was delivered. `READ-ONLY`                                                         |
-| `request_headers`  | array     | Request headers. See [Request Headers Attributes](#request-header-properties) for more details. `READ-ONLY`  |
+| `request_headers`  | object    | Request headers. See [Request Headers Attributes](#request-header-properties) for more details. `READ-ONLY`  |
 | `request_body`     | string    | Request body. `READ-ONLY`                                                                                    |
 | `response_code`    | string    | The HTTP response code from the receiving server. `READ-ONLY`                                                |
 | `response_message` | string    | The HTTP response message from the receiving server. `READ-ONLY`                                             |
-| `response_headers` | array     | Array of the response headers from the receiving server. `READ-ONLY`                                         |
+| `response_headers` | object    | Response headers from the receiving server. `READ-ONLY`                                                      |
 | `response_body`    | string    | The response body from the receiving server. `READ-ONLY`                                                     |
 | `date_created`     | date-time | The date the webhook delivery was logged, in the site's timezone. `READ-ONLY`                                |
 
@@ -94,6 +94,7 @@ You can find the Webhooks interface going to "WooCommerce" > "Settings" > "API" 
 |----------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------|
 | `User-Agent`               | string  | The request user agent, default is "WooCommerce/\{version\} Hookshot (WordPress/\{version\})". `READ-ONLY`  |
 | `Content-Type`             | string  | The request content-type, default is "application/json". `READ-ONLY`                                    |
+| `X-WC-Webhook-Source`      | string  | The webhook source URL. `READ-ONLY`                                                                     |
 | `X-WC-Webhook-Topic`       | string  | The webhook topic. `READ-ONLY`                                                                          |
 | `X-WC-Webhook-Resource`    | string  | The webhook resource. `READ-ONLY`                                                                       |
 | `X-WC-Webhook-Event`       | string  | The webhook event. `READ-ONLY`                                                                          |
@@ -996,7 +997,7 @@ View the <a href="#webhooks-delivery-properties">Webhooks Delivery properties</a
 :::
 
 ## List all webhook deliveries
-This API helps you to view all deliveries from a specific webhooks.
+This API helps you view all deliveries from a specific webhook.
 
 ```http
 GET /wp-json/wc/v1/webhooks/<id>/deliveries

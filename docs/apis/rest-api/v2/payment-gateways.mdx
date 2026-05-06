@@ -549,7 +549,7 @@ curl -X PUT https://example.com/wp-json/wc/v2/payment_gateways/bacs \
 
 ```javascript
 const data = {
-  enabled: true
+  enabled: false
 };
 
 WooCommerce.put("payment_gateways/bacs", data)
@@ -565,9 +565,9 @@ WooCommerce.put("payment_gateways/bacs", data)
   <TabItem value="php" label="PHP">
 
 ```php
-<?php 
+<?php
 $data = [
-    'enabled' => true
+    'enabled' => false
 ];
 
 print_r($woocommerce->put('payment_gateways/bacs', $data));
@@ -579,7 +579,7 @@ print_r($woocommerce->put('payment_gateways/bacs', $data));
 
 ```python
 data = {
-    "enabled": True
+    "enabled": False
 }
 
 print(wcapi.put("payment_gateways/bacs", data).json())
@@ -590,7 +590,7 @@ print(wcapi.put("payment_gateways/bacs", data).json())
 
 ```ruby
 data = {
-  enabled: true
+  enabled: false
 }
 
 woocommerce.put("payment_gateways/bacs", data).parsed_response
