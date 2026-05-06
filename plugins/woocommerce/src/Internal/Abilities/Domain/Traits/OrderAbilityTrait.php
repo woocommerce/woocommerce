@@ -7,12 +7,26 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain\Traits;
 
+use Automattic\WooCommerce\Utilities\OrderUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
  * Shared order helpers for WooCommerce domain ability definitions.
  */
 trait OrderAbilityTrait {
+
+	/**
+	 * Allowed order status slugs (without the `wc-` prefix).
+	 *
+	 * @return array<int, string>
+	 */
+	protected static function get_allowed_order_status_slugs(): array {
+		return array_map(
+			array( OrderUtil::class, 'remove_status_prefix' ),
+			array_keys( wc_get_order_statuses() )
+		);
+	}
 
 	/**
 	 * Get an order note output schema.
@@ -24,9 +38,64 @@ trait OrderAbilityTrait {
 			'type'                 => 'object',
 			'properties'           => array(
 				'note_id' => array( 'type' => 'integer' ),
-				'order'   => array(
-					'type'                 => 'object',
-					'additionalProperties' => true,
+				'order'   => self::get_order_output_schema(),
+			),
+			'additionalProperties' => false,
+		);
+	}
+
+	/**
+	 * Get the schema for a single order in a response.
+	 *
+	 * @return array
+	 */
+	protected static function get_order_output_schema(): array {
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'id'                   => array( 'type' => 'integer' ),
+				'status'               => array(
+					'type' => 'string',
+					'enum' => self::get_allowed_order_status_slugs(),
+				),
+				'currency'             => array( 'type' => 'string' ),
+				'currency_symbol'      => array( 'type' => 'string' ),
+				'total'                => array( 'type' => 'string' ),
+				'customer_id'          => array( 'type' => 'integer' ),
+				'billing_email'        => array( 'type' => 'string' ),
+				'payment_method'       => array( 'type' => 'string' ),
+				'payment_method_title' => array( 'type' => 'string' ),
+				'date_created'         => array(
+					'type'   => array( 'string', 'null' ),
+					'format' => 'date-time',
+				),
+				'date_created_gmt'     => array(
+					'type'   => array( 'string', 'null' ),
+					'format' => 'date-time',
+				),
+				'date_modified'        => array(
+					'type'   => array( 'string', 'null' ),
+					'format' => 'date-time',
+				),
+				'date_modified_gmt'    => array(
+					'type'   => array( 'string', 'null' ),
+					'format' => 'date-time',
+				),
+				'line_items'           => array(
+					'type'  => 'array',
+					'items' => array(
+						'type'                 => 'object',
+						'properties'           => array(
+							'id'           => array( 'type' => 'integer' ),
+							'name'         => array( 'type' => 'string' ),
+							'product_id'   => array( 'type' => 'integer' ),
+							'variation_id' => array( 'type' => 'integer' ),
+							'quantity'     => array( 'type' => 'integer' ),
+							'subtotal'     => array( 'type' => 'string' ),
+							'total'        => array( 'type' => 'string' ),
+						),
+						'additionalProperties' => false,
+					),
 				),
 			),
 			'additionalProperties' => false,
@@ -73,13 +142,16 @@ trait OrderAbilityTrait {
 			'id'                   => $order->get_id(),
 			'status'               => $order->get_status(),
 			'currency'             => $order->get_currency(),
+			'currency_symbol'      => html_entity_decode( get_woocommerce_currency_symbol( $order->get_currency() ) ),
 			'total'                => $order->get_total(),
 			'customer_id'          => $order->get_customer_id(),
 			'billing_email'        => $order->get_billing_email(),
 			'payment_method'       => $order->get_payment_method(),
 			'payment_method_title' => $order->get_payment_method_title(),
 			'date_created'         => wc_rest_prepare_date_response( $order->get_date_created(), false ),
+			'date_created_gmt'     => wc_rest_prepare_date_response( $order->get_date_created() ),
 			'date_modified'        => wc_rest_prepare_date_response( $order->get_date_modified(), false ),
+			'date_modified_gmt'    => wc_rest_prepare_date_response( $order->get_date_modified() ),
 		);
 
 		if ( $include_line_items ) {

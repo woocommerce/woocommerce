@@ -77,9 +77,18 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 		}
 
 		$note_id = $order->add_order_note(
-			sanitize_text_field( wp_unslash( (string) $input['note'] ) ),
-			( (bool) ( $input['customer_note'] ?? false ) ) ? 1 : 0
+			sanitize_text_field( $input['note'] ),
+			( (bool) ( $input['customer_note'] ?? false ) ) ? 1 : 0,
+			get_current_user_id() > 0
 		);
+
+		if ( $note_id <= 0 ) {
+			return new \WP_Error(
+				'woocommerce_order_note_create_failed',
+				__( 'Failed to add order note.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
 
 		return array(
 			'note_id' => (int) $note_id,

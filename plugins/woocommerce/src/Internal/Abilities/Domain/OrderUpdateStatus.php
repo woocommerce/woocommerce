@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Internal\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -46,7 +47,7 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_entity_output_schema( 'order' ),
+			'output_schema'       => self::get_entity_output_schema( 'order', self::get_order_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_edit_order' ),
 			'meta'                => self::get_ability_meta( false, false, true ),
@@ -76,10 +77,28 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 			);
 		}
 
-		$order->update_status(
-			sanitize_key( $input['status'] ),
-			isset( $input['note'] ) ? sanitize_text_field( wp_unslash( (string) $input['note'] ) ) : ''
+		$status = OrderUtil::remove_status_prefix( sanitize_key( $input['status'] ) );
+
+		if ( ! in_array( $status, self::get_allowed_order_status_slugs(), true ) ) {
+			return new \WP_Error(
+				'woocommerce_order_status_invalid',
+				__( 'Order status is invalid.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$updated = $order->update_status(
+			$status,
+			isset( $input['note'] ) ? sanitize_text_field( $input['note'] ) : ''
 		);
+
+		if ( ! $updated ) {
+			return new \WP_Error(
+				'woocommerce_order_status_update_failed',
+				__( 'Failed to update order status.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
 
 		return array(
 			'order' => self::format_order_for_response( $order, false ),
@@ -110,7 +129,10 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'     => array( 'type' => 'integer' ),
-				'status' => array( 'type' => 'string' ),
+				'status' => array(
+					'type' => 'string',
+					'enum' => self::get_allowed_order_status_slugs(),
+				),
 				'note'   => array( 'type' => 'string' ),
 			),
 			'required'             => array( 'id', 'status' ),

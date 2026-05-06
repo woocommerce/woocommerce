@@ -46,7 +46,7 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_collection_output_schema( 'orders' ),
+			'output_schema'       => self::get_collection_output_schema( 'orders', self::get_order_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_orders' ),
 			'meta'                => self::get_ability_meta( true, true, false ),
@@ -83,8 +83,8 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			);
 		}
 
-		$page     = max( 1, absint( $input['page'] ?? 1 ) );
-		$per_page = self::sanitize_per_page( $input['per_page'] ?? 10 );
+		$page     = (int) ( $input['page'] ?? 1 );
+		$per_page = (int) ( $input['per_page'] ?? 10 );
 		$args     = array(
 			'limit'    => $per_page,
 			'page'     => $page,
@@ -93,14 +93,31 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			'type'     => 'shop_order',
 		);
 
-		foreach ( array( 'status', 'billing_email' ) as $field ) {
+		foreach ( array( 'status', 'billing_email', 'orderby', 'order' ) as $field ) {
 			if ( ! empty( $input[ $field ] ) ) {
-				$args[ $field ] = wc_clean( wp_unslash( $input[ $field ] ) );
+				$args[ $field ] = wc_clean( $input[ $field ] );
 			}
 		}
 
-		if ( ! empty( $input['customer_id'] ) ) {
-			$args['customer_id'] = absint( $input['customer_id'] );
+		foreach ( array( 'customer_id', 'parent' ) as $field ) {
+			if ( isset( $input[ $field ] ) ) {
+				$args[ $field ] = absint( $input[ $field ] );
+			}
+		}
+
+		if ( ! empty( $input['exclude'] ) && is_array( $input['exclude'] ) ) {
+			$args['exclude'] = array_map( 'absint', $input['exclude'] );
+		}
+
+		foreach ( array( 'date_after', 'date_before' ) as $field ) {
+			if ( ! empty( $input[ $field ] ) ) {
+				$args[ $field ] = wc_clean( $input[ $field ] );
+			}
+		}
+
+		$date_modified = self::build_modified_date_arg( $input );
+		if ( null !== $date_modified ) {
+			$args['date_modified'] = $date_modified;
 		}
 
 		$results = wc_get_orders( $args );
@@ -152,9 +169,41 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			'type'                 => 'object',
 			'properties'           => array(
 				'id'                 => array( 'type' => 'integer' ),
-				'status'             => array( 'type' => 'string' ),
+				'status'             => array(
+					'type' => 'string',
+					'enum' => self::get_allowed_order_status_slugs(),
+				),
 				'customer_id'        => array( 'type' => 'integer' ),
 				'billing_email'      => array( 'type' => 'string' ),
+				'parent'             => array( 'type' => 'integer' ),
+				'exclude'            => array(
+					'type'  => 'array',
+					'items' => array( 'type' => 'integer' ),
+				),
+				'date_after'         => array(
+					'type'   => 'string',
+					'format' => 'date-time',
+				),
+				'date_before'        => array(
+					'type'   => 'string',
+					'format' => 'date-time',
+				),
+				'modified_after'     => array(
+					'type'   => 'string',
+					'format' => 'date-time',
+				),
+				'modified_before'    => array(
+					'type'   => 'string',
+					'format' => 'date-time',
+				),
+				'orderby'            => array(
+					'type' => 'string',
+					'enum' => array( 'id', 'date', 'date_modified', 'total' ),
+				),
+				'order'              => array(
+					'type' => 'string',
+					'enum' => array( 'asc', 'desc', 'ASC', 'DESC' ),
+				),
 				'include_line_items' => array(
 					'type'    => 'boolean',
 					'default' => false,
@@ -174,5 +223,26 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			'additionalProperties' => false,
 			'default'              => array(),
 		);
+	}
+
+	/**
+	 * Build a `date_modified` query arg from modified_after/modified_before input.
+	 *
+	 * @param array $input Ability input.
+	 * @return string|null
+	 */
+	private static function build_modified_date_arg( array $input ): ?string {
+		$after  = isset( $input['modified_after'] ) && is_string( $input['modified_after'] ) ? sanitize_text_field( $input['modified_after'] ) : '';
+		$before = isset( $input['modified_before'] ) && is_string( $input['modified_before'] ) ? sanitize_text_field( $input['modified_before'] ) : '';
+
+		if ( '' === $after && '' === $before ) {
+			return null;
+		}
+
+		if ( '' !== $after && '' !== $before ) {
+			return $after . '...' . $before;
+		}
+
+		return '' !== $before ? '<' . $before : '>' . $after;
 	}
 }
