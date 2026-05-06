@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix attribute escaping and loading attribute output in product gallery dialog images
