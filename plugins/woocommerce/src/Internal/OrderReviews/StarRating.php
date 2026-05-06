@@ -33,7 +33,9 @@ class StarRating {
 	 *
 	 * Optional:
 	 *  - `selected` (int): pre-selected value 0-5; pass `0` (the default)
-	 *    for no pre-selection.
+	 *    for no pre-selection. Values outside 0-5 are treated as no selection.
+	 *
+	 * @since 10.8.0
 	 *
 	 * @param array $args Render arguments. See description for required and optional keys.
 	 * @return string
@@ -47,6 +49,11 @@ class StarRating {
 			return '';
 		}
 
+		$selected = (int) ( $args['selected'] ?? 0 );
+		if ( $selected < 0 || $selected > 5 ) {
+			$selected = 0;
+		}
+
 		ob_start();
 		wc_get_template(
 			'order/star-rating.php',
@@ -54,7 +61,7 @@ class StarRating {
 				'name'      => $name,
 				'id_prefix' => $id_prefix,
 				'label_id'  => $label_id,
-				'selected'  => (int) ( $args['selected'] ?? 0 ),
+				'selected'  => $selected,
 				'labels'    => self::get_labels(),
 			)
 		);
@@ -67,6 +74,8 @@ class StarRating {
 	 * Defaults match the long-standing WooCommerce product-review labels in
 	 * `templates/single-product-reviews.php` so customers see consistent
 	 * wording across the two review entry points.
+	 *
+	 * @since 10.8.0
 	 *
 	 * @return array<int, string>
 	 */

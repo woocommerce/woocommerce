@@ -84,6 +84,23 @@ class StarRatingTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox render() treats an out-of-range selected value as no selection.
+	 */
+	public function test_render_rejects_out_of_range_selected(): void {
+		$args = array(
+			'name'      => 'reviews[42][rating]',
+			'id_prefix' => 'review-rating-42',
+			'label_id'  => 'review-rating-label-42',
+		);
+
+		$above = StarRating::render( array_merge( $args, array( 'selected' => 99 ) ) );
+		$below = StarRating::render( array_merge( $args, array( 'selected' => -3 ) ) );
+
+		$this->assertDoesNotMatchRegularExpression( '#<input[^>]*\bchecked\b#', $above );
+		$this->assertDoesNotMatchRegularExpression( '#<input[^>]*\bchecked\b#', $below );
+	}
+
+	/**
 	 * @testdox get_labels() returns the documented defaults out of the box.
 	 */
 	public function test_get_labels_returns_defaults(): void {
