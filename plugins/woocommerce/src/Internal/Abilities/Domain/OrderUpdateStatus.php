@@ -48,8 +48,8 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_entity_output_schema( 'order' ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
-			'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
-			'meta'                => self::get_domain_meta( false, false, true ),
+			'permission_callback' => array( __CLASS__, 'can_edit_order' ),
+			'meta'                => self::get_ability_meta( false, false, true ),
 		);
 	}
 
@@ -78,11 +78,11 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 
 		$order->update_status(
 			sanitize_key( $input['status'] ),
-			isset( $input['note'] ) ? self::sanitize_string( $input['note'] ) : ''
+			isset( $input['note'] ) ? sanitize_text_field( wp_unslash( (string) $input['note'] ) ) : ''
 		);
 
 		return array(
-			'order' => self::format_order( $order, false ),
+			'order' => self::format_order_for_response( $order, false ),
 		);
 	}
 
@@ -94,8 +94,8 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 	 *
 	 * @since 10.9.0
 	 */
-	public static function can_manage_orders( $input = array() ): bool {
-		$order_id = self::get_input_id( $input );
+	public static function can_edit_order( $input = array() ): bool {
+		$order_id = self::get_id_from_input( $input );
 
 		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'edit', $order_id );
 	}

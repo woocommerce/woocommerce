@@ -49,7 +49,7 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_collection_output_schema( 'products' ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_products' ),
-			'meta'                => self::get_domain_meta( true, true, false ),
+			'meta'                => self::get_ability_meta( true, true, false ),
 		);
 	}
 
@@ -74,7 +74,7 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 			}
 
 			return array(
-				'products' => array( self::format_product( $product ) ),
+				'products' => array( self::format_product_for_response( $product ) ),
 				'total'    => 1,
 				'page'     => 1,
 				'per_page' => 1,
@@ -107,7 +107,7 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 		return array(
 			'products' => array_map(
 				static function ( $product ) {
-					return self::format_product( $product );
+					return self::format_product_for_response( $product );
 				},
 				$products
 			),
@@ -126,7 +126,7 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_query_products( $input = array() ): bool {
-		$product_id = self::get_input_id( $input );
+		$product_id = self::get_id_from_input( $input );
 
 		return wc_rest_check_post_permissions( 'product', 'read', $product_id );
 	}

@@ -76,7 +76,7 @@ trait ProductAbilityTrait {
 	 * @param \WC_Product $product Product object.
 	 * @param array       $input   Ability input.
 	 */
-	protected static function set_product_props( \WC_Product $product, array $input ): void {
+	protected static function set_product_props_from_input( \WC_Product $product, array $input ): void {
 		$setters = array(
 			'name'              => 'set_name',
 			'sku'               => 'set_sku',
@@ -111,7 +111,7 @@ trait ProductAbilityTrait {
 	 * @param \WC_Product $product Product object.
 	 * @return array
 	 */
-	protected static function format_product( \WC_Product $product ): array {
+	protected static function format_product_for_response( \WC_Product $product ): array {
 		return array(
 			'id'             => $product->get_id(),
 			'name'           => $product->get_name(),

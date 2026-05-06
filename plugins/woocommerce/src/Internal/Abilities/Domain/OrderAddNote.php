@@ -48,8 +48,8 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 			'input_schema'        => self::get_input_schema(),
 			'output_schema'       => self::get_order_note_output_schema(),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
-			'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
-			'meta'                => self::get_domain_meta( false, false, false ),
+			'permission_callback' => array( __CLASS__, 'can_edit_order' ),
+			'meta'                => self::get_ability_meta( false, false, false ),
 		);
 	}
 
@@ -77,13 +77,13 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 		}
 
 		$note_id = $order->add_order_note(
-			self::sanitize_string( $input['note'] ),
+			sanitize_text_field( wp_unslash( (string) $input['note'] ) ),
 			( (bool) ( $input['customer_note'] ?? false ) ) ? 1 : 0
 		);
 
 		return array(
 			'note_id' => (int) $note_id,
-			'order'   => self::format_order( $order, false ),
+			'order'   => self::format_order_for_response( $order, false ),
 		);
 	}
 
@@ -95,8 +95,8 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 	 *
 	 * @since 10.9.0
 	 */
-	public static function can_manage_orders( $input = array() ): bool {
-		$order_id = self::get_input_id( $input );
+	public static function can_edit_order( $input = array() ): bool {
+		$order_id = self::get_id_from_input( $input );
 
 		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'edit', $order_id );
 	}

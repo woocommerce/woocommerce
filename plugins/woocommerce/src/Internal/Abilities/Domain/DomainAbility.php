@@ -15,14 +15,14 @@ defined( 'ABSPATH' ) || exit;
 abstract class DomainAbility {
 
 	/**
-	 * Get common domain metadata.
+	 * Get common ability metadata.
 	 *
 	 * @param bool   $is_readonly Whether the ability is readonly.
 	 * @param bool   $idempotent  Whether the ability is idempotent.
 	 * @param bool   $destructive Whether the ability can mutate data.
 	 * @return array
 	 */
-	protected static function get_domain_meta( bool $is_readonly, bool $idempotent, bool $destructive ): array {
+	protected static function get_ability_meta( bool $is_readonly, bool $idempotent, bool $destructive ): array {
 		return array(
 			'show_in_rest' => true,
 			'mcp'          => array(
@@ -103,7 +103,7 @@ abstract class DomainAbility {
 	 * @param mixed $input Ability input.
 	 * @return int
 	 */
-	protected static function get_input_id( $input ): int {
+	protected static function get_id_from_input( $input ): int {
 		return is_array( $input ) && ! empty( $input['id'] ) ? absint( $input['id'] ) : 0;
 	}
 
@@ -115,21 +115,5 @@ abstract class DomainAbility {
 	 */
 	protected static function sanitize_per_page( $value ): int {
 		return min( 100, max( 1, absint( $value ) ) );
-	}
-
-	/**
-	 * Sanitize a scalar string input value.
-	 *
-	 * @param mixed $value Raw input value.
-	 * @return string
-	 */
-	protected static function sanitize_string( $value ): string {
-		if ( ! is_scalar( $value ) ) {
-			return '';
-		}
-
-		$clean = wc_clean( wp_unslash( (string) $value ) );
-
-		return is_string( $clean ) ? $clean : '';
 	}
 }

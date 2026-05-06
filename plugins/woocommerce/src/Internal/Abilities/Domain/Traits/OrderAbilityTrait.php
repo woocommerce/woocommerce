@@ -68,7 +68,7 @@ trait OrderAbilityTrait {
 	 * @param bool      $include_line_items Whether to include line items.
 	 * @return array
 	 */
-	protected static function format_order( \WC_Order $order, bool $include_line_items ): array {
+	protected static function format_order_for_response( \WC_Order $order, bool $include_line_items ): array {
 		$data = array(
 			'id'                   => $order->get_id(),
 			'status'               => $order->get_status(),

@@ -49,7 +49,7 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_collection_output_schema( 'orders' ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_orders' ),
-			'meta'                => self::get_domain_meta( true, true, false ),
+			'meta'                => self::get_ability_meta( true, true, false ),
 		);
 	}
 
@@ -76,7 +76,7 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			}
 
 			return array(
-				'orders'   => array( self::format_order( $order, $include_line_items ) ),
+				'orders'   => array( self::format_order_for_response( $order, $include_line_items ) ),
 				'total'    => 1,
 				'page'     => 1,
 				'per_page' => 1,
@@ -118,7 +118,7 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 		return array(
 			'orders'   => array_map(
 				static function ( $order ) use ( $include_line_items ) {
-					return self::format_order( $order, $include_line_items );
+					return self::format_order_for_response( $order, $include_line_items );
 				},
 				$orders
 			),
@@ -137,7 +137,7 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_query_orders( $input = array() ): bool {
-		$order_id = self::get_input_id( $input );
+		$order_id = self::get_id_from_input( $input );
 
 		return wc_rest_check_post_permissions( 'shop_order', 'read', $order_id );
 	}

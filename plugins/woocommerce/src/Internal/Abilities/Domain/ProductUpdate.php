@@ -49,7 +49,7 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_entity_output_schema( 'product' ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_update_product' ),
-			'meta'                => self::get_domain_meta( false, false, true ),
+			'meta'                => self::get_ability_meta( false, false, true ),
 		);
 	}
 
@@ -68,11 +68,11 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 			return $product;
 		}
 
-		self::set_product_props( $product, $input );
+		self::set_product_props_from_input( $product, $input );
 		$product->save();
 
 		return array(
-			'product' => self::format_product( $product ),
+			'product' => self::format_product_for_response( $product ),
 		);
 	}
 
@@ -85,7 +85,7 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_update_product( $input = array() ): bool {
-		$product_id = self::get_input_id( $input );
+		$product_id = self::get_id_from_input( $input );
 
 		return $product_id > 0 && wc_rest_check_post_permissions( 'product', 'edit', $product_id );
 	}

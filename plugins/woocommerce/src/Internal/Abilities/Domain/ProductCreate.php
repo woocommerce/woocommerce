@@ -49,7 +49,7 @@ class ProductCreate extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_entity_output_schema( 'product' ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_create_product' ),
-			'meta'                => self::get_domain_meta( false, false, false ),
+			'meta'                => self::get_ability_meta( false, false, false ),
 		);
 	}
 
@@ -73,11 +73,11 @@ class ProductCreate extends DomainAbility implements AbilityDefinition {
 			);
 		}
 
-		self::set_product_props( $product, $input );
+		self::set_product_props_from_input( $product, $input );
 		$product->save();
 
 		return array(
-			'product' => self::format_product( $product ),
+			'product' => self::format_product_for_response( $product ),
 		);
 	}
 

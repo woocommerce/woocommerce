@@ -49,7 +49,7 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_delete_output_schema(),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_delete_product' ),
-			'meta'                => self::get_domain_meta( false, false, true ),
+			'meta'                => self::get_ability_meta( false, false, true ),
 		);
 	}
 
@@ -86,7 +86,7 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_delete_product( $input = array() ): bool {
-		$product_id = self::get_input_id( $input );
+		$product_id = self::get_id_from_input( $input );
 
 		return $product_id > 0 && wc_rest_check_post_permissions( 'product', 'delete', $product_id );
 	}
