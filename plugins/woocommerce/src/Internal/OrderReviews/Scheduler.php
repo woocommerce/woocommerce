@@ -7,7 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\OrderReviews;
 
-use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 use WC_Email_Customer_Review_Request;
 use WC_Order;
 
@@ -19,11 +18,15 @@ use WC_Order;
  * configured in the email's settings. Cancels the pending action when the
  * order is later refunded, cancelled, trashed or deleted.
  *
+ * The container auto-calls `init()` after instantiation, which is where
+ * the WordPress hooks are registered. Resolution is driven by the
+ * `OrderReviews` wrapper that lists this class as an `init()` argument.
+ *
  * @internal Just for internal use.
  *
  * @since 10.8.0
  */
-class Scheduler implements RegisterHooksInterface {
+class Scheduler {
 
 	/**
 	 * Action Scheduler hook fired when the configured delay elapses. The
@@ -45,8 +48,12 @@ class Scheduler implements RegisterHooksInterface {
 
 	/**
 	 * Register hooks and filters.
+	 *
+	 * Auto-called by the WC dependency container after instantiation.
+	 *
+	 * @internal
 	 */
-	public function register(): void {
+	final public function init(): void {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'handle_woocommerce_order_status_completed' ), 10, 1 );
 		add_action( 'woocommerce_order_status_cancelled', array( $this, 'handle_cancellation' ), 10, 1 );
 		add_action( 'woocommerce_order_status_refunded', array( $this, 'handle_cancellation' ), 10, 1 );
