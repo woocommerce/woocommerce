@@ -107,6 +107,68 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should expose price_html for live products and an empty string for tombstones.
+	 */
+	public function test_price_html_is_populated_for_live_products(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Priced T-Shirt',
+				'regular_price' => 19.99,
+			)
+		);
+
+		$response = $this->sut->get_item_response( $this->build_item( $product->get_id() ) );
+
+		$this->assertArrayHasKey( 'price_html', $response, 'price_html must be present on the response' );
+		$this->assertIsString( $response['price_html'] );
+		$this->assertNotSame( '', $response['price_html'], 'price_html must be non-empty for a live priced product' );
+		$this->assertStringContainsString( 'woocommerce-Price-amount', $response['price_html'], 'price_html should be the formatted markup from wc_price' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should expose image_html with the configured product thumbnail when one is set.
+	 */
+	public function test_image_html_uses_product_thumbnail_when_available(): void {
+		$attachment_id = $this->factory->attachment->create_upload_object( DIR_TESTDATA . '/images/canola.jpg' );
+		$product       = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Imaged T-Shirt' ) );
+		$product->set_image_id( $attachment_id );
+		$product->save();
+
+		$response = $this->sut->get_item_response( $this->build_item( $product->get_id() ) );
+
+		$this->assertArrayHasKey( 'image_html', $response, 'image_html must be present on the response' );
+		$this->assertIsString( $response['image_html'] );
+		$this->assertStringContainsString( '<img', $response['image_html'], 'image_html must be a fully-formed <img> element' );
+		$this->assertStringContainsString( 'srcset=', $response['image_html'], 'image_html must carry the responsive srcset attribute' );
+
+		$product->delete( true );
+		wp_delete_attachment( $attachment_id, true );
+	}
+
+	/**
+	 * @testdox Should expose image_html using the WooCommerce placeholder when the product has no image.
+	 */
+	public function test_image_html_falls_back_to_placeholder_when_product_has_no_image(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'No-Image T-Shirt' ) );
+		$product->set_image_id( 0 );
+		$product->save();
+
+		$response = $this->sut->get_item_response( $this->build_item( $product->get_id() ) );
+
+		$this->assertArrayHasKey( 'image_html', $response );
+		$this->assertSame(
+			(string) wc_placeholder_img( 'woocommerce_thumbnail' ),
+			$response['image_html'],
+			'image_html for an image-less product must equal the configured placeholder markup'
+		);
+
+		$product->delete( true );
+	}
+
+	/**
 	 * @testdox Should fall back to at-save snapshot data when the product no longer exists.
 	 */
 	public function test_falls_back_to_snapshot_when_product_missing(): void {
@@ -123,5 +185,32 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 		$this->assertSame( array(), $response['images'], 'No images should be returned for missing products' );
 		$this->assertNull( $response['prices'], 'Live prices should be null for missing products' );
 		$this->assertArrayNotHasKey( 'product_title_at_save', $response, 'Internal at-save title snapshot should not leak into the public response' );
+	}
+
+	/**
+	 * @testdox Should expose an empty price_html and the placeholder image_html for tombstones.
+	 */
+	public function test_tombstone_returns_empty_price_html_and_placeholder_image_html(): void {
+		$product    = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Going Away',
+				'regular_price' => 24.99,
+			)
+		);
+		$product_id = $product->get_id();
+		$item       = $this->build_item( $product_id, 0, array(), 'Going Away' );
+		wp_delete_post( $product_id, true );
+
+		$response = $this->sut->get_item_response( $item );
+
+		$this->assertArrayHasKey( 'price_html', $response );
+		$this->assertSame( '', $response['price_html'], 'Tombstones must not advertise a price' );
+		$this->assertArrayHasKey( 'image_html', $response );
+		$this->assertSame(
+			(string) wc_placeholder_img( 'woocommerce_thumbnail' ),
+			$response['image_html'],
+			'Tombstones must use the placeholder image markup'
+		);
 	}
 }

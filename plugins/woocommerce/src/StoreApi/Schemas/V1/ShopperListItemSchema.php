@@ -180,6 +180,18 @@ class ShopperListItemSchema extends AbstractSchema {
 					)
 				),
 			),
+			'price_html'     => array(
+				'description' => __( 'Live product price as HTML, formatted via wc_price including sale/discount markup. Empty when the product no longer exists.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'image_html'     => array(
+				'description' => __( 'Product thumbnail as a fully-formed <img> element with srcset, sizes, alt, and lazy-loading attributes. Falls back to the configured placeholder image when the product has no image or no longer exists.', 'woocommerce' ),
+				'type'        => 'string',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
 			'date_added_gmt' => array(
 				'description' => __( 'The date the item was saved, as GMT.', 'woocommerce' ),
 				'type'        => 'string',
@@ -215,17 +227,21 @@ class ShopperListItemSchema extends AbstractSchema {
 		$variation_data = isset( $item['variation'] ) && is_array( $item['variation'] ) ? $item['variation'] : array();
 
 		if ( $has_product ) {
-			$response['name']      = $this->get_name( $product );
-			$response['permalink'] = $product->get_permalink();
-			$response['images']    = $this->get_images( $product );
-			$response['variation'] = $this->format_variation_data( $variation_data, $product );
-			$response['prices']    = (object) $this->get_prices( $product );
+			$response['name']       = $this->get_name( $product );
+			$response['permalink']  = $product->get_permalink();
+			$response['images']     = $this->get_images( $product );
+			$response['variation']  = $this->format_variation_data( $variation_data, $product );
+			$response['prices']     = (object) $this->get_prices( $product );
+			$response['price_html'] = (string) $product->get_price_html();
+			$response['image_html'] = $this->get_image_html( $product );
 		} else {
-			$response['name']      = $this->prepare_html_response( (string) ( $item['product_title_at_save'] ?? '' ) );
-			$response['permalink'] = '';
-			$response['images']    = array();
-			$response['variation'] = array();
-			$response['prices']    = null;
+			$response['name']       = $this->prepare_html_response( (string) ( $item['product_title_at_save'] ?? '' ) );
+			$response['permalink']  = '';
+			$response['images']     = array();
+			$response['variation']  = array();
+			$response['prices']     = null;
+			$response['price_html'] = '';
+			$response['image_html'] = $this->get_image_html( null );
 		}//end if
 
 		return $response;
@@ -259,6 +275,26 @@ class ShopperListItemSchema extends AbstractSchema {
 
 		$image = $this->image_attachment_schema->get_item_response( $image_id );
 		return $image ? array( $image ) : array();
+	}
+
+	/**
+	 * Get the thumbnail image HTML for a shopper list item, falling back to the
+	 * WooCommerce placeholder when the product has no image or has been deleted.
+	 *
+	 * Pre-formatting on the server lets renderers (PHP SSR + JS hydration)
+	 * consume one canonical string instead of each side composing the markup
+	 * from the structured `images` array. Mirrors the pattern WC uses in
+	 * `ProductSchema::price_html` / `ProductImage::render`.
+	 *
+	 * @param \WC_Product|null $product Live product instance, or null for tombstones.
+	 * @return string
+	 */
+	private function get_image_html( ?\WC_Product $product ): string {
+		$image_id = $product instanceof \WC_Product ? (int) $product->get_image_id() : 0;
+		if ( $image_id > 0 ) {
+			return (string) wp_get_attachment_image( $image_id, 'woocommerce_thumbnail' );
+		}
+		return (string) wc_placeholder_img( 'woocommerce_thumbnail' );
 	}
 
 	/**

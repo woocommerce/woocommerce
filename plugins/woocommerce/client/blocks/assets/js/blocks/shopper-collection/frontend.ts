@@ -1,6 +1,305 @@
 /**
- * Side-effect import that boots the Shopper Collection iAPI store on the
- * frontend. The store itself will be wired in a follow-up that adds the
- * `@woocommerce/stores/woocommerce/shopper-lists` module.
+ * External dependencies
  */
-export {};
+import {
+	getConfig,
+	getContext,
+	getElement,
+	store,
+	type AsyncAction,
+} from '@wordpress/interactivity';
+import '@woocommerce/stores/woocommerce/shopper-lists';
+import '@woocommerce/stores/woocommerce/cart';
+import type {
+	RawShopperListItem,
+	Store as ShopperListsStore,
+} from '@woocommerce/stores/woocommerce/shopper-lists';
+import type { Store as WooCommerce } from '@woocommerce/stores/woocommerce/cart';
+import { sanitizeHTML } from '@woocommerce/sanitize';
+
+const universalLock =
+	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
+
+type ShopperCollectionConfig = {
+	quantityLabelTemplate: string;
+	removeLabelTemplate: string;
+};
+
+type BlockContext = {
+	listSlug: string;
+	listItem?: RawShopperListItem;
+	htmlField?: 'price_html' | 'image_html';
+};
+
+type BlockStore = {
+	state: {
+		currentItems: RawShopperListItem[];
+		hasError: boolean;
+		errorMessage: string;
+		isEmpty: boolean;
+		isMoveToCartHidden: boolean;
+		isPriceHidden: boolean;
+		currentItemDisplayName: string;
+		currentItemQuantityLabel: string;
+		currentItemRemoveLabel: string;
+		currentItemVariationLabel: string;
+	};
+	actions: {
+		onClickRemove: () => Generator< unknown, void >;
+		onClickMoveToCart: () => Generator< unknown, void >;
+	};
+	callbacks: {
+		updateInnerHtml: () => void;
+	};
+};
+
+// Allow-list for sanitizing the schema's preformatted strings on innerHTML
+// swap. Covers what `wc_price` (sale/discount markup, currency symbol) and
+// `wp_get_attachment_image` / `wc_placeholder_img` emit (responsive image
+// + dimensions + lazy loading).
+const ALLOWED_TAGS = [
+	'a',
+	'b',
+	'em',
+	'i',
+	'strong',
+	'p',
+	'br',
+	'span',
+	'bdi',
+	'del',
+	'ins',
+	'img',
+	'picture',
+	'source',
+];
+const ALLOWED_ATTR = [
+	'class',
+	'target',
+	'href',
+	'rel',
+	'name',
+	'download',
+	'aria-hidden',
+	'src',
+	'srcset',
+	'sizes',
+	'alt',
+	'width',
+	'height',
+	'loading',
+	'decoding',
+];
+
+const { state: shopperListsState, actions: shopperListsActions } =
+	store< ShopperListsStore >(
+		'woocommerce/shopper-lists',
+		{},
+		{ lock: universalLock }
+	);
+
+const { state: cartState, actions: cartActions } = store< WooCommerce >(
+	'woocommerce',
+	{},
+	{ lock: universalLock }
+);
+
+const decodeEntities = ( encoded: string ): string => {
+	const txt = document.createElement( 'textarea' );
+	txt.innerHTML = encoded;
+	return txt.value;
+};
+
+const formatVariationLabel = ( item: RawShopperListItem ): string => {
+	if ( ! item.variation || item.variation.length === 0 ) {
+		return '';
+	}
+	return item.variation
+		.map(
+			( v ) =>
+				`${ decodeEntities( v.attribute ) }: ${ decodeEntities(
+					v.value
+				) }`
+		)
+		.join( ', ' );
+};
+
+const getList = ( slug: string ) => shopperListsState.lists[ slug ] ?? null;
+
+store< BlockStore >(
+	'woocommerce/shopper-collection',
+	{
+		state: {
+			get currentItems(): RawShopperListItem[] {
+				const { listSlug } = getContext< BlockContext >();
+				return getList( listSlug )?.items ?? [];
+			},
+
+			get hasError(): boolean {
+				const { listSlug } = getContext< BlockContext >();
+				return !! getList( listSlug )?.error;
+			},
+
+			get errorMessage(): string {
+				const { listSlug } = getContext< BlockContext >();
+				return getList( listSlug )?.error ?? '';
+			},
+
+			get isEmpty(): boolean {
+				const { listSlug } = getContext< BlockContext >();
+				const list = getList( listSlug );
+				if ( ! list ) {
+					return true;
+				}
+				return ! list.isLoading && list.items.length === 0;
+			},
+
+			get isPriceHidden(): boolean {
+				const { listItem } = getContext< BlockContext >();
+				return ! listItem?.price_html;
+			},
+
+			get isMoveToCartHidden(): boolean {
+				const { listItem } = getContext< BlockContext >();
+				if ( ! listItem ) {
+					return true;
+				}
+				// Tombstones never have a buyable product.
+				return ! listItem.product_exists;
+			},
+
+			// `data-wp-text` writes its argument as text-content without
+			// running entity decoding, so a name returned by the schema as
+			// `Tom &amp; Jerry` would render literally that way. Bind
+			// templates and SSR text spans to this getter instead of the
+			// raw context field so what the browser shows matches what
+			// PHP wrote on first paint.
+			get currentItemDisplayName(): string {
+				const { listItem } = getContext< BlockContext >();
+				return listItem ? decodeEntities( listItem.name ) : '';
+			},
+
+			get currentItemQuantityLabel(): string {
+				const { listItem } = getContext< BlockContext >();
+				if ( ! listItem ) {
+					return '';
+				}
+				const { quantityLabelTemplate } = getConfig(
+					'woocommerce/shopper-collection'
+				) as ShopperCollectionConfig;
+				return quantityLabelTemplate.replace(
+					'%d',
+					String( listItem.quantity )
+				);
+			},
+
+			get currentItemRemoveLabel(): string {
+				const { listItem } = getContext< BlockContext >();
+				if ( ! listItem ) {
+					return '';
+				}
+				const { removeLabelTemplate } = getConfig(
+					'woocommerce/shopper-collection'
+				) as ShopperCollectionConfig;
+				return removeLabelTemplate.replace(
+					'%s',
+					decodeEntities( listItem.name )
+				);
+			},
+
+			get currentItemVariationLabel(): string {
+				const { listItem } = getContext< BlockContext >();
+				return listItem ? formatVariationLabel( listItem ) : '';
+			},
+		},
+
+		actions: {
+			*onClickRemove(): AsyncAction< void > {
+				const { listSlug, listItem } = getContext< BlockContext >();
+				if ( ! listItem ) {
+					return;
+				}
+				yield shopperListsActions.removeItem( listSlug, listItem.key );
+			},
+
+			*onClickMoveToCart(): AsyncAction< void > {
+				const { listSlug, listItem } = getContext< BlockContext >();
+				if ( ! listItem || ! listItem.product_exists ) {
+					return;
+				}
+
+				// Map the schema's `variation` shape to the cart's
+				// SelectedAttributes shape. The schema returns the
+				// slug-form attribute under `raw_attribute` (e.g.
+				// `attribute_pa_color`) plus a display label under
+				// `attribute` (e.g. "Color"); the cart matches by the
+				// slug-form, so override `attribute` with `raw_attribute`.
+				// Same swap mini-cart's `changeQuantity` does. Empty for
+				// simple products.
+				const variation = listItem.variation.map(
+					( { raw_attribute: rawAttribute, value, attribute } ) => ( {
+						attribute: rawAttribute || attribute,
+						value,
+					} )
+				);
+				const isVariation = listItem.variation_id > 0;
+
+				// `cartActions.addCartItem` catches its own errors and
+				// surfaces them as store notices, so the yield resolves
+				// the same way on success and failure. Snapshot the
+				// matching line's quantity, run the add, then only remove
+				// from the saved list if it actually grew.
+				const lookup = {
+					id: listItem.id,
+					...( isVariation && { variation } ),
+				};
+				const beforeItem = cartState.findItemInCart( lookup );
+				const beforeQuantity = beforeItem?.quantity ?? 0;
+
+				yield cartActions.addCartItem( {
+					id: listItem.id,
+					quantityToAdd: listItem.quantity,
+					type: isVariation ? 'variation' : 'simple',
+					...( isVariation && { variation } ),
+				} );
+
+				const afterItem = cartState.findItemInCart( lookup );
+				const afterQuantity = afterItem?.quantity ?? 0;
+
+				if ( afterQuantity <= beforeQuantity ) {
+					return;
+				}
+
+				yield shopperListsActions.removeItem( listSlug, listItem.key );
+			},
+		},
+
+		callbacks: {
+			// Single shared innerHTML-swap callback for any slot whose
+			// content is one of the schema's preformatted HTML fields.
+			// Mirrors the atomic product-elements `updateValue` callback:
+			// the watched element carries `data-wp-context='{"htmlField":"price_html"}'`
+			// (or `"image_html"`), and this callback reads that field
+			// off the row's `listItem` and pastes its sanitized HTML into
+			// `element.ref`. PHP renders the same HTML server-side, so
+			// hydration is a no-op when the row's listItem hasn't changed,
+			// and a clean swap when it has (e.g. after Remove shifts the
+			// next item into this slot).
+			updateInnerHtml: () => {
+				const { ref } = getElement();
+				const { listItem, htmlField } = getContext< BlockContext >();
+				if ( ! ref || ! listItem || ! htmlField ) {
+					return;
+				}
+				const html = listItem[ htmlField ];
+				if ( typeof html === 'string' ) {
+					ref.innerHTML = sanitizeHTML( html, {
+						tags: ALLOWED_TAGS,
+						attr: ALLOWED_ATTR,
+					} );
+				}
+			},
+		},
+	},
+	{ lock: universalLock }
+);
