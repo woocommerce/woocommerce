@@ -3009,6 +3009,13 @@ ul.wc_coupon_list_block {
 
 .woocommerce_page_wc-orders,
 .post-type-shop_order {
+	// Cap the admin Order edit/new screen content at 1200px and center it.
+	// `:has(#poststuff)` excludes the orders list screen (which doesn't render #poststuff).
+	.wrap:has(#poststuff) {
+		max-width: 1200px;
+		margin-inline: auto;
+	}
+
 	.tablenav .one-page .displaying-num {
 		display: none;
 	}
