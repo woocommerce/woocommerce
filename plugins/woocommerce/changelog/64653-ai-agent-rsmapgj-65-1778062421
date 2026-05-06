@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WC_Admin_Settings retrieving option values using field ID instead of field_name, restoring correct behavior for array-keyed settings fields.
