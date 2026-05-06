@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WC_Order_Data_Store_CPT::get_unpaid_orders returning orders modified before the given date instead of after.
