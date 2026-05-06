@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -46,7 +47,7 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_collection_output_schema( 'products' ),
+			'output_schema'       => self::get_collection_output_schema( 'products', self::get_product_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_products' ),
 			'meta'                => self::get_ability_meta( true, true, false ),
@@ -81,23 +82,24 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 			);
 		}
 
-		$page     = max( 1, absint( $input['page'] ?? 1 ) );
-		$per_page = self::sanitize_per_page( $input['per_page'] ?? 10 );
+		$page     = (int) ( $input['page'] ?? 1 );
+		$per_page = (int) ( $input['per_page'] ?? 10 );
 		$args     = array(
 			'limit'    => $per_page,
 			'page'     => $page,
 			'paginate' => true,
 			'return'   => 'objects',
+			'status'   => ProductStatus::PUBLISH,
 		);
 
 		foreach ( array( 'status', 'type', 'sku', 'stock_status' ) as $field ) {
 			if ( ! empty( $input[ $field ] ) ) {
-				$args[ $field ] = wc_clean( wp_unslash( $input[ $field ] ) );
+				$args[ $field ] = wc_clean( $input[ $field ] );
 			}
 		}
 
 		if ( ! empty( $input['search'] ) ) {
-			$args['s'] = wc_clean( wp_unslash( $input['search'] ) );
+			$args['s'] = wc_clean( $input['search'] );
 		}
 
 		$results  = wc_get_products( $args );
@@ -143,9 +145,19 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 				'id'           => array( 'type' => 'integer' ),
 				'search'       => array( 'type' => 'string' ),
 				'sku'          => array( 'type' => 'string' ),
-				'status'       => array( 'type' => 'string' ),
-				'type'         => array( 'type' => 'string' ),
-				'stock_status' => array( 'type' => 'string' ),
+				'status'       => array(
+					'type'    => 'string',
+					'default' => ProductStatus::PUBLISH,
+					'enum'    => self::get_product_query_status_slugs(),
+				),
+				'type'         => array(
+					'type' => 'string',
+					'enum' => array_keys( wc_get_product_types() ),
+				),
+				'stock_status' => array(
+					'type' => 'string',
+					'enum' => array_keys( wc_get_product_stock_status_options() ),
+				),
 				'page'         => array(
 					'type'    => 'integer',
 					'default' => 1,

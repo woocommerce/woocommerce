@@ -46,7 +46,7 @@ class ProductCreate extends DomainAbility implements AbilityDefinition {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_entity_output_schema( 'product' ),
+			'output_schema'       => self::get_entity_output_schema( 'product', self::get_product_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_create_product' ),
 			'meta'                => self::get_ability_meta( false, false, false ),
@@ -84,11 +84,13 @@ class ProductCreate extends DomainAbility implements AbilityDefinition {
 	/**
 	 * Check product creation access.
 	 *
+	 * @param mixed $input Ability input.
 	 * @return bool
 	 *
 	 * @since 10.9.0
 	 */
-	public static function can_create_product(): bool {
+	public static function can_create_product( $input = array() ): bool {
+		unset( $input ); // Cap is not object-scoped for create.
 		return wc_rest_check_post_permissions( 'product', 'create' );
 	}
 

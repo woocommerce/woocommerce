@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -46,7 +47,7 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 			),
 			'category'            => 'woocommerce',
 			'input_schema'        => self::get_input_schema(),
-			'output_schema'       => self::get_entity_output_schema( 'product' ),
+			'output_schema'       => self::get_entity_output_schema( 'product', self::get_product_output_schema() ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_update_product' ),
 			'meta'                => self::get_ability_meta( false, false, true ),
@@ -66,6 +67,19 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 
 		if ( is_wp_error( $product ) ) {
 			return $product;
+		}
+
+		if (
+			isset( $input['status'] )
+			&& ProductStatus::PUBLISH === $input['status']
+			&& ProductStatus::PUBLISH !== $product->get_status()
+			&& ! current_user_can( 'publish_products' )
+		) {
+			return new \WP_Error(
+				'woocommerce_product_publish_forbidden',
+				__( 'You are not allowed to publish products.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
 		}
 
 		self::set_product_props_from_input( $product, $input );
