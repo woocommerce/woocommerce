@@ -2313,7 +2313,7 @@ class WC_Order extends WC_Abstract_Order {
 					)
 				)
 				: array();
-		}
+		}//end if
 
 		$this->refunds = array();
 
