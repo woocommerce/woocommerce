@@ -36,8 +36,8 @@ export const Tab = ( {
 			key={ tabKey }
 			id={ tabKey }
 			data-testid={ tabKey }
-			aria-label={ ariaLabel }
-			title={ title || ariaLabel }
+			label={ title || ariaLabel }
+			showTooltip
 			onClick={ () => {
 				onTabClick( name );
 			} }

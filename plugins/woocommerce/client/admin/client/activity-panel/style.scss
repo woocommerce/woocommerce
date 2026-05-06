@@ -76,7 +76,9 @@
 		min-width: 0;
 		padding: 0 8px;
 		height: $header-height;
-		color: $gray-700;
+		// $gray-900 across all states (default, hover, active) — the blue
+		// underline alone signals active, matching Gutenberg's icon tab group.
+		color: $gray-900;
 		white-space: nowrap;
 
 		&::before {
@@ -95,7 +97,6 @@
 
 		&.is-active,
 		&.is-opened {
-			color: $gray-900;
 			box-shadow: none;
 
 			&::before {
@@ -132,8 +133,8 @@
 		&:hover,
 		&.components-button:not(:disabled):not([aria-disabled="true"]):hover {
 			box-shadow: none;
-			// Match header-meta-icon hover treatment so all five icons
-			// (bell / list / megaphone / gear / ?) read as one unified group.
+			// Override Button's default theme-blue hover — Gutenberg's own
+			// icon tab groups keep the same dark-grey across all states.
 			color: $gray-900;
 
 			&.has-unread::after,
@@ -172,26 +173,11 @@
 	}
 }
 
-.woocommerce-layout:has(.woocommerce-homescreen) {
-	.woocommerce-layout__activity-panel-tabs {
-		.woocommerce-layout__activity-panel-tab {
-			color: var(--wp-admin-theme-color) !important;
-			font-size: 13px;
-			font-style: normal;
-			font-weight: 400;
-			line-height: 20px; /* 153.846% */
-
-
-			&.has-icon {
-				padding: 6px 12px;
-			}
-
-			svg {
-				fill: #1e1e1e;
-			}
-		}
-	}
-}
+// Homescreen-specific tab styling intentionally removed so the Home page
+// header tabs (View store, display options, account avatar, help) inherit
+// the same treatment as every other floating-header tab (icon-only,
+// $gray-700, 18px icons, 0 8px padding, tight spacing). Visual consistency
+// across pages is the goal — even if the tab componentry underneath differs.
 
 
 .woocommerce-layout__activity-panel-toggle-bubble.has-unread::after {

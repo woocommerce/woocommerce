@@ -313,11 +313,8 @@ export const BaseHeader = ( {
 									activeMetaIcon === 'screen-options',
 							}
 						) }
-						aria-label={ __(
-							'Screen Options',
-							'woocommerce'
-						) }
-						title={ __( 'Screen Options', 'woocommerce' ) }
+						label={ __( 'Screen Options', 'woocommerce' ) }
+						showTooltip
 						onClick={ () =>
 							triggerMetaIcon(
 								'screen-options',
@@ -336,8 +333,8 @@ export const BaseHeader = ( {
 								'is-active': activeMetaIcon === 'help',
 							}
 						) }
-						aria-label={ __( 'Help', 'woocommerce' ) }
-						title={ __( 'Help', 'woocommerce' ) }
+						label={ __( 'Help', 'woocommerce' ) }
+						showTooltip
 						onClick={ () =>
 							triggerMetaIcon(
 								'help',
