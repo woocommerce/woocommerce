@@ -192,7 +192,7 @@ MESSAGE;
 				'multibyte'   => '中文字',
 				'backslashes' => 'C:\MS-DOS\\',
 			),
-			$context_delineator . '{"multibyte":"中文字","backslashes":"C:\MS-DOS\"}',
+			$context_delineator . '{"multibyte":"中文字","backslashes":"C:\\\\MS-DOS\\\\"}',
 		);
 		yield 'backtrace boolean only' => array(
 			array( 'backtrace' => true ),
