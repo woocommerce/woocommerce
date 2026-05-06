@@ -299,6 +299,11 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_wc\\_qr\\_login\\_claim\\_%' ESCAPE '\\\\'"
 		);
 
+		// Remove database-backed token scan claims.
+		$wpdb->query(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_wc\\_qr\\_login\\_scan\\_claim\\_%' ESCAPE '\\\\'"
+		);
+
 		wp_cache_flush();
 	}
 
@@ -457,13 +462,23 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Issue a GET to the /qr-login-session-status endpoint (Task 7).
 	 *
-	 * @param string|null $session_id The session id from /qr-login-scan.
+	 * The endpoint binds grant delivery to proof of token knowledge — every
+	 * call must send the SHA-256 hash of the plaintext token alongside the
+	 * session id. Tests that drive the happy path supply both; tests that
+	 * exercise the mismatch / missing-hash branches pass `$token_plaintext`
+	 * explicitly (or `null` to omit the hash entirely).
+	 *
+	 * @param string|null $session_id      The session id from /qr-login-scan.
+	 * @param string|null $token_plaintext Plaintext token. SHA-256'd before sending. `null` omits the parameter.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch_session_status( ?string $session_id ): \WP_REST_Response {
+	private function dispatch_session_status( ?string $session_id, ?string $token_plaintext = null ): \WP_REST_Response {
 		$request = new WP_REST_Request( 'GET', self::SESSION_STATUS_ENDPOINT );
 		if ( null !== $session_id ) {
 			$request->set_param( 'session_id', $session_id );
+		}
+		if ( null !== $token_plaintext ) {
+			$request->set_param( 'token_hash', hash( 'sha256', $token_plaintext ) );
 		}
 		return $this->server->dispatch( $request );
 	}
@@ -506,7 +521,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		// Mobile-side session-status to retrieve the grant.
 		wp_set_current_user( 0 );
-		$session_response = $this->dispatch_session_status( $scan_data['session_id'] );
+		$session_response = $this->dispatch_session_status( $scan_data['session_id'], $plaintext );
 		$this->assertSame( 200, $session_response->get_status(), 'Pre-exchange helper expected /session-status to succeed.' );
 		$session_data = $session_response->get_data();
 		$this->assertArrayHasKey( 'exchange_grant', $session_data, 'session-status should return the grant once approved.' );
@@ -1825,7 +1840,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( MobileAppQRLogin::MAX_INVALID_GRANT_ATTEMPTS, $record['invalid_grant_attempts'] );
 		$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
 
-		$status = $this->dispatch_session_status( $prep['session_id'] );
+		$status = $this->dispatch_session_status( $prep['session_id'], $prep['plaintext'] );
 		$this->assertSame( 200, $status->get_status() );
 		$this->assertSame( MobileAppQRLogin::STATE_REJECTED, $status->get_data()['state'] );
 	}
@@ -1859,6 +1874,71 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Concurrent /qr-login-scan requests on the same token produce exactly one winner thanks to the atomic claim — the loser is rejected with `qr_login_already_scanned`, never silently overwriting the canonical record.
+	 */
+	public function test_scan_atomic_claim_rejects_concurrent_second_scan(): void {
+		$plaintext  = $this->generate_token_as_admin();
+		$token_hash = hash( 'sha256', $plaintext );
+
+		// Pre-register the scan claim option to simulate a concurrent worker
+		// that has already grabbed the mutex but not yet completed its
+		// state-mutation. add_option() is atomic; the second worker (this
+		// test) must observe the existing key and bail out.
+		$claim_key = MobileAppQRLogin::SCAN_CLAIM_OPTION_PREFIX . $token_hash;
+		add_option( $claim_key, (string) ( time() + 60 ), '', false );
+
+		wp_set_current_user( 0 );
+		$response = $this->dispatch_scan( $plaintext );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'qr_login_already_scanned', $response->get_data()['code'] );
+
+		// The token record must remain in pending — the rejected scan should
+		// not have mutated it. Without the claim, this assertion would fail
+		// because the second worker would have written its own challenge.
+		$record = get_transient( $this->token_transient_key( $plaintext ) );
+		$this->assertIsArray( $record );
+		$this->assertSame( MobileAppQRLogin::STATE_PENDING, $record['state'] );
+
+		delete_option( $claim_key );
+	}
+
+	/**
+	 * @testdox Session-status endpoint refuses to return any state without proof of token knowledge — a session_id alone yields opaque `expired`.
+	 */
+	public function test_session_status_requires_token_hash_proof(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data = $this->dispatch_scan( $plaintext )->get_data();
+
+		// Approve the match server-side so a successful poll *would* otherwise
+		// return the grant. The point of this test is that without the
+		// token_hash, even an approved session can't be polled.
+		wp_set_current_user( $this->admin_id );
+		$this->dispatch_approve( $plaintext, $scan_data['real_number'] );
+		wp_set_current_user( 0 );
+
+		// No token_hash → opaque expired (we never confirm the session_id is real).
+		$response = $this->dispatch_session_status( $scan_data['session_id'] );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( MobileAppQRLogin::STATE_EXPIRED, $response->get_data()['state'] );
+		$this->assertArrayNotHasKey( 'exchange_grant', $response->get_data() );
+
+		// Wrong token_hash → same opaque expired.
+		$response = $this->dispatch_session_status( $scan_data['session_id'], 'a-different-token' );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( MobileAppQRLogin::STATE_EXPIRED, $response->get_data()['state'] );
+		$this->assertArrayNotHasKey( 'exchange_grant', $response->get_data() );
+
+		// Correct token_hash → grant delivered.
+		$response = $this->dispatch_session_status( $scan_data['session_id'], $plaintext );
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $response->get_data()['state'] );
+		$this->assertNotEmpty( $response->get_data()['exchange_grant'] );
+	}
+
+	/**
 	 * @testdox Session-status endpoint returns the exchange_grant once the merchant has approved the number-match.
 	 */
 	public function test_session_status_returns_grant_when_approved(): void {
@@ -1868,7 +1948,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$scan_data = $this->dispatch_scan( $plaintext )->get_data();
 
 		// Before approval — session-status returns scanned, no grant.
-		$pre = $this->dispatch_session_status( $scan_data['session_id'] );
+		$pre = $this->dispatch_session_status( $scan_data['session_id'], $plaintext );
 		$this->assertSame( 200, $pre->get_status() );
 		$this->assertSame( MobileAppQRLogin::STATE_SCANNED, $pre->get_data()['state'] );
 		$this->assertArrayNotHasKey( 'exchange_grant', $pre->get_data() );
@@ -1879,7 +1959,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		// After approval — session-status returns approved + exchange_grant.
 		wp_set_current_user( 0 );
-		$post = $this->dispatch_session_status( $scan_data['session_id'] );
+		$post = $this->dispatch_session_status( $scan_data['session_id'], $plaintext );
 		$this->assertSame( 200, $post->get_status() );
 		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $post->get_data()['state'] );
 		$this->assertNotEmpty( $post->get_data()['exchange_grant'] );

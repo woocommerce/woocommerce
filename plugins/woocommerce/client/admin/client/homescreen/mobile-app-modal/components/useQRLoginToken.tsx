@@ -250,6 +250,13 @@ export const useQRLoginToken = ( {
 				// challenge-expires-at window (90s after scan) so the user
 				// gets a clear sense of urgency for the pick.
 				clearTimer();
+				// Drop the plaintext token from React state once the scan is
+				// in. The QR view is no longer rendered (the component swaps
+				// to the number-match step), polling reads the token from
+				// `tokenRef`, and clearing the visible state limits what an
+				// XSS or malicious browser extension can scrape from the JS
+				// heap for the rest of the flow.
+				setQrUrl( null );
 				setCandidateNumbers( response.numbers );
 				setChallengeExpiresAt( response.expires_at );
 				setDeviceInfo( response.device || null );
