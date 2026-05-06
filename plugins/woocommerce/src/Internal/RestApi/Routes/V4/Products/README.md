@@ -26,7 +26,7 @@ As discussed in the team conversation:
 
 ### 2026-05-05 - Add embedded variation links
 
-**Summary**: Added embeddable `variations` links to variable product responses so child variations can be embedded when requesting products with `_embed=variations`. The product schema now exposes the `embed` context for fields that are already available in `view` context, while sensitive fields such as downloads, metadata, purchase notes, and cost of goods sold remain excluded from embedded variation responses.
+**Summary**: Added embeddable `variations` links to variable product responses so child variations can be embedded when requesting products with `_embed=1`. The product schema now exposes the `embed` context for fields that are already available in `view` context, while sensitive fields such as downloads, metadata, purchase notes, and cost of goods sold remain excluded from embedded variation responses.
 
 **PR**: [#64566](https://github.com/woocommerce/woocommerce/pull/64566)
 
