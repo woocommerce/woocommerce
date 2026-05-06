@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix incorrect conditional in WC_Admin_Upload_Downloadable_Product::update_filename so filename hashing only applies to downloadable-product uploads.
