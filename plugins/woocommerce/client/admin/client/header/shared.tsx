@@ -126,10 +126,12 @@ export const BaseHeader = ( {
 	// mount; the wp-admin <h1> is server-rendered and present before React hydrates.
 	const [ hasWpAdminH1, setHasWpAdminH1 ] = useState( false );
 	// Detect wp-admin's Screen Options + Help button wraps so we only render
-	// the corresponding placeholder icons when the underlying entry points exist.
-	// (Settings removes help tabs in PHP; Woo-React-only pages may not have them.)
+	// the corresponding icons when the underlying entry points exist. (Settings
+	// removes help tabs in PHP; Woo-React-only pages may not have them.)
 	const [ hasScreenOptions, setHasScreenOptions ] = useState( false );
 	const [ hasContextualHelp, setHasContextualHelp ] = useState( false );
+	// Re-run on `query` change so detection stays correct if BaseHeader persists
+	// across client-side route transitions (Home → Settings → Customers, etc.).
 	useEffect( () => {
 		setHasWpAdminH1(
 			!! document.querySelector( '.wrap > h1.wp-heading-inline' )
@@ -140,7 +142,7 @@ export const BaseHeader = ( {
 		setHasContextualHelp(
 			!! document.querySelector( '#contextual-help-link-wrap' )
 		);
-	}, [] );
+	}, [ query ] );
 
 	// Track which meta-icon dropdown is currently active so we can render the
 	// blue-underline active state (mirroring the activity-panel tab pattern).
@@ -152,9 +154,8 @@ export const BaseHeader = ( {
 
 	// Reverse direction of the tab-group sync: when an activity-panel tab is
 	// clicked AND a wp-admin dropdown is currently open, close the dropdown.
-	// Deferred via setTimeout so the wp-admin click happens AFTER the
-	// activity-panel's own React handlers have committed their state — otherwise
-	// the cross-system click cascade breaks bell ↔ finish setup tab switching.
+	// We don't update React state from this handler (state syncs reactively
+	// via the MutationObserver below), so no setTimeout deferral is needed.
 	useEffect( () => {
 		const handler = ( e: Event ) => {
 			const target = e.target as HTMLElement | null;
@@ -163,18 +164,16 @@ export const BaseHeader = ( {
 			) {
 				return;
 			}
-			setTimeout( () => {
-				document
-					.querySelector< HTMLButtonElement >(
-						'#show-settings-link[aria-expanded="true"]'
-					)
-					?.click();
-				document
-					.querySelector< HTMLButtonElement >(
-						'#contextual-help-link[aria-expanded="true"]'
-					)
-					?.click();
-			}, 0 );
+			document
+				.querySelector< HTMLButtonElement >(
+					'#show-settings-link[aria-expanded="true"]'
+				)
+				?.click();
+			document
+				.querySelector< HTMLButtonElement >(
+					'#contextual-help-link[aria-expanded="true"]'
+				)
+				?.click();
 		};
 		document.addEventListener( 'click', handler, true );
 		return () => document.removeEventListener( 'click', handler, true );
@@ -215,16 +214,19 @@ export const BaseHeader = ( {
 		which: 'screen-options' | 'help',
 		triggerId: string
 	) => {
-		// Close any open activity-panel tab so the four icons act as one group.
+		// Close any open activity-panel tab so the five icons act as one group.
 		document
 			.querySelector< HTMLButtonElement >(
 				'.woocommerce-layout__activity-panel-tab.is-active'
 			)
 			?.click();
 		// Close the OTHER wp-admin dropdown if open (mutual exclusion between
-		// gear ↔ help). When closing one, defer opening the new one so wp-admin's
-		// jQuery slideUp finishes before slideDown — otherwise the second click
-		// races the first and the new panel never opens.
+		// gear ↔ help). Chain the new open off the closing trigger's
+		// aria-expanded flip rather than a magic-number setTimeout — wp-admin's
+		// screen-meta.js sets aria-expanded synchronously when its handler fires,
+		// so the observer fires as soon as the close has registered, regardless
+		// of however long the slideUp animation takes. Self-disconnects on first
+		// flip so back-to-back clicks don't accumulate observers.
 		const otherTriggerId =
 			which === 'screen-options'
 				? '#contextual-help-link'
@@ -235,9 +237,17 @@ export const BaseHeader = ( {
 		const openTarget = () =>
 			document.querySelector< HTMLButtonElement >( triggerId )?.click();
 		if ( otherOpen ) {
+			const chain = new MutationObserver( () => {
+				if ( otherOpen.getAttribute( 'aria-expanded' ) !== 'true' ) {
+					chain.disconnect();
+					openTarget();
+				}
+			} );
+			chain.observe( otherOpen, {
+				attributes: true,
+				attributeFilter: [ 'aria-expanded' ],
+			} );
 			otherOpen.click();
-			// jQuery 'fast' is ~200ms; wait a bit longer for safety.
-			setTimeout( openTarget, 250 );
 		} else {
 			openTarget();
 		}
@@ -299,11 +309,11 @@ export const BaseHeader = ( {
 				{ children }
 				<WooHeaderItem.Slot fillProps={ { isEmbedded, query } } />
 
-				{ /* Placeholder Screen Options + Help icons consolidated into
-				the floating header. Only rendered when wp-admin would have
-				rendered the corresponding entry point (Settings, e.g., does
-				not). wp-admin's original strip is hidden via CSS. Buttons are
-				non-functional placeholders for the design prototype. */ }
+				{ /* Screen Options + Help icons consolidated into the floating
+				header. Only rendered when wp-admin would have rendered the
+				corresponding entry point (Settings, e.g., does not). The
+				original wp-admin wraps are visually hidden via CSS and these
+				icons proxy clicks into them through triggerMetaIcon. */ }
 				{ hasScreenOptions && (
 					<Button
 						className={ clsx(

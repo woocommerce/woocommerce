@@ -1,3 +1,10 @@
+// wp-admin Core greys, hardcoded because they're not exposed as CSS custom
+// properties on `:root` (verified via the `wp-token-check` skill). Local
+// SCSS variables keep them centralised so the next person doesn't have to
+// grep when WP shifts the bar / border palette.
+$wp-admin-page-bg: #f0f0f1; // wp-admin body background grey
+$wp-admin-border: #dcdcde; // wp-admin chrome border colour
+
 // Activity-panel tabs are icon-only across the floating header — labels
 // ("Activity", "Finish setup", etc.) are still in the DOM for screen readers
 // but visually hidden so the right-side chrome reads as infrastructure
@@ -23,8 +30,15 @@
 // than display:none) keeps the elements in the layout tree so wp-admin's
 // jQuery delegated click handlers still fire when we proxy .click() into
 // #show-settings-link / #contextual-help-link.
-.woocommerce-admin-page,
-body.woocommerce_page_wc-admin {
+//
+// Defensive guard: only hide when the floating header's meta-icon button
+// has actually rendered (`:has(.woocommerce-layout__header-meta-icon)`).
+// If hasScreenOptions / hasContextualHelp detection misses for any reason,
+// :has() doesn't match and the user keeps access to the original wp-admin
+// strip rather than losing it entirely. Browsers without :has() support
+// (Firefox <121) also fall through to the safe state.
+.woocommerce-admin-page:has(.woocommerce-layout__header-meta-icon),
+body.woocommerce_page_wc-admin:has(.woocommerce-layout__header-meta-icon) {
 	#screen-options-link-wrap,
 	#contextual-help-link-wrap {
 		position: absolute;
@@ -51,10 +65,10 @@ body.woocommerce_page_wc-settings {
 	}
 
 	.nav-tab-wrapper {
-		background: #f0f0f1;
+		background: $wp-admin-page-bg;
 		// Match the rest of our borders rather than the legacy lighter Woo
 		// colour so all bottom-borders in the chrome region read the same.
-		border-bottom-color: #dcdcde;
+		border-bottom-color: $wp-admin-border;
 	}
 }
 
@@ -66,8 +80,8 @@ $woo-chrome-only-header-height: 32px;
 	// Match wp-admin's page background so the bar reads as infrastructure
 	// rather than content. Bottom border anchors it visually so it doesn't
 	// look "hanging" against the page below.
-	background: #f0f0f1;
-	border-bottom: 1px solid #dcdcde;
+	background: $wp-admin-page-bg;
+	border-bottom: 1px solid $wp-admin-border;
 	box-sizing: border-box;
 	padding: 0;
 	position: fixed;

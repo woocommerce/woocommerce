@@ -1,3 +1,9 @@
+// wp-admin Core grey, hardcoded because it's not exposed as a CSS custom
+// property on `:root` (verified via the `wp-token-check` skill). Local SCSS
+// var duplicates the one in header/style.scss for the same reason — keeps
+// it centralised within this file.
+$wp-admin-page-bg: #f0f0f1;
+
 .woocommerce-layout__activity-panel {
 	display: flex;
 	flex-direction: row;
@@ -115,7 +121,7 @@
 			background: $alert-red;
 			// Match floating-header background so the ring around the unread
 			// dot blends in instead of looking like a white pill on grey.
-			border: 2px solid #f0f0f1;
+			border: 2px solid $wp-admin-page-bg;
 			width: 4px;
 			height: 4px;
 			display: inline-block;
@@ -176,7 +182,7 @@
 // Homescreen-specific tab styling intentionally removed so the Home page
 // header tabs (View store, display options, account avatar, help) inherit
 // the same treatment as every other floating-header tab (icon-only,
-// $gray-700, 18px icons, 0 8px padding, tight spacing). Visual consistency
+// $gray-900, 18px icons, 0 8px padding, tight spacing). Visual consistency
 // across pages is the goal — even if the tab componentry underneath differs.
 
 
@@ -186,7 +192,7 @@
 	padding: 1px;
 	background: $core-orange;
 	// Match floating-header background — see note above.
-	border: 2px solid #f0f0f1;
+	border: 2px solid $wp-admin-page-bg;
 	width: 4px;
 	height: 4px;
 	display: inline-block;
