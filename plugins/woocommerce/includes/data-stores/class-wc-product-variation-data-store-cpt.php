@@ -29,6 +29,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 	protected function exclude_internal_meta_keys( $meta ) {
 		$internal_meta_keys   = $this->internal_meta_keys;
 		$internal_meta_keys[] = '_cogs_value_is_additive';
+		$internal_meta_keys[] = '_variation_title_is_custom';
 
 		return ! in_array( $meta->meta_key, $internal_meta_keys, true ) && 0 !== stripos( $meta->meta_key, 'attribute_' ) && 0 !== stripos( $meta->meta_key, 'wp_' );
 	}
@@ -90,12 +91,15 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		$updates = array();
 		/**
 		 * If a variation title is not in sync with the parent e.g. saved prior to 3.0, or if the parent title has changed, detect here and update.
+		 * Skip auto-sync when the variation has a custom title explicitly set by the caller.
 		 */
-		$new_title = $this->generate_product_title( $product );
+		if ( ! get_post_meta( $product->get_id(), '_variation_title_is_custom', true ) ) {
+			$new_title = $this->generate_product_title( $product );
 
-		if ( $post_object->post_title !== $new_title ) {
-			$product->set_name( $new_title );
-			$updates = array_merge( $updates, array( 'post_title' => $new_title ) );
+			if ( $post_object->post_title !== $new_title ) {
+				$product->set_name( $new_title );
+				$updates = array_merge( $updates, array( 'post_title' => $new_title ) );
+			}
 		}
 
 		if ( ! empty( $updates ) ) {
@@ -118,9 +122,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_date_created( time() );
 		}
 
-		$new_title = $this->generate_product_title( $product );
+		$name_explicitly_set = isset( $product->get_changes()['name'] );
+		$new_title           = $this->generate_product_title( $product );
 
-		if ( $product->get_name( 'edit' ) !== $new_title ) {
+		if ( ! $name_explicitly_set && $product->get_name( 'edit' ) !== $new_title ) {
 			$product->set_name( $new_title );
 		}
 
@@ -157,6 +162,10 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		if ( $id && ! is_wp_error( $id ) ) {
 			$product->set_id( $id );
 
+			if ( $name_explicitly_set && $product->get_name( 'edit' ) !== $new_title ) {
+				update_post_meta( $id, '_variation_title_is_custom', '1' );
+			}
+
 			$this->update_post_meta( $product, true );
 			$this->update_terms( $product, true );
 			$this->update_visibility( $product, true );
@@ -188,10 +197,24 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			$product->set_date_created( time() );
 		}
 
-		$new_title = $this->generate_product_title( $product );
+		// Snapshot changes before any auto-title modification so we can detect explicit name changes.
+		$pre_changes         = $product->get_changes();
+		$name_explicitly_set = isset( $pre_changes['name'] );
+		$new_title           = $this->generate_product_title( $product );
 
-		if ( $product->get_name( 'edit' ) !== $new_title ) {
-			$product->set_name( $new_title );
+		if ( $name_explicitly_set ) {
+			// The caller explicitly set the name; respect it and track whether it is a custom value.
+			if ( $product->get_name( 'edit' ) !== $new_title ) {
+				update_post_meta( $product->get_id(), '_variation_title_is_custom', '1' );
+			} else {
+				// Name was set to the auto-generated value; clear the custom flag.
+				delete_post_meta( $product->get_id(), '_variation_title_is_custom' );
+			}
+		} elseif ( ! get_post_meta( $product->get_id(), '_variation_title_is_custom', true ) ) {
+			// No explicit name change and no custom name flag; auto-sync the title.
+			if ( $product->get_name( 'edit' ) !== $new_title ) {
+				$product->set_name( $new_title );
+			}
 		}
 
 		// The post parent is not a valid variable product so we should prevent this.

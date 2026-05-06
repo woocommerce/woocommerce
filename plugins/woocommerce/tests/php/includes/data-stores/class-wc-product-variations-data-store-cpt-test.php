@@ -296,6 +296,98 @@ class WC_Product_Variation_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox set_name() on a variation persists after save() and is returned by get_name() on a fresh fetch.
+	 */
+	public function test_set_name_persists_after_save_and_refetch() {
+		$variation = $this->get_variation();
+		$variation->set_name( 'My Custom Variation Name' );
+		$variation->save();
+
+		$refetched = wc_get_product( $variation->get_id() );
+
+		$this->assertEquals( 'My Custom Variation Name', $refetched->get_name() );
+	}
+
+	/**
+	 * @testdox Custom variation name set via set_name() persists across multiple saves without re-setting the name.
+	 */
+	public function test_custom_name_persists_across_subsequent_saves() {
+		$variation = $this->get_variation();
+		$variation->set_name( 'Persistent Custom Name' );
+		$variation->save();
+
+		// Save again without changing the name.
+		$variation2 = wc_get_product( $variation->get_id() );
+		$variation2->set_regular_price( '99.99' );
+		$variation2->save();
+
+		$refetched = wc_get_product( $variation->get_id() );
+
+		$this->assertEquals( 'Persistent Custom Name', $refetched->get_name() );
+	}
+
+	/**
+	 * @testdox Setting the name back to the auto-generated title via set_name() removes the custom name flag.
+	 */
+	public function test_setting_name_to_auto_generated_removes_custom_flag() {
+		$variation = $this->get_variation();
+		$variation->set_name( 'My Custom Name' );
+		$variation->save();
+
+		$this->assertEquals( '1', get_post_meta( $variation->get_id(), '_variation_title_is_custom', true ) );
+
+		// Now set it back to the auto-generated title.
+		$data_store = new WC_Product_Variation_Data_Store_CPT();
+		$auto_title = $data_store->get_attribute_summary( $variation );
+
+		$variation2 = wc_get_product( $variation->get_id() );
+		// The parent product name is used in the auto-generated title; derive it.
+		$parent     = wc_get_product( $variation2->get_parent_id() );
+		$auto_title = $parent->get_name();
+
+		$variation2->set_name( $auto_title );
+		$variation2->save();
+
+		$this->assertEmpty( get_post_meta( $variation->get_id(), '_variation_title_is_custom', true ) );
+	}
+
+	/**
+	 * @testdox Custom variation name set on create() persists after the first save and a subsequent fetch.
+	 */
+	public function test_set_name_on_new_variation_persists() {
+		$parent = WC_Helper_Product::create_variation_product();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $parent->get_id() );
+		$variation->set_name( 'Brand New Custom Name' );
+		$variation->set_status( 'publish' );
+		$variation->save();
+
+		$refetched = wc_get_product( $variation->get_id() );
+
+		$this->assertEquals( 'Brand New Custom Name', $refetched->get_name() );
+	}
+
+	/**
+	 * @testdox _variation_title_is_custom meta is excluded from the variation's public meta data.
+	 */
+	public function test_variation_title_is_custom_meta_is_internal() {
+		$variation = $this->get_variation();
+		$variation->set_name( 'Custom Name For Meta Test' );
+		$variation->save();
+
+		$meta_data = $variation->get_meta_data();
+		$keys      = array_map(
+			function ( $m ) {
+				return $m->key;
+			},
+			$meta_data
+		);
+
+		$this->assertNotContains( '_variation_title_is_custom', $keys );
+	}
+
+	/**
 	 * Create a variable product and return one of its variations.
 	 *
 	 * @return WC_Product_Variation The variation created.
