@@ -192,7 +192,12 @@ final class ShopperCollection extends AbstractBlock {
 		if ( $response->is_error() ) {
 			$error   = $response->as_error();
 			$message = $error instanceof \WP_Error ? $error->get_error_message() : 'Unknown error';
-			wc_get_logger()->warning(
+			// Logged at debug level on purpose: prefetch failures are
+			// often transient (network blips, auth refresh races) and
+			// the user-visible behaviour is the empty state — nothing
+			// for ops to act on. Anyone investigating a regression can
+			// flip the WC logger to debug to surface them.
+			wc_get_logger()->debug(
 				sprintf( 'Shopper Collection prefetch failed: %s', $message ),
 				array(
 					'source' => 'shopper-collection',
