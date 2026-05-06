@@ -165,17 +165,16 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
 	render: ( { item } ) => {
 		const featuredImage = item.images?.at( 0 );
-		const src = featuredImage?.src;
 
-		if ( ! src ) {
+		if ( ! featuredImage ) {
 			return null;
 		}
 
 		return (
 			<img
 				className="product-image"
-				src={ src }
-				alt={ featuredImage?.alt || featuredImage?.name || item.name }
+				src={ featuredImage.src }
+				alt={ featuredImage.alt || featuredImage.name || item.name }
 				style={ {
 					objectFit: 'cover',
 					borderRadius: 8,
