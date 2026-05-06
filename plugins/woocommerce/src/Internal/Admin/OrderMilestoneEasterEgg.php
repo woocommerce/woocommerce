@@ -36,9 +36,12 @@ class OrderMilestoneEasterEgg {
 			return;
 		}
 
-		$milestone_map = $this->get_milestone_map();
+		// Debug preview: ?woo_egg=first|hundred|thousand bypasses the order check when WP_DEBUG is true.
+		$is_debug_preview = defined( 'WP_DEBUG' ) && WP_DEBUG && isset( $_GET['woo_egg'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
-		if ( empty( $milestone_map ) ) {
+		$milestone_map = $is_debug_preview ? array() : $this->get_milestone_map();
+
+		if ( ! $is_debug_preview && empty( $milestone_map ) ) {
 			return;
 		}
 
