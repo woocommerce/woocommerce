@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Register wc_no_js script via wp_add_inline_script() to allow CSP nonce injection through the wp_inline_script_attributes() filter.

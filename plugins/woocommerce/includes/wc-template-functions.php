@@ -386,28 +386,13 @@ function wc_body_class( $classes ) {
 
 	$classes[] = 'woocommerce-no-js';
 
-	add_action( 'wp_footer', 'wc_no_js' );
+	wp_add_inline_script(
+		'woocommerce',
+		'(function(){var c=document.body.className;c=c.replace(/woocommerce-no-js/,"woocommerce-js");document.body.className=c;})()',
+		'after'
+	);
 
 	return array_unique( $classes );
-}
-
-/**
- * NO JS handling.
- *
- * @since 3.4.0
- * @return void
- */
-function wc_no_js() {
-	$type_attr = current_theme_supports( 'html5', 'script' ) ? '' : " type='text/javascript'";
-	?>
-	<script<?php echo $type_attr; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-		(function () {
-			var c = document.body.className;
-			c = c.replace(/woocommerce-no-js/, 'woocommerce-js');
-			document.body.className = c;
-		})();
-	</script>
-	<?php
 }
 
 /**
