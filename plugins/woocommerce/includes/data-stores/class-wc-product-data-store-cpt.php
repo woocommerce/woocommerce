@@ -1549,11 +1549,11 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 	 *
 	 * @since  3.6.0
 	 * @todo   Add to interface in 4.0.
-	 * @param  WC_Product $product Variable product.
-	 * @param  int        $limit Limit the number of created variations.
-	 * @param  array      $default_values Key value pairs to set on created variations.
-	 * @param  array      $metadata Key value pairs to set as meta data on created variations.
-	 * @return int        Number of created variations.
+	 * @param  WC_Product_Variable $product Variable product.
+	 * @param  int                 $limit Limit the number of created variations.
+	 * @param  array               $default_values Key value pairs to set on created variations.
+	 * @param  array               $metadata Key value pairs to set as meta data on created variations.
+	 * @return int                 Number of created variations.
 	 */
 	public function create_all_product_variations( $product, $limit = -1, $default_values = array(), $metadata = array() ) {
 		$count = 0;
@@ -1585,6 +1585,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		$possible_attributes = array_reverse( wc_array_cartesian( $attributes ) );
 		$product_id          = $product->get_id();
+		$new_variation_ids   = array();
 
 		foreach ( $possible_attributes as $possible_attribute ) {
 			// Allow any order if key/values -- do not use strict mode.
@@ -1600,6 +1601,8 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			$variation->set_attributes( $possible_attribute );
 			$variation_id = $variation->save();
 
+			$new_variation_ids[] = $variation_id;
+
 			do_action( 'product_variation_linked', $variation_id );
 
 			++$count;
@@ -1607,6 +1610,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			if ( $limit > 0 && $count >= $limit ) {
 				break;
 			}
+		}
+
+		// Update the children cache on the product instance so subsequent calls to
+		// get_children() reflect the newly created variations. Without this, the
+		// get_children() call above sets $children to [] (empty array, not null),
+		// causing later get_children() calls to return stale empty results.
+		if ( ! empty( $new_variation_ids ) ) {
+			$product->set_children( array_merge( $child_ids, $new_variation_ids ) );
 		}
 
 		return $count;

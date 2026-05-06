@@ -1101,6 +1101,36 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that create_all_product_variations updates the children cache on the product instance.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/61113
+	 */
+	public function test_variable_create_all_product_variations_updates_children_cache() {
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Test Variable Product' );
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_name( 'color' );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$attribute->set_options( array( 'red', 'blue' ) );
+
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$data_store = WC_Data_Store::load( 'product' );
+		$count      = $data_store->create_all_product_variations( $product );
+
+		$this->assertEquals( 2, $count );
+
+		// get_children() on the same product instance should return the newly
+		// created variation IDs, not the stale empty array that was cached
+		// before the variations were created.
+		$children = $product->get_children();
+		$this->assertCount( 2, $children, 'get_children() must reflect variations created in the same call' );
+	}
+
+	/**
 	 * Test find_matching_product_variation.
 	 *
 	 * @return void

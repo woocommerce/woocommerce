@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix stale children cache on variable product after calling create_all_product_variations
