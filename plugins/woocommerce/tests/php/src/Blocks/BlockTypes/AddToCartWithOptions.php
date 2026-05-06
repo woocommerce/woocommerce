@@ -445,6 +445,80 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that the stepper buttons render with correct aria labels when the product name contains a dollar sign.
+	 */
+	public function test_stepper_renders_correctly_with_dollar_sign_in_product_name() {
+		$simple_product = new \WC_Product_Simple();
+		$simple_product->set_regular_price( 10 );
+		$simple_product->set_name( 'CANADA, $1' );
+		$simple_product->set_manage_stock( true );
+		$simple_product->set_stock_quantity( 10 );
+		$simple_product_id = $simple_product->save();
+
+		$markup = do_blocks( '<!-- wp:woocommerce/single-product {"productId":' . $simple_product_id . '} --><!-- wp:woocommerce/add-to-cart-with-options /--><!-- /wp:woocommerce/single-product -->' );
+
+		$this->assertStringContainsString( 'wc-block-components-quantity-selector__button--minus', $markup, 'The minus stepper button is rendered.' );
+		$this->assertStringContainsString( 'wc-block-components-quantity-selector__button--plus', $markup, 'The plus stepper button is rendered.' );
+		$this->assertStringContainsString( 'Reduce quantity of CANADA, $1', $markup, 'The minus button aria-label contains the full product name with dollar sign.' );
+		$this->assertStringContainsString( 'Increase quantity of CANADA, $1', $markup, 'The plus button aria-label contains the full product name with dollar sign.' );
+
+		// Verify $1 was not interpreted as a backreference (which would inject the captured <input> HTML into the aria-label).
+		$this->assertDoesNotMatchRegularExpression(
+			'/aria-label="[^"]*<input[^"]*"/',
+			$markup,
+			'The aria-label should not contain HTML from backreference expansion.'
+		);
+	}
+
+	/**
+	 * Tests that the VariationSelectorAttribute block returns empty string
+	 * for non-variable products (simple, grouped, external) to prevent
+	 * a fatal error from calling get_variation_attributes() on unsupported
+	 * product types.
+	 *
+	 * @covers VariationSelectorAttribute::render
+	 */
+	public function test_variation_selector_attribute_returns_empty_for_non_variable_products() {
+		global $product;
+		$original_product = $product;
+
+		$block_markup = '<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute /-->';
+
+		try {
+			// Test with a missing/invalid product context.
+			$product = null;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string when the global product is null.' );
+
+			$product = false;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string when the global product is false.' );
+
+			// Test with a simple product.
+			$simple_product = new \WC_Product_Simple();
+			$simple_product->set_regular_price( 10 );
+			$simple_product->save();
+
+			$product = $simple_product;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for simple products.' );
+
+			// Test with a grouped product.
+			$grouped_product = new \WC_Product_Grouped();
+			$grouped_product->save();
+
+			$product = $grouped_product;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for grouped products.' );
+
+			// Test with an external product.
+			$external_product = new \WC_Product_External();
+			$external_product->save();
+
+			$product = $external_product;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for external products.' );
+		} finally {
+			$product = $original_product;
+		}//end try
+	}
+
+	/**
 	 * Tests that the quantity selector and its steppers are hidden when
 	 * a filter sets min and max quantity to the same value for a product.
 	 */

@@ -184,7 +184,7 @@ export function getStoreTimeZoneMoment() {
 		return moment().utcOffset( timeZone );
 	}
 
-	return ( moment() as momentTz.Moment ).tz( timeZone );
+	return momentTz.tz( timeZone );
 }
 
 /**

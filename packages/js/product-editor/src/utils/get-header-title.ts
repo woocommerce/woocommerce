@@ -16,9 +16,9 @@ import { AUTO_DRAFT_NAME } from './constants';
  * @return The new title
  */
 export const getHeaderTitle = (
-	editedProductName: string,
-	initialProductName: string
-): string => {
+	editedProductName: string | undefined,
+	initialProductName: string | undefined
+): string | undefined => {
 	const isProductNameNotEmpty = Boolean( editedProductName );
 	const isProductNameDirty = editedProductName !== initialProductName;
 	const isCreating = initialProductName === AUTO_DRAFT_NAME;

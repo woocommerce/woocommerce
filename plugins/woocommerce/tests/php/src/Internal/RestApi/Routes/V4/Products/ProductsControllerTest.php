@@ -7,6 +7,7 @@ use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 use WC_Helper_Product;
 use WC_REST_Unit_Test_Case;
 use WP_REST_Request;
@@ -19,6 +20,7 @@ use WP_REST_Request;
  */
 class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
+	use MetaDataAssertionTrait;
 
 
 	/**
@@ -300,6 +302,139 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 			$response_fields = array_keys( $response->get_data() );
 
 			$this->assertContains( $field, $response_fields, "Field $field was expected but not present in product API response." );
+		}
+	}
+
+	/**
+	 * @testdox Variable product responses include embeddable variation links.
+	 */
+	public function test_variable_product_response_includes_embeddable_variation_links(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$links = $response->get_links();
+		$this->assertArrayHasKey( 'variations', $links, 'Variable products should include variation links.' );
+		$this->assertCount( count( $variation_ids ), $links['variations'], 'Variation links should match child variations.' );
+
+		foreach ( $variation_ids as $index => $variation_id ) {
+			$link_attributes = $links['variations'][ $index ]['attributes'] ?? $links['variations'][ $index ];
+
+			$this->assertStringContainsString( '/wc/v4/products/' . $variation_id, $links['variations'][ $index ]['href'] );
+			$this->assertTrue( $link_attributes['embeddable'], 'Variation links should be embeddable.' );
+		}
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Variable product responses embed variations when requested.
+	 */
+	public function test_variable_product_response_embeds_variations_when_requested(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+		$request       = new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() );
+		$request->set_param( '_embed', 1 );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $this->server->response_to_data( $response, true );
+		$this->assertArrayHasKey( '_embedded', $response_data );
+		$this->assertArrayHasKey( 'variations', $response_data['_embedded'] );
+
+		$embedded_variation_ids = wp_list_pluck( $response_data['_embedded']['variations'], 'id' );
+		$this->assertEqualsCanonicalizing( $variation_ids, $embedded_variation_ids );
+
+		foreach ( $response_data['_embedded']['variations'] as $embedded_variation ) {
+			$this->assertArrayHasKey( '_links', $embedded_variation, 'Embedded variations should include REST links.' );
+			$this->assertArrayHasKey( 'self', $embedded_variation['_links'], 'Embedded variations should include a self link.' );
+			$this->assertArrayHasKey( 'up', $embedded_variation['_links'], 'Embedded variations should include a parent product link.' );
+		}
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Variation embed links do not propagate parent requested fields.
+	 */
+	public function test_variation_embed_links_do_not_propagate_parent_requested_fields(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() );
+		$request->set_param( '_fields', 'id,name,_links,_embedded' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$links = $response->get_links();
+
+		$this->assertArrayHasKey( 'variations', $links );
+		$this->assertStringNotContainsString( '_fields=', $links['variations'][0]['href'] );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Simple product responses do not include variation links.
+	 */
+	public function test_simple_product_response_does_not_include_variation_links(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( 'variations', $response->get_links() );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Variation parent links are not embeddable.
+	 */
+	public function test_variation_parent_link_is_not_embeddable(): void {
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $variation_id ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$links = $response->get_links();
+		$this->assertArrayHasKey( 'up', $links );
+		$this->assertArrayNotHasKey( 'embeddable', $links['up'][0]['attributes'] ?? $links['up'][0] );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Product schema exposes embed context only for allowed fields.
+	 */
+	public function test_product_schema_exposes_embed_context_for_allowed_fields_only(): void {
+		$this->enable_cogs_feature();
+
+		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/products' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$properties = $response->get_data()['schema']['properties'];
+
+		foreach ( array( 'id', 'name', 'price', 'variations', 'add_to_cart' ) as $property ) {
+			$this->assertContains( 'embed', $properties[ $property ]['context'], "{$property} should be available in embed context." );
+		}
+
+		$this->assertContains( 'embed', $properties['dimensions']['properties']['length']['context'] );
+		$this->assertContains( 'embed', $properties['add_to_cart']['properties']['url']['context'] );
+
+		foreach ( array( 'cost_of_goods_sold', 'downloads', 'download_limit', 'download_expiry', 'meta_data', 'purchase_note' ) as $property ) {
+			if ( isset( $properties[ $property ]['context'] ) ) {
+				$this->assertNotContains( 'embed', $properties[ $property ]['context'], "{$property} should not be available in embed context." );
+			}
 		}
 	}
 
@@ -2125,5 +2260,135 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 403, $response->get_status() );
 		$this->assertEquals( 'woocommerce_rest_cannot_view', $response->get_data()['code'] );
+	}
+
+	/**
+	 * @testdox Updating a product via V4 with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$this->update_product_via_post_request(
+			$product,
+			array( 'meta_data' => $this->get_incomplete_meta_data_input() )
+		);
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
+	}
+
+	/**
+	 * @testdox Should strip sensitive fields from response when author views a published product.
+	 */
+	public function test_get_published_product_as_author_strips_sensitive_fields(): void {
+		$download = new \WC_Product_Download();
+		$download->set_file( 'https://example.com/secret-file.zip' );
+		$download->set_name( 'Secret File' );
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'            => 'Downloadable Product',
+				'status'          => ProductStatus::PUBLISH,
+				'downloadable'    => true,
+				'download_limit'  => 5,
+				'download_expiry' => 30,
+				'purchase_note'   => 'Internal note for customers',
+			)
+		);
+		$product->set_downloads( array( $download ) );
+		$product->add_meta_data( 'secret_key', 'secret_value', true );
+		$product->save();
+
+		$author = $this->factory->user->create(
+			array(
+				'role' => 'author',
+			)
+		);
+		wp_set_current_user( $author );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( 'downloads', $data, 'Author should not see download URLs' );
+		$this->assertArrayNotHasKey( 'download_limit', $data, 'Author should not see download limit' );
+		$this->assertArrayNotHasKey( 'download_expiry', $data, 'Author should not see download expiry' );
+		$this->assertArrayNotHasKey( 'purchase_note', $data, 'Author should not see purchase note' );
+		$this->assertArrayNotHasKey( 'meta_data', $data, 'Author should not see meta data' );
+	}
+
+	/**
+	 * @testdox Should strip COGS data from response when author views a published product.
+	 */
+	public function test_get_published_product_as_author_strips_cogs_data(): void {
+		$this->enable_cogs_feature();
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'   => 'Product With COGS',
+				'status' => ProductStatus::PUBLISH,
+			)
+		);
+		$product->set_cogs_value( 5.00 );
+		$product->save();
+
+		$author = $this->factory->user->create(
+			array(
+				'role' => 'author',
+			)
+		);
+		wp_set_current_user( $author );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( 'cost_of_goods_sold', $data, 'Author should not see COGS data' );
+	}
+
+	/**
+	 * @testdox Should include sensitive fields in response when shop manager views a product.
+	 */
+	public function test_get_product_as_shop_manager_includes_sensitive_fields(): void {
+		$this->enable_cogs_feature();
+
+		$download = new \WC_Product_Download();
+		$download->set_file( 'https://example.com/secret-file.zip' );
+		$download->set_name( 'Secret File' );
+
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'            => 'Full Access Product',
+				'status'          => ProductStatus::PUBLISH,
+				'downloadable'    => true,
+				'download_limit'  => 5,
+				'download_expiry' => 30,
+				'purchase_note'   => 'Internal note for customers',
+			)
+		);
+		$product->set_downloads( array( $download ) );
+		$product->set_cogs_value( 5.00 );
+		$product->add_meta_data( 'secret_key', 'secret_value', true );
+		$product->save();
+
+		$shop_manager = $this->factory->user->create(
+			array(
+				'role' => 'shop_manager',
+			)
+		);
+		wp_set_current_user( $shop_manager );
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayHasKey( 'downloads', $data, 'Shop manager should see downloads' );
+		$this->assertArrayHasKey( 'download_limit', $data, 'Shop manager should see download limit' );
+		$this->assertArrayHasKey( 'download_expiry', $data, 'Shop manager should see download expiry' );
+		$this->assertArrayHasKey( 'purchase_note', $data, 'Shop manager should see purchase note' );
+		$this->assertArrayHasKey( 'cost_of_goods_sold', $data, 'Shop manager should see COGS data' );
+		$this->assertArrayHasKey( 'meta_data', $data, 'Shop manager should see meta data' );
 	}
 }

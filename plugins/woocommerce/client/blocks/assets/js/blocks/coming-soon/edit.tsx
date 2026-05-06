@@ -42,7 +42,6 @@ export default function Edit( { attributes, setAttributes }: EditProps ) {
 				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<ColorPicker
 						color={ color }
-						// @ts-expect-error type is not defined in the library
 						onChange={ ( newColor: string ) =>
 							setAttributes( { color: newColor } )
 						}

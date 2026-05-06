@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	useBlockProps,
-	// @ts-expect-error no exported member.
-	useInnerBlocksProps,
-} from '@wordpress/block-editor';
+import { useBlockProps, useInnerBlocksProps } from '@wordpress/block-editor';
 
 export const Save = () => {
 	const blockProps = useBlockProps.save( {

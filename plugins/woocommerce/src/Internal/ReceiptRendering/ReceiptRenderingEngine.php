@@ -2,6 +2,7 @@
 
 namespace Automattic\WooCommerce\Internal\ReceiptRendering;
 
+use Automattic\WooCommerce\Enums\OrderItemType;
 use Automattic\WooCommerce\Internal\Orders\PaymentInfo;
 use Automattic\WooCommerce\Internal\TransientFiles\TransientFilesEngine;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
@@ -295,7 +296,7 @@ class ReceiptRenderingEngine {
 		$get_price_args = array( 'currency' => $order->get_currency() );
 
 		$line_items_info = array();
-		$line_items      = $order->get_items( 'line_item' );
+		$line_items      = $order->get_items( OrderItemType::LINE_ITEM );
 		foreach ( $line_items as $line_item ) {
 			$line_item_product = $line_item->get_product();
 			if ( false === $line_item_product ) {
@@ -334,7 +335,7 @@ class ReceiptRenderingEngine {
 		foreach ( $order->get_fees() as $fee ) {
 			$name              = $fee->get_name();
 			$line_items_info[] = array(
-				'type'   => 'fee',
+				'type'   => OrderItemType::FEE,
 				'title'  => '' === $name ? __( 'Fee', 'woocommerce' ) : $name,
 				'amount' => wc_price( $fee->get_total(), $get_price_args ),
 			);

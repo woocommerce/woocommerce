@@ -13,7 +13,6 @@ import {
 	// @ts-ignore No types for this exist yet.
 	BlockContextProvider,
 	useBlockProps,
-	// @ts-expect-error no exported member.
 	useInnerBlocksProps,
 	store as blockEditorStore,
 	// @ts-expect-error no exported member.

@@ -78,3 +78,9 @@ declare module '@wordpress/data' {
 		key: typeof STORE_NAME
 	): PromiseifySelectors< SelectFromMap< typeof selectors > >;
 }
+
+declare module '@wordpress/data' {
+	interface StoreRegistry {
+		[ STORE_NAME ]: typeof store;
+	}
+}

@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments;
 
 use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\AbstractShippingProvider;
+use Automattic\WooCommerce\Admin\Features\Fulfillments\Providers\CustomShippingProvider;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 use WC_Order_Refund;
@@ -33,6 +34,7 @@ class FulfillmentsManager {
 	 */
 	public function register() {
 		add_filter( 'woocommerce_fulfillment_shipping_providers', array( $this, 'get_initial_shipping_providers' ), 10, 1 );
+		add_filter( 'woocommerce_fulfillment_shipping_providers', array( $this, 'get_custom_shipping_providers' ), 20, 1 );
 		add_filter( 'woocommerce_fulfillment_translate_meta_key', array( $this, 'translate_fulfillment_meta_key' ), 10, 1 );
 		add_filter( 'woocommerce_fulfillment_parse_tracking_number', array( $this, 'try_parse_tracking_number' ), 10, 3 );
 
@@ -97,6 +99,8 @@ class FulfillmentsManager {
 	 * Initialize order deletion hooks.
 	 *
 	 * Registers hooks to clean up fulfillment records when an order is permanently deleted.
+	 * Hooks into both `woocommerce_before_delete_order` (HPOS) and `before_delete_post`
+	 * (legacy post storage) to ensure cleanup regardless of storage backend.
 	 */
 	private function init_order_deletion_hooks(): void {
 		add_action( 'woocommerce_before_delete_order', array( $this, 'delete_order_fulfillments' ), 10, 1 );
@@ -105,6 +109,9 @@ class FulfillmentsManager {
 
 	/**
 	 * Delete all fulfillment records for an order that is being permanently deleted.
+	 *
+	 * Does nothing if the given ID does not correspond to a valid order type.
+	 * Exceptions are caught and logged; this method never throws.
 	 *
 	 * @since 10.7.0
 	 *
@@ -178,6 +185,49 @@ class FulfillmentsManager {
 		);
 
 		ksort( $shipping_providers );
+
+		return $shipping_providers;
+	}
+
+	/**
+	 * Load custom shipping providers from the wc_fulfillment_shipping_provider taxonomy.
+	 *
+	 * @since 10.7.0
+	 *
+	 * @param array $shipping_providers The current list of shipping providers.
+	 * @return array The modified list of shipping providers with custom providers appended.
+	 */
+	public function get_custom_shipping_providers( $shipping_providers ) {
+		if ( ! is_array( $shipping_providers ) ) {
+			$shipping_providers = array();
+		}
+
+		if ( ! taxonomy_exists( 'wc_fulfillment_shipping_provider' ) ) {
+			return $shipping_providers;
+		}
+
+		$terms = get_terms(
+			array(
+				'taxonomy'   => 'wc_fulfillment_shipping_provider',
+				'hide_empty' => false,
+			)
+		);
+
+		if ( is_wp_error( $terms ) || empty( $terms ) ) {
+			return $shipping_providers;
+		}
+
+		foreach ( $terms as $term ) {
+			$icon                  = get_term_meta( $term->term_id, 'icon', true );
+			$tracking_url_template = get_term_meta( $term->term_id, 'tracking_url_template', true );
+
+			$shipping_providers[] = new CustomShippingProvider(
+				$term->slug,
+				$term->name,
+				is_string( $icon ) ? $icon : '',
+				is_string( $tracking_url_template ) ? $tracking_url_template : ''
+			);
+		}
 
 		return $shipping_providers;
 	}
@@ -462,33 +512,9 @@ class FulfillmentsManager {
 		$shipping_providers = FulfillmentUtils::get_shipping_providers();
 		$results            = array();
 		foreach ( $shipping_providers as $provider ) {
-			if ( class_exists( $provider ) && is_subclass_of( $provider, AbstractShippingProvider::class ) ) {
-				try {
-					/**
-					 * Instantiate the shipping provider class.
-					 *
-					 * @var AbstractShippingProvider $provider_instance
-					 */
-					$provider_instance = wc_get_container()->get( $provider );
-				} catch ( \Throwable $e ) {
-					$logger = wc_get_logger();
-					$logger->error(
-						sprintf(
-							'Error instantiating shipping provider class %s: %s',
-							$provider,
-							$e->getMessage()
-						),
-						array( 'source' => 'woocommerce-fulfillments' )
-					);
-					continue; // Skip if the provider class cannot be instantiated.
-				}
-			} else {
-				continue; // Skip if the provider class does not exist or is not a valid shipping provider.
-			}
-
-			$parsing_result = $provider_instance->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
+			$parsing_result = $provider->try_parse_tracking_number( $tracking_number, $shipping_from, $shipping_to );
 			if ( ! is_null( $parsing_result ) ) {
-				$results[ $provider_instance->get_key() ] = $parsing_result;
+				$results[ $provider->get_key() ] = $parsing_result;
 			}
 		}
 

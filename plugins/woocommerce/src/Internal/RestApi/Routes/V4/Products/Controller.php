@@ -19,6 +19,7 @@ use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\CatalogVisibility;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareRestControllerTrait;
 use Automattic\WooCommerce\Utilities\I18nUtil;
+use Automattic\WooCommerce\Utilities\MetaDataUtil;
 use WC_REST_Products_V2_Controller;
 use WP_REST_Server;
 use WP_REST_Request;
@@ -26,7 +27,11 @@ use WP_REST_Response;
 use WP_Error;
 use WC_Admin_Duplicate_Product;
 use WC_REST_CRUD_Controller;
+use WC_Data_Store;
+use WC_Product_Attribute;
 use WC_Product_Factory;
+use WC_Product_Simple;
+use WC_REST_Exception;
 
 
 defined( 'ABSPATH' ) || exit;
@@ -39,6 +44,21 @@ defined( 'ABSPATH' ) || exit;
 class Controller extends WC_REST_Products_V2_Controller {
 
 	use CogsAwareRestControllerTrait;
+
+	/**
+	 * Fields stripped from the response for users without product management capabilities
+	 * (e.g. authors who can view published products via the edit_posts fallback).
+	 *
+	 * @since 10.8.0
+	 */
+	private const SENSITIVE_FIELDS = array(
+		'cost_of_goods_sold',
+		'downloads',
+		'download_limit',
+		'download_expiry',
+		'meta_data',
+		'purchase_note',
+	);
 
 	/**
 	 * Endpoint namespace.
@@ -219,6 +239,30 @@ class Controller extends WC_REST_Products_V2_Controller {
 		$response_data = $duplicated_product->get_data();
 
 		return new WP_REST_Response( $response_data, 200 );
+	}
+
+	/**
+	 * Prepare links for the request.
+	 *
+	 * @param \WC_Product                          $product  Object data.
+	 * @param WP_REST_Request<array<string,mixed>> $request Request object.
+	 * @return array Links for the given post.
+	 */
+	protected function prepare_links( $product, $request ) {
+		$links = parent::prepare_links( $product, $request );
+
+		if ( $product->is_type( ProductType::VARIABLE ) && $product->has_child() ) {
+			$links['variations'] = array();
+
+			foreach ( $product->get_children() as $variation_id ) {
+				$links['variations'][] = array(
+					'href'       => rest_url( sprintf( '/%s/%s/%d', $this->namespace, $this->rest_base, $variation_id ) ),
+					'embeddable' => true,
+				);
+			}
+		}
+
+		return $links;
 	}
 
 	/**
@@ -1196,11 +1240,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		// Allow set meta_data.
-		if ( is_array( $request['meta_data'] ) ) {
-			foreach ( $request['meta_data'] as $meta ) {
-				$product->update_meta_data( $meta['key'], $meta['value'], isset( $meta['id'] ) ? $meta['id'] : '' );
-			}
-		}
+		MetaDataUtil::update( $request['meta_data'], $product ); // @phpstan-ignore argument.type (missing `use WC_Product` causes phantom namespace-local type)
 
 		if ( ! empty( $request['date_created'] ) ) {
 			$date = rest_parse_date( $request['date_created'] );
@@ -1960,7 +2000,76 @@ class Controller extends WC_REST_Products_V2_Controller {
 			'readonly'    => true,
 		);
 
-			return $this->add_additional_fields_schema( $schema );
+		$schema = $this->add_embed_context_to_schema( $schema );
+
+		return $this->add_additional_fields_schema( $schema );
+	}
+
+	/**
+	 * Add the embed context to product schema properties available in view context.
+	 *
+	 * @param array $schema Product schema.
+	 * @return array Product schema with embed context support.
+	 */
+	private function add_embed_context_to_schema( array $schema ): array {
+		if ( empty( $schema['properties'] ) || ! is_array( $schema['properties'] ) ) {
+			return $schema;
+		}
+
+		// WordPress REST embeds cannot be narrowed with _fields. Keep all non-sensitive
+		// view fields embeddable for now; scalability is tracked in https://github.com/woocommerce/woocommerce/issues/64652.
+		foreach ( $schema['properties'] as $property => $property_schema ) {
+			if ( ! is_array( $property_schema ) ) {
+				continue;
+			}
+
+			if ( in_array( $property, self::SENSITIVE_FIELDS, true ) ) {
+				continue;
+			}
+
+			$schema['properties'][ $property ] = $this->add_embed_context_to_schema_property( $property_schema );
+		}
+
+		return $schema;
+	}
+
+	/**
+	 * Add the embed context to a schema property and its nested properties.
+	 *
+	 * @param array $property_schema Schema property.
+	 * @return array Schema property with embed context support.
+	 */
+	private function add_embed_context_to_schema_property( array $property_schema ): array {
+		if (
+			! empty( $property_schema['context'] ) &&
+			is_array( $property_schema['context'] ) &&
+			in_array( 'view', $property_schema['context'], true ) &&
+			! in_array( 'embed', $property_schema['context'], true )
+		) {
+			$property_schema['context'][] = 'embed';
+		}
+
+		if ( ! empty( $property_schema['properties'] ) && is_array( $property_schema['properties'] ) ) {
+			foreach ( $property_schema['properties'] as $property => $nested_property_schema ) {
+				if ( ! is_array( $nested_property_schema ) ) {
+					continue;
+				}
+
+				$property_schema['properties'][ $property ] = $this->add_embed_context_to_schema_property( $nested_property_schema );
+			}
+		}
+
+		if ( ! empty( $property_schema['items']['properties'] ) && is_array( $property_schema['items']['properties'] ) ) {
+			foreach ( $property_schema['items']['properties'] as $property => $nested_property_schema ) {
+				if ( ! is_array( $nested_property_schema ) ) {
+					continue;
+				}
+
+				$property_schema['items']['properties'][ $property ] = $this->add_embed_context_to_schema_property( $nested_property_schema );
+			}
+		}
+
+		return $property_schema;
 	}
 
 	/**
@@ -2140,9 +2249,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 		if ( $product->is_downloadable() || 'edit' === $context ) {
 			foreach ( $product->get_downloads() as $file_id => $file ) {
 				$downloads[] = array(
-					'id'   => $file_id, // MD5 hash.
-					'name' => $file['name'],
-					'file' => $file['file'],
+					'id'                           => $file_id,
+					// MD5 hash.
+											'name' => $file['name'],
+					'file'                         => $file['file'],
 				);
 			}
 		}
@@ -2230,14 +2340,15 @@ class Controller extends WC_REST_Products_V2_Controller {
 		$exclude_ids = $request->get_param( 'exclude' );
 		$limit       = $request->get_param( 'limit' ) ? $request->get_param( 'limit' ) : 5;
 
-		$data_store = \WC_Data_Store::load( 'product' );
+		$data_store = WC_Data_Store::load( 'product' );
 		// @phpstan-ignore-next-line method.notFound
 		$this->suggested_products_ids = $data_store->get_related_products(
 			$categories,
 			$tags,
 			$exclude_ids,
 			$limit,
-			null // No need to pass the product ID.
+			null
+			// No need to pass the product ID.
 		);
 
 		// When no suggested products are found, return an empty array.
@@ -2256,8 +2367,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 * (doesn't fire hooks, ensure_response, or add links).
 	 *
 	 * @param WC_Data         $object_data Object data.
-	 * @param WP_REST_Request $request Request object.
-	 * @param string          $context Request context.
+	 * @param WP_REST_Request $request     Request object.
+	 * @param string          $context     Request context.
 	 * @return array Product data to be included in the response.
 	 */
 	protected function prepare_object_for_response_core( $object_data, $request, $context ): array {
@@ -2273,6 +2384,15 @@ class Controller extends WC_REST_Products_V2_Controller {
 			'text'        => $object_data->add_to_cart_text(),
 			'single_text' => $object_data->single_add_to_cart_text(),
 		);
+
+		$post_type_object = get_post_type_object( 'product' );
+
+		if ( $post_type_object instanceof \WP_Post_Type && ! current_user_can( $post_type_object->cap->read_private_posts ) ) {
+			foreach ( self::SENSITIVE_FIELDS as $field ) {
+				unset( $data[ $field ] );
+			}
+		}
+
 		return $data;
 	}
 

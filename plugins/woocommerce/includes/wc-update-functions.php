@@ -21,6 +21,7 @@ defined( 'ABSPATH' ) || exit;
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Admin\Notes\Notes;
 use Automattic\WooCommerce\Database\Migrations\MigrationHelper;
+use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Admin\Marketing\MarketingSpecs;
@@ -29,6 +30,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -733,8 +735,8 @@ function wc_update_230_options() {
 	delete_metadata( 'user', 0, '_last_order', '', true );
 
 	// To prevent taxes being hidden when using a default 'no address' in a store with tax inc prices, set the woocommerce_default_customer_address to use the store base address by default.
-	if ( '' === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
-		update_option( 'woocommerce_default_customer_address', 'base' );
+	if ( DefaultCustomerAddress::NO_DEFAULT === get_option( 'woocommerce_default_customer_address', false ) && wc_prices_include_tax() ) {
+		update_option( 'woocommerce_default_customer_address', DefaultCustomerAddress::BASE );
 	}
 }
 
@@ -3417,4 +3419,123 @@ function wc_update_1070_disable_hpos_sync_on_read(): void {
 	}
 
 	WC_Admin_Notices::add_notice( 'hpos_sync_on_read_disabled' );
+}
+
+/**
+ * Migrate the legacy analytics immediate import option to the renamed scheduled import option.
+ *
+ * In 10.5.0, `woocommerce_analytics_immediate_import` was renamed to
+ * `woocommerce_analytics_scheduled_import` with inverted semantics, but no
+ * migration was added. Stores that had opted into scheduled imports (legacy
+ * value 'no') silently reverted to immediate imports on upgrade.
+ *
+ * @since 10.8.0
+ *
+ * @return void
+ */
+function wc_update_1080_migrate_analytics_import_option(): void {
+	$legacy_option = 'woocommerce_analytics_immediate_import';
+	$new_option    = 'woocommerce_analytics_scheduled_import';
+
+	$legacy_value = get_option( $legacy_option, false );
+
+	// Nothing to migrate if the legacy option was never set.
+	if ( false === $legacy_value ) {
+		return;
+	}
+
+	// If the new option already exists, just clean up the legacy option.
+	if ( false !== get_option( $new_option, false ) ) {
+		delete_option( $legacy_option );
+		return;
+	}
+
+	// Invert the semantics: legacy 'yes' (immediate) = new 'no' (not scheduled),
+	// legacy 'no' (not immediate) = new 'yes' (scheduled).
+	$new_value = 'no' === $legacy_value ? 'yes' : 'no';
+
+	// Only delete the legacy option if the new option was written successfully.
+	// On failure, the runtime fallback in is_scheduled_import_enabled() can
+	// still read the legacy option to preserve the store's preference.
+	if ( add_option( $new_option, $new_value ) ) {
+		delete_option( $legacy_option );
+	}
+}
+
+/**
+ * Slim the `meta_key_value` index on `wc_orders_meta` by removing the `meta_value` column.
+ *
+ * The original composite index `(meta_key(100), meta_value(82))` overlaps heavily with
+ * `order_id_meta_key_meta_value` and the `meta_value` prefix adds significant storage
+ * overhead with negligible selectivity benefit. All core queries that use this index
+ * filter primarily by `meta_key`.
+ *
+ * @since 10.8.0
+ *
+ * @return void
+ */
+function wc_update_1080_slim_orders_meta_key_index(): void {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'wc_orders_meta';
+	$index_name = 'meta_key_value';
+
+	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
+	$index = $wpdb->get_row(
+		$wpdb->prepare(
+			'SHOW INDEX FROM ' . $table_name . ' WHERE Key_name = %s AND Column_name = %s',
+			$index_name,
+			'meta_value'
+		)
+	);
+	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
+
+	if ( is_null( $index ) ) {
+		return;
+	}
+
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(100))" );
+}
+
+/**
+ * Backfill sync meta onto pre-existing `woo_email` posts so the template
+ * divergence detector introduced in the same release (RSM-138) can classify
+ * legacy installs safely.
+ *
+ * @since 10.8.0
+ *
+ * @return bool Always false. Once-per-site is enforced by the
+ *              `woocommerce_db_version` fence in `$db_updates`.
+ */
+function wc_update_1080_backfill_email_template_sync_meta(): bool {
+	return WCEmailTemplateSyncBackfill::run();
+}
+
+/**
+ * Seeds the Review Order page on existing installs so the rewrite rule and
+ * helper URL work after upgrading to 10.8.0. Mirrors how
+ * `wc_update_560_create_refund_returns_page` backfilled the refund/returns
+ * page when that feature shipped.
+ *
+ * @since 10.8.0
+ *
+ * @return void
+ */
+function wc_update_1080_create_review_order_page(): void {
+	$only_review_order = static function ( array $pages ): array {
+		return array_intersect_key( $pages, array_flip( array( 'review_order' ) ) );
+	};
+
+	add_filter( 'woocommerce_create_pages', $only_review_order );
+
+	WC_Install::create_pages();
+
+	remove_filter( 'woocommerce_create_pages', $only_review_order );
+
+	// `Endpoint::add_rewrite_rule` runs on init:10; this update routine fires
+	// from WC_Install::check_version on init:5, so flushing here would
+	// persist the rules table without the new /review-order/{id}/ rule.
+	// Defer the flush via an option that the endpoint clears on wp_loaded.
+	update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
 }

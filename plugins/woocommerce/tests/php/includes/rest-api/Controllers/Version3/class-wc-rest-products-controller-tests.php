@@ -3,6 +3,7 @@
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
+use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
 
 /**
  * class WC_REST_Products_Controller_Tests.
@@ -10,6 +11,7 @@ use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
  */
 class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use CogsAwareUnitTestSuiteTrait;
+	use MetaDataAssertionTrait;
 
 	/**
 	 * Saves the `woocommerce_hide_out_of_stock_items` option value for restoration after tests that modify it.
@@ -2113,5 +2115,21 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 		$product_ids = wp_list_pluck( $products, 'id' );
 		$this->assertContains( $visible_product->get_id(), $product_ids );
 		$this->assertContains( $hidden_product->get_id(), $product_ids );
+	}
+
+	/**
+	 * @testdox Updating a product with incomplete meta_data entries does not cause errors.
+	 */
+	public function test_update_meta_data_with_incomplete_entries(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/' . $product->get_id() );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body( wp_json_encode( array( 'meta_data' => $this->get_incomplete_meta_data_input() ) ) );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$this->assert_incomplete_meta_data_handled_correctly( wc_get_product( $product->get_id() ) );
 	}
 }

@@ -1,3 +1,57 @@
+useNodeVersion: 24.15.0
+
+catalogs:
+	# A curated set of `@wordpress/*` packages that are bundled with our minimum supported WordPress version.
+    wp-min:
+        '@types/wordpress__block-editor': 14.21.8
+        '@types/wordpress__block-library': 2.6.3
+        '@types/wordpress__blocks': 12.5.18
+        '@types/wordpress__edit-post': 8.4.2
+        '@types/wordpress__viewport': 5.5.3
+        '@wordpress/a11y': 4.19.1
+        '@wordpress/api-fetch': 7.19.2
+        '@wordpress/base-styles': 5.19.1
+        '@wordpress/blob': 4.19.1
+        '@wordpress/block-editor': 14.14.6
+        '@wordpress/block-library': 9.19.6
+        '@wordpress/blocks': 14.8.2
+        '@wordpress/commands': 1.19.4
+        '@wordpress/components': 29.5.4
+        '@wordpress/compose': 7.19.2
+        '@wordpress/core-data': 7.19.6
+        '@wordpress/create-block': 4.62.1
+        '@wordpress/data': 10.19.2
+        '@wordpress/data-controls': 4.19.2
+        '@wordpress/date': 5.19.1
+        '@wordpress/deprecated': 4.19.1
+        '@wordpress/dom': 4.19.2
+        '@wordpress/dom-ready': 4.19.1
+        '@wordpress/edit-post': 8.19.7
+        '@wordpress/editor': 14.19.7
+        '@wordpress/element': 6.19.1
+        '@wordpress/format-library': 5.19.6
+        '@wordpress/hooks': 4.19.1
+        '@wordpress/html-entities': 4.19.1
+        '@wordpress/i18n': 5.19.1
+        '@wordpress/icons': 10.19.1
+        '@wordpress/interface': 9.4.4
+        '@wordpress/is-shallow-equal': 5.19.1
+        '@wordpress/keyboard-shortcuts': 5.19.2
+        '@wordpress/keycodes': 4.19.1
+        '@wordpress/media-utils': 5.19.2
+        '@wordpress/notices': 5.19.2
+        '@wordpress/plugins': 7.19.4
+        '@wordpress/preferences': 4.19.4
+        '@wordpress/primitives': 4.19.1
+        '@wordpress/priority-queue': 3.19.1
+        '@wordpress/private-apis': ^1.19.1 # Use a caret range to make sure we are using an up-to-date private package list.
+        '@wordpress/rich-text': 7.19.2
+        '@wordpress/server-side-render': 5.19.4
+        '@wordpress/url': 4.19.2
+        '@wordpress/viewport': 6.19.2
+        '@wordpress/warning': 3.19.1
+        '@wordpress/wordcount': 4.19.1
+
 packages:
     - 'packages/js/*'
     - 'packages/php/*'
@@ -14,3 +68,84 @@ packages:
     - 'tools/release-posts'
     - 'tools/storybook'
     - 'tools/monorepo-utils'
+
+# Hoisting: restore pnpm 9 defaults that pnpm 10 removed.
+# pnpm 10 emptied public-hoist-pattern (was ['*eslint*', '*prettier*']).
+# Also hoist react/react-dom so phantom deps in @wordpress/* packages resolve
+# (e.g. @wordpress/dataviews imports react-dom/client without declaring it).
+publicHoistPattern:
+    - '*eslint*'
+    - '*prettier*'
+    - 'react'
+    - 'react-dom'
+    - '@use-gesture/react'
+
+# Quality of life tweaks (migrated from .npmrc)
+childConcurrency: 8        # 5 by default
+confirmModulesPurge: false
+modulesCacheMaxAge: 20160  # two weeks in minutes
+updateNotifier: false
+virtualStoreDirMaxLength: 60
+
+# Supply chain security (pnpm 10)
+# Context: axios supply chain attack (2026-03-31) — malicious versions lived ~2-3hrs on npm.
+
+# Let new releases age 24 hours before installing.
+minimumReleaseAge: 1440
+minimumReleaseAgeExclude:
+    - '@automattic/*'
+    - '@woocommerce/*'
+    - '@wordpress/*'
+
+# Require explicit approval for dependency build scripts (postinstall, etc).
+# msw copies its service worker file, and fs-ext needs a native build for wp-env.
+# All other deps with lifecycle scripts are implicitly blocked.
+# Fail (non-zero exit) on unapproved build scripts instead of warning.
+strictDepBuilds: true
+allowBuilds:
+    '@parcel/watcher': true
+    fs-ext: true
+    fs-ext-extra-prebuilt: true
+    msw: true
+    # Explicitly denied — these deps have build scripts we don't need.
+    '@swc/core': false
+    aws-sdk: false
+    core-js: false
+    core-js-pure: false
+    esbuild: false
+    fsevents: false
+    node-pty: false
+    puppeteer-core: false
+    unrs-resolver: false
+    yarn: false
+
+# Block odd protocols (git+ssh, etc.) in transitive dependencies.
+# DISABLED: @wordpress/interactivity uses a git-hosted fork (via .pnpmfile.cjs readPackage hook)
+# for @wordpress/interactivity-router. pnpm has no exclude mechanism for blockExoticSubdeps.
+# TODO: Re-enable once the WooCommerce Gutenberg fork of @wordpress/interactivity is no longer needed.
+blockExoticSubdeps: false
+
+# Prevent trust downgrades (e.g., replacing a signed version with unsigned).
+trustPolicy: no-downgrade
+trustPolicyExclude:
+    # Backport without provenance
+    - '@octokit/endpoint@9.0.6'
+    - '@octokit/plugin-paginate-rest@9.2.2'
+    - '@octokit/webhooks@12.3.2'
+    # Release automations broke (https://github.com/paulmillr/chokidar/issues/1440)
+    - 'chokidar@3.5.3 || 4.0.3'
+    # Backported without provenance
+    - 'css-declaration-sorter@6.4.1'
+    # Backported without provenance
+    - 'detect-port@1.6.1'
+    # Backported without provenance
+    - 'eslint-config-prettier@8.10.2'
+    # Backported without provenance
+    - 'hosted-git-info@6.1.3'
+    # Backported without provenance (https://github.com/reduxjs/reselect/issues/752)
+    - 'reselect@5.1.1'
+    # Backported security fixes (https://github.com/advisories/GHSA-c2qf-rxjj-qqgw)
+    - 'semver@5.7.2 || 6.3.1'
+    # Release automations broke (https://github.com/nodejs/undici/issues/4666)
+    - 'undici@5.29.0'
+    - 'undici-types@6.21.0'

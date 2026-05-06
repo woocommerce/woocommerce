@@ -304,9 +304,9 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 		);
 
 		// Update with tracking info (non-status change).
-		$fulfillment->update_meta_data( '_tracking_number', 'UPS999' );
-		$fulfillment->update_meta_data( '_shipment_provider', 'ups' );
-		$fulfillment->update_meta_data( '_tracking_url', 'https://ups.com/track/UPS999' );
+		$fulfillment->set_tracking_number( 'UPS999' );
+		$fulfillment->set_shipment_provider( 'ups' );
+		$fulfillment->set_tracking_url( 'https://ups.com/track/UPS999' );
 		$fulfillment->save();
 
 		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
@@ -399,7 +399,7 @@ class FulfillmentOrderNotesTest extends \WC_Unit_Test_Case {
 		);
 
 		// Update tracking number (non-status change).
-		$fulfillment->update_meta_data( '_tracking_number', 'NEWTRACK789' );
+		$fulfillment->set_tracking_number( 'NEWTRACK789' );
 		$fulfillment->save();
 
 		$notes = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );

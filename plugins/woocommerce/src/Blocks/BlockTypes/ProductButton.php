@@ -146,8 +146,6 @@ class ProductButton extends AbstractBlock {
 
 		$context = array(
 			'quantityToAdd'    => $default_quantity,
-			'productId'        => $product->get_id(),
-			'productType'      => $product->get_type(),
 			'addToCartText'    => $add_to_cart_text,
 			'tempQuantity'     => $number_of_items_in_cart,
 			'animationStatus'  => 'IDLE',
@@ -169,6 +167,11 @@ class ProductButton extends AbstractBlock {
 				'href' => esc_url( $product->add_to_cart_url() ),
 				'rel'  => 'nofollow',
 			);
+
+			if ( $product->is_type( ProductType::EXTERNAL ) ) {
+				$attributes['target'] = '_blank';
+				$attributes['rel']    = 'nofollow noopener noreferrer';
+			}
 		}
 
 		wp_interactivity_config(

@@ -39,7 +39,6 @@ const MultiProductPicker = ( props: MultiProductPickerProps ) => {
 		<div { ...blockProps }>
 			<Placeholder className="wc-block-editor-product-collection__product-picker">
 				<div className="wc-block-editor-product-collection__product-picker-info">
-					{ /* @ts-expect-error Icon types are incomplete */ }
 					<Icon
 						icon={ info }
 						className="wc-block-editor-product-collection__info-icon"

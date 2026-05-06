@@ -88,8 +88,9 @@ class WC_REST_Paypal_Webhooks_Controller extends WC_REST_Controller {
 		try {
 			$webhook_handler->process_webhook( $request );
 			return new WP_REST_Response( array( 'message' => 'Webhook processed successfully' ), 200 );
-		} catch ( Exception $e ) {
-			return new WP_REST_Response( array( 'error' => $e->getMessage() ), 500 );
+		} catch ( \Throwable $e ) {
+			WC_Gateway_Paypal::log( 'Error processing webhook: ' . $e->getMessage() );
+			return new WP_REST_Response( array( 'error' => __( 'Webhook processing failed.', 'woocommerce' ) ), 500 );
 		}
 	}
 }

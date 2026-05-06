@@ -218,6 +218,45 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_query_string_form_fields with nested array params.
+	 *
+	 * @dataProvider provide_nested_array_cases
+	 *
+	 * @param string $url            URL to parse.
+	 * @param string $expected_name  Expected hidden field name attribute.
+	 * @param string $expected_value Expected hidden field value attribute.
+	 * @return void
+	 */
+	public function test_wc_query_string_form_fields_nested_arrays( string $url, string $expected_name, string $expected_value ): void {
+		$html = wc_query_string_form_fields( $url, array(), '', true );
+
+		$this->assertStringContainsString( 'name="' . $expected_name . '"', $html );
+		$this->assertStringContainsString( 'value="' . $expected_value . '"', $html );
+		$this->assertStringNotContainsString( '{dot}', $html );
+		$this->assertStringNotContainsString( '{plus}', $html );
+	}
+
+	/**
+	 * Data provider for test_wc_query_string_form_fields_nested_arrays.
+	 *
+	 * @return array[]
+	 */
+	public function provide_nested_array_cases(): array {
+		return array(
+			// Baseline: nested params without any special chars.
+			'nested baseline'      => array( 'https://x/?products[1][id]=12345', 'products[1][id]', '12345' ),
+			// Nested params with dots in nested keys.
+			'dot in nested key'    => array( 'https://x/?products[1.5][id]=12345', 'products[1.5][id]', '12345' ),
+			// Nested params with dots in nested values.
+			'dot in nested value'  => array( 'https://x/?products[1][price]=12.50', 'products[1][price]', '12.50' ),
+			// Same as dot-in-key case but with + instead of .
+			'plus in nested key'   => array( 'https://x/?products[a+b][id]=12345', 'products[a+b][id]', '12345' ),
+			// Same as dot-in-value case but with + instead of .
+			'plus in nested value' => array( 'https://x/?products[1][label]=hello+world', 'products[1][label]', 'hello+world' ),
+		);
+	}
+
+	/**
 	 * Test test_wc_get_pay_buttons().
 	 */
 	public function test_wc_get_pay_buttons() {
