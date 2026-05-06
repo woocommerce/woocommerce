@@ -508,6 +508,24 @@ describe( 'useUpdateBanner — Tracks (6d)', () => {
 		);
 	} );
 
+	it( 'autoDismiss() does NOT fire _dismissed but DOES dispatch dismissUpdateBanner', () => {
+		// Spec §9.2: the success-morph auto-dismiss path must NOT fire the
+		// `_dismissed` Tracks event. The store dispatch still has to fire,
+		// otherwise the banner wouldn't unmount on success morph timeout.
+		setUpMocks( { summary: summaryFixture() } );
+		const { result } = renderHook( () => useUpdateBanner() );
+		recordEventMock.mockClear();
+		dispatchMocks.dismissUpdateBanner.mockClear();
+		act( () => result.current.autoDismiss() );
+		expect( recordEventMock ).not.toHaveBeenCalledWith(
+			'woocommerce_block_email_update_dismissed',
+			expect.anything()
+		);
+		expect( dispatchMocks.dismissUpdateBanner ).toHaveBeenCalledWith(
+			42
+		);
+	} );
+
 	it( '_applied fires on apply success with shared payload + applied_from + auto_resolved + had_customizations', async () => {
 		setUpMocks( { summary: summaryFixture() } );
 		const { result } = renderHook( () => useUpdateBanner() );

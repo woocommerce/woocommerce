@@ -38,6 +38,7 @@ interface BannerOverrides {
 	onApply?: jest.Mock;
 	onReview?: jest.Mock;
 	onDismiss?: jest.Mock;
+	onAutoDismiss?: jest.Mock;
 	onToggleExpanded?: jest.Mock;
 }
 
@@ -45,6 +46,7 @@ function renderBanner( overrides: BannerOverrides = {} ) {
 	const onApply = overrides.onApply ?? jest.fn();
 	const onReview = overrides.onReview ?? jest.fn();
 	const onDismiss = overrides.onDismiss ?? jest.fn();
+	const onAutoDismiss = overrides.onAutoDismiss ?? jest.fn();
 	const onToggleExpanded = overrides.onToggleExpanded ?? jest.fn();
 
 	const result = render(
@@ -64,11 +66,19 @@ function renderBanner( overrides: BannerOverrides = {} ) {
 			onApply={ onApply }
 			onReview={ onReview }
 			onDismiss={ onDismiss }
+			onAutoDismiss={ onAutoDismiss }
 			onToggleExpanded={ onToggleExpanded }
 		/>
 	);
 
-	return { ...result, onApply, onReview, onDismiss, onToggleExpanded };
+	return {
+		...result,
+		onApply,
+		onReview,
+		onDismiss,
+		onAutoDismiss,
+		onToggleExpanded,
+	};
 }
 
 describe( 'UpdateBanner', () => {
@@ -202,10 +212,11 @@ describe( 'UpdateBanner', () => {
 		expect( dismissButton ).toBeDisabled();
 	} );
 
-	it( 'renders the success morph and auto-dismisses after 2s', () => {
+	it( 'renders the success morph and auto-dismisses after 2s via onAutoDismiss', () => {
 		jest.useFakeTimers();
 		const onDismiss = jest.fn();
-		renderBanner( { applyState: 'applied', onDismiss } );
+		const onAutoDismiss = jest.fn();
+		renderBanner( { applyState: 'applied', onDismiss, onAutoDismiss } );
 
 		expect( screen.getByText( 'Template updated' ) ).toBeInTheDocument();
 		expect(
@@ -215,7 +226,25 @@ describe( 'UpdateBanner', () => {
 		act( () => {
 			jest.advanceTimersByTime( 2000 );
 		} );
-		expect( onDismiss ).toHaveBeenCalledTimes( 1 );
+		// Spec §9.2: success auto-dismiss does NOT fire `_dismissed`. The
+		// banner routes through the no-event path so the hook can skip
+		// `recordEvent`.
+		expect( onAutoDismiss ).toHaveBeenCalledTimes( 1 );
+		expect( onDismiss ).not.toHaveBeenCalled();
+	} );
+
+	it( 'success-state × button routes to onAutoDismiss, not onDismiss', () => {
+		const onDismiss = jest.fn();
+		const onAutoDismiss = jest.fn();
+		renderBanner( { applyState: 'applied', onDismiss, onAutoDismiss } );
+
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: /dismiss for this session/i,
+			} )
+		);
+		expect( onAutoDismiss ).toHaveBeenCalledTimes( 1 );
+		expect( onDismiss ).not.toHaveBeenCalled();
 	} );
 
 	it( 'renders the failure morph with role=alert and does not auto-dismiss', () => {
@@ -255,7 +284,8 @@ describe( 'UpdateBanner', () => {
 		const onApply = jest.fn();
 		const onReview = jest.fn();
 		const onDismiss = jest.fn();
-		renderBanner( { onApply, onReview, onDismiss } );
+		const onAutoDismiss = jest.fn();
+		renderBanner( { onApply, onReview, onDismiss, onAutoDismiss } );
 
 		fireEvent.click( screen.getByRole( 'button', { name: /^apply$/i } ) );
 		fireEvent.click( screen.getByRole( 'button', { name: /^review$/i } ) );
@@ -267,6 +297,23 @@ describe( 'UpdateBanner', () => {
 
 		expect( onApply ).toHaveBeenCalledTimes( 1 );
 		expect( onReview ).toHaveBeenCalledTimes( 1 );
+		// Default-state × routes to onDismiss (the user-initiated path that
+		// fires the `_dismissed` Tracks event in the hook).
 		expect( onDismiss ).toHaveBeenCalledTimes( 1 );
+		expect( onAutoDismiss ).not.toHaveBeenCalled();
+	} );
+
+	it( 'failure-state × routes to onDismiss (Tracks event fires)', () => {
+		const onDismiss = jest.fn();
+		const onAutoDismiss = jest.fn();
+		renderBanner( { applyState: 'failed', onDismiss, onAutoDismiss } );
+
+		fireEvent.click(
+			screen.getByRole( 'button', {
+				name: /dismiss for this session/i,
+			} )
+		);
+		expect( onDismiss ).toHaveBeenCalledTimes( 1 );
+		expect( onAutoDismiss ).not.toHaveBeenCalled();
 	} );
 } );

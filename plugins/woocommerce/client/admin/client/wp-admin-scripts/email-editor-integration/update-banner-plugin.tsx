@@ -79,6 +79,7 @@ export function UpdateBannerPlugin(): JSX.Element | null {
 			onApply={ banner.apply }
 			onReview={ banner.openReview }
 			onDismiss={ banner.dismiss }
+			onAutoDismiss={ banner.autoDismiss }
 			onToggleExpanded={ banner.toggleExpanded }
 		/>,
 		portalTarget

@@ -35,7 +35,19 @@ interface UpdateBannerProps {
 	expanded: boolean;
 	onApply: () => void;
 	onReview: () => void;
+	/**
+	 * User-initiated dismiss (× click in the default or failure morph).
+	 * The hook fires the `_dismissed` Tracks event from this path —
+	 * spec §9.2 scopes the event to the user-initiated paths only.
+	 */
 	onDismiss: () => void;
+	/**
+	 * Non-user dismiss path used by the success morph: both the 2s
+	 * auto-dismiss timer and the success-morph × click route here so
+	 * the `_dismissed` Tracks event does NOT fire (per spec §9.2 —
+	 * "does NOT fire on auto-dismiss after success").
+	 */
+	onAutoDismiss: () => void;
 	onToggleExpanded: () => void;
 }
 
@@ -137,22 +149,23 @@ export function UpdateBanner( {
 	onApply,
 	onReview,
 	onDismiss,
+	onAutoDismiss,
 	onToggleExpanded,
 }: UpdateBannerProps ): JSX.Element {
 	// ---- Success morph ---------------------------------------------------
 	// Schedule the auto-dismiss timer once the morph mounts; clean it up
-	// on unmount or if `onDismiss` changes mid-lifecycle.
+	// on unmount or if `onAutoDismiss` changes mid-lifecycle.
 	useEffect( () => {
 		if ( applyState !== 'applied' ) {
 			return;
 		}
 		const handle = setTimeout( () => {
-			onDismiss();
+			onAutoDismiss();
 		}, SUCCESS_AUTODISMISS_MS );
 		return () => {
 			clearTimeout( handle );
 		};
-	}, [ applyState, onDismiss ] );
+	}, [ applyState, onAutoDismiss ] );
 
 	if ( applyState === 'applied' ) {
 		return (
@@ -179,7 +192,7 @@ export function UpdateBanner( {
 						'Dismiss for this session',
 						'woocommerce'
 					) }
-					onClick={ onDismiss }
+					onClick={ onAutoDismiss }
 				>
 					{ '×' }
 				</button>

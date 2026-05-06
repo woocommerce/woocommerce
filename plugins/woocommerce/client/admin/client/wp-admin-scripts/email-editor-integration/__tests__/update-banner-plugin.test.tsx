@@ -35,6 +35,7 @@ const baseHookReturn = {
 	apply: jest.fn(),
 	openReview: jest.fn(),
 	dismiss: jest.fn(),
+	autoDismiss: jest.fn(),
 };
 
 describe( 'UpdateBannerPlugin', () => {

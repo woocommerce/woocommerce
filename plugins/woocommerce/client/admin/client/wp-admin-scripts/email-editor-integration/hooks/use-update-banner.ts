@@ -129,7 +129,18 @@ interface UseUpdateBannerResult {
 	toggleExpanded: () => void;
 	apply: () => Promise< void >;
 	openReview: () => void;
+	/**
+	 * User-initiated dismiss. Removes the banner for this session and
+	 * fires the `_dismissed` Tracks event (spec §9.2).
+	 */
 	dismiss: () => void;
+	/**
+	 * Non-user dismiss path used by the success morph (auto-dismiss timer
+	 * and the success-state × click). Removes the banner without firing
+	 * the `_dismissed` Tracks event — spec §9.2 explicitly excludes the
+	 * post-success unmount from the dismissed-event surface.
+	 */
+	autoDismiss: () => void;
 }
 
 /**
@@ -414,6 +425,16 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 		);
 	}, [ postId, sharedPayload, dismissUpdateBanner ] );
 
+	// Auto-dismiss path — used by the success morph (timer + ×). Mirrors
+	// `dismiss` minus the Tracks event; spec §9.2 excludes the success
+	// auto-dismiss from the `_dismissed` event surface.
+	const autoDismiss = useCallback( () => {
+		if ( postId === null ) {
+			return;
+		}
+		dismissUpdateBanner( postId );
+	}, [ postId, dismissUpdateBanner ] );
+
 	return {
 		shouldRender: finalShouldRender,
 		summary,
@@ -429,5 +450,6 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 		apply,
 		openReview,
 		dismiss,
+		autoDismiss,
 	};
 }
