@@ -157,6 +157,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'readonly', $meta['annotations'] );
 			$this->assertArrayHasKey( 'destructive', $meta['annotations'] );
 			$this->assertArrayHasKey( 'idempotent', $meta['annotations'] );
+			$this->assertArrayNotHasKey( 'expose_in_deprecated_woocommerce_mcp', $meta );
 		}
 	}
 
@@ -185,6 +186,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				);
 			}
 		}
+	}
+
+	/**
+	 * @testdox Should advertise every product status that mutation responses can return.
+	 */
+	public function test_product_output_schema_allows_mutation_statuses(): void {
+		$output_schema = wp_get_ability( 'woocommerce/product-create' )->get_output_schema();
+		$status_enum   = $output_schema['properties']['product']['properties']['status']['enum'] ?? array();
+
+		$this->assertContains( 'auto-draft', $status_enum );
+		$this->assertContains( 'trash', $status_enum );
+		$this->assertContains( 'publish', $status_enum );
 	}
 
 	/**

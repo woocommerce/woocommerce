@@ -193,7 +193,7 @@ trait ProductAbilityTrait {
 				),
 				'status'            => array(
 					'type' => 'string',
-					'enum' => self::get_product_query_status_slugs(),
+					'enum' => self::get_product_mutation_status_slugs(),
 				),
 				'sku'               => array( 'type' => 'string' ),
 				'currency'          => array( 'type' => 'string' ),
