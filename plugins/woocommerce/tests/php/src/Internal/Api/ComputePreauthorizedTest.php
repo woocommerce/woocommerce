@@ -31,11 +31,17 @@ use WC_Unit_Test_Case;
  * the resolver context.
  */
 class ComputePreauthorizedTest extends WC_Unit_Test_Case {
+	/**
+	 * Set up.
+	 */
 	public function setUp(): void {
 		parent::setUp();
 		wp_set_current_user( 0 );
 	}
 
+	/**
+	 * Tear down.
+	 */
 	public function tearDown(): void {
 		wp_set_current_user( 0 );
 		parent::tearDown();
@@ -80,8 +86,9 @@ class ComputePreauthorizedTest extends WC_Unit_Test_Case {
 	 */
 	public function test_autogen_helper_ands_merged_caps(): void {
 		// The MergedCapsQuery requires manage_options AND edit_posts.
+		// `editor` has edit_posts but not manage_options.
 		$admin      = $this->principal_with_role( 'administrator' );
-		$editor     = $this->principal_with_role( 'editor' ); // edit_posts but not manage_options.
+		$editor     = $this->principal_with_role( 'editor' );
 		$subscriber = $this->principal_with_role( 'subscriber' );
 
 		$this->assertTrue( MergedCapsResolver::compute_preauthorized( $admin ) );
