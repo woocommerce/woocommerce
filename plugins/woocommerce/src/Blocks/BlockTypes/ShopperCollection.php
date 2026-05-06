@@ -134,7 +134,7 @@ final class ShopperCollection extends AbstractBlock {
 			$this->render_template_markup( $variation ),
 			$this->render_items_markup( $items, $variation ),
 			$this->render_empty_markup( $is_empty, $variation ),
-			$this->render_error_markup( $variation )
+			$this->render_error_markup()
 		);
 	}
 
@@ -159,7 +159,6 @@ final class ShopperCollection extends AbstractBlock {
 			'saved-for-later' => array(
 				'modifierSlug'          => 'saved-for-later',
 				'emptyMessage'          => __( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
-				'errorMessage'          => __( 'Something went wrong — please try again.', 'woocommerce' ),
 				'removeButtonLabel'     => __( 'Remove', 'woocommerce' ),
 				/* translators: %s: product name. */
 				'removeLabelTemplate'   => __( 'Remove %s from saved items', 'woocommerce' ),
@@ -453,16 +452,22 @@ final class ShopperCollection extends AbstractBlock {
 
 	/**
 	 * Render the error-state markup. Hidden on initial paint and toggled on
-	 * by the JS-side `state.hasError` getter when a request fails.
+	 * by the JS-side `state.hasError` getter when a request fails. The text
+	 * content is left empty here on purpose: errors only happen post-hydration,
+	 * and `data-wp-text="state.errorMessage"` writes the actual server-supplied
+	 * message — surfacing that is more useful than a generic fallback.
 	 *
-	 * @param array<string, mixed> $variation Per-list-type rendering config.
+	 * TODO: replace this in-list error row with a `store-notices` notice
+	 * rendered above the list. Mini-cart's pattern (cart.ts → showNoticeError →
+	 * `@woocommerce/stores/store-notices`) is the right reference: dispatch
+	 * the server message there from the JS catch blocks in shopper-lists.ts
+	 * instead of holding it on `list.error`. That gives users a dismissible,
+	 * stylistically-aligned notice rather than a row tucked into the grid.
+	 *
 	 * @return string
 	 */
-	private function render_error_markup( array $variation ): string {
-		return sprintf(
-			'<li class="wc-block-shopper-collection__error" role="alert" data-wp-bind--hidden="!state.hasError" data-wp-text="state.errorMessage" hidden>%s</li>',
-			esc_html( $variation['errorMessage'] )
-		);
+	private function render_error_markup(): string {
+		return '<li class="wc-block-shopper-collection__error" role="alert" data-wp-bind--hidden="!state.hasError" data-wp-text="state.errorMessage" hidden></li>';
 	}
 
 	/**
