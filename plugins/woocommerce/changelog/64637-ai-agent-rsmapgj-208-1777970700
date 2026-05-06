@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure Store API product filtering recognises taxonomies registered for multiple object types (e.g. both `product` and `product-variation`).
