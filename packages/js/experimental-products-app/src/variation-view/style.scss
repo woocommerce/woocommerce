@@ -1,4 +1,24 @@
+@import "@wordpress/dataviews/build-style/style.css";
+
+// overflow: hidden on .panel-wrap creates a scroll container that prevents
+// position: sticky on .dataviews-footer from working relative to the viewport.
+// overflow: clip preserves the float-clearfix BFC without creating a scroll
+// container, so the footer can stick to the browser bottom.
+#woocommerce-product-data .panel-wrap:has(#woocommerce-variations-classic-root) {
+	overflow: clip;
+}
+
 .woocommerce-variation-view {
+	// DataViews is designed for a constrained editor viewport. Override to let
+	// the table grow to its natural height in the traditional metabox document flow.
+	.dataviews-wrapper {
+		height: auto;
+	}
+
+	.dataviews-layout__container {
+		overflow: visible;
+	}
+
 	&__toolbar {
 		padding: var(--wpds-dimension-padding-lg, 24px);
 	}
