@@ -98,16 +98,6 @@ abstract class DomainAbility {
 	}
 
 	/**
-	 * Format a WooCommerce datetime.
-	 *
-	 * @param \WC_DateTime|null $datetime Date/time value.
-	 * @return string|null
-	 */
-	protected static function format_datetime( ?\WC_DateTime $datetime ): ?string {
-		return $datetime ? $datetime->date( DATE_ATOM ) : null;
-	}
-
-	/**
 	 * Get an ID value from ability input.
 	 *
 	 * @param mixed $input Ability input.

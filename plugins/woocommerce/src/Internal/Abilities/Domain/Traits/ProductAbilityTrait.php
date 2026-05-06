@@ -128,8 +128,8 @@ trait ProductAbilityTrait {
 			'manage_stock'   => (bool) $product->get_manage_stock(),
 			'virtual'        => (bool) $product->get_virtual(),
 			'downloadable'   => (bool) $product->get_downloadable(),
-			'date_created'   => self::format_datetime( $product->get_date_created() ),
-			'date_modified'  => self::format_datetime( $product->get_date_modified() ),
+			'date_created'   => wc_rest_prepare_date_response( $product->get_date_created(), false ),
+			'date_modified'  => wc_rest_prepare_date_response( $product->get_date_modified(), false ),
 		);
 	}
 }
