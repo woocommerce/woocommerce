@@ -35,4 +35,35 @@ class Principal {
 	public function is_authenticated(): bool {
 		return $this->user->ID > 0;
 	}
+
+	/**
+	 * Whether this principal may run GraphQL schema introspection on the endpoint.
+	 *
+	 * Implementing `can_introspect()` is opt-in for plugin principal classes,
+	 * a principal that doesn't define it is denied by default. Plugins building
+	 * authenticated endpoints should make an explicit decision per principal
+	 * model rather than inheriting an introspection policy by accident.
+	 */
+	public function can_introspect(): bool {
+		return user_can( $this->user, 'manage_woocommerce' );
+	}
+
+	/**
+	 * Whether this principal may activate GraphQL debug mode on the endpoint.
+	 *
+	 * Implementing `can_use_debug_mode()` is opt-in for plugin principal classes,
+	 * a principal that doesn't define it is denied by default. Plugins building
+	 * authenticated endpoints should make an explicit decision per principal
+	 * model rather than inheriting a debug mode policy by accident.
+	 *
+	 * Note that this method's outcome is necessary but not sufficient for debug
+	 * mode to be active: the controller also requires either `WP_DEBUG` to be
+	 * defined and true, or the request to carry `_debug=1`. There's also a
+	 * developer escape hatch that bypasses this method entirely — when the
+	 * controller's `is_local_environment()` check is true, debug mode is
+	 * available without consulting the principal.
+	 */
+	public function can_use_debug_mode(): bool {
+		return user_can( $this->user, 'manage_options' );
+	}
 }

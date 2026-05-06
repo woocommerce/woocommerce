@@ -188,15 +188,24 @@ abstract class GraphQLController {
 	/**
 	 * Handle an incoming GraphQL request.
 	 *
+	 * Resolves the principal first so debug-mode / introspection checks can
+	 * consult it from inside both `process_request()` and the top-level
+	 * exception formatter. When `resolve_request_principal()` itself throws
+	 * (e.g. an InvalidTokenException from a plugin's PrincipalResolver),
+	 * `$principal` stays null and the resulting error response carries no
+	 * debug info — by design, since the caller failed to authenticate.
+	 *
 	 * @param \WP_REST_Request $request The REST request.
 	 */
 	public function handle_request( \WP_REST_Request $request ): \WP_REST_Response {
+		$principal = null;
 		try {
-			return $this->process_request( $request );
+			$principal = $this->resolve_request_principal( $request );
+			return $this->process_request( $request, $principal );
 		} catch ( \Throwable $e ) {
 			$output = array(
 				'errors' => array(
-					$this->format_exception( $e, $request ),
+					$this->format_exception( $e, $request, $principal ),
 				),
 			);
 
@@ -209,16 +218,10 @@ abstract class GraphQLController {
 	 * Process the GraphQL request. Extracted so that handle_request() can
 	 * wrap everything in a single try/catch that respects debug mode.
 	 *
-	 * @param \WP_REST_Request $request The REST request.
+	 * @param \WP_REST_Request $request   The REST request.
+	 * @param object           $principal The principal resolved by handle_request(); never null when this is reached.
 	 */
-	private function process_request( \WP_REST_Request $request ): \WP_REST_Response {
-		// 1. Resolve the request principal. Eager: a PrincipalResolver throwing
-		// ApiException (e.g. INVALID_TOKEN) bubbles to handle_request()'s
-		// try/catch and fails the whole request with a single coded error
-		// before any resolver runs. Null = anonymous; resolvers see this via
-		// the `principal` key on the GraphQL context value.
-		$principal = $this->resolve_request_principal( $request );
-
+	private function process_request( \WP_REST_Request $request, object $principal ): \WP_REST_Response {
 		// 2. Parse request. GET query-string `variables` and `extensions`
 		// arrive as JSON strings; decode_json_param() unifies them with the
 		// already-decoded-array path from POST bodies and rejects malformed
@@ -261,7 +264,7 @@ abstract class GraphQLController {
 		$validation_rules   = array_values( DocumentValidator::allRules() );
 		$validation_rules[] = new QueryDepthRule( self::get_max_query_depth() );
 		$validation_rules[] = $complexity_rule;
-		if ( ! $this->is_introspection_allowed( $request ) ) {
+		if ( ! $this->is_introspection_allowed( $principal, $request ) ) {
 			$validation_rules[] = new DisableIntrospection( DisableIntrospection::ENABLED );
 		}
 
@@ -296,7 +299,7 @@ abstract class GraphQLController {
 		// chain so wrapped errors (e.g. a \ValueError caught by a resolver and
 		// re-thrown as INTERNAL_ERROR) stay visible to the developer instead
 		// of being masked behind the generic "Internal server error" message.
-		$debug_mode = $this->is_debug_mode( $request );
+		$debug_mode = $this->is_debug_mode( $principal, $request );
 		$result->setErrorFormatter(
 			function ( \Throwable $error ) use ( $debug_mode ): array {
 				$formatted = \Automattic\WooCommerce\Vendor\GraphQL\Error\FormattedError::createFromException( $error );
@@ -335,12 +338,12 @@ abstract class GraphQLController {
 			}
 		);
 
-		$debug_flags = $this->get_debug_flags( $request );
+		$debug_flags = $this->get_debug_flags( $request, $principal );
 		$output      = $result->toArray( $debug_flags );
 
 		// 8. Debug-mode metrics: expose the computed complexity and depth so
 		// clients tuning queries can see what the server scored the request at.
-		if ( $this->is_debug_mode( $request ) ) {
+		if ( $this->is_debug_mode( $principal, $request ) ) {
 			if ( ! isset( $output['extensions'] ) ) {
 				$output['extensions'] = array();
 			}
@@ -520,12 +523,13 @@ abstract class GraphQLController {
 	}
 
 	/**
-	 * Determine debug flags based on WP_DEBUG, user role, and query string.
+	 * Determine debug flags based on WP_DEBUG, principal, and query string.
 	 *
-	 * @param \WP_REST_Request $request The REST request.
+	 * @param \WP_REST_Request $request   The REST request.
+	 * @param ?object          $principal The resolved principal, or null if resolution itself failed.
 	 */
-	private function get_debug_flags( \WP_REST_Request $request ): int {
-		if ( ! $this->is_debug_mode( $request ) ) {
+	private function get_debug_flags( \WP_REST_Request $request, ?object $principal ): int {
+		if ( ! $this->is_debug_mode( $principal, $request ) ) {
 			return DebugFlag::NONE;
 		}
 		return DebugFlag::INCLUDE_DEBUG_MESSAGE | DebugFlag::INCLUDE_TRACE;
@@ -536,32 +540,43 @@ abstract class GraphQLController {
 	 *
 	 * Introspection is permitted if either condition holds:
 	 * - The request is in debug mode ({@see self::is_debug_mode()}).
-	 * - The caller has the `manage_woocommerce` capability.
+	 * - The principal opts in via a `can_introspect(): bool` method.
 	 *
-	 * Gating on capability rather than mere authentication keeps the full
-	 * schema (including admin-only mutations) hidden from low-privilege
-	 * roles such as `customer`, which every storefront account is assigned
-	 * at checkout — while still allowing admin tooling (e.g. GraphiQL-like
-	 * explorers) to query it.
-	 *
-	 * @param \WP_REST_Request $request The REST request.
+	 * @param ?object          $principal The resolved principal, or null if resolution failed.
+	 * @param \WP_REST_Request $request   The REST request.
 	 */
-	private function is_introspection_allowed( \WP_REST_Request $request ): bool {
-		return $this->is_debug_mode( $request ) || current_user_can( 'manage_woocommerce' );
+	private function is_introspection_allowed( ?object $principal, \WP_REST_Request $request ): bool {
+		if ( $this->is_debug_mode( $principal, $request ) ) {
+			return true;
+		}
+		return null !== $principal
+			&& method_exists( $principal, 'can_introspect' )
+			&& $principal->can_introspect();
 	}
 
 	/**
 	 * Check if debug mode is active.
 	 *
-	 * Debug mode is active when either:
-	 * - WP_DEBUG is enabled AND the current user is an administrator (or in a local environment).
-	 * - The current user is an administrator (or in a local environment) AND `_debug=1` is in the query string.
+	 * Debug mode is active when both:
+	 * - The principal can use it (opted in via `can_use_debug_mode(): bool`,
+	 *   or a local environment is detected — the developer escape hatch).
+	 * - WP_DEBUG is enabled OR `_debug=1` is set on the request.
 	 *
-	 * @param \WP_REST_Request $request The REST request.
+	 * The principal-method check follows the same opt-in convention as
+	 * {@see self::is_introspection_allowed()} — plugin principals must
+	 * declare `can_use_debug_mode()` to grant access; absence denies.
+	 *
+	 * @param ?object          $principal The resolved principal, or null if resolution failed.
+	 * @param \WP_REST_Request $request   The REST request.
 	 */
-	private function is_debug_mode( \WP_REST_Request $request ): bool {
-		if ( ! $this->is_local_environment() && ! current_user_can( 'manage_options' ) ) {
-			return false;
+	private function is_debug_mode( ?object $principal, \WP_REST_Request $request ): bool {
+		if ( ! $this->is_local_environment() ) {
+			$allowed = null !== $principal
+				&& method_exists( $principal, 'can_use_debug_mode' )
+				&& $principal->can_use_debug_mode();
+			if ( ! $allowed ) {
+				return false;
+			}
 		}
 
 		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
@@ -574,10 +589,11 @@ abstract class GraphQLController {
 	/**
 	 * Format a caught exception into a GraphQL error array.
 	 *
-	 * @param \Throwable       $e       The caught exception.
-	 * @param \WP_REST_Request $request The REST request.
+	 * @param \Throwable       $e         The caught exception.
+	 * @param \WP_REST_Request $request   The REST request.
+	 * @param ?object          $principal The resolved principal, or null when the exception came from principal resolution itself.
 	 */
-	private function format_exception( \Throwable $e, \WP_REST_Request $request ): array {
+	private function format_exception( \Throwable $e, \WP_REST_Request $request, ?object $principal ): array {
 		if ( $e instanceof ApiException ) {
 			// Caller-supplied extensions come first so the canonical
 			// getErrorCode() can't be silently overridden by an extensions
@@ -602,7 +618,7 @@ abstract class GraphQLController {
 			);
 		}
 
-		if ( $this->is_debug_mode( $request ) ) {
+		if ( $this->is_debug_mode( $principal, $request ) ) {
 			$error['extensions']['debug'] = array(
 				'message' => $e->getMessage(),
 				'file'    => $e->getFile(),
