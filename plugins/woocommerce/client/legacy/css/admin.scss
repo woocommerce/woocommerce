@@ -9616,13 +9616,13 @@ body.woocommerce-settings-payments-section_legacy {
 	background-color: #fff;
 	display: inline-block;
 	vertical-align: middle;
-	vertical-align: center;
 	border: 1px solid #7e8993;
 	border-radius: 2px;
 	margin-right: 0.5em;
 	height: 1em;
 	width: 1em;
 	position: relative;
+	top: -1px;
 
 	&.is-empty::before {
 		content: '';
