@@ -149,16 +149,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should register canonical abilities with MCP metadata for the upstream adapter.
 	 */
 	public function test_canonical_abilities_register_with_mcp_metadata(): void {
-		$expected_operations = array(
-			'woocommerce/products-query'      => 'query',
-			'woocommerce/product-create'      => 'create',
-			'woocommerce/product-update'      => 'update',
-			'woocommerce/product-delete'      => 'delete',
-			'woocommerce/orders-query'        => 'query',
-			'woocommerce/order-update-status' => 'update-status',
-			'woocommerce/order-add-note'      => 'add-note',
-		);
-
 		foreach ( $this->registered_ability_ids as $ability_id ) {
 			$ability = wp_get_ability( $ability_id );
 
@@ -167,8 +157,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 			$meta = $ability->get_meta();
 			$this->assertTrue( $meta['show_in_rest'] );
-			$this->assertSame( 'domain-api', $meta['woocommerce_ability_source'] );
-			$this->assertSame( $expected_operations[ $ability_id ], $meta['woocommerce_ability_operation'] );
 			$this->assertTrue( $meta['mcp']['public'] );
 			$this->assertSame( 'tool', $meta['mcp']['type'] );
 			$this->assertArrayHasKey( 'readonly', $meta['annotations'] );

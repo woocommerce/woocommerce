@@ -48,7 +48,7 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_entity_output_schema( 'product' ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_update_product' ),
-			'meta'                => self::get_domain_meta( 'update', false, false, true ),
+			'meta'                => self::get_domain_meta( false, false, true ),
 		);
 	}
 

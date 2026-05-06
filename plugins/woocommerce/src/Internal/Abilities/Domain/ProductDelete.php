@@ -48,7 +48,7 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_delete_output_schema(),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_delete_product' ),
-			'meta'                => self::get_domain_meta( 'delete', false, false, true ),
+			'meta'                => self::get_domain_meta( false, false, true ),
 		);
 	}
 

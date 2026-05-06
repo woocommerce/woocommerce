@@ -48,7 +48,7 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_entity_output_schema( 'order' ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
-			'meta'                => self::get_domain_meta( 'update-status', false, false, true ),
+			'meta'                => self::get_domain_meta( false, false, true ),
 		);
 	}
 

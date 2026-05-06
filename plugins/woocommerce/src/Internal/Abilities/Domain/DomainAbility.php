@@ -17,29 +17,19 @@ abstract class DomainAbility {
 	/**
 	 * Get common domain metadata.
 	 *
-	 * @param string $operation   Operation group.
 	 * @param bool   $is_readonly Whether the ability is readonly.
 	 * @param bool   $idempotent  Whether the ability is idempotent.
 	 * @param bool   $destructive Whether the ability can mutate data.
 	 * @return array
 	 */
-	protected static function get_domain_meta( string $operation, bool $is_readonly, bool $idempotent, bool $destructive ): array {
+	protected static function get_domain_meta( bool $is_readonly, bool $idempotent, bool $destructive ): array {
 		return array(
-			'show_in_rest'                  => true,
-			'mcp'                           => array(
+			'show_in_rest' => true,
+			'mcp'          => array(
 				'public' => true,
 				'type'   => 'tool',
 			),
-
-			/*
-			 * These WooCommerce-specific meta values are intentionally separate from
-			 * MCP annotations. They identify this as a purpose-built WooCommerce
-			 * domain ability and preserve the coarse business operation for future
-			 * auditing, grouping, and filtering across mixed ability sources.
-			 */
-			'woocommerce_ability_source'    => 'domain-api',
-			'woocommerce_ability_operation' => $operation,
-			'annotations'                   => array(
+			'annotations'  => array(
 				'readonly'    => $is_readonly,
 				'idempotent'  => $idempotent,
 				'destructive' => $destructive,

@@ -48,7 +48,7 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_collection_output_schema( 'orders' ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_orders' ),
-			'meta'                => self::get_domain_meta( 'query', true, true, false ),
+			'meta'                => self::get_domain_meta( true, true, false ),
 		);
 	}
 

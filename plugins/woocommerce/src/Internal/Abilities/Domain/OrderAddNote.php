@@ -48,7 +48,7 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_order_note_output_schema(),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
-			'meta'                => self::get_domain_meta( 'add-note', false, false, false ),
+			'meta'                => self::get_domain_meta( false, false, false ),
 		);
 	}
 

@@ -48,7 +48,7 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_collection_output_schema( 'products' ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_query_products' ),
-			'meta'                => self::get_domain_meta( 'query', true, true, false ),
+			'meta'                => self::get_domain_meta( true, true, false ),
 		);
 	}
 

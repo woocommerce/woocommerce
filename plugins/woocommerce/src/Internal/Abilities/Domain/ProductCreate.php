@@ -48,7 +48,7 @@ class ProductCreate extends DomainAbility implements AbilityDefinition {
 			'output_schema'       => self::get_entity_output_schema( 'product' ),
 			'execute_callback'    => array( __CLASS__, 'execute' ),
 			'permission_callback' => array( __CLASS__, 'can_create_product' ),
-			'meta'                => self::get_domain_meta( 'create', false, false, false ),
+			'meta'                => self::get_domain_meta( false, false, false ),
 		);
 	}
 
