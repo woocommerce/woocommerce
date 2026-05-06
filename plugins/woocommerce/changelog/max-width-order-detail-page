@@ -1,4 +1,4 @@
-Significance: patch
-Type: tweak
+Significance: minor
+Type: add
 
-Cap the admin Order edit screen at 1200px max-width and center it on wide displays.
+Add the `order-detail-redesign` feature flag (default off). When enabled, caps the admin Order edit screen at 1200px on wide displays.
