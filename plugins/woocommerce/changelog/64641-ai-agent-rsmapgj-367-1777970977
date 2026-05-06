@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow float values for order line item quantity in the v3 REST API to match core behavior and the GET order response.
