@@ -54,6 +54,8 @@ export interface ChangeSummaryStructuralChange {
 export interface ChangeSummary {
 	version_from: string;
 	version_to: string;
+	/** sha1 of the canonical core content; consumed by RSM-145 Tracks instrumentation. */
+	source_hash_to: string;
 	added_blocks: ChangeSummaryBlockEntry[];
 	removed_blocks: ChangeSummaryBlockEntry[];
 	copy_changes: ChangeSummaryCopyChange[];
