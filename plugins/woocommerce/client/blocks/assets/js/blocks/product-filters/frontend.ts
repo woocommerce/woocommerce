@@ -260,20 +260,14 @@ const productFiltersStore = {
 			if ( ! el.ref ) return;
 
 			const style = el.ref.style;
-			if (
-				style.getPropertyValue(
-					'--wc-product-filters-background-color'
-				) &&
-				style.getPropertyValue( '--wc-product-filters-text-color' )
-			) {
-				return;
-			}
+			const hasBg = style.getPropertyValue(
+				'--wc-product-filters-background-color'
+			);
+			const hasFg = style.getPropertyValue(
+				'--wc-product-filters-text-color'
+			);
 
-			if (
-				! style.getPropertyValue(
-					'--wc-product-filters-background-color'
-				)
-			) {
+			if ( ! hasBg ) {
 				const bg = getClosestColor( el.ref, 'backgroundColor' );
 				if ( bg ) {
 					style.setProperty(
@@ -282,9 +276,7 @@ const productFiltersStore = {
 					);
 				}
 			}
-			if (
-				! style.getPropertyValue( '--wc-product-filters-text-color' )
-			) {
+			if ( ! hasFg ) {
 				const fg = getClosestColor( el.ref, 'color' );
 				if ( fg ) {
 					style.setProperty( '--wc-product-filters-text-color', fg );
