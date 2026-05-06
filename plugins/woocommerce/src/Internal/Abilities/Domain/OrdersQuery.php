@@ -16,31 +16,39 @@ defined( 'ABSPATH' ) || exit;
  */
 class OrdersQuery extends DomainAbility implements AbilityDefinition {
 
+	use OrderAbilityTrait;
+
 	/**
-	 * Register the ability.
+	 * Get the ability name.
+	 *
+	 * @return string
 	 *
 	 * @since 10.9.0
 	 */
-	public static function register(): void {
-		if ( self::has_ability( 'woocommerce/orders-query' ) ) {
-			return;
-		}
+	public static function get_name(): string {
+		return 'woocommerce/orders-query';
+	}
 
-		wp_register_ability(
-			'woocommerce/orders-query',
-			array(
-				'label'               => __( 'Query Orders', 'woocommerce' ),
-				'description'         => __(
-					'Find WooCommerce orders by ID or common order filters using WooCommerce order APIs.',
-					'woocommerce'
-				),
-				'category'            => 'woocommerce',
-				'input_schema'        => self::get_input_schema(),
-				'output_schema'       => self::get_collection_output_schema( 'orders' ),
-				'execute_callback'    => array( __CLASS__, 'execute' ),
-				'permission_callback' => array( __CLASS__, 'can_query_orders' ),
-				'meta'                => self::get_domain_meta( 'query', true, true, false ),
-			)
+	/**
+	 * Get the ability registration arguments.
+	 *
+	 * @return array
+	 *
+	 * @since 10.9.0
+	 */
+	public static function get_args(): array {
+		return array(
+			'label'               => __( 'Query Orders', 'woocommerce' ),
+			'description'         => __(
+				'Find WooCommerce orders by ID or common order filters using WooCommerce order APIs.',
+				'woocommerce'
+			),
+			'category'            => 'woocommerce',
+			'input_schema'        => self::get_input_schema(),
+			'output_schema'       => self::get_collection_output_schema( 'orders' ),
+			'execute_callback'    => array( __CLASS__, 'execute' ),
+			'permission_callback' => array( __CLASS__, 'can_query_orders' ),
+			'meta'                => self::get_domain_meta( 'query', true, true, false ),
 		);
 	}
 

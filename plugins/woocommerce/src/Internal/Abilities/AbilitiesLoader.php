@@ -80,7 +80,17 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			$class_name::register();
+			$ability_name = $class_name::get_name();
+
+			if ( '' === $ability_name ) {
+				continue;
+			}
+
+			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_name ) ) {
+				continue;
+			}
+
+			wp_register_ability( $ability_name, $class_name::get_args() );
 		}
 	}
 
@@ -96,8 +106,9 @@ class AbilitiesLoader {
 		 * Filter WooCommerce ability definition classes.
 		 *
 		 * Extensions can append autoloadable classes that implement
-		 * {@see AbilityDefinition}. The loader will call each class'
-		 * static register() method on the Abilities API init hook.
+		 * {@see AbilityDefinition}. The loader will call get_name() and
+		 * get_args() on each definition class and register the ability on the
+		 * Abilities API init hook.
 		 *
 		 * @since 10.9.0
 		 *

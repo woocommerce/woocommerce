@@ -16,31 +16,39 @@ defined( 'ABSPATH' ) || exit;
  */
 class ProductsQuery extends DomainAbility implements AbilityDefinition {
 
+	use ProductAbilityTrait;
+
 	/**
-	 * Register the ability.
+	 * Get the ability name.
+	 *
+	 * @return string
 	 *
 	 * @since 10.9.0
 	 */
-	public static function register(): void {
-		if ( self::has_ability( 'woocommerce/products-query' ) ) {
-			return;
-		}
+	public static function get_name(): string {
+		return 'woocommerce/products-query';
+	}
 
-		wp_register_ability(
-			'woocommerce/products-query',
-			array(
-				'label'               => __( 'Query Products', 'woocommerce' ),
-				'description'         => __(
-					'Find WooCommerce products by ID or common catalog filters using WooCommerce product APIs.',
-					'woocommerce'
-				),
-				'category'            => 'woocommerce',
-				'input_schema'        => self::get_input_schema(),
-				'output_schema'       => self::get_collection_output_schema( 'products' ),
-				'execute_callback'    => array( __CLASS__, 'execute' ),
-				'permission_callback' => array( __CLASS__, 'can_query_products' ),
-				'meta'                => self::get_domain_meta( 'query', true, true, false ),
-			)
+	/**
+	 * Get the ability registration arguments.
+	 *
+	 * @return array
+	 *
+	 * @since 10.9.0
+	 */
+	public static function get_args(): array {
+		return array(
+			'label'               => __( 'Query Products', 'woocommerce' ),
+			'description'         => __(
+				'Find WooCommerce products by ID or common catalog filters using WooCommerce product APIs.',
+				'woocommerce'
+			),
+			'category'            => 'woocommerce',
+			'input_schema'        => self::get_input_schema(),
+			'output_schema'       => self::get_collection_output_schema( 'products' ),
+			'execute_callback'    => array( __CLASS__, 'execute' ),
+			'permission_callback' => array( __CLASS__, 'can_query_products' ),
+			'meta'                => self::get_domain_meta( 'query', true, true, false ),
 		);
 	}
 

@@ -16,31 +16,39 @@ defined( 'ABSPATH' ) || exit;
  */
 class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 
+	use OrderAbilityTrait;
+
 	/**
-	 * Register the ability.
+	 * Get the ability name.
+	 *
+	 * @return string
 	 *
 	 * @since 10.9.0
 	 */
-	public static function register(): void {
-		if ( self::has_ability( 'woocommerce/order-update-status' ) ) {
-			return;
-		}
+	public static function get_name(): string {
+		return 'woocommerce/order-update-status';
+	}
 
-		wp_register_ability(
-			'woocommerce/order-update-status',
-			array(
-				'label'               => __( 'Update Order Status', 'woocommerce' ),
-				'description'         => __(
-					'Update a WooCommerce order status using WooCommerce order APIs.',
-					'woocommerce'
-				),
-				'category'            => 'woocommerce',
-				'input_schema'        => self::get_input_schema(),
-				'output_schema'       => self::get_entity_output_schema( 'order' ),
-				'execute_callback'    => array( __CLASS__, 'execute' ),
-				'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
-				'meta'                => self::get_domain_meta( 'update-status', false, false, true ),
-			)
+	/**
+	 * Get the ability registration arguments.
+	 *
+	 * @return array
+	 *
+	 * @since 10.9.0
+	 */
+	public static function get_args(): array {
+		return array(
+			'label'               => __( 'Update Order Status', 'woocommerce' ),
+			'description'         => __(
+				'Update a WooCommerce order status using WooCommerce order APIs.',
+				'woocommerce'
+			),
+			'category'            => 'woocommerce',
+			'input_schema'        => self::get_input_schema(),
+			'output_schema'       => self::get_entity_output_schema( 'order' ),
+			'execute_callback'    => array( __CLASS__, 'execute' ),
+			'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
+			'meta'                => self::get_domain_meta( 'update-status', false, false, true ),
 		);
 	}
 

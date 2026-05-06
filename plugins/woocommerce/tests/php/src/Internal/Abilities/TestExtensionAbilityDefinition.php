@@ -17,40 +17,44 @@ class TestExtensionAbilityDefinition implements AbilityDefinition {
 	public const ABILITY_ID = 'woocommerce/test-extension-ability';
 
 	/**
-	 * Register the test extension ability.
+	 * Get the ability name.
+	 *
+	 * @return string
 	 */
-	public static function register(): void {
-		if ( function_exists( 'wp_has_ability' ) && wp_has_ability( self::ABILITY_ID ) ) {
-			return;
-		}
+	public static function get_name(): string {
+		return self::ABILITY_ID;
+	}
 
-		wp_register_ability(
-			self::ABILITY_ID,
-			array(
-				'label'               => 'Test Extension Ability',
-				'description'         => 'Test extension ability registered through the WooCommerce ability loader.',
-				'category'            => 'woocommerce',
-				'execute_callback'    => static function (): array {
-					return array(
-						'ok' => true,
-					);
-				},
-				'output_schema'       => array(
-					'type'                 => 'object',
-					'properties'           => array(
-						'ok' => array( 'type' => 'boolean' ),
-					),
-					'additionalProperties' => false,
+	/**
+	 * Get the ability registration arguments.
+	 *
+	 * @return array
+	 */
+	public static function get_args(): array {
+		return array(
+			'label'               => 'Test Extension Ability',
+			'description'         => 'Test extension ability registered through the WooCommerce ability loader.',
+			'category'            => 'woocommerce',
+			'execute_callback'    => static function (): array {
+				return array(
+					'ok' => true,
+				);
+			},
+			'output_schema'       => array(
+				'type'                 => 'object',
+				'properties'           => array(
+					'ok' => array( 'type' => 'boolean' ),
 				),
-				'permission_callback' => '__return_true',
-				'meta'                => array(
-					'show_in_rest' => true,
-					'mcp'          => array(
-						'public' => true,
-						'type'   => 'tool',
-					),
+				'additionalProperties' => false,
+			),
+			'permission_callback' => '__return_true',
+			'meta'                => array(
+				'show_in_rest' => true,
+				'mcp'          => array(
+					'public' => true,
+					'type'   => 'tool',
 				),
-			)
+			),
 		);
 	}
 }

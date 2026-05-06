@@ -16,31 +16,39 @@ defined( 'ABSPATH' ) || exit;
  */
 class ProductDelete extends DomainAbility implements AbilityDefinition {
 
+	use ProductAbilityTrait;
+
 	/**
-	 * Register the ability.
+	 * Get the ability name.
+	 *
+	 * @return string
 	 *
 	 * @since 10.9.0
 	 */
-	public static function register(): void {
-		if ( self::has_ability( 'woocommerce/product-delete' ) ) {
-			return;
-		}
+	public static function get_name(): string {
+		return 'woocommerce/product-delete';
+	}
 
-		wp_register_ability(
-			'woocommerce/product-delete',
-			array(
-				'label'               => __( 'Delete Product', 'woocommerce' ),
-				'description'         => __(
-					'Delete a WooCommerce product using WooCommerce product APIs.',
-					'woocommerce'
-				),
-				'category'            => 'woocommerce',
-				'input_schema'        => self::get_input_schema(),
-				'output_schema'       => self::get_delete_output_schema(),
-				'execute_callback'    => array( __CLASS__, 'execute' ),
-				'permission_callback' => array( __CLASS__, 'can_delete_product' ),
-				'meta'                => self::get_domain_meta( 'delete', false, false, true ),
-			)
+	/**
+	 * Get the ability registration arguments.
+	 *
+	 * @return array
+	 *
+	 * @since 10.9.0
+	 */
+	public static function get_args(): array {
+		return array(
+			'label'               => __( 'Delete Product', 'woocommerce' ),
+			'description'         => __(
+				'Delete a WooCommerce product using WooCommerce product APIs.',
+				'woocommerce'
+			),
+			'category'            => 'woocommerce',
+			'input_schema'        => self::get_input_schema(),
+			'output_schema'       => self::get_delete_output_schema(),
+			'execute_callback'    => array( __CLASS__, 'execute' ),
+			'permission_callback' => array( __CLASS__, 'can_delete_product' ),
+			'meta'                => self::get_domain_meta( 'delete', false, false, true ),
 		);
 	}
 

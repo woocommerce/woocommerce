@@ -16,31 +16,39 @@ defined( 'ABSPATH' ) || exit;
  */
 class OrderAddNote extends DomainAbility implements AbilityDefinition {
 
+	use OrderAbilityTrait;
+
 	/**
-	 * Register the ability.
+	 * Get the ability name.
+	 *
+	 * @return string
 	 *
 	 * @since 10.9.0
 	 */
-	public static function register(): void {
-		if ( self::has_ability( 'woocommerce/order-add-note' ) ) {
-			return;
-		}
+	public static function get_name(): string {
+		return 'woocommerce/order-add-note';
+	}
 
-		wp_register_ability(
-			'woocommerce/order-add-note',
-			array(
-				'label'               => __( 'Add Order Note', 'woocommerce' ),
-				'description'         => __(
-					'Add a note to a WooCommerce order using WooCommerce order APIs.',
-					'woocommerce'
-				),
-				'category'            => 'woocommerce',
-				'input_schema'        => self::get_input_schema(),
-				'output_schema'       => self::get_order_note_output_schema(),
-				'execute_callback'    => array( __CLASS__, 'execute' ),
-				'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
-				'meta'                => self::get_domain_meta( 'add-note', false, false, false ),
-			)
+	/**
+	 * Get the ability registration arguments.
+	 *
+	 * @return array
+	 *
+	 * @since 10.9.0
+	 */
+	public static function get_args(): array {
+		return array(
+			'label'               => __( 'Add Order Note', 'woocommerce' ),
+			'description'         => __(
+				'Add a note to a WooCommerce order using WooCommerce order APIs.',
+				'woocommerce'
+			),
+			'category'            => 'woocommerce',
+			'input_schema'        => self::get_input_schema(),
+			'output_schema'       => self::get_order_note_output_schema(),
+			'execute_callback'    => array( __CLASS__, 'execute' ),
+			'permission_callback' => array( __CLASS__, 'can_manage_orders' ),
+			'meta'                => self::get_domain_meta( 'add-note', false, false, false ),
 		);
 	}
 

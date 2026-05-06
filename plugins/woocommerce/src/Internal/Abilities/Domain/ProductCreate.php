@@ -16,31 +16,39 @@ defined( 'ABSPATH' ) || exit;
  */
 class ProductCreate extends DomainAbility implements AbilityDefinition {
 
+	use ProductAbilityTrait;
+
 	/**
-	 * Register the ability.
+	 * Get the ability name.
+	 *
+	 * @return string
 	 *
 	 * @since 10.9.0
 	 */
-	public static function register(): void {
-		if ( self::has_ability( 'woocommerce/product-create' ) ) {
-			return;
-		}
+	public static function get_name(): string {
+		return 'woocommerce/product-create';
+	}
 
-		wp_register_ability(
-			'woocommerce/product-create',
-			array(
-				'label'               => __( 'Create Product', 'woocommerce' ),
-				'description'         => __(
-					'Create a WooCommerce product using WooCommerce product APIs.',
-					'woocommerce'
-				),
-				'category'            => 'woocommerce',
-				'input_schema'        => self::get_input_schema(),
-				'output_schema'       => self::get_entity_output_schema( 'product' ),
-				'execute_callback'    => array( __CLASS__, 'execute' ),
-				'permission_callback' => array( __CLASS__, 'can_create_product' ),
-				'meta'                => self::get_domain_meta( 'create', false, false, false ),
-			)
+	/**
+	 * Get the ability registration arguments.
+	 *
+	 * @return array
+	 *
+	 * @since 10.9.0
+	 */
+	public static function get_args(): array {
+		return array(
+			'label'               => __( 'Create Product', 'woocommerce' ),
+			'description'         => __(
+				'Create a WooCommerce product using WooCommerce product APIs.',
+				'woocommerce'
+			),
+			'category'            => 'woocommerce',
+			'input_schema'        => self::get_input_schema(),
+			'output_schema'       => self::get_entity_output_schema( 'product' ),
+			'execute_callback'    => array( __CLASS__, 'execute' ),
+			'permission_callback' => array( __CLASS__, 'can_create_product' ),
+			'meta'                => self::get_domain_meta( 'create', false, false, false ),
 		);
 	}
 

@@ -15,9 +15,20 @@ defined( 'ABSPATH' ) || exit;
 interface AbilityDefinition {
 
 	/**
-	 * Register the ability with the WordPress Abilities API.
+	 * Get the ability name.
+	 *
+	 * @return string
 	 *
 	 * @since 10.9.0
 	 */
-	public static function register(): void;
+	public static function get_name(): string;
+
+	/**
+	 * Get the arguments used to register the ability with the WordPress Abilities API.
+	 *
+	 * @return array
+	 *
+	 * @since 10.9.0
+	 */
+	public static function get_args(): array;
 }
