@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Customers analytics screen failing to render when a customer record contains a country value that collides with an Array index or property name.
