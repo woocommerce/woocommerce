@@ -27,7 +27,7 @@
 	&:hover {
 		background-color: color-mix(
 			in srgb,
-			var(--wp--preset--color--contrast) 10%,
+			var(--wp--preset--color--contrast, currentColor) 10%,
 			transparent
 		);
 	}
@@ -44,6 +44,9 @@
 }
 
 .wc-block-product-filter-chips__item[aria-checked="true"] {
+	background: var(--wp--preset--color--contrast, currentColor);
+	color: var(--wp--preset--color--base, Canvas);
+	border-color: var(--wp--preset--color--contrast, currentColor);
 
 	.has-selected-chip-text-color & {
 		color: var(--wc-product-filter-chips-selected-text);
@@ -53,6 +56,15 @@
 	}
 	.has-selected-chip-border-color & {
 		border-color: var(--wc-product-filter-chips-selected-border);
+	}
+}
+
+.wc-block-product-filter-chips__item:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+
+	&:hover {
+		background: transparent;
 	}
 }
 
@@ -67,15 +79,22 @@
 }
 
 .wc-block-product-filter-chips__count {
-	display: contents;
 	white-space: nowrap;
 }
 
 .wc-block-product-filter-chips__show-more {
-	text-decoration: underline;
 	appearance: none;
-	font-family: inherit;
 	background: transparent;
-	border: none;
+	border: 0;
 	padding: 0;
+	font: inherit;
+	font-size: 0.875em;
+	color: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+
+	&:hover,
+	&:focus {
+		text-decoration: none;
+	}
 }

@@ -564,6 +564,18 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'dual_code_graphql_api'              => array(
+				'name'                         => __( 'Dual Code & GraphQL API', 'woocommerce' ),
+				'description'                  => __(
+					'Experimental code-first API for WooCommerce with automatic GraphQL endpoint generation. Requires PHP 8.1 or later.',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => true,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			PushNotifications::FEATURE_NAME      => array(
 				'name'                         => __( 'Push Notifications', 'woocommerce' ),
 				'description'                  => __(

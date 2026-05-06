@@ -110,6 +110,7 @@ type MiniCart = {
 		contentsBackgroundColor: string;
 		badgeBackgroundColor: string | undefined;
 		badgeTextColor: string | undefined;
+		productCountColor: string;
 	};
 	actions: {
 		openDrawer: () => void;
@@ -287,6 +288,9 @@ store< MiniCart >(
 
 			get badgeBackgroundColor(): string | undefined {
 				if ( state.isHydrated ) {
+					if ( state.productCountColor ) {
+						return state.productCountColor;
+					}
 					const { ref } = getElement();
 					return getClosestColor( ref!, 'color' ) || '#000';
 				}

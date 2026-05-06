@@ -55,14 +55,14 @@ const productFilterPriceSliderStore = {
 		},
 		debounceSetMinPrice: debounceWithScope(
 			( e: HTMLElementEvent< HTMLInputElement > ) => {
-				actions.setMinPrice( e );
+				actions.setMin( e );
 				actions.navigate();
 			},
 			1000
 		),
 		debounceSetMaxPrice: debounceWithScope(
 			( e: HTMLElementEvent< HTMLInputElement > ) => {
-				actions.setMaxPrice( e );
+				actions.setMax( e );
 				actions.navigate();
 			},
 			1000
