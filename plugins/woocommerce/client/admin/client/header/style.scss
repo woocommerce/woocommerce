@@ -30,7 +30,6 @@ $wp-admin-border: #dcdcde; // wp-admin chrome border colour
 // than display:none) keeps the elements in the layout tree so wp-admin's
 // jQuery delegated click handlers still fire when we proxy .click() into
 // #show-settings-link / #contextual-help-link.
-//
 // Defensive guard: only hide when the floating header's meta-icon button
 // has actually rendered (`:has(.woocommerce-layout__header-meta-icon)`).
 // If hasScreenOptions / hasContextualHelp detection misses for any reason,
