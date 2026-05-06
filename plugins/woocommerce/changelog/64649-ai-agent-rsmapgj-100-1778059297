@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Guard `mb_list_encodings()` call in product CSV import form with `function_exists()` to prevent fatal error on servers without mbstring.
