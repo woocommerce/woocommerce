@@ -107,7 +107,7 @@ class ProductFilters extends AbstractBlock {
 			'data-wp-init--colors'             => 'callbacks.initColors',
 			'data-wp-watch--scrolling'         => 'callbacks.scrollLimit',
 			'data-wp-on--keyup'                => 'actions.closeOverlayOnEscape',
-			'data-wp-context'                  => wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
+			'data-wp-context'                  => (string) wp_json_encode( $interactivity_context, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP ),
 			'data-wp-class--is-overlay-opened' => 'context.isOverlayOpened',
 			'style'                            => $this->get_css_variables( $attributes ),
 		);
@@ -211,7 +211,7 @@ class ProductFilters extends AbstractBlock {
 			$styles[] = sprintf( '--wc-product-filter-block-spacing: %s', StyleAttributesUtils::get_spacing_value( $block_gap ) );
 		}
 
-		return implode( ';', $styles );
+		return $styles ? implode( ';', $styles ) . ';' : '';
 	}
 
 	/**

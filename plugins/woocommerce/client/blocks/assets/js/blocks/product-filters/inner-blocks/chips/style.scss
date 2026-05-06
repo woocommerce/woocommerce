@@ -35,7 +35,7 @@
 	}
 }
 
-:where(.wc-block-product-filter-chips__item)[aria-checked="true"] {
+.wc-block-product-filter-chips__item[aria-checked="true"] {
 	background: var(--wc-product-filters-text-color, CanvasText);
 	color: var(--wc-product-filters-background-color, Canvas);
 	border-color: var(--wc-product-filters-text-color, CanvasText);
