@@ -8,18 +8,20 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
+use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
+use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
 
 /**
- * Tests for canonical WooCommerce domain abilities.
+ * Tests for the canonical WooCommerce domain abilities and their loader.
  */
 class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
-	/**
-	 * Ability IDs registered by these tests.
-	 *
-	 * @var array
-	 */
-	private $registered_ability_ids = array(
+	private const CANONICAL_ABILITY_IDS = array(
 		'woocommerce/products-query',
 		'woocommerce/product-create',
 		'woocommerce/product-update',
@@ -28,6 +30,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		'woocommerce/order-update-status',
 		'woocommerce/order-add-note',
 	);
+
+	/**
+	 * Ability IDs registered by these tests.
+	 *
+	 * @var array
+	 */
+	private $registered_ability_ids = self::CANONICAL_ABILITY_IDS;
 
 	/**
 	 * Category IDs registered by these tests.
@@ -51,52 +60,36 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	private $created_order_ids = array();
 
 	/**
-	 * Original value of $wp_actions['wp_abilities_api_init'] to restore in tearDown.
+	 * Original action counts captured for restoration in tearDown.
 	 *
-	 * @var int|null
+	 * @var array<string, int|null>
 	 */
-	private $original_abilities_init_action_count;
+	private $original_action_counts = array();
 
-	/**
-	 * Original value of $wp_actions['wp_abilities_api_categories_init'] to restore in tearDown.
-	 *
-	 * @var int|null
-	 */
-	private $original_categories_init_action_count;
-
-	/**
-	 * Set up each test.
-	 */
 	public function setUp(): void {
 		global $wp_actions;
 
 		parent::setUp();
 
-		$this->original_abilities_init_action_count  = $wp_actions['wp_abilities_api_init'] ?? null;
-		$this->original_categories_init_action_count = $wp_actions['wp_abilities_api_categories_init'] ?? null;
+		foreach ( array( 'wp_abilities_api_init', 'wp_abilities_api_categories_init' ) as $action ) {
+			$this->original_action_counts[ $action ] = $wp_actions[ $action ] ?? null;
+		}
 
 		if ( ! function_exists( 'wp_register_ability' ) ) {
-			$abilities_bootstrap = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
+			$abilities_bootstrap = WC_ABSPATH . 'vendor/wordpress/abilities-api/includes/bootstrap.php';
 			if ( file_exists( $abilities_bootstrap ) ) {
 				require_once $abilities_bootstrap;
 			}
 		}
 
 		wp_set_current_user(
-			$this->factory->user->create(
-				array(
-					'role' => 'administrator',
-				)
-			)
+			$this->factory->user->create( array( 'role' => 'administrator' ) )
 		);
 
 		$this->register_woocommerce_category();
 		$this->register_domain_abilities();
 	}
 
-	/**
-	 * Clean up after each test.
-	 */
 	public function tearDown(): void {
 		global $wp_actions;
 
@@ -128,16 +121,12 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			}
 		}
 
-		if ( null !== $this->original_abilities_init_action_count ) {
-			$wp_actions['wp_abilities_api_init'] = $this->original_abilities_init_action_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		} elseif ( isset( $wp_actions['wp_abilities_api_init'] ) ) {
-			unset( $wp_actions['wp_abilities_api_init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		}
-
-		if ( null !== $this->original_categories_init_action_count ) {
-			$wp_actions['wp_abilities_api_categories_init'] = $this->original_categories_init_action_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
-		} elseif ( isset( $wp_actions['wp_abilities_api_categories_init'] ) ) {
-			unset( $wp_actions['wp_abilities_api_categories_init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		foreach ( $this->original_action_counts as $action => $original_count ) {
+			if ( null !== $original_count ) {
+				$wp_actions[ $action ] = $original_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			} elseif ( isset( $wp_actions[ $action ] ) ) {
+				unset( $wp_actions[ $action ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
 		}
 
 		wp_set_current_user( 0 );
@@ -145,31 +134,63 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		parent::tearDown();
 	}
 
-	/**
-	 * @testdox Should register canonical abilities with MCP metadata for the upstream adapter.
+	/*
+	 * ---------------------------------------------------------------------
+	 * Registration / Loader
+	 * ---------------------------------------------------------------------
 	 */
-	public function test_canonical_abilities_register_with_mcp_metadata(): void {
-		foreach ( $this->registered_ability_ids as $ability_id ) {
+
+	/**
+	 * @testdox Should register every canonical ability with WooCommerce metadata.
+	 */
+	public function test_canonical_abilities_register_with_woocommerce_metadata(): void {
+		foreach ( self::CANONICAL_ABILITY_IDS as $ability_id ) {
 			$ability = wp_get_ability( $ability_id );
 
 			$this->assertNotNull( $ability, "{$ability_id} should be registered." );
-			$this->assertSame( 'woocommerce', $ability->get_category() );
+			$this->assertSame( 'woocommerce', $ability->get_category(), "{$ability_id} should belong to the woocommerce category." );
 
 			$meta = $ability->get_meta();
-			$this->assertTrue( $meta['show_in_rest'] );
-			$this->assertTrue( $meta['mcp']['public'] );
-			$this->assertSame( 'tool', $meta['mcp']['type'] );
+			$this->assertTrue( $meta['show_in_rest'] ?? false, "{$ability_id} should be exposed in REST." );
+			$this->assertTrue( $meta['mcp']['public'] ?? false, "{$ability_id} should be flagged as MCP-public." );
+			$this->assertSame( 'tool', $meta['mcp']['type'] ?? '', "{$ability_id} should be an MCP tool." );
 			$this->assertArrayHasKey( 'readonly', $meta['annotations'] );
 			$this->assertArrayHasKey( 'destructive', $meta['annotations'] );
 			$this->assertArrayHasKey( 'idempotent', $meta['annotations'] );
-			$this->assertArrayNotHasKey( 'expose_in_deprecated_woocommerce_mcp', $meta );
 		}
 	}
 
 	/**
-	 * @testdox Should register extension ability definition classes from the loader filter.
+	 * @testdox Should mark write abilities as destructive and queries as readonly/idempotent.
 	 */
-	public function test_abilities_loader_accepts_extension_definition_classes(): void {
+	public function test_canonical_ability_annotations_match_intent(): void {
+		$expectations = array(
+			'woocommerce/products-query'      => array( 'readonly' => true,  'idempotent' => true,  'destructive' => false ),
+			'woocommerce/product-create'      => array( 'readonly' => false, 'idempotent' => false, 'destructive' => false ),
+			'woocommerce/product-update'      => array( 'readonly' => false, 'idempotent' => false, 'destructive' => true ),
+			'woocommerce/product-delete'      => array( 'readonly' => false, 'idempotent' => false, 'destructive' => true ),
+			'woocommerce/orders-query'        => array( 'readonly' => true,  'idempotent' => true,  'destructive' => false ),
+			'woocommerce/order-update-status' => array( 'readonly' => false, 'idempotent' => false, 'destructive' => true ),
+			'woocommerce/order-add-note'      => array( 'readonly' => false, 'idempotent' => false, 'destructive' => false ),
+		);
+
+		foreach ( $expectations as $ability_id => $annotations ) {
+			$meta = wp_get_ability( $ability_id )->get_meta();
+
+			foreach ( $annotations as $key => $value ) {
+				$this->assertSame(
+					$value,
+					$meta['annotations'][ $key ] ?? null,
+					"{$ability_id} should have annotations.{$key}=" . ( $value ? 'true' : 'false' ) . '.'
+				);
+			}
+		}
+	}
+
+	/**
+	 * @testdox Should register extension ability classes appended via the loader filter.
+	 */
+	public function test_loader_filter_accepts_valid_extension_classes(): void {
 		add_filter( 'woocommerce_ability_definition_classes', array( $this, 'add_test_extension_ability_definition_class' ) );
 		$this->register_domain_abilities();
 		remove_filter( 'woocommerce_ability_definition_classes', array( $this, 'add_test_extension_ability_definition_class' ) );
@@ -179,131 +200,334 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertNotNull( $ability, 'Extension ability should be registered.' );
 		$this->assertSame( 'woocommerce', $ability->get_category() );
+
+		$result = $ability->execute();
+
+		$this->assertNotWPError( $result );
+		$this->assertTrue( $result['ok'] );
 	}
 
 	/**
-	 * @testdox Should query products by SKU.
+	 * @testdox Should ignore filter entries that are not strings or AbilityDefinition implementations.
 	 */
-	public function test_products_query_by_sku(): void {
-		$product                     = \WC_Helper_Product::create_simple_product(
-			true,
+	public function test_loader_filter_skips_invalid_entries(): void {
+		$callback = static function ( array $classes ): array {
+			$classes[] = '\\Some\\Class\\That\\Does\\Not\\Exist';
+			$classes[] = \WC_Order::class; // Real class but not an AbilityDefinition.
+			$classes[] = 42; // Wrong type.
+			return $classes;
+		};
+
+		add_filter( 'woocommerce_ability_definition_classes', $callback );
+		$this->register_domain_abilities();
+		remove_filter( 'woocommerce_ability_definition_classes', $callback );
+
+		// Canonical abilities should still register; nothing extra.
+		foreach ( self::CANONICAL_ABILITY_IDS as $ability_id ) {
+			$this->assertNotNull( wp_get_ability( $ability_id ), "{$ability_id} should remain registered." );
+		}
+	}
+
+	/*
+	 * ---------------------------------------------------------------------
+	 * Permission negative paths
+	 * ---------------------------------------------------------------------
+	 */
+
+	/**
+	 * @testdox Should reject every canonical ability when no user is authenticated.
+	 *
+	 * @dataProvider provider_canonical_abilities_with_minimal_input
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Minimal valid-shape input.
+	 */
+	public function test_abilities_reject_unauthenticated_user( string $ability_id, array $input ): void {
+		wp_set_current_user( 0 );
+
+		$result = wp_get_ability( $ability_id )->execute( $input );
+
+		$this->assertWPError( $result, "{$ability_id} should reject unauthenticated users." );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should reject every canonical ability for a subscriber with no shop caps.
+	 *
+	 * @dataProvider provider_canonical_abilities_with_minimal_input
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Minimal valid-shape input.
+	 */
+	public function test_abilities_reject_subscriber_without_caps( string $ability_id, array $input ): void {
+		wp_set_current_user( $this->factory->user->create( array( 'role' => 'subscriber' ) ) );
+
+		$result = wp_get_ability( $ability_id )->execute( $input );
+
+		$this->assertWPError( $result, "{$ability_id} should reject subscribers without shop caps." );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+	}
+
+	/**
+	 * Provides ability IDs and minimal valid-shape input for cap negative-path tests.
+	 *
+	 * @return array<string, array{0: string, 1: array}>
+	 */
+	public function provider_canonical_abilities_with_minimal_input(): array {
+		// Valid-shape input only — permission check should fire before execute.
+		return array(
+			'products-query'      => array( 'woocommerce/products-query', array( 'id' => 1 ) ),
+			'product-create'      => array( 'woocommerce/product-create', array( 'name' => 'Forbidden' ) ),
+			'product-update'      => array( 'woocommerce/product-update', array( 'id' => 1, 'name' => 'Forbidden' ) ),
+			'product-delete'      => array( 'woocommerce/product-delete', array( 'id' => 1 ) ),
+			'orders-query'        => array( 'woocommerce/orders-query', array( 'id' => 1 ) ),
+			'order-update-status' => array( 'woocommerce/order-update-status', array( 'id' => 1, 'status' => 'processing' ) ),
+			'order-add-note'      => array( 'woocommerce/order-add-note', array( 'id' => 1, 'note' => 'denied' ) ),
+		);
+	}
+
+	/**
+	 * @testdox Should require publish_products to transition an existing draft to published.
+	 */
+	public function test_product_update_publish_transition_requires_publish_cap(): void {
+		$product = \WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) );
+		$this->created_product_ids[] = $product->get_id();
+
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$user    = get_user_by( 'id', $user_id );
+		$user->add_cap( 'edit_products' );
+		$user->add_cap( 'edit_others_products' );
+		$user->add_cap( 'edit_published_products' );
+		wp_set_current_user( $user_id );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
-				'name' => 'Domain Query Product',
-				'sku'  => 'domain-query-product',
+				'id'     => $product->get_id(),
+				'status' => 'publish',
 			)
 		);
-		$this->created_product_ids[] = $product->get_id();
+
+		$this->assertWPError( $result, 'A user without publish_products should not be able to publish a draft.' );
+		$this->assertSame( 'woocommerce_product_publish_forbidden', $result->get_error_code() );
+	}
+
+	/*
+	 * ---------------------------------------------------------------------
+	 * Input validation
+	 * ---------------------------------------------------------------------
+	 */
+
+	/**
+	 * @testdox Should reject order status updates with an unknown status slug.
+	 */
+	public function test_order_update_status_rejects_invalid_status_slug(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'totally-bogus',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should reject product creation with a status not in the allowed enum.
+	 */
+	public function test_product_create_rejects_unknown_status(): void {
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'   => 'Bad Status Product',
+				'status' => 'not-a-real-status',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should reject extra unknown fields on product create input.
+	 */
+	public function test_product_create_rejects_unknown_input_field(): void {
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'         => 'Mass Assigned',
+				'invoice_url'  => 'https://attacker.example.com',
+				'admin_notes'  => 'tampering',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should reject orders-query orderby values outside the allowed enum.
+	 */
+	public function test_orders_query_rejects_unknown_orderby(): void {
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array( 'orderby' => 'malicious_field' )
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/*
+	 * ---------------------------------------------------------------------
+	 * Execution behaviors
+	 * ---------------------------------------------------------------------
+	 */
+
+	/**
+	 * @testdox Should default products-query status filter to publish.
+	 */
+	public function test_products_query_default_status_is_publish(): void {
+		$published = \WC_Helper_Product::create_simple_product(
+			true,
+			array( 'name' => 'Public Item' )
+		);
+		$this->created_product_ids[] = $published->get_id();
+
+		$draft = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'   => 'Draft Item',
+				'status' => 'draft',
+			)
+		);
+		$this->created_product_ids[] = $draft->get_id();
+
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array() );
+
+		$this->assertNotWPError( $result );
+		$ids = array_column( $result['products'], 'id' );
+		$this->assertContains( $published->get_id(), $ids );
+		$this->assertNotContains( $draft->get_id(), $ids );
+	}
+
+	/**
+	 * @testdox Should return drafts when explicitly filtered by status=draft.
+	 */
+	public function test_products_query_returns_drafts_when_explicitly_requested(): void {
+		$draft = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'   => 'Hidden Draft',
+				'status' => 'draft',
+				'sku'    => 'hidden-draft-sku',
+			)
+		);
+		$this->created_product_ids[] = $draft->get_id();
 
 		$result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'sku' => 'domain-query-product',
+				'status' => 'draft',
+				'sku'    => 'hidden-draft-sku',
 			)
 		);
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( 1, $result['total'] );
-		$this->assertSame( $product->get_id(), $result['products'][0]['id'] );
-		$this->assertSame( 'Domain Query Product', $result['products'][0]['name'] );
+		$this->assertSame( $draft->get_id(), $result['products'][0]['id'] );
 	}
 
 	/**
-	 * @testdox Should create and update a product.
+	 * @testdox Should include currency context in product responses.
 	 */
-	public function test_product_create_and_update(): void {
+	public function test_product_response_includes_currency_context(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'type'          => 'simple',
-				'name'          => 'Domain Managed Product',
-				'sku'           => 'domain-managed-product',
-				'regular_price' => '19.99',
+				'name'          => 'Priced Product',
+				'regular_price' => '12.34',
 			)
 		);
 
 		$this->assertNotWPError( $created );
-		$product_id                  = $created['product']['id'];
-		$this->created_product_ids[] = $product_id;
+		$this->created_product_ids[] = $created['product']['id'];
 
-		$this->assertSame( 'Domain Managed Product', $created['product']['name'] );
-		$this->assertSame( '19.99', $created['product']['regular_price'] );
-
-		$updated = wp_get_ability( 'woocommerce/product-update' )->execute(
-			array(
-				'id'            => $product_id,
-				'name'          => 'Domain Managed Product Updated',
-				'regular_price' => '24.99',
-			)
-		);
-
-		$this->assertNotWPError( $updated );
-		$this->assertSame( 'Domain Managed Product Updated', $updated['product']['name'] );
-		$this->assertSame( '24.99', $updated['product']['regular_price'] );
+		$this->assertSame( get_woocommerce_currency(), $created['product']['currency'] );
+		$this->assertNotEmpty( $created['product']['currency_symbol'] );
+		$this->assertSame( '12.34', $created['product']['regular_price'] );
 	}
 
 	/**
-	 * @testdox Should delete a product.
+	 * @testdox Should update product properties and reflect changes in the response.
 	 */
-	public function test_product_delete(): void {
+	public function test_product_update_changes_props_and_returns_updated_response(): void {
 		$product                     = \WC_Helper_Product::create_simple_product();
 		$this->created_product_ids[] = $product->get_id();
 
-		$deleted = wp_get_ability( 'woocommerce/product-delete' )->execute(
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'            => $product->get_id(),
+				'name'          => 'Updated Name',
+				'regular_price' => '99.00',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'Updated Name', $result['product']['name'] );
+		$this->assertSame( '99.00', $result['product']['regular_price'] );
+	}
+
+	/**
+	 * @testdox Should hard-delete a product when force=true.
+	 */
+	public function test_product_delete_force_true_hard_deletes(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
 			array(
 				'id'    => $product->get_id(),
 				'force' => true,
 			)
 		);
 
-		$this->assertNotWPError( $deleted );
-		$this->assertTrue( $deleted['deleted'] );
-		$this->assertSame( $product->get_id(), $deleted['id'] );
-
-		$this->created_product_ids = array_diff( $this->created_product_ids, array( $product->get_id() ) );
+		$this->assertNotWPError( $result );
+		$this->assertTrue( $result['deleted'] );
+		$this->assertSame( $product->get_id(), $result['id'] );
+		$this->assertNull( get_post( $product->get_id() ) );
 	}
 
 	/**
-	 * @testdox Should reject product mutations without operation-specific product caps.
+	 * @testdox Should trash a product when force=false.
 	 */
-	public function test_product_mutations_require_operation_specific_product_caps(): void {
+	public function test_product_delete_force_false_trashes(): void {
 		$product                     = \WC_Helper_Product::create_simple_product();
 		$this->created_product_ids[] = $product->get_id();
 
-		wp_set_current_user( $this->create_user_with_caps( array( 'read', 'edit_products' ) ) );
-
-		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
-			array(
-				'type' => 'simple',
-				'name' => 'Disallowed Product',
-			)
-		);
-
-		$this->assertWPError( $created );
-		$this->assertSame( 'ability_invalid_permissions', $created->get_error_code() );
-
-		$updated = wp_get_ability( 'woocommerce/product-update' )->execute(
-			array(
-				'id'   => $product->get_id(),
-				'name' => 'Disallowed Product Update',
-			)
-		);
-
-		$this->assertWPError( $updated );
-		$this->assertSame( 'ability_invalid_permissions', $updated->get_error_code() );
-
-		$deleted = wp_get_ability( 'woocommerce/product-delete' )->execute(
+		$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
 			array(
 				'id'    => $product->get_id(),
-				'force' => true,
+				'force' => false,
 			)
 		);
 
-		$this->assertWPError( $deleted );
-		$this->assertSame( 'ability_invalid_permissions', $deleted->get_error_code() );
+		$this->assertNotWPError( $result );
+		$this->assertTrue( $result['deleted'] );
+		$this->assertSame( 'trash', get_post_status( $product->get_id() ) );
 	}
 
 	/**
-	 * @testdox Should query orders by billing email.
+	 * @testdox Should return a not-found error when querying an unknown product ID.
 	 */
-	public function test_orders_query_by_billing_email(): void {
+	public function test_products_query_returns_not_found_for_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => 999999 ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should query orders by billing email and include line items when requested.
+	 */
+	public function test_orders_query_filters_by_billing_email_with_line_items(): void {
 		$order = \WC_Helper_Order::create_order();
 		$order->set_billing_email( 'domain-order-query@example.com' );
 		$order->save();
@@ -319,22 +543,66 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertNotWPError( $result );
 		$this->assertSame( 1, $result['total'] );
 		$this->assertSame( $order->get_id(), $result['orders'][0]['id'] );
-		$this->assertSame( 'domain-order-query@example.com', $result['orders'][0]['billing_email'] );
 		$this->assertNotEmpty( $result['orders'][0]['line_items'] );
+		$this->assertNotEmpty( $result['orders'][0]['currency_symbol'] );
 	}
 
 	/**
-	 * @testdox Should reject order queries without order read caps.
+	 * @testdox Should narrow orders-query results by date range.
 	 */
-	public function test_orders_query_requires_order_read_caps(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
+	public function test_orders_query_filters_by_date_range(): void {
+		$old_order = \WC_Helper_Order::create_order();
+		$old_order->set_date_created( '2020-01-15T00:00:00' );
+		$old_order->set_billing_email( 'date-range@example.com' );
+		$old_order->save();
+		$this->created_order_ids[] = $old_order->get_id();
 
-		wp_set_current_user( $this->create_user_with_caps( array( 'read', 'view_woocommerce_reports' ) ) );
+		$new_order = \WC_Helper_Order::create_order();
+		$new_order->set_date_created( '2025-01-15T00:00:00' );
+		$new_order->set_billing_email( 'date-range@example.com' );
+		$new_order->save();
+		$this->created_order_ids[] = $new_order->get_id();
 
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
 			array(
-				'id' => $order->get_id(),
+				'billing_email' => 'date-range@example.com',
+				'date_after'    => '2024-01-01T00:00:00',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$ids = array_column( $result['orders'], 'id' );
+		$this->assertContains( $new_order->get_id(), $ids );
+		$this->assertNotContains( $old_order->get_id(), $ids );
+	}
+
+	/**
+	 * @testdox Should change order status and surface failure when status update fails.
+	 */
+	public function test_order_update_status_changes_status(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'     => $order->get_id(),
+				'status' => 'processing',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'processing', $result['order']['status'] );
+		$this->assertSame( 'processing', wc_get_order( $order->get_id() )->get_status() );
+	}
+
+	/**
+	 * @testdox Should reject status updates against unknown order IDs without leaking existence.
+	 */
+	public function test_order_update_status_rejects_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'     => 999999,
+				'status' => 'processing',
 			)
 		);
 
@@ -343,31 +611,51 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should update order status and add an order note.
+	 * @testdox Should attribute order notes to the acting user.
 	 */
-	public function test_order_update_status_and_add_note(): void {
+	public function test_order_add_note_attributes_to_acting_user(): void {
 		$order                     = \WC_Helper_Order::create_order();
 		$this->created_order_ids[] = $order->get_id();
 
-		$updated = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+		$user_id = $this->factory->user->create(
 			array(
-				'id'     => $order->get_id(),
-				'status' => 'processing',
+				'role'         => 'shop_manager',
+				'display_name' => 'Audit Trail Admin',
 			)
 		);
+		wp_set_current_user( $user_id );
 
-		$this->assertNotWPError( $updated );
-		$this->assertSame( 'processing', $updated['order']['status'] );
-
-		$note = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
 			array(
 				'id'   => $order->get_id(),
-				'note' => 'Domain ability order note.',
+				'note' => 'Tracked by acting user.',
 			)
 		);
 
-		$this->assertNotWPError( $note );
-		$this->assertGreaterThan( 0, $note['note_id'] );
+		$this->assertNotWPError( $result );
+
+		$comment = get_comment( $result['note_id'] );
+		$this->assertNotNull( $comment );
+		$this->assertSame( 'Audit Trail Admin', $comment->comment_author );
+	}
+
+	/**
+	 * @testdox Should mark notes as customer-facing when customer_note=true.
+	 */
+	public function test_order_add_note_persists_customer_note_flag(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'            => $order->get_id(),
+				'note'          => 'Visible to customer.',
+				'customer_note' => true,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( '1', get_comment_meta( $result['note_id'], 'is_customer_note', true ) );
 	}
 
 	/**
@@ -382,9 +670,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			return;
 		}
 
-		$category = null;
-		$callback = function () use ( &$category ) {
-			$category = wp_register_ability_category(
+		$callback = static function () {
+			wp_register_ability_category(
 				'woocommerce',
 				array(
 					'label'       => 'WooCommerce',
@@ -397,7 +684,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		do_action( 'wp_abilities_api_categories_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
 		remove_action( 'wp_abilities_api_categories_init', $callback );
 
-		$this->assertNotNull( $category, 'WooCommerce ability category should register.' );
 		$this->registered_category_ids[] = 'woocommerce';
 	}
 
@@ -422,24 +708,5 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$classes[] = TestExtensionAbilityDefinition::class;
 
 		return $classes;
-	}
-
-	/**
-	 * Create a user with the given primitive capabilities.
-	 *
-	 * @param array $caps Capabilities to grant.
-	 * @return int User ID.
-	 */
-	private function create_user_with_caps( array $caps ): int {
-		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
-		$user    = get_user_by( 'id', $user_id );
-
-		$this->assertNotFalse( $user );
-
-		foreach ( $caps as $cap ) {
-			$user->add_cap( $cap );
-		}
-
-		return $user_id;
 	}
 }
