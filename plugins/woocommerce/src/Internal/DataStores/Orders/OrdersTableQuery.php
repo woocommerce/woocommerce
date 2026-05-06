@@ -203,8 +203,8 @@ class OrdersTableQuery {
 		$this->args       = $args;
 		$this->query_args = $args; // Keep a copy of the original vars used to initialize the query.
 
-		// TODO: args to be implemented.
-		unset( $this->args['customer_note'], $this->args['name'] );
+		// TODO: 'name' arg (post_name equivalent) is not yet implemented for HPOS.
+		unset( $this->args['name'] );
 
 		$this->build_query();
 		if ( ! $this->maybe_override_query() ) {
@@ -1267,6 +1267,7 @@ class OrdersTableQuery {
 				'discount_tax_amount',
 				'shipping_total_amount',
 				'shipping_tax_amount',
+				'customer_note',
 			),
 			array( $this, 'arg_isset' )
 		);
@@ -1349,7 +1350,7 @@ class OrdersTableQuery {
 		$order   = $this->sanitize_order( $this->args['order'] ?? '' );
 		$orderby = $this->sanitize_order_orderby( $this->args['orderby'] ?? 'none' );
 
-		// Set orderby to an empty array by default. This will also be used if sanitize_order_orderby recieved "none".
+		// Set orderby to an empty array by default. This will also be used if sanitize_order_orderby received "none".
 		$this->orderby = array();
 
 		if ( 'include' === $orderby || 'post__in' === $orderby ) {

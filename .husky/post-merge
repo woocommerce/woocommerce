@@ -1,6 +1,3 @@
-#!/usr/bin/env bash
-. "$(dirname "$0")/_/husky.sh"
-
 # The hook documentation: https://git-scm.com/docs/githooks.html#_post_merge
 
 # Auto-switch pnpm versions when pulled changes include pnpm version change.

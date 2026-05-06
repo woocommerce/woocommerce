@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Add the logic to clear "wc_attribute_taxonomies" transient and cache when clicking on "clear transients".
