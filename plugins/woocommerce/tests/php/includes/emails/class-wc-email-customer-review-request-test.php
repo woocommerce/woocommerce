@@ -25,7 +25,35 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-review-request.php';
 
+		$this->ensure_review_order_page();
+
 		$this->sut = new WC_Email_Customer_Review_Request();
+	}
+
+	/**
+	 * Make sure the WC-managed Review Order page exists for tests that build a
+	 * URL through the endpoint. The bootstrap install seeds the page, but the
+	 * stored option can outlive the post across test runs, so re-create it
+	 * defensively if `woocommerce_review_order_page_id` doesn't resolve.
+	 */
+	private function ensure_review_order_page(): void {
+		$page_id = (int) get_option( 'woocommerce_review_order_page_id' );
+		if ( $page_id > 0 && get_post( $page_id ) instanceof \WP_Post ) {
+			return;
+		}
+
+		$new_page_id = wp_insert_post(
+			array(
+				'post_title'   => 'Review your order',
+				'post_name'    => 'review-order',
+				'post_status'  => 'publish',
+				'post_type'    => 'page',
+				'post_content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
+			)
+		);
+		if ( ! is_wp_error( $new_page_id ) && $new_page_id > 0 ) {
+			update_option( 'woocommerce_review_order_page_id', $new_page_id );
+		}
 	}
 
 	/**
