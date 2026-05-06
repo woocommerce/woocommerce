@@ -11,7 +11,7 @@ import {
 	external,
 	bell,
 	listView,
-	megaphone,
+	comment,
 } from '@wordpress/icons';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { H, Section } from '@woocommerce/components';
@@ -252,7 +252,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const feedback = {
 			name: 'feedback',
 			title: __( 'Feedback', 'woocommerce' ),
-			icon: <Icon icon={ megaphone } size={ 18 } />,
+			icon: <Icon icon={ comment } size={ 18 } />,
 			onClick: () => {
 				setCurrentTab( 'feedback' );
 				setIsPanelOpen( true );
