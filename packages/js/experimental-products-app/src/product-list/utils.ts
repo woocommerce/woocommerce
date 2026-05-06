@@ -22,8 +22,10 @@ export function getItemId( item: ProductEntityRecord ) {
 	return item.id.toString();
 }
 
-export function getProductListItemLevel( item: ProductEntityRecord ) {
-	return item.parent_id && item.parent_id > 0 ? 1 : 0;
+export function getProductListItemParentId( item: ProductEntityRecord ) {
+	return item.parent_id && item.parent_id > 0
+		? item.parent_id.toString()
+		: undefined;
 }
 
 export function sortProductsForHierarchy(

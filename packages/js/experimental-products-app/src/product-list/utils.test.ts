@@ -3,7 +3,7 @@
  */
 import type { ProductEntityRecord } from '../fields/types';
 import {
-	getProductListItemLevel,
+	getProductListItemParentId,
 	getProductsWithEmbeddedVariations,
 	sortProductsForHierarchy,
 } from './utils';
@@ -21,11 +21,16 @@ function createProduct(
 }
 
 describe( 'product list utils', () => {
-	describe( 'getProductListItemLevel', () => {
-		it( 'returns 0 for parent products and 1 for variations', () => {
-			expect( getProductListItemLevel( createProduct( 1 ) ) ).toBe( 0 );
-			expect( getProductListItemLevel( createProduct( 2, 1 ) ) ).toBe(
-				1
+	describe( 'getProductListItemParentId', () => {
+		it( 'returns the parent product id for variations', () => {
+			expect( getProductListItemParentId( createProduct( 1 ) ) ).toBe(
+				undefined
+			);
+			expect( getProductListItemParentId( createProduct( 2, 1 ) ) ).toBe(
+				'1'
+			);
+			expect( getProductListItemParentId( createProduct( 3, 0 ) ) ).toBe(
+				undefined
 			);
 		} );
 	} );

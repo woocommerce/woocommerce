@@ -28,7 +28,7 @@ describe( 'buildProductListQuery', () => {
 				page: 3,
 				order: 'asc',
 				orderby: 'title',
-				_embed: 'variations',
+				_embed: 1,
 				search_name_or_sku: 'hoodie',
 			} )
 		);

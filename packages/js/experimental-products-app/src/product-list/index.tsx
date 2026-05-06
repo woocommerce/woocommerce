@@ -31,7 +31,7 @@ import { buildProductListQuery } from './query';
 import {
 	getItemId,
 	getProductListNavigationPath,
-	getProductListItemLevel,
+	getProductListItemParentId,
 	getProductListTab,
 	getProductsWithEmbeddedVariations,
 	getSelectionFromPostId,
@@ -320,7 +320,7 @@ export default function ProductList( { className }: ProductListProps ) {
 				onChangeView={ setView }
 				onChangeSelection={ onChangeSelection }
 				getItemId={ getItemId }
-				getItemLevel={ getProductListItemLevel }
+				getItemParentId={ getProductListItemParentId }
 				selection={ selection }
 				defaultLayouts={ DEFAULT_LAYOUTS }
 				isItemClickable={ isProductEditorAccessible }
