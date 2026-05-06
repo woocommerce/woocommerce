@@ -961,9 +961,9 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		 *
 		 * @since 10.9.0
 		 *
-		 * @param bool                                                                       $should_send     Whether to send the email.
-		 * @param \WP_User                                                                   $user            The user who minted the QR token.
-		 * @param array{consumed_at: int, user_id: int, ap_uuid: string, ap_name: string, device: array<string, string>} $consumed_record The consumed record about to be emailed.
+		 * @param bool                 $should_send     Whether to send the email.
+		 * @param \WP_User             $user            The user who minted the QR token.
+		 * @param array<string, mixed> $consumed_record The consumed record about to be emailed (keys: consumed_at, user_id, ap_uuid, ap_name, device).
 		 */
 		$should_send = (bool) apply_filters(
 			'woocommerce_qr_login_should_send_signin_email',
