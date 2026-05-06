@@ -101,7 +101,9 @@ class ProductCreate extends DomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_create_product( $input = array() ): bool {
-		unset( $input ); // Cap is not object-scoped for create.
+		// Cap is not object-scoped for create.
+		unset( $input );
+
 		return wc_rest_check_post_permissions( 'product', 'create' );
 	}
 

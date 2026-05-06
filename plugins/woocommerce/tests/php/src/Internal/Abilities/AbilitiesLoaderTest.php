@@ -66,6 +66,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	private $original_action_counts = array();
 
+	/**
+	 * Set up test fixtures.
+	 */
 	public function setUp(): void {
 		global $wp_actions;
 
@@ -90,6 +93,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->register_domain_abilities();
 	}
 
+	/**
+	 * Tear down test fixtures.
+	 */
 	public function tearDown(): void {
 		global $wp_actions;
 
@@ -166,13 +172,41 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function test_canonical_ability_annotations_match_intent(): void {
 		$expectations = array(
-			'woocommerce/products-query'      => array( 'readonly' => true,  'idempotent' => true,  'destructive' => false ),
-			'woocommerce/product-create'      => array( 'readonly' => false, 'idempotent' => false, 'destructive' => false ),
-			'woocommerce/product-update'      => array( 'readonly' => false, 'idempotent' => false, 'destructive' => true ),
-			'woocommerce/product-delete'      => array( 'readonly' => false, 'idempotent' => false, 'destructive' => true ),
-			'woocommerce/orders-query'        => array( 'readonly' => true,  'idempotent' => true,  'destructive' => false ),
-			'woocommerce/order-update-status' => array( 'readonly' => false, 'idempotent' => false, 'destructive' => true ),
-			'woocommerce/order-add-note'      => array( 'readonly' => false, 'idempotent' => false, 'destructive' => false ),
+			'woocommerce/products-query'      => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/product-create'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
+			'woocommerce/product-update'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/product-delete'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/orders-query'        => array(
+				'readonly'    => true,
+				'idempotent'  => true,
+				'destructive' => false,
+			),
+			'woocommerce/order-update-status' => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => true,
+			),
+			'woocommerce/order-add-note'      => array(
+				'readonly'    => false,
+				'idempotent'  => false,
+				'destructive' => false,
+			),
 		);
 
 		foreach ( $expectations as $ability_id => $annotations ) {
@@ -256,8 +290,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_loader_filter_skips_invalid_entries(): void {
 		$callback = static function ( array $classes ): array {
 			$classes[] = '\\Some\\Class\\That\\Does\\Not\\Exist';
-			$classes[] = \WC_Order::class; // Real class but not an AbilityDefinition.
-			$classes[] = 42; // Wrong type.
+			// Real class but not an AbilityDefinition.
+			$classes[] = \WC_Order::class;
+			// Wrong type.
+			$classes[] = 42;
+
 			return $classes;
 		};
 
@@ -319,13 +356,51 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function provider_canonical_abilities_with_minimal_input(): array {
 		// Valid-shape input only — permission check should fire before execute.
 		return array(
-			'products-query'      => array( 'woocommerce/products-query', array( 'id' => 1 ) ),
-			'product-create'      => array( 'woocommerce/product-create', array( 'name' => 'Forbidden' ) ),
-			'product-update'      => array( 'woocommerce/product-update', array( 'id' => 1, 'name' => 'Forbidden' ) ),
-			'product-delete'      => array( 'woocommerce/product-delete', array( 'id' => 1 ) ),
-			'orders-query'        => array( 'woocommerce/orders-query', array( 'id' => 1 ) ),
-			'order-update-status' => array( 'woocommerce/order-update-status', array( 'id' => 1, 'status' => 'processing' ) ),
-			'order-add-note'      => array( 'woocommerce/order-add-note', array( 'id' => 1, 'note' => 'denied' ) ),
+			'products-query'      => array(
+				'woocommerce/products-query',
+				array(
+					'id' => 1,
+				),
+			),
+			'product-create'      => array(
+				'woocommerce/product-create',
+				array(
+					'name' => 'Forbidden',
+				),
+			),
+			'product-update'      => array(
+				'woocommerce/product-update',
+				array(
+					'id'   => 1,
+					'name' => 'Forbidden',
+				),
+			),
+			'product-delete'      => array(
+				'woocommerce/product-delete',
+				array(
+					'id' => 1,
+				),
+			),
+			'orders-query'        => array(
+				'woocommerce/orders-query',
+				array(
+					'id' => 1,
+				),
+			),
+			'order-update-status' => array(
+				'woocommerce/order-update-status',
+				array(
+					'id'     => 1,
+					'status' => 'processing',
+				),
+			),
+			'order-add-note'      => array(
+				'woocommerce/order-add-note',
+				array(
+					'id'   => 1,
+					'note' => 'denied',
+				),
+			),
 		);
 	}
 
@@ -333,7 +408,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should require publish_products to transition an existing draft to published.
 	 */
 	public function test_product_update_publish_transition_requires_publish_cap(): void {
-		$product = \WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) );
+		$product                     = \WC_Helper_Product::create_simple_product( true, array( 'status' => 'draft' ) );
 		$this->created_product_ids[] = $product->get_id();
 
 		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
@@ -399,9 +474,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_product_create_rejects_unknown_input_field(): void {
 		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'         => 'Mass Assigned',
-				'invoice_url'  => 'https://attacker.example.com',
-				'admin_notes'  => 'tampering',
+				'name'        => 'Mass Assigned',
+				'invoice_url' => 'https://attacker.example.com',
+				'admin_notes' => 'tampering',
 			)
 		);
 
@@ -431,13 +506,13 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should default products-query status filter to publish.
 	 */
 	public function test_products_query_default_status_is_publish(): void {
-		$published = \WC_Helper_Product::create_simple_product(
+		$published                   = \WC_Helper_Product::create_simple_product(
 			true,
 			array( 'name' => 'Public Item' )
 		);
 		$this->created_product_ids[] = $published->get_id();
 
-		$draft = \WC_Helper_Product::create_simple_product(
+		$draft                       = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'name'   => 'Draft Item',
@@ -458,7 +533,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should return drafts when explicitly filtered by status=draft.
 	 */
 	public function test_products_query_returns_drafts_when_explicitly_requested(): void {
-		$draft = \WC_Helper_Product::create_simple_product(
+		$draft                       = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
 				'name'   => 'Hidden Draft',

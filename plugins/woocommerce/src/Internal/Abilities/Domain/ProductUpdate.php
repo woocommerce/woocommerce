@@ -84,7 +84,7 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 			isset( $input['status'] )
 			&& ProductStatus::PUBLISH === $input['status']
 			&& ProductStatus::PUBLISH !== $product->get_status()
-			&& ! current_user_can( 'publish_products' )
+			&& ! self::current_user_can_publish_products()
 		) {
 			return new \WP_Error(
 				'woocommerce_product_publish_forbidden',
@@ -113,6 +113,16 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 		$product_id = self::get_id_from_input( $input );
 
 		return $product_id > 0 && wc_rest_check_post_permissions( 'product', 'edit', $product_id );
+	}
+
+	/**
+	 * Check whether the current user can publish products.
+	 *
+	 * @return bool
+	 */
+	private static function current_user_can_publish_products(): bool {
+		// phpcs:ignore WordPress.WP.Capabilities.Unknown -- WooCommerce registers the publish_products capability.
+		return current_user_can( 'publish_products' );
 	}
 
 	/**

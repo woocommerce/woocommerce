@@ -160,7 +160,10 @@ trait ProductAbilityTrait {
 			'status'            => $product->get_status(),
 			'sku'               => $product->get_sku(),
 			'currency'          => get_woocommerce_currency(),
-			'currency_symbol'   => html_entity_decode( get_woocommerce_currency_symbol() ),
+			'currency_symbol'   => html_entity_decode(
+				get_woocommerce_currency_symbol(),
+				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
+			),
 			'price'             => $product->get_price(),
 			'regular_price'     => $product->get_regular_price(),
 			'sale_price'        => $product->get_sale_price(),

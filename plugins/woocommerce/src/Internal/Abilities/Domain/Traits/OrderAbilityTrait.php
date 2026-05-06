@@ -167,7 +167,10 @@ trait OrderAbilityTrait {
 			'id'                   => $order->get_id(),
 			'status'               => $order->get_status(),
 			'currency'             => $order->get_currency(),
-			'currency_symbol'      => html_entity_decode( get_woocommerce_currency_symbol( $order->get_currency() ) ),
+			'currency_symbol'      => html_entity_decode(
+				get_woocommerce_currency_symbol( $order->get_currency() ),
+				ENT_QUOTES | ENT_SUBSTITUTE | ENT_HTML401
+			),
 			'total'                => $order->get_total(),
 			'customer_id'          => $order->get_customer_id(),
 			'billing_email'        => '' === $billing_email ? null : $billing_email,
