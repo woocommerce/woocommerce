@@ -662,34 +662,6 @@ class WC_Admin_Post_Types {
 			$this->maybe_update_cogs_value( $product, $request_data );
 		}
 
-		// Handle category changes.
-		$change_product_cat = ! empty( $request_data['change_product_cat'] ) ? absint( $request_data['change_product_cat'] ) : 0;
-		if ( $change_product_cat ) {
-			$cat_ids = isset( $request_data['product_cat_ids'] )
-				? array_map( 'absint', (array) $request_data['product_cat_ids'] )
-				: array();
-			switch ( $change_product_cat ) {
-				// Add to existing.
-				case 1:
-					if ( ! empty( $cat_ids ) ) {
-						$current_ids = $product->get_category_ids();
-						$product->set_category_ids( array_unique( array_merge( $current_ids, $cat_ids ) ) );
-					}
-					break;
-				// Remove from existing.
-				case 2:
-					if ( ! empty( $cat_ids ) ) {
-						$current_ids = $product->get_category_ids();
-						$product->set_category_ids( array_values( array_diff( $current_ids, $cat_ids ) ) );
-					}
-					break;
-				// Replace all (empty $cat_ids clears all categories).
-				case 3:
-					$product->set_category_ids( $cat_ids );
-					break;
-			}
-		}
-
 		/*
 		 * Apply replace-semantics for hierarchical taxonomy checklists rendered in
 		 * the bulk-edit row (e.g. product_cat, product_brand). WP core's bulk-edit
@@ -704,10 +676,6 @@ class WC_Admin_Post_Types {
 			foreach ( $request_data['bulk_edit_seen_taxonomy'] as $taxonomy_name => $seen_ids ) {
 				$taxonomy_name = sanitize_key( $taxonomy_name );
 				if ( ! taxonomy_exists( $taxonomy_name ) ) {
-					continue;
-				}
-				// The custom Add/Remove/Replace UI for product_cat takes precedence.
-				if ( 'product_cat' === $taxonomy_name && $change_product_cat ) {
 					continue;
 				}
 
