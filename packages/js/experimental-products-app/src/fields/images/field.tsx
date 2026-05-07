@@ -3,6 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useMemo, useCallback, useState } from '@wordpress/element';
+import { BaseControl } from '@wordpress/components';
 import { IconButton } from '@wordpress/ui';
 import clsx from 'clsx';
 import type { Field } from '@wordpress/dataviews';
@@ -78,7 +79,6 @@ interface SortableImageProps {
 	image: ProductEntityRecord[ 'images' ][ number ];
 	alt: string;
 	onRemove: () => void;
-	isFeatured: boolean;
 	showDragHandle: boolean;
 	isDragging: boolean;
 	onDragStart: ( id: number ) => void;
@@ -90,7 +90,6 @@ function SortableImage( {
 	image,
 	alt,
 	onRemove,
-	isFeatured,
 	showDragHandle,
 	isDragging,
 	onDragStart,
@@ -107,9 +106,20 @@ function SortableImage( {
 		<div
 			role="group"
 			aria-label={ image.name }
+			draggable={ showDragHandle }
+			onDragStart={ ( event ) => {
+				if ( ! showDragHandle ) {
+					return;
+				}
+				event.dataTransfer.effectAllowed = 'move';
+				event.dataTransfer.setData( 'text/plain', image.id.toString() );
+				onDragStart( image.id );
+			} }
+			onDragEnd={ onDragEnd }
 			onDragOver={ ( event ) => {
 				if ( showDragHandle ) {
 					event.preventDefault();
+					event.dataTransfer.dropEffect = 'move';
 				}
 			} }
 			onDrop={ ( event ) => {
@@ -118,23 +128,28 @@ function SortableImage( {
 			} }
 			className={ clsx( 'woocommerce-fields-controls__image-wrapper', {
 				'is-dragging': isDragging,
-				'is-featured': isFeatured,
 			} ) }
 		>
-			<img className="product-image" src={ previewSrc } alt={ alt } />
+			<img
+				className="product-image"
+				src={ previewSrc }
+				alt={ alt }
+				draggable={ false }
+			/>
 			<div className="woocommerce-fields-controls__image-overlay" />
 			{ showDragHandle && (
-				<div className="woocommerce-fields-controls__image-drag-handle-container">
+				<div
+					className="woocommerce-fields-controls__image-drag-handle-container"
+					aria-hidden="true"
+				>
 					<IconButton
-						draggable
 						icon={ dragHandle }
 						label={ __( 'Drag to reorder', 'woocommerce' ) }
 						className="woocommerce-fields-controls__image-drag-handle"
 						variant="minimal"
 						size="small"
 						tone="neutral"
-						onDragStart={ () => onDragStart( image.id ) }
-						onDragEnd={ onDragEnd }
+						tabIndex={ -1 }
 					/>
 				</div>
 			) }
@@ -156,7 +171,7 @@ function SortableImage( {
 }
 
 const fieldDefinition = {
-	label: __( 'Featured Image', 'woocommerce' ),
+	label: __( 'Images', 'woocommerce' ),
 	enableSorting: false,
 	filterBy: false,
 } satisfies Partial< Field< ProductEntityRecord > >;
@@ -289,40 +304,46 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		}, [ images, handleRemoveImage ] );
 
 		return (
-			<div className="woocommerce-fields-control__featured-image">
-				<div className="woocommerce-fields-controls__featured-image-uploaded-images">
-					{ images.map( ( image, index ) => {
-						const onRemove = removeCallbacks.get( image.id );
+			// eslint-disable-next-line @wordpress/no-base-control-with-label-without-id
+			<BaseControl label={ __( 'Images', 'woocommerce' ) }>
+				<div className="woocommerce-fields-control__featured-image">
+					<div className="woocommerce-fields-controls__featured-image-uploaded-images">
+						{ images.map( ( image ) => {
+							const onRemove = removeCallbacks.get( image.id );
 
-						if ( ! onRemove ) {
-							return null;
-						}
+							if ( ! onRemove ) {
+								return null;
+							}
 
-						return (
-							<SortableImage
-								key={ image.id }
-								image={ image }
-								alt={ image.alt || data.name }
-								onRemove={ onRemove }
-								isFeatured={ index === 0 }
-								showDragHandle={ images.length > 1 }
-								isDragging={ draggedImageId === image.id }
-								onDragStart={ setDraggedImageId }
-								onDragEnd={ () => setDraggedImageId( null ) }
-								onDropOn={ handleDropOnImage }
-							/>
-						);
-					} ) }
+							return (
+								<SortableImage
+									key={ image.id }
+									image={ image }
+									alt={ image.alt || data.name }
+									onRemove={ onRemove }
+									showDragHandle={ images.length > 1 }
+									isDragging={
+										draggedImageId === image.id
+									}
+									onDragStart={ setDraggedImageId }
+									onDragEnd={ () =>
+										setDraggedImageId( null )
+									}
+									onDropOn={ handleDropOnImage }
+								/>
+							);
+						} ) }
+					</div>
+					<div className="woocommerce-fields-control__featured-image-actions">
+						<IconButton
+							variant="minimal"
+							icon={ upload }
+							label={ __( 'Add images', 'woocommerce' ) }
+							onClick={ handleOpenMediaLibrary }
+						/>
+					</div>
 				</div>
-				<div className="woocommerce-fields-control__featured-image-actions">
-					<IconButton
-						variant="minimal"
-						icon={ upload }
-						label={ __( 'Add images', 'woocommerce' ) }
-						onClick={ handleOpenMediaLibrary }
-					/>
-				</div>
-			</div>
+			</BaseControl>
 		);
 	},
 };
