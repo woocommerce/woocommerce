@@ -264,6 +264,10 @@ class Cart extends AbstractBlock {
 		$this->asset_data_registry->add( 'isBlockTheme', wp_is_block_theme() );
 		$this->asset_data_registry->add( 'shippingMethodsExist', CartCheckoutUtils::shipping_methods_exist() > 0 );
 
+		if ( has_block( 'woocommerce/shopper-collection' ) ) {
+			$this->asset_data_registry->add( 'cartPageHasSavedForLater', true );
+		}
+
 		$is_block_editor = $this->is_block_editor();
 
 		// Check `current_user_can` so we can show notices about incompatible extensions in the front-end to admins too.
