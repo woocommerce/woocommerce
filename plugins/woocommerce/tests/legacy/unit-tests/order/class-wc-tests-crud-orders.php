@@ -2269,6 +2269,36 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox calculate_totals() extracts tax from negative fees in fixed end-price mode.
+	 */
+	public function test_calculate_taxes_fixed_price_negative_fee_uses_inclusive_tax(): void {
+		$context = $this->create_manual_order_tax_context();
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		$order = $this->create_manual_order_for_tax_context( $context, '24' );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Manual discount',
+				'tax_status' => ProductTaxStatus::TAXABLE,
+				'tax_class'  => $context['tax_class_slug'],
+				'total'      => -10,
+			)
+		);
+		$order->add_item( $fee );
+
+		try {
+			$order->calculate_totals();
+
+			$this->assertEquals( -0.83, round( (float) $fee->get_total_tax(), 2 ) );
+			$this->assertEquals( 1.16, round( (float) $order->get_cart_tax(), 2 ) );
+			$this->assertEquals( 13.17, round( (float) $order->get_total(), 2 ) );
+		} finally {
+			$this->cleanup_manual_order_tax_context( $context, $order );
+		}
+	}
+
+	/**
 	 * Creates tax rates and a product for manual order tax tests.
 	 *
 	 * @param string $prices_include_tax Whether prices include tax.
