@@ -1107,6 +1107,24 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject product variation IDs when deleting products.
+	 */
+	public function test_product_delete_rejects_variation_ids(): void {
+		$variation_id = $this->create_variation_product_id_for_test();
+
+		$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
+			array(
+				'id'    => $variation_id,
+				'force' => true,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+		$this->assertNotNull( wc_get_product( $variation_id ) );
+	}
+
+	/**
 	 * @testdox Should trash a product by default.
 	 */
 	public function test_product_delete_defaults_to_trash(): void {
@@ -1184,6 +1202,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should reject product variation IDs when querying products by ID.
+	 */
+	public function test_products_query_rejects_variation_ids(): void {
+		$variation_id = $this->create_variation_product_id_for_test();
+
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute( array( 'id' => $variation_id ) );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
 	}
 
 	/**
@@ -1509,5 +1539,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function preserve_fractional_stock_amount( $amount ): float {
 		return (float) $amount;
+	}
+
+	/**
+	 * Create a product variation and track it for cleanup.
+	 *
+	 * @return int Variation product ID.
+	 */
+	private function create_variation_product_id_for_test(): int {
+		$parent       = \WC_Helper_Product::create_variation_product();
+		$variation_id = $parent->get_children()[0];
+
+		$this->created_product_ids[] = $variation_id;
+		$this->created_product_ids[] = $parent->get_id();
+
+		return $variation_id;
 	}
 }

@@ -8,6 +8,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
 defined( 'ABSPATH' ) || exit;
@@ -78,6 +79,14 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 
 			if ( is_wp_error( $product ) ) {
 				return $product;
+			}
+
+			if ( $product->is_type( ProductType::VARIATION ) ) {
+				return new \WP_Error(
+					'woocommerce_product_type_unsupported',
+					__( 'Product type is not supported by this ability.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
 			}
 
 			return array(
