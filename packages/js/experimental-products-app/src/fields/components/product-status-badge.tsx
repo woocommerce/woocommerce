@@ -16,7 +16,7 @@ const statuses = {
 		intent: 'draft',
 	},
 	publish: {
-		label: __( 'Active', 'woocommerce' ),
+		label: __( 'Published', 'woocommerce' ),
 		intent: 'stable',
 	},
 	trash: {
@@ -32,7 +32,7 @@ const statuses = {
 		intent: 'none',
 	},
 	pending: {
-		label: __( 'Pending', 'woocommerce' ),
+		label: __( 'Pending review', 'woocommerce' ),
 		intent: 'none',
 	},
 	private: {
