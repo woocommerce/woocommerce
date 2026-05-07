@@ -47,9 +47,6 @@ export default function useLayoutAreas() {
 				preview: false,
 				mobile: <ProductList postType={ postType } />,
 			},
-			widths: {
-				edit: showQuickEdit ? 380 : undefined,
-			},
 		};
 	}
 
