@@ -92,6 +92,7 @@ All events are prefixed `email_editor_events_`.
 | `template_select_modal_opened` | `{ templateSelectMode }` | Tracked when template select modal is opened |
 | `template_select_modal_start_from_scratch_clicked` | - | Tracked when the "Start from scratch" button is clicked in the template select modal |
 | `template_select_modal_template_selected` | `{ template }` | Tracked when user selects a template in the template select modal |
+| `template_canvas_affordance_edit_template_clicked` | `{ templateId }` | Tracked when the edit template button in the canvas template affordance is clicked |
 | `trash_modal_move_to_trash_button_clicked` | - | Tracked when user clicks the move to trash button in the trash modal |
 | `styles_sidebar_screen_typography_element_panel_set_letter_spacing` | `{ element, newValue, selectedDefaultLetterSpacing }` | Tracked when letter spacing is changed in typography panel |
 | `styles_sidebar_screen_typography_element_panel_set_line_height` | `{ element, newValue, selectedDefaultLineHeight }` | Tracked when line height is changed in typography panel |
