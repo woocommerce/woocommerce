@@ -5,6 +5,9 @@
 
 namespace Automattic\WooCommerce\Internal\Admin\Orders;
 
+use Automattic\WooCommerce\Admin\Features\Features;
+use Automattic\WooCommerce\Admin\Features\OrderDetailRedesign\Init as OrderDetailRedesignInit;
+use Automattic\WooCommerce\Admin\Features\OrderDetailRedesign\OrderListNav;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
@@ -435,6 +438,10 @@ class Edit {
 		<?php
 		if ( 'edit_order' === $this->current_action ) {
 			echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action">' . esc_html( $post_type->labels->add_new ) . '</a>';
+		}
+
+		if ( 'edit_order' === $this->current_action && Features::is_enabled( OrderDetailRedesignInit::FEATURE_ID ) ) {
+			wc_get_container()->get( OrderListNav::class )->render( $this->order );
 		}
 		?>
 		<hr class="wp-header-end">
