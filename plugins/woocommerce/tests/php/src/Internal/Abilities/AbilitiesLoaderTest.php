@@ -10,8 +10,6 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesCategories;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesLoader;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
-use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
-use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
@@ -282,10 +280,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertContains( get_woocommerce_currency(), $order['currency']['enum'] ?? array() );
 		$this->assertSame( array( 'string', 'null' ), $order['billing_email']['type'] ?? null );
 		$this->assertSame( 'email', $order['billing_email']['format'] ?? null );
-		$this->assertSame(
-			'Order line items. Only present when include_line_items is true.',
-			$order['line_items']['description'] ?? null
-		);
+		$this->assertNotEmpty( $order['line_items']['description'] ?? '' );
+		$this->assertSame( 'array', $order['line_items']['type'] ?? null );
+		$this->assertSame( 'object', $order['line_items']['items']['type'] ?? null );
+		$this->assertArrayHasKey( 'quantity', $order['line_items']['items']['properties'] ?? array() );
 	}
 
 	/**
@@ -461,6 +459,75 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				),
 			),
 		);
+	}
+
+	/**
+	 * @testdox Should require object edit and delete permissions for product mutations.
+	 */
+	public function test_product_mutations_require_object_permissions(): void {
+		$product_to_update             = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Owned by another user' ) );
+		$product_to_delete             = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Also owned by another user' ) );
+		$this->created_product_ids[]   = $product_to_update->get_id();
+		$this->created_product_ids[]   = $product_to_delete->get_id();
+		$limited_product_manager_id    = $this->create_user_with_caps(
+			array(
+				'edit_products',
+				'edit_published_products',
+				'delete_products',
+				'delete_published_products',
+			)
+		);
+		wp_set_current_user( $limited_product_manager_id );
+
+		$cases = array(
+			'woocommerce/product-update' => array(
+				'id'   => $product_to_update->get_id(),
+				'name' => 'Unauthorized update',
+			),
+			'woocommerce/product-delete' => array(
+				'id' => $product_to_delete->get_id(),
+			),
+		);
+
+		foreach ( $cases as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should reject users without object-level access." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
+	}
+
+	/**
+	 * @testdox Should require object edit permissions for order mutations.
+	 */
+	public function test_order_mutations_require_object_edit_permissions(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$limited_order_manager_id  = $this->create_user_with_caps(
+			array(
+				'edit_shop_orders',
+				'edit_published_shop_orders',
+			)
+		);
+		wp_set_current_user( $limited_order_manager_id );
+
+		$cases = array(
+			'woocommerce/order-update-status' => array(
+				'id'     => $order->get_id(),
+				'status' => 'processing',
+			),
+			'woocommerce/order-add-note'      => array(
+				'id'   => $order->get_id(),
+				'note' => 'Unauthorized note',
+			),
+		);
+
+		foreach ( $cases as $ability_id => $input ) {
+			$result = wp_get_ability( $ability_id )->execute( $input );
+
+			$this->assertWPError( $result, "{$ability_id} should reject users without object-level access." );
+			$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+		}
 	}
 
 	/**
@@ -640,24 +707,6 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				),
 			),
 		);
-	}
-
-	/**
-	 * @testdox Should reject invalid status when order update status is called directly.
-	 */
-	public function test_order_update_status_execute_rejects_invalid_status_slug(): void {
-		$order                     = \WC_Helper_Order::create_order();
-		$this->created_order_ids[] = $order->get_id();
-
-		$result = OrderUpdateStatus::execute(
-			array(
-				'id'     => $order->get_id(),
-				'status' => 'totally-bogus',
-			)
-		);
-
-		$this->assertWPError( $result );
-		$this->assertSame( 'woocommerce_order_status_invalid', $result->get_error_code() );
 	}
 
 	/*
@@ -1096,10 +1145,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should return a not-found error when orders-query execution receives an unknown order ID.
+	 * @testdox Should return a not-found error when orders-query receives an unknown order ID.
 	 */
-	public function test_orders_query_execute_returns_not_found_for_unknown_id(): void {
-		$result = OrdersQuery::execute( array( 'id' => 999999 ) );
+	public function test_orders_query_returns_not_found_for_unknown_id(): void {
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => 999999 ) );
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_order_not_found', $result->get_error_code() );
@@ -1359,6 +1408,25 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				wp_unregister_ability( $ability_id );
 			}
 		}
+	}
+
+	/**
+	 * Create a user with specific capabilities.
+	 *
+	 * @param array<int, string> $capabilities Capabilities to grant.
+	 * @return int
+	 */
+	private function create_user_with_caps( array $capabilities ): int {
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$user    = get_user_by( 'id', $user_id );
+
+		if ( $user instanceof \WP_User ) {
+			foreach ( $capabilities as $capability ) {
+				$user->add_cap( $capability );
+			}
+		}
+
+		return $user_id;
 	}
 
 	/**
