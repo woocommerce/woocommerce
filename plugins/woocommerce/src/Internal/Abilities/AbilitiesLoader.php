@@ -116,25 +116,26 @@ class AbilitiesLoader {
 		 * Extensions can append autoloadable classes that implement
 		 * {@see AbilityDefinition}. The loader will call get_name() and
 		 * get_registration_args() on each definition class and register the ability on the
-		 * Abilities API init hook.
+		 * Abilities API init hook. Returning a subset will not unregister core abilities;
+		 * core classes are always retained.
 		 *
 		 * @since 10.9.0
 		 *
 		 * @param array<int, class-string> $classes Ability definition class names.
 		 */
-			$classes = apply_filters( 'woocommerce_ability_definition_classes', self::CORE_ABILITY_DEFINITION_CLASSES );
+		$classes = apply_filters( 'woocommerce_ability_definition_classes', self::CORE_ABILITY_DEFINITION_CLASSES );
 
 		if ( ! is_array( $classes ) ) {
 			$classes = array();
 		}
 
-			return array_values(
-				array_unique(
-					array_filter(
-						array_merge( self::CORE_ABILITY_DEFINITION_CLASSES, $classes ),
-						'is_string'
-					)
+		return array_values(
+			array_unique(
+				array_filter(
+					array_merge( self::CORE_ABILITY_DEFINITION_CLASSES, $classes ),
+					'is_string'
 				)
-			);
+			)
+		);
 	}
 }
