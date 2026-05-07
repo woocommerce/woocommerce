@@ -301,6 +301,10 @@ class WCEmailTemplateSyncBackfill {
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $current_core_hash );
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, gmdate( 'Y-m-d H:i:s' ) );
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $status_for_stamp );
+		// Mark backfilled so RSM-145 Tracks instrumentation can separate organic
+		// divergence from legacy-post events. Read-only over REST via the
+		// detector's `register_meta()`.
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, true );
 	}
 
 	/**
