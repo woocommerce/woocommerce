@@ -95,6 +95,59 @@ class Tree_Builder_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * When the Extensions node is present in the tree, third-party submenu
+	 * items registered under `woocommerce` nest under Extensions instead of
+	 * the Woo root — keeps the top level of the cascade curated.
+	 */
+	public function test_auto_attach_nests_under_extensions_when_present() {
+		$default = array(
+			'woocommerce'             => array( 'parent' => null,          'title' => 'WooCommerce', 'position' => 2 ),
+			'wc-admin&path=/extensions' => array( 'parent' => 'woocommerce', 'title' => 'Extensions',  'position' => 95 ),
+		);
+
+		$raw_menu    = array(
+			array( 'WooCommerce', 'read', 'woocommerce',                 '', '' ),
+			array( 'Extensions',  'read', 'wc-admin&path=/extensions',   '', '' ),
+		);
+		$raw_submenu = array(
+			'woocommerce' => array(
+				array( 'Third-party Tool', 'manage_woocommerce', 'my-plugin-page' ),
+			),
+		);
+
+		$builder = new Tree_Builder();
+		$tree    = $builder->build( $default, $raw_menu, $raw_submenu );
+
+		$this->assertArrayHasKey( 'my-plugin-page', $tree );
+		$this->assertSame( 'wc-admin&path=/extensions', $tree['my-plugin-page']['parent'] );
+		$this->assertSame( 'auto', $tree['my-plugin-page']['source'] );
+	}
+
+	/**
+	 * If the Extensions node isn't in the tree (e.g. a filter removed it),
+	 * auto-attached items fall back to the Woo root rather than getting
+	 * dropped by the unknown-parent pass.
+	 */
+	public function test_auto_attach_falls_back_to_root_when_extensions_absent() {
+		$default = array(
+			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+		);
+
+		$raw_menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
+		$raw_submenu = array(
+			'woocommerce' => array(
+				array( 'Third-party Tool', 'manage_woocommerce', 'my-plugin-page' ),
+			),
+		);
+
+		$builder = new Tree_Builder();
+		$tree    = $builder->build( $default, $raw_menu, $raw_submenu );
+
+		$this->assertArrayHasKey( 'my-plugin-page', $tree );
+		$this->assertSame( 'woocommerce', $tree['my-plugin-page']['parent'] );
+	}
+
+	/**
 	 * A parent-chain cycle (A -> B -> A) is broken by demoting the lowest-position
 	 * node to the Woo root. Deterministic — same input produces same output.
 	 */

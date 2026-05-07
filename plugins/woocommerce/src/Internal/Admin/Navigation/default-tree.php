@@ -67,7 +67,7 @@ return array(
 	'wc-settings'                                                            => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Settings', 'woocommerce' ),
-		'icon'     => 'dashicons-admin-generic',
+		'icon'     => 'dashicons-admin-settings',
 		'position' => 90,
 	),
 	'woocommerce-payments'                                                   => array(

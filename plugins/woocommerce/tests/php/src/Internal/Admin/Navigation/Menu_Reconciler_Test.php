@@ -97,6 +97,107 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * When a third-party plugin registers its own top-level menu and a filter
+	 * callback rehomes it under `woocommerce`, the reconciler captures the
+	 * plugin's top-level icon (from $menu[key][6]) onto the tree node so the
+	 * rail renders the native icon rather than falling back to generic.
+	 */
+	public function test_third_party_top_level_icon_is_carried_onto_tree_node() {
+		global $menu, $submenu;
+		$menu = array(
+			array( 'WooCommerce', 'read', 'woocommerce',  '', '', '', 'dashicons-cart' ),
+			array( 'My Plugin',   'read', 'my-plugin',    '', '', '', 'dashicons-cloud' ),
+		);
+		$submenu = array(
+			'woocommerce' => array(
+				array( 'Home', 'read', 'wc-admin' ),
+			),
+		);
+
+		// Filter: graft `my-plugin` under woocommerce so it ends up in the tree.
+		add_filter(
+			'woocommerce_admin_menu_tree',
+			function ( $tree ) {
+				$tree['my-plugin'] = array(
+					'parent'     => 'woocommerce',
+					'title'      => 'My Plugin',
+					'position'   => 500,
+					'capability' => 'read',
+				);
+				return $tree;
+			}
+		);
+
+		$reconciler = new Menu_Reconciler();
+		$reconciler->reconcile();
+
+		$tree = Menu_Reconciler::get_tree();
+		$this->assertArrayHasKey( 'my-plugin', $tree );
+		$this->assertSame( 'dashicons-cloud', $tree['my-plugin']['icon'] );
+	}
+
+	/**
+	 * An explicit icon (from default-tree.php or set by a filter callback) is
+	 * preserved — captured $menu icons only fill gaps, they don't overwrite.
+	 */
+	public function test_explicit_tree_icon_wins_over_captured_menu_icon() {
+		global $menu, $submenu;
+		$menu = array(
+			array( 'WooCommerce', 'read', 'woocommerce', '', '', '', 'dashicons-cart' ),
+			array( 'Products',    'read', 'edit.php?post_type=product', '', '', '', 'dashicons-admin-post' ),
+		);
+		$submenu = array(
+			'woocommerce' => array(
+				array( 'Home', 'read', 'wc-admin' ),
+			),
+		);
+
+		$reconciler = new Menu_Reconciler();
+		$reconciler->reconcile();
+
+		$tree = Menu_Reconciler::get_tree();
+		$this->assertArrayHasKey( 'edit.php?post_type=product', $tree );
+		// default-tree.php declares dashicons-products for this slug; the
+		// captured $menu icon (dashicons-admin-post) must NOT overwrite it.
+		$this->assertSame( 'dashicons-products', $tree['edit.php?post_type=product']['icon'] );
+	}
+
+	/**
+	 * The `none` and `div` sentinels (WP's way of saying "no icon") are
+	 * skipped during capture so tree nodes without an explicit icon fall back
+	 * to the JS-side default rather than rendering an empty slot.
+	 */
+	public function test_none_and_div_icon_sentinels_are_not_applied() {
+		global $menu, $submenu;
+		$menu = array(
+			array( 'WooCommerce', 'read', 'woocommerce',  '', '', '', 'dashicons-cart' ),
+			array( 'Plugin None', 'read', 'plugin-none',  '', '', '', 'none' ),
+			array( 'Plugin Div',  'read', 'plugin-div',   '', '', '', 'div' ),
+		);
+		$submenu = array(
+			'woocommerce' => array( array( 'Home', 'read', 'wc-admin' ) ),
+		);
+
+		add_filter(
+			'woocommerce_admin_menu_tree',
+			function ( $tree ) {
+				$tree['plugin-none'] = array( 'parent' => 'woocommerce', 'title' => 'None', 'position' => 500, 'capability' => 'read' );
+				$tree['plugin-div']  = array( 'parent' => 'woocommerce', 'title' => 'Div',  'position' => 510, 'capability' => 'read' );
+				return $tree;
+			}
+		);
+
+		$reconciler = new Menu_Reconciler();
+		$reconciler->reconcile();
+
+		$tree = Menu_Reconciler::get_tree();
+		$this->assertArrayHasKey( 'plugin-none', $tree );
+		$this->assertArrayHasKey( 'plugin-div', $tree );
+		$this->assertArrayNotHasKey( 'icon', $tree['plugin-none'] );
+		$this->assertArrayNotHasKey( 'icon', $tree['plugin-div'] );
+	}
+
+	/**
 	 * The woocommerce_admin_menu_tree filter is applied and receives the
 	 * raw $menu and $submenu.
 	 */

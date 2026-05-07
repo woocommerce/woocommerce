@@ -109,6 +109,10 @@ class Menu_Reconciler {
 	public function reconcile(): void {
 		global $menu, $submenu;
 
+		// Snapshot top-level icons BEFORE remove_rehomed_top_level_items() wipes
+		// their $menu entries — otherwise rehomed plugin icons are unrecoverable.
+		$icon_map = $this->capture_top_level_icons( (array) $menu );
+
 		$default_tree = require __DIR__ . '/default-tree.php';
 		$builder      = new Tree_Builder();
 		$tree         = $builder->build( $default_tree, (array) $menu, (array) $submenu );
@@ -126,6 +130,13 @@ class Menu_Reconciler {
 		 * @param array $raw_submenu WP's $submenu at the time of reconciliation.
 		 */
 		$tree = apply_filters( 'woocommerce_admin_menu_tree', $tree, (array) $menu, (array) $submenu );
+
+		// Carry third-party top-level icons onto their tree nodes. Runs after
+		// the filter so plugins that rehome themselves via the filter get their
+		// icon attached automatically. Nodes with an explicit icon (default
+		// tree, filter override) are left alone.
+		$tree = $this->apply_captured_icons( $tree, $icon_map );
+
 		$tree = $builder->apply_capability_filter( $tree );
 
 		$this->remove_rehomed_top_level_items();
@@ -356,6 +367,55 @@ class Menu_Reconciler {
 				unset( $menu[ $key ] );
 			}
 		}
+	}
+
+	/**
+	 * Read the icon slot (index 6) from each top-level $menu entry and index
+	 * it by slug (index 2). WP stores icons in one of four shapes: a
+	 * `dashicons-*` class string, a URL to an image, a `data:image/svg+xml;
+	 * base64,...` data URI, or the sentinels `none`/`div` (meaning no icon).
+	 * We filter the sentinels out here so the apply step treats "no icon
+	 * captured" uniformly.
+	 *
+	 * @param array $raw_menu WP's $menu global.
+	 * @return array<string,string> Map of slug → icon value.
+	 */
+	private function capture_top_level_icons( array $raw_menu ): array {
+		$icons = array();
+		foreach ( $raw_menu as $entry ) {
+			if ( ! isset( $entry[2], $entry[6] ) ) {
+				continue;
+			}
+			$slug = (string) $entry[2];
+			$icon = (string) $entry[6];
+			if ( '' === $icon || 'none' === $icon || 'div' === $icon ) {
+				continue;
+			}
+			$icons[ $slug ] = $icon;
+		}
+		return $icons;
+	}
+
+	/**
+	 * Fill in `icon` on tree nodes that don't have one, using icons captured
+	 * from $menu. An explicit icon (from default-tree.php or from a filter
+	 * callback) always wins — we only fill gaps.
+	 *
+	 * @param array $tree     Tree.
+	 * @param array $icon_map Map of slug → icon value.
+	 * @return array
+	 */
+	private function apply_captured_icons( array $tree, array $icon_map ): array {
+		foreach ( $tree as $slug => $node ) {
+			if ( ! empty( $node['icon'] ) ) {
+				continue;
+			}
+			if ( ! isset( $icon_map[ $slug ] ) ) {
+				continue;
+			}
+			$tree[ $slug ]['icon'] = $icon_map[ $slug ];
+		}
+		return $tree;
 	}
 
 	/**

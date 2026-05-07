@@ -19,21 +19,28 @@
 	position: relative;
 
 	> a::after {
-		content: "›";
+		content: "";
 		position: absolute;
 		right: 10px;
 		top: 50%;
 		transform: translateY(-50%);
-		opacity: 0.5;
+		width: 0;
+		height: 0;
+		border-style: solid;
+		border-width: 4px 0 4px 5px;
+		border-color: transparent transparent transparent currentColor;
+		opacity: 0.7;
 	}
 
+	// Background / text / hover color come from the active admin color scheme
+	// via `#adminmenu .wp-submenu` rules (our <ul> carries the `wp-submenu`
+	// class). We only override positioning, sizing, and layout here.
 	> .wc-nav-v2-subflyout {
 		position: absolute;
 		left: 100%;
 		top: -6px;
 		min-width: 180px;
 		padding: 6px 0;
-		background: #2c3338;
 		box-shadow: 0 3px 5px rgba(0, 0, 0, 0.2);
 		list-style: none;
 		margin: 0;
@@ -47,16 +54,9 @@
 			> a {
 				display: block;
 				padding: 5px 12px;
-				color: rgba(240, 246, 252, 0.7);
 				text-decoration: none;
 				font-size: 13px;
 				line-height: 1.4;
-
-				&:hover,
-				&:focus {
-					color: #72aee6;
-					background: transparent;
-				}
 			}
 		}
 	}
@@ -72,9 +72,10 @@
 
 body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 	> a::after {
-		content: "‹";
 		right: auto;
 		left: 10px;
+		border-width: 4px 5px 4px 0;
+		border-color: transparent currentColor transparent transparent;
 	}
 	> .wc-nav-v2-subflyout {
 		left: auto;
@@ -102,12 +103,21 @@ html.no-js body.wc-nav-v2-active #adminmenu {
 	visibility: visible;
 }
 
-// Spec §6.3: touch devices do not get the hover cascade. Tapping navigates.
+// Spec §6.3: touch devices do not get the hover cascade. Tapping a cascade
+// parent (Settings, Marketing, etc.) navigates directly.
+//
+// NOTE: we deliberately do NOT hide `#toplevel_page_woocommerce > .wp-submenu`
+// here. WP's small-screen responsive mode (< 783px) reveals top-level
+// submenus inline when `.wp-menu-open` is added to the parent <li>; hiding
+// our first-level flyout with `!important` would break that, leaving the
+// WooCommerce tap unresponsive on mobile.
 @media (hover: none) {
-	li#toplevel_page_woocommerce > .wp-submenu {
-		display: none !important;
-	}
 	#toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout > .wc-nav-v2-subflyout {
 		display: none !important;
+	}
+	// Drop the `›` caret on cascade parents — on touch they behave as plain
+	// links (tap navigates), so the indicator would be misleading.
+	#toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout > a::after {
+		display: none;
 	}
 }

@@ -214,8 +214,19 @@ class Tree_Builder {
 	}
 
 	/**
+	 * Slug we nest third-party `add_submenu_page('woocommerce', …)` items
+	 * under so the top level of the cascade stays curated.
+	 */
+	private const AUTO_ATTACH_PARENT = 'wc-admin&path=/extensions';
+
+	/**
 	 * Attach any submenu items registered under 'woocommerce' that aren't
-	 * already in the tree as children of the Woo root, preserving registration order.
+	 * already in the tree, preserving registration order.
+	 *
+	 * Third-party items get nested under Extensions so the top level of the
+	 * cascade stays curated. If Extensions isn't in the tree (e.g. a filter
+	 * removed it) we fall back to parenting at the Woo root so items aren't
+	 * dropped silently.
 	 *
 	 * @param array $tree         Tree being built.
 	 * @param array $default_tree Default tree (used to decide "already present").
@@ -227,13 +238,15 @@ class Tree_Builder {
 			return $tree;
 		}
 
-		// Normalize the titles of items already attached to the woocommerce root
-		// so we can skip auto-attach candidates with the same visible label
+		$auto_parent = isset( $tree[ self::AUTO_ATTACH_PARENT ] ) ? self::AUTO_ATTACH_PARENT : 'woocommerce';
+
+		// Normalize titles of items already attached to the chosen parent so
+		// we can skip auto-attach candidates with the same visible label
 		// (prevents "Orders/Orders" / "Extensions/Extensions" from surfacing
 		// WC's internal legacy redirects alongside default-tree entries).
 		$existing_titles = array();
 		foreach ( $tree as $existing_slug => $node ) {
-			if ( 'woocommerce' === ( $node['parent'] ?? null ) ) {
+			if ( $auto_parent === ( $node['parent'] ?? null ) ) {
 				$key = strtolower( trim( (string) ( $node['title'] ?? '' ) ) );
 				if ( '' !== $key ) {
 					$existing_titles[ $key ] = true;
@@ -261,7 +274,7 @@ class Tree_Builder {
 			}
 
 			$tree[ $slug ] = array(
-				'parent'     => 'woocommerce',
+				'parent'     => $auto_parent,
 				'title'      => $title,
 				'position'   => $auto_position,
 				'source'     => 'auto',

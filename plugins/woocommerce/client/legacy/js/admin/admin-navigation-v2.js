@@ -132,6 +132,42 @@
 	}
 
 	/**
+	 * Build the `.wp-menu-image` div for a rail item. Mirrors the four icon
+	 * shapes WP's wp-admin/menu-header.php renders: dashicons class, base64
+	 * SVG data URI, arbitrary URL (rendered as <img>), or none. Plugin
+	 * top-levels rehomed under WooCommerce come through any of these shapes,
+	 * so we can't assume dashicons.
+	 *
+	 * @param icon Icon value from the tree node.
+	 */
+	function buildMenuImage( icon ) {
+		var $div = $( '<div></div>' )
+			.addClass( 'wp-menu-image' )
+			.attr( 'aria-hidden', 'true' );
+
+		if ( ! icon || 'none' === icon || 'div' === icon ) {
+			$div.addClass( 'dashicons-before' ).append( '<br>' );
+			return $div;
+		}
+		if ( 0 === icon.indexOf( 'data:image/svg+xml;base64,' ) ) {
+			$div.addClass( 'svg' )
+				.css( 'background-image', "url('" + icon + "')" )
+				.append( '<br>' );
+			return $div;
+		}
+		if ( 0 === icon.indexOf( 'dashicons-' ) ) {
+			$div.addClass( 'dashicons-before ' + icon ).append( '<br>' );
+			return $div;
+		}
+		// URL — render as <img>, preserving dashicons-before for layout
+		// (WP itself does this).
+		$div.addClass( 'dashicons-before' ).append(
+			$( '<img>' ).attr( 'src', icon ).attr( 'alt', '' )
+		);
+		return $div;
+	}
+
+	/**
 	 * Build a WP-native rail <li> for one tree node. Returns a jQuery element.
 	 *
 	 * @param node      Tree node (with .slug added).
@@ -175,12 +211,7 @@
 		var $a  = $( '<a></a>' )
 			.attr( 'href', toAdminUrl( node.url || node.slug ) )
 			.addClass( aClasses.join( ' ' ) );
-		$a.append(
-			$( '<div></div>' )
-				.addClass( 'wp-menu-image dashicons-before ' + icon )
-				.attr( 'aria-hidden', 'true' )
-				.append( '<br>' )
-		);
+		$a.append( buildMenuImage( icon ) );
 		$a.append( $( '<div></div>' ).addClass( 'wp-menu-name' ).text( node.title ) );
 		$li.append( $a );
 
@@ -265,6 +296,15 @@
 
 		$adminmenu.empty();
 		$adminmenu.append( buildBackItem() );
+		// Visual break between the back link and the Woo rail. Uses WP's
+		// native `wp-menu-separator` class so the active color scheme styles
+		// it the same as the dividers WP draws between its own menu groups.
+		$adminmenu.append(
+			$( '<li></li>' )
+				.addClass( 'wp-menu-separator wc-nav-v2-separator' )
+				.attr( 'aria-hidden', 'true' )
+				.append( '<div></div>' )
+		);
 		roots.forEach( function ( node ) {
 			$adminmenu.append( buildRailItem( node, byParent, current, ancestors ) );
 		} );
@@ -451,7 +491,10 @@
 			}
 
 			$li.addClass( 'wc-nav-v2-has-subflyout' );
-			var $nested = $( '<ul class="wc-nav-v2-subflyout"></ul>' );
+			// Include `wp-submenu` so the active admin color scheme's
+			// `#adminmenu .wp-submenu` rules (background, link color, hover)
+			// apply to the cascade.
+			var $nested = $( '<ul class="wp-submenu wc-nav-v2-subflyout"></ul>' );
 			grandkids.forEach( function ( kid ) {
 				if ( kid.hidden ) {
 					return;
