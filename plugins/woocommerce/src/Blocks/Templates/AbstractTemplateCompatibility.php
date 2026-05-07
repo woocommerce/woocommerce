@@ -248,7 +248,11 @@ abstract class AbstractTemplateCompatibility {
 			// later).
 			// We display a `wc_doing_it_wrong()` message if somebody was
 			// hooking into it too early.
-			wc_doing_it_wrong( 'woocommerce_disable_compatibility_layer', 'The `woocommerce_disable_compatibility_layer` filter should be added in `template_include`, after WooCommerce has set the default value based on the resolved template.', '10.9.0' );
+			wc_doing_it_wrong(
+				'woocommerce_disable_compatibility_layer',
+				'The `woocommerce_disable_compatibility_layer` filter should only be added during or after the `template_include` action, once WooCommerce has determined the default value based on the resolved template.',
+				'10.9.0'
+			);
 			return;
 		}
 
