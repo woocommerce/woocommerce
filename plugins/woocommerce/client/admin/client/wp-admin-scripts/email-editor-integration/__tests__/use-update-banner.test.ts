@@ -343,6 +343,27 @@ describe( 'useUpdateBanner — change summary + conflicts (6b)', () => {
 		const { result } = renderHook( () => useUpdateBanner() );
 		expect( result.current.shouldRender ).toBe( true );
 	} );
+
+	it( 'shouldRender flips to false when summary reports no real diff (status stale despite older version)', () => {
+		// Defensive guard: even when version-compare says merchant hasn't
+		// reviewed yet, hide the banner if the summary has no real changes.
+		// Avoids surfacing a "Review update" → drawer with `Apply (0)` dead
+		// end (test fixtures or stale meta can produce this state).
+		setUpMocks( {
+			summary: summaryFixture( {
+				version_from: '9.4.0-test',
+				version_to: '10.7.0',
+				summary_lines: [],
+				added_blocks: [],
+				removed_blocks: [],
+				copy_changes: [],
+				structural_changes: [],
+				is_fallback: false,
+			} ),
+		} );
+		const { result } = renderHook( () => useUpdateBanner() );
+		expect( result.current.shouldRender ).toBe( false );
+	} );
 } );
 
 // ==========================================================================

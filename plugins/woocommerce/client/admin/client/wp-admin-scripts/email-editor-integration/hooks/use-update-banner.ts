@@ -319,7 +319,23 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 			effectiveSummary.version_to
 		) >= 0;
 
-	const finalShouldRender = shouldRender && ! summaryShowsReviewed;
+	// Defensive: even when version-compare says the merchant hasn't reviewed
+	// yet, hide the banner if there's nothing actually different — sending
+	// the merchant into a drawer that says `Apply (0)` is a dead end. This
+	// catches stale-status scenarios where meta says `core_updated_customized`
+	// but the post content matches canonical core (test fixtures, race
+	// conditions during core upgrade, manual meta edits).
+	const summaryShowsNoChanges =
+		effectiveSummary !== null &&
+		! effectiveSummary.is_fallback &&
+		effectiveSummary.summary_lines.length === 0 &&
+		effectiveSummary.added_blocks.length === 0 &&
+		effectiveSummary.removed_blocks.length === 0 &&
+		effectiveSummary.copy_changes.length === 0 &&
+		effectiveSummary.structural_changes.length === 0;
+
+	const finalShouldRender =
+		shouldRender && ! summaryShowsReviewed && ! summaryShowsNoChanges;
 	const summary: ChangeSummary | null = finalShouldRender
 		? effectiveSummary
 		: null;
