@@ -188,7 +188,10 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 					'description' => __( 'Filter by order status slug without the wc- prefix.', 'woocommerce' ),
 					'enum'        => self::get_allowed_order_status_slugs(),
 				),
-				'customer_id'        => array( 'type' => 'integer' ),
+				'customer_id'        => array(
+					'type'        => 'integer',
+					'description' => __( 'Filter by customer ID. Use 0 to filter guest orders.', 'woocommerce' ),
+				),
 				'billing_email'      => array(
 					'type'   => 'string',
 					'format' => 'email',
