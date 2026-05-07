@@ -250,9 +250,27 @@ class ApiBuilder {
 
 		if ( null !== $this->composer_working_dir ) {
 			echo "Regenerating autoloader...\n";
-			exec( 'composer dump-autoload --working-dir=' . escapeshellarg( $this->composer_working_dir ) . ' 2>&1', $output, $code );
-			if ( $code !== 0 ) {
-				echo 'Warning: composer dump-autoload failed: ' . implode( "\n", $output ) . "\n";
+			// Use chdir() + passthru() instead of exec() with --working-dir.
+			// Some composer post-autoload-dump hooks — notably the Jetpack
+			// autoloader's merged-manifest step that WooCommerce relies on
+			// at runtime — read getcwd() rather than honouring composer's
+			// resolved --working-dir, and silently produce stale manifests
+			// when the two don't match. Setting the actual process CWD
+			// keeps every hook on the same dir; passthru() also streams
+			// output so any failure mode is visible to the developer
+			// rather than being swallowed into a captured array.
+			$original_cwd = getcwd();
+			if ( false === chdir( $this->composer_working_dir ) ) {
+				echo "Warning: could not chdir to {$this->composer_working_dir}; skipping autoloader regeneration.\n";
+			} else {
+				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_passthru -- design-time CLI script; never runs in a web context.
+				passthru( 'composer dump-autoload', $code );
+				if ( false !== $original_cwd ) {
+					chdir( $original_cwd );
+				}
+				if ( 0 !== $code ) {
+					echo "Warning: composer dump-autoload exited with code {$code}.\n";
+				}
 			}
 		}
 
