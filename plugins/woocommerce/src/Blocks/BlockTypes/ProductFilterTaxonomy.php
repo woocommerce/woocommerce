@@ -244,21 +244,11 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 					$term          = (array) $term;
 					$term['count'] = $taxonomy_counts[ $term['term_id'] ] ?? 0;
 
-					$type       = 'taxonomy/' . $taxonomy;
-					$aria_label = $term['name'];
-					if ( $show_counts ) {
-						$aria_label = sprintf(
-							/* translators: %1$s: filter item label. %2$d: number of results. */
-							_n( '%1$s, %2$d result', '%1$s, %2$d results', $term['count'], 'woocommerce' ),
-							$term['name'],
-							$term['count']
-						);
-					}
-
+					$type   = 'taxonomy/' . $taxonomy;
 					$option = array(
 						'id'        => $type . '-' . $term['slug'],
 						'label'     => $term['name'],
-						'ariaLabel' => $aria_label,
+						'ariaLabel' => $term['name'],
 						'value'     => $term['slug'],
 						'selected'  => in_array( $term['slug'], $selected_terms, true ),
 						'type'      => $type,
