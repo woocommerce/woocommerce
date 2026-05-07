@@ -118,6 +118,14 @@ class SiteHealthChecks {
 			'async_direct_test' => static fn() => $cache->remember( 'sessions_table', static fn() => $sessions->run() ),
 		);
 
+		$lookup = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\ProductLookupTableCheck();
+		$tests['async']['woocommerce_product_lookup_table'] = array(
+			'label'             => __( 'WooCommerce product lookup table', 'woocommerce' ),
+			'test'              => 'woocommerce_product_lookup_table',
+			'async'             => true,
+			'async_direct_test' => static fn() => $cache->remember( 'product_lookup_table', static fn() => $lookup->run() ),
+		);
+
 		return $tests;
 	}
 
