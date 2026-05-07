@@ -121,12 +121,19 @@ class AbilitiesLoader {
 		 *
 		 * @param array<int, class-string> $classes Ability definition class names.
 		 */
-		$classes = apply_filters( 'woocommerce_ability_definition_classes', self::CORE_ABILITY_DEFINITION_CLASSES );
+			$classes = apply_filters( 'woocommerce_ability_definition_classes', self::CORE_ABILITY_DEFINITION_CLASSES );
 
 		if ( ! is_array( $classes ) ) {
-			return array();
+			$classes = array();
 		}
 
-		return array_values( array_unique( array_filter( $classes, 'is_string' ) ) );
+			return array_values(
+				array_unique(
+					array_filter(
+						array_merge( self::CORE_ABILITY_DEFINITION_CLASSES, $classes ),
+						'is_string'
+					)
+				)
+			);
 	}
 }

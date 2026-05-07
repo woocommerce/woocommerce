@@ -88,7 +88,7 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 		}
 
 		$note_id = $order->add_order_note(
-			sanitize_text_field( $input['note'] ),
+			wp_kses_post( $input['note'] ),
 			( (bool) ( $input['customer_note'] ?? false ) ) ? 1 : 0,
 			get_current_user_id() > 0
 		);
@@ -116,9 +116,7 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_edit_order( $input = array() ): bool {
-		$order_id = self::get_id_from_input( $input );
-
-		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'edit', $order_id );
+		return self::current_user_can_edit_order_from_input( $input );
 	}
 
 	/**
@@ -130,7 +128,10 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'            => array( 'type' => 'integer' ),
+				'id'            => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+				),
 				'note'          => array( 'type' => 'string' ),
 				'customer_note' => array(
 					'type'    => 'boolean',

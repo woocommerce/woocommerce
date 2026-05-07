@@ -80,10 +80,28 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 			return $product;
 		}
 
+		if ( empty( array_diff( array_keys( $input ), array( 'id' ) ) ) ) {
+			return new \WP_Error(
+				'woocommerce_product_update_no_fields',
+				__( 'At least one product field is required to update a product.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+		$product_config = self::get_product_config_for_product( $product );
+
+		if ( is_wp_error( $product_config ) ) {
+			return $product_config;
+		}
+
 		if (
 			isset( $input['status'] )
-			&& ProductStatus::PUBLISH === $input['status']
-			&& ProductStatus::PUBLISH !== $product->get_status()
+			&& in_array(
+				sanitize_key( $input['status'] ),
+				array( ProductStatus::PUBLISH, ProductStatus::FUTURE, ProductStatus::PRIVATE ),
+				true
+			)
+			&& sanitize_key( $input['status'] ) !== $product->get_status()
 			&& ! self::current_user_can_publish_products()
 		) {
 			return new \WP_Error(
@@ -93,8 +111,41 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 			);
 		}
 
-		self::set_product_props_from_input( $product, $input );
-		$product->save();
+		if ( isset( $input['product_type'] ) ) {
+			$product_config = self::get_product_config( $input['product_type'] );
+
+			if ( is_wp_error( $product_config ) ) {
+				return $product_config;
+			}
+
+			$product = wc_get_product_object( $product_config['wc_type'], $product->get_id() );
+
+			if ( ! $product ) {
+				return new \WP_Error(
+					'woocommerce_invalid_product_type',
+					__( 'Invalid product type.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+		}
+
+		try {
+			if ( isset( $input['product_type'] ) ) {
+				self::apply_product_type_config( $product, $product_config );
+			}
+
+			$validation_error = self::set_product_props_from_input( $product, $input, $product_config );
+			if ( is_wp_error( $validation_error ) ) {
+				return $validation_error;
+			}
+		} catch ( \WC_Data_Exception $exception ) {
+			return self::get_product_data_exception_error( $exception );
+		}
+
+		$save_error = self::save_product( $product, 'woocommerce_product_update_failed' );
+		if ( is_wp_error( $save_error ) ) {
+			return $save_error;
+		}
 
 		return array(
 			'product' => self::format_product_for_response( $product ),
@@ -134,7 +185,10 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 		$schema               = self::get_product_mutation_input_schema();
 		$schema['properties'] = array_merge(
 			array(
-				'id' => array( 'type' => 'integer' ),
+				'id' => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+				),
 			),
 			$schema['properties']
 		);

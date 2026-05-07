@@ -76,14 +76,10 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 		$include_line_items = (bool) ( $input['include_line_items'] ?? false );
 
 		if ( ! empty( $input['id'] ) ) {
-			$order = wc_get_order( absint( $input['id'] ) );
+			$order = self::get_order_from_input( $input );
 
-			if ( ! $order instanceof \WC_Order ) {
-				return new \WP_Error(
-					'woocommerce_order_not_found',
-					__( 'Order not found.', 'woocommerce' ),
-					array( 'status' => 404 )
-				);
+			if ( is_wp_error( $order ) ) {
+				return $order;
 			}
 
 			return array(
@@ -179,7 +175,10 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'                 => array( 'type' => 'integer' ),
+				'id'                 => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+				),
 				'status'             => array(
 					'type' => 'string',
 					'enum' => self::get_allowed_order_status_slugs(),
@@ -192,7 +191,10 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 				'parent'             => array( 'type' => 'integer' ),
 				'exclude'            => array(
 					'type'  => 'array',
-					'items' => array( 'type' => 'integer' ),
+					'items' => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+					),
 				),
 				'date_after'         => array(
 					'type'   => 'string',
@@ -216,7 +218,7 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 				),
 				'order'              => array(
 					'type' => 'string',
-					'enum' => array( 'asc', 'desc', 'ASC', 'DESC' ),
+					'enum' => array( 'asc', 'desc' ),
 				),
 				'include_line_items' => array(
 					'type'    => 'boolean',

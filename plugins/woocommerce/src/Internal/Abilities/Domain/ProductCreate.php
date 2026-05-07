@@ -73,8 +73,13 @@ class ProductCreate extends DomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
-		$type    = sanitize_key( $input['type'] ?? 'simple' );
-		$product = wc_get_product_object( $type );
+		$product_config = self::get_product_config( $input['product_type'] ?? 'physical' );
+
+		if ( is_wp_error( $product_config ) ) {
+			return $product_config;
+		}
+
+		$product = wc_get_product_object( $product_config['wc_type'] );
 
 		if ( ! $product ) {
 			return new \WP_Error(
@@ -84,8 +89,21 @@ class ProductCreate extends DomainAbility implements AbilityDefinition {
 			);
 		}
 
-		self::set_product_props_from_input( $product, $input );
-		$product->save();
+		try {
+			self::apply_product_type_config( $product, $product_config );
+
+			$validation_error = self::set_product_props_from_input( $product, $input, $product_config );
+			if ( is_wp_error( $validation_error ) ) {
+				return $validation_error;
+			}
+		} catch ( \WC_Data_Exception $exception ) {
+			return self::get_product_data_exception_error( $exception );
+		}
+
+		$save_error = self::save_product( $product, 'woocommerce_product_create_failed' );
+		if ( is_wp_error( $save_error ) ) {
+			return $save_error;
+		}
 
 		return array(
 			'product' => self::format_product_for_response( $product ),
@@ -113,6 +131,9 @@ class ProductCreate extends DomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		return self::get_product_mutation_input_schema();
+		$schema = self::get_product_mutation_input_schema();
+		$schema['properties']['product_type']['default'] = 'physical';
+
+		return $schema;
 	}
 }

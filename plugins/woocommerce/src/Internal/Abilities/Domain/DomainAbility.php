@@ -77,6 +77,6 @@ abstract class DomainAbility {
 	 * @return int
 	 */
 	protected static function get_id_from_input( $input ): int {
-		return is_array( $input ) && ! empty( $input['id'] ) ? absint( $input['id'] ) : 0;
+		return is_array( $input ) && ! empty( $input['id'] ) ? (int) $input['id'] : 0;
 	}
 }

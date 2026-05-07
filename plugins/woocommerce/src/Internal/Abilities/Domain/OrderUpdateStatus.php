@@ -98,10 +98,11 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 			);
 		}
 
-		$updated = $order->update_status(
-			$status,
-			isset( $input['note'] ) ? sanitize_text_field( $input['note'] ) : ''
-		);
+			$updated = $order->update_status(
+				$status,
+				isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
+				true
+			);
 
 		if ( ! $updated ) {
 			return new \WP_Error(
@@ -125,9 +126,7 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function can_edit_order( $input = array() ): bool {
-		$order_id = self::get_id_from_input( $input );
-
-		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'edit', $order_id );
+		return self::current_user_can_edit_order_from_input( $input );
 	}
 
 	/**
@@ -139,7 +138,10 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'     => array( 'type' => 'integer' ),
+				'id'     => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+				),
 				'status' => array(
 					'type' => 'string',
 					'enum' => self::get_allowed_order_status_slugs(),

@@ -105,8 +105,9 @@ trait OrderAbilityTrait {
 					'format' => 'date-time',
 				),
 				'line_items'           => array(
-					'type'  => 'array',
-					'items' => array(
+					'type'        => 'array',
+					'description' => __( 'Order line items. Only included when include_line_items is true.', 'woocommerce' ),
+					'items'       => array(
 						'type'                 => 'object',
 						'properties'           => array(
 							'id'           => array( 'type' => 'integer' ),
@@ -140,7 +141,17 @@ trait OrderAbilityTrait {
 			);
 		}
 
-		$order = wc_get_order( absint( $input['id'] ) );
+			$order_id = (int) $input['id'];
+
+		if ( $order_id < 1 ) {
+			return new \WP_Error(
+				'woocommerce_order_id_required',
+				__( 'Order ID is required.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
+			$order = wc_get_order( $order_id );
 
 		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(
@@ -150,7 +161,19 @@ trait OrderAbilityTrait {
 			);
 		}
 
-		return $order;
+			return $order;
+	}
+
+		/**
+		 * Check order edit access for an ability input payload.
+		 *
+		 * @param mixed $input Ability input.
+		 * @return bool
+		 */
+	protected static function current_user_can_edit_order_from_input( $input ): bool {
+		$order_id = self::get_id_from_input( $input );
+
+		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'edit', $order_id );
 	}
 
 	/**

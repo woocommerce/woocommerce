@@ -7,7 +7,6 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Internal\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\ProductAbilityTrait;
 
@@ -75,14 +74,10 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 	 */
 	public static function execute( array $input ) {
 		if ( ! empty( $input['id'] ) ) {
-			$product = wc_get_product( absint( $input['id'] ) );
+			$product = self::get_product_from_input( $input );
 
-			if ( ! $product ) {
-				return new \WP_Error(
-					'woocommerce_product_not_found',
-					__( 'Product not found.', 'woocommerce' ),
-					array( 'status' => 404 )
-				);
+			if ( is_wp_error( $product ) ) {
+				return $product;
 			}
 
 			return array(
@@ -100,7 +95,6 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 			'page'     => $page,
 			'paginate' => true,
 			'return'   => 'objects',
-			'status'   => ProductStatus::PUBLISH,
 		);
 
 		foreach ( array( 'status', 'type', 'sku', 'stock_status' ) as $field ) {
@@ -153,13 +147,15 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'           => array( 'type' => 'integer' ),
+				'id'           => array(
+					'type'    => 'integer',
+					'minimum' => 1,
+				),
 				'search'       => array( 'type' => 'string' ),
 				'sku'          => array( 'type' => 'string' ),
 				'status'       => array(
-					'type'    => 'string',
-					'default' => ProductStatus::PUBLISH,
-					'enum'    => self::get_product_query_status_slugs(),
+					'type' => 'string',
+					'enum' => self::get_product_query_status_slugs(),
 				),
 				'type'         => array(
 					'type' => 'string',

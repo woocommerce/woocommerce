@@ -80,7 +80,20 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 		}
 
 		$product_id = $product->get_id();
-		$deleted    = $product->delete( (bool) ( $input['force'] ?? false ) );
+		$force      = (bool) ( $input['force'] ?? false );
+		$deleted    = $product->delete( $force );
+
+		if (
+			! $deleted
+			|| ( $force && null !== get_post( $product_id ) )
+			|| ( ! $force && 'trash' !== get_post_status( $product_id ) )
+		) {
+			return new \WP_Error(
+				'woocommerce_product_delete_failed',
+				__( 'Failed to delete product.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
 
 		return array(
 			'deleted' => (bool) $deleted,
@@ -108,17 +121,20 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		return array(
-			'type'                 => 'object',
-			'properties'           => array(
-				'id'    => array( 'type' => 'integer' ),
-				'force' => array(
-					'type'    => 'boolean',
-					'default' => false,
+			return array(
+				'type'                 => 'object',
+				'properties'           => array(
+					'id'    => array(
+						'type'    => 'integer',
+						'minimum' => 1,
+					),
+					'force' => array(
+						'type'    => 'boolean',
+						'default' => false,
+					),
 				),
-			),
-			'required'             => array( 'id' ),
-			'additionalProperties' => false,
-		);
+				'required'             => array( 'id' ),
+				'additionalProperties' => false,
+			);
 	}
 }
