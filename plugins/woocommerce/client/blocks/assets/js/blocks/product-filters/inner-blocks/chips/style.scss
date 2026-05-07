@@ -24,14 +24,6 @@
 		outline-offset: 1px;
 	}
 
-	&:hover {
-		background-color: color-mix(
-			in srgb,
-			var(--wp--preset--color--contrast, currentColor) 10%,
-			transparent
-		);
-	}
-
 	.has-chip-text-color & {
 		color: var(--wc-product-filter-chips-text);
 	}
@@ -44,9 +36,9 @@
 }
 
 .wc-block-product-filter-chips__item[aria-checked="true"] {
-	background: var(--wp--preset--color--contrast, currentColor);
-	color: var(--wp--preset--color--base, Canvas);
-	border-color: var(--wp--preset--color--contrast, currentColor);
+	background: var(--wc-product-filters-text-color, CanvasText);
+	color: var(--wc-product-filters-background-color, Canvas);
+	border-color: var(--wc-product-filters-text-color, CanvasText);
 
 	.has-selected-chip-text-color & {
 		color: var(--wc-product-filter-chips-selected-text);
