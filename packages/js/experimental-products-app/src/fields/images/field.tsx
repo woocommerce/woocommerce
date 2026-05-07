@@ -138,7 +138,10 @@ function SortableImage( {
 			/>
 			<div className="woocommerce-fields-controls__image-overlay" />
 			{ showDragHandle && (
-				<div className="woocommerce-fields-controls__image-drag-handle-container">
+				<div
+					className="woocommerce-fields-controls__image-drag-handle-container"
+					aria-hidden="true"
+				>
 					<IconButton
 						icon={ dragHandle }
 						label={ __( 'Drag to reorder', 'woocommerce' ) }
