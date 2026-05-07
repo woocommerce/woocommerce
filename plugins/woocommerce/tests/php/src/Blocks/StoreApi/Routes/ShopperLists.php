@@ -39,6 +39,11 @@ class ShopperLists extends ControllerTestCase {
 	 * Setup test data.
 	 */
 	protected function setUp(): void {
+		// The shopper-lists routes are gated behind the `cart_save_for_later`
+		// feature flag, which is read inside `do_action( 'rest_api_init' )`
+		// fired by parent::setUp(). The option must be in place before then.
+		update_option( 'woocommerce_cart_save_for_later_enabled', 'yes' );
+
 		parent::setUp();
 
 		$fixtures      = new FixtureData();
@@ -75,6 +80,8 @@ class ShopperLists extends ControllerTestCase {
 		if ( $this->other_customer_id ) {
 			wp_delete_user( $this->other_customer_id );
 		}
+
+		delete_option( 'woocommerce_cart_save_for_later_enabled' );
 	}
 
 	/**
