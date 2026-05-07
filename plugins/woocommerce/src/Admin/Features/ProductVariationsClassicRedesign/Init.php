@@ -7,7 +7,6 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign;
 
-
 /**
  * Loads assets for the product variations classic redesign feature.
  */
@@ -69,5 +68,4 @@ class Init {
 			'after'
 		);
 	}
-
 }
