@@ -159,23 +159,31 @@ export function useApplyUpdate(
 
 				syncEditorState( res.merged_content );
 
-				createSuccessNotice(
-					__(
-						'Update applied · customizations preserved',
-						'woocommerce'
-					),
-					{
-						type: 'snackbar',
-						actions: [
-							{
-								label: __( 'Undo', 'woocommerce' ),
-								onClick: () => {
-									void undo( res.revision_id );
-								},
+				// Snackbar wording follows what the merchant actually chose.
+				// Smart Apply (`choices: []`) defaults every conflict to
+				// `keep_yours`, so customizations are preserved. If the
+				// drawer-driven path picked `use_core` for everything, the
+				// merchant explicitly chose to overwrite — say so plainly.
+				const allUseCore =
+					choices.length > 0 &&
+					choices.every( ( c ) => c.decision === 'use_core' );
+				const successMessage = allUseCore
+					? __( 'Update applied', 'woocommerce' )
+					: __(
+							'Update applied · customizations preserved',
+							'woocommerce'
+					  );
+				createSuccessNotice( successMessage, {
+					type: 'snackbar',
+					actions: [
+						{
+							label: __( 'Undo', 'woocommerce' ),
+							onClick: () => {
+								void undo( res.revision_id );
 							},
-						],
-					}
-				);
+						},
+					],
+				} );
 
 				return res;
 			} catch ( err: unknown ) {

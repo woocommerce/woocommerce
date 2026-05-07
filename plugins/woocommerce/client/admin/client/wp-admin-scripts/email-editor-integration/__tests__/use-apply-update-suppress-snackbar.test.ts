@@ -108,4 +108,54 @@ describe( 'useApplyUpdate — suppressSnackbarOnError option', () => {
 			expect.objectContaining( { type: 'snackbar' } )
 		);
 	} );
+
+	it( 'snackbar copy drops the "customizations preserved" suffix when every choice is use_core', async () => {
+		mockedApiFetch.mockResolvedValueOnce( {
+			merged_content: 'merged',
+			revision_id: 'rev1',
+			version_to: '9.5',
+			status: 'applied',
+			structural_skipped: false,
+			aliases_migrated: [],
+		} );
+
+		const { result } = renderHook( () => useApplyUpdate( 42 ) );
+
+		await act( async () => {
+			await result.current.apply( [
+				{ path: [ 0 ], decision: 'use_core' },
+				{ path: [ 1 ], decision: 'use_core' },
+			] );
+		} );
+
+		expect( createSuccessNoticeMock ).toHaveBeenCalledWith(
+			'Update applied',
+			expect.objectContaining( { type: 'snackbar' } )
+		);
+	} );
+
+	it( 'snackbar keeps the suffix when at least one choice is keep_yours', async () => {
+		mockedApiFetch.mockResolvedValueOnce( {
+			merged_content: 'merged',
+			revision_id: 'rev1',
+			version_to: '9.5',
+			status: 'applied',
+			structural_skipped: false,
+			aliases_migrated: [],
+		} );
+
+		const { result } = renderHook( () => useApplyUpdate( 42 ) );
+
+		await act( async () => {
+			await result.current.apply( [
+				{ path: [ 0 ], decision: 'use_core' },
+				{ path: [ 1 ], decision: 'keep_yours' },
+			] );
+		} );
+
+		expect( createSuccessNoticeMock ).toHaveBeenCalledWith(
+			'Update applied · customizations preserved',
+			expect.objectContaining( { type: 'snackbar' } )
+		);
+	} );
 } );

@@ -173,26 +173,26 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 	// glance — and the test can bypass the lambda entirely.
 	const { postId, postType, isDirty, canUserUpdate, isDismissed } = useSelect(
 		( selectFn ) => {
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const editor = ( selectFn as any )( 'core/editor' );
-			const id =
-				typeof editor?.getCurrentPostId?.() === 'number'
-					? ( editor.getCurrentPostId() as number )
-					: null;
-			const type =
-				typeof editor?.getCurrentPostType?.() === 'string'
-					? ( editor.getCurrentPostType() as string )
-					: null;
-			const dirty = Boolean( editor?.isEditedPostDirty?.() );
+			// We pass string store keys here because importing `store as
+			// editorStore` from `@wordpress/editor` pulls in a transitive
+			// module that Jest can't resolve in this package's test setup.
+			// Stable WP store keys: `core/editor`, `core` (core-data).
+			const { getCurrentPostId, getCurrentPostType, isEditedPostDirty } =
+				selectFn( 'core/editor' );
+			const { canUser } = selectFn( 'core' );
+			const { isUpdateBannerDismissedFor } = selectFn( STORE_NAME );
+
+			const rawId = getCurrentPostId();
+			const id = typeof rawId === 'number' ? rawId : null;
+			const type = getCurrentPostType() ?? null;
+			const dirty = Boolean( isEditedPostDirty() );
 
 			// `canUser` is `undefined` while the resolver is in flight; treat
 			// undefined as permissive so we don't flicker the banner away
 			// during the initial load. Only an explicit `false` denies.
-			// eslint-disable-next-line @typescript-eslint/no-explicit-any
-			const core = ( selectFn as any )( 'core' );
 			const canUpdateRaw =
 				id !== null
-					? core?.canUser?.( 'update', {
+					? canUser( 'update', {
 							kind: 'postType',
 							name: 'woo_email',
 							id,
@@ -202,11 +202,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 
 			const dismissed =
 				id !== null
-					? Boolean(
-							selectFn( STORE_NAME ).isUpdateBannerDismissedFor(
-								id
-							)
-					  )
+					? Boolean( isUpdateBannerDismissedFor( id ) )
 					: false;
 
 			return {
@@ -255,28 +251,68 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 		summary: rawSummary,
 		isLoading: isLoadingSummary,
 		error: summaryError,
+		refetch: refetchSummary,
 	} = useChangeSummary( postId, shouldRender );
 
+	// When the review drawer closes — typically right after a drawer-driven
+	// `/apply` succeeds — refresh the change-summary. If the apply made the
+	// post match core, the next response will report no diff and the
+	// `summaryShowsNoDiff` guard below unmounts the banner. (RSM-143's apply
+	// endpoint doesn't currently flip `_wc_email_template_status` to
+	// `in_sync` server-side, so we rely on the diff response to know we're
+	// done. A merchant who just opens and closes the drawer without applying
+	// triggers an extra fetch — acceptable cost for the cleanup.)
+	const isReviewDrawerOpen = useSelect(
+		( selectFn ) => selectFn( STORE_NAME ).isReviewDrawerOpen(),
+		[]
+	);
+	const prevDrawerOpenRef = useRef< boolean >( false );
+	useEffect( () => {
+		if ( prevDrawerOpenRef.current && ! isReviewDrawerOpen ) {
+			refetchSummary();
+		}
+		prevDrawerOpenRef.current = isReviewDrawerOpen;
+	}, [ isReviewDrawerOpen, refetchSummary ] );
+
+	// Cache the most recent non-null summary so the banner doesn't briefly
+	// flip variants while a refetch is in flight (which clears `rawSummary`
+	// to null inside `useChangeSummary` before the new response arrives).
+	const lastNonNullSummaryRef = useRef< ChangeSummary | null >( null );
+	if ( rawSummary !== null ) {
+		lastNonNullSummaryRef.current = rawSummary;
+	}
+	const effectiveSummary: ChangeSummary | null =
+		rawSummary ?? lastNonNullSummaryRef.current;
+
 	// Defensive: if the meta still says `core_updated_customized` but the
-	// change-summary reports identical from/to versions, the meta is
-	// stale (e.g. the upgrade routine already ran but the post entity
-	// cache hasn't refreshed). Don't render — and warn so the
-	// inconsistency shows up in dev consoles.
+	// change-summary reports no real diff (no added/removed/copy/structural
+	// changes, not a fallback), the meta is stale — e.g. the apply already
+	// ran and the server hasn't reclassified yet, or content was rewritten
+	// without bumping `_wc_email_template_version`. Treat as stale and
+	// unmount; warn for dev visibility. Note we used to check version
+	// equality here, but that hides a legitimate diff when versions match
+	// but content actually changed.
 	const summaryShowsNoDiff =
-		rawSummary !== null &&
-		rawSummary.version_from === rawSummary.version_to;
+		effectiveSummary !== null &&
+		! effectiveSummary.is_fallback &&
+		effectiveSummary.summary_lines.length === 0 &&
+		effectiveSummary.added_blocks.length === 0 &&
+		effectiveSummary.removed_blocks.length === 0 &&
+		effectiveSummary.copy_changes.length === 0 &&
+		effectiveSummary.structural_changes.length === 0;
 
 	if ( summaryShowsNoDiff ) {
 		// eslint-disable-next-line no-console
 		console.warn(
-			'[RSM-141] _wc_email_template_status is %s but change-summary reports version_from === version_to (%s). Treating as stale; banner will not render.',
-			status,
-			rawSummary?.version_to
+			'[RSM-141] _wc_email_template_status is %s but change-summary reports no real diff. Treating as stale; banner will not render.',
+			status
 		);
 	}
 
 	const finalShouldRender = shouldRender && ! summaryShowsNoDiff;
-	const summary: ChangeSummary | null = finalShouldRender ? rawSummary : null;
+	const summary: ChangeSummary | null = finalShouldRender
+		? effectiveSummary
+		: null;
 	const hasConflicts = summary !== null && summary.copy_changes.length > 0;
 
 	// `@wordpress/data`'s typed dispatch surface isn't exhaustive for

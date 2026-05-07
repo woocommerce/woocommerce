@@ -318,19 +318,42 @@ describe( 'useUpdateBanner — change summary + conflicts (6b)', () => {
 		expect( result.current.hasConflicts ).toBe( false );
 	} );
 
-	it( 'shouldRender flips to false when summary reports version_from === version_to', () => {
+	it( 'shouldRender flips to false when summary reports no real diff (status is stale)', () => {
 		const warnSpy = jest
 			.spyOn( console, 'warn' )
 			.mockImplementation( () => {} );
 		setUpMocks( {
 			summary: summaryFixture( {
-				version_from: '9.5',
-				version_to: '9.5',
+				summary_lines: [],
+				added_blocks: [],
+				removed_blocks: [],
+				copy_changes: [],
+				structural_changes: [],
+				is_fallback: false,
 			} ),
 		} );
 		const { result } = renderHook( () => useUpdateBanner() );
 		expect( result.current.shouldRender ).toBe( false );
 		warnSpy.mockRestore();
+	} );
+
+	it( 'shouldRender stays true when versions match but the diff has real changes', () => {
+		// Version-only equality is no longer a stale signal — content can
+		// change without bumping the registry version. Make sure the
+		// banner still renders in that case.
+		setUpMocks( {
+			summary: summaryFixture( {
+				version_from: '10.7.0',
+				version_to: '10.7.0',
+				summary_lines: [ 'Removed 2 Paragraph blocks' ],
+				removed_blocks: [
+					{ name: 'core/paragraph', label: 'Paragraph', path: [ 0 ] },
+					{ name: 'core/paragraph', label: 'Paragraph', path: [ 1 ] },
+				],
+			} ),
+		} );
+		const { result } = renderHook( () => useUpdateBanner() );
+		expect( result.current.shouldRender ).toBe( true );
 	} );
 } );
 
