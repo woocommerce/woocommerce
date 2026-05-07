@@ -27,14 +27,21 @@
 		return ( slug || 'generic' ).replace( /[^A-Za-z0-9_-]/g, '-' );
 	}
 
+	// Server-localized base. Falls back to `/wp-admin/` if the localize step
+	// somehow runs before the script (shouldn't happen in WP, but defensive).
+	function adminBase() {
+		var base = ( window.wcNavV2Config && window.wcNavV2Config.adminUrl ) || '/wp-admin/';
+		return base.charAt( base.length - 1 ) === '/' ? base : base + '/';
+	}
+
 	function toAdminUrl( target ) {
 		if ( ! target ) {
 			return '#';
 		}
 		if ( target.indexOf( '?' ) >= 0 ) {
-			return '/wp-admin/' + target;
+			return adminBase() + target;
 		}
-		return '/wp-admin/admin.php?page=' + target;
+		return adminBase() + 'admin.php?page=' + target;
 	}
 
 	/**
@@ -253,11 +260,13 @@
 	 * Build the back-to-WordPress rail item (first item in the Woo rail).
 	 */
 	function buildBackItem() {
-		var $li = $( '<li></li>' ).addClass(
+		var dashboardUrl = ( window.wcNavV2Config && window.wcNavV2Config.wpDashboardUrl ) || ( adminBase() + 'index.php' );
+		var label        = ( window.wcNavV2Config && window.wcNavV2Config.backLabel ) || 'Back';
+		var $li          = $( '<li></li>' ).addClass(
 			'menu-top menu-icon-generic menu-top-first wc-nav-v2-item wc-nav-v2-back-item'
 		);
 		var $a = $( '<a></a>' )
-			.attr( 'href', '/wp-admin/index.php' )
+			.attr( 'href', dashboardUrl )
 			.attr( 'id', 'wc-nav-v2-back' )
 			.addClass( 'menu-top' );
 		$a.append(
@@ -267,7 +276,7 @@
 				.append( '<br>' )
 		);
 		$a.append(
-			$( '<div></div>' ).addClass( 'wp-menu-name' ).text( 'Back' )
+			$( '<div></div>' ).addClass( 'wp-menu-name' ).text( label )
 		);
 		$li.append( $a );
 		return $li;
@@ -563,13 +572,16 @@
 		// partial failure doesn't leave users staring at an empty rail.
 		$( 'body' ).addClass( 'wc-nav-v2-rail-ready' );
 
-		// Tracks — clicks.
-		$( '#adminmenu' ).on( 'click.wcnavv2', 'a', function () {
+		// Tracks — clicks. Scope to the Woo cascade only on non-Woo pages
+		// (the WP rail is otherwise unmodified there) and to the whole rail
+		// on Woo pages (where every rail item is part of our injected tree).
+		var clickScope = isWooPage ? '#adminmenu a' : '#toplevel_page_woocommerce a';
+		$( document ).on( 'click.wcnavv2', clickScope, function () {
 			var $a      = $( this );
-			var slug    = $a.attr( 'href' ) || '';
+			var href    = $a.attr( 'href' ) || '';
 			var depth   = $a.parents( 'li.wp-has-submenu' ).length;
 			var surface = isWooPage ? 'rail' : 'hover';
-			tracks( 'navigation_v2_item_clicked', { slug: slug, depth: depth, surface: surface } );
+			tracks( 'navigation_v2_item_clicked', { href: href, depth: depth, surface: surface } );
 		} );
 
 		// Tracks — back link.

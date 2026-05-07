@@ -1046,9 +1046,16 @@ class FeaturesControllerTest extends \WC_Unit_Test_Case {
 		$features   = $controller->get_features( true );
 
 		remove_action( 'woocommerce_register_feature_definitions', array( $bootstrap, 'register_feature' ), 12 );
+		// Bootstrap also registered an `init` hook in its constructor; clean
+		// that up so it doesn't leak into later tests in this file.
+		remove_action( 'init', array( $bootstrap, 'boot_when_enabled' ), 20 );
 
 		$this->assertArrayHasKey( 'navigation_v2', $features );
 		$this->assertTrue( $features['navigation_v2']['is_experimental'] );
+		$this->assertFalse(
+			$features['navigation_v2']['is_enabled'],
+			'navigation_v2 must be disabled by default'
+		);
 	}
 
 	/**

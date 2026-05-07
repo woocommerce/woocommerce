@@ -79,9 +79,10 @@ class Bootstrap {
 			return;
 		}
 
-		new Menu_Reconciler();
-		new Renderer();
-		new Assets();
-		new Telemetry();
+		$container = wc_get_container();
+		$container->get( Menu_Reconciler::class );
+		$container->get( Renderer::class );
+		$container->get( Assets::class );
+		$container->get( Telemetry::class );
 	}
 }

@@ -17,14 +17,31 @@ use Automattic\WooCommerce\Internal\Features\FeaturesController;
  */
 class Flag_Off_Snapshot_Test extends \WC_Unit_Test_Case {
 
+	/** @var mixed */
+	private $option_backup;
+
+	/** @var mixed */
+	private $menu_backup;
+
 	public function setUp(): void {
 		parent::setUp();
+		$this->option_backup = get_option( 'woocommerce_feature_navigation_v2_enabled', null );
+		$this->menu_backup   = $GLOBALS['menu'] ?? null;
 		// Ensure flag is explicitly off.
 		update_option( 'woocommerce_feature_navigation_v2_enabled', 'no' );
 	}
 
 	public function tearDown(): void {
-		delete_option( 'woocommerce_feature_navigation_v2_enabled' );
+		if ( null === $this->option_backup ) {
+			delete_option( 'woocommerce_feature_navigation_v2_enabled' );
+		} else {
+			update_option( 'woocommerce_feature_navigation_v2_enabled', $this->option_backup );
+		}
+		if ( null === $this->menu_backup ) {
+			unset( $GLOBALS['menu'] );
+		} else {
+			$GLOBALS['menu'] = $this->menu_backup;
+		}
 		parent::tearDown();
 	}
 

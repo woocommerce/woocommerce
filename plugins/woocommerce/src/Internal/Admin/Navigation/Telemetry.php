@@ -43,10 +43,10 @@ class Telemetry {
 	/**
 	 * Fire toggled event with the new enabled state.
 	 *
-	 * @param string $old Old value.
-	 * @param string $new New value.
+	 * @param string $_old Old value (unused; required by hook signature).
+	 * @param string $new  New value.
 	 */
-	public function on_flag_toggled( $old, $new ): void {
+	public function on_flag_toggled( $_old, $new ): void {
 		if ( function_exists( 'wc_admin_record_tracks_event' ) ) {
 			wc_admin_record_tracks_event(
 				'navigation_v2_toggled',
@@ -58,10 +58,10 @@ class Telemetry {
 	/**
 	 * First-time add_option signature: ($option, $value) not ($old, $new).
 	 *
-	 * @param string $option Option name.
-	 * @param string $value  Option value.
+	 * @param string $_option Option name (unused; required by hook signature).
+	 * @param string $value   Option value.
 	 */
-	public function on_flag_toggled_first_time( $option, $value ): void {
+	public function on_flag_toggled_first_time( $_option, $value ): void {
 		if ( function_exists( 'wc_admin_record_tracks_event' ) ) {
 			wc_admin_record_tracks_event(
 				'navigation_v2_toggled',

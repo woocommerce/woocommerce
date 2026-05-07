@@ -43,6 +43,10 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 		$submenu = $this->submenu_backup;
 		wp_set_current_user( 0 );
 		wp_delete_user( $this->admin_user_id );
+		// Anonymous closures attached to woocommerce_admin_menu_tree by these
+		// tests can't be individually unhooked; clear them all so they don't
+		// leak into other suites.
+		remove_all_filters( 'woocommerce_admin_menu_tree' );
 		parent::tearDown();
 	}
 
@@ -227,5 +231,7 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 
 		$this->assertIsArray( $captured_raw_menu );
 		$this->assertSame( 'woocommerce', $captured_raw_menu[0][2] );
+		$this->assertIsArray( $captured_raw_submenu );
+		$this->assertArrayHasKey( 'woocommerce', $captured_raw_submenu );
 	}
 }

@@ -102,7 +102,7 @@ final class Context {
 	 * @return array{0:string,1:array<string,string>}
 	 */
 	private static function decompose_slug( string $slug ): array {
-		if ( str_contains( $slug, '?' ) ) {
+		if ( false !== strpos( $slug, '?' ) ) {
 			list( $path, $query ) = explode( '?', $slug, 2 );
 		} else {
 			$path  = 'admin.php';

@@ -69,7 +69,9 @@ class Assets {
 			'wcNavV2Config',
 			array(
 				'isWooPage'      => Context::is_woo_page( $tree ) ? '1' : '0',
+				'adminUrl'       => admin_url(),
 				'wpDashboardUrl' => admin_url( 'index.php' ),
+				'backLabel'      => __( 'Back', 'woocommerce' ),
 				'tree'           => $tree,
 			)
 		);

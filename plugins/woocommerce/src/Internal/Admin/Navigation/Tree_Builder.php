@@ -357,14 +357,14 @@ class Tree_Builder {
 
 		foreach ( $raw_menu as $entry ) {
 			if ( isset( $entry[2] ) ) {
-				$slugs[ $entry[2] ] = true;
+				$slugs[ self::normalize_slug( (string) $entry[2] ) ] = true;
 			}
 		}
 
 		foreach ( $raw_submenu as $children ) {
 			foreach ( $children as $entry ) {
 				if ( isset( $entry[2] ) ) {
-					$slugs[ $entry[2] ] = true;
+					$slugs[ self::normalize_slug( (string) $entry[2] ) ] = true;
 				}
 			}
 		}
