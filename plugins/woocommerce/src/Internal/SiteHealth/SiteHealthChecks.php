@@ -102,6 +102,14 @@ class SiteHealthChecks {
 			'async_direct_test' => static fn() => $cache->remember( 'action_scheduler_total', static fn() => $as_stats->run_total() ),
 		);
 
+		$auto = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\AutoloadedOptionsAudit();
+		$tests['async']['woocommerce_autoloaded_options'] = array(
+			'label'             => __( 'WooCommerce autoloaded options size', 'woocommerce' ),
+			'test'              => 'woocommerce_autoloaded_options',
+			'async'             => true,
+			'async_direct_test' => static fn() => $cache->remember( 'autoloaded_options', static fn() => $auto->run() ),
+		);
+
 		return $tests;
 	}
 
