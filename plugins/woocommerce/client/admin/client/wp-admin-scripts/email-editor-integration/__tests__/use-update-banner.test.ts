@@ -318,38 +318,26 @@ describe( 'useUpdateBanner — change summary + conflicts (6b)', () => {
 		expect( result.current.hasConflicts ).toBe( false );
 	} );
 
-	it( 'shouldRender flips to false when summary reports no real diff (status is stale)', () => {
-		const warnSpy = jest
-			.spyOn( console, 'warn' )
-			.mockImplementation( () => {} );
-		setUpMocks( {
-			summary: summaryFixture( {
-				summary_lines: [],
-				added_blocks: [],
-				removed_blocks: [],
-				copy_changes: [],
-				structural_changes: [],
-				is_fallback: false,
-			} ),
-		} );
-		const { result } = renderHook( () => useUpdateBanner() );
-		expect( result.current.shouldRender ).toBe( false );
-		warnSpy.mockRestore();
-	} );
-
-	it( 'shouldRender stays true when versions match but the diff has real changes', () => {
-		// Version-only equality is no longer a stale signal — content can
-		// change without bumping the registry version. Make sure the
-		// banner still renders in that case.
+	it( 'shouldRender flips to false when summary reports merchant reviewed this version (version_from >= version_to)', () => {
+		// Canonical detector check: when stored version >= current registry
+		// version the merchant has already reviewed this release — hide the
+		// indicator even if status is still customized (which happens after
+		// a drawer apply that kept any customizations).
 		setUpMocks( {
 			summary: summaryFixture( {
 				version_from: '10.7.0',
 				version_to: '10.7.0',
-				summary_lines: [ 'Removed 2 Paragraph blocks' ],
-				removed_blocks: [
-					{ name: 'core/paragraph', label: 'Paragraph', path: [ 0 ] },
-					{ name: 'core/paragraph', label: 'Paragraph', path: [ 1 ] },
-				],
+			} ),
+		} );
+		const { result } = renderHook( () => useUpdateBanner() );
+		expect( result.current.shouldRender ).toBe( false );
+	} );
+
+	it( 'shouldRender stays true when merchant version is older than current (version_from < version_to)', () => {
+		setUpMocks( {
+			summary: summaryFixture( {
+				version_from: '10.6.0',
+				version_to: '10.7.0',
 			} ),
 		} );
 		const { result } = renderHook( () => useUpdateBanner() );

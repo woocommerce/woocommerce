@@ -91,6 +91,26 @@ function buildSharedTracksPayload( {
 }
 
 /**
+ * Numeric semver compare. Returns negative if `a < b`, zero if equal, positive
+ * if `a > b`. Lightweight implementation — template versions don't carry
+ * pre-release / build metadata so we don't need full semver semantics.
+ * Mirrors the helper in `settings-email-listing-update-cell.tsx` so the
+ * banner and the list cell stay in lockstep.
+ */
+function compareTemplateVersions( a: string, b: string ): number {
+	const partsA = a.split( '.' ).map( ( s ) => parseInt( s, 10 ) || 0 );
+	const partsB = b.split( '.' ).map( ( s ) => parseInt( s, 10 ) || 0 );
+	const len = Math.max( partsA.length, partsB.length );
+	for ( let i = 0; i < len; i++ ) {
+		const diff = ( partsA[ i ] ?? 0 ) - ( partsB[ i ] ?? 0 );
+		if ( diff !== 0 ) {
+			return diff;
+		}
+	}
+	return 0;
+}
+
+/**
  * Compute sha1(input) as a lowercase hex string. Used to detect whether
  * the merchant has customized the post body (`had_customizations`) by
  * comparing against the `source_hash_from` recorded at upgrade time.
@@ -255,13 +275,11 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 	} = useChangeSummary( postId, shouldRender );
 
 	// When the review drawer closes — typically right after a drawer-driven
-	// `/apply` succeeds — refresh the change-summary. If the apply made the
-	// post match core, the next response will report no diff and the
-	// `summaryShowsNoDiff` guard below unmounts the banner. (RSM-143's apply
-	// endpoint doesn't currently flip `_wc_email_template_status` to
-	// `in_sync` server-side, so we rely on the diff response to know we're
-	// done. A merchant who just opens and closes the drawer without applying
-	// triggers an extra fetch — acceptable cost for the cleanup.)
+	// `/apply` succeeds — refresh the change-summary so its `version_from`
+	// reflects the merchant's now-bumped meta. The canonical
+	// `summaryShowsReviewed` check below then sees `version_from >= version_to`
+	// and unmounts the banner. A merchant who just opens and closes the
+	// drawer without applying triggers an extra fetch — acceptable cost.
 	const isReviewDrawerOpen = useSelect(
 		( selectFn ) => selectFn( STORE_NAME ).isReviewDrawerOpen(),
 		[]
@@ -284,32 +302,24 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 	const effectiveSummary: ChangeSummary | null =
 		rawSummary ?? lastNonNullSummaryRef.current;
 
-	// Defensive: if the meta still says `core_updated_customized` but the
-	// change-summary reports no real diff (no added/removed/copy/structural
-	// changes, not a fallback), the meta is stale — e.g. the apply already
-	// ran and the server hasn't reclassified yet, or content was rewritten
-	// without bumping `_wc_email_template_version`. Treat as stale and
-	// unmount; warn for dev visibility. Note we used to check version
-	// equality here, but that hides a legitimate diff when versions match
-	// but content actually changed.
-	const summaryShowsNoDiff =
+	// Canonical "has the merchant reviewed this version?" check, mirroring
+	// the detector docblock's `version_compare( $reviewed, $current, '<' )`
+	// formula. When the change-summary reports `version_from >= version_to`
+	// the merchant's stored version is at-or-above the registry's current,
+	// so they've reviewed this release — even if status stays
+	// `core_updated_customized` because they kept some customizations on
+	// purpose during a drawer apply. Hide the indicator; the cell uses
+	// the same check via `currentVersion` on the slotfill payload.
+	const summaryShowsReviewed =
 		effectiveSummary !== null &&
-		! effectiveSummary.is_fallback &&
-		effectiveSummary.summary_lines.length === 0 &&
-		effectiveSummary.added_blocks.length === 0 &&
-		effectiveSummary.removed_blocks.length === 0 &&
-		effectiveSummary.copy_changes.length === 0 &&
-		effectiveSummary.structural_changes.length === 0;
+		effectiveSummary.version_from !== '' &&
+		effectiveSummary.version_to !== '' &&
+		compareTemplateVersions(
+			effectiveSummary.version_from,
+			effectiveSummary.version_to
+		) >= 0;
 
-	if ( summaryShowsNoDiff ) {
-		// eslint-disable-next-line no-console
-		console.warn(
-			'[RSM-141] _wc_email_template_status is %s but change-summary reports no real diff. Treating as stale; banner will not render.',
-			status
-		);
-	}
-
-	const finalShouldRender = shouldRender && ! summaryShowsNoDiff;
+	const finalShouldRender = shouldRender && ! summaryShowsReviewed;
 	const summary: ChangeSummary | null = finalShouldRender
 		? effectiveSummary
 		: null;
