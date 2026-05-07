@@ -4858,7 +4858,7 @@ table.wc-shipping-classes {
 
 		a.wc-shipping-zone-actions,
 		a.wc-shipping-zone-actions:hover {
-			color: #cc1818;
+			color: var(--wc-destructive, #cc1818);
 		}
 	}
 
@@ -9630,5 +9630,4 @@ body.woocommerce-settings-payments-section_legacy {
 		background: #f0f0f1;
 	}
 }
-
 
