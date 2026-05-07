@@ -81,7 +81,27 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 
 		$product_id = $product->get_id();
 		$force      = (bool) ( $input['force'] ?? false );
-		$deleted    = $product->delete( $force );
+
+		/**
+		 * Filter whether a product supports trashing.
+		 *
+		 * Reuses the REST product trashability filter so custom trash support is
+		 * consistent across REST and domain abilities.
+		 *
+		 * @param bool        $supports_trash Whether the product supports trashing.
+		 * @param \WC_Product $product        The product being considered for trashing.
+		 */
+		$supports_trash = apply_filters( 'woocommerce_rest_product_object_trashable', EMPTY_TRASH_DAYS > 0, $product );
+
+		if ( ! $force && ! $supports_trash ) {
+			return new \WP_Error(
+				'woocommerce_trash_not_supported',
+				__( 'Trash is disabled on this site. Pass force: true to permanently delete.', 'woocommerce' ),
+				array( 'status' => 501 )
+			);
+		}
+
+		$deleted = $product->delete( $force );
 
 		if (
 			! $deleted

@@ -1125,6 +1125,30 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject soft deletes when product trashing is not supported.
+	 */
+	public function test_product_delete_rejects_soft_delete_when_trash_not_supported(): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+
+		add_filter( 'woocommerce_rest_product_object_trashable', '__return_false' );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
+				array(
+					'id' => $product->get_id(),
+				)
+			);
+		} finally {
+			remove_filter( 'woocommerce_rest_product_object_trashable', '__return_false' );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_trash_not_supported', $result->get_error_code() );
+		$this->assertNotSame( 'trash', get_post_status( $product->get_id() ) );
+	}
+
+	/**
 	 * @testdox Should return an error when product deletion is blocked.
 	 */
 	public function test_product_delete_returns_error_when_delete_is_blocked(): void {
