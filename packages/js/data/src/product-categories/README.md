@@ -1,6 +1,6 @@
 # Product Categories Data Store
 
-This data store provides functions to interact with the [Product Category REST endpoints](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-categories).
+This data store provides functions to interact with the [Product Category REST endpoints](https://developer.woocommerce.com/docs/apis/rest-api/v3/product-categories/).
 Under the hood this data store makes use of the [CRUD data store](../crud/README.md).
 
 **Note: This data store is listed as experimental still as it is still in active development.**

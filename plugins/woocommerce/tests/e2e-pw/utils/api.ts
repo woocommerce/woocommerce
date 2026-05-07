@@ -133,9 +133,9 @@ export const create = {
 	/**
 	 * Batch create product variations.
 	 *
-	 * @see {@link [Batch update product variations](https://woocommerce.github.io/woocommerce-rest-api-docs/#batch-update-product-variations)}
+	 * @see {@link [Batch update product variations](https://developer.woocommerce.com/docs/apis/rest-api/v3/product-variations/#batch-update-product-variations)}
 	 * @param {number|string} productId  Product ID to add variations to
-	 * @param {object[]}      variations Array of variations to add. See [Product variation properties](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-variation-properties)
+	 * @param {object[]}      variations Array of variations to add. See [Product variation properties](https://developer.woocommerce.com/docs/apis/rest-api/v3/product-variations/#product-variation-properties)
 	 * @return {Promise<number[]>} Array of variation ID's.
 	 */
 	productVariations: async (

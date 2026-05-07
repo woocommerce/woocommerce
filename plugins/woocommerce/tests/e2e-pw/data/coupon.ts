@@ -3,7 +3,7 @@
  *
  * For more details on a coupon's properties, see:
  *
- * https://woocommerce.github.io/woocommerce-rest-api-docs/#coupons
+ * https://developer.woocommerce.com/docs/apis/rest-api/v3/coupons/
  *
  */
 export const coupon = {

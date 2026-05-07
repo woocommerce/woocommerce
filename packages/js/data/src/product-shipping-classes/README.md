@@ -1,6 +1,6 @@
 # Product Shipping Classes Data Store
 
-This data store provides functions to interact with the [Product Shipping Class REST endpoints](https://woocommerce.github.io/woocommerce-rest-api-docs/#product-shipping-classes).
+This data store provides functions to interact with the [Product Shipping Class REST endpoints](https://developer.woocommerce.com/docs/apis/rest-api/v3/product-shipping-classes/).
 Under the hood this data store makes use of the [CRUD data store](../crud/README.md).
 
 **Note: This data store is listed as experimental still as it is still in active development.**

@@ -12,7 +12,7 @@ import {
  *
  * For more details on the order properties, see:
  *
- * https://woocommerce.github.io/woocommerce-rest-api-docs/#order-properties
+ * https://developer.woocommerce.com/docs/apis/rest-api/v3/orders/#order-properties
  */
 export const order = {
 	payment_method: '',
