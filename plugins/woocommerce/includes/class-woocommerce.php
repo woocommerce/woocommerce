@@ -54,7 +54,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '10.8.0-dev';
+	public $version = '10.9.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -378,6 +378,8 @@ final class WooCommerce {
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
 		$container->get( OrderMilestoneEasterEgg::class );
+		$container->get( Automattic\WooCommerce\Internal\OrderReviews\Scheduler::class );
+		$container->get( Automattic\WooCommerce\Internal\OrderReviews\Endpoint::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
