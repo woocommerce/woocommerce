@@ -113,6 +113,13 @@ class SiteHealthChecksTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'recommended', $result['status'] );
 	}
 
+	public function test_legacy_rest_api_check_good_when_disabled() {
+		update_option( 'woocommerce_api_enabled', 'no' );
+		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		$result = call_user_func( $tests['direct']['woocommerce_legacy_rest_api']['test'] );
+		$this->assertSame( 'good', $result['status'] );
+	}
+
 	// -------------------------------------------------------------------------
 	// Task 6: HTTPS and payment gateway checks.
 	// -------------------------------------------------------------------------
@@ -138,9 +145,18 @@ class SiteHealthChecksTest extends WC_Unit_Test_Case {
 		update_option( 'woocommerce_cheque_settings', array( 'enabled' => 'no' ) );
 		update_option( 'woocommerce_cod_settings', array( 'enabled' => 'no' ) );
 		update_option( 'woocommerce_paypal_settings', array( 'enabled' => 'no' ) );
+		WC()->payment_gateways()->init();
 		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
 		$result = call_user_func( $tests['direct']['woocommerce_payment_gateway']['test'] );
 		$this->assertSame( 'recommended', $result['status'] );
+	}
+
+	public function test_payment_gateway_check_good_when_gateway_enabled() {
+		update_option( 'woocommerce_bacs_settings', array( 'enabled' => 'yes', 'title' => 'Bank Transfer' ) );
+		WC()->payment_gateways()->init();
+		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		$result = call_user_func( $tests['direct']['woocommerce_payment_gateway']['test'] );
+		$this->assertSame( 'good', $result['status'] );
 	}
 
 	// -------------------------------------------------------------------------
