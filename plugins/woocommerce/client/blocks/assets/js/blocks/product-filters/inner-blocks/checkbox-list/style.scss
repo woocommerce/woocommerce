@@ -123,6 +123,32 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
 	white-space: nowrap;
 }
 
+.wc-block-product-filter-checkbox-list__color-swatch {
+	border-radius: 50%;
+	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+	display: inline-block;
+	flex-shrink: 0;
+	height: 1.25em;
+	width: 1.25em;
+
+	&.is-empty {
+		background: linear-gradient(
+			to bottom right,
+			transparent calc(50% - 0.5px),
+			color-mix(in srgb, currentColor 30%, transparent) calc(50% - 0.5px),
+			color-mix(in srgb, currentColor 30%, transparent) calc(50% + 0.5px),
+			transparent calc(50% + 0.5px)
+		);
+	}
+}
+
+.wc-block-product-filter-checkbox-list__label:has(
+	input.wc-block-product-filter-checkbox-list__input:checked
+) .wc-block-product-filter-checkbox-list__color-swatch {
+	outline: var(--wp-admin-border-width-focus, 2px) solid currentColor;
+	outline-offset: 2px;
+}
+
 .wc-block-product-filter-checkbox-list__stars {
 	display: inline-block;
 	height: 1.55em;
