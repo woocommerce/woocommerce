@@ -58,11 +58,16 @@ class OrderMilestoneEasterEgg {
 		$all_messages = $this->get_milestone_messages();
 		$labels       = $this->get_ui_labels();
 
+		$encoded_milestones = wp_json_encode( $milestone_map );
+		$encoded_svg        = wp_json_encode( $svg_data );
+		$encoded_messages   = wp_json_encode( $all_messages );
+		$encoded_labels     = wp_json_encode( $labels );
+
 		$script = $this->get_script_template();
-		$script = str_replace( '__MILESTONES__',     wp_json_encode( $milestone_map ) ?: '{}', $script );
-		$script = str_replace( '__SVG_DATA__',       wp_json_encode( $svg_data ) ?: '{}', $script );
-		$script = str_replace( '__ALL_MILESTONES__', wp_json_encode( $all_messages ) ?: '{}', $script );
-		$script = str_replace( '__LABELS__',         wp_json_encode( $labels ) ?: '{}', $script );
+		$script = str_replace( '__MILESTONES__', false !== $encoded_milestones ? $encoded_milestones : '{}', $script );
+		$script = str_replace( '__SVG_DATA__', false !== $encoded_svg ? $encoded_svg : '{}', $script );
+		$script = str_replace( '__ALL_MILESTONES__', false !== $encoded_messages ? $encoded_messages : '{}', $script );
+		$script = str_replace( '__LABELS__', false !== $encoded_labels ? $encoded_labels : '{}', $script );
 
 		wp_add_inline_script( 'jquery-core', $script, 'after' );
 	}
@@ -75,28 +80,32 @@ class OrderMilestoneEasterEgg {
 	private function get_milestone_map(): array {
 		$all_real_order_ids = array_values(
 			(array) wc_get_orders(
-			array(
-				'limit'      => 1001,
-				'orderby'    => 'date',
-				'order'      => 'ASC',
-				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-					'relation' => 'AND',
-					array(
-						'key'     => 'transaction_id',
-						'compare' => 'EXISTS',
+				array(
+					'limit'      => 1001,
+					'orderby'    => 'date',
+					'order'      => 'ASC',
+					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
+						'relation' => 'AND',
+						array(
+							'key'     => 'transaction_id',
+							'compare' => 'EXISTS',
+						),
+						array(
+							'key'     => 'wcpay_mode',
+							'value'   => 'live',
+							'compare' => '=',
+						),
 					),
-					array(
-						'key'     => 'wcpay_mode',
-						'value'   => 'live',
-						'compare' => '=',
-					),
-				),
-				'return'     => 'ids',
-			)
+					'return'     => 'ids',
+				)
 			)
 		);
 
-		$positions     = array( 0 => 'first', 99 => 'hundred', 999 => 'thousand' );
+		$positions = array(
+			0   => 'first',
+			99  => 'hundred',
+			999 => 'thousand',
+		);
 		$messages      = $this->get_milestone_messages();
 		$milestone_map = array();
 
