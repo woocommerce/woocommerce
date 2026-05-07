@@ -9,26 +9,6 @@ namespace Automattic\WooCommerce\Internal\Api;
  */
 class Utils {
 	/**
-	 * Assert that the current user has the given WordPress capability.
-	 *
-	 * Throws a GraphQL UNAUTHORIZED error if the check fails. Intended to
-	 * be called from generated resolver methods so the capability-check
-	 * boilerplate doesn't have to be repeated in every resolver.
-	 *
-	 * @param string $capability A WordPress capability slug.
-	 *
-	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error When the current user lacks the capability.
-	 */
-	public static function check_current_user_can( string $capability ): void {
-		if ( ! current_user_can( $capability ) ) {
-			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
-				'You do not have permission to perform this action.',
-				extensions: array( 'code' => 'UNAUTHORIZED' )
-			);
-		}
-	}
-
-	/**
 	 * Compute the complexity cost of a paginated connection field.
 	 *
 	 * Used as the `complexity` callable on every generated resolver field
@@ -120,7 +100,7 @@ class Utils {
 	 * into spec-compliant GraphQL errors.
 	 *
 	 * Mirror of execute_command() for the authorize step. Needed because an
-	 * authorize() call can throw an ApiException (e.g. AuthorizationException
+	 * authorize() call can throw an ApiException (e.g. UnauthorizedException
 	 * when a target record does not exist); without this wrapper the
 	 * exception would propagate up to webonyx and lose its error code and
 	 * user-visible message on its way through the generic error formatter.
@@ -135,6 +115,163 @@ class Utils {
 		return self::translate_exceptions(
 			static fn() => $command->authorize( ...$authorize_args )
 		);
+	}
+
+	/**
+	 * Build the GraphQL error to throw when an authorization check fails.
+	 *
+	 * Distinguishes the two HTTP-correct shapes:
+	 *  - **UNAUTHORIZED (401)** when the principal is anonymous — the caller
+	 *    could plausibly fix it by authenticating, so the response invites
+	 *    re-auth.
+	 *  - **FORBIDDEN (403)** otherwise — the principal is recognised but
+	 *    isn't allowed; re-authenticating wouldn't help.
+	 *
+	 * The "anonymous" check is opt-in by convention: the principal's
+	 * `is_authenticated(): bool` method, when present, decides. Principals
+	 * that don't define it fall through to FORBIDDEN — generated resolvers
+	 * still emit a coded error, just without the 401/403 distinction.
+	 *
+	 * @param object $principal The resolved request principal.
+	 */
+	public static function build_authorization_error( object $principal ): \Automattic\WooCommerce\Internal\Api\Schema\Error {
+		$is_anonymous = method_exists( $principal, 'is_authenticated' ) && ! $principal->is_authenticated();
+		return new \Automattic\WooCommerce\Internal\Api\Schema\Error(
+			$is_anonymous ? 'Authentication required.' : 'You do not have permission to perform this action.',
+			extensions: array( 'code' => $is_anonymous ? 'UNAUTHORIZED' : 'FORBIDDEN' )
+		);
+	}
+
+	/**
+	 * Compute the value `_preauthorized` would carry for the given command and
+	 * principal (the AND of the autodiscovered authorization attributes'
+	 * authorize() outcomes).
+	 *
+	 * Lets code-API callers (and tests) ask "would this command's attribute-based
+	 * authorization grant access to this principal?" without going through the
+	 * GraphQL pipeline.
+	 *
+	 * Note that it returns true when the command has no authorization attributes
+	 * (in that case the command's own `authorize()` method, if any, is the sole
+	 * guard; and consulting it requires running the command, which this helper
+	 * deliberately doesn't do).
+	 *
+	 * Note: this provides the attribute-level authorization only. A command with
+	 * both attributes and an `authorize()` method composes the two via the
+	 * `_preauthorized` infrastructure parameter; this helper returns the value
+	 * that `_preauthorized` would carry, not the final `authorize()` outcome.
+	 *
+	 * @param string $command_fqcn Fully-qualified command class name.
+	 * @param object $principal    The resolved principal. Anonymous requests are represented by a sentinel principal (e.g. {@see \Automattic\WooCommerce\Api\Infrastructure\Principal} whose underlying WP_User has ID=0), not by null.
+	 *
+	 * @throws \InvalidArgumentException When `$command_fqcn` does not name an existing class.
+	 */
+	public static function compute_preauthorized( string $command_fqcn, object $principal ): bool {
+		if ( ! class_exists( $command_fqcn ) ) {
+			throw new \InvalidArgumentException(
+				sprintf( 'Class %s does not exist.', esc_html( $command_fqcn ) )
+			);
+		}
+		$ref    = new \ReflectionClass( $command_fqcn );
+		$direct = self::collect_authorization_instances( $ref );
+		$usages = $direct;
+		if ( empty( $usages ) ) {
+			// No direct attribute — collect from the entire ancestor tree:
+			// the parent chain plus each ancestor's traits and interfaces
+			// (recursively). All inherited sources contribute as peers; the
+			// only thing direct attributes shadow is the inherited tree as a
+			// whole. Mirrors
+			// {@see \Automattic\WooCommerce\Internal\Api\DesignTime\Scripts\ApiBuilder::resolve_authorization()}.
+			$visited = array();
+			$stack   = array_merge(
+				$ref->getParentClass() ? array( $ref->getParentClass() ) : array(),
+				$ref->getTraits(),
+				$ref->getInterfaces(),
+			);
+			while ( ! empty( $stack ) ) {
+				$source = array_shift( $stack );
+				$name   = $source->getName();
+				if ( in_array( $name, $visited, true ) ) {
+					continue;
+				}
+				$visited[] = $name;
+				$usages    = array_merge( $usages, self::collect_authorization_instances( $source ) );
+				if ( false !== $source->getParentClass() ) {
+					$stack[] = $source->getParentClass();
+				}
+				$stack = array_merge( $stack, $source->getTraits(), $source->getInterfaces() );
+			}
+		}
+
+		foreach ( $usages as $instance ) {
+			$auth_method = new \ReflectionMethod( $instance, 'authorize' );
+			$result      = $auth_method->getNumberOfParameters() > 0
+				? $instance->authorize( $principal )
+				: $instance->authorize();
+			if ( ! $result ) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Collect attribute instances declared on $source whose class declares an
+	 * authorization-shaped `authorize()` method.
+	 *
+	 * Mirrors {@see \Automattic\WooCommerce\Internal\Api\DesignTime\Scripts\ApiBuilder::collect_authorization_usages()}
+	 * for the runtime path: same direct-then-inherited precedence, same
+	 * "any class with a bool-returning authorize() method qualifies" rule.
+	 *
+	 * @param \ReflectionClass $source Class/trait/interface to read attributes from.
+	 *
+	 * @return array<int, object>
+	 */
+	private static function collect_authorization_instances( \ReflectionClass $source ): array {
+		$instances = array();
+		foreach ( $source->getAttributes() as $attr ) {
+			$name = $attr->getName();
+			if ( ! class_exists( $name ) || ! method_exists( $name, 'authorize' ) ) {
+				continue;
+			}
+			$method = new \ReflectionMethod( $name, 'authorize' );
+			if ( ! self::authorize_method_shape_is_valid( $method ) ) {
+				continue;
+			}
+			$instances[] = $attr->newInstance();
+		}
+		return $instances;
+	}
+
+	/**
+	 * Whether a method's shape matches the authorization-attribute contract:
+	 * public, non-static, returns bool, and takes either 0 parameters or
+	 * exactly 1 typed, non-nullable parameter (the principal — anonymous
+	 * requests use a sentinel non-null principal, so attributes never see null).
+	 *
+	 * Mirrors the build-time `ApiBuilder::validate_attribute_authorize_shape()`
+	 * check so the runtime helper recognises the same set of attributes ApiBuilder
+	 * would have emitted into a resolver.
+	 *
+	 * @param \ReflectionMethod $method The method to inspect.
+	 */
+	private static function authorize_method_shape_is_valid( \ReflectionMethod $method ): bool {
+		if ( $method->isStatic() || ! $method->isPublic() ) {
+			return false;
+		}
+		$return_type = $method->getReturnType();
+		if ( ! $return_type instanceof \ReflectionNamedType || 'bool' !== $return_type->getName() ) {
+			return false;
+		}
+		$params = $method->getParameters();
+		if ( count( $params ) > 1 ) {
+			return false;
+		}
+		if ( 0 === count( $params ) ) {
+			return true;
+		}
+		$param_type = $params[0]->getType();
+		return $param_type instanceof \ReflectionNamedType && ! $param_type->allowsNull();
 	}
 
 	/**

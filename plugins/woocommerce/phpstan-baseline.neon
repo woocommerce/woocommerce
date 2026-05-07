@@ -51616,12 +51616,6 @@ parameters:
 			path: src/Blocks/BlockTypes/CatalogSorting.php
 
 		-
-			message: '#^Variable \$styles_and_classes on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: src/Blocks/BlockTypes/CatalogSorting.php
-
-		-
 			message: '#^Cannot call method allocate_and_return_parsed_attributes\(\) on Automattic\\Block_Scanner\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -53804,7 +53798,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterRating.php
-
 
 		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, Closure\(mixed\)\: \(0\|1\) given\.$#'
