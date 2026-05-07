@@ -83,6 +83,12 @@ class SiteHealthChecks {
 			'test'  => array( $this, 'check_object_cache' ),
 		);
 
+		$postmeta_index = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\PostmetaIndexCheck();
+		$tests['direct'][ $postmeta_index->get_id() ] = array(
+			'label' => $postmeta_index->get_label(),
+			'test'  => array( $postmeta_index, 'run' ),
+		);
+
 		return $tests;
 	}
 
