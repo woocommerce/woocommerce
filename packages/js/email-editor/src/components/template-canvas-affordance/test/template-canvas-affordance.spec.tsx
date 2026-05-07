@@ -79,8 +79,36 @@ const addEditorCanvas = () => {
 	document.body.appendChild( iframe );
 	iframe.contentDocument?.body.insertAdjacentHTML(
 		'beforeend',
-		'<div><div class="block-editor-block-list__layout is-root-container"></div></div>'
+		[
+			'<div>',
+			'<div class="block-editor-block-list__layout is-root-container">',
+			'<div class="block-editor-block-list__block" data-block="template-header">',
+			'<h1 class="wp-block-site-title">testingbun</h1>',
+			'</div>',
+			'<div class="block-editor-block-list__block" data-block="email-content">',
+			'<h2>New order</h2>',
+			'</div>',
+			'</div>',
+			'</div>',
+		].join( '' )
 	);
+
+	const templateHeader = iframe.contentDocument?.querySelector(
+		'[data-block="template-header"]'
+	);
+
+	Object.defineProperty( templateHeader, 'getBoundingClientRect', {
+		value: () => ( {
+			bottom: 148,
+			height: 64,
+			left: 120,
+			right: 720,
+			top: 84,
+			width: 600,
+			x: 120,
+			y: 84,
+		} ),
+	} );
 
 	return iframe;
 };
@@ -91,7 +119,7 @@ describe( 'TemplateCanvasAffordance', () => {
 		document.body.innerHTML = '';
 	} );
 
-	it( 'renders an edit template affordance before the editor canvas content', async () => {
+	it( 'renders a selectable frame over the template area without showing the toolbar by default', async () => {
 		const iframe = addEditorCanvas();
 		setupUseSelectMock();
 
@@ -104,6 +132,36 @@ describe( 'TemplateCanvasAffordance', () => {
 				)
 			).toBeInTheDocument();
 		} );
+
+		expect(
+			iframe.contentDocument?.querySelector(
+				'.woocommerce-email-editor-template-area-affordance__frame'
+			)
+		).toBeInTheDocument();
+		expect( iframe.contentDocument?.body ).not.toHaveTextContent(
+			'Edit template'
+		);
+	} );
+
+	it( 'shows the toolbar after the template area is selected', async () => {
+		const iframe = addEditorCanvas();
+		setupUseSelectMock();
+
+		render( <TemplateCanvasAffordance /> );
+
+		await waitFor( () => {
+			expect(
+				iframe.contentDocument?.querySelector(
+					'.woocommerce-email-editor-template-area-affordance__frame'
+				)
+			).toBeInTheDocument();
+		} );
+
+		fireEvent.click(
+			iframe.contentDocument?.querySelector(
+				'.woocommerce-email-editor-template-area-affordance__frame'
+			) as HTMLDivElement
+		);
 
 		expect( iframe.contentDocument?.body ).toHaveTextContent( 'Template' );
 		expect( iframe.contentDocument?.body ).toHaveTextContent(
@@ -119,13 +177,21 @@ describe( 'TemplateCanvasAffordance', () => {
 
 		await waitFor( () => {
 			expect(
-				iframe.contentDocument?.querySelector( 'button' )
+				iframe.contentDocument?.querySelector(
+					'.woocommerce-email-editor-template-area-affordance__frame'
+				)
 			).toBeInTheDocument();
 		} );
 
 		fireEvent.click(
 			iframe.contentDocument?.querySelector(
-				'button'
+				'.woocommerce-email-editor-template-area-affordance__frame'
+			) as HTMLDivElement
+		);
+
+		fireEvent.click(
+			iframe.contentDocument?.querySelector(
+				'.woocommerce-email-editor-template-area-affordance__button'
 			) as HTMLButtonElement
 		);
 

@@ -4,7 +4,13 @@
 import { Button } from '@wordpress/components';
 import { useSelect } from '@wordpress/data';
 import { store as editorStore } from '@wordpress/editor';
-import { createPortal, useEffect, useState } from '@wordpress/element';
+import {
+	createPortal,
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+} from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon, layout } from '@wordpress/icons';
 
@@ -20,6 +26,19 @@ type NavigateToEntityRecord = ( params: {
 	postId: number | string;
 	postType: string;
 } ) => void;
+
+type AffordancePosition = {
+	frame: {
+		height: number;
+		left: number;
+		top: number;
+		width: number;
+	};
+	toolbar: {
+		left: number;
+		top: number;
+	};
+};
 
 function getCanvasDocument(): Document | null {
 	const frames = Array.from( document.querySelectorAll( 'iframe' ) );
@@ -47,13 +66,23 @@ function getCanvasRoot( canvasDocument: Document ): Element | null {
 	);
 }
 
-function createSlot( canvasDocument: Document ): HTMLDivElement | null {
-	const canvasRoot = getCanvasRoot( canvasDocument );
+function getTemplateTarget( canvasDocument: Document ): Element | null {
+	const templateBlock = canvasDocument.querySelector(
+		'.wp-block-site-logo, .wp-block-site-title'
+	);
 
-	if ( ! canvasRoot?.parentElement ) {
-		return null;
+	if ( templateBlock ) {
+		return (
+			templateBlock.closest( '[data-block]' ) ||
+			templateBlock.closest( '.block-editor-block-list__block' ) ||
+			templateBlock
+		);
 	}
 
+	return getCanvasRoot( canvasDocument )?.firstElementChild || null;
+}
+
+function createSlot( canvasDocument: Document ): HTMLDivElement {
 	let slot = canvasDocument.getElementById(
 		SLOT_ID
 	) as HTMLDivElement | null;
@@ -63,16 +92,21 @@ function createSlot( canvasDocument: Document ): HTMLDivElement | null {
 		slot.id = SLOT_ID;
 		slot.className =
 			'woocommerce-email-editor-template-area-affordance-slot';
-		canvasRoot.parentElement.insertBefore( slot, canvasRoot );
+		canvasDocument.body.appendChild( slot );
 	}
 
 	return slot;
 }
 
 export function TemplateCanvasAffordance() {
+	const [ isActive, setIsActive ] = useState( false );
 	const [ portalSlot, setPortalSlot ] = useState< HTMLDivElement | null >(
 		null
 	);
+	const [ position, setPosition ] = useState< AffordancePosition | null >(
+		null
+	);
+	const targetRef = useRef< Element | null >( null );
 
 	const {
 		canEditTemplates,
@@ -100,9 +134,52 @@ export function TemplateCanvasAffordance() {
 		!! template?.id &&
 		!! onNavigateToEntityRecord;
 
+	const updatePosition = useCallback( () => {
+		const target = targetRef.current;
+		const canvasDocument = target?.ownerDocument;
+		const canvasWindow = canvasDocument?.defaultView;
+
+		if ( ! target || ! canvasDocument || ! canvasWindow ) {
+			setPosition( null );
+			return;
+		}
+
+		const rect = target.getBoundingClientRect();
+
+		if ( ! rect.width || ! rect.height ) {
+			setPosition( null );
+			return;
+		}
+
+		const scrollX = canvasWindow.scrollX;
+		const scrollY = canvasWindow.scrollY;
+		const toolbarHeight = 50;
+		const toolbarGap = 4;
+		const toolbarTop =
+			rect.top > toolbarHeight + toolbarGap
+				? rect.top + scrollY - toolbarHeight - toolbarGap
+				: rect.bottom + scrollY + toolbarGap;
+
+		setPosition( {
+			frame: {
+				height: rect.height + 2,
+				left: rect.left + scrollX - 1,
+				top: rect.top + scrollY - 1,
+				width: rect.width + 2,
+			},
+			toolbar: {
+				left: rect.left + scrollX - 1,
+				top: toolbarTop,
+			},
+		} );
+	}, [] );
+
 	useEffect( () => {
 		if ( ! canShowAffordance ) {
+			setIsActive( false );
 			setPortalSlot( null );
+			setPosition( null );
+			targetRef.current = null;
 			return undefined;
 		}
 
@@ -111,20 +188,18 @@ export function TemplateCanvasAffordance() {
 
 		const mount = () => {
 			const canvasDocument = getCanvasDocument();
+			const templateTarget =
+				canvasDocument && getTemplateTarget( canvasDocument );
 
-			if ( ! canvasDocument ) {
+			if ( ! canvasDocument || ! templateTarget ) {
 				animationFrame = window.requestAnimationFrame( mount );
 				return;
 			}
 
 			mountedSlot = createSlot( canvasDocument );
-
-			if ( ! mountedSlot ) {
-				animationFrame = window.requestAnimationFrame( mount );
-				return;
-			}
-
+			targetRef.current = templateTarget;
 			setPortalSlot( mountedSlot );
+			updatePosition();
 		};
 
 		mount();
@@ -135,41 +210,114 @@ export function TemplateCanvasAffordance() {
 			}
 
 			mountedSlot?.remove();
+			setIsActive( false );
 			setPortalSlot( null );
+			setPosition( null );
+			targetRef.current = null;
 		};
-	}, [ canShowAffordance ] );
+	}, [ canShowAffordance, updatePosition ] );
 
-	if ( ! canShowAffordance || ! portalSlot ) {
+	useEffect( () => {
+		const canvasDocument = portalSlot?.ownerDocument;
+		const canvasWindow = canvasDocument?.defaultView;
+
+		if ( ! portalSlot || ! canvasDocument || ! canvasWindow ) {
+			return undefined;
+		}
+
+		const closeOnOutsidePointerDown = ( event: MouseEvent ) => {
+			if (
+				event.target instanceof Node &&
+				portalSlot.contains( event.target )
+			) {
+				return;
+			}
+
+			setIsActive( false );
+		};
+
+		canvasDocument.addEventListener(
+			'mousedown',
+			closeOnOutsidePointerDown
+		);
+		canvasDocument.addEventListener( 'scroll', updatePosition, true );
+		canvasWindow.addEventListener( 'resize', updatePosition );
+		window.addEventListener( 'resize', updatePosition );
+		updatePosition();
+
+		return () => {
+			canvasDocument.removeEventListener(
+				'mousedown',
+				closeOnOutsidePointerDown
+			);
+			canvasDocument.removeEventListener(
+				'scroll',
+				updatePosition,
+				true
+			);
+			canvasWindow.removeEventListener( 'resize', updatePosition );
+			window.removeEventListener( 'resize', updatePosition );
+		};
+	}, [ portalSlot, updatePosition ] );
+
+	if ( ! canShowAffordance || ! portalSlot || ! position ) {
 		return null;
 	}
 
 	return createPortal(
-		<div className="woocommerce-email-editor-template-area-affordance">
-			<span
-				className="woocommerce-email-editor-template-area-affordance__label"
+		<>
+			<div
+				className={
+					isActive
+						? 'woocommerce-email-editor-template-area-affordance__frame is-active'
+						: 'woocommerce-email-editor-template-area-affordance__frame'
+				}
+				role="button"
+				tabIndex={ 0 }
 				aria-label={ __( 'Template area', 'woocommerce' ) }
-				title={ __( 'Template area', 'woocommerce' ) }
-			>
-				<Icon icon={ layout } size={ 24 } />
-				<span>{ __( 'Template', 'woocommerce' ) }</span>
-			</span>
-			<Button
-				className="woocommerce-email-editor-template-area-affordance__button"
-				variant="tertiary"
-				onClick={ () => {
-					recordEvent(
-						'template_canvas_affordance_edit_template_clicked',
-						{ templateId: template.id }
-					);
-					onNavigateToEntityRecord( {
-						postId: template.id,
-						postType: 'wp_template',
-					} );
+				style={ position.frame }
+				onClick={ () => setIsActive( true ) }
+				onKeyDown={ ( event ) => {
+					if ( event.key !== 'Enter' && event.key !== ' ' ) {
+						return;
+					}
+
+					event.preventDefault();
+					setIsActive( true );
 				} }
-			>
-				{ __( 'Edit template', 'woocommerce' ) }
-			</Button>
-		</div>,
+			/>
+			{ isActive && (
+				<div
+					className="woocommerce-email-editor-template-area-affordance"
+					style={ position.toolbar }
+				>
+					<span
+						className="woocommerce-email-editor-template-area-affordance__label"
+						aria-label={ __( 'Template area', 'woocommerce' ) }
+						title={ __( 'Template area', 'woocommerce' ) }
+					>
+						<Icon icon={ layout } size={ 24 } />
+						<span>{ __( 'Template', 'woocommerce' ) }</span>
+					</span>
+					<Button
+						className="woocommerce-email-editor-template-area-affordance__button"
+						variant="tertiary"
+						onClick={ () => {
+							recordEvent(
+								'template_canvas_affordance_edit_template_clicked',
+								{ templateId: template.id }
+							);
+							onNavigateToEntityRecord( {
+								postId: template.id,
+								postType: 'wp_template',
+							} );
+						} }
+					>
+						{ __( 'Edit template', 'woocommerce' ) }
+					</Button>
+				</div>
+			) }
+		</>,
 		portalSlot
 	);
 }
