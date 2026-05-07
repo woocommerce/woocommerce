@@ -88,6 +88,8 @@ class WC_Unit_Tests_Bootstrap {
 		// load the WP testing environment.
 		require_once $this->wp_tests_dir . '/includes/bootstrap.php';
 
+		$this->maybe_announce_skipped_graphql_infra_tests();
+
 		// Ensure theme install tests use direct filesystem method.
 		if ( ! defined( 'FS_METHOD' ) ) {
 			define( 'FS_METHOD', 'direct' );
@@ -178,6 +180,27 @@ class WC_Unit_Tests_Bootstrap {
 	}
 
 	/**
+	 * Echo a "Not running GraphQL infrastructure tests" message when the
+	 * current invocation does not include the `wc-phpunit-graphql-infra` suite,
+	 * mirroring the "Not running ajax tests" line printed by WP's own bootstrap
+	 * for the `ajax`, `ms-files` and `external-http` groups.
+	 *
+	 * The GraphQL infrastructure tests live in their own suite because they
+	 * require PHP 8.1+ and are excluded from the default suite.
+	 */
+	private function maybe_announce_skipped_graphql_infra_tests() {
+		$argv = isset( $GLOBALS['argv'] ) && is_array( $GLOBALS['argv'] ) ? $GLOBALS['argv'] : array();
+		foreach ( $argv as $arg ) {
+			if ( 'wc-phpunit-graphql-infra' === $arg || 'wc-phpunit-full' === $arg
+				|| '--testsuite=wc-phpunit-graphql-infra' === $arg || '--testsuite=wc-phpunit-full' === $arg ) {
+				return;
+			}
+		}
+
+		echo 'Not running GraphQL infrastructure tests. To execute these, use --testsuite=wc-phpunit-graphql-infra or wc-phpunit-full.' . PHP_EOL;
+	}
+
+	/**
 	 * Re-initialize the dependency injection engine.
 	 *
 	 * The dependency injection engine has been already initialized as part of the Woo initialization, but we need
@@ -215,8 +238,11 @@ class WC_Unit_Tests_Bootstrap {
 		define( 'WC_TAX_ROUNDING_MODE', 'auto' );
 		define( 'WC_USE_TRANSACTIONS', false );
 
-		// Enable Back In Stock alpha during tests.
-		define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+		// Default Back In Stock alpha to enabled during tests when no
+		// per-suite override has been set.
+		if ( ! defined( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
+			define( 'WOOCOMMERCE_BIS_ALPHA_ENABLED', true );
+		}
 
 		update_option( 'woocommerce_enable_coupons', 'yes' );
 		update_option( 'woocommerce_calc_taxes', 'yes' );

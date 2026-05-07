@@ -1,0 +1,85 @@
+/**
+ * Review Order page styles.
+ *
+ * Intentionally minimal. The active theme drives typography, color, and
+ * button styling; only the interactive star-rating control needs bespoke
+ * CSS to map radio inputs to SVG stars.
+ *
+ * The star control renders with `flex-direction: row-reverse`: the DOM
+ * order is 5..1 so that sibling combinators (`~`) can fill all stars up
+ * to the selected/hovered one without relying on `:has()`.
+ */
+
+.woocommerce-star-rating {
+	display: inline-flex;
+	flex-direction: row-reverse;
+	justify-content: flex-end;
+	align-items: center;
+	flex-wrap: wrap;
+	gap: 2px;
+	line-height: 1;
+
+	// Visually hide the native radios but keep them in the a11y tree.
+	&__input {
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
+	}
+
+	&__star {
+		cursor: pointer;
+		display: inline-flex;
+		padding: 4px;
+		color: currentColor;
+	}
+
+	&__icon {
+		display: block;
+		width: 1.5em;
+		height: 1.5em;
+		fill: currentColor;
+		opacity: 0.3;
+		transition: opacity 100ms ease-in-out;
+	}
+
+	// Fill: a checked input fills its own label and every following sibling
+	// star (which appear visually before it under row-reverse).
+	&__input:checked ~ .woocommerce-star-rating__star .woocommerce-star-rating__icon {
+		opacity: 1;
+	}
+
+	// Hover preview: when hovering the rating, dim everything, then re-fill
+	// from the hovered star outward (visual left).
+	&:hover .woocommerce-star-rating__icon {
+		opacity: 0.3;
+	}
+
+	&__star:hover .woocommerce-star-rating__icon,
+	&__star:hover ~ .woocommerce-star-rating__star .woocommerce-star-rating__icon {
+		opacity: 1;
+	}
+
+	// Focus ring: the input sits next to its own label; style the label when
+	// the input has visible keyboard focus.
+	&__input:focus-visible + .woocommerce-star-rating__star {
+		outline: 2px solid currentColor;
+		outline-offset: 2px;
+	}
+
+	// Caption keeps a stable footprint so the layout doesn't shift when the
+	// label text changes. Negative order sends it to the visual right of the
+	// stars (under row-reverse, the lowest-ordered item lays out first along
+	// the main axis, which is the rightmost slot).
+	&__caption {
+		order: -1;
+		margin-left: 0.5em;
+		min-height: 1em;
+		min-width: 4em;
+	}
+}

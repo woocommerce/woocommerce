@@ -97,6 +97,34 @@ class Flex_Layout_Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it uses RTL defaults when no justification is authored.
+	 */
+	public function testItUsesRtlDefaultJustificationAndGapSide(): void {
+		$theme_controller = $this->di_container->get( Theme_Controller::class );
+		$rtl_context      = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+		$parsed_block     = array(
+			'innerBlocks' => array(
+				array(
+					'blockName' => 'dummy/block',
+					'innerHTML' => 'Dummy 1',
+				),
+				array(
+					'blockName' => 'dummy/block',
+					'innerHTML' => 'Dummy 2',
+				),
+			),
+			'email_attrs' => array(),
+		);
+
+		$output = $this->renderer->render_inner_blocks_in_layout( $parsed_block, $rtl_context );
+
+		$this->assertStringContainsString( 'text-align: right', $output );
+		$this->assertStringContainsString( 'align="right"', $output );
+		$this->assertStringContainsString( 'padding-right', $output );
+		$this->assertStringNotContainsString( 'padding-left', $output );
+	}
+
+	/**
 	 * Test it applies margin-top from email_attrs on the inner div for Gmail compatibility.
 	 */
 	public function testItAppliesMarginTopFromEmailAttrs(): void {

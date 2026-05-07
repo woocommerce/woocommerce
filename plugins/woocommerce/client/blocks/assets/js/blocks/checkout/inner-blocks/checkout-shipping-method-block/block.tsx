@@ -190,6 +190,7 @@ const Block = ( {
 			// components-button-group is here for backwards compatibility, in case themes or plugins rely on it.
 			className="components-button-group wc-block-checkout__shipping-method-container"
 			role="radiogroup"
+			aria-label={ __( 'Shipping method', 'woocommerce' ) }
 		>
 			<ShippingSelector
 				checked={ checked }

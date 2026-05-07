@@ -263,6 +263,49 @@ class Spacing_Preprocessor_Test extends \Email_Editor_Unit_Test {
 	}
 
 	/**
+	 * Test it adds padding-right to column blocks in RTL renders.
+	 */
+	public function testItAddsPaddingRightToColumnsInRtl(): void {
+		$theme_json = $this->createMock( \WP_Theme_JSON::class );
+		$context    = new \Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context(
+			$theme_json,
+			array( 'is_rtl' => true )
+		);
+		$blocks     = array(
+			array(
+				'blockName'   => 'core/columns',
+				'attrs'       => array(
+					'style' => array(
+						'spacing' => array(
+							'blockGap' => array(
+								'left' => '30px',
+							),
+						),
+					),
+				),
+				'innerBlocks' => array(
+					array(
+						'blockName'   => 'core/column',
+						'attrs'       => array(),
+						'innerBlocks' => array(),
+					),
+					array(
+						'blockName'   => 'core/column',
+						'attrs'       => array(),
+						'innerBlocks' => array(),
+					),
+				),
+			),
+		);
+
+		$result        = $this->preprocessor->preprocess_with_context( $blocks, $this->layout, $this->styles, $context );
+		$second_column = $result[0]['innerBlocks'][1];
+
+		$this->assertArrayNotHasKey( 'padding-left', $second_column['email_attrs'] );
+		$this->assertSame( '30px', $second_column['email_attrs']['padding-right'] );
+	}
+
+	/**
 	 * Test it skips root padding for core/post-content but applies it to its children
 	 */
 	public function testItDistributesRootPaddingThroughPostContent(): void {
