@@ -134,6 +134,14 @@ class SiteHealthChecks {
 			'async_direct_test' => static fn() => $cache->remember( 'webhook_failures', static fn() => $webhooks->run() ),
 		);
 
+		$templates = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\TemplateOverrideScanner();
+		$tests['async']['woocommerce_outdated_templates'] = array(
+			'label'             => __( 'WooCommerce template overrides', 'woocommerce' ),
+			'test'              => 'woocommerce_outdated_templates',
+			'async'             => true,
+			'async_direct_test' => static fn() => $cache->remember( 'outdated_templates', static fn() => $templates->run() ),
+		);
+
 		return $tests;
 	}
 
