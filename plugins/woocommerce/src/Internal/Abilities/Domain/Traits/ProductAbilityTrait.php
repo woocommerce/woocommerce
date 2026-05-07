@@ -349,7 +349,12 @@ trait ProductAbilityTrait {
 				continue;
 			}
 
-			$product->{$setter}( self::prepare_product_field_value( $field, $input[ $field ] ) );
+			$prepared_value = self::prepare_product_field_value( $field, $input[ $field ] );
+			if ( is_wp_error( $prepared_value ) ) {
+				return $prepared_value;
+			}
+
+			$product->{$setter}( $prepared_value );
 		}
 
 		return null;
@@ -411,7 +416,7 @@ trait ProductAbilityTrait {
 	 *
 	 * @param string $field Field name.
 	 * @param mixed  $value Field value.
-	 * @return mixed
+	 * @return mixed|\WP_Error
 	 */
 	private static function prepare_product_field_value( string $field, $value ) {
 		if ( in_array( $field, array( 'name', 'description', 'short_description' ), true ) && is_string( $value ) ) {
@@ -426,8 +431,30 @@ trait ProductAbilityTrait {
 			return esc_url_raw( $value );
 		}
 
-		if ( 'grouped_products' === $field && is_array( $value ) ) {
-			return array_map( 'absint', $value );
+		if ( 'grouped_products' === $field ) {
+			if ( ! is_array( $value ) ) {
+				return new \WP_Error(
+					'woocommerce_product_grouped_products_invalid',
+					__( 'Grouped product IDs must be positive integers.', 'woocommerce' ),
+					array( 'status' => 400 )
+				);
+			}
+
+			$grouped_product_ids = array();
+
+			foreach ( $value as $product_id ) {
+				if ( ! rest_is_integer( $product_id ) || (int) $product_id < 1 ) {
+					return new \WP_Error(
+						'woocommerce_product_grouped_products_invalid',
+						__( 'Grouped product IDs must be positive integers.', 'woocommerce' ),
+						array( 'status' => 400 )
+					);
+				}
+
+				$grouped_product_ids[] = (int) $product_id;
+			}
+
+			return $grouped_product_ids;
 		}
 
 		if ( is_string( $value ) ) {

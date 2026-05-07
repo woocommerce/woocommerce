@@ -985,6 +985,22 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject invalid grouped product IDs before setting children.
+	 */
+	public function test_product_create_rejects_invalid_grouped_product_ids(): void {
+		$result = ProductCreate::execute(
+			array(
+				'name'             => 'Invalid Grouped Product',
+				'product_type'     => 'grouped',
+				'grouped_products' => array( -12 ),
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_grouped_products_invalid', $result->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should reject fields that are unsupported by the selected product type.
 	 */
 	public function test_product_create_rejects_fields_not_supported_by_product_type(): void {
