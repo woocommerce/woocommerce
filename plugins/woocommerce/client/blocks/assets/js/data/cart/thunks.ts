@@ -485,6 +485,44 @@ export const removeItemFromCart =
 	};
 
 /**
+ * Saves a cart line item to the saved-for-later shopper list.
+ *
+ * On success, emits a `wc-blocks_store_sync_required` event with
+ * `detail.type === 'shopper-list-changed'` so a `woocommerce/shopper-lists`
+ * iAPI store on the same page (rendered by a Shopper Collection block)
+ * refetches and reconciles. Mirrors the ping-and-refetch pattern this store
+ * already uses to sync with the iAPI cart store — no payload on the wire,
+ * the listener owns the reconcile.
+ *
+ * Removing the item from the cart is the caller's responsibility — keep the
+ * two awaits separate so save and remove errors can be reported distinctly.
+ *
+ * @param {string} cartItemKey Cart item to save.
+ */
+export const saveForLater =
+	( cartItemKey: string ) => async (): Promise< { key: string } > => {
+		const { response } = await apiFetchWithHeaders< {
+			response: { key: string };
+		} >( {
+			path: '/wc/store/v1/shopper-lists/saved-for-later/items',
+			method: 'POST',
+			data: { cart_item_key: cartItemKey },
+			cache: 'no-store',
+		} );
+
+		window.dispatchEvent(
+			new CustomEvent( 'wc-blocks_store_sync_required', {
+				detail: {
+					type: 'shopper-list-changed',
+					slug: 'saved-for-later',
+				},
+			} )
+		);
+
+		return response;
+	};
+
+/**
  * Tracks AbortControllers per cart item for cancelling in-flight quantity requests.
  */
 const quantityAbortControllers = new Map< string, AbortController >();
@@ -698,6 +736,7 @@ export type Thunks =
 	| typeof removeCoupon
 	| typeof addItemToCart
 	| typeof removeItemFromCart
+	| typeof saveForLater
 	| typeof changeCartItemQuantity
 	| typeof selectShippingRate
 	| typeof updateCustomerData;

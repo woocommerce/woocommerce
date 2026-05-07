@@ -11,6 +11,7 @@ import {
 	useStoreCartItemQuantity,
 	useStoreEvents,
 	useStoreCart,
+	useSaveForLater,
 } from '@woocommerce/base-context/hooks';
 import { getCurrencyFromPriceResponse } from '@woocommerce/price-format';
 import {
@@ -117,7 +118,9 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 
 		const { quantity, setItemQuantity, removeItem, isPendingDelete } =
 			useStoreCartItemQuantity( lineItem );
+		const { saveForLater, isSaving: isSavingForLater } = useSaveForLater();
 		const { dispatchStoreEvent } = useStoreEvents();
+		const isUserLoggedIn = !! getSetting< number >( 'currentUserId', 0 );
 
 		// Prepare props to pass to the applyCheckoutFilter filter.
 		// We need to pluck out receiveCart.
@@ -339,6 +342,59 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 								</button>
 							) }
 						</div>
+						{ isUserLoggedIn && (
+							<div className="wc-block-cart-item__save-for-later">
+								<button
+									type="button"
+									className="wc-block-cart-item__save-for-later-link"
+									onClick={ async () => {
+										const saved = await saveForLater(
+											lineItem.key
+										);
+										if ( ! saved ) {
+											return;
+										}
+										// removeItem surfaces its own errors
+										// via processErrorResponse; we still
+										// fire the analytics event and a11y
+										// announcement to mirror the regular
+										// remove flow.
+										await removeItem();
+										// TODO: consider a dedicated
+										// 'cart-save-for-later' store event so
+										// analytics can distinguish a save
+										// from a plain remove.
+										dispatchStoreEvent(
+											'cart-remove-item',
+											{
+												product: lineItem,
+												quantity,
+											}
+										);
+										speak(
+											sprintf(
+												/* translators: %s refers to the item name. */
+												__(
+													'%s has been saved for later and removed from your cart.',
+													'woocommerce'
+												),
+												name
+											)
+										);
+									} }
+									disabled={
+										isPendingDelete || isSavingForLater
+									}
+								>
+									{ isSavingForLater
+										? __( 'Saving…', 'woocommerce' )
+										: __(
+												'Save for later',
+												'woocommerce'
+										  ) }
+								</button>
+							</div>
+						) }
 					</div>
 				</td>
 				<td className="wc-block-cart-item__total">

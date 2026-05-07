@@ -169,7 +169,7 @@ async function restRequest< T >(
 // so an empty-string default would clobber the values seeded server-side via
 // `wp_interactivity_state`. State for those fields comes purely from PHP. Same
 // reason the cart store doesn't ship state defaults — see cart.ts.
-const { state } = store< Store >(
+const { state, actions } = store< Store >(
 	'woocommerce/shopper-lists',
 	{
 		actions: {
@@ -288,3 +288,18 @@ const { state } = store< Store >(
 	},
 	{ lock: universalLock }
 );
+
+// Listen for shopper-list mutations emitted from the wp.data side (e.g. the
+// cart store's saveForLater thunk). Mirrors the cart store's ping-and-refetch
+// pattern: the producer announces "this list changed" with no payload, and
+// this side refetches to reconcile. Keeps the discriminator contract in sync
+// with `assets/js/data/cart/thunks.ts::saveForLater`.
+window.addEventListener( 'wc-blocks_store_sync_required', ( event: Event ) => {
+	const detail = ( event as CustomEvent ).detail as
+		| { type?: string; slug?: string }
+		| undefined;
+	if ( detail?.type !== 'shopper-list-changed' || ! detail.slug ) {
+		return;
+	}
+	actions.loadList( detail.slug );
+} );
