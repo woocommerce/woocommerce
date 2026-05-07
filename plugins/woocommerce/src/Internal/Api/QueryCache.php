@@ -27,17 +27,22 @@ class QueryCache {
 	private const CACHE_KEY_PREFIX = 'graphql_ast_v15_';
 
 	/**
-	 * Time-to-live (in seconds) for a cached parsed query.
+	 * Default time-to-live (in seconds) applied when the option is unset or non-positive.
 	 *
 	 * See {@see self::get_cache_ttl()} for the accessor.
 	 */
-	private const CACHE_TTL = DAY_IN_SECONDS;
+	public const DEFAULT_CACHE_TTL = DAY_IN_SECONDS;
 
 	/**
 	 * The time-to-live (in seconds) for a cached parsed query.
+	 *
+	 * Reads the {@see Main::OPTION_QUERY_CACHE_TTL} store option; falls back
+	 * to {@see self::DEFAULT_CACHE_TTL} when the option is unset, empty, or
+	 * non-positive.
 	 */
 	public static function get_cache_ttl(): int {
-		return self::CACHE_TTL;
+		$value = (int) get_option( Main::OPTION_QUERY_CACHE_TTL, self::DEFAULT_CACHE_TTL );
+		return $value > 0 ? $value : self::DEFAULT_CACHE_TTL;
 	}
 
 	/**
@@ -50,15 +55,25 @@ class QueryCache {
 	 * @return DocumentNode|array
 	 */
 	public function resolve( ?string $query, array $extensions ) {
-		$apq = $extensions['persistedQuery'] ?? null;
+		$apq      = $extensions['persistedQuery'] ?? null;
+		$apq_hash = is_array( $apq ) ? ( $apq['sha256Hash'] ?? null ) : null;
 
-		if ( is_array( $apq ) && 1 === ( $apq['version'] ?? null ) && ! empty( $apq['sha256Hash'] ) ) {
-			return $this->resolve_apq( $query, $apq['sha256Hash'] );
+		if ( Main::is_apq_enabled()
+			&& is_array( $apq )
+			&& 1 === ( $apq['version'] ?? null )
+			&& is_string( $apq_hash )
+			&& '' !== $apq_hash ) {
+			return $this->resolve_apq( $query, $apq_hash );
 		}
 
 		// Standard query — no APQ.
 		if ( empty( $query ) ) {
 			return $this->error_response( 'No query provided.', 'BAD_REQUEST' );
+		}
+
+		// APQ keeps using the cache; it has its own settings toggle.
+		if ( ! Main::is_object_cache_enabled() ) {
+			return $this->parse( $query );
 		}
 
 		$hash = hash( 'sha256', $query );
@@ -120,6 +135,21 @@ class QueryCache {
 	}
 
 	/**
+	 * Parse a query and return the DocumentNode, or a GraphQL-shaped error
+	 * array if the query has a syntax error.
+	 *
+	 * @param string $query The GraphQL query string.
+	 * @return DocumentNode|array
+	 */
+	private function parse( string $query ) {
+		try {
+			return Parser::parse( $query, array( 'noLocation' => true ) );
+		} catch ( \Automattic\WooCommerce\Vendor\GraphQL\Error\SyntaxError $e ) {
+			return $this->error_response( 'GraphQL syntax error: ' . $e->getMessage(), 'GRAPHQL_PARSE_ERROR' );
+		}
+	}
+
+	/**
 	 * Parse a query, cache the resulting AST, and return the DocumentNode.
 	 *
 	 * Returns an error array if the query has a syntax error.
@@ -129,10 +159,9 @@ class QueryCache {
 	 * @return DocumentNode|array
 	 */
 	private function parse_and_cache( string $query, string $hash ) {
-		try {
-			$document = Parser::parse( $query, array( 'noLocation' => true ) );
-		} catch ( \Automattic\WooCommerce\Vendor\GraphQL\Error\SyntaxError $e ) {
-			return $this->error_response( 'GraphQL syntax error: ' . $e->getMessage(), 'GRAPHQL_PARSE_ERROR' );
+		$document = $this->parse( $query );
+		if ( ! $document instanceof DocumentNode ) {
+			return $document;
 		}
 
 		wp_cache_set( $this->build_cache_key( $hash ), $document->toArray(), self::CACHE_GROUP, self::get_cache_ttl() );

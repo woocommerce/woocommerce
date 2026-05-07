@@ -981,6 +981,11 @@ class WC_Query {
 	 * @return array
 	 */
 	public static function get_main_meta_query() {
+		// PHPStan infers $product_query as non-nullable from other call sites. See https://github.com/woocommerce/woocommerce/pull/64360#issuecomment-4360066970.
+		// @phpstan-ignore-next-line isset.property See above.
+		if ( ! isset( self::$product_query ) ) {
+			return array();
+		}
 		$args       = self::$product_query->query_vars;
 		$meta_query = isset( $args['meta_query'] ) ? $args['meta_query'] : array();
 
@@ -993,6 +998,11 @@ class WC_Query {
 	public static function get_main_search_query_sql() {
 		global $wpdb;
 
+		// PHPStan infers $product_query as non-nullable from other call sites. See https://github.com/woocommerce/woocommerce/pull/64360#issuecomment-4360066970.
+		// @phpstan-ignore-next-line isset.property See above.
+		if ( ! isset( self::$product_query ) ) {
+			return '';
+		}
 		$args         = self::$product_query->query_vars;
 		$search_terms = isset( $args['search_terms'] ) ? $args['search_terms'] : array();
 		$sql          = array();

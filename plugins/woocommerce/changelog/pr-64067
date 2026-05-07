@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix HPOS data cache cross-bleed between order data store subclasses

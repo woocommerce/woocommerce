@@ -106,4 +106,28 @@ final class OrderStatus {
 		self::FAILED,
 		self::CANCELLED,
 	);
+
+	/**
+	 * Returns all order status values defined in this class.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return string[]
+	 */
+	public static function get_all(): array {
+		return array(
+			self::PENDING,
+			self::FAILED,
+			self::ON_HOLD,
+			self::COMPLETED,
+			self::PROCESSING,
+			self::REFUNDED,
+			self::CANCELLED,
+			self::TRASH,
+			self::NEW,
+			self::AUTO_DRAFT,
+			self::DRAFT,
+			self::CHECKOUT_DRAFT,
+		);
+	}
 }

@@ -9,12 +9,13 @@ declare(strict_types = 1);
 namespace Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preprocessors;
 
 use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Preset_Variable_Resolver;
+use Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context;
 
 /**
  * This preprocessor is responsible for setting default spacing values for blocks.
  * In the early development phase, we are setting only margin-top for blocks that are not first or last in the columns block.
  */
-class Spacing_Preprocessor implements Preprocessor {
+class Spacing_Preprocessor implements Context_Aware_Preprocessor {
 	/**
 	 * Cached post-content block names to avoid repeated apply_filters calls.
 	 *
@@ -31,10 +32,33 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @return array
 	 */
 	public function preprocess( array $parsed_blocks, array $layout, array $styles ): array {
+		return $this->preprocess_with_context( $parsed_blocks, $layout, $styles );
+	}
+
+	/**
+	 * Preprocesses the parsed blocks with rendering context.
+	 *
+	 * @param array                  $parsed_blocks Parsed blocks.
+	 * @param array                  $layout Layout.
+	 * @param array                  $styles Styles.
+	 * @param Rendering_Context|null $rendering_context Rendering context.
+	 * @return array
+	 */
+	public function preprocess_with_context( array $parsed_blocks, array $layout, array $styles, ?Rendering_Context $rendering_context = null ): array {
 		$root_padding      = $this->get_root_padding( $styles );
 		$container_padding = $styles['__container_padding'] ?? array();
 		$variables_map     = $styles['__variables_map'] ?? array();
-		$parsed_blocks     = $this->add_block_gaps( $parsed_blocks, $styles['spacing']['blockGap'] ?? '', null, $root_padding, false, $container_padding, $variables_map );
+		$gap_padding_side  = $rendering_context && $rendering_context->is_rtl() ? 'padding-right' : 'padding-left';
+		$parsed_blocks     = $this->add_block_gaps(
+			$parsed_blocks,
+			$styles['spacing']['blockGap'] ?? '',
+			null,
+			$root_padding,
+			false,
+			$container_padding,
+			$variables_map,
+			$gap_padding_side
+		);
 		return $parsed_blocks;
 	}
 
@@ -114,9 +138,10 @@ class Spacing_Preprocessor implements Preprocessor {
 	 * @param bool       $apply_root_padding Whether this block should receive root padding (delegated by parent container).
 	 * @param array      $container_padding Container horizontal padding with 'left' and 'right' keys.
 	 * @param array      $variables_map Map of CSS variable names to resolved values for preset resolution.
+	 * @param string     $gap_padding_side Physical padding side for generated column gaps.
 	 * @return array
 	 */
-	private function add_block_gaps( array $parsed_blocks, string $gap = '', $parent_block = null, array $root_padding = array(), bool $apply_root_padding = false, array $container_padding = array(), array $variables_map = array() ): array {
+	private function add_block_gaps( array $parsed_blocks, string $gap = '', $parent_block = null, array $root_padding = array(), bool $apply_root_padding = false, array $container_padding = array(), array $variables_map = array(), string $gap_padding_side = 'padding-left' ): array {
 		foreach ( $parsed_blocks as $key => $block ) {
 			$block_name        = $block['blockName'] ?? '';
 			$parent_block_name = $parent_block['blockName'] ?? '';
@@ -132,11 +157,11 @@ class Spacing_Preprocessor implements Preprocessor {
 				$block['email_attrs']['margin-top'] = $gap;
 			}
 
-			// Handle horizontal gap for columns: apply padding-left to column children (except the first).
+			// Handle horizontal gap for columns: apply physical padding to column children (except the first).
 			if ( 'core/columns' === $parent_block_name && 0 !== $key && null !== $parent_block ) {
 				$columns_gap = $this->get_columns_block_gap( $parent_block, $gap );
 				if ( $columns_gap ) {
-					$block['email_attrs']['padding-left'] = $columns_gap;
+					$block['email_attrs'][ $gap_padding_side ] = $columns_gap;
 				}
 			}
 
@@ -210,7 +235,7 @@ class Spacing_Preprocessor implements Preprocessor {
 				unset( $block['email_attrs']['root-padding-left'], $block['email_attrs']['root-padding-right'] );
 			}
 
-			$block['innerBlocks']  = $this->add_block_gaps( $block['innerBlocks'] ?? array(), $gap, $block, $root_padding, $children_apply, $children_container_pad, $variables_map );
+			$block['innerBlocks']  = $this->add_block_gaps( $block['innerBlocks'] ?? array(), $gap, $block, $root_padding, $children_apply, $children_container_pad, $variables_map, $gap_padding_side );
 			$parsed_blocks[ $key ] = $block;
 		}
 
