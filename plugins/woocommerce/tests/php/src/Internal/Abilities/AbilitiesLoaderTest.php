@@ -14,11 +14,15 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * Tests for the canonical WooCommerce domain abilities and their loader.
  */
 class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
+
+	use HPOSToggleTrait;
 
 	private const CANONICAL_ABILITY_IDS = array(
 		'woocommerce/products-query',
@@ -64,6 +68,20 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @var array<string, int|null>
 	 */
 	private $original_action_counts = array();
+
+	/**
+	 * Original HPOS/COT state captured before tests that toggle storage.
+	 *
+	 * @var bool|null
+	 */
+	private $original_cot_state = null;
+
+	/**
+	 * Whether HPOS/COT tables were set up by the current test.
+	 *
+	 * @var bool
+	 */
+	private $cot_setup_for_test = false;
 
 	/**
 	 * Set up test fixtures.
@@ -132,6 +150,15 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			} elseif ( isset( $wp_actions[ $action ] ) ) {
 				unset( $wp_actions[ $action ] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 			}
+		}
+
+		if ( null !== $this->original_cot_state ) {
+			if ( $this->cot_setup_for_test ) {
+				$this->clean_up_cot_setup();
+			}
+
+			$this->toggle_cot_feature_and_usage( $this->original_cot_state );
+			remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
 		}
 
 		wp_set_current_user( 0 );
@@ -743,6 +770,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * Provides order storage engine states.
+	 *
+	 * @return array<string, array{0: bool}>
+	 */
+	public function provider_order_storage_engines(): array {
+		return array(
+			'legacy' => array( false ),
+			'hpos'   => array( true ),
+		);
+	}
+
 	/*
 	 * ---------------------------------------------------------------------
 	 * Execution behaviors
@@ -1286,6 +1325,66 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should sort orders by ID across order storage engines.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_orders_query_sorts_by_id_across_order_storage_engines( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		$email  = wp_unique_id( 'abilities-order-id-sort-' ) . '@example.com';
+		$first  = $this->create_order_for_query_sorting( $email, '2025-01-01T12:00:00', '2025-01-01T12:00:00' );
+		$second = $this->create_order_for_query_sorting( $email, '2020-01-01T12:00:00', '2020-01-01T12:00:00' );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'orderby'       => 'id',
+				'order'         => 'asc',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame(
+			array( $first->get_id(), $second->get_id() ),
+			array_column( $result['orders'], 'id' )
+		);
+	}
+
+	/**
+	 * @testdox Should sort orders by modified date across order storage engines.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_orders_query_sorts_by_modified_date_across_order_storage_engines( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		$email  = wp_unique_id( 'abilities-order-modified-sort-' ) . '@example.com';
+		$first  = $this->create_order_for_query_sorting( $email, '2020-01-01T12:00:00', '2025-01-01T12:00:00' );
+		$second = $this->create_order_for_query_sorting( $email, '2025-01-01T12:00:00', '2020-01-01T12:00:00' );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'orderby'       => 'date_modified',
+				'order'         => 'asc',
+				'per_page'      => 2,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame(
+			array( $second->get_id(), $first->get_id() ),
+			array_column( $result['orders'], 'id' )
+		);
+	}
+
+	/**
 	 * @testdox Should return null for absent billing email values.
 	 */
 	public function test_orders_query_returns_null_for_absent_billing_email(): void {
@@ -1590,5 +1689,46 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->created_product_ids[] = $parent->get_id();
 
 		return $variation_id;
+	}
+
+	/**
+	 * Set order storage mode for a test.
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled.
+	 */
+	private function set_order_storage_for_test( bool $hpos_enabled ): void {
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+
+		if ( null === $this->original_cot_state ) {
+			$this->original_cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+		}
+
+		if ( $hpos_enabled && ! $this->cot_setup_for_test ) {
+			$this->setup_cot();
+			$this->cot_setup_for_test = true;
+			return;
+		}
+
+		$this->toggle_cot_feature_and_usage( $hpos_enabled );
+	}
+
+	/**
+	 * Create an order with controlled dates for query tests.
+	 *
+	 * @param string $billing_email Billing email.
+	 * @param string $date_created  Created date.
+	 * @param string $date_modified Modified date.
+	 * @return \WC_Order
+	 */
+	private function create_order_for_query_sorting( string $billing_email, string $date_created, string $date_modified ): \WC_Order {
+		$order = \WC_Helper_Order::create_order();
+		$order->set_billing_email( $billing_email );
+		$order->set_date_created( $date_created );
+		$order->set_date_modified( $date_modified );
+		$order->save();
+
+		$this->created_order_ids[] = $order->get_id();
+
+		return $order;
 	}
 }

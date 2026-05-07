@@ -106,6 +106,10 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			}
 		}
 
+		if ( ! empty( $args['orderby'] ) ) {
+			$args['orderby'] = self::prepare_orderby_arg( (string) $args['orderby'] );
+		}
+
 		foreach ( array( 'customer_id', 'parent' ) as $field ) {
 			if ( isset( $input[ $field ] ) ) {
 				$args[ $field ] = absint( $input[ $field ] );
@@ -273,5 +277,20 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 		}
 
 		return '' !== $before ? '<' . $before : '>' . $after;
+	}
+
+	/**
+	 * Prepare orderby values for wc_get_orders across HPOS and legacy storage.
+	 *
+	 * @param string $orderby Input orderby value.
+	 * @return string
+	 */
+	private static function prepare_orderby_arg( string $orderby ): string {
+		$orderby_map = array(
+			'id'            => 'ID',
+			'date_modified' => 'modified',
+		);
+
+		return $orderby_map[ $orderby ] ?? $orderby;
 	}
 }
