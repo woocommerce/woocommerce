@@ -142,6 +142,14 @@ class SiteHealthChecks {
 			'async_direct_test' => static fn() => $cache->remember( 'outdated_templates', static fn() => $templates->run() ),
 		);
 
+		$cart_fragments = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\CartFragmentsCheck();
+		$tests['async']['woocommerce_cart_fragments_sitewide'] = array(
+			'label'             => __( 'WooCommerce cart fragments load policy', 'woocommerce' ),
+			'test'              => 'woocommerce_cart_fragments_sitewide',
+			'async'             => true,
+			'async_direct_test' => static fn() => $cache->remember( 'cart_fragments_sitewide', static fn() => $cart_fragments->run() ),
+		);
+
 		return $tests;
 	}
 
