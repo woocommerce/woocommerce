@@ -146,6 +146,15 @@ describe( 'product list actions', () => {
 		expect( onActionPerformed ).toHaveBeenCalledWith( [ product ] );
 	} );
 
+	it( 'exposes the Quick edit action as a bulk action', () => {
+		const { result } = renderHook( () => useProductActions() );
+		const quickEditProductAction = result.current.find(
+			( action ) => action.id === 'quick-edit-product'
+		);
+
+		expect( quickEditProductAction?.supportsBulk ).toBe( true );
+	} );
+
 	it( 'opens product editor when the Edit action is triggered', () => {
 		const { result } = renderHook( () => useProductActions() );
 		const editProductAction = result.current.find(

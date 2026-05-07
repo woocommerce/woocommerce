@@ -126,6 +126,7 @@ export const quickEditAction = ( {
 	id: 'quick-edit-product',
 	label: __( 'Quick edit', 'woocommerce' ),
 	isPrimary: true,
+	supportsBulk: true,
 	icon: edit,
 	isEligible( product ) {
 		return product.status !== 'trash';
