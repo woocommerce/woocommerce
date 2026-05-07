@@ -112,8 +112,9 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 			}
 		}
 
-		if ( ! empty( $input['type'] ) ) {
-			$type_args = self::get_product_query_args_for_type( wc_clean( $input['type'] ) );
+		if ( ! empty( $input['type'] ) && is_scalar( $input['type'] ) ) {
+			$product_type = sanitize_text_field( (string) $input['type'] );
+			$type_args    = self::get_product_query_args_for_type( $product_type );
 
 			if ( is_wp_error( $type_args ) ) {
 				return $type_args;

@@ -99,6 +99,8 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 		 *
 		 * @param bool        $supports_trash Whether the product supports trashing.
 		 * @param \WC_Product $product        The product being considered for trashing.
+		 *
+		 * @since 10.9.0
 		 */
 		$supports_trash = apply_filters( 'woocommerce_rest_product_object_trashable', EMPTY_TRASH_DAYS > 0, $product );
 

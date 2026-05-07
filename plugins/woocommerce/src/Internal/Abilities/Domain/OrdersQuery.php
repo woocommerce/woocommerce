@@ -101,14 +101,15 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			'type'     => 'shop_order',
 		);
 
-		foreach ( array( 'status', 'billing_email', 'orderby', 'order' ) as $field ) {
-			if ( ! empty( $input[ $field ] ) ) {
-				$args[ $field ] = wc_clean( $input[ $field ] );
+		foreach ( array( 'status', 'billing_email', 'order' ) as $field ) {
+			if ( ! empty( $input[ $field ] ) && is_scalar( $input[ $field ] ) ) {
+				$args[ $field ] = wc_clean( (string) $input[ $field ] );
 			}
 		}
 
-		if ( ! empty( $args['orderby'] ) ) {
-			$args['orderby'] = self::prepare_orderby_arg( (string) $args['orderby'] );
+		if ( ! empty( $input['orderby'] ) && is_scalar( $input['orderby'] ) ) {
+			$orderby         = sanitize_text_field( (string) $input['orderby'] );
+			$args['orderby'] = self::prepare_orderby_arg( $orderby );
 		}
 
 		foreach ( array( 'customer_id', 'parent' ) as $field ) {

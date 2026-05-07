@@ -494,11 +494,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 * @testdox Should require object edit and delete permissions for product mutations.
 	 */
 	public function test_product_mutations_require_object_permissions(): void {
-		$product_to_update             = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Owned by another user' ) );
-		$product_to_delete             = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Also owned by another user' ) );
-		$this->created_product_ids[]   = $product_to_update->get_id();
-		$this->created_product_ids[]   = $product_to_delete->get_id();
-		$limited_product_manager_id    = $this->create_user_with_caps(
+		$product_to_update           = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Owned by another user' ) );
+		$product_to_delete           = \WC_Helper_Product::create_simple_product( true, array( 'name' => 'Also owned by another user' ) );
+		$this->created_product_ids[] = $product_to_update->get_id();
+		$this->created_product_ids[] = $product_to_delete->get_id();
+		$limited_product_manager_id  = $this->create_user_with_caps(
 			array(
 				'edit_products',
 				'edit_published_products',
