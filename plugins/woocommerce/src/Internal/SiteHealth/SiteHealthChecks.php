@@ -68,6 +68,16 @@ class SiteHealthChecks {
 			'test'  => array( $this, 'check_legacy_rest_api' ),
 		);
 
+		$tests['direct']['woocommerce_https'] = array(
+			'label' => __( 'WooCommerce store uses HTTPS', 'woocommerce' ),
+			'test'  => array( $this, 'check_https' ),
+		);
+
+		$tests['direct']['woocommerce_payment_gateway'] = array(
+			'label' => __( 'WooCommerce has an active payment gateway', 'woocommerce' ),
+			'test'  => array( $this, 'check_payment_gateway' ),
+		);
+
 		return $tests;
 	}
 
@@ -232,6 +242,80 @@ class SiteHealthChecks {
 				'test'        => 'woocommerce_legacy_rest_api',
 			);
 		return $this->apply_result_filters( 'legacy_rest_api', $result );
+	}
+
+	/**
+	 * Check whether the store home URL uses HTTPS.
+	 *
+	 * Returns 'critical' when the home option does not start with 'https://',
+	 * and 'good' when it does. HTTPS is required for safe transmission of
+	 * payment and account data.
+	 *
+	 * @return array WP Site Health result array.
+	 */
+	public function check_https(): array {
+		$home_url = (string) get_option( 'home' );
+		$is_https = ( 0 === stripos( $home_url, 'https://' ) );
+		$result   = $is_https
+			? array(
+				'label'       => __( 'Store URL uses HTTPS', 'woocommerce' ),
+				'status'      => 'good',
+				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'green' ),
+				'description' => '<p>' . esc_html__( 'Your site URL uses HTTPS.', 'woocommerce' ) . '</p>',
+				'actions'     => '',
+				'test'        => 'woocommerce_https',
+			)
+			: array(
+				'label'       => __( 'Store URL is not using HTTPS', 'woocommerce' ),
+				'status'      => 'critical',
+				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'red' ),
+				'description' => '<p>' . esc_html__( 'Your store should use HTTPS so checkout and account data are protected in transit.', 'woocommerce' ) . '</p>',
+				'actions'     => sprintf(
+					'<p><a href="%s">%s</a></p>',
+					'https://wordpress.org/documentation/article/why-should-i-use-https/',
+					esc_html__( 'Learn more about HTTPS', 'woocommerce' )
+				),
+				'test'        => 'woocommerce_https',
+			);
+		return $this->apply_result_filters( 'https', $result );
+	}
+
+	/**
+	 * Check whether at least one payment gateway is enabled and available.
+	 *
+	 * Returns 'recommended' when no available payment gateways are found
+	 * (customers cannot complete purchases), and 'good' when one or more
+	 * gateways are active.
+	 *
+	 * @return array WP Site Health result array.
+	 */
+	public function check_payment_gateway(): array {
+		$available = WC()->payment_gateways()->get_available_payment_gateways();
+		$count     = is_array( $available ) ? count( $available ) : 0;
+		$result    = $count > 0
+			? array(
+				'label'       => __( 'WooCommerce has an active payment gateway', 'woocommerce' ),
+				'status'      => 'good',
+				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'green' ),
+				'description' => '<p>' . esc_html(
+					sprintf( _n( '%d payment gateway is enabled.', '%d payment gateways are enabled.', $count, 'woocommerce' ), $count )
+				) . '</p>',
+				'actions'     => '',
+				'test'        => 'woocommerce_payment_gateway',
+			)
+			: array(
+				'label'       => __( 'WooCommerce has no active payment gateway', 'woocommerce' ),
+				'status'      => 'recommended',
+				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'orange' ),
+				'description' => '<p>' . esc_html__( 'Customers cannot complete purchases until at least one payment gateway is enabled.', 'woocommerce' ) . '</p>',
+				'actions'     => sprintf(
+					'<p><a href="%s">%s</a></p>',
+					esc_url( admin_url( 'admin.php?page=wc-settings&tab=checkout' ) ),
+					esc_html__( 'Configure payments', 'woocommerce' )
+				),
+				'test'        => 'woocommerce_payment_gateway',
+			);
+		return $this->apply_result_filters( 'payment_gateway', $result );
 	}
 
 	/**

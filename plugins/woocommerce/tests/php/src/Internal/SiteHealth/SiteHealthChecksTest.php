@@ -112,4 +112,34 @@ class SiteHealthChecksTest extends WC_Unit_Test_Case {
 		$result = call_user_func( $tests['direct']['woocommerce_legacy_rest_api']['test'] );
 		$this->assertSame( 'recommended', $result['status'] );
 	}
+
+	// -------------------------------------------------------------------------
+	// Task 6: HTTPS and payment gateway checks.
+	// -------------------------------------------------------------------------
+
+	public function test_https_check_critical_when_site_url_not_https() {
+		update_option( 'siteurl', 'http://example.test' );
+		update_option( 'home', 'http://example.test' );
+		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		$result = call_user_func( $tests['direct']['woocommerce_https']['test'] );
+		$this->assertSame( 'critical', $result['status'] );
+	}
+
+	public function test_https_check_good_when_site_url_https() {
+		update_option( 'siteurl', 'https://example.test' );
+		update_option( 'home', 'https://example.test' );
+		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		$result = call_user_func( $tests['direct']['woocommerce_https']['test'] );
+		$this->assertSame( 'good', $result['status'] );
+	}
+
+	public function test_payment_gateway_check_recommended_when_none_enabled() {
+		update_option( 'woocommerce_bacs_settings', array( 'enabled' => 'no' ) );
+		update_option( 'woocommerce_cheque_settings', array( 'enabled' => 'no' ) );
+		update_option( 'woocommerce_cod_settings', array( 'enabled' => 'no' ) );
+		update_option( 'woocommerce_paypal_settings', array( 'enabled' => 'no' ) );
+		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		$result = call_user_func( $tests['direct']['woocommerce_payment_gateway']['test'] );
+		$this->assertSame( 'recommended', $result['status'] );
+	}
 }
