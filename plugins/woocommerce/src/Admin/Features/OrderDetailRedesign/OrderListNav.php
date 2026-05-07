@@ -13,12 +13,13 @@ use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
 
 /**
- * Renders a `< 1 / 23 >` previous/next nav next to the H1 on the HPOS Order edit page.
+ * Renders a `< Prev   Next >` previous/next nav next to the H1 on the HPOS Order edit page.
  *
- * Position and total reflect the orders-list filter set the user came from
- * (read once from the referer, then carried forward via URL params on
- * prev/next links). When no list context is available, falls back to all
- * shop_orders sorted by `date_created` DESC.
+ * Direction follows list-traversal semantics, not chronological: the orders list defaults
+ * to date DESC, so "Prev" (left) goes to the newer order (the one above in the list) and
+ * "Next" (right) goes to the older order (the one below). Filters are read once from the
+ * orders-list referer and carried forward on each link. When no list context is available,
+ * falls back to all shop_orders sorted by `date_created` DESC.
  *
  * @since 10.9.0
  */
@@ -58,36 +59,33 @@ class OrderListNav {
 
 		$data = $this->get_navigation_data( $order );
 
-		if ( $data['total'] < 1 ) {
-			return;
-		}
-
 		$prev_url = $data['prev_id'] ? $this->build_edit_url( $data['prev_id'], $data['list_query'] ) : null;
 		$next_url = $data['next_id'] ? $this->build_edit_url( $data['next_id'], $data['list_query'] ) : null;
 
-		$count_label = sprintf(
-			/* translators: 1: position of the current order in the list, 2: total orders in the list. */
-			__( 'Order %1$s of %2$s', 'woocommerce' ),
-			number_format_i18n( $data['position'] ),
-			number_format_i18n( $data['total'] )
-		);
+		// Nothing to navigate to in either direction — there's only one order in the set.
+		if ( null === $prev_url && null === $next_url ) {
+			return;
+		}
 
 		?>
 		<nav class="woocommerce-order-list-nav" aria-label="<?php esc_attr_e( 'Order navigation', 'woocommerce' ); ?>">
-			<?php $this->render_chevron( $prev_url, __( 'Previous order', 'woocommerce' ), self::CHEVRON_LEFT_PATH ); ?>
-			<span class="woocommerce-order-list-nav__count" aria-label="<?php echo esc_attr( $count_label ); ?>">
-				<span class="is-current"><?php echo esc_html( number_format_i18n( $data['position'] ) ); ?></span><span class="is-muted"> / <?php echo esc_html( number_format_i18n( $data['total'] ) ); ?></span>
-			</span>
-			<?php $this->render_chevron( $next_url, __( 'Next order', 'woocommerce' ), self::CHEVRON_RIGHT_PATH ); ?>
+			<?php
+			$this->render_link( $prev_url, __( 'Prev', 'woocommerce' ), self::CHEVRON_LEFT_PATH, true );
+			$this->render_link( $next_url, __( 'Next', 'woocommerce' ), self::CHEVRON_RIGHT_PATH, false );
+			?>
 		</nav>
 		<?php
 	}
 
 	/**
-	 * Computes the position/total/prev_id/next_id for the given order.
+	 * Computes the prev_id / next_id / forwarded list filters for the given order.
+	 *
+	 * If the current order is excluded by the active filters (e.g. the user filtered the
+	 * orders list to status=completed but is now viewing a processing order), the filters
+	 * are silently dropped so the nav still shows usable links.
 	 *
 	 * @param WC_Order $order Order being edited.
-	 * @return array{position:int,total:int,prev_id:?int,next_id:?int,list_query:array<string,string>}
+	 * @return array{prev_id:?int,next_id:?int,list_query:array<string,string>}
 	 *
 	 * @since 10.9.0
 	 */
@@ -95,21 +93,14 @@ class OrderListNav {
 		$list_query = $this->get_list_query_from_request();
 		$query_args = $this->build_query_args( $list_query );
 
-		$position_data = $this->compute_position_and_total( $order, $query_args );
-
-		// If the current order doesn't match the active filters, drop the filters and
-		// recompute against the unfiltered set so the nav stays useful.
-		if ( ! $position_data['in_set'] && ! empty( $list_query ) ) {
-			$list_query    = array();
-			$query_args    = $this->build_query_args( $list_query );
-			$position_data = $this->compute_position_and_total( $order, $query_args );
+		if ( ! empty( $list_query ) && ! $this->order_matches_filters( $order, $query_args ) ) {
+			$list_query = array();
+			$query_args = $this->build_query_args( $list_query );
 		}
 
 		$boundaries = $this->compute_prev_next_ids( $order, $query_args );
 
 		return array(
-			'position'   => $position_data['position'],
-			'total'      => $position_data['total'],
 			'prev_id'    => $boundaries['prev_id'],
 			'next_id'    => $boundaries['next_id'],
 			'list_query' => $list_query,
@@ -117,32 +108,36 @@ class OrderListNav {
 	}
 
 	/**
-	 * Renders a single chevron — as a link when navigable, or a disabled span at boundaries.
+	 * Renders a single Prev / Next link — chevron + label, or a disabled span at boundaries.
 	 *
-	 * @param string|null $url       Destination URL, or null when disabled.
-	 * @param string      $label     Accessible label.
-	 * @param string      $svg_path  Inline SVG `d` attribute.
+	 * @param string|null $url        Destination URL, or null when disabled.
+	 * @param string      $label      Visible link text (e.g. "Prev", "Next").
+	 * @param string      $svg_path   Inline SVG `d` attribute for the chevron.
+	 * @param bool        $icon_first Whether the chevron renders before the label (true for Prev, false for Next).
 	 */
-	private function render_chevron( ?string $url, string $label, string $svg_path ): void {
-		$svg = sprintf(
+	private function render_link( ?string $url, string $label, string $svg_path, bool $icon_first ): void {
+		$svg             = sprintf(
 			'<svg class="woocommerce-order-list-nav__icon" width="24" height="24" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false"><path d="%s"></path></svg>',
 			esc_attr( $svg_path )
 		);
+		$text            = sprintf( '<span class="woocommerce-order-list-nav__label">%s</span>', esc_html( $label ) );
+		$inner           = $icon_first ? $svg . $text : $text . $svg;
+		$direction_class = $icon_first ? 'is-prev' : 'is-next';
 
 		if ( null === $url ) {
 			printf(
-				'<span class="woocommerce-order-list-nav__chevron" aria-disabled="true" aria-label="%s">%s</span>',
-				esc_attr( $label ),
-				$svg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- inline SVG built from constant + escaped attr.
+				'<span class="woocommerce-order-list-nav__link %s" aria-disabled="true">%s</span>',
+				esc_attr( $direction_class ),
+				$inner // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- inline SVG built from constant + escaped label.
 			);
 			return;
 		}
 
 		printf(
-			'<a href="%s" class="woocommerce-order-list-nav__chevron" aria-label="%s">%s</a>',
+			'<a href="%s" class="woocommerce-order-list-nav__link %s">%s</a>',
 			esc_url( $url ),
-			esc_attr( $label ),
-			$svg // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- inline SVG built from constant + escaped attr.
+			esc_attr( $direction_class ),
+			$inner // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- inline SVG built from constant + escaped label.
 		);
 	}
 
@@ -260,57 +255,26 @@ class OrderListNav {
 	}
 
 	/**
-	 * Computes total count + position via two paginated count queries.
+	 * Whether the given order matches the active filter set (i.e. would appear in that list view).
 	 *
-	 * Position is one-based. `in_set` is false when the current order doesn't match
-	 * the active filters (e.g. the user filtered to status=completed but is viewing
-	 * a processing order).
+	 * Used to decide whether to drop the filters before computing prev/next, so the nav still
+	 * shows usable links when the user has navigated to an order outside their filtered view.
 	 *
-	 * @param WC_Order            $order      Current order.
-	 * @param array<string,mixed> $query_args Base query args (type/status/etc).
-	 * @return array{position:int,total:int,in_set:bool}
+	 * @param WC_Order            $order      Order being edited.
+	 * @param array<string,mixed> $query_args Filter set as `wc_get_orders` args.
 	 */
-	private function compute_position_and_total( WC_Order $order, array $query_args ): array {
-		$total_query = wc_get_orders(
+	private function order_matches_filters( WC_Order $order, array $query_args ): bool {
+		$match = wc_get_orders(
 			array_merge(
 				$query_args,
 				array(
+					'post__in' => array( $order->get_id() ),
 					'limit'    => 1,
-					'paginate' => true,
 					'return'   => 'ids',
 				)
 			)
 		);
-		$total       = isset( $total_query->total ) ? (int) $total_query->total : 0;
-
-		if ( $total < 1 ) {
-			return array(
-				'position' => 0,
-				'total'    => 0,
-				'in_set'   => false,
-			);
-		}
-
-		$timestamp   = $order->get_date_created() ? $order->get_date_created()->getTimestamp() : time();
-		$newer_query = wc_get_orders(
-			array_merge(
-				$query_args,
-				array(
-					'date_created' => '>' . $timestamp,
-					'limit'        => 1,
-					'paginate'     => true,
-					'return'       => 'ids',
-				)
-			)
-		);
-		$newer_count = isset( $newer_query->total ) ? (int) $newer_query->total : 0;
-		$position    = $newer_count + 1;
-
-		return array(
-			'position' => $position,
-			'total'    => $total,
-			'in_set'   => $position <= $total,
-		);
+		return is_array( $match ) && ! empty( $match );
 	}
 
 	/**

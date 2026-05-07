@@ -96,37 +96,33 @@ class OrderListNavTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should report position 1 / N for the newest order in the set.
+	 * @testdox Should disable Prev (left) at the newest order in the set.
 	 */
-	public function test_position_is_one_for_newest_order(): void {
+	public function test_no_prev_at_newest_order(): void {
 		$ids   = $this->create_orders( 5 );
 		$order = wc_get_order( end( $ids ) );
 
 		$data = $this->sut->get_navigation_data( $order );
 
-		$this->assertSame( 1, $data['position'], 'Newest order should be position 1.' );
-		$this->assertSame( 5, $data['total'], 'Total should reflect all 5 orders.' );
-		$this->assertNull( $data['prev_id'], 'No previous-position link at position 1.' );
-		$this->assertSame( $ids[3], $data['next_id'], 'Next-position link should be the second-newest order.' );
+		$this->assertNull( $data['prev_id'], 'Prev link should be disabled at the newest order.' );
+		$this->assertSame( $ids[3], $data['next_id'], 'Next link should point at the second-newest order.' );
 	}
 
 	/**
-	 * @testdox Should report position N / N for the oldest order in the set.
+	 * @testdox Should disable Next (right) at the oldest order in the set.
 	 */
-	public function test_position_is_total_for_oldest_order(): void {
+	public function test_no_next_at_oldest_order(): void {
 		$ids   = $this->create_orders( 5 );
 		$order = wc_get_order( $ids[0] );
 
 		$data = $this->sut->get_navigation_data( $order );
 
-		$this->assertSame( 5, $data['position'], 'Oldest order should be at position equal to total.' );
-		$this->assertSame( 5, $data['total'], 'Total should reflect all 5 orders.' );
-		$this->assertNull( $data['next_id'], 'No next-position link at the last position.' );
-		$this->assertSame( $ids[1], $data['prev_id'], 'Previous-position link should be the second-oldest order.' );
+		$this->assertNull( $data['next_id'], 'Next link should be disabled at the oldest order.' );
+		$this->assertSame( $ids[1], $data['prev_id'], 'Prev link should point at the second-oldest order.' );
 	}
 
 	/**
-	 * @testdox Should narrow position and total to the active status filter.
+	 * @testdox Should narrow prev/next to the active status filter.
 	 */
 	public function test_status_filter_narrows_the_set(): void {
 		$ids = $this->create_orders( 5 );
@@ -139,11 +135,10 @@ class OrderListNavTest extends WC_Unit_Test_Case {
 
 		$data = $this->sut->get_navigation_data( $completed_order );
 
-		$this->assertSame( 1, $data['position'], 'The single completed order should be at position 1 within its filter.' );
-		$this->assertSame( 1, $data['total'], 'Total should reflect the filtered set (1 completed order).' );
 		$this->assertNull( $data['prev_id'], 'No prev order matches the filter.' );
 		$this->assertNull( $data['next_id'], 'No next order matches the filter.' );
-		$this->assertSame( array( 'status' => 'completed' ), $data['list_query'], 'Filter should be carried forward.' );
+		$this->assertArrayHasKey( 'status', $data['list_query'] );
+		$this->assertSame( 'completed', $data['list_query']['status'], 'Filter should be carried forward.' );
 	}
 
 	/**
@@ -157,8 +152,8 @@ class OrderListNavTest extends WC_Unit_Test_Case {
 		$processing_order = wc_get_order( $ids[1] );
 		$data             = $this->sut->get_navigation_data( $processing_order );
 
-		$this->assertSame( 3, $data['total'], 'Total should reflect the unfiltered set after fallback.' );
-		$this->assertSame( 2, $data['position'], 'Position should reflect the unfiltered set (middle of 3).' );
+		$this->assertSame( $ids[2], $data['prev_id'], 'Prev should walk the unfiltered set after fallback.' );
+		$this->assertSame( $ids[0], $data['next_id'], 'Next should walk the unfiltered set after fallback.' );
 		$this->assertSame( array(), $data['list_query'], 'Filter should be dropped after fallback.' );
 	}
 

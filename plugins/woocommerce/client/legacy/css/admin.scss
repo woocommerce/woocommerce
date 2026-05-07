@@ -3023,28 +3023,17 @@ ul.wc_coupon_list_block {
 		float: right;
 		display: inline-flex;
 		align-items: center;
-		gap: 8px;
+		gap: 4px;
 		margin-top: 4px;
 		font-size: 13px;
 		line-height: 1.4;
 	}
 
-	&.woocommerce-feature-enabled-order-detail-redesign .woocommerce-order-list-nav__count {
-		.is-current {
-			color: $gray-900;
-		}
-
-		.is-muted {
-			color: $gray-700;
-		}
-	}
-
-	&.woocommerce-feature-enabled-order-detail-redesign .woocommerce-order-list-nav__chevron {
+	&.woocommerce-feature-enabled-order-detail-redesign .woocommerce-order-list-nav__link {
 		display: inline-flex;
 		align-items: center;
-		justify-content: center;
-		width: 32px;
-		height: 32px;
+		gap: 4px;
+		padding: 4px 8px;
 		border-radius: $radius-s;
 		color: $gray-900;
 		text-decoration: none;
@@ -3053,6 +3042,7 @@ ul.wc_coupon_list_block {
 		&:hover,
 		&:focus-visible {
 			background-color: rgba(0, 0, 0, 0.06);
+			color: $gray-900;
 		}
 
 		&:focus-visible {
@@ -3071,12 +3061,13 @@ ul.wc_coupon_list_block {
 		}
 	}
 
-	// Mirror the chevron icons in RTL so the visual direction still matches position-number direction.
+	// In RTL, float the nav to the left so it still hugs the inline-end edge.
 	&.woocommerce-feature-enabled-order-detail-redesign[dir="rtl"] .woocommerce-order-list-nav,
 	[dir="rtl"] &.woocommerce-feature-enabled-order-detail-redesign .woocommerce-order-list-nav {
 		float: left;
 	}
 
+	// Mirror the chevron icons in RTL so the visual direction still matches the reading direction.
 	&.woocommerce-feature-enabled-order-detail-redesign[dir="rtl"] .woocommerce-order-list-nav__icon,
 	[dir="rtl"] &.woocommerce-feature-enabled-order-detail-redesign .woocommerce-order-list-nav__icon {
 		transform: scaleX(-1);
