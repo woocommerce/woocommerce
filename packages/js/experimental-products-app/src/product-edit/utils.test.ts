@@ -11,8 +11,11 @@ import { productFields } from '../product-list/fields';
 import {
 	buildMergedProductEditData,
 	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
+	getProductWithUpdatedVariation,
 	getProductEditFields,
+	getProductVariationUpdatePath,
 	getVisibleProductEditFields,
+	isProductVariation,
 } from './utils';
 
 jest.mock( '@woocommerce/settings', () => ( {
@@ -120,6 +123,76 @@ describe( 'product edit utils', () => {
 				'shipping_summary',
 				'linked_products_count',
 			] )
+		);
+	} );
+
+	it( 'identifies variations and builds their update endpoint path', () => {
+		const variation = buildProduct( {
+			id: 34,
+			parent_id: 12,
+			type: 'variation',
+		} );
+
+		expect( isProductVariation( variation ) ).toBe( true );
+
+		if ( isProductVariation( variation ) ) {
+			expect( getProductVariationUpdatePath( variation ) ).toBe(
+				'/wc/v3/products/12/variations/34'
+			);
+		}
+
+		expect(
+			isProductVariation( buildProduct( { id: 12, parent_id: 0 } ) )
+		).toBe( false );
+		expect(
+			isProductVariation(
+				buildProduct( {
+					id: 34,
+					parent_id: 0,
+					type: 'variation',
+				} )
+			)
+		).toBe( true );
+		const orphanVariation = buildProduct( {
+			id: 34,
+			parent_id: 0,
+			type: 'variation',
+		} );
+
+		if ( isProductVariation( orphanVariation ) ) {
+			expect( () =>
+				getProductVariationUpdatePath( orphanVariation )
+			).toThrow( 'Variation parent ID is required' );
+		}
+	} );
+
+	it( 'updates an embedded variation in a product record', () => {
+		const variation = buildProduct( {
+			id: 34,
+			parent_id: 12,
+			name: 'Blue',
+			type: 'variation',
+		} );
+		const updatedVariation = {
+			...variation,
+			name: 'Green',
+		};
+		const parent = buildProduct( {
+			id: 12,
+			_embedded: {
+				variations: [ variation ],
+			},
+		} );
+
+		expect(
+			getProductWithUpdatedVariation( parent, updatedVariation )
+		).toEqual(
+			expect.objectContaining( {
+				id: 12,
+				_embedded: {
+					variations: [ updatedVariation ],
+				},
+			} )
 		);
 	} );
 

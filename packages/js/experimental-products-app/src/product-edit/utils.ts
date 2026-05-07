@@ -25,6 +25,9 @@ const EXCLUDED_PRODUCT_EDIT_FIELD_ID_SET = new Set(
 
 type ProductField = Field< ProductEntityRecord >;
 type ProductEditFieldId = ( typeof PRODUCT_EDIT_FIELD_IDS )[ number ];
+type ProductVariationEntityRecord = ProductEntityRecord & {
+	parent_id: number;
+};
 
 const PRODUCT_EDIT_FIELD_IDS = [
 	'name',
@@ -184,6 +187,67 @@ function getProductTypeCompatibleFieldIds( product: ProductEntityRecord ) {
 	}
 
 	return COMMON_PRODUCT_EDIT_FIELD_IDS;
+}
+
+export function isProductVariation(
+	product: ProductEntityRecord
+): product is ProductVariationEntityRecord {
+	return product.type === 'variation' || Boolean( product.parent_id );
+}
+
+export function getProductVariationUpdatePath(
+	product: ProductVariationEntityRecord
+) {
+	if ( ! product.parent_id ) {
+		throw new Error(
+			'Variation parent ID is required to update a variation.'
+		);
+	}
+
+	return `/wc/v3/products/${ product.parent_id }/variations/${ product.id }`;
+}
+
+export function getProductWithUpdatedVariation(
+	product: ProductEntityRecord,
+	variation: ProductEntityRecord
+): ProductEntityRecord {
+	const embeddedVariations = product._embedded?.variations ?? [];
+	const hasEmbeddedVariation = embeddedVariations.some(
+		( embeddedVariation ) => embeddedVariation.id === variation.id
+	);
+
+	return {
+		...product,
+		_embedded: {
+			...product._embedded,
+			variations: hasEmbeddedVariation
+				? embeddedVariations.map( ( embeddedVariation ) =>
+						embeddedVariation.id === variation.id
+							? variation
+							: embeddedVariation
+				  )
+				: [ ...embeddedVariations, variation ],
+		},
+	};
+}
+
+export function findProductInList(
+	products: ProductEntityRecord[],
+	productId: number
+) {
+	for ( const product of products ) {
+		if ( product.id === productId ) {
+			return product;
+		}
+
+		const variation = product._embedded?.variations?.find(
+			( embeddedVariation ) => embeddedVariation.id === productId
+		);
+
+		if ( variation ) {
+			return variation;
+		}
+	}
 }
 
 function getCommonProductTypeCompatibleFieldIds(
