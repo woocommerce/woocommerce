@@ -12,6 +12,17 @@
 		"woocommerce/product-filter-taxonomy",
 		"woocommerce/product-filter-status"
 	],
+	"styles": [
+		{
+			"name": "default",
+			"label": "Label",
+			"isDefault": true
+		},
+		{
+			"name": "swatch",
+			"label": "Swatch"
+		}
+	],
 	"supports": {
 		"interactivity": true
 	},

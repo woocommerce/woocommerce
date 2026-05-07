@@ -75,6 +75,10 @@
 	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
 	box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.1), inset 0 0 0 2px rgba(255, 255, 255, 0.1);
 	flex-shrink: 0;
+
+	&--no-color {
+		display: none;
+	}
 }
 
 .wc-block-product-filter-chips__text {
@@ -99,5 +103,65 @@
 	&:hover,
 	&:focus {
 		text-decoration: none;
+	}
+}
+
+// Swatch style — color circles only, no text labels.
+.is-style-swatch {
+	.wc-block-product-filter-chips__item {
+		border: none;
+		background: transparent;
+		padding: 4px;
+		border-radius: 50%;
+
+		&[aria-checked="true"] {
+			background: transparent;
+			color: inherit;
+			border: none;
+
+			.wc-block-product-filter-chips__swatch {
+				border-color: var(--wc-product-filters-text-color, CanvasText);
+			}
+		}
+
+		&:focus {
+			outline: none;
+		}
+	}
+
+	.wc-block-product-filter-chips__label {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.wc-block-product-filter-chips__swatch {
+		width: 2em;
+		height: 2em;
+		border-width: 2px;
+
+		&--no-color {
+			display: inline-block;
+			background:
+				linear-gradient(
+					to top right,
+					transparent calc(50% - 0.5px),
+					color-mix(in srgb, currentColor 40%, transparent) calc(50% - 0.5px),
+					color-mix(in srgb, currentColor 40%, transparent) calc(50% + 0.5px),
+					transparent calc(50% + 0.5px)
+				);
+		}
+	}
+
+	.wc-block-product-filter-chips__text,
+	.wc-block-product-filter-chips__count {
+		display: block;
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 }

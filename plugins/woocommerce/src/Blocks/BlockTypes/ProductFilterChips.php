@@ -73,7 +73,8 @@ final class ProductFilterChips extends AbstractBlock {
 		$hidden_count       = max( 0, count( $items ) - count( $visible_items ) );
 		$first_item         = reset( $items );
 		$show_counts        = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$has_color_swatches = is_array( $first_item ) && ! empty( $first_item['color'] );
+		$is_swatch_style    = is_string( $classes ) && str_contains( $classes, 'is-style-swatch' );
+		$has_color_swatches = $is_swatch_style || ( is_array( $first_item ) && ! empty( $first_item['color'] ) );
 
 		ob_start();
 		?>
@@ -109,10 +110,12 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-on--click="actions.toggle"
 						>
 							<span class="wc-block-product-filter-chips__label">
-								<?php if ( $has_color_swatches && ! empty( $item['color'] ) ) : ?>
+								<?php if ( $has_color_swatches ) : ?>
 									<span
-										class="wc-block-product-filter-chips__swatch"
-										style="background-color: <?php echo esc_attr( $item['color'] ); ?>;"
+										class="wc-block-product-filter-chips__swatch<?php echo empty( $item['color'] ) ? ' wc-block-product-filter-chips__swatch--no-color' : ''; ?>"
+										<?php if ( ! empty( $item['color'] ) ) : ?>
+											style="background-color: <?php echo esc_attr( $item['color'] ); ?>;"
+										<?php endif; ?>
 										aria-hidden="true"
 									></span>
 								<?php endif; ?>
@@ -147,7 +150,7 @@ final class ProductFilterChips extends AbstractBlock {
 								<?php if ( $has_color_swatches ) : ?>
 									<span
 										class="wc-block-product-filter-chips__swatch"
-										data-wp-bind--hidden="woocommerce/product-filter-chips::state.swatchHidden"
+										data-wp-class--wc-block-product-filter-chips__swatch--no-color="woocommerce/product-filter-chips::state.swatchHidden"
 										data-wp-bind--style="woocommerce/product-filter-chips::state.swatchStyle"
 										aria-hidden="true"
 									></span>

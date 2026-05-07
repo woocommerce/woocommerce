@@ -52,6 +52,10 @@ const Edit = ( props: EditProps ) => {
 	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
+	const termColors = getSetting< Record< string, string > >(
+		'productFilterTermColors',
+		{}
+	);
 
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		FilterOptionItem[]
@@ -102,6 +106,9 @@ const Edit = ( props: EditProps ) => {
 					value: term.id.toString(),
 					selected: index === 0,
 					...( showCounts && { count: term.count } ),
+					...( termColors[ term.id ] && {
+						color: termColors[ term.id ],
+					} ),
 				} ) );
 
 			setAttributeOptions(
@@ -119,6 +126,7 @@ const Edit = ( props: EditProps ) => {
 		isTermsLoading,
 		isFilterCountsLoading,
 		attributeObject,
+		termColors,
 	] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
