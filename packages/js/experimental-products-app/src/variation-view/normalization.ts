@@ -15,7 +15,7 @@ function getVariationName( variation: ProductVariation ) {
 		return variation.name;
 	}
 
-	if ( variation.attributes.length > 0 ) {
+	if ( variation.attributes?.length > 0 ) {
 		return variation.attributes.map( ( attr ) => attr.option ).join( ', ' );
 	}
 
