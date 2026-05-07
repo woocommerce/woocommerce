@@ -53,6 +53,11 @@ class SiteHealthChecks {
 			'test'  => array( $this, 'check_pending_db_update' ),
 		);
 
+		$tests['direct']['woocommerce_required_pages'] = array(
+			'label' => __( 'WooCommerce required pages are configured', 'woocommerce' ),
+			'test'  => array( $this, 'check_required_pages' ),
+		);
+
 		return $tests;
 	}
 
@@ -90,6 +95,57 @@ class SiteHealthChecks {
 			);
 
 		return $this->apply_result_filters( 'pending_db_update', $result );
+	}
+
+	/**
+	 * Check whether all required WooCommerce pages are assigned and published.
+	 *
+	 * Returns a 'critical' result when any required page (shop, cart, checkout,
+	 * myaccount) is missing or not in 'publish' status, and 'good' when all
+	 * pages are correctly configured.
+	 *
+	 * @return array WP Site Health result array.
+	 */
+	public function check_required_pages(): array {
+		$required = array(
+			'shop'      => __( 'Shop', 'woocommerce' ),
+			'cart'      => __( 'Cart', 'woocommerce' ),
+			'checkout'  => __( 'Checkout', 'woocommerce' ),
+			'myaccount' => __( 'My Account', 'woocommerce' ),
+		);
+		$missing = array();
+		foreach ( $required as $key => $label ) {
+			$page_id = (int) get_option( "woocommerce_{$key}_page_id" );
+			if ( ! $page_id || 'publish' !== get_post_status( $page_id ) ) {
+				$missing[] = $label;
+			}
+		}
+
+		$result = empty( $missing )
+			? array(
+				'label'       => __( 'WooCommerce required pages are configured', 'woocommerce' ),
+				'status'      => 'good',
+				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'green' ),
+				'description' => '<p>' . esc_html__( 'All required WooCommerce pages are assigned and published.', 'woocommerce' ) . '</p>',
+				'actions'     => '',
+				'test'        => 'woocommerce_required_pages',
+			)
+			: array(
+				'label'       => __( 'WooCommerce required pages are missing', 'woocommerce' ),
+				'status'      => 'critical',
+				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'red' ),
+				'description' => '<p>' . esc_html(
+					sprintf( __( 'These required WooCommerce pages are missing or unpublished: %s.', 'woocommerce' ), implode( ', ', $missing ) )
+				) . '</p>',
+				'actions'     => sprintf(
+					'<p><a href="%s">%s</a></p>',
+					esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced' ) ),
+					esc_html__( 'Configure pages', 'woocommerce' )
+				),
+				'test'        => 'woocommerce_required_pages',
+			);
+
+		return $this->apply_result_filters( 'required_pages', $result );
 	}
 
 	/**
