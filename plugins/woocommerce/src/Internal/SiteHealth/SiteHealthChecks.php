@@ -18,8 +18,6 @@ class SiteHealthChecks {
 	 * The check result cache.
 	 *
 	 * @var CheckResultCache
-	 * Consumed by async check methods added in later tasks.
-	 * @phpstan-ignore property.onlyWritten
 	 */
 	private CheckResultCache $cache;
 
@@ -87,6 +85,21 @@ class SiteHealthChecks {
 		$tests['direct'][ $postmeta_index->get_id() ] = array(
 			'label' => $postmeta_index->get_label(),
 			'test'  => array( $postmeta_index, 'run' ),
+		);
+
+		$as_stats = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\ActionSchedulerStats();
+		$cache    = $this->cache;
+		$tests['async']['woocommerce_action_scheduler_overdue'] = array(
+			'label'             => __( 'Action Scheduler backlog', 'woocommerce' ),
+			'test'              => 'woocommerce_action_scheduler_overdue',
+			'async'             => true,
+			'async_direct_test' => static fn() => $cache->remember( 'action_scheduler_overdue', static fn() => $as_stats->run_overdue() ),
+		);
+		$tests['async']['woocommerce_action_scheduler_total'] = array(
+			'label'             => __( 'Action Scheduler table size', 'woocommerce' ),
+			'test'              => 'woocommerce_action_scheduler_total',
+			'async'             => true,
+			'async_direct_test' => static fn() => $cache->remember( 'action_scheduler_total', static fn() => $as_stats->run_total() ),
 		);
 
 		return $tests;
