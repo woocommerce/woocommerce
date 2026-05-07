@@ -28,7 +28,12 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Reset cached static state after each test so context constants don't leak.
+	 * Reset cached static state after each test.
+	 *
+	 * Note: PHP constants like REST_REQUEST cannot be undefined once set, so
+	 * any constant a test defines leaks for the rest of the process. Tests
+	 * that depend on the absence of those constants must run first, or move
+	 * to a class annotated with @runInSeparateProcess.
 	 */
 	public function tear_down(): void {
 		$this->reset_tracking_static_state();
@@ -37,28 +42,69 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Use reflection to clear the `cached_visitor_id` static between tests.
+	 * Use reflection to clear the `cached_visitor_id` and `pixel_batch_queue`
+	 * statics between tests so each case starts from a known-empty state.
 	 */
 	private function reset_tracking_static_state(): void {
 		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
-		$property   = $reflection->getProperty( 'cached_visitor_id' );
-		$property->setAccessible( true );
-		$property->setValue( null, null );
+
+		$visitor = $reflection->getProperty( 'cached_visitor_id' );
+		$visitor->setAccessible( true );
+		$visitor->setValue( null, null );
+
+		$queue = $reflection->getProperty( 'pixel_batch_queue' );
+		$queue->setAccessible( true );
+		$queue->setValue( null, array() );
 	}
 
 	/**
-	 * record_event() should short-circuit (no pixel emitted) when called from a
-	 * REST request that has no `tk_ai` cookie. Generating a one-shot id here
-	 * would fragment Nosara/Tracks sessions across cookie-less integrations.
+	 * Read the current `pixel_batch_queue` static via reflection. Used to
+	 * verify whether a pixel was queued for shutdown delivery.
+	 *
+	 * @return array
+	 */
+	private function get_pixel_batch_queue(): array {
+		$reflection = new \ReflectionClass( WC_Analytics_Tracking::class );
+		$property   = $reflection->getProperty( 'pixel_batch_queue' );
+		$property->setAccessible( true );
+		return $property->getValue();
+	}
+
+	/**
+	 * record_event() should short-circuit (no pixel emitted) when called from
+	 * a REST request that has no `tk_ai` cookie. Generating a one-shot id
+	 * here would fragment Nosara/Tracks sessions across cookie-less
+	 * integrations.
+	 *
+	 * Asserts both the skip return value AND the absence of any HTTP egress
+	 * (intercepted via `pre_http_request`) or queued batch entry — since
+	 * `record_event()` returns true both on skip and on successful emission,
+	 * the return value alone is not sufficient evidence of the skip.
 	 */
 	public function test_record_event_skips_rest_request_without_cookie(): void {
 		if ( ! defined( 'REST_REQUEST' ) ) {
 			define( 'REST_REQUEST', true );
 		}
 
+		$captured = array();
+		$filter   = function ( $pre, $args, $url ) use ( &$captured ) {
+			if ( false !== strpos( $url, 'pixel.wp.com' ) ) {
+				$captured[] = $url;
+			}
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => '',
+			);
+		};
+		add_filter( 'pre_http_request', $filter, 10, 3 );
+
 		$result = WC_Analytics_Tracking::record_event( 'add_to_cart' );
 
+		remove_filter( 'pre_http_request', $filter, 10 );
+
 		$this->assertTrue( $result, 'record_event should return true (skipped) for cookie-less REST contexts.' );
+		$this->assertCount( 0, $captured, 'No pixel.wp.com request should fire when no tk_ai cookie is present in REST context.' );
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'No pixel should be queued for batch when no tk_ai cookie is present in REST context.' );
 	}
 
 	/**
@@ -84,8 +130,8 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 	}
 
 	/**
-	 * Bot user-agents should still be filtered out. This test guards against the
-	 * new visitor-id check accidentally relaxing the existing bot check.
+	 * Bot user-agents should still be filtered out. This test guards against
+	 * the new visitor-id check accidentally relaxing the existing bot check.
 	 */
 	public function test_record_event_skips_bots(): void {
 		$_SERVER['HTTP_USER_AGENT'] = 'Googlebot/2.1 (+http://www.google.com/bot.html)';
