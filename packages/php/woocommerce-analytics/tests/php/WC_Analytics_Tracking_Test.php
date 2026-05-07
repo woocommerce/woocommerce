@@ -62,11 +62,13 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 	}
 
 	/**
-	 * record_event() should still record when a `tk_ai` cookie is present, even
-	 * inside a REST request — that's a real visitor whose action arrived via the
-	 * Store API, mobile app, or AJAX with cookies forwarded.
+	 * When the `tk_ai` cookie is present, get_visitor_id() should return its
+	 * value verbatim — even inside a REST request. This is the precondition
+	 * that lets record_event() proceed past the cookie-less skip guard for
+	 * real visitors whose action arrived via Store API, mobile app, or AJAX
+	 * with cookies forwarded.
 	 */
-	public function test_record_event_proceeds_when_cookie_is_present(): void {
+	public function test_get_visitor_id_returns_cookie_value_in_rest_context(): void {
 		if ( ! defined( 'REST_REQUEST' ) ) {
 			define( 'REST_REQUEST', true );
 		}

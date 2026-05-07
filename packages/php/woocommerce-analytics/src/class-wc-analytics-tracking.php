@@ -504,6 +504,10 @@ class WC_Analytics_Tracking {
 
 		self::$cached_visitor_id = base64_encode( $binary ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
+		// Note: httponly is intentionally false. tk_ai is an anonymous visitor
+		// identifier, not a credential. Keeping it readable from JS lets the
+		// _wca legacy library and client-side analytics see the same value the
+		// server just wrote, avoiding split visitor IDs across server↔client.
 		setcookie(
 			'tk_ai',
 			self::$cached_visitor_id,
@@ -512,7 +516,7 @@ class WC_Analytics_Tracking {
 				'path'     => '/',
 				'domain'   => COOKIE_DOMAIN,
 				'secure'   => is_ssl(),
-				'httponly' => true,
+				'httponly' => false,
 				'samesite' => 'Strict',
 			)
 		);
