@@ -87,7 +87,7 @@ function ProductEditForm( {
 	const mergedData = buildMergedProductEditData( selectedProducts );
 	const visibleFields = getVisibleProductEditFields(
 		editableFields,
-		mergedData
+		selectedProducts
 	);
 
 	const form = {

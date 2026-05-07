@@ -70,8 +70,8 @@ $meta_parts = array_filter(
 $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 
 // Single batched lookup of every existing review by this customer for the
-// items below. Without this each describe() call would issue its own query.
-\Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prime( $items, $order );
+// items below. Without this each decide() call would issue its own query.
+\Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::preload_for_items( $items, $order );
 
 // Pre-compute one decision per item so we know whether the form has any
 // actionable rows or whether to fall through to the empty-state thank-you.
@@ -86,7 +86,7 @@ foreach ( $items as $item ) {
 		continue;
 	}
 
-	$decision = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::describe( $item, $order );
+	$decision = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::decide( $item, $order );
 	if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_SKIP === $decision['status'] ) {
 		continue;
 	}
@@ -180,7 +180,7 @@ $order_key = (string) $order->get_order_key();
 		<?php esc_html_e( '* Mandatory fields', 'woocommerce' ); ?>
 	</p>
 
-	<?php if ( ! empty( $items ) ) : ?>
+	<?php if ( $has_form_rows ) : ?>
 		<form
 			class="woocommerce-review-order__form"
 			method="post"
@@ -188,7 +188,7 @@ $order_key = (string) $order->get_order_key();
 			data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
 			novalidate
 		>
-			<input type="hidden" name="action" value="woocommerce_submit_order_reviews" />
+			<input type="hidden" name="action" value="<?php echo esc_attr( 'woocommerce_submit_order_reviews' ); ?>" />
 			<input type="hidden" name="order_id" value="<?php echo esc_attr( (string) $order->get_id() ); ?>" />
 			<input type="hidden" name="key" value="<?php echo esc_attr( $order_key ); ?>" />
 			<?php wp_nonce_field( 'woocommerce_submit_order_reviews', '_wcnonce' ); ?>
@@ -223,9 +223,8 @@ $order_key = (string) $order->get_order_key();
 							'row_index' => $row_index,
 						)
 					);
-
 					++$row_index;
-				}//end foreach
+				}
 				?>
 			</ul>
 

@@ -32,6 +32,7 @@ import {
 	getItemId,
 	getProductListNavigationPath,
 	getProductListTab,
+	getProductsWithEmbeddedVariations,
 	getSelectionFromPostId,
 	getStatusForProductListTab,
 	isProductEditorAccessible,
@@ -203,6 +204,16 @@ export default function ProductList( { className }: ProductListProps ) {
 		[ totalCount, view.perPage ]
 	);
 
+	const data = useMemo(
+		() => getProductsWithEmbeddedVariations( records || EMPTY_ARRAY ),
+		[ records ]
+	);
+	const getItemParentId = useCallback(
+		( item: ProductEntityRecord ) =>
+			item.parent_id && item.parent_id > 0 ? item.parent_id : undefined,
+		[]
+	);
+
 	const { canCreateRecord } = useSelect(
 		( select ) => {
 			const { canUser } = select( coreStore );
@@ -302,13 +313,14 @@ export default function ProductList( { className }: ProductListProps ) {
 				key={ activeView }
 				paginationInfo={ paginationInfo }
 				fields={ productFields }
-				data={ records || EMPTY_ARRAY }
+				data={ data }
 				isLoading={ isLoading && ! hasResolved }
 				view={ view }
 				actions={ actions }
 				onChangeView={ setView }
 				onChangeSelection={ onChangeSelection }
 				getItemId={ getItemId }
+				getItemParentId={ getItemParentId }
 				selection={ selection }
 				defaultLayouts={ DEFAULT_LAYOUTS }
 				isItemClickable={ isProductEditorAccessible }
