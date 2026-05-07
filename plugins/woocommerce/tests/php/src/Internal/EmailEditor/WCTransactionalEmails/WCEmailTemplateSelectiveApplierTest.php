@@ -323,6 +323,40 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stamp _wc_email_template_last_core_render with current canonical (not merged content) after apply.
+	 *
+	 * Per the three-way diff design: base = "what core looked like the last time we synced".
+	 * Selective apply IS a sync against the new canonical even if the merchant kept some
+	 * yours-blocks, so base advances to the current canonical regardless of merge result.
+	 */
+	public function test_apply_selectively_stamps_last_core_render_with_canonical(): void {
+		$email_id = 'sa_last_core_render';
+		$this->register_fixture_email( $email_id );
+
+		$core_content = "<!-- wp:paragraph -->\n<p>Core.</p>\n<!-- /wp:paragraph -->";
+		$post_content = "<!-- wp:paragraph -->\n<p>Merchant.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+		$this->assertIsArray( $result );
+		$this->assertSame( 'applied', $result['status'] );
+
+		$stored_render = (string) get_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			true
+		);
+
+		$this->assertSame(
+			$core_content,
+			$stored_render,
+			'last_core_render after selective apply should equal the current canonical core content, not the merged content.'
+		);
+	}
+
+	/**
 	 * @testdox Should stamp source_hash from the post_content WordPress actually persisted on a use_core apply.
 	 *
 	 * Pins the saved-content invariant for the `merged_content === $core_content`

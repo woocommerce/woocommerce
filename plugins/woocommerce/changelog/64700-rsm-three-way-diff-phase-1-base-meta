@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Stamp `_wc_email_template_last_core_render` post meta on every system write to woo_email post_content (generator, auto-applier, selective applier, reset endpoint, RSM-149 backfill). Phase 1 of the three-way diff transition for the change-summary; no behavior change yet.

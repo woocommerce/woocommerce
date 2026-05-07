@@ -218,6 +218,10 @@ class WCEmailTemplateSelectiveApplier {
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $version_to );
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $source_hash );
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $synced_at );
+			// Three-way diff base reference: "what core looked like the last time we synced."
+			// Always stamps the current canonical (NOT the merged content) — selective apply IS
+			// a sync against the new canonical even if the merchant kept some yours-blocks.
+			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $core_content );
 
 			if ( $is_aligned_with_canonical ) {
 				WCEmailTemplateDivergenceDetector::reclassify( $post_id );
