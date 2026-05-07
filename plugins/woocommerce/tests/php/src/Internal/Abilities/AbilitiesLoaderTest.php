@@ -280,7 +280,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( array( 'string', 'null' ), $order['billing_email']['type'] ?? null );
 		$this->assertSame( 'email', $order['billing_email']['format'] ?? null );
 		$this->assertSame(
-			'Order line items. Only included when include_line_items is true.',
+			'Order line items. Only present when include_line_items is true.',
 			$order['line_items']['description'] ?? null
 		);
 	}

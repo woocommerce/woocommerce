@@ -28,33 +28,57 @@ trait ProductAbilityTrait {
 			'type'                 => 'object',
 			'properties'           => array(
 				'product_type'      => array(
-					'type' => 'string',
-					'enum' => self::get_supported_product_type_slugs(),
+					'type'        => 'string',
+					'description' => __(
+						'Agent-facing product type. physical/digital map to simple; affiliate maps to external; grouped maps to grouped.',
+						'woocommerce'
+					),
+					'enum'        => self::get_supported_product_type_slugs(),
 				),
 				'name'              => array( 'type' => 'string' ),
 				'sku'               => array( 'type' => 'string' ),
-				'regular_price'     => array( 'type' => 'string' ),
-				'sale_price'        => array( 'type' => 'string' ),
-				'description'       => array( 'type' => 'string' ),
-				'short_description' => array( 'type' => 'string' ),
+				'regular_price'     => array(
+					'type'        => 'string',
+					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+				),
+				'sale_price'        => array(
+					'type'        => 'string',
+					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+				),
+				'description'       => array(
+					'type'        => 'string',
+					'description' => __( 'Product description content. Safe HTML is allowed.', 'woocommerce' ),
+				),
+				'short_description' => array(
+					'type'        => 'string',
+					'description' => __( 'Short product description content. Safe HTML is allowed.', 'woocommerce' ),
+				),
 				'status'            => array(
 					'type' => 'string',
 					'enum' => self::get_product_mutation_status_slugs(),
 				),
 				'manage_stock'      => array( 'type' => 'boolean' ),
-				'stock_quantity'    => array( 'type' => self::get_product_stock_quantity_schema_type() ),
+				'stock_quantity'    => array(
+					'type'        => self::get_product_stock_quantity_schema_type(),
+					'description' => __( 'Available stock quantity when product-level stock management is used.', 'woocommerce' ),
+				),
 				'stock_status'      => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
 				'external_url'      => array(
-					'type'   => 'string',
-					'format' => 'uri',
+					'type'        => 'string',
+					'description' => __( 'External product URL for affiliate products.', 'woocommerce' ),
+					'format'      => 'uri',
 				),
-				'button_text'       => array( 'type' => 'string' ),
+				'button_text'       => array(
+					'type'        => 'string',
+					'description' => __( 'Button text for affiliate products.', 'woocommerce' ),
+				),
 				'grouped_products'  => array(
-					'type'  => 'array',
-					'items' => array(
+					'type'        => 'array',
+					'description' => __( 'Product IDs to include as children of a grouped product.', 'woocommerce' ),
+					'items'       => array(
 						'type'    => 'integer',
 						'minimum' => 1,
 					),
@@ -487,8 +511,9 @@ trait ProductAbilityTrait {
 					'format' => 'uri',
 				),
 				'type'              => array(
-					'type' => 'string',
-					'enum' => array_keys( wc_get_product_types() ),
+					'type'        => 'string',
+					'description' => __( 'WooCommerce product type, such as simple, external, grouped, or variable.', 'woocommerce' ),
+					'enum'        => array_keys( wc_get_product_types() ),
 				),
 				'status'            => array(
 					'type' => 'string',
@@ -500,27 +525,42 @@ trait ProductAbilityTrait {
 					'enum' => array_keys( get_woocommerce_currencies() ),
 				),
 				'currency_symbol'   => array( 'type' => 'string' ),
-				'price'             => array( 'type' => 'string' ),
-				'regular_price'     => array( 'type' => 'string' ),
-				'sale_price'        => array( 'type' => 'string' ),
+				'price'             => array(
+					'type'        => 'string',
+					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+				),
+				'regular_price'     => array(
+					'type'        => 'string',
+					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+				),
+				'sale_price'        => array(
+					'type'        => 'string',
+					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+				),
 				'stock_status'      => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
 				'stock_quantity'    => array(
-					'type' => array( self::get_product_stock_quantity_schema_type(), 'null' ),
+					'type'        => array( self::get_product_stock_quantity_schema_type(), 'null' ),
+					'description' => __( 'Current stock quantity, or null when no stock quantity is set.', 'woocommerce' ),
 				),
 				'manage_stock'      => array( 'type' => 'boolean' ),
 				'virtual'           => array( 'type' => 'boolean' ),
 				'downloadable'      => array( 'type' => 'boolean' ),
 				'external_url'      => array(
-					'type'   => array( 'string', 'null' ),
-					'format' => 'uri',
+					'type'        => array( 'string', 'null' ),
+					'description' => __( 'External product URL for external products.', 'woocommerce' ),
+					'format'      => 'uri',
 				),
-				'button_text'       => array( 'type' => array( 'string', 'null' ) ),
+				'button_text'       => array(
+					'type'        => array( 'string', 'null' ),
+					'description' => __( 'Button text for external products.', 'woocommerce' ),
+				),
 				'grouped_products'  => array(
-					'type'  => 'array',
-					'items' => array( 'type' => 'integer' ),
+					'type'        => 'array',
+					'description' => __( 'Product IDs included as children of a grouped product.', 'woocommerce' ),
+					'items'       => array( 'type' => 'integer' ),
 				),
 				'date_created'      => array(
 					'type'   => array( 'string', 'null' ),

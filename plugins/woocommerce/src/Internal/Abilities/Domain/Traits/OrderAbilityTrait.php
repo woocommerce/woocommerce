@@ -106,7 +106,7 @@ trait OrderAbilityTrait {
 				),
 				'line_items'           => array(
 					'type'        => 'array',
-					'description' => __( 'Order line items. Only included when include_line_items is true.', 'woocommerce' ),
+					'description' => __( 'Order line items. Only present when include_line_items is true.', 'woocommerce' ),
 					'items'       => array(
 						'type'                 => 'object',
 						'properties'           => array(

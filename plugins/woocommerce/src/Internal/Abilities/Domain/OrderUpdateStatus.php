@@ -143,10 +143,14 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 					'minimum' => 1,
 				),
 				'status' => array(
-					'type' => 'string',
-					'enum' => self::get_allowed_order_status_slugs(),
+					'type'        => 'string',
+					'description' => __( 'Order status slug without the wc- prefix.', 'woocommerce' ),
+					'enum'        => self::get_allowed_order_status_slugs(),
 				),
-				'note'   => array( 'type' => 'string' ),
+				'note'   => array(
+					'type'        => 'string',
+					'description' => __( 'Optional note to record with the status change.', 'woocommerce' ),
+				),
 			),
 			'required'             => array( 'id', 'status' ),
 			'additionalProperties' => false,

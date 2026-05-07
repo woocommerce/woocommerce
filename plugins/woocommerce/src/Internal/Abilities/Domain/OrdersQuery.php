@@ -180,37 +180,46 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 					'minimum' => 1,
 				),
 				'status'             => array(
-					'type' => 'string',
-					'enum' => self::get_allowed_order_status_slugs(),
+					'type'        => 'string',
+					'description' => __( 'Filter by order status slug without the wc- prefix.', 'woocommerce' ),
+					'enum'        => self::get_allowed_order_status_slugs(),
 				),
 				'customer_id'        => array( 'type' => 'integer' ),
 				'billing_email'      => array(
 					'type'   => 'string',
 					'format' => 'email',
 				),
-				'parent'             => array( 'type' => 'integer' ),
+				'parent'             => array(
+					'type'        => 'integer',
+					'description' => __( 'Filter by parent order ID.', 'woocommerce' ),
+				),
 				'exclude'            => array(
-					'type'  => 'array',
-					'items' => array(
+					'type'        => 'array',
+					'description' => __( 'Order IDs to exclude from the results.', 'woocommerce' ),
+					'items'       => array(
 						'type'    => 'integer',
 						'minimum' => 1,
 					),
 				),
 				'date_after'         => array(
-					'type'   => 'string',
-					'format' => 'date-time',
+					'type'        => 'string',
+					'description' => __( 'Filter orders created after this date/time.', 'woocommerce' ),
+					'format'      => 'date-time',
 				),
 				'date_before'        => array(
-					'type'   => 'string',
-					'format' => 'date-time',
+					'type'        => 'string',
+					'description' => __( 'Filter orders created before this date/time.', 'woocommerce' ),
+					'format'      => 'date-time',
 				),
 				'modified_after'     => array(
-					'type'   => 'string',
-					'format' => 'date-time',
+					'type'        => 'string',
+					'description' => __( 'Filter orders modified after this date/time.', 'woocommerce' ),
+					'format'      => 'date-time',
 				),
 				'modified_before'    => array(
-					'type'   => 'string',
-					'format' => 'date-time',
+					'type'        => 'string',
+					'description' => __( 'Filter orders modified before this date/time.', 'woocommerce' ),
+					'format'      => 'date-time',
 				),
 				'orderby'            => array(
 					'type' => 'string',
@@ -221,8 +230,12 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 					'enum' => array( 'asc', 'desc' ),
 				),
 				'include_line_items' => array(
-					'type'    => 'boolean',
-					'default' => false,
+					'type'        => 'boolean',
+					'description' => __(
+						'Whether to include order line items in each returned order. Defaults to false.',
+						'woocommerce'
+					),
+					'default'     => false,
 				),
 				'page'               => array(
 					'type'    => 'integer',

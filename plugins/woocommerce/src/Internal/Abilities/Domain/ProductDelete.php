@@ -121,20 +121,24 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-			return array(
-				'type'                 => 'object',
-				'properties'           => array(
-					'id'    => array(
-						'type'    => 'integer',
-						'minimum' => 1,
-					),
-					'force' => array(
-						'type'    => 'boolean',
-						'default' => false,
-					),
+		return array(
+			'type'                 => 'object',
+			'properties'           => array(
+				'id'    => array(
+					'type'    => 'integer',
+					'minimum' => 1,
 				),
-				'required'             => array( 'id' ),
-				'additionalProperties' => false,
-			);
+				'force' => array(
+					'type'        => 'boolean',
+					'description' => __(
+						'Permanently delete the product. Defaults to false, which moves the product to trash.',
+						'woocommerce'
+					),
+					'default'     => false,
+				),
+			),
+			'required'             => array( 'id' ),
+			'additionalProperties' => false,
+		);
 	}
 }

@@ -132,10 +132,17 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'note'          => array( 'type' => 'string' ),
+				'note'          => array(
+					'type'        => 'string',
+					'description' => __( 'Order note content. Safe HTML is allowed.', 'woocommerce' ),
+				),
 				'customer_note' => array(
-					'type'    => 'boolean',
-					'default' => false,
+					'type'        => 'boolean',
+					'description' => __(
+						'Whether the note is visible to the customer. Defaults to false for a private/admin note.',
+						'woocommerce'
+					),
+					'default'     => false,
 				),
 			),
 			'required'             => array( 'id', 'note' ),
