@@ -198,10 +198,21 @@ final class ProductFilterAttribute extends AbstractBlock {
 					$term          = (array) $term;
 					$term['count'] = $attribute_counts[ $term['term_id'] ] ?? 0;
 
-					$type = 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug );
+					$type       = 'attribute/' . str_replace( 'pa_', '', $product_attribute->slug );
+					$aria_label = $term['name'];
+					if ( $show_counts ) {
+						$aria_label = sprintf(
+							/* translators: %1$s: filter item label. %2$d: number of results. */
+							_n( '%1$s, %2$d result', '%1$s, %2$d results', $term['count'], 'woocommerce' ),
+							$term['name'],
+							$term['count']
+						);
+					}
+
 					$item = array(
 						'id'                 => $type . '-' . $term['slug'],
 						'label'              => $term['name'],
+						'ariaLabel'          => $aria_label,
 						'value'              => $term['slug'],
 						'selected'           => in_array( $term['slug'], $selected_terms, true ),
 						'type'               => $type,
