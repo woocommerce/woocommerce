@@ -323,6 +323,85 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Bug 04 regression: parallel additions on yours and core both survive the apply when last_core_render meta is set.
+	 *
+	 * Without 3-way, the applier's LCS pairs yours' added paragraph with core's added paragraph
+	 * (name-only match) and they end up in copy_changes; default keep_yours preserves yours' text
+	 * and core's added paragraph never gets inserted. With 3-way (base meta present), the change-
+	 * summary correctly classifies them as separate add+remove and the applier's merge inserts
+	 * core's addition while preserving yours.
+	 */
+	public function test_apply_selectively_three_way_keeps_parallel_additions_separate(): void {
+		$email_id = 'sa_three_way_parallel_additions';
+		$this->register_fixture_email( $email_id );
+
+		$base_render = "<!-- wp:heading -->\n<h2>H</h2>\n<!-- /wp:heading -->";
+
+		$core_content = "<!-- wp:heading -->\n<h2>H</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>PS from core.</p>\n<!-- /wp:paragraph -->";
+
+		$post_content = "<!-- wp:heading -->\n<h2>H</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Reach out anytime.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			$base_render
+		);
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively( $post_id, array() );
+
+		$this->assertIsArray( $result );
+		$this->assertSame( 'applied', $result['status'] );
+		$this->assertStringContainsString( 'Reach out anytime.', $result['merged_content'], 'Yours\' added paragraph must be preserved.' );
+		$this->assertStringContainsString( 'PS from core.', $result['merged_content'], 'Core\'s added paragraph must be inserted.' );
+	}
+
+	/**
+	 * @testdox Three-way: a yours-only edit is preserved even when use_core is requested explicitly — the summary doesn't classify it as a conflict.
+	 */
+	public function test_apply_selectively_three_way_ignores_use_core_for_yours_only_edit(): void {
+		$email_id = 'sa_three_way_yours_only_edit';
+		$this->register_fixture_email( $email_id );
+
+		$base_and_core = "<!-- wp:paragraph -->\n<p>Hi.</p>\n<!-- /wp:paragraph -->";
+		$post_content  = "<!-- wp:paragraph -->\n<p>Hi friend.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $base_and_core );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			$base_and_core
+		);
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively(
+			$post_id,
+			array(
+				array(
+					'path'     => array( 0 ),
+					'decision' => 'use_core',
+				),
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertStringContainsString(
+			'Hi friend.',
+			$result['merged_content'],
+			'Three-way must preserve yours-only edits even when use_core is explicitly requested — they are not conflicts.'
+		);
+		$this->assertStringNotContainsString(
+			'Hi.</p>',
+			$result['merged_content'],
+			'Yours\' edit must not have been replaced with core\'s text.'
+		);
+	}
+
+	/**
 	 * @testdox Should stamp _wc_email_template_last_core_render with current canonical (not merged content) after apply.
 	 *
 	 * Per the three-way diff design: base = "what core looked like the last time we synced".

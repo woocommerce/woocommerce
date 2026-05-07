@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Selective applier consumes the change-summary payload when `last_core_render` meta is set: yours-only edits are silently preserved, and matched pairs the summary classified as separate add+remove are rejected by Pass 1 so Pass 2/3 handle them. Eliminates dual-implementation drift between the diff and the apply path. Backwards-compatible — posts without the meta keep the existing two-way merge.
