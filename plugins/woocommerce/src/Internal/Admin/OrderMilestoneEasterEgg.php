@@ -39,6 +39,15 @@ class OrderMilestoneEasterEgg {
 		// Preview: ?woo_egg=first|hundred|thousand lets admins preview any milestone without real orders.
 		$is_debug_preview = current_user_can( 'manage_options' ) && isset( $_GET['woo_egg'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 
+		// Only run the order query on the HPOS order edit page to avoid overhead on every admin page.
+		$is_order_edit_page = isset( $_GET['page'], $_GET['action'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			&& 'wc-orders' === $_GET['page']  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			&& 'edit' === $_GET['action'];    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( ! $is_debug_preview && ! $is_order_edit_page ) {
+			return;
+		}
+
 		$milestone_map = $is_debug_preview ? array() : $this->get_milestone_map();
 
 		if ( ! $is_debug_preview && empty( $milestone_map ) ) {
@@ -47,11 +56,13 @@ class OrderMilestoneEasterEgg {
 
 		$svg_data     = $this->get_svg_data();
 		$all_messages = $this->get_milestone_messages();
+		$labels       = $this->get_ui_labels();
 
 		$script = $this->get_script_template();
 		$script = str_replace( '__MILESTONES__',     wp_json_encode( $milestone_map ) ?: '{}', $script );
 		$script = str_replace( '__SVG_DATA__',       wp_json_encode( $svg_data ) ?: '{}', $script );
 		$script = str_replace( '__ALL_MILESTONES__', wp_json_encode( $all_messages ) ?: '{}', $script );
+		$script = str_replace( '__LABELS__',         wp_json_encode( $labels ) ?: '{}', $script );
 
 		wp_add_inline_script( 'jquery-core', $script, 'after' );
 	}
@@ -65,7 +76,7 @@ class OrderMilestoneEasterEgg {
 		$all_real_order_ids = array_values(
 			(array) wc_get_orders(
 			array(
-				'limit'      => -1,
+				'limit'      => 1001,
 				'orderby'    => 'date',
 				'order'      => 'ASC',
 				'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -106,26 +117,39 @@ class OrderMilestoneEasterEgg {
 	private function get_milestone_messages(): array {
 		return array(
 			'first'    => array(
-				'title'     => 'Cha-ching! Order number one',
-				'subtitle'  => "That's a big deal. Smash the llama. You've earned it.",
+				'title'     => __( 'Cha-ching! Order number one', 'woocommerce' ),
+				'subtitle'  => __( "That's a big deal. Smash the llama. You've earned it.", 'woocommerce' ),
 				'variant'   => 'lama',
-				'boomText'  => 'One down',
-				'shareText' => 'I got my first sale with WooCommerce',
+				'boomText'  => __( 'One down', 'woocommerce' ),
+				'shareText' => __( 'I got my first sale with WooCommerce', 'woocommerce' ),
 			),
 			'hundred'  => array(
-				'title'     => 'Triple digits looks good on you',
-				'subtitle'  => 'A hundred orders means you\'re juggling a lot. Take a moment to celebrate',
+				'title'     => __( 'Triple digits looks good on you', 'woocommerce' ),
+				'subtitle'  => __( "A hundred orders means you're juggling a lot. Take a moment to celebrate", 'woocommerce' ),
 				'variant'   => 'octo',
-				'boomText'  => 'Hands full',
-				'shareText' => 'I got my 100th sale with WooCommerce',
+				'boomText'  => __( 'Hands full', 'woocommerce' ),
+				'shareText' => __( 'I got my 100th sale with WooCommerce', 'woocommerce' ),
 			),
 			'thousand' => array(
-				'title'     => 'ONE. THOUSAND. ORDERS',
-				'subtitle'  => 'Seriously. A thousand orders. This called for a bigger piñata',
+				'title'     => __( 'ONE. THOUSAND. ORDERS', 'woocommerce' ),
+				'subtitle'  => __( 'Seriously. A thousand orders. This called for a bigger piñata', 'woocommerce' ),
 				'variant'   => 'whale',
-				'boomText'  => 'Off the charts',
-				'shareText' => 'I got my 1000th sale with WooCommerce',
+				'boomText'  => __( 'Off the charts', 'woocommerce' ),
+				'shareText' => __( 'I got my 1000th sale with WooCommerce', 'woocommerce' ),
 			),
+		);
+	}
+
+	/**
+	 * Returns translated UI labels for the overlay script.
+	 *
+	 * @return array<string, string>
+	 */
+	private function get_ui_labels(): array {
+		return array(
+			'cta'        => __( "Let's go!", 'woocommerce' ),
+			'closeLabel' => __( 'Close', 'woocommerce' ),
+			'closeTitle' => __( 'Close (Esc)', 'woocommerce' ),
 		);
 	}
 
@@ -185,10 +209,12 @@ class OrderMilestoneEasterEgg {
 (function() {
   'use strict';
 
-  var milestones    = __MILESTONES__;
-  var SVG_DATA      = __SVG_DATA__;
+  var milestones     = __MILESTONES__;
+  var SVG_DATA       = __SVG_DATA__;
   var ALL_MILESTONES = __ALL_MILESTONES__;
-  var shown         = {};
+  var LABELS         = __LABELS__;
+  var shown          = {};
+  var reducedMotion  = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
   /* ── Variant definitions ──────────────────────────────────────────────── */
   var STRING_OVERLAP_PX = 20;
@@ -265,6 +291,7 @@ class OrderMilestoneEasterEgg {
   var currentMilestone = null;
   var pinataEl = null;
   var squishAmp = 0, squishVel = 0, squishAngle = 0;
+  var _previousFocus = null;
 
   /* ── Layout helpers ───────────────────────────────────────────────────── */
   function pinataPxWidth() {
@@ -476,13 +503,17 @@ class OrderMilestoneEasterEgg {
   async function init() {
     stick.innerHTML = SVG_DATA.stick || '';
     ALL_SHAPES = [];
-    await loadConfettiShapes();
+    if (!reducedMotion) await loadConfettiShapes();
     filterShapes();
     await loadPinata(settings.variant);
-    startBlink();
+    if (!reducedMotion) startBlink();
     dropped = true;
-    mainOmega = 0.022;
-    loop();
+    if (reducedMotion) {
+      applyRotation(); drawBg();
+    } else {
+      mainOmega = 0.022;
+      loop();
+    }
   }
 
   /* ── Blink ────────────────────────────────────────────────────────────── */
@@ -831,7 +862,16 @@ class OrderMilestoneEasterEgg {
   function onMouseLeave()  { mActive = false; }
   function onMouseEnter()  { mActive = true; }
   function onResize()      { applyLayout(); sizeConfetti(); rebuildColumns(); settled.length = 0; }
-  function onKeyDown(e)    { if (e.key === 'Escape') closeOverlay(); }
+  function onKeyDown(e) {
+    if (e.key === 'Escape') { closeOverlay(); return; }
+    if (e.key === 'Tab' && overlayEl) {
+      var focusable = [].slice.call(overlayEl.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])'));
+      if (!focusable.length) return;
+      var first = focusable[0], last = focusable[focusable.length - 1];
+      if (e.shiftKey) { if (document.activeElement === first) { e.preventDefault(); last.focus(); } }
+      else            { if (document.activeElement === last)  { e.preventDefault(); first.focus(); } }
+    }
+  }
 
   function onDocClick(e) {
     var t = e.target;
@@ -855,6 +895,7 @@ class OrderMilestoneEasterEgg {
     if (overlayEl  && overlayEl.parentNode)  overlayEl.remove();
     var st = document.getElementById('woo-egg-style');
     if (st) st.remove();
+    if (_previousFocus && typeof _previousFocus.focus === 'function') { _previousFocus.focus(); }
   }
 
   /* ── Build overlay DOM ────────────────────────────────────────────────── */
@@ -898,7 +939,8 @@ class OrderMilestoneEasterEgg {
       '#egg-close-btn:hover{background:#f0f0f0;border-color:#949494}' +
       '#egg-sprinkle-bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}' +
       '#egg-sprinkle-bg svg{width:100%;height:100%;display:block}' +
-      '@keyframes egg-particle-pulse{0%,100%{opacity:1}50%{opacity:0.15}}';
+      '@keyframes egg-particle-pulse{0%,100%{opacity:1}50%{opacity:0.15}}' +
+      '@media (prefers-reduced-motion: reduce){#egg-sprinkle-bg *{animation:none!important}#egg-pinata-container svg{transition:none!important}}';
     document.head.appendChild(style);
 
     var el = document.createElement('div');
@@ -914,13 +956,13 @@ class OrderMilestoneEasterEgg {
         '</div>' +
         '<canvas id="egg-confetti"></canvas>' +
         '<div class="egg-copy">' +
-          '<h1 class="egg-headline">' + escHtml(milestoneData.title) + '</h1>' +
+          '<h1 id="egg-headline" class="egg-headline">' + escHtml(milestoneData.title) + '</h1>' +
           '<p class="egg-body">' + escHtml(milestoneData.subtitle) + '</p>' +
-          '<button class="egg-celebrate-btn components-button is-primary">Let’s go!</button>' +
+          ‘<button class="egg-celebrate-btn components-button is-primary">’ + escHtml(LABELS.cta) + ‘</button>’ +
         '</div>' +
         '<div id="egg-cursor-stick"></div>' +
       '</div>' +
-      '<button id="egg-close-btn" aria-label="Close" title="Close (Esc)"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"/></svg></button>';
+      '<button id="egg-close-btn" aria-label="' + escHtml(LABELS.closeLabel) + '" title="' + escHtml(LABELS.closeTitle) + '"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M12 13.06l3.712 3.713 1.061-1.06L13.061 12l3.712-3.712-1.06-1.06L12 10.938 8.288 7.227l-1.061 1.06L10.939 12l-3.712 3.712 1.06 1.061L12 13.061z"/></svg></button>';
 
     if (SVG_DATA.sprinkle) {
       var sp = document.createElement('div');
@@ -940,8 +982,14 @@ class OrderMilestoneEasterEgg {
       scene.insertBefore(sp, scene.firstChild);
     }
 
+    el.setAttribute('role', 'dialog');
+    el.setAttribute('aria-modal', 'true');
+    el.setAttribute('aria-labelledby', 'egg-headline');
     document.body.appendChild(el);
     overlayEl = el;
+
+    var firstFocusable = el.querySelector('.egg-celebrate-btn, #egg-close-btn');
+    if (firstFocusable) firstFocusable.focus();
 
     bgCV  = document.getElementById('egg-bg');    bgCtx = bgCV.getContext('2d');
     cfCV  = document.getElementById('egg-confetti'); cfCtx = cfCV.getContext('2d');
@@ -1001,6 +1049,7 @@ class OrderMilestoneEasterEgg {
       boomText: milestoneData.boomText || 'One down',
     });
 
+    _previousFocus = document.activeElement;
     buildOverlay(milestoneData);
     init();
   }
