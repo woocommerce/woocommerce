@@ -110,6 +110,14 @@ class SiteHealthChecks {
 			'async_direct_test' => static fn() => $cache->remember( 'autoloaded_options', static fn() => $auto->run() ),
 		);
 
+		$sessions = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\SessionsTableCheck();
+		$tests['async']['woocommerce_sessions_table'] = array(
+			'label'             => __( 'WooCommerce sessions table size', 'woocommerce' ),
+			'test'              => 'woocommerce_sessions_table',
+			'async'             => true,
+			'async_direct_test' => static fn() => $cache->remember( 'sessions_table', static fn() => $sessions->run() ),
+		);
+
 		return $tests;
 	}
 
