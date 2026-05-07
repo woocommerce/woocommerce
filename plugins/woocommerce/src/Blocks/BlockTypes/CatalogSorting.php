@@ -10,6 +10,8 @@ use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
  */
 class CatalogSorting extends AbstractBlock {
 
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
