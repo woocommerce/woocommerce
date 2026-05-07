@@ -97,10 +97,20 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 			'return'   => 'objects',
 		);
 
-		foreach ( array( 'status', 'type', 'sku', 'stock_status' ) as $field ) {
+		foreach ( array( 'status', 'sku', 'stock_status' ) as $field ) {
 			if ( ! empty( $input[ $field ] ) ) {
 				$args[ $field ] = wc_clean( $input[ $field ] );
 			}
+		}
+
+		if ( ! empty( $input['type'] ) ) {
+			$type_args = self::get_product_query_args_for_type( wc_clean( $input['type'] ) );
+
+			if ( is_wp_error( $type_args ) ) {
+				return $type_args;
+			}
+
+			$args = array_merge( $args, $type_args );
 		}
 
 		if ( ! empty( $input['search'] ) ) {
@@ -158,8 +168,12 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 					'enum' => self::get_product_query_status_slugs(),
 				),
 				'type'         => array(
-					'type' => 'string',
-					'enum' => array_keys( wc_get_product_types() ),
+					'type'        => 'string',
+					'description' => __(
+						'Filter by agent-facing product type. physical/digital map to simple; affiliate maps to external; grouped maps to grouped.',
+						'woocommerce'
+					),
+					'enum'        => self::get_supported_product_type_slugs(),
 				),
 				'stock_status' => array(
 					'type' => 'string',

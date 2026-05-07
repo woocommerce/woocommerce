@@ -120,6 +120,34 @@ trait ProductAbilityTrait {
 	}
 
 	/**
+	 * Get product query arguments for an agent-facing product type.
+	 *
+	 * @param string $product_type Agent-facing product type.
+	 * @return array|\WP_Error
+	 */
+	protected static function get_product_query_args_for_type( string $product_type ) {
+		$product_config = self::get_product_config( $product_type );
+
+		if ( is_wp_error( $product_config ) ) {
+			return $product_config;
+		}
+
+		$query_args = array(
+			'type' => $product_config['wc_type'],
+		);
+
+		if ( ProductType::SIMPLE === $product_config['wc_type'] ) {
+			foreach ( array( 'virtual', 'downloadable' ) as $field ) {
+				if ( array_key_exists( $field, $product_config['product_props'] ) ) {
+					$query_args[ $field ] = (bool) $product_config['product_props'][ $field ];
+				}
+			}
+		}
+
+		return $query_args;
+	}
+
+	/**
 	 * Get product configuration for an existing product.
 	 *
 	 * @param \WC_Product $product Product object.

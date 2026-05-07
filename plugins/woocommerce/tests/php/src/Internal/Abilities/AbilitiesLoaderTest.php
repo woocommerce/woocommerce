@@ -251,18 +251,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose agent-friendly product type inputs for product mutations.
+	 * @testdox Should expose agent-friendly product type inputs for product operations.
 	 */
-	public function test_product_mutation_schema_uses_agent_friendly_product_types(): void {
+	public function test_product_schema_uses_agent_friendly_product_types(): void {
+		$query_schema  = wp_get_ability( 'woocommerce/products-query' )->get_input_schema();
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 
 		$expected_types = array( 'physical', 'digital', 'affiliate', 'grouped' );
 
+		$this->assertSame( $expected_types, $query_schema['properties']['type']['enum'] ?? array() );
 		$this->assertSame( $expected_types, $create_schema['properties']['product_type']['enum'] ?? array() );
 		$this->assertSame( $expected_types, $update_schema['properties']['product_type']['enum'] ?? array() );
 		$this->assertSame( 'physical', $create_schema['properties']['product_type']['default'] ?? null );
 		$this->assertArrayNotHasKey( 'default', $update_schema['properties']['product_type'] ?? array() );
+		$this->assertNotContains( 'variable', $query_schema['properties']['type']['enum'] ?? array() );
 		$this->assertNotContains( 'variable', $create_schema['properties']['product_type']['enum'] ?? array() );
 	}
 
@@ -752,6 +755,68 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 'simple', $created['product']['type'] );
 		$this->assertTrue( $created['product']['virtual'] );
 		$this->assertTrue( $created['product']['downloadable'] );
+	}
+
+	/**
+	 * @testdox Should query simple products by agent-friendly physical and digital product types.
+	 */
+	public function test_products_query_maps_agent_friendly_product_types_to_product_fields(): void {
+		$physical_sku = wp_unique_id( 'abilities-physical-' );
+		$digital_sku  = wp_unique_id( 'abilities-digital-' );
+
+		$physical = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'         => 'Physical Query Product',
+				'product_type' => 'physical',
+				'sku'          => $physical_sku,
+			)
+		);
+
+		$this->assertNotWPError( $physical );
+		$this->created_product_ids[] = $physical['product']['id'];
+
+		$digital = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'         => 'Digital Query Product',
+				'product_type' => 'digital',
+				'sku'          => $digital_sku,
+			)
+		);
+
+		$this->assertNotWPError( $digital );
+		$this->created_product_ids[] = $digital['product']['id'];
+
+		$physical_result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'type' => 'physical',
+				'sku'  => $physical_sku,
+			)
+		);
+
+		$this->assertNotWPError( $physical_result );
+		$this->assertSame( 1, $physical_result['total'] );
+		$this->assertSame( $physical['product']['id'], $physical_result['products'][0]['id'] );
+
+		$digital_result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'type' => 'digital',
+				'sku'  => $digital_sku,
+			)
+		);
+
+		$this->assertNotWPError( $digital_result );
+		$this->assertSame( 1, $digital_result['total'] );
+		$this->assertSame( $digital['product']['id'], $digital_result['products'][0]['id'] );
+
+		$mismatched_result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'type' => 'physical',
+				'sku'  => $digital_sku,
+			)
+		);
+
+		$this->assertNotWPError( $mismatched_result );
+		$this->assertSame( 0, $mismatched_result['total'] );
 	}
 
 	/**
