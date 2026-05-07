@@ -8,6 +8,7 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
+const webpack = require( 'webpack' );
 
 /**
  * Internal dependencies
@@ -47,6 +48,7 @@ const wcAdminPackages = [
 	'currency',
 	'customer-effort-score',
 	'date',
+	'experimental-products-app',
 	'experimental',
 	'explat',
 	'navigation',
@@ -86,23 +88,31 @@ const webpackConfig = {
 	performance: {
 		hints: false,
 	},
-	cache: ( isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK )
-		? { type: 'memory' }
-		: {
-				type: 'filesystem',
-				cacheDirectory: path.resolve(
-					__dirname,
-					`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
-				),
-				buildDependencies: {
-					config: [
-						__filename,
-						path.resolve( __dirname, '../../../../pnpm-lock.yaml' ),
-						require.resolve( '@woocommerce/dependency-extraction-webpack-plugin' ),
-						require.resolve( '@woocommerce/internal-style-build' ),
-					],
-				},
-		  },
+	cache:
+		isWatch || process.env.CI || process.env.HOT || process.env.STORYBOOK
+			? { type: 'memory' }
+			: {
+					type: 'filesystem',
+					cacheDirectory: path.resolve(
+						__dirname,
+						`node_modules/.cache/webpack-${ WC_ADMIN_PHASE }`
+					),
+					buildDependencies: {
+						config: [
+							__filename,
+							path.resolve(
+								__dirname,
+								'../../../../pnpm-lock.yaml'
+							),
+							require.resolve(
+								'@woocommerce/dependency-extraction-webpack-plugin'
+							),
+							require.resolve(
+								'@woocommerce/internal-style-build'
+							),
+						],
+					},
+			  },
 	entry: getEntryPoints(),
 	output: {
 		filename: ( data ) => {
@@ -186,6 +196,12 @@ const webpackConfig = {
 	},
 	plugins: [
 		...styleConfig.plugins,
+		// Substitute the `__i18n_text_domain__` identifier used by the
+		// @woocommerce/email-editor package with the WooCommerce text
+		// domain so strings extract and translate under `woocommerce`.
+		new webpack.DefinePlugin( {
+			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
+		} ),
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && isWatch && new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {
@@ -252,6 +268,14 @@ const webpackConfig = {
 					}
 
 					if ( request.startsWith( '@wordpress/dataviews' ) ) {
+						return null;
+					}
+
+					if ( request.startsWith( '@wordpress/theme' ) ) {
+						return null;
+					}
+
+					if ( request.startsWith( '@wordpress/ui' ) ) {
 						return null;
 					}
 

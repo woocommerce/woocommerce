@@ -49,7 +49,7 @@ function getModalTitle(
 						'Are you sure you want to permanently delete %d item?',
 						'Are you sure you want to permanently delete %d items?',
 						items.length,
-						'woocommerce'
+						__i18n_text_domain__
 					),
 					items.length
 			  )
@@ -57,7 +57,7 @@ function getModalTitle(
 					// translators: %s: The post's title
 					__(
 						'Are you sure you want to permanently delete "%s"?',
-						'woocommerce'
+						__i18n_text_domain__
 					),
 					decodeEntities( getItemTitle( items[ 0 ] ) )
 			  );
@@ -70,7 +70,7 @@ function getModalTitle(
 					'Are you sure you want to move %d item to the trash ?',
 					'Are you sure you want to move %d items to the trash ?',
 					items.length,
-					'woocommerce'
+					__i18n_text_domain__
 				),
 				items.length
 		  )
@@ -78,7 +78,7 @@ function getModalTitle(
 				// translators: %s: The item's title.
 				__(
 					'Are you sure you want to move "%s" to the trash?',
-					'woocommerce'
+					__i18n_text_domain__
 				),
 				getItemTitle( items[ 0 ] )
 		  );
@@ -98,8 +98,8 @@ const getTrashEmailPostAction = () => {
 	const trashEmailPost = {
 		id: 'trash-email-post',
 		label: shouldPermanentlyDelete
-			? __( 'Permanently delete', 'woocommerce' )
-			: __( 'Move to trash', 'woocommerce' ),
+			? __( 'Permanently delete', __i18n_text_domain__ )
+			: __( 'Move to trash', __i18n_text_domain__ ),
 		supportsBulk: true,
 		icon: trash,
 		isEligible( item: PostWithPermissions ) {
@@ -151,7 +151,7 @@ const getTrashEmailPostAction = () => {
 							disabled={ isBusy }
 							__next40pxDefaultSize
 						>
-							{ __( 'Cancel', 'woocommerce' ) }
+							{ __( 'Cancel', __i18n_text_domain__ ) }
 						</Button>
 						<Button
 							variant="primary"
@@ -185,7 +185,7 @@ const getTrashEmailPostAction = () => {
 													/* translators: The posts's title. */
 													__(
 														'"%s" permanently deleted.',
-														'woocommerce'
+														__i18n_text_domain__
 													),
 													getItemTitle( items[ 0 ] )
 											  )
@@ -193,7 +193,7 @@ const getTrashEmailPostAction = () => {
 													/* translators: The item's title. */
 													__(
 														'"%s" moved to the trash.',
-														'woocommerce'
+														__i18n_text_domain__
 													),
 													getItemTitle( items[ 0 ] )
 											  );
@@ -201,7 +201,7 @@ const getTrashEmailPostAction = () => {
 										successMessage = shouldPermanentlyDelete
 											? __(
 													'The items were permanently deleted.',
-													'woocommerce'
+													__i18n_text_domain__
 											  )
 											: sprintf(
 													/* translators: The number of items. */
@@ -209,7 +209,7 @@ const getTrashEmailPostAction = () => {
 														'%s item moved to the trash.',
 														'%s items moved to the trash.',
 														items.length,
-														'woocommerce'
+														__i18n_text_domain__
 													),
 													items.length
 											  );
@@ -235,7 +235,7 @@ const getTrashEmailPostAction = () => {
 										} else {
 											errorMessage = __(
 												'An error occurred while performing the action.',
-												'woocommerce'
+												__i18n_text_domain__
 											);
 										}
 										// If we were trying to permanently delete multiple posts
@@ -260,14 +260,14 @@ const getTrashEmailPostAction = () => {
 										if ( errorMessages.size === 0 ) {
 											errorMessage = __(
 												'An error occurred while performing the action.',
-												'woocommerce'
+												__i18n_text_domain__
 											);
 										} else if ( errorMessages.size === 1 ) {
 											errorMessage = sprintf(
 												/* translators: %s: an error message */
 												__(
 													'An error occurred while performing the action: %s',
-													'woocommerce'
+													__i18n_text_domain__
 												),
 												[ ...errorMessages ][ 0 ]
 											);
@@ -276,7 +276,7 @@ const getTrashEmailPostAction = () => {
 												/* translators: %s: a list of comma separated error messages */
 												__(
 													'Some errors occurred while performing the action: %s',
-													'woocommerce'
+													__i18n_text_domain__
 												),
 												[ ...errorMessages ].join( ',' )
 											);
@@ -301,8 +301,11 @@ const getTrashEmailPostAction = () => {
 							__next40pxDefaultSize
 						>
 							{ shouldPermanentlyDelete
-								? __( 'Delete permanently', 'woocommerce' )
-								: __( 'Move to trash', 'woocommerce' ) }
+								? __(
+										'Delete permanently',
+										__i18n_text_domain__
+								  )
+								: __( 'Move to trash', __i18n_text_domain__ ) }
 						</Button>
 					</HStack>
 				</VStack>

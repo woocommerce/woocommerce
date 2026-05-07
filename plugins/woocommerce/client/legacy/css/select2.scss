@@ -194,7 +194,7 @@
 .select2-container--default
 	.select2-selection--single
 	.select2-selection__placeholder {
-	color: #999;
+	color: #444;
 }
 
 .select2-container--default
@@ -289,7 +289,7 @@
 .select2-container--default
 	.select2-selection--multiple
 	.select2-selection__placeholder {
-	color: #999;
+	color: #444;
 	margin-top: 5px;
 	float: left;
 }
@@ -487,7 +487,7 @@
 	.select2-results__option--highlighted[data-selected],
 .select2-container--default
 	.select2-results__option--highlighted[aria-selected] {
-	background-color: #0073aa;
+	background-color: var(--wp-admin-theme-color, #0073aa);
 	color: white;
 }
 
@@ -508,7 +508,7 @@
 }
 
 .select2-container--classic .select2-selection--single:focus {
-	border: 1px solid #0073aa;
+	border: 1px solid var(--wp-admin-theme-color, #0073aa);
 }
 
 .select2-container--classic
@@ -530,7 +530,7 @@
 .select2-container--classic
 	.select2-selection--single
 	.select2-selection__placeholder {
-	color: #999;
+	color: #444;
 }
 
 .select2-container--classic
@@ -586,7 +586,7 @@
 }
 
 .select2-container--classic.select2-container--open .select2-selection--single {
-	border: 1px solid #0073aa;
+	border: 1px solid var(--wp-admin-theme-color, #0073aa);
 }
 
 .select2-container--classic.select2-container--open
@@ -633,7 +633,7 @@
 }
 
 .select2-container--classic .select2-selection--multiple:focus {
-	border: 1px solid #0073aa;
+	border: 1px solid var(--wp-admin-theme-color, #0073aa);
 }
 
 .select2-container--classic
@@ -701,7 +701,7 @@
 
 .select2-container--classic.select2-container--open
 	.select2-selection--multiple {
-	border: 1px solid #0073aa;
+	border: 1px solid var(--wp-admin-theme-color, #0073aa);
 }
 
 .select2-container--classic.select2-container--open.select2-container--above
@@ -769,5 +769,5 @@
 }
 
 .select2-container--classic.select2-container--open .select2-dropdown {
-	border-color: #0073aa;
+	border-color: var(--wp-admin-theme-color, #0073aa);
 }
