@@ -142,4 +142,18 @@ class SiteHealthChecksTest extends WC_Unit_Test_Case {
 		$result = call_user_func( $tests['direct']['woocommerce_payment_gateway']['test'] );
 		$this->assertSame( 'recommended', $result['status'] );
 	}
+
+	// -------------------------------------------------------------------------
+	// Task 7: Object cache check.
+	// -------------------------------------------------------------------------
+
+	public function test_object_cache_check_recommended_when_no_external_cache() {
+		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		$result = call_user_func( $tests['direct']['woocommerce_object_cache']['test'] );
+		if ( wp_using_ext_object_cache() ) {
+			$this->assertSame( 'good', $result['status'] );
+		} else {
+			$this->assertSame( 'recommended', $result['status'] );
+		}
+	}
 }

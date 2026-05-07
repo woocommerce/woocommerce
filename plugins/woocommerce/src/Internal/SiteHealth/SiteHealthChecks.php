@@ -78,6 +78,11 @@ class SiteHealthChecks {
 			'test'  => array( $this, 'check_payment_gateway' ),
 		);
 
+		$tests['direct']['woocommerce_object_cache'] = array(
+			'label' => __( 'WooCommerce uses a persistent object cache', 'woocommerce' ),
+			'test'  => array( $this, 'check_object_cache' ),
+		);
+
 		return $tests;
 	}
 
@@ -316,6 +321,42 @@ class SiteHealthChecks {
 				'test'        => 'woocommerce_payment_gateway',
 			);
 		return $this->apply_result_filters( 'payment_gateway', $result );
+	}
+
+	/**
+	 * Check whether WordPress is using a persistent external object cache.
+	 *
+	 * Returns 'good' when an external object cache (e.g. Redis or Memcached) is
+	 * active, and 'recommended' when only the built-in non-persistent cache is
+	 * in use. A persistent cache significantly reduces database load for
+	 * WooCommerce stores.
+	 *
+	 * @return array WP Site Health result array.
+	 */
+	public function check_object_cache(): array {
+		$using  = wp_using_ext_object_cache();
+		$result = $using
+			? array(
+				'label'       => __( 'A persistent object cache is in use', 'woocommerce' ),
+				'status'      => 'good',
+				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'green' ),
+				'description' => '<p>' . esc_html__( 'WordPress is using an external object cache.', 'woocommerce' ) . '</p>',
+				'actions'     => '',
+				'test'        => 'woocommerce_object_cache',
+			)
+			: array(
+				'label'       => __( 'No persistent object cache is in use', 'woocommerce' ),
+				'status'      => 'recommended',
+				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
+				'description' => '<p>' . esc_html__( 'WooCommerce stores benefit significantly from a persistent object cache (Redis or Memcached). Without one, every request re-runs option queries.', 'woocommerce' ) . '</p>',
+				'actions'     => sprintf(
+					'<p><a href="%s">%s</a></p>',
+					'https://developer.wordpress.org/advanced-administration/performance/optimization/#caching',
+					esc_html__( 'Learn about object caching', 'woocommerce' )
+				),
+				'test'        => 'woocommerce_object_cache',
+			);
+		return $this->apply_result_filters( 'object_cache', $result );
 	}
 
 	/**
