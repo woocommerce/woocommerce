@@ -314,6 +314,60 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Out-of-range ratings surface as a per-row error (invalid_rating).
+	 */
+	public function test_invalid_rating_returns_error(): void {
+		$built = $this->make_order( 1 );
+		$order = $built['order'];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0],
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => 7,
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = $response['data']['results'][0];
+
+		$this->assertSame( 'error', $row['status'] );
+		$this->assertSame( 'invalid_rating', $row['error'] );
+	}
+
+	/**
+	 * @testdox Submitting a product_id that doesn't match the order item surfaces product_mismatch.
+	 */
+	public function test_product_mismatch_returns_error(): void {
+		$built = $this->make_order( 1 );
+		$order = $built['order'];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $built['product_ids'][0] + 99999,
+					'order_item_id' => $built['item_ids'][0],
+					'rating'        => 4,
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$row      = $response['data']['results'][0];
+
+		$this->assertSame( 'error', $row['status'] );
+		$this->assertSame( 'product_mismatch', $row['error'] );
+	}
+
+	/**
 	 * @testdox Order completed-at meta is set when every item has been reviewed.
 	 */
 	public function test_marks_order_complete_when_every_item_reviewed(): void {
