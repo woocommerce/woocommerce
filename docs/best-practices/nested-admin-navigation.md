@@ -20,10 +20,10 @@ When enabled, the flag:
 - Keeps the `WooCommerce` top-level registration in place; positions it
   directly after the Dashboard item.
 - Shows two navigation surfaces:
-  - **Hover cascade** — hovering the rail item opens a flyout.
-  - **Rail replacement** — on any Woo page, the native rail is replaced
-    by a 160px Woo rail with a `← WordPress` link that returns to the
-    WP Dashboard.
+    - **Hover cascade** — hovering the rail item opens a flyout.
+    - **Rail replacement** — on any Woo page, the native rail is replaced
+      by a 160px Woo rail with a `← WordPress` link that returns to the
+      WP Dashboard.
 
 ## Filter hook
 

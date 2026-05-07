@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types = 1 );
+
 /**
  * Asset enqueuing for navigation_v2.
  *

@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types = 1 );
+
 /**
  * Woo-page context detection.
  *
@@ -46,7 +49,7 @@ final class Context {
 
 		$current_pagenow = $pagenow ?: 'admin.php';
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$current_params = isset( $_GET ) ? wp_unslash( $_GET ) : array();
+		$current_params = wp_unslash( $_GET );
 		// phpcs:enable
 
 		$best       = null;
@@ -80,7 +83,7 @@ final class Context {
 
 			$specificity = count( $expected_params );
 			if ( $specificity > $best_specs ) {
-				$best       = $slug;
+				$best       = (string) $slug;
 				$best_specs = $specificity;
 			}
 		}
@@ -108,6 +111,15 @@ final class Context {
 
 		$params = array();
 		parse_str( $query, $params );
-		return array( $path, $params );
+
+		// Tree slugs only carry flat scalar params; flatten any nested arrays
+		// `parse_str` may produce (`a[b]=c`) to satisfy the documented return type.
+		$flat_params = array();
+		foreach ( $params as $key => $value ) {
+			if ( is_scalar( $value ) ) {
+				$flat_params[ (string) $key ] = (string) $value;
+			}
+		}
+		return array( $path, $flat_params );
 	}
 }

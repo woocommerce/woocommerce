@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types = 1 );
+
 /**
  * Ergonomic helpers for filter callbacks so extension authors don't have to
  * hand-mutate the tree array.

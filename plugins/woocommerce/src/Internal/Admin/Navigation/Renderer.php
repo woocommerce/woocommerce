@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types = 1 );
+
 /**
  * Renderer for navigation_v2.
  *

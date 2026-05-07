@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types = 1 );
+
 /**
  * Hard-coded list of Woo-related top-level menu slugs that the reconciler
  * removes from WP's native rail when the navigation_v2 feature is enabled.

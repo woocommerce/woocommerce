@@ -1,4 +1,7 @@
 <?php
+
+declare( strict_types = 1 );
+
 /**
  * Pure-logic tree builder. No side effects, no $menu/$submenu mutation.
  */
@@ -115,8 +118,8 @@ class Tree_Builder {
 	 * @return string
 	 */
 	public static function clean_title( string $raw ): string {
-		$raw = preg_replace( '/\s*<span class=["\'](?:update-plugins|awaiting-mod|menu-counter)[^"\']*["\'][^>]*>.*?<\/span>\s*/i', '', $raw );
-		return trim( html_entity_decode( wp_strip_all_tags( $raw ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
+		$stripped = preg_replace( '/\s*<span class=["\'](?:update-plugins|awaiting-mod|menu-counter)[^"\']*["\'][^>]*>.*?<\/span>\s*/i', '', $raw );
+		return trim( html_entity_decode( wp_strip_all_tags( $stripped ?? $raw ), ENT_QUOTES | ENT_HTML5, 'UTF-8' ) );
 	}
 
 	/**
@@ -167,18 +170,21 @@ class Tree_Builder {
 	private function find_cycle( array $tree, string $slug ): ?array {
 		$visited = array();
 		$current = $slug;
-		while ( null !== $current ) {
+		while ( true ) {
 			if ( isset( $visited[ $current ] ) ) {
-				return array_keys( array_slice( $visited, array_search( $current, array_keys( $visited ), true ) ) );
+				$offset = array_search( $current, array_keys( $visited ), true );
+				if ( false === $offset ) {
+					return null;
+				}
+				return array_keys( array_slice( $visited, (int) $offset ) );
 			}
 			$visited[ $current ] = true;
 			$parent              = $tree[ $current ]['parent'] ?? null;
-			if ( null === $parent || ! isset( $tree[ $parent ] ) ) {
+			if ( ! is_string( $parent ) || ! isset( $tree[ $parent ] ) ) {
 				return null;
 			}
 			$current = $parent;
 		}
-		return null;
 	}
 
 	/**
