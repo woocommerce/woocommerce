@@ -24,7 +24,6 @@ export const DEFAULT_PRODUCT_TABLE_LAYOUT: NonNullable<
 				align: 'end',
 			},
 		},
-		hierarchyStyle: 'tree',
 	},
 };
 

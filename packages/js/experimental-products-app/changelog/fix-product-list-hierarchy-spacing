@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove the empty hierarchy column in the product list table by switching to text-based variation indentation.
