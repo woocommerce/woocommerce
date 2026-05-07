@@ -37,6 +37,7 @@ const fieldDefinition = {
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
 	type: 'boolean',
+	isVisible: ( item ) => item.downloadable === true,
 	getValue: ( { item } ) => item.downloadable,
 	Edit: ( { data, onChange } ) => {
 		const downloads = ( data.downloads ?? [] ) as Array<
