@@ -336,7 +336,7 @@ class Endpoint {
 
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented on customer-review-order.php template.
 		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
-		ItemEligibility::prime( $items, $order );
+		ItemEligibility::preload_for_items( $items, $order );
 
 		foreach ( $items as $item ) {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
@@ -348,7 +348,7 @@ class Endpoint {
 			if ( ! $item->get_product() instanceof \WC_Product ) {
 				continue;
 			}
-			$decision = ItemEligibility::describe( $item, $order );
+			$decision = ItemEligibility::decide( $item, $order );
 			if ( ItemEligibility::STATUS_FORM === $decision['status'] ) {
 				return;
 			}

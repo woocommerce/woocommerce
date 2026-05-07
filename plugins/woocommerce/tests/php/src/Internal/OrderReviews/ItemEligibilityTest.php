@@ -59,7 +59,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 	public function test_default_returns_form(): void {
 		$built = $this->make_order();
 
-		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+		$decision = ItemEligibility::decide( $built['item'], $built['order'] );
 
 		$this->assertSame( ItemEligibility::STATUS_FORM, $decision['status'] );
 		$this->assertNull( $decision['comment'] );
@@ -77,7 +77,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+		$decision = ItemEligibility::decide( $built['item'], $built['order'] );
 
 		$this->assertSame( ItemEligibility::STATUS_SKIP, $decision['status'] );
 	}
@@ -99,7 +99,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 		);
 		$this->assertNotFalse( $comment_id );
 
-		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+		$decision = ItemEligibility::decide( $built['item'], $built['order'] );
 
 		$this->assertSame( ItemEligibility::STATUS_REVIEWED, $decision['status'] );
 		$this->assertNotNull( $decision['comment'] );
@@ -122,7 +122,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+		$decision = ItemEligibility::decide( $built['item'], $built['order'] );
 
 		$this->assertSame( ItemEligibility::STATUS_FORM, $decision['status'] );
 	}
@@ -141,7 +141,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 			}
 		);
 
-		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+		$decision = ItemEligibility::decide( $built['item'], $built['order'] );
 		$this->assertSame( ItemEligibility::STATUS_REVIEWED, $decision['status'] );
 	}
 
@@ -166,7 +166,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 			4
 		);
 
-		ItemEligibility::describe( $built['item'], $built['order'] );
+		ItemEligibility::decide( $built['item'], $built['order'] );
 
 		$this->assertSame( (int) $built['product_id'], $received['product_id'] );
 		$this->assertSame( (int) $built['order']->get_id(), $received['order_id'] );
@@ -190,7 +190,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 		);
 		$this->assertNotFalse( $comment_id );
 
-		ItemEligibility::prime( $built['order']->get_items(), $built['order'] );
+		ItemEligibility::preload_for_items( $built['order']->get_items(), $built['order'] );
 
 		// Count get_comments calls during describe(); cache should serve the answer.
 		$call_count = 0;
@@ -201,7 +201,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 		add_filter( 'comments_pre_query', $counter );
 
 		try {
-			$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+			$decision = ItemEligibility::decide( $built['item'], $built['order'] );
 		} finally {
 			remove_filter( 'comments_pre_query', $counter );
 		}
@@ -221,7 +221,7 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 			'__return_true'
 		);
 
-		$decision = ItemEligibility::describe( $built['item'], $built['order'] );
+		$decision = ItemEligibility::decide( $built['item'], $built['order'] );
 
 		$this->assertSame( ItemEligibility::STATUS_REVIEWED, $decision['status'] );
 		$this->assertNull( $decision['comment'], 'Filter-only reviewed state should leave comment as null.' );

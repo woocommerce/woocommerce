@@ -129,9 +129,9 @@ class SubmissionHandler {
 		$author_agent = $order->get_customer_user_agent();
 		$require_mod  = (bool) get_option( 'comment_moderation' );
 
-		// Prime the eligibility cache so the per-row describe() calls below
+		// Preload the eligibility cache so the per-row decide() calls below
 		// don't issue one already-reviewed query each.
-		ItemEligibility::prime( $item_index, $order );
+		ItemEligibility::preload_for_items( $item_index, $order );
 
 		foreach ( $rows_in as $row_index => $row ) {
 			$row_index = (int) $row_index;
@@ -187,7 +187,7 @@ class SubmissionHandler {
 			// reject when reviews are disabled on the product (STATUS_SKIP),
 			// or when the customer already left a review for this product
 			// (STATUS_REVIEWED) instead of stacking duplicates.
-			$decision = ItemEligibility::describe( $item, $order );
+			$decision = ItemEligibility::decide( $item, $order );
 			if ( ItemEligibility::STATUS_SKIP === $decision['status'] ) {
 				$result['error']       = 'reviews_not_open';
 				$results[ $row_index ] = $result;
@@ -199,6 +199,13 @@ class SubmissionHandler {
 				continue;
 			}
 
+			// Only attribute the comment to a WP user when the current request is
+			// authenticated as that user. Guests reaching the page via the order
+			// key are not authenticated, so the comment stays unattributed (0).
+			$customer_id     = (int) $order->get_customer_id();
+			$current_user_id = get_current_user_id();
+			$comment_user_id = ( $current_user_id > 0 && $current_user_id === $customer_id ) ? $current_user_id : 0;
+
 			$comment_data = array(
 				'comment_post_ID'      => $review_post_id,
 				'comment_author'       => '' !== $author_name ? $author_name : __( 'Anonymous', 'woocommerce' ),
@@ -208,7 +215,7 @@ class SubmissionHandler {
 				'comment_content'      => $text,
 				'comment_type'         => 'review',
 				'comment_approved'     => $require_mod ? 0 : 1,
-				'user_id'              => $order->get_customer_id(),
+				'user_id'              => $comment_user_id,
 			);
 
 			$comment_id = wp_insert_comment( wp_slash( $comment_data ) );
@@ -247,37 +254,41 @@ class SubmissionHandler {
 			return;
 		}
 
-		// Apply the same eligibility filter the page and submission rows use
-		// so refunded items (and any other extension-excluded ones) don't
-		// stay flagged as "missing review" forever.
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented on Endpoint::is_authorised().
+		// Build the same eligible-row set the page uses, then count required
+		// reviews per parent product. Same product appearing on N rows needs
+		// N reviews, not 1. Refunded items (and any other extension-excluded
+		// ones) are dropped here so they don't stay flagged as "missing
+		// review" forever.
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented at the page-template invocation site.
 		$eligible_items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 
-		$product_ids = array();
+		$required_reviews = array();
 		foreach ( $eligible_items as $item ) {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
 			}
-			$product_id = $item->get_product_id();
-			if ( $product_id ) {
-				$product_ids[ $product_id ] = $product_id;
+			$product_id = (int) $item->get_product_id();
+			if ( $product_id > 0 ) {
+				$required_reviews[ $product_id ] = ( $required_reviews[ $product_id ] ?? 0 ) + 1;
 			}
 		}
 
-		if ( empty( $product_ids ) ) {
+		if ( empty( $required_reviews ) ) {
 			return;
 		}
 
 		// Single grouped lookup, fetching the comment objects directly so we
 		// can read comment_post_ID without a follow-up query per row. Limit
 		// to approved + pending-moderation so spam/trash never count as
-		// completion.
+		// completion. number=>0 disables the default 20-row cap so this still
+		// works for orders with many reviewable items.
 		$comments = get_comments(
 			array(
-				'post__in'     => array_values( $product_ids ),
+				'post__in'     => array_keys( $required_reviews ),
 				'author_email' => $customer_email,
 				'type'         => 'review',
 				'status'       => array( 'approve', 'hold' ),
+				'number'       => 0,
 			)
 		);
 
@@ -285,15 +296,16 @@ class SubmissionHandler {
 			return;
 		}
 
-		$reviewed_products = array();
+		$review_counts = array();
 		foreach ( $comments as $comment ) {
 			if ( $comment instanceof \WP_Comment ) {
-				$reviewed_products[ (int) $comment->comment_post_ID ] = true;
+				$post_id                   = (int) $comment->comment_post_ID;
+				$review_counts[ $post_id ] = ( $review_counts[ $post_id ] ?? 0 ) + 1;
 			}
 		}
 
-		foreach ( $product_ids as $product_id ) {
-			if ( empty( $reviewed_products[ $product_id ] ) ) {
+		foreach ( $required_reviews as $product_id => $required ) {
+			if ( ( $review_counts[ $product_id ] ?? 0 ) < $required ) {
 				return;
 			}
 		}

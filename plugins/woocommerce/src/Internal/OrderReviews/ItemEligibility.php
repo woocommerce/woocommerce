@@ -43,13 +43,13 @@ class ItemEligibility {
 	 * Pre-fill the per-request review cache for a set of items in a single query.
 	 *
 	 * Call this from the template before iterating items so each subsequent
-	 * `describe()` call hits the cache instead of running its own
+	 * `decide()` call hits the cache instead of running its own
 	 * `get_comments()` query (avoids the N+1 pattern on multi-item orders).
 	 *
 	 * @param iterable<WC_Order_Item_Product|mixed> $items Order line items.
 	 * @param WC_Order                              $order Order being reviewed.
 	 */
-	public static function prime( iterable $items, WC_Order $order ): void {
+	public static function preload_for_items( iterable $items, WC_Order $order ): void {
 		$email = $order->get_billing_email();
 		if ( '' === $email ) {
 			return;
@@ -83,7 +83,7 @@ class ItemEligibility {
 			)
 		);
 
-		// Default every product id to null so describe() doesn't re-query.
+		// Default every product id to null so decide() doesn't re-query.
 		foreach ( $product_ids as $pid ) {
 			self::$review_cache[ $email . '|' . $pid ] = null;
 		}
@@ -111,13 +111,16 @@ class ItemEligibility {
 	}
 
 	/**
-	 * Describe how an order line item should render on the Review Order page.
+	 * Decide how an order line item should render on the Review Order page.
+	 *
+	 * Returns one of the STATUS_* constants plus the matched comment (when
+	 * STATUS_REVIEWED) and the product id.
 	 *
 	 * @param WC_Order_Item_Product $item  Order line item.
 	 * @param WC_Order              $order Order being reviewed.
 	 * @return array{status:string, comment:?WP_Comment, product_id:int}
 	 */
-	public static function describe( WC_Order_Item_Product $item, WC_Order $order ): array {
+	public static function decide( WC_Order_Item_Product $item, WC_Order $order ): array {
 		$product_id = $item->get_product_id();
 		$result     = array(
 			'status'     => self::STATUS_FORM,
