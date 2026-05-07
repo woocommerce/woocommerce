@@ -134,7 +134,6 @@ function SortableImage( {
 				className="product-image"
 				src={ previewSrc }
 				alt={ alt }
-				draggable={ false }
 			/>
 			<div className="woocommerce-fields-controls__image-overlay" />
 			{ showDragHandle && (
