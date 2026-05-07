@@ -219,7 +219,7 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 		$dir = $this->use_temp_opcache_dir();
 		update_option( Main::OPTION_OPCACHE_ENABLED, 'yes' );
 
-		$query = '{ widget { id } }';
+		$query  = '{ widget { id } }';
 		$result = $this->sut->resolve( $query, array() );
 
 		$this->assertInstanceOf( DocumentNode::class, $result );
@@ -311,15 +311,16 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 	 * capability check requires opcache_get_status to report enabled.
 	 */
 	private function use_temp_opcache_dir(): string {
-		if ( ! function_exists( 'opcache_get_status' ) ) {
-			$this->markTestSkipped( 'OPcache extension not available.' );
+		if ( ! function_exists( 'opcache_get_status' ) || ! ini_get( 'opcache.enable' ) ) {
+			$this->markTestSkipped( 'OPcache is not enabled in this environment.' );
 		}
-		$status = @opcache_get_status( false );
+		$status = opcache_get_status( false );
 		if ( ! is_array( $status ) || empty( $status['opcache_enabled'] ) ) {
 			$this->markTestSkipped( 'OPcache is not enabled in this environment.' );
 		}
 
 		$dir = sys_get_temp_dir() . '/wc-graphql-test-' . bin2hex( random_bytes( 6 ) );
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
 		mkdir( $dir, 0700, true );
 
 		add_filter(
@@ -350,6 +351,7 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 		if ( ! is_dir( $dir ) ) {
 			return;
 		}
+		// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_unlink, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 		foreach ( scandir( $dir ) as $entry ) {
 			if ( '.' === $entry || '..' === $entry ) {
 				continue;
@@ -362,6 +364,7 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 			}
 		}
 		rmdir( $dir );
+		// phpcs:enable
 	}
 
 	/**
