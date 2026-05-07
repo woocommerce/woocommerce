@@ -47,19 +47,14 @@ final class ShopperCollection extends AbstractBlock {
 			return $hooked_block_types;
 		}
 
-		// `wc_get_page_id()` returns -1 when the page option isn't set —
-		// don't wrap it in `absint()`, which would turn that sentinel into a
-		// real-looking ID of 1 and false-match a post with that ID.
+		// `wc_get_page_id()` returns -1 when the page option isn't set.
 		$cart_page_id = (int) wc_get_page_id( 'cart' );
 		if ( $cart_page_id <= 0 || ! ( $context instanceof \WP_Post ) || (int) $context->ID !== $cart_page_id ) {
 			return $hooked_block_types;
 		}
 
 		// Don't double-inject if the block is already in the cart page
-		// content (e.g. a merchant added it manually before the feature
-		// flag was flipped, or after). `has_block()` parses the content
-		// rather than substring-matching, so it won't false-positive on
-		// the block name appearing inside attribute strings or comments.
+		// content.
 		if ( has_block( $this->get_full_block_name(), $context ) ) {
 			return $hooked_block_types;
 		}
