@@ -65,7 +65,7 @@ class CatalogSorting extends AbstractBlock {
 						]
 					)
 				),
-				'style' => esc_attr( $styles_and_classes['styles'] ?? '' ),
+				'style' => esc_attr( $classes_and_styles['styles'] ?? '' ),
 			)
 		);
 
