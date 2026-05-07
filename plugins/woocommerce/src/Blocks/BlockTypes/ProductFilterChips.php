@@ -68,11 +68,12 @@ final class ProductFilterChips extends AbstractBlock {
 			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
 		}
 
-		$visible_items  = array_slice( $items, 0, $display_limit, true );
-		$has_more_items = count( $items ) > count( $visible_items );
-		$hidden_count   = max( 0, count( $items ) - count( $visible_items ) );
-		$first_item     = reset( $items );
-		$show_counts    = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$visible_items      = array_slice( $items, 0, $display_limit, true );
+		$has_more_items     = count( $items ) > count( $visible_items );
+		$hidden_count       = max( 0, count( $items ) - count( $visible_items ) );
+		$first_item         = reset( $items );
+		$show_counts        = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$has_color_swatches = is_array( $first_item ) && ! empty( $first_item['color'] );
 
 		ob_start();
 		?>
@@ -108,6 +109,13 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-on--click="actions.toggle"
 						>
 							<span class="wc-block-product-filter-chips__label">
+								<?php if ( $has_color_swatches && ! empty( $item['color'] ) ) : ?>
+									<span
+										class="wc-block-product-filter-chips__swatch"
+										style="background-color: <?php echo esc_attr( $item['color'] ); ?>;"
+										aria-hidden="true"
+									></span>
+								<?php endif; ?>
 								<span class="wc-block-product-filter-chips__text">
 									<?php echo esc_html( $item['label'] ); ?>
 								</span>
@@ -136,6 +144,14 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-on--click="actions.toggle"
 						>
 							<span class="wc-block-product-filter-chips__label">
+								<?php if ( $has_color_swatches ) : ?>
+									<span
+										class="wc-block-product-filter-chips__swatch"
+										data-wp-bind--hidden="woocommerce/product-filter-chips::state.swatchHidden"
+										data-wp-bind--style="woocommerce/product-filter-chips::state.swatchStyle"
+										aria-hidden="true"
+									></span>
+								<?php endif; ?>
 								<span
 									class="wc-block-product-filter-chips__text"
 									data-wp-text="context.item.label"

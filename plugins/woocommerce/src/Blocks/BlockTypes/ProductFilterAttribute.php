@@ -212,6 +212,13 @@ final class ProductFilterAttribute extends AbstractBlock {
 						$item['count'] = $term['count'];
 					}
 
+					if ( 'wc-visual' === $product_attribute->type ) {
+						$color = get_term_meta( $term['term_id'], 'color', true );
+						if ( $color ) {
+							$item['color'] = $color;
+						}
+					}
+
 					return $item;
 				},
 				$attribute_terms

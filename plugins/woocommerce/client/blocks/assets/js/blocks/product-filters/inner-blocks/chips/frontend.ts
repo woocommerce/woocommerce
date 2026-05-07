@@ -8,7 +8,7 @@ import { store, getContext } from '@wordpress/interactivity';
  */
 import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
 
-type ItemWithIndex = SelectableItem & { index?: number };
+type ItemWithIndex = SelectableItem< { color?: string } > & { index?: number };
 
 type ChipsContext = {
 	storeNamespace: string;
@@ -23,6 +23,8 @@ type ParentItemContext = {
 type ChipsStore = {
 	state: {
 		itemHidden: boolean;
+		swatchHidden: boolean;
+		swatchStyle: string;
 	};
 	actions: {
 		showAll: () => void;
@@ -47,6 +49,17 @@ const { state }: ChipsStore = store< ChipsStore >(
 				if ( item.selected ) return false;
 				if ( item.index === undefined ) return false;
 				return item.index >= displayLimit;
+			},
+			get swatchHidden(): boolean {
+				const { storeNamespace } = getContext< ChipsContext >();
+				const item = getParentItem( storeNamespace );
+				return ! item?.color;
+			},
+			get swatchStyle(): string {
+				const { storeNamespace } = getContext< ChipsContext >();
+				const item = getParentItem( storeNamespace );
+				if ( ! item?.color ) return '';
+				return `background-color: ${ item.color }`;
 			},
 		},
 		actions: {
