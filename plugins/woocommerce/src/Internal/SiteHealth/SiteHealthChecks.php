@@ -126,6 +126,14 @@ class SiteHealthChecks {
 			'async_direct_test' => static fn() => $cache->remember( 'product_lookup_table', static fn() => $lookup->run() ),
 		);
 
+		$webhooks = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\WebhookFailureCheck();
+		$tests['async']['woocommerce_webhook_failures'] = array(
+			'label'             => __( 'WooCommerce webhook deliveries', 'woocommerce' ),
+			'test'              => 'woocommerce_webhook_failures',
+			'async'             => true,
+			'async_direct_test' => static fn() => $cache->remember( 'webhook_failures', static fn() => $webhooks->run() ),
+		);
+
 		return $tests;
 	}
 
