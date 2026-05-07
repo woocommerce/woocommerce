@@ -25,6 +25,9 @@ const EXCLUDED_PRODUCT_EDIT_FIELD_ID_SET = new Set(
 
 type ProductField = Field< ProductEntityRecord >;
 type ProductEditFieldId = ( typeof PRODUCT_EDIT_FIELD_IDS )[ number ];
+type ProductVariationEntityRecord = ProductEntityRecord & {
+	parent_id: number;
+};
 
 const PRODUCT_EDIT_FIELD_IDS = [
 	'name',
@@ -184,6 +187,76 @@ function getProductTypeCompatibleFieldIds( product: ProductEntityRecord ) {
 	}
 
 	return COMMON_PRODUCT_EDIT_FIELD_IDS;
+}
+
+export function isProductVariation(
+	product: ProductEntityRecord
+): product is ProductVariationEntityRecord {
+	return product.type === 'variation' || Boolean( product.parent_id );
+}
+
+export function getProductVariationUpdatePath(
+	product: ProductVariationEntityRecord
+) {
+	if ( ! product.parent_id ) {
+		throw new Error(
+			'Variation parent ID is required to update a variation.'
+		);
+	}
+
+	return `/wc/v3/products/${ product.parent_id }/variations/${ product.id }`;
+}
+
+export function getProductsWithUpdatedVariation(
+	products: ProductEntityRecord[],
+	variation: ProductEntityRecord
+) {
+	const updatedProductsById = new Map< number, ProductEntityRecord >();
+
+	products.forEach( ( product ) => {
+		if ( product.id === variation.id ) {
+			updatedProductsById.set( product.id, variation );
+			return;
+		}
+
+		if ( product.id !== variation.parent_id ) {
+			updatedProductsById.set( product.id, product );
+			return;
+		}
+
+		const embeddedVariations = product._embedded?.variations ?? [];
+		const hasEmbeddedVariation = embeddedVariations.some(
+			( embeddedVariation ) => embeddedVariation.id === variation.id
+		);
+
+		updatedProductsById.set( product.id, {
+			...product,
+			_embedded: {
+				...product._embedded,
+				variations: hasEmbeddedVariation
+					? embeddedVariations.map( ( embeddedVariation ) =>
+							embeddedVariation.id === variation.id
+								? variation
+								: embeddedVariation
+					  )
+					: [ ...embeddedVariations, variation ],
+			},
+		} );
+	} );
+
+	if ( ! updatedProductsById.has( variation.id ) ) {
+		updatedProductsById.set( variation.id, variation );
+	}
+
+	return Array.from( updatedProductsById.values() );
+}
+
+export function getClearedProductEdits(
+	edits?: Partial< ProductEntityRecord >
+) {
+	return Object.fromEntries(
+		Object.keys( edits ?? {} ).map( ( key ) => [ key, undefined ] )
+	);
 }
 
 function getCommonProductTypeCompatibleFieldIds(

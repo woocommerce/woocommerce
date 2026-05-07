@@ -2,14 +2,16 @@
  * External dependencies
  */
 import { Button, Spinner } from '@wordpress/components';
+import apiFetch from '@wordpress/api-fetch';
 import { store as coreStore } from '@wordpress/core-data';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { select as wpSelect, useDispatch, useSelect } from '@wordpress/data';
 import { DataForm } from '@wordpress/dataviews';
 import { useCallback, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { closeSmall } from '@wordpress/icons';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
+import type { ProductVariation } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -20,11 +22,16 @@ import {
 	getSelectionFromPostId,
 } from '../product-list/utils';
 import type { ProductEntityRecord } from '../fields/types';
+import { normalizeVariation } from '../variation-view/normalization';
 import { unlock } from '../lock-unlock';
 import {
 	buildMergedProductEditData,
+	getClearedProductEdits,
 	getProductEditFields,
+	getProductsWithUpdatedVariation,
+	getProductVariationUpdatePath,
 	getVisibleProductEditFields,
+	isProductVariation,
 } from './utils';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
@@ -216,8 +223,12 @@ export default function ProductEdit() {
 		[ requestedProductIds ]
 	);
 
-	const { editEntityRecord, saveEditedEntityRecord } =
-		useDispatch( coreStore );
+	const {
+		editEntityRecord,
+		invalidateResolutionForStoreSelector,
+		receiveEntityRecords,
+		saveEditedEntityRecord,
+	} = useDispatch( coreStore );
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
@@ -264,7 +275,7 @@ export default function ProductEdit() {
 	}, [ navigate, path, query ] );
 
 	const onSave = useCallback( async () => {
-		if ( selectedProductIds.length === 0 || isSaving ) {
+		if ( selectedProducts.length === 0 || isSaving ) {
 			return;
 		}
 
@@ -272,12 +283,74 @@ export default function ProductEdit() {
 
 		try {
 			const results = await Promise.allSettled(
-				selectedProductIds.map( ( productId ) =>
-					saveEditedEntityRecord( 'root', 'product', productId, {
-						throwOnError: true,
-					} )
-				)
+				selectedProducts.map( async ( product ) => {
+					if ( ! isProductVariation( product ) ) {
+						return saveEditedEntityRecord(
+							'root',
+							'product',
+							product.id,
+							{
+								throwOnError: true,
+							}
+						);
+					}
+
+					const edits = wpSelect( coreStore ).getEntityRecordEdits(
+						'root',
+						'product',
+						product.id
+					);
+					const savedVariation = await apiFetch< ProductVariation >( {
+						path: getProductVariationUpdatePath( product ),
+						method: 'PUT',
+						data: edits,
+					} );
+					const normalizedVariation =
+						normalizeVariation( savedVariation );
+					const parentProduct = wpSelect( coreStore ).getEntityRecord(
+						'root',
+						'product',
+						product.parent_id
+					) as ProductEntityRecord | undefined;
+					const savedProducts = getProductsWithUpdatedVariation(
+						parentProduct
+							? [ parentProduct, product ]
+							: [ product ],
+						normalizedVariation
+					);
+
+					receiveEntityRecords(
+						'root',
+						'product',
+						savedProducts,
+						undefined,
+						true,
+						undefined,
+						undefined
+					);
+					editEntityRecord(
+						'root',
+						'product',
+						product.id,
+						getClearedProductEdits( edits ),
+						{
+							undoIgnore: true,
+						}
+					);
+
+					return normalizedVariation;
+				} )
 			);
+			const savedVariationsCount = results.filter(
+				( result, index ) =>
+					result.status === 'fulfilled' &&
+					isProductVariation( selectedProducts[ index ] )
+			).length;
+
+			if ( savedVariationsCount > 0 ) {
+				invalidateResolutionForStoreSelector( 'getEntityRecords' );
+			}
+
 			const successfulCount = results.filter(
 				( result ) => result.status === 'fulfilled'
 			).length;
@@ -305,9 +378,12 @@ export default function ProductEdit() {
 	}, [
 		createErrorNotice,
 		createSuccessNotice,
+		editEntityRecord,
+		invalidateResolutionForStoreSelector,
 		isSaving,
+		receiveEntityRecords,
 		saveEditedEntityRecord,
-		selectedProductIds,
+		selectedProducts,
 	] );
 
 	return (

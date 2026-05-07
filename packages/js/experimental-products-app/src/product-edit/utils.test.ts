@@ -11,8 +11,12 @@ import { productFields } from '../product-list/fields';
 import {
 	buildMergedProductEditData,
 	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
+	getClearedProductEdits,
 	getProductEditFields,
+	getProductsWithUpdatedVariation,
+	getProductVariationUpdatePath,
 	getVisibleProductEditFields,
+	isProductVariation,
 } from './utils';
 
 jest.mock( '@woocommerce/settings', () => ( {
@@ -121,6 +125,92 @@ describe( 'product edit utils', () => {
 				'linked_products_count',
 			] )
 		);
+	} );
+
+	it( 'identifies variations and builds their update endpoint path', () => {
+		const variation = buildProduct( {
+			id: 34,
+			parent_id: 12,
+			type: 'variation',
+		} );
+
+		expect( isProductVariation( variation ) ).toBe( true );
+
+		if ( isProductVariation( variation ) ) {
+			expect( getProductVariationUpdatePath( variation ) ).toBe(
+				'/wc/v3/products/12/variations/34'
+			);
+		}
+
+		expect(
+			isProductVariation( buildProduct( { id: 12, parent_id: 0 } ) )
+		).toBe( false );
+		expect(
+			isProductVariation(
+				buildProduct( {
+					id: 34,
+					parent_id: 0,
+					type: 'variation',
+				} )
+			)
+		).toBe( true );
+		const orphanVariation = buildProduct( {
+			id: 34,
+			parent_id: 0,
+			type: 'variation',
+		} );
+
+		if ( isProductVariation( orphanVariation ) ) {
+			expect( () =>
+				getProductVariationUpdatePath( orphanVariation )
+			).toThrow( 'Variation parent ID is required' );
+		}
+	} );
+
+	it( 'updates embedded and standalone variation records in product records', () => {
+		const variation = buildProduct( {
+			id: 34,
+			parent_id: 12,
+			name: 'Blue',
+			type: 'variation',
+		} );
+		const updatedVariation = {
+			...variation,
+			name: 'Green',
+		};
+		const parent = buildProduct( {
+			id: 12,
+			_embedded: {
+				variations: [ variation ],
+			},
+		} );
+
+		expect(
+			getProductsWithUpdatedVariation(
+				[ parent, variation ],
+				updatedVariation
+			)
+		).toEqual( [
+			expect.objectContaining( {
+				id: 12,
+				_embedded: {
+					variations: [ updatedVariation ],
+				},
+			} ),
+			updatedVariation,
+		] );
+	} );
+
+	it( 'creates edit-clearing updates from existing edits', () => {
+		expect(
+			getClearedProductEdits( {
+				name: 'Green',
+				regular_price: '12',
+			} )
+		).toEqual( {
+			name: undefined,
+			regular_price: undefined,
+		} );
 	} );
 
 	describe( 'getVisibleProductEditFields', () => {
