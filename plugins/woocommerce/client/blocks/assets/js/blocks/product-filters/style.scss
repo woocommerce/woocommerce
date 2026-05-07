@@ -52,17 +52,11 @@
 		transition: none;
 		background-color: var(
 			--wc-product-filters-overlay-background-color,
-			var(
-				--wc-product-filters-background-color,
-				var(--wp--preset--color--base, #fff)
-			)
+			var(--wc-product-filters-background-color, Canvas)
 		);
 		color: var(
 			--wc-product-filters-overlay-text-color,
-			var(
-				--wc-product-filters-text-color,
-				var(--wp--preset--color--base, #111)
-			)
+			var(--wc-product-filters-text-color, CanvasText)
 		);
 		display: flex !important;
 		flex-direction: column;
@@ -109,7 +103,6 @@
 
 		.wc-block-product-filters__overlay-dialog {
 			transform: translateY(0);
-			color: var(--wc-product-filters-overlay-color, inherit);
 			transition: transform 500ms;
 		}
 	}
