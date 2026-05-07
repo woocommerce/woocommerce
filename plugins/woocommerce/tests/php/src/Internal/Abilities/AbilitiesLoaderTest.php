@@ -652,6 +652,24 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject whitespace-only order notes during schema validation.
+	 */
+	public function test_order_add_note_schema_rejects_whitespace_only_note(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/order-add-note' )->execute(
+			array(
+				'id'   => $order->get_id(),
+				'note' => '   ',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
 	 * @testdox Should reject negative entity IDs during schema validation.
 	 *
 	 * @dataProvider provider_negative_entity_id_inputs
@@ -1338,6 +1356,24 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$comment = get_comment( $result['note_id'] );
 		$this->assertStringContainsString( '<strong>care</strong>', $comment->comment_content );
 		$this->assertStringNotContainsString( '<script>', $comment->comment_content );
+	}
+
+	/**
+	 * @testdox Should reject whitespace-only order notes during execution.
+	 */
+	public function test_order_add_note_execute_rejects_whitespace_only_note(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = OrderAddNote::execute(
+			array(
+				'id'   => $order->get_id(),
+				'note' => '   ',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_order_note_required', $result->get_error_code() );
 	}
 
 	/**

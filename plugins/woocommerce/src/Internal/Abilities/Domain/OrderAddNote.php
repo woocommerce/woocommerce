@@ -79,7 +79,9 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 			return $order;
 		}
 
-		if ( empty( $input['note'] ) ) {
+		$note = isset( $input['note'] ) ? trim( wp_kses_post( (string) $input['note'] ) ) : '';
+
+		if ( '' === $note ) {
 			return new \WP_Error(
 				'woocommerce_order_note_required',
 				__( 'Order note is required.', 'woocommerce' ),
@@ -88,7 +90,7 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 		}
 
 		$note_id = $order->add_order_note(
-			wp_kses_post( $input['note'] ),
+			$note,
 			( (bool) ( $input['customer_note'] ?? false ) ) ? 1 : 0,
 			get_current_user_id() > 0
 		);
@@ -135,6 +137,8 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 				'note'          => array(
 					'type'        => 'string',
 					'description' => __( 'Order note content. Safe HTML is allowed.', 'woocommerce' ),
+					'minLength'   => 1,
+					'pattern'     => '\S',
 				),
 				'customer_note' => array(
 					'type'        => 'boolean',
