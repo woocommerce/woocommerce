@@ -7,6 +7,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Queries\Au
 use Automattic\WooCommerce\Api\ApiException;
 use Automattic\WooCommerce\Api\Attributes\Description;
 use Automattic\WooCommerce\Api\Attributes\Name;
+use Automattic\WooCommerce\Api\InvalidTokenException;
 
 /**
  * Authorization is decided solely by `authorize()`, which always throws. The
@@ -38,6 +39,9 @@ class AuthorizeThrowsQuery {
 	public function authorize( string $kind ): bool {
 		if ( 'api_exception' === $kind ) {
 			throw new ApiException( 'Authorize failed.', 'AUTH_FAILURE', array( 'detail' => 'extra' ), 403 );
+		}
+		if ( 'invalid_token' === $kind ) {
+			throw new InvalidTokenException();
 		}
 		throw new \RuntimeException( 'Internals leaked from authorize.' );
 	}
