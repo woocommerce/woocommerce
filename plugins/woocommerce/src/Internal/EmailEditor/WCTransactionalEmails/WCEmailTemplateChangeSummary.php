@@ -11,16 +11,33 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  * Produces a localized summary of differences between a merchant's `woo_email`
  * post content and the current canonical core render of the same email.
  *
- * Algorithm: DFS-flatten both block trees → normalize known namespace aliases
- * (e.g. `woo/email-content` → `woocommerce/email-content`) → run an LCS over
- * the resulting block-name sequences → classify the residue as added /
- * removed / copy / structural. Result is cached in a transient keyed on the
- * post ID, the post and core content hashes, and the active locale, so any
- * merchant edit or core bump invalidates automatically.
+ * Two diff modes, selected per-call by post-meta presence:
+ *
+ * - **Three-way (since 10.10.0)** — when the post has
+ *   {@see WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY} meta
+ *   (every post touched by a sync-eligible writer: generator, auto-applier,
+ *   selective applier, reset endpoint, RSM-149 backfill), the summary runs
+ *   two LCS passes (yours-vs-base, core-vs-base) and classifies each block
+ *   by what changed relative to base. The diff is deterministic on any
+ *   post; the inversion guard does not fire on this path.
+ * - **Two-way (legacy fallback)** — when the meta is absent (legacy posts
+ *   not yet touched since the meta was introduced), the summary falls back
+ *   to the original `lcs_matches(core, post)` algorithm. The summary-
+ *   inversion guard (>= 5 unmatched && 0 copy && post >= 1.5x core) is
+ *   active in this path only — it bails to "Template updated — see release
+ *   notes." when it can't reliably attribute changes.
+ *
+ * Both paths normalize known namespace aliases (e.g. `woo/email-content` →
+ * `woocommerce/email-content`) and produce the same payload shape (added /
+ * removed / copy / structural) so consumers don't need a mode switch.
+ *
+ * Result is cached in a transient keyed on the post ID, the post + core +
+ * base content hashes, and the active locale; any merchant edit, core bump,
+ * or base shift invalidates automatically.
  *
  * Hash input parity with {@see WCTransactionalEmailPostsGenerator::compute_canonical_post_content()}
- * is guaranteed by construction — both sides route through the same canonical
- * render, identical to the divergence detector.
+ * is guaranteed by construction — both sides route through the same
+ * canonical render, identical to the divergence detector.
  *
  * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
  * @since 10.9.0

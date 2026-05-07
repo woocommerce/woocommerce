@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Add bug 03 + bug 04 regression tests against the three-way change-summary path. Update class docblocks on `WCEmailTemplateChangeSummary` and `WCEmailTemplateSelectiveApplier` to document the three-way path and base-meta gating.

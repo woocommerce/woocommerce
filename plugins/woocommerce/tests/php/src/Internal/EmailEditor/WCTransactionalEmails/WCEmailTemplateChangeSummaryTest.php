@@ -820,6 +820,89 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Bug 03 regression: three-way diff does not fall back to the release-notes copy on a heavily-customized post when last_core_render meta is present.
+	 *
+	 * The inversion-guard heuristic (>= 5 unmatched && 0 copy && post >= 1.5x core) fires under
+	 * the 2-way fallback for the same post, hiding actionable diffs behind "see release notes".
+	 * With base meta set, the 3-way path is deterministic — the guard isn't reached and the
+	 * merchant gets per-block detail.
+	 */
+	public function test_three_way_does_not_fall_back_on_heavily_customized_post(): void {
+		$email_id = 'cs_three_way_heavily_customized';
+		$this->register_fixture_email( $email_id );
+
+		$base_and_core = "<!-- wp:heading -->\n<h2>Hi</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Hello.</p>\n<!-- /wp:paragraph -->";
+
+		// Merchant added 6 unrelated blocks (above the inversion-guard threshold of 5);
+		// nothing on the core side was edited or removed.
+		$post_content = "<!-- wp:heading -->\n<h2>Hi</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Hello.</p>\n<!-- /wp:paragraph -->\n\n"
+			. "<!-- wp:image --><figure></figure><!-- /wp:image -->\n\n"
+			. "<!-- wp:image --><figure></figure><!-- /wp:image -->\n\n"
+			. "<!-- wp:image --><figure></figure><!-- /wp:image -->\n\n"
+			. "<!-- wp:gallery --><figure></figure><!-- /wp:gallery -->\n\n"
+			. "<!-- wp:list --><ul></ul><!-- /wp:list -->\n\n"
+			. '<!-- wp:separator --><hr/><!-- /wp:separator -->';
+
+		$this->use_canonical_content( $email_id, $base_and_core );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base_and_core );
+
+		$result = WCEmailTemplateChangeSummary::summarize( $post_id );
+
+		$this->assertFalse(
+			$result['is_fallback'],
+			'Three-way must not fall back to the release-notes line on a heavily-customized post.'
+		);
+		$this->assertGreaterThanOrEqual(
+			6,
+			count( $result['removed_blocks'] ),
+			'All six yours-only additions should appear as removed_blocks (preserved on apply).'
+		);
+	}
+
+	/**
+	 * @testdox Bug 04 regression: parallel additions on yours and core via summarize() classify as separate add+remove, not as a single copy_change.
+	 */
+	public function test_three_way_parallel_additions_via_summarize(): void {
+		$email_id = 'cs_three_way_parallel_summarize';
+		$this->register_fixture_email( $email_id );
+
+		$base_render = "<!-- wp:heading -->\n<h2>Hi</h2>\n<!-- /wp:heading -->";
+
+		$core_content = "<!-- wp:heading -->\n<h2>Hi</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>PS from core.</p>\n<!-- /wp:paragraph -->";
+
+		$post_content = "<!-- wp:heading -->\n<h2>Hi</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Reach out anytime.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base_render );
+
+		$result = WCEmailTemplateChangeSummary::summarize( $post_id );
+
+		$this->assertFalse( $result['is_fallback'] );
+
+		$copy_paragraphs = array_values(
+			array_filter(
+				$result['copy_changes'],
+				static fn ( array $cc ): bool => 'Paragraph' === ( $cc['block'] ?? '' )
+			)
+		);
+		$this->assertSame(
+			array(),
+			$copy_paragraphs,
+			'Parallel additions must not collapse into a Paragraph copy_change in 3-way mode.'
+		);
+		$this->assertCount( 1, $result['added_blocks'], 'Core PS should appear in added_blocks.' );
+		$this->assertCount( 1, $result['removed_blocks'], 'Yours\' note should appear in removed_blocks.' );
+	}
+
+	/**
 	 * Build a list of flatten_blocks-shaped records from a simple list of name + inner_text pairs.
 	 * Each record gets a top-level path (`[$idx]`) and a null parent_name.
 	 *

@@ -36,6 +36,22 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  * subsequent apply overwrites the snapshot. {@see self::undo()} restores from
  * the snapshot when the supplied `revision_id` matches.
  *
+ * Three-way payload consumption (since 10.10.0): when the post has
+ * {@see WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY} meta,
+ * `apply_selectively()` passes the change-summary's payload through to
+ * `merge()`, which uses it to gate matched-pair classification:
+ *
+ * - LCS pairs whose paths the summary classified as separate add+remove are
+ *   rejected by Pass 1 (preventing false yours+core pairings on parallel
+ *   additions); Pass 2/3 then handle them as two independent adds.
+ * - Matched pairs whose paths are NOT in `copy_changes` are silently
+ *   preserved (yours-only edits aren't conflicts; the `use_core` decision
+ *   is ignored on those paths).
+ *
+ * Posts without the meta keep the legacy two-way behavior — `merge()` runs
+ * its own LCS and treats every text-divergent matched pair as a candidate
+ * for `use_core`.
+ *
  * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
  * @since   10.9.0
  */
