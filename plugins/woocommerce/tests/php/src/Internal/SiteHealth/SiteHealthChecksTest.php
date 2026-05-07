@@ -78,4 +78,38 @@ class SiteHealthChecksTest extends WC_Unit_Test_Case {
 		$result = call_user_func( $tests['direct']['woocommerce_required_pages']['test'] );
 		$this->assertSame( 'good', $result['status'] );
 	}
+
+	// -------------------------------------------------------------------------
+	// Task 5: HPOS status and Legacy REST API checks.
+	// -------------------------------------------------------------------------
+
+	public function test_hpos_check_recommended_when_legacy_storage() {
+		update_option( 'woocommerce_custom_orders_table_enabled', 'no' );
+		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		$result = call_user_func( $tests['direct']['woocommerce_hpos_status']['test'] );
+		$this->assertSame( 'recommended', $result['status'] );
+	}
+
+	public function test_hpos_check_recommended_when_sync_enabled() {
+		update_option( 'woocommerce_custom_orders_table_enabled', 'yes' );
+		update_option( 'woocommerce_custom_orders_table_data_sync_enabled', 'yes' );
+		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		$result = call_user_func( $tests['direct']['woocommerce_hpos_status']['test'] );
+		$this->assertSame( 'recommended', $result['status'] );
+	}
+
+	public function test_hpos_check_good_when_authoritative_no_sync() {
+		update_option( 'woocommerce_custom_orders_table_enabled', 'yes' );
+		update_option( 'woocommerce_custom_orders_table_data_sync_enabled', 'no' );
+		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		$result = call_user_func( $tests['direct']['woocommerce_hpos_status']['test'] );
+		$this->assertSame( 'good', $result['status'] );
+	}
+
+	public function test_legacy_rest_api_check_recommended_when_enabled() {
+		update_option( 'woocommerce_api_enabled', 'yes' );
+		$tests  = apply_filters( 'site_status_tests', array( 'direct' => array(), 'async' => array() ) );
+		$result = call_user_func( $tests['direct']['woocommerce_legacy_rest_api']['test'] );
+		$this->assertSame( 'recommended', $result['status'] );
+	}
 }

@@ -58,6 +58,16 @@ class SiteHealthChecks {
 			'test'  => array( $this, 'check_required_pages' ),
 		);
 
+		$tests['direct']['woocommerce_hpos_status'] = array(
+			'label' => __( 'WooCommerce order storage', 'woocommerce' ),
+			'test'  => array( $this, 'check_hpos_status' ),
+		);
+
+		$tests['direct']['woocommerce_legacy_rest_api'] = array(
+			'label' => __( 'WooCommerce Legacy REST API', 'woocommerce' ),
+			'test'  => array( $this, 'check_legacy_rest_api' ),
+		);
+
 		return $tests;
 	}
 
@@ -146,6 +156,82 @@ class SiteHealthChecks {
 			);
 
 		return $this->apply_result_filters( 'required_pages', $result );
+	}
+
+	/**
+	 * Check the WooCommerce High-Performance Order Storage (HPOS) configuration.
+	 *
+	 * Returns 'recommended' when the legacy post-based storage is still active,
+	 * or when HPOS is enabled but data sync is still running. Returns 'good'
+	 * when HPOS is the sole authoritative storage with sync disabled.
+	 *
+	 * @return array WP Site Health result array.
+	 */
+	public function check_hpos_status(): array {
+		$hpos_enabled = 'yes' === get_option( 'woocommerce_custom_orders_table_enabled', 'no' );
+		$sync_enabled = 'yes' === get_option( 'woocommerce_custom_orders_table_data_sync_enabled', 'no' );
+
+		if ( ! $hpos_enabled ) {
+			$status = 'recommended';
+			$label  = __( 'WooCommerce is using legacy order storage', 'woocommerce' );
+			$desc   = __( 'High-Performance Order Storage (HPOS) provides faster order queries. Consider enabling it.', 'woocommerce' );
+		} elseif ( $sync_enabled ) {
+			$status = 'recommended';
+			$label  = __( 'HPOS is running with sync enabled', 'woocommerce' );
+			$desc   = __( 'Order data is being written to both the legacy and custom tables. Once verified, disable sync to reduce database write overhead.', 'woocommerce' );
+		} else {
+			$status = 'good';
+			$label  = __( 'WooCommerce order storage is optimized', 'woocommerce' );
+			$desc   = __( 'HPOS is enabled and sync is disabled.', 'woocommerce' );
+		}
+
+		return $this->apply_result_filters( 'hpos_status', array(
+			'label'       => $label,
+			'status'      => $status,
+			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
+			'description' => '<p>' . esc_html( $desc ) . '</p>',
+			'actions'     => sprintf(
+				'<p><a href="%s">%s</a></p>',
+				esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=features' ) ),
+				esc_html__( 'Manage features', 'woocommerce' )
+			),
+			'test'        => 'woocommerce_hpos_status',
+		) );
+	}
+
+	/**
+	 * Check whether the deprecated WooCommerce Legacy REST API is enabled.
+	 *
+	 * Returns 'recommended' when the legacy API is enabled (prompting the
+	 * merchant to disable it if no integrations require it), and 'good' when
+	 * it is disabled.
+	 *
+	 * @return array WP Site Health result array.
+	 */
+	public function check_legacy_rest_api(): array {
+		$enabled = 'yes' === get_option( 'woocommerce_api_enabled', 'no' );
+		$result  = $enabled
+			? array(
+				'label'       => __( 'WooCommerce Legacy REST API is enabled', 'woocommerce' ),
+				'status'      => 'recommended',
+				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'orange' ),
+				'description' => '<p>' . esc_html__( 'The Legacy REST API is deprecated. If no integrations require it, disable it to reduce surface area.', 'woocommerce' ) . '</p>',
+				'actions'     => sprintf(
+					'<p><a href="%s">%s</a></p>',
+					esc_url( admin_url( 'admin.php?page=wc-settings&tab=advanced&section=legacy_api' ) ),
+					esc_html__( 'Configure Legacy REST API', 'woocommerce' )
+				),
+				'test'        => 'woocommerce_legacy_rest_api',
+			)
+			: array(
+				'label'       => __( 'WooCommerce Legacy REST API is disabled', 'woocommerce' ),
+				'status'      => 'good',
+				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'green' ),
+				'description' => '<p>' . esc_html__( 'The deprecated Legacy REST API is not enabled.', 'woocommerce' ) . '</p>',
+				'actions'     => '',
+				'test'        => 'woocommerce_legacy_rest_api',
+			);
+		return $this->apply_result_filters( 'legacy_rest_api', $result );
 	}
 
 	/**
