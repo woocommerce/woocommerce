@@ -300,7 +300,7 @@ abstract class GraphQLController {
 	 * @param array            $output  The response body about to be sent (may include `errors`/`data`).
 	 * @param \WP_REST_Request $request The originating request.
 	 *
-	 * @throws StatusResolverFailedException When the resolver throws.
+	 * @throws StatusResolverFailedException When the resolver throws or returns a status code outside the 100..599 HTTP range.
 	 */
 	private function pick_status( int $default, array $output, \WP_REST_Request $request ): int {
 		if ( null === $this->status_resolver ) {
@@ -308,11 +308,21 @@ abstract class GraphQLController {
 		}
 		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Internal sentinel; never serialised to the wire.
 		try {
-			return $this->status_resolver->resolve_status( $default, $output, $request );
+			$resolved = $this->status_resolver->resolve_status( $default, $output, $request );
 		} catch ( \Throwable $e ) {
 			throw new StatusResolverFailedException( 'HTTP status resolver threw.', 0, $e );
 		}
+		// Guard against nonsensical return values. Range-checking outside the
+		// try/catch keeps this exception out of the generic-Throwable wrap
+		// above, so a bad return value surfaces as the same fixed-shape 500
+		// response as a throw — never as a malformed WP_REST_Response.
+		if ( $resolved < 100 || $resolved > 599 ) {
+			throw new StatusResolverFailedException(
+				sprintf( 'HTTP status resolver returned an out-of-range status code: %d.', $resolved )
+			);
+		}
 		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
+		return $resolved;
 	}
 
 	/**
