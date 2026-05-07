@@ -86,6 +86,14 @@ class WC_Analytics_Tracking {
 			return true;
 		}
 
+		// Skip events without a stable visitor id. Cookie-less server-side calls
+		// (REST API, XMLRPC, cron, WP-CLI, requests after headers were sent) cannot
+		// persist a tk_ai cookie, so attributing them to a fresh random id would
+		// inflate session counts in downstream analytics.
+		if ( empty( self::get_visitor_id() ) ) {
+			return true;
+		}
+
 		$prefixed_event_name = self::PREFIX . $event_name;
 		$properties          = self::get_properties( $prefixed_event_name, $event_properties );
 
@@ -474,7 +482,20 @@ class WC_Analytics_Tracking {
 			return self::$cached_visitor_id;
 		}
 
-		// Generate a new anonId and try to save it in the browser's cookies.
+		// Only mint a new anonymous id when we can persist it in a cookie.
+		// REST, XMLRPC, cron, WP-CLI, and post-headers contexts cannot set a cookie,
+		// so a generated id would be a single-use throw-away that fragments sessions
+		// in downstream analytics. Return null in those cases so record_event() skips.
+		if ( headers_sent()
+			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+			|| ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
+			|| ( defined( 'DOING_CRON' ) && DOING_CRON )
+			|| ( defined( 'WP_CLI' ) && WP_CLI )
+		) {
+			return null;
+		}
+
+		// Real browser request with no tk_ai cookie yet. Generate and persist.
 		// Note that base64-encoding an 18 character string generates a 24-character anon id.
 		$binary = '';
 		for ( $i = 0; $i < 18; ++$i ) {
@@ -483,24 +504,19 @@ class WC_Analytics_Tracking {
 
 		self::$cached_visitor_id = base64_encode( $binary ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
+		setcookie(
+			'tk_ai',
+			self::$cached_visitor_id,
+			array(
+				'expires'  => time() + ( 365 * 24 * 60 * 60 ), // 1 year
+				'path'     => '/',
+				'domain'   => COOKIE_DOMAIN,
+				'secure'   => is_ssl(),
+				'httponly' => true,
+				'samesite' => 'Strict',
+			)
+		);
 
-		if ( ! headers_sent()
-			&& ! ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			&& ! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
-		) {
-			setcookie(
-				'tk_ai',
-				self::$cached_visitor_id,
-				array(
-					'expires'  => time() + ( 365 * 24 * 60 * 60 ), // 1 year
-					'path'     => '/',
-					'domain'   => COOKIE_DOMAIN,
-					'secure'   => is_ssl(),
-					'httponly' => true,
-					'samesite' => 'Strict',
-				)
-			);
-		}
 		return self::$cached_visitor_id;
 	}
 

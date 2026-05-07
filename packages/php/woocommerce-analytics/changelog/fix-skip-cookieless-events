@@ -1,0 +1,4 @@
+Significance: patch
+Type: fixed
+
+Skip server-side analytics events from cookie-less contexts (REST API, XMLRPC, cron, WP-CLI) to prevent inflated session counts.
