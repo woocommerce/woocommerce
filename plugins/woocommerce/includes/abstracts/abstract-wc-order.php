@@ -1845,6 +1845,20 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * @return void
 	 */
 	public function calculate_taxes( $args = array() ) {
+		if ( array_key_exists( '_adjust_non_base_location_prices', $args ) ) {
+			$adjust_non_base_location_prices = wc_string_to_bool( $args['_adjust_non_base_location_prices'] );
+			unset( $args['_adjust_non_base_location_prices'] );
+		} else {
+			/**
+			 * Filters whether to adjust product prices for non-base tax locations.
+			 *
+			 * @since 2.4.7
+			 *
+			 * @param bool $adjust_non_base_location_prices True by default.
+			 */
+			$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
+		}
+
 		do_action( 'woocommerce_order_before_calculate_taxes', $args, $this );
 
 		$calculate_tax_for  = $this->get_tax_location( $args );
@@ -1857,24 +1871,8 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 
 		$is_vat_exempt = apply_filters( 'woocommerce_order_is_vat_exempt', 'yes' === $this->get_meta( 'is_vat_exempt' ), $this );
 
-		if (
-			$this->get_prices_include_tax() &&
-			/**
-			 * Filters whether to adjust product prices for non-base tax locations.
-			 *
-			 * @since 10.7.0
-			 *
-			 * @param bool $adjust_non_base_location_prices True by default.
-			 */
-			! apply_filters( 'woocommerce_adjust_non_base_location_prices', true )
-		) {
-			$calculate_tax_for = array(
-				'country'            => WC()->countries->get_base_country(),
-				'state'              => WC()->countries->get_base_state(),
-				'postcode'           => WC()->countries->get_base_postcode(),
-				'city'               => WC()->countries->get_base_city(),
-				'prices_include_tax' => true,
-			);
+		if ( $this->get_prices_include_tax() && ! $adjust_non_base_location_prices ) {
+			$calculate_tax_for['prices_include_tax'] = true;
 		}
 		foreach ( $this->get_items( array( 'line_item', 'fee' ) ) as $item_id => $item ) {
 			if ( ! $is_vat_exempt ) {
@@ -2040,24 +2038,24 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$fees_total += (float) $item->get_total();
 		}
 
+		/**
+		 * Filters whether to adjust product prices for non-base tax locations.
+		 *
+		 * @since 2.4.7
+		 *
+		 * @param bool $adjust_non_base_location_prices True by default.
+		 */
+		$adjust_non_base_location_prices = apply_filters( 'woocommerce_adjust_non_base_location_prices', true );
+
 		// Calculate taxes for items, shipping, discounts. Note; this also triggers save().
 		if ( $and_taxes ) {
-			$this->calculate_taxes();
+			$this->calculate_taxes( array( '_adjust_non_base_location_prices' => $adjust_non_base_location_prices ) );
 		}
 
-		// Re-read cart totals after calculate_taxes(). 
-		// Item totals may have been adjusted (e.g. when woocommerce_adjust_non_base_location_prices is false and prices include tax).
+		// Re-read cart totals after calculate_taxes().
+		// Negative fees may have been capped while calculating totals.
 		$cart_subtotal = $this->get_cart_subtotal_for_order();
 		$cart_total    = (float) $this->get_cart_total_for_order();
-
-		// $cart_total holds inclusive prices when prices include tax and fixed end-price
-		// mode is active. Subtract extracted cart tax to avoid counting it twice.
-		if (
-			$this->get_prices_include_tax() &&
-			! apply_filters( 'woocommerce_adjust_non_base_location_prices', true )
-		) {
-			$cart_total    = $cart_total    - (float) $this->get_cart_tax();
-		}
 
 		// Sum taxes again so we can work out how much tax was discounted. This uses original values, not those possibly rounded to 2dp.
 		foreach ( $this->get_items() as $item ) {
@@ -2070,6 +2068,12 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			foreach ( $taxes['subtotal'] as $tax_rate_id => $tax ) {
 				$cart_subtotal_tax += (float) $tax;
 			}
+		}
+
+		// Fixed end-price orders keep inclusive item totals; compare net values and add tax back below.
+		if ( $this->get_prices_include_tax() && ! $adjust_non_base_location_prices ) {
+			$cart_subtotal = $cart_subtotal - $cart_subtotal_tax;
+			$cart_total    = $cart_total - $cart_total_tax;
 		}
 
 		$this->set_discount_total( NumberUtil::round( $cart_subtotal - $cart_total, wc_get_price_decimals() ) );

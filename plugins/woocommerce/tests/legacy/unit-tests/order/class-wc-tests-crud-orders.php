@@ -2147,104 +2147,24 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 *          for manual backend orders.
 	 */
 	public function test_calculate_taxes_fixed_end_price_non_base_country(): void {
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
-		$original_tax_based_on       = get_option( 'woocommerce_tax_based_on' );
-		$original_base_country       = get_option( 'woocommerce_default_country' );
-
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_tax_based_on', 'billing' );
-		update_option( 'woocommerce_default_country', 'BE' );
-
-		// Use a dedicated tax class so to avoid '' class rates inserted by other tests.
-		$tax_class_name = 'Books VAT';
-		$tax_class_slug = 'books-vat';
-
-		$tax_class_created = false;
-		if ( ! in_array( $tax_class_slug, WC_Tax::get_tax_class_slugs(), true ) ) {
-			WC_Tax::create_tax_class( $tax_class_name, $tax_class_slug );
-			$tax_class_created = true;
-		}
-
-		$be_rate_id = WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => 'BE',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '6.0000',
-				'tax_rate_name'     => 'Belgium VAT',
-				'tax_rate_priority' => '1',
-				'tax_rate_compound' => '0',
-				'tax_rate_shipping' => '1',
-				'tax_rate_order'    => '1',
-				'tax_rate_class'    => $tax_class_slug,
-			)
-		);
-
-		$nl_rate_id = WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => 'NL',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '9.0000',
-				'tax_rate_name'     => 'Netherlands VAT',
-				'tax_rate_priority' => '1',
-				'tax_rate_compound' => '0',
-				'tax_rate_shipping' => '1',
-				'tax_rate_order'    => '1',
-				'tax_rate_class'    => $tax_class_slug,
-			)
-		);
-
-		// Clears any stale cached tax rates.
-		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
-
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_price( '24' );
-		$product->set_regular_price( '24' );
-		$product->set_tax_status( 'taxable' );
-		// Assign the dedicated tax class.
-		$product->set_tax_class( $tax_class_slug );
-		$product->save();
-
+		$context = $this->create_manual_order_tax_context();
 		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
-
-		$order = wc_create_order();
-		$order->set_billing_country( 'NL' );
-		$order->set_shipping_country( 'NL' );
-		$order->add_product( $product, 1 );
-		$order->save();
+		$order = $this->create_manual_order_for_tax_context( $context, '24' );
 
 		try {
 			$order->calculate_totals();
 
-			$this->assertEquals(
-				24.00,
-				round( (float) $order->get_total(), 2 ),
-				'NL manual order gross must be €24.00 when adjust_non_base_location_prices is false.'
-			);
+			$this->assertEquals( 24.00, round( (float) $order->get_total(), 2 ) );
+			$this->assertEquals( 0.00, round( (float) $order->get_discount_total(), 2 ) );
 
-			$items = $order->get_items();
-			$item  = reset( $items );
+			$item = $this->get_first_order_item( $order );
 			$this->assertEquals(
-				1.36,
+				1.98,
 				round( (float) $item->get_subtotal_tax(), 2 ),
-				'Line subtotal tax must be 24/1.06*0.06 ≈ €1.36 (base BE rate extracted), not 24/1.09*0.09 ≈ €1.98 (NL rate).'
+				'Line subtotal tax must be 24/1.09*0.09 from the customer NL rate.'
 			);
 		} finally {
-			// Cleanup.
-			remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
-			WC_Tax::_delete_tax_rate( $be_rate_id );
-			WC_Tax::_delete_tax_rate( $nl_rate_id );
-			if ( $tax_class_created ) {
-				WC_Tax::delete_tax_class_by( 'slug', $tax_class_slug );
-			}
-			WC_Cache_Helper::invalidate_cache_group( 'taxes' );
-			WC_Helper_Product::delete_product( $product->get_id() );
-			$order->delete( true );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_tax_based_on', $original_tax_based_on );
-			update_option( 'woocommerce_default_country', $original_base_country );
+			$this->cleanup_manual_order_tax_context( $context, $order );
 		}
 	}
 
@@ -2253,92 +2173,20 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 *          country (default WooCommerce behaviour must be preserved).
 	 */
 	public function test_calculate_taxes_adjusts_price_without_filter(): void {
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
-		$original_base_country       = get_option( 'woocommerce_default_country' );
-
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_default_country', 'BE' );
-
-		$tax_class_name    = 'Books VAT';
-		$tax_class_slug    = 'books-vat';
-		$tax_class_created = false;
-		if ( ! in_array( $tax_class_slug, WC_Tax::get_tax_class_slugs(), true ) ) {
-			WC_Tax::create_tax_class( $tax_class_name, $tax_class_slug );
-			$tax_class_created = true;
-		}
-
-		$be_rate_id = WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => 'BE',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '6.0000',
-				'tax_rate_name'     => 'Belgium VAT',
-				'tax_rate_priority' => '1',
-				'tax_rate_compound' => '0',
-				'tax_rate_shipping' => '1',
-				'tax_rate_order'    => '1',
-				'tax_rate_class'    => $tax_class_slug,
-			)
-		);
-
-		$nl_rate_id = WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => 'NL',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '9.0000',
-				'tax_rate_name'     => 'Netherlands VAT',
-				'tax_rate_priority' => '1',
-				'tax_rate_compound' => '0',
-				'tax_rate_shipping' => '1',
-				'tax_rate_order'    => '1',
-				'tax_rate_class'    => $tax_class_slug,
-			)
-		);
-
-		// Clears any stale cached tax rates.
-		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_price( '24' );
-		$product->set_regular_price( '24' );
-		$product->set_tax_status( 'taxable' );
-
-		// Assign the dedicated tax class.
-		$product->set_tax_class( $tax_class_slug );
-		$product->save();
-
-		$order = wc_create_order();
-		$order->set_billing_country( 'NL' );
-		$order->add_product( $product, 1 );
-		$order->save();
+		$context = $this->create_manual_order_tax_context();
+		$order   = $this->create_manual_order_for_tax_context( $context );
 
 		try {
 			$order->calculate_totals();
-			// 24 / 1.06 * 1.09 ≈ 24.68 — price adjustment is expected.
-			$this->assertGreaterThan(
-				24.00,
-				(float) $order->get_total(),
-				'Without the filter, NL 9% VAT should produce a gross above €24.'
-			);
+
+			$this->assertGreaterThan( 24.00, (float) $order->get_total() );
 			$this->assertEquals(
 				24.68,
 				round( (float) $order->get_total(), 2 ),
-				'Without the filter, NL total should be ~€24.68.'
+				'Without the filter, NL total should be ~24.68.'
 			);
 		} finally {
-			// Cleanup.
-			WC_Tax::_delete_tax_rate( $be_rate_id );
-			WC_Tax::_delete_tax_rate( $nl_rate_id );
-			if ( $tax_class_created ) {
-				WC_Tax::delete_tax_class_by( 'slug', $tax_class_slug );
-			}
-			WC_Cache_Helper::invalidate_cache_group( 'taxes' );
-			WC_Helper_Product::delete_product( $product->get_id() );
-			$order->delete( true );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_default_country', $original_base_country );
+			$this->cleanup_manual_order_tax_context( $context, $order );
 		}
 	}
 
@@ -2347,90 +2195,20 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 *          no-op for prices-exclusive-of-tax stores.
 	 */
 	public function test_calculate_taxes_fixed_price_filter_noop_for_excl_tax_store(): void {
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
-		$original_base_country       = get_option( 'woocommerce_default_country' );
-
-		update_option( 'woocommerce_prices_include_tax', 'no' );  // excl-tax store.
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_default_country', 'BE' );
-
-		$tax_class_name    = 'Books VAT';
-		$tax_class_slug    = 'books-vat';
-		$tax_class_created = false;
-
-		if ( ! in_array( $tax_class_slug, WC_Tax::get_tax_class_slugs(), true ) ) {
-			WC_Tax::create_tax_class( $tax_class_name, $tax_class_slug );
-			$tax_class_created = true;
-		}
-
-		$be_rate_id = WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => 'BE',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '6.0000',
-				'tax_rate_name'     => 'Belgium VAT',
-				'tax_rate_priority' => '1',
-				'tax_rate_compound' => '0',
-				'tax_rate_shipping' => '1',
-				'tax_rate_order'    => '1',
-				'tax_rate_class'    => $tax_class_slug,
-			)
-		);
-
-		$nl_rate_id = WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => 'NL',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '9.0000',
-				'tax_rate_name'     => 'Netherlands VAT',
-				'tax_rate_priority' => '1',
-				'tax_rate_compound' => '0',
-				'tax_rate_shipping' => '1',
-				'tax_rate_order'    => '1',
-				'tax_rate_class'    => $tax_class_slug,
-			)
-		);
-
-		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_price( '24' );
-		$product->set_regular_price( '24' );
-		$product->set_tax_status( 'taxable' );
-		// Assign the dedicated tax class.
-		$product->set_tax_class( $tax_class_slug );
-		$product->save();
-
+		$context = $this->create_manual_order_tax_context( 'no' );
 		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
-
-		$order = wc_create_order();
-		$order->set_billing_country( 'NL' );
-		$order->add_product( $product, 1 );
-		$order->save();
+		$order = $this->create_manual_order_for_tax_context( $context );
 
 		try {
 			$order->calculate_totals();
 
-			// Excl-tax store: NL 9% applied on top of €24 → €26.16. Filter is irrelevant.
 			$this->assertEquals(
 				26.16,
 				round( (float) $order->get_total(), 2 ),
-				'For excl-tax stores the filter must be a no-op; NL 9% applies on top of €24.'
+				'For excl-tax stores the filter must be a no-op; NL 9% applies on top of 24.'
 			);
 		} finally {
-			// Cleanup.
-			remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
-			WC_Tax::_delete_tax_rate( $be_rate_id );
-			WC_Tax::_delete_tax_rate( $nl_rate_id );
-			if ( $tax_class_created ) {
-				WC_Tax::delete_tax_class_by( 'slug', $tax_class_slug );
-			}
-			WC_Cache_Helper::invalidate_cache_group( 'taxes' );
-			WC_Helper_Product::delete_product( $product->get_id() );
-			$order->delete( true );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_default_country', $original_base_country );
+			$this->cleanup_manual_order_tax_context( $context, $order );
 		}
 	}
 
@@ -2439,100 +2217,189 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 	 *          the same result when adjust_non_base_location_prices is false.
 	 */
 	public function test_calculate_taxes_fixed_price_idempotent(): void {
-		$original_prices_include_tax = get_option( 'woocommerce_prices_include_tax' );
-		$original_calc_taxes         = get_option( 'woocommerce_calc_taxes' );
-		$original_base_country       = get_option( 'woocommerce_default_country' );
-
-		update_option( 'woocommerce_prices_include_tax', 'yes' );
-		update_option( 'woocommerce_calc_taxes', 'yes' );
-		update_option( 'woocommerce_default_country', 'BE' );
-
-		$tax_class_slug    = 'books-vat';
-		$tax_class_created = false;
-
-		if ( ! in_array( $tax_class_slug, WC_Tax::get_tax_class_slugs(), true ) ) {
-			WC_Tax::create_tax_class( 'Books VAT', $tax_class_slug );
-			$tax_class_created = true;
-		}
-
-		$be_rate_id = WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => 'BE',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '6.0000',
-				'tax_rate_name'     => 'Belgium VAT',
-				'tax_rate_priority' => '1',
-				'tax_rate_compound' => '0',
-				'tax_rate_shipping' => '1',
-				'tax_rate_order'    => '1',
-				'tax_rate_class'    => $tax_class_slug,
-			)
-		);
-
-		$nl_rate_id = WC_Tax::_insert_tax_rate(
-			array(
-				'tax_rate_country'  => 'NL',
-				'tax_rate_state'    => '',
-				'tax_rate'          => '9.0000',
-				'tax_rate_name'     => 'Netherlands VAT',
-				'tax_rate_priority' => '1',
-				'tax_rate_compound' => '0',
-				'tax_rate_shipping' => '1',
-				'tax_rate_order'    => '1',
-				'tax_rate_class'    => $tax_class_slug,
-			)
-		);
-
-		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
-
-		$product = WC_Helper_Product::create_simple_product();
-		$product->set_price( '24' );
-		$product->set_regular_price( '24' );
-		$product->set_tax_status( 'taxable' );
-		$product->set_tax_class( $tax_class_slug );
-		$product->save();
-
+		$context = $this->create_manual_order_tax_context();
 		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
-
-		$order = wc_create_order();
-		$order->set_billing_country( 'NL' );
-		$order->set_shipping_country( 'NL' );
-		$order->add_product( $product, 1 );
-		$order->save();
+		$order = $this->create_manual_order_for_tax_context( $context, '24' );
 
 		try {
-			// First call.
 			$order->calculate_totals();
 			$total_first = $order->get_total();
 
-			// Second call must produce identical result.
 			$order->calculate_totals();
 			$total_second = $order->get_total();
 
 			$this->assertEquals(
 				round( (float) $total_first, 2 ),
 				round( (float) $total_second, 2 ),
-				'Calling calculate_totals() twice must produce the same total — tax must not be stripped on each run.'
+				'Calling calculate_totals() twice must produce the same total.'
 			);
-
-			$this->assertEquals(
-				24.00,
-				round( (float) $total_second, 2 ),
-				'Total must remain €24.00 after multiple calculate_totals() calls.'
-			);
+			$this->assertEquals( 24.00, round( (float) $total_second, 2 ) );
 		} finally {
-			remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
-			WC_Tax::_delete_tax_rate( $be_rate_id );
-			WC_Tax::_delete_tax_rate( $nl_rate_id );
-			if ( $tax_class_created ) {
-				WC_Tax::delete_tax_class_by( 'slug', $tax_class_slug );
-			}
-			WC_Cache_Helper::invalidate_cache_group( 'taxes' );
-			WC_Helper_Product::delete_product( $product->get_id() );
-			$order->delete( true );
-			update_option( 'woocommerce_prices_include_tax', $original_prices_include_tax );
-			update_option( 'woocommerce_calc_taxes', $original_calc_taxes );
-			update_option( 'woocommerce_default_country', $original_base_country );
+			$this->cleanup_manual_order_tax_context( $context, $order );
 		}
+	}
+
+	/**
+	 * @testdox calculate_totals() keeps positive fees tax-exclusive in fixed end-price mode.
+	 */
+	public function test_calculate_taxes_fixed_price_positive_fee_remains_tax_exclusive(): void {
+		$context = $this->create_manual_order_tax_context();
+		add_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		$order = $this->create_manual_order_for_tax_context( $context, '24' );
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_props(
+			array(
+				'name'       => 'Handling',
+				'tax_status' => ProductTaxStatus::TAXABLE,
+				'tax_class'  => $context['tax_class_slug'],
+				'total'      => 10,
+			)
+		);
+		$order->add_item( $fee );
+
+		try {
+			$order->calculate_totals();
+
+			$this->assertEquals( 34.90, round( (float) $order->get_total(), 2 ) );
+			$this->assertEquals( 0.90, round( (float) $fee->get_total_tax(), 2 ) );
+		} finally {
+			$this->cleanup_manual_order_tax_context( $context, $order );
+		}
+	}
+
+	/**
+	 * Creates tax rates and a product for manual order tax tests.
+	 *
+	 * @param string $prices_include_tax Whether prices include tax.
+	 * @return array<string,mixed>
+	 */
+	private function create_manual_order_tax_context( string $prices_include_tax = 'yes' ): array {
+		$tax_class_slug    = 'books-vat';
+		$tax_class_created = false;
+
+		$context = array(
+			'original_prices_include_tax' => get_option( 'woocommerce_prices_include_tax' ),
+			'original_calc_taxes'         => get_option( 'woocommerce_calc_taxes' ),
+			'original_tax_based_on'       => get_option( 'woocommerce_tax_based_on' ),
+			'original_base_country'       => get_option( 'woocommerce_default_country' ),
+			'tax_class_slug'              => $tax_class_slug,
+		);
+
+		update_option( 'woocommerce_prices_include_tax', $prices_include_tax );
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+		update_option( 'woocommerce_tax_based_on', 'billing' );
+		update_option( 'woocommerce_default_country', 'BE' );
+
+		if ( ! in_array( $tax_class_slug, WC_Tax::get_tax_class_slugs(), true ) ) {
+			WC_Tax::create_tax_class( 'Books VAT', $tax_class_slug );
+			$tax_class_created = true;
+		}
+
+		$context['tax_class_created'] = $tax_class_created;
+		$context['be_rate_id']        = $this->insert_manual_order_tax_rate( 'BE', '6.0000', 'Belgium VAT', $tax_class_slug );
+		$context['nl_rate_id']        = $this->insert_manual_order_tax_rate( 'NL', '9.0000', 'Netherlands VAT', $tax_class_slug );
+
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_price( '24' );
+		$product->set_regular_price( '24' );
+		$product->set_tax_status( ProductTaxStatus::TAXABLE );
+		$product->set_tax_class( $tax_class_slug );
+		$product->save();
+
+		$context['product'] = $product;
+
+		return $context;
+	}
+
+	/**
+	 * Inserts a tax rate for manual order tax tests.
+	 *
+	 * @param string $country Tax rate country.
+	 * @param string $rate Tax rate percentage.
+	 * @param string $name Tax rate name.
+	 * @param string $tax_class_slug Tax class slug.
+	 * @return int
+	 */
+	private function insert_manual_order_tax_rate( string $country, string $rate, string $name, string $tax_class_slug ): int {
+		return WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => $country,
+				'tax_rate_state'    => '',
+				'tax_rate'          => $rate,
+				'tax_rate_name'     => $name,
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '1',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => $tax_class_slug,
+			)
+		);
+	}
+
+	/**
+	 * Creates a manual order for the tax context.
+	 *
+	 * @param array<string,mixed> $context Tax test context.
+	 * @param string|null         $line_total Optional line total override.
+	 * @return WC_Order
+	 */
+	private function create_manual_order_for_tax_context( array $context, ?string $line_total = null ): WC_Order {
+		$order = wc_create_order();
+		$order->set_billing_country( 'NL' );
+		$order->set_shipping_country( 'NL' );
+		$item_id = $order->add_product( $context['product'], 1 );
+
+		if ( null !== $line_total ) {
+			$item = $order->get_item( $item_id );
+			$item->set_subtotal( $line_total );
+			$item->set_total( $line_total );
+			$item->save();
+		}
+
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Cleans up manual order tax test data.
+	 *
+	 * @param array<string,mixed> $context Tax test context.
+	 * @param WC_Order|null       $order Order to delete.
+	 */
+	private function cleanup_manual_order_tax_context( array $context, ?WC_Order $order = null ): void {
+		remove_filter( 'woocommerce_adjust_non_base_location_prices', '__return_false' );
+		WC_Tax::_delete_tax_rate( $context['be_rate_id'] );
+		WC_Tax::_delete_tax_rate( $context['nl_rate_id'] );
+
+		if ( $context['tax_class_created'] ) {
+			WC_Tax::delete_tax_class_by( 'slug', $context['tax_class_slug'] );
+		}
+
+		WC_Cache_Helper::invalidate_cache_group( 'taxes' );
+		WC_Helper_Product::delete_product( $context['product']->get_id() );
+
+		if ( $order ) {
+			$order->delete( true );
+		}
+
+		update_option( 'woocommerce_prices_include_tax', $context['original_prices_include_tax'] );
+		update_option( 'woocommerce_calc_taxes', $context['original_calc_taxes'] );
+		update_option( 'woocommerce_tax_based_on', $context['original_tax_based_on'] );
+		update_option( 'woocommerce_default_country', $context['original_base_country'] );
+	}
+
+	/**
+	 * Gets the first item from an order.
+	 *
+	 * @param WC_Order $order Order object.
+	 * @return WC_Order_Item
+	 */
+	private function get_first_order_item( WC_Order $order ): WC_Order_Item {
+		$items = $order->get_items();
+		return reset( $items );
 	}
 }
