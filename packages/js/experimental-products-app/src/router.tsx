@@ -42,7 +42,6 @@ export type Route = {
 export default function useLayoutAreas() {
 	const { params = {}, query = {} } = useLocation();
 	const postType = params.postType ?? query.postType ?? 'product';
-	const canvas = params.canvas ?? query.canvas;
 	const activeView = query.activeView as string | undefined;
 	const selectedTabFromLocation = getProductListTab( activeView );
 	const [ selectedTab, setSelectedTab ] = useState( selectedTabFromLocation );
