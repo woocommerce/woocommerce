@@ -106,8 +106,8 @@ class OrderListNavTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 1, $data['position'], 'Newest order should be position 1.' );
 		$this->assertSame( 5, $data['total'], 'Total should reflect all 5 orders.' );
-		$this->assertNull( $data['next_id'], 'No next link from newest order.' );
-		$this->assertSame( $ids[3], $data['prev_id'], 'Prev should be the second-newest order.' );
+		$this->assertNull( $data['prev_id'], 'No previous-position link at position 1.' );
+		$this->assertSame( $ids[3], $data['next_id'], 'Next-position link should be the second-newest order.' );
 	}
 
 	/**
@@ -121,8 +121,8 @@ class OrderListNavTest extends WC_Unit_Test_Case {
 
 		$this->assertSame( 5, $data['position'], 'Oldest order should be at position equal to total.' );
 		$this->assertSame( 5, $data['total'], 'Total should reflect all 5 orders.' );
-		$this->assertNull( $data['prev_id'], 'No prev link from oldest order.' );
-		$this->assertSame( $ids[1], $data['next_id'], 'Next should be the second-oldest order.' );
+		$this->assertNull( $data['next_id'], 'No next-position link at the last position.' );
+		$this->assertSame( $ids[1], $data['prev_id'], 'Previous-position link should be the second-oldest order.' );
 	}
 
 	/**

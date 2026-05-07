@@ -314,7 +314,12 @@ class OrderListNav {
 	}
 
 	/**
-	 * Finds the IDs of the prev (older) and next (newer) orders matching the same filters.
+	 * Finds the IDs of the orders at position-1 (left chevron) and position+1 (right chevron).
+	 *
+	 * The orders list defaults to date DESC, so position 1 is the newest order. Decrementing
+	 * the position number means moving to a newer order; incrementing means moving to an older
+	 * one. `prev_id` (left chevron) therefore points to the newer order; `next_id` (right
+	 * chevron) points to the older one.
 	 *
 	 * @param WC_Order            $order      Current order.
 	 * @param array<string,mixed> $query_args Base query args.
@@ -323,26 +328,28 @@ class OrderListNav {
 	private function compute_prev_next_ids( WC_Order $order, array $query_args ): array {
 		$timestamp = $order->get_date_created() ? $order->get_date_created()->getTimestamp() : time();
 
+		// Left chevron: decrement position → newer order.
 		$prev_ids = wc_get_orders(
-			array_merge(
-				$query_args,
-				array(
-					'date_created' => '<' . $timestamp,
-					'orderby'      => 'date',
-					'order'        => 'DESC',
-					'limit'        => 1,
-					'return'       => 'ids',
-				)
-			)
-		);
-
-		$next_ids = wc_get_orders(
 			array_merge(
 				$query_args,
 				array(
 					'date_created' => '>' . $timestamp,
 					'orderby'      => 'date',
 					'order'        => 'ASC',
+					'limit'        => 1,
+					'return'       => 'ids',
+				)
+			)
+		);
+
+		// Right chevron: increment position → older order.
+		$next_ids = wc_get_orders(
+			array_merge(
+				$query_args,
+				array(
+					'date_created' => '<' . $timestamp,
+					'orderby'      => 'date',
+					'order'        => 'DESC',
 					'limit'        => 1,
 					'return'       => 'ids',
 				)

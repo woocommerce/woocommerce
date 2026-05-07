@@ -3014,71 +3014,69 @@ ul.wc_coupon_list_block {
 	&.woocommerce-feature-enabled-order-detail-redesign .wrap:has(#poststuff) {
 		max-width: 1200px;
 		margin-inline: auto;
+	}
 
-		// Make the H1 row a flex container so the prev/next nav can right-align via margin-inline-start: auto.
-		// Wraps below the title on narrow viewports.
-		display: flex;
-		flex-wrap: wrap;
+	// Float the prev/next nav to the right of the H1 row. The `<hr class="wp-header-end">`
+	// that follows the title row clears this float, so the metabox columns below are unaffected.
+	// On narrow viewports where the nav can't fit beside the title, the float wraps to the next line.
+	&.woocommerce-feature-enabled-order-detail-redesign .woocommerce-order-list-nav {
+		float: right;
+		display: inline-flex;
 		align-items: center;
-		column-gap: 8px;
+		gap: 8px;
+		margin-top: 4px;
+		font-size: 13px;
+		line-height: 1.4;
+	}
 
-		> h1.wp-heading-inline {
-			margin-right: 0;
-		}
-
-		.woocommerce-order-list-nav {
-			display: inline-flex;
-			align-items: center;
-			gap: 8px;
-			margin-inline-start: auto;
-			font-size: 13px;
-			line-height: 1.4;
-		}
-
-		.woocommerce-order-list-nav__count {
-			.is-current {
-				color: $gray-900;
-			}
-
-			.is-muted {
-				color: $gray-700;
-			}
-		}
-
-		.woocommerce-order-list-nav__chevron {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 32px;
-			height: 32px;
-			border-radius: $radius-s;
+	&.woocommerce-feature-enabled-order-detail-redesign .woocommerce-order-list-nav__count {
+		.is-current {
 			color: $gray-900;
-			text-decoration: none;
-			transition: background-color 0.1s ease-in-out;
+		}
 
-			&:hover,
-			&:focus-visible {
-				background-color: rgba(0, 0, 0, 0.06);
-			}
-
-			&:focus-visible {
-				outline: var(--wp-admin-border-width-focus) solid currentColor;
-				outline-offset: 1px;
-			}
-
-			&[aria-disabled="true"] {
-				opacity: 0.4;
-				cursor: default;
-				pointer-events: none;
-			}
-
-			.woocommerce-order-list-nav__icon {
-				fill: currentColor;
-			}
+		.is-muted {
+			color: $gray-700;
 		}
 	}
 
-	// Mirror the chevron icons in RTL so "previous" still reads as "back".
+	&.woocommerce-feature-enabled-order-detail-redesign .woocommerce-order-list-nav__chevron {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 32px;
+		height: 32px;
+		border-radius: $radius-s;
+		color: $gray-900;
+		text-decoration: none;
+		transition: background-color 0.1s ease-in-out;
+
+		&:hover,
+		&:focus-visible {
+			background-color: rgba(0, 0, 0, 0.06);
+		}
+
+		&:focus-visible {
+			outline: var(--wp-admin-border-width-focus) solid currentColor;
+			outline-offset: 1px;
+		}
+
+		&[aria-disabled="true"] {
+			opacity: 0.4;
+			cursor: default;
+			pointer-events: none;
+		}
+
+		.woocommerce-order-list-nav__icon {
+			fill: currentColor;
+		}
+	}
+
+	// Mirror the chevron icons in RTL so the visual direction still matches position-number direction.
+	&.woocommerce-feature-enabled-order-detail-redesign[dir="rtl"] .woocommerce-order-list-nav,
+	[dir="rtl"] &.woocommerce-feature-enabled-order-detail-redesign .woocommerce-order-list-nav {
+		float: left;
+	}
+
 	&.woocommerce-feature-enabled-order-detail-redesign[dir="rtl"] .woocommerce-order-list-nav__icon,
 	[dir="rtl"] &.woocommerce-feature-enabled-order-detail-redesign .woocommerce-order-list-nav__icon {
 		transform: scaleX(-1);
