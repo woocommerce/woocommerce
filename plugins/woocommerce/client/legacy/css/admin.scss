@@ -3015,6 +3015,8 @@ ul.wc_coupon_list_block {
 		.wrap:has(#poststuff) {
 			max-width: 1200px;
 			margin-inline: auto;
+			// Anchor for the absolutely-positioned prev/next nav below.
+			position: relative;
 		}
 
 		// Strip postbox chrome from the redesigned submit block so the
@@ -3051,14 +3053,19 @@ ul.wc_coupon_list_block {
 			}
 		}
 
-		// Prev/next order navigation in the H1 row. Floats right so it sits
-		// on the opposite side of the title + "Add new" action.
+		// Prev/next order navigation in the H1 row. Absolutely positioned so
+		// it sits on the opposite side of the title + "Add new" action and
+		// stays vertically centered with the H1 text regardless of H1 height.
+		// `right: 20px` matches WP admin's standard right gutter so the nav
+		// aligns with the right edge of the postbox column (not the .wrap edge).
 		.woocommerce-order-list-nav {
 			display: inline-flex;
 			align-items: center;
 			gap: 4px;
-			float: right;
-			margin-top: 4px;
+			position: absolute;
+			right: 20px;
+			top: 24px;
+			transform: translateY(-50%);
 		}
 
 		.woocommerce-order-list-nav__button {
@@ -3096,11 +3103,6 @@ ul.wc_coupon_list_block {
 		// Mirror the chevrons in RTL contexts so "Prev" still points to older orders.
 		html[dir="rtl"] & .woocommerce-order-list-nav__button svg {
 			transform: scaleX(-1);
-		}
-
-		// Keep the form content from wrapping around the floated nav.
-		.wp-header-end {
-			clear: right;
 		}
 	}
 
