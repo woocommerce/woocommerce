@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -126,9 +127,9 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			}
 		}
 
-		$date_modified = self::build_modified_date_arg( $input );
-		if ( null !== $date_modified ) {
-			$args['date_modified'] = $date_modified;
+		$modified_date_query = self::build_modified_date_query_arg( $input );
+		if ( null !== $modified_date_query ) {
+			$args['date_query'][] = $modified_date_query;
 		}
 
 		$results = wc_get_orders( $args );
@@ -262,12 +263,12 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Build a `date_modified` query arg from modified_after/modified_before input.
+	 * Build a modified-date query arg from modified_after/modified_before input.
 	 *
 	 * @param array $input Ability input.
-	 * @return string|null
+	 * @return array|null
 	 */
-	private static function build_modified_date_arg( array $input ): ?string {
+	private static function build_modified_date_query_arg( array $input ): ?array {
 		$after  = isset( $input['modified_after'] ) && is_string( $input['modified_after'] ) ? sanitize_text_field( $input['modified_after'] ) : '';
 		$before = isset( $input['modified_before'] ) && is_string( $input['modified_before'] ) ? sanitize_text_field( $input['modified_before'] ) : '';
 
@@ -285,11 +286,20 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			return null;
 		}
 
-		if ( '' !== $after && '' !== $before ) {
-			return $after_timestamp . '...' . $before_timestamp;
+		$date_query = array(
+			'column'    => 'post_modified_gmt',
+			'inclusive' => false,
+		);
+
+		if ( null !== $after_timestamp ) {
+			$date_query['after'] = self::format_timestamp_for_date_query( $after_timestamp );
 		}
 
-		return '' !== $before ? '<' . $before_timestamp : '>' . $after_timestamp;
+		if ( null !== $before_timestamp ) {
+			$date_query['before'] = self::format_timestamp_for_date_query( $before_timestamp );
+		}
+
+		return $date_query;
 	}
 
 	/**
@@ -307,6 +317,16 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 	}
 
 	/**
+	 * Format a timestamp for a GMT date query.
+	 *
+	 * @param int $timestamp Timestamp.
+	 * @return string
+	 */
+	private static function format_timestamp_for_date_query( int $timestamp ): string {
+		return gmdate( 'Y-m-d H:i:s', $timestamp );
+	}
+
+	/**
 	 * Prepare orderby values for wc_get_orders across HPOS and legacy storage.
 	 *
 	 * @param string $orderby Input orderby value.
@@ -314,9 +334,12 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 	 */
 	private static function prepare_orderby_arg( string $orderby ): string {
 		$orderby_map = array(
-			'id'            => 'ID',
-			'date_modified' => 'modified',
+			'id' => 'ID',
 		);
+
+		if ( 'date_modified' === $orderby ) {
+			return OrderUtil::custom_orders_table_usage_is_enabled() ? 'date_modified' : 'post_modified';
+		}
 
 		return $orderby_map[ $orderby ] ?? $orderby;
 	}

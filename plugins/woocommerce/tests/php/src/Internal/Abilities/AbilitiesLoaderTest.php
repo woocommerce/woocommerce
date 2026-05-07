@@ -14,6 +14,7 @@ use Automattic\WooCommerce\Internal\Abilities\Domain\ProductCreate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductDelete;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductUpdate;
 use Automattic\WooCommerce\Internal\Abilities\Domain\ProductsQuery;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
@@ -1280,11 +1281,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$product->save();
 		$this->created_product_ids[] = $product->get_id();
 
-		$result = wp_get_ability( 'woocommerce/products-query' )->execute(
-			array(
-				'id' => $product->get_id(),
-			)
-		);
+		$filter_permalink = static function ( $permalink, $post ) use ( $product ) {
+			return $post instanceof \WP_Post && $post->ID === $product->get_id() ? false : $permalink;
+		};
+
+		add_filter( 'post_type_link', $filter_permalink, 20, 2 );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/products-query' )->execute(
+				array(
+					'id' => $product->get_id(),
+				)
+			);
+		} finally {
+			remove_filter( 'post_type_link', $filter_permalink, 20 );
+		}
 
 		$this->assertNotWPError( $result );
 		$this->assertSame( 'auto-draft', $result['products'][0]['status'] );
@@ -1756,7 +1767,43 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$order->save();
 
 		$this->created_order_ids[] = $order->get_id();
+		$this->set_order_modified_date_for_query_test( $order, $date_modified );
 
 		return $order;
+	}
+
+	/**
+	 * Set an order modified date directly in the authoritative storage table.
+	 *
+	 * @param \WC_Order $order         Order object.
+	 * @param string    $date_modified Modified date.
+	 */
+	private function set_order_modified_date_for_query_test( \WC_Order $order, string $date_modified ): void {
+		global $wpdb;
+
+		$timestamp = wc_string_to_datetime( $date_modified )->getTimestamp();
+		$gmt_date  = gmdate( 'Y-m-d H:i:s', $timestamp );
+
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$wpdb->update(
+				OrdersTableDataStore::get_orders_table_name(),
+				array(
+					'date_updated_gmt' => $gmt_date,
+				),
+				array( 'id' => $order->get_id() )
+			);
+
+			return;
+		}
+
+		$wpdb->update(
+			$wpdb->posts,
+			array(
+				'post_modified_gmt' => $gmt_date,
+				'post_modified'     => get_date_from_gmt( $gmt_date ),
+			),
+			array( 'ID' => $order->get_id() )
+		);
+		clean_post_cache( $order->get_id() );
 	}
 }
