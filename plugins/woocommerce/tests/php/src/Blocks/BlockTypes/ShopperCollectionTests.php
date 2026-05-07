@@ -4,10 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ShopperCollection;
-use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Assets\Api;
-use Automattic\WooCommerce\Blocks\Assets\AssetDataRegistry;
-use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
+use ReflectionClass;
 use WP_UnitTestCase;
 
 /**
@@ -16,33 +13,25 @@ use WP_UnitTestCase;
 class ShopperCollectionTests extends WP_UnitTestCase {
 
 	/**
-	 * System under test. Constructing it registers the block-hook filters via `initialize()`.
+	 * System under test.
+	 *
+	 * Constructed via reflection so `AbstractBlock::__construct` doesn't run
+	 * `parent::initialize()` and re-register the block (the test bootstrap
+	 * has already registered it). The filter callbacks under test only read
+	 * `$this->namespace` and `$this->block_name`, both class defaults.
 	 *
 	 * @var ShopperCollection
 	 */
 	private ShopperCollection $sut;
 
 	/**
-	 * Instantiate the block.
+	 * Instantiate the block without invoking its constructor.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
-		$this->sut = new ShopperCollection(
-			Package::container()->get( Api::class ),
-			Package::container()->get( AssetDataRegistry::class ),
-			new IntegrationRegistry()
-		);
-	}
-
-	/**
-	 * Remove the registered filters so other tests aren't affected.
-	 */
-	public function tearDown(): void {
-		remove_filter( 'hooked_block_types', array( $this->sut, 'register_hooked_block' ), 9 );
-		remove_filter( 'hooked_block_woocommerce/shopper-collection', array( $this->sut, 'set_hooked_block_attributes' ), 10 );
-
-		parent::tearDown();
+		$reflection = new ReflectionClass( ShopperCollection::class );
+		$this->sut  = $reflection->newInstanceWithoutConstructor();
 	}
 
 	/**
@@ -84,10 +73,14 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 
 		$context_id = $context_is_cart_page
 			? $cart_page_id
-			: self::factory()->post->create( array( 'post_type' => 'page', 'post_status' => 'publish' ) );
+			: self::factory()->post->create(
+				array(
+					'post_type'   => 'page',
+					'post_status' => 'publish',
+				)
+			);
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
-		$hooked = apply_filters( 'hooked_block_types', array(), 'after', $anchor, get_post( $context_id ) );
+		$hooked = $this->sut->register_hooked_block( array(), 'after', $anchor, get_post( $context_id ) );
 
 		if ( $expected_hooked ) {
 			$this->assertContains( 'woocommerce/shopper-collection', $hooked );
@@ -111,8 +104,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 			)
 		);
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
-		$hooked = apply_filters( 'hooked_block_types', array(), 'after', 'woocommerce/cart', get_post( $context_id ) );
+		$hooked = $this->sut->register_hooked_block( array(), 'after', 'woocommerce/cart', get_post( $context_id ) );
 
 		$this->assertNotContains( 'woocommerce/shopper-collection', $hooked );
 	}
@@ -127,9 +119,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 		);
 		$parsed_anchor_block = array( 'blockName' => 'woocommerce/cart' );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
-		$result = apply_filters(
-			'hooked_block_woocommerce/shopper-collection',
+		$result = $this->sut->set_hooked_block_attributes(
 			$parsed_hooked_block,
 			'woocommerce/shopper-collection',
 			'after',
