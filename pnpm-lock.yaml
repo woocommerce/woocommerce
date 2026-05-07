@@ -1759,8 +1759,8 @@ importers:
         specifier: 1.11.0
         version: 1.11.0(react@18.3.1)
       '@wordpress/theme':
-        specifier: 0.11.0
-        version: 0.11.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
+        specifier: 0.12.0
+        version: 0.12.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
       '@wordpress/ui':
         specifier: 0.12.0
         version: 0.12.0(@date-fns/tz@1.4.1)(@types/react@18.3.28)(date-fns@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)(stylelint@16.26.1(typescript@5.7.3))
@@ -3753,7 +3753,7 @@ importers:
         version: 7.25.7
       '@pmmmwh/react-refresh-webpack-plugin':
         specifier: ^0.5.11
-        version: 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+        version: 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@statelyai/inspect':
         specifier: ^0.3.1
         version: 0.3.1(ws@8.20.0)(xstate@4.37.1)
@@ -26831,7 +26831,7 @@ snapshots:
       '@types/istanbul-lib-coverage': 2.0.6
       collect-v8-coverage: 1.0.3
 
-  '@jest/test-sequencer@26.6.3':
+  '@jest/test-sequencer@26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))':
     dependencies:
       '@jest/test-result': 26.6.2
       graceful-fs: 4.2.11
@@ -26839,7 +26839,11 @@ snapshots:
       jest-runner: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-runtime: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - ts-node
+      - utf-8-validate
 
   '@jest/test-sequencer@29.7.0':
     dependencies:
@@ -28186,7 +28190,7 @@ snapshots:
       webpack-dev-server: 4.15.2(webpack-cli@5.1.4)(webpack@5.97.1)
       webpack-hot-middleware: 2.26.1
 
-  '@pmmmwh/react-refresh-webpack-plugin@0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)':
+  '@pmmmwh/react-refresh-webpack-plugin@0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))':
     dependencies:
       ansi-html: 0.0.9
       core-js-pure: 3.49.0
@@ -30608,7 +30612,7 @@ snapshots:
     dependencies:
       '@babel/preset-flow': 7.27.1(@babel/core@7.25.7)
       '@babel/preset-react': 7.25.7(@babel/core@7.25.7)
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@storybook/core-webpack': 7.6.19(encoding@0.1.13)
       '@storybook/docs-tools': 7.6.19(encoding@0.1.13)
       '@storybook/node-logger': 7.6.19
@@ -30646,7 +30650,7 @@ snapshots:
     dependencies:
       '@babel/preset-flow': 7.27.1(@babel/core@7.25.7)
       '@babel/preset-react': 7.25.7(@babel/core@7.25.7)
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@storybook/core-webpack': 7.6.19(encoding@0.1.13)
       '@storybook/docs-tools': 7.6.19(encoding@0.1.13)
       '@storybook/node-logger': 7.6.19
@@ -33161,7 +33165,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
       '@wordpress/i18n': 5.26.0
@@ -33221,7 +33225,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
       '@wordpress/i18n': 5.26.0
@@ -33281,7 +33285,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
       '@wordpress/i18n': 5.26.0
@@ -33339,7 +33343,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/global-styles-engine': 1.11.0(react@18.3.1)
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
@@ -33402,7 +33406,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/global-styles-engine': 1.11.0(react@18.3.1)
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
@@ -33465,7 +33469,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/global-styles-engine': 1.11.0(react@18.3.1)
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
@@ -33695,7 +33699,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
       '@wordpress/i18n': 6.17.0
@@ -34227,7 +34231,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
       '@wordpress/i18n': 6.17.0
@@ -34281,7 +34285,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
       '@wordpress/i18n': 5.26.0
@@ -34335,7 +34339,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
       '@wordpress/i18n': 5.26.0
@@ -34498,7 +34502,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/hooks': 4.44.0
       '@wordpress/html-entities': 4.44.0
       '@wordpress/i18n': 6.17.0
@@ -37537,7 +37541,7 @@ snapshots:
       '@wordpress/deprecated': 4.44.0
       '@wordpress/dom': 4.44.0
       '@wordpress/element': 6.44.0
-      '@wordpress/escape-html': 3.44.0
+      '@wordpress/escape-html': 3.45.0
       '@wordpress/i18n': 6.17.0
       '@wordpress/keycodes': 4.44.0
       '@wordpress/private-apis': 1.44.0
@@ -37610,7 +37614,7 @@ snapshots:
       expect-puppeteer: 4.4.0
       filenamify: 4.3.0
       jest: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
-      jest-circus: 26.6.3
+      jest-circus: 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       jest-dev-server: 5.0.3
       jest-environment-node: 26.6.2
       markdownlint: 0.23.1
@@ -37666,7 +37670,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.59.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@svgr/webpack': 8.1.0(typescript@5.7.3)
       '@wordpress/babel-preset-default': 7.42.0
       '@wordpress/browserslist-config': 5.41.0
@@ -37762,7 +37766,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.59.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@svgr/webpack': 8.1.0(typescript@5.7.3)
       '@wordpress/babel-preset-default': 8.44.0
       '@wordpress/browserslist-config': 6.44.0
@@ -37859,7 +37863,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.59.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@svgr/webpack': 8.1.0(typescript@5.7.3)
       '@wordpress/babel-preset-default': 8.44.0
       '@wordpress/browserslist-config': 6.44.0
@@ -37955,7 +37959,7 @@ snapshots:
     dependencies:
       '@babel/core': 7.25.7
       '@playwright/test': 1.59.1
-      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2)(webpack-hot-middleware@2.26.1)(webpack@5.97.1)
+      '@pmmmwh/react-refresh-webpack-plugin': 0.5.17(@types/webpack@4.41.40)(react-refresh@0.14.2)(type-fest@4.41.0)(webpack-dev-server@4.15.2(webpack@5.97.1(@swc/core@1.15.24)))(webpack-hot-middleware@2.26.1)(webpack@5.97.1(@swc/core@1.15.24))
       '@svgr/webpack': 8.1.0(typescript@5.7.3)
       '@wordpress/babel-preset-default': 8.44.0
       '@wordpress/browserslist-config': 6.44.0
@@ -45680,7 +45684,7 @@ snapshots:
       jest-util: 29.7.0
       p-limit: 3.1.0
 
-  jest-circus@26.6.3:
+  jest-circus@26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)):
     dependencies:
       '@babel/traverse': 7.29.0
       '@jest/environment': 26.6.2
@@ -45704,7 +45708,11 @@ snapshots:
       stack-utils: 2.0.6
       throat: 5.0.0
     transitivePeerDependencies:
+      - bufferutil
+      - canvas
       - supports-color
+      - ts-node
+      - utf-8-validate
 
   jest-circus@29.5.0:
     dependencies:
@@ -45825,7 +45833,7 @@ snapshots:
   jest-config@26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3)):
     dependencies:
       '@babel/core': 7.25.7
-      '@jest/test-sequencer': 26.6.3
+      '@jest/test-sequencer': 26.6.3(ts-node@10.9.2(@swc/core@1.15.24)(@types/node@24.12.2)(typescript@5.7.3))
       '@jest/types': 26.6.2
       babel-jest: 26.6.3(@babel/core@7.25.7)
       chalk: 4.1.2

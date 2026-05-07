@@ -5,7 +5,7 @@ import { Button, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { DataForm } from '@wordpress/dataviews';
-import { useCallback, useEffect, useRef, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
@@ -112,7 +112,6 @@ export default function ProductEdit() {
 
 	const [ isSaving, setIsSaving ] = useState( false );
 	const [ isDrawerOpen, setIsDrawerOpen ] = useState( false );
-	const hasDrawerOpened = useRef( false );
 	const editableFields = getProductEditFields( productFields );
 	const {
 		selectedProducts,
@@ -228,7 +227,7 @@ export default function ProductEdit() {
 		[ editEntityRecord, selectedProductIds ]
 	);
 
-	const onClose = useCallback( () => {
+	const closeDrawer = useCallback( () => {
 		const nextQuery = {
 			...query,
 		} as Record< string, string >;
@@ -237,34 +236,6 @@ export default function ProductEdit() {
 
 		navigate( getProductListNavigationPath( path, nextQuery ) );
 	}, [ navigate, path, query ] );
-
-	useEffect( () => {
-		const frame = requestAnimationFrame( () => {
-			hasDrawerOpened.current = true;
-			setIsDrawerOpen( true );
-		} );
-
-		return () => {
-			cancelAnimationFrame( frame );
-		};
-	}, [] );
-
-	const onOpenChange = useCallback( ( open: boolean ) => {
-		setIsDrawerOpen( open );
-	}, [] );
-
-	const onOpenChangeComplete = useCallback(
-		( open: boolean ) => {
-			if ( hasDrawerOpened.current && ! open ) {
-				onClose();
-			}
-		},
-		[ onClose ]
-	);
-
-	const closeDrawer = useCallback( () => {
-		setIsDrawerOpen( false );
-	}, [] );
 
 	const onSave = useCallback( async () => {
 		if ( selectedProductIds.length === 0 || isSaving ) {
@@ -313,11 +284,20 @@ export default function ProductEdit() {
 		selectedProductIds,
 	] );
 
+	useEffect( () => {
+		if ( requestedProductIds.length > 0 && ! isDrawerOpen ) {
+			setIsDrawerOpen( true );
+		}
+	}, [ requestedProductIds, isDrawerOpen ] );
+
 	return (
 		<Drawer.Root
 			open={ isDrawerOpen }
-			onOpenChange={ onOpenChange }
-			onOpenChangeComplete={ onOpenChangeComplete }
+			onOpenChangeComplete={ ( isOpen ) => {
+				if ( ! isOpen ) {
+					closeDrawer();
+				}
+			} }
 			swipeDirection="right"
 		>
 			<Drawer.Popup
@@ -332,6 +312,7 @@ export default function ProductEdit() {
 						{ title }
 					</Drawer.Title>
 					<Drawer.CloseIcon
+						onClick={ closeDrawer }
 						label={ __( 'Close quick edit', 'woocommerce' ) }
 					/>
 				</Drawer.Header>
