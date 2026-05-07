@@ -20,7 +20,6 @@ const fieldDefinition = {
 		'woocommerce'
 	),
 	enableSorting: false,
-	enableHiding: false,
 	filterBy: false,
 } satisfies Partial< Field< ProductEntityRecord > >;
 
