@@ -33,7 +33,7 @@ const statuses = {
 	},
 	pending: {
 		label: __( 'Pending review', 'woocommerce' ),
-		intent: 'none',
+		intent: 'informational',
 	},
 	private: {
 		label: __( 'Private', 'woocommerce' ),
