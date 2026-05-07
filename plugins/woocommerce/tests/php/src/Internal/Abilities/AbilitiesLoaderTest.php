@@ -1433,6 +1433,34 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should filter modified_before with time precision across order storage engines.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_orders_query_filters_modified_before_with_time_precision( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		$email = wp_unique_id( 'abilities-order-modified-before-' ) . '@example.com';
+		$early = $this->create_order_for_query_sorting( $email, '2025-01-15T09:00:00', '2025-01-15T10:00:00' );
+		$late  = $this->create_order_for_query_sorting( $email, '2025-01-15T09:00:00', '2025-01-15T12:00:00' );
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email'   => $email,
+				'modified_before' => '2025-01-15T11:00:00',
+				'per_page'        => 2,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$ids = array_column( $result['orders'], 'id' );
+		$this->assertContains( $early->get_id(), $ids );
+		$this->assertNotContains( $late->get_id(), $ids );
+	}
+
+	/**
 	 * @testdox Should change order status and surface failure when status update fails.
 	 */
 	public function test_order_update_status_changes_status(): void {

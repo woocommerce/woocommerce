@@ -272,11 +272,35 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			return null;
 		}
 
-		if ( '' !== $after && '' !== $before ) {
-			return $after . '...' . $before;
+		$after_timestamp  = '' !== $after ? self::prepare_date_time_for_query( $after ) : null;
+		$before_timestamp = '' !== $before ? self::prepare_date_time_for_query( $before ) : null;
+
+		if (
+			( '' !== $after && null === $after_timestamp )
+			|| ( '' !== $before && null === $before_timestamp )
+		) {
+			return null;
 		}
 
-		return '' !== $before ? '<' . $before : '>' . $after;
+		if ( '' !== $after && '' !== $before ) {
+			return $after_timestamp . '...' . $before_timestamp;
+		}
+
+		return '' !== $before ? '<' . $before_timestamp : '>' . $after_timestamp;
+	}
+
+	/**
+	 * Prepare a date-time string as a timestamp for second-precision order queries.
+	 *
+	 * @param string $date_time Date-time string.
+	 * @return int|null
+	 */
+	private static function prepare_date_time_for_query( string $date_time ): ?int {
+		try {
+			return wc_string_to_datetime( $date_time )->getTimestamp();
+		} catch ( \Exception $exception ) {
+			return null;
+		}
 	}
 
 	/**
