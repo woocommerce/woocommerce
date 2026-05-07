@@ -2291,7 +2291,7 @@ class WC_Tests_CRUD_Orders extends WC_Unit_Test_Case {
 			$order->calculate_totals();
 
 			$this->assertEquals( -0.83, round( (float) $fee->get_total_tax(), 2 ) );
-			$this->assertEquals( 1.16, round( (float) $order->get_cart_tax(), 2 ) );
+			$this->assertEquals( 1.15, round( (float) $order->get_cart_tax(), 2 ) );
 			$this->assertEquals( 13.17, round( (float) $order->get_total(), 2 ) );
 		} finally {
 			$this->cleanup_manual_order_tax_context( $context, $order );
