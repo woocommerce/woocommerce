@@ -73,6 +73,8 @@
 		"access": "public"
 	},
 	"devDependencies": {
+		"@swc/cli": "0.5.2",
+		"@swc/core": "1.15.x",
 		"@babel/core": "7.25.7",
 		"@babel/runtime": "7.25.7",
 		"@testing-library/react": "^16.x.x",
@@ -130,10 +132,10 @@
 	},
 	"wireit": {
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --noCheck",
+			"command": "swc src/ --out-dir build/ --strip-leading-paths",
 			"clean": "if-file-deleted",
 			"files": [
-				"tsconfig-cjs.json",
+				".swcrc",
 				"src/**/*.{js,jsx,ts,tsx}",
 				"typings/**/*.ts"
 			],
@@ -145,7 +147,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
+			"command": "swc src/ --out-dir build/ --strip-leading-paths --watch",
 			"service": true
 		},
 		"build:project:esm": {
@@ -174,13 +176,10 @@
 				"package.json",
 				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/date/build",
-				"node_modules/@woocommerce/date/build-module",
 				"node_modules/@woocommerce/date/build-types",
 				"node_modules/@woocommerce/navigation/build",
-				"node_modules/@woocommerce/navigation/build-module",
 				"node_modules/@woocommerce/navigation/build-types",
 				"node_modules/@woocommerce/tracks/build",
-				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",

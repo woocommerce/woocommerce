@@ -66,6 +66,8 @@
 		}
 	},
 	"devDependencies": {
+		"@swc/cli": "0.5.2",
+		"@swc/core": "1.15.x",
 		"@playwright/test": "^1.57.0",
 		"@types/jest": "29.5.x",
 		"@types/node": "^24.1.0",
@@ -87,10 +89,10 @@
 	},
 	"wireit": {
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --noCheck",
+			"command": "swc src/ --out-dir build/ --strip-leading-paths",
 			"clean": "if-file-deleted",
 			"files": [
-				"tsconfig-cjs.json",
+				".swcrc",
 				"src/**/*.{js,jsx,ts,tsx}"
 			],
 			"output": [
@@ -101,7 +103,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
+			"command": "swc src/ --out-dir build/ --strip-leading-paths --watch",
 			"service": true
 		},
 		"build:project:esm": {

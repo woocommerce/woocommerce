@@ -73,6 +73,8 @@
 		"react-router-dom": "~6.3.0"
 	},
 	"devDependencies": {
+		"@swc/cli": "0.5.2",
+		"@swc/core": "1.15.x",
 		"@babel/core": "7.25.7",
 		"@babel/runtime": "7.25.7",
 		"@testing-library/dom": "^10.4.x",
@@ -190,10 +192,10 @@
 			"service": true
 		},
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --noCheck",
+			"command": "swc src/ --out-dir build/ --strip-leading-paths --copy-files --ignore '**/*.scss' --ignore '**/*.md'",
 			"clean": "if-file-deleted",
 			"files": [
-				"tsconfig-cjs.json",
+				".swcrc",
 				"src/**/*.{js,jsx,ts,tsx}",
 				"typings/**/*.ts"
 			],
@@ -205,7 +207,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
+			"command": "swc src/ --out-dir build/ --strip-leading-paths --copy-files --ignore '**/*.scss' --ignore '**/*.md' --watch",
 			"service": true
 		},
 		"build:project:esm": {
@@ -234,21 +236,16 @@
 				"package.json",
 				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/product-editor/build",
-				"node_modules/@woocommerce/product-editor/build-module",
 				"node_modules/@woocommerce/product-editor/build-style",
 				"node_modules/@woocommerce/product-editor/build-types",
 				"node_modules/@woocommerce/tracks/build",
-				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types",
 				"node_modules/@woocommerce/navigation/build",
-				"node_modules/@woocommerce/navigation/build-module",
 				"node_modules/@woocommerce/navigation/build-types",
 				"node_modules/@woocommerce/components/build",
-				"node_modules/@woocommerce/components/build-module",
 				"node_modules/@woocommerce/components/build-style",
 				"node_modules/@woocommerce/components/build-types",
 				"node_modules/@woocommerce/sanitize/build",
-				"node_modules/@woocommerce/sanitize/build-module",
 				"node_modules/@woocommerce/sanitize/build-style",
 				"node_modules/@woocommerce/sanitize/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",

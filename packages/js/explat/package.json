@@ -62,6 +62,8 @@
 		"qs": "^6.11.2"
 	},
 	"devDependencies": {
+		"@swc/cli": "0.5.2",
+		"@swc/core": "1.15.x",
 		"@babel/core": "7.25.7",
 		"@types/cookie": "^0.4.1",
 		"@types/jest": "29.5.x",
@@ -110,10 +112,10 @@
 	},
 	"wireit": {
 		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --noCheck",
+			"command": "swc src/ --out-dir build/ --strip-leading-paths",
 			"clean": "if-file-deleted",
 			"files": [
-				"tsconfig-cjs.json",
+				".swcrc",
 				"src/**/*.{js,jsx,ts,tsx}",
 				"typings/**/*.ts"
 			],
@@ -125,7 +127,7 @@
 			]
 		},
 		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
+			"command": "swc src/ --out-dir build/ --strip-leading-paths --watch",
 			"service": true
 		},
 		"build:project:esm": {
