@@ -222,9 +222,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should advertise every product status that mutation responses can return.
+	 * @testdox Should advertise product statuses that product responses can return.
 	 */
-	public function test_product_output_schema_allows_mutation_statuses(): void {
+	public function test_product_output_schema_allows_response_statuses(): void {
 		$output_schema = wp_get_ability( 'woocommerce/product-create' )->get_output_schema();
 		$status_enum   = $output_schema['properties']['product']['properties']['status']['enum'] ?? array();
 
@@ -241,6 +241,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$product       = $output_schema['properties']['product']['properties'] ?? array();
 
 		$this->assertSame( 'uri', $product['permalink']['format'] ?? null );
+		$this->assertSame( array( 'string', 'null' ), $product['permalink']['type'] ?? null );
 		$this->assertContains( get_woocommerce_currency(), $product['currency']['enum'] ?? array() );
 		$this->assertSame(
 			array( wc_is_stock_amount_integer() ? 'integer' : 'number', 'null' ),
@@ -604,6 +605,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			array(
 				'name'   => 'Bad Status Product',
 				'status' => 'not-a-real-status',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should reject auto-draft as a product mutation status.
+	 */
+	public function test_product_create_rejects_auto_draft_status(): void {
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'   => 'Auto Draft Product',
+				'status' => 'auto-draft',
 			)
 		);
 
@@ -1214,6 +1230,26 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_type_unsupported', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should return products without public permalinks without output validation errors.
+	 */
+	public function test_products_query_handles_products_without_public_permalink(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$product->set_status( 'auto-draft' );
+		$product->save();
+		$this->created_product_ids[] = $product->get_id();
+
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'id' => $product->get_id(),
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'auto-draft', $result['products'][0]['status'] );
+		$this->assertNull( $result['products'][0]['permalink'] );
 	}
 
 	/**

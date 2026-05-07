@@ -240,7 +240,7 @@ trait ProductAbilityTrait {
 	protected static function get_product_mutation_status_slugs(): array {
 		return array_merge(
 			array_keys( get_post_statuses() ),
-			array( ProductStatus::FUTURE, ProductStatus::AUTO_DRAFT )
+			array( ProductStatus::FUTURE )
 		);
 	}
 
@@ -254,7 +254,7 @@ trait ProductAbilityTrait {
 			array_unique(
 				array_merge(
 					self::get_product_mutation_status_slugs(),
-					array( ProductStatus::TRASH )
+					array( ProductStatus::AUTO_DRAFT, ProductStatus::TRASH )
 				)
 			)
 		);
@@ -490,12 +490,13 @@ trait ProductAbilityTrait {
 	 */
 	protected static function format_product_for_response( \WC_Product $product ): array {
 		$stock_quantity = $product->get_stock_quantity();
+		$permalink      = $product->get_permalink();
 
 		return array(
 			'id'                => $product->get_id(),
 			'name'              => $product->get_name(),
 			'slug'              => $product->get_slug(),
-			'permalink'         => $product->get_permalink(),
+			'permalink'         => false === $permalink ? null : $permalink,
 			'type'              => $product->get_type(),
 			'status'            => $product->get_status(),
 			'sku'               => $product->get_sku(),
@@ -535,8 +536,9 @@ trait ProductAbilityTrait {
 				'name'              => array( 'type' => 'string' ),
 				'slug'              => array( 'type' => 'string' ),
 				'permalink'         => array(
-					'type'   => 'string',
-					'format' => 'uri',
+					'type'        => array( 'string', 'null' ),
+					'description' => __( 'Product permalink, or null when no public permalink is available.', 'woocommerce' ),
+					'format'      => 'uri',
 				),
 				'type'              => array(
 					'type'        => 'string',
