@@ -29,6 +29,10 @@ class CheckResultCache {
 			return $cached;
 		}
 		$result = $factory();
+		if ( ! is_array( $result ) ) {
+			// Don't poison the transient with non-array data; surface the contract violation immediately.
+			throw new \TypeError( 'CheckResultCache factory must return an array.' );
+		}
 		set_transient( $key, $result, $this->ttl( $check_id ) );
 		return $result;
 	}
@@ -53,7 +57,7 @@ class CheckResultCache {
 	 * @return string
 	 */
 	private function key( string $check_id ): string {
-		$version = defined( 'WC_VERSION' ) ? WC_VERSION : ( function_exists( 'WC' ) ? WC()->version : '0' );
+		$version = function_exists( 'WC' ) ? WC()->version : ( defined( 'WC_VERSION' ) ? WC_VERSION : '0' );
 		return self::KEY_PREFIX . $check_id . '_' . md5( $version );
 	}
 

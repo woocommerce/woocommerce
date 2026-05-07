@@ -57,6 +57,25 @@ class CheckResultCacheTest extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( $expected_hash, $found );
 	}
 
+	public function test_cache_key_changes_when_wc_version_changes() {
+		$original = WC()->version;
+
+		WC()->version = '99.99.99';
+		$this->result_cache->remember( 'foo', fn() => array( 'v' => 'first' ) );
+
+		WC()->version = '88.88.88';
+		$calls   = 0;
+		$factory = function() use ( &$calls ) {
+			$calls++;
+			return array( 'v' => 'second' );
+		};
+		$this->result_cache->remember( 'foo', $factory );
+
+		$this->assertSame( 1, $calls, 'Cache should miss when WC version changes' );
+
+		WC()->version = $original;
+	}
+
 	public function test_ttl_filter_applies() {
 		add_filter( 'woocommerce_site_health_check_foo_cache_ttl', fn() => 60 );
 		$this->result_cache->remember( 'foo', fn() => array( 'status' => 'good' ) );
