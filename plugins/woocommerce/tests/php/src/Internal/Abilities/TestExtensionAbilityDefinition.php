@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 
-use Automattic\WooCommerce\Internal\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityDefinition;
 
 /**
  * Test extension ability definition.

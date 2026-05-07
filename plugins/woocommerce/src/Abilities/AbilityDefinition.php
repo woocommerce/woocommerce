@@ -5,7 +5,7 @@
 
 declare( strict_types=1 );
 
-namespace Automattic\WooCommerce\Internal\Abilities;
+namespace Automattic\WooCommerce\Abilities;
 
 defined( 'ABSPATH' ) || exit;
 

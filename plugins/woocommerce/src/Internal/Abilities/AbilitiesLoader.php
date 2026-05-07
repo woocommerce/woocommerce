@@ -7,6 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities;
 
+use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderAddNote;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrderUpdateStatus;
 use Automattic\WooCommerce\Internal\Abilities\Domain\OrdersQuery;

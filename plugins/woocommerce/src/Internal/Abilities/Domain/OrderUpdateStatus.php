@@ -7,7 +7,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Abilities\Domain;
 
-use Automattic\WooCommerce\Internal\Abilities\AbilityDefinition;
+use Automattic\WooCommerce\Abilities\AbilityDefinition;
 use Automattic\WooCommerce\Internal\Abilities\Domain\Traits\OrderAbilityTrait;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
