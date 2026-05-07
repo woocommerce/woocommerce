@@ -29,18 +29,11 @@ class SiteHealthChecksTest extends WC_Unit_Test_Case {
 		parent::tearDown();
 	}
 
-	public function test_registers_with_site_status_tests_filter() {
-		// This filter is documented in wp-admin/includes/class-wp-site-health.php.
-		$tests = apply_filters(
-			'site_status_tests',
-			array(
-				'direct' => array(),
-				'async'  => array(),
-			)
+	public function test_register_attaches_site_status_tests_filter() {
+		// Proves register() actually wired up the callback — has_filter() returns
+		// false when the callback is absent, or the integer priority when present.
+		$this->assertNotFalse(
+			has_filter( 'site_status_tests', array( $this->checks, 'register_tests' ) )
 		);
-
-		$this->assertIsArray( $tests );
-		$this->assertArrayHasKey( 'direct', $tests );
-		$this->assertArrayHasKey( 'async', $tests );
 	}
 }

@@ -18,6 +18,7 @@ class SiteHealthChecks {
 	 * The check result cache.
 	 *
 	 * @var CheckResultCache
+	 * Consumed by async check methods added in later tasks.
 	 * @phpstan-ignore property.onlyWritten
 	 */
 	private CheckResultCache $cache;
