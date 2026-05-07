@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
+use Automattic\WooCommerce\Internal\Features\OrderDetailRedesign\OrderListNav;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
@@ -439,6 +440,10 @@ class Edit {
 		<?php
 		if ( 'edit_order' === $this->current_action ) {
 			echo ' <a href="' . esc_url( $new_page_url ) . '" class="page-title-action">' . esc_html( $post_type->labels->add_new ) . '</a>';
+		}
+
+		if ( 'edit_order' === $this->current_action && FeaturesUtil::feature_is_enabled( 'order-detail-redesign' ) ) {
+			OrderListNav::render( $this->order );
 		}
 		?>
 		<hr class="wp-header-end">
