@@ -199,8 +199,9 @@ export const BaseHeader = ( {
 			setActiveMetaIcon( null );
 			return;
 		}
-		const screenOptBtn =
-			document.querySelector< HTMLButtonElement >( '#show-settings-link' );
+		const screenOptBtn = document.querySelector< HTMLButtonElement >(
+			'#show-settings-link'
+		);
 		const helpBtn = document.querySelector< HTMLButtonElement >(
 			'#contextual-help-link'
 		);
@@ -209,9 +210,13 @@ export const BaseHeader = ( {
 				screenOptBtn?.getAttribute( 'aria-expanded' ) === 'true';
 			const helpOpen =
 				helpBtn?.getAttribute( 'aria-expanded' ) === 'true';
-			setActiveMetaIcon(
-				screenOpen ? 'screen-options' : helpOpen ? 'help' : null
-			);
+			let next: 'screen-options' | 'help' | null = null;
+			if ( screenOpen ) {
+				next = 'screen-options';
+			} else if ( helpOpen ) {
+				next = 'help';
+			}
+			setActiveMetaIcon( next );
 		};
 		sync();
 		const observer = new MutationObserver( sync );
@@ -336,9 +341,7 @@ export const BaseHeader = ( {
 							}
 						) }
 						label={ __( 'Screen options', 'woocommerce' ) }
-						aria-expanded={
-							activeMetaIcon === 'screen-options'
-						}
+						aria-expanded={ activeMetaIcon === 'screen-options' }
 						showTooltip
 						onClick={ () =>
 							triggerMetaIcon(
@@ -362,10 +365,7 @@ export const BaseHeader = ( {
 						aria-expanded={ activeMetaIcon === 'help' }
 						showTooltip
 						onClick={ () =>
-							triggerMetaIcon(
-								'help',
-								'#contextual-help-link'
-							)
+							triggerMetaIcon( 'help', '#contextual-help-link' )
 						}
 					>
 						<Icon icon={ help } size={ 18 } />

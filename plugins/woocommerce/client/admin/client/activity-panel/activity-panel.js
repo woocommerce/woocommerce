@@ -154,8 +154,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		requestingTaskListOptions,
 		setupTaskListComplete,
 		setupTaskListHidden,
-		setupTasksCount,
-		setupTasksCompleteCount,
 		thingsToDoNextCount,
 	} = useTaskListsState();
 
