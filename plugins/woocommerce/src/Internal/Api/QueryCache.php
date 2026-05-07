@@ -256,15 +256,11 @@ class QueryCache {
 	 * directory to exist (or be creatable) and be writable.
 	 */
 	private function compute_is_opcache_usable(): bool {
-		if ( ! function_exists( 'opcache_get_status' ) ) {
+		if ( ! function_exists( 'opcache_get_status' ) || ! ini_get( 'opcache.enable' ) ) {
 			return false;
 		}
 
-		// opcache_get_status() returns false when OPcache is disabled or in
-		// restricted mode (opcache.restrict_api). Suppress the warning that
-		// restricted mode emits — false return is the meaningful signal.
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		$status = @opcache_get_status( false );
+		$status = opcache_get_status( false );
 		if ( ! is_array( $status ) || empty( $status['opcache_enabled'] ) ) {
 			return false;
 		}
@@ -312,15 +308,14 @@ class QueryCache {
 		}
 
 		// Best-effort hardening; ignore failures (e.g. read-only permissions).
+		$fs       = $this->wp_filesystem();
 		$htaccess = $dir . '/.htaccess';
 		$index    = $dir . '/index.html';
-		if ( ! file_exists( $htaccess ) ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents, WordPress.PHP.NoSilencedErrors.Discouraged
-			@file_put_contents( $htaccess, "Deny from all\n" );
+		if ( $fs && ! file_exists( $htaccess ) ) {
+			$fs->put_contents( $htaccess, "Deny from all\n" );
 		}
-		if ( ! file_exists( $index ) ) {
-			// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents, WordPress.PHP.NoSilencedErrors.Discouraged
-			@file_put_contents( $index, '' );
+		if ( $fs && ! file_exists( $index ) ) {
+			$fs->put_contents( $index, '' );
 		}
 
 		return true;
@@ -340,11 +335,9 @@ class QueryCache {
 		}
 
 		// File contents are produced by self::write_to_opcache() and only
-		// ever return a primitive array. Suppress include-time warnings to
-		// fail soft on a missing or malformed file; the caller will fall
-		// back to parsing.
-		// phpcs:ignore Generic.PHP.NoSilencedErrors.Discouraged
-		$data = @include $path;
+		// ever return a primitive array. The caller falls back to parsing
+		// when the include returns a non-array.
+		$data = include $path;
 
 		if ( ! is_array( $data ) ) {
 			return false;
@@ -384,10 +377,11 @@ class QueryCache {
 			return;
 		}
 
-		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
-		if ( ! @rename( $tmp, $path ) ) {
-			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged, WordPress.WP.AlternativeFunctions.unlink_unlink
-			@unlink( $tmp );
+		$fs = $this->wp_filesystem();
+		if ( ! $fs || ! $fs->move( $tmp, $path, true ) ) {
+			if ( $fs ) {
+				$fs->delete( $tmp );
+			}
 			return;
 		}
 
@@ -416,5 +410,20 @@ class QueryCache {
 				),
 			),
 		);
+	}
+
+	/**
+	 * Lazy-initialize and return the WP_Filesystem global, or null when the
+	 * direct method isn't available (e.g. credentials prompt would be needed).
+	 */
+	private function wp_filesystem(): ?\WP_Filesystem_Base {
+		global $wp_filesystem;
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			if ( ! WP_Filesystem() ) {
+				return null;
+			}
+		}
+		return $wp_filesystem;
 	}
 }
