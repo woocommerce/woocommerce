@@ -14,8 +14,9 @@ import type {
 	FilterOptionItem,
 	ProductFiltersContext,
 } from './types';
+import { getClosestColor } from './utils/get-closest-color';
 
-const { getContext, store, getServerContext, getConfig } = iAPI;
+const { getContext, getElement, store, getServerContext, getConfig } = iAPI;
 
 const BLOCK_NAME = 'woocommerce/product-filters';
 
@@ -254,6 +255,34 @@ const productFiltersStore = {
 		},
 	},
 	callbacks: {
+		initColors: () => {
+			const el = getElement();
+			if ( ! el.ref ) return;
+
+			const style = el.ref.style;
+			const hasBg = style.getPropertyValue(
+				'--wc-product-filters-background-color'
+			);
+			const hasFg = style.getPropertyValue(
+				'--wc-product-filters-text-color'
+			);
+
+			if ( ! hasBg ) {
+				const bg = getClosestColor( el.ref, 'backgroundColor' );
+				if ( bg ) {
+					style.setProperty(
+						'--wc-product-filters-background-color',
+						bg
+					);
+				}
+			}
+			if ( ! hasFg ) {
+				const fg = getClosestColor( el.ref, 'color' );
+				if ( fg ) {
+					style.setProperty( '--wc-product-filters-text-color', fg );
+				}
+			}
+		},
 		scrollLimit: () => {
 			const { isOverlayOpened } = getContext< ProductFiltersContext >();
 			if ( isOverlayOpened ) {

@@ -626,7 +626,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 				}
 
 				p {
-					color: #2c3338;
+					color: $gray-900;
 					font-size: 14px;
 					line-height: 20px;
 					margin: 14px 64px 0 0;
@@ -679,7 +679,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 				}
 
 				.price-suffix {
-					color: #646970; // Gray 50
+					color: $gray-700;
 				}
 
 				.product-reviews-block {
@@ -708,7 +708,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 					}
 
 					.product-reviews-count {
-						color: #646970; // Gray 50
+						color: $gray-700;
 						font-size: 12px;
 						font-family: sans-serif;
 						line-height: 24px;
@@ -9127,7 +9127,7 @@ table.bar_chart {
 				a:visited,
 				a:hover,
 				a:active {
-					color: #2c3338;
+					color: $gray-900;
 					padding: 10px 16px !important;
 				}
 			}

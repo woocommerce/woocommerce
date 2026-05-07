@@ -24,6 +24,10 @@ $highlightext:      desaturate(lighten($highlight, 80%), 18%) !default;  // Text
 $contentbg:         #fff !default;                                     // Content BG - Tabs (active state)
 $subtext:           #767676 !default;                                  // small, breadcrumbs etc
 
+// Mirrors @wordpress/base-styles/colors.scss (WP 7.0 admin gray scale).
+$gray-900:          #1e1e1e !default;                                  // Primary admin text
+$gray-700:          #757575 !default;                                  // Placeholder / secondary admin text
+
 // Border radius tokens — mirrors WP Design System naming.
 $radius-s:          2px !default;                                      // Small radius: inputs, buttons, selects.
 
