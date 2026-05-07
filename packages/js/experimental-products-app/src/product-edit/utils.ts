@@ -78,11 +78,9 @@ const COMMON_PRODUCT_EDIT_FIELD_IDS = [
 	'sku',
 	'categories',
 	'tags',
-	'organization_summary',
 	'type',
 	'featured',
 	'catalog_visibility',
-	'visibility_summary',
 	'upsell_ids',
 ] satisfies ProductEditFieldId[];
 
@@ -98,18 +96,14 @@ const SIMPLE_PRODUCT_EDIT_FIELD_IDS = [
 	'stock',
 	'stock_quantity',
 	'manage_stock',
-	'inventory_summary',
 	'downloadable',
-	'downloadable_count',
 	'weight',
 	'length',
 	'width',
 	'height',
 	'shipping_class',
-	'shipping_summary',
 	'tax_status',
 	'cross_sell_ids',
-	'linked_products_count',
 ] satisfies ProductEditFieldId[];
 
 const VARIABLE_PRODUCT_EDIT_FIELD_IDS = [
@@ -117,10 +111,8 @@ const VARIABLE_PRODUCT_EDIT_FIELD_IDS = [
 	'stock',
 	'stock_quantity',
 	'manage_stock',
-	'inventory_summary',
 	'tax_status',
 	'cross_sell_ids',
-	'linked_products_count',
 ] satisfies ProductEditFieldId[];
 
 const EXTERNAL_PRODUCT_EDIT_FIELD_IDS = [
@@ -135,7 +127,6 @@ const EXTERNAL_PRODUCT_EDIT_FIELD_IDS = [
 	'external_url',
 	'button_text',
 	'tax_status',
-	'linked_products_count',
 ] satisfies ProductEditFieldId[];
 
 const GROUPED_PRODUCT_EDIT_FIELD_IDS = [

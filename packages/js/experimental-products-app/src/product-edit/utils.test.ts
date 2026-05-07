@@ -10,6 +10,7 @@ import type { ProductEntityRecord } from '../fields/types';
 import { productFields } from '../product-list/fields';
 import {
 	buildMergedProductEditData,
+	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
 	getProductEditFields,
 	getVisibleProductEditFields,
 } from './utils';
@@ -177,6 +178,18 @@ describe( 'product edit utils', () => {
 				] )
 			);
 			expectFieldsHidden( fieldIds, [ 'external_url', 'button_text' ] );
+		} );
+
+		it( 'does not include excluded fields in product type compatibility', () => {
+			const fieldIds = getVisibleProductEditFields( productFields, [
+				buildProduct( {
+					type: 'simple',
+				} ),
+			] ).map( ( field ) => field.id );
+
+			expect( fieldIds ).not.toEqual(
+				expect.arrayContaining( [ ...EXCLUDED_PRODUCT_EDIT_FIELD_IDS ] )
+			);
 		} );
 
 		it( 'uses the same compatible fields for simple products regardless of virtual status', () => {
