@@ -890,6 +890,35 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should return a structured error when product updates throw during save.
+	 */
+	public function test_product_update_returns_error_when_save_throws_exception(): void {
+		$product                     = \WC_Helper_Product::create_simple_product();
+		$this->created_product_ids[] = $product->get_id();
+		$throw_on_update             = static function (): void {
+			throw new \Exception( 'Generic product save failure.' );
+		};
+
+		add_action( 'woocommerce_update_product', $throw_on_update );
+
+		try {
+			$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+				array(
+					'id'   => $product->get_id(),
+					'name' => 'Updated Name',
+				)
+			);
+		} finally {
+			remove_action( 'woocommerce_update_product', $throw_on_update );
+		}
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_product_update_failed', $result->get_error_code() );
+		$this->assertSame( 'Generic product save failure.', $result->get_error_message() );
+		$this->assertSame( 400, $result->get_error_data()['status'] );
+	}
+
+	/**
 	 * @testdox Should apply product type configuration when updating a product type.
 	 */
 	public function test_product_update_applies_product_type_configuration(): void {

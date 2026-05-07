@@ -411,6 +411,12 @@ trait ProductAbilityTrait {
 			$product_id = $product->save();
 		} catch ( \WC_Data_Exception $exception ) {
 			return self::get_product_data_exception_error( $exception );
+		} catch ( \Exception $exception ) {
+			return new \WP_Error(
+				$failure_code,
+				$exception->getMessage(),
+				array( 'status' => 400 )
+			);
 		}
 
 		if ( $product_id <= 0 || $product->get_id() <= 0 ) {
