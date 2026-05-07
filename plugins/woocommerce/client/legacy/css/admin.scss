@@ -3104,6 +3104,112 @@ ul.wc_coupon_list_block {
 		html[dir="rtl"] & .woocommerce-order-list-nav__button svg {
 			transform: scaleX(-1);
 		}
+
+		// Items meta box polish — typography, WP DS icons, action bar, alignment.
+		// All rules use `var(--wpds-…, fallback)` so they remain correct when WP DS
+		// tokens aren't loaded.
+		#woocommerce-order-items {
+			.add-items {
+				display: flex;
+				align-items: center;
+				flex-wrap: wrap;
+				gap: var(--wpds-dimension-gap-sm, 8px);
+
+				.button {
+					float: none;
+					margin-right: 0;
+				}
+
+				.button-primary {
+					margin-left: auto;
+					float: none;
+				}
+			}
+
+			.woocommerce_order_items_wrapper small.refunded {
+				color: var(--wpds-color-fg-content-error-weak, #cc1818);
+			}
+
+			table.woocommerce_order_items {
+				thead th {
+					font-size: var(--wpds-typography-font-size-xs, 12px);
+					font-weight: var(--wpds-typography-font-weight-regular, 400);
+					line-height: var(--wpds-typography-line-height-xs, 1.4);
+					color: var(--wpds-color-fg-content-neutral-weak, #757575);
+				}
+
+				// Center the icon thumb with the row label on rows that have a
+				// single line of label content. Product rows stack name + SKU +
+				// variation and stay top-aligned via the inherited rule.
+				tbody#order_shipping_line_items td,
+				tbody#order_fee_line_items td,
+				tbody#order_refunds td {
+					vertical-align: middle;
+				}
+
+				td.name {
+					.wc-order-item-name {
+						display: block;
+						font-size: var(--wpds-typography-font-size-md, 14px);
+						font-weight: var(--wpds-typography-font-weight-medium, 500);
+						line-height: var(--wpds-typography-line-height-md, 1.4);
+						color: var(--wpds-color-fg-content-neutral, #1d2327);
+						text-decoration: none;
+					}
+
+					.wc-order-item-sku,
+					.wc-order-item-variation {
+						margin-top: 0.4em;
+						font-size: var(--wpds-typography-font-size-sm, 12px) !important;
+						line-height: var(--wpds-typography-line-height-sm, 1.4);
+						color: var(--wpds-color-fg-content-neutral-weak, #757575);
+
+						strong {
+							font-weight: var(--wpds-typography-font-weight-regular, 400);
+							color: var(--wpds-color-fg-content-neutral-weak, #757575);
+						}
+					}
+				}
+
+				// Replace the WC custom-font glyph on shipping / fee / refund
+				// thumb cells with a WP DS icon painted via mask-image. Suppress
+				// the original `::before` glyph so only the WP DS icon shows.
+				tr.shipping .thumb div,
+				tr.fee .thumb div,
+				tr.refund .thumb div {
+					width: 38px;
+					height: 38px;
+					font-size: 0;
+					border: 0;
+					background-color: var(--wpds-color-fg-content-neutral-weak, #757575);
+					-webkit-mask-repeat: no-repeat;
+					mask-repeat: no-repeat;
+					-webkit-mask-position: center;
+					mask-position: center;
+					-webkit-mask-size: 24px 24px;
+					mask-size: 24px 24px;
+
+					&::before {
+						content: none;
+					}
+				}
+
+				tr.shipping .thumb div {
+					-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M3 6.75C3 5.784 3.784 5 4.75 5H15V7.313l.05.027 5.056 2.73.394.212v3.468a1.75 1.75 0 01-1.75 1.75h-.012a2.5 2.5 0 11-4.975 0H9.737a2.5 2.5 0 11-4.975 0H3V6.75zM13.5 14V6.5H4.75a.25.25 0 00-.25.25V14h.965a2.493 2.493 0 011.785-.75c.7 0 1.332.287 1.785.75H13.5zm4.535 0h.715a.25.25 0 00.25-.25v-2.573l-4-2.16v4.568a2.487 2.487 0 011.25-.335c.7 0 1.332.287 1.785.75zM6.282 15.5a1.002 1.002 0 00.968 1.25 1 1 0 10-.968-1.25zm9 0a1 1 0 101.937.498 1 1 0 00-1.938-.498z'/></svg>");
+					mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M3 6.75C3 5.784 3.784 5 4.75 5H15V7.313l.05.027 5.056 2.73.394.212v3.468a1.75 1.75 0 01-1.75 1.75h-.012a2.5 2.5 0 11-4.975 0H9.737a2.5 2.5 0 11-4.975 0H3V6.75zM13.5 14V6.5H4.75a.25.25 0 00-.25.25V14h.965a2.493 2.493 0 011.785-.75c.7 0 1.332.287 1.785.75H13.5zm4.535 0h.715a.25.25 0 00.25-.25v-2.573l-4-2.16v4.568a2.487 2.487 0 011.25-.335c.7 0 1.332.287 1.785.75zM6.282 15.5a1.002 1.002 0 00.968 1.25 1 1 0 10-.968-1.25zm9 0a1 1 0 101.937.498 1 1 0 00-1.938-.498z'/></svg>");
+				}
+
+				tr.fee .thumb div {
+					-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M10.7 9.6c.3-.2.8-.4 1.3-.4s1 .2 1.3.4c.3.2.4.5.4.6 0 .4.3.8.8.8s.8-.3.8-.8c0-.8-.5-1.4-1.1-1.9-.4-.3-.9-.5-1.4-.6v-.3c0-.4-.3-.8-.8-.8s-.8.3-.8.8v.3c-.5 0-1 .3-1.4.6-.6.4-1.1 1.1-1.1 1.9s.5 1.4 1.1 1.9c.6.4 1.4.6 2.2.6h.2c.5 0 .9.2 1.1.4.3.2.4.5.4.6s0 .4-.4.6c-.3.2-.8.4-1.3.4s-1-.2-1.3-.4c-.3-.2-.4-.5-.4-.6 0-.4-.3-.8-.8-.8s-.8.3-.8.8c0 .8.5 1.4 1.1 1.9.4.3.9.5 1.4.6v.3c0 .4.3.8.8.8s.8-.3.8-.8v-.3c.5 0 1-.3 1.4-.6.6-.4 1.1-1.1 1.1-1.9s-.5-1.4-1.1-1.9c-.5-.4-1.2-.6-1.9-.6H12c-.6 0-1-.2-1.3-.4-.3-.2-.4-.5-.4-.6s0-.4.4-.6ZM12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm0 14.5c-3.6 0-6.5-2.9-6.5-6.5S8.4 5.5 12 5.5s6.5 2.9 6.5 6.5-2.9 6.5-6.5 6.5Z'/></svg>");
+					mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M10.7 9.6c.3-.2.8-.4 1.3-.4s1 .2 1.3.4c.3.2.4.5.4.6 0 .4.3.8.8.8s.8-.3.8-.8c0-.8-.5-1.4-1.1-1.9-.4-.3-.9-.5-1.4-.6v-.3c0-.4-.3-.8-.8-.8s-.8.3-.8.8v.3c-.5 0-1 .3-1.4.6-.6.4-1.1 1.1-1.1 1.9s.5 1.4 1.1 1.9c.6.4 1.4.6 2.2.6h.2c.5 0 .9.2 1.1.4.3.2.4.5.4.6s0 .4-.4.6c-.3.2-.8.4-1.3.4s-1-.2-1.3-.4c-.3-.2-.4-.5-.4-.6 0-.4-.3-.8-.8-.8s-.8.3-.8.8c0 .8.5 1.4 1.1 1.9.4.3.9.5 1.4.6v.3c0 .4.3.8.8.8s.8-.3.8-.8v-.3c.5 0 1-.3 1.4-.6.6-.4 1.1-1.1 1.1-1.9s-.5-1.4-1.1-1.9c-.5-.4-1.2-.6-1.9-.6H12c-.6 0-1-.2-1.3-.4-.3-.2-.4-.5-.4-.6s0-.4.4-.6ZM12 4c-4.4 0-8 3.6-8 8s3.6 8 8 8 8-3.6 8-8-3.6-8-8-8Zm0 14.5c-3.6 0-6.5-2.9-6.5-6.5S8.4 5.5 12 5.5s6.5 2.9 6.5 6.5-2.9 6.5-6.5 6.5Z'/></svg>");
+				}
+
+				tr.refund .thumb div {
+					-webkit-mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M18.3 11.7c-.6-.6-1.4-.9-2.3-.9H6.7l2.9-3.3-1.1-1-4.5 5L8.5 16l1-1-2.7-2.7H16c.5 0 .9.2 1.3.5 1 1 1 3.4 1 4.5v.3h1.5v-.2c0-1.5 0-4.3-1.5-5.7z'/></svg>");
+					mask-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path d='M18.3 11.7c-.6-.6-1.4-.9-2.3-.9H6.7l2.9-3.3-1.1-1-4.5 5L8.5 16l1-1-2.7-2.7H16c.5 0 .9.2 1.3.5 1 1 1 3.4 1 4.5v.3h1.5v-.2c0-1.5 0-4.3-1.5-5.7z'/></svg>");
+				}
+			}
+		}
 	}
 
 	.tablenav .one-page .displaying-num {
