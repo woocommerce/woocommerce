@@ -42,7 +42,7 @@
 		"@wordpress/compose": "7.44.0",
 		"@wordpress/core-data": "7.44.0",
 		"@wordpress/data": "10.44.0",
-		"@wordpress/dataviews": "14.1.0",
+		"@wordpress/dataviews": "https://github.com/gigitux/gutenberg/releases/download/%40wordpress%2Fdataviews-hierarchy/wordpress-dataviews-14.2.0-external.tgz",
 		"@wordpress/editor": "14.44.0",
 		"@wordpress/element": "6.44.0",
 		"@wordpress/admin-ui": "1.12.0",
