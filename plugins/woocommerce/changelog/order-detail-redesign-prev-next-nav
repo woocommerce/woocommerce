@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Order detail redesign: add prev/next order navigation in the Order edit page header so users can walk between adjacent orders without going back to the list. No-op when the order-detail-redesign feature flag is off.
