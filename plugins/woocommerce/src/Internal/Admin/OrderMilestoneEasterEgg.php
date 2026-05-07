@@ -101,7 +101,7 @@ class OrderMilestoneEasterEgg {
 			)
 		);
 
-		$positions = array(
+		$positions     = array(
 			0   => 'first',
 			99  => 'hundred',
 			999 => 'thousand',
