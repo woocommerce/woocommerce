@@ -71,6 +71,37 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 	}
 
 	/**
+	 * Must run BEFORE any test defines REST_REQUEST: once leaked, the cookie-less guard
+	 * would skip on its own and mask a broken bot check. The injected tk_ai cookie is a
+	 * second belt so the bot path is the only thing that can produce the skip.
+	 */
+	public function test_record_event_skips_bots(): void {
+		$_SERVER['HTTP_USER_AGENT'] = 'Googlebot/2.1 (+http://www.google.com/bot.html)';
+		$_COOKIE['tk_ai']           = 'test-visitor-id-1234567890ab';
+
+		$captured = array();
+		$filter   = function ( $pre, $args, $url ) use ( &$captured ) {
+			if ( false !== strpos( $url, 'pixel.wp.com' ) ) {
+				$captured[] = $url;
+			}
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => '',
+			);
+		};
+		add_filter( 'pre_http_request', $filter, 10, 3 );
+
+		$result = WC_Analytics_Tracking::record_event( 'add_to_cart' );
+
+		remove_filter( 'pre_http_request', $filter, 10 );
+		unset( $_SERVER['HTTP_USER_AGENT'] );
+
+		$this->assertTrue( $result, 'record_event should skip bot traffic.' );
+		$this->assertCount( 0, $captured, 'No pixel.wp.com request should fire for bot UA.' );
+		$this->assertSame( array(), $this->get_pixel_batch_queue(), 'No pixel should be queued for bot UA.' );
+	}
+
+	/**
 	 * record_event() should short-circuit (no pixel emitted) when called from
 	 * a REST request that has no `tk_ai` cookie. Generating a one-shot id
 	 * here would fragment Nosara/Tracks sessions across cookie-less
@@ -127,19 +158,5 @@ class WC_Analytics_Tracking_Test extends BaseTestCase {
 		$visitor_id = $method->invoke( null );
 
 		$this->assertSame( 'test-visitor-id-1234567890ab', $visitor_id, 'Cookie value should be returned verbatim when present.' );
-	}
-
-	/**
-	 * Bot user-agents should still be filtered out. This test guards against
-	 * the new visitor-id check accidentally relaxing the existing bot check.
-	 */
-	public function test_record_event_skips_bots(): void {
-		$_SERVER['HTTP_USER_AGENT'] = 'Googlebot/2.1 (+http://www.google.com/bot.html)';
-
-		$result = WC_Analytics_Tracking::record_event( 'add_to_cart' );
-
-		$this->assertTrue( $result, 'record_event should skip bot traffic.' );
-
-		unset( $_SERVER['HTTP_USER_AGENT'] );
 	}
 }

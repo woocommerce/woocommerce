@@ -73,10 +73,11 @@ class WC_Analytics_Tracking {
 	 * @param string $event_name The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
 	 *
-	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be fired.
+	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA,
+	 *                       or cookie-less context); WP_Error if pixel firing failed.
 	 */
 	public static function record_event( $event_name, $event_properties = array() ) {
-		// Check consent before recording any event
+		// Check consent before recording any event.
 		if ( ! Consent_Manager::has_analytics_consent() ) {
 			return true; // Skip recording.
 		}
@@ -86,10 +87,7 @@ class WC_Analytics_Tracking {
 			return true;
 		}
 
-		// Skip events without a stable visitor id. Cookie-less server-side calls
-		// (REST API, XMLRPC, cron, WP-CLI, requests after headers were sent) cannot
-		// persist a tk_ai cookie, so attributing them to a fresh random id would
-		// inflate session counts in downstream analytics.
+		// Skip cookie-less contexts that cannot persist a stable visitor id; fresh random ids fragment sessions.
 		if ( empty( self::get_visitor_id() ) ) {
 			return true;
 		}
@@ -476,30 +474,20 @@ class WC_Analytics_Tracking {
 			return self::$cached_visitor_id;
 		}
 
-		// Cron and WP-CLI have no real request context — no client IP, no
-		// User-Agent — so even with proxy tracking enabled the IP-based hash
-		// would collapse to a constant phantom "user" that all background
-		// activity gets attributed to. Skip these unconditionally.
+		// Cron and WP-CLI have no client IP or UA, so even proxy-tracking would collapse all background activity into one phantom user.
 		if ( ( defined( 'DOING_CRON' ) && DOING_CRON )
 			|| ( defined( 'WP_CLI' ) && WP_CLI )
 		) {
 			return null;
 		}
 
-		// Fallback to IP-based visitor ID if proxy tracking is enabled.
-		// REST/XMLRPC/post-headers contexts still get a stable id from
-		// daily_salt + domain + ip + user_agent, since the real client's
-		// IP and UA are present for those requests.
+		// Proxy tracking provides a stable id from daily_salt + domain + ip + user_agent, even in REST/XMLRPC contexts.
 		if ( Features::is_proxy_tracking_enabled() ) {
 			self::$cached_visitor_id = self::get_ip_based_visitor_id();
 			return self::$cached_visitor_id;
 		}
 
-		// Only mint a new anonymous id when we can persist it in a cookie.
-		// REST, XMLRPC, and post-headers contexts cannot set a cookie, so a
-		// generated id would be a single-use throw-away that fragments
-		// sessions in downstream analytics. Return null in those cases so
-		// record_event() skips.
+		// Only mint a new id when we can persist it in a cookie; otherwise it would be a single-use throwaway that fragments sessions.
 		if ( headers_sent()
 			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
 			|| ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
@@ -507,22 +495,18 @@ class WC_Analytics_Tracking {
 			return null;
 		}
 
-		// Real browser request with no tk_ai cookie yet. Generate and persist.
-		// Note that base64-encoding an 18 character string generates a 24-character anon id.
+		// Base64-encoding 18 random bytes produces a 24-character anon id.
 		$binary = '';
 		for ( $i = 0; $i < 18; ++$i ) {
 			$binary .= chr( wp_rand( 0, 255 ) );
 		}
 
-		self::$cached_visitor_id = base64_encode( $binary ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		$new_visitor_id = base64_encode( $binary ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
-		// Note: httponly is intentionally false. tk_ai is an anonymous visitor
-		// identifier, not a credential. Keeping it readable from JS lets the
-		// _wca legacy library and client-side analytics see the same value the
-		// server just wrote, avoiding split visitor IDs across server↔client.
-		setcookie(
+		// httponly=false is intentional: _wca and client-side analytics need to read the same value the server wrote.
+		$persisted = setcookie(
 			'tk_ai',
-			self::$cached_visitor_id,
+			$new_visitor_id,
 			array(
 				'expires'  => time() + ( 365 * 24 * 60 * 60 ), // 1 year
 				'path'     => '/',
@@ -533,6 +517,12 @@ class WC_Analytics_Tracking {
 			)
 		);
 
+		// If setcookie failed, the id won't reach the next request and would fragment sessions.
+		if ( ! $persisted ) {
+			return null;
+		}
+
+		self::$cached_visitor_id = $new_visitor_id;
 		return self::$cached_visitor_id;
 	}
 
