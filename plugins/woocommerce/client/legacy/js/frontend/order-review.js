@@ -73,9 +73,59 @@
 		syncCaption();
 	}
 
+	/**
+	 * Enable / disable the review-order submit button based on whether at
+	 * least one row has a rating selected.
+	 *
+	 * @param {HTMLFormElement} form `.woocommerce-review-order__form`
+	 */
+	function initSubmitGate( form ) {
+		var submit = form.querySelector( '.woocommerce-review-order__submit' );
+		if ( ! submit ) {
+			if ( window.console && window.console.warn ) {
+				window.console.warn(
+					'Review Order form is missing its submit button ' +
+						'(.woocommerce-review-order__submit); ' +
+						'the rating-based gate will not run.'
+				);
+			}
+			return;
+		}
+
+		function syncSubmit() {
+			var anyChecked = !! form.querySelector(
+				'.woocommerce-star-rating__input:checked'
+			);
+			submit.disabled = ! anyChecked;
+		}
+
+		// Expose so external code (e.g. the AJAX submission handler in #64527)
+		// can re-evaluate the gate after async state changes.
+		form.syncReviewOrderSubmitGate = syncSubmit;
+
+		form.addEventListener( 'change', function ( event ) {
+			if (
+				event.target &&
+				event.target.classList &&
+				event.target.classList.contains(
+					'woocommerce-star-rating__input'
+				)
+			) {
+				syncSubmit();
+			}
+		} );
+
+		syncSubmit();
+	}
+
 	function init() {
 		var groups = document.querySelectorAll( '.woocommerce-star-rating' );
 		Array.prototype.forEach.call( groups, initGroup );
+
+		var forms = document.querySelectorAll(
+			'.woocommerce-review-order__form'
+		);
+		Array.prototype.forEach.call( forms, initSubmitGate );
 	}
 
 	if ( document.readyState === 'loading' ) {
