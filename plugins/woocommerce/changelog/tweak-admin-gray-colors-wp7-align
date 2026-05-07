@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Align Woo admin primary text (#2c3338 → #1e1e1e / $gray-900) and placeholder text (#646970 → #757575 / $gray-700) colors with WordPress 7.0 admin gray scale, using SCSS tokens.
