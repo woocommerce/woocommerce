@@ -69,6 +69,23 @@ $meta_parts = array_filter(
  */
 $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 
+// Pre-filter to the rows we can actually render so the <form> doesn't open
+// when every item is non-product or has a deleted product.
+$renderable_rows = array();
+foreach ( $items as $item ) {
+	if ( ! $item instanceof WC_Order_Item_Product ) {
+		continue;
+	}
+	$product = $item->get_product();
+	if ( ! $product instanceof WC_Product ) {
+		continue;
+	}
+	$renderable_rows[] = array(
+		'item'    => $item,
+		'product' => $product,
+	);
+}
+
 // The Endpoint has already validated the URL key against the order key, so the
 // canonical value on the order is the right thing to echo into the form post.
 $order_key = (string) $order->get_order_key();
@@ -90,7 +107,7 @@ $order_key = (string) $order->get_order_key();
 		<?php esc_html_e( '* Mandatory fields', 'woocommerce' ); ?>
 	</p>
 
-	<?php if ( ! empty( $items ) ) : ?>
+	<?php if ( ! empty( $renderable_rows ) ) : ?>
 		<form
 			class="woocommerce-review-order__form"
 			method="post"
@@ -102,28 +119,17 @@ $order_key = (string) $order->get_order_key();
 
 			<ul class="woocommerce-review-order__items">
 				<?php
-				$row_index = 0;
-				foreach ( $items as $item ) {
-					if ( ! $item instanceof WC_Order_Item_Product ) {
-						continue;
-					}
-					$product = $item->get_product();
-					if ( ! $product instanceof WC_Product ) {
-						continue;
-					}
-
+				foreach ( $renderable_rows as $row_index => $row ) {
 					wc_get_template(
 						'order/customer-review-order-row.php',
 						array(
-							'item'      => $item,
-							'product'   => $product,
+							'item'      => $row['item'],
+							'product'   => $row['product'],
 							'order'     => $order,
 							'row_index' => $row_index,
 						)
 					);
-
-					++$row_index;
-				}//end foreach
+				}
 				?>
 			</ul>
 

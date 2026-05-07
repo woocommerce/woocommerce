@@ -99,6 +99,10 @@
 			submit.disabled = ! anyChecked;
 		}
 
+		// Expose so external code (e.g. the AJAX submission handler in #64527)
+		// can re-evaluate the gate after async state changes.
+		form.syncReviewOrderSubmitGate = syncSubmit;
+
 		form.addEventListener( 'change', function ( event ) {
 			if (
 				event.target &&
