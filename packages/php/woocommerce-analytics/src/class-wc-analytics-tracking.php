@@ -476,21 +476,33 @@ class WC_Analytics_Tracking {
 			return self::$cached_visitor_id;
 		}
 
+		// Cron and WP-CLI have no real request context — no client IP, no
+		// User-Agent — so even with proxy tracking enabled the IP-based hash
+		// would collapse to a constant phantom "user" that all background
+		// activity gets attributed to. Skip these unconditionally.
+		if ( ( defined( 'DOING_CRON' ) && DOING_CRON )
+			|| ( defined( 'WP_CLI' ) && WP_CLI )
+		) {
+			return null;
+		}
+
 		// Fallback to IP-based visitor ID if proxy tracking is enabled.
+		// REST/XMLRPC/post-headers contexts still get a stable id from
+		// daily_salt + domain + ip + user_agent, since the real client's
+		// IP and UA are present for those requests.
 		if ( Features::is_proxy_tracking_enabled() ) {
 			self::$cached_visitor_id = self::get_ip_based_visitor_id();
 			return self::$cached_visitor_id;
 		}
 
 		// Only mint a new anonymous id when we can persist it in a cookie.
-		// REST, XMLRPC, cron, WP-CLI, and post-headers contexts cannot set a cookie,
-		// so a generated id would be a single-use throw-away that fragments sessions
-		// in downstream analytics. Return null in those cases so record_event() skips.
+		// REST, XMLRPC, and post-headers contexts cannot set a cookie, so a
+		// generated id would be a single-use throw-away that fragments
+		// sessions in downstream analytics. Return null in those cases so
+		// record_event() skips.
 		if ( headers_sent()
 			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
 			|| ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
-			|| ( defined( 'DOING_CRON' ) && DOING_CRON )
-			|| ( defined( 'WP_CLI' ) && WP_CLI )
 		) {
 			return null;
 		}
