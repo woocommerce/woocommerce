@@ -47,8 +47,11 @@ final class ShopperCollection extends AbstractBlock {
 			return $hooked_block_types;
 		}
 
-		$cart_page_id = absint( wc_get_page_id( 'cart' ) );
-		if ( ! $cart_page_id || ! ( $context instanceof \WP_Post ) || (int) $context->ID !== $cart_page_id ) {
+		// `wc_get_page_id()` returns -1 when the page option isn't set —
+		// don't wrap it in `absint()`, which would turn that sentinel into a
+		// real-looking ID of 1 and false-match a post with that ID.
+		$cart_page_id = (int) wc_get_page_id( 'cart' );
+		if ( $cart_page_id <= 0 || ! ( $context instanceof \WP_Post ) || (int) $context->ID !== $cart_page_id ) {
 			return $hooked_block_types;
 		}
 

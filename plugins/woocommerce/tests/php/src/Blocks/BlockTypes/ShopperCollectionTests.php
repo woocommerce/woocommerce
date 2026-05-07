@@ -97,6 +97,27 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * When the cart page option is unset, `wc_get_page_id()` returns -1 — the filter
+	 * must treat that as "no cart page" rather than letting it match a real post ID.
+	 */
+	public function test_register_hooked_block_skips_when_cart_page_unset(): void {
+		delete_option( 'woocommerce_cart_page_id' );
+
+		$context_id = self::factory()->post->create(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_content' => '<!-- wp:woocommerce/cart /-->',
+			)
+		);
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
+		$hooked = apply_filters( 'hooked_block_types', array(), 'after', 'woocommerce/cart', get_post( $context_id ) );
+
+		$this->assertNotContains( 'woocommerce/shopper-collection', $hooked );
+	}
+
+	/**
 	 * The auto-injected block has its `listName` attribute set to `saved-for-later`.
 	 */
 	public function test_hooked_block_attributes_set_list_name(): void {
