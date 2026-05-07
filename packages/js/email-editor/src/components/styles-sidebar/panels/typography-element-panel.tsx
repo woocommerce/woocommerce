@@ -223,11 +223,11 @@ export function TypographyElementPanel( {
 
 	return (
 		<ToolsPanel
-			label={ __( 'Typography', 'woocommerce' ) }
+			label={ __( 'Typography', __i18n_text_domain__ ) }
 			resetAll={ resetAll }
 		>
 			<ToolsPanelItem
-				label={ __( 'Font family', 'woocommerce' ) }
+				label={ __( 'Font family', __i18n_text_domain__ ) }
 				hasValue={ hasFontFamily }
 				onDeselect={ () => setFontFamily( undefined ) }
 				isShownByDefault={ defaultControls.fontFamily }
@@ -242,7 +242,7 @@ export function TypographyElementPanel( {
 			</ToolsPanelItem>
 			{ showToolFontSize && (
 				<ToolsPanelItem
-					label={ __( 'Font size', 'woocommerce' ) }
+					label={ __( 'Font size', __i18n_text_domain__ ) }
 					hasValue={ hasFontSize }
 					onDeselect={ () => setFontSize( undefined ) }
 					isShownByDefault={ defaultControls.fontSize }
@@ -261,7 +261,7 @@ export function TypographyElementPanel( {
 			) }
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Appearance', 'woocommerce' ) }
+				label={ __( 'Appearance', __i18n_text_domain__ ) }
 				hasValue={ hasFontAppearance }
 				onDeselect={ () => {
 					setFontAppearance( {
@@ -284,7 +284,7 @@ export function TypographyElementPanel( {
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Line height', 'woocommerce' ) }
+				label={ __( 'Line height', __i18n_text_domain__ ) }
 				hasValue={ hasLineHeight }
 				onDeselect={ () => setLineHeight( undefined ) }
 				isShownByDefault={ defaultControls.lineHeight }
@@ -299,7 +299,7 @@ export function TypographyElementPanel( {
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Letter spacing', 'woocommerce' ) }
+				label={ __( 'Letter spacing', __i18n_text_domain__ ) }
 				hasValue={ hasLetterSpacing }
 				onDeselect={ () => setLetterSpacing( undefined ) }
 				isShownByDefault={ defaultControls.letterSpacing }
@@ -313,7 +313,7 @@ export function TypographyElementPanel( {
 			</ToolsPanelItem>
 			<ToolsPanelItem
 				className="single-column"
-				label={ __( 'Text decoration', 'woocommerce' ) }
+				label={ __( 'Text decoration', __i18n_text_domain__ ) }
 				hasValue={ hasTextDecoration }
 				onDeselect={ () => setTextDecoration( undefined ) }
 				isShownByDefault={ defaultControls.textDecoration }
@@ -326,7 +326,7 @@ export function TypographyElementPanel( {
 				/>
 			</ToolsPanelItem>
 			<ToolsPanelItem
-				label={ __( 'Letter case', 'woocommerce' ) }
+				label={ __( 'Letter case', __i18n_text_domain__ ) }
 				hasValue={ hasTextTransform }
 				onDeselect={ () => setTextTransform( defaultTextTransform ) }
 				isShownByDefault={ defaultControls.textTransform }

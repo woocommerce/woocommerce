@@ -77,6 +77,70 @@ class Quote_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it moves default quote border to the right in RTL.
+	 */
+	public function testItUsesRightDefaultBorderInRtl(): void {
+		$theme_controller = $this->di_container->get( Theme_Controller::class );
+		$rtl_context      = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+		$content          = '<blockquote class="wp-block-quote" style="border-color: currentColor; border-width: 0 0 0 1px; border-left-style: solid;"><p>Quote content</p></blockquote>';
+
+		$rendered = $this->quote_renderer->render( $content, $this->parsed_quote, $rtl_context );
+
+		$this->assertStringContainsString( 'border-width:0 1px 0 0;', $rendered );
+		$this->assertStringContainsString( 'border-style:solid;', $rendered );
+		$this->assertStringContainsString( 'border-left-style:none;', $rendered );
+		$this->assertStringContainsString( 'border-left-width:0;', $rendered );
+		$this->assertStringContainsString( 'border-right-style:solid;', $rendered );
+	}
+
+	/**
+	 * Test it preserves authored quote borders in RTL.
+	 */
+	public function testItPreservesAuthoredQuoteBorderInRtl(): void {
+		$theme_controller      = $this->di_container->get( Theme_Controller::class );
+		$rtl_context           = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+		$parsed_quote          = $this->parsed_quote;
+		$parsed_quote['attrs'] = array(
+			'style' => array(
+				'border' => array(
+					'width' => '0 0 0 2px',
+					'style' => 'dashed',
+				),
+			),
+		);
+
+		$rendered = $this->quote_renderer->render( '<p>Quote content</p>', $parsed_quote, $rtl_context );
+
+		$this->assertStringContainsString( 'border-width:0 0 0 2px;', $rendered );
+		$this->assertStringContainsString( 'border-style:dashed;', $rendered );
+		$this->assertStringNotContainsString( 'border-width:0 1px 0 0;', $rendered );
+	}
+
+	/**
+	 * Test it preserves explicit authored quote alignment in RTL.
+	 */
+	public function testItPreservesAuthoredQuoteAlignmentInRtl(): void {
+		$theme_controller = $this->di_container->get( Theme_Controller::class );
+		$rtl_context      = new Rendering_Context( $theme_controller->get_theme(), array( 'is_rtl' => true ) );
+		$expected_borders = array(
+			'left'   => 'border-width:0 0 0 1px;',
+			'center' => 'border-width:0;',
+			'right'  => 'border-width:0 1px 0 0;',
+		);
+
+		foreach ( array( 'left', 'center', 'right' ) as $alignment ) {
+			$parsed_quote                       = $this->parsed_quote;
+			$parsed_quote['attrs']['textAlign'] = $alignment;
+			$content                            = '<blockquote class="wp-block-quote has-text-align-' . $alignment . '"></blockquote>';
+			$rendered                           = $this->quote_renderer->render( $content, $parsed_quote, $rtl_context );
+
+			$this->assertStringContainsString( 'text-align:' . $alignment . ';', $rendered );
+			$this->assertStringContainsString( 'has-text-align-' . $alignment, $rendered );
+			$this->assertStringContainsString( $expected_borders[ $alignment ], $rendered );
+		}
+	}
+
+	/**
 	 * Test it contains quote styles
 	 */
 	public function testItContainsQuoteStyles(): void {

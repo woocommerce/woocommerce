@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix address autocomplete branding logo not rendering in block checkout due to sanitizeHTML stripping img tags
