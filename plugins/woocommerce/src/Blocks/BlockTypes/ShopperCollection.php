@@ -23,6 +23,69 @@ final class ShopperCollection extends AbstractBlock {
 	protected $block_name = 'shopper-collection';
 
 	/**
+	 * Initialize this block type.
+	 */
+	protected function initialize(): void {
+		parent::initialize();
+
+		// We do not use `BlockHooksTrait` currently as it has issues with PHPStan.
+		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+		add_filter( 'hooked_block_woocommerce/shopper-collection', array( $this, 'set_hooked_block_attributes' ), 10, 4 );
+	}
+
+	/**
+	 * Auto-inject this block after `woocommerce/cart`, scoped to the cart page.
+	 *
+	 * @param array                                  $hooked_block_types Block names hooked at this position.
+	 * @param string                                 $relative_position  Position of the insertion point.
+	 * @param string                                 $anchor_block_type  Anchor block name.
+	 * @param array|\WP_Post|\WP_Block_Template|null $context            Where the block is being embedded.
+	 * @return array
+	 */
+	public function register_hooked_block( $hooked_block_types, $relative_position, $anchor_block_type, $context ) {
+		if ( 'after' !== $relative_position || 'woocommerce/cart' !== $anchor_block_type ) {
+			return $hooked_block_types;
+		}
+
+		$cart_page_id = absint( wc_get_page_id( 'cart' ) );
+		if ( ! $cart_page_id || ! ( $context instanceof \WP_Post ) || (int) $context->ID !== $cart_page_id ) {
+			return $hooked_block_types;
+		}
+
+		// Don't double-inject if the block is already in the cart page
+		// content (e.g. a merchant added it manually before the feature
+		// flag was flipped, or after). `has_block()` parses the content
+		// rather than substring-matching, so it won't false-positive on
+		// the block name appearing inside attribute strings or comments.
+		if ( has_block( $this->get_full_block_name(), $context ) ) {
+			return $hooked_block_types;
+		}
+
+		$hooked_block_types[] = $this->get_full_block_name();
+		return $hooked_block_types;
+	}
+
+	/**
+	 * Set the `listName` attribute on the auto-injected block.
+	 *
+	 * @param array|null $parsed_hooked_block The parsed hooked block array, or null to suppress insertion.
+	 * @param string     $hooked_block_type   The hooked block type name.
+	 * @param string     $relative_position   Position of the insertion point.
+	 * @param array      $parsed_anchor_block The anchor block, in parsed block array format.
+	 * @return array|null
+	 */
+	public function set_hooked_block_attributes( $parsed_hooked_block, $hooked_block_type, $relative_position, $parsed_anchor_block ) {
+		if ( null === $parsed_hooked_block || 'after' !== $relative_position ) {
+			return $parsed_hooked_block;
+		}
+		if ( ! isset( $parsed_anchor_block['blockName'] ) || 'woocommerce/cart' !== $parsed_anchor_block['blockName'] ) {
+			return $parsed_hooked_block;
+		}
+		$parsed_hooked_block['attrs']['listName'] = 'saved-for-later';
+		return $parsed_hooked_block;
+	}
+
+	/**
 	 * Render the block.
 	 *
 	 * @param array     $attributes Block attributes.
