@@ -69,9 +69,26 @@ $meta_parts = array_filter(
  */
 $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 
+// Pre-filter to the rows we can actually render so the <form> doesn't open
+// when every item is non-product or has a deleted product.
+$renderable_rows = array();
+foreach ( $items as $item ) {
+	if ( ! $item instanceof WC_Order_Item_Product ) {
+		continue;
+	}
+	$product = $item->get_product();
+	if ( ! $product instanceof WC_Product ) {
+		continue;
+	}
+	$renderable_rows[] = array(
+		'item'    => $item,
+		'product' => $product,
+	);
+}
+
 // Single batched lookup of every existing review by this customer for the
-// items below. Without this each describe() call would issue its own query.
-\Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prime( $items, $order );
+// items below. Without this each decide() call would issue its own query.
+\Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::preload_for_items( $items, $order );
 
 // The Endpoint has already validated the URL key against the order key, so the
 // canonical value on the order is the right thing to echo into the form post.
@@ -94,7 +111,7 @@ $order_key = (string) $order->get_order_key();
 		<?php esc_html_e( '* Mandatory fields', 'woocommerce' ); ?>
 	</p>
 
-	<?php if ( ! empty( $items ) ) : ?>
+	<?php if ( ! empty( $renderable_rows ) ) : ?>
 		<form
 			class="woocommerce-review-order__form"
 			method="post"
@@ -102,7 +119,7 @@ $order_key = (string) $order->get_order_key();
 			data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
 			novalidate
 		>
-			<input type="hidden" name="action" value="woocommerce_submit_order_reviews" />
+			<input type="hidden" name="action" value="<?php echo esc_attr( 'woocommerce_submit_order_reviews' ); ?>" />
 			<input type="hidden" name="order_id" value="<?php echo esc_attr( (string) $order->get_id() ); ?>" />
 			<input type="hidden" name="key" value="<?php echo esc_attr( $order_key ); ?>" />
 			<?php wp_nonce_field( 'woocommerce_submit_order_reviews', '_wcnonce' ); ?>
@@ -110,16 +127,8 @@ $order_key = (string) $order->get_order_key();
 			<ul class="woocommerce-review-order__items">
 				<?php
 				$row_index = 0;
-				foreach ( $items as $item ) {
-					if ( ! $item instanceof WC_Order_Item_Product ) {
-						continue;
-					}
-					$product = $item->get_product();
-					if ( ! $product instanceof WC_Product ) {
-						continue;
-					}
-
-					$decision = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::describe( $item, $order );
+				foreach ( $renderable_rows as $row ) {
+					$decision = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::decide( $row['item'], $order );
 
 					if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_SKIP === $decision['status'] ) {
 						continue;
@@ -129,8 +138,8 @@ $order_key = (string) $order->get_order_key();
 						wc_get_template(
 							'order/customer-review-order-row-reviewed.php',
 							array(
-								'item'    => $item,
-								'product' => $product,
+								'item'    => $row['item'],
+								'product' => $row['product'],
 								'order'   => $order,
 								'review'  => $decision['comment'],
 							)
@@ -141,15 +150,14 @@ $order_key = (string) $order->get_order_key();
 					wc_get_template(
 						'order/customer-review-order-row.php',
 						array(
-							'item'      => $item,
-							'product'   => $product,
+							'item'      => $row['item'],
+							'product'   => $row['product'],
 							'order'     => $order,
 							'row_index' => $row_index,
 						)
 					);
-
 					++$row_index;
-				}//end foreach
+				}
 				?>
 			</ul>
 
