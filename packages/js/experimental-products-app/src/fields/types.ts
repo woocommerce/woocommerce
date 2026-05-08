@@ -23,6 +23,10 @@ export type ProductEntityRecord = Omit< Product, 'categories' | 'tags' > & {
 	upsell_ids?: number[];
 	date_on_sale_from?: string | null;
 	date_on_sale_to?: string | null;
+	parent_id?: number;
+	_embedded?: {
+		variations?: ProductEntityRecord[];
+	};
 	seo_title?: string;
 	seo_description?: string;
 	visible_in_pos?: boolean;

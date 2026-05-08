@@ -28,14 +28,33 @@ class OverriddenCapQuery {
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
-		Utils::check_current_user_can( 'manage_categories' );
+		// Standalone authorization gate: no authorize() method on the command,
+		// so the autodiscovered authorization attributes are the sole guard.
+		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
+			throw Utils::build_authorization_error( $context['principal'] );
+		}
 
-		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Container::get( OverriddenCapQueryCommand::class );
+		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( OverriddenCapQueryCommand::class );
 
 		$execute_args = array();
 
 		$result = Utils::execute_command( $command, $execute_args );
 
 		return array( 'result' => $result );
+	}
+
+	/**
+	 * Compute the value `_preauthorized` would carry for a given principal —
+	 * the AND of the autodiscovered authorization attributes' authorize()
+	 * outcomes on this command. Single source of truth for both the resolver's
+	 * own gates and external (code-API) callers asking about authorization
+	 * without going through GraphQL execution.
+	 *
+	 * Returns true vacuously when the command has no authorization attributes
+	 * (in that case authorize() on the command is the sole guard, and that
+	 * method should be consulted instead).
+	 */
+	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('manage_categories') )->authorize( $principal );
 	}
 }
