@@ -1,4 +1,0 @@
-Significance: patch
-Type: update
-
-Three-way change-summary diff: when the post has `_wc_email_template_last_core_render` meta, `summarize()` runs a deterministic per-block diff (yours-vs-base, core-vs-base) and the inversion-guard heuristic is suppressed. Posts without the meta keep the existing two-way behavior.

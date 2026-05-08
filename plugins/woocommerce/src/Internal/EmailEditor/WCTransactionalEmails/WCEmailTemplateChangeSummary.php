@@ -13,7 +13,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  *
  * Two diff modes, selected per-call by post-meta presence:
  *
- * - **Three-way (since 10.10.0)** — when the post has
+ * - **Three-way (since 10.9.0)** — when the post has
  *   {@see WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY} meta
  *   (every post touched by a sync-eligible writer: generator, auto-applier,
  *   selective applier, reset endpoint, RSM-149 backfill), the summary runs
@@ -694,7 +694,7 @@ class WCEmailTemplateChangeSummary {
 	 *
 	 * @return array{added_blocks:array<int, array<string, mixed>>, removed_blocks:array<int, array<string, mixed>>, copy_changes:array<int, array<string, mixed>>, structural_changes:array<int, array<string, mixed>>}
 	 *
-	 * @since 10.10.0
+	 * @since 10.9.0
 	 */
 	public static function diff_records_three_way( array $core_records, array $base_records, array $post_records ): array {
 		$core_to_base = self::lcs_matches( $core_records, $base_records );
@@ -763,9 +763,15 @@ class WCEmailTemplateChangeSummary {
 				continue;
 			}
 
-			// Both sides have the block — check what changed relative to base.
-			$core          = $core_records[ $core_idx ];
-			$post          = $post_records[ $post_idx ];
+			// Both sides have the block — increment occurrence ordinal for every
+			// matched pair, regardless of whether a copy_change is emitted, so
+			// "Paragraph N of M" reflects the block's true ordinal across the run.
+			// Mirrors the 2-way `diff_records()` placement of the counter.
+			$core                      = $core_records[ $core_idx ];
+			$post                      = $post_records[ $post_idx ];
+			$name                      = $core['name'];
+			$occurrence_index[ $name ] = ( $occurrence_index[ $name ] ?? 0 ) + 1;
+
 			$yours_changed = ( $base['inner_text'] !== $post['inner_text'] );
 			$core_changed  = ( $base['inner_text'] !== $core['inner_text'] );
 
@@ -778,9 +784,7 @@ class WCEmailTemplateChangeSummary {
 			}
 
 			// Core changed (with or without yours also changing).
-			$name                      = $core['name'];
-			$occurrence_index[ $name ] = ( $occurrence_index[ $name ] ?? 0 ) + 1;
-			$copy_changes[]            = array(
+			$copy_changes[] = array(
 				'block'           => self::block_label( $name ),
 				'before'          => self::truncate_text( $post['inner_text'] ),
 				'after'           => self::truncate_text( $core['inner_text'] ),
@@ -791,9 +795,26 @@ class WCEmailTemplateChangeSummary {
 			);
 		}//end foreach
 
-		// Pass 2: unmatched core records → added_blocks.
+		// Pass 2: unmatched core records → added_blocks. Structural wrappers
+		// (`core/group`, `core/columns`, `core/column`, `core/row`) route to
+		// `structural_changes` instead — the selective applier skips them at
+		// merge time, and surfacing them as `added_blocks` would advertise an
+		// "Added Group block" the apply will never apply. Mirrors the 2-way
+		// `diff_records()` handling of structural wrappers.
 		foreach ( $core_records as $c_idx => $rec ) {
 			if ( isset( $matched_core_indices[ $c_idx ] ) ) {
+				continue;
+			}
+			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
+				$structural_changes[] = array(
+					'kind'        => 'nest',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Added %s wrapper', 'woocommerce' ),
+						self::block_label( $rec['name'] )
+					),
+					'path'        => $rec['path'],
+				);
 				continue;
 			}
 			$added_blocks[] = array(
@@ -804,8 +825,22 @@ class WCEmailTemplateChangeSummary {
 		}
 
 		// Pass 3: unmatched post records → removed_blocks (yours-only additions, preserved by default).
+		// Same structural-wrapper handling as Pass 2 — yours-only structural blocks land in
+		// `structural_changes` rather than `removed_blocks`.
 		foreach ( $post_records as $p_idx => $rec ) {
 			if ( isset( $matched_post_indices[ $p_idx ] ) ) {
+				continue;
+			}
+			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
+				$structural_changes[] = array(
+					'kind'        => 'nest',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Removed %s wrapper', 'woocommerce' ),
+						self::block_label( $rec['name'] )
+					),
+					'path'        => $rec['path'],
+				);
 				continue;
 			}
 			$removed_blocks[] = array(

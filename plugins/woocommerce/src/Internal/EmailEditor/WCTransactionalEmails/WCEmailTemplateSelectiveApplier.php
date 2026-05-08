@@ -36,7 +36,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  * subsequent apply overwrites the snapshot. {@see self::undo()} restores from
  * the snapshot when the supplied `revision_id` matches.
  *
- * Three-way payload consumption (since 10.10.0): when the post has
+ * Three-way payload consumption (since 10.9.0): when the post has
  * {@see WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY} meta,
  * `apply_selectively()` passes the change-summary's payload through to
  * `merge()`, which uses it to gate matched-pair classification:
@@ -200,11 +200,19 @@ class WCEmailTemplateSelectiveApplier {
 		$structural_skipped = $merged_result['structural_skipped'];
 		$aliases_migrated   = $merged_result['aliases_migrated'];
 
+		// Capture the prior `last_core_render` so undo() can restore it alongside
+		// `post_content`. Without this, an undone apply would leave the base
+		// stamped at the post-apply canonical: the next summarize() would see
+		// the restored content as a yours-only edit and silently swallow the
+		// pending core update.
+		$prior_last_core_render = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
+
 		$revision_id = wp_generate_uuid4();
 		$snapshot    = array(
-			'revision_id' => $revision_id,
-			'content'     => $post_content,
-			'snapshot_at' => gmdate( 'Y-m-d H:i:s' ),
+			'revision_id'      => $revision_id,
+			'content'          => $post_content,
+			'last_core_render' => $prior_last_core_render,
+			'snapshot_at'      => gmdate( 'Y-m-d H:i:s' ),
 		);
 		update_post_meta( $post_id, self::SNAPSHOT_META_KEY, $snapshot );
 
@@ -334,6 +342,25 @@ class WCEmailTemplateSelectiveApplier {
 
 			if ( is_wp_error( $updated ) ) {
 				return $updated;
+			}
+
+			// Restore the prior three-way base reference if the snapshot recorded
+			// one. Without this, summarize() would compare the restored content
+			// against the post-apply base and report a yours-only edit, silently
+			// swallowing the pending core update. Snapshots written before the
+			// three-way landing don't carry this key — leave existing meta alone
+			// in that case.
+			if ( array_key_exists( 'last_core_render', $snapshot ) ) {
+				$prior_last_core_render = (string) $snapshot['last_core_render'];
+				if ( '' !== $prior_last_core_render ) {
+					update_post_meta(
+						$post_id,
+						WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+						$prior_last_core_render
+					);
+				} else {
+					delete_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY );
+				}
 			}
 
 			// The snapshot's prior_status was correct at snapshot time, but

@@ -576,6 +576,60 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Undo restores the prior _wc_email_template_last_core_render alongside post_content (CodeRabbit feedback on PR 64716).
+	 *
+	 * Without this, the restored content would diff against the post-apply base and the
+	 * pending core update would silently disappear from the drawer.
+	 */
+	public function test_undo_restores_prior_last_core_render(): void {
+		$email_id = 'undo_restores_three_way_base';
+		$this->register_fixture_email( $email_id );
+
+		$old_canonical = "<!-- wp:paragraph -->\n<p>Old core.</p>\n<!-- /wp:paragraph -->";
+		$post_content  = "<!-- wp:paragraph -->\n<p>Yours.</p>\n<!-- /wp:paragraph -->";
+		$new_canonical = "<!-- wp:paragraph -->\n<p>New core.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $new_canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		// Pre-apply: post is on the OLD canonical as its base reference.
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			$old_canonical
+		);
+
+		$apply_result = WCEmailTemplateSelectiveApplier::apply_selectively(
+			$post_id,
+			array(
+				array(
+					'path'     => array( 0 ),
+					'decision' => 'use_core',
+				),
+			)
+		);
+		$this->assertIsArray( $apply_result );
+
+		// Sanity: apply advanced the base reference to the new canonical.
+		$this->assertSame(
+			$new_canonical,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true )
+		);
+
+		$undo_result = WCEmailTemplateSelectiveApplier::undo( $post_id, $apply_result['revision_id'] );
+		$this->assertIsArray( $undo_result );
+		$this->assertSame( 'restored', $undo_result['status'] );
+
+		// Post-apply: undo must have rolled back the base to the old canonical so summarize()
+		// recognizes the pending core update on the next read.
+		$this->assertSame(
+			$old_canonical,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true ),
+			'Undo must restore the pre-apply last_core_render so the pending core update stays surfaced.'
+		);
+	}
+
+	/**
 	 * @testdox Should reclassify after undo rather than restore the stored prior_status verbatim.
 	 */
 	public function test_undo_reclassifies_status_after_restoring_snapshot(): void {

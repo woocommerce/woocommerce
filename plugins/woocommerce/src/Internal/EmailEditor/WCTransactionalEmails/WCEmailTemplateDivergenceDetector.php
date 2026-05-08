@@ -134,7 +134,7 @@ class WCEmailTemplateDivergenceDetector {
 	 * synced against), and the RSM-149 backfill (seeds for legacy posts).
 	 *
 	 * @var string
-	 * @since 10.10.0
+	 * @since 10.9.0
 	 */
 	public const LAST_CORE_RENDER_META_KEY = '_wc_email_template_last_core_render';
 

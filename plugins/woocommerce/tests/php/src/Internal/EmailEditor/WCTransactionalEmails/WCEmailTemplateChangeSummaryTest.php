@@ -903,6 +903,132 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Three-way diff: occurrence ordinal counts every matched pair, not just emitted conflicts (CodeRabbit feedback on PR 64716).
+	 *
+	 * Earlier same-name blocks that aren't emitted (yours-only edit, both unchanged) must still
+	 * advance the occurrence counter so a later conflict's ordinal reflects the block's true
+	 * position in the document. Mirrors the 2-way `diff_records()` placement of the counter.
+	 */
+	public function test_three_way_occurrence_counts_every_matched_pair(): void {
+		// Three Paragraph blocks. First yours-only edit (no entry). Second core-only edit
+		// (copy_change). Third both unchanged (no entry). The conflict's "occurrence" should
+		// be 2, NOT 1 — the second-of-three Paragraph in the document.
+		$base = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P1.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P2.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P3.',
+				),
+			)
+		);
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P1.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P2 changed by core.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P3.',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P1 edited by yours.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P2.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P3.',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertCount( 1, $diff['copy_changes'] );
+		$this->assertSame(
+			2,
+			$diff['copy_changes'][0]['occurrence'],
+			'The conflict on the second Paragraph should be labeled occurrence 2 of 3, not 1 of 3.'
+		);
+		$this->assertSame( 3, $diff['copy_changes'][0]['total'] );
+	}
+
+	/**
+	 * @testdox Three-way diff: structural wrappers route to structural_changes, not added_blocks/removed_blocks (CodeRabbit feedback on PR 64716).
+	 *
+	 * The selective applier skips structural blocks (`core/group`, `core/columns`, etc.) at
+	 * merge time, so surfacing them in `added_blocks` would advertise an "Added Group block"
+	 * the apply will never apply. Mirrors 2-way `diff_records()` behavior.
+	 */
+	public function test_three_way_routes_structural_wrappers_to_structural_changes(): void {
+		$base = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+			)
+		);
+		// Core adds a group wrapper; yours adds a columns wrapper.
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/group',
+					'inner_text' => '',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/columns',
+					'inner_text' => '',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$structural_names = array_map( static fn( array $e ): string => (string) ( $e['kind'] ?? '' ), $diff['structural_changes'] );
+		$this->assertContains( 'nest', $structural_names, 'Structural wrappers must route to structural_changes with kind "nest".' );
+		$this->assertCount(
+			2,
+			$diff['structural_changes'],
+			'Both yours-only and core-only structural wrappers should produce structural_changes entries.'
+		);
+		$this->assertSame( array(), $diff['added_blocks'], 'core/group must not appear in added_blocks.' );
+		$this->assertSame( array(), $diff['removed_blocks'], 'core/columns must not appear in removed_blocks.' );
+	}
+
+	/**
 	 * Build a list of flatten_blocks-shaped records from a simple list of name + inner_text pairs.
 	 * Each record gets a top-level path (`[$idx]`) and a null parent_name.
 	 *
