@@ -219,9 +219,8 @@ final class ShopperCollection extends AbstractBlock {
 		return array(
 			'modifierSlug'          => 'saved-for-later',
 			'emptyMessage'          => __( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
-			'removeButtonLabel'     => __( 'Remove', 'woocommerce' ),
 			/* translators: %s: product name. */
-			'removeLabelTemplate'   => __( 'Remove %s from saved items', 'woocommerce' ),
+			'removeLabelTemplate'   => __( 'Remove %s from Saved for later list', 'woocommerce' ),
 			/* translators: %d: quantity of saved items. */
 			'quantityLabelTemplate' => __( 'Quantity: %d', 'woocommerce' ),
 			'actionLabel'           => __( 'Move to cart', 'woocommerce' ),
@@ -312,21 +311,19 @@ final class ShopperCollection extends AbstractBlock {
 					<a data-wp-bind--href="context.listItem.permalink">
 						<span class="wc-block-shopper-collection-item__image-slot" data-wp-context='{"htmlField":"image_html"}' data-wp-watch="callbacks.updateInnerHtml"></span>
 					</a>
-					<div class="wc-block-components-product-image__inner-container">
-						<button
-							type="button"
-							class="wc-block-shopper-collection-item__remove"
-							data-wp-on--click="actions.onClickRemove"
-							data-wp-bind--aria-label="state.currentItemRemoveLabel"
-						>
-							<?php echo esc_html( $variation['removeButtonLabel'] ); ?>
-						</button>
-					</div>
+					<button
+						type="button"
+						class="wc-block-shopper-collection-item__remove"
+						data-wp-on--click="actions.onClickRemove"
+						data-wp-bind--aria-label="state.currentItemRemoveLabel"
+					>
+						<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
+					</button>
+					<span class="wc-block-shopper-collection-item__variation" data-wp-bind--hidden="!state.currentItemVariationLabel" data-wp-text="state.currentItemVariationLabel"></span>
 				</div>
 				<h2 class="wp-block-post-title has-text-align-center has-medium-font-size">
 					<a data-wp-bind--href="context.listItem.permalink" data-wp-text="state.currentItemDisplayName"></a>
 				</h2>
-				<span class="wc-block-shopper-collection-item__variation" data-wp-bind--hidden="!state.currentItemVariationLabel" data-wp-text="state.currentItemVariationLabel"></span>
 				<div class="price wc-block-components-product-price has-text-align-center has-small-font-size" data-wp-bind--hidden="state.isPriceHidden" data-wp-context='{"htmlField":"price_html"}' data-wp-watch="callbacks.updateInnerHtml"></div>
 				<span class="wc-block-shopper-collection-item__quantity" data-wp-text="state.currentItemQuantityLabel"></span>
 				<?php if ( ! empty( $variation['showAction'] ) ) : ?>
@@ -422,17 +419,18 @@ final class ShopperCollection extends AbstractBlock {
 						<?php echo wp_kses_post( $image_html ); ?>
 					</span>
 				</a>
-				<div class="wc-block-components-product-image__inner-container">
-					<button
-						type="button"
-						class="wc-block-shopper-collection-item__remove"
-						aria-label="<?php echo esc_attr( $remove_aria ); ?>"
-						data-wp-on--click="actions.onClickRemove"
-						data-wp-bind--aria-label="state.currentItemRemoveLabel"
-					>
-						<?php echo esc_html( $variation['removeButtonLabel'] ); ?>
-					</button>
-				</div>
+				<button
+					type="button"
+					class="wc-block-shopper-collection-item__remove"
+					aria-label="<?php echo esc_attr( $remove_aria ); ?>"
+					data-wp-on--click="actions.onClickRemove"
+					data-wp-bind--aria-label="state.currentItemRemoveLabel"
+				>
+					<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
+				</button>
+				<?php if ( '' !== $variation_label ) : ?>
+					<span class="wc-block-shopper-collection-item__variation"><?php echo esc_html( $variation_label ); ?></span>
+				<?php endif; ?>
 			</div>
 			<?php
 			// Render the decoded display name as plain text so the SSR
@@ -445,9 +443,6 @@ final class ShopperCollection extends AbstractBlock {
 			<h2 class="wp-block-post-title has-text-align-center has-medium-font-size">
 				<a <?php echo $product_exists && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink" data-wp-text="state.currentItemDisplayName"><?php echo esc_html( $alt ); ?></a>
 			</h2>
-			<?php if ( '' !== $variation_label ) : ?>
-				<span class="wc-block-shopper-collection-item__variation"><?php echo esc_html( $variation_label ); ?></span>
-			<?php endif; ?>
 			<div
 				class="price wc-block-components-product-price has-text-align-center has-small-font-size"
 				data-wp-bind--hidden="state.isPriceHidden"
@@ -534,6 +529,19 @@ final class ShopperCollection extends AbstractBlock {
 	 */
 	private function render_error_markup(): string {
 		return '<li class="wc-block-shopper-collection__error" role="alert" data-wp-bind--hidden="!state.hasError" data-wp-text="state.errorMessage" hidden></li>';
+	}
+
+	/**
+	 * Markup for the trash icon used in the remove-item button. Mirrors the
+	 * `trash` icon from `@wordpress/icons` that the cart line item uses for
+	 * `wc-block-cart-item__remove-link`, inlined here so SSR first paint
+	 * matches what JS would render after hydration. `currentColor` lets the
+	 * surrounding badge wrapper drive the fill.
+	 *
+	 * @return string
+	 */
+	private function get_remove_icon_svg(): string {
+		return '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false"><path fill="currentColor" fill-rule="evenodd" clip-rule="evenodd" d="M12 5.5A2.25 2.25 0 0 0 9.878 7h4.244A2.251 2.251 0 0 0 12 5.5ZM12 4a3.751 3.751 0 0 0-3.675 3H5v1.5h1.27l.818 8.997a2.75 2.75 0 0 0 2.739 2.501h4.347a2.75 2.75 0 0 0 2.738-2.5L17.73 8.5H19V7h-3.325A3.751 3.751 0 0 0 12 4Zm4.224 4.5H7.776l.806 8.861a1.25 1.25 0 0 0 1.245 1.137h4.347a1.25 1.25 0 0 0 1.245-1.137l.805-8.861Z"/></svg>';
 	}
 
 	/**

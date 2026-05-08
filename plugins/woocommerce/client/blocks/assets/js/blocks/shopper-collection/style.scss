@@ -1,30 +1,16 @@
 // Frontend stylesheet for the Shopper Collection block.
 // Diverges from `editor.scss` because the editor canvas loads the
 // WooCommerce atomic block stylesheet for free (which provides image
-// sizing, the relative/absolute positioning for the remove-button
-// overlay, etc.); the frontend only ships this block's CSS, so anything
-// the layout depends on has to live here. If we add pieces to
-// editor.scss that the frontend also needs, mirror them here too —
-// keep the visual result aligned.
+// sizing for the borrowed `.wc-block-components-product-image` class);
+// the frontend only ships this block's CSS, so anything the layout
+// depends on has to live here. If we add pieces to editor.scss that
+// the frontend also needs, mirror them here too — keep the visual
+// result aligned.
 // TODO: revisit how this block depends on atomic-block CSS. We currently
-// borrow `.wc-block-components-product-image` / `__inner-container` from
-// the product-image atomic block. Product Collection avoids this problem
-// by *rendering* the atomic blocks as inner blocks, so WordPress
-// auto-enqueues their stylesheets — we don't, so we have to handle it
-// ourselves. Three options:
-//   1. (current) Duplicate the rules we need into this file.
-//      Self-contained but drifts if atomic styles change upstream.
-//   2. Enqueue the atomic image stylesheet from ShopperCollection.php
-//      (e.g. `wp_enqueue_style( 'wc-block-product-elements-image' )` —
-//      verify the actual handle in the build). Zero duplication, but
-//      pulls in the whole atomic stylesheet for a few rules.
-//   3. Stop borrowing atomic classes — give our markup its own
-//      block-local classes (e.g. `wc-block-shopper-collection-item__image`,
-//      `__image-link`) and own all the styling. Cleanest ownership, but
-//      requires a small template rewrite.
-// Option 1 is the lightest while we only borrow two classes; switch to
-// option 2 if we end up borrowing more, or option 3 if a future
-// variation needs different image/overlay behaviour.
+// borrow `.wc-block-components-product-image` from the product-image
+// atomic block. Product Collection avoids this problem by *rendering*
+// the atomic blocks as inner blocks, so WordPress auto-enqueues their
+// stylesheets — we don't, so we have to handle it ourselves.
 
 .wc-block-shopper-collection {
 	display: grid;
@@ -46,7 +32,7 @@
 	// `.wc-block-components-product-image` is normally styled by the
 	// atomic-block stylesheet. Reproduce just enough here so the
 	// image fills its column track and acts as a positioning anchor
-	// for the remove-button overlay.
+	// for the remove-button badge overlay.
 	.wc-block-components-product-image {
 		display: block;
 		margin: 0;
@@ -60,18 +46,6 @@
 		}
 	}
 
-	// The remove button lives inside `__inner-container` which the
-	// atomic stylesheet positions absolutely in the top-right of the
-	// image. Replicate that here so the button overlays rather than
-	// stacking below the thumbnail.
-	.wc-block-components-product-image__inner-container {
-		padding: 0.5em;
-		position: absolute;
-		right: 0;
-		top: 0;
-		z-index: 10;
-	}
-
 	// Title spacing/line-height matches Product Collection's default
 	// product-title attributes (level: 2, margin: 0 0 0.75rem, line-height: 1.4).
 	// We target wp-block-post-title (core's post-title class) because the
@@ -81,10 +55,9 @@
 		margin: 0 0 0.75rem;
 	}
 
-	// Variation and quantity have no atomic equivalent in Product Collection,
-	// so we own their styling. Center-aligned and small to mirror the rest
-	// of the row (price + button use the WP `has-small-font-size` preset).
-	&__variation,
+	// Quantity has no atomic equivalent in Product Collection, so we own
+	// its styling. Center-aligned and small to mirror the rest of the row
+	// (price + button use the WP `has-small-font-size` preset).
 	&__quantity {
 		color: rgba(0, 0, 0, 0.7);
 		display: block;
@@ -92,27 +65,73 @@
 		text-align: center;
 	}
 
-	// The remove button is centered inside `__inner-container`, which is
-	// itself absolutely positioned over the image. No alignment hacks
-	// needed here; just style the pill.
+	// Variation overlay sits at the bottom of the image and shares the
+	// remove badge's border/background/radius so the two corner overlays
+	// read as a pair. Spans the full image width (with the same 4px inset
+	// the remove badge uses on top/right) and is only rendered for
+	// variation products, so when absent the image isn't pushed around.
+	&__variation {
+		background: #fff;
+		border: 1px solid #43454b;
+		border-radius: 4px;
+		bottom: 4px;
+		box-sizing: border-box;
+		color: #43454b;
+		font-size: var(--wp--preset--font-size--small, 0.875em);
+		left: 4px;
+		padding: 0.25em 0.75em;
+		position: absolute;
+		right: 4px;
+		text-align: center;
+		z-index: 10;
+	}
+
+	// Icon-only Remove button overlaying the image. Visually mirrors the
+	// `wc-block-components-product-sale-badge--align-right` overlay (same
+	// border, radius, colors, white fill, top-right inset over the image)
+	// so it reads as a corner badge. Symmetric padding keeps the hit
+	// area square. Hover inverts the colors for a clear affordance.
 	&__remove {
 		appearance: none;
-		background: rgba(0, 0, 0, 0.65);
-		border: 0;
-		border-radius: 999px;
-		color: #fff;
+		background: #fff;
+		border: 1px solid #fff;
+		border-radius: 4px;
+		box-sizing: border-box;
+		color: #43454b;
 		cursor: pointer;
-		font-size: var(--wp--preset--font-size--small, 0.75em);
-		line-height: 1;
-		padding: 0.4em 0.75em;
+		display: block;
+		line-height: 0;
+		padding: 0.25em;
+		position: absolute;
+		right: 4px;
+		top: 4px;
+		transition: background-color 120ms ease, color 120ms ease;
+		z-index: 10;
+
+		svg {
+			display: block;
+			fill: currentColor;
+		}
+
+		&:hover:not([disabled]) {
+			background: #43454b;
+			color: #fff;
+		}
+
+		// Keyboard focus indicator. The default :focus-visible ring would
+		// land on a transparent border against the white badge body and
+		// be invisible, so paint our own — outline (so it sits outside the
+		// border without nudging layout) plus a soft offset to keep it
+		// readable over both the badge body and the product image behind
+		// it. Not applied to :hover-only — pointer users keep the invert.
+		&:focus-visible:not([disabled]) {
+			outline: 2px solid #43454b;
+			outline-offset: 1px;
+		}
 
 		&[disabled] {
 			cursor: not-allowed;
 			opacity: 0.7;
-		}
-
-		&:hover:not([disabled]) {
-			background: rgba(0, 0, 0, 0.85);
 		}
 	}
 }
