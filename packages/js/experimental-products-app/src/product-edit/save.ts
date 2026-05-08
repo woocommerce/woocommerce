@@ -69,6 +69,7 @@ function restoreUnselectedVariationEdits(
 	productId: number,
 	products: ProductEntityRecord[],
 	savedVariationIds: Set< number >,
+	selectedVariationIds: Set< number >,
 	editEntityRecord: EditProductRecord
 ) {
 	const editedProduct = getEditedProduct( productId );
@@ -86,7 +87,10 @@ function restoreUnselectedVariationEdits(
 		] )
 	);
 	const restoredVariations = editedVariations.map( ( variation ) => {
-		if ( savedVariationIds.has( variation.id ) ) {
+		if (
+			savedVariationIds.has( variation.id ) ||
+			selectedVariationIds.has( variation.id )
+		) {
 			return variation;
 		}
 
@@ -238,6 +242,9 @@ export async function saveSelectedProducts( {
 } ) {
 	const savedVariationIds = new Set< number >();
 	const selectedVariations = selectedProducts.filter( isProductVariation );
+	const selectedVariationIds = new Set(
+		selectedVariations.map( ( variation ) => variation.id )
+	);
 	const productIdsToSave = new Set(
 		selectedProducts
 			.filter( ( product ) => ! isProductVariation( product ) )
@@ -262,6 +269,7 @@ export async function saveSelectedProducts( {
 				productId,
 				products,
 				savedVariationIds,
+				selectedVariationIds,
 				editEntityRecord
 			);
 
