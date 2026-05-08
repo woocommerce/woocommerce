@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\MCP;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\REST\RestAbilityFactory;
 use Automattic\WooCommerce\Internal\MCP\Transport\WooCommerceRestTransport;
 
 defined( 'ABSPATH' ) || exit;
@@ -175,7 +176,10 @@ class MCPAdapterProvider {
 				 *
 				 * @since 10.3.0
 				 *
-				 * @param bool   $include    Whether to include the ability.
+				 * @param bool   $include    Whether to include the ability by default. True when the ability has
+				 *                            `expose_in_deprecated_woocommerce_mcp => true` in its metadata
+				 *                            (set automatically on REST-derived abilities by RestAbilityFactory).
+				 *                            Return unchanged to keep the default, or return true/false to override.
 				 * @param string $ability_id The ability ID.
 				 */
 				return apply_filters( 'woocommerce_mcp_include_ability', $include, $ability_id );
@@ -192,15 +196,22 @@ class MCPAdapterProvider {
 	 * REST-derived abilities can opt in to the deprecated WooCommerce MCP endpoint.
 	 * Require explicit metadata so semantic/domain abilities can use WooCommerce
 	 * namespaces without expanding the deprecated MCP tool list.
+	 * This intentionally allows abilities from any namespace to opt in to the
+	 * deprecated endpoint while keeping namespace and transport exposure separate.
 	 *
 	 * @param string $ability_id Ability ID.
 	 * @return bool Whether to include the ability by default.
 	 */
 	private static function should_include_ability_by_default( string $ability_id ): bool {
+		// Keep the pre-check to avoid triggering _doing_it_wrong() for stale or mocked registry IDs.
 		if ( function_exists( 'wp_get_ability' ) && function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
 			$ability = wp_get_ability( $ability_id );
 			if ( $ability ) {
-				return true === $ability->get_meta_item( 'expose_in_deprecated_woocommerce_mcp', false );
+				// Strict boolean required: truthy values like 1 or "true" are intentionally excluded.
+				return true === $ability->get_meta_item(
+					RestAbilityFactory::EXPOSE_IN_DEPRECATED_MCP_META_KEY,
+					false
+				);
 			}
 		}
 
