@@ -301,6 +301,15 @@ class WCEmailTemplateSyncBackfill {
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $current_core_hash );
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, gmdate( 'Y-m-d H:i:s' ) );
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $status_for_stamp );
+		// Snapshot the canonical core render alongside the source hash so the
+		// three-way diff change-summary shipping in 10.9 has a `base` reference
+		// to compare against on existing 10.8-era posts. Forward-compatible:
+		// 10.8 has no consumer for this meta yet.
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $canonical_post_content );
+		// Mark the post as backfilled so later release Tracks instrumentation
+		// (RSM-145, shipping in 10.9) can distinguish backfilled posts from
+		// natively generated ones.
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, true );
 	}
 
 	/**
