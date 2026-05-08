@@ -26,12 +26,26 @@ abstract class DomainAbility {
 			'type'                 => 'object',
 			'properties'           => array(
 				$collection_key => array(
-					'type'  => 'array',
-					'items' => $item_schema,
+					'type'        => 'array',
+					'description' => sprintf(
+						/* translators: %s: Collection key, such as products or orders. */
+						__( 'Returned %s for the current page.', 'woocommerce' ),
+						$collection_key
+					),
+					'items'       => $item_schema,
 				),
-				'total'         => array( 'type' => 'integer' ),
-				'page'          => array( 'type' => 'integer' ),
-				'per_page'      => array( 'type' => 'integer' ),
+				'total_pages'    => array(
+					'type'        => 'integer',
+					'description' => __( 'Total number of result pages available for the current query.', 'woocommerce' ),
+				),
+				'page'           => array(
+					'type'        => 'integer',
+					'description' => __( 'Current result page.', 'woocommerce' ),
+				),
+				'per_page'       => array(
+					'type'        => 'integer',
+					'description' => __( 'Maximum number of items requested per page.', 'woocommerce' ),
+				),
 			),
 			'additionalProperties' => false,
 		);

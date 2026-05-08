@@ -32,7 +32,7 @@ class TestExtensionAbilityDefinition implements AbilityDefinition {
 	 */
 	public static function get_registration_args(): array {
 		return array(
-			'label'               => 'Test Extension Ability',
+			'label'               => 'Test extension ability',
 			'description'         => 'Test extension ability registered through the WooCommerce ability loader.',
 			'category'            => 'woocommerce',
 			'execute_callback'    => static function (): array {
@@ -53,6 +53,11 @@ class TestExtensionAbilityDefinition implements AbilityDefinition {
 				'mcp'          => array(
 					'public' => true,
 					'type'   => 'tool',
+				),
+				'annotations'  => array(
+					'readonly'    => true,
+					'idempotent'  => true,
+					'destructive' => false,
 				),
 			),
 		);

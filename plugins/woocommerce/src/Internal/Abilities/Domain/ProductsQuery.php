@@ -40,7 +40,7 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 	 */
 	public static function get_registration_args(): array {
 		return array(
-			'label'               => __( 'Query Products', 'woocommerce' ),
+			'label'               => __( 'Query products', 'woocommerce' ),
 			'description'         => __(
 				'Find WooCommerce products by ID or common catalog filters using WooCommerce product APIs.',
 				'woocommerce'
@@ -90,10 +90,10 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 			}
 
 			return array(
-				'products' => array( self::format_product_for_response( $product ) ),
-				'total'    => 1,
-				'page'     => 1,
-				'per_page' => 1,
+				'products'    => array( self::format_product_for_response( $product ) ),
+				'total_pages' => 1,
+				'page'        => 1,
+				'per_page'    => 1,
 			);
 		}
 
@@ -129,18 +129,18 @@ class ProductsQuery extends DomainAbility implements AbilityDefinition {
 
 		$results  = wc_get_products( $args );
 		$products = is_object( $results ) && isset( $results->products ) ? $results->products : array();
-		$total    = is_object( $results ) && isset( $results->total ) ? (int) $results->total : count( $products );
+		$pages    = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $products ) > 0 ? 1 : 0 );
 
 		return array(
-			'products' => array_map(
+			'products'    => array_map(
 				static function ( $product ) {
 					return self::format_product_for_response( $product );
 				},
 				$products
 			),
-			'total'    => $total,
-			'page'     => $page,
-			'per_page' => $per_page,
+			'total_pages' => $pages,
+			'page'        => $page,
+			'per_page'    => $per_page,
 		);
 	}
 

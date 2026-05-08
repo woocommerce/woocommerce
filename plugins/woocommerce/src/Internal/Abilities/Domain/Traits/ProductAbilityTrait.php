@@ -39,11 +39,13 @@ trait ProductAbilityTrait {
 				'sku'               => array( 'type' => 'string' ),
 				'regular_price'     => array(
 					'type'        => 'string',
-					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+					'description' => __( 'Decimal price as a string, without a currency symbol or thousand separators.', 'woocommerce' ),
+					'pattern'     => self::get_product_price_input_pattern(),
 				),
 				'sale_price'        => array(
 					'type'        => 'string',
-					'description' => __( 'Decimal price as a string, without a currency symbol.', 'woocommerce' ),
+					'description' => __( 'Decimal price as a string, without a currency symbol or thousand separators.', 'woocommerce' ),
+					'pattern'     => self::get_product_price_input_pattern(),
 				),
 				'description'       => array(
 					'type'        => 'string',
@@ -431,6 +433,10 @@ trait ProductAbilityTrait {
 			return esc_url_raw( $value );
 		}
 
+		if ( in_array( $field, array( 'regular_price', 'sale_price' ), true ) ) {
+			return self::prepare_product_price_value( $value );
+		}
+
 		if ( 'grouped_products' === $field ) {
 			if ( ! is_array( $value ) ) {
 				return new \WP_Error(
@@ -462,6 +468,78 @@ trait ProductAbilityTrait {
 		}
 
 		return $value;
+	}
+
+	/**
+	 * Prepare a product price before passing it to the product setter.
+	 *
+	 * @param mixed $value Price value.
+	 * @return string|\WP_Error
+	 */
+	private static function prepare_product_price_value( $value ) {
+		if ( ! is_scalar( $value ) || is_bool( $value ) ) {
+			return self::get_invalid_product_price_error();
+		}
+
+		$value = trim( (string) $value );
+
+		if ( 1 !== preg_match( '/' . self::get_product_price_input_pattern() . '/', $value ) ) {
+			return self::get_invalid_product_price_error();
+		}
+
+		return wc_format_decimal( $value );
+	}
+
+	/**
+	 * Get a schema-compatible pattern for product price inputs.
+	 *
+	 * @return string
+	 */
+	private static function get_product_price_input_pattern(): string {
+		$decimal_separators = array_map(
+			static function ( string $separator ): string {
+				return preg_quote( $separator, '/' );
+			},
+			self::get_product_price_decimal_separators()
+		);
+		$decimal_separator_pattern = implode( '', $decimal_separators );
+
+		return '^(?:-?(?:[0-9]+(?:[' . $decimal_separator_pattern . '][0-9]+)?|[' . $decimal_separator_pattern . '][0-9]+)|)$';
+	}
+
+	/**
+	 * Get decimal separators accepted by WooCommerce decimal formatting.
+	 *
+	 * @return array<int, string>
+	 */
+	private static function get_product_price_decimal_separators(): array {
+		$locale = localeconv();
+
+		return array_values(
+			array_unique(
+				array_filter(
+					array(
+						wc_get_price_decimal_separator(),
+						$locale['decimal_point'] ?? '',
+						$locale['mon_decimal_point'] ?? '',
+					),
+					'strlen'
+				)
+			)
+		);
+	}
+
+	/**
+	 * Get an invalid product price error.
+	 *
+	 * @return \WP_Error
+	 */
+	private static function get_invalid_product_price_error(): \WP_Error {
+		return new \WP_Error(
+			'woocommerce_product_price_invalid',
+			__( 'Product prices must be decimal strings without currency symbols or thousand separators.', 'woocommerce' ),
+			array( 'status' => 400 )
+		);
 	}
 
 	/**

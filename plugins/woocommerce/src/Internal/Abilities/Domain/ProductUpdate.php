@@ -40,7 +40,7 @@ class ProductUpdate extends DomainAbility implements AbilityDefinition {
 	 */
 	public static function get_registration_args(): array {
 		return array(
-			'label'               => __( 'Update Product', 'woocommerce' ),
+			'label'               => __( 'Update product', 'woocommerce' ),
 			'description'         => __(
 				'Update an existing WooCommerce product using WooCommerce product APIs.',
 				'woocommerce'

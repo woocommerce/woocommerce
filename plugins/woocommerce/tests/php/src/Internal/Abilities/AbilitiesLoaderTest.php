@@ -278,6 +278,30 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should describe collection pagination metadata in query outputs.
+	 */
+	public function test_collection_output_schemas_describe_pagination_metadata(): void {
+		$schemas = array(
+			'woocommerce/products-query' => 'products',
+			'woocommerce/orders-query'   => 'orders',
+		);
+
+		foreach ( $schemas as $ability_id => $collection_key ) {
+			$properties = wp_get_ability( $ability_id )->get_output_schema()['properties'] ?? array();
+
+			$this->assertArrayHasKey( $collection_key, $properties );
+			$this->assertArrayHasKey( 'total_pages', $properties );
+			$this->assertArrayHasKey( 'page', $properties );
+			$this->assertArrayHasKey( 'per_page', $properties );
+			$this->assertArrayNotHasKey( 'total', $properties );
+			$this->assertNotEmpty( $properties[ $collection_key ]['description'] ?? '' );
+			$this->assertNotEmpty( $properties['total_pages']['description'] ?? '' );
+			$this->assertNotEmpty( $properties['page']['description'] ?? '' );
+			$this->assertNotEmpty( $properties['per_page']['description'] ?? '' );
+		}
+	}
+
+	/**
 	 * @testdox Should expose agent-friendly product type inputs for product operations.
 	 */
 	public function test_product_schema_uses_agent_friendly_product_types(): void {
@@ -696,6 +720,68 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject non-numeric product prices during schema validation.
+	 *
+	 * @dataProvider provider_invalid_product_price_inputs
+	 *
+	 * @param string $price Invalid price input.
+	 */
+	public function test_product_create_rejects_non_numeric_prices( string $price ): void {
+		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'          => 'Invalid Price Product',
+				'regular_price' => $price,
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * Provides invalid product price inputs.
+	 *
+	 * @return array<string, array{0: string}>
+	 */
+	public function provider_invalid_product_price_inputs(): array {
+		return array(
+			'text'               => array( 'free' ),
+			'currency-symbol'    => array( '$10.00' ),
+			'thousand-separator' => array( '1,234.56' ),
+		);
+	}
+
+	/**
+	 * @testdox Should accept the configured WooCommerce decimal separator for product prices.
+	 */
+	public function test_product_create_accepts_configured_decimal_separator_for_prices(): void {
+		$original_decimal_separator = get_option( 'woocommerce_price_decimal_sep' );
+		$created                    = null;
+
+		$this->unregister_domain_abilities();
+		update_option( 'woocommerce_price_decimal_sep', ',' );
+
+		try {
+			$this->register_domain_abilities();
+
+			$created = wp_get_ability( 'woocommerce/product-create' )->execute(
+				array(
+					'name'          => 'Localized Price Product',
+					'regular_price' => '10,99',
+				)
+			);
+		} finally {
+			$this->unregister_domain_abilities();
+			update_option( 'woocommerce_price_decimal_sep', $original_decimal_separator );
+			$this->register_domain_abilities();
+		}
+
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$this->assertSame( '10.99', $created['product']['regular_price'] );
+	}
+
+	/**
 	 * @testdox Should reject whitespace-only order notes during schema validation.
 	 */
 	public function test_order_add_note_schema_rejects_whitespace_only_note(): void {
@@ -772,6 +858,58 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject negative order query filter IDs during schema validation.
+	 *
+	 * @dataProvider provider_negative_order_query_filter_id_inputs
+	 *
+	 * @param array $input Ability input.
+	 */
+	public function test_orders_query_filter_id_schemas_reject_negative_ids( array $input ): void {
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( $input );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_input', $result->get_error_code() );
+	}
+
+	/**
+	 * Provides negative order query filter ID inputs.
+	 *
+	 * @return array<string, array{0: array}>
+	 */
+	public function provider_negative_order_query_filter_id_inputs(): array {
+		return array(
+			'customer-id' => array(
+				array( 'customer_id' => -123 ),
+			),
+			'parent'      => array(
+				array( 'parent' => -123 ),
+			),
+		);
+	}
+
+	/**
+	 * @testdox Should allow customer_id=0 to filter guest orders.
+	 */
+	public function test_orders_query_allows_customer_id_zero_for_guest_orders(): void {
+		$email = wp_unique_id( 'abilities-guest-order-' ) . '@example.com';
+		$order = \WC_Helper_Order::create_order();
+		$order->set_customer_id( 0 );
+		$order->set_billing_email( $email );
+		$order->save();
+		$this->created_order_ids[] = $order->get_id();
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'customer_id'   => 0,
+				'billing_email' => $email,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( array( $order->get_id() ), array_column( $result['orders'], 'id' ) );
+	}
+
+	/**
 	 * Provides order storage engine states.
 	 *
 	 * @return array<string, array{0: bool}>
@@ -838,7 +976,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['total_pages'] );
 		$this->assertSame( $draft->get_id(), $result['products'][0]['id'] );
 	}
 
@@ -917,7 +1055,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $physical_result );
-		$this->assertSame( 1, $physical_result['total'] );
+		$this->assertSame( 1, $physical_result['total_pages'] );
 		$this->assertSame( $physical['product']['id'], $physical_result['products'][0]['id'] );
 
 		$digital_result = wp_get_ability( 'woocommerce/products-query' )->execute(
@@ -928,7 +1066,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $digital_result );
-		$this->assertSame( 1, $digital_result['total'] );
+		$this->assertSame( 1, $digital_result['total_pages'] );
 		$this->assertSame( $digital['product']['id'], $digital_result['products'][0]['id'] );
 
 		$mismatched_result = wp_get_ability( 'woocommerce/products-query' )->execute(
@@ -939,7 +1077,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $mismatched_result );
-		$this->assertSame( 0, $mismatched_result['total'] );
+		$this->assertSame( 0, $mismatched_result['total_pages'] );
 	}
 
 	/**
@@ -1345,7 +1483,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		);
 
 		$this->assertNotWPError( $result );
-		$this->assertSame( 1, $result['total'] );
+		$this->assertSame( 1, $result['total_pages'] );
 		$this->assertSame( $order->get_id(), $result['orders'][0]['id'] );
 		$this->assertNotEmpty( $result['orders'][0]['line_items'] );
 		$this->assertNotEmpty( $result['orders'][0]['currency_symbol'] );

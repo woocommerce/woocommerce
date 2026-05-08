@@ -40,7 +40,7 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 	 */
 	public static function get_registration_args(): array {
 		return array(
-			'label'               => __( 'Update Order Status', 'woocommerce' ),
+			'label'               => __( 'Update order status', 'woocommerce' ),
 			'description'         => __(
 				'Update a WooCommerce order status using WooCommerce order APIs.',
 				'woocommerce'

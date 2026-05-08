@@ -39,7 +39,7 @@ class ProductCreate extends DomainAbility implements AbilityDefinition {
 	 */
 	public static function get_registration_args(): array {
 		return array(
-			'label'               => __( 'Create Product', 'woocommerce' ),
+			'label'               => __( 'Create product', 'woocommerce' ),
 			'description'         => __(
 				'Create a WooCommerce product using WooCommerce product APIs.',
 				'woocommerce'

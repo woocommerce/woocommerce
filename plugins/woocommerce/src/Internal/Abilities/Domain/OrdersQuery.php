@@ -40,7 +40,7 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 	 */
 	public static function get_registration_args(): array {
 		return array(
-			'label'               => __( 'Query Orders', 'woocommerce' ),
+			'label'               => __( 'Query orders', 'woocommerce' ),
 			'description'         => __(
 				'Find WooCommerce orders by ID or common order filters using WooCommerce order APIs.',
 				'woocommerce'
@@ -84,10 +84,10 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			}
 
 			return array(
-				'orders'   => array( self::format_order_for_response( $order, $include_line_items ) ),
-				'total'    => 1,
-				'page'     => 1,
-				'per_page' => 1,
+				'orders'      => array( self::format_order_for_response( $order, $include_line_items ) ),
+				'total_pages' => 1,
+				'page'        => 1,
+				'per_page'    => 1,
 			);
 		}
 
@@ -114,12 +114,12 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 
 		foreach ( array( 'customer_id', 'parent' ) as $field ) {
 			if ( isset( $input[ $field ] ) ) {
-				$args[ $field ] = absint( $input[ $field ] );
+				$args[ $field ] = (int) $input[ $field ];
 			}
 		}
 
 		if ( ! empty( $input['exclude'] ) && is_array( $input['exclude'] ) ) {
-			$args['exclude'] = array_map( 'absint', $input['exclude'] );
+			$args['exclude'] = array_map( 'intval', $input['exclude'] );
 		}
 
 		foreach ( array( 'date_after', 'date_before' ) as $field ) {
@@ -143,18 +143,18 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 				}
 			)
 		);
-		$total   = is_object( $results ) && isset( $results->total ) ? (int) $results->total : count( $orders );
+		$pages   = is_object( $results ) && isset( $results->max_num_pages ) ? (int) $results->max_num_pages : ( count( $orders ) > 0 ? 1 : 0 );
 
 		return array(
-			'orders'   => array_map(
+			'orders'      => array_map(
 				static function ( $order ) use ( $include_line_items ) {
 					return self::format_order_for_response( $order, $include_line_items );
 				},
 				$orders
 			),
-			'total'    => $total,
-			'page'     => $page,
-			'per_page' => $per_page,
+			'total_pages' => $pages,
+			'page'        => $page,
+			'per_page'    => $per_page,
 		);
 	}
 
@@ -193,6 +193,7 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 				'customer_id'        => array(
 					'type'        => 'integer',
 					'description' => __( 'Filter by customer ID. Use 0 to filter guest orders.', 'woocommerce' ),
+					'minimum'     => 0,
 				),
 				'billing_email'      => array(
 					'type'   => 'string',
@@ -201,6 +202,7 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 				'parent'             => array(
 					'type'        => 'integer',
 					'description' => __( 'Filter by parent order ID.', 'woocommerce' ),
+					'minimum'     => 1,
 				),
 				'exclude'            => array(
 					'type'        => 'array',

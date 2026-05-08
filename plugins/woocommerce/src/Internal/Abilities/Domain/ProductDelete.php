@@ -40,7 +40,7 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 	 */
 	public static function get_registration_args(): array {
 		return array(
-			'label'               => __( 'Delete Product', 'woocommerce' ),
+			'label'               => __( 'Delete product', 'woocommerce' ),
 			'description'         => __(
 				'Delete a WooCommerce product using WooCommerce product APIs.',
 				'woocommerce'
