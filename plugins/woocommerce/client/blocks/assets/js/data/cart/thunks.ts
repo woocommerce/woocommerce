@@ -487,12 +487,14 @@ export const removeItemFromCart =
 /**
  * Saves a cart line item to the saved-for-later shopper list.
  *
- * On success, emits a `wc-blocks_store_sync_required` event with
- * `detail.type === 'shopper-list-changed'` so a `woocommerce/shopper-lists`
- * iAPI store on the same page (rendered by a Shopper Collection block)
- * refetches and reconciles. Mirrors the ping-and-refetch pattern this store
- * already uses to sync with the iAPI cart store — no payload on the wire,
- * the listener owns the reconcile.
+ * On success, emits a `wc-blocks_store_sync_required` event with the saved
+ * item in `detail.item` so a `woocommerce/shopper-lists` iAPI store on the
+ * same page (rendered by a Shopper Collection block) can splice the row
+ * into its local state — no extra GET, no race window between a slow
+ * refetch and concurrent mutations. Same envelope the cart's iAPI → wp.data
+ * sync uses to ship payloads (`detail.type === 'from_iAPI'` carries
+ * `quantityChanges`); this is the wp.data → iAPI direction of the same
+ * pattern.
  *
  * Removing the item from the cart is the caller's responsibility — keep the
  * two awaits separate so save and remove errors can be reported distinctly.
@@ -513,8 +515,9 @@ export const saveForLater =
 		window.dispatchEvent(
 			new CustomEvent( 'wc-blocks_store_sync_required', {
 				detail: {
-					type: 'shopper-list-changed',
+					type: 'shopper-list-item-added',
 					slug: 'saved-for-later',
+					item: response,
 				},
 			} )
 		);

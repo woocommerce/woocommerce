@@ -169,7 +169,7 @@ async function restRequest< T >(
 // so an empty-string default would clobber the values seeded server-side via
 // `wp_interactivity_state`. State for those fields comes purely from PHP. Same
 // reason the cart store doesn't ship state defaults — see cart.ts.
-const { state, actions } = store< Store >(
+const { state } = store< Store >(
 	'woocommerce/shopper-lists',
 	{
 		actions: {
@@ -289,17 +289,33 @@ const { state, actions } = store< Store >(
 	{ lock: universalLock }
 );
 
-// Listen for shopper-list mutations emitted from the wp.data side (e.g. the
-// cart store's saveForLater thunk). Mirrors the cart store's ping-and-refetch
-// pattern: the producer announces "this list changed" with no payload, and
-// this side refetches to reconcile. Keeps the discriminator contract in sync
-// with `assets/js/data/cart/thunks.ts::saveForLater`.
+// Listen for shopper-list item additions emitted from the wp.data side (e.g.
+// the cart store's saveForLater thunk). Mirrors the cart's iAPI → wp.data
+// sync direction, which also ships a payload (`from_iAPI` carries
+// `quantityChanges`). The event carries the saved item directly so we can
+// splice it in without an extra GET — keeps the merge ordering deterministic
+// and avoids the loadList-vs-mutation race the iAPI store's loadList still
+// has a TODO about.
+//
+// Keeps the discriminator + payload contract in sync with
+// `assets/js/data/cart/thunks.ts::saveForLater`.
 window.addEventListener( 'wc-blocks_store_sync_required', ( event: Event ) => {
 	const detail = ( event as CustomEvent ).detail as
-		| { type?: string; slug?: string }
+		| { type?: string; slug?: string; item?: RawShopperListItem }
 		| undefined;
-	if ( detail?.type !== 'shopper-list-changed' || ! detail.slug ) {
+	if ( detail?.type !== 'shopper-list-item-added' ) {
 		return;
 	}
-	actions.loadList( detail.slug );
+	if ( ! detail.slug || ! isShopperListItem( detail.item ) ) {
+		return;
+	}
+	const list = ensureListState( state, detail.slug );
+	const item = detail.item;
+	const existingIndex = list.items.findIndex( ( i ) => i.key === item.key );
+	if ( existingIndex >= 0 ) {
+		list.items[ existingIndex ] = item;
+	} else {
+		list.items.push( item );
+	}
+	list.error = null;
 } );
