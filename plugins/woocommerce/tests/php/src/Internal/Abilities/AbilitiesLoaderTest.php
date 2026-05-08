@@ -1761,6 +1761,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_order_status_unchanged', $result->get_error_code() );
+		$this->assertStringContainsString( 'woocommerce/order-add-note', $result->get_error_message() );
 		$this->assertSame(
 			$note_count_before,
 			count(

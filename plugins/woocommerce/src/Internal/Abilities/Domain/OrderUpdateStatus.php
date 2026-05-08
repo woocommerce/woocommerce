@@ -102,7 +102,7 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 			return new \WP_Error(
 				'woocommerce_order_status_unchanged',
 				__(
-					'Order already has this status. Use Add order note to add a note without changing status.',
+					'Order already has this status. Use the woocommerce/order-add-note ability to add a note without changing status.',
 					'woocommerce'
 				),
 				array( 'status' => 400 )
@@ -148,7 +148,7 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 				),
 				'note'   => array(
 					'type'        => 'string',
-					'description' => __( 'Optional status change note. Safe HTML is allowed. Use Add order note for notes without a status change.', 'woocommerce' ),
+					'description' => __( 'Optional status change note. Safe HTML is allowed. Use the woocommerce/order-add-note ability for notes without a status change.', 'woocommerce' ),
 				),
 			),
 			'required'             => array( 'id', 'status' ),
