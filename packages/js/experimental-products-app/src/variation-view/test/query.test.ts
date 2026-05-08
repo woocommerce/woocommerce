@@ -6,7 +6,7 @@ import type { View } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
-import { buildVariationViewQuery } from './query';
+import { buildVariationViewQuery } from '../query';
 
 describe( 'buildVariationViewQuery', () => {
 	it( 'maps the parent product and pagination params', () => {

@@ -6,7 +6,7 @@ import type { ProductVariation } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { normalizeVariation } from './normalization';
+import { normalizeVariation } from '../normalization';
 
 describe( 'normalizeVariation', () => {
 	it( 'maps variation image and product fields for reusable field renderers', () => {

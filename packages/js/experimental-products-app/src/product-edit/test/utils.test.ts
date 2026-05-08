@@ -6,14 +6,14 @@ import type { Field } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
-import type { ProductEntityRecord } from '../fields/types';
-import { productFields } from '../product-list/fields';
+import type { ProductEntityRecord } from '../../fields/types';
+import { productFields } from '../../product-list/fields';
 import {
 	buildMergedProductEditData,
 	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
 	getProductEditFields,
 	getVisibleProductEditFields,
-} from './utils';
+} from '../utils';
 
 jest.mock( '@woocommerce/settings', () => ( {
 	CURRENCY: {

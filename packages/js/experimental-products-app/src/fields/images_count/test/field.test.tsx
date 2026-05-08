@@ -8,9 +8,9 @@ import React from 'react';
 /**
  * Internal dependencies
  */
-import type { ProductEntityRecord } from '../types';
+import type { ProductEntityRecord } from '../../types';
 
-import { fieldExtensions } from './field';
+import { fieldExtensions } from '../field';
 
 const renderSummary = ( item: Partial< ProductEntityRecord > ) => {
 	if ( ! fieldExtensions.render ) {

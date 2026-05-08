@@ -1,8 +1,8 @@
 /**
  * Internal dependencies
  */
-import type { ProductEntityRecord } from '../fields/types';
-import { getProductsWithEmbeddedVariations } from './utils';
+import type { ProductEntityRecord } from '../../fields/types';
+import { getProductsWithEmbeddedVariations } from '../utils';
 
 function createProduct(
 	id: number,

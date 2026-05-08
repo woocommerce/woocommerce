@@ -6,7 +6,7 @@ import type { View } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
-import { buildProductListQuery } from './query';
+import { buildProductListQuery } from '../query';
 
 describe( 'buildProductListQuery', () => {
 	const baseView = {

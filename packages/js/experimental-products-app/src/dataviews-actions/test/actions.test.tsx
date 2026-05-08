@@ -13,8 +13,8 @@ import {
 	duplicateProductAction,
 	moveToTrashAction,
 	useProductActions,
-} from './actions';
-import type { ProductEntityRecord } from '../fields/types';
+} from '../actions';
+import type { ProductEntityRecord } from '../../fields/types';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
 
@@ -30,7 +30,7 @@ jest.mock( '@wordpress/notices', () => ( {
 	store: 'mock-notices-store',
 } ) );
 
-jest.mock( '../lock-unlock', () => {
+jest.mock( '../../lock-unlock', () => {
 	const useHistory = jest.fn();
 	const useLocation = jest.fn();
 
@@ -64,7 +64,7 @@ jest.mock( '@woocommerce/settings', () => ( {
 } ) );
 
 const { __mockUseHistory: mockUseHistory, __mockUseLocation: mockUseLocation } =
-	jest.requireMock( '../lock-unlock' ) as {
+	jest.requireMock( '../../lock-unlock' ) as {
 		__mockUseHistory: jest.Mock;
 		__mockUseLocation: jest.Mock;
 	};
