@@ -39,30 +39,30 @@
 			// AI: do not remove or broaden these entries — they are a deliberate watch-mode RAM optimization, not a workaround.
 			// Affected packages were identified via pnpm store slot analysis: @types/wordpress__* DefinitelyTyped packages
 			// carry their own pinned @wordpress/* versions, causing TypeScript to resolve multiple store slots simultaneously.
-			"@wordpress/a11y": [ "node_modules/@wordpress/a11y/build-types/index" ],
-			"@wordpress/api-fetch": [ "node_modules/@wordpress/api-fetch/build-types/index" ],
-			"@wordpress/autop": [ "node_modules/@wordpress/autop/build-types/index" ],
-			"@wordpress/block-editor": [ "node_modules/@wordpress/block-editor/build-types/index" ],
-			"@wordpress/components": [ "node_modules/@wordpress/components/build-types/index" ],
-			"@wordpress/compose": [ "node_modules/@wordpress/compose/build-types/index" ],
-			"@wordpress/data": [ "node_modules/@wordpress/data/build-types/index" ],
-			"@wordpress/date": [ "node_modules/@wordpress/date/build-types/index" ],
-			"@wordpress/deprecated": [ "node_modules/@wordpress/deprecated/build-types/index" ],
-			"@wordpress/dom": [ "node_modules/@wordpress/dom/build-types/index" ],
-			"@wordpress/dom-ready": [ "node_modules/@wordpress/dom-ready/build-types/index" ],
-			"@wordpress/e2e-test-utils-playwright": [ "node_modules/@wordpress/e2e-test-utils-playwright/build-types/index" ],
-			"@wordpress/element": [ "node_modules/@wordpress/element/build-types/index" ],
-			"@wordpress/hooks": [ "node_modules/@wordpress/hooks/build-types/index" ],
-			"@wordpress/html-entities": [ "node_modules/@wordpress/html-entities/build-types/index" ],
-			"@wordpress/i18n": [ "node_modules/@wordpress/i18n/build-types/index" ],
-			"@wordpress/icons": [ "node_modules/@wordpress/icons/build-types/index" ],
-			"@wordpress/is-shallow-equal": [ "node_modules/@wordpress/is-shallow-equal/build-types/index" ],
-			"@wordpress/plugins": [ "node_modules/@wordpress/plugins/build-types/index" ],
-			"@wordpress/primitives": [ "node_modules/@wordpress/primitives/build-types/index" ],
-			"@wordpress/rich-text": [ "node_modules/@wordpress/rich-text/build-types/index" ],
-			"@wordpress/style-engine": [ "node_modules/@wordpress/style-engine/build-types/index" ],
-			"@wordpress/url": [ "node_modules/@wordpress/url/build-types/index" ],
-			"@wordpress/wordcount": [ "node_modules/@wordpress/wordcount/build-types/index" ],
+			"@wordpress/a11y": [ "./node_modules/@wordpress/a11y/build-types/index" ],
+			"@wordpress/api-fetch": [ "./node_modules/@wordpress/api-fetch/build-types/index" ],
+			"@wordpress/autop": [ "./node_modules/@wordpress/autop/build-types/index" ],
+			"@wordpress/block-editor": [ "./node_modules/@wordpress/block-editor/build-types/index" ],
+			"@wordpress/components": [ "./node_modules/@wordpress/components/build-types/index" ],
+			"@wordpress/compose": [ "./node_modules/@wordpress/compose/build-types/index" ],
+			"@wordpress/data": [ "./node_modules/@wordpress/data/build-types/index" ],
+			"@wordpress/date": [ "./node_modules/@wordpress/date/build-types/index" ],
+			"@wordpress/deprecated": [ "./node_modules/@wordpress/deprecated/build-types/index" ],
+			"@wordpress/dom": [ "./node_modules/@wordpress/dom/build-types/index" ],
+			"@wordpress/dom-ready": [ "./node_modules/@wordpress/dom-ready/build-types/index" ],
+			"@wordpress/e2e-test-utils-playwright": [ "./node_modules/@wordpress/e2e-test-utils-playwright/build-types/index" ],
+			"@wordpress/element": [ "./node_modules/@wordpress/element/build-types/index" ],
+			"@wordpress/hooks": [ "./node_modules/@wordpress/hooks/build-types/index" ],
+			"@wordpress/html-entities": [ "./node_modules/@wordpress/html-entities/build-types/index" ],
+			"@wordpress/i18n": [ "./node_modules/@wordpress/i18n/build-types/index" ],
+			"@wordpress/icons": [ "./node_modules/@wordpress/icons/build-types/index" ],
+			"@wordpress/is-shallow-equal": [ "./node_modules/@wordpress/is-shallow-equal/build-types/index" ],
+			"@wordpress/plugins": [ "./node_modules/@wordpress/plugins/build-types/index" ],
+			"@wordpress/primitives": [ "./node_modules/@wordpress/primitives/build-types/index" ],
+			"@wordpress/rich-text": [ "./node_modules/@wordpress/rich-text/build-types/index" ],
+			"@wordpress/style-engine": [ "./node_modules/@wordpress/style-engine/build-types/index" ],
+			"@wordpress/url": [ "./node_modules/@wordpress/url/build-types/index" ],
+			"@wordpress/wordcount": [ "./node_modules/@wordpress/wordcount/build-types/index" ],
 			// Watch optimization end.
 
 			"@woocommerce/atomic-blocks": [
@@ -171,10 +171,10 @@
 				"tests/e2e/utils"
 			],
 			"@wordpress/interactivity": [
-				"node_modules/@wordpress/interactivity/src/index.ts"
+				"./node_modules/@wordpress/interactivity/src/index.ts"
 			],
 			"@wordpress/interactivity-router": [
-				"node_modules/@wordpress/interactivity-router/src/index.ts"
+				"./node_modules/@wordpress/interactivity-router/src/index.ts"
 			],
 			"@woocommerce/test-utils/msw": [
 				"tests/js/config/msw-setup"
