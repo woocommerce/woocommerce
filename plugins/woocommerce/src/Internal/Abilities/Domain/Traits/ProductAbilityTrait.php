@@ -496,7 +496,7 @@ trait ProductAbilityTrait {
 	 * @return string
 	 */
 	private static function get_product_price_input_pattern(): string {
-		$decimal_separators = array_map(
+		$decimal_separators        = array_map(
 			static function ( string $separator ): string {
 				return preg_quote( $separator, '/' );
 			},
@@ -523,7 +523,9 @@ trait ProductAbilityTrait {
 						$locale['decimal_point'] ?? '',
 						$locale['mon_decimal_point'] ?? '',
 					),
-					'strlen'
+					static function ( $separator ): bool {
+						return is_string( $separator ) && '' !== $separator;
+					}
 				)
 			)
 		);

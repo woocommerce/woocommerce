@@ -34,15 +34,15 @@ abstract class DomainAbility {
 					),
 					'items'       => $item_schema,
 				),
-				'total_pages'    => array(
+				'total_pages'   => array(
 					'type'        => 'integer',
 					'description' => __( 'Total number of result pages available for the current query.', 'woocommerce' ),
 				),
-				'page'           => array(
+				'page'          => array(
 					'type'        => 'integer',
 					'description' => __( 'Current result page.', 'woocommerce' ),
 				),
-				'per_page'       => array(
+				'per_page'      => array(
 					'type'        => 'integer',
 					'description' => __( 'Maximum number of items requested per page.', 'woocommerce' ),
 				),
