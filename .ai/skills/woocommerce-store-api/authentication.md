@@ -23,7 +23,7 @@ The class docblock literally says *"The Store API does not require authenticatio
 
 State-changing routes get their CSRF protection from `AbstractCartRoute::check_nonce()`, which:
 
-- Is invoked on every request via `get_response()` at [AbstractCartRoute.php:117](../../../plugins/woocommerce/src/StoreApi/Routes/V1/AbstractCartRoute.php:117), gated by `requires_nonce()` (defined at [line 224](../../../plugins/woocommerce/src/StoreApi/Routes/V1/AbstractCartRoute.php:224); returns true on non-GET requests).
+- Is invoked on every request via `get_response()` at [AbstractCartRoute.php:117](../../../plugins/woocommerce/src/StoreApi/Routes/V1/AbstractCartRoute.php:117), gated by `requires_nonce()` (defined at [line 224](../../../plugins/woocommerce/src/StoreApi/Routes/V1/AbstractCartRoute.php:224); returns true on non-GET requests that don't carry a valid `Cart-Token` header — cart-token-bearing requests are authenticated via the token instead and skip the nonce check, see [Authentication.php:65](../../../plugins/woocommerce/src/StoreApi/Authentication.php:65)).
 - Verifies a `Nonce` header against the `wc_store_api` action ([line 302](../../../plugins/woocommerce/src/StoreApi/Routes/V1/AbstractCartRoute.php:302)).
 - Rejects with `401 woocommerce_rest_missing_nonce` or `403 woocommerce_rest_invalid_nonce`.
 - Hands back a fresh `Nonce` response header on every response ([line 154](../../../plugins/woocommerce/src/StoreApi/Routes/V1/AbstractCartRoute.php:154)) that the client echoes back on the next state-changing request.
