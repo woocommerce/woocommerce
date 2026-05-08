@@ -360,6 +360,45 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should skip extension ability classes that use the reserved WooCommerce namespace.
+	 */
+	public function test_loader_filter_skips_extension_classes_using_reserved_woocommerce_namespace(): void {
+		add_filter( 'woocommerce_ability_definition_classes', array( $this, 'add_reserved_woocommerce_ability_definition_class' ) );
+		$this->register_domain_abilities();
+		remove_filter( 'woocommerce_ability_definition_classes', array( $this, 'add_reserved_woocommerce_ability_definition_class' ) );
+
+		$ability = wp_get_ability( TestReservedWooAbilityDefinition::ABILITY_ID );
+
+		$this->assertNotNull( $ability, 'Canonical ability should remain registered.' );
+		$this->assertSame( 'Query products', $ability->get_label() );
+	}
+
+	/**
+	 * @testdox Should preserve core WooCommerce definitions when the reserved namespace was registered first.
+	 */
+	public function test_loader_preserves_core_definition_when_reserved_namespace_ability_exists(): void {
+		$this->unregister_domain_abilities();
+
+		$shadow_callback = static function (): void {
+			wp_register_ability(
+				TestReservedWooAbilityDefinition::ABILITY_ID,
+				TestReservedWooAbilityDefinition::get_registration_args()
+			);
+		};
+
+		add_action( 'wp_abilities_api_init', $shadow_callback, 5 );
+		add_action( 'wp_abilities_api_init', array( AbilitiesLoader::class, 'register_abilities' ), 10 );
+		do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		remove_action( 'wp_abilities_api_init', $shadow_callback, 5 );
+		remove_action( 'wp_abilities_api_init', array( AbilitiesLoader::class, 'register_abilities' ), 10 );
+
+		$ability = wp_get_ability( TestReservedWooAbilityDefinition::ABILITY_ID );
+
+		$this->assertNotNull( $ability, 'Canonical ability should be registered.' );
+		$this->assertSame( 'Query products', $ability->get_label() );
+	}
+
+	/**
 	 * @testdox Should ignore filter entries that are not strings or AbilityDefinition implementations.
 	 */
 	public function test_loader_filter_skips_invalid_entries(): void {
@@ -1891,6 +1930,18 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	 */
 	public function add_test_extension_ability_definition_class( array $classes ): array {
 		$classes[] = TestExtensionAbilityDefinition::class;
+
+		return $classes;
+	}
+
+	/**
+	 * Add the test reserved WooCommerce ability definition class.
+	 *
+	 * @param array $classes Ability definition class names.
+	 * @return array
+	 */
+	public function add_reserved_woocommerce_ability_definition_class( array $classes ): array {
+		$classes[] = TestReservedWooAbilityDefinition::class;
 
 		return $classes;
 	}

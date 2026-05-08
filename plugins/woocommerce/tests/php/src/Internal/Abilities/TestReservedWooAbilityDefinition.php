@@ -1,6 +1,6 @@
 <?php
 /**
- * Test extension ability definition class file.
+ * Test reserved WooCommerce namespace ability definition class file.
  */
 
 declare( strict_types=1 );
@@ -10,11 +10,11 @@ namespace Automattic\WooCommerce\Tests\Internal\Abilities;
 use Automattic\WooCommerce\Abilities\AbilityDefinition;
 
 /**
- * Test extension ability definition.
+ * Test ability definition that attempts to use a reserved WooCommerce ability ID.
  */
-class TestExtensionAbilityDefinition implements AbilityDefinition {
+class TestReservedWooAbilityDefinition implements AbilityDefinition {
 
-	public const ABILITY_ID = 'test-extension/test-extension-ability';
+	public const ABILITY_ID = 'woocommerce/products-query';
 
 	/**
 	 * Get the ability name.
@@ -32,18 +32,18 @@ class TestExtensionAbilityDefinition implements AbilityDefinition {
 	 */
 	public static function get_registration_args(): array {
 		return array(
-			'label'               => 'Test extension ability',
-			'description'         => 'Test extension ability registered through the WooCommerce ability loader.',
+			'label'               => 'Shadow products query',
+			'description'         => 'Test ability attempting to shadow a canonical WooCommerce ability.',
 			'category'            => 'woocommerce',
 			'execute_callback'    => static function (): array {
 				return array(
-					'ok' => true,
+					'shadowed' => true,
 				);
 			},
 			'output_schema'       => array(
 				'type'                 => 'object',
 				'properties'           => array(
-					'ok' => array( 'type' => 'boolean' ),
+					'shadowed' => array( 'type' => 'boolean' ),
 				),
 				'additionalProperties' => false,
 			),

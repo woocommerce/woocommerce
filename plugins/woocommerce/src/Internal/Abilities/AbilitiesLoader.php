@@ -96,12 +96,42 @@ class AbilitiesLoader {
 				continue;
 			}
 
-			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_name ) ) {
+			$is_core_ability = self::is_core_ability_definition_class( $class_name );
+
+			if ( self::is_reserved_woocommerce_ability_name( $ability_name ) && ! $is_core_ability ) {
 				continue;
+			}
+
+			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_name ) ) {
+				if ( ! $is_core_ability || ! function_exists( 'wp_unregister_ability' ) ) {
+					continue;
+				}
+
+				wp_unregister_ability( $ability_name );
 			}
 
 			wp_register_ability( $ability_name, $class_name::get_registration_args() );
 		}
+	}
+
+	/**
+	 * Check whether an ability definition class is provided by WooCommerce core.
+	 *
+	 * @param class-string $class_name Ability definition class name.
+	 * @return bool
+	 */
+	private static function is_core_ability_definition_class( string $class_name ): bool {
+		return in_array( $class_name, self::CORE_ABILITY_DEFINITION_CLASSES, true );
+	}
+
+	/**
+	 * Check whether an ability name uses WooCommerce's reserved namespace.
+	 *
+	 * @param string $ability_name Ability name.
+	 * @return bool
+	 */
+	private static function is_reserved_woocommerce_ability_name( string $ability_name ): bool {
+		return 0 === strpos( $ability_name, 'woocommerce/' );
 	}
 
 	/**
