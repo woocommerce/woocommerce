@@ -7,14 +7,15 @@
 
 declare( strict_types = 1 );
 
-namespace Automattic\WooCommerce\Admin\Features\OrderDetailRedesign;
+namespace Automattic\WooCommerce\Internal\Features\OrderDetailRedesign;
 
 /**
  * Loads support for the redesigned WooCommerce order detail page.
  *
- * Auto-instantiated by `Features::load_features()` when the
+ * Manually instantiated from `Features::load_features()` when the
  * `order-detail-redesign` feature flag is enabled (see
- * `client/admin/config/core.json`).
+ * `client/admin/config/core.json`). Lives in the `Internal` namespace
+ * because the feature class is not part of the public API surface.
  *
  * @since 10.9.0
  */
