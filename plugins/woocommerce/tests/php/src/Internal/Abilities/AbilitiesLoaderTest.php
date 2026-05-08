@@ -396,12 +396,38 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				TestReservedWooAbilityDefinition::get_registration_args()
 			);
 		};
+		$logger          = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger_filter   = static function () use ( $logger ) {
+			return $logger;
+		};
 
+		$logger
+			->expects( $this->once() )
+			->method( 'warning' )
+			->with(
+				'WooCommerce unregistered a previously registered ability before registering its canonical definition.',
+				$this->callback(
+					static function ( $context ): bool {
+						return is_array( $context )
+							&& 'woocommerce-abilities' === ( $context['source'] ?? null )
+							&& TestReservedWooAbilityDefinition::ABILITY_ID === ( $context['ability_name'] ?? null )
+							&& ProductsQuery::class === ( $context['definition_class'] ?? null )
+							&& 'woocommerce/' === ( $context['reserved_prefix'] ?? null );
+					}
+				)
+			);
+
+		add_filter( 'woocommerce_logging_class', $logger_filter );
 		add_action( 'wp_abilities_api_init', $shadow_callback, 5 );
 		add_action( 'wp_abilities_api_init', array( AbilitiesLoader::class, 'register_abilities' ), 10 );
-		do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
-		remove_action( 'wp_abilities_api_init', $shadow_callback, 5 );
-		remove_action( 'wp_abilities_api_init', array( AbilitiesLoader::class, 'register_abilities' ), 10 );
+
+		try {
+			do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+			remove_action( 'wp_abilities_api_init', $shadow_callback, 5 );
+			remove_action( 'wp_abilities_api_init', array( AbilitiesLoader::class, 'register_abilities' ), 10 );
+		}
 
 		$ability = wp_get_ability( TestReservedWooAbilityDefinition::ABILITY_ID );
 

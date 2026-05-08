@@ -46,6 +46,13 @@ class AbilitiesLoader {
 	);
 
 	/**
+	 * Log source for ability registration notices.
+	 *
+	 * @var string
+	 */
+	private const LOG_SOURCE = 'woocommerce-abilities';
+
+	/**
 	 * Initialize ability registration hooks.
 	 *
 	 * @internal
@@ -108,10 +115,33 @@ class AbilitiesLoader {
 				}
 
 				wp_unregister_ability( $ability_name );
+				self::log_replaced_reserved_ability( $ability_name, $class_name );
 			}
 
 			wp_register_ability( $ability_name, $class_name::get_registration_args() );
 		}
+	}
+
+	/**
+	 * Log when WooCommerce replaces a pre-existing registration in its reserved namespace.
+	 *
+	 * @param string       $ability_name Ability name.
+	 * @param class-string $class_name Ability definition class name.
+	 */
+	private static function log_replaced_reserved_ability( string $ability_name, string $class_name ): void {
+		if ( ! function_exists( 'wc_get_logger' ) ) {
+			return;
+		}
+
+		wc_get_logger()->warning(
+			'WooCommerce unregistered a previously registered ability before registering its canonical definition.',
+			array(
+				'source'           => self::LOG_SOURCE,
+				'ability_name'     => $ability_name,
+				'definition_class' => $class_name,
+				'reserved_prefix'  => 'woocommerce/',
+			)
+		);
 	}
 
 	/**
