@@ -242,7 +242,7 @@ abstract class GraphQLController {
 			// Resolver threw on one of the decision points inside
 			// process_request(). Produce a clean 500 without re-invoking
 			// the (broken) resolver.
-			return $this->build_resolver_failure_response();
+			return $this->build_resolver_failure_response( $e, $request, $principal );
 		} catch ( \Throwable $e ) {
 			$output = array(
 				'errors' => array(
@@ -257,7 +257,7 @@ abstract class GraphQLController {
 				// Resolver threw specifically when handed the synthetic
 				// errors shape from this catch block. Fall through to the
 				// fixed 500; do not loop back into the resolver.
-				return $this->build_resolver_failure_response();
+				return $this->build_resolver_failure_response( $e2, $request, $principal );
 			}
 
 			return new \WP_REST_Response( $output, $status );
@@ -266,21 +266,45 @@ abstract class GraphQLController {
 
 	/**
 	 * Build the canonical 500 response used when the HTTP status resolver
-	 * throws. Body shape matches an unhandled internal error so callers
-	 * don't need a separate path for "resolver blew up".
+	 * throws or returns an out-of-range value. Body shape matches an
+	 * unhandled internal error so callers don't need a separate path for
+	 * "resolver blew up".
+	 *
+	 * In debug mode, attaches `extensions.debug` (message, file, line, trace)
+	 * for the wrapper exception, plus an `extensions.previous` chain when the
+	 * resolver itself threw — mirroring the shape that {@see self::format_exception()}
+	 * produces for the generic-Throwable path. Outside debug mode the body
+	 * stays purely generic so resolver internals never leak to anonymous callers.
+	 *
+	 * @param StatusResolverFailedException $e         The wrapper exception thrown by {@see self::pick_status()}.
+	 * @param \WP_REST_Request              $request   The originating REST request.
+	 * @param ?object                       $principal The resolved principal, or null when resolution failed.
 	 */
-	private function build_resolver_failure_response(): \WP_REST_Response {
-		return new \WP_REST_Response(
-			array(
-				'errors' => array(
-					array(
-						'message'    => 'An unexpected error occurred.',
-						'extensions' => array( 'code' => 'INTERNAL_ERROR' ),
-					),
-				),
-			),
-			500
+	private function build_resolver_failure_response(
+		StatusResolverFailedException $e,
+		\WP_REST_Request $request,
+		?object $principal
+	): \WP_REST_Response {
+		$error = array(
+			'message'    => 'An unexpected error occurred.',
+			'extensions' => array( 'code' => 'INTERNAL_ERROR' ),
 		);
+
+		if ( $this->is_debug_mode( $principal, $request ) ) {
+			$error['extensions']['debug'] = array(
+				'message' => $e->getMessage(),
+				'file'    => $e->getFile(),
+				'line'    => $e->getLine(),
+				'trace'   => $e->getTraceAsString(),
+			);
+
+			$chain = $this->extract_previous_chain( $e );
+			if ( ! empty( $chain ) ) {
+				$error['extensions']['previous'] = $chain;
+			}
+		}
+
+		return new \WP_REST_Response( array( 'errors' => array( $error ) ), 500 );
 	}
 
 	/**
