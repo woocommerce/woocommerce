@@ -306,7 +306,11 @@ window.addEventListener( 'wc-blocks_store_sync_required', ( event: Event ) => {
 	if ( detail?.type !== 'shopper-list-item-added' ) {
 		return;
 	}
-	if ( ! detail.slug || ! isShopperListItem( detail.item ) ) {
+	if (
+		typeof detail.slug !== 'string' ||
+		detail.slug.trim().length === 0 ||
+		! isShopperListItem( detail.item )
+	) {
 		return;
 	}
 	const list = ensureListState( state, detail.slug );

@@ -21,6 +21,7 @@ import {
 	type ConfigOf,
 	type ActionCreatorsOf,
 } from '@wordpress/data/build-types/types';
+import { __ } from '@wordpress/i18n';
 import { cartStore } from '@woocommerce/block-data';
 
 /**
@@ -160,8 +161,8 @@ export const applyExtensionCartUpdate =
 
 			if ( ! includeShipping || ! includeBilling ) {
 				const {
-					shipping_address: _,
-					billing_address: __,
+					shipping_address: _shipping,
+					billing_address: _billing,
 					...responseWithoutAddresses
 				} = response;
 
@@ -503,6 +504,17 @@ export const removeItemFromCart =
  */
 export const saveForLater =
 	( cartItemKey: string ) => async (): Promise< { key: string } > => {
+		if (
+			typeof cartItemKey !== 'string' ||
+			cartItemKey.trim().length === 0
+		) {
+			throw new Error(
+				__(
+					'A cart item is required to save it for later.',
+					'woocommerce'
+				)
+			);
+		}
 		const { response } = await apiFetchWithHeaders< {
 			response: { key: string };
 		} >( {
