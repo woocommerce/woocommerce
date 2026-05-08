@@ -25,6 +25,9 @@ const EXCLUDED_PRODUCT_EDIT_FIELD_ID_SET = new Set(
 
 type ProductField = Field< ProductEntityRecord >;
 type ProductEditFieldId = ( typeof PRODUCT_EDIT_FIELD_IDS )[ number ];
+type ProductVariationEntityRecord = ProductEntityRecord & {
+	parent_id: number;
+};
 
 const PRODUCT_EDIT_FIELD_IDS = [
 	'name',
@@ -78,7 +81,6 @@ const COMMON_PRODUCT_EDIT_FIELD_IDS = [
 	'sku',
 	'categories',
 	'tags',
-	'type',
 	'featured',
 	'catalog_visibility',
 	'upsell_ids',
@@ -111,8 +113,34 @@ const VARIABLE_PRODUCT_EDIT_FIELD_IDS = [
 	'stock',
 	'stock_quantity',
 	'manage_stock',
+	'weight',
+	'length',
+	'width',
+	'height',
+	'shipping_class',
 	'tax_status',
 	'cross_sell_ids',
+] satisfies ProductEditFieldId[];
+
+const VARIATION_PRODUCT_EDIT_FIELD_IDS = [
+	'images',
+	'sku',
+	'price',
+	'regular_price',
+	'on_sale',
+	'sale_price',
+	'schedule_sale',
+	'date_on_sale_from',
+	'date_on_sale_to',
+	'stock',
+	'stock_quantity',
+	'manage_stock',
+	'weight',
+	'length',
+	'width',
+	'height',
+	'shipping_class',
+	'tax_status',
 ] satisfies ProductEditFieldId[];
 
 const EXTERNAL_PRODUCT_EDIT_FIELD_IDS = [
@@ -136,9 +164,36 @@ const GROUPED_PRODUCT_EDIT_FIELD_IDS = [
 const PRODUCT_TYPE_COMPATIBLE_FIELD_IDS = {
 	simple: SIMPLE_PRODUCT_EDIT_FIELD_IDS,
 	variable: VARIABLE_PRODUCT_EDIT_FIELD_IDS,
+	variation: VARIATION_PRODUCT_EDIT_FIELD_IDS,
 	grouped: GROUPED_PRODUCT_EDIT_FIELD_IDS,
 	external: EXTERNAL_PRODUCT_EDIT_FIELD_IDS,
 } satisfies Record< string, readonly ProductEditFieldId[] >;
+
+const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
+	'name',
+	'short_description',
+	'description',
+	'product_status',
+	'catalog_visibility',
+	'categories',
+	'tags',
+	'type',
+	'featured',
+	'upsell_ids',
+	'cross_sell_ids',
+	'external_url',
+	'button_text',
+] );
+
+const SELLABLE_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
+	'price',
+	'regular_price',
+	'on_sale',
+	'sale_price',
+	'schedule_sale',
+	'date_on_sale_from',
+	'date_on_sale_to',
+] );
 
 function normalizeValue( value: unknown ) {
 	if ( value === undefined ) {
@@ -184,6 +239,101 @@ function getProductTypeCompatibleFieldIds( product: ProductEntityRecord ) {
 	}
 
 	return COMMON_PRODUCT_EDIT_FIELD_IDS;
+}
+
+function isVariableProductParent( product: ProductEntityRecord ) {
+	return product.type === 'variable' && ! product.parent_id;
+}
+
+export function isProductVariation(
+	product: ProductEntityRecord
+): product is ProductVariationEntityRecord {
+	return product.type === 'variation' || Boolean( product.parent_id );
+}
+
+function isFieldVisibleForProductRelationships(
+	fieldId: string,
+	products: ProductEntityRecord[]
+) {
+	if ( ! PRODUCT_EDIT_FIELD_IDS.includes( fieldId as ProductEditFieldId ) ) {
+		return true;
+	}
+
+	const productEditFieldId = fieldId as ProductEditFieldId;
+	const hasVariation = products.some( isProductVariation );
+
+	if (
+		hasVariation &&
+		PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET.has( productEditFieldId )
+	) {
+		return false;
+	}
+
+	const hasVariableParent = products.some( isVariableProductParent );
+
+	if (
+		SELLABLE_PRODUCT_EDIT_FIELD_ID_SET.has( productEditFieldId ) &&
+		hasVariableParent
+	) {
+		return false;
+	}
+
+	return true;
+}
+
+export function getProductVariationUpdatePath(
+	product: ProductVariationEntityRecord
+) {
+	if ( ! product.parent_id ) {
+		throw new Error(
+			'Variation parent ID is required to update a variation.'
+		);
+	}
+
+	return `/wc/v3/products/${ product.parent_id }/variations/${ product.id }`;
+}
+
+export function getProductWithUpdatedVariation(
+	product: ProductEntityRecord,
+	variation: ProductEntityRecord
+): ProductEntityRecord {
+	const embeddedVariations = product._embedded?.variations ?? [];
+	const hasEmbeddedVariation = embeddedVariations.some(
+		( embeddedVariation ) => embeddedVariation.id === variation.id
+	);
+
+	return {
+		...product,
+		_embedded: {
+			...product._embedded,
+			variations: hasEmbeddedVariation
+				? embeddedVariations.map( ( embeddedVariation ) =>
+						embeddedVariation.id === variation.id
+							? variation
+							: embeddedVariation
+				  )
+				: [ ...embeddedVariations, variation ],
+		},
+	};
+}
+
+export function findProductInList(
+	products: ProductEntityRecord[],
+	productId: number
+) {
+	for ( const product of products ) {
+		if ( product.id === productId ) {
+			return product;
+		}
+
+		const variation = product._embedded?.variations?.find(
+			( embeddedVariation ) => embeddedVariation.id === productId
+		);
+
+		if ( variation ) {
+			return variation;
+		}
+	}
 }
 
 function getCommonProductTypeCompatibleFieldIds(
@@ -288,6 +438,10 @@ export function getVisibleProductEditFields(
 
 	return fields.reduce< ProductField[] >( ( visibleFields, field ) => {
 		if ( ! compatibleFieldIds.has( field.id ) ) {
+			return visibleFields;
+		}
+
+		if ( ! isFieldVisibleForProductRelationships( field.id, products ) ) {
 			return visibleFields;
 		}
 

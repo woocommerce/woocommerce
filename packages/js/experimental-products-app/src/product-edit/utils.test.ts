@@ -11,8 +11,11 @@ import { productFields } from '../product-list/fields';
 import {
 	buildMergedProductEditData,
 	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
+	getProductWithUpdatedVariation,
 	getProductEditFields,
+	getProductVariationUpdatePath,
 	getVisibleProductEditFields,
+	isProductVariation,
 } from './utils';
 
 jest.mock( '@woocommerce/settings', () => ( {
@@ -123,6 +126,76 @@ describe( 'product edit utils', () => {
 		);
 	} );
 
+	it( 'identifies variations and builds their update endpoint path', () => {
+		const variation = buildProduct( {
+			id: 34,
+			parent_id: 12,
+			type: 'variation',
+		} );
+
+		expect( isProductVariation( variation ) ).toBe( true );
+
+		if ( isProductVariation( variation ) ) {
+			expect( getProductVariationUpdatePath( variation ) ).toBe(
+				'/wc/v3/products/12/variations/34'
+			);
+		}
+
+		expect(
+			isProductVariation( buildProduct( { id: 12, parent_id: 0 } ) )
+		).toBe( false );
+		expect(
+			isProductVariation(
+				buildProduct( {
+					id: 34,
+					parent_id: 0,
+					type: 'variation',
+				} )
+			)
+		).toBe( true );
+		const orphanVariation = buildProduct( {
+			id: 34,
+			parent_id: 0,
+			type: 'variation',
+		} );
+
+		if ( isProductVariation( orphanVariation ) ) {
+			expect( () =>
+				getProductVariationUpdatePath( orphanVariation )
+			).toThrow( 'Variation parent ID is required' );
+		}
+	} );
+
+	it( 'updates an embedded variation in a product record', () => {
+		const variation = buildProduct( {
+			id: 34,
+			parent_id: 12,
+			name: 'Blue',
+			type: 'variation',
+		} );
+		const updatedVariation = {
+			...variation,
+			name: 'Green',
+		};
+		const parent = buildProduct( {
+			id: 12,
+			_embedded: {
+				variations: [ variation ],
+			},
+		} );
+
+		expect(
+			getProductWithUpdatedVariation( parent, updatedVariation )
+		).toEqual(
+			expect.objectContaining( {
+				id: 12,
+				_embedded: {
+					variations: [ updatedVariation ],
+				},
+			} )
+		);
+	} );
+
 	describe( 'getVisibleProductEditFields', () => {
 		const getVisibleFieldIds = ( products: ProductEntityRecord[] ) =>
 			getVisibleProductEditFields(
@@ -147,6 +220,42 @@ describe( 'product edit utils', () => {
 				expect( fieldIds ).not.toContain( fieldId );
 			} );
 		};
+		const parentOwnedFieldIds = [
+			'name',
+			'short_description',
+			'description',
+			'product_status',
+			'catalog_visibility',
+			'categories',
+			'tags',
+			'type',
+			'featured',
+			'upsell_ids',
+			'cross_sell_ids',
+			'external_url',
+			'button_text',
+		];
+		const priceFieldIds = [
+			'price',
+			'regular_price',
+			'on_sale',
+			'sale_price',
+			'schedule_sale',
+			'date_on_sale_from',
+			'date_on_sale_to',
+		];
+		const universalFieldIds = [
+			'images',
+			'sku',
+			'manage_stock',
+			'stock_quantity',
+			'weight',
+			'length',
+			'width',
+			'height',
+			'shipping_class',
+			'tax_status',
+		];
 
 		it( 'shows pricing, shipping, and linked product fields for simple physical products', () => {
 			const fieldIds = getVisibleFieldIds( [
@@ -265,10 +374,11 @@ describe( 'product edit utils', () => {
 			] );
 		} );
 
-		it( 'hides parent pricing, downloads, and shipping fields for variable products', () => {
+		it( 'hides parent pricing and downloads for variable products', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					type: 'variable',
+					manage_stock: true,
 				} ),
 			] );
 
@@ -281,44 +391,168 @@ describe( 'product edit utils', () => {
 				'date_on_sale_from',
 				'date_on_sale_to',
 				'downloadable',
-				'weight',
-				'length',
-				'width',
-				'height',
-				'shipping_class',
 			] );
 			expect( fieldIds ).toEqual(
-				expect.arrayContaining( [ 'upsell_ids', 'cross_sell_ids' ] )
+				expect.arrayContaining( [
+					'upsell_ids',
+					'cross_sell_ids',
+					...universalFieldIds,
+				] )
 			);
 		} );
 
-		it( 'hides a field in bulk edit if any selected product does not support it', () => {
+		it( 'shows parent-owned and universal fields for simple and variable products', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					id: 1,
 					type: 'simple',
 					virtual: false,
 					downloadable: false,
+					manage_stock: true,
 				} ),
 				buildProduct( {
 					id: 2,
 					type: 'variable',
+					manage_stock: true,
 				} ),
 			] );
 
-			expectFieldsHidden( fieldIds, [
-				'price',
-				'regular_price',
-				'on_sale',
-				'weight',
-				'length',
-				'width',
-				'height',
-				'shipping_class',
-			] );
+			expectFieldsHidden( fieldIds, priceFieldIds );
 			expect( fieldIds ).toEqual(
-				expect.arrayContaining( [ 'upsell_ids', 'cross_sell_ids' ] )
+				expect.arrayContaining( [
+					'name',
+					'product_status',
+					'catalog_visibility',
+					'categories',
+					'tags',
+					'featured',
+					'upsell_ids',
+					'cross_sell_ids',
+					...universalFieldIds,
+				] )
 			);
+		} );
+
+		it( 'shows sellable instance fields for variations', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( [
+					...priceFieldIds,
+					...universalFieldIds,
+				] )
+			);
+			expectFieldsHidden( fieldIds, [
+				...parentOwnedFieldIds,
+				'downloadable',
+			] );
+		} );
+
+		it( 'shows shared sellable instance fields for simple products and variations', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 1,
+					type: 'simple',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( [
+					...priceFieldIds,
+					...universalFieldIds,
+				] )
+			);
+			expectFieldsHidden( fieldIds, [
+				...parentOwnedFieldIds,
+				'downloadable',
+			] );
+		} );
+
+		it( 'shows only universal fields for variable products and variations', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 12,
+					type: 'variable',
+					manage_stock: true,
+				} ),
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( universalFieldIds )
+			);
+			expectFieldsHidden( fieldIds, [
+				...parentOwnedFieldIds,
+				...priceFieldIds,
+				'downloadable',
+			] );
+		} );
+
+		it( 'shows only universal fields for simple, variable, and variation selections', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 1,
+					type: 'simple',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+				buildProduct( {
+					id: 12,
+					type: 'variable',
+					manage_stock: true,
+				} ),
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( universalFieldIds )
+			);
+			expectFieldsHidden( fieldIds, [
+				...parentOwnedFieldIds,
+				...priceFieldIds,
+				'downloadable',
+			] );
 		} );
 
 		it( 'does not return visibility predicates after checking selected products', () => {

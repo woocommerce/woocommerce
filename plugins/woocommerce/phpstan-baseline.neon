@@ -71755,12 +71755,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessions.php
 
 		-
-			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Order\|null\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
 			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
 			identifier: property.protected
 			count: 3
@@ -71791,56 +71785,8 @@ parameters:
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
 		-
-			message: '#^Cannot call method get_id\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method get_payment_method_title\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method needs_payment\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
 			message: '#^Cannot call method payment_complete\(\) on WC_Order\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method save\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method set_customer_note\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method set_payment_method\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method set_payment_method_title\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
 			count: 1
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
@@ -71991,7 +71937,7 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$order of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:persist_field_for_order\(\) expects WC_Order, WC_Order\|null given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
 		-
@@ -72303,7 +72249,7 @@ parameters:
 		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
-			count: 4
+			count: 3
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
@@ -72591,12 +72537,6 @@ parameters:
 		-
 			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 
