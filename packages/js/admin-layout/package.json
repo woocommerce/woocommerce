@@ -58,7 +58,7 @@
 		"@wordpress/element": "catalog:wp-min"
 	},
 	"devDependencies": {
-		"@swc/cli": "0.5.2",
+		"@swc/cli": "0.5.x",
 		"@swc/core": "1.15.x",
 		"@types/react": "18.3.x",
 		"@woocommerce/eslint-plugin": "workspace:*",

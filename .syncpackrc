@@ -168,6 +168,24 @@
 		},
 		{
 			"dependencies": [
+				"@swc/core"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "1.15.x"
+		},
+		{
+			"dependencies": [
+				"@swc/cli"
+			],
+			"packages": [
+				"**"
+			],
+			"pinVersion": "0.5.x"
+		},
+		{
+			"dependencies": [
 				"jest-fixed-jsdom"
 			],
 			"packages": [

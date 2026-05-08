@@ -66,7 +66,7 @@
 		}
 	},
 	"devDependencies": {
-		"@swc/cli": "0.5.2",
+		"@swc/cli": "0.5.x",
 		"@swc/core": "1.15.x",
 		"@playwright/test": "^1.57.0",
 		"@types/jest": "29.5.x",

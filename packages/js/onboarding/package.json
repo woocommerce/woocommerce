@@ -71,7 +71,7 @@
 		"string-similarity": "4.0.4"
 	},
 	"devDependencies": {
-		"@swc/cli": "0.5.2",
+		"@swc/cli": "0.5.x",
 		"@swc/core": "1.15.x",
 		"@babel/core": "7.25.7",
 		"@testing-library/react": "^16.x.x",
