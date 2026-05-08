@@ -5,6 +5,9 @@ namespace Automattic\WooCommerce\Tests\Internal\SiteHealth;
 
 use WC_Unit_Test_Case;
 
+/**
+ * Verifies the System Report view includes the link banner pointing users to WordPress Site Health.
+ */
 class StatusReportBannerTest extends WC_Unit_Test_Case {
 
 	public function test_status_report_view_renders_site_health_banner() {
