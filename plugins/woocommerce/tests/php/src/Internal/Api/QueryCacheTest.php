@@ -351,7 +351,7 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 		if ( ! is_dir( $dir ) ) {
 			return;
 		}
-		// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_unlink, WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
+		// phpcs:disable WordPress.WP.AlternativeFunctions.file_system_operations_rmdir
 		foreach ( scandir( $dir ) as $entry ) {
 			if ( '.' === $entry || '..' === $entry ) {
 				continue;
@@ -360,7 +360,7 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 			if ( is_dir( $path ) ) {
 				$this->rrmdir( $path );
 			} else {
-				unlink( $path );
+				wp_delete_file( $path );
 			}
 		}
 		rmdir( $dir );

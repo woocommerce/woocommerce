@@ -303,18 +303,18 @@ class QueryCache {
 			return false;
 		}
 
-		if ( ! is_writable( $dir ) ) {
+		$fs = $this->wp_filesystem();
+		if ( ! $fs || ! $fs->is_writable( $dir ) ) {
 			return false;
 		}
 
 		// Best-effort hardening; ignore failures (e.g. read-only permissions).
-		$fs       = $this->wp_filesystem();
 		$htaccess = $dir . '/.htaccess';
 		$index    = $dir . '/index.html';
-		if ( $fs && ! file_exists( $htaccess ) ) {
+		if ( ! file_exists( $htaccess ) ) {
 			$fs->put_contents( $htaccess, "Deny from all\n" );
 		}
-		if ( $fs && ! file_exists( $index ) ) {
+		if ( ! file_exists( $index ) ) {
 			$fs->put_contents( $index, '' );
 		}
 
