@@ -78,7 +78,6 @@ const COMMON_PRODUCT_EDIT_FIELD_IDS = [
 	'sku',
 	'categories',
 	'tags',
-	'type',
 	'featured',
 	'catalog_visibility',
 	'upsell_ids',

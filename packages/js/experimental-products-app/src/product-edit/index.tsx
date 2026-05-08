@@ -5,11 +5,11 @@ import { Button, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { useDispatch, useSelect } from '@wordpress/data';
 import { DataForm } from '@wordpress/dataviews';
-import { useCallback, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { closeSmall } from '@wordpress/icons';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
+import { Drawer } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -31,11 +31,7 @@ const { useHistory, useLocation } = unlock( routerPrivateApis );
 
 type ProductEditFormProps = {
 	editableFields: ReturnType< typeof getProductEditFields >;
-	hasEdits: boolean;
-	isSaving: boolean;
 	onChange: ( changes: Partial< ProductEntityRecord > ) => void;
-	onClose: () => void;
-	onSave: () => void;
 	selectedProducts: ProductEntityRecord[];
 };
 
@@ -77,11 +73,7 @@ function getSaveNoticeMessage( successCount: number, failedCount: number ) {
 
 function ProductEditForm( {
 	editableFields,
-	hasEdits,
-	isSaving,
 	onChange,
-	onClose,
-	onSave,
 	selectedProducts,
 }: ProductEditFormProps ) {
 	const mergedData = buildMergedProductEditData( selectedProducts );
@@ -97,33 +89,14 @@ function ProductEditForm( {
 	};
 
 	return (
-		<>
-			<div className="woocommerce-product-edit__form">
-				<DataForm
-					data={ mergedData }
-					fields={ visibleFields }
-					form={ form }
-					onChange={ onChange }
-				/>
-			</div>
-			<div className="woocommerce-product-edit__footer">
-				<Button
-					variant="tertiary"
-					onClick={ onClose }
-					disabled={ isSaving }
-				>
-					{ __( 'Cancel', 'woocommerce' ) }
-				</Button>
-				<Button
-					variant="primary"
-					onClick={ onSave }
-					isBusy={ isSaving }
-					disabled={ isSaving || ! hasEdits }
-				>
-					{ __( 'Save', 'woocommerce' ) }
-				</Button>
-			</div>
-		</>
+		<div className="woocommerce-product-edit__form">
+			<DataForm
+				data={ mergedData }
+				fields={ visibleFields }
+				form={ form }
+				onChange={ onChange }
+			/>
+		</div>
 	);
 }
 
@@ -138,6 +111,7 @@ export default function ProductEdit() {
 	);
 
 	const [ isSaving, setIsSaving ] = useState( false );
+	const [ isDrawerOpen, setIsDrawerOpen ] = useState( false );
 	const editableFields = getProductEditFields( productFields );
 	const {
 		selectedProducts,
@@ -253,7 +227,7 @@ export default function ProductEdit() {
 		[ editEntityRecord, selectedProductIds ]
 	);
 
-	const onClose = useCallback( () => {
+	const closeDrawer = useCallback( () => {
 		const nextQuery = {
 			...query,
 		} as Record< string, string >;
@@ -310,59 +284,99 @@ export default function ProductEdit() {
 		selectedProductIds,
 	] );
 
+	useEffect( () => {
+		if ( requestedProductIds.length > 0 && ! isDrawerOpen ) {
+			setIsDrawerOpen( true );
+		}
+	}, [ requestedProductIds, isDrawerOpen ] );
+
 	return (
-		<div className="woocommerce-product-edit">
-			<div className="woocommerce-product-edit__header">
-				<h2 className="woocommerce-product-edit__title">{ title }</h2>
-				<Button
-					className="woocommerce-product-edit__close"
-					icon={ closeSmall }
-					label={ __( 'Close quick edit', 'woocommerce' ) }
-					onClick={ onClose }
-				/>
-			</div>
+		<Drawer.Root
+			open={ isDrawerOpen }
+			onOpenChangeComplete={ ( isOpen ) => {
+				if ( ! isOpen ) {
+					closeDrawer();
+				}
+			} }
+			swipeDirection="right"
+		>
+			<Drawer.Popup
+				className="woocommerce-product-edit__drawer"
+				portal={
+					<Drawer.Portal className="woocommerce-product-edit__drawer-portal" />
+				}
+				style={ { width: 450 } }
+			>
+				<Drawer.Header className="woocommerce-product-edit__header">
+					<Drawer.Title className="woocommerce-product-edit__title">
+						{ title }
+					</Drawer.Title>
+					<Drawer.CloseIcon
+						onClick={ closeDrawer }
+						label={ __( 'Close quick edit', 'woocommerce' ) }
+					/>
+				</Drawer.Header>
 
-			{ hasNoRequestedProducts && (
-				<div className="woocommerce-product-edit__empty-state">
-					<p>
-						{ __(
-							'Select one or more products to edit them here.',
-							'woocommerce'
+				<Drawer.Content className="woocommerce-product-edit">
+					{ hasNoRequestedProducts && (
+						<div className="woocommerce-product-edit__empty-state">
+							<p>
+								{ __(
+									'Select one or more products to edit them here.',
+									'woocommerce'
+								) }
+							</p>
+						</div>
+					) }
+
+					{ ! hasNoRequestedProducts && isResolving && (
+						<div className="woocommerce-product-edit__loading">
+							<Spinner />
+						</div>
+					) }
+
+					{ ! hasNoRequestedProducts &&
+						! isResolving &&
+						hasMissingProducts && (
+							<div className="woocommerce-product-edit__empty-state">
+								<p>
+									{ __(
+										'Select one or more products to edit them here.',
+										'woocommerce'
+									) }
+								</p>
+							</div>
 						) }
-					</p>
-				</div>
-			) }
 
-			{ ! hasNoRequestedProducts && isResolving && (
-				<div className="woocommerce-product-edit__loading">
-					<Spinner />
-				</div>
-			) }
+					{ isReady && (
+						<ProductEditForm
+							editableFields={ editableFields }
+							onChange={ onChange }
+							selectedProducts={ selectedProducts }
+						/>
+					) }
+				</Drawer.Content>
 
-			{ ! hasNoRequestedProducts &&
-				! isResolving &&
-				hasMissingProducts && (
-					<div className="woocommerce-product-edit__empty-state">
-						<p>
-							{ __(
-								'Select one or more products to edit them here.',
-								'woocommerce'
-							) }
-						</p>
-					</div>
+				{ isReady && (
+					<Drawer.Footer className="woocommerce-product-edit__footer">
+						<Button
+							variant="tertiary"
+							onClick={ closeDrawer }
+							disabled={ isSaving }
+						>
+							{ __( 'Cancel', 'woocommerce' ) }
+						</Button>
+						<Button
+							variant="primary"
+							onClick={ onSave }
+							isBusy={ isSaving }
+							disabled={ isSaving || ! hasEdits }
+						>
+							{ __( 'Save', 'woocommerce' ) }
+						</Button>
+					</Drawer.Footer>
 				) }
-
-			{ isReady && (
-				<ProductEditForm
-					editableFields={ editableFields }
-					hasEdits={ hasEdits }
-					isSaving={ isSaving }
-					onChange={ onChange }
-					onClose={ onClose }
-					onSave={ onSave }
-					selectedProducts={ selectedProducts }
-				/>
-			) }
-		</div>
+			</Drawer.Popup>
+		</Drawer.Root>
 	);
 }
