@@ -115,6 +115,30 @@ const VARIABLE_PRODUCT_EDIT_FIELD_IDS = [
 	'cross_sell_ids',
 ] satisfies ProductEditFieldId[];
 
+const VARIATION_PRODUCT_EDIT_FIELD_IDS = [
+	'name',
+	'images',
+	'product_status',
+	'sku',
+	'price',
+	'regular_price',
+	'on_sale',
+	'sale_price',
+	'schedule_sale',
+	'date_on_sale_from',
+	'date_on_sale_to',
+	'stock',
+	'stock_quantity',
+	'manage_stock',
+	'downloadable',
+	'weight',
+	'length',
+	'width',
+	'height',
+	'shipping_class',
+	'tax_status',
+] satisfies ProductEditFieldId[];
+
 const EXTERNAL_PRODUCT_EDIT_FIELD_IDS = [
 	'name',
 	'product_status',
@@ -148,10 +172,11 @@ const GROUPED_PRODUCT_EDIT_FIELD_IDS = [
 const PRODUCT_TYPE_COMPATIBLE_FIELD_IDS = {
 	simple: SIMPLE_PRODUCT_EDIT_FIELD_IDS,
 	variable: VARIABLE_PRODUCT_EDIT_FIELD_IDS,
+	variation: VARIATION_PRODUCT_EDIT_FIELD_IDS,
 	grouped: GROUPED_PRODUCT_EDIT_FIELD_IDS,
 	external: EXTERNAL_PRODUCT_EDIT_FIELD_IDS,
 } satisfies Record<
-	'simple' | 'variable' | 'grouped' | 'external',
+	'simple' | 'variable' | 'variation' | 'grouped' | 'external',
 	readonly ProductEditFieldId[]
 >;
 
@@ -224,6 +249,7 @@ function getProductTypeCompatibleFieldIds(
 ): readonly ProductEditFieldId[] {
 	const productType =
 		product.type === 'variable' ||
+		product.type === 'variation' ||
 		product.type === 'grouped' ||
 		product.type === 'external'
 			? product.type

@@ -291,7 +291,8 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 						'root',
 						'product',
 						product.parent_id
-					) as ProductEntityRecord | false | undefined );
+					) as ProductEntityRecord | false | undefined ) ??
+					findProductInList( products, product.parent_id );
 
 				if ( ! parentProduct ) {
 					return;
@@ -312,7 +313,7 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 				} );
 			} );
 		},
-		[ editEntityRecord, selectedProducts ]
+		[ editEntityRecord, products, selectedProducts ]
 	);
 
 	const closeDrawer = useCallback( () => {
