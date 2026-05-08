@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fix - Handle PayPal Standard duplicate invoice ID errors by updating the invoice ID in the PayPal order and retrying payment capture.

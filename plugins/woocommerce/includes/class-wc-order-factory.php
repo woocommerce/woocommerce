@@ -53,8 +53,20 @@ class WC_Order_Factory {
 			return $order;
 		} catch ( Exception $e ) {
 			wc_caught_exception( $e, __FUNCTION__, array( $order_id ) );
+			wc_get_logger()->error(
+				sprintf(
+					'Exception caught in %s: %s',
+					__FUNCTION__,
+					$e->getMessage()
+				),
+				array(
+					'source'    => 'get_order',
+					'order_id'  => $order_id,
+					'exception' => $e,
+				)
+			);
 			return false;
-		}
+		}//end try
 	}
 
 	/**
@@ -92,7 +104,10 @@ class WC_Order_Factory {
 			$order_ids = $uncached_order_ids;
 		}
 
-		_prime_post_caches( $order_ids, false, true );
+		if ( ! empty( $order_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $order_ids, false, true );
+		}
 
 		// We separate order list by class, since their datastore might be different.
 		$order_list_by_class = array();

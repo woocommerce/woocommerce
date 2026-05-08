@@ -11,7 +11,7 @@ permissions:
 jobs:
   check-upcoming-release-events:
     name: Check for upcoming release events
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     outputs:
       should-trigger-webhook: ${{ steps.check-code-freeze-8-weeks.outputs.should-trigger-webhook }}
       version: ${{ steps.check-code-freeze-8-weeks.outputs.version }}
@@ -134,7 +134,7 @@ jobs:
     name: Assign a release lead
     needs: [check-upcoming-release-events]
     if: ${{ needs.check-upcoming-release-events.outputs.should-trigger-webhook == 'true' }}
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     outputs:
       create-tracking-issues: ${{ steps.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues }}
       post: ${{ steps.trigger-upcoming-code-freeze-events.outputs.post }}
@@ -212,7 +212,7 @@ jobs:
     name: Send Slack notification
     needs: [trigger-upcoming-code-freeze-events, check-upcoming-release-events, create-parent-tracking-issue, create-sub-tracking-issues]
     if: ${{ needs.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues == 'true' }}
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Send Slack notification
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v2.10.0
@@ -232,7 +232,7 @@ jobs:
     name: Create Parent Tracking Issue in Linear
     needs: [trigger-upcoming-code-freeze-events, check-upcoming-release-events]
     if: ${{ needs.trigger-upcoming-code-freeze-events.outputs.create-tracking-issues == 'true' }}
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     outputs:
       sub-issues-matrix: ${{ steps.build-matrix.outputs.matrix }}
       issue-url: ${{ steps.check-existing-issue.outputs.issue-url || steps.create-tracking-issue.outputs.issue-url }}
@@ -466,7 +466,7 @@ jobs:
     name: Notify on failure
     needs: [check-upcoming-release-events, trigger-upcoming-code-freeze-events, send-slack-notification, create-parent-tracking-issue, create-sub-tracking-issues]
     if: ${{ failure() }}
-    runs-on: ${{ ( github.repository == 'woocommerce/woocommerce' && 'blacksmith-2vcpu-ubuntu-2404' ) || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
       - name: Send failure notification to Slack
         uses: archive/github-actions-slack@a62d71a4ea93e68cbdc37581166b0298bea512e9 # v2.10.0

@@ -5,6 +5,5 @@ export type InnerBlockTemplate = [
 ];
 
 export interface Attributes {
-	isPreview: boolean;
 	hasDarkControls: boolean;
 }

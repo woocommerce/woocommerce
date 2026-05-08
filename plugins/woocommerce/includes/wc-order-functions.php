@@ -405,7 +405,7 @@ function wc_orders_count( $status, string $type = '' ) {
 
 		foreach ( $types_for_count as $type ) {
 			$cache = $order_count_cache->get( $type, array( $status ) );
-			if ( false !== $cache && isset( $cache[ $status ] ) ) {
+			if ( isset( $cache[ $status ] ) ) {
 				$count += $cache[ $status ];
 			} else {
 				$count_for_type = OrderUtil::get_count_for_type( $type );

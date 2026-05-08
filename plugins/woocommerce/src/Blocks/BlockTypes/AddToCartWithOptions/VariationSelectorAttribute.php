@@ -34,6 +34,10 @@ class VariationSelectorAttribute extends AbstractBlock {
 	protected function render( $attributes, $content, $block ): string {
 		global $product;
 
+		if ( ! $product instanceof \WC_Product_Variable ) {
+			return '';
+		}
+
 		$content = '';
 
 		$product_attributes = $product->get_variation_attributes();

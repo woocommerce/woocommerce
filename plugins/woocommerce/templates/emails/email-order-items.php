@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.7.0
+ * @version 10.8.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -193,7 +193,6 @@ foreach ( $items as $item_id => $item ) :
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">
 			<?php
-			echo $email_improvements_enabled ? '&times;' : '';
 			$qty          = $item->get_quantity();
 			$refunded_qty = $order->get_qty_refunded_for_item( $item_id );
 
@@ -202,7 +201,19 @@ foreach ( $items as $item_id => $item ) :
 			} else {
 				$qty_display = esc_html( $qty );
 			}
-			echo wp_kses_post( apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item ) );
+			/**
+			 * Email Order Item Quantity hook.
+			 *
+			 * @since 2.4.0
+			 * @param string                $qty_display Item quantity.
+			 * @param WC_Order_Item_Product $item        Item object.
+			 * @return string
+			 */
+			$quantity = apply_filters( 'woocommerce_email_order_item_quantity', $qty_display, $item );
+			if ( '' !== $quantity ) {
+				$quantity_prefix = $email_improvements_enabled ? '&times;' : '';
+				echo wp_kses_post( $quantity_prefix . $quantity );
+			}
 			?>
 		</td>
 		<td class="td font-family text-align-<?php echo esc_attr( $price_text_align ); ?>" style="vertical-align:middle;">

@@ -205,19 +205,19 @@ type FileUploadEvents =
 	| { type: 'RETRY' }
 	| { type: 'DISMISS_ERRORS' }
 	| {
-			type: `xstate.done.actor.${ number }.fileUpload.uploading`;
+			type: 'xstate.done.actor.0.fileUpload.uploading';
 			output: BlueprintQueueResponse;
 	  }
 	| {
-			type: `xstate.done.actor.${ number }.fileUpload.importer`;
+			type: 'xstate.done.actor.0.fileUpload.importer';
 			output: BlueprintImportResponse;
 	  }
 	| {
-			type: `xstate.error.actor.${ number }.fileUpload.uploading`;
+			type: 'xstate.error.actor.0.fileUpload.uploading';
 			output: Error;
 	  }
 	| {
-			type: `xstate.error.actor.${ number }.fileUpload.importer`;
+			type: 'xstate.error.actor.0.fileUpload.importer';
 			output: Error;
 	  };
 

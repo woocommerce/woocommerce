@@ -667,14 +667,15 @@ function wc_get_product_visibility_term_ids() {
 		return array();
 	}
 
-	static $term_ids = array();
+	static $term_ids_by_blog = array();
 
-	// The static variable doesn't work well with unit tests.
-	if ( count( $term_ids ) > 0 && ! class_exists( 'WC_Unit_Tests_Bootstrap' ) ) {
-		return $term_ids;
+	$blog_id = get_current_blog_id();
+
+	if ( isset( $term_ids_by_blog[ $blog_id ] ) && ! class_exists( 'WC_Unit_Tests_Bootstrap' ) ) {
+		return $term_ids_by_blog[ $blog_id ];
 	}
 
-	$term_ids = array_map(
+	$term_ids_by_blog[ $blog_id ] = array_map(
 		'absint',
 		wp_parse_args(
 			wp_list_pluck(
@@ -701,7 +702,7 @@ function wc_get_product_visibility_term_ids() {
 		)
 	);
 
-	return $term_ids;
+	return $term_ids_by_blog[ $blog_id ];
 }
 
 /**

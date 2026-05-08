@@ -18,13 +18,10 @@ function admin_notes_add_note( $request ) {
 	$note           = new Note();
 	$mock_note_data = get_mock_note_data();
 	$type           = $request->get_param( 'type' );
-	$layout         = $request->get_param( 'layout' );
 
 	$note->set_name( $request->get_param( 'name' ) );
 	$note->set_title( $request->get_param( 'title' ) );
 	$note->set_content( $mock_note_data['content'] );
-	$note->set_image( $mock_note_data[ $type ][ $layout ] );
-	$note->set_layout( $layout );
 	$note->set_type( $type );
 	possibly_add_action( $note );
 
@@ -69,18 +66,7 @@ function possibly_add_action( $note ) {
  * Gets mock note data.
  */
 function get_mock_note_data() {
-	$plugin_url = site_url() . '/wp-content/plugins/woocommerce-admin-test-helper/';
 	return array(
 		'content' => 'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud.',
-		'info'    => array(
-			'thumbnail' => $plugin_url . 'images/admin-notes/thumbnail.jpg',
-			'plain'     => '',
-		),
-		'email'   => array(
-			'plain' => $plugin_url . 'images/admin-notes/woocommerce-logo-vector.png',
-		),
-		'update'  => array(
-			'plain' => '',
-		),
 	);
 }

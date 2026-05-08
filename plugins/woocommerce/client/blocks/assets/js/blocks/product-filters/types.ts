@@ -2,8 +2,49 @@
  * External dependencies
  */
 import type { BlockEditProps } from '@wordpress/blocks';
-import type { ReactNode } from 'react';
 
+/**
+ * Internal dependencies
+ */
+import type { SelectableItem } from '../../types/type-defs/selectable-items';
+
+// ----------------------------------------
+// Filter-specific item fields
+// ----------------------------------------
+export type FilterItemFields = {
+	count?: number;
+	termId?: number;
+	parent?: number;
+	depth?: number;
+	menuOrder?: number;
+	attributeQueryType?: 'and' | 'or';
+};
+
+export type FilterOptionItem = SelectableItem< FilterItemFields >;
+
+// ----------------------------------------
+// Parent store context + active-filter shape
+// ----------------------------------------
+export type ActiveFilterItem = {
+	type: string;
+	value: string;
+	attributeQueryType?: 'and' | 'or';
+	activeLabel: string;
+};
+
+export type ProductFiltersContext = {
+	isOverlayOpened: boolean;
+	params: Record< string, string >;
+	activeFilters: ActiveFilterItem[];
+	items?: FilterOptionItem[];
+	item: FilterOptionItem;
+	activeLabelTemplate: string;
+	filterType: string;
+};
+
+// ----------------------------------------
+// Block props
+// ----------------------------------------
 export type BlockAttributes = {
 	productId?: string;
 	isPreview: boolean;
@@ -11,39 +52,9 @@ export type BlockAttributes = {
 
 export type EditProps = BlockEditProps< BlockAttributes >;
 
-export type FilterOptionItem = (
-	| {
-			label: string;
-			ariaLabel?: string;
-	  }
-	| {
-			label: ReactNode;
-			ariaLabel: string;
-	  }
- ) & {
-	value: string;
-	selected?: boolean;
-	count: number;
-	id?: number;
-	parent?: number;
-	depth?: number;
-	menuOrder?: number;
-};
-
-export type FilterBlockContext = {
-	filterData: {
-		isLoading: boolean;
-		items?: FilterOptionItem[];
-		price?: {
-			minPrice: number;
-			minRange: number;
-			maxPrice: number;
-			maxRange: number;
-		};
-		showCounts?: boolean;
-	};
-};
-
+// ----------------------------------------
+// Editor color picker
+// ----------------------------------------
 export type Color = {
 	slug?: string;
 	class?: string;
