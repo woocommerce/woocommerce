@@ -279,7 +279,7 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		$this->assertNotNull( $ability, 'REST-derived test ability should register successfully.' );
 		$this->registered_ability_ids[] = $ability_id;
 		$this->assertTrue( $ability->get_meta_item( 'show_in_rest', false ), 'REST-derived abilities should remain exposed through the Abilities REST API.' );
-		$this->assertTrue( $ability->get_meta_item( 'expose_in_deprecated_woocommerce_mcp', false ), 'REST-derived abilities should opt in to the deprecated WooCommerce MCP endpoint.' );
+		$this->assertTrue( $ability->get_meta_item( RestAbilityFactory::EXPOSE_IN_DEPRECATED_MCP_META_KEY, false ), 'REST-derived abilities should opt in to the deprecated WooCommerce MCP endpoint.' );
 	}
 
 	// ── Bug 1: date-time type conversion (issue #62764) ──

@@ -7,8 +7,9 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\MCP;
 
-use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\REST\RestAbilityFactory;
+use Automattic\WooCommerce\Internal\MCP\MCPAdapterProvider;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
@@ -164,9 +165,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that maybe_initialize respects feature flag when disabled.
+	 * @testdox Should not initialize when the MCP feature flag is disabled.
 	 */
-	public function test_maybe_initialize_respects_feature_flag_disabled() {
+	public function test_maybe_initialize_respects_feature_flag_disabled(): void {
 		// Ensure MCP feature is disabled via option.
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'no' );
 
@@ -176,9 +177,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that maybe_initialize respects feature flag when enabled.
+	 * @testdox Should initialize when the MCP feature flag is enabled.
 	 */
-	public function test_maybe_initialize_respects_feature_flag_enabled() {
+	public function test_maybe_initialize_respects_feature_flag_enabled(): void {
 
 		// Enable MCP feature via option.
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
@@ -189,9 +190,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that double initialization is prevented.
+	 * @testdox Should prevent double initialization.
 	 */
-	public function test_prevents_double_initialization() {
+	public function test_prevents_double_initialization(): void {
 		// Enable MCP feature via option.
 		update_option( 'woocommerce_feature_mcp_integration_enabled', 'yes' );
 
@@ -206,41 +207,22 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test ability filtering by deprecated WooCommerce MCP exposure metadata.
+	 * @testdox Should include marked deprecated WooCommerce MCP abilities across namespaces.
 	 */
-	public function test_get_woocommerce_mcp_abilities_filters_by_deprecated_endpoint_exposure_metadata() {
+	public function test_get_woocommerce_mcp_abilities_includes_marked_abilities_across_namespaces(): void {
 		$exposed_woocommerce_ability = 'woocommerce/test-deprecated-products-a';
 		$exposed_external_ability    = 'custom-plugin/test-deprecated-orders-a';
-		$unmarked_ability            = 'woocommerce/test-unmarked';
-		$opted_out_ability           = 'woocommerce/test-opted-out';
-		$invalid_exposure_ability    = 'woocommerce/test-invalid-exposure';
 
 		$this->register_test_ability(
 			$exposed_woocommerce_ability,
 			array(
-				'expose_in_deprecated_woocommerce_mcp' => true,
+				RestAbilityFactory::EXPOSE_IN_DEPRECATED_MCP_META_KEY => true,
 			)
 		);
 		$this->register_test_ability(
 			$exposed_external_ability,
 			array(
-				'expose_in_deprecated_woocommerce_mcp' => true,
-			)
-		);
-		$this->register_test_ability(
-			$unmarked_ability,
-			array()
-		);
-		$this->register_test_ability(
-			$opted_out_ability,
-			array(
-				'expose_in_deprecated_woocommerce_mcp' => false,
-			)
-		);
-		$this->register_test_ability(
-			$invalid_exposure_ability,
-			array(
-				'expose_in_deprecated_woocommerce_mcp' => 'true',
+				RestAbilityFactory::EXPOSE_IN_DEPRECATED_MCP_META_KEY => true,
 			)
 		);
 
@@ -250,8 +232,66 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 				array(
 					'unregistered-plugin/not-available',
 					$exposed_woocommerce_ability,
-					$unmarked_ability,
 					$exposed_external_ability,
+				)
+			);
+
+		$result = $this->get_woocommerce_mcp_abilities();
+
+		$this->assertCount( 2, $result, 'Should only return abilities explicitly exposed in the deprecated WooCommerce MCP endpoint.' );
+		$this->assertContains( $exposed_woocommerce_ability, $result, 'Should include marked WooCommerce abilities.' );
+		$this->assertContains( $exposed_external_ability, $result, 'Should include marked abilities from other namespaces.' );
+		$this->assertSame( array( 0, 1 ), array_keys( $result ), 'Should re-index array after filtering.' );
+	}
+
+	/**
+	 * @testdox Should exclude unmarked WooCommerce abilities from the deprecated MCP endpoint.
+	 */
+	public function test_get_woocommerce_mcp_abilities_excludes_unmarked_woocommerce_abilities(): void {
+		$unmarked_ability = 'woocommerce/test-unmarked';
+
+		$this->register_test_ability(
+			$unmarked_ability,
+			array()
+		);
+
+		$this->mock_abilities_registry
+			->method( 'get_abilities_ids' )
+			->willReturn(
+				array(
+					$unmarked_ability,
+				)
+			);
+
+		$result = $this->get_woocommerce_mcp_abilities();
+
+		$this->assertEmpty( $result, 'Should exclude unmarked WooCommerce abilities.' );
+	}
+
+	/**
+	 * @testdox Should require strict boolean metadata for deprecated MCP endpoint exposure.
+	 */
+	public function test_get_woocommerce_mcp_abilities_excludes_false_or_non_boolean_exposure_metadata(): void {
+		$opted_out_ability        = 'woocommerce/test-opted-out';
+		$invalid_exposure_ability = 'woocommerce/test-invalid-exposure';
+
+		$this->register_test_ability(
+			$opted_out_ability,
+			array(
+				RestAbilityFactory::EXPOSE_IN_DEPRECATED_MCP_META_KEY => false,
+			)
+		);
+		$this->register_test_ability(
+			$invalid_exposure_ability,
+			array(
+				RestAbilityFactory::EXPOSE_IN_DEPRECATED_MCP_META_KEY => 'true',
+			)
+		);
+
+		$this->mock_abilities_registry
+			->method( 'get_abilities_ids' )
+			->willReturn(
+				array(
 					$opted_out_ability,
 					$invalid_exposure_ability,
 				)
@@ -259,25 +299,19 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 		$result = $this->get_woocommerce_mcp_abilities();
 
-		$expected = array(
-			$exposed_woocommerce_ability,
-			$exposed_external_ability,
-		);
-
-		$this->assertEquals( $expected, $result, 'Should only return abilities explicitly exposed in the deprecated WooCommerce MCP endpoint.' );
-		$this->assertSame( array( 0, 1 ), array_keys( $result ), 'Should re-index array after filtering.' );
+		$this->assertEmpty( $result, 'Should exclude false and non-boolean exposure metadata.' );
 	}
 
 	/**
-	 * Test ability filtering with custom filter.
+	 * @testdox Should respect custom filters for deprecated WooCommerce MCP ability inclusion.
 	 */
-	public function test_get_woocommerce_mcp_abilities_respects_custom_filter() {
+	public function test_get_woocommerce_mcp_abilities_respects_custom_filter(): void {
 		$deprecated_ability = 'woocommerce/test-custom-filter-deprecated';
 
 		$this->register_test_ability(
 			$deprecated_ability,
 			array(
-				'expose_in_deprecated_woocommerce_mcp' => true,
+				RestAbilityFactory::EXPOSE_IN_DEPRECATED_MCP_META_KEY => true,
 			)
 		);
 
@@ -310,26 +344,25 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 		$result = $this->get_woocommerce_mcp_abilities();
 
-		$expected = array(
-			'custom-plugin/special-action',
-		);
-
-		$this->assertEquals( $expected, $result, 'Should respect custom filter for including abilities' );
+		$this->assertCount( 1, $result, 'Should only return abilities included by the custom filter.' );
+		$this->assertContains( 'custom-plugin/special-action', $result, 'Should include abilities opted in by filter.' );
+		$this->assertNotContains( $deprecated_ability, $result, 'Should exclude abilities opted out by filter.' );
+		$this->assertSame( array( 0 ), array_keys( $result ), 'Should re-index array after filter override.' );
 	}
 
 	/**
-	 * Test MCP validation disable workaround.
+	 * @testdox Should disable MCP validation.
 	 */
-	public function test_disable_mcp_validation_returns_false() {
+	public function test_disable_mcp_validation_returns_false(): void {
 		$result = MCPAdapterProvider::disable_mcp_validation();
 
 		$this->assertFalse( $result, 'disable_mcp_validation should always return false' );
 	}
 
 	/**
-	 * Test initialization state tracking.
+	 * @testdox Should track initialization state.
 	 */
-	public function test_is_initialized_tracks_state() {
+	public function test_is_initialized_tracks_state(): void {
 		$this->assertFalse( $this->sut->is_initialized(), 'Should start as not initialized' );
 
 		// Enable MCP feature via option.
@@ -340,9 +373,9 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that abilities with empty array are handled correctly.
+	 * @testdox Should handle an empty abilities array.
 	 */
-	public function test_handles_empty_abilities_array() {
+	public function test_handles_empty_abilities_array(): void {
 		// Mock abilities registry to return empty array.
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
@@ -350,13 +383,13 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 		$result = $this->get_woocommerce_mcp_abilities();
 
-		$this->assertEquals( array(), $result, 'Should handle empty abilities array correctly' );
+		$this->assertEmpty( $result, 'Should handle empty abilities array correctly' );
 	}
 
 	/**
-	 * Test that unregistered abilities are filtered out.
+	 * @testdox Should filter out unregistered abilities.
 	 */
-	public function test_filters_out_unregistered_abilities() {
+	public function test_filters_out_unregistered_abilities(): void {
 		$this->mock_abilities_registry
 			->method( 'get_abilities_ids' )
 			->willReturn(
@@ -369,7 +402,7 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 
 		$result = $this->get_woocommerce_mcp_abilities();
 
-		$this->assertEquals( array(), $result, 'Should filter out all unregistered abilities.' );
+		$this->assertEmpty( $result, 'Should filter out all unregistered abilities.' );
 	}
 
 	/**
