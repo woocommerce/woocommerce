@@ -155,6 +155,33 @@ async function saveVariation(
 	return savedVariation;
 }
 
+async function saveVariationsSequentially(
+	selectedVariations: ProductVariationEntityRecord[],
+	editEntityRecord: EditProductRecord
+) {
+	const variationResults: ProductSaveResult[] = [];
+
+	for ( const product of selectedVariations ) {
+		try {
+			// Save variations one at a time because saveVariation merges each
+			// saved variation into the parent product's current embedded
+			// variations. Concurrent saves can merge against stale parent
+			// snapshots and overwrite another variation's just-saved update.
+			variationResults.push( {
+				status: 'fulfilled',
+				value: await saveVariation( product, editEntityRecord ),
+			} );
+		} catch ( error ) {
+			variationResults.push( {
+				status: 'rejected',
+				reason: error,
+			} );
+		}
+	}
+
+	return variationResults;
+}
+
 function getSelectedProductSaveResults(
 	selectedProducts: ProductEntityRecord[],
 	selectedVariations: ProductVariationEntityRecord[],
@@ -216,10 +243,9 @@ export async function saveSelectedProducts( {
 			.filter( ( product ) => ! isProductVariation( product ) )
 			.map( ( product ) => product.id )
 	);
-	const variationResults = await Promise.allSettled(
-		selectedVariations.map( ( product ) =>
-			saveVariation( product, editEntityRecord )
-		)
+	const variationResults = await saveVariationsSequentially(
+		selectedVariations,
+		editEntityRecord
 	);
 
 	variationResults.forEach( ( result, index ) => {
