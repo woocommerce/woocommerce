@@ -2,10 +2,9 @@
  * External dependencies
  */
 import { DataViews, type Action, type View } from '@wordpress/dataviews';
-import { Notice } from '@wordpress/components';
 import { Button, Stack } from '@wordpress/ui';
 import { __ } from '@wordpress/i18n';
-import { useMemo, useState, useCallback } from '@wordpress/element';
+import { useMemo, useState, useCallback, useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
@@ -19,6 +18,7 @@ import { normalizeVariation } from './normalization';
 import { variationFields } from './fields';
 import type { VariationEntityRecord } from './types';
 import ProductEdit from '../product-edit';
+import { getProductWithUpdatedVariation } from '../product-edit/utils';
 import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
 import {
@@ -122,7 +122,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 					: undefined,
 			};
 		},
-		[ query ]
+		[ productId, query ]
 	);
 
 	const allVariations = useMemo< VariationEntityRecord[] >(
@@ -139,6 +139,20 @@ export function VariationView( { productId }: VariationViewProps ) {
 			),
 		[ allVariations, view ]
 	);
+	const productWithVariations = useMemo( () => {
+		if ( ! parentProduct ) {
+			return undefined;
+		}
+
+		return allVariations.reduce< ProductEntityRecord >(
+			( product, variation ) =>
+				getProductWithUpdatedVariation(
+					product,
+					variation as unknown as ProductEntityRecord
+				),
+			parentProduct
+		);
+	}, [ allVariations, parentProduct ] );
 	const perPage = view.perPage || PAGE_SIZE;
 	const variations = useMemo< VariationEntityRecord[] >( () => {
 		const page = view.page ?? 1;
@@ -154,6 +168,10 @@ export function VariationView( { productId }: VariationViewProps ) {
 		} ),
 		[ filteredVariations.length, perPage ]
 	);
+
+	useEffect( () => {
+		setSelection( getSelectionFromPostId( postId ) );
+	}, [ postId ] );
 
 	const onChangeSelection = useCallback(
 		( items: string[] ) => {
@@ -262,8 +280,8 @@ export function VariationView( { productId }: VariationViewProps ) {
 				<DataViews.Layout />
 				<DataViews.Footer />
 			</DataViews>
-			{ showQuickEdit && parentProduct && (
-				<ProductEdit products={ [ parentProduct ] } />
+			{ showQuickEdit && productWithVariations && (
+				<ProductEdit products={ [ productWithVariations ] } />
 			) }
 		</div>
 	);
