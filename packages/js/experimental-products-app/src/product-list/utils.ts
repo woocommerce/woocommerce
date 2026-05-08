@@ -22,6 +22,35 @@ export function getItemId( item: ProductEntityRecord ) {
 	return item.id.toString();
 }
 
+export function getProductsWithEmbeddedVariations(
+	items: ProductEntityRecord[]
+): ProductEntityRecord[] {
+	const itemsById = new Map( items.map( ( item ) => [ item.id, item ] ) );
+	const productsWithVariations = new Map< number, ProductEntityRecord >();
+
+	function addItem( item: ProductEntityRecord ) {
+		if ( productsWithVariations.has( item.id ) ) {
+			return;
+		}
+
+		productsWithVariations.set( item.id, item );
+	}
+
+	items.forEach( ( item ) => {
+		if ( item.parent_id && itemsById.has( item.parent_id ) ) {
+			return;
+		}
+
+		addItem( item );
+
+		item._embedded?.variations?.forEach( ( variation ) => {
+			addItem( itemsById.get( variation.id ) ?? variation );
+		} );
+	} );
+
+	return Array.from( productsWithVariations.values() );
+}
+
 function isProductListTabValue( value: string ): value is StatusTab {
 	return PRODUCT_LIST_TAB_VALUES.includes( value as StatusTab );
 }
