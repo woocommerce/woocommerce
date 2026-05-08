@@ -12,7 +12,9 @@ The first production-facing use case is the setup step titled "Where do you ship
 
 ## Goal
 
-Build a shipping-first TreeCombo implementation that preserves the prototype behavior while keeping the reusable tree selection foundation separate from shipping-specific concepts.
+Build one shipping-first TreeCombo pattern that preserves the prototype behavior while keeping reusable tree selection behavior separate from shipping-specific concepts.
+
+The current prototype may use separate demo wrappers for shipping destinations and product categories while we explore quickly. That is scaffolding for validation, not a proposal to ship two different shared TreeCombo components.
 
 ## Assumptions
 
@@ -55,13 +57,13 @@ This layer adapts the generic TreeCombo to shipping setup:
 - Converts selected destination tags into WooCommerce shipping zone objects.
 - Preserves the prototype's default setup: US and Canada selected, Alaska and Hawaii split out as custom rates, and Anywhere else selected.
 
-### 3. Validation Fixtures
+### 3. Validation Scenarios
 
-Add fixtures that prove the generic layer is not shipping-only:
+Add scenarios that prove the generic layer is not shipping-only:
 
-- Shipping fixture: mirrors the prototype "Where do you ship?" flow.
-- Product category fixture: uses a deep category tree with many nested layers.
-- Mobile/modal fixture: shows inline mode, narrow width behavior, and breadcrumb overflow handling.
+- Shipping source case: mirrors the prototype "Where do you ship?" flow.
+- Product category stress case: uses a deep category tree with many nested layers.
+- Mobile/modal check: shows inline mode, narrow width behavior, and breadcrumb overflow handling.
 
 ## User Experience Requirements
 

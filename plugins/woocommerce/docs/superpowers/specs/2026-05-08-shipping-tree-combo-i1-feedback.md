@@ -2,7 +2,9 @@
 
 ## Purpose
 
-This draft PR is for early feedback on a shipping-first TreeCombo pattern. It is not a production-ready shared component proposal yet.
+This draft PR is for early feedback on one shipping-first TreeCombo pattern. It is not a production-ready shared component proposal yet.
+
+The prototype may show separate demo wrappers for shipping destinations and product categories. Those are validation scenarios, not a proposal for two different TreeCombo components.
 
 The interactive prototype currently validates three surfaces:
 
@@ -15,6 +17,7 @@ The interactive prototype currently validates three surfaces:
 The intended shape is:
 
 - Keep shipping as the first consumer and source case.
+- Discuss the demos as scenarios for the same pattern, not as separate component proposals.
 - Keep generic tree selection behavior separate from shipping-specific concepts like zones, custom rates, and "Anywhere else".
 - Use product categories as the first non-shipping pressure test, especially for deep nesting and search result path context.
 - Treat accessibility as an early design constraint, while being honest that the current prototype is not yet design-system ready.
