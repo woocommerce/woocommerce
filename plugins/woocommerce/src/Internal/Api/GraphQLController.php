@@ -682,34 +682,46 @@ abstract class GraphQLController {
 	 * can grant or revoke access without subclassing the principal — useful
 	 * for per-request rules (specific IPs, headers, query parameters, etc.).
 	 *
-	 * The filter must return strictly `true` to allow introspection; any other
-	 * value denies. This avoids surprises from filters returning truthy values
-	 * like `1` or `'yes'`.
+	 * Fail-closed contract: the principal must be non-null (principal-resolution
+	 * failures deny outright, before the filter is consulted), the principal
+	 * method's return value is treated with `=== true`, and any throw from
+	 * either the principal method or the filter callback denies. The filter
+	 * must likewise return strictly `true` to allow; any other value denies.
 	 *
-	 * @param ?object          $principal The resolved principal, or null if resolution failed.
+	 * @param ?object          $principal The resolved principal, or null when principal resolution failed.
 	 * @param \WP_REST_Request $request   The REST request.
 	 */
 	private function is_introspection_allowed( ?object $principal, \WP_REST_Request $request ): bool {
-		$can_introspect = ! is_null( $principal )
-			&& method_exists( $principal, 'can_introspect' )
-			&& $principal->can_introspect();
+		if ( is_null( $principal ) ) {
+			return false;
+		}
 
-		/**
-		 * Filters whether the current principal may run GraphQL introspection.
-		 *
-		 * The filter receives the principal-derived decision (false when the
-		 * principal is null or doesn't declare `can_introspect()`) and must
-		 * return strictly `true` to grant access; any other return value denies.
-		 *
-		 * @since 10.9.0
-		 * 
-		 * @internal
-		 *
-		 * @param bool             $can_introspect Whether the principal can introspect, derived from `$principal->can_introspect()`.
-		 * @param ?object          $principal      The resolved principal, or null when principal resolution failed.
-		 * @param \WP_REST_Request $request        The REST request being processed.
-		 */
-		$can_introspect = apply_filters( 'woocommerce_graphql_can_introspect', $can_introspect, $principal, $request );
+		try {
+			$can_introspect = method_exists( $principal, 'can_introspect' )
+				&& true === $principal->can_introspect();
+
+			/**
+			 * Filters whether the current principal may run GraphQL introspection.
+			 *
+			 * The filter receives the principal-derived decision (false when the
+			 * principal doesn't declare `can_introspect()` or its `can_introspect()`
+			 * doesn't return strictly `true`) and must return strictly `true` to
+			 * grant access; any other return value denies. The filter is not
+			 * invoked when principal resolution failed (i.e. when the controller
+			 * passes a null principal) — that case denies outright.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @internal
+			 *
+			 * @param bool             $can_introspect Whether the principal can introspect, derived from `$principal->can_introspect()`.
+			 * @param object           $principal      The resolved principal.
+			 * @param \WP_REST_Request $request        The REST request being processed.
+			 */
+			$can_introspect = apply_filters( 'woocommerce_graphql_can_introspect', $can_introspect, $principal, $request );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
 
 		return true === $can_introspect;
 	}
@@ -723,40 +735,49 @@ abstract class GraphQLController {
 	 * that don't declare it are denied by default), and the decision is then
 	 * passed through the {@see 'woocommerce_graphql_can_use_debug_mode'} filter.
 	 *
-	 * The filter must return strictly `true` to allow debug mode; any other
-	 * value denies. This avoids surprises from filters returning truthy values
-	 * like `1` or `'yes'`.
+	 * Fail-closed contract: the principal must be non-null (principal-resolution
+	 * failures deny outright, before the filter is consulted), the principal
+	 * method's return value is treated with `=== true`, and any throw from
+	 * either the principal method or the filter callback denies. The filter
+	 * must likewise return strictly `true` to allow; any other value denies.
 	 *
-	 * @param ?object          $principal The resolved principal, or null if resolution failed.
+	 * @param ?object          $principal The resolved principal, or null when principal resolution failed.
 	 * @param \WP_REST_Request $request   The REST request.
 	 */
 	private function is_debug_mode( ?object $principal, \WP_REST_Request $request ): bool {
 		if ( '1' !== $request->get_param( '_debug' ) ) {
 			return false;
 		}
+		if ( is_null( $principal ) ) {
+			return false;
+		}
 
-		$can_debug = ! is_null( $principal )
-			&& method_exists( $principal, 'can_use_debug_mode' )
-			&& $principal->can_use_debug_mode();
+		try {
+			$can_debug = method_exists( $principal, 'can_use_debug_mode' )
+				&& true === $principal->can_use_debug_mode();
 
-		/**
-		 * Filters whether the current principal may activate GraphQL debug mode.
-		 *
-		 * Only invoked when the request carries `_debug=1`, so the filter is not
-		 * called on every GraphQL request. The filter receives the
-		 * principal-derived decision (false when the principal is null or
-		 * doesn't declare `can_use_debug_mode()`) and must return strictly `true`
-		 * to grant access; any other return value denies.
-		 *
-		 * @since 10.9.0
-		 * 
-		 * @internal
-		 *
-		 * @param bool             $can_debug Whether the principal can use debug mode, derived from `$principal->can_use_debug_mode()`.
-		 * @param ?object          $principal The resolved principal, or null when principal resolution failed.
-		 * @param \WP_REST_Request $request   The REST request being processed.
-		 */
-		$can_debug = apply_filters( 'woocommerce_graphql_can_use_debug_mode', $can_debug, $principal, $request );
+			/**
+			 * Filters whether the current principal may activate GraphQL debug mode.
+			 *
+			 * Only invoked when the request carries `_debug=1` and a principal was
+			 * resolved successfully, so the filter is not called on every GraphQL
+			 * request. The filter receives the principal-derived decision (false
+			 * when the principal doesn't declare `can_use_debug_mode()` or its
+			 * `can_use_debug_mode()` doesn't return strictly `true`) and must
+			 * return strictly `true` to grant access; any other return value denies.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @internal
+			 *
+			 * @param bool             $can_debug Whether the principal can use debug mode, derived from `$principal->can_use_debug_mode()`.
+			 * @param object           $principal The resolved principal.
+			 * @param \WP_REST_Request $request   The REST request being processed.
+			 */
+			$can_debug = apply_filters( 'woocommerce_graphql_can_use_debug_mode', $can_debug, $principal, $request );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
 
 		return true === $can_debug;
 	}

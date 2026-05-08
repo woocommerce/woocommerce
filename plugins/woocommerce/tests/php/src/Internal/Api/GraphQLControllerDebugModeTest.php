@@ -306,4 +306,97 @@ class GraphQLControllerDebugModeTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertFalse( $invoked );
 	}
+
+	/**
+	 * @testdox a throw from the woocommerce_graphql_can_use_debug_mode filter callback denies debug mode (fail-closed).
+	 *
+	 * Defensive: is_debug_mode() is invoked from format_exception() and
+	 * build_resolver_failure_response(), both of which run while the controller
+	 * is already handling another exception. A throw escaping is_debug_mode()
+	 * there would corrupt the error pipeline, so any throw must be caught.
+	 */
+	public function test_filter_callback_throw_denies_debug_mode(): void {
+		$filter = function () {
+			throw new \RuntimeException( 'broken-filter-callback' );
+		};
+		add_filter( 'woocommerce_graphql_can_use_debug_mode', $filter );
+
+		try {
+			$response = $this->sut->handle_request(
+				$this->post_request( array( 'query' => '{ greeting { result } }' ), true )
+			);
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_use_debug_mode', $filter );
+		}
+
+		// Response is well-formed (the throw didn't escape the controller),
+		// and debug mode stayed off (the throw was treated as a deny).
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'debug', $data['extensions'] ?? array() );
+
+		// The filter's exception message must not appear anywhere on the wire.
+		$wire = wp_json_encode( $data );
+		$this->assertIsString( $wire );
+		$this->assertStringNotContainsString( 'broken-filter-callback', $wire );
+	}
+
+	/**
+	 * @testdox a null principal denies debug mode even when a permissive filter is installed.
+	 *
+	 * Honours the contract documented on handle_request(): when principal
+	 * resolution itself fails ($principal stays null), no debug info is
+	 * surfaced — the filter is not consulted in that case.
+	 */
+	public function test_null_principal_denies_debug_mode_even_with_permissive_filter(): void {
+		$filter_invoked = false;
+		$filter         = function ( bool $can_debug ) use ( &$filter_invoked ): bool {
+			// Avoid parameter not used PHPCS errors.
+			unset( $can_debug );
+			$filter_invoked = true;
+			return true;
+		};
+		add_filter( 'woocommerce_graphql_can_use_debug_mode', $filter );
+
+		try {
+			$reflection = new \ReflectionClass( GraphQLController::class );
+			$method     = $reflection->getMethod( 'is_debug_mode' );
+			$method->setAccessible( true );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/graphql' );
+			$request->set_query_params( array( '_debug' => '1' ) );
+
+			$result = $method->invoke( $this->sut, null, $request );
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_use_debug_mode', $filter );
+		}
+
+		$this->assertFalse( $result );
+		$this->assertFalse( $filter_invoked, 'Filter must not be consulted for null principals.' );
+	}
+
+	/**
+	 * @testdox a throw from the principal's can_use_debug_mode() method denies debug mode (fail-closed).
+	 */
+	public function test_principal_method_throw_denies_debug_mode(): void {
+		$throwing_principal = new class() {
+			/**
+			 * Always throw to simulate a buggy plugin principal.
+			 *
+			 * @throws \RuntimeException Always.
+			 */
+			public function can_use_debug_mode(): bool {
+				throw new \RuntimeException( 'broken-principal-method' );
+			}
+		};
+
+		$reflection = new \ReflectionClass( GraphQLController::class );
+		$method     = $reflection->getMethod( 'is_debug_mode' );
+		$method->setAccessible( true );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/graphql' );
+		$request->set_query_params( array( '_debug' => '1' ) );
+
+		$this->assertFalse( $method->invoke( $this->sut, $throwing_principal, $request ) );
+	}
 }
