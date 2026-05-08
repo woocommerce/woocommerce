@@ -58,7 +58,7 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 				),
 				'annotations'  => array(
 					'readonly'    => false,
-					'idempotent'  => false,
+					'idempotent'  => true,
 					'destructive' => true,
 				),
 			),
