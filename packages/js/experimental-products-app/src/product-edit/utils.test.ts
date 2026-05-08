@@ -220,6 +220,42 @@ describe( 'product edit utils', () => {
 				expect( fieldIds ).not.toContain( fieldId );
 			} );
 		};
+		const parentOwnedFieldIds = [
+			'name',
+			'short_description',
+			'description',
+			'product_status',
+			'catalog_visibility',
+			'categories',
+			'tags',
+			'type',
+			'featured',
+			'upsell_ids',
+			'cross_sell_ids',
+			'external_url',
+			'button_text',
+		];
+		const priceFieldIds = [
+			'price',
+			'regular_price',
+			'on_sale',
+			'sale_price',
+			'schedule_sale',
+			'date_on_sale_from',
+			'date_on_sale_to',
+		];
+		const universalFieldIds = [
+			'images',
+			'sku',
+			'manage_stock',
+			'stock_quantity',
+			'weight',
+			'length',
+			'width',
+			'height',
+			'shipping_class',
+			'tax_status',
+		];
 
 		it( 'shows pricing, shipping, and linked product fields for simple physical products', () => {
 			const fieldIds = getVisibleFieldIds( [
@@ -338,10 +374,11 @@ describe( 'product edit utils', () => {
 			] );
 		} );
 
-		it( 'hides parent pricing, downloads, and shipping fields for variable products', () => {
+		it( 'hides parent pricing and downloads for variable products', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					type: 'variable',
+					manage_stock: true,
 				} ),
 			] );
 
@@ -354,14 +391,13 @@ describe( 'product edit utils', () => {
 				'date_on_sale_from',
 				'date_on_sale_to',
 				'downloadable',
-				'weight',
-				'length',
-				'width',
-				'height',
-				'shipping_class',
 			] );
 			expect( fieldIds ).toEqual(
-				expect.arrayContaining( [ 'upsell_ids', 'cross_sell_ids' ] )
+				expect.arrayContaining( [
+					'upsell_ids',
+					'cross_sell_ids',
+					...universalFieldIds,
+				] )
 			);
 		} );
 
@@ -417,26 +453,151 @@ describe( 'product edit utils', () => {
 					type: 'simple',
 					virtual: false,
 					downloadable: false,
+					manage_stock: true,
 				} ),
 				buildProduct( {
 					id: 2,
 					type: 'variable',
+					manage_stock: true,
 				} ),
 			] );
 
-			expectFieldsHidden( fieldIds, [
-				'price',
-				'regular_price',
-				'on_sale',
-				'weight',
-				'length',
-				'width',
-				'height',
-				'shipping_class',
-			] );
+			expectFieldsHidden( fieldIds, priceFieldIds );
 			expect( fieldIds ).toEqual(
-				expect.arrayContaining( [ 'upsell_ids', 'cross_sell_ids' ] )
+				expect.arrayContaining( [
+					'name',
+					'product_status',
+					'catalog_visibility',
+					'categories',
+					'tags',
+					'featured',
+					'upsell_ids',
+					'cross_sell_ids',
+					...universalFieldIds,
+				] )
 			);
+		} );
+
+		it( 'shows sellable instance fields for variations', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( [
+					...priceFieldIds,
+					...universalFieldIds,
+				] )
+			);
+			expectFieldsHidden( fieldIds, [
+				...parentOwnedFieldIds,
+				'downloadable',
+			] );
+		} );
+
+		it( 'shows shared sellable instance fields for simple products and variations', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 1,
+					type: 'simple',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( [
+					...priceFieldIds,
+					...universalFieldIds,
+				] )
+			);
+			expectFieldsHidden( fieldIds, [
+				...parentOwnedFieldIds,
+				'downloadable',
+			] );
+		} );
+
+		it( 'shows only universal fields for variable products and variations', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 12,
+					type: 'variable',
+					manage_stock: true,
+				} ),
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( universalFieldIds )
+			);
+			expectFieldsHidden( fieldIds, [
+				...parentOwnedFieldIds,
+				...priceFieldIds,
+				'downloadable',
+			] );
+		} );
+
+		it( 'shows only universal fields for simple, variable, and variation selections', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 1,
+					type: 'simple',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+				buildProduct( {
+					id: 12,
+					type: 'variable',
+					manage_stock: true,
+				} ),
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					manage_stock: true,
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( universalFieldIds )
+			);
+			expectFieldsHidden( fieldIds, [
+				...parentOwnedFieldIds,
+				...priceFieldIds,
+				'downloadable',
+			] );
 		} );
 
 		it( 'does not return visibility predicates after checking selected products', () => {
