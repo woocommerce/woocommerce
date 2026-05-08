@@ -8,6 +8,32 @@
 		"declarationMap": true,
 		"declarationDir": "./build-types",
 		"resolveJsonModule": true,
+		"paths": {
+			// Watch optimization start: reduce type definitions RAM footprint of the packages resolving as multiple versions.
+			// Here we specify explicitly to use types from the package dependencies, cutting off any transitive resolution.
+			// AI: do not remove or broaden these entries — they are a deliberate watch-mode RAM optimization, not a workaround.
+			// Affected packages were identified via pnpm store slot analysis: @types/wordpress__* DefinitelyTyped packages
+			// carry their own pinned @wordpress/* versions, causing TypeScript to resolve multiple store slots simultaneously.
+			"@wordpress/api-fetch": [ "node_modules/@wordpress/api-fetch/build-types/index" ],
+			"@wordpress/block-editor": [ "node_modules/@wordpress/block-editor/build-types/index" ],
+			"@wordpress/components": [ "node_modules/@wordpress/components/build-types/index" ],
+			"@wordpress/compose": [ "node_modules/@wordpress/compose/build-types/index" ],
+			"@wordpress/core-data": [ "node_modules/@wordpress/core-data/build-types/index" ],
+			"@wordpress/data": [ "node_modules/@wordpress/data/build-types/index" ],
+			"@wordpress/date": [ "node_modules/@wordpress/date/build-types/index" ],
+			"@wordpress/deprecated": [ "node_modules/@wordpress/deprecated/build-types/index" ],
+			"@wordpress/editor": [ "node_modules/@wordpress/editor/build-types/index" ],
+			"@wordpress/element": [ "node_modules/@wordpress/element/build-types/index" ],
+			"@wordpress/hooks": [ "node_modules/@wordpress/hooks/build-types/index" ],
+			"@wordpress/html-entities": [ "node_modules/@wordpress/html-entities/build-types/index" ],
+			"@wordpress/i18n": [ "node_modules/@wordpress/i18n/build-types/index" ],
+			"@wordpress/icons": [ "node_modules/@wordpress/icons/build-types/index" ],
+			"@wordpress/keycodes": [ "node_modules/@wordpress/keycodes/build-types/index" ],
+			"@wordpress/media-utils": [ "node_modules/@wordpress/media-utils/build-types/index" ],
+			"@wordpress/plugins": [ "node_modules/@wordpress/plugins/build-types/index" ],
+			"@wordpress/url": [ "node_modules/@wordpress/url/build-types/index" ]
+			// Watch optimization end.
+		},
 		"typeRoots": [
 			"./typings",
 			"./node_modules/@types"

@@ -91,10 +91,10 @@ export function HeaderToolbar( {
 	return (
 		<div className="woocommerce-iframe-editor__header">
 			<div className="woocommerce-iframe-editor__header-left">
-				{ /* @ts-expect-error NavigableToolbar accepts a variant prop at runtime but it's missing from the public types. */ }
 				<NavigableToolbar
 					className="woocommerce-iframe-editor-document-tools"
 					aria-label={ __( 'Document tools', 'woocommerce' ) }
+					// @ts-expect-error variant prop is accepted at runtime but missing from NavigableToolbar's public types.
 					variant="unstyled"
 				>
 					<div className="woocommerce-iframe-editor-document-tools__left">
