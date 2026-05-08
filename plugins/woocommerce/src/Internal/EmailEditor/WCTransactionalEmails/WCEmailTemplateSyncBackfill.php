@@ -301,9 +301,9 @@ class WCEmailTemplateSyncBackfill {
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $current_core_hash );
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, gmdate( 'Y-m-d H:i:s' ) );
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, $status_for_stamp );
-		// Three-way diff base reference. For pre-existing posts we don't know what core looked
-		// like at original generation time; using the current canonical is the best-guess
-		// trade-off documented in the RSM-1181 design notes.
+		// Seed the three-way base with the current canonical render. We don't know the
+		// original generation-time render for pre-existing posts; the alternative — empty
+		// meta, falling back to 2-way's inversion-guard heuristic — is strictly worse.
 		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $canonical_post_content );
 	}
 

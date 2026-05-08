@@ -119,8 +119,9 @@ class WCEmailTemplateChangeSummary {
 	 * - `source_hash_to`      — `string`     — sha1 of the canonical core content for this email type. Mirrors the post's `_wc_email_template_source_hash` meta. Empty string in fallback / no-config paths where the core content can't be computed.
 	 * - `added_blocks`        — `array<int, array{name:string, label:string, path:array<int|string>}>` — blocks that would be added to the post by applying (in core, not in post). `name` is the post-alias-normalized block name (e.g. `core/heading`); `label` is its humanized form for display; `path` is the core-side index path.
 	 * - `removed_blocks`      — `array<int, array{name:string, label:string, path:array<int|string>}>` — blocks that would be removed from the post by applying (in post, not in core). Same field semantics as `added_blocks`; `path` is the post-side index path.
-	 * - `copy_changes`        — `array<int, array{block:string, before:string, after:string, occurrence:int, total:int, path:array<int|string>}>`.
+	 * - `copy_changes`        — `array<int, array{block:string, before:string, after:string, occurrence:int, total:int, path:array<int|string>, auto_resolvable?:bool}>`.
 	 *                           `before` is the merchant's current text; `after` is the canonical core text. `path` is the post-side index path.
+	 *                           `auto_resolvable` is emitted only on the three-way path: `true` when only core changed since base (safe to auto-apply), `false` when both sides changed (true conflict). Absent on two-way fallback payloads.
 	 * - `structural_changes`  — `array<int, array{kind:string, description:string, path?:array<int|string>}>` — `path` is omitted for `kind: 'reorder'` entries.
 	 * - `summary_lines`       — `string[]`   — pre-localized one-liners ready to render.
 	 * - `is_fallback`         — `bool`       — true when the diff could not be produced.
@@ -184,10 +185,8 @@ class WCEmailTemplateChangeSummary {
 		$post_hash = sha1( $post_content );
 		$core_hash = sha1( $core_content );
 
-		// Include `base_render` hash in the cache key so a base shift busts the cache.
-		// `''` when the meta is absent — keeps cache keys stable for two-way fallback posts.
-		$base_render_for_key = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
-		$base_hash           = '' !== $base_render_for_key ? sha1( $base_render_for_key ) : '';
+		$base_render = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
+		$base_hash   = '' !== $base_render ? sha1( $base_render ) : '';
 
 		$cache_key = self::cache_key( $post_id, $post_hash, $core_hash, $base_hash, self::current_locale() );
 		$cached    = get_transient( $cache_key );
@@ -225,8 +224,6 @@ class WCEmailTemplateChangeSummary {
 		// inversion-guard heuristic is not needed in this branch — three-way is
 		// deterministic on any post. Posts without the meta fall through to the
 		// legacy two-way path, which keeps the inversion guard for safety.
-		$base_render = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
-
 		if ( '' !== $base_render ) {
 			$base_records = self::flatten_blocks( parse_blocks( $base_render ) );
 			$structured   = self::diff_records_three_way( $core_records, $base_records, $post_records );
@@ -686,6 +683,11 @@ class WCEmailTemplateChangeSummary {
 	 * including heavily-customized ones. The reorder pass is also dropped: the LCS
 	 * tail-pairing bug it compensated for cannot fire under three-way attribution.
 	 *
+	 * Structural relocations (a matched pair whose `parent_name` differs between
+	 * core and post) are intentionally not surfaced here, unlike the 2-way path's
+	 * `Moved %1$s into %2$s` entry. Selective apply preserves the merchant's
+	 * structure either way, so the move is something the merchant cannot act on.
+	 *
 	 * @internal
 	 *
 	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $core_records Core side (current canonical).
@@ -772,6 +774,10 @@ class WCEmailTemplateChangeSummary {
 			$name                      = $core['name'];
 			$occurrence_index[ $name ] = ( $occurrence_index[ $name ] ?? 0 ) + 1;
 
+			// Known limitation: comparison is `inner_text` only; block `attrs` (colors,
+			// alignment, etc.) don't register as changes. With `auto_resolvable: true`
+			// the drawer can silently overwrite an attr-only merchant edit. Follow-up
+			// to extend the comparison to a stable hash of `attrs`.
 			$yours_changed = ( $base['inner_text'] !== $post['inner_text'] );
 			$core_changed  = ( $base['inner_text'] !== $core['inner_text'] );
 

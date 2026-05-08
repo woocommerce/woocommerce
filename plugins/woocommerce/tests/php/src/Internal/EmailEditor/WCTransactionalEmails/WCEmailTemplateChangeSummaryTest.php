@@ -1029,6 +1029,93 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Three-way diff: no reorder structural change is emitted for blocks reordered relative to base.
+	 *
+	 * Pins the docblock claim on `diff_records_three_way()` that the 2-way reorder pass
+	 * is structurally unreachable under three-way attribution. The fixture uses three
+	 * differently-named blocks so the 2-way LCS (which pairs by `name`) can leave
+	 * same-named entries unmatched. Core keeps `[Heading, Paragraph, Image]`; post
+	 * moves Image to the front: `[Image, Heading, Paragraph]`. Two-way LCS picks the
+	 * length-2 alignment `Heading+Paragraph`, leaves `Image` unmatched on both sides,
+	 * and the reorder pass collapses them into a `Reordered Image` entry. Three-way
+	 * attributes each block via base indices instead — the unmatched post-side `Image`
+	 * becomes a `removed_blocks` entry and the unmatched core-side `Image` becomes a
+	 * `merchant_removed` structural entry, neither of which is a `reorder`.
+	 */
+	public function test_three_way_does_not_emit_reorder_for_blocks_reordered_relative_to_base(): void {
+		$base = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P.',
+				),
+				array(
+					'name'       => 'core/image',
+					'inner_text' => '',
+				),
+			)
+		);
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P.',
+				),
+				array(
+					'name'       => 'core/image',
+					'inner_text' => '',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'       => 'core/image',
+					'inner_text' => '',
+				),
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P.',
+				),
+			)
+		);
+
+		// Sanity check: the same fixture under the 2-way path emits a `reorder` entry.
+		// If this assertion ever stops holding, the fixture has stopped exercising the
+		// reorder pass and the three-way assertion below has become a tautology.
+		// `diff_records()` is private; reflection here keeps the production API tight.
+		$two_way_method = new \ReflectionMethod( WCEmailTemplateChangeSummary::class, 'diff_records' );
+		$two_way_method->setAccessible( true );
+		$two_way       = $two_way_method->invoke( null, $core, $post );
+		$two_way_kinds = array_map( static fn( array $e ): string => (string) ( $e['kind'] ?? '' ), $two_way['structural_changes'] );
+		$this->assertContains(
+			'reorder',
+			$two_way_kinds,
+			'Fixture must trigger the 2-way reorder pass; otherwise the three-way assertion is meaningless.'
+		);
+
+		$three_way       = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+		$three_way_kinds = array_map( static fn( array $e ): string => (string) ( $e['kind'] ?? '' ), $three_way['structural_changes'] );
+		$this->assertNotContains(
+			'reorder',
+			$three_way_kinds,
+			'Three-way must not emit a reorder structural entry — base-anchored matching makes it unreachable.'
+		);
+	}
+
+	/**
 	 * Build a list of flatten_blocks-shaped records from a simple list of name + inner_text pairs.
 	 * Each record gets a top-level path (`[$idx]`) and a null parent_name.
 	 *
