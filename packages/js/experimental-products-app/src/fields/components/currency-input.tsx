@@ -52,6 +52,7 @@ export function CurrencyInput( {
 		<ValidatedInputControl
 			id={ `currency-input-${ fieldId }` }
 			label={ field.label }
+			placeholder={ field.placeholder }
 			value={ value }
 			onChange={ ( newValue: string ) => {
 				onChange( { [ fieldId ]: newValue } );

@@ -182,7 +182,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			/>
 		);
 	},
-	Edit: ( { data, onChange } ) => {
+	Edit: ( { data, onChange, field } ) => {
 		const images = useMemo( () => data.images ?? [], [ data.images ] );
 		const [ draggedImageId, setDraggedImageId ] = useState< number | null >(
 			null
@@ -291,6 +291,11 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		return (
 			<div className="woocommerce-fields-control__featured-image">
 				<div className="woocommerce-fields-controls__featured-image-uploaded-images">
+					{ field.placeholder && images.length === 0 && (
+						<p className="woocommerce-product-edit__mixed-placeholder">
+							{ field.placeholder }
+						</p>
+					) }
 					{ images.map( ( image, index ) => {
 						const onRemove = removeCallbacks.get( image.id );
 

@@ -38,6 +38,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			}
 			excludeProductIds={ data.id ? [ data.id ] : undefined }
 			includeProductStatuses={ LINKED_PRODUCT_STATUSES }
+			placeholder={ field.placeholder }
 		/>
 	),
 };

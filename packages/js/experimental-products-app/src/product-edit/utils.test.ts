@@ -11,8 +11,10 @@ import { productFields } from '../product-list/fields';
 import {
 	buildMergedProductEditData,
 	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
+	getMixedProductEditFieldIds,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
+	getProductEditFieldsWithMixedPlaceholders,
 	getProductVariationUpdatePath,
 	getVisibleProductEditFields,
 	isProductVariation,
@@ -99,6 +101,154 @@ describe( 'product edit utils', () => {
 			expect.objectContaining( {
 				name: '',
 				categories: [],
+			} )
+		);
+	} );
+
+	it( 'merges dimension fields independently in a bulk selection', () => {
+		const products = [
+			buildProduct( {
+				id: 1,
+				dimensions: {
+					length: '10',
+					width: '5',
+					height: '2',
+				},
+			} ),
+			buildProduct( {
+				id: 2,
+				dimensions: {
+					length: '12',
+					width: '5',
+					height: '2',
+				},
+			} ),
+		];
+
+		expect( buildMergedProductEditData( products ) ).toEqual(
+			expect.objectContaining( {
+				dimensions: {
+					length: '',
+					width: '5',
+					height: '2',
+				},
+			} )
+		);
+	} );
+
+	it( 'identifies mixed fields in a bulk selection', () => {
+		const products = [
+			buildProduct( {
+				id: 1,
+				name: 'Beanie',
+				status: 'publish',
+				dimensions: {
+					length: '10',
+					width: '5',
+					height: '2',
+				},
+			} ),
+			buildProduct( {
+				id: 2,
+				name: 'Hoodie',
+				status: 'publish',
+				dimensions: {
+					length: '12',
+					width: '5',
+					height: '2',
+				},
+			} ),
+		];
+
+		expect(
+			getMixedProductEditFieldIds(
+				[
+					{ id: 'name' },
+					{
+						id: 'product_status',
+						getValue: ( { item } ) => item.status,
+					},
+					{ id: 'length' },
+				] as Field< ProductEntityRecord >[],
+				products
+			)
+		).toEqual( [ 'name', 'length' ] );
+	} );
+
+	it( 'adds mixed placeholders only to mixed edit fields', () => {
+		const fields = [
+			{
+				id: 'name',
+			},
+			{
+				id: 'sku',
+			},
+		] as Field< ProductEntityRecord >[];
+
+		expect(
+			getProductEditFieldsWithMixedPlaceholders(
+				fields,
+				[ 'name' ],
+				'(Mixed)'
+			)
+		).toEqual( [
+			expect.objectContaining( {
+				id: 'name',
+				placeholder: '(Mixed)',
+			} ),
+			{
+				id: 'sku',
+			},
+		] );
+	} );
+
+	it( 'adds a disabled mixed option to mixed fixed-option fields', () => {
+		const fields = [
+			{
+				id: 'product_status',
+				elements: [
+					{ label: 'Published', value: 'publish' },
+					{ label: 'Draft', value: 'draft' },
+				],
+			},
+		] as Field< ProductEntityRecord >[];
+
+		const [ decoratedField ] = getProductEditFieldsWithMixedPlaceholders(
+			fields,
+			[ 'product_status' ],
+			'(Mixed)'
+		);
+
+		expect( decoratedField.elements ).toEqual( [
+			{
+				label: '(Mixed)',
+				value: '',
+				disabled: true,
+			},
+			{ label: 'Published', value: 'publish' },
+			{ label: 'Draft', value: 'draft' },
+		] );
+	} );
+
+	it( 'shows mixed placeholders as helper text for mixed toggle fields', () => {
+		const fields = [
+			{
+				id: 'featured',
+				Edit: 'toggle',
+				description: 'Highlight this product.',
+			},
+		] as Field< ProductEntityRecord >[];
+
+		const [ decoratedField ] = getProductEditFieldsWithMixedPlaceholders(
+			fields,
+			[ 'featured' ],
+			'(Mixed)'
+		);
+
+		expect( decoratedField ).toEqual(
+			expect.objectContaining( {
+				placeholder: '(Mixed)',
+				description: '(Mixed) Highlight this product.',
 			} )
 		);
 	} );

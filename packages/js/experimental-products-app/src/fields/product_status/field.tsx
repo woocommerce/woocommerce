@@ -43,7 +43,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	Edit: ( { data, onChange, field } ) => (
 		<SelectControl
 			label={ field.label }
-			value={ data.status }
+			value={ data.status || '' }
 			options={ field.elements?.filter(
 				( element: { label: string; value: string } ) =>
 					element.value !== 'trash'

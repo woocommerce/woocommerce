@@ -28,6 +28,11 @@ type ProductEditFieldId = ( typeof PRODUCT_EDIT_FIELD_IDS )[ number ];
 type ProductVariationEntityRecord = ProductEntityRecord & {
 	parent_id: number;
 };
+type ProductFieldOptionWithDisabled = NonNullable<
+	ProductField[ 'elements' ]
+>[ number ] & {
+	disabled?: boolean;
+};
 
 const PRODUCT_EDIT_FIELD_IDS = [
 	'name',
@@ -195,6 +200,8 @@ const SELLABLE_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'date_on_sale_to',
 ] );
 
+const DIMENSION_FIELD_IDS = [ 'height', 'length', 'width' ] as const;
+
 function normalizeValue( value: unknown ) {
 	if ( value === undefined ) {
 		return '__undefined__';
@@ -220,6 +227,22 @@ function getMixedValueFallback( sample: unknown ) {
 }
 
 function getFieldValue( field: ProductField, item: ProductEntityRecord ) {
+	if (
+		field.id === 'height' ||
+		field.id === 'length' ||
+		field.id === 'width'
+	) {
+		return item.dimensions?.[ field.id ];
+	}
+
+	if ( field.id === 'downloadable' ) {
+		return item.downloads ?? [];
+	}
+
+	if ( field.id === 'schedule_sale' ) {
+		return Boolean( item.date_on_sale_from || item.date_on_sale_to );
+	}
+
 	if ( typeof field.getValue === 'function' ) {
 		return field.getValue( {
 			item,
@@ -401,6 +424,31 @@ export function buildMergedProductEditData(
 			: getMixedValueFallback( firstDefinedValue );
 	} );
 
+	if ( products.some( ( product ) => product.dimensions ) ) {
+		mergedData.dimensions = Object.fromEntries(
+			DIMENSION_FIELD_IDS.map( ( key ) => {
+				const values = products.map(
+					( product ) => product.dimensions?.[ key ]
+				);
+				const firstDefinedValue = values.find(
+					( value ) => value !== undefined
+				);
+				const areValuesEqual = values.every(
+					( value ) =>
+						normalizeValue( value ) ===
+						normalizeValue( values[ 0 ] )
+				);
+
+				return [
+					key,
+					areValuesEqual
+						? values[ 0 ]
+						: getMixedValueFallback( firstDefinedValue ),
+				];
+			} )
+		);
+	}
+
 	return mergedData as ProductEntityRecord;
 }
 
@@ -427,6 +475,70 @@ export function getMixedProductEditFieldIds(
 
 		return mixedFields;
 	}, [] );
+}
+
+function getMixedPlaceholderElements(
+	elements: NonNullable< ProductField[ 'elements' ] >,
+	mixedPlaceholder: string
+) {
+	const mixedPlaceholderOption = {
+		label: mixedPlaceholder,
+		value: '',
+		disabled: true,
+	} satisfies ProductFieldOptionWithDisabled;
+
+	return [
+		mixedPlaceholderOption,
+		...elements.filter( ( element ) => element.value !== '' ),
+	] as ProductField[ 'elements' ];
+}
+
+function getMixedPlaceholderDescription(
+	field: ProductField,
+	mixedPlaceholder: string
+) {
+	if ( field.Edit !== 'toggle' ) {
+		return field.description;
+	}
+
+	if ( ! field.description ) {
+		return mixedPlaceholder;
+	}
+
+	if ( typeof field.description === 'string' ) {
+		return `${ mixedPlaceholder } ${ field.description }`;
+	}
+
+	return field.description;
+}
+
+export function getProductEditFieldsWithMixedPlaceholders(
+	fields: ProductField[],
+	mixedFieldIds: string[],
+	mixedPlaceholder: string
+) {
+	const mixedFieldIdSet = new Set( mixedFieldIds );
+
+	return fields.map( ( field ) => {
+		if ( ! mixedFieldIdSet.has( field.id ) ) {
+			return field;
+		}
+
+		return {
+			...field,
+			description: getMixedPlaceholderDescription(
+				field,
+				mixedPlaceholder
+			),
+			placeholder: mixedPlaceholder,
+			elements: field.elements
+				? getMixedPlaceholderElements(
+						field.elements,
+						mixedPlaceholder
+				  )
+				: field.elements,
+		};
+	} );
 }
 
 export function getVisibleProductEditFields(

@@ -20,6 +20,7 @@ type ProductSelectorProps = {
 	onSelectedProductIdsChange: ( ids: number[] ) => void;
 	excludeProductIds?: number[];
 	includeProductStatuses?: ProductStatus[];
+	placeholder?: string;
 };
 
 const SEARCH_DELAY_MS = 250;
@@ -37,6 +38,7 @@ export function ProductSelector( {
 	onSelectedProductIdsChange,
 	excludeProductIds = [],
 	includeProductStatuses,
+	placeholder,
 }: ProductSelectorProps ) {
 	const [ inputValue, setInputValue ] = useState( '' );
 	const [ suggestions, setSuggestions ] = useState< Product[] >( [] );
@@ -174,6 +176,7 @@ export function ProductSelector( {
 				value={ selectedProducts.map( getProductToken ) }
 				suggestions={ suggestions.map( getProductToken ) }
 				onInputChange={ setInputValue }
+				placeholder={ placeholder }
 				onChange={ ( tokens ) => {
 					onSelectedProductIdsChange(
 						tokens

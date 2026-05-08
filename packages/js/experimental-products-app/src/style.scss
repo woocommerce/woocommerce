@@ -83,6 +83,13 @@
 	flex: 1;
 }
 
+.woocommerce-product-edit__mixed-placeholder {
+	margin: 4px 0 0;
+	color: var(--wp-components-color-gray-700, #757575);
+	font-size: 12px;
+	line-height: 16px;
+}
+
 .woocommerce-product-edit__footer {
 	display: flex;
 	justify-content: flex-end;

@@ -89,6 +89,11 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 						{ field.label }
 					</FlexBlock>
 				</HStack>
+				{ field.placeholder && (
+					<p className="woocommerce-product-edit__mixed-placeholder">
+						{ field.placeholder }
+					</p>
+				) }
 			</BaseControl>
 		);
 	},

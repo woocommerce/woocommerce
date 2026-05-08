@@ -37,7 +37,8 @@ export const createDimensionField = (
 			return (
 				<InputControl
 					label={ field.label }
-					value={ data.dimensions[ key ] }
+					placeholder={ field.placeholder }
+					value={ data.dimensions?.[ key ] ?? '' }
 					onChange={ ( event ) => {
 						onChange( {
 							dimensions: {

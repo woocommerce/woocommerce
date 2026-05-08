@@ -446,7 +446,9 @@ export function TaxonomyEdit< T extends Record< string, unknown > >( {
 				onChange={ handleValueChange }
 				onInputChange={ setInputValue }
 				placeholder={
-					searchPlaceholder ?? __( 'Search', 'woocommerce' )
+					field.placeholder ??
+					searchPlaceholder ??
+					__( 'Search', 'woocommerce' )
 				}
 				saveTransform={ saveTransform }
 				suggestions={ suggestions }

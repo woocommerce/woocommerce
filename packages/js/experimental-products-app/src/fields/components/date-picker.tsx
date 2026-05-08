@@ -15,6 +15,7 @@ type DatePickerProps = {
 	field: {
 		id?: string;
 		label?: string;
+		placeholder?: string;
 	};
 	fieldKey: DateFieldKey;
 	min?: Date;
@@ -55,6 +56,7 @@ export function DatePicker( {
 		<InputControl
 			label={ field.label }
 			type="datetime-local"
+			placeholder={ field.placeholder }
 			value={ data[ fieldKey ] || '' }
 			min={ min ? formatDateTimeLocal( min ) : undefined }
 			onChange={ ( event ) =>

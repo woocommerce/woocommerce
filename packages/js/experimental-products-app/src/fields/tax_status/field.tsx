@@ -25,6 +25,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		return (
 			<CheckboxControl
 				label={ field.label }
+				help={ field.placeholder ?? field.description }
 				checked={ data.tax_status === 'taxable' }
 				onChange={ () =>
 					onChange( {

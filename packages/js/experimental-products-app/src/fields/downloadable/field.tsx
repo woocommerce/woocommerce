@@ -39,7 +39,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	type: 'boolean',
 	isVisible: ( item ) => item.downloadable === true,
 	getValue: ( { item } ) => item.downloadable,
-	Edit: ( { data, onChange } ) => {
+	Edit: ( { data, onChange, field } ) => {
 		const downloads = ( data.downloads ?? [] ) as Array<
 			UploadedItem | ItemToUpload
 		>;
@@ -102,6 +102,11 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 
 		return (
 			<div className="woocommerce-fields-field__downloadable">
+				{ field.placeholder && items.length === 0 && (
+					<p className="woocommerce-product-edit__mixed-placeholder">
+						{ field.placeholder }
+					</p>
+				) }
 				{ items.length > 0 && (
 					<ListItem
 						items={ items }

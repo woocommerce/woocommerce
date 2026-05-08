@@ -32,6 +32,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			<TextareaControl
 				label={ field.label }
 				rows={ 10 }
+				placeholder={ field.placeholder }
 				value={ convertHtmlToPlainText( data.description || '' ) }
 				onChange={ ( value ) => onChange( { description: value } ) }
 			/>

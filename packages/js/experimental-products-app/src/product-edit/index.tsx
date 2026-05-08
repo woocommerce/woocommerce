@@ -26,6 +26,8 @@ import {
 	findProductInList,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
+	getProductEditFieldsWithMixedPlaceholders,
+	getMixedProductEditFieldIds,
 	getVisibleProductEditFields,
 	isProductVariation,
 } from './utils';
@@ -89,18 +91,28 @@ function ProductEditForm( {
 		editableFields,
 		selectedProducts
 	);
+	const mixedFieldIds = getMixedProductEditFieldIds(
+		visibleFields,
+		selectedProducts
+	);
+	const fieldsWithMixedPlaceholders =
+		getProductEditFieldsWithMixedPlaceholders(
+			visibleFields,
+			mixedFieldIds,
+			__( '(Mixed)', 'woocommerce' )
+		);
 
 	const form = {
 		type: 'regular' as const,
 		labelPosition: 'top' as const,
-		fields: visibleFields.map( ( field ) => field.id ),
+		fields: fieldsWithMixedPlaceholders.map( ( field ) => field.id ),
 	};
 
 	return (
 		<div className="woocommerce-product-edit__form">
 			<DataForm
 				data={ mergedData }
-				fields={ visibleFields }
+				fields={ fieldsWithMixedPlaceholders }
 				form={ form }
 				onChange={ onChange }
 			/>

@@ -20,6 +20,8 @@ interface ProductShippingClass {
 	count: number;
 }
 
+const MIXED_OPTION_VALUE = '__woocommerce_mixed__';
+
 const fieldDefinition = {
 	type: 'text',
 	label: __( 'Shipping Class', 'woocommerce' ),
@@ -50,6 +52,15 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		}, [] );
 
 		const options = [
+			...( field.placeholder && ! data.shipping_class
+				? [
+						{
+							label: field.placeholder,
+							value: MIXED_OPTION_VALUE,
+							disabled: true,
+						},
+				  ]
+				: [] ),
 			{
 				label: __( 'No shipping class', 'woocommerce' ),
 				value: '',
@@ -65,13 +76,21 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		return (
 			<SelectControl
 				label={ field.label }
-				value={ data.shipping_class }
+				value={
+					field.placeholder && ! data.shipping_class
+						? MIXED_OPTION_VALUE
+						: data.shipping_class
+				}
 				options={ options }
-				onChange={ ( value ) =>
+				onChange={ ( value ) => {
+					if ( value === MIXED_OPTION_VALUE ) {
+						return;
+					}
+
 					onChange( {
 						shipping_class: value,
-					} )
-				}
+					} );
+				} }
 			/>
 		);
 	},
