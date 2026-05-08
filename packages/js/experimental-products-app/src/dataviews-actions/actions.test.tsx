@@ -128,15 +128,15 @@ describe( 'product list actions', () => {
 		} );
 	} );
 
-	it( 'opens quick edit when the Edit action is triggered', () => {
+	it( 'opens quick edit panel when the Quick edit action is triggered', () => {
 		const { result } = renderHook( () => useProductActions() );
-		const editProductAction = result.current.find(
-			( action ) => action.id === 'edit-product'
+		const quickEditProductAction = result.current.find(
+			( action ) => action.id === 'quick-edit-product'
 		);
 
-		expect( editProductAction ).toBeDefined();
+		expect( quickEditProductAction ).toBeDefined();
 
-		getCallbackAction( editProductAction! ).callback( [ product ], {
+		getCallbackAction( quickEditProductAction! ).callback( [ product ], {
 			onActionPerformed,
 		} );
 
@@ -144,6 +144,33 @@ describe( 'product list actions', () => {
 			'/products?activeView=draft&postId=12&quickEdit=true'
 		);
 		expect( onActionPerformed ).toHaveBeenCalledWith( [ product ] );
+	} );
+
+	it( 'opens product editor when the Edit action is triggered', () => {
+		const { result } = renderHook( () => useProductActions() );
+		const editProductAction = result.current.find(
+			( action ) => action.id === 'edit-product'
+		);
+
+		expect( editProductAction ).toBeDefined();
+
+		const originalLocation = window.location;
+		Object.defineProperty( window, 'location', {
+			writable: true,
+			value: { href: '' },
+		} );
+
+		getCallbackAction( editProductAction! ).callback( [ product ], {
+			onActionPerformed,
+		} );
+
+		expect( window.location.href ).toBe( 'post.php?post=12&action=edit' );
+		expect( onActionPerformed ).toHaveBeenCalledWith( [ product ] );
+
+		Object.defineProperty( window, 'location', {
+			writable: true,
+			value: originalLocation,
+		} );
 	} );
 
 	it( 'duplicates products through the WooCommerce duplicate endpoint', async () => {
