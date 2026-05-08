@@ -41,6 +41,22 @@ class ItemEligibility {
 	private static array $review_cache = array();
 
 	/**
+	 * Register the default filter callbacks the OrderReviews feature ships with.
+	 *
+	 * Auto-called by the WC dependency container after instantiation.
+	 *
+	 * @internal
+	 */
+	final public function init(): void {
+		add_filter(
+			'woocommerce_review_order_eligible_items',
+			array( self::class, 'exclude_fully_refunded_items' ),
+			10,
+			2
+		);
+	}
+
+	/**
 	 * Pre-fill the per-request review cache for a set of items in a single query.
 	 *
 	 * Call this from the template before iterating items so each subsequent
