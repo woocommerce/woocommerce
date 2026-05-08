@@ -118,6 +118,17 @@
 			color: #fff;
 		}
 
+		// Keyboard focus indicator. The default :focus-visible ring would
+		// land on a transparent border against the white badge body and
+		// be invisible, so paint our own — outline (so it sits outside the
+		// border without nudging layout) plus a soft offset to keep it
+		// readable over both the badge body and the product image behind
+		// it. Not applied to :hover-only — pointer users keep the invert.
+		&:focus-visible:not([disabled]) {
+			outline: 2px solid #43454b;
+			outline-offset: 1px;
+		}
+
 		&[disabled] {
 			cursor: not-allowed;
 			opacity: 0.7;
