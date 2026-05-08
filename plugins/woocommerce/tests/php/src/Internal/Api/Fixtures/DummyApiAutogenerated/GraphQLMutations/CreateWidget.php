@@ -23,6 +23,11 @@ class CreateWidget {
 					'type' => Type::nonNull(CreateWidgetInput::get()),
 						'description' => __( 'The data for the new widget', 'woocommerce' ),
 						),
+				'related_inputs' => array(
+					'type' => Type::listOf(Type::nonNull(CreateWidgetInput::get())),
+						'description' => __( 'Related widget inputs for array input generation coverage', 'woocommerce' ),
+						'defaultValue' => NULL,
+					),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);
@@ -40,6 +45,9 @@ class CreateWidget {
 		$execute_args = array();
 		if ( array_key_exists( 'input', $args ) ) {
 			$execute_args['input'] = self::convert_create_widget_input( $args['input'] );
+		}
+		if ( array_key_exists( 'related_inputs', $args ) ) {
+			$execute_args['related_inputs'] = $args['related_inputs'];
 		}
 
 		$result = Utils::execute_command( $command, $execute_args );
