@@ -18,7 +18,7 @@ import { sanitizeHTML } from '@woocommerce/sanitize';
 /**
  * Internal dependencies
  */
-import { Text } from '@wordpress/components';
+import { Text } from '../../text';
 import { ExperimentalListItem as ListItem } from '../experimental-list-item';
 import { VerticalCSSTransition } from '../../vertical-css-transition';
 
