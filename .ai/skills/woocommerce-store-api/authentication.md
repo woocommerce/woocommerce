@@ -33,7 +33,7 @@ Routes that extend `AbstractRoute` directly do **not** get this. They will accep
 ## When to extend which abstract
 
 | Use case | Extend | Why |
-|---|---|---|
+| --- | --- | --- |
 | Read-only routes (catalog, public data) | `AbstractRoute` | No state to protect from CSRF. |
 | Cart-related state mutation | `AbstractCartRoute` | Existing precedent; nonce + cart-session machinery wired up. |
 | Login-required mutation routes (per-user preferences, account-scoped writes) | `AbstractCartRoute`, **or** implement equivalent nonce protection on `AbstractRoute` | Mutation via cookie auth without CSRF protection is unacceptable. |
@@ -44,7 +44,7 @@ If you find yourself extending `AbstractRoute` for a route that POSTs/DELETEs ba
 ## `permission_callback` conventions
 
 | Use case | Pattern | Reference |
-|---|---|---|
+| --- | --- | --- |
 | Guest-accessible | `'__return_true'` | [Cart.php](../../../plugins/woocommerce/src/StoreApi/Routes/V1/Cart.php), most cart routes |
 | Login-required | `function () { return is_user_logged_in(); }` | [Patterns.php](../../../plugins/woocommerce/src/StoreApi/Routes/V1/Patterns.php) |
 | Owner-only access | `[ $this, 'is_authorized' ]` | [Order.php](../../../plugins/woocommerce/src/StoreApi/Routes/V1/Order.php) |

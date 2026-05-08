@@ -5,7 +5,7 @@ The Store API follows REST conventions more strictly than the older `/wc/v3/*` a
 ## Where data goes
 
 | Where | What it's for |
-|---|---|
+| --- | --- |
 | **Path** (`/items/{key}`) | Identifies *which* resource. Required for any single-resource operation. |
 | **Body** (JSON) | Payload for create/update. POST, PUT, PATCH. |
 | **Query string** (`?since=...`) | Filters, pagination, sort options on GET. |
@@ -21,7 +21,7 @@ The Store API follows REST conventions more strictly than the older `/wc/v3/*` a
 Store API routes split into three shapes, each with a different response convention:
 
 | Shape | URL | Returns | Example |
-|---|---|---|---|
+| --- | --- | --- | --- |
 | Collection-add | `POST /items` | The added single item, status 201 | `CartItems::get_route_post_response()` |
 | Collection-delete | `DELETE /items/{key}` | 204 with null body | `CartItemsByKey::get_route_delete_response()` (in `CartItemsByKey.php`) |
 | Action on parent | `POST /cart/add-item`, `POST /cart/apply-coupon` | The whole parent resource | `CartAddItem`, `CartApplyCoupon` |
@@ -33,7 +33,7 @@ Don't mix the two. "POST /items returns the whole collection" is awkward, breaks
 ## Status codes
 
 | Code | When |
-|---|---|
+| --- | --- |
 | `200` | GET success; PATCH/PUT success returning the updated resource. |
 | `201 Created` | POST that creates a new resource. Body is the new resource. |
 | `204 No Content` | DELETE success. Empty body. |
@@ -83,7 +83,7 @@ private static function generate_key( int $product_id, int $variation_id, array 
 
 Resource identifiers in the path should follow the resource hierarchy:
 
-```
+```text
 /{collection}                               ← collection of parents
 /{collection}/{slug}                        ← one specific parent
 /{collection}/{slug}/items                  ← items collection inside a parent

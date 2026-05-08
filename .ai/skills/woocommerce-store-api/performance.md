@@ -83,7 +83,7 @@ Alternative: `update_post_thumbnail_cache( $wp_query )` is a WordPress-idiomatic
 When reviewing a new Store API schema, check whether each per-item operation has a corresponding batch prime up front:
 
 | Per-item operation | Required prime |
-|---|---|
+| --- | --- |
 | `wc_get_product( $id )` in a loop | `_prime_post_caches( $product_ids )` |
 | `get_post_thumbnail_id()` + image rendering | Plus `_prime_post_caches( $thumbnail_ids, true, true )` |
 | `get_term( $id )` for taxonomy attributes | `_prime_term_caches( $term_ids )` (or use `update_term_cache = true` on the post prime) |
