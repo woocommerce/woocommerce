@@ -286,7 +286,15 @@ class QueryCache {
 		 *
 		 * @param string $dir Default cache directory under wp-uploads.
 		 */
-		return (string) apply_filters( 'woocommerce_graphql_opcache_cache_dir', $default );
+		$dir = (string) apply_filters( 'woocommerce_graphql_opcache_cache_dir', $default );
+
+		// Reject stream wrappers (e.g. phar://, http://) to keep file_put_contents,
+		// rename, and include constrained to local filesystem paths.
+		if ( '' === $dir || wp_is_stream( $dir ) ) {
+			return '';
+		}
+
+		return $dir;
 	}
 
 	/**
@@ -298,6 +306,10 @@ class QueryCache {
 	 */
 	private function ensure_opcache_dir_writable(): bool {
 		$dir = $this->get_opcache_cache_dir();
+
+		if ( '' === $dir ) {
+			return false;
+		}
 
 		if ( ! is_dir( $dir ) && ! wp_mkdir_p( $dir ) ) {
 			return false;
