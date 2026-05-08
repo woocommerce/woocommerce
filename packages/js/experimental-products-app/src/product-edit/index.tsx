@@ -232,7 +232,7 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 		[ products, requestedProductIds ]
 	);
 
-	const { editEntityRecord, saveEditedEntityRecord } =
+	const { clearEntityRecordEdits, editEntityRecord, saveEditedEntityRecord } =
 		useDispatch( coreStore );
 
 	const { createSuccessNotice, createErrorNotice } =
@@ -308,14 +308,25 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 	);
 
 	const closeDrawer = useCallback( () => {
+		const editedProductIds = new Set(
+			selectedProducts.map( ( product ) =>
+				isProductVariation( product ) && product.parent_id
+					? product.parent_id
+					: product.id
+			)
+		);
 		const nextQuery = {
 			...query,
 		} as Record< string, string >;
 
+		editedProductIds.forEach( ( productId ) => {
+			clearEntityRecordEdits( 'root', 'product', productId );
+		} );
+
 		delete nextQuery.quickEdit;
 
 		navigate( getProductListNavigationPath( path, nextQuery ) );
-	}, [ navigate, path, query ] );
+	}, [ clearEntityRecordEdits, navigate, path, query, selectedProducts ] );
 
 	const onSave = useCallback( async () => {
 		if ( selectedProducts.length === 0 || isSaving ) {
@@ -326,7 +337,6 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 
 		try {
 			const results = await saveSelectedProducts( {
-				products,
 				selectedProducts,
 				editEntityRecord,
 				saveEditedEntityRecord,
@@ -361,7 +371,6 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 		createSuccessNotice,
 		editEntityRecord,
 		isSaving,
-		products,
 		saveEditedEntityRecord,
 		selectedProducts,
 	] );

@@ -79,21 +79,6 @@ describe( 'saveSelectedProducts', () => {
 			...originalFailedVariation,
 			name: 'Green edited',
 		};
-		const editedUnselectedVariation = {
-			...originalUnselectedVariation,
-			name: 'Red edited',
-		};
-		const originalParent = buildProduct( {
-			id: 10,
-			type: 'variable',
-			_embedded: {
-				variations: [
-					originalSavedVariation,
-					originalFailedVariation,
-					originalUnselectedVariation,
-				],
-			},
-		} );
 		const editedParent = buildProduct( {
 			id: 10,
 			type: 'variable',
@@ -101,7 +86,7 @@ describe( 'saveSelectedProducts', () => {
 				variations: [
 					editedSavedVariation,
 					editedFailedVariation,
-					editedUnselectedVariation,
+					originalUnselectedVariation,
 				],
 			},
 		} );
@@ -132,7 +117,6 @@ describe( 'saveSelectedProducts', () => {
 			.mockRejectedValueOnce( saveError );
 
 		const results = await saveSelectedProducts( {
-			products: [ originalParent ],
 			selectedProducts: [ editedSavedVariation, editedFailedVariation ],
 			editEntityRecord,
 			saveEditedEntityRecord,

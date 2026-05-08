@@ -12,7 +12,6 @@ import type { ProductVariation } from '@woocommerce/data';
 import type { ProductEntityRecord } from '../fields/types';
 import { normalizeVariation } from '../variation-view/normalization';
 import {
-	findProductInList,
 	getProductWithUpdatedVariation,
 	getProductVariationUpdatePath,
 	isProductVariation,
@@ -49,75 +48,6 @@ function getEditedProduct( productId: number ) {
 	) as ProductEntityRecord | false | undefined;
 
 	return product !== false ? product : undefined;
-}
-
-function getOriginalProduct(
-	products: ProductEntityRecord[],
-	productId: number
-) {
-	return (
-		findProductInList( products, productId ) ??
-		( select( coreStore ).getEntityRecord(
-			'root',
-			'product',
-			productId
-		) as ProductEntityRecord | undefined )
-	);
-}
-
-function restoreUnselectedVariationEdits(
-	productId: number,
-	products: ProductEntityRecord[],
-	savedVariationIds: Set< number >,
-	selectedVariationIds: Set< number >,
-	editEntityRecord: EditProductRecord
-) {
-	const editedProduct = getEditedProduct( productId );
-	const editedVariations = editedProduct?._embedded?.variations ?? [];
-
-	if ( ! editedProduct || editedVariations.length === 0 ) {
-		return;
-	}
-
-	const originalProduct = getOriginalProduct( products, productId );
-	const originalVariationsById = new Map(
-		( originalProduct?._embedded?.variations ?? [] ).map( ( variation ) => [
-			variation.id,
-			variation,
-		] )
-	);
-	const restoredVariations = editedVariations.map( ( variation ) => {
-		if (
-			savedVariationIds.has( variation.id ) ||
-			selectedVariationIds.has( variation.id )
-		) {
-			return variation;
-		}
-
-		return originalVariationsById.get( variation.id ) ?? variation;
-	} );
-	const hasRestoredVariation = restoredVariations.some(
-		( variation, index ) => variation !== editedVariations[ index ]
-	);
-
-	if ( ! hasRestoredVariation ) {
-		return;
-	}
-
-	editEntityRecord(
-		'root',
-		'product',
-		editedProduct.id,
-		{
-			_embedded: {
-				...editedProduct._embedded,
-				variations: restoredVariations,
-			},
-		},
-		{
-			undoIgnore: true,
-		}
-	);
 }
 
 async function saveVariation(
@@ -230,21 +160,15 @@ function getSelectedProductSaveResults(
 }
 
 export async function saveSelectedProducts( {
-	products,
 	selectedProducts,
 	editEntityRecord,
 	saveEditedEntityRecord,
 }: {
-	products: ProductEntityRecord[];
 	selectedProducts: ProductEntityRecord[];
 	editEntityRecord: EditProductRecord;
 	saveEditedEntityRecord: SaveEditedProductRecord;
 } ) {
-	const savedVariationIds = new Set< number >();
 	const selectedVariations = selectedProducts.filter( isProductVariation );
-	const selectedVariationIds = new Set(
-		selectedVariations.map( ( variation ) => variation.id )
-	);
 	const productIdsToSave = new Set(
 		selectedProducts
 			.filter( ( product ) => ! isProductVariation( product ) )
@@ -257,26 +181,17 @@ export async function saveSelectedProducts( {
 
 	variationResults.forEach( ( result, index ) => {
 		if ( result.status === 'fulfilled' ) {
-			savedVariationIds.add( selectedVariations[ index ].id );
 			productIdsToSave.add( selectedVariations[ index ].parent_id );
 		}
 	} );
 
 	const productSaveIds = Array.from( productIdsToSave );
 	const productSaveResults = await Promise.allSettled(
-		productSaveIds.map( ( productId ) => {
-			restoreUnselectedVariationEdits(
-				productId,
-				products,
-				savedVariationIds,
-				selectedVariationIds,
-				editEntityRecord
-			);
-
-			return saveEditedEntityRecord( 'root', 'product', productId, {
+		productSaveIds.map( ( productId ) =>
+			saveEditedEntityRecord( 'root', 'product', productId, {
 				throwOnError: true,
-			} );
-		} )
+			} )
+		)
 	);
 
 	return getSelectedProductSaveResults(
