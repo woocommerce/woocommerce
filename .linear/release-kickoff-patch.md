@@ -30,7 +30,7 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ### 3. Upload the release to WordPress.org
 
-- [ ] Run workflow **[Release: Upload release to WordPress.org]({repository_url}/actions/workflows/release-upload-to-wporg.yml)**: enter `{release_version}` as _Release tag to upload_ and make sure to check off the confirmation box.
+- [ ] Run workflow **[Release: Upload release to WordPress.org]({repository_url}/actions/workflows/release-upload-to-wporg.yml)**: enter `{release_version}` as _Release tag to upload_ and make sure to check 'I confirm that I want to upload a release to WordPress.org.'
 - [ ] Confirm that SVN tag `{release_version}` [exists on WordPress.org SVN](https://plugins.svn.wordpress.org/woocommerce/tags/{release_version}).
 - [ ] Log [into WordPress.org](https://wordpress.org/plugins/developers/releases/) using the credentials from the `WordPress.org "WooCommerce" user account` secret in the secret store and approve the release.
 - [ ] After a few minutes, confirm that [`{release_version}` is available for download](https://downloads.wordpress.org/plugin/woocommerce.{release_version}.zip).
@@ -49,7 +49,7 @@ Keep the _[Release Troubleshooting & Recovery](https://developer.woocommerce.com
 
 ### 5. Publish the release
 
-- [ ] Run workflow **[Release: Update stable tag]({repository_url}/actions/workflows/release-update-stable-tag.yml)**: enter `{release_version}` as _Version_ and make sure to check off the confirmation box.
+- [ ] Run workflow **[Release: Update stable tag]({repository_url}/actions/workflows/release-update-stable-tag.yml)**: enter `{release_version}` as _Version_ and make sure to check 'I confirm that I want to update the stable tag (this will update the SVN and GitHub stable tags).'
 - [ ] Publish the `{release_version}` [release draft]({repository_url}/releases) that was previously created, as well as any other `{release_main_version}` drafts that might exist from previous attempts. **Ensure** that "Set as the latest release" is checked for `{release_version}`.
 
 
