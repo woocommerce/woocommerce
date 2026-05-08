@@ -36,8 +36,10 @@ class TemplateOverrideScannerTest extends WC_Unit_Test_Case {
 	}
 
 	public function test_good_when_overrides_match_core_version(): void {
-		$core_meta = get_file_data( WC()->plugin_path() . '/templates/cart/cart.php', array( 'version' => 'version' ) );
-		$this->write_template( 'cart/cart.php', $core_meta['version'] );
+		$core_contents = file_get_contents( WC()->plugin_path() . '/templates/cart/cart.php', false, null, 0, 4096 );
+		preg_match( '/@version\s+([0-9][0-9a-zA-Z.\-]*)/i', $core_contents, $matches );
+		$core_version = $matches[1] ?? '0';
+		$this->write_template( 'cart/cart.php', $core_version );
 
 		$result = ( new TemplateOverrideScanner() )->run();
 		$this->assertSame( 'good', $result['status'] );

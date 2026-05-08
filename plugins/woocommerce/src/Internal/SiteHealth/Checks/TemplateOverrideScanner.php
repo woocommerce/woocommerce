@@ -91,10 +91,8 @@ class TemplateOverrideScanner {
 			if ( ! file_exists( $core_path ) ) {
 				continue;
 			}
-			$theme_meta = get_file_data( $file->getPathname(), array( 'version' => 'version' ) );
-			$core_meta  = get_file_data( $core_path, array( 'version' => 'version' ) );
-			$theme_v    = (string) ( $theme_meta['version'] ?? '0' );
-			$core_v     = (string) ( $core_meta['version']  ?? '0' );
+			$theme_v = $this->read_version( $file->getPathname() );
+			$core_v  = $this->read_version( $core_path );
 			if ( $this->is_two_minors_behind( $theme_v, $core_v ) ) {
 				$outdated[] = array(
 					'relative' => $relative,
@@ -104,6 +102,17 @@ class TemplateOverrideScanner {
 			}
 		}
 		return $outdated;
+	}
+
+	private function read_version( string $path ): string {
+		$contents = file_get_contents( $path, false, null, 0, 4096 );
+		if ( false === $contents ) {
+			return '0';
+		}
+		if ( preg_match( '/@version\s+([0-9][0-9a-zA-Z.\-]*)/i', $contents, $matches ) ) {
+			return $matches[1];
+		}
+		return '0';
 	}
 
 	private function is_two_minors_behind( string $theme_version, string $core_version ): bool {
