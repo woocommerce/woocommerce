@@ -40,7 +40,7 @@ describe( 'product list utils', () => {
 		it( 'keeps top-level variation data when available', () => {
 			const embeddedVariation = createProduct( 2, 1 );
 			const listedVariation = {
-				...createProduct( 2, 1 ),
+				...embeddedVariation,
 				name: 'Listed variation',
 			} as ProductEntityRecord;
 			const parent = createProduct( 1, undefined, [ embeddedVariation ] );

@@ -30,6 +30,7 @@ export const PRODUCT_LIST_TAB_VALUES = [
 	'all',
 	'publish',
 	'draft',
+	'pending',
 	'trash',
 ] as const;
 
@@ -50,6 +51,10 @@ export const PRODUCT_LIST_TABS: Array< {
 	{
 		value: 'draft',
 		label: __( 'Draft', 'woocommerce' ),
+	},
+	{
+		value: 'pending',
+		label: __( 'Pending review', 'woocommerce' ),
 	},
 	{
 		value: 'trash',

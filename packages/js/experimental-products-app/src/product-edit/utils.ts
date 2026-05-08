@@ -81,7 +81,6 @@ const COMMON_PRODUCT_EDIT_FIELD_IDS = [
 	'sku',
 	'categories',
 	'tags',
-	'type',
 	'featured',
 	'catalog_visibility',
 	'upsell_ids',
@@ -294,56 +293,47 @@ export function getProductVariationUpdatePath(
 	return `/wc/v3/products/${ product.parent_id }/variations/${ product.id }`;
 }
 
-export function getProductsWithUpdatedVariation(
-	products: ProductEntityRecord[],
+export function getProductWithUpdatedVariation(
+	product: ProductEntityRecord,
 	variation: ProductEntityRecord
-) {
-	const updatedProductsById = new Map< number, ProductEntityRecord >();
+): ProductEntityRecord {
+	const embeddedVariations = product._embedded?.variations ?? [];
+	const hasEmbeddedVariation = embeddedVariations.some(
+		( embeddedVariation ) => embeddedVariation.id === variation.id
+	);
 
-	products.forEach( ( product ) => {
-		if ( product.id === variation.id ) {
-			updatedProductsById.set( product.id, variation );
-			return;
-		}
-
-		if ( product.id !== variation.parent_id ) {
-			updatedProductsById.set( product.id, product );
-			return;
-		}
-
-		const embeddedVariations = product._embedded?.variations ?? [];
-		const hasEmbeddedVariation = embeddedVariations.some(
-			( embeddedVariation ) => embeddedVariation.id === variation.id
-		);
-
-		updatedProductsById.set( product.id, {
-			...product,
-			_embedded: {
-				...product._embedded,
-				variations: hasEmbeddedVariation
-					? embeddedVariations.map( ( embeddedVariation ) =>
-							embeddedVariation.id === variation.id
-								? variation
-								: embeddedVariation
-					  )
-					: [ ...embeddedVariations, variation ],
-			},
-		} );
-	} );
-
-	if ( ! updatedProductsById.has( variation.id ) ) {
-		updatedProductsById.set( variation.id, variation );
-	}
-
-	return Array.from( updatedProductsById.values() );
+	return {
+		...product,
+		_embedded: {
+			...product._embedded,
+			variations: hasEmbeddedVariation
+				? embeddedVariations.map( ( embeddedVariation ) =>
+						embeddedVariation.id === variation.id
+							? variation
+							: embeddedVariation
+				  )
+				: [ ...embeddedVariations, variation ],
+		},
+	};
 }
 
-export function getClearedProductEdits(
-	edits?: Partial< ProductEntityRecord >
+export function findProductInList(
+	products: ProductEntityRecord[],
+	productId: number
 ) {
-	return Object.fromEntries(
-		Object.keys( edits ?? {} ).map( ( key ) => [ key, undefined ] )
-	);
+	for ( const product of products ) {
+		if ( product.id === productId ) {
+			return product;
+		}
+
+		const variation = product._embedded?.variations?.find(
+			( embeddedVariation ) => embeddedVariation.id === productId
+		);
+
+		if ( variation ) {
+			return variation;
+		}
+	}
 }
 
 function getCommonProductTypeCompatibleFieldIds(

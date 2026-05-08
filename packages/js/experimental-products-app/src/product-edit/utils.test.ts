@@ -11,9 +11,8 @@ import { productFields } from '../product-list/fields';
 import {
 	buildMergedProductEditData,
 	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
-	getClearedProductEdits,
+	getProductWithUpdatedVariation,
 	getProductEditFields,
-	getProductsWithUpdatedVariation,
 	getProductVariationUpdatePath,
 	getVisibleProductEditFields,
 	isProductVariation,
@@ -167,7 +166,7 @@ describe( 'product edit utils', () => {
 		}
 	} );
 
-	it( 'updates embedded and standalone variation records in product records', () => {
+	it( 'updates an embedded variation in a product record', () => {
 		const variation = buildProduct( {
 			id: 34,
 			parent_id: 12,
@@ -186,31 +185,15 @@ describe( 'product edit utils', () => {
 		} );
 
 		expect(
-			getProductsWithUpdatedVariation(
-				[ parent, variation ],
-				updatedVariation
-			)
-		).toEqual( [
+			getProductWithUpdatedVariation( parent, updatedVariation )
+		).toEqual(
 			expect.objectContaining( {
 				id: 12,
 				_embedded: {
 					variations: [ updatedVariation ],
 				},
-			} ),
-			updatedVariation,
-		] );
-	} );
-
-	it( 'creates edit-clearing updates from existing edits', () => {
-		expect(
-			getClearedProductEdits( {
-				name: 'Green',
-				regular_price: '12',
 			} )
-		).toEqual( {
-			name: undefined,
-			regular_price: undefined,
-		} );
+		);
 	} );
 
 	describe( 'getVisibleProductEditFields', () => {

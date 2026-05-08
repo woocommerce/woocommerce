@@ -2,16 +2,14 @@
  * External dependencies
  */
 import { Button, Spinner } from '@wordpress/components';
-import apiFetch from '@wordpress/api-fetch';
 import { store as coreStore } from '@wordpress/core-data';
 import { select as wpSelect, useDispatch, useSelect } from '@wordpress/data';
 import { DataForm } from '@wordpress/dataviews';
-import { useCallback, useState } from '@wordpress/element';
+import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
-import { closeSmall } from '@wordpress/icons';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
-import type { ProductVariation } from '@woocommerce/data';
+import { Drawer } from '@wordpress/ui';
 
 /**
  * Internal dependencies
@@ -22,28 +20,27 @@ import {
 	getSelectionFromPostId,
 } from '../product-list/utils';
 import type { ProductEntityRecord } from '../fields/types';
-import { normalizeVariation } from '../variation-view/normalization';
 import { unlock } from '../lock-unlock';
 import {
 	buildMergedProductEditData,
-	getClearedProductEdits,
+	findProductInList,
+	getProductWithUpdatedVariation,
 	getProductEditFields,
-	getProductsWithUpdatedVariation,
-	getProductVariationUpdatePath,
 	getVisibleProductEditFields,
 	isProductVariation,
 } from './utils';
+import { saveSelectedProducts } from './save';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
 type ProductEditFormProps = {
 	editableFields: ReturnType< typeof getProductEditFields >;
-	hasEdits: boolean;
-	isSaving: boolean;
 	onChange: ( changes: Partial< ProductEntityRecord > ) => void;
-	onClose: () => void;
-	onSave: () => void;
 	selectedProducts: ProductEntityRecord[];
+};
+
+type ProductEditProps = {
+	products: ProductEntityRecord[];
 };
 
 function getSaveNoticeMessage( successCount: number, failedCount: number ) {
@@ -84,11 +81,7 @@ function getSaveNoticeMessage( successCount: number, failedCount: number ) {
 
 function ProductEditForm( {
 	editableFields,
-	hasEdits,
-	isSaving,
 	onChange,
-	onClose,
-	onSave,
 	selectedProducts,
 }: ProductEditFormProps ) {
 	const mergedData = buildMergedProductEditData( selectedProducts );
@@ -104,37 +97,18 @@ function ProductEditForm( {
 	};
 
 	return (
-		<>
-			<div className="woocommerce-product-edit__form">
-				<DataForm
-					data={ mergedData }
-					fields={ visibleFields }
-					form={ form }
-					onChange={ onChange }
-				/>
-			</div>
-			<div className="woocommerce-product-edit__footer">
-				<Button
-					variant="tertiary"
-					onClick={ onClose }
-					disabled={ isSaving }
-				>
-					{ __( 'Cancel', 'woocommerce' ) }
-				</Button>
-				<Button
-					variant="primary"
-					onClick={ onSave }
-					isBusy={ isSaving }
-					disabled={ isSaving || ! hasEdits }
-				>
-					{ __( 'Save', 'woocommerce' ) }
-				</Button>
-			</div>
-		</>
+		<div className="woocommerce-product-edit__form">
+			<DataForm
+				data={ mergedData }
+				fields={ visibleFields }
+				form={ form }
+				onChange={ onChange }
+			/>
+		</div>
 	);
 }
 
-export default function ProductEdit() {
+export default function ProductEdit( { products }: ProductEditProps ) {
 	const { navigate } = useHistory();
 	const { path, query = {} } = useLocation();
 	const requestedProductIdsFromRoute = getSelectionFromPostId( query.postId )
@@ -145,10 +119,10 @@ export default function ProductEdit() {
 	);
 
 	const [ isSaving, setIsSaving ] = useState( false );
+	const [ isDrawerOpen, setIsDrawerOpen ] = useState( false );
 	const editableFields = getProductEditFields( productFields );
 	const {
 		selectedProducts,
-		selectedProductIds,
 		isResolving,
 		hasResolved,
 		hasMissingProducts,
@@ -158,7 +132,6 @@ export default function ProductEdit() {
 			if ( requestedProductIds.length === 0 ) {
 				return {
 					selectedProducts: [],
-					selectedProductIds: [],
 					isResolving: false,
 					hasResolved: true,
 					hasMissingProducts: false,
@@ -169,37 +142,73 @@ export default function ProductEdit() {
 			const coreSelect = select( coreStore );
 			const productResults = requestedProductIds.map( ( productId ) => {
 				const resolutionArgs = [ 'root', 'product', productId ];
+				const rootRecord = coreSelect.getEditedEntityRecord(
+					'root',
+					'product',
+					productId
+				) as unknown as ProductEntityRecord | false | undefined;
+				const listedProduct = findProductInList( products, productId );
+				const product =
+					listedProduct ??
+					( rootRecord !== false ? rootRecord : undefined );
+				let record: ProductEntityRecord | false | undefined =
+					product ?? rootRecord;
+
+				if (
+					product &&
+					isProductVariation( product ) &&
+					product.parent_id
+				) {
+					const parentProduct = coreSelect.getEditedEntityRecord(
+						'root',
+						'product',
+						product.parent_id
+					) as unknown as ProductEntityRecord | false | undefined;
+					const editedParentProduct =
+						parentProduct !== false ? parentProduct : undefined;
+					const editedVariation =
+						editedParentProduct?._embedded?.variations?.find(
+							( variation ) => variation.id === product.id
+						);
+
+					record = editedVariation || product;
+				}
 
 				return {
 					productId,
-					record: coreSelect.getEditedEntityRecord(
-						'root',
-						'product',
-						productId
-					) as unknown as ProductEntityRecord | false | undefined,
-					isResolving: coreSelect.isResolving(
-						'getEditedEntityRecord',
-						resolutionArgs
-					),
-					hasFinishedResolution: coreSelect.hasFinishedResolution(
-						'getEditedEntityRecord',
-						resolutionArgs
-					),
+					record,
+					isResolving: listedProduct
+						? false
+						: coreSelect.isResolving(
+								'getEditedEntityRecord',
+								resolutionArgs
+						  ),
+					hasFinishedResolution: listedProduct
+						? true
+						: coreSelect.hasFinishedResolution(
+								'getEditedEntityRecord',
+								resolutionArgs
+						  ),
 				};
 			} );
-			const products = productResults
+			const resolvedProducts = productResults
 				.map( ( { record } ) => record )
 				.filter(
 					( product ): product is ProductEntityRecord =>
 						product !== undefined && product !== false
 				);
-			const validSelectedProductIds = products.map(
-				( product ) => product.id
+			const editedProductIds = Array.from(
+				new Set(
+					resolvedProducts.map( ( product ) =>
+						isProductVariation( product ) && product.parent_id
+							? product.parent_id
+							: product.id
+					)
+				)
 			);
 
 			return {
-				selectedProducts: products,
-				selectedProductIds: validSelectedProductIds,
+				selectedProducts: resolvedProducts,
 				isResolving: productResults.some(
 					( result ) =>
 						result.isResolving || ! result.hasFinishedResolution
@@ -211,7 +220,7 @@ export default function ProductEdit() {
 					( result ) =>
 						result.hasFinishedResolution && result.record === false
 				),
-				hasEdits: validSelectedProductIds.some( ( productId ) =>
+				hasEdits: editedProductIds.some( ( productId ) =>
 					coreSelect.hasEditsForEntityRecord(
 						'root',
 						'product',
@@ -220,15 +229,11 @@ export default function ProductEdit() {
 				),
 			};
 		},
-		[ requestedProductIds ]
+		[ products, requestedProductIds ]
 	);
 
-	const {
-		editEntityRecord,
-		invalidateResolutionForStoreSelector,
-		receiveEntityRecords,
-		saveEditedEntityRecord,
-	} = useDispatch( coreStore );
+	const { clearEntityRecordEdits, editEntityRecord, saveEditedEntityRecord } =
+		useDispatch( coreStore );
 
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
@@ -257,22 +262,71 @@ export default function ProductEdit() {
 
 	const onChange = useCallback(
 		( changes: Partial< ProductEntityRecord > ) => {
-			selectedProductIds.forEach( ( productId ) => {
-				editEntityRecord( 'root', 'product', productId, changes );
+			const updatedParentProductsById = new Map<
+				number,
+				ProductEntityRecord
+			>();
+
+			selectedProducts.forEach( ( product ) => {
+				if ( ! isProductVariation( product ) ) {
+					editEntityRecord( 'root', 'product', product.id, changes );
+					return;
+				}
+
+				if ( ! product.parent_id ) {
+					return;
+				}
+
+				const parentProduct =
+					updatedParentProductsById.get( product.parent_id ) ??
+					( wpSelect( coreStore ).getEditedEntityRecord(
+						'root',
+						'product',
+						product.parent_id
+					) as ProductEntityRecord | false | undefined );
+
+				if ( ! parentProduct ) {
+					return;
+				}
+
+				updatedParentProductsById.set(
+					product.parent_id,
+					getProductWithUpdatedVariation( parentProduct, {
+						...product,
+						...changes,
+					} )
+				);
+			} );
+
+			updatedParentProductsById.forEach( ( parentProduct ) => {
+				editEntityRecord( 'root', 'product', parentProduct.id, {
+					_embedded: parentProduct._embedded,
+				} );
 			} );
 		},
-		[ editEntityRecord, selectedProductIds ]
+		[ editEntityRecord, selectedProducts ]
 	);
 
-	const onClose = useCallback( () => {
+	const closeDrawer = useCallback( () => {
+		const editedProductIds = new Set(
+			selectedProducts.map( ( product ) =>
+				isProductVariation( product ) && product.parent_id
+					? product.parent_id
+					: product.id
+			)
+		);
 		const nextQuery = {
 			...query,
 		} as Record< string, string >;
 
+		editedProductIds.forEach( ( productId ) => {
+			clearEntityRecordEdits( 'root', 'product', productId );
+		} );
+
 		delete nextQuery.quickEdit;
 
 		navigate( getProductListNavigationPath( path, nextQuery ) );
-	}, [ navigate, path, query ] );
+	}, [ clearEntityRecordEdits, navigate, path, query, selectedProducts ] );
 
 	const onSave = useCallback( async () => {
 		if ( selectedProducts.length === 0 || isSaving ) {
@@ -282,74 +336,11 @@ export default function ProductEdit() {
 		setIsSaving( true );
 
 		try {
-			const results = await Promise.allSettled(
-				selectedProducts.map( async ( product ) => {
-					if ( ! isProductVariation( product ) ) {
-						return saveEditedEntityRecord(
-							'root',
-							'product',
-							product.id,
-							{
-								throwOnError: true,
-							}
-						);
-					}
-
-					const edits = wpSelect( coreStore ).getEntityRecordEdits(
-						'root',
-						'product',
-						product.id
-					);
-					const savedVariation = await apiFetch< ProductVariation >( {
-						path: getProductVariationUpdatePath( product ),
-						method: 'PUT',
-						data: edits,
-					} );
-					const normalizedVariation =
-						normalizeVariation( savedVariation );
-					const parentProduct = wpSelect( coreStore ).getEntityRecord(
-						'root',
-						'product',
-						product.parent_id
-					) as ProductEntityRecord | undefined;
-					const savedProducts = getProductsWithUpdatedVariation(
-						parentProduct
-							? [ parentProduct, product ]
-							: [ product ],
-						normalizedVariation
-					);
-
-					receiveEntityRecords(
-						'root',
-						'product',
-						savedProducts,
-						undefined,
-						true,
-						undefined,
-						undefined
-					);
-					editEntityRecord(
-						'root',
-						'product',
-						product.id,
-						getClearedProductEdits( edits ),
-						{
-							undoIgnore: true,
-						}
-					);
-
-					return normalizedVariation;
-				} )
-			);
-			const savedVariationsCount = results.filter(
-				( result, index ) =>
-					result.status === 'fulfilled' &&
-					isProductVariation( selectedProducts[ index ] )
-			).length;
-
-			if ( savedVariationsCount > 0 ) {
-				invalidateResolutionForStoreSelector( 'getEntityRecords' );
-			}
+			const results = await saveSelectedProducts( {
+				selectedProducts,
+				editEntityRecord,
+				saveEditedEntityRecord,
+			} );
 
 			const successfulCount = results.filter(
 				( result ) => result.status === 'fulfilled'
@@ -379,66 +370,104 @@ export default function ProductEdit() {
 		createErrorNotice,
 		createSuccessNotice,
 		editEntityRecord,
-		invalidateResolutionForStoreSelector,
 		isSaving,
-		receiveEntityRecords,
 		saveEditedEntityRecord,
 		selectedProducts,
 	] );
 
+	useEffect( () => {
+		if ( requestedProductIds.length > 0 && ! isDrawerOpen ) {
+			setIsDrawerOpen( true );
+		}
+	}, [ requestedProductIds, isDrawerOpen ] );
+
 	return (
-		<div className="woocommerce-product-edit">
-			<div className="woocommerce-product-edit__header">
-				<h2 className="woocommerce-product-edit__title">{ title }</h2>
-				<Button
-					className="woocommerce-product-edit__close"
-					icon={ closeSmall }
-					label={ __( 'Close quick edit', 'woocommerce' ) }
-					onClick={ onClose }
-				/>
-			</div>
+		<Drawer.Root
+			open={ isDrawerOpen }
+			onOpenChangeComplete={ ( isOpen ) => {
+				if ( ! isOpen ) {
+					closeDrawer();
+				}
+			} }
+			swipeDirection="right"
+		>
+			<Drawer.Popup
+				className="woocommerce-product-edit__drawer"
+				portal={
+					<Drawer.Portal className="woocommerce-product-edit__drawer-portal" />
+				}
+				style={ { width: 450 } }
+			>
+				<Drawer.Header className="woocommerce-product-edit__header">
+					<Drawer.Title className="woocommerce-product-edit__title">
+						{ title }
+					</Drawer.Title>
+					<Drawer.CloseIcon
+						onClick={ closeDrawer }
+						label={ __( 'Close quick edit', 'woocommerce' ) }
+					/>
+				</Drawer.Header>
 
-			{ hasNoRequestedProducts && (
-				<div className="woocommerce-product-edit__empty-state">
-					<p>
-						{ __(
-							'Select one or more products to edit them here.',
-							'woocommerce'
+				<Drawer.Content className="woocommerce-product-edit">
+					{ hasNoRequestedProducts && (
+						<div className="woocommerce-product-edit__empty-state">
+							<p>
+								{ __(
+									'Select one or more products to edit them here.',
+									'woocommerce'
+								) }
+							</p>
+						</div>
+					) }
+
+					{ ! hasNoRequestedProducts && isResolving && (
+						<div className="woocommerce-product-edit__loading">
+							<Spinner />
+						</div>
+					) }
+
+					{ ! hasNoRequestedProducts &&
+						! isResolving &&
+						hasMissingProducts && (
+							<div className="woocommerce-product-edit__empty-state">
+								<p>
+									{ __(
+										'Select one or more products to edit them here.',
+										'woocommerce'
+									) }
+								</p>
+							</div>
 						) }
-					</p>
-				</div>
-			) }
 
-			{ ! hasNoRequestedProducts && isResolving && (
-				<div className="woocommerce-product-edit__loading">
-					<Spinner />
-				</div>
-			) }
+					{ isReady && (
+						<ProductEditForm
+							editableFields={ editableFields }
+							onChange={ onChange }
+							selectedProducts={ selectedProducts }
+						/>
+					) }
+				</Drawer.Content>
 
-			{ ! hasNoRequestedProducts &&
-				! isResolving &&
-				hasMissingProducts && (
-					<div className="woocommerce-product-edit__empty-state">
-						<p>
-							{ __(
-								'Select one or more products to edit them here.',
-								'woocommerce'
-							) }
-						</p>
-					</div>
+				{ isReady && (
+					<Drawer.Footer className="woocommerce-product-edit__footer">
+						<Button
+							variant="tertiary"
+							onClick={ closeDrawer }
+							disabled={ isSaving }
+						>
+							{ __( 'Cancel', 'woocommerce' ) }
+						</Button>
+						<Button
+							variant="primary"
+							onClick={ onSave }
+							isBusy={ isSaving }
+							disabled={ isSaving || ! hasEdits }
+						>
+							{ __( 'Save', 'woocommerce' ) }
+						</Button>
+					</Drawer.Footer>
 				) }
-
-			{ isReady && (
-				<ProductEditForm
-					editableFields={ editableFields }
-					hasEdits={ hasEdits }
-					isSaving={ isSaving }
-					onChange={ onChange }
-					onClose={ onClose }
-					onSave={ onSave }
-					selectedProducts={ selectedProducts }
-				/>
-			) }
-		</div>
+			</Drawer.Popup>
+		</Drawer.Root>
 	);
 }
