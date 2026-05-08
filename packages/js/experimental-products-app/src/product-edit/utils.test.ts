@@ -365,6 +365,51 @@ describe( 'product edit utils', () => {
 			);
 		} );
 
+		it( 'shows variation fields and hides parent-only product fields for variations', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+					downloadable: true,
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( [
+					'name',
+					'images',
+					'product_status',
+					'sku',
+					'price',
+					'regular_price',
+					'sale_price',
+					'schedule_sale',
+					'date_on_sale_from',
+					'stock',
+					'manage_stock',
+					'downloadable',
+					'weight',
+					'length',
+					'width',
+					'height',
+					'shipping_class',
+					'tax_status',
+				] )
+			);
+			expectFieldsHidden( fieldIds, [
+				'categories',
+				'tags',
+				'featured',
+				'catalog_visibility',
+				'upsell_ids',
+				'cross_sell_ids',
+			] );
+		} );
+
 		it( 'hides a field in bulk edit if any selected product does not support it', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {

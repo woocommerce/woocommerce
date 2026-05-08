@@ -5,9 +5,11 @@ import { DataViews, type Action, type View } from '@wordpress/dataviews';
 import { Notice } from '@wordpress/components';
 import { Button, Stack } from '@wordpress/ui';
 import { __ } from '@wordpress/i18n';
-import { useMemo, useState, useCallback } from '@wordpress/element';
+import { useMemo, useState, useCallback, useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
 import { experimentalProductVariationsStore } from '@woocommerce/data';
+import { store as coreStore } from '@wordpress/core-data';
+import { privateApis as routerPrivateApis } from '@wordpress/router';
 
 /**
  * Internal dependencies
@@ -16,29 +18,68 @@ import { DEFAULT_LAYOUTS, DEFAULT_VIEW, PAGE_SIZE } from './constants';
 import { buildVariationViewQuery } from './query';
 import { normalizeVariation } from './normalization';
 import { variationFields } from './fields';
-import { VariationEditModal } from './variation-edit-modal';
 import type { VariationEntityRecord } from './types';
+import ProductEdit from '../product-edit';
+import { getProductWithUpdatedVariation } from '../product-edit/utils';
+import type { ProductEntityRecord } from '../fields/types';
+import { unlock } from '../lock-unlock';
+import {
+	getProductListNavigationPath,
+	getSelectionFromPostId,
+} from '../product-list/utils';
 
 const EMPTY_ARRAY: VariationEntityRecord[] = [];
+const { useHistory, useLocation } = unlock( routerPrivateApis );
 
 type VariationViewProps = {
 	productId: number;
 };
 
 export function VariationView( { productId }: VariationViewProps ) {
+	const { navigate } = useHistory();
+	const location = useLocation();
+	const currentQuery = useMemo(
+		() =>
+			( location.query || {} ) as {
+				postId?: string;
+				quickEdit?: string;
+			},
+		[ location.query ]
+	);
+	const { postId } = currentQuery;
 	const [ view, setView ] = useState< View >( DEFAULT_VIEW );
-	const [ selection, setSelection ] = useState< string[] >( [] );
-	const [ editingVariation, setEditingVariation ] =
-		useState< VariationEntityRecord | null >( null );
+	const [ selection, setSelection ] = useState( () =>
+		getSelectionFromPostId( postId )
+	);
+	const showQuickEdit = currentQuery.quickEdit === 'true';
 
 	const query = useMemo(
 		() => buildVariationViewQuery( view, productId ),
 		[ productId, view ]
 	);
 
-	const { records, totalItems, error } = useSelect(
+	const { records, totalItems, error, parentProduct } = useSelect(
 		( select ) => {
 			const store = select( experimentalProductVariationsStore );
+			const coreSelect = select( coreStore );
+			const product = coreSelect.getEntityRecord(
+				'root',
+				'product',
+				productId
+			) as ProductEntityRecord | false | undefined;
+			const editedProduct = coreSelect.getEditedEntityRecord(
+				'root',
+				'product',
+				productId
+			) as ProductEntityRecord | false | undefined;
+			let resolvedParentProduct: ProductEntityRecord | undefined;
+
+			if ( editedProduct !== false && editedProduct !== undefined ) {
+				resolvedParentProduct = editedProduct;
+			} else if ( product !== false ) {
+				resolvedParentProduct = product;
+			}
+
 			return {
 				// @ts-expect-error missing types.
 				records: store.getProductVariations( query ),
@@ -46,15 +87,30 @@ export function VariationView( { productId }: VariationViewProps ) {
 				totalItems: store.getProductVariationsTotalCount( query ),
 				// @ts-expect-error missing types.
 				error: store.getProductVariationsError( query ),
+				parentProduct: resolvedParentProduct,
 			};
 		},
-		[ query ]
+		[ productId, query ]
 	);
 
-	const variations = useMemo(
+	const variations = useMemo< VariationEntityRecord[] >(
 		() => records?.map( normalizeVariation ) || EMPTY_ARRAY,
 		[ records ]
 	);
+	const productWithVariations = useMemo( () => {
+		if ( ! parentProduct ) {
+			return undefined;
+		}
+
+		return variations.reduce< ProductEntityRecord >(
+			( product, variation ) =>
+				getProductWithUpdatedVariation(
+					product,
+					variation as unknown as ProductEntityRecord
+				),
+			parentProduct
+		);
+	}, [ parentProduct, variations ] );
 	const perPage = view.perPage || PAGE_SIZE;
 	const paginationInfo = useMemo(
 		() => ( {
@@ -64,11 +120,51 @@ export function VariationView( { productId }: VariationViewProps ) {
 		[ perPage, totalItems ]
 	);
 
+	useEffect( () => {
+		setSelection( getSelectionFromPostId( postId ) );
+	}, [ postId ] );
+
+	const onChangeSelection = useCallback(
+		( items: string[] ) => {
+			setSelection( items );
+
+			const nextQuery = { ...currentQuery };
+
+			if ( items.length > 0 ) {
+				nextQuery.postId = items.join( ',' );
+			} else {
+				delete nextQuery.postId;
+			}
+
+			navigate(
+				getProductListNavigationPath( location.path, nextQuery )
+			);
+		},
+		[ currentQuery, location.path, navigate ]
+	);
+
+	const handleEditSelectedVariations = useCallback(
+		( selectedIds: string[] ) => {
+			if ( selectedIds.length === 0 ) {
+				return;
+			}
+
+			navigate(
+				getProductListNavigationPath( location.path, {
+					...currentQuery,
+					postId: selectedIds.join( ',' ),
+					quickEdit: 'true',
+				} )
+			);
+		},
+		[ currentQuery, location.path, navigate ]
+	);
+
 	const handleEditVariation = useCallback(
 		( variation: VariationEntityRecord ) => {
-			setEditingVariation( variation );
+			handleEditSelectedVariations( [ String( variation.id ) ] );
 		},
-		[]
+		[ handleEditSelectedVariations ]
 	);
 
 	const actions: Action< VariationEntityRecord >[] = useMemo(
@@ -77,7 +173,11 @@ export function VariationView( { productId }: VariationViewProps ) {
 				id: 'edit',
 				label: __( 'Edit', 'woocommerce' ),
 				isPrimary: true,
-				callback: ( items ) => handleEditVariation( items[ 0 ] ),
+				supportsBulk: true,
+				callback: ( items ) =>
+					handleEditSelectedVariations(
+						items.map( ( item ) => String( item.id ) )
+					),
 			},
 			{
 				id: 'delete-variation',
@@ -86,7 +186,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 				callback: () => {},
 			},
 		],
-		[ handleEditVariation ]
+		[ handleEditSelectedVariations ]
 	);
 
 	if ( error ) {
@@ -113,7 +213,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 				defaultLayouts={ DEFAULT_LAYOUTS }
 				actions={ actions }
 				selection={ selection }
-				onChangeSelection={ setSelection }
+				onChangeSelection={ onChangeSelection }
 			>
 				<Stack
 					direction="row"
@@ -126,7 +226,12 @@ export function VariationView( { productId }: VariationViewProps ) {
 					/>
 					<Stack direction="row" gap="xs">
 						<DataViews.ViewConfig />
-						<Button disabled>
+						<Button
+							disabled={ selection.length === 0 }
+							onClick={ () =>
+								handleEditSelectedVariations( selection )
+							}
+						>
 							{ __( 'Edit options', 'woocommerce' ) }
 						</Button>
 					</Stack>
@@ -134,11 +239,8 @@ export function VariationView( { productId }: VariationViewProps ) {
 				<DataViews.Layout />
 				<DataViews.Footer />
 			</DataViews>
-			{ editingVariation && (
-				<VariationEditModal
-					variation={ editingVariation }
-					onClose={ () => setEditingVariation( null ) }
-				/>
+			{ showQuickEdit && productWithVariations && (
+				<ProductEdit products={ [ productWithVariations ] } />
 			) }
 		</div>
 	);
