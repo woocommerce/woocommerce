@@ -288,3 +288,38 @@ const { state } = store< Store >(
 	},
 	{ lock: universalLock }
 );
+
+// Listen for shopper-list item additions emitted from the wp.data side (e.g.
+// the cart store's saveForLater thunk). Mirrors the cart's iAPI → wp.data
+// sync direction, which also ships a payload (`from_iAPI` carries
+// `quantityChanges`). The event carries the saved item directly so we can
+// splice it in without an extra GET — keeps the merge ordering deterministic
+// and avoids the loadList-vs-mutation race the iAPI store's loadList still
+// has a TODO about.
+//
+// Keeps the discriminator + payload contract in sync with
+// `assets/js/data/cart/thunks.ts::saveForLater`.
+window.addEventListener( 'wc-blocks_store_sync_required', ( event: Event ) => {
+	const detail = ( event as CustomEvent ).detail as
+		| { type?: string; slug?: string; item?: RawShopperListItem }
+		| undefined;
+	if ( detail?.type !== 'shopper-list-item-added' ) {
+		return;
+	}
+	if (
+		typeof detail.slug !== 'string' ||
+		detail.slug.trim().length === 0 ||
+		! isShopperListItem( detail.item )
+	) {
+		return;
+	}
+	const list = ensureListState( state, detail.slug );
+	const item = detail.item;
+	const existingIndex = list.items.findIndex( ( i ) => i.key === item.key );
+	if ( existingIndex >= 0 ) {
+		list.items[ existingIndex ] = item;
+	} else {
+		list.items.push( item );
+	}
+	list.error = null;
+} );
