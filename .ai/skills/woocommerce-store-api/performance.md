@@ -6,9 +6,8 @@ This file is a thin wrapper over the `woocommerce-performance` skill, framed for
 
 Any schema that serialises a **collection** of post-based objects (products, orders, attachments) is a candidate for cache priming. Store API list responses are the most common case:
 
-- `GET /shopper-lists/{slug}/items` returns N saved items, each loaded via `wc_get_product()`.
 - `GET /cart` returns N cart line items, each loaded via `wc_get_product()`.
-- Any future route returning a collection of products, orders, or attachment-backed resources.
+- Any future route returning a collection of products, orders, or attachment-backed resources — each item loaded individually inside the per-item loop.
 
 Without priming, each per-item lookup hits the database individually — classic N+1.
 
@@ -18,11 +17,11 @@ The priming must run **before** the per-item loop and at the level that has the 
 
 ### Prime in `Schema::get_item_response()` (preferred)
 
-When the schema receives the full collection (e.g., `ShopperListSchema::get_item_response()` receives `$shopper_list['items']` as an array), prime there:
+When the schema receives the full collection (e.g., a parent-resource schema's `get_item_response()` receives `$collection['items']` as an array), prime there:
 
 ```php
-public function get_item_response( $shopper_list ) {
-    $items = $shopper_list['items'] ?? array();
+public function get_item_response( $collection ) {
+    $items = $collection['items'] ?? array();
 
     $product_ids = array_filter( array_map(
         static fn( $item ) => (int) ( $item['variation_id'] ?: $item['product_id'] ),

@@ -5,7 +5,7 @@ description: Add or modify routes in the WooCommerce Store API (`/wc/store/v1/*`
 
 # WooCommerce Store API
 
-The Store API is the public REST surface used by Woo blocks (Cart, Checkout, Mini-Cart, Shopper Collections) and external integrations. It lives under `/wc/store/v1/*` and has its own conventions distinct from the older `/wc/v3/*` admin REST API.
+The Store API is the public REST surface used by Woo blocks (Cart, Checkout, Mini-Cart) and external integrations. It lives under `/wc/store/v1/*` and has its own conventions distinct from the older `/wc/v3/*` admin REST API.
 
 ## When to use this skill
 

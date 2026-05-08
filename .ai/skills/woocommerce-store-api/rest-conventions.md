@@ -84,17 +84,17 @@ private static function generate_key( int $product_id, int $variation_id, array 
 Resource identifiers in the path should follow the resource hierarchy:
 
 ```
-/shopper-lists                              ← collection of lists
-/shopper-lists/{slug}                       ← one specific list
-/shopper-lists/{slug}/items                 ← items collection inside a list
-/shopper-lists/{slug}/items/{key}           ← one specific item
+/{collection}                               ← collection of parents
+/{collection}/{slug}                        ← one specific parent
+/{collection}/{slug}/items                  ← items collection inside a parent
+/{collection}/{slug}/items/{key}            ← one specific item
 ```
 
 Each segment adds one identifier. Avoid flat URLs like `/items/{key}` when keys are scoped per-parent — the same identifier can collide across parents and the URL can't disambiguate.
 
 ## Anti-patterns to avoid
 
-- **Auto-creating a resource on GET.** `GET /shopper-lists` triggering a database write is surprising and breaks under any retry/cache scenario. Materialise lazily in memory and persist on the first POST.
+- **Auto-creating a resource on GET.** A GET that triggers a database write is surprising and breaks under any retry/cache scenario. Materialise lazily in memory and persist on the first POST.
 - **Returning the parent on POST `/items`.** Mixes the collection-add and action shapes. Clients can't reconcile without re-parsing the whole parent. Stick to "POST returns the added member."
 - **Bolting fields onto the response after the schema produced it.** The schema and the wire format diverge; introspection lies. Add the field to `get_properties()` and populate it inside `get_item_response()`.
 - **Accepting JSON-encoded strings in query parameters.** A request like `?variation={...}` arrives as a string; the validator can't usefully coerce it. Send structured data in the body.

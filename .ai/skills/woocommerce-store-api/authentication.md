@@ -36,7 +36,7 @@ Routes that extend `AbstractRoute` directly do **not** get this. They will accep
 |---|---|---|
 | Read-only routes (catalog, public data) | `AbstractRoute` | No state to protect from CSRF. |
 | Cart-related state mutation | `AbstractCartRoute` | Existing precedent; nonce + cart-session machinery wired up. |
-| Login-required mutation routes (saved lists, user prefs) | `AbstractCartRoute`, **or** implement equivalent nonce protection on `AbstractRoute` | Mutation via cookie auth without CSRF protection is unacceptable. |
+| Login-required mutation routes (per-user preferences, account-scoped writes) | `AbstractCartRoute`, **or** implement equivalent nonce protection on `AbstractRoute` | Mutation via cookie auth without CSRF protection is unacceptable. |
 | Read routes with own auth model (e.g. order ownership) | `AbstractRoute` + custom `permission_callback` | The auth check is the protection. |
 
 If you find yourself extending `AbstractRoute` for a route that POSTs/DELETEs based on cookie auth, stop and reconsider. Either inherit from `AbstractCartRoute`, or document and implement an equivalent nonce flow.

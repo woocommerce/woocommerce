@@ -157,10 +157,10 @@ The reconciliation throws PHP `InvalidArgumentException` for validation failures
 ```php
 protected function get_route_post_response( \WP_REST_Request $request ) {
     try {
-        $item = ShopperListItem::from_product( $lookup_id, $variation, $quantity );
+        $item = LineItem::from_product( $lookup_id, $variation, $quantity );
     } catch ( \InvalidArgumentException $error ) {
         throw new RouteException(
-            'woocommerce_rest_shopper_list_invalid_variation',
+            'woocommerce_rest_<feature>_invalid_variation',
             esc_html( $error->getMessage() ),
             400
         );
@@ -188,6 +188,5 @@ The variation path is the single most-likely place a future regression will land
 ## Reference
 
 - [`CartController::parse_variation_data()`](../../../plugins/woocommerce/src/StoreApi/Utilities/CartController.php) — the canonical reconciliation pattern; mirror this.
-- [`ShopperListItem::resolve_variation_attributes()`](../../../plugins/woocommerce/src/Internal/ShopperLists/ShopperListItem.php) — concrete example in the shopper-lists feature.
 - `wc_get_product_variation_attributes()` (WooCommerce core) — returns canonical slugs for a variation, with `''` for "any" slots.
 - `WC_Product_Attribute::get_slugs()` (WooCommerce core) — returns the allowed slug list for an attribute on the parent product.
