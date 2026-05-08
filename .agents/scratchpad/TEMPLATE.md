@@ -19,4 +19,4 @@ created: YYYY-MM-DD HH:MM
 
 > **Prompt:** "{user's triggering prompt, verbatim}"
 
-<body>
+{body}
