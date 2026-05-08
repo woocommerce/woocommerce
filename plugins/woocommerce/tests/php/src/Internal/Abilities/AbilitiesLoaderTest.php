@@ -1546,6 +1546,43 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should exclude checkout-draft orders from default order queries.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
+	 */
+	public function test_orders_query_excludes_checkout_draft_orders_by_default( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
+		$email = wp_unique_id( 'abilities-checkout-draft-' ) . '@example.com';
+
+		$processing_order = \WC_Helper_Order::create_order();
+		$processing_order->set_billing_email( $email );
+		$processing_order->set_status( 'processing' );
+		$processing_order->save();
+		$this->created_order_ids[] = $processing_order->get_id();
+
+		$checkout_draft = \WC_Helper_Order::create_order();
+		$checkout_draft->set_billing_email( $email );
+		$checkout_draft->set_status( 'checkout-draft' );
+		$checkout_draft->save();
+		$this->created_order_ids[] = $checkout_draft->get_id();
+
+		$result = wp_get_ability( 'woocommerce/orders-query' )->execute(
+			array(
+				'billing_email' => $email,
+				'per_page'      => 10,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$ids = array_column( $result['orders'], 'id' );
+		$this->assertContains( $processing_order->get_id(), $ids );
+		$this->assertNotContains( $checkout_draft->get_id(), $ids );
+	}
+
+	/**
 	 * @testdox Should sort orders by ID across order storage engines.
 	 *
 	 * @dataProvider provider_order_storage_engines

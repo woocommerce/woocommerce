@@ -107,6 +107,10 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 			}
 		}
 
+		if ( empty( $args['status'] ) ) {
+			$args['status'] = self::get_allowed_order_status_slugs();
+		}
+
 		if ( ! empty( $input['orderby'] ) && is_scalar( $input['orderby'] ) ) {
 			$orderby         = sanitize_text_field( (string) $input['orderby'] );
 			$args['orderby'] = self::prepare_orderby_arg( $orderby );
