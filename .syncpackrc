@@ -167,6 +167,7 @@
 			"pinVersion": "5.7.x"
 		},
 		{
+			"label": "SWC core — pinned to resolved version at time of cjs-task migration (1.15.24 from pnpm-lock). SWC has breaking CJS-output changes between minor versions; bump only after verifying build output diff.",
 			"dependencies": [
 				"@swc/core"
 			],
@@ -176,6 +177,7 @@
 			"pinVersion": "1.15.x"
 		},
 		{
+			"label": "SWC CLI — pinned to resolved version at time of cjs-task migration (0.5.2 from pnpm-lock). Keep aligned with @swc/core pin above.",
 			"dependencies": [
 				"@swc/cli"
 			],
