@@ -185,7 +185,6 @@ const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'categories',
 	'brands',
 	'tags',
-	'type',
 	'featured',
 	'upsell_ids',
 	'cross_sell_ids',
