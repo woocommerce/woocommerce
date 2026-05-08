@@ -158,7 +158,7 @@ overrides:
   react-resize-aware: 3.1.1
   sass: 1.69.5
 
-pnpmfileChecksum: sha256-cvKNqxjwntfDNotqF/iujSp2e2/z1ep8nkLWsUXa/bs=
+pnpmfileChecksum: sha256-3v9YQQWG7a2W35+8YPOScLpw6WPOlGYSpVuBZ2CScmY=
 
 patchedDependencies:
   '@wordpress/edit-site@5.15.0':
