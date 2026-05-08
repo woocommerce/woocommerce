@@ -344,7 +344,7 @@ class SiteHealthChecks {
 				'description' => '<p>' . esc_html__( 'Your store should use HTTPS so checkout and account data are protected in transit.', 'woocommerce' ) . '</p>',
 				'actions'     => sprintf(
 					'<p><a href="%s">%s</a></p>',
-					esc_url( 'https://wordpress.org/documentation/article/why-should-i-use-https/' ),
+					esc_url( 'https://woocommerce.com/document/ssl-and-https/' ),
 					esc_html__( 'Learn more about HTTPS', 'woocommerce' )
 				),
 				'test'        => 'woocommerce_https',
