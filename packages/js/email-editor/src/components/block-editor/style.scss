@@ -155,7 +155,9 @@
 	white-space: nowrap;
 }
 
-.woocommerce-email-editor-template-area-affordance__button.components-button:hover:not(:disabled) {
+.woocommerce-email-editor-template-area-affordance__button.components-button:hover:not(
+		:disabled
+	) {
 	color: var(--wp-components-color-accent, #3858e9);
 }
 
