@@ -7,9 +7,33 @@
 }
 
 .plugins_page_wc-beta-tester-version-picker .wcbt-sidebar-submit {
-	position: sticky;
-	top: 32px;
 	padding: 10px 0;
+}
+
+/* Desktop: Use flexbox layout so sidebar stretches to content height, enabling sticky positioning */
+@media screen and (min-width: 851px) {
+	.plugins_page_wc-beta-tester-version-picker #post-body.columns-2 {
+		display: flex;
+	}
+
+	.plugins_page_wc-beta-tester-version-picker #post-body-content {
+		flex: 1;
+		min-width: 0;
+		order: 1;
+	}
+
+	.plugins_page_wc-beta-tester-version-picker #postbox-container-1 {
+		flex-shrink: 0;
+		order: 2;
+		width: 280px;
+		margin-left: 20px;
+	}
+
+	.plugins_page_wc-beta-tester-version-picker .wcbt-sidebar-submit {
+		position: sticky;
+		top: 32px;
+		max-width: 200px;
+	}
 }
 
 .plugins_page_wc-beta-tester-version-picker .wcbt-sidebar-submit .button-hero {
