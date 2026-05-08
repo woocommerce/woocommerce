@@ -340,6 +340,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should exclude checkout-draft from order status inputs.
+	 */
+	public function test_order_status_input_schemas_exclude_checkout_draft(): void {
+		$query_schema  = wp_get_ability( 'woocommerce/orders-query' )->get_input_schema();
+		$update_schema = wp_get_ability( 'woocommerce/order-update-status' )->get_input_schema();
+
+		$this->assertNotContains( 'checkout-draft', $query_schema['properties']['status']['enum'] ?? array() );
+		$this->assertNotContains( 'checkout-draft', $update_schema['properties']['status']['enum'] ?? array() );
+	}
+
+	/**
 	 * @testdox Should register extension ability classes appended via the loader filter.
 	 */
 	public function test_loader_filter_accepts_valid_extension_classes(): void {
@@ -1497,8 +1508,14 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should return a not-found error when orders-query receives an unknown order ID.
+	 *
+	 * @dataProvider provider_order_storage_engines
+	 *
+	 * @param bool $hpos_enabled Whether HPOS/COT should be enabled for the test.
 	 */
-	public function test_orders_query_returns_not_found_for_unknown_id(): void {
+	public function test_orders_query_returns_not_found_for_unknown_id( bool $hpos_enabled ): void {
+		$this->set_order_storage_for_test( $hpos_enabled );
+
 		$result = wp_get_ability( 'woocommerce/orders-query' )->execute( array( 'id' => 999999 ) );
 
 		$this->assertWPError( $result );

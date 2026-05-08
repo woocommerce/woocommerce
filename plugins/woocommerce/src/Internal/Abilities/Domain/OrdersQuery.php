@@ -332,6 +332,9 @@ class OrdersQuery extends DomainAbility implements AbilityDefinition {
 	/**
 	 * Prepare orderby values for wc_get_orders across HPOS and legacy storage.
 	 *
+	 * Values not present in the map are already accepted by wc_get_orders for
+	 * both storage engines and pass through unchanged.
+	 *
 	 * @param string $orderby Input orderby value.
 	 * @return string
 	 */

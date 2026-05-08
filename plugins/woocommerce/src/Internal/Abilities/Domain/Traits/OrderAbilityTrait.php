@@ -23,9 +23,14 @@ trait OrderAbilityTrait {
 	 * @return array<int, string>
 	 */
 	protected static function get_allowed_order_status_slugs(): array {
-		return array_map(
-			array( OrderUtil::class, 'remove_status_prefix' ),
-			array_keys( wc_get_order_statuses() )
+		return array_values(
+			array_diff(
+				array_map(
+					array( OrderUtil::class, 'remove_status_prefix' ),
+					array_keys( wc_get_order_statuses() )
+				),
+				array( OrderStatus::CHECKOUT_DRAFT )
+			)
 		);
 	}
 
