@@ -71,7 +71,7 @@ class RestAbilityFactory {
 				},
 				'ability_class'       => RestAbility::class,
 				'meta'                => array(
-					'show_in_rest'                         => true,
+					'show_in_rest' => true,
 					self::EXPOSE_IN_DEPRECATED_MCP_META_KEY => true,
 				),
 			);
