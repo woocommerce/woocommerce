@@ -513,7 +513,7 @@ describe( 'product edit utils', () => {
 			] );
 		} );
 
-		it( 'hides parent pricing and downloads for variable products', () => {
+		it( 'hides parent pricing, downloads, and shipping fields for variable products', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					type: 'variable',
@@ -529,6 +529,11 @@ describe( 'product edit utils', () => {
 				'date_on_sale_from',
 				'date_on_sale_to',
 				'downloadable',
+				'weight',
+				'length',
+				'width',
+				'height',
+				'shipping_class',
 			] );
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
@@ -596,12 +601,10 @@ describe( 'product edit utils', () => {
 					type: 'simple',
 					virtual: false,
 					downloadable: false,
-					manage_stock: true,
 				} ),
 				buildProduct( {
 					id: 2,
 					type: 'variable',
-					manage_stock: true,
 				} ),
 			] );
 
