@@ -362,6 +362,11 @@ class SiteHealthChecks {
 	 * @return array WP Site Health result array.
 	 */
 	public function check_payment_gateway(): array {
+		// This is a direct (synchronous) check rather than async because:
+		//   1. Having no payment gateway is a critical store-functionality issue
+		//      where stale (cached) results would mislead the operator.
+		//   2. Gateway initialization is not free, but happens during normal admin
+		//      navigation anyway, so the marginal cost on Site Health page load is small.
 		$available = WC()->payment_gateways()->get_available_payment_gateways();
 		$count     = is_array( $available ) ? count( $available ) : 0;
 		$result    = $count > 0

@@ -30,10 +30,17 @@ class CheckResultCache {
 		}
 		$result = $factory();
 		if ( ! is_array( $result ) ) {
-			// Don't poison the transient with non-array data; surface the contract violation immediately.
-			throw new \TypeError( 'CheckResultCache factory must return an array.' );
+			throw new \TypeError(
+				sprintf(
+					'CheckResultCache factory for "%s" must return an array; got %s.',
+					$check_id,
+					get_debug_type( $result )
+				)
+			);
 		}
-		set_transient( $key, $result, $this->ttl( $check_id ) );
+		if ( ! empty( $result ) ) {
+			set_transient( $key, $result, $this->ttl( $check_id ) );
+		}
 		return $result;
 	}
 

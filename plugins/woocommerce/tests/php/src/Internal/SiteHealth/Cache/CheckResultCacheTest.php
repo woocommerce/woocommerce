@@ -82,4 +82,17 @@ class CheckResultCacheTest extends WC_Unit_Test_Case {
 		$this->assertSame( array( 'status' => 'good' ), $this->result_cache->remember( 'foo', fn() => array( 'status' => 'critical' ) ) );
 		remove_all_filters( 'woocommerce_site_health_check_foo_cache_ttl' );
 	}
+
+	public function test_remember_does_not_cache_empty_result() {
+		$calls   = 0;
+		$factory = function() use ( &$calls ) {
+			$calls++;
+			return array(); // simulates a disabled check.
+		};
+
+		$this->result_cache->remember( 'foo', $factory );
+		$this->result_cache->remember( 'foo', $factory );
+
+		$this->assertSame( 2, $calls, 'Empty results must not be cached so re-enabling a check via filter takes immediate effect.' );
+	}
 }
