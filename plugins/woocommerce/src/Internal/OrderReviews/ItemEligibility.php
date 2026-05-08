@@ -8,6 +8,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\OrderReviews;
 
 use WC_Order;
+use WC_Order_Item;
 use WC_Order_Item_Product;
 use WP_Comment;
 
@@ -38,6 +39,22 @@ class ItemEligibility {
 	 * @var array<string, ?WP_Comment>
 	 */
 	private static array $review_cache = array();
+
+	/**
+	 * Register the default filter callbacks the OrderReviews feature ships with.
+	 *
+	 * Auto-called by the WC dependency container after instantiation.
+	 *
+	 * @internal
+	 */
+	final public function init(): void {
+		add_filter(
+			'woocommerce_review_order_eligible_items',
+			array( self::class, 'exclude_fully_refunded_items' ),
+			10,
+			2
+		);
+	}
 
 	/**
 	 * Pre-fill the per-request review cache for a set of items in a single query.
@@ -163,6 +180,40 @@ class ItemEligibility {
 		}
 
 		return $result;
+	}
+
+	/**
+	 * Drop fully-refunded line items from the eligible-items list.
+	 *
+	 * Default callback wired onto `woocommerce_review_order_eligible_items`
+	 * so the page never shows a row for a product the customer no longer
+	 * owns. A line item is considered fully refunded when the absolute
+	 * refunded quantity is greater than or equal to the item's ordered
+	 * quantity. Fractional quantities are honoured.
+	 *
+	 * @param WC_Order_Item[] $items Order line items.
+	 * @param WC_Order        $order Order being reviewed.
+	 * @return WC_Order_Item[]
+	 */
+	public static function exclude_fully_refunded_items( array $items, WC_Order $order ): array {
+		$filtered = array();
+		foreach ( $items as $key => $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				$filtered[ $key ] = $item;
+				continue;
+			}
+
+			$refunded_qty = (float) abs( (float) $order->get_qty_refunded_for_item( $item->get_id() ) );
+			$ordered_qty  = (float) $item->get_quantity();
+
+			if ( $ordered_qty > 0 && $refunded_qty >= $ordered_qty ) {
+				continue;
+			}
+
+			$filtered[ $key ] = $item;
+		}
+
+		return $filtered;
 	}
 
 	/**
