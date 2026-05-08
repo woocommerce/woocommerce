@@ -1444,11 +1444,14 @@ class OrdersTableQuery {
 			return;
 		}
 
+		$offset    = (int) ( $this->limits[0] ?? 0 );
 		$row_count = $this->limits[1] ?? 0;
 
-		if ( $this->limits && $row_count > 0 ) {
+		if ( $this->limits && ( $row_count > 0 || $offset > 0 ) ) {
 			$this->found_orders  = absint( $wpdb->get_var( $this->count_sql ) ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$this->max_num_pages = (int) ceil( $this->found_orders / $row_count );
+			$this->max_num_pages = $row_count > 0
+				? (int) ceil( $this->found_orders / $row_count )
+				: 0;
 		} else {
 			$this->found_orders = count( $this->orders );
 		}
