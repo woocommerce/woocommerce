@@ -2,12 +2,14 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useMemo, useCallback, useState } from '@wordpress/element';
+import { useMemo, useCallback } from '@wordpress/element';
 import { BaseControl } from '@wordpress/components';
 import { IconButton } from '@wordpress/ui';
 import clsx from 'clsx';
 import type { Field } from '@wordpress/dataviews';
 import { upload, closeSmall, dragHandle } from '@wordpress/icons';
+import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
+import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 
 /**
  * Internal dependencies
@@ -68,35 +70,27 @@ const toProductImage = (
 	};
 };
 
-function moveItem< T >( items: T[], fromIndex: number, toIndex: number ) {
-	const nextItems = [ ...items ];
-	const [ movedItem ] = nextItems.splice( fromIndex, 1 );
-	nextItems.splice( toIndex, 0, movedItem );
-	return nextItems;
-}
-
 interface SortableImageProps {
 	image: ProductEntityRecord[ 'images' ][ number ];
+	index: number;
 	alt: string;
 	onRemove: () => void;
 	showDragHandle: boolean;
-	isDragging: boolean;
-	onDragStart: ( id: number ) => void;
-	onDragEnd: () => void;
-	onDropOn: ( id: number ) => void;
 }
 
 function SortableImage( {
 	image,
+	index,
 	alt,
 	onRemove,
 	showDragHandle,
-	isDragging,
-	onDragStart,
-	onDragEnd,
-	onDropOn,
 }: SortableImageProps ) {
 	const previewSrc = image.thumbnail || image.src;
+	const { ref, handleRef, isDragging } = useSortable( {
+		id: image.id,
+		index,
+		disabled: ! showDragHandle,
+	} );
 
 	const stopPropagation = useCallback( ( event: React.SyntheticEvent ) => {
 		event.stopPropagation();
@@ -104,51 +98,25 @@ function SortableImage( {
 
 	return (
 		<div
+			ref={ ref }
 			role="group"
 			aria-label={ image.name }
-			draggable={ showDragHandle }
-			onDragStart={ ( event ) => {
-				if ( ! showDragHandle ) {
-					return;
-				}
-				event.dataTransfer.effectAllowed = 'move';
-				event.dataTransfer.setData( 'text/plain', image.id.toString() );
-				onDragStart( image.id );
-			} }
-			onDragEnd={ onDragEnd }
-			onDragOver={ ( event ) => {
-				if ( showDragHandle ) {
-					event.preventDefault();
-					event.dataTransfer.dropEffect = 'move';
-				}
-			} }
-			onDrop={ ( event ) => {
-				event.preventDefault();
-				onDropOn( image.id );
-			} }
 			className={ clsx( 'woocommerce-fields-controls__image-wrapper', {
 				'is-dragging': isDragging,
 			} ) }
 		>
-			<img
-				className="product-image"
-				src={ previewSrc }
-				alt={ alt }
-			/>
+			<img className="product-image" src={ previewSrc } alt={ alt } />
 			<div className="woocommerce-fields-controls__image-overlay" />
 			{ showDragHandle && (
-				<div
-					className="woocommerce-fields-controls__image-drag-handle-container"
-					aria-hidden="true"
-				>
+				<div className="woocommerce-fields-controls__image-drag-handle-container">
 					<IconButton
+						ref={ handleRef }
 						icon={ dragHandle }
 						label={ __( 'Drag to reorder', 'woocommerce' ) }
 						className="woocommerce-fields-controls__image-drag-handle"
 						variant="minimal"
 						size="small"
 						tone="neutral"
-						tabIndex={ -1 }
 					/>
 				</div>
 			) }
@@ -198,9 +166,6 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	},
 	Edit: ( { data, onChange } ) => {
 		const images = useMemo( () => data.images ?? [], [ data.images ] );
-		const [ draggedImageId, setDraggedImageId ] = useState< number | null >(
-			null
-		);
 
 		const handleSelect = useCallback(
 			( selection: Attachment | Attachment[] ) => {
@@ -264,34 +229,42 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			[ images, onChange ]
 		);
 
-		const handleDropOnImage = useCallback(
-			( targetImageId: number ) => {
+		const handleDragEnd = useCallback(
+			( event: DragEndEvent ) => {
+				if ( event.canceled ) {
+					return;
+				}
+
+				const { source } = event.operation;
+
+				if ( ! isSortable( source ) ) {
+					return;
+				}
+
+				const { initialIndex, index } = source;
+
 				if (
-					draggedImageId === null ||
-					draggedImageId === targetImageId
+					initialIndex === index ||
+					initialIndex < 0 ||
+					index < 0 ||
+					initialIndex >= images.length ||
+					index >= images.length
 				) {
-					setDraggedImageId( null );
 					return;
 				}
 
-				const sourceIndex = images.findIndex(
-					( image ) => image.id === draggedImageId
+				const reorderedImages = [ ...images ];
+				const [ movedImage ] = reorderedImages.splice(
+					initialIndex,
+					1
 				);
-				const targetIndex = images.findIndex(
-					( image ) => image.id === targetImageId
-				);
-
-				if ( sourceIndex < 0 || targetIndex < 0 ) {
-					setDraggedImageId( null );
-					return;
-				}
+				reorderedImages.splice( index, 0, movedImage );
 
 				onChange( {
-					images: moveItem( images, sourceIndex, targetIndex ),
+					images: reorderedImages,
 				} );
-				setDraggedImageId( null );
 			},
-			[ draggedImageId, images, onChange ]
+			[ images, onChange ]
 		);
 
 		const removeCallbacks = useMemo( () => {
@@ -305,43 +278,40 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		return (
 			// eslint-disable-next-line @wordpress/no-base-control-with-label-without-id
 			<BaseControl label={ __( 'Images', 'woocommerce' ) }>
-				<div className="woocommerce-fields-control__featured-image">
-					<div className="woocommerce-fields-controls__featured-image-uploaded-images">
-						{ images.map( ( image ) => {
-							const onRemove = removeCallbacks.get( image.id );
+				<DragDropProvider onDragEnd={ handleDragEnd }>
+					<div className="woocommerce-fields-control__featured-image">
+						<div className="woocommerce-fields-controls__featured-image-uploaded-images">
+							{ images.map( ( image, index ) => {
+								const onRemove = removeCallbacks.get(
+									image.id
+								);
 
-							if ( ! onRemove ) {
-								return null;
-							}
+								if ( ! onRemove ) {
+									return null;
+								}
 
-							return (
-								<SortableImage
-									key={ image.id }
-									image={ image }
-									alt={ image.alt || data.name }
-									onRemove={ onRemove }
-									showDragHandle={ images.length > 1 }
-									isDragging={
-										draggedImageId === image.id
-									}
-									onDragStart={ setDraggedImageId }
-									onDragEnd={ () =>
-										setDraggedImageId( null )
-									}
-									onDropOn={ handleDropOnImage }
-								/>
-							);
-						} ) }
+								return (
+									<SortableImage
+										key={ image.id }
+										image={ image }
+										index={ index }
+										alt={ image.alt || data.name }
+										onRemove={ onRemove }
+										showDragHandle={ images.length > 1 }
+									/>
+								);
+							} ) }
+						</div>
+						<div className="woocommerce-fields-control__featured-image-actions">
+							<IconButton
+								variant="minimal"
+								icon={ upload }
+								label={ __( 'Add images', 'woocommerce' ) }
+								onClick={ handleOpenMediaLibrary }
+							/>
+						</div>
 					</div>
-					<div className="woocommerce-fields-control__featured-image-actions">
-						<IconButton
-							variant="minimal"
-							icon={ upload }
-							label={ __( 'Add images', 'woocommerce' ) }
-							onClick={ handleOpenMediaLibrary }
-						/>
-					</div>
-				</div>
+				</DragDropProvider>
 			</BaseControl>
 		);
 	},
