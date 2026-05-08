@@ -195,6 +195,9 @@ const SELLABLE_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'date_on_sale_to',
 ] );
 
+const BULK_UNSUPPORTED_PRODUCT_EDIT_FIELD_ID_SET =
+	new Set< ProductEditFieldId >( [ 'sku' ] );
+
 function normalizeValue( value: unknown ) {
 	if ( value === undefined ) {
 		return '__undefined__';
@@ -435,9 +438,19 @@ export function getVisibleProductEditFields(
 ) {
 	const compatibleFieldIds =
 		getCommonProductTypeCompatibleFieldIds( products );
+	const isBulkEdit = products.length > 1;
 
 	return fields.reduce< ProductField[] >( ( visibleFields, field ) => {
 		if ( ! compatibleFieldIds.has( field.id ) ) {
+			return visibleFields;
+		}
+
+		if (
+			isBulkEdit &&
+			BULK_UNSUPPORTED_PRODUCT_EDIT_FIELD_ID_SET.has(
+				field.id as ProductEditFieldId
+			)
+		) {
 			return visibleFields;
 		}
 
