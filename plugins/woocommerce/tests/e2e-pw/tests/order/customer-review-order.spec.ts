@@ -90,8 +90,10 @@ test.describe.serial(
 				`/review-order/${ order.id }/?key=${ order.order_key }`
 			);
 
+			// Block themes render the page title in `wp-block-post-title` with
+			// the same text, so scope to the shortcode-rendered heading.
 			await expect(
-				page.getByRole( 'heading', { name: 'Review your order' } )
+				page.locator( '.woocommerce-review-order__title' )
 			).toBeVisible();
 
 			const rows = page.locator( '.woocommerce-review-order__item' );
