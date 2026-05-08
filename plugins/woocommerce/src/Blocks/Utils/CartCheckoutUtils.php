@@ -305,11 +305,13 @@ class CartCheckoutUtils {
 	 * Checks if the template overriding the page loads the page content or not.
 	 * Templates by default load the page content, but if that block is deleted the content can get out of sync with the one presented in the page editor.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @param string $block The block to check.
 	 *
 	 * @return bool true if the template has out of sync content.
 	 */
-	public static function is_overriden_by_custom_template_content( string $block ): bool {
+	public static function is_overridden_by_custom_template_content( string $block ): bool {
 
 		$block = str_replace( 'woocommerce/', '', $block );
 
@@ -324,6 +326,21 @@ class CartCheckoutUtils {
 		}
 
 		return false;
+	}
+
+	/**
+	 * Checks if the template overriding the page loads the page content or not.
+	 * Templates by default load the page content, but if that block is deleted the content can get out of sync with the one presented in the page editor.
+	 *
+	 * @deprecated 10.9.0 Use is_overridden_by_custom_template_content() instead.
+	 *
+	 * @param string $block The block to check.
+	 *
+	 * @return bool true if the template has out of sync content.
+	 */
+	public static function is_overriden_by_custom_template_content( string $block ): bool {
+		wc_deprecated_function( __METHOD__, '10.9.0', 'is_overridden_by_custom_template_content' );
+		return self::is_overridden_by_custom_template_content( $block );
 	}
 
 	/**

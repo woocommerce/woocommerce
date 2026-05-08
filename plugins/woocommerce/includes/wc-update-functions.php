@@ -3511,3 +3511,31 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 function wc_update_1080_backfill_email_template_sync_meta(): bool {
 	return WCEmailTemplateSyncBackfill::run();
 }
+
+/**
+ * Seeds the Review Order page on existing installs so the rewrite rule and
+ * helper URL work after upgrading to 10.8.0. Mirrors how
+ * `wc_update_560_create_refund_returns_page` backfilled the refund/returns
+ * page when that feature shipped.
+ *
+ * @since 10.8.0
+ *
+ * @return void
+ */
+function wc_update_1080_create_review_order_page(): void {
+	$only_review_order = static function ( array $pages ): array {
+		return array_intersect_key( $pages, array_flip( array( 'review_order' ) ) );
+	};
+
+	add_filter( 'woocommerce_create_pages', $only_review_order );
+
+	WC_Install::create_pages();
+
+	remove_filter( 'woocommerce_create_pages', $only_review_order );
+
+	// `Endpoint::add_rewrite_rule` runs on init:10; this update routine fires
+	// from WC_Install::check_version on init:5, so flushing here would
+	// persist the rules table without the new /review-order/{id}/ rule.
+	// Defer the flush via an option that the endpoint clears on wp_loaded.
+	update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+}

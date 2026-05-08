@@ -16,12 +16,13 @@ import { EmailType } from './settings-email-listing-slotfill';
 import { useTransactionalEmails } from './settings-email-listing-data';
 import { Status, EMAIL_STATUSES } from './settings-email-listing-status';
 import { RecipientsList } from './settings-email-listing-recipients';
+import { UpdatesCell } from './settings-email-listing-update-cell';
 
 export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 	const [ view, setView ] = useState< View >( {
 		type: 'table',
 		search: '',
-		fields: [ 'recipients', 'status' ],
+		fields: [ 'recipients', 'status', 'updates' ],
 		filters: [],
 		page: 1,
 		perPage: 20,
@@ -103,6 +104,33 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 					return <Status slug={ row.item.status } />;
 				},
 				elements: EMAIL_STATUSES,
+			},
+			{
+				id: 'updates',
+				label: __( 'Updates', 'woocommerce' ),
+				enableHiding: true,
+				enableSorting: false,
+				getValue: ( { item }: { item: EmailType } ) =>
+					item.templateStatus === 'core_updated_customized'
+						? 'available'
+						: 'none',
+				elements: [
+					{
+						value: 'available',
+						label: __( 'Update available', 'woocommerce' ),
+					},
+					{
+						value: 'none',
+						label: __( 'Up to date', 'woocommerce' ),
+					},
+				],
+				filterBy: {
+					operators: [ 'is' ],
+					isPrimary: true,
+				},
+				render: ( { item }: { item: EmailType } ) => (
+					<UpdatesCell post={ item } />
+				),
 			},
 		];
 	}, [ emailTypes ] );

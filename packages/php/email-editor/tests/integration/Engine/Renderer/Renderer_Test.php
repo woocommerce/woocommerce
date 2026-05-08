@@ -108,6 +108,131 @@ class Renderer_Test extends \Email_Editor_Integration_Test_Case {
 	}
 
 	/**
+	 * Test it renders LTR direction by default.
+	 */
+	public function testItRendersLtrDirectionByDefault(): void {
+		$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en_US' );
+
+		$html_tag_position = strpos( $rendered['html'], '<html ' );
+		$head_tag_position = strpos( $rendered['html'], '<head>' );
+
+		$this->assertNotFalse( $html_tag_position );
+		$this->assertNotFalse( $head_tag_position );
+		$this->assertLessThan( $head_tag_position, $html_tag_position );
+		$html_opening_tag = substr( $rendered['html'], $html_tag_position, $head_tag_position - $html_tag_position );
+		$this->assertStringContainsString( 'lang="', $html_opening_tag );
+		$this->assertStringContainsString( 'dir="ltr"', $html_opening_tag );
+		$this->assertStringContainsString( 'dir="ltr"', $rendered['html'] );
+		$this->assertStringContainsString( 'direction: ltr', $rendered['html'] );
+		$this->assertStringContainsString( 'text-align: left', $rendered['html'] );
+	}
+
+	/**
+	 * Test it renders RTL direction from language fallback.
+	 */
+	public function testItRendersRtlDirectionFromLanguage(): void {
+		$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'ar_SA' );
+
+		$this->assertStringContainsString( 'lang="ar-SA"', $rendered['html'] );
+		$this->assertStringContainsString( 'dir="rtl"', $rendered['html'] );
+		$this->assertStringContainsString( 'direction: rtl', $rendered['html'] );
+		$this->assertStringContainsString( 'text-align: right', $rendered['html'] );
+	}
+
+	/**
+	 * Test explicit LTR context takes precedence over RTL language.
+	 */
+	public function testExplicitLtrContextTakesPrecedenceOverRtlLanguage(): void {
+		$context_filter = function () {
+			return array( 'is_rtl' => false );
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+
+		try {
+			$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'ar' );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+		}
+
+		$this->assertStringContainsString( 'dir="ltr"', $rendered['html'] );
+		$this->assertStringContainsString( 'direction: ltr', $rendered['html'] );
+	}
+
+	/**
+	 * Test explicit RTL context takes precedence over LTR language.
+	 */
+	public function testExplicitRtlContextTakesPrecedenceOverLtrLanguage(): void {
+		$context_filter = function () {
+			return array( 'is_rtl' => true );
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+
+		try {
+			$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en_US' );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+		}
+
+		$this->assertStringContainsString( 'dir="rtl"', $rendered['html'] );
+		$this->assertStringContainsString( 'direction: rtl', $rendered['html'] );
+	}
+
+	/**
+	 * Test it applies the rendering email context filter once per full render.
+	 */
+	public function testItAppliesRenderingContextFilterOncePerRender(): void {
+		$filter_calls   = 0;
+		$context_filter = function () use ( &$filter_calls ) {
+			++$filter_calls;
+			return array( 'is_rtl' => true );
+		};
+		add_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+
+		try {
+			$rendered = $this->renderer->render( $this->email_post, 'Subject', '', 'en_US' );
+		} finally {
+			remove_filter( 'woocommerce_email_editor_rendering_email_context', $context_filter );
+		}
+
+		$this->assertSame( 1, $filter_calls );
+		$this->assertStringContainsString( 'dir="rtl"', $rendered['html'] );
+	}
+
+	/**
+	 * Test render restores a previously active rendering context.
+	 */
+	public function testRenderRestoresPreviousRenderingContext(): void {
+		$content_renderer_property = new \ReflectionProperty( Renderer::class, 'content_renderer' );
+		$content_renderer_property->setAccessible( true );
+		$content_renderer = $content_renderer_property->getValue( $this->renderer );
+		$this->assertInstanceOf( \Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Content_Renderer::class, $content_renderer );
+
+		$previous_context = new \Automattic\WooCommerce\EmailEditor\Engine\Renderer\ContentRenderer\Rendering_Context(
+			$this->createMock( \WP_Theme_JSON::class ),
+			array( 'is_rtl' => true ),
+			'ar_SA'
+		);
+		$content_renderer->set_rendering_context( $previous_context );
+
+		try {
+			$this->renderer->render( $this->email_post, 'Subject', '', 'en_US' );
+			$this->assertSame( $previous_context, $content_renderer->get_current_rendering_context() );
+		} finally {
+			$content_renderer->restore_rendering_context( null );
+		}
+	}
+
+	/**
+	 * Test base template CSS resets both physical flex padding sides on mobile.
+	 */
+	public function testTemplateCssResetsBothFlexGapSides(): void {
+		$template_styles = (string) file_get_contents( __DIR__ . '/../../../../src/Engine/Renderer/template-canvas.css' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Local fixture file.
+
+		$this->assertStringContainsString( 'padding-left: 0 !important;', $template_styles );
+		$this->assertStringContainsString( 'padding-right: 0 !important;', $template_styles );
+	}
+
+	/**
 	 * Test it inlines styles.
 	 */
 	public function testItInlinesStyles(): void {

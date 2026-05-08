@@ -807,12 +807,24 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 			// Parse the string.
 			parse_str( $query_string, $parsed_query_string );
 
-			// Convert the full-stops, pluses and spaces back and add to values array.
-			foreach ( $parsed_query_string as $key => $value ) {
-				$new_key            = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key );
-				$new_value          = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $value );
-				$values[ $new_key ] = $new_value;
-			}
+			// Convert the full-stops, pluses and spaces back in all scalar values (any depth).
+			array_walk_recursive(
+				$parsed_query_string,
+				function ( &$value ) use ( $replace_chars ) {
+					$value = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $value );
+				}
+			);
+
+			// Restore placeholders in keys at every depth, then add to values array.
+			$restore_keys = function ( $items ) use ( &$restore_keys, $replace_chars ) {
+				$out = array();
+				foreach ( $items as $key => $value ) {
+					$key         = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key );
+					$out[ $key ] = is_array( $value ) ? $restore_keys( $value ) : $value;
+				}
+				return $out;
+			};
+			$values       = $restore_keys( $parsed_query_string );
 		}
 	}
 	$html = '';
@@ -3001,6 +3013,12 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 				$image        = $image_data[0];
 				$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
 				$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+
+				$uncropped = 0 === ( $dimensions['crop'] ?? 0 ) && '' === ( $dimensions['height'] ?? '' );
+				if ( $uncropped && isset( $image_data[1], $image_data[2] ) ) {
+					$dimensions['width']  = $image_data[1];
+					$dimensions['height'] = $image_data[2];
+				}
 			} else {
 				$image        = wc_placeholder_img_src();
 				$image_srcset = false;

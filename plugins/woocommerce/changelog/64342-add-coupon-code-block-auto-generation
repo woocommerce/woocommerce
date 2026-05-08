@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add auto-generation mode to the coupon code email block, allowing users to configure coupon rules that generate unique codes at send time.

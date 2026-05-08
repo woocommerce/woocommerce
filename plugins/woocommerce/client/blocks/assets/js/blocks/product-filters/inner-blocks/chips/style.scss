@@ -24,14 +24,6 @@
 		outline-offset: 1px;
 	}
 
-	&:hover {
-		background-color: color-mix(
-			in srgb,
-			var(--wp--preset--color--contrast) 10%,
-			transparent
-		);
-	}
-
 	.has-chip-text-color & {
 		color: var(--wc-product-filter-chips-text);
 	}
@@ -44,6 +36,9 @@
 }
 
 .wc-block-product-filter-chips__item[aria-checked="true"] {
+	background: var(--wc-product-filters-text-color, CanvasText);
+	color: var(--wc-product-filters-background-color, Canvas);
+	border-color: var(--wc-product-filters-text-color, CanvasText);
 
 	.has-selected-chip-text-color & {
 		color: var(--wc-product-filter-chips-selected-text);
@@ -53,6 +48,15 @@
 	}
 	.has-selected-chip-border-color & {
 		border-color: var(--wc-product-filter-chips-selected-border);
+	}
+}
+
+.wc-block-product-filter-chips__item:disabled {
+	opacity: 0.5;
+	cursor: not-allowed;
+
+	&:hover {
+		background: transparent;
 	}
 }
 
@@ -67,15 +71,22 @@
 }
 
 .wc-block-product-filter-chips__count {
-	display: contents;
 	white-space: nowrap;
 }
 
 .wc-block-product-filter-chips__show-more {
-	text-decoration: underline;
 	appearance: none;
-	font-family: inherit;
 	background: transparent;
-	border: none;
+	border: 0;
 	padding: 0;
+	font: inherit;
+	font-size: 0.875em;
+	color: inherit;
+	text-decoration: underline;
+	cursor: pointer;
+
+	&:hover,
+	&:focus {
+		text-decoration: none;
+	}
 }
