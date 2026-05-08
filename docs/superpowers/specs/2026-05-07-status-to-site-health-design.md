@@ -57,7 +57,7 @@ Hooks:
 | 5 | HPOS status | Custom orders table enabled and sync state consistent |
 | 6 | Legacy REST API | Legacy REST API option enabled OR required plugin missing |
 | 7 | HTTPS on store URLs | `is_ssl()` plus site URL scheme on production |
-| 10 | No active payment gateway | Iterate gateways, fail if none enabled |
+| 10 | No active payment gateway | Iterate gateways, warn if none enabled |
 | 14 | Persistent object cache | `wp_using_ext_object_cache()` |
 | 16 | Missing postmeta meta_value index | `SHOW INDEX FROM wp_postmeta` (cheap; recommend-only, no UI to add it) |
 
@@ -82,7 +82,7 @@ Default thresholds (all filterable via `woocommerce_site_health_check_{id}_thres
 |-------|--------|-----------|
 | Pending DB updates (#2) | critical | needs update |
 | Required pages (#3) | critical | any missing/unpublished |
-| HPOS (#5) | recommended | running on legacy storage; or HPOS+sync inconsistent |
+| HPOS (#5) | recommended | running on legacy storage; or HPOS+sync enabled (should aim to disable sync) |
 | Legacy REST API (#6) | recommended | enabled, or required plugin missing |
 | HTTPS (#7) | critical | site URL not HTTPS on production |
 | Payment gateway (#10) | recommended | no enabled gateway |
