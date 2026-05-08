@@ -11,6 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
 
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
 use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 
 /**
@@ -84,8 +85,20 @@ class WC_Admin_Taxonomies {
 				add_action( $taxonomy . '_pre_add_form', array( $this, 'product_attribute_description' ) );
 				add_action( $taxonomy . '_add_form_fields', array( $this, 'add_product_attribute_term_fields' ) );
 				add_action( $taxonomy . '_edit_form_fields', array( $this, 'edit_product_attribute_term_fields' ), 10, 1 );
-				add_filter( "manage_edit-{$taxonomy}_columns", array( $this, 'add_term_color_columns' ) );
-				add_filter( "manage_{$taxonomy}_custom_column", array( $this, 'render_term_color_column' ), 10, 3 );
+				add_filter(
+					"manage_edit-{$taxonomy}_columns",
+					function ( $columns ) use ( $taxonomy ) {
+						return $this->add_term_color_columns( $columns, $taxonomy );
+					}
+				);
+				add_filter(
+					"manage_{$taxonomy}_custom_column",
+					function ( $content, $column, $term_id ) use ( $taxonomy ) {
+						return $this->render_term_color_column( $content, $column, $term_id, $taxonomy );
+					},
+					10,
+					3
+				);
 			}
 		}
 
@@ -93,6 +106,7 @@ class WC_Admin_Taxonomies {
 		add_filter( 'wp_terms_checklist_args', array( $this, 'disable_checked_ontop' ) );
 
 		// Admin footer scripts for taxonomy screens.
+		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_visual_attribute_color_picker_script' ) );
 		add_action( 'admin_footer', array( $this, 'scripts_at_product_cat_screen_footer' ) );
 		add_action( 'admin_footer', array( $this, 'scripts_at_visual_attribute_screen_footer' ) );
 	}
@@ -349,7 +363,7 @@ class WC_Admin_Taxonomies {
 		?>
 		<div class="form-field term-color-wrap">
 			<label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label>
-			<input name="term_color" id="term_color" type="color" value="" />
+			<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="text" value="" />
 		</div>
 		<?php
 	}
@@ -372,10 +386,38 @@ class WC_Admin_Taxonomies {
 		<tr class="form-field term-color-wrap">
 			<th scope="row" valign="top"><label for="term_color"><?php esc_html_e( 'Color value', 'woocommerce' ); ?></label></th>
 			<td>
-				<input name="term_color" id="term_color" type="color" value="<?php echo esc_attr( $color_value ); ?>" />
+				<input name="term_color" id="term_color" class="wc-admin-visual-attribute-color-input" type="text" value="<?php echo esc_attr( $color_value ); ?>" />
 			</td>
 		</tr>
 		<?php
+	}
+
+	/**
+	 * Enqueue Gutenberg color picker script for visual attribute forms.
+	 *
+	 * @return void
+	 */
+	public function enqueue_visual_attribute_color_picker_script() {
+		$screen = get_current_screen();
+
+		if ( ! $screen ) {
+			return;
+		}
+
+		$is_product_editor_screen = 'product' === $screen->id;
+
+		if ( $is_product_editor_screen && array_key_exists( 'wc-visual', wc_get_attribute_types() ) ) {
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
+			return;
+		}
+
+		$is_attribute_term_screen = 0 === strpos( $screen->id, 'edit-pa_' );
+		$taxonomy                 = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+
+		if ( $is_attribute_term_screen && $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
+			WCAdminAssets::register_script( 'wp-admin-scripts', 'visual-attribute-color-picker', true, array( 'wp-components' ) );
+			return;
+		}
 	}
 
 	/**
@@ -397,6 +439,8 @@ class WC_Admin_Taxonomies {
 
 			if ( $color_value ) {
 				update_term_meta( $term_id, 'color', $color_value );
+			} elseif ( '' === $color_value ) {
+				delete_term_meta( $term_id, 'color' );
 			}
 		}
 	}
@@ -447,13 +491,13 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Add custom columns for product attribute terms.
 	 *
-	 * @param array $columns Existing columns.
+	 * @param array  $columns  Existing columns.
+	 * @param string $taxonomy Taxonomy slug (bound when the filter is registered).
 	 * @return array
 	 *
 	 * @internal
 	 */
-	public function add_term_color_columns( $columns ) {
-		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+	public function add_term_color_columns( $columns, $taxonomy ) {
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
 			return $columns;
 		}
@@ -476,21 +520,21 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Render color column for product attribute terms.
 	 *
-	 * @param string $columns Existing columns HTML.
-	 * @param string $column  Current column key.
-	 * @param int    $term_id Term ID.
+	 * @param string $content  Column output so far (often empty string).
+	 * @param string $column   Current column key.
+	 * @param int    $term_id  Term ID.
+	 * @param string $taxonomy Taxonomy slug (bound when the filter is registered).
 	 * @return string
 	 *
 	 * @internal
 	 */
-	public function render_term_color_column( $columns, $column, $term_id ) {
+	public function render_term_color_column( $content, $column, $term_id, $taxonomy ) {
 		if ( 'color' !== $column ) {
-			return $columns;
+			return $content;
 		}
 
-		$taxonomy = isset( $_GET['taxonomy'] ) ? sanitize_text_field( wp_unslash( $_GET['taxonomy'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
 		if ( ! $this->is_visual_product_attribute_taxonomy( $taxonomy ) ) {
-			return $columns;
+			return $content;
 		}
 
 		$color_value = get_term_meta( $term_id, 'color', true );

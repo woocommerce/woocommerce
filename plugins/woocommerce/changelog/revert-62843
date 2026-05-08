@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Revert PR 62843 which added checkout evidence validation to WC_Order::payment_complete()
