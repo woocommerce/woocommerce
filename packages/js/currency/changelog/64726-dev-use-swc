@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Monorepo: reduced RAM usage during watch mode by migrating cjs-tasks to SWC for packages in 'packages/js'.
