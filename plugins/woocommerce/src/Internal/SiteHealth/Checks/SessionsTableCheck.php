@@ -21,7 +21,7 @@ class SessionsTableCheck {
 	}
 
 	public function get_label(): string {
-		return __( 'Woo: sessions table size', 'woocommerce' );
+		return __( 'WooCommerce sessions table size', 'woocommerce' );
 	}
 
 	public function is_async(): bool {
@@ -42,7 +42,7 @@ class SessionsTableCheck {
 
 		if ( $count > $threshold ) {
 			return $this->finish( array(
-				'label'       => __( 'Woo: sessions table is large', 'woocommerce' ),
+				'label'       => __( 'WooCommerce sessions table is large', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
 				'description' => '<p>' . esc_html(
@@ -60,7 +60,7 @@ class SessionsTableCheck {
 		}
 
 		return $this->finish( array(
-			'label'       => __( 'Woo: sessions table size is healthy', 'woocommerce' ),
+			'label'       => __( 'WooCommerce sessions table size is healthy', 'woocommerce' ),
 			'status'      => 'good',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'green' ),
 			'description' => '<p>' . esc_html__( 'The WooCommerce sessions table is within healthy bounds.', 'woocommerce' ) . '</p>',
@@ -97,7 +97,7 @@ class SessionsTableCheck {
 			wc_get_logger()->error( $e->getMessage(), array( 'source' => 'site-health' ) );
 		}
 		return $this->finish( array(
-			'label'       => __( 'Woo: could not run a Site Health check', 'woocommerce' ),
+			'label'       => __( 'WooCommerce could not run a Site Health check', 'woocommerce' ),
 			'status'      => 'recommended',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'gray' ),
 			'description' => '<p>' . esc_html__( 'WooCommerce was unable to run this check. See the site-health log channel for details.', 'woocommerce' ) . '</p>',

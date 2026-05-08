@@ -29,7 +29,7 @@ class PostmetaIndexCheck {
 	 * @return string
 	 */
 	public function get_label(): string {
-		return __( 'Woo: meta_value index', 'woocommerce' );
+		return __( 'WooCommerce meta_value index', 'woocommerce' );
 	}
 
 	/**
@@ -65,7 +65,7 @@ class PostmetaIndexCheck {
 		if ( $present ) {
 			return $this->finish(
 				array(
-					'label'       => __( 'Woo: postmeta.meta_value index is present', 'woocommerce' ),
+					'label'       => __( 'WooCommerce-related queries can use the postmeta meta_value index', 'woocommerce' ),
 					'status'      => 'good',
 					'badge'       => array(
 						'label' => __( 'Performance', 'woocommerce' ),
@@ -79,7 +79,7 @@ class PostmetaIndexCheck {
 
 		return $this->finish(
 			array(
-				'label'       => __( 'Woo: postmeta.meta_value index is missing', 'woocommerce' ),
+				'label'       => __( 'postmeta.meta_value index is missing', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array(
 					'label' => __( 'Performance', 'woocommerce' ),
@@ -125,7 +125,7 @@ class PostmetaIndexCheck {
 		}
 		return $this->finish(
 			array(
-				'label'       => __( 'Woo: could not run the postmeta index check', 'woocommerce' ),
+				'label'       => __( 'WooCommerce could not run the postmeta index check', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array(
 					'label' => __( 'Performance', 'woocommerce' ),

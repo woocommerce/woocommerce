@@ -47,33 +47,38 @@ class SiteHealthChecks {
 	 */
 	public function register_tests( array $tests ): array {
 		$tests['direct']['woocommerce_pending_db_update'] = array(
-			'label' => __( 'Woo: database is up to date', 'woocommerce' ),
+			'label' => __( 'WooCommerce database is up to date', 'woocommerce' ),
 			'test'  => array( $this, 'check_pending_db_update' ),
 		);
 
 		$tests['direct']['woocommerce_required_pages'] = array(
-			'label' => __( 'Woo: required pages are configured', 'woocommerce' ),
+			'label' => __( 'WooCommerce required pages are configured', 'woocommerce' ),
 			'test'  => array( $this, 'check_required_pages' ),
 		);
 
 		$tests['direct']['woocommerce_hpos_status'] = array(
-			'label' => __( 'Woo: order storage', 'woocommerce' ),
+			'label' => __( 'WooCommerce order storage', 'woocommerce' ),
 			'test'  => array( $this, 'check_hpos_status' ),
 		);
 
 		$tests['direct']['woocommerce_legacy_rest_api'] = array(
-			'label' => __( 'Woo: Legacy REST API', 'woocommerce' ),
+			'label' => __( 'WooCommerce Legacy REST API', 'woocommerce' ),
 			'test'  => array( $this, 'check_legacy_rest_api' ),
 		);
 
 		$tests['direct']['woocommerce_https'] = array(
-			'label' => __( 'Woo: store uses HTTPS', 'woocommerce' ),
+			'label' => __( 'WooCommerce store uses HTTPS', 'woocommerce' ),
 			'test'  => array( $this, 'check_https' ),
 		);
 
 		$tests['direct']['woocommerce_payment_gateway'] = array(
-			'label' => __( 'Woo: has an active payment gateway', 'woocommerce' ),
+			'label' => __( 'WooCommerce has an active payment gateway', 'woocommerce' ),
 			'test'  => array( $this, 'check_payment_gateway' ),
+		);
+
+		$tests['direct']['woocommerce_object_cache'] = array(
+			'label' => __( 'WooCommerce uses a persistent object cache', 'woocommerce' ),
+			'test'  => array( $this, 'check_object_cache' ),
 		);
 
 		$postmeta_index = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\PostmetaIndexCheck();
@@ -85,13 +90,13 @@ class SiteHealthChecks {
 		$as_stats = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\ActionSchedulerStats();
 		$cache    = $this->cache;
 		$tests['async']['woocommerce_action_scheduler_overdue'] = array(
-			'label'             => __( 'Woo: Action Scheduler backlog', 'woocommerce' ),
+			'label'             => __( 'Action Scheduler backlog', 'woocommerce' ),
 			'test'              => 'woocommerce_action_scheduler_overdue',
 			'async'             => true,
 			'async_direct_test' => static fn() => $cache->remember( 'action_scheduler_overdue', static fn() => $as_stats->run_overdue() ),
 		);
 		$tests['async']['woocommerce_action_scheduler_total'] = array(
-			'label'             => __( 'Woo: Action Scheduler table size', 'woocommerce' ),
+			'label'             => __( 'Action Scheduler table size', 'woocommerce' ),
 			'test'              => 'woocommerce_action_scheduler_total',
 			'async'             => true,
 			'async_direct_test' => static fn() => $cache->remember( 'action_scheduler_total', static fn() => $as_stats->run_total() ),
@@ -99,7 +104,7 @@ class SiteHealthChecks {
 
 		$auto = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\AutoloadedOptionsAudit();
 		$tests['async']['woocommerce_autoloaded_options'] = array(
-			'label'             => __( 'Woo: autoloaded options size', 'woocommerce' ),
+			'label'             => __( 'WooCommerce autoloaded options size', 'woocommerce' ),
 			'test'              => 'woocommerce_autoloaded_options',
 			'async'             => true,
 			'async_direct_test' => static fn() => $cache->remember( 'autoloaded_options', static fn() => $auto->run() ),
@@ -107,7 +112,7 @@ class SiteHealthChecks {
 
 		$sessions = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\SessionsTableCheck();
 		$tests['async']['woocommerce_sessions_table'] = array(
-			'label'             => __( 'Woo: sessions table size', 'woocommerce' ),
+			'label'             => __( 'WooCommerce sessions table size', 'woocommerce' ),
 			'test'              => 'woocommerce_sessions_table',
 			'async'             => true,
 			'async_direct_test' => static fn() => $cache->remember( 'sessions_table', static fn() => $sessions->run() ),
@@ -115,7 +120,7 @@ class SiteHealthChecks {
 
 		$lookup = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\ProductLookupTableCheck();
 		$tests['async']['woocommerce_product_lookup_table'] = array(
-			'label'             => __( 'Woo: product lookup table', 'woocommerce' ),
+			'label'             => __( 'WooCommerce product lookup table', 'woocommerce' ),
 			'test'              => 'woocommerce_product_lookup_table',
 			'async'             => true,
 			'async_direct_test' => static fn() => $cache->remember( 'product_lookup_table', static fn() => $lookup->run() ),
@@ -123,7 +128,7 @@ class SiteHealthChecks {
 
 		$webhooks = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\WebhookFailureCheck();
 		$tests['async']['woocommerce_webhook_failures'] = array(
-			'label'             => __( 'Woo: webhook deliveries', 'woocommerce' ),
+			'label'             => __( 'WooCommerce webhook deliveries', 'woocommerce' ),
 			'test'              => 'woocommerce_webhook_failures',
 			'async'             => true,
 			'async_direct_test' => static fn() => $cache->remember( 'webhook_failures', static fn() => $webhooks->run() ),
@@ -131,7 +136,7 @@ class SiteHealthChecks {
 
 		$templates = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\TemplateOverrideScanner();
 		$tests['async']['woocommerce_outdated_templates'] = array(
-			'label'             => __( 'Woo: template overrides', 'woocommerce' ),
+			'label'             => __( 'WooCommerce template overrides', 'woocommerce' ),
 			'test'              => 'woocommerce_outdated_templates',
 			'async'             => true,
 			'async_direct_test' => static fn() => $cache->remember( 'outdated_templates', static fn() => $templates->run() ),
@@ -139,7 +144,7 @@ class SiteHealthChecks {
 
 		$cart_fragments = new \Automattic\WooCommerce\Internal\SiteHealth\Checks\CartFragmentsCheck();
 		$tests['async']['woocommerce_cart_fragments_sitewide'] = array(
-			'label'             => __( 'Woo: cart fragments load policy', 'woocommerce' ),
+			'label'             => __( 'WooCommerce cart fragments load policy', 'woocommerce' ),
 			'test'              => 'woocommerce_cart_fragments_sitewide',
 			'async'             => true,
 			'async_direct_test' => static fn() => $cache->remember( 'cart_fragments_sitewide', static fn() => $cart_fragments->run() ),
@@ -161,7 +166,7 @@ class SiteHealthChecks {
 
 		$result = $needs_update
 			? array(
-				'label'       => __( 'Woo: database update required', 'woocommerce' ),
+				'label'       => __( 'WooCommerce database update required', 'woocommerce' ),
 				'status'      => 'critical',
 				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'red' ),
 				'description' => '<p>' . esc_html__( 'WooCommerce has pending database updates that should be run to keep the store working correctly.', 'woocommerce' ) . '</p>',
@@ -173,7 +178,7 @@ class SiteHealthChecks {
 				'test'        => 'woocommerce_pending_db_update',
 			)
 			: array(
-				'label'       => __( 'Woo: database is up to date', 'woocommerce' ),
+				'label'       => __( 'WooCommerce database is up to date', 'woocommerce' ),
 				'status'      => 'good',
 				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'green' ),
 				'description' => '<p>' . esc_html__( 'No WooCommerce database updates are pending.', 'woocommerce' ) . '</p>',
@@ -210,7 +215,7 @@ class SiteHealthChecks {
 
 		$result = empty( $missing )
 			? array(
-				'label'       => __( 'Woo: required pages are configured', 'woocommerce' ),
+				'label'       => __( 'WooCommerce required pages are configured', 'woocommerce' ),
 				'status'      => 'good',
 				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'green' ),
 				'description' => '<p>' . esc_html__( 'All required WooCommerce pages are assigned and published.', 'woocommerce' ) . '</p>',
@@ -218,7 +223,7 @@ class SiteHealthChecks {
 				'test'        => 'woocommerce_required_pages',
 			)
 			: array(
-				'label'       => __( 'Woo: required pages are missing', 'woocommerce' ),
+				'label'       => __( 'WooCommerce required pages are missing', 'woocommerce' ),
 				'status'      => 'critical',
 				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'red' ),
 				'description' => '<p>' . esc_html(
@@ -250,7 +255,7 @@ class SiteHealthChecks {
 
 		if ( ! $hpos_enabled ) {
 			$status = 'recommended';
-			$label  = __( 'Woo: is using legacy order storage', 'woocommerce' );
+			$label  = __( 'WooCommerce is using legacy order storage', 'woocommerce' );
 			$desc   = __( 'High-Performance Order Storage (HPOS) provides faster order queries. Consider enabling it.', 'woocommerce' );
 		} elseif ( $sync_enabled ) {
 			$status = 'recommended';
@@ -258,7 +263,7 @@ class SiteHealthChecks {
 			$desc   = __( 'Order data is being written to both the legacy and custom tables. Once verified, disable sync to reduce database write overhead.', 'woocommerce' );
 		} else {
 			$status = 'good';
-			$label  = __( 'Woo: order storage is optimized', 'woocommerce' );
+			$label  = __( 'WooCommerce order storage is optimized', 'woocommerce' );
 			$desc   = __( 'HPOS is enabled and sync is disabled.', 'woocommerce' );
 		}
 
@@ -289,7 +294,7 @@ class SiteHealthChecks {
 		$enabled = 'yes' === get_option( 'woocommerce_api_enabled', 'no' );
 		$result  = $enabled
 			? array(
-				'label'       => __( 'Woo: Legacy REST API is enabled', 'woocommerce' ),
+				'label'       => __( 'WooCommerce Legacy REST API is enabled', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'orange' ),
 				'description' => '<p>' . esc_html__( 'The Legacy REST API is deprecated. If no integrations require it, disable it to reduce surface area.', 'woocommerce' ) . '</p>',
@@ -301,7 +306,7 @@ class SiteHealthChecks {
 				'test'        => 'woocommerce_legacy_rest_api',
 			)
 			: array(
-				'label'       => __( 'Woo: Legacy REST API is disabled', 'woocommerce' ),
+				'label'       => __( 'WooCommerce Legacy REST API is disabled', 'woocommerce' ),
 				'status'      => 'good',
 				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'green' ),
 				'description' => '<p>' . esc_html__( 'The deprecated Legacy REST API is not enabled.', 'woocommerce' ) . '</p>',
@@ -325,7 +330,7 @@ class SiteHealthChecks {
 		$is_https = ( 0 === stripos( $home_url, 'https://' ) );
 		$result   = $is_https
 			? array(
-				'label'       => __( 'Woo: store URL uses HTTPS', 'woocommerce' ),
+				'label'       => __( 'Store URL uses HTTPS', 'woocommerce' ),
 				'status'      => 'good',
 				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'green' ),
 				'description' => '<p>' . esc_html__( 'Your site URL uses HTTPS.', 'woocommerce' ) . '</p>',
@@ -333,10 +338,10 @@ class SiteHealthChecks {
 				'test'        => 'woocommerce_https',
 			)
 			: array(
-				'label'       => __( 'Woo: store URL is not using HTTPS', 'woocommerce' ),
+				'label'       => __( 'Store URL is not using HTTPS', 'woocommerce' ),
 				'status'      => 'critical',
 				'badge'       => array( 'label' => __( 'Security', 'woocommerce' ), 'color' => 'red' ),
-				'description' => '<p>' . esc_html__( 'Your store must use HTTPS so checkout and account data are protected in transit. Most payment methods will not work without HTTPS enabled on the checkout page.', 'woocommerce' ) . '</p>',
+				'description' => '<p>' . esc_html__( 'Your store should use HTTPS so checkout and account data are protected in transit.', 'woocommerce' ) . '</p>',
 				'actions'     => sprintf(
 					'<p><a href="%s">%s</a></p>',
 					esc_url( 'https://woocommerce.com/document/ssl-and-https/' ),
@@ -366,7 +371,7 @@ class SiteHealthChecks {
 		$count     = is_array( $available ) ? count( $available ) : 0;
 		$result    = $count > 0
 			? array(
-				'label'       => __( 'Woo: has an active payment gateway', 'woocommerce' ),
+				'label'       => __( 'WooCommerce has an active payment gateway', 'woocommerce' ),
 				'status'      => 'good',
 				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'green' ),
 				'description' => '<p>' . esc_html(
@@ -376,7 +381,7 @@ class SiteHealthChecks {
 				'test'        => 'woocommerce_payment_gateway',
 			)
 			: array(
-				'label'       => __( 'Woo: has no active payment gateway', 'woocommerce' ),
+				'label'       => __( 'WooCommerce has no active payment gateway', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'orange' ),
 				'description' => '<p>' . esc_html__( 'Customers cannot complete purchases until at least one payment gateway is enabled.', 'woocommerce' ) . '</p>',
@@ -388,6 +393,42 @@ class SiteHealthChecks {
 				'test'        => 'woocommerce_payment_gateway',
 			);
 		return $this->apply_result_filters( 'payment_gateway', $result );
+	}
+
+	/**
+	 * Check whether WordPress is using a persistent external object cache.
+	 *
+	 * Returns 'good' when an external object cache (e.g. Redis or Memcached) is
+	 * active, and 'recommended' when only the built-in non-persistent cache is
+	 * in use. A persistent cache significantly reduces database load for
+	 * WooCommerce stores.
+	 *
+	 * @return array WP Site Health result array.
+	 */
+	public function check_object_cache(): array {
+		$using  = wp_using_ext_object_cache();
+		$result = $using
+			? array(
+				'label'       => __( 'A persistent object cache is in use', 'woocommerce' ),
+				'status'      => 'good',
+				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'green' ),
+				'description' => '<p>' . esc_html__( 'WordPress is using an external object cache.', 'woocommerce' ) . '</p>',
+				'actions'     => '',
+				'test'        => 'woocommerce_object_cache',
+			)
+			: array(
+				'label'       => __( 'No persistent object cache is in use', 'woocommerce' ),
+				'status'      => 'recommended',
+				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
+				'description' => '<p>' . esc_html__( 'WooCommerce stores benefit significantly from a persistent object cache (Redis or Memcached). Without one, every request re-runs option queries.', 'woocommerce' ) . '</p>',
+				'actions'     => sprintf(
+					'<p><a href="%s">%s</a></p>',
+					esc_url( 'https://developer.wordpress.org/advanced-administration/performance/optimization/#caching' ),
+					esc_html__( 'Learn about object caching', 'woocommerce' )
+				),
+				'test'        => 'woocommerce_object_cache',
+			);
+		return $this->apply_result_filters( 'object_cache', $result );
 	}
 
 	/**
