@@ -27,7 +27,7 @@ class ActionSchedulerStats {
 		$threshold = (int) apply_filters( 'woocommerce_site_health_check_' . self::ID_OVERDUE . '_threshold', self::DEFAULT_OVERDUE_THRESHOLD );
 		if ( $count > $threshold ) {
 			return $this->finish( self::ID_OVERDUE, array(
-				'label'       => __( 'Action Scheduler has overdue actions', 'woocommerce' ),
+				'label'       => __( 'Woo: Action Scheduler has overdue actions', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
 				'description' => '<p>' . esc_html(
@@ -37,7 +37,7 @@ class ActionSchedulerStats {
 			) );
 		}
 		return $this->finish( self::ID_OVERDUE, array(
-			'label'       => __( 'Action Scheduler is up to date', 'woocommerce' ),
+			'label'       => __( 'Woo: Action Scheduler is up to date', 'woocommerce' ),
 			'status'      => 'good',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'green' ),
 			'description' => '<p>' . esc_html__( 'Action Scheduler has no significant backlog of overdue actions.', 'woocommerce' ) . '</p>',
@@ -54,7 +54,7 @@ class ActionSchedulerStats {
 		$threshold = (int) apply_filters( 'woocommerce_site_health_check_' . self::ID_TOTAL . '_threshold', self::DEFAULT_TOTAL_THRESHOLD );
 		if ( $count > $threshold ) {
 			return $this->finish( self::ID_TOTAL, array(
-				'label'       => __( 'Action Scheduler table is large', 'woocommerce' ),
+				'label'       => __( 'Woo: Action Scheduler table is large', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
 				'description' => '<p>' . esc_html(
@@ -64,7 +64,7 @@ class ActionSchedulerStats {
 			) );
 		}
 		return $this->finish( self::ID_TOTAL, array(
-			'label'       => __( 'Action Scheduler table size is healthy', 'woocommerce' ),
+			'label'       => __( 'Woo: Action Scheduler table size is healthy', 'woocommerce' ),
 			'status'      => 'good',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'green' ),
 			'description' => '<p>' . esc_html__( 'Action Scheduler retention is within healthy bounds.', 'woocommerce' ) . '</p>',
@@ -115,7 +115,7 @@ class ActionSchedulerStats {
 			wc_get_logger()->error( $e->getMessage(), array( 'source' => 'site-health' ) );
 		}
 		return $this->finish( $id, array(
-			'label'       => __( 'WooCommerce could not run an Action Scheduler check', 'woocommerce' ),
+			'label'       => __( 'Woo: WooCommerce could not run an Action Scheduler check', 'woocommerce' ),
 			'status'      => 'recommended',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'gray' ),
 			'description' => '<p>' . esc_html__( 'WooCommerce was unable to query the Action Scheduler tables. Check the site error logs.', 'woocommerce' ) . '</p>',

@@ -22,7 +22,7 @@ class AutoloadedOptionsAudit {
 	}
 
 	public function get_label(): string {
-		return __( 'WooCommerce autoloaded options size', 'woocommerce' );
+		return __( 'Woo: WooCommerce autoloaded options size', 'woocommerce' );
 	}
 
 	public function is_async(): bool {
@@ -60,7 +60,7 @@ class AutoloadedOptionsAudit {
 				);
 			}
 			return $this->finish( array(
-				'label'       => __( 'WooCommerce autoloaded options are large', 'woocommerce' ),
+				'label'       => __( 'Woo: WooCommerce autoloaded options are large', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
 				'description' => '<p>' . esc_html( $description ) . '</p>',
@@ -73,7 +73,7 @@ class AutoloadedOptionsAudit {
 		}
 
 		return $this->finish( array(
-			'label'       => __( 'WooCommerce autoloaded options size is healthy', 'woocommerce' ),
+			'label'       => __( 'Woo: WooCommerce autoloaded options size is healthy', 'woocommerce' ),
 			'status'      => 'good',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'green' ),
 			'description' => '<p>' . esc_html__( 'Autoloaded options are within healthy bounds.', 'woocommerce' ) . '</p>',
@@ -109,7 +109,7 @@ class AutoloadedOptionsAudit {
 			wc_get_logger()->error( $e->getMessage(), array( 'source' => 'site-health' ) );
 		}
 		return $this->finish( array(
-			'label'       => __( 'WooCommerce could not run a Site Health check', 'woocommerce' ),
+			'label'       => __( 'Woo: WooCommerce could not run a Site Health check', 'woocommerce' ),
 			'status'      => 'recommended',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'gray' ),
 			'description' => '<p>' . esc_html__( 'WooCommerce was unable to run this check. See the site-health log channel for details.', 'woocommerce' ) . '</p>',

@@ -19,7 +19,7 @@ class TemplateOverrideScanner {
 	}
 
 	public function get_label(): string {
-		return __( 'WooCommerce template overrides', 'woocommerce' );
+		return __( 'Woo: WooCommerce template overrides', 'woocommerce' );
 	}
 
 	public function is_async(): bool {
@@ -47,7 +47,7 @@ class TemplateOverrideScanner {
 					) . '</li>';
 			}
 			return $this->finish( array(
-				'label'       => __( 'WooCommerce has outdated template overrides', 'woocommerce' ),
+				'label'       => __( 'Woo: WooCommerce has outdated template overrides', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'orange' ),
 				'description' => '<p>' . esc_html__( 'These template files in your theme are at least two minor versions behind their core counterparts and may produce visual or functional issues:', 'woocommerce' ) . '</p><ul>' . $list . '</ul>',
@@ -60,7 +60,7 @@ class TemplateOverrideScanner {
 		}
 
 		return $this->finish( array(
-			'label'       => __( 'WooCommerce template overrides are up to date', 'woocommerce' ),
+			'label'       => __( 'Woo: WooCommerce template overrides are up to date', 'woocommerce' ),
 			'status'      => 'good',
 			'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'green' ),
 			'description' => '<p>' . esc_html__( 'No outdated WooCommerce template overrides were found.', 'woocommerce' ) . '</p>',
@@ -140,7 +140,7 @@ class TemplateOverrideScanner {
 			wc_get_logger()->error( $e->getMessage(), array( 'source' => 'site-health' ) );
 		}
 		return $this->finish( array(
-			'label'       => __( 'WooCommerce could not run the template overrides check', 'woocommerce' ),
+			'label'       => __( 'Woo: WooCommerce could not run the template overrides check', 'woocommerce' ),
 			'status'      => 'recommended',
 			'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'gray' ),
 			'description' => '<p>' . esc_html__( 'WooCommerce was unable to scan template overrides. Check the site error logs.', 'woocommerce' ) . '</p>',
