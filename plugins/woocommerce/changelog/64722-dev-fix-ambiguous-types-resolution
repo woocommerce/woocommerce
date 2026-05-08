@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Monorepo: Reduced the RAM footprint of type definitions for packages resolving to multiple versions.
