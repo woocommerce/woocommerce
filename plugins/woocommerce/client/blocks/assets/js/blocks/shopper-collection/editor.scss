@@ -31,10 +31,9 @@
 		margin: 0 0 0.75rem;
 	}
 
-	// Variation and quantity have no atomic equivalent in Product Collection,
-	// so we own their styling. Center-aligned and small to mirror the rest
-	// of the row (price + button use the WP `has-small-font-size` preset).
-	&__variation,
+	// Quantity has no atomic equivalent in Product Collection, so we own
+	// its styling. Center-aligned and small to mirror the rest of the row
+	// (price + button use the WP `has-small-font-size` preset).
 	&__quantity {
 		color: rgba(0, 0, 0, 0.7);
 		display: block;
@@ -42,30 +41,62 @@
 		text-align: center;
 	}
 
-	// Remove button overlays the image (mirrors Product Collection's
-	// sale-badge slot — top-right corner inside the product-image wrapper).
-	// Positioned absolute with align-self: flex-end so the parent's
-	// __inner-container flex layout pushes it to the right edge.
-	&__remove {
-		align-self: flex-end;
-		appearance: none;
-		background: rgba(0, 0, 0, 0.65);
-		border: 0;
-		border-radius: 999px;
-		color: #fff;
-		cursor: pointer;
-		font-size: var(--wp--preset--font-size--small, 0.75em);
-		line-height: 1;
-		padding: 0.4em 0.75em;
+	// Variation overlay sits at the bottom of the image and shares the
+	// remove badge's border/background/radius so the two corner overlays
+	// read as a pair. Spans the full image width (with the same 4px inset
+	// the remove badge uses on top/right) and is only rendered for
+	// variation products, so when absent the image isn't pushed around.
+	&__variation {
+		background: #fff;
+		border: 1px solid #43454b;
+		border-radius: 4px;
+		bottom: 4px;
+		box-sizing: border-box;
+		color: #43454b;
+		font-size: var(--wp--preset--font-size--small, 0.875em);
+		left: 4px;
+		padding: 0.25em 0.75em;
+		position: absolute;
+		right: 4px;
+		text-align: center;
 		z-index: 10;
+	}
+
+	// Icon-only Remove button overlaying the image. Visually mirrors the
+	// `wc-block-components-product-sale-badge--align-right` overlay (same
+	// border, radius, colors, white fill, top-right inset over the image)
+	// so it reads as a corner badge. Symmetric padding keeps the hit
+	// area square. Hover inverts the colors for a clear affordance.
+	&__remove {
+		appearance: none;
+		background: #fff;
+		border: 1px solid #43454b;
+		border-radius: 4px;
+		box-sizing: border-box;
+		color: #43454b;
+		cursor: pointer;
+		display: block;
+		line-height: 0;
+		padding: 0.25em;
+		position: absolute;
+		right: 4px;
+		top: 4px;
+		transition: background-color 120ms ease, color 120ms ease;
+		z-index: 10;
+
+		svg {
+			display: block;
+			fill: currentColor;
+		}
+
+		&:hover:not([disabled]) {
+			background: #43454b;
+			color: #fff;
+		}
 
 		&[disabled] {
 			cursor: not-allowed;
 			opacity: 0.7;
-		}
-
-		&:hover:not([disabled]) {
-			background: rgba(0, 0, 0, 0.85);
 		}
 	}
 }

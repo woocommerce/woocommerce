@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
 import { PanelBody, SelectControl } from '@wordpress/components';
+import { Icon, trash } from '@wordpress/icons';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 
 interface ShopperCollectionAttributes {
@@ -115,15 +116,26 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 							>
 								<img src={ PLACEHOLDER_IMG_SRC } alt="" />
 							</a>
-							<div className="wc-block-components-product-image__inner-container">
-								<button
-									type="button"
-									className="wc-block-shopper-collection-item__remove"
-									disabled
-								>
-									{ __( 'Remove', 'woocommerce' ) }
-								</button>
-							</div>
+							<button
+								type="button"
+								className="wc-block-shopper-collection-item__remove"
+								aria-label={ sprintf(
+									/* translators: %s: product name. */
+									__(
+										'Remove %s from Saved for later list',
+										'woocommerce'
+									),
+									item.name
+								) }
+								disabled
+							>
+								<Icon icon={ trash } size={ 24 } />
+							</button>
+							{ item.variation && (
+								<span className="wc-block-shopper-collection-item__variation">
+									{ item.variation }
+								</span>
+							) }
 						</div>
 						<h2 className="wp-block-post-title has-text-align-center has-medium-font-size">
 							<a
@@ -133,11 +145,6 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 								{ item.name }
 							</a>
 						</h2>
-						{ item.variation && (
-							<span className="wc-block-shopper-collection-item__variation">
-								{ item.variation }
-							</span>
-						) }
 						<div className="price wc-block-components-product-price has-text-align-center has-small-font-size">
 							<span className="wc-block-components-product-price__value">
 								{ item.price }
