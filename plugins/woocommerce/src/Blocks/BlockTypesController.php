@@ -9,6 +9,7 @@ use Automattic\WooCommerce\Blocks\Integrations\IntegrationRegistry;
 use Automattic\WooCommerce\Blocks\BlockTypes\Cart;
 use Automattic\WooCommerce\Blocks\BlockTypes\Checkout;
 use Automattic\WooCommerce\Blocks\BlockTypes\MiniCartContents;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * BlockTypesController class.
@@ -506,7 +507,6 @@ final class BlockTypesController {
 			'ReviewsByCategory',
 			'ReviewsByProduct',
 			'RelatedProducts',
-			'ShopperCollection',
 			'SingleProduct',
 			'StockFilter',
 			'PageContentWrapper',
@@ -553,6 +553,10 @@ final class BlockTypesController {
 			Checkout::get_checkout_block_types(),
 			MiniCartContents::get_mini_cart_block_types()
 		);
+
+		if ( FeaturesUtil::feature_is_enabled( 'cart_save_for_later' ) ) {
+			$block_types[] = 'ShopperCollection';
+		}
 
 		if ( wp_is_block_theme() ) {
 			$block_types[] = 'AddToCartWithOptions\AddToCartWithOptions';

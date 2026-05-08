@@ -39,7 +39,7 @@ class RoutesController {
 	public function __construct( SchemaController $schema_controller ) {
 		$this->schema_controller = $schema_controller;
 		$this->routes            = [
-			'v1'      => [
+			'v1'            => [
 				Routes\V1\Batch::IDENTIFIER              => Routes\V1\Batch::class,
 				Routes\V1\Cart::IDENTIFIER               => Routes\V1\Cart::class,
 				Routes\V1\CartAddItem::IDENTIFIER        => Routes\V1\CartAddItem::class,
@@ -70,16 +70,19 @@ class RoutesController {
 				Routes\V1\Products::IDENTIFIER           => Routes\V1\Products::class,
 				Routes\V1\ProductsById::IDENTIFIER       => Routes\V1\ProductsById::class,
 				Routes\V1\ProductsBySlug::IDENTIFIER     => Routes\V1\ProductsBySlug::class,
+			],
+			'private'       => [
+				// This route should be moved outside of the Store API namespace.
+				Routes\V1\Patterns::IDENTIFIER => Routes\V1\Patterns::class,
+			],
+			'shopper_lists' => [
+				// Gated behind the `cart_save_for_later` feature flag.
 				Routes\V1\ShopperLists::IDENTIFIER       => Routes\V1\ShopperLists::class,
 				Routes\V1\ShopperListsBySlug::IDENTIFIER => Routes\V1\ShopperListsBySlug::class,
 				Routes\V1\ShopperListItems::IDENTIFIER   => Routes\V1\ShopperListItems::class,
 				Routes\V1\ShopperListItemsByKey::IDENTIFIER => Routes\V1\ShopperListItemsByKey::class,
 			],
-			'private' => [
-				// This route should be moved outside of the Store API namespace.
-				Routes\V1\Patterns::IDENTIFIER => Routes\V1\Patterns::class,
-			],
-			'agentic' => [
+			'agentic'       => [
 				// Agentic Commerce Protocol endpoints.
 				Routes\V1\Agentic\CheckoutSessions::IDENTIFIER         => Routes\V1\Agentic\CheckoutSessions::class,
 				Routes\V1\Agentic\CheckoutSessionsUpdate::IDENTIFIER   => Routes\V1\Agentic\CheckoutSessionsUpdate::class,
@@ -95,6 +98,10 @@ class RoutesController {
 		$this->register_routes( 'v1', self::$api_namespace );
 		$this->register_routes( 'v1', self::$api_namespace . '/v1' );
 		$this->register_routes( 'private', 'wc/private' );
+
+		if ( FeaturesUtil::feature_is_enabled( 'cart_save_for_later' ) ) {
+			$this->register_routes( 'shopper_lists', self::$api_namespace . '/v1' );
+		}
 
 		if ( FeaturesUtil::feature_is_enabled( 'agentic_checkout' ) ) {
 			$this->register_routes( 'agentic', 'wc/agentic/v1' );
