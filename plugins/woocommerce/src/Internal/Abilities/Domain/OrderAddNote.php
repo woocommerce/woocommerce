@@ -110,18 +110,6 @@ class OrderAddNote extends DomainAbility implements AbilityDefinition {
 	}
 
 	/**
-	 * Check order management access.
-	 *
-	 * @param mixed $input Ability input.
-	 * @return bool
-	 *
-	 * @since 10.9.0
-	 */
-	public static function can_edit_order( $input = array() ): bool {
-		return self::current_user_can_edit_order_from_input( $input );
-	}
-
-	/**
 	 * Get the ability input schema.
 	 *
 	 * @return array

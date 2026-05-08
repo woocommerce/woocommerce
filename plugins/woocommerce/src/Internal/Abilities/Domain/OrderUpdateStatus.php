@@ -98,11 +98,22 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 			);
 		}
 
-			$updated = $order->update_status(
-				$status,
-				isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
-				true
+		if ( $status === $order->get_status() ) {
+			return new \WP_Error(
+				'woocommerce_order_status_unchanged',
+				__(
+					'Order already has this status. Use Add order note to add a note without changing status.',
+					'woocommerce'
+				),
+				array( 'status' => 400 )
 			);
+		}
+
+		$updated = $order->update_status(
+			$status,
+			isset( $input['note'] ) ? wp_kses_post( $input['note'] ) : '',
+			true
+		);
 
 		if ( ! $updated ) {
 			return new \WP_Error(
@@ -115,18 +126,6 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 		return array(
 			'order' => self::format_order_for_response( $order, false ),
 		);
-	}
-
-	/**
-	 * Check order management access.
-	 *
-	 * @param mixed $input Ability input.
-	 * @return bool
-	 *
-	 * @since 10.9.0
-	 */
-	public static function can_edit_order( $input = array() ): bool {
-		return self::current_user_can_edit_order_from_input( $input );
 	}
 
 	/**
@@ -149,7 +148,7 @@ class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
 				),
 				'note'   => array(
 					'type'        => 'string',
-					'description' => __( 'Optional note to record with the status change.', 'woocommerce' ),
+					'description' => __( 'Optional status change note. Safe HTML is allowed. Use Add order note for notes without a status change.', 'woocommerce' ),
 				),
 			),
 			'required'             => array( 'id', 'status' ),

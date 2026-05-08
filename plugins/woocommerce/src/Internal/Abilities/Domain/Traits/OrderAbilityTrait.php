@@ -141,7 +141,7 @@ trait OrderAbilityTrait {
 			);
 		}
 
-			$order_id = (int) $input['id'];
+		$order_id = (int) $input['id'];
 
 		if ( $order_id < 1 ) {
 			return new \WP_Error(
@@ -151,7 +151,7 @@ trait OrderAbilityTrait {
 			);
 		}
 
-			$order = wc_get_order( $order_id );
+		$order = wc_get_order( $order_id );
 
 		if ( ! $order instanceof \WC_Order ) {
 			return new \WP_Error(
@@ -161,16 +161,18 @@ trait OrderAbilityTrait {
 			);
 		}
 
-			return $order;
+		return $order;
 	}
 
-		/**
-		 * Check order edit access for an ability input payload.
-		 *
-		 * @param mixed $input Ability input.
-		 * @return bool
-		 */
-	protected static function current_user_can_edit_order_from_input( $input ): bool {
+	/**
+	 * Check order edit access for an ability input payload.
+	 *
+	 * @param mixed $input Ability input.
+	 * @return bool
+	 *
+	 * @since 10.9.0
+	 */
+	public static function can_edit_order( $input = array() ): bool {
 		$order_id = self::get_id_from_input( $input );
 
 		return $order_id > 0 && wc_rest_check_post_permissions( 'shop_order', 'edit', $order_id );

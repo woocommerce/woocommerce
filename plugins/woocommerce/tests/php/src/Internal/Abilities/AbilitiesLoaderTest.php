@@ -1645,6 +1645,42 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should reject unchanged order status updates without adding notes.
+	 */
+	public function test_order_update_status_rejects_unchanged_status_without_adding_notes(): void {
+		$order                     = \WC_Helper_Order::create_order();
+		$this->created_order_ids[] = $order->get_id();
+		$note_count_before         = count(
+			wc_get_order_notes(
+				array(
+					'order_id' => $order->get_id(),
+				)
+			)
+		);
+
+		$result = wp_get_ability( 'woocommerce/order-update-status' )->execute(
+			array(
+				'id'     => $order->get_id(),
+				'status' => $order->get_status(),
+				'note'   => 'This should be added through Add order note.',
+			)
+		);
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'woocommerce_order_status_unchanged', $result->get_error_code() );
+		$this->assertSame(
+			$note_count_before,
+			count(
+				wc_get_order_notes(
+					array(
+						'order_id' => $order->get_id(),
+					)
+				)
+			)
+		);
+	}
+
+	/**
 	 * @testdox Should treat order status updates as manual status changes.
 	 */
 	public function test_order_update_status_uses_manual_status_update(): void {
