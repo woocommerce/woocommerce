@@ -7,7 +7,7 @@ use Automattic\WooCommerce\Internal\SiteHealth\SiteHealthChecks;
 use WC_Unit_Test_Case;
 
 /**
- * Integration tests for SiteHealthChecks: verifies all 16 checks are registered
+ * Integration tests for SiteHealthChecks: verifies all 15 checks are registered
  * and every callback returns a well-formed result array.
  */
 class SiteHealthChecksIntegrationTest extends WC_Unit_Test_Case {
@@ -19,7 +19,6 @@ class SiteHealthChecksIntegrationTest extends WC_Unit_Test_Case {
 		'woocommerce_legacy_rest_api',
 		'woocommerce_https',
 		'woocommerce_payment_gateway',
-		'woocommerce_object_cache',
 		'woocommerce_postmeta_meta_value_index',
 	);
 

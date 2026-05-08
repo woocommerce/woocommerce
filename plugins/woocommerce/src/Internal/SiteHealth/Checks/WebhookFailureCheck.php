@@ -21,7 +21,7 @@ class WebhookFailureCheck {
 	}
 
 	public function get_label(): string {
-		return __( 'WooCommerce webhook deliveries', 'woocommerce' );
+		return __( 'Woo: webhook deliveries', 'woocommerce' );
 	}
 
 	public function is_async(): bool {
@@ -42,7 +42,7 @@ class WebhookFailureCheck {
 
 		if ( $count > $threshold ) {
 			return $this->finish( array(
-				'label'       => __( 'WooCommerce has failed webhook deliveries', 'woocommerce' ),
+				'label'       => __( 'Woo: has failed webhook deliveries', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'orange' ),
 				'description' => '<p>' . esc_html(
@@ -61,7 +61,7 @@ class WebhookFailureCheck {
 		}
 
 		return $this->finish( array(
-			'label'       => __( 'WooCommerce webhook deliveries are healthy', 'woocommerce' ),
+			'label'       => __( 'Woo: webhook deliveries are healthy', 'woocommerce' ),
 			'status'      => 'good',
 			'badge'       => array( 'label' => __( 'WooCommerce', 'woocommerce' ), 'color' => 'green' ),
 			'description' => '<p>' . esc_html__( 'No significant webhook delivery failures detected in the last 24 hours.', 'woocommerce' ) . '</p>',
@@ -102,7 +102,7 @@ class WebhookFailureCheck {
 			wc_get_logger()->error( $e->getMessage(), array( 'source' => 'site-health' ) );
 		}
 		return $this->finish( array(
-			'label'       => __( 'WooCommerce could not run a Site Health check', 'woocommerce' ),
+			'label'       => __( 'Woo: could not run a Site Health check', 'woocommerce' ),
 			'status'      => 'recommended',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'gray' ),
 			'description' => '<p>' . esc_html__( 'WooCommerce was unable to run this check. See the site-health log channel for details.', 'woocommerce' ) . '</p>',

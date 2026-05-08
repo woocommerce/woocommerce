@@ -19,7 +19,7 @@ class CartFragmentsCheck {
 	}
 
 	public function get_label(): string {
-		return __( 'WooCommerce cart fragments load policy', 'woocommerce' );
+		return __( 'Woo: cart fragments load policy', 'woocommerce' );
 	}
 
 	public function is_async(): bool {
@@ -33,7 +33,7 @@ class CartFragmentsCheck {
 				wc_get_logger()->error( 'Cart fragments loopback failed: ' . $response->get_error_message(), array( 'source' => 'site-health' ) );
 			}
 			return $this->finish( array(
-				'label'       => __( 'WooCommerce could not run the cart fragments check', 'woocommerce' ),
+				'label'       => __( 'Woo: could not run the cart fragments check', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'gray' ),
 				'description' => '<p>' . esc_html__( 'The loopback request to the home page failed, so the cart fragments check could not run.', 'woocommerce' ) . '</p>',
@@ -46,7 +46,7 @@ class CartFragmentsCheck {
 
 		if ( $loaded ) {
 			return $this->finish( array(
-				'label'       => __( 'WooCommerce cart fragments are loaded on the home page', 'woocommerce' ),
+				'label'       => __( 'Woo: cart fragments are loaded on the home page', 'woocommerce' ),
 				'status'      => 'recommended',
 				'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'orange' ),
 				'description' => '<p>' . esc_html__( 'The cart fragments script makes an AJAX request on every front-end request that loads it. If you do not need cart counts on non-cart pages, suppress it via the woocommerce_cart_fragments_should_load filter.', 'woocommerce' ) . '</p>',
@@ -55,7 +55,7 @@ class CartFragmentsCheck {
 		}
 
 		return $this->finish( array(
-			'label'       => __( 'WooCommerce cart fragments are not loaded site-wide', 'woocommerce' ),
+			'label'       => __( 'Woo: cart fragments are not loaded site-wide', 'woocommerce' ),
 			'status'      => 'good',
 			'badge'       => array( 'label' => __( 'Performance', 'woocommerce' ), 'color' => 'green' ),
 			'description' => '<p>' . esc_html__( 'Cart fragments are not enqueued on the home page.', 'woocommerce' ) . '</p>',
