@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Stamp the new `_wc_email_template_last_core_render` and `_wc_email_backfilled` post meta during email template sync so 10.9's three-way diff change-summary has a base reference on 10.8-era posts.

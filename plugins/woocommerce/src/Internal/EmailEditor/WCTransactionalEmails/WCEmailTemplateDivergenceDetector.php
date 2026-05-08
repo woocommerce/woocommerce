@@ -72,6 +72,29 @@ class WCEmailTemplateDivergenceDetector {
 	public const LAST_SYNCED_AT_META_KEY = '_wc_email_last_synced_at';
 
 	/**
+	 * Post meta key for the canonical core render at the moment of the last
+	 * system write. Stamped by the generator and the RSM-149 backfill so that
+	 * the three-way diff change-summary shipping in 10.9 has a `base` reference
+	 * to compare against on existing 10.8-era posts. Forward-compatible: 10.8
+	 * has no consumer for this meta yet.
+	 *
+	 * @var string
+	 * @since 10.8.0
+	 */
+	public const LAST_CORE_RENDER_META_KEY = '_wc_email_template_last_core_render';
+
+	/**
+	 * Informational flag set to `true` by the RSM-149 backfill on every existing
+	 * `woo_email` post it stamps. Lets later release Tracks instrumentation
+	 * (RSM-145, shipping in 10.9) distinguish backfilled posts from natively
+	 * generated ones.
+	 *
+	 * @var string
+	 * @since 10.8.0
+	 */
+	public const BACKFILLED_META_KEY = '_wc_email_backfilled';
+
+	/**
 	 * Classification outcomes.
 	 */
 	public const STATUS_IN_SYNC                   = 'in_sync';
