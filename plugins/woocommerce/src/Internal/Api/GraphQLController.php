@@ -637,7 +637,7 @@ abstract class GraphQLController {
 	}
 
 	/**
-	 * Determine debug flags based on WP_DEBUG, principal, and query string.
+	 * Determine debug flags for the request, based on {@see self::is_debug_mode()}.
 	 *
 	 * @param \WP_REST_Request $request   The REST request.
 	 * @param ?object          $principal The resolved principal, or null if resolution itself failed.
@@ -652,52 +652,89 @@ abstract class GraphQLController {
 	/**
 	 * Check whether GraphQL introspection is allowed for this request.
 	 *
-	 * Introspection is permitted if either condition holds:
-	 * - The request is in debug mode ({@see self::is_debug_mode()}).
-	 * - The principal opts in via a `can_introspect(): bool` method.
+	 * The principal opts in via a `can_introspect(): bool` method; principals
+	 * that don't declare it are denied by default. The decision is then passed
+	 * through the {@see 'woocommerce_graphql_can_introspect'} filter so sites
+	 * can grant or revoke access without subclassing the principal — useful
+	 * for per-request rules (specific IPs, headers, query parameters, etc.).
+	 *
+	 * The filter must return strictly `true` to allow introspection; any other
+	 * value denies. This avoids surprises from filters returning truthy values
+	 * like `1` or `'yes'`.
 	 *
 	 * @param ?object          $principal The resolved principal, or null if resolution failed.
 	 * @param \WP_REST_Request $request   The REST request.
 	 */
 	private function is_introspection_allowed( ?object $principal, \WP_REST_Request $request ): bool {
-		if ( $this->is_debug_mode( $principal, $request ) ) {
-			return true;
-		}
-		return null !== $principal
+		$can_introspect = ! is_null( $principal )
 			&& method_exists( $principal, 'can_introspect' )
 			&& $principal->can_introspect();
+
+		/**
+		 * Filters whether the current principal may run GraphQL introspection.
+		 *
+		 * The filter receives the principal-derived decision (false when the
+		 * principal is null or doesn't declare `can_introspect()`) and must
+		 * return strictly `true` to grant access; any other return value denies.
+		 *
+		 * @since 10.9.0
+		 * 
+		 * @internal
+		 *
+		 * @param bool             $can_introspect Whether the principal can introspect, derived from `$principal->can_introspect()`.
+		 * @param ?object          $principal      The resolved principal, or null when principal resolution failed.
+		 * @param \WP_REST_Request $request        The REST request being processed.
+		 */
+		$can_introspect = apply_filters( 'woocommerce_graphql_can_introspect', $can_introspect, $principal, $request );
+
+		return true === $can_introspect;
 	}
 
 	/**
 	 * Check if debug mode is active.
 	 *
-	 * Debug mode is active when both:
-	 * - The principal can use it (opted in via `can_use_debug_mode(): bool`,
-	 *   or a local environment is detected — the developer escape hatch).
-	 * - WP_DEBUG is enabled OR `_debug=1` is set on the request.
+	 * Debug mode is gated on `_debug=1` being set on the request: when absent,
+	 * debug mode is off regardless of any other signal. When present, the
+	 * principal opts in via a `can_use_debug_mode(): bool` method (principals
+	 * that don't declare it are denied by default), and the decision is then
+	 * passed through the {@see 'woocommerce_graphql_can_use_debug_mode'} filter.
 	 *
-	 * The principal-method check follows the same opt-in convention as
-	 * {@see self::is_introspection_allowed()} — plugin principals must
-	 * declare `can_use_debug_mode()` to grant access; absence denies.
+	 * The filter must return strictly `true` to allow debug mode; any other
+	 * value denies. This avoids surprises from filters returning truthy values
+	 * like `1` or `'yes'`.
 	 *
 	 * @param ?object          $principal The resolved principal, or null if resolution failed.
 	 * @param \WP_REST_Request $request   The REST request.
 	 */
 	private function is_debug_mode( ?object $principal, \WP_REST_Request $request ): bool {
-		if ( ! $this->is_local_environment() ) {
-			$allowed = null !== $principal
-				&& method_exists( $principal, 'can_use_debug_mode' )
-				&& $principal->can_use_debug_mode();
-			if ( ! $allowed ) {
-				return false;
-			}
+		if ( '1' !== $request->get_param( '_debug' ) ) {
+			return false;
 		}
 
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			return true;
-		}
+		$can_debug = ! is_null( $principal )
+			&& method_exists( $principal, 'can_use_debug_mode' )
+			&& $principal->can_use_debug_mode();
 
-		return '1' === $request->get_param( '_debug' );
+		/**
+		 * Filters whether the current principal may activate GraphQL debug mode.
+		 *
+		 * Only invoked when the request carries `_debug=1`, so the filter is not
+		 * called on every GraphQL request. The filter receives the
+		 * principal-derived decision (false when the principal is null or
+		 * doesn't declare `can_use_debug_mode()`) and must return strictly `true`
+		 * to grant access; any other return value denies.
+		 *
+		 * @since 10.9.0
+		 * 
+		 * @internal
+		 *
+		 * @param bool             $can_debug Whether the principal can use debug mode, derived from `$principal->can_use_debug_mode()`.
+		 * @param ?object          $principal The resolved principal, or null when principal resolution failed.
+		 * @param \WP_REST_Request $request   The REST request being processed.
+		 */
+		$can_debug = apply_filters( 'woocommerce_graphql_can_use_debug_mode', $can_debug, $principal, $request );
+
+		return true === $can_debug;
 	}
 
 	/**
@@ -953,27 +990,5 @@ abstract class GraphQLController {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Check if running in a local/development environment.
-	 *
-	 * Prefers {@see wp_get_environment_type()} when available. Otherwise
-	 * parses the site URL and performs a case-insensitive *exact* match
-	 * against the hostname — not a substring check, to avoid matching
-	 * impostor domains like `mylocalhost.com` or `127.0.0.1.attacker.example`.
-	 */
-	private function is_local_environment(): bool {
-		if ( function_exists( 'wp_get_environment_type' ) && 'local' === wp_get_environment_type() ) {
-			return true;
-		}
-
-		$host = wp_parse_url( get_site_url(), PHP_URL_HOST );
-		if ( ! is_string( $host ) ) {
-			return false;
-		}
-
-		$host = strtolower( $host );
-		return 'localhost' === $host || '127.0.0.1' === $host;
 	}
 }

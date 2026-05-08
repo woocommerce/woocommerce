@@ -102,21 +102,16 @@ class GraphQLControllerDebugModeTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox debug mode is off without _debug=1 and WP_DEBUG, even for an admin.
+	 * @testdox debug mode is off without _debug=1, even for an admin.
 	 */
 	public function test_debug_mode_is_off_without_trigger(): void {
-		// Define WP_DEBUG only if it isn't already; we can't undefine constants.
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			$this->markTestSkipped( 'Cannot exercise the "no debug trigger" branch when WP_DEBUG is on.' );
-		}
-
 		$response = $this->sut->handle_request(
 			$this->post_request( array( 'query' => '{ greeting { result } }' ), false )
 		);
 
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
-		// No debug metrics should be attached when neither _debug=1 nor WP_DEBUG is set.
+		// No debug metrics should be attached when _debug=1 is missing.
 		$this->assertArrayNotHasKey( 'debug', $data['extensions'] ?? array() );
 	}
 
@@ -197,20 +192,8 @@ class GraphQLControllerDebugModeTest extends WC_REST_Unit_Test_Case {
 
 	/**
 	 * @testdox debug mode stays off for an authenticated low-privilege user even with `_debug=1`.
-	 *
-	 * Skipped when the test environment is local (`wp_get_environment_type()`
-	 * returns `'local'` or the site URL host is `localhost` / `127.0.0.1`),
-	 * because in that case `is_local_environment()` short-circuits the
-	 * admin/_debug gate and the test can't tell the two paths apart.
 	 */
 	public function test_debug_mode_is_off_for_low_privilege_user_with_debug_param(): void {
-		$reflection = new \ReflectionClass( $this->sut );
-		$is_local   = $reflection->getMethod( 'is_local_environment' );
-		$is_local->setAccessible( true );
-		if ( $is_local->invoke( $this->sut ) ) {
-			$this->markTestSkipped( 'is_local_environment() returns true in this environment; the non-admin debug gate is not exercisable.' );
-		}
-
 		$editor = self::factory()->user->create( array( 'role' => 'editor' ) );
 		wp_set_current_user( $editor );
 
@@ -221,5 +204,106 @@ class GraphQLControllerDebugModeTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$data = $response->get_data();
 		$this->assertArrayNotHasKey( 'debug', $data['extensions'] ?? array() );
+	}
+
+	/**
+	 * @testdox the woocommerce_graphql_can_use_debug_mode filter can grant debug mode to a user the principal would deny.
+	 */
+	public function test_filter_can_grant_debug_mode_to_low_privilege_user(): void {
+		$editor = self::factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor );
+
+		$received_principal = null;
+		$received_request   = null;
+		$filter             = function ( bool $can_debug, ?object $principal, \WP_REST_Request $request ) use ( &$received_principal, &$received_request ): bool {
+			$received_principal = $principal;
+			$received_request   = $request;
+			return true;
+		};
+		add_filter( 'woocommerce_graphql_can_use_debug_mode', $filter, 10, 3 );
+
+		try {
+			$response = $this->sut->handle_request(
+				$this->post_request( array( 'query' => '{ greeting { result } }' ), true )
+			);
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_use_debug_mode', $filter, 10 );
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'debug', $data['extensions'] ?? array() );
+
+		$this->assertNotNull( $received_principal, 'The filter should receive the resolved principal.' );
+		$this->assertInstanceOf( \WP_REST_Request::class, $received_request );
+	}
+
+	/**
+	 * @testdox the woocommerce_graphql_can_use_debug_mode filter can revoke debug mode from an admin.
+	 */
+	public function test_filter_can_revoke_debug_mode_from_admin(): void {
+		$filter = function (): bool {
+			return false;
+		};
+		add_filter( 'woocommerce_graphql_can_use_debug_mode', $filter );
+
+		try {
+			$response = $this->sut->handle_request(
+				$this->post_request( array( 'query' => '{ greeting { result } }' ), true )
+			);
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_use_debug_mode', $filter );
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'debug', $data['extensions'] ?? array() );
+	}
+
+	/**
+	 * @testdox the woocommerce_graphql_can_use_debug_mode filter must return strictly true; truthy non-bool denies.
+	 */
+	public function test_filter_requires_strict_true_to_grant_debug_mode(): void {
+		$editor = self::factory()->user->create( array( 'role' => 'editor' ) );
+		wp_set_current_user( $editor );
+
+		$filter = function () {
+			return 1;
+		};
+		add_filter( 'woocommerce_graphql_can_use_debug_mode', $filter );
+
+		try {
+			$response = $this->sut->handle_request(
+				$this->post_request( array( 'query' => '{ greeting { result } }' ), true )
+			);
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_use_debug_mode', $filter );
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertArrayNotHasKey( 'debug', $data['extensions'] ?? array() );
+	}
+
+	/**
+	 * @testdox the woocommerce_graphql_can_use_debug_mode filter is not invoked when _debug=1 is absent.
+	 */
+	public function test_filter_is_not_invoked_without_debug_param(): void {
+		$invoked = false;
+		$filter  = function ( bool $can_debug ) use ( &$invoked ): bool {
+			$invoked = true;
+			return $can_debug;
+		};
+		add_filter( 'woocommerce_graphql_can_use_debug_mode', $filter );
+
+		try {
+			$this->sut->handle_request(
+				$this->post_request( array( 'query' => '{ greeting { result } }' ), false )
+			);
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_use_debug_mode', $filter );
+		}
+
+		$this->assertFalse( $invoked );
 	}
 }
