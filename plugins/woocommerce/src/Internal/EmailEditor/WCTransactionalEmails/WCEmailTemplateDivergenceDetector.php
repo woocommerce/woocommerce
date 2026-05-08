@@ -106,10 +106,14 @@ class WCEmailTemplateDivergenceDetector {
 	public const LAST_SYNCED_AT_META_KEY = '_wc_email_last_synced_at';
 
 	/**
-	 * Informational flag set to `true` by the RSM-149 backfill on every existing
-	 * `woo_email` post it stamps. Surfaced read-only over REST so RSM-145 Tracks
-	 * instrumentation can distinguish backfilled posts from natively generated
-	 * ones when the merchant interacts with the RSM-141 update banner.
+	 * Informational flag intended to be set to `true` by the RSM-149 backfill
+	 * on every pre-existing `woo_email` post it stamps. Registered + surfaced
+	 * read-only over REST here so RSM-145 Tracks instrumentation can distinguish
+	 * backfilled posts from natively generated ones, but the writer is staged
+	 * in a separate follow-up PR after the 10.8 feature freeze for the backfill
+	 * class. Until then, the field defaults to `false` everywhere — Tracks will
+	 * report `was_backfilled: false` for all posts. Safe default; no behavior
+	 * depends on it being `true`.
 	 *
 	 * @var string
 	 */

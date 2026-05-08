@@ -109,10 +109,6 @@ class WCEmailTemplateSyncBackfillTest extends \WC_Unit_Test_Case {
 			'',
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true )
 		);
-		$this->assertTrue(
-			(bool) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, true ),
-			'Backfilled flag must be true after the backfill stamps the post.'
-		);
 	}
 
 	/**
