@@ -31,7 +31,7 @@ type EditActionOptions = {
 function getQuickEditPath(
 	path: string,
 	query: Record< string, string | undefined >,
-	productId: number
+	productIds: number[]
 ) {
 	const nextQuery = Object.entries( query ).reduce(
 		( acc, [ key, value ] ) => {
@@ -46,7 +46,7 @@ function getQuickEditPath(
 
 	return getProductListNavigationPath( path, {
 		...nextQuery,
-		postId: String( productId ),
+		postId: productIds.join( ',' ),
 		quickEdit: 'true',
 	} );
 }
@@ -132,10 +132,10 @@ export const quickEditAction = ( {
 		return product.status !== 'trash';
 	},
 	callback( items, { onActionPerformed } ) {
-		const product = items[ 0 ];
+		const productIds = items.map( ( product ) => product.id );
 
-		if ( product ) {
-			navigate( getQuickEditPath( path, query, product.id ) );
+		if ( productIds.length > 0 ) {
+			navigate( getQuickEditPath( path, query, productIds ) );
 		}
 
 		if ( onActionPerformed ) {
