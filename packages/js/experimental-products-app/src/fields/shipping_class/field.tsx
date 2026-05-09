@@ -65,6 +65,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 
 		return (
 			<SelectControl
+				__next40pxDefaultSize
 				label={ field.label }
 				value={ data.shipping_class }
 				options={ options }

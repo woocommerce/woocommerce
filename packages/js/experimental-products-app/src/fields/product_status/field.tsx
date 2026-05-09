@@ -42,6 +42,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	),
 	Edit: ( { data, onChange, field } ) => (
 		<SelectControl
+			__next40pxDefaultSize
 			label={ field.label }
 			value={ data.status }
 			options={ field.elements?.filter(
