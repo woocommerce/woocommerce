@@ -28,6 +28,7 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Tax\Controller as
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Controller as EmailsSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Account\Controller as AccountSettingsController;
+use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\LegacyFields\Controller as LegacyFieldsController;
 
 /**
  * Class responsible for loading the REST API and all REST API namespaces.
@@ -249,6 +250,7 @@ class Server {
 			'settings-payment-gateways' => PaymentGatewaysController::class,
 			'settings-tax'              => TaxSettingsController::class,
 			'settings-account'          => AccountSettingsController::class,
+			'products-legacy-fields'    => LegacyFieldsController::class,
 			// This is a wrapper that redirects V4 settings requests to the V3 settings controller.
 			'settings'                  => 'WC_REST_Settings_V4_Controller',
 		);

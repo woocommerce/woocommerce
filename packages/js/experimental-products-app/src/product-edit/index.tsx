@@ -20,6 +20,7 @@ import {
 	getSelectionFromPostId,
 } from '../product-list/utils';
 import type { ProductEntityRecord } from '../fields/types';
+import { useLegacyFields, insertLegacyFields } from '../fields/legacy';
 import { unlock } from '../lock-unlock';
 import {
 	buildMergedProductEditData,
@@ -31,6 +32,7 @@ import {
 	isProductVariation,
 } from './utils';
 import { saveSelectedProducts } from './save';
+import { VARIATION_LEGACY_HOOK_MAP } from '../variation-view/legacy-hooks';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
@@ -85,9 +87,23 @@ function ProductEditForm( {
 	onChange,
 	selectedProducts,
 }: ProductEditFormProps ) {
+	const hasVariations = selectedProducts.some( isProductVariation );
+	const { fieldsByHook } = useLegacyFields(
+		hasVariations ? VARIATION_LEGACY_HOOK_MAP : {}
+	);
+
+	const fieldsWithLegacy =
+		hasVariations && Object.keys( fieldsByHook ).length > 0
+			? insertLegacyFields(
+					editableFields,
+					fieldsByHook,
+					VARIATION_LEGACY_HOOK_MAP
+			  )
+			: editableFields;
+
 	const mergedData = buildMergedProductEditData( selectedProducts );
 	const visibleFields = getVisibleProductEditFields(
-		editableFields,
+		fieldsWithLegacy,
 		selectedProducts
 	);
 

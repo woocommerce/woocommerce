@@ -33,6 +33,7 @@ export type ProductEntityRecord = Omit< Product, 'categories' | 'tags' > & {
 	_embedded?: {
 		variations?: ProductEntityRecord[];
 	};
+	meta_data?: Array< { id?: number; key: string; value: string } >;
 	seo_title?: string;
 	seo_description?: string;
 	visible_in_pos?: boolean;
