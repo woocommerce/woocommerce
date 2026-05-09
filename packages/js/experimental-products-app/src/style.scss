@@ -40,6 +40,12 @@
 	height: 100%;
 }
 
+.woocommerce-product-list .dataviews-title-field a,
+.woocommerce-product-list .dataviews-title-field a:hover,
+.woocommerce-product-list .dataviews-title-field a:focus {
+	text-decoration: none;
+}
+
 .woocommerce-product-edit {
 	display: flex;
 	flex-direction: column;
