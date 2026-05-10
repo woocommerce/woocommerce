@@ -18,77 +18,10 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useChangeSummary, type ChangeSummary } from './use-change-summary';
 import { useApplyUpdate } from './use-apply-update';
 import { STORE_NAME } from '../store';
-
-/**
- * Shape of the Tracks payload shared by every banner-fired event.
- *
- * RSM-145 standardizes these keys across the divergence-related events
- * so they can be correlated end-to-end (`viewed` → `applied`/`dismissed`).
- */
-interface SharedTracksPayload {
-	email_type: string;
-	template_version_from: string;
-	template_version_to: string | null;
-	source_hash_from: string | null;
-	source_hash_to: string | null;
-	classification: string;
-	was_backfilled: boolean;
-	// `recordEvent` types its payload as `{ [k: string]: unknown }`;
-	// the index signature lets us pass `SharedTracksPayload` directly.
-	[ key: string ]: unknown;
-}
-
-interface SharedPayloadInputs {
-	record: {
-		slug?: unknown;
-		meta?: Record< string, unknown >;
-	} | null;
-	summary: ChangeSummary | null;
-}
-
-/**
- * Build the shared Tracks payload from the current entity record + summary.
- *
- * Returns `null` when there's no record yet (eligibility hasn't fired,
- * so no event should fire either). Falsy `summary` is permitted: in
- * that case the version_to / source_hash_to fields are `null`.
- */
-function buildSharedTracksPayload( {
-	record,
-	summary,
-}: SharedPayloadInputs ): SharedTracksPayload | null {
-	const meta = record?.meta;
-	if ( ! meta ) {
-		return null;
-	}
-	const slug = typeof record?.slug === 'string' ? record.slug : '';
-	const versionFrom =
-		typeof meta._wc_email_template_version === 'string'
-			? ( meta._wc_email_template_version as string )
-			: '';
-	const sourceHashFrom =
-		typeof meta._wc_email_template_source_hash === 'string'
-			? ( meta._wc_email_template_source_hash as string )
-			: null;
-	const wasBackfilled =
-		meta._wc_email_backfilled === true ||
-		meta._wc_email_backfilled === '1' ||
-		meta._wc_email_backfilled === 1;
-	const classification =
-		typeof meta._wc_email_template_status === 'string'
-			? ( meta._wc_email_template_status as string )
-			: '';
-
-	return {
-		email_type: slug,
-		template_version_from: versionFrom,
-		template_version_to: summary?.version_to ?? null,
-		source_hash_from: sourceHashFrom,
-		source_hash_to: summary?.source_hash_to ?? null,
-		classification,
-		was_backfilled: wasBackfilled,
-	};
-}
+import {
+	buildSharedTracksPayload,
+	type SharedTracksPayload,
+} from '../tracks/build-shared-payload';
 
 /**
  * Numeric semver compare. Returns negative if `a < b`, zero if equal, positive
@@ -459,11 +392,19 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 			// Compute `had_customizations` BEFORE the apply round-trip so
 			// the comparison is against the pre-apply content, not the
 			// merged content that core-data caches mid-flight.
+			//
+			// `source_hash_from` is not part of the shared wire payload
+			// (RSM-145 §15.4) — read it directly from the entity record's
+			// meta and use it only as an in-memory comparison input.
 			const contentRaw =
 				( record as { content?: { raw?: string } } ).content?.raw ?? '';
-			const hadCustomizations = sharedPayload.source_hash_from
-				? ( await sha1Hex( contentRaw ) ) !==
-				  sharedPayload.source_hash_from
+			const sourceHashFrom =
+				record?.meta &&
+				typeof record.meta._wc_email_template_source_hash === 'string'
+					? ( record.meta._wc_email_template_source_hash as string )
+					: '';
+			const hadCustomizations = sourceHashFrom
+				? ( await sha1Hex( contentRaw ) ) !== sourceHashFrom
 				: false;
 
 			const res = await doApply( [] );

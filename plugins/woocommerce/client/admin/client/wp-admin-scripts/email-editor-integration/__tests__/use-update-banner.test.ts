@@ -506,10 +506,9 @@ describe( 'useUpdateBanner — apply / gates / dispatchers (6c)', () => {
 // ==========================================================================
 describe( 'useUpdateBanner — Tracks (6d)', () => {
 	const sharedPayloadMatcher = {
-		email_type: 'customer_processing_order',
+		email_id: 'customer_processing_order',
 		template_version_from: '9.4',
 		template_version_to: '9.5',
-		source_hash_from: 'abc123',
 		source_hash_to: 'def456',
 		classification: 'core_updated_customized',
 		was_backfilled: false,
