@@ -13,6 +13,14 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import type { EmailType } from '../settings-email-listing-slotfill';
 import { UpdatesCell } from '../settings-email-listing-update-cell';
 
+const recordEventMock = jest.fn();
+
+jest.mock( '@woocommerce/tracks', () => ( {
+	recordEvent: ( name: string, payload: Record< string, unknown > ) => {
+		recordEventMock( name, payload );
+	},
+} ) );
+
 jest.mock( '@woocommerce/settings', () => ( {
 	getAdminLink: ( path: string ) => `https://example.test/wp-admin/${ path }`,
 } ) );
@@ -45,12 +53,15 @@ const baseEmail: EmailType = {
 	templateStatus: null,
 	templateVersion: null,
 	currentVersion: null,
+	wasBackfilled: false,
 };
 
 describe( '<UpdatesCell>', () => {
 	let originalLocation: Location;
 
 	beforeEach( () => {
+		recordEventMock.mockClear();
+		window.sessionStorage.clear();
 		originalLocation = window.location;
 		// eslint-disable-next-line @typescript-eslint/no-explicit-any
 		delete ( window as any ).location;
@@ -201,5 +212,89 @@ describe( '<UpdatesCell>', () => {
 		);
 
 		expect( window.location.href ).toBe( '' );
+	} );
+
+	// RSM-145 list-page `_viewed` instrumentation.
+	describe( 'Tracks _viewed event', () => {
+		const eligibleEmail: EmailType = {
+			...baseEmail,
+			templateStatus: 'core_updated_customized',
+			templateVersion: '10.6.0',
+			currentVersion: '10.7.0',
+		};
+
+		it( 'fires woocommerce_block_email_update_viewed once on mount when the cell is eligible', () => {
+			render( <UpdatesCell post={ eligibleEmail } /> );
+
+			expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
+			expect( recordEventMock ).toHaveBeenCalledWith(
+				'woocommerce_block_email_update_viewed',
+				expect.objectContaining( {
+					email_id: 'new-order',
+					template_version_from: '10.6.0',
+					template_version_to: '10.7.0',
+					source_hash_to: null,
+					classification: 'core_updated_customized',
+					was_backfilled: false,
+					viewed_from: 'email_list',
+				} )
+			);
+		} );
+
+		it( 'dedups within a session for the same (post_id, version_to)', () => {
+			const { rerender, unmount } = render(
+				<UpdatesCell post={ eligibleEmail } />
+			);
+			rerender( <UpdatesCell post={ eligibleEmail } /> );
+			unmount();
+			render( <UpdatesCell post={ eligibleEmail } /> );
+
+			expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
+		} );
+
+		it( 'fires a fresh event when currentVersion advances for the same post', () => {
+			const { rerender } = render(
+				<UpdatesCell post={ eligibleEmail } />
+			);
+			rerender(
+				<UpdatesCell
+					post={ { ...eligibleEmail, currentVersion: '10.8.0' } }
+				/>
+			);
+
+			expect( recordEventMock ).toHaveBeenCalledTimes( 2 );
+			expect( recordEventMock ).toHaveBeenLastCalledWith(
+				'woocommerce_block_email_update_viewed',
+				expect.objectContaining( { template_version_to: '10.8.0' } )
+			);
+		} );
+
+		it( 'does not fire when the cell is not eligible (status in_sync)', () => {
+			render(
+				<UpdatesCell
+					post={ {
+						...baseEmail,
+						templateStatus: 'in_sync',
+					} }
+				/>
+			);
+
+			expect( recordEventMock ).not.toHaveBeenCalled();
+		} );
+
+		it( 'does not fire when the merchant version already matches current', () => {
+			render(
+				<UpdatesCell
+					post={ {
+						...baseEmail,
+						templateStatus: 'core_updated_customized',
+						templateVersion: '10.7.0',
+						currentVersion: '10.7.0',
+					} }
+				/>
+			);
+
+			expect( recordEventMock ).not.toHaveBeenCalled();
+		} );
 	} );
 } );

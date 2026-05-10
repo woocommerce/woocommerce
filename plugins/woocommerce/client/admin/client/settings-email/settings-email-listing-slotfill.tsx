@@ -54,6 +54,14 @@ export type EmailType = {
 	 * merchant has not yet reviewed this version.
 	 */
 	currentVersion: string | null;
+	/**
+	 * Whether the post was stamped by the RSM-149 backfill rather than created
+	 * natively by the modern generator. Sourced from `_wc_email_backfilled`
+	 * post meta and projected from `wp/v2/woo_email` REST in
+	 * {@link useTransactionalEmails}. Consumed by RSM-145 Tracks instrumentation
+	 * (`was_backfilled` shared-payload key) on the list-page `_viewed` event.
+	 */
+	wasBackfilled: boolean;
 };
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
