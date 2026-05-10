@@ -16,8 +16,8 @@ import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from '../../constants';
 import store from '../../store';
 
 export const CustomerEffortScoreModalContainer = () => {
-	const { createSuccessNotice } = useDispatch( 'core/notices' );
-	const { hideCesModal } = useDispatch( store );
+	const coreNoticesDispatch = useDispatch( 'core/notices' );
+	const cesDispatch = useDispatch( store );
 	const {
 		storeAgeInWeeks,
 		resolving: isLoading,
@@ -41,6 +41,16 @@ export const CustomerEffortScoreModalContainer = () => {
 			resolving,
 		};
 	}, [] );
+
+	// When the customer-effort-score-tracks feature is disabled,
+	// the store may not be registered, causing useDispatch to return null.
+	// Return null early to prevent destructuring crashes.
+	if ( ! coreNoticesDispatch || ! cesDispatch ) {
+		return null;
+	}
+
+	const { createSuccessNotice } = coreNoticesDispatch;
+	const { hideCesModal } = cesDispatch;
 
 	const recordScore = (
 		score: number,
