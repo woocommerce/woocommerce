@@ -7,7 +7,6 @@
  */
 
 use Automattic\Jetpack\Constants;
-use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,7 +35,6 @@ class WC_Admin_Notices {
 		'template_files'                     => 'template_file_check_notice',
 		'legacy_shipping'                    => 'legacy_shipping_notice',
 		'no_shipping_methods'                => 'no_shipping_methods_notice',
-		'regenerating_thumbnails'            => 'regenerating_thumbnails_notice',
 		'regenerating_lookup_table'          => 'regenerating_lookup_table_notice',
 		'no_secure_connection'               => 'secure_connection_notice',
 		'maxmind_license_key'                => 'maxmind_missing_license_key_notice',
@@ -69,7 +67,6 @@ class WC_Admin_Notices {
 		add_action( 'switch_theme', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'woocommerce_installed', array( __CLASS__, 'reset_admin_notices' ) );
 		add_action( 'admin_init', array( __CLASS__, 'hide_notices' ), 20 );
-		add_action( 'admin_init', array( __CLASS__, 'maybe_remove_legacy_api_removal_notice' ), 20 );
 
 		// @TODO: This prevents Action Scheduler async jobs from storing empty list of notices during WC installation.
 		// That could lead to OBW not starting and 'Run setup wizard' notice not appearing in WP admin, which we want
@@ -167,47 +164,6 @@ class WC_Admin_Notices {
 	 * @return void
 	 */
 	public static function reset_admin_notices() {
-		self::maybe_add_legacy_api_removal_notice();
-	}
-
-	/**
-	 * Add an admin notice about unsupported webhooks with Legacy API payload if at least one of these exist
-	 * and the Legacy REST API plugin is not installed.
-	 *
-	 * @return void
-	 */
-	private static function maybe_add_legacy_api_removal_notice() {
-		if ( wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() > 0 && ! WC()->legacy_rest_api_is_available() ) {
-			self::add_custom_notice(
-				'legacy_webhooks_unsupported_in_woo_90',
-				sprintf(
-					'%s%s',
-					sprintf(
-						'<h4>%s</h4>',
-						esc_html__( 'WooCommerce webhooks that use the Legacy REST API are unsupported', 'woocommerce' )
-					),
-					sprintf(
-					// translators: Placeholders are URLs.
-						wpautop( __( '⚠️ The WooCommerce Legacy REST API has been removed from WooCommerce, this will cause <a href="%1$s">webhooks on this site that are configured to use the Legacy REST API</a> to stop working. <a target="_blank" href="%2$s">A separate WooCommerce extension is available</a> to allow these webhooks to keep using the Legacy REST API without interruption. You can also edit these webhooks to use the current REST API version to generate the payload instead. <b><a target="_blank" href="%3$s">Learn more about this change.</a></b>', 'woocommerce' ) ),
-						admin_url( 'admin.php?page=wc-settings&tab=advanced&section=webhooks&legacy=true' ),
-						'https://wordpress.org/plugins/woocommerce-legacy-rest-api/',
-						'https://developer.woocommerce.com/2023/10/03/the-legacy-rest-api-will-move-to-a-dedicated-extension-in-woocommerce-9-0/'
-					)
-				)
-			);
-		}
-	}
-
-	/**
-	 * Remove the admin notice about the unsupported webhooks if the Legacy REST API plugin is installed.
-	 *
-	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
-	 * @return void
-	 */
-	public static function maybe_remove_legacy_api_removal_notice() {
-		if ( self::has_notice( 'legacy_webhooks_unsupported_in_woo_90' ) && ( WC()->legacy_rest_api_is_available() || 0 === wc_get_container()->get( WebhookUtil::class )->get_legacy_webhooks_count() ) ) {
-			self::remove_notice( 'legacy_webhooks_unsupported_in_woo_90' );
-		}
 	}
 
 	/**
@@ -478,17 +434,6 @@ class WC_Admin_Notices {
 	}
 
 	/**
-	 * Previously showed a notice while product thumbnails regenerated.
-	 *
-	 * Thumbnail regeneration status is now shown beside the matching status tool.
-	 *
-	 * @return void
-	 */
-	public static function regenerating_thumbnails_notice() {
-		self::remove_notice( 'regenerating_thumbnails' );
-	}
-
-	/**
 	 * Previously showed a notice about secure connections.
 	 *
 	 * Secure connection status is now shown in Site Health.
@@ -514,7 +459,7 @@ class WC_Admin_Notices {
 	/**
 	 * Add notice about minimum PHP and WordPress requirement.
 	 *
-	 * @deprecated 8.2.0 WordPress and PHP minimum requirements notices are no longer shown.
+	 * @deprecated 10.9.0 WordPress and PHP minimum requirements notices are no longer shown.
 	 *
 	 * @since 3.6.5
 	 * @return void

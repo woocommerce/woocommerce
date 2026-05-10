@@ -511,14 +511,24 @@ class SiteHealth {
 			return 'protected' === $status;
 		}
 
-		$uploads          = wp_get_upload_dir();
-		$response         = wp_safe_remote_get(
+		$uploads  = wp_get_upload_dir();
+		$response = wp_safe_remote_get(
 			esc_url_raw( $uploads['baseurl'] . '/woocommerce_uploads/' ),
 			array(
 				'redirection' => 0,
 			)
 		);
-		$response_code    = intval( wp_remote_retrieve_response_code( $response ) );
+
+		if ( is_wp_error( $response ) ) {
+			return false;
+		}
+
+		$response_code = intval( wp_remote_retrieve_response_code( $response ) );
+
+		if ( 0 === $response_code ) {
+			return false;
+		}
+
 		$response_content = wp_remote_retrieve_body( $response );
 		$is_protected     = ( 200 === $response_code && empty( $response_content ) ) || ( 200 !== $response_code );
 

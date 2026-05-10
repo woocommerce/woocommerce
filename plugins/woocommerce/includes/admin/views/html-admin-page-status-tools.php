@@ -44,16 +44,22 @@ foreach ( $tools as $action_name => $tool ) {
 								echo '</p><p class="description">';
 								echo wp_kses_post( $selector['description'] );
 							}
-							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
-							echo "&nbsp;&nbsp;<select style='width: 300px;' form='form_$action_name' id='selector_$action_name' data-allow_clear='true' class='{$selector['class']}' name='{$selector['name']}' data-placeholder='{$selector['placeholder']}' data-action='{$selector['search_action']}'></select>";
+							printf(
+								'&nbsp;&nbsp;<select style="width: 300px;" form="%1$s" id="%2$s" data-allow_clear="true" class="%3$s" name="%4$s" data-placeholder="%5$s" data-action="%6$s"></select>',
+								esc_attr( 'form_' . $action_name ),
+								esc_attr( 'selector_' . $action_name ),
+								esc_attr( $selector['class'] ),
+								esc_attr( $selector['name'] ),
+								esc_attr( $selector['placeholder'] ),
+								esc_attr( $selector['search_action'] )
+							);
 						}
 						?>
 					</p>
 				</th>
 				<td class="run-tool">
 					<span class="run-tool-actions">
-					<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-					<input <?php echo ArrayUtil::is_truthy( $tool, 'disabled' ) ? 'disabled' : ''; ?> type="submit" form="<?php echo 'form_' . $action_name; ?>" class="button button-large" value="<?php echo esc_attr( $tool['button'] ); ?>" />
+					<input <?php disabled( ArrayUtil::is_truthy( $tool, 'disabled' ) ); ?> type="submit" form="<?php echo esc_attr( 'form_' . $action_name ); ?>" class="button button-large" value="<?php echo esc_attr( $tool['button'] ); ?>" />
 
 					<?php if ( ! empty( $tool['status_text'] ) ) : ?>
 					<span class="run-tool-status"><?php echo wp_kses_post( $tool['status_text'] ); ?></span>
