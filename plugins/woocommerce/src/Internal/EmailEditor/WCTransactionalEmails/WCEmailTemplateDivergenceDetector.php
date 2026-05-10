@@ -262,6 +262,33 @@ class WCEmailTemplateDivergenceDetector {
 	}
 
 	/**
+	 * Stamp {@see self::BACKFILL_COMPLETE_OPTION} on fresh WooCommerce installs.
+	 *
+	 * The RSM-149 backfill runs as a 10.8 db-update migration callback. Fresh
+	 * installs on 10.9 (or any later release) never cross the 10.8 db-update
+	 * boundary — {@see \WC_Install::needs_db_update()} short-circuits on a null
+	 * `woocommerce_db_version` — so the migration never runs and the backfill
+	 * option never flips. Without this fix, {@see self::run_sweep()} would
+	 * early-return on every subsequent WC upgrade for the lifetime of the site
+	 * and Tracks instrumentation would be silently dead.
+	 *
+	 * A fresh install has no legacy `woo_email` posts to backfill: every post
+	 * the generator creates is already 10.9-stamped at creation. The migration
+	 * is trivially complete; recording that here is the truthful statement.
+	 *
+	 * Hooked on `woocommerce_newly_installed`, the WP-style public action
+	 * contract WC fires from {@see \WC_Install::newly_installed()} after the
+	 * fresh-install flag flips.
+	 *
+	 * @return void
+	 *
+	 * @since 10.9.0
+	 */
+	public static function mark_backfill_complete_on_fresh_install(): void {
+		update_option( self::BACKFILL_COMPLETE_OPTION, 'yes' );
+	}
+
+	/**
 	 * Run the post-upgrade divergence sweep.
 	 *
 	 * Intended to be hooked on `woocommerce_updated`, which fires once per WC

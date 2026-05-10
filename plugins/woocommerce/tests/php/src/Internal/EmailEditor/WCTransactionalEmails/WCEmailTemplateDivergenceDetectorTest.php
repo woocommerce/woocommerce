@@ -178,6 +178,52 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stamp BACKFILL_COMPLETE_OPTION when fresh-install listener fires.
+	 */
+	public function test_mark_backfill_complete_on_fresh_install_stamps_option(): void {
+		// Start from the "option missing" state a fresh 10.9 install would have.
+		delete_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION );
+		$this->assertFalse( get_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION ) );
+
+		WCEmailTemplateDivergenceDetector::mark_backfill_complete_on_fresh_install();
+
+		$this->assertSame(
+			'yes',
+			(string) get_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION ),
+			'Fresh-install listener must stamp the backfill-complete option.'
+		);
+	}
+
+	/**
+	 * @testdox Should let run_sweep() classify posts after fresh-install listener runs.
+	 */
+	public function test_run_sweep_proceeds_after_fresh_install_listener(): void {
+		$email_id = 'wc_test_divergence_fresh_install_sweep';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		// Simulate a fresh-install scenario: the migration never ran so the option is missing.
+		delete_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY );
+		delete_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION );
+
+		// Sweep gate trips → no classification work.
+		WCEmailTemplateDivergenceDetector::run_sweep();
+		$this->assertSame(
+			'',
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Sweep must early-return when the backfill option is missing.'
+		);
+
+		// Listener stamps the option; the next sweep proceeds.
+		WCEmailTemplateDivergenceDetector::mark_backfill_complete_on_fresh_install();
+		WCEmailTemplateDivergenceDetector::run_sweep();
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Sweep should classify normally once the fresh-install listener has stamped the option.'
+		);
+	}
+
+	/**
 	 * Cleanup after test.
 	 */
 	public function tearDown(): void {
