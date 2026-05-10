@@ -116,7 +116,7 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 		 * filter the page-load endpoint and submission handler use keeps the
 		 * three entry points consistent.
 		 *
-		 * @since 10.9.0
+		 * @since 10.8.0
 		 * @return bool
 		 */
 		protected function is_order_eligible_for_send(): bool {
@@ -130,7 +130,7 @@ if ( ! class_exists( 'WC_Email_Customer_Review_Request', false ) ) :
 			 * Defaults to `completed` only. Same hook the page-load endpoint and the
 			 * submission handler use, so the three entry points stay aligned.
 			 *
-			 * @since 10.9.0
+			 * @since 10.8.0
 			 *
 			 * @param string[] $eligible_statuses Default: `[ 'completed' ]`.
 			 * @param WC_Order $order             Order being inspected.
