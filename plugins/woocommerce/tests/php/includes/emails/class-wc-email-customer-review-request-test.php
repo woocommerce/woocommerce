@@ -246,19 +246,19 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 		$order->set_status( 'processing' );
 		$order->save();
 
-		add_filter(
-			'woocommerce_review_order_eligible_statuses',
-			static function () {
-				return array( 'completed', 'processing' );
-			}
-		);
+		$widen_statuses = static function () {
+			return array( 'completed', 'processing' );
+		};
+		add_filter( 'woocommerce_review_order_eligible_statuses', $widen_statuses );
 
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
-		$this->sut->trigger( $order->get_id() );
-		$after = count( $mailer->mock_sent );
-
-		remove_all_filters( 'woocommerce_review_order_eligible_statuses' );
+		try {
+			$this->sut->trigger( $order->get_id() );
+			$after = count( $mailer->mock_sent );
+		} finally {
+			remove_filter( 'woocommerce_review_order_eligible_statuses', $widen_statuses );
+		}
 
 		$this->assertSame( $before + 1, $after, 'Filter must allow non-default statuses to receive the email.' );
 	}
