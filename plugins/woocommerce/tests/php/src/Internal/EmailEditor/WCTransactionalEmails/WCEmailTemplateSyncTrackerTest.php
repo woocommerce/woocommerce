@@ -349,5 +349,4 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 		$property->setAccessible( true );
 		$property->setValue( null, $running );
 	}
-
 }
