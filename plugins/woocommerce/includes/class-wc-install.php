@@ -781,9 +781,6 @@ class WC_Install {
 			->get_missing_tables( $schema );
 
 		if ( 0 < count( $missing_tables ) ) {
-			if ( $modify_notice ) {
-				WC_Admin_Notices::add_notice( 'base_tables_missing' );
-			}
 			update_option( 'woocommerce_schema_missing_tables', $missing_tables );
 		} else {
 			if ( $modify_notice ) {

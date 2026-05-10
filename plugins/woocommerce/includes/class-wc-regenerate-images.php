@@ -142,11 +142,19 @@ class WC_Regenerate_Images {
 	 * Show notice when job is running in background.
 	 */
 	public static function regenerating_notice() {
-		if ( ! self::$background_process->is_running() ) {
-			WC_Admin_Notices::add_notice( 'regenerating_thumbnails' );
-		} else {
+		if ( ! self::is_regeneration_in_progress() ) {
 			WC_Admin_Notices::remove_notice( 'regenerating_thumbnails' );
 		}
+	}
+
+	/**
+	 * See if thumbnail regeneration is currently in progress.
+	 *
+	 * @return bool
+	 */
+	public static function is_regeneration_in_progress() {
+		// WC_Regenerate_Images_Request::is_running() returns whether the queue is empty.
+		return self::$background_process && ! self::$background_process->is_running();
 	}
 
 	/**
