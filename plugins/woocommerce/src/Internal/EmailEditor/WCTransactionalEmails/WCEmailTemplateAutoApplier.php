@@ -203,6 +203,11 @@ class WCEmailTemplateAutoApplier {
 			self::$is_auto_applying = false;
 		}//end try
 
+		// Fire `_update_applied` for the auto-applier path. Static extensions:
+		// the auto-applier only acts on `core_updated_uncustomized` posts, so
+		// `had_customizations` is always false and `auto_resolved` is always true.
+		WCEmailTemplateSyncTracker::record_auto_applied( $post_id );
+
 		return array(
 			'content'     => $canonical,
 			'version'     => $version,
