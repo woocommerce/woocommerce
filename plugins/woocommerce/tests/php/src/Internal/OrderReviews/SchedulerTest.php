@@ -136,8 +136,13 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	 */
 	public function cancellation_status_provider(): array {
 		return array(
-			'cancelled' => array( 'cancelled' ),
-			'refunded'  => array( 'refunded' ),
+			'cancelled'  => array( 'cancelled' ),
+			'refunded'   => array( 'refunded' ),
+			// Any other transition out of `completed` must also unschedule.
+			'processing' => array( 'processing' ),
+			'on-hold'    => array( 'on-hold' ),
+			'pending'    => array( 'pending' ),
+			'failed'     => array( 'failed' ),
 		);
 	}
 

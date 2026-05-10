@@ -7,6 +7,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\OrderReviews;
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use WC_Email_Customer_Review_Request;
 use WC_Order;
 
@@ -55,10 +56,33 @@ class Scheduler {
 	 */
 	final public function init(): void {
 		add_action( 'woocommerce_order_status_completed', array( $this, 'handle_woocommerce_order_status_completed' ), 10, 1 );
-		add_action( 'woocommerce_order_status_cancelled', array( $this, 'handle_cancellation' ), 10, 1 );
-		add_action( 'woocommerce_order_status_refunded', array( $this, 'handle_cancellation' ), 10, 1 );
+		// Catch every transition out of `completed` (cancelled, refunded,
+		// processing, on-hold, pending, failed, custom statuses…) so the
+		// pending email is unscheduled regardless of which status the order
+		// moves to.
+		add_action( 'woocommerce_order_status_changed', array( $this, 'handle_status_changed' ), 10, 3 );
 		add_action( 'woocommerce_trash_order', array( $this, 'handle_cancellation' ), 10, 1 );
 		add_action( 'woocommerce_before_delete_order', array( $this, 'handle_cancellation' ), 10, 1 );
+	}
+
+	/**
+	 * Unschedule the pending review-request email whenever the order leaves
+	 * the eligible state. `woocommerce_order_status_changed` fires for every
+	 * transition, so a single listener covers cancelled / refunded /
+	 * processing / on-hold / pending / failed / custom statuses in one place.
+	 *
+	 * @internal
+	 *
+	 * @param int    $order_id   Order ID.
+	 * @param string $old_status Previous status (sans `wc-` prefix).
+	 * @param string $new_status New status (sans `wc-` prefix).
+	 */
+	public function handle_status_changed( int $order_id, string $old_status, string $new_status ): void {
+		if ( OrderStatus::COMPLETED !== $old_status || OrderStatus::COMPLETED === $new_status ) {
+			return;
+		}
+
+		$this->handle_cancellation( $order_id );
 	}
 
 	/**
