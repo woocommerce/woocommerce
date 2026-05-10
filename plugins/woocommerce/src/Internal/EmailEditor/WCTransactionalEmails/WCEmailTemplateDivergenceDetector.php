@@ -483,6 +483,22 @@ class WCEmailTemplateDivergenceDetector {
 		}
 
 		update_post_meta( $post_id, self::STATUS_META_KEY, $status );
+
+		// Fire `_update_available` Tracks event on the merchant-intervention
+		// transition. Gates: new status is `core_updated_customized` AND the
+		// stored `version_from` precedes the registry's current `version_to`
+		// (i.e. the merchant hasn't already reviewed this release).
+		// Suppress-during-backfill and per-tuple dedup live in the tracker.
+		if ( self::STATUS_CORE_UPDATED_CUSTOMIZED === $status ) {
+			$sync_config  = WCEmailTemplateSyncRegistry::get_email_sync_config( $email_id );
+			$version_to   = null !== $sync_config ? (string) ( $sync_config['version'] ?? '' ) : '';
+			$version_from = (string) get_post_meta( $post_id, self::VERSION_META_KEY, true );
+
+			if ( '' !== $version_to && version_compare( $version_from, $version_to, '<' ) ) {
+				WCEmailTemplateSyncTracker::record_update_available( $post_id );
+			}
+		}
+
 		return $status;
 	}
 

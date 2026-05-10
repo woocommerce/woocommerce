@@ -178,6 +178,70 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fire `_update_available` from reclassify() on version-advance transition into customized.
+	 */
+	public function test_reclassify_fires_update_available_on_version_advance(): void {
+		$email_id = 'wc_test_divergence_available_fires';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		// Stage the divergence: simulate "core has moved AND merchant has drifted"
+		// by stamping a different source hash (so neither current_core_hash nor
+		// current_post_hash matches the stamp). The classifier returns
+		// `core_updated_customized` in that case.
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
+			sha1( 'stamped-from-an-earlier-core-render' )
+		);
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, '1.0.0' );
+
+		$captured = array();
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder(
+			static function ( string $event_name, array $payload ) use ( &$captured ): void {
+				$captured[] = array( $event_name, $payload );
+			}
+		);
+
+		$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder( null );
+
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED, $status );
+		$this->assertCount( 1, $captured, 'reclassify must fire one _update_available event on version-advance transition.' );
+		$this->assertSame( 'block_email_update_available', $captured[0][0] );
+	}
+
+	/**
+	 * @testdox Should not fire `_update_available` from reclassify() when version_from equals version_to.
+	 */
+	public function test_reclassify_skips_update_available_when_version_unchanged(): void {
+		$email_id = 'wc_test_divergence_available_no_advance';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		// Stage the divergence: as above, but leave the version stamp at the
+		// fixture's `@version` so the version-advance gate fails.
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
+			sha1( 'stamped-from-an-earlier-core-render' )
+		);
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, '1.2.3' );
+
+		$captured = array();
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder(
+			static function ( string $event_name, array $payload ) use ( &$captured ): void {
+				$captured[] = array( $event_name, $payload );
+			}
+		);
+
+		WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder( null );
+
+		$this->assertSame( array(), $captured, 'reclassify must not fire _update_available when the merchant has already reviewed this version.' );
+	}
+
+	/**
 	 * @testdox Should stamp BACKFILL_COMPLETE_OPTION when fresh-install listener fires.
 	 */
 	public function test_mark_backfill_complete_on_fresh_install_stamps_option(): void {
