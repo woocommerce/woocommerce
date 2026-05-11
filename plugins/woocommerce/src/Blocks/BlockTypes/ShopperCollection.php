@@ -585,6 +585,15 @@ final class ShopperCollection extends AbstractBlock {
 	/**
 	 * Get the frontend style handle for this block type.
 	 *
+	 * Returning null lets WP use the `style` array from block.json, which
+	 * lists this block's own stylesheet plus the atomic
+	 * product-image / product-price / product-button stylesheets we
+	 * borrow class names from. We can't render those atomic blocks as
+	 * inner blocks (they rely on WP_Query / $post loop context, which
+	 * this block doesn't have — it hydrates from a Store API call), so
+	 * declaring them as style dependencies is the only way to get WP
+	 * to enqueue their CSS whenever Shopper Collection renders.
+	 *
 	 * @return null
 	 */
 	protected function get_block_type_style() {
