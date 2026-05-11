@@ -197,9 +197,10 @@ class QueryCache {
 	/**
 	 * Parse a query, cache the resulting AST, and return the DocumentNode.
 	 *
-	 * Writes to OPcache when enabled and usable; otherwise to the object
-	 * cache. APQ requests pass $for_apq=true so the object cache is used
-	 * even when the standard-query toggle is off.
+	 * Writes to OPcache when enabled and usable. APQ registrations always
+	 * also write to the object cache so hash-only lookups still resolve if
+	 * OPcache later becomes unavailable (toggle off, dir unwritable, files
+	 * cleaned up, or a silent write_to_opcache failure).
 	 *
 	 * Returns an error array if the query has a syntax error.
 	 *
@@ -214,9 +215,12 @@ class QueryCache {
 			return $document;
 		}
 
-		if ( Main::is_opcache_enabled() && $this->is_opcache_usable() ) {
+		$used_opcache = Main::is_opcache_enabled() && $this->is_opcache_usable();
+		if ( $used_opcache ) {
 			$this->write_to_opcache( $hash, $document );
-		} elseif ( $for_apq || Main::is_object_cache_enabled() ) {
+		}
+
+		if ( $for_apq || ( Main::is_object_cache_enabled() && ! $used_opcache ) ) {
 			wp_cache_set( $this->build_cache_key( $hash ), $document->toArray(), self::CACHE_GROUP, self::get_cache_ttl() );
 		}
 

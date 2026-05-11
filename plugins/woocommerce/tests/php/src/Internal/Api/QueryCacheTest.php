@@ -285,6 +285,36 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox apq hash-only lookup resolves from the object cache when OPcache becomes unavailable after registration.
+	 */
+	public function test_apq_lookup_falls_back_to_object_cache_when_opcache_disabled(): void {
+		$this->use_temp_opcache_dir();
+		update_option( Main::OPTION_OPCACHE_ENABLED, 'yes' );
+
+		$query      = '{ widget { id } }';
+		$hash       = hash( 'sha256', $query );
+		$extensions = array(
+			'persistedQuery' => array(
+				'version'    => 1,
+				'sha256Hash' => $hash,
+			),
+		);
+
+		$register = $this->sut->resolve( $query, $extensions );
+		$this->assertInstanceOf( DocumentNode::class, $register );
+
+		update_option( Main::OPTION_OPCACHE_ENABLED, 'no' );
+		$this->sut = new QueryCache();
+
+		$lookup = $this->sut->resolve( null, $extensions );
+		$this->assertInstanceOf(
+			DocumentNode::class,
+			$lookup,
+			'APQ hash-only lookup must still resolve from the object cache after OPcache is disabled.'
+		);
+	}
+
+	/**
 	 * @testdox resolve falls back to the object cache when the OPcache dir is not writable.
 	 */
 	public function test_resolve_falls_back_to_object_cache_when_opcache_dir_unwritable(): void {
