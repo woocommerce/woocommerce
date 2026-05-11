@@ -70,6 +70,9 @@ final class ProductFilterDropdown extends AbstractBlock {
 
 		$select_id   = wp_unique_id( 'wc-block-product-filter-dropdown-' );
 		$show_counts = is_array( $first ) && array_key_exists( 'count', $first );
+		$aria_label  = ! empty( $block_context['groupLabel'] )
+			? (string) $block_context['groupLabel']
+			: __( 'Product filter', 'woocommerce' );
 
 		ob_start();
 		?>
@@ -81,9 +84,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 				<select
 					class="wc-block-product-filter-dropdown__select"
 					id="<?php echo esc_attr( $select_id ); ?>"
-					<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
-						aria-label="<?php echo esc_attr( (string) $block_context['groupLabel'] ); ?>"
-					<?php endif; ?>
+					aria-label="<?php echo esc_attr( $aria_label ); ?>"
 					data-wp-bind--value="woocommerce/product-filter-dropdown::state.selectValue"
 					data-wp-on--change="actions.onDropdownChange"
 				>
