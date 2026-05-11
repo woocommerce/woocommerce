@@ -14,16 +14,22 @@ under a single top-level `WooCommerce` rail item. Enable it from
 
 When enabled, the flag:
 
-- Removes Woo-related top-level items from WP's native rail: Products,
-  Analytics, Marketing, Payments (all variants), WooPayments, and Klaviyo
-  (when no Marketing parent is present).
-- Keeps the `WooCommerce` top-level registration in place; positions it
-  directly after the Dashboard item.
-- Shows two navigation surfaces:
-    - **Hover cascade** — hovering the rail item opens a flyout.
-    - **Rail replacement** — on any Woo page, the native rail is replaced
-      by a 160px Woo rail with a `← WordPress` link that returns to the
-      WP Dashboard.
+- Builds a curated tree of Woo navigation items from WP's `$menu`/`$submenu`
+  globals, the default tree (`default-tree.php`), and the
+  `woocommerce_admin_menu_tree` filter.
+- On Woo pages (resolved via `Context::is_woo_page()`), splices that tree
+  back into `$menu`/`$submenu` so WordPress's native admin-menu renderer
+  emits the Woo rail directly — each tree root becomes its own top-level
+  entry, first-level children populate its native flyout, and WP's
+  `index.php` (Dashboard) entry is relabeled in place as the rail's
+  back-to-Dashboard link.
+- On non-Woo pages, leaves the native rail intact; hovering the
+  `WooCommerce` item reveals the curated tree as a native flyout
+  (built into `$submenu['woocommerce']` server-side).
+- A small JS module (`admin-navigation-v2.js`) handles only the third-level
+  cascade — flyouts deeper than one level, which WP's native admin rail
+  doesn't render. It walks each rail root's submenu after DOM load and
+  attaches grandchild items.
 
 ## Filter hook
 
