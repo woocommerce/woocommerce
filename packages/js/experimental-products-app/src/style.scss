@@ -52,6 +52,20 @@
 }
 
 /*
+ * Primary cell left padding: 0px on parent rows (checkbox sits right next to
+ * the image) and 16px on nested (variation) rows. Same min()-keyed-off-
+ * --wp-dataviews-table-hierarchy-level pattern as the checkbox rule below.
+ */
+.woocommerce-product-list
+	.dataviews-view-table
+	tbody
+	td:has( > .dataviews-view-table__primary-column ) {
+	padding-left: calc(
+		min(var(--wp-dataviews-table-hierarchy-level, 0), 1) * 16px
+	) !important;
+}
+
+/*
  * Nested rows (product variations) sit one column to the left of where their
  * parent's primary content starts. Add 16px of left padding to the checkbox
  * cell so the nested checkbox lines up with the parent's first content (image).
