@@ -17,6 +17,7 @@ import {
 	EmailStatus,
 	TemplateStatus,
 } from './settings-email-listing-slotfill';
+import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
 import { getAdminSetting } from '~/utils/admin-settings';
 
 /**
@@ -105,12 +106,25 @@ export const useTransactionalEmails = (
 						? rawVersion
 						: null;
 
+				// PHP serializes the registry's current version under
+				// `current_version` (snake) on the slotfill payload; project to
+				// `currentVersion` (camel) for the row's TS contract.
+				const rawCurrentVersion = (
+					emailType as unknown as { current_version?: string | null }
+				 ).current_version;
+				const currentVersion: string | null =
+					typeof rawCurrentVersion === 'string' &&
+					rawCurrentVersion.length > 0
+						? rawCurrentVersion
+						: null;
+
 				return {
 					...emailType,
 					link: post?.link || '',
 					status: status as EmailStatus,
 					templateStatus,
 					templateVersion,
+					currentVersion,
 				};
 			} ),
 		[ emailTypesData, emailPosts, postIdsMap ]
@@ -212,10 +226,9 @@ export const useTransactionalEmails = (
 		const selected = Array.isArray( updatesFilter.value )
 			? ( updatesFilter.value as string[] )
 			: [ updatesFilter.value as string ];
-		const emailValue =
-			email.templateStatus === 'core_updated_customized'
-				? 'available'
-				: 'none';
+		const emailValue = shouldShowReviewUpdate( email )
+			? 'available'
+			: 'none';
 		return selected.includes( emailValue );
 	} );
 

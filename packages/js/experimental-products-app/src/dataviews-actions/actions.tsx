@@ -118,14 +118,15 @@ function getNoticeFromSettledResults( {
 	};
 }
 
-export const editAction = ( {
+export const quickEditAction = ( {
 	navigate,
 	path = '/',
 	query = {},
 }: EditActionOptions ): Action< ProductEntityRecord > => ( {
-	id: 'edit-product',
-	label: __( 'Edit', 'woocommerce' ),
+	id: 'quick-edit-product',
+	label: __( 'Quick edit', 'woocommerce' ),
 	isPrimary: true,
+	supportsBulk: true,
 	icon: edit,
 	isEligible( product ) {
 		return product.status !== 'trash';
@@ -135,6 +136,31 @@ export const editAction = ( {
 
 		if ( product ) {
 			navigate( getQuickEditPath( path, query, product.id ) );
+		}
+
+		if ( onActionPerformed ) {
+			onActionPerformed( items );
+		}
+	},
+} );
+
+export const editAction = (): Action< ProductEntityRecord > => ( {
+	id: 'edit-product',
+	label: __( 'Edit', 'woocommerce' ),
+	isPrimary: true,
+	isEligible( product ) {
+		return product.status !== 'trash';
+	},
+	callback( items, { onActionPerformed } ) {
+		const product = items[ 0 ];
+
+		if ( product ) {
+			window.location.href = getAdminLink(
+				addQueryArgs( 'post.php', {
+					post: product.id,
+					action: 'edit',
+				} )
+			);
 		}
 
 		if ( onActionPerformed ) {
@@ -349,11 +375,12 @@ export const useProductActions = () => {
 
 	return useMemo(
 		() => [
-			editAction( {
+			quickEditAction( {
 				navigate,
 				path,
 				query,
 			} ),
+			editAction(),
 			viewAction(),
 			duplicateProductAction(),
 			moveToTrashAction(),

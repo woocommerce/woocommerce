@@ -1,0 +1,303 @@
+---
+sidebar_position: 27
+sidebar_label: 'System status'
+---
+
+import Tabs from '@theme/Tabs';
+import TabItem from '@theme/TabItem';
+
+# System status
+The system status API allows you to view all system status items.
+
+## System status properties
+| Attribute        | Type   | Description                                                                                                                                |
+| ---------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| `environment`    | object | Environment. See [System status - Environment properties](#system-status---environment-properties) `READ-ONLY` |
+| `database`       | object | Database. See [System status - Database properties](#system-status---database-properties) `READ-ONLY`          |
+| `active_plugins` | array  | Active plugins. `READ-ONLY`                                                                                  |
+| `theme`          | object | Theme. See [System status - Theme properties](#system-status---theme-properties) `READ-ONLY`                   |
+| `settings`       | object | Settings. See [System status - Settings properties](#system-status---settings-properties) `READ-ONLY`          |
+| `security`       | object | Security. See [System status - Security properties](#system-status---security-properties) `READ-ONLY`          |
+| `pages`          | array  | WooCommerce pages. `READ-ONLY`                                                                               |
+
+### System status - Environment properties
+| Attribute                   | Type    | Description                                                                |
+| --------------------------- | ------- | -------------------------------------------------------------------------- |
+| `home_url`                  | string  | Home URL. `READ-ONLY`                        |
+| `site_url`                  | string  | Site URL. `READ-ONLY`                        |
+| `wc_version`                | string  | WooCommerce version. `READ-ONLY`             |
+| `log_directory`             | string  | Log directory. `READ-ONLY`                   |
+| `log_directory_writable`    | boolean | Is log directory writable? `READ-ONLY`       |
+| `wp_version`                | string  | WordPress version. `READ-ONLY`               |
+| `wp_multisite`              | boolean | Is WordPress multisite? `READ-ONLY`          |
+| `wp_memory_limit`           | integer | WordPress memory limit. `READ-ONLY`          |
+| `wp_debug_mode`             | boolean | Is WordPress debug mode active? `READ-ONLY`  |
+| `wp_cron`                   | boolean | Are WordPress cron jobs enabled? `READ-ONLY` |
+| `wp_environment_type`       | string  | WordPress environment type. `READ-ONLY`      |
+| `language`                  | string  | WordPress language. `READ-ONLY`              |
+| `server_info`               | string  | Server info. `READ-ONLY`                     |
+| `php_version`               | string  | PHP version. `READ-ONLY`                     |
+| `php_post_max_size`         | integer | PHP post max size. `READ-ONLY`               |
+| `php_max_execution_time`    | integer | PHP max execution time. `READ-ONLY`          |
+| `php_max_input_vars`        | integer | PHP max input vars. `READ-ONLY`              |
+| `curl_version`              | string  | cURL version. `READ-ONLY`                    |
+| `suhosin_installed`         | boolean | Is SUHOSIN installed? `READ-ONLY`            |
+| `max_upload_size`           | integer | Max upload size. `READ-ONLY`                 |
+| `mysql_version`             | string  | MySQL version. `READ-ONLY`                   |
+| `default_timezone`          | string  | Default timezone. `READ-ONLY`                |
+| `fsockopen_or_curl_enabled` | boolean | Is fsockopen/cURL enabled? `READ-ONLY`       |
+| `soapclient_enabled`        | boolean | Is SoapClient class enabled? `READ-ONLY`     |
+| `domdocument_enabled`       | boolean | Is DomDocument class enabled? `READ-ONLY`    |
+| `gzip_enabled`              | boolean | Is GZip enabled? `READ-ONLY`                 |
+| `mbstring_enabled`          | boolean | Is mbstring enabled? `READ-ONLY`             |
+| `remote_post_successful`    | boolean | Remote POST successful? `READ-ONLY`          |
+| `remote_post_response`      | string  | Remote POST response. `READ-ONLY`            |
+| `remote_get_successful`     | boolean | Remote GET successful? `READ-ONLY`           |
+| `remote_get_response`       | string  | Remote GET response. `READ-ONLY`             |
+
+### System status - Database properties
+| Attribute                | Type   | Description                                                       |
+| ------------------------ | ------ | ----------------------------------------------------------------- |
+| `wc_database_version`    | string | WC database version. `READ-ONLY`    |
+| `database_prefix`        | string | Database prefix. `READ-ONLY`        |
+| `maxmind_geoip_database` | string | MaxMind GeoIP database. `READ-ONLY` |
+| `database_tables`        | array  | Database tables. `READ-ONLY`        |
+
+### System status - Theme properties
+| Attribute                 | Type    | Description                                                                           |
+| ------------------------- | ------- | ------------------------------------------------------------------------------------- |
+| `name`                    | string  | Theme name. `READ-ONLY`                                 |
+| `version`                 | string  | Theme version. `READ-ONLY`                              |
+| `version_latest`          | string  | Latest version of theme. `READ-ONLY`                    |
+| `author_url`              | string  | Theme author URL. `READ-ONLY`                           |
+| `is_child_theme`          | boolean | Is this theme a child theme? `READ-ONLY`                |
+| `has_woocommerce_support` | boolean | Does the theme declare WooCommerce support? `READ-ONLY` |
+| `has_woocommerce_file`    | boolean | Does the theme have a woocommerce.php file? `READ-ONLY` |
+| `has_outdated_templates`  | boolean | Does this theme have outdated templates? `READ-ONLY`    |
+| `overrides`               | array   | Template overrides. `READ-ONLY`                         |
+| `parent_name`             | string  | Parent theme name. `READ-ONLY`                          |
+| `parent_version`          | string  | Parent theme version. `READ-ONLY`                       |
+| `parent_author_url`       | string  | Parent theme author URL. `READ-ONLY`                    |
+
+### System status - Settings properties
+| Attribute             | Type    | Description                                                                          |
+| --------------------- | ------- | ------------------------------------------------------------------------------------ |
+| `api_enabled`         | boolean | REST API enabled? `READ-ONLY`                          |
+| `force_ssl`           | boolean | SSL forced? `READ-ONLY`                                |
+| `currency`            | string  | Currency. `READ-ONLY`                                  |
+| `currency_symbol`     | string  | Currency symbol. `READ-ONLY`                           |
+| `currency_position`   | string  | Currency position. `READ-ONLY`                         |
+| `thousand_separator`  | string  | Thousand separator. `READ-ONLY`                        |
+| `decimal_separator`   | string  | Decimal separator. `READ-ONLY`                         |
+| `number_of_decimals`  | integer | Number of decimals. `READ-ONLY`                        |
+| `geolocation_enabled` | boolean | Geolocation enabled? `READ-ONLY`                       |
+| `taxonomies`          | array   | Taxonomy terms for product/order statuses. `READ-ONLY` |
+
+### System status - Security properties
+| Attribute           | Type    | Description                                                                       |
+| ------------------- | ------- | --------------------------------------------------------------------------------- |
+| `secure_connection` | boolean | Is the connection to your store secure? `READ-ONLY` |
+| `hide_errors`       | boolean | Hide errors from visitors? `READ-ONLY`              |
+
+## List all system status items
+This API helps you to view all the system status items.
+
+```http
+GET /wp-json/wc/v2/system_status
+```
+
+<Tabs>
+  <TabItem value="curl" label="cURL">
+
+```shell
+curl https://example.com/wp-json/wc/v2/system_status \
+	-u consumer_key:consumer_secret
+```
+
+  </TabItem>
+  <TabItem value="js" label="JavaScript">
+
+```javascript
+WooCommerce.get("system_status")
+  .then((response) => {
+    console.log(response.data);
+  })
+  .catch((error) => {
+    console.log(error.response.data);
+  });
+```
+
+  </TabItem>
+  <TabItem value="php" label="PHP">
+
+```php
+<?php print_r($woocommerce->get('system_status')); ?>
+```
+
+  </TabItem>
+  <TabItem value="python" label="Python">
+
+```python
+print(wcapi.get("system_status").json())
+```
+
+  </TabItem>
+  <TabItem value="ruby" label="Ruby">
+
+```ruby
+woocommerce.get("system_status").parsed_response
+```
+
+  </TabItem>
+  <TabItem value="response" label="JSON Response">
+
+```json
+{
+  "environment": {
+    "home_url": "http://example.com",
+    "site_url": "http://example.com",
+    "version": "3.0.0",
+    "log_directory": "/var/www/woocommerce/wp-content/uploads/wc-logs/",
+    "log_directory_writable": true,
+    "wp_version": "4.7.3",
+    "wp_multisite": false,
+    "wp_memory_limit": 134217728,
+    "wp_debug_mode": true,
+    "wp_cron": true,
+    "wp_environment_type": "production",
+    "language": "en_US",
+    "server_info": "Apache/2.4.18 (Ubuntu)",
+    "php_version": "7.1.3-2+deb.sury.org~yakkety+1",
+    "php_post_max_size": 8388608,
+    "php_max_execution_time": 30,
+    "php_max_input_vars": 1000,
+    "curl_version": "7.50.1, OpenSSL/1.0.2g",
+    "suhosin_installed": false,
+    "max_upload_size": 2097152,
+    "mysql_version": "5.7.17",
+    "default_timezone": "UTC",
+    "fsockopen_or_curl_enabled": true,
+    "soapclient_enabled": true,
+    "domdocument_enabled": true,
+    "gzip_enabled": true,
+    "mbstring_enabled": true,
+    "remote_post_successful": true,
+    "remote_post_response": "200",
+    "remote_get_successful": true,
+    "remote_get_response": "200"
+  },
+  "database": {
+    "wc_database_version": "3.0.0",
+    "database_prefix": "wp_",
+    "maxmind_geoip_database": "/var/www/woocommerce/wp-content/uploads/GeoIP.dat",
+    "database_tables": {
+      "woocommerce_sessions": true,
+      "woocommerce_api_keys": true,
+      "woocommerce_attribute_taxonomies": true,
+      "woocommerce_downloadable_product_permissions": true,
+      "woocommerce_order_items": true,
+      "woocommerce_order_itemmeta": true,
+      "woocommerce_tax_rates": true,
+      "woocommerce_tax_rate_locations": true,
+      "woocommerce_shipping_zones": true,
+      "woocommerce_shipping_zone_locations": true,
+      "woocommerce_shipping_zone_methods": true,
+      "woocommerce_payment_tokens": true,
+      "woocommerce_payment_tokenmeta": true
+    }
+  },
+  "active_plugins": [
+    {
+      "plugin": "woocommerce/woocommerce.php",
+      "name": "WooCommerce",
+      "version": "3.0.0-rc.1",
+      "version_latest": "2.6.14",
+      "url": "https://woocommerce.com/",
+      "author_name": "Automattic",
+      "author_url": "https://woocommerce.com",
+      "network_activated": false
+    }
+  ],
+  "theme": {
+    "name": "Twenty Sixteen",
+    "version": "1.3",
+    "version_latest": "1.3",
+    "author_url": "https://wordpress.org/",
+    "is_child_theme": false,
+    "has_woocommerce_support": true,
+    "has_woocommerce_file": false,
+    "has_outdated_templates": false,
+    "overrides": [],
+    "parent_name": "",
+    "parent_version": "",
+    "parent_version_latest": "",
+    "parent_author_url": ""
+  },
+  "settings": {
+    "api_enabled": true,
+    "force_ssl": false,
+    "currency": "USD",
+    "currency_symbol": "&#36;",
+    "currency_position": "left",
+    "thousand_separator": ",",
+    "decimal_separator": ".",
+    "number_of_decimals": 2,
+    "geolocation_enabled": false,
+    "taxonomies": {
+      "external": "external",
+      "grouped": "grouped",
+      "simple": "simple",
+      "variable": "variable"
+    }
+  },
+  "security": {
+    "secure_connection": true,
+    "hide_errors": true
+  },
+  "pages": [
+    {
+      "page_name": "Shop base",
+      "page_id": "4",
+      "page_set": true,
+      "page_exists": true,
+      "page_visible": true,
+      "shortcode": "",
+      "shortcode_required": false,
+      "shortcode_present": false
+    },
+    {
+      "page_name": "Cart",
+      "page_id": "5",
+      "page_set": true,
+      "page_exists": true,
+      "page_visible": true,
+      "shortcode": "[woocommerce_cart]",
+      "shortcode_required": true,
+      "shortcode_present": true
+    },
+    {
+      "page_name": "Checkout",
+      "page_id": "6",
+      "page_set": true,
+      "page_exists": true,
+      "page_visible": true,
+      "shortcode": "[woocommerce_checkout]",
+      "shortcode_required": true,
+      "shortcode_present": true
+    },
+    {
+      "page_name": "My account",
+      "page_id": "7",
+      "page_set": true,
+      "page_exists": true,
+      "page_visible": true,
+      "shortcode": "[woocommerce_my_account]",
+      "shortcode_required": true,
+      "shortcode_present": true
+    }
+  ]
+}
+```
+
+  </TabItem>
+</Tabs>
