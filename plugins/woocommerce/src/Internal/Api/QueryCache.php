@@ -264,7 +264,8 @@ class QueryCache {
 			return false;
 		}
 
-		$status = opcache_get_status( false );
+		// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged -- opcache.restrict_api raises E_WARNING when the calling path is disallowed; the false return is handled below.
+		$status = @opcache_get_status( false );
 		if ( ! is_array( $status ) || empty( $status['opcache_enabled'] ) ) {
 			return false;
 		}
