@@ -81,7 +81,7 @@ class QueryCache {
 			&& is_array( $apq )
 			&& 1 === ( $apq['version'] ?? null )
 			&& is_string( $apq_hash )
-			&& '' !== $apq_hash ) {
+			&& 1 === preg_match( '/^[a-f0-9]{64}$/', $apq_hash ) ) {
 			return $this->resolve_apq( $query, $apq_hash );
 		}
 

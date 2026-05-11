@@ -182,6 +182,26 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox apq is ignored when the hash is not 64-char lowercase hex — guards the OPcache include path against traversal.
+	 */
+	public function test_apq_rejects_malformed_hash(): void {
+		$extensions = array(
+			'persistedQuery' => array(
+				'version'    => 1,
+				'sha256Hash' => 'not-a-sha256-hash',
+			),
+		);
+
+		$result = $this->sut->resolve( '{ widget { id } }', $extensions );
+
+		$this->assertInstanceOf(
+			DocumentNode::class,
+			$result,
+			'A malformed APQ hash must bypass APQ dispatch so it never reaches the OPcache include path.'
+		);
+	}
+
+	/**
 	 * @testdox get_cache_ttl exposes the configured TTL.
 	 */
 	public function test_get_cache_ttl_is_a_day(): void {
