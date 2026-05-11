@@ -8,7 +8,7 @@ This document defines the **context protocol pattern** used by WooCommerce block
 
 | Context Key | Purpose | Inner Blocks |
 | --- | --- | --- |
-| `woocommerceSelectableItems` | Select/deselect items (filters, variations) | checkbox-list, chips |
+| `woocommerceSelectableItems` | Select/deselect items (filters, variations) | checkbox-list, chips, dropdown |
 | `woocommerceRemovableItems` | Remove individual items (active filters) | removable-chips |
 | `woocommerceRangeInput` | Numeric range input (price, slider) | price-slider |
 
@@ -592,7 +592,7 @@ Key points:
 - **Nested `data-wp-interactive`** — outer wrapper under the inner namespace, items region switches to the parent namespace so wp-each + parent selection bindings resolve there; presentational bindings (`itemHidden`, `ratingStyle`) use cross-namespace `::` back to the inner store
 - **`filterType` discriminator** — inner block can branch rendering (e.g. stars for `'rating'`) without leaking presentation into the parent store
 
-Reference implementation: `ProductFilterCheckboxList.php`, `ProductFilterChips.php`, `checkbox-list/frontend.ts`, `chips/frontend.ts`
+Reference implementation: `ProductFilterCheckboxList.php`, `ProductFilterChips.php`, `ProductFilterDropdown.php`, `checkbox-list/frontend.ts`, `chips/frontend.ts`, `dropdown/frontend.ts`
 
 ### Implementing as Parent Block (Provider)
 
