@@ -467,15 +467,12 @@
 
 		var byParent = buildByParent( tree );
 
-		// Build a canonical-URL → tree-slug map. When two tree nodes canonicalize
-		// to the same URL (e.g. Marketing parent's `url` override and its
-		// Overview child's slug both produce the same URL), prefer the node
-		// that has grandchildren so the cascade shows up on the right row.
+		// Build a canonical-URL → tree-slug map (unchanged from prior version).
 		var urlToSlug = {};
 		Object.keys( tree ).forEach( function ( slug ) {
-			var target = tree[ slug ].url || slug;
-			var key    = canonicalUrl( toAdminUrl( target ) );
-			var existing = urlToSlug[ key ];
+			var target      = tree[ slug ].url || slug;
+			var key         = canonicalUrl( toAdminUrl( target ) );
+			var existing    = urlToSlug[ key ];
 			var thisHasKids = ( ( byParent[ slug ] || [] ).length ) > 0;
 			var prevHasKids = existing && ( ( byParent[ existing ] || [] ).length ) > 0;
 			if ( ! existing || ( thisHasKids && ! prevHasKids ) ) {
@@ -483,8 +480,14 @@
 			}
 		} );
 
-		var $items = $( '#toplevel_page_woocommerce > .wp-submenu > li' ).not( '.wp-submenu-head' );
-		$items.each( function () {
+		// Find every rail-root flyout: any #adminmenu top-level <li> whose id
+		// starts with `toplevel_page_` and has a `.wp-submenu`. This covers both
+		// the legacy single-Woo-rail-item case (non-Woo pages) and the new
+		// native-multi-root rail (Woo pages).
+		var $rootSubmenuItems = $( '#adminmenu > li.menu-top[id^="toplevel_page_"] > .wp-submenu > li' )
+			.not( '.wp-submenu-head' );
+
+		$rootSubmenuItems.each( function () {
 			var $li  = $( this );
 			var $a   = $li.find( '> a' ).first();
 			var href = canonicalUrl( $a.attr( 'href' ) || '' );
@@ -500,9 +503,6 @@
 			}
 
 			$li.addClass( 'wc-nav-v2-has-subflyout' );
-			// Include `wp-submenu` so the active admin color scheme's
-			// `#adminmenu .wp-submenu` rules (background, link color, hover)
-			// apply to the cascade.
 			var $nested = $( '<ul class="wp-submenu wc-nav-v2-subflyout"></ul>' );
 			grandkids.forEach( function ( kid ) {
 				if ( kid.hidden ) {
@@ -519,30 +519,22 @@
 			$li.append( $nested );
 		} );
 
-		// WP's common.js binds hoverIntent to every li.wp-has-submenu with a
-		// 200ms close timeout — that's what strips `.opensub` from our
-		// WooCommerce item when the cursor leaves, regardless of how long we
-		// delay our own inner class. Unbind WP's handlers on just our item
-		// and install our own opensub toggler with HOVER_CLOSE_DELAY. Other
-		// menu-top items keep WP's native behaviour; when the user hovers
-		// them, WP's handler clears opensub across `#adminmenu` (including
-		// ours) so switching between rail items stays snappy.
-		$( '#toplevel_page_woocommerce' ).off( 'mouseenter mouseleave mouseover mouseout' );
-		bindDelayedHover(
-			$( '#adminmenu' ),
-			'#toplevel_page_woocommerce',
-			'opensub'
-		);
-
-		// JS-driven hover open/close on the second-level cascade, with the
-		// same HOVER_CLOSE_DELAY forgiveness used by the rail submenus.
-		// The SCSS now keys show/hide on `.wc-nav-v2-subopen` (+ :focus-within
-		// for keyboard).
-		bindDelayedHover(
-			$( '#toplevel_page_woocommerce' ),
-			'.wp-submenu li.wc-nav-v2-has-subflyout',
-			'wc-nav-v2-subopen'
-		);
+		// Apply the existing hover behaviour to every rail-root flyout, not
+		// just woocommerce.
+		$( '#adminmenu > li.menu-top[id^="toplevel_page_"]:has(.wc-nav-v2-has-subflyout)' ).each( function () {
+			var $root = $( this );
+			$root.off( 'mouseenter mouseleave mouseover mouseout' );
+			bindDelayedHover(
+				$( '#adminmenu' ),
+				'#' + $root.attr( 'id' ),
+				'opensub'
+			);
+			bindDelayedHover(
+				$root,
+				'.wp-submenu li.wc-nav-v2-has-subflyout',
+				'wc-nav-v2-subopen'
+			);
+		} );
 	}
 
 	$( function () {
