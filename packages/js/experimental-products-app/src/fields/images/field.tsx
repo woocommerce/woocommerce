@@ -3,8 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useMemo, useCallback } from '@wordpress/element';
-import { BaseControl } from '@wordpress/components';
-import { IconButton } from '@wordpress/ui';
+import { Fieldset, IconButton } from '@wordpress/ui';
 import clsx from 'clsx';
 import type { Field } from '@wordpress/dataviews';
 import { upload, closeSmall, dragHandle } from '@wordpress/icons';
@@ -164,7 +163,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			/>
 		);
 	},
-	Edit: ( { data, onChange } ) => {
+	Edit: ( { data, onChange, field } ) => {
 		const images = useMemo( () => data.images ?? [], [ data.images ] );
 
 		const handleSelect = useCallback(
@@ -276,8 +275,8 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		}, [ images, handleRemoveImage ] );
 
 		return (
-			// eslint-disable-next-line @wordpress/no-base-control-with-label-without-id
-			<BaseControl label={ __( 'Images', 'woocommerce' ) }>
+			<Fieldset.Root>
+				<Fieldset.Legend>{ field.label }</Fieldset.Legend>
 				<DragDropProvider onDragEnd={ handleDragEnd }>
 					<div className="woocommerce-fields-control__featured-image">
 						<div className="woocommerce-fields-controls__featured-image-uploaded-images">
@@ -312,7 +311,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 						</div>
 					</div>
 				</DragDropProvider>
-			</BaseControl>
+			</Fieldset.Root>
 		);
 	},
 };
