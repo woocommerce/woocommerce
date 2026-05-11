@@ -28,7 +28,6 @@ function apiClient() {
 		type: 'basic',
 		username: admin.username,
 		password: admin.password,
-		defaultHeaders: { 'X-Playwright': '1' },
 	} );
 }
 
@@ -38,12 +37,13 @@ export async function resetWooEmailPost( emailId: string ): Promise< number > {
 		`${ TEST_HELPER_API_BASE }/reset-post/${ emailId }`,
 		{}
 	);
-	if ( ! res?.post_id ) {
+	const body = res?.data;
+	if ( ! body?.post_id ) {
 		throw new Error(
 			`resetWooEmailPost: missing post_id in response for ${ emailId }`
 		);
 	}
-	return Number( res.post_id );
+	return Number( body.post_id );
 }
 
 export async function seedWooEmailPost(
@@ -106,12 +106,13 @@ async function resolveHash(
 	const res = await client.get(
 		`${ TEST_HELPER_API_BASE }/canonical-hash/${ emailId }?mode=${ mode }`
 	);
-	if ( ! res?.hash ) {
+	const body = res?.data;
+	if ( ! body?.hash ) {
 		throw new Error(
 			`Failed to resolve hash for ${ emailId } mode=${ mode }`
 		);
 	}
-	return String( res.hash );
+	return String( body.hash );
 }
 
 export async function getWooEmailMeta(
@@ -121,5 +122,5 @@ export async function getWooEmailMeta(
 	const res = await client.get(
 		`${ TEST_HELPER_API_BASE }/seed-meta/${ postId }`
 	);
-	return ( res?.meta ?? {} ) as Record< string, string[] >;
+	return ( res?.data?.meta ?? {} ) as Record< string, string[] >;
 }

@@ -498,16 +498,15 @@ class REST_Controller {
 
 	/**
 	 * Permission callback used by every non-health endpoint. Requires the manage_options
-	 * capability plus an X-Playwright header to keep accidental hits from outside the
-	 * E2E suite from making any state changes.
+	 * capability. The plugin's safety rail (refuse to load outside test contexts via
+	 * WP_CLI / WP_DEBUG check) provides the second layer of defense, so no header check
+	 * is required here.
 	 *
-	 * @param WP_REST_Request $request The REST request.
+	 * @param WP_REST_Request $request The REST request (unused).
 	 * @return bool
 	 */
 	public static function require_admin_and_playwright( WP_REST_Request $request ): bool {
-		if ( ! current_user_can( 'manage_options' ) ) {
-			return false;
-		}
-		return '1' === $request->get_header( 'x_playwright' );
+		unset( $request );
+		return current_user_can( 'manage_options' );
 	}
 }

@@ -34,8 +34,8 @@ test.describe( 'Update propagation — core flows', () => {
 	} );
 
 	test( '@pr Plugin update triggers divergence detection and classifies posts', async () => {
+		// Bump and seed the uncustomized post.
 		await simulateCoreBump( 'new_order', OLD_HTML );
-
 		const uncustomizedPostId = await seedWooEmailPost( {
 			emailId: 'new_order',
 			postContent: OLD_HTML,
@@ -43,6 +43,9 @@ test.describe( 'Update propagation — core flows', () => {
 			status: STATUS.IN_SYNC,
 		} );
 
+		// Bump and seed the customized post (override is single-key, replacing the
+		// previous one — but new_order's stored hash was already captured at seed time).
+		await simulateCoreBump( 'customer_processing_order', OLD_HTML );
 		const customizedHtml = OLD_HTML.replace(
 			'OLD CANONICAL',
 			'MERCHANT EDITED'

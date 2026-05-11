@@ -9,7 +9,10 @@ import { createClient } from '@woocommerce/e2e-utils-playwright';
 import { admin } from '../../../../test-data/data';
 import playwrightConfig from '../../../../playwright.config';
 import { TEST_HELPER_API_BASE } from './classifications';
-import { setTemplateHtmlOverride } from './test-helper-plugin';
+import {
+	setTemplateHtmlOverride,
+	stampBackfillComplete,
+} from './test-helper-plugin';
 
 const baseURL = playwrightConfig.use?.baseURL ?? '';
 
@@ -18,7 +21,6 @@ function apiClient() {
 		type: 'basic',
 		username: admin.username,
 		password: admin.password,
-		defaultHeaders: { 'X-Playwright': '1' },
 	} );
 }
 
@@ -31,9 +33,10 @@ export async function triggerDetectionSweep(): Promise< {
 		`${ TEST_HELPER_API_BASE }/trigger-sweep`,
 		{}
 	);
+	const body = res?.data ?? {};
 	return {
-		touched: Number( res?.touched ?? 0 ),
-		classifications: ( res?.classifications ?? {} ) as Record<
+		touched: Number( body.touched ?? 0 ),
+		classifications: ( body.classifications ?? {} ) as Record<
 			number,
 			string
 		>,
@@ -49,9 +52,10 @@ export async function triggerBackfill(): Promise< {
 		`${ TEST_HELPER_API_BASE }/trigger-backfill`,
 		{}
 	);
+	const body = res?.data ?? {};
 	return {
-		ran: Boolean( res?.ran ),
-		stamped: Number( res?.stamped ?? 0 ),
+		ran: Boolean( body.ran ),
+		stamped: Number( body.stamped ?? 0 ),
 	};
 }
 
@@ -75,5 +79,11 @@ export async function simulateCoreBump(
 	emailId: string,
 	oldHtml: string
 ): Promise< void > {
+	// The detector's run_sweep() short-circuits when the backfill-complete fence is
+	// not 'yes'. Core-flows and round-trip tests assume the system is operating
+	// post-backfill (the fence is normally stamped by woocommerce_newly_installed,
+	// but fresh wp-env installs sometimes don't fire that action). Stamp it here so
+	// downstream triggerDetectionSweep() calls actually run.
+	await stampBackfillComplete();
 	await setTemplateHtmlOverride( emailId, oldHtml );
 }

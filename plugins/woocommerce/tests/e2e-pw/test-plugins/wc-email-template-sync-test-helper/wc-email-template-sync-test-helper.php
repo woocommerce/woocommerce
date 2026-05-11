@@ -13,14 +13,8 @@ declare( strict_types=1 );
 
 defined( 'ABSPATH' ) || exit;
 
-// Safety rail: refuse to load outside test contexts.
-if (
-	! defined( 'WP_CLI' )
-	&& empty( $_SERVER['HTTP_X_PLAYWRIGHT'] )
-	&& ! ( defined( 'WP_DEBUG' ) && WP_DEBUG )
-) {
-	return;
-}
+// This plugin is only mounted by .wp-env.json for E2E test environments — it does not ship
+// in any production WooCommerce build. REST permission callbacks still enforce manage_options.
 
 define( 'WC_EMAIL_TEMPLATE_SYNC_TEST_HELPER_DIR', plugin_dir_path( __FILE__ ) );
 

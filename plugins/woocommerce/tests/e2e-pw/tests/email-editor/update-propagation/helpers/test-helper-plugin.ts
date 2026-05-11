@@ -25,7 +25,6 @@ function apiClient() {
 		type: 'basic',
 		username: admin.username,
 		password: admin.password,
-		defaultHeaders: { 'X-Playwright': '1' },
 	} );
 }
 
@@ -93,4 +92,11 @@ export async function enableFakeThirdPartyEmail(): Promise< void > {
 
 export async function disableFakeThirdPartyEmail(): Promise< void > {
 	await deleteOption( OPTIONS.FAKE_THIRD_PARTY_EMAIL_ENABLED );
+}
+
+export async function stampBackfillComplete(): Promise< void > {
+	await setOption(
+		'woocommerce_email_template_sync_backfill_complete',
+		'yes'
+	);
 }

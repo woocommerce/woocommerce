@@ -39,7 +39,6 @@ async function resetBackfillFence( baseURL: string ): Promise< void > {
 		type: 'basic',
 		username: admin.username,
 		password: admin.password,
-		defaultHeaders: { 'X-Playwright': '1' },
 	} );
 	await client.post( `${ TEST_HELPER_API_BASE }/delete-option`, {
 		option_name: BACKFILL_COMPLETE_OPTION,

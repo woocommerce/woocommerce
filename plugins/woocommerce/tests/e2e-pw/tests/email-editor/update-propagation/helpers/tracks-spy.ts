@@ -45,7 +45,6 @@ function apiClient() {
 		type: 'basic',
 		username: admin.username,
 		password: admin.password,
-		defaultHeaders: { 'X-Playwright': '1' },
 	} );
 }
 
@@ -105,7 +104,7 @@ export async function attachTracksSpy( page: Page ): Promise< TracksSpy > {
 		const serverRes = await client.get(
 			`${ TEST_HELPER_API_BASE }/tracks`
 		);
-		const serverEvents = ( serverRes?.events ?? [] ) as TracksEvent[];
+		const serverEvents = ( serverRes?.data?.events ?? [] ) as TracksEvent[];
 		await client.delete( `${ TEST_HELPER_API_BASE }/tracks`, {} );
 
 		const seen = new Set< string >();

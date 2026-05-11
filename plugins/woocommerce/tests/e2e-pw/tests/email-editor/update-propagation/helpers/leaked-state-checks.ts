@@ -25,7 +25,6 @@ function apiClient() {
 		type: 'basic',
 		username: admin.username,
 		password: admin.password,
-		defaultHeaders: { 'X-Playwright': '1' },
 	} );
 }
 
@@ -38,7 +37,9 @@ function apiClient() {
 export async function assertNoLeakedFixtureState(): Promise< void > {
 	const client = apiClient();
 	const tracksRes = await client.get( `${ TEST_HELPER_API_BASE }/tracks` );
-	const trackCount = ( ( tracksRes?.events ?? [] ) as unknown[] ).length;
+	const trackCount = (
+		( tracksRes?.data?.events ?? [] ) as unknown[]
+	).length;
 
 	await clearAllTemplateHtmlOverrides();
 	await clearOptedInOverride();

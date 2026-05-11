@@ -36,4 +36,4 @@ export const BACKFILL_CASES = {
 	C: 'C',
 } as const;
 
-export const TEST_HELPER_API_BASE = '/wp-json/wc-email-test-helper/v1';
+export const TEST_HELPER_API_BASE = 'wc-email-test-helper/v1';
