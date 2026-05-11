@@ -119,42 +119,41 @@ export const BaseHeader = ( {
 		headerItemSlot,
 	} );
 
-	// On embedded pages, suppress the floating-header <h1> only when wp-admin
-	// actually rendered its own <h1> (post-type screens like Edit Product / Edit
-	// Order). On Woo-custom admin pages (Settings, etc.) wp-admin doesn't render
-	// an h1, so the floating header is the only title and must stay.
+	// Detect wp-admin chrome that wp-admin already renders for the current
+	// screen. Three signals are queried together because they always change
+	// together (on mount + on route change):
+	//   - `.wrap > h1.wp-heading-inline` — wp-admin's own page title. When
+	//     present (post-type screens like Edit Product / Edit Order), suppress
+	//     the floating-header <h1> so we don't double up. When absent (Settings,
+	//     Home, Analytics), the floating header is the only title and must stay.
+	//   - `#screen-options-link-wrap` and `#contextual-help-link-wrap` — the
+	//     standard wp-admin meta-toggle wraps. When present we render proxy
+	//     gear / ? icons in the floating header and hide the originals.
 	//
 	// Lazy initial state reads the DOM synchronously on first render so we
 	// don't get a one-frame duplicate-title flash before useEffect commits.
 	// wp-admin's <h1> + meta-link wraps are server-rendered before React
-	// hydrates, so this is safe. The useEffect below still re-runs on `query`
-	// changes if BaseHeader persists across client-side route transitions.
-	const [ hasWpAdminH1, setHasWpAdminH1 ] = useState( () =>
-		typeof document !== 'undefined'
-			? !! document.querySelector( '.wrap > h1.wp-heading-inline' )
-			: false
-	);
-	const [ hasScreenOptions, setHasScreenOptions ] = useState( () =>
-		typeof document !== 'undefined'
-			? !! document.querySelector( '#screen-options-link-wrap' )
-			: false
-	);
-	const [ hasContextualHelp, setHasContextualHelp ] = useState( () =>
-		typeof document !== 'undefined'
-			? !! document.querySelector( '#contextual-help-link-wrap' )
-			: false
-	);
+	// hydrates, so this is safe. The useEffect below re-runs on `query` changes
+	// if BaseHeader persists across client-side route transitions.
+	const detectWpAdminChrome = () => ( {
+		hasH1: !! document.querySelector( '.wrap > h1.wp-heading-inline' ),
+		hasScreenOptions: !! document.querySelector(
+			'#screen-options-link-wrap'
+		),
+		hasContextualHelp: !! document.querySelector(
+			'#contextual-help-link-wrap'
+		),
+	} );
+	const [ wpAdminChrome, setWpAdminChrome ] =
+		useState( detectWpAdminChrome );
 	useEffect( () => {
-		setHasWpAdminH1(
-			!! document.querySelector( '.wrap > h1.wp-heading-inline' )
-		);
-		setHasScreenOptions(
-			!! document.querySelector( '#screen-options-link-wrap' )
-		);
-		setHasContextualHelp(
-			!! document.querySelector( '#contextual-help-link-wrap' )
-		);
+		setWpAdminChrome( detectWpAdminChrome() );
 	}, [ query ] );
+	const {
+		hasH1: hasWpAdminH1,
+		hasScreenOptions,
+		hasContextualHelp,
+	} = wpAdminChrome;
 
 	// Track which meta-icon dropdown is currently active so we can render the
 	// blue-underline active state (mirroring the activity-panel tab pattern).

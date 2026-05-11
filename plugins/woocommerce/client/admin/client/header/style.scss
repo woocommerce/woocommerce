@@ -22,14 +22,6 @@ $wp-admin-border: #dcdcde; // wp-admin chrome border colour
 	white-space: nowrap;
 }
 
-// Activity-panel tabs are icon-only across the floating header — labels
-// ("Activity", "Finish setup", etc.) are still in the DOM for screen readers
-// but visually hidden so the right-side chrome reads as infrastructure
-// rather than content.
-.woocommerce-layout__activity-panel-tab-title {
-	@include visually-hidden;
-}
-
 // Hide ONLY the two standard wp-admin meta-toggle wraps (Screen Options +
 // Help) that we proxy via the floating header's gear / ? icons. The parent
 // #screen-meta-links container is left alone so any third-party sibling
