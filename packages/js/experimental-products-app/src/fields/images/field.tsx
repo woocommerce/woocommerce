@@ -7,6 +7,7 @@ import { Fieldset, IconButton } from '@wordpress/ui';
 import clsx from 'clsx';
 import type { Field } from '@wordpress/dataviews';
 import { upload, closeSmall, dragHandle } from '@wordpress/icons';
+import { MediaUpload } from '@wordpress/media-utils';
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
 import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 
@@ -24,63 +25,21 @@ type Attachment = {
 	date_gmt?: string;
 	modified?: string;
 	modified_gmt?: string;
+	sizes?: Record< string, { source_url?: string; url?: string } >;
 	media_details?: {
-		sizes?: Record< string, { source_url: string } >;
+		sizes?: Record< string, { source_url?: string; url?: string } >;
 	};
 };
-
-type AttachmentModel = {
-	fetch?: () => unknown;
-	toJSON: () => Attachment;
-};
-
-type AttachmentSelection = {
-	add?: ( attachment: AttachmentModel ) => void;
-	first?: () => AttachmentModel | undefined;
-	map?: (
-		callback: ( attachment: AttachmentModel ) => Attachment
-	) => Attachment[];
-	toJSON?: () => Attachment | Attachment[];
-};
-
-type MediaFrame = {
-	on: ( event: 'open' | 'select', callback: () => void ) => void;
-	open: () => void;
-	state: () => {
-		get: ( key: string ) => AttachmentSelection | undefined;
-	};
-};
-
-type MediaLibraryController = new (
-	options: Record< string, unknown >
-) => Record< string, unknown >;
-
-type WPMedia = {
-	( options: Record< string, unknown > ): MediaFrame;
-	attachment?: ( id: number ) => AttachmentModel;
-	controller?: {
-		Library?: MediaLibraryController;
-	};
-	query?: ( options?: Record< string, unknown > ) => unknown;
-};
-
-declare global {
-	interface Window {
-		wp?: {
-			media?: WPMedia;
-		};
-	}
-}
 
 const toProductImage = (
 	att: Attachment
 ): ProductEntityRecord[ 'images' ][ number ] => {
-	const sizes = att.media_details?.sizes as
-		| Record< string, { source_url: string } >
-		| undefined;
+	const sizes = att.media_details?.sizes || att.sizes;
 	const thumbnailUrl =
 		sizes?.woocommerce_thumbnail?.source_url ||
+		sizes?.woocommerce_thumbnail?.url ||
 		sizes?.thumbnail?.source_url ||
+		sizes?.thumbnail?.url ||
 		'';
 
 	return {
@@ -94,53 +53,6 @@ const toProductImage = (
 		date_modified: att.modified || '',
 		date_modified_gmt: att.modified_gmt || '',
 	};
-};
-
-const getSelectedAttachments = (
-	selection: AttachmentSelection | undefined
-): Attachment[] => {
-	if ( ! selection ) {
-		return [];
-	}
-
-	if ( typeof selection.map === 'function' ) {
-		return selection.map( ( attachment ) => attachment.toJSON() );
-	}
-
-	const json = selection.toJSON?.();
-
-	if ( Array.isArray( json ) ) {
-		return json;
-	}
-
-	if ( json ) {
-		return [ json ];
-	}
-
-	const firstAttachment = selection.first?.();
-
-	return firstAttachment ? [ firstAttachment.toJSON() ] : [];
-};
-
-const setSelectedMediaAttachments = (
-	media: WPMedia,
-	selection: AttachmentSelection | undefined,
-	images: ProductEntityRecord[ 'images' ]
-) => {
-	if ( ! media.attachment || ! selection?.add ) {
-		return;
-	}
-
-	images.forEach( ( image ) => {
-		const attachment = media.attachment?.( image.id );
-
-		if ( ! attachment ) {
-			return;
-		}
-
-		attachment.fetch?.();
-		selection.add?.( attachment );
-	} );
 };
 
 interface SortableImageProps {
@@ -267,61 +179,6 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			[ commitImages ]
 		);
 
-		const handleOpenMediaLibrary = useCallback( () => {
-			const media = window.wp?.media;
-
-			if ( ! media || ! media.controller?.Library || ! media.query ) {
-				return;
-			}
-
-			const title = __( 'Add images', 'woocommerce' );
-			const buttonText = __( 'Use images', 'woocommerce' );
-			const multiple = 'add';
-			const frame = media( {
-				title,
-				button: {
-					text: buttonText,
-				},
-				multiple,
-				library: {
-					type: 'image',
-				},
-				states: [
-					new media.controller.Library( {
-						title,
-						library: media.query( {
-							type: 'image',
-						} ),
-						multiple,
-						filterable: 'all',
-						syncSelection: false,
-					} ),
-				],
-			} );
-
-			frame.on( 'open', () => {
-				setSelectedMediaAttachments(
-					media,
-					frame.state().get( 'selection' ),
-					images
-				);
-			} );
-
-			frame.on( 'select', () => {
-				const selectedAttachments = getSelectedAttachments(
-					frame.state().get( 'selection' )
-				);
-
-				if ( selectedAttachments.length === 0 ) {
-					return;
-				}
-
-				handleSelect( selectedAttachments );
-			} );
-
-			frame.open();
-		}, [ handleSelect, images ] );
-
 		const handleRemoveImage = useCallback(
 			( imageToRemove: ProductEntityRecord[ 'images' ][ number ] ) => {
 				commitImages(
@@ -403,11 +260,23 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 							} ) }
 						</div>
 						<div className="woocommerce-fields-control__featured-image-actions">
-							<IconButton
-								variant="minimal"
-								icon={ upload }
-								label={ __( 'Add images', 'woocommerce' ) }
-								onClick={ handleOpenMediaLibrary }
+							<MediaUpload
+								allowedTypes={ [ 'image' ] }
+								multiple="add"
+								onSelect={ handleSelect }
+								title={ __( 'Add images', 'woocommerce' ) }
+								value={ images.map( ( image ) => image.id ) }
+								render={ ( { open }: { open: () => void } ) => (
+									<IconButton
+										variant="minimal"
+										icon={ upload }
+										label={ __(
+											'Add images',
+											'woocommerce'
+										) }
+										onClick={ open }
+									/>
+								) }
 							/>
 						</div>
 					</div>

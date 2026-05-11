@@ -1752,6 +1752,9 @@ importers:
       '@wordpress/icons':
         specifier: 10.6.0
         version: 10.6.0(react@18.3.1)
+      '@wordpress/media-utils':
+        specifier: catalog:wp-min
+        version: 5.19.2
       '@wordpress/notices':
         specifier: 5.44.0
         version: 5.44.0(@emotion/is-prop-valid@1.4.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)

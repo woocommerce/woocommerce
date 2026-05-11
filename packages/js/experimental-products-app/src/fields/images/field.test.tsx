@@ -5,6 +5,24 @@ import { act, fireEvent, render, screen } from '@testing-library/react';
 import type { DataFormControlProps } from '@wordpress/dataviews';
 import React from 'react';
 
+type MockMediaUploadProps = {
+	allowedTypes?: string[];
+	multiple?: boolean | string;
+	onSelect: ( attachments: unknown ) => void;
+	render: ( args: { open: () => void } ) => React.ReactNode;
+	title?: string;
+	value?: number[];
+};
+
+const mockOpenMediaUploadModal = jest.fn();
+const mockMediaUpload = jest.fn( ( props: MockMediaUploadProps ) =>
+	props.render( { open: mockOpenMediaUploadModal } )
+);
+
+jest.mock( '@wordpress/media-utils', () => ( {
+	MediaUpload: ( props: MockMediaUploadProps ) => mockMediaUpload( props ),
+} ) );
+
 /**
  * Internal dependencies
  */
@@ -38,7 +56,6 @@ describe( 'images field', () => {
 		} as ProductEntityRecord );
 
 	afterEach( () => {
-		delete ( window as unknown as { wp?: unknown } ).wp;
 		jest.clearAllMocks();
 	} );
 
@@ -47,82 +64,23 @@ describe( 'images field', () => {
 			throw new Error( 'images edit not implemented' );
 		}
 
-		let openCallback: () => void = () => undefined;
-		let selectCallback: () => void = () => undefined;
 		const attachments = [
 			{
 				id: 34,
 				url: 'new-image.jpg',
 				alt: 'New image',
 				title: 'New image title',
-				media_details: {
-					sizes: {
-						thumbnail: {
-							source_url: 'new-image-thumbnail.jpg',
-						},
+				sizes: {
+					thumbnail: {
+						url: 'new-image-thumbnail.jpg',
 					},
 				},
 			},
 		];
-		const selectionAdd = jest.fn();
-		const frame = {
-			on: jest.fn( ( event: 'open' | 'select', callback: () => void ) => {
-				if ( event === 'open' ) {
-					openCallback = callback;
-				}
-
-				if ( event === 'select' ) {
-					selectCallback = callback;
-				}
-			} ),
-			open: jest.fn( () => {
-				openCallback();
-			} ),
-			state: () => ( {
-				get: () => ( {
-					add: selectionAdd,
-					map: (
-						callback: ( attachment: {
-							toJSON: () => ( typeof attachments )[ number ];
-						} ) => ( typeof attachments )[ number ]
-					) =>
-						attachments.map( ( attachment ) =>
-							callback( {
-								toJSON: () => attachment,
-							} )
-						),
-				} ),
-			} ),
-		};
 		const onChange = jest.fn();
-		const query = jest.fn( ( options ) => ( {
-			queryOptions: options,
-		} ) );
-		const Library = jest.fn( function Library(
-			this: { options: Record< string, unknown > },
-			options: Record< string, unknown >
-		) {
-			this.options = options;
-		} );
-		const selectedAttachment = {
-			fetch: jest.fn(),
-			toJSON: jest.fn(),
-		};
-		const attachment = jest.fn( () => selectedAttachment );
-		const media = jest.fn( () => frame );
 		const Edit = fieldExtensions.Edit as React.ComponentType<
 			DataFormControlProps< ProductEntityRecord >
 		>;
-
-		( window as unknown as { wp: { media: typeof media } } ).wp = {
-			media: Object.assign( media, {
-				controller: {
-					Library,
-				},
-				attachment,
-				query,
-			} ),
-		};
 
 		render(
 			<Edit
@@ -146,37 +104,26 @@ describe( 'images field', () => {
 			/>
 		);
 
+		expect( mockMediaUpload ).toHaveBeenCalledWith(
+			expect.objectContaining( {
+				allowedTypes: [ 'image' ],
+				multiple: 'add',
+				title: 'Add images',
+				value: [ 15 ],
+			} )
+		);
+
 		fireEvent.click(
 			screen.getByRole( 'button', {
 				name: 'Add images',
 			} )
 		);
+		expect( mockOpenMediaUploadModal ).toHaveBeenCalled();
+
 		act( () => {
-			selectCallback();
+			mockMediaUpload.mock.calls[ 0 ][ 0 ].onSelect( attachments );
 		} );
 
-		expect( query ).toHaveBeenCalledWith( {
-			type: 'image',
-		} );
-		expect( Library ).toHaveBeenCalledWith( {
-			title: 'Add images',
-			library: {
-				queryOptions: {
-					type: 'image',
-				},
-			},
-			multiple: 'add',
-			filterable: 'all',
-			syncSelection: false,
-		} );
-		expect( media ).toHaveBeenCalledWith(
-			expect.objectContaining( {
-				multiple: 'add',
-			} )
-		);
-		expect( attachment ).toHaveBeenCalledWith( 15 );
-		expect( selectedAttachment.fetch ).toHaveBeenCalled();
-		expect( selectionAdd ).toHaveBeenCalledWith( selectedAttachment );
 		expect(
 			screen.getByRole( 'img', {
 				name: 'New image',

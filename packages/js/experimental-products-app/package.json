@@ -50,6 +50,7 @@
 		"@wordpress/html-entities": "catalog:wp-min",
 		"@wordpress/i18n": "catalog:wp-min",
 		"@wordpress/icons": "10.6.0",
+		"@wordpress/media-utils": "catalog:wp-min",
 		"@wordpress/private-apis": "1.44.0",
 		"@wordpress/router": "1.11.0",
 		"@wordpress/ui": "0.12.0",
