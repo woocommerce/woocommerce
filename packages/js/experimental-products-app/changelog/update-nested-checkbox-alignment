@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Indent nested-row checkboxes by 16px so they align with the parent row's first content (image) in the experimental products list.

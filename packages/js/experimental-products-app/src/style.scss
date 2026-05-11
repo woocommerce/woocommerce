@@ -40,6 +40,20 @@
 	height: 100%;
 }
 
+/*
+ * Nested rows (product variations) sit one column to the left of where their
+ * parent's primary content starts. Add 16px of left padding to the checkbox
+ * cell so the nested checkbox lines up with the parent's first content (image).
+ */
+.woocommerce-product-list
+	.dataviews-view-table
+	tbody
+	td.dataviews-view-table__checkbox-column {
+	padding-left: calc(
+		12px + min(var(--wp-dataviews-table-hierarchy-level, 0), 1) * 16px
+	);
+}
+
 .woocommerce-product-edit {
 	display: flex;
 	flex-direction: column;
