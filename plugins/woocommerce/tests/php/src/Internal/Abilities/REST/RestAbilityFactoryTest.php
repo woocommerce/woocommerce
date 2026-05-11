@@ -1108,6 +1108,71 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should not null-union scalars nested deep inside a oneOf branch.
+	 */
+	public function test_output_schema_propagates_no_null_union_into_nested_oneof_descendants(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'shape' => array(
+						'oneOf' => array(
+							array(
+								'type'       => 'object',
+								'properties' => array(
+									'value' => array( 'type' => 'string' ),
+								),
+							),
+							array(
+								'type'       => 'object',
+								'properties' => array(
+									'value' => array( 'type' => 'integer' ),
+								),
+							),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$branches = $schema['properties']['shape']['oneOf'];
+		$this->assertSame( 'string', $branches[0]['properties']['value']['type'], 'Nested property inside oneOf branch must not be unioned with null; otherwise {"value": null} matches both branches and breaks oneOf semantics' );
+		$this->assertSame( 'integer', $branches[1]['properties']['value']['type'] );
+	}
+
+	/**
+	 * @testdox Should normalize date-time pseudo-type inside tuple-form items.
+	 */
+	public function test_sanitize_schema_normalizes_tuple_form_items(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'pair' => array(
+						'type'  => 'array',
+						'items' => array(
+							array( 'type' => 'date-time' ),
+							array( 'type' => 'integer' ),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$entries = $schema['properties']['pair']['items'];
+		$this->assertContains(
+			$entries[0]['type'],
+			array( 'string', array( 'string', 'null' ) ),
+			'date-time pseudo-type in a tuple entry must be normalized to string by sanitize_schema before relax runs'
+		);
+		$this->assertArrayNotHasKey( 'format', $entries[0], 'format: date-time emitted by sanitize_schema must then be stripped by relax' );
+	}
+
+	/**
 	 * @testdox Should relax each entry of a tuple-form items array.
 	 */
 	public function test_output_schema_relaxes_tuple_form_items(): void {

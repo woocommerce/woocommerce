@@ -292,7 +292,16 @@ class RestAbilityFactory {
 		}
 
 		if ( isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
-			$schema['items'] = self::sanitize_schema( $schema['items'] );
+			if ( isset( $schema['items'][0] ) ) {
+				// Tuple form: sanitize each positional entry.
+				foreach ( $schema['items'] as $index => $entry ) {
+					if ( is_array( $entry ) ) {
+						$schema['items'][ $index ] = self::sanitize_schema( $entry );
+					}
+				}
+			} else {
+				$schema['items'] = self::sanitize_schema( $schema['items'] );
+			}
 		}
 
 		return $schema;
@@ -438,7 +447,7 @@ class RestAbilityFactory {
 		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
 			foreach ( $schema['properties'] as $key => $property ) {
 				if ( is_array( $property ) ) {
-					$schema['properties'][ $key ] = self::relax_output_schema_for_wc_quirks( $property );
+					$schema['properties'][ $key ] = self::relax_output_schema_for_wc_quirks( $property, $apply_null_union );
 				}
 			}
 		}
@@ -448,22 +457,23 @@ class RestAbilityFactory {
 				// Tuple form: each numerically-indexed entry validates the array element at that position.
 				foreach ( $schema['items'] as $index => $entry ) {
 					if ( is_array( $entry ) ) {
-						$schema['items'][ $index ] = self::relax_output_schema_for_wc_quirks( $entry );
+						$schema['items'][ $index ] = self::relax_output_schema_for_wc_quirks( $entry, $apply_null_union );
 					}
 				}
 			} else {
-				$schema['items'] = self::relax_output_schema_for_wc_quirks( $schema['items'] );
+				$schema['items'] = self::relax_output_schema_for_wc_quirks( $schema['items'], $apply_null_union );
 			}
 		}
 
 		if ( isset( $schema['additionalProperties'] ) && is_array( $schema['additionalProperties'] ) ) {
-			$schema['additionalProperties'] = self::relax_output_schema_for_wc_quirks( $schema['additionalProperties'] );
+			$schema['additionalProperties'] = self::relax_output_schema_for_wc_quirks( $schema['additionalProperties'], $apply_null_union );
 		}
 
 		foreach ( array( 'anyOf', 'oneOf', 'allOf' ) as $combiner ) {
 			if ( isset( $schema[ $combiner ] ) && is_array( $schema[ $combiner ] ) ) {
 				foreach ( $schema[ $combiner ] as $index => $branch ) {
 					if ( is_array( $branch ) ) {
+						// Entering a combiner from anywhere disables null-union for the entire subtree.
 						$schema[ $combiner ][ $index ] = self::relax_output_schema_for_wc_quirks( $branch, false );
 					}
 				}
