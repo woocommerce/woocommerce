@@ -28,7 +28,6 @@ require_once WC_EMAIL_TEMPLATE_SYNC_TEST_HELPER_DIR . 'includes/class-template-h
 require_once WC_EMAIL_TEMPLATE_SYNC_TEST_HELPER_DIR . 'includes/class-opted-in-overrides.php';
 require_once WC_EMAIL_TEMPLATE_SYNC_TEST_HELPER_DIR . 'includes/class-tracks-recorder.php';
 require_once WC_EMAIL_TEMPLATE_SYNC_TEST_HELPER_DIR . 'includes/class-rest-controller.php';
-require_once WC_EMAIL_TEMPLATE_SYNC_TEST_HELPER_DIR . 'includes/class-fake-third-party-email.php';
 
 add_action(
 	'plugins_loaded',
@@ -48,13 +47,17 @@ add_action(
 );
 
 // Register the fake third-party WC_Email subclass ONLY when an option signals tests want it.
-// The class itself is dormant if its option flag isn't set.
+// The class file is lazy-loaded here because it extends WC_Email, which is not defined
+// until the woocommerce plugin has loaded — eager-loading at plugin-bootstrap time would
+// fatal on PHP class resolution.
 add_filter(
 	'woocommerce_email_classes',
 	static function ( $emails ) {
-		if ( 'yes' === get_option( 'wc_test_fake_third_party_email_enabled', 'no' ) ) {
-			$emails['WC_Email_Template_Sync_Test_Helper\\Fake_Third_Party_Email'] = new \WC_Email_Template_Sync_Test_Helper\Fake_Third_Party_Email();
+		if ( 'yes' !== get_option( 'wc_test_fake_third_party_email_enabled', 'no' ) ) {
+			return $emails;
 		}
+		require_once WC_EMAIL_TEMPLATE_SYNC_TEST_HELPER_DIR . 'includes/class-fake-third-party-email.php';
+		$emails['WC_Email_Template_Sync_Test_Helper\\Fake_Third_Party_Email'] = new \WC_Email_Template_Sync_Test_Helper\Fake_Third_Party_Email();
 		return $emails;
 	}
 );
