@@ -292,57 +292,62 @@ class WCEmailTemplateSyncTracker {
 	/**
 	 * Assemble the shared base payload for one post.
 	 *
-	 * Returns `null` when the post is not a sync-eligible `woo_email` (no email
-	 * type, not in registry, etc.). Otherwise produces the six keys documented
-	 * in the RSM-145 spec §3.
+	 * Returns `null` when the post is not a sync-eligible `woo_email` or when
+	 * any inner call throws — every `record_*` caller treats `null` as "skip
+	 * this event," keeping the Tracks surface fire-and-forget.
 	 *
 	 * @param int $post_id The `woo_email` post ID.
 	 * @return array<string,mixed>|null
 	 */
 	private static function build_base_payload( int $post_id ): ?array {
-		$post = get_post( $post_id );
-		if ( ! $post instanceof \WP_Post ) {
-			return null;
-		}
-
-		$posts_manager = WCTransactionalEmailPostsManager::get_instance();
-		$email_id      = (string) $posts_manager->get_email_type_from_post_id( $post_id );
-		if ( '' === $email_id ) {
-			return null;
-		}
-
-		$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( $email_id );
-		if ( null === $sync_config ) {
-			return null;
-		}
-
-		$emails = $posts_manager->get_emails_by_id();
-		$email  = $emails[ $email_id ] ?? null;
-
-		$source_hash_to = '';
-		if ( $email instanceof \WC_Email ) {
-			try {
-				$source_hash_to = sha1( WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email ) );
-			} catch ( \Throwable $e ) {
-				// Canonical compute can throw on misconfigured templates. The event
-				// is still useful with an empty `source_hash_to` — analytics will
-				// see "site with broken canonical render" as a distinct cohort.
-				$source_hash_to = '';
+		try {
+			$post = get_post( $post_id );
+			if ( ! $post instanceof \WP_Post ) {
+				return null;
 			}
+
+			$posts_manager = WCTransactionalEmailPostsManager::get_instance();
+			$email_id      = (string) $posts_manager->get_email_type_from_post_id( $post_id );
+			if ( '' === $email_id ) {
+				return null;
+			}
+
+			$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( $email_id );
+			if ( null === $sync_config ) {
+				return null;
+			}
+
+			$emails = $posts_manager->get_emails_by_id();
+			$email  = $emails[ $email_id ] ?? null;
+
+			$source_hash_to = '';
+			if ( $email instanceof \WC_Email ) {
+				try {
+					$source_hash_to = sha1( WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email ) );
+				} catch ( \Throwable $e ) {
+					// Canonical compute can throw on misconfigured templates. The event
+					// is still useful with an empty `source_hash_to` — analytics will
+					// see "site with broken canonical render" as a distinct cohort.
+					$source_hash_to = '';
+				}
+			}
+
+			$version_from   = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true );
+			$status         = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true );
+			$was_backfilled = (bool) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, true );
+
+			return array(
+				'email_id'              => $email_id,
+				'template_version_from' => $version_from,
+				'template_version_to'   => (string) ( $sync_config['version'] ?? '' ),
+				'source_hash_to'        => $source_hash_to,
+				'classification'        => $status,
+				'was_backfilled'        => $was_backfilled,
+			);
+		} catch ( \Throwable $e ) {
+			unset( $e );
+			return null;
 		}
-
-		$version_from   = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true );
-		$status         = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true );
-		$was_backfilled = (bool) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, true );
-
-		return array(
-			'email_id'              => $email_id,
-			'template_version_from' => $version_from,
-			'template_version_to'   => (string) ( $sync_config['version'] ?? '' ),
-			'source_hash_to'        => $source_hash_to,
-			'classification'        => $status,
-			'was_backfilled'        => $was_backfilled,
-		);
 	}
 
 	/**

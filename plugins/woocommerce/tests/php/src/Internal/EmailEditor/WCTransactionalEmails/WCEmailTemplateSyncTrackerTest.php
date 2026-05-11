@@ -256,6 +256,35 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should swallow exceptions thrown inside build_base_payload so callers don't surface failures.
+	 */
+	public function test_record_swallows_exceptions_from_payload_builder(): void {
+		$email_id = 'wc_test_tracker_payload_builder_throws';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		// Simulate a third-party callback throwing inside the payload-building
+		// pipeline by hooking `get_post_metadata` (which `build_base_payload`
+		// calls via `get_post_meta`) and throwing from the filter.
+		$throw_filter = static function (): void {
+			throw new \RuntimeException( 'simulated meta-filter failure' );
+		};
+		add_filter( 'get_post_metadata', $throw_filter );
+
+		try {
+			// Should not bubble up despite the inner filter throwing.
+			WCEmailTemplateSyncTracker::record_selective_applied( $post_id );
+		} finally {
+			remove_filter( 'get_post_metadata', $throw_filter );
+		}
+
+		$this->assertSame(
+			array(),
+			$this->captured_events,
+			'A throw from build_base_payload must result in zero events, not a propagated exception.'
+		);
+	}
+
+	/**
 	 * @testdox Should swallow exceptions from the event recorder so callers don't surface failures.
 	 */
 	public function test_record_swallows_exceptions_from_recorder(): void {
