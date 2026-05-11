@@ -173,6 +173,10 @@ class Main {
 
 		$settings = wc_get_container()->get( Settings::class );
 		$settings->register();
+
+		if ( self::is_enabled() ) {
+			add_action( OpcacheFileExpiry::ACTION_HOOK, array( OpcacheFileExpiry::class, 'handle_cleanup_action' ) );
+		}
 	}
 
 	/**

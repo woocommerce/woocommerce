@@ -283,8 +283,10 @@ class QueryCache {
 	 * Defaults to a versioned subdirectory under wp-uploads so it inherits
 	 * the writability guarantees WordPress places on uploads. Filterable
 	 * for tests and unusual hosting layouts.
+	 *
+	 * @internal Public for {@see OpcacheFileExpiry}; not part of the plugin's external API.
 	 */
-	private function get_opcache_cache_dir(): string {
+	public static function get_opcache_cache_dir(): string {
 		$upload_dir = wp_get_upload_dir();
 		$default    = trailingslashit( $upload_dir['basedir'] ) . self::OPCACHE_DIR_RELATIVE;
 
@@ -314,7 +316,7 @@ class QueryCache {
 	 * the directory ends up non-writable.
 	 */
 	private function ensure_opcache_dir_writable(): bool {
-		$dir = $this->get_opcache_cache_dir();
+		$dir = self::get_opcache_cache_dir();
 
 		if ( '' === $dir ) {
 			return false;
@@ -349,7 +351,7 @@ class QueryCache {
 	 * @return DocumentNode|false
 	 */
 	private function read_from_opcache( string $hash ) {
-		$path = $this->get_opcache_cache_dir() . '/' . $hash . '.php';
+		$path = self::get_opcache_cache_dir() . '/' . $hash . '.php';
 
 		if ( ! is_file( $path ) ) {
 			return false;
@@ -387,7 +389,7 @@ class QueryCache {
 	 * @param DocumentNode $document The parsed AST.
 	 */
 	private function write_to_opcache( string $hash, DocumentNode $document ): void {
-		$dir  = $this->get_opcache_cache_dir();
+		$dir  = self::get_opcache_cache_dir();
 		$path = $dir . '/' . $hash . '.php';
 		$tmp  = $path . '.' . bin2hex( random_bytes( 8 ) ) . '.tmp';
 
@@ -413,6 +415,8 @@ class QueryCache {
 			// phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
 			@opcache_compile_file( $path );
 		}
+
+		OpcacheFileExpiry::ensure_scheduled();
 	}
 
 	/**

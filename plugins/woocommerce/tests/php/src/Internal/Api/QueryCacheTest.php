@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Api;
 
 use Automattic\WooCommerce\Internal\Api\Main;
 use Automattic\WooCommerce\Internal\Api\QueryCache;
+use Automattic\WooCommerce\Internal\Api\OpcacheFileExpiry;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\DocumentNode;
 use WC_Unit_Test_Case;
 
@@ -62,6 +63,9 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 			}
 		}
 		$this->temp_files_to_clean = array();
+		if ( function_exists( 'as_unschedule_all_actions' ) ) {
+			as_unschedule_all_actions( OpcacheFileExpiry::ACTION_HOOK );
+		}
 		wp_cache_flush();
 		parent::tearDown();
 	}
@@ -377,6 +381,26 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 		$this->assertNotFalse(
 			wp_cache_get( $this->cache_key_for( '{ __typename }' ), 'wc-graphql' ),
 			'Should have fallen back to the object cache when the OPcache dir is unwritable.'
+		);
+	}
+
+	/**
+	 * @testdox writing to the OPcache backend schedules the cleanup sweep on first write.
+	 */
+	public function test_first_write_schedules_cleanup(): void {
+		$this->use_temp_opcache_dir();
+		update_option( Main::OPTION_OPCACHE_ENABLED, 'yes' );
+
+		$this->assertFalse(
+			as_has_scheduled_action( OpcacheFileExpiry::ACTION_HOOK ),
+			'Pre-condition: no cleanup action should be scheduled before the first write.'
+		);
+
+		$this->sut->resolve( '{ __typename }', array() );
+
+		$this->assertTrue(
+			as_has_scheduled_action( OpcacheFileExpiry::ACTION_HOOK ),
+			'A successful OPcache write must schedule the cleanup sweep.'
 		);
 	}
 
