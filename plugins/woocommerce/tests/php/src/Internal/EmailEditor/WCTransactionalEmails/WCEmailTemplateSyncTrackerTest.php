@@ -235,6 +235,27 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should swallow exceptions from the event recorder so callers don't surface failures.
+	 */
+	public function test_record_swallows_exceptions_from_recorder(): void {
+		$email_id = 'wc_test_tracker_swallow_throws';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		WCEmailTemplateSyncTracker::set_event_recorder(
+			static function (): void {
+				throw new \RuntimeException( 'simulated tracker failure' );
+			}
+		);
+
+		// Should not bubble up despite the recorder throwing.
+		WCEmailTemplateSyncTracker::record_selective_applied( $post_id );
+
+		// `captured_events` is empty because we replaced the spy with a thrower —
+		// the test passes simply by not propagating the exception.
+		$this->assertTrue( true, 'A thrown recorder must not propagate to the caller.' );
+	}
+
+	/**
 	 * @testdox Should silently no-op when the post is not in the sync registry.
 	 */
 	public function test_record_update_available_noop_for_unregistered_post(): void {

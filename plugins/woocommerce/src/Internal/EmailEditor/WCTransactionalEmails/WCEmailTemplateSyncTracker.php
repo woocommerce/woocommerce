@@ -110,16 +110,30 @@ class WCEmailTemplateSyncTracker {
 	/**
 	 * Fire one Tracks event, routed through the injected recorder when present.
 	 *
+	 * Wrapped in a try/catch so a throw from the Tracks pipeline (a third-party
+	 * `woocommerce_tracks_event_properties` filter that mishandles the payload,
+	 * a misconfigured Tracks client, etc.) cannot bubble up into the caller's
+	 * code path. Every consumer of this method is a fire-and-forget telemetry
+	 * surface — a logging failure must never turn a successful apply or
+	 * reclassify into an error response. Silent-swallow is intentional: a
+	 * failed Tracks event is not actionable for the merchant or the operator,
+	 * and logging the failure per event would generate noise out of proportion
+	 * to its diagnostic value.
+	 *
 	 * @param string              $event_name The event name (without the `wcadmin_` prefix).
 	 * @param array<string,mixed> $payload    Event properties.
 	 * @return void
 	 */
 	private static function record( string $event_name, array $payload ): void {
-		if ( null !== self::$event_recorder ) {
-			( self::$event_recorder )( $event_name, $payload );
-			return;
+		try {
+			if ( null !== self::$event_recorder ) {
+				( self::$event_recorder )( $event_name, $payload );
+				return;
+			}
+			WC_Tracks::record_event( $event_name, $payload );
+		} catch ( \Throwable $e ) {
+			unset( $e );
 		}
-		WC_Tracks::record_event( $event_name, $payload );
 	}
 
 	/**
