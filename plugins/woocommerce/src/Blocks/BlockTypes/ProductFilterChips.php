@@ -73,8 +73,12 @@ final class ProductFilterChips extends AbstractBlock {
 		$hidden_count       = max( 0, count( $items ) - count( $visible_items ) );
 		$first_item         = reset( $items );
 		$show_counts        = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$is_swatch_style    = is_string( $classes ) && str_contains( $classes, 'is-style-swatch' );
-		$has_color_swatches = $is_swatch_style || ( is_array( $first_item ) && array_key_exists( 'color', $first_item ) );
+		$has_color_swatches = is_array( $first_item ) && array_key_exists( 'color', $first_item );
+
+		if ( $has_color_swatches && is_string( $classes ) && ! str_contains( $classes, 'is-style-swatch' ) ) {
+			$classes .= ' is-style-swatch';
+			$wrapper_attributes['class'] = esc_attr( $classes );
+		}
 
 		ob_start();
 		?>

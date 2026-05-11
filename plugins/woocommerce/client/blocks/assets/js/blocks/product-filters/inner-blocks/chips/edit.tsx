@@ -55,9 +55,12 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const { isLoading = false, items = [] } =
 		context?.woocommerceSelectableItems ?? {};
 
+	const hasColorSwatches = items.some( ( item ) => 'color' in item );
+
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
 			'is-loading': isLoading,
+			'is-style-swatch': hasColorSwatches,
 			...getColorClasses( attributes ),
 		} ),
 		style: getColorVars( attributes ),

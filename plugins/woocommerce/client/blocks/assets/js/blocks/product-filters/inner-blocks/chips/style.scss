@@ -118,14 +118,14 @@
 		padding: 2px;
 		border-radius: 50%;
 		border: 1px solid transparent;
+		outline: none;
 
 		&:hover {
 			border-color: color-mix(in srgb, currentColor 40%, transparent);
 		}
 
-		&:focus {
+		&:focus-visible {
 			border-color: color-mix(in srgb, currentColor 60%, transparent);
-			outline: none;
 		}
 
 		&[aria-checked="true"] {
