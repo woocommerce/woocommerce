@@ -124,10 +124,12 @@ class LegacyFieldsSchema extends AbstractSchema {
 	/**
 	 * Get the item response.
 	 *
-	 * @param mixed                                 $item           Captured field definitions grouped by hook name.
-	 * @param \WP_REST_Request<array<string,mixed>> $request        Request object.
-	 * @param array                                 $include_fields Fields to include in the response.
+	 * @param mixed           $item           Captured field definitions grouped by hook name.
+	 * @param WP_REST_Request $request        Request object.
+	 * @param array           $include_fields Fields to include in the response.
 	 * @return array
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string,mixed>> $request
 	 */
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
 		$response = array(
