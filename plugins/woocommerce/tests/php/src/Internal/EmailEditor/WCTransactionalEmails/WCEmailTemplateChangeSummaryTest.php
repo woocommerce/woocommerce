@@ -481,6 +481,40 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * `source_hash_to` is the sha1 of the canonical core content for the
+	 * email type. It mirrors the post's `_wc_email_template_source_hash`
+	 * meta and is consumed by the RSM-145 Tracks instrumentation to identify
+	 * which canonical revision a merchant is comparing against.
+	 *
+	 * @testdox Should expose source_hash_to as a non-empty sha1 hex string on the success-path payload.
+	 */
+	public function test_summarize_includes_source_hash_to_for_customized_post(): void {
+		$email_id = 'change_summary_source_hash';
+		$this->register_fixture_email( $email_id );
+
+		$core_content = "<!-- wp:heading -->\n<h2>Welcome</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Original line.</p>\n<!-- /wp:paragraph -->";
+
+		// Merchant edited the paragraph copy.
+		$post_content = "<!-- wp:heading -->\n<h2>Welcome</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Edited line.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		$summary = WCEmailTemplateChangeSummary::summarize( $post_id );
+
+		$this->assertArrayHasKey( 'source_hash_to', $summary );
+		$this->assertIsString( $summary['source_hash_to'] );
+		$this->assertNotEmpty( $summary['source_hash_to'] );
+		$this->assertSame( 40, strlen( $summary['source_hash_to'] ) );
+		$this->assertTrue(
+			ctype_xdigit( $summary['source_hash_to'] ),
+			'source_hash_to must be a hex-only sha1 (40 hex chars).'
+		);
+	}
+
+	/**
 	 * Cache: first call computes and stores; second call with same inputs hits
 	 * the cache; mutating the post invalidates by content hash.
 	 *
