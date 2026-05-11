@@ -35,12 +35,70 @@ class Native_Rail_Splicer {
 			return;
 		}
 
+		$pre_splice_submenu_woocommerce = $GLOBALS['submenu']['woocommerce'] ?? array();
+
 		$this->relabel_dashboard();
 		$this->strip_non_woo_top_level();
 		$this->hide_woocommerce_top_level();
 		$this->insert_woo_roots( $tree );
 		$this->populate_root_submenus( $tree );
+		$this->preserve_access_check_entries( $tree, $pre_splice_submenu_woocommerce );
 		$this->force_current_highlight( $tree );
+	}
+
+	/**
+	 * Re-attach as `hide-if-js` any entries that WP originally registered under
+	 * `$submenu['woocommerce']` whose tree slug is *not* a direct child of a
+	 * rail root. WP needs these entries somewhere in `$submenu` so
+	 * `user_can_access_admin_page()` resolves capability for direct page visits.
+	 *
+	 * @param array $tree                            Final tree.
+	 * @param array $pre_splice_submenu_woocommerce  $submenu['woocommerce'] captured before mutations.
+	 */
+	private function preserve_access_check_entries( array $tree, array $pre_splice_submenu_woocommerce ): void {
+		global $submenu;
+
+		// Build a set of slugs already rendered as visible submenu items under
+		// the rail roots. Excludes `$submenu['woocommerce']` itself — that
+		// belongs to the (now hidden) `woocommerce` top-level entry and is the
+		// bucket we're rebuilding for access checks here.
+		$rendered = array();
+		foreach ( $submenu as $parent => $entries ) {
+			if ( 'woocommerce' === $parent ) {
+				continue;
+			}
+			foreach ( $entries as $entry ) {
+				if ( isset( $entry[2] ) ) {
+					$rendered[ (string) $entry[2] ] = true;
+				}
+			}
+		}
+
+		$preserved = array();
+		foreach ( $pre_splice_submenu_woocommerce as $entry ) {
+			$slug = $entry[2] ?? null;
+			if ( null === $slug || isset( $rendered[ (string) $slug ] ) ) {
+				continue;
+			}
+			// Only preserve slugs that the tree actually knows about — anything
+			// else was orphan registration we'd rather not surface.
+			if ( ! isset( $tree[ (string) $slug ] ) ) {
+				continue;
+			}
+			$existing_classes = isset( $entry[4] ) ? (string) $entry[4] : '';
+			$entry[4]         = trim( $existing_classes . ' hide-if-js' );
+			$preserved[]      = $entry;
+		}
+
+		// Replace `$submenu['woocommerce']` with the preserved entries so any
+		// visible duplicates (rendered under a rail root) don't appear here
+		// without `hide-if-js`. Drop the key entirely when nothing needs
+		// preserving so the (hidden) top-level entry has no submenu.
+		if ( ! empty( $preserved ) ) {
+			$submenu['woocommerce'] = $preserved;
+		} else {
+			unset( $submenu['woocommerce'] );
+		}
 	}
 
 	/**

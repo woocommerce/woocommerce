@@ -240,4 +240,56 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'wc-admin&path=/marketing', apply_filters( 'parent_file', 'something-else' ) );
 		$this->assertSame( 'wc-admin&path=/marketing/coupons', apply_filters( 'submenu_file', 'something-else' ) );
 	}
+
+	public function test_splice_preserves_grandchild_access_check_entries_as_hide_if_js(): void {
+		global $menu, $submenu;
+		$menu = array(
+			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
+			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
+		);
+		// Pretend WP already had `wc-status` registered as a child of woocommerce
+		// so direct visits to ?page=wc-status pass the access check.
+		$submenu['woocommerce'] = array(
+			array( 'Home',   'manage_woocommerce', 'wc-admin' ),
+			array( 'Status', 'manage_woocommerce', 'wc-status' ),
+		);
+
+		$tree = array(
+			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'wc-admin'    => array( 'parent' => 'woocommerce', 'title' => 'Home',    'position' => 10, 'capability' => 'manage_woocommerce' ),
+			'wc-tools'    => array( 'parent' => 'woocommerce', 'title' => 'Tools',   'position' => 80, 'capability' => 'manage_woocommerce' ),
+			'wc-status'   => array(
+				// `wc-status` is a grandchild of `woocommerce` in the tree
+				// (nested under Tools) but WP registered it as a direct child
+				// of `woocommerce`.
+				'parent'     => 'wc-tools',
+				'title'      => 'Status',
+				'position'   => 10,
+				'capability' => 'manage_woocommerce',
+			),
+		);
+
+		$_GET['page']       = 'wc-admin';
+		$GLOBALS['pagenow'] = 'admin.php';
+
+		( new Native_Rail_Splicer() )->splice( $tree );
+
+		// `wc-status` should remain present under SOME parent submenu so the
+		// access check still resolves. Either kept under `woocommerce` with
+		// `hide-if-js`, or attached under `wc-tools`. We require at least one.
+		$found_access_entry = false;
+		foreach ( $submenu as $parent => $entries ) {
+			foreach ( $entries as $entry ) {
+				if ( ( $entry[2] ?? null ) !== 'wc-status' ) {
+					continue;
+				}
+				$found_access_entry = true;
+				// If kept under `woocommerce`, must be hide-if-js so it doesn't render.
+				if ( 'woocommerce' === $parent ) {
+					$this->assertStringContainsString( 'hide-if-js', (string) ( $entry[4] ?? '' ) );
+				}
+			}
+		}
+		$this->assertTrue( $found_access_entry, 'wc-status access-check entry must survive splice.' );
+	}
 }
