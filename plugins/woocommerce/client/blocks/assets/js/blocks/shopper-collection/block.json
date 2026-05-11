@@ -46,6 +46,5 @@
 		"wc-blocks-style-product-image",
 		"woocommerce-product-price-style",
 		"woocommerce-product-button-style"
-	],
-	"editorStyle": "file:../woocommerce/shopper-collection-editor.css"
+	]
 }
