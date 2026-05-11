@@ -941,24 +941,21 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	 *
 	 * The `woocommerce_webhook_topic_hooks` filter is applied here. When called
 	 * statically (without a webhook context, e.g. from the topic validator),
-	 * the filter receives a shared, unsaved `WC_Webhook` instance so callbacks
-	 * registered with `accepted_args = 2` keep working; those callbacks should
-	 * not rely on the second argument exposing per-webhook state in that call
-	 * path (`get_id()` returns 0, `get_topic()` is empty).
+	 * a fresh, unsaved `WC_Webhook` instance is passed as the filter's second
+	 * argument so callbacks registered with `accepted_args = 2` keep working.
+	 * Those callbacks should not rely on the second argument exposing
+	 * per-webhook state in that call path (`get_id()` returns 0,
+	 * `get_topic()` is empty).
 	 *
 	 * @since 10.9.0
 	 * @param WC_Webhook|null $webhook Optional webhook instance to pass as the
-	 *                                 filter's context argument. Defaults to a
-	 *                                 shared bare instance when omitted.
+	 *                                 filter's context argument. A fresh
+	 *                                 unsaved instance is created when omitted.
 	 * @return array
 	 */
 	public static function get_default_topic_hooks( $webhook = null ) {
-		if ( null === $webhook ) {
-			static $bare_webhook = null;
-			if ( null === $bare_webhook ) {
-				$bare_webhook = new self();
-			}
-			$webhook = $bare_webhook;
+		if ( ! $webhook instanceof WC_Webhook ) {
+			$webhook = new self();
 		}
 
 		$topic_hooks = array(
