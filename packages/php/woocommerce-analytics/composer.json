@@ -3,7 +3,7 @@
 	"description": "Enhanced analytics for WooCommerce users.",
 	"type": "jetpack-library",
 	"license": "GPL-2.0-or-later",
-	"version": "0.16.3",
+	"version": "0.16.4",
 	"require": {
 		"php": ">=7.2",
 		"automattic/jetpack-assets": "^4.3",
