@@ -56,6 +56,12 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 			$this->rrmdir( $dir );
 		}
 		$this->temp_dirs_to_clean = array();
+		foreach ( $this->temp_files_to_clean as $file ) {
+			if ( file_exists( $file ) ) {
+				wp_delete_file( $file );
+			}
+		}
+		$this->temp_files_to_clean = array();
 		wp_cache_flush();
 		parent::tearDown();
 	}
@@ -282,11 +288,15 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 	 * @testdox resolve falls back to the object cache when the OPcache dir is not writable.
 	 */
 	public function test_resolve_falls_back_to_object_cache_when_opcache_dir_unwritable(): void {
-		// Point the filter at a path that is impossible to create or write.
+		$this->skip_if_opcache_disabled();
+
+		$not_a_dir                     = tempnam( sys_get_temp_dir(), 'wc-graphql-cache-' );
+		$this->temp_files_to_clean[]   = $not_a_dir;
+
 		add_filter(
 			'woocommerce_graphql_opcache_cache_dir',
-			static function () {
-				return '/this/path/cannot/be/created/by/php/wc-graphql-cache';
+			static function () use ( $not_a_dir ) {
+				return $not_a_dir;
 			}
 		);
 
@@ -303,14 +313,13 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Point the OPcache backend at a per-test temp dir, return the path, and
-	 * register a teardown hook to remove it.
+	 * Skip the calling test if OPcache is not enabled in this environment.
 	 *
-	 * Skips the calling test if OPcache is not enabled in this environment
-	 * (typical for PHP CLI without opcache.enable_cli=1) — the file-backend
-	 * capability check requires opcache_get_status to report enabled.
+	 * Typical for PHP CLI without opcache.enable_cli=1 — the file-backend
+	 * capability check requires opcache_get_status to report enabled, so
+	 * tests that exercise that path are not meaningful without it.
 	 */
-	private function use_temp_opcache_dir(): string {
+	private function skip_if_opcache_disabled(): void {
 		if ( ! function_exists( 'opcache_get_status' ) || ! ini_get( 'opcache.enable' ) ) {
 			$this->markTestSkipped( 'OPcache is not enabled in this environment.' );
 		}
@@ -318,6 +327,14 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 		if ( ! is_array( $status ) || empty( $status['opcache_enabled'] ) ) {
 			$this->markTestSkipped( 'OPcache is not enabled in this environment.' );
 		}
+	}
+
+	/**
+	 * Point the OPcache backend at a per-test temp dir, return the path, and
+	 * register a teardown hook to remove it.
+	 */
+	private function use_temp_opcache_dir(): string {
+		$this->skip_if_opcache_disabled();
 
 		$dir = sys_get_temp_dir() . '/wc-graphql-test-' . bin2hex( random_bytes( 6 ) );
 		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_mkdir
@@ -341,6 +358,13 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 	 * @var string[]
 	 */
 	private array $temp_dirs_to_clean = array();
+
+	/**
+	 * Track temp files for removal in tearDown.
+	 *
+	 * @var string[]
+	 */
+	private array $temp_files_to_clean = array();
 
 	/**
 	 * Recursively remove a directory tree.
