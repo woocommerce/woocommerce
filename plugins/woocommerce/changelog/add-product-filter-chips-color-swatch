@@ -1,4 +1,5 @@
 Significance: patch
 Type: add
+Comment: Feature not yet publicly released (behind wc-visual-attribute feature flag).
 
 Add color swatch support to Product Filter: Chips block for wc-visual attributes

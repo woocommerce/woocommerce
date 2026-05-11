@@ -75,10 +75,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			}
 
 			foreach ( $terms as $term ) {
-				$color = get_term_meta( $term->term_id, 'color', true );
-				if ( $color ) {
-					$colors[ $term->term_id ] = $color;
-				}
+				$colors[ $term->term_id ] = get_term_meta( $term->term_id, 'color', true );
 			}
 		}
 
@@ -250,10 +247,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 					}
 
 					if ( 'wc-visual' === $product_attribute->type ) {
-						$color = get_term_meta( $term['term_id'], 'color', true );
-						if ( $color ) {
-							$item['color'] = $color;
-						}
+						$item['color'] = get_term_meta( $term['term_id'], 'color', true );
 					}
 
 					return $item;

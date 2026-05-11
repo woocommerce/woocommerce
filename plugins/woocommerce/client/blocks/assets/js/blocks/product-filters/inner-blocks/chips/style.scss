@@ -119,14 +119,18 @@
 		border-radius: 50%;
 		border: 1px solid transparent;
 
+		&:hover {
+			border-color: color-mix(in srgb, currentColor 40%, transparent);
+		}
+
+		&:focus {
+			border-color: color-mix(in srgb, currentColor 60%, transparent);
+		}
+
 		&[aria-checked="true"] {
 			background: transparent;
 			color: inherit;
 			border-color: var(--wc-product-filters-text-color, CanvasText);
-		}
-
-		&:focus {
-			outline: none;
 		}
 	}
 
