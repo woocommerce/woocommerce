@@ -35,6 +35,30 @@ class Native_Rail_Splicer {
 			return;
 		}
 
-		// Subsequent tasks fill this in.
+		$this->relabel_dashboard();
+	}
+
+	/**
+	 * Relabel WP's `index.php` entry to act as the rail's back-to-Dashboard
+	 * link. Replace its icon with `dashicons-arrow-left-alt` and clear its
+	 * submenu (Home / Updates) so it renders as a single flat row.
+	 *
+	 * No-op if WP's Dashboard entry isn't present (e.g. user lacks `read`).
+	 */
+	private function relabel_dashboard(): void {
+		global $menu, $submenu;
+
+		foreach ( $menu as $key => $entry ) {
+			if ( ! isset( $entry[2] ) || 'index.php' !== $entry[2] ) {
+				continue;
+			}
+			$menu[ $key ][0] = __( 'Dashboard', 'woocommerce' );
+			$menu[ $key ][3] = __( 'Dashboard', 'woocommerce' );
+			$menu[ $key ][6] = 'dashicons-arrow-left-alt';
+		}
+
+		if ( isset( $submenu['index.php'] ) ) {
+			$submenu['index.php'] = array();
+		}
 	}
 }
