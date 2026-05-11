@@ -63,4 +63,34 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'dashicons-arrow-left-alt', $menu[2][6] );
 		$this->assertSame( array(), $submenu['index.php'] ?? array(), 'Dashboard submenu cleared.' );
 	}
+
+	public function test_splice_removes_non_woo_top_level_entries_keeping_dashboard_and_woocommerce(): void {
+		global $menu, $submenu;
+		$menu = array(
+			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
+			5  => array( 'Posts', 'edit_posts', 'edit.php', 'Posts', '', 'menu-posts', 'dashicons-admin-post' ),
+			10 => array( 'Media', 'upload_files', 'upload.php', 'Media', '', 'menu-media', 'dashicons-admin-media' ),
+			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
+			56 => array( 'Plugins', 'activate_plugins', 'plugins.php', 'Plugins', '', 'menu-plugins', 'dashicons-admin-plugins' ),
+		);
+		$submenu['index.php']  = array( array( 'Home', 'read', 'index.php' ) );
+		$submenu['woocommerce'] = array( array( 'Home', 'manage_woocommerce', 'wc-admin' ) );
+
+		$tree = array(
+			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'wc-admin'    => array( 'parent' => 'woocommerce', 'title' => 'Home', 'position' => 10, 'capability' => 'manage_woocommerce' ),
+		);
+
+		$_GET['page']               = 'wc-admin';
+		$GLOBALS['pagenow']         = 'admin.php';
+
+		( new Native_Rail_Splicer() )->splice( $tree );
+
+		$remaining_slugs = array_values( array_filter( array_map(
+			static fn( $entry ) => is_array( $entry ) && isset( $entry[2] ) ? $entry[2] : null,
+			$menu
+		) ) );
+		sort( $remaining_slugs );
+		$this->assertSame( array( 'index.php', 'woocommerce' ), $remaining_slugs );
+	}
 }

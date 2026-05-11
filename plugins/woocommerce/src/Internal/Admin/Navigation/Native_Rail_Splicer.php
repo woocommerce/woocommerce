@@ -36,6 +36,44 @@ class Native_Rail_Splicer {
 		}
 
 		$this->relabel_dashboard();
+		$this->strip_non_woo_top_level();
+	}
+
+	/**
+	 * Remove every `$menu` top-level entry that isn't `index.php` (the relabeled
+	 * Dashboard back link) or `woocommerce` (WC's own registration, used by the
+	 * existing $submenu['woocommerce'] for access checks; the entry itself will
+	 * be hidden via `hide-if-js` in Task 5).
+	 *
+	 * Preserves numeric keys (= WP-native position slots) by using `unset()`
+	 * rather than `array_values()`. We are not interleaving with non-Woo items,
+	 * so absolute positions don't matter visually — but keeping keys avoids
+	 * disturbing any code that reads $menu by position later in the request.
+	 */
+	private function strip_non_woo_top_level(): void {
+		global $menu, $submenu;
+
+		$keep = array( 'index.php', 'woocommerce' );
+		foreach ( $menu as $key => $entry ) {
+			if ( ! isset( $entry[2] ) ) {
+				continue;
+			}
+			if ( in_array( $entry[2], $keep, true ) ) {
+				continue;
+			}
+			unset( $menu[ $key ] );
+		}
+
+		// Also drop separators — WP renders them as visual breaks; we don't
+		// want stray separators between Dashboard and the Woo roots.
+		foreach ( $menu as $key => $entry ) {
+			if ( ! isset( $entry[2] ) ) {
+				continue;
+			}
+			if ( 0 === strpos( (string) $entry[2], 'separator' ) ) {
+				unset( $menu[ $key ] );
+			}
+		}
 	}
 
 	/**
