@@ -52,32 +52,6 @@
 }
 
 /*
- * Override the DataViews default of 0 right padding on the checkbox cell so
- * there is a consistent 8px gap on the right of the checkbox. Combined with
- * the primary column's left padding (8px below) this gives a total 16px gap
- * between the checkbox and the first element of the row (image).
- */
-.woocommerce-product-list
-	.dataviews-view-table
-	.dataviews-view-table__checkbox-column {
-	padding-right: 8px;
-}
-
-/*
- * The primary column TD has no class. Target it via :has() and set
- * padding-left to 8px so that combined with the checkbox column's 8px
- * right padding the gap between the checkbox and the first row element
- * (image) is 16px. !important guards against any Stack-internal styles
- * (Emotion CSS-in-JS) winning on specificity.
- */
-.woocommerce-product-list
-	.dataviews-view-table
-	tbody
-	td:has( > .dataviews-view-table__primary-column ) {
-	padding-left: 8px !important;
-}
-
-/*
  * Nested rows (product variations) sit one column to the left of where their
  * parent's primary content starts. Add 16px of left padding to the checkbox
  * cell so the nested checkbox lines up with the parent's first content (image).
