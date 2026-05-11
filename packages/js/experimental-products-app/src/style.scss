@@ -52,6 +52,18 @@
 }
 
 /*
+ * The primary column TD has no class. Target it via :has() and tighten its
+ * left padding from the 12px default to 4px so the visual gap between the
+ * checkbox and the first row element (image) is 4px.
+ */
+.woocommerce-product-list
+	.dataviews-view-table
+	tbody
+	td:has( > .dataviews-view-table__primary-column ) {
+	padding-left: 4px !important;
+}
+
+/*
  * Nested rows (product variations) sit one column to the left of where their
  * parent's primary content starts. Add 16px of left padding to the checkbox
  * cell so the nested checkbox lines up with the parent's first content (image).
