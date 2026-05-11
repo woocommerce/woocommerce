@@ -451,8 +451,14 @@ class REST_Controller {
 	}
 
 	/**
-	 * Run the divergence sweep inline, then snapshot classifications from post meta
+	 * Run the divergence sweep inline, then immediately run the auto-applier inline
+	 * (bypassing Action Scheduler), then snapshot classifications from post meta
 	 * across all sync-enabled emails.
+	 *
+	 * Production flow: run_sweep() fires the sweep_complete action → schedule()
+	 * enqueues an async AS job → run() executes later. For E2E tests we need the
+	 * full classify-then-apply cycle to complete within the same HTTP request so
+	 * assertions can run immediately after this call returns.
 	 *
 	 * @param WP_REST_Request $request The REST request (unused).
 	 * @return WP_REST_Response
@@ -461,6 +467,11 @@ class REST_Controller {
 		unset( $request );
 
 		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector::run_sweep();
+
+		// Run the auto-applier inline so unmodified posts are stamped IN_SYNC before
+		// this response returns. In production the applier is deferred via Action
+		// Scheduler; calling run() directly here keeps the E2E request synchronous.
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier::run();
 
 		$registry = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry::get_sync_enabled_emails();
 		$manager  = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager::get_instance();

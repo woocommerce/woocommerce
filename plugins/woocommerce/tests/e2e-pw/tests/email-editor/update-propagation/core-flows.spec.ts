@@ -64,9 +64,13 @@ test.describe( 'Update propagation — core flows', () => {
 		const uncustomizedMeta = await getWooEmailMeta( uncustomizedPostId );
 		const customizedMeta = await getWooEmailMeta( customizedPostId );
 
+		// The sweep classifies the unmodified post as core_updated_uncustomized,
+		// then the auto-applier (also fired by /trigger-sweep inline) silently
+		// applies the new canonical and re-stamps the post as in_sync.
 		expect( uncustomizedMeta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe(
-			STATUS.CORE_UPDATED_UNCUSTOMIZED
+			STATUS.IN_SYNC
 		);
+		// Customized posts are left for the merchant to apply manually.
 		expect( customizedMeta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe(
 			STATUS.CORE_UPDATED_CUSTOMIZED
 		);
