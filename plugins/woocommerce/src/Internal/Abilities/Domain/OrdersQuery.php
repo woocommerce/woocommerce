@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Registers the WooCommerce orders query ability.
  */
-class OrdersQuery extends DomainAbility implements AbilityDefinition {
+class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 	use OrderAbilityTrait;
 

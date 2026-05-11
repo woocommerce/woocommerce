@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Registers the WooCommerce product update ability.
  */
-class ProductUpdate extends DomainAbility implements AbilityDefinition {
+class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 
 	use ProductAbilityTrait;
 

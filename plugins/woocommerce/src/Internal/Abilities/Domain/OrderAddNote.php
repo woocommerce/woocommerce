@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Registers the WooCommerce order add note ability.
  */
-class OrderAddNote extends DomainAbility implements AbilityDefinition {
+class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 
 	use OrderAbilityTrait;
 

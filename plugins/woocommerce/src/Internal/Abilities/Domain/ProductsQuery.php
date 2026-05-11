@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Registers the WooCommerce products query ability.
  */
-class ProductsQuery extends DomainAbility implements AbilityDefinition {
+class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 
 	use ProductAbilityTrait;
 

@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Registers the WooCommerce order update status ability.
  */
-class OrderUpdateStatus extends DomainAbility implements AbilityDefinition {
+class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefinition {
 
 	use OrderAbilityTrait;
 

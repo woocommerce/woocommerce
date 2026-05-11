@@ -12,7 +12,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Shared helpers for WooCommerce domain ability definitions.
  */
-abstract class DomainAbility {
+abstract class AbstractDomainAbility {
 
 	/**
 	 * Get a collection output schema.

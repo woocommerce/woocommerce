@@ -15,7 +15,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Registers the WooCommerce product create ability.
  */
-class ProductCreate extends DomainAbility implements AbilityDefinition {
+class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 
 	use ProductAbilityTrait;
 

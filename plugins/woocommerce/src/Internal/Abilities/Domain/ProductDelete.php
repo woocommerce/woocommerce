@@ -16,7 +16,7 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Registers the WooCommerce product delete ability.
  */
-class ProductDelete extends DomainAbility implements AbilityDefinition {
+class ProductDelete extends AbstractDomainAbility implements AbilityDefinition {
 
 	use ProductAbilityTrait;
 
@@ -92,17 +92,14 @@ class ProductDelete extends DomainAbility implements AbilityDefinition {
 		$force      = (bool) ( $input['force'] ?? false );
 
 		/**
-		 * Filter whether a product supports trashing.
-		 *
-		 * Reuses the REST product trashability filter so custom trash support is
-		 * consistent across REST and domain abilities.
+		 * Filter whether a product supports trashing in WooCommerce domain abilities.
 		 *
 		 * @param bool        $supports_trash Whether the product supports trashing.
 		 * @param \WC_Product $product        The product being considered for trashing.
 		 *
 		 * @since 10.9.0
 		 */
-		$supports_trash = apply_filters( 'woocommerce_rest_product_object_trashable', EMPTY_TRASH_DAYS > 0, $product );
+		$supports_trash = apply_filters( 'woocommerce_product_object_trashable', EMPTY_TRASH_DAYS > 0, $product );
 
 		if ( ! $force && ! $supports_trash ) {
 			return new \WP_Error(
