@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Field } from '@wordpress/dataviews';
+import type { Field, FormField } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
@@ -474,4 +474,48 @@ export function getVisibleProductEditFields(
 
 		return visibleFields;
 	}, [] );
+}
+
+const DIMENSION_FIELD_IDS = [
+	'weight',
+	'length',
+	'width',
+	'height',
+] as const;
+
+/**
+ * Convert a flat list of visible field ids into the DataForm `fields`
+ * configuration, grouping the dimension fields (weight, length, width,
+ * height) into a single row layout so they render side-by-side.
+ */
+export function buildProductEditFormFields(
+	fieldIds: string[]
+): Array< FormField | string > {
+	const dimensionIdSet = new Set< string >( DIMENSION_FIELD_IDS );
+	const presentDimensions = fieldIds.filter( ( id ) =>
+		dimensionIdSet.has( id )
+	);
+
+	if ( presentDimensions.length === 0 ) {
+		return fieldIds;
+	}
+
+	const firstDimensionIndex = fieldIds.findIndex( ( id ) =>
+		dimensionIdSet.has( id )
+	);
+
+	const before = fieldIds.slice( 0, firstDimensionIndex );
+	const after = fieldIds
+		.slice( firstDimensionIndex )
+		.filter( ( id ) => ! dimensionIdSet.has( id ) );
+
+	return [
+		...before,
+		{
+			id: 'dimensions',
+			layout: { type: 'row' as const },
+			children: presentDimensions,
+		},
+		...after,
+	];
 }

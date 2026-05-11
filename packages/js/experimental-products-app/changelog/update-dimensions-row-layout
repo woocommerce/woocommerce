@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Render the weight, length, width, and height fields side-by-side on a single row in the experimental products quick edit panel.

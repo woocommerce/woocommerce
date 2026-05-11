@@ -10,6 +10,7 @@ import type { ProductEntityRecord } from '../fields/types';
 import { productFields } from '../product-list/fields';
 import {
 	buildMergedProductEditData,
+	buildProductEditFormFields,
 	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
@@ -617,6 +618,65 @@ describe( 'product edit utils', () => {
 
 			expect( field ).toBeDefined();
 			expect( field?.isVisible ).toBeUndefined();
+		} );
+	} );
+
+	describe( 'buildProductEditFormFields', () => {
+		it( 'returns the input unchanged when no dimension fields are present', () => {
+			const ids = [ 'name', 'sku', 'price' ];
+
+			expect( buildProductEditFormFields( ids ) ).toEqual( ids );
+		} );
+
+		it( 'groups all four dimension fields into a single row layout', () => {
+			const ids = [
+				'name',
+				'sku',
+				'weight',
+				'length',
+				'width',
+				'height',
+				'shipping_class',
+			];
+
+			expect( buildProductEditFormFields( ids ) ).toEqual( [
+				'name',
+				'sku',
+				{
+					id: 'dimensions',
+					layout: { type: 'row' },
+					children: [ 'weight', 'length', 'width', 'height' ],
+				},
+				'shipping_class',
+			] );
+		} );
+
+		it( 'only includes dimension fields that are actually present', () => {
+			const ids = [ 'name', 'length', 'height', 'tax_status' ];
+
+			expect( buildProductEditFormFields( ids ) ).toEqual( [
+				'name',
+				{
+					id: 'dimensions',
+					layout: { type: 'row' },
+					children: [ 'length', 'height' ],
+				},
+				'tax_status',
+			] );
+		} );
+
+		it( 'places the dimension group at the position of the first dimension field', () => {
+			const ids = [ 'name', 'weight', 'sku', 'length', 'width' ];
+
+			expect( buildProductEditFormFields( ids ) ).toEqual( [
+				'name',
+				{
+					id: 'dimensions',
+					layout: { type: 'row' },
+					children: [ 'weight', 'length', 'width' ],
+				},
+				'sku',
+			] );
 		} );
 	} );
 } );
