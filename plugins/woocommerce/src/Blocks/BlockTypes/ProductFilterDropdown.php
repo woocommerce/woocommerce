@@ -72,7 +72,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 		$show_counts = is_array( $first ) && array_key_exists( 'count', $first );
 		$aria_label  = ! empty( $selectable_items['groupLabel'] )
 			? (string) $selectable_items['groupLabel']
-			: __( 'Product filter', 'woocommerce' );
+			: __( 'Filter options', 'woocommerce' );
 
 		ob_start();
 		?>

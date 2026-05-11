@@ -67,9 +67,10 @@ store(
 					);
 				}
 
-				const row = parent.state.selectableItems.find(
-					( item ) => item.value === value
-				);
+				const items = Array.isArray( parent.state.selectableItems )
+					? parent.state.selectableItems
+					: [];
+				const row = items.find( ( item ) => item.value === value );
 
 				// Don't try to toggle empty option ("") or invalid options.
 				if ( ! isToggleableItem( row ) ) {

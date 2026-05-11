@@ -85,18 +85,24 @@ const Edit = ( props: EditProps ): JSX.Element => {
 									  )
 									: __( 'Select an option', 'woocommerce' ) }
 							</option>
-							{ items.map( ( item, index ) => (
-								<option
-									key={ index }
-									value={ item.value }
-									disabled={ !! item.disabled }
-								>
-									{ getOptionLabel( item ) }
-									{ item.count !== undefined
-										? ` (${ item.count })`
-										: '' }
-								</option>
-							) ) }
+							{ items.map( ( item, index ) => {
+								const optionLabel = getOptionLabel( item );
+								if ( ! optionLabel ) {
+									return null;
+								}
+								return (
+									<option
+										key={ index }
+										value={ item.value }
+										disabled={ !! item.disabled }
+									>
+										{ optionLabel }
+										{ item.count !== undefined
+											? ` (${ item.count })`
+											: '' }
+									</option>
+								);
+							} ) }
 						</select>
 					) }
 				</fieldset>
