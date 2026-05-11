@@ -9,11 +9,11 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
 /**
  * GET / POST on /shopper-lists/{slug}/items.
- *
- * GET returns the items in a list.
- * POST saves an item to the list either from an existing cart line or from direct item payload fields.
  */
 class ShopperListItems extends AbstractRoute {
+	// Stopgap CSRF guard, replaced once the upstream trait lands on trunk.
+	use ShopperListsNonceCheck;
+
 	/**
 	 * Route identifier.
 	 *

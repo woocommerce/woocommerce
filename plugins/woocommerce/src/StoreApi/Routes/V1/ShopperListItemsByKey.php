@@ -10,6 +10,9 @@ use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
  * DELETE /shopper-lists/{slug}/items/{key}.
  */
 class ShopperListItemsByKey extends AbstractRoute {
+	// Stopgap CSRF guard, replaced once the upstream trait lands on trunk.
+	use ShopperListsNonceCheck;
+
 	/**
 	 * Route identifier.
 	 *
