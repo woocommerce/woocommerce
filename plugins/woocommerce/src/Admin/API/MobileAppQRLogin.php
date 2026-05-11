@@ -572,6 +572,16 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
+	 * Release a token scan claim owned by this request.
+	 *
+	 * @param string $token_hash SHA-256 hash of the plaintext token.
+	 * @return void
+	 */
+	private function release_token_scan_claim( $token_hash ) {
+		delete_option( self::SCAN_CLAIM_OPTION_PREFIX . $token_hash );
+	}
+
+	/**
 	 * Get the remaining storage TTL for a token record.
 	 *
 	 * @param array<string, mixed> $token_data Token record.
@@ -1292,14 +1302,6 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		if ( ! $this->check_scan_rate_limit() ) {
-			return new \WP_Error(
-				'rate_limit_exceeded',
-				__( 'Too many QR login scans. Please try again later.', 'woocommerce' ),
-				array( 'status' => 429 )
-			);
-		}
-
 		if ( true !== (bool) $request->get_param( 'supports_number_matching' ) ) {
 			return new \WP_Error(
 				'mobile_app_update_required',
@@ -1321,6 +1323,14 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
+		if ( ! $this->check_scan_rate_limit() ) {
+			return new \WP_Error(
+				'rate_limit_exceeded',
+				__( 'Too many QR login scans. Please try again later.', 'woocommerce' ),
+				array( 'status' => 429 )
+			);
+		}
+
 		// Atomic mutex on the read-mutate-write window. Without this, two
 		// concurrent scans both pass the state==pending check below and both
 		// write a new challenge — last writer wins, the loser's session_id
@@ -1339,6 +1349,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$current_state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
 		if ( self::STATE_PENDING !== $current_state ) {
+			$this->release_token_scan_claim( $token_hash );
 			return new \WP_Error(
 				'qr_login_already_scanned',
 				__( 'This QR login session is no longer accepting scans.', 'woocommerce' ),
@@ -1381,6 +1392,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			$token_hash,
 			self::CHALLENGE_TTL_SECONDS + 30
 		);
+
+		$this->release_token_scan_claim( $token_hash );
 
 		return rest_ensure_response(
 			array(
@@ -1510,14 +1523,6 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$session_id     = (string) $request->get_param( 'session_id' );
 		$submitted_hash = (string) $request->get_param( 'token_hash' );
 
-		if ( ! $this->check_session_status_rate_limit( $session_id ) ) {
-			return new \WP_Error(
-				'rate_limit_exceeded',
-				__( 'Too many QR login session-status checks. Please try again later.', 'woocommerce' ),
-				array( 'status' => 429 )
-			);
-		}
-
 		$token_hash = get_transient( self::SESSION_TRANSIENT_PREFIX . hash( 'sha256', $session_id ) );
 		if ( ! is_string( $token_hash ) || '' === $token_hash ) {
 			// Either the session never existed or it has expired. Either way,
@@ -1535,6 +1540,14 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// we never leak whether the session_id is real or not.
 		if ( ! hash_equals( $token_hash, $submitted_hash ) ) {
 			return rest_ensure_response( array( 'state' => self::STATE_EXPIRED ) );
+		}
+
+		if ( ! $this->check_session_status_rate_limit( $session_id ) ) {
+			return new \WP_Error(
+				'rate_limit_exceeded',
+				__( 'Too many QR login session-status checks. Please try again later.', 'woocommerce' ),
+				array( 'status' => 429 )
+			);
 		}
 
 		$record = get_transient( self::TOKEN_TRANSIENT_PREFIX . $token_hash );

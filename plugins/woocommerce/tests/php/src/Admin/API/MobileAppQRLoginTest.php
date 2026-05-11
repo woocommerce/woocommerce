@@ -384,6 +384,16 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Build the database scan-claim option key for a plaintext token.
+	 *
+	 * @param string $token Plaintext token.
+	 * @return string
+	 */
+	private function token_scan_claim_key( string $token ): string {
+		return MobileAppQRLogin::SCAN_CLAIM_OPTION_PREFIX . $this->token_hash( $token );
+	}
+
+	/**
 	 * Issue a POST to the token-generation endpoint.
 	 *
 	 * @return \WP_REST_Response
@@ -1646,6 +1656,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertIsArray( $record );
 		$this->assertSame( MobileAppQRLogin::STATE_SCANNED, $record['state'] );
 		$this->assertSame( 'Pixel 10', $record['challenge']['device']['model'] ?? null );
+		$this->assertNotNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_SCAN, '203.0.113.10' )
+		);
+		$this->assertFalse( get_option( $this->token_scan_claim_key( $plaintext ), false ) );
 	}
 
 	/**
@@ -1660,10 +1674,28 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 426, $response->get_status() );
 		$this->assertSame( 'mobile_app_update_required', $response->get_data()['code'] );
+		$this->assertNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_SCAN, '203.0.113.10' )
+		);
 
 		// Token state must remain pending — a legacy scan must not mutate the record.
 		$record = get_transient( MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
 		$this->assertSame( MobileAppQRLogin::STATE_PENDING, $record['state'] );
+	}
+
+	/**
+	 * @testdox Scan endpoint does not consume the scan bucket for invalid random tokens.
+	 */
+	public function test_scan_invalid_token_does_not_consume_scan_rate_limit(): void {
+		wp_set_current_user( 0 );
+
+		$response = $this->dispatch_scan( 'not-a-real-token' );
+
+		$this->assertSame( 401, $response->get_status() );
+		$this->assertSame( 'invalid_token', $response->get_data()['code'] );
+		$this->assertNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_SCAN, '203.0.113.10' )
+		);
 	}
 
 	/**
@@ -1884,8 +1916,9 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		// that has already grabbed the mutex but not yet completed its
 		// state-mutation. add_option() is atomic; the second worker (this
 		// test) must observe the existing key and bail out.
-		$claim_key = MobileAppQRLogin::SCAN_CLAIM_OPTION_PREFIX . $token_hash;
-		add_option( $claim_key, (string) ( time() + 60 ), '', false );
+		$claim_key        = MobileAppQRLogin::SCAN_CLAIM_OPTION_PREFIX . $token_hash;
+		$claim_expires_at = (string) ( time() + 60 );
+		add_option( $claim_key, $claim_expires_at, '', false );
 
 		wp_set_current_user( 0 );
 		$response = $this->dispatch_scan( $plaintext );
@@ -1899,8 +1932,61 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$record = get_transient( $this->token_transient_key( $plaintext ) );
 		$this->assertIsArray( $record );
 		$this->assertSame( MobileAppQRLogin::STATE_PENDING, $record['state'] );
+		$this->assertSame(
+			$claim_expires_at,
+			get_option( $claim_key ),
+			'A rejected second scan must not release another request\'s claim.'
+		);
 
 		delete_option( $claim_key );
+	}
+
+	/**
+	 * @testdox QR login endpoints introduced after the base PR use wc_rate_limits buckets instead of transient rate rows.
+	 */
+	public function test_later_qr_endpoint_rate_limits_use_wc_rate_limits(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( $this->admin_id );
+		$this->assertSame( 200, $this->dispatch_status( $plaintext )->get_status() );
+		$this->assertNotNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_STATUS, (string) $this->admin_id )
+		);
+
+		$this->assertSame( 404, $this->dispatch_revoke( 'missing-uuid' )->get_status() );
+		$this->assertNotNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_REVOKE, (string) $this->admin_id )
+		);
+
+		wp_set_current_user( 0 );
+		$scan_response = $this->dispatch_scan( $plaintext );
+		$this->assertSame( 200, $scan_response->get_status() );
+		$this->assertNotNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_SCAN, '203.0.113.10' )
+		);
+
+		wp_set_current_user( $this->admin_id );
+		$this->assertSame(
+			200,
+			$this->dispatch_approve( $plaintext, $scan_response->get_data()['real_number'] )->get_status()
+		);
+		$this->assertNotNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_APPROVE, (string) $this->admin_id )
+		);
+
+		wp_set_current_user( 0 );
+		$this->assertSame(
+			200,
+			$this->dispatch_session_status( $scan_response->get_data()['session_id'], $plaintext )->get_status()
+		);
+		$this->assertNotNull(
+			$this->get_qr_login_rate_limit_row(
+				QRLoginRateLimits::BUCKET_SESSION_STATUS,
+				$scan_response->get_data()['session_id']
+			)
+		);
+
+		$this->assertSame( 0, $this->get_qr_login_rate_limit_transient_count() );
 	}
 
 	/**
@@ -1930,12 +2016,33 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( MobileAppQRLogin::STATE_EXPIRED, $response->get_data()['state'] );
 		$this->assertArrayNotHasKey( 'exchange_grant', $response->get_data() );
+		$this->assertNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_SESSION_STATUS, $scan_data['session_id'] )
+		);
 
 		// Correct token_hash → grant delivered.
 		$response = $this->dispatch_session_status( $scan_data['session_id'], $plaintext );
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $response->get_data()['state'] );
 		$this->assertNotEmpty( $response->get_data()['exchange_grant'] );
+		$this->assertNotNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_SESSION_STATUS, $scan_data['session_id'] )
+		);
+	}
+
+	/**
+	 * @testdox Session-status endpoint does not create rate-limit rows for random missing sessions.
+	 */
+	public function test_session_status_missing_session_does_not_consume_rate_limit(): void {
+		wp_set_current_user( 0 );
+
+		$response = $this->dispatch_session_status( 'missing-session-id', 'not-a-real-token' );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( MobileAppQRLogin::STATE_EXPIRED, $response->get_data()['state'] );
+		$this->assertNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_SESSION_STATUS, 'missing-session-id' )
+		);
 	}
 
 	/**
