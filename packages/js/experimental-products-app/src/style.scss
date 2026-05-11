@@ -6,6 +6,15 @@
 
 .product_page_woocommerce-products-dashboard {
 	background-color: unset;
+
+	/*
+	 * Select.Popup from @wordpress/ui renders into a portal at <body>; its CSS
+	 * uses var(--wp-ui-select-z-index) which is unset by default. The quick
+	 * edit drawer is at z-index: 100000, so the popup needs to be higher or
+	 * it will render behind the drawer (invisible to the user).
+	 */
+	--wp-ui-select-z-index: 100001;
+
 	@import "./fields/components/list-item/style.scss";
 	@import "./fields/downloadable/style.scss";
 	@import "./fields/images/style.scss";
