@@ -53,14 +53,17 @@
 
 /*
  * The primary column TD has no class. Target it via :has() and tighten its
- * left padding from the 12px default to 4px so the visual gap between the
- * checkbox and the first row element (image) is 4px.
+ * left padding so the visual gap between the checkbox and the first row
+ * element is 4px on parent rows and 16px on nested (variation) rows.
+ * min() caps the extra at one increment so deeper nesting doesn't compound.
  */
 .woocommerce-product-list
 	.dataviews-view-table
 	tbody
 	td:has( > .dataviews-view-table__primary-column ) {
-	padding-left: 4px !important;
+	padding-left: calc(
+		4px + min(var(--wp-dataviews-table-hierarchy-level, 0), 1) * 12px
+	) !important;
 }
 
 /*
