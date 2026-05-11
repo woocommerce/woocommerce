@@ -144,33 +144,22 @@ function wc_is_webhook_valid_topic( $topic ) {
 	}
 
 	// Topics that include a filter-added resource or event are accepted; plugins
-	// extending those lists wire delivery themselves (via the
-	// `woocommerce_webhook_topic_hooks` or `woocommerce_webhook_hooks` filters).
+	// extending the resource/event lists are expected to wire delivery via the
+	// `woocommerce_webhook_topic_hooks` or `woocommerce_webhook_hooks` filters.
 	if ( ! in_array( $data[0], $default_resources, true ) || ! in_array( $data[1], $default_events, true ) ) {
 		return true;
 	}
 
 	// Default-resource + default-event topics must correspond to a registered
 	// hook. Pairs without one (e.g. `order.published`, `customer.restored`) save
-	// as Active webhooks but never deliver, so reject them at create time.
-	$default_topics = array(
-		'coupon.created',
-		'coupon.updated',
-		'coupon.deleted',
-		'coupon.restored',
-		'customer.created',
-		'customer.updated',
-		'customer.deleted',
-		'order.created',
-		'order.updated',
-		'order.deleted',
-		'order.restored',
-		'product.created',
-		'product.updated',
-		'product.deleted',
-		'product.restored',
-		'product.published',
-	);
+	// as Active webhooks but never deliver, so reject them.
+	//
+	// The allowlist is derived from `WC_Webhook::get_default_topic_hooks()`,
+	// which runs through the `woocommerce_webhook_topic_hooks` filter.
+	// Extensions that register hooks for an otherwise-empty default pair (via
+	// that filter) are therefore honored automatically, with no separate
+	// allowlist to keep in sync.
+	$default_topics = array_keys( array_filter( WC_Webhook::get_default_topic_hooks() ) );
 
 	return in_array( $topic, $default_topics, true );
 }
