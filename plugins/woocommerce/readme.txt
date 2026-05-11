@@ -170,7 +170,7 @@ WooCommerce comes with some sample data you can use to see how products look; im
 
 == Changelog ==
 
-= 10.8.0-beta.2 2026-XX-XX =
+= 10.8.0-beta.2 2026-05-11 =
 
 **WooCommerce**
 
@@ -248,6 +248,10 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Fix - Strip sensitive fields (downloads, COGS, purchase note) from V4 products REST API response for users without product management capabilities. [#63895](https://github.com/woocommerce/woocommerce/pull/63895)
 * Fix - Suppress harmless duplicate key database errors logged during WooCommerce table creation on update. [#64188](https://github.com/woocommerce/woocommerce/pull/64188)
 * Fix - Use default cursor in Product Gallery large image when it's not clickable [#63956](https://github.com/woocommerce/woocommerce/pull/63956)
+* Fix - Add row layout data to the WooCommerce Shipping partner suggestion so the card renders correctly in row / vertical placements. [#64593](https://github.com/woocommerce/woocommerce/pull/64593)
+* Fix - Fix PHP 8.5 fatal error when unsetting string offsets in StoreApi AbstractSchema [#64670](https://github.com/woocommerce/woocommerce/pull/64670)
+* Fix - Prevent re-entrant order reads triggered by cached refund objects. [#64657](https://github.com/woocommerce/woocommerce/pull/64657)
+* Fix - Revert PR 62843 which added checkout evidence validation to WC_Order::payment_complete() [#64687](https://github.com/woocommerce/woocommerce/pull/64687)
 * Add - Add a GraphQL settings section under Advanced with a toggle for the GET endpoint. [#64293](https://github.com/woocommerce/woocommerce/pull/64293)
 * Add - Add an offline banner to WooCommerce admin that appears when the browser loses its connection, and surface a clear notice when save requests fail silently due to network loss. [#64334](https://github.com/woocommerce/woocommerce/pull/64334)
 * Add - Add auto-generation mode to the coupon code email block, allowing users to configure coupon rules that generate unique codes at send time. [#64342](https://github.com/woocommerce/woocommerce/pull/64342)
@@ -255,6 +259,12 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Add - Add woocommerce_email_order_details_heading and woocommerce_email_display_order_number filters to the email order details template. [#63898](https://github.com/woocommerce/woocommerce/pull/63898)
 * Add - Export Skeleton component via PaymentMethodInterface components prop for payment gateway extensions. [#63788](https://github.com/woocommerce/woocommerce/pull/63788)
 * Add - Introduce the dual code + GraphQL API for WooCommerce [#63772](https://github.com/woocommerce/woocommerce/pull/63772)
+* Add - Add a new "Review request" transactional email that invites customers to review the products they purchased. Disabled by default and configurable under WooCommerce → Settings → Emails. [#64624](https://github.com/woocommerce/woocommerce/pull/64624)
+* Add - Add a `/review-order/{id}/?key={order_key}` URL and a tokenized, read-only landing page for the Customer Review Request feature, plus the public `wc_get_review_order_url()` helper. The page is read-only; form controls land in a follow-up. [#64628](https://github.com/woocommerce/woocommerce/pull/64628)
+* Add - Add the accessible 5-star rating control used by the Review Order page. Native radio inputs with keyboard navigation (arrows, Home, End), dynamic caption, and visible focus ring; filterable labels via `woocommerce_review_order_rating_labels`. [#64689](https://github.com/woocommerce/woocommerce/pull/64689)
+* Add - Add the accessible 5-star rating control used by the Review Order page. Native radio inputs with keyboard navigation (arrows, Home, End), dynamic caption, and visible focus ring; filterable labels via `woocommerce_review_order_rating_labels`. [#64701](https://github.com/woocommerce/woocommerce/pull/64701)
+* Add - Add the per-item review form row on the Review Order page: linked product title, thumbnail, accessible star rating, review textarea, and an extensions hook (`woocommerce_review_order_form_fields`). Submit button is gated on at least one rating being selected. Narrow-viewport layout stacks the row vertically below 600px. [#64701](https://github.com/woocommerce/woocommerce/pull/64701)
+* Add - Schedule the Review request email via Action Scheduler so it fires automatically a configurable number of days after an order is completed, and cancel the pending send when the order is cancelled, refunded, trashed or deleted. [#64625](https://github.com/woocommerce/woocommerce/pull/64625)
 * Update - Add a woocommerce/product-context iAPI store for use in Add to Cart with Options [#63208](https://github.com/woocommerce/woocommerce/pull/63208)
 * Update - Add to Cart Button: open external products link in a new tab [#63970](https://github.com/woocommerce/woocommerce/pull/63970)
 * Update - Bump @wordpress/* dependencies to the wp-6.8 minimum across the admin, blocks, email-editor, product-editor, and settings-editor packages. [#64114](https://github.com/woocommerce/woocommerce/pull/64114)
@@ -269,6 +279,8 @@ WooCommerce comes with some sample data you can use to see how products look; im
 * Update - Replace 'Return to Cart' link with a cart icon in the checkout header [#63678](https://github.com/woocommerce/woocommerce/pull/63678)
 * Update - Shorten the email editor reset action label from "Reset content to default" to "Reset" for consistency with site template resets and to reduce i18n overhead. [#63828](https://github.com/woocommerce/woocommerce/pull/63828)
 * Update - Update copy on the activate payments step in NOX [#63919](https://github.com/woocommerce/woocommerce/pull/63919)
+* Update - Show all country-relevant shipping partner recommendations on the settings page even when one of the partners is already installed. [#64629](https://github.com/woocommerce/woocommerce/pull/64629)
+* Update - Stamp the new `_wc_email_template_last_core_render` and `_wc_email_backfilled` post meta during email template sync so 10.9's three-way diff change-summary has a base reference on 10.8-era posts. [#64728](https://github.com/woocommerce/woocommerce/pull/64728)
 * Dev - Add internal WCEmailTemplateSyncRegistry helper that resolves block email templates participating in template update propagation via their @version header. No runtime behaviour change yet. [#64261](https://github.com/woocommerce/woocommerce/pull/64261)
 * Dev - Add server-side POST /woocommerce-email-editor/v1/emails/{id}/reset endpoint that atomically rewrites a woo_email post to its current core template render and stamps sync meta (version, source hash, synced-at, status=in_sync). [#64355](https://github.com/woocommerce/woocommerce/pull/64355)
 * Dev - Backfill template sync metadata onto pre-existing block email posts during upgrade so the divergence detector can classify legacy installs safely. [#64364](https://github.com/woocommerce/woocommerce/pull/64364)
