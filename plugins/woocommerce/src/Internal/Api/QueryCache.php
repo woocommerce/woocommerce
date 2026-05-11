@@ -172,7 +172,11 @@ class QueryCache {
 		if ( $for_apq || Main::is_object_cache_enabled() ) {
 			$cached = wp_cache_get( $this->build_cache_key( $hash ), self::CACHE_GROUP );
 			if ( is_array( $cached ) ) {
-				return AST::fromArray( $cached );
+				try {
+					return AST::fromArray( $cached );
+				} catch ( \Throwable ) {
+					return false;
+				}
 			}
 		}
 

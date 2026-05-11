@@ -219,6 +219,24 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox resolve treats a malformed object-cache entry as a cache miss and reparses.
+	 */
+	public function test_resolve_treats_malformed_object_cache_entry_as_miss(): void {
+		update_option( Main::OPTION_OBJECT_CACHE_ENABLED, 'yes' );
+
+		$query = '{ __typename }';
+		wp_cache_set( $this->cache_key_for( $query ), array( 'not' => 'a valid AST' ), 'wc-graphql' );
+
+		$result = $this->sut->resolve( $query, array() );
+
+		$this->assertInstanceOf(
+			DocumentNode::class,
+			$result,
+			'A corrupted cache payload must be treated as a miss and the query reparsed.'
+		);
+	}
+
+	/**
 	 * @testdox resolve writes a parsed AST as a PHP file when OPcache is enabled and the dir is writable.
 	 */
 	public function test_resolve_writes_to_opcache_file_when_toggle_on(): void {
