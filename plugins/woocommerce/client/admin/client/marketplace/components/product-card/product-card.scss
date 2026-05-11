@@ -129,6 +129,8 @@
 		}
 
 		&__title {
+			--woocommerce-marketplace-product-card-title-focus-width: var(--wp-admin-border-width-focus, 2px);
+
 			display: -webkit-box;
 			-webkit-box-orient: vertical;
 			-webkit-line-clamp: 2;
@@ -137,8 +139,11 @@
 			font-style: normal;
 			font-weight: 600;
 			line-height: $large-gap;
-			margin: -4px 0 0;
-			padding: 0;
+			margin:
+				calc(-4px - var(--woocommerce-marketplace-product-card-title-focus-width))
+				calc(-1 * var(--woocommerce-marketplace-product-card-title-focus-width))
+				calc(-1 * var(--woocommerce-marketplace-product-card-title-focus-width));
+			padding: var(--woocommerce-marketplace-product-card-title-focus-width);
 			overflow: hidden;
 			text-overflow: ellipsis;
 		}
@@ -444,4 +449,3 @@
 		}
 	}
 }
-
