@@ -67,16 +67,14 @@
 
 /*
  * Primary cell left padding: 0px on parent rows (checkbox cell's right padding
- * supplies the 16px gap), 16px on nested rows (checkbox cell's right padding
- * is 0, so the gap comes from here). Result: 16px checkbox-to-image gap on
- * every row.
+ * supplies the parent's 16px gap), 12px on nested rows.
  */
 .woocommerce-product-list
 	.dataviews-view-table
 	tbody
 	td:has( > .dataviews-view-table__primary-column ) {
 	padding-left: calc(
-		min(var(--wp-dataviews-table-hierarchy-level, 0), 1) * 16px
+		min(var(--wp-dataviews-table-hierarchy-level, 0), 1) * 12px
 	) !important;
 }
 
