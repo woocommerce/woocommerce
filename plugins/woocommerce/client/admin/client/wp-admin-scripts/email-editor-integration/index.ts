@@ -21,12 +21,14 @@ import { modifySidebar } from './sidebar_settings';
 import { registerEmailValidationRules } from './email-validation';
 import getResetNotificationEmailContentAction from './reset-notification-email-content';
 import { ReviewUpdatePlugin } from './review-update-plugin';
+import { UpdateBannerPlugin } from './update-banner-plugin';
 import {
 	registerStore as registerIntegrationStore,
 	STORE_NAME as INTEGRATION_STORE_NAME,
 } from './store';
 
 import './style.scss';
+import './update-banner.scss';
 
 addFilter( 'woocommerce_email_editor_send_button_label', NAME_SPACE, () =>
 	__( 'Save email', 'woocommerce' )
@@ -96,6 +98,16 @@ registerPlugin( 'woocommerce-email-editor-review-update', {
 	render: ReviewUpdatePlugin,
 } );
 
+// Register the update banner plugin (RSM-141). Mounts a floating banner
+// over the editor canvas when the open email post is classified
+// `core_updated_customized`. Reads dismiss + viewed-dedup state from the
+// integration store; consumes useChangeSummary (RSM-142) and
+// useApplyUpdate (RSM-143) for content + apply.
+registerPlugin( 'woocommerce-email-editor-update-banner', {
+	scope: 'woocommerce-email-editor',
+	render: UpdateBannerPlugin,
+} );
+
 // Deep-link contract: opens the review drawer when arriving with
 // `?wc_email_review_drawer=1` (set by the email list page's update indicator).
 if (
@@ -104,6 +116,12 @@ if (
 	) === '1'
 ) {
 	dispatch( INTEGRATION_STORE_NAME ).openReviewDrawer();
+
+	// Strip the param from the URL so a refresh doesn't re-trigger the
+	// drawer auto-open. RSM-141 §5.2.
+	const url = new URL( window.location.href );
+	url.searchParams.delete( 'wc_email_review_drawer' );
+	window.history.replaceState( {}, '', url.pathname + url.search + url.hash );
 }
 
 /**

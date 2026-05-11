@@ -44,6 +44,16 @@ export type EmailType = {
 	status?: EmailStatus;
 	templateStatus: TemplateStatus | null;
 	templateVersion: string | null;
+	/**
+	 * Registry-side current version of the canonical core template for this
+	 * email. Sourced from `WCEmailTemplateSyncRegistry::get_email_sync_config()`
+	 * server-side; serialized as `current_version` in the slotfill payload
+	 * and projected to camelCase in the data hook. Combined with
+	 * `templateVersion` to gate the "update available" indicator on both
+	 * surfaces (list cell + RSM-141 editor banner): show only when the
+	 * merchant has not yet reviewed this version.
+	 */
+	currentVersion: string | null;
 };
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
