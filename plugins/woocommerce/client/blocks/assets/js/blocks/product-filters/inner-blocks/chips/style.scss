@@ -125,11 +125,10 @@
 
 		&:focus {
 			border-color: color-mix(in srgb, currentColor 60%, transparent);
+			outline: none;
 		}
 
 		&[aria-checked="true"] {
-			background: transparent;
-			color: inherit;
 			border-color: var(--wc-product-filters-text-color, CanvasText);
 		}
 	}
