@@ -41,13 +41,33 @@
 }
 
 /*
+ * Tighten the hierarchy column's right padding so the visual gap between the
+ * variation chevron and the row checkbox is 4 + 12 = 16px (DataViews defaults
+ * to 12 + 12 = 24px).
+ */
+.woocommerce-product-list
+	.dataviews-view-table
+	.dataviews-view-table__hierarchy-column {
+	padding-right: 4px;
+}
+
+/*
  * Override the DataViews default of 0 right padding on the checkbox cell so
- * there is a consistent 8px gap between the checkbox and the next column.
+ * there is a consistent 8px gap on the right of the checkbox. Combined with
+ * the primary column's left padding (8px below) this gives a total 16px gap
+ * between the checkbox and the first element of the row (image).
  */
 .woocommerce-product-list
 	.dataviews-view-table
 	.dataviews-view-table__checkbox-column {
 	padding-right: 8px;
+}
+
+.woocommerce-product-list
+	.dataviews-view-table
+	tbody
+	td:has( .dataviews-view-table__primary-column ) {
+	padding-left: 8px;
 }
 
 /*
