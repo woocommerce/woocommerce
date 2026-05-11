@@ -413,19 +413,25 @@ class RestAbilityFactory {
 	 *    requires, and `format: "uri"` fields routinely return empty strings.
 	 * 2. Scalar `type` values (`string`, `integer`, `number`, `boolean`) are unioned
 	 *    with `null` so unset fields validate. Object and array types are left alone.
+	 *    Skipped inside `anyOf` / `oneOf` / `allOf` branches: unioning `null` into
+	 *    every branch of a `oneOf` makes `null` match multiple branches at once and
+	 *    breaks the "exactly one" rule, and for `anyOf` / `allOf` the schema author
+	 *    was explicit about which branches admit `null`.
 	 *
-	 * Recurses into `properties`, `items`, `additionalProperties`, and the `anyOf` /
-	 * `oneOf` / `allOf` combiners.
+	 * Recurses into `properties`, `items` (single schema and tuple form),
+	 * `additionalProperties`, and the `anyOf` / `oneOf` / `allOf` combiners.
 	 *
-	 * @param array $schema A JSON Schema node.
+	 * @param array $schema           A JSON Schema node.
+	 * @param bool  $apply_null_union Whether to apply the scalar-to-nullable widening at this node.
+	 *                                False when recursing into combiner branches.
 	 * @return array Relaxed schema node.
 	 */
-	private static function relax_output_schema_for_wc_quirks( array $schema ): array {
+	private static function relax_output_schema_for_wc_quirks( array $schema, bool $apply_null_union = true ): array {
 		if ( isset( $schema['format'] ) && in_array( $schema['format'], array( 'date-time', 'uri' ), true ) ) {
 			unset( $schema['format'] );
 		}
 
-		if ( isset( $schema['type'] ) && is_string( $schema['type'] ) && in_array( $schema['type'], self::NULLABLE_SCALAR_TYPES, true ) ) {
+		if ( $apply_null_union && isset( $schema['type'] ) && is_string( $schema['type'] ) && in_array( $schema['type'], self::NULLABLE_SCALAR_TYPES, true ) ) {
 			$schema['type'] = array( $schema['type'], 'null' );
 		}
 
@@ -438,7 +444,16 @@ class RestAbilityFactory {
 		}
 
 		if ( isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
-			$schema['items'] = self::relax_output_schema_for_wc_quirks( $schema['items'] );
+			if ( isset( $schema['items'][0] ) ) {
+				// Tuple form: each numerically-indexed entry validates the array element at that position.
+				foreach ( $schema['items'] as $index => $entry ) {
+					if ( is_array( $entry ) ) {
+						$schema['items'][ $index ] = self::relax_output_schema_for_wc_quirks( $entry );
+					}
+				}
+			} else {
+				$schema['items'] = self::relax_output_schema_for_wc_quirks( $schema['items'] );
+			}
 		}
 
 		if ( isset( $schema['additionalProperties'] ) && is_array( $schema['additionalProperties'] ) ) {
@@ -449,7 +464,7 @@ class RestAbilityFactory {
 			if ( isset( $schema[ $combiner ] ) && is_array( $schema[ $combiner ] ) ) {
 				foreach ( $schema[ $combiner ] as $index => $branch ) {
 					if ( is_array( $branch ) ) {
-						$schema[ $combiner ][ $index ] = self::relax_output_schema_for_wc_quirks( $branch );
+						$schema[ $combiner ][ $index ] = self::relax_output_schema_for_wc_quirks( $branch, false );
 					}
 				}
 			}

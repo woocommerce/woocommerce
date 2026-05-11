@@ -1039,7 +1039,7 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should relax sub-schemas inside anyOf, oneOf, and allOf combiners.
+	 * @testdox Should strip formats inside combiner sub-schemas but skip null-union there.
 	 */
 	public function test_output_schema_relaxes_combiner_sub_schemas(): void {
 		$controller = $this->create_mock_controller_with_item_schema(
@@ -1075,10 +1075,66 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		$schema = $this->invoke_get_output_schema( $controller, 'get' );
 
 		$this->assertArrayNotHasKey( 'format', $schema['properties']['either']['anyOf'][0], 'anyOf branch should have format: date-time stripped' );
-		$this->assertSame( array( 'string', 'null' ), $schema['properties']['either']['anyOf'][0]['type'] );
-		$this->assertSame( array( 'integer', 'null' ), $schema['properties']['either']['anyOf'][1]['type'] );
+		$this->assertSame( 'string', $schema['properties']['either']['anyOf'][0]['type'], 'null should not be unioned inside combiner branches' );
+		$this->assertSame( 'integer', $schema['properties']['either']['anyOf'][1]['type'] );
 		$this->assertArrayNotHasKey( 'format', $schema['properties']['one_of']['oneOf'][0], 'oneOf branch should have format: uri stripped' );
-		$this->assertSame( array( 'number', 'null' ), $schema['properties']['all_of']['allOf'][0]['type'] );
+		$this->assertSame( 'string', $schema['properties']['one_of']['oneOf'][0]['type'] );
+		$this->assertSame( 'number', $schema['properties']['all_of']['allOf'][0]['type'] );
+	}
+
+	/**
+	 * @testdox Should preserve oneOf semantics by not adding null to every branch.
+	 */
+	public function test_output_schema_preserves_oneof_exactly_one_semantics(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'value' => array(
+						'oneOf' => array(
+							array( 'type' => 'string' ),
+							array( 'type' => 'integer' ),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$branches = $schema['properties']['value']['oneOf'];
+		$this->assertSame( 'string', $branches[0]['type'], 'oneOf branches must remain non-nullable so null does not match every branch and break the "exactly one" rule' );
+		$this->assertSame( 'integer', $branches[1]['type'] );
+	}
+
+	/**
+	 * @testdox Should relax each entry of a tuple-form items array.
+	 */
+	public function test_output_schema_relaxes_tuple_form_items(): void {
+		$controller = $this->create_mock_controller_with_item_schema(
+			array(
+				'type'       => 'object',
+				'properties' => array(
+					'pair' => array(
+						'type'  => 'array',
+						'items' => array(
+							array(
+								'type'   => 'string',
+								'format' => 'date-time',
+							),
+							array( 'type' => 'integer' ),
+						),
+					),
+				),
+			)
+		);
+
+		$schema = $this->invoke_get_output_schema( $controller, 'get' );
+
+		$items = $schema['properties']['pair']['items'];
+		$this->assertArrayNotHasKey( 'format', $items[0], 'first tuple entry should have format stripped' );
+		$this->assertSame( array( 'string', 'null' ), $items[0]['type'], 'tuple entries are positional and not combiner branches, so null-union applies' );
+		$this->assertSame( array( 'integer', 'null' ), $items[1]['type'] );
 	}
 
 	/**
