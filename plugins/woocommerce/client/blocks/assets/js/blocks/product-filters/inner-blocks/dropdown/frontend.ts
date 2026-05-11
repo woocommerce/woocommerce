@@ -63,7 +63,6 @@ store(
 					parent.actions.removeActiveFiltersBy(
 						( filter ) => filter.type === filterItemType
 					);
-					parent.actions.navigate();
 				}
 
 				const row = parent.state.selectableItems.find(
