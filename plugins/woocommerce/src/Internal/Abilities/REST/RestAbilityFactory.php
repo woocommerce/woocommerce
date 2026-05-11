@@ -170,6 +170,12 @@ class RestAbilityFactory {
 	private static $valid_types = array( 'string', 'number', 'integer', 'boolean', 'object', 'array', 'null' );
 
 	/**
+	 * Subset of {@see self::$valid_types} that gets a `null` union in output schemas
+	 * to accommodate fields WooCommerce REST controllers may return as `null`.
+	 */
+	private const NULLABLE_SCALAR_TYPES = array( 'string', 'integer', 'number', 'boolean' );
+
+	/**
 	 * Sanitize WordPress REST args to valid JSON Schema format.
 	 *
 	 * Converts WordPress REST API argument arrays to JSON Schema by:
@@ -392,6 +398,67 @@ class RestAbilityFactory {
 	}
 
 	/**
+	 * Recursively relax an output schema so it accepts the shapes WooCommerce REST
+	 * controllers actually return.
+	 *
+	 * Used on output schemas only — input schemas keep their tighter constraints so
+	 * MCP clients still get useful hints when formatting tool calls. Must run AFTER
+	 * {@see self::sanitize_schema()}, which converts the `date-time` pseudo-type to
+	 * `type: "string"` + `format: "date-time"` — this method then strips the format.
+	 *
+	 * Relaxations:
+	 *
+	 * 1. `format: "date-time"` and `format: "uri"` are stripped. WooCommerce REST
+	 *    date strings (e.g. `2025-11-24T16:31:43`) omit the timezone suffix RFC 3339
+	 *    requires, and `format: "uri"` fields routinely return empty strings.
+	 * 2. Scalar `type` values (`string`, `integer`, `number`, `boolean`) are unioned
+	 *    with `null` so unset fields validate. Object and array types are left alone.
+	 *
+	 * Recurses into `properties`, `items`, `additionalProperties`, and the `anyOf` /
+	 * `oneOf` / `allOf` combiners.
+	 *
+	 * @param array $schema A JSON Schema node.
+	 * @return array Relaxed schema node.
+	 */
+	private static function relax_output_schema_for_wc_quirks( array $schema ): array {
+		if ( isset( $schema['format'] ) && in_array( $schema['format'], array( 'date-time', 'uri' ), true ) ) {
+			unset( $schema['format'] );
+		}
+
+		if ( isset( $schema['type'] ) && is_string( $schema['type'] ) && in_array( $schema['type'], self::NULLABLE_SCALAR_TYPES, true ) ) {
+			$schema['type'] = array( $schema['type'], 'null' );
+		}
+
+		if ( isset( $schema['properties'] ) && is_array( $schema['properties'] ) ) {
+			foreach ( $schema['properties'] as $key => $property ) {
+				if ( is_array( $property ) ) {
+					$schema['properties'][ $key ] = self::relax_output_schema_for_wc_quirks( $property );
+				}
+			}
+		}
+
+		if ( isset( $schema['items'] ) && is_array( $schema['items'] ) ) {
+			$schema['items'] = self::relax_output_schema_for_wc_quirks( $schema['items'] );
+		}
+
+		if ( isset( $schema['additionalProperties'] ) && is_array( $schema['additionalProperties'] ) ) {
+			$schema['additionalProperties'] = self::relax_output_schema_for_wc_quirks( $schema['additionalProperties'] );
+		}
+
+		foreach ( array( 'anyOf', 'oneOf', 'allOf' ) as $combiner ) {
+			if ( isset( $schema[ $combiner ] ) && is_array( $schema[ $combiner ] ) ) {
+				foreach ( $schema[ $combiner ] as $index => $branch ) {
+					if ( is_array( $branch ) ) {
+						$schema[ $combiner ][ $index ] = self::relax_output_schema_for_wc_quirks( $branch );
+					}
+				}
+			}
+		}
+
+		return $schema;
+	}
+
+	/**
 	 * Get output schema for operation.
 	 *
 	 * @param object $controller REST controller instance.
@@ -401,6 +468,7 @@ class RestAbilityFactory {
 	private static function get_output_schema( $controller, string $operation ): array {
 		if ( method_exists( $controller, 'get_item_schema' ) ) {
 			$schema = self::sanitize_schema( $controller->get_item_schema() );
+			$schema = self::relax_output_schema_for_wc_quirks( $schema );
 
 			if ( 'list' === $operation ) {
 				// For list operations, return object wrapping array of items.
