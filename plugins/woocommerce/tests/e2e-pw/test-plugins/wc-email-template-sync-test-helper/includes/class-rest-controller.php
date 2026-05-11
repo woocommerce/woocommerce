@@ -110,6 +110,26 @@ class REST_Controller {
 				),
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/set-option',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'set_option' ),
+				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/delete-option',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'delete_option_value' ),
+				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+			)
+		);
 	}
 
 	/**
@@ -349,6 +369,46 @@ class REST_Controller {
 		unset( $request );
 		delete_option( Tracks_Recorder::LOG_OPTION );
 		return new WP_REST_Response( array( 'cleared' => true ), 200 );
+	}
+
+	/**
+	 * Write a typed value to a WordPress option, preserving array/object structure.
+	 * Body shape: `{ "option_name": string, "option_value": mixed }`. Unlike the
+	 * shared `e2e-options/update` endpoint, this preserves arrays and nested objects
+	 * because it pulls the value from the JSON body rather than sanitize_text_field.
+	 *
+	 * @param WP_REST_Request $request The REST request.
+	 * @return WP_REST_Response
+	 */
+	public function set_option( WP_REST_Request $request ): WP_REST_Response {
+		$body = $request->get_json_params();
+		if ( ! is_array( $body ) || ! isset( $body['option_name'] ) ) {
+			return new WP_REST_Response( array( 'error' => 'Body must include option_name' ), 400 );
+		}
+
+		$option_name  = (string) $body['option_name'];
+		$option_value = $body['option_value'] ?? '';
+
+		update_option( $option_name, $option_value, false );
+
+		return new WP_REST_Response( array( 'ok' => true ), 200 );
+	}
+
+	/**
+	 * Delete a WordPress option. Body shape: `{ "option_name": string }`.
+	 *
+	 * @param WP_REST_Request $request The REST request.
+	 * @return WP_REST_Response
+	 */
+	public function delete_option_value( WP_REST_Request $request ): WP_REST_Response {
+		$body = $request->get_json_params();
+		if ( ! is_array( $body ) || ! isset( $body['option_name'] ) ) {
+			return new WP_REST_Response( array( 'error' => 'Body must include option_name' ), 400 );
+		}
+
+		delete_option( (string) $body['option_name'] );
+
+		return new WP_REST_Response( array( 'ok' => true ), 200 );
 	}
 
 	/**
