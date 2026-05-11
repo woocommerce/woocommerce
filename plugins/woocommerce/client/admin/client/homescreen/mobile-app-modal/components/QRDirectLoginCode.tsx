@@ -2,11 +2,7 @@
  * External dependencies
  */
 import { QRCodeSVG } from 'qrcode.react';
-import React, {
-	createInterpolateElement,
-	useEffect,
-	useRef,
-} from '@wordpress/element';
+import React, { createInterpolateElement, useEffect } from '@wordpress/element';
 import { Button, Spinner } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
@@ -25,41 +21,20 @@ export const QRDirectLoginCode = () => {
 		errorMessage,
 		fetchToken,
 		refreshToken,
-	} = useQRLoginToken();
+	} = useQRLoginToken( {
+		onReady: () => {
+			recordEvent( 'mobile_app_qr_direct_login_displayed' );
+		},
+		onError: ( nextErrorMessage ) => {
+			recordEvent( 'mobile_app_qr_direct_login_failed', {
+				error_message: nextErrorMessage,
+			} );
+		},
+	} );
 
 	useEffect( () => {
 		fetchToken();
 	}, [ fetchToken ] );
-
-	// Fire the displayed event only once a QR code is actually shown, so
-	// funnel analysis (display → scan → login) doesn't conflate users who
-	// only ever saw LOADING/ERROR with users who saw a real code.
-	const displayedTrackedRef = useRef( false );
-	useEffect( () => {
-		if (
-			state === QRLoginTokenStates.READY &&
-			! displayedTrackedRef.current
-		) {
-			displayedTrackedRef.current = true;
-			recordEvent( 'mobile_app_qr_direct_login_displayed' );
-		}
-	}, [ state ] );
-
-	// Mirror the displayed-event semantics for ERROR transitions so the funnel
-	// has symmetric attribution: each entry into the error state fires once,
-	// and a successful retry (back to LOADING/READY) re-arms tracking so a
-	// later failure is recorded again.
-	const errorTrackedRef = useRef( false );
-	useEffect( () => {
-		if ( state === QRLoginTokenStates.ERROR && ! errorTrackedRef.current ) {
-			errorTrackedRef.current = true;
-			recordEvent( 'mobile_app_qr_direct_login_failed', {
-				error_message: errorMessage ?? '',
-			} );
-		} else if ( state !== QRLoginTokenStates.ERROR ) {
-			errorTrackedRef.current = false;
-		}
-	}, [ state, errorMessage ] );
 
 	const formatTime = ( seconds: number ) => {
 		const mins = Math.floor( seconds / 60 );

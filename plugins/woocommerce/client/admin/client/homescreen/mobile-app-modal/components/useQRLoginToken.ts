@@ -23,7 +23,15 @@ type QRLoginTokenResponse = {
 	ttl: number;
 };
 
-export const useQRLoginToken = () => {
+type UseQRLoginTokenOptions = {
+	onReady?: () => void;
+	onError?: ( errorMessage: string ) => void;
+};
+
+export const useQRLoginToken = ( {
+	onReady,
+	onError,
+}: UseQRLoginTokenOptions = {} ) => {
 	const [ state, setState ] = useState< QRLoginTokenState >(
 		QRLoginTokenStates.IDLE
 	);
@@ -32,6 +40,11 @@ export const useQRLoginToken = () => {
 	const [ errorMessage, setErrorMessage ] = useState< string | null >( null );
 	const timerRef = useRef< ReturnType< typeof setInterval > | null >( null );
 	const expiresAtRef = useRef< number >( 0 );
+	const onReadyRef = useRef( onReady );
+	const onErrorRef = useRef( onError );
+
+	onReadyRef.current = onReady;
+	onErrorRef.current = onError;
 
 	const clearTimer = useCallback( () => {
 		if ( timerRef.current ) {
@@ -93,33 +106,33 @@ export const useQRLoginToken = () => {
 			setQrUrl( response.qr_url );
 			setState( QRLoginTokenStates.READY );
 			startCountdown( response.expires_at );
+			onReadyRef.current?.();
 		} catch ( error: unknown ) {
-			setState( QRLoginTokenStates.ERROR );
-
 			const err = error as { code?: string; message?: string };
+			let nextErrorMessage: string;
+
 			if ( err.code === 'rate_limit_exceeded' ) {
-				setErrorMessage(
-					__(
-						'Too many requests. Please try again in a few minutes.',
-						'woocommerce'
-					)
+				nextErrorMessage = __(
+					'Too many requests. Please try again in a few minutes.',
+					'woocommerce'
 				);
 			} else if ( err.code === 'ssl_required' ) {
-				setErrorMessage(
-					__(
-						'QR login requires an HTTPS connection.',
-						'woocommerce'
-					)
+				nextErrorMessage = __(
+					'QR login requires an HTTPS connection.',
+					'woocommerce'
 				);
 			} else {
-				setErrorMessage(
+				nextErrorMessage =
 					err.message ||
-						__(
-							'Failed to generate QR login code. Please try again.',
-							'woocommerce'
-						)
-				);
+					__(
+						'Failed to generate QR login code. Please try again.',
+						'woocommerce'
+					);
 			}
+
+			setErrorMessage( nextErrorMessage );
+			setState( QRLoginTokenStates.ERROR );
+			onErrorRef.current?.( nextErrorMessage );
 		}
 	}, [ startCountdown ] );
 
