@@ -53,6 +53,13 @@ class AbilitiesLoader {
 	private const LOG_SOURCE = 'woocommerce-abilities';
 
 	/**
+	 * Core ability instances registered by this loader in the current request.
+	 *
+	 * @var array<string, object>
+	 */
+	private static array $registered_core_abilities = array();
+
+	/**
 	 * Initialize ability registration hooks.
 	 *
 	 * @internal
@@ -110,15 +117,31 @@ class AbilitiesLoader {
 			}
 
 			if ( function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_name ) ) {
+				$existing_ability = function_exists( 'wp_get_ability' ) ? wp_get_ability( $ability_name ) : null;
+
+				if (
+					$is_core_ability
+					&& isset( self::$registered_core_abilities[ $ability_name ] )
+					&& $existing_ability === self::$registered_core_abilities[ $ability_name ]
+				) {
+					continue;
+				}
+
 				if ( ! $is_core_ability || ! function_exists( 'wp_unregister_ability' ) ) {
 					continue;
 				}
 
+				// Drop stale instance tracking before replacing a shadowed registration.
+				unset( self::$registered_core_abilities[ $ability_name ] );
 				wp_unregister_ability( $ability_name );
 				self::log_replaced_reserved_ability( $ability_name, $class_name );
 			}
 
-			wp_register_ability( $ability_name, $class_name::get_registration_args() );
+			$registered_ability = wp_register_ability( $ability_name, $class_name::get_registration_args() );
+
+			if ( $is_core_ability && null !== $registered_ability ) {
+				self::$registered_core_abilities[ $ability_name ] = $registered_ability;
+			}
 		}
 	}
 

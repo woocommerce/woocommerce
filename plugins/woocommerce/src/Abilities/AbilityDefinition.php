@@ -11,6 +11,8 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Defines a WooCommerce ability registration class.
+ *
+ * @since 10.9.0
  */
 interface AbilityDefinition {
 
