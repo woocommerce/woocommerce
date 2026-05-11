@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Harden the mobile-app QR login exchange endpoint: atomically claim tokens before reading them to enforce single-use under concurrent requests, and key the per-IP rate limiter on REMOTE_ADDR only so clients cannot spoof an X-Forwarded-For header to bypass the cap.

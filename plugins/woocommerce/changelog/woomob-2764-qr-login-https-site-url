@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Ensure the mobile-app QR login endpoints refuse to return credentials bound to a non-HTTPS site URL so a stale `siteurl` behind a misconfigured proxy cannot cause tokens to travel in cleartext.
