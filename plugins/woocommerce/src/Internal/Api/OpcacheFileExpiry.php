@@ -41,10 +41,14 @@ class OpcacheFileExpiry {
 			return 0;
 		}
 
-		$cutoff = time() - self::FILE_TTL;
+		$files = glob( $dir . '/*.php' );
+		if ( false === $files ) {
+			return 0;
+		}
 
-		$count = 0;
-		foreach ( glob( $dir . '/*.php' ) ?: array() as $path ) {
+		$cutoff = time() - self::FILE_TTL;
+		$count  = 0;
+		foreach ( $files as $path ) {
 			$mtime = $fs->mtime( $path );
 			if ( false !== $mtime && $mtime < $cutoff && $fs->delete( $path ) ) {
 				++$count;

@@ -29,6 +29,9 @@ class OpcacheFileExpiryTest extends WC_Unit_Test_Case {
 		}
 	}
 
+	/**
+	 * Clean up filters, temp dirs, and scheduled actions between tests.
+	 */
 	public function tearDown(): void {
 		remove_all_filters( 'woocommerce_graphql_opcache_cache_dir' );
 		foreach ( $this->temp_dirs_to_clean as $dir ) {
@@ -51,7 +54,7 @@ class OpcacheFileExpiryTest extends WC_Unit_Test_Case {
 		$expired = $dir . '/' . str_repeat( 'b', 64 ) . '.php';
 		file_put_contents( $fresh, '<?php return array();' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 		file_put_contents( $expired, '<?php return array();' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		touch( $expired, time() - OpcacheFileExpiry::FILE_TTL - 1 );
+		touch( $expired, time() - OpcacheFileExpiry::FILE_TTL - 1 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
 
 		$deleted = OpcacheFileExpiry::delete_expired_files();
 
@@ -96,6 +99,8 @@ class OpcacheFileExpiryTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Recursively remove a directory tree.
+	 *
+	 * @param string $dir Path to remove.
 	 */
 	private function rrmdir( string $dir ): void {
 		if ( ! is_dir( $dir ) ) {
