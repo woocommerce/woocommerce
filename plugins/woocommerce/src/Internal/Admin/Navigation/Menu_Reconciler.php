@@ -23,6 +23,13 @@ defined( 'ABSPATH' ) || exit;
 class Menu_Reconciler {
 
 	/**
+	 * Splicer that mutates $menu/$submenu for native rail rendering on Woo pages.
+	 *
+	 * @var Native_Rail_Splicer
+	 */
+	private $splicer;
+
+	/**
 	 * The computed tree. Static so Renderer/Assets can read it without coupling.
 	 *
 	 * @var array|null
@@ -42,8 +49,11 @@ class Menu_Reconciler {
 	 * which cascades into visible reordering of unrelated items (Posts
 	 * shifting down, etc.). Our filter removes slugs from $menu_order that
 	 * no longer exist in $menu, leaving native WP ordering intact.
+	 *
+	 * @param Native_Rail_Splicer|null $splicer Optional splicer (injectable for tests).
 	 */
-	public function __construct() {
+	public function __construct( ?Native_Rail_Splicer $splicer = null ) {
+		$this->splicer = $splicer ?? new Native_Rail_Splicer();
 		add_action( 'admin_menu', array( $this, 'reconcile' ), 999 );
 		add_filter( 'menu_order', array( $this, 'strip_phantom_slugs' ), 20 );
 		// Place Woo right after Dashboard. Runs after WC's own menu_order
@@ -147,6 +157,9 @@ class Menu_Reconciler {
 		$this->hide_non_woo_relocated_items();
 
 		self::$tree = $tree;
+
+		// Splice into $menu/$submenu for native rendering on Woo pages.
+		$this->splicer->splice( $tree );
 	}
 
 	/**

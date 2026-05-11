@@ -47,6 +47,9 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 		// tests can't be individually unhooked; clear them all so they don't
 		// leak into other suites.
 		remove_all_filters( 'woocommerce_admin_menu_tree' );
+		unset( $_GET['page'], $GLOBALS['pagenow'] );
+		remove_all_filters( 'parent_file' );
+		remove_all_filters( 'submenu_file' );
 		parent::tearDown();
 	}
 
@@ -233,5 +236,30 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'woocommerce', $captured_raw_menu[0][2] );
 		$this->assertIsArray( $captured_raw_submenu );
 		$this->assertArrayHasKey( 'woocommerce', $captured_raw_submenu );
+	}
+
+	public function test_reconcile_invokes_native_rail_splicer_on_woo_pages(): void {
+		global $menu, $submenu;
+		$menu = array(
+			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
+			5  => array( 'Posts', 'edit_posts', 'edit.php', 'Posts', '', 'menu-posts', 'dashicons-admin-post' ),
+			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
+		);
+		$submenu['woocommerce'] = array(
+			array( 'Home', 'manage_woocommerce', 'wc-admin' ),
+		);
+
+		$_GET['page']       = 'wc-admin';
+		$GLOBALS['pagenow'] = 'admin.php';
+
+		wp_set_current_user( $this->admin_user_id );
+		( new Menu_Reconciler() )->reconcile();
+
+		$top_slugs = array_values( array_filter( array_map(
+			static fn( $entry ) => is_array( $entry ) && isset( $entry[2] ) ? $entry[2] : null,
+			$menu
+		) ) );
+		$this->assertNotContains( 'edit.php', $top_slugs, 'Posts should be stripped on Woo pages.' );
+		$this->assertContains( 'wc-admin', $top_slugs, 'Home root should be spliced in.' );
 	}
 }
