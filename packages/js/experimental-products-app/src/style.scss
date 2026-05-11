@@ -63,11 +63,17 @@
 	padding-right: 8px;
 }
 
+/*
+ * The primary column TD has no class, so reach for the Stack element inside
+ * (which is what DataViews applies the row-level translateX to) and pull it
+ * 4px to the left of where the default 12px cell padding would place it.
+ * Combined with the checkbox column's 8px right padding this gives the
+ * 16px checkbox-to-first-element gap in both collapsed and expanded states.
+ */
 .woocommerce-product-list
 	.dataviews-view-table
-	tbody
-	td:has( .dataviews-view-table__primary-column ) {
-	padding-left: 8px;
+	.dataviews-view-table__primary-column {
+	margin-left: -4px;
 }
 
 /*
