@@ -263,7 +263,8 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 		$post_id  = $this->generate_stamped_post( $email_id );
 
 		WCEmailTemplateSyncTracker::set_event_recorder(
-			static function (): void {
+			static function ( string $event_name, array $payload ): void {
+				unset( $event_name, $payload );
 				throw new \RuntimeException( 'simulated tracker failure' );
 			}
 		);

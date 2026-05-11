@@ -403,7 +403,7 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 		);
 
 		try {
-			WCEmailTemplateAutoApplier::apply_to_post(
+			$result = WCEmailTemplateAutoApplier::apply_to_post(
 				$email,
 				$post_id,
 				array( 'require_uncustomized' => false )
@@ -411,6 +411,10 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 		} finally {
 			WCEmailTemplateSyncTracker::set_event_recorder( null );
 		}
+
+		// Assert the reset itself succeeded — otherwise an early bail would
+		// produce zero events and false-pass the silence assertion below.
+		$this->assertIsArray( $result, 'Reset path setup must succeed before asserting Tracks silence.' );
 
 		$applied_events = array_values(
 			array_filter(
