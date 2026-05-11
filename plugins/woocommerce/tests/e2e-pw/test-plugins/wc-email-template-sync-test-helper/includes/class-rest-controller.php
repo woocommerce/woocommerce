@@ -55,11 +55,35 @@ class REST_Controller {
 			self::NAMESPACE,
 			'/seed-meta/(?P<post_id>\d+)',
 			array(
-				'methods'             => WP_REST_Server::CREATABLE,
-				'callback'            => array( $this, 'seed_meta' ),
+				array(
+					'methods'             => WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'seed_meta' ),
+					'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+					'args'                => array(
+						'post_id' => array( 'sanitize_callback' => 'absint' ),
+					),
+				),
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'read_meta' ),
+					'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+					'args'                => array(
+						'post_id' => array( 'sanitize_callback' => 'absint' ),
+					),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/canonical-hash/(?P<email_id>[a-z0-9_]+)',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'canonical_hash' ),
 				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
 				'args'                => array(
-					'post_id' => array( 'sanitize_callback' => 'absint' ),
+					'email_id' => array( 'sanitize_callback' => 'sanitize_key' ),
+					'mode'     => array( 'sanitize_callback' => 'sanitize_key' ),
 				),
 			)
 		);
@@ -226,6 +250,67 @@ class REST_Controller {
 			array(
 				'post_id' => $post_id,
 				'meta'    => get_post_meta( $post_id ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Read all post meta for a post. Mirrors seed-meta's response shape (without writes).
+	 *
+	 * @param WP_REST_Request $request The REST request. Expects `post_id` route parameter.
+	 * @return WP_REST_Response
+	 */
+	public function read_meta( WP_REST_Request $request ): WP_REST_Response {
+		$post_id = (int) $request->get_param( 'post_id' );
+
+		if ( ! get_post( $post_id ) ) {
+			return new WP_REST_Response( array( 'error' => "Post {$post_id} not found" ), 404 );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'post_id' => $post_id,
+				'meta'    => get_post_meta( $post_id ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Compute the sha1 of the canonical core HTML for a given email type. Mode 'old'
+	 * temporarily suppresses the Template_HTML_Overrides option so the canonical
+	 * resolves to the real WC default; mode 'current' applies the active override
+	 * (if any).
+	 *
+	 * @param WP_REST_Request $request The REST request. Expects `email_id` and `mode` params.
+	 * @return WP_REST_Response
+	 */
+	public function canonical_hash( WP_REST_Request $request ): WP_REST_Response {
+		$email_id = (string) $request->get_param( 'email_id' );
+		$mode     = (string) $request->get_param( 'mode' );
+
+		$manager = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager::get_instance();
+		$email   = $manager->get_email_by_id( $email_id );
+		if ( ! $email instanceof \WC_Email ) {
+			return new WP_REST_Response( array( 'error' => "Unknown email_id {$email_id}" ), 404 );
+		}
+
+		$existing_override = get_option( Template_HTML_Overrides::OPTION_NAME, array() );
+		if ( 'old' === $mode ) {
+			delete_option( Template_HTML_Overrides::OPTION_NAME );
+		}
+
+		$canonical = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		if ( 'old' === $mode && is_array( $existing_override ) && ! empty( $existing_override ) ) {
+			update_option( Template_HTML_Overrides::OPTION_NAME, $existing_override, false );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'hash'      => sha1( $canonical ),
+				'canonical' => $canonical,
 			),
 			200
 		);
