@@ -7,6 +7,7 @@ import {
 	getConfig,
 	withSyncEvent,
 } from '@wordpress/interactivity';
+import type { AsyncAction } from '@wordpress/interactivity';
 import type {
 	Store as WooCommerce,
 	SelectedAttributes,
@@ -14,6 +15,13 @@ import type {
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
+// PoC: side-effect import so the shopper-lists iAPI store is registered on
+// single-product pages where the Wishlist button is injected after the form.
+import '@woocommerce/stores/woocommerce/shopper-lists';
+import type {
+	RawShopperListItem,
+	Store as ShopperListsStore,
+} from '@woocommerce/stores/woocommerce/shopper-lists';
 
 /**
  * Internal dependencies
@@ -63,6 +71,12 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
+const { state: shopperListsState } = store< ShopperListsStore >(
+	'woocommerce/shopper-lists',
+	{},
+	{ lock: universalLock }
+);
+
 export type AddToCartWithOptionsStore = {
 	state: {
 		noticeIds: string[];
@@ -71,6 +85,8 @@ export type AddToCartWithOptionsStore = {
 		allowsAddingToCart: boolean;
 		quantity: Record< number, number >;
 		selectedAttributes: SelectedAttributes[];
+		matchingWishlistItem: RawShopperListItem | null;
+		isInWishlist: boolean;
 	};
 	actions: {
 		validateQuantity: ( productId: number, value?: number ) => void;
@@ -78,6 +94,7 @@ export type AddToCartWithOptionsStore = {
 		addError: ( error: AddToCartError ) => string;
 		clearErrors: ( group?: string ) => void;
 		addToCart: ( event: SubmitEvent ) => void;
+		toggleWishlistFromForm: () => void;
 	};
 };
 
@@ -130,6 +147,60 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 			get selectedAttributes(): SelectedAttributes[] {
 				const context = getContext< Context >();
 				return context.selectedAttributes || [];
+			},
+			// PoC: returns the saved-for-later item that matches the currently
+			// configured product (and variation, if applicable), or null. Used
+			// by both the toggle action (needs the item's `key` to remove) and
+			// the visibility/aria-pressed bindings. Matches by product_id +
+			// attribute/value pairs (order-insensitive) rather than replicating
+			// the server's MD5 key — cheaper and good enough until we tackle
+			// the dedicated wishlist slug.
+			get matchingWishlistItem(): RawShopperListItem | null {
+				const product = productsState.productInContext;
+				if ( ! product ) {
+					return null;
+				}
+				const list = shopperListsState.lists?.[ 'saved-for-later' ];
+				if ( ! list || ! Array.isArray( list.items ) ) {
+					return null;
+				}
+				const context = getContext< Context >();
+				const selected = context.selectedAttributes || [];
+				const selectedByAttribute = new Map(
+					selected
+						.filter( ( s ) => s.attribute && s.value )
+						.map( ( s ) => [ s.attribute, s.value ] )
+				);
+				return (
+					list.items.find( ( item ) => {
+						// Use Number() so a stringified product_id from the
+						// serialized state still matches the typed
+						// product.id (number from the products store).
+						if (
+							Number( item.product_id ) !== Number( product.id )
+						) {
+							return false;
+						}
+						const itemPairs = Array.isArray( item.variation )
+							? item.variation.filter(
+									( v ) => v.attribute && v.value
+							  )
+							: [];
+						if (
+							itemPairs.length !== selectedByAttribute.size
+						) {
+							return false;
+						}
+						return itemPairs.every(
+							( v ) =>
+								selectedByAttribute.get( v.attribute ) ===
+								v.value
+						);
+					} ) || null
+				);
+			},
+			get isInWishlist(): boolean {
+				return state.matchingWishlistItem !== null;
 			},
 		},
 		actions: {
@@ -311,6 +382,45 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					}
 				);
 			} ),
+			// PoC: Toggle the currently configured product in the Saved-for-later
+			// list — add when absent, remove when present. Lives on this store
+			// so the star button injected after the form inherits the form's
+			// iAPI context (`quantity`, `selectedAttributes`) for free.
+			*toggleWishlistFromForm(): AsyncAction< void > {
+				const product = productsState.productInContext;
+				if ( ! product ) {
+					return;
+				}
+
+				if ( ! state.isFormValid ) {
+					return;
+				}
+
+				const { actions: shopperListsActions } = store<
+					ShopperListsStore
+				>(
+					'woocommerce/shopper-lists',
+					{},
+					{ lock: universalLock }
+				);
+
+				const existing = state.matchingWishlistItem;
+				if ( existing ) {
+					yield shopperListsActions.removeItem(
+						'saved-for-later',
+						existing.key
+					);
+					return;
+				}
+
+				const { quantity, selectedAttributes } =
+					getContext< Context >();
+				yield shopperListsActions.addItem( 'saved-for-later', {
+					product_id: product.id,
+					quantity: quantity[ product.id ] || 1,
+					variation: selectedAttributes,
+				} );
+			},
 		},
 	},
 	{ lock: universalLock }

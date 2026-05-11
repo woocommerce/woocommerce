@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a Wishlist endpoint under My Account that renders the saved-for-later shopper list, plus a single-product star toggle that adds/removes the configured product (with variation) from the list.
