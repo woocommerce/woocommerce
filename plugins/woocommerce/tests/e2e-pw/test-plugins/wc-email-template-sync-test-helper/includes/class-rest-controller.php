@@ -63,6 +63,36 @@ class REST_Controller {
 				),
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/seed-bulk',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'seed_bulk' ),
+				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/trigger-sweep',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'trigger_sweep' ),
+				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/trigger-backfill',
+			array(
+				'methods'             => WP_REST_Server::CREATABLE,
+				'callback'            => array( $this, 'trigger_backfill' ),
+				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+			)
+		);
 	}
 
 	/**
@@ -159,6 +189,119 @@ class REST_Controller {
 			array(
 				'post_id' => $post_id,
 				'meta'    => get_post_meta( $post_id ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Bulk-insert woo_email posts with seeded meta in one round-trip. Body shape:
+	 * `{ "seeds": [ { "post": <wp_insert_post args>, "meta": {key: value | null, ...} }, ... ] }`.
+	 *
+	 * @param WP_REST_Request $request The REST request.
+	 * @return WP_REST_Response
+	 */
+	public function seed_bulk( WP_REST_Request $request ): WP_REST_Response {
+		$body = $request->get_json_params();
+		if ( ! is_array( $body ) || empty( $body['seeds'] ) || ! is_array( $body['seeds'] ) ) {
+			return new WP_REST_Response( array( 'error' => 'Body must include a "seeds" array' ), 400 );
+		}
+
+		$results = array();
+		foreach ( $body['seeds'] as $seed ) {
+			$post_data = array_merge(
+				array(
+					'post_type'   => 'woo_email',
+					'post_status' => 'publish',
+				),
+				is_array( $seed['post'] ?? null ) ? $seed['post'] : array()
+			);
+
+			$post_id = wp_insert_post( $post_data, true );
+
+			if ( is_wp_error( $post_id ) ) {
+				$results[] = array( 'error' => $post_id->get_error_message() );
+				continue;
+			}
+
+			$meta_updates = $seed['meta'] ?? array();
+			if ( is_array( $meta_updates ) ) {
+				foreach ( $meta_updates as $key => $value ) {
+					if ( null === $value ) {
+						delete_post_meta( (int) $post_id, (string) $key );
+					} else {
+						update_post_meta( (int) $post_id, (string) $key, $value );
+					}
+				}
+			}
+
+			$results[] = array( 'post_id' => (int) $post_id );
+		}
+
+		return new WP_REST_Response( array( 'results' => $results ), 200 );
+	}
+
+	/**
+	 * Run the divergence sweep inline, then snapshot classifications from post meta
+	 * across all sync-enabled emails.
+	 *
+	 * @param WP_REST_Request $request The REST request (unused).
+	 * @return WP_REST_Response
+	 */
+	public function trigger_sweep( WP_REST_Request $request ): WP_REST_Response {
+		unset( $request );
+
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector::run_sweep();
+
+		$registry = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry::get_sync_enabled_emails();
+		$manager  = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager::get_instance();
+
+		$classifications = array();
+		foreach ( array_keys( $registry ) as $email_id ) {
+			$post = $manager->get_email_post( (string) $email_id );
+			if ( ! $post instanceof \WP_Post ) {
+				continue;
+			}
+			$status = (string) get_post_meta( (int) $post->ID, \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true );
+			if ( '' !== $status ) {
+				$classifications[ (int) $post->ID ] = $status;
+			}
+		}
+
+		return new WP_REST_Response(
+			array(
+				'touched'         => count( $classifications ),
+				'classifications' => $classifications,
+			),
+			200
+		);
+	}
+
+	/**
+	 * Run the legacy-post backfill inline, then snapshot a count of stamped posts.
+	 * Production `run()` returns false unconditionally — value reported back is for caller
+	 * convenience only. Tests assert via meta snapshots before/after.
+	 *
+	 * @param WP_REST_Request $request The REST request (unused).
+	 * @return WP_REST_Response
+	 */
+	public function trigger_backfill( WP_REST_Request $request ): WP_REST_Response {
+		unset( $request );
+
+		$ran = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill::run();
+
+		global $wpdb;
+		$stamped = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(DISTINCT post_id) FROM {$wpdb->postmeta} WHERE meta_key = %s AND meta_value <> ''",
+				\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY
+			)
+		);
+
+		return new WP_REST_Response(
+			array(
+				'ran'     => (bool) $ran,
+				'stamped' => $stamped,
 			),
 			200
 		);
