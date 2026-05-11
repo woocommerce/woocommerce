@@ -364,6 +364,11 @@ class ShopperLists extends ControllerTestCase {
 	 *           ["POST", "not-a-valid-nonce", 403, "woocommerce_rest_invalid_nonce"]
 	 *           ["DELETE", "", 401, "woocommerce_rest_missing_nonce"]
 	 *           ["DELETE", "not-a-valid-nonce", 403, "woocommerce_rest_invalid_nonce"]
+	 *
+	 * @param string $method              HTTP method.
+	 * @param string $nonce               Nonce header value.
+	 * @param int    $expected_status     Expected HTTP status code.
+	 * @param string $expected_error_code Expected WP_Error code.
 	 */
 	public function test_write_nonce_enforcement( string $method, string $nonce, int $expected_status, string $expected_error_code ) {
 		wp_set_current_user( $this->customer_id );
@@ -385,6 +390,9 @@ class ShopperLists extends ControllerTestCase {
 	 *
 	 * @testWith [null, 201]
 	 *           ["", 401]
+	 *
+	 * @param string|null $nonce           Nonce header value, or null to auto-attach a valid one.
+	 * @param int         $expected_status Expected HTTP status code.
 	 */
 	public function test_response_refreshes_nonce_headers( ?string $nonce, int $expected_status ) {
 		wp_set_current_user( $this->customer_id );
