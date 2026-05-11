@@ -702,6 +702,8 @@ if ( ! class_exists( 'WC_Admin_Assets', false ) ) :
 					'i18n_permission_revoke'                          => __( 'Are you sure you want to revoke access to this download?', 'woocommerce' ),
 					'i18n_tax_rate_already_exists'                    => __( 'You cannot add the same tax rate twice!', 'woocommerce' ),
 					'i18n_delete_note'                                => __( 'Are you sure you wish to delete this note? This action cannot be undone.', 'woocommerce' ),
+					'i18n_delete_customer_note'                       => __( 'Are you sure you wish to delete this note? This action cannot be undone. Caution: This only removes the note from your records — it does not recall the email already sent to the customer.', 'woocommerce' ),
+					'i18n_no_notes_yet'                               => __( 'There are no notes yet.', 'woocommerce' ),
 					'i18n_apply_coupon'                               => __( 'Enter a coupon code to apply. Discounts are applied to line totals, before taxes.', 'woocommerce' ),
 					'i18n_add_fee'                                    => __( 'Enter a fixed amount or percentage to apply as a fee.', 'woocommerce' ),
 					'i18n_attribute_name_placeholder'                 => __( 'New attribute', 'woocommerce' ),
