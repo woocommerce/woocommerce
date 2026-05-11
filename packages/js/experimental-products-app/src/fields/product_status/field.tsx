@@ -4,13 +4,13 @@
 import { __ } from '@wordpress/i18n';
 
 import type { Field } from '@wordpress/dataviews';
-import { SelectControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
 import { ProductStatusBadge } from '../components/product-status-badge';
+import { SelectField } from '../components/select-field';
 
 function isValidStatus( value: string ) {
 	return (
@@ -41,13 +41,15 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		<ProductStatusBadge status={ item.status } />
 	),
 	Edit: ( { data, onChange, field } ) => (
-		<SelectControl
+		<SelectField
 			label={ field.label }
 			value={ data.status }
-			options={ field.elements?.filter(
-				( element: { label: string; value: string } ) =>
-					element.value !== 'trash'
-			) }
+			options={
+				field.elements?.filter(
+					( element: { label: string; value: string } ) =>
+						element.value !== 'trash'
+				) ?? []
+			}
 			onChange={ ( value ) => {
 				if ( value && isValidStatus( value ) ) {
 					onChange( {

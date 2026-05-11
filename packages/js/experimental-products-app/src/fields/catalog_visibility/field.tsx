@@ -9,6 +9,16 @@ import type { Field } from '@wordpress/dataviews';
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
+import { SelectField } from '../components/select-field';
+
+function isValidVisibility( value: string ) {
+	return (
+		value === 'visible' ||
+		value === 'catalog' ||
+		value === 'search' ||
+		value === 'hidden'
+	);
+}
 
 const fieldDefinition = {
 	label: __( 'Visibility', 'woocommerce' ),
@@ -25,4 +35,18 @@ const fieldDefinition = {
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
+	Edit: ( { data, onChange, field } ) => (
+		<SelectField
+			label={ field.label }
+			value={ data.catalog_visibility ?? 'visible' }
+			options={ field.elements ?? [] }
+			onChange={ ( value ) => {
+				if ( value && isValidVisibility( value ) ) {
+					onChange( {
+						catalog_visibility: value,
+					} );
+				}
+			} }
+		/>
+	),
 };

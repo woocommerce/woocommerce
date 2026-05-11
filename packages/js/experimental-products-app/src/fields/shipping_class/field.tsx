@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { SelectControl } from '@wordpress/components';
 import type { Field } from '@wordpress/dataviews';
 
 /**
@@ -11,6 +10,7 @@ import type { Field } from '@wordpress/dataviews';
  */
 
 import type { ProductEntityRecord } from '../types';
+import { SelectField } from '../components/select-field';
 
 interface ProductShippingClass {
 	id: number;
@@ -63,9 +63,9 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		];
 
 		return (
-			<SelectControl
+			<SelectField
 				label={ field.label }
-				value={ data.shipping_class }
+				value={ data.shipping_class ?? '' }
 				options={ options }
 				onChange={ ( value ) =>
 					onChange( {
