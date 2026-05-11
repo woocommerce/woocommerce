@@ -11,22 +11,27 @@
  * @var string $return_type_expr
  * @var array  $use_statements
  * @var array  $args - each: ['name', 'type_expr', 'description', 'has_default', 'default']
- * @var array  $capabilities
- * @var bool   $public_access
  * @var bool   $has_connection_of
  * @var string $connection_type_alias
+ * @var bool   $standalone_attribute_check - true when authorize() is absent and the attribute_expr is the sole authorization gate
+ * @var string $attribute_expr - PHP expression (referencing local `$principal`) that evaluates to true iff the autodiscovered authorization attributes grant access
+ * @var string $compute_preauthorized_param_type - typed parameter declaration for the generated compute_preauthorized() helper (e.g. `object` or `\WP_User`)
  * @var array  $execute_params - each: ['name', 'conversion' => ?string, 'is_infrastructure' => bool, 'unroll' => ?array]
+ * @var ?array $execute_principal_arg - if non-null, ['type_name' => string]: execute() declares a $_principal infra param
+ * @var bool   $execute_query_info_arg - true when execute() declares a $_query_info infra param
  * @var array  $input_converters - each: ['method_name', 'input_fqcn', 'input_class', 'properties' => [['name', 'conversion']]]
  * @var ?array $authorize_param_names - if non-null, the authorize() method param names (subset of execute params)
  * @var bool   $has_preauthorized - true when authorize() declares a bool $_preauthorized infrastructure param
  * @var string $preauthorized_expr - PHP expression that evaluates to the $_preauthorized bool at runtime
+ * @var ?array $authorize_principal_arg - if non-null, ['type_name' => string]: authorize() declares a $_principal infra param
+ * @var bool   $authorize_query_info_arg - true when authorize() declares a $_query_info infra param
  * @var bool    $scalar_return - true when execute() returns a scalar (bool, int, float, string)
- * @var ?string $container_fqcn - FQCN of a user-provided container with static get(string): object; null for direct `new` instantiation
+ * @var ?string $class_resolver_fqcn - FQCN of a user-provided class resolver with static resolve_class(string): object; null for direct `new` instantiation
  */
 
 $escaped_description = addslashes( $description );
 $has_authorize       = $authorize_param_names !== null;
-$has_cap_check       = ! $has_authorize && ! $public_access && ! empty( $capabilities );
+$any_query_info_arg  = $execute_query_info_arg || $authorize_query_info_arg;
 ?>
 <?php echo '<?php'; ?>
 
@@ -108,18 +113,23 @@ class <?php echo $class_name; ?> {
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
-<?php if ( $has_cap_check ) : ?>
-<?php foreach ( $capabilities as $cap ) : ?>
-		Utils::check_current_user_can( '<?php echo addslashes( $cap ); ?>' );
-<?php endforeach; ?>
+<?php if ( $standalone_attribute_check ) : ?>
+		// Standalone authorization gate: no authorize() method on the command,
+		// so the autodiscovered authorization attributes are the sole guard.
+		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
+			throw Utils::build_authorization_error( $context['principal'] );
+		}
 
 <?php endif; ?>
-<?php if ( null !== $container_fqcn ) : ?>
-		$command = \<?php echo $container_fqcn; ?>::get( <?php echo $command_alias; ?>::class );
+<?php if ( null !== $class_resolver_fqcn ) : ?>
+		$command = \<?php echo $class_resolver_fqcn; ?>::resolve_class( <?php echo $command_alias; ?>::class );
 <?php else : ?>
 		$command = new <?php echo $command_alias; ?>();
 <?php endif; ?>
 
+<?php if ( $any_query_info_arg ) : ?>
+		$query_info = QueryInfoExtractor::extract_from_info( $info, $args );
+<?php endif; ?>
 		$execute_args = array();
 <?php
 $pagination_fqcn = 'Automattic\\WooCommerce\\Api\\Pagination\\PaginationParams';
@@ -136,7 +146,9 @@ foreach ( $execute_params as $param ) :
 			)
 		);
 <?php elseif ( $param['is_infrastructure'] && $param['name'] === '_query_info' ) : ?>
-		$execute_args['_query_info'] = QueryInfoExtractor::extract_from_info( $info, $args );
+		$execute_args['_query_info'] = $query_info;
+<?php elseif ( $param['is_infrastructure'] && $param['name'] === '_principal' ) : ?>
+		$execute_args['_principal'] = $context['principal'];
 <?php elseif ( ! empty( $param['conversion'] ) ) : ?>
 		if ( array_key_exists( '<?php echo $param['name']; ?>', $args ) ) {
 			$execute_args['<?php echo $param['name']; ?>'] = <?php echo $param['conversion']; ?>;
@@ -153,14 +165,17 @@ foreach ( $execute_params as $param ) :
 <?php foreach ( $authorize_param_names as $name ) : ?>
 			'<?php echo $name; ?>' => $execute_args['<?php echo $name; ?>'],
 <?php endforeach; ?>
+<?php if ( null !== $authorize_principal_arg ) : ?>
+			'_principal' => $context['principal'],
+<?php endif; ?>
+<?php if ( $authorize_query_info_arg ) : ?>
+			'_query_info' => $query_info,
+<?php endif; ?>
 <?php if ( $has_preauthorized ) : ?>
 			'_preauthorized' => <?php echo $preauthorized_expr; ?>,
 <?php endif; ?>
 		) ) ) {
-			throw new \Automattic\WooCommerce\Internal\Api\Schema\Error(
-				'You do not have permission to perform this action.',
-				extensions: array( 'code' => 'UNAUTHORIZED' )
-			);
+			throw Utils::build_authorization_error( $context['principal'] );
 		}
 
 <?php endif; ?>
@@ -171,6 +186,21 @@ foreach ( $execute_params as $param ) :
 <?php else : ?>
 		return $result;
 <?php endif; ?>
+	}
+
+	/**
+	 * Compute the value `_preauthorized` would carry for a given principal —
+	 * the AND of the autodiscovered authorization attributes' authorize()
+	 * outcomes on this command. Single source of truth for both the resolver's
+	 * own gates and external (code-API) callers asking about authorization
+	 * without going through GraphQL execution.
+	 *
+	 * Returns true vacuously when the command has no authorization attributes
+	 * (in that case authorize() on the command is the sole guard, and that
+	 * method should be consulted instead).
+	 */
+	public static function compute_preauthorized( <?php echo $compute_preauthorized_param_type; ?> $principal ): bool {
+		return <?php echo $attribute_expr; ?>;
 	}
 <?php foreach ( $input_converters as $converter ) : ?>
 

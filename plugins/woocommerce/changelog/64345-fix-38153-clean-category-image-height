@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Fix the missing height attribute on category images when uncropped
+

@@ -626,7 +626,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 				}
 
 				p {
-					color: #2c3338;
+					color: $gray-900;
 					font-size: 14px;
 					line-height: 20px;
 					margin: 14px 64px 0 0;
@@ -679,7 +679,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 				}
 
 				.price-suffix {
-					color: #646970; // Gray 50
+					color: $gray-700;
 				}
 
 				.product-reviews-block {
@@ -708,7 +708,7 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 					}
 
 					.product-reviews-count {
-						color: #646970; // Gray 50
+						color: $gray-700;
 						font-size: 12px;
 						font-family: sans-serif;
 						line-height: 24px;
@@ -992,12 +992,21 @@ $font-sf-pro-display: "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe U
 		padding-bottom: 2em;
 	}
 
+	label:not(:first-child) {
+		display: block;
+		margin-top: 1.5em;
+	}
+
 	input[type="text"] {
 		display: block;
 		font-size: 13px;
 		line-height: 16px;
 		margin: 6px 0;
 		padding: 12px;
+		width: 100%;
+	}
+
+	.wc-admin-visual-attribute-color-picker-trigger {
 		width: 100%;
 	}
 }
@@ -2864,10 +2873,6 @@ ul.wc_coupon_list_block {
 	margin: 0;
 	padding: 0;
 
-	ul.order_notes li {
-		padding: 0 10px;
-	}
-
 	button {
 		margin: 1px;
 		vertical-align: top;
@@ -3521,13 +3526,18 @@ ul.wc_coupon_list_block {
 
 /* Order notes */
 ul.order_notes {
-	padding: 2px 0 0;
+	list-style: none;
+	padding: 16px 12px;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 
 	li {
 		.note_content {
-			padding: 10px;
-			background: #efefef;
-			position: relative;
+			background: #fff;
+			border: 1px solid $gray-200;
+			border-radius: 4px;
 
 			p {
 				margin: 0;
@@ -3536,67 +3546,96 @@ ul.order_notes {
 			}
 		}
 
+		.note_header {
+			margin: 0;
+			padding: 6px 12px;
+			// Mirrors @wordpress/components Notice is-warning variant
+			// (bg #fef8ee, accent #f0b849). Supplementary cue — info is
+			// also in the label text itself.
+			background: #fef8ee;
+			border-bottom: 1px solid $gray-200;
+			border-top-left-radius: 3px;
+			border-top-right-radius: 3px;
+			font-size: 11px;
+			font-weight: 600;
+		}
+
+		.note_body {
+			padding: 8px 12px;
+		}
+
 		p.meta {
-			padding: 10px;
-			color: #999;
+			padding: 4px 0 0;
+			color: $subtext;
 			margin: 0;
 			font-size: 11px;
 
 			.exact-date {
-				border-bottom: 1px dotted #999;
+				border-bottom: 0;
+				text-decoration: none;
 			}
 		}
 
 		a.delete_note {
 			color: $red;
-		}
-
-		.note_content::after {
-			content: "";
-			display: block;
-			position: absolute;
-			bottom: -10px;
-			left: 20px;
-			width: 0;
-			height: 0;
-			border-width: 10px 10px 0 0;
-			border-style: solid;
-			border-color: #efefef transparent;
+			margin-left: 4px;
 		}
 	}
 
-	li.system-note {
-		.note_content {
-			background: #d7cad2;
-		}
-
-		.note_content::after {
-			border-color: #d7cad2 transparent;
-		}
+	li.no-items {
+		color: $subtext;
+		padding: 16px 0;
+		text-align: center;
 	}
 
-	li.customer-note {
-		.note_content {
-			background: #a7cedc;
-		}
-
-		.note_content::after {
-			border-color: #a7cedc transparent;
-		}
+	li.system-note .note_content {
+		// Auto-generated notes (status changes, webhooks, etc.) are
+		// visually de-emphasised so manual notes scan more easily.
+		background: $gray-100;
 	}
 }
 
 .add_note {
-	border-top: 1px solid #ddd;
-	padding: 10px 10px 0;
+	border-bottom: 1px solid $gray-200;
+	padding: 16px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 
-	h4 {
-		margin-top: 5px !important;
+	> p {
+		margin: 0;
+	}
+
+	label {
+		display: block;
+		margin-bottom: 4px;
 	}
 
 	#add_order_note {
 		width: 100%;
-		height: 50px;
+		height: 60px;
+	}
+
+	.order_note_visibility {
+		select {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.add_note_email_settings {
+			margin: 6px 0 0;
+			font-size: 12px;
+			color: $subtext;
+
+			a {
+				color: inherit;
+			}
+		}
+	}
+
+	.add_note_actions button.add_note {
+		width: 100%;
+		text-align: center;
 	}
 }
 
@@ -8314,9 +8353,26 @@ table.bar_chart {
 	// Order preview action buttons.
 	.wc-order-preview footer {
 		.button.button-large {
-			min-height: 0;
+			min-height: 32px;
+		}
+
+		// Adopt WP 7.0 secondary outline: theme-color border and 2px radius.
+		.wc-action-button {
+			min-height: 32px !important;
+			border-color: var(--wp-admin-theme-color);
+
+			&:first-child {
+				border-top-left-radius: 2px !important;
+				border-bottom-left-radius: 2px !important;
+			}
+
+			&:last-child {
+				border-top-right-radius: 2px !important;
+				border-bottom-right-radius: 2px !important;
+			}
 		}
 	}
+
 
 	// Order actions: select + button overflow container due to WP 7.0 select margins.
 	.order_actions {
@@ -9101,7 +9157,7 @@ table.bar_chart {
 				a:visited,
 				a:hover,
 				a:active {
-					color: #2c3338;
+					color: $gray-900;
 					padding: 10px 16px !important;
 				}
 			}
@@ -9587,12 +9643,49 @@ body.woocommerce-settings-payments-section_legacy {
 }
 
 .wc-admin-color-swatch {
+	background-color: #fff;
 	display: inline-block;
 	vertical-align: middle;
-	vertical-align: center;
 	border: 1px solid #7e8993;
 	border-radius: 2px;
-	margin-right: 6px;
-	width: 12px;
-	height: 12px;
+	margin-right: 0.5em;
+	height: 1em;
+	width: 1em;
+	position: relative;
+	top: -1px;
+
+	&.is-empty::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		background: linear-gradient(to bottom right, transparent 47%, #7e8993 47%, #7e8993 53%, transparent 53%);
+	}
+}
+
+.wc-admin-visual-attribute-color-picker-trigger {
+	width: 95%;
+	display: flex;
+	align-items: center;
+	gap: 8px;
+	padding: 0 12px;
+	min-height: 40px;
+	background: #fff;
+	border: 1px solid #949494;
+	border-radius: 2px;
+	text-align: left;
+	font-size: 13px;
+	line-height: 1.4;
+	cursor: pointer;
+
+	+ .wc-admin-visual-attribute-color-picker-clear {
+		display: block;
+		margin: 2px 0 5px;
+	}
+
+	.wc-admin-color-swatch {
+		margin-right: 0;
+	}
 }

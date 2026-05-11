@@ -44,8 +44,8 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	} = props;
 	const { customChipText, customChipBackground, customChipBorder, layout } =
 		attributes;
-	const { filterData } = context;
-	const { items } = filterData;
+	const removableItemsContext = context.woocommerceRemovableItems;
+	const { items } = removableItemsContext ?? {};
 
 	// Extract attributes from block layout
 	const layoutBlockSupport = getBlockSupport( name, 'layout' );
