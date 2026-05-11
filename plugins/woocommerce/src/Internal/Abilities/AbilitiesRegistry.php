@@ -20,6 +20,8 @@ class AbilitiesRegistry {
 	/**
 	 * Initialize all WooCommerce abilities.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @internal
 	 */
 	final public function init(): void {
