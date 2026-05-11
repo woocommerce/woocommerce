@@ -1,5 +1,0 @@
-Significance: patch
-Type: fix
-Comment: Fix Add to Cart + Options button being disabled when a grouped product child quantity changed to 0
-
-
