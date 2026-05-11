@@ -2873,10 +2873,6 @@ ul.wc_coupon_list_block {
 	margin: 0;
 	padding: 0;
 
-	ul.order_notes li {
-		padding: 0 10px;
-	}
-
 	button {
 		margin: 1px;
 		vertical-align: top;
@@ -3530,13 +3526,18 @@ ul.wc_coupon_list_block {
 
 /* Order notes */
 ul.order_notes {
-	padding: 2px 0 0;
+	list-style: none;
+	padding: 16px 12px;
+	margin: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 
 	li {
 		.note_content {
-			padding: 10px;
-			background: #efefef;
-			position: relative;
+			background: #fff;
+			border: 1px solid $gray-200;
+			border-radius: 4px;
 
 			p {
 				margin: 0;
@@ -3545,67 +3546,96 @@ ul.order_notes {
 			}
 		}
 
+		.note_header {
+			margin: 0;
+			padding: 6px 12px;
+			// Mirrors @wordpress/components Notice is-warning variant
+			// (bg #fef8ee, accent #f0b849). Supplementary cue — info is
+			// also in the label text itself.
+			background: #fef8ee;
+			border-bottom: 1px solid $gray-200;
+			border-top-left-radius: 3px;
+			border-top-right-radius: 3px;
+			font-size: 11px;
+			font-weight: 600;
+		}
+
+		.note_body {
+			padding: 8px 12px;
+		}
+
 		p.meta {
-			padding: 10px;
-			color: #999;
+			padding: 4px 0 0;
+			color: $subtext;
 			margin: 0;
 			font-size: 11px;
 
 			.exact-date {
-				border-bottom: 1px dotted #999;
+				border-bottom: 0;
+				text-decoration: none;
 			}
 		}
 
 		a.delete_note {
 			color: $red;
-		}
-
-		.note_content::after {
-			content: "";
-			display: block;
-			position: absolute;
-			bottom: -10px;
-			left: 20px;
-			width: 0;
-			height: 0;
-			border-width: 10px 10px 0 0;
-			border-style: solid;
-			border-color: #efefef transparent;
+			margin-left: 4px;
 		}
 	}
 
-	li.system-note {
-		.note_content {
-			background: #d7cad2;
-		}
-
-		.note_content::after {
-			border-color: #d7cad2 transparent;
-		}
+	li.no-items {
+		color: $subtext;
+		padding: 16px 0;
+		text-align: center;
 	}
 
-	li.customer-note {
-		.note_content {
-			background: #a7cedc;
-		}
-
-		.note_content::after {
-			border-color: #a7cedc transparent;
-		}
+	li.system-note .note_content {
+		// Auto-generated notes (status changes, webhooks, etc.) are
+		// visually de-emphasised so manual notes scan more easily.
+		background: $gray-100;
 	}
 }
 
 .add_note {
-	border-top: 1px solid #ddd;
-	padding: 10px 10px 0;
+	border-bottom: 1px solid $gray-200;
+	padding: 16px 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
 
-	h4 {
-		margin-top: 5px !important;
+	> p {
+		margin: 0;
+	}
+
+	label {
+		display: block;
+		margin-bottom: 4px;
 	}
 
 	#add_order_note {
 		width: 100%;
-		height: 50px;
+		height: 60px;
+	}
+
+	.order_note_visibility {
+		select {
+			width: 100%;
+			max-width: 100%;
+		}
+
+		.add_note_email_settings {
+			margin: 6px 0 0;
+			font-size: 12px;
+			color: $subtext;
+
+			a {
+				color: inherit;
+			}
+		}
+	}
+
+	.add_note_actions button.add_note {
+		width: 100%;
+		text-align: center;
 	}
 }
 
