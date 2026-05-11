@@ -3,6 +3,7 @@
 namespace Automattic\WooCommerce\Tests\Blocks\Assets;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
+use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use Automattic\WooCommerce\Blocks\Package;
 use InvalidArgumentException;
@@ -85,5 +86,43 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$original_data['cheeseburger'] = 'fries';
 		$this->assertEquals( $original_data, $data );
 		remove_filter( 'woocommerce_shared_settings', [ self::class, 'ndcallback' ] );
+	}
+
+	/**
+	 * @testdox `experimentalCartSaveForLater` is registered as true when the `cart_save_for_later` feature is enabled.
+	 */
+	public function test_experimental_cart_save_for_later_setting_is_true_when_feature_enabled() {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$original_enabled    = $features_controller->feature_is_enabled( 'cart_save_for_later' );
+
+		$features_controller->change_feature_enable( 'cart_save_for_later', true );
+		try {
+			$this->registry->initialize_core_data();
+			$data = $this->registry->get();
+
+			$this->assertArrayHasKey( 'experimentalCartSaveForLater', $data );
+			$this->assertTrue( $data['experimentalCartSaveForLater'] );
+		} finally {
+			$features_controller->change_feature_enable( 'cart_save_for_later', $original_enabled );
+		}
+	}
+
+	/**
+	 * @testdox `experimentalCartSaveForLater` is registered as false when the `cart_save_for_later` feature is disabled.
+	 */
+	public function test_experimental_cart_save_for_later_setting_is_false_when_feature_disabled() {
+		$features_controller = wc_get_container()->get( FeaturesController::class );
+		$original_enabled    = $features_controller->feature_is_enabled( 'cart_save_for_later' );
+
+		$features_controller->change_feature_enable( 'cart_save_for_later', false );
+		try {
+			$this->registry->initialize_core_data();
+			$data = $this->registry->get();
+
+			$this->assertArrayHasKey( 'experimentalCartSaveForLater', $data );
+			$this->assertFalse( $data['experimentalCartSaveForLater'] );
+		} finally {
+			$features_controller->change_feature_enable( 'cart_save_for_later', $original_enabled );
+		}
 	}
 }
