@@ -9,6 +9,8 @@
  * @package WC_Email_Template_Sync_Test_Helper
  */
 
+declare( strict_types=1 );
+
 defined( 'ABSPATH' ) || exit;
 
 // Safety rail: refuse to load outside test contexts.
