@@ -883,8 +883,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 * @since 7.8.0
 		 */
 		do_action( 'woocommerce_remove_order_items', $this, $type );
+
+		// Unsaved orders (id 0) have no persisted items — skip the data store round-trip.
+		$has_persisted_items = $this->get_id() > 0;
+
 		if ( ! empty( $type ) ) {
-			$this->data_store->delete_items( $this, $type );
+			if ( $has_persisted_items ) {
+				$this->data_store->delete_items( $this, $type );
+			}
 
 			$group = $this->type_to_group( $type );
 
@@ -892,7 +898,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				unset( $this->items[ $group ] );
 			}
 		} else {
-			$this->data_store->delete_items( $this );
+			if ( $has_persisted_items ) {
+				$this->data_store->delete_items( $this );
+			}
 			$this->items = array();
 		}
 		/**

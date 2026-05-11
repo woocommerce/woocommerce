@@ -19,6 +19,12 @@ export type ProductEntityRecord = Omit< Product, 'categories' | 'tags' > & {
 		id: number;
 		name?: string;
 	} >;
+	brands?: Array< {
+		id: number;
+		name?: string;
+		slug?: string;
+	} >;
+	global_unique_id?: string;
 	cross_sell_ids?: number[];
 	upsell_ids?: number[];
 	date_on_sale_from?: string | null;

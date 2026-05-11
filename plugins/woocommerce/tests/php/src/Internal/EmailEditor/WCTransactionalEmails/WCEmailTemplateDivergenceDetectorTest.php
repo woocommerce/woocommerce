@@ -94,6 +94,44 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should register _wc_email_template_source_hash post meta on woo_email with show_in_rest.
+	 */
+	public function test_registers_template_source_hash_meta_with_show_in_rest(): void {
+		$this->initialize_email_editor_integration();
+
+		$this->assertTrue(
+			registered_meta_key_exists( 'post', WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, 'woo_email' ),
+			'Expected _wc_email_template_source_hash to be registered for woo_email.'
+		);
+
+		$args = get_registered_meta_keys( 'post', 'woo_email' )[ WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY ];
+
+		$this->assertTrue( $args['show_in_rest'], 'Expected show_in_rest = true.' );
+		$this->assertTrue( $args['single'], 'Expected single = true.' );
+		$this->assertSame( 'string', $args['type'] );
+		$this->assertIsCallable( $args['auth_callback'] );
+	}
+
+	/**
+	 * @testdox Should register _wc_email_backfilled post meta on woo_email with show_in_rest.
+	 */
+	public function test_registers_email_backfilled_meta_with_show_in_rest(): void {
+		$this->initialize_email_editor_integration();
+
+		$this->assertTrue(
+			registered_meta_key_exists( 'post', WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, 'woo_email' ),
+			'Expected _wc_email_backfilled to be registered for woo_email.'
+		);
+
+		$args = get_registered_meta_keys( 'post', 'woo_email' )[ WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY ];
+
+		$this->assertTrue( $args['show_in_rest'], 'Expected show_in_rest = true.' );
+		$this->assertTrue( $args['single'], 'Expected single = true.' );
+		$this->assertSame( 'boolean', $args['type'] );
+		$this->assertIsCallable( $args['auth_callback'] );
+	}
+
+	/**
 	 * @testdox Should deny REST writes to template meta even for administrators.
 	 */
 	public function test_meta_auth_callback_denies_write_via_rest(): void {

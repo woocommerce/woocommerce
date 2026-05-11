@@ -202,6 +202,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 					$item = array(
 						'id'                 => $type . '-' . $term['slug'],
 						'label'              => $term['name'],
+						'ariaLabel'          => $term['name'],
 						'value'              => $term['slug'],
 						'selected'           => in_array( $term['slug'], $selected_terms, true ),
 						'type'               => $type,
