@@ -29,6 +29,7 @@ use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
+use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
 use Automattic\WooCommerce\Internal\Admin\Marketplace;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\{LoggingUtil, TimeUtil};
@@ -52,7 +53,7 @@ final class WooCommerce {
 	 *
 	 * @var string
 	 */
-	public $version = '10.7.0-dev';
+	public $version = '10.9.0-dev';
 
 	/**
 	 * WooCommerce Schema version.
@@ -368,12 +369,15 @@ final class WooCommerce {
 		$container->get( ComingSoonRequestHandler::class );
 		$container->get( OrderCountCacheService::class );
 		$container->get( EmailImprovements::class );
+		$container->get( DeferredEmailQueue::class );
 		$container->get( AddressProviderController::class );
 		$container->get( AbilitiesRegistry::class );
 		$container->get( MCPAdapterProvider::class );
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
+		$container->get( Automattic\WooCommerce\Internal\OrderReviews\Scheduler::class );
+		$container->get( Automattic\WooCommerce\Internal\OrderReviews\Endpoint::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
@@ -392,7 +396,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\Admin\Settings\PaymentsProviders\WooPayments\WooPaymentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Email\EmailStyleSync::class )->register();
-		$container->get( Automattic\WooCommerce\Internal\Fulfillments\FulfillmentsController::class )->register();
+		$container->get( Automattic\WooCommerce\Admin\Features\Fulfillments\FulfillmentsController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\Admin\Agentic\AgenticController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFeed\ProductFeed::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\PushNotifications\PushNotifications::class )->register();
@@ -409,6 +413,9 @@ final class WooCommerce {
 
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\MainQueryController::class )->register();
 		$container->get( Automattic\WooCommerce\Internal\ProductFilters\CacheController::class )->register();
+
+		// Code+GraphQL API.
+		Automattic\WooCommerce\Internal\Api\Main::register();
 
 		// Integration point between legacy reports and orders APIs (the reports caches invalidation focused).
 		\WC_Admin_Reports::register_orders_hook_handlers();
@@ -1180,7 +1187,8 @@ final class WooCommerce {
 	 * @internal For exclusive usage of WooCommerce core, backwards compatibility not guaranteed.
 	 */
 	public function robots_txt( $output ) {
-		$path = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
+		$site_url = wp_parse_url( site_url() );
+		$path     = ( ! empty( $site_url['path'] ) ) ? $site_url['path'] : '';
 
 		$lines       = preg_split( '/\r\n|\r|\n/', $output );
 		$agent_index = array_search( 'User-agent: *', $lines, true );
@@ -1660,7 +1668,7 @@ final class WooCommerce {
 
 		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'woocommerce_cleanup_rate_limits_wrapper', array(), 'woocommerce', true );
 
-		as_schedule_recurring_action( time(), DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
+		as_schedule_recurring_action( $tomorrow_3am, DAY_IN_SECONDS, 'wc_admin_daily_wrapper', array(), 'woocommerce', true );
 
 		// Note: this is potentially redundant when the core package exists.
 		as_schedule_single_action( time() + 10, 'generate_category_lookup_table_wrapper', array(), 'woocommerce', true );

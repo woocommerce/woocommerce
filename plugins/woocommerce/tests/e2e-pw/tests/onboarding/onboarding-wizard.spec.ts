@@ -424,7 +424,9 @@ test.describe(
 			await test.step( 'Clean up installed extensions', async () => {
 				const deactivateAndDeletePlugin = async ( slug: string ) => {
 					await page.goto( 'wp-admin/plugins.php' );
-					const pluginRow = page.locator( `tr[data-slug="${ slug }"]` );
+					const pluginRow = page.locator(
+						`tr[data-slug="${ slug }"]`
+					);
 
 					// Skip if plugin is not present
 					if ( ! ( await pluginRow.isVisible() ) ) {
@@ -432,7 +434,10 @@ test.describe(
 					}
 
 					// Deactivate if active
-					const deactivateLink = pluginRow.getByRole( 'link', { name: 'Deactivate', exact: true } );
+					const deactivateLink = pluginRow.getByRole( 'link', {
+						name: 'Deactivate',
+						exact: true,
+					} );
 					if ( await deactivateLink.isVisible() ) {
 						await deactivateLink.click();
 						await expect(
@@ -441,7 +446,10 @@ test.describe(
 					}
 
 					// Delete plugin
-					const deleteLink = pluginRow.getByRole( 'link', { name: 'Delete', exact: true } );
+					const deleteLink = pluginRow.getByRole( 'link', {
+						name: 'Delete',
+						exact: true,
+					} );
 					if ( await deleteLink.isVisible() ) {
 						try {
 							await deleteLink.click();
@@ -453,7 +461,9 @@ test.describe(
 								.getByText( 'Yes, delete these files and data' )
 								.click();
 							await page
-								.getByText( 'The selected plugin has been deleted.' )
+								.getByText(
+									'The selected plugin has been deleted.'
+								)
 								.waitFor();
 						}
 					}

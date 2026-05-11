@@ -38,7 +38,6 @@ export const SiteHub = forwardRef<
 	}
 >( ( { isTransparent, ...restProps }, ref ) => {
 	const { siteTitle } = useSelect( ( select ) => {
-		// @ts-expect-error No types for this exist yet.
 		const { getSite } = select( coreStore );
 
 		return {
@@ -117,7 +116,7 @@ export const SiteHub = forwardRef<
 									delay: 0.1,
 								} }
 							>
-								{ decodeEntities( siteTitle ) }
+								{ decodeEntities( siteTitle ?? '' ) }
 							</motion.div>
 						</AnimatePresence>
 					) }

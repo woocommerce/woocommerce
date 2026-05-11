@@ -1,21 +1,21 @@
 /**
  * External dependencies
  */
-import type { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
-import type {
-	ProductResponseItem,
-	ProductResponseVariationsItem,
-} from '@woocommerce/types';
+import type { ProductResponseVariationsItem } from '@woocommerce/types';
 
 /**
  * Normalize attribute name by stripping the 'attribute_' or 'attribute_pa_' prefix
- * that WooCommerce adds for variation attributes.
+ * that WooCommerce adds for variation attributes, and replacing hyphens with spaces
+ * so that slugs (e.g., "some-name") match labels (e.g., "some name").
  *
  * @param name The attribute name (e.g., 'attribute_color' or 'attribute_pa_color').
  * @return The normalized name (e.g., 'color').
  */
 export const normalizeAttributeName = ( name: string ): string => {
-	return name.replace( /^attribute_(pa_)?/, '' );
+	return name
+		.replace( /^attribute_(pa_)?/, '' )
+		.replace( /-/g, ' ' )
+		.toLowerCase();
 };
 
 /**
@@ -32,10 +32,7 @@ export const attributeNamesMatch = (
 	name1: string,
 	name2: string
 ): boolean => {
-	return (
-		normalizeAttributeName( name1 ).toLowerCase() ===
-		normalizeAttributeName( name2 ).toLowerCase()
-	);
+	return normalizeAttributeName( name1 ) === normalizeAttributeName( name2 );
 };
 
 /**
@@ -53,54 +50,8 @@ export const getVariationAttributeValue = (
 	variation: ProductResponseVariationsItem,
 	attributeName: string
 ): string | undefined => {
-	const normalizedName =
-		normalizeAttributeName( attributeName ).toLowerCase();
-	const attr = variation.attributes.find(
-		( a ) => a.name.toLowerCase() === normalizedName
+	const attr = variation.attributes.find( ( a ) =>
+		attributeNamesMatch( attributeName, a.name )
 	);
 	return attr?.value;
-};
-
-/**
- * Find the matching variation from a product's variations based on selected attributes.
- *
- * Uses case-insensitive comparison since Store API returns labels (e.g., "Color")
- * while PHP context uses slugs (e.g., "attribute_pa_color" → "color").
- *
- * @param product            The product in Store API format.
- * @param selectedAttributes The selected attributes.
- * @return The matching variation, or null if no match.
- */
-export const findMatchingVariation = (
-	product: ProductResponseItem,
-	selectedAttributes: SelectedAttributes[]
-): ProductResponseVariationsItem | null => {
-	if ( ! product.variations?.length || ! selectedAttributes?.length ) {
-		return null;
-	}
-
-	const matchedVariation = product.variations.find(
-		( variation: ProductResponseVariationsItem ) => {
-			return variation.attributes.every( ( attr ) => {
-				const attrNameLower = attr.name.toLowerCase();
-				const selectedAttr = selectedAttributes.find(
-					( selected ) =>
-						normalizeAttributeName(
-							selected.attribute
-						).toLowerCase() === attrNameLower
-				);
-
-				// If variation attribute has empty value, it accepts "Any" value.
-				if ( attr.value === '' ) {
-					return (
-						selectedAttr !== undefined && selectedAttr.value !== ''
-					);
-				}
-
-				return selectedAttr?.value === attr.value;
-			} );
-		}
-	);
-
-	return matchedVariation ?? null;
 };

@@ -15,12 +15,13 @@ import {
 	productPriceScreenReaderValidation,
 	productPriceValidation,
 } from '@woocommerce/blocks-checkout';
-import Dinero from 'dinero.js';
 import { getSetting } from '@woocommerce/settings';
-import { createInterpolateElement, useMemo } from '@wordpress/element';
+import { useMemo } from '@wordpress/element';
 import { useStoreCart } from '@woocommerce/base-context/hooks';
 import { CartItem, isString } from '@woocommerce/types';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
+import { dinero, transformScale, toSnapshot } from 'dinero.js';
+import { USD } from 'dinero.js/currencies'; // USD is used as a placeholder currency for arithmetic; actual formatting is handled elsewhere.
 
 /**
  * Internal dependencies
@@ -77,32 +78,43 @@ const OrderSummaryItem = ( {
 		arg,
 	} );
 
-	const regularPriceSingle = Dinero( {
-		amount: parseInt( prices.raw_prices.regular_price, 10 ),
-		precision: isString( prices.raw_prices.precision )
-			? parseInt( prices.raw_prices.precision, 10 )
-			: prices.raw_prices.precision,
-	} )
-		.convertPrecision( priceCurrency.minorUnit )
-		.getAmount();
-	const priceSingle = Dinero( {
-		amount: parseInt( prices.raw_prices.price, 10 ),
-		precision: isString( prices.raw_prices.precision )
-			? parseInt( prices.raw_prices.precision, 10 )
-			: prices.raw_prices.precision,
-	} )
-		.convertPrecision( priceCurrency.minorUnit )
-		.getAmount();
+	const rawPrecision = isString( prices.raw_prices.precision )
+		? parseInt( prices.raw_prices.precision, 10 )
+		: prices.raw_prices.precision;
+
+	const regularPriceSingle = toSnapshot(
+		transformScale(
+			dinero( {
+				amount: parseInt( prices.raw_prices.regular_price, 10 ),
+				currency: USD,
+				scale: rawPrecision,
+			} ),
+			priceCurrency.minorUnit
+		)
+	).amount;
+	const priceSingle = toSnapshot(
+		transformScale(
+			dinero( {
+				amount: parseInt( prices.raw_prices.price, 10 ),
+				currency: USD,
+				scale: rawPrecision,
+			} ),
+			priceCurrency.minorUnit
+		)
+	).amount;
 	const totalsCurrency = getCurrencyFromPriceResponse( totals );
 
 	let lineSubtotal = parseInt( totals.line_subtotal, 10 );
 	if ( getSetting( 'displayCartPricesIncludingTax', false ) ) {
 		lineSubtotal += parseInt( totals.line_subtotal_tax, 10 );
 	}
-	const subtotalPrice = Dinero( {
-		amount: lineSubtotal,
-		precision: totalsCurrency.minorUnit,
-	} ).getAmount();
+	const subtotalPrice = toSnapshot(
+		dinero( {
+			amount: lineSubtotal,
+			currency: USD,
+			scale: totalsCurrency.minorUnit,
+		} )
+	).amount;
 
 	const saleAmountSingle = calculateSaleAmount(
 		prices,
@@ -150,13 +162,22 @@ const OrderSummaryItem = ( {
 		validation: productPriceScreenReaderValidation,
 	} );
 
-	const ProductPriceScreenReaderOutput = () => {
-		return createInterpolateElement( productPriceScreenReaderFormat, {
-			quantity: <>{ quantity }</>,
-			productName: <>{ name }</>,
-			price: <>{ formatPrice( subtotalPrice, totalsCurrency ) }</>,
-		} );
-	};
+	// Build as one string (not React nodes) so screen readers announce the
+	// full sentence as a single unit rather than separate sibling text nodes.
+	const productPriceScreenReaderText = productPriceScreenReaderFormat.replace(
+		/<(quantity|productName|price)\/>/g,
+		( _match, key ) => {
+			switch ( key ) {
+				case 'quantity':
+					return String( quantity );
+				case 'productName':
+					return name;
+				case 'price':
+					return formatPrice( subtotalPrice, totalsCurrency );
+			}
+			return '';
+		}
+	);
 
 	const cartItemClassNameFilter = applyCheckoutFilter( {
 		filterName: 'cartItemClass',
@@ -229,7 +250,7 @@ const OrderSummaryItem = ( {
 				<ProductMetadata { ...productMetaProps } />
 			</div>
 			<span className="screen-reader-text">
-				<ProductPriceScreenReaderOutput />
+				{ productPriceScreenReaderText }
 			</span>
 			<div
 				className="wc-block-components-order-summary-item__total-price"

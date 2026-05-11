@@ -4,7 +4,6 @@
 import apiFetch from '@wordpress/api-fetch';
 import { __, sprintf } from '@wordpress/i18n';
 import { dispatch } from '@wordpress/data';
-import type { Options } from 'wordpress__notices';
 import { store as coreNoticesStore } from '@wordpress/notices';
 import { Icon } from '@wordpress/components';
 
@@ -28,7 +27,7 @@ import {
 	SearchAPIJSONType,
 	SearchAPIProductType,
 } from '../components/product-list/types';
-import { NoticeStatus } from '../contexts/types';
+import { NoticeOptions, NoticeStatus } from '../contexts/types';
 import { noticeStore } from '../contexts/notice-store';
 
 interface ProductGroup {
@@ -450,7 +449,7 @@ function addNotice(
 	productKey: string,
 	message: string,
 	status?: NoticeStatus,
-	options?: Partial< Options >
+	options?: Partial< NoticeOptions >
 ) {
 	if ( status === NoticeStatus.Error ) {
 		dispatch( noticeStore ).addNotice(

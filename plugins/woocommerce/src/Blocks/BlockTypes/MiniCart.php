@@ -519,8 +519,8 @@ class MiniCart extends AbstractBlock {
 		if ( $cart ) {
 			$classes_styles                   = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes );
 			$icon_color                       = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
-			$styles                           = $product_count_color ? 'background:' . $product_count_color : '';
+			$product_count_color              = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
+			$styles                           = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
 			$icon                             = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 			$product_count_visibility         = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';
 			$wrapper_classes                  = sprintf( 'wc-block-mini-cart wp-block-woocommerce-mini-cart %s', $classes_styles['classes'] );
@@ -567,6 +567,7 @@ class MiniCart extends AbstractBlock {
 							? sprintf( $button_aria_label_template, $state['totalItemsInCart'] )
 							: sprintf( $button_aria_label_template, $state['totalItemsInCart'], $state['formattedSubtotal'] );
 					},
+					'productCountColor'  => $product_count_color,
 				)
 			);
 
@@ -607,12 +608,13 @@ class MiniCart extends AbstractBlock {
 				data-wp-on-document--wc-blocks_added_to_cart---open-drawer="actions.openDrawer"
 				<?php endif; ?>
 				data-wp-watch="callbacks.disableScrollingOnBody"
+				data-wp-init--mark-as-hydrated="callbacks.markAsHydrated"
 				<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 				<?php echo wp_interactivity_data_wp_context( $context ); ?>
 				class="<?php echo esc_attr( $wrapper_classes ); ?>"
 				style="<?php echo esc_attr( $wrapper_styles ); ?>"
 			>
-				<button 
+				<button
 					data-wp-on--click="actions.openDrawer"
 					data-wp-bind--aria-label="state.buttonAriaLabel"
 					class="wc-block-mini-cart__button"
@@ -623,8 +625,15 @@ class MiniCart extends AbstractBlock {
 							// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 							echo $icon;
 						?>
-						<?php if ( 'never' !== $product_count_visibility ) : ?>
-							<span data-wp-bind--hidden="!state.badgeIsVisible" data-wp-text="state.totalItemsInCart" class="wc-block-mini-cart__badge" style="<?php echo esc_attr( $styles ); ?>">
+							<?php if ( 'never' !== $product_count_visibility ) : ?>
+								<span
+									data-wp-style--background-color="state.badgeBackgroundColor"
+									data-wp-style--color="state.badgeTextColor"
+									data-wp-bind--hidden="!state.badgeIsVisible"
+									data-wp-text="state.totalItemsInCart"
+									class="wc-block-mini-cart__badge"
+									style="<?php echo esc_attr( $styles ); ?>"
+								>
 							</span>
 						<?php endif; ?>
 					</span>
@@ -812,8 +821,8 @@ class MiniCart extends AbstractBlock {
 		$wrapper_styles  = $classes_styles['styles'];
 
 		$icon_color          = isset( $attributes['iconColor']['color'] ) ? esc_attr( $attributes['iconColor']['color'] ) : 'currentColor';
-		$product_count_color = isset( $attributes['productCountColor']['color'] ) ? esc_attr( $attributes['productCountColor']['color'] ) : '';
-		$styles              = $product_count_color ? 'background:' . $product_count_color : '';
+		$product_count_color = isset( $attributes['productCountColor']['color'] ) ? $attributes['productCountColor']['color'] : '';
+		$styles              = $product_count_color ? 'background:' . esc_attr( $product_count_color ) : '';
 		$icon                = MiniCartUtils::get_svg_icon( $attributes['miniCartIcon'] ?? '', $icon_color );
 
 		$product_count_visibility = isset( $attributes['productCountVisibility'] ) ? $attributes['productCountVisibility'] : 'greater_than_zero';

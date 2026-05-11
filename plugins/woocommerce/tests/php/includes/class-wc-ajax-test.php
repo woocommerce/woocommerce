@@ -131,6 +131,135 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * Test to verify that term color is saved in AJAX calls, but only for terms belonging to a visual attribute.
+	 *
+	 * @testdox Should save term color only when adding visual attribute terms via AJAX.
+	 */
+	public function test_add_new_attribute_saves_color_only_for_visual_attributes(): void {
+		$original_theme      = wp_get_theme()->get_stylesheet();
+		$visual_attribute_id = null;
+		$text_attribute_id   = null;
+		$visual_taxonomy     = null;
+		$text_taxonomy       = null;
+		$visual_term_id      = 0;
+		$text_term_id        = 0;
+		$suffix              = (string) wp_rand( 1000, 9999 );
+
+		$enable_visual_attribute_feature = function ( $features ) {
+			$features[] = 'wc-visual-attribute';
+			return array_unique( $features );
+		};
+
+		add_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
+
+		try {
+			switch_theme( 'twentytwentyfour' );
+
+			$visual_attribute_id = wc_create_attribute(
+				array(
+					'name' => 'Visual AJAX ' . $suffix,
+					'type' => 'wc-visual',
+				)
+			);
+			$text_attribute_id   = wc_create_attribute(
+				array(
+					'name' => 'Text AJAX ' . $suffix,
+					'type' => 'select',
+				)
+			);
+
+			$this->assertIsInt( $visual_attribute_id, 'The visual attribute should be created.' );
+			$this->assertIsInt( $text_attribute_id, 'The text attribute should be created.' );
+
+			$visual_taxonomy = $this->register_attribute_taxonomy_for_test( $visual_attribute_id );
+			$text_taxonomy   = $this->register_attribute_taxonomy_for_test( $text_attribute_id );
+
+			$this->_setRole( 'administrator' );
+
+			$_POST['security']   = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']   = $visual_taxonomy;
+			$_POST['term']       = 'Cerulean ' . $suffix;
+			$_POST['term_color'] = '#336699';
+
+			$visual_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$visual_term_id  = isset( $visual_response['term_id'] ) ? absint( $visual_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $visual_term_id, 'The visual attribute term should be created.' );
+			$this->assertSame( '#336699', get_term_meta( $visual_term_id, 'color', true ), 'Visual attribute terms should store the posted color.' );
+
+			$_POST['security']   = wp_create_nonce( 'add-attribute' );
+			$_POST['taxonomy']   = $text_taxonomy;
+			$_POST['term']       = 'Plain ' . $suffix;
+			$_POST['term_color'] = '#abcdef';
+
+			$text_response = $this->do_ajax( 'woocommerce_add_new_attribute' );
+			$text_term_id  = isset( $text_response['term_id'] ) ? absint( $text_response['term_id'] ) : 0;
+
+			$this->assertNotEmpty( $text_term_id, 'The text attribute term should be created.' );
+			$this->assertSame( '', get_term_meta( $text_term_id, 'color', true ), 'Text attribute terms should ignore posted colors.' );
+		} finally {
+			unset( $_POST['security'], $_POST['taxonomy'], $_POST['term'], $_POST['term_color'] );
+
+			if ( $visual_term_id && taxonomy_exists( $visual_taxonomy ) ) {
+				wp_delete_term( $visual_term_id, $visual_taxonomy );
+			}
+
+			if ( $text_term_id && taxonomy_exists( $text_taxonomy ) ) {
+				wp_delete_term( $text_term_id, $text_taxonomy );
+			}
+
+			if ( is_int( $visual_attribute_id ) ) {
+				wc_delete_attribute( $visual_attribute_id );
+			}
+
+			if ( is_int( $text_attribute_id ) ) {
+				wc_delete_attribute( $text_attribute_id );
+			}
+
+			global $wc_product_attributes;
+			foreach ( array_filter( array( $visual_taxonomy, $text_taxonomy ) ) as $taxonomy ) {
+				if ( taxonomy_exists( $taxonomy ) ) {
+					unregister_taxonomy( $taxonomy );
+				}
+				unset( $wc_product_attributes[ $taxonomy ] );
+			}
+
+			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
+			switch_theme( $original_theme );
+		}//end try
+	}
+
+	/**
+	 * Register a product attribute taxonomy created inside a test.
+	 *
+	 * @param int $attribute_id Attribute ID.
+	 * @return string
+	 */
+	private function register_attribute_taxonomy_for_test( int $attribute_id ): string {
+		global $wc_product_attributes;
+
+		$taxonomy             = wc_attribute_taxonomy_name_by_id( $attribute_id );
+		$attribute_taxonomies = wc_get_attribute_taxonomies();
+
+		$wc_product_attributes[ $taxonomy ] = $attribute_taxonomies[ 'id:' . $attribute_id ];
+
+		register_taxonomy(
+			$taxonomy,
+			array( 'product' ),
+			array(
+				'capabilities' => array(
+					'manage_terms' => 'manage_product_terms',
+					'edit_terms'   => 'edit_product_terms',
+					'delete_terms' => 'delete_product_terms',
+					'assign_terms' => 'assign_product_terms',
+				),
+			)
+		);
+
+		return $taxonomy;
+	}
+
+	/**
 	 * Test coupon and recalculation of totals sequences when product prices are tax inclusive.
 	 */
 	public function test_apply_coupon_with_tax_inclusive_settings() {
@@ -312,6 +441,115 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 			$response,
 			'If the customer is not part of the blog, we do not get back any customer information (in reality, the request was ended with wp_die).'
 		);
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request when adding an item via AJAX.
+	 */
+	public function test_add_to_cart_fires_cart_item_added_from_user_request(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$_POST['product_id'] = $product->get_id();
+		$_POST['quantity']   = 3;
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$this->do_ajax( 'woocommerce_add_to_cart' );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $product->get_id(), $captured_args['product_id'] );
+		$this->assertEquals( 3, $captured_args['quantity'] );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+
+		WC()->cart->empty_cart();
+		unset( $_POST['product_id'], $_POST['quantity'] );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_added_from_user_request with variation ID when adding a variation via AJAX.
+	 */
+	public function test_add_to_cart_fires_cart_item_added_from_user_request_for_variation(): void {
+		$product = new \WC_Product_Variable();
+		$product->set_name( 'Test Variable Product' );
+		$attribute = WC_Helper_Product::create_product_attribute_object( 'color', array( 'blue' ) );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new \WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( 'pa_color' => 'blue' ) );
+		$variation->set_regular_price( 10 );
+		$variation->save();
+
+		$_POST['product_id'] = $variation->get_id();
+		$_POST['quantity']   = 2;
+
+		$captured_args = array();
+		$callback      = function ( $product_id, $quantity ) use ( &$captured_args ) {
+			$captured_args = array(
+				'product_id' => $product_id,
+				'quantity'   => $quantity,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback, 10, 2 );
+
+		$this->do_ajax( 'woocommerce_add_to_cart' );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $variation->get_id(), $captured_args['product_id'], 'The product_id should be the variation ID, not the parent product ID' );
+		$this->assertEquals( 2, $captured_args['quantity'] );
+
+		remove_action( 'internal_woocommerce_cart_item_added_from_user_request', $callback );
+
+		WC()->cart->empty_cart();
+		unset( $_POST['product_id'], $_POST['quantity'] );
+		$variation->delete( true );
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should fire internal_woocommerce_cart_item_removed_from_user_request when removing an item via AJAX.
+	 */
+	public function test_remove_from_cart_fires_cart_item_removed_from_user_request(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		WC()->cart->empty_cart();
+		$cart_item_key = WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$_POST['cart_item_key'] = $cart_item_key;
+
+		$captured_args = array();
+		$callback      = function ( $key, $cart ) use ( &$captured_args ) {
+			$captured_args = array(
+				'cart_item_key' => $key,
+				'cart'          => $cart,
+			);
+		};
+
+		add_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback, 10, 2 );
+
+		$this->do_ajax( 'woocommerce_remove_from_cart' );
+
+		$this->assertNotEmpty( $captured_args, 'The action should have been fired' );
+		$this->assertSame( $cart_item_key, $captured_args['cart_item_key'] );
+		$this->assertInstanceOf( WC_Cart::class, $captured_args['cart'] );
+
+		remove_action( 'internal_woocommerce_cart_item_removed_from_user_request', $callback );
+
+		WC()->cart->empty_cart();
+		unset( $_POST['cart_item_key'] );
+		$product->delete( true );
 	}
 
 	/**

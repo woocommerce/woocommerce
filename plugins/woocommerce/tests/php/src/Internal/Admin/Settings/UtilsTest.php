@@ -1462,6 +1462,37 @@ class UtilsTest extends WC_Unit_Test_Case {
 					'provider3' => 2,
 				),
 			),
+			'integer keys are removed'                => array(
+				array(
+					0           => 0,
+					'provider1' => 1,
+					'provider2' => 2,
+				),
+				array(
+					'provider1' => 0,
+					'provider2' => 1,
+				),
+			),
+			'only integer keys'                       => array(
+				array(
+					0 => 0,
+					1 => 1,
+					2 => 2,
+				),
+				array(),
+			),
+			'mixed integer and string keys'           => array(
+				array(
+					0           => 5,
+					'provider1' => 10,
+					1           => 15,
+					'provider2' => 20,
+				),
+				array(
+					'provider1' => 0,
+					'provider2' => 1,
+				),
+			),
 		);
 	}
 

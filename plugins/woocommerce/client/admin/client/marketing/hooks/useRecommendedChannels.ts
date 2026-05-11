@@ -9,8 +9,7 @@ import { differenceWith } from 'lodash';
  * Internal dependencies
  */
 import { STORE_KEY } from '~/marketing/data-multichannel/constants';
-import { RecommendedChannel } from '~/marketing/data-multichannel/types';
-import { Selectors } from '~/marketing/data-multichannel/selectors';
+import type { RecommendedChannel } from '~/marketing/data-multichannel/types';
 
 type UseRecommendedChannels = {
 	loading: boolean;
@@ -19,10 +18,12 @@ type UseRecommendedChannels = {
 
 export const useRecommendedChannels = (): UseRecommendedChannels => {
 	return useSelect( ( select ) => {
-		const { hasFinishedResolution, getRecommendedChannels } = select(
-			STORE_KEY
-		) as Selectors;
-		const { data, error } = getRecommendedChannels();
+		const { hasFinishedResolution, getRecommendedChannels } =
+			select( STORE_KEY );
+		const { data, error } = getRecommendedChannels() as {
+			data?: RecommendedChannel[];
+			error?: unknown;
+		};
 
 		const { getActivePlugins } = select( pluginsStore );
 		const activePlugins = getActivePlugins();

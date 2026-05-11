@@ -118,6 +118,9 @@ class ProductGalleryUtils {
 		try {
 			if ( $product->is_type( 'variable' ) ) {
 				$variations = $product->get_children();
+				if ( ! empty( $variations ) ) {
+					_prime_post_caches( $variations );
+				}
 				foreach ( $variations as $variation_id ) {
 					$variation = wc_get_product( $variation_id );
 					if ( $variation ) {
