@@ -44,7 +44,7 @@ export const QRDirectLoginCode = () => {
 
 	if ( state === QRLoginTokenStates.LOADING ) {
 		return (
-			<div className="qr-direct-login">
+			<div className="woocommerce-qr-direct-login">
 				<Spinner />
 				<p role="status" aria-live="polite">
 					{ __( 'Generating secure login code…', 'woocommerce' ) }
@@ -55,9 +55,9 @@ export const QRDirectLoginCode = () => {
 
 	if ( state === QRLoginTokenStates.ERROR ) {
 		return (
-			<div className="qr-direct-login">
+			<div className="woocommerce-qr-direct-login">
 				<p
-					className="qr-direct-login__error"
+					className="woocommerce-qr-direct-login__error"
 					role="status"
 					aria-live="polite"
 				>
@@ -78,7 +78,7 @@ export const QRDirectLoginCode = () => {
 
 	if ( state === QRLoginTokenStates.EXPIRED ) {
 		return (
-			<div className="qr-direct-login">
+			<div className="woocommerce-qr-direct-login">
 				<p role="status" aria-live="polite">
 					{ __( 'The login code has expired.', 'woocommerce' ) }
 				</p>
@@ -97,18 +97,21 @@ export const QRDirectLoginCode = () => {
 
 	if ( state === QRLoginTokenStates.READY && qrUrl ) {
 		return (
-			<div className="qr-direct-login">
+			<div className="woocommerce-qr-direct-login">
 				<QRCodeSVG value={ qrUrl } size={ 140 } />
 				{ /* Countdown stays outside any live region so screen readers
 				     don't re-announce it every second. */ }
-				<p className="qr-direct-login__timer" aria-live="off">
+				<p
+					className="woocommerce-qr-direct-login__timer"
+					aria-live="off"
+				>
 					{ sprintf(
 						/* translators: %s: time remaining in M:SS format */
 						__( 'Code expires in %s', 'woocommerce' ),
 						formatTime( secondsRemaining )
 					) }
 				</p>
-				<p className="qr-direct-login__version-note">
+				<p className="woocommerce-qr-direct-login__version-note">
 					{ __(
 						'The app version needs to be 15.7 or above to sign in with this link.',
 						'woocommerce'
