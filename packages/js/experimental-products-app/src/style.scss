@@ -40,6 +40,12 @@
 	height: 100%;
 }
 
+.woocommerce-product-list
+	.dataviews-view-table
+	.dataviews-view-table__hierarchy-column {
+	padding-right: 4px;
+}
+
 .woocommerce-product-edit {
 	display: flex;
 	flex-direction: column;
