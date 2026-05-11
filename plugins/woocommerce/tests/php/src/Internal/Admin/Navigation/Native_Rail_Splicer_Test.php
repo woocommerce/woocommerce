@@ -158,4 +158,50 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'woocommerce', $entries_by_slug );
 		$this->assertStringContainsString( 'hide-if-js', (string) $entries_by_slug['woocommerce'][4] );
 	}
+
+	public function test_splice_populates_submenu_for_each_root_with_first_level_children(): void {
+		global $menu, $submenu;
+		$menu = array(
+			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
+			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
+		);
+
+		$tree = array(
+			'woocommerce'           => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'wc-admin&path=/marketing' => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Marketing',
+				'icon'       => 'dashicons-megaphone',
+				'position'   => 40,
+				'capability' => 'manage_woocommerce',
+			),
+			'wc-admin&path=/marketing/overview' => array(
+				'parent'     => 'wc-admin&path=/marketing',
+				'title'      => 'Overview',
+				'position'   => 10,
+				'capability' => 'manage_woocommerce',
+			),
+			'wc-admin&path=/marketing/coupons'  => array(
+				'parent'     => 'wc-admin&path=/marketing',
+				'title'      => 'Coupons',
+				'position'   => 20,
+				'capability' => 'manage_woocommerce',
+			),
+		);
+
+		$_GET['page']       = 'wc-admin';
+		$_GET['path']       = '/marketing';
+		$GLOBALS['pagenow'] = 'admin.php';
+
+		( new Native_Rail_Splicer() )->splice( $tree );
+
+		$this->assertArrayHasKey( 'wc-admin&path=/marketing', $submenu );
+		$slugs = array_map( static fn( $entry ) => $entry[2], $submenu['wc-admin&path=/marketing'] );
+		$this->assertSame(
+			array( 'wc-admin&path=/marketing/overview', 'wc-admin&path=/marketing/coupons' ),
+			$slugs
+		);
+		$this->assertSame( 'Overview', $submenu['wc-admin&path=/marketing'][0][0] );
+		$this->assertSame( 'manage_woocommerce', $submenu['wc-admin&path=/marketing'][0][1] );
+	}
 }

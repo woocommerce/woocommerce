@@ -39,6 +39,61 @@ class Native_Rail_Splicer {
 		$this->strip_non_woo_top_level();
 		$this->hide_woocommerce_top_level();
 		$this->insert_woo_roots( $tree );
+		$this->populate_root_submenus( $tree );
+	}
+
+	/**
+	 * For each Woo tree root, write `$submenu[$root_slug]` with that root's
+	 * first-level children (grandchildren stay tree-only — the JS cascade
+	 * picks them up at render time).
+	 *
+	 * Entry shape: `[ title, capability, slug, page_title, classes ]`. We
+	 * write `page_title` = title and leave `classes` blank; WP appends to
+	 * classes for `current` highlighting at render time.
+	 *
+	 * @param array $tree Final tree.
+	 */
+	private function populate_root_submenus( array $tree ): void {
+		global $submenu;
+
+		$by_parent = array();
+		foreach ( $tree as $slug => $node ) {
+			$parent = $node['parent'] ?? null;
+			if ( null === $parent ) {
+				continue;
+			}
+			$by_parent[ $parent ][ $slug ] = $node;
+		}
+
+		foreach ( $tree as $slug => $node ) {
+			if ( ( $node['parent'] ?? null ) !== 'woocommerce' ) {
+				continue;
+			}
+			if ( ! isset( $by_parent[ $slug ] ) ) {
+				continue;
+			}
+
+			$children = $by_parent[ $slug ];
+			uasort(
+				$children,
+				static fn( $a, $b ) => ( $a['position'] ?? 0 ) <=> ( $b['position'] ?? 0 )
+			);
+
+			$entries = array();
+			foreach ( $children as $child_slug => $child ) {
+				if ( ! empty( $child['hidden'] ) ) {
+					continue;
+				}
+				$title     = (string) ( $child['title'] ?? $child_slug );
+				$cap       = (string) ( $child['capability'] ?? 'read' );
+				$url       = (string) ( $child['url'] ?? $child_slug );
+				$entries[] = array( $title, $cap, $url, $title, '' );
+			}
+
+			if ( ! empty( $entries ) ) {
+				$submenu[ $slug ] = $entries;
+			}
+		}
 	}
 
 	/**
