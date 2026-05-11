@@ -34,6 +34,7 @@ import {
 	getProductEditFields,
 	getVisibleProductEditFields,
 	isProductVariation,
+	mergeVariationMeta,
 } from './utils';
 import { saveSelectedProducts } from './save';
 import { VARIATION_LEGACY_HOOK_MAP } from '../variation-view/legacy-hooks';
@@ -91,7 +92,7 @@ function ProductEditForm( {
 	onChange,
 	selectedProducts,
 }: ProductEditFormProps ) {
-	const hasVariations = selectedProducts.some( isProductVariation );
+	const hasVariations = selectedProducts.every( isProductVariation );
 	const { fieldsByHook } = useLegacyFields(
 		hasVariations ? VARIATION_LEGACY_HOOK_MAP : {}
 	);
@@ -113,10 +114,13 @@ function ProductEditForm( {
 
 	const mergedData = buildMergedProductEditData( selectedProducts );
 
-	const dataWithMeta =
-		variationMeta && ! mergedData.meta_data?.length
-			? { ...mergedData, meta_data: variationMeta }
-			: mergedData;
+	const mergedMeta = mergeVariationMeta(
+		variationMeta,
+		mergedData.meta_data
+	);
+	const dataWithMeta = mergedMeta
+		? { ...mergedData, meta_data: mergedMeta }
+		: mergedData;
 
 	const visibleFields = getVisibleProductEditFields(
 		fieldsWithLegacy,

@@ -84,7 +84,7 @@ function updateMetaData(
 	onChange( { meta_data: updated } as Partial< ProductEntityRecord > );
 }
 
-function parseVisibility(
+export function parseVisibility(
 	wrapperClass: string
 ): ( ( item: ProductEntityRecord ) => boolean ) | undefined {
 	const patterns: Record<
@@ -100,13 +100,18 @@ function parseVisibility(
 			item.downloadable === true,
 	};
 
+	const checks: ( ( item: ProductEntityRecord ) => boolean )[] = [];
 	for ( const [ pattern, check ] of Object.entries( patterns ) ) {
 		if ( wrapperClass.includes( pattern ) ) {
-			return check;
+			checks.push( check );
 		}
 	}
 
-	return undefined;
+	if ( checks.length === 0 ) {
+		return undefined;
+	}
+
+	return ( item ) => checks.every( ( check ) => check( item ) );
 }
 
 function createTextEdit(

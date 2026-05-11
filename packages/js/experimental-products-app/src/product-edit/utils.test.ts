@@ -17,6 +17,7 @@ import {
 	getProductVariationUpdatePath,
 	getVisibleProductEditFields,
 	isProductVariation,
+	mergeVariationMeta,
 } from './utils';
 
 jest.mock( '@dnd-kit/react', () => ( {
@@ -941,6 +942,59 @@ describe( 'product edit utils', () => {
 
 			expect( field ).toBeDefined();
 			expect( field?.isVisible ).toBeUndefined();
+		} );
+	} );
+
+	describe( 'mergeVariationMeta', () => {
+		it( 'preserves unedited fetched values when one key is edited', () => {
+			const fetched = [
+				{ id: 1, key: '_a', value: 'fetched_a' },
+				{ id: 2, key: '_b', value: 'fetched_b' },
+				{ id: 3, key: '_c', value: 'fetched_c' },
+			];
+			const edited = [ { key: '_a', value: 'edited_a' } ];
+
+			const result = mergeVariationMeta( fetched, edited );
+
+			expect( result ).toEqual( [
+				{ key: '_a', value: 'edited_a' },
+				{ id: 2, key: '_b', value: 'fetched_b' },
+				{ id: 3, key: '_c', value: 'fetched_c' },
+			] );
+		} );
+
+		it( 'returns editedMeta when fetchedMeta is undefined', () => {
+			const edited = [ { key: '_a', value: 'v' } ];
+
+			expect( mergeVariationMeta( undefined, edited ) ).toBe( edited );
+		} );
+
+		it( 'returns fetchedMeta when editedMeta is empty', () => {
+			const fetched = [ { id: 1, key: '_a', value: 'v' } ];
+
+			expect( mergeVariationMeta( fetched, [] ) ).toBe( fetched );
+		} );
+
+		it( 'returns undefined when both sources are undefined', () => {
+			expect(
+				mergeVariationMeta( undefined, undefined )
+			).toBeUndefined();
+		} );
+
+		it( 'appends edited keys not present in fetched meta', () => {
+			const fetched = [ { id: 1, key: '_a', value: 'fetched_a' } ];
+			const edited = [ { key: '_d', value: 'new_d' } ];
+
+			const result = mergeVariationMeta( fetched, edited );
+
+			expect( result ).toEqual( [
+				{ id: 1, key: '_a', value: 'fetched_a' },
+				{ key: '_d', value: 'new_d' },
+			] );
+		} );
+
+		it( 'returns empty array when both sources are empty', () => {
+			expect( mergeVariationMeta( [], [] ) ).toEqual( [] );
 		} );
 	} );
 } );

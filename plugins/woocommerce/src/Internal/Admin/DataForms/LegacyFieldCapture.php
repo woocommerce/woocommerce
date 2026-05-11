@@ -22,7 +22,7 @@ defined( 'ABSPATH' ) || exit;
  * When capture mode is active, helper functions (woocommerce_wp_text_input, etc.)
  * push their field definition arrays to this collector instead of echoing HTML.
  *
- * @since 9.9.0
+ * @since 10.9.0
  */
 class LegacyFieldCapture {
 
@@ -66,6 +66,8 @@ class LegacyFieldCapture {
 	 *
 	 * Fires each hook in capture mode so that WC helper functions push their
 	 * field definitions to the collector instead of rendering HTML.
+	 *
+	 * @since 10.9.0
 	 *
 	 * @param string[] $hooks Hook names to capture.
 	 * @return array<string, array<int, array<string, mixed>>> Field definitions grouped by hook name.
@@ -115,6 +117,8 @@ class LegacyFieldCapture {
 	/**
 	 * Whether capture mode is currently active.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @return bool
 	 */
 	public static function is_capturing(): bool {
@@ -125,6 +129,8 @@ class LegacyFieldCapture {
 	 * Collect a field definition from a helper function.
 	 *
 	 * Called by the modified WC helper functions when capture mode is active.
+	 *
+	 * @since 10.9.0
 	 *
 	 * @param string               $helper_type The helper function type (text_input, select, checkbox, etc.).
 	 * @param array<string, mixed> $field       The raw field array passed to the helper function.
@@ -142,7 +148,7 @@ class LegacyFieldCapture {
 			'type'              => $helper_type,
 			'input_type'        => $field['type'] ?? 'text',
 			'label'             => $field['label'] ?? '',
-			'meta_key'          => '_' . $base_id,
+			'meta_key'          => $base_id,
 			'placeholder'       => $field['placeholder'] ?? '',
 			'description'       => is_array( $field['description'] ?? null )
 				? implode( ' ', $field['description'] )
@@ -159,6 +165,8 @@ class LegacyFieldCapture {
 
 	/**
 	 * Reset the capture state.
+	 *
+	 * @since 10.9.0
 	 */
 	public static function reset(): void {
 		self::$capturing    = false;
@@ -169,6 +177,8 @@ class LegacyFieldCapture {
 	/**
 	 * Get the list of allowed hook names.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @return string[]
 	 */
 	public static function get_allowed_hooks(): array {
@@ -176,92 +186,90 @@ class LegacyFieldCapture {
 	}
 
 	/**
-	 * Register meta_data REST field on product and product_variation post types.
+	 * Register meta_data REST field on the product post type.
 	 *
-	 * The WP REST API endpoints (/wp/v2/product, /wp/v2/product_variation) use
-	 * WP_REST_Posts_Controller which does not include WooCommerce's meta_data
-	 * array. This ensures meta_data round-trips through the entity store.
+	 * The WP REST API endpoint (/wp/v2/product) uses WP_REST_Posts_Controller
+	 * which does not include WooCommerce's meta_data array. This ensures
+	 * meta_data round-trips through the entity store.
+	 *
+	 * @since 10.9.0
 	 */
 	public static function register_meta_data_rest_field(): void {
-		$post_types = array( 'product', 'product_variation' );
+		register_rest_field(
+			'product',
+			'meta_data',
+			array(
+				'get_callback'    => function ( $post_array ) {
+					$product = wc_get_product( $post_array['id'] );
+					if ( ! $product ) {
+						return array();
+					}
 
-		foreach ( $post_types as $post_type ) {
-			register_rest_field(
-				$post_type,
-				'meta_data',
-				array(
-					'get_callback'    => function ( $post_array ) {
-						$product = wc_get_product( $post_array['id'] );
-						if ( ! $product ) {
-							return array();
+					return array_values(
+						array_map(
+							function ( $meta ) {
+								return array(
+									'id'    => $meta->id,
+									'key'   => $meta->key,
+									'value' => $meta->value,
+								);
+							},
+							$product->get_meta_data()
+						)
+					);
+				},
+				'update_callback' => function ( $meta_data, $post ) {
+					if ( ! is_array( $meta_data ) ) {
+						return;
+					}
+
+					$product = wc_get_product( $post->ID );
+					if ( ! $product ) {
+						return;
+					}
+
+					foreach ( $meta_data as $meta ) {
+						if ( empty( $meta['key'] ) ) {
+							continue;
 						}
 
-						return array_values(
-							array_map(
-								function ( $meta ) {
-									return array(
-										'id'    => $meta->id,
-										'key'   => $meta->key,
-										'value' => $meta->value,
-									);
-								},
-								$product->get_meta_data()
-							)
+						$product->update_meta_data(
+							$meta['key'],
+							$meta['value'] ?? '',
+							! empty( $meta['id'] ) ? (int) $meta['id'] : 0
 						);
-					},
-					'update_callback' => function ( $meta_data, $post ) {
-						if ( ! is_array( $meta_data ) ) {
-							return;
-						}
+					}
 
-						$product = wc_get_product( $post->ID );
-						if ( ! $product ) {
-							return;
-						}
-
-						foreach ( $meta_data as $meta ) {
-							if ( empty( $meta['key'] ) ) {
-								continue;
-							}
-
-							$product->update_meta_data(
-								$meta['key'],
-								$meta['value'] ?? '',
-								! empty( $meta['id'] ) ? (int) $meta['id'] : 0
-							);
-						}
-
-						$product->save_meta_data();
-					},
-					'schema'          => array(
-						'description' => __( 'Meta data.', 'woocommerce' ),
-						'type'        => 'array',
-						'context'     => array( 'view', 'edit' ),
-						'items'       => array(
-							'type'       => 'object',
-							'properties' => array(
-								'id'    => array(
-									'description' => __( 'Meta ID.', 'woocommerce' ),
-									'type'        => 'integer',
-									'context'     => array( 'view', 'edit' ),
-									'readonly'    => true,
-								),
-								'key'   => array(
-									'description' => __( 'Meta key.', 'woocommerce' ),
-									'type'        => 'string',
-									'context'     => array( 'view', 'edit' ),
-								),
-								'value' => array(
-									'description' => __( 'Meta value.', 'woocommerce' ),
-									'type'        => 'mixed',
-									'context'     => array( 'view', 'edit' ),
-								),
+					$product->save_meta_data();
+				},
+				'schema'          => array(
+					'description' => __( 'Meta data.', 'woocommerce' ),
+					'type'        => 'array',
+					'context'     => array( 'view', 'edit' ),
+					'items'       => array(
+						'type'       => 'object',
+						'properties' => array(
+							'id'    => array(
+								'description' => __( 'Meta ID.', 'woocommerce' ),
+								'type'        => 'integer',
+								'context'     => array( 'view', 'edit' ),
+								'readonly'    => true,
+							),
+							'key'   => array(
+								'description' => __( 'Meta key.', 'woocommerce' ),
+								'type'        => 'string',
+								'context'     => array( 'view', 'edit' ),
+							),
+							'value' => array(
+								'description' => __( 'Meta value.', 'woocommerce' ),
+								'type'        => 'mixed',
+								'context'     => array( 'view', 'edit' ),
 							),
 						),
 					),
-				)
-			);
-		}
+				),
+			)
+		);
 	}
 
 	/**
