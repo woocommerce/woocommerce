@@ -21,6 +21,7 @@ import { storeName } from '../../store';
 import { recordEvent } from '../../events';
 
 const SLOT_ID = 'woocommerce-email-editor-template-area-affordance-slot';
+const BLOCK_SELECTOR = '[data-block], .block-editor-block-list__block';
 
 type NavigateToEntityRecord = ( params: {
 	postId: number | string;
@@ -60,26 +61,58 @@ function getCanvasDocument(): Document | null {
 	return null;
 }
 
-function getCanvasRoot( canvasDocument: Document ): Element | null {
-	return canvasDocument.querySelector(
-		'.block-editor-block-list__layout.is-root-container, .is-root-container'
+function getClosestBlock( element: Element ): Element {
+	return (
+		element.closest( BLOCK_SELECTOR ) ||
+		element.closest( '[data-type]' ) ||
+		element
 	);
+}
+
+function getPreviousBlock( element: Element ): Element | null {
+	let current: Element | null = getClosestBlock( element );
+
+	while ( current ) {
+		let sibling = current.previousElementSibling;
+
+		while ( sibling ) {
+			if ( sibling.matches( BLOCK_SELECTOR ) ) {
+				return sibling;
+			}
+
+			const descendantBlocks = sibling.querySelectorAll( BLOCK_SELECTOR );
+
+			if ( descendantBlocks.length ) {
+				return descendantBlocks.item( descendantBlocks.length - 1 );
+			}
+
+			sibling = sibling.previousElementSibling;
+		}
+
+		current = current.parentElement?.closest( BLOCK_SELECTOR ) || null;
+	}
+
+	return null;
 }
 
 function getTemplateTarget( canvasDocument: Document ): Element | null {
 	const templateBlock = canvasDocument.querySelector(
-		'.wp-block-site-logo, .wp-block-site-title'
+		'[data-type="core/site-logo"], [data-type="core/site-title"], .wp-block-site-logo, .wp-block-site-title'
 	);
 
 	if ( templateBlock ) {
-		return (
-			templateBlock.closest( '[data-block]' ) ||
-			templateBlock.closest( '.block-editor-block-list__block' ) ||
-			templateBlock
-		);
+		return getClosestBlock( templateBlock );
 	}
 
-	return getCanvasRoot( canvasDocument )?.firstElementChild || null;
+	const postContentBlock = canvasDocument.querySelector(
+		'[data-type="core/post-content"], .wp-block-post-content'
+	);
+
+	if ( postContentBlock ) {
+		return getPreviousBlock( postContentBlock );
+	}
+
+	return null;
 }
 
 function createSlot( canvasDocument: Document ): HTMLDivElement {

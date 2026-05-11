@@ -74,7 +74,10 @@ const setupUseSelectMock = ( {
 	return { onNavigateToEntityRecord };
 };
 
-const addEditorCanvas = () => {
+const addEditorCanvas = ( {
+	headerAttributes = '',
+	headerContent = '<h1 class="wp-block-site-title">testingbun</h1>',
+} = {} ) => {
 	const iframe = document.createElement( 'iframe' );
 	document.body.appendChild( iframe );
 	iframe.contentDocument?.body.insertAdjacentHTML(
@@ -82,11 +85,18 @@ const addEditorCanvas = () => {
 		[
 			'<div>',
 			'<div class="block-editor-block-list__layout is-root-container">',
-			'<div class="block-editor-block-list__block" data-block="template-header">',
-			'<h1 class="wp-block-site-title">testingbun</h1>',
+			'<div class="block-editor-block-list__block" data-block="outer-template">',
+			`<div class="block-editor-block-list__block" data-block="template-header" ${ headerAttributes }>`,
+			headerContent,
 			'</div>',
+			'<div class="block-editor-block-list__block" data-block="email-content-wrapper">',
 			'<div class="block-editor-block-list__block" data-block="email-content">',
-			'<h2>New order</h2>',
+			'<div class="wp-block-post-content">New order</div>',
+			'</div>',
+			'</div>',
+			'<div class="block-editor-block-list__block" data-block="template-footer">',
+			'<p>Footer</p>',
+			'</div>',
 			'</div>',
 			'</div>',
 			'</div>',
@@ -96,6 +106,22 @@ const addEditorCanvas = () => {
 	const templateHeader = iframe.contentDocument?.querySelector(
 		'[data-block="template-header"]'
 	);
+	const outerTemplate = iframe.contentDocument?.querySelector(
+		'[data-block="outer-template"]'
+	);
+
+	Object.defineProperty( outerTemplate, 'getBoundingClientRect', {
+		value: () => ( {
+			bottom: 900,
+			height: 900,
+			left: 100,
+			right: 760,
+			top: 0,
+			width: 660,
+			x: 100,
+			y: 0,
+		} ),
+	} );
 
 	Object.defineProperty( templateHeader, 'getBoundingClientRect', {
 		value: () => ( {
@@ -167,6 +193,75 @@ describe( 'TemplateCanvasAffordance', () => {
 		expect( iframe.contentDocument?.body ).toHaveTextContent(
 			'Edit template'
 		);
+	} );
+
+	it( 'anchors the affordance to editor block metadata when site title classes are not rendered', async () => {
+		const iframe = addEditorCanvas( {
+			headerAttributes: 'data-type="core/site-title"',
+			headerContent: '<h1>testingbun</h1>',
+		} );
+		setupUseSelectMock();
+
+		render( <TemplateCanvasAffordance /> );
+
+		await waitFor( () => {
+			expect(
+				iframe.contentDocument?.querySelector(
+					'.woocommerce-email-editor-template-area-affordance__frame'
+				)
+			).toBeInTheDocument();
+		} );
+
+		fireEvent.click(
+			iframe.contentDocument?.querySelector(
+				'.woocommerce-email-editor-template-area-affordance__frame'
+			) as HTMLDivElement
+		);
+
+		expect(
+			iframe.contentDocument?.querySelector(
+				'.woocommerce-email-editor-template-area-affordance__frame'
+			)
+		).toHaveStyle( { top: '83px' } );
+		expect(
+			iframe.contentDocument?.querySelector(
+				'.woocommerce-email-editor-template-area-affordance'
+			)
+		).toHaveStyle( { top: '30px' } );
+	} );
+
+	it( 'anchors to the block before email content instead of the full template wrapper', async () => {
+		const iframe = addEditorCanvas( {
+			headerContent: '<h1>testingbun</h1>',
+		} );
+		setupUseSelectMock();
+
+		render( <TemplateCanvasAffordance /> );
+
+		await waitFor( () => {
+			expect(
+				iframe.contentDocument?.querySelector(
+					'.woocommerce-email-editor-template-area-affordance__frame'
+				)
+			).toBeInTheDocument();
+		} );
+
+		fireEvent.click(
+			iframe.contentDocument?.querySelector(
+				'.woocommerce-email-editor-template-area-affordance__frame'
+			) as HTMLDivElement
+		);
+
+		expect(
+			iframe.contentDocument?.querySelector(
+				'.woocommerce-email-editor-template-area-affordance__frame'
+			)
+		).toHaveStyle( { top: '83px' } );
+		expect(
+			iframe.contentDocument?.querySelector(
+				'.woocommerce-email-editor-template-area-affordance'
+			)
+		).toHaveStyle( { top: '30px' } );
 	} );
 
 	it( 'navigates to the current template when edit template is clicked', async () => {
