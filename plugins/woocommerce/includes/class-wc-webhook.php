@@ -1021,6 +1021,16 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 		);
 
+		/**
+		 * Filters the map of webhook topics to their registered hook names.
+		 *
+		 * @since 2.2.0
+		 * @param array      $topic_hooks Map of topic name to array of hook names.
+		 * @param WC_Webhook $webhook     The webhook instance. May be a fresh,
+		 *                                unsaved instance when called from
+		 *                                `WC_Webhook::get_default_topic_hooks()`
+		 *                                without a webhook context.
+		 */
 		return apply_filters( 'woocommerce_webhook_topic_hooks', $topic_hooks, $webhook );
 	}
 
