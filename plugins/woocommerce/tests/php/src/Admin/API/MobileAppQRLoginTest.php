@@ -10,6 +10,7 @@ declare( strict_types=1 );
 namespace Automattic\WooCommerce\Tests\Admin\API;
 
 use Automattic\WooCommerce\Admin\API\MobileAppQRLogin;
+use Automattic\WooCommerce\Admin\API\RateLimits\QRLoginRateLimits;
 use WC_REST_Unit_Test_Case;
 use WP_Application_Passwords;
 use WP_REST_Request;
@@ -139,8 +140,8 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		wp_delete_user( $this->shop_manager_id );
 		wp_delete_user( $this->subscriber_id );
 
-		// Clear any transients the tests may have written.
-		$this->delete_all_qr_login_transients();
+		// Clear any QR login data the tests may have written.
+		$this->delete_all_qr_login_data();
 
 		// Restore $_SERVER state.
 		if ( null === $this->original_https ) {
@@ -224,9 +225,9 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Delete every transient created by the controller (token + rate limit).
+	 * Delete QR login data created by the controller.
 	 */
-	private function delete_all_qr_login_transients(): void {
+	private function delete_all_qr_login_data(): void {
 		global $wpdb;
 
 		// Remove token transients keyed by sha256 hash (and their _timeout siblings).
@@ -234,17 +235,53 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_\\_wc\\_qr\\_login\\_token\\_%' ESCAPE '\\\\' OR option_name LIKE '\\_transient\\_timeout\\_\\_wc\\_qr\\_login\\_token\\_%' ESCAPE '\\\\'"
 		);
 
-		// Remove rate-limit transients.
-		$wpdb->query(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_\\_wc\\_qr\\_login\\_rate\\_%' ESCAPE '\\\\' OR option_name LIKE '\\_transient\\_timeout\\_\\_wc\\_qr\\_login\\_rate\\_%' ESCAPE '\\\\'"
-		);
-
 		// Remove database-backed token exchange claims.
 		$wpdb->query(
 			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_wc\\_qr\\_login\\_claim\\_%' ESCAPE '\\\\'"
 		);
 
+		// Remove rate-limit rows.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_rate_limits WHERE rate_limit_key LIKE %s",
+				$wpdb->esc_like( QRLoginRateLimits::KEY_PREFIX ) . '%'
+			)
+		);
+
 		wp_cache_flush();
+	}
+
+	/**
+	 * Get a QR login rate-limit row.
+	 *
+	 * @param string $bucket Bucket name.
+	 * @param string $identifier Bucket identifier.
+	 * @return object|null
+	 */
+	private function get_qr_login_rate_limit_row( string $bucket, string $identifier ): ?object {
+		global $wpdb;
+
+		$key = QRLoginRateLimits::get_action_id( $bucket, $identifier );
+
+		return $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT rate_limit_key, rate_limit_expiry, rate_limit_remaining FROM {$wpdb->prefix}wc_rate_limits WHERE rate_limit_key = %s",
+				$key
+			)
+		);
+	}
+
+	/**
+	 * Count legacy transient-backed QR login rate-limit rows.
+	 *
+	 * @return int
+	 */
+	private function get_qr_login_rate_limit_transient_count(): int {
+		global $wpdb;
+
+		return (int) $wpdb->get_var(
+			"SELECT COUNT(*) FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_\\_wc\\_qr\\_login\\_rate\\_%' ESCAPE '\\\\' OR option_name LIKE '\\_transient\\_timeout\\_\\_wc\\_qr\\_login\\_rate\\_%' ESCAPE '\\\\'"
+		);
 	}
 
 	/**
@@ -525,6 +562,15 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$response = $this->dispatch_generate();
 		$this->assertSame( 429, $response->get_status() );
 		$this->assertSame( 'rate_limit_exceeded', $response->get_data()['code'] );
+
+		$row = $this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_GENERATION, (string) $this->admin_id );
+		$this->assertNotNull( $row );
+		$this->assertSame(
+			QRLoginRateLimits::get_action_id( QRLoginRateLimits::BUCKET_GENERATION, (string) $this->admin_id ),
+			$row->rate_limit_key
+		);
+		$this->assertSame( 0, (int) $row->rate_limit_remaining );
+		$this->assertSame( 0, $this->get_qr_login_rate_limit_transient_count() );
 	}
 
 	/**
@@ -733,6 +779,15 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$response = $this->dispatch_exchange( 'bad-token-final' );
 		$this->assertSame( 429, $response->get_status() );
 		$this->assertSame( 'rate_limit_exceeded', $response->get_data()['code'] );
+
+		$row = $this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_INVALID_EXCHANGE, '203.0.113.10' );
+		$this->assertNotNull( $row );
+		$this->assertSame(
+			QRLoginRateLimits::get_action_id( QRLoginRateLimits::BUCKET_INVALID_EXCHANGE, '203.0.113.10' ),
+			$row->rate_limit_key
+		);
+		$this->assertSame( 0, (int) $row->rate_limit_remaining );
+		$this->assertSame( 0, $this->get_qr_login_rate_limit_transient_count() );
 	}
 
 	/**
@@ -748,6 +803,43 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		// Different IP → fresh bucket.
 		$_SERVER['REMOTE_ADDR'] = '198.51.100.25';
 		$this->assertSame( 401, $this->dispatch_exchange( 'new-ip' )->get_status() );
+	}
+
+	/**
+	 * @testdox QR login rate limits are persisted in wc_rate_limits and reset after expiry.
+	 */
+	public function test_qr_login_rate_limits_are_persistent_and_reset_after_expiry(): void {
+		global $wpdb;
+
+		$bucket     = QRLoginRateLimits::BUCKET_INVALID_EXCHANGE;
+		$identifier = '203.0.113.10';
+		$key        = QRLoginRateLimits::get_action_id( $bucket, $identifier );
+
+		for ( $i = 0; $i < MobileAppQRLogin::MAX_INVALID_EXCHANGE_ATTEMPTS; $i++ ) {
+			$this->assertTrue( QRLoginRateLimits::consume( $bucket, $identifier ) );
+		}
+
+		$this->assertFalse( QRLoginRateLimits::consume( $bucket, $identifier ) );
+
+		$row = $this->get_qr_login_rate_limit_row( $bucket, $identifier );
+		$this->assertNotNull( $row );
+		$this->assertSame( $key, $row->rate_limit_key );
+		$this->assertSame( 0, (int) $row->rate_limit_remaining );
+		$this->assertSame( 0, $this->get_qr_login_rate_limit_transient_count() );
+
+		$wpdb->update(
+			$wpdb->prefix . 'wc_rate_limits',
+			array( 'rate_limit_expiry' => time() - 1 ),
+			array( 'rate_limit_key' => $key ),
+			array( '%d' ),
+			array( '%s' )
+		);
+
+		$this->assertTrue( QRLoginRateLimits::consume( $bucket, $identifier ) );
+
+		$row = $this->get_qr_login_rate_limit_row( $bucket, $identifier );
+		$this->assertNotNull( $row );
+		$this->assertSame( MobileAppQRLogin::MAX_INVALID_EXCHANGE_ATTEMPTS - 1, (int) $row->rate_limit_remaining );
 	}
 
 	/**

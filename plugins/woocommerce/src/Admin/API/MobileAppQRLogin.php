@@ -12,6 +12,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Admin\API;
 
+use Automattic\WooCommerce\Admin\API\RateLimits\QRLoginRateLimits;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -44,11 +46,6 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * Transient prefix for QR login tokens.
 	 */
 	const TOKEN_TRANSIENT_PREFIX = '_wc_qr_login_token_';
-
-	/**
-	 * Rate limit transient prefix.
-	 */
-	const RATE_LIMIT_PREFIX = '_wc_qr_login_rate_';
 
 	/**
 	 * Max tokens per user per 15-minute window.
@@ -169,33 +166,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return bool True if within rate limit.
 	 */
 	private function check_generation_rate_limit( $user_id ) {
-		$key   = self::RATE_LIMIT_PREFIX . 'gen_' . $user_id;
-		$count = (int) get_transient( $key );
-
-		if ( $count >= self::MAX_TOKENS_PER_WINDOW ) {
-			return false;
-		}
-
-		set_transient( $key, $count + 1, 15 * MINUTE_IN_SECONDS );
-		return true;
-	}
-
-	/**
-	 * Check a transient-backed rate limit.
-	 *
-	 * @param string $key The rate-limit transient key.
-	 * @param int    $max_attempts Max attempts within the fixed window.
-	 * @return bool True if within rate limit.
-	 */
-	private function check_rate_limit( $key, $max_attempts ) {
-		$count = (int) get_transient( $key );
-
-		if ( $count >= $max_attempts ) {
-			return false;
-		}
-
-		set_transient( $key, $count + 1, 15 * MINUTE_IN_SECONDS );
-		return true;
+		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_GENERATION, (string) $user_id );
 	}
 
 	/**
@@ -209,9 +180,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return bool True if within rate limit.
 	 */
 	private function check_exchange_ip_rate_limit() {
-		$ip  = $this->get_client_ip();
-		$key = self::RATE_LIMIT_PREFIX . 'exc_ip_' . md5( $ip );
-		return $this->check_rate_limit( $key, self::MAX_EXCHANGE_IP_ATTEMPTS );
+		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_EXCHANGE_IP, $this->get_client_ip() );
 	}
 
 	/**
@@ -220,9 +189,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return bool True if within rate limit.
 	 */
 	private function check_invalid_exchange_rate_limit() {
-		$ip  = $this->get_client_ip();
-		$key = self::RATE_LIMIT_PREFIX . 'exc_invalid_' . md5( $ip );
-		return $this->check_rate_limit( $key, self::MAX_INVALID_EXCHANGE_ATTEMPTS );
+		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_INVALID_EXCHANGE, $this->get_client_ip() );
 	}
 
 	/**
@@ -232,8 +199,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return bool True if within rate limit.
 	 */
 	private function check_valid_exchange_rate_limit( $token_hash ) {
-		$key = self::RATE_LIMIT_PREFIX . 'exc_token_' . $token_hash;
-		return $this->check_rate_limit( $key, self::MAX_EXCHANGE_ATTEMPTS );
+		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_VALID_EXCHANGE, $token_hash );
 	}
 
 	/**
