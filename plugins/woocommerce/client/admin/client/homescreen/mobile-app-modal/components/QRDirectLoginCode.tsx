@@ -2,10 +2,13 @@
  * External dependencies
  */
 import { QRCodeSVG } from 'qrcode.react';
-import React, { useEffect, useRef } from '@wordpress/element';
+import React, {
+	createInterpolateElement,
+	useEffect,
+	useRef,
+} from '@wordpress/element';
 import { Button, Spinner } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
-import interpolateComponents from '@automattic/interpolate-components';
 import { recordEvent } from '@woocommerce/tracks';
 import { Link } from '@woocommerce/components';
 
@@ -137,12 +140,12 @@ export const QRDirectLoginCode = () => {
 					) }
 				</p>
 				<div>
-					{ interpolateComponents( {
-						mixedString: __(
-							'Any troubles signing in? Check out the {{link}}FAQ{{/link}}.',
+					{ createInterpolateElement(
+						__(
+							'Any troubles signing in? Check out the <link>FAQ</link>.',
 							'woocommerce'
 						),
-						components: {
+						{
 							link: (
 								<Link
 									href="https://woocommerce.com/document/android-ios-apps-login-help-faq/"
@@ -155,9 +158,8 @@ export const QRDirectLoginCode = () => {
 									} }
 								/>
 							),
-							strong: <strong />,
-						},
-					} ) }
+						}
+					) }
 				</div>
 			</div>
 		);
