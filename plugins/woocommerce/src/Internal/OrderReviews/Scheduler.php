@@ -71,6 +71,11 @@ class Scheduler {
 	 * transition, so a single listener covers cancelled / refunded /
 	 * processing / on-hold / pending / failed / custom statuses in one place.
 	 *
+	 * Eligibility is read from the same `woocommerce_review_order_eligible_statuses`
+	 * filter the trigger uses, so a site that widens the filter (e.g. to also
+	 * accept `processing`) keeps the email queued through transitions inside
+	 * its expanded eligible set.
+	 *
 	 * @internal
 	 *
 	 * @param int    $order_id   Order ID.
@@ -78,7 +83,19 @@ class Scheduler {
 	 * @param string $new_status New status (sans `wc-` prefix).
 	 */
 	public function handle_status_changed( int $order_id, string $old_status, string $new_status ): void {
-		if ( OrderStatus::COMPLETED !== $old_status || OrderStatus::COMPLETED === $new_status ) {
+		$order = wc_get_order( $order_id );
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- documented on WC_Email_Customer_Review_Request::is_order_eligible_for_send().
+		$eligible_statuses = (array) apply_filters(
+			'woocommerce_review_order_eligible_statuses',
+			array( OrderStatus::COMPLETED ),
+			$order instanceof WC_Order ? $order : null
+		);
+
+		$was_eligible = in_array( $old_status, $eligible_statuses, true );
+		$is_eligible  = in_array( $new_status, $eligible_statuses, true );
+
+		if ( ! $was_eligible || $is_eligible ) {
 			return;
 		}
 
@@ -135,13 +152,13 @@ class Scheduler {
 	}
 
 	/**
-	 * Cancel any pending review-request action when the order leaves the
-	 * eligible state.
+	 * Cancel any pending review-request action and clear the scheduled-at meta.
 	 *
-	 * Hooked into `woocommerce_order_status_cancelled`,
-	 * `woocommerce_order_status_refunded`, `woocommerce_trash_order` and
-	 * `woocommerce_before_delete_order` so full refunds, cancellations, trashes
-	 * and deletions all clean up the pending job.
+	 * Hooked directly into `woocommerce_trash_order` and
+	 * `woocommerce_before_delete_order` for the trash/delete lifecycle events,
+	 * and called from `handle_status_changed()` for every status transition
+	 * out of an eligible status (cancelled, refunded, processing, on-hold,
+	 * pending, failed, custom statuses…).
 	 *
 	 * @internal
 	 *
