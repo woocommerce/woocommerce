@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a Shopper Collection Header inner block that renders a section heading with a live item count above the saved-for-later list. Empty-state message is now visually hidden and announced via an `aria-live` region.
