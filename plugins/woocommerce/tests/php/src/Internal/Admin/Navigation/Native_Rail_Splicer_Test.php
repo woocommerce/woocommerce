@@ -91,6 +91,71 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 			$menu
 		) ) );
 		sort( $remaining_slugs );
-		$this->assertSame( array( 'index.php', 'woocommerce' ), $remaining_slugs );
+		// `wc-admin` is inserted as a native top-level entry by insert_woo_roots().
+		$this->assertSame( array( 'index.php', 'wc-admin', 'woocommerce' ), $remaining_slugs );
+	}
+
+	public function test_splice_inserts_woo_roots_into_menu_with_icon_and_capability(): void {
+		global $menu, $submenu;
+		$menu = array(
+			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
+			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
+		);
+		$submenu['woocommerce'] = array( array( 'Home', 'manage_woocommerce', 'wc-admin' ) );
+
+		$tree = array(
+			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'wc-admin'    => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Home',
+				'icon'       => 'dashicons-admin-home',
+				'position'   => 10,
+				'capability' => 'manage_woocommerce',
+			),
+			'wc-orders'   => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Orders',
+				'icon'       => 'dashicons-list-view',
+				'position'   => 20,
+				'capability' => 'edit_shop_orders',
+			),
+		);
+
+		$_GET['page']       = 'wc-admin';
+		$GLOBALS['pagenow'] = 'admin.php';
+
+		( new Native_Rail_Splicer() )->splice( $tree );
+
+		// Collect rail entries in the order they will render (by numeric key asc).
+		ksort( $menu );
+		$entries_by_slug = array();
+		foreach ( $menu as $entry ) {
+			if ( isset( $entry[2] ) ) {
+				$entries_by_slug[ $entry[2] ] = $entry;
+			}
+		}
+
+		$this->assertArrayHasKey( 'wc-admin', $entries_by_slug );
+		$this->assertSame( 'Home', $entries_by_slug['wc-admin'][0] );
+		$this->assertSame( 'manage_woocommerce', $entries_by_slug['wc-admin'][1] );
+		$this->assertSame( 'dashicons-admin-home', $entries_by_slug['wc-admin'][6] );
+
+		$this->assertArrayHasKey( 'wc-orders', $entries_by_slug );
+		$this->assertSame( 'edit_shop_orders', $entries_by_slug['wc-orders'][1] );
+
+		// Rail order: Dashboard (preserved), woocommerce (hidden), then Woo roots in tree position order.
+		$ordered_slugs = array_values( array_map(
+			static fn( $entry ) => $entry[2] ?? null,
+			$menu
+		) );
+		$this->assertSame(
+			array( 'index.php', 'woocommerce', 'wc-admin', 'wc-orders' ),
+			$ordered_slugs,
+			'Rail order must follow tree position (wc-admin position 10 before wc-orders position 20).'
+		);
+
+		// The original woocommerce entry is preserved but hidden.
+		$this->assertArrayHasKey( 'woocommerce', $entries_by_slug );
+		$this->assertStringContainsString( 'hide-if-js', (string) $entries_by_slug['woocommerce'][4] );
 	}
 }
