@@ -176,6 +176,95 @@ class LegacyFieldCapture {
 	}
 
 	/**
+	 * Register meta_data REST field on product and product_variation post types.
+	 *
+	 * The WP REST API endpoints (/wp/v2/product, /wp/v2/product_variation) use
+	 * WP_REST_Posts_Controller which does not include WooCommerce's meta_data
+	 * array. This ensures meta_data round-trips through the entity store.
+	 */
+	public static function register_meta_data_rest_field(): void {
+		$post_types = array( 'product', 'product_variation' );
+
+		foreach ( $post_types as $post_type ) {
+			register_rest_field(
+				$post_type,
+				'meta_data',
+				array(
+					'get_callback'    => function ( $post_array ) {
+						$product = wc_get_product( $post_array['id'] );
+						if ( ! $product ) {
+							return array();
+						}
+
+						return array_values(
+							array_map(
+								function ( $meta ) {
+									return array(
+										'id'    => $meta->id,
+										'key'   => $meta->key,
+										'value' => $meta->value,
+									);
+								},
+								$product->get_meta_data()
+							)
+						);
+					},
+					'update_callback' => function ( $meta_data, $post ) {
+						if ( ! is_array( $meta_data ) ) {
+							return;
+						}
+
+						$product = wc_get_product( $post->ID );
+						if ( ! $product ) {
+							return;
+						}
+
+						foreach ( $meta_data as $meta ) {
+							if ( empty( $meta['key'] ) ) {
+								continue;
+							}
+
+							$product->update_meta_data(
+								$meta['key'],
+								$meta['value'] ?? '',
+								! empty( $meta['id'] ) ? (int) $meta['id'] : 0
+							);
+						}
+
+						$product->save_meta_data();
+					},
+					'schema'          => array(
+						'description' => __( 'Meta data.', 'woocommerce' ),
+						'type'        => 'array',
+						'context'     => array( 'view', 'edit' ),
+						'items'       => array(
+							'type'       => 'object',
+							'properties' => array(
+								'id'    => array(
+									'description' => __( 'Meta ID.', 'woocommerce' ),
+									'type'        => 'integer',
+									'context'     => array( 'view', 'edit' ),
+									'readonly'    => true,
+								),
+								'key'   => array(
+									'description' => __( 'Meta key.', 'woocommerce' ),
+									'type'        => 'string',
+									'context'     => array( 'view', 'edit' ),
+								),
+								'value' => array(
+									'description' => __( 'Meta value.', 'woocommerce' ),
+									'type'        => 'mixed',
+									'context'     => array( 'view', 'edit' ),
+								),
+							),
+						),
+					),
+				)
+			);
+		}
+	}
+
+	/**
 	 * Strip loop index suffix from a field ID.
 	 *
 	 * Field IDs in variation loops often end with [0], [1], etc.

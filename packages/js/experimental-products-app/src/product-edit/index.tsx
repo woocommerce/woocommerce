@@ -20,7 +20,11 @@ import {
 	getSelectionFromPostId,
 } from '../product-list/utils';
 import type { ProductEntityRecord } from '../fields/types';
-import { useLegacyFields, insertLegacyFields } from '../fields/legacy';
+import {
+	useLegacyFields,
+	insertLegacyFields,
+	useVariationMeta,
+} from '../fields/legacy';
 import { unlock } from '../lock-unlock';
 import {
 	buildMergedProductEditData,
@@ -92,6 +96,12 @@ function ProductEditForm( {
 		hasVariations ? VARIATION_LEGACY_HOOK_MAP : {}
 	);
 
+	const firstVariation = hasVariations ? selectedProducts[ 0 ] : undefined;
+	const variationMeta = useVariationMeta(
+		firstVariation?.parent_id,
+		firstVariation?.id
+	);
+
 	const fieldsWithLegacy =
 		hasVariations && Object.keys( fieldsByHook ).length > 0
 			? insertLegacyFields(
@@ -102,6 +112,12 @@ function ProductEditForm( {
 			: editableFields;
 
 	const mergedData = buildMergedProductEditData( selectedProducts );
+
+	const dataWithMeta =
+		variationMeta && ! mergedData.meta_data?.length
+			? { ...mergedData, meta_data: variationMeta }
+			: mergedData;
+
 	const visibleFields = getVisibleProductEditFields(
 		fieldsWithLegacy,
 		selectedProducts
@@ -116,7 +132,7 @@ function ProductEditForm( {
 	return (
 		<div className="woocommerce-product-edit__form">
 			<DataForm
-				data={ mergedData }
+				data={ dataWithMeta }
 				fields={ visibleFields }
 				form={ form }
 				onChange={ onChange }
