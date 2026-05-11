@@ -76,7 +76,7 @@ final class ProductFilterChips extends AbstractBlock {
 		$has_color_swatches = is_array( $first_item ) && array_key_exists( 'color', $first_item );
 
 		if ( $has_color_swatches && is_string( $classes ) && ! str_contains( $classes, 'is-style-swatch' ) ) {
-			$classes .= ' is-style-swatch';
+			$classes                    .= ' is-style-swatch';
 			$wrapper_attributes['class'] = esc_attr( $classes );
 		}
 

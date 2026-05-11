@@ -86,7 +86,7 @@ final class ProductFilterAttribute extends AbstractBlock {
 			}
 
 			foreach ( $terms as $term ) {
-				$color = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
+				$color                    = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
 				$colors[ $term->term_id ] = $color ? $color : '';
 			}
 		}
