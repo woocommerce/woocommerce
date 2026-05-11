@@ -933,13 +933,31 @@ class WC_Webhook extends WC_Legacy_Webhook {
 	*/
 
 	/**
-	 * Get the associated hook names for a topic.
+	 * Get the default topic-hooks map (topic => array of hook names).
 	 *
-	 * @since  2.2.0
-	 * @param  string $topic Topic name.
+	 * Source of truth for which default-resource/default-event webhook topics
+	 * can deliver. Used by `wc_is_webhook_valid_topic()` to derive the
+	 * default-pair allowlist so the validator and the map cannot drift.
+	 *
+	 * The `woocommerce_webhook_topic_hooks` filter is applied here. When called
+	 * statically (without a webhook context, e.g. from the topic validator),
+	 * a fresh, unsaved `WC_Webhook` instance is passed as the filter's second
+	 * argument so callbacks registered with `accepted_args = 2` keep working.
+	 * Those callbacks should not rely on the second argument exposing
+	 * per-webhook state in that call path (`get_id()` returns 0,
+	 * `get_topic()` is empty).
+	 *
+	 * @since 10.9.0
+	 * @param WC_Webhook|null $webhook Optional webhook instance to pass as the
+	 *                                 filter's context argument. A fresh
+	 *                                 unsaved instance is created when omitted.
 	 * @return array
 	 */
-	private function get_topic_hooks( $topic ) {
+	public static function get_default_topic_hooks( $webhook = null ) {
+		if ( ! $webhook instanceof WC_Webhook ) {
+			$webhook = new self();
+		}
+
 		$topic_hooks = array(
 			'coupon.created'    => array(
 				'woocommerce_process_shop_coupon_meta',
@@ -1003,7 +1021,28 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 		);
 
-		$topic_hooks = apply_filters( 'woocommerce_webhook_topic_hooks', $topic_hooks, $this );
+		/**
+		 * Filters the map of webhook topics to their registered hook names.
+		 *
+		 * @since 2.2.0
+		 * @param array      $topic_hooks Map of topic name to array of hook names.
+		 * @param WC_Webhook $webhook     The webhook instance. May be a fresh,
+		 *                                unsaved instance when called from
+		 *                                `WC_Webhook::get_default_topic_hooks()`
+		 *                                without a webhook context.
+		 */
+		return apply_filters( 'woocommerce_webhook_topic_hooks', $topic_hooks, $webhook );
+	}
+
+	/**
+	 * Get the associated hook names for a topic.
+	 *
+	 * @since  2.2.0
+	 * @param  string $topic Topic name.
+	 * @return array
+	 */
+	private function get_topic_hooks( $topic ) {
+		$topic_hooks = self::get_default_topic_hooks( $this );
 
 		return isset( $topic_hooks[ $topic ] ) ? $topic_hooks[ $topic ] : array();
 	}
