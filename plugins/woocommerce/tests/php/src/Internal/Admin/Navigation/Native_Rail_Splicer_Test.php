@@ -23,6 +23,8 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 		$this->submenu_backup = is_array( $submenu ) ? $submenu : null;
 		$menu                 = array();
 		$submenu              = array();
+		remove_all_filters( 'parent_file' );
+		remove_all_filters( 'submenu_file' );
 	}
 
 	public function tearDown(): void {
@@ -203,5 +205,39 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 		);
 		$this->assertSame( 'Overview', $submenu['wc-admin&path=/marketing'][0][0] );
 		$this->assertSame( 'manage_woocommerce', $submenu['wc-admin&path=/marketing'][0][1] );
+	}
+
+	public function test_splice_sets_parent_file_and_submenu_file_via_filters_for_compound_current_slug(): void {
+		global $menu, $submenu;
+		$menu                  = array(
+			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
+			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
+		);
+
+		$tree = array(
+			'woocommerce'                       => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'wc-admin&path=/marketing'          => array(
+				'parent'     => 'woocommerce',
+				'title'      => 'Marketing',
+				'position'   => 40,
+				'capability' => 'manage_woocommerce',
+			),
+			'wc-admin&path=/marketing/coupons'  => array(
+				'parent'     => 'wc-admin&path=/marketing',
+				'title'      => 'Coupons',
+				'position'   => 20,
+				'capability' => 'manage_woocommerce',
+			),
+		);
+
+		// Pretend we're on the Coupons page.
+		$_GET['page']       = 'wc-admin';
+		$_GET['path']       = '/marketing/coupons';
+		$GLOBALS['pagenow'] = 'admin.php';
+
+		( new Native_Rail_Splicer() )->splice( $tree );
+
+		$this->assertSame( 'wc-admin&path=/marketing', apply_filters( 'parent_file', 'something-else' ) );
+		$this->assertSame( 'wc-admin&path=/marketing/coupons', apply_filters( 'submenu_file', 'something-else' ) );
 	}
 }

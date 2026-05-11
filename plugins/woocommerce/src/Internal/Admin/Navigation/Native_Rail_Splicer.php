@@ -40,6 +40,65 @@ class Native_Rail_Splicer {
 		$this->hide_woocommerce_top_level();
 		$this->insert_woo_roots( $tree );
 		$this->populate_root_submenus( $tree );
+		$this->force_current_highlight( $tree );
+	}
+
+	/**
+	 * Resolve the current tree slug (via Context) and force WP's `parent_file`
+	 * and `submenu_file` filters to emit it so the renderer applies `current`
+	 * highlighting to the correct rail root and submenu item.
+	 *
+	 * `parent_file` returns the rail root (the ancestor whose parent is
+	 * `woocommerce`). `submenu_file` returns the resolved slug itself when it
+	 * is a first-level child; for grandchild pages the JS cascade applies
+	 * `current` separately at render time.
+	 *
+	 * @param array $tree Final reconciled tree.
+	 */
+	private function force_current_highlight( array $tree ): void {
+		$current = Context::resolve_current_slug( $tree );
+		if ( null === $current ) {
+			return;
+		}
+
+		$root = $this->ancestor_root_slug( $tree, $current );
+		if ( null === $root ) {
+			return;
+		}
+
+		add_filter(
+			'parent_file',
+			static fn( $_ ): string => $root,
+			PHP_INT_MAX
+		);
+		add_filter(
+			'submenu_file',
+			static fn( $_ ): string => $current,
+			PHP_INT_MAX
+		);
+	}
+
+	/**
+	 * Walk the parent chain from `$slug` and return the slug whose parent is
+	 * `woocommerce` (i.e. the rail root for that subtree). Returns null if the
+	 * slug isn't in the tree or doesn't descend from a Woo root.
+	 *
+	 * @param array  $tree Tree.
+	 * @param string $slug Current slug.
+	 */
+	private function ancestor_root_slug( array $tree, string $slug ): ?string {
+		$walk = $slug;
+		while ( isset( $tree[ $walk ] ) ) {
+			$parent = $tree[ $walk ]['parent'] ?? null;
+			if ( 'woocommerce' === $parent ) {
+				return $walk;
+			}
+			if ( null === $parent ) {
+				return null;
+			}
+			$walk = $parent;
+		}
+		return null;
 	}
 
 	/**
