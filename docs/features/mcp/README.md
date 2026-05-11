@@ -100,7 +100,7 @@ WooCommerce Core
 
 - Manages MCP server initialization and configuration
 - Handles feature flag checking (`mcp_integration`)
-- Provides ability filtering and namespace management
+- Provides deprecated endpoint exposure filtering
 
 **Abilities Registry** ([`AbilitiesRegistry.php`](https://github.com/woocommerce/woocommerce/blob/trunk/plugins/woocommerce/src/Internal/Abilities/AbilitiesRegistry.php))
 
@@ -281,7 +281,26 @@ add_action( 'abilities_api_init', function() {
 
 ### Including Custom Abilities in WooCommerce MCP Server
 
-By default, only abilities with the `woocommerce/` namespace are included. To include abilities from other namespaces:
+REST-derived WooCommerce abilities include `expose_in_deprecated_woocommerce_mcp` metadata automatically. Custom abilities are not included by namespace alone; set this metadata to boolean `true` when registering the ability to include it in the deprecated WooCommerce MCP server by default:
+
+```php
+wp_register_ability(
+    'your-plugin/custom-operation',
+    array(
+        'label'               => __( 'Custom Store Operation', 'your-plugin' ),
+        'description'         => __( 'Performs a custom store operation.', 'your-plugin' ),
+        'execute_callback'    => 'your_custom_ability_handler',
+        'permission_callback' => function () {
+            return current_user_can( 'manage_woocommerce' );
+        },
+        'meta'                => array(
+            'expose_in_deprecated_woocommerce_mcp' => true,
+        ),
+    )
+);
+```
+
+To override the default metadata decision at runtime, use the `woocommerce_mcp_include_ability` filter:
 
 ```php
 add_filter( 'woocommerce_mcp_include_ability', function( $include, $ability_id ) {
@@ -322,7 +341,7 @@ The demo plugin creates a `woocommerce-demo/store-info` ability that retrieves s
 ## Ability Not Found
 
 - Confirm abilities are registered during `abilities_api_init`
-- Check namespace inclusion using the `woocommerce_mcp_include_ability` filter
+- Check the ability's `expose_in_deprecated_woocommerce_mcp` metadata or override inclusion using the `woocommerce_mcp_include_ability` filter
 - Verify ability callbacks are accessible
 
 Check **WooCommerce → Status → Logs** for entries with source `woocommerce-mcp`.

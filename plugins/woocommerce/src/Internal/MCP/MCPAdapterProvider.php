@@ -179,6 +179,8 @@ class MCPAdapterProvider {
 				 * @param bool   $include    Whether to include the ability by default. True when the ability has
 				 *                            `expose_in_deprecated_woocommerce_mcp => true` in its metadata
 				 *                            (set automatically on REST-derived abilities by RestAbilityFactory).
+				 *                            Migration note: this value no longer represents whether the ability uses
+				 *                            the `woocommerce/` namespace.
 				 *                            Return unchanged to keep the default, or return true/false to override.
 				 * @param string $ability_id The ability ID.
 				 */
