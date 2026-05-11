@@ -115,15 +115,6 @@ class MCPAdapterProvider {
 			return;
 		}
 
-		/*
-		 * Temporarily disable MCP validation during server creation.
-		 * Workaround for validator bug with union types (e.g., ["integer", "null"]).
-		 * This will be removed once the mcp-adapter validator bug is fixed.
-		 *
-		 * @see https://github.com/WordPress/mcp-adapter/issues/47
-		 */
-		add_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
-
 		try {
 			// Create MCP server.
 			$adapter->create_server(
@@ -145,9 +136,6 @@ class MCPAdapterProvider {
 					array( 'source' => 'woocommerce-mcp' )
 				);
 			}
-		} finally {
-			// Re-enable MCP validation immediately after server creation.
-			remove_filter( 'mcp_validation_enabled', array( __CLASS__, 'disable_mcp_validation' ), 999 );
 		}
 	}
 
@@ -217,18 +205,6 @@ class MCPAdapterProvider {
 			}
 		}
 
-		return false;
-	}
-
-	/**
-	 * Temporarily disable MCP validation.
-	 *
-	 * Used as a callback for the mcp_validation_enabled filter to work around
-	 * validator bugs with union types.
-	 *
-	 * @return bool Always returns false to disable validation.
-	 */
-	public static function disable_mcp_validation(): bool {
 		return false;
 	}
 

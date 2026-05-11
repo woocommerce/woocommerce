@@ -126,7 +126,6 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 		// Reset any filters that might have been added.
 		remove_all_filters( 'woocommerce_mcp_include_ability' );
 		remove_all_filters( 'woocommerce_mcp_allow_insecure_transport' );
-		remove_all_filters( 'mcp_validation_enabled' );
 
 		foreach ( $this->registered_ability_ids as $ability_id ) {
 			if ( function_exists( 'wp_unregister_ability' ) ) {
@@ -351,15 +350,6 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should disable MCP validation.
-	 */
-	public function test_disable_mcp_validation_returns_false(): void {
-		$result = MCPAdapterProvider::disable_mcp_validation();
-
-		$this->assertFalse( $result, 'disable_mcp_validation should always return false' );
-	}
-
-	/**
 	 * @testdox Should track initialization state.
 	 */
 	public function test_is_initialized_tracks_state(): void {
@@ -426,6 +416,11 @@ class MCPAdapterProviderTest extends \WC_Unit_Test_Case {
 	 */
 	private function register_test_ability( string $ability_id, array $meta ): void {
 		$this->ensure_test_ability_category( 'woocommerce-rest' );
+
+		if ( function_exists( 'wp_has_ability' ) ) {
+			// Initialize the registry before firing the test callback to avoid recursive action dispatch.
+			$this->assertFalse( wp_has_ability( $ability_id ), 'Test ability should not already be registered.' );
+		}
 
 		$ability  = null;
 		$callback = null;

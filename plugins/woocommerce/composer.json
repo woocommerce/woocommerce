@@ -35,10 +35,6 @@
 		},
 		{
 			"type": "vcs",
-			"url": "https://github.com/WordPress/mcp-adapter.git"
-		},
-		{
-			"type": "vcs",
 			"url": "https://github.com/WordPress/abilities-api"
 		}
 	],
@@ -57,7 +53,7 @@
 		"woocommerce/blueprint": "*",
 		"woocommerce/email-editor": "*",
 		"wordpress/abilities-api": "^0.4.0",
-		"wordpress/mcp-adapter": "^0.3.0"
+		"wordpress/mcp-adapter": "^0.5.0"
 	},
 	"require-dev": {
 		"automattic/jetpack-changelogger": "^3.3.0",
@@ -168,6 +164,9 @@
 	},
 	"extra": {
 		"installer-paths": {
+			"vendor/{$vendor}/{$name}/": [
+				"wordpress/mcp-adapter"
+			],
 			"packages/{$name}": [
 				"woocommerce/action-scheduler",
 				"woocommerce/email-editor",
