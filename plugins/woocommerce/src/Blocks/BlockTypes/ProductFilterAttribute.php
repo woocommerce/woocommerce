@@ -20,6 +20,13 @@ final class ProductFilterAttribute extends AbstractBlock {
 	protected $block_name = 'product-filter-attribute';
 
 	/**
+	 * Cached map of term ID to color value for all wc-visual attribute terms.
+	 *
+	 * @var array<int, string>|null
+	 */
+	private $term_colors = null;
+
+	/**
 	 * Initialize this block type.
 	 *
 	 * - Hook into WP lifecycle.
@@ -55,6 +62,10 @@ final class ProductFilterAttribute extends AbstractBlock {
 	 * @return array<int, string> Map of term ID to hex color.
 	 */
 	private function get_visual_attribute_term_colors(): array {
+		if ( null !== $this->term_colors ) {
+			return $this->term_colors;
+		}
+
 		$colors     = array();
 		$attributes = wc_get_attribute_taxonomies();
 
@@ -79,7 +90,9 @@ final class ProductFilterAttribute extends AbstractBlock {
 			}
 		}
 
-		return $colors;
+		$this->term_colors = $colors;
+
+		return $this->term_colors;
 	}
 
 	/**
@@ -247,7 +260,8 @@ final class ProductFilterAttribute extends AbstractBlock {
 					}
 
 					if ( 'wc-visual' === $product_attribute->type ) {
-						$item['color'] = get_term_meta( $term['term_id'], 'color', true );
+						$colors        = $this->get_visual_attribute_term_colors();
+						$item['color'] = $colors[ $term['term_id'] ] ?? '';
 					}
 
 					return $item;
