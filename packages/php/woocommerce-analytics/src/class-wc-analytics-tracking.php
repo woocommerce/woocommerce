@@ -504,7 +504,7 @@ class WC_Analytics_Tracking {
 		$new_visitor_id = base64_encode( $binary ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
 		// httponly=false is intentional: _wca and client-side analytics need to read the same value the server wrote.
-		$persisted = setcookie(
+		setcookie(
 			'tk_ai',
 			$new_visitor_id,
 			array(
@@ -516,11 +516,6 @@ class WC_Analytics_Tracking {
 				'samesite' => 'Strict',
 			)
 		);
-
-		// If setcookie failed, the id won't reach the next request and would fragment sessions.
-		if ( ! $persisted ) {
-			return null;
-		}
 
 		self::$cached_visitor_id = $new_visitor_id;
 		return self::$cached_visitor_id;
