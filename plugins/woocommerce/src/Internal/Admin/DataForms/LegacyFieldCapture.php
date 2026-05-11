@@ -76,7 +76,7 @@ class LegacyFieldCapture {
 		self::ensure_helper_functions_loaded();
 		self::reset();
 
-		$mock_post     = new WP_Post( (object) array( 'ID' => 0 ) );
+		$mock_post      = new WP_Post( (object) array( 'ID' => 0 ) );
 		$variation_data = array();
 
 		foreach ( $hooks as $hook ) {
@@ -84,12 +84,20 @@ class LegacyFieldCapture {
 				continue;
 			}
 
-			self::$current_hook = $hook;
+			self::$current_hook    = $hook;
 			self::$fields[ $hook ] = array();
-			self::$capturing = true;
+			self::$capturing       = true;
 
 			try {
 				ob_start();
+				/**
+				 * Fires to capture legacy field definitions from variation hooks.
+				 *
+				 * The hook is executed in capture mode so that WC helper functions
+				 * push field definitions to the collector instead of rendering HTML.
+				 *
+				 * @since 10.9.0
+				 */
 				do_action( $hook, 0, $variation_data, $mock_post );
 				ob_end_clean();
 			} catch ( \Throwable $e ) {
@@ -108,7 +116,7 @@ class LegacyFieldCapture {
 		}
 
 		self::$current_hook = '';
-		$result = self::$fields;
+		$result             = self::$fields;
 		self::reset();
 
 		return $result;
@@ -183,93 +191,6 @@ class LegacyFieldCapture {
 	 */
 	public static function get_allowed_hooks(): array {
 		return self::ALLOWED_HOOKS;
-	}
-
-	/**
-	 * Register meta_data REST field on the product post type.
-	 *
-	 * The WP REST API endpoint (/wp/v2/product) uses WP_REST_Posts_Controller
-	 * which does not include WooCommerce's meta_data array. This ensures
-	 * meta_data round-trips through the entity store.
-	 *
-	 * @since 10.9.0
-	 */
-	public static function register_meta_data_rest_field(): void {
-		register_rest_field(
-			'product',
-			'meta_data',
-			array(
-				'get_callback'    => function ( $post_array ) {
-					$product = wc_get_product( $post_array['id'] );
-					if ( ! $product ) {
-						return array();
-					}
-
-					return array_values(
-						array_map(
-							function ( $meta ) {
-								return array(
-									'id'    => $meta->id,
-									'key'   => $meta->key,
-									'value' => $meta->value,
-								);
-							},
-							$product->get_meta_data()
-						)
-					);
-				},
-				'update_callback' => function ( $meta_data, $post ) {
-					if ( ! is_array( $meta_data ) ) {
-						return;
-					}
-
-					$product = wc_get_product( $post->ID );
-					if ( ! $product ) {
-						return;
-					}
-
-					foreach ( $meta_data as $meta ) {
-						if ( empty( $meta['key'] ) ) {
-							continue;
-						}
-
-						$product->update_meta_data(
-							$meta['key'],
-							$meta['value'] ?? '',
-							! empty( $meta['id'] ) ? (int) $meta['id'] : 0
-						);
-					}
-
-					$product->save_meta_data();
-				},
-				'schema'          => array(
-					'description' => __( 'Meta data.', 'woocommerce' ),
-					'type'        => 'array',
-					'context'     => array( 'view', 'edit' ),
-					'items'       => array(
-						'type'       => 'object',
-						'properties' => array(
-							'id'    => array(
-								'description' => __( 'Meta ID.', 'woocommerce' ),
-								'type'        => 'integer',
-								'context'     => array( 'view', 'edit' ),
-								'readonly'    => true,
-							),
-							'key'   => array(
-								'description' => __( 'Meta key.', 'woocommerce' ),
-								'type'        => 'string',
-								'context'     => array( 'view', 'edit' ),
-							),
-							'value' => array(
-								'description' => __( 'Meta value.', 'woocommerce' ),
-								'type'        => 'mixed',
-								'context'     => array( 'view', 'edit' ),
-							),
-						),
-					),
-				),
-			)
-		);
 	}
 
 	/**

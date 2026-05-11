@@ -9,10 +9,7 @@ import type { Field } from '@wordpress/dataviews';
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
-import type {
-	LegacyFieldsResponse,
-	LegacyHookMapping,
-} from './types';
+import type { LegacyFieldsResponse, LegacyHookMapping } from './types';
 import { createLegacyField } from './adapter';
 
 type UseLegacyFieldsResult = {
@@ -96,7 +93,10 @@ export function useLegacyFields(
 			.catch( ( error ) => {
 				if ( ! cancelled ) {
 					// eslint-disable-next-line no-console
-					console.error( 'Failed to load legacy field definitions:', error );
+					console.error(
+						'Failed to load legacy field definitions:',
+						error
+					);
 					setFieldsByHook( {} );
 					setIsLoading( false );
 				}

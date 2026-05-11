@@ -28,7 +28,6 @@ use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Tax\Controller as
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Emails\Controller as EmailsSettingsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Fulfillments\Controller as FulfillmentsController;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Settings\Account\Controller as AccountSettingsController;
-use Automattic\WooCommerce\Internal\Admin\DataForms\LegacyFieldCapture;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\LegacyFields\Controller as LegacyFieldsController;
 
 /**
@@ -49,7 +48,6 @@ class Server {
 	 */
 	public function init() { // phpcs:ignore WooCommerce.Functions.InternalInjectionMethod -- Not an injection method.
 		add_action( 'rest_api_init', array( $this, 'register_rest_routes' ), 10 );
-		add_action( 'rest_api_init', array( LegacyFieldCapture::class, 'register_meta_data_rest_field' ), 10 );
 
 		\WC_REST_System_Status_V2_Controller::register_cache_clean();
 	}

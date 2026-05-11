@@ -1,4 +1,10 @@
 <?php
+/**
+ * Tests for LegacyFieldCapture.
+ *
+ * @package WooCommerce\Tests\Internal\Admin\DataForms
+ */
+
 declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Admin\DataForms;
@@ -43,18 +49,27 @@ class LegacyFieldCaptureTest extends WC_Unit_Test_Case {
 		return $all['woocommerce_variation_options'] ?? array();
 	}
 
+	/**
+	 * Reset capture state after each test.
+	 */
 	public function tearDown(): void {
 		LegacyFieldCapture::reset();
 		parent::tearDown();
 	}
 
+	/**
+	 * Test that collect uses the base ID as the meta key without a prefix.
+	 */
 	public function test_collect_uses_base_id_as_meta_key_without_prefix(): void {
 		$this->enable_capture();
 
-		LegacyFieldCapture::collect( 'text_input', array(
-			'id'    => 'my_custom_field[0]',
-			'label' => 'Custom Field',
-		) );
+		LegacyFieldCapture::collect(
+			'text_input',
+			array(
+				'id'    => 'my_custom_field[0]',
+				'label' => 'Custom Field',
+			)
+		);
 
 		$fields = $this->get_collected_fields();
 		$this->assertCount( 1, $fields );
@@ -62,13 +77,19 @@ class LegacyFieldCaptureTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'my_custom_field', $fields[0]['meta_key'] );
 	}
 
+	/**
+	 * Test that collect preserves underscore prefix without doubling it.
+	 */
 	public function test_collect_preserves_underscore_prefix_without_doubling(): void {
 		$this->enable_capture();
 
-		LegacyFieldCapture::collect( 'text_input', array(
-			'id'    => '_my_custom_field[0]',
-			'label' => 'Custom Field',
-		) );
+		LegacyFieldCapture::collect(
+			'text_input',
+			array(
+				'id'    => '_my_custom_field[0]',
+				'label' => 'Custom Field',
+			)
+		);
 
 		$fields = $this->get_collected_fields();
 		$this->assertCount( 1, $fields );
@@ -76,13 +97,19 @@ class LegacyFieldCaptureTest extends WC_Unit_Test_Case {
 		$this->assertSame( '_my_custom_field', $fields[0]['meta_key'] );
 	}
 
+	/**
+	 * Test that collect strips the loop index for the meta key.
+	 */
 	public function test_collect_strips_loop_index_for_meta_key(): void {
 		$this->enable_capture();
 
-		LegacyFieldCapture::collect( 'text_input', array(
-			'id'    => 'variable_weight[3]',
-			'label' => 'Weight',
-		) );
+		LegacyFieldCapture::collect(
+			'text_input',
+			array(
+				'id'    => 'variable_weight[3]',
+				'label' => 'Weight',
+			)
+		);
 
 		$fields = $this->get_collected_fields();
 		$this->assertCount( 1, $fields );
@@ -90,13 +117,19 @@ class LegacyFieldCaptureTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'variable_weight', $fields[0]['meta_key'] );
 	}
 
+	/**
+	 * Test that collect handles a field ID without a loop index.
+	 */
 	public function test_collect_handles_id_without_loop_index(): void {
 		$this->enable_capture();
 
-		LegacyFieldCapture::collect( 'text_input', array(
-			'id'    => 'field_name',
-			'label' => 'Field',
-		) );
+		LegacyFieldCapture::collect(
+			'text_input',
+			array(
+				'id'    => 'field_name',
+				'label' => 'Field',
+			)
+		);
 
 		$fields = $this->get_collected_fields();
 		$this->assertCount( 1, $fields );

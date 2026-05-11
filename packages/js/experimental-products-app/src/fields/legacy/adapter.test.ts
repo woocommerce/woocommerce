@@ -28,9 +28,7 @@ describe( 'parseVisibility', () => {
 		const check = parseVisibility( 'show_if_variation_manage_stock' );
 		expect( check ).toBeDefined();
 		expect( check!( buildItem( { manage_stock: true } ) ) ).toBe( true );
-		expect( check!( buildItem( { manage_stock: false } ) ) ).toBe(
-			false
-		);
+		expect( check!( buildItem( { manage_stock: false } ) ) ).toBe( false );
 	} );
 
 	it( 'handles single hide_if_variation_virtual', () => {

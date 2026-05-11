@@ -53,10 +53,7 @@ type TextControlType =
 	| 'time'
 	| 'datetime-local';
 
-function getMetaValue(
-	item: ProductEntityRecord,
-	metaKey: string
-): string {
+function getMetaValue( item: ProductEntityRecord, metaKey: string ): string {
 	const entry = item.meta_data?.find(
 		( m: MetaDataEntry ) => m.key === metaKey
 	);
@@ -70,9 +67,7 @@ function updateMetaData(
 	onChange: ( changes: Partial< ProductEntityRecord > ) => void
 ): void {
 	const existing = data.meta_data ?? [];
-	const idx = existing.findIndex(
-		( m: MetaDataEntry ) => m.key === metaKey
-	);
+	const idx = existing.findIndex( ( m: MetaDataEntry ) => m.key === metaKey );
 
 	const updated =
 		idx >= 0
@@ -87,18 +82,16 @@ function updateMetaData(
 export function parseVisibility(
 	wrapperClass: string
 ): ( ( item: ProductEntityRecord ) => boolean ) | undefined {
-	const patterns: Record<
-		string,
-		( item: ProductEntityRecord ) => boolean
-	> = {
-		show_if_variation_manage_stock: ( item ) =>
-			item.manage_stock === true,
-		hide_if_variation_virtual: ( item ) =>
-			( item as ProductEntityRecord & { virtual?: boolean } )
-				.virtual !== true,
-		show_if_variation_downloadable: ( item ) =>
-			item.downloadable === true,
-	};
+	const patterns: Record< string, ( item: ProductEntityRecord ) => boolean > =
+		{
+			show_if_variation_manage_stock: ( item ) =>
+				item.manage_stock === true,
+			hide_if_variation_virtual: ( item ) =>
+				( item as ProductEntityRecord & { virtual?: boolean } )
+					.virtual !== true,
+			show_if_variation_downloadable: ( item ) =>
+				item.downloadable === true,
+		};
 
 	const checks: ( ( item: ProductEntityRecord ) => boolean )[] = [];
 	for ( const [ pattern, check ] of Object.entries( patterns ) ) {
@@ -199,11 +192,7 @@ function createSelectEdit(
 		} );
 }
 
-function createCheckboxEdit(
-	metaKey: string,
-	label: string,
-	help?: string
-) {
+function createCheckboxEdit( metaKey: string, label: string, help?: string ) {
 	return ( {
 		data,
 		onChange,
@@ -291,11 +280,7 @@ export function createLegacyField(
 			return {
 				...baseField,
 				type: 'text',
-				Edit: createSelectEdit(
-					metaKey,
-					definition.options,
-					help
-				),
+				Edit: createSelectEdit( metaKey, definition.options, help ),
 			} as Field< ProductEntityRecord >;
 
 		case 'checkbox':
@@ -313,11 +298,7 @@ export function createLegacyField(
 			return {
 				...baseField,
 				type: 'text',
-				Edit: createSelectEdit(
-					metaKey,
-					definition.options,
-					help
-				),
+				Edit: createSelectEdit( metaKey, definition.options, help ),
 			} as Field< ProductEntityRecord >;
 
 		default:
