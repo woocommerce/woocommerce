@@ -174,7 +174,7 @@ class QueryCache {
 			if ( is_array( $cached ) ) {
 				try {
 					return AST::fromArray( $cached );
-				} catch ( \Throwable ) {
+				} catch ( \Throwable $e ) {
 					return false;
 				}
 			}
@@ -366,7 +366,7 @@ class QueryCache {
 
 		try {
 			return AST::fromArray( $data );
-		} catch ( \Throwable ) {
+		} catch ( \Throwable $e ) {
 			return false;
 		}
 	}

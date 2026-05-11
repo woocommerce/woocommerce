@@ -339,7 +339,7 @@ class QueryCacheTest extends WC_Unit_Test_Case {
 		$this->skip_if_opcache_disabled();
 
 		$not_a_dir                     = tempnam( sys_get_temp_dir(), 'wc-graphql-cache-' );
-		$this->temp_files_to_clean[]   = $not_a_dir;
+		$this->temp_files_to_clean[]    = $not_a_dir;
 
 		add_filter(
 			'woocommerce_graphql_opcache_cache_dir',
