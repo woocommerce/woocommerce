@@ -52,18 +52,16 @@
 }
 
 /*
- * The primary column TD has no class. Target it via :has() and tighten its
- * left padding so the visual gap between the checkbox and the first row
- * element is 4px on parent rows and 16px on nested (variation) rows.
- * min() caps the extra at one increment so deeper nesting doesn't compound.
+ * The primary column TD has no class. Target it via :has() and set its left
+ * padding to 16px so the gap between the checkbox and the first row element
+ * (image) is 16px on every row — parent collapsed, parent expanded, and
+ * nested. !important guards against any Stack-internal styles winning.
  */
 .woocommerce-product-list
 	.dataviews-view-table
 	tbody
 	td:has( > .dataviews-view-table__primary-column ) {
-	padding-left: calc(
-		4px + min(var(--wp-dataviews-table-hierarchy-level, 0), 1) * 12px
-	) !important;
+	padding-left: 16px !important;
 }
 
 /*
