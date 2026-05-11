@@ -158,8 +158,8 @@ class Controller extends AbstractController {
 	/**
 	 * Get the item response.
 	 *
-	 * @param mixed            $item    Captured field definitions.
-	 * @param WP_REST_Request  $request Request object.
+	 * @param mixed           $item    Captured field definitions.
+	 * @param WP_REST_Request $request Request object.
 	 * @return array
 	 *
 	 * @phpstan-param \WP_REST_Request<array<string,mixed>> $request

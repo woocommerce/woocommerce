@@ -430,6 +430,33 @@ export function buildMergedProductEditData(
 	return mergedData as ProductEntityRecord;
 }
 
+type MetaEntry = { id?: number; key: string; value: string };
+
+export function mergeVariationMeta(
+	fetchedMeta: MetaEntry[] | undefined,
+	editedMeta: MetaEntry[] | undefined
+): MetaEntry[] | undefined {
+	if ( ! fetchedMeta ) {
+		return editedMeta;
+	}
+	const edits = editedMeta ?? [];
+	if ( edits.length === 0 ) {
+		return fetchedMeta;
+	}
+	const editsByKey = new Map(
+		edits.map( ( entry ) => [ entry.key, entry ] )
+	);
+	const merged = fetchedMeta.map(
+		( entry ) => editsByKey.get( entry.key ) ?? entry
+	);
+	editsByKey.forEach( ( entry, key ) => {
+		if ( ! fetchedMeta.some( ( m ) => m.key === key ) ) {
+			merged.push( entry );
+		}
+	} );
+	return merged;
+}
+
 export function getVisibleProductEditFields(
 	fields: ProductField[],
 	products: ProductEntityRecord[]
