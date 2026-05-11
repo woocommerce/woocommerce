@@ -21,20 +21,18 @@ import { unlock } from '../lock-unlock';
 import type { ProductEntityRecord } from '../fields/types';
 import {
 	DEFAULT_LAYOUTS,
-	DEFAULT_VIEW,
 	EMPTY_ARRAY,
 	PAGE_SIZE,
 	PRODUCT_LIST_TABS,
+	type StatusTab,
 } from './constants';
 import { productFields } from './fields';
-import { buildProductListQuery } from './query';
 import {
 	getItemId,
 	getProductListNavigationPath,
 	getProductListTab,
 	getProductsWithEmbeddedVariations,
 	getSelectionFromPostId,
-	getStatusForProductListTab,
 	isProductEditorAccessible,
 } from './utils';
 import { useProductActions } from '../dataviews-actions';
@@ -47,30 +45,28 @@ export type ProductListProps = {
 	className?: string;
 	hideTitleFromUI?: boolean;
 	postType?: string;
+	hasResolved: boolean;
+	isLoading: boolean;
+	records?: ProductEntityRecord[] | null;
+	selectedTab: StatusTab;
+	setSelectedTab: ( selectedTab: StatusTab ) => void;
+	setView: ( view: View ) => void;
+	totalCount?: number | null;
+	view: View;
 };
 
-/**
- * This function abstracts working with default & custom views by
- * providing a [ state, setState ] tuple based on the URL parameters.
- *
- * Consumers use the provided tuple to work with state
- * and don't have to deal with the specifics of default & custom views.
- *
- * @return {Array} The [ state, setState ] tuple.
- */
-function useView(): [ View, ( view: View ) => void ] {
-	const { query: { activeView = 'all' } = {} } = useLocation();
-	const [ view, setView ] = useState< View >( DEFAULT_VIEW );
-
-	// When activeView URL parameter changes, reset the view.
-	useEffect( () => {
-		setView( DEFAULT_VIEW );
-	}, [ activeView ] );
-
-	return [ view, setView ];
-}
-
-export default function ProductList( { className }: ProductListProps ) {
+export default function ProductList( {
+	className,
+	hasResolved,
+	isLoading,
+	records,
+	selectedTab,
+	setSelectedTab,
+	setView,
+	totalCount,
+	view,
+	postType = 'product',
+}: ProductListProps ) {
 	const { navigate } = useHistory();
 	const location = useLocation();
 	const currentQuery = useMemo(
@@ -82,32 +78,14 @@ export default function ProductList( { className }: ProductListProps ) {
 			},
 		[ location.query ]
 	);
-	const { postId, postType = 'product', activeView = 'all' } = currentQuery;
-	const selectedTabFromLocation = getProductListTab( activeView );
-	const [ selectedTab, setSelectedTab ] = useState( selectedTabFromLocation );
+	const { postId, activeView = 'all' } = currentQuery;
 	const [ selection, setSelection ] = useState( () =>
 		getSelectionFromPostId( postId )
 	);
-	const [ view, setView ] = useView();
-
-	useEffect( () => {
-		setSelectedTab( selectedTabFromLocation );
-	}, [ selectedTabFromLocation ] );
 
 	useEffect( () => {
 		setSelection( getSelectionFromPostId( postId ) );
 	}, [ postId ] );
-
-	const queryParams = useMemo( () => {
-		const query = buildProductListQuery( view );
-		const productStatus = getStatusForProductListTab( selectedTab );
-
-		if ( productStatus ) {
-			query.status = productStatus;
-		}
-
-		return query;
-	}, [ selectedTab, view ] );
 
 	const onChangeSelection = useCallback(
 		( items: string[] ) => {
@@ -154,44 +132,7 @@ export default function ProductList( { className }: ProductListProps ) {
 				getProductListNavigationPath( location.path, nextParams )
 			);
 		},
-		[ currentQuery, navigate, location.path, selectedTab ]
-	);
-
-	const {
-		records,
-		totalItems: totalCount,
-		isResolving: isLoading,
-		hasResolved,
-	} = useSelect(
-		( select ) => {
-			const {
-				getEntityRecords,
-				isResolving,
-				hasFinishedResolution,
-				getEntityRecordsTotalItems,
-			} = select( coreStore );
-			return {
-				records: getEntityRecords< ProductEntityRecord >(
-					'root',
-					'product',
-					queryParams
-				),
-				totalItems: getEntityRecordsTotalItems( 'root', 'product', {
-					...queryParams,
-				} ),
-				isResolving: isResolving( 'getEntityRecords', [
-					'root',
-					'product',
-					queryParams,
-				] ),
-				hasResolved: hasFinishedResolution( 'getEntityRecords', [
-					'root',
-					'product',
-					queryParams,
-				] ),
-			};
-		},
-		[ queryParams ]
+		[ currentQuery, navigate, location.path, selectedTab, setSelectedTab ]
 	);
 
 	const paginationInfo = useMemo(

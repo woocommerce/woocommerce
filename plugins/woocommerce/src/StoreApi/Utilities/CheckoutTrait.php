@@ -138,18 +138,42 @@ trait CheckoutTrait {
 	/**
 	 * Update the current order using the posted values from the request.
 	 *
+	 * Called only with a real, persisted order — either the place-order POST flow or
+	 * the rare failed-payment PATCH retry flow where `get_draft_order()` resolved to
+	 * an existing `pending`/`failed` order from the customer's session. Fresh-session
+	 * PATCHes never call this method; they go through the no-order draft path.
+	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @param bool             $persist Whether to persist the changes right away (defaults to true).
+	 * @throws RouteException If the order is missing, or if the order requires a payment method on POST and none was supplied.
 	 */
 	private function update_order_from_request( \WP_REST_Request $request, bool $persist = true ) {
+		if ( ! $this->order instanceof \WC_Order ) {
+			throw new RouteException(
+				'woocommerce_rest_checkout_missing_order',
+				esc_html__( 'Unable to create order', 'woocommerce' ),
+				500
+			);
+		}
+
 		$this->order->set_customer_note( wc_sanitize_textarea( $request['customer_note'] ) ?? '' );
 		$payment_method = $this->get_request_payment_method( $request );
 		if ( null !== $payment_method ) {
 			WC()->session->set( 'chosen_payment_method', $payment_method->id );
 			$this->order->set_payment_method( $payment_method->id );
 			$this->order->set_payment_method_title( $payment_method->title );
-		} elseif ( ! $this->order->needs_payment() ) {
-			$this->order->set_payment_method( '' );
+		} else {
+			$order_needs_payment = $this->order->needs_payment();
+			if ( $order_needs_payment && 'POST' === $request->get_method() ) {
+				throw new RouteException(
+					'woocommerce_rest_checkout_missing_payment_method',
+					esc_html__( 'No payment method provided.', 'woocommerce' ),
+					400
+				);
+			}
+			if ( ! $order_needs_payment ) {
+				$this->order->set_payment_method( '' );
+			}
 		}
 		wc_log_order_step(
 			'[Store API #5::update_order_from_request] Set customer note and payment method',
@@ -225,38 +249,79 @@ trait CheckoutTrait {
 	 * @param \WP_REST_Request $request Full details about the request.
 	 */
 	private function persist_additional_fields_for_order( \WP_REST_Request $request ) {
+		$this->resolve_and_persist_additional_fields(
+			$request,
+			function ( string $key, $value ) {
+				$this->additional_fields_controller->persist_field_for_order( $key, $value, $this->order, 'other', false );
+			}
+		);
+
+		if ( 0 !== $this->order->get_customer_id() && get_current_user_id() === $this->order->get_customer_id() ) {
+			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $this->order, wc()->customer );
+		}
+	}
+
+	/**
+	 * Persist additional fields for the customer session.
+	 *
+	 * Counterpart to `persist_additional_fields_for_order` for routes that operate
+	 * without a persisted order (e.g. the deferred-draft PATCH path).
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param \WP_REST_Request $request Full details about the request.
+	 */
+	private function persist_additional_fields_for_customer( \WP_REST_Request $request ): void {
+		$customer = wc()->customer;
+
+		$this->resolve_and_persist_additional_fields(
+			$request,
+			function ( string $key, $value ) use ( $customer ) {
+				$this->additional_fields_controller->persist_field_for_customer( $key, $value, $customer, 'other' );
+			}
+		);
+
+		$customer->save();
+	}
+
+	/**
+	 * Resolve the additional checkout fields from the request and persist each one
+	 * via the supplied callback. Fields hidden by conditional logic that were still
+	 * posted are cleared (passed with an empty value).
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param \WP_REST_Request $request Full details about the request.
+	 * @param callable         $persist Callback invoked as `$persist( string $key, mixed $value )` for each field.
+	 */
+	private function resolve_and_persist_additional_fields( \WP_REST_Request $request, callable $persist ): void {
 		if ( Features::is_enabled( 'experimental-blocks' ) ) {
 			$document_object = $this->get_document_object_from_rest_request( $request );
 			$document_object->set_context( 'order' );
-			$additional_fields_order   = $this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object );
-			$additional_fields_contact = $this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object );
-			$additional_fields         = array_merge( $additional_fields_order, $additional_fields_contact );
+			$additional_fields = array_merge(
+				$this->additional_fields_controller->get_contextual_fields_for_location( 'order', $document_object ),
+				$this->additional_fields_controller->get_contextual_fields_for_location( 'contact', $document_object )
+			);
 		} else {
-			$additional_fields_order   = $this->additional_fields_controller->get_fields_for_location( 'order' );
-			$additional_fields_contact = $this->additional_fields_controller->get_fields_for_location( 'contact' );
-			$additional_fields         = array_merge( $additional_fields_order, $additional_fields_contact );
+			$additional_fields = array_merge(
+				$this->additional_fields_controller->get_fields_for_location( 'order' ),
+				$this->additional_fields_controller->get_fields_for_location( 'contact' )
+			);
 		}
 
-		$field_values = (array) $request['additional_fields'] ?? [];
+		$field_values = isset( $request['additional_fields'] ) ? (array) $request['additional_fields'] : array();
 
 		foreach ( $additional_fields as $key => $field ) {
 			if ( isset( $field_values[ $key ] ) ) {
-				$this->additional_fields_controller->persist_field_for_order( $key, $field_values[ $key ], $this->order, 'other', false );
+				$persist( $key, $field_values[ $key ] );
 			}
 		}
 
-		// The above logic sets visible fields, but not hidden fields. Unset the hidden fields here.
-		$other_posted_field_values = array_diff_key( $field_values, $additional_fields );
-
-		foreach ( $other_posted_field_values as $key => $value ) {
+		$hidden_posted_field_values = array_diff_key( $field_values, $additional_fields );
+		foreach ( $hidden_posted_field_values as $key => $value ) {
 			if ( $this->additional_fields_controller->is_field( $key ) ) {
-				$this->additional_fields_controller->persist_field_for_order( $key, '', $this->order, 'other', false );
+				$persist( $key, '' );
 			}
-		}
-
-		// We need to sync the customer additional fields with the order otherwise they will be overwritten on next page load.
-		if ( 0 !== $this->order->get_customer_id() && get_current_user_id() === $this->order->get_customer_id() ) {
-			$this->additional_fields_controller->sync_customer_additional_fields_with_order( $this->order, wc()->customer );
 		}
 	}
 

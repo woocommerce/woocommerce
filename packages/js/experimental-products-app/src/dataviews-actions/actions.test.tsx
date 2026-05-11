@@ -87,6 +87,11 @@ describe( 'product list actions', () => {
 		status: 'draft',
 		name: 'Beanie',
 	} as ProductEntityRecord;
+	const hoodie = {
+		id: 34,
+		status: 'draft',
+		name: 'Hoodie',
+	} as ProductEntityRecord;
 
 	const deleteEntityRecord = jest.fn();
 	const invalidateResolution = jest.fn();
@@ -128,15 +133,19 @@ describe( 'product list actions', () => {
 		} );
 	} );
 
-	it( 'opens quick edit when the Edit action is triggered', () => {
+	it( 'opens quick edit panel when the Quick edit action is triggered', () => {
 		const { result } = renderHook( () => useProductActions() );
-		const editProductAction = result.current.find(
-			( action ) => action.id === 'edit-product'
+		const quickEditProductAction = result.current.find(
+			( action ) => action.id === 'quick-edit-product'
 		);
 
-		expect( editProductAction ).toBeDefined();
+		expect( quickEditProductAction ).toBeDefined();
 
-		getCallbackAction( editProductAction! ).callback( [ product ], {
+		if ( ! quickEditProductAction ) {
+			throw new Error( 'Quick edit action not found.' );
+		}
+
+		getCallbackAction( quickEditProductAction ).callback( [ product ], {
 			onActionPerformed,
 		} );
 
@@ -144,6 +153,71 @@ describe( 'product list actions', () => {
 			'/products?activeView=draft&postId=12&quickEdit=true'
 		);
 		expect( onActionPerformed ).toHaveBeenCalledWith( [ product ] );
+	} );
+
+	it( 'exposes the Quick edit action as a bulk action', () => {
+		const { result } = renderHook( () => useProductActions() );
+		const quickEditProductAction = result.current.find(
+			( action ) => action.id === 'quick-edit-product'
+		);
+
+		expect( quickEditProductAction?.supportsBulk ).toBe( true );
+	} );
+
+	it( 'opens quick edit panel with all selected products when triggered as a bulk action', () => {
+		const { result } = renderHook( () => useProductActions() );
+		const quickEditProductAction = result.current.find(
+			( action ) => action.id === 'quick-edit-product'
+		);
+
+		expect( quickEditProductAction ).toBeDefined();
+
+		if ( ! quickEditProductAction ) {
+			throw new Error( 'Quick edit action not found.' );
+		}
+
+		getCallbackAction( quickEditProductAction ).callback(
+			[ product, hoodie ],
+			{
+				onActionPerformed,
+			}
+		);
+
+		expect( navigate ).toHaveBeenCalledWith(
+			'/products?activeView=draft&postId=12%2C34&quickEdit=true'
+		);
+		expect( onActionPerformed ).toHaveBeenCalledWith( [ product, hoodie ] );
+	} );
+
+	it( 'opens product editor when the Edit action is triggered', () => {
+		const { result } = renderHook( () => useProductActions() );
+		const editProductAction = result.current.find(
+			( action ) => action.id === 'edit-product'
+		);
+
+		expect( editProductAction ).toBeDefined();
+
+		if ( ! editProductAction ) {
+			throw new Error( 'Edit action not found.' );
+		}
+
+		const originalLocation = window.location;
+		Object.defineProperty( window, 'location', {
+			writable: true,
+			value: { href: '' },
+		} );
+
+		getCallbackAction( editProductAction ).callback( [ product ], {
+			onActionPerformed,
+		} );
+
+		expect( window.location.href ).toBe( 'post.php?post=12&action=edit' );
+		expect( onActionPerformed ).toHaveBeenCalledWith( [ product ] );
+
+		Object.defineProperty( window, 'location', {
+			writable: true,
+			value: originalLocation,
+		} );
 	} );
 
 	it( 'duplicates products through the WooCommerce duplicate endpoint', async () => {

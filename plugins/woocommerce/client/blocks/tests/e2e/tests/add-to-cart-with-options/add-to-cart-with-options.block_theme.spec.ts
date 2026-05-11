@@ -551,16 +551,21 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await test.step( 'successfully adds to cart when child products are selected', async () => {
-			const increaseQuantityButton = page
+			const increaseBeanieQuantityButton = page
 				.locator(
 					'[data-block-name="woocommerce/add-to-cart-with-options"]'
 				)
 				.getByLabel( 'Increase quantity of Beanie' );
-			await increaseQuantityButton.click();
+			await increaseBeanieQuantityButton.click();
 
 			await expect( addToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
-			await increaseQuantityButton.click();
+			const increaseTShirtQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options"]'
+				)
+				.getByLabel( 'Increase quantity of T-Shirt' );
+			await increaseTShirtQuantityButton.click();
 
 			await addToCartButton.click();
 
@@ -581,28 +586,39 @@ test.describe( 'Add to Cart + Options Block', () => {
 		} );
 
 		await test.step( 'child simple product quantities can be decreased down to 0', async () => {
-			const reduceQuantityButton = page
+			const reduceBeanieQuantityButton = page
 				.locator(
 					'[data-block-name="woocommerce/add-to-cart-with-options-grouped-product-item-selector"]'
 				)
 				.getByLabel( 'Reduce quantity of Beanie' );
-			await reduceQuantityButton.click();
-			await reduceQuantityButton.click();
+			await reduceBeanieQuantityButton.click();
 
-			const quantityInput = page.getByRole( 'spinbutton', {
-				name: 'Beanie',
+			const addedToCartButton = page.getByRole( 'button', {
+				name: 'Added to cart',
+				exact: true,
 			} );
 
-			await expect( quantityInput ).toHaveValue( '0' );
+			await expect( addedToCartButton ).not.toHaveClass( /\bdisabled\b/ );
 
-			await expect( reduceQuantityButton ).toBeDisabled();
+			const reduceTShirtQuantityButton = page
+				.locator(
+					'[data-block-name="woocommerce/add-to-cart-with-options-grouped-product-item-selector"]'
+				)
+				.getByLabel( 'Reduce quantity of T-Shirt' );
+			await reduceTShirtQuantityButton.click();
 
-			await expect(
-				page.getByRole( 'button', {
-					name: 'Added to cart',
-					exact: true,
-				} )
-			).toHaveClass( /\bdisabled\b/ );
+			const beanieQuantityInput = page.getByRole( 'spinbutton', {
+				name: 'Beanie',
+			} );
+			const tShirtQuantityInput = page.getByRole( 'spinbutton', {
+				name: 'T-Shirt',
+			} );
+
+			await expect( beanieQuantityInput ).toHaveValue( '0' );
+			await expect( tShirtQuantityInput ).toHaveValue( '0' );
+			await expect( reduceBeanieQuantityButton ).toBeDisabled();
+			await expect( reduceTShirtQuantityButton ).toBeDisabled();
+			await expect( addedToCartButton ).toHaveClass( /\bdisabled\b/ );
 		} );
 
 		await test.step( 'products sold individually can be added to cart', async () => {
