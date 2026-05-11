@@ -156,7 +156,7 @@ class LegacyFieldCapture {
 			'type'              => $helper_type,
 			'input_type'        => $field['type'] ?? 'text',
 			'label'             => $field['label'] ?? '',
-			'meta_key'          => $base_id,
+			'meta_key'          => $base_id, // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- not a DB query, this is a field definition key.
 			'placeholder'       => $field['placeholder'] ?? '',
 			'description'       => is_array( $field['description'] ?? null )
 				? implode( ' ', $field['description'] )

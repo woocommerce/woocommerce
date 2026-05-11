@@ -77,7 +77,7 @@ class LegacyFieldsSchema extends AbstractSchema {
 					'type'        => 'string',
 					'context'     => self::VIEW_EDIT_CONTEXT,
 				),
-				'meta_key'          => array(
+				'meta_key'          => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key -- schema definition, not a DB query.
 					'description' => __( 'Post meta key for persistence.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => self::VIEW_EDIT_CONTEXT,
@@ -124,9 +124,9 @@ class LegacyFieldsSchema extends AbstractSchema {
 	/**
 	 * Get the item response.
 	 *
-	 * @param mixed           $item           Captured field definitions grouped by hook name.
-	 * @param WP_REST_Request $request        Request object.
-	 * @param array           $include_fields Fields to include in the response.
+	 * @param mixed                                 $item           Captured field definitions grouped by hook name.
+	 * @param \WP_REST_Request<array<string,mixed>> $request        Request object.
+	 * @param array                                 $include_fields Fields to include in the response.
 	 * @return array
 	 */
 	public function get_item_response( $item, WP_REST_Request $request, array $include_fields = array() ): array {
