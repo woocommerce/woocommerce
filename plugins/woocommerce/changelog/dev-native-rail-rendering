@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Render the navigation_v2 rail via WP-native $menu/$submenu instead of JS DOM replacement.
