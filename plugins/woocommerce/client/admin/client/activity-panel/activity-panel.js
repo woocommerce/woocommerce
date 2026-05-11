@@ -10,6 +10,7 @@ import {
 	help as helpIcon,
 	external,
 	bell,
+	bellUnread,
 	listView,
 	comment,
 } from '@wordpress/icons';
@@ -241,7 +242,20 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		const activity = {
 			name: 'activity',
 			title: __( 'Activity', 'woocommerce' ),
-			icon: <Icon icon={ bell } size={ 18 } />,
+			// Use bellUnread (bell + dot baked into the SVG) when there is
+			// unread activity so the unread state lives in one source of truth
+			// inside @wordpress/icons rather than a separately-positioned CSS
+			// pseudo-element on top of the plain bell.
+			icon: (
+				<Icon
+					icon={
+						hasUnreadNotes || hasAbbreviatedNotifications
+							? bellUnread
+							: bell
+					}
+					size={ 18 }
+				/>
+			),
 			unread: hasUnreadNotes || hasAbbreviatedNotifications,
 			visible:
 				( isEmbedded || ! isHomescreen ) &&

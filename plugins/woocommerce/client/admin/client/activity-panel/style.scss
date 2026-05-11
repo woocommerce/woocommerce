@@ -113,27 +113,12 @@ $wp-admin-page-bg: #f0f0f1;
 			}
 		}
 
-		&.has-unread::after,
-		&.woocommerce-layout__activity-panel-tab-wordpress-notices::after {
-			content: " ";
-			position: absolute;
-			padding: 1px;
-			background: $alert-red;
-			// Match floating-header background so the ring around the unread
-			// dot blends in instead of looking like a white pill on grey.
-			border: 2px solid $wp-admin-page-bg;
-			width: 4px;
-			height: 4px;
-			display: inline-block;
-			border-radius: 50%;
-			// Anchor at the top-right of the 18px icon, with a slight overlap
-			// inward so the dot reads as part of the icon rather than next to it.
-			// Button has flex-column + justify-content: center, so the icon's
-			// vertical centre is at 50% of the button. Works at any bar height.
-			top: calc(50% - 9px);
-			left: calc(50% + 2px);
-			right: auto;
-			margin: 0;
+		// The unread state ships as `bellUnread` from @wordpress/icons — a
+		// single SVG with the dot baked in. We just colour the dot red so the
+		// urgency signal reads, instead of inheriting currentColor like the
+		// rest of the icon.
+		&.has-unread svg circle {
+			fill: $alert-red;
 		}
 
 		&:hover,
@@ -142,11 +127,6 @@ $wp-admin-page-bg: #f0f0f1;
 			// Override Button's default theme-blue hover — Gutenberg's own
 			// icon tab groups keep the same dark-grey across all states.
 			color: $gray-900;
-
-			&.has-unread::after,
-			&.woocommerce-layout__activity-panel-tab-wordpress-notices::after {
-				border-color: $gray-200;
-			}
 		}
 
 		// Suppress the inset focus shadow on mouse-click focus (it conflicts
