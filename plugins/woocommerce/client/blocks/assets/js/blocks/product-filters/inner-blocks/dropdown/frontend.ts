@@ -42,7 +42,9 @@ store(
 			get selectValue(): string {
 				const { storeNamespace } = getContext< DropdownContext >();
 				const parent = store< ProductFiltersStore >( storeNamespace );
-				const items = parent.state.selectableItems as SelectableRow[];
+				const items = Array.isArray( parent.state.selectableItems )
+					? parent.state.selectableItems
+					: [];
 				const selected = items.find( ( row ) => row.selected );
 				return selected?.value ?? '';
 			},
