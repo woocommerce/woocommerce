@@ -97,6 +97,9 @@ final class ProductFilterDropdown extends AbstractBlock {
 							continue;
 						}
 						$option_label = $this->get_option_text( $item );
+						if ( empty( $option_label ) ) {
+							continue;
+						}
 						?>
 						<option
 							value="<?php echo esc_attr( isset( $item['value'] ) ? (string) $item['value'] : '' ); ?>"
