@@ -143,7 +143,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * auto-rejects. Short enough to limit replay; long enough for a confused
 	 * user to read the phone, find their browser, and click.
 	 */
-	const CHALLENGE_TTL = 90;
+	const CHALLENGE_TTL_SECONDS = 90;
 
 	/**
 	 * Length (bytes pre-bin2hex) of the exchange-grant nonce minted on
@@ -1364,14 +1364,14 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			'distractors' => $challenge_numbers['distractors'],
 			'shuffled'    => $candidates,
 			'session_id'  => $session_id,
-			'expires_at'  => $now + self::CHALLENGE_TTL,
+			'expires_at'  => $now + self::CHALLENGE_TTL_SECONDS,
 			'device'      => $this->sanitize_device_payload( $request->get_param( 'device' ) ),
 		);
 
 		// Re-use whatever ttl the original transient had left. Capped to
-		// CHALLENGE_TTL because the user has at most that long to pick.
-		$ttl_left = max( 30, ( isset( $record['expires_at'] ) ? (int) $record['expires_at'] - $now : self::CHALLENGE_TTL ) );
-		set_transient( $key, $record, min( $ttl_left, self::CHALLENGE_TTL + 30 ) );
+		// CHALLENGE_TTL_SECONDS because the user has at most that long to pick.
+		$ttl_left = max( 30, ( isset( $record['expires_at'] ) ? (int) $record['expires_at'] - $now : self::CHALLENGE_TTL_SECONDS ) );
+		set_transient( $key, $record, min( $ttl_left, self::CHALLENGE_TTL_SECONDS + 30 ) );
 
 		// Sibling transient that resolves session_id → token_hash for the
 		// app's session-status poll. Stored hashed so the session id isn't
@@ -1379,14 +1379,14 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		set_transient(
 			self::SESSION_TRANSIENT_PREFIX . hash( 'sha256', $session_id ),
 			$token_hash,
-			self::CHALLENGE_TTL + 30
+			self::CHALLENGE_TTL_SECONDS + 30
 		);
 
 		return rest_ensure_response(
 			array(
 				'session_id'  => $session_id,
 				'real_number' => $challenge_numbers['real'],
-				'expires_in'  => self::CHALLENGE_TTL,
+				'expires_in'  => self::CHALLENGE_TTL_SECONDS,
 			)
 		);
 	}
@@ -1483,7 +1483,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$record['exchange_grant'] = bin2hex( random_bytes( self::EXCHANGE_GRANT_BYTES ) );
 		$ttl                      = max(
 			30,
-			isset( $record['expires_at'] ) ? (int) $record['expires_at'] - time() : self::CHALLENGE_TTL
+			isset( $record['expires_at'] ) ? (int) $record['expires_at'] - time() : self::CHALLENGE_TTL_SECONDS
 		);
 
 		set_transient( $key, $record, $ttl );

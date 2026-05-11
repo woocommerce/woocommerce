@@ -1639,7 +1639,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertArrayHasKey( 'real_number', $data );
 		$this->assertMatchesRegularExpression( '/^\d{3}$/', (string) $data['real_number'], 'Real number must be 3 digits, zero-padded.' );
 		$this->assertArrayHasKey( 'expires_in', $data );
-		$this->assertSame( MobileAppQRLogin::CHALLENGE_TTL, $data['expires_in'] );
+		$this->assertSame( MobileAppQRLogin::CHALLENGE_TTL_SECONDS, $data['expires_in'] );
 
 		// Underlying transient is now in the scanned state with the device payload threaded through.
 		$record = get_transient( MobileAppQRLogin::TOKEN_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
