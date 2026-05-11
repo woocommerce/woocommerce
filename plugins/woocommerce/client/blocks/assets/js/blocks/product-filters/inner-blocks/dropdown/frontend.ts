@@ -73,6 +73,7 @@ store(
 
 				// Don't try to toggle empty option ("") or invalid options.
 				if ( ! isToggleableItem( row ) ) {
+					parent.actions.navigate();
 					return;
 				}
 
