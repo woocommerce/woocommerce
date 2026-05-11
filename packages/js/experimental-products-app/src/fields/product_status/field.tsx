@@ -13,7 +13,12 @@ import type { ProductEntityRecord } from '../types';
 import { ProductStatusBadge } from '../components/product-status-badge';
 
 function isValidStatus( value: string ) {
-	return value === 'draft' || value === 'publish' || value === 'trash';
+	return (
+		value === 'draft' ||
+		value === 'pending' ||
+		value === 'publish' ||
+		value === 'trash'
+	);
 }
 
 const fieldDefinition = {
@@ -22,8 +27,9 @@ const fieldDefinition = {
 	enableSorting: false,
 	filterBy: false,
 	elements: [
+		{ value: 'publish', label: __( 'Published', 'woocommerce' ) },
 		{ value: 'draft', label: __( 'Draft', 'woocommerce' ) },
-		{ value: 'publish', label: __( 'Active', 'woocommerce' ) },
+		{ value: 'pending', label: __( 'Pending review', 'woocommerce' ) },
 		{ value: 'trash', label: __( 'Trash', 'woocommerce' ) },
 	],
 } satisfies Partial< Field< ProductEntityRecord > >;
@@ -34,35 +40,21 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	render: ( { item }: { item: ProductEntityRecord } ) => (
 		<ProductStatusBadge status={ item.status } />
 	),
-	Edit: ( { data, onChange, field } ) => {
-		const description =
-			data.status === 'publish'
-				? __(
-						'This product is live and visible on your store.',
-						'woocommerce'
-				  )
-				: __(
-						'This product is not visible to customers.',
-						'woocommerce'
-				  );
-
-		return (
-			<SelectControl
-				label={ field.label }
-				help={ description }
-				value={ data.status }
-				options={ field.elements?.filter(
-					( element: { label: string; value: string } ) =>
-						element.value !== 'trash'
-				) }
-				onChange={ ( value ) => {
-					if ( value && isValidStatus( value ) ) {
-						onChange( {
-							status: value,
-						} );
-					}
-				} }
-			/>
-		);
-	},
+	Edit: ( { data, onChange, field } ) => (
+		<SelectControl
+			label={ field.label }
+			value={ data.status }
+			options={ field.elements?.filter(
+				( element: { label: string; value: string } ) =>
+					element.value !== 'trash'
+			) }
+			onChange={ ( value ) => {
+				if ( value && isValidStatus( value ) ) {
+					onChange( {
+						status: value,
+					} );
+				}
+			} }
+		/>
+	),
 };

@@ -31,7 +31,7 @@ type EditActionOptions = {
 function getQuickEditPath(
 	path: string,
 	query: Record< string, string | undefined >,
-	productId: number
+	productIds: number[]
 ) {
 	const nextQuery = Object.entries( query ).reduce(
 		( acc, [ key, value ] ) => {
@@ -46,7 +46,7 @@ function getQuickEditPath(
 
 	return getProductListNavigationPath( path, {
 		...nextQuery,
-		postId: String( productId ),
+		postId: productIds.join( ',' ),
 		quickEdit: 'true',
 	} );
 }
@@ -118,15 +118,36 @@ function getNoticeFromSettledResults( {
 	};
 }
 
-export const editAction = ( {
+export const quickEditAction = ( {
 	navigate,
 	path = '/',
 	query = {},
 }: EditActionOptions ): Action< ProductEntityRecord > => ( {
+	id: 'quick-edit-product',
+	label: __( 'Quick edit', 'woocommerce' ),
+	isPrimary: true,
+	supportsBulk: true,
+	icon: edit,
+	isEligible( product ) {
+		return product.status !== 'trash';
+	},
+	callback( items, { onActionPerformed } ) {
+		const productIds = items.map( ( product ) => product.id );
+
+		if ( productIds.length > 0 ) {
+			navigate( getQuickEditPath( path, query, productIds ) );
+		}
+
+		if ( onActionPerformed ) {
+			onActionPerformed( items );
+		}
+	},
+} );
+
+export const editAction = (): Action< ProductEntityRecord > => ( {
 	id: 'edit-product',
 	label: __( 'Edit', 'woocommerce' ),
 	isPrimary: true,
-	icon: edit,
 	isEligible( product ) {
 		return product.status !== 'trash';
 	},
@@ -134,7 +155,12 @@ export const editAction = ( {
 		const product = items[ 0 ];
 
 		if ( product ) {
-			navigate( getQuickEditPath( path, query, product.id ) );
+			window.location.href = getAdminLink(
+				addQueryArgs( 'post.php', {
+					post: product.id,
+					action: 'edit',
+				} )
+			);
 		}
 
 		if ( onActionPerformed ) {
@@ -349,11 +375,12 @@ export const useProductActions = () => {
 
 	return useMemo(
 		() => [
-			editAction( {
+			quickEditAction( {
 				navigate,
 				path,
 				query,
 			} ),
+			editAction(),
 			viewAction(),
 			duplicateProductAction(),
 			moveToTrashAction(),
