@@ -52,16 +52,16 @@
 }
 
 /*
- * Checkbox cell right padding: 16px on parent rows, 0 on nested rows.
- * On nested rows the 16px gap is provided by the primary cell's left
- * padding (see rule below), so we don't double-up.
+ * Checkbox cell right padding: 24px on parent rows, 0 on nested rows.
+ * On nested rows the gap is provided by the primary cell's left padding
+ * (see rule below), so we don't double-up.
  */
 .woocommerce-product-list
 	.dataviews-view-table
 	tbody
 	td.dataviews-view-table__checkbox-column {
 	padding-right: calc(
-		16px - min(var(--wp-dataviews-table-hierarchy-level, 0), 1) * 16px
+		24px - min(var(--wp-dataviews-table-hierarchy-level, 0), 1) * 24px
 	);
 }
 
