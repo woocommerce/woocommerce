@@ -199,11 +199,9 @@
 				"package.json",
 				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/experimental/build",
-				"node_modules/@woocommerce/experimental/build-module",
 				"node_modules/@woocommerce/experimental/build-style",
 				"node_modules/@woocommerce/experimental/build-types",
 				"node_modules/@woocommerce/data/build",
-				"node_modules/@woocommerce/data/build-module",
 				"node_modules/@woocommerce/data/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",
@@ -219,10 +217,8 @@
 				"node_modules/@woocommerce/internal-ts-config/tsconfig-cjs.json",
 				"node_modules/@woocommerce/internal-ts-config/types",
 				"node_modules/@woocommerce/navigation/build",
-				"node_modules/@woocommerce/navigation/build-module",
 				"node_modules/@woocommerce/navigation/build-types",
 				"node_modules/@woocommerce/tracks/build",
-				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types"
 			]
 		}

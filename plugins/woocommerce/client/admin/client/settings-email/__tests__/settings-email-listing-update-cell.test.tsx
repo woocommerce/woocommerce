@@ -44,6 +44,7 @@ const baseEmail: EmailType = {
 	status: 'enabled',
 	templateStatus: null,
 	templateVersion: null,
+	currentVersion: null,
 };
 
 describe( '<UpdatesCell>', () => {
@@ -66,12 +67,56 @@ describe( '<UpdatesCell>', () => {
 		( window as any ).location = originalLocation;
 	} );
 
-	it( 'renders a Review update button when status is core_updated_customized', () => {
+	it( 'renders a Review update button when status is core_updated_customized and merchant version is older than current', () => {
 		render(
 			<UpdatesCell
 				post={ {
 					...baseEmail,
 					templateStatus: 'core_updated_customized',
+					templateVersion: '10.6.0',
+					currentVersion: '10.7.0',
+				} }
+			/>
+		);
+
+		expect(
+			screen.getByRole( 'button', { name: /review update/i } )
+		).toBeInTheDocument();
+	} );
+
+	it( 'renders em-dash when status is core_updated_customized but merchant version equals current (already reviewed)', () => {
+		// Canonical detector check: status alone isn't enough — the merchant
+		// is "up to date" once they've reviewed this version, even if they
+		// kept some customizations during the apply.
+		render(
+			<UpdatesCell
+				post={ {
+					...baseEmail,
+					templateStatus: 'core_updated_customized',
+					templateVersion: '10.7.0',
+					currentVersion: '10.7.0',
+				} }
+			/>
+		);
+
+		expect(
+			screen.queryByRole( 'button', { name: /review update/i } )
+		).not.toBeInTheDocument();
+		expect( screen.getByLabelText( /up to date/i ) ).toHaveTextContent(
+			'—'
+		);
+	} );
+
+	it( 'falls back to status-only gating when version metadata is missing (legacy posts)', () => {
+		// Posts that haven't been backfilled yet won't have templateVersion;
+		// keep showing the indicator on status alone so legacy posts surface.
+		render(
+			<UpdatesCell
+				post={ {
+					...baseEmail,
+					templateStatus: 'core_updated_customized',
+					templateVersion: null,
+					currentVersion: '10.7.0',
 				} }
 			/>
 		);

@@ -246,11 +246,12 @@ final class ProductFilterTaxonomy extends AbstractBlock {
 
 					$type   = 'taxonomy/' . $taxonomy;
 					$option = array(
-						'id'       => $type . '-' . $term['slug'],
-						'label'    => $term['name'],
-						'value'    => $term['slug'],
-						'selected' => in_array( $term['slug'], $selected_terms, true ),
-						'type'     => $type,
+						'id'        => $type . '-' . $term['slug'],
+						'label'     => $term['name'],
+						'ariaLabel' => $term['name'],
+						'value'     => $term['slug'],
+						'selected'  => in_array( $term['slug'], $selected_terms, true ),
+						'type'      => $type,
 					);
 
 					if ( $show_counts ) {
