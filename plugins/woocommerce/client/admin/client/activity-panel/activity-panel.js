@@ -197,13 +197,16 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			isTabOpen &&
 			isPanelOpen;
 
-		if ( isPanelClosing ) {
-			return;
-		}
-
 		setCurrentTab( tabName );
 		setIsPanelOpen( isTabOpen );
 		setIsPanelSwitching( panelSwitching );
+		// Clear any pending close so a tab click reliably switches/opens the
+		// panel. Previously a `useFocusOutside`-triggered closePanel() would
+		// set isPanelClosing=true mid-click, an isPanelClosing guard here
+		// would short-circuit togglePanel(), and the new tab's panel would
+		// fail to switch in (visible when clicking between Activity, Inbox,
+		// and Finish setup tabs).
+		setIsPanelClosing( false );
 	};
 
 	const isProductScreen = () => {

@@ -33,20 +33,7 @@ export const Panel = ( {
 			) ||
 				event.relatedTarget.closest( '.components-snackbar__action' ) );
 
-		// Clicking a sibling activity-panel tab is a tab-switch, not a "click
-		// outside to close" — let the togglePanel() call from the clicked tab
-		// own the resulting panel state.
-		const isClickOnPanelTab =
-			event.relatedTarget &&
-			event.relatedTarget.closest(
-				'.woocommerce-layout__activity-panel-tab'
-			);
-
-		if (
-			isPanelOpen &&
-			! isClickOnModalOrSnackbar &&
-			! isClickOnPanelTab
-		) {
+		if ( isPanelOpen && ! isClickOnModalOrSnackbar ) {
 			closePanel();
 		}
 	};
