@@ -8575,33 +8575,9 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot access property \$added_by on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot access property \$children on WP_Error\|WP_Term\|null\.$#'
 			identifier: property.nonObject
 			count: 4
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot access property \$content on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot access property \$date_created on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot access property \$id on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 1
 			path: includes/class-wc-ajax.php
 
 		-

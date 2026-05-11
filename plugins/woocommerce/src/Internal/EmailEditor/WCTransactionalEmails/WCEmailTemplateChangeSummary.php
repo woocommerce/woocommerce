@@ -99,6 +99,7 @@ class WCEmailTemplateChangeSummary {
 	 *
 	 * - `version_from`        — `string`     — `_wc_email_template_version` meta on the post (may be empty).
 	 * - `version_to`          — `string`     — registry-side current version.
+	 * - `source_hash_to`      — `string`     — sha1 of the canonical core content for this email type. Mirrors the post's `_wc_email_template_source_hash` meta. Empty string in fallback / no-config paths where the core content can't be computed.
 	 * - `added_blocks`        — `array<int, array{name:string, label:string, path:array<int|string>}>` — blocks that would be added to the post by applying (in core, not in post). `name` is the post-alias-normalized block name (e.g. `core/heading`); `label` is its humanized form for display; `path` is the core-side index path.
 	 * - `removed_blocks`      — `array<int, array{name:string, label:string, path:array<int|string>}>` — blocks that would be removed from the post by applying (in post, not in core). Same field semantics as `added_blocks`; `path` is the post-side index path.
 	 * - `copy_changes`        — `array<int, array{block:string, before:string, after:string, occurrence:int, total:int, path:array<int|string>}>`.
@@ -180,9 +181,10 @@ class WCEmailTemplateChangeSummary {
 		// by emptiness alone — they construct any "you're up to date" copy
 		// themselves.
 		if ( $post_hash === $core_hash ) {
-			$payload                 = self::empty_payload();
-			$payload['version_from'] = $version_from;
-			$payload['version_to']   = $version_to;
+			$payload                   = self::empty_payload();
+			$payload['version_from']   = $version_from;
+			$payload['version_to']     = $version_to;
+			$payload['source_hash_to'] = $core_hash;
 			self::write_cache( $cache_key, $payload );
 			return $payload;
 		}
@@ -220,6 +222,7 @@ class WCEmailTemplateChangeSummary {
 		$payload = array(
 			'version_from'       => $version_from,
 			'version_to'         => $version_to,
+			'source_hash_to'     => $core_hash,
 			'added_blocks'       => $structured['added_blocks'],
 			'removed_blocks'     => $structured['removed_blocks'],
 			'copy_changes'       => $structured['copy_changes'],
@@ -274,6 +277,7 @@ class WCEmailTemplateChangeSummary {
 		return array(
 			'version_from'       => '',
 			'version_to'         => '',
+			'source_hash_to'     => '',
 			'added_blocks'       => array(),
 			'removed_blocks'     => array(),
 			'copy_changes'       => array(),
