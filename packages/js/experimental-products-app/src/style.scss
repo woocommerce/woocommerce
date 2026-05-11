@@ -41,6 +41,16 @@
 }
 
 /*
+ * Override the DataViews default of 0 right padding on the checkbox cell so
+ * there is a consistent 8px gap between the checkbox and the next column.
+ */
+.woocommerce-product-list
+	.dataviews-view-table
+	.dataviews-view-table__checkbox-column {
+	padding-right: 8px;
+}
+
+/*
  * Nested rows (product variations) sit one column to the left of where their
  * parent's primary content starts. Add 16px of left padding to the checkbox
  * cell so the nested checkbox lines up with the parent's first content (image).
