@@ -18,10 +18,13 @@
 	box-sizing: border-box;
 	transform-origin: 0 0;
 	touch-action: manipulation;
-	cursor: grab;
 
-	&:active {
-		cursor: grabbing;
+	&:has( .woocommerce-fields-controls__image-drag-handle-container ) {
+		cursor: grab;
+
+		&:active {
+			cursor: grabbing;
+		}
 	}
 }
 
