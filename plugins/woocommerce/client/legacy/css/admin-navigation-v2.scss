@@ -1,16 +1,14 @@
 // Nested admin navigation v2.
 //
-// On Woo pages our JS empties #adminmenu and repopulates it with the Woo
-// tree (using WP-native markup: menu-top / wp-menu-image / wp-menu-name /
-// wp-submenu). No custom rail styles are needed — admin-menu.css applies
-// natively.
+// The rail itself (Woo and non-Woo pages) is rendered natively by WordPress
+// via PHP-side menu splicing, so admin-menu.css handles fonts, icons, hover,
+// current-page highlighting, color schemes, RTL, and folded mode for free.
 //
 // This file only contains the extras WP's CSS doesn't cover:
-// 1. The second-level cascade on the non-Woo page flyout (hover Settings →
+// 1. The second-level cascade on the rail-root flyout (hover Settings →
 //    Payments / WooPayments / Status).
-// 2. The `← WordPress` back link's dashicon alignment tweak on Woo pages.
-// 3. Breadcrumb-only (non-clickable) ancestor styling.
-// 4. Touch-device hover suppression per spec §6.3.
+// 2. Breadcrumb-only (non-clickable) ancestor styling.
+// 3. Touch-device hover suppression per spec §6.3.
 
 // Second-level cascade on the native rail flyout. Injected by JS into
 // `#toplevel_page_woocommerce .wp-submenu li` for tree items that have
@@ -88,19 +86,6 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 #adminmenu li.wc-nav-v2-breadcrumb > a {
 	pointer-events: none;
 	opacity: 0.6;
-}
-
-// Prevent the flash-of-native-rail on Woo pages. The body gets
-// `wc-nav-v2-active` server-side; the rail is hidden until our JS replaces
-// #adminmenu's contents and adds `wc-nav-v2-rail-ready` to the body.
-// The .no-js override keeps the rail visible when JS is disabled — it'll
-// show the native WP rail rather than a permanently-hidden one.
-body.wc-nav-v2-active #adminmenu {
-	visibility: hidden;
-}
-body.wc-nav-v2-active.wc-nav-v2-rail-ready #adminmenu,
-html.no-js body.wc-nav-v2-active #adminmenu {
-	visibility: visible;
 }
 
 // Spec §6.3: touch devices do not get the hover cascade. Tapping a cascade

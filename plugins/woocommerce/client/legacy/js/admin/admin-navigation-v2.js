@@ -2,30 +2,16 @@
 /**
  * Nested admin navigation v2.
  *
- * Two surfaces, one shared DOM:
- *
- * - On non-Woo pages: WP's native rail shows a single `WooCommerce` item.
- *   Hovering it opens the native flyout — we inject a second-level cascade
- *   into first-level flyout items that have grandchildren in the tree
- *   (Settings → Payments / WooPayments / Status, etc.).
- *
- * - On Woo pages: we REPLACE the contents of #adminmenu with our tree's
- *   top-level items (plus a `← WordPress` back link at the top). Because
- *   we re-use WP's native markup (menu-top / wp-menu-image / wp-menu-name /
- *   wp-submenu), the native admin-menu.css styles apply automatically —
- *   fonts, icons, hover, current-page highlighting, color schemes, RTL,
- *   folded mode all come for free.
- *
- * - Tracks: emit the design-spec events on hover / click / back.
+ * The rail itself (Woo and non-Woo pages) is rendered natively by WordPress
+ * via PHP-side menu splicing. This script's only job is to inject a
+ * second-level cascade into native flyout items that have grandchildren in
+ * the tree (Settings → Payments / WooPayments / Status, etc.), and to emit
+ * the design-spec Tracks events on click.
  */
 ( function ( $ ) {
 	'use strict';
 
 	var tracks = ( window.wcTracks && window.wcTracks.recordEvent ) || function () {};
-
-	function cssSlug( slug ) {
-		return ( slug || 'generic' ).replace( /[^A-Za-z0-9_-]/g, '-' );
-	}
 
 	// Server-localized base. Falls back to `/wp-admin/` if the localize step
 	// somehow runs before the script (shouldn't happen in WP, but defensive).
@@ -44,82 +30,6 @@
 		return adminBase() + 'admin.php?page=' + target;
 	}
 
-	/**
-	 * Split a tree slug into ( pagenow, params ). Mirrors Context::decompose_slug().
-	 */
-	function decomposeSlug( slug ) {
-		var path, query;
-		if ( slug.indexOf( '?' ) >= 0 ) {
-			var parts = slug.split( '?' );
-			path  = parts[ 0 ];
-			query = parts.slice( 1 ).join( '?' );
-		} else {
-			path  = 'admin.php';
-			query = 'page=' + slug;
-		}
-		var params = {};
-		query.split( '&' ).forEach( function ( pair ) {
-			if ( ! pair ) { return; }
-			var kv = pair.split( '=' );
-			params[ decodeURIComponent( kv[ 0 ] ) ] = kv.length > 1 ? decodeURIComponent( kv.slice( 1 ).join( '=' ) ) : '';
-		} );
-		return { path: path, params: params };
-	}
-
-	/**
-	 * Find the tree slug whose (pagenow, params) expectations are all
-	 * satisfied by the current request. Most-specific match wins.
-	 */
-	function currentSlug( tree ) {
-		var pagenow = window.location.pathname.replace( /^.*\//, '' ) || 'admin.php';
-		var current = {};
-		new URLSearchParams( window.location.search ).forEach( function ( v, k ) {
-			current[ k ] = v;
-		} );
-
-		var best       = null;
-		var bestSpecs  = -1;
-		Object.keys( tree ).forEach( function ( slug ) {
-			if ( ! tree[ slug ].parent ) {
-				return;
-			}
-			// Decompose against the URL override when one is declared (e.g.
-			// `action-scheduler` slug → `tools.php?page=action-scheduler` URL),
-			// so the path match works for pages that don't live at admin.php.
-			var target = tree[ slug ].url || slug;
-			var d = decomposeSlug( target );
-			if ( d.path !== pagenow ) {
-				return;
-			}
-			var keys    = Object.keys( d.params );
-			var matched = keys.every( function ( k ) {
-				return current[ k ] !== undefined && String( current[ k ] ) === String( d.params[ k ] );
-			} );
-			if ( ! matched ) {
-				return;
-			}
-			if ( keys.length > bestSpecs ) {
-				best      = slug;
-				bestSpecs = keys.length;
-			}
-		} );
-		return best;
-	}
-
-	/**
-	 * Walk the parent chain starting from `slug` and return a Set of all
-	 * ancestor slugs (inclusive of `slug` itself).
-	 */
-	function ancestorSet( tree, slug ) {
-		var set = new Set();
-		var walk = slug;
-		while ( walk && tree[ walk ] ) {
-			set.add( walk );
-			walk = tree[ walk ].parent;
-		}
-		return set;
-	}
-
 	function buildByParent( tree ) {
 		var byParent = {};
 		Object.keys( tree ).forEach( function ( slug ) {
@@ -136,216 +46,6 @@
 			} );
 		} );
 		return byParent;
-	}
-
-	/**
-	 * Build the `.wp-menu-image` div for a rail item. Mirrors the four icon
-	 * shapes WP's wp-admin/menu-header.php renders: dashicons class, base64
-	 * SVG data URI, arbitrary URL (rendered as <img>), or none. Plugin
-	 * top-levels rehomed under WooCommerce come through any of these shapes,
-	 * so we can't assume dashicons.
-	 *
-	 * @param icon Icon value from the tree node.
-	 */
-	function buildMenuImage( icon ) {
-		var $div = $( '<div></div>' )
-			.addClass( 'wp-menu-image' )
-			.attr( 'aria-hidden', 'true' );
-
-		if ( ! icon || 'none' === icon || 'div' === icon ) {
-			$div.addClass( 'dashicons-before' ).append( '<br>' );
-			return $div;
-		}
-		if ( 0 === icon.indexOf( 'data:image/svg+xml;base64,' ) ) {
-			$div.addClass( 'svg' )
-				.css( 'background-image', "url('" + icon + "')" )
-				.append( '<br>' );
-			return $div;
-		}
-		if ( 0 === icon.indexOf( 'dashicons-' ) ) {
-			$div.addClass( 'dashicons-before ' + icon ).append( '<br>' );
-			return $div;
-		}
-		// URL — render as <img>, preserving dashicons-before for layout
-		// (WP itself does this).
-		$div.addClass( 'dashicons-before' ).append(
-			$( '<img>' ).attr( 'src', icon ).attr( 'alt', '' )
-		);
-		return $div;
-	}
-
-	/**
-	 * Build a WP-native rail <li> for one tree node. Returns a jQuery element.
-	 *
-	 * @param node      Tree node (with .slug added).
-	 * @param byParent  Parent-indexed children map.
-	 * @param current   Current-page slug or null.
-	 * @param ancestors Set of slugs on the current-page chain.
-	 */
-	function buildRailItem( node, byParent, current, ancestors ) {
-		var kids         = byParent[ node.slug ] || [];
-		var icon         = node.icon || 'dashicons-admin-generic';
-		var isCurrent    = node.slug === current;
-		var hasCurrent   = ! isCurrent && ancestors.has( node.slug );
-		var hasKids      = kids.length > 0;
-
-		var liClasses = [ 'menu-top', 'menu-icon-' + cssSlug( node.slug ), 'wc-nav-v2-item' ];
-		var aClasses  = [ 'menu-top' ];
-
-		if ( isCurrent || hasCurrent ) {
-			liClasses.push( 'wp-has-current-submenu', 'wp-menu-open' );
-			aClasses.push( 'wp-has-current-submenu' );
-			if ( isCurrent ) {
-				liClasses.push( 'current' );
-				aClasses.push( 'current' );
-			}
-		} else if ( hasKids ) {
-			liClasses.push( 'wp-has-submenu', 'wp-not-current-submenu' );
-			aClasses.push( 'wp-has-submenu', 'wp-not-current-submenu' );
-		}
-
-		// wc-admin's React router calls wpNavMenuClassChange( page, url ) when
-		// routing between pages and queries `#<wpOpenMenu>` to highlight the
-		// active top-level. Each wc-admin page declares a `wpOpenMenu` like
-		// `toplevel_page_woocommerce-marketing`. Give our rail items the same
-		// WP-native `toplevel_page_<slug>` id so those lookups succeed and
-		// wc-admin's highlighting works across navigation.
-		var liId = 'toplevel_page_' + cssSlug( node.slug );
-
-		var $li = $( '<li></li>' )
-			.attr( 'id', liId )
-			.addClass( liClasses.join( ' ' ) );
-		var $a  = $( '<a></a>' )
-			.attr( 'href', toAdminUrl( node.url || node.slug ) )
-			.addClass( aClasses.join( ' ' ) );
-		$a.append( buildMenuImage( icon ) );
-		$a.append( $( '<div></div>' ).addClass( 'wp-menu-name' ).text( node.title ) );
-		$li.append( $a );
-
-		if ( hasKids ) {
-			var $ul = $( '<ul></ul>' ).addClass( 'wp-submenu wp-submenu-wrap' );
-			$ul.append(
-				$( '<li></li>' )
-					.addClass( 'wp-submenu-head' )
-					.attr( 'aria-hidden', 'true' )
-					.text( node.title )
-			);
-			kids.forEach( function ( kid, idx ) {
-				if ( kid.hidden ) {
-					return;
-				}
-				var kidIsCurrent = kid.slug === current;
-				var $kLi         = $( '<li></li>' );
-				var $kA          = $( '<a></a>' )
-					.attr( 'href', toAdminUrl( kid.url || kid.slug ) )
-					.text( kid.title );
-				if ( 0 === idx ) {
-					$kLi.addClass( 'wp-first-item' );
-					$kA.addClass( 'wp-first-item' );
-				}
-				if ( kidIsCurrent ) {
-					$kLi.addClass( 'current' );
-					$kA.addClass( 'current' );
-				}
-				$kLi.append( $kA );
-				$ul.append( $kLi );
-			} );
-			$li.append( $ul );
-		}
-
-		return $li;
-	}
-
-	/**
-	 * Build the back-to-WordPress rail item (first item in the Woo rail).
-	 */
-	function buildBackItem() {
-		var dashboardUrl = ( window.wcNavV2Config && window.wcNavV2Config.wpDashboardUrl ) || ( adminBase() + 'index.php' );
-		var label        = ( window.wcNavV2Config && window.wcNavV2Config.backLabel ) || 'Back';
-		var $li          = $( '<li></li>' ).addClass(
-			'menu-top menu-icon-generic menu-top-first wc-nav-v2-item wc-nav-v2-back-item'
-		);
-		var $a = $( '<a></a>' )
-			.attr( 'href', dashboardUrl )
-			.attr( 'id', 'wc-nav-v2-back' )
-			.addClass( 'menu-top' );
-		$a.append(
-			$( '<div></div>' )
-				.addClass( 'wp-menu-image dashicons-before dashicons-arrow-left-alt' )
-				.attr( 'aria-hidden', 'true' )
-				.append( '<br>' )
-		);
-		$a.append(
-			$( '<div></div>' ).addClass( 'wp-menu-name' ).text( label )
-		);
-		$li.append( $a );
-		return $li;
-	}
-
-	/**
-	 * Replace #adminmenu's contents with our tree on Woo pages.
-	 */
-	function injectWooRail() {
-		var $adminmenu = $( '#adminmenu' );
-		if ( ! $adminmenu.length ) {
-			return;
-		}
-		var tree = window.wcNavV2Config.tree;
-		if ( ! tree ) {
-			return;
-		}
-
-		var byParent  = buildByParent( tree );
-		var current   = currentSlug( tree );
-		var ancestors = ancestorSet( tree, current );
-		var roots     = byParent.woocommerce || [];
-
-		// Preserve the collapse-menu button at the end if present.
-		var $collapse = $adminmenu.find( '#collapse-menu' ).detach();
-
-		$adminmenu.empty();
-		$adminmenu.append( buildBackItem() );
-		// Visual break between the back link and the Woo rail. Uses WP's
-		// native `wp-menu-separator` class so the active color scheme styles
-		// it the same as the dividers WP draws between its own menu groups.
-		$adminmenu.append(
-			$( '<li></li>' )
-				.addClass( 'wp-menu-separator wc-nav-v2-separator' )
-				.attr( 'aria-hidden', 'true' )
-				.append( '<div></div>' )
-		);
-		roots.forEach( function ( node ) {
-			$adminmenu.append( buildRailItem( node, byParent, current, ancestors ) );
-		} );
-
-		// Mark first/last rail items so WP styling (.menu-top-first/.menu-top-last) applies.
-		$adminmenu.find( '> li.wc-nav-v2-item' ).first().addClass( 'menu-top-first' );
-		$adminmenu.find( '> li.wc-nav-v2-item' ).last().addClass( 'menu-top-last' );
-
-		if ( $collapse.length ) {
-			$adminmenu.append( $collapse );
-		}
-
-		// WP's common.js hoverIntent was bound to the native rail before we
-		// replaced it, so our injected items have no hover handler. Rebind
-		// WP's expected behaviour: add/remove `opensub` on hover (with a
-		// close delay so a small off-menu overshoot doesn't snap the flyout
-		// shut) and when focus enters/leaves the flyout.
-		// Scope the target selector to direct children of #adminmenu by
-		// using the `#adminmenu > li…` form (Element.closest can't evaluate
-		// a bare `>`-prefixed selector).
-		bindDelayedHover(
-			$adminmenu,
-			'#adminmenu > li.wp-has-submenu, #adminmenu > li.wp-has-current-submenu',
-			'opensub'
-		);
-		$adminmenu
-			.on( 'focus.wcnavv2', '.wp-submenu a', function () {
-				$( this ).closest( 'li.menu-top' ).addClass( 'opensub' );
-			} )
-			.on( 'blur.wcnavv2', '.wp-submenu a', function () {
-				$( this ).closest( 'li.menu-top' ).removeClass( 'opensub' );
-			} );
 	}
 
 	/**
@@ -543,30 +243,16 @@
 		}
 
 		var isWooPage = window.wcNavV2Config.isWooPage === '1';
-		// Wrap in try/catch so any bug in our rail injection can't take down
-		// wc-admin's React app (which also runs at DOM-ready). Errors log to
-		// the console but never bubble.
 		try {
-			if ( isWooPage ) {
-				injectWooRail();
-			} else {
-				injectNativeCascade();
-			}
+			injectNativeCascade();
 		} catch ( err ) {
 			// eslint-disable-next-line no-console
-			console.error( 'navigation_v2: rail injection failed', err );
+			console.error( 'navigation_v2: cascade injection failed', err );
 		}
 
-		// Reveal the rail now that injection has completed (or failed). The
-		// SCSS hides #adminmenu on body.wc-nav-v2-active to prevent a flash
-		// of the native rail before we replace its contents; adding
-		// wc-nav-v2-rail-ready flips visibility back on. Unconditional so a
-		// partial failure doesn't leave users staring at an empty rail.
-		$( 'body' ).addClass( 'wc-nav-v2-rail-ready' );
-
-		// Tracks — clicks. Scope to the Woo cascade only on non-Woo pages
-		// (the WP rail is otherwise unmodified there) and to the whole rail
-		// on Woo pages (where every rail item is part of our injected tree).
+		// Tracks — clicks. The rail is now native WP markup either way; scope
+		// to the woocommerce-named entries on non-Woo pages and to all rail
+		// items on Woo pages.
 		var clickScope = isWooPage ? '#adminmenu a' : '#toplevel_page_woocommerce a';
 		$( document ).on( 'click.wcnavv2', clickScope, function () {
 			var $a      = $( this );
@@ -576,9 +262,12 @@
 			tracks( 'navigation_v2_item_clicked', { href: href, depth: depth, surface: surface } );
 		} );
 
-		// Tracks — back link.
-		$( document ).on( 'click.wcnavv2', '#wc-nav-v2-back', function () {
-			tracks( 'navigation_v2_back_clicked' );
-		} );
+		// Tracks — back link. Only on Woo pages, where the splicer has relabeled
+		// the native Dashboard entry to serve as the rail's back link.
+		if ( isWooPage ) {
+			$( document ).on( 'click.wcnavv2', '#adminmenu > li > a[href$="index.php"]', function () {
+				tracks( 'navigation_v2_back_clicked' );
+			} );
+		}
 	} );
 } )( jQuery );
