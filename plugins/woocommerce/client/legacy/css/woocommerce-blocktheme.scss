@@ -223,7 +223,7 @@ a.added_to_cart {
 */
 .woocommerce-page {
 	// Ensure text input fields aren't too small.
-	select,
+	select:where(:not(.wc-block-product-filter-dropdown__select)),
 	.input-text,
 	.select2-container {
 		font-size: var(--wp--preset--font-size--small);

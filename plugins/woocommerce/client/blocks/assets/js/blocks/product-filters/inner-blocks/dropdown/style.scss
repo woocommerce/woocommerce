@@ -1,0 +1,18 @@
+:where(.wc-block-product-filter-dropdown__fieldset) {
+	border: 0;
+	margin: 0;
+	padding: 0;
+	min-width: 0;
+}
+
+:where(.wc-block-product-filter-dropdown__select) {
+	background: transparent;
+	border: 1px solid color-mix(in srgb,currentColor 40%,transparent);
+	border-radius: 2px;
+	box-sizing: border-box;
+	color: inherit;
+	font-family: inherit;
+	font-size: .8em;
+	max-width: 100%;
+	padding: .25em .75em;
+}
