@@ -56,7 +56,15 @@ trait ShopperListsNonceCheck {
 	 * @return true|\WP_Error True on success, WP_Error on missing/invalid nonce.
 	 */
 	private function check_store_api_nonce( \WP_REST_Request $request ) {
-		// This filter is documented in src/StoreApi/Routes/V1/AbstractCartRoute.php.
+		/**
+		 * Filters whether to disable the Store API nonce check.
+		 *
+		 * This filter is documented in src/StoreApi/Routes/V1/AbstractCartRoute.php.
+		 *
+		 * @since 4.5.0
+		 *
+		 * @param bool $disable_nonce_check If true, nonce checks will be disabled.
+		 */
 		if ( apply_filters( 'woocommerce_store_api_disable_nonce_check', false ) ) {
 			return true;
 		}
