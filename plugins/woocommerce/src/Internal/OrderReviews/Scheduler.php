@@ -85,7 +85,17 @@ class Scheduler {
 	public function handle_status_changed( int $order_id, string $old_status, string $new_status ): void {
 		$order = wc_get_order( $order_id );
 
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment -- documented on WC_Email_Customer_Review_Request::is_order_eligible_for_send().
+		/**
+		 * Filter the order statuses that are eligible to receive the review-request email.
+		 *
+		 * Same hook the email's `trigger()` consults at send time; documented on
+		 * `WC_Email_Customer_Review_Request::is_order_eligible_for_send()`.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param string[]      $eligible_statuses Default: `[ 'completed' ]`.
+		 * @param WC_Order|null $order             Order being inspected, or null if it could not be loaded.
+		 */
 		$eligible_statuses = (array) apply_filters(
 			'woocommerce_review_order_eligible_statuses',
 			array( OrderStatus::COMPLETED ),
