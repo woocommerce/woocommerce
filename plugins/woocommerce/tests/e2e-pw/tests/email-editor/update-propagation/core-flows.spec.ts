@@ -10,7 +10,12 @@ import { ADMIN_STATE_PATH } from '../../../playwright.config';
 import { enableEmailEditor } from '../helpers/enable-email-editor-feature';
 import { accessTheEmailEditor } from '../../../utils/email';
 import { clearTemplateHtmlOverride } from './helpers/test-helper-plugin';
-import { seedWooEmailPost, getWooEmailMeta } from './helpers/seed-woo-email';
+import {
+	seedWooEmailPost,
+	getWooEmailMeta,
+	getWooEmailPostContent,
+	applyWooEmailTemplate,
+} from './helpers/seed-woo-email';
 import {
 	simulateCoreBump,
 	triggerDetectionSweep,
@@ -131,9 +136,7 @@ test.describe( 'Update propagation — core flows', () => {
 		await spy.expectNotFired( TRACKS_EVENTS.DISMISSED );
 	} );
 
-	test( '@pr Selective apply succeeds and preserves customizations', async ( {
-		request,
-	} ) => {
+	test( '@pr Selective apply succeeds and preserves customizations', async () => {
 		const oldHtml =
 			'<!-- wp:paragraph --><p>OLD CORE</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>SECOND BLOCK</p><!-- /wp:paragraph -->';
 		const customized = oldHtml.replace(
@@ -151,20 +154,21 @@ test.describe( 'Update propagation — core flows', () => {
 		await clearTemplateHtmlOverride();
 		await triggerDetectionSweep();
 
-		const apply = await request.post(
-			`/wp-json/woocommerce-email-editor/v1/emails/${ postId }/apply`,
-			{ data: { choices: [] } }
-		);
-		expect( apply.ok() ).toBeTruthy();
+		// Use applyWooEmailTemplate (basic auth) instead of request.post (cookie auth)
+		// because WP REST POST endpoints require a nonce when using cookie-based auth.
+		// choices: [] keeps all merchant edits and applies only core additions.
+		const apply = await applyWooEmailTemplate( postId, [] );
+		expect( apply.status ).toBe( 'applied' );
 
 		const meta = await getWooEmailMeta( postId );
-		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
-
-		const postRes = await request.get(
-			`/wp-json/wp/v2/woo_email/${ postId }?context=edit`
+		// With choices:[] the merchant's edits are preserved (keep_yours is the
+		// default for copy_changes). The merged result diverges from canonical, so
+		// the applier stamps core_updated_customized — not in_sync.
+		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe(
+			STATUS.CORE_UPDATED_CUSTOMIZED
 		);
-		const post = await postRes.json();
-		const content = post?.content?.raw ?? '';
+
+		const content = await getWooEmailPostContent( postId );
 		expect( content ).toContain( 'MERCHANT EDITED SECOND' );
 	} );
 

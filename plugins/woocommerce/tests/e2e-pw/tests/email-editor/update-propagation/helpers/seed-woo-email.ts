@@ -134,3 +134,40 @@ export async function getWooEmailPostContent(
 	);
 	return String( res?.data?.post_content ?? '' );
 }
+
+export type ApplyChoice = {
+	path: ( number | string )[];
+	decision: 'keep_yours' | 'use_core';
+};
+
+export type ApplyResult = {
+	merged_content: string;
+	revision_id: string;
+	version_to: string;
+	status: string;
+	structural_skipped: boolean;
+	aliases_migrated: string[];
+};
+
+/**
+ * Call the /apply endpoint for a woo_email post using basic-auth credentials,
+ * bypassing the cookie+nonce requirement of the WP REST API for authenticated
+ * cookie sessions. `choices` defaults to [] (keep all merchant edits, apply
+ * only core additions).
+ */
+export async function applyWooEmailTemplate(
+	postId: number,
+	choices: ApplyChoice[] = []
+): Promise< ApplyResult > {
+	const client = apiClient();
+	const res = await client.post(
+		`woocommerce-email-editor/v1/emails/${ postId }/apply`,
+		{ choices } as Record< string, unknown >
+	);
+	if ( ! res?.data?.status ) {
+		throw new Error(
+			`applyWooEmailTemplate: unexpected response for post ${ postId }: ${ JSON.stringify( res?.data ) }`
+		);
+	}
+	return res.data as ApplyResult;
+}
