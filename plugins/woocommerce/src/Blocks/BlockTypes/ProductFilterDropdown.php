@@ -36,9 +36,9 @@ final class ProductFilterDropdown extends AbstractBlock {
 	/**
 	 * Render the block.
 	 *
-	 * @param array    $attributes Block attributes.
-	 * @param string   $content    Block content.
-	 * @param WP_Block $block      Block instance.
+	 * @param array     $attributes Block attributes.
+	 * @param string    $content    Block content.
+	 * @param \WP_Block $block      Block instance.
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
@@ -57,15 +57,6 @@ final class ProductFilterDropdown extends AbstractBlock {
 		$first       = reset( $items );
 		$filter_type = ( is_array( $first ) && ! empty( $first['type'] ) ) ? (string) $first['type'] : '';
 
-		$classes = '';
-		$style   = '';
-
-		$tags = new \WP_HTML_Tag_Processor( $content );
-		if ( $tags->next_tag( array( 'class_name' => 'wc-block-product-filter-dropdown' ) ) ) {
-			$classes = $tags->get_attribute( 'class' );
-			$style   = $tags->get_attribute( 'style' );
-		}
-
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filter-dropdown',
 			'data-wp-context'     => (string) wp_json_encode(
@@ -75,12 +66,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
-			'class'               => esc_attr( $classes ),
 		);
-
-		if ( ! empty( $style ) ) {
-			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
-		}
 
 		$select_id   = wp_unique_id( 'wc-block-product-filter-dropdown-' );
 		$show_counts = is_array( $first ) && array_key_exists( 'count', $first );
@@ -129,6 +115,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 			</fieldset>
 		</div>
 		<?php
-		return ob_get_clean();
+		$output = ob_get_clean();
+		return is_string( $output ) ? $output : '';
 	}
 }
