@@ -114,7 +114,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 												? {
 														backgroundColor:
 															item.color,
-													}
+												  }
 												: undefined
 										}
 										aria-hidden="true"
