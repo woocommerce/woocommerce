@@ -42,7 +42,7 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 		return array(
 			'label'               => __( 'Update product', 'woocommerce' ),
 			'description'         => __(
-				'Update an existing WooCommerce product using WooCommerce product APIs.',
+				'Update an existing product using supported catalog fields.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',

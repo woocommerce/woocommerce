@@ -41,7 +41,7 @@ class OrderAddNote extends AbstractDomainAbility implements AbilityDefinition {
 		return array(
 			'label'               => __( 'Add order note', 'woocommerce' ),
 			'description'         => __(
-				'Add a note to a WooCommerce order using WooCommerce order APIs.',
+				'Add a note to an order.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',

@@ -126,7 +126,7 @@ trait ProductAbilityTrait {
 		return array(
 			'type'        => 'string',
 			'description' => __(
-				'Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the WooCommerce external product type; grouped maps to grouped.',
+				'Supported agent-facing product type alias. physical maps to a simple shippable, non-downloadable product; virtual maps to a simple non-shipping, non-downloadable product; digital maps to a simple virtual/downloadable product; affiliate maps to the external product type; grouped maps to grouped.',
 				'woocommerce'
 			),
 			'enum'        => null === $product_type_alias ? self::get_supported_product_type_aliases() : array( $product_type_alias ),
@@ -175,12 +175,12 @@ trait ProductAbilityTrait {
 			),
 			'external_url'      => array(
 				'type'        => 'string',
-				'description' => __( 'External product URL for affiliate products, which use WooCommerce external products.', 'woocommerce' ),
+				'description' => __( 'External destination URL for affiliate products.', 'woocommerce' ),
 				'format'      => 'uri',
 			),
 			'button_text'       => array(
 				'type'        => 'string',
-				'description' => __( 'Button text for affiliate products, which use WooCommerce external products.', 'woocommerce' ),
+				'description' => __( 'Button text for affiliate products.', 'woocommerce' ),
 			),
 			'grouped_products'  => array(
 				'type'        => 'array',
@@ -834,7 +834,7 @@ trait ProductAbilityTrait {
 				),
 				'type'              => array(
 					'type'        => 'string',
-					'description' => __( 'Internal WooCommerce product type slug, such as simple, external, grouped, or variable.', 'woocommerce' ),
+					'description' => __( 'Internal product type slug, such as simple, external, grouped, or variable.', 'woocommerce' ),
 					'enum'        => array_keys( wc_get_product_types() ),
 				),
 				'status'            => array(
@@ -872,12 +872,12 @@ trait ProductAbilityTrait {
 				'downloadable'      => array( 'type' => 'boolean' ),
 				'external_url'      => array(
 					'type'        => array( 'string', 'null' ),
-					'description' => __( 'External product URL for WooCommerce external products.', 'woocommerce' ),
+					'description' => __( 'External product URL for external products.', 'woocommerce' ),
 					'format'      => 'uri',
 				),
 				'button_text'       => array(
 					'type'        => array( 'string', 'null' ),
-					'description' => __( 'Button text for WooCommerce external products.', 'woocommerce' ),
+					'description' => __( 'Button text for external products.', 'woocommerce' ),
 				),
 				'grouped_products'  => array(
 					'type'        => 'array',

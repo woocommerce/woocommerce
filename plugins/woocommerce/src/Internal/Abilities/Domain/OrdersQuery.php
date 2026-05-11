@@ -42,7 +42,7 @@ class OrdersQuery extends AbstractDomainAbility implements AbilityDefinition {
 		return array(
 			'label'               => __( 'Query orders', 'woocommerce' ),
 			'description'         => __(
-				'Find WooCommerce orders by ID or common order filters using WooCommerce order APIs.',
+				'Find orders by ID or common order filters.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',

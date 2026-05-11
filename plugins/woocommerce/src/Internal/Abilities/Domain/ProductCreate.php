@@ -41,7 +41,7 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 		return array(
 			'label'               => __( 'Create product', 'woocommerce' ),
 			'description'         => __(
-				'Create a WooCommerce product using WooCommerce product APIs.',
+				'Create a product using supported catalog fields.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',

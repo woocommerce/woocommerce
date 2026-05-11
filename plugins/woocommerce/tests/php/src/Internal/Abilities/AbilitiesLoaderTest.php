@@ -2207,7 +2207,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				'woocommerce',
 				array(
 					'label'       => 'WooCommerce',
-					'description' => 'Canonical WooCommerce store management abilities.',
+					'description' => 'Canonical store management abilities.',
 				)
 			);
 		};

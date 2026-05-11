@@ -33,7 +33,7 @@ class TestExtensionAbilityDefinition implements AbilityDefinition {
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => 'Test extension ability',
-			'description'         => 'Test extension ability registered through the WooCommerce ability loader.',
+			'description'         => 'Test extension ability registered through the ability loader.',
 			'category'            => 'woocommerce',
 			'execute_callback'    => static function (): array {
 				return array(

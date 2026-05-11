@@ -42,7 +42,7 @@ class OrderUpdateStatus extends AbstractDomainAbility implements AbilityDefiniti
 		return array(
 			'label'               => __( 'Update order status', 'woocommerce' ),
 			'description'         => __(
-				'Update a WooCommerce order status using WooCommerce order APIs.',
+				'Update an order status.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',

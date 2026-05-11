@@ -42,7 +42,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		return array(
 			'label'               => __( 'Query products', 'woocommerce' ),
 			'description'         => __(
-				'Find WooCommerce products by ID or common catalog filters using WooCommerce product APIs.',
+				'Find products by ID or common catalog filters.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',
@@ -183,7 +183,7 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 				'product_type_alias' => array(
 					'type'        => 'string',
 					'description' => __(
-						'Filter by supported agent-facing product type alias. physical maps to simple shippable, non-downloadable products; virtual maps to simple non-shipping, non-downloadable products; digital maps to simple virtual/downloadable products; affiliate maps to the WooCommerce external product type; grouped maps to grouped.',
+						'Filter by supported agent-facing product type alias. physical maps to simple shippable, non-downloadable products; virtual maps to simple non-shipping, non-downloadable products; digital maps to simple virtual/downloadable products; affiliate maps to the external product type; grouped maps to grouped.',
 						'woocommerce'
 					),
 					'enum'        => self::get_supported_product_type_aliases(),

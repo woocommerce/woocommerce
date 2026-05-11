@@ -42,7 +42,7 @@ class ProductDelete extends AbstractDomainAbility implements AbilityDefinition {
 		return array(
 			'label'               => __( 'Delete product', 'woocommerce' ),
 			'description'         => __(
-				'Delete a WooCommerce product using WooCommerce product APIs.',
+				'Delete, trash, or restore a product.',
 				'woocommerce'
 			),
 			'category'            => 'woocommerce',

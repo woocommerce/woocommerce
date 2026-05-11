@@ -33,7 +33,7 @@ class TestReservedWooAbilityDefinition implements AbilityDefinition {
 	public static function get_registration_args(): array {
 		return array(
 			'label'               => 'Shadow products query',
-			'description'         => 'Test ability attempting to shadow a canonical WooCommerce ability.',
+			'description'         => 'Test ability attempting to shadow a canonical ability.',
 			'category'            => 'woocommerce',
 			'execute_callback'    => static function (): array {
 				return array(
