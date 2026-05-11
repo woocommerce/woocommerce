@@ -2,10 +2,11 @@
  * External dependencies
  */
 import { Button, Notice } from '@wordpress/components';
+import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
-import interpolateComponents from '@automattic/interpolate-components';
 import { Link } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -45,7 +46,7 @@ export const QRLoginUnavailableCard = ( {
 	// scenario; the AP-unsupported and HTTPS branches are typically infra
 	// setup issues. All branches expose the same docs link + settings shortcut
 	// because the diagnostic flow is the same regardless.
-	let headline: React.ReactNode;
+	let headline: ReactNode;
 	if ( reason === QRLoginUnavailableReasons.HTTPS_REQUIRED ) {
 		headline = __(
 			'QR sign-in is unavailable because this site is not served over HTTPS. Application passwords require an HTTPS connection.',
@@ -55,12 +56,12 @@ export const QRLoginUnavailableCard = ( {
 		// AP unsupported or filtered off — the merchant-facing distinction is
 		// blurry, so we share one message and let the docs link carry the
 		// explanation.
-		headline = interpolateComponents( {
-			mixedString: __(
-				'QR sign-in is unavailable because application passwords are disabled on this site. Find more about application passwords {{link}}here{{/link}}.',
+		headline = createInterpolateElement(
+			__(
+				'QR sign-in is unavailable because application passwords are disabled on this site. Find more about application passwords <link>here</link>.',
 				'woocommerce'
 			),
-			components: {
+			{
 				link: (
 					<Link
 						href={ APPLICATION_PASSWORDS_DOCS_URL }
@@ -68,14 +69,14 @@ export const QRLoginUnavailableCard = ( {
 						type="external"
 					/>
 				),
-			},
-		} );
+			}
+		);
 	}
 
 	return (
-		<div className="qr-direct-login qr-direct-login--unavailable">
+		<div className="woocommerce-qr-direct-login woocommerce-qr-direct-login--unavailable">
 			<Notice
-				className="qr-direct-login__unavailable-notice"
+				className="woocommerce-qr-direct-login__unavailable-notice"
 				status="warning"
 				isDismissible={ false }
 			>
@@ -91,7 +92,7 @@ export const QRLoginUnavailableCard = ( {
 			   they have read the diagnostic context, and folding it under
 			   the disclosure keeps the default state quiet.
 			*/ }
-			<details className="qr-direct-login__why">
+			<details className="woocommerce-qr-direct-login__why">
 				<summary>
 					{ __( 'Why am I seeing this?', 'woocommerce' ) }
 				</summary>
@@ -118,7 +119,7 @@ export const QRLoginUnavailableCard = ( {
 
 				<Button
 					variant="secondary"
-					className="qr-direct-login__open-ap-settings"
+					className="woocommerce-qr-direct-login__open-ap-settings"
 					href={ APPLICATION_PASSWORDS_SETTINGS_PATH }
 					onClick={ () => {
 						recordEvent(

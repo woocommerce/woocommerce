@@ -126,7 +126,7 @@ export const QRDirectLoginCode = ( {
 	// (terminal) or fall through to the normal state machine below.
 	if ( availability.isLoading ) {
 		return (
-			<div className="qr-direct-login">
+			<div className="woocommerce-qr-direct-login">
 				<Spinner />
 				<p role="status" aria-live="polite">
 					{ __( 'Checking sign-in availability…', 'woocommerce' ) }
@@ -171,7 +171,7 @@ export const QRDirectLoginCode = ( {
 				{ isStructuralAPFailure ? (
 					<Button
 						variant="secondary"
-						className="qr-direct-login__open-ap-settings"
+						className="woocommerce-qr-direct-login__open-ap-settings"
 						href={ APPLICATION_PASSWORDS_SETTINGS_PATH }
 						onClick={ () => {
 							recordEvent(
