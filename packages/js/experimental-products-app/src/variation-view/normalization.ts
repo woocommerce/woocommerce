@@ -19,6 +19,7 @@ type VariationSource = Pick< ProductVariation, 'id' > & {
 	image?: ProductVariation[ 'image' ] | null;
 	images?: ProductEntityRecord[ 'images' ];
 	manage_stock?: ProductVariation[ 'manage_stock' ];
+	meta_data?: ProductVariation[ 'meta_data' ];
 	name?: string;
 	parent_id?: number;
 	slug?: string;

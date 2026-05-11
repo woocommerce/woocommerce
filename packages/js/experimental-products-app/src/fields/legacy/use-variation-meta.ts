@@ -2,9 +2,26 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
-import { useEffect, useRef, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 
 type MetaDataEntry = { id?: number; key: string; value: string };
+
+const metaCache: Record< string, MetaDataEntry[] > = {};
+
+function getCacheKey( parentId: number, variationId: number ) {
+	return `${ parentId }:${ variationId }`;
+}
+
+export function updateVariationMetaCache(
+	parentId: number,
+	variationId: number,
+	meta: Array< { id?: number; key: string; value?: string } >
+) {
+	metaCache[ getCacheKey( parentId, variationId ) ] = meta.map( ( m ) => ( {
+		...m,
+		value: m.value ?? '',
+	} ) );
+}
 
 /**
  * Fetch meta_data for a variation from the WC REST API.
@@ -17,22 +34,19 @@ export function useVariationMeta(
 	parentId: number | undefined,
 	variationId: number | undefined
 ): MetaDataEntry[] | undefined {
-	const [ metaData, setMetaData ] = useState< MetaDataEntry[] | undefined >(
-		undefined
-	);
-	const cacheRef = useRef<
-		Record< string, MetaDataEntry[] >
-	>( {} );
+	const [ fetchedData, setFetchedData ] = useState<
+		MetaDataEntry[] | undefined
+	>( undefined );
 
 	useEffect( () => {
 		if ( ! parentId || ! variationId ) {
-			setMetaData( undefined );
+			setFetchedData( undefined );
 			return;
 		}
 
-		const cacheKey = `${ parentId }:${ variationId }`;
-		if ( cacheRef.current[ cacheKey ] ) {
-			setMetaData( cacheRef.current[ cacheKey ] );
+		const cacheKey = getCacheKey( parentId, variationId );
+		if ( metaCache[ cacheKey ] ) {
+			setFetchedData( metaCache[ cacheKey ] );
 			return;
 		}
 
@@ -47,12 +61,12 @@ export function useVariationMeta(
 				}
 
 				const meta = response.meta_data ?? [];
-				cacheRef.current[ cacheKey ] = meta;
-				setMetaData( meta );
+				metaCache[ cacheKey ] = meta;
+				setFetchedData( meta );
 			} )
 			.catch( () => {
 				if ( ! cancelled ) {
-					setMetaData( [] );
+					setFetchedData( [] );
 				}
 			} );
 
@@ -61,5 +75,12 @@ export function useVariationMeta(
 		};
 	}, [ parentId, variationId ] );
 
-	return metaData;
+	if ( parentId && variationId ) {
+		const cached = metaCache[ getCacheKey( parentId, variationId ) ];
+		if ( cached ) {
+			return cached;
+		}
+	}
+
+	return fetchedData;
 }

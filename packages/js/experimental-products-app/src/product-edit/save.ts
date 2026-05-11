@@ -10,6 +10,7 @@ import type { ProductVariation } from '@woocommerce/data';
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../fields/types';
+import { updateVariationMetaCache } from '../fields/legacy/use-variation-meta';
 import { normalizeVariation } from '../variation-view/normalization';
 import {
 	getProductWithUpdatedVariation,
@@ -64,6 +65,14 @@ async function saveVariation(
 		method: 'PUT',
 		data: editedVariation,
 	} );
+
+	if ( savedVariation.meta_data ) {
+		updateVariationMetaCache(
+			product.parent_id,
+			product.id,
+			savedVariation.meta_data
+		);
+	}
 
 	if ( parentProduct ) {
 		const updatedParentProduct = getProductWithUpdatedVariation(
