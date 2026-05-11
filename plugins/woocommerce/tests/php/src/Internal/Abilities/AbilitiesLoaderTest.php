@@ -92,7 +92,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		parent::setUp();
 
-		foreach ( array( 'wp_abilities_api_init', 'wp_abilities_api_categories_init' ) as $action ) {
+		foreach ( array( 'init', 'wp_abilities_api_init', 'wp_abilities_api_categories_init' ) as $action ) {
 			$this->original_action_counts[ $action ] = $wp_actions[ $action ] ?? null;
 		}
 
@@ -102,6 +102,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				require_once $abilities_bootstrap;
 			}
 		}
+
+		// WordPress 6.9+ requires init to have fired before the Abilities API registry can be initialized.
+		$wp_actions['init'] = max( 1, (int) ( $wp_actions['init'] ?? 0 ) ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 
 		wp_set_current_user(
 			$this->factory->user->create( array( 'role' => 'administrator' ) )
@@ -302,22 +305,58 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should expose agent-friendly product type inputs for product operations.
+	 * @testdox Should expose agent-friendly product type alias inputs for product operations.
 	 */
 	public function test_product_schema_uses_agent_friendly_product_types(): void {
 		$query_schema  = wp_get_ability( 'woocommerce/products-query' )->get_input_schema();
 		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
 
-		$expected_types = array( 'physical', 'digital', 'affiliate', 'grouped' );
+		$expected_aliases = array( 'physical', 'virtual', 'digital', 'affiliate', 'grouped' );
 
-		$this->assertSame( $expected_types, $query_schema['properties']['type']['enum'] ?? array() );
-		$this->assertSame( $expected_types, $create_schema['properties']['product_type']['enum'] ?? array() );
-		$this->assertSame( $expected_types, $update_schema['properties']['product_type']['enum'] ?? array() );
-		$this->assertSame( 'physical', $create_schema['properties']['product_type']['default'] ?? null );
-		$this->assertArrayNotHasKey( 'default', $update_schema['properties']['product_type'] ?? array() );
-		$this->assertNotContains( 'variable', $query_schema['properties']['type']['enum'] ?? array() );
-		$this->assertNotContains( 'variable', $create_schema['properties']['product_type']['enum'] ?? array() );
+		$this->assertSame( $expected_aliases, $query_schema['properties']['product_type_alias']['enum'] ?? array() );
+		$this->assertSame( $expected_aliases, $this->get_product_type_aliases_from_schema_branches( $create_schema ) );
+		$this->assertSame( $expected_aliases, $this->get_product_type_aliases_from_schema_branches( $update_schema ) );
+		$this->assertSame( 'physical', $this->get_product_type_alias_schema_branch( $create_schema, 'physical' )['properties']['product_type_alias']['default'] ?? null );
+		$this->assertArrayNotHasKey( 'default', $this->get_product_type_alias_schema_branch( $update_schema, 'physical' )['properties']['product_type_alias'] ?? array() );
+		$this->assertNotContains( 'variable', $query_schema['properties']['product_type_alias']['enum'] ?? array() );
+		$this->assertNotContains( 'variable', $this->get_product_type_aliases_from_schema_branches( $create_schema ) );
+		$this->assertArrayNotHasKey(
+			'product_type_alias',
+			wp_get_ability( 'woocommerce/product-create' )->get_output_schema()['properties']['product']['properties'] ?? array()
+		);
+		$this->assertArrayNotHasKey( 'default', $create_schema );
+		$this->assertArrayNotHasKey( 'default', $update_schema );
+	}
+
+	/**
+	 * @testdox Should expose only alias-relevant product fields in mutation schema branches.
+	 */
+	public function test_product_mutation_schema_branches_only_include_alias_relevant_fields(): void {
+		$create_schema = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
+		$update_schema = wp_get_ability( 'woocommerce/product-update' )->get_input_schema();
+
+		$physical_properties  = $this->get_product_type_alias_schema_branch( $create_schema, 'physical' )['properties'];
+		$affiliate_properties = $this->get_product_type_alias_schema_branch( $create_schema, 'affiliate' )['properties'];
+		$grouped_properties   = $this->get_product_type_alias_schema_branch( $create_schema, 'grouped' )['properties'];
+		$common_properties    = $update_schema['oneOf'][0]['properties'];
+
+		$this->assertArrayNotHasKey( 'external_url', $physical_properties );
+		$this->assertArrayNotHasKey( 'button_text', $physical_properties );
+		$this->assertArrayNotHasKey( 'grouped_products', $physical_properties );
+
+		$this->assertArrayNotHasKey( 'manage_stock', $affiliate_properties );
+		$this->assertArrayNotHasKey( 'stock_quantity', $affiliate_properties );
+		$this->assertArrayNotHasKey( 'grouped_products', $affiliate_properties );
+
+		$this->assertArrayNotHasKey( 'regular_price', $grouped_properties );
+		$this->assertArrayNotHasKey( 'sale_price', $grouped_properties );
+		$this->assertArrayNotHasKey( 'stock_status', $grouped_properties );
+
+		$this->assertArrayNotHasKey( 'product_type_alias', $common_properties );
+		$this->assertArrayNotHasKey( 'regular_price', $common_properties );
+		$this->assertArrayNotHasKey( 'external_url', $common_properties );
+		$this->assertArrayNotHasKey( 'grouped_products', $common_properties );
 	}
 
 	/**
@@ -380,8 +419,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$ability = wp_get_ability( TestReservedWooAbilityDefinition::ABILITY_ID );
 
-		$this->assertNotNull( $ability, 'Canonical ability should remain registered.' );
-		$this->assertSame( 'Query products', $ability->get_label() );
+		$this->assert_products_query_ability_is_canonical( $ability );
 	}
 
 	/**
@@ -405,7 +443,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			->expects( $this->once() )
 			->method( 'warning' )
 			->with(
-				'WooCommerce unregistered a previously registered ability before registering its canonical definition.',
+				$this->stringContains( 'previously registered ability' ),
 				$this->callback(
 					static function ( $context ): bool {
 						return is_array( $context )
@@ -431,8 +469,33 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$ability = wp_get_ability( TestReservedWooAbilityDefinition::ABILITY_ID );
 
-		$this->assertNotNull( $ability, 'Canonical ability should be registered.' );
-		$this->assertSame( 'Query products', $ability->get_label() );
+		$this->assert_products_query_ability_is_canonical( $ability );
+	}
+
+	/**
+	 * @testdox Should not replace canonical abilities when registration is called again in the same request.
+	 */
+	public function test_register_abilities_is_idempotent_for_existing_canonical_abilities(): void {
+		$logger        = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger_filter = static function () use ( $logger ) {
+			return $logger;
+		};
+
+		$logger
+			->expects( $this->never() )
+			->method( 'warning' );
+
+		add_filter( 'woocommerce_logging_class', $logger_filter );
+
+		try {
+			$this->register_domain_abilities();
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+		}
+
+		foreach ( self::CANONICAL_ABILITY_IDS as $ability_id ) {
+			$this->assertNotNull( wp_get_ability( $ability_id ), "{$ability_id} should remain registered." );
+		}
 	}
 
 	/**
@@ -686,6 +749,32 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result, "A user without publish_products should not be able to set status {$status}." );
 		$this->assertSame( 'woocommerce_product_publish_forbidden', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should allow non-status updates to published products without publish_products.
+	 */
+	public function test_product_update_allows_published_product_edits_without_publish_cap_when_status_is_unchanged(): void {
+		$product                     = \WC_Helper_Product::create_simple_product( true, array( 'status' => 'publish' ) );
+		$this->created_product_ids[] = $product->get_id();
+
+		$user_id = $this->factory->user->create( array( 'role' => 'subscriber' ) );
+		$user    = get_user_by( 'id', $user_id );
+		$user->add_cap( 'edit_products' );
+		$user->add_cap( 'edit_others_products' );
+		$user->add_cap( 'edit_published_products' );
+		wp_set_current_user( $user_id );
+
+		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
+			array(
+				'id'   => $product->get_id(),
+				'name' => 'Updated Published Product',
+			)
+		);
+
+		$this->assertNotWPError( $result );
+		$this->assertSame( 'Updated Published Product', $result['product']['name'] );
+		$this->assertSame( 'publish', $result['product']['status'] );
 	}
 
 	/**
@@ -1081,9 +1170,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_product_create_maps_digital_product_type_to_simple_downloadable_product(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'          => 'Digital Product',
-				'product_type'  => 'digital',
-				'regular_price' => '19.99',
+				'name'               => 'Digital Product',
+				'product_type_alias' => 'digital',
+				'regular_price'      => '19.99',
 			)
 		);
 
@@ -1095,38 +1184,77 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should query simple products by agent-friendly physical and digital product types.
+	 * @testdox Should map virtual products to simple virtual non-downloadable products.
+	 */
+	public function test_product_create_maps_virtual_product_type_alias_to_simple_virtual_product(): void {
+		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'               => 'Virtual Product',
+				'product_type_alias' => 'virtual',
+				'regular_price'      => '29.99',
+			)
+		);
+
+		$this->assertNotWPError( $created );
+		$this->created_product_ids[] = $created['product']['id'];
+		$this->assertSame( 'simple', $created['product']['type'] );
+		$this->assertTrue( $created['product']['virtual'] );
+		$this->assertFalse( $created['product']['downloadable'] );
+	}
+
+	/**
+	 * @testdox Should query simple products by agent-friendly physical, virtual, and digital product type aliases.
 	 */
 	public function test_products_query_maps_agent_friendly_product_types_to_product_fields(): void {
 		$physical_sku = wp_unique_id( 'abilities-physical-' );
+		$virtual_sku  = wp_unique_id( 'abilities-virtual-' );
 		$digital_sku  = wp_unique_id( 'abilities-digital-' );
+		$hybrid_sku   = wp_unique_id( 'abilities-downloadable-shippable-' );
 
 		$physical = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'         => 'Physical Query Product',
-				'product_type' => 'physical',
-				'sku'          => $physical_sku,
+				'name'               => 'Physical Query Product',
+				'product_type_alias' => 'physical',
+				'sku'                => $physical_sku,
 			)
 		);
 
 		$this->assertNotWPError( $physical );
 		$this->created_product_ids[] = $physical['product']['id'];
 
+		$virtual = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name'               => 'Virtual Query Product',
+				'product_type_alias' => 'virtual',
+				'sku'                => $virtual_sku,
+			)
+		);
+
+		$this->assertNotWPError( $virtual );
+		$this->created_product_ids[] = $virtual['product']['id'];
+
 		$digital = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'         => 'Digital Query Product',
-				'product_type' => 'digital',
-				'sku'          => $digital_sku,
+				'name'               => 'Digital Query Product',
+				'product_type_alias' => 'digital',
+				'sku'                => $digital_sku,
 			)
 		);
 
 		$this->assertNotWPError( $digital );
 		$this->created_product_ids[] = $digital['product']['id'];
 
+		$hybrid = \WC_Helper_Product::create_simple_product();
+		$hybrid->set_sku( $hybrid_sku );
+		$hybrid->set_virtual( false );
+		$hybrid->set_downloadable( true );
+		$hybrid->save();
+		$this->created_product_ids[] = $hybrid->get_id();
+
 		$physical_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'type' => 'physical',
-				'sku'  => $physical_sku,
+				'product_type_alias' => 'physical',
+				'sku'                => $physical_sku,
 			)
 		);
 
@@ -1134,10 +1262,21 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $physical_result['total_pages'] );
 		$this->assertSame( $physical['product']['id'], $physical_result['products'][0]['id'] );
 
+		$virtual_result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'product_type_alias' => 'virtual',
+				'sku'                => $virtual_sku,
+			)
+		);
+
+		$this->assertNotWPError( $virtual_result );
+		$this->assertSame( 1, $virtual_result['total_pages'] );
+		$this->assertSame( $virtual['product']['id'], $virtual_result['products'][0]['id'] );
+
 		$digital_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'type' => 'digital',
-				'sku'  => $digital_sku,
+				'product_type_alias' => 'digital',
+				'sku'                => $digital_sku,
 			)
 		);
 
@@ -1147,13 +1286,32 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$mismatched_result = wp_get_ability( 'woocommerce/products-query' )->execute(
 			array(
-				'type' => 'physical',
-				'sku'  => $digital_sku,
+				'product_type_alias' => 'physical',
+				'sku'                => $digital_sku,
 			)
 		);
 
 		$this->assertNotWPError( $mismatched_result );
 		$this->assertSame( 0, $mismatched_result['total_pages'] );
+
+		$unfiltered_hybrid_result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'sku' => $hybrid_sku,
+			)
+		);
+
+		$this->assertNotWPError( $unfiltered_hybrid_result );
+		$this->assertSame( $hybrid->get_id(), $unfiltered_hybrid_result['products'][0]['id'] );
+
+		$physical_hybrid_result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'product_type_alias' => 'physical',
+				'sku'                => $hybrid_sku,
+			)
+		);
+
+		$this->assertNotWPError( $physical_hybrid_result );
+		$this->assertSame( 0, $physical_hybrid_result['total_pages'] );
 	}
 
 	/**
@@ -1162,11 +1320,11 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	public function test_product_create_maps_affiliate_product_type_to_external_product(): void {
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'          => 'Affiliate Product',
-				'product_type'  => 'affiliate',
-				'regular_price' => '49.99',
-				'external_url'  => 'https://example.com/buy',
-				'button_text'   => 'Buy elsewhere',
+				'name'               => 'Affiliate Product',
+				'product_type_alias' => 'affiliate',
+				'regular_price'      => '49.99',
+				'external_url'       => 'https://example.com/buy',
+				'button_text'        => 'Buy elsewhere',
 			)
 		);
 
@@ -1186,9 +1344,9 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$created = wp_get_ability( 'woocommerce/product-create' )->execute(
 			array(
-				'name'             => 'Grouped Product',
-				'product_type'     => 'grouped',
-				'grouped_products' => array( $child->get_id() ),
+				'name'               => 'Grouped Product',
+				'product_type_alias' => 'grouped',
+				'grouped_products'   => array( $child->get_id() ),
 			)
 		);
 
@@ -1199,14 +1357,51 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should support the WooCommerce SKU wildcard for products with any non-empty SKU.
+	 */
+	public function test_products_query_supports_sku_wildcard_for_products_with_any_sku(): void {
+		$sku_product = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name' => 'SKU Product',
+				'sku'  => wp_unique_id( 'abilities-any-sku-' ),
+			)
+		);
+
+		$this->assertNotWPError( $sku_product );
+		$this->created_product_ids[] = $sku_product['product']['id'];
+
+		$no_sku_product = wp_get_ability( 'woocommerce/product-create' )->execute(
+			array(
+				'name' => 'No SKU Product',
+			)
+		);
+
+		$this->assertNotWPError( $no_sku_product );
+		$this->created_product_ids[] = $no_sku_product['product']['id'];
+
+		$result = wp_get_ability( 'woocommerce/products-query' )->execute(
+			array(
+				'sku'      => '*',
+				'per_page' => 100,
+			)
+		);
+
+		$this->assertNotWPError( $result );
+
+		$ids = array_column( $result['products'], 'id' );
+		$this->assertContains( $sku_product['product']['id'], $ids );
+		$this->assertNotContains( $no_sku_product['product']['id'], $ids );
+	}
+
+	/**
 	 * @testdox Should reject invalid grouped product IDs before setting children.
 	 */
 	public function test_product_create_rejects_invalid_grouped_product_ids(): void {
 		$result = ProductCreate::execute(
 			array(
-				'name'             => 'Invalid Grouped Product',
-				'product_type'     => 'grouped',
-				'grouped_products' => array( -12 ),
+				'name'               => 'Invalid Grouped Product',
+				'product_type_alias' => 'grouped',
+				'grouped_products'   => array( -12 ),
 			)
 		);
 
@@ -1215,14 +1410,14 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should reject fields that are unsupported by the selected product type.
+	 * @testdox Should reject fields that are unsupported by the selected product type alias.
 	 */
-	public function test_product_create_rejects_fields_not_supported_by_product_type(): void {
-		$result = wp_get_ability( 'woocommerce/product-create' )->execute(
+	public function test_product_create_rejects_fields_not_supported_by_product_type_alias(): void {
+		$result = ProductCreate::execute(
 			array(
-				'name'          => 'Invalid Grouped Product',
-				'product_type'  => 'grouped',
-				'regular_price' => '19.99',
+				'name'               => 'Invalid Grouped Product',
+				'product_type_alias' => 'grouped',
+				'regular_price'      => '19.99',
 			)
 		);
 
@@ -1264,7 +1459,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			$input_schema  = wp_get_ability( 'woocommerce/product-create' )->get_input_schema();
 			$output_schema = wp_get_ability( 'woocommerce/product-create' )->get_output_schema();
 
-			$this->assertSame( 'number', $input_schema['properties']['stock_quantity']['type'] ?? null );
+			$this->assertSame( 'number', $this->get_product_type_alias_schema_branch( $input_schema, 'physical' )['properties']['stock_quantity']['type'] ?? null );
 			$this->assertSame(
 				array( 'number', 'null' ),
 				$output_schema['properties']['product']['properties']['stock_quantity']['type'] ?? null
@@ -1296,9 +1491,10 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
-				'id'            => $product->get_id(),
-				'name'          => 'Updated Name',
-				'regular_price' => '99.00',
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'physical',
+				'name'               => 'Updated Name',
+				'regular_price'      => '99.00',
 			)
 		);
 
@@ -1316,7 +1512,29 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$throw_on_update             = static function (): void {
 			throw new \Exception( 'Generic product save failure.' );
 		};
+		$logger                      = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger_filter               = static function () use ( $logger ) {
+			return $logger;
+		};
 
+		$logger
+			->expects( $this->once() )
+			->method( 'error' )
+			->with(
+				$this->stringContains( 'failed to save product' ),
+				$this->callback(
+					static function ( $context ) use ( $product ): bool {
+						return is_array( $context )
+							&& 'woocommerce-abilities' === ( $context['source'] ?? null )
+							&& 'woocommerce_product_update_failed' === ( $context['failure_code'] ?? null )
+							&& $product->get_id() === ( $context['product_id'] ?? null )
+							&& \Exception::class === ( $context['exception'] ?? null )
+							&& 'Generic product save failure.' === ( $context['error_message'] ?? null );
+					}
+				)
+			);
+
+		add_filter( 'woocommerce_logging_class', $logger_filter );
 		add_action( 'woocommerce_update_product', $throw_on_update );
 
 		try {
@@ -1328,16 +1546,17 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 			);
 		} finally {
 			remove_action( 'woocommerce_update_product', $throw_on_update );
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
 		}
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_update_failed', $result->get_error_code() );
-		$this->assertSame( 'Generic product save failure.', $result->get_error_message() );
-		$this->assertSame( 400, $result->get_error_data()['status'] );
+		$this->assertSame( 'Failed to save product.', $result->get_error_message() );
+		$this->assertSame( 500, $result->get_error_data()['status'] );
 	}
 
 	/**
-	 * @testdox Should apply product type configuration when updating a product type.
+	 * @testdox Should apply product type configuration when updating a product type alias.
 	 */
 	public function test_product_update_applies_product_type_configuration(): void {
 		$product                     = \WC_Helper_Product::create_simple_product();
@@ -1345,8 +1564,8 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$result = wp_get_ability( 'woocommerce/product-update' )->execute(
 			array(
-				'id'           => $product->get_id(),
-				'product_type' => 'digital',
+				'id'                 => $product->get_id(),
+				'product_type_alias' => 'digital',
 			)
 		);
 
@@ -1435,7 +1654,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 		$product                     = \WC_Helper_Product::create_simple_product();
 		$this->created_product_ids[] = $product->get_id();
 
-		add_filter( 'woocommerce_rest_product_object_trashable', '__return_false' );
+		add_filter( 'woocommerce_product_object_trashable', '__return_false' );
 
 		try {
 			$result = wp_get_ability( 'woocommerce/product-delete' )->execute(
@@ -1444,7 +1663,7 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				)
 			);
 		} finally {
-			remove_filter( 'woocommerce_rest_product_object_trashable', '__return_false' );
+			remove_filter( 'woocommerce_product_object_trashable', '__return_false' );
 		}
 
 		$this->assertWPError( $result );
@@ -1488,6 +1707,44 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 
 		$this->assertWPError( $result );
 		$this->assertSame( 'woocommerce_product_not_found', $result->get_error_code() );
+	}
+
+	/**
+	 * @testdox Should reject product mutation unknown IDs without leaking existence.
+	 *
+	 * @dataProvider provider_product_mutation_unknown_id_inputs
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @param array  $input      Ability input.
+	 */
+	public function test_product_mutations_reject_unknown_ids_without_leaking_existence( string $ability_id, array $input ): void {
+		$result = wp_get_ability( $ability_id )->execute( $input );
+
+		$this->assertWPError( $result );
+		$this->assertSame( 'ability_invalid_permissions', $result->get_error_code() );
+	}
+
+	/**
+	 * Provides product mutation inputs with unknown IDs.
+	 *
+	 * @return array<string, array{0: string, 1: array}>
+	 */
+	public function provider_product_mutation_unknown_id_inputs(): array {
+		return array(
+			'product-update' => array(
+				'woocommerce/product-update',
+				array(
+					'id'   => 999999,
+					'name' => 'Unknown Product',
+				),
+			),
+			'product-delete' => array(
+				'woocommerce/product-delete',
+				array(
+					'id' => 999999,
+				),
+			),
+		);
 	}
 
 	/**
@@ -1982,6 +2239,60 @@ class AbilitiesLoaderTest extends \WC_Unit_Test_Case {
 				wp_unregister_ability( $ability_id );
 			}
 		}
+	}
+
+	/**
+	 * Assert that a registered ability matches the canonical products-query definition.
+	 *
+	 * @param \WP_Ability|null $ability Ability instance.
+	 */
+	private function assert_products_query_ability_is_canonical( $ability ): void {
+		$this->assertNotNull( $ability, 'Canonical products-query ability should be registered.' );
+
+		$registration_args = ProductsQuery::get_registration_args();
+
+		$this->assertSame( ProductsQuery::get_name(), $ability->get_name() );
+		$this->assertSame( $registration_args['category'], $ability->get_category() );
+		$this->assertSame( $registration_args['input_schema'], $ability->get_input_schema() );
+		$this->assertSame( $registration_args['output_schema'], $ability->get_output_schema() );
+	}
+
+	/**
+	 * Get product type aliases from a branched product input schema.
+	 *
+	 * @param array $schema Input schema.
+	 * @return array<int, string>
+	 */
+	private function get_product_type_aliases_from_schema_branches( array $schema ): array {
+		$aliases = array();
+
+		foreach ( $schema['oneOf'] ?? array() as $branch ) {
+			$alias = $branch['properties']['product_type_alias']['enum'][0] ?? null;
+
+			if ( is_string( $alias ) ) {
+				$aliases[] = $alias;
+			}
+		}
+
+		return array_values( array_unique( $aliases ) );
+	}
+
+	/**
+	 * Get a product input schema branch for a product type alias.
+	 *
+	 * @param array  $schema             Input schema.
+	 * @param string $product_type_alias Product type alias.
+	 * @return array
+	 */
+	private function get_product_type_alias_schema_branch( array $schema, string $product_type_alias ): array {
+		foreach ( $schema['oneOf'] ?? array() as $branch ) {
+			if ( in_array( $product_type_alias, $branch['properties']['product_type_alias']['enum'] ?? array(), true ) ) {
+				return $branch;
+			}
+		}
+
+		$this->fail( "Missing product type alias schema branch: {$product_type_alias}" );
+		return array();
 	}
 
 	/**

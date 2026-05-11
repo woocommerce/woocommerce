@@ -73,7 +73,7 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 	 * @since 10.9.0
 	 */
 	public static function execute( array $input ) {
-		$product_config = self::get_product_config( $input['product_type'] ?? 'physical' );
+		$product_config = self::get_product_config_for_alias( $input['product_type_alias'] ?? 'physical' );
 
 		if ( is_wp_error( $product_config ) ) {
 			return $product_config;
@@ -131,9 +131,6 @@ class ProductCreate extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		$schema = self::get_product_mutation_input_schema();
-		$schema['properties']['product_type']['default'] = 'physical';
-
-		return $schema;
+		return self::get_product_create_input_schema();
 	}
 }

@@ -111,8 +111,8 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 			);
 		}
 
-		if ( isset( $input['product_type'] ) ) {
-			$product_config = self::get_product_config( $input['product_type'] );
+		if ( isset( $input['product_type_alias'] ) ) {
+			$product_config = self::get_product_config_for_alias( $input['product_type_alias'] );
 
 			if ( is_wp_error( $product_config ) ) {
 				return $product_config;
@@ -130,7 +130,7 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 		}
 
 		try {
-			if ( isset( $input['product_type'] ) ) {
+			if ( isset( $input['product_type_alias'] ) ) {
 				self::apply_product_type_config( $product, $product_config );
 			}
 
@@ -182,18 +182,6 @@ class ProductUpdate extends AbstractDomainAbility implements AbilityDefinition {
 	 * @return array
 	 */
 	private static function get_input_schema(): array {
-		$schema               = self::get_product_mutation_input_schema();
-		$schema['properties'] = array_merge(
-			array(
-				'id' => array(
-					'type'    => 'integer',
-					'minimum' => 1,
-				),
-			),
-			$schema['properties']
-		);
-		$schema['required']   = array( 'id' );
-
-		return $schema;
+		return self::get_product_update_input_schema();
 	}
 }

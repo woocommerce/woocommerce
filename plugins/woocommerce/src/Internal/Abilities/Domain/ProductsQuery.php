@@ -112,9 +112,9 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 			}
 		}
 
-		if ( ! empty( $input['type'] ) && is_scalar( $input['type'] ) ) {
-			$product_type = sanitize_text_field( (string) $input['type'] );
-			$type_args    = self::get_product_query_args_for_type( $product_type );
+		if ( ! empty( $input['product_type_alias'] ) && is_scalar( $input['product_type_alias'] ) ) {
+			$product_type_alias = sanitize_text_field( (string) $input['product_type_alias'] );
+			$type_args          = self::get_product_query_args_for_alias( $product_type_alias );
 
 			if ( is_wp_error( $type_args ) ) {
 				return $type_args;
@@ -167,34 +167,37 @@ class ProductsQuery extends AbstractDomainAbility implements AbilityDefinition {
 		return array(
 			'type'                 => 'object',
 			'properties'           => array(
-				'id'           => array(
+				'id'                 => array(
 					'type'    => 'integer',
 					'minimum' => 1,
 				),
-				'search'       => array( 'type' => 'string' ),
-				'sku'          => array( 'type' => 'string' ),
-				'status'       => array(
+				'search'             => array( 'type' => 'string' ),
+				'sku'                => array(
+					'type'        => 'string',
+					'description' => __( 'Limit results to products with SKUs that partially match this string. Use * to match products with any non-empty SKU.', 'woocommerce' ),
+				),
+				'status'             => array(
 					'type' => 'string',
 					'enum' => self::get_product_query_status_slugs(),
 				),
-				'type'         => array(
+				'product_type_alias' => array(
 					'type'        => 'string',
 					'description' => __(
-						'Filter by agent-facing product type. physical/digital map to simple; affiliate maps to external; grouped maps to grouped.',
+						'Filter by supported agent-facing product type alias. physical maps to simple shippable, non-downloadable products; virtual maps to simple non-shipping, non-downloadable products; digital maps to simple virtual/downloadable products; affiliate maps to the WooCommerce external product type; grouped maps to grouped.',
 						'woocommerce'
 					),
-					'enum'        => self::get_supported_product_type_slugs(),
+					'enum'        => self::get_supported_product_type_aliases(),
 				),
-				'stock_status' => array(
+				'stock_status'       => array(
 					'type' => 'string',
 					'enum' => array_keys( wc_get_product_stock_status_options() ),
 				),
-				'page'         => array(
+				'page'               => array(
 					'type'    => 'integer',
 					'default' => 1,
 					'minimum' => 1,
 				),
-				'per_page'     => array(
+				'per_page'           => array(
 					'type'    => 'integer',
 					'default' => 10,
 					'minimum' => 1,
