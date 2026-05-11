@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { registerBlockType } from '@wordpress/blocks';
-import { Icon, starEmpty } from '@wordpress/icons';
+import { Icon, heading } from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -10,15 +10,12 @@ import { Icon, starEmpty } from '@wordpress/icons';
 import metadata from './block.json';
 import Edit from './edit';
 import Save from './save';
-import './variations';
-import './style.scss';
-import './inner-blocks/shopper-collection-header';
 
 registerBlockType( metadata, {
 	icon: {
 		src: (
 			<Icon
-				icon={ starEmpty }
+				icon={ heading }
 				className="wc-block-editor-components-block-icon"
 			/>
 		),

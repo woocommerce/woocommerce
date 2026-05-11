@@ -23,6 +23,8 @@ const universalLock =
 type ShopperCollectionConfig = {
 	quantityLabelTemplate: string;
 	removeLabelTemplate: string;
+	headerCountSuffixSingular: string;
+	headerCountSuffixPlural: string;
 };
 
 type BlockContext = {
@@ -37,6 +39,9 @@ type BlockStore = {
 		hasError: boolean;
 		errorMessage: string;
 		isEmpty: boolean;
+		hasItems: boolean;
+		itemCount: number;
+		itemCountSuffix: string;
 		isMoveToCartHidden: boolean;
 		isPriceHidden: boolean;
 		currentItemDisplayName: string;
@@ -152,6 +157,46 @@ store< BlockStore >(
 					return true;
 				}
 				return ! list.isLoading && list.items.length === 0;
+			},
+
+			get itemCount(): number {
+				const { listSlug } = getContext< BlockContext >();
+				return getList( listSlug )?.items.length ?? 0;
+			},
+
+			// Used by `shopper-collection-header` to toggle visibility of
+			// the section heading. Mirrors `isEmpty` but lives on its own
+			// getter so the header doesn't have to also consider loading
+			// state — the heading just disappears when there's nothing to
+			// label.
+			get hasItems(): boolean {
+				const { listSlug } = getContext< BlockContext >();
+				return ( getList( listSlug )?.items.length ?? 0 ) > 0;
+			},
+
+			// Picks singular/plural at runtime so the header count suffix
+			// reacts to add/remove without the SSR rendering needing to
+			// re-run. Templates flow in through `wp_interactivity_config`
+			// alongside the existing per-row label templates. The heading
+			// text itself is editor-owned (core/heading inner block) and
+			// is not touched by iAPI.
+			get itemCountSuffix(): string {
+				const { listSlug } = getContext< BlockContext >();
+				const count = getList( listSlug )?.items.length ?? 0;
+				if ( count <= 0 ) {
+					return '';
+				}
+				const {
+					headerCountSuffixSingular,
+					headerCountSuffixPlural,
+				} = getConfig(
+					'woocommerce/shopper-collection'
+				) as ShopperCollectionConfig;
+				const template =
+					count === 1
+						? headerCountSuffixSingular
+						: headerCountSuffixPlural;
+				return template.replace( '%d', String( count ) );
 			},
 
 			get isPriceHidden(): boolean {

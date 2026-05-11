@@ -80,6 +80,42 @@ final class ShopperCollection extends AbstractBlock {
 			return $parsed_hooked_block;
 		}
 		$parsed_hooked_block['attrs']['listName'] = 'saved-for-later';
+
+		// Auto-inject the header inner block (with its default core/heading
+		// child) so the heading + count appear on pages where this block
+		// is reached via `hooked_block_types` rather than the editor's
+		// template flow. `innerContent => [ null ]` is WP's marker for
+		// "render `innerBlocks[0]` at this position".
+		$variation                           = $this->get_variation_config();
+		$heading_text                        = $variation['defaultHeading'];
+		$heading_html                        = sprintf(
+			'<h2 class="wp-block-heading">%s</h2>',
+			esc_html( $heading_text )
+		);
+		$heading_block                       = array(
+			'blockName'    => 'core/heading',
+			'attrs'        => array(
+				'level'   => 2,
+				'content' => $heading_text,
+				'lock'    => array(
+					'remove' => true,
+					'move'   => true,
+				),
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => $heading_html,
+			'innerContent' => array( $heading_html ),
+		);
+		$header_block                        = array(
+			'blockName'    => 'woocommerce/shopper-collection-header',
+			'attrs'        => array(),
+			'innerBlocks'  => array( $heading_block ),
+			'innerHTML'    => '',
+			'innerContent' => array( null ),
+		);
+		$parsed_hooked_block['innerBlocks']  = array( $header_block );
+		$parsed_hooked_block['innerContent'] = array( null );
+
 		return $parsed_hooked_block;
 	}
 
@@ -107,8 +143,10 @@ final class ShopperCollection extends AbstractBlock {
 			$list_slug = 'saved-for-later';
 		}
 
-		// `layout` comes from `supports.layout`, not a declared attribute, so WP doesn't guarantee every nested key is set — `??` covers a partial layout object.
-		$column_count = max( 1, (int) ( $attributes['layout']['columnCount'] ?? 3 ) );
+		// `columnCount` is declared with a default in block.json, but `??`
+		// covers legacy instances that pre-date the attribute (the block
+		// previously read the count out of `supports.layout`).
+		$column_count = max( 1, (int) ( $attributes['columnCount'] ?? 3 ) );
 
 		$variation = $this->get_variation_config();
 
@@ -169,16 +207,23 @@ final class ShopperCollection extends AbstractBlock {
 		wp_interactivity_config(
 			'woocommerce/shopper-collection',
 			array(
-				'quantityLabelTemplate' => $variation['quantityLabelTemplate'],
-				'removeLabelTemplate'   => $variation['removeLabelTemplate'],
+				'quantityLabelTemplate'     => $variation['quantityLabelTemplate'],
+				'removeLabelTemplate'       => $variation['removeLabelTemplate'],
+				'headerCountSuffixSingular' => $variation['headerCountSuffixSingular'],
+				'headerCountSuffixPlural'   => $variation['headerCountSuffixPlural'],
 			)
 		);
 
 		$wrapper_class = sprintf(
-			'wc-block-shopper-collection wc-block-shopper-collection--%s',
+			'wc-block-shopper-collection-wrapper wc-block-shopper-collection-wrapper--%s',
 			$variation['modifierSlug']
 		);
 
+		// Block-level supports (color, typography, spacing) ride on the
+		// outer `<section>` so admins styling the block as a whole pick up
+		// the wrapper. The grid container lives on the inner `<ul>` so
+		// item layout stays self-contained — the CSS variable here drives
+		// `style.scss`'s `grid-template-columns`.
 		$wrapper_attributes = array(
 			'class'               => $wrapper_class,
 			'data-wp-interactive' => 'woocommerce/shopper-collection',
@@ -187,13 +232,44 @@ final class ShopperCollection extends AbstractBlock {
 			// navigations land on the same block identity across renders.
 			'data-wp-key'         => $this->get_full_block_name() . '-' . $list_slug,
 			'style'               => sprintf( '--wc-shopper-collection-columns:%d;', $column_count ),
+			// Mark the wrapper as labelled by the header block. The header
+			// renders an `<h2 id>` whose id we point at here; when the list
+			// is empty the header is hidden and the section is unlabelled,
+			// but that's acceptable because the empty-state row carries the
+			// announcement instead.
+			'aria-labelledby'     => 'wc-block-shopper-collection-heading-' . $list_slug,
 		);
 
-		$is_empty = empty( $items );
+		$is_empty   = empty( $items );
+		$item_count = count( $items );
+
+		$list_class = sprintf(
+			'wc-block-shopper-collection wc-block-shopper-collection--%s',
+			$variation['modifierSlug']
+		);
+
+		// Render inner blocks ourselves (rather than using the auto-rendered
+		// `$content`) so we can hand each one explicit block context — the
+		// header reads `woocommerce/shopperItemCount` and the singular/
+		// plural count-suffix templates off this context to render the
+		// correct initial "(N items)" badge without reading iAPI state
+		// in PHP.
+		$inner_context = array(
+			'woocommerce/shopperListSlug'            => $list_slug,
+			'woocommerce/shopperItemCount'           => $item_count,
+			'woocommerce/shopperHeaderCountSingular' => $variation['headerCountSuffixSingular'],
+			'woocommerce/shopperHeaderCountPlural'   => $variation['headerCountSuffixPlural'],
+		);
+		$inner_html    = '';
+		foreach ( $block->parsed_block['innerBlocks'] as $parsed_inner_block ) {
+			$inner_html .= ( new \WP_Block( $parsed_inner_block, $inner_context ) )->render();
+		}
 
 		return sprintf(
-			'<ul %1$s>%2$s%3$s%4$s%5$s</ul>',
+			'<section %1$s>%2$s<ul class="%3$s">%4$s%5$s%6$s%7$s</ul></section>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
+			$inner_html,
+			esc_attr( $list_class ),
 			$this->render_template_markup( $variation ),
 			$this->render_items_markup( $items, $variation ),
 			$this->render_empty_markup( $is_empty, $variation ),
@@ -217,15 +293,20 @@ final class ShopperCollection extends AbstractBlock {
 	 */
 	private function get_variation_config(): array {
 		return array(
-			'modifierSlug'          => 'saved-for-later',
-			'emptyMessage'          => __( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
+			'modifierSlug'              => 'saved-for-later',
+			'emptyMessage'              => __( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
 			/* translators: %s: product name. */
-			'removeLabelTemplate'   => __( 'Remove %s from Saved for later list', 'woocommerce' ),
+			'removeLabelTemplate'       => __( 'Remove %s from Saved for later list', 'woocommerce' ),
 			/* translators: %d: quantity of saved items. */
-			'quantityLabelTemplate' => __( 'Quantity: %d', 'woocommerce' ),
-			'actionLabel'           => __( 'Move to cart', 'woocommerce' ),
-			'actionDirective'       => 'actions.onClickMoveToCart',
-			'showAction'            => true,
+			'quantityLabelTemplate'     => __( 'Quantity: %d', 'woocommerce' ),
+			'defaultHeading'            => __( 'Saved for later', 'woocommerce' ),
+			/* translators: %d: number of saved items. */
+			'headerCountSuffixSingular' => __( '(%d item)', 'woocommerce' ),
+			/* translators: %d: number of saved items. */
+			'headerCountSuffixPlural'   => __( '(%d items)', 'woocommerce' ),
+			'actionLabel'               => __( 'Move to cart', 'woocommerce' ),
+			'actionDirective'           => 'actions.onClickMoveToCart',
+			'showAction'                => true,
 		);
 	}
 
@@ -499,9 +580,16 @@ final class ShopperCollection extends AbstractBlock {
 	 * @return string
 	 */
 	private function render_empty_markup( bool $is_empty, array $variation ): string {
+		// Visually hidden in all states but announced when the list goes
+		// from populated to empty. `aria-live="polite"` lets the live
+		// region pick up the transition without re-announcing on every
+		// page load (a hardcoded "Nothing saved yet" greeting would be
+		// noisy when items are present). The `data-wp-bind--hidden`
+		// toggles content presence — the live region itself stays in the
+		// DOM so screen readers attach to it once and observe mutations.
 		$hidden_attr = $is_empty ? '' : ' hidden';
 		return sprintf(
-			'<li class="wc-block-shopper-collection__empty" data-wp-bind--hidden="!state.isEmpty"%1$s>%2$s</li>',
+			'<li class="wc-block-shopper-collection__empty screen-reader-text" role="status" aria-live="polite" data-wp-bind--hidden="!state.isEmpty"%1$s>%2$s</li>',
 			$hidden_attr,
 			esc_html( $variation['emptyMessage'] )
 		);

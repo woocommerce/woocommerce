@@ -1,6 +1,30 @@
-// The block IS the grid. supports.layout's `columnCount` attribute drives
-// our --wc-shopper-collection-columns CSS variable (set inline on the wrapper
-// in both editor preview and PHP render). No nested grids, no inner blocks.
+// Outer section wraps the header inner block + items grid. The block's
+// own supports (color, typography, spacing) ride on this element via
+// `useBlockProps`. The grid is on the nested `<ul>` so the header isn't
+// forced into a grid cell alongside the items.
+.wc-block-shopper-collection-wrapper {
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--style--block-gap, 1em);
+}
+
+.wc-block-shopper-collection-header {
+	align-items: baseline;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--style--block-gap, 0.5em);
+
+	&__heading-slot,
+	.wp-block-heading {
+		margin: 0;
+	}
+
+	&__count {
+		color: rgba(0, 0, 0, 0.7);
+		font-size: var(--wp--preset--font-size--small, 0.875em);
+	}
+}
+
 .wc-block-shopper-collection {
 	display: grid;
 	gap: var(--wp--style--block-gap, 1.5em);
@@ -112,11 +136,20 @@
 	}
 }
 
+// Empty state mirrors the frontend: visually hidden, announced via
+// `aria-live`. Kept here so the editor preview matches what ships.
 .wc-block-shopper-collection__empty {
-	color: rgba(0, 0, 0, 0.7);
-	grid-column: 1 / -1;
-	padding: 1em 0;
-	text-align: center;
+	border: 0;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+	word-wrap: normal !important;
 }
 
 // Error state spans every grid column so it reads as a single alert

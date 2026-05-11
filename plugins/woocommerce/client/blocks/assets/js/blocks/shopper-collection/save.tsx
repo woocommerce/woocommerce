@@ -1,7 +1,13 @@
 /**
- * The block is rendered server-side. The save callback returns null so the
- * Block Editor stores no static markup.
+ * External dependencies
  */
-const Save = (): null => null;
+import { InnerBlocks } from '@wordpress/block-editor';
+
+/**
+ * The block is rendered server-side. We serialize inner block content so
+ * the server can pick up the header (and any future children) via
+ * `$content` in the PHP render callback.
+ */
+const Save = (): JSX.Element => <InnerBlocks.Content />;
 
 export default Save;

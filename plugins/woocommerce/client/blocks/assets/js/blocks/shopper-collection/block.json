@@ -12,20 +12,20 @@
 		"listName": {
 			"type": "string",
 			"default": "saved-for-later"
+		},
+		"columnCount": {
+			"type": "number",
+			"default": 3
 		}
 	},
+	"providesContext": {
+		"woocommerce/shopperListSlug": "listName"
+	},
 	"supports": {
-		 "align": [ "wide", "full" ],
+		"align": [ "wide", "full" ],
 		"interactivity": true,
 		"html": false,
 		"reusable": false,
-		"layout": {
-			"default": {
-				"type": "grid",
-				"columnCount": 3
-			},
-			"allowEditing": true
-		},
 		"spacing": {
 			"margin": true,
 			"padding": true,

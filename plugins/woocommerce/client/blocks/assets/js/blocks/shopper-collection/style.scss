@@ -12,6 +12,19 @@
 // the atomic blocks as inner blocks, so WordPress auto-enqueues their
 // stylesheets — we don't, so we have to handle it ourselves.
 
+// Outer section wraps the header + items list. Block-level supports
+// (color, typography, spacing) land here via `get_block_wrapper_attributes`.
+.wc-block-shopper-collection-wrapper {
+	// The CSS variable from PHP rides on this element, but it's consumed
+	// by the nested `<ul.wc-block-shopper-collection>` below. Keep it
+	// here so the variable scope covers the whole block.
+	display: flex;
+	flex-direction: column;
+	gap: var(--wp--style--block-gap, 1em);
+}
+
+// Inner list — the grid container. Items inside are atomic and not
+// editor-managed, so this element keeps the grid logic self-contained.
 .wc-block-shopper-collection {
 	display: grid;
 	gap: var(--wp--style--block-gap, 1.5em);
@@ -22,6 +35,27 @@
 	list-style: none;
 	margin: 0;
 	padding: 0;
+}
+
+// Header wraps an editable `core/heading` and the live item-count
+// badge. Flex container with baseline alignment so the heading and the
+// count sit side-by-side without the badge starting on a new line.
+// Per-heading typography/color come from `core/heading`'s own supports.
+.wc-block-shopper-collection-header {
+	align-items: baseline;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--wp--style--block-gap, 0.5em);
+
+	&__heading-slot,
+	.wp-block-heading {
+		margin: 0;
+	}
+
+	&__count {
+		color: rgba(0, 0, 0, 0.7);
+		font-size: var(--wp--preset--font-size--small, 0.875em);
+	}
 }
 
 .wc-block-shopper-collection-item {
@@ -136,11 +170,22 @@
 	}
 }
 
+// Empty state lives in the DOM as an `aria-live` region but is visually
+// hidden — the header (and its absence) does the visual job. The
+// `screen-reader-text` utility ships with WP core; mirror it here so the
+// frontend stylesheet doesn't depend on a parent theme loading it.
 .wc-block-shopper-collection__empty {
-	color: rgba(0, 0, 0, 0.7);
-	grid-column: 1 / -1;
-	padding: 1em 0;
-	text-align: center;
+	border: 0;
+	clip: rect(1px, 1px, 1px, 1px);
+	clip-path: inset(50%);
+	height: 1px;
+	margin: -1px;
+	overflow: hidden;
+	padding: 0;
+	position: absolute;
+	white-space: nowrap;
+	width: 1px;
+	word-wrap: normal !important;
 }
 
 // Error state spans every grid column so it reads as a single alert
