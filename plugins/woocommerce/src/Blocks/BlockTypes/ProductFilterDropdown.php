@@ -46,9 +46,9 @@ final class ProductFilterDropdown extends AbstractBlock {
 			return '';
 		}
 
-		$block_context   = $block->context['woocommerceSelectableItems'];
-		$items           = is_array( $block_context['items'] ?? null ) ? $block_context['items'] : array();
-		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
+		$selectable_items = $block->context['woocommerceSelectableItems'];
+		$items            = is_array( $selectable_items['items'] ?? null ) ? $selectable_items['items'] : array();
+		$store_namespace  = $selectable_items['storeNamespace'] ?? 'woocommerce/product-filters';
 
 		if ( array() === $items ) {
 			return '';
@@ -70,16 +70,16 @@ final class ProductFilterDropdown extends AbstractBlock {
 
 		$select_id   = wp_unique_id( 'wc-block-product-filter-dropdown-' );
 		$show_counts = is_array( $first ) && array_key_exists( 'count', $first );
-		$aria_label  = ! empty( $block_context['groupLabel'] )
-			? (string) $block_context['groupLabel']
+		$aria_label  = ! empty( $selectable_items['groupLabel'] )
+			? (string) $selectable_items['groupLabel']
 			: __( 'Product filter', 'woocommerce' );
 
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<fieldset class="wc-block-product-filter-dropdown__fieldset">
-				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
-					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
+				<?php if ( ! empty( $selectable_items['groupLabel'] ) ) : ?>
+					<legend class="screen-reader-text"><?php echo esc_html( $selectable_items['groupLabel'] ); ?></legend>
 				<?php endif; ?>
 				<select
 					class="wc-block-product-filter-dropdown__select"
