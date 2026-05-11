@@ -75,8 +75,7 @@ class AbilitiesLoader {
 		 * Register abilities when Abilities API is ready.
 		 * Support both old (pre-6.9) and new (6.9+) action names.
 		 */
-		add_action( 'abilities_api_categories_init', array( AbilitiesCategories::class, 'register_categories' ) );
-		add_action( 'wp_abilities_api_categories_init', array( AbilitiesCategories::class, 'register_categories' ) );
+		AbilitiesCategories::init();
 		add_action( 'abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 		add_action( 'wp_abilities_api_init', array( __CLASS__, 'register_abilities' ) );
 
