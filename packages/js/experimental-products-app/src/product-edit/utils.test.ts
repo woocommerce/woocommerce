@@ -18,6 +18,20 @@ import {
 	isProductVariation,
 } from './utils';
 
+jest.mock( '@dnd-kit/react', () => ( {
+	DragDropProvider: ( { children }: { children: React.ReactNode } ) =>
+		children,
+} ) );
+
+jest.mock( '@dnd-kit/react/sortable', () => ( {
+	isSortable: () => false,
+	useSortable: () => ( {
+		ref: () => undefined,
+		handleRef: () => undefined,
+		isDragging: false,
+	} ),
+} ) );
+
 jest.mock( '@woocommerce/settings', () => ( {
 	CURRENCY: {
 		code: 'USD',

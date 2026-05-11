@@ -106,6 +106,20 @@ class WCEmailTemplateDivergenceDetector {
 	public const LAST_SYNCED_AT_META_KEY = '_wc_email_last_synced_at';
 
 	/**
+	 * Informational flag intended to be set to `true` by the RSM-149 backfill
+	 * on every pre-existing `woo_email` post it stamps. Registered + surfaced
+	 * read-only over REST here so RSM-145 Tracks instrumentation can distinguish
+	 * backfilled posts from natively generated ones, but the writer is staged
+	 * in a separate follow-up PR after the 10.8 feature freeze for the backfill
+	 * class. Until then, the field defaults to `false` everywhere — Tracks will
+	 * report `was_backfilled: false` for all posts. Safe default; no behavior
+	 * depends on it being `true`.
+	 *
+	 * @var string
+	 */
+	public const BACKFILLED_META_KEY = '_wc_email_backfilled';
+
+	/**
 	 * Classification outcomes.
 	 */
 	public const STATUS_IN_SYNC                   = 'in_sync';
@@ -120,18 +134,24 @@ class WCEmailTemplateDivergenceDetector {
 	private static $logger = null;
 
 	/**
-	 * Register `_wc_email_template_status` and `_wc_email_template_version` post meta on
-	 * the `woo_email` post type as REST-readable, server-write-only meta.
+	 * Register the four sync-related post meta keys on the `woo_email` post type as
+	 * REST-readable, server-write-only meta:
+	 *
+	 * - {@see self::STATUS_META_KEY} (`_wc_email_template_status`)
+	 * - {@see self::VERSION_META_KEY} (`_wc_email_template_version`)
+	 * - {@see self::SOURCE_HASH_META_KEY} (`_wc_email_template_source_hash`)
+	 * - {@see self::BACKFILLED_META_KEY} (`_wc_email_backfilled`)
 	 *
 	 * Because the `woo_email` post type declares `'custom-fields'` support (see
 	 * {@see Integration::add_email_post_type()}), WP core auto-surfaces every
 	 * `show_in_rest = true` meta key under the standard `meta` property of the
 	 * `wp/v2/woo_email` response — no custom REST field registration is needed.
 	 *
-	 * This is a stable read contract for the email list UI and any downstream consumer
-	 * (extensions, headless admins). Renaming or removing either meta key, or changing
-	 * the meaning of an existing status string value, is a breaking change. Vocabulary
-	 * expansion (adding new status values) is fine.
+	 * This is a stable read contract for the email list UI, the RSM-141 editor
+	 * "update available" banner, and the RSM-145 Tracks instrumentation. Renaming
+	 * or removing any of these meta keys, or changing the meaning of an existing
+	 * status string value, is a breaking change. Vocabulary expansion (adding new
+	 * status values) is fine.
 	 *
 	 * Hook: `init`.
 	 *
@@ -163,6 +183,32 @@ class WCEmailTemplateDivergenceDetector {
 				'show_in_rest'      => true,
 				'auth_callback'     => array( self::class, 'rest_meta_auth_read_only' ),
 				'sanitize_callback' => 'sanitize_text_field',
+			)
+		);
+
+		register_post_meta(
+			'woo_email',
+			self::SOURCE_HASH_META_KEY,
+			array(
+				'type'              => 'string',
+				'description'       => 'SHA-1 stamp of the canonical core post content recorded the last time this email post was generated, applied, or reset. Consumed by RSM-145 Tracks instrumentation to fingerprint the baseline the merchant was reviewing. Read-only over REST.',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'auth_callback'     => array( self::class, 'rest_meta_auth_read_only' ),
+				'sanitize_callback' => 'sanitize_text_field',
+			)
+		);
+
+		register_post_meta(
+			'woo_email',
+			self::BACKFILLED_META_KEY,
+			array(
+				'type'              => 'boolean',
+				'description'       => 'True when the post was stamped by the RSM-149 backfill rather than created natively by the modern generator. Consumed by RSM-145 Tracks instrumentation to segment update-banner interactions on backfilled posts. Read-only over REST.',
+				'single'            => true,
+				'show_in_rest'      => true,
+				'auth_callback'     => array( self::class, 'rest_meta_auth_read_only' ),
+				'sanitize_callback' => 'rest_sanitize_boolean',
 			)
 		);
 	}
