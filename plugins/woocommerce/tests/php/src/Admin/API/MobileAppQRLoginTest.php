@@ -571,6 +571,10 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		);
 		$this->assertSame( 0, (int) $row->rate_limit_remaining );
 		$this->assertSame( 0, $this->get_qr_login_rate_limit_transient_count() );
+		$this->assertNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_EXCHANGE_IP, '203.0.113.10' ),
+			'Invalid-token traffic must not consume the broad exchange-IP bucket.'
+		);
 	}
 
 	/**
@@ -853,11 +857,19 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		for ( $i = 0; $i < MobileAppQRLogin::MAX_EXCHANGE_ATTEMPTS; $i++ ) {
 			$this->assertSame( 401, $this->dispatch_exchange( 'random-invalid-' . $i )->get_status() );
 		}
+		$this->assertNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_EXCHANGE_IP, '203.0.113.10' ),
+			'Invalid-token traffic must not create a broad exchange-IP row.'
+		);
 
 		$response = $this->dispatch_exchange( $plaintext );
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertCount( 1, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+		$this->assertNotNull(
+			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_EXCHANGE_IP, '203.0.113.10' ),
+			'Valid-token exchange traffic should still consume the broad exchange-IP guard.'
+		);
 	}
 
 	/**

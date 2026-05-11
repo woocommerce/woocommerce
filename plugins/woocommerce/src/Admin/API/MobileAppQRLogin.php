@@ -412,17 +412,6 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// Broad anonymous abuse guard. Token-specific limits are applied after
-		// token lookup so random invalid requests cannot exhaust the bucket for
-		// legitimate exchanges behind a shared proxy/CDN IP.
-		if ( ! $this->check_exchange_ip_rate_limit() ) {
-			return new \WP_Error(
-				'rate_limit_exceeded',
-				__( 'Too many exchange attempts. Please try again later.', 'woocommerce' ),
-				array( 'status' => 429 )
-			);
-		}
-
 		// Refuse to return credentials bound to a non-HTTPS site URL — see
 		// get_secure_site_url() for rationale. A token that was minted while the
 		// siteurl was still https:// but has since been changed to http:// should
@@ -452,6 +441,18 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 				'invalid_token',
 				__( 'Invalid or expired QR login token.', 'woocommerce' ),
 				array( 'status' => 401 )
+			);
+		}
+
+		// Broad anonymous abuse guard applies only after token lookup. Random
+		// invalid requests use the invalid-token bucket above so they cannot
+		// exhaust this shared-IP guard for later valid exchanges behind the same
+		// proxy/CDN IP.
+		if ( ! $this->check_exchange_ip_rate_limit() ) {
+			return new \WP_Error(
+				'rate_limit_exceeded',
+				__( 'Too many exchange attempts. Please try again later.', 'woocommerce' ),
+				array( 'status' => 429 )
 			);
 		}
 
