@@ -49,6 +49,9 @@
 		]
 	},
 	"config": {
+		"platform": {
+			"php": "7.4"
+		},
 		"allow-plugins": {
 			"roots/wordpress-core-installer": true,
 			"dealerdirect/phpcodesniffer-composer-installer": true
