@@ -14,7 +14,11 @@ import {
 	clearTemplateHtmlOverride,
 	setTemplateHtmlOverride,
 } from './helpers/test-helper-plugin';
-import { seedWooEmailPost, getWooEmailMeta } from './helpers/seed-woo-email';
+import {
+	seedWooEmailPost,
+	getWooEmailMeta,
+	getWooEmailPostContent,
+} from './helpers/seed-woo-email';
 import {
 	simulateCoreBump,
 	triggerBackfill,
@@ -115,9 +119,7 @@ test.describe( 'Update propagation — backward compatibility', () => {
 		expect( content ).not.toContain( 'OLD' );
 	} );
 
-	test( '@pr BC Case C — customized post content preserved (critical safety)', async ( {
-		request,
-	} ) => {
+	test( '@pr BC Case C — customized post content preserved (critical safety)', async () => {
 		const customized =
 			'<!-- wp:paragraph --><p>MERCHANT CUSTOM 1234</p><!-- /wp:paragraph -->';
 
@@ -133,14 +135,15 @@ test.describe( 'Update propagation — backward compatibility', () => {
 		expect( backfill.stamped ).toBeGreaterThanOrEqual( 1 );
 
 		let meta = await getWooEmailMeta( postId );
-		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
+		// Case C: content differs from canonical AND the post has been edited.
+		// Backfill stamps core_updated_customized (does NOT rewrite post_content).
+		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe(
+			STATUS.CORE_UPDATED_CUSTOMIZED
+		);
 
 		// CRITICAL: post content must be UNTOUCHED by backfill.
-		const postRes = await request.get(
-			`/wp-json/wp/v2/woo_email/${ postId }?context=edit`
-		);
-		const post = await postRes.json();
-		expect( post?.content?.raw ?? '' ).toContain( 'MERCHANT CUSTOM 1234' );
+		const contentAfterBackfill = await getWooEmailPostContent( postId );
+		expect( contentAfterBackfill ).toContain( 'MERCHANT CUSTOM 1234' );
 
 		await setTemplateHtmlOverride( 'new_order', OLD_HTML );
 		await triggerDetectionSweep();
@@ -152,11 +155,8 @@ test.describe( 'Update propagation — backward compatibility', () => {
 			STATUS.CORE_UPDATED_CUSTOMIZED
 		);
 
-		const postRes2 = await request.get(
-			`/wp-json/wp/v2/woo_email/${ postId }?context=edit`
-		);
-		const post2 = await postRes2.json();
-		expect( post2?.content?.raw ?? '' ).toContain( 'MERCHANT CUSTOM 1234' );
+		const contentAfterBump = await getWooEmailPostContent( postId );
+		expect( contentAfterBump ).toContain( 'MERCHANT CUSTOM 1234' );
 	} );
 
 	test( 'BC no mass-fire on first upgrade: zero _available, one _backfill_completed', async ( {

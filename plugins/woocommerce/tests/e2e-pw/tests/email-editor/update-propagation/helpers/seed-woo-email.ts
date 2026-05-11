@@ -124,3 +124,13 @@ export async function getWooEmailMeta(
 	);
 	return ( res?.data?.meta ?? {} ) as Record< string, string[] >;
 }
+
+export async function getWooEmailPostContent(
+	postId: number
+): Promise< string > {
+	const client = apiClient();
+	const res = await client.get(
+		`${ TEST_HELPER_API_BASE }/post-content/${ postId }`
+	);
+	return String( res?.data?.post_content ?? '' );
+}

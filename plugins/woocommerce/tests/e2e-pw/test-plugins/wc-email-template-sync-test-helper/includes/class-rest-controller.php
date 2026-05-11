@@ -90,6 +90,19 @@ class REST_Controller {
 
 		register_rest_route(
 			self::NAMESPACE,
+			'/post-content/(?P<post_id>\d+)',
+			array(
+				'methods'             => WP_REST_Server::READABLE,
+				'callback'            => array( $this, 'read_post_content' ),
+				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				'args'                => array(
+					'post_id' => array( 'sanitize_callback' => 'absint' ),
+				),
+			)
+		);
+
+		register_rest_route(
+			self::NAMESPACE,
 			'/seed-bulk',
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
@@ -212,10 +225,18 @@ class REST_Controller {
 	 * Apply arbitrary meta + post column updates to a post in one round-trip.
 	 * Body is JSON `{ meta?: {key: value | null}, post?: {wp_update_post fields} }`.
 	 *
+	 * Timestamp columns (`post_date`, `post_date_gmt`, `post_modified`,
+	 * `post_modified_gmt`) are applied via a direct `$wpdb->update()` after the
+	 * `wp_update_post()` call, because WordPress always overwrites `post_modified*`
+	 * with the current time during an update pass — passing them through
+	 * `wp_update_post()` would be silently ignored.
+	 *
 	 * @param WP_REST_Request $request The REST request. Expects `post_id` route parameter and JSON body.
 	 * @return WP_REST_Response
 	 */
 	public function seed_meta( WP_REST_Request $request ): WP_REST_Response {
+		global $wpdb;
+
 		$post_id = (int) $request->get_param( 'post_id' );
 		$body    = $request->get_json_params();
 
@@ -238,12 +259,54 @@ class REST_Controller {
 			}
 		}
 
-		$post_updates = $body['post'] ?? array();
-		if ( is_array( $post_updates ) && ! empty( $post_updates ) ) {
+		// Timestamp columns must be handled separately: wp_update_post always
+		// stamps post_modified* with current_time(), ignoring any caller-supplied
+		// value. Split the post update array into "regular" fields (handled by
+		// wp_update_post) and timestamp fields (applied via direct DB write after).
+		$timestamp_columns = array( 'post_date', 'post_date_gmt', 'post_modified', 'post_modified_gmt' );
+
+		$post_updates      = $body['post'] ?? array();
+		$timestamp_updates = array();
+		$regular_updates   = array();
+
+		if ( is_array( $post_updates ) ) {
+			foreach ( $post_updates as $col => $value ) {
+				if ( in_array( $col, $timestamp_columns, true ) ) {
+					$timestamp_updates[ $col ] = (string) $value;
+				} else {
+					$regular_updates[ $col ] = $value;
+				}
+			}
+		}
+
+		if ( ! empty( $regular_updates ) ) {
 			wp_update_post(
-				array_merge( array( 'ID' => $post_id ), $post_updates ),
+				array_merge( array( 'ID' => $post_id ), $regular_updates ),
 				true
 			);
+		}
+
+		if ( ! empty( $timestamp_updates ) ) {
+			// Ensure the local-time columns stay consistent with their GMT counterparts.
+			// `was_never_edited()` in WCEmailTemplateSyncBackfill checks the local pair
+			// as a fallback (`post_date === post_modified`), so both pairs must differ
+			// for the post to be classified as Case C rather than Case B.
+			if ( isset( $timestamp_updates['post_date_gmt'] ) && ! isset( $timestamp_updates['post_date'] ) ) {
+				$timestamp_updates['post_date'] = get_date_from_gmt( $timestamp_updates['post_date_gmt'] );
+			}
+			if ( isset( $timestamp_updates['post_modified_gmt'] ) && ! isset( $timestamp_updates['post_modified'] ) ) {
+				$timestamp_updates['post_modified'] = get_date_from_gmt( $timestamp_updates['post_modified_gmt'] );
+			}
+
+			// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->update(
+				$wpdb->posts,
+				$timestamp_updates,
+				array( 'ID' => $post_id ),
+				array_fill( 0, count( $timestamp_updates ), '%s' ),
+				array( '%d' )
+			);
+			clean_post_cache( $post_id );
 		}
 
 		return new WP_REST_Response(
@@ -272,6 +335,30 @@ class REST_Controller {
 			array(
 				'post_id' => $post_id,
 				'meta'    => get_post_meta( $post_id ),
+			),
+			200
+		);
+	}
+
+	/**
+	 * Read the raw post_content for a post. Bypasses the wp/v2 REST surface, which
+	 * doesn't reliably expose `content.raw` for custom post types under all auth modes.
+	 *
+	 * @param WP_REST_Request $request The REST request. Expects `post_id` route parameter.
+	 * @return WP_REST_Response
+	 */
+	public function read_post_content( WP_REST_Request $request ): WP_REST_Response {
+		$post_id = (int) $request->get_param( 'post_id' );
+		$post    = get_post( $post_id );
+
+		if ( ! $post ) {
+			return new WP_REST_Response( array( 'error' => "Post {$post_id} not found" ), 404 );
+		}
+
+		return new WP_REST_Response(
+			array(
+				'post_id'      => $post_id,
+				'post_content' => (string) $post->post_content,
 			),
 			200
 		);
