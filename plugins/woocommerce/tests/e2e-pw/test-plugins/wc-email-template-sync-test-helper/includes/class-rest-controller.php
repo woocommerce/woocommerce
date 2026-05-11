@@ -93,6 +93,23 @@ class REST_Controller {
 				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
 			)
 		);
+
+		register_rest_route(
+			self::NAMESPACE,
+			'/tracks',
+			array(
+				array(
+					'methods'             => WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_tracks' ),
+					'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				),
+				array(
+					'methods'             => WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'clear_tracks' ),
+					'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				),
+			)
+		);
 	}
 
 	/**
@@ -305,6 +322,33 @@ class REST_Controller {
 			),
 			200
 		);
+	}
+
+	/**
+	 * Return the in-option Tracks event log captured by Tracks_Recorder.
+	 *
+	 * @param WP_REST_Request $request The REST request (unused).
+	 * @return WP_REST_Response
+	 */
+	public function get_tracks( WP_REST_Request $request ): WP_REST_Response {
+		unset( $request );
+		$log = get_option( Tracks_Recorder::LOG_OPTION, array() );
+		return new WP_REST_Response(
+			array( 'events' => is_array( $log ) ? $log : array() ),
+			200
+		);
+	}
+
+	/**
+	 * Clear the Tracks event log option so the next read starts empty.
+	 *
+	 * @param WP_REST_Request $request The REST request (unused).
+	 * @return WP_REST_Response
+	 */
+	public function clear_tracks( WP_REST_Request $request ): WP_REST_Response {
+		unset( $request );
+		delete_option( Tracks_Recorder::LOG_OPTION );
+		return new WP_REST_Response( array( 'cleared' => true ), 200 );
 	}
 
 	/**
