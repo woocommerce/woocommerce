@@ -62,6 +62,17 @@ class WCEmailTemplateSyncTracker {
 	public const EVENT_BACKFILL_COMPLETED = 'block_email_sync_backfill_completed';
 
 	/**
+	 * Persistent guard option recording that `_backfill_completed` has already
+	 * been recorded for this site. Once set, repeat invocations of
+	 * {@see self::on_backfill_complete()} short-circuit — protects against
+	 * manual re-runs of {@see WCEmailTemplateSyncBackfill::run()} (e.g. via
+	 * wp-cli or tests) double-counting the migration in analytics.
+	 *
+	 * @var string
+	 */
+	public const BACKFILL_COMPLETED_TRACKED_OPTION = 'wc_email_sync_backfill_completed_tracked';
+
+	/**
 	 * Prefix for the per-`(post_id, template_version_to)` dedup transients used by
 	 * `_update_available`. The composite suffix is md5-hashed so the resulting
 	 * option name stays comfortably under WordPress's 191-char limit even for
@@ -255,6 +266,16 @@ class WCEmailTemplateSyncTracker {
 	 * @since 10.9.0
 	 */
 	public static function on_backfill_complete(): void {
+		// Persistent one-shot guard: `WCEmailTemplateSyncBackfill::run()`
+		// fires `finalize()` on every invocation, and finalize() always
+		// fires `BACKFILL_COMPLETE_ACTION`. In production `run()` only
+		// runs once (10.8 db-update callback), but manual re-runs via
+		// wp-cli or tests can re-fire the action — this gate ensures the
+		// Tracks event still lands at most once per site.
+		if ( 'yes' === get_option( self::BACKFILL_COMPLETED_TRACKED_OPTION, 'no' ) ) {
+			return;
+		}
+
 		$posts_backfilled = self::count_backfilled_posts();
 
 		self::record(
@@ -264,6 +285,8 @@ class WCEmailTemplateSyncTracker {
 				'wc_version'       => function_exists( 'WC' ) && WC() ? (string) WC()->version : '',
 			)
 		);
+
+		update_option( self::BACKFILL_COMPLETED_TRACKED_OPTION, 'yes', false );
 	}
 
 	/**

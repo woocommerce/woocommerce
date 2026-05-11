@@ -87,6 +87,7 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 		$wpdb->query( "DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_wc_email_update_available_fired\\_%'" );
 
 		delete_option( WCEmailTemplateDivergenceDetector::BACKFILL_COMPLETE_OPTION );
+		delete_option( WCEmailTemplateSyncTracker::BACKFILL_COMPLETED_TRACKED_OPTION );
 		update_option( 'woocommerce_feature_block_email_editor_enabled', 'no' );
 
 		parent::tearDown();
@@ -232,6 +233,26 @@ class WCEmailTemplateSyncTrackerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $payload['posts_backfilled'] );
 		$this->assertArrayHasKey( 'wc_version', $payload );
 		$this->assertNotSame( '', $payload['wc_version'] );
+	}
+
+	/**
+	 * @testdox Should only fire `_backfill_completed` once per site even on repeat hook firings.
+	 */
+	public function test_on_backfill_complete_is_one_shot(): void {
+		$email_id = 'wc_test_tracker_backfill_one_shot';
+		$post_id  = $this->generate_stamped_post( $email_id );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, true );
+
+		WCEmailTemplateSyncTracker::on_backfill_complete();
+		WCEmailTemplateSyncTracker::on_backfill_complete();
+		WCEmailTemplateSyncTracker::on_backfill_complete();
+
+		$this->assertCount( 1, $this->captured_events, 'Repeat invocations must not double-count the backfill.' );
+		$this->assertSame(
+			'yes',
+			(string) get_option( WCEmailTemplateSyncTracker::BACKFILL_COMPLETED_TRACKED_OPTION ),
+			'One-shot guard option should be stamped after the first record.'
+		);
 	}
 
 	/**
