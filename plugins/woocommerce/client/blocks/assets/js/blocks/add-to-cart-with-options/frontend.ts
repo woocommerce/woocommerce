@@ -15,8 +15,6 @@ import type {
 import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-// PoC: side-effect import so the shopper-lists iAPI store is registered on
-// single-product pages where the Wishlist button is injected after the form.
 import '@woocommerce/stores/woocommerce/shopper-lists';
 import type {
 	RawShopperListItem,
@@ -186,9 +184,7 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 									( v ) => v.attribute && v.value
 							  )
 							: [];
-						if (
-							itemPairs.length !== selectedByAttribute.size
-						) {
+						if ( itemPairs.length !== selectedByAttribute.size ) {
 							return false;
 						}
 						return itemPairs.every(
@@ -396,13 +392,12 @@ const { actions } = store< MergedAddToCartWithOptionsStores >(
 					return;
 				}
 
-				const { actions: shopperListsActions } = store<
-					ShopperListsStore
-				>(
-					'woocommerce/shopper-lists',
-					{},
-					{ lock: universalLock }
-				);
+				const { actions: shopperListsActions } =
+					store< ShopperListsStore >(
+						'woocommerce/shopper-lists',
+						{},
+						{ lock: universalLock }
+					);
 
 				const existing = state.matchingWishlistItem;
 				if ( existing ) {

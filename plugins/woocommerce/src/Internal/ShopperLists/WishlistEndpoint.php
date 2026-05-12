@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\ShopperLists;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * PoC: a `/my-account/wishlist/` endpoint that renders the existing
@@ -28,9 +29,15 @@ class WishlistEndpoint implements RegisterHooksInterface {
 	private const ENDPOINT = 'wishlist';
 
 	/**
-	 * Register hooks and filters.
+	 * Register hooks and filters. The endpoint piggy-backs on the SFL feature
+	 * flag because the block it renders is itself gated on `cart_save_for_later`;
+	 * registering the menu item, query var, and rewrite endpoint when the
+	 * underlying block can't render would just surface an empty page.
 	 */
-	public function register() {
+	public function register(): void {
+		if ( ! FeaturesUtil::feature_is_enabled( 'cart_save_for_later' ) ) {
+			return;
+		}
 		add_filter( 'woocommerce_get_query_vars', array( $this, 'add_query_var' ) );
 		add_filter( 'woocommerce_account_menu_items', array( $this, 'add_menu_item' ) );
 		add_filter( 'woocommerce_endpoint_' . self::ENDPOINT . '_title', array( $this, 'endpoint_title' ) );
@@ -78,17 +85,14 @@ class WishlistEndpoint implements RegisterHooksInterface {
 	 * @param string $title Default title (empty for unknown endpoints).
 	 * @return string
 	 */
-	public function endpoint_title( $title ) {
+	public function endpoint_title( $title ): string {
 		return __( 'Wishlist', 'woocommerce' );
 	}
 
 	/**
-	 * Render the Shopper Collection block inside the endpoint. The block is
-	 * already gated by the `cart_save_for_later` feature flag at registration
-	 * time, so if the flag is off `do_blocks()` parses the comment but renders
-	 * nothing — no separate guard needed here.
+	 * Render the Shopper Collection block inside the endpoint.
 	 */
-	public function render() {
+	public function render(): void {
 		// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- block markup is a static literal; do_blocks() output is rendered HTML.
 		echo do_blocks( '<!-- wp:woocommerce/shopper-collection {"listName":"saved-for-later"} /-->' );
 	}

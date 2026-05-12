@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Internal\ShopperLists;
 
 use Automattic\WooCommerce\Internal\RegisterHooksInterface;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 /**
  * PoC: inject a "Save to wishlist" button after the Add-to-Cart-with-Options
@@ -24,9 +25,13 @@ use Automattic\WooCommerce\Internal\RegisterHooksInterface;
 class WishlistFromSingleProduct implements RegisterHooksInterface {
 
 	/**
-	 * Register hooks and filters.
+	 * Register hooks and filters. Piggy-backs on the SFL feature flag because
+	 * the iAPI store and action this button targets are themselves gated there.
 	 */
-	public function register() {
+	public function register(): void {
+		if ( ! FeaturesUtil::feature_is_enabled( 'cart_save_for_later' ) ) {
+			return;
+		}
 		add_filter( 'render_block_woocommerce/add-to-cart-with-options', array( $this, 'inject_button' ), 10, 1 );
 	}
 
@@ -143,10 +148,10 @@ class WishlistFromSingleProduct implements RegisterHooksInterface {
 	 * @return string
 	 */
 	private function get_star_svg( bool $filled ): string {
-		$path     = 'M12 2.6l2.85 5.77 6.37.93-4.61 4.49 1.09 6.35L12 17.13l-5.7 3.01 1.09-6.35-4.61-4.49 6.37-.93L12 2.6z';
-		$fill     = $filled ? 'currentColor' : 'none';
-		$stroke   = 'currentColor';
-		$markup   = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">'
+		$path   = 'M12 2.6l2.85 5.77 6.37.93-4.61 4.49 1.09 6.35L12 17.13l-5.7 3.01 1.09-6.35-4.61-4.49 6.37-.93L12 2.6z';
+		$fill   = $filled ? 'currentColor' : 'none';
+		$stroke = 'currentColor';
+		$markup = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24" aria-hidden="true" focusable="false">'
 			. '<path d="' . $path . '" fill="' . $fill . '" stroke="' . $stroke . '" stroke-width="1.5" stroke-linejoin="round"/>'
 			. '</svg>';
 		return $markup;
