@@ -134,26 +134,17 @@ $order_key = (string) $order->get_order_key();
 						continue;
 					}
 
-					if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_REVIEWED === $decision['status'] ) {
-						wc_get_template(
-							'order/customer-review-order-row-reviewed.php',
-							array(
-								'item'    => $row['item'],
-								'product' => $row['product'],
-								'order'   => $order,
-								'review'  => $decision['comment'],
-							)
-						);
-						continue;
-					}
+					$prefill = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prefill_for_item( $row['item'], $order );
 
 					wc_get_template(
 						'order/customer-review-order-row.php',
 						array(
-							'item'      => $row['item'],
-							'product'   => $row['product'],
-							'order'     => $order,
-							'row_index' => $row_index,
+							'item'           => $row['item'],
+							'product'        => $row['product'],
+							'order'          => $order,
+							'row_index'      => $row_index,
+							'existing_rating' => $prefill['rating'],
+							'existing_text'   => $prefill['text'],
 						)
 					);
 					++$row_index;

@@ -178,18 +178,11 @@ class SubmissionHandler {
 			// product page regardless of which variation was bought.
 			$review_post_id = $line_product_id;
 
-			// Mirror the page-side decision so the API and the UI agree:
-			// reject when reviews are disabled on the product (STATUS_SKIP),
-			// or when the customer already left a review for this product
-			// (STATUS_REVIEWED) instead of stacking duplicates.
+			// Reject submissions for products whose review form was never
+			// rendered (comments disabled on the product).
 			$decision = ItemEligibility::decide( $item, $order );
 			if ( ItemEligibility::STATUS_SKIP === $decision['status'] ) {
 				$result['error']       = 'reviews_not_open';
-				$results[ $row_index ] = $result;
-				continue;
-			}
-			if ( ItemEligibility::STATUS_REVIEWED === $decision['status'] ) {
-				$result['error']       = 'already_reviewed';
 				$results[ $row_index ] = $result;
 				continue;
 			}
@@ -200,6 +193,36 @@ class SubmissionHandler {
 			$customer_id     = (int) $order->get_customer_id();
 			$current_user_id = get_current_user_id();
 			$comment_user_id = ( $current_user_id > 0 && $current_user_id === $customer_id ) ? $current_user_id : 0;
+
+			// If the customer already has a review tied to this order for this
+			// product, update it in place instead of stacking duplicates. The
+			// existing comment id comes from the server-side lookup, not the
+			// client, so a tampered POST can't target someone else's review.
+			$existing = $decision['comment'] instanceof \WP_Comment ? $decision['comment'] : null;
+
+			if ( $existing instanceof \WP_Comment ) {
+				$update_ok = wp_update_comment(
+					wp_slash(
+						array(
+							'comment_ID'       => (int) $existing->comment_ID,
+							'comment_content'  => $text,
+							'comment_approved' => $require_mod ? 0 : 1,
+						)
+					)
+				);
+				if ( false === $update_ok || is_wp_error( $update_ok ) ) {
+					$result['error']       = 'update_failed';
+					$results[ $row_index ] = $result;
+					continue;
+				}
+
+				update_comment_meta( (int) $existing->comment_ID, 'rating', $rating );
+
+				$result['comment_id']  = (int) $existing->comment_ID;
+				$result['status']      = $require_mod ? 'pending_moderation' : 'ok';
+				$results[ $row_index ] = $result;
+				continue;
+			}
 
 			$comment_data = array(
 				'comment_post_ID'      => $review_post_id,
@@ -222,6 +245,7 @@ class SubmissionHandler {
 
 			add_comment_meta( $comment_id, 'rating', $rating, true );
 			add_comment_meta( $comment_id, 'verified', 1, true );
+			add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
 
 			$result['comment_id']  = (int) $comment_id;
 			$result['status']      = $require_mod ? 'pending_moderation' : 'ok';
