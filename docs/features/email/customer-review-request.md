@@ -17,8 +17,8 @@ The feature is implemented in the `Automattic\WooCommerce\Internal\OrderReviews`
 | ----- | -------------- |
 | `Scheduler` | Schedules the delayed review-request email via Action Scheduler when an order moves to `completed`, and unschedules it on cancellation, refund, trash, or delete. |
 | `Endpoint` | Routes `/review-order/{id}/?key={order_key}` to the WC-managed Review Order page (seeded by `wc_create_pages()` / a 10.8.0 update callback), runs the gating checks (key match, eligible status, customer ownership), and renders the landing-page template through the `[woocommerce_review_order]` shortcode inside the page's content. |
-| `SubmissionHandler` | AJAX handler that consumes the form post. Per-row outcome reporting (`ok`, `pending_moderation`, `error`); honors WordPress's `comment_moderation` option; sets `verified=1` commentmeta on every inserted review. |
-| `ItemEligibility` | Decides per line item whether the row should be a form, a locked "already reviewed" row, or skipped. Provides the default callback that excludes fully-refunded line items. |
+| `SubmissionHandler` | AJAX handler that consumes the form post. Per-row outcome reporting (`ok`, `pending_moderation`, `error`); honors WordPress's `comment_moderation` option; tags every inserted comment with `verified=1` and `_review_order_id` commentmeta so the page can scope existing reviews to the order being viewed. When the customer resubmits a row that already has a review for this order, the existing comment is updated in place rather than duplicated. |
+| `ItemEligibility` | Decides per line item whether the row should render the form (`STATUS_FORM`) or be skipped (`STATUS_SKIP`, used when reviews are disabled on the product). Lookups are order-scoped via the `_review_order_id` commentmeta, so a customer who reviewed the same product on a previous order can still review it again here, and the form pre-fills with the existing rating/text when the customer already submitted a review for this order. Also provides the default callback that excludes fully-refunded line items. |
 | `StarRating` | Server-side renderer for the accessible 5-star rating control (radio inputs + SVG visuals + caption). |
 
 ## Tokenized URL helper
@@ -48,31 +48,42 @@ Returns the tokenized review-order URL for a given `WC_Order`. Use this rather t
 - `woocommerce_review_order_eligible_items` (`WC_Order_Item[]`, `WC_Order`)  
   Filter the line items rendered on the page. The default callback excludes fully-refunded items.
 
-- `woocommerce_review_order_item_already_reviewed` (`bool`, `int $product_id`, `WC_Order`, `string $customer_email`)  
-  Override the per-item "already reviewed" decision. Useful when reviews live somewhere other than `wp_comments`.
-
 - `woocommerce_review_order_rating_labels` (`array<int,string>`)  
   Customize the 1-5 star labels surfaced beside the control. Defaults to `Very poor / Not that bad / Average / Good / Perfect`.
 
 ### Actions
 
+#### Send pipeline
+
+- `woocommerce_send_review_request` (`int $order_id`)  
+  Action Scheduler hook. `Scheduler` enqueues this for each eligible order when the order moves to `completed`, with the delay configured on the email settings screen. When the delay elapses, Action Scheduler fires the hook and WC's transactional-email pipeline (`WC_Emails::email_actions()`) re-dispatches it as `woocommerce_send_review_request_notification`. Useful for plugins that need to observe or short-circuit the scheduled send without owning the email itself.
+
+- `woocommerce_send_review_request_notification` (`int $order_id`)  
+  Transactional email pipeline action, fired by `WC_Emails` after `woocommerce_send_review_request`. `WC_Email_Customer_Review_Request::trigger()` listens here and builds + sends the email. Useful when you need to add a second listener (e.g. analytics) alongside the built-in mailer.
+
+#### Form
+
 - `woocommerce_review_order_form_fields` (`WC_Order_Item_Product`, `WC_Product`, `WC_Order`, `int $row_index`)  
   Fires inside each form row, after the rating + textarea. Echo extra fields directly.
 
 - `woocommerce_review_order_submitted` (`WC_Order $order`, `array $results`)  
-  Fires after a successful submission, once any pending or approved comments have been inserted. `$results` is the per-row outcome map keyed by row index, with `product_id`, `status` (`ok | pending_moderation | error`), and (on success) `comment_id`.
+  Fires after the form has been processed, even when some rows ended in `error`. `$results` is the per-row outcome map keyed by row index, with `product_id`, `status` (`ok | pending_moderation | error`), and (on success) `comment_id`.
 
 ## Theme overrides
 
 The page renders through `wc_get_template()`, so themes can override any of:
 
-- `templates/order/customer-review-order.php` — the page wrapper.
-- `templates/order/customer-review-order-row.php` — one form row per item.
-- `templates/order/customer-review-order-row-reviewed.php` — locked variant for items the customer already reviewed.
-- `templates/order/customer-review-order-empty.php` — thank-you view rendered when nothing is left to review.
+- `templates/order/customer-review-order.php` — the page wrapper. Branches between the form view and the empty-state thank-you view, and pre-computes the per-row decisions consumed by the row template.
+- `templates/order/customer-review-order-row.php` — one form row per item. Receives `existing_rating` and `existing_text` so the row pre-fills when the customer already submitted a review for this order.
+- `templates/order/customer-review-order-empty.php` — thank-you view rendered when no actionable rows remain (every item already reviewed for this order, or every item skipped because reviews are disabled).
 - `templates/order/star-rating.php` — the accessible star-rating control partial.
 
-Copy any of those files into `yourtheme/woocommerce/order/{name}.php` to override.
+To override, copy a template into your theme while preserving the relative path:
+
+- `templates/order/customer-review-order.php` → `yourtheme/woocommerce/order/customer-review-order.php`
+- `templates/order/customer-review-order-row.php` → `yourtheme/woocommerce/order/customer-review-order-row.php`
+- `templates/order/customer-review-order-empty.php` → `yourtheme/woocommerce/order/customer-review-order-empty.php`
+- `templates/order/star-rating.php` → `yourtheme/woocommerce/order/star-rating.php`
 
 ## Email template overrides
 
