@@ -22,6 +22,12 @@
 	flex-direction: column;
 	gap: 0.25em;
 
+	// The atomic product-button's `display: flex` outspecifies `[hidden]`,
+	// so the move-to-cart wrapper wouldn't honor `hidden` without this.
+	.wp-block-button.wc-block-components-product-button[hidden] {
+		display: none;
+	}
+
 	// Title spacing/line-height matches Product Collection's default
 	// product-title attributes (level: 2, margin: 0 0 0.75rem, line-height: 1.4).
 	// We target wp-block-post-title (core's post-title class) because the

@@ -87,9 +87,9 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should serve live product data and product_exists=true when the product exists.
+	 * @testdox Should serve live product data and is_live=true for a published product.
 	 */
-	public function test_returns_live_data_when_product_exists(): void {
+	public function test_returns_live_data_when_is_live(): void {
 		$product = \WC_Helper_Product::create_simple_product(
 			true,
 			array(
@@ -100,12 +100,180 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 
 		$response = $this->sut->get_item_response( $this->build_item( $product->get_id(), 0, array(), 'Snapshot T-Shirt' ) );
 
-		$this->assertTrue( $response['product_exists'], 'product_exists must be true when the product still exists' );
+		$this->assertTrue( $response['is_live'], 'is_live must be true for a published product' );
+		$this->assertTrue( $response['is_purchasable'], 'A published, in-stock priced product is purchasable' );
 		$this->assertSame( 'Live T-Shirt', $response['name'], 'Live name should be served, not the snapshot' );
 		$this->assertSame( $product->get_permalink(), $response['permalink'] );
 		$this->assertNotNull( $response['prices'], 'Live prices should be populated' );
 
 		$product->delete( true );
+	}
+
+	/**
+	 * @testdox is_live should gate on publish status (self and parent). Stock, catalog visibility, and post password don't affect it.
+	 * @dataProvider provider_is_live_cases
+	 *
+	 * @param array<string, string> $overrides     Post/product overrides to apply.
+	 * @param bool                  $expected_live Expected is_live value.
+	 */
+	public function test_is_live_predicate( array $overrides, bool $expected_live ): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Subject',
+				'regular_price' => 19.99,
+			)
+		);
+
+		if ( isset( $overrides['stock_status'] ) ) {
+			$product->set_stock_status( $overrides['stock_status'] );
+			$product->save();
+		}
+		if ( isset( $overrides['catalog_visibility'] ) ) {
+			$product->set_catalog_visibility( $overrides['catalog_visibility'] );
+			$product->save();
+		}
+		$post_overrides = array_intersect_key( $overrides, array_flip( array( 'post_status', 'post_password' ) ) );
+		if ( ! empty( $post_overrides ) ) {
+			wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_overrides ) );
+		}
+
+		$response = $this->sut->get_item_response( $this->build_item( $product->get_id(), 0, array(), 'Snapshot Title' ) );
+
+		$this->assertSame( $expected_live, $response['is_live'] );
+		if ( ! $expected_live ) {
+			$this->assertFalse( $response['is_purchasable'], 'Non-public products are not purchasable' );
+			$this->assertSame( 'Snapshot Title', $response['name'], 'Tombstone must not leak the live title' );
+			$this->assertSame( '', $response['permalink'], 'Tombstone must not leak the live permalink' );
+			$this->assertNull( $response['prices'], 'Tombstone must not leak live prices' );
+		}
+
+		wp_delete_post( $product->get_id(), true );
+	}
+
+	/**
+	 * @return array<string, array{0: array<string, string>, 1: bool}>
+	 */
+	public function provider_is_live_cases(): array {
+		return array(
+			// Renderable — guards against using `is_visible()`, which would
+			// tombstone deliberately-saved OOS / catalog-hidden items.
+			'OOS, publish'              => array( array( 'stock_status' => 'outofstock' ), true ),
+			'catalog_visibility=hidden' => array( array( 'catalog_visibility' => 'hidden' ), true ),
+			// Tombstone cases.
+			'draft'                     => array( array( 'post_status' => 'draft' ), false ),
+			'pending'                   => array( array( 'post_status' => 'pending' ), false ),
+			'private'                   => array( array( 'post_status' => 'private' ), false ),
+			'trash'                     => array( array( 'post_status' => 'trash' ), false ),
+		);
+	}
+
+	/**
+	 * @testdox Out-of-stock products stay live but aren't purchasable, matching catalog behavior.
+	 */
+	public function test_out_of_stock_product_is_live_but_not_purchasable(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'OOS T-Shirt',
+				'regular_price' => 19.99,
+			)
+		);
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+
+		$response = $this->sut->get_item_response( $this->build_item( $product->get_id() ) );
+
+		$this->assertTrue( $response['is_live'], 'OOS products stay renderable' );
+		$this->assertFalse( $response['is_purchasable'], 'Cart button hidden for OOS, mirroring the storefront catalog gate (is_purchasable() && is_in_stock())' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Password-protected products stay live (clickable) but aren't purchasable.
+	 */
+	public function test_password_protected_product_is_live_but_not_purchasable(): void {
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Gated T-Shirt',
+				'regular_price' => 19.99,
+			)
+		);
+		wp_update_post(
+			array(
+				'ID'            => $product->get_id(),
+				'post_password' => 'secret',
+			)
+		);
+
+		$response = $this->sut->get_item_response( $this->build_item( $product->get_id() ) );
+
+		$this->assertTrue( $response['is_live'], 'Page renders behind a password prompt, so the row stays clickable' );
+		$this->assertFalse( $response['is_purchasable'], 'Customer must authenticate before purchasing' );
+		$this->assertSame( $product->get_permalink(), $response['permalink'] );
+
+		wp_delete_post( $product->get_id(), true );
+	}
+
+	/**
+	 * @testdox Admins viewing their own draft products see a tombstone, not a Move-to-cart button.
+	 */
+	public function test_admin_viewing_own_draft_does_not_short_circuit_is_purchasable(): void {
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+
+		$product = \WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name'          => 'Pre-launch T-Shirt',
+				'regular_price' => 19.99,
+			)
+		);
+		wp_update_post(
+			array(
+				'ID'          => $product->get_id(),
+				'post_status' => 'draft',
+			)
+		);
+
+		$response = $this->sut->get_item_response( $this->build_item( $product->get_id() ) );
+
+		// WC_Product::is_purchasable() short-circuits via `current_user_can( 'edit_post', ... )`
+		// for admins. Our predicate must gate on is_live first so the tombstone row isn't
+		// rendered with a working cart button.
+		$this->assertFalse( $response['is_live'] );
+		$this->assertFalse( $response['is_purchasable'], 'Admin escape hatch in WC_Product::is_purchasable() must not leak into is_purchasable on a tombstone row.' );
+
+		wp_delete_post( $product->get_id(), true );
+		wp_delete_user( $admin_id );
+	}
+
+	/**
+	 * @testdox Should tombstone a variation whose parent is not published.
+	 */
+	public function test_variation_with_non_publish_parent_is_tombstoned(): void {
+		$variable = \WC_Helper_Product::create_variation_product();
+		$children = $variable->get_children();
+		$this->assertNotEmpty( $children, 'Variable product helper should produce variation children' );
+		$variation_id = (int) $children[0];
+
+		wp_update_post(
+			array(
+				'ID'          => $variable->get_id(),
+				'post_status' => 'draft',
+			)
+		);
+
+		$response = $this->sut->get_item_response(
+			$this->build_item( $variable->get_id(), $variation_id, array(), 'Snapshot Title' )
+		);
+
+		$this->assertFalse( $response['is_live'], 'Variations under a non-publish parent must be tombstoned' );
+		$this->assertSame( 'Snapshot Title', $response['name'] );
+
+		$variable->delete( true );
 	}
 
 	/**
@@ -181,7 +349,7 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 
 		$response = $this->sut->get_item_response( $item );
 
-		$this->assertFalse( $response['product_exists'], 'product_exists must be false when the product is gone' );
+		$this->assertFalse( $response['is_live'], 'is_live must be false when the product is gone' );
 		$this->assertSame( 'Snapshot Title', $response['name'], 'Tombstone name should fall back to the at-save title snapshot' );
 		$this->assertSame( '', $response['permalink'], 'permalink should be empty in tombstone path' );
 		$this->assertSame( array(), $response['images'], 'No images should be returned for missing products' );

@@ -42,7 +42,8 @@ export type RawShopperListItem = {
 	product_id: number;
 	variation_id: number;
 	quantity: number;
-	product_exists: boolean;
+	is_live: boolean;
+	is_purchasable: boolean;
 	name: string;
 	permalink: string;
 	images: ShopperListItemImage[];

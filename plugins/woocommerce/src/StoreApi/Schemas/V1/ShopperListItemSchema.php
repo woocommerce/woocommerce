@@ -11,8 +11,8 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
 /**
  * ShopperListItemSchema class.
  *
- * Serializes a {@see ShopperListItem}. Serves live product data when the
- * underlying product still exists, and at-save tombstone data otherwise.
+ * Serializes a {@see ShopperListItem}. Renders live product fields when the
+ * item reports `is_live`, and falls back to at-save snapshot data otherwise.
  */
 class ShopperListItemSchema extends AbstractSchema {
 	// We only call format_variation_data(); see phpstan.neon for the related suppressions.
@@ -93,14 +93,20 @@ class ShopperListItemSchema extends AbstractSchema {
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
-			'product_exists' => array(
-				'description' => __( 'True when the underlying product still exists in the catalog. When false, the row is a tombstone served from at-save snapshot data.', 'woocommerce' ),
+			'is_live'        => array(
+				'description' => __( 'True when the row serves live product data; false rows are at-save tombstones.', 'woocommerce' ),
+				'type'        => 'boolean',
+				'context'     => array( 'view', 'edit' ),
+				'readonly'    => true,
+			),
+			'is_purchasable' => array(
+				'description' => __( 'True when the product can be added to the cart.', 'woocommerce' ),
 				'type'        => 'boolean',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
 			),
 			'name'           => array(
-				'description' => __( 'Product name. Live when product_exists is true; falls back to the at-save title snapshot otherwise.', 'woocommerce' ),
+				'description' => __( 'Product name. Live when is_live is true; falls back to the at-save title snapshot otherwise.', 'woocommerce' ),
 				'type'        => 'string',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -211,8 +217,8 @@ class ShopperListItemSchema extends AbstractSchema {
 	public function get_item_response( $item ) {
 		$variation_id = $item->get_variation_id();
 		$product_id   = $variation_id > 0 ? $variation_id : $item->get_product_id();
-		$product      = $product_id > 0 ? wc_get_product( $product_id ) : false;
-		$has_product  = $product instanceof \WC_Product;
+		$product      = $item->get_product();
+		$is_live      = $item->is_live();
 
 		$response = array(
 			'key'            => $item->get_key(),
@@ -220,11 +226,12 @@ class ShopperListItemSchema extends AbstractSchema {
 			'product_id'     => $item->get_product_id(),
 			'variation_id'   => $variation_id,
 			'quantity'       => $item->get_quantity(),
-			'product_exists' => $has_product,
+			'is_live'        => $is_live,
+			'is_purchasable' => $item->is_purchasable(),
 			'date_added_gmt' => wc_rest_prepare_date_response( $item->get_date_added_gmt() ),
 		);
 
-		if ( $has_product ) {
+		if ( $is_live && $product instanceof \WC_Product ) {
 			$response['name']       = $this->get_name( $product );
 			$response['permalink']  = $product->get_permalink();
 			$response['images']     = $this->get_images( $product );
