@@ -73,6 +73,7 @@ export const QRDirectLoginCode = ( {
 		qrUrl,
 		secondsRemaining,
 		errorMessage,
+		errorCode,
 		deviceInfo,
 		apUuid,
 		candidateNumbers,
@@ -89,9 +90,9 @@ export const QRDirectLoginCode = ( {
 			displayedTrackedRef.current = true;
 			recordEvent( 'mobile_app_qr_direct_login_displayed' );
 		},
-		onError: ( errorCode ) => {
+		onError: ( nextErrorCode ) => {
 			recordEvent( 'mobile_app_qr_direct_login_failed', {
-				error_code: errorCode,
+				error_code: nextErrorCode,
 			} );
 		},
 	} );
