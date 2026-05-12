@@ -199,6 +199,11 @@ test.describe( 'Update propagation — core flows', () => {
 			postContent: customized,
 			storedSourceHash: 'AUTO_CURRENT',
 			status: STATUS.IN_SYNC,
+			// Seed an older version so the registry's current_version is higher.
+			// The editor banner only shows when templateVersion < currentVersion;
+			// same-version posts surface summaryShowsReviewed=true and unmount
+			// the banner before the dismiss button can be clicked.
+			version: '10.0.0',
 		} );
 		await clearTemplateHtmlOverride();
 		await triggerDetectionSweep();
