@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Api\Pagination\Connection;
 use Automattic\WooCommerce\Api\Attributes\Deprecated;
 use Automattic\WooCommerce\Api\Attributes\Description;
 use Automattic\WooCommerce\Api\Attributes\Ignore;
+use Automattic\WooCommerce\Api\Attributes\Metadata;
 use Automattic\WooCommerce\Api\Attributes\Name;
 use Automattic\WooCommerce\Api\Attributes\Parameter;
 use Automattic\WooCommerce\Api\Attributes\ParameterDescription;
@@ -1247,6 +1248,7 @@ class ApiBuilder {
 				'case_name'          => $case->getName(),
 				'description'        => $this->get_description( $case ),
 				'deprecation_reason' => ! empty( $deprecation ) ? $deprecation[0]->newInstance()->reason : null,
+				'metadata'           => $this->harvest_metadata( $case, "{$ref->getShortName()}::{$case->getName()}" ),
 			);
 		}
 
@@ -1260,6 +1262,7 @@ class ApiBuilder {
 				'enum_fqcn'    => $fqcn,
 				'enum_alias'   => $enum_alias,
 				'values'       => $values,
+				'metadata'     => $this->harvest_metadata( $ref, $ref->getShortName() ),
 			)
 		);
 
@@ -1284,6 +1287,7 @@ class ApiBuilder {
 				'description'  => $description,
 				'scalar_fqcn'  => $fqcn,
 				'scalar_alias' => $scalar_alias,
+				'metadata'     => $this->harvest_metadata( $ref, $ref->getShortName() ),
 			)
 		);
 
@@ -1333,6 +1337,7 @@ class ApiBuilder {
 				'use_statements' => array_unique( $use_stmts ),
 				'fields'         => $fields,
 				'type_map'       => $type_map,
+				'metadata'       => $this->harvest_metadata( $ref, $ref->getShortName() ),
 			)
 		);
 
@@ -1383,6 +1388,7 @@ class ApiBuilder {
 				'use_statements' => array_unique( $use_stmts ),
 				'interfaces'     => $interfaces,
 				'fields'         => $fields,
+				'metadata'       => $this->harvest_metadata( $ref, $ref->getShortName() ),
 			)
 		);
 
@@ -1426,6 +1432,7 @@ class ApiBuilder {
 				'description'    => $description,
 				'use_statements' => array_unique( $use_stmts ),
 				'fields'         => $fields,
+				'metadata'       => $this->harvest_metadata( $ref, $ref->getShortName() ),
 			)
 		);
 
@@ -1525,6 +1532,7 @@ class ApiBuilder {
 				'description' => $param_description,
 				'has_default' => $param->isDefaultValueAvailable(),
 				'default'     => $param->isDefaultValueAvailable() ? $param->getDefaultValue() : null,
+				'metadata'    => $this->harvest_metadata( $param, "{$ref->getShortName()}::execute() parameter \${$param_name}" ),
 			);
 			$args[]    = $arg_entry;
 
@@ -1634,6 +1642,7 @@ class ApiBuilder {
 				'attribute_expr'                   => $attribute_expr,
 				'compute_preauthorized_param_type' => $compute_preauthorized_param_type,
 				'scalar_return'                    => $scalar_return,
+				'metadata'                         => $this->harvest_metadata( $ref, $ref->getShortName() ),
 			)
 		);
 
@@ -1905,6 +1914,7 @@ class ApiBuilder {
 			// Description from attribute.
 			$desc_attrs  = $prop->getAttributes( Description::class );
 			$description = ! empty( $desc_attrs ) ? $desc_attrs[0]->newInstance()->description : '';
+			$description = $this->apply_description_transforms( $description, $prop );
 
 			// Default value.
 			$has_default = $prop->hasDefaultValue();
@@ -1933,6 +1943,10 @@ class ApiBuilder {
 				'description' => $description,
 				'has_default' => $has_default,
 				'default'     => $default,
+				// Unrolled args inherit metadata from the source property: the
+				// unroll is a renaming of input fields into top-level args, so
+				// any `#[Metadata]` on the property travels with the rename.
+				'metadata'    => $this->harvest_metadata( $prop, "{$ref->getShortName()}::\${$prop_name}" ),
 			);
 
 			// Value expression for the constructor call.
@@ -2227,19 +2241,87 @@ class ApiBuilder {
 	}
 
 	private function get_description( \ReflectionClass|\ReflectionEnum|\ReflectionEnumUnitCase $ref ): string {
-		$attrs = $ref->getAttributes( Description::class );
-		return ! empty( $attrs ) ? $attrs[0]->newInstance()->description : '';
+		$attrs       = $ref->getAttributes( Description::class );
+		$description = ! empty( $attrs ) ? $attrs[0]->newInstance()->description : '';
+		return $this->apply_description_transforms( $description, $ref );
 	}
 
 	private function get_param_description( \ReflectionParameter $param ): string {
-		$attrs = $param->getAttributes( Description::class );
-		return ! empty( $attrs ) ? $attrs[0]->newInstance()->description : '';
+		$attrs       = $param->getAttributes( Description::class );
+		$description = ! empty( $attrs ) ? $attrs[0]->newInstance()->description : '';
+		return $this->apply_description_transforms( $description, $param );
+	}
+
+	/**
+	 * Thread the description through {@see Metadata::transform_description()}
+	 * on every `Metadata`-derived attribute applied to the element.
+	 *
+	 * The base `Metadata` implementation is a no-op; subclasses opt into the
+	 * description-mirror convention by overriding (`#[Internal]` prefixes
+	 * `[Internal] ` and supplies a default body, `#[Experimental]` does the
+	 * analogous thing, etc.). Calls happen in PHP reflection (source) order,
+	 * threading each return value into the next, so the last attribute in
+	 * source ends up as the outermost prefix.
+	 *
+	 * The returned text is consumed verbatim by the templates and wrapped in
+	 * `__( ..., 'woocommerce' )`, so any default description supplied by a
+	 * subclass flows through the usual translation pipeline like any other
+	 * description.
+	 *
+	 * @param string                                                                                                              $description Original description text (empty when the element has no `#[Description]`).
+	 * @param \ReflectionClass|\ReflectionEnum|\ReflectionEnumUnitCase|\ReflectionMethod|\ReflectionProperty|\ReflectionParameter $source      Reflector whose `Metadata`-derived attributes drive the transforms.
+	 */
+	private function apply_description_transforms( string $description, $source ): string {
+		foreach ( $source->getAttributes( Metadata::class, \ReflectionAttribute::IS_INSTANCEOF ) as $attribute ) {
+			$description = $attribute->newInstance()->transform_description( $description );
+		}
+		return $description;
+	}
+
+	/**
+	 * Collect {@see Metadata}-derived attributes from a reflector into a
+	 * `name => value` map.
+	 *
+	 * Two attributes producing the same `name` on the same element are a
+	 * generation-time error: surprising metadata in production is worse than a
+	 * loud build failure. The check spans subclasses too (e.g. a future
+	 * `#[Beta]` that also yielded `name = 'internal'` would conflict with a
+	 * sibling `#[Internal]`), which is why we match by `instanceof Metadata`
+	 * rather than by attribute class.
+	 *
+	 * @param \ReflectionClass|\ReflectionEnum|\ReflectionEnumUnitCase|\ReflectionMethod|\ReflectionProperty|\ReflectionParameter $source        Reflector to read attributes from.
+	 * @param string                                                                                                              $context_label Human-readable label for the source, used in error messages (e.g. `"Coupon::$lock_state"`).
+	 *
+	 * @return array<string, bool|int|float|string|null>
+	 */
+	private function harvest_metadata( $source, string $context_label ): array {
+		$entries = array();
+		foreach ( $source->getAttributes( Metadata::class, \ReflectionAttribute::IS_INSTANCEOF ) as $attribute ) {
+			$instance = $attribute->newInstance();
+			$name     = $instance->get_name();
+			if ( array_key_exists( $name, $entries ) ) {
+				$this->errors[] = "{$context_label}: duplicate metadata name '{$name}'.";
+				continue;
+			}
+			$entries[ $name ] = $instance->get_value();
+		}
+		return $entries;
 	}
 
 	private function get_class_info( string $class_name ): ?array {
 		return $this->classes[ $class_name ] ?? null;
 	}
 
+	/**
+	 * Build the field-definition array consumed by templates.
+	 *
+	 * Per-field metadata is harvested from the property itself. Per-argument
+	 * metadata for `#[Parameter]`-declared arguments on output fields is *not*
+	 * supported in the MVP because the `Parameter` attribute carries the arg
+	 * shape inline; there is no separate target to decorate with `#[Metadata]`.
+	 * Root-operation arguments (declared as `execute()` parameters) do get
+	 * per-argument metadata — that path runs through {@see self::generate_resolver()}.
+	 */
 	private function build_field_definition( \ReflectionProperty $prop, string $context, array &$use_stmts ): ?array {
 		$type        = $prop->getType();
 		$type_name   = $type instanceof \ReflectionNamedType ? $type->getName() : 'mixed';
@@ -2256,6 +2338,7 @@ class ApiBuilder {
 		if ( ! empty( $desc_attrs ) ) {
 			$description = $desc_attrs[0]->newInstance()->description;
 		}
+		$description = $this->apply_description_transforms( $description, $prop );
 
 		$deprecation = $prop->getAttributes( Deprecated::class );
 
@@ -2279,6 +2362,10 @@ class ApiBuilder {
 					'name'        => $param_inst->name,
 					'type_expr'   => $arg_type_expr,
 					'description' => $param_inst->description,
+					// `#[Parameter]`-declared args carry their shape inline and
+					// have no separate reflector to read `#[Metadata]` from, so
+					// the MVP exposes them without metadata.
+					'metadata'    => array(),
 				);
 				if ( $param_inst->has_default ) {
 					$arg_entry['default'] = $param_inst->default;
@@ -2307,6 +2394,8 @@ class ApiBuilder {
 		$has_pagination       = $is_connection && ! empty( $args );
 		$paginated_connection = $context === 'output' && $has_pagination;
 
+		$field_context_label = $prop->getDeclaringClass()->getShortName() . '::$' . $prop->getName();
+
 		return array(
 			'name'                 => $prop->getName(),
 			'type_expr'            => $type_expr,
@@ -2314,6 +2403,7 @@ class ApiBuilder {
 			'args'                 => $args,
 			'deprecation_reason'   => ! empty( $deprecation ) ? $deprecation[0]->newInstance()->reason : null,
 			'paginated_connection' => $paginated_connection,
+			'metadata'             => $this->harvest_metadata( $prop, $field_context_label ),
 		);
 	}
 
