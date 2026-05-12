@@ -147,6 +147,30 @@ function applyPriceFilter( query: ProductListQuery, filter: Filter ) {
 	query.max_price = price;
 }
 
+function applyStockQuantityFilter( query: ProductListQuery, filter: Filter ) {
+	if ( filter.operator === 'between' && Array.isArray( filter.value ) ) {
+		const [ min, max ] = filter.value;
+		query.min_stock_quantity = getPriceValue( min );
+		query.max_stock_quantity = getPriceValue( max );
+		return;
+	}
+
+	const value = getPriceValue( filter.value );
+
+	if ( ! value ) {
+		return;
+	}
+
+	if ( filter.operator === 'greaterThanOrEqual' ) {
+		query.min_stock_quantity = value;
+		return;
+	}
+
+	if ( filter.operator === 'lessThanOrEqual' ) {
+		query.max_stock_quantity = value;
+	}
+}
+
 export function buildProductListQuery( view: View ): ProductListQuery {
 	const query: ProductListQuery = {
 		_embed: 1,
@@ -178,6 +202,9 @@ export function buildProductListQuery( view: View ): ProductListQuery {
 				break;
 			case 'price':
 				applyPriceFilter( query, filter );
+				break;
+			case 'stock_quantity':
+				applyStockQuantityFilter( query, filter );
 				break;
 		}
 	} );

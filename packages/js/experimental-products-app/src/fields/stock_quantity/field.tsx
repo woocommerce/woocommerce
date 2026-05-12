@@ -12,10 +12,12 @@ import type { ProductEntityRecord } from '../types';
 
 const fieldDefinition = {
 	type: 'integer',
-	label: __( 'Available stock', 'woocommerce' ),
+	label: __( 'Stock quantity', 'woocommerce' ),
 	enableSorting: false,
 	enableHiding: false,
-	filterBy: false,
+	filterBy: {
+		operators: [ 'greaterThanOrEqual', 'lessThanOrEqual', 'between' ],
+	},
 } satisfies Partial< Field< ProductEntityRecord > >;
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
