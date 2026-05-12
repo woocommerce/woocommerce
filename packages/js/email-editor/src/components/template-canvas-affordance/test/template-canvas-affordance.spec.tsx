@@ -16,16 +16,25 @@ import { TemplateCanvasAffordance } from '../template-canvas-affordance';
 import { storeName } from '../../../store';
 import { recordEvent } from '../../../events';
 
-jest.mock( '@wordpress/components', () => ( {
-	Button: ( { children, className, onClick, variant } ) => (
-		<button
-			className={ `${ className } components-button is-${ variant }` }
-			onClick={ onClick }
-		>
-			{ children }
-		</button>
-	),
-} ) );
+jest.mock( '@wordpress/components', () => {
+	const { forwardRef: forwardRefImpl } =
+		jest.requireActual( '@wordpress/element' );
+
+	return {
+		Button: forwardRefImpl(
+			( { children, className, onClick, variant }, ref ) => (
+				<button
+					ref={ ref }
+					className={ `${ className } components-button is-${ variant }` }
+					onClick={ onClick }
+					type="button"
+				>
+					{ children }
+				</button>
+			)
+		),
+	};
+} );
 
 jest.mock( '@wordpress/icons', () => ( {
 	Icon: () => <span data-testid="template-area-icon" />,
@@ -110,6 +119,12 @@ const addEditorCanvas = ( {
 		'[data-block="outer-template"]'
 	);
 
+	if ( ! outerTemplate || ! templateHeader ) {
+		throw new Error(
+			'Editor canvas fixture is missing expected template elements.'
+		);
+	}
+
 	Object.defineProperty( outerTemplate, 'getBoundingClientRect', {
 		value: () => ( {
 			bottom: 900,
@@ -186,7 +201,7 @@ describe( 'TemplateCanvasAffordance', () => {
 		fireEvent.click(
 			iframe.contentDocument?.querySelector(
 				'.woocommerce-email-editor-template-area-affordance__frame'
-			) as HTMLDivElement
+			) as HTMLButtonElement
 		);
 
 		expect( iframe.contentDocument?.body ).toHaveTextContent( 'Template' );
@@ -215,7 +230,7 @@ describe( 'TemplateCanvasAffordance', () => {
 		fireEvent.click(
 			iframe.contentDocument?.querySelector(
 				'.woocommerce-email-editor-template-area-affordance__frame'
-			) as HTMLDivElement
+			) as HTMLButtonElement
 		);
 
 		expect(
@@ -230,7 +245,7 @@ describe( 'TemplateCanvasAffordance', () => {
 		).toHaveStyle( { top: '30px' } );
 	} );
 
-	it( 'anchors to the block before email content instead of the full template wrapper', async () => {
+	it( 'does not render when no site-identity block is available to anchor to', async () => {
 		const iframe = addEditorCanvas( {
 			headerContent: '<h1>testingbun</h1>',
 		} );
@@ -238,30 +253,29 @@ describe( 'TemplateCanvasAffordance', () => {
 
 		render( <TemplateCanvasAffordance /> );
 
-		await waitFor( () => {
-			expect(
-				iframe.contentDocument?.querySelector(
-					'.woocommerce-email-editor-template-area-affordance__frame'
-				)
-			).toBeInTheDocument();
-		} );
-
-		fireEvent.click(
-			iframe.contentDocument?.querySelector(
-				'.woocommerce-email-editor-template-area-affordance__frame'
-			) as HTMLDivElement
-		);
+		// Give the rAF-driven mount loop a chance to run and bail out.
+		await new Promise( ( resolve ) => setTimeout( resolve, 50 ) );
 
 		expect(
-			iframe.contentDocument?.querySelector(
-				'.woocommerce-email-editor-template-area-affordance__frame'
+			iframe.contentDocument?.getElementById(
+				'woocommerce-email-editor-template-area-affordance-slot'
 			)
-		).toHaveStyle( { top: '83px' } );
+		).not.toBeInTheDocument();
+	} );
+
+	it( 'does not render when the user cannot edit templates', async () => {
+		const iframe = addEditorCanvas();
+		setupUseSelectMock( { canEditTemplates: false } );
+
+		render( <TemplateCanvasAffordance /> );
+
+		await new Promise( ( resolve ) => setTimeout( resolve, 50 ) );
+
 		expect(
-			iframe.contentDocument?.querySelector(
-				'.woocommerce-email-editor-template-area-affordance'
+			iframe.contentDocument?.getElementById(
+				'woocommerce-email-editor-template-area-affordance-slot'
 			)
-		).toHaveStyle( { top: '30px' } );
+		).not.toBeInTheDocument();
 	} );
 
 	it( 'navigates to the current template when edit template is clicked', async () => {
@@ -281,7 +295,7 @@ describe( 'TemplateCanvasAffordance', () => {
 		fireEvent.click(
 			iframe.contentDocument?.querySelector(
 				'.woocommerce-email-editor-template-area-affordance__frame'
-			) as HTMLDivElement
+			) as HTMLButtonElement
 		);
 
 		fireEvent.click(
