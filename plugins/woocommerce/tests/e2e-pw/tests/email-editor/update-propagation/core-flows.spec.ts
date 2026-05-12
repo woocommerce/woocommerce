@@ -91,20 +91,34 @@ test.describe( 'Update propagation — core flows', () => {
 			postContent: OLD_HTML.replace( 'OLD CANONICAL', 'MERCHANT EDIT' ),
 			storedSourceHash: 'AUTO_CURRENT',
 			status: STATUS.IN_SYNC,
+			// Seed an older version so the registry's current_version is higher.
+			// The list cell and editor banner only show when
+			// templateVersion < currentVersion; same-version posts don't surface
+			// the indicator even when status is core_updated_customized.
+			version: '10.0.0',
 		} );
 		await clearTemplateHtmlOverride();
 		await triggerDetectionSweep();
 
 		await page.goto( '/wp-admin/admin.php?page=wc-settings&tab=email' );
-		const newOrderRow = page.getByRole( 'row', { name: /New order/i } );
+		// DataViews table rows have no aria-label, so getByRole('row', {name:...})
+		// doesn't work. Use filter({ hasText }) to scope to the New order row.
+		// The Updates column renders a secondary Button labelled "Review update"
+		// when the post is core_updated_customized. The text "Update available"
+		// only appears in the filter-dropdown elements, not in the row cell itself.
+		const newOrderRow = page
+			.locator( 'tr' )
+			.filter( { hasText: /New order/i } )
+			.first();
 		await expect(
-			newOrderRow.getByText( /update available/i )
-		).toBeVisible();
+			newOrderRow.getByRole( 'button', { name: /review update/i } )
+		).toBeVisible( { timeout: 15000 } );
 
 		await accessTheEmailEditor( page, 'New order' );
+		// The editor banner title is "Template update available" (role="status").
 		await expect(
-			page.getByText( /update available/i ).first()
-		).toBeVisible();
+			page.getByText( /template update available/i ).first()
+		).toBeVisible( { timeout: 15000 } );
 	} );
 
 	test( '@pr Auto-apply succeeds silently for unmodified posts', async ( {
