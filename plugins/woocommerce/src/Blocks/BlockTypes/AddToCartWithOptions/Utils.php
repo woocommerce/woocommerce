@@ -31,6 +31,7 @@ class Utils {
 		}
 		return false;
 	}
+
 	/**
 	 * Add increment and decrement buttons to the quantity input field.
 	 *
