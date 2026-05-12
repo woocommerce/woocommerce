@@ -142,12 +142,6 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
 	}
 }
 
-.wc-block-product-filter-checkbox-list__label:has(
-	input.wc-block-product-filter-checkbox-list__input:checked
-) .wc-block-product-filter-checkbox-list__color-swatch {
-	outline: var(--wp-admin-border-width-focus, 2px) solid currentColor;
-	outline-offset: 2px;
-}
 
 .wc-block-product-filter-checkbox-list__stars {
 	display: inline-block;
