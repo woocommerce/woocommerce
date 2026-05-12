@@ -502,13 +502,52 @@ class REST_Controller {
 	 * Production `run()` returns false unconditionally — value reported back is for caller
 	 * convenience only. Tests assert via meta snapshots before/after.
 	 *
+	 * WC_Tracks::record_event() short-circuits when site tracking is disabled (the
+	 * default in wp-env), so it never reaches the woocommerce_tracks_event_properties
+	 * filter that Tracks_Recorder hooks into. To capture the _backfill_completed event
+	 * reliably we inject a custom recorder via set_event_recorder() that writes
+	 * directly to the Tracks_Recorder log option, then restore the default (null)
+	 * after the backfill completes.
+	 *
 	 * @param WP_REST_Request $request The REST request (unused).
 	 * @return WP_REST_Response
 	 */
 	public function trigger_backfill( WP_REST_Request $request ): WP_REST_Response {
 		unset( $request );
 
+		// Inject a direct-write recorder so _backfill_completed lands in the log
+		// even when WC_Tracks::record_event() is disabled for the test environment.
+		// The recorder is gated on the same wc_test_tracks_enabled option that
+		// Tracks_Recorder uses, so it only fires when a spy is active and the log
+		// stays empty for tests that don't attach a spy.
+		//
+		// Event names are stored with the 'woocommerce_' prefix to match the
+		// naming convention the JS-side wcTracks.recordEvent calls use (e.g.
+		// 'woocommerce_block_email_sync_backfill_completed'), which is what the
+		// TRACKS_EVENTS constants in classifications.ts expect.
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder(
+			static function ( string $event_name, array $payload ): void {
+				if ( 'yes' !== get_option( Tracks_Recorder::ENABLED_OPTION, 'no' ) ) {
+					return;
+				}
+				$log = get_option( Tracks_Recorder::LOG_OPTION, array() );
+				if ( ! is_array( $log ) ) {
+					$log = array();
+				}
+				$log[] = array(
+					'name'         => 'woocommerce_' . $event_name,
+					'properties'   => $payload,
+					'timestamp_ms' => (int) ( microtime( true ) * 1000 ),
+				);
+				update_option( Tracks_Recorder::LOG_OPTION, $log, false );
+			}
+		);
+
 		$ran = \Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill::run();
+
+		// Restore the default recorder so subsequent calls don't double-log via
+		// both the injected recorder and any future WC_Tracks path.
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder( null );
 
 		global $wpdb;
 		$stamped = (int) $wpdb->get_var(

@@ -36,6 +36,12 @@ import {
 const BACKFILL_COMPLETE_OPTION =
 	'woocommerce_email_template_sync_backfill_complete';
 
+// One-shot Tracks guard added by RSM-145: fires _backfill_completed at most
+// once per site. Must be cleared alongside BACKFILL_COMPLETE_OPTION so the
+// Tracks spy can observe the event each time a BC test re-runs the backfill.
+const BACKFILL_COMPLETED_TRACKED_OPTION =
+	'wc_email_sync_backfill_completed_tracked';
+
 const OLD_HTML = '<!-- wp:paragraph --><p>OLD</p><!-- /wp:paragraph -->';
 
 async function resetBackfillFence( baseURL: string ): Promise< void > {
@@ -46,6 +52,9 @@ async function resetBackfillFence( baseURL: string ): Promise< void > {
 	} );
 	await client.post( `${ TEST_HELPER_API_BASE }/delete-option`, {
 		option_name: BACKFILL_COMPLETE_OPTION,
+	} );
+	await client.post( `${ TEST_HELPER_API_BASE }/delete-option`, {
+		option_name: BACKFILL_COMPLETED_TRACKED_OPTION,
 	} );
 }
 
@@ -85,10 +94,11 @@ test.describe( 'Update propagation — backward compatibility', () => {
 		await triggerDetectionSweep();
 		await clearTemplateHtmlOverride();
 
+		// The sweep classifies the unmodified post as core_updated_uncustomized,
+		// then the auto-applier (run inline by /trigger-sweep) silently applies
+		// the new canonical and re-stamps the post as in_sync.
 		const metaAfter = await getWooEmailMeta( postId );
-		expect( metaAfter[ META_KEYS.STATUS ]?.[ 0 ] ).toBe(
-			STATUS.CORE_UPDATED_UNCUSTOMIZED
-		);
+		expect( metaAfter[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
 	} );
 
 	test( 'BC Case B — timestamps equal and content behind core', async ( {
@@ -189,8 +199,19 @@ test.describe( 'Update propagation — backward compatibility', () => {
 
 		await triggerDetectionSweep();
 
-		await spy.expectNotFired( TRACKS_EVENTS.AVAILABLE );
-		await spy.expectFired( TRACKS_EVENTS.BACKFILL_COMPLETED, 1 );
+		// Drain all server + client events in one call. Each expectFired/expectNotFired
+		// call invokes drain() independently, which reads and deletes the server log —
+		// a second call would see an empty log. Assert both conditions against the same
+		// snapshot to avoid missing events.
+		const events = await spy.drain();
+		const available = events.filter(
+			( e ) => e.name === TRACKS_EVENTS.AVAILABLE
+		);
+		const backfillCompleted = events.filter(
+			( e ) => e.name === TRACKS_EVENTS.BACKFILL_COMPLETED
+		);
+		expect( available.length, 'No _available events should fire during backfill' ).toBe( 0 );
+		expect( backfillCompleted.length, 'Exactly one _backfill_completed event should fire' ).toBe( 1 );
 	} );
 
 	test( 'BC migration is idempotent: second backfill is a no-op', async () => {
