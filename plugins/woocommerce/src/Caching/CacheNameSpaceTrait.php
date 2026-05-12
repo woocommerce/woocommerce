@@ -22,11 +22,12 @@ trait CacheNameSpaceTrait {
 	 */
 	public static function get_cache_prefix( $group ) {
 		// Get cache key - uses cache key wc_orders_cache_prefix to invalidate when needed.
-		$prefix = wp_cache_get( 'wc_' . $group . '_cache_prefix', $group );
+		$cache_key = 'wc_' . $group . '_cache_prefix';
+		$prefix    = wp_cache_get( $cache_key, $group );
 
-		if ( false === $prefix ) {
-			$prefix = microtime();
-			wp_cache_set( 'wc_' . $group . '_cache_prefix', $prefix, $group );
+		if ( ! self::is_valid_cache_prefix( $prefix ) ) {
+			$prefix = self::generate_cache_prefix();
+			wp_cache_set( $cache_key, $prefix, $group );
 		}
 
 		return 'wc_cache_' . $prefix . '_';
@@ -49,7 +50,7 @@ trait CacheNameSpaceTrait {
 	 * @since 3.9.0
 	 */
 	public static function invalidate_cache_group( $group ) {
-		return wp_cache_set( 'wc_' . $group . '_cache_prefix', microtime(), $group );
+		return wp_cache_set( 'wc_' . $group . '_cache_prefix', self::generate_cache_prefix(), $group );
 	}
 
 	/**
@@ -62,5 +63,28 @@ trait CacheNameSpaceTrait {
 	 */
 	public static function get_prefixed_key( $key, $group ) {
 		return self::get_cache_prefix( $group ) . $key;
+	}
+
+	/**
+	 * Generate a cache-safe prefix value.
+	 *
+	 * @return float Cache prefix.
+	 */
+	private static function generate_cache_prefix() {
+		return microtime( true );
+	}
+
+	/**
+	 * Check whether a cached prefix can safely be used in cache keys.
+	 *
+	 * @param mixed $prefix Cached prefix value.
+	 * @return bool True if the prefix is valid.
+	 */
+	private static function is_valid_cache_prefix( $prefix ) {
+		if ( is_int( $prefix ) || is_float( $prefix ) ) {
+			return true;
+		}
+
+		return is_string( $prefix ) && '' !== $prefix && 1 !== preg_match( '/\s/', $prefix );
 	}
 }

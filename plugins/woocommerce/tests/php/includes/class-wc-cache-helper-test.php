@@ -8,6 +8,15 @@ declare( strict_types = 1 );
 class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 
 	/**
+	 * Tear down test fixtures.
+	 */
+	public function tearDown(): void {
+		wp_cache_delete( 'wc_orders_cache_prefix', 'orders' );
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Data provider for test_geolocation_ajax_get_location_hash.
 	 *
 	 * @return array[]
@@ -73,5 +82,63 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 			$expected,
 			WC_Cache_Helper::geolocation_ajax_get_location_hash()
 		);
+	}
+
+	/**
+	 * @testdox Get cache prefix should generate cache-safe prefixes for empty cache groups.
+	 */
+	public function test_get_cache_prefix_generates_cache_safe_prefix(): void {
+		wp_cache_delete( 'wc_orders_cache_prefix', 'orders' );
+
+		$prefix = WC_Cache_Helper::get_cache_prefix( 'orders' );
+
+		$this->assert_cache_safe_prefix( $prefix );
+	}
+
+	/**
+	 * @testdox Get cache prefix should replace stale whitespace-prefixed values.
+	 */
+	public function test_get_cache_prefix_replaces_stale_whitespace_prefix(): void {
+		wp_cache_set( 'wc_orders_cache_prefix', '0.84069400 1778478731', 'orders' );
+
+		$prefix = WC_Cache_Helper::get_cache_prefix( 'orders' );
+
+		$this->assert_cache_safe_prefix( $prefix );
+		$this->assertNotSame( 'wc_cache_0.84069400 1778478731_', $prefix );
+	}
+
+	/**
+	 * @testdox Invalidate cache group should generate cache-safe prefixes.
+	 */
+	public function test_invalidate_cache_group_generates_cache_safe_prefix(): void {
+		WC_Cache_Helper::invalidate_cache_group( 'orders' );
+
+		$prefix = WC_Cache_Helper::get_cache_prefix( 'orders' );
+
+		$this->assert_cache_safe_prefix( $prefix );
+	}
+
+	/**
+	 * @testdox Get cache prefix should recover when a cached prefix is not stringable.
+	 */
+	public function test_get_cache_prefix_recovers_non_stringable_cached_prefix(): void {
+		wp_cache_set( 'wc_orders_cache_prefix', (object) array( 'invalid' => true ), 'orders' );
+
+		$cache_key = WC_Order::generate_meta_cache_key( 123, 'orders' );
+
+		$this->assertStringStartsWith( 'wc_cache_', $cache_key );
+		$this->assertStringContainsString( 'object_meta_123', $cache_key );
+	}
+
+	/**
+	 * Assert that a generated cache prefix is safe to use in cache keys.
+	 *
+	 * @param string $prefix Cache prefix.
+	 */
+	private function assert_cache_safe_prefix( string $prefix ): void {
+		$this->assertStringStartsWith( 'wc_cache_', $prefix );
+		$this->assertStringEndsWith( '_', $prefix );
+		$this->assertNotSame( 'wc_cache__', $prefix );
+		$this->assertSame( 0, preg_match( '/\s/', $prefix ), 'Cache prefix should not contain whitespace.' );
 	}
 }
