@@ -719,7 +719,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param string $context What the value is for. Valid values are view and edit.
 	 * @return int[]
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	public function get_image_ids( $context = 'view' ) {
 		$image_ids = array();
@@ -734,6 +734,17 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 			if ( $gallery_id && ! in_array( $gallery_id, $image_ids, true ) ) {
 				$image_ids[] = $gallery_id;
 			}
+		}
+
+		if ( 'view' === $context ) {
+			/**
+			 * Filters the combined product image IDs (featured + gallery) in display order.
+			 *
+			 * @since 10.9.0
+			 * @param int[]      $image_ids Product image IDs with featured image first.
+			 * @param WC_Product $product   Product object.
+			 */
+			$image_ids = apply_filters( 'woocommerce_product_get_image_ids', $image_ids, $this );
 		}
 
 		return $image_ids;
@@ -1508,7 +1519,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 * @param int[] $image_ids Ordered array of attachment IDs.
 	 * @return void
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	public function set_image_ids( $image_ids ) {
 		$image_ids = wp_parse_id_list( $image_ids );

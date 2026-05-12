@@ -424,4 +424,42 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$this->assertEquals( 0, $product->get_image_id() );
 		$this->assertSame( array(), $product->get_gallery_image_ids() );
 	}
+
+	/**
+	 * @testdox get_image_ids applies woocommerce_product_get_image_ids filter in view context.
+	 */
+	public function test_get_image_ids_applies_filter_in_view_context(): void {
+		$product = new WC_Product_Simple();
+		$product->set_image_id( 10 );
+		$product->set_gallery_image_ids( array( 20, 30 ) );
+		$product->save();
+
+		$filter = function ( $ids ) {
+			return array_reverse( $ids );
+		};
+		add_filter( 'woocommerce_product_get_image_ids', $filter, 10, 1 );
+
+		$this->assertSame( array( 30, 20, 10 ), $product->get_image_ids( 'view' ) );
+
+		remove_filter( 'woocommerce_product_get_image_ids', $filter, 10 );
+	}
+
+	/**
+	 * @testdox get_image_ids does not apply filter in edit context.
+	 */
+	public function test_get_image_ids_skips_filter_in_edit_context(): void {
+		$product = new WC_Product_Simple();
+		$product->set_image_id( 10 );
+		$product->set_gallery_image_ids( array( 20, 30 ) );
+		$product->save();
+
+		$filter = function () {
+			return array( 999 );
+		};
+		add_filter( 'woocommerce_product_get_image_ids', $filter, 10, 0 );
+
+		$this->assertSame( array( 10, 20, 30 ), $product->get_image_ids( 'edit' ) );
+
+		remove_filter( 'woocommerce_product_get_image_ids', $filter, 10 );
+	}
 }
