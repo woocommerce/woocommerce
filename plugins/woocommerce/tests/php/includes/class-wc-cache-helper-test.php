@@ -127,6 +127,8 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 			'integer'           => array( 123 ),
 			'float'             => array( 123.45 ),
 			'stdClass'          => array( (object) array( 'invalid' => true ) ),
+			// This would match the regex if stringified, but cached prefixes must
+			// be strings already.
 			'stringable object' => array(
 				new class() {
 					/**
