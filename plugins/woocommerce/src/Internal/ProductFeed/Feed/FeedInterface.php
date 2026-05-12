@@ -59,7 +59,7 @@ interface FeedInterface {
 	 * than the number of products iterated by `ProductWalker` because the
 	 * validator can silently drop entries before they reach `add_entry()`.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 * @return int Number of entries added to the feed.
 	 */
 	public function get_entry_count(): int;

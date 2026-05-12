@@ -98,6 +98,10 @@ class JsonFileFeed implements FeedInterface {
 	 * @throws Exception If the feed directory cannot be created.
 	 */
 	public function start(): void {
+		$this->entry_count    = 0;
+		$this->file_completed = false;
+		$this->file_url       = null;
+
 		/**
 		 * Allows the current time to be overridden before a feed is stored.
 		 *
