@@ -56,6 +56,16 @@ class Endpoint {
 	public const SHORTCODE = 'woocommerce_review_order';
 
 	/**
+	 * Flipped to true inside `gate_request()` once the request is confirmed
+	 * to be a real, authorised review-order page render. The title-suppression
+	 * filters bail unless this is set, so an admin previewing the host page
+	 * from the editor (no order id, no key) still sees the page title.
+	 *
+	 * @var bool
+	 */
+	private bool $suppress_title = false;
+
+	/**
 	 * Wire the endpoint into WordPress.
 	 *
 	 * Auto-called by the WC dependency container after instantiation.
@@ -69,6 +79,8 @@ class Endpoint {
 		add_action( 'wp_loaded', array( $this, 'maybe_flush_pending_rewrite' ) );
 		add_action( 'transition_post_status', array( $this, 'skip_auto_menu_for_self' ), 9, 3 );
 		add_filter( 'get_pages', array( $this, 'exclude_self_from_page_list' ) );
+		add_filter( 'the_title', array( $this, 'maybe_hide_page_title' ), 10, 2 );
+		add_filter( 'render_block', array( $this, 'maybe_hide_post_title_block' ), 10, 2 );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
 	}
 
@@ -100,6 +112,67 @@ class Endpoint {
 				}
 			)
 		);
+	}
+
+	/**
+	 * Suppress the theme-rendered page title for classic themes on the
+	 * Review Order page.
+	 *
+	 * The page body (`templates/order/customer-review-order.php` and the
+	 * empty-state template) already prints its own `<h1>`, so the chrome
+	 * heading would duplicate the text both visually and for screen readers.
+	 *
+	 * Three guards narrow the filter so it only affects the page title slot:
+	 *
+	 * - `$this->suppress_title` is only true after `gate_request()` has
+	 *   confirmed a real, authorised review-order request.
+	 * - The post id must match the Review Order page id, so titles for nav
+	 *   menu items or "recent posts" widgets pointing at the same page on a
+	 *   different request are untouched.
+	 * - `in_the_loop() && is_main_query()` keeps the filter scoped to the
+	 *   actual page title slot. WP's `wp_get_document_title()` reads the
+	 *   post title outside the loop, so the `<title>` tag stays meaningful.
+	 *
+	 * @param string|mixed $title   Title being rendered.
+	 * @param int|mixed    $post_id Post id the title belongs to.
+	 * @return string|mixed
+	 */
+	public function maybe_hide_page_title( $title, $post_id = 0 ) {
+		if ( ! $this->suppress_title ) {
+			return $title;
+		}
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id <= 0 || (int) $post_id !== $page_id ) {
+			return $title;
+		}
+		if ( ! in_the_loop() || ! is_main_query() ) {
+			return $title;
+		}
+		return '';
+	}
+
+	/**
+	 * Suppress the `core/post-title` block on block themes for the
+	 * Review Order page.
+	 *
+	 * Block themes render the page title through `core/post-title` rather
+	 * than `the_title`, so the classic-theme filter above doesn't catch it.
+	 * `$this->suppress_title` is only flipped on after a confirmed request,
+	 * so editor previews and unrelated pages keep rendering their titles.
+	 *
+	 * @param string|mixed              $block_content Block markup.
+	 * @param array<string,mixed>|mixed $block         Parsed block.
+	 * @return string|mixed
+	 */
+	public function maybe_hide_post_title_block( $block_content, $block ) {
+		if ( ! $this->suppress_title ) {
+			return $block_content;
+		}
+		$block_name = is_array( $block ) ? (string) ( $block['blockName'] ?? '' ) : '';
+		if ( 'core/post-title' !== $block_name ) {
+			return $block_content;
+		}
+		return '';
 	}
 
 	/**
@@ -252,6 +325,12 @@ class Endpoint {
 			$this->render_404();
 			exit;
 		}
+
+		// Flip the title-suppression flag now that the request is fully
+		// authorised. The two filters wired in `init()` bail early when this
+		// is false, so editor previews and direct hits on an unrelated page
+		// (where `gate_request()` early-returns above) keep their page title.
+		$this->suppress_title = true;
 
 		// template_redirect fires after wp_enqueue_scripts but before
 		// wp_head, so styles registered here are still output in <head>.

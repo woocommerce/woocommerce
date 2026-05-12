@@ -57,8 +57,22 @@ class EndpointTest extends WC_Unit_Test_Case {
 		if ( $wp_query instanceof WP_Query ) {
 			$wp_query->is_404 = false;
 		}
+		wp_reset_postdata();
 		wp_set_current_user( 0 );
 		parent::tearDown();
+	}
+
+	/**
+	 * Flip the private `suppress_title` flag on the endpoint under test.
+	 * Used by the title-suppression tests so they can exercise the filters
+	 * without driving a full request through `gate_request()`.
+	 *
+	 * @param bool $value Desired flag value.
+	 */
+	private function set_suppress_title( bool $value ): void {
+		$ref = new \ReflectionProperty( Endpoint::class, 'suppress_title' );
+		$ref->setAccessible( true );
+		$ref->setValue( $this->endpoint, $value );
 	}
 
 	/**
@@ -234,5 +248,129 @@ class EndpointTest extends WC_Unit_Test_Case {
 		global $wp_query;
 		$this->assertFalse( $wp_query->is_404 );
 		$this->assertStringContainsString( 'woocommerce-review-order', $html );
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() empties the title for the Review Order page when iterating the main loop.
+	 */
+	public function test_maybe_hide_page_title_empties_review_order_page_title_in_main_loop(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+		$this->set_suppress_title( true );
+
+		// Stage a main query so in_the_loop() + is_main_query() both pass.
+		global $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query.
+		$wp_the_query = $wp_query;
+		$wp_query->the_post();
+
+		$this->assertSame(
+			'',
+			$this->endpoint->maybe_hide_page_title( 'Review your order', $page_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() returns the title unchanged when the suppression flag is off (admin preview, no gate).
+	 */
+	public function test_maybe_hide_page_title_leaves_title_when_flag_off(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		// No gate ran, so $suppress_title stays false.
+		$this->assertSame(
+			'Review your order',
+			$this->endpoint->maybe_hide_page_title( 'Review your order', $page_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() leaves titles for other posts alone, even when the flag is on.
+	 */
+	public function test_maybe_hide_page_title_leaves_other_post_titles(): void {
+		$this->set_suppress_title( true );
+
+		$other_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Sample Page',
+			)
+		);
+
+		global $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query on a different page.
+		$wp_query = new WP_Query( array( 'page_id' => $other_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query on a different page.
+		$wp_the_query = $wp_query;
+		$wp_query->the_post();
+
+		$this->assertSame(
+			'Sample Page',
+			$this->endpoint->maybe_hide_page_title( 'Sample Page', $other_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() leaves nav menu / out-of-loop titles alone so the document title stays meaningful.
+	 */
+	public function test_maybe_hide_page_title_leaves_out_of_loop_titles(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+		$this->set_suppress_title( true );
+
+		// No loop running — emulates `wp_get_document_title()` reading the
+		// title outside the main query, or a nav menu item.
+		global $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: empty main query.
+		$wp_query = new WP_Query();
+
+		$this->assertSame(
+			'Review your order',
+			$this->endpoint->maybe_hide_page_title( 'Review your order', $page_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() empties `core/post-title` markup when the flag is on.
+	 */
+	public function test_maybe_hide_post_title_block_empties_core_post_title(): void {
+		$this->set_suppress_title( true );
+
+		$this->assertSame(
+			'',
+			$this->endpoint->maybe_hide_post_title_block(
+				'<h1 class="wp-block-post-title">Review your order</h1>',
+				array( 'blockName' => 'core/post-title' )
+			)
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() leaves non-title blocks alone.
+	 */
+	public function test_maybe_hide_post_title_block_leaves_other_blocks(): void {
+		$this->set_suppress_title( true );
+
+		$this->assertSame(
+			'<p>Body paragraph.</p>',
+			$this->endpoint->maybe_hide_post_title_block(
+				'<p>Body paragraph.</p>',
+				array( 'blockName' => 'core/paragraph' )
+			)
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() leaves `core/post-title` alone when the flag is off (admin preview).
+	 */
+	public function test_maybe_hide_post_title_block_leaves_title_when_flag_off(): void {
+		$markup = '<h1 class="wp-block-post-title">Review your order</h1>';
+		$this->assertSame(
+			$markup,
+			$this->endpoint->maybe_hide_post_title_block(
+				$markup,
+				array( 'blockName' => 'core/post-title' )
+			)
+		);
 	}
 }
