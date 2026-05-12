@@ -378,6 +378,7 @@ final class WooCommerce {
 		$container->get( TaxRateVersionStringInvalidator::class );
 		$container->get( Automattic\WooCommerce\Internal\OrderReviews\Scheduler::class );
 		$container->get( Automattic\WooCommerce\Internal\OrderReviews\Endpoint::class );
+		$container->get( Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
