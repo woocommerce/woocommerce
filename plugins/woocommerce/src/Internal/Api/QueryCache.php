@@ -326,7 +326,7 @@ class QueryCache {
 			return false;
 		}
 
-		$fs = $this->wp_filesystem();
+		$fs = Utils::wp_filesystem();
 		if ( ! $fs || ! $fs->is_writable( $dir ) ) {
 			return false;
 		}
@@ -400,7 +400,7 @@ class QueryCache {
 			return;
 		}
 
-		$fs = $this->wp_filesystem();
+		$fs = Utils::wp_filesystem();
 		if ( ! $fs || ! $fs->move( $tmp, $path, true ) ) {
 			if ( $fs ) {
 				$fs->delete( $tmp );
@@ -435,20 +435,5 @@ class QueryCache {
 				),
 			),
 		);
-	}
-
-	/**
-	 * Lazy-initialize and return the WP_Filesystem global, or null when the
-	 * direct method isn't available (e.g. credentials prompt would be needed).
-	 */
-	private function wp_filesystem(): ?\WP_Filesystem_Base {
-		global $wp_filesystem;
-		if ( ! $wp_filesystem ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-			if ( ! WP_Filesystem() ) {
-				return null;
-			}
-		}
-		return $wp_filesystem;
 	}
 }

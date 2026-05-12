@@ -31,7 +31,7 @@ class OpcacheFileExpiry {
 			return 0;
 		}
 
-		$fs = self::wp_filesystem();
+		$fs = Utils::wp_filesystem();
 		if ( ! $fs ) {
 			return 0;
 		}
@@ -83,19 +83,5 @@ class OpcacheFileExpiry {
 			return;
 		}
 		as_schedule_single_action( time() + DAY_IN_SECONDS, self::ACTION_HOOK, array(), self::ACTION_GROUP );
-	}
-
-	/**
-	 * Lazy-initialize WP_Filesystem; null if the direct method isn't available.
-	 */
-	private static function wp_filesystem(): ?\WP_Filesystem_Base {
-		global $wp_filesystem;
-		if ( ! $wp_filesystem ) {
-			require_once ABSPATH . 'wp-admin/includes/file.php';
-			if ( ! WP_Filesystem() ) {
-				return null;
-			}
-		}
-		return $wp_filesystem;
 	}
 }
