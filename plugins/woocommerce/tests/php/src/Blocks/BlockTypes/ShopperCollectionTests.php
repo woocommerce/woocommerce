@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ShopperCollection;
 use ReflectionClass;
+use ReflectionMethod;
 use WP_UnitTestCase;
 
 /**
@@ -127,5 +128,20 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 		);
 
 		$this->assertSame( 'saved-for-later', $result['attrs']['listName'] );
+	}
+
+	/**
+	 * `render()` emits markup only for logged-in shoppers.
+	 */
+	public function test_render_is_gated_on_login(): void {
+		$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+		$render->setAccessible( true );
+		$attributes = array( 'listName' => 'saved-for-later' );
+
+		wp_set_current_user( 0 );
+		$this->assertSame( '', (string) $render->invoke( $this->sut, $attributes, '', null ) );
+
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'customer' ) ) );
+		$this->assertStringContainsString( 'wc-block-shopper-collection', (string) $render->invoke( $this->sut, $attributes, '', null ) );
 	}
 }

@@ -92,6 +92,11 @@ final class ShopperCollection extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		// Guests have no personal list — bail before enqueuing assets or seeding state.
+		if ( ! is_user_logged_in() ) {
+			return '';
+		}
+
 		// `listName` is declared with a default in block.json, so WP core's
 		// `prepare_attributes_for_render` guarantees it's set as a string by
 		// the time we get here. `sanitize_title` is *not* redundant though:
