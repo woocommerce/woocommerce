@@ -42,7 +42,19 @@ trait CacheNameSpaceTrait {
 			return 'wc_cache_' . $prefix . '_';
 		}
 
-		if ( ! $found || ! self::is_valid_cache_prefix( $prefix ) ) {
+		if ( ! $found ) {
+			$prefix = self::regenerate_cache_prefix( $cache_key, $group, $found );
+		} elseif ( ! self::is_valid_cache_prefix( $prefix ) ) {
+			/**
+			 * Fires when WooCommerce detects an invalid cache prefix before replacing it.
+			 *
+			 * @since 10.8.0
+			 *
+			 * @param string $group  Cache group.
+			 * @param mixed  $prefix Invalid cached prefix value.
+			 */
+			do_action( 'woocommerce_invalid_cache_prefix_detected', $group, $prefix );
+
 			$prefix = self::regenerate_cache_prefix( $cache_key, $group, $found );
 		}
 
@@ -99,8 +111,6 @@ trait CacheNameSpaceTrait {
 	 * @param string $group Cache group.
 	 * @param bool   $found Whether an existing prefix was found.
 	 * @return string Cache prefix.
-	 *
-	 * @since 10.9.0
 	 */
 	private static function regenerate_cache_prefix( $cache_key, $group, $found ) {
 		$prefix = self::generate_cache_prefix();
@@ -126,8 +136,6 @@ trait CacheNameSpaceTrait {
 	 * Generate a cache-safe prefix value.
 	 *
 	 * @return string Cache prefix.
-	 *
-	 * @since 10.9.0
 	 */
 	private static function generate_cache_prefix() {
 		return str_replace( ' ', '_', microtime() ) . '_' . bin2hex( random_bytes( 8 ) );
@@ -138,8 +146,6 @@ trait CacheNameSpaceTrait {
 	 *
 	 * @param mixed $prefix Cached prefix value.
 	 * @return bool True if the prefix is valid.
-	 *
-	 * @since 10.9.0
 	 */
 	private static function is_valid_cache_prefix( $prefix ) {
 		return is_string( $prefix ) && '' !== trim( $prefix );

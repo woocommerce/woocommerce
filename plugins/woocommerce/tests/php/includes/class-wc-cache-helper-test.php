@@ -166,6 +166,33 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Get cache prefix should fire an action when replacing an invalid cached prefix.
+	 */
+	public function test_get_cache_prefix_fires_action_when_replacing_invalid_cached_prefix(): void {
+		$invalid_prefix = array( 'invalid' => true );
+		$detected       = array();
+		$callback       = function ( $group, $prefix ) use ( &$detected ) {
+			$detected[] = array(
+				'group'  => $group,
+				'prefix' => $prefix,
+			);
+		};
+
+		wp_cache_set( 'wc_orders_cache_prefix', $invalid_prefix, 'orders' );
+		add_action( 'woocommerce_invalid_cache_prefix_detected', $callback, 10, 2 );
+
+		try {
+			WC_Cache_Helper::get_cache_prefix( 'orders' );
+		} finally {
+			remove_action( 'woocommerce_invalid_cache_prefix_detected', $callback, 10 );
+		}
+
+		$this->assertCount( 1, $detected );
+		$this->assertSame( 'orders', $detected[0]['group'] );
+		$this->assertSame( $invalid_prefix, $detected[0]['prefix'] );
+	}
+
+	/**
 	 * Data provider for valid cache prefix values.
 	 *
 	 * @return array<string,array{0:string}>
