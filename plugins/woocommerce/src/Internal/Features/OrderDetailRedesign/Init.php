@@ -35,13 +35,12 @@ class Init {
 	}
 
 	/**
-	 * Adds the feature body class on the order edit/new screens.
+	 * Adds the feature body class to every admin page while the feature is enabled.
 	 *
-	 * The framework's auto-added `woocommerce-feature-enabled-*` body class
-	 * (in `Features::add_admin_body_classes()`) only fires on wc-admin and
-	 * embedded pages; the HPOS order edit screen and the legacy `shop_order`
-	 * CPT edit screen are neither, so the class is added here for those
-	 * screens.
+	 * Screen-level scoping is handled by the CSS selectors, which chain this
+	 * class with the WP-provided page classes (`.woocommerce_page_wc-orders`,
+	 * `.post-type-shop_order`) and qualifiers like `:has(#poststuff)` so the
+	 * styles only apply on the actual order edit/new screens.
 	 *
 	 * @internal
 	 *
@@ -49,35 +48,6 @@ class Init {
 	 * @return string
 	 */
 	public function handle_admin_body_class( string $classes ): string {
-		if ( ! self::is_order_edit_screen() ) {
-			return $classes;
-		}
-
 		return $classes . ' woocommerce-feature-enabled-' . self::FEATURE_ID;
-	}
-
-	/**
-	 * Returns true on the HPOS order edit/new screen or the legacy `shop_order` CPT edit/new screen.
-	 *
-	 * @return bool
-	 */
-	private static function is_order_edit_screen(): bool {
-		// HPOS edit/new: admin.php?page=wc-orders&action=edit|new.
-		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		if ( isset( $_GET['page'] ) && 'wc-orders' === sanitize_text_field( wp_unslash( $_GET['page'] ) ) ) {
-			$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
-			if ( in_array( $action, array( 'edit', 'new' ), true ) ) {
-				return true;
-			}
-		}
-		// phpcs:enable WordPress.Security.NonceVerification.Recommended
-
-		// Legacy CPT shop_order edit/new screens.
-		$screen = get_current_screen();
-		if ( $screen && 'shop_order' === $screen->id && 'post' === $screen->base ) {
-			return true;
-		}
-
-		return false;
 	}
 }
