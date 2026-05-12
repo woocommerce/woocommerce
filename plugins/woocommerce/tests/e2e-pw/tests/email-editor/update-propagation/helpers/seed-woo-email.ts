@@ -115,6 +115,60 @@ async function resolveHash(
 	return String( body.hash );
 }
 
+/**
+ * Create a woo_email post directly via the seed-bulk endpoint, bypassing the
+ * WCTransactionalEmailPostsGenerator. The created post has no entry in the
+ * options-table mapping used by WCTransactionalEmailPostsManager, so the
+ * backfill and divergence-sweep pipelines cannot resolve its email_id and
+ * will skip it entirely.
+ *
+ * Use this for scenarios that need a woo_email post for an email type that is
+ * NOT in the sync registry (e.g. a third-party email that is registered as a
+ * WC_Email subclass but is not enrolled in the block-editor transactional
+ * emails list).
+ */
+export async function seedWooEmailPostDirect(
+	seed: Pick< WooEmailSeed, 'postContent' | 'stripStampMeta' >
+): Promise< number > {
+	const meta: Record< string, unknown > = {};
+
+	if ( seed.stripStampMeta ) {
+		meta[ META_KEYS.STATUS ] = null;
+		meta[ META_KEYS.SOURCE_HASH ] = null;
+		meta[ META_KEYS.SOURCE_VERSION ] = null;
+		meta[ META_KEYS.LAST_SYNCED_AT ] = null;
+		meta[ META_KEYS.BACKFILLED ] = null;
+	}
+
+	const postData: Record< string, unknown > = {
+		post_type: 'woo_email',
+		post_status: 'publish',
+	};
+	if ( seed.postContent !== undefined ) {
+		postData.post_content = seed.postContent;
+	}
+
+	const client = apiClient();
+	const res = await client.post( `${ TEST_HELPER_API_BASE }/seed-bulk`, {
+		seeds: [
+			{
+				post: postData,
+				meta,
+			},
+		],
+	} );
+
+	const results: Array< { post_id?: number; error?: string } > =
+		res?.data?.results ?? [];
+	const first = results[ 0 ];
+	if ( ! first?.post_id ) {
+		throw new Error(
+			`seedWooEmailPostDirect: failed to create post — ${ first?.error ?? 'no post_id returned' }`
+		);
+	}
+	return Number( first.post_id );
+}
+
 export async function getWooEmailMeta(
 	postId: number
 ): Promise< Record< string, string[] > > {

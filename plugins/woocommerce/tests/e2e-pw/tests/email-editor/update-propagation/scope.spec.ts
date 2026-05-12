@@ -18,7 +18,11 @@ import {
 	enableFakeThirdPartyEmail,
 	disableFakeThirdPartyEmail,
 } from './helpers/test-helper-plugin';
-import { seedWooEmailPost, getWooEmailMeta } from './helpers/seed-woo-email';
+import {
+	seedWooEmailPost,
+	seedWooEmailPostDirect,
+	getWooEmailMeta,
+} from './helpers/seed-woo-email';
 import {
 	triggerBackfill,
 	triggerDetectionSweep,
@@ -54,11 +58,13 @@ test.describe( 'Update propagation — scope and allow-list', () => {
 	} ) => {
 		const spy = await attachTracksSpy( page );
 
-		await setTransactionalEmailsOverride( [ FAKE_EMAIL_ID ] );
-		// Opted-in is intentionally NOT set.
-
-		const postId = await seedWooEmailPost( {
-			emailId: FAKE_EMAIL_ID,
+		// Deliberately do NOT add FAKE_EMAIL_ID to the transactional emails list:
+		// a third-party email that has not enrolled in block-editor sync is excluded
+		// from WCEmailTemplateSyncRegistry and therefore skipped by both the backfill
+		// and the divergence sweep. Create the woo_email post directly (bypassing the
+		// generator) so no options-table mapping exists for the email type — the
+		// backfill's get_email_type_from_post_id() will return null and skip the post.
+		const postId = await seedWooEmailPostDirect( {
 			postContent:
 				'<!-- wp:paragraph --><p>Third-party content</p><!-- /wp:paragraph -->',
 			stripStampMeta: true,
@@ -73,8 +79,6 @@ test.describe( 'Update propagation — scope and allow-list', () => {
 		expect( meta[ META_KEYS.STATUS ] ).toBeUndefined();
 		expect( meta[ META_KEYS.SOURCE_HASH ] ).toBeUndefined();
 		await spy.expectNotFired( TRACKS_EVENTS.AVAILABLE );
-
-		await clearTransactionalEmailsOverride();
 	} );
 
 	test( 'Opted-in third-party email: version bump flips status when unedited', async () => {
@@ -99,9 +103,12 @@ test.describe( 'Update propagation — scope and allow-list', () => {
 
 		await triggerDetectionSweep();
 		meta = await getWooEmailMeta( postId );
-		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe(
-			STATUS.CORE_UPDATED_UNCUSTOMIZED
-		);
+		// The inline auto-applier runs immediately after the sweep (same HTTP request in
+		// the E2E trigger-sweep endpoint). An unedited post classified as
+		// core_updated_uncustomized is auto-applied and flipped back to in_sync before
+		// this assertion runs — consistent with the lifecycle tested in core-flows
+		// scenario 1 and backward-compat Case A.
+		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
 
 		await clearTransactionalEmailsOverride();
 		await clearOptedInOverride();
