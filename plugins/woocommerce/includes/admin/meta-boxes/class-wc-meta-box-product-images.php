@@ -96,7 +96,9 @@ class WC_Meta_Box_Product_Images {
 	 */
 	public static function save( $post_id, $post ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Nonce verified in WC_Admin_Meta_Boxes::save_meta_boxes().
-		$product_type = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( wp_unslash( $_POST['product-type'] ) );
+		$product_type = ( ! empty( $_POST['product-type'] ) && is_scalar( $_POST['product-type'] ) )
+			? sanitize_title( wp_unslash( (string) $_POST['product-type'] ) )
+			: WC_Product_Factory::get_product_type( $post_id );
 		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : ProductType::SIMPLE );
 		/**
 		 * Product instance.
