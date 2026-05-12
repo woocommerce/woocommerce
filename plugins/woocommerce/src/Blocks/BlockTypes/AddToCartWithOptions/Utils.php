@@ -84,7 +84,7 @@ class Utils {
 
 			if (
 				$processor->get_tag() === 'INPUT' &&
-				$processor->get_attribute( 'name' ) === 'quantity' &&
+				$processor->has_class( 'qty' ) &&
 				$processor->get_attribute( 'type' ) !== 'hidden'
 			) {
 				$processor->add_class( 'wc-block-components-quantity-selector__input' );
