@@ -4785,7 +4785,7 @@ table.wc-shipping-classes {
 
 		a.wc-shipping-zone-actions,
 		a.wc-shipping-zone-actions:hover {
-			color: var(--wc-red);
+			color: var(--wc-destructive, #cc1818);
 		}
 	}
 

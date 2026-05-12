@@ -120,6 +120,25 @@ class WCEmailTemplateDivergenceDetector {
 	public const BACKFILLED_META_KEY = '_wc_email_backfilled';
 
 	/**
+	 * Post meta key for the canonical core render at the moment of the last
+	 * system write. Used as the `base` reference in three-way diff
+	 * comparisons (yours-vs-base, core-vs-base) so the engine can attribute
+	 * each block's change to either the merchant or to core, eliminating the
+	 * inversion guard's need to fall back to "see release notes" on
+	 * heavily-customized posts.
+	 *
+	 * Written by every code path that mutates `post_content` for a sync-
+	 * eligible `woo_email` post: the generator (initial stamp), the auto-
+	 * applier and reset endpoint (wholesale writes align yours with core),
+	 * the selective applier (records the new canonical the merchant just
+	 * synced against), and the RSM-149 backfill (seeds for legacy posts).
+	 *
+	 * @var string
+	 * @since 10.9.0
+	 */
+	public const LAST_CORE_RENDER_META_KEY = '_wc_email_template_last_core_render';
+
+	/**
 	 * Classification outcomes.
 	 */
 	public const STATUS_IN_SYNC                   = 'in_sync';

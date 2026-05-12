@@ -191,6 +191,7 @@ class WCEmailTemplateAutoApplier {
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $version );
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $source_hash );
 				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $synced_at );
+				update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $canonical );
 
 				// Status comes from the classifier so all writers stay consistent.
 				// In this path we always write canonical, so the classifier returns

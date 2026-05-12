@@ -242,7 +242,7 @@ abstract class GraphQLController {
 			// Resolver threw on one of the decision points inside
 			// process_request(). Produce a clean 500 without re-invoking
 			// the (broken) resolver.
-			return $this->build_resolver_failure_response();
+			return $this->build_resolver_failure_response( $e, $request, $principal );
 		} catch ( \Throwable $e ) {
 			$output = array(
 				'errors' => array(
@@ -257,7 +257,7 @@ abstract class GraphQLController {
 				// Resolver threw specifically when handed the synthetic
 				// errors shape from this catch block. Fall through to the
 				// fixed 500; do not loop back into the resolver.
-				return $this->build_resolver_failure_response();
+				return $this->build_resolver_failure_response( $e2, $request, $principal );
 			}
 
 			return new \WP_REST_Response( $output, $status );
@@ -266,21 +266,45 @@ abstract class GraphQLController {
 
 	/**
 	 * Build the canonical 500 response used when the HTTP status resolver
-	 * throws. Body shape matches an unhandled internal error so callers
-	 * don't need a separate path for "resolver blew up".
+	 * throws or returns an out-of-range value. Body shape matches an
+	 * unhandled internal error so callers don't need a separate path for
+	 * "resolver blew up".
+	 *
+	 * In debug mode, attaches `extensions.debug` (message, file, line, trace)
+	 * for the wrapper exception, plus an `extensions.previous` chain when the
+	 * resolver itself threw — mirroring the shape that {@see self::format_exception()}
+	 * produces for the generic-Throwable path. Outside debug mode the body
+	 * stays purely generic so resolver internals never leak to anonymous callers.
+	 *
+	 * @param StatusResolverFailedException $e         The wrapper exception thrown by {@see self::pick_status()}.
+	 * @param \WP_REST_Request              $request   The originating REST request.
+	 * @param ?object                       $principal The resolved principal, or null when resolution failed.
 	 */
-	private function build_resolver_failure_response(): \WP_REST_Response {
-		return new \WP_REST_Response(
-			array(
-				'errors' => array(
-					array(
-						'message'    => 'An unexpected error occurred.',
-						'extensions' => array( 'code' => 'INTERNAL_ERROR' ),
-					),
-				),
-			),
-			500
+	private function build_resolver_failure_response(
+		StatusResolverFailedException $e,
+		\WP_REST_Request $request,
+		?object $principal
+	): \WP_REST_Response {
+		$error = array(
+			'message'    => 'An unexpected error occurred.',
+			'extensions' => array( 'code' => 'INTERNAL_ERROR' ),
 		);
+
+		if ( $this->is_debug_mode( $principal, $request ) ) {
+			$error['extensions']['debug'] = array(
+				'message' => $e->getMessage(),
+				'file'    => $e->getFile(),
+				'line'    => $e->getLine(),
+				'trace'   => $e->getTraceAsString(),
+			);
+
+			$chain = $this->extract_previous_chain( $e );
+			if ( ! empty( $chain ) ) {
+				$error['extensions']['previous'] = $chain;
+			}
+		}
+
+		return new \WP_REST_Response( array( 'errors' => array( $error ) ), 500 );
 	}
 
 	/**
@@ -637,7 +661,7 @@ abstract class GraphQLController {
 	}
 
 	/**
-	 * Determine debug flags based on WP_DEBUG, principal, and query string.
+	 * Determine debug flags for the request, based on {@see self::is_debug_mode()}.
 	 *
 	 * @param \WP_REST_Request $request   The REST request.
 	 * @param ?object          $principal The resolved principal, or null if resolution itself failed.
@@ -652,52 +676,110 @@ abstract class GraphQLController {
 	/**
 	 * Check whether GraphQL introspection is allowed for this request.
 	 *
-	 * Introspection is permitted if either condition holds:
-	 * - The request is in debug mode ({@see self::is_debug_mode()}).
-	 * - The principal opts in via a `can_introspect(): bool` method.
+	 * The principal opts in via a `can_introspect(): bool` method; principals
+	 * that don't declare it are denied by default. The decision is then passed
+	 * through the {@see 'woocommerce_graphql_can_introspect'} filter so sites
+	 * can grant or revoke access without subclassing the principal — useful
+	 * for per-request rules (specific IPs, headers, query parameters, etc.).
 	 *
-	 * @param ?object          $principal The resolved principal, or null if resolution failed.
+	 * Fail-closed contract: the principal must be non-null (principal-resolution
+	 * failures deny outright, before the filter is consulted), the principal
+	 * method's return value is treated with `=== true`, and any throw from
+	 * either the principal method or the filter callback denies. The filter
+	 * must likewise return strictly `true` to allow; any other value denies.
+	 *
+	 * @param ?object          $principal The resolved principal, or null when principal resolution failed.
 	 * @param \WP_REST_Request $request   The REST request.
 	 */
 	private function is_introspection_allowed( ?object $principal, \WP_REST_Request $request ): bool {
-		if ( $this->is_debug_mode( $principal, $request ) ) {
-			return true;
+		if ( is_null( $principal ) ) {
+			return false;
 		}
-		return null !== $principal
-			&& method_exists( $principal, 'can_introspect' )
-			&& $principal->can_introspect();
+
+		try {
+			$can_introspect = method_exists( $principal, 'can_introspect' )
+				&& true === $principal->can_introspect();
+
+			/**
+			 * Filters whether the current principal may run GraphQL introspection.
+			 *
+			 * The filter receives the principal-derived decision (false when the
+			 * principal doesn't declare `can_introspect()` or its `can_introspect()`
+			 * doesn't return strictly `true`) and must return strictly `true` to
+			 * grant access; any other return value denies. The filter is not
+			 * invoked when principal resolution failed (i.e. when the controller
+			 * passes a null principal) — that case denies outright.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @internal
+			 *
+			 * @param bool             $can_introspect Whether the principal can introspect, derived from `$principal->can_introspect()`.
+			 * @param object           $principal      The resolved principal.
+			 * @param \WP_REST_Request $request        The REST request being processed.
+			 */
+			$can_introspect = apply_filters( 'woocommerce_graphql_can_introspect', $can_introspect, $principal, $request );
+		} catch ( \Throwable $e ) {
+			return false;
+		}
+
+		return true === $can_introspect;
 	}
 
 	/**
 	 * Check if debug mode is active.
 	 *
-	 * Debug mode is active when both:
-	 * - The principal can use it (opted in via `can_use_debug_mode(): bool`,
-	 *   or a local environment is detected — the developer escape hatch).
-	 * - WP_DEBUG is enabled OR `_debug=1` is set on the request.
+	 * Debug mode is gated on `_debug=1` being set on the request: when absent,
+	 * debug mode is off regardless of any other signal. When present, the
+	 * principal opts in via a `can_use_debug_mode(): bool` method (principals
+	 * that don't declare it are denied by default), and the decision is then
+	 * passed through the {@see 'woocommerce_graphql_can_use_debug_mode'} filter.
 	 *
-	 * The principal-method check follows the same opt-in convention as
-	 * {@see self::is_introspection_allowed()} — plugin principals must
-	 * declare `can_use_debug_mode()` to grant access; absence denies.
+	 * Fail-closed contract: the principal must be non-null (principal-resolution
+	 * failures deny outright, before the filter is consulted), the principal
+	 * method's return value is treated with `=== true`, and any throw from
+	 * either the principal method or the filter callback denies. The filter
+	 * must likewise return strictly `true` to allow; any other value denies.
 	 *
-	 * @param ?object          $principal The resolved principal, or null if resolution failed.
+	 * @param ?object          $principal The resolved principal, or null when principal resolution failed.
 	 * @param \WP_REST_Request $request   The REST request.
 	 */
 	private function is_debug_mode( ?object $principal, \WP_REST_Request $request ): bool {
-		if ( ! $this->is_local_environment() ) {
-			$allowed = null !== $principal
-				&& method_exists( $principal, 'can_use_debug_mode' )
-				&& $principal->can_use_debug_mode();
-			if ( ! $allowed ) {
-				return false;
-			}
+		if ( '1' !== $request->get_param( '_debug' ) ) {
+			return false;
+		}
+		if ( is_null( $principal ) ) {
+			return false;
 		}
 
-		if ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
-			return true;
+		try {
+			$can_debug = method_exists( $principal, 'can_use_debug_mode' )
+				&& true === $principal->can_use_debug_mode();
+
+			/**
+			 * Filters whether the current principal may activate GraphQL debug mode.
+			 *
+			 * Only invoked when the request carries `_debug=1` and a principal was
+			 * resolved successfully, so the filter is not called on every GraphQL
+			 * request. The filter receives the principal-derived decision (false
+			 * when the principal doesn't declare `can_use_debug_mode()` or its
+			 * `can_use_debug_mode()` doesn't return strictly `true`) and must
+			 * return strictly `true` to grant access; any other return value denies.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @internal
+			 *
+			 * @param bool             $can_debug Whether the principal can use debug mode, derived from `$principal->can_use_debug_mode()`.
+			 * @param object           $principal The resolved principal.
+			 * @param \WP_REST_Request $request   The REST request being processed.
+			 */
+			$can_debug = apply_filters( 'woocommerce_graphql_can_use_debug_mode', $can_debug, $principal, $request );
+		} catch ( \Throwable $e ) {
+			return false;
 		}
 
-		return '1' === $request->get_param( '_debug' );
+		return true === $can_debug;
 	}
 
 	/**
@@ -953,27 +1035,5 @@ abstract class GraphQLController {
 		}
 
 		return false;
-	}
-
-	/**
-	 * Check if running in a local/development environment.
-	 *
-	 * Prefers {@see wp_get_environment_type()} when available. Otherwise
-	 * parses the site URL and performs a case-insensitive *exact* match
-	 * against the hostname — not a substring check, to avoid matching
-	 * impostor domains like `mylocalhost.com` or `127.0.0.1.attacker.example`.
-	 */
-	private function is_local_environment(): bool {
-		if ( function_exists( 'wp_get_environment_type' ) && 'local' === wp_get_environment_type() ) {
-			return true;
-		}
-
-		$host = wp_parse_url( get_site_url(), PHP_URL_HOST );
-		if ( ! is_string( $host ) ) {
-			return false;
-		}
-
-		$host = strtolower( $host );
-		return 'localhost' === $host || '127.0.0.1' === $host;
 	}
 }

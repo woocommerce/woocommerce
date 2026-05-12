@@ -146,6 +146,46 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stamp _wc_email_template_last_core_render with the new canonical post_content after apply_to_post.
+	 */
+	public function test_apply_to_post_stamps_last_core_render(): void {
+		$email_id = 'wc_test_auto_apply_last_core_render';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+
+		// Simulate a core-template change so the auto-apply has something to write.
+		add_filter(
+			'woocommerce_email_content_post_data',
+			static function ( array $post_data ) use ( $email_id ): array {
+				if ( ( $post_data['post_name'] ?? '' ) === $email_id ) {
+					$post_data['post_content'] = (string) ( $post_data['post_content'] ?? '' ) . "\n<!-- new core release -->";
+				}
+				return $post_data;
+			}
+		);
+
+		$expected_canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
+		$this->assertIsArray( $result, 'Atom must return an array on success.' );
+
+		$stored_render = (string) get_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			true
+		);
+
+		$this->assertNotSame( '', $stored_render, 'last_core_render must be populated after auto-apply.' );
+		$this->assertSame(
+			$expected_canonical,
+			$stored_render,
+			'last_core_render must equal the new canonical post_content (post-filter).'
+		);
+	}
+
+	/**
 	 * @testdox Should stamp STATUS_IN_SYNC via the classifier after a successful apply_to_post.
 	 *
 	 * The auto-applier always writes full canonical content, so the classifier
