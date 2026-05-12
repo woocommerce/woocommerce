@@ -1,4 +1,4 @@
 Significance: minor
 Type: dev
 
-Remove Legacy REST API admin notices, auto-install logic, and UI nudges from WooCommerce core. The Legacy REST API settings section is now hidden by default and only renders when an extension hooks into the `woocommerce_settings_rest_api` filter. The Legacy REST API extension continues to work if manually installed.
+Remove Legacy REST API admin notices, auto-install logic, and UI nudges from WooCommerce core. The Legacy REST API settings section is now hidden by default and only renders when an extension hooks into the `woocommerce_settings_rest_api` filter. `PluginUtil::get_plugins_excluded_from_compatibility_ui()` now always returns an empty array as core no longer excludes any plugins from the compatibility UI. The Legacy REST API extension continues to work if manually installed.
