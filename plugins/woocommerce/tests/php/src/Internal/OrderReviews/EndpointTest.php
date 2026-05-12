@@ -304,6 +304,13 @@ class EndpointTest extends WC_Unit_Test_Case {
 	public function test_completed_meta_is_not_overwritten(): void {
 		$order = OrderHelper::create_order();
 		$order->set_status( OrderStatus::COMPLETED );
+		// Empty the order so the no-actionable-rows path falls through and
+		// would re-stamp `time()` if the early-return guard were removed;
+		// keeping items here lets the loop's unreviewed-item bail-out hide
+		// the guard's effect and the test would pass without it.
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
 		$preset = (string) ( time() - 3600 );
 		$order->update_meta_data( SubmissionHandler::COMPLETED_META_KEY, $preset );
 		$order->save();
