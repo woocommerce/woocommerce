@@ -4,6 +4,29 @@
 import type { ChangeSummary } from '../hooks/use-change-summary';
 
 /**
+ * Per-surface identifiers for the `applied_from` and `viewed_from` extension
+ * keys on the block-email update Tracks events (RSM-145 §3.2). Mirror the PHP
+ * constants on `WCEmailTemplateSyncTracker` (`APPLIED_FROM_AUTO`,
+ * `APPLIED_FROM_SELECTIVE_REST`) so dashboard queries that segment by surface
+ * stay aligned across the server- and client-emitted events.
+ */
+export const APPLIED_FROM_EDITOR_BANNER = 'editor_banner' as const;
+export const APPLIED_FROM_AUTO = 'auto' as const;
+export const APPLIED_FROM_SELECTIVE_REST = 'selective_rest' as const;
+
+export const VIEWED_FROM_EDITOR_BANNER = 'editor_banner' as const;
+export const VIEWED_FROM_EMAIL_LIST = 'email_list' as const;
+
+export type AppliedFrom =
+	| typeof APPLIED_FROM_EDITOR_BANNER
+	| typeof APPLIED_FROM_AUTO
+	| typeof APPLIED_FROM_SELECTIVE_REST;
+
+export type ViewedFrom =
+	| typeof VIEWED_FROM_EDITOR_BANNER
+	| typeof VIEWED_FROM_EMAIL_LIST;
+
+/**
  * Shape of the base payload shared by every block-email update Tracks event
  * (RSM-145 §3). The same six keys are produced server-side by
  * `WCEmailTemplateSyncTracker::build_base_payload()`; consumer dashboards

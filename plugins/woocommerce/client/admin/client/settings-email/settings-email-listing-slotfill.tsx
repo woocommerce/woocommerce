@@ -3,13 +3,17 @@
  */
 import { createSlotFill, Button } from '@wordpress/components';
 import { registerPlugin } from '@wordpress/plugins';
+import { useEffect } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { SETTINGS_SLOT_FILL_CONSTANT } from '~/settings/settings-slots';
 import { ListView } from './settings-email-listing-listview';
+import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
+import { VIEWED_FROM_EMAIL_LIST } from '../wp-admin-scripts/email-editor-integration/tracks/build-shared-payload';
 
 export type Recipients = {
 	to: string;
@@ -58,18 +62,61 @@ export type EmailType = {
 	 * Whether the post was stamped by the RSM-149 backfill rather than created
 	 * natively by the modern generator. Sourced from `_wc_email_backfilled`
 	 * post meta and projected from `wp/v2/woo_email` REST in
-	 * {@link useTransactionalEmails}. Consumed by RSM-145 Tracks instrumentation
-	 * (`was_backfilled` shared-payload key) on the list-page `_viewed` event.
+	 * {@link useTransactionalEmails}. Reserved for future surfaces — the list
+	 * page emits a single aggregate `_list_viewed` event with row counts only,
+	 * so this field is not part of that payload.
 	 */
 	wasBackfilled: boolean;
 };
 
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
-const EmailListingFill: React.FC< {
+/**
+ * Session-storage key for the list-page `_list_viewed` Tracks dedup. The list
+ * fires a single aggregate event per browser session (not per row), so a refresh
+ * re-fires the event but re-mounts within the same session do not.
+ */
+const LIST_VIEWED_DEDUP_SESSION_KEY = 'wc_email_update_list_viewed';
+
+export const EmailListingFill: React.FC< {
 	emailTypes: EmailType[];
 	editTemplateUrl: string | null;
 } > = ( { emailTypes, editTemplateUrl } ) => {
+	// Fire one aggregate `_list_viewed` per session covering the entire list.
+	// Tracking per-row creates one event per visible cell (~20+ on a default
+	// install) per page load with limited analytical lift over a single
+	// page-level signal — the editor-banner `_viewed` covers per-post drilldown
+	// already. sessionStorage gate stays once-per-session-per-tab; a refresh
+	// fires a fresh event.
+	useEffect( () => {
+		try {
+			if (
+				window.sessionStorage.getItem( LIST_VIEWED_DEDUP_SESSION_KEY )
+			) {
+				return;
+			}
+			window.sessionStorage.setItem( LIST_VIEWED_DEDUP_SESSION_KEY, '1' );
+		} catch {
+			// sessionStorage unavailable (privacy mode / quota). Fall through
+			// and fire the event anyway — duplicate counts are preferable to
+			// silent dropouts when storage is blocked.
+		}
+
+		const eligibleCount = emailTypes.filter( ( post ) =>
+			shouldShowReviewUpdate( post )
+		).length;
+
+		recordEvent( 'woocommerce_block_email_list_viewed', {
+			viewed_from: VIEWED_FROM_EMAIL_LIST,
+			eligible_count: eligibleCount,
+			total_count: emailTypes.length,
+		} );
+		// `emailTypes` is sourced once from the server-rendered slot payload
+		// and does not change during the page's lifetime, so this effect runs
+		// exactly once per mount.
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
+
 	return (
 		<Fill>
 			<div

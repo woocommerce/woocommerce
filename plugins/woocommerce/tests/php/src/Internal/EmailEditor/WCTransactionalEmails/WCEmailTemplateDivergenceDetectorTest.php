@@ -212,6 +212,54 @@ class WCEmailTemplateDivergenceDetectorTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should fire `_update_available` on a cross-release sweep even when status stays customized.
+	 *
+	 * Regression for the case where a merchant sits on a `core_updated_customized`
+	 * divergence across multiple core releases. Status meta does not change between
+	 * sweeps (still customized), but `version_to` advances each release — analytics
+	 * must see one event per release boundary, not a single lifetime event.
+	 */
+	public function test_reclassify_fires_update_available_on_subsequent_release_when_status_unchanged(): void {
+		$email_id = 'wc_test_divergence_available_cross_release';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		// Stage the divergence as in the fires-on-version-advance test, but also
+		// pre-stamp the status meta to `core_updated_customized` so the
+		// idempotency early-return inside reclassify() is the only thing between
+		// the classifier verdict and the event-firing block.
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
+			sha1( 'stamped-from-an-earlier-core-render' )
+		);
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, '1.0.0' );
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+			WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED
+		);
+
+		$captured = array();
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder(
+			static function ( string $event_name, array $payload ) use ( &$captured ): void {
+				$captured[] = array( $event_name, $payload );
+			}
+		);
+
+		$status = WCEmailTemplateDivergenceDetector::reclassify( $post_id );
+
+		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder( null );
+
+		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_CORE_UPDATED_CUSTOMIZED, $status );
+		$this->assertCount(
+			1,
+			$captured,
+			'reclassify must fire _update_available across release boundaries even when status meta is unchanged.'
+		);
+		$this->assertSame( 'block_email_update_available', $captured[0][0] );
+	}
+
+	/**
 	 * @testdox Should not fire `_update_available` from reclassify() when version_from equals version_to.
 	 */
 	public function test_reclassify_skips_update_available_when_version_unchanged(): void {

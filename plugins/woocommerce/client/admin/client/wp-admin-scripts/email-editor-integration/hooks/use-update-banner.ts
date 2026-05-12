@@ -20,6 +20,8 @@ import { useApplyUpdate } from './use-apply-update';
 import { STORE_NAME } from '../store';
 import {
 	buildSharedTracksPayload,
+	APPLIED_FROM_EDITOR_BANNER,
+	VIEWED_FROM_EDITOR_BANNER,
 	type SharedTracksPayload,
 } from '../tracks/build-shared-payload';
 
@@ -376,7 +378,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 		markUpdateBannerViewed( postId, sharedPayload.template_version_to );
 		recordEvent( 'woocommerce_block_email_update_viewed', {
 			...sharedPayload,
-			viewed_from: 'editor_banner',
+			viewed_from: VIEWED_FROM_EDITOR_BANNER,
 		} );
 	}, [ finalShouldRender, postId, sharedPayload, markUpdateBannerViewed ] );
 
@@ -412,7 +414,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 				setApplyState( 'applied' );
 				recordEvent( 'woocommerce_block_email_update_applied', {
 					...sharedPayload,
-					applied_from: 'editor_banner',
+					applied_from: APPLIED_FROM_EDITOR_BANNER,
 					auto_resolved: true,
 					had_customizations: hadCustomizations,
 				} );

@@ -184,9 +184,13 @@ class WCEmailTemplateSyncTracker {
 
 		self::record( self::EVENT_UPDATE_AVAILABLE, $payload );
 
-		// Write after the event so a fatal in `record_event()` doesn't permanently
-		// suppress the firing. 30-day TTL outlasts the realistic gap between core
-		// releases without leaving stale dedup keys forever.
+		// Set the dedup transient after the record() call. record() swallows
+		// throws from the Tracks pipeline in production, so in steady state
+		// either ordering would dedup identically. The post-record ordering is
+		// intentional for the testing path: when set_event_recorder() injects a
+		// throwing spy, the transient stays unwritten and a retry remains
+		// possible without manually clearing it. 30-day TTL outlasts the gap
+		// between core releases without leaving stale dedup keys forever.
 		set_transient( $transient_key, 1, MONTH_IN_SECONDS );
 	}
 

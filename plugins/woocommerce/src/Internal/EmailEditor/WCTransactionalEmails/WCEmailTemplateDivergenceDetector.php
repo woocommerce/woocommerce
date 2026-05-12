@@ -474,21 +474,18 @@ class WCEmailTemplateDivergenceDetector {
 			return null;
 		}
 
-		// Idempotent write: skip the meta call entirely when the status hasn't shifted,
-		// so successive reclassifies on unchanged state produce zero DB writes (and zero
-		// `update_post_metadata` filter calls observed by tests / observers).
-		$existing_status = (string) get_post_meta( $post_id, self::STATUS_META_KEY, true );
-		if ( $existing_status === $status ) {
-			return $status;
-		}
-
-		update_post_meta( $post_id, self::STATUS_META_KEY, $status );
-
-		// Fire `_update_available` Tracks event on the merchant-intervention
-		// transition. Gates: new status is `core_updated_customized` AND the
-		// stored `version_from` precedes the registry's current `version_to`
-		// (i.e. the merchant hasn't already reviewed this release).
-		// Suppress-during-backfill and per-tuple dedup live in the tracker.
+		// Fire `_update_available` on every sweep where the merchant hasn't yet
+		// reviewed the current registry version, *before* the idempotency early-
+		// return below. A post that stays `core_updated_customized` across
+		// multiple core releases (merchant sits on the divergence through 10.7,
+		// 10.8, 10.9…) still represents a fresh "update available" signal at
+		// each new `version_to`: the status meta is unchanged but the registry
+		// version has advanced, so analytics should see one event per release
+		// boundary. The per-`(post_id, version_to)` dedup transient in the
+		// tracker prevents same-release re-fires; the suppress-during-backfill
+		// gate lives there too. Order matters: we fire here rather than after
+		// the meta write so the cross-release case isn't accidentally
+		// short-circuited by the status-unchanged guard.
 		if ( self::STATUS_CORE_UPDATED_CUSTOMIZED === $status ) {
 			$sync_config  = WCEmailTemplateSyncRegistry::get_email_sync_config( $email_id );
 			$version_to   = null !== $sync_config ? (string) ( $sync_config['version'] ?? '' ) : '';
@@ -498,6 +495,16 @@ class WCEmailTemplateDivergenceDetector {
 				WCEmailTemplateSyncTracker::record_update_available( $post_id );
 			}
 		}
+
+		// Idempotent write: skip the meta call entirely when the status hasn't shifted,
+		// so successive reclassifies on unchanged state produce zero DB writes (and zero
+		// `update_post_metadata` filter calls observed by tests / observers).
+		$existing_status = (string) get_post_meta( $post_id, self::STATUS_META_KEY, true );
+		if ( $existing_status === $status ) {
+			return $status;
+		}
+
+		update_post_meta( $post_id, self::STATUS_META_KEY, $status );
 
 		return $status;
 	}
