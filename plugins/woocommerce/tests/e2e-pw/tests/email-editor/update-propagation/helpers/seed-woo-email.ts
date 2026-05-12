@@ -171,3 +171,37 @@ export async function applyWooEmailTemplate(
 	}
 	return res.data as ApplyResult;
 }
+
+export type ResetResult = {
+	content: string;
+	version: string | null;
+	source_hash: string | null;
+	synced_at: string | null;
+	/** The post-reset sync status (e.g. "in_sync") for sync-enabled emails, or null otherwise. */
+	status: string | null;
+};
+
+/**
+ * Call the /reset endpoint for a woo_email post using basic-auth credentials,
+ * bypassing the cookie+nonce requirement of the WP REST API for authenticated
+ * cookie sessions. Resets the post content to the canonical WooCommerce template.
+ *
+ * Note: unlike applyWooEmailTemplate whose `status` field is "applied", the
+ * reset endpoint returns the post-reset sync status (e.g. "in_sync") in the
+ * `status` field.
+ */
+export async function resetWooEmailTemplate(
+	postId: number
+): Promise< ResetResult > {
+	const client = apiClient();
+	const res = await client.post(
+		`woocommerce-email-editor/v1/emails/${ postId }/reset`,
+		{}
+	);
+	if ( res?.data?.content === undefined ) {
+		throw new Error(
+			`resetWooEmailTemplate: unexpected response for post ${ postId }: ${ JSON.stringify( res?.data ) }`
+		);
+	}
+	return res.data as ResetResult;
+}

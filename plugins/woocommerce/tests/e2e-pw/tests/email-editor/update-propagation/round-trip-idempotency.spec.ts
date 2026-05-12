@@ -9,7 +9,12 @@ import { test, expect } from '@playwright/test';
 import { ADMIN_STATE_PATH } from '../../../playwright.config';
 import { enableEmailEditor } from '../helpers/enable-email-editor-feature';
 import { clearTemplateHtmlOverride } from './helpers/test-helper-plugin';
-import { seedWooEmailPost, getWooEmailMeta } from './helpers/seed-woo-email';
+import {
+	seedWooEmailPost,
+	getWooEmailMeta,
+	applyWooEmailTemplate,
+	resetWooEmailTemplate,
+} from './helpers/seed-woo-email';
 import {
 	simulateCoreBump,
 	triggerDetectionSweep,
@@ -47,9 +52,7 @@ test.describe( 'Update propagation — round-trip and idempotency', () => {
 		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
 	} );
 
-	test( 'Selective apply round-trip: edit, bump, apply → in_sync', async ( {
-		request,
-	} ) => {
+	test( 'Selective apply round-trip: edit, bump, apply with keep-yours → stays customized', async () => {
 		const oldHtml =
 			'<!-- wp:paragraph --><p>OLD A</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>OLD B</p><!-- /wp:paragraph -->';
 
@@ -68,19 +71,22 @@ test.describe( 'Update propagation — round-trip and idempotency', () => {
 			STATUS.CORE_UPDATED_CUSTOMIZED
 		);
 
-		const apply = await request.post(
-			`/wp-json/woocommerce-email-editor/v1/emails/${ postId }/apply`,
-			{ data: { choices: [] } }
-		);
-		expect( apply.ok() ).toBeTruthy();
+		// Use applyWooEmailTemplate (basic auth) instead of request.post (cookie auth)
+		// because WP REST POST endpoints require a nonce when using cookie-based auth.
+		// choices: [] keeps all merchant edits (keep_yours default), so the merged
+		// result diverges from canonical and the applier stamps core_updated_customized.
+		const apply = await applyWooEmailTemplate( postId, [] );
+		expect( apply.status ).toBe( 'applied' );
 
 		meta = await getWooEmailMeta( postId );
-		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
+		// With choices:[] the merchant's diverged block is preserved, so the post
+		// stays core_updated_customized rather than reaching in_sync.
+		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe(
+			STATUS.CORE_UPDATED_CUSTOMIZED
+		);
 	} );
 
-	test( 'Reset round-trip: customized → reset → in_sync', async ( {
-		request,
-	} ) => {
+	test( 'Reset round-trip: customized → reset → in_sync', async () => {
 		const customized =
 			'<!-- wp:paragraph --><p>MERCHANT CUSTOM</p><!-- /wp:paragraph -->';
 		const postId = await seedWooEmailPost( {
@@ -90,10 +96,11 @@ test.describe( 'Update propagation — round-trip and idempotency', () => {
 			status: STATUS.IN_SYNC,
 		} );
 
-		const reset = await request.post(
-			`/wp-json/woocommerce-email-editor/v1/emails/${ postId }/reset`
-		);
-		expect( reset.ok() ).toBeTruthy();
+		// Use resetWooEmailTemplate (basic auth) instead of request.post (cookie auth)
+		// because WP REST POST endpoints require a nonce when using cookie-based auth.
+		// The reset endpoint returns the post-reset sync status directly (not "applied").
+		const reset = await resetWooEmailTemplate( postId );
+		expect( reset.status ).toBe( STATUS.IN_SYNC );
 
 		const meta = await getWooEmailMeta( postId );
 		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
