@@ -12,10 +12,12 @@
  * @package WooCommerce\Templates
  * @version 10.8.0
  *
- * @var WC_Order_Item_Product $item       Order line item being rendered.
- * @var WC_Product            $product    Product attached to the line item.
- * @var WC_Order              $order      Order being reviewed.
- * @var int                   $row_index  Zero-based row index, used in input names.
+ * @var WC_Order_Item_Product $item            Order line item being rendered.
+ * @var WC_Product            $product         Product attached to the line item.
+ * @var WC_Order              $order           Order being reviewed.
+ * @var int                   $row_index       Zero-based row index, used in input names.
+ * @var int                   $existing_rating Pre-fill rating (0 when no prior review for this order).
+ * @var string                $existing_text   Pre-fill review text (empty when no prior review for this order).
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -23,6 +25,9 @@ defined( 'ABSPATH' ) || exit;
 if ( ! $item instanceof WC_Order_Item_Product || ! $product instanceof WC_Product || ! $order instanceof WC_Order ) {
 	return;
 }
+
+$existing_rating = isset( $existing_rating ) ? (int) $existing_rating : 0;
+$existing_text   = isset( $existing_text ) ? (string) $existing_text : '';
 
 $item_id         = $item->get_id();
 $product_id      = $product->get_id();
@@ -38,6 +43,7 @@ $rating_control = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::rend
 		'name'      => 'reviews[' . $row_index . '][rating]',
 		'id_prefix' => 'woocommerce-review-rating-' . $item_id,
 		'label_id'  => $rating_label_id,
+		'selected'  => $existing_rating,
 	)
 );
 ?>
@@ -85,7 +91,7 @@ $rating_control = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::rend
 					name="reviews[<?php echo esc_attr( (string) $row_index ); ?>][text]"
 					rows="3"
 					placeholder="<?php esc_attr_e( 'Share your experience with this product...', 'woocommerce' ); ?>"
-				></textarea>
+				><?php echo esc_textarea( $existing_text ); ?></textarea>
 			</div>
 
 			<?php
