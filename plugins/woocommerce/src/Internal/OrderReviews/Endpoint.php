@@ -125,7 +125,7 @@ class Endpoint {
 	 *   actual page title slot. WP's `wp_get_document_title()` reads the
 	 *   post title outside the loop, so the `<title>` tag stays meaningful.
 	 *
-	 * @since 10.9.0
+	 * @since 10.8.0
 	 *
 	 * @param string|mixed $title   Title being rendered.
 	 * @param int|mixed    $post_id Post id the title belongs to.
@@ -159,7 +159,7 @@ class Endpoint {
 	 *   related-posts template part, or a footer "recent posts" panel for a
 	 *   different post on the same render is untouched.
 	 *
-	 * @since 10.9.0
+	 * @since 10.8.0
 	 *
 	 * @param string|mixed         $block_content Block markup.
 	 * @param array<string,mixed>  $block         Parsed block (unused but kept for filter signature).
