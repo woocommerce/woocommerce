@@ -39,17 +39,17 @@ class WC_Meta_Box_Product_Images {
 		<div id="wc-product-images__list" class="wc-product-images__list<?php echo ! empty( $all_ids ) ? ' wc-product-images__list--has-images' : ''; ?>">
 			<?php
 			if ( ! empty( $all_ids ) ) {
-				foreach ( $all_ids as $index => $attachment_id ) {
-					$is_featured = ( 0 === $index );
-					$size        = $is_featured ? 'medium' : 'thumbnail';
-					$img         = wp_get_attachment_image( $attachment_id, $size );
+				foreach ( $all_ids as $attachment_id ) {
+					$img = wp_get_attachment_image( $attachment_id, empty( $rendered_ids ) ? 'medium' : 'thumbnail' );
 
 					if ( empty( $img ) ) {
 						continue;
 					}
 
 					$rendered_ids[] = (int) $attachment_id;
-					$modifier       = $is_featured ? 'featured' : 'gallery';
+					$is_featured    = ( 1 === count( $rendered_ids ) );
+
+					$modifier = $is_featured ? 'featured' : 'gallery';
 					?>
 					<div class="wc-product-images__image wc-product-images__image--<?php echo esc_attr( $modifier ); ?>" data-attachment-id="<?php echo esc_attr( (string) $attachment_id ); ?>" tabindex="0">
 						<?php echo $img; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
