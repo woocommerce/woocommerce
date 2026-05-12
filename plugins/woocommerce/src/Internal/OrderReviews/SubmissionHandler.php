@@ -29,8 +29,13 @@ class SubmissionHandler {
 	public const ACTION = 'woocommerce_submit_order_reviews';
 
 	/**
-	 * Order meta set when every eligible item has been reviewed by the
-	 * matching author.
+	 * Order meta stamped with the time the Review Order page first had no
+	 * actionable rows left.
+	 *
+	 * Set by the submission handler once every eligible item has a review by
+	 * this customer (approved or pending moderation), and also by the Endpoint
+	 * when the page is loaded with no actionable rows (e.g. all items are
+	 * already-reviewed or skipped because reviews are disabled on the products).
 	 */
 	public const COMPLETED_META_KEY = '_wc_review_request_completed_at';
 
@@ -124,8 +129,12 @@ class SubmissionHandler {
 		$author_agent = $order->get_customer_user_agent();
 		$require_mod  = (bool) get_option( 'comment_moderation' );
 
-		// Preload the eligibility cache so the per-row decide() calls below
-		// don't issue one already-reviewed query each.
+		// Drop any per-request memoisation a prior caller may have populated,
+		// then preload the eligibility cache so the per-row decide() calls
+		// below don't issue one already-reviewed query each. Reset matters
+		// inside the suite (multiple submissions in one PHP process) and is
+		// a no-op in production (admin-ajax runs in a fresh process).
+		ItemEligibility::reset_cache();
 		ItemEligibility::preload_for_items( $item_index, $order );
 
 		foreach ( $rows_in as $row_index => $row ) {

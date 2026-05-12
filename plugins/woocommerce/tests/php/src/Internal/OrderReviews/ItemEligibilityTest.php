@@ -140,6 +140,71 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox exclude_fully_refunded_items drops items whose full quantity has been refunded.
+	 */
+	public function test_exclude_fully_refunded_items_drops_full_refunds(): void {
+		$built = $this->make_order();
+		$order = $built['order'];
+		$item  = $built['item'];
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => $item->get_total(),
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => $item->get_quantity(),
+						'refund_total' => $item->get_total(),
+					),
+				),
+			)
+		);
+
+		$fresh    = wc_get_order( $order->get_id() );
+		$filtered = ItemEligibility::exclude_fully_refunded_items( $fresh->get_items(), $fresh );
+
+		$this->assertCount( 0, $filtered, 'Fully refunded line item should be excluded.' );
+	}
+
+	/**
+	 * @testdox exclude_fully_refunded_items keeps partially-refunded items.
+	 */
+	public function test_exclude_fully_refunded_items_keeps_partial_refunds(): void {
+		$order = OrderHelper::create_order();
+		foreach ( $order->get_items() as $line ) {
+			$order->remove_item( $line->get_id() );
+		}
+		$order->set_billing_email( 'jane@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$order->add_product( $product, 3 );
+		$order->save();
+
+		$items = $order->get_items();
+		/** @var WC_Order_Item_Product $item */
+		$item = reset( $items );
+
+		wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => (float) $item->get_total() / 3,
+				'line_items' => array(
+					$item->get_id() => array(
+						'qty'          => 1,
+						'refund_total' => (float) $item->get_total() / 3,
+					),
+				),
+			)
+		);
+
+		$fresh    = wc_get_order( $order->get_id() );
+		$filtered = ItemEligibility::exclude_fully_refunded_items( $fresh->get_items(), $fresh );
+
+		$this->assertCount( 1, $filtered, 'Partially refunded line item should still be eligible.' );
+	}
+
+	/**
 	 * @testdox decide() ignores reviews without the order meta (default for legacy reviews).
 	 */
 	public function test_decide_ignores_review_without_order_meta(): void {
