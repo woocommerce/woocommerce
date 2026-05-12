@@ -56,7 +56,12 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			$sections['rest_api_caching'] = __( 'REST API caching', 'woocommerce' );
 		}
 
-		$sections['webhooks']        = __( 'Webhooks', 'woocommerce' );
+		$sections['webhooks'] = __( 'Webhooks', 'woocommerce' );
+
+		if ( has_filter( 'woocommerce_settings_rest_api' ) ) {
+			$sections['legacy_api'] = __( 'Legacy API', 'woocommerce' );
+		}
+
 		$sections['woocommerce_com'] = __( 'WooCommerce.com', 'woocommerce' );
 
 		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
@@ -396,6 +401,19 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 			);
 
 		return apply_filters( 'woocommerce_com_integration_settings', $settings );
+	}
+
+	/**
+	 * Get settings for the legacy API section.
+	 *
+	 * The section is only registered when an extension has hooked into the
+	 * `woocommerce_settings_rest_api` filter, so this acts purely as an
+	 * extension point — core no longer ships any settings of its own here.
+	 *
+	 * @return array
+	 */
+	protected function get_settings_for_legacy_api_section() {
+		return apply_filters( 'woocommerce_settings_rest_api', array() );
 	}
 
 	/**
