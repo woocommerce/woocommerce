@@ -289,7 +289,7 @@ final class DeferredEmailQueue {
 			return false;
 		}
 
-		return ! in_array( $id, array( 0, '0', '' ), true );
+		return ! empty( $id );
 	}
 
 	/**
