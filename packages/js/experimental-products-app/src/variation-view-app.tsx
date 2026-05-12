@@ -2,6 +2,14 @@
  * External dependencies
  */
 import { StrictMode, Suspense, createRoot, lazy } from '@wordpress/element';
+import { privateApis as routerPrivateApis } from '@wordpress/router';
+
+/**
+ * Internal dependencies
+ */
+import { unlock } from './lock-unlock';
+
+const { RouterProvider } = unlock( routerPrivateApis );
 
 const VariationView = lazy( () =>
 	import(
@@ -32,7 +40,9 @@ export function initializeVariationView(
 	root.render(
 		<StrictMode>
 			<Suspense fallback={ null }>
-				<VariationView productId={ productId } />
+				<RouterProvider>
+					<VariationView productId={ productId } />
+				</RouterProvider>
 			</Suspense>
 		</StrictMode>
 	);
