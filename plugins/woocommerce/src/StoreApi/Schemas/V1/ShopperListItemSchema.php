@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListItem;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
@@ -10,9 +11,8 @@ use Automattic\WooCommerce\StoreApi\Utilities\ProductItemTrait;
 /**
  * ShopperListItemSchema class.
  *
- * One row in a shopper list. Serves live product data when the product still
- * exists in the catalog, and at-save tombstone data when it doesn't, distinguishing
- * the two states via the `product_exists` boolean.
+ * Serializes a {@see ShopperListItem}. Serves live product data when the
+ * underlying product still exists, and at-save tombstone data otherwise.
  */
 class ShopperListItemSchema extends AbstractSchema {
 	// We only call format_variation_data(); see phpstan.neon for the related suppressions.
@@ -203,46 +203,44 @@ class ShopperListItemSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Convert a stored item record into the response shape.
+	 * Serialize the saved item.
 	 *
-	 * @param array $item Stored item record.
+	 * @param ShopperListItem $item Saved item.
 	 * @return array
 	 */
 	public function get_item_response( $item ) {
-		$variation_id = $item['variation_id'] ?? 0;
-		$product_id   = $variation_id > 0 ? $variation_id : ( $item['product_id'] ?? 0 );
-		$product      = $product_id ? wc_get_product( $product_id ) : false;
+		$variation_id = $item->get_variation_id();
+		$product_id   = $variation_id > 0 ? $variation_id : $item->get_product_id();
+		$product      = $product_id > 0 ? wc_get_product( $product_id ) : false;
 		$has_product  = $product instanceof \WC_Product;
 
 		$response = array(
-			'key'            => $item['key'] ?? '',
+			'key'            => $item->get_key(),
 			'id'             => $product_id,
-			'product_id'     => $item['product_id'] ?? 0,
-			'variation_id'   => $item['variation_id'] ?? 0,
-			'quantity'       => $item['quantity'] ?? 1,
+			'product_id'     => $item->get_product_id(),
+			'variation_id'   => $variation_id,
+			'quantity'       => $item->get_quantity(),
 			'product_exists' => $has_product,
-			'date_added_gmt' => wc_rest_prepare_date_response( $item['date_added_gmt'] ?? current_time( 'mysql', true ) ),
+			'date_added_gmt' => wc_rest_prepare_date_response( $item->get_date_added_gmt() ),
 		);
-
-		$variation_data = isset( $item['variation'] ) && is_array( $item['variation'] ) ? $item['variation'] : array();
 
 		if ( $has_product ) {
 			$response['name']       = $this->get_name( $product );
 			$response['permalink']  = $product->get_permalink();
 			$response['images']     = $this->get_images( $product );
-			$response['variation']  = $this->format_variation_data( $variation_data, $product );
+			$response['variation']  = $this->format_variation_data( $item->get_variation_attributes(), $product );
 			$response['prices']     = (object) $this->get_prices( $product );
 			$response['price_html'] = (string) $product->get_price_html();
 			$response['image_html'] = $this->get_image_html( $product );
 		} else {
-			$response['name']       = $this->prepare_html_response( (string) ( $item['product_title_at_save'] ?? '' ) );
+			$response['name']       = $this->prepare_html_response( $item->get_product_title_at_save() );
 			$response['permalink']  = '';
 			$response['images']     = array();
 			$response['variation']  = array();
 			$response['prices']     = null;
 			$response['price_html'] = '';
 			$response['image_html'] = $this->get_image_html( null );
-		}//end if
+		}
 
 		return $response;
 	}

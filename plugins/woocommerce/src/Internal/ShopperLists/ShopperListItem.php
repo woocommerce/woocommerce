@@ -109,7 +109,7 @@ class ShopperListItem {
 			absint( $data['variation_id'] ?? 0 ),
 			$data['variation'] ?? array(),
 			absint( $data['quantity'] ),
-			$data['date_added_gmt'] ?? '',
+			$data['date_added_gmt'] ?? current_time( 'mysql', true ),
 			$data['product_title_at_save'] ?? ''
 		);
 	}
@@ -265,7 +265,28 @@ class ShopperListItem {
 	}
 
 	/**
-	 * Storage / response shape.
+	 * Variation attributes captured at save time.
+	 */
+	public function get_variation_attributes(): array {
+		return $this->variation;
+	}
+
+	/**
+	 * Save time as a MySQL DATETIME in GMT.
+	 */
+	public function get_date_added_gmt(): string {
+		return $this->date_added_gmt;
+	}
+
+	/**
+	 * Snapshot of the product title at save time. Used as the tombstone label.
+	 */
+	public function get_product_title_at_save(): string {
+		return $this->product_title_at_save;
+	}
+
+	/**
+	 * Storage shape used to persist into user_meta.
 	 */
 	public function to_array(): array {
 		return array(

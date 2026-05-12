@@ -137,7 +137,7 @@ class ShopperListItems extends AbstractRoute {
 
 		$response = array();
 		foreach ( $items as $item ) {
-			$response[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $item->to_array(), $request ) );
+			$response[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $item, $request ) );
 		}
 
 		return rest_ensure_response( $response );
@@ -176,7 +176,7 @@ class ShopperListItems extends AbstractRoute {
 		$list->save();
 
 		$saved = $list->find_item( $item->get_key() ) ?? $item;
-		return new \WP_REST_Response( $this->schema->get_item_response( $saved->to_array() ), 201 );
+		return new \WP_REST_Response( $this->schema->get_item_response( $saved ), 201 );
 	}
 
 	/**

@@ -3,6 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi\Schemas\V1;
 
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperList;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListItem;
 use Automattic\WooCommerce\StoreApi\Schemas\ExtendSchema;
 use Automattic\WooCommerce\StoreApi\SchemaController;
 
@@ -90,19 +92,19 @@ class ShopperListSchema extends AbstractSchema {
 	}
 
 	/**
-	 * Convert a stored list record into the response shape.
+	 * Serialize the shopper list.
 	 *
-	 * @param array $shopper_list List array (as returned by ShopperList::to_array()).
+	 * @param ShopperList $shopper_list The list.
 	 * @return array
 	 */
 	public function get_item_response( $shopper_list ) {
-		$items = isset( $shopper_list['items'] ) && is_array( $shopper_list['items'] ) ? $shopper_list['items'] : array();
+		$items = array_values( $shopper_list->get_items() );
 
 		$product_ids = array_filter(
 			array_map(
-				static function ( $item ) {
-					$variation_id = absint( $item['variation_id'] ?? 0 );
-					return $variation_id ? $variation_id : absint( $item['product_id'] ?? 0 );
+				static function ( ShopperListItem $item ): int {
+					$variation_id = $item->get_variation_id();
+					return $variation_id > 0 ? $variation_id : $item->get_product_id();
 				},
 				$items
 			)
@@ -112,12 +114,12 @@ class ShopperListSchema extends AbstractSchema {
 		}
 
 		return array(
-			'slug'             => $shopper_list['slug'] ?? '',
-			'date_created_gmt' => wc_rest_prepare_date_response( $shopper_list['date_created_gmt'] ?? current_time( 'mysql', true ) ),
+			'slug'             => $shopper_list->get_slug(),
+			'date_created_gmt' => wc_rest_prepare_date_response( $shopper_list->get_date_created_gmt() ),
 			'item_count'       => count( $items ),
 			'items'            => array_values(
 				array_map(
-					fn( $item ) => $this->item_schema->get_item_response( $item ),
+					fn( ShopperListItem $item ) => $this->item_schema->get_item_response( $item ),
 					$items
 				)
 			),

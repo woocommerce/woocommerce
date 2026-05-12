@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Schemas;
 
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListItem;
 use Automattic\WooCommerce\StoreApi\Formatters;
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
@@ -64,23 +65,24 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build a minimal stored item record around a product.
+	 * Build a ShopperListItem around a product.
 	 *
 	 * @param int    $product_id   Product ID.
 	 * @param int    $variation_id Variation ID, or 0.
 	 * @param array  $variation    Variation attributes.
 	 * @param string $title        Title snapshot.
-	 * @return array
 	 */
-	private function build_item( int $product_id, int $variation_id = 0, array $variation = array(), string $title = 'Snapshot Title' ): array {
-		return array(
-			'key'                   => md5( (string) $product_id ),
-			'product_id'            => $product_id,
-			'variation_id'          => $variation_id,
-			'variation'             => $variation,
-			'quantity'              => 1,
-			'date_added_gmt'        => '2024-04-25 03:20:00',
-			'product_title_at_save' => $title,
+	private function build_item( int $product_id, int $variation_id = 0, array $variation = array(), string $title = 'Snapshot Title' ): ShopperListItem {
+		return ShopperListItem::from_array(
+			array(
+				'key'                   => md5( (string) $product_id ),
+				'product_id'            => $product_id,
+				'variation_id'          => $variation_id,
+				'variation'             => $variation,
+				'quantity'              => 1,
+				'date_added_gmt'        => '2024-04-25 03:20:00',
+				'product_title_at_save' => $title,
+			)
 		);
 	}
 
