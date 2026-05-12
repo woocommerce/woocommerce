@@ -16,6 +16,7 @@ export type ProductListQuery = Omit< ProductQuery, 'status' > & {
 	include_types?: ProductType[];
 	exclude_types?: ProductType[];
 	exclude_category?: number[];
+	exclude_shipping_class?: number[];
 	min_stock_quantity?: string;
 	max_stock_quantity?: string;
 };
@@ -111,6 +112,21 @@ function applyCategoryFilter( query: ProductListQuery, filter: Filter ) {
 	query.category = values.join( ',' );
 }
 
+function applyShippingClassFilter( query: ProductListQuery, filter: Filter ) {
+	const values = getNumericValues( filter.value );
+
+	if ( values.length === 0 ) {
+		return;
+	}
+
+	if ( filter.operator === 'isNone' ) {
+		query.exclude_shipping_class = values;
+		return;
+	}
+
+	query.shipping_class = values.join( ',' );
+}
+
 function applyStockFilter( query: ProductListQuery, filter: Filter ) {
 	const [ stockStatus ] = getStringValues( filter.value );
 
@@ -172,6 +188,9 @@ export function buildProductListQuery( view: View ): ProductListQuery {
 				break;
 			case 'categories':
 				applyCategoryFilter( query, filter );
+				break;
+			case 'shipping_class':
+				applyShippingClassFilter( query, filter );
 				break;
 			case 'stock':
 				applyStockFilter( query, filter );
