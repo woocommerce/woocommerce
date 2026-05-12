@@ -73,10 +73,12 @@ $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $orde
 // items below. Without this each decide() call would issue its own query.
 \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::preload_for_items( $items, $order );
 
-// Pre-compute one decision per item so we know whether the form has any
-// actionable rows or whether to fall through to the empty-state thank-you.
-$decisions     = array();
-$has_form_rows = false;
+// Pre-compute one decision per item so we know whether to render the form
+// (any item still missing a review for this order) or fall through to the
+// empty-state thank-you (every renderable item already has a review tied
+// to this order).
+$decisions          = array();
+$has_unreviewed_row = false;
 foreach ( $items as $item ) {
 	if ( ! $item instanceof WC_Order_Item_Product ) {
 		continue;
@@ -91,8 +93,8 @@ foreach ( $items as $item ) {
 		continue;
 	}
 
-	if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_FORM === $decision['status'] ) {
-		$has_form_rows = true;
+	if ( ! ( $decision['comment'] instanceof WP_Comment ) ) {
+		$has_unreviewed_row = true;
 	}
 
 	$decisions[] = array(
@@ -104,7 +106,7 @@ foreach ( $items as $item ) {
 
 // Empty-state: no actionable rows remain. The Endpoint already stamped the
 // completion meta before we got here, so this branch is purely the view.
-if ( ! $has_form_rows ) {
+if ( ! $has_unreviewed_row ) {
 	$customer_email = $order->get_billing_email();
 	$reviewed_count = 0;
 	$rating_total   = 0;
@@ -180,7 +182,7 @@ $order_key = (string) $order->get_order_key();
 		<?php esc_html_e( '* Mandatory fields', 'woocommerce' ); ?>
 	</p>
 
-	<?php if ( $has_form_rows ) : ?>
+	<?php if ( $has_unreviewed_row ) : ?>
 		<form
 			class="woocommerce-review-order__form"
 			method="post"
@@ -201,26 +203,17 @@ $order_key = (string) $order->get_order_key();
 					$product  = $entry['product'];
 					$decision = $entry['decision'];
 
-					if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_REVIEWED === $decision['status'] ) {
-						wc_get_template(
-							'order/customer-review-order-row-reviewed.php',
-							array(
-								'item'    => $item,
-								'product' => $product,
-								'order'   => $order,
-								'review'  => $decision['comment'],
-							)
-						);
-						continue;
-					}
+					$prefill = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prefill_for_item( $item, $order );
 
 					wc_get_template(
 						'order/customer-review-order-row.php',
 						array(
-							'item'      => $item,
-							'product'   => $product,
-							'order'     => $order,
-							'row_index' => $row_index,
+							'item'            => $item,
+							'product'         => $product,
+							'order'           => $order,
+							'row_index'       => $row_index,
+							'existing_rating' => $prefill['rating'],
+							'existing_text'   => $prefill['text'],
 						)
 					);
 					++$row_index;

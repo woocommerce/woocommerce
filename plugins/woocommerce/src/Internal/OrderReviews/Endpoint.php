@@ -349,7 +349,12 @@ class Endpoint {
 				continue;
 			}
 			$decision = ItemEligibility::decide( $item, $order );
-			if ( ItemEligibility::STATUS_FORM === $decision['status'] ) {
+			if ( ItemEligibility::STATUS_SKIP === $decision['status'] ) {
+				continue;
+			}
+			// Any non-skip row without a review tied to this order means the
+			// customer still has something to submit — order isn't complete.
+			if ( ! ( $decision['comment'] instanceof \WP_Comment ) ) {
 				return;
 			}
 		}
