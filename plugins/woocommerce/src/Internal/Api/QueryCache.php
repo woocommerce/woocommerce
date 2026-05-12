@@ -21,7 +21,7 @@ class QueryCache {
 	/**
 	 * WP object-cache group.
 	 */
-	private const CACHE_GROUP = 'wc-graphql';
+	public const CACHE_GROUP = 'wc-graphql';
 
 	/**
 	 * Cache key prefix. Includes the library major version so that upgrading

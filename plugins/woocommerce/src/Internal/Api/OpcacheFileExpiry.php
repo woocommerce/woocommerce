@@ -20,6 +20,11 @@ class OpcacheFileExpiry {
 	public const ACTION_GROUP = 'woocommerce-graphql';
 
 	/**
+	 * Object-cache key used to short-circuit {@see self::ensure_scheduled()}.
+	 */
+	private const SCHEDULED_CACHE_KEY = 'graphql_opcache_cleanup_scheduled';
+
+	/**
 	 * Delete OPcache cache files older than {@see QueryCache::get_cache_ttl()}.
 	 *
 	 * AST contents are a pure function of the query, so this is a disk-usage
@@ -76,12 +81,18 @@ class OpcacheFileExpiry {
 	 * triggered by the first write — no separate bootstrap step.
 	 */
 	public static function ensure_scheduled(): void {
+		if ( wp_cache_get( self::SCHEDULED_CACHE_KEY, QueryCache::CACHE_GROUP ) ) {
+			return;
+		}
+
 		if ( ! function_exists( 'as_has_scheduled_action' ) || ! function_exists( 'as_schedule_single_action' ) ) {
 			return;
 		}
-		if ( as_has_scheduled_action( self::ACTION_HOOK, array(), self::ACTION_GROUP ) ) {
-			return;
+
+		if ( ! as_has_scheduled_action( self::ACTION_HOOK, array(), self::ACTION_GROUP ) ) {
+			as_schedule_single_action( time() + DAY_IN_SECONDS, self::ACTION_HOOK, array(), self::ACTION_GROUP );
 		}
-		as_schedule_single_action( time() + DAY_IN_SECONDS, self::ACTION_HOOK, array(), self::ACTION_GROUP );
+
+		wp_cache_set( self::SCHEDULED_CACHE_KEY, true, QueryCache::CACHE_GROUP, HOUR_IN_SECONDS );
 	}
 }
