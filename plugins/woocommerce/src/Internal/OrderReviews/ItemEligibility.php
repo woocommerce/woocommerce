@@ -112,7 +112,6 @@ class ItemEligibility {
 		if ( isset( self::$preloaded[ $preload_key ] ) ) {
 			return;
 		}
-		self::$preloaded[ $preload_key ] = true;
 
 		$product_ids = array();
 		foreach ( $items as $item ) {
@@ -127,6 +126,8 @@ class ItemEligibility {
 		if ( empty( $product_ids ) ) {
 			return;
 		}
+
+		self::$preloaded[ $preload_key ] = true;
 
 		// Scope to this order's reviews only: a customer who buys the same
 		// product on a later order shouldn't see their old review here.
