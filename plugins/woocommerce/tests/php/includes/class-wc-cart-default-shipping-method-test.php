@@ -154,6 +154,20 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Helper: simulate the auto-defaulter having selected a rate for a package
+	 * by writing the session entries it would write.
+	 *
+	 * @param int|string $key      Package key.
+	 * @param string     $rate_id  Rate id (e.g. 'local_pickup:1').
+	 */
+	private function record_auto_choice( $key, string $rate_id ): void {
+		$chosen         = WC()->session->get( 'chosen_shipping_methods', array() );
+		$chosen[ $key ] = $rate_id;
+		WC()->session->set( 'chosen_shipping_methods', $chosen );
+		wc_set_chosen_shipping_method_origin( $key, 'auto', $rate_id );
+	}
+
+	/**
 	 * When the previous Local Pickup choice came from the auto-defaulter and a
 	 * shipping rate is now available, the auto pickup should be replaced with
 	 * the shipping rate. This is the WOOPMNT-6159 / Apple Pay scenario.
@@ -161,7 +175,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 * @testdox Replaces auto-chosen local pickup with shipping rate when one is now available.
 	 */
 	public function test_replaces_auto_local_pickup_when_shipping_rate_becomes_available(): void {
-		wc_set_chosen_shipping_method_origin( 0, 'auto' );
+		$this->record_auto_choice( 0, 'local_pickup:1' );
 
 		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
@@ -176,7 +190,10 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 * @testdox Preserves manually chosen local pickup even when a shipping rate is available.
 	 */
 	public function test_preserves_manual_local_pickup_when_shipping_rate_available(): void {
-		wc_set_chosen_shipping_method_origin( 0, 'manual' );
+		$chosen      = WC()->session->get( 'chosen_shipping_methods', array() );
+		$chosen[ 0 ] = 'local_pickup:1';
+		WC()->session->set( 'chosen_shipping_methods', $chosen );
+		wc_set_chosen_shipping_method_origin( 0, 'manual', 'local_pickup:1' );
 
 		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
@@ -207,7 +224,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 * @testdox Keeps auto local pickup when no shipping alternative exists.
 	 */
 	public function test_keeps_auto_local_pickup_when_no_alternative(): void {
-		wc_set_chosen_shipping_method_origin( 0, 'auto' );
+		$this->record_auto_choice( 0, 'local_pickup:1' );
 
 		$package = $this->build_package( array( 'local_pickup:1' ) );
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
@@ -239,10 +256,46 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	 * @testdox Manual write paths can flip the origin from auto to manual.
 	 */
 	public function test_manual_write_overrides_auto_origin(): void {
-		wc_set_chosen_shipping_method_origin( 0, 'auto' );
+		$this->record_auto_choice( 0, 'local_pickup:1' );
 		$this->assertSame( 'auto', wc_get_chosen_shipping_method_origin( 0 ) );
 
-		wc_set_chosen_shipping_method_origin( 0, 'manual' );
+		wc_set_chosen_shipping_method_origin( 0, 'manual', 'local_pickup:1' );
 		$this->assertSame( 'manual', wc_get_chosen_shipping_method_origin( 0 ) );
+	}
+
+	/**
+	 * Third-party plugins occasionally write directly to `chosen_shipping_methods`
+	 * in the WC session without going through Store API, the AJAX endpoints, or
+	 * `wc_set_chosen_shipping_method_origin()`. The recorded origin must invalidate
+	 * itself in that case, so a stale 'auto' marker can't override a third party's
+	 * deliberate choice on a subsequent re-evaluation.
+	 *
+	 * @testdox External write to chosen_shipping_methods invalidates the recorded auto origin.
+	 */
+	public function test_external_chosen_shipping_methods_write_invalidates_auto_origin(): void {
+		// Simulate the auto-defaulter having recorded pickup_location:1 as 'auto'.
+		$this->record_auto_choice( 0, 'local_pickup:1' );
+		$this->assertSame( 'auto', wc_get_chosen_shipping_method_origin( 0 ) );
+
+		// Simulate a third-party plugin overwriting the chosen rate directly.
+		$chosen      = WC()->session->get( 'chosen_shipping_methods', array() );
+		$chosen[ 0 ] = 'local_pickup:2';
+		WC()->session->set( 'chosen_shipping_methods', $chosen );
+
+		$this->assertSame(
+			'manual',
+			wc_get_chosen_shipping_method_origin( 0 ),
+			'External write to chosen_shipping_methods should invalidate the stale auto marker'
+		);
+
+		// And the auto-defaulter must not unstick the externally-chosen pickup.
+		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:2' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:2' );
+
+		$this->assertSame(
+			'local_pickup:2',
+			$result,
+			'Externally-chosen pickup should be preserved (treated as manual)'
+		);
 	}
 }

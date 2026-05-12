@@ -479,7 +479,7 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
 		WC()->session->set( 'shipping_method_counts', $method_counts );
-		wc_set_chosen_shipping_method_origin( $key, 'auto' );
+		wc_set_chosen_shipping_method_origin( $key, 'auto', $chosen_method );
 
 		/**
 		 * Fires when a shipping method is chosen.
@@ -505,13 +505,20 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
  * shipping rate becomes available, e.g. after an Apple Pay / Google Pay wallet
  * supplies an address).
  *
+ * Origin is tied to the rate_id it was recorded against, so that a third-party
+ * caller writing to `chosen_shipping_methods` directly (bypassing the Store API
+ * and the AJAX endpoints) implicitly invalidates a stale 'auto' marker — the
+ * recorded rate_id no longer matches the current chosen rate, and the reader
+ * falls back to 'manual'.
+ *
  * @since 10.6.0
  *
- * @param int|string $key    Package key.
- * @param string     $origin Either 'auto' or 'manual'.
+ * @param int|string $key     Package key.
+ * @param string     $origin  Either 'auto' or 'manual'.
+ * @param string     $rate_id The rate_id this origin applies to.
  * @return void
  */
-function wc_set_chosen_shipping_method_origin( $key, $origin ) {
+function wc_set_chosen_shipping_method_origin( $key, $origin, $rate_id ) {
 	if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
 		return;
 	}
@@ -521,18 +528,25 @@ function wc_set_chosen_shipping_method_origin( $key, $origin ) {
 	}
 
 	$origins         = WC()->session->get( 'chosen_shipping_method_origins', array() );
-	$origins[ $key ] = $origin;
+	$origins[ $key ] = array(
+		'rate_id' => (string) $rate_id,
+		'origin'  => $origin,
+	);
 	WC()->session->set( 'chosen_shipping_method_origins', $origins );
 }
 
 /**
  * Returns the recorded origin ('auto' or 'manual') of the chosen shipping method
- * for a package, or 'manual' when no origin has been recorded yet.
+ * for a package.
  *
- * Defaulting to 'manual' preserves the historical sticky-Local-Pickup behavior
- * for sessions that pre-date origin tracking. New sessions get the correct
- * origin written from the first `wc_get_chosen_shipping_method_for_package()`
- * call onwards.
+ * Falls back to 'manual' when:
+ *
+ * - no origin has been recorded yet (preserves the historical sticky-Local-Pickup
+ *   behavior for sessions that pre-date origin tracking); or
+ * - the recorded rate_id no longer matches the chosen rate currently in
+ *   `chosen_shipping_methods` (something other than the tracked write paths
+ *   overwrote the choice, so the recorded 'auto' marker is stale and we treat
+ *   the new choice as deliberate).
  *
  * @since 10.6.0
  *
@@ -545,8 +559,22 @@ function wc_get_chosen_shipping_method_origin( $key ) {
 	}
 
 	$origins = WC()->session->get( 'chosen_shipping_method_origins', array() );
+	$entry   = isset( $origins[ $key ] ) ? $origins[ $key ] : null;
 
-	return isset( $origins[ $key ] ) && 'auto' === $origins[ $key ] ? 'auto' : 'manual';
+	if ( ! is_array( $entry ) || ! isset( $entry['rate_id'], $entry['origin'] ) ) {
+		return 'manual';
+	}
+
+	$chosen_methods = WC()->session->get( 'chosen_shipping_methods', array() );
+	$current_rate   = isset( $chosen_methods[ $key ] ) ? (string) $chosen_methods[ $key ] : '';
+
+	// If the chosen rate has been overwritten by something that didn't go through
+	// `wc_set_chosen_shipping_method_origin()`, treat the new choice as manual.
+	if ( $current_rate !== (string) $entry['rate_id'] ) {
+		return 'manual';
+	}
+
+	return 'auto' === $entry['origin'] ? 'auto' : 'manual';
 }
 
 /**

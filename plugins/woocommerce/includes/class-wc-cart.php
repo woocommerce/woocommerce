@@ -2105,7 +2105,7 @@ class WC_Cart extends WC_Legacy_Cart {
 
 			foreach ( $packages as $i => $package ) {
 				$chosen_shipping_methods[ $i ] = 'free_shipping';
-				wc_set_chosen_shipping_method_origin( $i, 'manual' );
+				wc_set_chosen_shipping_method_origin( $i, 'manual', 'free_shipping' );
 			}
 
 			WC()->session->set( 'chosen_shipping_methods', $chosen_shipping_methods );
