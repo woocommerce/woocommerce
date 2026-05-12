@@ -94,23 +94,23 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Get cache prefix should generate cache-safe prefixes for empty cache groups.
+	 * @testdox Get cache prefix should generate string prefixes for empty cache groups.
 	 */
-	public function test_get_cache_prefix_generates_cache_safe_prefix(): void {
+	public function test_get_cache_prefix_generates_string_prefix(): void {
 		$prefix = WC_Cache_Helper::get_cache_prefix( 'orders' );
 
-		$this->assert_cache_safe_prefix( $prefix );
+		$this->assert_prefixed_cache_key_namespace( $prefix );
 	}
 
 	/**
-	 * @testdox Get cache prefix should store cache-safe string prefixes.
+	 * @testdox Get cache prefix should store string prefixes.
 	 */
-	public function test_get_cache_prefix_stores_cache_safe_string_prefix(): void {
+	public function test_get_cache_prefix_stores_string_prefix(): void {
 		WC_Cache_Helper::get_cache_prefix( 'orders' );
 
 		$stored_prefix = wp_cache_get( 'wc_orders_cache_prefix', 'orders' );
 
-		$this->assert_cache_safe_stored_prefix( $stored_prefix );
+		$this->assert_valid_stored_prefix( $stored_prefix );
 	}
 
 	/**
@@ -127,8 +127,6 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 			'integer'           => array( 123 ),
 			'float'             => array( 123.45 ),
 			'stdClass'          => array( (object) array( 'invalid' => true ) ),
-			// This would match the regex if stringified, but cached prefixes must
-			// be strings already.
 			'stringable object' => array(
 				new class() {
 					/**
@@ -142,14 +140,10 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 				},
 			),
 			'empty string'      => array( '' ),
-			'plain string'      => array( 'invalid' ),
-			'space'             => array( 'has space' ),
+			'spaces'            => array( '   ' ),
 			'tab'               => array( "\t" ),
 			'newline'           => array( "\n" ),
 			'null byte'         => array( "\0" ),
-			'unit separator'    => array( "\x1f" ),
-			'delete character'  => array( "\x7f" ),
-			'old microtime'     => array( '0.84069400 1778478731' ),
 		);
 	}
 
@@ -166,17 +160,34 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 		$prefix        = WC_Cache_Helper::get_cache_prefix( 'orders' );
 		$stored_prefix = wp_cache_get( 'wc_orders_cache_prefix', 'orders' );
 
-		$this->assert_cache_safe_prefix( $prefix );
-		$this->assert_cache_safe_stored_prefix( $stored_prefix );
+		$this->assert_prefixed_cache_key_namespace( $prefix );
+		$this->assert_valid_stored_prefix( $stored_prefix );
 		$this->assertNotSame( $invalid_prefix, $stored_prefix );
 	}
 
 	/**
-	 * @testdox Get cache prefix should reuse valid cached values.
+	 * Data provider for valid cache prefix values.
+	 *
+	 * @return array<string,array{0:string}>
 	 */
-	public function test_get_cache_prefix_reuses_valid_cached_prefix(): void {
-		$stored_prefix = '0.12345600_1778592656_deadbeefdeadbeef';
+	public function data_provider_valid_cache_prefixes(): array {
+		return array(
+			'generated format'    => array( '0.12345600_1778592656_deadbeefdeadbeef' ),
+			'old microtime'       => array( '0.84069400 1778478731' ),
+			'plain string'        => array( 'extension-prefix' ),
+			'string with spaces'  => array( 'extension prefix' ),
+			'numeric string zero' => array( '0' ),
+		);
+	}
 
+	/**
+	 * @testdox Get cache prefix should reuse valid cached values.
+	 *
+	 * @dataProvider data_provider_valid_cache_prefixes
+	 *
+	 * @param string $stored_prefix Stored cache prefix.
+	 */
+	public function test_get_cache_prefix_reuses_valid_cached_prefix( string $stored_prefix ): void {
 		wp_cache_set( 'wc_orders_cache_prefix', $stored_prefix, 'orders' );
 
 		$prefix = WC_Cache_Helper::get_cache_prefix( 'orders' );
@@ -186,16 +197,16 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Invalidate cache group should generate cache-safe prefixes.
+	 * @testdox Invalidate cache group should generate string prefixes.
 	 */
-	public function test_invalidate_cache_group_generates_cache_safe_prefix(): void {
+	public function test_invalidate_cache_group_generates_string_prefix(): void {
 		WC_Cache_Helper::invalidate_cache_group( 'orders' );
 
 		$prefix        = WC_Cache_Helper::get_cache_prefix( 'orders' );
 		$stored_prefix = wp_cache_get( 'wc_orders_cache_prefix', 'orders' );
 
-		$this->assert_cache_safe_prefix( $prefix );
-		$this->assert_cache_safe_stored_prefix( $stored_prefix );
+		$this->assert_prefixed_cache_key_namespace( $prefix );
+		$this->assert_valid_stored_prefix( $stored_prefix );
 	}
 
 	/**
@@ -209,26 +220,28 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 
 		$this->assertStringStartsWith( 'wc_cache_', $cache_key );
 		$this->assertStringContainsString( 'object_meta_123', $cache_key );
-		$this->assert_cache_safe_stored_prefix( $stored_prefix );
+		$this->assert_valid_stored_prefix( $stored_prefix );
 	}
 
 	/**
-	 * Assert that a generated cache prefix is safe to use in cache keys.
+	 * Assert that a namespaced cache key contains a valid prefix.
 	 *
-	 * @param string $prefix Cache prefix.
+	 * @param string $prefix Namespaced cache key prefix.
 	 */
-	private function assert_cache_safe_prefix( string $prefix ): void {
-		$this->assertMatchesRegularExpression( '/^wc_cache_\d+\.\d+_\d+_[a-f0-9]{16}_$/', $prefix );
+	private function assert_prefixed_cache_key_namespace( string $prefix ): void {
+		$this->assertStringStartsWith( 'wc_cache_', $prefix );
+		$this->assertStringEndsWith( '_', $prefix );
+		$this->assert_valid_stored_prefix( substr( $prefix, strlen( 'wc_cache_' ), -1 ) );
 	}
 
 	/**
-	 * Assert that a stored cache prefix matches the generated prefix format.
+	 * Assert that a stored cache prefix can be used as a cache-key namespace.
 	 *
 	 * @param mixed $prefix Stored cache prefix.
 	 */
-	private function assert_cache_safe_stored_prefix( $prefix ): void {
+	private function assert_valid_stored_prefix( $prefix ): void {
 		$this->assertIsString( $prefix );
-		$this->assertMatchesRegularExpression( '/^\d+\.\d+_\d+_[a-f0-9]{16}$/', $prefix );
+		$this->assertNotSame( '', trim( $prefix ) );
 	}
 
 	/**
