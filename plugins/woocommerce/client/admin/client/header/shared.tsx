@@ -3,17 +3,12 @@
  */
 import {
 	useCallback,
-	useEffect,
 	useLayoutEffect,
 	useRef,
-	useState,
 } from '@wordpress/element';
 import { useSlot, Text } from '@woocommerce/experimental';
 import clsx from 'clsx';
 import { decodeEntities } from '@wordpress/html-entities';
-import { __ } from '@wordpress/i18n';
-import { Button, Icon } from '@wordpress/components';
-import { cog, help } from '@wordpress/icons';
 import {
 	WC_HEADER_SLOT_NAME,
 	WC_HEADER_PAGE_TITLE_SLOT_NAME,
@@ -93,6 +88,15 @@ export const getPageTitle = ( sections: string[] ) => {
 	return pageTitle;
 };
 
+/**
+ * BaseHeader is a dumb layout component shared by Header (non-embedded WC
+ * admin pages) and EmbedHeader (overlay on top of classic wp-admin pages).
+ * It owns the fixed-position bar, body-margin sync, slot rendering, and
+ * the optional reminder bar. Anything wp-admin-specific (h1 suppression,
+ * compact-bar mode, Screen Options / Help proxy icons) is the caller's
+ * responsibility — passed in via `suppressTitle`, `compact`, and the
+ * `trailingItems` slot.
+ */
 export const BaseHeader = ( {
 	isEmbedded,
 	query,
@@ -100,6 +104,9 @@ export const BaseHeader = ( {
 	sections,
 	children,
 	leftAlign = true,
+	suppressTitle = false,
+	compact = false,
+	trailingItems,
 }: {
 	isEmbedded: boolean;
 	query: Record< string, string >;
@@ -107,6 +114,24 @@ export const BaseHeader = ( {
 	sections: string[];
 	children?: React.ReactNode;
 	leftAlign?: boolean;
+	/**
+	 * When true, render a spacer instead of the title. Caller (EmbedHeader)
+	 * sets this on classic post-type screens where wp-admin already renders
+	 * its own <h1>. Page-title slot fills always win over this flag — if a
+	 * fill is registered, it renders regardless.
+	 */
+	suppressTitle?: boolean;
+	/**
+	 * When true, collapse the bar to admin-bar height. Used in tandem with
+	 * `suppressTitle` to give the bar a chrome-only treatment.
+	 */
+	compact?: boolean;
+	/**
+	 * Items rendered at the right edge, after WooHeaderItem.Slot. EmbedHeader
+	 * uses this for the gear / ? icons that proxy clicks into wp-admin's
+	 * Screen Options and Help dropdowns.
+	 */
+	trailingItems?: React.ReactNode;
 } ) => {
 	const { isScrolled } = useIsScrolled();
 
@@ -119,168 +144,16 @@ export const BaseHeader = ( {
 		headerItemSlot,
 	} );
 
-	// Detect wp-admin chrome that wp-admin already renders for the current
-	// screen. Three signals are queried together because they always change
-	// together (on mount + on route change):
-	//   - `.wrap > h1.wp-heading-inline` — wp-admin's own page title. When
-	//     present (post-type screens like Edit Product / Edit Order), suppress
-	//     the floating-header <h1> so we don't double up. When absent (Settings,
-	//     Home, Analytics), the floating header is the only title and must stay.
-	//   - `#screen-options-link-wrap` and `#contextual-help-link-wrap` — the
-	//     standard wp-admin meta-toggle wraps. When present we render proxy
-	//     gear / ? icons in the floating header and hide the originals.
-	//
-	// Lazy initial state reads the DOM synchronously on first render so we
-	// don't get a one-frame duplicate-title flash before useEffect commits.
-	// wp-admin's <h1> + meta-link wraps are server-rendered before React
-	// hydrates, so this is safe. The useEffect below re-runs on `query` changes
-	// if BaseHeader persists across client-side route transitions.
-	const detectWpAdminChrome = () => ( {
-		hasH1: !! document.querySelector( '.wrap > h1.wp-heading-inline' ),
-		hasScreenOptions: !! document.querySelector(
-			'#screen-options-link-wrap'
-		),
-		hasContextualHelp: !! document.querySelector(
-			'#contextual-help-link-wrap'
-		),
-	} );
-	const [ wpAdminChrome, setWpAdminChrome ] =
-		useState( detectWpAdminChrome );
-	useEffect( () => {
-		setWpAdminChrome( detectWpAdminChrome() );
-	}, [ query ] );
-	const {
-		hasH1: hasWpAdminH1,
-		hasScreenOptions,
-		hasContextualHelp,
-	} = wpAdminChrome;
-
-	// Track which meta-icon dropdown is currently active so we can render the
-	// blue-underline active state (mirroring the activity-panel tab pattern).
-	// Only one is active at a time — opening either closes any open
-	// activity-panel tab first, keeping all four icons behaving as one tab group.
-	const [ activeMetaIcon, setActiveMetaIcon ] = useState<
-		'screen-options' | 'help' | null
-	>( null );
-
-	// Reverse direction of the tab-group sync: when an activity-panel tab is
-	// clicked AND a wp-admin dropdown is currently open, close the dropdown.
-	// We don't update React state from this handler (state syncs reactively
-	// via the MutationObserver below), so no setTimeout deferral is needed.
-	useEffect( () => {
-		const handler = ( e: Event ) => {
-			const target = e.target as HTMLElement | null;
-			if (
-				! target?.closest( '.woocommerce-layout__activity-panel-tab' )
-			) {
-				return;
-			}
-			document
-				.querySelector< HTMLButtonElement >(
-					'#show-settings-link[aria-expanded="true"]'
-				)
-				?.click();
-			document
-				.querySelector< HTMLButtonElement >(
-					'#contextual-help-link[aria-expanded="true"]'
-				)
-				?.click();
-		};
-		document.addEventListener( 'click', handler, true );
-		return () => document.removeEventListener( 'click', handler, true );
-	}, [] );
-
-	// Keep activeMetaIcon in sync with the actual wp-admin dropdown state by
-	// observing aria-expanded changes on the trigger buttons. This way React
-	// state updates only happen *after* a click has fully settled — never during.
-	useEffect( () => {
-		if ( ! hasScreenOptions && ! hasContextualHelp ) {
-			setActiveMetaIcon( null );
-			return;
-		}
-		const screenOptBtn = document.querySelector< HTMLButtonElement >(
-			'#show-settings-link'
-		);
-		const helpBtn = document.querySelector< HTMLButtonElement >(
-			'#contextual-help-link'
-		);
-		const sync = () => {
-			const screenOpen =
-				screenOptBtn?.getAttribute( 'aria-expanded' ) === 'true';
-			const helpOpen =
-				helpBtn?.getAttribute( 'aria-expanded' ) === 'true';
-			let next: 'screen-options' | 'help' | null = null;
-			if ( screenOpen ) {
-				next = 'screen-options';
-			} else if ( helpOpen ) {
-				next = 'help';
-			}
-			setActiveMetaIcon( next );
-		};
-		sync();
-		const observer = new MutationObserver( sync );
-		const opts = {
-			attributes: true,
-			attributeFilter: [ 'aria-expanded' ],
-		};
-		if ( screenOptBtn ) observer.observe( screenOptBtn, opts );
-		if ( helpBtn ) observer.observe( helpBtn, opts );
-		return () => observer.disconnect();
-	}, [ hasScreenOptions, hasContextualHelp ] );
-
-	const triggerMetaIcon = (
-		which: 'screen-options' | 'help',
-		triggerId: string
-	) => {
-		// Close any open activity-panel tab so the five icons act as one group.
-		document
-			.querySelector< HTMLButtonElement >(
-				'.woocommerce-layout__activity-panel-tab.is-active'
-			)
-			?.click();
-		// Close the OTHER wp-admin dropdown if open (mutual exclusion between
-		// gear ↔ help). Chain the new open off the closing trigger's
-		// aria-expanded flip rather than a magic-number setTimeout — wp-admin's
-		// screen-meta.js sets aria-expanded synchronously when its handler fires,
-		// so the observer fires as soon as the close has registered, regardless
-		// of however long the slideUp animation takes. Self-disconnects on first
-		// flip so back-to-back clicks don't accumulate observers.
-		const otherTriggerId =
-			which === 'screen-options'
-				? '#contextual-help-link'
-				: '#show-settings-link';
-		const otherOpen = document.querySelector< HTMLButtonElement >(
-			`${ otherTriggerId }[aria-expanded="true"]`
-		);
-		const openTarget = () =>
-			document.querySelector< HTMLButtonElement >( triggerId )?.click();
-		if ( otherOpen ) {
-			const chain = new MutationObserver( () => {
-				if ( otherOpen.getAttribute( 'aria-expanded' ) !== 'true' ) {
-					chain.disconnect();
-					openTarget();
-				}
-			} );
-			chain.observe( otherOpen, {
-				attributes: true,
-				attributeFilter: [ 'aria-expanded' ],
-			} );
-			otherOpen.click();
-		} else {
-			openTarget();
-		}
-	};
-
-	const shouldRenderTitle =
-		! isEmbedded || hasPageTitleFills || ! hasWpAdminH1;
+	const shouldRenderTitle = hasPageTitleFills || ! suppressTitle;
 
 	return (
 		<div
 			className={ clsx( 'woocommerce-layout__header', {
 				'is-scrolled': isScrolled,
 				// Chrome-only treatment: bar collapses to admin-bar height when
-				// no title is rendered (Edit Order, Edit Product, Add Product).
-				'is-chrome-only': ! shouldRenderTitle,
+				// the caller requests it (e.g. Edit Order, Edit Product, Add
+				// Product, where wp-admin renders its own title below).
+				'is-chrome-only': compact,
 			} ) }
 			ref={ headerElement }
 		>
@@ -315,7 +188,8 @@ export const BaseHeader = ( {
 						) }
 					</Text>
 				) : (
-					// Spacer keeps WooHeaderItem.Slot pinned right when no title renders.
+					// Spacer keeps WooHeaderItem.Slot pinned right when no
+					// title renders.
 					<div
 						className="woocommerce-layout__header-spacer"
 						aria-hidden="true"
@@ -324,52 +198,7 @@ export const BaseHeader = ( {
 
 				{ children }
 				<WooHeaderItem.Slot fillProps={ { isEmbedded, query } } />
-
-				{ /* Screen Options + Help icons consolidated into the floating
-				header. Only rendered when wp-admin would have rendered the
-				corresponding entry point (Settings, e.g., does not). The
-				original wp-admin wraps are visually hidden via CSS and these
-				icons proxy clicks into them through triggerMetaIcon. */ }
-				{ hasScreenOptions && (
-					<Button
-						className={ clsx(
-							'woocommerce-layout__header-meta-icon',
-							{
-								'is-active':
-									activeMetaIcon === 'screen-options',
-							}
-						) }
-						label={ __( 'Screen options', 'woocommerce' ) }
-						aria-expanded={ activeMetaIcon === 'screen-options' }
-						showTooltip
-						onClick={ () =>
-							triggerMetaIcon(
-								'screen-options',
-								'#show-settings-link'
-							)
-						}
-					>
-						<Icon icon={ cog } size={ 18 } />
-					</Button>
-				) }
-				{ hasContextualHelp && (
-					<Button
-						className={ clsx(
-							'woocommerce-layout__header-meta-icon',
-							{
-								'is-active': activeMetaIcon === 'help',
-							}
-						) }
-						label={ __( 'Help', 'woocommerce' ) }
-						aria-expanded={ activeMetaIcon === 'help' }
-						showTooltip
-						onClick={ () =>
-							triggerMetaIcon( 'help', '#contextual-help-link' )
-						}
-					>
-						<Icon icon={ help } size={ 18 } />
-					</Button>
-				) }
+				{ trailingItems }
 			</div>
 		</div>
 	);
