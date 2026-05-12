@@ -20,8 +20,8 @@ import {
 } from '@woocommerce/blocks-checkout';
 import { forwardRef, useMemo } from '@wordpress/element';
 import type { CartItem } from '@woocommerce/types';
-import { objectHasProp, Currency } from '@woocommerce/types';
-import { getSetting } from '@woocommerce/settings';
+import { isBoolean, objectHasProp, Currency } from '@woocommerce/types';
+import { getSetting, getSettingWithCoercion } from '@woocommerce/settings';
 import { Icon, trash } from '@wordpress/icons';
 import { calculateSaleAmount } from '@woocommerce/base-utils';
 import { dinero, transformScale, toSnapshot, type Dinero } from 'dinero.js';
@@ -121,6 +121,28 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 		const { saveForLater, isSaving: isSavingForLater } = useSaveForLater();
 		const { dispatchStoreEvent } = useStoreEvents();
 		const isUserLoggedIn = !! getSetting< number >( 'currentUserId', 0 );
+		const isSaveForLaterFeatureEnabled = getSettingWithCoercion(
+			'experimentalCartSaveForLater',
+			false,
+			isBoolean
+		);
+		const cartPageHasSavedForLater = getSettingWithCoercion(
+			'cartPageHasSavedForLater',
+			false,
+			isBoolean
+		);
+		// Three signals, each catching a distinct failure mode.
+		// Disabling the `cart_save_for_later` feature unregisters the
+		// shopper-collection block but leaves any prior insertion in the
+		// cart page's post content (the editor renders it as an
+		// "unsupported block" notice) — so presence alone could render
+		// this link with no working destination. Inversely, the feature
+		// can be enabled on cart pages that never inserted the block.
+		// And the REST endpoints behind the click are auth-only.
+		const showSaveForLater =
+			isUserLoggedIn &&
+			isSaveForLaterFeatureEnabled &&
+			cartPageHasSavedForLater;
 
 		// Prepare props to pass to the applyCheckoutFilter filter.
 		// We need to pluck out receiveCart.
@@ -342,7 +364,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 								</button>
 							) }
 						</div>
-						{ isUserLoggedIn && (
+						{ showSaveForLater && (
 							<div className="wc-block-cart-item__save-for-later">
 								<button
 									type="button"
