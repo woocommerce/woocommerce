@@ -630,6 +630,88 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Undo restores version, source_hash, and last_synced_at alongside last_core_render and content.
+	 *
+	 * Without full meta restoration the post lands in an inconsistent state after undo: the
+	 * `_wc_email_template_version` meta stays at the post-apply value, which defeats the
+	 * editor-banner and email-list indicator gates (both require
+	 * `templateVersion < currentVersion`) and hides the pending update from the merchant on
+	 * every surface despite `summarize()` still reporting it.
+	 */
+	public function test_undo_restores_full_meta_tuple_not_just_content_and_base(): void {
+		$email_id = 'undo_restores_full_meta_tuple';
+		$this->register_fixture_email( $email_id );
+
+		$old_canonical = "<!-- wp:paragraph -->\n<p>Old core.</p>\n<!-- /wp:paragraph -->";
+		$new_canonical = "<!-- wp:paragraph -->\n<p>New core.</p>\n<!-- /wp:paragraph -->";
+		$post_content  = "<!-- wp:paragraph -->\n<p>Old core.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $new_canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		// Stage the post on a stale baseline. The fixture template's `@version`
+		// (parsed by the registry) is 1.2.3, so apply stamps post version to
+		// 1.2.3 regardless. A pre-apply value of `0.9.0` proves restoration
+		// without needing to bump the registry mid-test.
+		$pre_apply_version        = '0.9.0';
+		$pre_apply_source_hash    = sha1( $old_canonical );
+		$pre_apply_last_synced_at = '2026-04-01 00:00:00';
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $old_canonical );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $pre_apply_version );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $pre_apply_source_hash );
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $pre_apply_last_synced_at );
+
+		$apply_result = WCEmailTemplateSelectiveApplier::apply_selectively(
+			$post_id,
+			array(
+				array(
+					'path'     => array( 0 ),
+					'decision' => 'use_core',
+				),
+			)
+		);
+		$this->assertIsArray( $apply_result );
+
+		// Sanity: apply advanced every stamped meta.
+		$this->assertNotSame(
+			$pre_apply_source_hash,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'Sanity: apply should have advanced source_hash.'
+		);
+		$this->assertNotSame(
+			$pre_apply_last_synced_at,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ),
+			'Sanity: apply should have advanced last_synced_at.'
+		);
+
+		$undo_result = WCEmailTemplateSelectiveApplier::undo( $post_id, $apply_result['revision_id'] );
+		$this->assertIsArray( $undo_result );
+		$this->assertSame( 'restored', $undo_result['status'] );
+
+		// All four metas must be restored to their pre-apply values.
+		$this->assertSame(
+			$old_canonical,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true ),
+			'Undo must restore last_core_render.'
+		);
+		$this->assertSame(
+			$pre_apply_version,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ),
+			'Undo must restore version — the indicator gate depends on it.'
+		);
+		$this->assertSame(
+			$pre_apply_source_hash,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ),
+			'Undo must restore source_hash so classify_post sees the pre-apply baseline.'
+		);
+		$this->assertSame(
+			$pre_apply_last_synced_at,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ),
+			'Undo must restore last_synced_at.'
+		);
+	}
+
+	/**
 	 * @testdox Should reclassify after undo rather than restore the stored prior_status verbatim.
 	 */
 	public function test_undo_reclassifies_status_after_restoring_snapshot(): void {

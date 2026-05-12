@@ -58,12 +58,11 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
 class WCEmailTemplateSelectiveApplier {
 	/**
 	 * Post meta key for the single-step pre-apply snapshot. Stores an array
-	 * with `revision_id`, `content`, and `snapshot_at` (UTC `Y-m-d H:i:s`).
-	 * The snapshot does **not** record the prior status — on undo the status
-	 * is recomputed via
-	 * {@see WCEmailTemplateDivergenceDetector::reclassify()} so it reflects
-	 * the world as it stands at undo time (core may have shipped a release
-	 * since the apply).
+	 * with `revision_id`, `content`, `last_core_render`, `version`,
+	 * `source_hash`, `last_synced_at`, and `snapshot_at` (UTC `Y-m-d H:i:s`).
+	 * The status is **not** recorded — on undo it is recomputed via
+	 * {@see WCEmailTemplateDivergenceDetector::reclassify()} against current
+	 * state.
 	 *
 	 * @var string
 	 */
@@ -200,18 +199,22 @@ class WCEmailTemplateSelectiveApplier {
 		$structural_skipped = $merged_result['structural_skipped'];
 		$aliases_migrated   = $merged_result['aliases_migrated'];
 
-		// Capture the prior `last_core_render` so undo() can restore it alongside
-		// `post_content`. Without this, an undone apply would leave the base
-		// stamped at the post-apply canonical: the next summarize() would see
-		// the restored content as a yours-only edit and silently swallow the
-		// pending core update.
+		// Snapshot every meta apply is about to overwrite. Restoring only a
+		// subset would leave the banner / email-list gates reading stale
+		// post-apply `_wc_email_template_version`, hiding the pending update.
 		$prior_last_core_render = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
+		$prior_version          = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true );
+		$prior_source_hash      = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true );
+		$prior_last_synced_at   = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true );
 
 		$revision_id = wp_generate_uuid4();
 		$snapshot    = array(
 			'revision_id'      => $revision_id,
 			'content'          => $post_content,
 			'last_core_render' => $prior_last_core_render,
+			'version'          => $prior_version,
+			'source_hash'      => $prior_source_hash,
+			'last_synced_at'   => $prior_last_synced_at,
 			'snapshot_at'      => gmdate( 'Y-m-d H:i:s' ),
 		);
 		update_post_meta( $post_id, self::SNAPSHOT_META_KEY, $snapshot );
@@ -344,24 +347,32 @@ class WCEmailTemplateSelectiveApplier {
 				return $updated;
 			}
 
-			// Restore the prior three-way base reference if the snapshot recorded
-			// one. Without this, summarize() would compare the restored content
-			// against the post-apply base and report a yours-only edit, silently
-			// swallowing the pending core update. Snapshots written before the
-			// three-way landing don't carry this key — leave existing meta alone
-			// in that case.
-			if ( array_key_exists( 'last_core_render', $snapshot ) ) {
-				$prior_last_core_render = (string) $snapshot['last_core_render'];
-				if ( '' !== $prior_last_core_render ) {
-					update_post_meta(
-						$post_id,
-						WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
-						$prior_last_core_render
-					);
-				} else {
-					delete_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY );
-				}
-			}
+			// Restore every meta apply stamped. `restore_meta_from_snapshot`
+			// no-ops on keys missing from older snapshot formats.
+			self::restore_meta_from_snapshot(
+				$post_id,
+				$snapshot,
+				'last_core_render',
+				WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY
+			);
+			self::restore_meta_from_snapshot(
+				$post_id,
+				$snapshot,
+				'version',
+				WCEmailTemplateDivergenceDetector::VERSION_META_KEY
+			);
+			self::restore_meta_from_snapshot(
+				$post_id,
+				$snapshot,
+				'source_hash',
+				WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY
+			);
+			self::restore_meta_from_snapshot(
+				$post_id,
+				$snapshot,
+				'last_synced_at',
+				WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY
+			);
 
 			// The snapshot's prior_status was correct at snapshot time, but
 			// the world may have moved since (core released, canonical
@@ -401,6 +412,28 @@ class WCEmailTemplateSelectiveApplier {
 	 */
 	public static function set_logger( ?Email_Editor_Logger_Interface $logger ): void {
 		self::$logger = $logger;
+	}
+
+	/**
+	 * Restore one post meta from a snapshot entry. Empty prior values delete
+	 * the meta rather than writing an empty string; missing keys (older
+	 * snapshot format) no-op.
+	 *
+	 * @param int                  $post_id       The post ID.
+	 * @param array<string, mixed> $snapshot      The snapshot array stored in SNAPSHOT_META_KEY.
+	 * @param string               $snapshot_key  The key inside the snapshot array.
+	 * @param string               $post_meta_key The post meta key to write back to.
+	 */
+	private static function restore_meta_from_snapshot( int $post_id, array $snapshot, string $snapshot_key, string $post_meta_key ): void {
+		if ( ! array_key_exists( $snapshot_key, $snapshot ) ) {
+			return;
+		}
+		$value = (string) $snapshot[ $snapshot_key ];
+		if ( '' !== $value ) {
+			update_post_meta( $post_id, $post_meta_key, $value );
+		} else {
+			delete_post_meta( $post_id, $post_meta_key );
+		}
 	}
 
 	/**
