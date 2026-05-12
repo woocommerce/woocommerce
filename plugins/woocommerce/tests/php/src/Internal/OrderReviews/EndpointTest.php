@@ -254,8 +254,9 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$order->add_product( $product, 1 );
 		$order->save();
 
-		// Pre-create a matching review so describe() returns STATUS_REVIEWED.
-		wp_insert_comment(
+		// Pre-create a matching review tied to this order so decide() surfaces
+		// the existing comment and the page treats every row as already reviewed.
+		$comment_id = (int) wp_insert_comment(
 			array(
 				'comment_post_ID'      => $product->get_id(),
 				'comment_author'       => 'Already',
@@ -265,6 +266,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 				'comment_approved'     => 1,
 			)
 		);
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
 
 		$_GET = array( 'key' => $order->get_order_key() );
 
