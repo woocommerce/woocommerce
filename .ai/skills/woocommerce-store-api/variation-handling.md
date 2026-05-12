@@ -12,7 +12,7 @@ A typical Store API request looks like:
 { "id": 99, "variation": { "attribute_pa_color": "blue" } }
 ```
 
-Two things are claimed: variation 99 exists, and its colour is blue. **The first is verifiable; the second is not, unless you check.** A client (malicious or buggy) can send `id: 99` with `variation: { color: red }` while variation 99 is actually red — and a route that trusts the client verbatim will store the wrong attributes.
+Two things are claimed: variation 99 exists, and its colour is blue. **The first is verifiable; the second is not, unless you check.** A client (malicious or buggy) can send `id: 99` with `variation: { color: red }` while variation 99 is actually blue — and a route that trusts the client verbatim will store the wrong attributes.
 
 This produces two downstream problems:
 
