@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Don't leak title, price, permalink, or image for non-public products (draft, private, password-protected, etc.) in shopper-list responses.
