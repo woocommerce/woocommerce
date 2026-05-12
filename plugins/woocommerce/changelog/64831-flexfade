@@ -1,0 +1,4 @@
+Significance: minor
+Type: fix
+
+FlexSlider thumbnails now appear correctly when using the fade animation.
