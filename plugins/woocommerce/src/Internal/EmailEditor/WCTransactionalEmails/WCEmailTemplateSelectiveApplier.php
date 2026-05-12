@@ -199,6 +199,19 @@ class WCEmailTemplateSelectiveApplier {
 		$structural_skipped = $merged_result['structural_skipped'];
 		$aliases_migrated   = $merged_result['aliases_migrated'];
 
+		// Alignment is decided on whitespace-normalized content: serialize_blocks()
+		// can't reproduce the PHP template's literal whitespace byte-for-byte, so a
+		// strict === would never match even when the trees are semantically equal.
+		// When aligned, persist canonical verbatim so source_hash, classify_post,
+		// and downstream byte comparisons hold without further normalization.
+		$is_aligned_with_canonical = (
+			self::normalize_for_comparison( $merged_content )
+			=== self::normalize_for_comparison( $core_content )
+		);
+		if ( $is_aligned_with_canonical ) {
+			$merged_content = $core_content;
+		}
+
 		// Snapshot every meta apply is about to overwrite. Restoring only a
 		// subset would leave the banner / email-list gates reading stale
 		// post-apply `_wc_email_template_version`, hiding the pending update.
@@ -237,17 +250,11 @@ class WCEmailTemplateSelectiveApplier {
 			$saved_post = get_post( $post_id );
 			$saved_body = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : $merged_content;
 
-			// When merged content diverges from canonical (any keep_yours or
-			// preserved removed-block), stamp sha1(canonical) and hard-stamp
-			// STATUS_CORE_UPDATED_CUSTOMIZED so the auto-applier (which only
-			// acts on STATUS_CORE_UPDATED_UNCUSTOMIZED) can't silently overwrite
-			// the merchant's choice on the next core bump.
-			$is_aligned_with_canonical = ( $merged_content === $core_content );
-			$source_hash               = $is_aligned_with_canonical
+			$source_hash = $is_aligned_with_canonical
 				? sha1( $saved_body )
 				: sha1( $core_content );
-			$synced_at                 = gmdate( 'Y-m-d H:i:s' );
-			$version_to                = (string) $sync_config['version'];
+			$synced_at   = gmdate( 'Y-m-d H:i:s' );
+			$version_to  = (string) $sync_config['version'];
 
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $version_to );
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $source_hash );
@@ -839,6 +846,21 @@ class WCEmailTemplateSelectiveApplier {
 			array( 'core/group', 'core/columns', 'core/column', 'core/row' ),
 			true
 		);
+	}
+
+	/**
+	 * Whitespace-normalize block markup for semantic comparison. Trims and
+	 * collapses runs of whitespace adjacent to tag boundaries — covers the
+	 * leading/trailing newlines and the spaces inside `<div> ##WOO_CONTENT## </div>`
+	 * that `serialize_blocks()` can't reproduce from a hand-authored PHP template.
+	 *
+	 * @param string $content Block markup.
+	 */
+	private static function normalize_for_comparison( string $content ): string {
+		$content = trim( $content );
+		$content = (string) preg_replace( '/>\s+/', '>', $content );
+		$content = (string) preg_replace( '/\s+</', '<', $content );
+		return $content;
 	}
 
 	/**

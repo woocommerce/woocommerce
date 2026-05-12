@@ -524,6 +524,59 @@ class WCEmailTemplateSelectiveApplierTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should stamp STATUS_IN_SYNC when use_core resolves the only conflict and merged differs from canonical only in tag-boundary whitespace.
+	 *
+	 * Regression: prior to Option B, `is_aligned_with_canonical` was a raw
+	 * `===` against `compute_canonical_post_content()`. Canonical comes from
+	 * the PHP template (literal `\n` between blocks, leading/trailing
+	 * whitespace), while merged comes from `serialize_blocks()`. The two are
+	 * semantically equal but never byte-equal, so the fully-resolved scenario
+	 * could never reach STATUS_IN_SYNC — posts got pinned at CUSTOMIZED
+	 * forever, and the banner / email-list indicator never cleared.
+	 */
+	public function test_apply_selectively_use_core_reaches_in_sync_when_merged_matches_canonical_modulo_whitespace(): void {
+		$email_id = 'sa_use_core_aligned_in_sync';
+		$this->register_fixture_email( $email_id );
+
+		// Canonical mimics what `wc_get_template_html()` produces: leading and
+		// trailing newlines that `serialize_blocks()` will not reproduce.
+		$canonical = "\n<!-- wp:paragraph -->\n<p>Canonical copy.</p>\n<!-- /wp:paragraph -->\n";
+		$post_html = "<!-- wp:paragraph -->\n<p>Merchant copy.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $canonical );
+		$post_id = $this->create_woo_email_post( $email_id, $post_html );
+
+		$result = WCEmailTemplateSelectiveApplier::apply_selectively(
+			$post_id,
+			array(
+				array(
+					'path'     => array( 0 ),
+					'decision' => 'use_core',
+				),
+			)
+		);
+		$this->assertIsArray( $result );
+
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true ),
+			'Fully-resolved apply must reach STATUS_IN_SYNC even when serialize_blocks output differs from canonical only in tag-boundary whitespace.'
+		);
+
+		$persisted = get_post( $post_id );
+		$this->assertInstanceOf( \WP_Post::class, $persisted );
+		$this->assertSame(
+			$canonical,
+			(string) $persisted->post_content,
+			'Aligned merged must be persisted as canonical verbatim so source_hash and classify_post hold without normalization.'
+		);
+		$this->assertSame(
+			sha1( $canonical ),
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true )
+		);
+	}
+
+	/**
 	 * @testdox Should restore post_content and consume the snapshot meta on undo.
 	 *
 	 * Apply → undo round-trip: post_content matches the original and the
