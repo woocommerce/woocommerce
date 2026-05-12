@@ -240,19 +240,16 @@ abstract class AbstractTemplateCompatibility {
 	 * @internal
 	 */
 	public function set_compatibility_layer_flag() {
-		$has_filter = has_filter( 'woocommerce_disable_compatibility_layer' );
+		/**
+		 * Filter to disable the compatibility layer for the blockified templates.
+		 *
+		 * @since 10.9.0
+		 * @param bool|null $compatibility_layer_status The compatibility layer status. If `null`, the compatibility layer will be enabled or disabled based on the current template.
+		 */
+		$compatibility_layer_status = apply_filters( 'woocommerce_disable_compatibility_layer', null );
 
-		if ( $has_filter ) {
-			// In #64504 we moved the `woocommerce_disable_compatibility_layer`
-			// filter from `template_redirect` to `template_include` (which runs
-			// later).
-			// We display a `wc_doing_it_wrong()` message if somebody was
-			// hooking into it too early.
-			wc_doing_it_wrong(
-				'woocommerce_disable_compatibility_layer',
-				'The `woocommerce_disable_compatibility_layer` filter should only be added during or after the `template_include` action, once WooCommerce has determined the default value based on the resolved template.',
-				'10.9.0'
-			);
+		// If an extension has already set the compatibility layer status, use it.
+		if ( is_bool( $compatibility_layer_status ) ) {
 			return;
 		}
 
