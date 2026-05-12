@@ -86,6 +86,10 @@ foreach ( $items as $item ) {
 	);
 }
 
+// Single batched lookup of every existing review by this customer for the
+// items below. Without this each decide() call would issue its own query.
+\Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::preload_for_items( $items, $order );
+
 // The Endpoint has already validated the URL key against the order key, so the
 // canonical value on the order is the right thing to echo into the form post.
 $order_key = (string) $order->get_order_key();
@@ -122,16 +126,28 @@ $order_key = (string) $order->get_order_key();
 
 			<ul class="woocommerce-review-order__items">
 				<?php
-				foreach ( $renderable_rows as $row_index => $row ) {
+				$row_index = 0;
+				foreach ( $renderable_rows as $row ) {
+					$decision = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::decide( $row['item'], $order );
+
+					if ( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::STATUS_SKIP === $decision['status'] ) {
+						continue;
+					}
+
+					$prefill = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prefill_for_item( $row['item'], $order );
+
 					wc_get_template(
 						'order/customer-review-order-row.php',
 						array(
-							'item'      => $row['item'],
-							'product'   => $row['product'],
-							'order'     => $order,
-							'row_index' => $row_index,
+							'item'            => $row['item'],
+							'product'         => $row['product'],
+							'order'           => $order,
+							'row_index'       => $row_index,
+							'existing_rating' => $prefill['rating'],
+							'existing_text'   => $prefill['text'],
 						)
 					);
+					++$row_index;
 				}
 				?>
 			</ul>
