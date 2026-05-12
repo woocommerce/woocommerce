@@ -72,9 +72,10 @@ export type EmailType = {
 const { Fill } = createSlotFill( SETTINGS_SLOT_FILL_CONSTANT );
 
 /**
- * Session-storage key for the list-page `_list_viewed` Tracks dedup. The list
- * fires a single aggregate event per browser session (not per row), so a refresh
- * re-fires the event but re-mounts within the same session do not.
+ * Session-storage key for the list-page `_list_viewed` Tracks dedup. Fires once
+ * per tab session: sessionStorage persists across reloads in the same tab, so
+ * refreshes do not re-fire. Closing the tab (or opening the page in a new tab)
+ * resets the gate.
  */
 const LIST_VIEWED_DEDUP_SESSION_KEY = 'wc_email_update_list_viewed';
 
@@ -86,8 +87,8 @@ export const EmailListingFill: React.FC< {
 	// Tracking per-row creates one event per visible cell (~20+ on a default
 	// install) per page load with limited analytical lift over a single
 	// page-level signal — the editor-banner `_viewed` covers per-post drilldown
-	// already. sessionStorage gate stays once-per-session-per-tab; a refresh
-	// fires a fresh event.
+	// already. sessionStorage persists for the tab's lifetime, so refreshes
+	// dedup; a new tab fires once.
 	useEffect( () => {
 		try {
 			if (
@@ -106,7 +107,7 @@ export const EmailListingFill: React.FC< {
 			shouldShowReviewUpdate( post )
 		).length;
 
-		recordEvent( 'woocommerce_block_email_list_viewed', {
+		recordEvent( 'block_email_list_viewed', {
 			viewed_from: VIEWED_FROM_EMAIL_LIST,
 			eligible_count: eligibleCount,
 			total_count: emailTypes.length,

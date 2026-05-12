@@ -16,17 +16,17 @@ use WC_Tracks;
  *
  * Events shipped here (server-side):
  *
- * - `woocommerce_block_email_update_available`           — fired from
+ * - `block_email_update_available`           — fired from
  *   {@see WCEmailTemplateDivergenceDetector::reclassify()} when a post transitions
  *   into `core_updated_customized` at a newer `template_version_to` than the
  *   merchant last reviewed. Deduplicated per `(post_id, template_version_to)` via
  *   a 30-day transient so repeat sweeps at the same core version do not refire.
- * - `woocommerce_block_email_update_applied` (`applied_from: 'auto'`) — fired
+ * - `block_email_update_applied` (`applied_from: 'auto'`) — fired
  *   from {@see WCEmailTemplateAutoApplier::apply_to_post()} on a successful write.
- * - `woocommerce_block_email_update_applied` (`applied_from: 'selective_rest'`) —
+ * - `block_email_update_applied` (`applied_from: 'selective_rest'`) —
  *   fired from {@see WCEmailTemplateSelectiveApplier::apply_selectively()} on a
  *   successful write.
- * - `woocommerce_block_email_sync_backfill_completed` — fired exactly once per
+ * - `block_email_sync_backfill_completed` — fired exactly once per
  *   site, from the listener on
  *   {@see WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION}.
  *

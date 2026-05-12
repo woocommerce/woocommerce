@@ -74,7 +74,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 		window.sessionStorage.clear();
 	} );
 
-	it( 'fires one woocommerce_block_email_list_viewed on mount with eligible_count and total_count', () => {
+	it( 'fires one block_email_list_viewed on mount with eligible_count and total_count', () => {
 		render(
 			<EmailListingFill
 				emailTypes={ [ baseEmail, eligibleEmail ] }
@@ -84,7 +84,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 
 		expect( recordEventMock ).toHaveBeenCalledTimes( 1 );
 		expect( recordEventMock ).toHaveBeenCalledWith(
-			'woocommerce_block_email_list_viewed',
+			'block_email_list_viewed',
 			expect.objectContaining( {
 				viewed_from: 'email_list',
 				eligible_count: 1,
@@ -141,7 +141,7 @@ describe( 'EmailListingFill — list-page Tracks instrumentation', () => {
 		);
 
 		expect( recordEventMock ).toHaveBeenCalledWith(
-			'woocommerce_block_email_list_viewed',
+			'block_email_list_viewed',
 			expect.objectContaining( { eligible_count: 0, total_count: 2 } )
 		);
 	} );
@@ -206,7 +206,7 @@ describe( 'normalizeEmailTypePayload — regression for eligible_count=0', () =>
 		);
 
 		expect( recordEventMock ).toHaveBeenCalledWith(
-			'woocommerce_block_email_list_viewed',
+			'block_email_list_viewed',
 			expect.objectContaining( {
 				eligible_count: 0,
 				total_count: 1,
@@ -231,7 +231,7 @@ describe( 'normalizeEmailTypePayload — regression for eligible_count=0', () =>
 		);
 
 		expect( recordEventMock ).toHaveBeenCalledWith(
-			'woocommerce_block_email_list_viewed',
+			'block_email_list_viewed',
 			expect.objectContaining( {
 				eligible_count: 1,
 				total_count: 1,

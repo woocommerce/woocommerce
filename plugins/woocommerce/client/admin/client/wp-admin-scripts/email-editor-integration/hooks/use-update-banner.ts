@@ -376,7 +376,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 			return;
 		}
 		markUpdateBannerViewed( postId, sharedPayload.template_version_to );
-		recordEvent( 'woocommerce_block_email_update_viewed', {
+		recordEvent( 'block_email_update_viewed', {
 			...sharedPayload,
 			viewed_from: VIEWED_FROM_EDITOR_BANNER,
 		} );
@@ -412,7 +412,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 			const res = await doApply( [] );
 			if ( res ) {
 				setApplyState( 'applied' );
-				recordEvent( 'woocommerce_block_email_update_applied', {
+				recordEvent( 'block_email_update_applied', {
 					...sharedPayload,
 					applied_from: APPLIED_FROM_EDITOR_BANNER,
 					auto_resolved: true,
@@ -439,10 +439,7 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 			return;
 		}
 		dismissUpdateBanner( postId );
-		recordEvent(
-			'woocommerce_block_email_update_dismissed',
-			sharedPayload
-		);
+		recordEvent( 'block_email_update_dismissed', sharedPayload );
 	}, [ postId, sharedPayload, dismissUpdateBanner ] );
 
 	// Auto-dismiss path — used by the success morph (timer + ×). Mirrors

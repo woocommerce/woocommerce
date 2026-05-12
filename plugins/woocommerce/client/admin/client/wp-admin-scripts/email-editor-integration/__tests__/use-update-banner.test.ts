@@ -522,7 +522,7 @@ describe( 'useUpdateBanner — Tracks (6d)', () => {
 		setUpMocks( { summary: summaryFixture() } );
 		renderHook( () => useUpdateBanner() );
 		expect( recordEventMock ).toHaveBeenCalledWith(
-			'woocommerce_block_email_update_viewed',
+			'block_email_update_viewed',
 			expect.objectContaining( {
 				...sharedPayloadMatcher,
 				viewed_from: 'editor_banner',
@@ -534,7 +534,7 @@ describe( 'useUpdateBanner — Tracks (6d)', () => {
 		setUpMocks( { summary: summaryFixture(), wasViewed: true } );
 		renderHook( () => useUpdateBanner() );
 		expect( recordEventMock ).not.toHaveBeenCalledWith(
-			'woocommerce_block_email_update_viewed',
+			'block_email_update_viewed',
 			expect.anything()
 		);
 	} );
@@ -545,7 +545,7 @@ describe( 'useUpdateBanner — Tracks (6d)', () => {
 		recordEventMock.mockClear();
 		act( () => result.current.dismiss() );
 		expect( recordEventMock ).toHaveBeenCalledWith(
-			'woocommerce_block_email_update_dismissed',
+			'block_email_update_dismissed',
 			expect.objectContaining( sharedPayloadMatcher )
 		);
 	} );
@@ -560,7 +560,7 @@ describe( 'useUpdateBanner — Tracks (6d)', () => {
 		dispatchMocks.dismissUpdateBanner.mockClear();
 		act( () => result.current.autoDismiss() );
 		expect( recordEventMock ).not.toHaveBeenCalledWith(
-			'woocommerce_block_email_update_dismissed',
+			'block_email_update_dismissed',
 			expect.anything()
 		);
 		expect( dispatchMocks.dismissUpdateBanner ).toHaveBeenCalledWith( 42 );
@@ -574,7 +574,7 @@ describe( 'useUpdateBanner — Tracks (6d)', () => {
 			await result.current.apply();
 		} );
 		expect( recordEventMock ).toHaveBeenCalledWith(
-			'woocommerce_block_email_update_applied',
+			'block_email_update_applied',
 			expect.objectContaining( {
 				...sharedPayloadMatcher,
 				applied_from: 'editor_banner',
@@ -595,7 +595,7 @@ describe( 'useUpdateBanner — Tracks (6d)', () => {
 			await result.current.apply();
 		} );
 		expect( recordEventMock ).not.toHaveBeenCalledWith(
-			'woocommerce_block_email_update_applied',
+			'block_email_update_applied',
 			expect.anything()
 		);
 	} );
