@@ -91,6 +91,16 @@ class WC_Payment_Gateways_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Payment gateway exposes its ID through get_id().
+	 */
+	public function test_payment_gateway_get_id_returns_gateway_id(): void {
+		$gateway = $this->sut->payment_gateways()[ WC_Gateway_BACS::ID ] ?? null;
+
+		$this->assertInstanceOf( WC_Payment_Gateway::class, $gateway );
+		$this->assertSame( WC_Gateway_BACS::ID, $gateway->get_id() );
+	}
+
+	/**
 	 * Test get_payment_gateway_name_by_id returns gateway title for known gateway.
 	 *
 	 * @return void
