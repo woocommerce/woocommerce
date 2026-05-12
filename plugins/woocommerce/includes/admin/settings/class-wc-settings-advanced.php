@@ -413,6 +413,15 @@ class WC_Settings_Advanced extends WC_Settings_Page {
 	 * @return array
 	 */
 	protected function get_settings_for_legacy_api_section() {
+		/**
+		 * Filter the settings rendered in the Legacy API section of the Advanced settings tab.
+		 *
+		 * Core no longer ships any settings in this section; the section itself is only
+		 * registered when at least one callback is hooked into this filter.
+		 *
+		 * @since 3.4.0
+		 * @param array $settings Settings array. Empty by default.
+		 */
 		return apply_filters( 'woocommerce_settings_rest_api', array() );
 	}
 
