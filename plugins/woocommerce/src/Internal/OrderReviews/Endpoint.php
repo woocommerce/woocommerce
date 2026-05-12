@@ -56,19 +56,12 @@ class Endpoint {
 	public const SHORTCODE = 'woocommerce_review_order';
 
 	/**
-	 * Flipped to true inside `gate_request()` once the request is confirmed
-	 * to be a real, authorised review-order page render. The title-suppression
-	 * filters bail unless this is set, so an admin previewing the host page
-	 * from the editor (no order id, no key) still sees the page title.
-	 *
-	 * @var bool
-	 */
-	private bool $suppress_title = false;
-
-	/**
 	 * Wire the endpoint into WordPress.
 	 *
-	 * Auto-called by the WC dependency container after instantiation.
+	 * Auto-called by the WC dependency container after instantiation. The
+	 * title-suppression filters are deliberately NOT registered here; they
+	 * land inside `gate_request()` once the request is confirmed to be an
+	 * authorised review-order render, so they never run on unrelated pages.
 	 *
 	 * @internal
 	 */
@@ -79,11 +72,6 @@ class Endpoint {
 		add_action( 'wp_loaded', array( $this, 'maybe_flush_pending_rewrite' ) );
 		add_action( 'transition_post_status', array( $this, 'skip_auto_menu_for_self' ), 9, 3 );
 		add_filter( 'get_pages', array( $this, 'exclude_self_from_page_list' ) );
-		add_filter( 'the_title', array( $this, 'maybe_hide_page_title' ), 10, 2 );
-		// Block-specific filter so only `core/post-title` is touched — `render_block`
-		// would fire for every block on the page. The third arg is the `WP_Block`
-		// instance, which carries `context['postId']` so we can scope to the host page.
-		add_filter( 'render_block_core/post-title', array( $this, 'maybe_hide_post_title_block' ), 10, 3 );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
 	}
 
@@ -125,27 +113,27 @@ class Endpoint {
 	 * empty-state template) already prints its own `<h1>`, so the chrome
 	 * heading would duplicate the text both visually and for screen readers.
 	 *
-	 * Three guards narrow the filter so it only affects the page title slot:
+	 * `gate_request()` registers this filter only after the request passes
+	 * the auth check, so on any unrelated render it isn't even on the hook.
+	 * Two in-method guards narrow the scope to the page title slot of the
+	 * Review Order render itself:
 	 *
-	 * - `$this->suppress_title` is only true after `gate_request()` has
-	 *   confirmed a real, authorised review-order request.
-	 * - The post id must match the Review Order page id, so titles for nav
-	 *   menu items or "recent posts" widgets pointing at the same page on a
-	 *   different request are untouched.
+	 * - The post id must match the Review Order page id, so within the same
+	 *   render a nav menu item or "recent posts" widget pointing at another
+	 *   post stays intact.
 	 * - `in_the_loop() && is_main_query()` keeps the filter scoped to the
 	 *   actual page title slot. WP's `wp_get_document_title()` reads the
 	 *   post title outside the loop, so the `<title>` tag stays meaningful.
+	 *
+	 * @since 10.9.0
 	 *
 	 * @param string|mixed $title   Title being rendered.
 	 * @param int|mixed    $post_id Post id the title belongs to.
 	 * @return string|mixed
 	 */
 	public function maybe_hide_page_title( $title, $post_id = 0 ) {
-		if ( ! $this->suppress_title ) {
-			return $title;
-		}
 		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
-		if ( $page_id <= 0 || (int) $post_id !== $page_id ) {
+		if ( (int) $post_id !== $page_id ) {
 			return $title;
 		}
 		if ( ! in_the_loop() || ! is_main_query() ) {
@@ -160,16 +148,18 @@ class Endpoint {
 	 *
 	 * Block themes render the page title through `core/post-title` rather
 	 * than `the_title`, so the classic-theme filter above doesn't catch it.
-	 * Three guards keep the suppression narrow:
+	 * Two guards keep the suppression narrow (registration is gated by
+	 * `gate_request()` so the filter isn't even on the hook for unrelated
+	 * renders):
 	 *
-	 * - `$this->suppress_title` is only true after `gate_request()` has
-	 *   confirmed a real, authorised review-order request.
 	 * - The hook is `render_block_core/post-title` so unrelated block types
 	 *   (headings, paragraphs, navigation, etc.) never reach this method.
 	 * - The block's resolved `context['postId']` must match the Review Order
 	 *   page id, so a `core/post-title` rendered inside a Query Loop, a
 	 *   related-posts template part, or a footer "recent posts" panel for a
-	 *   different post on the same request is untouched.
+	 *   different post on the same render is untouched.
+	 *
+	 * @since 10.9.0
 	 *
 	 * @param string|mixed         $block_content Block markup.
 	 * @param array<string,mixed>  $block         Parsed block (unused but kept for filter signature).
@@ -179,15 +169,12 @@ class Endpoint {
 	public function maybe_hide_post_title_block( $block_content, $block, $instance = null ) {
 		unset( $block );
 
-		if ( ! $this->suppress_title ) {
-			return $block_content;
-		}
 		if ( ! $instance instanceof \WP_Block ) {
 			return $block_content;
 		}
 		$page_id      = (int) wc_get_page_id( self::PAGE_KEY );
 		$block_postid = isset( $instance->context['postId'] ) ? (int) $instance->context['postId'] : 0;
-		if ( $page_id <= 0 || $block_postid !== $page_id ) {
+		if ( $block_postid !== $page_id ) {
 			return $block_content;
 		}
 		return '';
@@ -344,11 +331,16 @@ class Endpoint {
 			exit;
 		}
 
-		// Flip the title-suppression flag now that the request is fully
-		// authorised. The two filters wired in `init()` bail early when this
-		// is false, so editor previews and direct hits on an unrelated page
-		// (where `gate_request()` early-returns above) keep their page title.
-		$this->suppress_title = true;
+		// Register the page-title suppression filters now that the request
+		// is fully authorised. Doing this here instead of `init()` keeps the
+		// filters out of every unrelated page render and removes the need
+		// for a per-instance "is this an authorised render" boolean.
+		add_filter( 'the_title', array( $this, 'maybe_hide_page_title' ), 10, 2 );
+		// Block-specific filter so only `core/post-title` is touched —
+		// `render_block` would fire for every block on the page. The third
+		// arg is the `WP_Block` instance carrying `context['postId']`, used
+		// to scope to the host page.
+		add_filter( 'render_block_core/post-title', array( $this, 'maybe_hide_post_title_block' ), 10, 3 );
 
 		// template_redirect fires after wp_enqueue_scripts but before
 		// wp_head, so styles registered here are still output in <head>.
