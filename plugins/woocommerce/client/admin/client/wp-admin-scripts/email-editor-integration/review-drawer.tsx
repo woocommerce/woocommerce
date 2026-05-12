@@ -225,11 +225,18 @@ const AutoResolvedItem = ( {
 	</div>
 );
 
-const AutoResolvedGroup = ( { summary }: { summary: ChangeSummary } ) => {
+const AutoResolvedGroup = ( {
+	summary,
+	autoResolvedCopyChanges,
+}: {
+	summary: ChangeSummary;
+	autoResolvedCopyChanges: ChangeSummaryCopyChange[];
+} ) => {
 	const total =
 		summary.added_blocks.length +
 		summary.removed_blocks.length +
-		summary.structural_changes.length;
+		summary.structural_changes.length +
+		autoResolvedCopyChanges.length;
 
 	if ( total === 0 ) {
 		return null;
@@ -259,6 +266,31 @@ const AutoResolvedGroup = ( { summary }: { summary: ChangeSummary } ) => {
 				{ heading }
 			</h3>
 
+			{ autoResolvedCopyChanges.map( ( entry ) => {
+				const title =
+					entry.total > 1
+						? sprintf(
+								/* translators: 1: block name; 2: occurrence; 3: total. */
+								__( '%1$s %2$d of %3$d', 'woocommerce' ),
+								entry.block,
+								entry.occurrence,
+								entry.total
+						  )
+						: entry.block;
+				return (
+					<AutoResolvedItem
+						key={ `copy-${ pathKey( entry.path ) }-${
+							entry.occurrence ?? 0
+						}` }
+						title={ title }
+						sub={ __(
+							'Core updated this text. Your version was unchanged, so the update will apply.',
+							'woocommerce'
+						) }
+						tag="apply_core"
+					/>
+				);
+			} ) }
 			{ summary.added_blocks.map( ( entry ) => (
 				<AutoResolvedItem
 					key={ `added-${ pathKey( entry.path ) }` }
@@ -542,11 +574,18 @@ export const ReviewDrawer = ( {
 						{ summary && ! summary.is_fallback && (
 							<>
 								<ConflictsGroup
-									conflicts={ summary.copy_changes }
+									conflicts={ summary.copy_changes.filter(
+										( cc ) => ! cc.auto_resolvable
+									) }
 									choices={ choices }
 									onChoose={ setChoice }
 								/>
-								<AutoResolvedGroup summary={ summary } />
+								<AutoResolvedGroup
+									summary={ summary }
+									autoResolvedCopyChanges={ summary.copy_changes.filter(
+										( cc ) => cc.auto_resolvable === true
+									) }
+								/>
 							</>
 						) }
 					</div>

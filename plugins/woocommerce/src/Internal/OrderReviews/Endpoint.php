@@ -253,9 +253,6 @@ class Endpoint {
 			exit;
 		}
 
-		// Side effect (persistent write) lives in the controller, not the
-		// view: stamp the no-actionable-rows meta now so the template stays
-		// pure rendering.
 		if ( $order instanceof WC_Order ) {
 			$this->maybe_mark_no_actionable_rows( $order );
 		}
@@ -311,9 +308,6 @@ class Endpoint {
 			return;
 		}
 
-		// Side effect (persistent write) lives in the controller, not the
-		// view: stamp the no-actionable-rows meta now so the template stays
-		// pure rendering.
 		if ( $order instanceof WC_Order ) {
 			$this->maybe_mark_no_actionable_rows( $order );
 		}
@@ -322,9 +316,15 @@ class Endpoint {
 	}
 
 	/**
-	 * Stamp the order with the no-actionable-rows meta when the Review Order
-	 * page would render the empty-state. Mirrors the SubmissionHandler's
-	 * completion check so back-button visits also record completion.
+	 * Stamp the completed-at meta when the Review Order page would render the
+	 * empty-state, so back-button visits and direct revisits also record
+	 * completion. The persistent write lives here, in the controller, so the
+	 * page template stays read-only.
+	 *
+	 * Scope differs from `SubmissionHandler::maybe_mark_order_complete()`:
+	 * that one counts the customer's reviews per product across all of their
+	 * history, while this one walks the per-item decisions ItemEligibility
+	 * produces (order-scoped, mirroring exactly what the page renders).
 	 *
 	 * @param WC_Order $order Order being reviewed.
 	 */
@@ -342,13 +342,10 @@ class Endpoint {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
 			}
-			// Mirror the template: a deleted product (get_product() === null)
-			// renders nothing on the page, so it shouldn't keep the order in
-			// the "still has actionable rows" state forever.
-			if ( ! $item->get_product() instanceof \WC_Product ) {
-				continue;
-			}
 			$decision = ItemEligibility::decide( $item, $order );
+			// Skip rows are intentionally treated as "done": an order whose
+			// items all have reviews disabled renders the empty-state, so we
+			// stamp completion to match what the customer sees on the page.
 			if ( ItemEligibility::STATUS_SKIP === $decision['status'] ) {
 				continue;
 			}
@@ -360,7 +357,20 @@ class Endpoint {
 		}
 
 		$order->update_meta_data( $completed_meta_key, (string) time() );
-		$order->save();
+
+		try {
+			$order->save();
+		} catch ( \Exception $e ) {
+			wc_get_logger()->warning(
+				sprintf(
+					/* translators: 1: order ID, 2: error message */
+					__( 'Could not stamp Review Order completion meta on order %1$d: %2$s.', 'woocommerce' ),
+					$order->get_id(),
+					$e->getMessage()
+				),
+				array( 'source' => 'order-reviews' )
+			);
+		}
 	}
 
 	/**
