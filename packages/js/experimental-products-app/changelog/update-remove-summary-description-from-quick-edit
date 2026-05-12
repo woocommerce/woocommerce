@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Remove the Summary and Description fields from the experimental quick edit panel.

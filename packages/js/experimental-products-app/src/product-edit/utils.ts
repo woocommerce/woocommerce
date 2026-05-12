@@ -74,8 +74,6 @@ const PRODUCT_EDIT_FIELD_IDS = [
 
 const COMMON_PRODUCT_EDIT_FIELD_IDS = [
 	'name',
-	'short_description',
-	'description',
 	'images',
 	'product_status',
 	'sku',
