@@ -16,10 +16,6 @@ import { TaxonomyEdit } from '../components/taxonomy-edit';
 const fieldDefinition = {
 	type: 'array',
 	label: __( 'Tags', 'woocommerce' ),
-	description: __(
-		'Add descriptive tags to help customers find related items while shopping.',
-		'woocommerce'
-	),
 	enableSorting: false,
 	filterBy: false,
 } satisfies Partial< Field< ProductEntityRecord > >;
