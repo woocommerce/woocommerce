@@ -230,6 +230,7 @@ class ApiBuilder {
 		$this->detect_status_resolver();
 		$this->discover_authorization_attributes();
 		$this->discover();
+		$this->check_attribute_resolutions();
 		$this->validate();
 
 		if ( ! empty( $this->errors ) ) {
@@ -2276,6 +2277,71 @@ class ApiBuilder {
 			$description = $attribute->newInstance()->transform_description( $description );
 		}
 		return $description;
+	}
+
+	/**
+	 * Walk every discovered class and emit a build-time warning for any
+	 * attribute reference whose class doesn't autoload.
+	 *
+	 * Symptom this catches: a developer writes `#[Metadata( … )]` (or any
+	 * other attribute) without importing the class, so PHP resolves the
+	 * reference relative to the current namespace and lands on a non-existent
+	 * class. ApiBuilder filters attributes by class via reflection and
+	 * silently ignores unresolved ones, so the attribute disappears from the
+	 * generated tree without any visible error — confusing to debug from the
+	 * runtime side. The warning surfaces the typo / missing import at build
+	 * time instead.
+	 *
+	 * The check is intentionally untyped: it warns about every attribute it
+	 * can't resolve, regardless of which `Metadata`/`Description`/`Internal`/etc.
+	 * the developer intended. The warning text quotes the unresolved FQCN so
+	 * the developer can see exactly what PHP tried to load.
+	 */
+	private function check_attribute_resolutions(): void {
+		foreach ( $this->classes as $info ) {
+			$ref = $info['class'];
+			$this->check_attributes_on( $ref, $ref->getShortName() );
+
+			foreach ( $ref->getProperties() as $prop ) {
+				$this->check_attributes_on( $prop, $ref->getShortName() . '::$' . $prop->getName() );
+			}
+
+			foreach ( $ref->getMethods() as $method ) {
+				if ( $method->getDeclaringClass()->getName() !== $ref->getName() ) {
+					continue;
+				}
+				$this->check_attributes_on( $method, $ref->getShortName() . '::' . $method->getName() . '()' );
+
+				foreach ( $method->getParameters() as $param ) {
+					$this->check_attributes_on(
+						$param,
+						$ref->getShortName() . '::' . $method->getName() . '($' . $param->getName() . ')'
+					);
+				}
+			}
+
+			if ( $ref instanceof \ReflectionEnum ) {
+				foreach ( $ref->getCases() as $case ) {
+					$this->check_attributes_on( $case, $ref->getShortName() . '::' . $case->getName() );
+				}
+			}
+		}
+	}
+
+	/**
+	 * Check every attribute applied to a single reflector and accumulate a
+	 * warning per unresolvable class.
+	 *
+	 * @param \ReflectionClass|\ReflectionEnum|\ReflectionEnumUnitCase|\ReflectionMethod|\ReflectionProperty|\ReflectionParameter $source        Reflector to scan.
+	 * @param string                                                                                                              $context_label Human-readable label used in the warning.
+	 */
+	private function check_attributes_on( $source, string $context_label ): void {
+		foreach ( $source->getAttributes() as $attribute ) {
+			$name = $attribute->getName();
+			if ( ! class_exists( $name ) ) {
+				$this->warnings[] = "{$context_label}: attribute `{$name}` could not be resolved (likely a missing `use` statement). The attribute was silently ignored during generation.";
+			}
+		}
 	}
 
 	/**
