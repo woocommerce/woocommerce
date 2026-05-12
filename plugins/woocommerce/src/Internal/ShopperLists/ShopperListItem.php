@@ -313,15 +313,15 @@ class ShopperListItem {
 	 */
 	public function is_live(): bool {
 		$product = $this->get_product();
-		if ( ! $product || ProductStatus::PUBLISH !== $product->get_status() ) {
+		if ( ! $product instanceof \WC_Product || ProductStatus::PUBLISH !== $product->get_status() ) {
 			return false;
 		}
 
 		$parent_id = $product->get_parent_id();
-		if ( $parent_id ) {
+		if ( $parent_id > 0 ) {
 			$parent = wc_get_product( $parent_id );
 
-			if ( ! $parent || ProductStatus::PUBLISH !== $parent->get_status() ) {
+			if ( ! $parent instanceof \WC_Product || ProductStatus::PUBLISH !== $parent->get_status() ) {
 				return false;
 			}
 		}
