@@ -277,6 +277,32 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Variations under a password-protected parent stay live but aren't purchasable.
+	 */
+	public function test_variation_with_password_protected_parent_is_not_purchasable(): void {
+		$variable = \WC_Helper_Product::create_variation_product();
+		$children = $variable->get_children();
+		$this->assertNotEmpty( $children, 'Variable product helper should produce variation children' );
+		$variation_id = (int) $children[0];
+
+		wp_update_post(
+			array(
+				'ID'            => $variable->get_id(),
+				'post_password' => 'secret',
+			)
+		);
+
+		$response = $this->sut->get_item_response(
+			$this->build_item( $variable->get_id(), $variation_id, array(), 'Snapshot Title' )
+		);
+
+		$this->assertTrue( $response['is_live'], 'Parent still renders behind a password prompt' );
+		$this->assertFalse( $response['is_purchasable'], 'Parent password must gate the variation too' );
+
+		$variable->delete( true );
+	}
+
+	/**
 	 * @testdox Should expose price_html for live products and an empty string for tombstones.
 	 */
 	public function test_price_html_is_populated_for_live_products(): void {

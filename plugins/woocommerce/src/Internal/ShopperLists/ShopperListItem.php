@@ -330,16 +330,38 @@ class ShopperListItem {
 	}
 
 	/**
-	 * Whether the product can be added to the cart.
+	 * Whether the product can be added to the cart. Mirrors the catalog gate
+	 * (`is_purchasable()` && `is_in_stock()`), but additionally requires the
+	 * row to be live and rejects password-gated products (self or parent) —
+	 * cart-add can't prompt for a password.
 	 */
 	public function is_purchasable(): bool {
 		$product = $this->get_product();
 		if ( ! $this->is_live() || ! $product ) {
 			return false;
 		}
+		if ( ! $product->is_purchasable() || ! $product->is_in_stock() ) {
+			return false;
+		}
+		if ( $this->has_password( $product ) ) {
+			return false;
+		}
+		$parent_id = $product->get_parent_id();
+		if ( $parent_id > 0 ) {
+			$parent = wc_get_product( $parent_id );
+			if ( $parent instanceof \WC_Product && $this->has_password( $parent ) ) {
+				return false;
+			}
+		}
+		return true;
+	}
 
-		$product_password = $product->get_post_password();
-		return $product->is_purchasable() && $product->is_in_stock() && ( ! is_string( $product_password ) || '' === $product_password );
+	/**
+	 * @param \WC_Product $product Product to inspect.
+	 */
+	private function has_password( \WC_Product $product ): bool {
+		$password = $product->get_post_password();
+		return is_string( $password ) && '' !== $password;
 	}
 
 	/**
