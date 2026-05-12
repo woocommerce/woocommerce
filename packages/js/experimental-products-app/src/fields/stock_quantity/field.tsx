@@ -2,13 +2,18 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { InputControl } from '@wordpress/ui';
+import { InputControl, Stack } from '@wordpress/ui';
 import type { DataFormControlProps, Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
+
+type StockQuantityRange = [ number | string, number | string ];
+type StockQuantityFilterRecord = Omit< ProductEntityRecord, 'stock_quantity' > & {
+	stock_quantity?: number | null | StockQuantityRange;
+};
 
 const fieldDefinition = {
 	type: 'integer',
@@ -18,10 +23,12 @@ const fieldDefinition = {
 	filterBy: {
 		operators: [
 			'is',
+			'isNot',
 			'greaterThan',
 			'greaterThanOrEqual',
 			'lessThan',
 			'lessThanOrEqual',
+			'between',
 		],
 	},
 } satisfies Partial< Field< ProductEntityRecord > >;
@@ -35,9 +42,51 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		data,
 		onChange,
 		hideLabelFromVision,
+		operator,
 		field,
 	}: DataFormControlProps< ProductEntityRecord > ) => {
-		const raw = ( data as ProductEntityRecord ).stock_quantity;
+		const onChangeBetween = onChange as (
+			data: Partial< StockQuantityFilterRecord >
+		) => void;
+		const raw = ( data as StockQuantityFilterRecord ).stock_quantity;
+
+		if ( operator === 'between' ) {
+			const [ minRaw = '', maxRaw = '' ] = Array.isArray( raw ) ? raw : [];
+			const min = String( minRaw );
+			const max = String( maxRaw );
+
+			return (
+				<Stack direction="row">
+					<InputControl
+						label={ __( 'From', 'woocommerce' ) }
+						type="number"
+						step={ 1 }
+						value={ min }
+						onChange={ ( event ) => {
+							const next = event.target.value;
+							const nextMin = next === '' ? '' : Number( next );
+							onChangeBetween( {
+								stock_quantity: [ nextMin, max ],
+							} );
+						} }
+					/>
+					<InputControl
+						label={ __( 'To', 'woocommerce' ) }
+						type="number"
+						step={ 1 }
+						value={ max }
+						onChange={ ( event ) => {
+							const next = event.target.value;
+							const nextMax = next === '' ? '' : Number( next );
+							onChangeBetween( {
+								stock_quantity: [ min, nextMax ],
+							} );
+						} }
+					/>
+				</Stack>
+			);
+		}
+
 		const value =
 			typeof raw === 'number'
 				? String( raw )
@@ -54,8 +103,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				onChange={ ( event ) => {
 					const next = event.target.value;
 					onChange( {
-						stock_quantity:
-							next === '' ? null : Number( next ),
+						stock_quantity: next === '' ? null : Number( next ),
 					} );
 				} }
 			/>

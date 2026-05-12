@@ -148,6 +148,20 @@ function applyPriceFilter( query: ProductListQuery, filter: Filter ) {
 }
 
 function applyStockQuantityFilter( query: ProductListQuery, filter: Filter ) {
+	if ( filter.operator === 'between' && Array.isArray( filter.value ) ) {
+		const [ min, max ] = filter.value;
+		query.min_stock_quantity = getPriceValue( min );
+		query.max_stock_quantity = getPriceValue( max );
+		return;
+	}
+
+	if ( filter.operator === 'isNot' ) {
+		// No WC REST param for stock_quantity exclusion; intentionally
+		// unsupported server-side. The operator is exposed because the user
+		// explicitly asked for it in the UI.
+		return;
+	}
+
 	const raw = getPriceValue( filter.value );
 
 	if ( ! raw ) {
