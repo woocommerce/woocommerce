@@ -343,25 +343,24 @@ class ShopperListItem {
 		if ( ! $product->is_purchasable() || ! $product->is_in_stock() ) {
 			return false;
 		}
-		if ( $this->has_password( $product ) ) {
+
+		$product_password = $product->get_post_password();
+		if ( is_string( $product_password ) && '' !== $product_password ) {
 			return false;
 		}
+
 		$parent_id = $product->get_parent_id();
 		if ( $parent_id > 0 ) {
 			$parent = wc_get_product( $parent_id );
-			if ( $parent instanceof \WC_Product && $this->has_password( $parent ) ) {
-				return false;
+			if ( $parent instanceof \WC_Product ) {
+				$parent_password = $parent->get_post_password();
+				if ( is_string( $parent_password ) && '' !== $parent_password ) {
+					return false;
+				}
 			}
 		}
-		return true;
-	}
 
-	/**
-	 * @param \WC_Product $product Product to inspect.
-	 */
-	private function has_password( \WC_Product $product ): bool {
-		$password = $product->get_post_password();
-		return is_string( $password ) && '' !== $password;
+		return true;
 	}
 
 	/**
