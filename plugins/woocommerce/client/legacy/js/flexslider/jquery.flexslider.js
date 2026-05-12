@@ -556,7 +556,7 @@
       },
       smoothHeight: function(dur) {
         if (!vertical || fade) {
-          var $obj = (fade) ? slider : slider.viewport;
+          var $obj = slider.viewport;
           $obj.css({"height": slider.slides.eq(slider.animatingTo).innerHeight(), "transition": dur ? ("height " + dur + "ms") : "none"});
         }
       },
@@ -886,6 +886,7 @@
           slider.slides.css({"width": "100%", "float": 'left', "marginRight": "-100%", "position": "relative"});
         }
         if (type === "init") {
+          slider.viewport = slider.slides.parent().css({"overflow": "hidden"});
           if (!touch) {
             // Every "opacity" change before outerWidth() does NOT get animated; every "opacity" change after outerWidth() becomes a fadeIn animation
             if (slider.vars.fadeFirstSlide == false) {
