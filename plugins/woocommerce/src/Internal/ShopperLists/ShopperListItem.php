@@ -313,50 +313,33 @@ class ShopperListItem {
 	 */
 	public function is_live(): bool {
 		$product = $this->get_product();
-		if ( ! $product || ! $this->is_publish( $product ) ) {
+		if ( ! $product || ProductStatus::PUBLISH !== $product->get_status() ) {
 			return false;
 		}
-		$parent_id = $product->get_parent_id();
-		return $parent_id <= 0 || $this->is_publish( wc_get_product( $parent_id ) );
-	}
 
-	/**
-	 * Whether the product can be added to the cart. Mirrors the catalog gate
-	 * (`is_purchasable()` && `is_in_stock()`), but additionally requires the
-	 * row to be live (WC's `is_purchasable()` has an admin-edit escape hatch
-	 * we don't want here) and excludes password-gated products (cart-add
-	 * can't prompt for a password).
-	 */
-	public function is_purchasable(): bool {
-		if ( ! $this->is_live() ) {
-			return false;
-		}
-		$product = $this->get_product();
-		if ( ! $product instanceof \WC_Product ) {
-			return false;
-		}
-		if ( ! $product->is_purchasable() || ! $product->is_in_stock() ) {
-			return false;
-		}
-		if ( '' !== (string) $product->get_post_password() ) {
-			return false;
-		}
 		$parent_id = $product->get_parent_id();
-		if ( $parent_id > 0 ) {
+		if ( $parent_id ) {
 			$parent = wc_get_product( $parent_id );
-			if ( $parent instanceof \WC_Product && '' !== (string) $parent->get_post_password() ) {
+
+			if ( ! $parent || ProductStatus::PUBLISH !== $parent->get_status() ) {
 				return false;
 			}
 		}
+
 		return true;
 	}
 
 	/**
-	 * @param mixed $product Product instance or a falsy `wc_get_product()` result.
+	 * Whether the product can be added to the cart.
 	 */
-	private function is_publish( $product ): bool {
-		return $product instanceof \WC_Product
-			&& ProductStatus::PUBLISH === $product->get_status();
+	public function is_purchasable(): bool {
+		$product = $this->get_product();
+		if ( ! $this->is_live() || ! $product ) {
+			return false;
+		}
+
+		$product_password = $product->get_post_password();
+		return $product->is_purchasable() && $product->is_in_stock() && ( ! is_string( $product_password ) || '' === $product_password );
 	}
 
 	/**
