@@ -10,13 +10,32 @@ import { __, sprintf } from '@wordpress/i18n';
 import type { ProductEntityRecord } from '../fields/types';
 import type { VariationEntityRecord } from './types';
 
-function getVariationName( variation: ProductVariation ) {
+type VariationSource = Pick< ProductVariation, 'id' > & {
+	attributes?: Array< {
+		option?: string;
+		options?: string[];
+	} >;
+	categories?: ProductEntityRecord[ 'categories' ];
+	image?: ProductVariation[ 'image' ] | null;
+	images?: ProductEntityRecord[ 'images' ];
+	manage_stock?: ProductVariation[ 'manage_stock' ];
+	name?: string;
+	parent_id?: number;
+	slug?: string;
+	tags?: ProductEntityRecord[ 'tags' ];
+};
+
+function getVariationName( variation: VariationSource ) {
 	if ( variation.name ) {
 		return variation.name;
 	}
 
-	if ( variation.attributes?.length > 0 ) {
-		return variation.attributes.map( ( attr ) => attr.option ).join( ', ' );
+	const attributes = variation.attributes ?? [];
+
+	if ( attributes.length > 0 ) {
+		return attributes
+			.flatMap( ( attr ) => attr.option ?? attr.options ?? [] )
+			.join( ', ' );
 	}
 
 	return sprintf(
@@ -27,8 +46,12 @@ function getVariationName( variation: ProductVariation ) {
 }
 
 function getVariationImages(
-	variation: ProductVariation
+	variation: VariationSource
 ): ProductEntityRecord[ 'images' ] {
+	if ( variation.images ) {
+		return variation.images;
+	}
+
 	if ( ! variation.image ) {
 		return [];
 	}
@@ -49,15 +72,15 @@ function getVariationImages(
 }
 
 export function normalizeVariation(
-	variation: ProductVariation
+	variation: VariationSource
 ): VariationEntityRecord {
 	return {
 		...variation,
-		categories: [],
-		tags: [],
+		categories: variation.categories ?? [],
+		tags: variation.tags ?? [],
 		images: getVariationImages( variation ),
 		name: getVariationName( variation ),
-		slug: String( variation.id ),
+		slug: variation.slug ?? String( variation.id ),
 		type: 'variation',
 		manage_stock: variation.manage_stock === true,
 	} as unknown as VariationEntityRecord;

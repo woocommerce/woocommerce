@@ -408,8 +408,9 @@ class WCTransactionalEmailPostsGenerator {
 			if ( ! isset( $post_data['meta_input'] ) || ! is_array( $post_data['meta_input'] ) ) {
 				$post_data['meta_input'] = array();
 			}
-			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ]        = (string) $sync_config['version'];
-			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY ] = gmdate( 'Y-m-d H:i:s' );
+			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ]          = (string) $sync_config['version'];
+			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY ]   = gmdate( 'Y-m-d H:i:s' );
+			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY ] = (string) ( $post_data['post_content'] ?? '' );
 		}
 
 		$post_id = wp_insert_post( $post_data, true );
