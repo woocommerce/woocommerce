@@ -16,7 +16,7 @@ import {
 	BlockContextProvider,
 } from '@wordpress/block-editor';
 import { withSpokenMessages } from '@wordpress/components';
-import { useEffect, useMemo, useState } from '@wordpress/element';
+import { useEffect, useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { getSetting } from '@woocommerce/settings';
 
@@ -37,10 +37,7 @@ import { Notice } from '../../components/notice';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
-
-const VISUAL_ATTRIBUTE_TERM_COLORS = getSetting<
-	Record< string, Record< string, string > >
->( 'visualAttributeTermColors', {} );
+const EMPTY_TERM_COLORS: Record< string, string > = {};
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
@@ -56,14 +53,9 @@ const Edit = ( props: EditProps ) => {
 	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
-	const rawAttribute = ATTRIBUTES.find(
-		( a ) => parseInt( a.attribute_id, 10 ) === attributeId
-	);
-	const isVisual = rawAttribute?.attribute_type === 'wc-visual';
-	const termColors = useMemo(
-		() =>
-			isVisual ? VISUAL_ATTRIBUTE_TERM_COLORS[ attributeId ] ?? {} : {},
-		[ isVisual, attributeId ]
+	const termColors = getSetting< Record< string, string > >(
+		'productFilterTermColors',
+		EMPTY_TERM_COLORS
 	);
 
 	const [ attributeOptions, setAttributeOptions ] = useState<
@@ -115,8 +107,8 @@ const Edit = ( props: EditProps ) => {
 					value: term.id.toString(),
 					selected: index === 0,
 					...( showCounts && { count: term.count } ),
-					...( isVisual && {
-						color: termColors[ term.id ] ?? '',
+					...( term.id in termColors && {
+						color: termColors[ term.id ],
 					} ),
 				} ) );
 
@@ -135,7 +127,6 @@ const Edit = ( props: EditProps ) => {
 		isTermsLoading,
 		isFilterCountsLoading,
 		attributeObject,
-		isVisual,
 		termColors,
 	] );
 
