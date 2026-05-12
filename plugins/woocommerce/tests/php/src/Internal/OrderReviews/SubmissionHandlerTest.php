@@ -515,7 +515,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$item_id    = $built['item_ids'][0];
 
 		// First submission inserts the comment with the order-id meta.
-		$_POST = array(
+		$_POST      = array(
 			'order_id' => $order->get_id(),
 			'key'      => $order->get_order_key(),
 			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
@@ -534,7 +534,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$this->assertGreaterThan( 0, $comment_id );
 
 		// Second submission edits the same row.
-		$_POST = array(
+		$_POST      = array(
 			'order_id' => $order->get_id(),
 			'key'      => $order->get_order_key(),
 			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
@@ -592,7 +592,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		);
 		add_comment_meta( $older_comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id() + 999, true );
 
-		$_POST = array(
+		$_POST    = array(
 			'order_id' => $order->get_id(),
 			'key'      => $order->get_order_key(),
 			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
