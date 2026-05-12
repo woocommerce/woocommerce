@@ -52,6 +52,20 @@
 		resize: vertical;
 	}
 
+	// Submission status note. Falls back to literal hex if a stylesheet
+	// loads before _variables.scss exposes the WC color tokens.
+	&__item-status {
+		margin: 0.5em 0 0;
+
+		&--ok {
+			color: var(--wc-green, #008a20);
+		}
+
+		&--error {
+			color: var(--wc-red, #a00);
+		}
+	}
+
 	@media (max-width: 600px) {
 		&__item-row {
 			flex-direction: column;

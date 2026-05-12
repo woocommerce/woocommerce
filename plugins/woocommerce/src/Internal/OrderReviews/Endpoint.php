@@ -433,6 +433,18 @@ class Endpoint {
 				'in_footer' => true,
 			)
 		);
+
+		wp_localize_script(
+			'wc-order-review',
+			'wcOrderReview',
+			array(
+				'i18n' => array(
+					'ok'                 => __( 'Thanks, your review is live.', 'woocommerce' ),
+					'pending_moderation' => __( 'Thanks, your review is pending approval.', 'woocommerce' ),
+					'error'              => __( 'Something went wrong, please try again.', 'woocommerce' ),
+				),
+			)
+		);
 	}
 
 	/**

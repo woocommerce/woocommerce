@@ -111,8 +111,11 @@ $order_key = (string) $order->get_order_key();
 		<form
 			class="woocommerce-review-order__form"
 			method="post"
+			action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+			data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
 			novalidate
 		>
+			<input type="hidden" name="action" value="<?php echo esc_attr( 'woocommerce_submit_order_reviews' ); ?>" />
 			<input type="hidden" name="order_id" value="<?php echo esc_attr( (string) $order->get_id() ); ?>" />
 			<input type="hidden" name="key" value="<?php echo esc_attr( $order_key ); ?>" />
 			<?php wp_nonce_field( 'woocommerce_submit_order_reviews', '_wcnonce' ); ?>
