@@ -29,6 +29,33 @@ foreach ( $fields as $f ) {
 		break;
 	}
 }
+// Drop any caller-supplied import whose effective short name would collide
+// with one of the hardcoded imports emitted below, otherwise the generated
+// file wouldn't compile ("Cannot use ... because the name is already in use").
+$reserved_short_names = array( 'ObjectType', 'Type' );
+if ( $has_paginated_connection ) {
+	$reserved_short_names[] = 'Connection';
+	$reserved_short_names[] = 'Utils';
+}
+// PHP class-name resolution (including `use`) is case-insensitive, so the
+// collision check has to be too — a caller-supplied `Foo\resolveinfo` would
+// otherwise slip past and fail at compile time of the generated file.
+$reserved_short_names_lower = array_map( 'strtolower', $reserved_short_names );
+$use_statements             = array_values(
+	array_filter(
+		$use_statements,
+		static function ( $use ) use ( $reserved_short_names_lower ) {
+			$as_pos = stripos( $use, ' as ' );
+			if ( false !== $as_pos ) {
+				$short = trim( substr( $use, $as_pos + 4 ) );
+			} else {
+				$sep_pos = strrpos( $use, '\\' );
+				$short   = false !== $sep_pos ? substr( $use, $sep_pos + 1 ) : $use;
+			}
+			return ! in_array( strtolower( $short ), $reserved_short_names_lower, true );
+		}
+	)
+);
 ?>
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;
@@ -37,8 +64,8 @@ use <?php echo $use; ?>;
 use Automattic\WooCommerce\Api\Pagination\Connection;
 use Automattic\WooCommerce\Internal\Api\Utils;
 <?php endif; ?>
-use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ObjectType;
-use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\Type;
+use Automattic\WooCommerce\Internal\Api\Schema\ObjectType;
+use Automattic\WooCommerce\Internal\Api\Schema\Type;
 
 class <?php echo $class_name; ?> {
 	private static ?ObjectType $instance = null;

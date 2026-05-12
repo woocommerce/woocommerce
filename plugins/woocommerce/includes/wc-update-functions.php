@@ -30,6 +30,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -3495,4 +3496,46 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 
 	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 	$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(100))" );
+}
+
+/**
+ * Backfill sync meta onto pre-existing `woo_email` posts so the template
+ * divergence detector introduced in the same release (RSM-138) can classify
+ * legacy installs safely.
+ *
+ * @since 10.8.0
+ *
+ * @return bool Always false. Once-per-site is enforced by the
+ *              `woocommerce_db_version` fence in `$db_updates`.
+ */
+function wc_update_1080_backfill_email_template_sync_meta(): bool {
+	return WCEmailTemplateSyncBackfill::run();
+}
+
+/**
+ * Seeds the Review Order page on existing installs so the rewrite rule and
+ * helper URL work after upgrading to 10.8.0. Mirrors how
+ * `wc_update_560_create_refund_returns_page` backfilled the refund/returns
+ * page when that feature shipped.
+ *
+ * @since 10.8.0
+ *
+ * @return void
+ */
+function wc_update_1080_create_review_order_page(): void {
+	$only_review_order = static function ( array $pages ): array {
+		return array_intersect_key( $pages, array_flip( array( 'review_order' ) ) );
+	};
+
+	add_filter( 'woocommerce_create_pages', $only_review_order );
+
+	WC_Install::create_pages();
+
+	remove_filter( 'woocommerce_create_pages', $only_review_order );
+
+	// `Endpoint::add_rewrite_rule` runs on init:10; this update routine fires
+	// from WC_Install::check_version on init:5, so flushing here would
+	// persist the rules table without the new /review-order/{id}/ rule.
+	// Defer the flush via an option that the endpoint clears on wp_loaded.
+	update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
 }

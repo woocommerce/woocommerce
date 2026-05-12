@@ -76,7 +76,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 	 * Order items will be stored here, sometimes before they persist in the DB.
 	 *
 	 * @since 3.0.0
-	 * @var array<string, array<int, \WC_Order_Item>>
+	 * @var array<string, array<\WC_Order_Item>>
 	 */
 	protected $items = array();
 
@@ -883,8 +883,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		 * @since 7.8.0
 		 */
 		do_action( 'woocommerce_remove_order_items', $this, $type );
+
+		// Unsaved orders (id 0) have no persisted items — skip the data store round-trip.
+		$has_persisted_items = $this->get_id() > 0;
+
 		if ( ! empty( $type ) ) {
-			$this->data_store->delete_items( $this, $type );
+			if ( $has_persisted_items ) {
+				$this->data_store->delete_items( $this, $type );
+			}
 
 			$group = $this->type_to_group( $type );
 
@@ -892,7 +898,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 				unset( $this->items[ $group ] );
 			}
 		} else {
-			$this->data_store->delete_items( $this );
+			if ( $has_persisted_items ) {
+				$this->data_store->delete_items( $this );
+			}
 			$this->items = array();
 		}
 		/**
@@ -954,15 +962,17 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 					// on warm post meta caches for products. This addresses scenarios where the order object was not populated during a batch population.
 					if ( 'line_item' === $type && ! empty( $read_items ) ) {
 						$product_ids = array_map( static fn( $item ) => $item->get_variation_id() ? $item->get_variation_id() : $item->get_product_id(), $read_items );
-						$product_ids = array_unique( array_filter( $product_ids ) );
-						_prime_post_caches( $product_ids );
+						_prime_post_caches( array_unique( array_filter( $product_ids ) ) );
 					}
+
+					// Set the back-reference to the parent order on each loaded item.
+					array_walk( $read_items, fn( $item ) => $item instanceof WC_Order_Item && $item->set_order( $this ) );
 
 					$this->items[ $group ] = $read_items;
 				}
 				// Don't use array_merge here because keys are numeric.
 				$items = $items + $this->items[ $group ];
-			}
+			}//end if
 		}
 
 		return apply_filters( 'woocommerce_order_get_items', $items, $this, $types );
@@ -1165,11 +1175,10 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		}
 
 		// Set parent.
-		$item->set_order_id( $this->get_id() );
+		$item instanceof WC_Order_Item ? $item->set_order( $this ) : $item->set_order_id( $this->get_id() );
 
 		// Append new row with generated temporary ID.
 		$item_id = $item->get_id();
-
 		if ( $item_id ) {
 			$this->items[ $items_key ][ $item_id ] = $item;
 		} else {
@@ -2008,13 +2017,14 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 		$shipping_total    = 0;
 		$cart_subtotal_tax = 0;
 		$cart_total_tax    = 0;
+		$price_decimals    = wc_get_price_decimals();
 
 		$cart_subtotal = $this->get_cart_subtotal_for_order();
 		$cart_total    = (float) $this->get_cart_total_for_order();
 
 		// Sum shipping costs.
 		foreach ( $this->get_shipping_methods() as $shipping ) {
-			$shipping_total += NumberUtil::round( $shipping->get_total(), wc_get_price_decimals() );
+			$shipping_total += NumberUtil::round( $shipping->get_total(), $price_decimals );
 		}
 
 		$this->set_shipping_total( $shipping_total );
@@ -2024,7 +2034,7 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			$fee_total = (float) $item->get_total();
 
 			if ( 0 > $fee_total ) {
-				$max_discount = NumberUtil::round( $cart_total + $fees_total + $shipping_total, wc_get_price_decimals() ) * -1;
+				$max_discount = NumberUtil::round( $cart_total + $fees_total + $shipping_total, $price_decimals ) * -1;
 
 				if ( $fee_total < $max_discount && 0 > $max_discount ) {
 					$item->set_total( $max_discount );
@@ -2051,9 +2061,9 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			}
 		}
 
-		$this->set_discount_total( NumberUtil::round( $cart_subtotal - $cart_total, wc_get_price_decimals() ) );
+		$this->set_discount_total( NumberUtil::round( $cart_subtotal - $cart_total, $price_decimals ) );
 		$this->set_discount_tax( wc_round_tax_total( $cart_subtotal_tax - $cart_total_tax ) );
-		$this->set_total( NumberUtil::round( $cart_total + $fees_total + (float) $this->get_shipping_total() + (float) $this->get_cart_tax() + (float) $this->get_shipping_tax(), wc_get_price_decimals() ) );
+		$this->set_total( NumberUtil::round( $cart_total + $fees_total + (float) $this->get_shipping_total() + (float) $this->get_cart_tax() + (float) $this->get_shipping_tax(), $price_decimals ) );
 
 		if ( $this->has_cogs() && $this->cogs_is_enabled() ) {
 			$this->calculate_cogs_total_value();

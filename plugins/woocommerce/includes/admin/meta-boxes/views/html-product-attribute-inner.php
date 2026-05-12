@@ -35,7 +35,10 @@ if ( ! defined( 'ABSPATH' ) ) {
 					$attribute_taxonomy->attribute_type = 'select';
 				}
 
-				if ( 'select' === $attribute_taxonomy->attribute_type ) {
+				if (
+					'select' === $attribute_taxonomy->attribute_type ||
+					'wc-visual' === $attribute_taxonomy->attribute_type
+				) {
 					$attribute_orderby = ! empty( $attribute_taxonomy->attribute_orderby ) ? $attribute_taxonomy->attribute_orderby : 'name';
 					/**
 					* Filter the length (number of terms) rendered in the list.
@@ -71,7 +74,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					</select>
 					<button class="button plus select_all_attributes"><?php esc_html_e( 'Select all', 'woocommerce' ); ?></button>
 					<button class="button minus select_no_attributes"><?php esc_html_e( 'Select none', 'woocommerce' ); ?></button>
-					<button class="button fr plus add_new_attribute"><?php esc_html_e( 'Create value', 'woocommerce' ); ?></button>
+					<button class="button fr plus add_new_attribute" data-is-visual-attribute="<?php echo esc_attr( wc_bool_to_string( 'wc-visual' === $attribute_taxonomy->attribute_type ) ); ?>"><?php esc_html_e( 'Create value', 'woocommerce' ); ?></button>
 					<?php
 				}
 
