@@ -317,6 +317,32 @@ export function findProductInList(
 	}
 }
 
+export function getProductEditRecord(
+	listedProduct: ProductEntityRecord | undefined,
+	rootRecord: ProductEntityRecord | false | undefined,
+	rootRecordEdits?: Partial< ProductEntityRecord >
+) {
+	const editedRootRecord = rootRecord !== false ? rootRecord : undefined;
+	const hasRootRecordEdits =
+		rootRecordEdits && Object.keys( rootRecordEdits ).length > 0;
+
+	if ( listedProduct && hasRootRecordEdits ) {
+		return {
+			...listedProduct,
+			...rootRecordEdits,
+		};
+	}
+
+	if ( listedProduct && editedRootRecord ) {
+		return {
+			...listedProduct,
+			...editedRootRecord,
+		};
+	}
+
+	return listedProduct ?? editedRootRecord;
+}
+
 function getCommonProductTypeCompatibleFieldIds(
 	products: ProductEntityRecord[]
 ) {

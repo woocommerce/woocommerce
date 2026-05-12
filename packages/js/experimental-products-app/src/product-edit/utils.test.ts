@@ -13,6 +13,7 @@ import {
 	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
+	getProductEditRecord,
 	getProductVariationUpdatePath,
 	getVisibleProductEditFields,
 	isProductVariation,
@@ -207,6 +208,45 @@ describe( 'product edit utils', () => {
 					variations: [ updatedVariation ],
 				},
 			} )
+		);
+	} );
+
+	it( 'uses edited product values over the listed product values', () => {
+		const listedProduct = buildProduct( {
+			id: 12,
+			name: 'Beanie',
+			on_sale: false,
+			regular_price: '15',
+			categories: [ { id: 22, name: 'Accessories' } ],
+		} );
+		const editedProduct = {
+			on_sale: true,
+			sale_price: '12',
+		};
+
+		expect(
+			getProductEditRecord( listedProduct, undefined, editedProduct )
+		).toEqual(
+			expect.objectContaining( {
+				on_sale: true,
+				sale_price: '12',
+				regular_price: '15',
+				categories: [ { id: 22, name: 'Accessories' } ],
+			} )
+		);
+	} );
+
+	it( 'falls back to the listed product when the root record is unavailable', () => {
+		const listedProduct = buildProduct( {
+			id: 12,
+			name: 'Beanie',
+		} );
+
+		expect( getProductEditRecord( listedProduct, false ) ).toBe(
+			listedProduct
+		);
+		expect( getProductEditRecord( listedProduct, undefined ) ).toBe(
+			listedProduct
 		);
 	} );
 
