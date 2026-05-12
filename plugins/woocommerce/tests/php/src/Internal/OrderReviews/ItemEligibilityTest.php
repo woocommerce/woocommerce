@@ -55,6 +55,14 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 
 	/**
 	 * Insert a customer review for a product, optionally tagged with the source order id.
+	 *
+	 * @param int      $product_id Product post id.
+	 * @param string   $email      Author email.
+	 * @param string   $body       Comment body.
+	 * @param int      $rating     Rating value 1-5.
+	 * @param int|null $order_id   Source order id stamped as `_review_order_id` commentmeta. Pass null to skip.
+	 * @param int      $approved   1 for approved, 0 for pending moderation.
+	 * @return int Inserted comment id.
 	 */
 	private function insert_review( int $product_id, string $email, string $body, int $rating, ?int $order_id = null, int $approved = 1 ): int {
 		$comment_id = (int) wp_insert_comment(
