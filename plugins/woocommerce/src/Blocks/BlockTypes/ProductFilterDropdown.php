@@ -70,26 +70,25 @@ final class ProductFilterDropdown extends AbstractBlock {
 
 		$select_id   = wp_unique_id( 'wc-block-product-filter-dropdown-' );
 		$show_counts = is_array( $first ) && array_key_exists( 'count', $first );
-		$aria_label  = ! empty( $selectable_items['groupLabel'] )
-			? (string) $selectable_items['groupLabel']
-			: __( 'Filter options', 'woocommerce' );
+		$label       = is_string( $selectable_items['groupLabel'] ) && '' !== $selectable_items['groupLabel']
+			/** translators: %s: Attribute or filter type label. */
+			? sprintf( __( 'Select %s', 'woocommerce' ), $selectable_items['groupLabel'] )
+			: __( 'Select options', 'woocommerce' );
 
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<fieldset class="wc-block-product-filter-dropdown__fieldset">
-				<?php if ( ! empty( $selectable_items['groupLabel'] ) ) : ?>
-					<legend class="screen-reader-text"><?php echo esc_html( $selectable_items['groupLabel'] ); ?></legend>
-				<?php endif; ?>
+				<legend class="screen-reader-text"><?php echo esc_html( $label ); ?></legend>
 				<select
 					class="wc-block-product-filter-dropdown__select"
 					id="<?php echo esc_attr( $select_id ); ?>"
-					aria-label="<?php echo esc_attr( $aria_label ); ?>"
+					aria-label="<?php echo esc_attr( $label ); ?>"
 					data-wp-bind--value="woocommerce/product-filter-dropdown::state.selectValue"
 					data-wp-on--change="actions.onDropdownChange"
 				>
 					<option value="">
-						<?php esc_html_e( 'Select an option', 'woocommerce' ); ?>
+						<?php echo esc_html( $label ); ?>
 					</option>
 					<?php foreach ( $items as $item ) : ?>
 						<?php

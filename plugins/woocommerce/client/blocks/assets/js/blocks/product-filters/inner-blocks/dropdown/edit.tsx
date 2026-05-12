@@ -45,7 +45,6 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	const items = Array.isArray( selectableItems.items )
 		? selectableItems.items
 		: [];
-	const groupLabel = selectableItems.groupLabel ?? '';
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-dropdown', {
@@ -53,15 +52,19 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		} ),
 	} );
 
+	const label = selectableItems.groupLabel
+		? sprintf(
+				/* translators: %s: Attribute or filter type label. */
+				__( 'Select %s', 'woocommerce' ),
+				selectableItems.groupLabel
+		  )
+		: __( 'Select options', 'woocommerce' );
+
 	return (
 		<div { ...blockProps }>
 			<Disabled>
 				<fieldset className="wc-block-product-filter-dropdown__fieldset">
-					{ groupLabel ? (
-						<legend className="screen-reader-text">
-							{ groupLabel }
-						</legend>
-					) : null }
+					<legend className="screen-reader-text">{ label }</legend>
 					{ isLoading ? (
 						<div className="wc-block-product-filter-dropdown__skeleton">
 							<div className="wc-block-product-filter-dropdown__skeleton-option" />
@@ -69,22 +72,11 @@ const Edit = ( props: EditProps ): JSX.Element => {
 					) : (
 						<select
 							className="wc-block-product-filter-dropdown__select"
-							aria-label={
-								groupLabel ||
-								__( 'Filter options', 'woocommerce' )
-							}
+							aria-label={ label }
 							disabled
 							value=""
 						>
-							<option value="">
-								{ groupLabel
-									? sprintf(
-											/* translators: %s: Attribute or filter type label. */
-											__( 'Select a %s', 'woocommerce' ),
-											groupLabel
-									  )
-									: __( 'Select an option', 'woocommerce' ) }
-							</option>
+							<option value="">{ label }</option>
 							{ items.map( ( item, index ) => {
 								const optionLabel = getOptionLabel( item );
 								if ( ! optionLabel ) {
