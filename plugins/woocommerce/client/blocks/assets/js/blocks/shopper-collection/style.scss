@@ -1,16 +1,9 @@
 // Frontend stylesheet for the Shopper Collection block.
-// Diverges from `editor.scss` because the editor canvas loads the
-// WooCommerce atomic block stylesheet for free (which provides image
-// sizing for the borrowed `.wc-block-components-product-image` class);
-// the frontend only ships this block's CSS, so anything the layout
-// depends on has to live here. If we add pieces to editor.scss that
-// the frontend also needs, mirror them here too — keep the visual
-// result aligned.
-// TODO: revisit how this block depends on atomic-block CSS. We currently
-// borrow `.wc-block-components-product-image` from the product-image
-// atomic block. Product Collection avoids this problem by *rendering*
-// the atomic blocks as inner blocks, so WordPress auto-enqueues their
-// stylesheets — we don't, so we have to handle it ourselves.
+// Layout rules for `.wc-block-components-product-image`,
+// `.wc-block-components-product-price` and `.wc-block-components-product-button`
+// come from the atomic product-image / -price / -button blocks' stylesheets,
+// which we declare as style dependencies in `block.json` so WordPress
+// enqueues them whenever this block renders. Don't duplicate those rules here.
 
 .wc-block-shopper-collection {
 	display: grid;
@@ -28,23 +21,6 @@
 	display: flex;
 	flex-direction: column;
 	gap: 0.25em;
-
-	// `.wc-block-components-product-image` is normally styled by the
-	// atomic-block stylesheet. Reproduce just enough here so the
-	// image fills its column track and acts as a positioning anchor
-	// for the remove-button badge overlay.
-	.wc-block-components-product-image {
-		display: block;
-		margin: 0;
-		position: relative;
-
-		img {
-			display: block;
-			height: auto;
-			max-width: 100%;
-			width: 100%;
-		}
-	}
 
 	// Title spacing/line-height matches Product Collection's default
 	// product-title attributes (level: 2, margin: 0 0 0.75rem, line-height: 1.4).

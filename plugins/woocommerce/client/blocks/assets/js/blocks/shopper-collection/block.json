@@ -41,6 +41,10 @@
 		}
 	},
 	"viewScriptModule": "woocommerce/shopper-collection",
-	"style": "file:../woocommerce/shopper-collection-style.css",
-	"editorStyle": "file:../woocommerce/shopper-collection-editor.css"
+	"style": [
+		"file:../woocommerce/shopper-collection-style.css",
+		"wc-blocks-style-product-image",
+		"woocommerce-product-price-style",
+		"woocommerce-product-button-style"
+	]
 }
