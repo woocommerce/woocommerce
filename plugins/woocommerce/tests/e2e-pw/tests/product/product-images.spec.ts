@@ -242,6 +242,7 @@ test.describe( 'Products > Product Images', () => {
 				.locator( '#publishing-action' )
 				.getByRole( 'button', { name: 'Update' } )
 				.click();
+			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
 		} );
 
 		await test.step( 'Verify product gallery', async () => {
@@ -292,6 +293,7 @@ test.describe( 'Products > Product Images', () => {
 				.locator( '#publishing-action' )
 				.getByRole( 'button', { name: 'Update' } )
 				.click();
+			await expect( page.getByText( 'Product updated.' ) ).toBeVisible();
 		} );
 
 		await test.step( 'Verify product gallery', async () => {

@@ -1297,7 +1297,10 @@ jQuery( function ( $ ) {
 			'</svg>';
 
 		function announce( message ) {
-			$liveRegion.text( message );
+			$liveRegion.text( '' );
+			window.setTimeout( function () {
+				$liveRegion.text( message );
+			}, 10 );
 		}
 
 		function syncIds() {

@@ -32,6 +32,7 @@ class WC_Meta_Box_Product_Images {
 		$thepostid      = $post->ID;
 		$product_object = $thepostid ? wc_get_product( $thepostid ) : new WC_Product();
 		$all_ids        = $product_object ? $product_object->get_image_ids( 'edit' ) : array();
+		$rendered_ids   = array();
 
 		wp_nonce_field( 'woocommerce_save_data', 'woocommerce_meta_nonce' );
 		?>
@@ -47,7 +48,8 @@ class WC_Meta_Box_Product_Images {
 						continue;
 					}
 
-					$modifier = $is_featured ? 'featured' : 'gallery';
+					$rendered_ids[] = (int) $attachment_id;
+					$modifier       = $is_featured ? 'featured' : 'gallery';
 					?>
 					<div class="wc-product-images__image wc-product-images__image--<?php echo esc_attr( $modifier ); ?>" data-attachment-id="<?php echo esc_attr( (string) $attachment_id ); ?>" tabindex="0">
 						<?php echo $img; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
@@ -70,7 +72,7 @@ class WC_Meta_Box_Product_Images {
 				}
 			}
 
-			$slot_modifier = empty( $all_ids ) ? 'featured' : 'gallery';
+			$slot_modifier = empty( $rendered_ids ) ? 'featured' : 'gallery';
 			?>
 			<div id="wc-product-images__add-slot" class="wc-product-images__add-slot wc-product-images__add-slot--<?php echo esc_attr( $slot_modifier ); ?> hide-if-no-js" role="button" tabindex="0" aria-label="<?php esc_attr_e( 'Add product images', 'woocommerce' ); ?>">
 				<span class="wc-product-images__add-label"><?php esc_html_e( 'Add an image', 'woocommerce' ); ?></span>
@@ -78,7 +80,7 @@ class WC_Meta_Box_Product_Images {
 			</div>
 		</div>
 
-		<input type="hidden" id="wc_product_image_ids" name="wc_product_image_ids" value="<?php echo esc_attr( implode( ',', $all_ids ) ); ?>" />
+		<input type="hidden" id="wc_product_image_ids" name="wc_product_image_ids" value="<?php echo esc_attr( implode( ',', $rendered_ids ) ); ?>" />
 		<div id="wc-product-images__live-region" class="screen-reader-text" aria-live="polite"></div>
 		<?php
 	}

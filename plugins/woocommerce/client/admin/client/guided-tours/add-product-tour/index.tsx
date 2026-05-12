@@ -128,7 +128,7 @@ const getTourConfig = ( {
 				heading: __( 'Add your product images', 'woocommerce' ),
 				descriptions: {
 					desktop: __(
-						'Upload images for your product here. Ideally JPEG or PNG files about 600 px wide or bigger. The first image will be the main product image in your catalog.',
+						'Upload images for your product here. For best results, use JPEG or PNG files that are 1000 by 1000 pixels or larger. The first image will be the main product image in your catalog.',
 						'woocommerce'
 					),
 				},

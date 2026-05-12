@@ -5565,6 +5565,7 @@ img.help_tip {
 		background: none;
 		cursor: pointer;
 		opacity: 0;
+		pointer-events: none;
 		transition: opacity 0.15s ease;
 		display: flex;
 		align-items: center;
@@ -5597,6 +5598,7 @@ img.help_tip {
 	.wc-product-images__image:hover .wc-product-images__remove,
 	.wc-product-images__image:focus-within .wc-product-images__remove {
 		opacity: 1;
+		pointer-events: auto;
 	}
 
 	.wc-product-images__image:focus {
