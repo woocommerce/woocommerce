@@ -104,8 +104,10 @@ class WC_Meta_Box_Product_Images {
 		 * @var WC_Product $product
 		 */
 		$product   = new $classname( $post_id );
-		$raw_ids   = isset( $_POST['wc_product_image_ids'] ) ? wc_clean( wp_unslash( $_POST['wc_product_image_ids'] ) ) : '';
-		$image_ids = array_filter( array_map( 'absint', explode( ',', $raw_ids ) ) );
+		$raw_ids   = isset( $_POST['wc_product_image_ids'] ) && is_scalar( $_POST['wc_product_image_ids'] )
+			? wc_clean( wp_unslash( (string) $_POST['wc_product_image_ids'] ) )
+			: '';
+		$image_ids = '' === $raw_ids ? array() : array_filter( array_map( 'absint', explode( ',', $raw_ids ) ) );
 		// phpcs:enable WordPress.Security.NonceVerification.Missing
 
 		$product->set_image_ids( $image_ids );
