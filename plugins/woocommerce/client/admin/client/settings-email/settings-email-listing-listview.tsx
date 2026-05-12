@@ -14,6 +14,7 @@ import { DataViews, View } from '@wordpress/dataviews/wp'; // eslint-disable-lin
  */
 import { EmailType } from './settings-email-listing-slotfill';
 import { useTransactionalEmails } from './settings-email-listing-data';
+import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
 import { Status, EMAIL_STATUSES } from './settings-email-listing-status';
 import { RecipientsList } from './settings-email-listing-recipients';
 import { UpdatesCell } from './settings-email-listing-update-cell';
@@ -111,9 +112,7 @@ export const ListView = ( { emailTypes }: { emailTypes: EmailType[] } ) => {
 				enableHiding: true,
 				enableSorting: false,
 				getValue: ( { item }: { item: EmailType } ) =>
-					item.templateStatus === 'core_updated_customized'
-						? 'available'
-						: 'none',
+					shouldShowReviewUpdate( item ) ? 'available' : 'none',
 				elements: [
 					{
 						value: 'available',

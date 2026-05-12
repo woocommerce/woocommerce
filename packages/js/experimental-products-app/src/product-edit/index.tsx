@@ -3,7 +3,7 @@
  */
 import { Button, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
-import { useDispatch, useSelect } from '@wordpress/data';
+import { select as wpSelect, useDispatch, useSelect } from '@wordpress/data';
 import { DataForm } from '@wordpress/dataviews';
 import { useCallback, useEffect, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
@@ -23,9 +23,13 @@ import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
 import {
 	buildMergedProductEditData,
+	findProductInList,
+	getProductWithUpdatedVariation,
 	getProductEditFields,
 	getVisibleProductEditFields,
+	isProductVariation,
 } from './utils';
+import { saveSelectedProducts } from './save';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
@@ -33,6 +37,10 @@ type ProductEditFormProps = {
 	editableFields: ReturnType< typeof getProductEditFields >;
 	onChange: ( changes: Partial< ProductEntityRecord > ) => void;
 	selectedProducts: ProductEntityRecord[];
+};
+
+type ProductEditProps = {
+	products: ProductEntityRecord[];
 };
 
 function getSaveNoticeMessage( successCount: number, failedCount: number ) {
@@ -100,7 +108,7 @@ function ProductEditForm( {
 	);
 }
 
-export default function ProductEdit() {
+export default function ProductEdit( { products }: ProductEditProps ) {
 	const { navigate } = useHistory();
 	const { path, query = {} } = useLocation();
 	const requestedProductIdsFromRoute = getSelectionFromPostId( query.postId )
@@ -115,7 +123,6 @@ export default function ProductEdit() {
 	const editableFields = getProductEditFields( productFields );
 	const {
 		selectedProducts,
-		selectedProductIds,
 		isResolving,
 		hasResolved,
 		hasMissingProducts,
@@ -125,7 +132,6 @@ export default function ProductEdit() {
 			if ( requestedProductIds.length === 0 ) {
 				return {
 					selectedProducts: [],
-					selectedProductIds: [],
 					isResolving: false,
 					hasResolved: true,
 					hasMissingProducts: false,
@@ -136,37 +142,73 @@ export default function ProductEdit() {
 			const coreSelect = select( coreStore );
 			const productResults = requestedProductIds.map( ( productId ) => {
 				const resolutionArgs = [ 'root', 'product', productId ];
+				const rootRecord = coreSelect.getEditedEntityRecord(
+					'root',
+					'product',
+					productId
+				) as unknown as ProductEntityRecord | false | undefined;
+				const listedProduct = findProductInList( products, productId );
+				const product =
+					listedProduct ??
+					( rootRecord !== false ? rootRecord : undefined );
+				let record: ProductEntityRecord | false | undefined =
+					product ?? rootRecord;
+
+				if (
+					product &&
+					isProductVariation( product ) &&
+					product.parent_id
+				) {
+					const parentProduct = coreSelect.getEditedEntityRecord(
+						'root',
+						'product',
+						product.parent_id
+					) as unknown as ProductEntityRecord | false | undefined;
+					const editedParentProduct =
+						parentProduct !== false ? parentProduct : undefined;
+					const editedVariation =
+						editedParentProduct?._embedded?.variations?.find(
+							( variation ) => variation.id === product.id
+						);
+
+					record = editedVariation || product;
+				}
 
 				return {
 					productId,
-					record: coreSelect.getEditedEntityRecord(
-						'root',
-						'product',
-						productId
-					) as unknown as ProductEntityRecord | false | undefined,
-					isResolving: coreSelect.isResolving(
-						'getEditedEntityRecord',
-						resolutionArgs
-					),
-					hasFinishedResolution: coreSelect.hasFinishedResolution(
-						'getEditedEntityRecord',
-						resolutionArgs
-					),
+					record,
+					isResolving: listedProduct
+						? false
+						: coreSelect.isResolving(
+								'getEditedEntityRecord',
+								resolutionArgs
+						  ),
+					hasFinishedResolution: listedProduct
+						? true
+						: coreSelect.hasFinishedResolution(
+								'getEditedEntityRecord',
+								resolutionArgs
+						  ),
 				};
 			} );
-			const products = productResults
+			const resolvedProducts = productResults
 				.map( ( { record } ) => record )
 				.filter(
 					( product ): product is ProductEntityRecord =>
 						product !== undefined && product !== false
 				);
-			const validSelectedProductIds = products.map(
-				( product ) => product.id
+			const editedProductIds = Array.from(
+				new Set(
+					resolvedProducts.map( ( product ) =>
+						isProductVariation( product ) && product.parent_id
+							? product.parent_id
+							: product.id
+					)
+				)
 			);
 
 			return {
-				selectedProducts: products,
-				selectedProductIds: validSelectedProductIds,
+				selectedProducts: resolvedProducts,
 				isResolving: productResults.some(
 					( result ) =>
 						result.isResolving || ! result.hasFinishedResolution
@@ -178,7 +220,7 @@ export default function ProductEdit() {
 					( result ) =>
 						result.hasFinishedResolution && result.record === false
 				),
-				hasEdits: validSelectedProductIds.some( ( productId ) =>
+				hasEdits: editedProductIds.some( ( productId ) =>
 					coreSelect.hasEditsForEntityRecord(
 						'root',
 						'product',
@@ -187,10 +229,10 @@ export default function ProductEdit() {
 				),
 			};
 		},
-		[ requestedProductIds ]
+		[ products, requestedProductIds ]
 	);
 
-	const { editEntityRecord, saveEditedEntityRecord } =
+	const { clearEntityRecordEdits, editEntityRecord, saveEditedEntityRecord } =
 		useDispatch( coreStore );
 
 	const { createSuccessNotice, createErrorNotice } =
@@ -220,38 +262,86 @@ export default function ProductEdit() {
 
 	const onChange = useCallback(
 		( changes: Partial< ProductEntityRecord > ) => {
-			selectedProductIds.forEach( ( productId ) => {
-				editEntityRecord( 'root', 'product', productId, changes );
+			const updatedParentProductsById = new Map<
+				number,
+				ProductEntityRecord
+			>();
+
+			selectedProducts.forEach( ( product ) => {
+				if ( ! isProductVariation( product ) ) {
+					editEntityRecord( 'root', 'product', product.id, changes );
+					return;
+				}
+
+				if ( ! product.parent_id ) {
+					return;
+				}
+
+				const parentProduct =
+					updatedParentProductsById.get( product.parent_id ) ??
+					( wpSelect( coreStore ).getEditedEntityRecord(
+						'root',
+						'product',
+						product.parent_id
+					) as ProductEntityRecord | false | undefined );
+
+				if ( ! parentProduct ) {
+					return;
+				}
+
+				updatedParentProductsById.set(
+					product.parent_id,
+					getProductWithUpdatedVariation( parentProduct, {
+						...product,
+						...changes,
+					} )
+				);
+			} );
+
+			updatedParentProductsById.forEach( ( parentProduct ) => {
+				editEntityRecord( 'root', 'product', parentProduct.id, {
+					_embedded: parentProduct._embedded,
+				} );
 			} );
 		},
-		[ editEntityRecord, selectedProductIds ]
+		[ editEntityRecord, selectedProducts ]
 	);
 
 	const closeDrawer = useCallback( () => {
+		const editedProductIds = new Set(
+			selectedProducts.map( ( product ) =>
+				isProductVariation( product ) && product.parent_id
+					? product.parent_id
+					: product.id
+			)
+		);
 		const nextQuery = {
 			...query,
 		} as Record< string, string >;
 
+		editedProductIds.forEach( ( productId ) => {
+			clearEntityRecordEdits( 'root', 'product', productId );
+		} );
+
 		delete nextQuery.quickEdit;
 
 		navigate( getProductListNavigationPath( path, nextQuery ) );
-	}, [ navigate, path, query ] );
+	}, [ clearEntityRecordEdits, navigate, path, query, selectedProducts ] );
 
 	const onSave = useCallback( async () => {
-		if ( selectedProductIds.length === 0 || isSaving ) {
+		if ( selectedProducts.length === 0 || isSaving ) {
 			return;
 		}
 
 		setIsSaving( true );
 
 		try {
-			const results = await Promise.allSettled(
-				selectedProductIds.map( ( productId ) =>
-					saveEditedEntityRecord( 'root', 'product', productId, {
-						throwOnError: true,
-					} )
-				)
-			);
+			const results = await saveSelectedProducts( {
+				selectedProducts,
+				editEntityRecord,
+				saveEditedEntityRecord,
+			} );
+
 			const successfulCount = results.filter(
 				( result ) => result.status === 'fulfilled'
 			).length;
@@ -279,9 +369,10 @@ export default function ProductEdit() {
 	}, [
 		createErrorNotice,
 		createSuccessNotice,
+		editEntityRecord,
 		isSaving,
 		saveEditedEntityRecord,
-		selectedProductIds,
+		selectedProducts,
 	] );
 
 	useEffect( () => {
