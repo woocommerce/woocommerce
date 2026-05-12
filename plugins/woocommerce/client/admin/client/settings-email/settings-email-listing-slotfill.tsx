@@ -144,6 +144,46 @@ export const EmailListingFill: React.FC< {
 	);
 };
 
+/**
+ * Normalize the raw snake_case slotfill payload into the camelCase `EmailType`
+ * shape consumed by the React tree. The server projects `template_status`,
+ * `template_version`, `was_backfilled`, and `current_version` directly (so the
+ * list-page `_list_viewed` event can compute `eligible_count` on mount without
+ * waiting for the REST enrichment in `useTransactionalEmails`). Other fields
+ * already match the TS shape and pass through unchanged.
+ *
+ * Exported for unit testing.
+ */
+export const normalizeEmailTypePayload = (
+	raw: Record< string, unknown >
+): EmailType => {
+	const templateStatus =
+		typeof raw.template_status === 'string' &&
+		raw.template_status.length > 0
+			? ( raw.template_status as EmailType[ 'templateStatus' ] )
+			: null;
+	const templateVersion =
+		typeof raw.template_version === 'string' &&
+		raw.template_version.length > 0
+			? ( raw.template_version as string )
+			: null;
+	const currentVersion =
+		typeof raw.current_version === 'string' &&
+		raw.current_version.length > 0
+			? ( raw.current_version as string )
+			: null;
+	const wasBackfilled =
+		raw.was_backfilled === true || raw.was_backfilled === 1;
+
+	return {
+		...( raw as unknown as EmailType ),
+		templateStatus,
+		templateVersion,
+		currentVersion,
+		wasBackfilled,
+	};
+};
+
 export const registerSettingsEmailListingFill = () => {
 	const slotElementId = 'wc_settings_email_listing_slotfill';
 	const slotElement = document.getElementById( slotElementId );
@@ -156,7 +196,12 @@ export const registerSettingsEmailListingFill = () => {
 	);
 	let emailTypes: EmailType[] = [];
 	try {
-		emailTypes = JSON.parse( emailTypesData || '' );
+		const parsed = JSON.parse( emailTypesData || '' );
+		emailTypes = Array.isArray( parsed )
+			? parsed.map( ( item: Record< string, unknown > ) =>
+					normalizeEmailTypePayload( item )
+			  )
+			: [];
 	} catch ( e ) {}
 
 	registerPlugin( 'woocommerce-admin-settings-email-listing', {
