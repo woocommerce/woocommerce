@@ -117,12 +117,16 @@ class SubmissionHandler {
 	 */
 	private function process_rows( WC_Order $order, array $rows_in ): array {
 		$results      = array();
-		$item_index   = $this->index_order_items( $order );
+		$item_index   = $this->index_eligible_order_items( $order );
 		$author_name  = trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() );
 		$author_email = $order->get_billing_email();
 		$author_ip    = $order->get_customer_ip_address();
 		$author_agent = $order->get_customer_user_agent();
 		$require_mod  = (bool) get_option( 'comment_moderation' );
+
+		// Preload the eligibility cache so the per-row decide() calls below
+		// don't issue one already-reviewed query each.
+		ItemEligibility::preload_for_items( $item_index, $order );
 
 		foreach ( $rows_in as $row_index => $row ) {
 			$row_index = (int) $row_index;
@@ -150,6 +154,8 @@ class SubmissionHandler {
 				continue;
 			}
 
+			// invalid_row also covers fully-refunded line items: index_eligible_order_items()
+			// runs them through woocommerce_review_order_eligible_items, which strips them.
 			if ( ! $product_id || ! $order_item_id || ! isset( $item_index[ $order_item_id ] ) ) {
 				$result['error']       = 'invalid_row';
 				$results[ $row_index ] = $result;
@@ -172,12 +178,51 @@ class SubmissionHandler {
 			// product page regardless of which variation was bought.
 			$review_post_id = $line_product_id;
 
+			// Reject submissions for products whose review form was never
+			// rendered (comments disabled on the product).
+			$decision = ItemEligibility::decide( $item, $order );
+			if ( ItemEligibility::STATUS_SKIP === $decision['status'] ) {
+				$result['error']       = 'reviews_not_open';
+				$results[ $row_index ] = $result;
+				continue;
+			}
+
 			// Only attribute the comment to a WP user when the current request is
 			// authenticated as that user. Guests reaching the page via the order
 			// key are not authenticated, so the comment stays unattributed (0).
 			$customer_id     = (int) $order->get_customer_id();
 			$current_user_id = get_current_user_id();
 			$comment_user_id = ( $current_user_id > 0 && $current_user_id === $customer_id ) ? $current_user_id : 0;
+
+			// If the customer already has a review tied to this order for this
+			// product, update it in place instead of stacking duplicates. The
+			// existing comment id comes from the server-side lookup, not the
+			// client, so a tampered POST can't target someone else's review.
+			$existing = $decision['comment'] instanceof \WP_Comment ? $decision['comment'] : null;
+
+			if ( $existing instanceof \WP_Comment ) {
+				$update_ok = wp_update_comment(
+					wp_slash(
+						array(
+							'comment_ID'       => (int) $existing->comment_ID,
+							'comment_content'  => $text,
+							'comment_approved' => $require_mod ? 0 : 1,
+						)
+					)
+				);
+				if ( false === $update_ok || is_wp_error( $update_ok ) ) {
+					$result['error']       = 'update_failed';
+					$results[ $row_index ] = $result;
+					continue;
+				}
+
+				update_comment_meta( (int) $existing->comment_ID, 'rating', $rating );
+
+				$result['comment_id']  = (int) $existing->comment_ID;
+				$result['status']      = $require_mod ? 'pending_moderation' : 'ok';
+				$results[ $row_index ] = $result;
+				continue;
+			}
 
 			$comment_data = array(
 				'comment_post_ID'      => $review_post_id,
@@ -200,6 +245,7 @@ class SubmissionHandler {
 
 			add_comment_meta( $comment_id, 'rating', $rating, true );
 			add_comment_meta( $comment_id, 'verified', 1, true );
+			add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
 
 			$result['comment_id']  = (int) $comment_id;
 			$result['status']      = $require_mod ? 'pending_moderation' : 'ok';
@@ -286,14 +332,31 @@ class SubmissionHandler {
 	}
 
 	/**
-	 * Map order_item_id => `WC_Order_Item_Product` for fast row lookup.
+	 * Map order_item_id => `WC_Order_Item_Product` for fast row lookup,
+	 * filtered through `woocommerce_review_order_eligible_items` so the
+	 * handler agrees with the page on which items are reviewable. The
+	 * default callback excludes fully-refunded items.
 	 *
 	 * @param WC_Order $order Order being reviewed.
 	 * @return array<int, \WC_Order_Item_Product>
 	 */
-	private function index_order_items( WC_Order $order ): array {
+	private function index_eligible_order_items( WC_Order $order ): array {
+		/**
+		 * Filter the eligible items considered by the Review Order
+		 * submission handler.
+		 *
+		 * Same hook the page uses; documented in
+		 * `templates/order/customer-review-order.php`.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param \WC_Order_Item[] $items Order line items.
+		 * @param WC_Order         $order The order being reviewed.
+		 */
+		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+
 		$index = array();
-		foreach ( $order->get_items() as $item ) {
+		foreach ( $items as $item ) {
 			if ( $item instanceof \WC_Order_Item_Product ) {
 				$index[ $item->get_id() ] = $item;
 			}
