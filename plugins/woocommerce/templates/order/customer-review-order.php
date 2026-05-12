@@ -107,7 +107,6 @@ foreach ( $items as $item ) {
 // Empty-state: no actionable rows remain. The Endpoint already stamped the
 // completion meta before we got here, so this branch is purely the view.
 if ( ! $has_unreviewed_row ) {
-	$customer_email = $order->get_billing_email();
 	$reviewed_count = 0;
 	$rating_total   = 0;
 	$rating_n       = 0;
@@ -161,6 +160,10 @@ if ( ! $has_unreviewed_row ) {
 	return;
 }//end if
 
+// Single batched lookup of every existing review by this customer for the
+// items below. Without this each decide() call would issue its own query.
+\Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::preload_for_items( $items, $order );
+
 // The Endpoint has already validated the URL key against the order key, so the
 // canonical value on the order is the right thing to echo into the form post.
 $order_key = (string) $order->get_order_key();
@@ -182,53 +185,51 @@ $order_key = (string) $order->get_order_key();
 		<?php esc_html_e( '* Mandatory fields', 'woocommerce' ); ?>
 	</p>
 
-	<?php if ( $has_unreviewed_row ) : ?>
-		<form
-			class="woocommerce-review-order__form"
-			method="post"
-			action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
-			data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
-			novalidate
-		>
-			<input type="hidden" name="action" value="<?php echo esc_attr( 'woocommerce_submit_order_reviews' ); ?>" />
-			<input type="hidden" name="order_id" value="<?php echo esc_attr( (string) $order->get_id() ); ?>" />
-			<input type="hidden" name="key" value="<?php echo esc_attr( $order_key ); ?>" />
-			<?php wp_nonce_field( 'woocommerce_submit_order_reviews', '_wcnonce' ); ?>
+	<form
+		class="woocommerce-review-order__form"
+		method="post"
+		action="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+		data-ajax-url="<?php echo esc_url( admin_url( 'admin-ajax.php' ) ); ?>"
+		novalidate
+	>
+		<input type="hidden" name="action" value="<?php echo esc_attr( 'woocommerce_submit_order_reviews' ); ?>" />
+		<input type="hidden" name="order_id" value="<?php echo esc_attr( (string) $order->get_id() ); ?>" />
+		<input type="hidden" name="key" value="<?php echo esc_attr( $order_key ); ?>" />
+		<?php wp_nonce_field( 'woocommerce_submit_order_reviews', '_wcnonce' ); ?>
 
-			<ul class="woocommerce-review-order__items">
-				<?php
-				$row_index = 0;
-				foreach ( $decisions as $entry ) {
-					$item     = $entry['item'];
-					$product  = $entry['product'];
-					$decision = $entry['decision'];
+		<ul class="woocommerce-review-order__items">
+			<?php
+			$row_index = 0;
+			foreach ( $decisions as $entry ) {
+				$item     = $entry['item'];
+				$product  = $entry['product'];
+				$decision = $entry['decision'];
 
-					$prefill = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prefill_for_item( $item, $order );
+				$prefill = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::prefill_for_item( $item, $order );
 
-					wc_get_template(
-						'order/customer-review-order-row.php',
-						array(
-							'item'            => $item,
-							'product'         => $product,
-							'order'           => $order,
-							'row_index'       => $row_index,
-							'existing_rating' => $prefill['rating'],
-							'existing_text'   => $prefill['text'],
-						)
-					);
-					++$row_index;
-				}
-				?>
-			</ul>
+				wc_get_template(
+					'order/customer-review-order-row.php',
+					array(
+						'item'            => $item,
+						'product'         => $product,
+						'order'           => $order,
+						'row_index'       => $row_index,
+						'existing_rating' => $prefill['rating'],
+						'existing_text'   => $prefill['text'],
+					)
+				);
+				++$row_index;
+			}
+			?>
+		</ul>
 
-			<div class="woocommerce-review-order__actions">
-				<button
-					type="submit"
-					class="woocommerce-review-order__submit button"
-				>
-					<?php esc_html_e( 'Submit reviews', 'woocommerce' ); ?>
-				</button>
-			</div>
-		</form>
-	<?php endif; ?>
+		<div class="woocommerce-review-order__actions">
+			<button
+				type="submit"
+				class="woocommerce-review-order__submit button"
+			>
+				<?php esc_html_e( 'Submit reviews', 'woocommerce' ); ?>
+			</button>
+		</div>
+	</form>
 </div>

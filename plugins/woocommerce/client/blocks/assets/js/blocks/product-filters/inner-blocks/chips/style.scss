@@ -10,7 +10,7 @@
 
 .wc-block-product-filter-chips__item {
 	border: 1px solid color-mix(in srgb, currentColor 40%, transparent);
-	padding: 0.25em 0.75em;
+	padding: 0.4em 0.75em;
 	appearance: none;
 	background: transparent;
 	border-radius: 2px;
@@ -64,6 +64,20 @@
 	display: inline-flex;
 	align-items: center;
 	gap: $gap-smallest;
+	vertical-align: bottom;
+}
+
+.wc-block-product-filter-chips__swatch {
+	display: inline-block;
+	width: 1.25em;
+	height: 1.25em;
+	border-radius: 50%;
+	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+	flex-shrink: 0;
+
+	&--no-color {
+		display: none;
+	}
 }
 
 .wc-block-product-filter-chips__text {
@@ -88,5 +102,65 @@
 	&:hover,
 	&:focus {
 		text-decoration: none;
+	}
+}
+
+// Swatch style — color circles only, no text labels.
+.is-style-swatch {
+	.wc-block-product-filter-chips__items {
+		gap: $gap-small;
+	}
+
+	.wc-block-product-filter-chips__item {
+		background: transparent;
+		padding: 2px;
+		border-radius: 50%;
+		border: 1px solid transparent;
+		outline: none;
+
+		&:hover {
+			border-color: color-mix(in srgb, currentColor 40%, transparent);
+		}
+
+		&:focus-visible {
+			border-color: color-mix(in srgb, currentColor 60%, transparent);
+		}
+
+		&[aria-checked="true"] {
+			border-color: var(--wc-product-filters-text-color, CanvasText);
+		}
+	}
+
+	.wc-block-product-filter-chips__label {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+
+	.wc-block-product-filter-chips__swatch {
+		&--no-color {
+			display: inline-block;
+			background: linear-gradient(
+				to top left,
+				transparent calc(50% - 0.5px),
+				color-mix(in srgb, currentColor 40%, transparent)
+					calc(50% - 0.5px),
+				color-mix(in srgb, currentColor 40%, transparent)
+					calc(50% + 0.5px),
+				transparent calc(50% + 0.5px)
+			);
+		}
+	}
+
+	.wc-block-product-filter-chips__text,
+	.wc-block-product-filter-chips__count {
+		display: block;
+		position: absolute;
+		width: 1px;
+		height: 1px;
+		overflow: hidden;
+		clip: rect(0 0 0 0);
+		clip-path: inset(50%);
+		white-space: nowrap;
 	}
 }
