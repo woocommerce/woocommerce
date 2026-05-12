@@ -235,6 +235,32 @@ pnpm run test:js                            # runs JS component test using Jest
 
 ### Dependencies
 
+#### Text domain
+
+Translation function calls (`__()`, `_x()`, `_n()`, `_nx()`) in this package use the `__i18n_text_domain__` identifier as their text domain argument rather than a hardcoded string literal, so each consumer plugin can extract and translate strings under its own text domain.
+
+If the identifier is not substituted at bundle time, the package falls back to `'woocommerce'` at runtime so the editor still loads — strings then resolve under the `woocommerce` text domain (matching the package's pre-1.11 behaviour, where the domain was hardcoded). To extract and translate strings under a different text domain, consumers should substitute the identifier at bundle time, typically with [`webpack.DefinePlugin`](https://webpack.js.org/plugins/define-plugin/):
+
+```js
+// consumer webpack.config.js
+const webpack = require( 'webpack' );
+
+module.exports = {
+    // …
+    plugins: [
+        new webpack.DefinePlugin( {
+            __i18n_text_domain__: JSON.stringify( 'your-text-domain' ),
+        } ),
+    ],
+};
+```
+
+For Jest (or any non-webpack test runner), the runtime fallback applies, so unit tests will see strings under the `woocommerce` domain by default. Set the identifier on the global in the consumer's test setup file to override:
+
+```js
+globalThis.__i18n_text_domain__ = 'your-text-domain';
+```
+
 #### Global Styles Engine
 
 A of 1.4.3 the email editor package depends on `@wordpress/global-styles-engine`, which is **not enqueued by WordPress core**. Unlike most `@wordpress/*` packages, this package is not available globally in WordPress environments and must be bundled.
@@ -318,6 +344,7 @@ We may add, update and delete any of them.
 | `woocommerce_email_editor_wrap_editor_component`                   | `JSX.Element` Editor                                  | `JSX.Element` Editor                       | The main editor component. Custom component can wrap the editor and provide additional functionality                           |
 | `woocommerce_email_editor_send_button_label`                       | `string` 'Send'                                       | `string` 'Send' (default)                  | Email editor send button label. The `Send` text can be updated using this filter                                               |
 | `woocommerce_email_editor_send_action_callback`                    | `function` sendAction                                 | `function` sendAction                      | Action to perform when the Send button is clicked                                                                              |
+| `woocommerce_email_editor_send_button_disabled`                    | `boolean` isDisabled, `object` flags                  | `boolean` isDisabled                       | Override the send button disabled state. The flags object contains `hasEmptyContent`, `isEmailSent`, and `isDirty` booleans    |
 | `woocommerce_email_editor_content_validation_rules`                | `array` rules                                         | `EmailContentValidationRule[]` rules       | Email editor content validation rules. The validation is done on `send button` click and revalidated on `save draft`           |
 | `woocommerce_email_editor_check_sending_method_configuration_link` | `string` link                                         | `string` link                              | Edit or remove the sending configuration link message                                                                          |
 | `woocommerce_email_editor_setting_sidebar_extension_component`     | `JSX.Element` RichTextWithButton                      | `JSX.Element` Sidebar extension component  | Add components to the Email settings sidebar                                                                                   |

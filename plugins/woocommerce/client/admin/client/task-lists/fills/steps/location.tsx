@@ -7,7 +7,6 @@ import { countriesStore } from '@woocommerce/data';
 import { Fragment, useState } from '@wordpress/element';
 import { Form, FormContextType, Spinner } from '@woocommerce/components';
 import { useSelect } from '@wordpress/data';
-import type { Status, Options } from 'wordpress__notices';
 
 /**
  * Internal dependencies
@@ -17,13 +16,14 @@ import {
 	getStoreAddressValidator,
 	FormValues,
 } from '~/dashboard/components/settings/general/store-address';
+import type { NoticeOptions, NoticeStatus } from '~/lib/notices/types';
 
 type StoreLocationProps = {
 	onComplete: ( values: FormValues ) => void;
 	createNotice: (
-		status: Status | undefined,
+		status: NoticeStatus | undefined,
 		content: string,
-		options?: Partial< Options >
+		options?: Partial< NoticeOptions >
 	) => void;
 	isSettingsRequesting: boolean;
 	buttonText?: string;

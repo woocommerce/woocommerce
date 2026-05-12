@@ -232,12 +232,16 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 						<ProductImage
 							image={ firstImage }
 							fallbackAlt={ name }
+							width={ 80 }
+							height={ 80 }
 						/>
 					) : (
 						<a href={ permalink } tabIndex={ -1 }>
 							<ProductImage
 								image={ firstImage }
 								fallbackAlt={ name }
+								width={ 80 }
+								height={ 80 }
 							/>
 						</a>
 					) }

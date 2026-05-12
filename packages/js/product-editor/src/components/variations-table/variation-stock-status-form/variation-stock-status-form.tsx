@@ -73,6 +73,7 @@ export function VariationStockStatusForm( {
 		if (
 			value.manage_stock &&
 			value.stock_quantity &&
+			// @ts-expect-error Form state tracks stock_quantity as string from the input control, but ProductVariation types it as number (see product-variations/types.ts).
 			Number.parseInt( value.stock_quantity, 10 ) < 0
 		) {
 			error = __(
@@ -81,6 +82,7 @@ export function VariationStockStatusForm( {
 			);
 		}
 
+		// @ts-expect-error Form state tracks stock_quantity as string from the input control, but ProductVariation types it as number (see product-variations/types.ts).
 		setErrors( { stock_quantity: error } );
 
 		return ! error;
@@ -90,6 +92,7 @@ export function VariationStockStatusForm( {
 		event.preventDefault();
 
 		if ( validateStockQuantity() ) {
+			// @ts-expect-error Form state shape doesn't fully match Pick<ProductVariation, ...> until ProductVariation is reconciled with the form's string/optional field types (see product-variations/types.ts).
 			onSubmit?.( value );
 		}
 	}
@@ -129,6 +132,7 @@ export function VariationStockStatusForm( {
 	function handleStockQuantityInputControlChange(
 		stock_quantity: string | undefined
 	) {
+		// @ts-expect-error Form state tracks stock_quantity as string from the input control, but ProductVariation types it as number (see product-variations/types.ts).
 		setValue( ( current ) => ( { ...current, stock_quantity } ) );
 	}
 
@@ -156,6 +160,7 @@ export function VariationStockStatusForm( {
 						min={ 0 }
 						label={ __( 'Available stock', 'woocommerce' ) }
 						help={ errors.stock_quantity }
+						// @ts-expect-error Form state tracks stock_quantity as string from the input control, but ProductVariation types it as number (see product-variations/types.ts).
 						value={ value.stock_quantity }
 						onChange={ handleStockQuantityInputControlChange }
 						onBlur={ validateStockQuantity }

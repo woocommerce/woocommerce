@@ -807,12 +807,24 @@ function wc_query_string_form_fields( $values = null, $exclude = array(), $curre
 			// Parse the string.
 			parse_str( $query_string, $parsed_query_string );
 
-			// Convert the full-stops, pluses and spaces back and add to values array.
-			foreach ( $parsed_query_string as $key => $value ) {
-				$new_key            = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key );
-				$new_value          = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $value );
-				$values[ $new_key ] = $new_value;
-			}
+			// Convert the full-stops, pluses and spaces back in all scalar values (any depth).
+			array_walk_recursive(
+				$parsed_query_string,
+				function ( &$value ) use ( $replace_chars ) {
+					$value = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $value );
+				}
+			);
+
+			// Restore placeholders in keys at every depth, then add to values array.
+			$restore_keys = function ( $items ) use ( &$restore_keys, $replace_chars ) {
+				$out = array();
+				foreach ( $items as $key => $value ) {
+					$key         = str_replace( array_values( $replace_chars ), array_keys( $replace_chars ), $key );
+					$out[ $key ] = is_array( $value ) ? $restore_keys( $value ) : $value;
+				}
+				return $out;
+			};
+			$values       = $restore_keys( $parsed_query_string );
 		}
 	}
 	$html = '';
@@ -2029,7 +2041,9 @@ if ( ! function_exists( 'woocommerce_grouped_add_to_cart' ) ) {
 			return;
 		}
 
-		$products = array_filter( array_map( 'wc_get_product', $product->get_children() ), 'wc_products_array_filter_visible_grouped' );
+		$child_ids = $product->get_children();
+		_prime_post_caches( $child_ids );
+		$products = array_filter( array_map( 'wc_get_product', $child_ids ), 'wc_products_array_filter_visible_grouped' );
 
 		if ( $products ) {
 			wc_get_template(
@@ -2366,7 +2380,7 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 		$related_products    = array();
 		$related_product_ids = wc_get_related_products( $product->get_id(), $args['posts_per_page'], $product->get_upsell_ids() );
 		if ( ! empty( $related_product_ids ) ) {
-			// Optimization: reduce the number of SQLs needed to populate product objects.
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $related_product_ids );
 
 			// Get visible related products then sort them at random, then handle orderby.
@@ -2374,7 +2388,7 @@ if ( ! function_exists( 'woocommerce_related_products' ) ) {
 			$related_products = wc_products_array_orderby( $related_products, $args['orderby'], $args['order'] );
 			/** @var WC_Product[] $related_products */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 
-			// Optimization: reduce the number of SQLs needed to fetch images when rendering.
+			// Prime caches to reduce future queries.
 			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $related_products ) ) );
 		}
 		$args['related_products'] = $related_products;
@@ -2431,7 +2445,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 		$upsells    = array();
 		$upsell_ids = $product->get_upsell_ids();
 		if ( ! empty( $upsell_ids ) ) {
-			// Optimization: reduce the number of SQLs needed to populate product objects.
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $upsell_ids );
 
 			// Get visible upsells then sort them at random, then limit result set.
@@ -2439,7 +2453,7 @@ if ( ! function_exists( 'woocommerce_upsell_display' ) ) {
 			$upsells = $limit > 0 ? array_slice( $upsells, 0, $limit ) : $upsells;
 			/** @var WC_Product[] $upsells */ // phpcs:ignore Generic.Commenting.DocComment.MissingShort
 
-			// Optimization: reduce the number of SQLs needed to fetch images when rendering.
+			// Prime caches to reduce future queries.
 			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $upsells ) ) );
 		}
 
@@ -2513,9 +2527,14 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		}
 
 		// Get visible cross sells then sort them at random.
-		$cross_sells = isset( WC()->cart )
-			? array_filter( array_map( 'wc_get_product', WC()->cart->get_cross_sells() ), 'wc_products_array_filter_visible' )
-			: array();
+		$cross_sells    = array();
+		$cross_sell_ids = isset( WC()->cart ) ? WC()->cart->get_cross_sells() : array();
+		if ( ! empty( $cross_sell_ids ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( $cross_sell_ids );
+
+			$cross_sells = array_filter( array_map( 'wc_get_product', $cross_sell_ids ), 'wc_products_array_filter_visible' );
+		}
 
 		wc_set_loop_prop( 'name', 'cross-sells' );
 		wc_set_loop_prop( 'columns', apply_filters( 'woocommerce_cross_sells_columns', $columns ) );
@@ -2532,6 +2551,11 @@ if ( ! function_exists( 'woocommerce_cross_sell_display' ) ) {
 		 */
 		$limit       = intval( apply_filters( 'woocommerce_cross_sells_total', $limit ) );
 		$cross_sells = $limit > 0 ? array_slice( $cross_sells, 0, $limit ) : $cross_sells;
+
+		if ( ! empty( $cross_sells ) ) {
+			// Prime caches to reduce future queries.
+			_prime_post_caches( array_filter( array_map( fn( $product ) => (int) $product->get_image_id(), $cross_sells ) ) );
+		}
 
 		wc_get_template(
 			'cart/cross-sells.php',
@@ -2989,6 +3013,12 @@ if ( ! function_exists( 'woocommerce_subcategory_thumbnail' ) ) {
 				$image        = $image_data[0];
 				$image_srcset = function_exists( 'wp_get_attachment_image_srcset' ) ? wp_get_attachment_image_srcset( $thumbnail_id, $small_thumbnail_size ) : false;
 				$image_sizes  = function_exists( 'wp_get_attachment_image_sizes' ) ? wp_get_attachment_image_sizes( $thumbnail_id, $small_thumbnail_size ) : false;
+
+				$uncropped = 0 === ( $dimensions['crop'] ?? 0 ) && '' === ( $dimensions['height'] ?? '' );
+				if ( $uncropped && isset( $image_data[1], $image_data[2] ) ) {
+					$dimensions['width']  = $image_data[1];
+					$dimensions['height'] = $image_data[2];
+				}
 			} else {
 				$image        = wc_placeholder_img_src();
 				$image_srcset = false;

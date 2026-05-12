@@ -113,7 +113,20 @@ changes.json
 
 # Claude related files
 **/.claude/**/*.local.*
+.claude/docs/plans/
+.claude/docs/analysis/
+.claude/docs/research/
 CLAUDE.local.md
+
+# AI agent scratchpad and temp (scaffold-project)
+.agents/scratchpad/**
+!.agents/scratchpad/**/
+!.agents/scratchpad/TEMPLATE.md
+!.agents/scratchpad/**/.gitkeep
+# Re-include .agents/tmp/ dir (the unanchored "tmp/" rule above ignores it)
+!.agents/tmp/
+.agents/tmp/*
+!.agents/tmp/.gitkeep
 
 # Cursor related files
 .cursorignore

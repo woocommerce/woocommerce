@@ -308,9 +308,6 @@ class BlockTemplateUtils {
 			'product-search-results.html',
 			'single-product.html',
 			'taxonomy-product_attribute.html',
-			'taxonomy-product_brand.html',
-			'taxonomy-product_cat.html',
-			'taxonomy-product_tag.html',
 		);
 
 		if ( Features::is_enabled( 'launch-your-store' ) ) {
@@ -748,6 +745,7 @@ class BlockTemplateUtils {
 		if ( null === ( $request_level_cache[ $template_type ][ $theme ] ?? null ) ) {
 			$request_level_cache[ $template_type ][ $theme ] = array();
 			if ( ! empty( $ids[ $theme ] ) ) {
+				// Prime caches to reduce future queries.
 				_prime_post_caches( $ids[ $theme ], false, false );
 				$request_level_cache[ $template_type ][ $theme ] = array_filter( array_map( 'get_post', $ids[ $theme ] ) );
 			}

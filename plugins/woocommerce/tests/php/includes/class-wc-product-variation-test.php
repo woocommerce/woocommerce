@@ -109,4 +109,16 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 		$this->variation->set_cogs_value( $defined_value );
 		$this->assertEquals( $expected_value, $this->variation->get_cogs_total_value() );
 	}
+
+	/**
+	 * Ensure get_permalink() handles non-array variation data without fataling.
+	 *
+	 * @testdox get_permalink() returns a URL without fataling when $item_object['variation'] is a string rather than the expected variation-attributes array.
+	 */
+	public function test_get_permalink_handles_non_array_variation_value() {
+		$url = $this->variation->get_permalink( array( 'variation' => 'some-string-value' ) );
+
+		$this->assertIsString( $url );
+		$this->assertNotEmpty( $url );
+	}
 }

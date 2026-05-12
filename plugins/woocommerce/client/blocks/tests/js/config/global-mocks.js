@@ -5,6 +5,12 @@ global.crypto = webcrypto;
 global.TextEncoder = require( 'util' ).TextEncoder;
 global.TextDecoder = require( 'util' ).TextDecoder;
 
+// The @woocommerce/email-editor package reads `__i18n_text_domain__` as its
+// text domain. It is normally replaced by `webpack.DefinePlugin` at bundle
+// time, but Jest does not run through webpack, so provide a default here so
+// test files that import from the package do not hit a ReferenceError.
+global.__i18n_text_domain__ = 'woocommerce';
+
 /**
  * Set up `wp.*` aliases.  Doing this because any tests importing wp stuff will
  * likely run into this.
@@ -361,10 +367,50 @@ if ( ! window.DOMRect ) {
 }
 
 /**
+ * `@wordpress/block-editor`@14.14.6 (wp-6.8) constructs `DOMRectReadOnly`
+ * instances in `getElementBounds`, which `jest-fixed-jsdom` doesn't polyfill.
+ * Stub it so tests that render `<BlockToolbarPopover>` and friends don't
+ * crash.
+ */
+if ( ! window.DOMRectReadOnly ) {
+	window.DOMRectReadOnly = class DOMRectReadOnly {};
+}
+
+/**
  * client-zip is meant to be used in a browser and is therefore released as an
  * ES6 module only, in order to use it in node environment, we need to mock it.
  * See: https://github.com/Touffy/client-zip/issues/28
  */
 jest.mock( 'client-zip', () => ( {
 	downloadZip: jest.fn(),
+} ) );
+
+/**
+ * Mock isEditor to return false by default in tests, since the core/editor
+ * store may be registered in the test environment without an actual editor
+ * context. Individual tests can override this mock if needed.
+ */
+jest.mock( '../../../assets/js/data/utils/is-editor', () => ( {
+	isEditor: jest.fn().mockReturnValue( false ),
+} ) );
+
+/**
+ * `@wordpress/editor` (wp-6.8) registers a `withPatternOverrideControls`
+ * filter as a side-effect of being imported. The filter destructures
+ * `PARTIAL_SYNCING_SUPPORTED_BLOCKS` from `unlock( patternsPrivateApis )`,
+ * which returns `undefined` in the test environment because pnpm's package
+ * isolation gives `@wordpress/editor` and `@wordpress/patterns` separate
+ * `@wordpress/private-apis` lock/unlock scopes (the `lock` target identity
+ * doesn't match). The filter then crashes with `"Cannot read properties of
+ * undefined (reading '<block-name>')"` inside any `BlockEdit` render.
+ *
+ * Mock the hook module to a no-op — block tests don't exercise pattern
+ * overrides. Both the `build-module` and `build` paths are mocked because
+ * jest config remaps `build-module` → `build` via `moduleNameMapper`.
+ */
+jest.mock( '@wordpress/editor/build-module/hooks/pattern-overrides', () => ( {
+	__esModule: true,
+} ) );
+jest.mock( '@wordpress/editor/build/hooks/pattern-overrides', () => ( {
+	__esModule: true,
 } ) );

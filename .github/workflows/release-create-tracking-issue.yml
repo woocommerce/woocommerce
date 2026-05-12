@@ -193,6 +193,7 @@ jobs:
             console.log( `Looking for parent issue: "${ parentTitle }"` );
 
             const parentIssues = await linearClient.issues( {
+              includeArchived: true,
               filter: {
                 team: { id: { eq: '${{ secrets.LINEAR_TEAM_ID }}' } },
                 title: { eq: parentTitle }

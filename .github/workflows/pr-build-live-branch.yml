@@ -6,23 +6,25 @@ on:
             - reopened
             - synchronize
             - ready_for_review
-        paths-ignore:
-            - 'docs/**'
-            - 'packages/php/**'
-            - '!packages/php/blueprint/**'
-            - 'tools/**'
-            - '**/changelog/**'
-            - '**/changelog.txt'
-            - '**/readme.txt'
-            - '.gitignore'
-            - '.coderabbit.yml'
-            - 'CODEOWNERS'
-            - '**/tests/**'
-            - '**/*.md'
-            - '.husky/**'
-            - '.cursor/**'
-            - '.github/**'
-            - '!.github/workflows/pr-build-live-branch.yml'
+        paths:
+            - '**'
+            - '!docs/**'
+            - '!packages/php/**'
+            - 'packages/php/blueprint/**'
+            - '!tools/**'
+            - '!**/changelog/**'
+            - '!**/changelog.txt'
+            - '!**/readme.txt'
+            - '!.gitignore'
+            - '!.coderabbit.yml'
+            - '!CODEOWNERS'
+            - '!**/tests/**'
+            - '!**/*.md'
+            - '!.husky/**'
+            - '!.cursor/**'
+            - '!.github/**'
+            - '.github/workflows/pr-build-live-branch.yml'
+            - '.github/workflows/scripts/generate-playground-blueprint.js'
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.event.pull_request.number }}

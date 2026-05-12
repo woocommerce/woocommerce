@@ -398,9 +398,9 @@ function wc_product_canonical_redirect(): void {
 
 	// In the event we are dealing with ugly permalinks, this will be empty.
 	$specified_category_slug = get_query_var( 'product_cat' );
-	$specified_category_slug = urldecode( $specified_category_slug );
+	$specified_category_slug = is_array( $specified_category_slug ) ? '' : urldecode( (string) $specified_category_slug );
 
-	if ( ! is_string( $specified_category_slug ) || strlen( $specified_category_slug ) < 1 ) {
+	if ( '' === $specified_category_slug ) {
 		return;
 	}
 
@@ -644,6 +644,13 @@ function wc_apply_sale_state_for_product( WC_Product $product, string $mode ): v
 		update_post_meta( $product_id, '_price', $regular_price );
 	}
 
+	// Refresh the lookup table since only the `price` prop changed, which is
+	// not in the tracked props list in handle_updated_props().
+	$data_store = WC_Data_Store::load( 'product' );
+	if ( $data_store->has_callable( 'refresh_product_lookup_table' ) ) {
+		$data_store->refresh_product_lookup_table( $product_id ); // @phpstan-ignore method.notFound (Guarded by has_callable() and called via __call() on the underlying product data store instance.)
+	}
+
 	wc_delete_product_transients( $product_id );
 
 	// Sync parent variable product price range if this is a variation.
@@ -764,8 +771,40 @@ function wc_maybe_schedule_product_sale_events( $product_id, $product = null ): 
 		wc_schedule_product_sale_events( $product );
 	}
 }
-add_action( 'woocommerce_update_product', 'wc_maybe_schedule_product_sale_events', 10, 2 );
-add_action( 'woocommerce_new_product', 'wc_maybe_schedule_product_sale_events', 10, 2 );
+
+/**
+ * Schedule sale events when sale date meta is added, updated, or deleted.
+ *
+ * Hooks into post meta operations so per-product sale events are kept in sync regardless
+ * of how the meta is written: WooCommerce CRUD, direct update_post_meta() calls from
+ * importers, ERP sync tools, or custom code.
+ *
+ * @since 10.8.0
+ * @param int|int[] $meta_id    Meta ID (or array of IDs for delete).
+ * @param int       $object_id  Post ID.
+ * @param string    $meta_key   Meta key.
+ * @return void
+ */
+function wc_maybe_schedule_sale_events_on_meta_change( $meta_id, $object_id, $meta_key ): void { // phpcs:ignore Generic.CodeAnalysis.UnusedFunctionParameter.FoundAfterLastUsed
+	if ( '_sale_price_dates_from' !== $meta_key && '_sale_price_dates_to' !== $meta_key ) {
+		return;
+	}
+
+	// Prevent duplicate scheduling when a sale handler's save() rewrites dates already in flight.
+	if ( doing_action( 'wc_product_start_scheduled_sale' ) || doing_action( 'wc_product_end_scheduled_sale' ) ) {
+		return;
+	}
+
+	$post_type = get_post_type( $object_id );
+	if ( 'product' !== $post_type && 'product_variation' !== $post_type ) {
+		return;
+	}
+
+	wc_maybe_schedule_product_sale_events( $object_id );
+}
+add_action( 'added_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change', 10, 3 );
+add_action( 'updated_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change', 10, 3 );
+add_action( 'deleted_post_meta', 'wc_maybe_schedule_sale_events_on_meta_change', 10, 3 );
 
 /**
  * Function which handles the start and end of scheduled sales via cron.
@@ -796,6 +835,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to start.
 	$product_ids = $data_store->get_starting_sales();
 	if ( $product_ids ) {
+		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_starting_sales', $product_ids );
 
@@ -804,8 +844,9 @@ function wc_scheduled_sales() {
 
 			if ( $product ) {
 				wc_apply_sale_state_for_product( $product, 'start' );
-				// Note: wc_apply_sale_state_for_product() calls save(), which triggers
-				// woocommerce_update_product hook, which schedules the end AS event.
+				// Note: wc_apply_sale_state_for_product() calls save(), which writes sale
+				// date meta and triggers wc_maybe_schedule_sale_events_on_meta_change(),
+				// which schedules the end AS event.
 			}
 
 			$product_util->delete_product_specific_transients( $product ? $product : $product_id );
@@ -817,6 +858,7 @@ function wc_scheduled_sales() {
 	// Sales which are due to end.
 	$product_ids = $data_store->get_ending_sales();
 	if ( $product_ids ) {
+		_prime_post_caches( $product_ids );
 		$must_refresh_transient = true;
 		do_action( 'wc_before_products_ending_sales', $product_ids );
 

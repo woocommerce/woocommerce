@@ -154,7 +154,7 @@ class WC_Product_Variable extends WC_Product {
 	 * Note: Variable prices do not show suffixes like other product types. This
 	 * is due to some things like tax classes being set at variation level which
 	 * could differ from the parent price. The only way to show accurate prices
-	 * would be to load the variation and get it's price, which adds extra
+	 * would be to load the variation and get its price, which adds extra
 	 * overhead and still has edge cases where the values would be inaccurate.
 	 *
 	 * Additionally, ranges of prices no longer show 'striked out' sale prices
@@ -329,7 +329,8 @@ class WC_Product_Variable extends WC_Product {
 		$hide_out_of_stock_items = ( 'yes' === get_option( 'woocommerce_hide_out_of_stock_items' ) );
 		$available_variations    = array();
 
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $variation_ids ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 		}
 
@@ -380,7 +381,8 @@ class WC_Product_Variable extends WC_Product {
 	public function has_purchasable_variations() {
 		$variation_ids = $this->get_children();
 
-		if ( is_callable( '_prime_post_caches' ) ) {
+		if ( ! empty( $variation_ids ) ) {
+			// Prime caches to reduce future queries.
 			_prime_post_caches( $variation_ids );
 		}
 
