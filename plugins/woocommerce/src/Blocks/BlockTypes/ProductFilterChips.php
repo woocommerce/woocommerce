@@ -68,11 +68,11 @@ final class ProductFilterChips extends AbstractBlock {
 			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
 		}
 
-		$visible_items = array_slice( $items, 0, $display_limit, true );
-
-		// Count hidden items, considering that selected items beyond the limit stay visible.
-		$overflowing_items = array_slice( array_values( $items ), $display_limit );
-		$hidden_count      = count( array_filter( $overflowing_items, fn( $item ) => is_array( $item ) && empty( $item['selected'] ) ) );
+		$first_items             = array_slice( $items, 0, $display_limit, true );
+		$overflow_items          = array_slice( $items, $display_limit );
+		$overflow_selected_items = array_filter( $overflow_items, fn( $item ) => is_array( $item ) && ! empty( $item['selected'] ) );
+		$visible_items           = array_merge( $first_items, $overflow_selected_items );
+		$hidden_count            = count( $items ) - count( $visible_items );
 
 		$first_item         = reset( $items );
 		$show_counts        = is_array( $first_item ) && array_key_exists( 'count', $first_item );
