@@ -65,6 +65,15 @@ class ItemEligibility {
 	private static array $review_cache = array();
 
 	/**
+	 * Set of `order_id|email` pairs that have already been bulk-preloaded in
+	 * this request, so a repeated `preload_for_items()` call (e.g. once from
+	 * the Endpoint and once from the page template) doesn't re-run the query.
+	 *
+	 * @var array<string, true>
+	 */
+	private static array $preloaded = array();
+
+	/**
 	 * Register the default filter callbacks the OrderReviews feature ships with.
 	 *
 	 * Auto-called by the WC dependency container after instantiation.
@@ -98,6 +107,12 @@ class ItemEligibility {
 		if ( '' === $email || $order_id <= 0 ) {
 			return;
 		}
+
+		$preload_key = $order_id . '|' . $email;
+		if ( isset( self::$preloaded[ $preload_key ] ) ) {
+			return;
+		}
+		self::$preloaded[ $preload_key ] = true;
 
 		$product_ids = array();
 		foreach ( $items as $item ) {
@@ -159,6 +174,7 @@ class ItemEligibility {
 	 */
 	public static function reset_cache(): void {
 		self::$review_cache = array();
+		self::$preloaded    = array();
 	}
 
 	/**
