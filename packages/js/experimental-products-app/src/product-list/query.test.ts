@@ -159,15 +159,35 @@ describe( 'buildProductListQuery', () => {
 		expect( query.stock_status ).toBe( 'onbackorder' );
 	} );
 
+	it( 'maps the stock_quantity is filter to both min and max', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{ field: 'stock_quantity', operator: 'is', value: 5 },
+			],
+		} as View );
+
+		expect( query.min_stock_quantity ).toEqual( '5' );
+		expect( query.max_stock_quantity ).toEqual( '5' );
+	} );
+
+	it( 'maps the stock_quantity greaterThan filter to min_stock_quantity + 1', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{ field: 'stock_quantity', operator: 'greaterThan', value: 5 },
+			],
+		} as View );
+
+		expect( query.min_stock_quantity ).toEqual( '6' );
+		expect( query.max_stock_quantity ).toBeUndefined();
+	} );
+
 	it( 'maps the stock_quantity greaterThanOrEqual filter to min_stock_quantity', () => {
 		const query = buildProductListQuery( {
 			...baseView,
 			filters: [
-				{
-					field: 'stock_quantity',
-					operator: 'greaterThanOrEqual',
-					value: 5,
-				},
+				{ field: 'stock_quantity', operator: 'greaterThanOrEqual', value: 5 },
 			],
 		} as View );
 
@@ -175,35 +195,27 @@ describe( 'buildProductListQuery', () => {
 		expect( query.max_stock_quantity ).toBeUndefined();
 	} );
 
+	it( 'maps the stock_quantity lessThan filter to max_stock_quantity - 1', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{ field: 'stock_quantity', operator: 'lessThan', value: 20 },
+			],
+		} as View );
+
+		expect( query.max_stock_quantity ).toEqual( '19' );
+		expect( query.min_stock_quantity ).toBeUndefined();
+	} );
+
 	it( 'maps the stock_quantity lessThanOrEqual filter to max_stock_quantity', () => {
 		const query = buildProductListQuery( {
 			...baseView,
 			filters: [
-				{
-					field: 'stock_quantity',
-					operator: 'lessThanOrEqual',
-					value: 20,
-				},
+				{ field: 'stock_quantity', operator: 'lessThanOrEqual', value: 20 },
 			],
 		} as View );
 
 		expect( query.max_stock_quantity ).toEqual( '20' );
 		expect( query.min_stock_quantity ).toBeUndefined();
-	} );
-
-	it( 'maps the stock_quantity between filter to both min and max', () => {
-		const query = buildProductListQuery( {
-			...baseView,
-			filters: [
-				{
-					field: 'stock_quantity',
-					operator: 'between',
-					value: [ 5, 20 ],
-				},
-			],
-		} as View );
-
-		expect( query.min_stock_quantity ).toEqual( '5' );
-		expect( query.max_stock_quantity ).toEqual( '20' );
 	} );
 } );
