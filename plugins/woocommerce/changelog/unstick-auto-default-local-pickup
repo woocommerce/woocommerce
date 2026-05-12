@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Replace auto-defaulted Local Pickup with a real shipping rate once one becomes available (e.g. after an Apple Pay / Google Pay wallet supplies a delivery address), instead of keeping pickup sticky when the customer never explicitly chose it.

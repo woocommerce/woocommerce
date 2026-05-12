@@ -46,6 +46,7 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$this->zone->delete( true );
 		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
 		WC()->cart->cart_context = 'shortcode';
+		WC()->session->set( 'chosen_shipping_method_origins', null );
 		parent::tearDown();
 	}
 
@@ -150,5 +151,98 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
 
 		$this->assertSame( 'local_pickup:1', $result, 'Shortcode context should always select the first rate' );
+	}
+
+	/**
+	 * When the previous Local Pickup choice came from the auto-defaulter and a
+	 * shipping rate is now available, the auto pickup should be replaced with
+	 * the shipping rate. This is the WOOPMNT-6159 / Apple Pay scenario.
+	 *
+	 * @testdox Replaces auto-chosen local pickup with shipping rate when one is now available.
+	 */
+	public function test_replaces_auto_local_pickup_when_shipping_rate_becomes_available(): void {
+		wc_set_chosen_shipping_method_origin( 0, 'auto' );
+
+		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
+
+		$this->assertSame( 'flat_rate:1', $result, 'Should replace auto-chosen pickup with the first non-pickup rate' );
+	}
+
+	/**
+	 * When the customer explicitly selected Local Pickup (origin = manual), the
+	 * sticky behavior must be preserved even when a shipping rate is available.
+	 *
+	 * @testdox Preserves manually chosen local pickup even when a shipping rate is available.
+	 */
+	public function test_preserves_manual_local_pickup_when_shipping_rate_available(): void {
+		wc_set_chosen_shipping_method_origin( 0, 'manual' );
+
+		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
+
+		$this->assertSame( 'local_pickup:1', $result, 'Should preserve manually chosen pickup' );
+	}
+
+	/**
+	 * Sessions that pre-date origin tracking default to 'manual' to preserve
+	 * existing sticky behavior; without a recorded origin we cannot tell the
+	 * choice was an auto-default, so we must not silently switch it.
+	 *
+	 * @testdox Defaults unrecorded origin to manual (backwards-compat).
+	 */
+	public function test_unrecorded_origin_preserves_local_pickup(): void {
+		WC()->session->set( 'chosen_shipping_method_origins', null );
+
+		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
+
+		$this->assertSame( 'local_pickup:1', $result, 'Unrecorded origin should be treated as manual' );
+	}
+
+	/**
+	 * When pickup is the only rate available, even an auto origin must keep
+	 * pickup — there is nothing else to switch to.
+	 *
+	 * @testdox Keeps auto local pickup when no shipping alternative exists.
+	 */
+	public function test_keeps_auto_local_pickup_when_no_alternative(): void {
+		wc_set_chosen_shipping_method_origin( 0, 'auto' );
+
+		$package = $this->build_package( array( 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
+
+		$this->assertSame( 'local_pickup:1', $result, 'Should keep pickup when no non-pickup alternative is available' );
+	}
+
+	/**
+	 * `wc_get_chosen_shipping_method_for_package()` is the path through which
+	 * the auto-defaulter writes to the session. After it runs, the origin must
+	 * be recorded as 'auto' so a subsequent re-evaluation can unstick if a
+	 * shipping rate becomes available.
+	 *
+	 * @testdox Auto-defaulter records the chosen shipping method origin as 'auto'.
+	 */
+	public function test_auto_defaulter_records_auto_origin(): void {
+		$package = $this->build_package( array( 'local_pickup:1' ) );
+
+		wc_get_chosen_shipping_method_for_package( 0, $package );
+
+		$this->assertSame( 'auto', wc_get_chosen_shipping_method_origin( 0 ) );
+	}
+
+	/**
+	 * `wc_set_chosen_shipping_method_origin()` is the helper manual-write paths
+	 * call (Store API select-shipping-rate, AJAX update_shipping_method, etc.).
+	 * Origin must round-trip correctly through the session.
+	 *
+	 * @testdox Manual write paths can flip the origin from auto to manual.
+	 */
+	public function test_manual_write_overrides_auto_origin(): void {
+		wc_set_chosen_shipping_method_origin( 0, 'auto' );
+		$this->assertSame( 'auto', wc_get_chosen_shipping_method_origin( 0 ) );
+
+		wc_set_chosen_shipping_method_origin( 0, 'manual' );
+		$this->assertSame( 'manual', wc_get_chosen_shipping_method_origin( 0 ) );
 	}
 }

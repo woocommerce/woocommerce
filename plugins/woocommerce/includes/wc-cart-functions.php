@@ -479,6 +479,7 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 
 		WC()->session->set( 'chosen_shipping_methods', $chosen_methods );
 		WC()->session->set( 'shipping_method_counts', $method_counts );
+		wc_set_chosen_shipping_method_origin( $key, 'auto' );
 
 		/**
 		 * Fires when a shipping method is chosen.
@@ -489,6 +490,63 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 		do_action( 'woocommerce_shipping_method_chosen', $chosen_method );
 	}
 	return $chosen_method;
+}
+
+/**
+ * Records who picked the currently chosen shipping method for a package: the
+ * `wc_get_default_shipping_method_for_package()` auto-defaulter ('auto') or the
+ * customer via an explicit selection path like the Store API select-shipping-rate
+ * route, the shortcode cart/checkout AJAX, or a coupon-driven free-shipping
+ * override ('manual').
+ *
+ * This signal lets `wc_get_default_shipping_method_for_package()` distinguish
+ * between "the customer chose Local Pickup" (sticky on purpose) and "WC defaulted
+ * to Local Pickup because no zone matched yet" (should re-evaluate once a real
+ * shipping rate becomes available, e.g. after an Apple Pay / Google Pay wallet
+ * supplies an address).
+ *
+ * @since 10.6.0
+ *
+ * @param int|string $key    Package key.
+ * @param string     $origin Either 'auto' or 'manual'.
+ * @return void
+ */
+function wc_set_chosen_shipping_method_origin( $key, $origin ) {
+	if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+		return;
+	}
+
+	if ( ! in_array( $origin, array( 'auto', 'manual' ), true ) ) {
+		return;
+	}
+
+	$origins         = WC()->session->get( 'chosen_shipping_method_origins', array() );
+	$origins[ $key ] = $origin;
+	WC()->session->set( 'chosen_shipping_method_origins', $origins );
+}
+
+/**
+ * Returns the recorded origin ('auto' or 'manual') of the chosen shipping method
+ * for a package, or 'manual' when no origin has been recorded yet.
+ *
+ * Defaulting to 'manual' preserves the historical sticky-Local-Pickup behavior
+ * for sessions that pre-date origin tracking. New sessions get the correct
+ * origin written from the first `wc_get_chosen_shipping_method_for_package()`
+ * call onwards.
+ *
+ * @since 10.6.0
+ *
+ * @param int|string $key Package key.
+ * @return string 'auto' or 'manual'.
+ */
+function wc_get_chosen_shipping_method_origin( $key ) {
+	if ( ! is_callable( array( WC()->session, 'get' ) ) ) {
+		return 'manual';
+	}
+
+	$origins = WC()->session->get( 'chosen_shipping_method_origins', array() );
+
+	return isset( $origins[ $key ] ) && 'auto' === $origins[ $key ] ? 'auto' : 'manual';
 }
 
 /**
@@ -540,17 +598,27 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	}
 
 	/**
-	 * If the customer has selected local pickup, keep it selected if it's still in the package. We don't want to auto
-	 * toggle between shipping and pickup even if available shipping methods are changed.
+	 * If the customer has explicitly selected local pickup, keep it selected if it's still in the package. We don't
+	 * want to auto toggle between shipping and pickup even if available shipping methods are changed.
 	 *
 	 * This is important for block-based checkout where there is an explicit toggle between shipping and pickup.
+	 *
+	 * However, if the previous local-pickup choice came from this auto-defaulter (because at the time only pickup
+	 * matched — e.g. no customer address yet), it is not a real customer choice and should be replaced once a
+	 * non-pickup rate becomes available (e.g. after an Apple Pay / Google Pay wallet supplies an address that
+	 * matches a shipping zone). The origin of the previous choice is tracked via `wc_set_chosen_shipping_method_origin()`.
 	 */
-	$chosen_method_id       = current( explode( ':', $chosen_method ) );
-	$chosen_method_exists   = in_array( $chosen_method, $rate_keys, true );
-	$is_local_pickup_chosen = in_array( $chosen_method_id, $local_pickup_method_ids, true );
+	$chosen_method_id            = current( explode( ':', $chosen_method ) );
+	$chosen_method_exists        = in_array( $chosen_method, $rate_keys, true );
+	$is_local_pickup_chosen      = in_array( $chosen_method_id, $local_pickup_method_ids, true );
+	$default_method_id           = '' === $default ? '' : current( explode( ':', $default ) );
+	$has_non_pickup_alternative  = '' !== $default && ! in_array( $default_method_id, $local_pickup_method_ids, true );
+	$previous_choice_was_auto    = 'auto' === wc_get_chosen_shipping_method_origin( $key );
+	$unstick_auto_default_pickup = $previous_choice_was_auto && $has_non_pickup_alternative;
 
-	// Default to local pickup if its chosen already.
-	if ( $chosen_method_exists && $is_local_pickup_chosen ) {
+	// Default to local pickup if it's chosen already — unless the previous pickup choice came from the auto-defaulter
+	// AND a real shipping rate is now available, in which case we prefer the shipping rate.
+	if ( $chosen_method_exists && $is_local_pickup_chosen && ! $unstick_auto_default_pickup ) {
 		$default = $chosen_method;
 
 	} else {
