@@ -73,16 +73,22 @@ class WC_Analytics_Tracking {
 	 * @param string $event_name The name of the event.
 	 * @param array  $event_properties Custom properties to send with the event.
 	 *
-	 * @return bool|WP_Error True for success or WP_Error if the event pixel could not be fired.
+	 * @return bool|WP_Error True on emit or deliberate skip (no consent, bot UA,
+	 *                       or cookie-less context); WP_Error if pixel firing failed.
 	 */
 	public static function record_event( $event_name, $event_properties = array() ) {
-		// Check consent before recording any event
+		// Check consent before recording any event.
 		if ( ! Consent_Manager::has_analytics_consent() ) {
 			return true; // Skip recording.
 		}
 
 		// Skip recording if the request is coming from a bot.
 		if ( User_Agent_Info::is_bot() ) {
+			return true;
+		}
+
+		// Skip cookie-less contexts that cannot persist a stable visitor id; fresh random ids fragment sessions.
+		if ( empty( self::get_visitor_id() ) ) {
 			return true;
 		}
 
@@ -468,39 +474,50 @@ class WC_Analytics_Tracking {
 			return self::$cached_visitor_id;
 		}
 
-		// Fallback to IP-based visitor ID if proxy tracking is enabled.
+		// Cron and WP-CLI have no client IP or UA, so even proxy-tracking would collapse all background activity into one phantom user.
+		if ( ( defined( 'DOING_CRON' ) && DOING_CRON )
+			|| ( defined( 'WP_CLI' ) && WP_CLI )
+		) {
+			return null;
+		}
+
+		// Proxy tracking provides a stable id from daily_salt + domain + ip + user_agent, even in REST/XMLRPC contexts.
 		if ( Features::is_proxy_tracking_enabled() ) {
 			self::$cached_visitor_id = self::get_ip_based_visitor_id();
 			return self::$cached_visitor_id;
 		}
 
-		// Generate a new anonId and try to save it in the browser's cookies.
-		// Note that base64-encoding an 18 character string generates a 24-character anon id.
+		// Only mint a new id when we can persist it in a cookie; otherwise it would be a single-use throwaway that fragments sessions.
+		if ( headers_sent()
+			|| ( defined( 'REST_REQUEST' ) && REST_REQUEST )
+			|| ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
+		) {
+			return null;
+		}
+
+		// Base64-encoding 18 random bytes produces a 24-character anon id.
 		$binary = '';
 		for ( $i = 0; $i < 18; ++$i ) {
 			$binary .= chr( wp_rand( 0, 255 ) );
 		}
 
-		self::$cached_visitor_id = base64_encode( $binary ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
+		$new_visitor_id = base64_encode( $binary ); // phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.obfuscation_base64_encode
 
+		// httponly=false is intentional: _wca and client-side analytics need to read the same value the server wrote.
+		setcookie(
+			'tk_ai',
+			$new_visitor_id,
+			array(
+				'expires'  => time() + ( 365 * 24 * 60 * 60 ), // 1 year
+				'path'     => '/',
+				'domain'   => COOKIE_DOMAIN,
+				'secure'   => is_ssl(),
+				'httponly' => false,
+				'samesite' => 'Strict',
+			)
+		);
 
-		if ( ! headers_sent()
-			&& ! ( defined( 'REST_REQUEST' ) && REST_REQUEST )
-			&& ! ( defined( 'XMLRPC_REQUEST' ) && XMLRPC_REQUEST )
-		) {
-			setcookie(
-				'tk_ai',
-				self::$cached_visitor_id,
-				array(
-					'expires'  => time() + ( 365 * 24 * 60 * 60 ), // 1 year
-					'path'     => '/',
-					'domain'   => COOKIE_DOMAIN,
-					'secure'   => is_ssl(),
-					'httponly' => true,
-					'samesite' => 'Strict',
-				)
-			);
-		}
+		self::$cached_visitor_id = $new_visitor_id;
 		return self::$cached_visitor_id;
 	}
 

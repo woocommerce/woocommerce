@@ -218,7 +218,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								'delete-webhook'
 							);
 							?>
-							<a style="color: #a00; text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( $delete_url ); ?>"><?php esc_html_e( 'Delete permanently', 'woocommerce' ); ?></a>
+							<a style="color: var(--wc-destructive, #cc1818); text-decoration: none; margin-left: 10px;" href="<?php echo esc_url( $delete_url ); ?>"><?php esc_html_e( 'Delete permanently', 'woocommerce' ); ?></a>
 						<?php endif; ?>
 					</p>
 				</td>

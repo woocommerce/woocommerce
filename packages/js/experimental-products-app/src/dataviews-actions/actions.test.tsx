@@ -87,6 +87,11 @@ describe( 'product list actions', () => {
 		status: 'draft',
 		name: 'Beanie',
 	} as ProductEntityRecord;
+	const hoodie = {
+		id: 34,
+		status: 'draft',
+		name: 'Hoodie',
+	} as ProductEntityRecord;
 
 	const deleteEntityRecord = jest.fn();
 	const invalidateResolution = jest.fn();
@@ -136,7 +141,11 @@ describe( 'product list actions', () => {
 
 		expect( quickEditProductAction ).toBeDefined();
 
-		getCallbackAction( quickEditProductAction! ).callback( [ product ], {
+		if ( ! quickEditProductAction ) {
+			throw new Error( 'Quick edit action not found.' );
+		}
+
+		getCallbackAction( quickEditProductAction ).callback( [ product ], {
 			onActionPerformed,
 		} );
 
@@ -155,6 +164,31 @@ describe( 'product list actions', () => {
 		expect( quickEditProductAction?.supportsBulk ).toBe( true );
 	} );
 
+	it( 'opens quick edit panel with all selected products when triggered as a bulk action', () => {
+		const { result } = renderHook( () => useProductActions() );
+		const quickEditProductAction = result.current.find(
+			( action ) => action.id === 'quick-edit-product'
+		);
+
+		expect( quickEditProductAction ).toBeDefined();
+
+		if ( ! quickEditProductAction ) {
+			throw new Error( 'Quick edit action not found.' );
+		}
+
+		getCallbackAction( quickEditProductAction ).callback(
+			[ product, hoodie ],
+			{
+				onActionPerformed,
+			}
+		);
+
+		expect( navigate ).toHaveBeenCalledWith(
+			'/products?activeView=draft&postId=12%2C34&quickEdit=true'
+		);
+		expect( onActionPerformed ).toHaveBeenCalledWith( [ product, hoodie ] );
+	} );
+
 	it( 'opens product editor when the Edit action is triggered', () => {
 		const { result } = renderHook( () => useProductActions() );
 		const editProductAction = result.current.find(
@@ -163,13 +197,17 @@ describe( 'product list actions', () => {
 
 		expect( editProductAction ).toBeDefined();
 
+		if ( ! editProductAction ) {
+			throw new Error( 'Edit action not found.' );
+		}
+
 		const originalLocation = window.location;
 		Object.defineProperty( window, 'location', {
 			writable: true,
 			value: { href: '' },
 		} );
 
-		getCallbackAction( editProductAction! ).callback( [ product ], {
+		getCallbackAction( editProductAction ).callback( [ product ], {
 			onActionPerformed,
 		} );
 

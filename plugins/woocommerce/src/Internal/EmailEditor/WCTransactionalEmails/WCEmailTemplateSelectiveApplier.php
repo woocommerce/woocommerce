@@ -36,18 +36,33 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  * subsequent apply overwrites the snapshot. {@see self::undo()} restores from
  * the snapshot when the supplied `revision_id` matches.
  *
+ * Three-way payload consumption (since 10.9.0): when the post has
+ * {@see WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY} meta,
+ * `apply_selectively()` passes the change-summary's payload through to
+ * `merge()`, which uses it to gate matched-pair classification:
+ *
+ * - LCS pairs whose paths the summary classified as separate add+remove are
+ *   rejected by Pass 1 (preventing false yours+core pairings on parallel
+ *   additions); Pass 2/3 then handle them as two independent adds.
+ * - Matched pairs whose paths are NOT in `copy_changes` are silently
+ *   preserved (yours-only edits aren't conflicts; the `use_core` decision
+ *   is ignored on those paths).
+ *
+ * Posts without the meta keep the legacy two-way behavior — `merge()` runs
+ * its own LCS and treats every text-divergent matched pair as a candidate
+ * for `use_core`.
+ *
  * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
  * @since   10.9.0
  */
 class WCEmailTemplateSelectiveApplier {
 	/**
 	 * Post meta key for the single-step pre-apply snapshot. Stores an array
-	 * with `revision_id`, `content`, and `snapshot_at` (UTC `Y-m-d H:i:s`).
-	 * The snapshot does **not** record the prior status — on undo the status
-	 * is recomputed via
-	 * {@see WCEmailTemplateDivergenceDetector::reclassify()} so it reflects
-	 * the world as it stands at undo time (core may have shipped a release
-	 * since the apply).
+	 * with `revision_id`, `content`, `last_core_render`, `version`,
+	 * `source_hash`, `last_synced_at`, and `snapshot_at` (UTC `Y-m-d H:i:s`).
+	 * The status is **not** recorded — on undo it is recomputed via
+	 * {@see WCEmailTemplateDivergenceDetector::reclassify()} against current
+	 * state.
 	 *
 	 * @var string
 	 */
@@ -172,16 +187,48 @@ class WCEmailTemplateSelectiveApplier {
 			);
 		}//end try
 
-		$merged_result      = self::merge( $post_content, $core_content, $choices );
+		// When the post has `last_core_render` meta, the change-summary already classified
+		// each block via three-way attribution (yours-vs-base, core-vs-base) and the merge
+		// can consume that payload directly — gating use_core decisions to "real" conflicts
+		// only and rejecting LCS pairs that the summary classified as separate add+remove.
+		$base_render_for_merge = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
+		$summary_for_merge     = '' !== $base_render_for_merge ? $summary : null;
+
+		$merged_result      = self::merge( $post_content, $core_content, $choices, $summary_for_merge );
 		$merged_content     = $merged_result['content'];
 		$structural_skipped = $merged_result['structural_skipped'];
 		$aliases_migrated   = $merged_result['aliases_migrated'];
 
+		// Alignment is decided on whitespace-normalized content: serialize_blocks()
+		// can't reproduce the PHP template's literal whitespace byte-for-byte, so a
+		// strict === would never match even when the trees are semantically equal.
+		// When aligned, persist canonical verbatim so source_hash, classify_post,
+		// and downstream byte comparisons hold without further normalization.
+		$is_aligned_with_canonical = (
+			self::normalize_for_comparison( $merged_content )
+			=== self::normalize_for_comparison( $core_content )
+		);
+		if ( $is_aligned_with_canonical ) {
+			$merged_content = $core_content;
+		}
+
+		// Snapshot every meta apply is about to overwrite. Restoring only a
+		// subset would leave the banner / email-list gates reading stale
+		// post-apply `_wc_email_template_version`, hiding the pending update.
+		$prior_last_core_render = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
+		$prior_version          = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true );
+		$prior_source_hash      = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true );
+		$prior_last_synced_at   = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true );
+
 		$revision_id = wp_generate_uuid4();
 		$snapshot    = array(
-			'revision_id' => $revision_id,
-			'content'     => $post_content,
-			'snapshot_at' => gmdate( 'Y-m-d H:i:s' ),
+			'revision_id'      => $revision_id,
+			'content'          => $post_content,
+			'last_core_render' => $prior_last_core_render,
+			'version'          => $prior_version,
+			'source_hash'      => $prior_source_hash,
+			'last_synced_at'   => $prior_last_synced_at,
+			'snapshot_at'      => gmdate( 'Y-m-d H:i:s' ),
 		);
 		update_post_meta( $post_id, self::SNAPSHOT_META_KEY, $snapshot );
 
@@ -203,21 +250,19 @@ class WCEmailTemplateSelectiveApplier {
 			$saved_post = get_post( $post_id );
 			$saved_body = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : $merged_content;
 
-			// When merged content diverges from canonical (any keep_yours or
-			// preserved removed-block), stamp sha1(canonical) and hard-stamp
-			// STATUS_CORE_UPDATED_CUSTOMIZED so the auto-applier (which only
-			// acts on STATUS_CORE_UPDATED_UNCUSTOMIZED) can't silently overwrite
-			// the merchant's choice on the next core bump.
-			$is_aligned_with_canonical = ( $merged_content === $core_content );
-			$source_hash               = $is_aligned_with_canonical
+			$source_hash = $is_aligned_with_canonical
 				? sha1( $saved_body )
 				: sha1( $core_content );
-			$synced_at                 = gmdate( 'Y-m-d H:i:s' );
-			$version_to                = (string) $sync_config['version'];
+			$synced_at   = gmdate( 'Y-m-d H:i:s' );
+			$version_to  = (string) $sync_config['version'];
 
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, $version_to );
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $source_hash );
 			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, $synced_at );
+			// Three-way diff base reference: "what core looked like the last time we synced."
+			// Always stamps the current canonical (NOT the merged content) — selective apply IS
+			// a sync against the new canonical even if the merchant kept some yours-blocks.
+			update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $core_content );
 
 			if ( $is_aligned_with_canonical ) {
 				WCEmailTemplateDivergenceDetector::reclassify( $post_id );
@@ -309,6 +354,33 @@ class WCEmailTemplateSelectiveApplier {
 				return $updated;
 			}
 
+			// Restore every meta apply stamped. `restore_meta_from_snapshot`
+			// no-ops on keys missing from older snapshot formats.
+			self::restore_meta_from_snapshot(
+				$post_id,
+				$snapshot,
+				'last_core_render',
+				WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY
+			);
+			self::restore_meta_from_snapshot(
+				$post_id,
+				$snapshot,
+				'version',
+				WCEmailTemplateDivergenceDetector::VERSION_META_KEY
+			);
+			self::restore_meta_from_snapshot(
+				$post_id,
+				$snapshot,
+				'source_hash',
+				WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY
+			);
+			self::restore_meta_from_snapshot(
+				$post_id,
+				$snapshot,
+				'last_synced_at',
+				WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY
+			);
+
 			// The snapshot's prior_status was correct at snapshot time, but
 			// the world may have moved since (core released, canonical
 			// changed). Ask the classifier for the truth against current
@@ -350,16 +422,55 @@ class WCEmailTemplateSelectiveApplier {
 	}
 
 	/**
+	 * Restore one post meta from a snapshot entry. Empty prior values delete
+	 * the meta rather than writing an empty string; missing keys (older
+	 * snapshot format) no-op.
+	 *
+	 * @param int                  $post_id       The post ID.
+	 * @param array<string, mixed> $snapshot      The snapshot array stored in SNAPSHOT_META_KEY.
+	 * @param string               $snapshot_key  The key inside the snapshot array.
+	 * @param string               $post_meta_key The post meta key to write back to.
+	 */
+	private static function restore_meta_from_snapshot( int $post_id, array $snapshot, string $snapshot_key, string $post_meta_key ): void {
+		if ( ! array_key_exists( $snapshot_key, $snapshot ) ) {
+			return;
+		}
+		$value = (string) $snapshot[ $snapshot_key ];
+		if ( '' !== $value ) {
+			update_post_meta( $post_id, $post_meta_key, $value );
+		} else {
+			delete_post_meta( $post_id, $post_meta_key );
+		}
+	}
+
+	/**
 	 * Compute the merged block tree, starting from the merchant's post and
 	 * layering on core's changes per the v1 algorithm.
 	 *
-	 * @param string                                                     $post_content Merchant's current `post_content`.
-	 * @param string                                                     $core_content Canonical core render.
-	 * @param array<int, array{path:array<int|string>, decision:string}> $choices      Per-conflict choices.
+	 * When `$precomputed_summary` is provided (the caller's `last_core_render`
+	 * meta was set, so the change-summary ran three-way attribution), the merge
+	 * defers to the summary's classification:
+	 *
+	 * - Matched pairs whose path is in `removed_blocks` (yours-only) or
+	 *   `added_blocks` (core-only) are REJECTED — the summary correctly
+	 *   identified them as separate adds; the local LCS may have falsely
+	 *   paired them by name. The reject lets Pass 2 / Pass 3 handle them.
+	 * - Matched pairs not in `copy_changes` are silent — Pass 1 skips them
+	 *   even if a `use_core` decision was passed (yours-only edit, no
+	 *   conflict to resolve).
+	 *
+	 * Without `$precomputed_summary` (legacy two-way fallback), the existing
+	 * behavior is preserved: every matched pair with differing inner_text is
+	 * eligible for `use_core`, and the local LCS drives matched-set tracking.
+	 *
+	 * @param string                                                     $post_content        Merchant's current `post_content`.
+	 * @param string                                                     $core_content        Canonical core render.
+	 * @param array<int, array{path:array<int|string>, decision:string}> $choices             Per-conflict choices.
+	 * @param array<string, mixed>|null                                  $precomputed_summary Optional three-way summary payload from {@see WCEmailTemplateChangeSummary::summarize()}; pass `null` to use the legacy two-way merge.
 	 *
 	 * @return array{content:string, structural_skipped:bool, aliases_migrated:string[]}
 	 */
-	private static function merge( string $post_content, string $core_content, array $choices ): array {
+	private static function merge( string $post_content, string $core_content, array $choices, ?array $precomputed_summary = null ): array {
 		$post_blocks = parse_blocks( $post_content );
 		$core_blocks = parse_blocks( $core_content );
 
@@ -387,6 +498,30 @@ class WCEmailTemplateSelectiveApplier {
 			$choice_map[ self::path_key( $choice['path'] ) ] = $decision;
 		}
 
+		// Three-way overrides derived from the precomputed summary. `null`
+		// signals the legacy two-way path (no gating).
+		$copy_change_paths = null;
+		$added_path_keys   = array();
+		$removed_path_keys = array();
+		if ( null !== $precomputed_summary ) {
+			$copy_change_paths = array();
+			foreach ( $precomputed_summary['copy_changes'] ?? array() as $cc ) {
+				if ( isset( $cc['path'] ) && is_array( $cc['path'] ) ) {
+					$copy_change_paths[ self::path_key( $cc['path'] ) ] = true;
+				}
+			}
+			foreach ( $precomputed_summary['added_blocks'] ?? array() as $ab ) {
+				if ( isset( $ab['path'] ) && is_array( $ab['path'] ) ) {
+					$added_path_keys[ self::path_key( $ab['path'] ) ] = true;
+				}
+			}
+			foreach ( $precomputed_summary['removed_blocks'] ?? array() as $rb ) {
+				if ( isset( $rb['path'] ) && is_array( $rb['path'] ) ) {
+					$removed_path_keys[ self::path_key( $rb['path'] ) ] = true;
+				}
+			}
+		}
+
 		// Pass 1: matched pairs. Apply use_core decisions on copy changes;
 		// detect parent-name diffs (structural punted, but we still flag
 		// `structural_skipped` so the caller can surface it).
@@ -394,11 +529,22 @@ class WCEmailTemplateSelectiveApplier {
 		$matched_core_set   = array();
 		$matched_post_set   = array();
 		foreach ( $matches as $pair ) {
-			$matched_core_set[ $pair[0] ] = true;
-			$matched_post_set[ $pair[1] ] = true;
-
 			$core_rec = $core_records[ $pair[0] ];
 			$post_rec = $post_records[ $pair[1] ];
+			$core_key = self::path_key( $core_rec['path'] );
+			$post_key = self::path_key( $post_rec['path'] );
+
+			// Three-way reject: applier's LCS paired these but the summary
+			// classified them as separate add+remove. Don't track as matched
+			// (so Pass 2 / Pass 3 will handle them) and don't apply.
+			if ( null !== $precomputed_summary
+				&& ( isset( $added_path_keys[ $core_key ] ) || isset( $removed_path_keys[ $post_key ] ) )
+			) {
+				continue;
+			}
+
+			$matched_core_set[ $pair[0] ] = true;
+			$matched_post_set[ $pair[1] ] = true;
 
 			if ( $core_rec['parent_name'] !== $post_rec['parent_name'] ) {
 				$structural_skipped = true;
@@ -408,7 +554,14 @@ class WCEmailTemplateSelectiveApplier {
 				continue;
 			}
 
-			$decision = $choice_map[ self::path_key( $post_rec['path'] ) ] ?? 'keep_yours';
+			// Three-way gate: only paths the summary surfaced as `copy_changes`
+			// are eligible for `use_core`. Yours-only edits are silently
+			// preserved — they aren't conflicts.
+			if ( null !== $copy_change_paths && ! isset( $copy_change_paths[ $post_key ] ) ) {
+				continue;
+			}
+
+			$decision = $choice_map[ $post_key ] ?? 'keep_yours';
 			if ( 'use_core' !== $decision ) {
 				continue;
 			}
@@ -693,6 +846,21 @@ class WCEmailTemplateSelectiveApplier {
 			array( 'core/group', 'core/columns', 'core/column', 'core/row' ),
 			true
 		);
+	}
+
+	/**
+	 * Whitespace-normalize block markup for semantic comparison. Trims and
+	 * collapses runs of whitespace adjacent to tag boundaries — covers the
+	 * leading/trailing newlines and the spaces inside `<div> ##WOO_CONTENT## </div>`
+	 * that `serialize_blocks()` can't reproduce from a hand-authored PHP template.
+	 *
+	 * @param string $content Block markup.
+	 */
+	private static function normalize_for_comparison( string $content ): string {
+		$content = trim( $content );
+		$content = (string) preg_replace( '/>\s+/', '>', $content );
+		$content = (string) preg_replace( '/\s+</', '<', $content );
+		return $content;
 	}
 
 	/**

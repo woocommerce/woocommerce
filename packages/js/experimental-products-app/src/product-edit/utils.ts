@@ -113,14 +113,17 @@ const VARIABLE_PRODUCT_EDIT_FIELD_IDS = [
 	'stock',
 	'stock_quantity',
 	'manage_stock',
+	'weight',
+	'length',
+	'width',
+	'height',
+	'shipping_class',
 	'tax_status',
 	'cross_sell_ids',
 ] satisfies ProductEditFieldId[];
 
 const VARIATION_PRODUCT_EDIT_FIELD_IDS = [
-	'name',
 	'images',
-	'product_status',
 	'sku',
 	'price',
 	'regular_price',
@@ -132,7 +135,6 @@ const VARIATION_PRODUCT_EDIT_FIELD_IDS = [
 	'stock',
 	'stock_quantity',
 	'manage_stock',
-	'downloadable',
 	'weight',
 	'length',
 	'width',
@@ -166,6 +168,35 @@ const PRODUCT_TYPE_COMPATIBLE_FIELD_IDS = {
 	grouped: GROUPED_PRODUCT_EDIT_FIELD_IDS,
 	external: EXTERNAL_PRODUCT_EDIT_FIELD_IDS,
 } satisfies Record< string, readonly ProductEditFieldId[] >;
+
+const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
+	'name',
+	'short_description',
+	'description',
+	'product_status',
+	'catalog_visibility',
+	'categories',
+	'tags',
+	'type',
+	'featured',
+	'upsell_ids',
+	'cross_sell_ids',
+	'external_url',
+	'button_text',
+] );
+
+const SELLABLE_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
+	'price',
+	'regular_price',
+	'on_sale',
+	'sale_price',
+	'schedule_sale',
+	'date_on_sale_from',
+	'date_on_sale_to',
+] );
+
+const BULK_UNSUPPORTED_PRODUCT_EDIT_FIELD_ID_SET =
+	new Set< ProductEditFieldId >( [ 'sku' ] );
 
 function normalizeValue( value: unknown ) {
 	if ( value === undefined ) {
@@ -213,10 +244,44 @@ function getProductTypeCompatibleFieldIds( product: ProductEntityRecord ) {
 	return COMMON_PRODUCT_EDIT_FIELD_IDS;
 }
 
+function isVariableProductParent( product: ProductEntityRecord ) {
+	return product.type === 'variable' && ! product.parent_id;
+}
+
 export function isProductVariation(
 	product: ProductEntityRecord
 ): product is ProductVariationEntityRecord {
 	return product.type === 'variation' || Boolean( product.parent_id );
+}
+
+function isFieldVisibleForProductRelationships(
+	fieldId: string,
+	products: ProductEntityRecord[]
+) {
+	if ( ! PRODUCT_EDIT_FIELD_IDS.includes( fieldId as ProductEditFieldId ) ) {
+		return true;
+	}
+
+	const productEditFieldId = fieldId as ProductEditFieldId;
+	const hasVariation = products.some( isProductVariation );
+
+	if (
+		hasVariation &&
+		PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET.has( productEditFieldId )
+	) {
+		return false;
+	}
+
+	const hasVariableParent = products.some( isVariableProductParent );
+
+	if (
+		SELLABLE_PRODUCT_EDIT_FIELD_ID_SET.has( productEditFieldId ) &&
+		hasVariableParent
+	) {
+		return false;
+	}
+
+	return true;
 }
 
 export function getProductVariationUpdatePath(
@@ -373,9 +438,23 @@ export function getVisibleProductEditFields(
 ) {
 	const compatibleFieldIds =
 		getCommonProductTypeCompatibleFieldIds( products );
+	const isBulkEdit = products.length > 1;
 
 	return fields.reduce< ProductField[] >( ( visibleFields, field ) => {
 		if ( ! compatibleFieldIds.has( field.id ) ) {
+			return visibleFields;
+		}
+
+		if (
+			isBulkEdit &&
+			BULK_UNSUPPORTED_PRODUCT_EDIT_FIELD_ID_SET.has(
+				field.id as ProductEditFieldId
+			)
+		) {
+			return visibleFields;
+		}
+
+		if ( ! isFieldVisibleForProductRelationships( field.id, products ) ) {
 			return visibleFields;
 		}
 
