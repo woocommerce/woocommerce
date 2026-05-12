@@ -109,35 +109,11 @@ trait CacheNameSpaceTrait {
 			return $prefix;
 		}
 
-		$cached_prefix = wp_cache_get( $cache_key, $group );
+		if ( ! $found ) {
+			$cached_prefix = wp_cache_get( $cache_key, $group );
 
-		if ( self::is_valid_cache_prefix( $cached_prefix ) ) {
-			return $cached_prefix;
-		}
-
-		return self::replace_invalid_cache_prefix( $cache_key, $group );
-	}
-
-	/**
-	 * Replace an invalid cache prefix with one shared by concurrent regenerators.
-	 *
-	 * @param string $cache_key Cache key.
-	 * @param string $group Cache group.
-	 * @return string Cache prefix.
-	 *
-	 * @since 10.9.0
-	 */
-	private static function replace_invalid_cache_prefix( $cache_key, $group ) {
-		$replacement_cache_key = $cache_key . '_replacement';
-		$prefix                = self::generate_cache_prefix();
-		// Short coordination window for concurrent regenerators.
-		$replacement_ttl = 10;
-
-		if ( ! wp_cache_add( $replacement_cache_key, $prefix, $group, $replacement_ttl ) ) {
-			$replacement_prefix = wp_cache_get( $replacement_cache_key, $group );
-
-			if ( self::is_valid_cache_prefix( $replacement_prefix ) ) {
-				$prefix = $replacement_prefix;
+			if ( self::is_valid_cache_prefix( $cached_prefix ) ) {
+				return $cached_prefix;
 			}
 		}
 

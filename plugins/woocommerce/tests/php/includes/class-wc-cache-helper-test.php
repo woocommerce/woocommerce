@@ -236,6 +236,5 @@ class WC_Cache_Helper_Tests extends WC_Unit_Test_Case {
 	 */
 	private function delete_orders_cache_prefixes(): void {
 		wp_cache_delete( 'wc_orders_cache_prefix', 'orders' );
-		wp_cache_delete( 'wc_orders_cache_prefix_replacement', 'orders' );
 	}
 }
