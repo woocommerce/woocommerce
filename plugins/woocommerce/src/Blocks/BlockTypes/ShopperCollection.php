@@ -428,9 +428,16 @@ final class ShopperCollection extends AbstractBlock {
 				>
 					<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
 				</button>
-				<?php if ( '' !== $variation_label ) : ?>
-					<span class="wc-block-shopper-collection-item__variation"><?php echo esc_html( $variation_label ); ?></span>
-				<?php endif; ?>
+				<span
+					class="wc-block-shopper-collection-item__variation"
+					data-wp-bind--hidden="!state.currentItemVariationLabel"
+					data-wp-text="state.currentItemVariationLabel"
+					<?php
+					if ( '' === $variation_label ) {
+						echo 'hidden';
+					}
+					?>
+				><?php echo esc_html( $variation_label ); ?></span>
 			</div>
 			<?php
 			// Render the decoded display name as plain text so the SSR
