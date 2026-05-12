@@ -20,12 +20,7 @@ class OpcacheFileExpiry {
 	public const ACTION_GROUP = 'woocommerce-graphql';
 
 	/**
-	 * TTL (in seconds) for OPcache cache files.
-	 */
-	public const FILE_TTL = 7 * DAY_IN_SECONDS;
-
-	/**
-	 * Delete OPcache cache files older than {@see self::FILE_TTL}.
+	 * Delete OPcache cache files older than {@see QueryCache::get_cache_ttl()}.
 	 *
 	 * AST contents are a pure function of the query, so this is a disk-usage
 	 * bound, not a correctness concern. Returns the count.
@@ -46,7 +41,7 @@ class OpcacheFileExpiry {
 			return 0;
 		}
 
-		$cutoff = time() - self::FILE_TTL;
+		$cutoff = time() - QueryCache::get_cache_ttl();
 		$count  = 0;
 		foreach ( $files as $path ) {
 			$mtime = $fs->mtime( $path );

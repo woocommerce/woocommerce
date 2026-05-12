@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\Api;
 
 use Automattic\WooCommerce\Internal\Api\OpcacheFileExpiry;
+use Automattic\WooCommerce\Internal\Api\QueryCache;
 use WC_Unit_Test_Case;
 
 /**
@@ -54,7 +55,7 @@ class OpcacheFileExpiryTest extends WC_Unit_Test_Case {
 		$expired = $dir . '/' . str_repeat( 'b', 64 ) . '.php';
 		file_put_contents( $fresh, '<?php return array();' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
 		file_put_contents( $expired, '<?php return array();' ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents
-		touch( $expired, time() - OpcacheFileExpiry::FILE_TTL - 1 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
+		touch( $expired, time() - QueryCache::get_cache_ttl() - 1 ); // phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_touch
 
 		$deleted = OpcacheFileExpiry::delete_expired_files();
 
