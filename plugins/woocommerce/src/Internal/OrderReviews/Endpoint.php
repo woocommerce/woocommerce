@@ -80,7 +80,10 @@ class Endpoint {
 		add_action( 'transition_post_status', array( $this, 'skip_auto_menu_for_self' ), 9, 3 );
 		add_filter( 'get_pages', array( $this, 'exclude_self_from_page_list' ) );
 		add_filter( 'the_title', array( $this, 'maybe_hide_page_title' ), 10, 2 );
-		add_filter( 'render_block', array( $this, 'maybe_hide_post_title_block' ), 10, 2 );
+		// Block-specific filter so only `core/post-title` is touched — `render_block`
+		// would fire for every block on the page. The third arg is the `WP_Block`
+		// instance, which carries `context['postId']` so we can scope to the host page.
+		add_filter( 'render_block_core/post-title', array( $this, 'maybe_hide_post_title_block' ), 10, 3 );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
 	}
 
@@ -152,24 +155,39 @@ class Endpoint {
 	}
 
 	/**
-	 * Suppress the `core/post-title` block on block themes for the
-	 * Review Order page.
+	 * Suppress the `core/post-title` block on block themes when it is bound
+	 * to the Review Order page itself.
 	 *
 	 * Block themes render the page title through `core/post-title` rather
 	 * than `the_title`, so the classic-theme filter above doesn't catch it.
-	 * `$this->suppress_title` is only flipped on after a confirmed request,
-	 * so editor previews and unrelated pages keep rendering their titles.
+	 * Three guards keep the suppression narrow:
 	 *
-	 * @param string|mixed              $block_content Block markup.
-	 * @param array<string,mixed>|mixed $block         Parsed block.
+	 * - `$this->suppress_title` is only true after `gate_request()` has
+	 *   confirmed a real, authorised review-order request.
+	 * - The hook is `render_block_core/post-title` so unrelated block types
+	 *   (headings, paragraphs, navigation, etc.) never reach this method.
+	 * - The block's resolved `context['postId']` must match the Review Order
+	 *   page id, so a `core/post-title` rendered inside a Query Loop, a
+	 *   related-posts template part, or a footer "recent posts" panel for a
+	 *   different post on the same request is untouched.
+	 *
+	 * @param string|mixed         $block_content Block markup.
+	 * @param array<string,mixed>  $block         Parsed block (unused but kept for filter signature).
+	 * @param \WP_Block|mixed|null $instance      Rendering instance carrying context.
 	 * @return string|mixed
 	 */
-	public function maybe_hide_post_title_block( $block_content, $block ) {
+	public function maybe_hide_post_title_block( $block_content, $block, $instance = null ) {
+		unset( $block );
+
 		if ( ! $this->suppress_title ) {
 			return $block_content;
 		}
-		$block_name = is_array( $block ) ? (string) ( $block['blockName'] ?? '' ) : '';
-		if ( 'core/post-title' !== $block_name ) {
+		if ( ! $instance instanceof \WP_Block ) {
+			return $block_content;
+		}
+		$page_id      = (int) wc_get_page_id( self::PAGE_KEY );
+		$block_postid = isset( $instance->context['postId'] ) ? (int) $instance->context['postId'] : 0;
+		if ( $page_id <= 0 || $block_postid !== $page_id ) {
 			return $block_content;
 		}
 		return '';

@@ -331,45 +331,92 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox maybe_hide_post_title_block() empties `core/post-title` markup when the flag is on.
+	 * Build a minimal `WP_Block` stand-in carrying the given `postId` context.
+	 * Avoids constructing a real `WP_Block`, which would require fully-parsed
+	 * block + registry plumbing.
+	 *
+	 * @param int $post_id Value to expose at `$instance->context['postId']`.
+	 * @return \WP_Block
 	 */
-	public function test_maybe_hide_post_title_block_empties_core_post_title(): void {
+	private function make_block_instance( int $post_id ): \WP_Block {
+		$instance          = $this->getMockBuilder( \WP_Block::class )
+			->disableOriginalConstructor()
+			->getMock();
+		$instance->context = array( 'postId' => $post_id );
+		return $instance;
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() empties `core/post-title` markup when bound to the Review Order page.
+	 */
+	public function test_maybe_hide_post_title_block_empties_when_bound_to_review_order_page(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
 		$this->set_suppress_title( true );
 
 		$this->assertSame(
 			'',
 			$this->endpoint->maybe_hide_post_title_block(
 				'<h1 class="wp-block-post-title">Review your order</h1>',
-				array( 'blockName' => 'core/post-title' )
+				array( 'blockName' => 'core/post-title' ),
+				$this->make_block_instance( $page_id )
 			)
 		);
 	}
 
 	/**
-	 * @testdox maybe_hide_post_title_block() leaves non-title blocks alone.
+	 * @testdox maybe_hide_post_title_block() leaves the title alone when the block is bound to a different post (e.g. inside a Query Loop).
 	 */
-	public function test_maybe_hide_post_title_block_leaves_other_blocks(): void {
+	public function test_maybe_hide_post_title_block_leaves_other_post_context(): void {
 		$this->set_suppress_title( true );
 
+		$other_post_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Another page',
+			)
+		);
+
+		$markup = '<h1 class="wp-block-post-title">Another page</h1>';
 		$this->assertSame(
-			'<p>Body paragraph.</p>',
+			$markup,
 			$this->endpoint->maybe_hide_post_title_block(
-				'<p>Body paragraph.</p>',
-				array( 'blockName' => 'core/paragraph' )
+				$markup,
+				array( 'blockName' => 'core/post-title' ),
+				$this->make_block_instance( $other_post_id )
 			)
 		);
 	}
 
 	/**
-	 * @testdox maybe_hide_post_title_block() leaves `core/post-title` alone when the flag is off (admin preview).
+	 * @testdox maybe_hide_post_title_block() leaves `core/post-title` alone when the flag is off (admin preview, unauthorised request).
 	 */
 	public function test_maybe_hide_post_title_block_leaves_title_when_flag_off(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+		$markup  = '<h1 class="wp-block-post-title">Review your order</h1>';
+		$this->assertSame(
+			$markup,
+			$this->endpoint->maybe_hide_post_title_block(
+				$markup,
+				array( 'blockName' => 'core/post-title' ),
+				$this->make_block_instance( $page_id )
+			)
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() leaves the title alone when the third arg is not a WP_Block (defensive guard).
+	 */
+	public function test_maybe_hide_post_title_block_leaves_title_when_instance_missing(): void {
+		$this->set_suppress_title( true );
+
 		$markup = '<h1 class="wp-block-post-title">Review your order</h1>';
 		$this->assertSame(
 			$markup,
 			$this->endpoint->maybe_hide_post_title_block(
 				$markup,
-				array( 'blockName' => 'core/post-title' )
+				array( 'blockName' => 'core/post-title' ),
+				null
 			)
 		);
 	}
