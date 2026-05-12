@@ -38,7 +38,9 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	label: __( 'Shipping Class', 'woocommerce' ),
 	enableSorting: false,
 	type: 'text',
-	getValue: ( { item } ) => item.shipping_class,
+	getValue: ( { item } ) =>
+		item.shipping_class_id ? item.shipping_class_id.toString() : '',
+	render: ( { item } ) => item.shipping_class ?? '',
 	getElements: async () => {
 		const records = ( await resolveSelect( coreStore ).getEntityRecords(
 			'taxonomy',
