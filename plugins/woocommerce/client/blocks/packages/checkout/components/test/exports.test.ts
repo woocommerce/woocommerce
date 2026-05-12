@@ -5,6 +5,10 @@
  * paymentMethodCommonIcons and getCommonIconProps so that third-party
  * extensions can import them from the package entry point.
  */
+
+/**
+ * External dependencies
+ */
 import {
 	paymentMethodCommonIcons,
 	getCommonIconProps,

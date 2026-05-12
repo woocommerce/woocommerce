@@ -1,10 +1,7 @@
 /**
  * Internal dependencies
  */
-import {
-	commonIcons,
-	getCommonIconProps,
-} from '../common-icons';
+import { commonIcons, getCommonIconProps } from '../common-icons';
 
 describe( 'common-icons exports', () => {
 	describe( 'commonIcons', () => {
@@ -41,9 +38,7 @@ describe( 'common-icons exports', () => {
 					alt: 'Visa',
 				} )
 			);
-			expect( typeof ( result as { src: string } ).src ).toBe(
-				'string'
-			);
+			expect( typeof ( result as { src: string } ).src ).toBe( 'string' );
 		} );
 
 		it( 'returns an empty object for an unknown id', () => {
