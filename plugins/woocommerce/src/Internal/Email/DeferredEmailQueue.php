@@ -215,7 +215,16 @@ final class DeferredEmailQueue {
 	 * @return bool
 	 */
 	private function is_supported_object_arg( object $arg ): bool {
-		return null !== $this->get_queued_object_type( $arg ) && is_callable( array( $arg, 'get_id' ) );
+		if ( null === $this->get_queued_object_type( $arg ) || ! is_callable( array( $arg, 'get_id' ) ) ) {
+			return false;
+		}
+
+		/**
+		 * Supported queued object types expose get_id().
+		 *
+		 * @var \WC_Product|\WC_Order|\WC_Payment_Gateway|StockNotification $arg
+		 */
+		return $this->is_restorable_object_id( $arg->get_id() );
 	}
 
 	/**
@@ -257,10 +266,30 @@ final class DeferredEmailQueue {
 			 *
 			 * @var \WC_Product|\WC_Order|\WC_Payment_Gateway|StockNotification $arg
 			 */
-			return $this->create_queued_object_reference( $type, $arg->get_id() );
+			$id = $arg->get_id();
+
+			if ( ! $this->is_restorable_object_id( $id ) ) {
+				throw new \UnexpectedValueException( 'Queued email object argument cannot be prepared.' );
+			}
+
+			return $this->create_queued_object_reference( $type, $id );
 		}
 
 		return $arg;
+	}
+
+	/**
+	 * Check whether an object ID can be restored from Action Scheduler storage.
+	 *
+	 * @param mixed $id The object ID.
+	 * @return bool
+	 */
+	private function is_restorable_object_id( $id ): bool {
+		if ( ! is_int( $id ) && ! is_string( $id ) ) {
+			return false;
+		}
+
+		return ! in_array( $id, array( 0, '0', '' ), true );
 	}
 
 	/**

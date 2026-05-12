@@ -44,6 +44,8 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		remove_all_actions( 'woocommerce_send_queued_transactional_email' );
 		remove_all_actions( 'woocommerce_deferred_email_test_unknown_object' );
 		remove_all_actions( 'woocommerce_deferred_email_test_unknown_object_notification' );
+		remove_all_actions( 'woocommerce_deferred_email_test_unsaved_product' );
+		remove_all_actions( 'woocommerce_deferred_email_test_unsaved_product_notification' );
 		$this->set_wc_emails_deferred_queue( null );
 		$this->delete_stock_notifications();
 		$this->reset_queue_singleton();
@@ -205,10 +207,41 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Queue transactional email sends synchronously when a supported object has no restorable ID.
+	 */
+	public function test_queue_transactional_email_sends_synchronously_when_supported_object_has_no_restorable_id(): void {
+		$product = new \WC_Product_Simple();
+		$sent    = array();
+
+		$this->set_wc_emails_deferred_queue( $this->sut );
+
+		// phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.MissingSinceComment -- Test-only hooks.
+		add_action( 'woocommerce_deferred_email_test_unsaved_product', array( \WC_Emails::class, 'queue_transactional_email' ) );
+		add_action(
+			'woocommerce_deferred_email_test_unsaved_product_notification',
+			function ( $arg ) use ( &$sent ) {
+				$sent[] = $arg;
+			}
+		);
+
+		do_action( 'woocommerce_deferred_email_test_unsaved_product', $product );
+		// phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment,WooCommerce.Commenting.CommentHooks.MissingSinceComment
+
+		$this->sut->dispatch();
+
+		$queue = $this->get_test_queue();
+
+		$this->assertSame( 0, $product->get_id() );
+		$this->assertEmpty( $queue->actions, 'Supported object args with no restorable ID should not be scheduled' );
+		$this->assertSame( array( $product ), $sent, 'Supported object args with no restorable ID should be sent synchronously' );
+	}
+
+	/**
 	 * @testdox Push rejects items with object arguments that cannot be prepared for storage.
 	 */
 	public function test_push_rejects_items_with_unprepared_object_args(): void {
 		$this->assertFalse( $this->sut->push( 'woocommerce_low_stock', array( new \stdClass() ) ) );
+		$this->assertFalse( $this->sut->push( 'woocommerce_low_stock', array( new \WC_Product_Simple() ) ) );
 
 		$this->sut->dispatch();
 
