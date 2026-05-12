@@ -91,17 +91,53 @@ describe( 'EnableGatewayButton', () => {
 
 		await waitFor( () => {
 			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
-				'Finish setting up Test Gateway before enabling it.',
-				{
+				expect.stringContaining( 'Test Gateway' ),
+				expect.objectContaining( {
 					type: 'snackbar',
 					explicitDismiss: true,
-					actions: [
-						{
+					actions: expect.arrayContaining( [
+						expect.objectContaining( {
 							label: 'Manage',
 							url: '/settings/test-gateway',
-						},
-					],
-				}
+						} ),
+					] ),
+				} )
+			);
+		} );
+	} );
+
+	it( 'falls back to a generic setup message when the gateway title is empty', async () => {
+		const gatewayProviderWithoutTitle = {
+			...gatewayProvider,
+			title: '',
+		} as PaymentGatewayProvider;
+
+		const { getByRole } = render(
+			<EnableGatewayButton
+				gatewayProvider={ gatewayProviderWithoutTitle }
+				settingsHref="/settings/test-gateway"
+				onboardingHref="/onboard/test-gateway"
+				isOffline={ false }
+				gatewayHasRecommendedPaymentMethods={ false }
+				installingPlugin={ null }
+			/>
+		);
+
+		fireEvent.click( getByRole( 'link', { name: 'Enable' } ) );
+
+		await waitFor( () => {
+			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
+				'Finish setting up this payment method before enabling it.',
+				expect.objectContaining( {
+					type: 'snackbar',
+					explicitDismiss: true,
+					actions: expect.arrayContaining( [
+						expect.objectContaining( {
+							label: 'Manage',
+							url: '/settings/test-gateway',
+						} ),
+					] ),
+				} )
 			);
 		} );
 	} );
