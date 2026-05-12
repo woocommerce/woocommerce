@@ -168,24 +168,48 @@ test.describe.serial(
 			).toHaveCount( 0 );
 		} );
 
-		test( 'reloading the page locks the previously reviewed rows', async ( {
+		test( 'reloading the page pre-fills previously submitted reviews', async ( {
 			page,
 		} ) => {
 			await page.goto(
 				`/review-order/${ order.id }/?key=${ order.order_key }`
 			);
 
-			// The first two products should now render the locked variant.
-			await expect(
-				page.locator( '.woocommerce-review-order__item--reviewed' )
-			).toHaveCount( 2 );
+			// The third product is still unreviewed, so the form (not the
+			// empty-state thank-you) is what renders. All three rows show.
+			const rows = page.locator( '.woocommerce-review-order__item' );
+			await expect( rows ).toHaveCount( products.length );
 
-			// The third product should still be a form row.
+			// First row was rated 5 stars on the previous submission — the
+			// matching radio should be pre-checked on reload.
 			await expect(
-				page.locator(
-					'.woocommerce-review-order__item:not(.woocommerce-review-order__item--reviewed)'
-				)
-			).toHaveCount( 1 );
+				rows.nth( 0 ).locator( 'input[id$="-5"]' )
+			).toBeChecked();
+
+			// Second row: 4 stars + text are both pre-filled.
+			await expect(
+				rows.nth( 1 ).locator( 'input[id$="-4"]' )
+			).toBeChecked();
+			await expect(
+				rows
+					.nth( 1 )
+					.locator(
+						'textarea.woocommerce-review-order__item-review-textarea'
+					)
+			).toHaveValue( 'Solid build. Recommended.' );
+
+			// Third row was never rated; no radio is checked and the textarea
+			// is empty.
+			await expect(
+				rows.nth( 2 ).locator( 'input[type="radio"]:checked' )
+			).toHaveCount( 0 );
+			await expect(
+				rows
+					.nth( 2 )
+					.locator(
+						'textarea.woocommerce-review-order__item-review-textarea'
+					)
+			).toHaveValue( '' );
 		} );
 
 		test( 'mismatched key renders a 404 page', async ( { page } ) => {
