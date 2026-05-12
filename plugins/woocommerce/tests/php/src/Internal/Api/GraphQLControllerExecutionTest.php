@@ -257,6 +257,83 @@ class GraphQLControllerExecutionTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox the woocommerce_graphql_can_introspect filter can grant introspection to an anonymous request.
+	 */
+	public function test_filter_can_grant_introspection_to_anonymous_user(): void {
+		wp_set_current_user( 0 );
+
+		$received_principal = null;
+		$received_request   = null;
+		$filter             = function ( bool $can_introspect, ?object $principal, \WP_REST_Request $request ) use ( &$received_principal, &$received_request ): bool {
+			$received_principal = $principal;
+			$received_request   = $request;
+			return true;
+		};
+		add_filter( 'woocommerce_graphql_can_introspect', $filter, 10, 3 );
+
+		try {
+			$response = $this->sut->handle_request(
+				$this->post_request( array( 'query' => '{ __schema { queryType { name } } }' ) )
+			);
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_introspect', $filter, 10 );
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'Query', $response->get_data()['data']['__schema']['queryType']['name'] ?? null );
+
+		$this->assertNotNull( $received_principal, 'The filter should receive the resolved principal even for anonymous requests.' );
+		$this->assertInstanceOf( \WP_REST_Request::class, $received_request );
+	}
+
+	/**
+	 * @testdox the woocommerce_graphql_can_introspect filter can revoke introspection from an admin.
+	 */
+	public function test_filter_can_revoke_introspection_from_admin(): void {
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$filter = function (): bool {
+			return false;
+		};
+		add_filter( 'woocommerce_graphql_can_introspect', $filter );
+
+		try {
+			$response = $this->sut->handle_request(
+				$this->post_request( array( 'query' => '{ __schema { queryType { name } } }' ) )
+			);
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_introspect', $filter );
+		}
+
+		$data = $response->get_data();
+		$this->assertNotEmpty( $data['errors'] ?? array() );
+	}
+
+	/**
+	 * @testdox the woocommerce_graphql_can_introspect filter must return strictly true; truthy non-bool denies.
+	 */
+	public function test_filter_requires_strict_true_to_grant_introspection(): void {
+		wp_set_current_user( 0 );
+
+		$filter = function () {
+			return 1;
+		};
+		add_filter( 'woocommerce_graphql_can_introspect', $filter );
+
+		try {
+			$response = $this->sut->handle_request(
+				$this->post_request( array( 'query' => '{ __schema { queryType { name } } }' ) )
+			);
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_introspect', $filter );
+		}
+
+		$data = $response->get_data();
+		$this->assertNotEmpty( $data['errors'] ?? array() );
+	}
+
+	/**
 	 * @testdox handle_request returns a syntax error as HTTP 400 GRAPHQL_PARSE_ERROR.
 	 */
 	public function test_handle_request_handles_syntax_error(): void {
@@ -472,5 +549,86 @@ class GraphQLControllerExecutionTest extends WC_REST_Unit_Test_Case {
 
 		$this->assertSame( 200, $response->get_status() );
 		$this->assertSame( 'anonymous', $response->get_data()['data']['principalAware']['result'] ?? null );
+	}
+
+	/**
+	 * @testdox a throw from the woocommerce_graphql_can_introspect filter callback denies introspection (fail-closed).
+	 */
+	public function test_filter_callback_throw_denies_introspection(): void {
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$filter = function () {
+			throw new \RuntimeException( 'broken-filter-callback' );
+		};
+		add_filter( 'woocommerce_graphql_can_introspect', $filter );
+
+		try {
+			$response = $this->sut->handle_request(
+				$this->post_request( array( 'query' => '{ __schema { queryType { name } } }' ) )
+			);
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_introspect', $filter );
+		}
+
+		// Validation rejects the introspection query (fail-closed), and the
+		// filter's exception message must not appear anywhere on the wire.
+		$data = $response->get_data();
+		$this->assertNotEmpty( $data['errors'] ?? array() );
+
+		$wire = wp_json_encode( $data );
+		$this->assertIsString( $wire );
+		$this->assertStringNotContainsString( 'broken-filter-callback', $wire );
+	}
+
+	/**
+	 * @testdox a null principal denies introspection even when a permissive filter is installed.
+	 */
+	public function test_null_principal_denies_introspection_even_with_permissive_filter(): void {
+		$filter_invoked = false;
+		$filter         = function ( bool $can_introspect ) use ( &$filter_invoked ): bool {
+			// Avoid parameter not used PHPCS errors.
+			unset( $can_introspect );
+			$filter_invoked = true;
+			return true;
+		};
+		add_filter( 'woocommerce_graphql_can_introspect', $filter );
+
+		try {
+			$reflection = new \ReflectionClass( GraphQLController::class );
+			$method     = $reflection->getMethod( 'is_introspection_allowed' );
+			$method->setAccessible( true );
+
+			$request = new \WP_REST_Request( 'POST', '/wc/graphql' );
+			$result  = $method->invoke( $this->sut, null, $request );
+		} finally {
+			remove_filter( 'woocommerce_graphql_can_introspect', $filter );
+		}
+
+		$this->assertFalse( $result );
+		$this->assertFalse( $filter_invoked, 'Filter must not be consulted for null principals.' );
+	}
+
+	/**
+	 * @testdox a throw from the principal's can_introspect() method denies introspection (fail-closed).
+	 */
+	public function test_principal_method_throw_denies_introspection(): void {
+		$throwing_principal = new class() {
+			/**
+			 * Always throw to simulate a buggy plugin principal.
+			 *
+			 * @throws \RuntimeException Always.
+			 */
+			public function can_introspect(): bool {
+				throw new \RuntimeException( 'broken-principal-method' );
+			}
+		};
+
+		$reflection = new \ReflectionClass( GraphQLController::class );
+		$method     = $reflection->getMethod( 'is_introspection_allowed' );
+		$method->setAccessible( true );
+
+		$request = new \WP_REST_Request( 'POST', '/wc/graphql' );
+		$this->assertFalse( $method->invoke( $this->sut, $throwing_principal, $request ) );
 	}
 }

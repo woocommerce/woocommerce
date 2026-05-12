@@ -106,6 +106,12 @@ export const useTransactionalEmails = (
 						? rawVersion
 						: null;
 
+				const rawBackfilled = meta?._wc_email_backfilled;
+				const wasBackfilled =
+					rawBackfilled === true ||
+					rawBackfilled === '1' ||
+					rawBackfilled === 1;
+
 				// PHP serializes the registry's current version under
 				// `current_version` (snake) on the slotfill payload; project to
 				// `currentVersion` (camel) for the row's TS contract.
@@ -125,6 +131,7 @@ export const useTransactionalEmails = (
 					templateStatus,
 					templateVersion,
 					currentVersion,
+					wasBackfilled,
 				};
 			} ),
 		[ emailTypesData, emailPosts, postIdsMap ]
