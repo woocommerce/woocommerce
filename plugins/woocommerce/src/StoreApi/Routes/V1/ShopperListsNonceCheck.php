@@ -17,6 +17,13 @@ namespace Automattic\WooCommerce\StoreApi\Routes\V1;
  */
 trait ShopperListsNonceCheck {
 	/**
+	 * Nonce action used to sign and verify Store API write requests.
+	 *
+	 * @var string
+	 */
+	private static $store_api_nonce_action = 'wc_store_api';
+
+	/**
 	 * Override of {@see AbstractRoute::get_response} that enforces the
 	 * `wc_store_api` Nonce header on writes and refreshes it on every reply.
 	 *
@@ -28,13 +35,13 @@ trait ShopperListsNonceCheck {
 		if ( $this->is_write_request( $request ) ) {
 			$nonce_check = $this->check_store_api_nonce( $request );
 			if ( is_wp_error( $nonce_check ) ) {
-				return $this->add_nonce_response_headers( $this->error_to_response( $nonce_check ) );
+				return $this->add_nonce_response_headers( rest_ensure_response( $this->error_to_response( $nonce_check ) ) );
 			}
 		}
 
 		$response = parent::get_response( $request );
 
-		return $this->add_nonce_response_headers( $response );
+		return $this->add_nonce_response_headers( rest_ensure_response( $response ) );
 	}
 
 	/**
@@ -71,18 +78,18 @@ trait ShopperListsNonceCheck {
 
 		$nonce = $request->get_header( 'Nonce' );
 		if ( null === $nonce || '' === $nonce ) {
-			return new \WP_Error(
+			return $this->get_route_error_response(
 				'woocommerce_rest_missing_nonce',
 				__( 'Missing the Nonce header. This endpoint requires a valid nonce.', 'woocommerce' ),
-				array( 'status' => 401 )
+				401
 			);
 		}
 
-		if ( ! wp_verify_nonce( $nonce, 'wc_store_api' ) ) {
-			return new \WP_Error(
+		if ( ! wp_verify_nonce( $nonce, self::$store_api_nonce_action ) ) {
+			return $this->get_route_error_response(
 				'woocommerce_rest_invalid_nonce',
 				__( 'Nonce is invalid.', 'woocommerce' ),
-				array( 'status' => 403 )
+				403
 			);
 		}
 
@@ -96,8 +103,9 @@ trait ShopperListsNonceCheck {
 	 * @return \WP_REST_Response
 	 */
 	private function add_nonce_response_headers( \WP_REST_Response $response ): \WP_REST_Response {
-		$response->header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+		$response->header( 'Nonce', wp_create_nonce( self::$store_api_nonce_action ) );
 		$response->header( 'Nonce-Timestamp', (string) time() );
+		$response->header( 'Cache-Control', 'no-store' );
 
 		return $response;
 	}
