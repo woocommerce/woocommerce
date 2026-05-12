@@ -21,7 +21,6 @@ use Attribute;
  * Two metadata entries with the same name on the same element produce a
  * build-time error, see ApiBuilder for the duplicate-name detection. Multiple
  * distinct names on one element are allowed.
- *
  */
 #[Attribute( Attribute::TARGET_CLASS | Attribute::TARGET_PROPERTY | Attribute::TARGET_PARAMETER | Attribute::TARGET_CLASS_CONSTANT | Attribute::IS_REPEATABLE )]
 class Metadata {

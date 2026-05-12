@@ -92,15 +92,17 @@ class MetadataController {
 	}
 
 	/**
-	 * Resolver for the `_apiMetadata` root field.
+	 * Resolver for the `_apiMetadata` root field. Signature matches the
+	 * webonyx resolver contract; `$root` and `$context` are unused here
+	 * (root operations have no parent, and metadata is principal-independent).
 	 *
-	 * @param mixed       $root    Unused; root operations have no parent.
+	 * @param ?array      $root    Webonyx passes null for root resolvers.
 	 * @param array       $args    GraphQL arguments (`name`, `type`, `field`).
-	 * @param mixed       $context Unused; metadata is principal-independent.
+	 * @param array       $context Per-request context the controller builds.
 	 * @param ResolveInfo $info    Carries the schema instance to walk.
 	 * @return list<array<string, mixed>>
 	 */
-	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): array {
+	public static function resolve( ?array $root, array $args, array $context, ResolveInfo $info ): array {
 		unset( $root, $context );
 
 		// Wrap the resolver's engine-typed schema into the same handle clients
