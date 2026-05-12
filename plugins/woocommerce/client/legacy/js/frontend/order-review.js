@@ -99,8 +99,8 @@
 			submit.disabled = ! anyChecked;
 		}
 
-		// Expose so external code (e.g. the AJAX submission handler in #64527)
-		// can re-evaluate the gate after async state changes.
+		// Expose so initAjaxSubmit can re-run the gate after the request
+		// completes (instead of unconditionally enabling the button).
 		form.syncReviewOrderSubmitGate = syncSubmit;
 
 		form.addEventListener( 'change', function ( event ) {
@@ -118,6 +118,135 @@
 		syncSubmit();
 	}
 
+	/**
+	 * Render per-row outcome inside a row's fields container.
+	 *
+	 * @param {HTMLElement} row    `.woocommerce-review-order__item`
+	 * @param {string}      status `ok | pending_moderation | error`
+	 * @param {string}      [text] Optional message override.
+	 */
+	function renderRowStatus( row, status, text ) {
+		var fields = row.querySelector(
+			'.woocommerce-review-order__item-fields'
+		);
+		if ( ! fields ) {
+			return;
+		}
+		var existing = fields.querySelector(
+			'.woocommerce-review-order__item-status'
+		);
+		if ( existing ) {
+			existing.parentNode.removeChild( existing );
+		}
+		var i18n =
+			( window.wcOrderReview && window.wcOrderReview.i18n ) || {};
+		var defaults = {
+			ok: i18n.ok || 'Thanks, your review is live.',
+			pending_moderation:
+				i18n.pending_moderation ||
+				'Thanks, your review is pending approval.',
+			error:
+				i18n.error || 'Something went wrong, please try again.',
+		};
+		var note = document.createElement( 'p' );
+		note.className =
+			'woocommerce-review-order__item-status woocommerce-review-order__item-status--' +
+			status;
+		note.setAttribute( 'role', 'status' );
+		note.textContent = text || defaults[ status ] || defaults.error;
+		fields.appendChild( note );
+	}
+
+	/**
+	 * Intercept form submit and POST it to admin-ajax.
+	 *
+	 * @param {HTMLFormElement} form
+	 */
+	function initAjaxSubmit( form ) {
+		var ajaxUrl = form.getAttribute( 'data-ajax-url' );
+		if ( ! ajaxUrl ) {
+			return;
+		}
+
+		form.addEventListener( 'submit', function ( event ) {
+			event.preventDefault();
+
+			var submit = form.querySelector(
+				'.woocommerce-review-order__submit'
+			);
+			if ( submit ) {
+				submit.disabled = true;
+			}
+
+			window
+				.fetch( ajaxUrl, {
+					method: 'POST',
+					credentials: 'same-origin',
+					body: new window.FormData( form ),
+				} )
+				.then( function ( response ) {
+					return response.json().catch( function () {
+						return { success: false };
+					} );
+				} )
+				.then( function ( payload ) {
+					if ( ! payload || ! payload.success || ! payload.data ) {
+						Array.prototype.forEach.call(
+							form.querySelectorAll(
+								'.woocommerce-review-order__item'
+							),
+							function ( row ) {
+								if (
+									row.querySelector(
+										'.woocommerce-star-rating__input:checked'
+									)
+								) {
+									renderRowStatus( row, 'error' );
+								}
+							}
+						);
+						return;
+					}
+
+					var results = payload.data.results || {};
+					Object.keys( results ).forEach( function ( key ) {
+						var entry = results[ key ];
+						var row = form.querySelector(
+							'.woocommerce-review-order__item[data-row-index="' +
+								key +
+								'"]'
+						);
+						if ( row && entry && entry.status ) {
+							renderRowStatus( row, entry.status );
+						}
+					} );
+				} )
+				.catch( function () {
+					Array.prototype.forEach.call(
+						form.querySelectorAll(
+							'.woocommerce-review-order__item'
+						),
+						function ( row ) {
+							if (
+								row.querySelector(
+									'.woocommerce-star-rating__input:checked'
+								)
+							) {
+								renderRowStatus( row, 'error' );
+							}
+						}
+					);
+				} )
+				.then( function () {
+					if ( typeof form.syncReviewOrderSubmitGate === 'function' ) {
+						form.syncReviewOrderSubmitGate();
+					} else if ( submit ) {
+						submit.disabled = false;
+					}
+				} );
+		} );
+	}
+
 	function init() {
 		var groups = document.querySelectorAll( '.woocommerce-star-rating' );
 		Array.prototype.forEach.call( groups, initGroup );
@@ -126,6 +255,7 @@
 			'.woocommerce-review-order__form'
 		);
 		Array.prototype.forEach.call( forms, initSubmitGate );
+		Array.prototype.forEach.call( forms, initAjaxSubmit );
 	}
 
 	if ( document.readyState === 'loading' ) {

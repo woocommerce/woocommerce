@@ -209,4 +209,57 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $before, $after, 'Disabled review-request email must not dispatch any mail.' );
 	}
+
+	/**
+	 * @testdox trigger() refuses to send when the order is no longer in an eligible status.
+	 *
+	 * Defence-in-depth against the scheduler missing a transition out of
+	 * `completed` (WOOPLUG-6672): even if the action fires, the email must
+	 * not go out for an order that is no longer eligible.
+	 */
+	public function test_trigger_skips_when_order_not_in_eligible_status(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		$this->sut->trigger( $order->get_id() );
+		$after = count( $mailer->mock_sent );
+
+		$this->assertSame( $before, $after, 'Review-request email must not dispatch for non-eligible status.' );
+	}
+
+	/**
+	 * @testdox The woocommerce_review_order_eligible_statuses filter widens the eligible set for trigger().
+	 */
+	public function test_trigger_eligible_statuses_filter_can_widen(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		$widen_statuses = static function () {
+			return array( 'completed', 'processing' );
+		};
+		add_filter( 'woocommerce_review_order_eligible_statuses', $widen_statuses );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		try {
+			$this->sut->trigger( $order->get_id() );
+			$after = count( $mailer->mock_sent );
+		} finally {
+			remove_filter( 'woocommerce_review_order_eligible_statuses', $widen_statuses );
+		}
+
+		$this->assertSame( $before + 1, $after, 'Filter must allow non-default statuses to receive the email.' );
+	}
 }

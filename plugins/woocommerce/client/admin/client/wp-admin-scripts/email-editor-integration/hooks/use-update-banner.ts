@@ -339,7 +339,11 @@ export function useUpdateBanner(): UseUpdateBannerResult {
 	const summary: ChangeSummary | null = finalShouldRender
 		? effectiveSummary
 		: null;
-	const hasConflicts = summary !== null && summary.copy_changes.length > 0;
+	// Only `auto_resolvable !== true` counts as a true conflict that blocks
+	// Apply. `undefined` is the two-way fallback (no base) and stays gated.
+	const hasConflicts =
+		summary !== null &&
+		summary.copy_changes.some( ( cc ) => cc.auto_resolvable !== true );
 
 	// `@wordpress/data`'s typed dispatch surface isn't exhaustive for
 	// custom stores; cast loosely to grab our integration-store actions.
