@@ -68,9 +68,12 @@ final class ProductFilterChips extends AbstractBlock {
 			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
 		}
 
-		$visible_items      = array_slice( $items, 0, $display_limit, true );
-		$has_more_items     = count( $items ) > count( $visible_items );
-		$hidden_count       = max( 0, count( $items ) - count( $visible_items ) );
+		$visible_items = array_slice( $items, 0, $display_limit, true );
+
+		// Count hidden items, considering that selected items beyond the limit stay visible.
+		$overflowing_items = array_slice( array_values( $items ), $display_limit );
+		$hidden_count      = count( array_filter( $overflowing_items, fn( $item ) => is_array( $item ) && empty( $item['selected'] ) ) );
+
 		$first_item         = reset( $items );
 		$show_counts        = is_array( $first_item ) && array_key_exists( 'count', $first_item );
 		$has_color_swatches = is_array( $first_item ) && array_key_exists( 'color', $first_item );
@@ -172,7 +175,7 @@ final class ProductFilterChips extends AbstractBlock {
 						</button>
 					</template>
 				</div>
-				<?php if ( $has_more_items ) : ?>
+				<?php if ( $hidden_count > 0 ) : ?>
 					<button
 						type="button"
 						class="wc-block-product-filter-chips__show-more"
