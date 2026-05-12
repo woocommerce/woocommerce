@@ -23,7 +23,10 @@ if ( ! $order instanceof WC_Order ) {
 	return;
 }
 
+// Fall back to the site home if the shop page is missing, mirroring how
+// `Endpoint::gate_request()` handles a missing host page.
 $shop_url = wc_get_page_permalink( 'shop' );
+$cta_url  = $shop_url ? $shop_url : home_url( '/' );
 ?>
 <div class="woocommerce-review-order woocommerce-review-order--empty">
 	<div class="woocommerce-review-order__empty-card">
@@ -81,12 +84,10 @@ $shop_url = wc_get_page_permalink( 'shop' );
 			</p>
 		<?php endif; ?>
 
-		<?php if ( $shop_url ) : ?>
-			<p class="woocommerce-review-order__empty-actions">
-				<a class="button" href="<?php echo esc_url( $shop_url ); ?>">
-					<?php esc_html_e( 'Continue shopping', 'woocommerce' ); ?>
-				</a>
-			</p>
-		<?php endif; ?>
+		<p class="woocommerce-review-order__empty-actions">
+			<a class="button" href="<?php echo esc_url( $cta_url ); ?>">
+				<?php esc_html_e( 'Continue shopping', 'woocommerce' ); ?>
+			</a>
+		</p>
 	</div>
 </div>
