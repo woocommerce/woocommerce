@@ -191,7 +191,11 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			return -1;
 		}
 
-		$order       = wc_get_order( $post_id );
+		$order = wc_get_order( $post_id );
+		if ( ! $order instanceof \WC_Order ) {
+			return -1;
+		}
+
 		$customer_id = self::get_existing_customer_id_from_order( $order );
 		if ( false === $customer_id ) {
 			return -1;
@@ -692,11 +696,14 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	 * Returns a data object and format object of the customers data coming from the order.
 	 *
 	 * @param \WC_Order   $order         WC_Order where we get customer info from.
-	 * @param object|null $customer_user WC_Customer registered customer WP user.
+	 * @param \WC_Customer|null $customer_user WC_Customer registered customer WP user.
 	 * @return array ($data, $format)
 	 */
 	public static function get_customer_order_data_and_format( $order, $customer_user = null ) {
-		$data   = array(
+		$order_date = $order->get_date_created( 'edit' )
+			?? $order->get_date_modified( 'edit' )
+			?? $order->get_date_paid( 'edit' );
+		$data       = array(
 			'first_name'       => method_exists( $order, 'get_customer_first_name' )
 				? $order->get_customer_first_name()
 				: $order->get_billing_first_name( 'edit' ),
@@ -708,9 +715,9 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 			'state'            => $order->get_billing_state( 'edit' ),
 			'postcode'         => $order->get_billing_postcode( 'edit' ),
 			'country'          => $order->get_billing_country( 'edit' ),
-			'date_last_active' => $order->get_date_created( 'edit' )
-				? gmdate( 'Y-m-d H:i:s', $order->get_date_created( 'edit' )->getTimestamp() )
-				: gmdate( 'Y-m-d H:i:s' ),
+			'date_last_active' => $order_date
+				? gmdate( 'Y-m-d H:i:s', $order_date->getTimestamp() )
+				: null,
 		);
 		$format = array(
 			'%s',

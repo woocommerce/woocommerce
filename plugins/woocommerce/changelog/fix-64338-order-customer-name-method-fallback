@@ -1,4 +1,4 @@
 Significance: patch
 Type: fix
 
-Fix fatal error when DataStore::get_or_create_customer_from_order() receives a plain WC_Order instead of the Overrides\Order subclass, by adding method_exists() fallback for get_customer_first_name/get_customer_last_name.
+Fix fatal error in Analytics Customers DataStore when a plain WC_Order (rather than the Overrides\Order subclass) is passed to get_or_create_customer_from_order(), and harden date_last_active against a missing date_created by cascading through date_modified and date_paid before falling back to null.
