@@ -31,9 +31,11 @@ class Checkout extends AbstractCartRoute {
 	const SCHEMA_TYPE = 'checkout';
 
 	/**
-	 * Holds the current order being processed.
+	 * Holds the current order being processed. Null until `create_or_update_draft_order()`
+	 * materialises it (either by reusing the session's pending/failed order or by creating
+	 * a new one from the cart).
 	 *
-	 * @var \WC_Order
+	 * @var \WC_Order|null
 	 */
 	private $order = null;
 
@@ -745,10 +747,15 @@ class Checkout extends AbstractCartRoute {
 	/**
 	 * Create or update a draft order based on the cart.
 	 *
+	 * @phpstan-assert \WC_Order $this->order
+	 *
 	 * @param \WP_REST_Request $request Full details about the request.
 	 * @throws RouteException On error.
 	 */
 	private function create_or_update_draft_order( \WP_REST_Request $request ) {
+		// Reuse the failed/pending order from the customer's session if one exists; otherwise the POST flow would orphan it by creating a fresh order on every retry.
+		$this->order = $this->order ?? $this->get_draft_order();
+
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
 			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
@@ -958,6 +965,8 @@ class Checkout extends AbstractCartRoute {
 	 * @param \WP_REST_Request $request Request object.
 	 */
 	private function process_customer( \WP_REST_Request $request ) {
+		$order = $this->get_order_or_throw();
+
 		if ( $this->should_create_customer_account( $request ) ) {
 			$customer_id = wc_create_new_customer(
 				$request['billing_address']['email'],
@@ -979,7 +988,7 @@ class Checkout extends AbstractCartRoute {
 			}
 
 			// Associate customer with the order.
-			$this->order->set_customer_id( $customer_id );
+			$order->set_customer_id( $customer_id );
 
 			// Set the customer auth cookie.
 			wc_set_customer_auth_cookie( $customer_id );
@@ -987,8 +996,8 @@ class Checkout extends AbstractCartRoute {
 		}
 
 		// Persist customer address data to account.
-		$this->order_controller->sync_customer_data_with_order( $this->order );
-		wc_log_order_step( '[Store API #6::process_customer] Synced customer data from order', array( 'customer_id' => $this->order->get_customer_id() ) );
+		$this->order_controller->sync_customer_data_with_order( $order );
+		wc_log_order_step( '[Store API #6::process_customer] Synced customer data from order', array( 'customer_id' => $order->get_customer_id() ) );
 	}
 
 	/**

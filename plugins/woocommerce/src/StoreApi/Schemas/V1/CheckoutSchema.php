@@ -270,7 +270,8 @@ class CheckoutSchema extends AbstractSchema {
 			'customer_id'        => $customer->get_id(),
 			'billing_address'    => (object) $this->billing_address_schema->get_item_response( $customer ),
 			'shipping_address'   => (object) $this->shipping_address_schema->get_item_response( $customer ),
-			'payment_method'     => (string) PaymentUtils::get_default_payment_method(),
+			// Session value takes precedence over the saved default so a logged-in shopper's PATCH-time selection isn't overwritten by their stored payment method on the next render.
+			'payment_method'     => (string) ( WC()->session->get( 'chosen_payment_method' ) ?? PaymentUtils::get_default_payment_method() ),
 			'payment_result'     => null,
 			'additional_fields'  => (object) $this->get_additional_fields_response( $customer ),
 			'__experimentalCart' => (object) $this->cart_schema->get_item_response( $cart ),
