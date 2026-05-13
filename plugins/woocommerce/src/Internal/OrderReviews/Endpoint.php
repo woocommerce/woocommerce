@@ -85,9 +85,21 @@ class Endpoint {
 	public function maybe_create_host_page(): void {
 		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
 		$page    = $page_id > 0 ? get_post( $page_id ) : null;
-		// Reseed if the stored option points at a draft, private, or
-		// non-page post — `add_rewrite_rule` requires a published `page`.
-		if ( $page instanceof WP_Post && 'page' === $page->post_type && 'publish' === $page->post_status ) {
+
+		if ( $page instanceof WP_Post && 'page' === $page->post_type ) {
+			if ( 'publish' === $page->post_status ) {
+				return;
+			}
+			// Existing host page is a draft/private/pending entry — republish
+			// it in place. `WC_Install::create_pages()` would short-circuit
+			// because a row already exists at that option value.
+			wp_update_post(
+				array(
+					'ID'          => (int) $page->ID,
+					'post_status' => 'publish',
+				)
+			);
+			update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
 			return;
 		}
 
