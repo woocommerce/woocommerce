@@ -179,24 +179,36 @@ final class ShopperCollection extends AbstractBlock {
 			$variation['modifierSlug']
 		);
 
+		// `hasShownItems` seeds the per-block context so the empty message
+		// stays hidden for new shoppers who land on a page with nothing
+		// saved. The JS-side watcher flips it to `true` the first time the
+		// list has any items (whether that's the SSR seed or a runtime add
+		// via "Save for later"), and `state.isEmpty` only flips on when the
+		// flag is set *and* the list is currently empty. The flag lives in
+		// the per-block context, so it naturally resets on every full page
+		// load — no extra Store API field or persisted flag needed.
 		$wrapper_attributes = array(
 			'class'               => $wrapper_class,
 			'data-wp-interactive' => 'woocommerce/shopper-collection',
-			'data-wp-context'     => (string) wp_json_encode( array( 'listSlug' => $list_slug ) ),
+			'data-wp-context'     => (string) wp_json_encode(
+				array(
+					'listSlug'      => $list_slug,
+					'hasShownItems' => ! empty( $items ),
+				)
+			),
+			'data-wp-watch'       => 'callbacks.trackShownItems',
 			// Deterministic key derived from the list slug so iAPI router
 			// navigations land on the same block identity across renders.
 			'data-wp-key'         => $this->get_full_block_name() . '-' . $list_slug,
 			'style'               => sprintf( '--wc-shopper-collection-columns:%d;', $column_count ),
 		);
 
-		$is_empty = empty( $items );
-
 		return sprintf(
 			'<ul %1$s>%2$s%3$s%4$s%5$s</ul>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$this->render_template_markup( $variation ),
 			$this->render_items_markup( $items, $variation ),
-			$this->render_empty_markup( $is_empty, $variation ),
+			$this->render_empty_markup( $variation ),
 			$this->render_error_markup()
 		);
 	}
@@ -499,17 +511,16 @@ final class ShopperCollection extends AbstractBlock {
 
 	/**
 	 * Render the empty-state markup. Always present in the DOM so JS can
-	 * toggle it on once the last item is removed.
+	 * toggle it on once the last item is removed. Initially hidden: SSR
+	 * never shows the message, since `state.isEmpty` requires the JS-side
+	 * `hasShownItems` context flag to flip first.
 	 *
-	 * @param bool                 $is_empty  Whether the list is empty on initial paint.
 	 * @param array<string, mixed> $variation Per-list-type rendering config.
 	 * @return string
 	 */
-	private function render_empty_markup( bool $is_empty, array $variation ): string {
-		$hidden_attr = $is_empty ? '' : ' hidden';
+	private function render_empty_markup( array $variation ): string {
 		return sprintf(
-			'<li class="wc-block-shopper-collection__empty" data-wp-bind--hidden="!state.isEmpty"%1$s>%2$s</li>',
-			$hidden_attr,
+			'<li class="wc-block-shopper-collection__empty" data-wp-bind--hidden="!state.isEmpty" hidden>%s</li>',
 			esc_html( $variation['emptyMessage'] )
 		);
 	}

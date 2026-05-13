@@ -128,4 +128,65 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 
 		$this->assertSame( 'saved-for-later', $result['attrs']['listName'] );
 	}
+
+	/**
+	 * For a new shopper landing on the page with nothing saved, SSR must:
+	 *   - emit the empty-state `<li>` already `hidden`, so the message
+	 *     never flashes between paint and iAPI hydration, and
+	 *   - seed the wrapper's iAPI context with `hasShownItems: false` and
+	 *     the matching `data-wp-watch` callback, so the JS-side
+	 *     `state.isEmpty` getter has the inputs it needs to keep the
+	 *     message hidden until the shopper has actually saved an item.
+	 *
+	 * Driven through reflection on `render()` as a logged-out user,
+	 * since `prefetch_list_items` short-circuits to `[]` in that case —
+	 * no Store API call, no feature-flag wiring, no user fixture needed.
+	 * Sets `WP_Block_Supports::$block_to_render` up front so
+	 * `get_block_wrapper_attributes()` (which reads it for layout/style
+	 * supports) has the context it expects when called outside the
+	 * usual block-render pipeline.
+	 */
+	public function test_render_seeds_hidden_empty_state_for_new_shopper(): void {
+		wp_set_current_user( 0 );
+
+		$attributes = array( 'listName' => 'saved-for-later' );
+
+		$previous_block_to_render            = \WP_Block_Supports::$block_to_render;
+		\WP_Block_Supports::$block_to_render = array(
+			'blockName' => 'woocommerce/shopper-collection',
+			'attrs'     => $attributes,
+		);
+
+		try {
+			$reflection = new ReflectionClass( ShopperCollection::class );
+			$method     = $reflection->getMethod( 'render' );
+			$method->setAccessible( true );
+
+			$markup = (string) $method->invoke( $this->sut, $attributes, '', null );
+		} finally {
+			\WP_Block_Supports::$block_to_render = $previous_block_to_render;
+		}
+
+		// The empty-state `<li>` is always rendered, always initially hidden.
+		$this->assertMatchesRegularExpression(
+			'/<li[^>]*class="wc-block-shopper-collection__empty"[^>]*\bhidden\b/',
+			$markup,
+			'Empty-state <li> must be initially hidden so the message does not flash before iAPI hydration.'
+		);
+
+		// The wrapper's `data-wp-context` JSON is HTML-escaped into an
+		// attribute, so the embedded quotes appear as `&quot;` in the
+		// rendered markup.
+		$this->assertStringContainsString(
+			'&quot;hasShownItems&quot;:false',
+			$markup,
+			'Wrapper context must seed hasShownItems=false for an empty list so the empty message stays hidden until the shopper actually saves an item.'
+		);
+
+		$this->assertStringContainsString(
+			'data-wp-watch="callbacks.trackShownItems"',
+			$markup,
+			'Wrapper must wire the trackShownItems watcher so hasShownItems can flip to true the first time items appear in-session.'
+		);
+	}
 }

@@ -27,6 +27,11 @@ type ShopperCollectionConfig = {
 
 type BlockContext = {
 	listSlug: string;
+	// Wrapper-scoped flag: starts as `items.length > 0` from SSR and the
+	// `trackShownItems` callback flips it to `true` the first time the
+	// list has any items at runtime. Lives in iAPI context so it resets
+	// on every full page load.
+	hasShownItems: boolean;
 	listItem?: RawShopperListItem;
 	htmlField?: 'price_html' | 'image_html';
 };
@@ -50,6 +55,7 @@ type BlockStore = {
 	};
 	callbacks: {
 		updateInnerHtml: () => void;
+		trackShownItems: () => void;
 	};
 };
 
@@ -146,12 +152,16 @@ store< BlockStore >(
 			},
 
 			get isEmpty(): boolean {
-				const { listSlug } = getContext< BlockContext >();
-				const list = getList( listSlug );
+				const ctx = getContext< BlockContext >();
+				const list = getList( ctx.listSlug );
 				if ( ! list ) {
-					return true;
+					return false;
 				}
-				return ! list.isLoading && list.items.length === 0;
+				return (
+					ctx.hasShownItems &&
+					! list.isLoading &&
+					list.items.length === 0
+				);
 			},
 
 			get isPriceHidden(): boolean {
@@ -275,6 +285,23 @@ store< BlockStore >(
 		},
 
 		callbacks: {
+			// Wrapper-level watcher: flips `hasShownItems` to `true` the
+			// first time the list has any items. Pairs with `state.isEmpty`
+			// to gate the empty message — a new shopper landing on a page
+			// with nothing saved keeps the flag at its SSR-seeded `false`
+			// and never sees the message; once they save an item (or
+			// landed with items) the flag is `true`, so emptying the list
+			// from that point surfaces the message. The flag never flips
+			// back to `false`, which is what gives the "had-items → now-empty"
+			// transition we want during the session.
+			trackShownItems: () => {
+				const ctx = getContext< BlockContext >();
+				const list = getList( ctx.listSlug );
+				if ( list && list.items.length > 0 && ! ctx.hasShownItems ) {
+					ctx.hasShownItems = true;
+				}
+			},
+
 			// Single shared innerHTML-swap callback for any slot whose
 			// content is one of the schema's preformatted HTML fields.
 			// Mirrors the atomic product-elements `updateValue` callback:
