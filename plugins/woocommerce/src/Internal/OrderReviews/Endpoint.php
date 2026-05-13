@@ -92,7 +92,7 @@ class Endpoint {
 		// default array (it's gated by this feature); replace the filtered
 		// list with only our entry so the call doesn't re-process every
 		// other WC page on the seed pass.
-		$inject_review_order = static function (): array {
+		$inject_review_order = function (): array {
 			return array(
 				'review_order' => array(
 					'name'    => _x( 'review-order', 'Page slug', 'woocommerce' ),
