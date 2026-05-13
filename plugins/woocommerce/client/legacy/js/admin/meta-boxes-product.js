@@ -33,6 +33,34 @@ jQuery( function ( $ ) {
 		}
 	} );
 
+	// Pre-select the product type and (optionally) the downloadable
+	// checkbox from URL query args. Used by the experimental products app
+	// "Add new" menu to land on the classic editor with the right product
+	// type already set. The select#product-type .trigger('change') call
+	// further below picks up the new value and shows/hides the right
+	// panels and tabs.
+	( function preselectProductTypeFromUrl() {
+		var params = new URLSearchParams( window.location.search );
+		var productType = params.get( 'product_type' );
+		var isDownloadable = params.get( 'downloadable' ) === '1';
+
+		if ( ! productType && ! isDownloadable ) {
+			return;
+		}
+
+		var $select = $( 'select#product-type' );
+		if (
+			productType &&
+			$select.find( 'option[value="' + productType + '"]' ).length
+		) {
+			$select.val( productType );
+		}
+
+		if ( isDownloadable ) {
+			$( 'input#_downloadable' ).prop( 'checked', true );
+		}
+	}() );
+
 	// Type box.
 	if ( $( 'body' ).hasClass( 'wc-wp-version-gte-55' ) ) {
 		$( '.type_box' ).appendTo( '#woocommerce-product-data .hndle' );
