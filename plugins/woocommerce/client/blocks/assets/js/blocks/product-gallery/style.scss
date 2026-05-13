@@ -246,6 +246,13 @@ $dialog-padding: 20px;
 	display: flex;
 }
 
+// `display: flex` above overrides the UA `[hidden] { display: none }`, so the
+// `hidden` attribute (set reactively by `syncThumbnailState` for images not in
+// the active variation's subset) needs an author rule with higher specificity.
+.wc-block-product-gallery-thumbnails__thumbnail[hidden] {
+	display: none;
+}
+
 :where(.wc-block-product-gallery-thumbnails__thumbnail__image) {
 	cursor: pointer;
 	max-width: 100%;
