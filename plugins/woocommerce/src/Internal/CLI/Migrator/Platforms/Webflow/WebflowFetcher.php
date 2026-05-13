@@ -74,6 +74,7 @@ class WebflowFetcher implements PlatformFetcherInterface {
 	public function fetch_batch( array $args ): array {
 		$site_id = $this->webflow_client->get_site_id();
 		if ( is_wp_error( $site_id ) ) {
+			// @phpstan-ignore-next-line class.notFound
 			\WP_CLI::warning( 'Failed to fetch Webflow products: ' . $site_id->get_error_message() );
 			return $this->empty_batch();
 		}
@@ -90,11 +91,13 @@ class WebflowFetcher implements PlatformFetcherInterface {
 		$response = $this->webflow_client->rest_request( "/sites/{$site_id}/products", $query );
 
 		if ( is_wp_error( $response ) ) {
+			// @phpstan-ignore-next-line class.notFound
 			\WP_CLI::warning( 'Failed to fetch products from Webflow: ' . $response->get_error_message() );
 			return $this->empty_batch();
 		}
 
 		if ( ! is_object( $response ) || ! isset( $response->items ) || ! is_array( $response->items ) ) {
+			// @phpstan-ignore-next-line class.notFound
 			\WP_CLI::warning( 'Invalid Webflow response: missing items array.' );
 			return $this->empty_batch();
 		}
@@ -127,6 +130,7 @@ class WebflowFetcher implements PlatformFetcherInterface {
 
 		$site_id = $this->webflow_client->get_site_id();
 		if ( is_wp_error( $site_id ) ) {
+			// @phpstan-ignore-next-line class.notFound
 			\WP_CLI::warning( 'Could not fetch Webflow product count: ' . $site_id->get_error_message() );
 			return 0;
 		}
@@ -140,11 +144,13 @@ class WebflowFetcher implements PlatformFetcherInterface {
 		);
 
 		if ( is_wp_error( $response ) ) {
+			// @phpstan-ignore-next-line class.notFound
 			\WP_CLI::warning( 'Could not fetch Webflow product count: ' . $response->get_error_message() );
 			return 0;
 		}
 
 		if ( ! is_object( $response ) || ! isset( $response->pagination->total ) ) {
+			// @phpstan-ignore-next-line class.notFound
 			\WP_CLI::warning( 'Unexpected response from Webflow products endpoint - missing pagination.total.' );
 			return 0;
 		}
@@ -186,6 +192,7 @@ class WebflowFetcher implements PlatformFetcherInterface {
 		if ( null === $this->category_cache || empty( $this->category_cache ) ) {
 			foreach ( $items as $item ) {
 				if ( is_object( $item ) ) {
+					// @phpstan-ignore-next-line property.notFound
 					$item->_resolved_categories = array();
 				}
 			}
@@ -210,6 +217,7 @@ class WebflowFetcher implements PlatformFetcherInterface {
 				}
 			}
 
+			// @phpstan-ignore-next-line property.notFound
 			$item->_resolved_categories = $resolved;
 		}
 	}
@@ -229,6 +237,7 @@ class WebflowFetcher implements PlatformFetcherInterface {
 
 		$collections_response = $this->webflow_client->rest_request( "/sites/{$site_id}/collections" );
 		if ( is_wp_error( $collections_response ) ) {
+			// @phpstan-ignore-next-line class.notFound
 			\WP_CLI::debug( 'Could not load Webflow collections list (categories will not be resolved): ' . $collections_response->get_error_message() );
 			return;
 		}
@@ -237,6 +246,7 @@ class WebflowFetcher implements PlatformFetcherInterface {
 		$category_id = $this->find_category_collection_id( $collections );
 
 		if ( null === $category_id ) {
+			// @phpstan-ignore-next-line class.notFound
 			\WP_CLI::debug( 'No "category" collection found on Webflow site; product categories will be skipped.' );
 			return;
 		}
@@ -309,6 +319,7 @@ class WebflowFetcher implements PlatformFetcherInterface {
 			);
 
 			if ( is_wp_error( $response ) ) {
+				// @phpstan-ignore-next-line class.notFound
 				\WP_CLI::debug( 'Could not load Webflow category items: ' . $response->get_error_message() );
 				break;
 			}

@@ -342,7 +342,7 @@ class WooCommerceProductImporter {
 			$existing_posts = get_posts(
 				array(
 					'post_type'   => 'product',
-					'post_status' => 'any', // Find regardless of status.
+					'post_status' => 'any',
 					'meta_key'    => '_original_product_id', // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 					'meta_value'  => $product_data['original_product_id'], // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
 					'fields'      => 'ids',

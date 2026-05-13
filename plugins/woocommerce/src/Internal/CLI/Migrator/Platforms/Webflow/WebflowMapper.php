@@ -158,7 +158,7 @@ class WebflowMapper implements PlatformMapperInterface {
 		$basic['is_variable']         = $is_variable;
 		$basic['original_product_id'] = isset( $product->id ) ? (string) $product->id : null;
 
-		$basic['name']        = isset( $field_data->name ) ? wc_clean( (string) $field_data->name ) : '';
+		$basic['name']        = isset( $field_data->name ) ? sanitize_text_field( (string) $field_data->name ) : '';
 		$basic['slug']        = isset( $field_data->slug ) ? sanitize_title( (string) $field_data->slug ) : sanitize_title( $basic['name'] );
 		$basic['description'] = isset( $field_data->description ) ? wp_kses_post( (string) $field_data->description ) : '';
 
@@ -217,12 +217,12 @@ class WebflowMapper implements PlatformMapperInterface {
 		foreach ( $platform_data->{$resolved_key} as $entry ) {
 			if ( is_array( $entry ) && ! empty( $entry['name'] ) ) {
 				$categories[] = array(
-					'name' => wc_clean( (string) $entry['name'] ),
+					'name' => sanitize_text_field( (string) $entry['name'] ),
 					'slug' => sanitize_title( (string) ( $entry['slug'] ?? $entry['name'] ) ),
 				);
 			} elseif ( is_object( $entry ) && ! empty( $entry->name ) ) {
 				$categories[] = array(
-					'name' => wc_clean( (string) $entry->name ),
+					'name' => sanitize_text_field( (string) $entry->name ),
 					'slug' => sanitize_title( (string) ( $entry->slug ?? $entry->name ) ),
 				);
 			}
@@ -313,7 +313,7 @@ class WebflowMapper implements PlatformMapperInterface {
 			return null;
 		}
 
-		$alt = isset( $img->alt ) && null !== $img->alt ? (string) $img->alt : null;
+		$alt = isset( $img->alt ) ? (string) $img->alt : null;
 
 		$original_id = '';
 		if ( isset( $img->fileId ) && '' !== (string) $img->fileId ) { // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Webflow API uses camelCase.
@@ -557,7 +557,7 @@ class WebflowMapper implements PlatformMapperInterface {
 			if ( null === $option_name ) {
 				continue;
 			}
-			$resolved[ wc_clean( $property_name ) ] = wc_clean( $option_name );
+			$resolved[ sanitize_text_field( $property_name ) ] = sanitize_text_field( $option_name );
 		}
 
 		return $resolved;

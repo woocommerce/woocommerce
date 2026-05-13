@@ -198,9 +198,9 @@ class WebflowMapperTest extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( 'Red', $by_sku['HOOD-RED-S']['attributes']['Color'] );
-		$this->assertSame( 'S',   $by_sku['HOOD-RED-S']['attributes']['Size'] );
+		$this->assertSame( 'S', $by_sku['HOOD-RED-S']['attributes']['Size'] );
 		$this->assertSame( 'Blue', $by_sku['HOOD-BLUE-M']['attributes']['Color'] );
-		$this->assertSame( 'M',    $by_sku['HOOD-BLUE-M']['attributes']['Size'] );
+		$this->assertSame( 'M', $by_sku['HOOD-BLUE-M']['attributes']['Size'] );
 	}
 
 	/**

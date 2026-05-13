@@ -120,7 +120,10 @@ class WebflowRealDataIntegrationTest extends WC_Unit_Test_Case {
 								'id'        => 'sku-tee',
 								'fieldData' => array(
 									'sku'        => 'TEE-001',
-									'price'      => array( 'unit' => 'USD', 'value' => 2000 ),
+									'price'      => array(
+										'unit'  => 'USD',
+										'value' => 2000,
+									),
 									'main-image' => null,
 									'sku-values' => new \stdClass(),
 								),
@@ -141,8 +144,16 @@ class WebflowRealDataIntegrationTest extends WC_Unit_Test_Case {
 										'id'   => 'prop-color',
 										'name' => 'Color',
 										'enum' => array(
-											array( 'id' => 'enum-red',  'name' => 'Red',  'slug' => 'red' ),
-											array( 'id' => 'enum-blue', 'name' => 'Blue', 'slug' => 'blue' ),
+											array(
+												'id'   => 'enum-red',
+												'name' => 'Red',
+												'slug' => 'red',
+											),
+											array(
+												'id'   => 'enum-blue',
+												'name' => 'Blue',
+												'slug' => 'blue',
+											),
 										),
 									),
 								),
@@ -154,24 +165,42 @@ class WebflowRealDataIntegrationTest extends WC_Unit_Test_Case {
 								'id'        => 'sku-red',
 								'fieldData' => array(
 									'sku'        => 'HOOD-R',
-									'price'      => array( 'unit' => 'USD', 'value' => 5000 ),
+									'price'      => array(
+										'unit'  => 'USD',
+										'value' => 5000,
+									),
 									'sku-values' => array( 'prop-color' => 'enum-red' ),
-									'main-image' => array( 'fileId' => 'img-shared', 'url' => 'https://cdn.example.test/hood.jpg', 'alt' => null ),
+									'main-image' => array(
+										'fileId' => 'img-shared',
+										'url'    => 'https://cdn.example.test/hood.jpg',
+										'alt'    => null,
+									),
 								),
 							),
 							array(
 								'id'        => 'sku-blue',
 								'fieldData' => array(
 									'sku'        => 'HOOD-B',
-									'price'      => array( 'unit' => 'USD', 'value' => 5000 ),
+									'price'      => array(
+										'unit'  => 'USD',
+										'value' => 5000,
+									),
 									'sku-values' => array( 'prop-color' => 'enum-blue' ),
-									'main-image' => array( 'fileId' => 'img-shared', 'url' => 'https://cdn.example.test/hood.jpg', 'alt' => null ),
+									'main-image' => array(
+										'fileId' => 'img-shared',
+										'url'    => 'https://cdn.example.test/hood.jpg',
+										'alt'    => null,
+									),
 								),
 							),
 						),
 					),
 				),
-				'pagination' => array( 'limit' => 100, 'offset' => 0, 'total' => 2 ),
+				'pagination' => array(
+					'limit'  => 100,
+					'offset' => 0,
+					'total'  => 2,
+				),
 			)
 		);
 	}
@@ -186,8 +215,16 @@ class WebflowRealDataIntegrationTest extends WC_Unit_Test_Case {
 		return wp_json_encode(
 			array(
 				'collections' => array(
-					array( 'id' => 'coll-blog', 'slug' => 'post',     'displayName' => 'Blog Posts' ),
-					array( 'id' => 'coll-cats', 'slug' => 'category', 'displayName' => 'Categories' ),
+					array(
+						'id'          => 'coll-blog',
+						'slug'        => 'post',
+						'displayName' => 'Blog Posts',
+					),
+					array(
+						'id'          => 'coll-cats',
+						'slug'        => 'category',
+						'displayName' => 'Categories',
+					),
 				),
 			)
 		);
@@ -204,10 +241,26 @@ class WebflowRealDataIntegrationTest extends WC_Unit_Test_Case {
 		return wp_json_encode(
 			array(
 				'items'      => array(
-					array( 'id' => 'cat-shirts',    'fieldData' => array( 'name' => 'Shirts',    'slug' => 'shirts' ) ),
-					array( 'id' => 'cat-outerwear', 'fieldData' => array( 'name' => 'Outerwear', 'slug' => 'outerwear' ) ),
+					array(
+						'id'        => 'cat-shirts',
+						'fieldData' => array(
+							'name' => 'Shirts',
+							'slug' => 'shirts',
+						),
+					),
+					array(
+						'id'        => 'cat-outerwear',
+						'fieldData' => array(
+							'name' => 'Outerwear',
+							'slug' => 'outerwear',
+						),
+					),
 				),
-				'pagination' => array( 'limit' => 100, 'offset' => 0, 'total' => 2 ),
+				'pagination' => array(
+					'limit'  => 100,
+					'offset' => 0,
+					'total'  => 2,
+				),
 			)
 		);
 	}
@@ -230,8 +283,8 @@ class WebflowRealDataIntegrationTest extends WC_Unit_Test_Case {
 
 		$by_name = array();
 		foreach ( $batch['items'] as $item ) {
-			$mapped                       = $mapper->map_product_data( $item );
-			$by_name[ $mapped['name'] ]   = $mapped;
+			$mapped                     = $mapper->map_product_data( $item );
+			$by_name[ $mapped['name'] ] = $mapped;
 		}
 		return $by_name;
 	}

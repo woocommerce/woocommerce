@@ -94,9 +94,9 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 	public function test_fetch_batch_returns_items_and_cursor(): void {
 		$this->install_http_router(
 			array(
-				'/sites/site-123/products'        => MockWebflowData::products_list_response_body(),
-				'/sites/site-123/collections'     => MockWebflowData::collections_list_response_body(),
-				'/collections/coll-cats/items'    => MockWebflowData::categories_collection_items_response_body(),
+				'/sites/site-123/products'     => MockWebflowData::products_list_response_body(),
+				'/sites/site-123/collections'  => MockWebflowData::collections_list_response_body(),
+				'/collections/coll-cats/items' => MockWebflowData::categories_collection_items_response_body(),
 			)
 		);
 
@@ -172,8 +172,8 @@ class WebflowFetcherTest extends WC_Unit_Test_Case {
 
 		$this->install_http_router(
 			array(
-				'/sites/site-123/products'    => $body,
-				'/sites/site-123/collections' => MockWebflowData::collections_list_response_body(),
+				'/sites/site-123/products'     => $body,
+				'/sites/site-123/collections'  => MockWebflowData::collections_list_response_body(),
 				'/collections/coll-cats/items' => MockWebflowData::categories_collection_items_response_body(),
 			)
 		);

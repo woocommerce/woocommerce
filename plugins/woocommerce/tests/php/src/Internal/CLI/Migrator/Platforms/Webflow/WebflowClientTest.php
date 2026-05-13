@@ -41,7 +41,7 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 			'site_id'      => 'site-123',
 			'access_token' => 'ws-test-token',
 		);
-		$this->client = new WebflowClient( $this->test_credentials );
+		$this->client           = new WebflowClient( $this->test_credentials );
 	}
 
 	/**
@@ -64,7 +64,12 @@ class WebflowClientTest extends WC_Unit_Test_Case {
 				$this->assertSame( 'Bearer ws-test-token', $args['headers']['Authorization'] );
 				return array(
 					'response' => array( 'code' => 200 ),
-					'body'     => wp_json_encode( array( 'items' => array(), 'pagination' => array( 'total' => 0 ) ) ),
+					'body'     => wp_json_encode(
+						array(
+							'items'      => array(),
+							'pagination' => array( 'total' => 0 ),
+						)
+					),
 				);
 			},
 			10,
