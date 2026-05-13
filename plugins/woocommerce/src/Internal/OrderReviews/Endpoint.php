@@ -84,7 +84,10 @@ class Endpoint {
 	 */
 	public function maybe_create_host_page(): void {
 		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
-		if ( $page_id > 0 && get_post( $page_id ) instanceof WP_Post ) {
+		$page    = $page_id > 0 ? get_post( $page_id ) : null;
+		// Reseed if the stored option points at a draft, private, or
+		// non-page post — `add_rewrite_rule` requires a published `page`.
+		if ( $page instanceof WP_Post && 'page' === $page->post_type && 'publish' === $page->post_status ) {
 			return;
 		}
 
