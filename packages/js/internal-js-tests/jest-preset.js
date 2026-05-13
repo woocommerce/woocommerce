@@ -47,24 +47,32 @@ const wpModulesMapper = mapWpModules.reduce( ( acc, module ) => {
 
 module.exports = {
 	moduleNameMapper: {
-		tinymce: path.resolve( __dirname, 'build/mocks/tinymce' ),
+		tinymce: path.resolve( __dirname, 'src/mocks/tinymce' ),
 		'@woocommerce/settings': path.resolve(
 			__dirname,
-			'build/mocks/woocommerce-settings'
+			'src/mocks/woocommerce-settings'
 		),
 		'@woocommerce/tracks': path.resolve(
 			__dirname,
-			'build/mocks/woocommerce-tracks'
+			'src/mocks/woocommerce-tracks'
 		),
+		// Route all monorepo @woocommerce/* imports through source so tests
+		// don't depend on sibling packages having been built. Subpath form
+		// must come before the bare form so it wins for nested paths.
+		'^@woocommerce/([^/]+)/(.+)$': path.resolve(
+			__dirname,
+			'../$1/src/$2'
+		),
+		'^@woocommerce/([^/]+)$': path.resolve( __dirname, '../$1/src' ),
 		'~/(.*)': path.resolve(
 			__dirname,
 			'../../../plugins/woocommerce/client/admin/client/$1'
 		),
 		'\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$':
-			path.resolve( __dirname, 'build/mocks/static' ),
+			path.resolve( __dirname, 'src/mocks/static' ),
 		'\\.(scss|css)$': path.resolve(
 			__dirname,
-			'build/mocks/style-mock.js'
+			'src/mocks/style-mock.js'
 		),
 		// Force some modules to resolve with the CJS entry point, because Jest does not support package.json.exports.
 		'lib0/webcrypto': require.resolve( 'lib0/webcrypto' ), // use the CJS entry point so that it uses the node:crypto API as jsdom doesn't have a crypto API
@@ -74,11 +82,11 @@ module.exports = {
 	},
 	restoreMocks: true,
 	setupFiles: [
-		path.resolve( __dirname, 'build/setup-window-globals.js' ),
-		path.resolve( __dirname, 'build/setup-globals.js' ),
+		path.resolve( __dirname, 'src/setup-window-globals.js' ),
+		path.resolve( __dirname, 'src/setup-globals.js' ),
 	],
 	setupFilesAfterEnv: [
-		path.resolve( __dirname, 'build/setup-react-testing-library.js' ),
+		path.resolve( __dirname, 'src/setup-react-testing-library.js' ),
 	],
 	testMatch: [
 		'**/__tests__/**/*.[jt]s?(x)',
