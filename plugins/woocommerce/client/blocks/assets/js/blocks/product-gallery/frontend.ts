@@ -91,8 +91,11 @@ const computeArrowsState = ( imageData: number[], selectedImageId: number ) => {
 };
 
 /** Scroll both the large viewer and the thumbnail strip to the given image. */
-const scrollImageEverywhereIntoView = ( imageId: number ) => {
-	scrollImageIntoView( imageId );
+const scrollImageEverywhereIntoView = (
+	imageId: number,
+	behavior: ScrollBehavior = 'smooth'
+) => {
+	scrollImageIntoView( imageId, behavior );
 	scrollThumbnailIntoView( imageId );
 };
 
@@ -127,15 +130,12 @@ const updateVisibleImageSet = (
 		return;
 	}
 
-	// Defer the scroll until after Preact has applied the DOM updates
-	// (notably the `hidden` attribute on the thumbnails strip and the
-	// Next/Previous arrows) and the browser has reflowed. Otherwise, the
-	// scroll target is computed against the pre-reflow container width,
-	// and the layout shift that follows leaves the selected image
-	// off-center on a neighbouring one.
-	requestAnimationFrame(
-		withScope( () => scrollImageEverywhereIntoView( nextSelectedImageId ) )
-	);
+	// Variation switches replace the gallery's image set entirely; an
+	// animation between them would just smear across unrelated images, so
+	// snap instantly. Instant is also race-proof: index-based scroll targets
+	// computed below are correct regardless of whether iAPI's per-wrapper
+	// `data-wp-watch` callbacks have flushed yet.
+	scrollImageEverywhereIntoView( nextSelectedImageId, 'instant' );
 };
 
 /**
@@ -187,63 +187,59 @@ const toggleActiveThumbnailAttributes = ( element: HTMLElement ) => {
 };
 
 /**
- * Scrolls the image into view for the main image.
+ * Scrolls the large viewer to the given image. The horizontal scroll target
+ * is `imageIndex × clientWidth`: every visible large-image wrapper is exactly
+ * one container-width (`min/max-width: 100%`) and non-subset wrappers are
+ * `display: none`, so the visible image at index N lives at content position
+ * `N × clientWidth`. Computing the target from the index — rather than from
+ * `getBoundingClientRect` on the `<img>` — keeps it correct even when iAPI's
+ * per-wrapper `data-wp-watch` callbacks haven't yet revealed the target
+ * wrapper (a hidden element's rect is `0`, which used to produce wrong scroll
+ * targets on variation switch).
  *
- * We use getElement to get the current element that triggered the action
- * to find the closest gallery container and scroll the image into view.
- * This is necessary because if you have two galleries on the same page with the same image IDs,
- * then we need to query the image in the correct gallery to avoid scrolling the wrong image into view.
+ * We resolve the gallery via `getElement().ref` so multiple galleries on the
+ * same page with overlapping image IDs each scroll independently.
  *
- * @param {string} imageId - The ID of the image to scroll into view.
+ * @param imageId  ID of the image to center in the viewer.
+ * @param behavior `scrollTo` behavior — `'smooth'` for arrow nav, `'instant'`
+ *                 for variation swaps where any animation would just smear
+ *                 across unrelated images.
  */
-const scrollImageIntoView = ( imageId: number ) => {
+const scrollImageIntoView = (
+	imageId: number,
+	behavior: ScrollBehavior = 'smooth'
+) => {
 	if ( ! imageId ) {
 		return;
 	}
 
-	// Get the current element that triggered the action
 	const element = getElement()?.ref as HTMLElement;
-
 	if ( ! element ) {
 		return;
 	}
 
 	const galleryContainer = element.closest( SELECTORS.galleryContainer );
-
 	if ( ! galleryContainer ) {
 		return;
 	}
 
-	// Find the scrollable container for the viewer gallery
 	const scrollableContainer = galleryContainer.querySelector(
 		SELECTORS.largeImageContainer
-	);
-
+	) as HTMLElement | null;
 	if ( ! scrollableContainer ) {
 		return;
 	}
 
-	const imageElement = scrollableContainer.querySelector(
-		SELECTORS.imgByImageId( imageId )
-	);
-
-	if ( imageElement ) {
-		// Calculate the scroll position to center the image horizontally
-		const containerRect = scrollableContainer.getBoundingClientRect();
-		const imageRect = imageElement.getBoundingClientRect();
-
-		const scrollLeft =
-			scrollableContainer.scrollLeft +
-			( imageRect.left - containerRect.left ) -
-			( containerRect.width - imageRect.width ) / 2;
-
-		// Use scrollTo as scrollIntoView with inline: 'center'
-		// is not supported in iOS (Safari and Chrome).
-		scrollableContainer.scrollTo( {
-			left: scrollLeft,
-			behavior: 'smooth',
-		} );
+	const { imageData } = getContext();
+	const imageIndex = imageData.indexOf( imageId );
+	if ( imageIndex < 0 ) {
+		return;
 	}
+
+	scrollableContainer.scrollTo( {
+		left: imageIndex * scrollableContainer.clientWidth,
+		behavior,
+	} );
 };
 
 /**

@@ -21,6 +21,11 @@ $dialog-padding: 20px;
 		align-items: center;
 		margin: 0;
 		padding: 0;
+		// Chrome silently drops `scrollTo({behavior:'smooth'})` on
+		// `overflow:hidden` elements unless `scroll-behavior` is set on the
+		// element itself. Without this, arrow-nav scrolls inside the viewer
+		// would no-op and the carousel would never visually advance.
+		scroll-behavior: smooth;
 	}
 
 	:where(.wc-block-product-gallery-large-image__wrapper) {
@@ -34,6 +39,15 @@ $dialog-padding: 20px;
 		&:has(.wc-block-components-product-image--aspect-ratio-auto) {
 			aspect-ratio: 1/1;
 		}
+	}
+
+	// `display: flex` above overrides the UA `[hidden] { display: none }`, so
+	// the `hidden` attribute (set reactively by `toggleImageVisibility` for
+	// images not in the active variation's subset) needs an author rule with
+	// higher specificity. For non-variable products `imageData` always equals
+	// the full gallery, so no wrapper is ever hidden — this is a no-op there.
+	.wc-block-product-gallery-large-image__wrapper[hidden] {
+		display: none;
 	}
 
 	// These rules are overriding styles from WooCommerce core, that's why we
