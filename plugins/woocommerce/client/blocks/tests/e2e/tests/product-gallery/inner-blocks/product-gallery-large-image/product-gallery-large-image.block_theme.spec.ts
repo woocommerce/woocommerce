@@ -222,9 +222,6 @@ test.describe( `${ blockData.name }`, () => {
 				isOnlyCurrentEntityDirty: true,
 			} );
 
-			// Swipe needs a multi-image gallery; Hoodie (variable) shows
-			// only the featured image until a variation is picked, so use
-			// Beanie which has a multi-image gallery from products.sh.
 			await page.goto( '/product/beanie/' );
 
 			await page.setViewportSize( {

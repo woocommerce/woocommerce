@@ -61,7 +61,6 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			// Beanie is configured with a multi-image gallery in products.sh.
 			await page.goto( '/product/beanie/' );
 
 			const productGalleryBlock = page.locator(
@@ -135,7 +134,6 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			// Beanie is configured with a multi-image gallery in products.sh.
 			await page.goto( '/product/beanie/' );
 
 			const thumbnailsBlock = page.locator(
@@ -194,7 +192,6 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			// Beanie is configured with a multi-image gallery in products.sh.
 			await page.goto( '/product/beanie/' );
 
 			const thumbnailsContainer = page.locator(

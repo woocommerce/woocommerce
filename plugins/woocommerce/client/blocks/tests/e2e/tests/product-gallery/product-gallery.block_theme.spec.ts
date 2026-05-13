@@ -13,10 +13,6 @@ const blockData = {
 	name: 'woocommerce/product-gallery',
 	title: 'Product Gallery',
 	slug: 'single-product',
-	// Beanie is a simple product with a multi-image gallery (set up in
-	// products.sh). Hoodie is variable and now shows only the featured image
-	// until a variation is selected — see `product-gallery-large-image`'s
-	// variation test for that flow.
 	productPage: '/product/beanie/',
 };
 
