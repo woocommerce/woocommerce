@@ -351,7 +351,22 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
-	 * Get route response for PUT requests.
+	 * Get route response for PUT/PATCH requests.
+	 *
+	 * Branches on whether a pending/failed order already exists in the customer's
+	 * session:
+	 *
+	 * - Order in session (failed-payment retry): update the existing order via
+	 *   `create_or_update_draft_order()` + `update_order_from_request()`. Same
+	 *   shape as the POST flow.
+	 * - No order in session (fresh checkout form interaction): persist request
+	 *   state to the customer session via `update_session_from_request()` and
+	 *   return a no-order response built from cart + customer + request.
+	 *
+	 * Draft order creation is deferred to POST (place-order time) to avoid
+	 * orphaned `wc-checkout-draft` rows from form interactions that never
+	 * complete. POSTs do not flow through this method — see
+	 * `get_route_post_response()`.
 	 *
 	 * @param \WP_REST_Request $request Request object.
 	 * @throws RouteException On error.
