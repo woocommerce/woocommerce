@@ -379,6 +379,7 @@ final class WooCommerce {
 		$container->get( Automattic\WooCommerce\Internal\OrderReviews\Scheduler::class );
 		$container->get( Automattic\WooCommerce\Internal\OrderReviews\Endpoint::class );
 		$container->get( Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler::class );
+		$container->get( Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::class );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {

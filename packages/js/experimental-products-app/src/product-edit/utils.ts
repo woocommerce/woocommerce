@@ -50,6 +50,7 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'manage_stock',
 	'inventory_summary',
 	'categories',
+	'brands',
 	'tags',
 	'organization_summary',
 	'type',
@@ -72,100 +73,85 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'linked_products_count',
 ] as const;
 
-const COMMON_PRODUCT_EDIT_FIELD_IDS = [
+const SIMPLE_PRODUCT_EDIT_FIELD_IDS = [
+	'name',
+	'product_status',
+	'catalog_visibility',
+	'regular_price',
+	'on_sale',
+	'sale_price',
+	'images',
+	'downloadable',
+	'sku',
+	'stock',
+	'manage_stock',
+	'stock_quantity',
+	'categories',
+	'brands',
+	'tags',
+] satisfies ProductEditFieldId[];
+
+const VARIABLE_PRODUCT_EDIT_FIELD_IDS = [
 	'name',
 	'images',
 	'product_status',
 	'sku',
+	'stock',
+	'stock_quantity',
+	'manage_stock',
+	'weight',
+	'length',
+	'width',
+	'height',
+	'shipping_class',
+	'tax_status',
 	'categories',
 	'tags',
 	'featured',
 	'catalog_visibility',
 	'upsell_ids',
-] satisfies ProductEditFieldId[];
-
-const SIMPLE_PRODUCT_EDIT_FIELD_IDS = [
-	...COMMON_PRODUCT_EDIT_FIELD_IDS,
-	'price',
-	'regular_price',
-	'on_sale',
-	'sale_price',
-	'schedule_sale',
-	'date_on_sale_from',
-	'date_on_sale_to',
-	'stock',
-	'stock_quantity',
-	'manage_stock',
-	'downloadable',
-	'weight',
-	'length',
-	'width',
-	'height',
-	'shipping_class',
-	'tax_status',
 	'cross_sell_ids',
-] satisfies ProductEditFieldId[];
-
-const VARIABLE_PRODUCT_EDIT_FIELD_IDS = [
-	...COMMON_PRODUCT_EDIT_FIELD_IDS,
-	'stock',
-	'stock_quantity',
-	'manage_stock',
-	'weight',
-	'length',
-	'width',
-	'height',
-	'shipping_class',
-	'tax_status',
-	'cross_sell_ids',
-] satisfies ProductEditFieldId[];
-
-const VARIATION_PRODUCT_EDIT_FIELD_IDS = [
-	'images',
-	'sku',
-	'price',
-	'regular_price',
-	'on_sale',
-	'sale_price',
-	'schedule_sale',
-	'date_on_sale_from',
-	'date_on_sale_to',
-	'stock',
-	'stock_quantity',
-	'manage_stock',
-	'weight',
-	'length',
-	'width',
-	'height',
-	'shipping_class',
-	'tax_status',
 ] satisfies ProductEditFieldId[];
 
 const EXTERNAL_PRODUCT_EDIT_FIELD_IDS = [
-	...COMMON_PRODUCT_EDIT_FIELD_IDS,
-	'price',
+	'name',
+	'product_status',
+	'catalog_visibility',
 	'regular_price',
 	'on_sale',
 	'sale_price',
-	'schedule_sale',
-	'date_on_sale_from',
-	'date_on_sale_to',
+	'images',
 	'external_url',
 	'button_text',
-	'tax_status',
+	'sku',
+	'categories',
+	'brands',
+	'tags',
+	'featured',
 ] satisfies ProductEditFieldId[];
 
 const GROUPED_PRODUCT_EDIT_FIELD_IDS = [
-	...COMMON_PRODUCT_EDIT_FIELD_IDS,
-] as const;
+	'name',
+	'product_status',
+	'catalog_visibility',
+	'upsell_ids',
+	'images',
+	'sku',
+	'categories',
+	'brands',
+	'tags',
+	'featured',
+] satisfies ProductEditFieldId[];
 
 const PRODUCT_TYPE_COMPATIBLE_FIELD_IDS = {
 	simple: SIMPLE_PRODUCT_EDIT_FIELD_IDS,
 	variable: VARIABLE_PRODUCT_EDIT_FIELD_IDS,
-	variation: VARIATION_PRODUCT_EDIT_FIELD_IDS,
 	grouped: GROUPED_PRODUCT_EDIT_FIELD_IDS,
 	external: EXTERNAL_PRODUCT_EDIT_FIELD_IDS,
-} satisfies Record< string, readonly ProductEditFieldId[] >;
+} satisfies Record<
+	'simple' | 'variable' | 'grouped' | 'external',
+	readonly ProductEditFieldId[]
+>;
 
 const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'name',
@@ -174,6 +160,7 @@ const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'product_status',
 	'catalog_visibility',
 	'categories',
+	'brands',
 	'tags',
 	'type',
 	'featured',
@@ -220,28 +207,6 @@ function getMixedValueFallback( sample: unknown ) {
 	return undefined;
 }
 
-function getFieldValue( field: ProductField, item: ProductEntityRecord ) {
-	if ( typeof field.getValue === 'function' ) {
-		return field.getValue( {
-			item,
-		} );
-	}
-
-	return item[ field.id as keyof ProductEntityRecord ];
-}
-
-function getProductTypeCompatibleFieldIds( product: ProductEntityRecord ) {
-	const productType = product.type;
-
-	if ( productType && productType in PRODUCT_TYPE_COMPATIBLE_FIELD_IDS ) {
-		return PRODUCT_TYPE_COMPATIBLE_FIELD_IDS[
-			productType as keyof typeof PRODUCT_TYPE_COMPATIBLE_FIELD_IDS
-		];
-	}
-
-	return COMMON_PRODUCT_EDIT_FIELD_IDS;
-}
-
 function isVariableProductParent( product: ProductEntityRecord ) {
 	return product.type === 'variable' && ! product.parent_id;
 }
@@ -250,6 +215,19 @@ export function isProductVariation(
 	product: ProductEntityRecord
 ): product is ProductVariationEntityRecord {
 	return product.type === 'variation' || Boolean( product.parent_id );
+}
+
+function getProductTypeCompatibleFieldIds(
+	product: ProductEntityRecord
+): readonly ProductEditFieldId[] {
+	const productType =
+		product.type === 'variable' ||
+		product.type === 'grouped' ||
+		product.type === 'external'
+			? product.type
+			: 'simple';
+
+	return PRODUCT_TYPE_COMPATIBLE_FIELD_IDS[ productType ];
 }
 
 function isFieldVisibleForProductRelationships(
@@ -337,31 +315,50 @@ export function findProductInList(
 	}
 }
 
+export function getProductEditRecord(
+	listedProduct: ProductEntityRecord | undefined,
+	rootRecord: ProductEntityRecord | false | undefined,
+	rootRecordEdits?: Partial< ProductEntityRecord >
+) {
+	const editedRootRecord = rootRecord !== false ? rootRecord : undefined;
+	const hasRootRecordEdits =
+		rootRecordEdits && Object.keys( rootRecordEdits ).length > 0;
+
+	if ( listedProduct && hasRootRecordEdits ) {
+		return {
+			...listedProduct,
+			...rootRecordEdits,
+		};
+	}
+
+	if ( listedProduct && editedRootRecord ) {
+		return {
+			...listedProduct,
+			...editedRootRecord,
+		};
+	}
+
+	return listedProduct ?? editedRootRecord;
+}
+
 function getCommonProductTypeCompatibleFieldIds(
 	products: ProductEntityRecord[]
 ) {
 	if ( products.length === 0 ) {
-		return new Set< string >();
+		return [];
 	}
 
 	const [ firstProduct, ...remainingProducts ] = products;
-	const commonFieldIds = new Set(
-		getProductTypeCompatibleFieldIds( firstProduct )
+	const remainingCompatibleFieldIdSets = remainingProducts.map(
+		( product ) => new Set( getProductTypeCompatibleFieldIds( product ) )
 	);
 
-	remainingProducts.forEach( ( product ) => {
-		const compatibleFieldIds = new Set(
-			getProductTypeCompatibleFieldIds( product )
-		);
-
-		commonFieldIds.forEach( ( fieldId ) => {
-			if ( ! compatibleFieldIds.has( fieldId ) ) {
-				commonFieldIds.delete( fieldId );
-			}
-		} );
-	} );
-
-	return commonFieldIds;
+	return getProductTypeCompatibleFieldIds( firstProduct ).filter(
+		( fieldId ) =>
+			remainingCompatibleFieldIdSets.every( ( compatibleFieldIds ) =>
+				compatibleFieldIds.has( fieldId )
+			)
+	);
 }
 
 export function getProductEditFields( fields: ProductField[] ): ProductField[] {
@@ -405,31 +402,6 @@ export function buildMergedProductEditData(
 	return mergedData as ProductEntityRecord;
 }
 
-export function getMixedProductEditFieldIds(
-	fields: ProductField[],
-	products: ProductEntityRecord[]
-) {
-	if ( products.length <= 1 ) {
-		return [];
-	}
-
-	return fields.reduce< string[] >( ( mixedFields, field ) => {
-		const values = products.map( ( product ) =>
-			getFieldValue( field, product )
-		);
-		const isMixed = values.some(
-			( value ) =>
-				normalizeValue( value ) !== normalizeValue( values[ 0 ] )
-		);
-
-		if ( isMixed ) {
-			mixedFields.push( field.id );
-		}
-
-		return mixedFields;
-	}, [] );
-}
-
 export function getVisibleProductEditFields(
 	fields: ProductField[],
 	products: ProductEntityRecord[]
@@ -437,39 +409,49 @@ export function getVisibleProductEditFields(
 	const compatibleFieldIds =
 		getCommonProductTypeCompatibleFieldIds( products );
 	const isBulkEdit = products.length > 1;
+	const fieldsById = new Map(
+		fields.map( ( field ) => [ field.id, field ] )
+	);
 
-	return fields.reduce< ProductField[] >( ( visibleFields, field ) => {
-		if ( ! compatibleFieldIds.has( field.id ) ) {
+	return compatibleFieldIds.reduce< ProductField[] >(
+		( visibleFields, fieldId ) => {
+			const field = fieldsById.get( fieldId );
+
+			if ( ! field ) {
+				return visibleFields;
+			}
+
+			if (
+				isBulkEdit &&
+				BULK_UNSUPPORTED_PRODUCT_EDIT_FIELD_ID_SET.has(
+					field.id as ProductEditFieldId
+				)
+			) {
+				return visibleFields;
+			}
+
+			if (
+				! isFieldVisibleForProductRelationships( field.id, products )
+			) {
+				return visibleFields;
+			}
+
+			const { isVisible } = field;
+
+			if ( typeof isVisible !== 'function' ) {
+				visibleFields.push( field );
+				return visibleFields;
+			}
+
+			if ( products.every( ( product ) => isVisible( product ) ) ) {
+				visibleFields.push( {
+					...field,
+					isVisible: undefined,
+				} );
+			}
+
 			return visibleFields;
-		}
-
-		if (
-			isBulkEdit &&
-			BULK_UNSUPPORTED_PRODUCT_EDIT_FIELD_ID_SET.has(
-				field.id as ProductEditFieldId
-			)
-		) {
-			return visibleFields;
-		}
-
-		if ( ! isFieldVisibleForProductRelationships( field.id, products ) ) {
-			return visibleFields;
-		}
-
-		const { isVisible } = field;
-
-		if ( typeof isVisible !== 'function' ) {
-			visibleFields.push( field );
-			return visibleFields;
-		}
-
-		if ( products.every( ( product ) => isVisible( product ) ) ) {
-			visibleFields.push( {
-				...field,
-				isVisible: undefined,
-			} );
-		}
-
-		return visibleFields;
-	}, [] );
+		},
+		[]
+	);
 }

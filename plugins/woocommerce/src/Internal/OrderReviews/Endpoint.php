@@ -58,7 +58,10 @@ class Endpoint {
 	/**
 	 * Wire the endpoint into WordPress.
 	 *
-	 * Auto-called by the WC dependency container after instantiation.
+	 * Auto-called by the WC dependency container after instantiation. The
+	 * title-suppression filters are deliberately NOT registered here; they
+	 * land inside `gate_request()` once the request is confirmed to be an
+	 * authorised review-order render, so they never run on unrelated pages.
 	 *
 	 * @internal
 	 */
@@ -100,6 +103,81 @@ class Endpoint {
 				}
 			)
 		);
+	}
+
+	/**
+	 * Suppress the theme-rendered page title for classic themes on the
+	 * Review Order page.
+	 *
+	 * The page body (`templates/order/customer-review-order.php` and the
+	 * empty-state template) already prints its own `<h1>`, so the chrome
+	 * heading would duplicate the text both visually and for screen readers.
+	 *
+	 * `gate_request()` registers this filter only after the request passes
+	 * the auth check, so on any unrelated render it isn't even on the hook.
+	 * Two in-method guards narrow the scope to the page title slot of the
+	 * Review Order render itself:
+	 *
+	 * - The post id must match the Review Order page id, so within the same
+	 *   render a nav menu item or "recent posts" widget pointing at another
+	 *   post stays intact.
+	 * - `in_the_loop() && is_main_query()` keeps the filter scoped to the
+	 *   actual page title slot. WP's `wp_get_document_title()` reads the
+	 *   post title outside the loop, so the `<title>` tag stays meaningful.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string|mixed $title   Title being rendered.
+	 * @param int|mixed    $post_id Post id the title belongs to.
+	 * @return string|mixed
+	 */
+	public function maybe_hide_page_title( $title, $post_id = 0 ) {
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( (int) $post_id !== $page_id ) {
+			return $title;
+		}
+		if ( ! in_the_loop() || ! is_main_query() ) {
+			return $title;
+		}
+		return '';
+	}
+
+	/**
+	 * Suppress the `core/post-title` block on block themes when it is bound
+	 * to the Review Order page itself.
+	 *
+	 * Block themes render the page title through `core/post-title` rather
+	 * than `the_title`, so the classic-theme filter above doesn't catch it.
+	 * Two guards keep the suppression narrow (registration is gated by
+	 * `gate_request()` so the filter isn't even on the hook for unrelated
+	 * renders):
+	 *
+	 * - The hook is `render_block_core/post-title` so unrelated block types
+	 *   (headings, paragraphs, navigation, etc.) never reach this method.
+	 * - The block's resolved `context['postId']` must match the Review Order
+	 *   page id, so a `core/post-title` rendered inside a Query Loop, a
+	 *   related-posts template part, or a footer "recent posts" panel for a
+	 *   different post on the same render is untouched.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param string|mixed         $block_content Block markup.
+	 * @param array<string,mixed>  $block         Parsed block (unused but kept for filter signature).
+	 * @param \WP_Block|mixed|null $instance      Rendering instance carrying context.
+	 * @return string|mixed
+	 */
+	public function maybe_hide_post_title_block( $block_content, $block, $instance = null ) {
+		unset( $block );
+
+		if ( ! $instance instanceof \WP_Block ) {
+			return $block_content;
+		}
+		$page_id      = (int) wc_get_page_id( self::PAGE_KEY );
+		$block_postid = isset( $instance->context['postId'] ) ? (int) $instance->context['postId'] : 0;
+		if ( $block_postid !== $page_id ) {
+			return $block_content;
+		}
+		return '';
 	}
 
 	/**
@@ -253,6 +331,21 @@ class Endpoint {
 			exit;
 		}
 
+		// Register the page-title suppression filters now that the request
+		// is fully authorised. Doing this here instead of `init()` keeps the
+		// filters out of every unrelated page render and removes the need
+		// for a per-instance "is this an authorised render" boolean.
+		add_filter( 'the_title', array( $this, 'maybe_hide_page_title' ), 10, 2 );
+		// Block-specific filter so only `core/post-title` is touched —
+		// `render_block` would fire for every block on the page. The third
+		// arg is the `WP_Block` instance carrying `context['postId']`, used
+		// to scope to the host page.
+		add_filter( 'render_block_core/post-title', array( $this, 'maybe_hide_post_title_block' ), 10, 3 );
+
+		if ( $order instanceof WC_Order ) {
+			$this->maybe_mark_no_actionable_rows( $order );
+		}
+
 		// template_redirect fires after wp_enqueue_scripts but before
 		// wp_head, so styles registered here are still output in <head>.
 		$this->enqueue_assets();
@@ -304,7 +397,69 @@ class Endpoint {
 			return;
 		}
 
+		if ( $order instanceof WC_Order ) {
+			$this->maybe_mark_no_actionable_rows( $order );
+		}
+
 		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
+	}
+
+	/**
+	 * Stamp the completed-at meta when the Review Order page would render the
+	 * empty-state, so back-button visits and direct revisits also record
+	 * completion. The persistent write lives here, in the controller, so the
+	 * page template stays read-only.
+	 *
+	 * Scope differs from `SubmissionHandler::maybe_mark_order_complete()`:
+	 * that one counts the customer's reviews per product across all of their
+	 * history, while this one walks the per-item decisions ItemEligibility
+	 * produces (order-scoped, mirroring exactly what the page renders).
+	 *
+	 * @param WC_Order $order Order being reviewed.
+	 */
+	private function maybe_mark_no_actionable_rows( WC_Order $order ): void {
+		$completed_meta_key = SubmissionHandler::COMPLETED_META_KEY;
+		if ( $order->get_meta( $completed_meta_key ) ) {
+			return;
+		}
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented on customer-review-order.php template.
+		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+		ItemEligibility::preload_for_items( $items, $order );
+
+		foreach ( $items as $item ) {
+			if ( ! $item instanceof \WC_Order_Item_Product ) {
+				continue;
+			}
+			$decision = ItemEligibility::decide( $item, $order );
+			// Skip rows are intentionally treated as "done": an order whose
+			// items all have reviews disabled renders the empty-state, so we
+			// stamp completion to match what the customer sees on the page.
+			if ( ItemEligibility::STATUS_SKIP === $decision['status'] ) {
+				continue;
+			}
+			// Any non-skip row without a review tied to this order means the
+			// customer still has something to submit — order isn't complete.
+			if ( ! ( $decision['comment'] instanceof \WP_Comment ) ) {
+				return;
+			}
+		}
+
+		$order->update_meta_data( $completed_meta_key, (string) time() );
+
+		try {
+			$order->save();
+		} catch ( \Exception $e ) {
+			wc_get_logger()->warning(
+				sprintf(
+					/* translators: 1: order ID, 2: error message */
+					__( 'Could not stamp Review Order completion meta on order %1$d: %2$s.', 'woocommerce' ),
+					$order->get_id(),
+					$e->getMessage()
+				),
+				array( 'source' => 'order-reviews' )
+			);
+		}
 	}
 
 	/**
