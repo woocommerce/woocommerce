@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Cap the DataViews "View options" popover height in the experimental products app so its inner content scrolls instead of letting the popover extend past the viewport.
