@@ -91,6 +91,39 @@ class WebflowMapperTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test simple product dimensions pass through.
+	 */
+	public function test_simple_product_dimensions(): void {
+		$result = $this->mapper->map_product_data( MockWebflowData::simple_product_item() );
+
+		$this->assertSame( 10.0, $result['length'] );
+		$this->assertSame( 5.0, $result['width'] );
+		$this->assertSame( 2.0, $result['height'] );
+	}
+
+	/**
+	 * Test that variation dimensions pass through and that null/missing dimensions stay null.
+	 */
+	public function test_variable_product_variation_dimensions(): void {
+		$result = $this->mapper->map_product_data( MockWebflowData::variable_product_item() );
+
+		$by_sku = array();
+		foreach ( $result['variations'] as $variation ) {
+			$by_sku[ $variation['sku'] ] = $variation;
+		}
+
+		// Red/S has dimensions in the fixture.
+		$this->assertSame( 20.0, $by_sku['HOOD-RED-S']['length'] );
+		$this->assertSame( 15.0, $by_sku['HOOD-RED-S']['width'] );
+		$this->assertSame( 8.0, $by_sku['HOOD-RED-S']['height'] );
+
+		// Other variants in the fixture omit dimensions — should stay null.
+		$this->assertNull( $by_sku['HOOD-RED-M']['length'] );
+		$this->assertNull( $by_sku['HOOD-BLUE-S']['width'] );
+		$this->assertNull( $by_sku['HOOD-BLUE-M']['height'] );
+	}
+
+	/**
 	 * Test SEO fields land in metafields.
 	 */
 	public function test_simple_product_seo_metafields(): void {

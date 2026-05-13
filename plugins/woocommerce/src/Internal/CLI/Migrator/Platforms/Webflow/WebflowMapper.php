@@ -396,6 +396,7 @@ class WebflowMapper implements PlatformMapperInterface {
 
 		if ( $this->should_process( 'weight' ) ) {
 			$simple['weight'] = $this->extract_weight( $sku_field );
+			$simple           = array_merge( $simple, $this->extract_dimensions( $sku_field ) );
 		}
 
 		return $simple;
@@ -498,6 +499,7 @@ class WebflowMapper implements PlatformMapperInterface {
 
 			if ( $this->should_process( 'weight' ) ) {
 				$variation['weight'] = $this->extract_weight( $sku_field );
+				$variation           = array_merge( $variation, $this->extract_dimensions( $sku_field ) );
 			}
 
 			if ( $this->should_process( 'attributes' ) ) {
@@ -635,6 +637,32 @@ class WebflowMapper implements PlatformMapperInterface {
 			'stock_quantity' => $quantity,
 			'stock_status'   => $quantity > 0 ? 'instock' : 'outofstock',
 		);
+	}
+
+	/**
+	 * Extract Webflow SKU dimensions (length, width, height).
+	 *
+	 * Webflow returns these as raw numerics with no associated unit on the SKU
+	 * payload — the unit is a store-level setting on the Webflow side, with no
+	 * API representation. We pass through as-is; WooCommerce will interpret them
+	 * in whatever `woocommerce_dimension_unit` is configured for the destination
+	 * store. Null/zero/non-numeric values are dropped.
+	 *
+	 * @param object $sku_field SKU fieldData.
+	 * @return array{length: ?float, width: ?float, height: ?float}
+	 */
+	private function extract_dimensions( object $sku_field ): array {
+		$dimensions = array(
+			'length' => null,
+			'width'  => null,
+			'height' => null,
+		);
+		foreach ( array_keys( $dimensions ) as $key ) {
+			if ( isset( $sku_field->{$key} ) && is_numeric( $sku_field->{$key} ) && (float) $sku_field->{$key} > 0 ) {
+				$dimensions[ $key ] = (float) $sku_field->{$key};
+			}
+		}
+		return $dimensions;
 	}
 
 	/**

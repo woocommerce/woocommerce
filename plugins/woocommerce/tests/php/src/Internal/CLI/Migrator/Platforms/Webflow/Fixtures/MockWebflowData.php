@@ -65,6 +65,9 @@ class MockWebflowData {
 							"inventory": { "type": "finite", "quantity": 7 },
 							"weight": 0.5,
 							"weight-unit": "lb",
+							"length": 10,
+							"width": 5,
+							"height": 2,
 							"main-image": { "fileId": "img-prod-1", "url": "https://cdn.webflow.test/prod-1.jpg", "alt": "front" }
 						}
 					}
@@ -127,6 +130,9 @@ class MockWebflowData {
 							"sku": "HOOD-RED-S",
 							"price": { "value": 4999, "unit": "USD" },
 							"inventory": { "type": "finite", "quantity": 3 },
+							"length": 20,
+							"width": 15,
+							"height": 8,
 							"sku-values": { "prop-color": "enum-red", "prop-size": "enum-s" },
 							"main-image": { "fileId": "img-red", "url": "https://cdn.webflow.test/red.jpg", "alt": "red" }
 						}
