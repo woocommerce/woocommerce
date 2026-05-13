@@ -107,8 +107,7 @@ final class ShopperCollection extends AbstractBlock {
 			$list_slug = 'saved-for-later';
 		}
 
-		// `layout` comes from `supports.layout`, not a declared attribute, so WP doesn't guarantee every nested key is set — `??` covers a partial layout object.
-		$column_count = max( 1, (int) ( $attributes['layout']['columnCount'] ?? 3 ) );
+		$column_count = max( 1, (int) ( $attributes['columnCount'] ?? 3 ) );
 
 		$variation = $this->get_variation_config();
 
@@ -175,8 +174,9 @@ final class ShopperCollection extends AbstractBlock {
 		);
 
 		$wrapper_class = sprintf(
-			'wc-block-shopper-collection wc-block-shopper-collection--%s',
-			$variation['modifierSlug']
+			'wc-block-shopper-collection wc-block-shopper-collection--%s columns-%d',
+			$variation['modifierSlug'],
+			$column_count
 		);
 
 		$wrapper_attributes = array(
@@ -186,7 +186,6 @@ final class ShopperCollection extends AbstractBlock {
 			// Deterministic key derived from the list slug so iAPI router
 			// navigations land on the same block identity across renders.
 			'data-wp-key'         => $this->get_full_block_name() . '-' . $list_slug,
-			'style'               => sprintf( '--wc-shopper-collection-columns:%d;', $column_count ),
 		);
 
 		$is_empty = empty( $items );

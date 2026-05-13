@@ -128,4 +128,23 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 
 		$this->assertSame( 'saved-for-later', $result['attrs']['listName'] );
 	}
+
+	/**
+	 * The wrapper carries a `columns-N` class matching the `columnCount` attribute.
+	 */
+	public function test_render_emits_columns_class(): void {
+		$markup = do_blocks( '<!-- wp:woocommerce/shopper-collection {"columnCount":4} /-->' );
+
+		$this->assertStringContainsString( 'columns-4', $markup );
+	}
+
+	/**
+	 * With no column attribute set, the renderer falls back to the declared
+	 * `columnCount` default (3).
+	 */
+	public function test_render_defaults_to_three_columns(): void {
+		$markup = do_blocks( '<!-- wp:woocommerce/shopper-collection /-->' );
+
+		$this->assertStringContainsString( 'columns-3', $markup );
+	}
 }

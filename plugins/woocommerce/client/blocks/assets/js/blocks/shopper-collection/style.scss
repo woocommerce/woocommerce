@@ -5,16 +5,31 @@
 // which we declare as style dependencies in `block.json` so WordPress
 // enqueues them whenever this block renders. Don't duplicate those rules here.
 
+// One concrete `.columns-N` class per supported column count so narrow
+// viewports reflow to fewer columns instead of shrinking items uniformly.
+// Mirrors Product Collection's `__responsive` formula.
+$min-item-width: 150px;
+$grid-gap: var(--wp--style--block-gap, 1.5em);
+
 .wc-block-shopper-collection {
 	display: grid;
-	gap: var(--wp--style--block-gap, 1.5em);
-	grid-template-columns: repeat(
-		var(--wc-shopper-collection-columns, 3),
-		minmax(0, 1fr)
-	);
+	gap: $grid-gap;
 	list-style: none;
 	margin: 0;
 	padding: 0;
+
+	@for $i from 2 through 6 {
+		$gap-count: calc(#{$i} - 1);
+		$total-gap-width: calc(#{$gap-count} * #{$grid-gap});
+		$max-item-width: calc((100% - #{$total-gap-width}) / #{$i});
+
+		&.columns-#{ $i } {
+			grid-template-columns: repeat(
+				auto-fill,
+				minmax(max(#{$min-item-width}, #{$max-item-width}), 1fr)
+			);
+		}
+	}
 }
 
 .wc-block-shopper-collection-item {
