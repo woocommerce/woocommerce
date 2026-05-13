@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Align the Customer Review Order page with the Figma design: surface an info notice when some order products have reviews disabled, show the customer/order meta line above the heading, restructure each row into image / rating / review columns with the caption beneath the stars, add a dirty-state submit gate plus an inline mandatory-rating validation, swap to theme-aware classes (`.woocommerce-info`, `.woocommerce-breadcrumb`, `wp-element-button`) so the active theme drives styling, and route the customer to a thank-you view in place after any successful submission while a refresh re-renders the form for any remaining items.
