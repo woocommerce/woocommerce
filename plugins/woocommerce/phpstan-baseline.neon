@@ -9703,12 +9703,6 @@ parameters:
 			path: includes/class-wc-cache-helper.php
 
 		-
-			message: '#^Method WC_Cache_Helper\:\:invalidate_cache_group\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/class-wc-cache-helper.php
-
-		-
 			message: '#^Method WC_Cache_Helper\:\:notices\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -56657,12 +56651,6 @@ parameters:
 
 		-
 			message: '#^Method Automattic\\WooCommerce\\Caching\\WPCacheEngine\:\:incr_cache_prefix\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Caching/WPCacheEngine.php
-
-		-
-			message: '#^Method Automattic\\WooCommerce\\Caching\\WPCacheEngine\:\:invalidate_cache_group\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
 			path: src/Caching/WPCacheEngine.php
