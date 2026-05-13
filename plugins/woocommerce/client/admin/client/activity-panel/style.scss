@@ -1,9 +1,3 @@
-// wp-admin Core grey, hardcoded because it's not exposed as a CSS custom
-// property on `:root` (verified via the `wp-token-check` skill). Local SCSS
-// var duplicates the one in header/style.scss for the same reason — keeps
-// it centralised within this file.
-$wp-admin-page-bg: #f0f0f1;
-
 .woocommerce-layout__activity-panel {
 	display: flex;
 	flex-direction: row;
@@ -210,9 +204,10 @@ $wp-admin-page-bg: #f0f0f1;
 	@include activity-panel-slide();
 	position: absolute;
 	right: 0;
-	// Clear the floating header's 1px bottom border so it stays visible
-	// when the slide-over panel is open (otherwise the panel covers it).
-	top: calc(100% + 1px);
+	// Clear the floating header's bottom border so it stays visible when the
+	// slide-over panel is open (otherwise the panel covers it). Shares the
+	// border width with the header — if that ever changes, this stays aligned.
+	top: calc(100% + #{$header-border-width});
 	z-index: 1000;
 	overflow-x: hidden;
 	overflow-y: auto;

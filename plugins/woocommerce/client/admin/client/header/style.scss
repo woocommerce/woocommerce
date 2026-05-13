@@ -1,10 +1,3 @@
-// wp-admin Core greys, hardcoded because they're not exposed as CSS custom
-// properties on `:root` (verified via the `wp-token-check` skill). Local
-// SCSS variables keep them centralised so the next person doesn't have to
-// grep when WP shifts the bar / border palette.
-$wp-admin-page-bg: #f0f0f1; // wp-admin body background grey
-$wp-admin-border: #dcdcde; // wp-admin chrome border colour
-
 // Standard visually-hidden pattern — keeps the element in the layout tree
 // (so jQuery delegated handlers still fire on it) but moves it off-screen
 // and clips its rendered area to nothing. Used twice in this file for the
@@ -44,34 +37,20 @@ body.woocommerce_page_wc-admin:has(.woocommerce-layout__header-meta-icon) {
 	}
 }
 
-// Settings-page polish: the floating header sits directly above Woo's tab
-// nav with no other content between them, so treat the two strips as one
-// continuous title region — drop the header's bottom border and match the
-// tab strip's white background to the page-grey we're using elsewhere.
-// The tab strip keeps its own bottom border (between tabs and content).
-body.woocommerce_page_wc-settings {
-	.woocommerce-layout__header {
-		border-bottom: 0;
-	}
-
-	.nav-tab-wrapper {
-		background: $wp-admin-page-bg;
-		// Match the rest of our borders rather than the legacy lighter Woo
-		// colour so all bottom-borders in the chrome region read the same.
-		border-bottom-color: $wp-admin-border;
-	}
-}
-
 // Chrome-only narrow-bar height (Edit Order, Edit Product, Add Product, etc.).
 // Now that activity-panel tabs are icon-only globally, they fit cleanly in 32px.
 $woo-chrome-only-header-height: 32px;
 
 .woocommerce-layout__header {
-	// Match wp-admin's page background so the bar reads as infrastructure
-	// rather than content. Bottom border anchors it visually so it doesn't
-	// look "hanging" against the page below.
-	background: $wp-admin-page-bg;
-	border-bottom: 1px solid $wp-admin-border;
+	// Background matches the wp-admin body grey so the bar reads as
+	// infrastructure rather than content. Needs to be explicit (not inherited)
+	// because `position: fixed` lets page content scroll behind the bar — a
+	// transparent background would show that content through. Bottom border
+	// anchors the bar visually against the page below. Settings-page tweaks
+	// (drop the border so the bar reads as one strip with the tab nav)
+	// live in the legacy admin.scss alongside the rest of that page's overrides.
+	background: $wp-admin-background;
+	border-bottom: $header-border-width solid $wp-admin-border;
 	box-sizing: border-box;
 	padding: 0;
 	position: fixed;
