@@ -87,16 +87,30 @@ class ShopperLists extends ControllerTestCase {
 	/**
 	 * Helper: dispatch a request and return the response.
 	 *
-	 * @param string $method HTTP method.
-	 * @param string $route Route path.
-	 * @param array  $params Body params.
+	 * On writes, `$nonce` defaults to a valid `wc_store_api` nonce. Pass `''`
+	 * to omit the header, or any other string to send a bad one.
+	 *
+	 * @param string      $method HTTP method.
+	 * @param string      $route  Route path.
+	 * @param array       $params Body params.
+	 * @param string|null $nonce  Nonce override.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch( string $method, string $route, array $params = array() ): \WP_REST_Response {
+	private function dispatch( string $method, string $route, array $params = array(), ?string $nonce = null ): \WP_REST_Response {
 		$request = new \WP_REST_Request( $method, $route );
 		foreach ( $params as $key => $value ) {
 			$request->set_param( $key, $value );
 		}
+
+		$is_write = in_array( $method, array( 'POST', 'PUT', 'PATCH', 'DELETE' ), true );
+		if ( $is_write ) {
+			if ( null === $nonce ) {
+				$request->set_header( 'Nonce', wp_create_nonce( 'wc_store_api' ) );
+			} elseif ( '' !== $nonce ) {
+				$request->set_header( 'Nonce', $nonce );
+			}
+		}
+
 		return rest_get_server()->dispatch( $request );
 	}
 
@@ -341,5 +355,80 @@ class ShopperLists extends ControllerTestCase {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $response->get_data(), 'Other user should not see the first user\'s items.' );
+	}
+
+	/**
+	 * Test writes without (or with invalid) Nonce header are rejected.
+	 *
+	 * @testWith ["POST", "", 401, "woocommerce_rest_missing_nonce"]
+	 *           ["POST", "not-a-valid-nonce", 403, "woocommerce_rest_invalid_nonce"]
+	 *           ["DELETE", "", 401, "woocommerce_rest_missing_nonce"]
+	 *           ["DELETE", "not-a-valid-nonce", 403, "woocommerce_rest_invalid_nonce"]
+	 *
+	 * @param string $method              HTTP method.
+	 * @param string $nonce               Nonce header value.
+	 * @param int    $expected_status     Expected HTTP status code.
+	 * @param string $expected_error_code Expected WP_Error code.
+	 */
+	public function test_write_nonce_enforcement( string $method, string $nonce, int $expected_status, string $expected_error_code ) {
+		wp_set_current_user( $this->customer_id );
+
+		$is_post = 'POST' === $method;
+		$path    = $is_post
+			? '/wc/store/v1/shopper-lists/saved-for-later/items'
+			: '/wc/store/v1/shopper-lists/saved-for-later/items/' . str_repeat( 'a', 32 );
+		$params  = $is_post ? array( 'product_id' => $this->product->get_id() ) : array();
+
+		$response = $this->dispatch( $method, $path, $params, $nonce );
+
+		$this->assertEquals( $expected_status, $response->get_status() );
+		$this->assertSame( $expected_error_code, $response->get_data()['code'] );
+	}
+
+	/**
+	 * Test every response (success or auth failure) refreshes the Nonce headers.
+	 *
+	 * @testWith [null, 201]
+	 *           ["", 401]
+	 *
+	 * @param string|null $nonce           Nonce header value, or null to auto-attach a valid one.
+	 * @param int         $expected_status Expected HTTP status code.
+	 */
+	public function test_response_refreshes_nonce_headers( ?string $nonce, int $expected_status ) {
+		wp_set_current_user( $this->customer_id );
+
+		$response = $this->dispatch(
+			'POST',
+			'/wc/store/v1/shopper-lists/saved-for-later/items',
+			array( 'product_id' => $this->product->get_id() ),
+			$nonce
+		);
+		$headers  = $response->get_headers();
+
+		$this->assertEquals( $expected_status, $response->get_status() );
+		$this->assertArrayHasKey( 'Nonce', $headers );
+		$this->assertArrayHasKey( 'Nonce-Timestamp', $headers );
+		$this->assertTrue( (bool) wp_verify_nonce( $headers['Nonce'], 'wc_store_api' ) );
+	}
+
+	/**
+	 * Test the `woocommerce_store_api_disable_nonce_check` filter bypass.
+	 */
+	public function test_disable_nonce_check_filter_bypasses_enforcement() {
+		wp_set_current_user( $this->customer_id );
+
+		add_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
+		try {
+			$response = $this->dispatch(
+				'POST',
+				'/wc/store/v1/shopper-lists/saved-for-later/items',
+				array( 'product_id' => $this->product->get_id() ),
+				''
+			);
+		} finally {
+			remove_filter( 'woocommerce_store_api_disable_nonce_check', '__return_true' );
+		}
+
+		$this->assertEquals( 201, $response->get_status() );
 	}
 }
