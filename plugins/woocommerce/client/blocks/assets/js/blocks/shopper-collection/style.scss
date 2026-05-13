@@ -77,18 +77,17 @@ $grid-gap: var(--wp--style--block-gap, 1.5em);
 		z-index: 10;
 	}
 
-	// Icon-only Remove button overlaying the image. Visually mirrors the
-	// `wc-block-components-product-sale-badge--align-right` overlay (same
-	// border, radius, colors, white fill, top-right inset over the image)
-	// so it reads as a corner badge. Symmetric padding keeps the hit
-	// area square. Hover inverts the colors for a clear affordance.
+	// Icon-only Remove button overlaying the image. Mirrors the
+	// `woocommerce-product-gallery__trigger` corner-overlay styles
+	// (white fill, circular, black icon, no border) so the affordance
+	// reads consistently with the gallery zoom trigger.
 	&__remove {
 		appearance: none;
 		background: #fff;
-		border: 1px solid #fff;
-		border-radius: 4px;
+		border: none;
+		border-radius: 100%;
 		box-sizing: border-box;
-		color: #43454b;
+		color: #000;
 		cursor: pointer;
 		display: block;
 		line-height: 0;
@@ -105,7 +104,7 @@ $grid-gap: var(--wp--style--block-gap, 1.5em);
 		}
 
 		&:hover:not([disabled]) {
-			background: #43454b;
+			background: #000;
 			color: #fff;
 		}
 
@@ -116,7 +115,7 @@ $grid-gap: var(--wp--style--block-gap, 1.5em);
 		// readable over both the badge body and the product image behind
 		// it. Not applied to :hover-only — pointer users keep the invert.
 		&:focus-visible:not([disabled]) {
-			outline: 2px solid #43454b;
+			outline: 2px solid #000;
 			outline-offset: 1px;
 		}
 
