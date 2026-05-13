@@ -385,11 +385,17 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 		selectedProducts,
 	] );
 
+	// `requestedProductIds` is re-computed (new array reference) on every
+	// render, so depending on it directly would re-fire the effect every
+	// render — including the render triggered by `setIsDrawerOpen(false)`
+	// while the URL still has the `quickEdit` key — and immediately re-open
+	// the drawer, preventing the close animation. Depend on a stable
+	// boolean (the existing `hasNoRequestedProducts`) instead.
 	useEffect( () => {
-		if ( requestedProductIds.length > 0 ) {
+		if ( ! hasNoRequestedProducts ) {
 			setIsDrawerOpen( true );
 		}
-	}, [ requestedProductIds ] );
+	}, [ hasNoRequestedProducts ] );
 
 	return (
 		<Drawer.Root
