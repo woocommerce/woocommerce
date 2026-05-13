@@ -25,7 +25,7 @@ type QRLoginTokenResponse = {
 
 type UseQRLoginTokenOptions = {
 	onReady?: () => void;
-	onError?: ( errorMessage: string ) => void;
+	onError?: ( errorCode: string ) => void;
 };
 
 export const useQRLoginToken = ( {
@@ -109,14 +109,15 @@ export const useQRLoginToken = ( {
 			onReadyRef.current?.();
 		} catch ( error: unknown ) {
 			const err = error as { code?: string; message?: string };
+			const errorCode = err.code || 'unknown_error';
 			let nextErrorMessage: string;
 
-			if ( err.code === 'rate_limit_exceeded' ) {
+			if ( errorCode === 'rate_limit_exceeded' ) {
 				nextErrorMessage = __(
 					'Too many requests. Please try again in a few minutes.',
 					'woocommerce'
 				);
-			} else if ( err.code === 'ssl_required' ) {
+			} else if ( errorCode === 'ssl_required' ) {
 				nextErrorMessage = __(
 					'QR login requires an HTTPS connection.',
 					'woocommerce'
@@ -132,7 +133,7 @@ export const useQRLoginToken = ( {
 
 			setErrorMessage( nextErrorMessage );
 			setState( QRLoginTokenStates.ERROR );
-			onErrorRef.current?.( nextErrorMessage );
+			onErrorRef.current?.( errorCode );
 		}
 	}, [ startCountdown ] );
 

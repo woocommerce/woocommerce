@@ -25,9 +25,9 @@ export const QRDirectLoginCode = () => {
 		onReady: () => {
 			recordEvent( 'mobile_app_qr_direct_login_displayed' );
 		},
-		onError: ( nextErrorMessage ) => {
+		onError: ( errorCode ) => {
 			recordEvent( 'mobile_app_qr_direct_login_failed', {
-				error_message: nextErrorMessage,
+				error_code: errorCode,
 			} );
 		},
 	} );
