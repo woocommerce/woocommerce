@@ -23,11 +23,11 @@ import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
 import {
 	buildMergedProductEditData,
-	buildProductEditFormFields,
 	findProductInList,
 	getProductEditRecord,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
+	getProductTypeFormFields,
 	getVisibleProductEditFields,
 	isProductVariation,
 } from './utils';
@@ -95,9 +95,7 @@ function ProductEditForm( {
 	const form = {
 		type: 'regular' as const,
 		labelPosition: 'top' as const,
-		fields: buildProductEditFormFields(
-			visibleFields.map( ( field ) => field.id )
-		),
+		fields: getProductTypeFormFields( selectedProducts ),
 	};
 
 	return (
