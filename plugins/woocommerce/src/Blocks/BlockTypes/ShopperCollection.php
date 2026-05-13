@@ -107,7 +107,11 @@ final class ShopperCollection extends AbstractBlock {
 			$list_slug = 'saved-for-later';
 		}
 
-		$column_count = max( 1, (int) ( $attributes['columnCount'] ?? 5 ) );
+		// `absint()` defends against a code-editor override (the attribute can
+		// be set to any JSON value there) before the value flows into the
+		// wrapper class. `max( 1, ... )` keeps the SCSS `&.columns-#{$i}` rules
+		// from missing for a 0-or-below value.
+		$column_count = max( 1, absint( $attributes['columnCount'] ?? 5 ) );
 
 		$variation = $this->get_variation_config();
 
