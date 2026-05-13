@@ -93,6 +93,43 @@ export async function attachTracksSpy( page: Page ): Promise< TracksSpy > {
 		}
 	} );
 
+	// addInitScript only instruments future documents. Patch the currently-loaded
+	// page too — idempotent via a __wcSpyWrapped guard so a second attachTracksSpy
+	// call (or a same-document re-attach) doesn't double-wrap.
+	await page.evaluate( () => {
+		window.__capturedTracksEvents = window.__capturedTracksEvents ?? [];
+		if (
+			! window.wcTracks ||
+			typeof window.wcTracks.recordEvent !== 'function'
+		) {
+			return;
+		}
+		const current = window.wcTracks.recordEvent as ( (
+			...args: unknown[]
+		) => unknown ) & { __wcSpyWrapped?: boolean };
+		if ( current.__wcSpyWrapped ) {
+			return;
+		}
+		const original = current;
+		const wrapped = function (
+			name: string,
+			properties?: Record< string, unknown >
+		) {
+			try {
+				window.__capturedTracksEvents!.push( {
+					name,
+					properties: properties ?? {},
+					timestamp_ms: Date.now(),
+				} );
+			} catch {}
+			return original.call( this, name, properties );
+		};
+		( wrapped as typeof wrapped & { __wcSpyWrapped: boolean } ).__wcSpyWrapped =
+			true;
+		window.wcTracks.recordEvent =
+			wrapped as typeof window.wcTracks.recordEvent;
+	} );
+
 	const drain = async (): Promise< TracksEvent[] > => {
 		const clientEvents = await page.evaluate( () => {
 			const events = window.__capturedTracksEvents ?? [];

@@ -144,9 +144,7 @@ test.describe( 'Update propagation — backward compatibility', () => {
 	 *
 	 *   "Show browser" eye: not needed.
 	 */
-	test( 'BC Case B — timestamps equal and content behind core', async ( {
-		request,
-	} ) => {
+	test( 'BC Case B — timestamps equal and content behind core', async () => {
 		const ts = '2024-01-01 12:00:00';
 
 		const postId = await seedWooEmailPost( {
@@ -164,11 +162,7 @@ test.describe( 'Update propagation — backward compatibility', () => {
 		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
 
 		// Critical: the backfill rewrote post_content from OLD_HTML to current canonical.
-		const postRes = await request.get(
-			`/wp-json/wp/v2/woo_email/${ postId }?context=edit`
-		);
-		const post = await postRes.json();
-		const content = post?.content?.raw ?? '';
+		const content = await getWooEmailPostContent( postId );
 		expect( content ).not.toContain( 'OLD' );
 	} );
 

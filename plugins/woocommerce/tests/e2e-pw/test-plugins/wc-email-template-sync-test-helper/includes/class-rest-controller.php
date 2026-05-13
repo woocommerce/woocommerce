@@ -18,7 +18,9 @@ defined( 'ABSPATH' ) || exit;
 /**
  * Helper REST endpoints exposed under /wc-email-test-helper/v1/ for Playwright E2E tests.
  *
- * Health endpoint is open; every other route requires manage_options + an X-Playwright header.
+ * Health endpoint is open; every other route requires manage_options. The plugin's location
+ * under tests/e2e-pw/test-plugins/ — only mounted via .wp-env.json for the test environment —
+ * provides the second layer of defense.
  */
 class REST_Controller {
 
@@ -44,7 +46,7 @@ class REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'reset_post' ),
-				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
 				'args'                => array(
 					'email_id' => array( 'sanitize_callback' => 'sanitize_key' ),
 				),
@@ -58,7 +60,7 @@ class REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'seed_meta' ),
-					'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+					'permission_callback' => array( self::class, 'require_admin' ),
 					'args'                => array(
 						'post_id' => array( 'sanitize_callback' => 'absint' ),
 					),
@@ -66,7 +68,7 @@ class REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'read_meta' ),
-					'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+					'permission_callback' => array( self::class, 'require_admin' ),
 					'args'                => array(
 						'post_id' => array( 'sanitize_callback' => 'absint' ),
 					),
@@ -80,7 +82,7 @@ class REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'canonical_hash' ),
-				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
 				'args'                => array(
 					'email_id' => array( 'sanitize_callback' => 'sanitize_key' ),
 					'mode'     => array( 'sanitize_callback' => 'sanitize_key' ),
@@ -94,7 +96,7 @@ class REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::READABLE,
 				'callback'            => array( $this, 'read_post_content' ),
-				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
 				'args'                => array(
 					'post_id' => array( 'sanitize_callback' => 'absint' ),
 				),
@@ -107,7 +109,7 @@ class REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'seed_bulk' ),
-				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
 			)
 		);
 
@@ -117,7 +119,7 @@ class REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'trigger_sweep' ),
-				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
 			)
 		);
 
@@ -127,7 +129,7 @@ class REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'trigger_backfill' ),
-				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
 			)
 		);
 
@@ -138,12 +140,12 @@ class REST_Controller {
 				array(
 					'methods'             => WP_REST_Server::READABLE,
 					'callback'            => array( $this, 'get_tracks' ),
-					'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+					'permission_callback' => array( self::class, 'require_admin' ),
 				),
 				array(
 					'methods'             => WP_REST_Server::DELETABLE,
 					'callback'            => array( $this, 'clear_tracks' ),
-					'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+					'permission_callback' => array( self::class, 'require_admin' ),
 				),
 			)
 		);
@@ -154,7 +156,7 @@ class REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'set_option' ),
-				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
 			)
 		);
 
@@ -164,7 +166,7 @@ class REST_Controller {
 			array(
 				'methods'             => WP_REST_Server::CREATABLE,
 				'callback'            => array( $this, 'delete_option_value' ),
-				'permission_callback' => array( self::class, 'require_admin_and_playwright' ),
+				'permission_callback' => array( self::class, 'require_admin' ),
 			)
 		);
 	}
@@ -634,14 +636,14 @@ class REST_Controller {
 
 	/**
 	 * Permission callback used by every non-health endpoint. Requires the manage_options
-	 * capability. The plugin's safety rail (refuse to load outside test contexts via
-	 * WP_CLI / WP_DEBUG check) provides the second layer of defense, so no header check
-	 * is required here.
+	 * capability. The plugin is only mounted in test environments via .wp-env.json — it
+	 * does not ship in any production WooCommerce build — which provides the second
+	 * layer of defense.
 	 *
 	 * @param WP_REST_Request $request The REST request (unused).
 	 * @return bool
 	 */
-	public static function require_admin_and_playwright( WP_REST_Request $request ): bool {
+	public static function require_admin( WP_REST_Request $request ): bool {
 		unset( $request );
 		return current_user_can( 'manage_options' );
 	}

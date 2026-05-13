@@ -30,8 +30,6 @@ import {
 	setTransactionalEmailsOverride,
 	setOptedInOverride,
 	setTemplateHtmlOverride,
-	clearTransactionalEmailsOverride,
-	clearOptedInOverride,
 	clearTemplateHtmlOverride,
 	enableFakeThirdPartyEmail,
 	disableFakeThirdPartyEmail,
@@ -154,10 +152,6 @@ test.describe( 'Update propagation — scope and allow-list', () => {
 		// this assertion runs — consistent with the lifecycle tested in core-flows
 		// scenario 1 and backward-compat Case A.
 		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
-
-		await clearTransactionalEmailsOverride();
-		await clearOptedInOverride();
-		await clearTemplateHtmlOverride();
 	} );
 
 	/**
@@ -197,9 +191,5 @@ test.describe( 'Update propagation — scope and allow-list', () => {
 		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe(
 			STATUS.CORE_UPDATED_CUSTOMIZED
 		);
-
-		await clearTransactionalEmailsOverride();
-		await clearOptedInOverride();
-		await clearTemplateHtmlOverride();
 	} );
 } );

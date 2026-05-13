@@ -197,11 +197,18 @@ test.describe( 'Update propagation — core flows', () => {
 		const meta = await getWooEmailMeta( postId );
 		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
 
+		// DataViews rows have no aria-label, so getByRole('row', {name:...}) doesn't
+		// match. Use locator('tr').filter({hasText}) — same approach as test 2 —
+		// then assert the "Review update" button is absent (toHaveCount(0)) which is
+		// what actually surfaces when a post is core_updated_customized.
 		await page.goto( '/wp-admin/admin.php?page=wc-settings&tab=email' );
-		const newOrderRow = page.getByRole( 'row', { name: /New order/i } );
+		const newOrderRow = page
+			.locator( 'tr' )
+			.filter( { hasText: /New order/i } )
+			.first();
 		await expect(
-			newOrderRow.getByText( /update available/i )
-		).toBeHidden();
+			newOrderRow.getByRole( 'button', { name: /review update/i } )
+		).toHaveCount( 0 );
 
 		await spy.expectNotFired( TRACKS_EVENTS.AVAILABLE );
 		await spy.expectNotFired( TRACKS_EVENTS.DISMISSED );

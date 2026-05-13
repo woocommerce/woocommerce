@@ -34,7 +34,7 @@ function apiClient() {
 export async function resetWooEmailPost( emailId: string ): Promise< number > {
 	const client = apiClient();
 	const res = await client.post(
-		`${ TEST_HELPER_API_BASE }/reset-post/${ emailId }`,
+		`${ TEST_HELPER_API_BASE }/reset-post/${ encodeURIComponent( emailId ) }`,
 		{}
 	);
 	const body = res?.data;
@@ -104,7 +104,7 @@ async function resolveHash(
 	const client = apiClient();
 	const mode = hashSpec === 'AUTO_OLD' ? 'old' : 'current';
 	const res = await client.get(
-		`${ TEST_HELPER_API_BASE }/canonical-hash/${ emailId }?mode=${ mode }`
+		`${ TEST_HELPER_API_BASE }/canonical-hash/${ encodeURIComponent( emailId ) }?mode=${ mode }`
 	);
 	const body = res?.data;
 	if ( ! body?.hash ) {
