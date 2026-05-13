@@ -40,18 +40,17 @@
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
+		"build:publish:project": "pnpm build && tsc --project tsconfig-cjs.json --noCheck",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
 		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
 		"lint:fix:lang:js": "eslint src --fix",
 		"lint:lang:js": "eslint src",
-		"prepack": "pnpm build",
+		"prepack": "pnpm build:publish:project",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:cjs": "wireit",
 		"watch:build:project:esm": "wireit"
 	},
 	"devDependencies": {
@@ -84,25 +83,6 @@
 		}
 	},
 	"wireit": {
-		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --noCheck",
-			"clean": "if-file-deleted",
-			"files": [
-				"tsconfig-cjs.json",
-				"src/**/*.{js,jsx,ts,tsx}",
-				"typings/**/*.ts"
-			],
-			"output": [
-				"build"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
-			"service": true
-		},
 		"build:project:esm": {
 			"command": "tsc --project tsconfig.json",
 			"clean": "if-file-deleted",
