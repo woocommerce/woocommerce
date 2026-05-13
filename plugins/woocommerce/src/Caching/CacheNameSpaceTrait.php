@@ -25,7 +25,6 @@ trait CacheNameSpaceTrait {
 		$cache_key = 'wc_' . $group . '_cache_prefix';
 		$found     = false;
 		$prefix    = wp_cache_get( $cache_key, $group, false, $found );
-		$found     = (bool) $found;
 
 		if ( self::is_valid_cache_prefix( $prefix ) ) {
 			return 'wc_cache_' . $prefix . '_';
