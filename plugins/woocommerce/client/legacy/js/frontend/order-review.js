@@ -325,6 +325,7 @@
 
 					var results = payload.data.results || {};
 					var anySaved = false;
+					var anyFailed = false;
 					Object.keys( results ).forEach( function ( key ) {
 						var entry = results[ key ];
 						var row = form.querySelector(
@@ -335,16 +336,21 @@
 						if ( row && entry && entry.status ) {
 							renderRowStatus( row, entry.status );
 						}
+						if ( ! entry || ! entry.status ) {
+							anyFailed = true;
+							return;
+						}
 						if (
-							entry &&
-							( entry.status === 'ok' ||
-								entry.status === 'pending_moderation' )
+							entry.status === 'ok' ||
+							entry.status === 'pending_moderation'
 						) {
 							anySaved = true;
+						} else {
+							anyFailed = true;
 						}
 					} );
 
-					if ( anySaved ) {
+					if ( anySaved && ! anyFailed ) {
 						var wrapper = form.closest(
 							'.woocommerce-review-order'
 						);

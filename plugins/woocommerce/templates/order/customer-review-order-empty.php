@@ -9,7 +9,7 @@
  * @version 10.8.0
  *
  * @var WC_Order $order          Order being reviewed.
- * @var int      $reviewed_count Number of reviews this customer left on this order.
+ * @var int      $reviewed_count Number of items reviewed on this order.
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -18,34 +18,7 @@ if ( ! $order instanceof WC_Order ) {
 	return;
 }
 
-$date_created    = $order->get_date_created();
-$customer_name   = trim( $order->get_billing_first_name() . ' ' . $order->get_billing_last_name() );
-$customer_email  = $order->get_billing_email();
-$order_number    = $order->get_order_number();
-$order_date_text = $date_created ? wc_format_datetime( $date_created ) : '';
-
-if ( '' !== $order_date_text ) {
-	$order_summary = sprintf(
-		/* translators: 1: order number, 2: order date */
-		__( 'Order #%1$s (%2$s)', 'woocommerce' ),
-		$order_number,
-		$order_date_text
-	);
-} else {
-	$order_summary = sprintf(
-		/* translators: %s: order number */
-		__( 'Order #%s', 'woocommerce' ),
-		$order_number
-	);
-}
-
-$meta_parts = array_filter(
-	array(
-		$customer_name,
-		$customer_email,
-		$order_summary,
-	)
-);
+$meta_parts = \Automattic\WooCommerce\Internal\OrderReviews\Meta::parts_for_order( $order );
 ?>
 <div class="woocommerce-review-order woocommerce-review-order--empty">
 	<p class="woocommerce-breadcrumb woocommerce-review-order__meta">

@@ -92,24 +92,23 @@ $rating_control = \Automattic\WooCommerce\Internal\OrderReviews\StarRating::rend
 				rows="3"
 				placeholder="<?php esc_attr_e( 'Share your experience with this product...', 'woocommerce' ); ?>"
 			><?php echo esc_textarea( $existing_text ); ?></textarea>
-
-			<?php
-			/**
-			 * Fires after the rating + textarea inside a Review Order form row.
-			 *
-			 * Lets extensions inject extra fields (e.g. an "I recommend this"
-			 * checkbox) without overriding the whole template. Echo HTML directly
-			 * — the surrounding container expects no return value.
-			 *
-			 * @since 10.8.0
-			 *
-			 * @param WC_Order_Item_Product $item       The line item being reviewed.
-			 * @param WC_Product            $product    The associated product.
-			 * @param WC_Order              $order      The order.
-			 * @param int                   $row_index  Zero-based row index for input names.
-			 */
-			do_action( 'woocommerce_review_order_form_fields', $item, $product, $order, $row_index );
-			?>
 		</div>
 	</div>
+
+	<?php
+	/**
+	 * Fires after the rating + textarea inside a Review Order form row, as a
+	 * sibling of the row's columns so injected fields render below them.
+	 *
+	 * Echo HTML directly; the surrounding container expects no return value.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @param WC_Order_Item_Product $item       The line item being reviewed.
+	 * @param WC_Product            $product    The associated product.
+	 * @param WC_Order              $order      The order.
+	 * @param int                   $row_index  Zero-based row index for input names.
+	 */
+	do_action( 'woocommerce_review_order_form_fields', $item, $product, $order, $row_index );
+	?>
 </li>

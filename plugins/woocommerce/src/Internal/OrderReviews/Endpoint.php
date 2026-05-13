@@ -597,6 +597,7 @@ class Endpoint {
 					'ok'                 => __( 'Thanks, your review is live.', 'woocommerce' ),
 					'pending_moderation' => __( 'Thanks, your review is pending approval.', 'woocommerce' ),
 					'error'              => __( 'Something went wrong, please try again.', 'woocommerce' ),
+					'rating_required'    => __( 'Please rate this product before submitting your review.', 'woocommerce' ),
 				),
 			)
 		);
