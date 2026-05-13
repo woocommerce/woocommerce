@@ -1,16 +1,17 @@
-/**
- * Review Order page styles.
- *
- * Intentionally minimal. The active theme drives typography, color, and
- * button styling; only the per-item row layout and the interactive
- * star-rating control need bespoke CSS.
- *
- * The star control renders with `flex-direction: row-reverse`: the DOM
- * order is 5..1 so that sibling combinators (`~`) can fill all stars up
- * to the selected/hovered one without relying on `:has()`.
- */
+// Star DOM order is 5..1 under `flex-direction: row-reverse` so the `~`
+// sibling selector can fill stars 1..N without `:has()`.
 
 .woocommerce-review-order {
+	&.is-success {
+		.woocommerce-review-order__title,
+		.woocommerce-review-order__intro,
+		.woocommerce-review-order__legend,
+		.woocommerce-review-order__notice,
+		.woocommerce-review-order__form {
+			display: none;
+		}
+	}
+
 	&__items {
 		list-style: none;
 		padding: 0;
@@ -27,6 +28,17 @@
 		}
 	}
 
+	&__item-title {
+		margin: 0 0 1em;
+		font-size: 1.25em;
+		line-height: 1.2;
+		font-weight: 500;
+
+		a {
+			text-decoration: underline;
+		}
+	}
+
 	&__item-row {
 		display: flex;
 		gap: 1.5em;
@@ -38,12 +50,21 @@
 		max-width: 120px;
 	}
 
-	&__item-fields {
+	&__item-rating {
+		flex: 0 0 auto;
+		min-width: 8em;
+	}
+
+	&__item-rating-label {
+		margin: 0 0 0.25em;
+	}
+
+	&__item-review {
 		flex: 1 1 auto;
 		min-width: 0;
 		display: flex;
 		flex-direction: column;
-		gap: 0.75em;
+		gap: 0.5em;
 	}
 
 	&__item-review-textarea {
@@ -52,8 +73,11 @@
 		resize: vertical;
 	}
 
-	// Submission status note. Falls back to literal hex if a stylesheet
-	// loads before _variables.scss exposes the WC color tokens.
+	&__item-rating-error {
+		margin: 0.5em 0 0;
+		color: var(--wc-red, #a00);
+	}
+
 	&__item-status {
 		margin: 0.5em 0 0;
 
@@ -66,12 +90,41 @@
 		}
 	}
 
-	// Locked "Reviewed" row variant: indent the quoted review with a
-	// subtle left rule that inherits the theme's text color.
-	&__item-reviewed-text {
-		margin: 0.5em 0 0;
-		padding: 0 0 0 0.75em;
-		border-left: 2px solid;
+	// Layered on `.woocommerce-info`; theme paints background, border, icon.
+	&__notice {
+		position: relative;
+
+		&-body {
+			min-width: 0;
+		}
+
+		&-title {
+			margin: 0;
+			font-weight: 600;
+		}
+
+		&-text {
+			margin: 0.25em 0 0;
+		}
+
+		&-dismiss {
+			position: absolute;
+			top: 0.5em;
+			right: 0.5em;
+			background: transparent;
+			border: 0;
+			cursor: pointer;
+			padding: 0;
+			min-width: 24px;
+			min-height: 24px;
+			font-size: 1.25em;
+			line-height: 1;
+			color: inherit;
+		}
+
+		&--hidden {
+			display: none;
+		}
 	}
 
 	@media (max-width: 600px) {
@@ -84,19 +137,31 @@
 			max-width: 240px;
 			width: 100%;
 		}
+
+		&__item-rating,
+		&__item-review {
+			flex: 1 1 auto;
+			width: 100%;
+		}
 	}
 }
 
 .woocommerce-star-rating {
 	display: inline-flex;
-	flex-direction: row-reverse;
-	justify-content: flex-end;
-	align-items: center;
-	flex-wrap: wrap;
-	gap: 2px;
+	flex-direction: column;
+	align-items: flex-start;
+	gap: 0.25em;
 	line-height: 1;
 
-	// Visually hide the native radios but keep them in the a11y tree.
+	&__stars {
+		display: inline-flex;
+		flex-direction: row-reverse;
+		justify-content: flex-end;
+		align-items: center;
+		gap: 4px;
+	}
+
+	// Visually hide radios, keep them in the a11y tree.
 	&__input {
 		position: absolute;
 		width: 1px;
@@ -109,11 +174,17 @@
 		border: 0;
 	}
 
+	// Reset margin so the theme's `input[type=radio]+label` rule can't leak in.
 	&__star {
 		cursor: pointer;
 		display: inline-flex;
-		padding: 4px;
+		padding: 0;
+		margin: 0;
 		color: currentColor;
+	}
+
+	&__input + &__star {
+		margin-left: 0;
 	}
 
 	&__icon {
@@ -125,15 +196,12 @@
 		transition: opacity 100ms ease-in-out;
 	}
 
-	// Fill: a checked input fills its own label and every following sibling
-	// star (which appear visually before it under row-reverse).
+	// Checked input fills its own star + every following sibling (visual left).
 	&__input:checked ~ .woocommerce-star-rating__star .woocommerce-star-rating__icon {
 		opacity: 1;
 	}
 
-	// Hover preview: when hovering the rating, dim everything, then re-fill
-	// from the hovered star outward (visual left).
-	&:hover .woocommerce-star-rating__icon {
+	&__stars:hover .woocommerce-star-rating__icon {
 		opacity: 0.3;
 	}
 
@@ -142,21 +210,15 @@
 		opacity: 1;
 	}
 
-	// Focus ring: the input sits next to its own label; style the label when
-	// the input has visible keyboard focus.
 	&__input:focus-visible + .woocommerce-star-rating__star {
 		outline: 2px solid currentColor;
 		outline-offset: 2px;
 	}
 
-	// Caption keeps a stable footprint so the layout doesn't shift when the
-	// label text changes. Negative order sends it to the visual right of the
-	// stars (under row-reverse, the lowest-ordered item lays out first along
-	// the main axis, which is the rightmost slot).
 	&__caption {
-		order: -1;
-		margin-left: 0.5em;
 		min-height: 1em;
 		min-width: 4em;
+		font-size: 0.875em;
+		opacity: 0.7;
 	}
 }

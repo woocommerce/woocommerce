@@ -62,6 +62,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 		if ( $wp_query instanceof WP_Query ) {
 			$wp_query->is_404 = false;
 		}
+		wp_reset_postdata();
 		wp_set_current_user( 0 );
 		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		parent::tearDown();
@@ -243,6 +244,213 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Build a minimal `WP_Block` stand-in carrying the given `postId` context.
+	 * Avoids constructing a real `WP_Block`, which would require fully-parsed
+	 * block + registry plumbing.
+	 *
+	 * @param int $post_id Value to expose at `$instance->context['postId']`.
+	 * @return \WP_Block
+	 */
+	private function make_block_instance( int $post_id ): \WP_Block {
+		$instance          = $this->getMockBuilder( \WP_Block::class )
+			->disableOriginalConstructor()
+			->getMock();
+		$instance->context = array( 'postId' => $post_id );
+		return $instance;
+	}
+
+	/**
+	 * @testdox A successful gate_request() registers the title-suppression filters so they fire on the rest of the request.
+	 */
+	public function test_gate_request_registers_title_filters_after_authorisation(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// Stage the globals gate_request() reads: `is_page( review_order_page_id )`
+		// for the early return, `$wp->query_vars[ QUERY_VAR ]` for the order id,
+		// and `$_GET['key']` for the order key.
+		global $wp, $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
+		$wp_the_query = $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => $order->get_order_key() );
+
+		// Both filters must be absent before gate runs.
+		$this->assertFalse(
+			has_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ) )
+		);
+		$this->assertFalse(
+			has_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ) )
+		);
+
+		$this->endpoint->gate_request();
+
+		$this->assertNotFalse(
+			has_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ) )
+		);
+		$this->assertNotFalse(
+			has_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ) )
+		);
+
+		remove_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ), 10 );
+		remove_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ), 10 );
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() empties the title for the Review Order page when iterating the main loop.
+	 */
+	public function test_maybe_hide_page_title_empties_review_order_page_title_in_main_loop(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		// Stage a main query so in_the_loop() + is_main_query() both pass.
+		global $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query.
+		$wp_the_query = $wp_query;
+		$wp_query->the_post();
+
+		$this->assertSame(
+			'',
+			$this->endpoint->maybe_hide_page_title( 'Review your order', $page_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() leaves titles for other posts alone (e.g. a nav link on the same render).
+	 */
+	public function test_maybe_hide_page_title_leaves_other_post_titles(): void {
+		$other_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Sample Page',
+			)
+		);
+
+		global $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query on a different page.
+		$wp_query = new WP_Query( array( 'page_id' => $other_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query on a different page.
+		$wp_the_query = $wp_query;
+		$wp_query->the_post();
+
+		$this->assertSame(
+			'Sample Page',
+			$this->endpoint->maybe_hide_page_title( 'Sample Page', $other_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() leaves the title alone when the request is outside any loop (e.g. wp_get_document_title()).
+	 */
+	public function test_maybe_hide_page_title_leaves_title_when_not_in_loop(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		// Main query exists and `is_main_query()` is true, but `the_post()`
+		// has not been called so `in_the_loop()` returns false. This is the
+		// state `wp_get_document_title()` reads the post title in.
+		global $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: main query without the_post().
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: keep is_main_query() true.
+		$wp_the_query = $wp_query;
+
+		$this->assertFalse( in_the_loop() );
+		$this->assertTrue( is_main_query() );
+
+		$this->assertSame(
+			'Review your order',
+			$this->endpoint->maybe_hide_page_title( 'Review your order', $page_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() leaves the title alone when the loop belongs to a secondary query (is_main_query() is false).
+	 */
+	public function test_maybe_hide_page_title_leaves_title_when_not_main_query(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		// `$wp_the_query` is some other query (an empty one is enough), so
+		// is_main_query() returns false even though we are inside `$wp_query`'s loop.
+		global $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: separate main query.
+		$wp_the_query = new WP_Query();
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: secondary query iterating the page.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		$wp_query->the_post();
+
+		$this->assertTrue( in_the_loop() );
+		$this->assertFalse( is_main_query() );
+
+		$this->assertSame(
+			'Review your order',
+			$this->endpoint->maybe_hide_page_title( 'Review your order', $page_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() empties `core/post-title` markup when bound to the Review Order page.
+	 */
+	public function test_maybe_hide_post_title_block_empties_when_bound_to_review_order_page(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		$this->assertSame(
+			'',
+			$this->endpoint->maybe_hide_post_title_block(
+				'<h1 class="wp-block-post-title">Review your order</h1>',
+				array( 'blockName' => 'core/post-title' ),
+				$this->make_block_instance( $page_id )
+			)
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() leaves the title alone when the block is bound to a different post (e.g. inside a Query Loop).
+	 */
+	public function test_maybe_hide_post_title_block_leaves_other_post_context(): void {
+		$other_post_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Another page',
+			)
+		);
+
+		$markup = '<h1 class="wp-block-post-title">Another page</h1>';
+		$this->assertSame(
+			$markup,
+			$this->endpoint->maybe_hide_post_title_block(
+				$markup,
+				array( 'blockName' => 'core/post-title' ),
+				$this->make_block_instance( $other_post_id )
+			)
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() leaves the title alone when the third arg is not a WP_Block (defensive guard).
+	 */
+	public function test_maybe_hide_post_title_block_leaves_title_when_instance_missing(): void {
+		$markup = '<h1 class="wp-block-post-title">Review your order</h1>';
+		$this->assertSame(
+			$markup,
+			$this->endpoint->maybe_hide_post_title_block(
+				$markup,
+				array( 'blockName' => 'core/post-title' ),
+				null
+			)
+		);
+	}
+
+	/**
 	 * @testdox Loading the page when no actionable rows remain stamps the completed-at meta.
 	 */
 	public function test_no_actionable_rows_stamps_completed_meta(): void {
@@ -299,6 +507,110 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$fresh = wc_get_order( $order->get_id() );
 		$this->assertEmpty( $fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ) );
+	}
+
+	/**
+	 * @testdox The disabled-products info notice renders when at least one order item is STATUS_SKIP and the form is still active.
+	 */
+	public function test_disabled_products_notice_renders_above_form(): void {
+		$order      = OrderHelper::create_order();
+		$reviewable = WC_Helper_Product::create_simple_product();
+		$disabled   = WC_Helper_Product::create_simple_product();
+		wp_update_post(
+			array(
+				'ID'             => $disabled->get_id(),
+				'comment_status' => 'closed',
+			)
+		);
+		$order->set_status( OrderStatus::COMPLETED );
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $reviewable, 1 );
+		$order->add_product( $disabled, 1 );
+		$order->save();
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'woocommerce-info woocommerce-review-order__notice', $html );
+		$this->assertStringContainsString( 'see all your products?', $html );
+		$this->assertStringContainsString( 'woocommerce-review-order__form', $html );
+	}
+
+	/**
+	 * @testdox The empty-state thank-you template renders the meta line, heading, and body when no actionable rows remain.
+	 */
+	public function test_empty_state_template_renders_meta_and_thank_you(): void {
+		$order   = OrderHelper::create_order();
+		$product = WC_Helper_Product::create_simple_product();
+		$order->set_billing_email( 'thanks@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product->get_id(),
+				'comment_author'       => 'Thanks',
+				'comment_author_email' => 'thanks@example.test',
+				'comment_content'      => 'Loved it.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'woocommerce-review-order--empty', $html );
+		$this->assertStringContainsString( 'woocommerce-breadcrumb woocommerce-review-order__meta', $html );
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html );
+		$this->assertStringContainsString( 'Thank you for your reviews', $html );
+		$this->assertStringContainsString( 'Your feedback helps', $html );
+	}
+
+	/**
+	 * @testdox A pre-filled row exposes the existing rating and text via data-initial-* attributes so the JS dirty gate can detect edits.
+	 */
+	public function test_row_exposes_data_initial_attributes_for_prefilled_review(): void {
+		$order      = OrderHelper::create_order();
+		$reviewed   = WC_Helper_Product::create_simple_product();
+		$unreviewed = WC_Helper_Product::create_simple_product();
+		$order->set_billing_email( 'prefill@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $reviewed, 1 );
+		$order->add_product( $unreviewed, 1 );
+		$order->save();
+
+		$comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $reviewed->get_id(),
+				'comment_author'       => 'Prefill',
+				'comment_author_email' => 'prefill@example.test',
+				'comment_content'      => 'Solid four.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		add_comment_meta( $comment_id, 'rating', 4, true );
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'data-initial-rating="4"', $html );
+		$this->assertStringContainsString( 'data-initial-text="Solid four."', $html );
 	}
 
 	/**

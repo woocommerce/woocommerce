@@ -155,11 +155,11 @@ class WC_Emails {
 	 * @return void
 	 */
 	public static function queue_transactional_email( ...$args ) {
-		if ( self::$deferred_queue instanceof DeferredEmailQueue ) {
-			self::$deferred_queue->push( current_filter(), $args );
-		} else {
-			self::send_transactional_email( ...$args );
+		if ( self::$deferred_queue instanceof DeferredEmailQueue && self::$deferred_queue->push( current_filter(), $args ) ) {
+			return;
 		}
+
+		self::send_transactional_email( ...$args );
 	}
 
 	/**

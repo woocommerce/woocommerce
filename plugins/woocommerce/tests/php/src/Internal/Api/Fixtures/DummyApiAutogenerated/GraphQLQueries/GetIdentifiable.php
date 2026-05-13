@@ -21,7 +21,7 @@ class GetIdentifiable {
 				'kind' => array(
 					'type' => Type::nonNull(Type::string()),
 						'description' => __( 'Which kind of object to return', 'woocommerce' ),
-					),
+						),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);

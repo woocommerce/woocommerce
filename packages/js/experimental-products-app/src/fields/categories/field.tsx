@@ -32,7 +32,7 @@ type ProductCategory = {
 
 const fieldDefinition = {
 	type: 'array',
-	label: __( 'Categories', 'woocommerce' ),
+	label: __( 'Category', 'woocommerce' ),
 	enableSorting: false,
 	filterBy: {
 		operators: [ 'isAny', 'isNone' ],

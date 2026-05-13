@@ -1,13 +1,12 @@
 /* global document, window */
 /**
- * Progressive enhancement for the Review Order page.
- *
- * Adds keyboard navigation (Left/Right/Up/Down + Home/End) and a dynamic
- * caption to every `.woocommerce-star-rating` group on the page.
- * Without this script the underlying native radio inputs still work.
+ * Progressive enhancement for the Review Order page. Without this script the
+ * native radios + form post still work; server validates per row.
  */
 ( function () {
 	'use strict';
+
+	var ERROR_CLASS = 'woocommerce-review-order__item-rating-error';
 
 	/**
 	 * @param {HTMLElement} container `.woocommerce-star-rating` element.
@@ -37,10 +36,7 @@
 			input.dispatchEvent( new window.Event( 'change', { bubbles: true } ) );
 		}
 
-		// DOM order is 5..1 (reversed for the CSS row-reverse layout), so
-		// "next visual star" is the previous DOM input and vice-versa.
-		// Home/End map to visual-leftmost / visual-rightmost = inputs[last] /
-		// inputs[0] in DOM order.
+		// DOM order is 5..1; under row-reverse the next visual star is the previous DOM input.
 		inputs.forEach( function ( input, index ) {
 			input.addEventListener( 'change', syncCaption );
 
@@ -74,8 +70,53 @@
 	}
 
 	/**
+	 * Return the currently selected rating (1-5) for a row, or 0 if none.
+	 *
+	 * @param {HTMLElement} row `.woocommerce-review-order__item`
+	 * @return {number}
+	 */
+	function currentRating( row ) {
+		var checked = row.querySelector(
+			'.woocommerce-star-rating__input:checked'
+		);
+		return checked ? parseInt( checked.value, 10 ) || 0 : 0;
+	}
+
+	/**
+	 * Return the current textarea value for a row (trimmed).
+	 *
+	 * @param {HTMLElement} row `.woocommerce-review-order__item`
+	 * @return {string}
+	 */
+	function currentText( row ) {
+		var textarea = row.querySelector(
+			'.woocommerce-review-order__item-review-textarea'
+		);
+		return textarea ? ( textarea.value || '' ).trim() : '';
+	}
+
+	/**
+	 * Whether a row has been edited since page load.
+	 *
+	 * @param {HTMLElement} row `.woocommerce-review-order__item`
+	 * @return {boolean}
+	 */
+	function isRowDirty( row ) {
+		var initialRating = parseInt(
+			row.getAttribute( 'data-initial-rating' ) || '0',
+			10
+		) || 0;
+		// Trim to match currentText so prefilled whitespace doesn't mark the row dirty.
+		var initialText = ( row.getAttribute( 'data-initial-text' ) || '' ).trim();
+		return (
+			currentRating( row ) !== initialRating ||
+			currentText( row ) !== initialText
+		);
+	}
+
+	/**
 	 * Enable / disable the review-order submit button based on whether at
-	 * least one row has a rating selected.
+	 * least one row has been edited since page load.
 	 *
 	 * @param {HTMLFormElement} form `.woocommerce-review-order__form`
 	 */
@@ -86,53 +127,114 @@
 				window.console.warn(
 					'Review Order form is missing its submit button ' +
 						'(.woocommerce-review-order__submit); ' +
-						'the rating-based gate will not run.'
+						'the dirty gate will not run.'
 				);
 			}
 			return;
 		}
 
+		var rows = Array.prototype.slice.call(
+			form.querySelectorAll( '.woocommerce-review-order__item' )
+		);
+
 		function syncSubmit() {
-			var anyChecked = !! form.querySelector(
-				'.woocommerce-star-rating__input:checked'
-			);
-			submit.disabled = ! anyChecked;
+			submit.disabled = ! rows.some( isRowDirty );
 		}
 
-		// Expose so initAjaxSubmit can re-run the gate after the request
-		// completes (instead of unconditionally enabling the button).
+		// Expose so initAjaxSubmit can re-run the gate after the request completes.
 		form.syncReviewOrderSubmitGate = syncSubmit;
 
-		form.addEventListener( 'change', function ( event ) {
-			if (
-				event.target &&
-				event.target.classList &&
-				event.target.classList.contains(
-					'woocommerce-star-rating__input'
-				)
-			) {
-				syncSubmit();
-			}
-		} );
+		form.addEventListener( 'change', syncSubmit );
+		form.addEventListener( 'input', syncSubmit );
 
 		syncSubmit();
 	}
 
 	/**
-	 * Render per-row outcome inside a row's fields container.
+	 * @param {HTMLElement} row     `.woocommerce-review-order__item`
+	 * @param {boolean}     visible Whether the error should be shown.
+	 */
+	function setRowRatingError( row, visible ) {
+		var rating = row.querySelector(
+			'.woocommerce-review-order__item-rating'
+		);
+		if ( ! rating ) {
+			return;
+		}
+		var existing = rating.querySelector( '.' + ERROR_CLASS );
+		if ( ! visible ) {
+			if ( existing ) {
+				existing.parentNode.removeChild( existing );
+			}
+			return;
+		}
+		if ( existing ) {
+			return;
+		}
+		var i18n = ( window.wcOrderReview && window.wcOrderReview.i18n ) || {};
+		var msg =
+			i18n.rating_required ||
+			'Please rate this product before submitting your review.';
+		var note = document.createElement( 'p' );
+		note.className = ERROR_CLASS;
+		note.setAttribute( 'role', 'alert' );
+		note.textContent = msg;
+		rating.appendChild( note );
+	}
+
+	/**
+	 * @param {HTMLFormElement} form `.woocommerce-review-order__form`
+	 * @return {function(): boolean} Validator the AJAX submit handler re-runs.
+	 */
+	function initRatingValidation( form ) {
+		var rows = Array.prototype.slice.call(
+			form.querySelectorAll( '.woocommerce-review-order__item' )
+		);
+
+		function validate() {
+			var ok = true;
+			rows.forEach( function ( row ) {
+				var needsRating =
+					currentText( row ).length > 0 && currentRating( row ) === 0;
+				setRowRatingError( row, needsRating );
+				if ( needsRating ) {
+					ok = false;
+				}
+			} );
+			return ok;
+		}
+
+		rows.forEach( function ( row ) {
+			row.addEventListener( 'change', function () {
+				if (
+					currentText( row ).length === 0 ||
+					currentRating( row ) > 0
+				) {
+					setRowRatingError( row, false );
+				}
+			} );
+			row.addEventListener( 'input', function () {
+				if (
+					currentText( row ).length === 0 ||
+					currentRating( row ) > 0
+				) {
+					setRowRatingError( row, false );
+				}
+			} );
+		} );
+
+		return validate;
+	}
+
+	/**
+	 * Render per-row outcome below the row's columns.
 	 *
 	 * @param {HTMLElement} row    `.woocommerce-review-order__item`
 	 * @param {string}      status `ok | pending_moderation | error`
 	 * @param {string}      [text] Optional message override.
 	 */
 	function renderRowStatus( row, status, text ) {
-		var fields = row.querySelector(
-			'.woocommerce-review-order__item-fields'
-		);
-		if ( ! fields ) {
-			return;
-		}
-		var existing = fields.querySelector(
+		var existing = row.querySelector(
 			'.woocommerce-review-order__item-status'
 		);
 		if ( existing ) {
@@ -154,15 +256,17 @@
 			status;
 		note.setAttribute( 'role', 'status' );
 		note.textContent = text || defaults[ status ] || defaults.error;
-		fields.appendChild( note );
+		row.appendChild( note );
 	}
 
 	/**
 	 * Intercept form submit and POST it to admin-ajax.
 	 *
 	 * @param {HTMLFormElement} form
+	 * @param {function(): boolean} validate Returns true when the form is
+	 *                                       safe to submit.
 	 */
-	function initAjaxSubmit( form ) {
+	function initAjaxSubmit( form, validate ) {
 		var ajaxUrl = form.getAttribute( 'data-ajax-url' );
 		if ( ! ajaxUrl ) {
 			return;
@@ -170,6 +274,17 @@
 
 		form.addEventListener( 'submit', function ( event ) {
 			event.preventDefault();
+
+			if ( ! validate() ) {
+				var firstError = form.querySelector( '.' + ERROR_CLASS );
+				if ( firstError && typeof firstError.scrollIntoView === 'function' ) {
+					firstError.scrollIntoView( {
+						behavior: 'smooth',
+						block: 'center',
+					} );
+				}
+				return;
+			}
 
 			var submit = form.querySelector(
 				'.woocommerce-review-order__submit'
@@ -209,6 +324,8 @@
 					}
 
 					var results = payload.data.results || {};
+					var anySaved = false;
+					var anyFailed = false;
 					Object.keys( results ).forEach( function ( key ) {
 						var entry = results[ key ];
 						var row = form.querySelector(
@@ -219,7 +336,42 @@
 						if ( row && entry && entry.status ) {
 							renderRowStatus( row, entry.status );
 						}
+						if ( ! entry || ! entry.status ) {
+							anyFailed = true;
+							return;
+						}
+						if (
+							entry.status === 'ok' ||
+							entry.status === 'pending_moderation'
+						) {
+							anySaved = true;
+						} else {
+							anyFailed = true;
+						}
 					} );
+
+					if ( anySaved && ! anyFailed ) {
+						var wrapper = form.closest(
+							'.woocommerce-review-order'
+						);
+						if ( wrapper ) {
+							wrapper.classList.add( 'is-success' );
+							var success = wrapper.querySelector(
+								'.woocommerce-review-order__success'
+							);
+							if ( success ) {
+								success.hidden = false;
+							}
+							if (
+								typeof wrapper.scrollIntoView === 'function'
+							) {
+								wrapper.scrollIntoView( {
+									behavior: 'smooth',
+									block: 'start',
+								} );
+							}
+						}
+					}
 				} )
 				.catch( function () {
 					Array.prototype.forEach.call(
@@ -247,6 +399,21 @@
 		} );
 	}
 
+	/**
+	 * @param {HTMLElement} notice `.woocommerce-review-order__notice`
+	 */
+	function initNoticeDismiss( notice ) {
+		var dismiss = notice.querySelector(
+			'.woocommerce-review-order__notice-dismiss'
+		);
+		if ( ! dismiss ) {
+			return;
+		}
+		dismiss.addEventListener( 'click', function () {
+			notice.classList.add( 'woocommerce-review-order__notice--hidden' );
+		} );
+	}
+
 	function init() {
 		var groups = document.querySelectorAll( '.woocommerce-star-rating' );
 		Array.prototype.forEach.call( groups, initGroup );
@@ -254,8 +421,16 @@
 		var forms = document.querySelectorAll(
 			'.woocommerce-review-order__form'
 		);
-		Array.prototype.forEach.call( forms, initSubmitGate );
-		Array.prototype.forEach.call( forms, initAjaxSubmit );
+		Array.prototype.forEach.call( forms, function ( form ) {
+			initSubmitGate( form );
+			var validate = initRatingValidation( form );
+			initAjaxSubmit( form, validate );
+		} );
+
+		var notices = document.querySelectorAll(
+			'.woocommerce-review-order__notice'
+		);
+		Array.prototype.forEach.call( notices, initNoticeDismiss );
 	}
 
 	if ( document.readyState === 'loading' ) {

@@ -222,6 +222,18 @@ class SettingsTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox add_settings defines the OPcache checkbox with a 'yes' default.
+	 */
+	public function test_add_settings_defines_opcache_checkbox(): void {
+		$fields = $this->sut->add_settings( array(), Settings::SECTION_ID );
+		$by_id  = array_column( $fields, null, 'id' );
+
+		$this->assertArrayHasKey( Main::OPTION_OPCACHE_ENABLED, $by_id );
+		$this->assertSame( 'checkbox', $by_id[ Main::OPTION_OPCACHE_ENABLED ]['type'] );
+		$this->assertSame( 'yes', $by_id[ Main::OPTION_OPCACHE_ENABLED ]['default'] );
+	}
+
+	/**
 	 * @testdox add_settings defines the max query depth field with min=1 and the default constant as default.
 	 */
 	public function test_add_settings_defines_max_query_depth_field(): void {

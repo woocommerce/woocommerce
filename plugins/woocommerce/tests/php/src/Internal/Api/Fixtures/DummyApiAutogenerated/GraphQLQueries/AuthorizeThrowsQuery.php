@@ -25,7 +25,7 @@ class AuthorizeThrowsQuery {
 				'kind' => array(
 					'type' => Type::nonNull(Type::string()),
 						'description' => __( 'Which exception class authorize() should raise.', 'woocommerce' ),
-					),
+						),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);

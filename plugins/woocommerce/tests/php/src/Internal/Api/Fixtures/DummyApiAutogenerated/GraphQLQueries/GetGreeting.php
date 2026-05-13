@@ -26,7 +26,7 @@ class GetGreeting {
 					'type' => Type::string(),
 						'description' => __( 'Who to greet (defaults to \"world\")', 'woocommerce' ),
 						'defaultValue' => NULL,
-				),
+					),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);
