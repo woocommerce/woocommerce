@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Shopper Collection: own the grid layout (custom `columnCount` attribute + `.columns-N` class) and ship Product-Collection-equivalent responsive behavior. Items now reflow to fewer columns on narrow viewports instead of shrinking uniformly.
