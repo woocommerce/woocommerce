@@ -371,10 +371,13 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 					type: 'snackbar',
 				} );
 			}
+
+			closeDrawer();
 		} finally {
 			setIsSaving( false );
 		}
 	}, [
+		closeDrawer,
 		createErrorNotice,
 		createSuccessNotice,
 		editEntityRecord,

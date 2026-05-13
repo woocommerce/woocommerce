@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Close the quick/bulk edit drawer after a fully successful save in the experimental products app. The drawer still stays open if any product fails to save so the user can correct and retry.
