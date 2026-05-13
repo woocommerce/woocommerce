@@ -93,8 +93,11 @@ class Endpoint {
 		};
 
 		add_filter( 'woocommerce_create_pages', $only_review_order );
-		\WC_Install::create_pages();
-		remove_filter( 'woocommerce_create_pages', $only_review_order );
+		try {
+			\WC_Install::create_pages();
+		} finally {
+			remove_filter( 'woocommerce_create_pages', $only_review_order );
+		}
 
 		// Defer the rewrite flush to wp_loaded; rewrite_rule fires later on init.
 		update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
