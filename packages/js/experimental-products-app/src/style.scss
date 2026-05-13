@@ -49,6 +49,8 @@
 	}
 
 	.components-menu-item__button {
+		display: flex;
+		width: 100%;
 		padding-block: var(--wpds-dimension-padding-md, 12px);
 		padding-inline: var(--wpds-dimension-padding-lg, 16px);
 		text-align: start;
@@ -56,12 +58,14 @@
 		height: auto;
 	}
 
-	.components-menu-items__item-icon {
-		margin-top: 2px;
+	.components-menu-item__info-wrapper {
+		flex: 1 1 auto;
+		min-width: 0;
+		gap: 2px;
 	}
 
-	.components-menu-item__info-wrapper {
-		gap: 2px;
+	.components-menu-items__item-icon {
+		margin-top: 2px;
 	}
 
 	.components-menu-item__info-wrapper .components-menu-item__item {
