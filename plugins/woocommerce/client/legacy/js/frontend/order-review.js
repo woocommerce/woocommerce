@@ -106,7 +106,8 @@
 			row.getAttribute( 'data-initial-rating' ) || '0',
 			10
 		) || 0;
-		var initialText = row.getAttribute( 'data-initial-text' ) || '';
+		// Trim to match currentText so prefilled whitespace doesn't mark the row dirty.
+		var initialText = ( row.getAttribute( 'data-initial-text' ) || '' ).trim();
 		return (
 			currentRating( row ) !== initialRating ||
 			currentText( row ) !== initialText
