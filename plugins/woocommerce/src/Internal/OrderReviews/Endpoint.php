@@ -90,9 +90,8 @@ class Endpoint {
 			if ( 'publish' === $page->post_status ) {
 				return;
 			}
-			// Existing host page is a draft/private/pending entry — republish
-			// it in place. `WC_Install::create_pages()` would short-circuit
-			// because a row already exists at that option value.
+			// `WC_Install::create_pages()` short-circuits on existing rows,
+			// so republish the draft/private/pending row in place.
 			wp_update_post(
 				array(
 					'ID'          => (int) $page->ID,
@@ -103,10 +102,8 @@ class Endpoint {
 			return;
 		}
 
-		// The review-order page is no longer in WC_Install::create_pages()'s
-		// default array (it's gated by this feature); replace the filtered
-		// list with only our entry so the call doesn't re-process every
-		// other WC page on the seed pass.
+		// Inject just our entry — the default array no longer carries it
+		// and we don't want to re-process every other WC page here.
 		$inject_review_order = function (): array {
 			return array(
 				self::PAGE_KEY => array(
