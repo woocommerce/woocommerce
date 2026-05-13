@@ -48,11 +48,11 @@
 }
 
 .woocommerce-product-list__add-new-menu {
+	width: 300px;
 	min-width: 300px;
 
-	// The inner popover content sizes to its content by default, which
-	// makes our min-width on the outer popover irrelevant. Force it to
-	// fill so the menu items can actually use the available space.
+	// The inner popover content sizes to its content by default. Force it
+	// to fill so menu items get the full 300px to work with.
 	.components-popover__content {
 		width: 100%;
 		box-sizing: border-box;
@@ -62,13 +62,15 @@
 		padding: var(--wpds-dimension-padding-md, 12px) 0;
 	}
 
-	.components-menu-item__button {
+	// The selector adds `.has-icon.has-text` so it beats the @wordpress
+	// design-system rule `.components-button.has-icon.has-text` (0,3,0)
+	// which would otherwise impose a 4px gap and 8/12 px padding-inline.
+	.components-menu-item__button.has-icon.has-text {
 		display: flex;
 		width: 100%;
-		// 16px between the icon and the left edge; 12px between the icon
-		// column and the title/description text.
 		padding-block: var(--wpds-dimension-padding-md, 12px);
-		padding-inline: 16px;
+		padding-left: 16px;
+		padding-right: 16px;
 		gap: 12px;
 		text-align: start;
 		align-items: flex-start;
