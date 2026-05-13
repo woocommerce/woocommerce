@@ -371,6 +371,8 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 					type: 'snackbar',
 				} );
 			}
+
+			setIsDrawerOpen( false );
 		} finally {
 			setIsSaving( false );
 		}
@@ -384,14 +386,15 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 	] );
 
 	useEffect( () => {
-		if ( requestedProductIds.length > 0 && ! isDrawerOpen ) {
+		if ( requestedProductIds.length > 0 ) {
 			setIsDrawerOpen( true );
 		}
-	}, [ requestedProductIds, isDrawerOpen ] );
+	}, [ requestedProductIds ] );
 
 	return (
 		<Drawer.Root
 			open={ isDrawerOpen }
+			onOpenChange={ setIsDrawerOpen }
 			onOpenChangeComplete={ ( isOpen ) => {
 				if ( ! isOpen ) {
 					closeDrawer();
@@ -411,7 +414,7 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 						{ title }
 					</Drawer.Title>
 					<Drawer.CloseIcon
-						onClick={ closeDrawer }
+						onClick={ () => setIsDrawerOpen( false ) }
 						label={ __( 'Close quick edit', 'woocommerce' ) }
 					/>
 				</Drawer.Header>
@@ -460,7 +463,7 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 					<Drawer.Footer className="woocommerce-product-edit__footer">
 						<Button
 							variant="tertiary"
-							onClick={ closeDrawer }
+							onClick={ () => setIsDrawerOpen( false ) }
 							disabled={ isSaving }
 						>
 							{ __( 'Cancel', 'woocommerce' ) }
