@@ -53,9 +53,9 @@ const PRODUCT_TYPE_MENU_ITEMS = [
 	{
 		key: 'simple',
 		icon: tag,
-		label: __( 'Physical product', 'woocommerce' ),
+		label: __( 'Simple product', 'woocommerce' ),
 		info: __(
-			'A tangible item that gets delivered.',
+			'A standalone item with no variations.',
 			'woocommerce'
 		),
 		queryArgs: {},
