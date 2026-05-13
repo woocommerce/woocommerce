@@ -113,11 +113,8 @@ class ProductGallery extends AbstractBlock {
 			return '';
 		}
 
-		$image_ids = ProductGalleryUtils::get_all_image_ids( $product );
-		// `defaultImageData` shows all images (parent + variations) when no
-		// variation is selected, so thumbnails stay visible until the merchant
-		// picks a variation.
-		$default_image_ids = $image_ids;
+		$image_ids         = ProductGalleryUtils::get_all_image_ids( $product );
+		$default_image_ids = array_map( 'intval', ProductGalleryUtils::get_product_gallery_image_ids( $product ) );
 
 		$number_of_images       = count( $default_image_ids );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
