@@ -55,6 +55,19 @@
 	--wp-ui-drawer-z-index: 100000;
 }
 
+// `@wordpress/ui`'s Drawer popup only declares its slide-in `transition` on
+// `[data-open]` / `[data-swiping]`, so the slide-out animation doesn't play:
+// base-ui removes `data-open` (swapping to `data-closed`) at the start of the
+// close, the transition rule no longer matches, and the transform jumps
+// straight to the off-screen state. Apply the same transition unconditionally
+// on our popup so the close mirrors the open animation. Honors
+// `prefers-reduced-motion` the same way the upstream rule does.
+@media not (prefers-reduced-motion) {
+	.woocommerce-product-edit__drawer {
+		transition: transform 450ms cubic-bezier(0.32, 0.72, 0, 1);
+	}
+}
+
 .woocommerce-product-edit__header {
 	display: flex;
 	align-items: center;
