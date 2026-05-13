@@ -94,10 +94,10 @@ class Endpoint {
 		// other WC page on the seed pass.
 		$inject_review_order = function (): array {
 			return array(
-				'review_order' => array(
+				self::PAGE_KEY => array(
 					'name'    => _x( 'review-order', 'Page slug', 'woocommerce' ),
 					'title'   => _x( 'Review your order', 'Page title', 'woocommerce' ),
-					'content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
+					'content' => '<!-- wp:shortcode -->[' . self::SHORTCODE . ']<!-- /wp:shortcode -->',
 				),
 			);
 		};
