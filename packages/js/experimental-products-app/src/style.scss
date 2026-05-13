@@ -94,14 +94,12 @@
 	gap: 8px;
 }
 
-// Cap the DataViews "View options" (Appearance) popover height so its
-// inner content scrolls instead of letting the popover grow past the
-// viewport. The upstream `is-expanded` mode is what enables scroll, but
-// it's not triggered in our wp-admin context — apply the equivalent
-// constraint directly here. Viewport-relative so the popover always
-// leaves room for the wp-admin top bar and a bit of breathing room.
+// Give the DataViews "View options" (Appearance) popover a fixed
+// maximum height so its inner content scrolls inside the popover
+// instead of growing with the property list. Mirrors the upstream
+// `is-expanded` behavior, which our wp-admin context doesn't trigger.
 .dataviews-config__popover .dataviews-config__popover-content-wrapper {
-	max-height: calc(100vh - 120px);
+	max-height: min(500px, calc(100vh - 120px));
 	overflow-y: auto;
 }
 
