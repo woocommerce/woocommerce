@@ -154,8 +154,8 @@ class ShopperListSchemaTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'key', $item );
 		$this->assertArrayHasKey( 'product_id', $item );
 		$this->assertArrayHasKey( 'quantity', $item );
-		$this->assertArrayHasKey( 'product_exists', $item );
-		$this->assertTrue( $item['product_exists'], 'Live product items should have product_exists=true.' );
+		$this->assertArrayHasKey( 'is_live', $item );
+		$this->assertTrue( $item['is_live'], 'Live product items should have is_live=true.' );
 
 		$product->delete( true );
 	}
