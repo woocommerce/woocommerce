@@ -4,6 +4,23 @@
 import { test, expect } from '@playwright/test';
 
 /**
+ * Update-propagation: core flows.
+ *
+ * Covers the merchant-facing lifecycle of a core-template update: divergence
+ * detection, the update-available indicator on the list + editor banner,
+ * auto-apply for unmodified posts, selective apply for customized posts, the
+ * dismiss flow, and the review-drawer-driven selective merge.
+ *
+ * Reviewing in Playwright UI mode:
+ *   1. Run `npx playwright test --project=e2e tests/email-editor/update-propagation --ui`
+ *   2. Filter the tree by `core-flows` and pick a test.
+ *   3. For UI tests, toggle "Show browser" (👁 in the top-left toolbar) to watch the
+ *      Chromium window drive the admin. For REST-only tests the Actions panel
+ *      shows the REST call sequence — no browser needed.
+ *   4. Per-test JSDoc below indicates whether each test drives the browser.
+ */
+
+/**
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../../playwright.config';
@@ -39,6 +56,18 @@ test.describe( 'Update propagation — core flows', () => {
 		await assertNoLeakedFixtureState();
 	} );
 
+	/**
+	 * Verifies that running the detection sweep after a core bump correctly
+	 * classifies an unmodified post as auto-applied (in_sync) and a merchant-
+	 * customized post as core_updated_customized, waiting for manual review.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows the REST call
+	 *   sequence: simulateCoreBump → seedWooEmailPost (×2) → clearTemplateHtmlOverride
+	 *   → triggerDetectionSweep → getWooEmailMeta assertions.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( '@pr Plugin update triggers divergence detection and classifies posts', async () => {
 		// Bump and seed the uncustomized post.
 		await simulateCoreBump( 'new_order', OLD_HTML );
@@ -83,6 +112,20 @@ test.describe( 'Update propagation — core flows', () => {
 		expect( sweep.touched ).toBeGreaterThanOrEqual( 2 );
 	} );
 
+	/**
+	 * Verifies that a core_updated_customized post surfaces a "Review update"
+	 * button on the email list page and a "Template update available" banner
+	 * inside the block editor.
+	 *
+	 * UI mode walkthrough:
+	 *   After REST setup the test navigates to WP Admin → WooCommerce → Settings →
+	 *   Email. The DataViews table loads and the "New order" row should contain a
+	 *   "Review update" button. The test then opens the email in the block editor
+	 *   and asserts the "Template update available" status banner is visible. No
+	 *   clicks — both assertions are visibility checks only.
+	 *
+	 *   "Show browser" eye: ON.
+	 */
 	test( '@pr Update-available indicator appears on email list and in editor', async ( {
 		page,
 	} ) => {
@@ -122,6 +165,19 @@ test.describe( 'Update propagation — core flows', () => {
 		).toBeVisible( { timeout: 15000 } );
 	} );
 
+	/**
+	 * Verifies that an unmodified post is silently brought back to in_sync by the
+	 * auto-applier, with no "Update available" indicator on the list and no
+	 * Tracks events fired for update-available or dismissed.
+	 *
+	 * UI mode walkthrough:
+	 *   The page fixture is used only to attach the Tracks spy and to navigate to
+	 *   the email list for the "no indicator" assertion — no clicks are performed.
+	 *   You'll see the browser open the email settings page and the test confirms
+	 *   the "Update available" text is hidden in the New order row.
+	 *
+	 *   "Show browser" eye: ON.
+	 */
 	test( '@pr Auto-apply succeeds silently for unmodified posts', async ( {
 		page,
 	} ) => {
@@ -151,6 +207,18 @@ test.describe( 'Update propagation — core flows', () => {
 		await spy.expectNotFired( TRACKS_EVENTS.DISMISSED );
 	} );
 
+	/**
+	 * Verifies that calling the apply endpoint with choices:[] (keep-yours default)
+	 * applies core additions while preserving merchant edits, and leaves the post
+	 * stamped core_updated_customized because the content still diverges from canonical.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows: simulateCoreBump
+	 *   → seedWooEmailPost → clearTemplateHtmlOverride → triggerDetectionSweep
+	 *   → applyWooEmailTemplate (REST POST) → getWooEmailMeta + content assertions.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( '@pr Selective apply succeeds and preserves customizations', async () => {
 		const oldHtml =
 			'<!-- wp:paragraph --><p>OLD CORE</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>SECOND BLOCK</p><!-- /wp:paragraph -->';
@@ -187,6 +255,19 @@ test.describe( 'Update propagation — core flows', () => {
 		expect( content ).toContain( 'MERCHANT EDITED SECOND' );
 	} );
 
+	/**
+	 * Verifies that clicking the "dismiss" button on the editor update banner fires
+	 * the expected Tracks dismissed event.
+	 *
+	 * UI mode walkthrough:
+	 *   After REST setup the test opens the block editor for the New order email.
+	 *   The editor canvas loads, and the update banner is visible at the top. If
+	 *   the review drawer is already open it is closed via Escape. Then the test
+	 *   clicks the banner's dismiss button (`.wc-update-banner__dismiss`) and
+	 *   asserts the Tracks dismissed event fired.
+	 *
+	 *   "Show browser" eye: ON.
+	 */
 	test( '@pr Dismiss flow records the dismissed Tracks event', async ( {
 		page,
 	} ) => {
@@ -231,6 +312,22 @@ test.describe( 'Update propagation — core flows', () => {
 		await spy.expectFired( TRACKS_EVENTS.DISMISSED );
 	} );
 
+	/**
+	 * Verifies that the review drawer allows per-conflict "keep yours" / "use core"
+	 * choices and that clicking Apply merges exactly the selected blocks into the
+	 * saved post content.
+	 *
+	 * UI mode walkthrough:
+	 *   After REST setup the test navigates directly to the editor with the
+	 *   `wc_email_review_drawer=1` deep-link param, which auto-opens the review
+	 *   drawer. The drawer loads a change summary showing three conflicts. The test
+	 *   leaves block A on "keep yours" (default), switches block B to "use core"
+	 *   via a radio button click, then clicks Apply. The drawer closes and the
+	 *   test verifies the merged content via REST (block A: merchant text kept,
+	 *   block B: core text applied, block C: default kept).
+	 *
+	 *   "Show browser" eye: ON.
+	 */
 	test( 'Review drawer: pick per-conflict yours vs core and apply', async ( {
 		page,
 	} ) => {

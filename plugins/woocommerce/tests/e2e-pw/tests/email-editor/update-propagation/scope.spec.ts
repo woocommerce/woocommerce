@@ -4,6 +4,24 @@
 import { test, expect } from '@playwright/test';
 
 /**
+ * Update-propagation: scope and allow-list.
+ *
+ * Covers the allow-list (opt-in) boundary for third-party email types: a
+ * non-opted-in email is entirely excluded from backfill and detection; an
+ * opted-in third-party email that is unedited is auto-applied (in_sync) after
+ * a version bump; an opted-in email that is edited is left as
+ * core_updated_customized for the merchant to review.
+ *
+ * Reviewing in Playwright UI mode:
+ *   1. Run `npx playwright test --project=e2e tests/email-editor/update-propagation --ui`
+ *   2. Filter the tree by `scope` and pick a test.
+ *   3. The first test ("Non-opted-in") attaches a Tracks spy via the page fixture
+ *      but performs no navigation or UI interaction. The other two tests are
+ *      purely REST-based. The Actions panel shows the REST call sequence for all.
+ *   4. "Show browser" eye is not needed for any test in this file.
+ */
+
+/**
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../../playwright.config';
@@ -53,6 +71,19 @@ test.describe( 'Update propagation — scope and allow-list', () => {
 		await assertNoLeakedFixtureState();
 	} );
 
+	/**
+	 * Verifies that a third-party email type that has not enrolled in block-editor
+	 * sync is completely ignored by both the backfill and the detection sweep —
+	 * no stamp meta is written and no Tracks _available event fires.
+	 *
+	 * UI mode walkthrough:
+	 *   The page fixture is used only to attach the Tracks spy — no navigation
+	 *   or UI interaction occurs. Actions panel shows: seedWooEmailPostDirect
+	 *   (no options-table mapping) → triggerBackfill → simulateCoreBump →
+	 *   triggerDetectionSweep → meta undefined assertions → spy.expectNotFired.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'Non-opted-in third-party email is excluded from sync', async ( {
 		page,
 	} ) => {
@@ -81,6 +112,20 @@ test.describe( 'Update propagation — scope and allow-list', () => {
 		await spy.expectNotFired( TRACKS_EVENTS.AVAILABLE );
 	} );
 
+	/**
+	 * Verifies that an opted-in third-party email with an unedited post is
+	 * auto-applied after a version bump (1.0.0 → 1.1.0), landing back at in_sync
+	 * rather than surfacing an update prompt to the merchant.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows:
+	 *   setTransactionalEmailsOverride + setOptedInOverride + setTemplateHtmlOverride
+	 *   (v1 setup) → seedWooEmailPost → triggerDetectionSweep → meta assertion
+	 *   (IN_SYNC) → override swap to v2 → triggerDetectionSweep → meta assertion
+	 *   (IN_SYNC via auto-apply) → cleanup calls.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'Opted-in third-party email: version bump flips status when unedited', async () => {
 		await setTransactionalEmailsOverride( [ FAKE_EMAIL_ID ] );
 		await setOptedInOverride( { [ FAKE_EMAIL_ID ]: { version: '1.0.0' } } );
@@ -115,6 +160,20 @@ test.describe( 'Update propagation — scope and allow-list', () => {
 		await clearTemplateHtmlOverride();
 	} );
 
+	/**
+	 * Verifies that an opted-in third-party email with a merchant-edited post is
+	 * stamped core_updated_customized after a version bump (1.0.0 → 1.1.0),
+	 * leaving the update for the merchant to review rather than auto-applying.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows:
+	 *   setTransactionalEmailsOverride + setOptedInOverride + setTemplateHtmlOverride
+	 *   (v1 setup) → seedWooEmailPost (customized content) → override swap to v2
+	 *   → triggerDetectionSweep → meta assertion (CORE_UPDATED_CUSTOMIZED)
+	 *   → cleanup calls.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'Opted-in third-party email: version bump flips status when edited', async () => {
 		const customized = V1_HTML.replace( 'V1 CONTENT', 'MERCHANT EDIT' );
 

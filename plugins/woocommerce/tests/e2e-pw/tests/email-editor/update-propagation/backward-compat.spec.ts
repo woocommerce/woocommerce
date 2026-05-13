@@ -5,6 +5,25 @@ import { test, expect } from '@playwright/test';
 import { createClient } from '@woocommerce/e2e-utils-playwright';
 
 /**
+ * Update-propagation: backward compatibility.
+ *
+ * Covers the five BC scenarios for sites that had email posts before the
+ * RSM-137 stamp meta was introduced: Case A (content matches core, no stamp),
+ * Case B (timestamps equal, content behind core), Case C (customized post —
+ * critical safety: content must never be overwritten), the no-mass-fire
+ * Tracks guard (backfill must not fire _available events), and idempotency
+ * (second backfill is a no-op).
+ *
+ * Reviewing in Playwright UI mode:
+ *   1. Run `npx playwright test --project=e2e tests/email-editor/update-propagation --ui`
+ *   2. Filter the tree by `backward-compat` and pick a test.
+ *   3. All tests are REST-only except "BC no mass-fire" which attaches a Tracks
+ *      spy via the page fixture (but does not navigate or interact with the UI).
+ *      For all tests, the Actions panel in UI mode shows the REST call sequence.
+ *   4. "Show browser" eye is not needed for any test in this file.
+ */
+
+/**
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../../playwright.config';
@@ -76,6 +95,18 @@ test.describe( 'Update propagation — backward compatibility', () => {
 		await assertNoLeakedFixtureState();
 	} );
 
+	/**
+	 * Verifies that a pre-RSM-137 post whose content already matches the current
+	 * canonical is stamped in_sync by the backfill and correctly participates in
+	 * subsequent detection sweeps.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows: seedWooEmailPost
+	 *   (stripStampMeta) → triggerBackfill → getWooEmailMeta assertions →
+	 *   setTemplateHtmlOverride → triggerDetectionSweep → meta re-check.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'BC Case A — content matches current core, no stamp meta', async () => {
 		const postId = await seedWooEmailPost( {
 			emailId: 'new_order',
@@ -101,6 +132,18 @@ test.describe( 'Update propagation — backward compatibility', () => {
 		expect( metaAfter[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
 	} );
 
+	/**
+	 * Verifies that a pre-RSM-137 post with equal created/modified timestamps
+	 * (indicating the content was never edited) is silently updated to the current
+	 * canonical during backfill and stamped in_sync.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows: seedWooEmailPost
+	 *   (stripStampMeta, equal timestamps, old content) → triggerBackfill →
+	 *   meta assertion → REST GET to verify post_content was rewritten to canonical.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'BC Case B — timestamps equal and content behind core', async ( {
 		request,
 	} ) => {
@@ -129,6 +172,20 @@ test.describe( 'Update propagation — backward compatibility', () => {
 		expect( content ).not.toContain( 'OLD' );
 	} );
 
+	/**
+	 * Critical safety test: verifies that a pre-RSM-137 post whose content diverges
+	 * from canonical (i.e., the merchant edited it) is stamped core_updated_customized
+	 * by the backfill and that its content is NEVER overwritten — neither during
+	 * backfill nor during subsequent detection sweeps.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows: seedWooEmailPost
+	 *   (stripStampMeta, customized content) → triggerBackfill → meta + content
+	 *   assertions → setTemplateHtmlOverride → triggerDetectionSweep → repeat
+	 *   meta + content assertions confirming the merchant text is still intact.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( '@pr BC Case C — customized post content preserved (critical safety)', async () => {
 		const customized =
 			'<!-- wp:paragraph --><p>MERCHANT CUSTOM 1234</p><!-- /wp:paragraph -->';
@@ -169,6 +226,19 @@ test.describe( 'Update propagation — backward compatibility', () => {
 		expect( contentAfterBump ).toContain( 'MERCHANT CUSTOM 1234' );
 	} );
 
+	/**
+	 * Verifies that running backfill + detection sweep on a full set of 11 email
+	 * types fires exactly one _backfill_completed Tracks event and zero
+	 * _available events (guarding against a mass notification storm on upgrade).
+	 *
+	 * UI mode walkthrough:
+	 *   The page fixture is used only to attach the Tracks spy — no navigation
+	 *   or UI interaction occurs. The spy intercepts server-side Tracks events via
+	 *   REST. Actions panel shows: seedWooEmailPost (×11) → triggerBackfill →
+	 *   triggerDetectionSweep → spy.drain() → event count assertions.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'BC no mass-fire on first upgrade: zero _available, one _backfill_completed', async ( {
 		page,
 	} ) => {
@@ -214,6 +284,18 @@ test.describe( 'Update propagation — backward compatibility', () => {
 		expect( backfillCompleted.length, 'Exactly one _backfill_completed event should fire' ).toBe( 1 );
 	} );
 
+	/**
+	 * Verifies that running the backfill twice produces identical post meta,
+	 * confirming the migration is safe to re-run (e.g., in case of interrupted
+	 * deploys or duplicate cron fires).
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows: seedWooEmailPost
+	 *   (stripStampMeta) → triggerBackfill (first) → getWooEmailMeta snapshot →
+	 *   triggerBackfill (second) → getWooEmailMeta equality assertion.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'BC migration is idempotent: second backfill is a no-op', async () => {
 		const postId = await seedWooEmailPost( {
 			emailId: 'new_order',

@@ -4,6 +4,23 @@
 import { test, expect } from '@playwright/test';
 
 /**
+ * Update-propagation: round-trip and idempotency.
+ *
+ * Covers four state-machine round-trips: (1) auto-apply returns an unmodified
+ * post to in_sync, (2) selective apply with keep-yours keeps the post in the
+ * customized state, (3) reset returns a customized post directly to in_sync,
+ * and (4) the detection sweep is idempotent — a second run classifies the same
+ * post identically and writes no new meta.
+ *
+ * Reviewing in Playwright UI mode:
+ *   1. Run `npx playwright test --project=e2e tests/email-editor/update-propagation --ui`
+ *   2. Filter the tree by `round-trip` and pick a test.
+ *   3. All four tests are REST-only — no browser window is driven. The Actions
+ *      panel in UI mode shows the full REST call sequence for each test.
+ *   4. "Show browser" eye is not needed for any test in this file.
+ */
+
+/**
  * Internal dependencies
  */
 import { ADMIN_STATE_PATH } from '../../../playwright.config';
@@ -36,6 +53,18 @@ test.describe( 'Update propagation — round-trip and idempotency', () => {
 		await assertNoLeakedFixtureState();
 	} );
 
+	/**
+	 * Verifies the full auto-apply round-trip: after a core bump the detection
+	 * sweep detects the divergence and the inline auto-applier immediately
+	 * re-stamps an unmodified post as in_sync.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows: simulateCoreBump
+	 *   → seedWooEmailPost → clearTemplateHtmlOverride → triggerDetectionSweep
+	 *   → getWooEmailMeta assertion (STATUS.IN_SYNC).
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'Auto-apply round-trip: uncustomized post returns to in_sync', async () => {
 		await simulateCoreBump( 'new_order', OLD_HTML );
 		const postId = await seedWooEmailPost( {
@@ -52,6 +81,19 @@ test.describe( 'Update propagation — round-trip and idempotency', () => {
 		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
 	} );
 
+	/**
+	 * Verifies that when a merchant applies a core update with choices:[] (keep-yours
+	 * default for all conflicts), the post's diverged block is preserved and the
+	 * status remains core_updated_customized rather than flipping to in_sync.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows: simulateCoreBump
+	 *   → seedWooEmailPost (customized block B) → clearTemplateHtmlOverride →
+	 *   triggerDetectionSweep → meta assertion (CUSTOMIZED) → applyWooEmailTemplate
+	 *   (choices:[]) → meta re-assertion (still CUSTOMIZED).
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'Selective apply round-trip: edit, bump, apply with keep-yours → stays customized', async () => {
 		const oldHtml =
 			'<!-- wp:paragraph --><p>OLD A</p><!-- /wp:paragraph --><!-- wp:paragraph --><p>OLD B</p><!-- /wp:paragraph -->';
@@ -86,6 +128,17 @@ test.describe( 'Update propagation — round-trip and idempotency', () => {
 		);
 	} );
 
+	/**
+	 * Verifies that the reset endpoint replaces a customized post's content with
+	 * the current canonical and stamps it in_sync in a single REST call.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows: seedWooEmailPost
+	 *   (customized content) → resetWooEmailTemplate (REST POST) → response status
+	 *   assertion → getWooEmailMeta assertion (STATUS.IN_SYNC).
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'Reset round-trip: customized → reset → in_sync', async () => {
 		const customized =
 			'<!-- wp:paragraph --><p>MERCHANT CUSTOM</p><!-- /wp:paragraph -->';
@@ -106,6 +159,20 @@ test.describe( 'Update propagation — round-trip and idempotency', () => {
 		expect( meta[ META_KEYS.STATUS ]?.[ 0 ] ).toBe( STATUS.IN_SYNC );
 	} );
 
+	/**
+	 * Verifies that running the detection sweep twice in a row produces the same
+	 * classification and identical meta for an already-classified customized post,
+	 * confirming the sweep does not mutate already-correct state.
+	 *
+	 * UI mode walkthrough:
+	 *   REST-only — no browser interaction. Actions panel shows: simulateCoreBump
+	 *   → seedWooEmailPost (merchant edit) → clearTemplateHtmlOverride →
+	 *   triggerDetectionSweep (first) → getWooEmailMeta snapshot →
+	 *   triggerDetectionSweep (second, sweep2.classifications assertion) →
+	 *   getWooEmailMeta equality assertion.
+	 *
+	 *   "Show browser" eye: not needed.
+	 */
 	test( 'Detection sweep is idempotent: second run touches zero posts', async () => {
 		await simulateCoreBump( 'new_order', OLD_HTML );
 		const postId = await seedWooEmailPost( {
