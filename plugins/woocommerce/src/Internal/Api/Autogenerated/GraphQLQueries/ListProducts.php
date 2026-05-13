@@ -68,11 +68,15 @@ class ListProducts {
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
-		Utils::check_current_user_can( 'manage_woocommerce' );
-		Utils::check_current_user_can( 'edit_products' );
+		// Standalone authorization gate: no authorize() method on the command,
+		// so the autodiscovered authorization attributes are the sole guard.
+		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
+			throw Utils::build_authorization_error( $context['principal'] );
+		}
 
-		$command = \Automattic\WooCommerce\Api\Container::get( ListProductsCommand::class );
+		$command = \Automattic\WooCommerce\Api\Infrastructure\ClassResolver::resolve_class( ListProductsCommand::class );
 
+		$query_info                 = QueryInfoExtractor::extract_from_info( $info, $args );
 		$execute_args               = array();
 		$execute_args['pagination'] = Utils::create_pagination_params( $args );
 		$execute_args['filters']    = Utils::create_input(
@@ -85,10 +89,25 @@ class ListProducts {
 		if ( array_key_exists( 'product_type', $args ) ) {
 			$execute_args['product_type'] = $args['product_type'];
 		}
-		$execute_args['_query_info'] = QueryInfoExtractor::extract_from_info( $info, $args );
+		$execute_args['_query_info'] = $query_info;
 
 		$result = Utils::execute_command( $command, $execute_args );
 
 		return $result;
+	}
+
+	/**
+	 * Compute the value `_preauthorized` would carry for a given principal —
+	 * the AND of the autodiscovered authorization attributes' authorize()
+	 * outcomes on this command. Single source of truth for both the resolver's
+	 * own gates and external (code-API) callers asking about authorization
+	 * without going through GraphQL execution.
+	 *
+	 * Returns true vacuously when the command has no authorization attributes
+	 * (in that case authorize() on the command is the sole guard, and that
+	 * method should be consulted instead).
+	 */
+	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_woocommerce' ) )->authorize( $principal ) && ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'edit_products' ) )->authorize( $principal );
 	}
 }

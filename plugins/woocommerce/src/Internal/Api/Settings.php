@@ -95,6 +95,13 @@ class Settings {
 				'custom_attributes' => array( 'min' => '1' ),
 			),
 			array(
+				'title'   => __( 'Enable OPcache-based caching', 'woocommerce' ),
+				'desc'    => __( 'Cache parsed queries on disk as PHP files so OPcache can serve them from shared memory. Falls back to the object cache when the filesystem is not writable.', 'woocommerce' ),
+				'id'      => Main::OPTION_OPCACHE_ENABLED,
+				'default' => 'yes',
+				'type'    => 'checkbox',
+			),
+			array(
 				'title'   => __( 'Enable ObjectCache-based caching', 'woocommerce' ),
 				'desc'    => __( 'Cache parsed queries in the WP object cache', 'woocommerce' ),
 				'id'      => Main::OPTION_OBJECT_CACHE_ENABLED,

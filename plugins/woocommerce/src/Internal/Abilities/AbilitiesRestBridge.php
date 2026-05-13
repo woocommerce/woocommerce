@@ -47,7 +47,7 @@ class AbilitiesRestBridge {
 						'id'          => 'woocommerce/products-create',
 						'operation'   => 'create',
 						'label'       => __( 'Create Product', 'woocommerce' ),
-						'description' => __( 'Create a new product in WooCommerce with name, price, description, and other product attributes.', 'woocommerce' ),
+						'description' => __( 'Create a new product with name, price, description, and other product attributes.', 'woocommerce' ),
 					),
 					array(
 						'id'          => 'woocommerce/products-update',

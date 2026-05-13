@@ -28,6 +28,7 @@ describe( 'buildProductListQuery', () => {
 				page: 3,
 				order: 'asc',
 				orderby: 'title',
+				_embed: 1,
 				search_name_or_sku: 'hoodie',
 			} )
 		);
@@ -156,5 +157,20 @@ describe( 'buildProductListQuery', () => {
 		} as View );
 
 		expect( query.stock_status ).toBe( 'onbackorder' );
+	} );
+
+	it( 'maps the brands isAny filter to the brand query param', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'brands',
+					operator: 'isAny',
+					value: [ '8', 9 ],
+				},
+			],
+		} as View );
+
+		expect( query.brand ).toEqual( '8,9' );
 	} );
 } );

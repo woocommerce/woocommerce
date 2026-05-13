@@ -150,7 +150,6 @@
 				"package.json",
 				"../../../pnpm-lock.yaml",
 				"node_modules/@woocommerce/tracks/build",
-				"node_modules/@woocommerce/tracks/build-module",
 				"node_modules/@woocommerce/tracks/build-types",
 				"node_modules/@woocommerce/eslint-plugin/configs",
 				"node_modules/@woocommerce/eslint-plugin/rules",

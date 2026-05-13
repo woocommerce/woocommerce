@@ -306,6 +306,139 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Variable product responses include embeddable variation links.
+	 */
+	public function test_variable_product_response_includes_embeddable_variation_links(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$links = $response->get_links();
+		$this->assertArrayHasKey( 'variations', $links, 'Variable products should include variation links.' );
+		$this->assertCount( count( $variation_ids ), $links['variations'], 'Variation links should match child variations.' );
+
+		foreach ( $variation_ids as $index => $variation_id ) {
+			$link_attributes = $links['variations'][ $index ]['attributes'] ?? $links['variations'][ $index ];
+
+			$this->assertStringContainsString( '/wc/v4/products/' . $variation_id, $links['variations'][ $index ]['href'] );
+			$this->assertTrue( $link_attributes['embeddable'], 'Variation links should be embeddable.' );
+		}
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Variable product responses embed variations when requested.
+	 */
+	public function test_variable_product_response_embeds_variations_when_requested(): void {
+		$product       = WC_Helper_Product::create_variation_product();
+		$variation_ids = $product->get_children();
+		$request       = new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() );
+		$request->set_param( '_embed', 1 );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$response_data = $this->server->response_to_data( $response, true );
+		$this->assertArrayHasKey( '_embedded', $response_data );
+		$this->assertArrayHasKey( 'variations', $response_data['_embedded'] );
+
+		$embedded_variation_ids = wp_list_pluck( $response_data['_embedded']['variations'], 'id' );
+		$this->assertEqualsCanonicalizing( $variation_ids, $embedded_variation_ids );
+
+		foreach ( $response_data['_embedded']['variations'] as $embedded_variation ) {
+			$this->assertArrayHasKey( '_links', $embedded_variation, 'Embedded variations should include REST links.' );
+			$this->assertArrayHasKey( 'self', $embedded_variation['_links'], 'Embedded variations should include a self link.' );
+			$this->assertArrayHasKey( 'up', $embedded_variation['_links'], 'Embedded variations should include a parent product link.' );
+		}
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Variation embed links do not propagate parent requested fields.
+	 */
+	public function test_variation_embed_links_do_not_propagate_parent_requested_fields(): void {
+		$product = WC_Helper_Product::create_variation_product();
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() );
+		$request->set_param( '_fields', 'id,name,_links,_embedded' );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$links = $response->get_links();
+
+		$this->assertArrayHasKey( 'variations', $links );
+		$this->assertStringNotContainsString( '_fields=', $links['variations'][0]['href'] );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Simple product responses do not include variation links.
+	 */
+	public function test_simple_product_response_does_not_include_variation_links(): void {
+		$product = WC_Helper_Product::create_simple_product();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $product->get_id() ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertArrayNotHasKey( 'variations', $response->get_links() );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Variation parent links are not embeddable.
+	 */
+	public function test_variation_parent_link_is_not_embeddable(): void {
+		$product      = WC_Helper_Product::create_variation_product();
+		$variation_id = $product->get_children()[0];
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v4/products/' . $variation_id ) );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$links = $response->get_links();
+		$this->assertArrayHasKey( 'up', $links );
+		$this->assertArrayNotHasKey( 'embeddable', $links['up'][0]['attributes'] ?? $links['up'][0] );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Product schema exposes embed context only for allowed fields.
+	 */
+	public function test_product_schema_exposes_embed_context_for_allowed_fields_only(): void {
+		$this->enable_cogs_feature();
+
+		$request  = new WP_REST_Request( 'OPTIONS', '/wc/v4/products' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$properties = $response->get_data()['schema']['properties'];
+
+		foreach ( array( 'id', 'name', 'price', 'variations', 'add_to_cart' ) as $property ) {
+			$this->assertContains( 'embed', $properties[ $property ]['context'], "{$property} should be available in embed context." );
+		}
+
+		$this->assertContains( 'embed', $properties['dimensions']['properties']['length']['context'] );
+		$this->assertContains( 'embed', $properties['add_to_cart']['properties']['url']['context'] );
+
+		foreach ( array( 'cost_of_goods_sold', 'downloads', 'download_limit', 'download_expiry', 'meta_data', 'purchase_note' ) as $property ) {
+			if ( isset( $properties[ $property ]['context'] ) ) {
+				$this->assertNotContains( 'embed', $properties[ $property ]['context'], "{$property} should not be available in embed context." );
+			}
+		}
+	}
+
+	/**
 	 * Test that the `search` parameter does partial matching in the product name, but not the SKU.
 	 *
 	 * @return void

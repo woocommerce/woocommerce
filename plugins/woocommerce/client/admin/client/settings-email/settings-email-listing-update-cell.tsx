@@ -27,13 +27,16 @@ import { getAdminLink } from '@woocommerce/settings';
  */
 import type { EmailType } from './settings-email-listing-slotfill';
 import { buildEmailEditorReviewUrl } from './build-email-editor-review-url';
+import { shouldShowReviewUpdate } from './settings-email-listing-update-state';
 
 interface UpdatesCellProps {
 	post: EmailType;
 }
 
 export const UpdatesCell = ( { post }: UpdatesCellProps ) => {
-	if ( post.templateStatus !== 'core_updated_customized' ) {
+	const eligible = shouldShowReviewUpdate( post );
+
+	if ( ! eligible ) {
 		return <span aria-label={ __( 'Up to date', 'woocommerce' ) }>—</span>;
 	}
 

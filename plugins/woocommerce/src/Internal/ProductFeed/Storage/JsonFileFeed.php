@@ -27,11 +27,11 @@ class JsonFileFeed implements FeedInterface {
 	public const UPLOAD_DIR = 'product-feeds';
 
 	/**
-	 * Indicates if there are previous entries in the feed.
+	 * The number of entries added to the feed.
 	 *
-	 * @var bool
+	 * @var int
 	 */
-	private $has_entries = false;
+	private $entry_count = 0;
 
 	/**
 	 * The base name of the feed file.
@@ -98,6 +98,10 @@ class JsonFileFeed implements FeedInterface {
 	 * @throws Exception If the feed directory cannot be created.
 	 */
 	public function start(): void {
+		$this->entry_count    = 0;
+		$this->file_completed = false;
+		$this->file_url       = null;
+
 		/**
 		 * Allows the current time to be overridden before a feed is stored.
 		 *
@@ -154,16 +158,17 @@ class JsonFileFeed implements FeedInterface {
 			return;
 		}
 
-		if ( ! $this->has_entries ) {
-			$this->has_entries = true;
-		} else {
+		$json = wp_json_encode( $entry );
+		if ( false === $json ) {
+			return;
+		}
+
+		if ( $this->entry_count > 0 ) {
 			fwrite( $this->file_handle, ',' );
 		}
 
-		$json = wp_json_encode( $entry );
-		if ( false !== $json ) {
-			fwrite( $this->file_handle, $json );
-		}
+		fwrite( $this->file_handle, $json );
+		++$this->entry_count;
 	}
 
 	/**
@@ -182,6 +187,13 @@ class JsonFileFeed implements FeedInterface {
 
 		// Indicate that we have a complete file.
 		$this->file_completed = true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public function get_entry_count(): int {
+		return $this->entry_count;
 	}
 
 	/**

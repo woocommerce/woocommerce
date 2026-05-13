@@ -3289,12 +3289,6 @@ parameters:
 			path: includes/admin/class-wc-admin-webhooks.php
 
 		-
-			message: '#^Method WC_Admin_Webhooks\:\:maybe_display_legacy_rest_api_warning\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-wc-admin-webhooks.php
-
-		-
 			message: '#^Method WC_Admin_Webhooks\:\:notices\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7951,9 +7945,9 @@ parameters:
 			path: includes/admin/settings/views/html-settings-tax.php
 
 		-
-			message: '#^Variable \$webhook might not be defined\.$#'
-			identifier: variable.undefined
-			count: 17
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
 			path: includes/admin/settings/views/html-webhooks-edit.php
 
 		-
@@ -8033,18 +8027,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/views/html-admin-page-status-logs.php
-
-		-
-			message: '#^Access to private property WooCommerce\:\:\$api\.$#'
-			identifier: property.private
-			count: 1
-			path: includes/admin/views/html-admin-page-status-report.php
-
-		-
-			message: '#^Call to method get_rest_api_package_path\(\) on an unknown class WC_API\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/admin/views/html-admin-page-status-report.php
 
 		-
 			message: '#^Calling self\:\:output_plugins_info\(\) outside of class scope\.$#'
@@ -8575,33 +8557,9 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot access property \$added_by on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 2
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot access property \$children on WP_Error\|WP_Term\|null\.$#'
 			identifier: property.nonObject
 			count: 4
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot access property \$content on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot access property \$date_created on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 3
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot access property \$id on stdClass\|null\.$#'
-			identifier: property.nonObject
-			count: 1
 			path: includes/class-wc-ajax.php
 
 		-
@@ -51616,12 +51574,6 @@ parameters:
 			path: src/Blocks/BlockTypes/CatalogSorting.php
 
 		-
-			message: '#^Variable \$styles_and_classes on left side of \?\? is never defined\.$#'
-			identifier: nullCoalesce.variable
-			count: 1
-			path: src/Blocks/BlockTypes/CatalogSorting.php
-
-		-
 			message: '#^Cannot call method allocate_and_return_parsed_attributes\(\) on Automattic\\Block_Scanner\|null\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -53805,7 +53757,6 @@ parameters:
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilterRating.php
 
-
 		-
 			message: '#^Parameter \#2 \$callback of function array_filter expects \(callable\(mixed\)\: bool\)\|null, Closure\(mixed\)\: \(0\|1\) given\.$#'
 			identifier: argument.type
@@ -53995,12 +53946,6 @@ parameters:
 		-
 			message: '#^Method Automattic\\WooCommerce\\Blocks\\BlockTypes\\ProductFilters\:\:render\(\) should return string but returns string\|false\.$#'
 			identifier: return.type
-			count: 1
-			path: src/Blocks/BlockTypes/ProductFilters.php
-
-		-
-			message: '#^Parameter \#1 \$extra_attributes of function get_block_wrapper_attributes expects array\<string, string\>, array\<string, bool\|string\|null\> given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Blocks/BlockTypes/ProductFilters.php
 
@@ -71768,12 +71713,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessions.php
 
 		-
-			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Order\|null\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
 			message: '#^Access to protected property Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:\$status\.$#'
 			identifier: property.protected
 			count: 3
@@ -71804,56 +71743,8 @@ parameters:
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
 		-
-			message: '#^Cannot call method get_id\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method get_payment_method_title\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method needs_payment\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
 			message: '#^Cannot call method payment_complete\(\) on WC_Order\|null\.$#'
 			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method save\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method set_customer_note\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method set_payment_method\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method set_payment_method_title\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
 			count: 1
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
@@ -72004,7 +71895,7 @@ parameters:
 		-
 			message: '#^Parameter \#3 \$order of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:persist_field_for_order\(\) expects WC_Order, WC_Order\|null given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
 		-
@@ -72316,7 +72207,7 @@ parameters:
 		-
 			message: '#^Expression on left side of \?\? is not nullable\.$#'
 			identifier: nullCoalesce.expr
-			count: 4
+			count: 3
 			path: src/StoreApi/Routes/V1/Checkout.php
 
 		-
@@ -72604,12 +72495,6 @@ parameters:
 		-
 			message: '#^Cannot access offset string on 0\|0\.0\|''''\|''0''\|array\<string, array\|string\>\|false\|null\.$#'
 			identifier: offsetAccess.nonOffsetAccessible
-			count: 1
-			path: src/StoreApi/Routes/V1/CheckoutOrder.php
-
-		-
-			message: '#^Expression on left side of \?\? is not nullable\.$#'
-			identifier: nullCoalesce.expr
 			count: 1
 			path: src/StoreApi/Routes/V1/CheckoutOrder.php
 

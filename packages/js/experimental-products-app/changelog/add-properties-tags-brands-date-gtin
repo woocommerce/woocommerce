@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add Tags, Brands, Date, and GTIN/UPC/EAN/ISBN as toggleable columns in the experimental products list (hidden by default).
