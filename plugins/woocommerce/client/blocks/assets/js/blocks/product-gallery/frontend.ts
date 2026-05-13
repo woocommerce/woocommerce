@@ -130,11 +130,8 @@ const updateVisibleImageSet = (
 		return;
 	}
 
-	// Variation switches replace the gallery's image set entirely; an
-	// animation between them would just smear across unrelated images, so
-	// snap instantly. Instant is also race-proof: index-based scroll targets
-	// computed below are correct regardless of whether iAPI's per-wrapper
-	// `data-wp-watch` callbacks have flushed yet.
+	// Scroll instantly on variation switch — animation would smear across
+	// unrelated images.
 	scrollImageEverywhereIntoView( nextSelectedImageId, 'instant' );
 };
 
@@ -187,23 +184,9 @@ const toggleActiveThumbnailAttributes = ( element: HTMLElement ) => {
 };
 
 /**
- * Scrolls the large viewer to the given image. The horizontal scroll target
- * is `imageIndex × clientWidth`: every visible large-image wrapper is exactly
- * one container-width (`min/max-width: 100%`) and non-subset wrappers are
- * `display: none`, so the visible image at index N lives at content position
- * `N × clientWidth`. Computing the target from the index — rather than from
- * `getBoundingClientRect` on the `<img>` — keeps it correct even when iAPI's
- * per-wrapper `data-wp-watch` callbacks haven't yet revealed the target
- * wrapper (a hidden element's rect is `0`, which used to produce wrong scroll
- * targets on variation switch).
- *
- * We resolve the gallery via `getElement().ref` so multiple galleries on the
- * same page with overlapping image IDs each scroll independently.
- *
- * @param imageId  ID of the image to center in the viewer.
- * @param behavior `scrollTo` behavior — `'smooth'` for arrow nav, `'instant'`
- *                 for variation swaps where any animation would just smear
- *                 across unrelated images.
+ * Scroll the large viewer to the given image, using `imageIndex × clientWidth`.
+ * Index-based math stays correct even before iAPI watches have revealed the
+ * target wrapper (a hidden element's rect is zero).
  */
 const scrollImageIntoView = (
 	imageId: number,
@@ -601,30 +584,16 @@ const productGallery = {
 		 * `productsState.variationId` changes.
 		 */
 		listenToProductDataChanges: () => {
-			// Bridge the blockified Add to Cart with Options block to the
-			// gallery: when that block updates `productsState.variationId`,
-			// we mirror the change into the gallery's imageData.
-			//
-			// Bail when no variation is selected in the products store. Two
-			// reasons:
-			//   1. Initial mount — the server-rendered `defaultImageData`
-			//      is already correct, no need to reset.
-			//   2. Legacy classic-form pages — the legacy form never writes
-			//      to `productsState.variationId`, so it stays null
-			//      forever; `watchForChangesOnAddToCartForm` is the source
-			//      of truth there. Without this guard, this watch re-fires
-			//      after every imageData mutation (iAPI's Proxy reactivity
-			//      triggers it on unrelated signal writes) and would
-			//      clobber what the legacy watcher just set.
+			// No variation selected — initial mount uses the server-rendered
+			// `defaultImageData`, and legacy-form pages rely on
+			// `watchForChangesOnAddToCartForm` instead.
 			const variationId = productsState.variationId;
 			if ( ! variationId ) {
 				return;
 			}
 
-			// Use `mainProductInContext` (always the parent variable
-			// product) rather than `productInContext`, which resolves to the
-			// active variation when one is selected — `getProductImageSet`
-			// is keyed on the parent's ID.
+			// `mainProductInContext` is always the parent (variable) product;
+			// `getProductImageSet` is keyed by that ID.
 			const product = productsState.mainProductInContext;
 			if ( ! product ) {
 				return;

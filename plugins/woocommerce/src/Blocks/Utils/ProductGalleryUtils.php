@@ -191,13 +191,8 @@ class ProductGalleryUtils {
 		$image_ids = self::get_variation_gallery_image_ids( $variation );
 
 		if ( empty( $image_ids ) ) {
-			// The variation has no usable images of its own. Prefer the
-			// parent product's featured image (so the merchant still sees
-			// the most representative image when picking a variation
-			// without a dedicated gallery), and fall back to the
-			// placeholder sentinel (id = 0) only when the parent has no
-			// featured image either. The product-image block renders
-			// `wc_placeholder_img()` for id = 0.
+			// No usable images: fall back to parent's featured, or the
+			// placeholder sentinel (id = 0) if parent has none either.
 			$fallback_id = $parent_image_id && wp_attachment_is_image( $parent_image_id ) ? $parent_image_id : 0;
 			return array(
 				'image_id'  => $fallback_id,
@@ -230,11 +225,8 @@ class ProductGalleryUtils {
 			$image_ids = array_merge( $image_ids, $gallery_image_ids );
 		}
 
-		// Drop IDs whose attachment is missing or no longer an image. The
-		// gallery would otherwise render them as empty `<li>` wrappers (no
-		// `<img>`, no `data-image-id`, default `hidden=false`) — phantom
-		// slots that `toggleImageVisibility` can't manage and that stay
-		// visible across every variation switch.
+		// Filter out missing/invalid attachments to avoid rendering phantom
+		// empty `<li>` wrappers that the visibility watch can't manage.
 		$image_ids = array_filter(
 			$image_ids,
 			function ( $id ) {
