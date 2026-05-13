@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Schemas;
 
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListItem;
 use Automattic\WooCommerce\StoreApi\Formatters;
 use Automattic\WooCommerce\StoreApi\Formatters\CurrencyFormatter;
 use Automattic\WooCommerce\StoreApi\Formatters\HtmlFormatter;
@@ -64,23 +65,24 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Build a minimal stored item record around a product.
+	 * Build a ShopperListItem around a product.
 	 *
 	 * @param int    $product_id   Product ID.
 	 * @param int    $variation_id Variation ID, or 0.
 	 * @param array  $variation    Variation attributes.
 	 * @param string $title        Title snapshot.
-	 * @return array
 	 */
-	private function build_item( int $product_id, int $variation_id = 0, array $variation = array(), string $title = 'Snapshot Title' ): array {
-		return array(
-			'key'                   => md5( (string) $product_id ),
-			'product_id'            => $product_id,
-			'variation_id'          => $variation_id,
-			'variation'             => $variation,
-			'quantity'              => 1,
-			'date_added_gmt'        => '2024-04-25 03:20:00',
-			'product_title_at_save' => $title,
+	private function build_item( int $product_id, int $variation_id = 0, array $variation = array(), string $title = 'Snapshot Title' ): ShopperListItem {
+		return ShopperListItem::from_array(
+			array(
+				'key'                   => md5( (string) $product_id ),
+				'product_id'            => $product_id,
+				'variation_id'          => $variation_id,
+				'variation'             => $variation,
+				'quantity'              => 1,
+				'date_added_gmt'        => '2024-04-25 03:20:00',
+				'product_title_at_save' => $title,
+			)
 		);
 	}
 
@@ -212,5 +214,82 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 			$response['image_html'],
 			'Tombstones must use the placeholder image markup'
 		);
+	}
+
+	/**
+	 * @testdox Should expose key on a live-product response.
+	 */
+	public function test_response_carries_the_item_key(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+		$item    = $this->build_item( $product->get_id() );
+
+		$response = $this->sut->get_item_response( $item );
+
+		$this->assertArrayHasKey( 'key', $response );
+		$this->assertSame( $item->get_key(), $response['key'], 'Response key must match the saved item key.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should format date_added_gmt via wc_rest_prepare_date_response (ISO8601, no timezone suffix).
+	 */
+	public function test_date_added_gmt_is_iso8601(): void {
+		$product = \WC_Helper_Product::create_simple_product();
+
+		$response = $this->sut->get_item_response( $this->build_item( $product->get_id() ) );
+
+		$this->assertArrayHasKey( 'date_added_gmt', $response );
+		$this->assertSame( '2024-04-25T03:20:00', $response['date_added_gmt'], 'date_added_gmt must be the ISO8601 formatting of the GMT save time.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox Should expose the variation ID as id when the saved item is a variation.
+	 */
+	public function test_id_resolves_to_variation_id_for_variations(): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$variation_ids    = $variable_product->get_children();
+		$variation_id     = (int) $variation_ids[0];
+		$item             = $this->build_item( $variable_product->get_id(), $variation_id );
+
+		$response = $this->sut->get_item_response( $item );
+
+		$this->assertArrayHasKey( 'id', $response );
+		$this->assertSame( $variation_id, $response['id'], 'id should resolve to variation_id when set.' );
+		$this->assertArrayHasKey( 'product_id', $response );
+		$this->assertSame( $variable_product->get_id(), $response['product_id'], 'product_id should still hold the parent product id.' );
+		$this->assertArrayHasKey( 'variation_id', $response );
+		$this->assertSame( $variation_id, $response['variation_id'] );
+
+		$variable_product->delete( true );
+	}
+
+	/**
+	 * @testdox Should format saved variation attributes via format_variation_data on live variations.
+	 */
+	public function test_variation_attributes_are_formatted_on_live_variations(): void {
+		$variable_product = \WC_Helper_Product::create_variation_product();
+		$variation_id     = (int) $variable_product->get_children()[0];
+		$item             = $this->build_item(
+			$variable_product->get_id(),
+			$variation_id,
+			array( 'attribute_pa_size' => 'small' )
+		);
+
+		$response = $this->sut->get_item_response( $item );
+
+		$this->assertArrayHasKey( 'variation', $response );
+		$this->assertIsArray( $response['variation'] );
+		$this->assertCount( 1, $response['variation'], 'A single saved attribute should produce one entry in the variation list.' );
+
+		$entry = $response['variation'][0];
+		$this->assertArrayHasKey( 'raw_attribute', $entry );
+		$this->assertArrayHasKey( 'attribute', $entry );
+		$this->assertArrayHasKey( 'value', $entry );
+		$this->assertSame( 'attribute_pa_size', $entry['raw_attribute'] );
+
+		$variable_product->delete( true );
 	}
 }

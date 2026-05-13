@@ -75,7 +75,7 @@ class ShopperLists extends AbstractRoute {
 		$response = array();
 
 		foreach ( ShopperList::get_all_for_user() as $list ) {
-			$response[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $list->to_array(), $request ) );
+			$response[] = $this->prepare_response_for_collection( $this->prepare_item_for_response( $list, $request ) );
 		}
 
 		return rest_ensure_response( $response );
