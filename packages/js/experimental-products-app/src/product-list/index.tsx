@@ -286,6 +286,8 @@ export default function ProductList( {
 				{ __( 'Import', 'woocommerce' ) }
 			</Button>
 			<Dropdown
+				className="woocommerce-product-list__add-new-dropdown"
+				contentClassName="woocommerce-product-list__add-new-menu"
 				popoverProps={ { placement: 'bottom-end' } }
 				renderToggle={ ( { isOpen, onToggle } ) => (
 					<Button
@@ -305,6 +307,7 @@ export default function ProductList( {
 							<MenuItem
 								key={ item.key }
 								icon={ item.icon }
+								iconPosition="left"
 								info={ item.info }
 								onClick={ () => {
 									onClose();

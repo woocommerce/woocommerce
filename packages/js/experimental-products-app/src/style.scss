@@ -41,6 +41,44 @@
 	padding: 0 var(--wpds-dimension-padding-2xl, 24px);
 }
 
+.woocommerce-product-list__add-new-menu {
+	min-width: 340px;
+
+	// The MenuGroup inside the popover.
+	.components-menu-group {
+		padding: 4px 0;
+	}
+
+	// Each MenuItem button: roomier vertical padding, left-aligned text
+	// (defends against any ambient text-align coming from outside the popover).
+	.components-menu-item__button {
+		padding-block: var(--wpds-dimension-padding-md, 12px);
+		padding-inline: var(--wpds-dimension-padding-md, 12px);
+		text-align: start;
+
+		// Vertically center the icon relative to the title row rather than
+		// the title + info block as a whole. Without this the icon sits
+		// halfway between the two lines.
+		align-items: flex-start;
+	}
+
+	// The icon column.
+	.components-menu-items__item-icon {
+		margin-top: 2px;
+	}
+
+	// Title (the children passed to MenuItem) — keep readable weight.
+	.components-menu-item__info-wrapper .components-menu-item__item {
+		font-weight: 500;
+	}
+
+	// Description (info prop) — restore left alignment and use the muted token.
+	.components-menu-item__info {
+		text-align: start;
+		color: var(--wpds-color-fg-content-neutral-weak, #757575);
+	}
+}
+
 .woocommerce-product-list .dataviews-wrapper {
 	height: 100%;
 }
