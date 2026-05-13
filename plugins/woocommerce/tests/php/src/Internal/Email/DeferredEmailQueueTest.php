@@ -21,6 +21,13 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Stock notification IDs created by this test class.
+	 *
+	 * @var int[]
+	 */
+	private $created_stock_notification_ids = array();
+
+	/**
 	 * Set up test fixtures.
 	 */
 	public function setUp(): void {
@@ -294,7 +301,7 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 			0,
 			'payment_gateway',
 			\WC_Payment_Gateway::class,
-			$gateway->get_id()
+			$gateway->id
 		);
 	}
 
@@ -483,7 +490,21 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		$this->assertCount( 1, $sent, 'Should process the email callback' );
 		$this->assertSame( $filter, $sent[0]['filter'] );
 		$this->assertInstanceOf( $expected_class, $sent[0]['args'][ $wrapped_position ] );
-		$this->assertSame( $expected_id, $sent[0]['args'][ $wrapped_position ]->get_id() );
+		$this->assertSame( $expected_id, $this->get_restored_object_id( $sent[0]['args'][ $wrapped_position ] ) );
+	}
+
+	/**
+	 * Get an ID from a restored queued object.
+	 *
+	 * @param object $restored_object Restored queued object.
+	 * @return int|string
+	 */
+	private function get_restored_object_id( object $restored_object ) {
+		if ( $restored_object instanceof \WC_Payment_Gateway ) {
+			return $restored_object->id;
+		}
+
+		return $restored_object->get_id();
 	}
 
 	/**
@@ -569,6 +590,8 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 		$notification->set_status( NotificationStatus::ACTIVE );
 		$notification->save();
 
+		$this->created_stock_notification_ids[] = (int) $notification->get_id();
+
 		return $notification;
 	}
 
@@ -578,7 +601,28 @@ class DeferredEmailQueueTest extends WC_Unit_Test_Case {
 	private function delete_stock_notifications(): void {
 		global $wpdb;
 
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta" );
-		$wpdb->query( "DELETE FROM {$wpdb->prefix}wc_stock_notifications" );
+		if ( empty( $this->created_stock_notification_ids ) ) {
+			return;
+		}
+
+		$ids              = array_map( 'absint', $this->created_stock_notification_ids );
+		$ids_placeholders = implode( ',', array_fill( 0, count( $ids ), '%d' ) );
+
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare -- $ids_placeholders contains %d placeholders for sanitized IDs.
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_stock_notificationmeta WHERE notification_id IN ({$ids_placeholders})",
+				...$ids
+			)
+		);
+		$wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->prefix}wc_stock_notifications WHERE id IN ({$ids_placeholders})",
+				...$ids
+			)
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+		$this->created_stock_notification_ids = array();
 	}
 }

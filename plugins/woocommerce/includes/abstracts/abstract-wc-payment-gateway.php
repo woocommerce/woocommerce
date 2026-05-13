@@ -185,16 +185,6 @@ abstract class WC_Payment_Gateway extends WC_Settings_API {
 	}
 
 	/**
-	 * Return the gateway ID.
-	 *
-	 * @since 10.9.0
-	 * @return string
-	 */
-	public function get_id() {
-		return $this->id;
-	}
-
-	/**
 	 * Return the title for admin screens.
 	 *
 	 * @return string
