@@ -8,11 +8,20 @@ import { store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import clsx from 'clsx';
 import { Button, Stack, Tabs } from '@wordpress/ui';
+import { Dropdown, MenuGroup, MenuItem, Icon } from '@wordpress/components';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 import { Page } from '@wordpress/admin-ui';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
+import {
+	tag,
+	stack,
+	grid,
+	download,
+	linkOff,
+	chevronDown,
+} from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -39,6 +48,59 @@ import { useProductActions } from '../dataviews-actions';
 
 const { usePostActions } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
+
+const PRODUCT_TYPE_MENU_ITEMS = [
+	{
+		key: 'simple',
+		icon: tag,
+		label: __( 'Physical product', 'woocommerce' ),
+		info: __(
+			'A tangible item that gets delivered.',
+			'woocommerce'
+		),
+		queryArgs: {},
+	},
+	{
+		key: 'variable',
+		icon: stack,
+		label: __( 'Variable product', 'woocommerce' ),
+		info: __(
+			'An item with variations like color or size.',
+			'woocommerce'
+		),
+		queryArgs: { product_type: 'variable' },
+	},
+	{
+		key: 'grouped',
+		icon: grid,
+		label: __( 'Grouped product', 'woocommerce' ),
+		info: __(
+			'A collection of related products.',
+			'woocommerce'
+		),
+		queryArgs: { product_type: 'grouped' },
+	},
+	{
+		key: 'downloadable',
+		icon: download,
+		label: __( 'Downloadable product', 'woocommerce' ),
+		info: __(
+			'A digital file like an ebook or template.',
+			'woocommerce'
+		),
+		queryArgs: { downloadable: '1' },
+	},
+	{
+		key: 'external',
+		icon: linkOff,
+		label: __( 'Affiliate product', 'woocommerce' ),
+		info: __(
+			'A product you promote and earn commission on.',
+			'woocommerce'
+		),
+		queryArgs: { product_type: 'external' },
+	},
+] as const;
 
 export type ProductListProps = {
 	subTitle?: string;
@@ -223,19 +285,43 @@ export default function ProductList( {
 			>
 				{ __( 'Import', 'woocommerce' ) }
 			</Button>
-			<Button
-				size="compact"
-				disabled={ canCreateRecord === false }
-				onClick={ () =>
-					( window.location.href = getAdminLink(
-						addQueryArgs( 'post-new.php', {
-							post_type: 'product',
-						} )
-					) )
-				}
-			>
-				{ __( 'Add new product', 'woocommerce' ) }
-			</Button>
+			<Dropdown
+				popoverProps={ { placement: 'bottom-end' } }
+				renderToggle={ ( { isOpen, onToggle } ) => (
+					<Button
+						size="compact"
+						disabled={ canCreateRecord === false }
+						onClick={ onToggle }
+						aria-expanded={ isOpen }
+						aria-haspopup="menu"
+					>
+						{ __( 'Add new', 'woocommerce' ) }
+						<Icon icon={ chevronDown } />
+					</Button>
+				) }
+				renderContent={ ( { onClose } ) => (
+					<MenuGroup>
+						{ PRODUCT_TYPE_MENU_ITEMS.map( ( item ) => (
+							<MenuItem
+								key={ item.key }
+								icon={ item.icon }
+								info={ item.info }
+								onClick={ () => {
+									onClose();
+									window.location.href = getAdminLink(
+										addQueryArgs( 'post-new.php', {
+											post_type: 'product',
+											...item.queryArgs,
+										} )
+									);
+								} }
+							>
+								{ item.label }
+							</MenuItem>
+						) ) }
+					</MenuGroup>
+				) }
+			/>
 		</Stack>
 	);
 
@@ -244,7 +330,7 @@ export default function ProductList( {
 			className={ classes }
 			ariaLabel={ __( 'Products', 'woocommerce' ) }
 			subTitle={ __(
-				'Add, edit, and manage the products you sell in your store',
+				'Add, edit, and manage the products you sell in your store.',
 				'woocommerce'
 			) }
 			title={ __( 'Products', 'woocommerce' ) }
