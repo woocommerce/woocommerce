@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Drop the trailing colon on the Date range filter label to match WordPress 7.0 form-field labeling.

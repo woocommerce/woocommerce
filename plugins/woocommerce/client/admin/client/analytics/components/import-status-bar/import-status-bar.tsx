@@ -56,7 +56,16 @@ export function ImportStatusBar(): JSX.Element | null {
 		if ( ! date ) {
 			return __( 'Never', 'woocommerce' );
 		}
-		return dateI18n( 'M j H:i', date, undefined );
+		return dateI18n(
+			/**
+			 * translators: %s: formatted date and time in site timezone.
+			 * Used to display the last processed time for the Analytics import, e.g. "Nov 21 at 12:00".
+			 * "M j" shows the month and day, "at" as literal, "H:i" shows time (24-hour format).
+			 */
+			__( 'M j \\a\\t H:i', 'woocommerce' ),
+			date,
+			undefined
+		);
 	};
 
 	const formatNextScheduledDate = ( date: string | null ): string => {
@@ -114,7 +123,7 @@ export function ImportStatusBar(): JSX.Element | null {
 	return (
 		<div className="woocommerce-analytics-import-status-bar-wrapper">
 			<div className="woocommerce-analytics-import-status-bar-wrapper__label">
-				{ __( 'Data status:', 'woocommerce' ) }
+				{ __( 'Data status', 'woocommerce' ) }
 			</div>
 			<div
 				className="woocommerce-analytics-import-status-bar"
