@@ -32,14 +32,13 @@
 		"lint": "eslint --ext=js,ts,tsx src",
 		"lint:fix": "eslint --ext=js,ts,tsx src --fix",
 		"test": "jest --passWithNoTests",
-		"prepack": "pnpm build",
+		"prepack": "pnpm build:publish:project",
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:cjs": "wireit",
 		"build:project:esm": "wireit",
+		"build:publish:project": "pnpm build && tsc --project tsconfig-cjs.json --noCheck",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:cjs": "wireit",
 		"watch:build:project:esm": "wireit"
 	},
 	"config": {
@@ -86,24 +85,6 @@
 		"access": "public"
 	},
 	"wireit": {
-		"build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --noCheck",
-			"clean": "if-file-deleted",
-			"files": [
-				"tsconfig-cjs.json",
-				"src/**/*.{js,jsx,ts,tsx}"
-			],
-			"output": [
-				"build"
-			],
-			"dependencies": [
-				"dependencyOutputs"
-			]
-		},
-		"watch:build:project:cjs": {
-			"command": "tsc --project tsconfig-cjs.json --watch --noCheck",
-			"service": true
-		},
 		"build:project:esm": {
 			"command": "tsc --project tsconfig.json",
 			"clean": "if-file-deleted",
