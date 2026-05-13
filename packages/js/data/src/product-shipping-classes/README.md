@@ -23,21 +23,21 @@ function Component() {
 }
 ```
 
-## Selections and actions:
+## Selections and actions
 
-| Selector                                       | Description                                                                                            |
-| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `getProductShippingClass( id: number )`        | Gets a Product Shipping Class by ID                                                                    |
-| `getProductShippingClassError( id )`           | Get the error for a failing GET shipping class request.                                                |
-| `getProductShippingClasses( query = {} )`      | Get all product shipping classes, optionally by a specific query, see `Query` type [here](./types.ts). |
-| `getProductShippingClassesError( query = {} )` | Get the error for a GET request for all shipping classes.                                              |
+| Selector                                       | Description                                                                                                   |
+| ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `getProductShippingClass( id: number )`        | Gets a Product Shipping Class by ID                                                                           |
+| `getProductShippingClassError( id )`           | Get the error for a failing GET shipping class request.                                                       |
+| `getProductShippingClasses( query = {} )`      | Get all product shipping classes, optionally by a specific query, see `Query` type in [types.ts](./types.ts). |
+| `getProductShippingClassesError( query = {} )` | Get the error for a GET request for all shipping classes.                                                     |
 
 Example usage: `wp.data.select( EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME ).getProductShippingClass( 3 );`
 
-| Actions                                                  | Method | Description                                                                        |
-| -------------------------------------------------------- | ------ | ---------------------------------------------------------------------------------- |
-| `createProductShippingClass( shippingClassObject )`      | POST   | Creates shipping class, see `ProductShippingClass` [here](./types.ts) for values   |
-| `deleteProductShippingClass( id )`                       | DELETE | Deletes a shipping class by ID                                                     |
-| `updatetProductShippingClass( id, shippingClassObject )` | PUT    | Updates a shipping class, see `ProductShippingClass` [here](./types.ts) for values |
+| Actions                                                  | Method | Description                                                                               |
+| -------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------- |
+| `createProductShippingClass( shippingClassObject )`      | POST   | Creates shipping class, see `ProductShippingClass` in [types.ts](./types.ts) for values   |
+| `deleteProductShippingClass( id )`                       | DELETE | Deletes a shipping class by ID                                                            |
+| `updatetProductShippingClass( id, shippingClassObject )` | PUT    | Updates a shipping class, see `ProductShippingClass` in [types.ts](./types.ts) for values |
 
 Example usage: `wp.data.dispatch( EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME ).updateProductShippingClass( 3, { name: 'New name' } );`
