@@ -16,6 +16,7 @@ export type ProductListQuery = Omit< ProductQuery, 'status' > & {
 	include_types?: ProductType[];
 	exclude_types?: ProductType[];
 	exclude_category?: number[];
+	exclude_tag?: number[];
 	min_stock_quantity?: string;
 	max_stock_quantity?: string;
 	brand?: string;
@@ -112,6 +113,21 @@ function applyCategoryFilter( query: ProductListQuery, filter: Filter ) {
 	query.category = values.join( ',' );
 }
 
+function applyTagFilter( query: ProductListQuery, filter: Filter ) {
+	const values = getNumericValues( filter.value );
+
+	if ( values.length === 0 ) {
+		return;
+	}
+
+	if ( filter.operator === 'isNone' ) {
+		query.exclude_tag = values;
+		return;
+	}
+
+	query.tag = values.join( ',' );
+}
+
 function applyBrandFilter( query: ProductListQuery, filter: Filter ) {
 	const values = getNumericValues( filter.value );
 
@@ -183,6 +199,9 @@ export function buildProductListQuery( view: View ): ProductListQuery {
 				break;
 			case 'categories':
 				applyCategoryFilter( query, filter );
+				break;
+			case 'tags':
+				applyTagFilter( query, filter );
 				break;
 			case 'brands':
 				applyBrandFilter( query, filter );
