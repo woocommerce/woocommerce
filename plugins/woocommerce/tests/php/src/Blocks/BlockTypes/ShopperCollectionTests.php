@@ -140,11 +140,11 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 
 	/**
 	 * With no column attribute set, the renderer falls back to the declared
-	 * `columnCount` default (3).
+	 * `columnCount` default (5).
 	 */
-	public function test_render_defaults_to_three_columns(): void {
+	public function test_render_defaults_to_five_columns(): void {
 		$markup = do_blocks( '<!-- wp:woocommerce/shopper-collection /-->' );
 
-		$this->assertStringContainsString( 'columns-3', $markup );
+		$this->assertStringContainsString( 'columns-5', $markup );
 	}
 }

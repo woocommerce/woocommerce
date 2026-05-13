@@ -107,7 +107,7 @@ final class ShopperCollection extends AbstractBlock {
 			$list_slug = 'saved-for-later';
 		}
 
-		$column_count = max( 1, (int) ( $attributes['columnCount'] ?? 3 ) );
+		$column_count = max( 1, (int) ( $attributes['columnCount'] ?? 5 ) );
 
 		$variation = $this->get_variation_config();
 
