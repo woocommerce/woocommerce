@@ -60,6 +60,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 		if ( $wp_query instanceof WP_Query ) {
 			$wp_query->is_404 = false;
 		}
+		wp_reset_postdata();
 		wp_set_current_user( 0 );
 		parent::tearDown();
 	}
@@ -237,6 +238,213 @@ class EndpointTest extends WC_Unit_Test_Case {
 		global $wp_query;
 		$this->assertFalse( $wp_query->is_404 );
 		$this->assertStringContainsString( 'woocommerce-review-order', $html );
+	}
+
+	/**
+	 * Build a minimal `WP_Block` stand-in carrying the given `postId` context.
+	 * Avoids constructing a real `WP_Block`, which would require fully-parsed
+	 * block + registry plumbing.
+	 *
+	 * @param int $post_id Value to expose at `$instance->context['postId']`.
+	 * @return \WP_Block
+	 */
+	private function make_block_instance( int $post_id ): \WP_Block {
+		$instance          = $this->getMockBuilder( \WP_Block::class )
+			->disableOriginalConstructor()
+			->getMock();
+		$instance->context = array( 'postId' => $post_id );
+		return $instance;
+	}
+
+	/**
+	 * @testdox A successful gate_request() registers the title-suppression filters so they fire on the rest of the request.
+	 */
+	public function test_gate_request_registers_title_filters_after_authorisation(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// Stage the globals gate_request() reads: `is_page( review_order_page_id )`
+		// for the early return, `$wp->query_vars[ QUERY_VAR ]` for the order id,
+		// and `$_GET['key']` for the order key.
+		global $wp, $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: singular page query so is_page() returns true.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: matching main query.
+		$wp_the_query = $wp_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: stage a fresh WP instance carrying our query var.
+		$wp                                    = new \WP();
+		$wp->query_vars[ Endpoint::QUERY_VAR ] = (string) $order->get_id();
+		$_GET                                  = array( 'key' => $order->get_order_key() );
+
+		// Both filters must be absent before gate runs.
+		$this->assertFalse(
+			has_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ) )
+		);
+		$this->assertFalse(
+			has_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ) )
+		);
+
+		$this->endpoint->gate_request();
+
+		$this->assertNotFalse(
+			has_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ) )
+		);
+		$this->assertNotFalse(
+			has_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ) )
+		);
+
+		remove_filter( 'the_title', array( $this->endpoint, 'maybe_hide_page_title' ), 10 );
+		remove_filter( 'render_block_core/post-title', array( $this->endpoint, 'maybe_hide_post_title_block' ), 10 );
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() empties the title for the Review Order page when iterating the main loop.
+	 */
+	public function test_maybe_hide_page_title_empties_review_order_page_title_in_main_loop(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		// Stage a main query so in_the_loop() + is_main_query() both pass.
+		global $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query.
+		$wp_the_query = $wp_query;
+		$wp_query->the_post();
+
+		$this->assertSame(
+			'',
+			$this->endpoint->maybe_hide_page_title( 'Review your order', $page_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() leaves titles for other posts alone (e.g. a nav link on the same render).
+	 */
+	public function test_maybe_hide_page_title_leaves_other_post_titles(): void {
+		$other_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Sample Page',
+			)
+		);
+
+		global $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query on a different page.
+		$wp_query = new WP_Query( array( 'page_id' => $other_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: drive a fake main query on a different page.
+		$wp_the_query = $wp_query;
+		$wp_query->the_post();
+
+		$this->assertSame(
+			'Sample Page',
+			$this->endpoint->maybe_hide_page_title( 'Sample Page', $other_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() leaves the title alone when the request is outside any loop (e.g. wp_get_document_title()).
+	 */
+	public function test_maybe_hide_page_title_leaves_title_when_not_in_loop(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		// Main query exists and `is_main_query()` is true, but `the_post()`
+		// has not been called so `in_the_loop()` returns false. This is the
+		// state `wp_get_document_title()` reads the post title in.
+		global $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: main query without the_post().
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: keep is_main_query() true.
+		$wp_the_query = $wp_query;
+
+		$this->assertFalse( in_the_loop() );
+		$this->assertTrue( is_main_query() );
+
+		$this->assertSame(
+			'Review your order',
+			$this->endpoint->maybe_hide_page_title( 'Review your order', $page_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_page_title() leaves the title alone when the loop belongs to a secondary query (is_main_query() is false).
+	 */
+	public function test_maybe_hide_page_title_leaves_title_when_not_main_query(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		// `$wp_the_query` is some other query (an empty one is enough), so
+		// is_main_query() returns false even though we are inside `$wp_query`'s loop.
+		global $wp_query, $wp_the_query;
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: separate main query.
+		$wp_the_query = new WP_Query();
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- test fixture: secondary query iterating the page.
+		$wp_query = new WP_Query( array( 'page_id' => $page_id ) );
+		$wp_query->the_post();
+
+		$this->assertTrue( in_the_loop() );
+		$this->assertFalse( is_main_query() );
+
+		$this->assertSame(
+			'Review your order',
+			$this->endpoint->maybe_hide_page_title( 'Review your order', $page_id )
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() empties `core/post-title` markup when bound to the Review Order page.
+	 */
+	public function test_maybe_hide_post_title_block_empties_when_bound_to_review_order_page(): void {
+		$page_id = (int) wc_get_page_id( Endpoint::PAGE_KEY );
+
+		$this->assertSame(
+			'',
+			$this->endpoint->maybe_hide_post_title_block(
+				'<h1 class="wp-block-post-title">Review your order</h1>',
+				array( 'blockName' => 'core/post-title' ),
+				$this->make_block_instance( $page_id )
+			)
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() leaves the title alone when the block is bound to a different post (e.g. inside a Query Loop).
+	 */
+	public function test_maybe_hide_post_title_block_leaves_other_post_context(): void {
+		$other_post_id = (int) wp_insert_post(
+			array(
+				'post_type'   => 'page',
+				'post_status' => 'publish',
+				'post_title'  => 'Another page',
+			)
+		);
+
+		$markup = '<h1 class="wp-block-post-title">Another page</h1>';
+		$this->assertSame(
+			$markup,
+			$this->endpoint->maybe_hide_post_title_block(
+				$markup,
+				array( 'blockName' => 'core/post-title' ),
+				$this->make_block_instance( $other_post_id )
+			)
+		);
+	}
+
+	/**
+	 * @testdox maybe_hide_post_title_block() leaves the title alone when the third arg is not a WP_Block (defensive guard).
+	 */
+	public function test_maybe_hide_post_title_block_leaves_title_when_instance_missing(): void {
+		$markup = '<h1 class="wp-block-post-title">Review your order</h1>';
+		$this->assertSame(
+			$markup,
+			$this->endpoint->maybe_hide_post_title_block(
+				$markup,
+				array( 'blockName' => 'core/post-title' ),
+				null
+			)
+		);
 	}
 
 	/**
