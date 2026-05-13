@@ -68,7 +68,8 @@
 	.components-menu-item__button.has-icon.has-text {
 		display: flex;
 		width: 100%;
-		padding-block: var(--wpds-dimension-padding-md, 12px);
+		// 8px top + 8px bottom = 16px visible spacing between consecutive items.
+		padding-block: 8px;
 		padding-left: 16px;
 		padding-right: 16px;
 		gap: 12px;
