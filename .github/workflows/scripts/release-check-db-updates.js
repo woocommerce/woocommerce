@@ -198,13 +198,12 @@ const run = async ( currentRef, { github, context } ) => {
     const updates2 = currentDbUpdates.get( key2 )
     const [ base1, suffix1 ] = key1.split( '-' );
 
-    updates2.forEach(
-      ( e ) => {
-        if ( ! updates1.includes( e ) ) {
-          throw new Error( `A new db update callback was added under key '${ key1 }' in version '${ version }'. Add them under a new key instead (e.g. '${ base1 }-${ Number( suffix1 || 0 ) + 1 }').` );
-        }
-      }
-    );
+    const newCallbacks = updates2.filter( ( e ) => ! updates1.includes( e ) );
+
+    if ( newCallbacks.length > 0 ) {
+      const callbackList = newCallbacks.map( ( c ) => `  - ${ c }` ).join( '\n' );
+      throw new Error( `${ newCallbacks.length } new db update callback(s) were added under key '${ key1 }' in version '${ version }':\n${ callbackList }\nAdd them under a new key instead (e.g. '${ base1 }-${ Number( suffix1 || 0 ) + 1 }').` );
+    }
 
     return;
   }
