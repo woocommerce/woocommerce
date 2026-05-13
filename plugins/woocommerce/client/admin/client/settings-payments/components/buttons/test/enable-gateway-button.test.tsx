@@ -106,39 +106,45 @@ describe( 'EnableGatewayButton', () => {
 		} );
 	} );
 
-	it( 'falls back to a generic setup message when the gateway title is empty', async () => {
-		const gatewayProviderWithoutTitle = {
-			...gatewayProvider,
-			title: '',
-		} as PaymentGatewayProvider;
+	it.each( [
+		[ 'empty', '' ],
+		[ 'null', null ],
+	] )(
+		'falls back to a generic setup message when the gateway title is %s',
+		async ( _case, title ) => {
+			const gatewayProviderWithoutTitle = {
+				...gatewayProvider,
+				title,
+			} as unknown as PaymentGatewayProvider;
 
-		const { getByRole } = render(
-			<EnableGatewayButton
-				gatewayProvider={ gatewayProviderWithoutTitle }
-				settingsHref="/settings/test-gateway"
-				onboardingHref="/onboard/test-gateway"
-				isOffline={ false }
-				gatewayHasRecommendedPaymentMethods={ false }
-				installingPlugin={ null }
-			/>
-		);
-
-		fireEvent.click( getByRole( 'link', { name: 'Enable' } ) );
-
-		await waitFor( () => {
-			expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
-				'Finish setting up this payment method before enabling it.',
-				expect.objectContaining( {
-					type: 'snackbar',
-					explicitDismiss: true,
-					actions: expect.arrayContaining( [
-						expect.objectContaining( {
-							label: 'Manage',
-							url: '/settings/test-gateway',
-						} ),
-					] ),
-				} )
+			const { getByRole } = render(
+				<EnableGatewayButton
+					gatewayProvider={ gatewayProviderWithoutTitle }
+					settingsHref="/settings/test-gateway"
+					onboardingHref="/onboard/test-gateway"
+					isOffline={ false }
+					gatewayHasRecommendedPaymentMethods={ false }
+					installingPlugin={ null }
+				/>
 			);
-		} );
-	} );
+
+			fireEvent.click( getByRole( 'link', { name: 'Enable' } ) );
+
+			await waitFor( () => {
+				expect( mockCreateErrorNotice ).toHaveBeenCalledWith(
+					expect.stringContaining( 'this payment method' ),
+					expect.objectContaining( {
+						type: 'snackbar',
+						explicitDismiss: true,
+						actions: expect.arrayContaining( [
+							expect.objectContaining( {
+								label: 'Manage',
+								url: '/settings/test-gateway',
+							} ),
+						] ),
+					} )
+				);
+			} );
+		}
+	);
 } );

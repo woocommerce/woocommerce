@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Improve payment setup fallback test coverage and translator context.
