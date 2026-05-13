@@ -925,7 +925,11 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} );
 		} );
 
-		await test.step( 'in variable products', async () => {
+		// Temporarily skip this step for WooCommerce 10.8 release, as it
+		// supports WordPress 6.8. This WordPress version contains a bug that
+		// affects this experimental block and without an easy workaround. The
+		// test should be re-enabled for subsequent WooCommerce versions.
+		await test.step.skip( 'in variable products', async () => {
 			await page.goto( '/product/hoodie/' );
 
 			const quantityInput = page.getByRole( 'spinbutton', {
