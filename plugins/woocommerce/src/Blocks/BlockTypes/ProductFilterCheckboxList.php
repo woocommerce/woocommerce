@@ -85,6 +85,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 
 		$first_item  = reset( $items );
 		$show_counts = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$has_colors  = is_array( $first_item ) && array_key_exists( 'color', $first_item );
 
 		ob_start();
 		?>
@@ -140,6 +141,15 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</span>
 									<?php else : ?>
+										<?php if ( $has_colors ) : ?>
+											<span
+												class="wc-block-product-filter-checkbox-list__color-swatch<?php echo empty( $item['color'] ) ? ' is-empty' : ''; ?>"
+												<?php if ( ! empty( $item['color'] ) ) : ?>
+													style="background-color: <?php echo esc_attr( $item['color'] ); ?>"
+												<?php endif; ?>
+												aria-hidden="true"
+											></span>
+										<?php endif; ?>
 										<span class="wc-block-product-filter-checkbox-list__text">
 											<?php echo esc_html( $item['label'] ); ?>
 										</span>
@@ -188,6 +198,14 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 											<?php echo $stars_svg; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</span>
 									<?php else : ?>
+										<?php if ( $has_colors ) : ?>
+											<span
+												class="wc-block-product-filter-checkbox-list__color-swatch"
+												data-wp-class--is-empty="woocommerce/product-filter-checkbox-list::state.isColorSwatchEmpty"
+												data-wp-bind--style="woocommerce/product-filter-checkbox-list::state.colorSwatchStyle"
+												aria-hidden="true"
+											></span>
+										<?php endif; ?>
 										<span
 											class="wc-block-product-filter-checkbox-list__text"
 											data-wp-text="context.item.label"

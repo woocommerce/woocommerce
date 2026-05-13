@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve deferred transactional email object arguments when queued through Action Scheduler.

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add per-user push notification preferences REST endpoint at `/wc-push-notifications/preferences`.

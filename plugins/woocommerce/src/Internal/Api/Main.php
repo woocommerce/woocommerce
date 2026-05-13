@@ -58,6 +58,14 @@ class Main {
 	public const OPTION_MAX_QUERY_COMPLEXITY = 'woocommerce_graphql_max_query_complexity';
 
 	/**
+	 * Option name for the "OPcache-based caching" setting.
+	 *
+	 * When enabled, parsed query ASTs are written to disk as PHP files so
+	 * that OPcache serves them from shared memory on subsequent requests.
+	 */
+	public const OPTION_OPCACHE_ENABLED = 'woocommerce_graphql_opcache_enabled';
+
+	/**
 	 * Option name for the "ObjectCache-based caching" setting.
 	 */
 	public const OPTION_OBJECT_CACHE_ENABLED = 'woocommerce_graphql_object_cache_enabled';
@@ -101,6 +109,17 @@ class Main {
 	 */
 	public static function is_apq_enabled(): bool {
 		return wc_string_to_bool( get_option( self::OPTION_APQ_ENABLED, 'yes' ) );
+	}
+
+	/**
+	 * Whether the OPcache-backed query cache is enabled.
+	 *
+	 * Defaults to true. Activation also depends on OPcache being loaded and
+	 * the cache directory being writable; see {@see QueryCache} for the
+	 * runtime capability check.
+	 */
+	public static function is_opcache_enabled(): bool {
+		return wc_string_to_bool( get_option( self::OPTION_OPCACHE_ENABLED, 'yes' ) );
 	}
 
 	/**
@@ -154,6 +173,10 @@ class Main {
 
 		$settings = wc_get_container()->get( Settings::class );
 		$settings->register();
+
+		if ( self::is_enabled() ) {
+			add_action( OpcacheFileExpiry::ACTION_HOOK, array( OpcacheFileExpiry::class, 'handle_cleanup_action' ) );
+		}
 	}
 
 	/**
