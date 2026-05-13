@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\EmailEditor\WCTransactionalEmail
 
 use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateChangeSummary;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 
@@ -548,6 +549,590 @@ class WCEmailTemplateChangeSummaryTest extends \WC_Unit_Test_Case {
 
 		$third = WCEmailTemplateChangeSummary::summarize( $post_id );
 		$this->assertFalse( $third['cache_hit'], 'After content mutation, the new key should miss the cache.' );
+	}
+
+	/**
+	 * @testdox Three-way diff: a yours-only edit (yours changed, core unchanged) yields no diff entry — it is a merchant edit, not a conflict.
+	 */
+	public function test_three_way_yours_only_edit_yields_no_entry(): void {
+		$single_paragraph = static fn( string $text ): array => array(
+			array(
+				'name'       => 'core/paragraph',
+				'inner_text' => $text,
+			),
+		);
+
+		$base = self::records( $single_paragraph( 'Hi.' ) );
+		$core = self::records( $single_paragraph( 'Hi.' ) );
+		$post = self::records( $single_paragraph( 'Hi friend.' ) );
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertSame( array(), $diff['copy_changes'], 'No copy_change should fire when only yours moved.' );
+		$this->assertSame( array(), $diff['added_blocks'] );
+		$this->assertSame( array(), $diff['removed_blocks'] );
+	}
+
+	/**
+	 * @testdox Three-way diff: a core-only edit (core changed, yours unchanged) classifies as a copy_change.
+	 */
+	public function test_three_way_core_only_edit_classifies_as_copy_change(): void {
+		$single_paragraph = static fn( string $text ): array => array(
+			array(
+				'name'       => 'core/paragraph',
+				'inner_text' => $text,
+			),
+		);
+
+		$base = self::records( $single_paragraph( 'Hi.' ) );
+		$core = self::records( $single_paragraph( 'Hello.' ) );
+		$post = self::records( $single_paragraph( 'Hi.' ) );
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertCount( 1, $diff['copy_changes'] );
+		$this->assertSame( 'Hi.', $diff['copy_changes'][0]['before'] );
+		$this->assertSame( 'Hello.', $diff['copy_changes'][0]['after'] );
+	}
+
+	/**
+	 * @testdox Three-way diff: when both yours and core edited, classifies as a conflict copy_change.
+	 */
+	public function test_three_way_both_edited_classifies_as_conflict(): void {
+		$single_paragraph = static fn( string $text ): array => array(
+			array(
+				'name'       => 'core/paragraph',
+				'inner_text' => $text,
+			),
+		);
+
+		$base = self::records( $single_paragraph( 'Hi.' ) );
+		$core = self::records( $single_paragraph( 'Hello.' ) );
+		$post = self::records( $single_paragraph( 'Hey there.' ) );
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertCount( 1, $diff['copy_changes'] );
+		$this->assertSame( 'Hey there.', $diff['copy_changes'][0]['before'] );
+		$this->assertSame( 'Hello.', $diff['copy_changes'][0]['after'] );
+	}
+
+	/**
+	 * @testdox Three-way diff: a yours-only added block classifies as a removed_block (preserved on apply).
+	 */
+	public function test_three_way_yours_only_addition_classifies_as_removed_block(): void {
+		$heading_only = array(
+			array(
+				'name'       => 'core/heading',
+				'inner_text' => 'H',
+			),
+		);
+
+		$base = self::records( $heading_only );
+		$core = self::records( $heading_only );
+		$post = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Merchant note.',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertCount( 1, $diff['removed_blocks'] );
+		$this->assertSame( 'core/paragraph', $diff['removed_blocks'][0]['name'] );
+	}
+
+	/**
+	 * @testdox Three-way diff: a core-only added block classifies as an added_block (auto-applied).
+	 */
+	public function test_three_way_core_only_addition_classifies_as_added_block(): void {
+		$heading_only = array(
+			array(
+				'name'       => 'core/heading',
+				'inner_text' => 'H',
+			),
+		);
+
+		$base = self::records( $heading_only );
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Core PS.',
+				),
+			)
+		);
+		$post = self::records( $heading_only );
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertCount( 1, $diff['added_blocks'] );
+		$this->assertSame( 'core/paragraph', $diff['added_blocks'][0]['name'] );
+	}
+
+	/**
+	 * @testdox Bug 04 regression: parallel additions on yours and core classify as separate add+remove, not as a single copy_change.
+	 */
+	public function test_three_way_parallel_additions_classify_separately(): void {
+		$base = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+			)
+		);
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'PS from core.',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'Reach out anytime.',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		// Bug 04 fingerprint: the 2-way LCS would have paired these as one copy_change. The 3-way
+		// diff identifies them against base as two independent additions on different sides.
+		$this->assertCount( 0, $diff['copy_changes'], 'Parallel additions must not collapse into a single copy_change.' );
+		$this->assertCount( 1, $diff['added_blocks'] );
+		$this->assertCount( 1, $diff['removed_blocks'] );
+		$this->assertSame( 'core/paragraph', $diff['added_blocks'][0]['name'] );
+		$this->assertSame( 'core/paragraph', $diff['removed_blocks'][0]['name'] );
+	}
+
+	/**
+	 * @testdox summarize() takes the three-way path when last_core_render meta is set and yours-only edits don't surface as copy_changes.
+	 */
+	public function test_summarize_uses_three_way_when_base_meta_present(): void {
+		$email_id = 'cs_three_way_yours_only_edit';
+		$this->register_fixture_email( $email_id );
+
+		$base_and_core = "<!-- wp:heading -->\n<h2>H</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Hi.</p>\n<!-- /wp:paragraph -->";
+		$post_content  = "<!-- wp:heading -->\n<h2>H</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Hi friend.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $base_and_core );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base_and_core );
+
+		$payload = WCEmailTemplateChangeSummary::summarize( $post_id );
+
+		$this->assertFalse( $payload['is_fallback'] );
+		$this->assertSame(
+			array(),
+			$payload['copy_changes'],
+			'A yours-only edit (yours diverges from base, core unchanged) should not produce a copy_change in 3-way mode.'
+		);
+		$this->assertSame( array(), $payload['added_blocks'] );
+		$this->assertSame( array(), $payload['removed_blocks'] );
+	}
+
+	/**
+	 * @testdox summarize() cache invalidates when last_core_render meta changes.
+	 */
+	public function test_summarize_cache_busts_when_base_render_changes(): void {
+		$email_id = 'cs_three_way_cache_bust';
+		$this->register_fixture_email( $email_id );
+
+		$core_content = "<!-- wp:paragraph -->\n<p>Core.</p>\n<!-- /wp:paragraph -->";
+		$post_content = "<!-- wp:paragraph -->\n<p>Yours.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			"<!-- wp:paragraph -->\n<p>Base A.</p>\n<!-- /wp:paragraph -->"
+		);
+		$first = WCEmailTemplateChangeSummary::summarize( $post_id );
+		$this->assertFalse( $first['cache_hit'], 'First call must compute fresh.' );
+
+		// Same call again, base unchanged → cache hit.
+		$second = WCEmailTemplateChangeSummary::summarize( $post_id );
+		$this->assertTrue( $second['cache_hit'], 'Second call with unchanged base should hit cache.' );
+
+		// Mutate the base — must miss the cache.
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			"<!-- wp:paragraph -->\n<p>Base B.</p>\n<!-- /wp:paragraph -->"
+		);
+		$third = WCEmailTemplateChangeSummary::summarize( $post_id );
+		$this->assertFalse( $third['cache_hit'], 'Changing base_render must bust the cache.' );
+	}
+
+	/**
+	 * @testdox summarize() falls back to the two-way path when last_core_render meta is missing.
+	 */
+	public function test_summarize_falls_back_to_two_way_when_base_meta_missing(): void {
+		$email_id = 'cs_three_way_fallback';
+		$this->register_fixture_email( $email_id );
+
+		$core_content = "<!-- wp:paragraph -->\n<p>Original.</p>\n<!-- /wp:paragraph -->";
+		$post_content = "<!-- wp:paragraph -->\n<p>Edited.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		// No last_core_render meta on this post — expect the existing 2-way classification.
+		$payload = WCEmailTemplateChangeSummary::summarize( $post_id );
+
+		$this->assertFalse( $payload['is_fallback'] );
+		$this->assertCount(
+			1,
+			$payload['copy_changes'],
+			'Two-way fallback must still surface yours-vs-core text divergence as a copy_change.'
+		);
+		$this->assertSame( 'Edited.', $payload['copy_changes'][0]['before'] );
+		$this->assertSame( 'Original.', $payload['copy_changes'][0]['after'] );
+	}
+
+	/**
+	 * @testdox Bug 03 regression: three-way diff does not fall back to the release-notes copy on a heavily-customized post when last_core_render meta is present.
+	 *
+	 * The inversion-guard heuristic (>= 5 unmatched && 0 copy && post >= 1.5x core) fires under
+	 * the 2-way fallback for the same post, hiding actionable diffs behind "see release notes".
+	 * With base meta set, the 3-way path is deterministic — the guard isn't reached and the
+	 * merchant gets per-block detail.
+	 */
+	public function test_three_way_does_not_fall_back_on_heavily_customized_post(): void {
+		$email_id = 'cs_three_way_heavily_customized';
+		$this->register_fixture_email( $email_id );
+
+		$base_and_core = "<!-- wp:heading -->\n<h2>Hi</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Hello.</p>\n<!-- /wp:paragraph -->";
+
+		// Merchant added 6 unrelated blocks (above the inversion-guard threshold of 5);
+		// nothing on the core side was edited or removed.
+		$post_content = "<!-- wp:heading -->\n<h2>Hi</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Hello.</p>\n<!-- /wp:paragraph -->\n\n"
+			. "<!-- wp:image --><figure></figure><!-- /wp:image -->\n\n"
+			. "<!-- wp:image --><figure></figure><!-- /wp:image -->\n\n"
+			. "<!-- wp:image --><figure></figure><!-- /wp:image -->\n\n"
+			. "<!-- wp:gallery --><figure></figure><!-- /wp:gallery -->\n\n"
+			. "<!-- wp:list --><ul></ul><!-- /wp:list -->\n\n"
+			. '<!-- wp:separator --><hr/><!-- /wp:separator -->';
+
+		$this->use_canonical_content( $email_id, $base_and_core );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base_and_core );
+
+		$result = WCEmailTemplateChangeSummary::summarize( $post_id );
+
+		$this->assertFalse(
+			$result['is_fallback'],
+			'Three-way must not fall back to the release-notes line on a heavily-customized post.'
+		);
+		$this->assertGreaterThanOrEqual(
+			6,
+			count( $result['removed_blocks'] ),
+			'All six yours-only additions should appear as removed_blocks (preserved on apply).'
+		);
+	}
+
+	/**
+	 * @testdox Bug 04 regression: parallel additions on yours and core via summarize() classify as separate add+remove, not as a single copy_change.
+	 */
+	public function test_three_way_parallel_additions_via_summarize(): void {
+		$email_id = 'cs_three_way_parallel_summarize';
+		$this->register_fixture_email( $email_id );
+
+		$base_render = "<!-- wp:heading -->\n<h2>Hi</h2>\n<!-- /wp:heading -->";
+
+		$core_content = "<!-- wp:heading -->\n<h2>Hi</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>PS from core.</p>\n<!-- /wp:paragraph -->";
+
+		$post_content = "<!-- wp:heading -->\n<h2>Hi</h2>\n<!-- /wp:heading -->\n\n"
+			. "<!-- wp:paragraph -->\n<p>Reach out anytime.</p>\n<!-- /wp:paragraph -->";
+
+		$this->use_canonical_content( $email_id, $core_content );
+		$post_id = $this->create_woo_email_post( $email_id, $post_content );
+
+		update_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, $base_render );
+
+		$result = WCEmailTemplateChangeSummary::summarize( $post_id );
+
+		$this->assertFalse( $result['is_fallback'] );
+
+		$copy_paragraphs = array_values(
+			array_filter(
+				$result['copy_changes'],
+				static fn ( array $cc ): bool => 'Paragraph' === ( $cc['block'] ?? '' )
+			)
+		);
+		$this->assertSame(
+			array(),
+			$copy_paragraphs,
+			'Parallel additions must not collapse into a Paragraph copy_change in 3-way mode.'
+		);
+		$this->assertCount( 1, $result['added_blocks'], 'Core PS should appear in added_blocks.' );
+		$this->assertCount( 1, $result['removed_blocks'], 'Yours\' note should appear in removed_blocks.' );
+	}
+
+	/**
+	 * @testdox Three-way diff: occurrence ordinal counts every matched pair, not just emitted conflicts (CodeRabbit feedback on PR 64716).
+	 *
+	 * Earlier same-name blocks that aren't emitted (yours-only edit, both unchanged) must still
+	 * advance the occurrence counter so a later conflict's ordinal reflects the block's true
+	 * position in the document. Mirrors the 2-way `diff_records()` placement of the counter.
+	 */
+	public function test_three_way_occurrence_counts_every_matched_pair(): void {
+		// Three Paragraph blocks. First yours-only edit (no entry). Second core-only edit
+		// (copy_change). Third both unchanged (no entry). The conflict's "occurrence" should
+		// be 2, NOT 1 — the second-of-three Paragraph in the document.
+		$base = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P1.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P2.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P3.',
+				),
+			)
+		);
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P1.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P2 changed by core.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P3.',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P1 edited by yours.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P2.',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P3.',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$this->assertCount( 1, $diff['copy_changes'] );
+		$this->assertSame(
+			2,
+			$diff['copy_changes'][0]['occurrence'],
+			'The conflict on the second Paragraph should be labeled occurrence 2 of 3, not 1 of 3.'
+		);
+		$this->assertSame( 3, $diff['copy_changes'][0]['total'] );
+	}
+
+	/**
+	 * @testdox Three-way diff: structural wrappers route to structural_changes, not added_blocks/removed_blocks (CodeRabbit feedback on PR 64716).
+	 *
+	 * The selective applier skips structural blocks (`core/group`, `core/columns`, etc.) at
+	 * merge time, so surfacing them in `added_blocks` would advertise an "Added Group block"
+	 * the apply will never apply. Mirrors 2-way `diff_records()` behavior.
+	 */
+	public function test_three_way_routes_structural_wrappers_to_structural_changes(): void {
+		$base = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+			)
+		);
+		// Core adds a group wrapper; yours adds a columns wrapper.
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/group',
+					'inner_text' => '',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/columns',
+					'inner_text' => '',
+				),
+			)
+		);
+
+		$diff = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+
+		$structural_names = array_map( static fn( array $e ): string => (string) ( $e['kind'] ?? '' ), $diff['structural_changes'] );
+		$this->assertContains( 'nest', $structural_names, 'Structural wrappers must route to structural_changes with kind "nest".' );
+		$this->assertCount(
+			2,
+			$diff['structural_changes'],
+			'Both yours-only and core-only structural wrappers should produce structural_changes entries.'
+		);
+		$this->assertSame( array(), $diff['added_blocks'], 'core/group must not appear in added_blocks.' );
+		$this->assertSame( array(), $diff['removed_blocks'], 'core/columns must not appear in removed_blocks.' );
+	}
+
+	/**
+	 * @testdox Three-way diff: no reorder structural change is emitted for blocks reordered relative to base.
+	 *
+	 * Pins the docblock claim on `diff_records_three_way()` that the 2-way reorder pass
+	 * is structurally unreachable under three-way attribution. The fixture uses three
+	 * differently-named blocks so the 2-way LCS (which pairs by `name`) can leave
+	 * same-named entries unmatched. Core keeps `[Heading, Paragraph, Image]`; post
+	 * moves Image to the front: `[Image, Heading, Paragraph]`. Two-way LCS picks the
+	 * length-2 alignment `Heading+Paragraph`, leaves `Image` unmatched on both sides,
+	 * and the reorder pass collapses them into a `Reordered Image` entry. Three-way
+	 * attributes each block via base indices instead — the unmatched post-side `Image`
+	 * becomes a `removed_blocks` entry and the unmatched core-side `Image` becomes a
+	 * `merchant_removed` structural entry, neither of which is a `reorder`.
+	 */
+	public function test_three_way_does_not_emit_reorder_for_blocks_reordered_relative_to_base(): void {
+		$base = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P.',
+				),
+				array(
+					'name'       => 'core/image',
+					'inner_text' => '',
+				),
+			)
+		);
+		$core = self::records(
+			array(
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P.',
+				),
+				array(
+					'name'       => 'core/image',
+					'inner_text' => '',
+				),
+			)
+		);
+		$post = self::records(
+			array(
+				array(
+					'name'       => 'core/image',
+					'inner_text' => '',
+				),
+				array(
+					'name'       => 'core/heading',
+					'inner_text' => 'H',
+				),
+				array(
+					'name'       => 'core/paragraph',
+					'inner_text' => 'P.',
+				),
+			)
+		);
+
+		// Sanity check: the same fixture under the 2-way path emits a `reorder` entry.
+		// If this assertion ever stops holding, the fixture has stopped exercising the
+		// reorder pass and the three-way assertion below has become a tautology.
+		// `diff_records()` is private; reflection here keeps the production API tight.
+		$two_way_method = new \ReflectionMethod( WCEmailTemplateChangeSummary::class, 'diff_records' );
+		$two_way_method->setAccessible( true );
+		$two_way       = $two_way_method->invoke( null, $core, $post );
+		$two_way_kinds = array_map( static fn( array $e ): string => (string) ( $e['kind'] ?? '' ), $two_way['structural_changes'] );
+		$this->assertContains(
+			'reorder',
+			$two_way_kinds,
+			'Fixture must trigger the 2-way reorder pass; otherwise the three-way assertion is meaningless.'
+		);
+
+		$three_way       = WCEmailTemplateChangeSummary::diff_records_three_way( $core, $base, $post );
+		$three_way_kinds = array_map( static fn( array $e ): string => (string) ( $e['kind'] ?? '' ), $three_way['structural_changes'] );
+		$this->assertNotContains(
+			'reorder',
+			$three_way_kinds,
+			'Three-way must not emit a reorder structural entry — base-anchored matching makes it unreachable.'
+		);
+	}
+
+	/**
+	 * Build a list of flatten_blocks-shaped records from a simple list of name + inner_text pairs.
+	 * Each record gets a top-level path (`[$idx]`) and a null parent_name.
+	 *
+	 * @param array<int, array{name:string, inner_text:string}> $simple Simple record specs.
+	 * @return array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}>
+	 */
+	private static function records( array $simple ): array {
+		$out = array();
+		foreach ( $simple as $i => $r ) {
+			$out[] = array(
+				'path'        => array( $i ),
+				'parent_name' => null,
+				'name'        => $r['name'],
+				'inner_text'  => $r['inner_text'],
+			);
+		}
+		return $out;
 	}
 
 	/**

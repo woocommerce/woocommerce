@@ -54,6 +54,8 @@ $gray-200:          #dcdcde !default;                                  // Border
 	--wc-form-border-color: rgba(32, 7, 7, 0.8);
 	--wc-form-border-radius: 4px;
 	--wc-form-border-width: 1px;
+	// Matches WP 7.0 $alert-red token for destructive actions.
+	--wc-destructive: #cc1818;
 	// Matches WP 7.0 $radius-l token (used on dashboard widgets).
 	--wc-card-border-radius: 8px;
 }

@@ -3289,12 +3289,6 @@ parameters:
 			path: includes/admin/class-wc-admin-webhooks.php
 
 		-
-			message: '#^Method WC_Admin_Webhooks\:\:maybe_display_legacy_rest_api_warning\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: includes/admin/class-wc-admin-webhooks.php
-
-		-
 			message: '#^Method WC_Admin_Webhooks\:\:notices\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -7951,9 +7945,9 @@ parameters:
 			path: includes/admin/settings/views/html-settings-tax.php
 
 		-
-			message: '#^Variable \$webhook might not be defined\.$#'
-			identifier: variable.undefined
-			count: 17
+			message: '#^Parameter \#1 \$text of function esc_attr expects string, int given\.$#'
+			identifier: argument.type
+			count: 1
 			path: includes/admin/settings/views/html-webhooks-edit.php
 
 		-
@@ -8033,18 +8027,6 @@ parameters:
 			identifier: variable.undefined
 			count: 1
 			path: includes/admin/views/html-admin-page-status-logs.php
-
-		-
-			message: '#^Access to private property WooCommerce\:\:\$api\.$#'
-			identifier: property.private
-			count: 1
-			path: includes/admin/views/html-admin-page-status-report.php
-
-		-
-			message: '#^Call to method get_rest_api_package_path\(\) on an unknown class WC_API\.$#'
-			identifier: class.notFound
-			count: 1
-			path: includes/admin/views/html-admin-page-status-report.php
 
 		-
 			message: '#^Calling self\:\:output_plugins_info\(\) outside of class scope\.$#'

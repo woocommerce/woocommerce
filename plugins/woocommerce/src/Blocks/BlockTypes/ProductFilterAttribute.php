@@ -20,6 +20,13 @@ final class ProductFilterAttribute extends AbstractBlock {
 	protected $block_name = 'product-filter-attribute';
 
 	/**
+	 * Cached map of term ID to color value for all wc-visual attribute terms.
+	 *
+	 * @var array<int, string>|null
+	 */
+	private $term_colors = null;
+
+	/**
 	 * Initialize this block type.
 	 *
 	 * - Hook into WP lifecycle.
@@ -45,7 +52,48 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 		if ( is_admin() ) {
 			$this->asset_data_registry->add( 'defaultProductFilterAttribute', $this->get_default_product_attribute() );
+			$this->asset_data_registry->add( 'productFilterTermColors', $this->get_visual_attribute_term_colors() );
 		}
+	}
+
+	/**
+	 * Get color values for all wc-visual attribute terms.
+	 *
+	 * @return array<int, string> Map of term ID to hex color.
+	 */
+	private function get_visual_attribute_term_colors(): array {
+		if ( null !== $this->term_colors ) {
+			return $this->term_colors;
+		}
+
+		$colors     = array();
+		$attributes = wc_get_attribute_taxonomies();
+
+		foreach ( $attributes as $attribute ) {
+			if ( 'wc-visual' !== $attribute->attribute_type ) {
+				continue;
+			}
+
+			$terms = get_terms(
+				array(
+					'taxonomy'   => 'pa_' . $attribute->attribute_name,
+					'hide_empty' => false,
+				)
+			);
+
+			if ( is_wp_error( $terms ) ) {
+				continue;
+			}
+
+			foreach ( $terms as $term ) {
+				$color                    = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
+				$colors[ $term->term_id ] = $color ? $color : '';
+			}
+		}
+
+		$this->term_colors = $colors;
+
+		return $this->term_colors;
 	}
 
 	/**
@@ -211,6 +259,11 @@ final class ProductFilterAttribute extends AbstractBlock {
 
 					if ( $show_counts ) {
 						$item['count'] = $term['count'];
+					}
+
+					if ( 'wc-visual' === $product_attribute->type ) {
+						$colors        = $this->get_visual_attribute_term_colors();
+						$item['color'] = $colors[ $term['term_id'] ] ?? '';
 					}
 
 					return $item;

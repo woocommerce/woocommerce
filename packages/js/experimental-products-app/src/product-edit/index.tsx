@@ -25,6 +25,7 @@ import {
 	buildMergedProductEditData,
 	buildProductEditFormFields,
 	findProductInList,
+	getProductEditRecord,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
 	getVisibleProductEditFields,
@@ -150,10 +151,17 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 					'product',
 					productId
 				) as unknown as ProductEntityRecord | false | undefined;
+				const rootRecordEdits = coreSelect.getEntityRecordEdits(
+					'root',
+					'product',
+					productId
+				) as Partial< ProductEntityRecord > | undefined;
 				const listedProduct = findProductInList( products, productId );
-				const product =
-					listedProduct ??
-					( rootRecord !== false ? rootRecord : undefined );
+				const product = getProductEditRecord(
+					listedProduct,
+					rootRecord,
+					rootRecordEdits
+				);
 				let record: ProductEntityRecord | false | undefined =
 					product ?? rootRecord;
 
