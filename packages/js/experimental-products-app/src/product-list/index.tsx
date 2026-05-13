@@ -397,7 +397,7 @@ export default function ProductList( {
 					</Tabs.Root>
 					<Stack direction="row" align="center" gap="xs">
 						<DataViews.Search
-							label={ __( 'Search products', 'woocommerce' ) }
+							label={ __( 'Search', 'woocommerce' ) }
 						/>
 						<DataViews.FiltersToggle />
 						<DataViews.LayoutSwitcher />

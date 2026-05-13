@@ -39,6 +39,18 @@
 
 .woocommerce-product-list__toolbar {
 	padding: 0 var(--wpds-dimension-padding-2xl, 24px);
+	// Move the page divider here so it sits below the tabs row rather than
+	// between the title block and the tabs.
+	border-bottom: 1px solid
+		var(--wp-components-color-gray-300, #ddd);
+}
+
+// Remove the @wordpress/admin-ui Page header's built-in divider (since
+// we draw it under the tabs now) and tighten its bottom padding so the
+// tabs row sits right under the subtitle.
+.product_page_woocommerce-products-dashboard .admin-ui-page__header {
+	padding-bottom: 4px;
+	border-bottom: 0;
 }
 
 // The chevron sits inside the primary "Add new" button. Force its SVG to
