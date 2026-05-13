@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Surface server-side error details on the Review Order page: non-JSON responses, top-level messages, and per-row error codes from the AJAX submission handler.
