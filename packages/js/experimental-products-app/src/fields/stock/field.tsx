@@ -2,14 +2,13 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { Badge } from '@wordpress/ui';
+import { Badge, SelectControl } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
-import { SelectField } from '../components/select-field';
 
 type StockStatus = 'instock' | 'outofstock' | 'onbackorder';
 
@@ -70,18 +69,30 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			</div>
 		);
 	},
-	Edit: ( { data, onChange, field } ) => (
-		<SelectField
-			label={ __( 'Status', 'woocommerce' ) }
-			value={ data.stock_status }
-			options={ field?.elements ?? [] }
-			onChange={ ( value ) => {
-				if ( value && isValidStockStatus( value ) ) {
-					onChange( {
-						stock_status: value,
-					} );
-				}
-			} }
-		/>
-	),
+	Edit: ( { data, onChange, field } ) => {
+		const options = field?.elements ?? [];
+		const selectedOption = options.find(
+			( option ) => option.value === data.stock_status
+		);
+
+		return (
+			<SelectControl
+				label={ __( 'Status', 'woocommerce' ) }
+				value={ selectedOption }
+				items={ options }
+				onValueChange={ ( option ) => {
+					const value = option?.value;
+
+					if (
+						typeof value === 'string' &&
+						isValidStockStatus( value )
+					) {
+						onChange( {
+							stock_status: value,
+						} );
+					}
+				} }
+			/>
+		);
+	},
 };

@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/ui';
 
 import type { Field } from '@wordpress/dataviews';
 
@@ -9,7 +10,6 @@ import type { Field } from '@wordpress/dataviews';
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../types';
-import { SelectField } from '../components/select-field';
 
 function isValidVisibility( value: string ) {
 	return (
@@ -35,18 +35,31 @@ const fieldDefinition = {
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
-	Edit: ( { data, onChange, field } ) => (
-		<SelectField
-			label={ field.label }
-			value={ data.catalog_visibility ?? 'visible' }
-			options={ field.elements ?? [] }
-			onChange={ ( value ) => {
-				if ( value && isValidVisibility( value ) ) {
-					onChange( {
-						catalog_visibility: value,
-					} );
-				}
-			} }
-		/>
-	),
+	Edit: ( { data, onChange, field } ) => {
+		const options = field.elements ?? [];
+		const selectedOption = options.find(
+			( option ) =>
+				option.value === ( data.catalog_visibility ?? 'visible' )
+		);
+
+		return (
+			<SelectControl
+				label={ field.label }
+				value={ selectedOption }
+				items={ options }
+				onValueChange={ ( option ) => {
+					const value = option?.value;
+
+					if (
+						typeof value === 'string' &&
+						isValidVisibility( value )
+					) {
+						onChange( {
+							catalog_visibility: value,
+						} );
+					}
+				} }
+			/>
+		);
+	},
 };

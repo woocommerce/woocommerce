@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/ui';
 
 import type { Field } from '@wordpress/dataviews';
 
@@ -10,7 +11,6 @@ import type { Field } from '@wordpress/dataviews';
  */
 import type { ProductEntityRecord } from '../types';
 import { ProductStatusBadge } from '../components/product-status-badge';
-import { SelectField } from '../components/select-field';
 
 function isValidStatus( value: string ) {
 	return (
@@ -40,23 +40,31 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	render: ( { item }: { item: ProductEntityRecord } ) => (
 		<ProductStatusBadge status={ item.status } />
 	),
-	Edit: ( { data, onChange, field } ) => (
-		<SelectField
-			label={ field.label }
-			value={ data.status }
-			options={
-				field.elements?.filter(
-					( element: { label: string; value: string } ) =>
-						element.value !== 'trash'
-				) ?? []
-			}
-			onChange={ ( value ) => {
-				if ( value && isValidStatus( value ) ) {
-					onChange( {
-						status: value,
-					} );
-				}
-			} }
-		/>
-	),
+	Edit: ( { data, onChange, field } ) => {
+		const options =
+			field.elements?.filter(
+				( element: { label: string; value: string } ) =>
+					element.value !== 'trash'
+			) ?? [];
+		const selectedOption = options.find(
+			( option ) => option.value === data.status
+		);
+
+		return (
+			<SelectControl
+				label={ field.label }
+				value={ selectedOption }
+				items={ options }
+				onValueChange={ ( option ) => {
+					const value = option?.value;
+
+					if ( typeof value === 'string' && isValidStatus( value ) ) {
+						onChange( {
+							status: value,
+						} );
+					}
+				} }
+			/>
+		);
+	},
 };
