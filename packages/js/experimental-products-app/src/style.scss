@@ -78,6 +78,18 @@
 		text-align: start;
 		align-items: flex-start;
 		height: auto;
+
+		// The default focus uses an outset box-shadow which gets clipped on
+		// the left/right because each item button spans the full popover
+		// width. Re-render the focus as an inset ring inside the button.
+		&:focus:not(:disabled) {
+			box-shadow: inset 0 0 0 var(--wp-admin-border-width-focus, 1.5px)
+				var(
+					--wp-components-color-accent,
+					var(--wp-admin-theme-color, #3858e9)
+				);
+			outline: 3px solid transparent;
+		}
 	}
 
 	.components-menu-item__info-wrapper {
