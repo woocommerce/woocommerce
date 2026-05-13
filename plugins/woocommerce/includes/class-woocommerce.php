@@ -376,21 +376,10 @@ final class WooCommerce {
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
-		// Feature flag gates the whole OrderReviews stack. Defer the check to
-		// `init` so FeaturesController is fully set up and `__()` is safe.
-		add_action(
-			'init',
-			static function () use ( $container ) {
-				if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
-					return;
-				}
-				$container->get( Automattic\WooCommerce\Internal\OrderReviews\Scheduler::class );
-				$container->get( Automattic\WooCommerce\Internal\OrderReviews\Endpoint::class );
-				$container->get( Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler::class );
-				$container->get( Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::class );
-			},
-			0
-		);
+		// Feature flag gates the whole OrderReviews stack. Run on `init`
+		// priority 1 so it lands after WooCommerce::init (priority 0) has
+		// loaded the textdomain — keeps the FeaturesController `__()` calls safe.
+		add_action( 'init', array( $this, 'maybe_init_order_reviews' ), 1 );
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
@@ -972,6 +961,25 @@ final class WooCommerce {
 		 * Action triggered after WooCommerce initialization finishes.
 		 */
 		do_action( 'woocommerce_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingSinceComment
+	}
+
+	/**
+	 * Resolve the OrderReviews services when the `customer_review_request`
+	 * feature flag is on. Hooked to `init` priority 1 from `init_hooks()`
+	 * so it runs after the textdomain is loaded.
+	 *
+	 * @since 10.8.0
+	 * @internal
+	 */
+	public function maybe_init_order_reviews(): void {
+		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
+			return;
+		}
+		$container = wc_get_container();
+		$container->get( \Automattic\WooCommerce\Internal\OrderReviews\Scheduler::class );
+		$container->get( \Automattic\WooCommerce\Internal\OrderReviews\Endpoint::class );
+		$container->get( \Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler::class );
+		$container->get( \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::class );
 	}
 
 	/**
