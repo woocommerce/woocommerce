@@ -39,7 +39,6 @@ import {
 	getWooEmailPostContent,
 } from './helpers/seed-woo-email';
 import {
-	simulateCoreBump,
 	triggerBackfill,
 	triggerDetectionSweep,
 } from './helpers/simulate-plugin-update';
@@ -274,8 +273,14 @@ test.describe( 'Update propagation — backward compatibility', () => {
 		const backfillCompleted = events.filter(
 			( e ) => e.name === TRACKS_EVENTS.BACKFILL_COMPLETED
 		);
-		expect( available.length, 'No _available events should fire during backfill' ).toBe( 0 );
-		expect( backfillCompleted.length, 'Exactly one _backfill_completed event should fire' ).toBe( 1 );
+		expect(
+			available.length,
+			'No _available events should fire during backfill'
+		).toBe( 0 );
+		expect(
+			backfillCompleted.length,
+			'Exactly one _backfill_completed event should fire'
+		).toBe( 1 );
 	} );
 
 	/**

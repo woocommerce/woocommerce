@@ -124,8 +124,9 @@ export async function attachTracksSpy( page: Page ): Promise< TracksSpy > {
 			} catch {}
 			return original.call( this, name, properties );
 		};
-		( wrapped as typeof wrapped & { __wcSpyWrapped: boolean } ).__wcSpyWrapped =
-			true;
+		(
+			wrapped as typeof wrapped & { __wcSpyWrapped: boolean }
+		 ).__wcSpyWrapped = true;
 		window.wcTracks.recordEvent =
 			wrapped as typeof window.wcTracks.recordEvent;
 	} );
@@ -171,9 +172,9 @@ export async function attachTracksSpy( page: Page ): Promise< TracksSpy > {
 		},
 		expectNotFired: async ( name: string ) => {
 			const events = await drain();
-			expect(
-				events.filter( ( e ) => e.name === name ).length
-			).toBe( 0 );
+			expect( events.filter( ( e ) => e.name === name ).length ).toBe(
+				0
+			);
 		},
 		reset: async () => {
 			await page.evaluate( () => {

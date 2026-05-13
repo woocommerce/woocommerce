@@ -8,7 +8,11 @@ import { createClient } from '@woocommerce/e2e-utils-playwright';
  */
 import { admin } from '../../../../test-data/data';
 import playwrightConfig from '../../../../playwright.config';
-import { META_KEYS, TEST_HELPER_API_BASE, type Status } from './classifications';
+import {
+	META_KEYS,
+	TEST_HELPER_API_BASE,
+	type Status,
+} from './classifications';
 
 export type WooEmailSeed = {
 	emailId: string;
@@ -34,7 +38,9 @@ function apiClient() {
 export async function resetWooEmailPost( emailId: string ): Promise< number > {
 	const client = apiClient();
 	const res = await client.post(
-		`${ TEST_HELPER_API_BASE }/reset-post/${ encodeURIComponent( emailId ) }`,
+		`${ TEST_HELPER_API_BASE }/reset-post/${ encodeURIComponent(
+			emailId
+		) }`,
 		{}
 	);
 	const body = res?.data;
@@ -44,6 +50,29 @@ export async function resetWooEmailPost( emailId: string ): Promise< number > {
 		);
 	}
 	return Number( body.post_id );
+}
+
+async function resolveHash(
+	emailId: string,
+	hashSpec: string | 'AUTO_OLD' | 'AUTO_CURRENT'
+): Promise< string > {
+	if ( hashSpec !== 'AUTO_OLD' && hashSpec !== 'AUTO_CURRENT' ) {
+		return hashSpec;
+	}
+	const client = apiClient();
+	const mode = hashSpec === 'AUTO_OLD' ? 'old' : 'current';
+	const res = await client.get(
+		`${ TEST_HELPER_API_BASE }/canonical-hash/${ encodeURIComponent(
+			emailId
+		) }?mode=${ mode }`
+	);
+	const body = res?.data;
+	if ( ! body?.hash ) {
+		throw new Error(
+			`Failed to resolve hash for ${ emailId } mode=${ mode }`
+		);
+	}
+	return String( body.hash );
 }
 
 export async function seedWooEmailPost(
@@ -94,27 +123,6 @@ export async function seedWooEmailPost(
 	return postId;
 }
 
-async function resolveHash(
-	emailId: string,
-	hashSpec: string | 'AUTO_OLD' | 'AUTO_CURRENT'
-): Promise< string > {
-	if ( hashSpec !== 'AUTO_OLD' && hashSpec !== 'AUTO_CURRENT' ) {
-		return hashSpec;
-	}
-	const client = apiClient();
-	const mode = hashSpec === 'AUTO_OLD' ? 'old' : 'current';
-	const res = await client.get(
-		`${ TEST_HELPER_API_BASE }/canonical-hash/${ encodeURIComponent( emailId ) }?mode=${ mode }`
-	);
-	const body = res?.data;
-	if ( ! body?.hash ) {
-		throw new Error(
-			`Failed to resolve hash for ${ emailId } mode=${ mode }`
-		);
-	}
-	return String( body.hash );
-}
-
 /**
  * Create a woo_email post directly via the seed-bulk endpoint, bypassing the
  * WCTransactionalEmailPostsGenerator. The created post has no entry in the
@@ -163,7 +171,9 @@ export async function seedWooEmailPostDirect(
 	const first = results[ 0 ];
 	if ( ! first?.post_id ) {
 		throw new Error(
-			`seedWooEmailPostDirect: failed to create post — ${ first?.error ?? 'no post_id returned' }`
+			`seedWooEmailPostDirect: failed to create post — ${
+				first?.error ?? 'no post_id returned'
+			}`
 		);
 	}
 	return Number( first.post_id );
@@ -220,7 +230,9 @@ export async function applyWooEmailTemplate(
 	);
 	if ( ! res?.data?.status ) {
 		throw new Error(
-			`applyWooEmailTemplate: unexpected response for post ${ postId }: ${ JSON.stringify( res?.data ) }`
+			`applyWooEmailTemplate: unexpected response for post ${ postId }: ${ JSON.stringify(
+				res?.data
+			) }`
 		);
 	}
 	return res.data as ApplyResult;
@@ -254,7 +266,9 @@ export async function resetWooEmailTemplate(
 	);
 	if ( res?.data?.content === undefined ) {
 		throw new Error(
-			`resetWooEmailTemplate: unexpected response for post ${ postId }: ${ JSON.stringify( res?.data ) }`
+			`resetWooEmailTemplate: unexpected response for post ${ postId }: ${ JSON.stringify(
+				res?.data
+			) }`
 		);
 	}
 	return res.data as ResetResult;

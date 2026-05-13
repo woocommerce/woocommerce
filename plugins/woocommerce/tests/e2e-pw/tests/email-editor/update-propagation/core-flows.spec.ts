@@ -26,7 +26,10 @@ import { test, expect } from '@playwright/test';
 import { ADMIN_STATE_PATH } from '../../../playwright.config';
 import { enableEmailEditor } from '../helpers/enable-email-editor-feature';
 import { accessTheEmailEditor } from '../../../utils/email';
-import { clearTemplateHtmlOverride } from './helpers/test-helper-plugin';
+import {
+	clearTemplateHtmlOverride,
+	setTemplateHtmlOverride,
+} from './helpers/test-helper-plugin';
 import {
 	seedWooEmailPost,
 	getWooEmailMeta,
@@ -40,7 +43,6 @@ import {
 import { attachTracksSpy } from './helpers/tracks-spy';
 import { assertNoLeakedFixtureState } from './helpers/leaked-state-checks';
 import { STATUS, META_KEYS, TRACKS_EVENTS } from './helpers/classifications';
-import { setTemplateHtmlOverride } from './helpers/test-helper-plugin';
 
 const OLD_HTML =
 	'<!-- wp:paragraph --><p>OLD CANONICAL</p><!-- /wp:paragraph -->';
@@ -349,7 +351,10 @@ test.describe( 'Update propagation — core flows', () => {
 			'<!-- wp:paragraph --><p>OLD BLOCK C</p><!-- /wp:paragraph -->';
 
 		// Merchant edited block A; blocks B and C kept the original text.
-		const customized = oldHtml.replace( 'OLD BLOCK A', 'MERCHANT EDITED A' );
+		const customized = oldHtml.replace(
+			'OLD BLOCK A',
+			'MERCHANT EDITED A'
+		);
 
 		// "New canonical" after a core bump: core changed text in B and C,
 		// but A still matches nothing (it will conflict with merchant's edit).
@@ -387,9 +392,11 @@ test.describe( 'Update propagation — core flows', () => {
 		);
 
 		// Wait for the editor canvas to be ready.
-		await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible( {
-			timeout: 20000,
-		} );
+		await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible(
+			{
+				timeout: 20000,
+			}
+		);
 
 		// The drawer's <aside role="dialog"> becomes aria-hidden="false" once the
 		// store dispatches openReviewDrawer(). The title text comes from the
@@ -403,9 +410,9 @@ test.describe( 'Update propagation — core flows', () => {
 		// hook (enabled = isOpen = true). Wait for the conflict group heading
 		// which appears once copy_changes are loaded. All 3 blocks conflict
 		// (merchant text vs new-canonical text) so the heading says "3 conflicts".
-		await expect(
-			drawer.getByText( /needs your attention/i )
-		).toBeVisible( { timeout: 15000 } );
+		await expect( drawer.getByText( /needs your attention/i ) ).toBeVisible(
+			{ timeout: 15000 }
+		);
 
 		// --- Per-conflict decisions ---
 		// All conflict radiogroups default to "keep yours" (aria-checked="true").
