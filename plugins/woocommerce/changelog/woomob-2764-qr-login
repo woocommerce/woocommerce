@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add QR code login for the WooCommerce mobile app so eligible store managers can sign in directly without a linked WordPress.com account.

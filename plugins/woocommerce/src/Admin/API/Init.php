@@ -102,6 +102,7 @@ class Init {
 			'Automattic\WooCommerce\Admin\API\OnboardingPlugins',
 			'Automattic\WooCommerce\Admin\API\OnboardingProducts',
 			'Automattic\WooCommerce\Admin\API\MobileAppMagicLink',
+			'Automattic\WooCommerce\Admin\API\MobileAppQRLogin',
 			'Automattic\WooCommerce\Admin\API\ShippingPartnerSuggestions',
 		);
 
