@@ -517,6 +517,19 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
+		// Mirror the permission check WP core performs in
+		// WP_REST_Application_Passwords_Controller::create_item_permissions_check().
+		// Capability or per-user availability filters could have changed in the
+		// window between token generation and exchange.
+		if ( ! user_can( $user, 'create_app_password', $user_id ) ) {
+			$this->release_token_exchange_claim( $token_hash );
+			return new \WP_Error(
+				'rest_cannot_create_application_passwords',
+				__( 'Application passwords are not available for your account. Please contact the site administrator for assistance.', 'woocommerce' ),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
+
 		// Create an Application Password for the mobile app.
 		$app_password_result = \WP_Application_Passwords::create_new_application_password(
 			$user_id,

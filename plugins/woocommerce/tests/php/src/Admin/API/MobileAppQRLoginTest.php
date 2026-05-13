@@ -518,6 +518,35 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Token exchange fails when the target user lacks the create_app_password capability.
+	 */
+	public function test_exchange_token_requires_create_app_password_capability(): void {
+		wp_set_current_user( $this->admin_id );
+		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+
+		$deny_create_app_password = function ( $caps, $cap ) {
+			if ( 'create_app_password' === $cap ) {
+				return array( 'do_not_allow' );
+			}
+			return $caps;
+		};
+		add_filter( 'map_meta_cap', $deny_create_app_password, 10, 2 );
+
+		try {
+			wp_set_current_user( 0 );
+			$response = $this->dispatch_exchange( $plaintext );
+
+			$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+			$this->assertSame( 'rest_cannot_create_application_passwords', $response->get_data()['code'] );
+			$this->assertCount( 0, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+			$this->assertIsArray( get_transient( $this->token_transient_key( $plaintext ) ) );
+			$this->assertFalse( get_option( $this->token_claim_key( $plaintext ), false ) );
+		} finally {
+			remove_filter( 'map_meta_cap', $deny_create_app_password, 10 );
+		}
+	}
+
+	/**
 	 * @testdox Successful generation persists the sha256 hash of the token in a transient, not the plaintext.
 	 */
 	public function test_generate_token_stores_hashed_token_in_transient(): void {
