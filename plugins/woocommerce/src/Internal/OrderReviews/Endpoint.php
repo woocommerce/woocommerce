@@ -93,9 +93,9 @@ class Endpoint {
 	 * @internal
 	 */
 	public function maybe_create_host_page(): void {
-		// 1. Adopt by slug only when the page also embeds our shortcode. The
-		//    combined signal avoids hijacking a merchant page that happens
-		//    to share either the slug or the shortcode in isolation.
+		// Adopt by slug only when the page also embeds our shortcode; the
+		// combined signal avoids hijacking a merchant page that happens to
+		// share either the slug or the shortcode in isolation.
 		$canonical = $this->find_canonical_host_page();
 		if ( $canonical instanceof WP_Post ) {
 			$option_id  = (int) wc_get_page_id( self::PAGE_KEY );
@@ -120,9 +120,9 @@ class Endpoint {
 			return;
 		}
 
-		// 2. No slug-canonical page. If the merchant renamed the host page
-		//    away from our default slug but the stored option still resolves,
-		//    respect that and only republish a draft we already own.
+		// No slug-canonical page. If the merchant renamed the host page away
+		// from our default slug but the stored option still resolves, respect
+		// that and only republish a draft we already own.
 		$option_id   = (int) wc_get_page_id( self::PAGE_KEY );
 		$option_page = $option_id > 0 ? get_post( $option_id ) : null;
 		if ( $option_page instanceof WP_Post && 'page' === $option_page->post_type && 'trash' !== $option_page->post_status ) {
@@ -138,9 +138,9 @@ class Endpoint {
 			return;
 		}
 
-		// 3. No managed page anywhere. Inject just our entry — the default
-		//    array no longer carries it and we don't want to re-process every
-		//    other WC page here.
+		// No managed page anywhere. Inject just our entry — the default array
+		// no longer carries it and we don't want to re-process every other WC
+		// page here.
 		$inject_review_order = function (): array {
 			return array(
 				self::PAGE_KEY => array(
