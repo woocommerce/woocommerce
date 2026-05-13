@@ -103,6 +103,8 @@
 		line-height: 18px;
 		margin-top: 2px;
 		white-space: normal;
+		// Avoid widows — single trailing words on their own line.
+		text-wrap: pretty;
 	}
 }
 
