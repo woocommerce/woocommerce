@@ -7,8 +7,8 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import clsx from 'clsx';
-import { Button, Stack, Tabs } from '@wordpress/ui';
-import { Dropdown, MenuGroup, MenuItem, Icon } from '@wordpress/components';
+import { Button, Icon, Stack, Tabs } from '@wordpress/ui';
+import { privateApis as componentsPrivateApis } from '@wordpress/components';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 import { Page } from '@wordpress/admin-ui';
 import { addQueryArgs } from '@wordpress/url';
@@ -18,9 +18,9 @@ import {
 	tag,
 	alignNone,
 	category,
-	download,
 	link,
 	chevronDown,
+	chevronUp,
 } from '@wordpress/icons';
 
 /**
@@ -46,6 +46,7 @@ import {
 } from './utils';
 import { useProductActions } from '../dataviews-actions';
 
+const { Menu } = unlock( componentsPrivateApis );
 const { usePostActions } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
@@ -54,10 +55,7 @@ const PRODUCT_TYPE_MENU_ITEMS = [
 		key: 'simple',
 		icon: tag,
 		label: __( 'Simple product', 'woocommerce' ),
-		info: __(
-			'A standalone item with no variations.',
-			'woocommerce'
-		),
+		info: __( 'A standalone item with no variations.', 'woocommerce' ),
 		queryArgs: {},
 	},
 	{
@@ -74,21 +72,8 @@ const PRODUCT_TYPE_MENU_ITEMS = [
 		key: 'grouped',
 		icon: category,
 		label: __( 'Grouped product', 'woocommerce' ),
-		info: __(
-			'A collection of related products.',
-			'woocommerce'
-		),
+		info: __( 'A collection of related products.', 'woocommerce' ),
 		queryArgs: { product_type: 'grouped' },
-	},
-	{
-		key: 'downloadable',
-		icon: download,
-		label: __( 'Downloadable product', 'woocommerce' ),
-		info: __(
-			'A digital file like an ebook or template.',
-			'woocommerce'
-		),
-		queryArgs: { downloadable: '1' },
 	},
 	{
 		key: 'external',
@@ -144,6 +129,7 @@ export default function ProductList( {
 	const [ selection, setSelection ] = useState( () =>
 		getSelectionFromPostId( postId )
 	);
+	const [ isMenuOpen, setIsMenuOpen ] = useState( false );
 
 	useEffect( () => {
 		setSelection( getSelectionFromPostId( postId ) );
@@ -285,33 +271,23 @@ export default function ProductList( {
 			>
 				{ __( 'Import', 'woocommerce' ) }
 			</Button>
-			<Dropdown
-				className="woocommerce-product-list__add-new-dropdown"
-				contentClassName="woocommerce-product-list__add-new-menu"
-				popoverProps={ { placement: 'bottom-end' } }
-				renderToggle={ ( { isOpen, onToggle } ) => (
-					<Button
-						className="woocommerce-product-list__add-new-trigger"
-						size="compact"
-						disabled={ canCreateRecord === false }
-						onClick={ onToggle }
-						aria-expanded={ isOpen }
-						aria-haspopup="menu"
-					>
-						{ __( 'Add new', 'woocommerce' ) }
-						<Icon icon={ chevronDown } />
-					</Button>
-				) }
-				renderContent={ ( { onClose } ) => (
-					<MenuGroup>
+			<Menu onOpenChange={ setIsMenuOpen } placement="bottom-end">
+				<Menu.TriggerButton
+					disabled={ canCreateRecord === false }
+					render={ <Button variant="solid" size="compact" /> }
+				>
+					{ __( 'Add new', 'woocommerce' ) }
+					<Button.Icon
+						icon={ isMenuOpen ? chevronUp : chevronDown }
+					/>
+				</Menu.TriggerButton>
+				<Menu.Popover>
+					<Menu.Group>
 						{ PRODUCT_TYPE_MENU_ITEMS.map( ( item ) => (
-							<MenuItem
+							<Menu.Item
 								key={ item.key }
-								icon={ item.icon }
-								iconPosition="left"
-								info={ item.info }
+								prefix={ <Icon icon={ item.icon } /> }
 								onClick={ () => {
-									onClose();
 									window.location.href = getAdminLink(
 										addQueryArgs( 'post-new.php', {
 											post_type: 'product',
@@ -320,12 +296,15 @@ export default function ProductList( {
 									);
 								} }
 							>
-								{ item.label }
-							</MenuItem>
+								<Menu.ItemLabel>{ item.label }</Menu.ItemLabel>
+								<Menu.ItemHelpText>
+									{ item.info }
+								</Menu.ItemHelpText>
+							</Menu.Item>
 						) ) }
-					</MenuGroup>
-				) }
-			/>
+					</Menu.Group>
+				</Menu.Popover>
+			</Menu>
 		</Stack>
 	);
 
