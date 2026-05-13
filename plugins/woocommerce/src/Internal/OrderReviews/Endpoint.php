@@ -78,6 +78,8 @@ class Endpoint {
 	 * Create the Review Order host page the first time the feature is on.
 	 * Idempotent — bails when the stored option already points at a page.
 	 *
+	 * @since 10.8.0
+	 *
 	 * @internal
 	 */
 	public function maybe_create_host_page(): void {
