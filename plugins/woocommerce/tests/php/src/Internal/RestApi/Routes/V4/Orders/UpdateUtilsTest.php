@@ -3,9 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Orders;
 
-use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Orders\UpdateUtils;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
-use WC_Order;
 use WC_Unit_Test_Case;
 
 /**
@@ -67,25 +65,5 @@ class UpdateUtilsTest extends WC_Unit_Test_Case {
 
 		$this->assertEquals( 'valid_value', $meta_by_key['valid_key'] ?? null, 'Valid entry should be saved' );
 		$this->assertArrayNotHasKey( '', $meta_by_key, 'Explicit null key should not create a meta data row' );
-	}
-}
-
-/**
- * Testable subclass that exposes the protected update_meta_data method.
- *
- * phpcs:disable Generic.Files.OneObjectStructurePerFile.MultipleFound
- * phpcs:disable Squiz.Classes.ClassFileName.NoMatch
- * phpcs:disable Suin.Classes.PSR4.IncorrectClassName
- */
-class TestableUpdateUtils extends UpdateUtils {
-
-	/**
-	 * Public wrapper for the protected update_meta_data method.
-	 *
-	 * @param WC_Order $order     Order object.
-	 * @param array    $meta_data Meta data array.
-	 */
-	public function call_update_meta_data( WC_Order $order, array $meta_data ) {
-		$this->update_meta_data( $order, $meta_data );
 	}
 }

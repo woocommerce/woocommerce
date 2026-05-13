@@ -50,7 +50,7 @@ if ( ! class_exists( 'WC_Payments_Utils' ) ) {
      * Mock for testing.
      *
      * phpcs:disable Squiz.Classes.ClassFileName.NoMatch
-     * phpcs:disable Suin.Classes.PSR4.IncorrectClassName
+     * phpcs:disable SlevomatCodingStandard.Files.TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName
      * phpcs:disable Squiz.Classes.ValidClassName.NotCamelCaps
      */
     class WC_Payments_Utils {
@@ -65,7 +65,7 @@ if ( ! class_exists( 'WC_Payments_Utils' ) ) {
 **Why ignores needed:**
 
 - `ClassFileName.NoMatch` - Mock doesn't match file name
-- `PSR4.IncorrectClassName` - External class not PSR-4
+- `TypeNameMatchesFileName.NoMatchBetweenTypeNameAndFileName` - External class not PSR-4
 - `ValidClassName.NotCamelCaps` - Uses underscores
 
 ## Unused Closure Parameters
