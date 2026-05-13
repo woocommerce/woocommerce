@@ -59,8 +59,9 @@
 	}
 
 	.components-menu-group {
-		// 16px breathing room between the popover edge and the first/last item.
-		padding: 16px 0;
+		// 8px here + 8px on the first/last item's padding-block = 16px
+		// total visible space between the popover edge and the item content.
+		padding: 8px 0;
 	}
 
 	// The selector adds `.has-icon.has-text` so it beats the @wordpress
