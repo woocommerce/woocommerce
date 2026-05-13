@@ -1157,11 +1157,6 @@ class WC_Install {
 					'title'   => _x( 'My account', 'Page title', 'woocommerce' ),
 					'content' => '<!-- wp:shortcode -->[' . $my_account_shortcode . ']<!-- /wp:shortcode -->',
 				),
-				'review_order'   => array(
-					'name'    => _x( 'review-order', 'Page slug', 'woocommerce' ),
-					'title'   => _x( 'Review your order', 'Page title', 'woocommerce' ),
-					'content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
-				),
 				'refund_returns' => array(
 					'name'        => _x( 'refund_returns', 'Page slug', 'woocommerce' ),
 					'title'       => _x( 'Refund and Returns Policy', 'Page title', 'woocommerce' ),

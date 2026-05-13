@@ -88,15 +88,25 @@ class Endpoint {
 			return;
 		}
 
-		$only_review_order = static function ( array $pages ): array {
-			return array_intersect_key( $pages, array_flip( array( 'review_order' ) ) );
+		// The review-order page is no longer in WC_Install::create_pages()'s
+		// default array (it's gated by this feature); replace the filtered
+		// list with only our entry so the call doesn't re-process every
+		// other WC page on the seed pass.
+		$inject_review_order = static function (): array {
+			return array(
+				'review_order' => array(
+					'name'    => _x( 'review-order', 'Page slug', 'woocommerce' ),
+					'title'   => _x( 'Review your order', 'Page title', 'woocommerce' ),
+					'content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
+				),
+			);
 		};
 
-		add_filter( 'woocommerce_create_pages', $only_review_order );
+		add_filter( 'woocommerce_create_pages', $inject_review_order );
 		try {
 			\WC_Install::create_pages();
 		} finally {
-			remove_filter( 'woocommerce_create_pages', $only_review_order );
+			remove_filter( 'woocommerce_create_pages', $inject_review_order );
 		}
 
 		// Defer the rewrite flush to wp_loaded; rewrite_rule fires later on init.
