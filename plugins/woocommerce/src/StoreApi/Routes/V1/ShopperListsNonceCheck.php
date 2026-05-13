@@ -35,7 +35,7 @@ trait ShopperListsNonceCheck {
 		if ( $this->is_write_request( $request ) ) {
 			$nonce_check = $this->check_store_api_nonce( $request );
 			if ( is_wp_error( $nonce_check ) ) {
-				return $this->add_nonce_response_headers( rest_ensure_response( $this->error_to_response( $nonce_check ) ) );
+				return $this->add_nonce_response_headers( $this->error_to_response( $nonce_check ) );
 			}
 		}
 
