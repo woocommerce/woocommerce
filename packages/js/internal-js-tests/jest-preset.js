@@ -114,7 +114,24 @@ module.exports = {
 			return acc;
 		},
 		{
-			'(?:src|client|assets/js)/.*\\.[jt]sx?$': 'ts-jest',
+			'(?:src|client|assets/js)/.*\\.[jt]sx?$': [
+				'ts-jest',
+				{
+					// Force CommonJS output regardless of the package's own
+					// tsconfig (which targets ESM for the publish build).
+					// Tests must run as CJS because Jest's runtime is CJS.
+					// Clear rootDir so ts-jest can transform source files
+					// from sibling packages (cross-package imports go
+					// through @woocommerce/* moduleNameMapper).
+					tsconfig: {
+						module: 'commonjs',
+						esModuleInterop: true,
+						allowJs: true,
+						rootDir: null,
+					},
+					diagnostics: false,
+				},
+			],
 		}
 	),
 	testEnvironment: 'jest-environment-jsdom',

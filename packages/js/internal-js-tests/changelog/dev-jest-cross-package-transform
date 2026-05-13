@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Configure ts-jest to compile cross-package source files so tests resolve @woocommerce/* dependencies through their src directories without requiring built artifacts.
