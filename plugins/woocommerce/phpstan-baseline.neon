@@ -8785,18 +8785,6 @@ parameters:
 			path: includes/class-wc-ajax.php
 
 		-
-			message: '#^Cannot call method set_date_on_sale_from\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Cannot call method set_date_on_sale_to\(\) on WC_Product\|false\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
 			message: '#^Cannot call method set_low_stock_amount\(\) on WC_Product\|false\|null\.$#'
 			identifier: method.nonObject
 			count: 2
@@ -9118,12 +9106,6 @@ parameters:
 			message: '#^Parameter \#2 \$str of function explode expects string, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
-			path: includes/class-wc-ajax.php
-
-		-
-			message: '#^Parameter \#2 \$timestamp of function date expects int, int\|false given\.$#'
-			identifier: argument.type
-			count: 2
 			path: includes/class-wc-ajax.php
 
 		-
