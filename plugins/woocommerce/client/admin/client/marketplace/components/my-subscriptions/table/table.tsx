@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { EmptyTable, Table, TablePlaceholder } from '@woocommerce/components';
-import {
+import type {
 	TableHeader,
 	TableRow,
 } from '@woocommerce/components/build-types/table/types';

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { TableRow } from '@woocommerce/components/build-types/table/types';
+import type { TableRow } from '@woocommerce/components/build-types/table/types';
 import { gmdateI18n } from '@wordpress/date';
 import { __, sprintf } from '@wordpress/i18n';
 import { Icon, plugins } from '@wordpress/icons';
