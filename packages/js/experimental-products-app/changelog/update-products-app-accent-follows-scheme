@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Bind the experimental products app accent color to the WP admin color scheme so primary buttons, filter chips, badges, and links follow the user's selected scheme.
