@@ -192,8 +192,11 @@ class MetadataController {
 							'description' => __( 'Identifier of the entry (e.g. `internal`, `beta`).', 'woocommerce' ),
 						),
 						'value' => array(
-							'type'        => Type::nonNull( self::get_value_scalar() ),
-							'description' => __( 'Scalar payload associated with the entry.', 'woocommerce' ),
+							// Nullable: `MetadataValue` itself permits a null payload (e.g.
+							// `#[Metadata( 'deprecated_reason', null )]`), so the wrapping
+							// must allow it through.
+							'type'        => self::get_value_scalar(),
+							'description' => __( 'Scalar payload associated with the entry. Null when the metadata entry carries a null value.', 'woocommerce' ),
 						),
 					),
 				)
