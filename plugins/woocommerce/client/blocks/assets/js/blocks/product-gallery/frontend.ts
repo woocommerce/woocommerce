@@ -123,9 +123,19 @@ const updateVisibleImageSet = (
 	context.isDisabledPrevious = arrowsState.isDisabledPrevious;
 	context.isDisabledNext = arrowsState.isDisabledNext;
 
-	if ( nextSelectedImageId !== -1 ) {
-		scrollImageEverywhereIntoView( nextSelectedImageId );
+	if ( nextSelectedImageId === -1 ) {
+		return;
 	}
+
+	// Defer the scroll until after Preact has applied the DOM updates
+	// (notably the `hidden` attribute on the thumbnails strip and the
+	// Next/Previous arrows) and the browser has reflowed. Otherwise, the
+	// scroll target is computed against the pre-reflow container width,
+	// and the layout shift that follows leaves the selected image
+	// off-center on a neighbouring one.
+	requestAnimationFrame(
+		withScope( () => scrollImageEverywhereIntoView( nextSelectedImageId ) )
+	);
 };
 
 /**
