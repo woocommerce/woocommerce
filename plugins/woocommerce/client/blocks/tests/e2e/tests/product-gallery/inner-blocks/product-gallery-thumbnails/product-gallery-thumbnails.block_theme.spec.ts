@@ -61,7 +61,8 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			await page.goto( '/product/hoodie/' );
+			// Beanie is configured with a multi-image gallery in products.sh.
+			await page.goto( '/product/beanie/' );
 
 			const productGalleryBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery"]'
@@ -134,7 +135,8 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 		} );
 
 		await test.step( 'in frontend', async () => {
-			await page.goto( '/product/hoodie/' );
+			// Beanie is configured with a multi-image gallery in products.sh.
+			await page.goto( '/product/beanie/' );
 
 			const thumbnailsBlock = page.locator(
 				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
@@ -191,9 +193,43 @@ test.describe( 'Product Gallery Thumbnails block', () => {
 			} );
 		} );
 
-		// TODO: Frontend overflow assertion requires a variation with a
-		// multi-image gallery now that variable products show only the
-		// parent's featured image until a variation is selected. Re-enable
-		// when a fixture sets `gallery_image_ids` on a Hoodie variation.
+		await test.step( 'in frontend', async () => {
+			// Beanie is configured with a multi-image gallery in products.sh.
+			await page.goto( '/product/beanie/' );
+
+			const thumbnailsContainer = page.locator(
+				'[data-block-name="woocommerce/product-gallery-thumbnails"]'
+			);
+
+			const scrollableContainer = page.locator(
+				'.wc-block-product-gallery-thumbnails__scrollable'
+			);
+
+			const thumbnails = scrollableContainer.locator(
+				'.wc-block-product-gallery-thumbnails__thumbnail'
+			);
+
+			// Get the last thumbnail
+			const lastThumbnail = thumbnails.last();
+
+			await expect( async () => {
+				await page.reload();
+				// Check if overflow classes are present initially
+				await expect( thumbnailsContainer ).toHaveClass(
+					/wc-block-product-gallery-thumbnails--overflow-bottom/
+				);
+
+				// Scroll to the last thumbnail
+				await lastThumbnail.scrollIntoViewIfNeeded();
+
+				// Verify the last thumbnail is visible
+				await expect( lastThumbnail ).toBeVisible();
+
+				// After scrolling to the end, the bottom overflow should be gone
+				await expect( thumbnailsContainer ).not.toHaveClass(
+					/wc-block-product-gallery-thumbnails--overflow-bottom/
+				);
+			} ).toPass( { timeout: 3_000 } );
+		} );
 	} );
 } );
