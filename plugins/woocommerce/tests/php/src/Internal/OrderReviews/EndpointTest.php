@@ -507,6 +507,110 @@ class EndpointTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox The disabled-products info notice renders when at least one order item is STATUS_SKIP and the form is still active.
+	 */
+	public function test_disabled_products_notice_renders_above_form(): void {
+		$order      = OrderHelper::create_order();
+		$reviewable = WC_Helper_Product::create_simple_product();
+		$disabled   = WC_Helper_Product::create_simple_product();
+		wp_update_post(
+			array(
+				'ID'             => $disabled->get_id(),
+				'comment_status' => 'closed',
+			)
+		);
+		$order->set_status( OrderStatus::COMPLETED );
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $reviewable, 1 );
+		$order->add_product( $disabled, 1 );
+		$order->save();
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'woocommerce-info woocommerce-review-order__notice', $html );
+		$this->assertStringContainsString( 'see all your products?', $html );
+		$this->assertStringContainsString( 'woocommerce-review-order__form', $html );
+	}
+
+	/**
+	 * @testdox The empty-state thank-you template renders the meta line, heading, and body when no actionable rows remain.
+	 */
+	public function test_empty_state_template_renders_meta_and_thank_you(): void {
+		$order   = OrderHelper::create_order();
+		$product = WC_Helper_Product::create_simple_product();
+		$order->set_billing_email( 'thanks@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product->get_id(),
+				'comment_author'       => 'Thanks',
+				'comment_author_email' => 'thanks@example.test',
+				'comment_content'      => 'Loved it.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'woocommerce-review-order--empty', $html );
+		$this->assertStringContainsString( 'woocommerce-breadcrumb woocommerce-review-order__meta', $html );
+		$this->assertStringContainsString( 'Order #' . $order->get_order_number(), $html );
+		$this->assertStringContainsString( 'Thank you for your reviews', $html );
+		$this->assertStringContainsString( 'Your feedback helps', $html );
+	}
+
+	/**
+	 * @testdox A pre-filled row exposes the existing rating and text via data-initial-* attributes so the JS dirty gate can detect edits.
+	 */
+	public function test_row_exposes_data_initial_attributes_for_prefilled_review(): void {
+		$order      = OrderHelper::create_order();
+		$reviewed   = WC_Helper_Product::create_simple_product();
+		$unreviewed = WC_Helper_Product::create_simple_product();
+		$order->set_billing_email( 'prefill@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $reviewed, 1 );
+		$order->add_product( $unreviewed, 1 );
+		$order->save();
+
+		$comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $reviewed->get_id(),
+				'comment_author'       => 'Prefill',
+				'comment_author_email' => 'prefill@example.test',
+				'comment_content'      => 'Solid four.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		add_comment_meta( $comment_id, 'rating', 4, true );
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$html = $this->render( $order->get_id() );
+
+		$this->assertStringContainsString( 'data-initial-rating="4"', $html );
+		$this->assertStringContainsString( 'data-initial-text="Solid four."', $html );
+	}
+
+	/**
 	 * @testdox The completed-at meta is never overwritten on subsequent loads.
 	 */
 	public function test_completed_meta_is_not_overwritten(): void {
