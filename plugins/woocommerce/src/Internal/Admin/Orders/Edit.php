@@ -9,6 +9,8 @@ use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomerHistory;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\CustomMetaBox;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\OrderAttribution;
 use Automattic\WooCommerce\Internal\Admin\Orders\MetaBoxes\TaxonomiesMetaBox;
+use Automattic\WooCommerce\Internal\Admin\WCAdminAssets;
+use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 use WC_Order;
@@ -115,6 +117,22 @@ class Edit {
 			wp_enqueue_script( 'jquery-touch-punch' );
 		}
 		wp_enqueue_script( 'post' ); // Ensure existing JS libraries are still available for backward compat.
+
+		if ( $this->should_render_react_experience() ) {
+			// Defer asset registration until `admin_enqueue_scripts` at priority 20,
+			// after WCAdminAssets::register_scripts (priority 10) registers
+			// `wc-admin-app` so our dependency on it resolves.
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_react_experience_assets' ), 20 );
+		}
+	}
+
+	/**
+	 * Register the React experiment's JS bundle + style. Hooked to admin_enqueue_scripts
+	 * at priority 20 so the wc-admin-app dependency is already registered.
+	 */
+	public function enqueue_react_experience_assets(): void {
+		WCAdminAssets::register_script( 'wp-admin-scripts', 'order-edit-react', true );
+		WCAdminAssets::register_style( 'order-edit-react', 'style' );
 	}
 
 	/**
@@ -178,6 +196,10 @@ class Edit {
 		 * @param WC_Order $order The order being edited.
 		 */
 		do_action( 'add_meta_boxes_' . $this->screen_id, $this->order );
+
+		if ( $this->should_render_react_experience() ) {
+			$this->remove_react_replaced_meta_boxes();
+		}
 
 		$this->enqueue_scripts();
 	}
@@ -381,6 +403,11 @@ class Edit {
 	 * Render order edit page.
 	 */
 	public function display() {
+		if ( $this->should_render_react_experience() ) {
+			$this->display_react();
+			return;
+		}
+
 		/**
 		 * This is used by the order edit page to show messages in the notice fields.
 		 * It should be similar to post_updated_messages filter, i.e.:
@@ -519,6 +546,148 @@ class Edit {
 		</div> <!-- /poststuff  -->
 		</form>
 		</div> <!-- /wrap -->
+		<?php
+	}
+
+	/**
+	 * Determine whether to render the experimental React-based order edit screen.
+	 *
+	 * Gated on three conditions: the feature flag is enabled, HPOS is in use,
+	 * and the request is for editing an existing order (not creating a new one).
+	 *
+	 * NOTE: We check `$_GET['action']` directly rather than `$this->current_action`,
+	 * because PageController sets `current_action` AFTER calling `Edit::setup()` —
+	 * which means this gate would return false at script-enqueue time and the
+	 * React bundle would never load.
+	 */
+	private function should_render_react_experience(): bool {
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only routing check.
+		$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
+		if ( 'edit' !== $action ) {
+			return false;
+		}
+
+		if ( ! OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			return false;
+		}
+
+		return Features::is_enabled( 'order-detail-design-system-comp' );
+	}
+
+	/**
+	 * Find the URL of the adjacent order (next-larger or next-smaller ID of the same type).
+	 *
+	 * Returns null when no adjacent order exists. HPOS-only — only called when HPOS is enabled.
+	 *
+	 * @param string $direction Either 'prev' (next-smaller ID) or 'next' (next-larger ID).
+	 */
+	private function get_adjacent_order_url( string $direction ): ?string {
+		global $wpdb;
+
+		$current_id   = $this->order->get_id();
+		$order_type   = $this->order->get_type();
+		$orders_table = $wpdb->prefix . 'wc_orders';
+
+		if ( 'prev' === $direction ) {
+			$sql = "SELECT id FROM {$orders_table} WHERE type = %s AND id < %d ORDER BY id DESC LIMIT 1";
+		} else {
+			$sql = "SELECT id FROM {$orders_table} WHERE type = %s AND id > %d ORDER BY id ASC LIMIT 1";
+		}
+
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared -- table name is internal, args are properly prepared.
+		$adjacent_id = $wpdb->get_var( $wpdb->prepare( $sql, $order_type, $current_id ) );
+
+		if ( ! $adjacent_id ) {
+			return null;
+		}
+
+		return $this->get_page_controller()->get_edit_url( (int) $adjacent_id );
+	}
+
+	/**
+	 * Remove WC core meta boxes that the React canvas replaces.
+	 *
+	 * Third-party meta boxes are left intact and rendered inside the React experience
+	 * via server-side `do_meta_boxes()` calls in `display_react()`.
+	 */
+	private function remove_react_replaced_meta_boxes(): void {
+		// Only remove boxes whose functionality is fully replaced by a React panel
+		// or the H1-row "More actions" kebab menu. Keep `woocommerce-order-downloads`
+		// for v1 — it's the only one without a native replacement yet.
+		$core_meta_boxes = array(
+			array( 'woocommerce-order-data', 'normal' ),
+			array( 'woocommerce-order-items', 'normal' ),
+			array( 'order_custom', 'normal' ),
+			array( 'woocommerce-order-notes', 'side' ),
+			array( 'woocommerce-order-actions', 'side' ),
+			array( 'woocommerce-order-source-data', 'side' ),
+			array( 'woocommerce-customer-history', 'side' ),
+		);
+
+		foreach ( $core_meta_boxes as $entry ) {
+			remove_meta_box( $entry[0], $this->screen_id, $entry[1] );
+		}
+	}
+
+	/**
+	 * Render the experimental React-based order edit screen.
+	 *
+	 * Emits the wp-admin H1 (overridden text + Save-as-draft + prev/next siblings),
+	 * the React mount point, and `<template>` containers holding server-rendered
+	 * third-party meta boxes that React relocates into its rendered layout.
+	 */
+	private function display_react(): void {
+		$order_number = $this->order->get_order_number();
+		$prev_url     = $this->get_adjacent_order_url( 'prev' );
+		$next_url     = $this->get_adjacent_order_url( 'next' );
+		?>
+		<div class="wrap wc-react-order-edit__wrap">
+			<div class="wc-react-order-edit__heading-row">
+				<h1 class="wp-heading-inline">
+					<?php
+					/* translators: %s: order number */
+					echo esc_html( sprintf( __( 'Order #%s', 'woocommerce' ), $order_number ) );
+					?>
+				</h1>
+				<span class="wc-react-order-edit__heading-actions">
+					<?php if ( $prev_url ) : ?>
+						<a href="<?php echo esc_url( $prev_url ); ?>" class="components-button is-tertiary wc-react-order-edit__nav-prev">
+							<?php esc_html_e( '‹ Previous', 'woocommerce' ); ?>
+						</a>
+					<?php endif; ?>
+					<?php if ( $next_url ) : ?>
+						<a href="<?php echo esc_url( $next_url ); ?>" class="components-button is-tertiary wc-react-order-edit__nav-next">
+							<?php esc_html_e( 'Next ›', 'woocommerce' ); ?>
+						</a>
+					<?php endif; ?>
+					<span
+						id="wc-react-order-edit-actions-menu"
+						data-order-id="<?php echo esc_attr( (string) $this->order->get_id() ); ?>"
+					></span>
+				</span>
+			</div>
+			<hr class="wp-header-end">
+
+			<template id="wc-react-order-edit-tmpl-side">
+				<?php do_meta_boxes( $this->screen_id, 'side', $this->order ); ?>
+			</template>
+			<template id="wc-react-order-edit-tmpl-extensions">
+				<div id="postbox-container-2" class="postbox-container">
+					<?php
+					do_meta_boxes( $this->screen_id, 'normal', $this->order );
+					do_meta_boxes( $this->screen_id, 'advanced', $this->order );
+					?>
+				</div>
+			</template>
+
+			<div
+				id="wc-react-order-edit-root"
+				data-order-id="<?php echo esc_attr( (string) $this->order->get_id() ); ?>"
+				data-order-status="<?php echo esc_attr( $this->order->get_status() ); ?>"
+			>
+				<noscript><?php esc_html_e( 'JavaScript is required for the new order editor.', 'woocommerce' ); ?></noscript>
+			</div>
+		</div>
 		<?php
 	}
 }

@@ -1,0 +1,638 @@
+/**
+ * Styles for the order-edit-react experiment.
+ *
+ * Visual language follows WordPress core: gray-900 text, Gutenberg-blue
+ * accents (via CSS custom properties), @wordpress/components tokens.
+ */
+
+// Constrain content max-width to 1200px, centered. We apply this to both the
+// outer .wrap and the React app container, with `.wrap.wc-react-order-edit__wrap`
+// to beat wp-admin's default `.wrap { margin: 0; }`.
+.wrap.wc-react-order-edit__wrap {
+	max-width: 1200px;
+	margin-left: auto;
+	margin-right: auto;
+	padding-bottom: 32px;
+	box-sizing: border-box;
+}
+
+// H1 row: flex container so the H1 and the prev/next actions vertically center.
+.wc-react-order-edit__heading-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 20px;
+
+	h1.wp-heading-inline {
+		margin: 0;
+	}
+}
+
+// Right-aligned cluster next to the H1 (prev/next chevrons styled as tertiary).
+.wc-react-order-edit__heading-actions {
+	display: inline-flex;
+	gap: 8px;
+	align-items: center;
+
+	// Mimic the @wordpress/components `Button variant="tertiary"` styling for the
+	// anchor-based prev/next links so they sit visually right next to the H1.
+	.components-button {
+		text-decoration: none;
+	}
+}
+
+// The React app container — also constrained so centering survives even if the
+// outer `.wrap` rule is overridden by another stylesheet.
+.wc-react-order-edit__app {
+	clear: both;
+	margin: 16px auto 0;
+	max-width: 1200px;
+	width: 100%;
+	box-sizing: border-box;
+}
+
+// 2-column body layout. Horizontal column gap matches the vertical card-stack
+// gap inside each column so the rhythm reads as a single grid.
+.wc-react-order-edit__layout {
+	display: grid;
+	grid-template-columns: 2fr 1fr;
+	gap: 20px;
+	align-items: start;
+}
+
+.wc-react-order-edit__main-col,
+.wc-react-order-edit__side-col {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+	min-width: 0; // allow children to shrink rather than overflow
+}
+
+// Generic panel — uses the WP `Card`/`CardHeader`/`CardBody` components for
+// background, border, and padding. We only keep tweaks that aren't covered
+// by the design-system defaults.
+.wc-react-order-edit__panel-header {
+	// Enforce a uniform header height regardless of whether the header contains
+	// an action button (Customer, Items & totals, Custom fields) or just a
+	// title (Notes, Status, History). Without this, the small-variant Button
+	// stretches its CardHeader taller than title-only ones.
+	min-height: 56px;
+}
+
+.wc-react-order-edit__panel-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+}
+
+.wc-react-order-edit__panel-body {
+	// `CardBody` provides padding; we add an internal vertical rhythm.
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.wc-react-order-edit__subheading {
+	font-size: 12px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+	color: #50575e;
+	margin: 0 0 8px;
+}
+
+.wc-react-order-edit__empty,
+.wc-react-order-edit__loading {
+	color: #757575;
+	font-style: italic;
+	margin: 0;
+}
+
+// Customer panel (merged with stats).
+.wc-react-order-edit__address {
+	font-style: normal;
+	color: #2c3338;
+	line-height: 1.5;
+}
+
+// Identity row: avatar + name link + pill.
+.wc-react-order-edit__customer-identity-body {
+	padding: 16px 20px;
+}
+
+.wc-react-order-edit__customer-identity {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.wc-react-order-edit__customer-avatar {
+	width: 32px;
+	height: 32px;
+	border-radius: 50%;
+	background: #f0f0f1;
+	object-fit: cover;
+	flex: 0 0 auto;
+
+	&--placeholder {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		font-size: 12px;
+		font-weight: 600;
+		color: #50575e;
+	}
+}
+
+.wc-react-order-edit__customer-name-link {
+	color: #2271b1;
+	text-decoration: none;
+	font-weight: 500;
+	font-size: 14px;
+
+	&:hover {
+		text-decoration: underline;
+	}
+}
+
+.wc-react-order-edit__customer-pill {
+	margin-left: auto;
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 10px;
+	border-radius: 999px;
+	background: #f0f0f1;
+	color: #1d2327;
+	font-size: 12px;
+	font-weight: 500;
+	line-height: 1.4;
+}
+
+// Substitute for @wordpress/components' CardDivider, which isn't exported in
+// the version pinned for this experiment. Renders the same 1px horizontal rule.
+.wc-react-order-edit__card-divider {
+	border: 0;
+	border-top: 1px solid #f0f0f1;
+	margin: 0;
+}
+
+// Status panel: Update button is right-aligned below the dropdown.
+.wc-react-order-edit__status-actions {
+	display: flex;
+	justify-content: flex-end;
+}
+
+// Note row visibility label (mixed chronological list — tells you at a glance
+// whether each note is private or customer-facing).
+.wc-react-order-edit__note-visibility {
+	display: inline-flex;
+	align-items: center;
+	padding: 1px 8px;
+	border-radius: 999px;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 1.4;
+
+	&--customer {
+		background: #e7f5ff;
+		color: #135e96;
+	}
+
+	&--private {
+		background: #f0f0f1;
+		color: #50575e;
+	}
+}
+
+// Per-section row: label + value (left) and Edit link (right).
+.wc-react-order-edit__customer-section {
+	padding: 16px 20px;
+}
+
+.wc-react-order-edit__customer-row {
+	display: flex;
+	gap: 20px;
+	align-items: flex-start;
+	justify-content: space-between;
+}
+
+.wc-react-order-edit__customer-row-content {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.wc-react-order-edit__customer-row-value {
+	color: #1d2327;
+}
+
+// Footer stats row: 3 columns side-by-side.
+.wc-react-order-edit__customer-stats {
+	padding: 16px 20px;
+}
+
+.wc-react-order-edit__stats {
+	display: grid;
+	grid-template-columns: repeat(3, 1fr);
+	gap: 20px;
+	margin: 0;
+}
+
+.wc-react-order-edit__stat {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+
+	dt {
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.4px;
+		color: #50575e;
+		font-weight: 600;
+	}
+
+	dd {
+		margin: 0;
+		font-size: 14px;
+		color: #1d2327;
+		font-variant-numeric: tabular-nums;
+	}
+}
+
+// Notes panel.
+.wc-react-order-edit__customer-checkout-note {
+	background: #fff8e5;
+	border: 1px solid #f0c33c;
+	border-radius: 4px;
+	padding: 12px 16px;
+}
+
+.wc-react-order-edit__customer-checkout-note-header {
+	display: flex;
+	gap: 8px;
+	align-items: center;
+	margin-bottom: 8px;
+}
+
+.wc-react-order-edit__customer-checkout-note-label {
+	font-size: 12px;
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+	color: #50575e;
+	font-weight: 600;
+}
+
+.wc-react-order-edit__customer-checkout-note-body {
+	margin: 0;
+	font-style: italic;
+	color: #1d2327;
+	border-left: 3px solid #f0c33c;
+	padding-left: 12px;
+}
+
+.wc-react-order-edit__notes-section {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+
+.wc-react-order-edit__notes-list {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	// Cap the list height so a long notes thread doesn't push the panels below
+	// (Attribution, side metaboxes) out of view. Scroll inside the list itself.
+	max-height: 480px;
+	overflow-y: auto;
+	// Small inset so the scrollbar doesn't overlap the note row borders.
+	padding-right: 4px;
+}
+
+.wc-react-order-edit__note-row {
+	border: 1px solid #f0f0f1;
+	border-radius: 4px;
+	padding: 10px 12px;
+	background: #fafafa;
+}
+
+.wc-react-order-edit__note-body {
+	color: #1d2327;
+	white-space: pre-wrap;
+}
+
+.wc-react-order-edit__note-meta {
+	display: flex;
+	gap: 12px;
+	font-size: 12px;
+	color: #757575;
+	margin-top: 6px;
+	align-items: center;
+}
+
+.wc-react-order-edit__note-author {
+	font-weight: 600;
+}
+
+.wc-react-order-edit__notes-composer {
+	// Section divider is provided by the sibling <hr.wc-react-order-edit__card-divider>
+	// between this CardBody and the previous one — same pattern as the Customer panel.
+	// Internal gap matches the panel-body's 16px (same rhythm as the Status panel
+	// between its dropdown and the Update order status CTA).
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+.wc-react-order-edit__notes-composer-actions {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	gap: 12px;
+
+	// The ToggleControl has its own outer margin; reset so it sits flush with the row.
+	.components-toggle-control {
+		margin: 0;
+	}
+}
+
+// Items & totals table — line items + summary rows (shipping / tax / total)
+// in a single styled table. Matches the rest of the panel rhythm (no grey
+// header, subtle row separators).
+.wc-react-order-edit__items-table {
+	width: 100%;
+	border-collapse: collapse;
+
+	th, td {
+		text-align: left;
+		padding: 8px 0;
+		color: #1d2327;
+		border-bottom: 1px solid #f0f0f1;
+	}
+
+	th {
+		font-size: 11px;
+		text-transform: uppercase;
+		letter-spacing: 0.4px;
+		color: #50575e;
+		font-weight: 600;
+	}
+
+	.wc-react-order-edit__cell-num {
+		text-align: right;
+		font-variant-numeric: tabular-nums;
+	}
+
+	// Summary rows (shipping / tax / total) — muted name color so they read
+	// as totals rather than line items.
+	.wc-react-order-edit__items-row--shipping td:first-child,
+	.wc-react-order-edit__items-row--tax td:first-child {
+		color: #50575e;
+	}
+
+	// Grand total — emphasized.
+	.wc-react-order-edit__items-row--total td {
+		font-weight: 600;
+		border-bottom: 0;
+		padding-top: 12px;
+	}
+}
+
+.wc-react-order-edit__payment-line {
+	margin: 0;
+	color: #2c3338;
+}
+
+.wc-react-order-edit__money-actions {
+	// Section divider is provided by the sibling <hr.wc-react-order-edit__card-divider>
+	// between this CardBody and the previous one — same pattern as the Customer panel.
+	display: flex;
+	gap: 12px;
+	flex-wrap: wrap;
+	justify-content: flex-end;
+}
+
+// Custom fields.
+.wc-react-order-edit__meta-list {
+	display: grid;
+	grid-template-columns: minmax(180px, auto) 1fr;
+	gap: 6px 16px;
+	margin: 0;
+}
+
+.wc-react-order-edit__meta-row {
+	display: contents;
+
+	dt {
+		color: #50575e;
+		code {
+			font-size: 12px;
+			background: #f0f0f1;
+			padding: 2px 6px;
+			border-radius: 3px;
+		}
+	}
+
+	dd {
+		margin: 0;
+		color: #1d2327;
+		word-break: break-all;
+	}
+}
+
+// History timeline — also a `Card`, so background/border come from there.
+// The body cancels CardBody's default padding so the tab strip can span edge-to-edge.
+.wc-react-order-edit__history-body {
+	padding: 0;
+}
+
+.wc-react-order-edit__history-tabs {
+	.components-tab-panel__tabs {
+		border-bottom: 1px solid #f0f0f1;
+	}
+
+	.components-tab-panel__tab-content {
+		padding: 12px 16px;
+	}
+}
+
+// Timeline visual: a vertical rail behind a column of dots, with content
+// laid out to the right of each dot.
+.wc-react-order-edit__timeline {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	position: relative;
+	// Cap the height so a long activity log doesn't push Attribution and the
+	// side metaboxes out of view. Scroll inside the timeline itself.
+	max-height: 480px;
+	overflow-y: auto;
+	// Small inset so the scrollbar has its own gutter beside the rail.
+	padding-right: 8px;
+
+	// The rail itself.
+	&::before {
+		content: '';
+		position: absolute;
+		top: 6px;
+		bottom: 6px;
+		left: 7px;
+		width: 2px;
+		background: #f0f0f1;
+		border-radius: 1px;
+	}
+}
+
+.wc-react-order-edit__timeline-row {
+	display: grid;
+	grid-template-columns: 16px 1fr;
+	gap: 10px;
+	padding: 4px 0 14px;
+	position: relative;
+
+	&:last-child {
+		padding-bottom: 0;
+	}
+}
+
+// Dot sits over the rail. Email-type rows get a filled blue dot; other events
+// get a hollow ring so the eye can tell them apart at a glance.
+.wc-react-order-edit__timeline-icon {
+	width: 16px;
+	height: 16px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 0;
+	line-height: 1;
+	margin-top: 4px;
+
+	&::after {
+		content: '';
+		display: block;
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: #ffffff;
+		border: 2px solid #c3c4c7;
+		box-sizing: border-box;
+	}
+
+	&[data-kind="email"]::after {
+		background: var(--wp-admin-theme-color, #2271b1);
+		border-color: var(--wp-admin-theme-color, #2271b1);
+	}
+}
+
+.wc-react-order-edit__timeline-text {
+	color: #1d2327;
+	line-height: 1.5;
+}
+
+.wc-react-order-edit__timeline-date {
+	color: #757575;
+	font-size: 12px;
+	margin-top: 2px;
+}
+
+// Email indicator.
+.wc-react-order-edit__email-indicator {
+	display: inline-flex;
+	gap: 4px;
+	align-items: center;
+	font-size: 12px;
+	color: #50575e;
+}
+
+.wc-react-order-edit__email-indicator-text {
+	font-weight: 500;
+}
+
+// Modal content wrapper — wraps every modal's body so its children (fields,
+// notices, the actions row) get a consistent 20px vertical rhythm. Matches the
+// inter-section gap used elsewhere on the page.
+.wc-react-order-edit__modal-form {
+	display: flex;
+	flex-direction: column;
+	gap: 20px;
+}
+
+// Modal action row.
+.wc-react-order-edit__modal-actions {
+	display: flex;
+	justify-content: flex-end;
+	gap: 8px;
+}
+
+.wc-react-order-edit__modal-helper {
+	font-size: 13px;
+	color: #757575;
+	margin: 0 0 12px;
+}
+
+// Loading state.
+.wc-react-order-edit__loading-wrap {
+	display: flex;
+	gap: 12px;
+	align-items: center;
+	padding: 16px;
+	color: #50575e;
+}
+
+// Legacy zones.
+.wc-react-order-edit__extensions-details {
+	margin-top: 8px;
+	background: #fafafa;
+	border: 1px solid #dcdcde;
+	border-radius: 4px;
+	padding: 12px 16px;
+
+	summary {
+		cursor: pointer;
+		color: #50575e;
+		font-size: 13px;
+	}
+
+	.wc-react-order-edit__legacy-extensions {
+		margin-top: 12px;
+	}
+}
+
+.wc-react-order-edit__legacy-side {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+}
+
+// Snackbar host.
+.wc-react-order-edit__snackbars {
+	position: fixed;
+	bottom: 24px;
+	left: 50%;
+	transform: translateX(-50%);
+	z-index: 1000;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	pointer-events: none;
+
+	> * {
+		pointer-events: auto;
+	}
+}
+
+// Responsive: stack columns below 960px.
+@media (max-width: 960px) {
+	.wc-react-order-edit__layout {
+		grid-template-columns: 1fr;
+	}
+
+	.wc-react-order-edit__heading-actions {
+		float: none;
+		margin-top: 8px;
+		display: flex;
+		flex-wrap: wrap;
+	}
+}
