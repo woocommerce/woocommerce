@@ -67,7 +67,6 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const isHomescreen = query.page === 'wc-admin' && ! query.path;
 
 	const [ currentTab, setCurrentTab ] = useState( '' );
-	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
 	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
 	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
 	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
@@ -77,13 +76,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	} );
 
 	const closePanel = () => {
-		setIsPanelClosing( true );
 		setIsPanelOpen( false );
 	};
 
 	const clearPanel = () => {
 		if ( ! isPanelOpen ) {
-			setIsPanelClosing( false );
 			setIsPanelSwitching( false );
 			setCurrentTab( '' );
 		}
@@ -198,16 +195,16 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 			isTabOpen &&
 			isPanelOpen;
 
+		// Tab clicks always win over a concurrent close. Previously this
+		// component tracked an `isPanelClosing` flag and a guard here bailed
+		// out of togglePanel() when `useFocusOutside`'s closePanel() set
+		// it true mid-click — causing the new tab's panel to fail to switch
+		// in (visible when clicking between Activity, Inbox, and Finish setup
+		// tabs). Removing the flag entirely was simpler than carrying a piece
+		// of state nobody actually reads.
 		setCurrentTab( tabName );
 		setIsPanelOpen( isTabOpen );
 		setIsPanelSwitching( panelSwitching );
-		// Clear any pending close so a tab click reliably switches/opens the
-		// panel. Previously a `useFocusOutside`-triggered closePanel() would
-		// set isPanelClosing=true mid-click, an isPanelClosing guard here
-		// would short-circuit togglePanel(), and the new tab's panel would
-		// fail to switch in (visible when clicking between Activity, Inbox,
-		// and Finish setup tabs).
-		setIsPanelClosing( false );
 	};
 
 	const isProductScreen = () => {

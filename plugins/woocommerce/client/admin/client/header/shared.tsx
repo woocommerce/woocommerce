@@ -1,11 +1,7 @@
 /**
  * External dependencies
  */
-import {
-	useCallback,
-	useLayoutEffect,
-	useRef,
-} from '@wordpress/element';
+import { useCallback, useLayoutEffect, useRef } from '@wordpress/element';
 import { useSlot, Text } from '@woocommerce/experimental';
 import clsx from 'clsx';
 import { decodeEntities } from '@wordpress/html-entities';

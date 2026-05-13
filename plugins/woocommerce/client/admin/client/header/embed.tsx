@@ -49,12 +49,9 @@ export const EmbedHeader = ( {
 			through triggerMetaIcon. */ }
 			{ hasScreenOptions && (
 				<Button
-					className={ clsx(
-						'woocommerce-layout__header-meta-icon',
-						{
-							'is-active': activeMetaIcon === 'screen-options',
-						}
-					) }
+					className={ clsx( 'woocommerce-layout__header-meta-icon', {
+						'is-active': activeMetaIcon === 'screen-options',
+					} ) }
 					label={ __( 'Screen options', 'woocommerce' ) }
 					aria-expanded={ activeMetaIcon === 'screen-options' }
 					showTooltip
@@ -70,12 +67,9 @@ export const EmbedHeader = ( {
 			) }
 			{ hasContextualHelp && (
 				<Button
-					className={ clsx(
-						'woocommerce-layout__header-meta-icon',
-						{
-							'is-active': activeMetaIcon === 'help',
-						}
-					) }
+					className={ clsx( 'woocommerce-layout__header-meta-icon', {
+						'is-active': activeMetaIcon === 'help',
+					} ) }
 					label={ __( 'Help', 'woocommerce' ) }
 					aria-expanded={ activeMetaIcon === 'help' }
 					showTooltip
