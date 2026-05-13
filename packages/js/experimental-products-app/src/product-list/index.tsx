@@ -16,10 +16,10 @@ import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
 import {
 	tag,
-	stack,
-	grid,
+	alignNone,
+	category,
 	download,
-	linkOff,
+	link,
 	chevronDown,
 } from '@wordpress/icons';
 
@@ -62,7 +62,7 @@ const PRODUCT_TYPE_MENU_ITEMS = [
 	},
 	{
 		key: 'variable',
-		icon: stack,
+		icon: alignNone,
 		label: __( 'Variable product', 'woocommerce' ),
 		info: __(
 			'An item with variations like color or size.',
@@ -72,7 +72,7 @@ const PRODUCT_TYPE_MENU_ITEMS = [
 	},
 	{
 		key: 'grouped',
-		icon: grid,
+		icon: category,
 		label: __( 'Grouped product', 'woocommerce' ),
 		info: __(
 			'A collection of related products.',
@@ -92,7 +92,7 @@ const PRODUCT_TYPE_MENU_ITEMS = [
 	},
 	{
 		key: 'external',
-		icon: linkOff,
+		icon: link,
 		label: __( 'Affiliate product', 'woocommerce' ),
 		info: __(
 			'A product you promote and earn commission on.',
