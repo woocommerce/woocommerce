@@ -191,21 +191,32 @@ class Checkout extends AbstractCartRoute {
 	}
 
 	/**
-	 * Convert the cart into a new draft order, or update an existing draft order, and return an updated cart response.
+	 * Return a checkout response for GET requests.
+	 *
+	 * If a `pending`/`failed` order from a previous payment attempt is in the customer
+	 * session, reuse it (the failed-payment retry path). Otherwise build a no-order
+	 * response directly from cart + customer + request.
 	 *
 	 * @throws RouteException On error.
 	 * @param \WP_REST_Request $request Request object.
 	 * @return \WP_REST_Response
 	 */
 	protected function get_route_response( \WP_REST_Request $request ) {
-		$this->create_or_update_draft_order( $request );
-		return $this->prepare_item_for_response(
-			(object) [
-				'order'          => $this->order,
-				'payment_result' => new PaymentResult(),
-			],
-			$request
-		);
+		$this->order = $this->get_draft_order();
+
+		if ( $this->order ) {
+			$this->create_or_update_draft_order( $request );
+
+			return $this->prepare_item_for_response(
+				(object) [
+					'order'          => $this->order,
+					'payment_result' => new PaymentResult(),
+				],
+				$request
+			);
+		}
+
+		return $this->build_draft_route_response( $request );
 	}
 
 	/**
@@ -354,14 +365,20 @@ class Checkout extends AbstractCartRoute {
 		/**
 		 * Create (or update) Draft Order and process request data.
 		 */
-		$this->create_or_update_draft_order( $request );
-		// Order save-point: 1.
+		$this->order = $this->get_draft_order();
 
-		/**
-		 * Persist additional fields, order notes and payment method for order.
-		 */
-		$this->update_order_from_request( $request );
-		// Order save-point: 2.
+		if ( $this->order ) {
+			$this->create_or_update_draft_order( $request );
+			// Order save-point: 1.
+
+			/**
+			 * Persist additional fields, order notes and payment method for order.
+			 */
+			$this->update_order_from_request( $request );
+			// Order save-point: 2.
+		} else {
+			$this->update_session_from_request( $request );
+		}
 
 		if ( $request->get_param( '__experimental_calc_totals' ) ) {
 			/**
@@ -380,12 +397,83 @@ class Checkout extends AbstractCartRoute {
 			$this->cart_controller->validate_cart();
 		}
 
-		return $this->prepare_item_for_response(
-			(object) [
-				'order' => wc_get_order( $this->order ),
-				'cart'  => $this->cart_controller->get_cart_instance(),
-			],
-			$request
+		if ( $this->order ) {
+			return $this->prepare_item_for_response(
+				(object) [
+					'order' => wc_get_order( $this->order ),
+					'cart'  => $this->cart_controller->get_cart_instance(),
+				],
+				$request
+			);
+		}
+
+		/**
+		 * Fires after a Store API checkout PATCH request has been validated and live
+		 * customer/session state has been updated, before the response is returned.
+		 *
+		 * Hook this action when an extension needs to observe live checkout state — e.g.
+		 * abandoned-cart trackers, side-panel previews, conditional shipping or payment
+		 * validators, or anything else that needs to react to every customer interaction
+		 * with the form.
+		 *
+		 * No `WC_Order` exists at this point under deferred draft order creation. Read
+		 * checkout state from `WC()->cart`, `WC()->customer`, and the supplied
+		 * `$request`, and persist any extension-owned state to `WC()->session`. To
+		 * apply that state to the real order at place-order time, hook
+		 * `woocommerce_store_api_checkout_update_order_meta` or
+		 * `woocommerce_store_api_checkout_update_order_from_request` — both fire
+		 * against the real, persisted order at POST exactly as they always have.
+		 *
+		 * @since 10.8.0
+		 *
+		 * @param \WP_REST_Request $request The current PATCH request.
+		 */
+		do_action( 'woocommerce_store_api_checkout_update_draft', $request );
+
+		return $this->build_draft_route_response( $request );
+	}
+
+	/**
+	 * Persist the PATCH request's payment method and additional fields to the customer
+	 * session. Counterpart to `update_order_from_request` for the no-order PATCH path.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @throws RouteException If the supplied payment method id is unknown or disabled.
+	 */
+	private function update_session_from_request( \WP_REST_Request $request ): void {
+		$payment_method = $this->get_request_payment_method( $request );
+		if ( null !== $payment_method ) {
+			WC()->session->set( 'chosen_payment_method', $payment_method->id );
+		}
+		if ( isset( $request['order_notes'] ) ) {
+			WC()->session->set( 'store_api_customer_note', wc_sanitize_textarea( $request['order_notes'] ) );
+		}
+		$this->persist_additional_fields_for_customer( $request );
+	}
+
+	/**
+	 * Build a checkout response for a session with no order in flight.
+	 *
+	 * @phpstan-param \WP_REST_Request<array<string, mixed>> $request
+	 *
+	 * @param \WP_REST_Request $request Request object.
+	 * @return \WP_REST_Response
+	 */
+	private function build_draft_route_response( \WP_REST_Request $request ) {
+		/**
+		 * Narrow the parent-declared schema property to the checkout subclass for phpstan.
+		 *
+		 * @var \Automattic\WooCommerce\StoreApi\Schemas\V1\CheckoutSchema $schema
+		 */
+		$schema = $this->schema;
+
+		return new \WP_REST_Response(
+			$schema->get_draft_response(
+				$this->cart_controller->get_cart_instance(),
+				wc()->customer
+			)
 		);
 	}
 
@@ -661,11 +749,24 @@ class Checkout extends AbstractCartRoute {
 	 * @throws RouteException On error.
 	 */
 	private function create_or_update_draft_order( \WP_REST_Request $request ) {
-		$this->order = $this->get_draft_order();
-
 		if ( ! $this->order ) {
 			$this->order = $this->order_controller->create_order_from_cart();
 			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Created order from cart', array( 'order_object' => $this->order ) );
+
+			/**
+			 * Fires once when the Store API checkout draft order is first materialised.
+			 *
+			 * Use this hook for first-touch logic that should only run when the draft
+			 * order is initially created (e.g. analytics, abandoned-cart trackers). As
+			 * of WooCommerce 10.8.0 the Store API defers draft order creation to
+			 * place-order time, so this action fires once at POST rather than on the
+			 * first PATCH.
+			 *
+			 * @since 10.8.0
+			 *
+			 * @param \WC_Order $order Order object.
+			 */
+			do_action( 'woocommerce_store_api_checkout_order_created', $this->order );
 		} else {
 			$this->order_controller->update_order_from_cart( $this->order, true );
 			wc_log_order_step( '[Store API #4::create_or_update_draft_order] Updated order from cart', array( 'order_object' => $this->order ) );
@@ -825,17 +926,8 @@ class Checkout extends AbstractCartRoute {
 	private function get_request_payment_method( \WP_REST_Request $request ) {
 		$available_gateways     = WC()->payment_gateways->get_available_payment_gateways();
 		$request_payment_method = wc_clean( wp_unslash( $request['payment_method'] ?? '' ) );
-		// For PUT requests, the order never requires payment, only POST does.
-		$requires_payment_method = $this->order->needs_payment() && 'POST' === $request->get_method();
 
 		if ( empty( $request_payment_method ) ) {
-			if ( $requires_payment_method ) {
-				throw new RouteException(
-					'woocommerce_rest_checkout_missing_payment_method',
-					esc_html__( 'No payment method provided.', 'woocommerce' ),
-					400
-				);
-			}
 			return null;
 		}
 

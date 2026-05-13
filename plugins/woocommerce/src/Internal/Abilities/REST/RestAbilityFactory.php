@@ -20,6 +20,11 @@ defined( 'ABSPATH' ) || exit;
 class RestAbilityFactory {
 
 	/**
+	 * Metadata key that marks REST-derived abilities for deprecated WooCommerce MCP exposure.
+	 */
+	public const EXPOSE_IN_DEPRECATED_MCP_META_KEY = 'expose_in_deprecated_woocommerce_mcp';
+
+	/**
 	 * Register abilities for a REST controller based on configuration.
 	 *
 	 * @param array $config Controller configuration containing controller class and abilities array.
@@ -67,6 +72,7 @@ class RestAbilityFactory {
 				'ability_class'       => RestAbility::class,
 				'meta'                => array(
 					'show_in_rest' => true,
+					self::EXPOSE_IN_DEPRECATED_MCP_META_KEY => true,
 				),
 			);
 

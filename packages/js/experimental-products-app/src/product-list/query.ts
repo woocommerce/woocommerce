@@ -10,6 +10,7 @@ import type {
 
 export type ProductListQuery = Omit< ProductQuery, 'status' > & {
 	status?: ProductStatus | ProductStatus[];
+	_embed?: number;
 	search_name_or_sku?: string;
 	exclude_status?: ProductStatus[];
 	include_types?: ProductType[];
@@ -17,6 +18,7 @@ export type ProductListQuery = Omit< ProductQuery, 'status' > & {
 	exclude_category?: number[];
 	min_stock_quantity?: string;
 	max_stock_quantity?: string;
+	brand?: string;
 };
 
 const SUPPORTED_STATUS_FILTER_FIELDS = [ 'status', 'product_status' ];
@@ -110,6 +112,16 @@ function applyCategoryFilter( query: ProductListQuery, filter: Filter ) {
 	query.category = values.join( ',' );
 }
 
+function applyBrandFilter( query: ProductListQuery, filter: Filter ) {
+	const values = getNumericValues( filter.value );
+
+	if ( values.length === 0 ) {
+		return;
+	}
+
+	query.brand = values.join( ',' );
+}
+
 function applyStockFilter( query: ProductListQuery, filter: Filter ) {
 	const [ stockStatus ] = getStringValues( filter.value );
 
@@ -148,6 +160,7 @@ function applyPriceFilter( query: ProductListQuery, filter: Filter ) {
 
 export function buildProductListQuery( view: View ): ProductListQuery {
 	const query: ProductListQuery = {
+		_embed: 1,
 		per_page: view.perPage,
 		page: view.page,
 		order: view.sort?.direction,
@@ -170,6 +183,9 @@ export function buildProductListQuery( view: View ): ProductListQuery {
 				break;
 			case 'categories':
 				applyCategoryFilter( query, filter );
+				break;
+			case 'brands':
+				applyBrandFilter( query, filter );
 				break;
 			case 'stock':
 				applyStockFilter( query, filter );

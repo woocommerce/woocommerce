@@ -20,7 +20,7 @@ import { CurrencyContext } from '@woocommerce/currency';
 /**
  * Internal dependencies
  */
-import { AUTO_DRAFT_NAME, getDerivedProductType } from '../index';
+import { AUTO_DRAFT_NAME, getDerivedProductType } from '../utils';
 import {
 	NUMBERS_AND_DECIMAL_SEPARATOR,
 	ONLY_ONE_DECIMAL_SEPARATOR,
