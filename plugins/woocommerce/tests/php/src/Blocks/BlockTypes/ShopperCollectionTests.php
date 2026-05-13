@@ -130,20 +130,44 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * Invoke the protected `render` method directly.
+	 *
+	 * `do_blocks()` would 404 here: the block is only registered when the
+	 * `cart_save_for_later` feature flag is on, which the test bootstrap
+	 * doesn't enable. Calling `render()` via reflection sidesteps the WP
+	 * block registry entirely — same pattern the rest of this file uses
+	 * for filter callbacks.
+	 *
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return string
+	 */
+	private function invoke_render( array $attributes ): string {
+		$reflection = new ReflectionClass( ShopperCollection::class );
+		$method     = $reflection->getMethod( 'render' );
+		$method->setAccessible( true );
+		return (string) $method->invoke( $this->sut, $attributes, '', null );
+	}
+
+	/**
 	 * The wrapper carries a `columns-N` class matching the `columnCount` attribute.
 	 */
 	public function test_render_emits_columns_class(): void {
-		$markup = do_blocks( '<!-- wp:woocommerce/shopper-collection {"columnCount":4} /-->' );
+		$markup = $this->invoke_render(
+			array(
+				'listName'    => 'saved-for-later',
+				'columnCount' => 4,
+			)
+		);
 
 		$this->assertStringContainsString( 'columns-4', $markup );
 	}
 
 	/**
-	 * With no column attribute set, the renderer falls back to the declared
-	 * `columnCount` default (5).
+	 * With no column attribute set, the renderer falls back to its hard-coded
+	 * default (5), matching the `block.json` `columnCount` default.
 	 */
 	public function test_render_defaults_to_five_columns(): void {
-		$markup = do_blocks( '<!-- wp:woocommerce/shopper-collection /-->' );
+		$markup = $this->invoke_render( array( 'listName' => 'saved-for-later' ) );
 
 		$this->assertStringContainsString( 'columns-5', $markup );
 	}
