@@ -74,39 +74,51 @@ class Endpoint {
 		add_action( 'wp_loaded', array( $this, 'maybe_flush_pending_rewrite' ) );
 		add_action( 'transition_post_status', array( $this, 'skip_auto_menu_for_self' ), 9, 3 );
 		add_filter( 'get_pages', array( $this, 'exclude_self_from_page_list' ) );
+		add_filter( 'display_post_states', array( $this, 'add_post_state_label' ), 10, 2 );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
 	}
 
 	/**
-	 * Create the Review Order host page the first time the feature is on.
-	 * Idempotent — bails when the stored option already points at a page.
+	 * Create or adopt the Review Order host page on every feature-on init.
+	 *
+	 * Idempotent and self-healing: re-aligns the stored option with whichever
+	 * row WP's permalink routing would resolve `/review-order/` to, so the
+	 * page id `gate_request()` checks always matches the page that
+	 * `add_rewrite_rule()` points at. Leftover duplicates from prior
+	 * activation/disable cycles no longer cause asset enqueueing to silently
+	 * skip.
 	 *
 	 * @since 10.8.0
 	 *
 	 * @internal
 	 */
 	public function maybe_create_host_page(): void {
-		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
-		$page    = $page_id > 0 ? get_post( $page_id ) : null;
+		$existing = $this->find_existing_host_page();
+		if ( $existing instanceof WP_Post ) {
+			$option_id  = (int) wc_get_page_id( self::PAGE_KEY );
+			$needs_save = false;
 
-		if ( $page instanceof WP_Post && 'page' === $page->post_type ) {
-			if ( 'publish' === $page->post_status ) {
-				return;
+			if ( $option_id !== (int) $existing->ID ) {
+				update_option( 'woocommerce_review_order_page_id', (int) $existing->ID );
+				$needs_save = true;
 			}
-			// `WC_Install::create_pages()` short-circuits on existing rows,
-			// so republish the draft/private/pending row in place.
-			wp_update_post(
-				array(
-					'ID'          => (int) $page->ID,
-					'post_status' => 'publish',
-				)
-			);
-			update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+			if ( 'publish' !== $existing->post_status ) {
+				wp_update_post(
+					array(
+						'ID'          => (int) $existing->ID,
+						'post_status' => 'publish',
+					)
+				);
+				$needs_save = true;
+			}
+			if ( $needs_save ) {
+				update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+			}
 			return;
 		}
 
-		// Inject just our entry — the default array no longer carries it
-		// and we don't want to re-process every other WC page here.
+		// No host page anywhere. Inject just our entry — the default array no
+		// longer carries it and we don't want to re-process every other WC page here.
 		$inject_review_order = function (): array {
 			return array(
 				self::PAGE_KEY => array(
@@ -126,6 +138,56 @@ class Endpoint {
 
 		// Defer the rewrite flush to wp_loaded; rewrite_rule fires later on init.
 		update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+	}
+
+	/**
+	 * Locate the Review Order host page in the database, preferring the row
+	 * that pretty-permalink routing will resolve to so the option stays in
+	 * sync with what `is_page()` will see on a real visit.
+	 *
+	 * @return WP_Post|null
+	 */
+	private function find_existing_host_page(): ?WP_Post {
+		$by_slug = get_page_by_path( _x( 'review-order', 'Page slug', 'woocommerce' ), OBJECT, 'page' );
+		if ( $by_slug instanceof WP_Post && 'trash' !== $by_slug->post_status ) {
+			return $by_slug;
+		}
+
+		// Slug missing or renamed; fall back to a shortcode-content lookup so
+		// we still adopt a page authored elsewhere with `[woocommerce_review_order]`.
+		global $wpdb;
+		$like = '%' . $wpdb->esc_like( '[' . self::SHORTCODE . ']' ) . '%';
+		$id   = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT ID FROM $wpdb->posts WHERE post_type = 'page' AND post_status NOT IN ( 'trash', 'auto-draft' ) AND post_content LIKE %s ORDER BY ID ASC LIMIT 1",
+				$like
+			)
+		);
+		if ( $id <= 0 ) {
+			return null;
+		}
+		$post = get_post( $id );
+		return $post instanceof WP_Post ? $post : null;
+	}
+
+	/**
+	 * Label the Review Order page in the admin Pages list ("— Review Order
+	 * Page"), mirroring how `WC_Admin_Post_Types` labels Shop / Cart /
+	 * Checkout / My account so editors can spot it at a glance.
+	 *
+	 * @param array<string,string>|mixed $post_states Existing post-state labels keyed by id.
+	 * @param \WP_Post|mixed             $post        Current post being listed.
+	 * @return array<string,string>|mixed
+	 */
+	public function add_post_state_label( $post_states, $post ) {
+		if ( ! is_array( $post_states ) || ! $post instanceof \WP_Post ) {
+			return $post_states;
+		}
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id > 0 && $page_id === (int) $post->ID ) {
+			$post_states['wc_page_for_review_order'] = __( 'Review Order Page', 'woocommerce' );
+		}
+		return $post_states;
 	}
 
 	/**
