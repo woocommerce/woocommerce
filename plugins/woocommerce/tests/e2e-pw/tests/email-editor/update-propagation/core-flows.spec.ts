@@ -211,9 +211,20 @@ test.describe( 'Update propagation — core flows', () => {
 
 		await accessTheEmailEditor( page, 'New order' );
 
-		const dismissButton = page
-			.getByRole( 'button', { name: /dismiss/i } )
-			.first();
+		// If the review drawer happened to open (e.g., via a deep-link or
+		// store state from a prior navigation), close it before looking for
+		// the banner's dismiss button so the drawer panel doesn't obscure it.
+		const drawer = page.getByRole( 'dialog', {
+			name: /review template update/i,
+		} );
+		if ( await drawer.isVisible() ) {
+			await page.keyboard.press( 'Escape' );
+			await drawer.waitFor( { state: 'hidden' } );
+		}
+
+		// Target the banner's dismiss button by its stable CSS class to avoid
+		// matching any other "dismiss"-labelled button that may be on the page.
+		const dismissButton = page.locator( '.wc-update-banner__dismiss' );
 		await expect( dismissButton ).toBeVisible( { timeout: 15000 } );
 		await dismissButton.click();
 

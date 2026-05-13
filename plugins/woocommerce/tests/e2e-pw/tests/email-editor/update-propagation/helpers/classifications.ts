@@ -4,6 +4,21 @@
  * Mirror the PHP-side meta keys and status values from
  * Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector
  * and the Tracks event names from RSM-145 (PR #64759).
+ *
+ * Event-name conventions (post-#64759 rename):
+ *
+ * Client-side events (fired via @woocommerce/tracks recordEvent, captured by
+ * the window.wcTracks.recordEvent spy as-is — no prefix added by the package):
+ *   block_email_update_viewed
+ *   block_email_update_applied
+ *   block_email_update_dismissed
+ *
+ * Server-side events (fired via WC_Tracks::record_event(), captured by the
+ * Tracks_Recorder woocommerce_tracks_event_properties filter which receives the
+ * name already prefixed with "wcadmin_" by WC_Tracks::PREFIX):
+ *   wcadmin_block_email_update_available
+ *   wcadmin_block_email_update_applied
+ *   wcadmin_block_email_sync_backfill_completed
  */
 
 export const STATUS = {
@@ -23,11 +38,16 @@ export const META_KEYS = {
 } as const;
 
 export const TRACKS_EVENTS = {
-	AVAILABLE: 'woocommerce_block_email_update_available',
-	VIEWED: 'woocommerce_block_email_update_viewed',
-	APPLIED: 'woocommerce_block_email_update_applied',
-	DISMISSED: 'woocommerce_block_email_update_dismissed',
-	BACKFILL_COMPLETED: 'woocommerce_block_email_sync_backfill_completed',
+	// Server-side: WC_Tracks::record_event() adds "wcadmin_" prefix before
+	// the woocommerce_tracks_event_properties filter fires, so the recorder
+	// captures these with the prefix already applied.
+	AVAILABLE: 'wcadmin_block_email_update_available',
+	BACKFILL_COMPLETED: 'wcadmin_block_email_sync_backfill_completed',
+	// Client-side: @woocommerce/tracks recordEvent() passes the name as-is
+	// to window.wcTracks.recordEvent; the spy captures it without any prefix.
+	VIEWED: 'block_email_update_viewed',
+	APPLIED: 'block_email_update_applied',
+	DISMISSED: 'block_email_update_dismissed',
 } as const;
 
 export const BACKFILL_CASES = {
