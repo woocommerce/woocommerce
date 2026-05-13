@@ -34,6 +34,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	label: __( 'Shipping Class', 'woocommerce' ),
 	enableSorting: false,
 	type: 'text',
+	isVisible: ( item ) => ! item.virtual,
 	getValue: ( { item } ) => item.shipping_class,
 	Edit: ( { data, onChange, field } ) => {
 		const { shippingClasses } = useSelect( ( select ) => {

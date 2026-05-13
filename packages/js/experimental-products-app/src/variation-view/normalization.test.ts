@@ -59,4 +59,31 @@ describe( 'normalizeVariation', () => {
 
 		expect( normalized.name ).toBe( 'Variation #12' );
 	} );
+
+	it( 'keeps product-style images from embedded variations', () => {
+		const images = [
+			{
+				id: 6,
+				src: 'https://example.com/red.jpg',
+				alt: 'Red',
+				name: 'Red image',
+				thumbnail: 'https://example.com/red-thumbnail.jpg',
+				date_created: '',
+				date_created_gmt: '',
+				date_modified: '',
+				date_modified_gmt: '',
+			},
+		];
+
+		const normalized = normalizeVariation( {
+			id: 13,
+			parent_id: 99,
+			name: 'Red',
+			attributes: [],
+			images,
+			manage_stock: true,
+		} as unknown as ProductVariation );
+
+		expect( normalized.images ).toBe( images );
+	} );
 } );
