@@ -19,6 +19,7 @@ export type ProductListQuery = Omit< ProductQuery, 'status' > & {
 	exclude_tag?: number[];
 	min_stock_quantity?: string;
 	max_stock_quantity?: string;
+	brand?: string;
 };
 
 const SUPPORTED_STATUS_FILTER_FIELDS = [ 'status', 'product_status' ];
@@ -127,6 +128,16 @@ function applyTagFilter( query: ProductListQuery, filter: Filter ) {
 	query.tag = values.join( ',' );
 }
 
+function applyBrandFilter( query: ProductListQuery, filter: Filter ) {
+	const values = getNumericValues( filter.value );
+
+	if ( values.length === 0 ) {
+		return;
+	}
+
+	query.brand = values.join( ',' );
+}
+
 function applyStockFilter( query: ProductListQuery, filter: Filter ) {
 	const [ stockStatus ] = getStringValues( filter.value );
 
@@ -191,6 +202,9 @@ export function buildProductListQuery( view: View ): ProductListQuery {
 				break;
 			case 'tags':
 				applyTagFilter( query, filter );
+				break;
+			case 'brands':
+				applyBrandFilter( query, filter );
 				break;
 			case 'stock':
 				applyStockFilter( query, filter );

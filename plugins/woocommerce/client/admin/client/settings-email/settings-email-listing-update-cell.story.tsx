@@ -16,6 +16,7 @@ const baseEmail: EmailType = {
 	templateStatus: null,
 	templateVersion: null,
 	currentVersion: null,
+	wasBackfilled: false,
 };
 
 export const CoreUpdatedCustomized = () => (

@@ -159,18 +159,29 @@ describe( 'buildProductListQuery', () => {
 		expect( query.stock_status ).toBe( 'onbackorder' );
 	} );
 
+<<<<<<< HEAD
 	it( 'maps the tags isAny filter to the tag query param', () => {
+=======
+	it( 'maps the brands isAny filter to the brand query param', () => {
+>>>>>>> 756969666392a90fd2802ae86ab3d0efd70f5ffb
 		const query = buildProductListQuery( {
 			...baseView,
 			filters: [
 				{
+<<<<<<< HEAD
 					field: 'tags',
 					operator: 'isAny',
 					value: [ '5', 7 ],
+=======
+					field: 'brands',
+					operator: 'isAny',
+					value: [ '8', 9 ],
+>>>>>>> 756969666392a90fd2802ae86ab3d0efd70f5ffb
 				},
 			],
 		} as View );
 
+<<<<<<< HEAD
 		expect( query.tag ).toEqual( '5,7' );
 	} );
 
@@ -187,5 +198,8 @@ describe( 'buildProductListQuery', () => {
 		} as View );
 
 		expect( query.exclude_tag ).toEqual( [ 5, 7 ] );
+=======
+		expect( query.brand ).toEqual( '8,9' );
+>>>>>>> 756969666392a90fd2802ae86ab3d0efd70f5ffb
 	} );
 } );

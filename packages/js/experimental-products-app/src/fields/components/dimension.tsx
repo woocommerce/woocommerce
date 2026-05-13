@@ -17,6 +17,7 @@ export const createDimensionField = (
 	key: DimensionKey
 ): Partial< Field< ProductEntityRecord > > => {
 	return {
+		isVisible: ( item ) => ! item.virtual,
 		Edit: ( { data, onChange, field } ) => {
 			const {
 				record: storeProductsSettings,
