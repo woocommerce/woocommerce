@@ -15,13 +15,6 @@ namespace Automattic\WooCommerce\Caching;
 trait CacheNameSpaceTrait {
 
 	/**
-	 * Cache prefixes that have already been validated in this request.
-	 *
-	 * @var array<string,string>
-	 */
-	private static $validated_cache_prefixes = array();
-
-	/**
 	 * Get prefix for use with wp_cache_set. Allows all cache in a group to be invalidated at once.
 	 *
 	 * @param  string $group Group of cache to get.
@@ -34,17 +27,11 @@ trait CacheNameSpaceTrait {
 		$prefix    = wp_cache_get( $cache_key, $group, false, $found );
 		$found     = (bool) $found;
 
-		if (
-			$found
-			&& isset( self::$validated_cache_prefixes[ $group ] )
-			&& self::$validated_cache_prefixes[ $group ] === $prefix
-		) {
+		if ( self::is_valid_cache_prefix( $prefix ) ) {
 			return 'wc_cache_' . $prefix . '_';
 		}
 
-		if ( ! $found ) {
-			$prefix = self::regenerate_cache_prefix( $cache_key, $group, $found );
-		} elseif ( ! self::is_valid_cache_prefix( $prefix ) ) {
+		if ( $found ) {
 			/**
 			 * Fires when WooCommerce detects an invalid cache prefix before replacing it.
 			 *
@@ -54,11 +41,23 @@ trait CacheNameSpaceTrait {
 			 * @param mixed  $prefix Invalid cached prefix value.
 			 */
 			do_action( 'woocommerce_invalid_cache_prefix_detected', $group, $prefix );
-
-			$prefix = self::regenerate_cache_prefix( $cache_key, $group, $found );
 		}
 
-		self::$validated_cache_prefixes[ $group ] = $prefix;
+		$prefix = self::generate_cache_prefix();
+
+		if ( ! $found ) {
+			if ( wp_cache_add( $cache_key, $prefix, $group ) ) {
+				return 'wc_cache_' . $prefix . '_';
+			}
+
+			$cached_prefix = wp_cache_get( $cache_key, $group );
+
+			if ( self::is_valid_cache_prefix( $cached_prefix ) ) {
+				return 'wc_cache_' . $cached_prefix . '_';
+			}
+		}
+
+		wp_cache_set( $cache_key, $prefix, $group );
 
 		return 'wc_cache_' . $prefix . '_';
 	}
@@ -82,14 +81,7 @@ trait CacheNameSpaceTrait {
 	 * @since 3.9.0
 	 */
 	public static function invalidate_cache_group( $group ) {
-		$prefix = self::generate_cache_prefix();
-		$result = wp_cache_set( 'wc_' . $group . '_cache_prefix', $prefix, $group );
-
-		if ( $result ) {
-			self::$validated_cache_prefixes[ $group ] = $prefix;
-		}
-
-		return $result;
+		return wp_cache_set( 'wc_' . $group . '_cache_prefix', self::generate_cache_prefix(), $group );
 	}
 
 	/**
@@ -102,34 +94,6 @@ trait CacheNameSpaceTrait {
 	 */
 	public static function get_prefixed_key( $key, $group ) {
 		return self::get_cache_prefix( $group ) . $key;
-	}
-
-	/**
-	 * Regenerate a cache prefix and prefer a concurrent writer's value when one exists.
-	 *
-	 * @param string $cache_key Cache key.
-	 * @param string $group Cache group.
-	 * @param bool   $found Whether an existing prefix was found.
-	 * @return string Cache prefix.
-	 */
-	private static function regenerate_cache_prefix( $cache_key, $group, $found ) {
-		$prefix = self::generate_cache_prefix();
-
-		if ( ! $found && wp_cache_add( $cache_key, $prefix, $group ) ) {
-			return $prefix;
-		}
-
-		if ( ! $found ) {
-			$cached_prefix = wp_cache_get( $cache_key, $group );
-
-			if ( self::is_valid_cache_prefix( $cached_prefix ) ) {
-				return $cached_prefix;
-			}
-		}
-
-		wp_cache_set( $cache_key, $prefix, $group );
-
-		return $prefix;
 	}
 
 	/**
