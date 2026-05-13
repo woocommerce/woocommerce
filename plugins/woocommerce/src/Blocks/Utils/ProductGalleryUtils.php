@@ -178,7 +178,9 @@ class ProductGalleryUtils {
 	 * Extracted so {@see self::get_product_variation_gallery_data()} reads as
 	 * "fetch + prime + project" without inlining the projection details.
 	 *
-	 * @param int $variation_id Variation post ID.
+	 * @param int $variation_id    Variation post ID.
+	 * @param int $parent_image_id Parent product's featured image ID, used as
+	 *                             fallback when the variation has no images.
 	 * @return array<string, mixed>|null
 	 */
 	private static function build_variation_gallery_entry( int $variation_id, int $parent_image_id ): ?array {
