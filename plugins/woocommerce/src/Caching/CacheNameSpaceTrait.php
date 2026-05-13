@@ -45,6 +45,8 @@ trait CacheNameSpaceTrait {
 		$prefix = self::generate_cache_prefix();
 
 		if ( ! $found ) {
+			// Use add on cold prefixes so concurrent requests converge on the first
+			// persisted value instead of writing competing cache namespaces.
 			if ( wp_cache_add( $cache_key, $prefix, $group ) ) {
 				return 'wc_cache_' . $prefix . '_';
 			}
