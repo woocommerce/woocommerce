@@ -63,6 +63,8 @@ class Endpoint {
 	 * @internal
 	 */
 	final public function init(): void {
+		// Seed the host page before `add_rewrite_rule` runs on init:10.
+		add_action( 'init', array( $this, 'maybe_create_host_page' ), 4 );
 		add_action( 'init', array( $this, 'add_rewrite_rule' ) );
 		add_filter( 'query_vars', array( $this, 'add_query_var' ), 0 );
 		add_action( 'template_redirect', array( $this, 'gate_request' ) );
@@ -70,6 +72,30 @@ class Endpoint {
 		add_action( 'transition_post_status', array( $this, 'skip_auto_menu_for_self' ), 9, 3 );
 		add_filter( 'get_pages', array( $this, 'exclude_self_from_page_list' ) );
 		add_shortcode( self::SHORTCODE, array( $this, 'render_shortcode' ) );
+	}
+
+	/**
+	 * Create the Review Order host page the first time the feature is on.
+	 * Idempotent — bails when the stored option already points at a page.
+	 *
+	 * @internal
+	 */
+	public function maybe_create_host_page(): void {
+		$page_id = (int) wc_get_page_id( self::PAGE_KEY );
+		if ( $page_id > 0 && get_post( $page_id ) instanceof WP_Post ) {
+			return;
+		}
+
+		$only_review_order = static function ( array $pages ): array {
+			return array_intersect_key( $pages, array_flip( array( 'review_order' ) ) );
+		};
+
+		add_filter( 'woocommerce_create_pages', $only_review_order );
+		\WC_Install::create_pages();
+		remove_filter( 'woocommerce_create_pages', $only_review_order );
+
+		// Defer the rewrite flush to wp_loaded; rewrite_rule fires later on init.
+		update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
 	}
 
 	/**

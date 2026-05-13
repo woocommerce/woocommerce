@@ -29,6 +29,8 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Feature flag gates the OrderReviews stack.
+		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
 		$this->endpoint = new Endpoint();
 
 		// `Endpoint::get_url()` derives the URL from the WC-managed Review
@@ -61,6 +63,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 			$wp_query->is_404 = false;
 		}
 		wp_set_current_user( 0 );
+		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		parent::tearDown();
 	}
 

@@ -376,10 +376,14 @@ final class WooCommerce {
 		$container->get( ProductVersionStringInvalidator::class );
 		$container->get( OrdersVersionStringInvalidator::class );
 		$container->get( TaxRateVersionStringInvalidator::class );
-		$container->get( Automattic\WooCommerce\Internal\OrderReviews\Scheduler::class );
-		$container->get( Automattic\WooCommerce\Internal\OrderReviews\Endpoint::class );
-		$container->get( Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler::class );
-		$container->get( Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::class );
+		// Feature flag gates the whole OrderReviews stack — services aren't
+		// resolved, so their `init()` hooks don't register.
+		if ( \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
+			$container->get( Automattic\WooCommerce\Internal\OrderReviews\Scheduler::class );
+			$container->get( Automattic\WooCommerce\Internal\OrderReviews\Endpoint::class );
+			$container->get( Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler::class );
+			$container->get( Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::class );
+		}
 
 		// Feature flags.
 		if ( Constants::is_true( 'WOOCOMMERCE_BIS_ALPHA_ENABLED' ) ) {
