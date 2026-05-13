@@ -543,7 +543,6 @@ describe( 'product edit utils', () => {
 					'cross_sell_ids',
 					'stock',
 					'manage_stock',
-					...shippingFieldIds,
 					'tax_status',
 				] )
 			);
@@ -565,33 +564,31 @@ describe( 'product edit utils', () => {
 
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
-					'name',
 					'images',
-					'product_status',
 					'sku',
-					'price',
 					'regular_price',
+					'on_sale',
 					'sale_price',
-					'schedule_sale',
-					'date_on_sale_from',
 					'stock',
 					'manage_stock',
 					'downloadable',
-					'weight',
-					'length',
-					'width',
-					'height',
-					'shipping_class',
-					'tax_status',
 				] )
 			);
 			expectFieldsHidden( fieldIds, [
+				'name',
+				'product_status',
 				'categories',
 				'tags',
 				'featured',
 				'catalog_visibility',
 				'upsell_ids',
 				'cross_sell_ids',
+				'price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
+				...shippingFieldIds,
+				'tax_status',
 			] );
 		} );
 
@@ -602,10 +599,12 @@ describe( 'product edit utils', () => {
 					type: 'simple',
 					virtual: false,
 					downloadable: false,
+					manage_stock: true,
 				} ),
 				buildProduct( {
 					id: 2,
 					type: 'variable',
+					manage_stock: true,
 				} ),
 			] );
 
