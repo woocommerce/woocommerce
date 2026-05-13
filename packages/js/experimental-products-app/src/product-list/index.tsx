@@ -291,6 +291,7 @@ export default function ProductList( {
 				popoverProps={ { placement: 'bottom-end' } }
 				renderToggle={ ( { isOpen, onToggle } ) => (
 					<Button
+						className="woocommerce-product-list__add-new-trigger"
 						size="compact"
 						disabled={ canCreateRecord === false }
 						onClick={ onToggle }

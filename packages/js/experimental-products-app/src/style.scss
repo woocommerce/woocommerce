@@ -41,12 +41,18 @@
 	padding: 0 var(--wpds-dimension-padding-2xl, 24px);
 }
 
+// The chevron sits inside the primary "Add new" button. Force its SVG to
+// inherit the button's white text color instead of falling back to dark.
+.woocommerce-product-list__add-new-trigger svg {
+	fill: currentColor;
+}
+
 .woocommerce-product-list__add-new-menu {
-	min-width: 380px;
+	min-width: 300px;
 
 	// The inner popover content sizes to its content by default, which
-	// makes our 380px min-width on the outer popover irrelevant. Force it
-	// to fill so the menu items can actually use the available space.
+	// makes our min-width on the outer popover irrelevant. Force it to
+	// fill so the menu items can actually use the available space.
 	.components-popover__content {
 		width: 100%;
 		box-sizing: border-box;
@@ -59,8 +65,11 @@
 	.components-menu-item__button {
 		display: flex;
 		width: 100%;
+		// 16px between the icon and the left edge; 12px between the icon
+		// column and the title/description text.
 		padding-block: var(--wpds-dimension-padding-md, 12px);
-		padding-inline: var(--wpds-dimension-padding-lg, 16px);
+		padding-inline: 16px;
+		gap: 12px;
 		text-align: start;
 		align-items: flex-start;
 		height: auto;
