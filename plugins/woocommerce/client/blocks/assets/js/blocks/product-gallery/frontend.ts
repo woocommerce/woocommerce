@@ -300,6 +300,12 @@ const { state: productsState } = store< ProductsStore >(
 	{ lock: universalLock }
 );
 
+// Tracks the last `productsState.variationId` we acted on, keyed by gallery
+// product ID. Lets `listenToProductDataChanges` distinguish "variation just
+// cleared" (reset to default) from "variation never set" (legacy form path)
+// and from a spurious re-fire of the watch.
+const lastSeenVariationId = new Map< string, number | null | undefined >();
+
 const productGallery = {
 	state: {
 		/**
@@ -584,13 +590,29 @@ const productGallery = {
 		 * `productsState.variationId` changes.
 		 */
 		listenToProductDataChanges: () => {
-			// No variation selected — initial mount uses the server-rendered
-			// `defaultImageData`, and legacy-form pages rely on
-			// `watchForChangesOnAddToCartForm` instead.
+			const context = getContext();
 			const variationId = productsState.variationId;
-			if ( ! variationId ) {
+			const prevVariationId = lastSeenVariationId.get(
+				context.productId
+			);
+
+			// Spurious re-fire (iAPI re-runs the watch even when our deps
+			// didn't actually change) — skip to avoid clobbering imageData
+			// the legacy-form watcher may have just set.
+			if ( prevVariationId === variationId ) {
 				return;
 			}
+
+			// First fire, no variation in the store: leave the
+			// server-rendered `defaultImageData` alone. Legacy-form pages
+			// stay on this branch forever and let
+			// `watchForChangesOnAddToCartForm` drive the gallery.
+			if ( prevVariationId === undefined && ! variationId ) {
+				lastSeenVariationId.set( context.productId, variationId );
+				return;
+			}
+
+			lastSeenVariationId.set( context.productId, variationId );
 
 			// `mainProductInContext` is always the parent (variable) product;
 			// `getProductImageSet` is keyed by that ID.
@@ -601,6 +623,11 @@ const productGallery = {
 
 			const productImageSet = getProductImageSet( product.id );
 			if ( ! productImageSet ) {
+				return;
+			}
+
+			if ( ! variationId ) {
+				actions.resetImageData();
 				return;
 			}
 
