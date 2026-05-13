@@ -44,6 +44,14 @@
 .woocommerce-product-list__add-new-menu {
 	min-width: 380px;
 
+	// The inner popover content sizes to its content by default, which
+	// makes our 380px min-width on the outer popover irrelevant. Force it
+	// to fill so the menu items can actually use the available space.
+	.components-popover__content {
+		width: 100%;
+		box-sizing: border-box;
+	}
+
 	.components-menu-group {
 		padding: var(--wpds-dimension-padding-md, 12px) 0;
 	}
