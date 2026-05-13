@@ -22,7 +22,7 @@ class CreateWidget {
 				'input' => array(
 					'type' => Type::nonNull(CreateWidgetInput::get()),
 						'description' => __( 'The data for the new widget', 'woocommerce' ),
-					),
+						),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);
