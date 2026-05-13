@@ -6,6 +6,11 @@
 
 .product_page_woocommerce-products-dashboard {
 	background-color: unset;
+}
+
+.product_page_woocommerce-products-dashboard,
+#woocommerce-variations-classic-root,
+.woocommerce-product-edit__drawer-portal {
 	@import "./fields/components/list-item/style.scss";
 	@import "./fields/downloadable/style.scss";
 	@import "./fields/images/style.scss";

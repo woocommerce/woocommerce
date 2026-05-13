@@ -3005,6 +3005,13 @@ ul.wc_coupon_list_block {
 
 .woocommerce_page_wc-orders,
 .post-type-shop_order {
+	// Gated behind the `order-detail-redesign` feature flag (body class added by OrderDetailRedesign\Init).
+	// `:has(#poststuff)` excludes the orders list screen (which doesn't render #poststuff).
+	&.woocommerce-feature-enabled-order-detail-redesign .wrap:has(#poststuff) {
+		max-width: 1200px;
+		margin-inline: auto;
+	}
+
 	.tablenav .one-page .displaying-num {
 		display: none;
 	}

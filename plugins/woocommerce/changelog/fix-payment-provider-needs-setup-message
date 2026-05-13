@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the payment provider setup-required error message more actionable.
