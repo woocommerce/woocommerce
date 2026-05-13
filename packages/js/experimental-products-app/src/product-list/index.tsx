@@ -404,7 +404,7 @@ export default function ProductList( {
 						<DataViews.ViewConfig />
 					</Stack>
 				</Stack>
-				<DataViews.FiltersToggled />
+				<DataViews.FiltersToggled className="woocommerce-product-list__filters" />
 				<DataViews.Layout />
 				<DataViews.Footer />
 			</DataViews>

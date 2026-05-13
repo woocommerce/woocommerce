@@ -53,6 +53,11 @@
 	border-bottom: 0;
 }
 
+// 16px gap between the toolbar's bottom divider and the filter chip row.
+.woocommerce-product-list__filters {
+	padding-top: 16px;
+}
+
 // The chevron sits inside the primary "Add new" button. Force its SVG to
 // inherit the button's white text color instead of falling back to dark.
 .woocommerce-product-list__add-new-trigger svg {
