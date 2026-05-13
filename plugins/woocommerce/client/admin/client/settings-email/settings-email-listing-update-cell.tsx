@@ -34,7 +34,9 @@ interface UpdatesCellProps {
 }
 
 export const UpdatesCell = ( { post }: UpdatesCellProps ) => {
-	if ( ! shouldShowReviewUpdate( post ) ) {
+	const eligible = shouldShowReviewUpdate( post );
+
+	if ( ! eligible ) {
 		return <span aria-label={ __( 'Up to date', 'woocommerce' ) }>—</span>;
 	}
 

@@ -5,7 +5,10 @@ namespace Automattic\WooCommerce\Tests\Internal\OrderReviews;
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\OrderReviews\Endpoint;
+use Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility;
+use Automattic\WooCommerce\Internal\OrderReviews\SubmissionHandler;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
+use WC_Helper_Product;
 use WC_Unit_Test_Case;
 use WP_Query;
 
@@ -234,5 +237,89 @@ class EndpointTest extends WC_Unit_Test_Case {
 		global $wp_query;
 		$this->assertFalse( $wp_query->is_404 );
 		$this->assertStringContainsString( 'woocommerce-review-order', $html );
+	}
+
+	/**
+	 * @testdox Loading the page when no actionable rows remain stamps the completed-at meta.
+	 */
+	public function test_no_actionable_rows_stamps_completed_meta(): void {
+		$order   = OrderHelper::create_order();
+		$product = WC_Helper_Product::create_simple_product();
+		$order->set_billing_email( 'reviewed@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		// Wipe the helper's default item, attach our reviewable product.
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		// Pre-create a matching review tied to this order so decide() surfaces
+		// the existing comment and the page treats every row as already reviewed.
+		$comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product->get_id(),
+				'comment_author'       => 'Already',
+				'comment_author_email' => 'reviewed@example.test',
+				'comment_content'      => 'Was good.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$this->render( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty( $fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ) );
+	}
+
+	/**
+	 * @testdox Loading the page with at least one actionable row leaves the completed-at meta unset.
+	 */
+	public function test_actionable_row_does_not_stamp_completed_meta(): void {
+		$order   = OrderHelper::create_order();
+		$product = WC_Helper_Product::create_simple_product();
+		$order->set_billing_email( 'fresh@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->add_product( $product, 1 );
+		$order->save();
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$this->render( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertEmpty( $fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ) );
+	}
+
+	/**
+	 * @testdox The completed-at meta is never overwritten on subsequent loads.
+	 */
+	public function test_completed_meta_is_not_overwritten(): void {
+		$order = OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		// Empty the order so the no-actionable-rows path falls through and
+		// would re-stamp `time()` if the early-return guard were removed;
+		// keeping items here lets the loop's unreviewed-item bail-out hide
+		// the guard's effect and the test would pass without it.
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$preset = (string) ( time() - 3600 );
+		$order->update_meta_data( SubmissionHandler::COMPLETED_META_KEY, $preset );
+		$order->save();
+
+		$_GET = array( 'key' => $order->get_order_key() );
+
+		$this->render( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( $preset, (string) $fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ) );
 	}
 }

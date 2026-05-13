@@ -253,6 +253,10 @@ class Endpoint {
 			exit;
 		}
 
+		if ( $order instanceof WC_Order ) {
+			$this->maybe_mark_no_actionable_rows( $order );
+		}
+
 		// template_redirect fires after wp_enqueue_scripts but before
 		// wp_head, so styles registered here are still output in <head>.
 		$this->enqueue_assets();
@@ -304,7 +308,69 @@ class Endpoint {
 			return;
 		}
 
+		if ( $order instanceof WC_Order ) {
+			$this->maybe_mark_no_actionable_rows( $order );
+		}
+
 		wc_get_template( 'order/customer-review-order.php', array( 'order' => $order ) );
+	}
+
+	/**
+	 * Stamp the completed-at meta when the Review Order page would render the
+	 * empty-state, so back-button visits and direct revisits also record
+	 * completion. The persistent write lives here, in the controller, so the
+	 * page template stays read-only.
+	 *
+	 * Scope differs from `SubmissionHandler::maybe_mark_order_complete()`:
+	 * that one counts the customer's reviews per product across all of their
+	 * history, while this one walks the per-item decisions ItemEligibility
+	 * produces (order-scoped, mirroring exactly what the page renders).
+	 *
+	 * @param WC_Order $order Order being reviewed.
+	 */
+	private function maybe_mark_no_actionable_rows( WC_Order $order ): void {
+		$completed_meta_key = SubmissionHandler::COMPLETED_META_KEY;
+		if ( $order->get_meta( $completed_meta_key ) ) {
+			return;
+		}
+
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented on customer-review-order.php template.
+		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+		ItemEligibility::preload_for_items( $items, $order );
+
+		foreach ( $items as $item ) {
+			if ( ! $item instanceof \WC_Order_Item_Product ) {
+				continue;
+			}
+			$decision = ItemEligibility::decide( $item, $order );
+			// Skip rows are intentionally treated as "done": an order whose
+			// items all have reviews disabled renders the empty-state, so we
+			// stamp completion to match what the customer sees on the page.
+			if ( ItemEligibility::STATUS_SKIP === $decision['status'] ) {
+				continue;
+			}
+			// Any non-skip row without a review tied to this order means the
+			// customer still has something to submit — order isn't complete.
+			if ( ! ( $decision['comment'] instanceof \WP_Comment ) ) {
+				return;
+			}
+		}
+
+		$order->update_meta_data( $completed_meta_key, (string) time() );
+
+		try {
+			$order->save();
+		} catch ( \Exception $e ) {
+			wc_get_logger()->warning(
+				sprintf(
+					/* translators: 1: order ID, 2: error message */
+					__( 'Could not stamp Review Order completion meta on order %1$d: %2$s.', 'woocommerce' ),
+					$order->get_id(),
+					$e->getMessage()
+				),
+				array( 'source' => 'order-reviews' )
+			);
+		}
 	}
 
 	/**

@@ -4,8 +4,8 @@
 import apiFetch from '@wordpress/api-fetch';
 import { store as coreStore } from '@wordpress/core-data';
 import { dispatch } from '@wordpress/data';
-import { edit, external, trash } from '@wordpress/icons';
-import { __, _n, _x, sprintf } from '@wordpress/i18n';
+import { edit, trash } from '@wordpress/icons';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { addQueryArgs } from '@wordpress/url';
@@ -48,6 +48,30 @@ function getQuickEditPath(
 		...nextQuery,
 		postId: productIds.join( ',' ),
 		quickEdit: 'true',
+	} );
+}
+
+function getSelectionPath(
+	path: string,
+	query: Record< string, string | undefined >,
+	productIds: number[]
+) {
+	const nextQuery = Object.entries( query ).reduce(
+		( acc, [ key, value ] ) => {
+			if ( typeof value === 'string' ) {
+				acc[ key ] = value;
+			}
+
+			return acc;
+		},
+		{} as Record< string, string >
+	);
+
+	delete nextQuery.quickEdit;
+
+	return getProductListNavigationPath( path, {
+		...nextQuery,
+		postId: productIds.join( ',' ),
 	} );
 }
 
@@ -169,23 +193,35 @@ export const editAction = (): Action< ProductEntityRecord > => ( {
 	},
 } );
 
-export const viewAction = (): Action< ProductEntityRecord > => ( {
-	id: 'view-product',
-	label: _x( 'View', 'verb', 'woocommerce' ),
+export const selectAllVariationsAction = ( {
+	navigate,
+	path = '/',
+	query = {},
+}: EditActionOptions ): Action< ProductEntityRecord > => ( {
+	id: 'select-all-variations',
+	label: __( 'Select all variations', 'woocommerce' ),
 	isPrimary: true,
-	icon: external,
 	isEligible( product ) {
-		return product.status !== 'trash' && !! product.permalink;
+		return (
+			product.status !== 'trash' &&
+			product.type === 'variable' &&
+			Boolean( product._embedded?.variations?.length )
+		);
 	},
 	callback( items, { onActionPerformed } ) {
-		const product = items[ 0 ];
+		const variations = items.flatMap(
+			( product ) => product._embedded?.variations ?? []
+		);
+		const variationIds = Array.from(
+			new Set( variations.map( ( variation ) => variation.id ) )
+		);
 
-		if ( product?.permalink ) {
-			window.open( product.permalink, '_blank' );
+		if ( variationIds.length > 0 ) {
+			navigate( getSelectionPath( path, query, variationIds ) );
 		}
 
 		if ( onActionPerformed ) {
-			onActionPerformed( items );
+			onActionPerformed( variations );
 		}
 	},
 } );
@@ -381,7 +417,11 @@ export const useProductActions = () => {
 				query,
 			} ),
 			editAction(),
-			viewAction(),
+			selectAllVariationsAction( {
+				navigate,
+				path,
+				query,
+			} ),
 			duplicateProductAction(),
 			moveToTrashAction(),
 		],
