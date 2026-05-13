@@ -601,13 +601,31 @@ const productGallery = {
 		 * `productsState.variationId` changes.
 		 */
 		listenToProductDataChanges: () => {
+			// Bridge the blockified Add to Cart with Options block to the
+			// gallery: when that block updates `productsState.variationId`,
+			// we mirror the change into the gallery's imageData.
+			//
+			// Bail when no variation is selected in the products store. Two
+			// reasons:
+			//   1. Initial mount — the server-rendered `defaultImageData`
+			//      is already correct, no need to reset.
+			//   2. Legacy classic-form pages — the legacy form never writes
+			//      to `productsState.variationId`, so it stays null
+			//      forever; `watchForChangesOnAddToCartForm` is the source
+			//      of truth there. Without this guard, this watch re-fires
+			//      after every imageData mutation (iAPI's Proxy reactivity
+			//      triggers it on unrelated signal writes) and would
+			//      clobber what the legacy watcher just set.
+			const variationId = productsState.variationId;
+			if ( ! variationId ) {
+				return;
+			}
+
 			// Use `mainProductInContext` (always the parent variable
 			// product) rather than `productInContext`, which resolves to the
 			// active variation when one is selected — `getProductImageSet`
-			// is keyed on the parent's ID. Read `variationId` directly from
-			// the store so this watcher re-fires on variation change.
+			// is keyed on the parent's ID.
 			const product = productsState.mainProductInContext;
-
 			if ( ! product ) {
 				return;
 			}
@@ -618,7 +636,7 @@ const productGallery = {
 			}
 
 			const variationImageSet =
-				productImageSet.variations?.[ productsState.variationId || 0 ];
+				productImageSet.variations?.[ variationId ];
 
 			if ( variationImageSet?.image_ids?.length ) {
 				actions.setImageData(
