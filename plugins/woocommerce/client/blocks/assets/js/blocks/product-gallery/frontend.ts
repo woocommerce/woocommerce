@@ -185,8 +185,8 @@ const toggleActiveThumbnailAttributes = ( element: HTMLElement ) => {
 
 /**
  * Scroll the large viewer to the given image, using `imageIndex × clientWidth`.
- * Index-based math stays correct even before iAPI watches have revealed the
- * target wrapper (a hidden element's rect is zero).
+ * Index-based math stays correct even before the Interactivity API watches
+ * have revealed the target wrapper (a hidden element's rect is zero).
  */
 const scrollImageIntoView = (
 	imageId: number,
