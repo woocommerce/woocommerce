@@ -4,10 +4,6 @@
  *
  * Theme-overridable. Copy to `yourtheme/woocommerce/order/customer-review-order-row.php`.
  *
- * Renders one product per row: linked title, thumbnail, hidden inputs that
- * tie the submission back to the order item, the accessible star-rating
- * control, and the review textarea.
- *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @version 10.8.0

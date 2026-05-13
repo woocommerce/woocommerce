@@ -1,18 +1,8 @@
 <?php
 /**
- * Customer Review Order page
+ * Customer Review Order page.
  *
- * Read-only landing page surfaced from the Customer Review Request email.
- * Lists the eligible line items from a completed order so the customer can
- * review what they purchased.
- *
- * This template can be overridden by copying it to yourtheme/woocommerce/order/customer-review-order.php.
- *
- * HOWEVER, on occasion WooCommerce will need to update template files and you
- * (the theme developer) will need to copy the new files to your theme to
- * maintain compatibility. We try to do this as little as possible, but it does
- * happen. When this occurs the version of the template file will be bumped and
- * the readme will list any important changes.
+ * Theme-overridable. Copy to `yourtheme/woocommerce/order/customer-review-order.php`.
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
@@ -69,16 +59,10 @@ $meta_parts = array_filter(
  */
 $items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 
-// Single batched lookup of every existing review by this customer for the
-// items below. Without this each decide() call would issue its own query.
+// Batched lookup; without this each decide() call would issue its own query.
 \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::preload_for_items( $items, $order );
 
-// Pre-compute one decision per item so we know whether to render the form
-// (any item still missing a review for this order) or fall through to the
-// empty-state thank-you (every renderable item already has a review tied
-// to this order). Skipped rows (STATUS_SKIP, reviews disabled on the
-// product) are counted separately so a single info notice can be surfaced
-// above the form instead of silently dropping the row.
+// Skipped rows are counted so the disabled-products notice can render above the form.
 $decisions          = array();
 $has_unreviewed_row = false;
 $skipped_count      = 0;
@@ -108,8 +92,7 @@ foreach ( $items as $item ) {
 	);
 }//end foreach
 
-// Empty-state: no actionable rows remain. The Endpoint already stamped the
-// completion meta before we got here, so this branch is purely the view.
+// Empty-state: no actionable rows remain.
 if ( ! $has_unreviewed_row ) {
 	$reviewed_count = 0;
 	foreach ( $decisions as $entry ) {
@@ -128,11 +111,7 @@ if ( ! $has_unreviewed_row ) {
 	return;
 }//end if
 
-// The Endpoint has already validated the URL key against the order key, so the
-// canonical value on the order is the right thing to echo into the form post.
-$order_key = (string) $order->get_order_key();
-
-// Block themes expose `wp-element-button`; helper returns '' on classic themes.
+$order_key       = (string) $order->get_order_key();
 $wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 ?>
 <div class="woocommerce-review-order">

@@ -4,10 +4,6 @@
  *
  * Theme-overridable. Copy to `yourtheme/woocommerce/order/customer-review-order-empty.php`.
  *
- * Rendered when every eligible line item on the order is either already
- * reviewed by the customer or skipped (reviews disabled on the product),
- * so there is nothing left to do on the form.
- *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @version 10.8.0

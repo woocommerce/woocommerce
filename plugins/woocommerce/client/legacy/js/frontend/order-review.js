@@ -1,17 +1,7 @@
 /* global document, window */
 /**
- * Progressive enhancement for the Review Order page.
- *
- * Adds keyboard navigation (Left/Right/Up/Down + Home/End) and a dynamic
- * caption to every `.woocommerce-star-rating` group on the page. Gates the
- * submit button on the form being dirty (i.e. the customer has changed
- * something from the prefilled state), enforces an inline "Please rate this
- * product before submitting your review." validation on rows with typed
- * text but no rating, and wires the dismiss control on the
- * disabled-products notice.
- *
- * Without this script the underlying native radio inputs still work; the
- * customer can submit and the server-side handler validates per row.
+ * Progressive enhancement for the Review Order page. Without this script the
+ * native radios + form post still work; server validates per row.
  */
 ( function () {
 	'use strict';
@@ -46,10 +36,7 @@
 			input.dispatchEvent( new window.Event( 'change', { bubbles: true } ) );
 		}
 
-		// DOM order is 5..1 (reversed for the CSS row-reverse layout), so
-		// "next visual star" is the previous DOM input and vice-versa.
-		// Home/End map to visual-leftmost / visual-rightmost = inputs[last] /
-		// inputs[0] in DOM order.
+		// DOM order is 5..1; under row-reverse the next visual star is the previous DOM input.
 		inputs.forEach( function ( input, index ) {
 			input.addEventListener( 'change', syncCaption );
 
@@ -153,8 +140,7 @@
 			submit.disabled = ! rows.some( isRowDirty );
 		}
 
-		// Expose so initAjaxSubmit can re-run the gate after the request
-		// completes (instead of unconditionally enabling the button).
+		// Expose so initAjaxSubmit can re-run the gate after the request completes.
 		form.syncReviewOrderSubmitGate = syncSubmit;
 
 		form.addEventListener( 'change', syncSubmit );
@@ -164,9 +150,6 @@
 	}
 
 	/**
-	 * Show or clear the "Please rate this product..." inline error for one
-	 * row. Mutating the DOM idempotently keeps the call sites simple.
-	 *
 	 * @param {HTMLElement} row     `.woocommerce-review-order__item`
 	 * @param {boolean}     visible Whether the error should be shown.
 	 */
@@ -199,16 +182,8 @@
 	}
 
 	/**
-	 * Wire client-side validation: any row that has typed review text but no
-	 * rating renders an inline error and blocks form submission until the
-	 * customer either rates the product or clears the text. Rows that are
-	 * entirely empty are still allowed (the "Feel free to skip" path).
-	 *
-	 * Returns the validation function so the AJAX submit handler can re-use
-	 * the same logic.
-	 *
 	 * @param {HTMLFormElement} form `.woocommerce-review-order__form`
-	 * @return {function(): boolean}
+	 * @return {function(): boolean} Validator the AJAX submit handler re-runs.
 	 */
 	function initRatingValidation( form ) {
 		var rows = Array.prototype.slice.call(
@@ -228,8 +203,6 @@
 			return ok;
 		}
 
-		// Clear a row's error as soon as the customer fixes it (sets a
-		// rating, or clears the textarea back to empty).
 		rows.forEach( function ( row ) {
 			row.addEventListener( 'change', function () {
 				if (
@@ -420,9 +393,6 @@
 	}
 
 	/**
-	 * Wire the dismiss control on the disabled-products notice. Dismissal is
-	 * in-page only; revisiting the URL re-renders the notice from PHP.
-	 *
 	 * @param {HTMLElement} notice `.woocommerce-review-order__notice`
 	 */
 	function initNoticeDismiss( notice ) {

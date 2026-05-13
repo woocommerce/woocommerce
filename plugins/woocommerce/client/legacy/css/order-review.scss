@@ -1,20 +1,7 @@
-/**
- * Review Order page styles.
- *
- * Intentionally minimal. The active theme drives typography, color, and
- * button styling; only the per-item row layout and the interactive
- * star-rating control need bespoke CSS.
- *
- * The star control renders its inputs + labels inside a `__stars` wrapper
- * with `flex-direction: row-reverse`: the DOM order is 5..1 so that sibling
- * combinators (`~`) can fill all stars up to the selected/hovered one
- * without relying on `:has()`. The caption sits OUTSIDE that wrapper so it
- * stacks below the stars on the same `__rating` line.
- */
+// Star DOM order is 5..1 under `flex-direction: row-reverse` so the `~`
+// sibling selector can fill stars 1..N without `:has()`.
 
 .woocommerce-review-order {
-	// After a successful submission JS toggles `.is-success` on the wrapper:
-	// the form chrome is hidden in place and the success block replaces it.
 	&.is-success {
 		.woocommerce-review-order__title,
 		.woocommerce-review-order__intro,
@@ -86,15 +73,11 @@
 		resize: vertical;
 	}
 
-	// Inline validation message shown when the customer typed review text
-	// without rating the product, then attempted to submit.
 	&__item-rating-error {
 		margin: 0.5em 0 0;
 		color: var(--wc-red, #a00);
 	}
 
-	// Submission status note. Falls back to literal hex if a stylesheet
-	// loads before _variables.scss exposes the WC color tokens.
 	&__item-status {
 		margin: 0.5em 0 0;
 
@@ -107,8 +90,7 @@
 		}
 	}
 
-	// Layered on top of `.woocommerce-info` (theme-aware) so we only need to
-	// position the body + dismiss button; the theme drives the rest.
+	// Layered on `.woocommerce-info`; theme paints background, border, icon.
 	&__notice {
 		position: relative;
 
@@ -179,7 +161,7 @@
 		gap: 4px;
 	}
 
-	// Visually hide the native radios but keep them in the a11y tree.
+	// Visually hide radios, keep them in the a11y tree.
 	&__input {
 		position: absolute;
 		width: 1px;
@@ -192,9 +174,7 @@
 		border: 0;
 	}
 
-	// Themes (Storefront, etc.) apply a global
-	// `input[type=radio]+label { margin-left: .381…em }` rule. Reset it so
-	// the only gap between stars comes from the `gap` on `__stars`.
+	// Reset margin so the theme's `input[type=radio]+label` rule can't leak in.
 	&__star {
 		cursor: pointer;
 		display: inline-flex;
@@ -216,14 +196,11 @@
 		transition: opacity 100ms ease-in-out;
 	}
 
-	// Fill: a checked input fills its own label and every following sibling
-	// star (which appear visually before it under row-reverse).
+	// Checked input fills its own star + every following sibling (visual left).
 	&__input:checked ~ .woocommerce-star-rating__star .woocommerce-star-rating__icon {
 		opacity: 1;
 	}
 
-	// Hover preview: when hovering the rating, dim everything, then re-fill
-	// from the hovered star outward (visual left).
 	&__stars:hover .woocommerce-star-rating__icon {
 		opacity: 0.3;
 	}
@@ -233,15 +210,11 @@
 		opacity: 1;
 	}
 
-	// Focus ring: the input sits next to its own label; style the label when
-	// the input has visible keyboard focus.
 	&__input:focus-visible + .woocommerce-star-rating__star {
 		outline: 2px solid currentColor;
 		outline-offset: 2px;
 	}
 
-	// Caption keeps a stable footprint so the layout doesn't shift when the
-	// label text changes. Sits below the row of stars.
 	&__caption {
 		min-height: 1em;
 		min-width: 4em;

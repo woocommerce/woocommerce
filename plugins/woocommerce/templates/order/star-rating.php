@@ -4,16 +4,6 @@
  *
  * Theme-overridable. Copy to `yourtheme/woocommerce/order/star-rating.php`.
  *
- * Renders five native `<input type="radio">` elements wrapped in a
- * `role="radiogroup"` container, with SVG icons added as decorative siblings
- * for the visual stars and a caption span the JS module updates as the
- * selection changes. Without JavaScript the customer still has a working
- * (if visually plain) radio group.
- *
- * The inputs and their labels live inside a `__stars` flex container so the
- * row-reverse sibling-selector trick (used to fill stars 1..N) keeps working
- * while the caption stacks below the stars rather than beside them.
- *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
  * @version 10.8.0
@@ -30,9 +20,7 @@ defined( 'ABSPATH' ) || exit;
 $caption_id      = $id_prefix . '-caption';
 $initial_caption = $selected > 0 && isset( $labels[ $selected ] ) ? $labels[ $selected ] : '';
 
-// Render in reverse (5 first, 1 last) so the visual layout — driven by
-// `flex-direction: row-reverse` — can use ~ sibling selectors for the
-// "fill stars 1..N" effect without depending on `:has()`.
+// Reverse so row-reverse + `~` selectors can fill stars 1..N without `:has()`.
 $reversed = array_reverse( $labels, true );
 ?>
 <div
