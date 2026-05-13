@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { QRCodeSVG } from 'qrcode.react';
-import React, { createInterpolateElement, useEffect } from '@wordpress/element';
+import React, {
+	createInterpolateElement,
+	useEffect,
+	useRef,
+} from '@wordpress/element';
 import { Button, Spinner } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
@@ -14,6 +18,11 @@ import { Link } from '@woocommerce/components';
 import { useQRLoginToken, QRLoginTokenStates } from './useQRLoginToken';
 
 export const QRDirectLoginCode = () => {
+	// Tracks whether _displayed has already fired for this mount so that
+	// subsequent successful refreshes (which re-enter the READY state) only
+	// emit _refreshed and don't over-count first-displays in the funnel.
+	const displayedTrackedRef = useRef( false );
+
 	const {
 		state,
 		qrUrl,
@@ -23,6 +32,10 @@ export const QRDirectLoginCode = () => {
 		refreshToken,
 	} = useQRLoginToken( {
 		onReady: () => {
+			if ( displayedTrackedRef.current ) {
+				return;
+			}
+			displayedTrackedRef.current = true;
 			recordEvent( 'mobile_app_qr_direct_login_displayed' );
 		},
 		onError: ( errorCode ) => {
