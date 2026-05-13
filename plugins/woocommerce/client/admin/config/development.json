@@ -45,6 +45,7 @@
 		"product-editor-template-system": false,
 		"use-wp-horizon": false,
 		"rest-api-v4": false,
+		"order-detail-redesign": false,
 		"product-variations-classic-redesign": false
 	}
 }

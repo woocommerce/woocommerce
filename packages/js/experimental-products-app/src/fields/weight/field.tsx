@@ -23,6 +23,7 @@ const fieldDefinition = {
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
 	label: __( 'Weight', 'woocommerce' ),
+	isVisible: ( item ) => ! item.virtual,
 	Edit: ( { data, onChange, field } ) => {
 		const {
 			record: storeProductsSettings,
