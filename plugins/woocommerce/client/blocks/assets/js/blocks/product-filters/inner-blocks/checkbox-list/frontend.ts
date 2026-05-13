@@ -47,6 +47,9 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 				if ( isExpanded ) return false;
 				const item = getParentItem( storeNamespace );
 				if ( ! item ) return false;
+				if ( 'hidden' in item && item.hidden ) {
+					return true;
+				}
 				if ( item.selected ) return false;
 				if ( item.index === undefined ) return false;
 				return item.index >= displayLimit;

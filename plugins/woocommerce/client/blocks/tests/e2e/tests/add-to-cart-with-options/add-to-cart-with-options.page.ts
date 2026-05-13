@@ -114,7 +114,7 @@ class AddToCartWithOptionsPage {
 		autoselect,
 		disabledAttributesAction,
 	}: {
-		optionStyle?: 'pills' | 'dropdown';
+		optionStyle?: 'chips' | 'dropdown';
 		autoselect?: boolean;
 		disabledAttributesAction?: 'disable' | 'hide';
 	} = {} ) {
@@ -137,10 +137,12 @@ class AddToCartWithOptionsPage {
 		);
 		await this.editor.selectBlocks( attributeOptionsBlock.first() );
 
-		// Option style attribute.
+		// Option style attribute (inner block titles: Chips, Dropdown).
 		if ( optionStyle ) {
+			const styleLabel =
+				optionStyle === 'dropdown' ? 'Dropdown' : 'Chips';
 			const optionStyleInput = page.getByRole( 'radio', {
-				name: optionStyle,
+				name: styleLabel,
 			} );
 			await optionStyleInput.click();
 		}
@@ -195,22 +197,24 @@ class AddToCartWithOptionsPage {
 	async selectVariationSelectorOptions(
 		attributeName: string,
 		attributeValue: string,
-		optionStyle: 'pills' | 'dropdown'
+		optionStyle: 'chips' | 'dropdown'
 	) {
 		if ( optionStyle === 'dropdown' ) {
 			await this.page
-				.getByLabel( attributeName )
+				.getByLabel( attributeName, { exact: true } )
 				.selectOption( attributeValue );
-		} else if ( attributeValue !== '' ) {
-			await this.page
-				.getByLabel( attributeName )
-				.getByText( attributeValue )
+			return;
+		}
+		const group = this.page.getByRole( 'radiogroup', {
+			name: attributeName,
+		} );
+		if ( attributeValue !== '' ) {
+			await group
+				.getByRole( 'checkbox', { name: attributeValue, exact: true } )
 				.click();
 		} else {
-			await this.page
-				.getByLabel( attributeName )
-				.locator( 'label:has(:checked)' )
-				.click();
+			const selected = group.getByRole( 'checkbox', { checked: true } );
+			await selected.click();
 		}
 	}
 
@@ -222,16 +226,19 @@ class AddToCartWithOptionsPage {
 			visible: boolean;
 		}[],
 		expectedValues: Record< string, string | RegExp > = {},
-		optionStyle: 'pills' | 'dropdown'
+		optionStyle: 'chips' | 'dropdown'
 	) {
 		for ( let {
 			name: attributeName,
 			options: attributeValues,
 		} of productAttributes ) {
-			const attributeNameLocator = this.page.getByLabel( attributeName, {
-				exact: true,
-			} );
 			if ( optionStyle === 'dropdown' ) {
+				const attributeNameLocator = this.page.getByLabel(
+					attributeName,
+					{
+						exact: true,
+					}
+				);
 				let expectedValue: string | RegExp;
 				if (
 					attributeName in expectedValues &&
@@ -246,27 +253,32 @@ class AddToCartWithOptionsPage {
 				);
 				continue;
 			}
+			const group = this.page.getByRole( 'radiogroup', {
+				name: attributeName,
+			} );
 			if (
 				attributeName in expectedValues &&
 				expectedValues[ attributeName ] !== ''
 			) {
 				attributeValues = attributeValues.filter(
 					( item ) => item !== expectedValues[ attributeName ]
-				); // Omit attributeName
+				);
 				await expect(
-					attributeNameLocator.getByLabel(
-						expectedValues[ attributeName ],
-						{ exact: true }
-					)
+					group.getByRole( 'checkbox', {
+						name: String( expectedValues[ attributeName ] ),
+						exact: true,
+					} )
 				).toBeChecked();
 			}
 			if ( attributeValues.length ) {
 				for ( const attributeValue of attributeValues ) {
-					await expect(
-						attributeNameLocator.getByLabel( attributeValue, {
-							exact: true,
-						} )
-					).not.toBeChecked();
+					const checkbox = group.getByRole( 'checkbox', {
+						name: attributeValue,
+						exact: true,
+					} );
+					if ( ( await checkbox.count() ) > 0 ) {
+						await expect( checkbox ).not.toBeChecked();
+					}
 				}
 			}
 		}

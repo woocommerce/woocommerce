@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions;
 use Automattic\WooCommerce\Blocks\BlockTypes\AbstractBlock;
 use Automattic\WooCommerce\Blocks\BlockTypes\EnableBlockJsonAssetsTrait;
 use Automattic\WooCommerce\Blocks\Utils\StyleAttributesUtils;
+use WP_Block;
 
 /**
  * Block type for variation selector attribute options in add to cart with options.
@@ -41,17 +42,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			return '';
 		}
 
-		$attribute_slug = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
-
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
-		$option_style = array_key_exists( 'optionStyle', $attributes ) ? $attributes['optionStyle'] : null;
-
-		// During the beta period, `optionStyle` was called `style`, so we check
-		// `style` for backwards compatibility.
-		if ( ! $option_style && array_key_exists( 'style', $attributes ) && 'dropdown' === $attributes['style'] ) {
-			$option_style = 'dropdown';
-		}
+		$option_style = $this->resolve_option_style( $attributes );
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
@@ -60,17 +53,44 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			)
 		);
 
-		if ( 'dropdown' === $option_style ) {
-			$content = $this->render_dropdown( $attributes, $content, $block );
-		} else {
-			$content = $this->render_pills( $attributes, $content, $block );
-		}
+		$content = $this->render_attribute_options( $attributes, $block, $option_style );
 
 		return sprintf(
 			'<div %s>%s</div>',
 			$wrapper_attributes,
 			$content
 		);
+	}
+
+	/**
+	 * Resolve option style from attributes, including legacy keys.
+	 *
+	 * @param array $attributes Block attributes.
+	 * @return string 'chips' or 'dropdown'.
+	 */
+	protected function resolve_option_style( array $attributes ): string {
+		$option_style = array_key_exists( 'optionStyle', $attributes ) ? $attributes['optionStyle'] : null;
+
+		// During the beta period, `optionStyle` was called `style`, so we check
+		// `style` for backwards compatibility.
+		if ( ! $option_style && array_key_exists( 'style', $attributes ) && 'dropdown' === $attributes['style'] ) {
+			$option_style = 'dropdown';
+		}
+
+		if ( 'dropdown' === $option_style ) {
+			return 'dropdown';
+		}
+
+		// Legacy `pills` matches the new chips presentation.
+		if ( 'pills' === $option_style ) {
+			return 'chips';
+		}
+
+		if ( 'chips' === $option_style ) {
+			return 'chips';
+		}
+
+		return 'chips';
 	}
 
 	/**
@@ -131,148 +151,122 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	}
 
 	/**
-	 * Render the attribute options as pills.
+	 * Build selectable items for the inner block protocol and client context.
+	 *
+	 * @param string $attribute_slug Attribute slug.
+	 * @param array  $attribute_terms Terms from context.
+	 * @return array<int, array<string, mixed>>
+	 */
+	protected function build_variation_selectable_items( string $attribute_slug, array $attribute_terms ): array {
+		$id_prefix = sanitize_title( $attribute_slug );
+		$items     = array();
+
+		foreach ( $attribute_terms as $attribute_term ) {
+			if ( ! is_array( $attribute_term ) || ! isset( $attribute_term['value'], $attribute_term['label'] ) ) {
+				continue;
+			}
+			$value   = (string) $attribute_term['value'];
+			$slug    = sanitize_title( $value );
+			$items[] = array(
+				'id'        => $id_prefix . '-' . $slug,
+				'label'     => (string) $attribute_term['label'],
+				'value'     => $value,
+				'ariaLabel' => (string) $attribute_term['label'],
+			);
+		}
+
+		return $items;
+	}
+
+	/**
+	 * Render attribute options using selectable inner blocks (chips / dropdown).
 	 *
 	 * @param array     $attributes Block attributes.
-	 * @param string    $content Block content.
 	 * @param \WP_Block $block Block instance.
-	 * @return string The pills.
+	 * @param string    $option_style Resolved option style.
+	 * @return string
 	 */
-	protected function render_pills( $attributes, $content, $block ) {
-		$attribute_id               = $block->context['woocommerce/attributeId'];
-		$attribute_slug             = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
-		$attribute_terms            = $block->context['woocommerce/attributeTerms'];
-		$autoselect                 = $attributes['autoselect'] ?? false;
-		$disabled_attributes_action = $attributes['disabledAttributesAction'] ?? 'disable';
+	protected function render_attribute_options( array $attributes, WP_Block $block, string $option_style ): string {
+		$attribute_id    = $block->context['woocommerce/attributeId'];
+		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
+		$attribute_terms = $block->context['woocommerce/attributeTerms'];
+		$autoselect      = $attributes['autoselect'] ?? false;
+		$disabled_action = $attributes['disabledAttributesAction'] ?? 'disable';
 
-		wp_interactivity_state(
-			'woocommerce/add-to-cart-with-options',
+		$variation_items = $this->build_variation_selectable_items( $attribute_slug, $attribute_terms );
+
+		$default_selected = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
+
+		$selectable_items_context = array(
+			'items'          => $variation_items,
+			'selectionMode'  => 'single',
+			'storeNamespace' => 'woocommerce/add-to-cart-with-options',
+			'groupLabel'     => '',
+		);
+
+		if ( 'dropdown' === $option_style ) {
+			$selectable_items_context['selectElementId']       = $attribute_id;
+			$selectable_items_context['selectAccessibleLabel'] = wc_attribute_label(
+				$block->context['woocommerce/attributeName']
+			);
+		}
+
+		$merged_context = array_merge(
+			$block->context,
 			array(
-				'isOptionSelected' =>
-				function () {
-					$context = wp_interactivity_get_context();
-
-					return $context['option']['value'] === $context['selectedValue'];
-				},
+				'woocommerceSelectableItems' => $selectable_items_context,
 			)
 		);
 
-		$pills = '';
-		foreach ( $attribute_terms as $attribute_term ) {
-			$input = sprintf(
-				'<input type="radio" %s/>',
-				$this->get_normalized_attributes(
-					array(
-						'class'                  => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input',
-						'name'                   => $attribute_slug,
-						'value'                  => $attribute_term['value'],
-						'data-wp-bind--checked'  => 'state.isOptionSelected',
-						'data-wp-bind--disabled' => 'state.isOptionDisabled',
-						'data-wp-bind--hidden'   => 'hide' === $disabled_attributes_action ? 'state.isOptionDisabled' : null,
-						'data-wp-on--click'      => 'actions.handlePillClick',
-						'data-wp-on--keydown'    => 'actions.handleKeyDown',
-						'data-wp-context'        => array(
-							'option' => $attribute_term,
-						),
-					),
-				)
+		$inner_blocks = $block->parsed_block['innerBlocks'] ?? array();
+		if ( empty( $inner_blocks ) ) {
+			$default_block_name = 'dropdown' === $option_style ? 'woocommerce/product-filter-dropdown' : 'woocommerce/product-filter-chips';
+			$inner_blocks       = array(
+				array(
+					'blockName'    => $default_block_name,
+					'attrs'        => array(),
+					'innerBlocks'  => array(),
+					'innerHTML'    => '',
+					'innerContent' => array(),
+				),
 			);
+		}
 
-			$pills .= '<label class="wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill">' . $input . esc_html( $attribute_term['label'] ) . '</label>';
+		$inner_html = '';
+		foreach ( $inner_blocks as $inner_block ) {
+			if ( ! is_array( $inner_block ) || empty( $inner_block['blockName'] ) ) {
+				continue;
+			}
+			$inner_html .= ( new WP_Block( $inner_block, $merged_context ) )->render();
+		}
+
+		$interactive_context = array(
+			'name'                      => wc_attribute_label( $block->context['woocommerce/attributeName'] ),
+			'variationAttributeOptions' => $variation_items,
+			'selectedValue'             => $default_selected,
+			'autoselect'                => $autoselect,
+			'disabledAttributesAction'  => $disabled_action,
+		);
+
+		$interactive_attributes = array(
+			'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
+			'data-wp-context'     => (string) wp_json_encode(
+				$interactive_context,
+				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
+			),
+			'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
+		);
+
+		if ( 'dropdown' !== $option_style ) {
+			$interactive_attributes['role']            = 'radiogroup';
+			$interactive_attributes['id']              = $attribute_id;
+			$interactive_attributes['aria-labelledby'] = $attribute_id . '_label';
 		}
 
 		return sprintf(
 			'<div %s>%s</div>',
-			$this->get_normalized_attributes(
-				array(
-					'class'           => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills',
-					'role'            => 'radiogroup',
-					'id'              => $attribute_id,
-					'aria-labelledby' => $attribute_id . '_label',
-					'data-wp-context' => array(
-						'name'          => wc_attribute_label( $block->context['woocommerce/attributeName'] ),
-						'options'       => $attribute_terms,
-						'selectedValue' => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
-						'focused'       => '',
-						'autoselect'    => $autoselect,
-					),
-					'data-wp-init'    => 'callbacks.setDefaultSelectedAttribute',
-				),
-			),
-			$pills,
-		);
-	}
-
-	/**
-	 * Render the attribute options as a dropdown.
-	 *
-	 * @param array     $attributes Block attributes.
-	 * @param string    $content Block content.
-	 * @param \WP_Block $block Block instance.
-	 * @return string The dropdown.
-	 */
-	protected function render_dropdown( $attributes, $content, $block ) {
-		$attribute_id    = $block->context['woocommerce/attributeId'];
-		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
-		$attribute_terms = $block->context['woocommerce/attributeTerms'];
-		$default_option  = array(
-			'label'      => esc_html__( 'Choose an option', 'woocommerce' ),
-			'value'      => '',
-			'isSelected' => false,
-		);
-
-		$attribute_terms = array_merge(
-			array( $default_option ),
-			$attribute_terms
-		);
-
-		$selected_attribute         = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
-		$autoselect                 = $attributes['autoselect'] ?? false;
-		$disabled_attributes_action = $attributes['disabledAttributesAction'] ?? 'disable';
-
-		$options = '';
-		foreach ( $attribute_terms as $attribute_term ) {
-			$option_attributes = array(
-				'value'                  => $attribute_term['value'],
-				'data-wp-bind--selected' => 'state.isOptionSelected',
-				'data-wp-bind--disabled' => 'state.isOptionDisabled',
-				'data-wp-bind--hidden'   => 'hide' === $disabled_attributes_action ? 'state.isOptionDisabled' : null,
-				'data-wp-context'        => array(
-					'option' => $attribute_term,
-				),
-			);
-
-			if ( $attribute_term['value'] === $selected_attribute ) {
-				$option_attributes['selected'] = 'selected';
-			}
-
-			$options .= sprintf(
-				'<option %s>%s</option>',
-				$this->get_normalized_attributes(
-					$option_attributes
-				),
-				esc_html( $attribute_term['label'] )
-			);
-		}
-
-		return sprintf(
-			'<select %s>%s</select>',
-			$this->get_normalized_attributes(
-				array(
-					'class'              => 'wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown',
-					'id'                 => $attribute_id,
-					'data-wp-context'    => array(
-						'name'          => wc_attribute_label( $block->context['woocommerce/attributeName'] ),
-						'options'       => $attribute_terms,
-						'selectedValue' => $selected_attribute,
-						'autoselect'    => $autoselect,
-					),
-					'data-wp-init'       => 'callbacks.setDefaultSelectedAttribute',
-					'data-wp-on--change' => 'actions.handleDropdownChange',
-					'name'               => $attribute_slug,
-				),
-			),
-			$options,
+			get_block_wrapper_attributes( $interactive_attributes ),
+			$inner_html
 		);
 	}
 }

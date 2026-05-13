@@ -8,7 +8,7 @@ This document defines the **context protocol pattern** used by WooCommerce block
 
 | Context Key | Purpose | Inner Blocks |
 | --- | --- | --- |
-| `woocommerceSelectableItems` | Select/deselect items (filters, variations) | checkbox-list, chips, dropdown |
+| `woocommerceSelectableItems` | Select/deselect items (filters, variation attributes) | checkbox-list, chips, dropdown |
 | `woocommerceRemovableItems` | Remove individual items (active filters) | removable-chips |
 | `woocommerceRangeInput` | Numeric range input (price, slider) | price-slider |
 
@@ -176,7 +176,7 @@ The store registered under `storeNamespace` MUST expose:
 
 | Name | Kind | Contract |
 | --- | --- | --- |
-| `state.selectableItems` | getter | Returns iterable of items with `selected: boolean` and `index: number` derived. Items come from `getServerContext().items` (so they refresh after navigation) merged with the client SSOT (`activeFilters`). Reactive — re-evaluates when SSOT changes. |
+| `state.selectableItems` | getter | Returns iterable of items with `selected: boolean` and `index: number` derived. For product filters, items come from `getServerContext().items` (so they refresh after navigation) merged with the client SSOT (`activeFilters`). Other parents (e.g. variation attribute options) may use a dedicated server context field such as `variationAttributeOptions` on the same interactive scope. Reactive — re-evaluates when SSOT changes. |
 | `actions.toggle` | action | Toggles selection for the target item. Accepts an optional `item` argument (used when an inner block proxies the call via its own store); when omitted, falls back to `getContext().item`. Mutates parent's SSOT (e.g. `activeFilters`). |
 
 Fixed names (not configurable). The getter is `selectableItems` (not `items`) to avoid colliding with other protocols (`removableItems`, etc.) when multiple protocols live on the same store namespace.
@@ -205,6 +205,16 @@ myStore satisfies SelectableItemsParentStore;
 - **`actions.toggle`** mutates SSOT only. Never touches raw `item.selected`. It reads `getContext().item` which is set by `data-wp-each` under the parent namespace (the items region switches to the parent namespace precisely so this works).
 
 External mutations (active-filter removal, cross-block sync) flow through automatically: mutate `activeFilters` → `state.selectableItems` re-evaluates → every `context.item.selected` binding updates across all blocks.
+
+### Variation selector attribute options
+
+The block `woocommerce/add-to-cart-with-options-variation-selector-attribute-options` is a Selectable Items parent on the `woocommerce/add-to-cart-with-options` store. It nests the same inner blocks as product filters (`woocommerce/product-filter-chips`, `woocommerce/product-filter-dropdown`) and passes `woocommerceSelectableItems` when rendering.
+
+- **SSOT**: `context.selectedAttributes` on the add-to-cart form (same as the legacy variation UI).
+- **Server / merged context**: `variationAttributeOptions` (list of `{ id, label, value, ariaLabel? }`) plus `name` (attribute label), `selectedValue`, `autoselect`, and `disabledAttributesAction` on the attribute row wrapper so `state.selectableItems` and `actions.toggle` can run without filter-only APIs.
+- **Optional context for dropdown**: `selectElementId` and `selectAccessibleLabel` on `woocommerceSelectableItems` let the shared dropdown block use a stable `<select id>` and accessible name (for example so the attribute name `<label for>` continues to reference the control on the storefront).
+
+Invalid combinations may set `disabled` and `hidden` on items; chips hide items when `hidden` is true (see `woocommerce/product-filter-chips` store `itemHidden`).
 
 ### Rendering Rules
 
@@ -268,6 +278,7 @@ export type SelectableItem< T = unknown > = (
 	value: string;
 	selected?: boolean;
 	disabled?: boolean;
+	hidden?: boolean;
 	type?: string;
 } & T;
 
@@ -278,6 +289,8 @@ export interface SelectableItemsContext< T = unknown > {
 	groupLabel?: string;
 	isLoading?: boolean;
 	filterType?: string;
+	selectElementId?: string;
+	selectAccessibleLabel?: string;
 }
 
 export type SelectableItemsBlockContext< T = unknown > = {

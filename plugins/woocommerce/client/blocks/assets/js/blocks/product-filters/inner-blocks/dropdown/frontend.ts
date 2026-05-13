@@ -6,32 +6,35 @@ import { store, getContext } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type { ProductFiltersStore } from '../../frontend';
-import type { FilterOptionItem } from '../../types';
+import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
 
 type DropdownContext = {
 	storeNamespace: string;
 	filterItemType: string;
 };
 
-type SelectableRow = FilterOptionItem & {
-	selected?: boolean;
-	value?: string;
-	type?: string;
+type SelectableParent = {
+	state: {
+		selectableItems: readonly SelectableItem[];
+	};
+	actions: {
+		toggle: ( item?: SelectableItem ) => void;
+		navigate?: () => void;
+		removeActiveFiltersBy?: (
+			callback: ( item: { type: string; value: string } ) => boolean
+		) => void;
+	};
 };
 
 function isToggleableItem(
-	item: SelectableRow | undefined
-): item is FilterOptionItem & {
-	type: string;
-	value: string;
-} {
+	item: SelectableItem | undefined
+): item is SelectableItem & { value: string } {
 	return (
 		!! item &&
-		typeof item.type === 'string' &&
-		item.type.length > 0 &&
 		typeof item.value === 'string' &&
-		item.value.length > 0
+		item.value.length > 0 &&
+		! item.disabled &&
+		! item.hidden
 	);
 }
 
@@ -41,7 +44,7 @@ store(
 		state: {
 			get selectValue(): string {
 				const { storeNamespace } = getContext< DropdownContext >();
-				const parent = store< ProductFiltersStore >( storeNamespace );
+				const parent = store< SelectableParent >( storeNamespace );
 				const items = Array.isArray( parent.state.selectableItems )
 					? parent.state.selectableItems
 					: [];
@@ -55,16 +58,16 @@ store(
 				if ( ! ( target instanceof HTMLSelectElement ) ) {
 					return;
 				}
-				const { storeNamespace, filterItemType } =
-					getContext< DropdownContext >();
-				const parent = store< ProductFiltersStore >( storeNamespace );
+				const { storeNamespace } = getContext< DropdownContext >();
+				const parent = store< SelectableParent >( storeNamespace );
 				const value = target.value;
 
-				// Clear previously selected option.
-				if ( filterItemType ) {
-					parent.actions.removeActiveFiltersBy(
-						( filter ) => filter.type === filterItemType
-					);
+				if ( value === '' ) {
+					// Product Filters: clear active filters for this filter type.
+					if ( typeof parent.actions.navigate === 'function' ) {
+						parent.actions.navigate();
+					}
+					return;
 				}
 
 				const items = Array.isArray( parent.state.selectableItems )
@@ -72,9 +75,10 @@ store(
 					: [];
 				const row = items.find( ( item ) => item.value === value );
 
-				// Don't try to toggle empty option ("") or invalid options.
 				if ( ! isToggleableItem( row ) ) {
-					parent.actions.navigate();
+					if ( typeof parent.actions.navigate === 'function' ) {
+						parent.actions.navigate();
+					}
 					return;
 				}
 

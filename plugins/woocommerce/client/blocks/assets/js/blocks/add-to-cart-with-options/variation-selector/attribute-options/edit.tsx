@@ -1,17 +1,22 @@
 /**
  * External dependencies
  */
-import clsx from 'clsx';
+import { useMemo } from '@wordpress/element';
 import { useCustomDataContext } from '@woocommerce/shared-context';
 import type { ProductResponseAttributeItem } from '@woocommerce/types';
 import { __ } from '@wordpress/i18n';
-import { InspectorControls, useBlockProps } from '@wordpress/block-editor';
+import {
+	BlockContextProvider,
+	InspectorControls,
+	useBlockProps,
+	useInnerBlocksProps,
+} from '@wordpress/block-editor';
 import { type BlockEditProps } from '@wordpress/blocks';
 import {
-	Disabled,
-	SelectControl,
 	ToggleControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControl as ToggleGroupControl,
+	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
 	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
@@ -22,51 +27,40 @@ import {
 /**
  * Internal dependencies
  */
-import { useThemeColors } from '../../../../shared/hooks/use-theme-colors';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
+import type { FilterItemFields } from '../../../product-filters/types';
+import {
+	DisplayStyleSwitcher,
+	resetDisplayStyleBlock,
+} from '../../../product-filters/components/display-style-switcher';
+
+const INNER_CHIPS = 'woocommerce/product-filter-chips';
+const INNER_DROPDOWN = 'woocommerce/product-filter-dropdown';
+
+function optionStyleToBlockName(
+	optionStyle: 'chips' | 'dropdown' | 'pills'
+): typeof INNER_CHIPS | typeof INNER_DROPDOWN {
+	if ( optionStyle === 'dropdown' ) {
+		return INNER_DROPDOWN;
+	}
+	return INNER_CHIPS;
+}
+
+function blockNameToOptionStyle( blockName: string ): 'chips' | 'dropdown' {
+	return blockName === INNER_DROPDOWN ? 'dropdown' : 'chips';
+}
 
 interface Attributes {
 	className?: string;
-	optionStyle: 'pills' | 'dropdown';
+	optionStyle: 'chips' | 'dropdown' | 'pills';
 	autoselect: boolean;
 	disabledAttributesAction: 'disable' | 'hide';
-}
-
-function Pills( {
-	id,
-	options,
-}: {
-	id: string;
-	options: SelectControl.Option[];
-} ) {
-	return (
-		<ul
-			id={ id }
-			className="wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills"
-		>
-			{ options.map( ( option, index ) => (
-				<li
-					key={ option.value }
-					className={ clsx(
-						'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill',
-						{
-							'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected':
-								index === 0,
-							'wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--disabled':
-								option.disabled,
-						}
-					) }
-				>
-					{ option.label }
-				</li>
-			) ) }
-		</ul>
-	);
 }
 
 export default function AttributeOptionsEdit(
 	props: BlockEditProps< Attributes >
 ) {
-	const { attributes, setAttributes } = props;
+	const { attributes, setAttributes, clientId } = props;
 	const { className, optionStyle, autoselect, disabledAttributesAction } =
 		attributes;
 
@@ -74,69 +68,87 @@ export default function AttributeOptionsEdit(
 		className,
 	} );
 
-	// Apply selected variation pill styles based on Site Editor's background and text colors.
-	useThemeColors(
-		'add-to-cart-with-options-variation-selector-attribute-options',
-		( { editorBackgroundColor, editorColor } ) => `
-			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill--selected) {
-				--pill-color: ${ editorBackgroundColor };
-				--pill-background-color: ${ editorColor };
-			}
-		`
-	);
-
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
-	if ( ! attribute ) return null;
+	const selectableContext = useMemo( () => {
+		if ( ! attribute ) {
+			return {
+				items: [] as SelectableItemsContext< FilterItemFields >[ 'items' ],
+				selectionMode: 'single' as const,
+				storeNamespace: 'woocommerce/add-to-cart-with-options',
+				groupLabel: '',
+			} satisfies SelectableItemsContext< FilterItemFields >;
+		}
 
-	const options = attribute.terms.map( ( term, index ) => ( {
-		value: term.slug,
-		label: term.name,
-		disabled: index > 1 && index === attribute.terms.length - 1,
-	} ) );
+		const items = attribute.terms.map( ( term ) => ( {
+			id: `${ attribute.taxonomy }-${ term.slug }`,
+			label: term.name,
+			value: term.slug,
+			ariaLabel: term.name,
+			count: 0,
+			termId: term.id,
+		} ) );
+
+		return {
+			items,
+			selectionMode: 'single' as const,
+			storeNamespace: 'woocommerce/add-to-cart-with-options',
+			groupLabel: '',
+		} satisfies SelectableItemsContext< FilterItemFields >;
+	}, [ attribute ] );
+
+	const { children, ...innerBlocksProps } = useInnerBlocksProps(
+		{
+			role: 'radiogroup',
+			id: attribute?.taxonomy,
+			'aria-label': attribute?.name,
+		},
+		{
+			allowedBlocks: [ INNER_CHIPS, INNER_DROPDOWN ],
+			template: [ [ optionStyleToBlockName( optionStyle ) ] ],
+			templateLock: 'all',
+		}
+	);
+
+	if ( ! attribute ) return null;
 
 	return (
 		<div { ...blockProps }>
 			<InspectorControls>
 				<ToolsPanel
 					label={ __( 'Style', 'woocommerce' ) }
-					resetAll={ () => setAttributes( { optionStyle: 'pills' } ) }
+					resetAll={ () => {
+						setAttributes( { optionStyle: 'chips' } );
+						resetDisplayStyleBlock( clientId, INNER_CHIPS );
+					} }
 				>
 					<ToolsPanelItem
-						hasValue={ () => optionStyle !== 'pills' }
+						hasValue={ () => optionStyle === 'dropdown' }
 						label={ __( 'Style', 'woocommerce' ) }
-						onDeselect={ () =>
-							setAttributes( { optionStyle: 'pills' } )
-						}
+						onDeselect={ () => {
+							setAttributes( { optionStyle: 'chips' } );
+							resetDisplayStyleBlock( clientId, INNER_CHIPS );
+						} }
 						isShownByDefault
 					>
-						<ToggleGroupControl
-							label={ __( 'Style', 'woocommerce' ) }
-							value={ optionStyle }
-							onChange={ ( newOptionStyle ) => {
-								if (
-									newOptionStyle === 'pills' ||
-									newOptionStyle === 'dropdown'
-								) {
+						<div>
+							<span className="screen-reader-text">
+								{ __( 'Style', 'woocommerce' ) }
+							</span>
+							<DisplayStyleSwitcher
+								clientId={ clientId }
+								currentStyle={ optionStyleToBlockName(
+									optionStyle
+								) }
+								onChange={ ( value ) => {
 									setAttributes( {
-										optionStyle: newOptionStyle,
+										optionStyle:
+											blockNameToOptionStyle( value ),
 									} );
-								}
-							} }
-							isBlock
-							hideLabelFromVision
-							size="__unstable-large"
-						>
-							<ToggleGroupControlOption
-								value="pills"
-								label={ __( 'Pills', 'woocommerce' ) }
+								} }
 							/>
-							<ToggleGroupControlOption
-								value="dropdown"
-								label={ __( 'Dropdown', 'woocommerce' ) }
-							/>
-						</ToggleGroupControl>
+						</div>
 					</ToolsPanelItem>
 				</ToolsPanel>
 				<ToolsPanel
@@ -217,22 +229,13 @@ export default function AttributeOptionsEdit(
 				</ToolsPanel>
 			</InspectorControls>
 
-			<Disabled>
-				{ optionStyle === 'dropdown' ? (
-					<select
-						id={ attribute.taxonomy }
-						className="wc-block-add-to-cart-with-options-variation-selector-attribute-options__dropdown"
-					>
-						{ options.map( ( option ) => (
-							<option key={ option.value } value={ option.value }>
-								{ option.label }
-							</option>
-						) ) }
-					</select>
-				) : (
-					<Pills id={ attribute.taxonomy } options={ options } />
-				) }
-			</Disabled>
+			<BlockContextProvider
+				value={ {
+					woocommerceSelectableItems: selectableContext,
+				} }
+			>
+				<div { ...innerBlocksProps }>{ children }</div>
+			</BlockContextProvider>
 		</div>
 	);
 }

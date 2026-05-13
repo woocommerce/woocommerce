@@ -36,11 +36,7 @@ function getClosestColor(
 }
 
 /**
- * Sets the appropriate styles for variation selector pills to ensure
- * visibility in both light and dark themes.
- *
- * This function swaps the text and background colors for selected pills
- * to create better contrast in all theme environments.
+ * Sets theme contrast hints for variation selector chips (and legacy pills)
  */
 function setStyles(): void {
 	/**
@@ -51,26 +47,34 @@ function setStyles(): void {
 	 * we only provide the option to customize the background color.
 	 */
 
-	// For simplicity, we only consider the background color of the first Variation Selector pills.
-	const pillsContainer = document.querySelector(
-		'.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills'
-	);
+	// Prefer chips (current UI); fall back to legacy pills markup if present.
+	const optionsContainer =
+		document.querySelector(
+			'.wc-block-add-to-cart-with-options-variation-selector-attribute-options .wc-block-product-filter-chips__items'
+		) ||
+		document.querySelector(
+			'.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills'
+		);
 
-	if ( ! pillsContainer ) {
+	if ( ! optionsContainer ) {
 		return;
 	}
 
 	const style = document.createElement( 'style' );
 
 	const selectedPillColor =
-		getClosestColor( pillsContainer, 'backgroundColor' ) || '#fff';
+		getClosestColor( optionsContainer, 'backgroundColor' ) || '#fff';
 	const selectedPillBackgroundColor =
-		getClosestColor( pillsContainer, 'color' ) || '#000';
+		getClosestColor( optionsContainer, 'color' ) || '#000';
 
 	// We use :where here to reduce specificity so customized colors and theme CSS take priority.
 	style.appendChild(
 		document.createTextNode(
-			`:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked)) {
+			`:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options .wc-block-product-filter-chips__item[aria-checked="true"]) {
+				--wc-product-filters-background-color: ${ selectedPillColor };
+				--wc-product-filters-text-color: ${ selectedPillBackgroundColor };
+			}
+			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked)) {
 				--pill-color: ${ selectedPillColor };
 				--pill-background-color: ${ selectedPillBackgroundColor };
 			}`

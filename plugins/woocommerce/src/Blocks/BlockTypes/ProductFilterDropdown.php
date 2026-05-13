@@ -24,11 +24,11 @@ final class ProductFilterDropdown extends AbstractBlock {
 	 * @return string
 	 */
 	private function get_option_text( array $item ): string {
-		if ( ! empty( $item['ariaLabel'] ) && is_string( $item['ariaLabel'] ) ) {
-			return $item['ariaLabel'];
-		}
 		if ( isset( $item['label'] ) && is_string( $item['label'] ) ) {
 			return wp_strip_all_tags( $item['label'] );
+		}
+		if ( ! empty( $item['ariaLabel'] ) && is_string( $item['ariaLabel'] ) ) {
+			return $item['ariaLabel'];
 		}
 		return '';
 	}
@@ -57,6 +57,14 @@ final class ProductFilterDropdown extends AbstractBlock {
 		$first       = reset( $items );
 		$filter_type = ( is_array( $first ) && ! empty( $first['type'] ) ) ? (string) $first['type'] : '';
 
+		$select_id = '';
+		if ( ! empty( $selectable_items['selectElementId'] ) && is_string( $selectable_items['selectElementId'] ) ) {
+			$select_id = $selectable_items['selectElementId'];
+		}
+		if ( '' === $select_id ) {
+			$select_id = wp_unique_id( 'wc-block-product-filter-dropdown-' );
+		}
+
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filter-dropdown',
 			'data-wp-context'     => (string) wp_json_encode(
@@ -68,12 +76,15 @@ final class ProductFilterDropdown extends AbstractBlock {
 			),
 		);
 
-		$select_id   = wp_unique_id( 'wc-block-product-filter-dropdown-' );
-		$show_counts = is_array( $first ) && array_key_exists( 'count', $first );
-		$label       = is_string( $selectable_items['groupLabel'] ) && '' !== $selectable_items['groupLabel']
+		$label = '';
+		if ( ! empty( $selectable_items['selectAccessibleLabel'] ) && is_string( $selectable_items['selectAccessibleLabel'] ) ) {
+			$label = $selectable_items['selectAccessibleLabel'];
+		} elseif ( is_string( $selectable_items['groupLabel'] ?? null ) && '' !== $selectable_items['groupLabel'] ) {
 			/** translators: %s: Attribute or filter type label. */
-			? sprintf( __( 'Select %s', 'woocommerce' ), $selectable_items['groupLabel'] )
-			: __( 'Select options', 'woocommerce' );
+			$label = sprintf( __( 'Select %s', 'woocommerce' ), $selectable_items['groupLabel'] );
+		} else {
+			$label = __( 'Select options', 'woocommerce' );
+		}
 
 		ob_start();
 		?>
@@ -90,7 +101,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 					<option value="">
 						<?php echo esc_html( $label ); ?>
 					</option>
-					<?php foreach ( $items as $item ) : ?>
+					<?php foreach ( $items as $index => $item ) : ?>
 						<?php
 						if ( ! is_array( $item ) ) {
 							continue;
@@ -101,19 +112,33 @@ final class ProductFilterDropdown extends AbstractBlock {
 						}
 						?>
 						<option
-							value="<?php echo esc_attr( isset( $item['value'] ) ? (string) $item['value'] : '' ); ?>"
-							<?php selected( ! empty( $item['selected'] ), true ); ?>
+							id="<?php echo esc_attr( $item['id'] ); ?>"
+							value="<?php echo esc_attr( $item['value'] ); ?>"
 							<?php disabled( ! empty( $item['disabled'] ) ); ?>
-						>
 							<?php
-							$option_output = $option_label;
-							if ( $show_counts && isset( $item['count'] ) ) {
-								$option_output .= ' (' . (string) $item['count'] . ')';
-							}
-							echo esc_html( $option_output );
+							if ( ! empty( $item['hidden'] ) ) :
+								?>
+							hidden
+								<?php
+							endif;
 							?>
+							data-wp-each-child
+						>
+							<?php echo esc_html( $option_label ); ?>
 						</option>
 					<?php endforeach; ?>
+					<template
+						data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
+						data-wp-each--item="state.selectableItems"
+						data-wp-each-key="context.item.id"
+					>
+						<option
+							data-wp-bind--value="context.item.value"
+							data-wp-bind--disabled="context.item.disabled"
+							data-wp-bind--hidden="woocommerce/product-filter-dropdown::state.itemHidden"
+							data-wp-text="context.item.label"
+						></option>
+					</template>
 				</select>
 			</fieldset>
 		</div>
