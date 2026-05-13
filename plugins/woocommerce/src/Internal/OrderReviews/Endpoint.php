@@ -93,19 +93,22 @@ class Endpoint {
 	 * @internal
 	 */
 	public function maybe_create_host_page(): void {
-		$existing = $this->find_existing_host_page();
-		if ( $existing instanceof WP_Post ) {
+		// 1. Adopt by slug only when the page also embeds our shortcode. The
+		//    combined signal avoids hijacking a merchant page that happens
+		//    to share either the slug or the shortcode in isolation.
+		$canonical = $this->find_canonical_host_page();
+		if ( $canonical instanceof WP_Post ) {
 			$option_id  = (int) wc_get_page_id( self::PAGE_KEY );
 			$needs_save = false;
 
-			if ( $option_id !== (int) $existing->ID ) {
-				update_option( 'woocommerce_review_order_page_id', (int) $existing->ID );
+			if ( $option_id !== (int) $canonical->ID ) {
+				update_option( 'woocommerce_review_order_page_id', (int) $canonical->ID );
 				$needs_save = true;
 			}
-			if ( 'publish' !== $existing->post_status ) {
+			if ( 'publish' !== $canonical->post_status ) {
 				wp_update_post(
 					array(
-						'ID'          => (int) $existing->ID,
+						'ID'          => (int) $canonical->ID,
 						'post_status' => 'publish',
 					)
 				);
@@ -117,8 +120,27 @@ class Endpoint {
 			return;
 		}
 
-		// No host page anywhere. Inject just our entry — the default array no
-		// longer carries it and we don't want to re-process every other WC page here.
+		// 2. No slug-canonical page. If the merchant renamed the host page
+		//    away from our default slug but the stored option still resolves,
+		//    respect that and only republish a draft we already own.
+		$option_id   = (int) wc_get_page_id( self::PAGE_KEY );
+		$option_page = $option_id > 0 ? get_post( $option_id ) : null;
+		if ( $option_page instanceof WP_Post && 'page' === $option_page->post_type && 'trash' !== $option_page->post_status ) {
+			if ( 'publish' !== $option_page->post_status ) {
+				wp_update_post(
+					array(
+						'ID'          => (int) $option_page->ID,
+						'post_status' => 'publish',
+					)
+				);
+				update_option( 'woocommerce_review_order_flush_rewrite_pending', 'yes' );
+			}
+			return;
+		}
+
+		// 3. No managed page anywhere. Inject just our entry — the default
+		//    array no longer carries it and we don't want to re-process every
+		//    other WC page here.
 		$inject_review_order = function (): array {
 			return array(
 				self::PAGE_KEY => array(
@@ -141,33 +163,21 @@ class Endpoint {
 	}
 
 	/**
-	 * Locate the Review Order host page in the database, preferring the row
-	 * that pretty-permalink routing will resolve to so the option stays in
-	 * sync with what `is_page()` will see on a real visit.
+	 * Return the slug-routed page if it also embeds our shortcode, so we only
+	 * adopt rows that are unambiguously WC-owned (matching slug alone or the
+	 * shortcode alone would hijack merchant-authored pages).
 	 *
 	 * @return WP_Post|null
 	 */
-	private function find_existing_host_page(): ?WP_Post {
-		$by_slug = get_page_by_path( _x( 'review-order', 'Page slug', 'woocommerce' ), OBJECT, 'page' );
-		if ( $by_slug instanceof WP_Post && 'trash' !== $by_slug->post_status ) {
-			return $by_slug;
-		}
-
-		// Slug missing or renamed; fall back to a shortcode-content lookup so
-		// we still adopt a page authored elsewhere with `[woocommerce_review_order]`.
-		global $wpdb;
-		$like = '%' . $wpdb->esc_like( '[' . self::SHORTCODE . ']' ) . '%';
-		$id   = (int) $wpdb->get_var(
-			$wpdb->prepare(
-				"SELECT ID FROM $wpdb->posts WHERE post_type = 'page' AND post_status NOT IN ( 'trash', 'auto-draft' ) AND post_content LIKE %s ORDER BY ID ASC LIMIT 1",
-				$like
-			)
-		);
-		if ( $id <= 0 ) {
+	private function find_canonical_host_page(): ?WP_Post {
+		$page = get_page_by_path( _x( 'review-order', 'Page slug', 'woocommerce' ), OBJECT, 'page' );
+		if ( ! $page instanceof WP_Post || 'trash' === $page->post_status ) {
 			return null;
 		}
-		$post = get_post( $id );
-		return $post instanceof WP_Post ? $post : null;
+		if ( false === strpos( (string) $page->post_content, '[' . self::SHORTCODE . ']' ) ) {
+			return null;
+		}
+		return $page;
 	}
 
 	/**
