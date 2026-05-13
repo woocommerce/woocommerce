@@ -180,6 +180,21 @@
 			}
 		} );
 
+		// Map a rail-root <li>'s DOM id to its tree slug. Used below to
+		// veto cascade injections whose resolved treeSlug is the same as
+		// the containing rail root (would duplicate the rail's own
+		// flyout — happens when a child's URL collides with the
+		// rail-root's `url` override, e.g. Marketing's Overview row
+		// resolves back to `woocommerce-marketing`).
+		var rootIdToSlug = {};
+		Object.keys( tree ).forEach( function ( slug ) {
+			if ( tree[ slug ].parent !== 'woocommerce' ) {
+				return;
+			}
+			var cssSlug = slug.replace( /[^A-Za-z0-9_-]/g, '-' );
+			rootIdToSlug[ 'toplevel_page_' + cssSlug ] = slug;
+		} );
+
 		// Find every rail-root flyout: any #adminmenu top-level <li> whose id
 		// starts with `toplevel_page_` and has a `.wp-submenu`. This covers both
 		// the legacy single-Woo-rail-item case (non-Woo pages) and the new
@@ -194,6 +209,19 @@
 
 			var treeSlug = urlToSlug[ href ];
 			if ( ! treeSlug ) {
+				return;
+			}
+
+			// Skip when the row resolves to its own containing rail-root's
+			// tree slug. The cascade's job is to inject grandkids; when
+			// the resolved treeSlug IS the rail root, byParent[treeSlug]
+			// is the rail's already-rendered children — injecting them
+			// produces a side-by-side duplicate flyout. (Happens when
+			// `urlToSlug` collides: rail-root has a `url` override that
+			// equals a leaf node's URL, e.g. Marketing's Overview row.)
+			var rootId   = $li.closest( 'li.menu-top' ).attr( 'id' ) || '';
+			var rootSlug = rootIdToSlug[ rootId ];
+			if ( rootSlug && treeSlug === rootSlug ) {
 				return;
 			}
 

@@ -199,8 +199,13 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'wc-admin&path=/marketing', $submenu );
 		$slugs = array_map( static fn( $entry ) => $entry[2], $submenu['wc-admin&path=/marketing'] );
+		// Compound bare slugs are rewritten to `admin.php?page=…` form so that
+		// WP's naked-href fallback in menu-header.php emits a valid relative URL.
 		$this->assertSame(
-			array( 'wc-admin&path=/marketing/overview', 'wc-admin&path=/marketing/coupons' ),
+			array(
+				'admin.php?page=wc-admin&path=/marketing/overview',
+				'admin.php?page=wc-admin&path=/marketing/coupons',
+			),
 			$slugs
 		);
 		$this->assertSame( 'Overview', $submenu['wc-admin&path=/marketing'][0][0] );
@@ -238,7 +243,10 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 		( new Native_Rail_Splicer() )->splice( $tree );
 
 		$this->assertSame( 'wc-admin&path=/marketing', apply_filters( 'parent_file', 'something-else' ) );
-		$this->assertSame( 'wc-admin&path=/marketing/coupons', apply_filters( 'submenu_file', 'something-else' ) );
+		// `submenu_file` is rewritten to the renderable URL so it matches the
+		// transformed `$sub_item[2]` in $submenu (which the renderer compares
+		// via `$submenu_file === $sub_item[2]` for `current` highlighting).
+		$this->assertSame( 'admin.php?page=wc-admin&path=/marketing/coupons', apply_filters( 'submenu_file', 'something-else' ) );
 	}
 
 	public function test_splice_preserves_grandchild_access_check_entries_as_hide_if_js(): void {

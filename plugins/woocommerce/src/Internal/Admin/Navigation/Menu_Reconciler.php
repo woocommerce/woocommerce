@@ -54,7 +54,12 @@ class Menu_Reconciler {
 	 */
 	public function __construct( ?Native_Rail_Splicer $splicer = null ) {
 		$this->splicer = $splicer ?? new Native_Rail_Splicer();
-		add_action( 'admin_menu', array( $this, 'reconcile' ), 999 );
+		// PHP_INT_MAX so we run after every other admin_menu registration —
+		// including ones that hook at high priorities (e.g. Klaviyo registers
+		// its `woocommerce-marketing` submenu at priority 1000, well after
+		// WP's default-priority plugins). If we ran earlier we'd build the
+		// tree from a partial $menu/$submenu and miss those slugs entirely.
+		add_action( 'admin_menu', array( $this, 'reconcile' ), PHP_INT_MAX );
 		add_filter( 'menu_order', array( $this, 'strip_phantom_slugs' ), 20 );
 		// Place Woo right after Dashboard. Runs after WC's own menu_order
 		// filter (priority 10) and our phantom strip (priority 20).
@@ -210,13 +215,22 @@ class Menu_Reconciler {
 			return $tree;
 		}
 
+		// Instantiate the settings pages so each one registers its
+		// `woocommerce_settings_tabs_array` callback. Then ask WC which tabs
+		// are actually displayable — that's what WC itself uses to decide
+		// which tab to render on `?page=wc-settings&tab=X`. Pages can opt
+		// out conditionally (e.g. WC_Settings_Tax only registers when
+		// `wc_tax_enabled()` is true). Iterating the raw page objects would
+		// list Tax in the rail on a tax-disabled store, but clicking it
+		// would fall through to General because WC doesn't recognise the
+		// tab.
+		\WC_Admin_Settings::get_settings_pages();
+		$tabs = (array) apply_filters( 'woocommerce_settings_tabs_array', array() );
+
 		$pos = 30; // After default Payments (10) and WooPayments (20); before Status (99).
-		foreach ( \WC_Admin_Settings::get_settings_pages() as $page ) {
-			if ( ! is_object( $page ) || ! method_exists( $page, 'get_id' ) || ! method_exists( $page, 'get_label' ) ) {
-				continue;
-			}
-			$id    = $page->get_id();
-			$label = Tree_Builder::clean_title( (string) $page->get_label() );
+		foreach ( $tabs as $id => $label ) {
+			$id    = (string) $id;
+			$label = Tree_Builder::clean_title( (string) $label );
 			if ( '' === $id || '' === $label ) {
 				continue;
 			}

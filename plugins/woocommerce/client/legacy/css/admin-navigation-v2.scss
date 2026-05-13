@@ -88,6 +88,23 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 	opacity: 0.6;
 }
 
+// The active rail-root's $entry[4] is tagged with `wp-has-current-submenu
+// wp-menu-open` by Native_Rail_Splicer::mark_root_current() so its submenu
+// renders inline. WP's `_wp_menu_output()` still also appends
+// `wp-not-current-submenu` (its else branch, line 104 of menu-header.php)
+// — that branch is guarded by `$parent_file === $item[2]` which can't be
+// made true for descendant pages where `get_admin_page_parent()` overrides
+// `$parent_file` to the `$_wp_real_parent_file` remap target or to the
+// page's original (non-Woo) parent.
+//
+// With both classes on the LI, admin-menu.css:206 wins (later in source) and
+// adds `border-left-width: 5px` to the inline submenu, shifting items 5px to
+// the right of the rail-root label. Reset the border so the active rail-root's
+// inline submenu aligns left.
+#adminmenu li.menu-top.wp-has-current-submenu.wp-not-current-submenu > .wp-submenu {
+	border: 0 none;
+}
+
 // Spec §6.3: touch devices do not get the hover cascade. Tapping a cascade
 // parent (Settings, Marketing, etc.) navigates directly.
 //

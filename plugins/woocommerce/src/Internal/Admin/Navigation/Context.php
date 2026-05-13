@@ -66,7 +66,18 @@ final class Context {
 			// the page actually lives at `tools.php?page=action-scheduler`).
 			$match_target = $node['url'] ?? $slug;
 			list( $path, $expected_params ) = self::decompose_slug( $match_target );
-			if ( $current_pagenow !== $path ) {
+
+			// Pagenow check: only enforce when the slug declares an explicit
+			// `.php` path (`edit.php?…`, `tools.php?…`). Bare slugs and bare
+			// compound slugs (`wc-admin&path=/…`) implicitly mean admin.php,
+			// but the same logical page can also be reached via its parent's
+			// pagenow with `&page=<slug>` — e.g. a submenu of
+			// `edit.php?post_type=product` is accessed at that pagenow, not
+			// at admin.php. Skip the pagenow check in that case; the param
+			// match below still ensures we only accept URLs whose
+			// `page=<slug>` agrees.
+			$has_explicit_path = ( false !== strpos( $match_target, '?' ) );
+			if ( $has_explicit_path && $current_pagenow !== $path ) {
 				continue;
 			}
 
@@ -81,7 +92,19 @@ final class Context {
 				continue;
 			}
 
+			// Score by number of matched expected params, plus a heavy boost
+			// when the slug's `page=` value agrees with the request's `page=`.
+			// The boost ensures a bare submenu slug (`product_attributes`)
+			// wins over its parent rail-root slug (`edit.php?post_type=product`)
+			// when both technically match the same URL.
 			$specificity = count( $expected_params );
+			if (
+				isset( $expected_params['page'], $current_params['page'] )
+				&& (string) $expected_params['page'] === (string) $current_params['page']
+			) {
+				$specificity += 100;
+			}
+
 			if ( $specificity > $best_specs ) {
 				$best       = (string) $slug;
 				$best_specs = $specificity;

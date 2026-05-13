@@ -43,7 +43,68 @@ class Native_Rail_Splicer {
 		$this->insert_woo_roots( $tree );
 		$this->populate_root_submenus( $tree );
 		$this->preserve_access_check_entries( $tree, $pre_splice_submenu_woocommerce );
+		$this->map_real_parents_for_access_checks( $tree );
 		$this->force_current_highlight( $tree );
+
+		// Some WC subsystems (importers, exporters) register
+		// `add_submenu_page` entries on `admin_menu` and then unset them
+		// from $submenu on `admin_head` so the URL works but the menu item
+		// is hidden. That admin_head pass runs after our splicer and wipes
+		// the rail entries we just wrote. Re-populate after WP's
+		// admin_head action has finished so menu-header.php sees our
+		// version — capture by ref since the same instance is reused for
+		// the action callback context.
+		add_action(
+			'admin_head',
+			function () use ( $tree ) {
+				$this->populate_root_submenus( $tree );
+			},
+			PHP_INT_MAX
+		);
+	}
+
+	/**
+	 * Remap each spliced bare-slug rail root back to `woocommerce` via
+	 * `$_wp_real_parent_file`, so that `user_can_access_admin_page()` resolves
+	 * the slug's hookname to the registration WC originally created.
+	 *
+	 * Background: after `insert_woo_roots()` puts a slug like `wc-admin` into
+	 * `$menu` as a top-level entry, WP's `get_admin_page_parent()` second
+	 * branch (which iterates `$menu` for `$menu[i][2] === $plugin_page`) finds
+	 * it and returns the slug ITSELF as the parent. `get_plugin_page_hookname()`
+	 * then computes `admin_page_<slug>` — which isn't registered, because WC
+	 * registered the page via `add_submenu_page('woocommerce', …)` (hookname:
+	 * `woocommerce_page_<slug>`). The access check returns false → 403.
+	 *
+	 * `$_wp_real_parent_file` is WP's documented remap that
+	 * `get_admin_page_parent()` consults after the lookup: if `[$slug] =>
+	 * 'woocommerce'` is set, the function returns `woocommerce` instead of
+	 * `$slug`, and the hookname computation lands on `woocommerce_page_<slug>`.
+	 *
+	 * Skipped for rail roots that already have an `$admin_page_hooks` entry
+	 * (post-type pages, plugins that called `add_menu_page` themselves). Those
+	 * have their own legitimate hookname registration under their original
+	 * prefix (`product_page_<slug>`, `marketing_page_<slug>`, etc.); remapping
+	 * would break it.
+	 *
+	 * @param array $tree Final reconciled tree.
+	 */
+	private function map_real_parents_for_access_checks( array $tree ): void {
+		global $_wp_real_parent_file, $admin_page_hooks;
+		if ( ! is_array( $_wp_real_parent_file ) ) {
+			$_wp_real_parent_file = array();
+		}
+		foreach ( $tree as $slug => $node ) {
+			if ( ( $node['parent'] ?? null ) !== 'woocommerce' ) {
+				continue;
+			}
+			if ( isset( $admin_page_hooks[ $slug ] ) ) {
+				continue;
+			}
+			if ( ! isset( $_wp_real_parent_file[ $slug ] ) ) {
+				$_wp_real_parent_file[ $slug ] = 'woocommerce';
+			}
+		}
 	}
 
 	/**
@@ -129,11 +190,51 @@ class Native_Rail_Splicer {
 			static fn( $_ ): string => $root,
 			PHP_INT_MAX
 		);
+		// Must mirror how `populate_root_submenus` writes `$entry[2]`: the
+		// url override (if any) then renderable_url(). Otherwise WP's
+		// `$submenu_file === $sub_item[2]` highlight check never matches
+		// for slugs whose tree node carries a `url` override (e.g.
+		// action-scheduler → tools.php?page=action-scheduler).
+		$current_url = self::renderable_url( (string) ( $tree[ $current ]['url'] ?? $current ) );
 		add_filter(
 			'submenu_file',
-			static fn( $_ ): string => $current,
+			static fn( $_ ): string => $current_url,
 			PHP_INT_MAX
 		);
+
+		$this->mark_root_current( $root );
+	}
+
+	/**
+	 * Add `wp-has-current-submenu wp-menu-open` to the active rail-root's
+	 * $menu entry so its submenu renders inline (in-rail expansion).
+	 *
+	 * Normally WP adds these classes in `_wp_menu_output()` when
+	 * `$parent_file === $item[2]`. We can't rely on that path: for
+	 * descendant pages (`wc-status`, `action-scheduler`, `wcdn_page`...)
+	 * `get_admin_page_parent()` runs after our `parent_file` filter and
+	 * resets `$parent_file` — either via the inline `$_wp_real_parent_file`
+	 * remap (`wc-settings` → `woocommerce`) when iterating $submenu, or via
+	 * the original Tools-side registration (`tools.php` for action-scheduler).
+	 * Neither matches the rail-root's $item[2], so the classes never get
+	 * added. Setting them directly via $entry[4] sidesteps the comparison.
+	 *
+	 * WP will also append `wp-not-current-submenu` (its else branch), so the
+	 * LI ends up with both — that's fine: `.wp-has-current-submenu .wp-submenu`
+	 * (position: relative, top: auto) wins on cascade order over
+	 * `.wp-not-current-submenu .wp-submenu` (which only sets border/width).
+	 *
+	 * @param string $root Active rail-root slug.
+	 */
+	private function mark_root_current( string $root ): void {
+		global $menu;
+		foreach ( $menu as $key => $entry ) {
+			if ( ! isset( $entry[2] ) || $entry[2] !== $root ) {
+				continue;
+			}
+			$existing        = isset( $entry[4] ) ? (string) $entry[4] : '';
+			$menu[ $key ][4] = trim( $existing . ' wp-has-current-submenu wp-menu-open' );
+		}
 	}
 
 	/**
@@ -203,7 +304,7 @@ class Native_Rail_Splicer {
 				}
 				$title     = (string) ( $child['title'] ?? $child_slug );
 				$cap       = (string) ( $child['capability'] ?? 'read' );
-				$url       = (string) ( $child['url'] ?? $child_slug );
+				$url       = self::renderable_url( (string) ( $child['url'] ?? $child_slug ) );
 				$entries[] = array( $title, $cap, $url, $title, '' );
 			}
 
@@ -275,12 +376,16 @@ class Native_Rail_Splicer {
 			while ( isset( $menu[ $key ] ) ) {
 				$key++;
 			}
+			// `menu-top` is the class WP keys positioning + hover styles off;
+			// `menu-header.php` does NOT add it automatically. Without it the
+			// rail LI loses `position: relative`, so the absolutely-positioned
+			// `.wp-submenu` flyout anchors to `#adminmenu` instead of its row.
 			$menu[ $key ] = array(
 				$title,
 				$cap,
 				$slug,
 				$title,
-				'wc-nav-v2-item',
+				'menu-top wc-nav-v2-item',
 				'toplevel_page_' . self::css_slug( $slug ),
 				$icon,
 			);
@@ -295,6 +400,34 @@ class Native_Rail_Splicer {
 	 */
 	private static function css_slug( string $slug ): string {
 		return (string) preg_replace( '/[^A-Za-z0-9_-]/', '-', $slug );
+	}
+
+	/**
+	 * Convert a tree slug/url to a form WP's `menu-header.php` will render as
+	 * a valid `<a href>` value.
+	 *
+	 * Compound bare slugs like `wc-settings&tab=tax` carry no registered page
+	 * hookname (the tab itself isn't `add_submenu_page()`'d), so WP's URL gen
+	 * falls through to its naked-fallback branch which echoes `$sub_item[2]`
+	 * verbatim. That branch produces a broken relative `<a href='wc-settings&tab=tax'>`.
+	 * The menu_hook branch isn't viable either — it pipes the value through
+	 * `add_query_arg()`, which URL-encodes the `&` and corrupts the tab arg.
+	 *
+	 * The fix: prepend `admin.php?page=` so the naked fallback emits a valid
+	 * relative admin URL. Bare plain slugs (`wc-admin`) and full URL overrides
+	 * (`edit.php?post_type=product`) are left untouched — both already render
+	 * correctly through their respective branches.
+	 *
+	 * @param string $slug_or_url Tree slug or url override.
+	 */
+	private static function renderable_url( string $slug_or_url ): string {
+		if ( false !== strpos( $slug_or_url, '?' ) ) {
+			return $slug_or_url;
+		}
+		if ( false !== strpos( $slug_or_url, '&' ) ) {
+			return 'admin.php?page=' . $slug_or_url;
+		}
+		return $slug_or_url;
 	}
 
 	/**
