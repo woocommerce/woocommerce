@@ -23,11 +23,11 @@ class Named {
 						'label' => array(
 							'type' => Type::nonNull(Type::string()),
 								'description' => __( 'The display label for this object', 'woocommerce' ),
-								),
+									),
 						'id' => array(
 							'type' => Type::nonNull(Type::int()),
 								'description' => __( 'The unique numeric identifier', 'woocommerce' ),
-								),
+									),
 					),
 					'resolveType' => function ( $value ) {
 						$class = get_class( $value );
