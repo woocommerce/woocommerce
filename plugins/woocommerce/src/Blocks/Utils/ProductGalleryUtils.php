@@ -157,9 +157,11 @@ class ProductGalleryUtils {
 			_prime_post_caches( $variations );
 		}
 
+		$parent_image_id = (int) $product->get_image_id();
+
 		foreach ( $variations as $variation_id ) {
 			$variation_id = (int) $variation_id;
-			$entry        = self::build_variation_gallery_entry( $variation_id );
+			$entry        = self::build_variation_gallery_entry( $variation_id, $parent_image_id );
 
 			if ( null !== $entry ) {
 				$variation_gallery_data[ $variation_id ] = $entry;
@@ -179,7 +181,7 @@ class ProductGalleryUtils {
 	 * @param int $variation_id Variation post ID.
 	 * @return array<string, mixed>|null
 	 */
-	private static function build_variation_gallery_entry( int $variation_id ): ?array {
+	private static function build_variation_gallery_entry( int $variation_id, int $parent_image_id ): ?array {
 		$variation = wc_get_product( $variation_id );
 
 		if ( ! $variation instanceof \WC_Product_Variation ) {
@@ -189,7 +191,18 @@ class ProductGalleryUtils {
 		$image_ids = self::get_variation_gallery_image_ids( $variation );
 
 		if ( empty( $image_ids ) ) {
-			return null;
+			// The variation has no usable images of its own. Prefer the
+			// parent product's featured image (so the merchant still sees
+			// the most representative image when picking a variation
+			// without a dedicated gallery), and fall back to the
+			// placeholder sentinel (id = 0) only when the parent has no
+			// featured image either. The product-image block renders
+			// `wc_placeholder_img()` for id = 0.
+			$fallback_id = $parent_image_id && wp_attachment_is_image( $parent_image_id ) ? $parent_image_id : 0;
+			return array(
+				'image_id'  => $fallback_id,
+				'image_ids' => array( $fallback_id ),
+			);
 		}
 
 		return array(
@@ -216,6 +229,18 @@ class ProductGalleryUtils {
 		if ( ! empty( $gallery_image_ids ) ) {
 			$image_ids = array_merge( $image_ids, $gallery_image_ids );
 		}
+
+		// Drop IDs whose attachment is missing or no longer an image. The
+		// gallery would otherwise render them as empty `<li>` wrappers (no
+		// `<img>`, no `data-image-id`, default `hidden=false`) — phantom
+		// slots that `toggleImageVisibility` can't manage and that stay
+		// visible across every variation switch.
+		$image_ids = array_filter(
+			$image_ids,
+			function ( $id ) {
+				return $id > 0 && wp_attachment_is_image( $id );
+			}
+		);
 
 		return array_values( array_unique( $image_ids ) );
 	}

@@ -172,7 +172,18 @@ class ProductImage extends AbstractBlock {
 		$target_image_id = $provided_image_id_is_valid ? $image_id : $featured_image_id;
 
 		if ( ! $target_image_id ) {
-			return wc_placeholder_img( $image_size, array( 'style' => $image_style ) );
+			// Tag the placeholder with `data-image-id="0"` so the Product
+			// Gallery's `toggleImageVisibility` watch can hide it when a
+			// variation that DOES have images is selected. Without this
+			// attribute, the watch returns early and the placeholder
+			// remains visible alongside the real variation image.
+			return wc_placeholder_img(
+				$image_size,
+				array(
+					'style'         => $image_style,
+					'data-image-id' => 0,
+				)
+			);
 		}
 
 		$alt_text = get_post_meta( $target_image_id, '_wp_attachment_image_alt', true );
