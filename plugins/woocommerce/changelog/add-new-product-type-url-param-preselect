@@ -1,4 +1,0 @@
-Significance: patch
-Type: add
-
-Pre-select the product type and downloadable checkbox on the classic product editor from `product_type` / `downloadable` URL query args, used by the experimental products app "Add new" menu.
