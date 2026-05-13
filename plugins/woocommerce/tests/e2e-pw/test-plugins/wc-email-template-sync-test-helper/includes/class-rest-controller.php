@@ -521,10 +521,9 @@ class REST_Controller {
 		// Tracks_Recorder uses, so it only fires when a spy is active and the log
 		// stays empty for tests that don't attach a spy.
 		//
-		// Event names are stored with the 'woocommerce_' prefix to match the
-		// naming convention the JS-side wcTracks.recordEvent calls use (e.g.
-		// 'woocommerce_block_email_sync_backfill_completed'), which is what the
-		// TRACKS_EVENTS constants in classifications.ts expect.
+		// Event names get the 'wcadmin_' prefix to match WC_Tracks::PREFIX — that's
+		// what server-side events are dispatched as via WC_Tracks::record_event().
+		// The TRACKS_EVENTS constants in classifications.ts expect the prefixed name.
 		\Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker::set_event_recorder(
 			static function ( string $event_name, array $payload ): void {
 				if ( 'yes' !== get_option( Tracks_Recorder::ENABLED_OPTION, 'no' ) ) {
@@ -535,7 +534,7 @@ class REST_Controller {
 					$log = array();
 				}
 				$log[] = array(
-					'name'         => 'woocommerce_' . $event_name,
+					'name'         => 'wcadmin_' . $event_name,
 					'properties'   => $payload,
 					'timestamp_ms' => (int) ( microtime( true ) * 1000 ),
 				);
