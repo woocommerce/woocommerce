@@ -492,6 +492,18 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'is_experimental'              => false,
 			),
+			'order-detail-redesign'              => array(
+				'name'                         => __( 'Order detail page redesign', 'woocommerce' ),
+				'description'                  => __(
+					'Try the redesigned order detail and edit page in the admin (experimental).',
+					'woocommerce'
+				),
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'block_email_editor'                 => array(
 				'name'                         => __( 'Block Email Editor (alpha)', 'woocommerce' ),
 				'description'                  => __(
