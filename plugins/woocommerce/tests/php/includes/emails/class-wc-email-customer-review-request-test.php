@@ -17,9 +17,18 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * Load up the email classes since they aren't loaded by default.
+	 *
+	 * `WC_Emails::init()` only registers the review-request email class
+	 * when the `customer_review_request` feature flag is on, so the suite
+	 * has to enable the option (and re-init the mailer to pick up the
+	 * flag change) before exercising the mailer-level registration. Doing
+	 * it here makes every test self-contained rather than relying on the
+	 * incidental order of other OrderReviews suites that also flip the flag.
 	 */
 	public function setUp(): void {
 		parent::setUp();
+
+		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
 
 		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
@@ -27,7 +36,19 @@ class WC_Email_Customer_Review_Request_Test extends \WC_Unit_Test_Case {
 
 		$this->ensure_review_order_page();
 
+		WC()->mailer()->init();
+
 		$this->sut = new WC_Email_Customer_Review_Request();
+	}
+
+	/**
+	 * Reset the feature flag between tests so the suite doesn't leak the
+	 * enabled state into unrelated test classes that assume the default.
+	 */
+	public function tearDown(): void {
+		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
+
+		parent::tearDown();
 	}
 
 	/**
