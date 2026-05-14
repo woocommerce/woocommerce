@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Order detail redesign: split the Order actions metabox so the Update and Move-to-trash buttons sit in a dedicated chrome-less block above the action dropdown. No-op when the order-detail-redesign feature flag is off.
