@@ -260,7 +260,18 @@ class ItemEligibility {
 	 * @return bool True when at least one item is still reviewable.
 	 */
 	public static function has_actionable_items( WC_Order $order ): bool {
-		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented on customer-review-order.php template.
+		/**
+		 * Filter the eligible items considered when deciding whether the
+		 * Customer Review Request email should fire for an order.
+		 *
+		 * Same hook the page template, submission handler, and endpoint use,
+		 * so all four entry points agree on the eligible-items set.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param WC_Order_Item[] $items Order line items.
+		 * @param WC_Order        $order The order being inspected.
+		 */
 		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 		self::preload_for_items( $items, $order );
 
