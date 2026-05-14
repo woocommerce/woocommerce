@@ -119,10 +119,12 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 	vertical-align: middle;
 }
 
-// Keep the numeric `menu-counter` bubble inline next to its label on
-// the Orders rail-root. `.wp-menu-name` defaults to
-// `word-break: break-word`, which wraps the inline-block bubble onto a
-// second line once the label fills the rail width.
+// Keep the order-attention bubble (numeric counter or plain dot)
+// inline next to its label. `.wp-menu-name` defaults to
+// `word-break: break-word`, which wraps the inline-block bubble onto
+// a second line once the label fills the rail width — notably on
+// the WooCommerce top-level where "WooCommerce" almost fills the row.
+#adminmenu li#toplevel_page_woocommerce > a .wp-menu-name,
 #adminmenu li#toplevel_page_wc-orders > a .wp-menu-name {
 	white-space: nowrap;
 	word-break: keep-all;
