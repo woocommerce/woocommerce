@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Fix `name` field for countries in the `GET /wc/v3/data/continents` REST endpoint returning the currency name instead of the country name.

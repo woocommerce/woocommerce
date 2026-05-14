@@ -131,6 +131,11 @@ class WC_REST_Data_Continents_Controller extends WC_REST_Data_Controller {
 						)
 					);
 
+					// Remove keys that would clobber the country fields. In particular, locale-info.php
+					// uses `name`/`singular`/`plural` to describe the country's currency (e.g. "Euro"),
+					// which must not overwrite the country's display name set above.
+					unset( $country_data['name'], $country_data['singular'], $country_data['plural'] );
+
 					$country = array_merge( $country, $country_data );
 				}
 
