@@ -344,19 +344,15 @@ class ShopperListItem {
 			return false;
 		}
 
-		$product_password = $product->get_post_password();
-		if ( is_string( $product_password ) && '' !== $product_password ) {
+		if ( ! empty( $product->get_post_password() ) ) {
 			return false;
 		}
 
 		$parent_id = $product->get_parent_id();
 		if ( $parent_id > 0 ) {
 			$parent = wc_get_product( $parent_id );
-			if ( $parent instanceof \WC_Product ) {
-				$parent_password = $parent->get_post_password();
-				if ( is_string( $parent_password ) && '' !== $parent_password ) {
-					return false;
-				}
+			if ( $parent instanceof \WC_Product && ! empty( $parent->get_post_password() ) ) {
+				return false;
 			}
 		}
 

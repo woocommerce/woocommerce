@@ -135,6 +135,12 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 		}
 		$post_overrides = array_intersect_key( $overrides, array_flip( array( 'post_status', 'post_password' ) ) );
 		if ( ! empty( $post_overrides ) ) {
+			// `wp_update_post` silently rewrites `future` back to `publish` when post_date is in the past,
+			// so a future date is needed to actually persist the status.
+			if ( 'future' === ( $post_overrides['post_status'] ?? '' ) ) {
+				$post_overrides['post_date_gmt'] = gmdate( 'Y-m-d H:i:s', strtotime( '+1 year' ) );
+				$post_overrides['post_date']     = $post_overrides['post_date_gmt'];
+			}
 			wp_update_post( array_merge( array( 'ID' => $product->get_id() ), $post_overrides ) );
 		}
 
@@ -144,7 +150,7 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 		if ( ! $expected_live ) {
 			$this->assertFalse( $response['is_purchasable'], 'Non-public products are not purchasable' );
 			$this->assertSame( 'Snapshot Title', $response['name'], 'Tombstone must not leak the live title' );
-			$this->assertSame( '', $response['permalink'], 'Tombstone must not leak the live permalink' );
+			$this->assertNull( $response['permalink'], 'Tombstone permalink must be null so iAPI strips the anchor href' );
 			$this->assertNull( $response['prices'], 'Tombstone must not leak live prices' );
 		}
 
@@ -165,6 +171,7 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 			'pending'                   => array( array( 'post_status' => 'pending' ), false ),
 			'private'                   => array( array( 'post_status' => 'private' ), false ),
 			'trash'                     => array( array( 'post_status' => 'trash' ), false ),
+			'future'                    => array( array( 'post_status' => 'future' ), false ),
 		);
 	}
 
@@ -377,7 +384,7 @@ class ShopperListItemSchemaTest extends WC_Unit_Test_Case {
 
 		$this->assertFalse( $response['is_live'], 'is_live must be false when the product is gone' );
 		$this->assertSame( 'Snapshot Title', $response['name'], 'Tombstone name should fall back to the at-save title snapshot' );
-		$this->assertSame( '', $response['permalink'], 'permalink should be empty in tombstone path' );
+		$this->assertNull( $response['permalink'], 'Tombstone permalink must be null so iAPI strips the anchor href' );
 		$this->assertSame( array(), $response['images'], 'No images should be returned for missing products' );
 		$this->assertNull( $response['prices'], 'Live prices should be null for missing products' );
 		$this->assertArrayNotHasKey( 'product_title_at_save', $response, 'Internal at-save title snapshot should not leak into the public response' );

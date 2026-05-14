@@ -45,7 +45,7 @@ export type RawShopperListItem = {
 	is_live: boolean;
 	is_purchasable: boolean;
 	name: string;
-	permalink: string;
+	permalink: string | null;
 	images: ShopperListItemImage[];
 	variation: ShopperListItemVariation[];
 	prices: ShopperListItemPrices | null;

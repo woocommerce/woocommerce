@@ -112,8 +112,8 @@ class ShopperListItemSchema extends AbstractSchema {
 				'readonly'    => true,
 			),
 			'permalink'      => array(
-				'description' => __( 'Product URL. Empty when the product no longer exists.', 'woocommerce' ),
-				'type'        => 'string',
+				'description' => __( 'Product URL. Null when the row is a tombstone (so iAPI strips the anchor href).', 'woocommerce' ),
+				'type'        => array( 'string', 'null' ),
 				'format'      => 'uri',
 				'context'     => array( 'view', 'edit' ),
 				'readonly'    => true,
@@ -241,7 +241,7 @@ class ShopperListItemSchema extends AbstractSchema {
 			$response['image_html'] = $this->get_image_html( $product );
 		} else {
 			$response['name']       = $this->prepare_html_response( $item->get_product_title_at_save() );
-			$response['permalink']  = '';
+			$response['permalink']  = null;
 			$response['images']     = array();
 			$response['variation']  = array();
 			$response['prices']     = null;
