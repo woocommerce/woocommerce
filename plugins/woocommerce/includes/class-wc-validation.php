@@ -51,10 +51,12 @@ class WC_Validation {
 
 		switch ( $country ) {
 			case 'AT':
+			case 'AU':
 			case 'BE':
 			case 'CH':
 			case 'HU':
 			case 'NO':
+			case 'NZ':
 				$valid = (bool) preg_match( '/^([0-9]{4})$/', $postcode );
 				break;
 			case 'BA':

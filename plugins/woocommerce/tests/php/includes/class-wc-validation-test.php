@@ -33,7 +33,27 @@ class WC_Validation_Test extends \WC_Unit_Test_Case {
 			array( false, '948A', 'LI' ),
 		);
 
-		return array_merge( $cz, $se, $li );
+		$au = array(
+			array( true, '2000', 'AU' ),
+			array( true, '0800', 'AU' ),
+			array( false, 'ABCD', 'AU' ),
+			array( false, '200', 'AU' ),
+			array( false, '20000', 'AU' ),
+			array( false, '20A0', 'AU' ),
+			array( false, '', 'AU' ),
+		);
+
+		$nz = array(
+			array( true, '6011', 'NZ' ),
+			array( true, '0110', 'NZ' ),
+			array( false, 'ABCD', 'NZ' ),
+			array( false, '601', 'NZ' ),
+			array( false, '60111', 'NZ' ),
+			array( false, '60A1', 'NZ' ),
+			array( false, '', 'NZ' ),
+		);
+
+		return array_merge( $cz, $se, $li, $au, $nz );
 	}
 
 	/**
