@@ -5827,6 +5827,14 @@ img.help_tip {
 				line-height: 20px !important;
 				border-bottom: 1px solid #eee;
 
+				// The rule above suppresses the global box-shadow focus ring; reinstate a
+				// visible focus indicator via outline. Negative offset keeps the outline
+				// inside the parent .panel-wrap, which uses overflow: hidden.
+				&:focus {
+					outline: 2px solid #2271b1;
+					outline-offset: -2px;
+				}
+
 				span {
 					margin-left: 0.618em;
 					margin-right: 0.618em;
