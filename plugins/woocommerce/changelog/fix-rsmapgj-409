@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix TypeError "Unsupported operand types: string * int" in the Sales by Date report when aggregating refund totals returned as strings on PHP 8.0+.
