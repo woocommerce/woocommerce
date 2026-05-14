@@ -37,7 +37,6 @@ const fieldDefinition = {
 	filterBy: {
 		operators: [
 			'is',
-			'isNot',
 			'greaterThan',
 			'greaterThanOrEqual',
 			'lessThan',
