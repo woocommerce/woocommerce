@@ -17,7 +17,7 @@ import {
 	MARKETPLACE_CATEGORY_API_PATH,
 	MARKETPLACE_HOST,
 	MARKETPLACE_SEARCH_API_PATH,
-	MARKETPLACE_RENEW_SUBSCRIPTON_PATH,
+	MARKETPLACE_RENEW_SUBSCRIPTION_PATH,
 } from '../components/constants';
 import { Subscription } from '../components/my-subscriptions/types';
 import {
@@ -325,7 +325,7 @@ function disconnectProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-type WpAjaxReponse = {
+type WpAjaxResponse = {
 	success: boolean;
 	data: WpAjaxResponseData;
 };
@@ -343,7 +343,7 @@ function wpAjax(
 		theme?: string;
 		success?: boolean;
 	}
-): Promise< WpAjaxReponse > {
+): Promise< WpAjaxResponse > {
 	return new Promise( ( resolve, reject ) => {
 		if ( ! window.wp.updates ) {
 			reject( __( 'Please reload and try again', 'woocommerce' ) );
@@ -438,7 +438,7 @@ function installProduct( subscription: Subscription ): Promise< void > {
 	} );
 }
 
-function updateProduct( subscription: Subscription ): Promise< WpAjaxReponse > {
+function updateProduct( subscription: Subscription ): Promise< WpAjaxResponse > {
 	return wpAjax( 'update-' + subscription.product_type, {
 		slug: subscription.local.slug,
 		[ subscription.product_type ]: subscription.local.path,
@@ -517,9 +517,9 @@ const appendURLParams = (
 const enableAutorenewalUrl = ( subscription: Subscription ): string => {
 	if ( ! subscription.product_key ) {
 		// review subscriptions on the Marketplace
-		return MARKETPLACE_RENEW_SUBSCRIPTON_PATH;
+		return MARKETPLACE_RENEW_SUBSCRIPTION_PATH;
 	}
-	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTON_PATH, [
+	return appendURLParams( MARKETPLACE_RENEW_SUBSCRIPTION_PATH, [
 		[ 'key', subscription.product_key.toString() ],
 	] );
 };
