@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { SelectControl } from '@wordpress/components';
+import { SelectControl } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
 /**
@@ -62,15 +62,18 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				  } ) )
 				: [] ),
 		];
+		const selectedOption = options.find(
+			( option ) => option.value === ( data.shipping_class ?? '' )
+		);
 
 		return (
 			<SelectControl
 				label={ field.label }
-				value={ data.shipping_class }
-				options={ options }
-				onChange={ ( value ) =>
+				value={ selectedOption }
+				items={ options }
+				onValueChange={ ( option ) =>
 					onChange( {
-						shipping_class: value,
+						shipping_class: option?.value ?? '',
 					} )
 				}
 			/>
