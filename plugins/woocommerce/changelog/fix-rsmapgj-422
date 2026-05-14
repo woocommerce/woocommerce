@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Prevent a fatal error in the Store API legacy payment processor when a gateway's process_payment() returns a non-array value (e.g. null) after adding an error notice.

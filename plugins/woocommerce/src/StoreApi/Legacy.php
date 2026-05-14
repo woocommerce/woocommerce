@@ -58,6 +58,18 @@ class Legacy {
 		// Restore $_POST data.
 		$_POST = $post_data;
 
+		// `process_payment` is documented to return an array, but some gateways abort early and
+		// return null (or another non-array value) after adding a notice. Normalize to an array so
+		// the rest of this method can rely on array access without triggering a fatal error.
+		if ( ! is_array( $gateway_result ) ) {
+			// Convert any notices added by the gateway to exceptions so the customer sees the
+			// gateway's message instead of a generic one when possible.
+			NoticeHandler::convert_notices_to_exceptions( 'woocommerce_rest_payment_error' );
+
+			// If no notices were thrown above, treat the missing array as a generic failure.
+			$gateway_result = array( 'result' => 'failure' );
+		}
+
 		// If the payment failed with a message, throw an exception.
 		if ( isset( $gateway_result['result'] ) && 'failure' === $gateway_result['result'] ) {
 			if ( isset( $gateway_result['message'] ) ) {
