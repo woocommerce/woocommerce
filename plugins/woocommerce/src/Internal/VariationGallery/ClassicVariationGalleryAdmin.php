@@ -71,8 +71,10 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 				'emptyCtaLabel'    => __( 'Add variation images', 'woocommerce' ),
 				'announceUpdated'  => __( 'Variation gallery updated.', 'woocommerce' ),
 				'announceReplaced' => __( 'Image replaced.', 'woocommerce' ),
+				'announceRemoved'  => __( 'Image removed from variation gallery.', 'woocommerce' ),
 				'announceReorder'  => __( 'Variation gallery order updated.', 'woocommerce' ),
 				'announcePrimary'  => __( 'New primary image set.', 'woocommerce' ),
+				'removeLabel'      => __( 'Remove image', 'woocommerce' ),
 				'countZero'        => __( 'No images yet', 'woocommerce' ),
 				/* translators: %d: number of variation gallery images */
 				'countSingular'    => __( '%d image', 'woocommerce' ),
@@ -323,6 +325,13 @@ class ClassicVariationGalleryAdmin implements RegisterHooksInterface {
 				<?php else : ?>
 					<?php echo wp_kses_post( $thumbnail ); ?>
 				<?php endif; ?>
+			</button>
+			<button
+				type="button"
+				class="wc-variation-gallery-thumb__remove"
+				aria-label="<?php esc_attr_e( 'Remove image', 'woocommerce' ); ?>"
+			>
+				<span class="dashicons dashicons-no-alt" aria-hidden="true"></span>
 			</button>
 		</li>
 		<?php
