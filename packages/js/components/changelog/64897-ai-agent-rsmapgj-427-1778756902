@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Editor: wrap the GTIN field info tooltip text instead of rendering it as a single unbounded line.
