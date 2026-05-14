@@ -145,6 +145,63 @@ class ShopPageEditorTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should add a Shop page post state label.
+	 */
+	public function test_adds_shop_page_post_state(): void {
+		$shop_page_id = $this->factory->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+
+		$post_states = $this->sut->add_shop_page_state( array(), get_post( $shop_page_id ) );
+
+		$this->assertSame( 'Shop page', $post_states['woocommerce_shop_page'] );
+	}
+
+	/**
+	 * @testdox Should hide template choices for the Shop page.
+	 */
+	public function test_hides_template_choices_for_shop_page(): void {
+		$shop_page_id = $this->factory->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+
+		$page_templates = $this->sut->hide_shop_page_templates(
+			array( 'template.php' => 'Template' ),
+			wp_get_theme(),
+			get_post( $shop_page_id ),
+			'page'
+		);
+
+		$this->assertSame( array(), $page_templates );
+	}
+
+	/**
+	 * @testdox Should keep template choices for non-Shop pages.
+	 */
+	public function test_keeps_template_choices_for_non_shop_page(): void {
+		$page_id        = $this->factory->post->create( array( 'post_type' => 'page' ) );
+		$page_templates = array( 'template.php' => 'Template' );
+
+		$this->assertSame(
+			$page_templates,
+			$this->sut->hide_shop_page_templates( $page_templates, wp_get_theme(), get_post( $page_id ), 'page' )
+		);
+	}
+
+	/**
+	 * @testdox Should disable available templates in block editor settings for the Shop page.
+	 */
+	public function test_disables_available_templates_for_shop_page(): void {
+		$shop_page_id = $this->factory->post->create( array( 'post_type' => 'page' ) );
+		update_option( 'woocommerce_shop_page_id', $shop_page_id );
+
+		$settings = $this->sut->lock_shop_page_template_selector(
+			array( 'availableTemplates' => array( 'template.php' => 'Template' ) ),
+			new \WP_Block_Editor_Context( array( 'post' => get_post( $shop_page_id ) ) )
+		);
+
+		$this->assertSame( array(), $settings['availableTemplates'] );
+	}
+
+	/**
 	 * Set the current screen to a given post type.
 	 *
 	 * @param string $post_type Post type slug.
