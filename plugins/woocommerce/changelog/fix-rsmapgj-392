@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow customers whose display name matches their email (e.g., registered with email as username) to save account details without hitting the "Display name cannot be changed to email address" error when the display name is unchanged.

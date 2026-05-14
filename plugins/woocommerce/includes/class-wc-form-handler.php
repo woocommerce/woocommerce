@@ -275,8 +275,13 @@ class WC_Form_Handler {
 		$user->last_name    = $account_last_name;
 		$user->display_name = $account_display_name;
 
-		// Prevent display name to be changed to email.
-		if ( is_email( $account_display_name ) ) {
+		// Prevent display name from being changed to an email address. Allow
+		// submissions where the display name already matches the stored value
+		// (e.g., when the user registered with their email as the username and
+		// the display name was pre-populated from that username), so that other
+		// account fields can still be updated.
+		$current_display_name = $current_user ? $current_user->display_name : '';
+		if ( is_email( $account_display_name ) && $account_display_name !== $current_display_name ) {
 			wc_add_notice( __( 'Display name cannot be changed to email address due to privacy concern.', 'woocommerce' ), 'error' );
 		}
 
