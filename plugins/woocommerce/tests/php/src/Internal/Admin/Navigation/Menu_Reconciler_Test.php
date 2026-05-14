@@ -213,8 +213,15 @@ class Menu_Reconciler_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_filter_receives_raw_menu_and_submenu() {
 		global $menu, $submenu;
+		// Mirror what WC's own `add_menu_page('woocommerce', …)` produces in real admin:
+		// a top-level entry plus a `$submenu['woocommerce']` bucket. The filter is
+		// supposed to receive both verbatim, so the fixture has to populate them.
 		$menu    = array( array( 'WooCommerce', 'read', 'woocommerce', '', '' ) );
-		$submenu = array();
+		$submenu = array(
+			'woocommerce' => array(
+				array( 'Home', 'read', 'wc-admin' ),
+			),
+		);
 
 		$captured_raw_menu    = null;
 		$captured_raw_submenu = null;

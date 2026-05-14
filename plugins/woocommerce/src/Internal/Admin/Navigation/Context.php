@@ -111,6 +111,27 @@ final class Context {
 			}
 		}
 
+		// `post.php?post=<id>&action=edit` and `post-new.php?post_type=<type>`
+		// don't carry the post type in $pagenow, so the loop above can't match
+		// the `edit.php?post_type=<type>` tree slug for the post's CPT. Look
+		// up the post type and try that slug as a fallback so the rail stays
+		// in the Woo context when editing / creating a product (or any other
+		// CPT that maps to a Woo rail root).
+		if ( null === $best ) {
+			$post_type = null;
+			if ( 'post.php' === $current_pagenow && isset( $current_params['post'] ) ) {
+				$post_type = get_post_type( (int) $current_params['post'] ) ?: null;
+			} elseif ( 'post-new.php' === $current_pagenow ) {
+				$post_type = isset( $current_params['post_type'] ) ? (string) $current_params['post_type'] : 'post';
+			}
+			if ( null !== $post_type ) {
+				$candidate = 'edit.php?post_type=' . $post_type;
+				if ( isset( $tree[ $candidate ] ) ) {
+					return $candidate;
+				}
+			}
+		}
+
 		return $best;
 	}
 

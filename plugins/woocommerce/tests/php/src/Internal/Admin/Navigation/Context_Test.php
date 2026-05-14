@@ -23,13 +23,55 @@ class Context_Test extends \WC_Unit_Test_Case {
 	}
 
 	public function tearDown(): void {
-		unset( $_GET['page'], $_GET['post_type'], $_GET['path'], $_GET['tab'], $_GET['taxonomy'] );
+		unset( $_GET['page'], $_GET['post_type'], $_GET['path'], $_GET['tab'], $_GET['taxonomy'], $_GET['post'], $_GET['action'] );
 		if ( null === $this->pagenow_backup ) {
 			unset( $GLOBALS['pagenow'] );
 		} else {
 			$GLOBALS['pagenow'] = $this->pagenow_backup;
 		}
 		parent::tearDown();
+	}
+
+	public function test_post_edit_screen_resolves_to_post_type_rail_root() {
+		$GLOBALS['pagenow'] = 'post.php';
+		$post_id            = $this->factory->post->create( array( 'post_type' => 'product' ) );
+		$_GET['post']       = (string) $post_id;
+		$_GET['action']     = 'edit';
+		$tree               = array(
+			'woocommerce'                => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'edit.php?post_type=product' => array( 'parent' => 'woocommerce', 'title' => 'Products', 'position' => 30 ),
+		);
+
+		$this->assertSame( 'edit.php?post_type=product', Context::resolve_current_slug( $tree ) );
+		$this->assertTrue( Context::is_woo_page( $tree ) );
+
+		wp_delete_post( $post_id, true );
+	}
+
+	public function test_post_new_screen_resolves_to_post_type_rail_root() {
+		$GLOBALS['pagenow']  = 'post-new.php';
+		$_GET['post_type']   = 'product';
+		$tree                = array(
+			'woocommerce'                => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'edit.php?post_type=product' => array( 'parent' => 'woocommerce', 'title' => 'Products', 'position' => 30 ),
+		);
+
+		$this->assertSame( 'edit.php?post_type=product', Context::resolve_current_slug( $tree ) );
+	}
+
+	public function test_post_edit_screen_for_non_woo_post_type_does_not_resolve() {
+		$GLOBALS['pagenow'] = 'post.php';
+		$post_id            = $this->factory->post->create( array( 'post_type' => 'post' ) );
+		$_GET['post']       = (string) $post_id;
+		$_GET['action']     = 'edit';
+		$tree               = array(
+			'woocommerce'                => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'edit.php?post_type=product' => array( 'parent' => 'woocommerce', 'title' => 'Products', 'position' => 30 ),
+		);
+
+		$this->assertNull( Context::resolve_current_slug( $tree ) );
+
+		wp_delete_post( $post_id, true );
 	}
 
 	public function test_current_request_in_tree_is_woo_context() {
