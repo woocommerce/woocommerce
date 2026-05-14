@@ -384,11 +384,12 @@ test.describe( 'Update propagation — core flows', () => {
 		// Step 4: sweep classifies the post as core_updated_customized.
 		await triggerDetectionSweep();
 
-		// Open the editor directly via the deep-link param that auto-opens the
-		// review drawer (wc_email_review_drawer=1 is consumed by the editor
-		// integration's index.ts on mount and dispatches openReviewDrawer()).
+		// Open the editor and click the banner's "Review changes" button — the
+		// merchant-facing path to open the drawer. (The wc_email_review_drawer=1
+		// deep-link works locally but races with editor mount in CI; clicking the
+		// banner button is the realistic flow and is stable.)
 		await page.goto(
-			`/wp-admin/post.php?post=${ postId }&action=edit&wc_email_review_drawer=1`
+			`/wp-admin/post.php?post=${ postId }&action=edit`
 		);
 
 		// Wait for the editor canvas to be ready.
@@ -397,6 +398,11 @@ test.describe( 'Update propagation — core flows', () => {
 				timeout: 20000,
 			}
 		);
+
+		// Click "Review changes" in the floating update banner.
+		await page
+			.getByRole( 'button', { name: /^review changes$/i } )
+			.click();
 
 		// The drawer's <aside role="dialog"> becomes aria-hidden="false" once the
 		// store dispatches openReviewDrawer(). The title text comes from the
