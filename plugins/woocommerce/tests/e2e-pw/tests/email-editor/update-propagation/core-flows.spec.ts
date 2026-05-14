@@ -388,9 +388,7 @@ test.describe( 'Update propagation — core flows', () => {
 		// merchant-facing path to open the drawer. (The wc_email_review_drawer=1
 		// deep-link works locally but races with editor mount in CI; clicking the
 		// banner button is the realistic flow and is stable.)
-		await page.goto(
-			`/wp-admin/post.php?post=${ postId }&action=edit`
-		);
+		await page.goto( `/wp-admin/post.php?post=${ postId }&action=edit` );
 
 		// Wait for the editor canvas to be ready.
 		await expect( page.locator( '#woocommerce-email-editor' ) ).toBeVisible(
@@ -400,9 +398,7 @@ test.describe( 'Update propagation — core flows', () => {
 		);
 
 		// Click "Review changes" in the floating update banner.
-		await page
-			.getByRole( 'button', { name: /^review changes$/i } )
-			.click();
+		await page.getByRole( 'button', { name: /^review changes$/i } ).click();
 
 		// The drawer's <aside role="dialog"> becomes aria-hidden="false" once the
 		// store dispatches openReviewDrawer(). The title text comes from the
