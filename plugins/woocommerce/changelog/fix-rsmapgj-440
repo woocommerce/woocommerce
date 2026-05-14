@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Improve color contrast on the admin order screen by replacing #777 with #3c434a for paragraph text under #order_data, meeting WCAG AA contrast requirements.
