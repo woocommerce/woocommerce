@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Fire the product.deleted webhook when a product variation is deleted, restoring parity with product.created and product.updated.
