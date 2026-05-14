@@ -39,7 +39,7 @@ Example usage: `wp.data.select( experimentalShippingZonesStore ).getShippingZone
 | Actions                                         | Method | Description                                                                      |
 | ----------------------------------------------- | ------ | -------------------------------------------------------------------------------- |
 | `createShippingZone( shippingZoneObject )`      | POST   | Creates shipping zone, see `ShippingZone` in [types.ts](./types.ts) for values   |
-| `deleteShippingZone( id )`                      | DELETE | Deletes a shipping class by ID                                                   |
-| `updatetShippingZone( id, shippingZoneObject )` | PUT    | Updates a shipping zone, see `ShippingZone` in [types.ts](./types.ts) for values |
+| `deleteShippingZone( id )`                      | DELETE | Deletes a shipping zone by ID                                                   |
+| `updateShippingZone( id, shippingZoneObject )` | PUT    | Updates a shipping zone, see `ShippingZone` in [types.ts](./types.ts) for values |
 
 Example usage: `wp.data.dispatch( experimentalShippingZonesStore ).updateShippingZone( 3, { name: 'New name' } );`

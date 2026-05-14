@@ -38,6 +38,6 @@ Example usage: `wp.data.select( EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME
 | -------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------- |
 | `createProductShippingClass( shippingClassObject )`      | POST   | Creates shipping class, see `ProductShippingClass` in [types.ts](./types.ts) for values   |
 | `deleteProductShippingClass( id )`                       | DELETE | Deletes a shipping class by ID                                                            |
-| `updatetProductShippingClass( id, shippingClassObject )` | PUT    | Updates a shipping class, see `ProductShippingClass` in [types.ts](./types.ts) for values |
+| `updateProductShippingClass( id, shippingClassObject )` | PUT    | Updates a shipping class, see `ProductShippingClass` in [types.ts](./types.ts) for values |
 
 Example usage: `wp.data.dispatch( EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME ).updateProductShippingClass( 3, { name: 'New name' } );`
