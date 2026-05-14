@@ -344,37 +344,15 @@ function wc_get_account_orders_actions( $order ) {
 	}
 
 	// Filter out malformed action entries from third-party extensions.
-	foreach ( $actions as $key => $action ) {
-		if (
-			! is_array( $action ) ||
-			! isset( $action['name'], $action['url'] ) ||
-			! is_string( $action['name'] ) ||
-			! is_string( $action['url'] )
-		) {
-			unset( $actions[ $key ] );
-			continue;
+	return array_filter(
+		$actions,
+		static function ( $action ) {
+			return is_array( $action )
+				&& isset( $action['name'], $action['url'] )
+				&& is_string( $action['name'] )
+				&& is_string( $action['url'] );
 		}
-
-		$action_name = trim( $action['name'] );
-		$action_url  = trim( $action['url'] );
-		if ( '' === $action_name || '' === $action_url ) {
-			unset( $actions[ $key ] );
-			continue;
-		}
-
-		$actions[ $key ]['name'] = $action_name;
-		$actions[ $key ]['url']  = $action_url;
-
-		// Ensure aria-label is a valid non-empty string; fall back to generating one.
-		if ( empty( $action['aria-label'] ) || ! is_string( $action['aria-label'] ) || '' === trim( $action['aria-label'] ) ) {
-			/* translators: %1$s Action name, %2$s Order number. */
-			$actions[ $key ]['aria-label'] = sprintf( __( '%1$s order number %2$s', 'woocommerce' ), $action_name, $order->get_order_number() );
-		} else {
-			$actions[ $key ]['aria-label'] = trim( $action['aria-label'] );
-		}
-	}
-
-	return $actions;
+	);
 }
 
 /**
