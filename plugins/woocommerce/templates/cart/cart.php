@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.8.0
+ * @version 10.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -53,6 +53,18 @@ do_action( 'woocommerce_before_cart' ); ?>
 
 				if ( $_product instanceof WC_Product && $_product->exists() && $cart_item['quantity'] > 0 && $visible ) {
 					/**
+					 * Filters the product title in the cart.
+					 *
+					 * This is the WordPress core `the_title` filter, applied here so that
+					 * cart product titles receive the same transformations (smart quotes,
+					 * etc.) as titles rendered elsewhere on the frontend.
+					 *
+					 * @since 10.9.0
+					 * @param string $title Product title.
+					 * @param int    $id    Product ID.
+					 */
+					$filtered_product_name = apply_filters( 'the_title', $_product->get_name(), $product_id );
+					/**
 					 * Filter the product name.
 					 *
 					 * @since 2.1.0
@@ -60,7 +72,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 					 * @param array $cart_item The product in the cart.
 					 * @param string $cart_item_key Key for the product in the cart.
 					 */
-					$product_name      = apply_filters( 'woocommerce_cart_item_name', $_product->get_name(), $cart_item, $cart_item_key );
+					$product_name      = apply_filters( 'woocommerce_cart_item_name', $filtered_product_name, $cart_item, $cart_item_key );
 					$product_permalink = apply_filters( 'woocommerce_cart_item_permalink', $_product->is_visible() ? $_product->get_permalink( $cart_item ) : '', $cart_item, $cart_item_key );
 					?>
 					<tr class="woocommerce-cart-form__cart-item <?php echo esc_attr( apply_filters( 'woocommerce_cart_item_class', 'cart_item', $cart_item, $cart_item_key ) ); ?>">
@@ -117,7 +129,7 @@ do_action( 'woocommerce_before_cart' ); ?>
 							 *
 							 * @since 2.1.0
 							 */
-							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', esc_url( $product_permalink ), $_product->get_name() ), $cart_item, $cart_item_key ) );
+							echo wp_kses_post( apply_filters( 'woocommerce_cart_item_name', sprintf( '<a href="%s">%s</a>', esc_url( $product_permalink ), $filtered_product_name ), $cart_item, $cart_item_key ) );
 						}
 
 						do_action( 'woocommerce_after_cart_item_name', $cart_item, $cart_item_key );

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Apply the WordPress `the_title` filter to product titles rendered in the cart and on the grouped product page so they receive the same transformations (smart quotes, etc.) as titles rendered elsewhere on the frontend.

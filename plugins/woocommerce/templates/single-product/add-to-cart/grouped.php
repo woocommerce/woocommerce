@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.2.0
+ * @version 10.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -102,8 +102,27 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 							$value = ob_get_clean();
 							break;
 						case 'label':
-							$value  = '<label for="product-' . esc_attr( $grouped_product_child->get_id() ) . '">';
-							$value .= $grouped_product_child->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', $grouped_product_child->get_permalink(), $grouped_product_child->get_id() ) ) . '">' . $grouped_product_child->get_name() . '</a>' : $grouped_product_child->get_name();
+							/**
+							 * Filters the grouped product child title.
+							 *
+							 * This is the WordPress core `the_title` filter, applied here so that
+							 * grouped product child titles receive the same transformations
+							 * (smart quotes, etc.) as titles rendered elsewhere on the frontend.
+							 *
+							 * @since 10.9.0
+							 * @param string $title Product title.
+							 * @param int    $id    Product ID.
+							 */
+							$grouped_product_child_title = apply_filters( 'the_title', $grouped_product_child->get_name(), $grouped_product_child->get_id() );
+							$value                       = '<label for="product-' . esc_attr( $grouped_product_child->get_id() ) . '">';
+							/**
+							 * Filter the permalink used for the grouped product child link in the list.
+							 *
+							 * @since 3.0.0
+							 * @param string $permalink  The grouped product child's permalink.
+							 * @param int    $product_id The grouped product child's ID.
+							 */
+							$value .= $grouped_product_child->is_visible() ? '<a href="' . esc_url( apply_filters( 'woocommerce_grouped_product_list_link', $grouped_product_child->get_permalink(), $grouped_product_child->get_id() ) ) . '">' . $grouped_product_child_title . '</a>' : $grouped_product_child_title;
 							$value .= '</label>';
 							break;
 						case 'price':
