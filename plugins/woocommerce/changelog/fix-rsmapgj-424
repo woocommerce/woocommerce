@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Logging: preserve dots in V2 log file source names so files with version-like sources (e.g. `my-plugin-v.1.0.0`) can be opened and downloaded.

@@ -85,6 +85,41 @@ class FileTest extends WC_Unit_Test_Case {
 				'file_id'  => 'test-Source_1-1-' . $hash . '.5',
 			),
 		);
+		yield 'standard filename, dotted source, no rotation' => array(
+			Settings::get_log_directory() . 'my-plugin-v.1.0.0-test_mode-2024-02-22-' . $hash . '.log',
+			array(
+				'basename' => 'my-plugin-v.1.0.0-test_mode-2024-02-22-' . $hash . '.log',
+				'source'   => 'my-plugin-v.1.0.0-test_mode',
+				'rotation' => null,
+				'created'  => strtotime( '2024-02-22' ),
+				'hash'     => $hash,
+				'file_id'  => 'my-plugin-v.1.0.0-test_mode-2024-02-22',
+			),
+		);
+		yield 'standard filename, dotted source, with rotation' => array(
+			Settings::get_log_directory() . 'my-plugin-v.1.0.0-test_mode.4-2024-02-22-' . $hash . '.log',
+			array(
+				'basename' => 'my-plugin-v.1.0.0-test_mode.4-2024-02-22-' . $hash . '.log',
+				'source'   => 'my-plugin-v.1.0.0-test_mode',
+				'rotation' => 4,
+				'created'  => strtotime( '2024-02-22' ),
+				'hash'     => $hash,
+				'file_id'  => 'my-plugin-v.1.0.0-test_mode.4-2024-02-22',
+			),
+		);
+		yield 'standard filename, source ending with numeric segment after dot, no rotation' => array(
+			// The last segment after the final `.` has more than one character, so it must not be treated
+			// as a rotation marker (rotation is always a single digit per generate_file_id()).
+			Settings::get_log_directory() . 'my-plugin-v.1.0-2024-02-22-' . $hash . '.log',
+			array(
+				'basename' => 'my-plugin-v.1.0-2024-02-22-' . $hash . '.log',
+				'source'   => 'my-plugin-v.1.0',
+				'rotation' => null,
+				'created'  => strtotime( '2024-02-22' ),
+				'hash'     => $hash,
+				'file_id'  => 'my-plugin-v.1.0-2024-02-22',
+			),
+		);
 	}
 
 	/**

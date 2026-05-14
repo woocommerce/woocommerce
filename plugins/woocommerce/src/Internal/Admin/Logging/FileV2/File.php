@@ -135,12 +135,14 @@ class File {
 
 		$rotation_marker = strrpos( $parsed['source'], '.', -1 );
 		if ( false !== $rotation_marker ) {
-			$rotation = substr( $parsed['source'], -1 );
-			if ( is_numeric( $rotation ) ) {
+			$rotation = substr( $parsed['source'], $rotation_marker + 1 );
+			// A rotation marker is exactly one numeric digit after the final `.` (see generate_file_id()).
+			// Only strip the suffix and treat it as a rotation when this is the case; otherwise the dot is
+			// part of the source name (e.g. "my-plugin-v.1.0.0-test_mode") and must be preserved.
+			if ( 1 === strlen( $rotation ) && is_numeric( $rotation ) ) {
 				$parsed['rotation'] = intval( $rotation );
+				$parsed['source']   = substr( $parsed['source'], 0, $rotation_marker );
 			}
-
-			$parsed['source'] = substr( $parsed['source'], 0, $rotation_marker );
 		}
 
 		$parsed['file_id'] = static::generate_file_id(
