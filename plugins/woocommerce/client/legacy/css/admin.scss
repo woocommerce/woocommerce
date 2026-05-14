@@ -3046,6 +3046,18 @@ ul.wc_coupon_list_block {
 				min-height: 36px;
 			}
 		}
+
+		// `.submitdelete` is kept on the trash link so existing admin scripts
+		// continue to recognize it as a delete action, but WP's
+		// `#poststuff a.submitdelete` rule would otherwise strip the
+		// button-secondary appearance. Restore the button look here.
+		#woocommerce-order-submit a.submitdelete {
+			background: #f6f7f7;
+			border: 1px solid #2271b1;
+			color: #2271b1;
+			padding: 0 10px;
+			text-decoration: none;
+		}
 	}
 
 	.tablenav .one-page .displaying-num {

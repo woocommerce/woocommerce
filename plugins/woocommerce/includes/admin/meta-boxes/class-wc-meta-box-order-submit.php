@@ -64,7 +64,7 @@ class WC_Meta_Box_Order_Submit {
 					: __( 'Move to trash', 'woocommerce' );
 				?>
 				<a
-					class="button button-secondary"
+					class="button button-secondary submitdelete deletion"
 					href="<?php echo esc_url( self::get_trash_or_delete_order_link( $order_id ) ); ?>"
 				><?php echo esc_html( $delete_text ); ?></a>
 			<?php endif; ?>
