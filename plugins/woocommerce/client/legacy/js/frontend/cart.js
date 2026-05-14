@@ -88,6 +88,7 @@ jQuery( function ( $ ) {
 		var $html = $.parseHTML( html_str );
 		var $new_form = $( '.woocommerce-cart-form', $html );
 		var $new_totals = $( '.cart_totals', $html );
+		var $new_cross_sells = $( '.cross-sells', $html );
 		var $notices = remove_duplicate_notices(
 			$(
 				'.woocommerce-error, .woocommerce-message, .woocommerce-info, .is-error, .is-info, .is-success',
@@ -164,6 +165,7 @@ jQuery( function ( $ ) {
 			}
 
 			update_cart_totals_div( $new_totals );
+			update_cross_sells_div( $new_cross_sells );
 		}
 
 		$( document.body ).trigger( 'updated_wc_div' );
@@ -177,6 +179,38 @@ jQuery( function ( $ ) {
 	var update_cart_totals_div = function ( html_str ) {
 		$( '.cart_totals' ).replaceWith( html_str );
 		$( document.body ).trigger( 'updated_cart_totals' );
+	};
+
+	/**
+	 * Update the .cross-sells div with the new contents from the response.
+	 *
+	 * When a cart item is removed via AJAX, the cross-sell suggestions may
+	 * change because cross-sells are derived from the products in the cart.
+	 * Replace the existing .cross-sells element with the one from the new
+	 * HTML, or remove it if the new HTML no longer contains cross-sells.
+	 *
+	 * @param {JQuery Object} $new_cross_sells The new cross-sells element parsed from the response.
+	 */
+	var update_cross_sells_div = function ( $new_cross_sells ) {
+		var $current_cross_sells = $( '.cross-sells' );
+
+		if ( $new_cross_sells.length > 0 ) {
+			if ( $current_cross_sells.length > 0 ) {
+				$current_cross_sells.replaceWith( $new_cross_sells );
+			} else {
+				// No previous cross-sells on the page; insert before .cart_totals to match template order.
+				var $cart_totals = $( '.cart-collaterals .cart_totals' );
+				if ( $cart_totals.length > 0 ) {
+					$cart_totals.before( $new_cross_sells );
+				} else {
+					$( '.cart-collaterals' ).prepend( $new_cross_sells );
+				}
+			}
+		} else if ( $current_cross_sells.length > 0 ) {
+			$current_cross_sells.remove();
+		}
+
+		$( document.body ).trigger( 'updated_cross_sells' );
 	};
 
 	/**

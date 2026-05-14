@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Refresh cross-sell suggestions on the cart page when a product is removed via AJAX, so stale cross-sells for the removed product no longer linger until a page reload.
