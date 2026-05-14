@@ -2,7 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
+import { resolveSelect, useSelect } from '@wordpress/data';
+import { store as coreStore } from '@wordpress/core-data';
+import { decodeEntities } from '@wordpress/html-entities';
 import { SelectControl } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
@@ -25,7 +27,9 @@ const fieldDefinition = {
 	label: __( 'Shipping Class', 'woocommerce' ),
 	enableSorting: false,
 	enableHiding: false,
-	filterBy: false,
+	filterBy: {
+		operators: [ 'isAny', 'isNone' ],
+	},
 } satisfies Partial< Field< ProductEntityRecord > >;
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
@@ -34,8 +38,21 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	label: __( 'Shipping Class', 'woocommerce' ),
 	enableSorting: false,
 	type: 'text',
+	getValue: ( { item } ) =>
+		item.shipping_class_id ? item.shipping_class_id.toString() : '',
+	render: ( { item } ) => item.shipping_class ?? '',
+	getElements: async () => {
+		const records = ( await resolveSelect( coreStore ).getEntityRecords(
+			'taxonomy',
+			'product_shipping_class',
+			{ per_page: -1 }
+		) ) as Array< { id: number; name: string } > | null;
+		return ( records ?? [] ).map( ( { id, name } ) => ( {
+			value: id.toString(),
+			label: decodeEntities( name ),
+		} ) );
+	},
 	isVisible: ( item ) => ! item.virtual,
-	getValue: ( { item } ) => item.shipping_class,
 	Edit: ( { data, onChange, field } ) => {
 		const { shippingClasses } = useSelect( ( select ) => {
 			// TODO: Register shipping class entity and use it instead.

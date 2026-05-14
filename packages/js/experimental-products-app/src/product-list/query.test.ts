@@ -203,4 +203,33 @@ describe( 'buildProductListQuery', () => {
 
 		expect( query.brand ).toEqual( '8,9' );
 	} );
+	it( 'maps the shipping_class isAny filter to the shipping_class query param', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'shipping_class',
+					operator: 'isAny',
+					value: [ '3', 4 ],
+				},
+			],
+		} as View );
+
+		expect( query.shipping_class ).toEqual( '3,4' );
+	} );
+
+	it( 'maps the shipping_class isNone filter to exclude_shipping_class', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'shipping_class',
+					operator: 'isNone',
+					value: [ '3', 4 ],
+				},
+			],
+		} as View );
+
+		expect( query.exclude_shipping_class ).toEqual( [ 3, 4 ] );
+	} );
 } );
