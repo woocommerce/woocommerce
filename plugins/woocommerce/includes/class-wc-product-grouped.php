@@ -93,17 +93,29 @@ class WC_Product_Grouped extends WC_Product {
 	public function get_price_html( $price = '' ) {
 		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
 		$child_prices     = array();
+		$min_prices       = array();
+		$max_prices       = array();
 		$children         = $this->get_primed_visible_children();
 
 		foreach ( $children as $child ) {
-			if ( '' !== $child->get_price() ) {
-				$child_prices[] = 'incl' === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
+			if ( '' === $child->get_price() ) {
+				continue;
 			}
+
+			list( $child_min, $child_max ) = $this->get_child_display_price_range( $child, $tax_display_mode );
+
+			if ( '' === $child_min ) {
+				continue;
+			}
+
+			$min_prices[]   = $child_min;
+			$max_prices[]   = $child_max;
+			$child_prices[] = $child_min;
 		}
 
-		if ( ! empty( $child_prices ) ) {
-			$min_price = min( $child_prices );
-			$max_price = max( $child_prices );
+		if ( ! empty( $min_prices ) && ! empty( $max_prices ) ) {
+			$min_price = min( $min_prices );
+			$max_price = max( $max_prices );
 		} else {
 			$min_price = '';
 			$max_price = '';
@@ -128,6 +140,38 @@ class WC_Product_Grouped extends WC_Product {
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
+	}
+
+	/**
+	 * Get the display min and max price for a child product, taking the
+	 * shop tax display setting into account. For variable products this
+	 * returns the lowest and highest variation prices so the grouped
+	 * product can display the correct overall range.
+	 *
+	 * @since 10.9.0
+	 * @param WC_Product $child            Child product.
+	 * @param string     $tax_display_mode Either 'incl' or 'excl'.
+	 * @return array Two-element array of [ min_price, max_price ]. Either value can be an empty string if not available.
+	 */
+	private function get_child_display_price_range( $child, $tax_display_mode ) {
+		if ( $child instanceof WC_Product_Variable ) {
+			$min_price = $child->get_variation_price( 'min', true );
+			$max_price = $child->get_variation_price( 'max', true );
+
+			if ( '' === $min_price || '' === $max_price ) {
+				return array( '', '' );
+			}
+
+			return array( (float) $min_price, (float) $max_price );
+		}
+
+		$price = 'incl' === $tax_display_mode ? wc_get_price_including_tax( $child ) : wc_get_price_excluding_tax( $child );
+
+		if ( '' === $price ) {
+			return array( '', '' );
+		}
+
+		return array( $price, $price );
 	}
 
 	/*
@@ -165,31 +209,65 @@ class WC_Product_Grouped extends WC_Product {
 	 * @return string Minimum price or empty string if no children
 	 */
 	public function get_min_price() {
-		$children = $this->get_primed_visible_children();
-		$prices   = array_map( 'wc_get_price_to_display', $children );
+		list( $min_price, ) = $this->get_child_price_extremes();
 
-		if ( empty( $prices ) ) {
+		if ( '' === $min_price ) {
 			return '';
 		}
 
-		return wc_format_decimal( min( $prices ) );
+		return wc_format_decimal( $min_price );
 	}
 
 	/**
 	 * Get the maximum price from visible child products.
 	 *
+	 * For child variable products, the highest variation price is used so
+	 * the grouped product reflects the full price range of all its
+	 * children.
+	 *
 	 * @since 10.1.0
 	 * @return string Maximum price or empty string if no children
 	 */
 	public function get_max_price() {
-		$children = $this->get_primed_visible_children();
-		$prices   = array_map( 'wc_get_price_to_display', $children );
+		list( , $max_price ) = $this->get_child_price_extremes();
 
-		if ( empty( $prices ) ) {
+		if ( '' === $max_price ) {
 			return '';
 		}
 
-		return wc_format_decimal( max( $prices ) );
+		return wc_format_decimal( $max_price );
+	}
+
+	/**
+	 * Aggregate the lowest and highest display prices across all visible
+	 * child products. For variable children the variation min and max are
+	 * used, so the returned range spans the full set of purchasable prices.
+	 *
+	 * @since 10.9.0
+	 * @return array Two-element array of [ min_price, max_price ]. Empty strings when no priced children exist.
+	 */
+	private function get_child_price_extremes() {
+		$tax_display_mode = get_option( 'woocommerce_tax_display_shop' );
+		$children         = $this->get_primed_visible_children();
+		$min_prices       = array();
+		$max_prices       = array();
+
+		foreach ( $children as $child ) {
+			list( $child_min, $child_max ) = $this->get_child_display_price_range( $child, $tax_display_mode );
+
+			if ( '' === $child_min ) {
+				continue;
+			}
+
+			$min_prices[] = $child_min;
+			$max_prices[] = $child_max;
+		}
+
+		if ( empty( $min_prices ) || empty( $max_prices ) ) {
+			return array( '', '' );
+		}
+
+		return array( min( $min_prices ), max( $max_prices ) );
 	}
 
 	/**

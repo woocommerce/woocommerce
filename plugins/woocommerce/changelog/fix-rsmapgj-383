@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Fix grouped product price range to span the full min-to-max range across variable child products, instead of showing only the lowest variation prices.
