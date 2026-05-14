@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Remove deleted Media Library attachments from product gallery meta so they no longer render as blank slots on the product page.

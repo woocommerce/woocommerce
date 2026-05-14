@@ -65,6 +65,7 @@ class WC_Post_Data {
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
 		add_action( 'woocommerce_before_delete_order', array( __CLASS__, 'before_delete_order' ) );
+		add_action( 'delete_attachment', array( __CLASS__, 'remove_deleted_attachment_from_product_galleries' ) );
 
 		// Meta cache flushing.
 		add_action( 'updated_post_meta', array( __CLASS__, 'flush_object_meta_cache' ), 10, 4 );
@@ -450,6 +451,71 @@ class WC_Post_Data {
 					}
 				}
 				break;
+		}
+	}
+
+	/**
+	 * Remove a deleted attachment ID from any product gallery (`_product_image_gallery`) meta that references it.
+	 *
+	 * When an attachment used in a product gallery is permanently deleted from the Media Library,
+	 * WordPress detaches the post-thumbnail relationship for featured images but leaves the gallery
+	 * meta untouched, causing the deleted ID to render as a blank slot on the product page until
+	 * the product is re-saved. This hook keeps the gallery meta in sync with the Media Library.
+	 *
+	 * @internal Hooked to the `delete_attachment` action.
+	 * @since 10.9.0
+	 *
+	 * @param int $attachment_id The ID of the attachment being deleted.
+	 *
+	 * @return void
+	 */
+	public static function remove_deleted_attachment_from_product_galleries( $attachment_id ) {
+		global $wpdb;
+
+		$attachment_id = (int) $attachment_id;
+		if ( $attachment_id <= 0 ) {
+			return;
+		}
+
+		$product_ids = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_product_image_gallery' AND ( meta_value = %s OR meta_value LIKE %s OR meta_value LIKE %s OR meta_value LIKE %s )",
+				(string) $attachment_id,
+				$wpdb->esc_like( $attachment_id . ',' ) . '%',
+				'%' . $wpdb->esc_like( ',' . $attachment_id . ',' ) . '%',
+				'%' . $wpdb->esc_like( ',' . $attachment_id )
+			)
+		);
+
+		if ( empty( $product_ids ) ) {
+			return;
+		}
+
+		foreach ( $product_ids as $product_id ) {
+			$gallery = get_post_meta( (int) $product_id, '_product_image_gallery', true );
+			if ( ! is_string( $gallery ) || '' === $gallery ) {
+				continue;
+			}
+
+			$gallery_ids = array_filter(
+				array_map( 'absint', explode( ',', $gallery ) ),
+				static function ( $id ) use ( $attachment_id ) {
+					return $id > 0 && $id !== $attachment_id;
+				}
+			);
+
+			$new_value = implode( ',', $gallery_ids );
+			if ( $new_value === $gallery ) {
+				continue;
+			}
+
+			update_post_meta( (int) $product_id, '_product_image_gallery', $new_value );
+
+			// Bust caches so the next read of the product reflects the cleaned-up gallery.
+			$product = wc_get_product( (int) $product_id );
+			if ( $product instanceof WC_Product ) {
+				wc_delete_product_transients( $product->get_id() );
+			}
 		}
 	}
 
