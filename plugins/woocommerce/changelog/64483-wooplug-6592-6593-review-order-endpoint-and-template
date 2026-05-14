@@ -1,4 +1,0 @@
-Significance: minor
-Type: add
-
-Add a `/review-order/{id}/?key={order_key}` URL and a tokenized, read-only landing page for the Customer Review Request feature, plus the public `wc_get_review_order_url()` helper. The page is read-only; form controls land in a follow-up.

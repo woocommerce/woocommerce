@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Order notes meta box: clarify note visibility (visibility label, dynamic CTA, customer-note header, email template link, customer-note delete confirmation) and modernize bubble styling for WP admin alignment.

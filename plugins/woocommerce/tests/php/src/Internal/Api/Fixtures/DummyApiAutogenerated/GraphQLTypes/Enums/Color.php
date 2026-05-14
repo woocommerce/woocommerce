@@ -21,14 +21,14 @@ class Color {
 						'RED' => array(
 							'value' => ColorEnum::Red,
 								'description' => __( 'Red', 'woocommerce' ),
-							),
+								),
 						'GREEN' => array(
 							'value' => ColorEnum::Green,
 								'description' => __( 'Green', 'woocommerce' ),
-							),
+								),
 						'BLUE' => array(
 							'value' => ColorEnum::Blue,
-								),
+									),
 					),
 				)
 			);

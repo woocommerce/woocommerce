@@ -13,10 +13,25 @@ import {
 	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
+	getProductEditRecord,
 	getProductVariationUpdatePath,
 	getVisibleProductEditFields,
 	isProductVariation,
 } from './utils';
+
+jest.mock( '@dnd-kit/react', () => ( {
+	DragDropProvider: ( { children }: { children: React.ReactNode } ) =>
+		children,
+} ) );
+
+jest.mock( '@dnd-kit/react/sortable', () => ( {
+	isSortable: () => false,
+	useSortable: () => ( {
+		ref: () => undefined,
+		handleRef: () => undefined,
+		isDragging: false,
+	} ),
+} ) );
 
 jest.mock( '@woocommerce/settings', () => ( {
 	CURRENCY: {
@@ -196,6 +211,45 @@ describe( 'product edit utils', () => {
 		);
 	} );
 
+	it( 'uses edited product values over the listed product values', () => {
+		const listedProduct = buildProduct( {
+			id: 12,
+			name: 'Beanie',
+			on_sale: false,
+			regular_price: '15',
+			categories: [ { id: 22, name: 'Accessories' } ],
+		} );
+		const editedProduct = {
+			on_sale: true,
+			sale_price: '12',
+		};
+
+		expect(
+			getProductEditRecord( listedProduct, undefined, editedProduct )
+		).toEqual(
+			expect.objectContaining( {
+				on_sale: true,
+				sale_price: '12',
+				regular_price: '15',
+				categories: [ { id: 22, name: 'Accessories' } ],
+			} )
+		);
+	} );
+
+	it( 'falls back to the listed product when the root record is unavailable', () => {
+		const listedProduct = buildProduct( {
+			id: 12,
+			name: 'Beanie',
+		} );
+
+		expect( getProductEditRecord( listedProduct, false ) ).toBe(
+			listedProduct
+		);
+		expect( getProductEditRecord( listedProduct, undefined ) ).toBe(
+			listedProduct
+		);
+	} );
+
 	describe( 'getVisibleProductEditFields', () => {
 		const getVisibleFieldIds = ( products: ProductEntityRecord[] ) =>
 			getVisibleProductEditFields(
@@ -220,6 +274,20 @@ describe( 'product edit utils', () => {
 				expect( fieldIds ).not.toContain( fieldId );
 			} );
 		};
+		const expectFieldOrder = (
+			fieldIds: string[],
+			orderedFieldIds: string[]
+		) => {
+			orderedFieldIds.forEach( ( fieldId, index ) => {
+				const previousFieldId = orderedFieldIds[ index - 1 ];
+
+				if ( previousFieldId ) {
+					expect( fieldIds.indexOf( previousFieldId ) ).toBeLessThan(
+						fieldIds.indexOf( fieldId )
+					);
+				}
+			} );
+		};
 		const parentOwnedFieldIds = [
 			'name',
 			'short_description',
@@ -227,6 +295,7 @@ describe( 'product edit utils', () => {
 			'product_status',
 			'catalog_visibility',
 			'categories',
+			'brands',
 			'tags',
 			'type',
 			'featured',
@@ -244,20 +313,26 @@ describe( 'product edit utils', () => {
 			'date_on_sale_from',
 			'date_on_sale_to',
 		];
-		const universalFieldIds = [
-			'images',
-			'sku',
-			'manage_stock',
-			'stock_quantity',
+		const basePriceFieldIds = [ 'regular_price', 'on_sale' ];
+		const managedStockFieldIds = [ 'manage_stock', 'stock_quantity' ];
+		const stockStatusFieldIds = [ 'stock', 'manage_stock' ];
+		const shippingFieldIds = [
 			'weight',
 			'length',
 			'width',
 			'height',
 			'shipping_class',
-			'tax_status',
 		];
+		const sellableInstanceFieldIds = [
+			'images',
+			'sku',
+			...managedStockFieldIds,
+		];
+		const bulkSellableInstanceFieldIds = sellableInstanceFieldIds.filter(
+			( fieldId ) => fieldId !== 'sku'
+		);
 
-		it( 'shows pricing, shipping, and linked product fields for simple physical products', () => {
+		it( 'shows simple product fields in quick edit order', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					type: 'simple',
@@ -269,24 +344,35 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expect( fieldIds ).toEqual(
-				expect.arrayContaining( [
-					'price',
-					'regular_price',
-					'on_sale',
-					'sale_price',
-					'schedule_sale',
-					'date_on_sale_from',
-					'weight',
-					'length',
-					'width',
-					'height',
-					'shipping_class',
-					'upsell_ids',
-					'cross_sell_ids',
-				] )
-			);
-			expectFieldsHidden( fieldIds, [ 'external_url', 'button_text' ] );
+			expect( fieldIds ).toEqual( [
+				'name',
+				'product_status',
+				'catalog_visibility',
+				'regular_price',
+				'on_sale',
+				'sale_price',
+				'images',
+				'sku',
+				'stock',
+				'manage_stock',
+				'categories',
+				'brands',
+				'tags',
+			] );
+			expectFieldsHidden( fieldIds, [
+				'price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
+				'downloadable',
+				'external_url',
+				'button_text',
+				...shippingFieldIds,
+				'tax_status',
+				'upsell_ids',
+				'cross_sell_ids',
+				'featured',
+			] );
 		} );
 
 		it( 'does not include excluded fields in product type compatibility', () => {
@@ -301,7 +387,24 @@ describe( 'product edit utils', () => {
 			);
 		} );
 
-		it( 'uses the same compatible fields for simple products regardless of virtual status', () => {
+		it( 'orders pricing fields for the quick edit form', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					type: 'simple',
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+			] );
+
+			expectFieldOrder( fieldIds, [
+				'regular_price',
+				'on_sale',
+				'sale_price',
+			] );
+		} );
+
+		it( 'hides shipping fields for virtual simple products', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					type: 'simple',
@@ -312,18 +415,19 @@ describe( 'product edit utils', () => {
 
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
-					'price',
 					'regular_price',
-					'weight',
-					'length',
-					'width',
-					'height',
-					'shipping_class',
-					'upsell_ids',
-					'cross_sell_ids',
+					'categories',
+					'brands',
+					'tags',
 				] )
 			);
-			expectFieldsHidden( fieldIds, [ 'external_url', 'button_text' ] );
+			expectFieldsHidden( fieldIds, [
+				...shippingFieldIds,
+				'external_url',
+				'button_text',
+				'upsell_ids',
+				'cross_sell_ids',
+			] );
 		} );
 
 		it( 'shows downloads for simple downloadable products', () => {
@@ -336,15 +440,40 @@ describe( 'product edit utils', () => {
 			] );
 
 			expect( fieldIds ).toContain( 'downloadable' );
-			expect( fieldIds ).toEqual(
-				expect.arrayContaining( [
-					'weight',
-					'length',
-					'width',
-					'height',
-					'shipping_class',
-				] )
-			);
+			expectFieldOrder( fieldIds, [ 'images', 'downloadable', 'sku' ] );
+			expectFieldsHidden( fieldIds, shippingFieldIds );
+		} );
+
+		it( 'shows grouped product fields in quick edit order', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					type: 'grouped',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual( [
+				'name',
+				'product_status',
+				'catalog_visibility',
+				'upsell_ids',
+				'images',
+				'sku',
+				'categories',
+				'brands',
+				'tags',
+				'featured',
+			] );
+			expectFieldsHidden( fieldIds, [
+				...priceFieldIds,
+				'downloadable',
+				'cross_sell_ids',
+				'external_url',
+				'button_text',
+				...shippingFieldIds,
+				...stockStatusFieldIds,
+				'stock_quantity',
+				'tax_status',
+			] );
 		} );
 
 		it( 'shows external fields for external products', () => {
@@ -354,23 +483,33 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expect( fieldIds ).toEqual(
-				expect.arrayContaining( [
-					'price',
-					'regular_price',
-					'external_url',
-					'button_text',
-					'upsell_ids',
-				] )
-			);
+			expect( fieldIds ).toEqual( [
+				'name',
+				'product_status',
+				'catalog_visibility',
+				'regular_price',
+				'on_sale',
+				'images',
+				'external_url',
+				'button_text',
+				'sku',
+				'categories',
+				'brands',
+				'tags',
+				'featured',
+			] );
 			expectFieldsHidden( fieldIds, [
+				'price',
+				'sale_price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
 				'cross_sell_ids',
 				'downloadable',
-				'weight',
-				'length',
-				'width',
-				'height',
-				'shipping_class',
+				'upsell_ids',
+				...shippingFieldIds,
+				...stockStatusFieldIds,
+				'stock_quantity',
 			] );
 		} );
 
@@ -378,7 +517,6 @@ describe( 'product edit utils', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					type: 'variable',
-					manage_stock: true,
 				} ),
 			] );
 
@@ -394,11 +532,16 @@ describe( 'product edit utils', () => {
 			] );
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
+					'sku',
 					'upsell_ids',
 					'cross_sell_ids',
-					...universalFieldIds,
+					'stock',
+					'manage_stock',
+					...shippingFieldIds,
+					'tax_status',
 				] )
 			);
+			expectFieldsHidden( fieldIds, [ 'stock_quantity' ] );
 		} );
 
 		it( 'shows parent-owned and universal fields for simple and variable products', () => {
@@ -418,6 +561,7 @@ describe( 'product edit utils', () => {
 			] );
 
 			expectFieldsHidden( fieldIds, priceFieldIds );
+			expectFieldsHidden( fieldIds, [ 'sku' ] );
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
 					'name',
@@ -425,12 +569,47 @@ describe( 'product edit utils', () => {
 					'catalog_visibility',
 					'categories',
 					'tags',
-					'featured',
-					'upsell_ids',
-					'cross_sell_ids',
-					...universalFieldIds,
+					...bulkSellableInstanceFieldIds,
 				] )
 			);
+			expectFieldsHidden( fieldIds, [
+				'featured',
+				'upsell_ids',
+				'cross_sell_ids',
+				...shippingFieldIds,
+				'tax_status',
+			] );
+		} );
+
+		it( 'shows sale fields but not SKU when bulk editing simple products', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 1,
+					type: 'simple',
+					regular_price: '12',
+					price: '12',
+					on_sale: false,
+				} ),
+				buildProduct( {
+					id: 2,
+					type: 'simple',
+					regular_price: '15',
+					price: '15',
+					on_sale: true,
+					sale_price: '12',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( basePriceFieldIds )
+			);
+			expectFieldsHidden( fieldIds, [
+				'sale_price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
+			] );
+			expectFieldsHidden( fieldIds, [ 'sku' ] );
 		} );
 
 		it( 'shows sellable instance fields for variations', () => {
@@ -448,14 +627,75 @@ describe( 'product edit utils', () => {
 
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
-					...priceFieldIds,
-					...universalFieldIds,
+					'regular_price',
+					'on_sale',
+					'sale_price',
+					'images',
+					'sku',
+					'manage_stock',
+					'stock_quantity',
 				] )
 			);
 			expectFieldsHidden( fieldIds, [
 				...parentOwnedFieldIds,
+				'stock',
 				'downloadable',
+				'price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
+				...shippingFieldIds,
+				'tax_status',
 			] );
+		} );
+
+		it( 'computes variation fields from parent IDs even when type differs', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'simple',
+					on_sale: true,
+					sale_price: '12',
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( [
+					'images',
+					'sku',
+					'regular_price',
+					'on_sale',
+					'sale_price',
+					'stock',
+					'manage_stock',
+				] )
+			);
+			expectFieldsHidden( fieldIds, parentOwnedFieldIds );
+			expectFieldsHidden( fieldIds, [
+				'price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
+				...shippingFieldIds,
+				'tax_status',
+			] );
+		} );
+
+		it( 'shows downloads and hides shipping for virtual downloadable variations', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					virtual: true,
+					downloadable: true,
+				} ),
+			] );
+
+			expect( fieldIds ).toContain( 'downloadable' );
+			expectFieldsHidden( fieldIds, shippingFieldIds );
 		} );
 
 		it( 'shows shared sellable instance fields for simple products and variations', () => {
@@ -481,14 +721,87 @@ describe( 'product edit utils', () => {
 
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
-					...priceFieldIds,
-					...universalFieldIds,
+					'regular_price',
+					'on_sale',
+					'sale_price',
+					...bulkSellableInstanceFieldIds,
 				] )
 			);
 			expectFieldsHidden( fieldIds, [
 				...parentOwnedFieldIds,
 				'downloadable',
+				'sku',
+				'price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
 			] );
+		} );
+
+		it( 'hides shipping fields when a bulk variation selection includes virtual items', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 1,
+					type: 'simple',
+					virtual: false,
+					manage_stock: true,
+				} ),
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					virtual: true,
+					manage_stock: true,
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( [
+					...basePriceFieldIds,
+					'images',
+					...managedStockFieldIds,
+				] )
+			);
+			expectFieldsHidden( fieldIds, [
+				...shippingFieldIds,
+				'tax_status',
+				'sku',
+			] );
+		} );
+
+		it( 'shows downloadable fields when every bulk sellable item is downloadable', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 1,
+					type: 'simple',
+					downloadable: true,
+				} ),
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					downloadable: true,
+				} ),
+			] );
+
+			expect( fieldIds ).toContain( 'downloadable' );
+		} );
+
+		it( 'hides downloadable fields unless every bulk item supports downloads', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 1,
+					type: 'simple',
+					downloadable: true,
+				} ),
+				buildProduct( {
+					id: 2,
+					type: 'simple',
+					downloadable: false,
+				} ),
+			] );
+
+			expectFieldsHidden( fieldIds, [ 'downloadable' ] );
 		} );
 
 		it( 'shows only universal fields for variable products and variations', () => {
@@ -510,12 +823,15 @@ describe( 'product edit utils', () => {
 			] );
 
 			expect( fieldIds ).toEqual(
-				expect.arrayContaining( universalFieldIds )
+				expect.arrayContaining( [ ...managedStockFieldIds ] )
 			);
 			expectFieldsHidden( fieldIds, [
 				...parentOwnedFieldIds,
 				...priceFieldIds,
 				'downloadable',
+				'sku',
+				...shippingFieldIds,
+				'tax_status',
 			] );
 		} );
 
@@ -546,12 +862,15 @@ describe( 'product edit utils', () => {
 			] );
 
 			expect( fieldIds ).toEqual(
-				expect.arrayContaining( universalFieldIds )
+				expect.arrayContaining( [ 'images', ...managedStockFieldIds ] )
 			);
 			expectFieldsHidden( fieldIds, [
 				...parentOwnedFieldIds,
 				...priceFieldIds,
 				'downloadable',
+				'sku',
+				...shippingFieldIds,
+				'tax_status',
 			] );
 		} );
 

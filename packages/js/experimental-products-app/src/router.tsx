@@ -124,16 +124,19 @@ export default function useLayoutAreas() {
 		key: 'products-list',
 		areas: {
 			content: <ProductList { ...productListProps } />,
-			edit: showQuickEdit ? (
-				<ProductEdit products={ records ?? [] } />
-			) : undefined,
+			edit: (
+				<ProductEdit
+					products={ records ?? [] }
+					isOpen={ showQuickEdit }
+				/>
+			),
 			preview: false,
 			mobile: (
 				<ProductList postType={ postType } { ...productListProps } />
 			),
 		},
 		widths: {
-			edit: showQuickEdit ? 380 : undefined,
+			edit: 380,
 		},
 	};
 }

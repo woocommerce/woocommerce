@@ -29,7 +29,6 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 			'',
 			'keys',
 			'webhooks',
-			'legacy_api',
 			'woocommerce_com',
 			'features',
 		);
@@ -47,7 +46,6 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 	 *
 	 * @testWith ["", "woocommerce_settings_pages"]
 	 *           ["woocommerce_com", "woocommerce_com_integration_settings"]
-	 *           ["legacy_api", "woocommerce_settings_rest_api"]
 	 *
 	 * @param string $section_name The section name to test getting the settings for.
 	 * @param string $filter_name The name of the filter that is expected to be triggered.
@@ -137,23 +135,6 @@ class WC_Settings_Advanced_Test extends WC_Settings_Unit_Test_Case {
 		);
 
 		$settings              = $sut->get_settings_for_section( 'woocommerce_com' );
-		$setting_ids_and_types = $this->get_ids_and_types( $settings );
-
-		$this->assertEquals( $expected, $setting_ids_and_types );
-	}
-
-	/**
-	 * @testdox get_settings('legacy_api') should return all the settings for the legacy_api section.
-	 */
-	public function test_get_legacy_api_settings_returns_all_settings() {
-		$sut = new WC_Settings_Advanced();
-
-		$expected = array(
-			'legacy_api_options'      => array( 'title', 'sectionend' ),
-			'woocommerce_api_enabled' => 'checkbox',
-		);
-
-		$settings              = $sut->get_settings_for_section( 'legacy_api' );
 		$setting_ids_and_types = $this->get_ids_and_types( $settings );
 
 		$this->assertEquals( $expected, $setting_ids_and_types );

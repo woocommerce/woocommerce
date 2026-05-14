@@ -58,7 +58,7 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$request = new WP_REST_Request( 'POST', $this->endpoint . '/install' );
 		$request->set_query_params(
 			array(
-				'plugins' => 'woocommerce-legacy-rest-api',
+				'plugins' => 'hello-dolly',
 			)
 		);
 		$response = $this->server->dispatch( $request );
@@ -69,9 +69,9 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$plugins = get_plugins();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertEquals( array( 'woocommerce-legacy-rest-api' ), $data['data']['installed'] );
+		$this->assertEquals( array( 'hello-dolly' ), $data['data']['installed'] );
 		$this->assertEquals( true, $data['success'] );
-		$this->assertArrayHasKey( 'woocommerce-legacy-rest-api/woocommerce-legacy-rest-api.php', $plugins );
+		$this->assertArrayHasKey( 'hello-dolly/hello.php', $plugins );
 	}
 
 	/**
@@ -84,7 +84,7 @@ class WC_Admin_Tests_API_Plugins extends WC_REST_Unit_Test_Case {
 		$request->set_query_params(
 			array(
 				'async'   => true,
-				'plugins' => 'woocommerce-legacy-rest-api',
+				'plugins' => 'hello-dolly',
 			)
 		);
 		$response = $this->server->dispatch( $request );
