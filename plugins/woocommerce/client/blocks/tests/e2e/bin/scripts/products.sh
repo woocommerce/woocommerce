@@ -34,9 +34,6 @@ wp post term set $hoodie_product_id product_brand $brand_id --by=id
 wp post term set $beanie_product_id product_brand $brand_id --by=id
 wp post term set $album_product_id product_brand $brand_id --by=id
 
-# Give Beanie (simple product) a multi-image gallery so the Product Gallery
-# e2e tests can exercise multi-thumbnail behavior without depending on a
-# variable product. Reuses Hoodie's existing attachments.
 wp post meta update $beanie_product_id _product_image_gallery "$image1,$image2,$image3"
 
 # This is a non-hacky work around to set up the cross sells product.

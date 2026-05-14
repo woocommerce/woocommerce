@@ -172,9 +172,6 @@ class ProductImage extends AbstractBlock {
 		$target_image_id = $provided_image_id_is_valid ? $image_id : $featured_image_id;
 
 		if ( ! $target_image_id ) {
-			// `data-image-id="0"` lets the Product Gallery's
-			// `toggleImageVisibility` watch hide the placeholder when a
-			// variation with images is selected.
 			return wc_placeholder_img(
 				$image_size,
 				array(
