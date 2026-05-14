@@ -39,7 +39,7 @@ pnpm lint:php:fix
 ### Quick Reference Table
 
 | Issue | Wrong | Correct |
-|-------|-------|---------|
+| ----- | ----- | ------- |
 | **Translators comment** | Before return | Before function call |
 | **File docblock (PSR-12)** | After `declare()` | Before `declare()` |
 | **Indentation** | Spaces | Tabs only |
