@@ -2,9 +2,9 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { SelectControl } from '@wordpress/ui';
 
 import type { Field } from '@wordpress/dataviews';
-import { SelectControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
@@ -40,21 +40,31 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	render: ( { item }: { item: ProductEntityRecord } ) => (
 		<ProductStatusBadge status={ item.status } />
 	),
-	Edit: ( { data, onChange, field } ) => (
-		<SelectControl
-			label={ field.label }
-			value={ data.status }
-			options={ field.elements?.filter(
+	Edit: ( { data, onChange, field } ) => {
+		const options =
+			field.elements?.filter(
 				( element: { label: string; value: string } ) =>
 					element.value !== 'trash'
-			) }
-			onChange={ ( value ) => {
-				if ( value && isValidStatus( value ) ) {
-					onChange( {
-						status: value,
-					} );
-				}
-			} }
-		/>
-	),
+			) ?? [];
+		const selectedOption = options.find(
+			( option ) => option.value === data.status
+		);
+
+		return (
+			<SelectControl
+				label={ field.label }
+				value={ selectedOption }
+				items={ options }
+				onValueChange={ ( option ) => {
+					const value = option?.value;
+
+					if ( typeof value === 'string' && isValidStatus( value ) ) {
+						onChange( {
+							status: value,
+						} );
+					}
+				} }
+			/>
+		);
+	},
 };

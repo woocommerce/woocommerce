@@ -30,59 +30,59 @@ class Widget {
 						'slug' => array(
 							'type' => Type::nonNull(Type::string()),
 								'description' => __( 'A short slug', 'woocommerce' ),
-									),
+										),
 						'caption' => array(
 							'type' => Type::string(),
 								'description' => __( 'An optional caption', 'woocommerce' ),
-									),
+										),
 						'color' => array(
 							'type' => Type::nonNull(ColorType::get()),
 								'description' => __( 'The widget color', 'woocommerce' ),
-									),
+										),
 						'priority' => array(
 							'type' => Type::nonNull(PriorityType::get()),
 								'description' => __( 'Priority assigned to this widget', 'woocommerce' ),
-									),
+										),
 						'tag_ids' => array(
 							'type' => Type::nonNull(Type::listOf(Type::nonNull(Type::int()))),
 								'description' => __( 'Tag IDs assigned to this widget', 'woocommerce' ),
-									),
+										),
 						'featured_reviews' => array(
 							'type' => Type::nonNull(Type::listOf(Type::nonNull(WidgetReview::get()))),
 								'description' => __( 'Notable comments left on this widget', 'woocommerce' ),
-									),
+										),
 						'reviews' => array(
 							'type' => Type::nonNull(WidgetReviewConnectionType::get()),
 								'description' => __( 'Reviews of the widget', 'woocommerce' ),
-									),
+										),
 						'date_created' => array(
 							'type' => DummyDateTimeType::get(),
 								'description' => __( 'When the widget was created', 'woocommerce' ),
-									),
+										),
 						'price' => array(
 							'type' => Type::nonNull(Type::string()),
 								'description' => __( 'The widget price', 'woocommerce' ),
-								'args' => array(
+									'args' => array(
 										'formatted' => array(
 									'type' => Type::boolean(),
 												'defaultValue' => false,
 												'description' => __( 'When true, prepend a $ sign', 'woocommerce' ),
-								),
+											),
 							),
 								),
 						'legacy_price' => array(
 							'type' => Type::nonNull(Type::string()),
 								'description' => __( 'A field flagged for removal', 'woocommerce' ),
-									'deprecationReason' => 'Use price instead.',
+										'deprecationReason' => 'Use price instead.',
 							),
 						'label' => array(
 							'type' => Type::nonNull(Type::string()),
 								'description' => __( 'The display label for this object', 'woocommerce' ),
-									),
+										),
 						'id' => array(
 							'type' => Type::nonNull(Type::int()),
 								'description' => __( 'The unique numeric identifier', 'woocommerce' ),
-									),
+										),
 					),
 				)
 			);

@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Fix Show more button in filter blocks being visible when it was not necessary
+
+

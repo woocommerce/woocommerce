@@ -101,9 +101,9 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		}
 
 		// confirm we're on the orders page
-		await expect( page.locator( 'h1.components-text' ) ).toContainText(
-			'Orders'
-		);
+		await expect(
+			page.locator( 'h1.components-text, h1.wp-heading-inline' )
+		).toContainText( 'Orders' );
 		// open order we created
 		await page.goto(
 			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
