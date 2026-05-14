@@ -886,7 +886,7 @@
           slider.slides.css({"width": "100%", "float": 'left', "marginRight": "-100%", "position": "relative"});
         }
         if (type === "init") {
-          slider.viewport = slider.slides.parent().css({"overflow": "hidden"});
+          slider.viewport = $('<div class="' + namespace + 'viewport"></div>').css({"overflow": "hidden"}).appendTo(slider).append(slider.container);
           if (!touch) {
             // Every "opacity" change before outerWidth() does NOT get animated; every "opacity" change after outerWidth() becomes a fadeIn animation
             if (slider.vars.fadeFirstSlide == false) {
