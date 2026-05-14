@@ -5,7 +5,7 @@ import { Button, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { select as wpSelect, useDispatch, useSelect } from '@wordpress/data';
 import { DataForm } from '@wordpress/dataviews';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
@@ -42,6 +42,7 @@ type ProductEditFormProps = {
 
 type ProductEditProps = {
 	products: ProductEntityRecord[];
+	isOpen: boolean;
 };
 
 function getSaveNoticeMessage( successCount: number, failedCount: number ) {
@@ -109,7 +110,7 @@ function ProductEditForm( {
 	);
 }
 
-export default function ProductEdit( { products }: ProductEditProps ) {
+export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 	const { navigate } = useHistory();
 	const { path, query = {} } = useLocation();
 	const requestedProductIdsFromRoute = getSelectionFromPostId( query.postId )
@@ -120,7 +121,7 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 	);
 
 	const [ isSaving, setIsSaving ] = useState( false );
-	const [ isDrawerOpen, setIsDrawerOpen ] = useState( false );
+
 	const editableFields = getProductEditFields( productFields );
 	const {
 		selectedProducts,
@@ -372,11 +373,12 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 				} );
 			}
 
-			setIsDrawerOpen( false );
+			closeDrawer();
 		} finally {
 			setIsSaving( false );
 		}
 	}, [
+		closeDrawer,
 		createErrorNotice,
 		createSuccessNotice,
 		editEntityRecord,
@@ -385,29 +387,8 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 		selectedProducts,
 	] );
 
-	// `requestedProductIds` is re-computed (new array reference) on every
-	// render, so depending on it directly would re-fire the effect every
-	// render — including the render triggered by `setIsDrawerOpen(false)`
-	// while the URL still has the `quickEdit` key — and immediately re-open
-	// the drawer, preventing the close animation. Depend on a stable
-	// boolean (the existing `hasNoRequestedProducts`) instead.
-	useEffect( () => {
-		if ( ! hasNoRequestedProducts ) {
-			setIsDrawerOpen( true );
-		}
-	}, [ hasNoRequestedProducts ] );
-
 	return (
-		<Drawer.Root
-			open={ isDrawerOpen }
-			onOpenChange={ setIsDrawerOpen }
-			onOpenChangeComplete={ ( isOpen ) => {
-				if ( ! isOpen ) {
-					closeDrawer();
-				}
-			} }
-			swipeDirection="right"
-		>
+		<Drawer.Root open={ isOpen } swipeDirection="right">
 			<Drawer.Popup
 				className="woocommerce-product-edit__drawer"
 				portal={
@@ -420,7 +401,7 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 						{ title }
 					</Drawer.Title>
 					<Drawer.CloseIcon
-						onClick={ () => setIsDrawerOpen( false ) }
+						onClick={ closeDrawer }
 						label={ __( 'Close quick edit', 'woocommerce' ) }
 					/>
 				</Drawer.Header>
@@ -469,7 +450,7 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 					<Drawer.Footer className="woocommerce-product-edit__footer">
 						<Button
 							variant="tertiary"
-							onClick={ () => setIsDrawerOpen( false ) }
+							onClick={ closeDrawer }
 							disabled={ isSaving }
 						>
 							{ __( 'Cancel', 'woocommerce' ) }
