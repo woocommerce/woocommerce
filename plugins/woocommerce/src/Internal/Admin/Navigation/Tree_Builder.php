@@ -28,7 +28,11 @@ class Tree_Builder {
 		$tree             = array();
 
 		foreach ( $default_tree as $slug => $node ) {
-			if ( 'woocommerce' === $slug || isset( $registered_slugs[ $slug ] ) ) {
+			// Synthetic nodes with an explicit `url` override don't need to
+			// match a WP-registered slug — the URL itself is the click
+			// target, and the slug acts purely as a unique tree key.
+			$is_synthetic_url = isset( $node['url'] );
+			if ( 'woocommerce' === $slug || isset( $registered_slugs[ $slug ] ) || $is_synthetic_url ) {
 				$tree[ $slug ]           = $node;
 				$tree[ $slug ]['source'] = 'default';
 			}

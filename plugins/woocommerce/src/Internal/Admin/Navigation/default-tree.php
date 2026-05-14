@@ -87,6 +87,16 @@ return array(
 		'icon'     => 'dashicons-admin-plugins',
 		'position' => 95,
 	),
+	// Default landing item under Extensions: the Marketplace listing
+	// (WooCommerce > Extensions in the classic menu). The synthetic key
+	// keeps the tree out of a key collision with the rail-root above; the
+	// `url` override points the click through to the real Marketplace URL.
+	'wc-admin&path=/extensions&marketplace'                                  => array(
+		'parent'   => 'wc-admin&path=/extensions',
+		'title'    => __( 'Browse Marketplace', 'woocommerce' ),
+		'position' => 1,
+		'url'      => 'wc-admin&path=/extensions',
+	),
 	// Status always sits at the end of Settings; use a high position so
 	// later additions (Scheduled Actions at 100, third-party tabs, etc.)
 	// still sort before it.
