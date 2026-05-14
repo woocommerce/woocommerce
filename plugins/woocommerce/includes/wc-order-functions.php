@@ -612,6 +612,39 @@ function wc_create_refund( $args = array() ) {
 					continue;
 				}
 
+				/*
+				 * Validate per-line-item refund totals so they cannot exceed the line's remaining
+				 * (non-refunded) total. Without this check, callers could refund $20 against a $10
+				 * fee/shipping/product line. The order-level $remaining_refund_amount check above
+				 * does not catch this when the order total is larger than the line total.
+				 *
+				 * Items returned by get_items( array( 'line_item', 'fee', 'shipping' ) ) are
+				 * subclasses (WC_Order_Item_Product/Fee/Shipping) that all expose get_total().
+				 * $order is a WC_Order here, so its refund helpers are safe to call.
+				 */
+				$item_total                  = (float) ( method_exists( $item, 'get_total' ) ? $item->get_total() : 0 );
+				$item_already_refunded_total = $order instanceof WC_Order
+					? (float) $order->get_total_refunded_for_item( $item_id, $item->get_type() )
+					: 0.0;
+				$item_remaining_total        = abs( $item_total ) - abs( $item_already_refunded_total );
+				$requested_refund_total      = abs( (float) $refund_total );
+
+				if ( $requested_refund_total - $item_remaining_total > 0.000001 ) {
+					throw new Exception( __( 'Invalid refund amount for line item.', 'woocommerce' ) );
+				}
+
+				if ( $qty && method_exists( $item, 'get_quantity' ) ) {
+					$item_qty                  = (float) $item->get_quantity();
+					$item_already_refunded_qty = $order instanceof WC_Order
+						? (float) $order->get_qty_refunded_for_item( $item_id, $item->get_type() )
+						: 0.0;
+					$item_remaining_qty        = abs( $item_qty ) - abs( $item_already_refunded_qty );
+
+					if ( abs( (float) $qty ) - $item_remaining_qty > 0.000001 ) {
+						throw new Exception( __( 'Invalid refund quantity for line item.', 'woocommerce' ) );
+					}
+				}
+
 				// array of order id and product id which were refunded.
 				// later to be used for revoking download permission.
 				// checking if the item is a product, as we only need to revoke download permission for products.

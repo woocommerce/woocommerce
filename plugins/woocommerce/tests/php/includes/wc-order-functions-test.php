@@ -252,6 +252,128 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that wc_create_refund() rejects per-line refund_total values larger than
+	 * the line item's own total. Regression test for woocommerce/woocommerce#25248.
+	 */
+	public function test_wc_create_refund_rejects_over_refund_on_fee_line() {
+		$order = new WC_Order();
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Fee under test' );
+		$fee->set_amount( 10 );
+		$fee->set_total( 10 );
+		$fee->set_tax_status( 'none' );
+		$order->add_item( $fee );
+
+		$order->calculate_totals();
+		$order->save();
+
+		$fee_id = 0;
+		foreach ( $order->get_items( 'fee' ) as $item_id => $item ) {
+			$fee_id = $item_id;
+		}
+
+		// Attempt to refund $20 against a $10 fee — should be blocked.
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 20,
+				'line_items' => array(
+					$fee_id => array(
+						'qty'          => 0,
+						'refund_total' => 20,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $refund, 'Refunding more than the fee total should return a WP_Error.' );
+		$this->assertSame( 0.0, (float) $order->get_total_refunded(), 'No refund should be recorded against the order.' );
+	}
+
+	/**
+	 * Test that wc_create_refund() rejects a per-line refund quantity larger than the line's quantity.
+	 */
+	public function test_wc_create_refund_rejects_over_refund_qty_on_product_line() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 5 );
+		$product->save();
+
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'total'    => 5,
+			)
+		);
+		$order->add_item( $item );
+		$order->calculate_totals();
+		$order->save();
+
+		$items   = $order->get_items();
+		$item_id = array_key_first( $items );
+
+		// Attempt to refund 2 units of a 1-unit product line — should be blocked.
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 5,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 2,
+						'refund_total' => 5,
+					),
+				),
+			)
+		);
+
+		$this->assertWPError( $refund, 'Refunding more units than purchased should return a WP_Error.' );
+	}
+
+	/**
+	 * Test that wc_create_refund() still permits a valid partial per-line refund
+	 * (sanity check that the validation does not over-block).
+	 */
+	public function test_wc_create_refund_allows_valid_partial_refund_on_fee_line() {
+		$order = new WC_Order();
+
+		$fee = new WC_Order_Item_Fee();
+		$fee->set_name( 'Fee under test' );
+		$fee->set_amount( 10 );
+		$fee->set_total( 10 );
+		$fee->set_tax_status( 'none' );
+		$order->add_item( $fee );
+
+		$order->calculate_totals();
+		$order->save();
+
+		$fee_id = 0;
+		foreach ( $order->get_items( 'fee' ) as $item_id => $item ) {
+			$fee_id = $item_id;
+		}
+
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 4,
+				'line_items' => array(
+					$fee_id => array(
+						'qty'          => 0,
+						'refund_total' => 4,
+						'refund_tax'   => array(),
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'A valid partial refund on a fee line should succeed.' );
+		$this->assertEquals( 4, $order->get_total_refunded_for_item( $fee_id, 'fee' ) );
+	}
+
+	/**
 	 * Test that creating a full refund with free items triggers fully refunded action.
 	 */
 	public function test_full_refund_with_free_items() {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent refunds that exceed a line item's total or quantity (e.g. refunding $20 against a $10 fee).
