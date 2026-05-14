@@ -84,5 +84,6 @@ class Bootstrap {
 		$container->get( Renderer::class );
 		$container->get( Assets::class );
 		$container->get( Telemetry::class );
+		$container->get( Section_Memory::class );
 	}
 }
