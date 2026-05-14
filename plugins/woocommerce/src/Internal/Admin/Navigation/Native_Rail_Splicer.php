@@ -360,9 +360,32 @@ class Native_Rail_Splicer {
 				$title     = (string) ( $node['title'] ?? $slug );
 				$cap       = (string) ( $node['capability'] ?? 'read' );
 				$entries[] = array( $title, $cap, $slug, $title, 'hide-if-js' );
+				// Tag the rail-root $menu entry so CSS can suppress the
+				// empty wp-submenu wrapper menu-header.php still emits
+				// around our hidden phantom.
+				$this->mark_menu_entry_no_children( $slug );
 			}
 
 			$submenu[ $slug ] = $entries;
+		}
+	}
+
+	/**
+	 * Append a marker class to the rail-root's $menu entry so the empty
+	 * wp-submenu wrapper (rendered around our phantom hide-if-js entry) can
+	 * be CSS-suppressed.
+	 *
+	 * @param string $slug Rail-root slug whose $menu entry should be marked.
+	 */
+	private function mark_menu_entry_no_children( string $slug ): void {
+		global $menu;
+		foreach ( $menu as $key => $entry ) {
+			if ( ! isset( $entry[2] ) || $entry[2] !== $slug ) {
+				continue;
+			}
+			$existing        = isset( $entry[4] ) ? (string) $entry[4] : '';
+			$menu[ $key ][4] = trim( $existing . ' wc-nav-v2-no-children' );
+			return;
 		}
 	}
 
