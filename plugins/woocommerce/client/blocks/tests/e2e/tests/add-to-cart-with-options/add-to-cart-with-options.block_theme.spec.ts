@@ -1062,9 +1062,6 @@ test.describe( 'Add to Cart + Options Block', () => {
 			await test.step( 'hides Product Quantity input when the product is sold individually', async () => {
 				await expect( quantityInput ).toBeVisible();
 
-				const addToCartBlock = page.locator(
-					'.wp-block-add-to-cart-with-options'
-				);
 				const colorGreenOption = addToCartBlock
 					.getByRole( 'radiogroup', { name: 'Color' } )
 					.getByRole( 'checkbox', { name: 'Green', exact: true } );

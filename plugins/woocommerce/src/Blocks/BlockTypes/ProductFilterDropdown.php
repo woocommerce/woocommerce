@@ -80,7 +80,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 		if ( ! empty( $selectable_items['selectAccessibleLabel'] ) && is_string( $selectable_items['selectAccessibleLabel'] ) ) {
 			$label = $selectable_items['selectAccessibleLabel'];
 		} elseif ( is_string( $selectable_items['groupLabel'] ?? null ) && '' !== $selectable_items['groupLabel'] ) {
-			/** translators: %s: Attribute or filter type label. */
+			/** Translators: %s Attribute or filter type label. */
 			$label = sprintf( __( 'Select %s', 'woocommerce' ), $selectable_items['groupLabel'] );
 		} else {
 			$label = __( 'Select options', 'woocommerce' );
