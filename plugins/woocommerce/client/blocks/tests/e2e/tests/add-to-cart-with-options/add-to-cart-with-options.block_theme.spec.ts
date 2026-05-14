@@ -1773,7 +1773,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} );
 		}
 
-		test( `Pills: "X in cart" text displays correctly after auto-selection`, async ( {
+		test( `chips: "X in cart" text displays correctly after auto-selection`, async ( {
 			page,
 			pageObject,
 			editor,

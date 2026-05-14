@@ -8,10 +8,9 @@
 		"woocommerce/add-to-cart-with-options-variation-selector-attribute"
 	],
 	"attributes": {
-		"optionStyle": {
+		"displayStyle": {
 			"type": "string",
-			"enum": [ "chips", "dropdown", "pills" ],
-			"default": "chips"
+			"default": "woocommerce/product-filter-chips"
 		},
 		"autoselect": {
 			"type": "boolean",

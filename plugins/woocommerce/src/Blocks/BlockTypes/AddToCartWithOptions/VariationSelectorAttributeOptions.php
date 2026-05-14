@@ -44,7 +44,13 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$classes_and_styles = StyleAttributesUtils::get_classes_and_styles_by_attributes( $attributes, array(), array( 'extra_classes' ) );
 
-		$option_style = $this->resolve_option_style( $attributes );
+		if ( array_key_exists( 'displayStyle', $attributes ) ) {
+			$display_style = $attributes['displayStyle'];
+		} elseif ( array_key_exists( 'optionStyle', $attributes ) ) {
+			$display_style = 'dropdown' === $attributes['optionStyle'] ? 'woocommerce/product-filter-dropdown' : 'woocommerce/product-filter-chips';
+		} else {
+			$display_style = 'woocommerce/product-filter-chips';
+		}
 
 		$wrapper_attributes = get_block_wrapper_attributes(
 			array(
@@ -53,44 +59,13 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			)
 		);
 
-		$content = $this->render_attribute_options( $attributes, $block, $option_style );
+		$content = $this->render_attribute_options( $attributes, $block, $display_style );
 
 		return sprintf(
 			'<div %s>%s</div>',
 			$wrapper_attributes,
 			$content
 		);
-	}
-
-	/**
-	 * Resolve option style from attributes, including legacy keys.
-	 *
-	 * @param array $attributes Block attributes.
-	 * @return string 'chips' or 'dropdown'.
-	 */
-	protected function resolve_option_style( array $attributes ): string {
-		$option_style = array_key_exists( 'optionStyle', $attributes ) ? $attributes['optionStyle'] : null;
-
-		// During the beta period, `optionStyle` was called `style`, so we check
-		// `style` for backwards compatibility.
-		if ( ! $option_style && array_key_exists( 'style', $attributes ) && 'dropdown' === $attributes['style'] ) {
-			$option_style = 'dropdown';
-		}
-
-		if ( 'dropdown' === $option_style ) {
-			return 'dropdown';
-		}
-
-		// Legacy `pills` matches the new chips presentation.
-		if ( 'pills' === $option_style ) {
-			return 'chips';
-		}
-
-		if ( 'chips' === $option_style ) {
-			return 'chips';
-		}
-
-		return 'chips';
 	}
 
 	/**
@@ -183,10 +158,10 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 	 *
 	 * @param array     $attributes Block attributes.
 	 * @param \WP_Block $block Block instance.
-	 * @param string    $option_style Resolved option style.
+	 * @param string    $display_style Resolved option style.
 	 * @return string
 	 */
-	protected function render_attribute_options( array $attributes, WP_Block $block, string $option_style ): string {
+	protected function render_attribute_options( array $attributes, WP_Block $block, string $display_style ): string {
 		$attribute_id    = $block->context['woocommerce/attributeId'];
 		$attribute_slug  = wc_variation_attribute_name( $block->context['woocommerce/attributeName'] );
 		$attribute_terms = $block->context['woocommerce/attributeTerms'];
@@ -216,10 +191,9 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 
 		$inner_blocks = $block->parsed_block['innerBlocks'] ?? array();
 		if ( empty( $inner_blocks ) ) {
-			$default_block_name = 'dropdown' === $option_style ? 'woocommerce/product-filter-dropdown' : 'woocommerce/product-filter-chips';
-			$inner_blocks       = array(
+			$inner_blocks = array(
 				array(
-					'blockName'    => $default_block_name,
+					'blockName'    => $display_style,
 					'attrs'        => array(),
 					'innerBlocks'  => array(),
 					'innerHTML'    => '',
@@ -253,7 +227,7 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 			'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
 		);
 
-		if ( 'dropdown' !== $option_style ) {
+		if ( 'woocommerce/product-filter-dropdown' !== $display_style ) {
 			$interactive_attributes['role']            = 'radiogroup';
 			$interactive_attributes['id']              = $attribute_id;
 			$interactive_attributes['aria-labelledby'] = $attribute_id . '_label';

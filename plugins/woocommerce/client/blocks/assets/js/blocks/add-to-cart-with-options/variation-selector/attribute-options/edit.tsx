@@ -31,26 +31,14 @@ import {
 	DisplayStyleSwitcher,
 	resetDisplayStyleBlock,
 } from '../../../product-filters/components/display-style-switcher';
+import { EXCLUDED_BLOCKS } from '../../../product-filters/constants';
+import { getAllowedBlocks } from '../../../product-filters/utils/get-allowed-blocks';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
-const INNER_DROPDOWN = 'woocommerce/product-filter-dropdown';
-
-function optionStyleToBlockName(
-	optionStyle: 'chips' | 'dropdown' | 'pills'
-): typeof INNER_CHIPS | typeof INNER_DROPDOWN {
-	if ( optionStyle === 'dropdown' ) {
-		return INNER_DROPDOWN;
-	}
-	return INNER_CHIPS;
-}
-
-function blockNameToOptionStyle( blockName: string ): 'chips' | 'dropdown' {
-	return blockName === INNER_DROPDOWN ? 'dropdown' : 'chips';
-}
 
 interface Attributes {
 	className?: string;
-	optionStyle: 'chips' | 'dropdown' | 'pills';
+	displayStyle: string;
 	autoselect: boolean;
 	disabledAttributesAction: 'disable' | 'hide';
 }
@@ -59,12 +47,8 @@ export default function AttributeOptionsEdit(
 	props: BlockEditProps< Attributes >
 ) {
 	const { attributes, setAttributes, clientId } = props;
-	const { className, optionStyle, autoselect, disabledAttributesAction } =
+	const { className, displayStyle, autoselect, disabledAttributesAction } =
 		attributes;
-
-	const blockProps = useBlockProps( {
-		className,
-	} );
 
 	const { data: attribute } =
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
@@ -96,18 +80,15 @@ export default function AttributeOptionsEdit(
 		} satisfies SelectableItemsContext< FilterItemFields >;
 	}, [ attribute ] );
 
-	const { children, ...innerBlocksProps } = useInnerBlocksProps(
-		{
-			role: 'radiogroup',
-			id: attribute?.taxonomy,
-			'aria-label': attribute?.name,
-		},
-		{
-			allowedBlocks: [ INNER_CHIPS, INNER_DROPDOWN ],
-			template: [ [ optionStyleToBlockName( optionStyle ) ] ],
-			templateLock: 'all',
-		}
-	);
+	const blockProps = useBlockProps( {
+		className,
+	} );
+
+	const { children, ...innerBlocksProps } = useInnerBlocksProps( blockProps, {
+		allowedBlocks: getAllowedBlocks( EXCLUDED_BLOCKS ),
+		template: [ [ displayStyle ] ],
+		templateLock: 'all',
+	} );
 
 	if ( ! attribute ) return null;
 
@@ -117,15 +98,15 @@ export default function AttributeOptionsEdit(
 				<ToolsPanel
 					label={ __( 'Style', 'woocommerce' ) }
 					resetAll={ () => {
-						setAttributes( { optionStyle: 'chips' } );
+						setAttributes( { displayStyle: INNER_CHIPS } );
 						resetDisplayStyleBlock( clientId, INNER_CHIPS );
 					} }
 				>
 					<ToolsPanelItem
-						hasValue={ () => optionStyle === 'dropdown' }
+						hasValue={ () => displayStyle !== INNER_CHIPS }
 						label={ __( 'Style', 'woocommerce' ) }
 						onDeselect={ () => {
-							setAttributes( { optionStyle: 'chips' } );
+							setAttributes( { displayStyle: INNER_CHIPS } );
 							resetDisplayStyleBlock( clientId, INNER_CHIPS );
 						} }
 						isShownByDefault
@@ -136,13 +117,10 @@ export default function AttributeOptionsEdit(
 							</span>
 							<DisplayStyleSwitcher
 								clientId={ clientId }
-								currentStyle={ optionStyleToBlockName(
-									optionStyle
-								) }
+								currentStyle={ displayStyle }
 								onChange={ ( value ) => {
 									setAttributes( {
-										optionStyle:
-											blockNameToOptionStyle( value ),
+										displayStyle: value,
 									} );
 								} }
 							/>

@@ -9,6 +9,7 @@ import { Icon, buttons } from '@wordpress/icons';
  */
 import metadata from './block.json';
 import AttributeOptionsEdit from './edit';
+import AttributeOptionsSave from './save';
 import './style.scss';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
@@ -19,15 +20,15 @@ registerBlockType( metadata, {
 	icon: {
 		src: <Icon icon={ buttons } />,
 	},
-	save: () => null,
+	save: AttributeOptionsSave,
 	deprecated: [
 		{
 			isEligible( attributes, innerBlocks ) {
 				const style = attributes?.optionStyle;
-				const legacyPills = style === 'pills';
+				const legacyStyle = style === 'pills' || style === 'dropdown';
 				const missingInner =
 					! Array.isArray( innerBlocks ) || innerBlocks.length === 0;
-				return legacyPills || missingInner;
+				return legacyStyle || missingInner;
 			},
 			migrate( attributes, innerBlocks ) {
 				const defaultAttributes = {
@@ -38,13 +39,15 @@ registerBlockType( metadata, {
 				};
 				const nextAttributes = { ...defaultAttributes, ...attributes };
 				if ( nextAttributes.optionStyle === 'pills' ) {
-					nextAttributes.optionStyle = 'chips';
+					nextAttributes.optionStyle =
+						'woocommerce/product-filter-chips';
 				}
 				if ( Array.isArray( innerBlocks ) && innerBlocks.length > 0 ) {
 					return [ nextAttributes, innerBlocks ];
 				}
 				const innerName =
-					nextAttributes.optionStyle === 'dropdown'
+					nextAttributes.optionStyle ===
+					'woocommerce/product-filter-dropdown'
 						? INNER_DROPDOWN
 						: INNER_CHIPS;
 				return [ nextAttributes, [ createBlock( innerName ) ] ];
