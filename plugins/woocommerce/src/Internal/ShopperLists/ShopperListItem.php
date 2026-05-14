@@ -199,7 +199,17 @@ class ShopperListItem {
 					);
 				}
 
-				if ( ! in_array( $requested_attributes[ $key ], $attribute->get_slugs(), true ) ) {
+				// Canonicalize the caller-supplied value the same way the cart does, so
+				// equivalent inputs (e.g. "Red" / " red ") match the parent slug list.
+				$requested = $attribute->is_taxonomy()
+					? sanitize_title( wp_unslash( (string) $requested_attributes[ $key ] ) )
+					: html_entity_decode(
+						wc_clean( wp_unslash( (string) $requested_attributes[ $key ] ) ),
+						ENT_QUOTES,
+						get_bloginfo( 'charset' )
+					);
+
+				if ( '' === $requested || ! in_array( $requested, $attribute->get_slugs(), true ) ) {
 					throw new \InvalidArgumentException(
 						esc_html(
 							sprintf(
@@ -212,7 +222,7 @@ class ShopperListItem {
 					);
 				}
 
-				$result[ $key ] = $requested_attributes[ $key ];
+				$result[ $key ] = $requested;
 				continue;
 			}//end if
 
@@ -280,9 +290,20 @@ class ShopperListItem {
 	}
 
 	/**
-	 * Compute a deterministic item key. Mirrors WC_Cart::generate_cart_id() so the same
-	 * product+variation always hashes to the same key, regardless of the input key order
-	 * for variation attributes.
+	 * Compute a deterministic item key for dedupe.
+	 *
+	 * Like {@see WC_Cart::generate_cart_id()} we hash the identity tuple, but we
+	 * canonicalize the variation array first so that semantically-equivalent inputs
+	 * always collapse to the same key:
+	 *
+	 * - Cast keys and values to string (defends against int/string drift through JSON).
+	 * - Trim keys and values.
+	 * - Drop entries with an empty value (so `attr => ''` and a missing `attr` match).
+	 * - `ksort()` so attribute order on the wire doesn't affect the hash.
+	 *
+	 * Per-attribute sanitization (taxonomy → `sanitize_title`, custom → `wc_clean`)
+	 * happens upstream in {@see self::resolve_variation_attributes()}, mirroring how
+	 * the cart pipelines normalize before hashing.
 	 *
 	 * @param int   $product_id   Product ID.
 	 * @param int   $variation_id Variation ID, or 0.
@@ -295,11 +316,21 @@ class ShopperListItem {
 			$id_parts[] = $variation_id;
 		}
 
-		if ( ! empty( $variation ) ) {
-			ksort( $variation );
+		$normalized = array();
+		foreach ( $variation as $k => $v ) {
+			$k = trim( (string) $k );
+			$v = trim( (string) $v );
+			if ( '' === $k || '' === $v ) {
+				continue;
+			}
+			$normalized[ $k ] = $v;
+		}
+
+		if ( ! empty( $normalized ) ) {
+			ksort( $normalized );
 			$variation_key = '';
-			foreach ( $variation as $k => $v ) {
-				$variation_key .= trim( (string) $k ) . trim( (string) $v );
+			foreach ( $normalized as $k => $v ) {
+				$variation_key .= $k . $v;
 			}
 			$id_parts[] = $variation_key;
 		}

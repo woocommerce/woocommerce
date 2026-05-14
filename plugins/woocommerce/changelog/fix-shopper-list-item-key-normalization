@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Normalize ShopperListItem variation attributes so equivalent inputs (case, whitespace, empty-vs-absent slots, numeric type drift) deduplicate to the same item key.

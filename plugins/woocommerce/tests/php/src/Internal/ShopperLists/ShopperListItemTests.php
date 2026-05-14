@@ -150,4 +150,103 @@ class ShopperListItemTests extends WC_Unit_Test_Case {
 			$this->addToAssertionCount( 1 );
 		}
 	}
+
+	/**
+	 * @testdox from_product canonicalizes "any" slot values like cart does, so equivalent inputs produce the same item.
+	 */
+	public function test_from_variation_canonicalizes_any_slot_values(): void {
+		$variable = \WC_Helper_Product::create_variation_product();
+
+		$any_number = 0;
+		foreach ( $variable->get_children() as $variation_id ) {
+			$attrs = wc_get_product_variation_attributes( (int) $variation_id );
+			if ( ( $attrs['attribute_pa_number'] ?? null ) === '' ) {
+				$any_number = (int) $variation_id;
+				break;
+			}
+		}
+		$this->assertNotSame( 0, $any_number, 'Expected the variation fixture to expose an "any pa_number" slot.' );
+
+		$canonical = ShopperListItem::from_product( $any_number, array( 'attribute_pa_number' => '2' ) );
+
+		// Leading/trailing whitespace is trimmed by sanitize_title.
+		$padded = ShopperListItem::from_product( $any_number, array( 'attribute_pa_number' => '  2  ' ) );
+		$this->assertSame( $canonical->get_key(), $padded->get_key() );
+		$this->assertSame( '2', $padded->to_array()['variation']['attribute_pa_number'] );
+
+		// Empty after sanitization is rejected (covers the explicit "" guard in the "any" branch).
+		try {
+			ShopperListItem::from_product( $any_number, array( 'attribute_pa_number' => '   ' ) );
+			$this->fail( 'Expected whitespace-only any-slot value to throw.' );
+		} catch ( \InvalidArgumentException $e ) {
+			$this->addToAssertionCount( 1 );
+		}
+	}
+
+	/**
+	 * @testdox generate_key collapses semantically-equivalent variation arrays to the same hash.
+	 */
+	public function test_generate_key_canonicalizes_variation_inputs(): void {
+		$method = new \ReflectionMethod( ShopperListItem::class, 'generate_key' );
+		$method->setAccessible( true );
+
+		$base = $method->invoke(
+			null,
+			10,
+			20,
+			array(
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => '2',
+			)
+		);
+
+		// Different key order hashes the same (ksort).
+		$reordered = $method->invoke(
+			null,
+			10,
+			20,
+			array(
+				'attribute_pa_number' => '2',
+				'attribute_pa_colour' => 'red',
+			)
+		);
+		$this->assertSame( $base, $reordered, 'Key order must not affect the hash.' );
+
+		// Leading/trailing whitespace on keys and values is trimmed.
+		$padded = $method->invoke(
+			null,
+			10,
+			20,
+			array(
+				' attribute_pa_colour ' => ' red ',
+				'attribute_pa_number'   => "\t2\n",
+			)
+		);
+		$this->assertSame( $base, $padded, 'Whitespace around keys/values must not affect the hash.' );
+
+		// Numeric values cast through (string) match their string equivalents.
+		$numeric = $method->invoke(
+			null,
+			10,
+			20,
+			array(
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => 2,
+			)
+		);
+		$this->assertSame( $base, $numeric, 'Numeric/string drift must not affect the hash.' );
+
+		// An attribute with an empty value is treated as if the key were absent.
+		$with_empty = $method->invoke(
+			null,
+			10,
+			20,
+			array(
+				'attribute_pa_colour' => 'red',
+				'attribute_pa_number' => '2',
+				'attribute_pa_size'   => '',
+			)
+		);
+		$this->assertSame( $base, $with_empty, 'An empty attribute value must hash the same as the key being absent.' );
+	}
 }
