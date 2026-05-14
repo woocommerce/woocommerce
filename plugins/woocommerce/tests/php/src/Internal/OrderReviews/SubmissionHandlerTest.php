@@ -18,6 +18,14 @@ use WPAjaxDieContinueException;
 class SubmissionHandlerTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Feature flag gates the OrderReviews stack.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
+	}
+
+	/**
 	 * Reset state between tests.
 	 */
 	public function tearDown(): void {
@@ -29,6 +37,7 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		remove_all_filters( 'wp_die_ajax_handler' );
 		remove_all_filters( 'wp_send_json_handler' );
 		remove_all_filters( 'wp_doing_ajax' );
+		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		parent::tearDown();
 	}
 

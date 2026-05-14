@@ -327,7 +327,6 @@ class PageController {
 					'',
 					'keys',
 					'webhooks',
-					'legacy_api',
 					'woocommerce_com',
 					'features',
 					'blueprint',

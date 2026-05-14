@@ -9329,6 +9329,15 @@ body.woocommerce_page_wc-settings {
 		padding-bottom: 0px;
 	}
 
+	// Floating header on Settings sits directly above the tab nav with no
+	// content between — treat both strips as one continuous title region
+	// by dropping the header's bottom border. The tab strip keeps its own
+	// bottom border (separating tabs from content); we just colour it to
+	// match the rest of the chrome.
+	.woocommerce-layout__header {
+		border-bottom: 0;
+	}
+
 	p.submit {
 		margin-bottom: 0;
 	}
@@ -9435,8 +9444,13 @@ body.woocommerce_page_wc-settings {
 			}
 		}
 		margin: 0;
-		background: #FFF;
-		border-bottom: 1px solid #EBEBEB;
+		// Tab strip inherits the wp-admin body bg so it reads as one
+		// continuous title region with the floating header above. Bottom
+		// border colour matches the rest of the wp-admin chrome borders
+		// ($wp-admin-border in packages/js/internal-style-build); kept as
+		// a literal here because legacy admin.scss doesn't import the
+		// shared variables file.
+		border-bottom: 1px solid #dcdcde;
 
 		.nav-tab-active, .nav-tab-active:focus, .nav-tab-active:focus:active, .nav-tab-active:hover {
 			border-bottom: 2px solid var(--wp-admin-theme-color, #3858e9);

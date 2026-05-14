@@ -18,10 +18,19 @@ use WC_Unit_Test_Case;
 class ItemEligibilityTest extends WC_Unit_Test_Case {
 
 	/**
+	 * Feature flag gates the OrderReviews stack.
+	 */
+	public function setUp(): void {
+		parent::setUp();
+		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
+	}
+
+	/**
 	 * Reset between tests.
 	 */
 	public function tearDown(): void {
 		ItemEligibility::reset_cache();
+		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		parent::tearDown();
 	}
 

@@ -22,8 +22,13 @@ class SchedulerTest extends WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		// Make sure the email class is available for WC()->mailer().
-		WC()->mailer();
+		// Feature flag gates the OrderReviews stack. Enable it, then resolve
+		// the Scheduler from the container (singleton across the test run)
+		// and call init() to wire hooks. Re-init WC_Emails so the
+		// review-request email class lands in the mailer map.
+		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
+		wc_get_container()->get( Scheduler::class )->init();
+		WC()->mailer()->init();
 
 		$this->set_review_email_enabled( true );
 	}
@@ -35,6 +40,7 @@ class SchedulerTest extends WC_Unit_Test_Case {
 		$this->set_review_email_enabled( false );
 		remove_all_filters( 'woocommerce_should_send_review_request' );
 		remove_all_filters( 'woocommerce_review_request_delay_seconds' );
+		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 
 		parent::tearDown();
 	}
