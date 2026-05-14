@@ -18,13 +18,6 @@ final class ProductFilterChips extends AbstractBlock {
 	protected $block_name = 'product-filter-chips';
 
 	/**
-	 * Default number of items to show before "Show more" button.
-	 *
-	 * @var int
-	 */
-	const DISPLAY_LIMIT = 15;
-
-	/**
 	 * Render the block.
 	 *
 	 * @param array    $attributes Block attributes.
@@ -40,7 +33,7 @@ final class ProductFilterChips extends AbstractBlock {
 		$block_context   = $block->context['woocommerceSelectableItems'];
 		$items           = is_array( $block_context['items'] ?? null ) ? $block_context['items'] : array();
 		$store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
-		$display_limit   = self::DISPLAY_LIMIT;
+		$display_limit   = 'woocommerce/product-filters' === $store_namespace ? 15 : 30;
 		$classes         = '';
 		$style           = '';
 
