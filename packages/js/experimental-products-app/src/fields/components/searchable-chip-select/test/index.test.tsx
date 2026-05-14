@@ -76,6 +76,26 @@ describe( 'SearchableChipSelect', () => {
 		).toBeVisible();
 	} );
 
+	it( 'renders custom empty content', async () => {
+		render(
+			<SearchableChipSelectControl
+				label="Fruits"
+				items={ [] }
+				emptyContent="No fruit found."
+			/>
+		);
+
+		await userEvent.click(
+			screen.getByRole( 'combobox', {
+				name: 'Fruits',
+			} )
+		);
+
+		expect( screen.getByRole( 'status' ) ).toHaveTextContent(
+			'No fruit found.'
+		);
+	} );
+
 	it( 'supports custom chip and item renderers', async () => {
 		const ref = createRef< HTMLDivElement >();
 		const chipRef = createRef< HTMLDivElement >();

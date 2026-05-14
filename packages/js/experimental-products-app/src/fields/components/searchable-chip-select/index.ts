@@ -14,6 +14,8 @@ export const SearchableChipSelect = Object.assign( _SearchableChipSelect, {
 	ChipWithRemove,
 } );
 
+export const Combobox = SearchableChipSelect;
+
 export const SearchableChipSelectControl = Object.assign(
 	_SearchableChipSelectControl,
 	{
