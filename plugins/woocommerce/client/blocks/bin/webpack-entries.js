@@ -29,10 +29,6 @@ const blocks = {
 	'add-to-cart-with-options-variation-selector-attribute-name': {
 		customDir: 'add-to-cart-with-options/variation-selector/attribute-name',
 	},
-	'add-to-cart-with-options-variation-selector-attribute-options': {
-		customDir:
-			'add-to-cart-with-options/variation-selector/attribute-options',
-	},
 	'add-to-cart-with-options-grouped-product-selector': {
 		customDir: 'add-to-cart-with-options/grouped-product-selector',
 	},

@@ -127,15 +127,15 @@ class AddToCartWithOptionsPage {
 		await expect(
 			this.editor.canvas
 				.getByLabel(
-					'Block: Variation Selector: Attribute Options (Beta)'
+					'Block: Variation Selector: Template (Beta)'
 				)
 				.first()
 		).toBeVisible();
 
-		const attributeOptionsBlock = await this.editor.getBlockByName(
-			'woocommerce/add-to-cart-with-options-variation-selector-attribute-options'
+		const attributeTemplateBlock = await this.editor.getBlockByName(
+			'woocommerce/add-to-cart-with-options-variation-selector-attribute'
 		);
-		await this.editor.selectBlocks( attributeOptionsBlock.first() );
+		await this.editor.selectBlocks( attributeTemplateBlock.first() );
 
 		// Option style attribute (inner block titles: Chips, Dropdown).
 		if ( optionStyle ) {

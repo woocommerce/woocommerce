@@ -49,7 +49,7 @@ function setStyles(): void {
 
 	// Prefer chips (current UI); fall back to legacy pills markup if present.
 	const optionsContainer = document.querySelector(
-		'.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options'
+		'.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute'
 	);
 
 	if ( ! optionsContainer ) {
@@ -66,7 +66,7 @@ function setStyles(): void {
 	// We use :where here to reduce specificity so customized colors and theme CSS take priority.
 	style.appendChild(
 		document.createTextNode(
-			`:where(.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options) {
+			`:where(.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute) {
 				--wc-product-filters-background-color: ${ selectedPillColor };
 				--wc-product-filters-text-color: ${ selectedPillBackgroundColor };
 			}`

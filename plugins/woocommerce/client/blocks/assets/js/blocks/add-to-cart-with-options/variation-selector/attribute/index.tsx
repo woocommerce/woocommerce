@@ -10,6 +10,7 @@ import { Icon, button } from '@wordpress/icons';
 import metadata from './block.json';
 import AttributeItemTemplateEdit from './edit';
 import AttributeItemTemplateSave from './save';
+import './style.scss';
 
 registerBlockType( metadata, {
 	edit: AttributeItemTemplateEdit,

@@ -15,7 +15,6 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsGroupedProduct
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
-use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeOptionsMock;
 use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 
 /**
@@ -47,7 +46,6 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 			new AddToCartWithOptionsVariationSelectorMock();
 			new AddToCartWithOptionsVariationSelectorAttributeMock();
 			new AddToCartWithOptionsVariationSelectorAttributeNameMock();
-			new AddToCartWithOptionsVariationSelectorAttributeOptionsMock();
 
 			self::$are_blocks_registered = true;
 		}

@@ -61,13 +61,11 @@ export const DisplayStyleSwitcher = ( {
 						...displayStyleBlocksAttributes,
 						[ currentStyle ]: currentStyleBlock.attributes,
 					} );
-					replaceBlock(
-						currentStyleBlock.clientId,
-						createBlock(
-							value,
-							displayStyleBlocksAttributes[ value ] || {}
-						)
+					const newBlock = createBlock(
+						value,
+						displayStyleBlocksAttributes[ value ] || {}
 					);
+					replaceBlock( currentStyleBlock.clientId, newBlock );
 				} else {
 					insertBlock(
 						createBlock( value ),
@@ -117,8 +115,8 @@ export function resetDisplayStyleBlock(
 	} else {
 		insertBlock(
 			createBlock( defaultStyle ),
-			filterBlock.innerBlocks.length,
-			filterBlock.clientId,
+			insertParent.innerBlocks.length,
+			insertParent.clientId,
 			false
 		);
 	}

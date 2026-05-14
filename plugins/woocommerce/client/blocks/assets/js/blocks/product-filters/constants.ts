@@ -13,6 +13,5 @@ export const EXCLUDED_BLOCKS = [
 	'woocommerce/add-to-cart-with-options-variation-description',
 	'woocommerce/add-to-cart-with-options-variation-selector',
 	'woocommerce/add-to-cart-with-options-variation-selector-attribute',
-	'woocommerce/add-to-cart-with-options-variation-selector-attribute-options',
 	'core/query',
 ];
