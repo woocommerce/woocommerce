@@ -91,8 +91,11 @@ const computeArrowsState = ( imageData: number[], selectedImageId: number ) => {
 };
 
 /** Scroll both the large viewer and the thumbnail strip to the given image. */
-const scrollImageEverywhereIntoView = ( imageId: number ) => {
-	scrollImageIntoView( imageId );
+const scrollImageEverywhereIntoView = (
+	imageId: number,
+	behavior: ScrollBehavior = 'smooth'
+) => {
+	scrollImageIntoView( imageId, behavior );
 	scrollThumbnailIntoView( imageId );
 };
 
@@ -123,9 +126,13 @@ const updateVisibleImageSet = (
 	context.isDisabledPrevious = arrowsState.isDisabledPrevious;
 	context.isDisabledNext = arrowsState.isDisabledNext;
 
-	if ( nextSelectedImageId !== -1 ) {
-		scrollImageEverywhereIntoView( nextSelectedImageId );
+	if ( nextSelectedImageId === -1 ) {
+		return;
 	}
+
+	// Scroll instantly on variation switch — animation would smear across
+	// unrelated images.
+	scrollImageEverywhereIntoView( nextSelectedImageId, 'instant' );
 };
 
 /**
@@ -177,63 +184,45 @@ const toggleActiveThumbnailAttributes = ( element: HTMLElement ) => {
 };
 
 /**
- * Scrolls the image into view for the main image.
- *
- * We use getElement to get the current element that triggered the action
- * to find the closest gallery container and scroll the image into view.
- * This is necessary because if you have two galleries on the same page with the same image IDs,
- * then we need to query the image in the correct gallery to avoid scrolling the wrong image into view.
- *
- * @param {string} imageId - The ID of the image to scroll into view.
+ * Scroll the large viewer to the given image, using `imageIndex × clientWidth`.
+ * Index-based math stays correct even before the Interactivity API watches
+ * have revealed the target wrapper (a hidden element's rect is zero).
  */
-const scrollImageIntoView = ( imageId: number ) => {
+const scrollImageIntoView = (
+	imageId: number,
+	behavior: ScrollBehavior = 'smooth'
+) => {
 	if ( ! imageId ) {
 		return;
 	}
 
-	// Get the current element that triggered the action
 	const element = getElement()?.ref as HTMLElement;
-
 	if ( ! element ) {
 		return;
 	}
 
 	const galleryContainer = element.closest( SELECTORS.galleryContainer );
-
 	if ( ! galleryContainer ) {
 		return;
 	}
 
-	// Find the scrollable container for the viewer gallery
 	const scrollableContainer = galleryContainer.querySelector(
 		SELECTORS.largeImageContainer
-	);
-
+	) as HTMLElement | null;
 	if ( ! scrollableContainer ) {
 		return;
 	}
 
-	const imageElement = scrollableContainer.querySelector(
-		SELECTORS.imgByImageId( imageId )
-	);
-
-	if ( imageElement ) {
-		// Calculate the scroll position to center the image horizontally
-		const containerRect = scrollableContainer.getBoundingClientRect();
-		const imageRect = imageElement.getBoundingClientRect();
-
-		const scrollLeft =
-			scrollableContainer.scrollLeft +
-			( imageRect.left - containerRect.left ) -
-			( containerRect.width - imageRect.width ) / 2;
-
-		// Use scrollTo as scrollIntoView with inline: 'center'
-		// is not supported in iOS (Safari and Chrome).
-		scrollableContainer.scrollTo( {
-			left: scrollLeft,
-			behavior: 'smooth',
-		} );
+	const { imageData } = getContext();
+	const imageIndex = imageData.indexOf( imageId );
+	if ( imageIndex < 0 ) {
+		return;
 	}
+
+	scrollableContainer.scrollTo( {
+		left: imageIndex * scrollableContainer.clientWidth,
+		behavior,
+	} );
 };
 
 /**
@@ -310,6 +299,12 @@ const { state: productsState } = store< ProductsStore >(
 	{},
 	{ lock: universalLock }
 );
+
+// Tracks the last `productsState.variationId` we acted on, keyed by gallery
+// product ID. Lets `listenToProductDataChanges` distinguish "variation just
+// cleared" (reset to default) from "variation never set" (legacy form path)
+// and from a spurious re-fire of the watch.
+const lastSeenVariationId = new Map< string, number | null | undefined >();
 
 const productGallery = {
 	state: {
@@ -595,13 +590,33 @@ const productGallery = {
 		 * `productsState.variationId` changes.
 		 */
 		listenToProductDataChanges: () => {
-			// Use `mainProductInContext` (always the parent variable
-			// product) rather than `productInContext`, which resolves to the
-			// active variation when one is selected — `getProductImageSet`
-			// is keyed on the parent's ID. Read `variationId` directly from
-			// the store so this watcher re-fires on variation change.
-			const product = productsState.mainProductInContext;
+			const context = getContext();
+			const variationId = productsState.variationId;
+			const prevVariationId = lastSeenVariationId.get(
+				context.productId
+			);
 
+			// Spurious re-fire (iAPI re-runs the watch even when our deps
+			// didn't actually change) — skip to avoid clobbering imageData
+			// the legacy-form watcher may have just set.
+			if ( prevVariationId === variationId ) {
+				return;
+			}
+
+			// First fire, no variation in the store: leave the
+			// server-rendered `defaultImageData` alone. Legacy-form pages
+			// stay on this branch forever and let
+			// `watchForChangesOnAddToCartForm` drive the gallery.
+			if ( prevVariationId === undefined && ! variationId ) {
+				lastSeenVariationId.set( context.productId, variationId );
+				return;
+			}
+
+			lastSeenVariationId.set( context.productId, variationId );
+
+			// `mainProductInContext` is always the parent (variable) product;
+			// `getProductImageSet` is keyed by that ID.
+			const product = productsState.mainProductInContext;
 			if ( ! product ) {
 				return;
 			}
@@ -611,8 +626,13 @@ const productGallery = {
 				return;
 			}
 
+			if ( ! variationId ) {
+				actions.resetImageData();
+				return;
+			}
+
 			const variationImageSet =
-				productImageSet.variations?.[ productsState.variationId || 0 ];
+				productImageSet.variations?.[ variationId ];
 
 			if ( variationImageSet?.image_ids?.length ) {
 				actions.setImageData(

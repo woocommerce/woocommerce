@@ -113,8 +113,15 @@ class ProductGallery extends AbstractBlock {
 			return '';
 		}
 
-		$image_ids         = ProductGalleryUtils::get_all_image_ids( $product );
-		$default_image_ids = array_map( 'intval', ProductGalleryUtils::get_product_gallery_image_ids( $product ) );
+		$image_ids = ProductGalleryUtils::get_all_image_ids( $product );
+
+		// Variable products show only the parent's featured image until a
+		// variation is picked; non-variable products show the full gallery.
+		if ( $product->is_type( ProductType::VARIABLE ) ) {
+			$default_image_ids = array( (int) $product->get_image_id() );
+		} else {
+			$default_image_ids = array_map( 'intval', ProductGalleryUtils::get_product_gallery_image_ids( $product ) );
+		}
 
 		$number_of_images       = count( $default_image_ids );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );

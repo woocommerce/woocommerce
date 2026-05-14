@@ -162,7 +162,7 @@ test.describe( `${ blockData.name }`, () => {
 		} );
 	} );
 
-	test( 'Renders correct image when selecting a product variation in the Add to Cart with Options block', async ( {
+	test( 'Variable product gallery: featured → variation → cleared', async ( {
 		page,
 		editor,
 		pageObject,
@@ -173,7 +173,6 @@ test.describe( `${ blockData.name }`, () => {
 		const viewerBlock = await pageObject.getViewerBlock( {
 			page: 'editor',
 		} );
-
 		await expect( viewerBlock ).toBeVisible();
 
 		await editor.saveSiteEditorEntities( {
@@ -182,24 +181,31 @@ test.describe( `${ blockData.name }`, () => {
 
 		await page.goto( blockData.productPage );
 
-		const initialImageId = await pageObject.getViewerImageId();
+		// Initial state: only the parent's featured image is visible.
+		const featuredImageId = await pageObject.getViewerImageId();
+		expect( featuredImageId ).not.toBeNull();
 
-		const addToCartWithOptionsBlock =
-			await pageObject.getAddToCartWithOptionsBlock( {
-				page: 'frontend',
-			} );
-		const addToCartWithOptionsColorSelector =
-			addToCartWithOptionsBlock.getByLabel( 'Color' );
-		const addToCartWithOptionsSizeSelector =
-			addToCartWithOptionsBlock.getByLabel( 'Logo' );
+		const cartForm = await pageObject.getAddToCartWithOptionsBlock( {
+			page: 'frontend',
+		} );
+		const colorSelect = cartForm.getByLabel( 'Color' );
+		const logoSelect = cartForm.getByLabel( 'Logo' );
 
-		await addToCartWithOptionsColorSelector.selectOption( 'Green' );
-		await addToCartWithOptionsSizeSelector.selectOption( 'No' );
+		// Variation selected: visible image switches to the variation's image.
+		await colorSelect.selectOption( 'Green' );
+		await logoSelect.selectOption( 'No' );
 
 		await expect( async () => {
 			const variationImageId = await pageObject.getViewerImageId();
+			expect( variationImageId ).not.toEqual( featuredImageId );
+		} ).toPass( { timeout: 5_000 } );
 
-			expect( initialImageId ).not.toEqual( variationImageId );
+		// Clear: gallery returns to the parent's featured image.
+		await colorSelect.selectOption( '' );
+
+		await expect( async () => {
+			const afterClearImageId = await pageObject.getViewerImageId();
+			expect( afterClearImageId ).toEqual( featuredImageId );
 		} ).toPass( { timeout: 5_000 } );
 	} );
 
@@ -216,7 +222,7 @@ test.describe( `${ blockData.name }`, () => {
 				isOnlyCurrentEntityDirty: true,
 			} );
 
-			await page.goto( blockData.productPage );
+			await page.goto( '/product/beanie/' );
 
 			await page.setViewportSize( {
 				height: 667,

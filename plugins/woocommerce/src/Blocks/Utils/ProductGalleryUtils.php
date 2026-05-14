@@ -157,9 +157,11 @@ class ProductGalleryUtils {
 			_prime_post_caches( $variations );
 		}
 
+		$parent_image_id = (int) $product->get_image_id();
+
 		foreach ( $variations as $variation_id ) {
 			$variation_id = (int) $variation_id;
-			$entry        = self::build_variation_gallery_entry( $variation_id );
+			$entry        = self::build_variation_gallery_entry( $variation_id, $parent_image_id );
 
 			if ( null !== $entry ) {
 				$variation_gallery_data[ $variation_id ] = $entry;
@@ -176,10 +178,12 @@ class ProductGalleryUtils {
 	 * Extracted so {@see self::get_product_variation_gallery_data()} reads as
 	 * "fetch + prime + project" without inlining the projection details.
 	 *
-	 * @param int $variation_id Variation post ID.
+	 * @param int $variation_id    Variation post ID.
+	 * @param int $parent_image_id Parent product's featured image ID, used as
+	 *                             fallback when the variation has no images.
 	 * @return array<string, mixed>|null
 	 */
-	private static function build_variation_gallery_entry( int $variation_id ): ?array {
+	private static function build_variation_gallery_entry( int $variation_id, int $parent_image_id ): ?array {
 		$variation = wc_get_product( $variation_id );
 
 		if ( ! $variation instanceof \WC_Product_Variation ) {
@@ -189,7 +193,13 @@ class ProductGalleryUtils {
 		$image_ids = self::get_variation_gallery_image_ids( $variation );
 
 		if ( empty( $image_ids ) ) {
-			return null;
+			// No usable images: fall back to parent's featured, or the
+			// placeholder sentinel (id = 0) if parent has none either.
+			$fallback_id = $parent_image_id && wp_attachment_is_image( $parent_image_id ) ? $parent_image_id : 0;
+			return array(
+				'image_id'  => $fallback_id,
+				'image_ids' => array( $fallback_id ),
+			);
 		}
 
 		return array(
@@ -216,6 +226,15 @@ class ProductGalleryUtils {
 		if ( ! empty( $gallery_image_ids ) ) {
 			$image_ids = array_merge( $image_ids, $gallery_image_ids );
 		}
+
+		// Filter out missing/invalid attachments to avoid rendering phantom
+		// empty `<li>` wrappers that the visibility watch can't manage.
+		$image_ids = array_filter(
+			$image_ids,
+			function ( $id ) {
+				return $id > 0 && wp_attachment_is_image( $id );
+			}
+		);
 
 		return array_values( array_unique( $image_ids ) );
 	}
