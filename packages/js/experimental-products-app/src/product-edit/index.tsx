@@ -5,7 +5,7 @@ import { Button, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { select as wpSelect, useDispatch, useSelect } from '@wordpress/data';
 import { DataForm } from '@wordpress/dataviews';
-import { useCallback, useEffect, useState } from '@wordpress/element';
+import { useCallback, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
@@ -27,6 +27,7 @@ import {
 	getProductEditRecord,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
+	getProductTypeFormFields,
 	getVisibleProductEditFields,
 	isProductVariation,
 } from './utils';
@@ -42,6 +43,7 @@ type ProductEditFormProps = {
 
 type ProductEditProps = {
 	products: ProductEntityRecord[];
+	isOpen: boolean;
 };
 
 function getSaveNoticeMessage( successCount: number, failedCount: number ) {
@@ -94,7 +96,7 @@ function ProductEditForm( {
 	const form = {
 		type: 'regular' as const,
 		labelPosition: 'top' as const,
-		fields: visibleFields.map( ( field ) => field.id ),
+		fields: getProductTypeFormFields( selectedProducts ),
 	};
 
 	return (
@@ -109,7 +111,7 @@ function ProductEditForm( {
 	);
 }
 
-export default function ProductEdit( { products }: ProductEditProps ) {
+export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 	const { navigate } = useHistory();
 	const { path, query = {} } = useLocation();
 	const requestedProductIdsFromRoute = getSelectionFromPostId( query.postId )
@@ -120,7 +122,7 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 	);
 
 	const [ isSaving, setIsSaving ] = useState( false );
-	const [ isDrawerOpen, setIsDrawerOpen ] = useState( false );
+
 	const editableFields = getProductEditFields( productFields );
 	const {
 		selectedProducts,
@@ -371,10 +373,13 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 					type: 'snackbar',
 				} );
 			}
+
+			closeDrawer();
 		} finally {
 			setIsSaving( false );
 		}
 	}, [
+		closeDrawer,
 		createErrorNotice,
 		createSuccessNotice,
 		editEntityRecord,
@@ -383,22 +388,8 @@ export default function ProductEdit( { products }: ProductEditProps ) {
 		selectedProducts,
 	] );
 
-	useEffect( () => {
-		if ( requestedProductIds.length > 0 && ! isDrawerOpen ) {
-			setIsDrawerOpen( true );
-		}
-	}, [ requestedProductIds, isDrawerOpen ] );
-
 	return (
-		<Drawer.Root
-			open={ isDrawerOpen }
-			onOpenChangeComplete={ ( isOpen ) => {
-				if ( ! isOpen ) {
-					closeDrawer();
-				}
-			} }
-			swipeDirection="right"
-		>
+		<Drawer.Root open={ isOpen } swipeDirection="right">
 			<Drawer.Popup
 				className="woocommerce-product-edit__drawer"
 				portal={

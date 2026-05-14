@@ -71719,24 +71719,6 @@ parameters:
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
 		-
-			message: '#^Cannot call method get_checkout_order_received_url\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method get_customer_id\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 2
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Cannot call method payment_complete\(\) on WC_Order\|null\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
 			message: '#^Instanceof between Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult and Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult will always evaluate to true\.$#'
 			identifier: instanceof.alwaysTrue
 			count: 1
@@ -71863,25 +71845,7 @@ parameters:
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
 
 		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:sync_customer_additional_fields_with_order\(\) expects WC_Order, WC_Order\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Parameter \#1 \$order of method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentContext\:\:set_order\(\) expects WC_Order, WC_Order\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
 			message: '#^Parameter \#1 \$redirect_url of method Automattic\\WooCommerce\\StoreApi\\Payments\\PaymentResult\:\:set_redirect_url\(\) expects array, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php
-
-		-
-			message: '#^Parameter \#3 \$order of method Automattic\\WooCommerce\\Blocks\\Domain\\Services\\CheckoutFields\:\:persist_field_for_order\(\) expects WC_Order, WC_Order\|null given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/StoreApi/Routes/V1/Agentic/CheckoutSessionsComplete.php

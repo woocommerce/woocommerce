@@ -13,11 +13,18 @@ import type { ProductEntityRecord, SettingsEntityRecord } from '../types';
 
 export type DimensionKey = 'height' | 'width' | 'length';
 
+export function isDimensionVisible( item: ProductEntityRecord ) {
+	return (
+		! item.virtual &&
+		( ( item.type === 'simple' && ! item.parent_id ) || item.downloadable )
+	);
+}
+
 export const createDimensionField = (
 	key: DimensionKey
 ): Partial< Field< ProductEntityRecord > > => {
 	return {
-		isVisible: ( item ) => ! item.virtual,
+		isVisible: isDimensionVisible,
 		Edit: ( { data, onChange, field } ) => {
 			const {
 				record: storeProductsSettings,

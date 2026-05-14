@@ -101,14 +101,17 @@
 		<exclude-pattern>src/Internal/Api/</exclude-pattern>
 	</rule>
 
-	<rule ref="Suin.Classes.PSR4">
+	<rule ref="SlevomatCodingStandard.Files.TypeNameMatchesFileName">
 		<include-pattern>src/</include-pattern>
 		<include-pattern>tests/php/src/</include-pattern>
 		<exclude-pattern>plugins/woocommerce/src/Admin/Notes/DeprecatedNotes.php</exclude-pattern>
 		<exclude-pattern>plugins/woocommerce/tests/php/src/Proxies/ExampleClasses/</exclude-pattern>
 		<exclude-pattern>plugins/woocommerce/tests/php/src/Internal/DependencyManagement/ExampleClasses/</exclude-pattern>
 		<properties>
-			<property name="composerJsonPath" value="composer.json"/>
+			<property name="rootNamespaces" type="array">
+				<element key="src" value="Automattic\WooCommerce"/>
+				<element key="tests/php/src" value="Automattic\WooCommerce\Tests"/>
+			</property>
 		</properties>
 	</rule>
 

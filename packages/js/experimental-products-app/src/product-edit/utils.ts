@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import type { Field } from '@wordpress/dataviews';
+import type { Field, FormField } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
@@ -25,6 +25,8 @@ const EXCLUDED_PRODUCT_EDIT_FIELD_ID_SET = new Set(
 
 type ProductField = Field< ProductEntityRecord >;
 type ProductEditFieldId = ( typeof PRODUCT_EDIT_FIELD_IDS )[ number ];
+type ProductEditFormField = ProductEditFieldId | FormField;
+type ProductType = 'simple' | 'variation' | 'variable' | 'grouped' | 'external';
 type ProductVariationEntityRecord = ProductEntityRecord & {
 	parent_id: number;
 };
@@ -73,7 +75,15 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'linked_products_count',
 ] as const;
 
-const SIMPLE_PRODUCT_EDIT_FIELD_IDS = [
+const DIMENSION_GROUP_FIELD_IDS = [ 'weight', 'length', 'width' ] as const;
+
+const DIMENSIONS_FORM_FIELD: ProductEditFormField = {
+	id: 'dimensions',
+	layout: { type: 'row' as const },
+	children: [ ...DIMENSION_GROUP_FIELD_IDS ],
+};
+
+const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	'name',
 	'product_status',
 	'catalog_visibility',
@@ -89,9 +99,25 @@ const SIMPLE_PRODUCT_EDIT_FIELD_IDS = [
 	'categories',
 	'brands',
 	'tags',
-] satisfies ProductEditFieldId[];
+	DIMENSIONS_FORM_FIELD,
+	'height',
+] satisfies ProductEditFormField[];
 
-const VARIABLE_PRODUCT_EDIT_FIELD_IDS = [
+const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
+	'regular_price',
+	'on_sale',
+	'sale_price',
+	'images',
+	'downloadable',
+	'sku',
+	'stock',
+	'manage_stock',
+	'stock_quantity',
+	DIMENSIONS_FORM_FIELD,
+	'height',
+] satisfies ProductEditFormField[];
+
+const VARIABLE_PRODUCT_EDIT_FORM_FIELDS = [
 	'name',
 	'short_description',
 	'description',
@@ -101,10 +127,6 @@ const VARIABLE_PRODUCT_EDIT_FIELD_IDS = [
 	'stock',
 	'stock_quantity',
 	'manage_stock',
-	'weight',
-	'length',
-	'width',
-	'height',
 	'shipping_class',
 	'tax_status',
 	'categories',
@@ -113,9 +135,11 @@ const VARIABLE_PRODUCT_EDIT_FIELD_IDS = [
 	'catalog_visibility',
 	'upsell_ids',
 	'cross_sell_ids',
-] satisfies ProductEditFieldId[];
+	DIMENSIONS_FORM_FIELD,
+	'height',
+] satisfies ProductEditFormField[];
 
-const EXTERNAL_PRODUCT_EDIT_FIELD_IDS = [
+const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
 	'name',
 	'product_status',
 	'catalog_visibility',
@@ -130,9 +154,9 @@ const EXTERNAL_PRODUCT_EDIT_FIELD_IDS = [
 	'brands',
 	'tags',
 	'featured',
-] satisfies ProductEditFieldId[];
+] satisfies ProductEditFormField[];
 
-const GROUPED_PRODUCT_EDIT_FIELD_IDS = [
+const GROUPED_PRODUCT_EDIT_FORM_FIELDS = [
 	'name',
 	'product_status',
 	'catalog_visibility',
@@ -143,17 +167,15 @@ const GROUPED_PRODUCT_EDIT_FIELD_IDS = [
 	'brands',
 	'tags',
 	'featured',
-] satisfies ProductEditFieldId[];
+] satisfies ProductEditFormField[];
 
-const PRODUCT_TYPE_COMPATIBLE_FIELD_IDS = {
-	simple: SIMPLE_PRODUCT_EDIT_FIELD_IDS,
-	variable: VARIABLE_PRODUCT_EDIT_FIELD_IDS,
-	grouped: GROUPED_PRODUCT_EDIT_FIELD_IDS,
-	external: EXTERNAL_PRODUCT_EDIT_FIELD_IDS,
-} satisfies Record<
-	'simple' | 'variable' | 'grouped' | 'external',
-	readonly ProductEditFieldId[]
->;
+const PRODUCT_TYPE_FORM_FIELDS = {
+	simple: SIMPLE_PRODUCT_EDIT_FORM_FIELDS,
+	variation: VARIATION_PRODUCT_EDIT_FORM_FIELDS,
+	variable: VARIABLE_PRODUCT_EDIT_FORM_FIELDS,
+	grouped: GROUPED_PRODUCT_EDIT_FORM_FIELDS,
+	external: EXTERNAL_PRODUCT_EDIT_FORM_FIELDS,
+} satisfies Record< ProductType, readonly ProductEditFormField[] >;
 
 const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'name',
@@ -213,23 +235,45 @@ function isVariableProductParent( product: ProductEntityRecord ) {
 	return product.type === 'variable' && ! product.parent_id;
 }
 
+function isProductType( type: string | undefined ): type is ProductType {
+	return (
+		type === 'simple' ||
+		type === 'variation' ||
+		type === 'variable' ||
+		type === 'grouped' ||
+		type === 'external'
+	);
+}
+
 export function isProductVariation(
 	product: ProductEntityRecord
 ): product is ProductVariationEntityRecord {
 	return product.type === 'variation' || Boolean( product.parent_id );
 }
 
-function getProductTypeCompatibleFieldIds(
-	product: ProductEntityRecord
-): readonly ProductEditFieldId[] {
-	const productType =
-		product.type === 'variable' ||
-		product.type === 'grouped' ||
-		product.type === 'external'
-			? product.type
-			: 'simple';
+function getProductType( product: ProductEntityRecord ): ProductType {
+	if ( isProductVariation( product ) ) {
+		return 'variation';
+	}
 
-	return PRODUCT_TYPE_COMPATIBLE_FIELD_IDS[ productType ];
+	return isProductType( product.type ) ? product.type : 'simple';
+}
+
+function getProductTypeFieldIds(
+	product: ProductEntityRecord
+): ProductEditFieldId[] {
+	return PRODUCT_TYPE_FORM_FIELDS[ getProductType( product ) ].flatMap(
+		( formField ) => {
+			if ( typeof formField === 'string' ) {
+				return [ formField ];
+			}
+
+			return ( formField.children ?? [] ).filter(
+				( child ): child is ProductEditFieldId =>
+					typeof child === 'string'
+			);
+		}
+	);
 }
 
 function isFieldVisibleForProductRelationships(
@@ -352,14 +396,13 @@ function getCommonProductTypeCompatibleFieldIds(
 
 	const [ firstProduct, ...remainingProducts ] = products;
 	const remainingCompatibleFieldIdSets = remainingProducts.map(
-		( product ) => new Set( getProductTypeCompatibleFieldIds( product ) )
+		( product ) => new Set( getProductTypeFieldIds( product ) )
 	);
 
-	return getProductTypeCompatibleFieldIds( firstProduct ).filter(
-		( fieldId ) =>
-			remainingCompatibleFieldIdSets.every( ( compatibleFieldIds ) =>
-				compatibleFieldIds.has( fieldId )
-			)
+	return getProductTypeFieldIds( firstProduct ).filter( ( fieldId ) =>
+		remainingCompatibleFieldIdSets.every( ( compatibleFieldIds ) =>
+			compatibleFieldIds.has( fieldId )
+		)
 	);
 }
 
@@ -456,4 +499,16 @@ export function getVisibleProductEditFields(
 		},
 		[]
 	);
+}
+
+export function getProductTypeFormFields(
+	products: ProductEntityRecord[]
+): Array< FormField | string > {
+	const [ firstProduct ] = products;
+
+	if ( ! firstProduct ) {
+		return [];
+	}
+
+	return [ ...PRODUCT_TYPE_FORM_FIELDS[ getProductType( firstProduct ) ] ];
 }

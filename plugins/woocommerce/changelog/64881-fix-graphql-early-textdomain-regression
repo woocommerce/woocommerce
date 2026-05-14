@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent a `_load_textdomain_just_in_time` notice from firing on every request when the GraphQL API feature is registered.
