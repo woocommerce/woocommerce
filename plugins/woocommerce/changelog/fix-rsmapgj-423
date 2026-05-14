@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment:
+
+Use the IPv6-capable HTTPS ipify endpoint in WC_Geolocation so external IP lookups behave consistently with the other lookup providers.
