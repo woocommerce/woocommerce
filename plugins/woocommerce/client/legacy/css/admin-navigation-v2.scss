@@ -105,6 +105,17 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 	border: 0 none;
 }
 
+// Float the order-attention `menu-counter` bubble on the WooCommerce
+// top-level and the Orders rail-root so long labels (notably "WooCommerce")
+// don't push the bubble onto a second line. Default WP CSS lays
+// `.menu-counter` out as `inline-block`, which wraps once the label fills
+// the rail width.
+#adminmenu li#toplevel_page_woocommerce > a .menu-counter,
+#adminmenu li#toplevel_page_wc-orders > a .menu-counter {
+	float: right;
+	margin: 7px 7px 0 0;
+}
+
 // Spec §6.3: touch devices do not get the hover cascade. Tapping a cascade
 // parent (Settings, Marketing, etc.) navigates directly.
 //
