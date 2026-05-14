@@ -42,8 +42,11 @@ const makeReadyState = () => ( {
 	errorCode: null,
 	deviceInfo: null,
 	apUuid: null,
+	candidateNumbers: null,
+	challengeExpiresAt: 0,
 	fetchToken: jest.fn(),
 	refreshToken: jest.fn(),
+	chooseNumber: jest.fn(),
 	revoke: jest.fn(),
 } );
 
@@ -119,8 +122,11 @@ describe( 'MobileAppLoginPage', () => {
 			errorCode: null,
 			deviceInfo: null,
 			apUuid: null,
+			candidateNumbers: null,
+			challengeExpiresAt: 0,
 			fetchToken: jest.fn(),
 			refreshToken,
+			chooseNumber: jest.fn(),
 			revoke: jest.fn(),
 		} );
 
@@ -161,8 +167,11 @@ describe( 'MobileAppLoginPage', () => {
 			errorCode: 'ssl_required',
 			deviceInfo: null,
 			apUuid: null,
+			candidateNumbers: null,
+			challengeExpiresAt: 0,
 			fetchToken: jest.fn(),
 			refreshToken: jest.fn(),
+			chooseNumber: jest.fn(),
 			revoke: jest.fn(),
 		} );
 
@@ -194,8 +203,11 @@ describe( 'MobileAppLoginPage', () => {
 			errorCode: null,
 			deviceInfo: { model: 'iPhone 15' },
 			apUuid: 'ap-uuid',
+			candidateNumbers: null,
+			challengeExpiresAt: 0,
 			fetchToken: jest.fn(),
 			refreshToken: jest.fn(),
+			chooseNumber: jest.fn(),
 			revoke: jest.fn(),
 		} );
 
