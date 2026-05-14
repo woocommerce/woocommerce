@@ -53,10 +53,6 @@ module.exports = {
 		'@wordpress/core-data/build/(.*)$':
 			'<rootDir>/node_modules/@wordpress/core-data/build/$1',
 
-		// WooCommerce workspace aliases
-		'@woocommerce/data': '<rootDir>/node_modules/@woocommerce/data/build',
-		'@woocommerce/sanitize':
-			'<rootDir>/node_modules/@woocommerce/sanitize/src',
 		'@woocommerce/atomic-blocks': 'assets/js/atomic/blocks',
 		'@woocommerce/atomic-utils': 'assets/js/atomic/utils',
 		'@woocommerce/icons': 'assets/js/icons',
@@ -89,6 +85,15 @@ module.exports = {
 		'^react$': '<rootDir>/node_modules/react',
 		'^react-dom$': '<rootDir>/node_modules/react-dom',
 		'^(.+)/build-module/(.*)$': '$1/build/$2',
+		// Catch-all for monorepo @woocommerce/* packages: route bare and
+		// subpath imports through source so tests don't depend on built
+		// artifacts. Must come after all blocks-internal aliases above.
+		'^@woocommerce/([^/]+)/(?:src|build|build-module|build-types)/(.+)$':
+			'<rootDir>/../../../../packages/js/$1/src/$2',
+		'^@woocommerce/([^/]+)/(.+)$':
+			'<rootDir>/../../../../packages/js/$1/src/$2',
+		'^@woocommerce/([^/]+)$':
+			'<rootDir>/../../../../packages/js/$1/src',
 	},
 	preset: '@wordpress/jest-preset-default',
 	setupFiles: [ '<rootDir>/tests/js/config/global-mocks.js' ],

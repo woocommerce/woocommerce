@@ -11,6 +11,7 @@
 	"files": [
 		"tsconfig.json",
 		"tsconfig-cjs.json",
+		"tsconfig-jest.json",
 		"types"
 	],
 	"scripts": {

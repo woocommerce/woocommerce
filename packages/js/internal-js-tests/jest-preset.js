@@ -57,8 +57,19 @@ module.exports = {
 			'src/mocks/woocommerce-tracks'
 		),
 		// Route all monorepo @woocommerce/* imports through source so tests
-		// don't depend on sibling packages having been built. Subpath form
-		// must come before the bare form so it wins for nested paths.
+		// don't depend on sibling packages having been built. internal-js-tests
+		// is a special case — its main is build/util/index.js so the source
+		// entry is src/util, not src/index. Subpaths that explicitly point
+		// at a build directory (src/, build/, build-module/, build-types/)
+		// are stripped of that segment so they resolve under src/. Bare
+		// subpaths get prefixed with src/. Order matters: targeted overrides
+		// first, then most specific to least.
+		'^@woocommerce/internal-js-tests$': path.resolve(
+			__dirname,
+			'src/util'
+		),
+		'^@woocommerce/([^/]+)/(?:src|build|build-module|build-types)/(.+)$':
+			path.resolve( __dirname, '../$1/src/$2' ),
 		'^@woocommerce/([^/]+)/(.+)$': path.resolve(
 			__dirname,
 			'../$1/src/$2'
@@ -101,7 +112,6 @@ module.exports = {
 		'node_modules/(?!(?:\\.pnpm|' +
 			Object.keys( transformModules ).join( '|' ) +
 			')/)',
-		__dirname,
 	],
 	// The values for the transformed modules contain an object with the transforms to apply.
 	transform: Object.entries( transformModules ).reduce(
@@ -117,18 +127,16 @@ module.exports = {
 			'(?:src|client|assets/js)/.*\\.[jt]sx?$': [
 				'ts-jest',
 				{
-					// Force CommonJS output regardless of the package's own
-					// tsconfig (which targets ESM for the publish build).
-					// Tests must run as CJS because Jest's runtime is CJS.
-					// Clear rootDir so ts-jest can transform source files
-					// from sibling packages (cross-package imports go
-					// through @woocommerce/* moduleNameMapper).
-					tsconfig: {
-						module: 'commonjs',
-						esModuleInterop: true,
-						allowJs: true,
-						rootDir: null,
-					},
+					// A dedicated test tsconfig sidesteps per-package
+					// include/exclude/rootDir restrictions that block
+					// ts-jest from compiling cross-package source files
+					// (resolved via the @woocommerce/* moduleNameMapper).
+					// The compiler emits CJS so Jest's runtime can execute
+					// it; package builds keep their own tsconfigs for
+					// publishing.
+					tsconfig: require.resolve(
+						'@woocommerce/internal-ts-config/tsconfig-jest.json'
+					),
 					diagnostics: false,
 				},
 			],
