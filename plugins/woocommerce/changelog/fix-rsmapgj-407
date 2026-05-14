@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix admin Product Reviews "Reply" not auto-approving the parent review due to a strict comparison between an int post ID and the string WP_Comment::comment_post_ID property.

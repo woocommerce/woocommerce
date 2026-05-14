@@ -597,4 +597,84 @@ test2</p></div>',
 		$this->assertSame( 'http://' . WP_TESTS_DOMAIN . '/wp-admin/edit.php?post_type=product&page=product-reviews', Reviews::get_reviews_page_url() );
 	}
 
+	/**
+	 * @testdox `handle_reply_to_review` auto-approves the parent review when its `comment_post_ID` (string from DB) matches the posted product ID (int).
+	 *
+	 * Regression test for the strict-comparison bug where `$parent->comment_post_ID` (string)
+	 * was compared with `===` against the casted-to-int `$comment_post_ID`, causing the
+	 * comparison to always fail and the parent review to never auto-approve.
+	 *
+	 * @covers \Automattic\WooCommerce\Internal\Admin\ProductReviews\Reviews::handle_reply_to_review()
+	 *
+	 * @return void
+	 */
+	public function test_handle_reply_to_review_auto_approves_parent_with_matching_post_id() : void {
+		// Need an admin user so capability checks pass.
+		$admin_id = $this->factory()->user->create( [ 'role' => 'administrator' ] );
+		wp_set_current_user( $admin_id );
+
+		$product_id = $this->factory()->post->create( [ 'post_type' => 'product' ] );
+
+		$parent_review_id = $this->factory()->comment->create(
+			[
+				'comment_type'     => 'review',
+				'comment_post_ID'  => $product_id,
+				'comment_approved' => '0',
+			]
+		);
+
+		// Sanity: the parent starts unapproved.
+		$parent_before = get_comment( $parent_review_id );
+		$this->assertSame( '0', $parent_before->comment_approved );
+		// Sanity: WP_Comment::comment_post_ID is a string, which is the property that triggered the original bug.
+		$this->assertIsString( $parent_before->comment_post_ID );
+
+		// Simulate the WP admin replyto-comment AJAX request payload.
+		$_POST                                  = [];
+		$_POST['action']                        = 'replyto-comment';
+		$_POST['comment_post_ID']               = (string) $product_id;
+		$_POST['comment_ID']                    = (string) $parent_review_id;
+		$_POST['content']                       = 'A reply body.';
+		$_POST['comment_type']                  = 'comment';
+		$_POST['approve_parent']                = '1';
+		$_POST['_ajax_nonce-replyto-comment']   = wp_create_nonce( 'replyto-comment' );
+
+		$reviews = wc_get_container()->get( Reviews::class );
+
+		// `handle_reply_to_review` calls `wp_die()` on success/failure; suppress the JSON response output
+		// and the wp_die exit, then verify the side effect we care about (parent approval).
+		add_filter( 'wp_die_ajax_handler', [ $this, 'get_wp_die_ajax_handler' ] );
+
+		ob_start();
+		try {
+			$reviews->handle_reply_to_review();
+		} catch ( \Exception $e ) { // phpcs:ignore Generic.CodeAnalysis.EmptyStatement.DetectedCatch
+			// Expected: wp_die was hit after the parent-approval logic ran.
+		} finally {
+			ob_end_clean();
+			remove_filter( 'wp_die_ajax_handler', [ $this, 'get_wp_die_ajax_handler' ] );
+			$_POST = [];
+		}
+
+		clean_comment_cache( $parent_review_id );
+		$parent_after = get_comment( $parent_review_id );
+
+		$this->assertSame(
+			'1',
+			$parent_after->comment_approved,
+			'Parent review should be auto-approved after a reply when approve_parent is set.'
+		);
+	}
+
+	/**
+	 * Returns an ajax wp_die handler that throws so the test can continue post-wp_die.
+	 *
+	 * @return callable
+	 */
+	public function get_wp_die_ajax_handler() : callable {
+		return static function () {
+			throw new \RuntimeException( 'wp_die called' );
+		};
+	}
+
 }
