@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix coupon usage count not incrementing when a coupon is added to a pending order and the order is later paid via the My Account "Pay" page.

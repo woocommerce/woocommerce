@@ -1027,10 +1027,19 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		$invalid_statuses
 	);
 
+	$coupon_codes = $order->get_coupon_codes();
+
 	if ( $order->has_status( $invalid_statuses ) && $has_recorded ) {
 		$action = 'reduce';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, false );
 	} elseif ( ! $order->has_status( $invalid_statuses ) && ! $has_recorded ) {
+		// Only mark coupon usage as recorded when the order actually has coupons to record.
+		// Otherwise, a later status transition that brings coupons in (for example, when an admin
+		// adds a coupon to a pending order that is then paid via the My Account "Pay" page) would
+		// be skipped because the flag was already flipped on the initial empty status transition.
+		if ( count( $coupon_codes ) === 0 ) {
+			return;
+		}
 		$action = 'increase';
 		$order->get_data_store()->set_recorded_coupon_usage_counts( $order, true );
 	} elseif ( $order->has_status( $invalid_statuses ) ) {
@@ -1040,8 +1049,8 @@ function wc_update_coupon_usage_counts( $order_id ) {
 		return;
 	}
 
-	if ( count( $order->get_coupon_codes() ) > 0 ) {
-		foreach ( $order->get_coupon_codes() as $code ) {
+	if ( count( $coupon_codes ) > 0 ) {
+		foreach ( $coupon_codes as $code ) {
 			if ( StringUtil::is_null_or_whitespace( $code ) ) {
 				continue;
 			}

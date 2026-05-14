@@ -187,6 +187,65 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Coupon usage counts should still increment when a coupon is added to a pending
+	 * order after the order was first created, then the order is paid via the My Account
+	 * "Pay" page (status transitions pending -> processing).
+	 *
+	 * Regression test for woocommerce/woocommerce#30845.
+	 */
+	public function test_wc_update_coupon_usage_counts_for_manual_order_paid_via_my_account() {
+		$coupon = WC_Helper_Coupon::create_coupon( 'manual-30845' );
+
+		// Step 1: Admin creates an empty pending order (no coupons yet). This mirrors the path
+		// where the order is created first and items/coupons are added later.
+		$order = wc_create_order(
+			array(
+				'status'      => OrderStatus::PENDING,
+				'customer_id' => 0,
+			)
+		);
+		$this->assertNotInstanceOf( WP_Error::class, $order );
+		$order_id = $order->get_id();
+
+		// At this point the order has no coupons.
+		$this->assertSame( array(), $order->get_coupon_codes() );
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		// The flag should not have been set just because the order transitioned to pending
+		// while it had no coupons - otherwise a later coupon addition + payment would be skipped.
+		$this->assertEmpty( $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		// Step 2: Admin adds a coupon line item to the existing pending order and saves it.
+		// This mirrors how a manually-created order has a coupon line attached without going
+		// through WC_Order::apply_coupon (which would have marked the order as recorded already).
+		$coupon_item = new WC_Order_Item_Coupon();
+		$coupon_item->set_code( $coupon->get_code() );
+		$coupon_item->set_discount( 1 );
+		$coupon_item->set_discount_tax( 0 );
+		$order->add_item( $coupon_item );
+		$order->save();
+
+		// The coupon usage count should still be zero - status hasn't transitioned yet.
+		$this->assertEquals( 0, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+
+		// Step 3: The customer pays the order via the My Account "Pay" page. This transitions
+		// the order from pending -> processing, which fires wc_update_coupon_usage_counts.
+		$order = wc_get_order( $order_id );
+		$order->update_status( OrderStatus::PROCESSING );
+
+		// After the payment-driven status transition, the coupon usage count must reflect
+		// the coupon that was added to the order. Before the fix this stayed at 0 because
+		// the recorded-usage flag was already true (set during the initial empty pending save),
+		// causing wc_update_coupon_usage_counts to return early.
+		$this->assertEquals( 1, ( new WC_Coupon( $coupon->get_code() ) )->get_usage_count() );
+		$this->assertEquals( 1, $order->get_data_store()->get_recorded_coupon_usage_counts( $order ) );
+
+		// The coupon line item should remain on the order so it still appears in coupon
+		// analytics / reporting that read coupon codes from the order.
+		$this->assertSame( array( $coupon->get_code() ), $order->get_coupon_codes() );
+	}
+
+	/**
 	 * Test getting total refunded for an item with and without refunds.
 	 */
 	public function test_get_total_refunded_for_item() {
