@@ -144,6 +144,43 @@ The HTML and plain-text bodies of the email itself follow standard WC convention
 - `templates/emails/plain/customer-review-request.php`
 - `templates/emails/block/customer-review-request.php` (block-based email editor)
 
+## Test coverage
+
+### PHPUnit
+
+PHP unit tests live under `plugins/woocommerce/tests/php/src/Internal/OrderReviews/` (plus the email class test under `plugins/woocommerce/tests/php/includes/emails/`). Run the suite with:
+
+```bash
+pnpm --filter=@woocommerce/plugin-woocommerce test:php:env -- --filter "OrderReviews|Customer_Review_Request"
+```
+
+| File | Covers |
+| ---- | ------ |
+| `EndpointTest.php` | Query-var registration, the `wc_get_review_order_url()` helper and its filter, every 404 gate (missing order / missing key / mismatched key / ineligible status / wrong logged-in customer), template render on success, `woocommerce_review_order_eligible_statuses` widening, `gate_request()` registering the title-suppression filters after auth, `maybe_hide_page_title()` / `maybe_hide_post_title_block()` scoping (main loop + matching post id, leaves other posts alone), no-actionable-rows stamping the completion meta + not overwriting on later loads, the disabled-products notice render path, the empty-state template, the `data-initial-*` row attributes used by the dirty gate, host-page reconciliation (`maybe_create_host_page` adopts the slug-canonical page when the option dangles, republishes a draft, and re-points the option to the slug-routed page when duplicates exist), and the permanent `woocommerce_create_pages` filter so third-party callers seed the page. |
+| `ItemEligibilityTest.php` | `decide()` per-status outcomes for the rendered row, scoping reviews via `_review_order_id`, ignoring legacy reviews without the order meta, `prefill_for_item()` for both prefilled and empty rows, the `exclude_fully_refunded_items` default callback, and the `preload_for_items()` cache shape. |
+| `SchedulerTest.php` | Action Scheduler enqueue on `woocommerce_order_status_completed`, delay sourced from the email's settings, no-op when the email is disabled, idempotency on repeated transitions, the `woocommerce_should_send_review_request` opt-out, status-transition cancellation (cancelled/refunded/processing/on-hold/pending/failed), trash/delete cancellation, the eligible-statuses filter widening / narrowing the set, and the meta-missing safety branch. |
+| `StarRatingTest.php` | Markup contract (`role="radiogroup"`, 5 radios, caption span), pre-checked selected value, out-of-range guard, missing-required-args guard, default labels, the `woocommerce_review_order_rating_labels` filter override, and the missing-key fallback. |
+| `SubmissionHandlerTest.php` | Nonce + key gates on the AJAX endpoint, comment insert with `verified=1` and `_review_order_id` meta, skipping rows without a rating, `pending_moderation` outcome when `comment_moderation` is on, per-row isolation when one row references a foreign product, `invalid_rating` / `product_mismatch` error codes, marking the order's completion meta on full coverage, NOT marking on partial coverage, and the `woocommerce_review_order_submitted` action fixture. |
+| `class-wc-email-customer-review-request-test.php` | Email class wiring (subject/heading/title defaults), the `get_delay_seconds()` clamp, `is_order_eligible_for_send()` (status guard, customer-owned guard), `trigger()` short-circuits on disabled or mis-keyed dispatch, placeholder substitution, and the block-email-editor description swap. |
+
+### Playwright (E2E)
+
+E2E tests live in `plugins/woocommerce/tests/e2e-pw/tests/order/customer-review-order.spec.ts`. Run with:
+
+```bash
+pnpm --filter=@woocommerce/plugin-woocommerce test:e2e --grep "Customer Review Order"
+```
+
+Three describe blocks:
+
+| Describe | Tests |
+| -------- | ----- |
+| `Customer Review Order page: rate, submit, prefill, empty-state` (serial) | 1. Submit button is disabled until a row is dirty. 2. Typing review text without a rating blocks submission with an inline error, and the error clears when a rating is set. 3. Guest customer rates two of three products, submits, lands on the in-place thank-you view (wrapper gains `is-success`, form chrome hidden, success block visible). 4. Reloading the page pre-fills previously submitted reviews and the submit gate starts disabled again. 5. Reviewing the last remaining product lands the empty-state thank-you on reload. |
+| `Customer Review Order page: disabled-products notice` | Order with one `reviews_allowed: false` product renders only the reviewable rows, the `.woocommerce-info` notice appears above the form, and the dismiss control hides it in-page. |
+| `Customer Review Order page: 404 paths` | Mismatched key on an otherwise valid order returns a 404 response. |
+
+The serial describe shares an order across tests so the empty-state assertion can build on the previously-submitted reviews; the other describes each create their own short-lived order so they don't share state with the serial chain.
+
 ## Accessibility notes
 
 - The star-rating control is a group of five native `<input type="radio">` elements inside a wrapper that carries the ARIA `role="radiogroup"` and `aria-labelledby` pointing at the rating label. The visual stars are SVG; the inputs themselves are visually hidden but remain in the accessibility tree.
