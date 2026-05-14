@@ -4,6 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\StoreApi\Routes\V1;
 
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperList;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListFullException;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListItem;
 use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 
@@ -175,7 +176,21 @@ class ShopperListItems extends AbstractRoute {
 			throw new RouteException( 'woocommerce_rest_shopper_list_unknown_product', esc_html__( 'No product exists for the supplied item.', 'woocommerce' ), 404 );
 		}
 
-		$list->add_item( $item );
+		try {
+			$list->add_item( $item );
+		} catch ( ShopperListFullException $e ) {
+			throw new RouteException(
+				'woocommerce_rest_shopper_list_full',
+				esc_html(
+					sprintf(
+						/* translators: %d: maximum number of items per shopper list. */
+						__( 'This list is full. Remove an item before adding a new one. Limit: %d items.', 'woocommerce' ),
+						ShopperList::MAX_ITEMS
+					)
+				),
+				400
+			);
+		}
 		$list->save();
 
 		$saved = $list->find_item( $item->get_key() ) ?? $item;

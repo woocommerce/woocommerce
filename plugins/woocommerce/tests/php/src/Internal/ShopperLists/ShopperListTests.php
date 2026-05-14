@@ -4,8 +4,8 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Internal\ShopperLists;
 
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperList;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListFullException;
 use Automattic\WooCommerce\Internal\ShopperLists\ShopperListItem;
-use Automattic\WooCommerce\Internal\Utilities\Users;
 use WC_Unit_Test_Case;
 
 /**
@@ -65,13 +65,13 @@ class ShopperListTests extends WC_Unit_Test_Case {
 		$this->assertSame( self::SAVED_FOR_LATER_SLUG, $list->get_slug() );
 		$this->assertSame( array(), $list->get_items() );
 
-		$meta_key = ShopperList::META_KEY_PREFIX . self::SAVED_FOR_LATER_SLUG;
-		$this->assertSame( '', Users::get_site_user_meta( $this->user_id, $meta_key ), 'Empty saved-for-later should not be persisted before the first add.' );
+		$option_name = $this->option_name( $this->user_id, self::SAVED_FOR_LATER_SLUG );
+		$this->assertFalse( get_option( $option_name, false ), 'Empty saved-for-later should not be persisted before the first add.' );
 
 		$list->add_item( $this->item );
 		$list->save();
 
-		$this->assertIsArray( Users::get_site_user_meta( $this->user_id, $meta_key ), 'saved-for-later should be persisted after the first add+save.' );
+		$this->assertIsArray( get_option( $option_name, false ), 'saved-for-later should be persisted after the first add+save.' );
 	}
 
 	/**
@@ -84,19 +84,19 @@ class ShopperListTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_by_slug should self-heal saved-for-later when the stored meta is corrupt.
+	 * @testdox get_by_slug should self-heal saved-for-later when the stored option is corrupt.
 	 */
 	public function test_load_self_heals_corrupt_saved_for_later(): void {
-		Users::update_site_user_meta(
-			$this->user_id,
-			ShopperList::META_KEY_PREFIX . self::SAVED_FOR_LATER_SLUG,
-			'this-is-not-an-array'
+		update_option(
+			$this->option_name( $this->user_id, self::SAVED_FOR_LATER_SLUG ),
+			'this-is-not-an-array',
+			false
 		);
 
 		$list = ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id );
 
 		$this->assertInstanceOf( ShopperList::class, $list );
-		$this->assertSame( array(), $list->get_items(), 'Corrupt meta must yield an empty in-memory list.' );
+		$this->assertSame( array(), $list->get_items(), 'Corrupt storage must yield an empty in-memory list.' );
 	}
 
 	/**
@@ -104,9 +104,8 @@ class ShopperListTests extends WC_Unit_Test_Case {
 	 */
 	public function test_load_skips_corrupt_items(): void {
 		$good_item = $this->item->to_array();
-		Users::update_site_user_meta(
-			$this->user_id,
-			ShopperList::META_KEY_PREFIX . self::SAVED_FOR_LATER_SLUG,
+		update_option(
+			$this->option_name( $this->user_id, self::SAVED_FOR_LATER_SLUG ),
 			array(
 				'slug'             => self::SAVED_FOR_LATER_SLUG,
 				'date_created_gmt' => '2026-04-01 00:00:00',
@@ -115,7 +114,8 @@ class ShopperListTests extends WC_Unit_Test_Case {
 					// Missing key + product_id.
 					'broken-row-key'  => array( 'variation_id' => 0 ),
 				),
-			)
+			),
+			false
 		);
 
 		$list = ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id );
@@ -123,6 +123,87 @@ class ShopperListTests extends WC_Unit_Test_Case {
 		$this->assertInstanceOf( ShopperList::class, $list );
 		$this->assertCount( 1, $list->get_items(), 'Bad rows should be skipped, the rest kept.' );
 		$this->assertNotNull( $list->find_item( $good_item['key'] ) );
+	}
+
+	/**
+	 * @testdox delete_all_for_user wipes the stored option for every known slug.
+	 */
+	public function test_delete_all_for_user_wipes_storage(): void {
+		$option_name = $this->option_name( $this->user_id, self::SAVED_FOR_LATER_SLUG );
+		update_option(
+			$option_name,
+			array(
+				'slug'  => self::SAVED_FOR_LATER_SLUG,
+				'items' => array(),
+			),
+			false
+		);
+
+		ShopperList::delete_all_for_user( $this->user_id );
+
+		$this->assertFalse( get_option( $option_name, false ), 'delete_all_for_user must remove the wp_options row.' );
+	}
+
+	/**
+	 * Storage option name for a (user, slug) pair.
+	 *
+	 * @param int    $user_id Owning user ID.
+	 * @param string $slug    List slug.
+	 */
+	private function option_name( int $user_id, string $slug ): string {
+		return ShopperList::OPTION_PREFIX . $user_id . '_' . $slug;
+	}
+
+	/**
+	 * @testdox add_item should throw when the list is at capacity and the incoming item is a new key.
+	 */
+	public function test_add_item_throws_when_list_at_capacity_for_new_key(): void {
+		$list = ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id );
+
+		for ( $i = 0; $i < ShopperList::MAX_ITEMS; $i++ ) {
+			$list->add_item( $this->synthetic_item( 'item-' . $i, $i + 1 ) );
+		}
+		$this->assertCount( ShopperList::MAX_ITEMS, $list->get_items() );
+
+		$this->expectException( ShopperListFullException::class );
+		$list->add_item( $this->synthetic_item( 'item-overflow', 9999 ) );
+	}
+
+	/**
+	 * @testdox add_item should still merge quantities at capacity when the incoming item matches an existing key.
+	 */
+	public function test_add_item_allows_merging_when_at_capacity(): void {
+		$list = ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id );
+
+		for ( $i = 0; $i < ShopperList::MAX_ITEMS; $i++ ) {
+			$list->add_item( $this->synthetic_item( 'item-' . $i, $i + 1 ) );
+		}
+
+		$list->add_item( $this->synthetic_item( 'item-0', 1, 3 ) );
+
+		$this->assertCount( ShopperList::MAX_ITEMS, $list->get_items(), 'A duplicate add at capacity must not grow the list.' );
+		$this->assertSame( 4, $list->find_item( 'item-0' )->get_quantity(), 'Merged quantity should equal the sum of the original and the new add.' );
+	}
+
+	/**
+	 * ShopperListItem with synthetic key/product_id, bypassing real product fixtures.
+	 *
+	 * @param string $key        Storage key.
+	 * @param int    $product_id Product ID.
+	 * @param int    $quantity   Quantity.
+	 */
+	private function synthetic_item( string $key, int $product_id, int $quantity = 1 ): ShopperListItem {
+		return ShopperListItem::from_array(
+			array(
+				'key'                   => $key,
+				'product_id'            => $product_id,
+				'variation_id'          => 0,
+				'variation'             => array(),
+				'quantity'              => $quantity,
+				'date_added_gmt'        => '2026-04-01 00:00:00',
+				'product_title_at_save' => 'Synthetic',
+			)
+		);
 	}
 
 	/**

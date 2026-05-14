@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Cap shopper lists at 100 items and store them in wp_options (autoload=no).

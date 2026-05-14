@@ -7,6 +7,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Routes;
 
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperList;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListItem;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 
 /**
@@ -355,6 +357,40 @@ class ShopperLists extends ControllerTestCase {
 
 		$this->assertEquals( 200, $response->get_status() );
 		$this->assertCount( 0, $response->get_data(), 'Other user should not see the first user\'s items.' );
+	}
+
+	/**
+	 * Test POST returns 400 when the list is already at capacity and the incoming item is new.
+	 */
+	public function test_post_item_returns_400_when_list_full() {
+		wp_set_current_user( $this->customer_id );
+
+		$list = ShopperList::get_by_slug( 'saved-for-later', $this->customer_id );
+		for ( $i = 0; $i < ShopperList::MAX_ITEMS; $i++ ) {
+			$list->add_item(
+				ShopperListItem::from_array(
+					array(
+						'key'                   => 'fixture-' . $i,
+						'product_id'            => $i + 1,
+						'variation_id'          => 0,
+						'variation'             => array(),
+						'quantity'              => 1,
+						'date_added_gmt'        => '2026-04-01 00:00:00',
+						'product_title_at_save' => 'Fixture',
+					)
+				)
+			);
+		}
+		$list->save();
+
+		$response = $this->dispatch(
+			'POST',
+			'/wc/store/v1/shopper-lists/saved-for-later/items',
+			array( 'product_id' => $this->product->get_id() )
+		);
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_shopper_list_full', $response->get_data()['code'] );
 	}
 
 	/**

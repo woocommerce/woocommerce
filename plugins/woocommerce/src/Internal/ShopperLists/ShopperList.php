@@ -3,16 +3,24 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ShopperLists;
 
-use Automattic\WooCommerce\Internal\Utilities\Users;
-
 /**
  * A user's saved list of products.
  */
 class ShopperList {
 	/**
-	 * Prefix for per-list usermeta key for list details.
+	 * Per-(user, slug) wp_options key prefix. Stored with autoload=no.
 	 */
-	const META_KEY_PREFIX = '_wc_shopper_list_';
+	const OPTION_PREFIX = 'wc_shopper_list_';
+
+	/**
+	 * Slugs cleaned up on user deletion.
+	 */
+	private const KNOWN_SLUGS = array( 'saved-for-later' );
+
+	/**
+	 * Maximum distinct items per list. Revisit when storage moves to a dedicated table.
+	 */
+	const MAX_ITEMS = 100;
 
 	/**
 	 * User ID.
@@ -75,7 +83,7 @@ class ShopperList {
 			return false;
 		}
 
-		$stored = Users::get_site_user_meta( $user_id, self::META_KEY_PREFIX . $slug );
+		$stored = get_option( self::get_option_name( $user_id, $slug ), false );
 
 		if ( is_array( $stored ) ) {
 			return self::from_array( $stored, $user_id );
@@ -126,6 +134,8 @@ class ShopperList {
 	/**
 	 * Add an item, or merge quantities if it already exists.
 	 *
+	 * @throws ShopperListFullException When the list is at MAX_ITEMS and the item would be a new entry.
+	 *
 	 * @param ShopperListItem $item Item to add.
 	 */
 	public function add_item( ShopperListItem $item ): void {
@@ -139,6 +149,12 @@ class ShopperList {
 				)
 			);
 			return;
+		}
+
+		if ( count( $this->items ) >= self::MAX_ITEMS ) {
+			throw new ShopperListFullException(
+				sprintf( 'Shopper list "%s" is at capacity (%d items).', $this->slug, self::MAX_ITEMS )
+			);
 		}
 
 		$this->items[ $key ] = $item;
@@ -176,14 +192,33 @@ class ShopperList {
 	}
 
 	/**
-	 * Persist the current state to user meta.
+	 * Persist the current state.
 	 */
 	public function save(): void {
-		Users::update_site_user_meta(
-			$this->user_id,
-			self::META_KEY_PREFIX . $this->slug,
-			$this->to_array()
-		);
+		update_option( self::get_option_name( $this->user_id, $this->slug ), $this->to_array(), false );
+	}
+
+	/**
+	 * Delete every stored list for a user.
+	 *
+	 * @param int $user_id Owning user ID.
+	 */
+	public static function delete_all_for_user( int $user_id ): void {
+		if ( $user_id > 0 ) {
+			foreach ( self::KNOWN_SLUGS as $slug ) {
+				delete_option( self::get_option_name( $user_id, $slug ) );
+			}
+		}
+	}
+
+	/**
+	 * Storage option name for a (user, slug) pair.
+	 *
+	 * @param int    $user_id Owning user ID.
+	 * @param string $slug    List slug.
+	 */
+	private static function get_option_name( int $user_id, string $slug ): string {
+		return self::OPTION_PREFIX . $user_id . '_' . $slug;
 	}
 
 	/**

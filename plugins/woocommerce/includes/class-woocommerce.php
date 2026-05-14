@@ -27,6 +27,7 @@ use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsService;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
 use Automattic\WooCommerce\Internal\Email\DeferredEmailQueue;
@@ -362,6 +363,7 @@ final class WooCommerce {
 		$container->get( BatchProcessingController::class );
 		$container->get( FeaturesController::class );
 		$container->get( WebhookUtil::class );
+		$container->get( ShopperListsService::class );
 		$container->get( Marketplace::class );
 		$container->get( TimeUtil::class );
 		$container->get( ComingSoonAdminBarBadge::class );
