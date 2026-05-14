@@ -1027,6 +1027,7 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			),
 			'product.deleted'   => array(
 				'wp_trash_post',
+				'woocommerce_delete_product_variation',
 			),
 			'product.restored'  => array(
 				'untrashed_post',
