@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Wrap tooltip popover text so long info tooltips (e.g. the GTIN field in the product editor) no longer render as a single unbounded line

@@ -17,6 +17,14 @@
 		 */
 		width: auto;
         max-width: 300px;
+		/* Ensure the tooltip text wraps within the max-width box.
+		 * Without this, ancestor styles (e.g. uppercase form labels)
+		 * can leak `white-space: nowrap` into the popover and the
+		 * tooltip renders as a single unbounded line.
+		 */
+		white-space: normal;
+		overflow-wrap: break-word;
+		word-wrap: break-word;
 		a {
 			white-space: nowrap;
 			text-decoration: underline;

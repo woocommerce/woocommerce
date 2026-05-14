@@ -16,11 +16,14 @@
 	}
 
 	&__tooltip {
-		.components-popover__content {
-			width: 200px;
-			min-width: auto;
-			white-space: normal !important;
-		}
+		/*
+		 * The `woocommerce-product-form-label__tooltip` className is
+		 * forwarded to the Tooltip's <button> (the help icon), not the
+		 * popover wrapper, so descendant selectors against
+		 * `.components-popover__content` never match. The popover
+		 * wrapping/width is handled centrally by `.woocommerce-tooltip`
+		 * styles instead.
+		 */
 	}
 
 	&__icon {

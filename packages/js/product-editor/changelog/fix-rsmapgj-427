@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove dead label tooltip popover CSS rule whose selector never matched (className is forwarded to the button, not the popover wrapper).
