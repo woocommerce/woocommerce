@@ -50,27 +50,38 @@
 		}
 	}
 
-	// On the WC Home page, HeaderAccount renders inside the
-	// activity-panel tab strip. The outer DropdownMenu wrapper has no
-	// `activity-panel-tab` class (only the inner toggle does — see
-	// header-account.tsx), so we explicitly stretch + centre this
-	// wrapper here to match the surrounding tabs' 60px bar height.
-	&__user-menu {
+	// HeaderAccount renders in two places — the WC Home floating-header
+	// activity-panel tab strip, and the Marketplace page's own header
+	// next to a search input. The default toggle structure doesn't
+	// stretch / centre vertically on its own, so we explicitly handle
+	// both contexts:
+	//
+	// - Floating header (inside `.woocommerce-layout__activity-panel-tabs`):
+	//   wrapper stretches to the 60px bar height so the User tab aligns
+	//   with its neighbours (bell / store / display / help).
+	// - Marketplace page (inside `.woocommerce-marketplace__header`):
+	//   wrapper sits at 40px to match the WP 7.0-height search input
+	//   beside it.
+	//
+	// Both rules scope to their parent container rather than styling
+	// `__user-menu` unconditionally, otherwise the Home rule would leak
+	// onto Marketplace (and vice versa).
+	.woocommerce-layout__activity-panel-tabs &__user-menu {
 		display: flex;
 		align-items: stretch;
 		height: $header-height;
 	}
 
-	// Scoped to .woocommerce-marketplace__header (the Marketplace page's
-	// own header bar, where this DropdownMenu sits beside a search input
-	// and needs to match its WP 7.0 input height). On the WC Home page
-	// the same component renders inside the activity-panel tab strip,
-	// where it should keep the standard 60px tab height instead — the
-	// previous unscoped 40px rule was leaking onto Home and forcing the
-	// User button shorter than its neighbours, throwing off the blue
-	// active underline and tab spacing.
 	&__header &__user-menu {
-		height: 40px;
+		// Inner toggle button is 40px to match the WP 7.0-height search
+		// input next to it. The 7px top offset compensates for the
+		// difference between the search input's `margin-top: 15px` (in
+		// search.scss) and the `padding-top: 8px` already on the parent
+		// `__header-meta` — without it, the User toggle visually sits
+		// ~7px higher than the search input. Previously masked by the
+		// removed `.activity-panel-tab` class overflowing the 60px grid
+		// cell.
+		margin-top: 7px;
 
 		> button.components-dropdown-menu__toggle {
 			height: 40px;
