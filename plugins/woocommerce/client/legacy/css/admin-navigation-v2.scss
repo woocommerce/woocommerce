@@ -105,14 +105,24 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 	border: 0 none;
 }
 
-// Keep the order-attention `menu-counter` bubble inline next to its
-// label on the WooCommerce top-level and the Orders rail-root.
-// `.wp-menu-name` defaults to `word-break: break-word`, which wraps the
-// inline-block bubble onto a second line once the label fills the rail
-// width. Holding the line keeps the bubble adjacent to the word — long
-// labels are already truncated by the rail, so allowing the bubble to
-// extend into the row's right padding is fine.
-#adminmenu li#toplevel_page_woocommerce > a .wp-menu-name,
+// Small filled circle indicating "attention needed" on top-level menu
+// items where a numeric `.menu-counter` would collide with the
+// rail-row's right-edge flyout arrow (notably the WooCommerce
+// top-level). The drill-down items still use the numeric bubble.
+.wc-attention-dot {
+	display: inline-block;
+	width: 8px;
+	height: 8px;
+	margin-left: 6px;
+	border-radius: 50%;
+	background-color: #d63638;
+	vertical-align: middle;
+}
+
+// Keep the numeric `menu-counter` bubble inline next to its label on
+// the Orders rail-root. `.wp-menu-name` defaults to
+// `word-break: break-word`, which wraps the inline-block bubble onto a
+// second line once the label fills the rail width.
 #adminmenu li#toplevel_page_wc-orders > a .wp-menu-name {
 	white-space: nowrap;
 	word-break: keep-all;

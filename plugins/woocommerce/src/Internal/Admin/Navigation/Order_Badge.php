@@ -41,12 +41,28 @@ class Order_Badge {
 	}
 
 	/**
-	 * Compute the processing-order count and stamp a `menu-counter` bubble
-	 * on every menu entry that should carry it: the WooCommerce top-level,
-	 * the spliced Orders rail-root (when nav-v2 is active on a Woo page),
-	 * and the Orders entry inside the WooCommerce flyout.
+	 * Stamp the per-item badges, then — if any menu item under the Woo
+	 * rail (ours or third-party) carries a `menu-counter` bubble —
+	 * stamp a plain "attention" dot on the WooCommerce top-level entry.
+	 *
+	 * The dot lives on the top-level because a numeric counter there
+	 * would run into WP's hover-flyout arrow at the right edge of the
+	 * rail row, and because the actual number lives on whichever
+	 * drill-down item triggered the attention.
 	 */
 	public function apply(): void {
+		$this->maybe_apply_orders_badge();
+
+		if ( $this->any_woo_item_has_badge() ) {
+			$this->append_to_menu_entry( 'woocommerce', $this->build_dot_html() );
+		}
+	}
+
+	/**
+	 * Apply the numeric processing-order bubble to the Orders rail-root
+	 * and to the Orders entry inside the WooCommerce flyout.
+	 */
+	private function maybe_apply_orders_badge(): void {
 		if ( ! current_user_can( 'edit_others_shop_orders' ) ) {
 			return;
 		}
@@ -68,11 +84,6 @@ class Order_Badge {
 		}
 
 		$badge = $this->build_badge_html( $count );
-
-		// Top-level entries: the WooCommerce item (visible in the WP rail
-		// on non-Woo pages; `hide-if-js` on Woo pages) and the spliced
-		// Orders rail-root (visible in the Woo rail).
-		$this->append_to_menu_entry( 'woocommerce', $badge );
 		$this->append_to_menu_entry( 'wc-orders', $badge );
 
 		// Orders item in the WooCommerce flyout. `Menu_Reconciler::replace_woocommerce_submenu`
@@ -80,6 +91,46 @@ class Order_Badge {
 		// strips the badge that the legacy `menu_order_count()` callback
 		// adds at admin_menu priority 10 — re-apply here.
 		$this->append_to_submenu_entry( 'woocommerce', 'wc-orders', $badge );
+	}
+
+	/**
+	 * True when any menu entry that belongs to the WooCommerce rail
+	 * (flyout child of `woocommerce` in `$submenu`, or a tree rail-root
+	 * spliced into `$menu`) carries a `menu-counter` bubble.
+	 *
+	 * Looks for the bare `menu-counter` class so it picks up bubbles
+	 * added by third-party plugins as well as our own
+	 * `wc-order-attention menu-counter` markup.
+	 */
+	private function any_woo_item_has_badge(): bool {
+		global $menu, $submenu;
+
+		if ( isset( $submenu['woocommerce'] ) && is_array( $submenu['woocommerce'] ) ) {
+			foreach ( $submenu['woocommerce'] as $entry ) {
+				if ( false !== strpos( (string) ( $entry[0] ?? '' ), 'menu-counter' ) ) {
+					return true;
+				}
+			}
+		}
+
+		$tree = Menu_Reconciler::get_tree();
+		if ( null !== $tree && is_array( $menu ) ) {
+			foreach ( $menu as $entry ) {
+				$slug = $entry[2] ?? null;
+				if ( ! is_string( $slug ) || 'woocommerce' === $slug ) {
+					continue;
+				}
+				$node = $tree[ $slug ] ?? null;
+				if ( null === $node || 'woocommerce' !== ( $node['parent'] ?? null ) ) {
+					continue;
+				}
+				if ( false !== strpos( (string) ( $entry[0] ?? '' ), 'menu-counter' ) ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
 	}
 
 	/**
@@ -96,10 +147,19 @@ class Order_Badge {
 			: number_format_i18n( $count );
 
 		return sprintf(
-			' <span class="menu-counter count-%1$s"><span class="processing-count">%2$s</span></span>',
+			' <span class="wc-order-attention menu-counter count-%1$s"><span class="processing-count">%2$s</span></span>',
 			esc_attr( (string) $count ),
 			esc_html( $display )
 		);
+	}
+
+	/**
+	 * Build the dot-only variant. Used on the WooCommerce top-level entry,
+	 * where a numeric counter would collide with WP's right-edge flyout
+	 * arrow. Indicates "attention needed" without spending the width.
+	 */
+	private function build_dot_html(): string {
+		return ' <span class="wc-order-attention wc-attention-dot" aria-hidden="true"></span>';
 	}
 
 	/**
@@ -121,7 +181,7 @@ class Order_Badge {
 				continue;
 			}
 			$title = (string) ( $entry[0] ?? '' );
-			if ( false !== strpos( $title, 'menu-counter' ) ) {
+			if ( false !== strpos( $title, 'wc-order-attention' ) ) {
 				continue;
 			}
 			$menu[ $key ][0] = $title . $badge;
@@ -146,7 +206,7 @@ class Order_Badge {
 				continue;
 			}
 			$title = (string) ( $entry[0] ?? '' );
-			if ( false !== strpos( $title, 'menu-counter' ) ) {
+			if ( false !== strpos( $title, 'wc-order-attention' ) ) {
 				continue;
 			}
 			$submenu[ $parent ][ $key ][0] = $title . $badge;
