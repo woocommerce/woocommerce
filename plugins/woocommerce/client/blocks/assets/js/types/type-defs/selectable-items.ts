@@ -11,10 +11,6 @@ export type SelectableItem< T = unknown > = (
 	value: string;
 	selected?: boolean;
 	disabled?: boolean;
-	/**
-	 * When true, presentational inner blocks may hide this item (e.g. invalid
-	 * variation combinations when the parent uses a "hide" invalid-options mode).
-	 */
 	hidden?: boolean;
 	type?: string;
 } & T;
@@ -31,16 +27,6 @@ export interface SelectableItemsContext< T = unknown > {
 	 * are parent-defined strings; unknown values fall back to text.
 	 */
 	filterType?: string;
-	/**
-	 * Optional: stable `id` for the product filter dropdown `<select>` (e.g. variation
-	 * attribute row id) so a visible `<label for>` can target the control.
-	 */
-	selectElementId?: string;
-	/**
-	 * Optional: accessible name for the dropdown `<select>` when it must match a
-	 * specific label (e.g. variation attribute label for tests and `label for=`).
-	 */
-	selectAccessibleLabel?: string;
 }
 
 export type SelectableItemsBlockContext< T = unknown > = {

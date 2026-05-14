@@ -57,13 +57,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 		$first       = reset( $items );
 		$filter_type = ( is_array( $first ) && ! empty( $first['type'] ) ) ? (string) $first['type'] : '';
 
-		$select_id = '';
-		if ( ! empty( $selectable_items['selectElementId'] ) && is_string( $selectable_items['selectElementId'] ) ) {
-			$select_id = $selectable_items['selectElementId'];
-		}
-		if ( '' === $select_id ) {
-			$select_id = wp_unique_id( 'wc-block-product-filter-dropdown-' );
-		}
+		$select_id = wp_unique_id( 'wc-block-product-filter-dropdown-' );
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/product-filter-dropdown',
@@ -76,25 +70,15 @@ final class ProductFilterDropdown extends AbstractBlock {
 			),
 		);
 
-		$label = '';
-		if ( ! empty( $selectable_items['selectAccessibleLabel'] ) && is_string( $selectable_items['selectAccessibleLabel'] ) ) {
-			$label = $selectable_items['selectAccessibleLabel'];
-		} elseif ( is_string( $selectable_items['groupLabel'] ?? null ) && '' !== $selectable_items['groupLabel'] ) {
-			/** Translators: %s Attribute or filter type label. */
-			$label = sprintf( __( 'Select %s', 'woocommerce' ), $selectable_items['groupLabel'] );
-		} else {
-			$label = __( 'Select options', 'woocommerce' );
-		}
-
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<fieldset class="wc-block-product-filter-dropdown__fieldset">
-				<legend class="screen-reader-text"><?php echo esc_html( $label ); ?></legend>
+				<legend class="screen-reader-text"><?php echo esc_html( __( 'Choose an option', 'woocommerce' ) ); ?></legend>
 				<select
 					class="wc-block-product-filter-dropdown__select"
 					id="<?php echo esc_attr( $select_id ); ?>"
-					aria-label="<?php echo esc_attr( $label ); ?>"
+					aria-label="<?php echo esc_attr( $selectable_items['groupLabel'] ); ?>"
 					data-wp-bind--value="woocommerce/product-filter-dropdown::state.selectValue"
 					data-wp-on--change="actions.onDropdownChange"
 				>

@@ -206,16 +206,6 @@ myStore satisfies SelectableItemsParentStore;
 
 External mutations (active-filter removal, cross-block sync) flow through automatically: mutate `activeFilters` → `state.selectableItems` re-evaluates → every `context.item.selected` binding updates across all blocks.
 
-### Variation selector attribute options
-
-The block `woocommerce/add-to-cart-with-options-variation-selector-attribute-options` is a Selectable Items parent on the `woocommerce/add-to-cart-with-options` store. It nests the same inner blocks as product filters (`woocommerce/product-filter-chips`, `woocommerce/product-filter-dropdown`) and passes `woocommerceSelectableItems` when rendering.
-
-- **SSOT**: `context.selectedAttributes` on the add-to-cart form (same as the legacy variation UI).
-- **Server / merged context**: `variationAttributeOptions` (list of `{ id, label, value, ariaLabel? }`) plus `name` (attribute label), `selectedValue`, `autoselect`, and `disabledAttributesAction` on the attribute row wrapper so `state.selectableItems` and `actions.toggle` can run without filter-only APIs.
-- **Optional context for dropdown**: `selectElementId` and `selectAccessibleLabel` on `woocommerceSelectableItems` let the shared dropdown block use a stable `<select id>` and accessible name (for example so the attribute name `<label for>` continues to reference the control on the storefront).
-
-Invalid combinations may set `disabled` and `hidden` on items; chips hide items when `hidden` is true (see `woocommerce/product-filter-chips` store `itemHidden`).
-
 ### Rendering Rules
 
 Inner blocks SHOULD:
@@ -289,8 +279,6 @@ export interface SelectableItemsContext< T = unknown > {
 	groupLabel?: string;
 	isLoading?: boolean;
 	filterType?: string;
-	selectElementId?: string;
-	selectAccessibleLabel?: string;
 }
 
 export type SelectableItemsBlockContext< T = unknown > = {

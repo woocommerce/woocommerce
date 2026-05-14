@@ -198,18 +198,14 @@ class VariationSelectorAttributeOptions extends AbstractBlock {
 		$default_selected = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
 
 		$selectable_items_context = array(
-			'items'          => $variation_items,
-			'selectionMode'  => 'single',
-			'storeNamespace' => 'woocommerce/add-to-cart-with-options',
-			'groupLabel'     => '',
-		);
-
-		if ( 'dropdown' === $option_style ) {
-			$selectable_items_context['selectElementId']       = $attribute_id;
-			$selectable_items_context['selectAccessibleLabel'] = wc_attribute_label(
+			'items'           => $variation_items,
+			'selectionMode'   => 'single',
+			'storeNamespace'  => 'woocommerce/add-to-cart-with-options',
+			'groupLabel'      => wc_attribute_label(
 				$block->context['woocommerce/attributeName']
-			);
-		}
+			),
+			'selectElementId' => $attribute_id,
+		);
 
 		$merged_context = array_merge(
 			$block->context,
