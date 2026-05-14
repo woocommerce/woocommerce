@@ -110,33 +110,60 @@ class Native_Rail_Splicer {
 
 	/**
 	 * Ensure WP's menu URL generator can resolve every rail-root to an
-	 * `admin.php?page=<slug>` href.
+	 * `admin.php?page=<slug>` href across every page context.
 	 *
-	 * `menu-header.php` decides whether to emit `admin.php?page=…` or a naked
-	 * literal href via `has_action( $hookname )`. For tree slugs that aren't
-	 * registered with a page callback (compound wc-admin routes like
-	 * `wc-admin&path=/customers`, and any rail root whose owning module
-	 * hasn't registered a hookname by the time we splice), the check fails
-	 * and the href falls through to the naked branch — producing
-	 * `/wp-admin/<slug>` instead of the working `?page=<slug>` form.
+	 * For rail roots without tree children, `menu-header.php` computes the
+	 * href via `get_plugin_page_hook( $item[2], 'admin.php' )`. That call
+	 * resolves to `<page_type>_page_<slug>` where `<page_type>` comes from
+	 * `$admin_page_hooks` keyed on whatever `get_admin_page_parent('admin.php')`
+	 * returns for the *current* request — and that varies by `$pagenow` /
+	 * `$typenow` / `$plugin_page`. On a Woo settings page it lands on
+	 * `'woocommerce'`; on the Products list (`edit.php?post_type=product`)
+	 * the `$typenow` branch of `get_admin_page_parent`'s foreach scan steers
+	 * it to the Products $submenu entry, yielding `'product'` instead. If
+	 * `has_action()` returns false for the computed hookname, the href
+	 * falls through to the naked literal (`/wp-admin/wc-orders`) instead of
+	 * the working `admin.php?page=wc-orders` form.
 	 *
-	 * Register a no-op `__return_true` callback under the expected hookname
-	 * (the one our `$_wp_real_parent_file` remap routes the rail-root slug
-	 * to, i.e. `woocommerce_page_<slug>`) so the check passes. `add_action`
-	 * is idempotent — if the real owner already registered a callback, the
-	 * no-op piles on harmlessly; if not, ours is the only one and `has_action`
-	 * still reports truthy.
+	 * Register a no-op callback under every `<page_type>_page_<slug>`
+	 * combination — one stub per registered page_type (`$admin_page_hooks`
+	 * value) crossed with every rail-root slug, plus the `admin` /
+	 * `toplevel` defaults `get_plugin_page_hookname()` falls back to when
+	 * no `$admin_page_hooks` entry matches. `add_action` is idempotent —
+	 * if the owning module already registered the real callback, our stub
+	 * piles on harmlessly; if not, ours is the only one and `has_action()`
+	 * still reports truthy regardless of which page context generated the
+	 * hookname lookup.
 	 *
 	 * @param array $tree Final reconciled tree.
 	 */
 	private function register_rail_root_hooknames( array $tree ): void {
+		global $admin_page_hooks;
+
+		$slugs = array();
 		foreach ( $tree as $slug => $node ) {
-			if ( ( $node['parent'] ?? null ) !== 'woocommerce' ) {
-				continue;
+			if ( ( $node['parent'] ?? null ) === 'woocommerce' ) {
+				$slugs[] = (string) $slug;
 			}
-			$hookname = 'woocommerce_page_' . $slug;
-			if ( ! has_action( $hookname ) ) {
-				add_action( $hookname, static function (): void {} );
+		}
+		if ( empty( $slugs ) ) {
+			return;
+		}
+
+		$page_types   = array();
+		$page_types[] = 'admin';
+		$page_types[] = 'toplevel';
+		foreach ( (array) $admin_page_hooks as $value ) {
+			$page_types[] = (string) $value;
+		}
+		$page_types = array_unique( array_filter( $page_types, static fn( $v ) => '' !== $v ) );
+
+		foreach ( $page_types as $page_type ) {
+			foreach ( $slugs as $slug ) {
+				$hookname = $page_type . '_page_' . $slug;
+				if ( ! has_action( $hookname ) ) {
+					add_action( $hookname, static function (): void {} );
+				}
 			}
 		}
 	}
@@ -321,71 +348,30 @@ class Native_Rail_Splicer {
 			if ( ( $node['parent'] ?? null ) !== 'woocommerce' ) {
 				continue;
 			}
-
-			$entries = array();
-			if ( isset( $by_parent[ $slug ] ) ) {
-				$children = $by_parent[ $slug ];
-				uasort(
-					$children,
-					static fn( $a, $b ) => ( $a['position'] ?? 0 ) <=> ( $b['position'] ?? 0 )
-				);
-				foreach ( $children as $child_slug => $child ) {
-					if ( ! empty( $child['hidden'] ) ) {
-						continue;
-					}
-					$title     = (string) ( $child['title'] ?? $child_slug );
-					$cap       = (string) ( $child['capability'] ?? 'read' );
-					$url       = self::renderable_url( (string) ( $child['url'] ?? $child_slug ) );
-					$entries[] = array( $title, $cap, $url, $title, '' );
-				}
-			}
-
-			if ( empty( $entries ) ) {
-				// Phantom hidden entry so menu-header.php takes its "parent
-				// with submenu" branch when computing the rail-root's href.
-				// That branch resolves the hookname against the rail-root
-				// slug itself (where our $_wp_real_parent_file remap routes
-				// to 'woocommerce' and our register_rail_root_hooknames stub
-				// registers a callback), so has_action() reports truthy and
-				// the emitted URL is `admin.php?page=<slug>` instead of a
-				// naked `<slug>` literal.
-				//
-				// The other branch ("no submenu") computes hookname against
-				// 'admin.php' and calls get_admin_page_parent('admin.php'),
-				// which falls through to the foreach scan of $submenu and
-				// can return an arbitrary slug depending on $typenow /
-				// $pagenow (e.g. 'edit.php?post_type=product' on the
-				// Products list). That breaks the hookname lookup and the
-				// href falls through to the naked literal.
-				$title     = (string) ( $node['title'] ?? $slug );
-				$cap       = (string) ( $node['capability'] ?? 'read' );
-				$entries[] = array( $title, $cap, $slug, $title, 'hide-if-js' );
-				// Tag the rail-root $menu entry so CSS can suppress the
-				// empty wp-submenu wrapper menu-header.php still emits
-				// around our hidden phantom.
-				$this->mark_menu_entry_no_children( $slug );
-			}
-
-			$submenu[ $slug ] = $entries;
-		}
-	}
-
-	/**
-	 * Append a marker class to the rail-root's $menu entry so the empty
-	 * wp-submenu wrapper (rendered around our phantom hide-if-js entry) can
-	 * be CSS-suppressed.
-	 *
-	 * @param string $slug Rail-root slug whose $menu entry should be marked.
-	 */
-	private function mark_menu_entry_no_children( string $slug ): void {
-		global $menu;
-		foreach ( $menu as $key => $entry ) {
-			if ( ! isset( $entry[2] ) || $entry[2] !== $slug ) {
+			if ( ! isset( $by_parent[ $slug ] ) ) {
 				continue;
 			}
-			$existing        = isset( $entry[4] ) ? (string) $entry[4] : '';
-			$menu[ $key ][4] = trim( $existing . ' wc-nav-v2-no-children' );
-			return;
+
+			$children = $by_parent[ $slug ];
+			uasort(
+				$children,
+				static fn( $a, $b ) => ( $a['position'] ?? 0 ) <=> ( $b['position'] ?? 0 )
+			);
+
+			$entries = array();
+			foreach ( $children as $child_slug => $child ) {
+				if ( ! empty( $child['hidden'] ) ) {
+					continue;
+				}
+				$title     = (string) ( $child['title'] ?? $child_slug );
+				$cap       = (string) ( $child['capability'] ?? 'read' );
+				$url       = self::renderable_url( (string) ( $child['url'] ?? $child_slug ) );
+				$entries[] = array( $title, $cap, $url, $title, '' );
+			}
+
+			if ( ! empty( $entries ) ) {
+				$submenu[ $slug ] = $entries;
+			}
 		}
 	}
 

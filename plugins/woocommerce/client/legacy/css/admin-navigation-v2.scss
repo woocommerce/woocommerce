@@ -105,16 +105,6 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 	border: 0 none;
 }
 
-// Rail-roots without tree children get a hidden phantom `$submenu` entry
-// (see Native_Rail_Splicer::populate_root_submenus) so menu-header.php's URL
-// generator emits `admin.php?page=<slug>` instead of a naked literal. WP
-// still wraps the phantom in a `<ul class="wp-submenu">` and emits its
-// `<li class="wp-submenu-head">` heading — visible on hover as a small empty
-// flyout. Suppress that wrapper for rail-roots tagged as no-children.
-#adminmenu li.menu-top.wc-nav-v2-no-children > .wp-submenu {
-	display: none;
-}
-
 // Spec §6.3: touch devices do not get the hover cascade. Tapping a cascade
 // parent (Settings, Marketing, etc.) navigates directly.
 //
