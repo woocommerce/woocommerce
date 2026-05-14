@@ -2787,7 +2787,11 @@ class ApiBuilder {
 	}
 
 	private function format_with_phpcbf( string $file_path ): void {
-		exec( escapeshellarg( $this->phpcbf_path ) . ' -q ' . escapeshellarg( $file_path ) . ' 2>&1' );
+		// Pass --standard explicitly: without it phpcbf reads the project's
+		// phpcs.xml, whose Suin.Classes.PSR4 sniff aborts processing under
+		// PHP 8.x with a "${var} in strings is deprecated" notice, leaving
+		// the generated files unformatted.
+		exec( escapeshellarg( $this->phpcbf_path ) . ' -q --standard=WordPress-Core ' . escapeshellarg( $file_path ) . ' 2>&1' );
 	}
 
 	private function rmdir_recursive( string $dir ): void {
