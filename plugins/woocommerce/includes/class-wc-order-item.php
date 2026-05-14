@@ -339,6 +339,16 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 		$product           = is_callable( array( $this, 'get_product' ) ) ? $this->get_product() : false;
 		$order_item_name   = $this->get_name();
 
+		/*
+		 * Also dedupe against the variation's live title, which reflects the current
+		 * `woocommerce_product_variation_title_include_attributes` filter state. Orders
+		 * placed before the filter was enabled have the legacy item name in the database,
+		 * but the title shown via `get_name()` on the live product object now includes
+		 * the attributes, and without this we would render them again as item meta below
+		 * the title on the Order Pay, My Account orders, and email templates.
+		 */
+		$product_name = ( $product && $product->is_type( ProductType::VARIATION ) ) ? $product->get_name() : '';
+
 		foreach ( $meta_data as $meta ) {
 			if ( empty( $meta->id ) || '' === $meta->value || ! is_scalar( $meta->value ) || ( $hideprefix_length && substr( $meta->key, 0, $hideprefix_length ) === $hideprefix ) ) {
 				continue;
@@ -358,7 +368,10 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 
 			// Skip items with values already in the product details area of the product name.
-			if ( ! $include_all && $product && $product->is_type( ProductType::VARIATION ) && wc_is_attribute_in_product_name( $display_value, $order_item_name ) ) {
+			if ( ! $include_all && $product && $product->is_type( ProductType::VARIATION ) && (
+				wc_is_attribute_in_product_name( $display_value, $order_item_name ) ||
+				( '' !== $product_name && wc_is_attribute_in_product_name( $display_value, $product_name ) )
+			) ) {
 				continue;
 			}
 

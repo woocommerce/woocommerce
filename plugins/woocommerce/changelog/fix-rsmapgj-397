@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent variation attributes from appearing twice on Order Pay, My Account orders, and emails when the `woocommerce_product_variation_title_include_attributes` filter is enabled.

@@ -383,6 +383,109 @@ class WC_Tests_Order_Item_Product extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Variation attribute meta should be deduped against the live variation title when
+	 * the `woocommerce_product_variation_title_include_attributes` filter is enabled,
+	 * even if the order item's stored name still reflects the legacy (pre-filter) title.
+	 *
+	 * Regression test for the Order Pay, My Account orders, and email templates duplicating
+	 * variation attributes both in the product title and again in the item meta below it.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_get_formatted_meta_data_dedupes_against_live_variation_title() {
+		$parent_product = new WC_Product_Variable();
+		$parent_product->set_name( 'Test Parent' );
+		$parent_product->save();
+
+		$variation_product = new WC_Product_Variation();
+		$variation_product->set_parent_id( $parent_product->get_id() );
+		$variation_product->set_attributes(
+			array(
+				'color'  => 'Red',
+				'size'   => 'Medium',
+				'sleeve' => 'Long',
+			)
+		);
+		$variation_product->save();
+
+		$product_item = new WC_Order_Item_Product();
+		$product_item->set_product( $variation_product );
+		// Simulate an order item whose stored name was captured before the filter was enabled
+		// (e.g. an order placed prior to the site adding the filter via a mu-plugin).
+		$product_item->set_name( 'Test Parent' );
+		$product_item->save();
+
+		add_filter( 'woocommerce_product_variation_title_include_attributes', '__return_true' );
+
+		try {
+			// Reload the product so the live title reflects the filter.
+			$variation_product = wc_get_product( $variation_product->get_id() );
+			$this->assertStringContainsString( 'Red', $variation_product->get_name() );
+			$this->assertStringContainsString( 'Medium', $variation_product->get_name() );
+			$this->assertStringContainsString( 'Long', $variation_product->get_name() );
+
+			// Reset the item's cached product so it picks up the reloaded variation.
+			$product_item->set_product( $variation_product );
+
+			$formatted = $product_item->get_formatted_meta_data( '_', false );
+
+			$keys = array();
+			foreach ( $formatted as $meta ) {
+				$keys[] = $meta->key;
+			}
+
+			// The three attribute metas should all be deduped against the live title.
+			$this->assertNotContains( 'color', $keys );
+			$this->assertNotContains( 'size', $keys );
+			$this->assertNotContains( 'sleeve', $keys );
+		} finally {
+			remove_filter( 'woocommerce_product_variation_title_include_attributes', '__return_true' );
+		}
+	}
+
+	/**
+	 * When the filter is not enabled, variation attribute meta should still be returned
+	 * (i.e. the live-title dedup must not unexpectedly hide attributes that are part of
+	 * the variation but not present in the title).
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_get_formatted_meta_data_keeps_attributes_when_title_excludes_them() {
+		$parent_product = new WC_Product_Variable();
+		$parent_product->set_name( 'Plain Parent' );
+		$parent_product->save();
+
+		$variation_product = new WC_Product_Variation();
+		$variation_product->set_parent_id( $parent_product->get_id() );
+		$variation_product->set_attributes(
+			array(
+				'color'  => 'Purple',
+				'size'   => 'XS',
+				'sleeve' => 'Cropped',
+			)
+		);
+		$variation_product->save();
+
+		// With 3+ attributes and no filter, the title excludes the attributes.
+		$this->assertStringNotContainsString( 'Purple', $variation_product->get_name() );
+
+		$product_item = new WC_Order_Item_Product();
+		$product_item->set_product( $variation_product );
+		$product_item->save();
+
+		$formatted = $product_item->get_formatted_meta_data( '_', false );
+
+		$keys = array();
+		foreach ( $formatted as $meta ) {
+			$keys[] = $meta->key;
+		}
+
+		$this->assertContains( 'color', $keys );
+		$this->assertContains( 'size', $keys );
+		$this->assertContains( 'sleeve', $keys );
+	}
+
+	/**
 	 * Test the Array Access methods.
 	 *
 	 * @since 3.3.0
