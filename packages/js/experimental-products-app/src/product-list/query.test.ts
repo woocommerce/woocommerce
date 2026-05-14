@@ -159,6 +159,36 @@ describe( 'buildProductListQuery', () => {
 		expect( query.stock_status ).toBe( 'onbackorder' );
 	} );
 
+	it( 'maps the tags isAny filter to the tag query param', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'tags',
+					operator: 'isAny',
+					value: [ '5', 7 ],
+				},
+			],
+		} as View );
+
+		expect( query.tag ).toEqual( '5,7' );
+	} );
+
+	it( 'maps the tags isNone filter to exclude_tag', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'tags',
+					operator: 'isNone',
+					value: [ '5', 7 ],
+				},
+			],
+		} as View );
+
+		expect( query.exclude_tag ).toEqual( [ 5, 7 ] );
+	} );
+
 	it( 'maps the brands isAny filter to the brand query param', () => {
 		const query = buildProductListQuery( {
 			...baseView,
@@ -172,5 +202,34 @@ describe( 'buildProductListQuery', () => {
 		} as View );
 
 		expect( query.brand ).toEqual( '8,9' );
+	} );
+	it( 'maps the shipping_class isAny filter to the shipping_class query param', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'shipping_class',
+					operator: 'isAny',
+					value: [ '3', 4 ],
+				},
+			],
+		} as View );
+
+		expect( query.shipping_class ).toEqual( '3,4' );
+	} );
+
+	it( 'maps the shipping_class isNone filter to exclude_shipping_class', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'shipping_class',
+					operator: 'isNone',
+					value: [ '3', 4 ],
+				},
+			],
+		} as View );
+
+		expect( query.exclude_shipping_class ).toEqual( [ 3, 4 ] );
 	} );
 } );

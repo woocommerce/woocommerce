@@ -72,17 +72,20 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 
 		$checkbox_svg = '<svg class="wc-block-product-filter-checkbox-list__mark" viewBox="0 0 10 8" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M9.25 1.19922L3.75 6.69922L1 3.94922" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 
-		$star_path      = '<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>';
-		$stars_svg      = sprintf(
+		$star_path               = '<path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>';
+		$stars_svg               = sprintf(
 			'<svg class="wc-block-product-filter-checkbox-list__stars-svg" width="120" height="24" viewBox="0 0 120 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">%1$s<g transform="translate(24, 0)">%1$s</g><g transform="translate(48, 0)">%1$s</g><g transform="translate(72, 0)">%1$s</g><g transform="translate(96, 0)">%1$s</g></svg>',
 			$star_path
 		);
-		$visible_items  = array_slice( $items, 0, $display_limit, true );
-		$has_more_items = count( $items ) > count( $visible_items );
-		$hidden_count   = max( 0, count( $items ) - count( $visible_items ) );
-		$first_item     = reset( $items );
-		$show_counts    = is_array( $first_item ) && array_key_exists( 'count', $first_item );
-		$has_colors     = is_array( $first_item ) && array_key_exists( 'color', $first_item );
+		$first_items             = array_slice( $items, 0, $display_limit, true );
+		$overflow_items          = array_slice( $items, $display_limit );
+		$overflow_selected_items = array_filter( $overflow_items, fn( $item ) => is_array( $item ) && ! empty( $item['selected'] ) );
+		$visible_items           = array_merge( $first_items, $overflow_selected_items );
+		$hidden_count            = count( $items ) - count( $visible_items );
+
+		$first_item  = reset( $items );
+		$show_counts = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$has_colors  = is_array( $first_item ) && array_key_exists( 'color', $first_item );
 
 		ob_start();
 		?>
@@ -218,7 +221,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 						</div>
 					</template>
 				</div>
-				<?php if ( $has_more_items ) : ?>
+				<?php if ( $hidden_count > 0 ) : ?>
 					<div class="wc-block-product-filter-checkbox-list__show-more">
 						<button
 							type="button"
