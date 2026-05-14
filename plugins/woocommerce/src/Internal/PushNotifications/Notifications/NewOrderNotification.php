@@ -90,6 +90,11 @@ class NewOrderNotification extends Notification {
 	 * When `min_amount` is set in the user's preferences, the order total must
 	 * meet or exceed it for the notification to be sent.
 	 *
+	 * The threshold is interpreted in the order's currency; no currency
+	 * conversion is performed. This mirrors how `WC_Coupon::minimum_amount`
+	 * behaves, so multi-currency merchants should set thresholds with that
+	 * in mind.
+	 *
 	 * @param mixed $pref_value The user's stored preference value, or null.
 	 * @return bool
 	 *
