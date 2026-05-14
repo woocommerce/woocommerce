@@ -45,6 +45,7 @@ import {
 	isProductEditorAccessible,
 } from './utils';
 import { useProductActions } from '../dataviews-actions';
+import { ProductListEmptyState } from './empty-state';
 
 const { Menu } = unlock( componentsPrivateApis );
 const { usePostActions } = unlock( editorPrivateApis );
@@ -334,6 +335,7 @@ export default function ProductList( {
 				selection={ selection }
 				defaultLayouts={ DEFAULT_LAYOUTS }
 				isItemClickable={ isProductEditorAccessible }
+				empty={ <ProductListEmptyState tab={ selectedTab } /> }
 				renderItemLink={ ( { item, ...props } ) => (
 					<a
 						{ ...props }
