@@ -634,6 +634,47 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
+	 * Parse the "date on sale to" field from a CSV.
+	 *
+	 * When a date-only value (with no time component) is supplied, it is treated as the
+	 * end of that day (23:59:59) to match the behaviour of the product edit screen, where
+	 * the "On sale to" date input is stored with an end-of-day time.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param string $value Field value.
+	 *
+	 * @return string|null
+	 */
+	public function parse_date_on_sale_to_field( $value ) {
+		$parsed = $this->parse_datetime_field( $value );
+
+		if ( null === $parsed || '' === $parsed ) {
+			return $parsed;
+		}
+
+		// If the value is numeric (Unix timestamp) it was already normalised to an ISO8601
+		// string with an explicit time component by parse_datetime_field(), so leave it alone.
+		if ( is_numeric( $value ) ) {
+			return $parsed;
+		}
+
+		// Detect any time component in the original string (e.g. "2023-01-26 10:00",
+		// "2023-01-26T10:00:00Z"). If one is present, preserve the caller's intent.
+		if ( preg_match( '/\d{1,2}:\d{2}/', (string) $value ) ) {
+			return $parsed;
+		}
+
+		// Date-only value: align with admin behaviour by treating it as end-of-day.
+		$timestamp = strtotime( $parsed );
+		if ( false === $timestamp ) {
+			return $parsed;
+		}
+
+		return gmdate( 'Y-m-d 23:59:59', $timestamp );
+	}
+
+	/**
 	 * Parse backorders from a CSV.
 	 *
 	 * @param string $value Field value.
@@ -786,7 +827,7 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 			'published'         => array( $this, 'parse_published_field' ),
 			'featured'          => array( $this, 'parse_bool_field' ),
 			'date_on_sale_from' => array( $this, 'parse_datetime_field' ),
-			'date_on_sale_to'   => array( $this, 'parse_datetime_field' ),
+			'date_on_sale_to'   => array( $this, 'parse_date_on_sale_to_field' ),
 			'name'              => array( $this, 'parse_skip_field' ),
 			'short_description' => array( $this, 'parse_description_field' ),
 			'description'       => array( $this, 'parse_description_field' ),

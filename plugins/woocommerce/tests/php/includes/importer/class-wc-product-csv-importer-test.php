@@ -224,4 +224,93 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		wc_delete_attribute( $color_attr_id );
 		wc_delete_attribute( $size_attr_id );
 	}
+
+	/**
+	 * @testdox Date-only "date on sale to" values are stored as end-of-day to match admin behaviour (RSMAPGJ-400 / #35321).
+	 */
+	public function test_parse_date_on_sale_to_field_date_only_is_end_of_day() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26 23:59:59', $importer->parse_date_on_sale_to_field( '2099-01-26' ) );
+		$this->assertSame( '2022-10-25 23:59:59', $importer->parse_date_on_sale_to_field( '2022-10-25' ) );
+	}
+
+	/**
+	 * @testdox "date on sale to" values that already include a time component are preserved.
+	 */
+	public function test_parse_date_on_sale_to_field_preserves_time_component() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertSame( '2099-01-26 10:30:00', $importer->parse_date_on_sale_to_field( '2099-01-26 10:30:00' ) );
+		$this->assertSame( '2099-01-26 10:30', $importer->parse_date_on_sale_to_field( '2099-01-26 10:30' ) );
+	}
+
+	/**
+	 * @testdox "date on sale to" Unix timestamps are normalised to ISO8601 without being shifted to end-of-day.
+	 */
+	public function test_parse_date_on_sale_to_field_unix_timestamp_preserved() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		// 2099-01-26 00:00:00 UTC.
+		$this->assertSame( '2099-01-26T00:00:00Z', $importer->parse_date_on_sale_to_field( '4072291200' ) );
+	}
+
+	/**
+	 * @testdox Empty / invalid "date on sale to" values are returned as null.
+	 */
+	public function test_parse_date_on_sale_to_field_empty_and_invalid() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->assertNull( $importer->parse_date_on_sale_to_field( '' ) );
+		$this->assertNull( $importer->parse_date_on_sale_to_field( 'not-a-date' ) );
+	}
+
+	/**
+	 * @testdox Importing a CSV with a date-only "date sale price ends" stores end-of-day, matching admin (RSMAPGJ-400 / #35321).
+	 */
+	public function test_import_date_on_sale_to_date_only_is_end_of_day() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_sku( 'rsmapgj-400-sku' );
+		$product->set_regular_price( '10.00' );
+		$product->save();
+
+		$csv_path = tempnam( sys_get_temp_dir(), 'wc-csv-' ) . '.csv';
+		$fh       = fopen( $csv_path, 'w' );
+		fputcsv( $fh, array( 'ID', 'date sale price starts', 'date sale price ends', 'Sale price' ) );
+		fputcsv( $fh, array( $product->get_id(), '2022-10-25', '2099-01-26', '2.00' ) );
+		fclose( $fh );
+
+		$importer = new WC_Product_CSV_Importer(
+			$csv_path,
+			array(
+				'update_existing' => true,
+				'parse'           => true,
+				'mapping'         => array(
+					'ID'                     => 'id',
+					'date sale price starts' => 'date_on_sale_from',
+					'date sale price ends'   => 'date_on_sale_to',
+					'Sale price'             => 'sale_price',
+				),
+			)
+		);
+		$importer->import();
+
+		$updated      = wc_get_product( $product->get_id() );
+		$date_to      = $updated->get_date_on_sale_to();
+		$date_from    = $updated->get_date_on_sale_from();
+
+		$this->assertNotNull( $date_to, 'date_on_sale_to should be set' );
+		$this->assertNotNull( $date_from, 'date_on_sale_from should be set' );
+		$this->assertSame( '23:59:59', $date_to->date( 'H:i:s' ), 'date_on_sale_to should be end-of-day to match admin' );
+		$this->assertSame( '2099-01-26', $date_to->date( 'Y-m-d' ) );
+		$this->assertSame( '00:00:00', $date_from->date( 'H:i:s' ), 'date_on_sale_from should remain start-of-day' );
+		$this->assertSame( '2022-10-25', $date_from->date( 'Y-m-d' ) );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		@unlink( $csv_path );
+	}
 }
