@@ -9,6 +9,7 @@
  */
 
 use Automattic\Jetpack\Constants;
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
@@ -18,6 +19,7 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -2047,16 +2049,19 @@ function wc_update_product_lookup_tables_column( $column ) {
 				"
 			);
 			break;
+		case 'total_sales':
+			// Recompute total_sales from existing orders so the regenerate tool corrects stale values
+			// left behind by previously deleted orders or missed status transitions. The result is
+			// written to both wp_postmeta (the source of truth for the product) and the lookup table.
+			wc_update_product_lookup_tables_total_sales();
+			break;
 		case 'sku':
 		case 'global_unique_id':
 		case 'stock_status':
 		case 'average_rating':
-		case 'total_sales':
 		case 'tax_class':
 		case 'tax_status':
-			if ( 'total_sales' === $column ) {
-				$meta_key = 'total_sales';
-			} elseif ( 'average_rating' === $column ) {
+			if ( 'average_rating' === $column ) {
 				$meta_key = '_wc_average_rating';
 			} else {
 				$meta_key = '_' . $column;
@@ -2133,6 +2138,115 @@ function wc_update_product_lookup_tables_column( $column ) {
 	}
 }
 add_action( 'wc_update_product_lookup_tables_column', 'wc_update_product_lookup_tables_column' );
+
+/**
+ * Recompute and persist `total_sales` for every product/variation from the current order data.
+ *
+ * Historically the regenerate-lookup-tables tool simply copied the value of the `total_sales`
+ * post meta into `wc_product_meta_lookup`. If `total_sales` ever drifted out of sync with the
+ * orders that actually exist (for example because orders were permanently deleted in a context
+ * that bypassed the normal sales-recording hooks), regenerating the lookup table preserved the
+ * stale value instead of correcting it. Recomputing from the order tables makes the tool
+ * authoritative again.
+ *
+ * Counts the sum of `_qty` across non-deleted shop_order line items whose parent order is in
+ * one of the statuses that increment `total_sales` in normal operation: completed, processing,
+ * and on-hold. Works against the HPOS orders table when enabled, falling back to the legacy
+ * `wp_posts` storage otherwise. The recomputed value is written to `wp_postmeta` (the per-product
+ * source of truth) and then mirrored into the lookup table.
+ *
+ * @since 10.9.0
+ */
+function wc_update_product_lookup_tables_total_sales(): void {
+	global $wpdb;
+
+	$counted_statuses    = array( OrderStatus::COMPLETED, OrderStatus::PROCESSING, OrderStatus::ON_HOLD );
+	$counted_statuses    = array_map(
+		static function ( $status ) {
+			return 0 === strpos( $status, 'wc-' ) ? $status : 'wc-' . $status;
+		},
+		$counted_statuses
+	);
+	$status_placeholders = implode( ',', array_fill( 0, count( $counted_statuses ), '%s' ) );
+
+	if ( class_exists( OrderUtil::class ) && OrderUtil::custom_orders_table_usage_is_enabled() ) {
+		$orders_table = $wpdb->prefix . 'wc_orders';
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$query = $wpdb->prepare(
+			"
+			SELECT product_im.meta_value AS product_id, COALESCE( SUM( qty_im.meta_value + 0 ), 0 ) AS total_sales
+			FROM {$wpdb->prefix}woocommerce_order_items AS oi
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS product_im
+				ON product_im.order_item_id = oi.order_item_id AND product_im.meta_key = '_product_id'
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS qty_im
+				ON qty_im.order_item_id = oi.order_item_id AND qty_im.meta_key = '_qty'
+			INNER JOIN {$orders_table} AS o ON o.id = oi.order_id
+			WHERE oi.order_item_type = 'line_item'
+				AND o.type = 'shop_order'
+				AND o.status IN ( {$status_placeholders} )
+			GROUP BY product_im.meta_value
+			",
+			...$counted_statuses
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+	} else {
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+		$query = $wpdb->prepare(
+			"
+			SELECT product_im.meta_value AS product_id, COALESCE( SUM( qty_im.meta_value + 0 ), 0 ) AS total_sales
+			FROM {$wpdb->prefix}woocommerce_order_items AS oi
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS product_im
+				ON product_im.order_item_id = oi.order_item_id AND product_im.meta_key = '_product_id'
+			INNER JOIN {$wpdb->prefix}woocommerce_order_itemmeta AS qty_im
+				ON qty_im.order_item_id = oi.order_item_id AND qty_im.meta_key = '_qty'
+			INNER JOIN {$wpdb->posts} AS p ON p.ID = oi.order_id
+			WHERE oi.order_item_type = 'line_item'
+				AND p.post_type = 'shop_order'
+				AND p.post_status IN ( {$status_placeholders} )
+			GROUP BY product_im.meta_value
+			",
+			...$counted_statuses
+		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	$totals_by_product = $wpdb->get_results( $query, ARRAY_A ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+
+	$totals_map = array();
+	if ( is_array( $totals_by_product ) ) {
+		foreach ( $totals_by_product as $row ) {
+			$product_id = absint( $row['product_id'] );
+			if ( $product_id ) {
+				$totals_map[ $product_id ] = (int) $row['total_sales'];
+			}
+		}
+	}
+
+	// Reset every product / variation's total_sales meta to zero so products that no longer have
+	// counted orders are corrected. Then overlay the freshly computed totals for those that do.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+	$product_ids = $wpdb->get_col(
+		"SELECT ID FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation' )"
+	);
+
+	foreach ( $product_ids as $product_id ) {
+		$product_id = (int) $product_id;
+		$total      = $totals_map[ $product_id ] ?? 0;
+		update_post_meta( $product_id, 'total_sales', $total );
+	}
+
+	// Mirror the post meta values into the lookup table.
+	// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery
+	$wpdb->query(
+		"
+		UPDATE
+			{$wpdb->wc_product_meta_lookup} lookup_table
+			LEFT JOIN {$wpdb->postmeta} meta ON lookup_table.product_id = meta.post_id AND meta.meta_key = 'total_sales'
+		SET
+			lookup_table.total_sales = COALESCE( meta.meta_value, 0 )
+		"
+	);
+}
 
 /**
  * Populate rating count lookup table data for products.

@@ -7,6 +7,7 @@
 
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\FunctionsMockerHack;
 use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 
@@ -307,8 +308,10 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	 * @testDox Action Scheduler events are scheduled when product with sale dates is saved.
 	 */
 	public function test_wc_schedule_product_sale_events_on_save() {
-		$future_start = time() + 3600;  // 1 hour from now.
-		$future_end   = time() + 86400; // 24 hours from now.
+		$future_start = time() + 3600;
+		// 1 hour from now.
+		$future_end = time() + 86400;
+		// 24 hours from now.
 
 		$product = WC_Helper_Product::create_simple_product();
 		$product->set_price( 100 );
@@ -356,7 +359,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		);
 
 		// Update the sale dates.
-		$new_start = time() + 7200; // 2 hours from now.
+		$new_start = time() + 7200;
+		// 2 hours from now.
 		$product->set_date_on_sale_from( gmdate( 'Y-m-d H:i:s', $new_start ) );
 		$product->save();
 
@@ -594,7 +598,8 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		// Create a guest order with French billing address.
 		$order = wc_create_order();
-		$order->set_customer_id( 0 ); // Guest order.
+		$order->set_customer_id( 0 );
+		// Guest order.
 		$order->set_billing_country( 'FR' );
 		$order->set_billing_city( 'Paris' );
 		$order->set_billing_postcode( '75001' );
@@ -850,11 +855,13 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 				}
 				foreach ( $terms as $key => $term ) {
 					if ( $term->term_id === $category1_term['term_id'] ) {
-						unset( $terms[ $key ] ); // Intentionally don't re-index.
+						unset( $terms[ $key ] );
+						// Intentionally don't re-index.
 						break;
 					}
 				}
-				return $terms; // Returns array with non-sequential keys.
+				return $terms;
+				// Returns array with non-sequential keys.
 			};
 			add_filter( 'get_the_terms', $filter_callback, 10, 3 );
 
@@ -1017,6 +1024,129 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 			$wp_rewrite = $old_wp_rewrite; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		}
 
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Regenerating the total_sales lookup column recomputes the value from current orders and clears stale counts.
+	 */
+	public function test_wc_update_product_lookup_tables_column_total_sales_recomputes_from_orders() {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Simulate stale state: total_sales recorded as 7 in both postmeta and the lookup table even though
+		// no counted orders exist for this product. This is the state the regenerate tool needs to correct.
+		update_post_meta( $product->get_id(), 'total_sales', 7 );
+		$wpdb->update(
+			$wpdb->prefix . 'wc_product_meta_lookup',
+			array( 'total_sales' => 7 ),
+			array( 'product_id' => $product->get_id() ),
+			array( '%d' ),
+			array( '%d' )
+		);
+
+		wc_update_product_lookup_tables_column( 'total_sales' );
+
+		$lookup_total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT total_sales FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d",
+				$product->get_id()
+			)
+		);
+		$meta_total   = (int) get_post_meta( $product->get_id(), 'total_sales', true );
+
+		$this->assertSame( 0, $lookup_total, 'Lookup table total_sales should be reset to 0 when no counted orders reference the product.' );
+		$this->assertSame( 0, $meta_total, 'Postmeta total_sales should be reset to 0 when no counted orders reference the product.' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Regenerating the total_sales lookup column counts line item quantities from completed and processing orders.
+	 */
+	public function test_wc_update_product_lookup_tables_column_total_sales_sums_line_item_quantities() {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		// Create two completed orders for the same product; WC_Helper_Order adds 4 units per order.
+		$order_a = WC_Helper_Order::create_order( 1, $product );
+		$order_a->set_status( OrderStatus::COMPLETED );
+		$order_a->save();
+
+		$order_b = WC_Helper_Order::create_order( 1, $product );
+		$order_b->set_status( OrderStatus::COMPLETED );
+		$order_b->save();
+
+		// Force stale lookup state so the assertion proves the regenerate tool corrected it, not that it was already correct.
+		update_post_meta( $product->get_id(), 'total_sales', 999 );
+		$wpdb->update(
+			$wpdb->prefix . 'wc_product_meta_lookup',
+			array( 'total_sales' => 999 ),
+			array( 'product_id' => $product->get_id() ),
+			array( '%d' ),
+			array( '%d' )
+		);
+
+		wc_update_product_lookup_tables_column( 'total_sales' );
+
+		$lookup_total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT total_sales FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d",
+				$product->get_id()
+			)
+		);
+		$meta_total   = (int) get_post_meta( $product->get_id(), 'total_sales', true );
+
+		$this->assertSame( 8, $lookup_total, 'Lookup table total_sales should equal the summed quantities (2 orders x 4 units) for completed orders.' );
+		$this->assertSame( 8, $meta_total, 'Postmeta total_sales should equal the summed quantities for completed orders.' );
+
+		$order_a->delete( true );
+		$order_b->delete( true );
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
+
+	/**
+	 * @testdox Regenerating the total_sales lookup column ignores orders in non-counted statuses such as pending or cancelled.
+	 */
+	public function test_wc_update_product_lookup_tables_column_total_sales_ignores_uncounted_statuses() {
+		global $wpdb;
+
+		$product = WC_Helper_Product::create_simple_product();
+
+		$pending_order = WC_Helper_Order::create_order( 1, $product );
+		$pending_order->set_status( OrderStatus::PENDING );
+		$pending_order->save();
+
+		$cancelled_order = WC_Helper_Order::create_order( 1, $product );
+		$cancelled_order->set_status( OrderStatus::CANCELLED );
+		$cancelled_order->save();
+
+		update_post_meta( $product->get_id(), 'total_sales', 42 );
+		$wpdb->update(
+			$wpdb->prefix . 'wc_product_meta_lookup',
+			array( 'total_sales' => 42 ),
+			array( 'product_id' => $product->get_id() ),
+			array( '%d' ),
+			array( '%d' )
+		);
+
+		wc_update_product_lookup_tables_column( 'total_sales' );
+
+		$lookup_total = (int) $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT total_sales FROM {$wpdb->prefix}wc_product_meta_lookup WHERE product_id = %d",
+				$product->get_id()
+			)
+		);
+		$meta_total   = (int) get_post_meta( $product->get_id(), 'total_sales', true );
+
+		$this->assertSame( 0, $lookup_total, 'Pending and cancelled orders should not count toward total_sales in the lookup table.' );
+		$this->assertSame( 0, $meta_total, 'Pending and cancelled orders should not count toward total_sales in postmeta.' );
+
+		$pending_order->delete( true );
+		$cancelled_order->delete( true );
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
 }

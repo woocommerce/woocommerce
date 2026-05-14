@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Recompute total_sales from existing orders when regenerating the product lookup tables so deleted orders no longer leave stale counts behind.
