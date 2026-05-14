@@ -32,7 +32,7 @@ function Component() {
 | `getShippingZone( id: number )`        | Gets a Shipping Zone by ID                              |
 | `getShippingZoneError( id )`           | Get the error for a failing GET shipping zone request.  |
 | `getShippingZones( query = {} )`       | Get all shipping zones, query object is empty.          |
-| `getShippingZoneesError( query = {} )` | Get the error for a GET request for all shipping zones. |
+| `getShippingZonesError( query = {} )` | Get the error for a GET request for all shipping zones. |
 
 Example usage: `wp.data.select( experimentalShippingZonesStore ).getShippingZone( 3 );`
 
