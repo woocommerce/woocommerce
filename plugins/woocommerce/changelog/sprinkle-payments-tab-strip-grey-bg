@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Align the Payments settings tab strip with the rest of the Settings tabs by giving it the wp-admin body grey background. The Payments content panel itself stays white.
