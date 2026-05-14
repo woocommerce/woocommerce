@@ -47,10 +47,13 @@
 	height: 100%;
 }
 
-.woocommerce-product-list .dataviews-title-field a,
-.woocommerce-product-list .dataviews-title-field a:hover,
-.woocommerce-product-list .dataviews-title-field a:focus {
+// Temporary override until DataViews supports title links without default underlines.
+#woocommerce-products-dashboard a.dataviews-title-field {
 	text-decoration: none;
+
+	&:hover {
+		text-decoration: underline;
+	}
 }
 
 .woocommerce-product-edit {
