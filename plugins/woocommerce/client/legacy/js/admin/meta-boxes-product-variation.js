@@ -1347,6 +1347,20 @@ jQuery( function ( $ ) {
 
 					if ( false === data.date_to && false === data.date_from ) {
 						cancel = true;
+					} else if ( data.date_from && data.date_to ) {
+						var from_ts = Date.parse( data.date_from ),
+							to_ts = Date.parse( data.date_to );
+
+						if (
+							! isNaN( from_ts ) &&
+							! isNaN( to_ts ) &&
+							to_ts < from_ts
+						) {
+							window.alert(
+								woocommerce_admin_meta_boxes_variations.i18n_scheduled_sale_end_before_start
+							);
+							cancel = true;
+						}
 					}
 					break;
 				default:
