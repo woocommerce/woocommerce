@@ -72,6 +72,29 @@ class WC_Tests_Product_Simple extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_image_id() returns 0 (int) when no image is set.
+	 */
+	public function test_get_image_id_returns_int_zero_when_unset() {
+		$image_id = $this->product->get_image_id();
+
+		$this->assertIsInt( $image_id, 'get_image_id() must return an int even when no image is set.' );
+		$this->assertSame( 0, $image_id, 'get_image_id() should return 0 (int) when no image is set, not an empty string.' );
+	}
+
+	/**
+	 * @testdox get_image_id() returns an int when an image id is set as a numeric string.
+	 */
+	public function test_get_image_id_returns_int_when_set_as_string() {
+		$this->product->set_image_id( '123' );
+		$this->product->save();
+
+		$image_id = $this->product->get_image_id();
+
+		$this->assertIsInt( $image_id, 'get_image_id() must return an int even if stored as a numeric string.' );
+		$this->assertSame( 123, $image_id, 'get_image_id() should return the numeric value cast to int.' );
+	}
+
+	/**
 	 * Test get_stock_quantity().
 	 *
 	 * @since 2.3

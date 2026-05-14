@@ -114,4 +114,43 @@ class WC_Tests_Product_Variation extends WC_Unit_Test_Case {
 		$actual = $sut->get_variation_attributes( $with_prefix );
 		$this->assertEquals( $expected, $actual );
 	}
+
+	/**
+	 * @testdox get_image_id() on a variation returns int 0 when neither the variation nor its parent has an image.
+	 */
+	public function test_get_image_id_returns_int_zero_when_unset() {
+		$product = new WC_Product_Variable();
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->save();
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$image_id = $variation->get_image_id();
+
+		$this->assertIsInt( $image_id, 'WC_Product_Variation::get_image_id() must return an int even when no image is set.' );
+		$this->assertSame( 0, $image_id, 'WC_Product_Variation::get_image_id() should return 0 (int) when no image is set on the variation or its parent.' );
+	}
+
+	/**
+	 * @testdox get_image_id() on a variation returns an int when stored as a numeric string.
+	 */
+	public function test_get_image_id_returns_int_when_set_as_string() {
+		$product = new WC_Product_Variable();
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_image_id( '456' );
+		$variation->save();
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$image_id = $variation->get_image_id();
+
+		$this->assertIsInt( $image_id, 'WC_Product_Variation::get_image_id() must return an int even if stored as a numeric string.' );
+		$this->assertSame( 456, $image_id, 'WC_Product_Variation::get_image_id() should return the numeric value cast to int.' );
+	}
 }

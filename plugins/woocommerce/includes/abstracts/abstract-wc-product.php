@@ -707,10 +707,10 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	 *
 	 * @since  3.0.0
 	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return string
+	 * @return int Attachment ID, or 0 if no image is set.
 	 */
 	public function get_image_id( $context = 'view' ) {
-		return $this->get_prop( 'image_id', $context );
+		return (int) $this->get_prop( 'image_id', $context );
 	}
 
 	/**

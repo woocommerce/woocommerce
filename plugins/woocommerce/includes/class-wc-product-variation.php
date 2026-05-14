@@ -368,7 +368,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 *
 	 * @since 3.0.0
 	 * @param  string $context What the value is for. Valid values are view and edit.
-	 * @return string
+	 * @return int Attachment ID, or 0 if no image is set.
 	 */
 	public function get_image_id( $context = 'view' ) {
 		$image_id = $this->get_prop( 'image_id', $context );
@@ -377,7 +377,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			$image_id = apply_filters( $this->get_hook_prefix() . 'image_id', $this->parent_data['image_id'], $this );
 		}
 
-		return $image_id;
+		return (int) $image_id;
 	}
 
 	/**
