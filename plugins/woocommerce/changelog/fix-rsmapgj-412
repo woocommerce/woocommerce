@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Correct the Indian state code for Chhattisgarh from `CT` to `CG` to match the GST state code, and migrate existing stored values.

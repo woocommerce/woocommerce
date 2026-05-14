@@ -3511,3 +3511,20 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 function wc_update_1080_backfill_email_template_sync_meta(): bool {
 	return WCEmailTemplateSyncBackfill::run();
 }
+
+/**
+ * Update the Indian state code for Chhattisgarh from `CT` to `CG` in the database
+ * after it was corrected in code to match the GST state code.
+ *
+ * @since 10.9.0
+ *
+ * @return bool True if there are more records that need to be migrated, false otherwise.
+ */
+function wc_update_1090_adjust_indian_states() {
+	return MigrationHelper::migrate_country_states(
+		'IN',
+		array(
+			'CT' => 'CG',
+		)
+	);
+}

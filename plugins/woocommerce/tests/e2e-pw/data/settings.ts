@@ -1005,7 +1005,7 @@ export const stateOptions = {
 	'IN:AR': 'India - Arunachal Pradesh',
 	'IN:AS': 'India - Assam',
 	'IN:BR': 'India - Bihar',
-	'IN:CT': 'India - Chhattisgarh',
+	'IN:CG': 'India - Chhattisgarh',
 	'IN:GA': 'India - Goa',
 	'IN:GJ': 'India - Gujarat',
 	'IN:HR': 'India - Haryana',

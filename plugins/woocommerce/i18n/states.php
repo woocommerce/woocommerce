@@ -810,7 +810,7 @@ return array(
 		'AS' => __( 'Assam', 'woocommerce' ),
 		'BR' => __( 'Bihar', 'woocommerce' ),
 		'CH' => __( 'Chandigarh', 'woocommerce' ),
-		'CT' => __( 'Chhattisgarh', 'woocommerce' ),
+		'CG' => __( 'Chhattisgarh', 'woocommerce' ),
 		'DD' => __( 'Daman and Diu', 'woocommerce' ),
 		'DH' => __( 'Dādra and Nagar Haveli and Damān and Diu', 'woocommerce' ),
 		'DL' => __( 'Delhi', 'woocommerce' ),

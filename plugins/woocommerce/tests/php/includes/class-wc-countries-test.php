@@ -43,4 +43,16 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * @testdox Should expose Chhattisgarh under the GST state code `CG` and not the legacy `CT`.
+	 */
+	public function test_indian_state_chhattisgarh_uses_cg_code() {
+		$in_states = wc()->countries->get_states( 'IN' );
+
+		$this->assertIsArray( $in_states, 'Indian states list should be available.' );
+		$this->assertArrayHasKey( 'CG', $in_states, 'Chhattisgarh should be keyed by the GST state code `CG`.' );
+		$this->assertSame( 'Chhattisgarh', $in_states['CG'], '`CG` should map to Chhattisgarh.' );
+		$this->assertArrayNotHasKey( 'CT', $in_states, 'The legacy `CT` code for Chhattisgarh should no longer be present in the Indian states list.' );
+	}
 }
