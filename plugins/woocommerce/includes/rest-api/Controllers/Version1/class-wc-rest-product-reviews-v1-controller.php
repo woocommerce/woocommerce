@@ -306,6 +306,12 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 
 		update_comment_meta( $product_review_id, 'rating', ( ! empty( $request['rating'] ) ? $request['rating'] : '0' ) );
 
+		// Ensure aggregate rating, rating count and review count product meta are kept in sync.
+		// The frontend comment form path performs this via WC_Comments::add_comment_rating(), but
+		// reviews created through the REST API (e.g. via `wp wc product_review create`) bypass it,
+		// so structured data on the product page would otherwise be missing aggregateRating/review.
+		WC_Comments::clear_transients( $product_id );
+
 		$product_review = get_comment( $product_review_id );
 		$this->update_additional_fields_for_object( $product_review, $request );
 
@@ -353,6 +359,10 @@ class WC_REST_Product_Reviews_V1_Controller extends WC_REST_Controller {
 		if ( ! empty( $request['rating'] ) ) {
 			update_comment_meta( $product_review_id, 'rating', $request['rating'] );
 		}
+
+		// Ensure aggregate rating, rating count and review count product meta are kept in sync
+		// for REST API edits, mirroring the behavior of edits made through the WordPress admin UI.
+		WC_Comments::clear_transients( $product_id );
 
 		$product_review = get_comment( $product_review_id );
 		$this->update_additional_fields_for_object( $product_review, $request );

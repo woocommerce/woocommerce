@@ -200,4 +200,57 @@ class WC_REST_Product_Reviews_Controller_Tests extends WC_REST_Unit_Test_Case {
 			'Comments that are not product reviews (including other types of comments belonging to products) cannot be deleted via this endpoint.'
 		);
 	}
+
+	/**
+	 * @testdox Creating a product review through the REST API refreshes the product's aggregate rating data so structured data on the storefront stays in sync.
+	 */
+	public function test_create_item_refreshes_product_rating_meta() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product = ProductHelper::create_simple_product();
+
+		// Sanity-check that the freshly created product has no rating data yet.
+		$this->assertEquals( 0, (float) $product->get_average_rating(), 'Fresh products should start with no average rating.' );
+		$this->assertEquals( 0, (int) $product->get_review_count(), 'Fresh products should start with no reviews counted.' );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/products/reviews' );
+		$request->set_param( 'product_id', $product->get_id() );
+		$request->set_param( 'reviewer', 'CLI Reviewer' );
+		$request->set_param( 'reviewer_email', 'cli-reviewer@example.com' );
+		$request->set_param( 'review', 'Pretty good overall.' );
+		$request->set_param( 'rating', 5 );
+		$request->set_param( 'status', 'approved' );
+
+		$response = $this->sut->create_item( $request );
+
+		$this->assertEquals( 201, $response->get_status(), 'A valid create request should return a 201 status.' );
+
+		$refreshed = wc_get_product( $product->get_id() );
+		$this->assertEquals( 5.0, (float) $refreshed->get_average_rating(), 'Creating an approved review via REST should update the product average rating.' );
+		$this->assertEquals( 1, (int) $refreshed->get_review_count(), 'Creating an approved review via REST should update the product review count.' );
+		$this->assertEquals( array( 5 => 1 ), $refreshed->get_rating_counts(), 'Creating an approved review via REST should update the product rating count distribution.' );
+	}
+
+	/**
+	 * @testdox Updating a product review's rating through the REST API refreshes the product's aggregate rating data.
+	 */
+	public function test_update_item_refreshes_product_rating_meta() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product   = ProductHelper::create_simple_product();
+		$review_id = ProductHelper::create_product_review( $product->get_id(), 'Initial review content.' );
+
+		// Pre-warm the aggregate fields the way the GUI path would.
+		WC_Comments::clear_transients( $product->get_id() );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/reviews/' . $review_id );
+		$request->set_param( 'id', $review_id );
+		$request->set_param( 'rating', 1 );
+
+		$response = $this->sut->update_item( $request );
+
+		$this->assertNotInstanceOf( WP_Error::class, $response, 'Updating a review with a new rating should not produce a WP_Error.' );
+
+		$refreshed = wc_get_product( $product->get_id() );
+		$this->assertEquals( 1.0, (float) $refreshed->get_average_rating(), 'Updating a review rating via REST should refresh the product average rating.' );
+		$this->assertEquals( array( 1 => 1 ), $refreshed->get_rating_counts(), 'Updating a review rating via REST should refresh the product rating distribution.' );
+	}
 }

@@ -476,6 +476,12 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 			update_comment_meta( $review_id, 'verified', $request['verified'] );
 		}
 
+		// Ensure aggregate rating, rating count and review count product meta are kept in sync.
+		// The frontend comment form path performs this via WC_Comments::add_comment_rating(), but
+		// reviews created through the REST API (e.g. via `wp wc product_review create`) bypass it,
+		// so structured data on the product page would otherwise be missing aggregateRating/review.
+		WC_Comments::clear_transients( $product_id );
+
 		$review = get_comment( $review_id );
 
 		/**
@@ -595,6 +601,12 @@ class WC_REST_Product_Reviews_Controller extends WC_REST_Controller {
 		}
 
 		$review = get_comment( $id );
+
+		// Ensure aggregate rating, rating count and review count product meta are kept in sync
+		// for REST API edits, mirroring the behavior of edits made through the WordPress admin UI.
+		if ( $review instanceof WP_Comment ) {
+			WC_Comments::clear_transients( (int) $review->comment_post_ID );
+		}
 
 		/** This action is documented in includes/api/class-wc-rest-product-reviews-controller.php */
 		do_action( 'woocommerce_rest_insert_product_review', $review, $request, false );

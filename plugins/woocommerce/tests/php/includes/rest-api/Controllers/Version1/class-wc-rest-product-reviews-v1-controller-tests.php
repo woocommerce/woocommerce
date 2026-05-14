@@ -170,4 +170,27 @@ class WC_REST_Product_Reviews_V1_Controller_Tests extends WC_Unit_Test_Case {
 			'Comments that are not product reviews (including other types of comments belonging to products) cannot be deleted via this endpoint.'
 		);
 	}
+
+	/**
+	 * @testdox Creating a product review through the v1 REST API refreshes the product's aggregate rating data so structured data on the storefront stays in sync.
+	 */
+	public function test_create_item_refreshes_product_rating_meta() {
+		wp_set_current_user( $this->shop_manager_id );
+		$product = ProductHelper::create_simple_product();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v1/products/' . $product->get_id() . '/reviews' );
+		$request->set_param( 'product_id', $product->get_id() );
+		$request->set_param( 'name', 'CLI Reviewer' );
+		$request->set_param( 'email', 'cli-reviewer@example.com' );
+		$request->set_param( 'review', 'Pretty good overall.' );
+		$request->set_param( 'rating', 4 );
+
+		$response = $this->sut->create_item( $request );
+
+		$this->assertEquals( 201, $response->get_status(), 'A valid create request should return a 201 status.' );
+
+		$refreshed = wc_get_product( $product->get_id() );
+		$this->assertEquals( 4.0, (float) $refreshed->get_average_rating(), 'Creating a review via the v1 REST API should update the product average rating.' );
+		$this->assertEquals( 1, (int) $refreshed->get_review_count(), 'Creating a review via the v1 REST API should update the product review count.' );
+	}
 }

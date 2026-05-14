@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Refresh product aggregate rating, rating counts, and review count when product reviews are created or updated via the REST API (including the `wp wc product_review` CLI commands), so structured data on product pages is in sync.
