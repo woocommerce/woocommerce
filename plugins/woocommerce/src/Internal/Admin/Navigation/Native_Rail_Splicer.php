@@ -294,7 +294,13 @@ class Native_Rail_Splicer {
 				continue;
 			}
 			$existing        = isset( $entry[4] ) ? (string) $entry[4] : '';
-			$menu[ $key ][4] = trim( $existing . ' wp-has-current-submenu wp-menu-open' );
+			// `wc-nav-v2-current-root` is a stable marker class that
+			// survives wc-admin's `wpNavMenuClassChange` (controller.js)
+			// — that function strips `wp-has-current-submenu`/`wp-menu-open`
+			// on every wc-admin route change. Our JS wrapper looks up
+			// `.wc-nav-v2-current-root` after the controller runs and
+			// re-applies the active classes there.
+			$menu[ $key ][4] = trim( $existing . ' wp-has-current-submenu wp-menu-open wc-nav-v2-current-root' );
 		}
 	}
 

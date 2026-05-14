@@ -297,5 +297,37 @@
 				tracks( 'navigation_v2_back_clicked' );
 			} );
 		}
+
+		// wc-admin's React router runs `window.wpNavMenuClassChange( page, url )`
+		// on every navigation. That function strips
+		// `wp-has-current-submenu`/`wp-menu-open` from every menu item and then
+		// re-applies them to `#<page.wpOpenMenu>` — a per-route ID hard-coded
+		// in controller.js that points at the pre-nav-v2 top-level slugs the
+		// splicer hides (e.g. `toplevel_page_woocommerce`). On nav-v2 the
+		// active rail-root LI ends up stripped of its in-rail expansion
+		// classes after every navigation.
+		//
+		// Wrap the function so that after the controller runs we re-apply the
+		// active classes to the rail-root the splicer tagged with
+		// `wc-nav-v2-current-root`. The marker class survives the controller's
+		// strip (it only removes `current`, `wp-has-current-submenu`,
+		// `selected`, `wp-menu-open`) so it's a stable hook for our re-apply.
+		if ( typeof window.wpNavMenuClassChange === 'function' ) {
+			var origClassChange = window.wpNavMenuClassChange;
+			window.wpNavMenuClassChange = function () {
+				var result = origClassChange.apply( this, arguments );
+				var current = document.querySelector(
+					'#adminmenu .wc-nav-v2-current-root'
+				);
+				if ( current ) {
+					current.classList.remove( 'wp-not-current-submenu' );
+					current.classList.add(
+						'wp-has-current-submenu',
+						'wp-menu-open'
+					);
+				}
+				return result;
+			};
+		}
 	} );
 } )( jQuery );
