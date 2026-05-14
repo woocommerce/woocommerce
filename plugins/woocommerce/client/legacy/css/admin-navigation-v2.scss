@@ -109,23 +109,18 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 // items where a numeric `.menu-counter` would collide with the
 // rail-row's right-edge flyout arrow (notably the WooCommerce
 // top-level). The drill-down items still use the numeric bubble.
-.wc-attention-dot {
-	display: inline-block;
+//
+// The element also carries the `.menu-counter` class so its background
+// color tracks whatever WP's admin color scheme assigns to badges. We
+// only override the dimensions to render a dot rather than a pill.
+#adminmenu .wc-attention-dot {
 	width: 8px;
+	min-width: 8px;
 	height: 8px;
-	margin-left: 2px;
+	padding: 0;
+	margin: 0 0 0 2px;
 	border-radius: 50%;
 	vertical-align: middle;
-}
-
-// Share the badge accent across WP's built-in counter classes and our
-// attention dot so they always render with the same color — single
-// source of truth makes it easier to retheme later if needed.
-#adminmenu .awaiting-mod,
-#adminmenu .menu-counter,
-#adminmenu .update-plugins,
-#adminmenu .wc-attention-dot {
-	background-color: #d63638;
 }
 
 // Keep the order-attention bubble (numeric counter or plain dot)

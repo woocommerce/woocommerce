@@ -159,7 +159,12 @@ class Order_Badge {
 	 * arrow. Indicates "attention needed" without spending the width.
 	 */
 	private function build_dot_html(): string {
-		return ' <span class="wc-order-attention wc-attention-dot" aria-hidden="true"></span>';
+		// `menu-counter` piggybacks on WP's badge styling — the active
+		// admin color scheme sets the background color on that class, so
+		// the dot picks up whatever accent the scheme provides. Our own
+		// `wc-attention-dot` class overrides the dimensions to render as
+		// a small dot rather than a number pill.
+		return ' <span class="wc-order-attention wc-attention-dot menu-counter" aria-hidden="true"></span>';
 	}
 
 	/**
