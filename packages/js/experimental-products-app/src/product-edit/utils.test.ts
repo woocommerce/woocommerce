@@ -15,6 +15,7 @@ import {
 	getProductEditFields,
 	getProductEditRecord,
 	getProductVariationUpdatePath,
+	getProductTypeFormFields,
 	getVisibleProductEditFields,
 	isProductVariation,
 } from './utils';
@@ -358,6 +359,10 @@ describe( 'product edit utils', () => {
 				'categories',
 				'brands',
 				'tags',
+				'weight',
+				'length',
+				'width',
+				'height',
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
@@ -367,7 +372,7 @@ describe( 'product edit utils', () => {
 				'downloadable',
 				'external_url',
 				'button_text',
-				...shippingFieldIds,
+				'shipping_class',
 				'tax_status',
 				'upsell_ids',
 				'cross_sell_ids',
@@ -440,8 +445,16 @@ describe( 'product edit utils', () => {
 			] );
 
 			expect( fieldIds ).toContain( 'downloadable' );
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( [
+					'weight',
+					'length',
+					'width',
+					'height',
+				] )
+			);
 			expectFieldOrder( fieldIds, [ 'images', 'downloadable', 'sku' ] );
-			expectFieldsHidden( fieldIds, shippingFieldIds );
+			expectFieldsHidden( fieldIds, [ 'shipping_class' ] );
 		} );
 
 		it( 'shows grouped product fields in quick edit order', () => {
@@ -537,11 +550,17 @@ describe( 'product edit utils', () => {
 					'cross_sell_ids',
 					'stock',
 					'manage_stock',
-					...shippingFieldIds,
+					'shipping_class',
 					'tax_status',
 				] )
 			);
-			expectFieldsHidden( fieldIds, [ 'stock_quantity' ] );
+			expectFieldsHidden( fieldIds, [
+				'stock_quantity',
+				'weight',
+				'length',
+				'width',
+				'height',
+			] );
 		} );
 
 		it( 'shows parent-owned and universal fields for simple and variable products', () => {
@@ -576,8 +595,12 @@ describe( 'product edit utils', () => {
 				'featured',
 				'upsell_ids',
 				'cross_sell_ids',
-				...shippingFieldIds,
+				'shipping_class',
 				'tax_status',
+				'weight',
+				'length',
+				'width',
+				'height',
 			] );
 		} );
 
@@ -696,6 +719,28 @@ describe( 'product edit utils', () => {
 
 			expect( fieldIds ).toContain( 'downloadable' );
 			expectFieldsHidden( fieldIds, shippingFieldIds );
+		} );
+
+		it( 'shows dimensions for physical downloadable variations', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					id: 34,
+					parent_id: 12,
+					type: 'variation',
+					virtual: false,
+					downloadable: true,
+				} ),
+			] );
+
+			expect( fieldIds ).toEqual(
+				expect.arrayContaining( [
+					'downloadable',
+					'weight',
+					'length',
+					'width',
+					'height',
+				] )
+			);
 		} );
 
 		it( 'shows shared sellable instance fields for simple products and variations', () => {
@@ -893,6 +938,67 @@ describe( 'product edit utils', () => {
 
 			expect( field ).toBeDefined();
 			expect( field?.isVisible ).toBeUndefined();
+		} );
+	} );
+
+	describe( 'getProductTypeFormFields', () => {
+		it( 'uses simple product form config with height last', () => {
+			const product = buildProduct( {
+				type: 'simple',
+				virtual: false,
+			} );
+
+			expect( getProductTypeFormFields( [ product ] ) ).toEqual( [
+				'name',
+				'product_status',
+				'catalog_visibility',
+				'regular_price',
+				'on_sale',
+				'sale_price',
+				'images',
+				'downloadable',
+				'sku',
+				'stock',
+				'manage_stock',
+				'stock_quantity',
+				'categories',
+				'brands',
+				'tags',
+				{
+					id: 'dimensions',
+					layout: { type: 'row' },
+					children: [ 'weight', 'length', 'width' ],
+				},
+				'height',
+			] );
+		} );
+
+		it( 'uses variation product form config', () => {
+			const product = buildProduct( {
+				id: 34,
+				parent_id: 12,
+				type: 'variation',
+				virtual: false,
+				downloadable: true,
+			} );
+
+			expect( getProductTypeFormFields( [ product ] ) ).toEqual( [
+				'regular_price',
+				'on_sale',
+				'sale_price',
+				'images',
+				'downloadable',
+				'sku',
+				'stock',
+				'manage_stock',
+				'stock_quantity',
+				{
+					id: 'dimensions',
+					layout: { type: 'row' },
+					children: [ 'weight', 'length', 'width' ],
+				},
+				'height',
+			] );
 		} );
 	} );
 } );
