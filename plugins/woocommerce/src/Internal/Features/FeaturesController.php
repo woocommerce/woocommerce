@@ -500,7 +500,10 @@ class FeaturesController {
 				),
 				'enabled_by_default'           => false,
 				'is_experimental'              => true,
-				'disable_ui'                   => false,
+				// Hide from WC Settings > Advanced > Features while this redesign
+				// is still being built. The flag stays toggleable from the WCA
+				// Test Helper plugin and from WP-CLI / direct option flips.
+				'disable_ui'                   => true,
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
