@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Add a non-dismissible warning notice when editing the Shop page in the block editor, explaining that layout and content are managed by the Product Catalog template.
