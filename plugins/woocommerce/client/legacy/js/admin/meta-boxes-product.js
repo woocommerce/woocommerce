@@ -1,4 +1,4 @@
-/*global woocommerce_admin_meta_boxes */
+/*global woocommerce_admin_meta_boxes, _ */
 jQuery( function ( $ ) {
 	let isPageUnloading = false;
 
@@ -1443,8 +1443,10 @@ jQuery( function ( $ ) {
 
 	// add a tooltip to the right of the product image meta box "Set product image" and "Add product gallery images"
 	const setProductImageLink = $( '#set-post-thumbnail' );
+	// Escape the translated label before interpolating into the attribute so a
+	// translation containing quotes or markup cannot break the rendered span.
 	const tooltipMarkup = `<span class="woocommerce-help-tip" tabindex="0" aria-label="${
-		woocommerce_admin_meta_boxes.i18n_product_image_tip
+		_.escape( woocommerce_admin_meta_boxes.i18n_product_image_tip )
 	}"></span>`;
 	const tooltipData = {
 		attribute: 'data-tip',
