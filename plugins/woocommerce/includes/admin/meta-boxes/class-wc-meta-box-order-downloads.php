@@ -6,6 +6,8 @@
  * @version     2.1.0
  */
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
+
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
 }
@@ -93,6 +95,16 @@ class WC_Meta_Box_Order_Downloads {
 	 * @param WP_Post $post Post object.
 	 */
 	public static function save( $post_id, $post ) {
+		// When the order detail redesign is on and the user clicked Apply
+		// in the Order actions metabox (not Update order), skip the
+		// downloads save — Apply is for running the selected action only.
+		if (
+			FeaturesUtil::feature_is_enabled( 'order-detail-redesign' )
+			&& ! empty( $_POST['wc_order_action_submit'] )
+		) {
+			return;
+		}
+
 		if ( isset( $_POST['permission_id'] ) ) {
 			$permission_ids      = $_POST['permission_id'];
 			$downloads_remaining = $_POST['downloads_remaining'];

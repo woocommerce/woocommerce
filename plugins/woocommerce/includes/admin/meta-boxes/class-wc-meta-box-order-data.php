@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\Utilities\Users;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -685,6 +686,16 @@ class WC_Meta_Box_Order_Data {
 	 */
 	public static function save( $order_id ) {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
+
+		// When the order detail redesign is on and the user clicked Apply
+		// in the Order actions metabox (not Update order), skip the order
+		// data save — Apply is for running the selected action only.
+		if (
+			FeaturesUtil::feature_is_enabled( 'order-detail-redesign' )
+			&& ! empty( $_POST['wc_order_action_submit'] )
+		) {
+			return;
+		}
 
 		if ( ! isset( $_POST['order_status'] ) ) {
 			throw new Exception( __( 'Order status is missing.', 'woocommerce' ), 400 );
