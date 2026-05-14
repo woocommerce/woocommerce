@@ -200,8 +200,11 @@
 
 	.woocommerce-qr-direct-login__unavailable-notice {
 		// The default Notice has a left margin from the WP admin chrome
-		// that doesn't fit inside the modal column, so strip it.
+		// that doesn't fit inside the modal column, so strip it. The
+		// Notice also centers its body text by default; left-align to match
+		// the rest of the column.
 		margin: 0;
+		text-align: left;
 	}
 
 	.woocommerce-qr-direct-login__why {
@@ -228,16 +231,6 @@
 
 		li + li {
 			margin-top: 4px;
-		}
-
-		// The "Open Application Passwords settings" CTA lives inside the
-		// disclosure (next to the bullet list) rather than below it. Sized
-		// to its label so it reads like an inline action — not a primary
-		// full-width call-to-action.
-		button.components-button.woocommerce-qr-direct-login__open-ap-settings {
-			margin-top: 12px;
-			width: auto;
-			align-self: flex-start;
 		}
 	}
 }

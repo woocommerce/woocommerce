@@ -1,11 +1,10 @@
 /**
  * External dependencies
  */
-import { Button, Notice } from '@wordpress/components';
+import { Notice } from '@wordpress/components';
 import { createInterpolateElement } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Link } from '@woocommerce/components';
-import { recordEvent } from '@woocommerce/tracks';
 import type { ReactNode } from 'react';
 
 /**
@@ -24,13 +23,6 @@ const APPLICATION_PASSWORDS_DOCS_URL =
 	'https://developer.wordpress.org/advanced-administration/security/application-passwords/';
 
 /**
- * Deep-link to the wp-admin Application Passwords section. Opens in the same
- * tab — the merchant is already in wp-admin and won't lose context.
- */
-const APPLICATION_PASSWORDS_SETTINGS_PATH =
-	'/wp-admin/profile.php#application-passwords-section';
-
-/**
  * Permanently-disabled QR card. Rendered when `/qr-login-availability` reports
  * `available: false` so the merchant gets a clear up-front explanation instead
  * of mounting the QR component, spinning, hitting `/qr-login-token`, and only
@@ -44,8 +36,8 @@ export const QRLoginUnavailableCard = ( {
 	// Each reason gets its own headline so the merchant can act on it. The
 	// AP-disabled-by-filter case is the most common third-party-plugin
 	// scenario; the AP-unsupported and HTTPS branches are typically infra
-	// setup issues. All branches expose the same docs link + settings shortcut
-	// because the diagnostic flow is the same regardless.
+	// setup issues. All branches share the docs link because the diagnostic
+	// flow is the same regardless.
 	let headline: ReactNode;
 	if ( reason === QRLoginUnavailableReasons.HTTPS_REQUIRED ) {
 		headline = __(
@@ -58,7 +50,7 @@ export const QRLoginUnavailableCard = ( {
 		// explanation.
 		headline = createInterpolateElement(
 			__(
-				'QR sign-in is unavailable because application passwords are disabled on this site. Find more about application passwords <link>here</link>.',
+				'Mobile login is unavailable if application passwords are disabled on your site. Find more about application passwords <link>here</link>.',
 				'woocommerce'
 			),
 			{
@@ -84,13 +76,9 @@ export const QRLoginUnavailableCard = ( {
 			</Notice>
 
 			{ /*
-			   Native <details> intentionally — no extra library, full
-			   keyboard + screen-reader support out of the box, and the
-			   collapsed state keeps the headline scannable. The
-			   "Open Application Passwords settings" CTA lives inside the
-			   expander too: it is most useful to the merchant only after
-			   they have read the diagnostic context, and folding it under
-			   the disclosure keeps the default state quiet.
+			   Native <details> — full keyboard + screen-reader support out
+			   of the box, and the collapsed state keeps the headline
+			   scannable.
 			*/ }
 			<details className="woocommerce-qr-direct-login__why">
 				<summary>
@@ -116,23 +104,6 @@ export const QRLoginUnavailableCard = ( {
 						) }
 					</li>
 				</ul>
-
-				<Button
-					variant="secondary"
-					className="woocommerce-qr-direct-login__open-ap-settings"
-					href={ APPLICATION_PASSWORDS_SETTINGS_PATH }
-					onClick={ () => {
-						recordEvent(
-							'mobile_app_qr_direct_login_open_ap_settings',
-							{ reason: reason ?? 'unknown' }
-						);
-					} }
-				>
-					{ __(
-						'Open Application Passwords settings',
-						'woocommerce'
-					) }
-				</Button>
 			</details>
 		</div>
 	);

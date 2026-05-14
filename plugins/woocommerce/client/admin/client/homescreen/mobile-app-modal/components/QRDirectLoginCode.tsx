@@ -18,13 +18,6 @@ import { QRLoginNumberMatchStep } from './QRLoginNumberMatchStep';
 import { QRLoginUnavailableCard } from './QRLoginUnavailableCard';
 
 /**
- * Deep-link into wp-admin's Application Passwords section. Reused by the
- * ERROR-state action when the failure is `application_passwords_unavailable`.
- */
-const APPLICATION_PASSWORDS_SETTINGS_PATH =
-	'/wp-admin/profile.php#application-passwords-section';
-
-/**
  * Snapshot the parent receives via `onConsumed`. The success step uses its
  * own `useRevokeQRLoginAccess` hook (so it stays self-contained after the QR
  * component is unmounted), so the only field the parent actually needs is the
@@ -155,8 +148,8 @@ export const QRDirectLoginCode = ( {
 		// "Try again" only makes sense when retrying could succeed. For
 		// `application_passwords_unavailable` the failure is structural —
 		// nothing about retrying changes the site's AP configuration — so
-		// swap in a one-click shortcut to wp-admin's Application Passwords
-		// settings instead.
+		// suppress the retry button and rely on the error message (which
+		// already carries the docs link) to explain.
 		const isStructuralAPFailure =
 			errorCode === 'application_passwords_unavailable';
 
@@ -169,24 +162,7 @@ export const QRDirectLoginCode = ( {
 				>
 					{ errorMessage }
 				</p>
-				{ isStructuralAPFailure ? (
-					<Button
-						variant="secondary"
-						className="woocommerce-qr-direct-login__open-ap-settings"
-						href={ APPLICATION_PASSWORDS_SETTINGS_PATH }
-						onClick={ () => {
-							recordEvent(
-								'mobile_app_qr_direct_login_open_ap_settings',
-								{ reason: 'error_state' }
-							);
-						} }
-					>
-						{ __(
-							'Open Application Passwords settings',
-							'woocommerce'
-						) }
-					</Button>
-				) : (
+				{ ! isStructuralAPFailure && (
 					<Button
 						variant="secondary"
 						onClick={ () => {
