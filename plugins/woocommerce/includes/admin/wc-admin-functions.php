@@ -403,6 +403,8 @@ function wc_save_order_items( $order_id, $items ) {
 			'shipping_taxes'        => array(),
 		);
 
+		$registered_shipping_methods = null;
+
 		foreach ( $items['shipping_method_id'] as $item_id ) {
 			$item = WC_Order_Factory::get_order_item( absint( $item_id ) );
 
@@ -414,6 +416,30 @@ function wc_save_order_items( $order_id, $items ) {
 
 			foreach ( $data_keys as $key => $default ) {
 				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
+			}
+
+			/*
+			 * When admins add a shipping line on a manual order and select a method from the dropdown
+			 * without typing a custom name, the posted title may be empty or stuck on the localized
+			 * "Shipping" fallback rendered by WC_Order_Item_Shipping::get_method_title(). In that case,
+			 * derive the title from the chosen registered shipping method so emails and order details
+			 * display the real method name (e.g. "Free Shipping") instead of the generic "Shipping".
+			 */
+			$posted_title         = is_string( $item_data['shipping_method_title'] ) ? $item_data['shipping_method_title'] : '';
+			$posted_method        = is_string( $item_data['shipping_method'] ) ? $item_data['shipping_method'] : '';
+			$default_method_title = __( 'Shipping', 'woocommerce' );
+
+			if ( '' !== $posted_method && 'other' !== $posted_method && ( '' === $posted_title || $default_method_title === $posted_title ) ) {
+				if ( null === $registered_shipping_methods ) {
+					$registered_shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
+				}
+
+				if ( isset( $registered_shipping_methods[ $posted_method ] ) && is_a( $registered_shipping_methods[ $posted_method ], 'WC_Shipping_Method' ) ) {
+					$resolved_title = $registered_shipping_methods[ $posted_method ]->get_method_title();
+					if ( '' !== $resolved_title ) {
+						$item_data['shipping_method_title'] = $resolved_title;
+					}
+				}
 			}
 
 			$item->set_props(

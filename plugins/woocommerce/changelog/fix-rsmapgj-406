@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix manual orders showing a truncated "Shipping" label instead of the real shipping method title (e.g. "Free Shipping") in invoice, new order, and customer emails.

@@ -535,4 +535,97 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 		$this->assertEquals( 4, $order_item->get_meta( '_reduced_stock', true ), 'Reduced stock meta should be updated to new quantity' );
 	}
+
+	/**
+	 * Regression test for woo#36049 / RSMAPGJ-406.
+	 *
+	 * When an admin adds a shipping line to a manual order and selects a method (e.g. Free Shipping)
+	 * from the dropdown without typing a custom title, the posted shipping_method_title arrives as
+	 * either the empty string or the localized "Shipping" fallback rendered by
+	 * WC_Order_Item_Shipping::get_method_title(). wc_save_order_items() must resolve the real
+	 * registered method title in that case so emails do not display a truncated "Shipping" label.
+	 */
+	public function test_wc_save_order_items_resolves_shipping_title_for_manual_orders() {
+		// Seed a shipping zone with a free_shipping method whose configured title is "Free Shipping".
+		$zone = new WC_Shipping_Zone();
+		$zone->set_zone_name( 'RSMAPGJ-406 zone' );
+		$zone->save();
+
+		$instance_id = $zone->add_shipping_method( 'free_shipping' );
+		$this->assertGreaterThan( 0, $instance_id );
+
+		update_option(
+			'woocommerce_free_shipping_' . $instance_id . '_settings',
+			array(
+				'title'      => 'Free Shipping',
+				'requires'   => '',
+				'min_amount' => '',
+			)
+		);
+
+		// Create a manual order with an empty-titled shipping line.
+		$order = WC_Helper_Order::create_order();
+		foreach ( $order->get_items( 'shipping' ) as $existing_shipping ) {
+			$order->remove_item( $existing_shipping->get_id() );
+		}
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_method_id( 'free_shipping:' . $instance_id );
+		$shipping_item->set_total( '0.00' );
+		$order->add_item( $shipping_item );
+		$order->save();
+
+		// Re-read the shipping item id from the saved order.
+		$shipping_items = $order->get_items( 'shipping' );
+		$this->assertCount( 1, $shipping_items );
+		$saved_shipping = reset( $shipping_items );
+		$item_id        = $saved_shipping->get_id();
+
+		// Case 1: empty posted title. wc_save_order_items should resolve it from the registered method.
+		$items_empty_title = array(
+			'order_id'              => $order->get_id(),
+			'shipping_method_id'    => array( $item_id ),
+			'shipping_method'       => array( $item_id => 'free_shipping:' . $instance_id ),
+			'shipping_method_title' => array( $item_id => '' ),
+			'shipping_cost'         => array( $item_id => '0.00' ),
+		);
+
+		wc_save_order_items( $order->get_id(), $items_empty_title );
+
+		$refreshed = wc_get_order( $order->get_id() );
+		$shipping  = reset( $refreshed->get_items( 'shipping' ) );
+		$this->assertSame( 'Free Shipping', $shipping->get_name(), 'Empty posted title should resolve to the registered method title.' );
+		$this->assertSame( 'Free Shipping', $shipping->get_method_title( 'edit' ) );
+
+		// Case 2: posted title equals the localized "Shipping" fallback (what the edit input shows
+		// when the item was created without a title) — should still resolve to the real method title.
+		$items_fallback_title = array(
+			'order_id'              => $order->get_id(),
+			'shipping_method_id'    => array( $item_id ),
+			'shipping_method'       => array( $item_id => 'free_shipping:' . $instance_id ),
+			'shipping_method_title' => array( $item_id => __( 'Shipping', 'woocommerce' ) ),
+			'shipping_cost'         => array( $item_id => '0.00' ),
+		);
+
+		wc_save_order_items( $order->get_id(), $items_fallback_title );
+
+		$refreshed = wc_get_order( $order->get_id() );
+		$shipping  = reset( $refreshed->get_items( 'shipping' ) );
+		$this->assertSame( 'Free Shipping', $shipping->get_name(), 'Localized "Shipping" fallback should be replaced with the registered method title.' );
+		$this->assertSame( 'Free Shipping', $shipping->get_method_title( 'edit' ) );
+
+		// Case 3: admin typed a custom title — must be preserved verbatim, not overwritten.
+		$items_custom_title = array(
+			'order_id'              => $order->get_id(),
+			'shipping_method_id'    => array( $item_id ),
+			'shipping_method'       => array( $item_id => 'free_shipping:' . $instance_id ),
+			'shipping_method_title' => array( $item_id => 'My Custom Carrier' ),
+			'shipping_cost'         => array( $item_id => '0.00' ),
+		);
+
+		wc_save_order_items( $order->get_id(), $items_custom_title );
+
+		$refreshed = wc_get_order( $order->get_id() );
+		$shipping  = reset( $refreshed->get_items( 'shipping' ) );
+		$this->assertSame( 'My Custom Carrier', $shipping->get_method_title( 'edit' ), 'Custom titles entered by the admin must not be overwritten.' );
+	}
 }
