@@ -153,7 +153,7 @@ class ShopperList {
 
 		if ( count( $this->items ) >= self::MAX_ITEMS ) {
 			throw new ShopperListFullException(
-				sprintf( 'Shopper list "%s" is at capacity (%d items).', $this->slug, self::MAX_ITEMS )
+				esc_html( sprintf( 'Shopper list "%s" is at capacity (%d items).', $this->slug, self::MAX_ITEMS ) )
 			);
 		}
 
