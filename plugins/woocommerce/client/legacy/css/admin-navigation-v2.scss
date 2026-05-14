@@ -135,6 +135,23 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 	overflow-wrap: normal;
 }
 
+// WP admin color-scheme files use !important on hover border/shadow and
+// text color, which overrides the base .current a:hover rule. Force the
+// current-page styling to win on all possible implementations of the
+// hover indicator (border-left on the <li>, border-left on the <a>,
+// or box-shadow).
+#adminmenu .wp-submenu li.current,
+#adminmenu .wp-submenu li.current:hover,
+#adminmenu .wp-submenu li.current > a,
+#adminmenu .wp-submenu li.current > a:hover {
+	border-left: none !important;
+	box-shadow: none !important;
+}
+#adminmenu .wp-submenu li.current > a,
+#adminmenu .wp-submenu li.current > a:hover {
+	color: #fff !important;
+}
+
 // Spec §6.3: touch devices do not get the hover cascade. Tapping a cascade
 // parent (Settings, Marketing, etc.) navigates directly.
 //

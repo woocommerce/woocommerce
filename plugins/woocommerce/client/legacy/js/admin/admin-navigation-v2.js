@@ -316,6 +316,8 @@
 			var origClassChange = window.wpNavMenuClassChange;
 			window.wpNavMenuClassChange = function () {
 				var result = origClassChange.apply( this, arguments );
+
+				// Re-apply rail-root expansion classes stripped by wc-admin's controller.
 				var current = document.querySelector(
 					'#adminmenu .wc-nav-v2-current-root'
 				);
@@ -326,6 +328,27 @@
 						'wp-menu-open'
 					);
 				}
+
+				// controller.js step 5 adds `current` to the rail-root itself,
+				// not the active sub-item. Its step 4 selector uses
+				// encodeURIComponent() which produces %2F-encoded slashes, but
+				// PHP renders sub-item hrefs with literal slashes — so the
+				// selector misses them. Match with both forms (literal and
+				// encoded) so the right sub-item is marked regardless of whether
+				// wpNavMenuUrlUpdate has rewritten the href yet.
+				var url = arguments[ 1 ] || '';
+				if ( url && url !== '/' ) {
+					var pathLiteral = 'page=wc-admin&path=' + url;
+					var pathEncoded = 'page=wc-admin&path=' + encodeURIComponent( url );
+					$( '#adminmenu .wp-submenu li' ).each( function () {
+						var href = canonicalUrl( $( this ).find( '> a' ).attr( 'href' ) || '' );
+						if ( href.indexOf( pathLiteral ) !== -1 || href.indexOf( pathEncoded ) !== -1 ) {
+							$( this ).addClass( 'current' );
+							return false;
+						}
+					} );
+				}
+
 				return result;
 			};
 		}

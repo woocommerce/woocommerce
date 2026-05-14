@@ -154,6 +154,7 @@ function applyShippingClassFilter( query: ProductListQuery, filter: Filter ) {
 	query.shipping_class = values.join( ',' );
 }
 
+
 function applyStockFilter( query: ProductListQuery, filter: Filter ) {
 	const [ stockStatus ] = getStringValues( filter.value );
 
