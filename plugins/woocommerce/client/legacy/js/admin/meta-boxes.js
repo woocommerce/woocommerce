@@ -121,16 +121,90 @@ jQuery( function ( $ ) {
 	$( document.body )
 		.on( 'wc-init-tabbed-panels', function () {
 			$( 'ul.wc-tabs' ).show();
-			$( 'ul.wc-tabs a' ).on( 'click', function ( e ) {
-				e.preventDefault();
-				var panel_wrap = $( this ).closest( 'div.panel-wrap' );
-				$( 'ul.wc-tabs li', panel_wrap ).removeClass( 'active' );
-				$( this ).parent().addClass( 'active' );
-				$( 'div.panel', panel_wrap ).hide();
-				$( $( this ).attr( 'href' ) ).show( 0, function () {
-					$( this ).trigger( 'woocommerce_tab_shown' );
+
+			// Wire each panel up as a tabpanel labelled by its corresponding tab.
+			$( 'div.panel-wrap' ).each( function () {
+				var panel_wrap = $( this );
+				panel_wrap.find( 'ul.wc-tabs > li > a[role="tab"]' ).each( function () {
+					var tab = $( this );
+					var target_id = ( tab.attr( 'href' ) || '' ).replace( /^#/, '' );
+					if ( ! target_id ) {
+						return;
+					}
+					// Mirror id <-> aria-controls so screen readers can announce the relationship.
+					if ( ! tab.attr( 'id' ) ) {
+						tab.attr( 'id', 'wc-tab-' + target_id );
+					}
+					var panel = panel_wrap.find( '#' + target_id );
+					if ( panel.length ) {
+						panel.attr( 'role', 'tabpanel' )
+							.attr( 'aria-labelledby', tab.attr( 'id' ) )
+							.attr( 'tabindex', '0' );
+					}
 				} );
 			} );
+
+			var activate_tab = function ( tab ) {
+				if ( ! tab || ! tab.length ) {
+					return;
+				}
+				var panel_wrap = tab.closest( 'div.panel-wrap' );
+				panel_wrap.find( 'ul.wc-tabs li' ).removeClass( 'active' );
+				panel_wrap.find( 'ul.wc-tabs a[role="tab"]' )
+					.attr( 'aria-selected', 'false' )
+					.attr( 'tabindex', '-1' );
+
+				tab.parent().addClass( 'active' );
+				tab.attr( 'aria-selected', 'true' ).attr( 'tabindex', '0' );
+
+				panel_wrap.find( 'div.panel' ).hide();
+				$( tab.attr( 'href' ) ).show( 0, function () {
+					$( this ).trigger( 'woocommerce_tab_shown' );
+				} );
+			};
+
+			$( 'ul.wc-tabs a' ).on( 'click', function ( e ) {
+				e.preventDefault();
+				activate_tab( $( this ) );
+			} );
+
+			// Arrow-key navigation per WAI-ARIA APG tabs pattern. WC tabs are stacked
+			// vertically, so Up/Down move focus and activate; Home/End jump to ends.
+			$( 'ul.wc-tabs' ).on( 'keydown', 'a[role="tab"]', function ( e ) {
+				var visible_tabs = $( this )
+					.closest( 'ul.wc-tabs' )
+					.find( 'li:visible > a[role="tab"]' );
+				if ( ! visible_tabs.length ) {
+					return;
+				}
+				var current_index = visible_tabs.index( this );
+				var target_index = null;
+
+				switch ( e.key ) {
+					case 'ArrowDown':
+					case 'Down':
+						target_index = ( current_index + 1 ) % visible_tabs.length;
+						break;
+					case 'ArrowUp':
+					case 'Up':
+						target_index = ( current_index - 1 + visible_tabs.length ) % visible_tabs.length;
+						break;
+					case 'Home':
+						target_index = 0;
+						break;
+					case 'End':
+						target_index = visible_tabs.length - 1;
+						break;
+					default:
+						return;
+				}
+
+				e.preventDefault();
+				var target = visible_tabs.eq( target_index );
+				activate_tab( target );
+				target.trigger( 'focus' );
+			} );
+
 			$( 'div.panel-wrap' ).each( function () {
 				$( this )
 					.find( 'ul.wc-tabs li' )
