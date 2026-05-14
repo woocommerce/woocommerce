@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add 4-digit numeric postcode validation for Australia (AU) and New Zealand (NZ) so invalid entries are rejected at checkout.
