@@ -190,6 +190,52 @@ function applyPriceFilter( query: ProductListQuery, filter: Filter ) {
 	query.max_price = price;
 }
 
+function applyStockQuantityFilter( query: ProductListQuery, filter: Filter ) {
+	if ( filter.operator === 'between' && Array.isArray( filter.value ) ) {
+		const [ min, max ] = filter.value;
+		query.min_stock_quantity = getPriceValue( min );
+		query.max_stock_quantity = getPriceValue( max );
+		return;
+	}
+
+	if ( filter.operator === 'isNot' ) {
+		// No WC REST param for stock_quantity exclusion; intentionally
+		// unsupported server-side. The operator is exposed because the user
+		// explicitly asked for it in the UI.
+		return;
+	}
+
+	const raw = getPriceValue( filter.value );
+
+	if ( ! raw ) {
+		return;
+	}
+
+	const numeric = Number( raw );
+
+	if ( ! Number.isFinite( numeric ) ) {
+		return;
+	}
+
+	switch ( filter.operator ) {
+		case 'is':
+			query.min_stock_quantity = raw;
+			query.max_stock_quantity = raw;
+			return;
+		case 'greaterThan':
+			query.min_stock_quantity = String( numeric + 1 );
+			return;
+		case 'greaterThanOrEqual':
+			query.min_stock_quantity = raw;
+			return;
+		case 'lessThan':
+			query.max_stock_quantity = String( numeric - 1 );
+			return;
+		case 'lessThanOrEqual':
+			query.max_stock_quantity = raw;
+	}
+}
+
 export function buildProductListQuery( view: View ): ProductListQuery {
 	const query: ProductListQuery = {
 		_embed: 1,
@@ -230,6 +276,9 @@ export function buildProductListQuery( view: View ): ProductListQuery {
 				break;
 			case 'price':
 				applyPriceFilter( query, filter );
+				break;
+			case 'stock_quantity':
+				applyStockQuantityFilter( query, filter );
 				break;
 		}
 	} );
