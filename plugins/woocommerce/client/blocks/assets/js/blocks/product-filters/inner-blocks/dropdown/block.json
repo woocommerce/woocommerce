@@ -8,10 +8,6 @@
 	"textdomain": "woocommerce",
 	"apiVersion": 3,
 	"ancestor": [
-		"woocommerce/product-filter-attribute",
-		"woocommerce/product-filter-status",
-		"woocommerce/product-filter-taxonomy",
-		"woocommerce/product-filter-rating",
 		"woocommerce/add-to-cart-with-options-variation-selector-attribute-options"
 	],
 	"supports": {
