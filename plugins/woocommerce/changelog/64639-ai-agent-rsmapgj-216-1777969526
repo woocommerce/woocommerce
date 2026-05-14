@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Zambian kwacha currency symbol from ZK to ZMW to match ISO 4217 standard.
