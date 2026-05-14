@@ -120,6 +120,10 @@ if ( $show_downloads ) {
 						<?php
 						$wp_button_class = wc_wp_theme_get_element_class_name( 'button' ) ? ' ' . wc_wp_theme_get_element_class_name( 'button' ) : '';
 						foreach ( $actions as $key => $action ) { // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+							// wc_get_account_orders_actions() is filterable; skip entries that don't expose the keys we render.
+							if ( ! is_array( $action ) || empty( $action['name'] ) || empty( $action['url'] ) ) {
+								continue;
+							}
 							if ( empty( $action['aria-label'] ) ) {
 								// Generate the aria-label based on the action name.
 								/* translators: %1$s Action name, %2$s Order number. */

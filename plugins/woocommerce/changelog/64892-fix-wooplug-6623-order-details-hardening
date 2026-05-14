@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Internal: skip malformed entries returned by the wc_get_account_orders_actions filter when rendering the order details actions list to avoid notices on stricter PHP versions.
