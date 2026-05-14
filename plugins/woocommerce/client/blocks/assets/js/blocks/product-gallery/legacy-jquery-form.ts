@@ -20,23 +20,11 @@ import { withScope } from '@wordpress/interactivity';
  * Internal dependencies
  */
 import { LEGACY_FORM_JQUERY_EVENTS } from './constants';
-
-type LegacyVariationPayload = {
-	image_id?: number;
-	gallery_image_ids?: number[];
-};
-
-type LegacyJQueryInstance = {
-	on: (
-		eventName: string,
-		handler: ( event?: unknown, variation?: LegacyVariationPayload ) => void
-	) => LegacyJQueryInstance;
-	off: ( namespace: string ) => LegacyJQueryInstance;
-};
-
-type LegacyJQueryWindow = Window & {
-	jQuery?: ( target: Element | string ) => LegacyJQueryInstance;
-};
+import type {
+	LegacyJQueryFormHandlers,
+	LegacyJQueryWindow,
+	LegacyVariationPayload,
+} from './types';
 
 /** A WP attachment ID that's safe to use as a gallery slot. */
 const isValidImageId = ( id: unknown ): id is number =>
@@ -59,11 +47,6 @@ const normalizeImageData = (
 				.filter( isValidImageId )
 		: [];
 	return Array.from( new Set( [ ...featured, ...others ] ) );
-};
-
-export type LegacyJQueryFormHandlers = {
-	onVariationFound: ( imageIds: number[], featuredImageId?: number ) => void;
-	onVariationReset: () => void;
 };
 
 /**

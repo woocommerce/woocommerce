@@ -11,12 +11,15 @@ import {
 } from '@wordpress/interactivity';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
-import type { WooCommerceConfig } from '@woocommerce/stores/woocommerce/cart';
 
 /**
  * Internal dependencies
  */
-import type { ProductGalleryContext } from './types';
+import type {
+	ProductGalleryContext,
+	ProductGalleryConfig,
+	ProductImageSet,
+} from './types';
 import { checkOverflow } from './utils';
 import { subscribeLegacyJQueryFormVariations } from './legacy-jquery-form';
 import { SELECTORS, CLASSES } from './constants';
@@ -32,19 +35,6 @@ const getArrowsState = ( imageIndex: number, totalImages: number ) => ( {
 	isDisabledPrevious: imageIndex === 0,
 	isDisabledNext: imageIndex === totalImages - 1,
 } );
-
-type VariationImageSet = {
-	image_id?: number;
-	image_ids?: number[];
-};
-
-type ProductImageSet = VariationImageSet & {
-	variations?: Record< number, VariationImageSet >;
-};
-
-type ProductGalleryConfig = WooCommerceConfig & {
-	products?: Record< string, ProductImageSet >;
-};
 
 /** Read the `products` map from the WooCommerce iAPI config (or `{}`). */
 const getConfiguredProducts = () =>
