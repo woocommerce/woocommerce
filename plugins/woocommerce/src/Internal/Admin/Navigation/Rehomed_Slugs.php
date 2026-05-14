@@ -59,5 +59,10 @@ final class Rehomed_Slugs {
 		// "Add New Product" — the All Products list view already exposes a
 		// prominent "Add new" action, so a duplicate menu entry is noise.
 		'post-new.php?post_type=product',
+		// Product Import / Export — the All Products list view exposes
+		// these actions in its toolbar already, so a duplicate menu entry
+		// is noise.
+		'product_importer',
+		'product_exporter',
 	);
 }

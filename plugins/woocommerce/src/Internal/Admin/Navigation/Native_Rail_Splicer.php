@@ -44,6 +44,7 @@ class Native_Rail_Splicer {
 		$this->populate_root_submenus( $tree );
 		$this->preserve_access_check_entries( $tree, $pre_splice_submenu_woocommerce );
 		$this->map_real_parents_for_access_checks( $tree );
+		$this->register_rail_root_hooknames( $tree );
 		$this->force_current_highlight( $tree );
 
 		// Some WC subsystems (importers, exporters) register
@@ -103,6 +104,39 @@ class Native_Rail_Splicer {
 			}
 			if ( ! isset( $_wp_real_parent_file[ $slug ] ) ) {
 				$_wp_real_parent_file[ $slug ] = 'woocommerce';
+			}
+		}
+	}
+
+	/**
+	 * Ensure WP's menu URL generator can resolve every rail-root to an
+	 * `admin.php?page=<slug>` href.
+	 *
+	 * `menu-header.php` decides whether to emit `admin.php?page=…` or a naked
+	 * literal href via `has_action( $hookname )`. For tree slugs that aren't
+	 * registered with a page callback (compound wc-admin routes like
+	 * `wc-admin&path=/customers`, and any rail root whose owning module
+	 * hasn't registered a hookname by the time we splice), the check fails
+	 * and the href falls through to the naked branch — producing
+	 * `/wp-admin/<slug>` instead of the working `?page=<slug>` form.
+	 *
+	 * Register a no-op `__return_true` callback under the expected hookname
+	 * (the one our `$_wp_real_parent_file` remap routes the rail-root slug
+	 * to, i.e. `woocommerce_page_<slug>`) so the check passes. `add_action`
+	 * is idempotent — if the real owner already registered a callback, the
+	 * no-op piles on harmlessly; if not, ours is the only one and `has_action`
+	 * still reports truthy.
+	 *
+	 * @param array $tree Final reconciled tree.
+	 */
+	private function register_rail_root_hooknames( array $tree ): void {
+		foreach ( $tree as $slug => $node ) {
+			if ( ( $node['parent'] ?? null ) !== 'woocommerce' ) {
+				continue;
+			}
+			$hookname = 'woocommerce_page_' . $slug;
+			if ( ! has_action( $hookname ) ) {
+				add_action( $hookname, static function (): void {} );
 			}
 		}
 	}
