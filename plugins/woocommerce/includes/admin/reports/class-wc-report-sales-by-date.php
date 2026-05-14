@@ -7,6 +7,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly.
@@ -47,6 +48,16 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 	 * Get all data needed for this report and store in the class.
 	 */
 	private function query_report_data() {
+		// The legacy SQL-builder (`get_order_report_data`) targets `wp_posts`/`wp_postmeta`.
+		// When HPOS is the authoritative datastore and order data is no longer synced
+		// to the posts tables, those queries return no rows. Route through the
+		// HPOS-aware implementation in that case so the legacy sales reports REST
+		// endpoint (`/wc/v3/reports/sales`) keeps working.
+		if ( OrderUtil::custom_orders_table_usage_is_enabled() ) {
+			$this->query_report_data_hpos();
+			return;
+		}
+
 		$this->report_data = new stdClass();
 
 		$this->report_data->order_counts = (array) $this->get_order_report_data(
@@ -444,6 +455,372 @@ class WC_Report_Sales_By_Date extends WC_Admin_Report {
 
 		// 3rd party filtering of report data
 		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
+	}
+
+	/**
+	 * HPOS-aware implementation of {@see self::query_report_data()}.
+	 *
+	 * Builds the same `$this->report_data` shape consumed by the legacy charts and
+	 * the `wc/v3/reports/sales` REST endpoint, but sources data from `wc_get_orders()`
+	 * instead of the legacy `wp_posts`/`wp_postmeta` SQL queries.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return void
+	 */
+	private function query_report_data_hpos() {
+		$this->report_data = new stdClass();
+
+		$count_statuses    = array( OrderStatus::COMPLETED, OrderStatus::PROCESSING, OrderStatus::ON_HOLD, OrderStatus::REFUNDED );
+		$count_order_types = wc_get_order_types( 'order-count' );
+		$sales_order_types = wc_get_order_types( 'sales-reports' );
+
+		$date_after  = gmdate( 'Y-m-d H:i:s', $this->start_date );
+		$date_before = gmdate( 'Y-m-d H:i:s', strtotime( '+1 DAY', $this->end_date ) - 1 );
+		$date_query  = $date_after . '...' . $date_before;
+
+		$grouping = $this->chart_groupby;
+
+		$bucket_for = function ( $order ) use ( $grouping ) {
+			$date = $order->get_date_created();
+			if ( ! $date ) {
+				return null;
+			}
+			$ts = $date->getOffsetTimestamp();
+			return 'day' === $grouping ? gmdate( 'Y-m-d', $ts ) : gmdate( 'Y-m', $ts );
+		};
+
+		$post_date_for = function ( $order ) {
+			$date = $order->get_date_created();
+			return $date ? $date->date( 'Y-m-d H:i:s' ) : '';
+		};
+
+		// 1) Counted orders (used for order_counts, order_items, coupons).
+		$counted_orders = $this->fetch_orders_for_report(
+			array(
+				'types'        => $count_order_types,
+				'status'       => $count_statuses,
+				'date_created' => $date_query,
+			)
+		);
+
+		// 2) Sales orders (used for total_sales/shipping/tax aggregation).
+		// Sales-report order types are typically a subset of order-count types, so reuse where possible.
+		if ( $count_order_types === $sales_order_types ) {
+			$sales_orders = $counted_orders;
+		} else {
+			$sales_orders = $this->fetch_orders_for_report(
+				array(
+					'types'        => $sales_order_types,
+					'status'       => $count_statuses,
+					'date_created' => $date_query,
+				)
+			);
+		}
+
+		// order_counts: one row per bucket with {count, post_date}.
+		$order_counts = array();
+		foreach ( $counted_orders as $order ) {
+			$bucket = $bucket_for( $order );
+			if ( null === $bucket ) {
+				continue;
+			}
+			if ( ! isset( $order_counts[ $bucket ] ) ) {
+				$order_counts[ $bucket ] = (object) array(
+					'count'     => 0,
+					'post_date' => $post_date_for( $order ),
+				);
+			}
+			++$order_counts[ $bucket ]->count;
+		}
+		ksort( $order_counts );
+		$this->report_data->order_counts = array_values( $order_counts );
+
+		// order_items: per-bucket sum of line-item quantities; coupons: per-bucket+code discount totals.
+		$order_items_buckets = array();
+		$coupon_buckets      = array();
+		foreach ( $counted_orders as $order ) {
+			$bucket = $bucket_for( $order );
+			if ( null === $bucket ) {
+				continue;
+			}
+			$pd = $post_date_for( $order );
+
+			if ( ! isset( $order_items_buckets[ $bucket ] ) ) {
+				$order_items_buckets[ $bucket ] = (object) array(
+					'order_item_count' => 0,
+					'post_date'        => $pd,
+				);
+			}
+			foreach ( $order->get_items( 'line_item' ) as $item ) {
+				$order_items_buckets[ $bucket ]->order_item_count += (int) $item->get_quantity();
+			}
+
+			foreach ( $order->get_items( 'coupon' ) as $coupon_item ) {
+				$code = $coupon_item->get_name();
+				$key  = $bucket . '|' . $code;
+				if ( ! isset( $coupon_buckets[ $key ] ) ) {
+					$coupon_buckets[ $key ] = (object) array(
+						'order_item_name' => $code,
+						'discount_amount' => 0.0,
+						'post_date'       => $pd,
+					);
+				}
+				if ( $coupon_item instanceof WC_Order_Item_Coupon ) {
+						$coupon_buckets[ $key ]->discount_amount += (float) $coupon_item->get_discount();
+				}
+			}
+		}
+		ksort( $order_items_buckets );
+		$this->report_data->order_items = array_values( $order_items_buckets );
+		$this->report_data->coupons     = array_values( $coupon_buckets );
+
+		// orders: per-bucket aggregates of order totals/shipping/tax/shipping-tax.
+		$orders_buckets = array();
+		foreach ( $sales_orders as $order ) {
+			$bucket = $bucket_for( $order );
+			if ( null === $bucket ) {
+				continue;
+			}
+			if ( ! isset( $orders_buckets[ $bucket ] ) ) {
+				$orders_buckets[ $bucket ] = (object) array(
+					'total_sales'        => 0.0,
+					'total_shipping'     => 0.0,
+					'total_tax'          => 0.0,
+					'total_shipping_tax' => 0.0,
+					'post_date'          => $post_date_for( $order ),
+				);
+			}
+			$orders_buckets[ $bucket ]->total_sales        += (float) $order->get_total();
+			$orders_buckets[ $bucket ]->total_shipping     += (float) $order->get_shipping_total();
+			$orders_buckets[ $bucket ]->total_tax          += (float) $order->get_cart_tax();
+			$orders_buckets[ $bucket ]->total_shipping_tax += (float) $order->get_shipping_tax();
+		}
+		ksort( $orders_buckets );
+		$this->report_data->orders = array_values( $orders_buckets );
+
+		// Refund-side data: iterate refunds in range and split into full vs. partial.
+		// Full refund = refund whose parent's status is 'refunded' (entire order refunded).
+		// Partial refund = refund whose parent is still completed/processing/on-hold.
+		$refunds = $this->fetch_orders_for_report(
+			array(
+				'types'        => array( 'shop_order_refund' ),
+				'status'       => array(),
+				'date_created' => $date_query,
+			)
+		);
+
+		$full_refunds    = array();
+		$partial_refunds = array();
+		$refund_lines    = array();
+		$seen_parents    = array();
+
+		foreach ( $refunds as $refund ) {
+			if ( ! $refund instanceof WC_Order_Refund ) {
+				continue;
+			}
+			$parent_id = (int) $refund->get_parent_id();
+			// wc_get_order() is backed by the order cache, so repeated lookups within this loop are cheap.
+			$parent = $parent_id ? wc_get_order( $parent_id ) : null;
+			if ( ! $parent ) {
+				continue;
+			}
+
+			$pd            = $post_date_for( $refund );
+			$parent_status = $parent->get_status();
+
+			// Refund lines covers partials on COMPLETED|PROCESSING|ON_HOLD|REFUNDED parents.
+			if ( in_array( $parent_status, array( OrderStatus::COMPLETED, OrderStatus::PROCESSING, OrderStatus::ON_HOLD, OrderStatus::REFUNDED ), true ) ) {
+				$item_count = 0;
+				foreach ( $refund->get_items( 'line_item' ) as $line ) {
+					$item_count += (int) $line->get_quantity();
+				}
+
+				$refund_line    = (object) array(
+					'refund_id'          => $refund->get_id(),
+					'total_refund'       => (float) $refund->get_amount(),
+					'post_date'          => $pd,
+					'item_type'          => $item_count > 0 ? 'line_item' : null,
+					'total_sales'        => (float) $parent->get_total(),
+					'total_shipping'     => (float) $refund->get_shipping_total(),
+					'total_tax'          => (float) $refund->get_cart_tax(),
+					'total_shipping_tax' => (float) $refund->get_shipping_tax(),
+					'order_item_count'   => $item_count,
+				);
+				$refund_lines[] = $refund_line;
+			}
+
+			if ( OrderStatus::REFUNDED === $parent_status ) {
+				if ( isset( $seen_parents[ $parent_id ] ) ) {
+					// Only count each fully-refunded parent once.
+					continue;
+				}
+				$seen_parents[ $parent_id ] = true;
+
+				$total_refund       = (float) $parent->get_total();
+				$total_shipping     = (float) $parent->get_shipping_total();
+				$total_tax          = (float) $parent->get_cart_tax();
+				$total_shipping_tax = (float) $parent->get_shipping_tax();
+				$full_refunds[]     = (object) array(
+					'total_refund'       => $total_refund,
+					'total_shipping'     => $total_shipping,
+					'total_tax'          => $total_tax,
+					'total_shipping_tax' => $total_shipping_tax,
+					'post_date'          => $pd,
+					'net_refund'         => $total_refund - ( $total_shipping + $total_tax + $total_shipping_tax ),
+				);
+			} elseif ( in_array( $parent_status, array( OrderStatus::COMPLETED, OrderStatus::PROCESSING, OrderStatus::ON_HOLD ), true ) ) {
+				$item_count = 0;
+				foreach ( $refund->get_items( 'line_item' ) as $line ) {
+					$item_count += (int) $line->get_quantity();
+				}
+
+				$total_refund       = (float) $refund->get_amount();
+				$total_shipping     = (float) $refund->get_shipping_total();
+				$total_tax          = (float) $refund->get_cart_tax();
+				$total_shipping_tax = (float) $refund->get_shipping_tax();
+				$partial            = (object) array(
+					'refund_id'          => $refund->get_id(),
+					'total_refund'       => $total_refund,
+					'post_date'          => $pd,
+					'item_type'          => $item_count > 0 ? 'line_item' : null,
+					'total_sales'        => (float) $parent->get_total(),
+					'total_shipping'     => $total_shipping,
+					'total_tax'          => $total_tax,
+					'total_shipping_tax' => $total_shipping_tax,
+					'order_item_count'   => $item_count,
+					'net_refund'         => $total_refund - ( $total_shipping + $total_tax + $total_shipping_tax ),
+				);
+				$partial_refunds[]  = $partial;
+			}
+		}
+
+		$this->report_data->full_refunds    = $full_refunds;
+		$this->report_data->partial_refunds = $partial_refunds;
+		$this->report_data->refund_lines    = $refund_lines;
+
+		// Refunded items aggregate: items in a fully-refunded order plus item counts on partial refunds.
+		$this->report_data->refunded_order_items = 0;
+		$refunded_only_orders                    = $this->fetch_orders_for_report(
+			array(
+				'types'        => $count_order_types,
+				'status'       => array( OrderStatus::REFUNDED ),
+				'date_created' => $date_query,
+			)
+		);
+		foreach ( $refunded_only_orders as $order ) {
+			foreach ( $order->get_items( 'line_item' ) as $line ) {
+				$this->report_data->refunded_order_items += (int) $line->get_quantity();
+			}
+		}
+
+		$refunded_orders                                = array_merge( $partial_refunds, $full_refunds );
+		$this->report_data->refunded_orders             = $refunded_orders;
+		$this->report_data->total_tax_refunded          = 0;
+		$this->report_data->total_shipping_refunded     = 0;
+		$this->report_data->total_shipping_tax_refunded = 0;
+		$this->report_data->total_refunds               = 0;
+
+		foreach ( $refunded_orders as $value ) {
+			$this->report_data->total_tax_refunded          += floatval( $value->total_tax < 0 ? $value->total_tax * -1 : $value->total_tax );
+			$this->report_data->total_refunds               += floatval( $value->total_refund );
+			$this->report_data->total_shipping_tax_refunded += floatval( $value->total_shipping_tax < 0 ? $value->total_shipping_tax * -1 : $value->total_shipping_tax );
+			$this->report_data->total_shipping_refunded     += floatval( $value->total_shipping < 0 ? $value->total_shipping * -1 : $value->total_shipping );
+
+			if ( isset( $value->order_item_count ) ) {
+				$this->report_data->refunded_order_items += floatval( $value->order_item_count < 0 ? $value->order_item_count * -1 : $value->order_item_count );
+			}
+		}
+
+		// Aggregate totals (mirrors logic in query_report_data()).
+		$sum_tax          = (float) array_sum( wp_list_pluck( $this->report_data->orders, 'total_tax' ) );
+		$sum_shipping     = (float) array_sum( wp_list_pluck( $this->report_data->orders, 'total_shipping' ) );
+		$sum_shipping_tax = (float) array_sum( wp_list_pluck( $this->report_data->orders, 'total_shipping_tax' ) );
+		$sum_sales        = (float) array_sum( wp_list_pluck( $this->report_data->orders, 'total_sales' ) );
+
+		$this->report_data->total_tax          = wc_format_decimal( $sum_tax - (float) $this->report_data->total_tax_refunded, 2 );
+		$this->report_data->total_shipping     = wc_format_decimal( $sum_shipping - (float) $this->report_data->total_shipping_refunded, 2 );
+		$this->report_data->total_shipping_tax = wc_format_decimal( $sum_shipping_tax - (float) $this->report_data->total_shipping_tax_refunded, 2 );
+
+		$this->report_data->total_sales = wc_format_decimal( $sum_sales - (float) $this->report_data->total_refunds, 2 );
+		$this->report_data->net_sales   = wc_format_decimal(
+			(float) $this->report_data->total_sales
+			- (float) $this->report_data->total_shipping
+			- max( 0.0, (float) $this->report_data->total_tax )
+			- max( 0.0, (float) $this->report_data->total_shipping_tax ),
+			2
+		);
+
+		$interval                               = (int) $this->chart_interval + 1;
+		$this->report_data->average_sales       = wc_format_decimal( (float) $this->report_data->net_sales / $interval, 2 );
+		$this->report_data->average_total_sales = wc_format_decimal( (float) $this->report_data->total_sales / $interval, 2 );
+
+		$this->report_data->total_coupons         = number_format( array_sum( wp_list_pluck( $this->report_data->coupons, 'discount_amount' ) ), 2, '.', '' );
+		$this->report_data->total_refunded_orders = absint( count( $this->report_data->full_refunds ) );
+
+		$this->report_data->total_orders = absint( array_sum( wp_list_pluck( $this->report_data->order_counts, 'count' ) ) );
+		$this->report_data->total_items  = absint( array_sum( wp_list_pluck( $this->report_data->order_items, 'order_item_count' ) ) );
+
+		/**
+		 * Filters the assembled admin report data.
+		 *
+		 * Mirrors the filter triggered in {@see self::query_report_data()} so callers can hook
+		 * a single filter regardless of whether HPOS or the legacy datastore is authoritative.
+		 *
+		 * @since 2.6.0
+		 *
+		 * @param stdClass $report_data The aggregated report data.
+		 */
+		$this->report_data = apply_filters( 'woocommerce_admin_report_data', $this->report_data );
+	}
+
+	/**
+	 * Page through `wc_get_orders` to fetch every order matching the supplied filters.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param array $args Filter args. Required keys: `types` (string[]), `status` (string[]), `date_created` (string).
+	 * @return WC_Order[]|WC_Abstract_Order[]
+	 */
+	private function fetch_orders_for_report( array $args ): array {
+		$collected = array();
+		$page      = 1;
+		$per_page  = 200;
+
+		$base_query = array(
+			'type'         => $args['types'],
+			'limit'        => $per_page,
+			'orderby'      => 'date',
+			'order'        => 'ASC',
+			'date_created' => $args['date_created'],
+			'return'       => 'objects',
+			'paginate'     => false,
+		);
+
+		if ( ! empty( $args['status'] ) ) {
+			$base_query['status'] = $args['status'];
+		} else {
+			$base_query['status'] = 'any';
+		}
+
+		do {
+			$query         = $base_query;
+			$query['page'] = $page;
+
+			$batch = wc_get_orders( $query );
+			if ( empty( $batch ) || ! is_array( $batch ) ) {
+				break;
+			}
+
+			foreach ( $batch as $order ) {
+				$collected[] = $order;
+			}
+
+			$batch_size = count( $batch );
+			++$page;
+		} while ( $batch_size === $per_page );
+
+		return $collected;
 	}
 
 	/**
