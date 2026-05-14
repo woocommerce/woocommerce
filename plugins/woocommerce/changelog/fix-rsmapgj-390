@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Align the fields cached by the individual order item data store with those cached by the order data store, so the `item-{order_item_id}` cache entry has a consistent shape regardless of which code path primed it.

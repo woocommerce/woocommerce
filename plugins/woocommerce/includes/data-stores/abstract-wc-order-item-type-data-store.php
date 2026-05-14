@@ -162,7 +162,10 @@ abstract class Abstract_WC_Order_Item_Type_Data_Store extends WC_Data_Store_WP i
 		$data = wp_cache_get( 'item-' . $item->get_id(), 'order-items' );
 
 		if ( false === $data ) {
-			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_id, order_item_name FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
+			// Fetch the same fields cached by the order data store's `read_items()` so the
+			// `item-{order_item_id}` cache entry has a consistent shape regardless of the
+			// code path that primed it. See `Abstract_WC_Order_Data_Store_CPT::read_items()`.
+			$data = $wpdb->get_row( $wpdb->prepare( "SELECT order_item_id, order_item_name, order_item_type, order_id FROM {$wpdb->prefix}woocommerce_order_items WHERE order_item_id = %d LIMIT 1;", $item->get_id() ) );
 			wp_cache_set( 'item-' . $item->get_id(), $data, 'order-items' );
 		}
 
