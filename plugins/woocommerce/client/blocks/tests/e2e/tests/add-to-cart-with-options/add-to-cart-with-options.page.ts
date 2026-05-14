@@ -126,9 +126,7 @@ class AddToCartWithOptionsPage {
 		// Verify inner blocks have loaded.
 		await expect(
 			this.editor.canvas
-				.getByLabel(
-					'Block: Variation Selector: Template (Beta)'
-				)
+				.getByLabel( 'Block: Variation Selector: Template (Beta)' )
 				.first()
 		).toBeVisible();
 
@@ -200,9 +198,18 @@ class AddToCartWithOptionsPage {
 		optionStyle: 'chips' | 'dropdown'
 	) {
 		if ( optionStyle === 'dropdown' ) {
-			await this.page
-				.getByLabel( attributeName, { exact: true } )
-				.selectOption( attributeValue );
+			const select = this.page.getByLabel( attributeName, {
+				exact: true,
+			} );
+			if ( attributeValue !== '' ) {
+				await expect(
+					select.getByRole( 'option', {
+						name: attributeValue,
+						exact: true,
+					} )
+				).toBeAttached();
+			}
+			await select.selectOption( attributeValue );
 			return;
 		}
 		const group = this.page.getByRole( 'radiogroup', {
