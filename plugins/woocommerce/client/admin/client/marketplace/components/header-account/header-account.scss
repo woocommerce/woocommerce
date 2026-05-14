@@ -1,6 +1,19 @@
 @import "../../stylesheets/_variables.scss";
 
 .woocommerce-marketplace {
+	// Connected-user avatar in the floating-header toggle — locked to 18px
+	// so the User button matches every other tab in the bar regardless of
+	// sign-in state. The larger 30px `__menu-avatar-image` further below
+	// stays in use inside the dropdown popover content, where it should
+	// keep its existing size.
+	&__header-account-avatar {
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		display: block;
+		object-fit: cover;
+	}
+
 	&__menu-item span {
 		white-space: normal;
 	}
@@ -37,9 +50,30 @@
 		}
 	}
 
+	// On the WC Home page, HeaderAccount renders inside the
+	// activity-panel tab strip. The outer DropdownMenu wrapper has no
+	// `activity-panel-tab` class (only the inner toggle does — see
+	// header-account.tsx), so we explicitly stretch + centre this
+	// wrapper here to match the surrounding tabs' 60px bar height.
 	&__user-menu {
+		display: flex;
+		align-items: stretch;
+		height: $header-height;
+	}
+
+	// Scoped to .woocommerce-marketplace__header (the Marketplace page's
+	// own header bar, where this DropdownMenu sits beside a search input
+	// and needs to match its WP 7.0 input height). On the WC Home page
+	// the same component renders inside the activity-panel tab strip,
+	// where it should keep the standard 60px tab height instead — the
+	// previous unscoped 40px rule was leaking onto Home and forcing the
+	// User button shorter than its neighbours, throwing off the blue
+	// active underline and tab spacing.
+	&__header &__user-menu {
+		height: 40px;
+
 		> button.components-dropdown-menu__toggle {
-			height: 40px; // Match WP 7.0 input height and align with adjacent search input.
+			height: 40px;
 		}
 	}
 

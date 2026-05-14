@@ -1,7 +1,11 @@
 export const DisplayIcon = () => (
 	<svg
-		width="24"
-		height="24"
+		// 18px to match the other floating-header icons (bell, listView,
+		// store, gear, ? all render at 18). Was 24, which made the
+		// Display options button measurably wider than its neighbours
+		// and the spacing read uneven.
+		width="18"
+		height="18"
 		viewBox="0 0 24 24"
 		fill="none"
 		xmlns="http://www.w3.org/2000/svg"
