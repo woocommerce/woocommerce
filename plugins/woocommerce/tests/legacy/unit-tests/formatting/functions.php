@@ -1135,5 +1135,22 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		// String with word joiner (U+2060), should be preserved.
 		$this->assertEquals( "Join\xE2\x81\xA0Me", wc_remove_non_displayable_chars( "Join\xE2\x81\xA0Me" ) );
+
+		// String with variation selector-14 (U+FE0D), should be removed.
+		// This is the specific character causing checkout phone validation failures when copy-pasted from PDFs.
+		$this->assertEquals( '+1-555-123-4567', wc_remove_non_displayable_chars( "+1\xEF\xB8\x8D-555-123-4567" ) );
+
+		// String with variation selector-16 (U+FE0F), should be removed.
+		$this->assertEquals( '+1-555-123-4567', wc_remove_non_displayable_chars( "+1\xEF\xB8\x8F-555-123-4567" ) );
+
+		// String with directional isolates (U+2066 - U+2069), should be removed.
+		$this->assertEquals( 'abc', wc_remove_non_displayable_chars( "\xE2\x81\xA6abc\xE2\x81\xA9" ) );
+		$this->assertEquals( 'abc', wc_remove_non_displayable_chars( "\xE2\x81\xA7abc\xE2\x81\xA8" ) );
+
+		// String with object replacement character (U+FFFC), should be removed.
+		$this->assertEquals( 'Hello', wc_remove_non_displayable_chars( "Hello\xEF\xBF\xBC" ) );
+
+		// Phone number with multiple invisible chars sprinkled throughout (real-world copy-paste from PDF).
+		$this->assertEquals( '+15551234567', wc_remove_non_displayable_chars( "+1\xEF\xB8\x8D5\xE2\x80\x8B5\xE2\x80\x8E5\xC2\xAD1234567" ) );
 	}
 }

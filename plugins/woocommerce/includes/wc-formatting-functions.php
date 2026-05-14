@@ -1641,8 +1641,11 @@ function wc_sanitize_endpoint_slug( $raw_value ) {
  * - **Soft hyphen (`U+00AD`)** – Invisible unless text is broken across lines.
  * - **Zero-width spaces & joiners (`U+200B–U+200D`)** – Invisible and can cause copy/paste issues.
  * - **Directional markers (`U+200E–U+200F`, `U+202A–U+202E`)** – Can affect text rendering.
+ * - **Directional isolates (`U+2066–U+2069`)** – Can affect text rendering.
+ * - **Variation selectors (`U+FE0D`, `U+FE0F`)** – Commonly introduced when copy-pasting from PDF documents.
  * - **Byte Order Mark (BOM) (`U+FEFF`)** – Can interfere with encoding.
  * - **Interlinear annotation characters (`U+FFF9–U+FFFB`)** – Rarely used and unnecessary in checkout fields.
+ * - **Object replacement character (`U+FFFC`)** – Placeholder for embedded objects, not user-meaningful in plain text.
  *
  * It does **not** remove:
  *
@@ -1667,10 +1670,24 @@ function wc_remove_non_displayable_chars( string $raw_value ): string {
 		"\u{202C}", // Pop Directional Formatting.
 		"\u{202D}", // Left-to-Right Override.
 		"\u{202E}", // Right-to-Left Override.
+		// Left-to-Right Isolate.
+		"\u{2066}",
+		// Right-to-Left Isolate.
+		"\u{2067}",
+		// First Strong Isolate.
+		"\u{2068}",
+		// Pop Directional Isolate.
+		"\u{2069}",
+		// Variation Selector-14 (commonly appears in PDF copy-paste).
+		"\u{FE0D}",
+		// Variation Selector-16.
+		"\u{FE0F}",
 		"\u{FEFF}", // Byte Order Mark (BOM).
 		"\u{FFF9}", // Interlinear Annotation Anchor.
 		"\u{FFFA}", // Interlinear Annotation Separator.
 		"\u{FFFB}", // Interlinear Annotation Terminator.
+		// Object Replacement Character.
+		"\u{FFFC}",
 	);
 
 	return str_replace( $remove_chars, '', $raw_value );

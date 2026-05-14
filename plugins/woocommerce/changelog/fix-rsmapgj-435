@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Strip additional invisible Unicode characters (variation selectors, directional isolates, object replacement) so checkout phone numbers copy-pasted from PDFs validate correctly.
