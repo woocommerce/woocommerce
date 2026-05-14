@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Announce order note save success to screen readers when adding a note from the order admin meta box, distinguishing between private notes and customer-emailed notes (WCAG 4.1.3).
