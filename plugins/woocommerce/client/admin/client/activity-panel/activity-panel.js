@@ -67,6 +67,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	const isHomescreen = query.page === 'wc-admin' && ! query.path;
 
 	const [ currentTab, setCurrentTab ] = useState( '' );
+	const [ isPanelClosing, setIsPanelClosing ] = useState( false );
 	const [ isPanelOpen, setIsPanelOpen ] = useState( false );
 	const [ isPanelSwitching, setIsPanelSwitching ] = useState( false );
 	const { fills } = useSlot( ABBREVIATED_NOTIFICATION_SLOT_NAME );
@@ -76,11 +77,13 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 	} );
 
 	const closePanel = () => {
+		setIsPanelClosing( true );
 		setIsPanelOpen( false );
 	};
 
 	const clearPanel = () => {
 		if ( ! isPanelOpen ) {
+			setIsPanelClosing( false );
 			setIsPanelSwitching( false );
 			setCurrentTab( '' );
 		}
@@ -188,23 +191,40 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 
 	const { currentUserCan } = useUser();
 
-	const togglePanel = ( { name: tabName }, isTabOpen ) => {
-		const panelSwitching =
-			tabName !== currentTab &&
-			currentTab !== '' &&
-			isTabOpen &&
-			isPanelOpen;
+	// Single decision point for a tab click. Side-effect tabs (Preview store,
+	// Feedback CES modal) bail out before any panel state is touched. The
+	// rest of the logic decides open / close / switch from the parent's own
+	// state (currentTab, isPanelOpen) rather than the click target's intent
+	// — that way a focus-outside close racing with a same-tab click can't
+	// flip the panel back open after blur fires closePanel().
+	const togglePanel = ( tab ) => {
+		if ( tab.onClick ) {
+			tab.onClick();
+			return;
+		}
 
-		// Tab clicks always win over a concurrent close. Previously this
-		// component tracked an `isPanelClosing` flag and a guard here bailed
-		// out of togglePanel() when `useFocusOutside`'s closePanel() set
-		// it true mid-click — causing the new tab's panel to fail to switch
-		// in (visible when clicking between Activity, Inbox, and Finish setup
-		// tabs). Removing the flag entirely was simpler than carrying a piece
-		// of state nobody actually reads.
+		const tabName = tab.name;
+		// Same-tab re-click during a pending close: do nothing. The close
+		// from useFocusOutside is already in flight; let it finish.
+		if ( isPanelClosing && tabName === currentTab ) {
+			return;
+		}
+
+		const isSameTab = tabName === currentTab;
+		const isClosing = isSameTab && isPanelOpen;
+		const isSwitching = ! isSameTab && currentTab !== '' && isPanelOpen;
+
+		// Record a Tracks event when a panel is being opened or switched in
+		// (not when closing). Previously the Tabs child fired this — moved
+		// here so it stays consistent with the rest of the intent logic.
+		if ( ! isClosing ) {
+			recordEvent( 'activity_panel_open', { tab: tabName } );
+		}
+
 		setCurrentTab( tabName );
-		setIsPanelOpen( isTabOpen );
-		setIsPanelSwitching( panelSwitching );
+		setIsPanelOpen( ! isClosing );
+		setIsPanelSwitching( isSwitching );
+		setIsPanelClosing( isClosing );
 	};
 
 	const isProductScreen = () => {
@@ -422,14 +442,7 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 						tabs={ tabs }
 						tabOpen={ isPanelOpen }
 						selectedTab={ currentTab }
-						onTabClick={ ( tab, tabOpen ) => {
-							if ( tab.onClick ) {
-								tab.onClick();
-								return;
-							}
-
-							togglePanel( tab, tabOpen );
-						} }
+						onTabClick={ togglePanel }
 					/>
 					<Panel
 						currentTab
