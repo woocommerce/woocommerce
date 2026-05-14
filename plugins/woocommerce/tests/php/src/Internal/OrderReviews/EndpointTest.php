@@ -646,12 +646,10 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 * lowest-id match, so the option must agree with that or `gate_request()`
 	 * silently skips its work (assets never enqueue).
 	 */
-	public function test_maybe_create_host_page_realigns_option_with_slug_routed_duplicate(): void {
+	public function test_maybe_create_host_page_adopts_slug_canonical_when_option_dangles(): void {
 		global $wpdb;
 
-		// The shared setUp seeds a "Review your order" page so subsequent
-		// tests can resolve the option. Wipe it so this test controls the
-		// full page state.
+		// Wipe whatever the shared setUp seeded so this test controls state.
 		$this->reset_review_order_pages();
 
 		$first_id  = (int) wp_insert_post(
@@ -680,13 +678,13 @@ class EndpointTest extends WC_Unit_Test_Case {
 		clean_post_cache( $first_id );
 		clean_post_cache( $second_id );
 
-		// Stage a stale option pointing at the non-slug-routed duplicate.
-		update_option( 'woocommerce_review_order_page_id', $second_id );
+		// Option absent so the fast-path short-circuit fails and reconciliation runs.
+		delete_option( 'woocommerce_review_order_page_id' );
 		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
 
 		$this->endpoint->maybe_create_host_page();
 
-		$this->assertSame( $first_id, (int) wc_get_page_id( Endpoint::PAGE_KEY ), 'option should point at the slug-routed (lowest-id) page' );
+		$this->assertSame( $first_id, (int) wc_get_page_id( Endpoint::PAGE_KEY ), 'option should adopt the slug-routed (lowest-id) page' );
 		$this->assertSame( 'yes', get_option( 'woocommerce_review_order_flush_rewrite_pending' ), 'rewrite flush should be queued when the option moves' );
 	}
 
@@ -713,6 +711,21 @@ class EndpointTest extends WC_Unit_Test_Case {
 		$fresh = get_post( $page_id );
 		$this->assertSame( 'publish', $fresh->post_status, 'draft host page should be republished' );
 		$this->assertSame( 'yes', get_option( 'woocommerce_review_order_flush_rewrite_pending' ) );
+	}
+
+	/**
+	 * @testdox The `woocommerce_create_pages` filter injects the Review Order entry so any caller of `WC_Install::create_pages()` (e.g. Status → Tools repair) seeds the page.
+	 */
+	public function test_inject_review_order_page_filter_adds_entry_for_third_party_callers(): void {
+		$pages = $this->endpoint->inject_review_order_page( array() );
+
+		$this->assertArrayHasKey( Endpoint::PAGE_KEY, $pages );
+		$this->assertSame( 'review-order', $pages[ Endpoint::PAGE_KEY ]['name'] );
+		$this->assertStringContainsString( '[woocommerce_review_order]', $pages[ Endpoint::PAGE_KEY ]['content'] );
+
+		// Defensive: a non-array value passes through untouched (matches the
+		// guard inside the method so other filters in the chain stay intact).
+		$this->assertNull( $this->endpoint->inject_review_order_page( null ) );
 	}
 
 	/**
