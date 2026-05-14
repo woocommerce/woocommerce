@@ -5,14 +5,13 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Api\Attributes;
 
 use Attribute;
+use Automattic\WooCommerce\Api\Infrastructure\Principal;
 
 /**
  * Declares a WordPress capability required to execute a query or mutation.
  *
- * The generated resolver checks `current_user_can()` for every declared
- * capability before invoking the command. If any check fails, an
- * UNAUTHORIZED error is returned. This attribute is repeatable: apply it
- * multiple times to require several capabilities.
+ * This attribute is repeatable: apply it multiple times to require several
+ * capabilities (logical AND).
  *
  * Mutually exclusive with #[PublicAccess] on the same class.
  */
@@ -27,5 +26,18 @@ final class RequiredCapability {
 	public function __construct(
 		public readonly string $capability,
 	) {
+	}
+
+	/**
+	 * Decide whether the given principal holds the required capability.
+	 *
+	 * Reads the WordPress user from the principal wrapper and delegates to
+	 * {@see \user_can()}. Anonymous principals (the WP user has `ID === 0`)
+	 * never hold any capability, so the check returns false naturally.
+	 *
+	 * @param Principal $principal The resolved request principal.
+	 */
+	public function authorize( Principal $principal ): bool {
+		return user_can( $principal->user, $this->capability );
 	}
 }

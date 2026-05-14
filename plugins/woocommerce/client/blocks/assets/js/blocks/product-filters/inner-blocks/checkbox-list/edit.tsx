@@ -49,8 +49,11 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 		customOptionElement,
 		customLabelElement,
 	} = attributes;
-	const { filterData } = context;
-	const { isLoading, items, showCounts } = filterData;
+	const selectableItems = context?.woocommerceSelectableItems ?? {};
+	const isLoading = selectableItems.isLoading ?? false;
+	const items = Array.isArray( selectableItems.items )
+		? selectableItems.items
+		: [];
 
 	const colorGradientSettings = useMultipleOriginColorsAndGradients();
 	const blockProps = useBlockProps( {
@@ -75,10 +78,6 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 			</div>
 		) );
 	}, [] );
-
-	if ( ! items ) {
-		return <></>;
-	}
 
 	const threshold = 15;
 	const isLongList = items.length > threshold;
@@ -123,6 +122,26 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 											/>
 										</span>
 										<span className="wc-block-product-filter-checkbox-list__text-wrapper">
+											{ item.color !== undefined && (
+												<span
+													className={ clsx(
+														'wc-block-product-filter-checkbox-list__color-swatch',
+														{
+															'is-empty':
+																! item.color,
+														}
+													) }
+													style={
+														item.color
+															? {
+																	backgroundColor:
+																		item.color,
+															  }
+															: undefined
+													}
+													aria-hidden="true"
+												/>
+											) }
 											<span className="wc-block-product-filter-checkbox-list__text">
 												{ typeof item.label === 'string'
 													? decodeHtmlEntities(
@@ -130,7 +149,7 @@ const CheckboxListEdit = ( props: EditProps ): JSX.Element => {
 													  )
 													: item.label }
 											</span>
-											{ showCounts && (
+											{ item.count !== undefined && (
 												<span className="wc-block-product-filter-checkbox-list__count">
 													{ ` (${ item.count })` }
 												</span>

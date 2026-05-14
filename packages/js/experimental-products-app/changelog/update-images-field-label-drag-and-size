@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Add an "Images" label above the images field, fix drag-and-drop reordering, and resize all thumbnails (including the featured image) to a uniform 72x72 grid.

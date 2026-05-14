@@ -25,19 +25,19 @@ class Increment {
 				'value' => array(
 					'type' => Type::nonNull(Type::int()),
 						'description' => __( 'The starting value', 'woocommerce' ),
-					),
+						),
 				'by' => array(
 					'type' => Type::nonNull(Type::int()),
 						'description' => __( 'How much to add', 'woocommerce' ),
 						'defaultValue' => 1,
-				),
+					),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
-		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Container::get( IncrementCommand::class );
+		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( IncrementCommand::class );
 
 		$execute_args = array();
 		if ( array_key_exists( 'value', $args ) ) {
@@ -50,5 +50,20 @@ class Increment {
 		$result = Utils::execute_command( $command, $execute_args );
 
 		return array( 'result' => $result );
+	}
+
+	/**
+	 * Compute the value `_preauthorized` would carry for a given principal —
+	 * the AND of the autodiscovered authorization attributes' authorize()
+	 * outcomes on this command. Single source of truth for both the resolver's
+	 * own gates and external (code-API) callers asking about authorization
+	 * without going through GraphQL execution.
+	 *
+	 * Returns true vacuously when the command has no authorization attributes
+	 * (in that case authorize() on the command is the sole guard, and that
+	 * method should be consulted instead).
+	 */
+	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
+		return true;
 	}
 }

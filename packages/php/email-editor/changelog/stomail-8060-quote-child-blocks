@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Block email editor: render every child block of a quote, render the citation only once, and stop emitting a quote-within-a-quote.

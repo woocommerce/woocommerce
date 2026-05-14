@@ -236,10 +236,11 @@ final class ReserveStock {
 		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		// Reliability: high concurrency on the same product reservation can trigger deadlocks (error codes 1213 and 1205).
+		// We currently do not have a reliable method to identify lock errors. The $wpdb interface does not consistently provide
+		// error codes, and error messages can vary by database locale. Previously, we matched messages to 'try restarting transaction'.
 		for ( $attempt = 0; $attempt < 3; ++$attempt ) {
-			$result  = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
-			$is_lock = false === $result && false !== strpos( $wpdb->last_error, 'try restarting transaction' );
-			if ( ! $is_lock ) {
+			$result = $wpdb->query( $sql ); // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
+			if ( false !== $result ) {
 				break;
 			}
 		}
