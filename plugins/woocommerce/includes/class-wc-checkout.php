@@ -1285,7 +1285,7 @@ class WC_Checkout {
 	 */
 	public function process_checkout() {
 		try {
-			$nonce_value    = wc_get_var( $_REQUEST['woocommerce-process-checkout-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // phpcs:ignore
+			$nonce_value    = isset( $_REQUEST['woocommerce-process-checkout-nonce'] ) ? $_REQUEST['woocommerce-process-checkout-nonce'] : ( isset( $_REQUEST['_wpnonce'] ) ? $_REQUEST['_wpnonce'] : '' ); // phpcs:ignore
 			$expiry_message = sprintf(
 				/* translators: %s: shop cart url */
 				__( 'Sorry, your session has expired. <a href="%s" class="wc-backward">Return to shop</a>', 'woocommerce' ),

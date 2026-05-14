@@ -2231,11 +2231,20 @@ function wc_make_phone_clickable( $phone ) {
  */
 function wc_get_post_data_by_key( $key, $default = '' ) {
 	// phpcs:ignore WordPress.Security.ValidatedSanitizedInput, WordPress.Security.NonceVerification.Missing
-	return wc_clean( wp_unslash( wc_get_var( $_POST[ $key ], $default ) ) );
+	return wc_clean( wp_unslash( isset( $_POST[ $key ] ) ? $_POST[ $key ] : $default ) );
 }
 
 /**
  * Get data if set, otherwise return a default value or null. Prevents notices when data is not set.
+ *
+ * Note: because this function accepts its first argument by reference, passing an
+ * array element that does not yet exist (for example `wc_get_var( $_POST['foo'] )`)
+ * will auto-create that element with a null value in the source array. This is a
+ * side effect of PHP's pass-by-reference semantics and cannot be avoided from within
+ * the function. Prefer `isset( $array['key'] ) ? $array['key'] : $default` (or the
+ * null coalescing operator `$array['key'] ?? $default`) when reading values from
+ * superglobals such as `$_GET`, `$_POST` and `$_REQUEST`, so the superglobal is not
+ * mutated on every request.
  *
  * @since  3.2.0
  * @param  mixed  $var     Variable.

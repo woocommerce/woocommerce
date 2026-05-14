@@ -79,7 +79,7 @@ class WC_Shortcode_Cart {
 		wc_maybe_define_constant( 'WOOCOMMERCE_CART', true );
 
 		$atts        = shortcode_atts( array(), $atts, 'woocommerce_cart' );
-		$nonce_value = wc_get_var( $_REQUEST['woocommerce-shipping-calculator-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+		$nonce_value = isset( $_REQUEST['woocommerce-shipping-calculator-nonce'] ) ? $_REQUEST['woocommerce-shipping-calculator-nonce'] : ( isset( $_REQUEST['_wpnonce'] ) ? $_REQUEST['_wpnonce'] : '' ); // @codingStandardsIgnoreLine.
 
 		// Update Shipping. Nonce check uses new value and old value (woocommerce-cart). @todo remove in 4.0.
 		if ( ! empty( $_POST['calc_shipping'] ) && ( wp_verify_nonce( $nonce_value, 'woocommerce-shipping-calculator' ) || wp_verify_nonce( $nonce_value, 'woocommerce-cart' ) ) ) { // WPCS: input var ok.

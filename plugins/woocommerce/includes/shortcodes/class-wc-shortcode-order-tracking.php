@@ -37,7 +37,7 @@ class WC_Shortcode_Order_Tracking {
 		}
 
 		$atts        = shortcode_atts( array(), $atts, 'woocommerce_order_tracking' );
-		$nonce_value = wc_get_var( $_REQUEST['woocommerce-order-tracking-nonce'], wc_get_var( $_REQUEST['_wpnonce'], '' ) ); // @codingStandardsIgnoreLine.
+		$nonce_value = isset( $_REQUEST['woocommerce-order-tracking-nonce'] ) ? $_REQUEST['woocommerce-order-tracking-nonce'] : ( isset( $_REQUEST['_wpnonce'] ) ? $_REQUEST['_wpnonce'] : '' ); // @codingStandardsIgnoreLine.
 
 		if ( isset( $_REQUEST['orderid'] ) && wp_verify_nonce( $nonce_value, 'woocommerce-order_tracking' ) ) { // WPCS: input var ok.
 

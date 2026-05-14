@@ -275,4 +275,60 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( _wc_delete_transients( true ) );
 		$this->assertFalse( _wc_delete_transients( new stdClass() ) );
 	}
+
+	/**
+	 * @testdox wc_get_post_data_by_key() should not auto-create the requested key in $_POST when the key is missing.
+	 */
+	public function test_wc_get_post_data_by_key_does_not_mutate_post_superglobal() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		$original_post = $_POST;
+		$_POST         = array();
+
+		$result = wc_get_post_data_by_key( 'rsmapgj_385_missing_key', 'default-value' );
+
+		$this->assertSame( 'default-value', $result, 'Default value should be returned when key is missing.' );
+		$this->assertArrayNotHasKey(
+			'rsmapgj_385_missing_key',
+			$_POST,
+			'$_POST must not be mutated when reading a missing key.'
+		);
+
+		$_POST = $original_post;
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
+	 * @testdox wc_get_post_data_by_key() should return the sanitized value when the key exists in $_POST.
+	 */
+	public function test_wc_get_post_data_by_key_returns_sanitized_existing_value() {
+		// phpcs:disable WordPress.Security.NonceVerification.Missing
+		$original_post = $_POST;
+		$_POST         = array( 'rsmapgj_385_present_key' => '  hello world  ' );
+
+		$result = wc_get_post_data_by_key( 'rsmapgj_385_present_key', 'default-value' );
+
+		$this->assertSame( 'hello world', $result, 'Existing values should be returned trimmed and sanitized.' );
+
+		$_POST = $original_post;
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+	}
+
+	/**
+	 * @testdox wc_get_var() should return the default value when the variable is not set.
+	 */
+	public function test_wc_get_var_returns_default_for_undefined_variable() {
+		$undefined = null;
+		unset( $undefined );
+
+		$this->assertSame( 'fallback', wc_get_var( $undefined, 'fallback' ) );
+	}
+
+	/**
+	 * @testdox wc_get_var() should return the value when the variable is set.
+	 */
+	public function test_wc_get_var_returns_value_when_set() {
+		$defined = 'hello';
+
+		$this->assertSame( 'hello', wc_get_var( $defined, 'fallback' ) );
+	}
 }

@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Stop wc_get_var() callsites from auto-creating nonce keys in $_REQUEST and $_POST when reading nonce values, so isset() checks on those superglobals no longer return false positives.
+
+
