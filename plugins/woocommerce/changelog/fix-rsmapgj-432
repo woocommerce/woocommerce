@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove blank lines from checkout/payment-method.php template so wpautop on the Order-pay page no longer wraps the payment method label in an empty paragraph.
