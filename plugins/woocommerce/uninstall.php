@@ -27,6 +27,21 @@ wp_clear_scheduled_hook( 'wc_admin_daily' );
 wp_clear_scheduled_hook( 'generate_category_lookup_table' );
 wp_clear_scheduled_hook( 'wc_admin_unsnooze_admin_notes' );
 
+/*
+ * Ensure Action Scheduler is loaded before unscheduling actions.
+ *
+ * When WooCommerce is the only plugin using Action Scheduler, the library
+ * will not be loaded during uninstall. We need to manually bootstrap it
+ * here so that the cleanup calls below can actually remove pending jobs.
+ */
+if ( ! class_exists( 'ActionScheduler', false ) ) {
+	$wc_action_scheduler_bootstrap = __DIR__ . '/packages/action-scheduler/action-scheduler.php';
+	if ( is_readable( $wc_action_scheduler_bootstrap ) ) {
+		require_once $wc_action_scheduler_bootstrap;
+	}
+	unset( $wc_action_scheduler_bootstrap );
+}
+
 if ( class_exists( ActionScheduler::class ) && ActionScheduler::is_initialized() && function_exists( 'as_unschedule_all_actions' ) ) {
 	as_unschedule_all_actions( 'woocommerce_scheduled_sales' );
 	as_unschedule_all_actions( 'woocommerce_cancel_unpaid_orders' );

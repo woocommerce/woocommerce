@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure scheduled actions are removed during uninstall by bootstrapping Action Scheduler if no other plugin has loaded it.
