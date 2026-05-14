@@ -16,6 +16,8 @@
 	@import "./fields/images/style.scss";
 	@import "./fields/stock/style.scss";
 	@import "./fields/visibility_summary/style.scss";
+	--wp-ui-drawer-z-index: 100000;
+	--wp-ui-select-z-index: 100001;
 }
 
 .product_page_woocommerce-products-dashboard-snackbar {
@@ -49,10 +51,6 @@
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-}
-
-.woocommerce-product-edit__drawer-portal {
-	--wp-ui-drawer-z-index: 100000;
 }
 
 .woocommerce-product-edit__header {
