@@ -204,7 +204,7 @@ class WC_Meta_Box_Order_Actions {
 				}
 			} elseif ( ! did_action( 'woocommerce_order_action_' . sanitize_title( $action ) ) ) {
 
-					do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
+				do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
 
 				if ( $redesign ) {
 					self::set_redirect_message_id( 15 );

@@ -30,9 +30,9 @@ class WC_Meta_Box_Order_Submit {
 	 * @param WP_Post|WC_Order $post Post or order object.
 	 */
 	public static function output( $post ): void {
-		// Render nothing when the redesign is not active. The empty meta box
-		// is hidden entirely by CSS rules scoped to the redesign body class,
-		// so it leaves no visible artifact when the flag is off.
+		// Defense in depth: the meta box is only registered when the flag is on
+		// (see `Edit::add_order_meta_boxes()`), but guard the callback too in
+		// case it is invoked directly from custom code.
 		if ( ! FeaturesUtil::feature_is_enabled( 'order-detail-redesign' ) ) {
 			return;
 		}
@@ -76,8 +76,10 @@ class WC_Meta_Box_Order_Submit {
 	 * Forms a trash/delete order URL.
 	 *
 	 * Mirrors WC_Meta_Box_Order_Actions::get_trash_or_delete_order_link() so
-	 * this class doesn't depend on a private helper of another class. To be
-	 * consolidated when the order detail redesign exits the feature flag.
+	 * this class doesn't depend on a private helper of another class.
+	 *
+	 * TODO: Consolidate with WC_Meta_Box_Order_Actions::get_trash_or_delete_order_link()
+	 * when the order-detail-redesign feature flag exits experimental status.
 	 *
 	 * @param int $order_id The order ID for which we want a trash/delete URL.
 	 * @return string

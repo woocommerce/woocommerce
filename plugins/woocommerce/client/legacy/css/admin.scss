@@ -3053,8 +3053,8 @@ ul.wc_coupon_list_block {
 		// button-secondary appearance. Restore the button look here.
 		#woocommerce-order-submit a.submitdelete {
 			background: #f6f7f7;
-			border: 1px solid #2271b1;
-			color: #2271b1;
+			border: 1px solid var(--wp-admin-theme-color, #2271b1);
+			color: var(--wp-admin-theme-color, #2271b1);
 			padding: 0 10px;
 			text-decoration: none;
 		}
