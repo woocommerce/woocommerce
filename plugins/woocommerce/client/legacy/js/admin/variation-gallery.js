@@ -23,6 +23,7 @@ jQuery( function ( $ ) {
 		fieldImageIdsInput: '.wc-variation-gallery-image-ids',
 		thumb: '.wc-variation-gallery-thumb',
 		thumbButton: '.wc-variation-gallery-thumb__button',
+		thumbRemove: '.wc-variation-gallery-thumb__remove',
 		manageTrigger: '.wc-variation-gallery-manage',
 		replaceTrigger: '.wc-variation-gallery-replace',
 		primaryBadge: '[data-primary-badge]',
@@ -164,6 +165,11 @@ jQuery( function ( $ ) {
 				SELECTORS.thumbButton,
 				this.onThumbClick.bind( this )
 			);
+			$root.on(
+				'click',
+				SELECTORS.thumbRemove,
+				this.onRemoveClick.bind( this )
+			);
 
 			// The meta box re-fires these events when variation rows are paginated
 			// in or appended after a save, so re-initialize sortables each time.
@@ -192,7 +198,7 @@ jQuery( function ( $ ) {
 
 				$list.sortable( {
 					items: 'li' + SELECTORS.thumb,
-					cancel: '',
+					cancel: SELECTORS.thumbRemove,
 					cursor: 'grabbing',
 					scrollSensitivity: 40,
 					forcePlaceholderSize: true,
@@ -201,9 +207,11 @@ jQuery( function ( $ ) {
 					placeholder: 'wc-metabox-sortable-placeholder',
 					start( _event, ui ) {
 						ui.item.addClass( 'is-dragging' );
+						$list.addClass( 'is-sorting' );
 					},
 					stop( _event, ui ) {
 						ui.item.removeClass( 'is-dragging' );
+						$list.removeClass( 'is-sorting' );
 					},
 					update() {
 						const wasPrimary =
@@ -240,6 +248,38 @@ jQuery( function ( $ ) {
 
 			event.preventDefault();
 			this.setActiveIndex( $field, index );
+		},
+
+		/**
+		 * Click on a thumbnail's remove button: drop that image from the
+		 * gallery.
+		 *
+		 * @param {jQuery.Event} event
+		 */
+		onRemoveClick( event ) {
+			event.preventDefault();
+			event.stopPropagation();
+
+			const $trigger = $( event.currentTarget );
+			const $thumb = $trigger.closest( SELECTORS.thumb );
+			const $field = $thumb.closest( SELECTORS.field );
+			const removedIndex = $thumb.index();
+			const currentActive = this.getActiveIndex( $field );
+			const ids = this.getFieldIds( $field );
+
+			ids.splice( removedIndex, 1 );
+
+			let nextActive;
+			if ( removedIndex < currentActive ) {
+				nextActive = currentActive - 1;
+			} else if ( removedIndex === currentActive ) {
+				nextActive = Math.min( removedIndex, ids.length - 1 );
+			} else {
+				nextActive = currentActive;
+			}
+
+			this.writeGallery( $field, ids, Math.max( 0, nextActive ) );
+			announce( l10n.announceRemoved );
 		},
 
 		/**
@@ -280,9 +320,7 @@ jQuery( function ( $ ) {
 				this.manageFrame.on( 'select', () =>
 					this.onManageSelect( this.manageFrame, this.activeField )
 				);
-				this.manageFrame.on( 'close', () =>
-					this.restoreMediaPostId()
-				);
+				this.manageFrame.on( 'close', () => this.restoreMediaPostId() );
 			}
 
 			this.manageFrame.open();
@@ -535,13 +573,21 @@ jQuery( function ( $ ) {
 			const $button = $( '<button type="button"></button>' )
 				.addClass( 'wc-variation-gallery-thumb__button' )
 				.attr( 'aria-label', label );
+			const $remove = $( '<button type="button"></button>' )
+				.addClass( 'wc-variation-gallery-thumb__remove' )
+				.attr( 'aria-label', l10n.removeLabel || 'Remove image' )
+				.append(
+					$( '<span></span>' )
+						.addClass( 'dashicons dashicons-no-alt' )
+						.attr( 'aria-hidden', 'true' )
+				);
 
 			if ( thumbnailUrl ) {
 				const $img = $( '<img />' )
 					.attr( 'src', thumbnailUrl )
 					.attr( 'alt', '' );
 				$button.append( $img );
-				return $li.append( $button );
+				return $li.append( $button, $remove );
 			}
 
 			$li.addClass( CLASSES.isBroken );
@@ -558,7 +604,7 @@ jQuery( function ( $ ) {
 				.text( l10n.missingFileLabel || 'Attachment file missing' );
 
 			$button.append( $brokenWrapper, $srLabel );
-			return $li.append( $button );
+			return $li.append( $button, $remove );
 		},
 
 		/**
