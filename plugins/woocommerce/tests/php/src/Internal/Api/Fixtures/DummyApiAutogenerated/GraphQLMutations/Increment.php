@@ -25,12 +25,12 @@ class Increment {
 				'value' => array(
 					'type' => Type::nonNull(Type::int()),
 						'description' => __( 'The starting value', 'woocommerce' ),
-					),
+						),
 				'by' => array(
 					'type' => Type::nonNull(Type::int()),
 						'description' => __( 'How much to add', 'woocommerce' ),
 						'defaultValue' => 1,
-				),
+					),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);

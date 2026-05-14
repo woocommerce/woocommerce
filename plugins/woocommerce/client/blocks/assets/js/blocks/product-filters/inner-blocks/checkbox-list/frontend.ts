@@ -8,7 +8,7 @@ import { store, getContext } from '@wordpress/interactivity';
  */
 import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
 
-type ItemWithIndex = SelectableItem & { index?: number };
+type ItemWithIndex = SelectableItem & { index?: number; color?: string };
 
 type CheckboxListContext = {
 	storeNamespace: string;
@@ -24,6 +24,8 @@ type CheckboxListStore = {
 	state: {
 		itemHidden: boolean;
 		ratingStyle: string;
+		colorSwatchStyle: string;
+		isColorSwatchEmpty: boolean;
 	};
 	actions: {
 		showAll: () => void;
@@ -54,6 +56,17 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 				const item = getParentItem( storeNamespace );
 				if ( ! item ) return '';
 				return `width: ${ Number( item.value ) * 20 }%`;
+			},
+			get colorSwatchStyle(): string {
+				const { storeNamespace } = getContext< CheckboxListContext >();
+				const item = getParentItem( storeNamespace );
+				if ( ! item?.color ) return '';
+				return `background-color: ${ item.color }`;
+			},
+			get isColorSwatchEmpty(): boolean {
+				const { storeNamespace } = getContext< CheckboxListContext >();
+				const item = getParentItem( storeNamespace );
+				return ! item?.color;
 			},
 		},
 		actions: {

@@ -123,6 +123,26 @@ input[type="checkbox"].wc-block-product-filter-checkbox-list__input:checked {
 	white-space: nowrap;
 }
 
+.wc-block-product-filter-checkbox-list__color-swatch {
+	border-radius: 50%;
+	border: 1px solid color-mix(in srgb, currentColor 20%, transparent);
+	display: inline-block;
+	flex-shrink: 0;
+	height: 1em;
+	margin-right: 0.25em;
+	width: 1em;
+
+	&.is-empty {
+		background: linear-gradient(
+			to bottom right,
+			transparent calc(50% - 0.5px),
+			color-mix(in srgb, currentColor 20%, transparent) calc(50% - 0.5px),
+			color-mix(in srgb, currentColor 20%, transparent) calc(50% + 0.5px),
+			transparent calc(50% + 0.5px)
+		);
+	}
+}
+
 .wc-block-product-filter-checkbox-list__stars {
 	display: inline-block;
 	height: 1.55em;
