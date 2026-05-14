@@ -62,12 +62,16 @@ class OpcacheFileExpiry {
 	 * Action Scheduler callback: delete expired files and reschedule.
 	 *
 	 * Immediate reschedule when files were deleted (drain the backlog), 24h
-	 * otherwise.
+	 * otherwise. Skipped when the feature is disabled.
 	 *
 	 * @internal
 	 */
 	public static function handle_cleanup_action(): void {
 		$interval = self::delete_expired_files() > 0 ? 1 : DAY_IN_SECONDS;
+
+		if ( ! Main::is_enabled() ) {
+			return;
+		}
 
 		if ( function_exists( 'as_schedule_single_action' ) ) {
 			as_schedule_single_action( time() + $interval, self::ACTION_HOOK, array(), self::ACTION_GROUP );
