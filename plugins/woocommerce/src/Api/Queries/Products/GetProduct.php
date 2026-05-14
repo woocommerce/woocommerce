@@ -8,14 +8,14 @@ use Automattic\WooCommerce\Api\Attributes\Description;
 use Automattic\WooCommerce\Api\Attributes\Name;
 use Automattic\WooCommerce\Api\Attributes\RequiredCapability;
 use Automattic\WooCommerce\Api\Attributes\ReturnType;
-use Automattic\WooCommerce\Api\AuthorizationException;
+use Automattic\WooCommerce\Api\UnauthorizedException;
 use Automattic\WooCommerce\Api\Interfaces\Product;
 use Automattic\WooCommerce\Api\Utils\Products\ProductMapper;
 
 /**
  * Query to retrieve a single product by ID.
  *
- * Demonstrates: authorize(), $_query_info, AuthorizationException.
+ * Demonstrates: authorize(), $_query_info, UnauthorizedException.
  *
  * Authorization logic: admins (manage_woocommerce) can read any product,
  * non-admin users can only read their own products.
@@ -30,7 +30,7 @@ class GetProduct {
 	 * Admins can read any product. Non-admin users can only read products
 	 * they authored themselves.
 	 *
-	 * Every inaccessible case throws `AuthorizationException('Product not
+	 * Every inaccessible case throws `UnauthorizedException('Product not
 	 * found.')` — whether the ID doesn't exist, points at a non-product
 	 * post type, or points at a product the caller doesn't own. This
 	 * prevents callers from enumerating product IDs vs non-product post
@@ -40,7 +40,7 @@ class GetProduct {
 	 * @param int  $id              The product ID.
 	 * @param bool $_preauthorized  Whether the declared capability check passed.
 	 * @return bool Whether the current user can read this product.
-	 * @throws AuthorizationException When the product is not accessible.
+	 * @throws UnauthorizedException When the product is not accessible.
 	 */
 	public function authorize( int $id, bool $_preauthorized ): bool {
 		// Reject non-positive IDs up front. `get_post( 0 )` inside a
@@ -48,13 +48,13 @@ class GetProduct {
 		// `get_post( $id )` below would accidentally operate on whatever
 		// global post was set upstream of this request.
 		if ( $id <= 0 ) {
-			throw new AuthorizationException( 'Product not found.' );
+			throw new UnauthorizedException( 'Product not found.' );
 		}
 
 		$post = get_post( $id );
 
 		if ( ! $post || 'product' !== $post->post_type ) {
-			throw new AuthorizationException( 'Product not found.' );
+			throw new UnauthorizedException( 'Product not found.' );
 		}
 
 		// Honor the declared #[RequiredCapability] (read_product).
@@ -87,7 +87,7 @@ class GetProduct {
 		// anonymous callers for those products.
 		$current_user_id = get_current_user_id();
 		if ( 0 === $current_user_id || $current_user_id !== (int) $post->post_author ) {
-			throw new AuthorizationException( 'Product not found.' );
+			throw new UnauthorizedException( 'Product not found.' );
 		}
 
 		return true;

@@ -101,9 +101,9 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		}
 
 		// confirm we're on the orders page
-		await expect( page.locator( 'h1.components-text' ) ).toContainText(
-			'Orders'
-		);
+		await expect(
+			page.locator( 'h1.components-text, h1.wp-heading-inline' )
+		).toContainText( 'Orders' );
 		// open order we created
 		await page.goto(
 			`wp-admin/admin.php?page=wc-orders&action=edit&id=${ orderId }`
@@ -209,7 +209,7 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			.fill(
 				'This order is a test order. It is only a test. This note is a private note.'
 			);
-		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
+		await page.getByRole( 'button', { name: 'Add private note' } ).click();
 
 		// verify the note saved
 		await expect(
@@ -238,8 +238,12 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 			.fill(
 				'This order is a test order. It is only a test. This note is a note to the customer.'
 			);
-		await page.getByLabel( 'Note type' ).selectOption( 'Note to customer' );
-		await page.getByRole( 'button', { name: 'Add', exact: true } ).click();
+		await page
+			.getByLabel( 'Visibility' )
+			.selectOption( 'Public note to customer' );
+		await page
+			.getByRole( 'button', { name: 'Send note to customer' } )
+			.click();
 
 		// verify the note saved
 		await expect(
@@ -257,7 +261,7 @@ test.describe( 'Edit order', { tag: [ tags.SERVICES, tags.HPOS ] }, () => {
 		// verify the note is gone
 		await expect(
 			page.getByText(
-				'This order is a test order. It is only a test. This note is a private note.'
+				'This order is a test order. It is only a test. This note is a note to the customer.'
 			)
 		).toBeHidden();
 	} );

@@ -399,20 +399,40 @@ class WCTransactionalEmailPostsGenerator {
 		$post_data = self::build_filtered_post_data( (string) $email_type, $email_data );
 
 		// Sync meta stamp for emails participating in template update propagation.
+		// VERSION + LAST_SYNCED_AT are filter-independent and can ride on `meta_input`
+		// during the insert. SOURCE_HASH must reflect the post_content WordPress
+		// actually persisted (post-`content_save_pre` filter chain), so we stamp it
+		// after the insert returns and re-fetch the post to hash its saved content.
 		$sync_config = WCEmailTemplateSyncRegistry::get_email_sync_config( (string) $email_data->id );
 		if ( null !== $sync_config ) {
 			if ( ! isset( $post_data['meta_input'] ) || ! is_array( $post_data['meta_input'] ) ) {
 				$post_data['meta_input'] = array();
 			}
-			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ]        = (string) $sync_config['version'];
-			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY ]    = sha1( (string) ( $post_data['post_content'] ?? '' ) );
-			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY ] = gmdate( 'Y-m-d H:i:s' );
+			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ]          = (string) $sync_config['version'];
+			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY ]   = gmdate( 'Y-m-d H:i:s' );
+			$post_data['meta_input'][ WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY ] = (string) ( $post_data['post_content'] ?? '' );
 		}
 
 		$post_id = wp_insert_post( $post_data, true );
 
 		if ( is_wp_error( $post_id ) ) {
 			throw new \Exception( esc_html( $post_id->get_error_message() ) );
+		}
+
+		if ( null !== $sync_config ) {
+			$saved_post = get_post( $post_id );
+			$saved_body = $saved_post instanceof \WP_Post ? (string) $saved_post->post_content : (string) ( $post_data['post_content'] ?? '' );
+			update_post_meta(
+				(int) $post_id,
+				WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
+				sha1( $saved_body )
+			);
+			// Freshly generated posts match canonical core by construction.
+			update_post_meta(
+				(int) $post_id,
+				WCEmailTemplateDivergenceDetector::STATUS_META_KEY,
+				WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC
+			);
 		}
 
 		$this->template_manager->save_email_template_post_id( $email_type, $post_id );
