@@ -145,7 +145,8 @@ class WC_Meta_Box_Order_Actions {
 				return;
 			}
 
-			$action = wc_clean( wp_unslash( $_POST['wc_order_action'] ) ); // @codingStandardsIgnoreLine
+			$action   = wc_clean( wp_unslash( $_POST['wc_order_action'] ) ); // @codingStandardsIgnoreLine
+			$redesign = FeaturesUtil::feature_is_enabled( 'order-detail-redesign' );
 
 			if ( 'send_order_details' === $action ) {
 				/**
@@ -170,9 +171,11 @@ class WC_Meta_Box_Order_Actions {
 				 */
 				do_action( 'woocommerce_after_resend_order_email', $order, 'customer_invoice' );
 
-				// Change the post saved message.
-				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
-
+				if ( $redesign ) {
+					self::set_redirect_message_id( 12 );
+				} else {
+					add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
+				}
 			} elseif ( 'send_order_details_admin' === $action ) {
 
 				do_action( 'woocommerce_before_resend_order_emails', $order, 'new_order' );
@@ -185,20 +188,49 @@ class WC_Meta_Box_Order_Actions {
 
 				do_action( 'woocommerce_after_resend_order_email', $order, 'new_order' );
 
-				// Change the post saved message.
-				add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
-
+				if ( $redesign ) {
+					self::set_redirect_message_id( 13 );
+				} else {
+					add_filter( 'redirect_post_location', array( __CLASS__, 'set_email_sent_message' ) );
+				}
 			} elseif ( 'regenerate_download_permissions' === $action ) {
 
 				$data_store = WC_Data_Store::load( 'customer-download' );
 				$data_store->delete_by_order_id( $post_id );
 				wc_downloadable_product_permissions( $post_id, true );
 
+				if ( $redesign ) {
+					self::set_redirect_message_id( 14 );
+				}
 			} elseif ( ! did_action( 'woocommerce_order_action_' . sanitize_title( $action ) ) ) {
 
 					do_action( 'woocommerce_order_action_' . sanitize_title( $action ), $order );
+
+				if ( $redesign ) {
+					self::set_redirect_message_id( 15 );
+				}
 			}
 		}
+	}
+
+	/**
+	 * Adds redirect-location filters that change the post-update message ID
+	 * to the given value.
+	 *
+	 * Filters both `redirect_post_location` (legacy CPT save flow) and
+	 * `woocommerce_redirect_order_location` (HPOS save flow) so the order
+	 * edit screen shows the same confirmation message regardless of which
+	 * order storage backend is active.
+	 *
+	 * @param int $message_id Message ID registered in
+	 *                        WC_Admin_Post_Types::order_updated_messages().
+	 */
+	private static function set_redirect_message_id( int $message_id ): void {
+		$filter = function ( $location ) use ( $message_id ) {
+			return add_query_arg( 'message', $message_id, $location );
+		};
+		add_filter( 'redirect_post_location', $filter );
+		add_filter( 'woocommerce_redirect_order_location', $filter );
 	}
 
 	/**

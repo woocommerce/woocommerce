@@ -210,6 +210,10 @@ class WC_Admin_Post_Types {
 			),
 			10 => __( 'Order draft updated.', 'woocommerce' ),
 			11 => __( 'Order updated and sent.', 'woocommerce' ),
+			12 => __( 'Order details sent to customer.', 'woocommerce' ),
+			13 => __( 'New order notification resent.', 'woocommerce' ),
+			14 => __( 'Download permissions regenerated.', 'woocommerce' ),
+			15 => __( 'Order action applied.', 'woocommerce' ),
 		);
 
 		return $messages;
