@@ -78,7 +78,7 @@ export function OrderStatusPanel( { statuses }: OrderStatusPanelProps ) {
 				/>
 				<div className="wc-react-order-edit__status-actions">
 					<Button
-						variant="primary"
+						variant="secondary"
 						size="compact"
 						onClick={ handleUpdateClick }
 						disabled={ ! hasPendingChange }

@@ -104,7 +104,7 @@ export function StatusChangeModal( {
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
-					variant="primary"
+					variant="secondary"
 					size="compact"
 					onClick={ handleConfirm }
 					isBusy={ saving }

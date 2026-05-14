@@ -1,29 +1,28 @@
 /**
  * Customer panel (merged with Customer History).
  *
- * Identity row (avatar + name link + Guest/Registered pill) → EMAIL section →
- * SHIPPING INFORMATION → BILLING INFORMATION → stats footer (total orders,
- * total revenue, average order value). Sections separated by `<CardDivider>`.
+ * Identity row (name link + Guest/Registered pill) → EMAIL section →
+ * SHIPPING INFORMATION → BILLING INFORMATION → stats footer → OTHER ORDERS
+ * (DataView table of the customer's most recent orders, when present).
  *
- * v1 demo: the Edit per-section buttons all open the same Customer edit modal
- * which currently edits billing address fields. Per-section edit scoping
- * (email-only modal, shipping-only modal) is Future spec.
+ * Edit affordance lives only in the CardHeader and opens a single side-panel
+ * drawer (CustomerEditPanel) with all editable fields (email + shipping +
+ * billing) combined in one form. The per-section modals were retired in
+ * favour of this pattern.
  */
 
-import { useState, useEffect } from '@wordpress/element';
-import { __ } from '@wordpress/i18n';
+import { useState, useEffect, useMemo } from '@wordpress/element';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button, Card, CardHeader, CardBody } from '@wordpress/components';
+import { DataViews, type Field, type View } from '@wordpress/dataviews';
 import { useOrder } from '../data/order-context';
-import { fetchCustomer } from '../data/api';
-import type { OrderAddress, CustomerSummary } from '../data/types';
-import { EmailEditModal } from './email-edit-modal';
-import { AddressEditModal } from './address-edit-modal';
-
-type EditingSection = 'email' | 'shipping' | 'billing' | null;
+import { fetchCustomer, fetchCustomerOrders } from '../data/api';
+import type { Order, OrderAddress, CustomerSummary } from '../data/types';
+import { CustomerEditPanel } from './customer-edit-panel';
 
 export function CustomerPanel() {
 	const { order } = useOrder();
-	const [ editing, setEditing ] = useState< EditingSection >( null );
+	const [ editing, setEditing ] = useState( false );
 	const [ customer, setCustomer ] = useState< CustomerSummary | null >( null );
 
 	const customerId = order?.customer_id ?? 0;
@@ -71,15 +70,17 @@ export function CustomerPanel() {
 				>
 					{ __( 'Customer', 'woocommerce' ) }
 				</h2>
+				<Button
+					variant="link"
+					onClick={ () => setEditing( true ) }
+					className="wc-react-order-edit__panel-edit"
+				>
+					{ __( 'Edit', 'woocommerce' ) }
+				</Button>
 			</CardHeader>
 
 			<CardBody className="wc-react-order-edit__customer-identity-body">
 				<div className="wc-react-order-edit__customer-identity">
-					<Avatar
-						customer={ customer }
-						email={ order.billing.email }
-						name={ displayName }
-					/>
 					{ customerId > 0 ? (
 						<a
 							href={ `/wp-admin/user-edit.php?user_id=${ customerId }` }
@@ -103,10 +104,7 @@ export function CustomerPanel() {
 			<hr className="wc-react-order-edit__card-divider" />
 
 			<CardBody className="wc-react-order-edit__customer-section">
-				<SectionRow
-					label={ __( 'Email', 'woocommerce' ) }
-					onEdit={ () => setEditing( 'email' ) }
-				>
+				<SectionRow label={ __( 'Email', 'woocommerce' ) }>
 					{ order.billing.email ? (
 						<a href={ `mailto:${ order.billing.email }` }>
 							{ order.billing.email }
@@ -122,10 +120,7 @@ export function CustomerPanel() {
 			<hr className="wc-react-order-edit__card-divider" />
 
 			<CardBody className="wc-react-order-edit__customer-section">
-				<SectionRow
-					label={ __( 'Shipping information', 'woocommerce' ) }
-					onEdit={ () => setEditing( 'shipping' ) }
-				>
+				<SectionRow label={ __( 'Shipping information', 'woocommerce' ) }>
 					<AddressBlock address={ order.shipping } />
 				</SectionRow>
 			</CardBody>
@@ -133,10 +128,7 @@ export function CustomerPanel() {
 			<hr className="wc-react-order-edit__card-divider" />
 
 			<CardBody className="wc-react-order-edit__customer-section">
-				<SectionRow
-					label={ __( 'Billing information', 'woocommerce' ) }
-					onEdit={ () => setEditing( 'billing' ) }
-				>
+				<SectionRow label={ __( 'Billing information', 'woocommerce' ) }>
 					<AddressBlock address={ order.billing } />
 				</SectionRow>
 			</CardBody>
@@ -151,65 +143,27 @@ export function CustomerPanel() {
 				/>
 			</CardBody>
 
-			{ editing === 'email' && (
-				<EmailEditModal onClose={ () => setEditing( null ) } />
+			{ ! isGuest && customerId > 0 && (
+				<OtherOrdersSection
+					customerId={ customerId }
+					excludeOrderId={ order.id }
+					currencySymbol={ order.currency_symbol }
+				/>
 			) }
-			{ editing === 'shipping' && (
-				<AddressEditModal type="shipping" onClose={ () => setEditing( null ) } />
-			) }
-			{ editing === 'billing' && (
-				<AddressEditModal type="billing" onClose={ () => setEditing( null ) } />
+
+			{ editing && (
+				<CustomerEditPanel onClose={ () => setEditing( false ) } />
 			) }
 		</Card>
 	);
 }
 
-function Avatar( {
-	customer,
-	email,
-	name,
-}: {
-	customer: CustomerSummary | null;
-	email?: string;
-	name: string;
-} ) {
-	const src = customer?.avatar_url;
-	const initials = name
-		.split( /\s+/ )
-		.map( ( w ) => w[ 0 ] )
-		.filter( Boolean )
-		.slice( 0, 2 )
-		.join( '' )
-		.toUpperCase();
-
-	if ( src ) {
-		return (
-			<img
-				src={ src }
-				alt=""
-				className="wc-react-order-edit__customer-avatar"
-				width={ 32 }
-				height={ 32 }
-			/>
-		);
-	}
-	return (
-		<span
-			className="wc-react-order-edit__customer-avatar wc-react-order-edit__customer-avatar--placeholder"
-			aria-hidden="true"
-		>
-			{ initials || '?' }
-		</span>
-	);
-}
-
 interface SectionRowProps {
 	label: string;
-	onEdit: () => void;
 	children: React.ReactNode;
 }
 
-function SectionRow( { label, onEdit, children }: SectionRowProps ) {
+function SectionRow( { label, children }: SectionRowProps ) {
 	return (
 		<div className="wc-react-order-edit__customer-row">
 			<div className="wc-react-order-edit__customer-row-content">
@@ -218,9 +172,6 @@ function SectionRow( { label, onEdit, children }: SectionRowProps ) {
 					{ children }
 				</div>
 			</div>
-			<Button variant="link" onClick={ onEdit }>
-				{ __( 'Edit', 'woocommerce' ) }
-			</Button>
 		</div>
 	);
 }
@@ -301,4 +252,211 @@ function StatsRow( {
 			</div>
 		</dl>
 	);
+}
+
+interface OtherOrdersSectionProps {
+	customerId: number;
+	excludeOrderId: number;
+	currencySymbol?: string;
+}
+
+/** Flat row type for the other-orders DataView. */
+interface OtherOrderRow {
+	id: string;
+	rawId: number;
+	number: string;
+	statusSlug: string;
+	statusLabel: string;
+	dateLabel: string;
+	totalLabel: string;
+}
+
+/**
+ * "Other orders" section rendered at the bottom of the Customer card. Lists
+ * the customer's most recent orders (excluding the one currently being
+ * edited) in a DataView table, followed by a link to the full Orders list
+ * filtered by this customer. Renders nothing if the customer has no other
+ * orders.
+ */
+function OtherOrdersSection( {
+	customerId,
+	excludeOrderId,
+	currencySymbol,
+}: OtherOrdersSectionProps ) {
+	const [ orders, setOrders ] = useState< Order[] >( [] );
+	const [ total, setTotal ] = useState( 0 );
+
+	useEffect( () => {
+		let cancelled = false;
+		fetchCustomerOrders( customerId, excludeOrderId, 3 )
+			.then( ( res ) => {
+				if ( cancelled ) {
+					return;
+				}
+				setOrders( res.orders );
+				setTotal( res.total );
+			} )
+			.catch( () => {
+				// Non-critical — silently hide the section on fetch errors.
+			} );
+		return () => {
+			cancelled = true;
+		};
+	}, [ customerId, excludeOrderId ] );
+
+	const symbol = currencySymbol || '';
+
+	const rows: OtherOrderRow[] = useMemo(
+		() =>
+			orders.map( ( o ) => ( {
+				id: String( o.id ),
+				rawId: o.id,
+				number: `#${ o.number || o.id }`,
+				statusSlug: o.status,
+				statusLabel: humanizeStatus( o.status ),
+				dateLabel: formatOrderDate( o.date_created ),
+				totalLabel: `${ symbol }${ parseFloat(
+					o.total || '0'
+				).toFixed( 2 ) }`,
+			} ) ),
+		[ orders, symbol ]
+	);
+
+	const fields: Field< OtherOrderRow >[] = useMemo(
+		() => [
+			{
+				id: 'number',
+				label: __( 'Order number', 'woocommerce' ),
+				enableSorting: false,
+				enableHiding: false,
+				render: ( { item } ) => (
+					<a
+						href={ `/wp-admin/admin.php?page=wc-orders&action=edit&id=${ item.rawId }` }
+						className="wc-react-order-edit__text-link"
+					>
+						{ item.number }
+					</a>
+				),
+			},
+			{
+				id: 'date',
+				label: __( 'Date', 'woocommerce' ),
+				enableSorting: false,
+				enableHiding: false,
+				render: ( { item } ) => (
+					<span className="wc-react-order-edit__dv-date">
+						{ item.dateLabel }
+					</span>
+				),
+			},
+			{
+				id: 'status',
+				label: __( 'Status', 'woocommerce' ),
+				enableSorting: false,
+				enableHiding: false,
+				render: ( { item } ) => (
+					<span
+						className={ `wc-react-order-edit__status-pill wc-react-order-edit__status-pill--${ item.statusSlug }` }
+					>
+						{ item.statusLabel }
+					</span>
+				),
+			},
+			{
+				id: 'total',
+				label: __( 'Total', 'woocommerce' ),
+				enableSorting: false,
+				enableHiding: false,
+				render: ( { item } ) => (
+					<span className="wc-react-order-edit__dv-num">
+						{ item.totalLabel }
+					</span>
+				),
+			},
+		],
+		[]
+	);
+
+	const [ view, setView ] = useState< View >( () => ( {
+		type: 'table',
+		fields: [ 'date', 'status', 'total' ],
+		titleField: 'number',
+		page: 1,
+		perPage: 100,
+	} ) );
+
+	if ( orders.length === 0 ) {
+		return null;
+	}
+
+	return (
+		<>
+			<hr className="wc-react-order-edit__card-divider" />
+			<CardBody className="wc-react-order-edit__customer-other-orders-section">
+				<h3 className="wc-react-order-edit__subheading">
+					{ sprintf(
+						/* translators: %d: number of other orders */
+						_n(
+							'Other orders (%d)',
+							'Other orders (%d)',
+							total,
+							'woocommerce'
+						),
+						total
+					) }
+				</h3>
+				<div className="wc-react-order-edit__dv-shell wc-react-order-edit__other-orders-table">
+					<DataViews< OtherOrderRow >
+						data={ rows }
+						fields={ fields }
+						view={ view }
+						onChangeView={ setView }
+						getItemId={ ( item ) => item.id }
+						paginationInfo={ {
+							totalItems: rows.length,
+							totalPages: 1,
+						} }
+						search={ false }
+						defaultLayouts={ { table: {} } }
+						actions={ [] }
+					/>
+				</div>
+				<a
+					href={ `/wp-admin/admin.php?page=wc-orders&_customer_user=${ customerId }` }
+					className="wc-react-order-edit__text-link wc-react-order-edit__customer-other-orders-link"
+				>
+					{ __( 'View other orders →', 'woocommerce' ) }
+				</a>
+			</CardBody>
+		</>
+	);
+}
+
+/** Render a status slug as a human-readable label ("on-hold" → "On hold"). */
+function humanizeStatus( slug: string ): string {
+	if ( ! slug ) {
+		return '';
+	}
+	return slug
+		.replace( /-/g, ' ' )
+		.replace( /^\w/, ( c ) => c.toUpperCase() );
+}
+
+/** Render an order date in a compact "May 13, 2026" style. The customer
+ * card is a narrow column, so we drop the time of day to keep the cell
+ * from overflowing into the Status column. Hover/title could surface the
+ * full timestamp later if needed. */
+function formatOrderDate( iso?: string ): string {
+	if ( ! iso ) {
+		return '—';
+	}
+	const date = new Date( iso );
+	if ( Number.isNaN( date.getTime() ) ) {
+		return '—';
+	}
+	return date.toLocaleDateString( undefined, {
+		month: 'short',
+		day: 'numeric',
+		year: 'numeric',
+	} );
 }

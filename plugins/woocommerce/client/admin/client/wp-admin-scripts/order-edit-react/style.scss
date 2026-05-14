@@ -91,6 +91,14 @@
 	display: flex;
 	flex-direction: column;
 	gap: 20px;
+
+	// When a panel body wraps a scrollable timeline, drop the right padding
+	// so the scrollbar sits near the module's right edge. Left and
+	// top/bottom padding stay intact. The timeline's own padding-right (8px)
+	// keeps content from sitting under the scrollbar.
+	&:has(.wc-react-order-edit__timeline) {
+		padding-right: 4px;
+	}
 }
 
 .wc-react-order-edit__subheading {
@@ -116,9 +124,13 @@
 	line-height: 1.5;
 }
 
-// Identity row: avatar + name link + pill.
+// Identity row: avatar + name link + pill, with optional "View other
+// orders" link stacking below.
 .wc-react-order-edit__customer-identity-body {
 	padding: 16px 20px;
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
 }
 
 .wc-react-order-edit__customer-identity {
@@ -127,26 +139,8 @@
 	gap: 12px;
 }
 
-.wc-react-order-edit__customer-avatar {
-	width: 32px;
-	height: 32px;
-	border-radius: 50%;
-	background: #f0f0f1;
-	object-fit: cover;
-	flex: 0 0 auto;
-
-	&--placeholder {
-		display: inline-flex;
-		align-items: center;
-		justify-content: center;
-		font-size: 12px;
-		font-weight: 600;
-		color: #50575e;
-	}
-}
-
 .wc-react-order-edit__customer-name-link {
-	color: #2271b1;
+	color: var(--wp-admin-theme-color, #2271b1);
 	text-decoration: none;
 	font-weight: 500;
 	font-size: 14px;
@@ -154,6 +148,33 @@
 	&:hover {
 		text-decoration: underline;
 	}
+}
+
+// Secondary text link used for "View other orders" affordances etc.
+// Reuses the customer-name-link palette but smaller and without weight.
+.wc-react-order-edit__text-link {
+	color: var(--wp-admin-theme-color, #2271b1);
+	text-decoration: none;
+	font-size: 12px;
+	display: inline-flex;
+	align-items: center;
+	gap: 2px;
+
+	&:hover,
+	&:focus {
+		text-decoration: underline;
+	}
+}
+
+// Row sitting under the Customer ComboboxControl in the edit drawer:
+// hosts the "Apply customer's saved address" button (only shown when a
+// new customer is picked) and the "View other orders →" link.
+.wc-react-order-edit__customer-picker-actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 12px 16px;
+	align-items: center;
+	justify-content: space-between;
 }
 
 .wc-react-order-edit__customer-pill {
@@ -231,6 +252,73 @@
 	padding: 16px 20px;
 }
 
+// --------------------------------------------------------------------------
+// Customer card → "Other orders" section (DataView table at the bottom of
+// the card, plus a "View other orders →" link to the filtered orders list).
+// --------------------------------------------------------------------------
+.wc-react-order-edit__customer-other-orders-section {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	padding: 16px 20px;
+}
+
+.wc-react-order-edit__customer-other-orders-link {
+	align-self: flex-start;
+}
+
+// Keep the date string on a single line so it doesn't fold at the comma
+// between year and time when the column is narrow.
+.wc-react-order-edit__dv-date {
+	white-space: nowrap;
+}
+
+// Small status pill used inside the other-orders table. Soft tinted
+// backgrounds keyed off the WC status slug. Falls back to neutral grey.
+.wc-react-order-edit__status-pill {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 4px;
+	background: #f0f0f1;
+	color: #1d2327;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 1.4;
+	white-space: nowrap;
+
+	&--completed {
+		background: #e6f4ea;
+		color: #1a6d3c;
+	}
+
+	&--processing {
+		background: #e1f0ff;
+		color: #1d4e89;
+	}
+
+	&--on-hold {
+		background: #fff4e0;
+		color: #8a5a00;
+	}
+
+	&--pending {
+		background: #fff8e1;
+		color: #8a6d00;
+	}
+
+	&--cancelled,
+	&--refunded {
+		background: #f0f0f1;
+		color: #50575e;
+	}
+
+	&--failed {
+		background: #fdecea;
+		color: #a02525;
+	}
+}
+
 .wc-react-order-edit__stats {
 	display: grid;
 	grid-template-columns: repeat(3, 1fr);
@@ -259,35 +347,12 @@
 	}
 }
 
-// Notes panel.
-.wc-react-order-edit__customer-checkout-note {
-	background: #fff8e5;
-	border: 1px solid #f0c33c;
-	border-radius: 4px;
-	padding: 12px 16px;
-}
-
-.wc-react-order-edit__customer-checkout-note-header {
-	display: flex;
-	gap: 8px;
-	align-items: center;
-	margin-bottom: 8px;
-}
-
-.wc-react-order-edit__customer-checkout-note-label {
-	font-size: 12px;
-	text-transform: uppercase;
-	letter-spacing: 0.4px;
-	color: #50575e;
-	font-weight: 600;
-}
-
+// Checkout note (customer-supplied at checkout) — rendered via the
+// `@wordpress/components` Notice with status="warning", so the design
+// system handles colors/border/padding. We just preserve newlines so
+// multi-line checkout notes keep their formatting.
 .wc-react-order-edit__customer-checkout-note-body {
-	margin: 0;
-	font-style: italic;
-	color: #1d2327;
-	border-left: 3px solid #f0c33c;
-	padding-left: 12px;
+	white-space: pre-wrap;
 }
 
 .wc-react-order-edit__notes-section {
@@ -296,31 +361,48 @@
 	gap: 8px;
 }
 
-.wc-react-order-edit__notes-list {
-	list-style: none;
-	margin: 0;
-	padding: 0;
-	display: flex;
-	flex-direction: column;
-	gap: 12px;
-	// Cap the list height so a long notes thread doesn't push the panels below
-	// (Attribution, side metaboxes) out of view. Scroll inside the list itself.
-	max-height: 480px;
-	overflow-y: auto;
-	// Small inset so the scrollbar doesn't overlap the note row borders.
-	padding-right: 4px;
+// Notes-as-timeline: the human-notes list reuses the same rail+dots visual
+// as the History timeline so the two panels read as a consistent pattern.
+// Each row's body is a trunk-style card: a `.note_content` box with an
+// optional `.note_header` strip for customer-facing notes.
+.wc-react-order-edit__notes-timeline {
+	.wc-react-order-edit__timeline-row {
+		padding-bottom: 18px;
+	}
 }
 
-.wc-react-order-edit__note-row {
-	border: 1px solid #f0f0f1;
+// Card body wrapper for the note — mirrors the trunk `<div class="note_content">`.
+.wc-react-order-edit__note-content {
+	background: #fff;
+	border: 1px solid #e0e0e0;
 	border-radius: 4px;
-	padding: 10px 12px;
-	background: #fafafa;
+	overflow: hidden;
+}
+
+// Header strip on customer-facing notes only. Amber/yellow, matching trunk's
+// `.note_header` (mirrors @wordpress/components Notice is-warning).
+.wc-react-order-edit__note-header {
+	padding: 6px 12px;
+	background: #fef8ee;
+	border-bottom: 1px solid #e0e0e0;
+	font-size: 11px;
+	font-weight: 600;
+	color: #50575e;
+	text-transform: none;
+	letter-spacing: 0;
 }
 
 .wc-react-order-edit__note-body {
+	padding: 8px 12px;
 	color: #1d2327;
 	white-space: pre-wrap;
+	line-height: 1.5;
+}
+
+// Meta row sits BELOW the card (outside .note_content), matching trunk.
+.wc-react-order-edit__notes-timeline .wc-react-order-edit__note-meta {
+	margin-top: 6px;
+	padding: 0 4px;
 }
 
 .wc-react-order-edit__note-meta {
@@ -330,6 +412,12 @@
 	color: #757575;
 	margin-top: 6px;
 	align-items: center;
+
+	// Push the Delete button to the right edge of the note card. Author +
+	// date stay grouped on the left, separated from Delete by an elastic gap.
+	.components-button {
+		margin-left: auto;
+	}
 }
 
 .wc-react-order-edit__note-author {
@@ -414,6 +502,23 @@
 	justify-content: flex-end;
 }
 
+// Tighten the vertical padding + flex gap of the items panel's CardBody
+// sections. Default CardBody padding is generous (~16-24px) and the
+// global panel-body uses gap: 20px — both made the items+totals+actions
+// stack feel hollow. 12px everywhere matches the 12px rhythm of the
+// totals summary.
+.wc-react-order-edit__items-totals-panel {
+	.components-card-body,
+	.components-card__body {
+		padding-top: 12px;
+		padding-bottom: 12px;
+	}
+
+	.wc-react-order-edit__panel-body {
+		gap: 12px;
+	}
+}
+
 // Custom fields.
 .wc-react-order-edit__meta-list {
 	display: grid;
@@ -464,25 +569,12 @@
 	list-style: none;
 	margin: 0;
 	padding: 0;
-	position: relative;
 	// Cap the height so a long activity log doesn't push Attribution and the
 	// side metaboxes out of view. Scroll inside the timeline itself.
 	max-height: 480px;
 	overflow-y: auto;
-	// Small inset so the scrollbar has its own gutter beside the rail.
-	padding-right: 8px;
-
-	// The rail itself.
-	&::before {
-		content: '';
-		position: absolute;
-		top: 6px;
-		bottom: 6px;
-		left: 7px;
-		width: 2px;
-		background: #f0f0f1;
-		border-radius: 1px;
-	}
+	// Inset so the scrollbar has its own gutter beside the content.
+	padding-right: 16px;
 }
 
 .wc-react-order-edit__timeline-row {
@@ -492,6 +584,28 @@
 	padding: 4px 0 14px;
 	position: relative;
 
+	// Each row draws its own rail segment spanning the full row height.
+	// Rows are flush siblings so the segments stack into one continuous
+	// vertical line — robust against stacking/overflow context issues that
+	// would interrupt a single rail on the parent <ul>.
+	&::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		bottom: 0;
+		left: 7px;
+		width: 2px;
+		background: #f0f0f1;
+		border-radius: 1px;
+	}
+
+	// First row: don't draw above the first dot.
+	&:first-child::before {
+		top: 6px;
+	}
+
+	// Last row: rail ends with the row (the row's own padding-bottom is
+	// removed below, so the rail won't trail past the last dot).
 	&:last-child {
 		padding-bottom: 0;
 	}
@@ -499,6 +613,8 @@
 
 // Dot sits over the rail. Email-type rows get a filled blue dot; other events
 // get a hollow ring so the eye can tell them apart at a glance.
+// `position: relative; z-index: 1` lifts the dot above the row's absolutely
+// positioned `::before` rail, which would otherwise paint over it.
 .wc-react-order-edit__timeline-icon {
 	width: 16px;
 	height: 16px;
@@ -508,6 +624,8 @@
 	font-size: 0;
 	line-height: 1;
 	margin-top: 4px;
+	position: relative;
+	z-index: 1;
 
 	&::after {
 		content: '';
@@ -636,3 +754,855 @@
 		flex-wrap: wrap;
 	}
 }
+
+// --------------------------------------------------------------------------
+// Customer edit drawer (side panel)
+// --------------------------------------------------------------------------
+// Fixed-position drawer pinned to the right edge of the viewport, leaving
+// space for the WP admin bar at the top. Slides in from off-screen on mount.
+// No backdrop — the page underneath stays visible. Cancel/Save/X/Esc close.
+
+// Applied to <body> while a drawer is open so the page underneath doesn't
+// scroll alongside the drawer body. Each drawer's React effect adds/removes
+// this class on mount/unmount.
+body.wc-react-order-edit__body-scroll-locked {
+	overflow: hidden;
+}
+
+@keyframes wc-react-order-edit__drawer-slide-in {
+	from {
+		transform: translateX(100%);
+	}
+	to {
+		transform: translateX(0);
+	}
+}
+
+@keyframes wc-react-order-edit__drawer-backdrop-fade-in {
+	from {
+		opacity: 0;
+	}
+	to {
+		opacity: 1;
+	}
+}
+
+// Backdrop sits between the page content and the drawer, dimming everything
+// underneath. Click anywhere on it to dismiss the drawer (unless saving).
+.wc-react-order-edit__drawer-backdrop {
+	position: fixed;
+	top: 32px; // align with drawer — keep the WP admin bar visible
+	right: 0;
+	bottom: 0;
+	left: 0;
+	background: rgba(0, 0, 0, 0.5);
+	z-index: 100000; // above WP admin bar (99999), below drawer (100001)
+	animation: wc-react-order-edit__drawer-backdrop-fade-in 180ms ease-out;
+
+	@media screen and (max-width: 782px) {
+		top: 46px;
+	}
+}
+
+.wc-react-order-edit__drawer {
+	position: fixed;
+	top: 32px; // below WP admin bar (46px on mobile via @media if needed later)
+	right: 0;
+	bottom: 0;
+	width: 450px;
+	max-width: 100vw;
+	background: #fff;
+	box-shadow: -8px 0 24px rgba(0, 0, 0, 0.08);
+	z-index: 100001; // above WP admin bar (z-index 99999) and WC chrome
+	display: flex;
+	flex-direction: column;
+	animation: wc-react-order-edit__drawer-slide-in 220ms ease-out;
+
+	@media screen and (max-width: 782px) {
+		top: 46px; // larger mobile admin bar
+	}
+}
+
+.wc-react-order-edit__drawer-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 16px;
+	border-bottom: 1px solid #e0e0e0;
+	flex-shrink: 0;
+}
+
+.wc-react-order-edit__drawer-title {
+	margin: 0;
+	font-size: 14px;
+	font-weight: 600;
+	color: #1d2327;
+	line-height: 1.4;
+}
+
+.wc-react-order-edit__drawer-body {
+	flex: 1 1 auto;
+	overflow-y: auto;
+	padding: 16px 24px;
+	display: flex;
+	flex-direction: column;
+	gap: 24px;
+}
+
+.wc-react-order-edit__drawer-section {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+
+	// Divider BETWEEN sections (not below each header). The first
+	// section has no top border so the page doesn't start with a line.
+	& + & {
+		border-top: 1px solid #f0f0f1;
+		padding-top: 24px;
+	}
+}
+
+.wc-react-order-edit__drawer-section-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+	// Match the 24px space above the heading (section padding-top): the
+	// section's flex gap contributes 12px, so we add 12px here to total
+	// 24px between the heading and the first form row below it.
+	margin-bottom: 12px;
+}
+
+// Typography is now provided by @wordpress/components' `Heading` (level={4}).
+// We keep the class only as a layout hook (margin reset) so the heading sits
+// flush with the section's flex layout.
+.wc-react-order-edit__drawer-section-title {
+	margin: 0;
+}
+
+.wc-react-order-edit__drawer-footer {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 12px;
+	padding: 12px 16px;
+	border-top: 1px solid #e0e0e0;
+	background: #fff;
+	flex-shrink: 0;
+}
+
+// A footer-left action (e.g., Recalculate) — pushes itself to the left
+// edge while Cancel/Save stay on the right.
+.wc-react-order-edit__drawer-footer-recalc {
+	margin-right: auto;
+}
+
+// --------------------------------------------------------------------------
+// Items edit drawer — line item cards + totals summary
+// --------------------------------------------------------------------------
+
+.wc-react-order-edit__items-edit-list {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+}
+
+.wc-react-order-edit__item-edit-card {
+	border: 1px solid #e0e0e0;
+	border-radius: 4px;
+	padding: 12px;
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	background: #fff;
+
+	&--deleted {
+		opacity: 0.55;
+		background: #f6f7f7;
+	}
+}
+
+.wc-react-order-edit__item-edit-card-header {
+	display: flex;
+	align-items: center;
+	gap: 10px;
+}
+
+.wc-react-order-edit__item-edit-card-thumb {
+	width: 36px;
+	height: 36px;
+	border-radius: 4px;
+	object-fit: cover;
+	flex-shrink: 0;
+	display: block;
+
+	&--placeholder {
+		background: #f0f0f1;
+		border: 1px solid #e0e0e0;
+	}
+}
+
+.wc-react-order-edit__item-edit-card-name {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	min-width: 0;
+	flex: 1 1 auto;
+}
+
+.wc-react-order-edit__item-edit-card-sku {
+	font-size: 11px;
+	color: #757575;
+}
+
+// --------------------------------------------------------------------------
+// Items & totals — DataViews table (read-only, in items-totals-panel.tsx)
+// --------------------------------------------------------------------------
+// The DataViews component renders its own chrome (search, filters, gear
+// menu, pagination, density). For a static collection of order line items
+// most of that is noise — we hide it via these overrides so the result
+// reads like the Figma design.
+
+.wc-react-order-edit__dv-shell {
+	// DataViews ships with margins/borders we don't want inside a CardBody.
+	// These targeted selectors flatten the container to the Card edges,
+	// including the trailing padding below the last row that was creating
+	// an oversized gap before the totals divider.
+	.dataviews-wrapper {
+		border: 0;
+		background: transparent;
+		padding: 0;
+		margin: 0;
+	}
+
+	// Any internal wrappers DataViews adds around the table — zero out
+	// vertical spacing so the table sits flush with our totals summary.
+	.dataviews-view-table-wrapper,
+	.dataviews-layout-table,
+	.dataviews__view-table {
+		padding: 0 !important;
+		margin: 0 !important;
+	}
+
+	.dataviews-view-table {
+		margin: 0;
+		border-collapse: collapse;
+	}
+
+	// Hide the entire control strip — search, filter chips, view dropdown,
+	// density toggle. Our table is static; none of those apply.
+	.dataviews__view-actions,
+	.dataviews-filters__container,
+	.dataviews-filters__custom-search,
+	.dataviews-filters-toggle,
+	.dataviews-view-config,
+	.dataviews-search {
+		display: none !important;
+	}
+
+	// Hide the pagination footer — single-page static lists don't need it.
+	.dataviews-footer,
+	.dataviews-pagination {
+		display: none !important;
+	}
+
+	// Make the table header style match our other panel typography.
+	// DataViews wraps each header cell in a button (for sort affordance);
+	// we override both the th and the inner button so the visual reads
+	// like static labels, matching the Figma reference.
+	.dataviews-view-table th,
+	.dataviews-view-table thead th button,
+	.dataviews-view-table thead th .components-button,
+	.dataviews-view-table thead th .dataviews-view-table-header-button {
+		font-size: 11px !important;
+		text-transform: uppercase !important;
+		letter-spacing: 0.4px !important;
+		color: #50575e !important;
+		font-weight: 600 !important;
+		background: transparent !important;
+		box-shadow: none !important;
+		text-decoration: none !important;
+		cursor: default !important;
+
+		&:hover,
+		&:focus {
+			color: #50575e !important;
+			background: transparent !important;
+		}
+
+		// Hide any sort/menu chevron icons next to non-sortable columns.
+		svg {
+			display: none;
+		}
+	}
+
+	// Zero out the inner button's own padding/margin so the header text
+	// sits at the th's padding edge — aligned with the column data's
+	// left edge (image position), not pushed inward by button padding.
+	.dataviews-view-table thead th button,
+	.dataviews-view-table thead th .components-button {
+		padding-left: 0 !important;
+		padding-right: 0 !important;
+		margin: 0 !important;
+		min-width: 0 !important;
+		min-height: 0 !important;
+		height: auto !important;
+		width: 100%;
+	}
+
+	// Uniform 12px vertical padding on every cell — header and body rows
+	// alike. Combined with the per-row content padding, this gives the
+	// table a consistent 12px rhythm matching the totals summary below.
+	.dataviews-view-table td,
+	.dataviews-view-table th {
+		padding: 12px 16px;
+	}
+
+	// Divider below the header row — separates labels from data.
+	.dataviews-view-table thead th {
+		border-bottom: 1px solid #e0e0e0;
+	}
+
+	// Subtle dividers between body rows so multi-item orders read as a
+	// scannable list, matching the Figma reference.
+	.dataviews-view-table tbody tr:not(:last-child) td {
+		border-bottom: 1px solid #f0f0f1;
+	}
+
+	// Column alignment: first column (Products) left-aligned with its image
+	// thumbnail and name; the three numeric columns (Cost, Qty, Total)
+	// right-aligned so the columns of numbers line up cleanly under their
+	// labels — matches the Figma reference.
+	.dataviews-view-table {
+		th:first-child,
+		td:first-child {
+			text-align: left;
+		}
+
+		th:first-child button,
+		th:first-child .components-button,
+		th:first-child .dataviews-view-table-header-button {
+			justify-content: flex-start !important;
+			text-align: left !important;
+		}
+
+		th:not(:first-child),
+		td:not(:first-child) {
+			text-align: right !important;
+		}
+
+		th:not(:first-child) button,
+		th:not(:first-child) .components-button,
+		th:not(:first-child) .dataviews-view-table-header-button {
+			justify-content: flex-end !important;
+			text-align: right !important;
+			width: 100%;
+		}
+	}
+
+	// Fixed column widths — keeps the layout consistent regardless of the
+	// number of rows and the longest product name.
+	.dataviews-view-table {
+		table-layout: fixed;
+		width: 100%;
+
+		th:nth-child(1), td:nth-child(1) { width: auto; }
+		th:nth-child(2), td:nth-child(2) { width: 80px; } // Cost
+		th:nth-child(3), td:nth-child(3) { width: 56px; } // Qty
+		th:nth-child(4), td:nth-child(4) { width: 80px; } // Total
+	}
+}
+
+// Right-aligned numeric cells (Cost, Qty, Total).
+.wc-react-order-edit__dv-num {
+	display: block;
+	text-align: right;
+	font-variant-numeric: tabular-nums;
+}
+
+// Products cell layout: thumbnail + name/badges/SKU stack.
+.wc-react-order-edit__dv-product {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+
+.wc-react-order-edit__dv-thumb {
+	width: 48px;
+	height: 48px;
+	border-radius: 4px;
+	object-fit: cover;
+	flex-shrink: 0;
+	display: block;
+
+	&--placeholder {
+		background: #f0f0f1;
+		border: 1px solid #e0e0e0;
+	}
+}
+
+.wc-react-order-edit__dv-product-body {
+	display: flex;
+	flex-direction: column;
+	gap: 4px;
+	min-width: 0;
+}
+
+.wc-react-order-edit__dv-product-name {
+	color: #1d2327;
+	font-weight: 500;
+	min-width: 0;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.wc-react-order-edit__dv-badges {
+	display: flex;
+	gap: 4px;
+	flex-wrap: wrap;
+}
+
+// Stand-in for `<Badge intent="default">` from @wordpress/components,
+// which crashes with React error #130 in this version. Matches the
+// Figma reference visually (soft grey pill, compact).
+.wc-react-order-edit__dv-badge {
+	display: inline-flex;
+	align-items: center;
+	padding: 2px 8px;
+	border-radius: 4px;
+	background: #f0f0f1;
+	color: #1d2327;
+	font-size: 11px;
+	font-weight: 500;
+	line-height: 1.4;
+	white-space: nowrap;
+}
+
+.wc-react-order-edit__dv-sku {
+	font-size: 11px;
+	color: #757575;
+	line-height: 1.4;
+}
+
+// --------------------------------------------------------------------------
+// Order-level totals summary (shipping / tax / discount / total) — rendered
+// below the DataViews table, not inside it. Horizontal padding matches the
+// items table's cell padding (16px) so labels align with PRODUCTS and
+// values align with the TOTAL column's right edge.
+// --------------------------------------------------------------------------
+.wc-react-order-edit__totals-summary {
+	display: flex;
+	flex-direction: column;
+	gap: 12px;
+	// No top margin — the parent panel-body's flex gap already separates
+	// us from the items table above, and our own border-top provides the
+	// visual divider.
+	margin-top: 0;
+	padding: 12px 16px 0;
+	border-top: 1px solid #e0e0e0;
+}
+
+.wc-react-order-edit__totals-summary-row {
+	display: flex;
+	justify-content: space-between;
+	align-items: baseline;
+	font-size: 13px;
+	color: #1d2327;
+
+	dt, dd {
+		margin: 0;
+	}
+
+	dt {
+		color: #50575e;
+	}
+
+	dd {
+		font-variant-numeric: tabular-nums;
+	}
+
+	&--grand {
+		margin-top: 0;
+		padding-top: 12px;
+		border-top: 1px solid #e0e0e0;
+		font-weight: 600;
+		font-size: 14px;
+	}
+}
+
+// Editable Custom fields block inside each line item card in the drawer.
+// Two-step UX: read-only display by default, toggle "Edit" in the header
+// to reveal key/value inputs.
+.wc-react-order-edit__item-edit-card-meta-section {
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+	padding-top: 8px;
+	border-top: 1px dashed #e0e0e0;
+}
+
+.wc-react-order-edit__item-edit-card-meta-header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 8px;
+}
+
+.wc-react-order-edit__item-edit-card-meta-heading {
+	margin: 0;
+	font-size: 11px;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.4px;
+	color: #50575e;
+}
+
+// Read-only meta display when the section is collapsed — same compact
+// italic-grey treatment as the items-totals-panel table row meta.
+.wc-react-order-edit__item-edit-card-meta-display {
+	font-size: 12px;
+	color: #50575e;
+	font-style: italic;
+	line-height: 1.4;
+}
+
+.wc-react-order-edit__item-edit-card-meta-row {
+	// Reserved hook for per-row tweaks; layout is handled by the inner Flex.
+}
+
+.wc-react-order-edit__item-edit-card-meta-add {
+	align-self: flex-start;
+	padding: 0;
+}
+
+.wc-react-order-edit__item-edit-card-deleted-note {
+	margin: 0;
+	font-size: 12px;
+	color: #50575e;
+	font-style: italic;
+}
+
+.wc-react-order-edit__item-edit-card-tax-toggle {
+	align-self: flex-start;
+}
+
+.wc-react-order-edit__item-edit-card-tax {
+	background: #f6f7f7;
+	border-radius: 4px;
+	padding: 8px 10px;
+	font-size: 12px;
+
+	ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 4px;
+	}
+}
+
+// Live totals preview inside the drawer body — not sticky, scrolls with
+// the rest of the form. Distinct from the panel's own totals display.
+.wc-react-order-edit__drawer-totals {
+	display: flex;
+	flex-direction: column;
+	gap: 6px;
+	padding: 12px 0 0;
+	border-top: 1px solid #e0e0e0;
+	font-size: 13px;
+}
+
+.wc-react-order-edit__drawer-totals-row {
+	display: flex;
+	justify-content: space-between;
+	color: #1d2327;
+
+	&--grand {
+		margin-top: 6px;
+		padding-top: 6px;
+		border-top: 1px solid #e0e0e0;
+		font-weight: 600;
+		font-size: 14px;
+	}
+}
+
+.wc-react-order-edit__drawer-totals-note {
+	margin: 8px 0 0;
+	font-size: 11px;
+	color: #757575;
+	font-style: italic;
+}
+
+// --------------------------------------------------------------------------
+// Items edit drawer — variant attribute badges inline with the item name
+// --------------------------------------------------------------------------
+
+.wc-react-order-edit__item-edit-card-name-row {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px;
+}
+
+.wc-react-order-edit__item-edit-card-badges {
+	display: inline-flex;
+	flex-wrap: wrap;
+	gap: 4px;
+}
+
+// --------------------------------------------------------------------------
+// Items edit drawer — other-meta read-row (key/value pairs, plain)
+// --------------------------------------------------------------------------
+
+.wc-react-order-edit__item-edit-card-meta-display-row {
+	display: flex;
+	gap: 8px;
+	font-size: 12px;
+	color: #50575e;
+}
+
+.wc-react-order-edit__item-edit-card-meta-display-key {
+	color: #757575;
+}
+
+.wc-react-order-edit__item-edit-card-meta-display-value {
+	color: #1e1e1e;
+}
+
+// --------------------------------------------------------------------------
+// Items edit drawer — "+ Add product" trigger row
+// --------------------------------------------------------------------------
+
+.wc-react-order-edit__items-edit-add-row {
+	margin-top: 16px;
+	display: flex;
+	justify-content: flex-start;
+}
+
+// Highlight pulse for a newly added line item card. Runs once when the
+// element first mounts; subsequent state changes don't re-trigger the
+// animation. The transient `_justAdded` flag gets cleared after the
+// animation has had time to play.
+@keyframes wc-react-order-edit__new-item-pulse {
+	0% {
+		box-shadow: 0 0 0 0 rgba(0, 115, 170, 0.35);
+		background: #f0f6fc;
+	}
+	60% {
+		box-shadow: 0 0 0 8px rgba(0, 115, 170, 0);
+		background: #f0f6fc;
+	}
+	100% {
+		box-shadow: 0 0 0 0 rgba(0, 115, 170, 0);
+		background: #fff;
+	}
+}
+
+.wc-react-order-edit__item-edit-card--new {
+	animation: wc-react-order-edit__new-item-pulse 1.4s ease-out 1;
+}
+
+// --------------------------------------------------------------------------
+// Drawer "behind modal" state — when the picker modal is open, drop the
+// drawer below the WP-DS Modal overlay so the modal's dimmer covers it.
+// The drawer's own backdrop is hidden because the modal overlay handles the
+// dimming and a second backdrop would just stack tones.
+// --------------------------------------------------------------------------
+
+.wc-react-order-edit__drawer-backdrop--behind-modal {
+	display: none;
+}
+
+.wc-react-order-edit__drawer--behind-modal {
+	// Below the WP-DS Modal overlay (default z-index 100000) so the modal's
+	// dimmer fully covers the drawer instead of being clipped by it.
+	z-index: 99990;
+}
+
+// --------------------------------------------------------------------------
+// Product picker modal (sits above the items edit drawer)
+// --------------------------------------------------------------------------
+
+// Lock the modal to a stable size. Without this, the frame width and the
+// body height shift as the inner state moves between hint / loading / empty
+// / results, which is jarring while typing a search.
+//
+// WP-DS applies the `className` prop directly to `.components-modal__frame`,
+// so we combine both class selectors to beat the framework's default
+// width/max-width rules on the frame.
+.components-modal__frame.wc-react-order-edit__product-picker-modal {
+	width: 660px;
+	max-width: 660px;
+}
+
+// Fixed picker body so the modal stays a consistent size across states.
+// The header / search input sit on top; the state container below fills
+// the remaining space and is the only thing that scrolls.
+.wc-react-order-edit__product-picker {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	height: 480px;
+}
+
+.wc-react-order-edit__product-picker-empty {
+	margin: 0;
+	flex: 1 1 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 0 4px;
+	color: #757575;
+	text-align: center;
+	font-size: 13px;
+}
+
+.wc-react-order-edit__product-picker-loading {
+	flex: 1 1 auto;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	gap: 8px;
+	color: #757575;
+	font-size: 13px;
+}
+
+.wc-react-order-edit__product-picker-back {
+	align-self: flex-start;
+}
+
+.wc-react-order-edit__product-picker-results {
+	list-style: none;
+	margin: 0;
+	padding: 0;
+	flex: 1 1 auto;
+	overflow-y: auto;
+	border: 1px solid #f0f0f0;
+	border-radius: 4px;
+}
+
+.wc-react-order-edit__product-picker-row {
+	margin: 0;
+
+	& + & {
+		border-top: 1px solid #f0f0f0;
+	}
+}
+
+.wc-react-order-edit__product-picker-row-button {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+	width: 100%;
+	padding: 10px 12px;
+	background: transparent;
+	border: 0;
+	cursor: pointer;
+	text-align: left;
+	color: inherit;
+	font: inherit;
+
+	&:hover,
+	&:focus-visible,
+	&:focus-within {
+		background: #f6f7f7;
+	}
+
+	&:focus-visible {
+		outline: 2px solid #007cba;
+		outline-offset: -2px;
+	}
+
+	&--oos {
+		opacity: 0.7;
+	}
+}
+
+// Checkbox column on selectable rows; matching empty slot on variable
+// parent rows so thumbs / names / prices stay aligned across row types.
+.wc-react-order-edit__product-picker-row-checkbox,
+.wc-react-order-edit__product-picker-row-checkslot {
+	flex-shrink: 0;
+	width: 18px;
+	height: 18px;
+	margin: 0;
+}
+
+.wc-react-order-edit__product-picker-row-checkbox {
+	cursor: pointer;
+}
+
+.wc-react-order-edit__product-picker-thumb {
+	width: 36px;
+	height: 36px;
+	border-radius: 4px;
+	object-fit: cover;
+	flex-shrink: 0;
+	display: block;
+
+	&--placeholder {
+		background: #f0f0f0;
+		border: 1px solid #e0e0e0;
+	}
+}
+
+.wc-react-order-edit__product-picker-row-main {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.wc-react-order-edit__product-picker-row-name {
+	font-weight: 500;
+	font-size: 13px;
+	color: #1e1e1e;
+	overflow: hidden;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.wc-react-order-edit__product-picker-row-meta {
+	display: flex;
+	gap: 8px;
+	font-size: 11px;
+	color: #757575;
+}
+
+.wc-react-order-edit__product-picker-row-oos {
+	color: #b32d2e;
+}
+
+.wc-react-order-edit__product-picker-row-side {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-end;
+	gap: 2px;
+	flex-shrink: 0;
+}
+
+.wc-react-order-edit__product-picker-row-price {
+	font-size: 13px;
+	color: #1e1e1e;
+}
+
+.wc-react-order-edit__product-picker-row-action {
+	font-size: 11px;
+	color: #007cba;
+}
+
+// Sticky footer with Cancel + "Add N products" CTA. Sits inside the fixed
+// 480px picker container so the results scroll above it.
+.wc-react-order-edit__product-picker-footer {
+	display: flex;
+	justify-content: flex-end;
+	align-items: center;
+	gap: 8px;
+	padding-top: 12px;
+	border-top: 1px solid #f0f0f0;
+	flex-shrink: 0;
+}
+

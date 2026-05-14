@@ -15,6 +15,7 @@ import { useMemo } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Card, CardHeader, CardBody } from '@wordpress/components';
 import { useNotes } from '../data/notes-context';
+import { isSystemNote } from '../data/types';
 
 const NOTE_GROUP_EMAIL = 'EMAIL_NOTIFICATION';
 
@@ -22,7 +23,7 @@ export function HistoryTimeline() {
 	const { notes, loading } = useNotes();
 
 	const systemNotes = useMemo(
-		() => notes.filter( ( n ) => ! n.added_by_user ),
+		() => notes.filter( ( n ) => isSystemNote( n ) ),
 		[ notes ]
 	);
 

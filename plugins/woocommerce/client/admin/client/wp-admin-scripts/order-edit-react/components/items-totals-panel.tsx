@@ -6,7 +6,7 @@
  * modal pattern (stub Confirm in v1).
  */
 
-import { useState, useMemo } from '@wordpress/element';
+import { useState } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import {
 	Button,
@@ -24,66 +24,31 @@ import {
 import { useOrder } from '../data/order-context';
 import { updateOrder, describeError } from '../data/api';
 import { EmailIndicator } from './email-indicator';
+import { ItemsEditPanel } from './items-edit-panel';
+import { ItemsDataViewsTable } from './items-dataviews-table';
 
 type ActionType = 'mark-paid' | 'refund' | 'fulfill' | null;
 
-// Row type for the Items table. Carries line items + synthetic summary rows
-// (shipping / tax / total). `_kind` lets row styles diverge per row.
-type ItemRowKind = 'product' | 'shipping' | 'tax' | 'total';
-interface ItemRow {
-	id: string;
-	_kind: ItemRowKind;
-	name: string;
-	quantity: number | null;
-	price: string;
-	total: string;
-}
 
 export function ItemsTotalsPanel() {
 	const { order } = useOrder();
 	const [ activeAction, setActiveAction ] = useState< ActionType >( null );
+	const [ editing, setEditing ] = useState( false );
 
-	const rows: ItemRow[] = useMemo( () => {
-		if ( ! order ) {
-			return [];
-		}
-		const symbol = order.currency_symbol || '';
-		const products: ItemRow[] = order.line_items.map( ( item ) => ( {
-			id: `item-${ item.id }`,
-			_kind: 'product',
-			name: item.name,
-			quantity: item.quantity,
-			price: formatCurrency( item.subtotal, symbol ),
-			total: formatCurrency( item.total, symbol ),
-		} ) );
-		const summary: ItemRow[] = [
-			{
-				id: 'summary-shipping',
-				_kind: 'shipping',
-				name: __( 'Shipping', 'woocommerce' ),
-				quantity: null,
-				price: '',
-				total: formatCurrency( order.shipping_total || '0', symbol ),
-			},
-			{
-				id: 'summary-tax',
-				_kind: 'tax',
-				name: __( 'Tax', 'woocommerce' ),
-				quantity: null,
-				price: '',
-				total: formatCurrency( order.total_tax || '0', symbol ),
-			},
-			{
-				id: 'summary-total',
-				_kind: 'total',
-				name: __( 'Total', 'woocommerce' ),
-				quantity: null,
-				price: '',
-				total: formatCurrency( order.total, symbol ),
-			},
-		];
-		return [ ...products, ...summary ];
-	}, [ order ] );
+	// Trunk's `WC_Order::is_editable()` defaults to only (`pending`,
+	// `auto-draft`) — too restrictive for real-world use. We broaden to
+	// also include `processing` and `on-hold`, the statuses where edits
+	// genuinely make sense. Finalized states (`completed`, `cancelled`,
+	// `refunded`, `failed`) stay locked.
+	const EDITABLE_STATUSES = [
+		'pending',
+		'auto-draft',
+		'processing',
+		'on-hold',
+	];
+	const isEditable = !! order && EDITABLE_STATUSES.includes( order.status );
+
+
 
 	if ( ! order ) {
 		return null;
@@ -112,51 +77,30 @@ export function ItemsTotalsPanel() {
 					{ __( 'Items & totals', 'woocommerce' ) }
 				</h2>
 				<Button
-					variant="tertiary"
-					size="compact"
-					disabled
-					aria-label={ __( 'Editing line items is a Future spec item', 'woocommerce' ) }
+					variant="link"
+					onClick={ () => setEditing( true ) }
+					disabled={ ! isEditable }
+					className="wc-react-order-edit__panel-edit"
+					aria-label={
+						isEditable
+							? __( 'Edit items & totals', 'woocommerce' )
+							: __(
+									'This order is locked — items can only be edited while it is pending payment.',
+									'woocommerce'
+							  )
+					}
 				>
 					{ __( 'Edit', 'woocommerce' ) }
 				</Button>
 			</CardHeader>
 
 			<CardBody className="wc-react-order-edit__panel-body">
-				<table className="wc-react-order-edit__items-table">
-					<thead>
-						<tr>
-							<th>{ __( 'Product', 'woocommerce' ) }</th>
-							<th className="wc-react-order-edit__cell-num">
-								{ __( 'Qty', 'woocommerce' ) }
-							</th>
-							<th className="wc-react-order-edit__cell-num">
-								{ __( 'Price', 'woocommerce' ) }
-							</th>
-							<th className="wc-react-order-edit__cell-num">
-								{ __( 'Total', 'woocommerce' ) }
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						{ rows.map( ( row ) => (
-							<tr
-								key={ row.id }
-								className={ `wc-react-order-edit__items-row wc-react-order-edit__items-row--${ row._kind }` }
-							>
-								<td>{ row.name }</td>
-								<td className="wc-react-order-edit__cell-num">
-									{ row.quantity ?? '' }
-								</td>
-								<td className="wc-react-order-edit__cell-num">
-									{ row.price }
-								</td>
-								<td className="wc-react-order-edit__cell-num">
-									{ row.total }
-								</td>
-							</tr>
-						) ) }
-					</tbody>
-				</table>
+				<ItemsDataViewsTable
+					lineItems={ order.line_items }
+					currencySymbol={ order.currency_symbol || '' }
+				/>
+
+				<TotalsSummary order={ order } />
 
 				<p className="wc-react-order-edit__payment-line">
 					<strong>{ __( 'Payment method: ', 'woocommerce' ) }</strong>
@@ -233,7 +177,51 @@ export function ItemsTotalsPanel() {
 					onClose={ () => setActiveAction( null ) }
 				/>
 			) }
+			{ editing && (
+				<ItemsEditPanel onClose={ () => setEditing( false ) } />
+			) }
 		</Card>
+	);
+}
+
+/** Order-level totals summary (shipping / tax / discount / total) rendered
+ * below the DataViews line-items table. Pulled out of the table because
+ * it's not a collection — it's a single summary row group, and DataViews'
+ * row-based model doesn't fit it cleanly. */
+function TotalsSummary( {
+	order,
+}: {
+	order: import( '../data/types' ).Order;
+} ) {
+	const symbol = order.currency_symbol || '';
+	const shipping = parseFloat( order.shipping_total || '0' );
+	const discount = parseFloat( order.discount_total || '0' );
+	const tax = parseFloat( order.total_tax || '0' );
+	const total = parseFloat( order.total || '0' );
+
+	const fmt = ( n: number ) => `${ symbol }${ n.toFixed( 2 ) }`;
+
+	return (
+		<dl className="wc-react-order-edit__totals-summary">
+			<div className="wc-react-order-edit__totals-summary-row">
+				<dt>{ __( 'Shipping', 'woocommerce' ) }</dt>
+				<dd>{ fmt( shipping ) }</dd>
+			</div>
+			{ discount > 0 && (
+				<div className="wc-react-order-edit__totals-summary-row">
+					<dt>{ __( 'Discount', 'woocommerce' ) }</dt>
+					<dd>−{ fmt( discount ) }</dd>
+				</div>
+			) }
+			<div className="wc-react-order-edit__totals-summary-row">
+				<dt>{ __( 'Tax', 'woocommerce' ) }</dt>
+				<dd>{ fmt( tax ) }</dd>
+			</div>
+			<div className="wc-react-order-edit__totals-summary-row wc-react-order-edit__totals-summary-row--grand">
+				<dt>{ __( 'Total', 'woocommerce' ) }</dt>
+				<dd>{ fmt( total ) }</dd>
+			</div>
+		</dl>
 	);
 }
 
@@ -360,7 +348,7 @@ function MarkAsPaidModal( {
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
-					variant="primary"
+					variant="secondary"
 					size="compact"
 					onClick={ handleConfirm }
 					isBusy={ saving }
@@ -450,7 +438,7 @@ function FulfillOrderModal( { onClose }: { onClose: () => void } ) {
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
 				<Button
-					variant="primary"
+					variant="secondary"
 					size="compact"
 					onClick={ handleConfirm }
 					isBusy={ saving }
@@ -524,7 +512,7 @@ function RefundModal( {
 				<Button variant="tertiary" size="compact" onClick={ onClose }>
 					{ __( 'Cancel', 'woocommerce' ) }
 				</Button>
-				<Button variant="primary" size="compact" disabled onClick={ onClose }>
+				<Button variant="secondary" size="compact" disabled onClick={ onClose }>
 					{ __( 'Confirm refund', 'woocommerce' ) }
 				</Button>
 			</div>

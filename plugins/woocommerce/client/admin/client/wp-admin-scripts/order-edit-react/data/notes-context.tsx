@@ -3,6 +3,7 @@
  */
 
 import { createContext, useContext, useEffect, useState, useCallback } from '@wordpress/element';
+import { __ } from '@wordpress/i18n';
 import type { ReactNode } from 'react';
 import {
 	fetchOrderNotes,
@@ -52,6 +53,23 @@ export function NotesProvider( { orderId, children }: NotesProviderProps ) {
 	const addNote = useCallback(
 		async ( body: string, customerVisible: boolean ) => {
 			const note = await createOrderNote( orderId, body, customerVisible );
+			// When the note was sent to the customer, also record a
+			// system-attributed tracking entry so the History timeline
+			// shows that an email went out. customer_note=false +
+			// added_by_user=false routes it to History via our filter.
+			if ( customerVisible ) {
+				try {
+					await createOrderNote(
+						orderId,
+						__( 'Customer note email sent.', 'woocommerce' ),
+						false,
+						false
+					);
+				} catch ( e ) {
+					// Tracking entry is best-effort — if it fails the user
+					// note itself is still saved.
+				}
+			}
 			await load();
 			return note;
 		},

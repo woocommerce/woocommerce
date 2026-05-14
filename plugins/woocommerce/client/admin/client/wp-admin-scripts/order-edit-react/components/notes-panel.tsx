@@ -17,14 +17,13 @@ import {
 	TextareaControl,
 	ToggleControl,
 	Notice,
-	Badge,
 	Card,
 	CardHeader,
 	CardBody,
 } from '@wordpress/components';
 import { useOrder } from '../data/order-context';
 import { useNotes } from '../data/notes-context';
-import type { OrderNote } from '../data/types';
+import { isSystemNote, type OrderNote } from '../data/types';
 
 export function NotesPanel() {
 	const { order } = useOrder();
@@ -40,7 +39,7 @@ export function NotesPanel() {
 	// History column). Sorted chronologically with the newest first.
 	const humanNotes = useMemo( () => {
 		return notes
-			.filter( ( n ) => n.added_by_user )
+			.filter( ( n ) => ! isSystemNote( n ) )
 			.slice()
 			.sort(
 				( a, b ) =>
@@ -109,14 +108,11 @@ export function NotesPanel() {
 						{ __( 'Checkout notes', 'woocommerce' ) }
 					</h3>
 					{ customerNote ? (
-						<div className="wc-react-order-edit__customer-checkout-note">
-							<div className="wc-react-order-edit__customer-checkout-note-header">
-								<Badge intent="warning">{ __( 'Important', 'woocommerce' ) }</Badge>
-							</div>
-							<blockquote className="wc-react-order-edit__customer-checkout-note-body">
+						<Notice status="warning" isDismissible={ false }>
+							<span className="wc-react-order-edit__customer-checkout-note-body">
 								{ customerNote }
-							</blockquote>
-						</div>
+							</span>
+						</Notice>
 					) : (
 						<p className="wc-react-order-edit__empty">
 							{ __( 'No notes left at checkout.', 'woocommerce' ) }
@@ -139,7 +135,7 @@ export function NotesPanel() {
 							{ __( 'No notes yet.', 'woocommerce' ) }
 						</p>
 					) : (
-						<ul className="wc-react-order-edit__notes-list">
+						<ul className="wc-react-order-edit__timeline wc-react-order-edit__notes-timeline">
 							{ humanNotes.map( ( note ) => (
 								<NoteRow
 									key={ note.id }
@@ -180,7 +176,7 @@ export function NotesPanel() {
 							__nextHasNoMarginBottom
 						/>
 						<Button
-							variant="primary"
+							variant="secondary"
 							size="compact"
 							onClick={ handleAdd }
 							isBusy={ submitting }
@@ -201,36 +197,54 @@ interface NoteRowProps {
 }
 
 function NoteRow( { note, onDelete }: NoteRowProps ) {
-	const visibilityLabel = note.customer_note
-		? __( 'Sent to customer', 'woocommerce' )
-		: __( 'Private', 'woocommerce' );
-	const visibilityClass = note.customer_note
-		? 'wc-react-order-edit__note-visibility--customer'
-		: 'wc-react-order-edit__note-visibility--private';
+	// Customer-facing notes fire an email and visually get the "email" dot
+	// (filled blue), matching the History timeline pattern. Private notes
+	// get the default hollow ring.
+	const dotKind = note.customer_note ? 'email' : 'event';
+	// Customer notes can't be retracted — the email has already been sent.
+	// Only private merchant notes get a Delete affordance.
+	const canDelete = ! note.customer_note;
 
 	return (
-		<li className="wc-react-order-edit__note-row">
-			<div className="wc-react-order-edit__note-body">{ note.note }</div>
-			<div className="wc-react-order-edit__note-meta">
-				<span
-					className={ `wc-react-order-edit__note-visibility ${ visibilityClass }` }
+		<li className="wc-react-order-edit__timeline-row">
+			<div
+				className="wc-react-order-edit__timeline-icon"
+				data-kind={ dotKind }
+				aria-hidden="true"
+			/>
+			<div className="wc-react-order-edit__timeline-body">
+				<div
+					className={ `wc-react-order-edit__note-content${
+						note.customer_note ? ' wc-react-order-edit__note-content--customer' : ''
+					}` }
 				>
-					{ visibilityLabel }
-				</span>
-				<span className="wc-react-order-edit__note-author">
-					{ note.author || __( 'System', 'woocommerce' ) }
-				</span>
-				<span className="wc-react-order-edit__note-date">
-					{ formatDate( note.date_created ) }
-				</span>
-				<Button
-					variant="tertiary"
-					size="small"
-					onClick={ onDelete }
-					aria-label={ __( 'Delete note', 'woocommerce' ) }
-				>
-					{ __( 'Delete', 'woocommerce' ) }
-				</Button>
+					{ note.customer_note && (
+						<div className="wc-react-order-edit__note-header">
+							{ __( 'Sent to customer', 'woocommerce' ) }
+						</div>
+					) }
+					<div className="wc-react-order-edit__note-body">
+						{ note.note }
+					</div>
+				</div>
+				<div className="wc-react-order-edit__note-meta">
+					<span className="wc-react-order-edit__note-author">
+						{ note.author || __( 'System', 'woocommerce' ) }
+					</span>
+					<span className="wc-react-order-edit__note-date">
+						{ formatDate( note.date_created ) }
+					</span>
+					{ canDelete && (
+						<Button
+							variant="tertiary"
+							size="small"
+							onClick={ onDelete }
+							aria-label={ __( 'Delete note', 'woocommerce' ) }
+						>
+							{ __( 'Delete', 'woocommerce' ) }
+						</Button>
+					) }
+				</div>
 			</div>
 		</li>
 	);
