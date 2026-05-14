@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Prevent the legacy product grid blocks (On Sale Products, Best Selling Products, etc.) from showing a duplicate "added to cart" notice when their Add to Cart button is clicked from inside the Single Product template.

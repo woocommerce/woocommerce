@@ -12,6 +12,25 @@ use Automattic\WooCommerce\Enums\ProductStockStatus;
 abstract class AbstractProductGrid extends AbstractDynamicBlock {
 
 	/**
+	 * Query arg appended to add-to-cart URLs rendered by the legacy product
+	 * grid blocks when they are displayed on a single product page. It is
+	 * used to suppress the duplicate "added to cart" notice that would
+	 * otherwise be rendered alongside the single product page's own notices.
+	 *
+	 * @var string
+	 */
+	const SINGLE_PRODUCT_GRID_ATC_QUERY_ARG = '_wc_blocks_grid_atc';
+
+	/**
+	 * Tracks whether the notice suppression filter has been registered to
+	 * avoid attaching it multiple times when several legacy grid blocks
+	 * render on the same request.
+	 *
+	 * @var bool
+	 */
+	private static $single_product_grid_atc_filter_registered = false;
+
+	/**
 	 * Attributes.
 	 *
 	 * @var array
@@ -682,11 +701,73 @@ abstract class AbstractProductGrid extends AbstractDynamicBlock {
 		 */
 		$attributes = apply_filters( 'woocommerce_blocks_product_grid_add_to_cart_attributes', $attributes, $product );
 
+		$add_to_cart_url = $product->add_to_cart_url();
+
+		/*
+		 * When a legacy product grid block (e.g. On Sale Products) is rendered
+		 * inside the Single Product template, the link-based add-to-cart action
+		 * causes a full-page reload that ends up displaying the standard
+		 * "added to cart" notice on top of the single product page. Modern
+		 * Interactivity-API-powered blocks do not exhibit this behaviour, so
+		 * we mark the URL with a query arg here and suppress the notice for
+		 * the corresponding request to keep parity between the two stacks.
+		 */
+		if ( function_exists( 'is_product' ) && is_product() ) {
+			$add_to_cart_url = add_query_arg( self::SINGLE_PRODUCT_GRID_ATC_QUERY_ARG, '1', $add_to_cart_url );
+		}
+
 		return sprintf(
 			'<a href="%s" %s>%s</a>',
-			esc_url( $product->add_to_cart_url() ),
+			esc_url( $add_to_cart_url ),
 			wc_implode_html_attributes( $attributes ),
 			esc_html( $product->add_to_cart_text() )
+		);
+	}
+
+	/**
+	 * Initialize this block type.
+	 *
+	 * Also wires up a filter that suppresses the standard "added to cart"
+	 * notice when the add-to-cart request originates from a legacy product
+	 * grid block rendered on a single product page (see
+	 * SINGLE_PRODUCT_GRID_ATC_QUERY_ARG).
+	 *
+	 * @return void
+	 */
+	protected function initialize() {
+		parent::initialize();
+		self::register_single_product_grid_atc_notice_filter();
+	}
+
+	/**
+	 * Register the filter that suppresses the legacy add-to-cart notice
+	 * when the request originates from a product grid block rendered on a
+	 * single product page. The filter is registered at most once per
+	 * request, regardless of how many grid blocks are registered.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return void
+	 */
+	private static function register_single_product_grid_atc_notice_filter() {
+		if ( self::$single_product_grid_atc_filter_registered ) {
+			return;
+		}
+
+		self::$single_product_grid_atc_filter_registered = true;
+
+		add_filter(
+			'wc_add_to_cart_message_html',
+			static function ( $message ) {
+				// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only marker; nonces are not applicable.
+				if ( isset( $_REQUEST[ self::SINGLE_PRODUCT_GRID_ATC_QUERY_ARG ] ) ) {
+					return '';
+				}
+
+				return $message;
+			},
+			10,
+			1
 		);
 	}
 
