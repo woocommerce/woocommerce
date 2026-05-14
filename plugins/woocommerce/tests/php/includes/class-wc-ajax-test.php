@@ -553,6 +553,84 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * The session-stored chosen_shipping_methods should be cleared when update_order_review
+	 * runs with no shipping methods posted (e.g. cart transitioned to virtual-only items
+	 * and the checkout no longer needs shipping).
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/51197.
+	 */
+	public function test_update_order_review_clears_chosen_shipping_methods_when_none_posted(): void {
+		// Add a product so the cart is non-empty and update_order_review proceeds.
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Pre-seed the session with a previously chosen shipping method.
+		WC()->session->set( 'chosen_shipping_methods', array( 'free_shipping:1' ) );
+
+		$_POST                   = array();
+		$_POST['security']       = wp_create_nonce( 'update-order-review' );
+		$_POST['payment_method'] = '';
+		// Note: $_POST['shipping_method'] intentionally unset to simulate an all-virtual cart.
+
+		try {
+			$this->_handleAjax( 'woocommerce_update_order_review' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			// wp_send_json triggers wp_die; this is expected and produces a continue exception.
+			unset( $e );
+		} catch ( WPAjaxDieStopException $e ) {
+			// Also acceptable if the AJAX flow terminates early via wp_die().
+			unset( $e );
+		}
+
+		$chosen_after = WC()->session->get( 'chosen_shipping_methods' );
+
+		$this->assertIsArray( $chosen_after, 'Session value should be an array.' );
+		$this->assertSame( array(), $chosen_after, 'chosen_shipping_methods should be emptied when no shipping method is posted.' );
+
+		// Clean up.
+		WC()->cart->empty_cart();
+		WC()->session->set( 'chosen_shipping_methods', array() );
+		$product->delete( true );
+	}
+
+	/**
+	 * When shipping methods are posted, update_order_review should preserve/overwrite them
+	 * (existing behaviour).
+	 */
+	public function test_update_order_review_sets_chosen_shipping_methods_from_post(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		WC()->session->set( 'chosen_shipping_methods', array( 'flat_rate:99' ) );
+
+		$_POST                    = array();
+		$_POST['security']        = wp_create_nonce( 'update-order-review' );
+		$_POST['payment_method']  = '';
+		$_POST['shipping_method'] = array( 'free_shipping:1' );
+
+		try {
+			$this->_handleAjax( 'woocommerce_update_order_review' );
+		} catch ( WPAjaxDieContinueException $e ) {
+			// Expected: wp_send_json triggers wp_die.
+			unset( $e );
+		} catch ( WPAjaxDieStopException $e ) {
+			// Also acceptable if the AJAX flow terminates early via wp_die().
+			unset( $e );
+		}
+
+		$chosen_after = WC()->session->get( 'chosen_shipping_methods' );
+
+		$this->assertIsArray( $chosen_after );
+		$this->assertSame( 'free_shipping:1', $chosen_after[0] ?? null, 'Posted shipping method should be applied to the session.' );
+
+		WC()->cart->empty_cart();
+		WC()->session->set( 'chosen_shipping_methods', array() );
+		$product->delete( true );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.

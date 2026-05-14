@@ -406,12 +406,23 @@ class WC_AJAX {
 		$chosen_shipping_methods = WC()->session->get( 'chosen_shipping_methods' );
 		$posted_shipping_methods = isset( $_POST['shipping_method'] ) ? wc_clean( wp_unslash( $_POST['shipping_method'] ) ) : array();
 
+		if ( ! is_array( $chosen_shipping_methods ) ) {
+			$chosen_shipping_methods = array();
+		}
+
 		if ( is_array( $posted_shipping_methods ) ) {
-			foreach ( $posted_shipping_methods as $i => $value ) {
-				if ( ! is_string( $value ) ) {
-					continue;
+			if ( empty( $posted_shipping_methods ) ) {
+				// When no shipping methods are posted (e.g. cart no longer needs shipping
+				// because all remaining items are virtual), clear the previously chosen
+				// shipping methods so stale selections do not persist in the session.
+				$chosen_shipping_methods = array();
+			} else {
+				foreach ( $posted_shipping_methods as $i => $value ) {
+					if ( ! is_string( $value ) ) {
+						continue;
+					}
+					$chosen_shipping_methods[ $i ] = $value;
 				}
-				$chosen_shipping_methods[ $i ] = $value;
 			}
 		}
 

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Empty the session 'chosen_shipping_methods' on checkout when no shipping methods are posted (e.g. cart becomes virtual-only), so stale selections do not persist.
