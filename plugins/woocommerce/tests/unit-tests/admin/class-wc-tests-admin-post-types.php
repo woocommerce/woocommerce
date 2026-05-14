@@ -151,4 +151,95 @@ class WC_Tests_Admin_Post_Types extends WC_Unit_Test_Case {
 		$actual  = $product->{"get_{$type_of_price}_price"}();
 		$this->assertEquals( $expected_new_price, $actual );
 	}
+
+	/**
+	 * Data for shipping class quick/bulk edit with non-ASCII (Asian / Cyrillic) slugs test.
+	 *
+	 * Term slugs in WordPress are stored URL-encoded when they contain non-ASCII characters
+	 * (e.g. `冷凍` is stored as `%e5%86%b7%e5%87%8d`). The quick/bulk edit form posts the slug
+	 * back unchanged, so the save handler must look the term up by that percent-encoded slug.
+	 *
+	 * @return array
+	 */
+	public function data_provider_shipping_class_non_ascii_slugs() {
+		return array(
+			'quick_edit_chinese'  => array( 'quick_edit', '冷凍' ),
+			'bulk_edit_chinese'   => array( 'bulk_edit', '常溫' ),
+			'quick_edit_cyrillic' => array( 'quick_edit', 'охлаждённый' ),
+		);
+	}
+
+	/**
+	 * @test
+	 * @testdox Quick/bulk edit should save the shipping class even when its slug contains non-ASCII (Asian) characters.
+	 * @dataProvider data_provider_shipping_class_non_ascii_slugs
+	 *
+	 * @param string $edit_type 'quick_edit' or 'bulk_edit'.
+	 * @param string $term_name Name of the shipping class term (used to derive the non-ASCII slug).
+	 */
+	public function shipping_class_non_ascii_slug_is_saved( $edit_type, $term_name ) {
+		// Create a shipping class with a non-ASCII name. WordPress will URL-encode the slug.
+		$term = wp_insert_term( $term_name, 'product_shipping_class' );
+		$this->assertIsArray( $term, 'Failed to create shipping class term.' );
+
+		$term_data = get_term( $term['term_id'], 'product_shipping_class' );
+		$slug      = $term_data->slug;
+
+		// Sanity check: the slug should contain a percent-encoded octet for non-ASCII characters.
+		$this->assertMatchesRegularExpression( '/%[a-f0-9]{2}/i', $slug, 'Expected slug to be percent-encoded.' );
+
+		$product = WC_Helper_Product::create_simple_product( true );
+
+		$this->login_as_administrator();
+
+		$request_data = array(
+			"woocommerce_{$edit_type}"     => '1',
+			'_shipping_class'              => $slug,
+			'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
+		);
+
+		$sut = $this->get_sut_with_request_data( $request_data );
+
+		$sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		$updated = wc_get_product( $product->get_id() );
+		$this->assertEquals(
+			$term['term_id'],
+			$updated->get_shipping_class_id(),
+			'Shipping class with non-ASCII slug should be saved on the product.'
+		);
+
+		// Cleanup.
+		wp_delete_term( $term['term_id'], 'product_shipping_class' );
+	}
+
+	/**
+	 * @test
+	 * @testdox Quick edit should clear the shipping class when '_no_shipping_class' is selected.
+	 */
+	public function quick_edit_clears_shipping_class_when_no_shipping_class_selected() {
+		$term = wp_insert_term( 'Standard', 'product_shipping_class' );
+		$this->assertIsArray( $term );
+
+		$product = WC_Helper_Product::create_simple_product( true );
+		$product->set_shipping_class_id( $term['term_id'] );
+		$product->save();
+
+		$this->login_as_administrator();
+
+		$request_data = array(
+			'woocommerce_quick_edit'       => '1',
+			'_shipping_class'              => '_no_shipping_class',
+			'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
+		);
+
+		$sut = $this->get_sut_with_request_data( $request_data );
+
+		$sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		$updated = wc_get_product( $product->get_id() );
+		$this->assertEquals( 0, $updated->get_shipping_class_id() );
+
+		wp_delete_term( $term['term_id'], 'product_shipping_class' );
+	}
 }

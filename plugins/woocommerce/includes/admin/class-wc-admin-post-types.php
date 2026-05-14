@@ -435,8 +435,11 @@ class WC_Admin_Post_Types {
 			if ( '_no_shipping_class' === $request_data['_shipping_class'] ) {
 				$product->set_shipping_class_id( 0 );
 			} else {
-				// phpcs:ignore WordPress.Security.ValidatedSanitizedInput.MissingUnslash
-				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $request_data['_shipping_class'] ) );
+				// Use sanitize_title() to preserve percent-encoded characters in non-ASCII slugs.
+				// wc_clean() / sanitize_text_field() strips percent-encoded octets, which breaks
+				// shipping class slugs that contain Asian or other non-ASCII characters.
+				$shipping_class_slug = sanitize_title( wp_unslash( $request_data['_shipping_class'] ) );
+				$shipping_class_id   = $data_store->get_shipping_class_id_by_slug( $shipping_class_slug );
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}
@@ -564,7 +567,11 @@ class WC_Admin_Post_Types {
 			if ( '_no_shipping_class' === $request_data['_shipping_class'] ) {
 				$product->set_shipping_class_id( 0 );
 			} else {
-				$shipping_class_id = $data_store->get_shipping_class_id_by_slug( wc_clean( $request_data['_shipping_class'] ) );
+				// Use sanitize_title() to preserve percent-encoded characters in non-ASCII slugs.
+				// wc_clean() / sanitize_text_field() strips percent-encoded octets, which breaks
+				// shipping class slugs that contain Asian or other non-ASCII characters.
+				$shipping_class_slug = sanitize_title( wp_unslash( $request_data['_shipping_class'] ) );
+				$shipping_class_id   = $data_store->get_shipping_class_id_by_slug( $shipping_class_slug );
 				$product->set_shipping_class_id( $shipping_class_id );
 			}
 		}

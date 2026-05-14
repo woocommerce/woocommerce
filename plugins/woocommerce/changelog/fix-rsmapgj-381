@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Fix shipping class being cleared on quick/bulk edit when the slug contains non-ASCII (e.g. Asian) characters.
