@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Cast `WC_Product::get_image_id()` and `WC_Product_Variation::get_image_id()` return values to `int` so they are compatible with strict-typed callbacks on `wp_get_attachment_image_url()` and related WordPress filters.
