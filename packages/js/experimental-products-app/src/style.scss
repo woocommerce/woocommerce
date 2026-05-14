@@ -51,7 +51,6 @@
 	display: flex;
 	flex-direction: column;
 	height: 100%;
-	// `Drawer.Content` strips its top padding when a `Drawer.Header` sibling exists; restore it explicitly.
 	padding-top: var(--wpds-dimension-padding-2xl, 24px);
 }
 
