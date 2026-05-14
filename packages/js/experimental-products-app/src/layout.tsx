@@ -90,18 +90,7 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 						</div>
 					) }
 
-					{ ! isMobileViewport && areas.edit && (
-						<div
-							className="edit-site-layout__area woocommerce-product-edit-layout__region"
-							style={ {
-								maxWidth: widths?.edit,
-							} }
-						>
-							<div className="woocommerce-product-edit-layout__panel">
-								{ areas.edit }
-							</div>
-						</div>
-					) }
+					{ ! isMobileViewport && areas.edit }
 				</div>
 			</div>
 		</>

@@ -8,7 +8,8 @@
  * @var string $description
  * @var string $enum_fqcn
  * @var string $enum_alias
- * @var array  $values - each: ['graphql_name', 'case_name', 'description', 'deprecation_reason' => ?string]
+ * @var array  $values - each: ['graphql_name', 'case_name', 'description', 'deprecation_reason' => ?string, 'metadata' => array]
+ * @var array  $metadata - type-level metadata, name => scalar value.
  */
 
 $escaped_description = addslashes( $description );
@@ -35,6 +36,13 @@ class <?php echo $class_name; ?> {
 <?php if ( $description !== '' ) : ?>
 					'description' => __( '<?php echo $escaped_description; ?>', 'woocommerce' ),
 <?php endif; ?>
+<?php if ( ! empty( $metadata ) ) : ?>
+					'metadata' => array(
+<?php foreach ( $metadata as $meta_name => $meta_value ) : ?>
+						<?php echo var_export( $meta_name, true ); ?> => <?php echo var_export( $meta_value, true ); ?>,
+<?php endforeach; ?>
+					),
+<?php endif; ?>
 					'values' => array(
 <?php foreach ( $values as $val ) : ?>
 						'<?php echo $val['graphql_name']; ?>' => array(
@@ -44,6 +52,13 @@ class <?php echo $class_name; ?> {
 <?php endif; ?>
 	<?php if ( ! empty( $val['deprecation_reason'] ) ) : ?>
 							'deprecationReason' => '<?php echo addslashes( $val['deprecation_reason'] ); ?>',
+<?php endif; ?>
+	<?php if ( ! empty( $val['metadata'] ) ) : ?>
+							'metadata' => array(
+		<?php foreach ( $val['metadata'] as $meta_name => $meta_value ) : ?>
+								<?php echo var_export( $meta_name, true ); ?> => <?php echo var_export( $meta_value, true ); ?>,
+<?php endforeach; ?>
+							),
 <?php endif; ?>
 						),
 <?php endforeach; ?>

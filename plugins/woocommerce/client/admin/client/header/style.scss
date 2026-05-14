@@ -1,5 +1,56 @@
+// Standard visually-hidden pattern — keeps the element in the layout tree
+// (so jQuery delegated handlers still fire on it) but moves it off-screen
+// and clips its rendered area to nothing. Used twice in this file for the
+// activity-panel tab title spans and the wp-admin meta-toggle wraps.
+@mixin visually-hidden {
+	position: absolute;
+	width: 1px;
+	height: 1px;
+	margin: -1px;
+	padding: 0;
+	border: 0;
+	overflow: hidden;
+	clip: rect(0 0 0 0);
+	clip-path: inset(50%);
+	white-space: nowrap;
+}
+
+// Hide ONLY the two standard wp-admin meta-toggle wraps (Screen Options +
+// Help) that we proxy via the floating header's gear / ? icons. The parent
+// #screen-meta-links container is left alone so any third-party sibling
+// buttons (the rare plugin that injects its own `.screen-meta-toggle` div
+// directly into the strip) remain visible. Visually-hidden pattern (rather
+// than display:none) keeps the elements in the layout tree so wp-admin's
+// jQuery delegated click handlers still fire when we proxy .click() into
+// #show-settings-link / #contextual-help-link.
+// Defensive guard: only hide when the floating header's meta-icon button
+// has actually rendered (`:has(.woocommerce-layout__header-meta-icon)`).
+// If hasScreenOptions / hasContextualHelp detection misses for any reason,
+// :has() doesn't match and the user keeps access to the original wp-admin
+// strip rather than losing it entirely. Browsers without :has() support
+// (Firefox <121) also fall through to the safe state.
+.woocommerce-admin-page:has(.woocommerce-layout__header-meta-icon),
+body.woocommerce_page_wc-admin:has(.woocommerce-layout__header-meta-icon) {
+	#screen-options-link-wrap,
+	#contextual-help-link-wrap {
+		@include visually-hidden;
+	}
+}
+
+// Chrome-only narrow-bar height (Edit Order, Edit Product, Add Product, etc.).
+// Now that activity-panel tabs are icon-only globally, they fit cleanly in 32px.
+$woo-chrome-only-header-height: 32px;
+
 .woocommerce-layout__header {
-	background: $studio-white;
+	// Background matches the wp-admin body grey so the bar reads as
+	// infrastructure rather than content. Needs to be explicit (not inherited)
+	// because `position: fixed` lets page content scroll behind the bar — a
+	// transparent background would show that content through. Bottom border
+	// anchors the bar visually against the page below. Settings-page tweaks
+	// (drop the border so the bar reads as one strip with the tab nav)
+	// live in the legacy admin.scss alongside the rest of that page's overrides.
+	background: $wp-admin-background;
+	border-bottom: $header-border-width solid $wp-admin-border;
 	box-sizing: border-box;
 	padding: 0;
 	position: fixed;
@@ -39,12 +90,114 @@
 		padding: 0 0 0 $fallback-gutter-large;
 		padding: 0 0 0 $gutter-large;
 		height: $header-height;
-		background: $studio-white;
+		background: transparent;
 		font-weight: 600;
 		font-size: 14px;
 
 		&.woocommerce-layout__header-left-align {
 			flex: 1 auto;
+		}
+	}
+
+	// Spacer that takes up the title's flex space when no h1 renders
+	// (embedded post-type screens), so right-side items stay pinned right.
+	.woocommerce-layout__header-spacer {
+		flex: 1 auto;
+	}
+
+	// Screen Options + Help icon buttons — visually mirror the
+	// activity-panel-tab pattern so bell / list / megaphone / gear / ? all
+	// look identical regardless of which subsystem renders them, including
+	// the blue ::before underline on the active tab.
+	.woocommerce-layout__header-meta-icon {
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		align-items: center;
+		position: relative;
+		border: none;
+		outline: none;
+		cursor: pointer;
+		background-color: transparent;
+		height: $header-height;
+		// wp-admin admin-bar items use ~0 8px horizontal padding each side;
+		// match it for a tight, infrastructure-y spacing.
+		min-width: 0;
+		padding: 0 8px;
+		// $gray-900 across all states (default, hover, active) — the blue
+		// underline alone signals active, matching Gutenberg's icon tab group.
+		color: $gray-900;
+
+		&::before {
+			background-color: var(--wp-admin-theme-color);
+			bottom: 0;
+			content: "";
+			height: 0;
+			opacity: 0;
+			transition-property: height, opacity;
+			transition-duration: 300ms;
+			transition-timing-function: cubic-bezier(0.42, 0, 0.58, 1);
+			left: 0;
+			position: absolute;
+			right: 0;
+		}
+
+		&.is-active {
+			box-shadow: none;
+
+			&::before {
+				// 2px to match Gutenberg's TabPanel + Woo's own
+				// nav-tab-active indicator on Settings.
+				height: 2px;
+				opacity: 1;
+			}
+		}
+
+		&:hover,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):hover {
+			box-shadow: none;
+			background-color: transparent;
+			// Override Button's default theme-blue hover — Gutenberg's own
+			// icon tab groups keep the same dark-grey across all states.
+			color: $gray-900;
+		}
+
+		// Suppress the inset focus shadow on mouse-click focus (it conflicts
+		// with the blue underline). Keyboard-only focus still shows a ring
+		// via :focus-visible, preserving accessibility.
+		&:focus,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus {
+			box-shadow: none;
+		}
+		&:focus-visible,
+		&.components-button:not(:disabled):not([aria-disabled="true"]):focus-visible {
+			box-shadow: inset -1px -1px 0 $gray-700,
+				inset 1px 1px 0 $gray-700;
+		}
+
+		svg {
+			fill: currentColor;
+		}
+	}
+
+	// Chrome-only treatment: bar collapses to 32px on pages without a title.
+	// Hard height + max-height + overflow:hidden so the wrapper can't be pushed
+	// taller by any naturally-sized child (Finish setup widget, plugin fills, etc.).
+	// Inner activity-panel and meta-icon items also collapse so they fit cleanly.
+	&.is-chrome-only {
+		.woocommerce-layout__header-wrapper {
+			height: $woo-chrome-only-header-height;
+			min-height: $woo-chrome-only-header-height;
+			max-height: $woo-chrome-only-header-height;
+			overflow: hidden;
+		}
+
+		.woocommerce-layout__activity-panel-tabs,
+		.woocommerce-layout__activity-panel-tab,
+		.woocommerce-layout__header-meta-icon {
+			height: $woo-chrome-only-header-height;
+			min-height: $woo-chrome-only-header-height;
+			max-height: $woo-chrome-only-header-height;
 		}
 	}
 }

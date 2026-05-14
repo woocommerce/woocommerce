@@ -1,4 +1,0 @@
-Significance: patch
-Type: fix
-
-Strip sensitive fields (downloads, COGS, purchase note) from V4 products REST API response for users without product management capabilities.

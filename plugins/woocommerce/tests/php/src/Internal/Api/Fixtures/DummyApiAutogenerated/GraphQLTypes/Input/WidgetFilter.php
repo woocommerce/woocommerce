@@ -22,11 +22,11 @@ class WidgetFilter {
 						'search' => array(
 							'type' => Type::string(),
 								'description' => __( 'A free-text search term', 'woocommerce' ),
-						),
+							),
 						'color' => array(
 							'type' => ColorType::get(),
 								'description' => __( 'Filter widgets by color', 'woocommerce' ),
-						),
+							),
 					),
 				)
 			);

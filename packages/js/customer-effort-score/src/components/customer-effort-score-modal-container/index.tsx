@@ -10,7 +10,7 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import { CustomerFeedbackModal } from '../';
+import { CustomerFeedbackModal } from '../customer-feedback-modal';
 import { getStoreAgeInWeeks } from '../../utils';
 import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from '../../constants';
 import store from '../../store';

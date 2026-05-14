@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { SelectControl } from '@wordpress/components';
+import { Badge, SelectControl } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
 /**
@@ -10,11 +10,22 @@ import type { Field } from '@wordpress/dataviews';
  */
 import type { ProductEntityRecord } from '../types';
 
-function isValidStockStatus( value: string ) {
+type StockStatus = 'instock' | 'outofstock' | 'onbackorder';
+
+function isValidStockStatus( value: string ): value is StockStatus {
 	return (
 		value === 'instock' || value === 'outofstock' || value === 'onbackorder'
 	);
 }
+
+const stockStatusBadgeIntent: Record<
+	StockStatus,
+	React.ComponentProps< typeof Badge >[ 'intent' ]
+> = {
+	instock: 'none',
+	outofstock: 'high',
+	onbackorder: 'draft',
+};
 
 const fieldDefinition = {
 	label: __( 'Stock', 'woocommerce' ),
@@ -40,35 +51,48 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		const match = field?.elements?.find(
 			( status ) => status.value === item.stock_status
 		);
-		return match ? (
+
+		if ( ! match || ! isValidStockStatus( match.value ) ) {
+			return item.stock_status;
+		}
+
+		return (
 			<div className="woocommerce-fields-field__stock">
-				<span
-					className={ `woocommerce-fields-field__stock-label woocommerce-fields-field__stock-label--${ match.value }` }
-				>
+				<Badge intent={ stockStatusBadgeIntent[ match.value ] }>
 					{ match.label }
-				</span>
+				</Badge>
 				{ item.stock_quantity && item.stock_quantity > 0 && (
 					<span className="woocommerce-fields-field__stock-quantity">
 						({ item.stock_quantity })
 					</span>
 				) }
 			</div>
-		) : (
-			item.stock_status
 		);
 	},
-	Edit: ( { data, onChange, field } ) => (
-		<SelectControl
-			label={ __( 'Status', 'woocommerce' ) }
-			value={ data.stock_status }
-			options={ field?.elements || [] }
-			onChange={ ( value ) => {
-				if ( value && isValidStockStatus( value ) ) {
-					onChange( {
-						stock_status: value,
-					} );
-				}
-			} }
-		/>
-	),
+	Edit: ( { data, onChange, field } ) => {
+		const options = field?.elements ?? [];
+		const selectedOption = options.find(
+			( option ) => option.value === data.stock_status
+		);
+
+		return (
+			<SelectControl
+				label={ __( 'Status', 'woocommerce' ) }
+				value={ selectedOption }
+				items={ options }
+				onValueChange={ ( option ) => {
+					const value = option?.value;
+
+					if (
+						typeof value === 'string' &&
+						isValidStockStatus( value )
+					) {
+						onChange( {
+							stock_status: value,
+						} );
+					}
+				} }
+			/>
+		);
+	},
 };

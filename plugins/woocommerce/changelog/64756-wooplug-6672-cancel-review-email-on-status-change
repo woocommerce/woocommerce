@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Cancel the delayed Customer Review Request email when the order leaves `completed` for any status, and refuse to send if the order is no longer in an eligible status at trigger time.
