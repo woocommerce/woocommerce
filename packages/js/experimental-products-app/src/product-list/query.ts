@@ -233,7 +233,6 @@ function applyStockQuantityFilter( query: ProductListQuery, filter: Filter ) {
 			return;
 		case 'lessThanOrEqual':
 			query.max_stock_quantity = raw;
-			return;
 	}
 }
 

@@ -11,8 +11,22 @@ import type { DataFormControlProps, Field } from '@wordpress/dataviews';
 import type { ProductEntityRecord } from '../types';
 
 type StockQuantityRange = [ number | string, number | string ];
-type StockQuantityFilterRecord = Omit< ProductEntityRecord, 'stock_quantity' > & {
+type StockQuantityFilterRecord = Omit<
+	ProductEntityRecord,
+	'stock_quantity'
+> & {
 	stock_quantity?: number | null | StockQuantityRange;
+};
+
+const castValueToString = (
+	value: number | string | null | StockQuantityRange | undefined
+): string => {
+	if ( typeof value === 'number' ) {
+		return String( value );
+	} else if ( typeof value === 'string' ) {
+		return value;
+	}
+	return '';
 };
 
 const fieldDefinition = {
@@ -51,7 +65,9 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		const raw = ( data as StockQuantityFilterRecord ).stock_quantity;
 
 		if ( operator === 'between' ) {
-			const [ minRaw = '', maxRaw = '' ] = Array.isArray( raw ) ? raw : [];
+			const [ minRaw = '', maxRaw = '' ] = Array.isArray( raw )
+				? raw
+				: [];
 			const min = String( minRaw );
 			const max = String( maxRaw );
 
@@ -87,13 +103,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			);
 		}
 
-		const value =
-			typeof raw === 'number'
-				? String( raw )
-				: typeof raw === 'string'
-				? raw
-				: '';
-
+		const value = castValueToString( raw );
 		return (
 			<InputControl
 				label={ hideLabelFromVision ? '' : field.label }
