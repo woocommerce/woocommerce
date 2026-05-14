@@ -1830,7 +1830,7 @@ function wc_asort_by_locale( &$data, $locale = '' ) {
 			if ( Constants::is_true( 'WP_DEBUG' ) ) {
 				error_log( // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_error_log
 					sprintf(
-						'An unexpected error occurred while trying to use PHP Intl Collator class, it may be caused by an incorrect installation of PHP Intl and ICU, and could be fixed by reinstallaing PHP Intl, see more details about PHP Intl installation: %1$s. Error message: %2$s',
+						'An unexpected error occurred while trying to use PHP Intl Collator class, it may be caused by an incorrect installation of PHP Intl and ICU, and could be fixed by reinstalling PHP Intl, see more details about PHP Intl installation: %1$s. Error message: %2$s',
 						'https://www.php.net/manual/en/intl.installation.php',
 						$e->getMessage()
 					)
