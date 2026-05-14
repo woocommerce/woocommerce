@@ -90,16 +90,7 @@ export function Layout( { route, showNewNavigation = false }: LayoutProps ) {
 						</div>
 					) }
 
-					{ ! isMobileViewport && areas.edit && (
-						<div
-							className="edit-site-layout__area"
-							style={ {
-								maxWidth: widths?.edit,
-							} }
-						>
-							{ areas.edit }
-						</div>
-					) }
+					{ ! isMobileViewport && areas.edit }
 				</div>
 			</div>
 		</>

@@ -4,9 +4,10 @@
 import apiFetch from '@wordpress/api-fetch';
 import { store as coreStore } from '@wordpress/core-data';
 import { dispatch } from '@wordpress/data';
-import { edit, external, trash } from '@wordpress/icons';
-import { __, _n, _x, sprintf } from '@wordpress/i18n';
+import { edit, trash } from '@wordpress/icons';
+import { __, _n, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
+import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
 import type { Action } from '@wordpress/dataviews';
@@ -16,6 +17,63 @@ import { useMemo } from '@wordpress/element';
  * Internal dependencies
  */
 import type { ProductEntityRecord } from '../fields/types';
+import { unlock } from '../lock-unlock';
+import { getProductListNavigationPath } from '../product-list/utils';
+
+const { useHistory, useLocation } = unlock( routerPrivateApis );
+
+type EditActionOptions = {
+	navigate: ( path: string ) => void;
+	path?: string;
+	query?: Record< string, string | undefined >;
+};
+
+function getQuickEditPath(
+	path: string,
+	query: Record< string, string | undefined >,
+	productIds: number[]
+) {
+	const nextQuery = Object.entries( query ).reduce(
+		( acc, [ key, value ] ) => {
+			if ( typeof value === 'string' ) {
+				acc[ key ] = value;
+			}
+
+			return acc;
+		},
+		{} as Record< string, string >
+	);
+
+	return getProductListNavigationPath( path, {
+		...nextQuery,
+		postId: productIds.join( ',' ),
+		quickEdit: 'true',
+	} );
+}
+
+function getSelectionPath(
+	path: string,
+	query: Record< string, string | undefined >,
+	productIds: number[]
+) {
+	const nextQuery = Object.entries( query ).reduce(
+		( acc, [ key, value ] ) => {
+			if ( typeof value === 'string' ) {
+				acc[ key ] = value;
+			}
+
+			return acc;
+		},
+		{} as Record< string, string >
+	);
+
+	delete nextQuery.quickEdit;
+
+	return getProductListNavigationPath( path, {
+		...nextQuery,
+		postId: productIds.join( ',' ),
+	} );
+}
 
 function getErrorMessage( error: unknown ): string {
 	if ( error instanceof Error ) {
@@ -84,11 +142,36 @@ function getNoticeFromSettledResults( {
 	};
 }
 
+export const quickEditAction = ( {
+	navigate,
+	path = '/',
+	query = {},
+}: EditActionOptions ): Action< ProductEntityRecord > => ( {
+	id: 'quick-edit-product',
+	label: __( 'Quick edit', 'woocommerce' ),
+	isPrimary: true,
+	supportsBulk: true,
+	icon: edit,
+	isEligible( product ) {
+		return product.status !== 'trash';
+	},
+	callback( items, { onActionPerformed } ) {
+		const productIds = items.map( ( product ) => product.id );
+
+		if ( productIds.length > 0 ) {
+			navigate( getQuickEditPath( path, query, productIds ) );
+		}
+
+		if ( onActionPerformed ) {
+			onActionPerformed( items );
+		}
+	},
+} );
+
 export const editAction = (): Action< ProductEntityRecord > => ( {
 	id: 'edit-product',
 	label: __( 'Edit', 'woocommerce' ),
 	isPrimary: true,
-	icon: edit,
 	isEligible( product ) {
 		return product.status !== 'trash';
 	},
@@ -110,23 +193,35 @@ export const editAction = (): Action< ProductEntityRecord > => ( {
 	},
 } );
 
-export const viewAction = (): Action< ProductEntityRecord > => ( {
-	id: 'view-product',
-	label: _x( 'View', 'verb', 'woocommerce' ),
+export const selectAllVariationsAction = ( {
+	navigate,
+	path = '/',
+	query = {},
+}: EditActionOptions ): Action< ProductEntityRecord > => ( {
+	id: 'select-all-variations',
+	label: __( 'Select all variations', 'woocommerce' ),
 	isPrimary: true,
-	icon: external,
 	isEligible( product ) {
-		return product.status !== 'trash' && !! product.permalink;
+		return (
+			product.status !== 'trash' &&
+			product.type === 'variable' &&
+			Boolean( product._embedded?.variations?.length )
+		);
 	},
 	callback( items, { onActionPerformed } ) {
-		const product = items[ 0 ];
+		const variations = items.flatMap(
+			( product ) => product._embedded?.variations ?? []
+		);
+		const variationIds = Array.from(
+			new Set( variations.map( ( variation ) => variation.id ) )
+		);
 
-		if ( product?.permalink ) {
-			window.open( product.permalink, '_blank' );
+		if ( variationIds.length > 0 ) {
+			navigate( getSelectionPath( path, query, variationIds ) );
 		}
 
 		if ( onActionPerformed ) {
-			onActionPerformed( items );
+			onActionPerformed( variations );
 		}
 	},
 } );
@@ -311,13 +406,25 @@ export const moveToTrashAction = (): Action< ProductEntityRecord > => ( {
 } );
 
 export const useProductActions = () => {
+	const { navigate } = useHistory();
+	const { path, query = {} } = useLocation();
+
 	return useMemo(
 		() => [
+			quickEditAction( {
+				navigate,
+				path,
+				query,
+			} ),
 			editAction(),
-			viewAction(),
+			selectAllVariationsAction( {
+				navigate,
+				path,
+				query,
+			} ),
 			duplicateProductAction(),
 			moveToTrashAction(),
 		],
-		[]
+		[ navigate, path, query ]
 	);
 };

@@ -348,12 +348,13 @@ class TransientFilesEngineTest extends \WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_public_url returns the full public URL of a transient file given its name.
+	 * @testdox get_public_url uses the frontend URL for subdirectory WordPress installs.
 	 */
 	public function test_get_public_url() {
 		$this->register_legacy_proxy_function_mocks(
 			array(
-				'get_site_url' => fn( $blog_id, $path) => 'http://example.com' . $path,
+				'home_url'     => fn( $path = '' ) => 'http://example.com' . $path,
+				'get_site_url' => fn( $blog_id = null, $path = '' ) => 'http://example.com/wp' . $path,
 			)
 		);
 

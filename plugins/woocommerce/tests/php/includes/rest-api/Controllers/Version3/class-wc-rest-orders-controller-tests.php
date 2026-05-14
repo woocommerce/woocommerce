@@ -3,10 +3,13 @@
 use Automattic\WooCommerce\Enums\OrderStatus;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
+use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 use Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper;
 use Automattic\WooCommerce\Tests\Helpers\MetaDataAssertionTrait;
+use Automattic\WooCommerce\Utilities\OrderUtil;
 
 /**
  * class WC_REST_Orders_Controller_Tests.
@@ -16,6 +19,13 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 	use HPOSToggleTrait;
 	use CogsAwareUnitTestSuiteTrait;
 	use MetaDataAssertionTrait;
+
+	/**
+	 * HPOS state captured at setUp so tearDown can restore it.
+	 *
+	 * @var bool
+	 */
+	private $cot_state;
 
 	/**
 	 * Setup our test server, endpoints, and user info.
@@ -29,6 +39,21 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 			)
 		);
 		wp_set_current_user( $this->user );
+
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->cot_state = OrderUtil::custom_orders_table_usage_is_enabled();
+	}
+
+	/**
+	 * Tear down test environment.
+	 */
+	public function tearDown(): void {
+		unregister_post_type( 'shop_test' );
+
+		$this->toggle_cot_feature_and_usage( $this->cot_state );
+		remove_all_filters( 'wc_allow_changing_orders_storage_while_sync_is_pending' );
+
+		parent::tearDown();
 	}
 
 	/**
@@ -346,8 +371,66 @@ class WC_REST_Orders_Controller_Tests extends WC_REST_Unit_Test_Case {
 		// The persisted record must be untouched: same post type, no added customer_note.
 		$this->assertSame( 'shop_test', get_post_type( $post_id ) );
 		$this->assertSame( '', (string) get_post_meta( $post_id, '_customer_note', true ) );
+	}
 
-		unregister_post_type( 'shop_test' );
+	/**
+	 * PUT against an ID belonging to a 'shop_order_refund' WC order type must be rejected.
+	 */
+	public function test_update_rejects_shop_order_refund_under_hpos(): void {
+		$this->toggle_cot_feature_and_usage( true );
+
+		// A refund (type 'shop_order_refund') is used because it's a real in-core order type that shares the same table as orders.
+		$order  = OrderHelper::create_order();
+		$refund = wc_create_refund(
+			array(
+				'amount'   => 10,
+				'order_id' => $order->get_id(),
+			)
+		);
+
+		$this->assertSame( 'shop_order_refund', OrderUtil::get_order_type( $refund->get_id() ) );
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $refund->get_id() );
+		$request->set_body_params( array( 'customer_note' => 'should not apply' ) );
+
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertArrayHasKey( 'code', $data );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $data['code'] );
+
+		// The persisted record must be untouched: type still 'shop_order_refund'.
+		$this->assertSame( 'shop_order_refund', OrderUtil::get_order_type( $refund->get_id() ) );
+	}
+
+	/**
+	 * PUT against an HPOS row whose type isn't shop_order must be rejected.
+	 */
+	public function test_update_rejects_non_shop_order_type_under_hpos(): void {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( true );
+		wc_register_order_type( 'shop_test' );
+
+		$order = OrderHelper::create_order();
+		$this->assertSame(
+			1,
+			$wpdb->update(
+				OrdersTableDataStore::get_orders_table_name(),
+				array( 'type' => 'shop_test' ),
+				array( 'id' => $order->get_id() )
+			)
+		);
+
+		$request = new \WP_REST_Request( 'PUT', '/wc/v3/orders/' . $order->get_id() );
+		$request->set_body_params( array( 'customer_note' => 'should not apply' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'woocommerce_rest_shop_order_invalid_id', $response->get_data()['code'] );
+		$this->assertSame( 'shop_test', OrderUtil::get_order_type( $order->get_id() ) );
 	}
 
 	/**

@@ -2,6 +2,10 @@
 
 This project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.13.0](https://github.com/woocommerce/email-editor/releases/tag/2.13.0) - 2026-05-04 
+
+-   Minor - Add RTL direction support to the PHP email renderer. [#64500]
+
 ## [2.12.0](https://github.com/woocommerce/email-editor/releases/tag/2.12.0) - 2026-04-27 
 
 -   Patch - Fix button border-radius mismatch between email editor preview and rendered output. [#64060]
