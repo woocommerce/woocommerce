@@ -63,6 +63,26 @@ store(
 				const value = target.value;
 
 				if ( value === '' ) {
+					// Add to Cart + Options: choosing the placeholder clears this attribute
+					// (the store has no `navigate`, so we must toggle off the current selection).
+					if (
+						storeNamespace ===
+						'woocommerce/add-to-cart-with-options'
+					) {
+						const items = Array.isArray(
+							parent.state.selectableItems
+						)
+							? parent.state.selectableItems
+							: [];
+						const selected = items.find( ( row ) => row.selected );
+						if (
+							selected &&
+							typeof parent.actions.toggle === 'function'
+						) {
+							parent.actions.toggle( selected );
+						}
+						return;
+					}
 					// Product Filters: clear active filters for this filter type.
 					if ( typeof parent.actions.navigate === 'function' ) {
 						parent.actions.navigate();

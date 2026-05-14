@@ -99,7 +99,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 					data-wp-on--change="actions.onDropdownChange"
 				>
 					<option value="">
-						<?php echo esc_html( $label ); ?>
+						<?php echo esc_html( __( 'Choose an option', 'woocommerce' ) ); ?>
 					</option>
 					<?php foreach ( $items as $index => $item ) : ?>
 						<?php

@@ -48,13 +48,9 @@ function setStyles(): void {
 	 */
 
 	// Prefer chips (current UI); fall back to legacy pills markup if present.
-	const optionsContainer =
-		document.querySelector(
-			'.wc-block-add-to-cart-with-options-variation-selector-attribute-options .wc-block-product-filter-chips__items'
-		) ||
-		document.querySelector(
-			'.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pills'
-		);
+	const optionsContainer = document.querySelector(
+		'.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options'
+	);
 
 	if ( ! optionsContainer ) {
 		return;
@@ -70,13 +66,9 @@ function setStyles(): void {
 	// We use :where here to reduce specificity so customized colors and theme CSS take priority.
 	style.appendChild(
 		document.createTextNode(
-			`:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options .wc-block-product-filter-chips__item[aria-checked="true"]) {
+			`:where(.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute-options) {
 				--wc-product-filters-background-color: ${ selectedPillColor };
 				--wc-product-filters-text-color: ${ selectedPillBackgroundColor };
-			}
-			:where(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill:has(.wc-block-add-to-cart-with-options-variation-selector-attribute-options__pill-input:checked)) {
-				--pill-color: ${ selectedPillColor };
-				--pill-background-color: ${ selectedPillBackgroundColor };
 			}`
 		)
 	);
