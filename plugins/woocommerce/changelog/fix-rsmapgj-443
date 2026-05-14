@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Remove reserved avatar space in product reviews when avatars are disabled in WordPress Discussion settings.

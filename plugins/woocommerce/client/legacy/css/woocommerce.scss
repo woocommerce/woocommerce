@@ -730,7 +730,7 @@ p.demo_store,
 					}
 
 					.comment-text {
-						margin: 0 0 0 50px;
+						margin: 0;
 						border: 1px solid darken($secondary, 3%);
 						border-radius: 4px;
 						padding: 1em 1em 0;
@@ -745,22 +745,34 @@ p.demo_store,
 							font-size: 0.83em;
 						}
 					}
+
+					&:has(> img.avatar) .comment-text {
+						margin-left: 50px;
+					}
 				}
 
 				ul.children {
 					list-style: none outside;
-					margin: 20px 0 0 50px;
+					margin: 20px 0 0;
 
 					.star-rating {
 						display: none;
 					}
 				}
 
+				li:has(> img.avatar) ul.children {
+					margin-left: 50px;
+				}
+
 				#respond {
 					border: 1px solid darken($secondary, 3%);
 					border-radius: 4px;
 					padding: 1em 1em 0;
-					margin: 20px 0 0 50px;
+					margin: 20px 0 0;
+				}
+
+				li:has(> img.avatar) #respond {
+					margin-left: 50px;
 				}
 			}
 
