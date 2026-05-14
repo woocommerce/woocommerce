@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Gate the Customer Review Request feature behind a FeaturesController flag (off by default). The host page is created lazily on the first request after the feature is enabled, not on plugin install.

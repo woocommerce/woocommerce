@@ -157,5 +157,89 @@ Common ignore identifiers:
 - `return.type` - Return type mismatch
 - `argument.type` - Argument type mismatch
 - `method.nonObject` - Method call on potentially non-object
+- `nullCoalesce.property` - `??` on a property typed as non-nullable
 
 **Important:** Only use ignores when the code is genuinely correct. Prefer fixing the type annotations or code when possible.
+
+## NEVER Delete Code to Silence a Warning
+
+When a PHPStan warning points at a specific expression, the fix is **never** to delete the expression as a shortcut. Always:
+
+1. **Understand the warning.** What is PHPStan claiming about the code?
+2. **Verify the claim.** Is the type annotation misleading PHPStan, or is the code genuinely unsafe?
+3. **Fix the root cause:**
+   - Wrong `@var` / `@param` / `@return`? Fix the annotation.
+   - Unsafe code (e.g. method call on possibly-null)? Add a guard, narrow with `instanceof`, or assert.
+   - PHPStan is genuinely mistaken? Use `@phpstan-ignore-next-line <identifier>` with a comment explaining *why* PHPStan is wrong.
+4. **Verify the warning is gone and tests still pass.**
+
+**Forbidden shortcut: removing the offending line.** This often silently breaks runtime behaviour that tests don't cover — especially with null-coalescing fallbacks (`??`), defensive guards, and "redundant"-looking session/cache reads.
+
+### Real example (PR #64155 → issue #64792)
+
+A PHPStan `nullCoalesce.property` warning was reported on:
+
+```php
+$this->order = $this->order ?? $this->get_draft_order();
+```
+
+The PR "fixed" the warning by deleting the line. Tests passed. But the line was the **load-bearing failed-payment retry fallback** — without it, every retry POST created a duplicate order. The actual root cause was that `$this->order` was declared `@var \WC_Order` (non-null) but initialised to `null`, so PHPStan thought the `??` was unnecessary.
+
+**Correct fix: make the type honest, then handle null at the points that read the property.**
+
+```php
+// 1. Fix the property docblock to match reality.
+/**
+ * @var \WC_Order|null
+ */
+private $order = null;
+
+// 2. Restore the load-bearing fallback. With the docblock correct, no warning.
+$this->order = $this->order ?? $this->get_draft_order();
+
+// 3. Declare the post-condition on the method that materialises the value, so
+//    PHPStan can narrow `$this->order` in the *direct caller's* scope.
+/**
+ * @phpstan-assert \WC_Order $this->order
+ */
+private function create_or_update_draft_order( \WP_REST_Request $request ) {
+    // ... method already throws if `$this->order` ends up null ...
+}
+
+// 4. For helper methods that read `$this->order` but live in their own method
+//    scope (so they don't benefit from a caller-side assertion), extract a
+//    small helper that throws if null and returns the narrowed order. Callers
+//    use the returned local variable rather than `$this->order` directly. Do
+//    not change method signatures to thread the order through.
+private function get_order_or_throw(): \WC_Order {
+    if ( ! $this->order instanceof \WC_Order ) {
+        throw new RouteException(
+            'woocommerce_rest_checkout_missing_order',
+            esc_html__( 'Unable to create order', 'woocommerce' ),
+            500
+        );
+    }
+    return $this->order;
+}
+
+private function process_payment( \WP_REST_Request $request, PaymentResult $payment_result ) {
+    $order = $this->get_order_or_throw();
+    // ... rest of method uses $order, which PHPStan knows is non-null ...
+}
+```
+
+The return-value pattern (rather than `@phpstan-assert \WC_Order $this->order` on the helper) is the safer choice when the helper lives in a trait used by multiple classes whose `$this->order` property may be typed differently. `@phpstan-assert` can fail with `assert.alreadyNarrowedType` in a consuming class whose property is already non-null per its (possibly inaccurate) docblock.
+
+Fixing the type honestly often surfaces other latent type-unsafety. Resolve it inside each affected method (null-check + throw, then narrowing), not by changing method signatures to thread the value through. Do not add the new errors to `phpstan-baseline.neon` — the baseline must only shrink.
+
+A single-line `@phpstan-ignore-next-line` with an explanatory comment is acceptable only when PHPStan is genuinely mistaken about a correct piece of code (e.g. it can't see through a runtime invariant). It is *not* a substitute for fixing a wrong type annotation.
+
+### Sanity-check questions before deleting any line to fix a warning
+
+Answer all three out loud:
+
+1. What does this line do at runtime?
+2. In what scenario does it matter (success path, failure path, retry path, edge case)?
+3. Which tests cover that scenario?
+
+If any answer is "I don't know," **do not delete the line.** Add an inline suppression with a comment, or fix the underlying annotation.
