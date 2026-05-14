@@ -81,8 +81,10 @@ class OpcacheFileExpiry {
 	/**
 	 * Schedule the cleanup if it isn't already scheduled.
 	 *
-	 * Called from {@see QueryCache::write_to_opcache()} so the first run is
-	 * triggered by the first write — no separate bootstrap step.
+	 * Called from {@see QueryCache::write_to_opcache()} and
+	 * {@see QueryCache::read_from_opcache()} so the cleanup is rescheduled
+	 * after a feature-disable/re-enable cycle even when every request hits a
+	 * cached file (no writes).
 	 */
 	public static function ensure_scheduled(): void {
 		if ( wp_cache_get( self::SCHEDULED_CACHE_KEY, QueryCache::CACHE_GROUP ) ) {
