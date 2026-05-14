@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Polish the Home and Settings floating header: add a tiny shopfront icon to View store / Preview store, even out icon spacing across the bar, fix the user-options click race with the Activity / Finish setup / Help panels, tidy the connected-user avatar fallback, and align the Payments settings tab strip with the rest of Settings.
+Polish the floating WC Admin header across Home and Settings: store icon for View store / Preview store, even icon spacing, fix the user-options click race, align title typography / colour / padding to WordPress design tokens, and remove a bunch of one-off overrides that were drifting from the rest of the wp-admin chrome.
