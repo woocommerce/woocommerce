@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Fix product quick edit saving stock quantity as NULL instead of 0 when manage stock is enabled with an empty quantity field, which caused incorrect backorder messages.

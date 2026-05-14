@@ -508,7 +508,17 @@ class WC_Admin_Post_Types {
 		}
 
 		if ( 'yes' === get_option( 'woocommerce_manage_stock' ) ) {
-			$stock_amount = 'yes' === $manage_stock && isset( $request_data['_stock'] ) && is_numeric( wp_unslash( $request_data['_stock'] ) ) ? wc_stock_amount( wp_unslash( $request_data['_stock'] ) ) : '';
+			if ( 'yes' === $manage_stock && isset( $request_data['_stock'] ) ) {
+				// Use wc_stock_amount for any provided value (including empty strings),
+				// matching the full product edit screen behavior. This ensures an empty
+				// stock quantity field saves as 0 instead of NULL when stock management
+				// is enabled, so arithmetic on backorder calculations works correctly.
+				$stock_amount = is_numeric( wp_unslash( $request_data['_stock'] ) )
+					? wc_stock_amount( wp_unslash( $request_data['_stock'] ) )
+					: wc_stock_amount( 0 );
+			} else {
+				$stock_amount = '';
+			}
 			$product->set_stock_quantity( $stock_amount );
 		}
 

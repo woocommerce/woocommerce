@@ -112,6 +112,102 @@ class WC_Tests_Admin_Post_Types extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Data for quick_edit_stock_quantity_saves_zero_when_manage_stock_enabled test.
+	 *
+	 * @return array
+	 */
+	public function data_provider_quick_edit_stock_quantity_with_manage_stock() {
+		// phpcs:ignore Squiz.PHP.CommentedOutCode.Found
+		// $stock_value, $expected_stock_quantity
+		return array(
+			'empty string saves as 0'       => array( '', 0 ),
+			'whitespace saves as 0'         => array( '   ', 0 ),
+			'non-numeric string saves as 0' => array( 'abc', 0 ),
+			'numeric string 5 saves as 5'   => array( '5', 5 ),
+			'numeric string 0 saves as 0'   => array( '0', 0 ),
+		);
+	}
+
+	/**
+	 * @test
+	 * @testdox When quick editing with manage stock enabled, an empty or non-numeric stock quantity should save as 0 rather than NULL.
+	 * @dataProvider data_provider_quick_edit_stock_quantity_with_manage_stock
+	 *
+	 * @param string $stock_value             The value of '_stock' from the request.
+	 * @param int    $expected_stock_quantity Expected stock quantity after save.
+	 */
+	public function quick_edit_stock_quantity_saves_zero_when_manage_stock_enabled( $stock_value, $expected_stock_quantity ) {
+		$original_manage_stock_option = get_option( 'woocommerce_manage_stock' );
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( false );
+		$product->save();
+
+		$this->login_as_administrator();
+
+		$request_data = array(
+			'woocommerce_quick_edit'       => '1',
+			'_manage_stock'                => 'yes',
+			'_backorders'                  => 'yes',
+			'_stock'                       => $stock_value,
+			'_stock_status'                => ProductStockStatus::IN_STOCK,
+			'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
+		);
+
+		$sut = $this->get_sut_with_request_data( $request_data );
+		$sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		$saved_product = wc_get_product( $product->get_id() );
+		$this->assertTrue( $saved_product->get_manage_stock(), 'Manage stock should be enabled.' );
+		$this->assertSame( $expected_stock_quantity, $saved_product->get_stock_quantity(), 'Stock quantity should match the expected value rather than NULL.' );
+		$this->assertNotNull( $saved_product->get_stock_quantity(), 'Stock quantity should never be NULL when managing stock.' );
+
+		// Cleanup.
+		if ( false === $original_manage_stock_option ) {
+			delete_option( 'woocommerce_manage_stock' );
+		} else {
+			update_option( 'woocommerce_manage_stock', $original_manage_stock_option );
+		}
+	}
+
+	/**
+	 * @test
+	 * @testdox When quick editing without manage stock enabled, the stock quantity should be cleared.
+	 */
+	public function quick_edit_stock_quantity_cleared_when_manage_stock_disabled() {
+		$original_manage_stock_option = get_option( 'woocommerce_manage_stock' );
+		update_option( 'woocommerce_manage_stock', 'yes' );
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 10 );
+		$product->save();
+
+		$this->login_as_administrator();
+
+		$request_data = array(
+			'woocommerce_quick_edit'       => '1',
+			'_stock_status'                => ProductStockStatus::IN_STOCK,
+			'woocommerce_quick_edit_nonce' => wp_create_nonce( 'woocommerce_quick_edit_nonce' ),
+		);
+
+		$sut = $this->get_sut_with_request_data( $request_data );
+		$sut->bulk_and_quick_edit_save_post( $product->get_id(), get_post( $product->get_id() ) );
+
+		$saved_product = wc_get_product( $product->get_id() );
+		$this->assertFalse( $saved_product->get_manage_stock(), 'Manage stock should be disabled.' );
+		$this->assertNull( $saved_product->get_stock_quantity(), 'Stock quantity should be cleared (NULL) when stock management is off.' );
+
+		// Cleanup.
+		if ( false === $original_manage_stock_option ) {
+			delete_option( 'woocommerce_manage_stock' );
+		} else {
+			update_option( 'woocommerce_manage_stock', $original_manage_stock_option );
+		}
+	}
+
+	/**
 	 * @test
 	 * @testdox Prices should change appropriately when a price change is requested via bulk edit.
 	 * @dataProvider data_provider_bulk_change_price
