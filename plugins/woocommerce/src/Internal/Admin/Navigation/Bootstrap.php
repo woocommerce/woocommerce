@@ -85,5 +85,6 @@ class Bootstrap {
 		$container->get( Assets::class );
 		$container->get( Telemetry::class );
 		$container->get( Section_Memory::class );
+		$container->get( Order_Badge::class );
 	}
 }
