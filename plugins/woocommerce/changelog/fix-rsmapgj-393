@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment:
+
+Prevent the Store API cart route from syncing a draft order when the nonce check has failed, fixing the endless checkout spinner that could occur after logging in via My Account and navigating back to checkout.

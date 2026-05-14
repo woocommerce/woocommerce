@@ -113,11 +113,12 @@ abstract class AbstractCartRoute extends AbstractRoute {
 	public function get_response( \WP_REST_Request $request ) {
 		$this->load_cart_session( $request );
 
-		$response    = null;
-		$nonce_check = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
+		$response          = null;
+		$nonce_check       = $this->requires_nonce( $request ) ? $this->check_nonce( $request ) : null;
+		$nonce_check_error = is_wp_error( $nonce_check ) ? $nonce_check : null;
 
-		if ( is_wp_error( $nonce_check ) ) {
-			$response = $nonce_check;
+		if ( $nonce_check_error ) {
+			$response = $nonce_check_error;
 		}
 
 		if ( ! $response ) {
@@ -131,7 +132,12 @@ abstract class AbstractCartRoute extends AbstractRoute {
 		}
 
 		// For update requests, this will recalculate cart totals and sync draft orders with the current cart.
-		if ( $this->is_update_request( $request ) ) {
+		// Skip this when the nonce check failed: a stale or invalid nonce after a session change (e.g. logging
+		// in via My Account and navigating back to checkout) must not be allowed to mutate the cart or
+		// associated draft order. Without this guard the request is rejected with 403 but the draft order is
+		// still synced from the (now-anonymous or freshly-authenticated) session, causing a spinner on the
+		// checkout page while it polls a cart that keeps changing under it.
+		if ( ! $nonce_check_error && $this->is_update_request( $request ) ) {
 			$this->cart_updated( $request );
 		}
 
