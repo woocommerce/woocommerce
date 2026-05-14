@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Polish the Home page header tabs: add a tiny shopfront icon to View store / Preview store, even out the icon spacing across the bar, fix the user-options click race with the Activity / Finish setup / Help panels, and tidy up the connected-user avatar fallback.
+Polish the Home and Settings floating header: add a tiny shopfront icon to View store / Preview store, even out icon spacing across the bar, fix the user-options click race with the Activity / Finish setup / Help panels, tidy the connected-user avatar fallback, and align the Payments settings tab strip with the rest of Settings.
