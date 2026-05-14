@@ -36,8 +36,8 @@ Example usage: `wp.data.select( EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME ).get
 
 | Actions                                             | Method | Description                                                                              |
 | --------------------------------------------------- | ------ | ---------------------------------------------------------------------------------------- |
-| `createProductCategory( shippingClassObject )`      | POST   | Create product category, see `ProductCategory` in [types.ts](./types.ts) for values      |
+| `createProductCategory( productCategoryObject )`      | POST   | Create product category, see `ProductCategory` in [types.ts](./types.ts) for values      |
 | `deleteProductCategory( id )`                       | DELETE | Delete a product category by ID                                                          |
-| `updatetProductCategory( id, shippingClassObject )` | PUT    | Update a product category, see `ProductCategory` in [types.ts](./types.ts) for values    |
+| `updateProductCategory( id, productCategoryObject )` | PUT    | Update a product category, see `ProductCategory` in [types.ts](./types.ts) for values    |
 
 Example usage: `wp.data.dispatch( EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME ).updateProductCategory( 3, { name: 'New name' } );`
