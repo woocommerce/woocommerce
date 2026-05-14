@@ -166,6 +166,10 @@ class Endpoint {
 	 * whenever the feature is on, without having to call create_pages()
 	 * with a one-off filter in `maybe_create_host_page()`.
 	 *
+	 * @since 10.8.0
+	 *
+	 * @internal Public only because WP filter callbacks need to be callable from outside.
+	 *
 	 * @param array<string,array<string,string>>|mixed $pages Existing page definitions.
 	 * @return array<string,array<string,string>>|mixed
 	 */
@@ -186,6 +190,8 @@ class Endpoint {
 	 * adopt rows that are unambiguously WC-owned (matching slug alone or the
 	 * shortcode alone would hijack merchant-authored pages).
 	 *
+	 * @since 10.8.0
+	 *
 	 * @return WP_Post|null
 	 */
 	private function find_canonical_host_page(): ?WP_Post {
@@ -203,6 +209,10 @@ class Endpoint {
 	 * Label the Review Order page in the admin Pages list ("— Review Order
 	 * Page"), mirroring how `WC_Admin_Post_Types` labels Shop / Cart /
 	 * Checkout / My account so editors can spot it at a glance.
+	 *
+	 * @since 10.8.0
+	 *
+	 * @internal Public only because WP filter callbacks need to be callable from outside.
 	 *
 	 * @param array<string,string>|mixed $post_states Existing post-state labels keyed by id.
 	 * @param \WP_Post|mixed             $post        Current post being listed.

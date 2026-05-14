@@ -48,6 +48,12 @@
 	&__item-image {
 		flex: 0 0 120px;
 		max-width: 120px;
+
+		img {
+			display: block;
+			width: 100%;
+			height: auto;
+		}
 	}
 
 	&__item-rating {
@@ -187,10 +193,12 @@
 		margin-left: 0;
 	}
 
+	// Absolute px so theme resets on `input[type=radio]+label` (e.g. font-size:0)
+	// can't collapse the icon to 0x0.
 	&__icon {
 		display: block;
-		width: 1.5em;
-		height: 1.5em;
+		width: 24px;
+		height: 24px;
 		fill: currentColor;
 		opacity: 0.3;
 		transition: opacity 100ms ease-in-out;
