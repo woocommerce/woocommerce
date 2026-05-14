@@ -23,6 +23,18 @@ class WC_Admin_Importers {
 	protected $importers = array();
 
 	/**
+	 * Tracks whether the products page title output buffer is currently open. Set in
+	 * {@see start_products_page_title_buffer()} and cleared in
+	 * {@see flush_products_page_title_buffer_if_open()} so that the buffer is closed
+	 * at most once per request even if the closing hook fires multiple times.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @var bool
+	 */
+	private $products_page_title_buffer_open = false;
+
+	/**
 	 * Constructor.
 	 */
 	public function __construct() {
@@ -37,6 +49,11 @@ class WC_Admin_Importers {
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'wp_ajax_woocommerce_do_ajax_product_import', array( $this, 'do_ajax_product_import' ) );
 		add_action( 'in_admin_footer', array( $this, 'track_importer_exporter_view' ) );
+		add_action( 'in_admin_header', array( $this, 'start_products_page_title_buffer' ) );
+		add_filter( 'views_edit-product', array( $this, 'end_products_page_title_buffer' ), 1 );
+		// Safety net: ensure the buffer is closed even if the views filter never fires
+		// (e.g. early bail-out before the list table renders).
+		add_action( 'in_admin_footer', array( $this, 'flush_products_page_title_buffer_if_open' ) );
 
 		/**
 		 * Register the WP Posts importer.
@@ -241,6 +258,164 @@ class WC_Admin_Importers {
 
 		include_once WC_ABSPATH . 'includes/admin/importers/class-wc-product-csv-importer-controller.php';
 		WC_Product_CSV_Importer_Controller::dispatch_ajax();
+	}
+
+	/**
+	 * Start an output buffer on the products list page so that the Import and Export
+	 * page title actions can be injected into the server-rendered HTML next to the Add
+	 * button, instead of being appended later by JavaScript.
+	 *
+	 * Rendering the buttons server-side eliminates the layout shift previously caused
+	 * by the JS-deferred injection in `woocommerce_admin.js`.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return void
+	 */
+	public function start_products_page_title_buffer() {
+		if ( ! $this->is_products_list_screen() ) {
+			return;
+		}
+
+		if ( $this->products_page_title_buffer_open ) {
+			return;
+		}
+
+		$this->products_page_title_buffer_open = true;
+
+		ob_start( array( $this, 'inject_products_page_title_actions' ) );
+	}
+
+	/**
+	 * Flush the output buffer started by {@see start_products_page_title_buffer()}.
+	 *
+	 * Hooked into `views_edit-product`, which fires from `WP_Posts_List_Table::views()` —
+	 * called by `edit.php` *after* WordPress has emitted the `<h1>` and the Add button
+	 * `.page-title-action`, so by the time this filter runs the heading area is already
+	 * in the buffer and ready for the Import and Export buttons to be injected.
+	 *
+	 * The `$views` argument is returned unchanged; this callback only manages buffering.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param array $views Views array passed by WordPress.
+	 * @return array Unmodified views array.
+	 */
+	public function end_products_page_title_buffer( $views ) {
+		$this->flush_products_page_title_buffer_if_open();
+
+		return $views;
+	}
+
+	/**
+	 * Flush the products page title output buffer if it is still open. Idempotent —
+	 * safe to call multiple times; subsequent calls are no-ops.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return void
+	 */
+	public function flush_products_page_title_buffer_if_open() {
+		if ( ! $this->products_page_title_buffer_open ) {
+			return;
+		}
+
+		$this->products_page_title_buffer_open = false;
+		ob_end_flush();
+	}
+
+	/**
+	 * Output buffer callback that inserts the Import and Export page title actions
+	 * immediately after the first `.page-title-action` element (the WordPress core
+	 * "Add" button) on the products list page.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param string $buffer Buffered HTML for the products list heading area.
+	 * @return string Modified buffer with the Import and Export buttons inlined.
+	 */
+	public function inject_products_page_title_actions( $buffer ) {
+		if ( ! is_string( $buffer ) || '' === $buffer ) {
+			return $buffer;
+		}
+
+		// Skip if no Add button is present (e.g. blank slate, capability missing).
+		if ( false === strpos( $buffer, 'page-title-action' ) ) {
+			return $buffer;
+		}
+
+		$markup = $this->get_products_page_title_actions_markup();
+
+		if ( '' === $markup ) {
+			return $buffer;
+		}
+
+		// Match the first WP-rendered Add button anchor and insert our buttons after it.
+		// The regex matches an <a ... class="page-title-action">...</a> with attributes in any order.
+		$pattern    = '/(<a\b[^>]*class=("|\')[^"\']*\bpage-title-action\b[^"\']*\2[^>]*>.*?<\/a>)/is';
+		$replaced   = 0;
+		$new_buffer = preg_replace(
+			$pattern,
+			'$1' . $markup,
+			$buffer,
+			1,
+			$replaced
+		);
+
+		if ( null === $new_buffer || 0 === $replaced ) {
+			return $buffer;
+		}
+
+		return $new_buffer;
+	}
+
+	/**
+	 * Build the HTML for the Import and Export page title actions on the products
+	 * list page. Respects the current user's capabilities — buttons are omitted when
+	 * the user lacks the required `import` or `export` capability.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return string HTML markup, or an empty string if no buttons should be rendered.
+	 */
+	private function get_products_page_title_actions_markup() {
+		$markup = '';
+
+		if ( current_user_can( 'import' ) ) {
+			$markup .= sprintf(
+				' <a href="%s" class="page-title-action">%s</a>',
+				esc_url( admin_url( 'edit.php?post_type=product&page=product_importer' ) ),
+				esc_html__( 'Import', 'woocommerce' )
+			);
+		}
+
+		if ( current_user_can( 'export' ) ) {
+			$markup .= sprintf(
+				' <a href="%s" class="page-title-action">%s</a>',
+				esc_url( admin_url( 'edit.php?post_type=product&page=product_exporter' ) ),
+				esc_html__( 'Export', 'woocommerce' )
+			);
+		}
+
+		return $markup;
+	}
+
+	/**
+	 * Whether the current admin screen is the products list table where the Import
+	 * and Export page title actions should be rendered.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return bool
+	 */
+	private function is_products_list_screen() {
+		if ( ! function_exists( 'get_current_screen' ) ) {
+			return false;
+		}
+
+		$screen = get_current_screen();
+
+		return $screen instanceof WP_Screen && 'edit-product' === $screen->id;
 	}
 
 	/**

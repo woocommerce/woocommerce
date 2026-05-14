@@ -7,7 +7,8 @@
 
 		// Add buttons to product screen.
 		var $product_screen = $( '.edit-php.post-type-product' ),
-			$title_action = $product_screen.find( '.page-title-action:first' ),
+			$title_actions = $product_screen.find( '.page-title-action' ),
+			$title_action = $title_actions.first(),
 			$blankslate = $product_screen.find( '.woocommerce-BlankState' );
 
 		if ( 0 === $blankslate.length ) {
@@ -16,7 +17,22 @@
 					.first()
 					.attr( 'href', woocommerce_admin.urls.add_product );
 			}
-			if ( woocommerce_admin.urls.export_products ) {
+
+			// The Import and Export buttons are rendered server-side to avoid the
+			// layout shift previously caused by injecting them after page load.
+			// Fall back to inserting them here for the rare case where the server
+			// markup is missing (e.g. extensions filtering it out), and only add
+			// each button when it isn't already in the DOM.
+			var existingHrefs = $title_actions
+				.map( function () {
+					return ( $( this ).attr( 'href' ) || '' );
+				} )
+				.get();
+
+			if (
+				woocommerce_admin.urls.export_products &&
+				-1 === existingHrefs.indexOf( woocommerce_admin.urls.export_products )
+			) {
 				const exportLink = document.createElement('a');
 				exportLink.href = woocommerce_admin.urls.export_products;
 				exportLink.className = 'page-title-action';
@@ -24,7 +40,10 @@
 
 				$title_action.after(exportLink);
 			}
-			if ( woocommerce_admin.urls.import_products ) {
+			if (
+				woocommerce_admin.urls.import_products &&
+				-1 === existingHrefs.indexOf( woocommerce_admin.urls.import_products )
+			) {
 				const importLink = document.createElement('a');
 				importLink.href = woocommerce_admin.urls.import_products;
 				importLink.className = 'page-title-action';
@@ -33,7 +52,7 @@
 				$title_action.after(importLink);
 			}
 		} else {
-			$title_action.hide();
+			$title_actions.hide();
 		}
 
 		// Progress indicators when showing steps.

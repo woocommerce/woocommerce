@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Render the Import and Export buttons server-side on the products list page to prevent the visible layout shift caused by their previous JS-deferred injection.
