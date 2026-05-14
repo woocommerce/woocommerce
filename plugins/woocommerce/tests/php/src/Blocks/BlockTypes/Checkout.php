@@ -141,4 +141,71 @@ class Checkout extends \WP_UnitTestCase {
 	public function override_wc_logger() {
 		return $this->mock_logger;
 	}
+
+	/**
+	 * Returns whether the current theme is treated as a block theme by wp_is_block_theme().
+	 *
+	 * Tests inspect this rather than calling the function directly so they can short-circuit
+	 * if the test environment ever flips defaults.
+	 *
+	 * @return bool
+	 */
+	private function is_block_theme(): bool {
+		return function_exists( 'wp_is_block_theme' ) && wp_is_block_theme();
+	}
+
+	/**
+	 * Notices added to the session via wc_add_notice() should be cleared on the initial
+	 * (non-POST) render of the Checkout block in classic themes, so they do not persist
+	 * across requests and re-surface in Store API responses (RSMAPGJ-446 / woo#62855).
+	 *
+	 * @return void
+	 */
+	public function test_render_clears_stale_session_notices_on_classic_themes() {
+		if ( $this->is_block_theme() ) {
+			$this->markTestSkipped( 'This regression only affects classic themes.' );
+		}
+
+		// Ensure no POST state leaks in from another test.
+		$saved_post = $_POST;
+		$_POST      = array();
+
+		wc_clear_notices();
+		wc_add_notice( 'You cannot add another "Exclusive Product" to your cart.', 'error' );
+		$this->assertSame( 1, wc_notice_count( 'error' ), 'Precondition: error notice should be queued.' );
+
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+		$checkout->call_render( array(), '<div class="wp-block-woocommerce-checkout"></div>', null );
+
+		$this->assertSame( 0, wc_notice_count( 'error' ), 'Stale error notice should be cleared on initial render.' );
+
+		$_POST = $saved_post;
+	}
+
+	/**
+	 * During form submissions (POST requests) notices added by the current request must
+	 * be preserved so the client can surface them. The render path therefore must not
+	 * clear notices when $_POST is non-empty.
+	 *
+	 * @return void
+	 */
+	public function test_render_preserves_notices_during_post_requests() {
+		if ( $this->is_block_theme() ) {
+			$this->markTestSkipped( 'Only the classic-theme branch performs explicit clearing.' );
+		}
+
+		$saved_post = $_POST;
+		$_POST      = array( 'woocommerce-process-checkout-nonce' => 'placeholder' );
+
+		wc_clear_notices();
+		wc_add_notice( 'A notice added during this request.', 'error' );
+
+		$checkout = new CheckoutMock( $this->asset_api, $this->registry, $this->integration_registry, 'checkout-mock' );
+		$checkout->call_render( array(), '<div class="wp-block-woocommerce-checkout"></div>', null );
+
+		$this->assertSame( 1, wc_notice_count( 'error' ), 'Notices added during a POST request should be preserved.' );
+
+		wc_clear_notices();
+		$_POST = $saved_post;
+	}
 }

@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Clear stale session error notices when the Checkout block initially renders in classic themes, so errors from a previous request (e.g. a failed `?add-to-cart=` attempt for a sold-individually product) no longer persist across requests and block subsequent checkout actions.

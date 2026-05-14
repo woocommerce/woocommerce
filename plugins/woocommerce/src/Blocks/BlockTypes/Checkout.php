@@ -250,6 +250,8 @@ class Checkout extends AbstractBlock {
 			return wp_is_block_theme() ? do_shortcode( '[woocommerce_checkout]' ) : '[woocommerce_checkout]';
 		}
 
+		$this->maybe_clear_stale_notices();
+
 		// Dequeue the core scripts when rendering this block.
 		add_action( 'wp_enqueue_scripts', array( $this, 'dequeue_woocommerce_core_scripts' ), 20 );
 
@@ -342,6 +344,49 @@ class Checkout extends AbstractBlock {
 	 */
 	protected function is_checkout_endpoint() {
 		return is_wc_endpoint_url( 'order-pay' ) || is_wc_endpoint_url( 'order-received' );
+	}
+
+	/**
+	 * Clear stale session notices on initial page load of the Checkout block in classic themes.
+	 *
+	 * Classic themes don't include the Store Notices block (or the legacy
+	 * `woocommerce_before_checkout_form` notice output) in their checkout template, so any
+	 * error notices left in the session from a previous request (e.g. a failed
+	 * `?add-to-cart=` attempt for a sold-individually product) persist indefinitely. They
+	 * then re-surface in Store API responses on the next user action (apply coupon, place
+	 * order), blocking checkout even though the cart is otherwise valid.
+	 *
+	 * Block themes are unaffected because the checkout template includes the Store Notices
+	 * block, which prints and clears notices on render.
+	 *
+	 * Mirrors the classic `[woocommerce_checkout]` shortcode behaviour, which clears
+	 * notices via `wc_clear_notices()` after `wc_print_notices()` on initial render.
+	 *
+	 * Only runs on the initial GET render, never during form submissions (POST), to avoid
+	 * discarding notices added during the current request that the client still needs.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return void
+	 */
+	protected function maybe_clear_stale_notices() {
+		// Only applies to classic themes; block themes clear notices via the Store Notices block.
+		if ( wp_is_block_theme() ) {
+			return;
+		}
+
+		// Skip during form submissions so notices added during the current request are preserved.
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing
+		if ( ! empty( $_POST ) ) {
+			return;
+		}
+
+		// Notice functions are only loaded on frontend requests; bail if unavailable.
+		if ( ! function_exists( 'wc_clear_notices' ) ) {
+			return;
+		}
+
+		wc_clear_notices();
 	}
 
 	/**

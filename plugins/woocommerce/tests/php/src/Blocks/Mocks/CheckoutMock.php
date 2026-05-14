@@ -18,4 +18,16 @@ class CheckoutMock extends Checkout {
 	public function mock_enqueue_data() {
 		$this->enqueue_data();
 	}
+
+	/**
+	 * Expose the protected render method so tests can exercise it directly.
+	 *
+	 * @param array  $attributes Block attributes.
+	 * @param string $content    Block content.
+	 * @param mixed  $block      Block instance.
+	 * @return string
+	 */
+	public function call_render( $attributes = array(), $content = '', $block = null ) {
+		return $this->render( $attributes, $content, $block );
+	}
 }
