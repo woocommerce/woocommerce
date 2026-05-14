@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Internal\Api;
 
 use Automattic\WooCommerce\Api\ApiException;
+use Automattic\WooCommerce\Api\Utils\SchemaHandle;
 use Automattic\WooCommerce\Vendor\GraphQL\GraphQL;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\DocumentNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\FieldNode;
@@ -62,6 +63,13 @@ abstract class GraphQLController {
 	 * @var ?Schema
 	 */
 	private ?Schema $schema = null;
+
+	/**
+	 * Cached public-facing schema handle wrapping {@see self::$schema}.
+	 *
+	 * @var ?SchemaHandle
+	 */
+	private ?SchemaHandle $schema_handle = null;
 
 	/**
 	 * Query cache / APQ resolver.
@@ -392,7 +400,7 @@ abstract class GraphQLController {
 		}
 
 		// 5. Load schema.
-		$schema = $this->get_schema();
+		$schema = $this->get_engine_schema();
 
 		// 6. Build validation rules.
 		// A single complexity-rule instance is kept so its computed score can
@@ -504,9 +512,28 @@ abstract class GraphQLController {
 	}
 
 	/**
-	 * Build and cache the GraphQL schema.
+	 * Public handle to the live GraphQL schema for runtime inspection.
+	 *
+	 * Returns an opaque {@see SchemaHandle}; callers reach metadata (and any
+	 * future schema-inspection operations) through methods on that object
+	 * rather than touching the underlying engine type. The handle is cached
+	 * and wraps the same engine schema this controller uses to serve real
+	 * requests.
 	 */
-	private function get_schema(): Schema {
+	public function get_schema(): SchemaHandle {
+		if ( null === $this->schema_handle ) {
+			$this->schema_handle = new SchemaHandle( $this->get_engine_schema() );
+		}
+		return $this->schema_handle;
+	}
+
+	/**
+	 * Build and cache the engine-typed GraphQL schema used internally to
+	 * serve requests. Kept private to keep the engine type out of the
+	 * controller's public surface; consumers should reach {@see SchemaHandle}
+	 * through {@see self::get_schema()} instead.
+	 */
+	private function get_engine_schema(): Schema {
 		if ( null === $this->schema ) {
 			$this->schema = $this->build_schema();
 		}

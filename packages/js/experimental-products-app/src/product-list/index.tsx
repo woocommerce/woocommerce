@@ -7,12 +7,21 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import clsx from 'clsx';
-import { Button, Stack, Tabs } from '@wordpress/ui';
+import { Button, Icon, Stack, Tabs } from '@wordpress/ui';
+import { privateApis as componentsPrivateApis } from '@wordpress/components';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 import { Page } from '@wordpress/admin-ui';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
+import {
+	tag,
+	alignNone,
+	category,
+	link,
+	chevronDown,
+	chevronUp,
+} from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -37,8 +46,46 @@ import {
 } from './utils';
 import { useProductActions } from '../dataviews-actions';
 
+const { Menu } = unlock( componentsPrivateApis );
 const { usePostActions } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
+
+const PRODUCT_TYPE_MENU_ITEMS = [
+	{
+		key: 'simple',
+		icon: tag,
+		label: __( 'Simple product', 'woocommerce' ),
+		info: __( 'A standalone item with no variations.', 'woocommerce' ),
+		queryArgs: {},
+	},
+	{
+		key: 'variable',
+		icon: alignNone,
+		label: __( 'Variable product', 'woocommerce' ),
+		info: __(
+			'An item with variations like color or size.',
+			'woocommerce'
+		),
+		queryArgs: { product_type: 'variable' },
+	},
+	{
+		key: 'grouped',
+		icon: category,
+		label: __( 'Grouped product', 'woocommerce' ),
+		info: __( 'A collection of related products.', 'woocommerce' ),
+		queryArgs: { product_type: 'grouped' },
+	},
+	{
+		key: 'external',
+		icon: link,
+		label: __( 'Affiliate product', 'woocommerce' ),
+		info: __(
+			'A product you promote and earn commission on.',
+			'woocommerce'
+		),
+		queryArgs: { product_type: 'external' },
+	},
+] as const;
 
 export type ProductListProps = {
 	subTitle?: string;
@@ -82,6 +129,7 @@ export default function ProductList( {
 	const [ selection, setSelection ] = useState( () =>
 		getSelectionFromPostId( postId )
 	);
+	const [ isMenuOpen, setIsMenuOpen ] = useState( false );
 
 	useEffect( () => {
 		setSelection( getSelectionFromPostId( postId ) );
@@ -223,19 +271,40 @@ export default function ProductList( {
 			>
 				{ __( 'Import', 'woocommerce' ) }
 			</Button>
-			<Button
-				size="compact"
-				disabled={ canCreateRecord === false }
-				onClick={ () =>
-					( window.location.href = getAdminLink(
-						addQueryArgs( 'post-new.php', {
-							post_type: 'product',
-						} )
-					) )
-				}
-			>
-				{ __( 'Add new product', 'woocommerce' ) }
-			</Button>
+			<Menu onOpenChange={ setIsMenuOpen } placement="bottom-end">
+				<Menu.TriggerButton
+					disabled={ canCreateRecord === false }
+					render={ <Button variant="solid" size="compact" /> }
+				>
+					{ __( 'Add new', 'woocommerce' ) }
+					<Button.Icon
+						icon={ isMenuOpen ? chevronUp : chevronDown }
+					/>
+				</Menu.TriggerButton>
+				<Menu.Popover>
+					<Menu.Group>
+						{ PRODUCT_TYPE_MENU_ITEMS.map( ( item ) => (
+							<Menu.Item
+								key={ item.key }
+								prefix={ <Icon icon={ item.icon } /> }
+								onClick={ () => {
+									window.location.href = getAdminLink(
+										addQueryArgs( 'post-new.php', {
+											post_type: 'product',
+											...item.queryArgs,
+										} )
+									);
+								} }
+							>
+								<Menu.ItemLabel>{ item.label }</Menu.ItemLabel>
+								<Menu.ItemHelpText>
+									{ item.info }
+								</Menu.ItemHelpText>
+							</Menu.Item>
+						) ) }
+					</Menu.Group>
+				</Menu.Popover>
+			</Menu>
 		</Stack>
 	);
 
@@ -244,7 +313,7 @@ export default function ProductList( {
 			className={ classes }
 			ariaLabel={ __( 'Products', 'woocommerce' ) }
 			subTitle={ __(
-				'Add, edit, and manage the products you sell in your store',
+				'Add, edit, and manage the products you sell in your store.',
 				'woocommerce'
 			) }
 			title={ __( 'Products', 'woocommerce' ) }
@@ -307,14 +376,14 @@ export default function ProductList( {
 					</Tabs.Root>
 					<Stack direction="row" align="center" gap="xs">
 						<DataViews.Search
-							label={ __( 'Search products', 'woocommerce' ) }
+							label={ __( 'Search', 'woocommerce' ) }
 						/>
 						<DataViews.FiltersToggle />
 						<DataViews.LayoutSwitcher />
 						<DataViews.ViewConfig />
 					</Stack>
 				</Stack>
-				<DataViews.FiltersToggled />
+				<DataViews.FiltersToggled className="woocommerce-product-list__filters" />
 				<DataViews.Layout />
 				<DataViews.Footer />
 			</DataViews>
