@@ -279,10 +279,12 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$product->save();
 
 		$csv_path = tempnam( sys_get_temp_dir(), 'wc-csv-' ) . '.csv';
-		$fh       = fopen( $csv_path, 'w' );
-		fputcsv( $fh, array( 'ID', 'date sale price starts', 'date sale price ends', 'Sale price' ) );
-		fputcsv( $fh, array( $product->get_id(), '2022-10-25', '2099-01-26', '2.00' ) );
-		fclose( $fh );
+		$lines    = array(
+			'"ID","date sale price starts","date sale price ends","Sale price"',
+			sprintf( '%d,"2022-10-25","2099-01-26","2.00"', $product->get_id() ),
+		);
+		// phpcs:ignore WordPress.WP.AlternativeFunctions.file_system_operations_file_put_contents -- Tests write to a tmp file we control.
+		file_put_contents( $csv_path, implode( "\n", $lines ) . "\n" );
 
 		$importer = new WC_Product_CSV_Importer(
 			$csv_path,
@@ -299,9 +301,9 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		);
 		$importer->import();
 
-		$updated      = wc_get_product( $product->get_id() );
-		$date_to      = $updated->get_date_on_sale_to();
-		$date_from    = $updated->get_date_on_sale_from();
+		$updated   = wc_get_product( $product->get_id() );
+		$date_to   = $updated->get_date_on_sale_to();
+		$date_from = $updated->get_date_on_sale_from();
 
 		$this->assertNotNull( $date_to, 'date_on_sale_to should be set' );
 		$this->assertNotNull( $date_from, 'date_on_sale_from should be set' );
@@ -311,6 +313,6 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( '2022-10-25', $date_from->date( 'Y-m-d' ) );
 
 		WC_Helper_Product::delete_product( $product->get_id() );
-		@unlink( $csv_path );
+		wp_delete_file( $csv_path );
 	}
 }
