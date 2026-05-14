@@ -535,4 +535,227 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 		$this->assertEquals( 4, $order_item->get_meta( '_reduced_stock', true ), 'Reduced stock meta should be updated to new quantity' );
 	}
+
+	/**
+	 * Data provider listing meta keys that are reserved by the line item data store.
+	 *
+	 * @return array<string,array{0:string}>
+	 */
+	public function protected_line_item_meta_keys_provider() {
+		return array(
+			'_product_id'        => array( '_product_id' ),
+			'_variation_id'      => array( '_variation_id' ),
+			'_tax_class'         => array( '_tax_class' ),
+			'_qty'               => array( '_qty' ),
+			'_line_subtotal'     => array( '_line_subtotal' ),
+			'_line_subtotal_tax' => array( '_line_subtotal_tax' ),
+			'_line_total'        => array( '_line_total' ),
+			'_line_tax'          => array( '_line_tax' ),
+			'_line_tax_data'     => array( '_line_tax_data' ),
+		);
+	}
+
+	/**
+	 * @testdox Should not persist line item meta when a protected internal meta key is submitted via the order editor.
+	 *
+	 * @dataProvider protected_line_item_meta_keys_provider
+	 *
+	 * @param string $protected_key Reserved meta key being submitted.
+	 */
+	public function test_wc_save_order_items_rejects_protected_line_item_meta_keys( $protected_key ) {
+		$order         = WC_Helper_Order::create_order();
+		$order_item_id = 0;
+		foreach ( $order->get_items() as $item ) {
+			$order_item_id = $item->get_id();
+			break;
+		}
+		$this->assertGreaterThan( 0, $order_item_id, 'Helper order should expose a line item.' );
+
+		$existing_item = WC_Order_Factory::get_order_item( $order_item_id );
+		$original_qty  = (int) $existing_item->get_quantity();
+
+		$items = array(
+			'order_item_id'        => array( $order_item_id ),
+			'order_item_name'      => array( $order_item_id => $existing_item->get_name() ),
+			'order_item_qty'       => array( $order_item_id => $original_qty ),
+			'order_item_tax_class' => array( $order_item_id => '' ),
+			'line_total'           => array( $order_item_id => $existing_item->get_total() ),
+			'line_subtotal'        => array( $order_item_id => $existing_item->get_subtotal() ),
+			'line_tax'             => array( $order_item_id => array() ),
+			'line_subtotal_tax'    => array( $order_item_id => array() ),
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_key'             => array(
+				$order_item_id => array(
+					'new-1' => $protected_key,
+				),
+			),
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'meta_value'           => array(
+				$order_item_id => array(
+					'new-1' => 'qa-test-62328',
+				),
+			),
+		);
+
+		wc_save_order_items( $order->get_id(), $items );
+
+		// Reload the item and verify the protected key was not stored as user meta.
+		$reloaded = WC_Order_Factory::get_order_item( $order_item_id );
+		$this->assertInstanceOf( WC_Order_Item_Product::class, $reloaded, 'Order item should still exist after save.' );
+
+		// The "Add meta" flow should never add a row using the protected key. Direct DB lookup confirms nothing was persisted.
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$persisted = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d AND meta_key = %s AND meta_value = %s",
+				$order_item_id,
+				$protected_key,
+				'qa-test-62328'
+			)
+		);
+
+		$this->assertSame(
+			'0',
+			(string) $persisted,
+			sprintf( 'Protected meta key "%s" should not be persisted to the order itemmeta table.', $protected_key )
+		);
+
+		// Real data-store properties should not have been clobbered by the rejected meta either.
+		$this->assertSame( $original_qty, (int) $reloaded->get_quantity(), 'Existing line item quantity should be unchanged.' );
+	}
+
+	/**
+	 * @testdox Should still persist user-defined meta when a protected meta key is rejected.
+	 */
+	public function test_wc_save_order_items_keeps_user_meta_alongside_rejected_protected_key() {
+		$order         = WC_Helper_Order::create_order();
+		$order_item_id = 0;
+		foreach ( $order->get_items() as $item ) {
+			$order_item_id = $item->get_id();
+			break;
+		}
+		$this->assertGreaterThan( 0, $order_item_id, 'Helper order should expose a line item.' );
+
+		$existing_item = WC_Order_Factory::get_order_item( $order_item_id );
+
+		$items = array(
+			'order_item_id'        => array( $order_item_id ),
+			'order_item_name'      => array( $order_item_id => $existing_item->get_name() ),
+			'order_item_qty'       => array( $order_item_id => $existing_item->get_quantity() ),
+			'order_item_tax_class' => array( $order_item_id => '' ),
+			'line_total'           => array( $order_item_id => $existing_item->get_total() ),
+			'line_subtotal'        => array( $order_item_id => $existing_item->get_subtotal() ),
+			'line_tax'             => array( $order_item_id => array() ),
+			'line_subtotal_tax'    => array( $order_item_id => array() ),
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_key'             => array(
+				$order_item_id => array(
+					'new-1' => '_variation_id',
+					'new-2' => 'gift_note',
+				),
+			),
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'meta_value'           => array(
+				$order_item_id => array(
+					'new-1' => 'qa-test-62328',
+					'new-2' => 'Happy birthday!',
+				),
+			),
+		);
+
+		wc_save_order_items( $order->get_id(), $items );
+
+		$reloaded = WC_Order_Factory::get_order_item( $order_item_id );
+
+		$this->assertSame(
+			'Happy birthday!',
+			(string) $reloaded->get_meta( 'gift_note', true ),
+			'User-defined meta should be saved even when a protected key is also submitted.'
+		);
+
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$persisted = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d AND meta_key = %s AND meta_value = %s",
+				$order_item_id,
+				'_variation_id',
+				'qa-test-62328'
+			)
+		);
+		$this->assertSame( '0', (string) $persisted, 'Protected _variation_id meta should not have been persisted.' );
+	}
+
+	/**
+	 * @testdox Should return reserved data store meta keys for a line item.
+	 */
+	public function test_wc_get_protected_order_item_meta_keys_returns_internal_meta_keys() {
+		$order         = WC_Helper_Order::create_order();
+		$order_item_id = 0;
+		foreach ( $order->get_items() as $item ) {
+			$order_item_id = $item->get_id();
+			break;
+		}
+
+		$item     = WC_Order_Factory::get_order_item( $order_item_id );
+		$reserved = wc_get_protected_order_item_meta_keys( $item );
+
+		$this->assertContains( '_product_id', $reserved, 'Product line items should reserve the _product_id meta key.' );
+		$this->assertContains( '_variation_id', $reserved, 'Product line items should reserve the _variation_id meta key.' );
+		$this->assertContains( '_qty', $reserved, 'Product line items should reserve the _qty meta key.' );
+		$this->assertContains( '_line_total', $reserved, 'Product line items should reserve the _line_total meta key.' );
+		$this->assertNotContains( 'gift_note', $reserved, 'User-defined keys should not be reported as reserved.' );
+	}
+
+	/**
+	 * @testdox Should not persist shipping item meta when a protected internal meta key is submitted.
+	 */
+	public function test_wc_save_order_items_rejects_protected_shipping_meta_keys() {
+		$order = WC_Helper_Order::create_order();
+
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_method_title( 'Flat rate' );
+		$shipping_item->set_method_id( 'flat_rate' );
+		$shipping_item->set_total( 5 );
+		$order->add_item( $shipping_item );
+		$order->save();
+
+		$shipping_item_id = $shipping_item->get_id();
+
+		$items = array(
+			'shipping_method_id'    => array( $shipping_item_id ),
+			'shipping_method'       => array( $shipping_item_id => 'flat_rate' ),
+			'shipping_method_title' => array( $shipping_item_id => 'Flat rate' ),
+			'shipping_cost'         => array( $shipping_item_id => '5' ),
+			'shipping_taxes'        => array( $shipping_item_id => array() ),
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			'meta_key'              => array(
+				$shipping_item_id => array(
+					'new-1' => 'method_id',
+				),
+			),
+			// phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+			'meta_value'            => array(
+				$shipping_item_id => array(
+					'new-1' => 'qa-test-62328',
+				),
+			),
+		);
+
+		wc_save_order_items( $order->get_id(), $items );
+
+		global $wpdb;
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.SlowDBQuery.slow_db_query_meta_key, WordPress.DB.SlowDBQuery.slow_db_query_meta_value
+		$persisted = $wpdb->get_var(
+			$wpdb->prepare(
+				"SELECT COUNT(*) FROM {$wpdb->prefix}woocommerce_order_itemmeta WHERE order_item_id = %d AND meta_key = %s AND meta_value = %s",
+				$shipping_item_id,
+				'method_id',
+				'qa-test-62328'
+			)
+		);
+
+		$this->assertSame( '0', (string) $persisted, 'Protected method_id meta should not have been persisted on a shipping item.' );
+	}
 }

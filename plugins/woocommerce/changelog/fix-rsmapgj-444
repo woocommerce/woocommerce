@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment:
+
+Reject reserved internal meta keys (like _product_id, _qty, _line_total) submitted via the order edit screen's "Add meta" button, so they no longer trigger doing_it_wrong warnings or write rows that are hidden from the UI.

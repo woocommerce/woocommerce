@@ -295,6 +295,47 @@ function wc_maybe_adjust_line_item_product_stock( $item, $item_quantity = -1 ) {
 }
 
 /**
+ * Get the list of meta keys reserved for internal use by an order item's data store.
+ *
+ * These keys map to first-class object properties (e.g. `_product_id`, `_qty`,
+ * `_line_total`) and must not be saved as user-defined meta data via the
+ * "Add meta" UI in the order edit screen. Storing user values under these keys
+ * either triggers a `doing_it_wrong` notice (for keys with matching
+ * setters/getters) or silently writes invisible rows to the meta table that
+ * cannot be removed from the UI.
+ *
+ * @since 10.9.0
+ *
+ * @param WC_Order_Item $item Order item object.
+ * @return string[] List of meta keys that are reserved by the item's data store.
+ */
+function wc_get_protected_order_item_meta_keys( $item ) {
+	if ( ! is_object( $item ) || ! is_callable( array( $item, 'get_data_store' ) ) ) {
+		return array();
+	}
+
+	$data_store = $item->get_data_store();
+	if ( ! $data_store ) {
+		return array();
+	}
+
+	$internal_meta_keys = is_callable( array( $data_store, 'get_internal_meta_keys' ) )
+		? (array) $data_store->get_internal_meta_keys()
+		: array();
+
+	// Also include the auto-prefixed data keys ("_" + property name), mirroring
+	// the filtering done in WC_Data_Store_WP::filter_raw_meta_data() so that
+	// every key the data store hides on read is also blocked on save.
+	if ( is_callable( array( $item, 'get_data_keys' ) ) ) {
+		foreach ( (array) $item->get_data_keys() as $data_key ) {
+			$internal_meta_keys[] = '_' === substr( $data_key, 0, 1 ) ? $data_key : '_' . $data_key;
+		}
+	}
+
+	return array_values( array_unique( array_filter( $internal_meta_keys, 'is_string' ) ) );
+}
+
+/**
  * Save order items. Uses the CRUD.
  *
  * @since 2.2
@@ -362,6 +403,8 @@ function wc_save_order_items( $order_id, $items ) {
 			}
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				$protected_meta_keys = wc_get_protected_order_item_meta_keys( $item );
+
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_key   = substr( wp_unslash( $meta_key ), 0, 255 );
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
@@ -370,6 +413,11 @@ function wc_save_order_items( $order_id, $items ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
 							$item->delete_meta_data_by_mid( $meta_id );
 						}
+					} elseif ( in_array( $meta_key, $protected_meta_keys, true ) ) {
+						// Skip meta keys that are reserved for the item's data store. Saving them as
+						// generic meta either triggers a "doing it wrong" warning or persists rows
+						// that are hidden from the UI, which the user cannot then remove.
+						continue;
 					} elseif ( strstr( $meta_id, 'new-' ) ) {
 						$item->add_meta_data( $meta_key, $meta_value, false );
 					} else {
@@ -428,6 +476,8 @@ function wc_save_order_items( $order_id, $items ) {
 			);
 
 			if ( isset( $items['meta_key'][ $item_id ], $items['meta_value'][ $item_id ] ) ) {
+				$protected_meta_keys = wc_get_protected_order_item_meta_keys( $item );
+
 				foreach ( $items['meta_key'][ $item_id ] as $meta_id => $meta_key ) {
 					$meta_value = isset( $items['meta_value'][ $item_id ][ $meta_id ] ) ? wp_unslash( $items['meta_value'][ $item_id ][ $meta_id ] ) : '';
 
@@ -435,6 +485,11 @@ function wc_save_order_items( $order_id, $items ) {
 						if ( ! strstr( $meta_id, 'new-' ) ) {
 							$item->delete_meta_data_by_mid( $meta_id );
 						}
+					} elseif ( in_array( $meta_key, $protected_meta_keys, true ) ) {
+						// Skip meta keys that are reserved for the item's data store. Saving them as
+						// generic meta either triggers a "doing it wrong" warning or persists rows
+						// that are hidden from the UI, which the user cannot then remove.
+						continue;
 					} elseif ( strstr( $meta_id, 'new-' ) ) {
 						$item->add_meta_data( $meta_key, $meta_value, false );
 					} else {
