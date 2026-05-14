@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add the current-menu-item class to the shop page link in the Navigation block on FSE themes.

@@ -238,6 +238,88 @@ function wc_nav_menu_inner_blocks( $inner_blocks ) {
 add_filter( 'block_core_navigation_render_inner_blocks', 'wc_nav_menu_inner_blocks' );
 
 /**
+ * Fix active class on shop page links rendered by the Navigation block.
+ *
+ * The legacy `wp_nav_menu_objects` filter (handled by `wc_nav_menu_item_classes`)
+ * does not run for block-based navigation. Block themes / the Navigation block use
+ * the `core/navigation-link` block, which determines the "current" state by
+ * comparing the linked post ID against `get_queried_object_id()`. On the Shop
+ * page WooCommerce sets up a product archive, so the queried object is not the
+ * Shop page and the comparison fails, leaving the navigation item without the
+ * `current-menu-item` class. This filter restores parity with classic menus by
+ * adding `current-menu-item` / `current_page_item` (and `aria-current="page"`)
+ * to the navigation link that points to the Shop page when viewing the shop,
+ * and `current_page_parent` when viewing a single product.
+ *
+ * @since 10.9.0
+ *
+ * @param string $block_content The rendered block HTML.
+ * @param array  $block         Parsed block array.
+ * @return string Possibly amended block HTML.
+ */
+function wc_nav_menu_link_block_current_shop( $block_content, $block ) {
+	if ( empty( $block_content ) || empty( $block['blockName'] ) || 'core/navigation-link' !== $block['blockName'] ) {
+		return $block_content;
+	}
+
+	if ( ! function_exists( 'is_shop' ) || ! function_exists( 'wc_get_page_id' ) ) {
+		return $block_content;
+	}
+
+	$attrs = isset( $block['attrs'] ) && is_array( $block['attrs'] ) ? $block['attrs'] : array();
+	$id    = isset( $attrs['id'] ) ? (int) $attrs['id'] : 0;
+
+	if ( $id <= 0 ) {
+		return $block_content;
+	}
+
+	$shop_page_id = (int) wc_get_page_id( 'shop' );
+
+	if ( $shop_page_id <= 0 || $shop_page_id !== $id ) {
+		return $block_content;
+	}
+
+	$is_shop_view    = is_shop();
+	$is_product_view = is_singular( 'product' );
+
+	if ( ! $is_shop_view && ! $is_product_view ) {
+		return $block_content;
+	}
+
+	if ( ! class_exists( 'WP_HTML_Tag_Processor' ) ) {
+		return $block_content;
+	}
+
+	$processor = new WP_HTML_Tag_Processor( $block_content );
+
+	if ( ! $processor->next_tag( array( 'tag_name' => 'LI' ) ) ) {
+		return $block_content;
+	}
+
+	if ( $is_shop_view ) {
+		$processor->add_class( 'current-menu-item' );
+		$processor->add_class( 'current_page_item' );
+	} elseif ( $is_product_view ) {
+		$processor->add_class( 'current-menu-ancestor' );
+		$processor->add_class( 'current_page_parent' );
+	}
+
+	$updated = $processor->get_updated_html();
+
+	if ( $is_shop_view ) {
+		$anchor = new WP_HTML_Tag_Processor( $updated );
+
+		if ( $anchor->next_tag( array( 'tag_name' => 'A' ) ) ) {
+			$anchor->set_attribute( 'aria-current', 'page' );
+			$updated = $anchor->get_updated_html();
+		}
+	}
+
+	return $updated;
+}
+add_filter( 'render_block', 'wc_nav_menu_link_block_current_shop', 10, 2 );
+
+/**
  * Fix active class in nav for shop page.
  *
  * @param array $menu_items Menu items.
