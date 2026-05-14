@@ -61,5 +61,48 @@ class Package {
 		$container = wc_get_container();
 		$container->get( ClassicVariationGalleryAdmin::class )->register();
 		$container->get( LegacyVariationGalleryCompatibility::class )->register();
+
+		// Defer the schedule check until Action Scheduler's data store is
+		// initialized, which doesn't happen until WP's `init` hook.
+		add_action( 'init', array( __CLASS__, 'maybe_schedule_migration' ), 20 );
+	}
+
+	/**
+	 * Schedule the legacy variation gallery migration if it hasn't already
+	 * completed and isn't already queued.
+	 *
+	 * Safe to call on every request: short-circuits when the completion
+	 * option is set or a pending action already exists for the callback.
+	 *
+	 * @internal
+	 */
+	public static function maybe_schedule_migration(): void {
+		if ( get_option( Migration::COMPLETED_OPTION ) ) {
+			return;
+		}
+
+		$update_callback = array( Migration::class, 'run' );
+
+		$pending = WC()->queue()->search(
+			array(
+				'hook'     => 'woocommerce_run_update_callback',
+				'status'   => 'pending',
+				'per_page' => 1,
+				'group'    => 'woocommerce-db-updates',
+			)
+		);
+
+		foreach ( $pending as $action ) {
+			$args = $action->get_args();
+			if ( isset( $args['update_callback'] ) && $args['update_callback'] === $update_callback ) {
+				return;
+			}
+		}
+
+		WC()->queue()->add(
+			'woocommerce_run_update_callback',
+			array( 'update_callback' => $update_callback ),
+			'woocommerce-db-updates'
+		);
 	}
 }
