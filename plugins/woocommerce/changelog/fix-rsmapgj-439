@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Always include `priceCurrency` at the top-level `offers` object in product structured data, so Google Search Console recognizes the field for products whose currency was previously only nested inside `priceSpecification`.

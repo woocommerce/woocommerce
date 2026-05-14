@@ -418,14 +418,13 @@ class WC_Structured_Data {
 					'url'   => $shop_url,
 				),
 			);
-			if (
-				( ! empty( $markup_offer['price'] ) ||
-					! empty( $markup_offer['lowPrice'] ) ||
-					! empty( $markup_offer['highPrice'] )
-				) && empty( $markup_offer['priceCurrency'] )
-			) {
-				$markup_offer['priceCurrency'] = $currency;
-			}
+			// Always include `priceCurrency` at the top-level `offers` object for
+			// Google Search Console (Merchant listings) compatibility, even when
+			// the price is only present inside `priceSpecification`. GSC reports a
+			// critical "Missing field priceCurrency" error otherwise, despite the
+			// nested value being valid per schema.org and Google Rich Results Test.
+			// See https://github.com/woocommerce/woocommerce/issues/60652.
+			$markup_offer['priceCurrency'] = $currency;
 
 			$markup['offers'] = array( apply_filters( 'woocommerce_structured_data_product_offer', $markup_offer, $product ) );
 		}
