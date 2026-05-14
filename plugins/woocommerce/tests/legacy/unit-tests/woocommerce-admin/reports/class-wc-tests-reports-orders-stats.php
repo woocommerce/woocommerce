@@ -4132,6 +4132,153 @@ class WC_Admin_Tests_Reports_Orders_Stats extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Regression test for negative Net sales after deleting refunded orders.
+	 *
+	 * When an order with one or more refunds is force-deleted, the analytics
+	 * `wc_order_stats` table should not retain the refund rows (which carry
+	 * negative totals). Otherwise Net sales remains negative even after every
+	 * order has been deleted.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/48955
+	 */
+	public function test_delete_order_cascades_to_refund_stats_rows() {
+		global $wpdb;
+
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Create a product and an order with a partial refund.
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->set_shipping_total( 0 );
+		$order->set_cart_tax( 0 );
+		$order->save();
+
+		$refund = null;
+		foreach ( $order->get_items() as $item_values ) {
+			$item_data = $item_values->get_data();
+			$refund    = wc_create_refund(
+				array(
+					'amount'     => 10,
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						$item_data['id'] => array(
+							'qty'          => 0,
+							'refund_total' => 10,
+						),
+					),
+				)
+			);
+			break;
+		}
+		$this->assertNotNull( $refund );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$order_id  = $order->get_id();
+		$refund_id = $refund->get_id();
+
+		// Sanity: both rows exist in wc_order_stats before deletion.
+		$pre_order_row  = $wpdb->get_row(
+			$wpdb->prepare( "SELECT order_id, parent_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id )
+		);
+		$pre_refund_row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT order_id, parent_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $refund_id )
+		);
+		$this->assertNotNull( $pre_order_row, 'Order stats row should exist before deletion.' );
+		$this->assertNotNull( $pre_refund_row, 'Refund stats row should exist before deletion.' );
+		$this->assertSame( (int) $order_id, (int) $pre_refund_row->parent_id );
+
+		// Delete the parent order. The refund row should be cleaned up too.
+		$order->delete( true );
+
+		$post_order_row  = $wpdb->get_row(
+			$wpdb->prepare( "SELECT order_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id )
+		);
+		$post_refund_row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT order_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $refund_id )
+		);
+		$orphan_rows     = $wpdb->get_var(
+			$wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->prefix}wc_order_stats WHERE parent_id = %d", $order_id )
+		);
+
+		$this->assertNull( $post_order_row, 'Order stats row should be removed after deletion.' );
+		$this->assertNull( $post_refund_row, 'Refund stats row should be removed when its parent order is deleted.' );
+		$this->assertSame( 0, (int) $orphan_rows, 'No refund rows should reference the deleted parent order.' );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * Deleting only a refund should not delete its parent order's stats row.
+	 *
+	 * Guards against an over-eager cascade in `delete_order` that could remove
+	 * the parent order's analytics row when only a child refund is deleted.
+	 */
+	public function test_delete_refund_only_does_not_remove_parent_order_stats() {
+		global $wpdb;
+
+		WC_Helper_Reports::reset_stats_dbs();
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Test Product' );
+		$product->set_regular_price( 25 );
+		$product->save();
+
+		$order = WC_Helper_Order::create_order( 1, $product );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->set_total( 100 );
+		$order->set_shipping_total( 0 );
+		$order->set_cart_tax( 0 );
+		$order->save();
+
+		$refund = null;
+		foreach ( $order->get_items() as $item_values ) {
+			$item_data = $item_values->get_data();
+			$refund    = wc_create_refund(
+				array(
+					'amount'     => 10,
+					'order_id'   => $order->get_id(),
+					'line_items' => array(
+						$item_data['id'] => array(
+							'qty'          => 0,
+							'refund_total' => 10,
+						),
+					),
+				)
+			);
+			break;
+		}
+		$this->assertNotNull( $refund );
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$order_id  = $order->get_id();
+		$refund_id = $refund->get_id();
+
+		// Delete only the refund.
+		$refund->delete( true );
+
+		$order_row  = $wpdb->get_row(
+			$wpdb->prepare( "SELECT order_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $order_id )
+		);
+		$refund_row = $wpdb->get_row(
+			$wpdb->prepare( "SELECT order_id FROM {$wpdb->prefix}wc_order_stats WHERE order_id = %d", $refund_id )
+		);
+
+		$this->assertNotNull( $order_row, 'Parent order stats row should remain after only the refund is deleted.' );
+		$this->assertNull( $refund_row, 'Refund stats row should be removed after the refund is deleted.' );
+
+		$order->delete( true );
+		$product->delete( true );
+	}
+
+	/**
 	 * Test segmenting by product id and by variation id.
 	 */
 	public function test_segmenting_by_product_and_variation() {

@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Prevent Analytics Orders report from showing negative Net sales after every order is deleted by cascading deletion of refund stats rows when their parent order is removed.
+
+

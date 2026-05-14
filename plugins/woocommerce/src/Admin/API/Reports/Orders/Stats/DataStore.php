@@ -634,22 +634,69 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 	/**
 	 * Deletes the order stats when an order is deleted.
 	 *
+	 * When the deleted order is a parent order (i.e. not a refund), any child
+	 * refund stats rows that reference it via `parent_id` are also removed.
+	 * This prevents orphaned refund rows (which carry negative totals) from
+	 * lingering in `wc_order_stats` and skewing reports such as Net sales,
+	 * which is the scenario that produces negative totals after every order
+	 * has been deleted.
+	 *
 	 * @param int $post_id Post ID.
 	 */
 	public static function delete_order( $post_id ) {
 		global $wpdb;
 		$order_id = (int) $post_id;
 
-		if ( ! OrderUtil::is_order( $post_id, array( 'shop_order', 'shop_order_refund' ) ) ) {
+		if ( $order_id <= 0 ) {
 			return;
 		}
 
-		// Retrieve customer details before the order is deleted.
-		$order       = wc_get_order( $order_id );
-		$customer_id = absint( CustomersDataStore::get_existing_customer_id_from_order( $order ) );
+		$table_name = self::get_db_table_name();
 
-		// Delete the order.
-		$wpdb->delete( self::get_db_table_name(), array( 'order_id' => $order_id ) );
+		// Look up the existing stats row directly. We cannot rely on
+		// OrderUtil::is_order() here because this method is also fired from
+		// WordPress' `delete_post` action, by which time the underlying order
+		// (and its HPOS record) may already be gone — leaving the analytics
+		// row behind. Reading the row first keeps the cleanup idempotent and
+		// lets us cascade-delete child refund rows even in that case.
+		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$existing = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT order_id, parent_id FROM {$table_name} WHERE order_id = %d",
+				$order_id
+			)
+		);
+		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$is_known_order = (bool) $existing;
+		$is_refund_row  = $is_known_order && (int) $existing->parent_id > 0;
+
+		// Fall back to the order type lookup for rows that have not been synced
+		// yet (e.g. the row was never created) so we still bail out for
+		// non-order post IDs and keep prior behaviour for callers that pass in
+		// unrelated post IDs via `delete_post`.
+		if ( ! $is_known_order && ! OrderUtil::is_order( $post_id, array( 'shop_order', 'shop_order_refund' ) ) ) {
+			return;
+		}
+
+		// Retrieve customer details before the order is deleted. wc_get_order()
+		// may legitimately return false here (the order has already been
+		// removed from its data store), so handle that gracefully.
+		$order       = wc_get_order( $order_id );
+		$customer_id = $order ? absint( CustomersDataStore::get_existing_customer_id_from_order( $order ) ) : 0;
+
+		// Delete the order's own row.
+		$wpdb->delete( $table_name, array( 'order_id' => $order_id ) );
+
+		// If the deleted row represents a parent order (not a refund), cascade
+		// the deletion to any child refund rows so they cannot remain as
+		// orphaned negative entries in the stats table.
+		if ( ! $is_refund_row ) {
+			// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+			$wpdb->delete( $table_name, array( 'parent_id' => $order_id ) );
+			// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
+		}
+
 		/**
 		 * Fires when orders stats are deleted.
 		 *
