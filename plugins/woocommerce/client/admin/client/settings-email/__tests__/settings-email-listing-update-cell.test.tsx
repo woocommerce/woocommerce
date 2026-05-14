@@ -45,6 +45,7 @@ const baseEmail: EmailType = {
 	templateStatus: null,
 	templateVersion: null,
 	currentVersion: null,
+	wasBackfilled: false,
 };
 
 describe( '<UpdatesCell>', () => {

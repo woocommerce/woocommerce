@@ -2,11 +2,12 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useMemo, useCallback } from '@wordpress/element';
+import { useMemo, useCallback, useEffect, useState } from '@wordpress/element';
 import { Fieldset, IconButton } from '@wordpress/ui';
 import clsx from 'clsx';
 import type { Field } from '@wordpress/dataviews';
 import { upload, closeSmall, dragHandle } from '@wordpress/icons';
+import { MediaUpload } from '@wordpress/media-utils';
 import { DragDropProvider, type DragEndEvent } from '@dnd-kit/react';
 import { isSortable, useSortable } from '@dnd-kit/react/sortable';
 
@@ -24,36 +25,21 @@ type Attachment = {
 	date_gmt?: string;
 	modified?: string;
 	modified_gmt?: string;
+	sizes?: Record< string, { source_url?: string; url?: string } >;
 	media_details?: {
-		sizes?: Record< string, { source_url: string } >;
+		sizes?: Record< string, { source_url?: string; url?: string } >;
 	};
 };
-
-declare global {
-	interface Window {
-		wp?: {
-			media?: ( options: Record< string, unknown > ) => {
-				on: ( event: 'select', callback: () => void ) => void;
-				open: () => void;
-				state: () => {
-					get: ( key: string ) => {
-						toJSON: () => Attachment[];
-					};
-				};
-			};
-		};
-	}
-}
 
 const toProductImage = (
 	att: Attachment
 ): ProductEntityRecord[ 'images' ][ number ] => {
-	const sizes = att.media_details?.sizes as
-		| Record< string, { source_url: string } >
-		| undefined;
+	const sizes = att.media_details?.sizes || att.sizes;
 	const thumbnailUrl =
 		sizes?.woocommerce_thumbnail?.source_url ||
+		sizes?.woocommerce_thumbnail?.url ||
 		sizes?.thumbnail?.source_url ||
+		sizes?.thumbnail?.url ||
 		'';
 
 	return {
@@ -164,7 +150,22 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		);
 	},
 	Edit: ( { data, onChange, field } ) => {
-		const images = useMemo( () => data.images ?? [], [ data.images ] );
+		const dataImages = useMemo( () => data.images ?? [], [ data.images ] );
+		const [ images, setImages ] = useState( dataImages );
+
+		useEffect( () => {
+			setImages( dataImages );
+		}, [ dataImages ] );
+
+		const commitImages = useCallback(
+			( nextImages: ProductEntityRecord[ 'images' ] ) => {
+				setImages( nextImages );
+				onChange( {
+					images: nextImages,
+				} );
+			},
+			[ onChange ]
+		);
 
 		const handleSelect = useCallback(
 			( selection: Attachment | Attachment[] ) => {
@@ -172,60 +173,19 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 					? selection
 					: [ selection ];
 				const mappedImages = attachments.map( toProductImage );
-				const selectedIds = new Set(
-					mappedImages.map( ( image ) => image.id )
-				);
-				const existingImages = images.filter( ( image ) =>
-					selectedIds.has( image.id )
-				);
-				const existingIds = new Set(
-					images.map( ( image ) => image.id )
-				);
-				const newImages = mappedImages.filter(
-					( image ) => ! existingIds.has( image.id )
-				);
 
-				onChange( {
-					images: [ ...existingImages, ...newImages ],
-				} );
+				commitImages( mappedImages );
 			},
-			[ images, onChange ]
+			[ commitImages ]
 		);
-
-		const handleOpenMediaLibrary = useCallback( () => {
-			const media = window.wp?.media;
-
-			if ( ! media ) {
-				return;
-			}
-
-			const frame = media( {
-				title: __( 'Add images', 'woocommerce' ),
-				button: {
-					text: __( 'Use images', 'woocommerce' ),
-				},
-				multiple: true,
-				library: {
-					type: 'image',
-				},
-			} );
-
-			frame.on( 'select', () => {
-				handleSelect( frame.state().get( 'selection' ).toJSON() );
-			} );
-
-			frame.open();
-		}, [ handleSelect ] );
 
 		const handleRemoveImage = useCallback(
 			( imageToRemove: ProductEntityRecord[ 'images' ][ number ] ) => {
-				onChange( {
-					images: images.filter(
-						( image ) => image.id !== imageToRemove.id
-					),
-				} );
+				commitImages(
+					images.filter( ( image ) => image.id !== imageToRemove.id )
+				);
 			},
-			[ images, onChange ]
+			[ commitImages, images ]
 		);
 
 		const handleDragEnd = useCallback(
@@ -259,11 +219,9 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				);
 				reorderedImages.splice( index, 0, movedImage );
 
-				onChange( {
-					images: reorderedImages,
-				} );
+				commitImages( reorderedImages );
 			},
-			[ images, onChange ]
+			[ commitImages, images ]
 		);
 
 		const removeCallbacks = useMemo( () => {
@@ -302,11 +260,23 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 							} ) }
 						</div>
 						<div className="woocommerce-fields-control__featured-image-actions">
-							<IconButton
-								variant="minimal"
-								icon={ upload }
-								label={ __( 'Add images', 'woocommerce' ) }
-								onClick={ handleOpenMediaLibrary }
+							<MediaUpload
+								allowedTypes={ [ 'image' ] }
+								multiple="add"
+								onSelect={ handleSelect }
+								title={ __( 'Add images', 'woocommerce' ) }
+								value={ images.map( ( image ) => image.id ) }
+								render={ ( { open }: { open: () => void } ) => (
+									<IconButton
+										variant="minimal"
+										icon={ upload }
+										label={ __(
+											'Add images',
+											'woocommerce'
+										) }
+										onClick={ open }
+									/>
+								) }
 							/>
 						</div>
 					</div>

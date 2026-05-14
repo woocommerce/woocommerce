@@ -102,4 +102,46 @@ class NotificationTest extends WC_Unit_Test_Case {
 			)
 		);
 	}
+
+	/**
+	 * Default `should_send_to_user` should:
+	 *  - treat `null` (no stored value) as opt-in,
+	 *  - read `enabled` from the array shape today's storage produces,
+	 *  - default to `true` when the array shape is missing the `enabled`
+	 *    key (so newly-added notification types are opt-in by default),
+	 *  - and fall back to a defensive bool cast for unexpected scalars.
+	 *
+	 * @return array<string, array<mixed>>
+	 */
+	public function provider_should_send_to_user_default(): array {
+		return array(
+			'null pref means opt-in by default'         => array( null, true ),
+			'array with enabled true'                   => array( array( 'enabled' => true ), true ),
+			'array with enabled false'                  => array( array( 'enabled' => false ), false ),
+			'array missing enabled defaults to true'    => array( array( 'min_value' => 500 ), true ),
+			'empty array defaults to true'              => array( array(), true ),
+			'array with truthy enabled (1) is true'     => array( array( 'enabled' => 1 ), true ),
+			'array with falsy enabled (0) is false'     => array( array( 'enabled' => 0 ), false ),
+			'scalar bool true (defensive fallback)'     => array( true, true ),
+			'scalar bool false (defensive fallback)'    => array( false, false ),
+			'scalar truthy string (defensive fallback)' => array( '1', true ),
+			'scalar empty string (defensive fallback)'  => array( '', false ),
+		);
+	}
+
+	/**
+	 * @testdox Default should_send_to_user with $_dataName returns $expected.
+	 * @dataProvider provider_should_send_to_user_default
+	 *
+	 * @param mixed $pref_value The stored preference value.
+	 * @param bool  $expected   The expected decision.
+	 */
+	public function test_should_send_to_user_default_behavior( $pref_value, bool $expected ): void {
+		$notification = $this->getMockBuilder( NewOrderNotification::class )
+			->setConstructorArgs( array( 1 ) )
+			->onlyMethods( array( 'to_payload', 'has_meta', 'write_meta', 'delete_meta' ) )
+			->getMock();
+
+		$this->assertSame( $expected, $notification->should_send_to_user( $pref_value ) );
+	}
 }
