@@ -300,4 +300,37 @@ class Native_Rail_Splicer_Test extends \WC_Unit_Test_Case {
 		}
 		$this->assertTrue( $found_access_entry, 'wc-status access-check entry must survive splice.' );
 	}
+
+	public function test_splice_writes_phantom_hide_if_js_entry_for_rail_root_without_children(): void {
+		global $menu, $submenu;
+		$menu = array(
+			2  => array( 'Dashboard', 'read', 'index.php', 'Dashboard', '', 'menu-dashboard', 'dashicons-dashboard' ),
+			55 => array( 'WooCommerce', 'manage_woocommerce', 'woocommerce', 'WooCommerce', '', 'toplevel_page_woocommerce', 'dashicons-cart' ),
+		);
+
+		// Two rail-roots, neither has any tree children.
+		$tree = array(
+			'woocommerce' => array( 'parent' => null, 'title' => 'WooCommerce', 'position' => 2 ),
+			'wc-orders'   => array( 'parent' => 'woocommerce', 'title' => 'Orders', 'position' => 20, 'capability' => 'manage_woocommerce' ),
+			'wc-admin'    => array( 'parent' => 'woocommerce', 'title' => 'Home',   'position' => 10, 'capability' => 'manage_woocommerce' ),
+		);
+
+		$_GET['page']       = 'wc-admin';
+		$GLOBALS['pagenow'] = 'admin.php';
+
+		( new Native_Rail_Splicer() )->splice( $tree );
+
+		// Both rail-roots must have a $submenu entry — that's what flips
+		// menu-header.php into the branch that resolves a registered
+		// hookname instead of emitting a naked literal href.
+		$this->assertArrayHasKey( 'wc-orders', $submenu );
+		$this->assertCount( 1, $submenu['wc-orders'] );
+		$this->assertSame( 'wc-orders', $submenu['wc-orders'][0][2] );
+		$this->assertStringContainsString( 'hide-if-js', (string) ( $submenu['wc-orders'][0][4] ?? '' ) );
+
+		$this->assertArrayHasKey( 'wc-admin', $submenu );
+		$this->assertCount( 1, $submenu['wc-admin'] );
+		$this->assertSame( 'wc-admin', $submenu['wc-admin'][0][2] );
+		$this->assertStringContainsString( 'hide-if-js', (string) ( $submenu['wc-admin'][0][4] ?? '' ) );
+	}
 }

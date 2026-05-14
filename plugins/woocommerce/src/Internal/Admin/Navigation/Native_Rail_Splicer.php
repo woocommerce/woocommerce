@@ -321,30 +321,48 @@ class Native_Rail_Splicer {
 			if ( ( $node['parent'] ?? null ) !== 'woocommerce' ) {
 				continue;
 			}
-			if ( ! isset( $by_parent[ $slug ] ) ) {
-				continue;
-			}
-
-			$children = $by_parent[ $slug ];
-			uasort(
-				$children,
-				static fn( $a, $b ) => ( $a['position'] ?? 0 ) <=> ( $b['position'] ?? 0 )
-			);
 
 			$entries = array();
-			foreach ( $children as $child_slug => $child ) {
-				if ( ! empty( $child['hidden'] ) ) {
-					continue;
+			if ( isset( $by_parent[ $slug ] ) ) {
+				$children = $by_parent[ $slug ];
+				uasort(
+					$children,
+					static fn( $a, $b ) => ( $a['position'] ?? 0 ) <=> ( $b['position'] ?? 0 )
+				);
+				foreach ( $children as $child_slug => $child ) {
+					if ( ! empty( $child['hidden'] ) ) {
+						continue;
+					}
+					$title     = (string) ( $child['title'] ?? $child_slug );
+					$cap       = (string) ( $child['capability'] ?? 'read' );
+					$url       = self::renderable_url( (string) ( $child['url'] ?? $child_slug ) );
+					$entries[] = array( $title, $cap, $url, $title, '' );
 				}
-				$title     = (string) ( $child['title'] ?? $child_slug );
-				$cap       = (string) ( $child['capability'] ?? 'read' );
-				$url       = self::renderable_url( (string) ( $child['url'] ?? $child_slug ) );
-				$entries[] = array( $title, $cap, $url, $title, '' );
 			}
 
-			if ( ! empty( $entries ) ) {
-				$submenu[ $slug ] = $entries;
+			if ( empty( $entries ) ) {
+				// Phantom hidden entry so menu-header.php takes its "parent
+				// with submenu" branch when computing the rail-root's href.
+				// That branch resolves the hookname against the rail-root
+				// slug itself (where our $_wp_real_parent_file remap routes
+				// to 'woocommerce' and our register_rail_root_hooknames stub
+				// registers a callback), so has_action() reports truthy and
+				// the emitted URL is `admin.php?page=<slug>` instead of a
+				// naked `<slug>` literal.
+				//
+				// The other branch ("no submenu") computes hookname against
+				// 'admin.php' and calls get_admin_page_parent('admin.php'),
+				// which falls through to the foreach scan of $submenu and
+				// can return an arbitrary slug depending on $typenow /
+				// $pagenow (e.g. 'edit.php?post_type=product' on the
+				// Products list). That breaks the hookname lookup and the
+				// href falls through to the naked literal.
+				$title     = (string) ( $node['title'] ?? $slug );
+				$cap       = (string) ( $node['capability'] ?? 'read' );
+				$entries[] = array( $title, $cap, $slug, $title, 'hide-if-js' );
 			}
+
+			$submenu[ $slug ] = $entries;
 		}
 	}
 
