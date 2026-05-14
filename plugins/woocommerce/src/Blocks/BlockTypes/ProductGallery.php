@@ -139,7 +139,6 @@ class ProductGallery extends AbstractBlock {
 				'data-wp-context',
 				wp_json_encode(
 					array(
-						'defaultImageData'        => $default_image_ids,
 						'imageData'               => $default_image_ids,
 						'isDialogOpen'            => false,
 						'isDragging'              => false,

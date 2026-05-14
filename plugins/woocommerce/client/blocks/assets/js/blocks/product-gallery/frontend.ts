@@ -91,16 +91,18 @@ const scrollImageEverywhereIntoView = (
 
 /**
  * Mutate the gallery's reactive context to reflect a new visible image
- * set. Empty input restores `defaultImageData` (the parent product's
- * gallery). Also recomputes arrow states and scrolls the active slot
- * into view.
+ * set. Empty input restores the parent product's gallery from the iAPI
+ * config. Also recomputes arrow states and scrolls the active slot into
+ * view.
  */
 const updateVisibleImageSet = (
 	imageIds: number[],
 	selectedImageId?: number
 ) => {
 	const context = getContext();
-	const nextImageData = imageIds.length ? imageIds : context.defaultImageData;
+	const nextImageData = imageIds.length
+		? imageIds
+		: getProductImageSet( context.productId )?.image_ids || [];
 	const nextSelectedImageId = pickSelectedImageId(
 		nextImageData,
 		selectedImageId
