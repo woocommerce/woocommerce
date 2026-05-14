@@ -88,6 +88,45 @@ class WC_Comments {
 
 		// Validate product reviews if requires verified owners.
 		add_action( 'pre_comment_on_post', array( __CLASS__, 'validate_product_review_verified_owners' ) );
+
+		// Honour the "Comments should be displayed with the" setting across paginated product reviews.
+		add_filter( 'comments_template_query_args', array( __CLASS__, 'order_product_reviews_query_args' ) );
+		add_filter( 'woocommerce_product_review_list_args', array( __CLASS__, 'order_product_reviews_list_args' ) );
+	}
+
+	/**
+	 * Ensure product reviews are fetched in the order configured by the "Comments should be displayed with the"
+	 * option so that pagination reflects the overall sort order rather than reversing each page individually.
+	 *
+	 * @since 10.9.0
+	 * @param array $comment_args Arguments passed to WP_Comment_Query by comments_template().
+	 * @return array
+	 */
+	public static function order_product_reviews_query_args( $comment_args ) {
+		if ( ! is_singular( 'product' ) ) {
+			return $comment_args;
+		}
+
+		$comment_args['order'] = ( 'desc' === strtolower( (string) get_option( 'comment_order' ) ) ) ? 'DESC' : 'ASC';
+
+		return $comment_args;
+	}
+
+	/**
+	 * Prevent wp_list_comments() from reversing the already-ordered product review list. Because the
+	 * comments_template_query_args filter fetches reviews in the final display order, the per-page
+	 * reversal that wp_list_comments() performs when comment_order=desc would otherwise break the
+	 * overall pagination order.
+	 *
+	 * @since 10.9.0
+	 * @param array $args Arguments passed to wp_list_comments() for product reviews.
+	 * @return array
+	 */
+	public static function order_product_reviews_list_args( $args ) {
+		$args['reverse_top_level'] = false;
+		$args['reverse_children']  = false;
+
+		return $args;
 	}
 
 	/**

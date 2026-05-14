@@ -54856,18 +54856,6 @@ parameters:
 			path: src/Blocks/BlockTypes/Reviews/ProductReviewTemplate.php
 
 		-
-			message: '#^Parameter \#1 \$input of function array_reverse expects array, array\<int\|WP_Comment\>\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/Reviews/ProductReviewTemplate.php
-
-		-
-			message: '#^Parameter \#1 \$var of function count expects array\|Countable, array\<int\|WP_Comment\>\|int given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Blocks/BlockTypes/Reviews/ProductReviewTemplate.php
-
-		-
 			message: '#^Access to property \$parsed_block on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\Reviews\\WP_Block\.$#'
 			identifier: class.notFound
 			count: 1
