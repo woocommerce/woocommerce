@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails\Plain
- * @version 8.6.0
+ * @version 10.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -40,7 +40,22 @@ if ( $order->get_billing_email() ) {
  */
 do_action( 'woocommerce_email_customer_address_section', 'billing', $order, $sent_to_admin, true );
 
-if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() ) {
+/**
+ * Filter whether to show the shipping address in the email.
+ *
+ * This filter is documented in templates/emails/email-addresses.php.
+ *
+ * @since 10.9.0
+ * @param bool     $show_shipping_address Whether to show the shipping address.
+ * @param WC_Order $order                 The order object.
+ */
+$show_shipping_address = (bool) apply_filters(
+	'woocommerce_email_show_shipping_address',
+	! wc_ship_to_billing_address_only() && ( $order->needs_shipping_address() || $order->has_shipping_address() ),
+	$order
+);
+
+if ( $show_shipping_address ) {
 	$shipping = $order->get_formatted_shipping_address();
 
 	if ( $shipping ) {

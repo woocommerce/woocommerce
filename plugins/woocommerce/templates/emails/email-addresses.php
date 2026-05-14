@@ -12,7 +12,7 @@
  *
  * @see https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates\Emails
- * @version 10.6.0
+ * @version 10.9.0
  */
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
@@ -23,6 +23,25 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 $address  = $order->get_formatted_billing_address();
 $shipping = $order->get_formatted_shipping_address();
+
+/**
+ * Filter whether to show the shipping address in the email.
+ *
+ * By default, the shipping address is shown when the order needs a shipping
+ * address (i.e. it has a non-local-pickup shipping method) OR when the order
+ * already has a shipping address on file. The latter ensures manually created
+ * orders with a shipping address but no shipping method still surface the
+ * shipping address in the invoice email.
+ *
+ * @since 10.9.0
+ * @param bool     $show_shipping_address Whether to show the shipping address.
+ * @param WC_Order $order                 The order object.
+ */
+$show_shipping_address = (bool) apply_filters(
+	'woocommerce_email_show_shipping_address',
+	! wc_ship_to_billing_address_only() && ( $order->needs_shipping_address() || $order->has_shipping_address() ),
+	$order
+);
 
 $email_improvements_enabled = FeaturesUtil::feature_is_enabled( 'email_improvements' );
 
@@ -70,7 +89,7 @@ $display_section_divider = (bool) apply_filters( 'woocommerce_email_body_display
 				?>
 			</address>
 		</td>
-		<?php if ( ! wc_ship_to_billing_address_only() && $order->needs_shipping_address() && $shipping ) : ?>
+		<?php if ( $show_shipping_address && $shipping ) : ?>
 			<td class="font-family text-align-left" style="padding:0;" valign="top" width="50%">
 				<?php if ( $email_improvements_enabled ) { ?>
 					<b class="address-title"><?php esc_html_e( 'Shipping address', 'woocommerce' ); ?></b>

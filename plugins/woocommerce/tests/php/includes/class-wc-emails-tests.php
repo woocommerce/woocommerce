@@ -121,4 +121,109 @@ class WC_Emails_Tests extends \WC_Unit_Test_Case {
 		$this->assertStringContainsString( 'Test meta key', $content );
 		$this->assertStringContainsString( 'test_meta_value', $content );
 	}
+
+	/**
+	 * Build an order with a shipping address but no shipping line items.
+	 *
+	 * @return WC_Order
+	 */
+	private function create_order_with_shipping_address_only() {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		// Drop any shipping line items the helper may have added so the order has
+		// a shipping address but no shipping method.
+		foreach ( $order->get_items( 'shipping' ) as $item_id => $item ) {
+			$order->remove_item( $item_id );
+		}
+
+		$order->set_shipping_first_name( 'Jane' );
+		$order->set_shipping_last_name( 'Doe' );
+		$order->set_shipping_address_1( '456 Shipping Ave' );
+		$order->set_shipping_city( 'Shipville' );
+		$order->set_shipping_state( 'NY' );
+		$order->set_shipping_postcode( '10001' );
+		$order->set_shipping_country( 'US' );
+		$order->save();
+
+		return $order;
+	}
+
+	/**
+	 * Render the email addresses template and return the markup.
+	 *
+	 * @param WC_Order $order      Order to render.
+	 * @param bool     $plain_text Whether to render the plain-text template.
+	 * @return string
+	 */
+	private function render_email_addresses( $order, $plain_text = false ) {
+		$email_object = new WC_Emails();
+		ob_start();
+		$email_object->email_addresses( $order, false, $plain_text );
+		$content = ob_get_contents();
+		ob_end_clean();
+		return $content;
+	}
+
+	/**
+	 * @testdox Should show the shipping address in HTML emails when the order has a shipping address but no shipping method.
+	 */
+	public function test_email_addresses_shows_shipping_address_when_no_shipping_method() {
+		$order = $this->create_order_with_shipping_address_only();
+
+		$this->assertFalse( $order->needs_shipping_address(), 'Sanity: order without a shipping method should not need a shipping address.' );
+		$this->assertTrue( $order->has_shipping_address(), 'Sanity: order should have a shipping address on file.' );
+
+		$content = $this->render_email_addresses( $order, false );
+
+		$this->assertStringContainsString( '456 Shipping Ave', $content, 'Shipping address line should appear in the HTML invoice when a shipping address is set, even without a shipping method.' );
+		$this->assertStringContainsString( 'Shipping address', $content, 'Shipping address heading should appear in the HTML invoice when a shipping address is set.' );
+	}
+
+	/**
+	 * @testdox Should show the shipping address in plain text emails when the order has a shipping address but no shipping method.
+	 */
+	public function test_email_addresses_plain_shows_shipping_address_when_no_shipping_method() {
+		$order = $this->create_order_with_shipping_address_only();
+
+		$content = $this->render_email_addresses( $order, true );
+
+		$this->assertStringContainsString( '456 Shipping Ave', $content, 'Shipping address line should appear in the plain-text invoice when a shipping address is set, even without a shipping method.' );
+		$this->assertStringContainsString( wc_strtoupper( 'Shipping address' ), $content, 'Shipping address heading should appear in the plain-text invoice when a shipping address is set.' );
+	}
+
+	/**
+	 * @testdox Should hide the shipping address when the store ships to the billing address only, even if a shipping address is set.
+	 */
+	public function test_email_addresses_hides_shipping_address_when_ship_to_billing_only() {
+		$order = $this->create_order_with_shipping_address_only();
+
+		add_filter( 'woocommerce_ship_to_billing_address_only', '__return_true' );
+		try {
+			$content       = $this->render_email_addresses( $order, false );
+			$content_plain = $this->render_email_addresses( $order, true );
+		} finally {
+			remove_filter( 'woocommerce_ship_to_billing_address_only', '__return_true' );
+		}
+
+		$this->assertStringNotContainsString( '456 Shipping Ave', $content, 'Shipping address should be hidden in HTML when ship-to-billing-only is enabled.' );
+		$this->assertStringNotContainsString( '456 Shipping Ave', $content_plain, 'Shipping address should be hidden in plain text when ship-to-billing-only is enabled.' );
+	}
+
+	/**
+	 * @testdox Should let the woocommerce_email_show_shipping_address filter override the default visibility.
+	 */
+	public function test_email_addresses_respects_show_shipping_address_filter() {
+		$order = $this->create_order_with_shipping_address_only();
+
+		add_filter( 'woocommerce_email_show_shipping_address', '__return_false' );
+		try {
+			$content       = $this->render_email_addresses( $order, false );
+			$content_plain = $this->render_email_addresses( $order, true );
+		} finally {
+			remove_filter( 'woocommerce_email_show_shipping_address', '__return_false' );
+		}
+
+		$this->assertStringNotContainsString( '456 Shipping Ave', $content, 'Filter returning false should suppress the shipping address in HTML emails.' );
+		$this->assertStringNotContainsString( '456 Shipping Ave', $content_plain, 'Filter returning false should suppress the shipping address in plain-text emails.' );
+	}
 }

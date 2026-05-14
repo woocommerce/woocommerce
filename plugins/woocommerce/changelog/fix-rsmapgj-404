@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the shipping address in customer-facing order emails when an order has a populated shipping address, even if no shipping method has been added (e.g. manually created orders).
