@@ -56,7 +56,7 @@ class WC_Meta_Box_Order_Actions {
 						<option value="<?php echo esc_attr( $action ); ?>"><?php echo esc_html( $title ); ?></option>
 					<?php } ?>
 				</select>
-				<button class="button wc-reload"><span><?php esc_html_e( 'Apply', 'woocommerce' ); ?></span></button>
+				<button type="submit" name="wc_order_action_submit" value="1" class="button wc-reload"><span><?php esc_html_e( 'Apply', 'woocommerce' ); ?></span></button>
 			</li>
 
 			<?php if ( ! FeaturesUtil::feature_is_enabled( 'order-detail-redesign' ) ) : ?>
@@ -132,6 +132,18 @@ class WC_Meta_Box_Order_Actions {
 
 		// Handle button actions.
 		if ( ! empty( $_POST['wc_order_action'] ) ) { // @codingStandardsIgnoreLine
+
+			// When the order detail redesign is enabled, only run the
+			// selected order action if the Apply button was the submitter —
+			// not the primary Update order button in the dedicated submit
+			// metabox. The Apply button posts `wc_order_action_submit`; the
+			// Update order button posts only `save`.
+			if (
+				FeaturesUtil::feature_is_enabled( 'order-detail-redesign' )
+				&& empty( $_POST['wc_order_action_submit'] )
+			) {
+				return;
+			}
 
 			$action = wc_clean( wp_unslash( $_POST['wc_order_action'] ) ); // @codingStandardsIgnoreLine
 
