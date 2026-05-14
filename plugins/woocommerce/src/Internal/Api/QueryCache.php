@@ -367,13 +367,12 @@ class QueryCache {
 		}
 
 		try {
-			$document = AST::fromArray( $data );
+			return AST::fromArray( $data );
 		} catch ( \Throwable $e ) {
 			return false;
+		} finally {
+			OpcacheFileExpiry::ensure_scheduled();
 		}
-
-		OpcacheFileExpiry::ensure_scheduled();
-		return $document;
 	}
 
 	/**
