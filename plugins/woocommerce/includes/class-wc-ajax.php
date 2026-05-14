@@ -1344,6 +1344,7 @@ class WC_AJAX {
 
 			$order_taxes      = $order->get_taxes();
 			$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
+			$shipping_zones   = class_exists( 'WC_Shipping_Zones' ) ? WC_Shipping_Zones::get_zones() : array();
 			$cogs_is_enabled  = wc_get_container()->get( CostOfGoodsSoldController::class )->feature_is_enabled();
 
 			// Add new shipping.

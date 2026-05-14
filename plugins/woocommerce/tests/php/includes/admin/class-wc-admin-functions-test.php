@@ -535,4 +535,105 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 		$this->assertEquals( 4, $order_item->get_meta( '_reduced_stock', true ), 'Reduced stock meta should be updated to new quantity' );
 	}
+
+	/**
+	 * Helper to seed a shipping order item against a freshly persisted order.
+	 *
+	 * @return array{order:WC_Order,item_id:int}
+	 */
+	private function create_order_with_shipping_item() {
+		$order = wc_create_order();
+		$item  = new WC_Order_Item_Shipping();
+		$item->set_order_id( $order->get_id() );
+		$item->set_method_title( 'Placeholder' );
+		$item->set_method_id( 'placeholder' );
+		$item_id = $item->save();
+
+		return array(
+			'order'   => $order,
+			'item_id' => $item_id,
+		);
+	}
+
+	/**
+	 * @testdox Should split method_id:instance_id when saving a manual order shipping line.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/38481
+	 */
+	public function test_wc_save_order_items_splits_method_and_instance_id_for_shipping() {
+		$created = $this->create_order_with_shipping_item();
+		$order   = $created['order'];
+		$item_id = $created['item_id'];
+
+		$post_data = array(
+			'shipping_method_id'    => array( (string) $item_id ),
+			'shipping_method'       => array( $item_id => 'flat_rate:42' ),
+			'shipping_method_title' => array( $item_id => 'Zone Flat Rate' ),
+			'shipping_cost'         => array( $item_id => '5' ),
+		);
+
+		wc_save_order_items( $order->get_id(), $post_data );
+
+		$saved_order  = wc_get_order( $order->get_id() );
+		$shipping     = $saved_order->get_items( 'shipping' );
+		$shipping_row = reset( $shipping );
+
+		$this->assertSame( 'flat_rate', $shipping_row->get_method_id(), 'method_id should be the bare method identifier' );
+		$this->assertSame( 42, $shipping_row->get_instance_id(), 'instance_id should be parsed from the submitted value' );
+		$this->assertSame( 'Zone Flat Rate', $shipping_row->get_method_title(), 'method_title should round-trip through save' );
+	}
+
+	/**
+	 * @testdox Should keep instance_id at zero when only a bare method id is submitted.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/38481
+	 */
+	public function test_wc_save_order_items_preserves_legacy_bare_method_id() {
+		$created = $this->create_order_with_shipping_item();
+		$order   = $created['order'];
+		$item_id = $created['item_id'];
+
+		$post_data = array(
+			'shipping_method_id'    => array( (string) $item_id ),
+			'shipping_method'       => array( $item_id => 'flat_rate' ),
+			'shipping_method_title' => array( $item_id => 'Legacy Flat Rate' ),
+			'shipping_cost'         => array( $item_id => '7' ),
+		);
+
+		wc_save_order_items( $order->get_id(), $post_data );
+
+		$saved_order  = wc_get_order( $order->get_id() );
+		$shipping     = $saved_order->get_items( 'shipping' );
+		$shipping_row = reset( $shipping );
+
+		$this->assertSame( 'flat_rate', $shipping_row->get_method_id(), 'method_id should remain as submitted' );
+		$this->assertSame( 0, $shipping_row->get_instance_id(), 'instance_id should default to zero without a colon-separated value' );
+	}
+
+	/**
+	 * @testdox Should ignore stray colons in the instance segment when parsing the shipping method value.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/38481
+	 */
+	public function test_wc_save_order_items_absints_instance_segment() {
+		$created = $this->create_order_with_shipping_item();
+		$order   = $created['order'];
+		$item_id = $created['item_id'];
+
+		$post_data = array(
+			'shipping_method_id'    => array( (string) $item_id ),
+			'shipping_method'       => array( $item_id => 'flat_rate:13garbage' ),
+			'shipping_method_title' => array( $item_id => 'Zone Flat Rate' ),
+			'shipping_cost'         => array( $item_id => '5' ),
+		);
+
+		wc_save_order_items( $order->get_id(), $post_data );
+
+		$saved_order  = wc_get_order( $order->get_id() );
+		$shipping     = $saved_order->get_items( 'shipping' );
+		$shipping_row = reset( $shipping );
+
+		$this->assertSame( 'flat_rate', $shipping_row->get_method_id(), 'method_id should still be parsed from the prefix' );
+		$this->assertSame( 13, $shipping_row->get_instance_id(), 'instance_id should be coerced through absint()' );
+	}
 }

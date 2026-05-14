@@ -416,9 +416,21 @@ function wc_save_order_items( $order_id, $items ) {
 				$item_data[ $key ] = isset( $items[ $key ][ $item_id ] ) ? wc_clean( wp_unslash( $items[ $key ][ $item_id ] ) ) : $default;
 			}
 
+			// The shipping_method value may be either a plain method id (e.g. `flat_rate`)
+			// for backward compatibility, or `method_id:instance_id` (e.g. `flat_rate:3`)
+			// when the admin selected a specific zone instance. Split it so the saved item
+			// keeps both pieces in sync. See https://github.com/woocommerce/woocommerce/issues/38481.
+			$submitted_method_id = is_scalar( $item_data['shipping_method'] ) ? (string) $item_data['shipping_method'] : '';
+			$method_instance_id  = 0;
+			if ( false !== strpos( $submitted_method_id, ':' ) ) {
+				list( $submitted_method_id, $maybe_instance_id ) = explode( ':', $submitted_method_id, 2 );
+				$method_instance_id                              = absint( $maybe_instance_id );
+			}
+
 			$item->set_props(
 				array(
-					'method_id'    => $item_data['shipping_method'],
+					'method_id'    => $submitted_method_id,
+					'instance_id'  => $method_instance_id,
 					'method_title' => $item_data['shipping_method_title'],
 					'total'        => $item_data['shipping_cost'],
 					'taxes'        => array(

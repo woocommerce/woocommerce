@@ -95,6 +95,7 @@ if ( wc_tax_enabled() ) {
 		<tbody id="order_shipping_line_items">
 			<?php
 			$shipping_methods = WC()->shipping() ? WC()->shipping()->load_shipping_methods() : array();
+			$shipping_zones   = class_exists( 'WC_Shipping_Zones' ) ? WC_Shipping_Zones::get_zones() : array();
 			foreach ( $line_items_shipping as $item_id => $item ) {
 				include __DIR__ . '/html-order-shipping.php';
 			}

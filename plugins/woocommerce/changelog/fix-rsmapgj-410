@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Persist the shipping method instance id when saving a manual order, so `get_instance_id()` returns the selected zone instance instead of zero.

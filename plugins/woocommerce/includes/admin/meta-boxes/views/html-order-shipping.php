@@ -25,28 +25,71 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<input type="hidden" name="shipping_method_id[]" value="<?php echo esc_attr( $item_id ); ?>" />
 			<input type="text" class="shipping_method_name" placeholder="<?php esc_attr_e( 'Shipping name', 'woocommerce' ); ?>" name="shipping_method_title[<?php echo esc_attr( $item_id ); ?>]" value="<?php echo esc_attr( $item->get_name() ); ?>" />
 			<select class="shipping_method" name="shipping_method[<?php echo esc_attr( $item_id ); ?>]">
-				<optgroup label="<?php esc_attr_e( 'Shipping method', 'woocommerce' ); ?>">
-					<option value=""><?php esc_html_e( 'N/A', 'woocommerce' ); ?></option>
-					<?php
-					$found_method = false;
+				<option value=""><?php esc_html_e( 'N/A', 'woocommerce' ); ?></option>
+				<?php
+				$shipping_item       = $item instanceof WC_Order_Item_Shipping ? $item : null;
+				$found_method        = false;
+				$current_method_id   = $shipping_item ? $shipping_item->get_method_id() : '';
+				$current_instance_id = $shipping_item ? $shipping_item->get_instance_id() : 0;
+				$current_value       = $current_instance_id ? $current_method_id . ':' . $current_instance_id : $current_method_id;
+				$zones               = isset( $shipping_zones ) && is_array( $shipping_zones ) ? $shipping_zones : array();
 
-					foreach ( $shipping_methods as $method ) {
-						$is_active = $item->get_method_id() === $method->id;
+				// List shipping methods grouped by zone so the saved value carries the instance id.
+				// See https://github.com/woocommerce/woocommerce/issues/38481.
+				foreach ( $zones as $zone ) {
+					if ( empty( $zone['shipping_methods'] ) ) {
+						continue;
+					}
 
-						echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( true, $is_active, false ) . '>' . esc_html( $method->get_method_title() ) . '</option>';
+					$zone_label = ! empty( $zone['zone_name'] ) ? $zone['zone_name'] : __( 'Shipping zone', 'woocommerce' );
+
+					echo '<optgroup label="' . esc_attr( $zone_label ) . '">';
+
+					foreach ( $zone['shipping_methods'] as $zone_method ) {
+						/**
+						 * The zone method instance.
+						 *
+						 * @var WC_Shipping_Method $zone_method
+						 */
+						if ( empty( $zone_method->instance_id ) ) {
+							continue;
+						}
+
+						$value     = $zone_method->id . ':' . $zone_method->instance_id;
+						$is_active = $current_instance_id && (int) $current_instance_id === (int) $zone_method->instance_id;
 
 						if ( $is_active ) {
 							$found_method = true;
 						}
+
+						$method_label = $zone_method->get_title() ? $zone_method->get_title() : $zone_method->get_method_title();
+
+						echo '<option value="' . esc_attr( $value ) . '" ' . selected( true, $is_active, false ) . '>' . esc_html( $method_label ) . '</option>';
 					}
 
-					if ( ! $found_method && $item->get_method_id() ) {
-						echo '<option value="' . esc_attr( $item->get_method_id() ) . '" selected="selected">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
-					} else {
-						echo '<option value="other">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
+					echo '</optgroup>';
+				}
+
+				echo '<optgroup label="' . esc_attr__( 'Other shipping methods', 'woocommerce' ) . '">';
+
+				foreach ( $shipping_methods as $method ) {
+					$is_active = ! $current_instance_id && $current_method_id === $method->id;
+
+					echo '<option value="' . esc_attr( $method->id ) . '" ' . selected( true, $is_active, false ) . '>' . esc_html( $method->get_method_title() ) . '</option>';
+
+					if ( $is_active ) {
+						$found_method = true;
 					}
-					?>
-				</optgroup>
+				}
+
+				if ( ! $found_method && $current_method_id ) {
+					echo '<option value="' . esc_attr( $current_value ) . '" selected="selected">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
+				} else {
+					echo '<option value="other">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
+				}
+
+				echo '</optgroup>';
+				?>
 			</select>
 		</div>
 

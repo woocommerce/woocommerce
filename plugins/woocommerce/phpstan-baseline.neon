@@ -6055,12 +6055,6 @@ parameters:
 			path: includes/admin/meta-boxes/views/html-order-refund.php
 
 		-
-			message: '#^Call to an undefined method object\:\:get_method_id\(\)\.$#'
-			identifier: method.notFound
-			count: 3
-			path: includes/admin/meta-boxes/views/html-order-shipping.php
-
-		-
 			message: '#^Call to an undefined method object\:\:get_name\(\)\.$#'
 			identifier: method.notFound
 			count: 3
