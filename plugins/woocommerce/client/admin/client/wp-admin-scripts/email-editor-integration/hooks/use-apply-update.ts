@@ -38,6 +38,20 @@ interface UndoResponse {
 	status: 'restored';
 }
 
+interface UseApplyUpdateOptions {
+	/**
+	 * When true, suppress the `createErrorNotice` snackbar fired on
+	 * `/apply` failure. Use when the calling surface (e.g., RSM-141's
+	 * editor banner) carries the error feedback itself and would
+	 * otherwise produce a double-error UI.
+	 *
+	 * Default: false — existing behavior (error snackbar fires).
+	 *
+	 * @since RSM-141
+	 */
+	suppressSnackbarOnError?: boolean;
+}
+
 interface UseApplyUpdateResult {
 	apply: ( choices: ApplyChoice[] ) => Promise< ApplyResponse | null >;
 	isApplying: boolean;
@@ -56,9 +70,13 @@ interface UseApplyUpdateResult {
  * matching pending edits, so no follow-up `saveEditedEntityRecord`
  * round-trip is needed.
  *
- * @param postId The `woo_email` post ID.
+ * @param postId  The `woo_email` post ID.
+ * @param options Optional behavior flags (e.g., `suppressSnackbarOnError`).
  */
-export function useApplyUpdate( postId: number | null ): UseApplyUpdateResult {
+export function useApplyUpdate(
+	postId: number | null,
+	options: UseApplyUpdateOptions = {}
+): UseApplyUpdateResult {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
 	const { receiveEntityRecords } = useDispatch( coreStore );
@@ -141,7 +159,21 @@ export function useApplyUpdate( postId: number | null ): UseApplyUpdateResult {
 
 				syncEditorState( res.merged_content );
 
-				createSuccessNotice( __( 'Update applied.', 'woocommerce' ), {
+				// Snackbar wording follows what the merchant actually chose.
+				// Smart Apply (`choices: []`) defaults every conflict to
+				// `keep_yours`, so customizations are preserved. If the
+				// drawer-driven path picked `use_core` for everything, the
+				// merchant explicitly chose to overwrite — say so plainly.
+				const allUseCore =
+					choices.length > 0 &&
+					choices.every( ( c ) => c.decision === 'use_core' );
+				const successMessage = allUseCore
+					? __( 'Update applied', 'woocommerce' )
+					: __(
+							'Update applied · customizations preserved',
+							'woocommerce'
+					  );
+				createSuccessNotice( successMessage, {
 					type: 'snackbar',
 					actions: [
 						{
@@ -159,7 +191,9 @@ export function useApplyUpdate( postId: number | null ): UseApplyUpdateResult {
 					err && typeof err === 'object' && 'message' in err
 						? String( err.message )
 						: __( 'Could not apply the update.', 'woocommerce' );
-				createErrorNotice( message, { type: 'snackbar' } );
+				if ( ! options.suppressSnackbarOnError ) {
+					createErrorNotice( message, { type: 'snackbar' } );
+				}
 				return null;
 			} finally {
 				setIsApplying( false );
@@ -171,6 +205,7 @@ export function useApplyUpdate( postId: number | null ): UseApplyUpdateResult {
 			createErrorNotice,
 			undo,
 			syncEditorState,
+			options.suppressSnackbarOnError,
 		]
 	);
 

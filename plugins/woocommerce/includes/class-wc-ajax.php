@@ -1736,31 +1736,48 @@ class WC_AJAX {
 			$comment_id = $order->add_order_note( $note, $is_customer_note, true );
 			$note       = wc_get_order_note( $comment_id );
 
+			if ( ! $note ) {
+				wp_die();
+			}
+
 			$note_classes   = array( 'note' );
 			$note_classes[] = $is_customer_note ? 'customer-note' : '';
 			$note_classes   = apply_filters( 'woocommerce_order_note_class', array_filter( $note_classes ), $note );
 			?>
 			<li rel="<?php echo absint( $note->id ); ?>" class="<?php echo esc_attr( implode( ' ', $note_classes ) ); ?>">
 				<div class="note_content">
-					<?php
-					$content = wc_wptexturize_order_note( $note->content );
-					echo wp_kses_post( wpautop( make_clickable( $content ) ) );
-					?>
+					<?php if ( $is_customer_note ) : ?>
+						<div class="note_header"><?php esc_html_e( 'Sent to customer', 'woocommerce' ); ?></div>
+					<?php endif; ?>
+					<div class="note_body">
+						<?php
+						$content = wc_wptexturize_order_note( $note->content );
+						echo wp_kses_post( wpautop( make_clickable( $content ) ) );
+						?>
+					</div>
 				</div>
 				<p class="meta">
-					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'y-m-d h:i:s' ) ); ?>">
+					<abbr class="exact-date" title="<?php echo esc_attr( $note->date_created->date( 'Y-m-d H:i:s' ) ); ?>">
 						<?php
-						/* translators: $1: Date created, $2 Time created */
-						printf( esc_html__( 'added on %1$s at %2$s', 'woocommerce' ), esc_html( $note->date_created->date_i18n( wc_date_format() ) ), esc_html( $note->date_created->date_i18n( wc_time_format() ) ) );
+						/* translators: %1$s: order note date, %2$s: order note time */
+						printf( esc_html__( '%1$s at %2$s', 'woocommerce' ), esc_html( $note->date_created->date_i18n( wc_date_format() ) ), esc_html( $note->date_created->date_i18n( wc_time_format() ) ) );
 						?>
 					</abbr>
 					<?php
 					if ( 'system' !== $note->added_by ) :
-						/* translators: %s: note author */
+						/* translators: %s: order note author */
 						printf( ' ' . esc_html__( 'by %s', 'woocommerce' ), esc_html( $note->added_by ) );
 					endif;
 					?>
-					<a href="#" class="delete_note" role="button"><?php esc_html_e( 'Delete note', 'woocommerce' ); ?></a>
+					<?php
+					$note_date_label   = $note->date_created->date_i18n( wc_date_format() );
+					$delete_aria_label = 'system' === $note->added_by
+						/* translators: %s: order note date */
+						? sprintf( __( 'Delete system note from %s', 'woocommerce' ), $note_date_label )
+						/* translators: %1$s: order note author, %2$s: order note date */
+						: sprintf( __( 'Delete note from %1$s on %2$s', 'woocommerce' ), $note->added_by, $note_date_label );
+					?>
+					<a href="#" class="delete_note" role="button" aria-label="<?php echo esc_attr( $delete_aria_label ); ?>"><?php esc_html_e( 'Delete', 'woocommerce' ); ?></a>
 				</p>
 			</li>
 			<?php
@@ -2597,7 +2614,7 @@ class WC_AJAX {
 				$response['consumer_key']    = $consumer_key;
 				$response['consumer_secret'] = $consumer_secret;
 				$response['message']         = __( 'API Key generated successfully. Make sure to copy your new keys now as the secret key will be hidden once you leave this page.', 'woocommerce' );
-				$response['revoke_url']      = '<a style="color: #a00; text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
+				$response['revoke_url']      = '<a style="color: var(--wc-destructive, #cc1818); text-decoration: none;" href="' . esc_url( wp_nonce_url( add_query_arg( array( 'revoke-key' => $key_id ), admin_url( 'admin.php?page=wc-settings&tab=advanced&section=keys' ) ), 'revoke' ) ) . '">' . __( 'Revoke key', 'woocommerce' ) . '</a>';
 			}
 		} catch ( Exception $e ) {
 			wp_send_json_error( array( 'message' => $e->getMessage() ) );

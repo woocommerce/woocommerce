@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update variations through the variation endpoint in the experimental products app

@@ -15,6 +15,8 @@ const baseEmail: EmailType = {
 	recipients: { to: '', cc: '', bcc: '' },
 	templateStatus: null,
 	templateVersion: null,
+	currentVersion: null,
+	wasBackfilled: false,
 };
 
 export const CoreUpdatedCustomized = () => (
@@ -22,6 +24,8 @@ export const CoreUpdatedCustomized = () => (
 		post={ {
 			...baseEmail,
 			templateStatus: 'core_updated_customized',
+			templateVersion: '10.6.0',
+			currentVersion: '10.7.0',
 		} }
 	/>
 );

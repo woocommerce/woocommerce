@@ -23,23 +23,23 @@ class CreateWidget {
 						'label' => array(
 							'type' => Type::nonNull(Type::string()),
 								'description' => __( 'The widget label', 'woocommerce' ),
-						),
+							),
 						'weight' => array(
 							'type' => Type::int(),
 								'description' => __( 'Optional weight in grams', 'woocommerce' ),
-						),
+							),
 						'color' => array(
 							'type' => Type::nonNull(ColorType::get()),
 								'description' => __( 'The widget color', 'woocommerce' ),
-						),
+							),
 						'tag_ids' => array(
 							'type' => Type::listOf(Type::nonNull(Type::int())),
 								'description' => __( 'Tag IDs to attach to the widget', 'woocommerce' ),
-						),
+							),
 						'expires_at' => array(
 							'type' => DummyDateTimeType::get(),
 								'description' => __( 'When the widget should expire', 'woocommerce' ),
-						),
+							),
 					),
 				)
 			);
