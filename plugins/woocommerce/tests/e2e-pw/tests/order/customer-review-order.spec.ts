@@ -305,12 +305,33 @@ test.describe.serial(
 
 			await lastRow.locator( 'label[for$="-3"]' ).click();
 			await Promise.all( [
-				page.waitForResponse(
-					( r ) =>
-						r.url().includes( 'admin-ajax.php' ) &&
-						r.request().method() === 'POST' &&
-						r.ok()
-				),
+				// Same predicate as the happy-path test: scope to the submit
+				// AJAX response by the JSON shape the handler returns
+				// (`{ data: { results } }`) so other admin-ajax requests
+				// firing in parallel don't resolve this wait.
+				page.waitForResponse( async ( response ) => {
+					if (
+						! response.url().includes( 'admin-ajax.php' ) ||
+						response.request().method() !== 'POST' ||
+						! response.ok()
+					) {
+						return false;
+					}
+					try {
+						const body = await response.json();
+						return (
+							body &&
+							typeof body === 'object' &&
+							body.data &&
+							Object.prototype.hasOwnProperty.call(
+								body.data,
+								'results'
+							)
+						);
+					} catch ( _err ) {
+						return false;
+					}
+				} ),
 				page.locator( '.woocommerce-review-order__submit' ).click(),
 			] );
 
