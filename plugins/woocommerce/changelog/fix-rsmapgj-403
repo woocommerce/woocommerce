@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix single product description styles in Twenty Nineteen, Twenty Twenty and Twenty Twenty-One themes: tab link styles no longer apply to all unordered lists in the description, and all direct descendants of the description tab now span the full width.

@@ -682,8 +682,7 @@ a.reset_variations {
 
 	/* reset description tab width to full width */
 	#tab-description {
-		h2,
-		p {
+		> * {
 			max-width: 100vw;
 			width: 100%;
 		}
@@ -709,7 +708,7 @@ a.reset_variations {
 		}
 	}
 
-	ul {
+	ul.tabs {
 		margin: 0 0 1.5rem;
 		padding: 0;
 		font-family: $headings;
