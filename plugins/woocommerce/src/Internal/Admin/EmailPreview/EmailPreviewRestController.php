@@ -294,7 +294,13 @@ class EmailPreviewRestController extends RestApiControllerBase {
 		// Set the recipient on the WC_Email instance so it is available to hooks
 		// (e.g. woocommerce_email_sent) and log entries when the test email is sent.
 		$email->recipient = $email_address;
-		$sent             = $email->send( $email_address, $email_subject, $email_content, $email->get_headers(), $email->get_attachments() );
+		$mark_as_test     = function ( array $context ): array {
+			$context['is_test'] = true;
+			return $context;
+		};
+		add_filter( 'woocommerce_email_log_context', $mark_as_test );
+		$sent = $email->send( $email_address, $email_subject, $email_content, $email->get_headers(), $email->get_attachments() );
+		remove_filter( 'woocommerce_email_log_context', $mark_as_test );
 
 		if ( $sent ) {
 			return array(

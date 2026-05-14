@@ -88,17 +88,11 @@ class EmailLogger implements RegisterHooksInterface {
 			return;
 		}
 
-		$object_context = $this->get_object_context( $email->object );
-		$object_label   = isset( $object_context['type'], $object_context['id'] )
+		$object_context  = $this->get_object_context( $email->object );
+		$object_label    = isset( $object_context['type'], $object_context['id'] )
 			? sprintf( ' for %s #%d', $object_context['type'], $object_context['id'] )
 			: '';
-
-		if ( $success ) {
-			$message = sprintf( 'Email "%s"%s sent', $email_id, $object_label );
-		} else {
-			$reason  = $this->last_mail_error ? ': ' . $this->last_mail_error : '';
-			$message = sprintf( 'Email "%s"%s failed to send%s', $email_id, $object_label, $reason );
-		}
+		$last_mail_error = $this->last_mail_error;
 
 		$this->last_mail_error = null;
 
@@ -123,6 +117,15 @@ class EmailLogger implements RegisterHooksInterface {
 		 * @param WC_Email $email    The WC_Email instance.
 		 */
 		$context = (array) apply_filters( 'woocommerce_email_log_context', $context, $email_id, $email );
+
+		$type_label = ! empty( $context['is_test'] ) ? 'Test email' : 'Email';
+
+		if ( $success ) {
+			$message = sprintf( '%s "%s"%s sent', $type_label, $email_id, $object_label );
+		} else {
+			$reason  = $last_mail_error ? ': ' . $last_mail_error : '';
+			$message = sprintf( '%s "%s"%s failed to send%s', $type_label, $email_id, $object_label, $reason );
+		}
 
 		$level = $success ? WC_Log_Levels::INFO : WC_Log_Levels::WARNING;
 		wc_get_logger()->log( $level, $message, $context );
