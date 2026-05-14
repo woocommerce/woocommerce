@@ -73,13 +73,35 @@ class Tree_Builder {
 				if ( null === $child_slug ) {
 					continue;
 				}
-				if ( isset( $tree[ $child_slug ] ) ) {
+				if ( in_array( $child_slug, Rehomed_Slugs::AUTO_ATTACH_EXCLUDE, true ) ) {
 					continue;
 				}
 				// WP's CPT submenus include the parent slug as the first "self" entry
 				// (e.g. 'edit.php?post_type=product' inside $submenu['edit.php?post_type=product']).
-				// Skip that self-reference.
+				// We can't add it under its own slug (tree-key collision with the
+				// rail-root), so hoist it under a synthetic key with the
+				// rail-root URL as `url` and a low position so it sorts first.
+				// The synthetic key (`<slug>--all`) is never a real URL — it's
+				// just a unique tree identifier; populate_root_submenus reads
+				// the URL from the `url` override. (Must run BEFORE the
+				// "already in tree" check below — the rail-root itself
+				// shares this slug, so that check would always short-circuit
+				// the self-ref entry.)
 				if ( $child_slug === $slug ) {
+					$self_key = $child_slug . '--all';
+					if ( ! isset( $tree[ $self_key ] ) ) {
+						$tree[ $self_key ] = array(
+							'parent'     => $slug,
+							'title'      => self::clean_title( $entry[0] ?? $child_slug ),
+							'position'   => 1,
+							'source'     => 'rehomed-self',
+							'capability' => $entry[1] ?? 'read',
+							'url'        => $child_slug,
+						);
+					}
+					continue;
+				}
+				if ( isset( $tree[ $child_slug ] ) ) {
 					continue;
 				}
 

@@ -285,4 +285,77 @@ class Tree_Builder_Test extends \WC_Unit_Test_Case {
 
 		$this->assertArrayNotHasKey( 'parent-cap', $tree );
 	}
+
+	/**
+	 * WP's CPT submenu auto-generates a self-reference entry as the first
+	 * item (`$submenu['edit.php?post_type=product'][5][2] === 'edit.php?post_type=product'`).
+	 * Hoist it under a synthetic `<slug>--all` key with `url` pointing back
+	 * at the rail root, so populate_root_submenus emits a working "All Products"
+	 * row first in the rail flyout.
+	 */
+	public function test_cpt_self_reference_is_hoisted_under_synthetic_key() {
+		$default = array(
+			'woocommerce'                => array( 'parent' => null,          'title' => 'WooCommerce', 'position' => 2  ),
+			'edit.php?post_type=product' => array( 'parent' => 'woocommerce', 'title' => 'Products',    'position' => 30 ),
+		);
+
+		$raw_menu    = array(
+			array( 'WooCommerce', 'read', 'woocommerce', '', '' ),
+			array( 'Products', 'edit_products', 'edit.php?post_type=product', '', '' ),
+		);
+		$raw_submenu = array(
+			'edit.php?post_type=product' => array(
+				array( 'All Products', 'edit_products', 'edit.php?post_type=product' ),
+				array( 'Reviews',      'edit_products', 'product-reviews' ),
+			),
+		);
+
+		$builder = new Tree_Builder();
+		$tree    = $builder->build( $default, $raw_menu, $raw_submenu );
+
+		$this->assertArrayHasKey( 'edit.php?post_type=product--all', $tree );
+		$this->assertSame( 'edit.php?post_type=product', $tree['edit.php?post_type=product--all']['parent'] );
+		$this->assertSame( 'edit.php?post_type=product', $tree['edit.php?post_type=product--all']['url'] );
+		$this->assertSame( 'All Products', $tree['edit.php?post_type=product--all']['title'] );
+		$this->assertSame( 'rehomed-self', $tree['edit.php?post_type=product--all']['source'] );
+		// Sorted first via position=1.
+		$this->assertSame( 1, $tree['edit.php?post_type=product--all']['position'] );
+		// Other rehomed children still hoist normally with auto positions.
+		$this->assertArrayHasKey( 'product-reviews', $tree );
+		$this->assertGreaterThan(
+			$tree['edit.php?post_type=product--all']['position'],
+			$tree['product-reviews']['position'],
+			'Self-reference must sort before other rehomed children'
+		);
+	}
+
+	/**
+	 * Slugs in `Rehomed_Slugs::AUTO_ATTACH_EXCLUDE` (e.g. `post-new.php?post_type=product`)
+	 * are filtered out when hoisting submenu children — they're either
+	 * legacy redirects or duplicates of more idiomatic actions surfaced
+	 * elsewhere in the UI.
+	 */
+	public function test_auto_attach_exclude_filters_rehomed_children() {
+		$default = array(
+			'woocommerce'                => array( 'parent' => null,          'title' => 'WooCommerce', 'position' => 2  ),
+			'edit.php?post_type=product' => array( 'parent' => 'woocommerce', 'title' => 'Products',    'position' => 30 ),
+		);
+
+		$raw_menu    = array(
+			array( 'WooCommerce', 'read', 'woocommerce', '', '' ),
+			array( 'Products', 'edit_products', 'edit.php?post_type=product', '', '' ),
+		);
+		$raw_submenu = array(
+			'edit.php?post_type=product' => array(
+				array( 'Add New Product', 'edit_products', 'post-new.php?post_type=product' ),
+				array( 'Reviews',         'edit_products', 'product-reviews' ),
+			),
+		);
+
+		$builder = new Tree_Builder();
+		$tree    = $builder->build( $default, $raw_menu, $raw_submenu );
+
+		$this->assertArrayNotHasKey( 'post-new.php?post_type=product', $tree );
+		$this->assertArrayHasKey( 'product-reviews', $tree );
+	}
 }
