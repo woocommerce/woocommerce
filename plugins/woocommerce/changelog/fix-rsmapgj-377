@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Document the woocommerce_gallery_thumbnail_size filter's actual default value (an array of width/height integers, not the image size name) and add inline docblocks to its sibling gallery image filters.
+
+

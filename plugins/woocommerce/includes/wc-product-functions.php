@@ -1280,7 +1280,13 @@ function wc_get_product_attachment_props( $attachment_id = null, $product = fals
 		/**
 		 * Filters the size for the gallery thumbnail.
 		 *
-		 * @param array $size Array containing width and height dimensions.
+		 * The default value passed to this filter is an array of explicit width/height integers
+		 * sourced from the `gallery_thumbnail` image size, not the size name string. A registered
+		 * image size name (string) is also accepted as a return value.
+		 *
+		 * @param array|string $size Default: array( int $width, int $height ) from the
+		 *                           `gallery_thumbnail` image size. May be filtered to return a
+		 *                           registered image size name string.
 		 *
 		 * @since 2.6.0
 		 */

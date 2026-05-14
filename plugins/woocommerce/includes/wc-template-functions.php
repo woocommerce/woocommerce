@@ -1809,7 +1809,10 @@ if ( ! function_exists( 'woocommerce_show_product_thumbnails' ) ) {
 /**
  * Get HTML for a gallery image.
  *
- * Hooks: woocommerce_gallery_thumbnail_size, woocommerce_gallery_image_size and woocommerce_gallery_full_size accept name based image sizes, or an array of width/height values.
+ * Hooks: woocommerce_gallery_thumbnail_size, woocommerce_gallery_image_size and woocommerce_gallery_full_size accept
+ * either a registered image size name (string) or an array of width/height values. By default,
+ * woocommerce_gallery_thumbnail_size is passed an array of dimensions derived from the `gallery_thumbnail` image size,
+ * not the size name itself.
  *
  * @since 3.3.2
  * @param int  $attachment_id Attachment ID.
@@ -1822,15 +1825,53 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false, $image_
 
 	$flexslider        = (bool) apply_filters( 'woocommerce_single_product_flexslider_enabled', get_theme_support( 'wc-product-gallery-slider' ) );
 	$gallery_thumbnail = wc_get_image_size( 'gallery_thumbnail' );
-	$thumbnail_size    = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
-	$image_size        = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $main_image ? 'woocommerce_single' : $thumbnail_size );
-	$full_size         = apply_filters( 'woocommerce_gallery_full_size', apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' ) );
-	$thumbnail_src     = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
-	$thumbnail_srcset  = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
-	$thumbnail_sizes   = wp_get_attachment_image_sizes( $attachment_id, $thumbnail_size );
-	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
-	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
-	$alt_text          = ( empty( $alt_text ) && ( $product instanceof WC_Product ) ) ? woocommerce_get_alt_from_product_title_and_position( $product->get_title(), $main_image, $image_index ) : $alt_text;
+	/**
+	 * Filters the size used for product gallery thumbnails.
+	 *
+	 * The default value is an array containing the width and height of the registered `gallery_thumbnail` image size,
+	 * not the size name string. A registered image size name (string) is also accepted as a return value and will be
+	 * passed through to `wp_get_attachment_image_src()`.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param array|string $size Default: array( int $width, int $height ) from the `gallery_thumbnail` image size.
+	 *                           May be filtered to return a registered image size name string.
+	 */
+	$thumbnail_size = apply_filters( 'woocommerce_gallery_thumbnail_size', array( $gallery_thumbnail['width'], $gallery_thumbnail['height'] ) );
+
+	/**
+	 * Filters the size used for the main product gallery image.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param array|string $size Image size name or array of width/height dimensions.
+	 */
+	$image_size = apply_filters( 'woocommerce_gallery_image_size', $flexslider || $main_image ? 'woocommerce_single' : $thumbnail_size );
+
+	/**
+	 * Filters the large/full size used for product thumbnails.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param string $size Image size name. Defaults to 'full'.
+	 */
+	$large_thumbnails_size = apply_filters( 'woocommerce_product_thumbnails_large_size', 'full' );
+
+	/**
+	 * Filters the size used for the full gallery image.
+	 *
+	 * @since 3.3.2
+	 *
+	 * @param array|string $size Image size name or array of width/height dimensions.
+	 */
+	$full_size = apply_filters( 'woocommerce_gallery_full_size', $large_thumbnails_size );
+
+	$thumbnail_src    = wp_get_attachment_image_src( $attachment_id, $thumbnail_size );
+	$thumbnail_srcset = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
+	$thumbnail_sizes  = wp_get_attachment_image_sizes( $attachment_id, $thumbnail_size );
+	$full_src         = wp_get_attachment_image_src( $attachment_id, $full_size );
+	$alt_text         = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+	$alt_text         = ( empty( $alt_text ) && ( $product instanceof WC_Product ) ) ? woocommerce_get_alt_from_product_title_and_position( $product->get_title(), $main_image, $image_index ) : $alt_text;
 
 	/**
 	 * Filters the attributes for the image markup.
