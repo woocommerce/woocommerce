@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Ensure the `order` term meta key is initialised when product category and product attribute terms are created outside of the admin (e.g. via the REST API or WP-CLI), and clean up any stale legacy `order_{$taxonomy}` meta key when the sort order is updated, so the two keys can no longer diverge.
+
+

@@ -50,8 +50,9 @@ class WC_Admin_Taxonomies {
 		// Default category ID.
 		$this->default_cat_id = get_option( 'default_product_cat', 0 );
 
-		// Category/term ordering.
-		add_action( 'create_term', array( $this, 'create_term' ), 5, 3 );
+		// Category/term ordering. The `create_term` action is now handled globally
+		// by `wc_init_term_order_meta()` in `wc-term-functions.php` so the `order`
+		// meta key is initialised in every context, not just the admin.
 		add_action(
 			'delete_product_cat',
 			function () {
@@ -114,16 +115,16 @@ class WC_Admin_Taxonomies {
 	/**
 	 * Order term when created (put in position 0).
 	 *
+	 * @deprecated 10.9.0 Use `wc_init_term_order_meta()` instead; the global helper runs
+	 *                   in every context so the `order` meta key is initialised even when
+	 *                   terms are inserted outside the admin (e.g. REST API, WP-CLI, cron).
+	 *
 	 * @param mixed  $term_id Term ID.
 	 * @param mixed  $tt_id Term taxonomy ID.
 	 * @param string $taxonomy Taxonomy slug.
 	 */
 	public function create_term( $term_id, $tt_id = '', $taxonomy = '' ) {
-		if ( 'product_cat' !== $taxonomy && ! taxonomy_is_product_attribute( $taxonomy ) ) {
-			return;
-		}
-
-		update_term_meta( $term_id, 'order', 0 );
+		wc_init_term_order_meta( (int) $term_id, (int) $tt_id, (string) $taxonomy );
 	}
 
 	/**

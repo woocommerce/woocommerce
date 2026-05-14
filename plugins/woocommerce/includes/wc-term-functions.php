@@ -367,6 +367,14 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 
 	update_term_meta( $term_id, 'order', $index );
 
+	// Clean up the legacy `order_{$taxonomy}` meta key, which was used in older versions of WooCommerce.
+	// Keeping it around causes confusion because creation paths used the legacy key while updates
+	// used the unified `order` key, leading to divergent values for the same term.
+	// See https://github.com/woocommerce/woocommerce/issues/34213.
+	if ( is_string( $taxonomy ) && '' !== $taxonomy ) {
+		delete_term_meta( $term_id, 'order_' . $taxonomy );
+	}
+
 	if ( ! $recursive ) {
 		return $index;
 	}
@@ -382,6 +390,40 @@ function wc_set_term_order( $term_id, $index, $taxonomy, $recursive = false ) {
 
 	return $index;
 }
+
+/**
+ * Initialise the `order` term meta key for newly-created product category and
+ * product attribute terms, so that the sort order can be edited from the admin UI
+ * straight away (the admin UI reads and writes the `order` meta key, not
+ * `order_{$taxonomy}`).
+ *
+ * Runs in every context (including REST API, WP-CLI and cron), not just admin,
+ * to guarantee the term has a value under the canonical meta key regardless of
+ * how it was inserted.
+ *
+ * @since 10.9.0
+ *
+ * @param int    $term_id  Term ID.
+ * @param int    $tt_id    Term taxonomy ID.
+ * @param string $taxonomy Taxonomy slug.
+ * @return void
+ */
+function wc_init_term_order_meta( $term_id, $tt_id = 0, $taxonomy = '' ) {
+	if ( ! is_string( $taxonomy ) || '' === $taxonomy ) {
+		return;
+	}
+
+	if ( 'product_cat' !== $taxonomy && ! taxonomy_is_product_attribute( $taxonomy ) ) {
+		return;
+	}
+
+	// Only initialise the meta if it isn't set yet, so we don't clobber a
+	// value supplied by the caller via `menu_order` or similar.
+	if ( '' === get_term_meta( (int) $term_id, 'order', true ) ) {
+		update_term_meta( (int) $term_id, 'order', 0 );
+	}
+}
+add_action( 'create_term', 'wc_init_term_order_meta', 5, 3 );
 
 /**
  * Function for recounting product terms, ignoring hidden products.
