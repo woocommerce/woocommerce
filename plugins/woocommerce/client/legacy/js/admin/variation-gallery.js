@@ -135,7 +135,13 @@ jQuery( function ( $ ) {
 
 	const variationGallery = {
 		/** @type {wp.media.frames.MediaFrame|null} */
-		frame: null,
+		manageFrame: null,
+		/** @type {wp.media.frames.MediaFrame|null} */
+		replaceFrame: null,
+		/** @type {jQuery|null} */
+		activeField: null,
+		/** @type {number[]} */
+		activePreloadIds: [],
 		/** @type {number|null} */
 		activeIndexForReplace: null,
 		wpMediaPostId: wp.media.model.settings.post.id,
@@ -246,7 +252,6 @@ jQuery( function ( $ ) {
 		onManage( event ) {
 			const $trigger = $( event.currentTarget );
 			const $field = $trigger.closest( SELECTORS.field );
-			const currentIds = this.getFieldIds( $field );
 			const variationId = $field.data( 'variationId' );
 
 			event.preventDefault();
@@ -254,24 +259,33 @@ jQuery( function ( $ ) {
 			// Scope newly-uploaded attachments to this variation post.
 			wp.media.model.settings.post.id = variationId;
 
-			this.frame = wp.media( {
-				title: l10n.manageTitle,
-				library: { type: 'image' },
-				button: { text: l10n.manageButton },
-				multiple: 'add',
-			} );
+			// Update per-open state read by the cached frame's handlers.
+			this.activeField = $field;
+			this.activePreloadIds = this.getFieldIds( $field );
 
-			this.frame.on(
-				'open',
-				variationGallery.preloadFrameSelection.bind(
-					variationGallery,
-					currentIds
-				)
-			);
-			this.frame.on( 'select', () => this.onManageSelect( $field ) );
-			this.frame.on( 'close', this.restoreMediaPostId.bind( this ) );
+			if ( ! this.manageFrame ) {
+				this.manageFrame = wp.media( {
+					title: l10n.manageTitle,
+					library: { type: 'image' },
+					button: { text: l10n.manageButton },
+					multiple: 'add',
+				} );
 
-			this.frame.open();
+				this.manageFrame.on( 'open', () =>
+					this.preloadFrameSelection(
+						this.manageFrame,
+						this.activePreloadIds
+					)
+				);
+				this.manageFrame.on( 'select', () =>
+					this.onManageSelect( this.manageFrame, this.activeField )
+				);
+				this.manageFrame.on( 'close', () =>
+					this.restoreMediaPostId()
+				);
+			}
+
+			this.manageFrame.open();
 		},
 
 		/**
@@ -288,34 +302,43 @@ jQuery( function ( $ ) {
 
 			event.preventDefault();
 
-			this.activeIndexForReplace = this.getActiveIndex( $field );
 			wp.media.model.settings.post.id = variationId;
 
-			this.frame = wp.media( {
-				title: l10n.replaceTitle,
-				library: { type: 'image' },
-				button: { text: l10n.replaceButton },
-				multiple: false,
-			} );
+			this.activeField = $field;
+			this.activeIndexForReplace = this.getActiveIndex( $field );
 
-			this.frame.on( 'select', () => this.onReplaceSelect( $field ) );
-			this.frame.on( 'close', this.restoreMediaPostId.bind( this ) );
+			if ( ! this.replaceFrame ) {
+				this.replaceFrame = wp.media( {
+					title: l10n.replaceTitle,
+					library: { type: 'image' },
+					button: { text: l10n.replaceButton },
+					multiple: false,
+				} );
 
-			this.frame.open();
+				this.replaceFrame.on( 'select', () =>
+					this.onReplaceSelect( this.replaceFrame, this.activeField )
+				);
+				this.replaceFrame.on( 'close', () =>
+					this.restoreMediaPostId()
+				);
+			}
+
+			this.replaceFrame.open();
 		},
 
 		/**
 		 * When the manage frame opens, populate its selection with the
 		 * variation's current gallery.
 		 *
-		 * @param {number[]} currentIds
+		 * @param {wp.media.frames.MediaFrame} frame
+		 * @param {number[]}                   currentIds
 		 */
-		preloadFrameSelection( currentIds ) {
-			if ( ! this.frame ) {
+		preloadFrameSelection( frame, currentIds ) {
+			if ( ! frame ) {
 				return;
 			}
 
-			const selection = this.frame.state().get( 'selection' );
+			const selection = frame.state().get( 'selection' );
 			if ( ! selection ) {
 				return;
 			}
@@ -333,10 +356,11 @@ jQuery( function ( $ ) {
 		 * Manage frame "select" handler: read attachments out of the
 		 * frame's selection model and rewrite the gallery to match.
 		 *
-		 * @param {jQuery} $field
+		 * @param {wp.media.frames.MediaFrame} frame
+		 * @param {jQuery}                     $field
 		 */
-		onManageSelect( $field ) {
-			const selection = this.frame.state().get( 'selection' );
+		onManageSelect( frame, $field ) {
+			const selection = frame.state().get( 'selection' );
 			const nextIds = [];
 
 			selection.each( ( attachment ) => {
@@ -356,10 +380,11 @@ jQuery( function ( $ ) {
 		 * cached active index with the chosen one and keep that slot
 		 * surfaced as the hero image.
 		 *
-		 * @param {jQuery} $field
+		 * @param {wp.media.frames.MediaFrame} frame
+		 * @param {jQuery}                     $field
 		 */
-		onReplaceSelect( $field ) {
-			const selection = this.frame.state().get( 'selection' );
+		onReplaceSelect( frame, $field ) {
+			const selection = frame.state().get( 'selection' );
 			const attachment = selection.first();
 
 			if ( ! attachment ) {
