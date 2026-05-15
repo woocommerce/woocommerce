@@ -81,7 +81,6 @@ function isTermRecord( value: unknown ): value is Term {
 	if ( ! ( 'id' in value ) || ! ( 'name' in value ) ) {
 		return false;
 	}
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- narrowed by property checks above
 	const term = value as Term;
 	return typeof term.id === 'number' && typeof term.name === 'string';
 }
@@ -91,9 +90,7 @@ function createFieldChange< T extends Record< string, unknown > >(
 	value: TaxonomyTermRef[]
 ): Partial< T > {
 	const change: Partial< T > = {};
-	// eslint-disable-next-line @typescript-eslint/no-unsafe-type-assertion -- computed property assignment for generic type
-	( change as Record< keyof T, TaxonomyTermRef[] > )[ fieldProperty ] =
-		value;
+	( change as Record< keyof T, TaxonomyTermRef[] > )[ fieldProperty ] = value;
 	return change;
 }
 
