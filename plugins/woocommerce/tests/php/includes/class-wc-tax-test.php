@@ -1011,4 +1011,32 @@ class WC_Tax_Test extends WC_Unit_Test_Case {
 
 		remove_filter( 'woocommerce_shipping_prices_include_tax', '__return_true' );
 	}
+
+	/**
+	 * `sanitize_tax_rate_name()` preserves `%XX`-like sequences while still cleaning the input.
+	 *
+	 * Regression coverage for https://github.com/woocommerce/woocommerce/issues/45103: tax names
+	 * such as "Test %15" were being mangled because `wc_clean()` -> `sanitize_text_field()` strips
+	 * percent-encoded octets.
+	 *
+	 * @return void
+	 */
+	public function test_sanitize_tax_rate_name_preserves_percent_sequences() {
+		// Percent followed by hex-like digits is preserved (this is the bug fix).
+		$this->assertSame( 'Test %15', WC_Tax::sanitize_tax_rate_name( 'Test %15' ) );
+		$this->assertSame( 'Test %25', WC_Tax::sanitize_tax_rate_name( 'Test %25' ) );
+		$this->assertSame( 'Test %1F', WC_Tax::sanitize_tax_rate_name( 'Test %1F' ) );
+
+		// Existing valid inputs are still preserved.
+		$this->assertSame( 'Test 15%', WC_Tax::sanitize_tax_rate_name( 'Test 15%' ) );
+		$this->assertSame( 'Test % 15', WC_Tax::sanitize_tax_rate_name( 'Test % 15' ) );
+		$this->assertSame( 'VAT', WC_Tax::sanitize_tax_rate_name( 'VAT' ) );
+
+		// Strips HTML tags and trims whitespace, like sanitize_text_field().
+		$this->assertSame( 'Bad %25', WC_Tax::sanitize_tax_rate_name( '<b>Bad</b> %25' ) );
+		$this->assertSame( 'multi line %ff', WC_Tax::sanitize_tax_rate_name( "  multi\nline  %ff  " ) );
+
+		// Non-scalar input returns empty string.
+		$this->assertSame( '', WC_Tax::sanitize_tax_rate_name( array( 'foo' ) ) );
+	}
 }

@@ -1031,6 +1031,34 @@ class WC_Tax {
 	}
 
 	/**
+	 * Sanitize a tax rate name while preserving percent-encoded sequences.
+	 *
+	 * WordPress's `sanitize_text_field()` (used by `wc_clean()`) strips characters that look
+	 * like URL-encoded octets (e.g. `%15`), which mangles tax names such as "Test %15". This
+	 * helper performs the same cleanup as `sanitize_text_field()` but escapes `%` before the
+	 * call and restores it afterwards so legitimate user input is preserved.
+	 *
+	 * @since 10.4.0
+	 *
+	 * @param  string $name The raw tax rate name value.
+	 * @return string Sanitized name with `%XX`-like sequences intact.
+	 */
+	public static function sanitize_tax_rate_name( $name ) {
+		if ( ! is_scalar( $name ) ) {
+			return '';
+		}
+
+		// Replace `%` with a placeholder using only printable ASCII so `sanitize_text_field()`
+		// does not strip the marker itself. The token is intentionally long to avoid collisions
+		// with realistic user-entered tax names.
+		$placeholder = '__WC_TAX_RATE_NAME_PERCENT_PLACEHOLDER__';
+		$name        = str_replace( '%', $placeholder, (string) $name );
+		$name        = sanitize_text_field( $name );
+
+		return str_replace( $placeholder, '%', $name );
+	}
+
+	/**
 	 * Format the rate.
 	 *
 	 * @param  float $rate Value to format.

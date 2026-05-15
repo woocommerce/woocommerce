@@ -307,7 +307,13 @@ class WC_Settings_Tax extends WC_Settings_Page {
 		// phpcs:disable WordPress.Security.NonceVerification.Missing
 		foreach ( $tax_rate_keys as $tax_rate_key ) {
 			if ( isset( $_POST[ $tax_rate_key ], $_POST[ $tax_rate_key ][ $key ] ) ) {
-				$tax_rate[ $tax_rate_key ] = wc_clean( wp_unslash( $_POST[ $tax_rate_key ][ $key ] ) );
+				if ( 'tax_rate_name' === $tax_rate_key ) {
+					// `wc_clean()` calls `sanitize_text_field()` which strips `%XX`-looking sequences.
+					// Tax names such as "Test %15" should be preserved verbatim, so use a tax-name-aware sanitizer.
+					$tax_rate[ $tax_rate_key ] = WC_Tax::sanitize_tax_rate_name( wp_unslash( $_POST[ $tax_rate_key ][ $key ] ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- Custom tax-name sanitizer is applied via WC_Tax::sanitize_tax_rate_name().
+				} else {
+					$tax_rate[ $tax_rate_key ] = wc_clean( wp_unslash( $_POST[ $tax_rate_key ][ $key ] ) );
+				}
 			}
 		}
 

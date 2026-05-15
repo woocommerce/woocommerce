@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve percent-encoded sequences in tax rate names (e.g. "Test %15") when saving via admin settings or REST API, so they no longer disappear on the Thank You / order details page.

@@ -385,6 +385,11 @@ class WC_REST_Taxes_V1_Controller extends WC_REST_Controller {
 				case 'tax_rate_class':
 					$data[ $field ] = 'standard' !== $request[ $key ] ? $request[ $key ] : '';
 					break;
+				case 'tax_rate_name':
+					// `wc_clean()` calls `sanitize_text_field()` which strips `%XX`-looking sequences.
+					// Tax names such as "Test %15" should be preserved verbatim.
+					$data[ $field ] = WC_Tax::sanitize_tax_rate_name( $request[ $key ] );
+					break;
 				default:
 					$data[ $field ] = wc_clean( $request[ $key ] );
 					break;
