@@ -60,17 +60,13 @@
 			margin: 0;
 			font-size: 0.8em;
 			box-sizing: content-box;
+			padding: 0.9rem 0;
 			margin-right: unset;
 			max-width: 3.631em; /* This value is based on the WC core styles. */
 
 			&:focus {
 				border-radius: unset;
 			}
-		}
-
-		/* We need some extra specificity in the padding to override the styles from the default quantity selector. */
-		input[type="number"].qty.qty {
-			padding: 0.9rem 0;
 		}
 
 		:where(input[type="number"]::-webkit-inner-spin-button),

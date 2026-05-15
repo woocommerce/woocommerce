@@ -165,6 +165,10 @@ h2.wc-block-mini-cart__title {
 	}
 }
 
+:where(.wc-block-mini-cart__items .wc-block-components-quantity-selector .wc-block-components-quantity-selector__input) {
+	padding: 0.4em 0;
+}
+
 .wc-block-mini-cart__footer {
 	border-top: 1px solid $universal-translucent-border-color;
 	padding: $gap-large $gap;
