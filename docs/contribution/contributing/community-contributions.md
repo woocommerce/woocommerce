@@ -4,11 +4,11 @@ category_slug: contributing
 post_title: Community contributions
 ---
 
-# Community Contributions
+# Community contributions
 
 WooCommerce is open source software that welcomes community contributions. To help us review your contribution quickly, please follow these guidelines.
 
-## Before You Submit
+## Before you submit
 
 1. **Link to a related issue** - If one exists, reference it in your PR. If you're proposing a new feature or significant change, [open an issue](https://github.com/woocommerce/woocommerce/issues/new/choose) first to discuss it.
 
@@ -16,7 +16,7 @@ WooCommerce is open source software that welcomes community contributions. To he
 
 3. **Consolidate related changes** - If you have multiple similar fixes (e.g., typos, documentation updates), combine them into a single PR when appropriate.
 
-## PR Requirements
+## PR requirements
 
 When you open a PR, you'll receive an immediate review from our AI code reviewer. Before a maintainer reviews your PR, please:
 
@@ -24,7 +24,7 @@ When you open a PR, you'll receive an immediate review from our AI code reviewer
 2. **Respond to all AI review feedback** - Address any issues raised by the automated review.
 3. **Confirm tests pass** - Note in your PR that you've run the test suite locally.
 
-## AI-Assisted Contributions
+## AI-assisted contributions
 
 We welcome AI-assisted contributions, but the same quality standards apply whether code is written by hand or with AI tools. As the contributor, you are responsible for:
 
@@ -32,7 +32,7 @@ We welcome AI-assisted contributions, but the same quality standards apply wheth
 - Verifying the changes work as intended
 - Following all contribution guidelines
 
-## What Happens Next
+## What happens next
 
 After you submit a PR that meets these requirements:
 
@@ -42,7 +42,7 @@ After you submit a PR that meets these requirements:
 
 If your PR needs changes, we'll add a `needs: author feedback` label. Please respond to feedback promptly to keep your contribution moving forward, as stale PRs with that label are automatically closed after a period of time.
 
-## Getting Help
+## Getting help
 
 - [WooCommerce Community Slack](https://woocommerce.com/community-slack/)
 - [Developer Documentation](https://developer.woocommerce.com/docs/)
