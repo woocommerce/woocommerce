@@ -12,6 +12,7 @@ import { recordEvent } from '@woocommerce/tracks';
  * Internal dependencies
  */
 import { QRDirectLoginCode } from '~/homescreen/mobile-app-modal/components/QRDirectLoginCode';
+import { WC_ASSET_URL } from '~/utils/admin-settings';
 import './style.scss';
 
 /**
@@ -45,17 +46,12 @@ export const MobileAppLoginPage = () => {
 		<div className="woocommerce-mobile-app-login">
 			<Card className="woocommerce-mobile-app-login__card">
 				<CardBody className="woocommerce-mobile-app-login__body">
-					{ /*
-					 * Branded mark at the top of the card. The same purple
-					 * gradient is used in the homescreen modal so a merchant
-					 * landing on either surface gets the same visual cue.
-					 */ }
-					<div
+					<img
 						className="woocommerce-mobile-app-login__brand"
+						src={ `${ WC_ASSET_URL }images/woo-logo.svg` }
+						alt=""
 						aria-hidden="true"
-					>
-						W
-					</div>
+					/>
 					<h1 className="woocommerce-mobile-app-login__heading">
 						{ __( 'Sign in to the Woo mobile app', 'woocommerce' ) }
 					</h1>
