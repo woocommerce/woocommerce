@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Replace opacity-based dimming on the product attributes placeholder text with an explicit muted color, so the "New attribute" label meets the WCAG 2.2 AA 4.5:1 contrast ratio.

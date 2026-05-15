@@ -6643,7 +6643,11 @@ img.help_tip {
 			}
 		}
 		.placeholder {
-			opacity: 0.4;
+			// Use an explicit color instead of opacity: 0.4 to ensure the
+			// placeholder text meets WCAG 2.2 AA contrast ratio (4.5:1) on
+			// the white metabox background. #646970 is WordPress core's
+			// secondary text color and yields a 5.74:1 contrast ratio.
+			color: #646970;
 		}
 	}
 }
