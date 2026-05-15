@@ -338,4 +338,53 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$product->set_cogs_value( 12.34 );
 		$this->assertEquals( 123.4, $product->get_cogs_value() );
 	}
+
+	/**
+	 * @testdox An in-stock product with stock management disabled exposes an "In stock" availability text so the front-end notice renders.
+	 *
+	 * Regression test for woocommerce/woocommerce#26258: previously, when "Manage stock?" was unchecked and the
+	 * stock status was set to "In stock", get_availability() returned an empty availability string, which caused
+	 * wc_get_stock_html() to skip rendering the stock notice on the product page entirely.
+	 */
+	public function test_get_availability_in_stock_without_manage_stock() {
+		$product = new WC_Product_Simple();
+		$product->set_manage_stock( false );
+		$product->set_stock_status( 'instock' );
+		$product->save();
+
+		$availability = $product->get_availability();
+
+		$this->assertSame( 'In stock', $availability['availability'] );
+		$this->assertSame( 'in-stock', $availability['class'] );
+	}
+
+	/**
+	 * @testdox An out-of-stock product with stock management disabled still reports the "Out of stock" availability text.
+	 */
+	public function test_get_availability_out_of_stock_without_manage_stock() {
+		$product = new WC_Product_Simple();
+		$product->set_manage_stock( false );
+		$product->set_stock_status( 'outofstock' );
+		$product->save();
+
+		$availability = $product->get_availability();
+
+		$this->assertSame( 'Out of stock', $availability['availability'] );
+		$this->assertSame( 'out-of-stock', $availability['class'] );
+	}
+
+	/**
+	 * @testdox wc_get_stock_html() renders a stock notice for an in-stock product even when stock management is disabled.
+	 */
+	public function test_wc_get_stock_html_in_stock_without_manage_stock() {
+		$product = new WC_Product_Simple();
+		$product->set_manage_stock( false );
+		$product->set_stock_status( 'instock' );
+		$product->save();
+
+		$html = wc_get_stock_html( $product );
+
+		$this->assertStringContainsString( 'In stock', $html );
+		$this->assertStringContainsString( 'in-stock', $html );
+	}
 }

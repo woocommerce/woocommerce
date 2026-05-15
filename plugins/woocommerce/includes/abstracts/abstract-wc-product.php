@@ -2369,7 +2369,7 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} elseif ( $this->managing_stock() ) {
 			$availability = wc_format_stock_for_display( $this );
 		} else {
-			$availability = '';
+			$availability = __( 'In stock', 'woocommerce' );
 		}
 		return apply_filters( 'woocommerce_get_availability_text', $availability, $this );
 	}

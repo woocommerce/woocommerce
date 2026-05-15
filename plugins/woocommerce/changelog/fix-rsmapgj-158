@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the "In stock" availability notice on the product page for in-stock products that have stock management disabled.
