@@ -236,6 +236,19 @@ abstract class WC_Abstract_Order extends WC_Abstract_Legacy_Order {
 			 */
 			do_action( 'woocommerce_after_' . $this->object_type . '_object_save', $this, $this->data_store );
 
+			/*
+			 * Invalidate the per-instance order items cache so that any rows persisted directly
+			 * to the order items tables outside of $this->add_item()/save_items() (e.g. via the
+			 * legacy wc_add_order_item() helper) become visible on subsequent reads against the
+			 * same order instance.
+			 *
+			 * Without this, get_items()/get_taxes()/get_fees()/etc. can return a stale snapshot
+			 * captured before the external write, despite the underlying object cache having
+			 * already been invalidated by the data store. See https://github.com/woocommerce/woocommerce/issues/57204.
+			 */
+			$this->items           = array();
+			$this->items_to_delete = array();
+
 		} catch ( Exception $e ) {
 			$message_id = $this->get_id() ? $this->get_id() : __( '(no ID)', 'woocommerce' );
 			$this->handle_exception(

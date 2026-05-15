@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix HPOS regression where $order->get_taxes() (and other item accessors) could return stale empty results on the same order instance after $order->save() when order item rows were also persisted out-of-band via wc_add_order_item(). Aligns behaviour with the legacy post-based storage.

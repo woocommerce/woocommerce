@@ -635,4 +635,89 @@ class WC_Abstract_Order_Test extends WC_Unit_Test_Case {
 		};
 		// phpcs:enable Squiz.Commenting
 	}
+
+	/**
+	 * @testDox After calling $order->save(), tax rows persisted out-of-band via wc_add_order_item()
+	 *          must be visible to $order->get_taxes() on the same instance, matching the behaviour
+	 *          previously observed under post-based storage. Regression test for woocommerce/woocommerce#57204.
+	 */
+	public function test_get_taxes_returns_externally_added_tax_rows_after_save() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 9.75 );
+		$product->set_tax_status( 'taxable' );
+		$product->save();
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country' => 'GB',
+				'tax_rate'         => '20.0000',
+				'tax_rate_name'    => 'VAT',
+				'tax_rate_order'   => 1,
+			)
+		);
+
+		$order = new WC_Order();
+		$order->set_currency( 'GBP' );
+		$order->set_prices_include_tax( false );
+		$order->set_billing_country( 'GB' );
+		$order->set_cart_tax( 1.95 );
+		$order->set_shipping_tax( 0 );
+		$order->set_total( 11.70 );
+
+		$item = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 9.75,
+				'total'    => 9.75,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+
+		$order_id = $order->save();
+		$item_id  = $item->get_id();
+
+		// Add line item meta the legacy way, as in the bug report.
+		wc_add_order_item_meta( $item_id, '_qty', 1 );
+		wc_add_order_item_meta( $item_id, '_tax_class', '' );
+		wc_add_order_item_meta( $item_id, '_line_subtotal', wc_format_decimal( 9.75 ) );
+		wc_add_order_item_meta( $item_id, '_line_total', wc_format_decimal( 9.75 ) );
+		wc_add_order_item_meta( $item_id, '_line_subtotal_tax', wc_format_decimal( 1.95 ) );
+		wc_add_order_item_meta( $item_id, '_line_tax', wc_format_decimal( 1.95 ) );
+
+		// Add a tax line directly via the legacy global helper, bypassing $order->add_item().
+		$tax_item_id = wc_add_order_item(
+			$order_id,
+			array(
+				'order_item_name' => 'VAT',
+				'order_item_type' => 'tax',
+			)
+		);
+		$this->assertGreaterThan( 0, $tax_item_id, 'wc_add_order_item() should return a positive item ID.' );
+		wc_add_order_item_meta( $tax_item_id, 'rate_id', $tax_rate_id );
+		wc_add_order_item_meta( $tax_item_id, 'label', 'VAT (20%)' );
+		wc_add_order_item_meta( $tax_item_id, 'compound', 0 );
+		wc_add_order_item_meta( $tax_item_id, 'tax_amount', wc_format_decimal( 1.95, 4 ) );
+		wc_add_order_item_meta( $tax_item_id, 'shipping_tax_amount', wc_format_decimal( 0, 4 ) );
+
+		// Save the order a second time, mirroring the reporter's flow.
+		$order->save();
+
+		// On the SAME instance, the tax row must now be visible.
+		$taxes_same_instance = $order->get_taxes();
+		$this->assertNotEmpty(
+			$taxes_same_instance,
+			'After $order->save(), get_taxes() must reflect tax rows persisted out-of-band on the same instance.'
+		);
+
+		// Re-instantiating the order should return the same tax rows.
+		$taxes_fresh = wc_get_order( $order_id )->get_taxes();
+		$this->assertCount(
+			count( $taxes_fresh ),
+			$taxes_same_instance,
+			'get_taxes() on the same instance should match wc_get_order( $id )->get_taxes() after save.'
+		);
+	}
 }
