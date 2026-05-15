@@ -233,7 +233,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		}, [ images, handleRemoveImage ] );
 
 		return (
-			<Fieldset.Root>
+			<Fieldset.Root className="woocommerce-fields-control__images-fieldset">
 				<Fieldset.Legend>{ field.label }</Fieldset.Legend>
 				<DragDropProvider onDragEnd={ handleDragEnd }>
 					<div className="woocommerce-fields-control__featured-image">
