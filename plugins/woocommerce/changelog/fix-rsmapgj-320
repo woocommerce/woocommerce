@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Guard OrdersTableQuery date arg processing against non-scalar and unparseable inputs so wc_get_orders() returns an empty result set instead of producing a TypeError when an extension or snippet passes malformed arguments.

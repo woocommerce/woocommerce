@@ -790,4 +790,57 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 		$order2->delete( true );
 		$order3->delete( true );
 	}
+
+	/**
+	 * @testDox Invalid (non-scalar) date arguments are rejected with an Exception instead of triggering a TypeError fatal.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/58259 where third-party snippets
+	 * passing junk (arrays/non-parseable strings) to `wc_get_orders` could fatal inside `OrdersTableQuery`.
+	 *
+	 * @dataProvider data_invalid_date_inputs_are_rejected
+	 *
+	 * @param mixed $bad_value Bad date value to feed the query.
+	 */
+	public function test_invalid_date_inputs_are_rejected( $bad_value ): void {
+		$this->expectException( \Exception::class );
+
+		new OrdersTableQuery(
+			array(
+				'date_created' => $bad_value,
+				'return'       => 'ids',
+			)
+		);
+	}
+
+	/**
+	 * Data provider with bad inputs that historically reached `strtotime()` and produced a TypeError.
+	 *
+	 * @return array<string, array{0: mixed}>
+	 */
+	public function data_invalid_date_inputs_are_rejected(): array {
+		return array(
+			'array given for date'           => array( array( 'not-an-array-but-passed-one' ) ),
+			'unparseable date string'        => array( 'this-is-not-a-date' ),
+			'boolean given for date'         => array( true ),
+			'array of arrays via date_query' => array( array( array( 'foo' ) ) ),
+		);
+	}
+
+	/**
+	 * @testDox The OrdersTableDataStore boundary swallows invalid date_query input and returns an empty result set.
+	 *
+	 * Confirms that the controlled \Exception thrown by OrdersTableQuery does not bubble out of
+	 * `wc_get_orders` and therefore replaces the historical fatal with an empty result.
+	 */
+	public function test_invalid_date_input_results_in_empty_orders_via_wc_get_orders(): void {
+		$result = wc_get_orders(
+			array(
+				'date_created' => array( 'unexpected', 'array' ),
+				'return'       => 'ids',
+			)
+		);
+
+		$this->assertIsArray( $result );
+		$this->assertEmpty( $result );
+	}
 }

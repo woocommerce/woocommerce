@@ -346,6 +346,7 @@ class OrdersTableQuery {
 	 *
 	 * @param mixed $date The date. Can be a {@see \WC_DateTime}, a timestamp or a string.
 	 * @return array An array with keys 'year', 'month', 'day' and possibly 'hour', 'minute' and 'second'.
+	 * @throws \Exception If $date is not a supported type or cannot be parsed.
 	 */
 	private function date_to_date_query_arg( $date ): array {
 		$result = array(
@@ -359,9 +360,20 @@ class OrdersTableQuery {
 			$date      = new \WC_DateTime( "@{$date}", new \DateTimeZone( 'UTC' ) );
 			$precision = 'second';
 		} elseif ( ! is_a( $date, 'WC_DateTime' ) ) {
+			if ( ! is_string( $date ) ) {
+				// Reject non-scalar/non-string inputs (e.g. arrays or objects passed in error)
+				// so that strtotime() is never invoked with an unsupported type.
+				throw new \Exception( 'Invalid date_query' );
+			}
+
+			$timestamp = strtotime( $date );
+			if ( false === $timestamp ) {
+				throw new \Exception( 'Invalid date_query' );
+			}
+
 			// For backwards compat (see https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date)
 			// only YYYY-MM-DD is considered for date values. Timestamps do support second precision.
-			$date      = wc_string_to_datetime( date( 'Y-m-d', strtotime( $date ) ) );
+			$date      = wc_string_to_datetime( date( 'Y-m-d', $timestamp ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- preserves original local-time parsing behaviour.
 			$precision = 'day';
 		}
 
@@ -385,17 +397,42 @@ class OrdersTableQuery {
 	 * @param  string $operator One of the operators supported by date queries (<, <=, =, ..., >, >=).
 	 * @return array Partial date query arg with relevant dates now UTC-based.
 	 *
-	 * @throws \Exception If an invalid date shorthand operator is specified.
+	 * @throws \Exception If an invalid date shorthand operator is specified, or if $dates_raw contains values that cannot be parsed as dates.
 	 *
 	 * @since 8.2.0
 	 */
 	private function local_time_to_gmt_date_query( $dates_raw, $operator ) {
 		$result = array();
 
+		if ( ! is_array( $dates_raw ) || empty( $dates_raw ) ) {
+			throw new \Exception( 'Invalid date_query' );
+		}
+
 		// Convert YYYY-MM-DD to UTC timestamp. Per https://developer.woocommerce.com/docs/extensions/core-concepts/wc-get-orders/#date only date is relevant (time is ignored).
 		foreach ( $dates_raw as &$raw_date ) {
-			$raw_date = is_numeric( $raw_date ) ? $raw_date : strtotime( get_gmt_from_date( date( 'Y-m-d', strtotime( $raw_date ) ) ) );
+			if ( is_numeric( $raw_date ) ) {
+				continue;
+			}
+
+			if ( ! is_string( $raw_date ) ) {
+				// Guard against non-scalar input (e.g. arrays/objects passed by extensions) that would
+				// otherwise trigger a TypeError inside strtotime().
+				throw new \Exception( 'Invalid date_query' );
+			}
+
+			$local_timestamp = strtotime( $raw_date );
+			if ( false === $local_timestamp ) {
+				throw new \Exception( 'Invalid date_query' );
+			}
+
+			$gmt_timestamp = strtotime( get_gmt_from_date( date( 'Y-m-d', $local_timestamp ) ) ); // phpcs:ignore WordPress.DateTime.RestrictedFunctions.date_date -- preserves original local-time parsing behaviour.
+			if ( false === $gmt_timestamp ) {
+				throw new \Exception( 'Invalid date_query' );
+			}
+
+			$raw_date = $gmt_timestamp;
 		}
+		unset( $raw_date );
 
 		$date1 = end( $dates_raw );
 
