@@ -22,6 +22,17 @@
 	flex-direction: column;
 	gap: 0.25em;
 
+	// Tombstone rows render `<a>` without an href so iAPI can keep
+	// reconciling them against the live-row template (swapping the
+	// element type would force a re-hydration). The browser already
+	// drops link semantics for hrefless anchors, but make the
+	// non-clickability explicit so any inherited link styles don't
+	// mislead pointer or keyboard users.
+	a:not([href]) {
+		cursor: default;
+		pointer-events: none;
+	}
+
 	// The atomic product-button's `display: flex` outspecifies `[hidden]`,
 	// so the move-to-cart wrapper wouldn't honor `hidden` without this.
 	.wp-block-button.wc-block-components-product-button[hidden] {
