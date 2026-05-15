@@ -1,10 +1,12 @@
 /**
  * E2E coverage for the Customer Review Request → Review Order page flow.
  *
- * Each test seeds its own products / order via REST, then opens the Review
- * Order URL (`/review-order/{id}/?key={order_key}`) directly — no need to
- * trigger the email pipeline since the page is the actual surface under
- * test and the URL is deterministic.
+ * Each test seeds its own products / order via the WC REST API (which uses
+ * its own basic-auth client, independent of the browser session), then opens
+ * the page logged-out, mirroring the real customer who reaches the URL via
+ * the tokenized email link. The page URL itself is read back from
+ * `wc_get_review_order_url()` over wp-cli so the test can't drift from the
+ * helper it's exercising.
  *
  * Tracked as WOOPLUG-6601 (Linear).
  */
@@ -18,60 +20,162 @@ import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  * Internal dependencies
  */
 import { tags, expect, test } from '../../fixtures/fixtures';
-import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { wpCLI } from '../../utils/cli';
 import { random } from '../../utils/helpers';
 
-type ReviewOrderRow = {
+type SeededOrder = {
 	id: number;
 	key: string;
 };
 
-test.use( { storageState: ADMIN_STATE_PATH } );
+// Browser context is logged-out by default — Review Order is a guest-friendly
+// surface and the order key is the auth. The `restApi` fixture is admin
+// (basic-auth) regardless.
 
-const ALL_PRODUCT_REVIEWS_ENABLED = 'yes';
+const FEATURE_FLAG_OPTION =
+	'woocommerce_feature_customer_review_request_enabled';
+const REQUEST_SETTINGS_OPTION = 'woocommerce_customer_review_request_settings';
+const SITE_REVIEWS_OPTION = 'woocommerce_enable_reviews';
 
 test.describe(
 	'Customer Review Request — Review Order page',
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
+		let originalFeatureFlag = '';
+		let originalRequestSettings = '';
+		let originalSiteReviews = '';
+
+		const readOption = async ( name: string ): Promise< string > => {
+			const { stdout } = await wpCLI(
+				`wp option get ${ name } --format=json`
+			);
+			return stdout.trim();
+		};
+
+		const writeOption = async (
+			name: string,
+			value: string
+		): Promise< void > => {
+			if ( value === '' ) {
+				await wpCLI( `wp option delete ${ name }` );
+				return;
+			}
+			// `wp option set --format=json` accepts JSON whether the option is a
+			// scalar string or an array — works for both `enabled` (string) and
+			// the request settings (array).
+			await wpCLI(
+				`wp option set ${ name } ${ JSON.stringify(
+					value
+				) } --format=json`
+			);
+		};
+
 		test.beforeAll( async () => {
-			// Enable the feature flag and the transactional email so the
-			// `/review-order/{id}` route is registered and submissions write
-			// per-order review meta. Action Scheduler scheduling is gated on
-			// these too, but the tests bypass that path by hitting the URL
-			// directly.
-			await wpCLI(
-				'wp option set woocommerce_feature_customer_review_request_enabled yes'
+			// Capture original option values so afterAll can restore them; the
+			// test site shouldn't be left in a feature-enabled state.
+			originalFeatureFlag = await readOption( FEATURE_FLAG_OPTION );
+			originalRequestSettings = await readOption(
+				REQUEST_SETTINGS_OPTION
 			);
+			originalSiteReviews = await readOption( SITE_REVIEWS_OPTION );
+
+			// Enable the feature flag.
+			await wpCLI( `wp option set ${ FEATURE_FLAG_OPTION } yes` );
+
+			// Force the request settings option to a known shape with the
+			// transactional email enabled. Using `wp option set --format=json`
+			// (vs. `wp option patch update`) so it works on a fresh site where
+			// the option doesn't exist yet.
 			await wpCLI(
-				`wp option patch update woocommerce_customer_review_request_settings enabled yes`
+				`wp option set ${ REQUEST_SETTINGS_OPTION } ` +
+					"'" +
+					JSON.stringify( { enabled: 'yes' } ) +
+					"' --format=json"
 			);
+
 			await wpCLI( 'wp rewrite flush' );
 		} );
 
 		test.afterAll( async () => {
-			await wpCLI(
-				`wp option update woocommerce_enable_reviews ${ ALL_PRODUCT_REVIEWS_ENABLED }`
-			);
-			await wpCLI(
-				`wp option patch update woocommerce_customer_review_request_settings enabled no`
-			);
-			await wpCLI(
-				'wp option update woocommerce_feature_customer_review_request_enabled no'
-			);
+			// Restore each option to the exact state we found it in.
+			if ( originalFeatureFlag === '' ) {
+				await wpCLI( `wp option delete ${ FEATURE_FLAG_OPTION }` );
+			} else {
+				await wpCLI(
+					`wp option set ${ FEATURE_FLAG_OPTION } ` +
+						JSON.stringify( originalFeatureFlag ) +
+						' --format=json'
+				);
+			}
+
+			if ( originalRequestSettings === '' ) {
+				await wpCLI( `wp option delete ${ REQUEST_SETTINGS_OPTION }` );
+			} else {
+				await wpCLI(
+					`wp option set ${ REQUEST_SETTINGS_OPTION } ` +
+						"'" +
+						originalRequestSettings +
+						"' --format=json"
+				);
+			}
+
+			if ( originalSiteReviews === '' ) {
+				await wpCLI( `wp option delete ${ SITE_REVIEWS_OPTION }` );
+			} else {
+				await wpCLI(
+					`wp option set ${ SITE_REVIEWS_OPTION } ` +
+						JSON.stringify( originalSiteReviews ) +
+						' --format=json'
+				);
+			}
 		} );
 
-		const reviewOrderUrl = ( { id, key }: ReviewOrderRow ) =>
-			`/review-order/${ id }/?key=${ key }`;
+		/**
+		 * Resolve the Review Order URL through the WC helper rather than
+		 * building it by hand, so the test exercises the same path the email
+		 * templates use.
+		 */
+		const reviewOrderUrl = async (
+			order: SeededOrder
+		): Promise< string > => {
+			const { stdout } = await wpCLI(
+				`wp eval "echo wc_get_review_order_url( wc_get_order( ${ order.id } ) );"`
+			);
+			return stdout.trim();
+		};
+
+		const cleanupProducts = async ( restApi: ApiClient, ids: number[] ) => {
+			for ( const id of ids ) {
+				if ( id <= 0 ) {
+					continue;
+				}
+				await restApi
+					.delete( `${ WC_API_PATH }/products/${ id }`, {
+						force: true,
+					} )
+					.catch( () => undefined );
+			}
+		};
+
+		const cleanupOrder = async ( restApi: ApiClient, id: number ) => {
+			if ( id <= 0 ) {
+				return;
+			}
+			await restApi
+				.delete( `${ WC_API_PATH }/orders/${ id }`, { force: true } )
+				.catch( () => undefined );
+		};
+
+		const buildBillingEmail = ( prefix: string ): string =>
+			`${ prefix }+${ random() }@example.test`;
 
 		/**
-		 * Create N simple products plus an open order containing them, all in
-		 * `completed` status so the Review Order page renders.
+		 * Create N simple products plus a completed order containing them.
+		 * Cleans up its own partial state if any step throws.
 		 *
 		 * @param restApi        Playwright fixture rest client.
 		 * @param productConfigs One config per product. Each can override `reviews_allowed`.
-		 * @return                    Created order id + key + the product ids in input order.
+		 * @return Created order id + key + the product ids in input order + the billing email used.
 		 */
 		const seedCompletedOrder = async (
 			restApi: ApiClient,
@@ -79,112 +183,136 @@ test.describe(
 				name?: string;
 				reviews_allowed?: boolean;
 			} >
-		): Promise< { order: ReviewOrderRow; productIds: number[] } > => {
+		): Promise< {
+			order: SeededOrder;
+			productIds: number[];
+			billingEmail: string;
+		} > => {
 			const productIds: number[] = [];
-			for ( const cfg of productConfigs ) {
-				const { data } = await restApi.post(
-					`${ WC_API_PATH }/products`,
+			const billingEmail = buildBillingEmail( 'shopper' );
+			let orderId = 0;
+			try {
+				for ( const cfg of productConfigs ) {
+					const { data } = await restApi.post(
+						`${ WC_API_PATH }/products`,
+						{
+							name:
+								cfg.name ||
+								`Review Order Test Product ${ random() }`,
+							type: 'simple',
+							regular_price: '10',
+							reviews_allowed: cfg.reviews_allowed ?? true,
+						}
+					);
+					productIds.push( data.id );
+				}
+
+				const { data: order } = await restApi.post(
+					`${ WC_API_PATH }/orders`,
 					{
-						name:
-							cfg.name ||
-							`Review Order Test Product ${ random() }`,
-						type: 'simple',
-						regular_price: '10',
-						reviews_allowed: cfg.reviews_allowed ?? true,
+						status: 'completed',
+						billing: {
+							first_name: 'Review',
+							last_name: 'Tester',
+							email: billingEmail,
+						},
+						line_items: productIds.map( ( id ) => ( {
+							product_id: id,
+							quantity: 1,
+						} ) ),
 					}
 				);
-				productIds.push( data.id );
+				orderId = order.id;
+
+				return {
+					order: { id: order.id, key: order.order_key },
+					productIds,
+					billingEmail,
+				};
+			} catch ( err ) {
+				// Make sure a partial seed doesn't strand products / orders.
+				await cleanupOrder( restApi, orderId );
+				await cleanupProducts( restApi, productIds );
+				throw err;
 			}
-
-			const { data: order } = await restApi.post(
-				`${ WC_API_PATH }/orders`,
-				{
-					status: 'completed',
-					line_items: productIds.map( ( id ) => ( {
-						product_id: id,
-						quantity: 1,
-					} ) ),
-				}
-			);
-
-			return {
-				order: { id: order.id, key: order.order_key },
-				productIds,
-			};
 		};
 
 		/**
 		 * Create a variable product with `variationOptions.length` variations
-		 * of a single `Size` attribute, all reviewable, plus an order
-		 * containing each variation.
+		 * of a single `Size` attribute, all reviewable, plus a completed order
+		 * containing each variation. Cleans up partial state on failure.
 		 */
 		const seedVariationOrder = async (
 			restApi: ApiClient,
 			variationOptions: string[]
 		): Promise< {
-			order: ReviewOrderRow;
+			order: SeededOrder;
 			parentId: number;
 			variationIds: number[];
+			billingEmail: string;
 		} > => {
-			const { data: parent } = await restApi.post(
-				`${ WC_API_PATH }/products`,
-				{
-					name: `Variable Review Test ${ random() }`,
-					type: 'variable',
-					attributes: [
-						{
-							name: 'Size',
-							visible: true,
-							variation: true,
-							options: variationOptions,
-						},
-					],
-				}
-			);
-
+			let parentId = 0;
+			let orderId = 0;
 			const variationIds: number[] = [];
-			for ( const option of variationOptions ) {
-				const { data: variation } = await restApi.post(
-					`${ WC_API_PATH }/products/${ parent.id }/variations`,
+			const billingEmail = buildBillingEmail( 'variation-shopper' );
+			try {
+				const { data: parent } = await restApi.post(
+					`${ WC_API_PATH }/products`,
 					{
-						regular_price: '10',
-						attributes: [ { name: 'Size', option } ],
+						name: `Variable Review Test ${ random() }`,
+						type: 'variable',
+						attributes: [
+							{
+								name: 'Size',
+								visible: true,
+								variation: true,
+								options: variationOptions,
+							},
+						],
 					}
 				);
-				variationIds.push( variation.id );
-			}
+				parentId = parent.id;
 
-			const { data: order } = await restApi.post(
-				`${ WC_API_PATH }/orders`,
-				{
-					status: 'completed',
-					line_items: variationIds.map( ( vid ) => ( {
-						product_id: parent.id,
-						variation_id: vid,
-						quantity: 1,
-					} ) ),
+				for ( const option of variationOptions ) {
+					const { data: variation } = await restApi.post(
+						`${ WC_API_PATH }/products/${ parent.id }/variations`,
+						{
+							regular_price: '10',
+							attributes: [ { name: 'Size', option } ],
+						}
+					);
+					variationIds.push( variation.id );
 				}
-			);
 
-			return {
-				order: { id: order.id, key: order.order_key },
-				parentId: parent.id,
-				variationIds,
-			};
-		};
+				const { data: order } = await restApi.post(
+					`${ WC_API_PATH }/orders`,
+					{
+						status: 'completed',
+						billing: {
+							first_name: 'Variation',
+							last_name: 'Tester',
+							email: billingEmail,
+						},
+						line_items: variationIds.map( ( vid ) => ( {
+							product_id: parent.id,
+							variation_id: vid,
+							quantity: 1,
+						} ) ),
+					}
+				);
+				orderId = order.id;
 
-		const cleanupProducts = async ( restApi: ApiClient, ids: number[] ) => {
-			for ( const id of ids ) {
-				await restApi.delete( `${ WC_API_PATH }/products/${ id }`, {
-					force: true,
-				} );
+				return {
+					order: { id: order.id, key: order.order_key },
+					parentId,
+					variationIds,
+					billingEmail,
+				};
+			} catch ( err ) {
+				await cleanupOrder( restApi, orderId );
+				await cleanupProducts( restApi, [ parentId ] );
+				throw err;
 			}
-		};
-
-		const cleanupOrder = async ( restApi: ApiClient, id: number ) => {
-			await restApi.delete( `${ WC_API_PATH }/orders/${ id }`, {
-				force: true,
-			} );
 		};
 
 		test( 'Scenario 1 — happy path: rate a product, submit, see thank-you in place', async ( {
@@ -197,7 +325,7 @@ test.describe(
 			] );
 
 			try {
-				await page.goto( reviewOrderUrl( order ) );
+				await page.goto( await reviewOrderUrl( order ) );
 
 				await expect(
 					page.getByRole( 'heading', {
@@ -245,7 +373,7 @@ test.describe(
 				// Verify the saved review via REST.
 				const reviewsResp = await restApi.get(
 					`${ WC_API_PATH }/products/reviews`,
-					{ product: productIds[ 0 ] }
+					{ product: productIds[ 0 ], status: 'approved' }
 				);
 				expect(
 					reviewsResp.data.find(
@@ -267,9 +395,10 @@ test.describe(
 				{ name: 'CRR Refresh A' },
 				{ name: 'CRR Refresh B' },
 			] );
+			const url = await reviewOrderUrl( order );
 
 			try {
-				await page.goto( reviewOrderUrl( order ) );
+				await page.goto( url );
 
 				const rows = page.locator( '.woocommerce-review-order__item' );
 				const submit = page.locator(
@@ -291,7 +420,7 @@ test.describe(
 				).toBeVisible();
 
 				// Refresh.
-				await page.goto( reviewOrderUrl( order ) );
+				await page.goto( url );
 
 				const rowsAfter = page.locator(
 					'.woocommerce-review-order__item'
@@ -341,7 +470,7 @@ test.describe(
 			] );
 
 			try {
-				await page.goto( reviewOrderUrl( order ) );
+				await page.goto( await reviewOrderUrl( order ) );
 
 				const rows = page.locator( '.woocommerce-review-order__item' );
 				await expect( rows ).toHaveCount( 1 );
@@ -372,11 +501,14 @@ test.describe(
 			const { order, productIds } = await seedCompletedOrder( restApi, [
 				{ name: 'CRR Site-wide Off' },
 			] );
+			const originalSiteReviewsForThisTest = await readOption(
+				SITE_REVIEWS_OPTION
+			);
 
 			try {
-				await wpCLI( 'wp option update woocommerce_enable_reviews no' );
+				await wpCLI( `wp option set ${ SITE_REVIEWS_OPTION } no` );
 
-				await page.goto( reviewOrderUrl( order ) );
+				await page.goto( await reviewOrderUrl( order ) );
 
 				await expect(
 					page.getByRole( 'heading', {
@@ -390,8 +522,9 @@ test.describe(
 					page.locator( '.woocommerce-review-order__submit' )
 				).toHaveCount( 0 );
 			} finally {
-				await wpCLI(
-					`wp option update woocommerce_enable_reviews ${ ALL_PRODUCT_REVIEWS_ENABLED }`
+				await writeOption(
+					SITE_REVIEWS_OPTION,
+					originalSiteReviewsForThisTest
 				);
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, productIds );
@@ -435,7 +568,7 @@ test.describe(
 			] );
 
 			try {
-				await page.goto( reviewOrderUrl( order ) );
+				await page.goto( await reviewOrderUrl( order ) );
 
 				const row = page
 					.locator( '.woocommerce-review-order__item' )
@@ -490,7 +623,7 @@ test.describe(
 			] );
 
 			try {
-				await page.goto( reviewOrderUrl( order ) );
+				await page.goto( await reviewOrderUrl( order ) );
 
 				const rows = page.locator( '.woocommerce-review-order__item' );
 				await expect( rows ).toHaveCount( 2 );
@@ -516,13 +649,14 @@ test.describe(
 			page,
 			restApi,
 		} ) => {
-			const { order, parentId } = await seedVariationOrder( restApi, [
-				'Small',
-				'Medium',
-			] );
+			const { order, parentId, variationIds } = await seedVariationOrder(
+				restApi,
+				[ 'Small', 'Medium' ]
+			);
+			const [ smallVariationId, mediumVariationId ] = variationIds;
 
 			try {
-				await page.goto( reviewOrderUrl( order ) );
+				await page.goto( await reviewOrderUrl( order ) );
 
 				const rows = page.locator( '.woocommerce-review-order__item' );
 
@@ -553,36 +687,102 @@ test.describe(
 					} )
 				).toBeVisible();
 
-				// Two distinct reviews recorded for the parent product.
+				// Pull the parent's reviews; assert each comment's variation
+				// meta points at the matching variation, not just that two
+				// reviews exist with the expected text.
 				const reviewsResp = await restApi.get(
 					`${ WC_API_PATH }/products/reviews`,
-					{ product: parentId }
+					{ product: parentId, status: 'approved' }
 				);
-				const reviewsForParent = (
+				const reviews = (
 					reviewsResp.data as Array< {
+						id: number;
 						review: string;
 						rating: number;
 					} >
 				 ).filter( ( r ) =>
 					/Small fit great|Medium ran short/.test( r.review )
 				);
-				expect( reviewsForParent.length ).toBe( 2 );
+				expect( reviews ).toHaveLength( 2 );
 
-				// Parent product page surfaces the variation summary above each comment.
+				const variationIdForReview = async (
+					commentId: number
+				): Promise< number > => {
+					const { stdout } = await wpCLI(
+						`wp eval "echo (int) get_comment_meta( ${ commentId }, '_review_variation_id', true );"`
+					);
+					return Number( stdout.trim() );
+				};
+
+				const requireReview = (
+					predicate: ( r: ( typeof reviews )[ number ] ) => boolean,
+					label: string
+				) => {
+					const found = reviews.find( predicate );
+					// eslint-disable-next-line playwright/no-conditional-in-test -- narrowing for downstream property access.
+					if ( ! found ) {
+						throw new Error(
+							`Expected to find a review matching ${ label }, none returned by the REST API.`
+						);
+					}
+					return found;
+				};
+
+				const smallReview = requireReview(
+					( r ) => r.review.includes( 'Small fit great' ),
+					'"Small fit great"'
+				);
+				const mediumReview = requireReview(
+					( r ) => r.review.includes( 'Medium ran short' ),
+					'"Medium ran short"'
+				);
+				expect( await variationIdForReview( smallReview.id ) ).toBe(
+					smallVariationId
+				);
+				expect( await variationIdForReview( mediumReview.id ) ).toBe(
+					mediumVariationId
+				);
+				expect( smallReview.rating ).toBe( 5 );
+				expect( mediumReview.rating ).toBe( 3 );
+
+				// Parent product page surfaces each review with its own
+				// variation summary. Open the Reviews tab when the active
+				// theme uses the classic tabbed layout (Storefront, etc.);
+				// block themes render the list inline, in which case the
+				// click target won't exist.
 				const { data: parentProduct } = await restApi.get(
 					`${ WC_API_PATH }/products/${ parentId }`
 				);
 				await page.goto( parentProduct.permalink );
-				const summaries = page.locator(
-					'.woocommerce-review__variation-summary'
+				// eslint-disable-next-line playwright/no-conditional-in-test -- block themes render the reviews inline, classic themes hide them behind a tab; both must work.
+				const reviewsTab = page.locator(
+					'#tab-title-reviews a, a[href="#tab-reviews"], a[href="#reviews"]'
 				);
-				await expect( summaries ).toHaveCount( 2 );
+				// eslint-disable-next-line playwright/no-conditional-in-test -- see above.
+				if ( ( await reviewsTab.count() ) > 0 ) {
+					await reviewsTab.first().click();
+				}
+
+				// Assert each review's variation summary sits next to its body.
+				const smallComment = page
+					.locator( 'li.comment, li[class*="comment"]' )
+					.filter( { hasText: 'Small fit great' } )
+					.first();
 				await expect(
-					summaries.filter( { hasText: /Size:\s*Small/ } )
-				).toHaveCount( 1 );
+					smallComment.locator(
+						'.woocommerce-review__variation-summary'
+					)
+				).toContainText( /Size:\s*Small/ );
+
+				const mediumComment = page
+					.locator( 'li.comment, li[class*="comment"]' )
+					.filter( { hasText: 'Medium ran short' } )
+					.first();
 				await expect(
-					summaries.filter( { hasText: /Size:\s*Medium/ } )
-				).toHaveCount( 1 );
+					mediumComment.locator(
+						'.woocommerce-review__variation-summary'
+					)
+				).toContainText( /Size:\s*Medium/ );
 			} finally {
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, [ parentId ] );
