@@ -637,7 +637,9 @@ class WC_Shortcode_Products {
 				)
 			);
 
-			$original_post = $GLOBALS['post'];
+			// Preserve the original global post so we can restore it after the loop.
+			// In contexts without a global post (e.g. AJAX callbacks), $GLOBALS['post'] may be unset.
+			$original_post = isset( $GLOBALS['post'] ) ? $GLOBALS['post'] : null;
 
 			do_action( "woocommerce_shortcode_before_{$this->type}_loop", $this->attributes );
 

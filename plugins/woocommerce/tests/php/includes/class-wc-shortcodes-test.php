@@ -447,6 +447,52 @@ class WC_Shortcodes_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Ensure the `[products]` shortcode does not emit an "Undefined index: post" notice
+	 * when $GLOBALS['post'] is not set (e.g. in AJAX request contexts).
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/30073.
+	 */
+	public function test_products_shortcode_without_global_post() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_name( 'Test AJAX Products Shortcode' );
+		$product->save();
+
+		// Simulate an AJAX/bare context where the global post is not defined.
+		$had_post      = array_key_exists( 'post', $GLOBALS );
+		$original_post = $had_post ? $GLOBALS['post'] : null;
+		unset( $GLOBALS['post'] );
+
+		$caught_notice = null;
+		// phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_set_error_handler -- Required to assert that no PHP notice is emitted.
+		set_error_handler(
+			function ( $errno, $errstr ) use ( &$caught_notice ) {
+				if ( false !== stripos( $errstr, 'Undefined index: post' )
+					|| false !== stripos( $errstr, 'Undefined array key "post"' ) ) {
+					$caught_notice = $errstr;
+				}
+				return false;
+			},
+			E_NOTICE | E_WARNING | E_USER_NOTICE | E_USER_WARNING
+		);
+
+		try {
+			$this->disable_deprecation_notice();
+			$shortcode = new WC_Shortcode_Products( array( 'limit' => '1' ) );
+			$output    = $shortcode->get_content();
+			$this->enable_deprecation_notice();
+		} finally {
+			restore_error_handler();
+			if ( $had_post ) {
+				$GLOBALS['post'] = $original_post; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+			}
+		}
+
+		$this->assertNull( $caught_notice, 'No "Undefined index: post" notice should be emitted when global post is missing.' );
+		$this->assertIsString( $output );
+		$this->assertStringContainsString( 'Test AJAX Products Shortcode', $output );
+	}
+
+	/**
 	 * Ensure the `product_page` shortcode renders the password prompt for a protected product belonging to any user.
 	 */
 	public function test_product_page_shortcode_protected_product() {
