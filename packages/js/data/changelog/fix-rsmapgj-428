@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Items store: paginate getItems resolver so search-based lookups (e.g. Analytics > Products) return all matching items instead of only the first page.

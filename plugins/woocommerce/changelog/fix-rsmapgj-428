@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics > Products: include all matching products in the report when a search returns more than 100 results.
