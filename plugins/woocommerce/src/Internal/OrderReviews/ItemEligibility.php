@@ -242,6 +242,56 @@ class ItemEligibility {
 	}
 
 	/**
+	 * Whether an order has at least one item the customer can still review.
+	 *
+	 * Walks the same eligible-items list and per-item decisions the page
+	 * renders, so the answer matches what `customer-review-order.php` would
+	 * show: items with `STATUS_SKIP` (reviews disabled on the product, or
+	 * site-wide via `woocommerce_enable_reviews`) and items already reviewed
+	 * on this order are excluded. Any remaining `STATUS_FORM` row without a
+	 * matching review counts as actionable.
+	 *
+	 * Callers in the email pipeline use this to short-circuit scheduling and
+	 * sending when the customer would otherwise land on the empty-state page.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param WC_Order $order Order being inspected.
+	 * @return bool True when at least one item is still reviewable.
+	 */
+	public static function has_actionable_items( WC_Order $order ): bool {
+		/**
+		 * Filter the eligible items considered when deciding whether the
+		 * Customer Review Request email should fire for an order.
+		 *
+		 * Same hook the page template, submission handler, and endpoint use,
+		 * so all four entry points agree on the eligible-items set.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param WC_Order_Item[] $items Order line items.
+		 * @param WC_Order        $order The order being inspected.
+		 */
+		$items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
+		self::preload_for_items( $items, $order );
+
+		foreach ( $items as $item ) {
+			if ( ! $item instanceof WC_Order_Item_Product ) {
+				continue;
+			}
+			$decision = self::decide( $item, $order );
+			if ( self::STATUS_SKIP === $decision['status'] ) {
+				continue;
+			}
+			if ( ! ( $decision['comment'] instanceof WP_Comment ) ) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	/**
 	 * Drop fully-refunded line items from the eligible-items list.
 	 *
 	 * Default callback wired onto `woocommerce_review_order_eligible_items`

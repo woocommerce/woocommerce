@@ -278,4 +278,54 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 		$this->assertNotNull( $decision['comment'] );
 		$this->assertSame( 0, $call_count, 'decide() should not query when preload_for_items() has cached the result.' );
 	}
+
+	/**
+	 * @testdox has_actionable_items() returns true when at least one item is reviewable.
+	 */
+	public function test_has_actionable_items_true_for_default_order(): void {
+		$built = $this->make_order();
+
+		$this->assertTrue( ItemEligibility::has_actionable_items( $built['order'] ) );
+	}
+
+	/**
+	 * @testdox has_actionable_items() returns false when every product has reviews disabled.
+	 */
+	public function test_has_actionable_items_false_when_all_items_disabled(): void {
+		$built   = $this->make_order();
+		$product = wc_get_product( $built['product_id'] );
+		$product->set_reviews_allowed( false );
+		$product->save();
+
+		$this->assertFalse( ItemEligibility::has_actionable_items( $built['order'] ) );
+	}
+
+	/**
+	 * @testdox has_actionable_items() returns false when reviews are disabled site-wide.
+	 */
+	public function test_has_actionable_items_false_when_site_wide_reviews_disabled(): void {
+		$built    = $this->make_order();
+		$previous = get_option( 'woocommerce_enable_reviews', 'yes' );
+		update_option( 'woocommerce_enable_reviews', 'no' );
+		remove_post_type_support( 'product', 'comments' );
+
+		try {
+			$this->assertFalse( ItemEligibility::has_actionable_items( $built['order'] ) );
+		} finally {
+			update_option( 'woocommerce_enable_reviews', $previous );
+			if ( 'yes' === $previous ) {
+				add_post_type_support( 'product', 'comments' );
+			}
+		}
+	}
+
+	/**
+	 * @testdox has_actionable_items() returns false once every reviewable item is reviewed.
+	 */
+	public function test_has_actionable_items_false_when_all_items_reviewed(): void {
+		$built = $this->make_order( 'all-done@example.test' );
+		$this->insert_review( $built['product_id'], 'all-done@example.test', 'Done.', 5, (int) $built['order']->get_id() );
+
+		$this->assertFalse( ItemEligibility::has_actionable_items( $built['order'] ) );
+	}
 }
