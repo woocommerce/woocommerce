@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+CSV product export: stop leaking variations into the export when a category filter is combined with a type filter that does not include "variation".

@@ -229,10 +229,19 @@ class WC_Product_CSV_Exporter extends WC_CSV_Batch_Exporter {
 		$this->row_data    = array();
 		$variable_products = array();
 
+		// When a category filter is applied, variations are not returned by the query because they do not
+		// carry their parent's category terms. We therefore append variations of any variable products that
+		// matched the category filter, but only when the user has not excluded the "variation" type from
+		// their selection (otherwise, picking only "Variable" alongside a category would leak variations
+		// into the export). For the include-by-ID path the type filter is ignored upstream, so we preserve
+		// the prior behavior of always appending variations of selected variable parents.
+		$include_variations = ! empty( $args['include'] )
+			|| ( ! empty( $args['category'] ) && in_array( ProductType::VARIATION, $this->product_types_to_export, true ) );
+
 		foreach ( $products->products as $product ) {
 			// Check if the product is variable and if either the include or category filter is active.
 			// This is to ensure that product variations are only included if they are being selectively exported or if they are part of a category.
-			if ( ( ! empty( $args['include'] ) || ! empty( $args['category'] ) ) &&
+			if ( $include_variations &&
 				$product->is_type( ProductType::VARIABLE ) &&
 				! in_array( $product->get_id(), $variable_products, true ) ) {
 				$variable_products[] = $product->get_id();
