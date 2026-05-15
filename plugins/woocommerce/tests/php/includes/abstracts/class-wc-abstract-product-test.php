@@ -338,4 +338,46 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 		$product->set_cogs_value( 12.34 );
 		$this->assertEquals( 123.4, $product->get_cogs_value() );
 	}
+
+	/**
+	 * @testdox validate_props() keeps a product in stock when stock quantity is a positive float below 1 and the woocommerce_stock_amount filter is set to floatval.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/41676 — the
+	 * (int) cast on get_stock_quantity() inside validate_props() truncated 0.5 to 0,
+	 * which is not above the default no-stock threshold (0), so the product was
+	 * incorrectly flipped to "outofstock".
+	 */
+	public function test_validate_props_preserves_in_stock_for_float_stock_quantity() {
+		remove_all_filters( 'woocommerce_stock_amount' );
+		add_filter( 'woocommerce_stock_amount', 'floatval' );
+
+		try {
+			$product = new WC_Product_Simple();
+			$product->set_manage_stock( true );
+			$product->set_stock_quantity( 0.5 );
+			$product->set_stock_status( 'instock' );
+
+			$product->validate_props();
+
+			$this->assertSame( 0.5, $product->get_stock_quantity() );
+			$this->assertSame( 'instock', $product->get_stock_status() );
+		} finally {
+			remove_filter( 'woocommerce_stock_amount', 'floatval' );
+			add_filter( 'woocommerce_stock_amount', 'intval' );
+		}
+	}
+
+	/**
+	 * @testdox validate_props() marks a product as out of stock when the stock quantity drops to zero.
+	 */
+	public function test_validate_props_marks_zero_stock_as_out_of_stock() {
+		$product = new WC_Product_Simple();
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 0 );
+		$product->set_stock_status( 'instock' );
+
+		$product->validate_props();
+
+		$this->assertSame( 'outofstock', $product->get_stock_status() );
+	}
 }
