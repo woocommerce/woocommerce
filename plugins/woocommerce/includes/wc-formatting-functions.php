@@ -672,11 +672,21 @@ function wc_price( $price, $args = array() ) {
  *
  * This function transforms the php.ini notation for numbers (like '2M') to an integer.
  *
- * @param  string $size Size value.
+ * The special value `-1` (used by PHP's `memory_limit` and WordPress' memory
+ * limit constants to mean "no limit") is preserved and returned as `-1` so
+ * callers can detect the unlimited case rather than receiving a misleading `0`.
+ *
+ * @param  string|int|false|null $size Size value.
  * @return int
  */
 function wc_let_to_num( $size ) {
-	$size = $size ?? '';
+	$size = (string) ( $size ?? '' );
+
+	// PHP/WordPress use `-1` to signal "no limit". Preserve that semantic
+	// instead of letting the legacy parsing turn it into `0`.
+	if ( '-1' === $size ) {
+		return -1;
+	}
 
 	$l   = substr( $size, -1 );
 	$ret = (int) substr( $size, 0, -1 );

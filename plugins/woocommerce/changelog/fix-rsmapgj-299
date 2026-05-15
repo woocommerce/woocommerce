@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Treat a PHP `memory_limit` of `-1` (unlimited) as valid on the Status page and in the system status REST response, mirroring WordPress core and suppressing the spurious low-memory warning.

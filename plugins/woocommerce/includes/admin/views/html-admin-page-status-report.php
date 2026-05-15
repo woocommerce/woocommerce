@@ -175,7 +175,11 @@ if ( file_exists( $plugin_path ) ) {
 			<td class="help"><?php echo wc_help_tip( esc_html__( 'The maximum amount of memory (RAM) that your site can use at one time.', 'woocommerce' ) ); /* phpcs:ignore WordPress.XSS.EscapeOutput.OutputNotEscaped */ ?></td>
 			<td>
 				<?php
-				if ( $environment['wp_memory_limit'] < 67108864 ) {
+				if ( -1 === (int) $environment['wp_memory_limit'] ) {
+					// `-1` means "no limit" per the PHP manual and WordPress core;
+					// don't raise a low-memory warning in that case.
+					echo '<mark class="yes">' . esc_html__( 'Unlimited', 'woocommerce' ) . '</mark>';
+				} elseif ( $environment['wp_memory_limit'] < 67108864 ) {
 					/* Translators: %1$s: Memory limit, %2$s: Docs link. */
 					echo '<mark class="error"><span class="dashicons dashicons-warning"></span> ' . sprintf( esc_html__( '%1$s - We recommend setting memory to at least 64MB. See: %2$s', 'woocommerce' ), esc_html( size_format( $environment['wp_memory_limit'] ) ), '<a href="https://wordpress.org/support/article/editing-wp-config-php/#increasing-memory-allocated-to-php" target="_blank">' . esc_html__( 'Increasing memory allocated to PHP', 'woocommerce' ) . '</a>' ) . '</mark>';
 				} else {

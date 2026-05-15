@@ -939,9 +939,24 @@ class WC_REST_System_Status_V2_Controller extends WC_REST_Controller {
 		}
 
 		// WP memory limit.
-		$wp_memory_limit = wc_let_to_num( WP_MEMORY_LIMIT );
+		// Match WordPress core's Site Health behavior: prefer WP_MAX_MEMORY_LIMIT
+		// (the admin-context limit) when available, fall back to WP_MEMORY_LIMIT,
+		// and consider the PHP ini value. Any of these may be `-1`, which means
+		// "no limit" per the PHP manual and WordPress core; in that case we
+		// surface `-1` so consumers/views can render it as unlimited rather than
+		// raising a spurious low-memory warning (see GH #32961).
+		$memory_limit_candidates = array( wc_let_to_num( WP_MEMORY_LIMIT ) );
+		if ( defined( 'WP_MAX_MEMORY_LIMIT' ) ) {
+			$memory_limit_candidates[] = wc_let_to_num( WP_MAX_MEMORY_LIMIT );
+		}
 		if ( function_exists( 'memory_get_usage' ) ) {
-			$wp_memory_limit = max( $wp_memory_limit, wc_let_to_num( @ini_get( 'memory_limit' ) ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			$memory_limit_candidates[] = wc_let_to_num( @ini_get( 'memory_limit' ) ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		}
+
+		if ( in_array( -1, $memory_limit_candidates, true ) ) {
+			$wp_memory_limit = -1;
+		} else {
+			$wp_memory_limit = max( $memory_limit_candidates );
 		}
 
 		// Test POST requests.

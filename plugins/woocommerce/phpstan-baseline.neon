@@ -16183,12 +16183,6 @@ parameters:
 			path: includes/class-wc-tracker.php
 
 		-
-			message: '#^Parameter \#1 \$size of function wc_let_to_num expects string, string\|false given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-tracker.php
-
-		-
 			message: '#^Parameter \#1 \$str of function trim expects string, string\|null given\.$#'
 			identifier: argument.type
 			count: 1
@@ -28202,12 +28196,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$keys of function array_fill_keys expects an array of values castable to string, array\<stromg\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-v2-controller.php
-
-		-
-			message: '#^Parameter \#1 \$size of function wc_let_to_num expects string, string\|false given\.$#'
 			identifier: argument.type
 			count: 1
 			path: includes/rest-api/Controllers/Version2/class-wc-rest-system-status-v2-controller.php

@@ -34,6 +34,35 @@ class WC_REST_System_Status_V2_Controller_Test extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox WP memory limit should be reported as `-1` (unlimited) when the PHP ini value is `-1`.
+	 *
+	 * Regression test for GH #32961: WooCommerce used to coerce `-1` to `0`
+	 * via wc_let_to_num(), which then made the Status page display the small
+	 * WP_MEMORY_LIMIT value and raise a spurious low-memory warning. PHP and
+	 * WordPress core both treat `-1` as "no limit"; we now mirror that.
+	 */
+	public function test_get_environment_info_treats_ini_memory_limit_minus_one_as_unlimited(): void {
+		if ( ! function_exists( 'memory_get_usage' ) ) {
+			$this->markTestSkipped( 'memory_get_usage() not available; controller path under test is skipped.' );
+		}
+
+		$original = @ini_get( 'memory_limit' ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+		// phpcs:ignore WordPress.PHP.IniSet.memory_limit_Disallowed,WordPress.PHP.NoSilencedErrors.Discouraged -- Test fixture, restored in finally.
+		$set = @ini_set( 'memory_limit', '-1' );
+		if ( false === $set ) {
+			$this->markTestSkipped( 'Unable to set memory_limit ini at runtime; cannot exercise the -1 path here.' );
+		}
+
+		try {
+			$env = $this->sut->get_environment_info_per_fields( array( 'environment' ) );
+			$this->assertSame( -1, $env['wp_memory_limit'], 'A `-1` PHP memory limit must surface as `-1`, not a coerced small value.' );
+		} finally {
+			// phpcs:ignore WordPress.PHP.IniSet.memory_limit_Disallowed,WordPress.PHP.NoSilencedErrors.Discouraged -- Restoring original value.
+			@ini_set( 'memory_limit', (string) $original );
+		}
+	}
+
+	/**
 	 * @testdox Should detect template override via wc_get_template filter.
 	 */
 	public function test_get_theme_info_detects_wc_get_template_filter_override(): void {

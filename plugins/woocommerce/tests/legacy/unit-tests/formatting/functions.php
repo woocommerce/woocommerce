@@ -666,6 +666,22 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that wc_let_to_num() preserves the PHP/WordPress "no limit" sentinel.
+	 *
+	 * PHP's `memory_limit` and WordPress' memory limit constants use `-1` to
+	 * indicate that no limit should be applied. wc_let_to_num() must surface
+	 * that as `-1` instead of folding it into `0`, so that downstream checks
+	 * (e.g. the WooCommerce Status page) don't raise spurious low-memory
+	 * warnings. Regression test for GH #32961.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_wc_let_to_num_preserves_unlimited_sentinel() {
+		$this->assertSame( -1, wc_let_to_num( '-1' ) );
+		$this->assertSame( -1, wc_let_to_num( -1 ) );
+	}
+
+	/**
 	 * Test wc_date_format().
 	 *
 	 * @since 2.2
