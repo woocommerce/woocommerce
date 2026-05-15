@@ -13,6 +13,16 @@ defined( 'ABSPATH' ) || exit;
 class WC_Beta_Tester {
 
 	/**
+	 * URL to download the nightly build zip from GitHub.
+	 */
+	const NIGHTLY_DOWNLOAD_URL = 'https://github.com/woocommerce/woocommerce/releases/download/nightly/woocommerce-trunk-nightly.zip';
+
+	/**
+	 * URL to fetch nightly release info from GitHub API.
+	 */
+	const NIGHTLY_VERSION_URL = 'https://api.github.com/repos/woocommerce/woocommerce/releases/tags/nightly';
+
+	/**
 	 * Config
 	 *
 	 * @var array
@@ -41,6 +51,13 @@ class WC_Beta_Tester {
 	private $wporg_data;
 
 	/**
+	 * GitHub nightly data
+	 *
+	 * @var object
+	 */
+	private $nightly_data;
+
+	/**
 	 * Main Instance.
 	 */
 	public static function instance() {
@@ -55,6 +72,7 @@ class WC_Beta_Tester {
 	public static function activate() {
 		delete_site_transient( 'update_plugins' );
 		delete_site_transient( 'woocommerce_latest_tag' );
+		delete_site_transient( 'wc_beta_tester_nightly_data' );
 	}
 
 	/**
@@ -71,7 +89,6 @@ class WC_Beta_Tester {
 			)
 		);
 
-		$settings->channel     = $settings->channel;
 		$settings->auto_update = (bool) $settings->auto_update;
 
 		return $settings;
@@ -102,11 +119,18 @@ class WC_Beta_Tester {
 		add_filter( "plugin_action_links_{$this->plugin_name}", array( $this, 'plugin_action_links' ), 10, 1 );
 		add_filter( 'auto_update_plugin', array( $this, 'auto_update_woocommerce' ), 100, 2 );
 
+		// Always add source selection filter for folder renaming (needed for nightly/GitHub downloads).
+		add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
+
 		if ( 'stable' !== $this->get_settings()->channel ) {
-			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ) );
+			// Priority 99 to run after WC_Helper_Updater (priority 21) which may
+			// otherwise overwrite our changes to the update transient.
+			add_filter( 'pre_set_site_transient_update_plugins', array( $this, 'api_check' ), 99 );
 			add_filter( 'plugins_api_result', array( $this, 'plugins_api_result' ), 10, 3 );
-			add_filter( 'upgrader_source_selection', array( $this, 'upgrader_source_selection' ), 10, 3 );
 		}
+
+		// Track when WooCommerce is updated so we can detect new nightly builds.
+		add_action( 'upgrader_process_complete', array( $this, 'on_upgrade_complete' ), 10, 2 );
 
 		$this->includes();
 	}
@@ -139,21 +163,36 @@ class WC_Beta_Tester {
 	}
 
 	/**
-	 * Get New Version from WPorg
+	 * Get New Version from WPorg or GitHub (for nightly)
 	 *
 	 * @since 1.0
-	 * @return int $version the version number
+	 * @return string|false $version the version number or false on failure.
 	 */
 	public function get_latest_channel_release() {
 		$tagged_version = get_site_transient( md5( $this->plugin_config['slug'] ) . '_latest_tag' );
+		$channel        = $this->get_settings()->channel;
 
 		if ( $this->overrule_transients() || empty( $tagged_version ) ) {
 
+			// Handle nightly channel separately - it doesn't come from WP.org.
+			// Use date-based version (YYYY.MM.DD-nightly) showing when the build was created.
+			// This format satisfies WooCommerce's requirement for X.Y.Z version format.
+			if ( 'nightly' === $channel ) {
+				$asset_timestamp = $this->get_nightly_asset_timestamp();
+				$nightly_date    = $asset_timestamp ? gmdate( 'Y.m.d', strtotime( $asset_timestamp ) ) : gmdate( 'Y.m.d' );
+				$tagged_version  = $nightly_date . '-nightly';
+				set_site_transient( md5( $this->plugin_config['slug'] ) . '_latest_tag', $tagged_version, HOUR_IN_SECONDS );
+				return $tagged_version;
+			}
+
+			// Existing WP.org logic for beta/rc/stable channels.
 			$data = $this->get_wporg_data();
 
-			$latest_version = $data->version;
-			$versions       = (array) $data->versions;
-			$channel        = $this->get_settings()->channel;
+			if ( ! $data ) {
+				return false;
+			}
+
+			$versions = (array) $data->versions;
 
 			foreach ( $versions as $version => $download_url ) {
 				if ( 'trunk' === $version ) {
@@ -220,6 +259,49 @@ class WC_Beta_Tester {
 	}
 
 	/**
+	 * Get nightly release data from GitHub API.
+	 *
+	 * @since 3.1.0
+	 * @return object|false The nightly data or false on failure.
+	 */
+	public function get_nightly_data() {
+		if ( ! empty( $this->nightly_data ) ) {
+			return $this->nightly_data;
+		}
+
+		$nightly_data = get_site_transient( 'wc_beta_tester_nightly_data' );
+
+		if ( $this->overrule_transients() || empty( $nightly_data ) ) {
+			$response = wp_remote_get(
+				self::NIGHTLY_VERSION_URL,
+				array(
+					'headers' => array(
+						'Accept' => 'application/vnd.github.v3+json',
+					),
+				)
+			);
+
+			if ( is_wp_error( $response ) ) {
+				return false;
+			}
+
+			$nightly_data = json_decode( wp_remote_retrieve_body( $response ) );
+
+			if ( empty( $nightly_data ) || isset( $nightly_data->message ) ) {
+				return false;
+			}
+
+			// Cache for 1 hour (nightlies update daily, but we check more frequently).
+			set_site_transient( 'wc_beta_tester_nightly_data', $nightly_data, HOUR_IN_SECONDS );
+		}
+
+		// Store the data in this class instance for future calls.
+		$this->nightly_data = $nightly_data;
+
+		return $nightly_data;
+	}
+
+	/**
 	 * Get plugin download URL.
 	 *
 	 * @since 1.0
@@ -227,6 +309,12 @@ class WC_Beta_Tester {
 	 * @return string
 	 */
 	public function get_download_url( $version ) {
+		// Handle nightly builds from GitHub.
+		if ( self::is_nightly_version( $version ) ) {
+			return self::NIGHTLY_DOWNLOAD_URL;
+		}
+
+		// Handle WP.org versions.
 		$data = $this->get_wporg_data();
 
 		if ( empty( $data->versions->$version ) ) {
@@ -258,15 +346,32 @@ class WC_Beta_Tester {
 		delete_site_transient( md5( $this->plugin_config['slug'] ) . '_latest_tag' );
 
 		// Get version data.
-		$plugin_data = $this->get_plugin_data();
-		$version     = $plugin_data['Version'];
-		$new_version = $this->get_latest_channel_release();
+		$plugin_data    = $this->get_plugin_data();
+		$current_version = $plugin_data['Version'];
+		$new_version    = $this->get_latest_channel_release();
 
-		// check the version and decide if it's new.
-		$update = version_compare( $new_version, $version, '>' );
+		if ( ! $new_version ) {
+			return $transient;
+		}
+
+		// Check if an update is available.
+		if ( 'nightly' === $this->get_settings()->channel ) {
+			// For nightly channel, check if the nightly release has been updated
+			// since we last installed it (using the asset's updated_at timestamp).
+			$update = $this->is_nightly_update_available();
+		} else {
+			// Standard version comparison for other channels.
+			$update = version_compare( $new_version, $current_version, '>' );
+		}
 
 		if ( ! $update ) {
 			return $transient;
+		}
+
+		// Remove from no_update if present (WordPress may have put it there
+		// because the .org version is lower than our installed dev version).
+		if ( isset( $transient->no_update['woocommerce/woocommerce.php'] ) ) {
+			unset( $transient->no_update['woocommerce/woocommerce.php'] );
 		}
 
 		// Populate response data.
@@ -303,6 +408,10 @@ class WC_Beta_Tester {
 
 		$warning = '';
 
+		if ( self::is_nightly_version( $new_version ) ) {
+			$warning = __( '<h1><span>&#9888;</span>This is a nightly development build<span>&#9888;</span></h1>', 'woocommerce-beta-tester' );
+		}
+
 		if ( $this->is_beta_version( $new_version ) ) {
 			$warning = __( '<h1><span>&#9888;</span>This is a beta release<span>&#9888;</span></h1>', 'woocommerce-beta-tester' );
 		}
@@ -315,9 +424,16 @@ class WC_Beta_Tester {
 		$response->version       = $new_version;
 		$response->download_link = $this->get_download_url( $new_version );
 
+		// Set the changelog URL based on version type.
+		if ( self::is_nightly_version( $new_version ) ) {
+			$changelog_url = 'https://github.com/woocommerce/woocommerce/releases/tag/nightly';
+		} else {
+			$changelog_url = 'https://github.com/woocommerce/woocommerce/blob/' . $response->version . '/readme.txt';
+		}
+
 		$response->sections['changelog'] = sprintf(
 			'<p><a target="_blank" href="%s">' . __( 'Read the changelog and find out more about the release on GitHub.', 'woocommerce-beta-tester' ) . '</a></p>',
-			'https://github.com/woocommerce/woocommerce/blob/' . $response->version . '/readme.txt'
+			$changelog_url
 		);
 
 		foreach ( $response->sections as $key => $section ) {
@@ -338,13 +454,20 @@ class WC_Beta_Tester {
 	public function upgrader_source_selection( $source, $remote_source, $upgrader ) {
 		global $wp_filesystem;
 
-		if ( strstr( $source, '/woocommerce-woocommerce-' ) ) {
+		// Get the folder name of the extracted plugin (e.g., 'woocommerce' or 'woocommerce-woocommerce-abc123').
+		$source_folder_name = basename( untrailingslashit( $source ) );
+
+		// Handle GitHub downloads that extract to non-standard folder names.
+		// Other GitHub downloads extract to 'woocommerce-woocommerce-{hash}/'.
+		// Only rename if the extracted folder name itself needs correction.
+		// Nightly builds already extract to 'woocommerce/' so no rename needed.
+		if ( strpos( $source_folder_name, 'woocommerce-woocommerce-' ) === 0 ) {
 			$corrected_source = trailingslashit( $remote_source ) . trailingslashit( $this->plugin_config['proper_folder_name'] );
 
 			if ( $wp_filesystem->move( $source, $corrected_source, true ) ) {
 				return $corrected_source;
 			} else {
-				return new WP_Error();
+				return new WP_Error( 'move_failed', 'Could not move ' . $source . ' to ' . $corrected_source );
 			}
 		}
 
@@ -393,7 +516,129 @@ class WC_Beta_Tester {
 	 * @return bool
 	 */
 	protected static function is_stable_version( $version_str ) {
-		return ! self::is_beta_version( $version_str ) && ! self::is_rc_version( $version_str );
+		return ! self::is_beta_version( $version_str ) && ! self::is_rc_version( $version_str ) && ! self::is_nightly_version( $version_str );
+	}
+
+	/**
+	 * Return true if version string is a nightly version.
+	 *
+	 * @since 3.1.0
+	 * @param string $version_str Version string.
+	 * @return bool
+	 */
+	protected static function is_nightly_version( $version_str ) {
+		// Nightly versions are either:
+		// - Contains '-nightly' (e.g., '2026.05.15-nightly' used in the update system)
+		// - Version strings containing '-dev' (e.g., '10.9.0-dev' from installed builds)
+		return strpos( $version_str, '-nightly' ) !== false || strpos( $version_str, '-dev' ) !== false;
+	}
+
+	/**
+	 * Check if a nightly update is available by comparing the GitHub release
+	 * asset's updated_at timestamp to when we last installed a nightly.
+	 *
+	 * @since 3.1.0
+	 * @return bool True if a newer nightly is available.
+	 */
+	protected function is_nightly_update_available() {
+		$nightly_data = $this->get_nightly_data();
+
+		if ( ! $nightly_data || empty( $nightly_data->assets ) ) {
+			return false;
+		}
+
+		// Find the zip asset's updated_at timestamp.
+		$asset_updated_at = null;
+		foreach ( $nightly_data->assets as $asset ) {
+			if ( isset( $asset->name ) && 'woocommerce-trunk-nightly.zip' === $asset->name ) {
+				$asset_updated_at = isset( $asset->updated_at ) ? $asset->updated_at : null;
+				break;
+			}
+		}
+
+		if ( ! $asset_updated_at ) {
+			// Can't determine, offer update to be safe.
+			return true;
+		}
+
+		// Get the timestamp of when we last installed a nightly.
+		$last_installed = get_option( 'wc_beta_tester_nightly_installed_at' );
+
+		if ( ! $last_installed ) {
+			// Never installed a nightly via this plugin, offer update.
+			return true;
+		}
+
+		// Compare timestamps - offer update if asset is newer.
+		return strtotime( $asset_updated_at ) > strtotime( $last_installed );
+	}
+
+	/**
+	 * Store the timestamp when a nightly build was installed.
+	 * Called after successful nightly installation.
+	 *
+	 * @since 3.1.0
+	 * @param string $timestamp ISO 8601 timestamp of the installed nightly asset.
+	 */
+	public function set_nightly_installed_timestamp( $timestamp ) {
+		update_option( 'wc_beta_tester_nightly_installed_at', $timestamp );
+	}
+
+	/**
+	 * Get the current nightly asset's updated_at timestamp from GitHub.
+	 *
+	 * @since 3.1.0
+	 * @return string|null ISO 8601 timestamp or null if not available.
+	 */
+	public function get_nightly_asset_timestamp() {
+		$nightly_data = $this->get_nightly_data();
+
+		if ( ! $nightly_data || empty( $nightly_data->assets ) ) {
+			return null;
+		}
+
+		foreach ( $nightly_data->assets as $asset ) {
+			if ( isset( $asset->name ) && 'woocommerce-trunk-nightly.zip' === $asset->name ) {
+				return isset( $asset->updated_at ) ? $asset->updated_at : null;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Callback for upgrader_process_complete action.
+	 * Stores the nightly timestamp when WooCommerce is updated via standard updater.
+	 *
+	 * @since 3.1.0
+	 * @param WP_Upgrader $upgrader WP_Upgrader instance.
+	 * @param array       $options  Array of update data.
+	 */
+	public function on_upgrade_complete( $upgrader, $options ) {
+		// Only handle plugin updates.
+		if ( 'update' !== $options['action'] || 'plugin' !== $options['type'] ) {
+			return;
+		}
+
+		// Check if WooCommerce was updated.
+		$wc_updated = false;
+		if ( isset( $options['plugins'] ) && is_array( $options['plugins'] ) ) {
+			$wc_updated = in_array( 'woocommerce/woocommerce.php', $options['plugins'], true );
+		} elseif ( isset( $options['plugin'] ) ) {
+			$wc_updated = 'woocommerce/woocommerce.php' === $options['plugin'];
+		}
+
+		if ( ! $wc_updated ) {
+			return;
+		}
+
+		// If we're on nightly channel, store the asset timestamp.
+		if ( 'nightly' === $this->get_settings()->channel ) {
+			$nightly_timestamp = $this->get_nightly_asset_timestamp();
+			if ( $nightly_timestamp ) {
+				$this->set_nightly_installed_timestamp( $nightly_timestamp );
+			}
+		}
 	}
 
 	/**
