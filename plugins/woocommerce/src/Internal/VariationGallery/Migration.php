@@ -11,21 +11,6 @@ defined( 'ABSPATH' ) || exit;
 
 /**
  * Migrate legacy variation gallery meta into WooCommerce's native variation gallery prop.
- *
- * Variations from the retired Additional Variation Images extension store their galleries
- * in `_wc_additional_variation_images`. Core now reads that meta at runtime as a fallback,
- * but the fallback adds extra postmeta lookups to every unresolved variation gallery read.
- * This runner copies legacy values into `_product_image_gallery` once and marks each
- * variation as finalized so the runtime fallback can stop executing.
- *
- * MIGRATED 10.8.0: legacy meta `_wc_additional_variation_images` is intentionally NOT
- * deleted by this runner. Third-party code (custom themes, exporters, integrations) may
- * still read it directly, and a merchant who later reactivates the legacy extension
- * should not lose their source data. The
- * `_wc_variation_gallery_legacy_fallback_disabled` sentinel is therefore the
- * source-of-truth marker — its presence signals that core has taken authority over the
- * gallery for that variation, regardless of what `_wc_additional_variation_images` still
- * contains.
  */
 class Migration {
 
@@ -46,6 +31,10 @@ class Migration {
 	 */
 	public static function run(): bool {
 		global $wpdb;
+
+		if ( get_option( self::COMPLETED_OPTION ) ) {
+			return false;
+		}
 
 		$legacy_meta_key      = '_wc_additional_variation_images';
 		$core_gallery_meta    = '_product_image_gallery';
@@ -85,20 +74,16 @@ class Migration {
 				update_post_meta( $variation_id, $core_gallery_meta, implode( ',', $legacy_gallery_image_ids ) );
 			}
 
+			// Keep legacy meta for third-party readers; disable fallback via the sentinel instead.
 			LegacyVariationGalleryCompatibility::mark_variation_id_core_managed( $variation_id );
 		}
 
 		$has_more = ! empty( $select_variation_ids( 1 ) );
 
-		if ( ! $has_more ) {
-			update_option( self::COMPLETED_OPTION, (string) time() );
-
-			Telemetry::record_event(
-				Telemetry::EVENT_MIGRATION_COMPLETED,
-				array(
-					'batched_variation_count' => count( $variation_ids ),
-				)
-			);
+		// Guard against duplicate completion events if this runner is invoked twice.
+		if ( ! $has_more && ! get_option( self::COMPLETED_OPTION ) ) {
+			update_option( self::COMPLETED_OPTION, time() );
+			Telemetry::record_event( Telemetry::EVENT_MIGRATION_COMPLETED );
 		}
 
 		return $has_more;
