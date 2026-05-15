@@ -513,7 +513,20 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return bool True if the claim was acquired.
 	 */
 	private function claim_token_for_exchange( $token_hash, $expires_at ) {
-		$claim_key        = $this->get_token_claim_key( $token_hash );
+		return $this->claim_token_with_option_key(
+			$this->get_token_claim_key( $token_hash ),
+			$expires_at
+		);
+	}
+
+	/**
+	 * Atomically claim a token using an option key.
+	 *
+	 * @param string $claim_key Option key used as the claim mutex.
+	 * @param int    $expires_at Unix timestamp when the token expires.
+	 * @return bool True if the claim was acquired.
+	 */
+	private function claim_token_with_option_key( $claim_key, $expires_at ) {
 		$claim_expires_at = max( time() + 30, (int) $expires_at );
 
 		if ( add_option( $claim_key, (string) $claim_expires_at, '', false ) ) {
@@ -555,20 +568,10 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * @return bool True if the claim was acquired.
 	 */
 	private function claim_token_for_scan( $token_hash, $expires_at ) {
-		$claim_key        = self::SCAN_CLAIM_OPTION_PREFIX . $token_hash;
-		$claim_expires_at = max( time() + 30, (int) $expires_at );
-
-		if ( add_option( $claim_key, (string) $claim_expires_at, '', false ) ) {
-			return true;
-		}
-
-		$existing_expires_at = (int) get_option( $claim_key, 0 );
-		if ( $existing_expires_at > 0 && $existing_expires_at <= time() ) {
-			delete_option( $claim_key );
-			return add_option( $claim_key, (string) $claim_expires_at, '', false );
-		}
-
-		return false;
+		return $this->claim_token_with_option_key(
+			self::SCAN_CLAIM_OPTION_PREFIX . $token_hash,
+			$expires_at
+		);
 	}
 
 	/**
