@@ -25,10 +25,10 @@ Toggling the flag on resolves the services. The host page is seeded on the first
 
 | Class | Responsibility |
 | ----- | -------------- |
-| `Scheduler` | Schedules the delayed review-request email via Action Scheduler when an order moves to `completed`, and unschedules it on any transition out of the eligible set (cancellation, refund, processing, on-hold, pending, failed, trash, delete). |
+| `Scheduler` | Schedules the delayed review-request email via Action Scheduler when an order moves to `completed`, and unschedules it on any transition out of the eligible set (cancellation, refund, processing, on-hold, pending, failed, trash, delete). Also short-circuits at schedule time when the order has no actionable items — see "Skip when nothing is reviewable" below. |
 | `Endpoint` | Routes `/review-order/{id}/?key={order_key}` to the WC-managed Review Order page, seeds and self-heals the host page, runs the gating checks (key match, eligible status, customer ownership), and renders the landing-page template through the `[woocommerce_review_order]` shortcode inside the page's content. Also registers the host page's admin affordances (Pages-list label, nav-list exclusion, host-page title suppression). |
-| `SubmissionHandler` | AJAX handler that consumes the form post. Per-row outcome reporting (`ok`, `pending_moderation`, `error`); honors WordPress's `comment_moderation` option; tags every inserted comment with `verified=1` and `_review_order_id` commentmeta so the page can scope existing reviews to the order being viewed. When the customer resubmits a row that already has a review for this order, the existing comment is updated in place rather than duplicated. |
-| `ItemEligibility` | Decides per line item whether the row should render the form (`STATUS_FORM`) or be skipped (`STATUS_SKIP`, used when reviews are disabled on the product). Lookups are order-scoped via the `_review_order_id` commentmeta, so a customer who reviewed the same product on a previous order can still review it again here, and the form pre-fills with the existing rating/text when the customer already submitted a review for this order. Also provides the default callback that excludes fully-refunded line items. |
+| `SubmissionHandler` | AJAX handler that consumes the form post. Per-row outcome reporting (`ok`, `pending_moderation`, `error`); honors WordPress's `comment_moderation` option; tags every inserted comment with `verified=1`, `_review_order_id`, `_review_variation_id`, and (for variations) a `_review_variation_summary` snapshot — see "Per-variation reviews" below. When the customer resubmits a row that already has a review for this order, the existing comment is updated in place rather than duplicated. Completion is stamped (`_wc_review_request_completed_at`) when every distinct `(parent product, variation)` slot on the order has a review tagged with the current order id, so an older review of the same parent on a previous order can't inflate the count and a double-submit on one variation can't satisfy a sibling row's quota. |
+| `ItemEligibility` | Decides per line item whether the row should render the form (`STATUS_FORM`) or be skipped (`STATUS_SKIP`, used when reviews are disabled on the product). Lookups are order-and-variation-scoped via `(order_id, product_id, variation_id, email)`, so two variations of one variable product on the same order get independent rows and prefill independently. A customer who reviewed the same product on a previous order can still review it again here, and the form pre-fills with the existing rating/text when the customer already submitted a review for this order/variation. Also provides the default callback that excludes fully-refunded line items, registers the single-product Reviews tab callback that renders the variation summary above each comment body, and exposes `has_actionable_items( WC_Order $order )` so the email pipeline can decide whether anything on the order is still reviewable. |
 | `StarRating` | Server-side renderer for the accessible 5-star rating control (radio inputs + SVG visuals + caption). |
 | `Meta` | Builds the shared customer/order meta-line (`Name · email · Order #N (date)`) consumed by both the form template and the empty-state thank-you template, so the wording stays in sync between views. |
 
@@ -51,6 +51,28 @@ The page body already prints its own `<h1>` ("Review your order" or "Thank you f
 - `render_block_core/post-title` → `Endpoint::maybe_hide_post_title_block()` — empties the `core/post-title` block on block themes when its resolved `context['postId']` matches the host page.
 
 Both filters are no-ops on any other render context.
+
+## Skip when nothing is reviewable
+
+The schedule path and the send-time path both short-circuit when an order would land on the empty-state page anyway. `ItemEligibility::has_actionable_items( WC_Order $order )` walks the same eligible-items list the page renders and returns `true` iff at least one item resolves to `STATUS_FORM` and doesn't already have a review tagged with the current order id.
+
+- `Scheduler::handle_woocommerce_order_status_completed()` calls the helper after the existing `is_enabled()` / `should_send` filter checks. When it returns `false`, scheduling is skipped and the skip is logged through `wc_get_logger()` with reason `no reviewable items`. No Action Scheduler row is created.
+- `WC_Email_Customer_Review_Request::is_order_eligible_for_send()` calls the helper at send time too, so an order that loses all its reviewable items between scheduling and sending (e.g. the admin disables site-wide reviews during the delay window) is silently dropped without dispatching mail.
+
+The empty-state thank-you template (`customer-review-order-empty.php`) still renders the **"Nothing to review here"** branch as a defensive fallback for direct-URL visits (bookmarks, admin-shared links) — the email pipeline simply never routes customers there now.
+
+## Per-variation reviews
+
+The Review Order page renders one row per line item, even when multiple rows share a parent product. Two variations of one variable product (e.g. a T-shirt purchased in Small + Medium) therefore get two distinct rows, each with its own image and attribute summary, and each can carry an independent rating + text review.
+
+Storage is on the parent product post — WC reviews don't live on variations — but the line item context is captured via two pieces of comment meta written by `SubmissionHandler` alongside `_review_order_id`:
+
+- `_review_variation_id` — the line item's `variation_id` (`0` for simple products, kept for symmetry).
+- `_review_variation_summary` — the attribute summary at the moment the review was written (e.g. `"Size: Small, Colour: Red"`). Captured as a snapshot so historical reviews stay readable even if the variation is later retired or its attribute terms are renamed.
+
+`ItemEligibility::find_existing_review()` keys by `(order_id, product_id, variation_id, email)`, so each variation row prefills against its own review on revisit. The Review Order row template renders the variation's attribute summary via `wc_get_formatted_variation()`, restricted to the live variation's whitelisted attribute slugs — third-party item meta (engraving, gift-wrap, custom add-ons) is intentionally excluded so private personalisation data can't leak into the public review snapshot.
+
+On the parent product's single-product Reviews tab, the variation summary is prepended above each comment body through the existing `woocommerce_review_before_comment_text` action (registered from `ItemEligibility::init()` → `render_variation_summary()`); reviews without the summary meta render unchanged. The class hook for theming is `.woocommerce-review__variation-summary`.
 
 ## Tokenized URL helper
 
@@ -157,29 +179,32 @@ pnpm --filter=@woocommerce/plugin-woocommerce test:php:env -- --filter "OrderRev
 | File | Covers |
 | ---- | ------ |
 | `EndpointTest.php` | Query-var registration, the `wc_get_review_order_url()` helper and its filter, every 404 gate (missing order / missing key / mismatched key / ineligible status / wrong logged-in customer), template render on success, `woocommerce_review_order_eligible_statuses` widening, `gate_request()` registering the title-suppression filters after auth, `maybe_hide_page_title()` / `maybe_hide_post_title_block()` scoping (main loop + matching post id, leaves other posts alone), no-actionable-rows stamping the completion meta + not overwriting on later loads, the disabled-products notice render path, the empty-state template, the `data-initial-*` row attributes used by the dirty gate, host-page reconciliation (`maybe_create_host_page` adopts the slug-canonical page when the option dangles, republishes a draft, and re-points the option to the slug-routed page when duplicates exist), and the permanent `woocommerce_create_pages` filter so third-party callers seed the page. |
-| `ItemEligibilityTest.php` | `decide()` per-status outcomes for the rendered row, scoping reviews via `_review_order_id`, ignoring legacy reviews without the order meta, `prefill_for_item()` for both prefilled and empty rows, the `exclude_fully_refunded_items` default callback, and the `preload_for_items()` cache shape. |
-| `SchedulerTest.php` | Action Scheduler enqueue on `woocommerce_order_status_completed`, delay sourced from the email's settings, no-op when the email is disabled, idempotency on repeated transitions, the `woocommerce_should_send_review_request` opt-out, status-transition cancellation (cancelled/refunded/processing/on-hold/pending/failed), trash/delete cancellation, the eligible-statuses filter widening / narrowing the set, and the meta-missing safety branch. |
+| `ItemEligibilityTest.php` | `decide()` per-status outcomes for the rendered row, scoping reviews via `_review_order_id`, ignoring reviews without the order meta, `prefill_for_item()` for both prefilled and empty rows, the `exclude_fully_refunded_items` default callback, the `preload_for_items()` cache shape, the variation-aware lookup (variation A's review only prefills variation A's row), and `has_actionable_items()` truthiness across "default order", "all per-product reviews disabled", "site-wide reviews disabled", and "all eligible items already reviewed for this order". |
+| `SchedulerTest.php` | Action Scheduler enqueue on `woocommerce_order_status_completed`, delay sourced from the email's settings, no-op when the email is disabled, idempotency on repeated transitions, the `woocommerce_should_send_review_request` opt-out, status-transition cancellation (cancelled/refunded/processing/on-hold/pending/failed), trash/delete cancellation, the eligible-statuses filter widening / narrowing the set, the meta-missing safety branch, AND the new "skip scheduling when nothing is reviewable" branches: skip when every product on the order has reviews disabled per-product, skip when site-wide reviews are disabled, and still schedule when a mixed order has at least one reviewable item. |
 | `StarRatingTest.php` | Markup contract (`role="radiogroup"`, 5 radios, caption span), pre-checked selected value, out-of-range guard, missing-required-args guard, default labels, the `woocommerce_review_order_rating_labels` filter override, and the missing-key fallback. |
-| `SubmissionHandlerTest.php` | Nonce + key gates on the AJAX endpoint, comment insert with `verified=1` and `_review_order_id` meta, skipping rows without a rating, `pending_moderation` outcome when `comment_moderation` is on, per-row isolation when one row references a foreign product, `invalid_rating` / `product_mismatch` error codes, marking the order's completion meta on full coverage, NOT marking on partial coverage, and the `woocommerce_review_order_submitted` action fixture. |
-| `class-wc-email-customer-review-request-test.php` | Email class wiring (subject/heading/title defaults), the `get_delay_seconds()` clamp, `is_order_eligible_for_send()` (status guard, customer-owned guard), `trigger()` short-circuits on disabled or mis-keyed dispatch, placeholder substitution, and the block-email-editor description swap. |
+| `SubmissionHandlerTest.php` | Nonce + key gates on the AJAX endpoint, comment insert with `verified=1`, `_review_order_id`, and `_review_variation_id` meta (plus `_review_variation_summary` for variation rows), the per-variation write path for two variations of one parent producing two distinct comments with distinct attribute snapshots, skipping rows without a rating, `pending_moderation` outcome when `comment_moderation` is on, per-row isolation when one row references a foreign product, `invalid_rating` / `product_mismatch` error codes, marking the order's completion meta on full coverage of every distinct `(parent, variation)` slot, NOT marking when a prior-order review on the same parent exists, NOT marking when duplicate comments for the same slot satisfy only one row, and the `woocommerce_review_order_submitted` action fixture. |
+| `class-wc-email-customer-review-request-test.php` | Email class wiring (subject/heading/title defaults), the `get_delay_seconds()` clamp, `is_order_eligible_for_send()` (status guard, customer-owned guard, and the "no actionable items" guard added with the schedule-time gate), `trigger()` short-circuits on disabled or mis-keyed dispatch, placeholder substitution, and the block-email-editor description swap. |
 
 ### Playwright (E2E)
 
-E2E tests live in `plugins/woocommerce/tests/e2e-pw/tests/order/customer-review-order.spec.ts`. Run with:
+E2E tests live in `plugins/woocommerce/tests/e2e-pw/tests/order/review-order-page.spec.ts`. Each test seeds its own products + completed order via the WC REST API and opens the deterministic `/review-order/{id}/?key={key}` URL directly, then cleans up in a `finally` block. Action-scheduler scheduling and the email pipeline are covered by the PHPUnit suite — the E2E specs focus on the customer-facing page.
+
+Run with:
 
 ```bash
-pnpm --filter=@woocommerce/plugin-woocommerce test:e2e --grep "Customer Review Order"
+pnpm --filter=@woocommerce/plugin-woocommerce test:e2e --grep "Customer Review Request"
 ```
 
-Three describe blocks:
-
-| Describe | Tests |
-| -------- | ----- |
-| `Customer Review Order page: rate, submit, prefill, empty-state` (serial) | 1. Submit button is disabled until a row is dirty. 2. Typing review text without a rating blocks submission with an inline error, and the error clears when a rating is set. 3. Guest customer rates two of three products, submits, lands on the in-place thank-you view (wrapper gains `is-success`, form chrome hidden, success block visible). 4. Reloading the page pre-fills previously submitted reviews and the submit gate starts disabled again. 5. Reviewing the last remaining product lands the empty-state thank-you on reload. |
-| `Customer Review Order page: disabled-products notice` | Order with one `reviews_allowed: false` product renders only the reviewable rows, the `.woocommerce-info` notice appears above the form, and the dismiss control hides it in-page. |
-| `Customer Review Order page: 404 paths` | Mismatched key on an otherwise valid order returns a 404 response. |
-
-The serial describe shares an order across tests so the empty-state assertion can build on the previously-submitted reviews; the other describes each create their own short-lived order so they don't share state with the serial chain.
+| Test | Covers |
+| ---- | ------ |
+| Scenario 1 — happy path | Heading, meta line, two rows, submit gated until a rating is set, dynamic caption, in-place "Thank you for your reviews" view after submit, REST-verifies the saved review (rating + text + product id). |
+| Scenario 2 — refresh after partial submit | Submitted row pre-fills on reload (radio + textarea), other row stays empty, submit gate starts disabled again, and re-enables when a sibling row diverges. |
+| Scenario 3 — per-product reviews disabled | A row with `reviews_allowed: false` is hidden, the dismissible "Don't see all your products?" notice surfaces, and clicking the × hides it in-page. |
+| Scenario 4 — site-wide reviews disabled | Empty-state thank-you "Nothing to review here" renders; no form, no submit button. Resets `woocommerce_enable_reviews` in `finally`. |
+| Scenario 5 — cancellation unschedules | Transitioning the order to `cancelled` via REST removes the pending `woocommerce_send_review_request` Action Scheduler action (queried with `wp eval as_next_scheduled_action`). |
+| Scenario 6 — text without rating | Inline error renders under the row's title, form does not submit, the error clears when a rating is selected, and the next submit succeeds. |
+| Variations — distinct rows | Two variations of one parent produce two distinct rows; each row shows its attribute summary inside the title. |
+| Variations — parent product surfaces summaries | Submitting both rows writes two reviews on the parent product, and visiting the parent product page renders `.woocommerce-review__variation-summary` above each comment body with the correct attribute text. |
 
 ## Accessibility notes
 
