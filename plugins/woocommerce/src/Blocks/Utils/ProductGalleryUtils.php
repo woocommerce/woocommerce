@@ -1,6 +1,8 @@
 <?php
 namespace Automattic\WooCommerce\Blocks\Utils;
 
+use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
+
 /**
  * Utility methods used for the Product Gallery block.
  * {@internal This class and its methods are not intended for public use.}
@@ -190,6 +192,20 @@ class ProductGalleryUtils {
 			return null;
 		}
 
+		$variation_image_id = (int) $variation->get_image_id();
+
+		// Multi-image variation galleries are gated on the feature flag.
+		// Check on the feature flag to be removed when feature is rolled out.
+		if ( ! VariationGalleryPackage::is_enabled() ) {
+			$resolved_id = $variation_image_id
+				? $variation_image_id
+				: ( $parent_image_id && wp_attachment_is_image( $parent_image_id ) ? $parent_image_id : 0 );
+			return array(
+				'image_id'  => $resolved_id,
+				'image_ids' => array( $resolved_id ),
+			);
+		}
+
 		$image_ids = self::get_variation_gallery_image_ids( $variation );
 
 		if ( empty( $image_ids ) ) {
@@ -203,7 +219,7 @@ class ProductGalleryUtils {
 		}
 
 		return array(
-			'image_id'  => (int) $variation->get_image_id(),
+			'image_id'  => $variation_image_id,
 			'image_ids' => $image_ids,
 		);
 	}

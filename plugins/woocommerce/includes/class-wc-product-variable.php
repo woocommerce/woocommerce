@@ -10,6 +10,7 @@
 
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Enums\ProductStockStatus;
+use Automattic\WooCommerce\Internal\VariationGallery\Package as VariationGalleryPackage;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -417,17 +418,23 @@ class WC_Product_Variable extends WC_Product {
 			return false;
 		}
 
-		$variation_gallery_image_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+		$variation_gallery_image_ids = array();
 		$variation_gallery_html      = '';
 
-		if ( ! empty( $variation_gallery_image_ids ) ) {
-			$variation_gallery_html = wc_get_product_gallery_html(
-				$this,
-				array_merge(
-					array_filter( array( $variation->get_image_id() ) ),
-					$variation_gallery_image_ids
-				)
-			);
+		// Multi-image variation galleries are gated on the feature flag.
+		// Check on the feature flag to be removed when feature is rolled out.
+		if ( VariationGalleryPackage::is_enabled() ) {
+			$variation_gallery_image_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+
+			if ( ! empty( $variation_gallery_image_ids ) ) {
+				$variation_gallery_html = wc_get_product_gallery_html(
+					$this,
+					array_merge(
+						array_filter( array( $variation->get_image_id() ) ),
+						$variation_gallery_image_ids
+					)
+				);
+			}
 		}
 
 		// See if prices should be shown for each variation after selection.
@@ -675,7 +682,8 @@ class WC_Product_Variable extends WC_Product {
 			$data_store = WC_Data_Store::load( 'product-' . $product->get_type() );
 			$data_store->sync_price( $product );
 			$data_store->sync_stock_status( $product );
-			self::sync_attributes( $product ); // Legacy update of attributes.
+			self::sync_attributes( $product );
+			// Legacy update of attributes.
 
 			do_action( 'woocommerce_variable_product_sync_data', $product );
 
