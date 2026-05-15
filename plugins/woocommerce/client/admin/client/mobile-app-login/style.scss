@@ -6,10 +6,7 @@
 	&__card {
 		width: 100%;
 		max-width: 560px;
-		// Woo brand accent stripe across the top of the card. Keeps the page
-		// visually consistent with the homescreen modal which uses the same
-		// purple as its primary brand colour.
-		border-top: 4px solid #873eff;
+		border-top: 4px solid $studio-woocommerce-purple-50;
 		overflow: hidden;
 	}
 
@@ -33,12 +30,12 @@
 		font-weight: 600;
 		line-height: 1.25;
 		letter-spacing: -0.01em;
-		color: #1d2327;
+		color: $gray-900;
 		margin: 0 0 $gap;
 	}
 
 	&__intro {
-		color: #50575e;
+		color: $gray-700;
 		font-size: 14px;
 		line-height: 1.5;
 		margin: 0 0 $gap-large;
@@ -71,7 +68,7 @@
 	}
 
 	&__faq {
-		color: #757575;
+		color: $gray-700;
 		font-size: 13px;
 		line-height: 1.5;
 		margin: 0;

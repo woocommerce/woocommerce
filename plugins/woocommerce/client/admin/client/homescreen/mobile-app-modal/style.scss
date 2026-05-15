@@ -266,13 +266,20 @@ button.components-button.send-magic-link-button {
 		margin: 0;
 		font-size: 14px;
 		line-height: 1.5;
-		color: #1e1e1e;
+		color: $gray-900;
 	}
 }
 
+.woocommerce-qr-direct-login__error {
+	margin: 0 0 12px;
+	color: $alert-red;
+	font-size: 13px;
+	line-height: 1.4;
+}
+
 // Step 3 — sign-in success panel.
-// Mirrors the rest of the modal: 24px / 16px vertical rhythm, body copy in
-// the same neutral as the help paragraph above the QR.
+// Mirrors the rest of the modal: 24px / 16px vertical rhythm and WP base
+// palette text colours.
 .qr-login-success-step {
 	display: flex;
 	flex-direction: column;
@@ -288,13 +295,13 @@ button.components-button.send-magic-link-button {
 		font-weight: 600;
 		line-height: 1.5;
 		margin: 0 0 4px;
-		color: #1d2327;
+		color: $gray-900;
 	}
 
 	.qr-login-success-step__description {
 		font-size: 14px;
 		line-height: 1.5;
-		color: #50575e;
+		color: $gray-700;
 		margin: 0;
 		max-width: 32em;
 	}
@@ -302,7 +309,7 @@ button.components-button.send-magic-link-button {
 	.qr-login-success-step__device {
 		font-size: 13px;
 		line-height: 1.5;
-		color: #50575e;
+		color: $gray-700;
 		margin: 0 0 16px;
 	}
 
@@ -310,13 +317,13 @@ button.components-button.send-magic-link-button {
 		font-size: 13px;
 		font-weight: 500;
 		line-height: 1.5;
-		color: #1d2327;
+		color: $gray-900;
 		margin: 0 0 8px;
 	}
 
 	.qr-login-success-step__error {
 		margin: 12px 0 0;
-		color: #cc1818;
+		color: $alert-red;
 		font-size: 13px;
 		line-height: 1.4;
 	}
