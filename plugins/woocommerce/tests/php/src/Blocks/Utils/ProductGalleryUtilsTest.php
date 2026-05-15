@@ -13,6 +13,8 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	 * Test get_product_gallery_image_data method.
 	 */
 	public function test_get_product_gallery_image_data() {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+
 		// Create the variable product.
 		$variable_product = \WC_Helper_Product::create_variation_product();
 
@@ -24,6 +26,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 				'post_mime_type' => 'image/jpeg',
 			)
 		);
+		update_post_meta( $image_id, '_wp_attached_file', 'main.jpg' );
 		$variable_product->set_image_id( $image_id );
 
 		// Create a variation image but don't add it to the gallery.
@@ -34,6 +37,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 				'post_mime_type' => 'image/jpeg',
 			)
 		);
+		update_post_meta( $variation_image_id, '_wp_attached_file', 'variation-featured.jpg' );
 
 		// Get the variations.
 		$variations = $variable_product->get_children();
@@ -60,6 +64,9 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 				)
 			),
 		);
+		foreach ( $gallery_image_ids as $i => $gid ) {
+			update_post_meta( $gid, '_wp_attached_file', 'gallery-' . ( $i + 1 ) . '.jpg' );
+		}
 		$variable_product->set_gallery_image_ids( $gallery_image_ids );
 		$variable_product->save();
 
@@ -79,6 +86,9 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 				)
 			),
 		);
+		foreach ( $variation_gallery_image_ids as $i => $vgid ) {
+			update_post_meta( $vgid, '_wp_attached_file', 'variation-gallery-' . ( $i + 1 ) . '.jpg' );
+		}
 
 		if ( isset( $variation ) ) {
 			$variation->set_gallery_image_ids( $variation_gallery_image_ids );
@@ -117,5 +127,52 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		foreach ( $variation_gallery_image_ids as $variation_gallery_image_id ) {
 			wp_delete_attachment( $variation_gallery_image_id, true );
 		}
+	}
+
+	/**
+	 * Test that get_product_variation_gallery_data returns the single-image
+	 * shape when the variation gallery feature flag is disabled, even when
+	 * the variation has multiple gallery images saved.
+	 */
+	public function test_get_product_variation_gallery_data_returns_single_image_when_feature_flag_disabled() {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'no' );
+
+		$variable_product = \WC_Helper_Product::create_variation_product();
+
+		$variation_image_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Variation Featured Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $variation_image_id, '_wp_attached_file', 'variation-featured.jpg' );
+
+		$variation_gallery_image_ids = array(
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 1',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 2',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+		);
+
+		$variation = wc_get_product( $variable_product->get_children()[0] );
+		$variation->set_image_id( $variation_image_id );
+		$variation->set_gallery_image_ids( $variation_gallery_image_ids );
+		$variation->save();
+
+		$variation_entry = ProductGalleryUtils::get_product_variation_gallery_data( $variable_product )[ $variation->get_id() ];
+
+		$this->assertSame( $variation_image_id, $variation_entry['image_id'] );
+		$this->assertSame( array( $variation_image_id ), $variation_entry['image_ids'] );
 	}
 }
