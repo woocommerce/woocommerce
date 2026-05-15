@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Preserves backwards compatibility for third-party order data stores while ensuring the standard data store path now returns refunded shipping tax correctly. WC_Order_Data_Store_Interface is intentionally not extended.
+
+Fix backwards compatibility issue and silent zero return in WC_Order::get_total_shipping_tax_refunded() by replacing method_exists() with is_callable() so the WC_Data_Store proxy correctly delegates to the underlying data store while staying safe for third-party data stores that do not implement the method.

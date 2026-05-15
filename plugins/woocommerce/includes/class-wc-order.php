@@ -2295,6 +2295,13 @@ class WC_Order extends WC_Abstract_Order {
 	/**
 	 * Get the total shipping tax refunded.
 	 *
+	 * The data store method `get_total_shipping_tax_refunded()` is intentionally
+	 * not declared on `WC_Order_Data_Store_Interface` to preserve backwards
+	 * compatibility with third-party data stores that implement the interface
+	 * (adding it would force a fatal error on activation). When the configured
+	 * data store does not implement the method we fall back to `0` and a notice
+	 * is logged in WP_DEBUG mode so extension authors can detect missing support.
+	 *
 	 * @since  10.2.0
 	 * @return float
 	 */
@@ -2308,8 +2315,19 @@ class WC_Order extends WC_Abstract_Order {
 
 		$total_shipping_tax_refunded = 0;
 
-		if ( method_exists( $this->data_store, 'get_total_shipping_tax_refunded' ) ) {
+		if ( is_callable( array( $this->data_store, 'get_total_shipping_tax_refunded' ) ) ) {
 			$total_shipping_tax_refunded = $this->data_store->get_total_shipping_tax_refunded( $this );
+		} elseif ( defined( 'WP_DEBUG' ) && WP_DEBUG ) {
+			$data_store_class = is_object( $this->data_store ) ? get_class( $this->data_store ) : 'unknown';
+			wc_doing_it_wrong(
+				__METHOD__,
+				sprintf(
+					/* translators: %s: data store class name */
+					esc_html__( 'The order data store "%s" does not implement get_total_shipping_tax_refunded(); returning 0. Implement this method to report refunded shipping tax accurately.', 'woocommerce' ),
+					esc_html( $data_store_class )
+				),
+				'10.9.0'
+			);
 		}
 
 		wp_cache_set( $cache_key, $total_shipping_tax_refunded, $this->cache_group );
