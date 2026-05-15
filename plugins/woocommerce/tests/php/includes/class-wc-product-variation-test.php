@@ -121,4 +121,54 @@ class WC_Product_Variation_Test extends WC_Unit_Test_Case {
 		$this->assertIsString( $url );
 		$this->assertNotEmpty( $url );
 	}
+
+	/**
+	 * @testdox set_attributes() converts a taxonomy term label containing fraction/special characters to its slug so the variation editor can resolve it back to a term (regression for woo#26233 / RSMAPGJ-356).
+	 */
+	public function test_set_attributes_converts_fraction_term_label_to_slug() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'shoe-size-frac', array( '6½', '7', '7½' ) );
+		$taxonomy       = $attribute_data['attribute_taxonomy'];
+
+		$term = get_term_by( 'name', '7½', $taxonomy );
+		$this->assertNotEmpty( $term, 'Term with fraction label should exist.' );
+		$this->assertNotSame( '7½', $term->slug, 'Slug should differ from label for fraction names.' );
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $this->parent_product->get_id() );
+		$variation->set_attributes( array( $taxonomy => '7½' ) );
+
+		$stored = $variation->get_attributes();
+		$this->assertArrayHasKey( $taxonomy, $stored );
+		$this->assertSame( $term->slug, $stored[ $taxonomy ], 'Fraction label should be converted to the term slug.' );
+
+		// And the slug should resolve back to the original display label via get_attribute().
+		$this->assertSame( '7½', $variation->get_attribute( $taxonomy ) );
+	}
+
+	/**
+	 * @testdox set_attributes() leaves an already-correct term slug untouched.
+	 */
+	public function test_set_attributes_preserves_existing_slug() {
+		$attribute_data = WC_Helper_Product::create_attribute( 'shoe-size-slug', array( 'small', 'medium' ) );
+		$taxonomy       = $attribute_data['attribute_taxonomy'];
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $this->parent_product->get_id() );
+		$variation->set_attributes( array( $taxonomy => 'small' ) );
+
+		$stored = $variation->get_attributes();
+		$this->assertSame( 'small', $stored[ $taxonomy ] );
+	}
+
+	/**
+	 * @testdox set_attributes() leaves non-taxonomy (custom) attribute values untouched.
+	 */
+	public function test_set_attributes_leaves_custom_attribute_values_untouched() {
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $this->parent_product->get_id() );
+		$variation->set_attributes( array( 'colour' => 'Royal Blue ½' ) );
+
+		$stored = $variation->get_attributes();
+		$this->assertSame( 'Royal Blue ½', $stored['colour'] );
+	}
 }

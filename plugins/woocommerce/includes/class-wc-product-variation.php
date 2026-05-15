@@ -511,6 +511,12 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Set attributes. Unlike the parent product which uses terms, variations are assigned
 	 * specific attributes using name value pairs.
 	 *
+	 * For taxonomy-backed (global) attributes, values are expected to be term slugs.
+	 * If a value matches an existing term name (e.g. '6½'), it is converted to the
+	 * term slug before being stored so that fraction/special characters survive
+	 * the slug round-trip when the variation editor reads back the value. This
+	 * mirrors how the REST API and admin metabox normalise the same input.
+	 *
 	 * @param array $raw_attributes array of raw attributes.
 	 */
 	public function set_attributes( $raw_attributes ) {
@@ -522,6 +528,20 @@ class WC_Product_Variation extends WC_Product_Simple {
 			if ( 0 === strpos( $key, 'attribute_' ) ) {
 				$key = substr( $key, 10 );
 			}
+
+			// For taxonomy-backed attributes the stored value must be a term slug.
+			// When callers pass a term label (e.g. '6½') look the term up by name
+			// and substitute its slug; otherwise fall back to sanitize_title so
+			// non-ASCII characters are normalised consistently with the admin path.
+			if ( is_string( $value ) && '' !== $value && taxonomy_exists( $key ) ) {
+				$term = get_term_by( 'name', $value, $key );
+				if ( $term && ! is_wp_error( $term ) ) {
+					$value = $term->slug;
+				} elseif ( sanitize_title( $value ) !== $value ) {
+					$value = sanitize_title( $value );
+				}
+			}
+
 			$attributes[ $key ] = $value;
 		}
 		$this->set_prop( 'attributes', $attributes );

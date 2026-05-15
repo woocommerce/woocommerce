@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix `WC_Product_Variation::set_attributes()` losing taxonomy attribute values containing fraction or other non-slug characters (e.g. `6½`) when called programmatically.
