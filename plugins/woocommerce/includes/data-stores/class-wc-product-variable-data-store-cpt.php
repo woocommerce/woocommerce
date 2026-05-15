@@ -250,25 +250,37 @@ class WC_Product_Variable_Data_Store_CPT extends WC_Product_Data_Store_CPT imple
 				}
 
 				// Get possible values for this attribute, for only visible variations.
+				$has_any_wildcard = false;
 				if ( ! empty( $child_ids ) ) {
 					$format     = array_fill( 0, count( $child_ids ), '%d' );
 					$query_in   = '(' . implode( ',', $format ) . ')';
 					$query_args = array( 'attribute_name' => wc_variation_attribute_name( $attribute['name'] ) ) + $child_ids;
-					$values     = array_unique(
-						$wpdb->get_col(
-							$wpdb->prepare(
-								// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-								"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN {$query_in}", // @codingStandardsIgnoreLine.
-								$query_args
-							)
+					$raw_values = $wpdb->get_col(
+						$wpdb->prepare(
+							// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+							"SELECT meta_value FROM {$wpdb->postmeta} WHERE meta_key = %s AND post_id IN {$query_in}",
+							$query_args
 						)
 					);
+
+					/*
+					 * A missing meta row for a variation must be treated as the "any" wildcard,
+					 * the same as a row whose value is null/empty. Without this guard, a variation
+					 * that only pins one attribute (e.g. an out-of-stock placeholder for "blue")
+					 * would shadow sibling variations that use the wildcard, collapsing the
+					 * front-end dropdown to just the pinned value. See woo#44830.
+					 */
+					if ( count( $raw_values ) < count( $child_ids ) ) {
+						$has_any_wildcard = true;
+					}
+
+					$values = array_unique( $raw_values );
 				} else {
 					$values = array();
 				}
 
 				// Empty value indicates that all options for given attribute are available.
-				if ( in_array( null, $values, true ) || in_array( '', $values, true ) || empty( $values ) ) {
+				if ( $has_any_wildcard || in_array( null, $values, true ) || in_array( '', $values, true ) || empty( $values ) ) {
 					$values = $attribute['is_taxonomy'] ? wc_get_object_terms( $product->get_id(), $attribute['name'], 'slug' ) : wc_get_text_attributes( $attribute['value'] );
 					// Get custom attributes (non taxonomy) as defined.
 				} elseif ( ! $attribute['is_taxonomy'] ) {

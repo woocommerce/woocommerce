@@ -393,6 +393,94 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Regression test for woo#44830 / RSMAPGJ-331.
+	 *
+	 * When a variable product has variations that use the wildcard "any" value
+	 * (empty string) for an attribute alongside a variation that pins that
+	 * attribute to a specific term (e.g. an out-of-stock placeholder), all
+	 * parent-assigned terms must still appear in the variation attributes
+	 * map. Otherwise the front-end dropdown collapses to only the pinned
+	 * value and the rest of the terms become unselectable.
+	 *
+	 * @since 10.4.0
+	 */
+	public function test_variation_attributes_with_any_value_and_specific_value() {
+		// Create a variable product with a color attribute that has 3 terms.
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Variable product with any + specific variations' );
+
+		$color_attribute    = WC_Helper_Product::create_product_attribute_object( 'rsmapgj331_color', array( 'blue', 'red', 'green' ) );
+		$material_attribute = WC_Helper_Product::create_product_attribute_object( 'rsmapgj331_material', array( 'cotton', 'silk' ) );
+
+		$product->set_attributes( array( $color_attribute, $material_attribute ) );
+		$product->save();
+
+		$product_id = $product->get_id();
+
+		// Variation 1: any color, material cotton (in stock).
+		$variation_1 = new WC_Product_Variation();
+		$variation_1->set_parent_id( $product_id );
+		$variation_1->set_regular_price( 10 );
+		$variation_1->set_stock_status( ProductStockStatus::IN_STOCK );
+		$variation_1->set_attributes(
+			array(
+				'pa_rsmapgj331_color'    => '',
+				'pa_rsmapgj331_material' => 'cotton',
+			)
+		);
+		$variation_1->save();
+
+		// Variation 2: any color, material silk (in stock).
+		$variation_2 = new WC_Product_Variation();
+		$variation_2->set_parent_id( $product_id );
+		$variation_2->set_regular_price( 15 );
+		$variation_2->set_stock_status( ProductStockStatus::IN_STOCK );
+		$variation_2->set_attributes(
+			array(
+				'pa_rsmapgj331_color'    => '',
+				'pa_rsmapgj331_material' => 'silk',
+			)
+		);
+		$variation_2->save();
+
+		// Variation 3: color = blue, any material (OUT OF STOCK placeholder).
+		$variation_3 = new WC_Product_Variation();
+		$variation_3->set_parent_id( $product_id );
+		$variation_3->set_regular_price( 12 );
+		$variation_3->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$variation_3->set_manage_stock( false );
+		$variation_3->set_attributes(
+			array(
+				'pa_rsmapgj331_color'    => 'blue',
+				'pa_rsmapgj331_material' => '',
+			)
+		);
+		$variation_3->save();
+
+		WC_Product_Variable::sync( $product_id );
+
+		// Re-read product to discard any in-memory state.
+		$product            = wc_get_product( $product_id );
+		$variation_attrs    = $product->get_variation_attributes();
+		$resolved_colors    = $variation_attrs['pa_rsmapgj331_color'] ?? array();
+		$resolved_materials = $variation_attrs['pa_rsmapgj331_material'] ?? array();
+
+		sort( $resolved_colors );
+		sort( $resolved_materials );
+
+		$this->assertSame(
+			array( 'blue', 'green', 'red' ),
+			$resolved_colors,
+			'When any variation uses the "any" wildcard for an attribute, the dropdown must list every term assigned to the parent product, not just the pinned values.'
+		);
+		$this->assertSame(
+			array( 'cotton', 'silk' ),
+			$resolved_materials,
+			'Specifying a value on every variation must continue to limit the dropdown to those values.'
+		);
+	}
+
+	/**
 	 * Tests saving variation attribute via set_attribute.
 	 */
 	public function test_variation_save_attributes() {

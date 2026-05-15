@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix variation dropdown showing only the out-of-stock value when sibling variations use the "any" wildcard for that attribute on the front-end product page.
