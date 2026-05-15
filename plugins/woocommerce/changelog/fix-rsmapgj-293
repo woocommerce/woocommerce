@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Fix the selected variation option line being missing in the new order when "Order Again" is used and the variation attribute name uses 2-byte characters.

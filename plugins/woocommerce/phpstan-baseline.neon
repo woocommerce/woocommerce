@@ -12975,7 +12975,7 @@ parameters:
 		-
 			message: '#^Access to an undefined property object\:\:\$key\.$#'
 			identifier: property.notFound
-			count: 3
+			count: 2
 			path: includes/class-wc-order-item.php
 
 		-

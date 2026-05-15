@@ -344,14 +344,18 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 				continue;
 			}
 
-			$meta->key     = rawurldecode( (string) $meta->key );
-			$meta->value   = rawurldecode( (string) $meta->value );
-			$attribute_key = str_replace( 'attribute_', '', $meta->key );
+			// Decode for display only; do not mutate the underlying meta object so that
+			// the original (possibly URL-encoded) keys/values remain intact for later
+			// reads such as Order Again, which relies on matching variation attribute
+			// keys produced by sanitize_title() (URL-encoded for multibyte characters).
+			$decoded_key   = rawurldecode( (string) $meta->key );
+			$decoded_value = rawurldecode( (string) $meta->value );
+			$attribute_key = str_replace( 'attribute_', '', $decoded_key );
 			$display_key   = wc_attribute_label( $attribute_key, $product );
-			$display_value = wp_kses_post( $meta->value );
+			$display_value = wp_kses_post( $decoded_value );
 
 			if ( taxonomy_exists( $attribute_key ) ) {
-				$term = get_term_by( 'slug', $meta->value, $attribute_key );
+				$term = get_term_by( 'slug', $decoded_value, $attribute_key );
 				if ( ! is_wp_error( $term ) && is_object( $term ) && $term->name ) {
 					$display_value = $term->name;
 				}
@@ -363,8 +367,8 @@ class WC_Order_Item extends WC_Data implements ArrayAccess {
 			}
 
 			$formatted_meta[ $meta->id ] = (object) array(
-				'key'           => $meta->key,
-				'value'         => $meta->value,
+				'key'           => $decoded_key,
+				'value'         => $decoded_value,
 				'display_key'   => apply_filters( 'woocommerce_order_item_display_meta_key', $display_key, $meta, $this ),
 				'display_value' => wpautop( make_clickable( apply_filters( 'woocommerce_order_item_display_meta_value', $display_value, $meta, $this ) ) ),
 			);

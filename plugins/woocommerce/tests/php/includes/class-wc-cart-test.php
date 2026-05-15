@@ -113,6 +113,134 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Order Again preserves the selected variation option meta when a custom attribute uses multibyte (2-byte) characters.
+	 *
+	 * Regression test for woocommerce#36781 (RSMAPGJ-293). Rendering the formatted
+	 * meta for a completed order must not mutate the underlying meta keys/values
+	 * via rawurldecode(), otherwise subsequent code paths that match against
+	 * sanitize_title()-generated keys (such as populate_cart_from_order) lose the
+	 * variation attribute when 2-byte characters are involved.
+	 */
+	public function test_order_again_preserves_multibyte_custom_variation_attribute() {
+		$user_id = $this->factory->user->create();
+		wp_set_current_user( $user_id );
+
+		WC()->session = new WC_Session_Handler();
+		WC()->session->init();
+		WC()->session->set_customer_session_cookie( true );
+
+		WC()->cart->empty_cart();
+		WC()->session->set( 'wc_notices', null );
+
+		// Build a variable product whose only attribute is a non-taxonomy attribute
+		// whose name contains Japanese (2-byte) characters.
+		$attribute_name  = '色';
+		$attribute_value = '赤';
+
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( 0 );
+		$attribute->set_name( $attribute_name );
+		$attribute->set_options( array( $attribute_value, '青' ) );
+		$attribute->set_variation( true );
+		$attribute->set_visible( true );
+
+		$variable_product = new WC_Product_Variable();
+		$variable_product->set_name( 'JP Variable' );
+		$variable_product->set_status( 'publish' );
+		$variable_product->set_attributes( array( $attribute ) );
+		$variable_product->save();
+
+		// Custom variation attributes must be stored under the sanitize_title()
+		// version of the parent attribute name (matches how the admin UI persists
+		// them and how WC_Product::set_attributes() keys the attribute array).
+		$sanitized_attribute_key = sanitize_title( $attribute_name );
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $variable_product->get_id() );
+		$variation->set_attributes( array( $sanitized_attribute_key => $attribute_value ) );
+		$variation->set_regular_price( '10' );
+		$variation->set_status( 'publish' );
+		$variation->save();
+
+		// Refresh references after save so the parent picks up the variation child.
+		$variable_product = wc_get_product( $variable_product->get_id() );
+		$variation        = wc_get_product( $variation->get_id() );
+
+		// Create a completed order containing the variation. The order item meta is
+		// stored under the sanitized (URL-encoded for multibyte chars) key, which is
+		// what wc_get_product_variation_attributes()/get_variation_attributes() emit.
+		$order = wc_create_order( array( 'customer_id' => $user_id ) );
+		$item  = new WC_Order_Item_Product();
+		$item->set_product( $variation );
+		$item->set_quantity( 1 );
+		$item->set_order_id( $order->get_id() );
+		$item->save();
+		$order->add_item( $item );
+		$order->set_billing_email( 'jp-customer@example.com' );
+		$order->calculate_totals();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		// Force any deferred formatted-meta rendering (e.g. transactional emails)
+		// to run by reloading the order and asking for its formatted meta. Before
+		// the fix, get_formatted_meta_data() mutated $meta->key in place via
+		// rawurldecode(), and the next $order->save() persisted the corrupted key.
+		$order_after_save = wc_get_order( $order->get_id() );
+		foreach ( $order_after_save->get_items() as $reloaded_item ) {
+			$reloaded_item->get_formatted_meta_data();
+		}
+		$order_after_save->update_meta_data( '_test_marker', '1' );
+		$order_after_save->save();
+
+		// Original order item meta must still use the sanitized (URL-encoded)
+		// attribute key so that Order Again can match it against the parent
+		// product's attribute keys.
+		$reloaded_order = wc_get_order( $order->get_id() );
+		$item_meta_keys = array();
+		foreach ( $reloaded_order->get_items() as $reloaded_item ) {
+			foreach ( $reloaded_item->get_meta_data() as $meta ) {
+				$item_meta_keys[] = $meta->key;
+			}
+		}
+		$this->assertContains(
+			$sanitized_attribute_key,
+			$item_meta_keys,
+			'Original order item meta key should remain URL-encoded (sanitize_title form) after status transitions and re-saves.'
+		);
+		$this->assertNotContains(
+			$attribute_name,
+			$item_meta_keys,
+			'Original order item meta key should not be rewritten to the raw multibyte attribute name.'
+		);
+
+		// Run the Order Again populate path.
+		$cart_session = new WC_Cart_Session( WC()->cart );
+		$ref          = new ReflectionClass( WC_Cart_Session::class );
+		$method       = $ref->getMethod( 'populate_cart_from_order' );
+		$method->setAccessible( true );
+		$populated = $method->invoke( $cart_session, $order->get_id(), array() );
+
+		$this->assertIsArray( $populated, 'populate_cart_from_order should return an array.' );
+		$this->assertCount( 1, $populated, 'Re-ordered cart should contain the variation.' );
+
+		$only_cart_item = array_values( $populated )[0];
+		$this->assertNotEmpty(
+			$only_cart_item['variation'],
+			'Re-ordered cart item should carry the variation attribute(s) selected on the original order.'
+		);
+		$this->assertSame(
+			$attribute_value,
+			$only_cart_item['variation'][ 'attribute_' . $sanitized_attribute_key ] ?? null,
+			'Re-ordered cart item variation should preserve the multibyte attribute value under the sanitize_title()-keyed slot.'
+		);
+
+		WC_Helper_Order::delete_order( $order->get_id() );
+		$variation->delete( true );
+		$variable_product->delete( true );
+		wp_delete_user( $user_id );
+	}
+
+	/**
 	 * @testdox check_cart_items should reduce quantity to 1 when product is marked as sold individually after being added to cart
 	 */
 	public function test_check_cart_items_reduces_sold_individually_quantity() {
