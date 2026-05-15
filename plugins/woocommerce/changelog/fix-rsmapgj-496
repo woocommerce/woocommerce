@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Clarify checkout/cart block inspector prompt by separating the automatic page-assign action from a manual link to settings.

@@ -7,6 +7,7 @@ import { store as coreStore } from '@wordpress/core-data';
 import { Notice } from '@wordpress/components';
 import { useSelect, useDispatch } from '@wordpress/data';
 import { CHECKOUT_PAGE_ID, CART_PAGE_ID } from '@woocommerce/block-settings';
+import { getAdminLink } from '@woocommerce/settings';
 import { CORE_EDITOR_STORE } from '@woocommerce/utils';
 
 import {
@@ -99,18 +100,33 @@ export function DefaultNotice( { block }: { block: string } ) {
 		slug,
 	] );
 
+	const settingsUrl = getAdminLink(
+		'admin.php?page=wc-settings&tab=advanced'
+	);
+
 	let noticeContent;
 	if ( block === 'checkout' ) {
 		noticeContent = createInterpolateElement(
 			__(
-				'If you would like to use this block as your default checkout, <a>update your page settings</a>.',
+				'To set this as your store’s default checkout, either <assign>assign this page automatically</assign>, or <settings>update your page settings manually</settings>.',
 				'woocommerce'
 			),
 			{
-				a: (
+				assign: (
 					// eslint-disable-next-line jsx-a11y/anchor-is-valid
 					<a href="#" onClick={ updatePage }>
-						{ __( 'update your page settings', 'woocommerce' ) }
+						{ __(
+							'assign this page automatically',
+							'woocommerce'
+						) }
+					</a>
+				),
+				settings: (
+					<a href={ settingsUrl }>
+						{ __(
+							'update your page settings manually',
+							'woocommerce'
+						) }
 					</a>
 				),
 			}
@@ -118,14 +134,25 @@ export function DefaultNotice( { block }: { block: string } ) {
 	} else {
 		noticeContent = createInterpolateElement(
 			__(
-				'If you would like to use this block as your default cart, <a>update your page settings</a>.',
+				'To set this as your store’s default cart, either <assign>assign this page automatically</assign>, or <settings>update your page settings manually</settings>.',
 				'woocommerce'
 			),
 			{
-				a: (
+				assign: (
 					// eslint-disable-next-line jsx-a11y/anchor-is-valid
 					<a href="#" onClick={ updatePage }>
-						{ __( 'update your page settings', 'woocommerce' ) }
+						{ __(
+							'assign this page automatically',
+							'woocommerce'
+						) }
+					</a>
+				),
+				settings: (
+					<a href={ settingsUrl }>
+						{ __(
+							'update your page settings manually',
+							'woocommerce'
+						) }
 					</a>
 				),
 			}
