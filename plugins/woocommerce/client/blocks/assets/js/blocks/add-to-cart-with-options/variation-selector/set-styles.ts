@@ -39,29 +39,20 @@ function getClosestColor(
  * Sets theme contrast hints for variation selector chips (and legacy pills)
  */
 function setStyles(): void {
-	/**
-	 * Get the background color of the body then set it as the background color
-	 * of the Variation Selector selected pills.
-	 *
-	 * We only set the background color, instead of the whole background. As
-	 * we only provide the option to customize the background color.
-	 */
-
-	// Prefer chips (current UI); fall back to legacy pills markup if present.
-	const optionsContainer = document.querySelector(
+	const container = document.querySelector(
 		'.wp-block-woocommerce-add-to-cart-with-options-variation-selector-attribute'
 	);
 
-	if ( ! optionsContainer ) {
+	if ( ! container ) {
 		return;
 	}
 
 	const style = document.createElement( 'style' );
 
 	const selectedPillColor =
-		getClosestColor( optionsContainer, 'backgroundColor' ) || '#fff';
+		getClosestColor( container, 'backgroundColor' ) || '#fff';
 	const selectedPillBackgroundColor =
-		getClosestColor( optionsContainer, 'color' ) || '#000';
+		getClosestColor( container, 'color' ) || '#000';
 
 	// We use :where here to reduce specificity so customized colors and theme CSS take priority.
 	style.appendChild(

@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __, sprintf } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import clsx from 'clsx';
 import { decodeHtmlEntities } from '@woocommerce/utils';
 import { Disabled } from '@wordpress/components';
@@ -26,14 +26,14 @@ function getOptionLabel( item: {
 	label: string | unknown;
 	ariaLabel?: string;
 } ): string {
+	if ( typeof item.label === 'string' && item.label.trim().length > 0 ) {
+		return decodeHtmlEntities( item.label.trim() );
+	}
 	if (
 		typeof item.ariaLabel === 'string' &&
 		item.ariaLabel.trim().length > 0
 	) {
-		return item.ariaLabel;
-	}
-	if ( typeof item.label === 'string' ) {
-		return decodeHtmlEntities( item.label );
+		return item.ariaLabel.trim();
 	}
 	return '';
 }
@@ -52,19 +52,13 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		} ),
 	} );
 
-	const label = selectableItems.groupLabel
-		? sprintf(
-				/* translators: %s: Attribute or filter type label. */
-				__( 'Select %s', 'woocommerce' ),
-				selectableItems.groupLabel
-		  )
-		: __( 'Select options', 'woocommerce' );
-
 	return (
 		<div { ...blockProps }>
 			<Disabled>
 				<fieldset className="wc-block-product-filter-dropdown__fieldset">
-					<legend className="screen-reader-text">{ label }</legend>
+					<legend className="screen-reader-text">
+						{ __( 'Choose an option', 'woocommerce' ) }
+					</legend>
 					{ isLoading ? (
 						<div className="wc-block-product-filter-dropdown__skeleton">
 							<div className="wc-block-product-filter-dropdown__skeleton-option" />
@@ -72,11 +66,12 @@ const Edit = ( props: EditProps ): JSX.Element => {
 					) : (
 						<select
 							className="wc-block-product-filter-dropdown__select"
-							aria-label={ label }
+							aria-label={ selectableItems.groupLabel }
 							disabled
-							value=""
 						>
-							<option value="">{ label }</option>
+							<option value="">
+								{ __( 'Choose an option', 'woocommerce' ) }
+							</option>
 							{ items.map( ( item, index ) => {
 								const optionLabel = getOptionLabel( item );
 								if ( ! optionLabel ) {
@@ -89,9 +84,6 @@ const Edit = ( props: EditProps ): JSX.Element => {
 										disabled={ !! item.disabled }
 									>
 										{ optionLabel }
-										{ item.count !== undefined
-											? ` (${ item.count })`
-											: '' }
 									</option>
 								);
 							} ) }

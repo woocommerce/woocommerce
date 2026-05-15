@@ -69,10 +69,10 @@ class VariationSelectorAttribute extends AbstractBlock {
 			$attribute_terms,
 			function ( $term ) use ( $product_variations, $attribute_name ) {
 				foreach ( $product_variations as $variation ) {
-					$attributes_var = $variation->get_variation_attributes();
+					$variation_attributes = $variation->get_variation_attributes();
 					if (
-						$term['value'] === $attributes_var[ wc_variation_attribute_name( $attribute_name ) ] ||
-						'' === $attributes_var[ wc_variation_attribute_name( $attribute_name ) ]
+						$term['value'] === $variation_attributes[ wc_variation_attribute_name( $attribute_name ) ] ||
+						'' === $variation_attributes[ wc_variation_attribute_name( $attribute_name ) ]
 					) {
 						return true;
 					}
@@ -113,6 +113,8 @@ class VariationSelectorAttribute extends AbstractBlock {
 	}
 
 	/**
+	 * Merge variation template attributes.
+	 *
 	 * @param array<string, mixed> $render_attributes Attributes from render().
 	 * @param array<string, mixed> $parsed_block Parsed block for the template.
 	 * @return array<string, mixed>

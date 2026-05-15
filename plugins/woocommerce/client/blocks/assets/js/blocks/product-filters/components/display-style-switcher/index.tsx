@@ -83,11 +83,13 @@ export const DisplayStyleSwitcher = ( {
 						...displayStyleBlocksAttributes,
 						[ currentStyle ]: currentStyleBlock.attributes,
 					} );
-					const newBlock = createBlock(
-						value,
-						displayStyleBlocksAttributes[ value ] || {}
+					replaceBlock(
+						currentStyleBlock.clientId,
+						createBlock(
+							value,
+							displayStyleBlocksAttributes[ value ] || {}
+						)
 					);
-					replaceBlock( currentStyleBlock.clientId, newBlock );
 				} else {
 					insertBlock(
 						createBlock( value ),

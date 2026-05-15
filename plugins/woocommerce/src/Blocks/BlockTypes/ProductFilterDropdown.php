@@ -50,12 +50,9 @@ final class ProductFilterDropdown extends AbstractBlock {
 		$items            = is_array( $selectable_items['items'] ?? null ) ? $selectable_items['items'] : array();
 		$store_namespace  = $selectable_items['storeNamespace'] ?? 'woocommerce/add-to-cart-with-options';
 
-		if ( array() === $items ) {
+		if ( empty( $items ) ) {
 			return '';
 		}
-
-		$first       = reset( $items );
-		$filter_type = ( is_array( $first ) && ! empty( $first['type'] ) ) ? (string) $first['type'] : '';
 
 		$select_id = wp_unique_id( 'wc-block-product-filter-dropdown-' );
 
@@ -64,7 +61,6 @@ final class ProductFilterDropdown extends AbstractBlock {
 			'data-wp-context'     => (string) wp_json_encode(
 				array(
 					'storeNamespace' => $store_namespace,
-					'filterItemType' => $filter_type,
 				),
 				JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP
 			),
@@ -79,7 +75,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 					class="wc-block-product-filter-dropdown__select"
 					id="<?php echo esc_attr( $select_id ); ?>"
 					aria-label="<?php echo esc_attr( $selectable_items['groupLabel'] ); ?>"
-					data-wp-bind--value="woocommerce/product-filter-dropdown::state.selectValue"
+					data-wp-bind--value="state.selectValue"
 					data-wp-on--change="actions.onDropdownChange"
 				>
 					<option value="">
@@ -119,7 +115,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 						<option
 							data-wp-bind--value="context.item.value"
 							data-wp-bind--disabled="context.item.disabled"
-							data-wp-bind--hidden="woocommerce/product-filter-dropdown::state.itemHidden"
+							data-wp-bind--hidden="context.item.hidden"
 							data-wp-text="context.item.label"
 						></option>
 					</template>

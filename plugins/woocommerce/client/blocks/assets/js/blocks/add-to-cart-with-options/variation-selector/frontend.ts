@@ -18,7 +18,7 @@ import type { ProductResponseItem } from '@woocommerce/types';
  */
 import type {
 	AddToCartWithOptionsStore,
-	Context as FormContext,
+	Context as AddToCartWithOptionsStoreContext,
 } from '../frontend';
 import type { SelectableItem } from '../../../types/type-defs/selectable-items';
 import {
@@ -35,7 +35,7 @@ type VariationOptionItem = {
 	ariaLabel?: string;
 };
 
-type VariationAttributeRowContext = FormContext & {
+type Context = AddToCartWithOptionsStoreContext & {
 	name: string;
 	selectedValue: string | null;
 	variationAttributeOptions: VariationOptionItem[];
@@ -43,7 +43,7 @@ type VariationAttributeRowContext = FormContext & {
 	disabledAttributesAction?: 'disable' | 'hide';
 };
 
-type ToggleContext = VariationAttributeRowContext & {
+type ToggleContext = Context & {
 	item?: SelectableItem;
 };
 
@@ -57,29 +57,6 @@ const { state: productsState } = store< ProductsStore >(
 	{},
 	{ lock: universalLock }
 );
-
-function getVariationRowContext(): VariationAttributeRowContext | undefined {
-	const client = getContext< VariationAttributeRowContext >();
-	if (
-		client &&
-		Array.isArray( client.variationAttributeOptions ) &&
-		client.variationAttributeOptions.length > 0
-	) {
-		return client;
-	}
-	const server =
-		typeof getServerContext === 'function'
-			? getServerContext< VariationAttributeRowContext >()
-			: undefined;
-	if (
-		server &&
-		Array.isArray( server.variationAttributeOptions ) &&
-		server.variationAttributeOptions.length > 0
-	) {
-		return server;
-	}
-	return undefined;
-}
 
 const isAttributeValueValid = ( {
 	attributeName,
@@ -98,6 +75,11 @@ const isAttributeValueValid = ( {
 		return false;
 	}
 
+	// If the current attribute is selected, we require one less attribute to
+	// match, this allows shoppers to switch between attributes. For example,
+	// if "Blue" and "Small" are selected, we want "Blue" and "Medium" to be
+	// valid, that's why we subtract one from the total number of attributes to
+	// match.
 	const isCurrentAttributeSelected = selectedAttributes.some(
 		( selectedAttribute ) =>
 			attributeNamesMatch( selectedAttribute.attribute, attributeName )
@@ -112,19 +94,23 @@ const isAttributeValueValid = ( {
 		return false;
 	}
 
+	// Check if there is at least one available variation matching the current
+	// selected attributes and the attribute value being checked.
 	return product.variations.some( ( variation ) => {
 		const variationAttrValue = getVariationAttributeValue(
 			variation,
 			attributeName
 		);
 
+		// Skip variations that don't match the current attribute value.
 		if (
 			variationAttrValue !== attributeValue &&
-			variationAttrValue !== null
+			variationAttrValue !== null // null is used for "any".
 		) {
 			return false;
 		}
 
+		// Count how many of the selected attributes match the variation.
 		const matchingAttributes = selectedAttributes.filter(
 			( selectedAttribute ) => {
 				const availableVariationAttributeValue =
@@ -132,11 +118,17 @@ const isAttributeValueValid = ( {
 						variation,
 						selectedAttribute.attribute
 					);
+				// If the current available variation matches the selected
+				// value, count it.
 				if (
 					availableVariationAttributeValue === selectedAttribute.value
 				) {
 					return true;
 				}
+				// If the current available variation has a null value
+				// (matching any), count it if it refers to a different
+				// attribute or the attribute it refers matches the current
+				// selection.
 				if ( availableVariationAttributeValue === null ) {
 					if (
 						! attributeNamesMatch(
@@ -156,6 +148,12 @@ const isAttributeValueValid = ( {
 	} );
 };
 
+/**
+ * Return the product attributes and options from Store API format.
+ *
+ * @param product The product in Store API format.
+ * @return Record of attribute names to their available option values.
+ */
 const getProductAttributesAndOptions = (
 	product: ProductResponseItem | null
 ): Record< string, string[] > => {
@@ -211,23 +209,26 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	{
 		state: {
 			get selectedAttributes(): SelectedAttributes[] {
-				const context = getContext< FormContext >();
+				const context = getContext< Context >();
 				if ( ! context ) {
 					return [];
 				}
 				return context.selectedAttributes || [];
 			},
 			get selectableItems(): readonly SelectableItem[] {
-				const ctx = getVariationRowContext();
-				if ( ! ctx ) {
+				const context = getContext< Context >();
+				if ( ! context ) {
 					return [];
 				}
-				const raw = ctx.variationAttributeOptions;
-				const { name, disabledAttributesAction } = ctx;
+				const {
+					name,
+					disabledAttributesAction,
+					variationAttributeOptions,
+				} = context;
 				const selectedAttributes = state.selectedAttributes;
 				const hideInvalid = disabledAttributesAction === 'hide';
 
-				return raw.map( ( row, index ) => {
+				return variationAttributeOptions.map( ( row, index ) => {
 					const disabled = ! isAttributeValueValid( {
 						attributeName: name,
 						attributeValue: row.value,
@@ -253,7 +254,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		},
 		actions: {
 			setAttribute( attribute: string, value: string ) {
-				const { selectedAttributes } = getContext< FormContext >();
+				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						attributeNamesMatch(
@@ -282,7 +283,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 			},
 			removeAttribute( attribute: string ) {
-				const { selectedAttributes } = getContext< FormContext >();
+				const { selectedAttributes } = getContext< Context >();
 				const index = selectedAttributes.findIndex(
 					( selectedAttribute ) =>
 						attributeNamesMatch(
@@ -300,19 +301,11 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					itemArg && ! ( itemArg instanceof Event )
 						? itemArg
 						: context.item;
-				if ( ! item || item.hidden ) {
-					return;
-				}
-				if ( item.disabled ) {
+				if ( ! item || item.hidden || item.disabled ) {
 					return;
 				}
 
-				const rowCtx = getVariationRowContext();
-				if ( ! rowCtx ) {
-					return;
-				}
-
-				const { name } = rowCtx;
+				const { name } = context;
 				const selectedAttributes = state.selectedAttributes;
 				const isCurrentlySelected = selectedAttributes.some(
 					( attrObject ) =>
@@ -321,10 +314,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				);
 
 				if ( isCurrentlySelected ) {
-					rowCtx.selectedValue = '';
+					context.selectedValue = '';
 					actions.setAttribute( name, '' );
 				} else {
-					rowCtx.selectedValue = item.value;
+					context.selectedValue = item.value;
 					actions.setAttribute( name, item.value );
 					actions.autoselectAttributes( {
 						excludedAttributes: [ name ],
@@ -338,8 +331,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				includedAttributes?: Array< string >;
 				excludedAttributes?: Array< string >;
 			} = {} ) {
-				const rowCtx = getVariationRowContext();
-				if ( ! rowCtx || ! rowCtx.autoselect ) {
+				const context = getContext< Context >();
+				if ( ! context || ! context.autoselect ) {
 					return;
 				}
 
@@ -398,16 +391,16 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		},
 		callbacks: {
 			setDefaultSelectedAttribute() {
-				const ctx = getVariationRowContext();
-				if ( ! ctx ) {
+				const { name, selectedValue } = getContext< Context >();
+				if ( ! name ) {
 					return;
 				}
 
-				if ( ctx.selectedValue ) {
-					actions.setAttribute( ctx.name, ctx.selectedValue );
+				if ( selectedValue ) {
+					actions.setAttribute( name, selectedValue );
 				}
 				actions.autoselectAttributes( {
-					includedAttributes: [ ctx.name ],
+					includedAttributes: [ name ],
 				} );
 			},
 			setSelectedVariationId: () => {
@@ -417,11 +410,13 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< FormContext >();
+				const { selectedAttributes } = getContext< Context >();
 				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,
 				} );
+				// findProduct returns the parent when no variation
+				// matches — only accept an actual variation.
 				const matchedVariation =
 					result && result.id !== product.id ? result : null;
 
@@ -430,6 +425,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					variationId?: number | null;
 				} >( 'woocommerce/products' );
 
+				// If there is context, update the context. Otherwise, update the state directly.
 				( productContext
 					? productContext
 					: productsState
@@ -444,11 +440,13 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< FormContext >();
+				const { selectedAttributes } = getContext< Context >();
 				const result = productsState.findProduct( {
 					id: product.id,
 					selectedAttributes,
 				} );
+				// findProduct returns the parent when no variation
+				// matches — only accept an actual variation.
 				const matchedVariation =
 					result && result.id !== product.id ? result : null;
 
@@ -465,10 +463,12 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
+				// Check stock status from productVariations store.
 				const variationData =
 					productsState.productVariations[ matchedVariation.id ];
 
 				if ( ! variationData ) {
+					// Variation data not loaded - this is a data consistency issue.
 					return;
 				}
 
@@ -480,6 +480,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					} );
 				}
 			},
+			// Quantity constraints might change dynamically when switching
+			// variations. Based on this, we might need to update the quantity.
 			watchQuantityConstraints() {
 				const { ref } = getElement();
 
@@ -487,6 +489,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
+				// Let's not do anything if the user is typing in the input.
 				if ( ref === document.activeElement ) {
 					return;
 				}
@@ -499,7 +502,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				const { minimum, maximum } = variation.add_to_cart;
 
-				const { quantity } = getContext< FormContext >();
+				const { quantity } = getContext< Context >();
 				const currentValue = quantity[ variation.id ];
 
 				let newValue = currentValue;

@@ -10,7 +10,6 @@ import type { SelectableItem } from '../../../../types/type-defs/selectable-item
 
 type DropdownContext = {
 	storeNamespace: string;
-	filterItemType: string;
 };
 
 type SelectableParent = {
@@ -20,9 +19,6 @@ type SelectableParent = {
 	actions: {
 		toggle: ( item?: SelectableItem ) => void;
 		navigate?: () => void;
-		removeActiveFiltersBy?: (
-			callback: ( item: { type: string; value: string } ) => boolean
-		) => void;
 	};
 };
 
@@ -62,30 +58,17 @@ store(
 				const parent = store< SelectableParent >( storeNamespace );
 				const value = target.value;
 
+				// Choosing the empty <option> unselect the selected option.
 				if ( value === '' ) {
-					// Add to Cart + Options: choosing the placeholder clears this attribute
-					// (the store has no `navigate`, so we must toggle off the current selection).
+					const items = Array.isArray( parent.state.selectableItems )
+						? parent.state.selectableItems
+						: [];
+					const selected = items.find( ( row ) => row.selected );
 					if (
-						storeNamespace ===
-						'woocommerce/add-to-cart-with-options'
+						selected &&
+						typeof parent.actions.toggle === 'function'
 					) {
-						const items = Array.isArray(
-							parent.state.selectableItems
-						)
-							? parent.state.selectableItems
-							: [];
-						const selected = items.find( ( row ) => row.selected );
-						if (
-							selected &&
-							typeof parent.actions.toggle === 'function'
-						) {
-							parent.actions.toggle( selected );
-						}
-						return;
-					}
-					// Product Filters: clear active filters for this filter type.
-					if ( typeof parent.actions.navigate === 'function' ) {
-						parent.actions.navigate();
+						parent.actions.toggle( selected );
 					}
 					return;
 				}
