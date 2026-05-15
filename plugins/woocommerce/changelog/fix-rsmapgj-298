@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix order refund creation so that copying a line item's meta to the refunded item no longer carries over the original meta IDs, preventing unique meta saves on the refund from overwriting or deleting the original line item's meta.

@@ -625,6 +625,14 @@ function wc_create_refund( $args = array() ) {
 				$class         = get_class( $item );
 				$refunded_item = new $class( $item );
 				$refunded_item->set_id( 0 );
+
+				// Clear the IDs of any meta carried over from the original item so that saving the refund
+				// line item creates new meta rows instead of overwriting (or deleting, when unique keys are
+				// used) the original item's meta. See https://github.com/woocommerce/woocommerce/issues/33545.
+				foreach ( $refunded_item->get_meta_data() as $refunded_item_meta ) {
+					$refunded_item_meta->id = null;
+				}
+
 				$refunded_item->add_meta_data( '_refunded_item_id', $item_id, true );
 				$refunded_item->set_total( wc_format_refund_total( $refund_total ) );
 				$refunded_item->set_taxes(

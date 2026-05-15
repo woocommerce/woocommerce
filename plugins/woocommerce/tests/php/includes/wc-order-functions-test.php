@@ -328,6 +328,73 @@ class WC_Order_Functions_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that creating a refund does not strip meta data from the original order line item
+	 * when the refunded item is given the same meta key with the unique flag set.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/33545: previously,
+	 * the refunded line item copied the original item's meta together with its meta_id, so saving
+	 * unique meta on the refund would overwrite or delete the original item's meta row instead of
+	 * creating a new one.
+	 */
+	public function test_refund_preserves_original_line_item_meta() {
+		// Create a product and place an order for it.
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( 20 );
+		$product->save();
+
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'total'    => 20,
+			)
+		);
+		$item->add_meta_data( 'foo', 'bar', true );
+		$order->add_item( $item );
+		$order->calculate_totals();
+		$order->save();
+
+		$items   = $order->get_items();
+		$item_id = array_key_first( $items );
+
+		// Sanity check: the original line item has the 'foo' meta with a real meta_id.
+		$original_item = WC_Order_Factory::get_order_item( $item_id );
+		$this->assertSame( 'bar', $original_item->get_meta( 'foo' ) );
+
+		// Create a refund and add a unique 'foo' meta to the refunded line item. The bug caused
+		// this save to delete the meta row from the original line item.
+		$refund = wc_create_refund(
+			array(
+				'order_id'   => $order->get_id(),
+				'amount'     => 20,
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => 20,
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund, 'Refund should be created successfully' );
+
+		$refund_items   = $refund->get_items();
+		$refunded_item  = reset( $refund_items );
+		$refunded_item->update_meta_data( 'foo', 'baz', true );
+		$refunded_item->save_meta_data();
+
+		// Re-read the original item from the database to ensure the meta is still intact.
+		$reloaded_item = WC_Order_Factory::get_order_item( $item_id );
+		$this->assertSame( 'bar', $reloaded_item->get_meta( 'foo' ), 'Original order line item meta should not be deleted by refund.' );
+
+		// The refunded item should carry the new value as its own row.
+		$reloaded_refund_item = WC_Order_Factory::get_order_item( $refunded_item->get_id() );
+		$this->assertSame( 'baz', $reloaded_refund_item->get_meta( 'foo' ), 'Refunded line item should hold its own meta value.' );
+	}
+
+	/**
 	 * Test that wc_wptexturize_order_note() preserves URLs with double hyphens.
 	 *
 	 * @dataProvider url_protection_test_data
