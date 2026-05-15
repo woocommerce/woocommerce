@@ -372,14 +372,20 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				// Get name.
 				$attribute_name = $attribute_id ? wc_attribute_taxonomy_name_by_id( $attribute_id ) : $attribute['name'];
 
-				// Set if is a variation attribute based on existing attributes if possible so updates via CSV do not change this.
-				$is_variation = 0;
+				// Set if is a variation attribute.
+				// Priority: explicit CSV column ("Attribute X used for variations") wins; otherwise
+				// fall back to the existing attribute on the product so updates via CSV do not change this.
+				if ( isset( $attribute['in_variation'] ) ) {
+					$is_variation = $attribute['in_variation'] ? 1 : 0;
+				} else {
+					$is_variation = 0;
 
-				if ( $existing_attributes ) {
-					foreach ( $existing_attributes as $existing_attribute ) {
-						if ( $existing_attribute->get_name() === $attribute_name ) {
-							$is_variation = $existing_attribute->get_variation();
-							break;
+					if ( $existing_attributes ) {
+						foreach ( $existing_attributes as $existing_attribute ) {
+							if ( $existing_attribute->get_name() === $attribute_name ) {
+								$is_variation = $existing_attribute->get_variation();
+								break;
+							}
 						}
 					}
 				}

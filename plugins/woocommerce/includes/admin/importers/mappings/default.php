@@ -103,15 +103,16 @@ function wc_importer_default_special_english_mappings( $mappings ) {
 	}
 
 	$new_mappings = array(
-		'Attribute %d name'     => 'attributes:name',
-		'Attribute %d value(s)' => 'attributes:value',
-		'Attribute %d visible'  => 'attributes:visible',
-		'Attribute %d global'   => 'attributes:taxonomy',
-		'Attribute %d default'  => 'attributes:default',
-		'Download %d ID'        => 'downloads:id',
-		'Download %d name'      => 'downloads:name',
-		'Download %d URL'       => 'downloads:url',
-		'Meta: %s'              => 'meta:',
+		'Attribute %d name'                => 'attributes:name',
+		'Attribute %d value(s)'            => 'attributes:value',
+		'Attribute %d visible'             => 'attributes:visible',
+		'Attribute %d global'              => 'attributes:taxonomy',
+		'Attribute %d used for variations' => 'attributes:in_variation',
+		'Attribute %d default'             => 'attributes:default',
+		'Download %d ID'                   => 'downloads:id',
+		'Download %d name'                 => 'downloads:name',
+		'Download %d URL'                  => 'downloads:url',
+		'Meta: %s'                         => 'meta:',
 	);
 
 	return array_merge( $mappings, $new_mappings );

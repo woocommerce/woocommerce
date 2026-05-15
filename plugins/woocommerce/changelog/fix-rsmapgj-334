@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product CSV importer/exporter: add an "Attribute X used for variations" column so the "Used for variations" flag survives a round-trip and is honored when the attribute name or values are edited in the CSV.

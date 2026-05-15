@@ -825,11 +825,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		 * Match special column names.
 		 */
 		$regex_match_data_formatting = array(
-			'/attributes:value*/'    => array( $this, 'parse_comma_field' ),
-			'/attributes:visible*/'  => array( $this, 'parse_bool_field' ),
-			'/attributes:taxonomy*/' => array( $this, 'parse_bool_field' ),
-			'/downloads:url*/'       => array( $this, 'parse_download_file_field' ),
-			'/meta:*/'               => 'wp_kses_post', // Allow some HTML in meta fields.
+			'/attributes:value*/'        => array( $this, 'parse_comma_field' ),
+			'/attributes:visible*/'      => array( $this, 'parse_bool_field' ),
+			'/attributes:taxonomy*/'     => array( $this, 'parse_bool_field' ),
+			'/attributes:in_variation*/' => array( $this, 'parse_bool_field' ),
+			'/downloads:url*/'           => array( $this, 'parse_download_file_field' ),
+			// Allow some HTML in meta fields.
+			'/meta:*/'                   => 'wp_kses_post',
 		);
 
 		$callbacks = array();
@@ -980,6 +982,13 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 
 			} elseif ( $this->starts_with( $key, 'attributes:visible' ) ) {
 				$attributes[ str_replace( 'attributes:visible', '', $key ) ]['visible'] = wc_string_to_bool( $value );
+				unset( $data[ $key ] );
+
+			} elseif ( $this->starts_with( $key, 'attributes:in_variation' ) ) {
+				// Only record an explicit value (true/false) so blank cells preserve the existing flag.
+				if ( is_bool( $value ) ) {
+					$attributes[ str_replace( 'attributes:in_variation', '', $key ) ]['in_variation'] = $value;
+				}
 				unset( $data[ $key ] );
 
 			} elseif ( $this->starts_with( $key, 'attributes:default' ) ) {

@@ -224,4 +224,149 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		wc_delete_attribute( $color_attr_id );
 		wc_delete_attribute( $size_attr_id );
 	}
+
+	/**
+	 * @testdox expand_data should collect the "attributes:in_variation" column into the raw_attributes array.
+	 */
+	public function test_expand_data_collects_in_variation_column() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$expand_data = ( new ReflectionClass( WC_Product_CSV_Importer::class ) )->getMethod( 'expand_data' );
+		$expand_data->setAccessible( true );
+
+		$expanded = $expand_data->invoke(
+			$importer,
+			array(
+				'attributes:name1'         => 'Color',
+				'attributes:value1'        => array( 'Red', 'Blue' ),
+				'attributes:taxonomy1'     => true,
+				'attributes:visible1'      => true,
+				'attributes:in_variation1' => true,
+			)
+		);
+
+		$this->assertArrayHasKey( 'raw_attributes', $expanded );
+		$this->assertCount( 1, $expanded['raw_attributes'] );
+		$this->assertTrue( $expanded['raw_attributes'][0]['in_variation'], 'in_variation flag should be carried through to raw_attributes.' );
+	}
+
+	/**
+	 * @testdox The "Attribute X used for variations" CSV column makes the imported attribute respect the flag even when the attribute name/values were edited in the CSV (bug 43190 / RSMAPGJ-334).
+	 */
+	public function test_attribute_in_variation_column_is_respected_on_import() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$attr_id  = wc_create_attribute(
+			array(
+				'name'         => 'Color',
+				'slug'         => 'color',
+				'type'         => 'select',
+				'order_by'     => 'menu_order',
+				'has_archives' => false,
+			)
+		);
+		$taxonomy = wc_attribute_taxonomy_name_by_id( $attr_id );
+		register_taxonomy( $taxonomy, 'product' );
+		wp_insert_term( 'Rouge', $taxonomy );
+		wp_insert_term( 'Bleu', $taxonomy );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Variable Product 43190' );
+		$product->set_sku( 'rsmapgj-334-sku' );
+		$product->save();
+
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$set_product_data = ( new ReflectionClass( $importer ) )->getMethod( 'set_product_data' );
+		$set_product_data->setAccessible( true );
+
+		// Simulate an imported row where the user changed the attribute value labels
+		// and explicitly set "Used for variations" = 1 in the CSV.
+		$data = array(
+			'raw_attributes' => array(
+				array(
+					'name'         => 'Color',
+					'value'        => array( 'Rouge', 'Bleu' ),
+					'taxonomy'     => true,
+					'visible'      => true,
+					'in_variation' => true,
+				),
+			),
+		);
+
+		$set_product_data->invokeArgs( $importer, array( &$product, $data ) );
+
+		$attributes = $product->get_attributes();
+		$this->assertNotEmpty( $attributes, 'Imported product should have attributes.' );
+		$attribute = reset( $attributes );
+		$this->assertTrue( $attribute->get_variation(), '"Used for variations" should be true when the CSV column is set to 1.' );
+		$this->assertTrue( $attribute->get_visible(), '"Visible on the product page" should be true when the CSV column is set to 1.' );
+
+		// Cleanup.
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wc_delete_attribute( $attr_id );
+	}
+
+	/**
+	 * @testdox When the "Attribute X used for variations" CSV column is omitted, the existing variation flag is preserved (back-compat).
+	 */
+	public function test_attribute_in_variation_falls_back_to_existing_attribute_when_column_omitted() {
+		wp_set_current_user( self::factory()->user->create( array( 'role' => 'administrator' ) ) );
+
+		$attr_id  = wc_create_attribute(
+			array(
+				'name'         => 'Size',
+				'slug'         => 'size',
+				'type'         => 'select',
+				'order_by'     => 'menu_order',
+				'has_archives' => false,
+			)
+		);
+		$taxonomy = wc_attribute_taxonomy_name_by_id( $attr_id );
+		register_taxonomy( $taxonomy, 'product' );
+		wp_insert_term( 'Small', $taxonomy );
+		wp_insert_term( 'Large', $taxonomy );
+
+		$product = new WC_Product_Variable();
+		$product->set_name( 'Variable Product No In_Variation Column' );
+		$product->set_sku( 'rsmapgj-334-fallback-sku' );
+
+		$existing = new WC_Product_Attribute();
+		$existing->set_id( $attr_id );
+		$existing->set_name( $taxonomy );
+		$existing->set_options( array( 'Small', 'Large' ) );
+		$existing->set_visible( true );
+		$existing->set_variation( true );
+		$product->set_attributes( array( $existing ) );
+		$product->save();
+
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$set_product_data = ( new ReflectionClass( $importer ) )->getMethod( 'set_product_data' );
+		$set_product_data->setAccessible( true );
+
+		$data = array(
+			'raw_attributes' => array(
+				array(
+					'name'     => 'Size',
+					'value'    => array( 'Small', 'Large' ),
+					'taxonomy' => true,
+					'visible'  => true,
+				),
+			),
+		);
+
+		$set_product_data->invokeArgs( $importer, array( &$product, $data ) );
+
+		$attributes = $product->get_attributes();
+		$this->assertNotEmpty( $attributes );
+		$attribute = reset( $attributes );
+		$this->assertTrue( $attribute->get_variation(), 'Existing "Used for variations" flag should be preserved when CSV does not specify it.' );
+
+		WC_Helper_Product::delete_product( $product->get_id() );
+		wc_delete_attribute( $attr_id );
+	}
 }
