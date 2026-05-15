@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Internal\ShopperLists;
 
+use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 
 /**
@@ -57,6 +58,13 @@ class ShopperListItem {
 	 * @var string
 	 */
 	private $product_title_at_save;
+
+	/**
+	 * Resolved product, cached on the instance.
+	 *
+	 * @var \WC_Product|null
+	 */
+	private $product = null;
 
 	/**
 	 * Private constructor. Use the static factories to obtain concrete instances.
@@ -279,10 +287,76 @@ class ShopperListItem {
 	}
 
 	/**
-	 * Snapshot of the product title at save time. Used as the tombstone label.
+	 * Snapshot of the product title at save time.
 	 */
 	public function get_product_title_at_save(): string {
 		return $this->product_title_at_save;
+	}
+
+	/**
+	 * Resolve the live product (or variation) backing this saved item.
+	 */
+	public function get_product(): ?\WC_Product {
+		if ( $this->product instanceof \WC_Product ) {
+			return $this->product;
+		}
+		$id            = $this->variation_id > 0 ? $this->variation_id : $this->product_id;
+		$product       = $id > 0 ? wc_get_product( $id ) : false;
+		$this->product = $product instanceof \WC_Product ? $product : null;
+		return $this->product;
+	}
+
+	/**
+	 * Whether the row serves live product data. True when the product (and its
+	 * parent, for variations) is `publish`; password-gated products still
+	 * qualify since their page renders behind a prompt.
+	 */
+	public function is_live(): bool {
+		$product = $this->get_product();
+		if ( ! $product instanceof \WC_Product || ProductStatus::PUBLISH !== $product->get_status() ) {
+			return false;
+		}
+
+		$parent_id = $product->get_parent_id();
+		if ( $parent_id > 0 ) {
+			$parent = wc_get_product( $parent_id );
+
+			if ( ! $parent instanceof \WC_Product || ProductStatus::PUBLISH !== $parent->get_status() ) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	/**
+	 * Whether the product can be added to the cart. Mirrors the catalog gate
+	 * (`is_purchasable()` && `is_in_stock()`), but additionally requires the
+	 * row to be live and rejects password-gated products (self or parent) —
+	 * cart-add can't prompt for a password.
+	 */
+	public function is_purchasable(): bool {
+		$product = $this->get_product();
+		if ( ! $this->is_live() || ! $product ) {
+			return false;
+		}
+		if ( ! $product->is_purchasable() || ! $product->is_in_stock() ) {
+			return false;
+		}
+
+		if ( ! empty( $product->get_post_password() ) ) {
+			return false;
+		}
+
+		$parent_id = $product->get_parent_id();
+		if ( $parent_id > 0 ) {
+			$parent = wc_get_product( $parent_id );
+			if ( $parent instanceof \WC_Product && ! empty( $parent->get_post_password() ) ) {
+				return false;
+			}
+		}
+
+		return true;
 	}
 
 	/**

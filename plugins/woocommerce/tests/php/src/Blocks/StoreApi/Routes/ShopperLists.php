@@ -194,7 +194,7 @@ class ShopperLists extends ControllerTestCase {
 		$this->assertEquals( 201, $response->get_status() );
 		$this->assertSame( $this->product->get_id(), $data['product_id'] );
 		$this->assertSame( 1, $data['quantity'], 'Saved quantity should mirror the cart line quantity.' );
-		$this->assertTrue( $data['product_exists'] );
+		$this->assertTrue( $data['is_live'] );
 		$this->assertSame( $this->product->get_title(), $data['name'] );
 		$this->assertNotEmpty( wc()->cart->cart_contents, 'Cart should still contain the line — POST is additive only.' );
 	}
