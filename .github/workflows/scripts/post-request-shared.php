@@ -239,7 +239,7 @@ function do_github_api_post_request( $request_path, $body ) {
 	$full_request_url = rtrim( $github_api_url, '/' ) . '/' . ltrim( $request_path, '/' );
 	$result = @file_get_contents( $full_request_url, false, $context );
 
-	// Verify that the post request was sucessful.
+	// Verify that the post request was successful.
 	$status_line = $http_response_header[0];
 	preg_match( "/^HTTPS?\/\d\.\d\s+(\d{3})\s+/i", $status_line, $matches );
 	$github_api_response_code = $matches[1];

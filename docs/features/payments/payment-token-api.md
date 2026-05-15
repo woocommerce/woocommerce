@@ -549,7 +549,7 @@ Does a check to make sure both the token and token type (CC, eCheck, ...) are pr
 Load an existing token object from the database. See `WC_Payment_Tokens::get()` which is an alias of this function.
 
 ```php
-// Load a credit card toke, ID 55, user ID 5
+// Load a credit card token, ID 55, user ID 5
 $token = WC_Payment_Token_CC();
 $token->read( 55 );
 echo $token->get_id(); // returns 55

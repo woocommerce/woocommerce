@@ -15,7 +15,7 @@ WooCommerce.com and WordPress.org both feature reviews heavily, and competing ex
 
 ## Primary considerations around reviews
 
-Requesting more reviews for a extension with major issues will not generate good reviews, and analyzing existing reviews will help surface areas to address before soliciting reviews.
+Requesting more reviews for an extension with major issues will not generate good reviews, and analyzing existing reviews will help surface areas to address before soliciting reviews.
 
 It is extremely rare for users of WordPress plugins to leave reviews organically (.2% of users for WordPress.org leave reviews), which means that there's an untapped market of 99.8% of users of the average plugin.
 

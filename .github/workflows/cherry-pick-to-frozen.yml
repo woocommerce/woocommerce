@@ -121,7 +121,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
 
-      # We set the milestone of the new PR to the milestone of the source PR since they should all be merged in preperation for the same release.
+      # We set the milestone of the new PR to the milestone of the source PR since they should all be merged in preparation for the same release.
       - name: Add milestone
         if: github.event.pull_request.milestone.number != null
         uses: actions/github-script@60a0d83039c74a4aee543508d2ffcb1c3799cdea #v7.0.1

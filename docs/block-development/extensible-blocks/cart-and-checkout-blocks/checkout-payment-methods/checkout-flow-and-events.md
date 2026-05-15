@@ -166,7 +166,7 @@ You could substitute in whatever emitter you are registering for the `emitter` f
 const unsubscribe = onCheckoutValidation( myCallback );
 ```
 
-You can also indicate what priority you want your observer to execute at. Lower priority is run before higher priority, so you can affect when your observer will run in the stack of observers registered to an emitter. You indicate priority via an number on the second argument:
+You can also indicate what priority you want your observer to execute at. Lower priority is run before higher priority, so you can affect when your observer will run in the stack of observers registered to an emitter. You indicate priority via a number on the second argument:
 
 ```jsx
 const unsubscribe = onCheckoutValidation( myCallback, 10 );
