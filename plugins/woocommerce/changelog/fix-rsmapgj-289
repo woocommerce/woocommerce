@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent duplicate `edit.php?post_type=product` entry in the admin menu order array when WooCommerce reorders the menu.
