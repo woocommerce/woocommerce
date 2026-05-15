@@ -138,13 +138,15 @@ const toggleImageVisibility = ( element: HTMLElement ) => {
 
 	const imageId = Number.parseInt( imageIdValue, 10 );
 	const { imageData } = getContext();
-	const isVisible = imageData.includes( imageId );
+	const visibleIndex = imageData.indexOf( imageId );
+	const isVisible = visibleIndex >= 0;
 	const closestWrapper = element.closest(
 		`${ SELECTORS.largeImageWrapper }, ${ SELECTORS.thumbnail }`
 	) as HTMLElement | null;
 	const visibilityTarget = closestWrapper || element;
 
 	visibilityTarget.hidden = ! isVisible;
+	visibilityTarget.style.order = isVisible ? String( visibleIndex ) : '';
 	element.setAttribute( 'aria-hidden', isVisible ? 'false' : 'true' );
 };
 
