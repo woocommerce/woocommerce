@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Guard wcSettings access in Search Variations autocompleter so importing @woocommerce/components no longer errors in third-party plugins.
