@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WC_Geolocation::get_ip_address() returning a duplicated comma-separated IP string when client headers (e.g. X-Real-IP from Apple iCloud Private Relay) contain multiple addresses, which caused payment gateways to reject the customer IP.

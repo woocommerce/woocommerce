@@ -77,25 +77,59 @@ class WC_Geolocation {
 	/**
 	 * Get current user IP Address.
 	 *
+	 * Proxies and privacy relays (for example Apple iCloud Private Relay) can
+	 * forward client IPs as a comma-separated list, sometimes with the same
+	 * address duplicated, and may include an optional port. This method always
+	 * returns a single, validated IP string, preferring the first valid entry
+	 * in the list so downstream consumers (such as payment gateways) receive a
+	 * well-formed address.
+	 *
 	 * @return string
 	 */
 	public static function get_ip_address() {
 		if ( isset( $_SERVER['HTTP_X_REAL_IP'] ) ) {
-			return sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) );
+			return self::parse_ip_from_header( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_REAL_IP'] ) ) );
 		} elseif ( isset( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) {
 			// Proxy servers can send through this header like this: X-Forwarded-For: client1, proxy1, proxy2
 			// Make sure we always only send through the first IP in the list which should always be the client IP.
-			$value = trim( current( preg_split( '/,/', sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) ) ) );
-			// Account for the '<IPv4 address>:<port>', '[<IPv6>]' and '[<IPv6>]:<port>' cases, removing the port.
-			// The regular expression is oversimplified on purpose, later 'rest_is_ip_address' will do the actual IP address validation.
-			$value = preg_replace( '/([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\:.*|\[([^]]+)\].*/', '$1$2', $value );
-			return (string) rest_is_ip_address( $value );
+			return self::parse_ip_from_header( sanitize_text_field( wp_unslash( $_SERVER['HTTP_X_FORWARDED_FOR'] ) ) );
 		} elseif ( isset( $_SERVER['REMOTE_ADDR'] ) ) {
 			// Make sure we always only send through the first IP in the list which should always be the client IP.
-			$value = trim( current( preg_split( '/,/', sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) ) ) );
-			return (string) rest_is_ip_address( $value );
+			return self::parse_ip_from_header( sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) );
 		}
 		return '';
+	}
+
+	/**
+	 * Parse and validate an IP address from a request header value.
+	 *
+	 * Handles comma-separated lists (taking the first entry), strips any
+	 * trailing port from IPv4 and bracketed IPv6 addresses, and validates the
+	 * result. Returns an empty string when no valid IP can be extracted.
+	 *
+	 * @since 10.9.0
+	 * @param string $header_value Sanitized, unslashed header value.
+	 * @return string Validated IP address, or empty string if invalid.
+	 */
+	private static function parse_ip_from_header( $header_value ) {
+		$header_value = (string) $header_value;
+
+		if ( '' === $header_value ) {
+			return '';
+		}
+
+		$parts = preg_split( '/,/', $header_value );
+		if ( false === $parts || array() === $parts ) {
+			return '';
+		}
+
+		$value = trim( (string) current( $parts ) );
+
+		// Account for the '<IPv4 address>:<port>', '[<IPv6>]' and '[<IPv6>]:<port>' cases, removing the port.
+		// The regular expression is oversimplified on purpose, later 'rest_is_ip_address' will do the actual IP address validation.
+		$value = preg_replace( '/([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\:.*|\[([^]]+)\].*/', '$1$2', $value );
+
+		return (string) rest_is_ip_address( $value );
 	}
 
 	/**
