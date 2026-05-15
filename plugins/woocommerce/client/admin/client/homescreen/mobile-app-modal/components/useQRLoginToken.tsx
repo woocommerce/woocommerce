@@ -47,9 +47,9 @@ export type QRLoginTokenState =
 
 /**
  * Whitelisted device-info shape returned by the status endpoint after a
- * successful exchange. The mobile app fills this in on the exchange request;
- * older clients omit it, in which case all fields are absent and the UI falls
- * back to generic copy. Mirrors `MobileAppQRLogin::DEVICE_PAYLOAD_KEYS`.
+ * scan or successful exchange. The mobile app fills this in on the scan
+ * request, and the server reuses that stored payload for later status
+ * responses. Mirrors `MobileAppQRLogin::DEVICE_PAYLOAD_KEYS`.
  *
  * `brand` is Android-only (`Build.BRAND`); iOS clients leave it absent.
  */
