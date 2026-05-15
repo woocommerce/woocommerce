@@ -131,6 +131,74 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The auto-injected block ships with a seeded `core/heading` inner block so
+	 * fresh cart pages render the heading on the frontend out of the box. The
+	 * matching `null` push onto `innerContent` is what makes `WP_Block::render()`
+	 * walk into the heading when building `$content`.
+	 */
+	public function test_hooked_block_attributes_seed_heading_inner_block(): void {
+		$parsed_hooked_block = array(
+			'blockName' => 'woocommerce/shopper-collection',
+			'attrs'     => array(),
+		);
+		$parsed_anchor_block = array( 'blockName' => 'woocommerce/cart' );
+
+		$result = $this->sut->set_hooked_block_attributes(
+			$parsed_hooked_block,
+			'woocommerce/shopper-collection',
+			'after',
+			$parsed_anchor_block
+		);
+
+		$this->assertArrayHasKey( 'innerBlocks', $result );
+		$this->assertCount( 1, $result['innerBlocks'] );
+
+		$heading = $result['innerBlocks'][0];
+		$this->assertSame( 'core/heading', $heading['blockName'] );
+		$this->assertSame( 2, $heading['attrs']['level'] );
+		$this->assertStringContainsString( '<h2 class="wp-block-heading">', $heading['innerHTML'] );
+		$this->assertSame( array( $heading['innerHTML'] ), $heading['innerContent'] );
+
+		$this->assertArrayHasKey( 'innerContent', $result );
+		$this->assertContains( null, $result['innerContent'] );
+	}
+
+	/**
+	 * If something else has already populated `innerBlocks` (e.g. another hook
+	 * running first, or a saved customisation), the seeding logic must not
+	 * clobber it.
+	 */
+	public function test_hooked_block_attributes_preserves_existing_inner_blocks(): void {
+		$existing_heading    = array(
+			'blockName'    => 'core/heading',
+			'attrs'        => array(
+				'level'   => 3,
+				'content' => 'My custom heading',
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '<h3 class="wp-block-heading">My custom heading</h3>',
+			'innerContent' => array( '<h3 class="wp-block-heading">My custom heading</h3>' ),
+		);
+		$parsed_hooked_block = array(
+			'blockName'    => 'woocommerce/shopper-collection',
+			'attrs'        => array(),
+			'innerBlocks'  => array( $existing_heading ),
+			'innerContent' => array( null ),
+		);
+		$parsed_anchor_block = array( 'blockName' => 'woocommerce/cart' );
+
+		$result = $this->sut->set_hooked_block_attributes(
+			$parsed_hooked_block,
+			'woocommerce/shopper-collection',
+			'after',
+			$parsed_anchor_block
+		);
+
+		$this->assertCount( 1, $result['innerBlocks'] );
+		$this->assertSame( $existing_heading, $result['innerBlocks'][0] );
+	}
+
+	/**
 	 * `render()` returns an empty string for logged-out shoppers.
 	 */
 	public function test_render_returns_empty_for_logged_out_user(): void {

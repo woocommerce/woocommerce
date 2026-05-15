@@ -2,7 +2,11 @@
  * External dependencies
  */
 import { __, sprintf } from '@wordpress/i18n';
-import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
+import {
+	useBlockProps,
+	useInnerBlocksProps,
+	InspectorControls,
+} from '@wordpress/block-editor';
 import { PanelBody, RangeControl, SelectControl } from '@wordpress/components';
 import { Icon, trash } from '@wordpress/icons';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
@@ -19,6 +23,16 @@ interface EditProps {
 
 const MIN_COLUMNS = 2;
 const MAX_COLUMNS = 6;
+
+// Lives in JS because `__()` is needed for the heading copy. `block.json`
+// strings aren't run through translation, so keeping the template here
+// is the only way to ship a localized default.
+const TEMPLATE: [ string, Record< string, unknown > ][] = [
+	[
+		'core/heading',
+		{ content: __( 'Saved for later', 'woocommerce' ), level: 2 },
+	],
+];
 
 const PREVIEW_ITEMS = [
 	{
@@ -69,8 +83,13 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 	const { listName, columnCount } = attributes;
 
 	const blockProps = useBlockProps( {
-		className: `wc-block-shopper-collection columns-${ columnCount }`,
+		className: 'wc-block-shopper-collection',
 	} );
+
+	// `allowedBlocks` is read from block.json automatically — passing it
+	// here would just duplicate the declaration. `templateLock: false`
+	// is the default so we omit that too.
+	const innerBlocksProps = useInnerBlocksProps( {}, { template: TEMPLATE } );
 
 	return (
 		<>
@@ -109,68 +128,73 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 					/>
 				</PanelBody>
 			</InspectorControls>
-			<ul { ...blockProps }>
-				{ PREVIEW_ITEMS.map( ( item ) => (
-					<li
-						key={ item.key }
-						className="wc-block-shopper-collection-item"
-					>
-						<div className="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
-							<a
-								href="#preview"
-								onClick={ ( e ) => e.preventDefault() }
-							>
-								<img src={ PLACEHOLDER_IMG_SRC } alt="" />
-							</a>
-							<button
-								type="button"
-								className="wc-block-shopper-collection-item__remove"
-								aria-label={ sprintf(
-									/* translators: %s: product name. */
-									__(
-										'Remove %s from Saved for later list',
-										'woocommerce'
-									),
-									item.name
+			<section { ...blockProps }>
+				<div { ...innerBlocksProps } />
+				<ul
+					className={ `wc-block-shopper-collection__list columns-${ columnCount }` }
+				>
+					{ PREVIEW_ITEMS.map( ( item ) => (
+						<li
+							key={ item.key }
+							className="wc-block-shopper-collection-item"
+						>
+							<div className="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
+								<a
+									href="#preview"
+									onClick={ ( e ) => e.preventDefault() }
+								>
+									<img src={ PLACEHOLDER_IMG_SRC } alt="" />
+								</a>
+								<button
+									type="button"
+									className="wc-block-shopper-collection-item__remove"
+									aria-label={ sprintf(
+										/* translators: %s: product name. */
+										__(
+											'Remove %s from Saved for later list',
+											'woocommerce'
+										),
+										item.name
+									) }
+									disabled
+								>
+									<Icon icon={ trash } size={ 24 } />
+								</button>
+								{ item.variation && (
+									<span className="wc-block-shopper-collection-item__variation">
+										{ item.variation }
+									</span>
 								) }
-								disabled
-							>
-								<Icon icon={ trash } size={ 24 } />
-							</button>
-							{ item.variation && (
-								<span className="wc-block-shopper-collection-item__variation">
-									{ item.variation }
+							</div>
+							<h2 className="wp-block-post-title has-text-align-center has-medium-font-size">
+								<a
+									href="#preview"
+									onClick={ ( e ) => e.preventDefault() }
+								>
+									{ item.name }
+								</a>
+							</h2>
+							<div className="price wc-block-components-product-price has-text-align-center has-small-font-size">
+								<span className="wc-block-components-product-price__value">
+									{ item.price }
 								</span>
-							) }
-						</div>
-						<h2 className="wp-block-post-title has-text-align-center has-medium-font-size">
-							<a
-								href="#preview"
-								onClick={ ( e ) => e.preventDefault() }
-							>
-								{ item.name }
-							</a>
-						</h2>
-						<div className="price wc-block-components-product-price has-text-align-center has-small-font-size">
-							<span className="wc-block-components-product-price__value">
-								{ item.price }
+							</div>
+							<span className="wc-block-shopper-collection-item__quantity">
+								{ item.quantity }
 							</span>
-						</div>
-						<span className="wc-block-shopper-collection-item__quantity">
-							{ item.quantity }
-						</span>
-						<div className="wp-block-button wc-block-components-product-button">
-							<button
-								type="button"
-								className="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
-								disabled
-							>
-								{ __( 'Move to cart', 'woocommerce' ) }
-							</button>
-						</div>
-					</li>
-				) ) }
-			</ul>
+							<div className="wp-block-button wc-block-components-product-button">
+								<button
+									type="button"
+									className="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
+									disabled
+								>
+									{ __( 'Move to cart', 'woocommerce' ) }
+								</button>
+							</div>
+						</li>
+					) ) }
+				</ul>
+			</section>
 		</>
 	);
 };

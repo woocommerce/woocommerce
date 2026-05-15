@@ -5,13 +5,16 @@
 // which we declare as style dependencies in `block.json` so WordPress
 // enqueues them whenever this block renders. Don't duplicate those rules here.
 
+// The outer `<section>` is a plain wrapper — no layout of its own. The
+// grid lives on the inner `<ul class="wc-block-shopper-collection__list">`
+// so it doesn't try to grid-place the seeded heading inner block.
 // One concrete `.columns-N` class per supported column count so narrow
 // viewports reflow to fewer columns instead of shrinking items uniformly.
 // Mirrors Product Collection's `__responsive` formula.
 $min-item-width: 150px;
 $grid-gap: var(--wp--style--block-gap, 1.5em);
 
-.wc-block-shopper-collection {
+.wc-block-shopper-collection__list {
 	display: grid;
 	gap: $grid-gap;
 	list-style: none;

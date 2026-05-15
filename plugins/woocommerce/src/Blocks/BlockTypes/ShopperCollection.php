@@ -80,6 +80,34 @@ final class ShopperCollection extends AbstractBlock {
 			return $parsed_hooked_block;
 		}
 		$parsed_hooked_block['attrs']['listName'] = 'saved-for-later';
+
+		// Seed a `core/heading` inner block so freshly-injected SC instances
+		// ship with the same heading the editor template seeds. Only do this
+		// when nothing else has already populated `innerBlocks` (e.g. another
+		// hook running first) — we don't want to clobber a customisation.
+		//
+		// `core/heading` is a static block, so the serialised markup must
+		// match what the editor would have saved (`<h2 class="wp-block-heading">…</h2>`)
+		// or it'll fail block validation when the cart page is opened in the
+		// editor. The matching `null` push onto `innerContent` is what makes
+		// `WP_Block::render()` walk into the heading when building `$content`.
+		if ( empty( $parsed_hooked_block['innerBlocks'] ) ) {
+			$region_label = $this->get_variation_config()['regionLabel'];
+			$heading_html = '<h2 class="wp-block-heading">' . esc_html( $region_label ) . '</h2>';
+
+			$parsed_hooked_block['innerBlocks'][] = array(
+				'blockName'    => 'core/heading',
+				'attrs'        => array( 'level' => 2 ),
+				'innerBlocks'  => array(),
+				'innerHTML'    => $heading_html,
+				'innerContent' => array( $heading_html ),
+			);
+			if ( ! isset( $parsed_hooked_block['innerContent'] ) || ! is_array( $parsed_hooked_block['innerContent'] ) ) {
+				$parsed_hooked_block['innerContent'] = array();
+			}
+			$parsed_hooked_block['innerContent'][] = null;
+		}
+
 		return $parsed_hooked_block;
 	}
 
@@ -184,9 +212,8 @@ final class ShopperCollection extends AbstractBlock {
 		);
 
 		$wrapper_class = sprintf(
-			'wc-block-shopper-collection wc-block-shopper-collection--%s columns-%d',
-			$variation['modifierSlug'],
-			$column_count
+			'wc-block-shopper-collection wc-block-shopper-collection--%s',
+			$variation['modifierSlug']
 		);
 
 		$wrapper_attributes = array(
@@ -200,13 +227,20 @@ final class ShopperCollection extends AbstractBlock {
 
 		$is_empty = empty( $items );
 
+		$list_class = sprintf( 'wc-block-shopper-collection__list columns-%d', $column_count );
+
+		// `$content` is the rendered output of the heading inner block (and
+		// any future siblings). It sits above the inner `<ul>` so the
+		// heading reads first in source order.
 		return sprintf(
-			'<ul %1$s>%2$s%3$s%4$s%5$s</ul>',
+			'<section %1$s>%6$s<ul class="%7$s">%2$s%3$s%4$s%5$s</ul></section>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$this->render_template_markup( $variation ),
 			$this->render_items_markup( $items, $variation ),
 			$this->render_empty_markup( $is_empty, $variation ),
-			$this->render_error_markup()
+			$this->render_error_markup(),
+			$content,
+			esc_attr( $list_class )
 		);
 	}
 
@@ -227,6 +261,9 @@ final class ShopperCollection extends AbstractBlock {
 	private function get_variation_config(): array {
 		return array(
 			'modifierSlug'          => 'saved-for-later',
+			// Content for the seeded `core/heading` inner block on
+			// auto-injected SC instances (via `set_hooked_block_attributes`).
+			'regionLabel'           => __( 'Saved for later', 'woocommerce' ),
 			'emptyMessage'          => __( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
 			/* translators: %s: product name. */
 			'removeLabelTemplate'   => __( 'Remove %s from Saved for later list', 'woocommerce' ),
