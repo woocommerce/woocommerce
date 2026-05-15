@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fire a generic `woocommerce_shipping_instance_form_fields` filter alongside the existing per-method `woocommerce_shipping_instance_form_fields_{$id}` filter so integrations can add or modify instance-level settings for every shipping method.

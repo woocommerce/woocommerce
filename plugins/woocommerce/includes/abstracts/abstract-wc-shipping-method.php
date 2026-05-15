@@ -562,7 +562,30 @@ abstract class WC_Shipping_Method extends WC_Settings_API {
 	 * @return array
 	 */
 	public function get_instance_form_fields() {
-		return apply_filters( 'woocommerce_shipping_instance_form_fields_' . $this->id, array_map( array( $this, 'set_defaults' ), $this->instance_form_fields ) );
+		$form_fields = array_map( array( $this, 'set_defaults' ), $this->instance_form_fields );
+
+		/**
+		 * Filters the instance settings fields for a specific shipping method by ID.
+		 *
+		 * @param array $form_fields The instance form fields keyed by field ID.
+		 *
+		 * @since 2.6.0
+		 */
+		$form_fields = apply_filters( 'woocommerce_shipping_instance_form_fields_' . $this->id, $form_fields );
+
+		/**
+		 * Filters the instance settings fields for all shipping methods.
+		 *
+		 * Fires after the per-method `woocommerce_shipping_instance_form_fields_{$id}` filter so
+		 * integrations can add or modify instance-level settings for every shipping method without
+		 * needing to target each method individually.
+		 *
+		 * @param array              $form_fields     The instance form fields keyed by field ID.
+		 * @param WC_Shipping_Method $shipping_method The shipping method instance.
+		 *
+		 * @since 10.9.0
+		 */
+		return apply_filters( 'woocommerce_shipping_instance_form_fields', $form_fields, $this );
 	}
 
 	/**
