@@ -367,10 +367,20 @@
 					}
 				}
 
-				// Hover background — read from the active color-scheme stylesheet
-				// (which overrides admin-menu.css) so the panel hover matches
-				// whatever scheme the user has chosen.
-				( function () {
+				// Hover background — scan the active color-scheme stylesheet for
+				// the `#adminmenu li.menu-top:hover` background-color and expose
+				// it as --wc-rail-hover-bg so the panel matches the chosen scheme.
+				//
+				// We require the rule to target `menu-top` or `opensub` to avoid
+				// matching plugin-specific hover rules scoped to #adminmenu (e.g.
+				// Code Snippets' .code-snippets-upgrade-button:hover is teal and
+				// loads after the color-scheme sheet, so "last match wins" picks it
+				// up incorrectly if we scan at DOMContentLoaded).
+				//
+				// The color-scheme stylesheet is loaded via a separate <link> that
+				// may not have been processed into cssRules yet at DOMContentLoaded.
+				// Deferring to window.load guarantees all external CSS is parsed.
+				$( window ).one( 'load', function () {
 					var hoverBg = null;
 					for ( var si = 0; si < document.styleSheets.length; si++ ) {
 						try {
@@ -379,10 +389,12 @@
 								var r  = sheetRules[ ri ];
 								var s  = r.selectorText || '';
 								var bg = r.style && r.style.backgroundColor;
-								if ( bg && s.indexOf( '#adminmenu' ) !== -1 &&
-									( s.indexOf( ':hover' ) !== -1 || s.indexOf( 'opensub' ) !== -1 ) &&
-									s.indexOf( 'submenu' ) === -1 ) {
-									hoverBg = bg; // keep updating — last match wins
+								if ( bg &&
+									s.indexOf( '#adminmenu' ) !== -1 &&
+									s.indexOf( 'submenu' ) === -1 &&
+									( s.indexOf( 'menu-top' ) !== -1 || s.indexOf( 'opensub' ) !== -1 ) &&
+									( s.indexOf( ':hover' ) !== -1 || s.indexOf( 'opensub' ) !== -1 ) ) {
+									hoverBg = bg; // last match wins (scheme overrides base)
 								}
 							}
 						} catch ( e ) {}
@@ -390,7 +402,7 @@
 					if ( hoverBg ) {
 						$wpRail[ 0 ].style.setProperty( '--wc-rail-hover-bg', hoverBg );
 					}
-				}() );
+				} );
 
 				// Icon mirror — some plugins (e.g. Code Snippets) register their
 				// admin menu icon via CSS rules scoped to
