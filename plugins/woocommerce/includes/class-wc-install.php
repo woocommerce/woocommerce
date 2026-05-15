@@ -329,9 +329,6 @@ class WC_Install {
 			'wc_update_1080_slim_orders_meta_key_index',
 			'wc_update_1080_backfill_email_template_sync_meta',
 		),
-		'10.9.0' => array(
-			'wc_update_1090_migrate_legacy_variation_gallery_meta',
-		),
 	);
 
 	/**

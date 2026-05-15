@@ -170,7 +170,7 @@ class LegacyVariationGalleryCompatibility implements RegisterHooksInterface {
 			return array_values( wp_parse_id_list( $gallery_image_ids ) );
 		}
 
-		// Sentinel set: respect the explicit "no images" choice.
+		// Sentinel set: respect the explicit "no images" choice; legacy meta remains for BC.
 		if ( self::is_variation_id_core_managed( $variation->get_id() ) ) {
 			return array();
 		}

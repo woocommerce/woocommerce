@@ -302,16 +302,6 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Ensures the legacy variation gallery migrator is registered in the 10.9.0 update batch.
-	 */
-	public function test_db_update_callbacks_include_legacy_variation_gallery_migration(): void {
-		$callbacks = \WC_Install::get_db_update_callbacks();
-
-		$this->assertArrayHasKey( '10.9.0', $callbacks );
-		$this->assertContains( 'wc_update_1090_migrate_legacy_variation_gallery_meta', $callbacks['10.9.0'] );
-	}
-
-	/**
 	 * Test that order stats table schema includes fulfillment_status column for new installations with fulfillments feature enabled.
 	 *
 	 * @return void
