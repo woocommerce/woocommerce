@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reduce quick edit drawer title to 15px and add 24px gap between the header and the first content element.

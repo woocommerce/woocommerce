@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Refresh the floating WC Admin header to consolidate Screen options, Help, Activity, and Finish setup into a single icon-only tab group, removing the duplicate page title that previously appeared on top of wp-admin's own H1 on classic admin screens.

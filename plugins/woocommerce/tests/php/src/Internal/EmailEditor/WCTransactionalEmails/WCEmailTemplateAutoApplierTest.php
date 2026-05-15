@@ -8,6 +8,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\Integration;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncRegistry;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsGenerator;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 
@@ -139,6 +140,71 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 		$this->assertSame( $expected_hash, (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, true ) );
 		$this->assertSame( $expected_version, (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::VERSION_META_KEY, true ) );
 		$this->assertNotSame( '', (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_SYNCED_AT_META_KEY, true ) );
+		$this->assertSame(
+			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
+			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
+		);
+	}
+
+	/**
+	 * @testdox Should stamp _wc_email_template_last_core_render with the new canonical post_content after apply_to_post.
+	 */
+	public function test_apply_to_post_stamps_last_core_render(): void {
+		$email_id = 'wc_test_auto_apply_last_core_render';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+
+		// Simulate a core-template change so the auto-apply has something to write.
+		add_filter(
+			'woocommerce_email_content_post_data',
+			static function ( array $post_data ) use ( $email_id ): array {
+				if ( ( $post_data['post_name'] ?? '' ) === $email_id ) {
+					$post_data['post_content'] = (string) ( $post_data['post_content'] ?? '' ) . "\n<!-- new core release -->";
+				}
+				return $post_data;
+			}
+		);
+
+		$expected_canonical = WCTransactionalEmailPostsGenerator::compute_canonical_post_content( $email );
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
+		$this->assertIsArray( $result, 'Atom must return an array on success.' );
+
+		$stored_render = (string) get_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY,
+			true
+		);
+
+		$this->assertNotSame( '', $stored_render, 'last_core_render must be populated after auto-apply.' );
+		$this->assertSame(
+			$expected_canonical,
+			$stored_render,
+			'last_core_render must equal the new canonical post_content (post-filter).'
+		);
+	}
+
+	/**
+	 * @testdox Should stamp STATUS_IN_SYNC via the classifier after a successful apply_to_post.
+	 *
+	 * The auto-applier always writes full canonical content, so the classifier
+	 * naturally returns IN_SYNC. This test pins the contract that the stamped
+	 * status comes through the classifier rather than from a hard-coded literal,
+	 * so a future regression that introduces a partial-apply path would trip it.
+	 */
+	public function test_apply_to_post_stamps_status_via_classifier(): void {
+		$email_id = 'auto_applier_classifier_path';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+		$this->assertInstanceOf( \WC_Email::class, $email );
+
+		$result = WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
+		$this->assertIsArray( $result );
+
 		$this->assertSame(
 			WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC,
 			(string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::STATUS_META_KEY, true )
@@ -283,6 +349,81 @@ class WCEmailTemplateAutoApplierTest extends \WC_Unit_Test_Case {
 		$this->assertSame( WCEmailTemplateDivergenceDetector::STATUS_IN_SYNC, $result['status'] );
 
 		$this->assertSame( $expected_canonical, (string) get_post( $post_id )->post_content );
+	}
+
+	/**
+	 * @testdox Should fire `_update_applied` Tracks event on successful auto-applier write.
+	 */
+	public function test_apply_to_post_fires_update_applied_in_auto_mode(): void {
+		$email_id = 'wc_test_auto_apply_tracks_auto';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+
+		$captured = array();
+		WCEmailTemplateSyncTracker::set_event_recorder(
+			static function ( string $event_name, array $payload ) use ( &$captured ): void {
+				$captured[] = array( $event_name, $payload );
+			}
+		);
+
+		try {
+			WCEmailTemplateAutoApplier::apply_to_post( $email, $post_id );
+		} finally {
+			WCEmailTemplateSyncTracker::set_event_recorder( null );
+		}
+
+		$applied_events = array_values(
+			array_filter(
+				$captured,
+				static fn( array $entry ): bool => WCEmailTemplateSyncTracker::EVENT_UPDATE_APPLIED === $entry[0]
+			)
+		);
+
+		$this->assertCount( 1, $applied_events, 'Auto-applier path should record exactly one _update_applied event.' );
+		$this->assertSame( WCEmailTemplateSyncTracker::APPLIED_FROM_AUTO, $applied_events[0][1]['applied_from'] );
+	}
+
+	/**
+	 * @testdox Should NOT fire `_update_applied` when apply_to_post is invoked from the reset path.
+	 */
+	public function test_apply_to_post_does_not_fire_update_applied_on_reset_path(): void {
+		$email_id = 'wc_test_auto_apply_tracks_reset_silent';
+		$post_id  = $this->generate_stamped_post( $email_id );
+
+		$emails_by_id = $this->posts_manager->get_emails_by_id();
+		$email        = $emails_by_id[ $email_id ];
+
+		$captured = array();
+		WCEmailTemplateSyncTracker::set_event_recorder(
+			static function ( string $event_name, array $payload ) use ( &$captured ): void {
+				$captured[] = array( $event_name, $payload );
+			}
+		);
+
+		try {
+			$result = WCEmailTemplateAutoApplier::apply_to_post(
+				$email,
+				$post_id,
+				array( 'require_uncustomized' => false )
+			);
+		} finally {
+			WCEmailTemplateSyncTracker::set_event_recorder( null );
+		}
+
+		// Assert the reset itself succeeded — otherwise an early bail would
+		// produce zero events and false-pass the silence assertion below.
+		$this->assertIsArray( $result, 'Reset path setup must succeed before asserting Tracks silence.' );
+
+		$applied_events = array_values(
+			array_filter(
+				$captured,
+				static fn( array $entry ): bool => WCEmailTemplateSyncTracker::EVENT_UPDATE_APPLIED === $entry[0]
+			)
+		);
+
+		$this->assertSame( array(), $applied_events, 'Reset path must not emit `_update_applied` with applied_from=auto.' );
 	}
 
 	/**

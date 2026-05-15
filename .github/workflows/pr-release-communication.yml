@@ -1,0 +1,283 @@
+name: PR Release Communication
+
+on:
+  pull_request_target:
+    types: [closed]
+
+concurrency:
+  group: release-comm-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  # ─────────────────────────────────────────────────────────────
+  # JOB 1: Feature Highlights (for users/merchants)
+  # ─────────────────────────────────────────────────────────────
+  feature-highlight:
+    name: Generate Feature Highlight
+    if: |
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.body, '[x] **Feature Highlight**')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Add Feature Highlight label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['feature highlight']
+            });
+
+      - name: Generate Feature Highlight
+        id: highlight
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: >
+            --allowedTools "Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --json-schema '{"type":"object","properties":{"title":{"type":"string"},"what_changed":{"type":"string"},"user_impact":{"type":"string"}},"required":["title","what_changed","user_impact"]}'
+          prompt: |
+            Feature Highlight Generator for WooCommerce
+
+            REPO: ${{ github.repository }}
+            PR: #${{ github.event.pull_request.number }}
+
+            OBJECTIVE
+            Generate a feature highlight for release notes and announcements.
+
+            OUTPUT FORMAT (JSON)
+            - title: Short, catchy title (5-10 words)
+            - what_changed: 2-3 sentences describing the changes
+            - user_impact: 2-3 sentences explaining benefits for store owners/merchants
+
+            METHOD
+            1. gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,body
+            2. gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+
+            ANALYSIS GUIDELINES
+
+            Title:
+            - Keep to 1-3 sentences
+            - Lead with the user/merchant impact
+            - Avoid internal implementation details (file names, test coverage, etc.)
+            - Write as if for a changelog or newsletter audience
+            - Focus on "what's different now" not "what code changed"
+
+            What Changed:
+            - Describe behavior changes, not file modifications
+            - Focus on what users will see or experience differently
+            - Avoid listing specific files, classes, or internal components
+
+            User Impact:
+            - Think from the merchant's perspective
+            - What problem does this solve for them?
+            - Do they need to take any action?
+            - Will they notice anything different in the admin or frontend?
+            - Consider performance, UX, and workflow impacts
+
+            TONE: Clear, accessible, focus on user benefits
+
+      - name: Post Feature Highlight Comment
+        if: steps.highlight.outputs.structured_output
+        uses: actions/github-script@v7
+        env:
+          OUTPUT: ${{ steps.highlight.outputs.structured_output }}
+        with:
+          script: |
+            const data = JSON.parse(process.env.OUTPUT);
+            const marker = '<!-- feature-highlight-comment -->';
+
+            const body = `${marker}
+            ## ✨ Feature Highlight (Draft)
+
+            **${data.title}**
+
+            ### What Changed
+            ${data.what_changed}
+
+            ### User Impact
+            ${data.user_impact}
+
+            ---
+            *🤖 Auto-generated. Please review and edit.*
+
+            cc @woocommerce/developer-advocacy`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body,
+              });
+            }
+
+  # ─────────────────────────────────────────────────────────────
+  # JOB 2: Developer Advisory (for developers/extenders)
+  # ─────────────────────────────────────────────────────────────
+  developer-advisory:
+    name: Generate Developer Advisory
+    if: |
+      github.event.pull_request.merged == true &&
+      contains(github.event.pull_request.body, '[x] **Developer Advisory**')
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Add Developer Advisory label
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.addLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              labels: ['developer advisory']
+            });
+
+      - name: Generate Developer Advisory
+        id: advisory
+        uses: anthropics/claude-code-action@v1
+        with:
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
+          claude_args: >
+            --allowedTools "Bash(gh pr diff:*),Bash(gh pr view:*)"
+            --json-schema '{"type":"object","properties":{"title":{"type":"string"},"what_changed":{"type":"string"},"how_to_detect":{"type":"string"},"actions_needed":{"type":"string"}},"required":["title","what_changed","how_to_detect","actions_needed"]}'
+          prompt: |
+            Developer Advisory Generator for WooCommerce
+
+            REPO: ${{ github.repository }}
+            PR: #${{ github.event.pull_request.number }}
+
+            OBJECTIVE
+            Generate a developer advisory for changes that affect plugins, themes, or extensions.
+
+            OUTPUT FORMAT (JSON)
+            - title: Clear title describing the change (5-15 words)
+            - what_changed: 2-3 sentences describing the technical changes (hooks, APIs, classes, etc.)
+            - how_to_detect: 2-3 sentences explaining how developers can tell if their code is affected
+            - actions_needed: 2-3 sentences describing what developers need to do to adapt
+
+            METHOD
+            1. gh pr view ${{ github.event.pull_request.number }} --repo ${{ github.repository }} --json title,body
+            2. gh pr diff ${{ github.event.pull_request.number }} --repo ${{ github.repository }}
+
+            ANALYSIS GUIDELINES
+
+            Title:
+            - Keep to 1-3 sentences
+            - Lead with the developer impact
+            - Avoid internal implementation details (file names, test coverage, etc.)
+            - Write as if for a developer changelog audience
+            - Focus on "what's different now" not "what code changed"
+
+            What Changed:
+            - Describe behavior changes, not file modifications
+            - Focus on third-party developers building extensions/plugins
+            - Always mention new or changed hooks/filters with their exact names
+            - Highlight API changes, new endpoints, or data structure changes
+            - Call out breaking changes prominently
+            - Note deprecations and migration paths
+
+            How to Detect:
+            - Help developers identify if their code is affected
+            - Reference specific hook/filter names to search for
+            - Mention affected APIs or class methods
+
+            Actions Needed:
+            - Provide clear migration steps
+            - Identify new extension points they might want to use
+            - Note any deprecation timelines
+
+            FOCUS ON:
+            - Hook changes (added, removed, signature changes)
+            - Class/method changes (deprecations, removals, renames)
+            - Filter/action changes
+            - REST API changes
+            - Database/option key changes
+
+            TONE: Technical but clear, actionable
+
+      - name: Post Developer Advisory Comment
+        if: steps.advisory.outputs.structured_output
+        uses: actions/github-script@v7
+        env:
+          OUTPUT: ${{ steps.advisory.outputs.structured_output }}
+        with:
+          script: |
+            const data = JSON.parse(process.env.OUTPUT);
+            const marker = '<!-- developer-advisory-comment -->';
+
+            const body = `${marker}
+            ## ⚠️ Developer Advisory (Draft)
+
+            **${data.title}**
+
+            ### What Changed
+            ${data.what_changed}
+
+            ### How to Detect if You're Affected
+            ${data.how_to_detect}
+
+            ### Actions Needed
+            ${data.actions_needed}
+
+            ---
+            *🤖 Auto-generated. Please review and edit.*
+
+            cc @woocommerce/developer-advocacy`;
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+
+            const existing = comments.find(c => c.body.includes(marker));
+
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body: body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: body,
+              });
+            }

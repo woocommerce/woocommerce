@@ -19,6 +19,88 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 	private const VALID_JSON_SCHEMA_TYPES = array( 'string', 'number', 'integer', 'boolean', 'object', 'array', 'null' );
 
 	/**
+	 * Ability IDs registered by these tests.
+	 *
+	 * @var array
+	 */
+	private $registered_ability_ids = array();
+
+	/**
+	 * Ability category IDs registered by these tests.
+	 *
+	 * @var array
+	 */
+	private $registered_ability_category_ids = array();
+
+	/**
+	 * Original value of $wp_actions['wp_abilities_api_init'] to restore in tearDown.
+	 *
+	 * @var int|null
+	 */
+	private $original_wp_abilities_api_init_action_count;
+
+	/**
+	 * Original value of $wp_actions['wp_abilities_api_categories_init'] to restore in tearDown.
+	 *
+	 * @var int|null
+	 */
+	private $original_wp_abilities_api_categories_init_action_count;
+
+	/**
+	 * Set up before each test.
+	 */
+	public function setUp(): void {
+		global $wp_actions;
+
+		parent::setUp();
+
+		$this->original_wp_abilities_api_init_action_count            = $wp_actions['wp_abilities_api_init'] ?? null;
+		$this->original_wp_abilities_api_categories_init_action_count = $wp_actions['wp_abilities_api_categories_init'] ?? null;
+
+		if ( ! function_exists( 'wp_register_ability' ) ) {
+			$abilities_bootstrap = WP_PLUGIN_DIR . '/woocommerce/vendor/wordpress/abilities-api/includes/bootstrap.php';
+			if ( file_exists( $abilities_bootstrap ) ) {
+				require_once $abilities_bootstrap;
+			}
+		}
+	}
+
+	/**
+	 * Clean up after each test.
+	 */
+	public function tearDown(): void {
+		global $wp_actions;
+
+		foreach ( $this->registered_ability_ids as $ability_id ) {
+			if ( function_exists( 'wp_unregister_ability' ) ) {
+				wp_unregister_ability( $ability_id );
+			}
+		}
+		$this->registered_ability_ids = array();
+
+		foreach ( $this->registered_ability_category_ids as $category_id ) {
+			if ( function_exists( 'wp_unregister_ability_category' ) ) {
+				wp_unregister_ability_category( $category_id );
+			}
+		}
+		$this->registered_ability_category_ids = array();
+
+		if ( null !== $this->original_wp_abilities_api_init_action_count ) {
+			$wp_actions['wp_abilities_api_init'] = $this->original_wp_abilities_api_init_action_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		} elseif ( isset( $wp_actions['wp_abilities_api_init'] ) ) {
+			unset( $wp_actions['wp_abilities_api_init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		if ( null !== $this->original_wp_abilities_api_categories_init_action_count ) {
+			$wp_actions['wp_abilities_api_categories_init'] = $this->original_wp_abilities_api_categories_init_action_count; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		} elseif ( isset( $wp_actions['wp_abilities_api_categories_init'] ) ) {
+			unset( $wp_actions['wp_abilities_api_categories_init'] ); // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		}
+
+		parent::tearDown();
+	}
+
+	/**
 	 * Helper to invoke the private sanitize_args_to_schema method.
 	 *
 	 * @param array $args WordPress REST API arguments array.
@@ -45,6 +127,51 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 		$method->setAccessible( true );
 
 		return $method->invoke( null, $controller, $operation );
+	}
+
+	/**
+	 * Register the test ability category if the suite has not already registered it.
+	 *
+	 * @param string $category_id Ability category ID.
+	 */
+	private function ensure_test_ability_category( string $category_id ): void {
+		if ( ! function_exists( 'wp_register_ability_category' ) || ! function_exists( 'wp_has_ability_category' ) ) {
+			return;
+		}
+
+		if ( wp_has_ability_category( $category_id ) ) {
+			return;
+		}
+
+		$category = null;
+		$callback = null;
+		$callback = function () use ( &$category, $category_id, &$callback ) {
+			remove_action( 'wp_abilities_api_categories_init', $callback );
+
+			if ( wp_has_ability_category( $category_id ) ) {
+				return;
+			}
+
+			$category = wp_register_ability_category(
+				$category_id,
+				array(
+					'label'       => 'WooCommerce REST API',
+					'description' => 'REST API operations for WooCommerce resources.',
+				)
+			);
+		};
+
+		add_action( 'wp_abilities_api_categories_init', $callback );
+		do_action( 'wp_abilities_api_categories_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		remove_action( 'wp_abilities_api_categories_init', $callback );
+
+		if ( null !== $category ) {
+			$this->assertNotWPError( $category, 'Test ability category should register successfully.' );
+			$this->assertNotNull( $category, 'Test ability category should register successfully.' );
+			$this->registered_ability_category_ids[] = $category_id;
+		}
+
+		$this->assertTrue( wp_has_ability_category( $category_id ), 'Test ability category should be available.' );
 	}
 
 	/**
@@ -112,6 +239,47 @@ class RestAbilityFactoryTest extends WC_Unit_Test_Case {
 				return $this->schema;
 			}
 		};
+	}
+
+	/**
+	 * @testdox Should mark REST-derived abilities for the deprecated WooCommerce MCP endpoint.
+	 */
+	public function test_register_controller_abilities_marks_rest_abilities_for_deprecated_mcp(): void {
+		$this->assertTrue( function_exists( 'wp_register_ability' ), 'Abilities API should be available.' );
+		$this->assertTrue( class_exists( \WC_REST_Products_Controller::class ), 'Products REST controller should be available.' );
+		$this->ensure_test_ability_category( 'woocommerce-rest' );
+
+		$ability_id = 'woocommerce/rest-factory-metadata-test';
+		$config     = array(
+			'controller' => \WC_REST_Products_Controller::class,
+			'route'      => '/wc/v3/products',
+			'abilities'  => array(
+				array(
+					'id'          => $ability_id,
+					'operation'   => 'list',
+					'label'       => 'List REST factory test products',
+					'description' => 'Retrieve REST factory test products.',
+				),
+			),
+		);
+
+		$callback = null;
+		$callback = static function () use ( $config, &$callback ) {
+			remove_action( 'wp_abilities_api_init', $callback );
+
+			RestAbilityFactory::register_controller_abilities( $config );
+		};
+
+		add_action( 'wp_abilities_api_init', $callback );
+		do_action( 'wp_abilities_api_init' ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test bootstrap for Abilities API registration.
+		remove_action( 'wp_abilities_api_init', $callback );
+
+		$ability = wp_get_ability( $ability_id );
+
+		$this->assertNotNull( $ability, 'REST-derived test ability should register successfully.' );
+		$this->registered_ability_ids[] = $ability_id;
+		$this->assertTrue( $ability->get_meta_item( 'show_in_rest', false ), 'REST-derived abilities should remain exposed through the Abilities REST API.' );
+		$this->assertTrue( $ability->get_meta_item( RestAbilityFactory::EXPOSE_IN_DEPRECATED_MCP_META_KEY, false ), 'REST-derived abilities should opt in to the deprecated WooCommerce MCP endpoint.' );
 	}
 
 	// ── Bug 1: date-time type conversion (issue #62764) ──

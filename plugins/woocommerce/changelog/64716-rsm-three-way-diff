@@ -1,0 +1,4 @@
+Significance: patch
+Type: update
+
+Add three-way diff for block email template change-summary and selective apply when the new `_wc_email_template_last_core_render` post meta is present.

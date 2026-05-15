@@ -186,7 +186,7 @@ class LegacyRestApiStub implements RegisterHooksInterface {
 	public function get_endpoint_data( $endpoint, $params = array() ) {
 		wc_doing_it_wrong(
 			'get_endpoint_data',
-			"'WC()->api->get_endpoint_data' is deprecated, please use the following instead: wc_get_container()->get(Automattic\WooCommerce\Utilities\RestApiUtil::class)->get_endpoint_data",
+			'Deprecated, please use the following instead: wc_get_container()->get(Automattic\WooCommerce\Utilities\RestApiUtil::class)->get_endpoint_data',
 			'9.1.0'
 		);
 
