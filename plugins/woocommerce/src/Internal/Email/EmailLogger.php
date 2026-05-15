@@ -49,10 +49,12 @@ class EmailLogger implements RegisterHooksInterface {
 	/**
 	 * Capture the PHPMailer error from a failed wp_mail() call so it can be included in the log entry.
 	 *
-	 * Note: wp_mail_failed is a global hook; any plugin's failed wp_mail() will fire it. In the unlikely
-	 * event that a non-WooCommerce wp_mail() failure fires between a WooCommerce send failure and the
-	 * woocommerce_email_sent action, its error message could overwrite the WooCommerce one. The post-send
-	 * reset of $last_mail_error keeps the window as narrow as possible.
+	 * Error attribution is best-effort: wp_mail_failed is a global hook, so any plugin's failed
+	 * wp_mail() call will set $last_mail_error. The trailing edge is controlled — $last_mail_error
+	 * is cleared immediately after each WooCommerce send — but the leading edge is unbounded: a
+	 * non-WooCommerce wp_mail_failed fired before a WooCommerce send failure will be attributed
+	 * to that WooCommerce send. This may produce misleading error reasons in stores where other
+	 * plugins also call wp_mail().
 	 *
 	 * @param WP_Error $error The error returned by wp_mail.
 	 * @return void
@@ -198,10 +200,13 @@ class EmailLogger implements RegisterHooksInterface {
 		}
 
 		$id = null;
-		if ( in_array( $type, array( 'order', 'product', 'user' ), true ) ) {
-			// Known WooCommerce / WordPress types with a stable get_id() signature —
-			// skip the reflection round-trip on this hot path.
+		if ( $wc_object instanceof WC_Order || $wc_object instanceof WC_Product ) {
+			// Both have an explicit get_id() — safe to call directly.
 			$id = (int) $wc_object->get_id();
+		} elseif ( $wc_object instanceof WP_User ) {
+			// WP_User has no get_id() method; __call() returns false for unknown methods,
+			// which casts to 0 and bypasses the ID-property fallback below.
+			$id = (int) $wc_object->ID;
 		} elseif ( method_exists( $wc_object, 'get_id' ) ) {
 			try {
 				$method = new \ReflectionMethod( $wc_object, 'get_id' );
