@@ -1,8 +1,6 @@
 name: 'CI'
 on:
   pull_request:
-    # Include labeled so adding `run: full ci` can trigger full PR CI immediately.
-    types: [opened, synchronize, reopened, labeled]
   push:
     paths:
       - '**'
@@ -49,17 +47,11 @@ jobs:
     if: ${{ !cancelled() && github.event_name == 'pull_request' }}
     runs-on: ubuntu-latest
     outputs:
-      run-full-ci: ${{ steps.ci-mode.outputs.run-full-ci }}
       needs-code-validation: ${{ steps.target-changes.outputs.needs-code-validation }}
       needs-changelog-validation: ${{ steps.target-changes.outputs.needs-changelog-validation }}
       needs-markdown-validation:  ${{ steps.target-changes.outputs.needs-markdown-validation }}
       needs-syncpack-validation:  ${{ steps.target-changes.outputs.needs-syncpack-validation }}
     steps:
-      - name: 'Check CI mode'
-        id: ci-mode
-        run: |
-          echo "run-full-ci=${{ contains( github.event.pull_request.labels.*.name, 'run: full ci' ) }}" >> "$GITHUB_OUTPUT"
-
       - uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: target-changes
         with:
@@ -79,7 +71,7 @@ jobs:
     # which projects have changed and what kind of change occurred. This lets us build the
     # matrices that we can use to run CI tasks only on the projects that need them.
     name: 'Build Project Jobs'
-    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.run-full-ci == 'true' ) }}
+    if: ${{ !cancelled() }}
     needs: 'identify-jobs-to-run'
     runs-on: ubuntu-latest
     outputs:
@@ -129,11 +121,10 @@ jobs:
             child_process.execSync( `pnpm utils ci-jobs ${ prNumberFilter } --event ${ githubEvent }` );
 
   project-lint-jobs:
-    # Full PR CI is opt-in. Add `run: full ci` to run these jobs on a PR.
     name: "Lint - ${{ matrix.projectName }} ${{ ( matrix.optional && ' (optional)' ) || '' }}"
     runs-on: ubuntu-latest
     needs: [ 'identify-jobs-to-run', 'project-jobs' ]
-    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.run-full-ci == 'true' && needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && needs.project-jobs.outputs.lint-jobs != '[]' }}
+    if: ${{ !cancelled() && github.event_name == 'pull_request' && needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && needs.project-jobs.outputs.lint-jobs != '[]' }}
     strategy:
       fail-fast: false
       max-parallel: 4
@@ -160,8 +151,8 @@ jobs:
   project-test-jobs:
     name: '${{ matrix.name }}'
     runs-on: ubuntu-latest
-    needs: [ 'identify-jobs-to-run', 'project-jobs' ]
-    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || ( needs.identify-jobs-to-run.outputs.run-full-ci == 'true' && needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) ) && needs.project-jobs.outputs.test-jobs != '[]' }}
+    needs: 'project-jobs'
+    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' ) && needs.project-jobs.outputs.test-jobs != '[]' }}
     env: ${{ matrix.testEnv.envVars }}
     strategy:
       fail-fast: false
@@ -306,9 +297,9 @@ jobs:
     # on the results of the other jobs in the workflow.
     name: 'Evaluate Project Job Statuses'
     runs-on: ubuntu-latest
-    needs: [ 'identify-jobs-to-run', 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
+    needs: [ 'project-jobs', 'project-lint-jobs', 'project-test-jobs', 'validate-changelog', 'validate-markdown', 'validate-syncpack' ]
     # This job must run for all trigger types (not just PRs) so that alert-on-failure can access its outputs
-    if: ${{ !cancelled() && ( github.event_name != 'pull_request' || needs.identify-jobs-to-run.outputs.run-full-ci == 'true' ) }}
+    if: ${{ !cancelled() }}
     outputs:
       non_successful_jobs: ${{ steps.evaluation.outputs.non_successful_jobs }}
     steps:
@@ -334,24 +325,6 @@ jobs:
           fi
 
           node .github/workflows/scripts/evaluate-jobs-conclusions.js
-
-  full-ci-required:
-    name: 'Full CI Required'
-    runs-on: ubuntu-latest
-    needs: [ 'identify-jobs-to-run', 'evaluate-project-jobs' ]
-    if: ${{ always() && github.event_name == 'pull_request' }}
-    steps:
-      - name: 'Check full CI status'
-        run: |
-          if [[ "${{ needs.identify-jobs-to-run.outputs.run-full-ci }}" != "true" ]]; then
-            echo "::error::Add the 'run: full ci' label to run full CI before merging."
-            exit 1
-          fi
-
-          if [[ "${{ needs.evaluate-project-jobs.result }}" != "success" ]]; then
-            echo "::error::Full CI has not passed for this commit."
-            exit 1
-          fi
 
   alert-on-failure:
     name: 'Report results on Slack'
@@ -402,8 +375,8 @@ jobs:
 
   test-reports:
     name: 'Test reports - ${{ matrix.report }}'
-    needs: ['identify-jobs-to-run', 'project-jobs', 'project-test-jobs', 'evaluate-project-jobs']
-    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || ( needs.identify-jobs-to-run.outputs.run-full-ci == 'true' && needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && ! github.event.pull_request.head.repo.fork ) ) && needs.project-jobs.outputs.report-jobs != '[]' }}
+    needs: ['project-jobs', 'project-test-jobs', 'evaluate-project-jobs']
+    if: ${{ !cancelled() && github.repository == 'woocommerce/woocommerce' && ( github.event_name != 'pull_request' || ( needs.identify-jobs-to-run.outputs.needs-code-validation == 'true' && ! github.event.pull_request.head.repo.fork ) ) && needs.project-jobs.outputs.report-jobs != '[]' }}
     strategy:
       fail-fast: false
       max-parallel: 1
