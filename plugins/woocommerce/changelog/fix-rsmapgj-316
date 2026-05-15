@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render the "Remove" control in the Product data > Attributes panel as a `<button>` element instead of an `<a>` link so it is announced as a button by screen readers and activates with the Space key (WCAG 2.2 SC 4.1.2, 2.1.1).

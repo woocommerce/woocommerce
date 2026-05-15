@@ -6512,7 +6512,16 @@ img.help_tip {
 				margin-right: 12px;
 			}
 
-			a.delete {
+			button.delete,
+			button.edit {
+				background: none;
+				border: 0;
+				padding: 0;
+				cursor: pointer;
+			}
+
+			a.delete,
+			button.delete {
 				color: red;
 				font-weight: normal;
 				line-height: 26px;
@@ -6520,7 +6529,8 @@ img.help_tip {
 				position: relative;
 			}
 
-			a.edit {
+			a.edit,
+			button.edit {
 				font-weight: normal;
 				line-height: 26px;
 				text-decoration: none;
@@ -6561,6 +6571,8 @@ img.help_tip {
 
 			a.delete,
 			a.edit,
+			button.delete,
+			button.edit,
 			.sort {
 				margin-top: 0.25em;
 			}
@@ -6568,6 +6580,8 @@ img.help_tip {
 		&.woocommerce_variation h3 {
 			a.delete,
 			a.edit,
+			button.delete,
+			button.edit,
 			.sort {
 				margin-top: 0.45em;
 			}

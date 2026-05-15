@@ -7,7 +7,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<h3>
 		<div class="handlediv" title="<?php esc_attr_e( 'Click to toggle', 'woocommerce' ); ?>"></div>
 		<div class="tips sort" data-tip="<?php esc_attr_e( 'Drag and drop to set admin attribute order', 'woocommerce' ); ?>"></div>
-		<a href="#" class="remove_row delete"><?php esc_html_e( 'Remove', 'woocommerce' ); ?></a>
+		<button type="button" class="remove_row delete"><?php esc_html_e( 'Remove', 'woocommerce' ); ?></button>
 		<strong class="attribute_name<?php echo esc_attr( $attribute->get_name() === '' ? ' placeholder' : '' ); ?>"><?php echo esc_html( $attribute->get_name() !== '' ? wc_attribute_label( $attribute->get_name() ) : __( 'New attribute', 'woocommerce' ) ); ?></strong>
 	</h3>
 	<div class="woocommerce_attribute_data wc-metabox-content hidden">
