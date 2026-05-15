@@ -80,6 +80,60 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox `order.updated` webhook is enqueued when a refund is deleted via the `woocommerce_refund_deleted` action.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/26532 - deleting a refund
+	 * did not fire the `order.updated` webhook because the deletion code path only triggered
+	 * `woocommerce_refund_deleted`, which was not bound to the `order.updated` topic.
+	 */
+	public function test_order_updated_webhook_fires_on_refund_deletion() {
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		$webhook = new WC_Webhook();
+		$webhook->set_name( 'Test order.updated on refund deletion' );
+		$webhook->set_topic( 'order.updated' );
+		$webhook->set_delivery_url( 'http://example.com/wc-webhook-sink' );
+		$webhook->set_status( 'active' );
+		$webhook->set_user_id( 1 );
+		$webhook->save();
+		$webhook->enqueue();
+
+		$captured = array();
+		$listener = function ( $wh, $arg ) use ( &$captured ) {
+			$captured[] = array(
+				'topic' => $wh->get_topic(),
+				'arg'   => $arg,
+			);
+		};
+		add_action( 'woocommerce_webhook_process_delivery', $listener, 10, 2 );
+
+		try {
+			// Simulate the AJAX refund deletion path: `class-wc-ajax.php::delete_refund()`
+			// fires `woocommerce_refund_deleted` with ( $refund_id, $order_id ).
+			$refund_id = 987654321;
+			// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Test code re-firing existing hook.
+			do_action( 'woocommerce_refund_deleted', $refund_id, $order->get_id() );
+
+			$matched = array_filter(
+				$captured,
+				function ( $entry ) use ( $order ) {
+					return 'order.updated' === $entry['topic'] && (int) $entry['arg'] === $order->get_id();
+				}
+			);
+
+			$this->assertCount(
+				1,
+				$matched,
+				'The order.updated webhook should be enqueued exactly once for the parent order when a refund is deleted.'
+			);
+		} finally {
+			remove_action( 'woocommerce_webhook_process_delivery', $listener, 10 );
+		}
+	}
+
+	/**
 	 * @testDox Check that a deleted administrator user (without content re-assigned to another user)
 	 * has all webhooks changed to user_id zero.
 	 */

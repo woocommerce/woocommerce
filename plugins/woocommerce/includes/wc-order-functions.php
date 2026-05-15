@@ -928,6 +928,31 @@ function wc_order_fully_refunded( $order_id ) {
 add_action( 'woocommerce_order_status_refunded', 'wc_order_fully_refunded' );
 
 /**
+ * Fire the `woocommerce_update_order` action when a refund is deleted so that
+ * the parent order is treated as updated. Without this, the `order.updated`
+ * webhook (and any other listener of `woocommerce_update_order`) does not run
+ * on refund deletion, even though deleting a refund changes the order's
+ * effective state (e.g. its total refunded amount).
+ *
+ * @internal
+ *
+ * @since 10.9.0
+ *
+ * @param int $refund_id The deleted refund ID.
+ * @param int $order_id  The parent order ID.
+ */
+function wc_refund_deleted_trigger_order_update( $refund_id, $order_id ): void {
+	$order_id = absint( $order_id );
+	if ( ! $order_id ) {
+		return;
+	}
+
+	// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Re-firing an existing documented hook.
+	do_action( 'woocommerce_update_order', $order_id );
+}
+add_action( 'woocommerce_refund_deleted', 'wc_refund_deleted_trigger_order_update', 10, 2 );
+
+/**
  * Search orders.
  *
  * @since  2.6.0

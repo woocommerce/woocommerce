@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fire the order.updated webhook when a refund is deleted so consumers see the parent order's effective state change. Fixes #26532.
