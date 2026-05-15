@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: No user-facing changelog entry needed — internal fix for an editor-only console error.
+
+Declare `postId` and `postType` attributes on the `woocommerce/page-content-wrapper` block to back the existing `providesContext` mapping, and stabilize the related `useEffect` dependencies. Fixes a JS console error when editing the Cart/Checkout templates in the Site Editor.

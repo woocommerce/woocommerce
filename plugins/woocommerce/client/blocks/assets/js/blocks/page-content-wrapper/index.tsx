@@ -50,7 +50,7 @@ const Edit = ( {
 				setAttributes( { postId, postType: 'page' } );
 			}
 		}
-	}, [ attributes, setAttributes ] );
+	}, [ attributes.page, attributes.postId, setAttributes ] );
 
 	return (
 		<div { ...blockProps }>
