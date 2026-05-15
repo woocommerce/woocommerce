@@ -212,6 +212,72 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$this->assertSame( 'review', $comment->comment_type );
 		$this->assertSame( '5', get_comment_meta( $row['comment_id'], 'rating', true ) );
 		$this->assertSame( '1', get_comment_meta( $row['comment_id'], 'verified', true ) );
+		// Simple products store variation_id `0`. Summary meta is omitted entirely (empty string would be misleading).
+		$this->assertSame( '0', get_comment_meta( $row['comment_id'], ItemEligibility::VARIATION_META_KEY, true ) );
+		$this->assertSame( '', get_comment_meta( $row['comment_id'], ItemEligibility::VARIATION_SUMMARY_META_KEY, true ) );
+	}
+
+	/**
+	 * @testdox Two variations of one parent product each produce their own review with variation meta.
+	 */
+	public function test_writes_per_variation_meta_for_variable_product_rows(): void {
+		$variable      = WC_Helper_Product::create_variation_product();
+		$variation_ids = $variable->get_children();
+		$variation_a   = wc_get_product( $variation_ids[0] );
+		$variation_b   = wc_get_product( $variation_ids[1] );
+
+		$order = OrderHelper::create_order();
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->set_billing_email( 'shopper@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->add_product( $variation_a, 1 );
+		$order->add_product( $variation_b, 1 );
+		$order->save();
+
+		$items  = array_values( $order->get_items() );
+		$item_a = $items[0];
+		$item_b = $items[1];
+
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $variable->get_id(),
+					'order_item_id' => $item_a->get_id(),
+					'rating'        => 5,
+					'text'          => 'Loved variation A.',
+				),
+				array(
+					'product_id'    => $variable->get_id(),
+					'order_item_id' => $item_b->get_id(),
+					'rating'        => 3,
+					'text'          => 'Variation B was just OK.',
+				),
+			),
+		);
+
+		$response = $this->dispatch();
+		$this->assertTrue( $response['success'] );
+		$results = $response['data']['results'];
+		$this->assertCount( 2, $results );
+
+		$rows         = array_values( $results );
+		$comment_a_id = (int) $rows[0]['comment_id'];
+		$comment_b_id = (int) $rows[1]['comment_id'];
+		$this->assertNotSame( $comment_a_id, $comment_b_id, 'Each variation row should produce its own comment.' );
+
+		$this->assertSame( (string) $variation_a->get_id(), get_comment_meta( $comment_a_id, ItemEligibility::VARIATION_META_KEY, true ) );
+		$this->assertSame( (string) $variation_b->get_id(), get_comment_meta( $comment_b_id, ItemEligibility::VARIATION_META_KEY, true ) );
+
+		$summary_a = (string) get_comment_meta( $comment_a_id, ItemEligibility::VARIATION_SUMMARY_META_KEY, true );
+		$summary_b = (string) get_comment_meta( $comment_b_id, ItemEligibility::VARIATION_SUMMARY_META_KEY, true );
+		$this->assertNotSame( '', $summary_a, 'Variation A summary snapshot should be captured.' );
+		$this->assertNotSame( '', $summary_b, 'Variation B summary snapshot should be captured.' );
+		$this->assertNotSame( $summary_a, $summary_b, 'Each variation should snapshot its own attribute summary.' );
 	}
 
 	/**

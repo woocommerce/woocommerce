@@ -255,6 +255,12 @@ class SubmissionHandler {
 			add_comment_meta( $comment_id, 'rating', $rating, true );
 			add_comment_meta( $comment_id, 'verified', 1, true );
 			add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+			add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, $line_variation_id, true );
+
+			$variation_summary = self::format_variation_summary( $item );
+			if ( '' !== $variation_summary ) {
+				add_comment_meta( $comment_id, ItemEligibility::VARIATION_SUMMARY_META_KEY, $variation_summary, true );
+			}
 
 			$result['comment_id']  = (int) $comment_id;
 			$result['status']      = $require_mod ? 'pending_moderation' : 'ok';
@@ -371,5 +377,31 @@ class SubmissionHandler {
 			}
 		}
 		return $index;
+	}
+
+	/**
+	 * Render the variation's attribute summary as a single flat line.
+	 *
+	 * Used to snapshot the variation context onto the review comment at write
+	 * time (e.g. `"Size: Small, Colour: Red"`), so the value stays readable
+	 * even if the variation is later retired or its attributes change.
+	 * Returns an empty string for simple products or when the line item's
+	 * product can no longer be resolved.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param \WC_Order_Item_Product $item Order line item.
+	 */
+	private static function format_variation_summary( \WC_Order_Item_Product $item ): string {
+		if ( (int) $item->get_variation_id() <= 0 ) {
+			return '';
+		}
+
+		$product = $item->get_product();
+		if ( ! $product instanceof \WC_Product_Variation ) {
+			return '';
+		}
+
+		return (string) wc_get_formatted_variation( $product, true );
 	}
 }
