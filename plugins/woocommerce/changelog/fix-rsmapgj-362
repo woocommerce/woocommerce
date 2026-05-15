@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Run AssetDataRegistry::enqueue_asset_data() on admin_enqueue_scripts (with admin_print_footer_scripts kept as a fallback) so wcSettings data – and any shipping method instantiation it triggers – happens at the right phase in wp-admin.

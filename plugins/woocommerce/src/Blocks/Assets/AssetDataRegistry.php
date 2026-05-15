@@ -48,6 +48,17 @@ class AssetDataRegistry {
 	private $handle = 'wc-settings';
 
 	/**
+	 * Tracks whether the inline script payload has already been emitted.
+	 *
+	 * Used so we can hook `enqueue_asset_data` early on `admin_enqueue_scripts`
+	 * and again on the print-footer hook as a fallback for late `add()` calls,
+	 * without emitting `wcSettings` twice.
+	 *
+	 * @var bool
+	 */
+	private $asset_data_enqueued = false;
+
+	/**
 	 * Asset API interface for various asset registration.
 	 *
 	 * @var API
@@ -66,10 +77,35 @@ class AssetDataRegistry {
 
 	/**
 	 * Hook into WP asset registration for enqueueing asset data.
+	 *
+	 * In wp-admin, we run `enqueue_asset_data` at the tail end of
+	 * `admin_enqueue_scripts` (after the priority-14 dependency injection in
+	 * `WCAdminAssets::inject_wc_settings_dependencies`) so that any
+	 * data-generation side effects (for example shipping method
+	 * instantiation via callbacks registered through `add()`) happen during
+	 * the enqueue phase rather than during footer printing. This addresses
+	 * https://github.com/woocommerce/woocommerce/issues/54657 where the
+	 * historical `admin_print_footer_scripts` timing meant shipping methods
+	 * were loaded too late for hooks like `admin_enqueue_scripts` that
+	 * extensions register inside `WC_Shipping_Method::__construct`.
+	 *
+	 * We retain a `admin_print_footer_scripts` fallback so that any data
+	 * registered after the enqueue phase still gets emitted; the
+	 * `asset_data_enqueued` flag prevents double-emission of `wcSettings`.
+	 *
+	 * On the frontend we keep the original `wp_print_footer_scripts` timing
+	 * because block rendering during `the_content` enqueues `wc-settings`
+	 * after `wp_enqueue_scripts` has already fired.
 	 */
 	protected function init() {
 		add_action( 'init', array( $this, 'register_data_script' ) );
-		add_action( is_admin() ? 'admin_print_footer_scripts' : 'wp_print_footer_scripts', array( $this, 'enqueue_asset_data' ), 1 );
+
+		if ( is_admin() ) {
+			add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_asset_data' ), PHP_INT_MAX );
+			add_action( 'admin_print_footer_scripts', array( $this, 'enqueue_asset_data' ), 1 );
+		} else {
+			add_action( 'wp_print_footer_scripts', array( $this, 'enqueue_asset_data' ), 1 );
+		}
 	}
 
 	/**
@@ -381,8 +417,15 @@ class AssetDataRegistry {
 	 * happens if the script attached to `wc-settings` handle is enqueued. This
 	 * is done to allow for any potentially expensive data generation to only
 	 * happen for routes that need it.
+	 *
+	 * This method is idempotent: it will run at most once per request so it
+	 * can safely be hooked on multiple actions (see `init()`).
 	 */
 	public function enqueue_asset_data() {
+		if ( $this->asset_data_enqueued ) {
+			return;
+		}
+
 		if ( wp_script_is( $this->handle, 'enqueued' ) ) {
 			$this->initialize_core_data();
 			$this->execute_lazy_data();
@@ -401,6 +444,8 @@ class AssetDataRegistry {
 				$wc_settings_script . $preloaded_api_requests_script,
 				'before'
 			);
+
+			$this->asset_data_enqueued = true;
 		}
 	}
 

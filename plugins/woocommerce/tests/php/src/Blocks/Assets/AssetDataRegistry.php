@@ -86,4 +86,62 @@ class AssetDataRegistry extends \WP_UnitTestCase {
 		$this->assertEquals( $original_data, $data );
 		remove_filter( 'woocommerce_shared_settings', [ self::class, 'ndcallback' ] );
 	}
+
+	/**
+	 * Regression test for woocommerce/woocommerce#54657:
+	 *
+	 * In wp-admin the registry should hook `enqueue_asset_data` on
+	 * `admin_enqueue_scripts` (so data-generation side effects happen during
+	 * the enqueue phase rather than during footer printing) while keeping
+	 * the historical `admin_print_footer_scripts` hook as a fallback for
+	 * late `add()` calls.
+	 */
+	public function test_admin_hooks_are_registered_for_enqueue_asset_data(): void {
+		if ( ! is_admin() ) {
+			set_current_screen( 'dashboard' );
+		}
+
+		$registry = new AssetDataRegistryMock(
+			Package::container()->get( Api::class )
+		);
+
+		$this->assertNotFalse(
+			has_action( 'admin_enqueue_scripts', array( $registry, 'enqueue_asset_data' ) ),
+			'enqueue_asset_data must be hooked on admin_enqueue_scripts so shipping methods are not loaded too late.'
+		);
+		$this->assertNotFalse(
+			has_action( 'admin_print_footer_scripts', array( $registry, 'enqueue_asset_data' ) ),
+			'admin_print_footer_scripts fallback must remain so late add() calls still emit data.'
+		);
+	}
+
+	/**
+	 * `enqueue_asset_data` must be idempotent: invoking it twice (once from
+	 * the admin_enqueue_scripts hook, again from the admin_print_footer_scripts
+	 * fallback) must not emit `wcSettings` twice.
+	 */
+	public function test_enqueue_asset_data_is_idempotent(): void {
+		// Register and enqueue the wc-settings handle so the inline-script
+		// guard inside enqueue_asset_data() is satisfied.
+		// phpcs:ignore WordPress.WP.EnqueuedResourceParameters.NotInFooter,WordPress.WP.EnqueuedResourceParameters.MissingVersion
+		wp_register_script( 'wc-settings', '' );
+		wp_enqueue_script( 'wc-settings' );
+
+		$this->registry->add( 'test_key', 'test_value' );
+
+		$this->registry->enqueue_asset_data();
+		$this->registry->enqueue_asset_data();
+
+		$inline = wp_scripts()->get_data( 'wc-settings', 'before' );
+		$inline = is_array( $inline ) ? implode( '', $inline ) : (string) $inline;
+
+		$this->assertSame(
+			1,
+			substr_count( $inline, 'var wcSettings = JSON.parse' ),
+			'wcSettings must only be emitted once even if enqueue_asset_data() runs multiple times.'
+		);
+
+		wp_dequeue_script( 'wc-settings' );
+		wp_deregister_script( 'wc-settings' );
+	}
 }
