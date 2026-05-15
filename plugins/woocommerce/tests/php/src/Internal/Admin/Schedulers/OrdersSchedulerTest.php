@@ -444,6 +444,112 @@ class OrdersSchedulerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Trashing an order should resync analytics so the stats row reflects the trash status.
+	 */
+	public function test_trashing_order_updates_order_stats_status_to_wc_trash(): void {
+		// Run in immediate-import mode and force the import to run inline rather
+		// than being queued via Action Scheduler.
+		Features::disable( 'analytics-scheduled-import' );
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'wc_order_stats';
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		// Ensure the row exists with the processing status before trashing.
+		OrdersScheduler::import( $order->get_id() );
+		$status_before = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$table} WHERE order_id = %d", $order->get_id() ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame( 'wc-processing', $status_before );
+
+		// Trash the order through the standard data-store entry point so the
+		// woocommerce_trash_order hook fires.
+		$order->delete( false );
+
+		$status_after = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$table} WHERE order_id = %d", $order->get_id() ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame(
+			'wc-trash',
+			$status_after,
+			'Trashing an order should refresh the wc_order_stats row so trashed orders stop affecting analytics totals.'
+		);
+
+		remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+	}
+
+	/**
+	 * @testdox Untrashing an order should resync analytics so the stats row reflects the restored status.
+	 */
+	public function test_untrashing_order_updates_order_stats_status(): void {
+		Features::disable( 'analytics-scheduled-import' );
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+		add_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+
+		global $wpdb;
+		$table = $wpdb->prefix . 'wc_order_stats';
+
+		$order = \WC_Helper_Order::create_order();
+		$order->set_status( 'processing' );
+		$order->save();
+
+		OrdersScheduler::import( $order->get_id() );
+		$order->delete( false );
+
+		$this->assertSame(
+			'wc-trash',
+			$wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$table} WHERE order_id = %d", $order->get_id() ) ) // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		// Untrash the order via the data store.
+		$order->get_data_store()->untrash_order( $order );
+
+		$status_after = $wpdb->get_var( $wpdb->prepare( "SELECT status FROM {$table} WHERE order_id = %d", $order->get_id() ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertSame(
+			'wc-processing',
+			$status_after,
+			'Untrashing an order should restore the original status in wc_order_stats so it counts toward analytics again.'
+		);
+
+		remove_filter( 'woocommerce_analytics_disable_action_scheduling', '__return_true' );
+	}
+
+	/**
+	 * @testdox sync_on_order_trash_change should ignore non-order IDs.
+	 */
+	public function test_sync_on_order_trash_change_ignores_non_orders(): void {
+		Features::disable( 'analytics-scheduled-import' );
+		update_option( OrdersScheduler::SCHEDULED_IMPORT_OPTION, 'no' );
+
+		// Use a post ID that is not an order.
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Not an order',
+				'post_status' => 'publish',
+				'post_type'   => 'post',
+			)
+		);
+
+		// Should not throw or schedule anything.
+		OrdersScheduler::sync_on_order_trash_change( $post_id );
+
+		$action_hook = OrdersScheduler::get_action( 'import' );
+		$scheduled   = as_get_scheduled_actions(
+			array(
+				'hook'     => $action_hook,
+				'args'     => array( (int) $post_id ),
+				'status'   => 'pending',
+				'per_page' => 1,
+			),
+			ARRAY_A
+		);
+		$this->assertEmpty( $scheduled, 'No import action should be scheduled for a non-order post.' );
+
+		wp_delete_post( $post_id, true );
+	}
+
+	/**
 	 * Clear any scheduled batch processor actions.
 	 *
 	 * @return void

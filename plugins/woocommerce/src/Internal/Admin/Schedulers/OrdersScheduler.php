@@ -105,6 +105,14 @@ class OrdersScheduler extends ImportScheduler {
 			add_action( 'woocommerce_schedule_import', array( __CLASS__, 'possibly_schedule_import' ) );
 		}
 
+		// Trashed and untrashed orders need an analytics resync regardless of the
+		// import mode: in HPOS, trashing/untrashing bypasses `woocommerce_update_order`
+		// and updates `wc_orders.status` directly, leaving the existing `wc_order_stats`
+		// row stale and causing trashed orders to still appear in Analytics reports.
+		// See https://github.com/woocommerce/woocommerce/issues/36747.
+		add_action( 'woocommerce_trash_order', array( __CLASS__, 'sync_on_order_trash_change' ) );
+		add_action( 'woocommerce_untrash_order', array( __CLASS__, 'sync_on_order_trash_change' ) );
+
 		if ( Features::is_enabled( 'analytics-scheduled-import' ) ) {
 			// Watch for changes to the scheduled import option.
 			add_action( 'add_option_' . self::SCHEDULED_IMPORT_OPTION, array( __CLASS__, 'handle_scheduled_import_option_added' ), 10, 2 );
@@ -326,6 +334,46 @@ AND status NOT IN ( 'wc-auto-draft', 'trash', 'auto-draft' )
 
 		self::schedule_action( 'import', array( $order_id ) );
 		return $order_id;
+	}
+
+	/**
+	 * Re-sync the analytics lookup tables after an order is trashed or untrashed.
+	 *
+	 * Trashing and untrashing an order does not fire `woocommerce_update_order`
+	 * (especially in HPOS where the status column is updated directly), so the
+	 * existing `wc_order_stats` row keeps its previous status and trashed orders
+	 * keep contributing to Analytics totals. Re-running the import refreshes the
+	 * row with the new status (`wc-trash` or the restored status), letting the
+	 * existing excluded-status filtering keep trashed orders out of reports while
+	 * untrashed orders return to them.
+	 *
+	 * Triggers an immediate Action Scheduler import in immediate-mode, and runs
+	 * the import inline in scheduled-mode so the change is reflected without
+	 * waiting for the next batch (which would skip trashed orders entirely).
+	 *
+	 * @internal
+	 * @param int $order_id Order ID.
+	 * @return void
+	 */
+	public static function sync_on_order_trash_change( $order_id ) {
+		$order_id = (int) $order_id;
+		if ( ! $order_id ) {
+			return;
+		}
+
+		if ( ! OrderUtil::is_order( $order_id, array( 'shop_order' ) ) ) {
+			return;
+		}
+
+		if ( self::is_scheduled_import_enabled() ) {
+			// In scheduled-import mode the recurring batch processor filters out
+			// trashed orders, so stale rows would never be refreshed. Run the
+			// import inline instead.
+			self::import( $order_id );
+			return;
+		}
+
+		self::schedule_action( 'import', array( $order_id ) );
 	}
 
 	/**

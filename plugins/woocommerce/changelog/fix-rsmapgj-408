@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Analytics: exclude trashed orders from reports by resyncing the order stats row when an order is trashed or untrashed.
