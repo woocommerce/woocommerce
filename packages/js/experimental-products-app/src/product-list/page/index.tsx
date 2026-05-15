@@ -38,12 +38,7 @@ export function ProductListPageHeader( {
 	return (
 		<header className="woocommerce-product-list-page__header">
 			<Stack direction="row" justify="space-between" gap="sm">
-				<Stack
-					direction="row"
-					gap="sm"
-					align="center"
-					justify="start"
-				>
+				<Stack direction="row" gap="sm" align="center" justify="start">
 					<h2 className="woocommerce-product-list-page__header-title">
 						{ title }
 					</h2>

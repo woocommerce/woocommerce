@@ -321,7 +321,10 @@ export default function ProductList( {
 			<Tabs.Root value={ selectedTab } onValueChange={ onChangeTab }>
 				<Tabs.List
 					variant="minimal"
-					aria-label={ __( 'Filter products by status', 'woocommerce' ) }
+					aria-label={ __(
+						'Filter products by status',
+						'woocommerce'
+					) }
 				>
 					{ PRODUCT_LIST_TABS.map( ( tab ) => (
 						<Tabs.Tab key={ tab.value } value={ tab.value }>
