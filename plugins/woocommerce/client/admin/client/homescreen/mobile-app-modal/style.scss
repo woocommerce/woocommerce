@@ -268,26 +268,11 @@ button.components-button.send-magic-link-button {
 		line-height: 1.5;
 		color: #1e1e1e;
 	}
-
-	button.components-button.woocommerce-qr-direct-login__renew {
-		padding: 0;
-		height: auto;
-		font-size: 13px;
-		line-height: 1.5;
-		color: #007cba;
-
-		&:hover:not(:disabled),
-		&:focus:not(:disabled) {
-			color: #005a87;
-		}
-	}
 }
 
 // Step 3 — sign-in success panel.
 // Mirrors the rest of the modal: 24px / 16px vertical rhythm, body copy in
-// the same #50575e neutral as the help paragraph above the QR, and the
-// existing #007cba primary blue for the revoke CTA so it reads as a deliberate
-// destructive action without departing from the brand palette.
+// the same neutral as the help paragraph above the QR.
 .qr-login-success-step {
 	display: flex;
 	flex-direction: column;
@@ -329,17 +314,6 @@ button.components-button.send-magic-link-button {
 		margin: 0 0 8px;
 	}
 
-	button.components-button.qr-login-success-step__revoke-button {
-		background: #007cba;
-		color: #fff;
-
-		&:hover:not(:disabled),
-		&:focus:not(:disabled) {
-			background: #005a87;
-			color: #fff;
-		}
-	}
-
 	.qr-login-success-step__error {
 		margin: 12px 0 0;
 		color: #cc1818;
@@ -348,26 +322,13 @@ button.components-button.send-magic-link-button {
 	}
 }
 
-// Confirmation modal — keep the action row right-aligned (Cancel | Revoke)
-// and reuse the same blue for the destructive primary so it visually echoes
-// the trigger that opened the dialog.
+// Confirmation modal — keep the action row right-aligned (Cancel | Revoke).
 .components-modal__frame.qr-login-success-step__confirm-modal {
 	.qr-login-success-step__confirm-actions {
 		display: flex;
 		justify-content: flex-end;
 		gap: 12px;
 		margin-top: 16px;
-	}
-
-	button.components-button.qr-login-success-step__confirm-revoke-button {
-		background: #007cba;
-		color: #fff;
-
-		&:hover:not(:disabled),
-		&:focus:not(:disabled) {
-			background: #005a87;
-			color: #fff;
-		}
 	}
 }
 
