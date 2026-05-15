@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add `woocommerce_cart_item_needs_shipping` filter to allow plugins to override the per-item shipping requirement in WC_Cart.

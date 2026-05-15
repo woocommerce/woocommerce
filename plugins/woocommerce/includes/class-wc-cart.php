@@ -1631,8 +1631,18 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return bool
 	 */
 	protected function filter_items_needing_shipping( $item ) {
-		$product = $item['data'];
-		return $product && $product->needs_shipping();
+		$product        = $item['data'];
+		$needs_shipping = $product && $product->needs_shipping();
+
+		/**
+		 * Filters whether a cart item requires shipping.
+		 *
+		 * @since 10.9.0
+		 * @param bool  $needs_shipping Whether the cart item needs shipping.
+		 * @param array $cart_item      The cart item data.
+		 * @return bool Whether the cart item needs shipping.
+		 */
+		return (bool) apply_filters( 'woocommerce_cart_item_needs_shipping', $needs_shipping, $item );
 	}
 
 	/**
@@ -1766,14 +1776,7 @@ class WC_Cart extends WC_Legacy_Cart {
 			return false;
 		}
 
-		$needs_shipping = false;
-
-		foreach ( $this->get_cart_contents() as $values ) {
-			if ( $values['data']->needs_shipping() ) {
-				$needs_shipping = true;
-				break;
-			}
-		}
+		$needs_shipping = count( $this->get_items_needing_shipping() ) > 0;
 
 		return apply_filters( 'woocommerce_cart_needs_shipping', $needs_shipping );
 	}

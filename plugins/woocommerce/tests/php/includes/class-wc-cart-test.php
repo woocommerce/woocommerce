@@ -1416,4 +1416,56 @@ class WC_Cart_Test extends \WC_Unit_Test_Case {
 		$variation->delete( true );
 		$product->delete( true );
 	}
+
+	/**
+	 * @testdox woocommerce_cart_item_needs_shipping filter can force a shippable item to not need shipping
+	 */
+	public function test_cart_item_needs_shipping_filter_can_disable_shipping_for_item() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( false );
+		$product->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Without the filter the physical product should need shipping.
+		$this->assertTrue( WC()->cart->needs_shipping() );
+
+		$callback = function ( $needs_shipping, $cart_item ) {
+			return false;
+		};
+		add_filter( 'woocommerce_cart_item_needs_shipping', $callback, 10, 2 );
+
+		$this->assertFalse( WC()->cart->needs_shipping() );
+
+		remove_filter( 'woocommerce_cart_item_needs_shipping', $callback );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+	}
+
+	/**
+	 * @testdox woocommerce_cart_item_needs_shipping filter can force a virtual item to need shipping
+	 */
+	public function test_cart_item_needs_shipping_filter_can_enable_shipping_for_virtual_item() {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_virtual( true );
+		$product->save();
+
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		// Without the filter the virtual product should not need shipping.
+		$this->assertFalse( WC()->cart->needs_shipping() );
+
+		$callback = function ( $needs_shipping, $cart_item ) {
+			return true;
+		};
+		add_filter( 'woocommerce_cart_item_needs_shipping', $callback, 10, 2 );
+
+		$this->assertTrue( WC()->cart->needs_shipping() );
+
+		remove_filter( 'woocommerce_cart_item_needs_shipping', $callback );
+
+		WC()->cart->empty_cart();
+		$product->delete( true );
+	}
 }
