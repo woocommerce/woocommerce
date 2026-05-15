@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Uninstall: when WC_REMOVE_ALL_DATA is enabled, also remove the WooCommerce placeholder attachment, product_visibility taxonomy terms, and WooCommerce-owned _woocommerce_ / wc_ prefixed user meta.

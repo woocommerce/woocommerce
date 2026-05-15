@@ -2334,6 +2334,77 @@ $stock_notifications_table_schema;
 	}
 
 	/**
+	 * Delete the placeholder attachment created by WooCommerce during install.
+	 *
+	 * The attachment is referenced by the `woocommerce_placeholder_image` option and
+	 * is removed surgically by ID so that other plugins' attachments are not affected.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return void
+	 */
+	public static function remove_placeholder_attachment() {
+		$placeholder_image_id = (int) get_option( 'woocommerce_placeholder_image', 0 );
+
+		if ( $placeholder_image_id <= 0 ) {
+			return;
+		}
+
+		$post = get_post( $placeholder_image_id );
+
+		if ( $post instanceof WP_Post && 'attachment' === $post->post_type ) {
+			wp_delete_attachment( $placeholder_image_id, true );
+		}
+	}
+
+	/**
+	 * Delete usermeta rows created by WooCommerce core.
+	 *
+	 * Targets the explicit keys WooCommerce core writes to `wp_usermeta` (including
+	 * keys with a leading-underscore prefix and the `wc_` prefixed customer aggregates)
+	 * so they are cleaned up when uninstalling with the `WC_REMOVE_ALL_DATA` constant.
+	 *
+	 * Patterns kept conservative to avoid touching rows that may be owned by other
+	 * plugins/extensions.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return void
+	 */
+	public static function remove_user_meta() {
+		global $wpdb;
+
+		// Keys prefixed with `_woocommerce_` (e.g. `_woocommerce_persistent_cart_<blog_id>`,
+		// `_woocommerce_tracks_anon_id`, `_woocommerce_load_saved_cart_after_login`).
+		$wpdb->query( "DELETE FROM {$wpdb->usermeta} WHERE meta_key LIKE '\\_woocommerce\\_%'" );
+
+		// Explicit `wc_` prefixed keys owned by WooCommerce core: `wc_last_active`,
+		// `wc_order_count_*`, `wc_money_spent_*`.
+		$wpdb->query(
+			"DELETE FROM {$wpdb->usermeta} WHERE meta_key = 'wc_last_active'
+			OR meta_key LIKE 'wc\\_order\\_count\\_%'
+			OR meta_key LIKE 'wc\\_money\\_spent\\_%'"
+		);
+	}
+
+	/**
+	 * Taxonomies owned by WooCommerce that should be cleared on uninstall.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return string[]
+	 */
+	public static function get_taxonomies_to_remove() {
+		return array(
+			'product_cat',
+			'product_tag',
+			'product_shipping_class',
+			'product_type',
+			'product_visibility',
+		);
+	}
+
+	/**
 	 * Create files/directories.
 	 *
 	 * @return void

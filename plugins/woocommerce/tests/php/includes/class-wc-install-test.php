@@ -483,4 +483,128 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
 		remove_filter( 'pre_option_' . \Automattic\WooCommerce\Admin\API\Reports\Orders\Stats\DataStore::OPTION_ORDER_STATS_TABLE_HAS_COLUMN_ORDER_FULFILLMENT_STATUS, $supply_column_status );
 	}
+
+	/**
+	 * Test that the WC-owned taxonomies list used by uninstall includes product_visibility.
+	 *
+	 * Regression for the issue where `product_visibility` terms remained in
+	 * `wp_term_taxonomy` after uninstalling with `WC_REMOVE_ALL_DATA` enabled.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_get_taxonomies_to_remove_includes_product_visibility(): void {
+		$taxonomies = WC_Install::get_taxonomies_to_remove();
+
+		$this->assertContains( 'product_visibility', $taxonomies );
+		$this->assertContains( 'product_cat', $taxonomies );
+		$this->assertContains( 'product_tag', $taxonomies );
+		$this->assertContains( 'product_shipping_class', $taxonomies );
+		$this->assertContains( 'product_type', $taxonomies );
+	}
+
+	/**
+	 * Test that remove_user_meta deletes _woocommerce_ and wc_ prefixed keys
+	 * owned by WooCommerce core, while leaving unrelated rows intact.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_remove_user_meta_cleans_wc_owned_keys(): void {
+		$user_id = self::factory()->user->create();
+
+		// WC-owned rows that must be removed.
+		update_user_meta( $user_id, '_woocommerce_persistent_cart_1', array( 'cart' => true ) );
+		update_user_meta( $user_id, '_woocommerce_tracks_anon_id', 'anon-id-123' );
+		update_user_meta( $user_id, '_woocommerce_load_saved_cart_after_login', 1 );
+		update_user_meta( $user_id, 'wc_last_active', '1700000000' );
+		update_user_meta( $user_id, 'wc_order_count_test_key', 5 );
+		update_user_meta( $user_id, 'wc_money_spent_test_key', 100 );
+
+		// Rows owned by other plugins / WP core that must NOT be removed.
+		update_user_meta( $user_id, 'other_plugin_wc_setting', 'preserve-me' );
+		update_user_meta( $user_id, 'session_tokens', 'preserve-me' );
+
+		WC_Install::remove_user_meta();
+
+		$this->assertSame( '', (string) get_user_meta( $user_id, '_woocommerce_persistent_cart_1', true ) );
+		$this->assertSame( '', (string) get_user_meta( $user_id, '_woocommerce_tracks_anon_id', true ) );
+		$this->assertSame( '', (string) get_user_meta( $user_id, '_woocommerce_load_saved_cart_after_login', true ) );
+		$this->assertSame( '', (string) get_user_meta( $user_id, 'wc_last_active', true ) );
+		$this->assertSame( '', (string) get_user_meta( $user_id, 'wc_order_count_test_key', true ) );
+		$this->assertSame( '', (string) get_user_meta( $user_id, 'wc_money_spent_test_key', true ) );
+
+		$this->assertSame( 'preserve-me', get_user_meta( $user_id, 'other_plugin_wc_setting', true ) );
+		$this->assertSame( 'preserve-me', get_user_meta( $user_id, 'session_tokens', true ) );
+	}
+
+	/**
+	 * Test that remove_placeholder_attachment deletes only the attachment whose ID
+	 * is stored in the `woocommerce_placeholder_image` option.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_remove_placeholder_attachment_deletes_only_the_referenced_attachment(): void {
+		$placeholder_id = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_title'     => 'woocommerce-placeholder',
+				'post_status'    => 'inherit',
+				'post_mime_type' => 'image/webp',
+			)
+		);
+
+		$other_attachment_id = self::factory()->post->create(
+			array(
+				'post_type'      => 'attachment',
+				'post_title'     => 'some-other-image',
+				'post_status'    => 'inherit',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		$original_option_value = get_option( 'woocommerce_placeholder_image', 0 );
+		update_option( 'woocommerce_placeholder_image', $placeholder_id );
+
+		WC_Install::remove_placeholder_attachment();
+
+		$this->assertNull( get_post( $placeholder_id ), 'Placeholder attachment should be deleted.' );
+		$this->assertNotNull( get_post( $other_attachment_id ), 'Unrelated attachments must be preserved.' );
+
+		// Restore the original option value so we do not leak state.
+		update_option( 'woocommerce_placeholder_image', $original_option_value );
+
+		// Cleanup the surviving fixture.
+		wp_delete_post( $other_attachment_id, true );
+	}
+
+	/**
+	 * Test that remove_placeholder_attachment is a no-op when the option is unset
+	 * or does not point to an attachment.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_remove_placeholder_attachment_is_noop_when_option_missing_or_invalid(): void {
+		$original_option_value = get_option( 'woocommerce_placeholder_image', 0 );
+
+		// Case 1: option is 0 / missing. Should not throw / error.
+		update_option( 'woocommerce_placeholder_image', 0 );
+		WC_Install::remove_placeholder_attachment();
+		$this->assertTrue( true, 'No-op when the option is not set.' );
+
+		// Case 2: option points to a non-attachment post.
+		$non_attachment_id = self::factory()->post->create(
+			array(
+				'post_type'   => 'post',
+				'post_status' => 'publish',
+			)
+		);
+		update_option( 'woocommerce_placeholder_image', $non_attachment_id );
+
+		WC_Install::remove_placeholder_attachment();
+
+		$this->assertNotNull( get_post( $non_attachment_id ), 'Non-attachment posts must not be deleted.' );
+
+		// Cleanup.
+		update_option( 'woocommerce_placeholder_image', $original_option_value );
+		wp_delete_post( $non_attachment_id, true );
+	}
 }

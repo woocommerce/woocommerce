@@ -5,7 +5,7 @@
  * Uninstalling WooCommerce deletes user roles, pages, tables, and options.
  *
  * @package WooCommerce\Uninstaller
- * @version 2.3.0
+ * @version 10.9.0
  */
 
 defined( 'WP_UNINSTALL_PLUGIN' ) || exit;
@@ -67,6 +67,9 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Roles + caps.
 	WC_Install::remove_roles();
 
+	// Delete the placeholder attachment created during install.
+	WC_Install::remove_placeholder_attachment();
+
 	// Pages.
 	wp_trash_post( get_option( 'woocommerce_shop_page_id' ) );
 	wp_trash_post( get_option( 'woocommerce_cart_page_id' ) );
@@ -90,8 +93,10 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'woocommerce\_%';" );
 	$wpdb->query( "DELETE FROM $wpdb->options WHERE option_name LIKE 'widget\_woocommerce\_%';" );
 
-	// Delete usermeta.
+	// Delete usermeta written by WooCommerce core, including keys with the
+	// `woocommerce_`, `_woocommerce_`, and well-known `wc_` prefixes.
 	$wpdb->query( "DELETE FROM $wpdb->usermeta WHERE meta_key LIKE 'woocommerce\_%';" );
+	WC_Install::remove_user_meta();
 
 	// Delete our data from the post and post meta tables, and remove any additional tables we created.
 	$wpdb->query( "DELETE FROM {$wpdb->posts} WHERE post_type IN ( 'product', 'product_variation', 'shop_coupon', 'shop_order', 'shop_order_refund' );" );
@@ -103,7 +108,7 @@ if ( defined( 'WC_REMOVE_ALL_DATA' ) && true === WC_REMOVE_ALL_DATA ) {
 	// Delete terms if > WP 4.2 (term splitting was added in 4.2).
 	if ( version_compare( $wp_version, '4.2', '>=' ) ) {
 		// Delete term taxonomies.
-		foreach ( array( 'product_cat', 'product_tag', 'product_shipping_class', 'product_type' ) as $_taxonomy ) {
+		foreach ( WC_Install::get_taxonomies_to_remove() as $_taxonomy ) {
 			$wpdb->delete(
 				$wpdb->term_taxonomy,
 				array(
