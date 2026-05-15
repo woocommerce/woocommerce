@@ -228,6 +228,10 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				const { selectedAttributes } = state;
 				const hideInvalid = disabledAttributesAction === 'hide';
 
+				if ( ! Array.isArray( variationAttributeOptions ) ) {
+					return [];
+				}
+
 				return variationAttributeOptions.map( ( row, index ) => {
 					const disabled = ! isAttributeValueValid( {
 						attributeName: name,
