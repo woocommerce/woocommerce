@@ -174,6 +174,63 @@ class WC_Gateway_Paypal_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that the live IPN verification request is sent to the ipnpb.paypal.com endpoint.
+	 *
+	 * see @link https://github.com/woocommerce/woocommerce/issues/28513
+	 */
+	public function test_ipn_validate_uses_ipnpb_live_endpoint() {
+		$captured_url = $this->capture_ipn_validate_url( false );
+
+		$this->assertEquals( 'https://ipnpb.paypal.com/cgi-bin/webscr', $captured_url );
+	}
+
+	/**
+	 * Test that the sandbox IPN verification request is sent to the ipnpb.sandbox.paypal.com endpoint.
+	 *
+	 * see @link https://github.com/woocommerce/woocommerce/issues/28513
+	 */
+	public function test_ipn_validate_uses_ipnpb_sandbox_endpoint() {
+		$captured_url = $this->capture_ipn_validate_url( true );
+
+		$this->assertEquals( 'https://ipnpb.sandbox.paypal.com/cgi-bin/webscr', $captured_url );
+	}
+
+	/**
+	 * Run validate_ipn() against an HTTP short-circuit and capture the URL it posts to.
+	 *
+	 * @param bool $sandbox Whether to instantiate the handler in sandbox mode.
+	 * @return string The URL that validate_ipn() attempted to POST to.
+	 */
+	private function capture_ipn_validate_url( $sandbox ) {
+		$captured_url = '';
+
+		$capture = function ( $preempt, $args, $url ) use ( &$captured_url ) {
+			$captured_url = $url;
+			return array(
+				'response' => array( 'code' => 200 ),
+				'body'     => 'VERIFIED',
+			);
+		};
+
+		add_filter( 'pre_http_request', $capture, 10, 3 );
+
+		// phpcs:disable WordPress.Security.NonceVerification.Missing -- Simulating an inbound IPN POST for the unit test.
+		$previous_post = $_POST;
+		$_POST         = array( 'foo' => 'bar' );
+
+		$handler  = new WC_Gateway_Paypal_IPN_Handler( $sandbox );
+		$is_valid = $handler->validate_ipn();
+
+		$_POST = $previous_post;
+		// phpcs:enable WordPress.Security.NonceVerification.Missing
+		remove_filter( 'pre_http_request', $capture, 10 );
+
+		$this->assertTrue( $is_valid );
+
+		return $captured_url;
+	}
+
+	/**
 	 * Test that correct settings are displayed when Orders v2 is enabled.
 	 */
 	public function test_correct_settings_is_displayed_when_orders_v2_is_enabled() {

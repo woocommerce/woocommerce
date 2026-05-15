@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update PayPal IPN verification endpoints to ipnpb.paypal.com and ipnpb.sandbox.paypal.com to match PayPal's current developer documentation.
