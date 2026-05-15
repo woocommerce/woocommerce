@@ -562,9 +562,13 @@ class QueryClauses implements QueryClausesGenerator, MainQueryClausesGenerator {
 
 		foreach ( $query_vars as $key => $value ) {
 			if ( 0 === strpos( $key, 'filter_' ) ) {
-				$attribute    = wc_sanitize_taxonomy_name( str_replace( 'filter_', '', $key ) );
-				$taxonomy     = wc_attribute_taxonomy_name( $attribute );
-				$filter_terms = ! empty( $value ) ? explode( ',', wc_clean( wp_unslash( $value ) ) ) : array();
+				$attribute = wc_sanitize_taxonomy_name( str_replace( 'filter_', '', $key ) );
+				$taxonomy  = wc_attribute_taxonomy_name( $attribute );
+				// Note: do not pass the raw value through `wc_clean()`/`sanitize_text_field()` here,
+				// because those strip percent-encoded octets (e.g. `%d1%87...`) used by WordPress to
+				// represent non-ASCII term slugs such as Cyrillic. `sanitize_title()` is applied to
+				// each individual term below and handles the necessary encoding/cleanup.
+				$filter_terms = ! empty( $value ) && ( is_string( $value ) || is_numeric( $value ) ) ? array_filter( explode( ',', wp_unslash( (string) $value ) ) ) : array();
 
 				if ( empty( $filter_terms ) || ! taxonomy_exists( $taxonomy ) || ! wc_attribute_taxonomy_id_by_name( $attribute ) ) {
 					continue;

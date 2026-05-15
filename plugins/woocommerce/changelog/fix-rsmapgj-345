@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix product attribute filter widget returning no results when attribute term slugs use non-ASCII (e.g. Cyrillic) characters

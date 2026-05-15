@@ -241,6 +241,132 @@ class WC_Query_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox 'get_layered_nav_chosen_attributes' preserves Cyrillic (percent-encoded) term slugs in $_GET filter values.
+	 *
+	 * Regression test for woo#33971 / RSMAPGJ-345: percent-encoded octets in the filter value
+	 * (the form WordPress uses for non-ASCII term slugs such as Cyrillic) were being stripped
+	 * by `sanitize_text_field`, causing the filter to silently match no products.
+	 */
+	public function test_get_layered_nav_chosen_attributes_preserves_cyrillic_slugs() {
+		// Create the attribute taxonomy and a term with a Cyrillic name so WordPress generates
+		// a percent-encoded slug, mirroring the real-world data the bug reporter has.
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Цвят',
+				'slug' => 'cyat',
+				'type' => 'select',
+			)
+		);
+		$this->assertIsInt( $attribute_id );
+
+		$taxonomy = wc_attribute_taxonomy_name( 'cyat' );
+		register_taxonomy( $taxonomy, 'product' );
+
+		$term = wp_insert_term( 'червен', $taxonomy );
+		$this->assertIsArray( $term );
+		$expected_slug = get_term( $term['term_id'], $taxonomy )->slug;
+		$this->assertSame( '%d1%87%d0%b5%d1%80%d0%b2%d0%b5%d0%bd', $expected_slug );
+
+		// Simulate `$_GET['filter_cyat']` with the percent-encoded slug, as built by the
+		// layered nav widget and rebroadcast by the browser through PHP's auto-decode.
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$previous_get = $_GET;
+		$_GET         = array( 'filter_cyat' => $expected_slug );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		WC_Query::reset_chosen_attributes();
+		$chosen = WC_Query::get_layered_nav_chosen_attributes();
+
+		$this->assertArrayHasKey( $taxonomy, $chosen );
+		$this->assertSame( array( $expected_slug ), $chosen[ $taxonomy ]['terms'] );
+
+		// Cleanup.
+		$_GET = $previous_get;
+		WC_Query::reset_chosen_attributes();
+		wp_delete_term( $term['term_id'], $taxonomy );
+		wc_delete_attribute( $attribute_id );
+	}
+
+	/**
+	 * @testdox 'get_layered_nav_chosen_attributes' continues to handle ASCII slugs correctly after the Cyrillic fix.
+	 */
+	public function test_get_layered_nav_chosen_attributes_handles_ascii_slugs() {
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Color',
+				'slug' => 'color',
+				'type' => 'select',
+			)
+		);
+		$this->assertIsInt( $attribute_id );
+
+		$taxonomy = wc_attribute_taxonomy_name( 'color' );
+		register_taxonomy( $taxonomy, 'product' );
+
+		$term = wp_insert_term( 'Red', $taxonomy );
+		$this->assertIsArray( $term );
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$previous_get = $_GET;
+		$_GET         = array( 'filter_color' => 'red' );
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		WC_Query::reset_chosen_attributes();
+		$chosen = WC_Query::get_layered_nav_chosen_attributes();
+
+		$this->assertArrayHasKey( $taxonomy, $chosen );
+		$this->assertSame( array( 'red' ), $chosen[ $taxonomy ]['terms'] );
+
+		$_GET = $previous_get;
+		WC_Query::reset_chosen_attributes();
+		wp_delete_term( $term['term_id'], $taxonomy );
+		wc_delete_attribute( $attribute_id );
+	}
+
+	/**
+	 * @testdox 'get_layered_nav_chosen_attributes' splits comma-separated filter values.
+	 */
+	public function test_get_layered_nav_chosen_attributes_splits_comma_separated_values() {
+		$attribute_id = wc_create_attribute(
+			array(
+				'name' => 'Size',
+				'slug' => 'size',
+				'type' => 'select',
+			)
+		);
+		$this->assertIsInt( $attribute_id );
+
+		$taxonomy = wc_attribute_taxonomy_name( 'size' );
+		register_taxonomy( $taxonomy, 'product' );
+
+		$small  = wp_insert_term( 'Small', $taxonomy );
+		$medium = wp_insert_term( 'Medium', $taxonomy );
+		$this->assertIsArray( $small );
+		$this->assertIsArray( $medium );
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$previous_get = $_GET;
+		$_GET         = array(
+			'filter_size'     => 'small,medium',
+			'query_type_size' => 'or',
+		);
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
+		WC_Query::reset_chosen_attributes();
+		$chosen = WC_Query::get_layered_nav_chosen_attributes();
+
+		$this->assertArrayHasKey( $taxonomy, $chosen );
+		$this->assertSame( array( 'small', 'medium' ), array_values( $chosen[ $taxonomy ]['terms'] ) );
+		$this->assertSame( 'or', $chosen[ $taxonomy ]['query_type'] );
+
+		$_GET = $previous_get;
+		WC_Query::reset_chosen_attributes();
+		wp_delete_term( $small['term_id'], $taxonomy );
+		wp_delete_term( $medium['term_id'], $taxonomy );
+		wc_delete_attribute( $attribute_id );
+	}
+
+	/**
 	 * @testdox A tax_query set by another plugin or hook before WC_Query's pre_get_posts survives the visibility merge.
 	 */
 	public function test_search_preserves_existing_tax_query() {

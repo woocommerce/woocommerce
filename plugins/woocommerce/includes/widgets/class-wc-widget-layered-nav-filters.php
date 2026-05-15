@@ -75,10 +75,15 @@ class WC_Widget_Layered_Nav_Filters extends WC_Widget {
 							continue;
 						}
 
-						$filter_name    = 'filter_' . wc_attribute_taxonomy_slug( $taxonomy );
-						$current_filter = isset( $_GET[ $filter_name ] ) ? explode( ',', wc_clean( wp_unslash( $_GET[ $filter_name ] ) ) ) : array(); // WPCS: input var ok, CSRF ok.
-						$current_filter = array_map( 'sanitize_title', $current_filter );
-						$new_filter     = array_diff( $current_filter, array( $term_slug ) );
+						$filter_name = 'filter_' . wc_attribute_taxonomy_slug( $taxonomy );
+						// Note: do not pass the raw value through `wc_clean()`/`sanitize_text_field()` here,
+						// because those strip percent-encoded octets (e.g. `%d1%87...`) used by WordPress to
+						// represent non-ASCII term slugs such as Cyrillic. `sanitize_title()` below handles cleanup.
+						// phpcs:ignore WordPress.Security.NonceVerification.Recommended, WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+						$raw_filter_value = isset( $_GET[ $filter_name ] ) && is_string( $_GET[ $filter_name ] ) ? wp_unslash( $_GET[ $filter_name ] ) : '';
+						$current_filter   = '' !== $raw_filter_value ? explode( ',', $raw_filter_value ) : array();
+						$current_filter   = array_filter( array_map( 'sanitize_title', $current_filter ) );
+						$new_filter       = array_diff( $current_filter, array( $term_slug ) );
 
 						$link = remove_query_arg( array( 'add-to-cart', $filter_name ), $base_link );
 
