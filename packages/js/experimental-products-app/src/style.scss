@@ -8,6 +8,18 @@
 	background-color: unset;
 }
 
+.product_page_woocommerce-products-dashboard #wpcontent {
+	padding: 0;
+}
+
+.product_page_woocommerce-products-dashboard #wpbody-content {
+	padding-bottom: 0;
+}
+
+.product_page_woocommerce-products-dashboard #wpfooter {
+	display: none;
+}
+
 .product_page_woocommerce-products-dashboard,
 #woocommerce-variations-classic-root,
 .woocommerce-product-edit__drawer-portal {
@@ -36,15 +48,51 @@
 }
 
 .woocommerce-product-list {
-	height: 85vh;
+	height: calc(100vh - var(--wp-admin--admin-bar--height, 32px));
 }
 
 .woocommerce-product-list__toolbar {
+	margin: var(--wpds-dimension-padding-xs, 4px)
+		calc(var(--wpds-dimension-padding-2xl, 24px) * -1) 0;
 	padding: 0 var(--wpds-dimension-padding-2xl, 24px);
 }
 
 .woocommerce-product-list .dataviews-wrapper {
 	height: 100%;
+}
+
+.woocommerce-product-list-page__header {
+	position: sticky;
+	top: 0;
+	z-index: 1;
+	padding: var(--wpds-dimension-padding-lg, 16px)
+		var(--wpds-dimension-padding-2xl, 24px)
+		0;
+	border-bottom: var(--wpds-border-width-xs, 1px) solid
+		var(--wpds-color-stroke-surface-neutral-weak, #ddd);
+}
+
+.woocommerce-product-list-page__header-title {
+	margin: 0;
+	overflow: hidden;
+	color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+	font-family: var(--wpds-typography-font-family-heading);
+	font-size: var(--wpds-typography-font-size-lg, 15px);
+	font-weight: var(--wpds-typography-font-weight-medium, 500);
+	text-overflow: ellipsis;
+	white-space: nowrap;
+}
+
+.woocommerce-product-list-page__header-actions {
+	width: auto;
+	flex-shrink: 0;
+}
+
+.woocommerce-product-list-page__header-subtitle {
+	margin: 0;
+	color: var(--wpds-color-fg-content-neutral-weak, #707070);
+	font-size: var(--wpds-typography-font-size-md, 13px);
+	line-height: var(--wpds-typography-line-height-md, 24px);
 }
 
 // Temporary override until DataViews supports title links without default underlines.

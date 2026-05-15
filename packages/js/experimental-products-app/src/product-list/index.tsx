@@ -10,7 +10,6 @@ import clsx from 'clsx';
 import { Button, Icon, Stack, Tabs } from '@wordpress/ui';
 import { privateApis as componentsPrivateApis } from '@wordpress/components';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
-import { Page } from '@wordpress/admin-ui';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
@@ -46,6 +45,7 @@ import {
 } from './utils';
 import { useProductActions } from '../dataviews-actions';
 import { ProductListEmptyState } from './empty-state';
+import { ProductListPage, ProductListPageHeader } from './page';
 
 const { Menu } = unlock( componentsPrivateApis );
 const { usePostActions } = unlock( editorPrivateApis );
@@ -309,16 +309,43 @@ export default function ProductList( {
 		</Stack>
 	);
 
+	const toolbar = (
+		<Stack
+			direction="row"
+			align="center"
+			justify="space-between"
+			gap="sm"
+			className="woocommerce-product-list__toolbar"
+		>
+			{ /* Tabs component should not be used: https://github.com/woocommerce/woocommerce/issues/64478 */ }
+			<Tabs.Root value={ selectedTab } onValueChange={ onChangeTab }>
+				<Tabs.List
+					variant="minimal"
+					aria-label={ __(
+						'Filter products by status',
+						'woocommerce'
+					) }
+				>
+					{ PRODUCT_LIST_TABS.map( ( tab ) => (
+						<Tabs.Tab key={ tab.value } value={ tab.value }>
+							{ tab.label }
+						</Tabs.Tab>
+					) ) }
+				</Tabs.List>
+			</Tabs.Root>
+			<Stack direction="row" align="center" gap="xs">
+				<DataViews.Search label={ __( 'Search', 'woocommerce' ) } />
+				<DataViews.FiltersToggle />
+				<DataViews.LayoutSwitcher />
+				<DataViews.ViewConfig />
+			</Stack>
+		</Stack>
+	);
+
 	return (
-		<Page
+		<ProductListPage
 			className={ classes }
 			ariaLabel={ __( 'Products', 'woocommerce' ) }
-			subTitle={ __(
-				'Add, edit, and manage the products you sell in your store.',
-				'woocommerce'
-			) }
-			title={ __( 'Products', 'woocommerce' ) }
-			actions={ pageActions }
 		>
 			<DataViews
 				key={ activeView }
@@ -350,45 +377,19 @@ export default function ProductList( {
 					</a>
 				) }
 			>
-				<Stack
-					direction="row"
-					align="center"
-					justify="space-between"
-					gap="sm"
-					className="woocommerce-product-list__toolbar"
-				>
-					{ /* Tabs component should not be used: https://github.com/woocommerce/woocommerce/issues/64478 */ }
-					<Tabs.Root
-						value={ selectedTab }
-						onValueChange={ onChangeTab }
-					>
-						<Tabs.List
-							variant="minimal"
-							aria-label={ __(
-								'Filter products by status',
-								'woocommerce'
-							) }
-						>
-							{ PRODUCT_LIST_TABS.map( ( tab ) => (
-								<Tabs.Tab key={ tab.value } value={ tab.value }>
-									{ tab.label }
-								</Tabs.Tab>
-							) ) }
-						</Tabs.List>
-					</Tabs.Root>
-					<Stack direction="row" align="center" gap="xs">
-						<DataViews.Search
-							label={ __( 'Search', 'woocommerce' ) }
-						/>
-						<DataViews.FiltersToggle />
-						<DataViews.LayoutSwitcher />
-						<DataViews.ViewConfig />
-					</Stack>
-				</Stack>
+				<ProductListPageHeader
+					title={ __( 'Products', 'woocommerce' ) }
+					subTitle={ __(
+						'Add, edit, and manage the products you sell in your store.',
+						'woocommerce'
+					) }
+					actions={ pageActions }
+					toolbar={ toolbar }
+				/>
 				<DataViews.FiltersToggled className="woocommerce-product-list__filters" />
 				<DataViews.Layout />
 				<DataViews.Footer />
 			</DataViews>
-		</Page>
+		</ProductListPage>
 	);
 }
