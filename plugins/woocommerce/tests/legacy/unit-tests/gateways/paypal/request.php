@@ -408,5 +408,113 @@ class WC_Tests_Paypal_Gateway_Request extends WC_Unit_Test_Case {
 
 	}
 
+	/**
+	 * Invoke the protected get_shipping_args() method via reflection.
+	 *
+	 * @param WC_Order $order Order to pass to get_shipping_args.
+	 * @return array
+	 */
+	protected function invoke_get_shipping_args( $order ) {
+		$reflection = new ReflectionClass( $this->paypal_request );
+		$method     = $reflection->getMethod( 'get_shipping_args' );
+		$method->setAccessible( true );
+		return $method->invoke( $this->paypal_request, $order );
+	}
+
+	/**
+	 * When the order has a shipping method selected but the shipping total is zero
+	 * (e.g. Free Shipping), `no_shipping` must be sent as 1 so PayPal does not
+	 * apply its own shipping calculations on top of the order total.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/24563
+	 */
+	public function test_no_shipping_arg_when_free_shipping_method_selected() {
+		$order = WC_Helper_Order::create_order();
+
+		// Attach a shipping line item with zero cost (simulates Free Shipping).
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_props(
+			array(
+				'method_title' => 'Free shipping',
+				'method_id'    => 'free_shipping',
+				'total'        => 0,
+			)
+		);
+		$order->add_item( $shipping_item );
+		$order->save();
+
+		$args = $this->invoke_get_shipping_args( $order );
+
+		$this->assertArrayHasKey( 'no_shipping', $args );
+		$this->assertSame( 1, $args['no_shipping'] );
+	}
+
+	/**
+	 * When the order has a shipping method selected with a non-zero cost,
+	 * `no_shipping` should remain 0 so PayPal still displays the shipping
+	 * address and honors the shipping line item sent by WooCommerce.
+	 */
+	public function test_no_shipping_arg_when_paid_shipping_method_selected() {
+		$order = WC_Helper_Order::create_order();
+
+		$shipping_item = new WC_Order_Item_Shipping();
+		$shipping_item->set_props(
+			array(
+				'method_title' => 'Flat rate',
+				'method_id'    => 'flat_rate',
+				'total'        => 10,
+			)
+		);
+		$order->add_item( $shipping_item );
+		$order->save();
+
+		$args = $this->invoke_get_shipping_args( $order );
+
+		$this->assertArrayHasKey( 'no_shipping', $args );
+		$this->assertSame( 0, $args['no_shipping'] );
+	}
+
+	/**
+	 * When the order does not require a shipping address, `no_shipping` must be 1
+	 * regardless of any other state.
+	 */
+	public function test_no_shipping_arg_when_order_does_not_need_shipping() {
+		$order = WC_Helper_Order::create_order();
+
+		// Replace the default shippable product with a virtual one so the order
+		// does not need a shipping address.
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+
+		$virtual_product = new WC_Product_Simple();
+		$virtual_product->set_props(
+			array(
+				'name'          => 'Virtual product',
+				'regular_price' => 10,
+				'price'         => 10,
+				'virtual'       => true,
+			)
+		);
+		$virtual_product->save();
+
+		$item = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $virtual_product,
+				'quantity' => 1,
+				'subtotal' => 10,
+				'total'    => 10,
+			)
+		);
+		$item->save();
+		$order->add_item( $item );
+		$order->save();
+
+		$args = $this->invoke_get_shipping_args( $order );
+
+		$this->assertArrayHasKey( 'no_shipping', $args );
+		$this->assertSame( 1, $args['no_shipping'] );
+	}
 }
 

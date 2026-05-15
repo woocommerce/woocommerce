@@ -362,7 +362,14 @@ class WC_Gateway_Paypal_Request {
 		$shipping_args = array();
 		if ( $order->needs_shipping_address() ) {
 			$shipping_args['address_override'] = $this->gateway->get_option( 'address_override' ) === 'yes' ? 1 : 0;
-			$shipping_args['no_shipping']      = 0;
+			// If the order has a shipping method selected with zero cost (e.g. Free Shipping),
+			// set `no_shipping` to 1 so PayPal does not apply its own shipping calculations on
+			// top of the order total. When a non-zero shipping line is sent, PayPal honors it,
+			// so `no_shipping` can remain 0 in that case to keep the shipping address visible.
+			// See https://github.com/woocommerce/woocommerce/issues/24563.
+			$has_shipping_method          = count( $order->get_shipping_methods() ) > 0;
+			$shipping_total_is_zero       = 0.0 === (float) $order->get_shipping_total();
+			$shipping_args['no_shipping'] = ( $has_shipping_method && $shipping_total_is_zero ) ? 1 : 0;
 			if ( 'yes' === $this->gateway->get_option( 'send_shipping' ) ) {
 				// If we are sending shipping, send shipping address instead of billing.
 				$shipping_args['first_name'] = $this->limit_length( $order->get_shipping_first_name(), 32 );
