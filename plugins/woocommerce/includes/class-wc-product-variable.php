@@ -424,13 +424,20 @@ class WC_Product_Variable extends WC_Product {
 		// Multi-image variation galleries are gated on the feature flag.
 		// Check on the feature flag to be removed when feature is rolled out.
 		if ( VariationGalleryPackage::is_enabled() ) {
-			$variation_gallery_image_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+			$variation_gallery_image_ids = array_values(
+				array_filter(
+					array_map( 'intval', $variation->get_gallery_image_ids() ),
+					'wp_attachment_is_image'
+				)
+			);
+			$variation_featured_id       = (int) $variation->get_image_id();
+			$valid_featured              = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
 
-			if ( ! empty( $variation_gallery_image_ids ) ) {
+			if ( $valid_featured || ! empty( $variation_gallery_image_ids ) ) {
 				$variation_gallery_html = wc_get_product_gallery_html(
 					$this,
 					array_merge(
-						array_filter( array( $variation->get_image_id() ) ),
+						array( $variation_featured_id ),
 						$variation_gallery_image_ids
 					)
 				);
