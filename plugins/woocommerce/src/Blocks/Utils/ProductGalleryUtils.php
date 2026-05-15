@@ -197,9 +197,11 @@ class ProductGalleryUtils {
 		// Multi-image variation galleries are gated on the feature flag.
 		// Check on the feature flag to be removed when feature is rolled out.
 		if ( ! VariationGalleryPackage::is_enabled() ) {
-			$resolved_id = $variation_image_id
+			$variation_image_valid = $variation_image_id && wp_attachment_is_image( $variation_image_id );
+			$parent_image_valid    = $parent_image_id && wp_attachment_is_image( $parent_image_id );
+			$resolved_id           = $variation_image_valid
 				? $variation_image_id
-				: ( $parent_image_id && wp_attachment_is_image( $parent_image_id ) ? $parent_image_id : 0 );
+				: ( $parent_image_valid ? $parent_image_id : 0 );
 			return array(
 				'image_id'  => $resolved_id,
 				'image_ids' => array( $resolved_id ),
