@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect block alignment on Cart and Checkout pages with the Twenty Twenty-Three theme by not constraining `<main>` width when it contains a wide or full-aligned child block.

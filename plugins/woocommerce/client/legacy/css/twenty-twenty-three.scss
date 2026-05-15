@@ -18,9 +18,15 @@
 
 	main {
 		// This is to allow .woocommerce div to have width of 1000px on styles with full width layout (such as Pitch).
-		max-width: calc(1000px + var(--wp--style--root--padding-right) + var(--wp--style--root--padding-left));
-		margin-left: auto;
-		margin-right: auto;
+		// Skip the constraint when the page contains a wide/full-aligned block (e.g. the Cart or
+		// Checkout block with alignment set to "Wide" or "Full") so the user's block alignment
+		// setting is respected on the frontend, matching the site editor preview.
+		// See https://github.com/woocommerce/woocommerce/issues/42238.
+		&:not(:has(> .alignwide, > .alignfull)) {
+			max-width: calc(1000px + var(--wp--style--root--padding-right) + var(--wp--style--root--padding-left));
+			margin-left: auto;
+			margin-right: auto;
+		}
 
 		.woocommerce {
 			@include clearfix();
