@@ -359,11 +359,29 @@
 				// Submenu link color — often different (lighter/gray) from the
 				// top-level color in custom schemes. Expose as a CSS custom
 				// property so .wp-submenu a can use it independently.
-				var subLink = document.querySelector( '#adminmenu .wp-submenu a' );
+				//
+				// Skip .current items: on Woo pages the first .wp-submenu a is
+				// the active rail item (e.g. "Home"), which is styled white in
+				// most schemes. Using that white as the panel's submenu color
+				// makes flyout text invisible on light backgrounds.
+				var subLink = document.querySelector( '#adminmenu .wp-submenu li:not(.current) > a' )
+					|| document.querySelector( '#adminmenu .wp-submenu a' );
 				if ( subLink ) {
 					var subColor = window.getComputedStyle( subLink ).color;
 					if ( subColor ) {
 						$wpRail[ 0 ].style.setProperty( '--wc-rail-submenu-color', subColor );
+					}
+				}
+
+				// Flyout submenu background — copy from #adminmenu .wp-submenu so
+				// the position:fixed flyout isn't transparent over the page content.
+				// Stored here in the outer closure and applied per-flyout in openFlyout().
+				var subMenuBg = '';
+				var subMenuEl = document.querySelector( '#adminmenu .wp-submenu' );
+				if ( subMenuEl ) {
+					var subBg = window.getComputedStyle( subMenuEl ).backgroundColor;
+					if ( subBg && subBg !== 'rgba(0, 0, 0, 0)' && subBg !== 'transparent' ) {
+						subMenuBg = subBg;
 					}
 				}
 
@@ -497,14 +515,18 @@
 							// reach our panel).
 							var $sub   = $( li ).find( '> .wp-submenu' );
 							var liRect = li.getBoundingClientRect();
-							$sub.css( {
+							var flyoutCss = {
 								display:     'block',
 								position:    'fixed',
 								left:        ( wrapRect.left + wrapRect.width ) + 'px',
 								top:         liRect.top + 'px',
 								'min-width': '185px',
 								'z-index':   '100000',
-							} );
+							};
+							if ( subMenuBg ) {
+								flyoutCss.background = subMenuBg;
+							}
+							$sub.css( flyoutCss );
 							$( li ).addClass( 'opensub' );
 							openLi = li;
 						}
