@@ -4356,7 +4356,19 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 
 	// Variation values are shown only if they are not found in the title as of 3.0.
 	// This is because variation titles display the attributes.
+	//
+	// However, if any variation attribute is missing from the title (e.g. an "any"
+	// attribute whose specific value was chosen at add-to-cart time, or an
+	// attribute hidden from the auto-generated title by other rules), show
+	// every variation attribute as separate metadata so the cart presents one
+	// consistent display style per item rather than mixing inline and stacked
+	// attributes for products that differ only in their variation setup. See
+	// https://github.com/woocommerce/woocommerce/issues/28826.
 	if ( $cart_item['data']->is_type( ProductType::VARIATION ) && is_array( $cart_item['variation'] ) ) {
+		$product_name        = $cart_item['data']->get_name();
+		$resolved_attributes = array();
+		$any_missing         = false;
+
 		foreach ( $cart_item['variation'] as $name => $value ) {
 			$taxonomy = wc_attribute_taxonomy_name( str_replace( 'attribute_pa_', '', urldecode( $name ) ) );
 
@@ -4373,14 +4385,35 @@ function wc_get_formatted_cart_item_data( $cart_item, $flat = false ) {
 				$label = wc_attribute_label( str_replace( 'attribute_', '', $name ), $cart_item['data'] );
 			}
 
-			// Check the nicename against the title.
-			if ( '' === $value || wc_is_attribute_in_product_name( $value, $cart_item['data']->get_name() ) ) {
+			if ( '' === $value ) {
+				continue;
+			}
+
+			$in_name = wc_is_attribute_in_product_name( $value, $product_name );
+
+			if ( ! $in_name ) {
+				$any_missing = true;
+			}
+
+			$resolved_attributes[] = array(
+				'key'     => $label,
+				'value'   => $value,
+				'in_name' => $in_name,
+			);
+		}
+
+		foreach ( $resolved_attributes as $attribute ) {
+			// If at least one attribute is missing from the title, render all
+			// of them as separate metadata for a consistent display. Otherwise,
+			// preserve the existing behaviour of skipping attributes that are
+			// already part of the title.
+			if ( ! $any_missing && $attribute['in_name'] ) {
 				continue;
 			}
 
 			$item_data[] = array(
-				'key'   => $label,
-				'value' => $value,
+				'key'   => $attribute['key'],
+				'value' => $attribute['value'],
 			);
 		}
 	}
