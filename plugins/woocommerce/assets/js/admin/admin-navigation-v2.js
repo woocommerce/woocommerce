@@ -342,11 +342,29 @@
 					width: wrapRect.width + 'px',
 				} );
 
-				// Copy the computed background color from #adminmenu so the
-				// overlay panel matches the active WP admin color scheme.
+				// Copy background and link colors from #adminmenu so the panel
+				// matches the active WP admin color scheme without hardcoding.
 				var menuBg = window.getComputedStyle( $adminmenu[ 0 ] ).backgroundColor;
 				if ( menuBg && menuBg !== 'rgba(0, 0, 0, 0)' && menuBg !== 'transparent' ) {
 					$wpRail[ 0 ].style.backgroundColor = menuBg;
+				}
+				// Top-level link color (inherited as panel default).
+				var menuLink = document.querySelector( '#adminmenu > li > a' );
+				if ( menuLink ) {
+					var linkColor = window.getComputedStyle( menuLink ).color;
+					if ( linkColor ) {
+						$wpRail[ 0 ].style.color = linkColor;
+					}
+				}
+				// Submenu link color — often different (lighter/gray) from the
+				// top-level color in custom schemes. Expose as a CSS custom
+				// property so .wp-submenu a can use it independently.
+				var subLink = document.querySelector( '#adminmenu .wp-submenu a' );
+				if ( subLink ) {
+					var subColor = window.getComputedStyle( subLink ).color;
+					if ( subColor ) {
+						$wpRail[ 0 ].style.setProperty( '--wc-rail-submenu-color', subColor );
+					}
 				}
 
 				// Flyout hover for top-level items. We can't use bindDelayedHover

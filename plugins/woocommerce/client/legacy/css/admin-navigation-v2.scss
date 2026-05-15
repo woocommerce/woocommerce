@@ -346,12 +346,24 @@ body.wc-nav-v2-showing-wp-rail #wc-nav-v2-wp-rail {
 		display: block;
 	}
 
-	// Baseline link colours matching WP's default admin color scheme.
-	// WP's color-scheme stylesheets target #adminmenu specifically and won't
-	// cascade into this panel, so we pin sensible defaults here.
-	a,
+	// Link text color is set by JS at runtime by copying #adminmenu a's computed
+	// color — this makes it scheme-aware without hardcoding. `inherit` picks that
+	// up from the panel element's inline style. text-decoration matches #adminmenu.
+	a {
+		color: inherit;
+		text-decoration: none;
+
+		&:hover,
+		&:focus {
+			color: #fff;
+		}
+	}
+
+	// Submenu link color is copied separately by JS — it's often a different
+	// (lighter/gray) shade from the top-level link color in custom schemes.
+	// Falls back to `inherit` (the top-level color) if the property isn't set.
 	.wp-submenu a {
-		color: #a7aaad;
+		color: var( --wc-rail-submenu-color, inherit );
 		text-decoration: none;
 
 		&:hover,

@@ -592,7 +592,13 @@ class Native_Rail_Splicer {
 			if ( '' === wp_strip_all_tags( $raw_title ) ) {
 				continue;
 			}
-			if ( false !== strpos( $css_classes, 'hide-if-js' ) ) {
+			// hide-if-js  → item must be hidden when JS is present (skip).
+			// hide-if-no-js → item is hidden by CSS and only shown by WP's JS
+			//                 for specific conditions (e.g. Links Manager when
+			//                 there are no links stays hidden even with JS).
+			//                 Exclude these so the panel matches the real rail.
+			if ( false !== strpos( $css_classes, 'hide-if-js' ) ||
+				false !== strpos( $css_classes, 'hide-if-no-js' ) ) {
 				continue;
 			}
 
@@ -627,9 +633,27 @@ class Native_Rail_Splicer {
 			// its flyout so clicking it just closes the overlay rather than showing
 			// the WC section submenu (which is already accessible in the Woo rail).
 			$has_sub  = ! empty( $children ) && 'woocommerce' !== $slug;
-			$li_class = 'menu-top' . ( $has_sub ? ' wp-has-submenu wp-not-current-submenu' : '' );
+
+			// Pass through the menu-icon-* class from $item[4] so CSS-based
+			// icons (e.g. built-in WP pages) render with their correct icon
+			// rather than falling back to the generic dashicon.
+			preg_match( '/\bmenu-icon-[a-z0-9_-]+\b/i', $css_classes, $icon_cls );
+			$li_class = 'menu-top'
+				. ( ! empty( $icon_cls[0] ) ? ' ' . sanitize_html_class( $icon_cls[0] ) : '' )
+				. ( $has_sub ? ' wp-has-submenu wp-not-current-submenu' : '' );
 			$a_class  = 'menu-top' . ( $has_sub ? ' wp-has-submenu wp-not-current-submenu' : '' );
-			$css_id   = 'wc-wp-item-' . self::css_slug( $slug );
+
+			// Use WP's standard `toplevel_page_<slug>` id for items that have
+			// been stripped from $menu by strip_non_woo_top_level(). This lets
+			// plugin CSS rules (e.g. mask-image icon rules targeting that id)
+			// apply automatically to our panel items.
+			// Items still present in $menu (index.php, woocommerce) get a
+			// custom prefix to avoid duplicate id attributes.
+			// $menu is already declared global above and restored to the live menu.
+			$live_slugs = array_column( (array) $menu, 2 );
+			$css_id     = in_array( $slug, $live_slugs, true )
+				? 'wc-wp-item-' . self::css_slug( $slug )
+				: 'toplevel_page_' . self::css_slug( $slug );
 
 			echo '<li class="' . esc_attr( $li_class ) . '" id="' . esc_attr( $css_id ) . '">';
 			echo '<a href="' . esc_url( $url ) . '" class="' . esc_attr( $a_class ) . '">';
@@ -664,17 +688,33 @@ class Native_Rail_Splicer {
 	 *
 	 * @param string $icon Icon value from $menu[i][6].
 	 */
+	/**
+	 * Mirror WP's menu-header.php icon rendering exactly so panel icons match
+	 * the real top-level rail.
+	 */
 	private static function wp_menu_icon_html( string $icon ): string {
-		if ( str_starts_with( $icon, 'dashicons-' ) ) {
-			return '<div class="wp-menu-image dashicons-before ' . esc_attr( $icon ) . '" aria-hidden="true"><br></div>';
+		// Mirrors the logic in wp-admin/menu-header.php _wp_menu_output().
+		$img       = '';
+		$img_class = '';
+		$img_style = '';
+
+		if ( '' !== $icon ) {
+			if ( 'none' === $icon || 'div' === $icon ) {
+				$img = '<br />';
+			} elseif ( str_starts_with( $icon, 'data:image/svg+xml;base64,' ) ) {
+				$img       = '<br />';
+				$img_style = ' style="background-image:url(\'' . esc_attr( $icon ) . '\')"';
+				$img_class = ' svg';
+			} elseif ( str_starts_with( $icon, 'dashicons-' ) ) {
+				$img       = '<br />';
+				$img_class = ' dashicons-before ' . sanitize_html_class( $icon );
+			} else {
+				// URL-based image (could also be a generic data: URI other than SVG).
+				$img = '<img src="' . esc_url( $icon ) . '" alt="" />';
+			}
 		}
-		if ( str_starts_with( $icon, 'data:image/' ) ) {
-			return '<div class="wp-menu-image svg" aria-hidden="true" style="background-image:url(' . esc_attr( $icon ) . ')"><br></div>';
-		}
-		if ( '' !== $icon && 'none' !== $icon && 'div' !== $icon && str_contains( $icon, '/' ) ) {
-			return '<div class="wp-menu-image" aria-hidden="true"><img src="' . esc_url( $icon ) . '" alt=""></div>';
-		}
-		return '<div class="wp-menu-image dashicons-before dashicons-admin-generic" aria-hidden="true"><br></div>';
+
+		return '<div class="wp-menu-image' . $img_class . '"' . $img_style . ' aria-hidden="true">' . $img . '</div>';
 	}
 
 	/**
