@@ -62,6 +62,7 @@ class Native_Rail_Splicer {
 			},
 			PHP_INT_MAX
 		);
+
 	}
 
 	/**
@@ -264,6 +265,27 @@ class Native_Rail_Splicer {
 		);
 
 		$this->mark_root_current( $root );
+
+		// WP's _wp_menu_output() marks any top-level item whose $item[2]
+		// matches $plugin_page as `current`, independently of parent_file.
+		// $plugin_page comes from $_GET['page'] (e.g. 'wc-settings' when
+		// visiting the Payments tab) and matches the Settings rail-root slug,
+		// causing Settings to appear active alongside Payments.
+		//
+		// Override $plugin_page to the rail-root slug so WP's check marks
+		// the correct item. Must run on admin_head (after WP's own access
+		// check which also uses $plugin_page) but before _wp_menu_output()
+		// which is called from menu-header.php included during body output.
+		add_action(
+			'admin_head',
+			static function () use ( $root ): void {
+				global $plugin_page;
+				if ( isset( $plugin_page ) && $plugin_page !== $root ) {
+					$plugin_page = $root;
+				}
+			},
+			0
+		);
 	}
 
 	/**

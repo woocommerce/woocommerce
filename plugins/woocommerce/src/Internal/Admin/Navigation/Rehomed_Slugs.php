@@ -56,8 +56,9 @@ final class Rehomed_Slugs {
 		// Legacy Extensions page — the default tree uses the modern
 		// `wc-admin&path=/extensions` Marketplace path instead.
 		'wc-addons',
-		// "Add New Product" — the All Products list view already exposes a
-		// prominent "Add new" action, so a duplicate menu entry is noise.
+		// "Add Product" is explicitly declared in default-tree.php at
+		// position 2 under Products. Keep it excluded here so auto-attach
+		// doesn't also hoist it and create a duplicate.
 		'post-new.php?post_type=product',
 		// Product Import / Export — the All Products list view exposes
 		// these actions in its toolbar already, so a duplicate menu entry

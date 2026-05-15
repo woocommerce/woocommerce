@@ -43,6 +43,11 @@ return array(
 		'icon'     => 'dashicons-products',
 		'position' => 30,
 	),
+	'post-new.php?post_type=product'                                         => array(
+		'parent'   => 'edit.php?post_type=product',
+		'title'    => __( 'Add Product', 'woocommerce' ),
+		'position' => 2,
+	),
 	'wc-admin&path=/analytics/overview'                                      => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Analytics', 'woocommerce' ),
@@ -72,6 +77,17 @@ return array(
 		'title'    => __( 'Settings', 'woocommerce' ),
 		'icon'     => 'dashicons-admin-settings',
 		'position' => 90,
+	),
+	// WC Settings > Payments tab surfaced directly on the rail. Using the
+	// tab slug as the key with a `url` override makes it a synthetic node
+	// (bypasses the registered-slugs check) and causes add_settings_tabs()
+	// to skip adding it a second time under Settings.
+	'wc-settings&tab=checkout'                                               => array(
+		'parent'   => 'woocommerce',
+		'title'    => __( 'Payments', 'woocommerce' ),
+		'icon'     => 'dashicons-money-alt',
+		'position' => 35,
+		'url'      => 'admin.php?page=wc-settings&tab=checkout',
 	),
 	'woocommerce-payments'                                                   => array(
 		'parent'   => 'wc-settings',

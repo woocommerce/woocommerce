@@ -227,7 +227,7 @@ class Menu_Reconciler {
 		\WC_Admin_Settings::get_settings_pages();
 		$tabs = (array) apply_filters( 'woocommerce_settings_tabs_array', array() );
 
-		$pos = 30; // After default Payments (10) and WooPayments (20); before Status (99).
+		$pos = 30; // After WooPayments (20); before Status (99). Checkout/Payments tab is placed on the rail directly via default-tree.php and skipped here.
 		foreach ( $tabs as $id => $label ) {
 			$id    = (string) $id;
 			$label = Tree_Builder::clean_title( (string) $label );

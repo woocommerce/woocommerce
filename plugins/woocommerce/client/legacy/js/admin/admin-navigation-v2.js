@@ -230,6 +230,9 @@
 				return;
 			}
 
+			if ( $li.find( '> .wc-nav-v2-subflyout' ).length ) {
+				return;
+			}
 			$li.addClass( 'wc-nav-v2-has-subflyout' );
 			var $nested = $( '<ul class="wp-submenu wc-nav-v2-subflyout"></ul>' );
 			grandkids.forEach( function ( kid ) {
@@ -251,6 +254,11 @@
 		// just woocommerce.
 		$( '#adminmenu > li.menu-top[id^="toplevel_page_"]:has(.wc-nav-v2-has-subflyout)' ).each( function () {
 			var $root = $( this );
+			// Remove WP's native hoverIntent so our 600ms close-delay is the
+			// sole handler for these items. On non-Woo pages this loop only
+			// visits #toplevel_page_woocommerce (the only item with cascade
+			// children), so other top-level items and third-party plugin
+			// hover bindings are left untouched.
 			$root.off( 'mouseenter mouseleave mouseover mouseout' );
 			bindDelayedHover(
 				$( '#adminmenu' ),
@@ -263,6 +271,12 @@
 				'wc-nav-v2-subopen'
 			);
 		} );
+
+		// Signal that JS hover management is in place so the CSS fallback
+		// (:hover immediate show) can be suppressed in favour of the 600ms
+		// close-delay path.
+		document.getElementById( 'adminmenu' ) &&
+			document.getElementById( 'adminmenu' ).classList.add( 'wc-nav-v2-js-ready' );
 	}
 
 	$( function () {
@@ -307,42 +321,101 @@
 		// active rail-root LI ends up stripped of its in-rail expansion
 		// classes after every navigation.
 		//
-		// Wrap the function so that after the controller runs we re-apply the
-		// active classes to the rail-root the splicer tagged with
-		// `wc-nav-v2-current-root`. The marker class survives the controller's
-		// strip (it only removes `current`, `wp-has-current-submenu`,
-		// `selected`, `wp-menu-open`) so it's a stable hook for our re-apply.
+		// Wrap the function so that after the controller runs we:
+		// 1. Determine the correct rail root for the new URL (not the stale
+		//    PHP-set wc-nav-v2-current-root which was only right on page load).
+		// 2. Re-apply expansion classes to that root and update the marker.
+		// 3. Mark the correct sub-item as `current`.
 		if ( typeof window.wpNavMenuClassChange === 'function' ) {
 			var origClassChange = window.wpNavMenuClassChange;
 			window.wpNavMenuClassChange = function () {
 				var result = origClassChange.apply( this, arguments );
+				var url    = arguments[ 1 ] || '';
 
-				// Re-apply rail-root expansion classes stripped by wc-admin's controller.
-				var current = document.querySelector(
-					'#adminmenu .wc-nav-v2-current-root'
-				);
-				if ( current ) {
-					current.classList.remove( 'wp-not-current-submenu' );
-					current.classList.add(
+				// --- Step 1: find the correct rail root for the new URL --- //
+				var newRootEl = null;
+				var tree = window.wcNavV2Config && window.wcNavV2Config.tree;
+
+				if ( url && url !== '/' && tree ) {
+					var pathKey = 'path=' + url;
+
+					// Primary: search tree for a slug whose slug or `url` field
+					// contains the path fragment, then walk up to the rail root
+					// (the ancestor whose parent === 'woocommerce').
+					Object.keys( tree ).forEach( function ( slug ) {
+						if ( newRootEl ) {
+							return;
+						}
+						var item    = tree[ slug ];
+						var itemUrl = item.url || slug;
+						if ( itemUrl.indexOf( pathKey ) === -1 ) {
+							return;
+						}
+						// Walk up to the rail root.
+						var cur   = slug;
+						var steps = 0;
+						while ( tree[ cur ] && tree[ cur ].parent && tree[ cur ].parent !== 'woocommerce' && steps < 10 ) {
+							cur = tree[ cur ].parent;
+							steps++;
+						}
+						var railSlug = ( tree[ cur ] && tree[ cur ].parent === 'woocommerce' ) ? cur : null;
+						if ( railSlug ) {
+							var cssSlug = railSlug.replace( /[^A-Za-z0-9_-]/g, '-' );
+							newRootEl = document.getElementById( 'toplevel_page_' + cssSlug );
+						}
+					} );
+
+					// Fallback: scan submenu links in the DOM (covers analytics
+					// sub-items and other paths not directly in the tree).
+					if ( ! newRootEl ) {
+						var pathEnc = 'path=' + encodeURIComponent( url );
+						$( '#adminmenu li.menu-top[id^="toplevel_page_"]' ).each( function () {
+							var found = $( this ).find( '.wp-submenu a' ).filter( function () {
+								var h = canonicalUrl( $( this ).attr( 'href' ) || '' );
+								return h.indexOf( pathKey ) !== -1 || h.indexOf( pathEnc ) !== -1;
+							} ).length > 0;
+							if ( found ) {
+								newRootEl = this;
+								return false;
+							}
+						} );
+					}
+				}
+
+				// --- Step 2: apply expansion classes to the correct root --- //
+				var markedRoot = document.querySelector( '#adminmenu .wc-nav-v2-current-root' );
+				if ( newRootEl ) {
+					// Move the marker class when the section changed.
+					if ( markedRoot && markedRoot !== newRootEl ) {
+						markedRoot.classList.remove(
+							'wc-nav-v2-current-root',
+							'wp-has-current-submenu',
+							'wp-menu-open'
+						);
+						markedRoot.classList.add( 'wp-not-current-submenu' );
+					}
+					newRootEl.classList.remove( 'wp-not-current-submenu' );
+					newRootEl.classList.add(
+						'wc-nav-v2-current-root',
 						'wp-has-current-submenu',
 						'wp-menu-open'
 					);
+				} else if ( markedRoot ) {
+					// No URL match (e.g. non-path-based page): keep the current root.
+					markedRoot.classList.remove( 'wp-not-current-submenu' );
+					markedRoot.classList.add( 'wp-has-current-submenu', 'wp-menu-open' );
 				}
 
-				// controller.js step 5 adds `current` to the rail-root itself,
-				// not the active sub-item. Its step 4 selector uses
-				// encodeURIComponent() which produces %2F-encoded slashes, but
-				// PHP renders sub-item hrefs with literal slashes — so the
-				// selector misses them. Match with both forms (literal and
-				// encoded) so the right sub-item is marked regardless of whether
-				// wpNavMenuUrlUpdate has rewritten the href yet.
-				var url = arguments[ 1 ] || '';
+				// --- Step 3: mark the correct sub-item as current --- //
+				// controller.js step 4 selector uses encodeURIComponent() which
+				// produces %2F-encoded slashes, but PHP renders hrefs with literal
+				// slashes — match both forms.
 				if ( url && url !== '/' ) {
-					var pathLiteral = 'page=wc-admin&path=' + url;
-					var pathEncoded = 'page=wc-admin&path=' + encodeURIComponent( url );
+					var subLit = 'page=wc-admin&path=' + url;
+					var subEnc = 'page=wc-admin&path=' + encodeURIComponent( url );
 					$( '#adminmenu .wp-submenu li' ).each( function () {
 						var href = canonicalUrl( $( this ).find( '> a' ).attr( 'href' ) || '' );
-						if ( href.indexOf( pathLiteral ) !== -1 || href.indexOf( pathEncoded ) !== -1 ) {
+						if ( href.indexOf( subLit ) !== -1 || href.indexOf( subEnc ) !== -1 ) {
 							$( this ).addClass( 'current' );
 							return false;
 						}

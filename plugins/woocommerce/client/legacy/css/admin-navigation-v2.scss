@@ -8,12 +8,16 @@
 // 1. The second-level cascade on the rail-root flyout (hover Settings →
 //    Payments / WooPayments / Status).
 // 2. Breadcrumb-only (non-clickable) ancestor styling.
-// 3. Touch-device hover suppression per spec §6.3.
+// 3. Current-page highlight overrides (border/shadow removal, text color).
+// 4. Attention-dot badge sizing and label wrapping fixes.
+// 5. Touch-device hover suppression per spec §6.3.
 
 // Second-level cascade on the native rail flyout. Injected by JS into
-// `#toplevel_page_woocommerce .wp-submenu li` for tree items that have
-// grandchildren (e.g. Settings → Payments / WooPayments / Status).
-#toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
+// `.wp-submenu li` for tree items that have grandchildren (e.g. Settings →
+// Payments / WooPayments / Status). Scoped to #adminmenu so it applies to
+// both the WooCommerce flyout (non-Woo pages) and the individual rail-root
+// inline submenus (Woo pages).
+#adminmenu .wp-submenu li.wc-nav-v2-has-subflyout {
 	position: relative;
 
 	> a::after {
@@ -59,16 +63,26 @@
 		}
 	}
 
-	// JS toggles .wc-nav-v2-subopen with a ~450ms close delay (hover-intent
+	// JS toggles .wc-nav-v2-subopen with a 600ms close delay (hover-intent
 	// style) so users can correct mid-motion when moving between the parent
 	// flyout item and the nested cascade. :focus-within covers keyboard nav.
+	// Before JS runs, CSS :hover acts as an immediate fallback so the cascade
+	// is usable as soon as the menu is rendered.
 	&.wc-nav-v2-subopen > .wc-nav-v2-subflyout,
-	&:focus-within > .wc-nav-v2-subflyout {
+	&:focus-within > .wc-nav-v2-subflyout,
+	&:hover > .wc-nav-v2-subflyout {
 		display: block;
+	}
+
+	// Once JS has run and set up delayed-hover management, suppress the
+	// immediate CSS :hover so only wc-nav-v2-subopen drives visibility
+	// (giving the 600 ms forgiveness window).
+	.wc-nav-v2-js-ready &:not(.wc-nav-v2-subopen):not(:focus-within):hover > .wc-nav-v2-subflyout {
+		display: none;
 	}
 }
 
-body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
+body.rtl #adminmenu .wp-submenu li.wc-nav-v2-has-subflyout {
 	> a::after {
 		right: auto;
 		left: 10px;
@@ -114,13 +128,13 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 // color tracks whatever WP's admin color scheme assigns to badges. We
 // only override the dimensions to render a dot rather than a pill.
 #adminmenu .wc-attention-dot {
-	width: 8px;
-	min-width: 8px;
-	height: 8px;
-	padding: 0;
-	margin: 0 0 0 2px;
-	border-radius: 50%;
-	vertical-align: middle;
+	width: 8px !important;
+	min-width: 8px !important;
+	height: 8px !important;
+	padding: 0 !important;
+	margin: 0 0 0 2px !important;
+	border-radius: 50% !important;
+	vertical-align: middle !important;
 }
 
 // Keep the order-attention bubble (numeric counter or plain dot)
@@ -141,15 +155,25 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 // hover indicator (border-left on the <li>, border-left on the <a>,
 // or box-shadow).
 #adminmenu .wp-submenu li.current,
-#adminmenu .wp-submenu li.current:hover,
-#adminmenu .wp-submenu li.current > a,
-#adminmenu .wp-submenu li.current > a:hover {
+#adminmenu .wp-submenu li.current:hover {
 	border-left: none !important;
 	box-shadow: none !important;
 }
 #adminmenu .wp-submenu li.current > a,
 #adminmenu .wp-submenu li.current > a:hover {
+	border-left: none !important;
+	box-shadow: none !important;
 	color: #fff !important;
+}
+
+// Top-level nav-v2 rail roots use background color as their active indicator.
+// Remove the color-scheme box-shadow / border-left notch that WP applies to
+// `li.current > a` on top-level items — it creates a thin white stripe along
+// the left edge that conflicts with the full-row highlight.
+#adminmenu li.menu-top.current > a,
+#adminmenu li.menu-top.current:hover > a {
+	border-left: none !important;
+	box-shadow: none !important;
 }
 
 // Spec §6.3: touch devices do not get the hover cascade. Tapping a cascade
@@ -161,12 +185,12 @@ body.rtl #toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout {
 // our first-level flyout with `!important` would break that, leaving the
 // WooCommerce tap unresponsive on mobile.
 @media (hover: none) {
-	#toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout > .wc-nav-v2-subflyout {
+	#adminmenu .wp-submenu li.wc-nav-v2-has-subflyout > .wc-nav-v2-subflyout {
 		display: none !important;
 	}
 	// Drop the `›` caret on cascade parents — on touch they behave as plain
 	// links (tap navigates), so the indicator would be misleading.
-	#toplevel_page_woocommerce .wp-submenu li.wc-nav-v2-has-subflyout > a::after {
+	#adminmenu .wp-submenu li.wc-nav-v2-has-subflyout > a::after {
 		display: none;
 	}
 }
