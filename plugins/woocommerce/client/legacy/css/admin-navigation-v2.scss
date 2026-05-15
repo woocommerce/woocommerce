@@ -195,6 +195,82 @@ body.rtl #adminmenu .wp-submenu li.wc-nav-v2-has-subflyout {
 	}
 }
 
+// WooCommerce W logo and Payments icon color-scheme fix.
+//
+// background-image SVGs can't inherit CSS `color` (fill="currentColor" resolves
+// to black in that context). The correct hook is `div.wp-menu-image::before`,
+// which WP's admin-menu.css and ALL color-scheme files already set to the right
+// color for every state: normal gray, hover blue, current white. Using
+// `background-color: currentColor` on ::before picks that up automatically —
+// no hardcoded colors, works across every scheme.
+//
+// Technique: remove the PHP-registered background-image, render the icon via
+// a ::before mask instead. mask-size: 20px auto matches WP's background-size
+// rule for SVG menu icons. margin: 7px auto centers the 20px icon in the
+// 34px element (7 + 20 + 7 = 34).
+
+// W logo — WooCommerce top-level item (non-Woo rail) AND the Home rail root
+// (li#toplevel_page_wc-admin, the first item in the Woo rail).
+#adminmenu li#toplevel_page_woocommerce .wp-menu-image.svg,
+#adminmenu li#toplevel_page_wc-admin .wp-menu-image.svg {
+	background-image: none !important;
+
+	&::before {
+		content: '';
+		display: block;
+		width: 20px;
+		height: 20px;
+		// WP's admin-menu.css already applies `padding: 7px 0` to
+		// div.wp-menu-image:before — that handles vertical centering.
+		// `margin: 0 auto` only centers horizontally within the 36px element.
+		margin: 0 auto;
+		background-color: currentColor;
+		// stylelint-disable function-url-quotes
+		-webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDg1LjkgNDcuNiI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03Ny40LDAuMWMtNC4zLDAtNy4xLDEuNC05LjYsNi4xTDU2LjQsMjcuN1Y4LjZjMC01LjctMi43LTguNS03LjctOC41cy03LjEsMS43LTkuNiw2LjVMMjguMywyNy43VjguOGMwLTYuMS0yLjUtOC43LTguNi04LjdINy4zQzIuNiwwLjEsMCwyLjMsMCw2LjNzMi41LDYuNCw3LjEsNi40aDUuMXYyNC4xYzAsNi44LDQuNiwxMC44LDExLjIsMTAuOFMzMyw0NSwzNi4zLDM4LjlsNy4yLTEzLjV2MTEuNGMwLDYuNyw0LjQsMTAuOCwxMS4xLDEwLjhzOS4yLTIuMywxMy04LjdsMTYuNi0yOGMzLjYtNi4xLDEuMS0xMC44LTYuOS0xMC44Qzc3LjMsMC4xLDc3LjMsMC4xLDc3LjQsMC4xeiIvPjwvc3ZnPg==");
+		mask-image: url("data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDg1LjkgNDcuNiI+PHBhdGggZmlsbD0id2hpdGUiIGQ9Ik03Ny40LDAuMWMtNC4zLDAtNy4xLDEuNC05LjYsNi4xTDU2LjQsMjcuN1Y4LjZjMC01LjctMi43LTguNS03LjctOC41cy03LjEsMS43LTkuNiw2LjVMMjguMywyNy43VjguOGMwLTYuMS0yLjUtOC43LTguNi04LjdINy4zQzIuNiwwLjEsMCwyLjMsMCw2LjNzMi41LDYuNCw3LjEsNi40aDUuMXYyNC4xYzAsNi44LDQuNiwxMC44LDExLjIsMTAuOFMzMyw0NSwzNi4zLDM4LjlsNy4yLTEzLjV2MTEuNGMwLDYuNyw0LjQsMTAuOCwxMS4xLDEwLjhzOS4yLTIuMywxMy04LjdsMTYuNi0yOGMzLjYtNi4xLDEuMS0xMC44LTYuOS0xMC44Qzc3LjMsMC4xLDc3LjMsMC4xLDc3LjQsMC4xeiIvPjwvc3ZnPg==");
+		// stylelint-enable function-url-quotes
+		-webkit-mask-size: contain;
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
+	}
+}
+
+// Payments icon — nav-v2 rail root (slug wc-settings&tab=checkout →
+// CSS slug wc-settings-tab-checkout → LI id toplevel_page_wc-settings-tab-checkout).
+#adminmenu li#toplevel_page_wc-settings-tab-checkout .wp-menu-image.svg {
+	background-image: none !important;
+
+	&::before {
+		content: '';
+		display: block;
+		width: 20px;
+		height: 20px;
+		margin: 0 auto;
+		background-color: currentColor;
+		// stylelint-disable function-url-quotes
+		-webkit-mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTgyIDg2djUxMmg2ODRWODZabTAgNTk4Yy00OCAwLTg0LTM4LTg0LTg2Vjg2Qy0yIDM4IDM0IDAgODIgMGg2ODRjNDggMCA4NCAzOCA4NCA4NnY1MTJjMCA0OC0zNiA4Ni04NCA4NnptMzg0LTU1NnY0NGg4NnY4NEgzODJ2NDRoMTI4YzI0IDAgNDIgMTggNDIgNDJ2MTI4YzAgMjQtMTggNDIgLTQyIDQyaC00NHY0NGgtODR2LTQ0aC04NnYtODRoMTcwdi00NEgzMzhjLTI0IDAtNDItMTgtNDItNDJWMjE0YzAtMjQgMTgtNDIgNDItNDJoNDR2LTQ0eiIvPjwvc3ZnPg==");
+		mask-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSJ3aGl0ZSIgZD0iTTgyIDg2djUxMmg2ODRWODZabTAgNTk4Yy00OCAwLTg0LTM4LTg0LTg2Vjg2Qy0yIDM4IDM0IDAgODIgMGg2ODRjNDggMCA4NCAzOCA4NCA4NnY1MTJjMCA0OC0zNiA4Ni04NCA4NnptMzg0LTU1NnY0NGg4NnY4NEgzODJ2NDRoMTI4YzI0IDAgNDIgMTggNDIgNDJ2MTI4YzAgMjQtMTggNDIgLTQyIDQyaC00NHY0NGgtODR2LTQ0aC04NnYtODRoMTcwdi00NEgzMzhjLTI0IDAtNDItMTgtNDItNDJWMjE0YzAtMjQgMTgtNDIgNDItNDJoNDR2LTQ0eiIvPjwvc3ZnPg==");
+		// stylelint-enable function-url-quotes
+		-webkit-mask-size: contain;
+		-webkit-mask-repeat: no-repeat;
+		-webkit-mask-position: center;
+		mask-size: contain;
+		mask-repeat: no-repeat;
+		mask-position: center;
+	}
+}
+
+// On Woo pages #adminmenu has its top-level items replaced by the nav-v2
+// rail roots. WP's native rule `#adminmenu { margin: 12px 0 }` adds 12px
+// above the first item; remove it when the rail contains our items.
+// :has() is supported by all browsers WP requires (Chrome 105+, FF 121+).
+#adminmenu:has(> li.wc-nav-v2-item) {
+	margin-top: 0;
+}
+
 // WP-rail overlay ──────────────────────────────────────────────────────────
 //
 // On Woo pages the back (←) link slides in a panel showing the original
@@ -282,5 +358,23 @@ body.wc-nav-v2-showing-wp-rail #wc-nav-v2-wp-rail {
 		&:focus {
 			color: #fff;
 		}
+	}
+
+	// Top-level hover: blue background + white text, matching WP admin
+	// color-scheme hover behavior (those rules are scoped to #adminmenu).
+	// !important overrides any WP admin or plugin CSS that may conflict.
+	li.menu-top > a:hover,
+	li.menu-top > a:focus {
+		background-color: #2271b1 !important;
+		color: #fff !important;
+		border-left: none !important;
+		box-shadow: none !important;
+	}
+
+	// SVG icons (background-image data URIs) aren't affected by CSS `color`.
+	// Invert them to white so they're visible against the blue hover background.
+	li.menu-top > a:hover .wp-menu-image.svg,
+	li.menu-top > a:focus .wp-menu-image.svg {
+		filter: brightness( 0 ) invert( 1 );
 	}
 }

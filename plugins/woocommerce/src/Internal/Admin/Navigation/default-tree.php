@@ -26,7 +26,9 @@ return array(
 	'wc-admin'                                                               => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Home', 'woocommerce' ),
-		'icon'     => 'dashicons-admin-home',
+		// WooCommerce logo — CSS mask in admin-navigation-v2.scss targets
+		// li#toplevel_page_wc-admin for color-scheme-aware coloring.
+		'icon'     => 'data:image/svg+xml;base64,PHN2ZyB2ZXJzaW9uPSIxLjEiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDg1LjkgNDcuNiI+PHBhdGggZmlsbD0iI2EyYWFiMiIgZD0iTTc3LjQsMC4xYy00LjMsMC03LjEsMS40LTkuNiw2LjFMNTYuNCwyNy43VjguNmMwLTUuNy0yLjctOC41LTcuNy04LjVzLTcuMSwxLjctOS42LDYuNUwyOC4zLDI3LjdWOC44YzAtNi4xLTIuNS04LjctOC42LTguN0g3LjNDMi42LDAuMSwwLDIuMywwLDYuM3MyLjUsNi40LDcuMSw2LjRoNS4xdjI0LjFjMCw2LjgsNC42LDEwLjgsMTEuMiwxMC44UzMzLDQ1LDM2LjMsMzguOWw3LjItMTMuNXYxMS40YzAsNi43LDQuNCwxMC44LDExLjEsMTAuOHM5LjItMi4zLDEzLTguN2wxNi42LTI4YzMuNi02LjEsMS4xLTEwLjgtNi45LTEwLjhDNzcuMywwLjEsNzcuMywwLjEsNzcuNCwwLjF6Ii8+PC9zdmc+',
 		'position' => 10,
 	),
 	// HPOS slug. The legacy CPT slug `edit.php?post_type=shop_order` is used
@@ -85,7 +87,10 @@ return array(
 	'wc-settings&tab=checkout'                                               => array(
 		'parent'   => 'woocommerce',
 		'title'    => __( 'Payments', 'woocommerce' ),
-		'icon'     => 'dashicons-money-alt',
+		// Dollar-sign-in-rounded-rectangle: same icon WC's PaymentsController registers.
+		// CSS in admin-navigation-v2.scss replaces this with a mask+currentColor
+		// approach so it responds correctly to all WP admin color schemes.
+		'icon'     => 'data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSI4NTIiIGhlaWdodD0iNjg0Ij48cGF0aCBmaWxsPSIjYTJhYWIyIiBkPSJNODIgODZ2NTEyaDY4NFY4NlptMCA1OThjLTQ4IDAtODQtMzgtODQtODZWODZDLTIgMzggMzQgMCA4MiAwaDY4NGM0OCAwIDg0IDM4IDg0IDg2djUxMmMwIDQ4LTM2IDg2LTg0IDg2em0zODQtNTU2djQ0aDg2djg0SDM4MnY0NGgxMjhjMjQgMCA0MiAxOCA0MiA0MnYxMjhjMCAyNC0xOCA0Mi00MiA0MmgtNDR2NDRoLTg0di00NGgtODZ2LTg0aDE3MHYtNDRIMzM4Yy0yNCAwLTQyLTE4LTQyLTQyVjIxNGMwLTI0IDE4LTQyIDQyLTQyaDQ0di00NHoiLz48L3N2Zz4=',
 		'position' => 35,
 		'url'      => 'admin.php?page=wc-settings&tab=checkout',
 	),
