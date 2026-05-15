@@ -167,6 +167,7 @@ export const QRDirectLoginCode = ( {
 				deviceInfo={ deviceInfo }
 				challengeExpiresAt={ challengeExpiresAt }
 				onChooseNumber={ chooseNumber }
+				errorMessage={ errorMessage }
 			/>
 		);
 	}

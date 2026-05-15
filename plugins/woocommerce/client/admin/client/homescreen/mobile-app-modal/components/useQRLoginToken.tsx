@@ -471,6 +471,9 @@ export const useQRLoginToken = ( {
 				return;
 			}
 
+			setErrorMessage( null );
+			setErrorCode( null );
+
 			try {
 				const response = await apiFetch< {
 					state: 'approved' | 'rejected';
@@ -528,6 +531,7 @@ export const useQRLoginToken = ( {
 							'woocommerce'
 						)
 				);
+				setErrorCode( err.code ?? null );
 			}
 		},
 		[ clearTimer, clearPollTimer ]

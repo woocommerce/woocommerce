@@ -182,6 +182,14 @@ describe( 'QRLoginNumberMatchStep', () => {
 		expect( screen.getByText( /Expires in 89s/ ) ).toBeInTheDocument();
 	} );
 
+	it( 'renders approval errors accessibly', () => {
+		renderStep( { errorMessage: 'Approval is already in progress.' } );
+
+		expect( screen.getByRole( 'alert' ) ).toHaveTextContent(
+			'Approval is already in progress.'
+		);
+	} );
+
 	it( 'disables tiles and surfaces an expired message once the challenge window elapses', () => {
 		renderStep( { challengeExpiresAt: NOW_SECONDS } );
 
