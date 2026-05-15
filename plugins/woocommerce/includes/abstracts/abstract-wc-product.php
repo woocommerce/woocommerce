@@ -2029,10 +2029,50 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 		} elseif ( $this->is_on_sale() ) {
 			$price = wc_format_sale_price( wc_get_price_to_display( $this, array( 'price' => $this->get_regular_price() ) ), wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
 		} else {
-			$price = wc_price( wc_get_price_to_display( $this ) ) . $this->get_price_suffix();
+			// If the sale has ended but the cached active price (`_price` meta) was not
+			// yet synced back to the regular price by the per-product Action Scheduler
+			// event or the daily `wc_scheduled_sales` cron, prefer the regular price for
+			// display so storefronts do not keep showing the expired sale price.
+			$display_price = $this->get_price_html_display_price();
+			$price         = wc_price( wc_get_price_to_display( $this, array( 'price' => $display_price ) ) ) . $this->get_price_suffix();
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
+	}
+
+	/**
+	 * Resolve the price used for the non-sale branch of get_price_html().
+	 *
+	 * Falls back to the regular price when the cached active price still
+	 * matches an expired sale price (i.e. before the per-product or daily
+	 * scheduled sale event has synced `_price` back to the regular price).
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return string The price string to render.
+	 */
+	protected function get_price_html_display_price() {
+		$price         = (string) $this->get_price();
+		$sale_price    = (string) $this->get_sale_price();
+		$regular_price = (string) $this->get_regular_price();
+
+		if ( '' === $sale_price || '' === $regular_price ) {
+			return $price;
+		}
+
+		$date_on_sale_to = $this->get_date_on_sale_to();
+		$sale_ended      = $date_on_sale_to && $date_on_sale_to->getTimestamp() < time();
+
+		if ( ! $sale_ended ) {
+			return $price;
+		}
+
+		// Compare numerically so trailing zeros / formatting differences do not matter.
+		if ( '' !== $price && (float) $price === (float) $sale_price && (float) $sale_price !== (float) $regular_price ) {
+			return $regular_price;
+		}
+
+		return $price;
 	}
 
 	/**

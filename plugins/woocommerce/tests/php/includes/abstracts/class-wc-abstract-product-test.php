@@ -235,6 +235,65 @@ class WC_Abstract_Product_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Price HTML falls back to the regular price when the cached active price is a stale, expired sale price.
+	 *
+	 * Simulates the window between the moment a sale's end date passes and the moment
+	 * `wc_scheduled_sales` / the per-product Action Scheduler event syncs `_price`
+	 * back to the regular price. In that window `_price` still holds the sale value,
+	 * but `is_on_sale()` already returns false. The storefront should show the
+	 * regular price, not the expired sale price.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/31048.
+	 */
+	public function test_get_price_html_falls_back_to_regular_price_when_sale_has_expired() {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 50,
+				'sale_price'    => 25,
+			)
+		);
+
+		// Bypass CRUD so the dates land in the past without `handle_updated_props()`
+		// syncing `_price` back to the regular price — that is exactly the stale state
+		// the storefront sees between the sale's end time and the next scheduled sales run.
+		$product_id = $product->get_id();
+		update_post_meta( $product_id, '_sale_price_dates_from', time() - DAY_IN_SECONDS * 2 );
+		update_post_meta( $product_id, '_sale_price_dates_to', time() - DAY_IN_SECONDS );
+
+		// `_price` still equals the (now expired) sale price.
+		update_post_meta( $product_id, '_price', '25' );
+
+		$product = wc_get_product( $product_id );
+
+		$this->assertFalse( $product->is_on_sale(), 'Sale should be considered ended once date_on_sale_to is in the past.' );
+		$this->assertSame( '25', (string) $product->get_price(), 'Cached _price meta should remain stale prior to the scheduled sync.' );
+
+		$html = $product->get_price_html();
+
+		$this->assertStringContainsString( wc_price( 50 ), $html, 'Price HTML should display the regular price when the sale has expired.' );
+		$this->assertStringNotContainsString( '<ins', $html, 'Price HTML should not include the sale (<ins>) markup when the sale has expired.' );
+	}
+
+	/**
+	 * @testDox Price HTML still shows the active price unchanged for products without a sale schedule.
+	 */
+	public function test_get_price_html_unaffected_when_no_sale_schedule_is_set() {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'regular_price' => 50,
+				'sale_price'    => 25,
+			)
+		);
+
+		// Sale price is set but no end date — should keep showing the sale.
+		$this->assertTrue( $product->is_on_sale() );
+		$html = $product->get_price_html();
+		$this->assertStringContainsString( '<ins', $html );
+	}
+
+	/**
 	 * @testdox The Cost of Goods Sold value can be set and retrieved when the COGS feature is enabled.
 	 */
 	public function test_cogs_value_with_feature_enabled() {

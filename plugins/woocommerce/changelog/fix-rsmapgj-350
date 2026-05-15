@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix product price HTML continuing to render an expired sale price when the cached active price has not yet been synced back to the regular price by the scheduled sales handler.
