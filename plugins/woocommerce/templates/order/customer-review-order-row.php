@@ -32,26 +32,9 @@ $product_name = $item->get_name();
 $image_html   = $product->get_image( 'woocommerce_thumbnail' );
 
 // Variation attribute summary (e.g. "Size: Small, Colour: Red"). Empty for simple products.
-// Read from the order line item's stored meta — not the live variation — so the label keeps
-// reflecting what the customer actually bought even if catalog attributes change later.
-$variation_summary = '';
-if ( (int) $item->get_variation_id() > 0 && $product instanceof WC_Product_Variation ) {
-	$summary_attributes = array();
-	foreach ( array_keys( (array) $product->get_variation_attributes() ) as $attribute_key ) {
-		$slug = str_replace( 'attribute_', '', (string) $attribute_key );
-		if ( '' === $slug ) {
-			continue;
-		}
-		$value = $item->get_meta( $slug, true );
-		if ( '' === $value || null === $value ) {
-			continue;
-		}
-		$summary_attributes[ $slug ] = $value;
-	}
-	if ( ! empty( $summary_attributes ) ) {
-		$variation_summary = (string) wc_get_formatted_variation( $summary_attributes, true );
-	}
-}
+// Shared with SubmissionHandler so the snapshot stored on the comment matches the label rendered here.
+$variation_summary = \Automattic\WooCommerce\Internal\OrderReviews\ItemEligibility::format_variation_summary( $item );
+
 $rating_label_id = 'woocommerce-review-rating-label-' . $item_id;
 $review_label_id = 'woocommerce-review-text-label-' . $item_id;
 $review_input_id = 'woocommerce-review-text-' . $item_id;

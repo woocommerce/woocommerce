@@ -155,15 +155,6 @@
 	 * @param {boolean}     visible Whether the error should be shown.
 	 */
 	function setRowRatingError( row, visible ) {
-		// Anchor the error directly under the product title so the customer
-		// sees the message at the top of the row, not buried below the stars
-		// where it can be off-screen when the row is taller than the viewport.
-		var title = row.querySelector(
-			'.woocommerce-review-order__item-title'
-		);
-		if ( ! title ) {
-			return;
-		}
 		var existing = row.querySelector( ':scope > .' + ERROR_CLASS );
 		if ( ! visible ) {
 			if ( existing ) {
@@ -182,7 +173,20 @@
 		note.className = ERROR_CLASS;
 		note.setAttribute( 'role', 'alert' );
 		note.textContent = msg;
-		title.parentNode.insertBefore( note, title.nextSibling );
+
+		// Anchor the error directly under the product title when the row has
+		// one so the customer sees the message at the top of the row, not
+		// buried below the stars on tall layouts. Fall back to prepending
+		// into the row itself so the error is never silently dropped if a
+		// theme override removes the title element.
+		var title = row.querySelector(
+			'.woocommerce-review-order__item-title'
+		);
+		if ( title ) {
+			title.parentNode.insertBefore( note, title.nextSibling );
+		} else {
+			row.insertBefore( note, row.firstChild );
+		}
 	}
 
 	/**

@@ -351,6 +351,12 @@ class ItemEligibilityTest extends WC_Unit_Test_Case {
 			$built['variation_a_id']
 		);
 
+		// Mirror the page-load path: bulk preload, then per-item decide(). This
+		// exercises the preload bucketing logic as well, not just the
+		// fallback single-item query inside `find_existing_review()`.
+		$items = $built['order']->get_items();
+		ItemEligibility::preload_for_items( $items, $built['order'] );
+
 		$decision_a = ItemEligibility::decide( $built['item_a'], $built['order'] );
 		$decision_b = ItemEligibility::decide( $built['item_b'], $built['order'] );
 

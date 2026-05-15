@@ -240,19 +240,23 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$item_a = $items[0];
 		$item_b = $items[1];
 
+		// The page template posts each row's product_id as the *variation* id
+		// (it reads `$product->get_id()` on the WC_Product_Variation), so the
+		// test mirrors that to exercise the same path SubmissionHandler runs
+		// in production.
 		$_POST = array(
 			'order_id' => $order->get_id(),
 			'key'      => $order->get_order_key(),
 			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
 			'reviews'  => array(
 				array(
-					'product_id'    => $variable->get_id(),
+					'product_id'    => $variation_a->get_id(),
 					'order_item_id' => $item_a->get_id(),
 					'rating'        => 5,
 					'text'          => 'Loved variation A.',
 				),
 				array(
-					'product_id'    => $variable->get_id(),
+					'product_id'    => $variation_b->get_id(),
 					'order_item_id' => $item_b->get_id(),
 					'rating'        => 3,
 					'text'          => 'Variation B was just OK.',
@@ -270,14 +274,36 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$comment_b_id = (int) $rows[1]['comment_id'];
 		$this->assertNotSame( $comment_a_id, $comment_b_id, 'Each variation row should produce its own comment.' );
 
+		// Result rows canonicalise product_id to the parent and surface the variation_id separately.
+		$this->assertSame( (int) $variable->get_id(), (int) $rows[0]['product_id'] );
+		$this->assertSame( (int) $variable->get_id(), (int) $rows[1]['product_id'] );
+		$this->assertSame( (int) $variation_a->get_id(), (int) $rows[0]['variation_id'] );
+		$this->assertSame( (int) $variation_b->get_id(), (int) $rows[1]['variation_id'] );
+
 		$this->assertSame( (string) $variation_a->get_id(), get_comment_meta( $comment_a_id, ItemEligibility::VARIATION_META_KEY, true ) );
 		$this->assertSame( (string) $variation_b->get_id(), get_comment_meta( $comment_b_id, ItemEligibility::VARIATION_META_KEY, true ) );
 
-		$summary_a = (string) get_comment_meta( $comment_a_id, ItemEligibility::VARIATION_SUMMARY_META_KEY, true );
-		$summary_b = (string) get_comment_meta( $comment_b_id, ItemEligibility::VARIATION_SUMMARY_META_KEY, true );
-		$this->assertNotSame( '', $summary_a, 'Variation A summary snapshot should be captured.' );
-		$this->assertNotSame( '', $summary_b, 'Variation B summary snapshot should be captured.' );
-		$this->assertNotSame( $summary_a, $summary_b, 'Each variation should snapshot its own attribute summary.' );
+		// Exact snapshot text — derived the same way the production helper builds it.
+		$expected_a = ItemEligibility::format_variation_summary( $item_a );
+		$expected_b = ItemEligibility::format_variation_summary( $item_b );
+		$this->assertNotSame( '', $expected_a, 'Test setup precondition: variation A produces a non-empty summary.' );
+		$this->assertNotSame( '', $expected_b, 'Test setup precondition: variation B produces a non-empty summary.' );
+		$this->assertSame(
+			$expected_a,
+			get_comment_meta( $comment_a_id, ItemEligibility::VARIATION_SUMMARY_META_KEY, true )
+		);
+		$this->assertSame(
+			$expected_b,
+			get_comment_meta( $comment_b_id, ItemEligibility::VARIATION_SUMMARY_META_KEY, true )
+		);
+		$this->assertNotSame( $expected_a, $expected_b, 'Each variation should snapshot its own attribute summary.' );
+
+		// Every row reviewed → order completion meta stamped.
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty(
+			$fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ),
+			'When every reviewable slot has a current-order review, the order should be marked complete.'
+		);
 	}
 
 	/**

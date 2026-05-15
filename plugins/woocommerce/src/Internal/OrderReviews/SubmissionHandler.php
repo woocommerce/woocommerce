@@ -152,9 +152,16 @@ class SubmissionHandler {
 			// $rows_in was already unslashed in handle(); avoid double-unslashing.
 			$text = isset( $row['text'] ) && is_string( $row['text'] ) ? trim( wp_kses_post( $row['text'] ) ) : '';
 
+			// Per-row result always carries `product_id` (parent product, where
+			// the review lives) and `variation_id` (0 for simple products) so
+			// callers don't have to know whether the client posted the parent
+			// or the variation id as `product_id`. Both are echoed back as
+			// soon as we resolve the line item; for early validation failures
+			// they reflect the raw submitted product id with `variation_id: 0`.
 			$result = array(
-				'product_id' => $product_id,
-				'status'     => 'error',
+				'product_id'   => $product_id,
+				'variation_id' => 0,
+				'status'       => 'error',
 			);
 
 			if ( $rating < 1 || $rating > 5 ) {
@@ -182,6 +189,11 @@ class SubmissionHandler {
 				$results[ $row_index ] = $result;
 				continue;
 			}
+
+			// Canonicalise the result fields now that we've resolved the line
+			// item: parent product id + the line's variation id (0 for simple).
+			$result['product_id']   = $line_product_id;
+			$result['variation_id'] = $line_variation_id;
 
 			// Reviews always attach to the parent product so they show on the
 			// product page regardless of which variation was bought.
@@ -257,7 +269,7 @@ class SubmissionHandler {
 			add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
 			add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, $line_variation_id, true );
 
-			$variation_summary = self::format_variation_summary( $item );
+			$variation_summary = ItemEligibility::format_variation_summary( $item );
 			if ( '' !== $variation_summary ) {
 				add_comment_meta( $comment_id, ItemEligibility::VARIATION_SUMMARY_META_KEY, $variation_summary, true );
 			}
@@ -394,58 +406,5 @@ class SubmissionHandler {
 			}
 		}
 		return $index;
-	}
-
-	/**
-	 * Render the variation's attribute summary as a single flat line.
-	 *
-	 * Used to snapshot the variation context onto the review comment at write
-	 * time (e.g. `"Size: Small, Colour: Red"`), so the value stays readable
-	 * even if the variation is later retired or its attribute values change.
-	 *
-	 * Restricted to actual variation attribute slugs so personalisation /
-	 * add-on / engraving / gift-message meta from third-party plugins isn't
-	 * accidentally folded into the public review snapshot. Returns an empty
-	 * string for simple products or when the variation product can no longer
-	 * be loaded to identify its attribute slugs.
-	 *
-	 * @since 10.9.0
-	 *
-	 * @param \WC_Order_Item_Product $item Order line item.
-	 */
-	private static function format_variation_summary( \WC_Order_Item_Product $item ): string {
-		$variation_id = (int) $item->get_variation_id();
-		if ( $variation_id <= 0 ) {
-			return '';
-		}
-
-		$variation = wc_get_product( $variation_id );
-		if ( ! $variation instanceof \WC_Product_Variation ) {
-			return '';
-		}
-
-		// Whitelist the attribute slugs that belong to this variation, then
-		// look each one up against the line item's stored meta so values
-		// reflect what was bought, not what the catalog now has. Keys in the
-		// item meta are stored without the `attribute_` prefix (see
-		// WC_Order_Item_Product::set_variation()).
-		$attributes = array();
-		foreach ( array_keys( (array) $variation->get_variation_attributes() ) as $attribute_key ) {
-			$slug = str_replace( 'attribute_', '', (string) $attribute_key );
-			if ( '' === $slug ) {
-				continue;
-			}
-			$value = $item->get_meta( $slug, true );
-			if ( '' === $value || null === $value ) {
-				continue;
-			}
-			$attributes[ $slug ] = $value;
-		}
-
-		if ( empty( $attributes ) ) {
-			return '';
-		}
-
-		return (string) wc_get_formatted_variation( $attributes, true );
 	}
 }
