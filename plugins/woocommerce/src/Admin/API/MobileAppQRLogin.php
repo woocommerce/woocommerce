@@ -1222,8 +1222,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	}
 
 	/**
-	 * Whitelist + sanitize the optional `device` payload sent by the mobile app
-	 * on the exchange call.
+	 * Whitelist + sanitize the `device` payload sent by the mobile app.
 	 *
 	 * Returns an array of strings keyed by the whitelisted keys defined in
 	 * `DEVICE_PAYLOAD_KEYS`. Anything outside that whitelist is dropped. Each
@@ -1263,10 +1262,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 *
 	 * Preferred: `Woo Mobile · iPhone 15 · 2026-04-28` (model + ISO date).
 	 * Falls back to `Woo Mobile · iOS · 2026-04-28` when only the OS is known.
-	 * Falls back to the legacy literal `WooCommerce Mobile App (QR Login)` if
-	 * neither model nor OS is available — that keeps older mobile clients (which
-	 * don't send the `device` payload) working without changing their visible
-	 * AP name.
+	 * The scan endpoint requires at least model or OS. The legacy fallback is
+	 * retained as a defensive guard in case stored token data is corrupted.
 	 *
 	 * The name is what the merchant sees in WP admin → Users → Profile →
 	 * Application Passwords, so it should be human-readable, single-line, and
@@ -1283,10 +1280,13 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// label if a particular device build returns an empty MODEL string.
 		// Both fields come from the platform SDK on the mobile side and are
 		// effectively always populated, but defending against an empty model
-		// is cheaper than chasing the edge case at runtime.
-		$descriptor = '' !== $model ? $model : $os;
+			// is cheaper than chasing the edge case at runtime.
+			$descriptor = '' !== $model ? $model : $os;
+			if ( '' === $descriptor ) {
+				return __( 'WooCommerce Mobile App (QR Login)', 'woocommerce' );
+			}
 
-		// Use the site's configured timezone so the date the merchant sees in
+			// Use the site's configured timezone so the date the merchant sees in
 		// the AP list matches what they'd see in the rest of wp-admin.
 		$date = wp_date( 'Y-m-d' );
 
@@ -1364,6 +1364,15 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
+		$device = $this->sanitize_device_payload( $request->get_param( 'device' ) );
+		if ( empty( $device['model'] ) && empty( $device['os'] ) ) {
+			return new \WP_Error(
+				'invalid_device',
+				__( 'QR login requires device information from the mobile app.', 'woocommerce' ),
+				array( 'status' => 400 )
+			);
+		}
+
 		// Atomic mutex on the read-mutate-write window. Without this, two
 		// concurrent scans both pass the state==pending check below and both
 		// write a new challenge — last writer wins, the loser's session_id
@@ -1409,7 +1418,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			'shuffled'    => $candidates,
 			'session_id'  => $session_id,
 			'expires_at'  => $now + self::CHALLENGE_TTL_SECONDS,
-			'device'      => $this->sanitize_device_payload( $request->get_param( 'device' ) ),
+			'device'      => $device,
 		);
 
 		// Re-use whatever ttl the original transient had left. Capped to

@@ -1694,6 +1694,27 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Scan endpoint rejects device payloads that do not include a model or OS identity.
+	 */
+	public function test_scan_requires_device_identity(): void {
+		$plaintext = $this->generate_token_as_admin();
+		wp_set_current_user( 0 );
+
+		$response = $this->dispatch_scan(
+			$plaintext,
+			array( 'app_version' => '24.7.0' )
+		);
+
+		$this->assertSame( 400, $response->get_status() );
+		$this->assertSame( 'invalid_device', $response->get_data()['code'] );
+
+		$record = get_transient( $this->token_transient_key( $plaintext ) );
+		$this->assertIsArray( $record );
+		$this->assertSame( MobileAppQRLogin::STATE_PENDING, $record['state'] );
+		$this->assertFalse( get_option( $this->token_scan_claim_key( $plaintext ), false ) );
+	}
+
+	/**
 	 * @testdox Scan endpoint does not consume the scan bucket for invalid random tokens.
 	 */
 	public function test_scan_invalid_token_does_not_consume_scan_rate_limit(): void {
