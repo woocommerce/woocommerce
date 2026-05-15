@@ -41,93 +41,17 @@ test.describe(
 	'Customer Review Request — Review Order page',
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
-		let originalFeatureFlag = '';
-		let originalRequestSettings = '';
-		let originalSiteReviews = '';
-
-		const readOption = async ( name: string ): Promise< string > => {
-			const { stdout } = await wpCLI(
-				`wp option get ${ name } --format=json`
-			);
-			return stdout.trim();
-		};
-
-		const writeOption = async (
-			name: string,
-			value: string
-		): Promise< void > => {
-			if ( value === '' ) {
-				await wpCLI( `wp option delete ${ name }` );
-				return;
-			}
-			// `wp option set --format=json` accepts JSON whether the option is a
-			// scalar string or an array — works for both `enabled` (string) and
-			// the request settings (array).
-			await wpCLI(
-				`wp option set ${ name } ${ JSON.stringify(
-					value
-				) } --format=json`
-			);
-		};
-
 		test.beforeAll( async () => {
-			// Capture original option values so afterAll can restore them; the
-			// test site shouldn't be left in a feature-enabled state.
-			originalFeatureFlag = await readOption( FEATURE_FLAG_OPTION );
-			originalRequestSettings = await readOption(
-				REQUEST_SETTINGS_OPTION
-			);
-			originalSiteReviews = await readOption( SITE_REVIEWS_OPTION );
-
-			// Enable the feature flag.
 			await wpCLI( `wp option set ${ FEATURE_FLAG_OPTION } yes` );
-
-			// Force the request settings option to a known shape with the
-			// transactional email enabled. Using `wp option set --format=json`
-			// (vs. `wp option patch update`) so it works on a fresh site where
-			// the option doesn't exist yet.
 			await wpCLI(
-				`wp option set ${ REQUEST_SETTINGS_OPTION } ` +
-					"'" +
-					JSON.stringify( { enabled: 'yes' } ) +
-					"' --format=json"
+				`wp option set ${ REQUEST_SETTINGS_OPTION } --format=json '{"enabled":"yes"}'`
 			);
-
 			await wpCLI( 'wp rewrite flush' );
 		} );
 
 		test.afterAll( async () => {
-			// Restore each option to the exact state we found it in.
-			if ( originalFeatureFlag === '' ) {
-				await wpCLI( `wp option delete ${ FEATURE_FLAG_OPTION }` );
-			} else {
-				await wpCLI(
-					`wp option set ${ FEATURE_FLAG_OPTION } ` +
-						JSON.stringify( originalFeatureFlag ) +
-						' --format=json'
-				);
-			}
-
-			if ( originalRequestSettings === '' ) {
-				await wpCLI( `wp option delete ${ REQUEST_SETTINGS_OPTION }` );
-			} else {
-				await wpCLI(
-					`wp option set ${ REQUEST_SETTINGS_OPTION } ` +
-						"'" +
-						originalRequestSettings +
-						"' --format=json"
-				);
-			}
-
-			if ( originalSiteReviews === '' ) {
-				await wpCLI( `wp option delete ${ SITE_REVIEWS_OPTION }` );
-			} else {
-				await wpCLI(
-					`wp option set ${ SITE_REVIEWS_OPTION } ` +
-						JSON.stringify( originalSiteReviews ) +
-						' --format=json'
-				);
-			}
+			await wpCLI( `wp option delete ${ FEATURE_FLAG_OPTION }` );
+			await wpCLI( `wp option delete ${ REQUEST_SETTINGS_OPTION }` );
 		} );
 
 		/**
@@ -501,9 +425,6 @@ test.describe(
 			const { order, productIds } = await seedCompletedOrder( restApi, [
 				{ name: 'CRR Site-wide Off' },
 			] );
-			const originalSiteReviewsForThisTest = await readOption(
-				SITE_REVIEWS_OPTION
-			);
 
 			try {
 				await wpCLI( `wp option set ${ SITE_REVIEWS_OPTION } no` );
@@ -522,10 +443,8 @@ test.describe(
 					page.locator( '.woocommerce-review-order__submit' )
 				).toHaveCount( 0 );
 			} finally {
-				await writeOption(
-					SITE_REVIEWS_OPTION,
-					originalSiteReviewsForThisTest
-				);
+				// Default for fresh installs is 'yes'; restore to that.
+				await wpCLI( `wp option set ${ SITE_REVIEWS_OPTION } yes` );
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, productIds );
 			}
