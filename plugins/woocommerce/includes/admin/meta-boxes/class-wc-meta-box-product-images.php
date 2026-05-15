@@ -22,6 +22,16 @@ if ( ! defined( 'ABSPATH' ) ) {
 class WC_Meta_Box_Product_Images {
 
 	/**
+	 * Whether the product gallery image ids have already been set and saved by
+	 * WC_Meta_Box_Product_Data::save() during the current `woocommerce_process_product_meta`
+	 * cycle. When true, self::save() skips its own call to $product->save() to avoid
+	 * a redundant second save during the same product update (see #55882).
+	 *
+	 * @var bool
+	 */
+	public static $gallery_handled_by_product_data = false;
+
+	/**
 	 * Output the metabox.
 	 *
 	 * @param WP_Post $post
@@ -95,6 +105,19 @@ class WC_Meta_Box_Product_Images {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
+		// The gallery image ids are already set and persisted as part of
+		// WC_Meta_Box_Product_Data::save(), which runs at priority 10 on the same
+		// `woocommerce_process_product_meta` hook. Skipping this redundant save
+		// avoids triggering save() twice per product update (see #55882).
+		// Reset the flag so subsequent product saves in the same request are still
+		// handled correctly.
+		if ( self::$gallery_handled_by_product_data ) {
+			self::$gallery_handled_by_product_data = false;
+			return;
+		}
+
+		// Fallback path: this runs only if WC_Meta_Box_Product_Data::save was unhooked
+		// by a third party. Keep the original behavior in that case.
 		$product_type   = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( stripslashes( $_POST['product-type'] ) );
 		$classname      = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : ProductType::SIMPLE );
 		$product        = new $classname( $post_id );

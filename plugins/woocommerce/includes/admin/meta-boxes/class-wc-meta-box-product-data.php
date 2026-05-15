@@ -339,6 +339,20 @@ class WC_Meta_Box_Product_Data {
 		$attributes   = self::prepare_attributes();
 		$stock        = null;
 
+		// Resolve the product gallery image ids from the form submission so they can
+		// be persisted as part of the single $product->save() call below. This
+		// replaces the redundant save() previously performed by
+		// WC_Meta_Box_Product_Images::save() (see #55882).
+		$gallery_image_ids_raw = isset( $_POST['product_image_gallery'] ) ? wp_unslash( $_POST['product_image_gallery'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( is_string( $gallery_image_ids_raw ) ) {
+			$gallery_image_ids_clean = wc_clean( $gallery_image_ids_raw );
+			$gallery_image_ids       = is_string( $gallery_image_ids_clean )
+				? array_filter( array_map( 'absint', explode( ',', $gallery_image_ids_clean ) ) )
+				: array();
+		} else {
+			$gallery_image_ids = array();
+		}
+
 		// Handle stock changes.
 		if ( isset( $_POST['_stock'] ) ) {
 			if ( isset( $_POST['_original_stock'] ) && wc_stock_amount( $product->get_stock_quantity( 'edit' ) ) !== wc_stock_amount( wp_unslash( $_POST['_original_stock'] ) ) ) {
@@ -413,6 +427,7 @@ class WC_Meta_Box_Product_Data {
 				'reviews_allowed'    => ! empty( $_POST['comment_status'] ) && 'open' === $_POST['comment_status'],
 				'attributes'         => $attributes,
 				'default_attributes' => self::prepare_set_attributes( $attributes, 'default_attribute_' ),
+				'gallery_image_ids'  => $gallery_image_ids,
 			)
 		);
 
@@ -439,6 +454,11 @@ class WC_Meta_Box_Product_Data {
 		 * @since 3.0.0
 		 */
 		do_action( 'woocommerce_admin_process_product_object', $product );
+
+		// The gallery image ids are set above via set_props() so the single save() call below
+		// persists them. Mark the gallery as already handled so WC_Meta_Box_Product_Images::save
+		// can skip its redundant second save() call (see #55882).
+		WC_Meta_Box_Product_Images::$gallery_handled_by_product_data = true;
 
 		$product->save();
 

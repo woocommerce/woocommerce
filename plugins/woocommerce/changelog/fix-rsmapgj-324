@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Avoid calling WC_Product::save() twice when updating a product in the classic editor: the gallery image ids are now persisted as part of the product data meta box save handler, removing the redundant second save from the product images meta box handler.
