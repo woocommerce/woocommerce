@@ -399,26 +399,32 @@
 				// may not have been processed into cssRules yet at DOMContentLoaded.
 				// Deferring to window.load guarantees all external CSS is parsed.
 				$( window ).one( 'load', function () {
-					var hoverBg = null;
+					var hoverBg    = null;
+					var hoverColor = null;
 					for ( var si = 0; si < document.styleSheets.length; si++ ) {
 						try {
 							var sheetRules = document.styleSheets[ si ].cssRules;
 							for ( var ri = 0; ri < sheetRules.length; ri++ ) {
-								var r  = sheetRules[ ri ];
-								var s  = r.selectorText || '';
-								var bg = r.style && r.style.backgroundColor;
-								if ( bg &&
-									s.indexOf( '#adminmenu' ) !== -1 &&
+								var r   = sheetRules[ ri ];
+								var s   = r.selectorText || '';
+								var bg  = r.style && r.style.backgroundColor;
+								var col = r.style && r.style.color;
+								var isHoverRule = s.indexOf( '#adminmenu' ) !== -1 &&
 									s.indexOf( 'submenu' ) === -1 &&
 									( s.indexOf( 'menu-top' ) !== -1 || s.indexOf( 'opensub' ) !== -1 ) &&
-									( s.indexOf( ':hover' ) !== -1 || s.indexOf( 'opensub' ) !== -1 ) ) {
-									hoverBg = bg; // last match wins (scheme overrides base)
+									( s.indexOf( ':hover' ) !== -1 || s.indexOf( 'opensub' ) !== -1 );
+								if ( isHoverRule ) {
+									if ( bg )  { hoverBg    = bg; }  // last match wins
+									if ( col ) { hoverColor = col; }
 								}
 							}
 						} catch ( e ) {}
 					}
 					if ( hoverBg ) {
 						$wpRail[ 0 ].style.setProperty( '--wc-rail-hover-bg', hoverBg );
+					}
+					if ( hoverColor ) {
+						$wpRail[ 0 ].style.setProperty( '--wc-rail-hover-color', hoverColor );
 					}
 				} );
 

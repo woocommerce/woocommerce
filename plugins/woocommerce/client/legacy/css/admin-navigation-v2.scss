@@ -163,7 +163,9 @@ body.rtl #adminmenu .wp-submenu li.wc-nav-v2-has-subflyout {
 #adminmenu .wp-submenu li.current > a:hover {
 	border-left: none !important;
 	box-shadow: none !important;
-	color: #fff !important;
+	// Do not force color here — WP's native color-scheme CSS already sets the
+	// correct current-item text color for every scheme. Overriding with #fff
+	// breaks light schemes where the submenu flyout background is white.
 }
 
 // Top-level nav-v2 rail roots use background color as their active indicator.
@@ -374,7 +376,10 @@ body.wc-nav-v2-showing-wp-rail #wc-nav-v2-wp-rail {
 
 		&:hover,
 		&:focus {
-			color: #fff;
+			// --wc-rail-hover-color is read from the active color-scheme stylesheet
+			// at window.load (same pass as --wc-rail-hover-bg). Falls back to #fff
+			// which is correct for all dark schemes.
+			color: var( --wc-rail-hover-color, #fff );
 		}
 	}
 
@@ -387,19 +392,18 @@ body.wc-nav-v2-showing-wp-rail #wc-nav-v2-wp-rail {
 
 		&:hover,
 		&:focus {
-			color: #fff;
+			color: var( --wc-rail-hover-color, #fff );
 		}
 	}
 
-	// Top-level hover: color-scheme background + white text.
-	// --wc-rail-hover-bg is set by JS by reading the active color-scheme
-	// stylesheet's `#adminmenu li.menu-top:hover` rule; falls back to WP's
-	// default blue so something reasonable shows before JS runs.
+	// Top-level hover: color-scheme background + scheme-appropriate text.
+	// Both --wc-rail-hover-bg and --wc-rail-hover-color are read from the active
+	// color-scheme stylesheet at window.load; fall back to WP defaults.
 	// !important overrides any WP admin or plugin CSS that may conflict.
 	li.menu-top > a:hover,
 	li.menu-top > a:focus {
 		background-color: var(--wc-rail-hover-bg, #2271b1) !important;
-		color: #fff !important;
+		color: var( --wc-rail-hover-color, #fff ) !important;
 		border-left: none !important;
 		box-shadow: none !important;
 	}
