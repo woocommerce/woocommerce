@@ -308,13 +308,12 @@ describe( 'product edit utils', () => {
 		const priceFieldIds = [
 			'price',
 			'regular_price',
-			'on_sale',
 			'sale_price',
 			'schedule_sale',
 			'date_on_sale_from',
 			'date_on_sale_to',
 		];
-		const basePriceFieldIds = [ 'regular_price', 'on_sale' ];
+		const basePriceFieldIds = [ 'regular_price', 'sale_price' ];
 		const managedStockFieldIds = [ 'manage_stock', 'stock_quantity' ];
 		const stockStatusFieldIds = [ 'stock', 'manage_stock' ];
 		const shippingFieldIds = [
@@ -350,7 +349,6 @@ describe( 'product edit utils', () => {
 				'product_status',
 				'catalog_visibility',
 				'regular_price',
-				'on_sale',
 				'sale_price',
 				'images',
 				'sku',
@@ -402,11 +400,7 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expectFieldOrder( fieldIds, [
-				'regular_price',
-				'on_sale',
-				'sale_price',
-			] );
+			expectFieldOrder( fieldIds, [ 'regular_price', 'sale_price' ] );
 		} );
 
 		it( 'hides shipping fields for virtual simple products', () => {
@@ -501,7 +495,7 @@ describe( 'product edit utils', () => {
 				'product_status',
 				'catalog_visibility',
 				'regular_price',
-				'on_sale',
+				'sale_price',
 				'images',
 				'external_url',
 				'button_text',
@@ -513,7 +507,6 @@ describe( 'product edit utils', () => {
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
-				'sale_price',
 				'schedule_sale',
 				'date_on_sale_from',
 				'date_on_sale_to',
@@ -536,7 +529,6 @@ describe( 'product edit utils', () => {
 			expectFieldsHidden( fieldIds, [
 				'price',
 				'regular_price',
-				'on_sale',
 				'sale_price',
 				'schedule_sale',
 				'date_on_sale_from',
@@ -627,7 +619,6 @@ describe( 'product edit utils', () => {
 				expect.arrayContaining( basePriceFieldIds )
 			);
 			expectFieldsHidden( fieldIds, [
-				'sale_price',
 				'schedule_sale',
 				'date_on_sale_from',
 				'date_on_sale_to',
@@ -651,7 +642,6 @@ describe( 'product edit utils', () => {
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
 					'regular_price',
-					'on_sale',
 					'sale_price',
 					'images',
 					'sku',
@@ -689,7 +679,6 @@ describe( 'product edit utils', () => {
 					'images',
 					'sku',
 					'regular_price',
-					'on_sale',
 					'sale_price',
 					'stock',
 					'manage_stock',
@@ -767,7 +756,6 @@ describe( 'product edit utils', () => {
 			expect( fieldIds ).toEqual(
 				expect.arrayContaining( [
 					'regular_price',
-					'on_sale',
 					'sale_price',
 					...bulkSellableInstanceFieldIds,
 				] )
@@ -953,7 +941,6 @@ describe( 'product edit utils', () => {
 				'product_status',
 				'catalog_visibility',
 				'regular_price',
-				'on_sale',
 				'sale_price',
 				'images',
 				'downloadable',
@@ -984,7 +971,6 @@ describe( 'product edit utils', () => {
 
 			expect( getProductTypeFormFields( [ product ] ) ).toEqual( [
 				'regular_price',
-				'on_sale',
 				'sale_price',
 				'images',
 				'downloadable',

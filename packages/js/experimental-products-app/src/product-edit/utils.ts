@@ -88,7 +88,6 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	'product_status',
 	'catalog_visibility',
 	'regular_price',
-	'on_sale',
 	'sale_price',
 	'images',
 	'downloadable',
@@ -105,7 +104,6 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 
 const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
 	'regular_price',
-	'on_sale',
 	'sale_price',
 	'images',
 	'downloadable',
@@ -144,7 +142,6 @@ const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
 	'product_status',
 	'catalog_visibility',
 	'regular_price',
-	'on_sale',
 	'sale_price',
 	'images',
 	'external_url',
