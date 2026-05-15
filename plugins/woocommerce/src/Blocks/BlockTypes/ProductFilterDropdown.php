@@ -66,6 +66,8 @@ final class ProductFilterDropdown extends AbstractBlock {
 			),
 		);
 
+		$aria_label = $selectable_items['groupLabel'] ?? __( 'Choose an option', 'woocommerce' );
+
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
@@ -74,7 +76,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 				<select
 					class="wc-block-product-filter-dropdown__select"
 					id="<?php echo esc_attr( $select_id ); ?>"
-					aria-label="<?php echo esc_attr( $selectable_items['groupLabel'] ); ?>"
+					aria-label="<?php echo esc_attr( $aria_label ); ?>"
 					data-wp-bind--value="state.selectValue"
 					data-wp-on--change="actions.onDropdownChange"
 				>
@@ -90,10 +92,12 @@ final class ProductFilterDropdown extends AbstractBlock {
 						if ( empty( $option_label ) ) {
 							continue;
 						}
+						$item_id    = $item['id'] ?? '';
+						$item_value = $item['value'] ?? '';
 						?>
 						<option
-							id="<?php echo esc_attr( $item['id'] ); ?>"
-							value="<?php echo esc_attr( $item['value'] ); ?>"
+							id="<?php echo esc_attr( $item_id ); ?>"
+							value="<?php echo esc_attr( $item_value ); ?>"
 							<?php disabled( ! empty( $item['disabled'] ) ); ?>
 							<?php
 							if ( ! empty( $item['hidden'] ) ) :
