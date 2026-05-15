@@ -70,6 +70,7 @@ final class ProductFilterChips extends AbstractBlock {
 		$first_item         = reset( $items );
 		$show_counts        = is_array( $first_item ) && array_key_exists( 'count', $first_item );
 		$has_color_swatches = is_array( $first_item ) && array_key_exists( 'color', $first_item );
+		$button_role        = 'single' === $block_context['selectionMode'] ? 'radio' : 'checkbox';
 
 		if ( $has_color_swatches && is_string( $classes ) && ! str_contains( $classes, 'is-style-swatch' ) ) {
 			$classes                    .= ' is-style-swatch';
@@ -94,7 +95,7 @@ final class ProductFilterChips extends AbstractBlock {
 						<button
 							class="wc-block-product-filter-chips__item"
 							type="button"
-							role="checkbox"
+							role="<?php echo esc_attr( $button_role ); ?>"
 							id="<?php echo esc_attr( $item['id'] ); ?>"
 							<?php if ( ! empty( $item['ariaLabel'] ) ) : ?>
 								aria-label="<?php echo esc_attr( $item['ariaLabel'] ); ?>"

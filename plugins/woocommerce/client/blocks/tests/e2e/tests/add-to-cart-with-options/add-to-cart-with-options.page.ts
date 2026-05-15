@@ -217,10 +217,10 @@ class AddToCartWithOptionsPage {
 		} );
 		if ( attributeValue !== '' ) {
 			await group
-				.getByRole( 'checkbox', { name: attributeValue, exact: true } )
+				.getByRole( 'radio', { name: attributeValue, exact: true } )
 				.click();
 		} else {
-			const selected = group.getByRole( 'checkbox', { checked: true } );
+			const selected = group.getByRole( 'radio', { checked: true } );
 			await selected.click();
 		}
 	}
@@ -271,7 +271,7 @@ class AddToCartWithOptionsPage {
 					( item ) => item !== expectedValues[ attributeName ]
 				);
 				await expect(
-					group.getByRole( 'checkbox', {
+					group.getByRole( 'radio', {
 						name: String( expectedValues[ attributeName ] ),
 						exact: true,
 					} )
@@ -279,12 +279,12 @@ class AddToCartWithOptionsPage {
 			}
 			if ( attributeValues.length ) {
 				for ( const attributeValue of attributeValues ) {
-					const checkbox = group.getByRole( 'checkbox', {
+					const radio = group.getByRole( 'radio', {
 						name: attributeValue,
 						exact: true,
 					} );
-					if ( ( await checkbox.count() ) > 0 ) {
-						await expect( checkbox ).not.toBeChecked();
+					if ( ( await radio.count() ) > 0 ) {
+						await expect( radio ).not.toBeChecked();
 					}
 				}
 			}

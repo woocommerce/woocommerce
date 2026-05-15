@@ -59,41 +59,66 @@ class VariationSelectorAttribute extends AbstractBlock {
 	 * @return string Row HTML
 	 */
 	private function render_attribute_row( string $attribute_name, array $product_attribute_terms, WP_Block $block, array $attributes, array $available_values_by_attribute ): string {
-		$attribute_terms  = $this->get_terms( $attribute_name, $product_attribute_terms );
-		$attribute_slug   = wc_variation_attribute_name( $attribute_name );
-		$available_values = $available_values_by_attribute[ $attribute_slug ] ?? array();
-		$attribute_terms  = $this->filter_terms_by_available_variations( $attribute_terms, $available_values );
+		$inner_blocks = $block->parsed_block['innerBlocks'] ?? array();
+
+		if ( empty( $inner_blocks ) ) {
+			return '';
+		}
+
+		$all_attribute_terms = $this->get_terms( $attribute_name, $product_attribute_terms );
+		$attribute_slug      = wc_variation_attribute_name( $attribute_name );
+		$available_values    = $available_values_by_attribute[ $attribute_slug ] ?? array();
+		$attribute_terms     = $this->filter_terms_by_available_variations( $all_attribute_terms, $available_values );
 
 		if ( empty( $attribute_terms ) ) {
 			return '';
 		}
 
-		$row_context = array(
-			'woocommerce/attributeId'    => 'wc_product_attribute_' . uniqid(),
+		$variation_items = $this->build_variation_selectable_items( $attribute_slug, $attribute_terms );
+		$attribute_label = wc_attribute_label( $attribute_name );
+		$attribute_id    = 'wc_product_attribute_' . uniqid();
+		$context         = array(
+			'woocommerce/attributeId'    => $attribute_id,
 			'woocommerce/attributeName'  => $attribute_name,
 			'woocommerce/attributeTerms' => $attribute_terms,
+			'woocommerceSelectableItems' => array(
+				'items'          => $variation_items,
+				'selectionMode'  => 'single',
+				'storeNamespace' => 'woocommerce/add-to-cart-with-options',
+				'groupLabel'     => $attribute_label,
+			),
 		);
 
-		$display_style   = $this->resolve_display_style( $attributes );
-		$variation_items = $this->build_variation_selectable_items( $attribute_slug, $attribute_terms );
-		$merged_context  = array_merge(
-			$row_context,
-			array(
-				'woocommerceSelectableItems' => $this->build_selectable_items_context_for_variation_row(
-					$row_context,
-					$variation_items
-				),
-			)
+		$interactive_context = array(
+			'name'                      => $attribute_label,
+			'variationAttributeOptions' => $variation_items,
+			'selectedValue'             => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
+			'autoselect'                => $attributes['autoselect'] ?? false,
+			'disabledAttributesAction'  => $attributes['disabledAttributesAction'] ?? 'disable',
 		);
 
-		return $this->render_inner_blocks(
-			$block->parsed_block,
-			$merged_context,
-			$attributes,
-			$row_context,
-			$display_style,
-			$variation_items,
-			$attribute_slug
+		$interactive_attributes = array(
+			'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
+			'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
+		);
+
+		$display_style = $this->resolve_display_style( $attributes );
+		if ( 'woocommerce/product-filter-dropdown' !== $display_style ) {
+			$interactive_attributes['role']            = 'radiogroup';
+			$interactive_attributes['id']              = $attribute_id;
+			$interactive_attributes['aria-labelledby'] = $attribute_id . '_label';
+		}
+
+		$inner_html = '';
+		foreach ( $inner_blocks as $inner_block ) {
+			$inner_html .= ( new WP_Block( $inner_block, $context ) )->render();
+		}
+
+		return sprintf(
+			'<div %s %s>%s</div>',
+			get_block_wrapper_attributes( $interactive_attributes ),
+			wp_interactivity_data_wp_context( $interactive_context ),
+			$inner_html
 		);
 	}
 
@@ -144,53 +169,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Render each top-level inner block for a variation attribute row.
-	 *
-	 * @param array<string, mixed>             $parsed_block Parsed attribute block.
-	 * @param array<string, mixed>             $merged_context Row and selectable-items context.
-	 * @param array<string, mixed>             $merged_attrs Merged template attributes.
-	 * @param array<string, mixed>             $row_context Row context (attribute id, name, terms).
-	 * @param string                           $display_style Resolved display style block name.
-	 * @param array<int, array<string, mixed>> $variation_items Selectable items for this row.
-	 * @param string                           $attribute_slug Attribute slug for default selection.
-	 */
-	private function render_inner_blocks( array $parsed_block, array $merged_context, array $merged_attrs, array $row_context, string $display_style, array $variation_items, string $attribute_slug ): string {
-		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
-
-		if ( empty( $inner_blocks ) ) {
-			return '';
-		}
-
-		$wrap_chips_or_dropdown = function ( string $block_content, array $inner_parsed_block ) use ( $merged_attrs, $row_context, $display_style, $variation_items, $attribute_slug ): string {
-			$name = $inner_parsed_block['blockName'] ?? '';
-			if ( 'woocommerce/product-filter-chips' !== $name && 'woocommerce/product-filter-dropdown' !== $name ) {
-				return $block_content;
-			}
-
-			return $this->wrap_variation_selector_markup(
-				$block_content,
-				$merged_attrs,
-				$row_context,
-				$display_style,
-				$variation_items,
-				$attribute_slug
-			);
-		};
-
-		add_filter( 'render_block', $wrap_chips_or_dropdown, 10, 2 );
-
-		try {
-			$content = '';
-			foreach ( $inner_blocks as $inner_block ) {
-				$content .= ( new WP_Block( $inner_block, $merged_context ) )->render();
-			}
-			return $content;
-		} finally {
-			remove_filter( 'render_block', $wrap_chips_or_dropdown, 10 );
-		}
-	}
-
-	/**
 	 * Resolve display style based on block attributes, supporting the legacy
 	 * `optionStyle` attribute.
 	 *
@@ -207,69 +185,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 				: 'woocommerce/product-filter-chips';
 		}
 		return 'woocommerce/product-filter-chips';
-	}
-
-	/**
-	 * Context passed to product-filter-chips / product-filter-dropdown when rendering a variation row.
-	 *
-	 * @param array<string, mixed>             $row_context Row context (attribute id, name, terms).
-	 * @param array<int, array<string, mixed>> $variation_items Selectable items for this row.
-	 * @return array<string, mixed>
-	 */
-	private function build_selectable_items_context_for_variation_row( array $row_context, array $variation_items ): array {
-		return array(
-			'items'          => $variation_items,
-			'selectionMode'  => 'single',
-			'storeNamespace' => 'woocommerce/add-to-cart-with-options',
-			'groupLabel'     => wc_attribute_label(
-				$row_context['woocommerce/attributeName']
-			),
-		);
-	}
-
-	/**
-	 * Outer interactivity wrapper for chips/dropdown markup already rendered by those blocks.
-	 *
-	 * @param string                           $inner_html Rendered chips or dropdown HTML.
-	 * @param array<string, mixed>             $merged_attrs Merged template attributes.
-	 * @param array<string, mixed>             $row_context Row context.
-	 * @param string                           $display_style Resolved display style block name.
-	 * @param array<int, array<string, mixed>> $variation_items Selectable items for this row.
-	 * @param string                           $attribute_slug Attribute slug for default selection.
-	 */
-	private function wrap_variation_selector_markup( string $inner_html, array $merged_attrs, array $row_context, string $display_style, array $variation_items, string $attribute_slug ): string {
-		$attribute_id    = $row_context['woocommerce/attributeId'];
-		$attribute_terms = $row_context['woocommerce/attributeTerms'];
-		$autoselect      = $merged_attrs['autoselect'] ?? false;
-		$disabled_action = $merged_attrs['disabledAttributesAction'] ?? 'disable';
-
-		$default_selected = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
-
-		$interactive_context = array(
-			'name'                      => wc_attribute_label( $row_context['woocommerce/attributeName'] ),
-			'variationAttributeOptions' => $variation_items,
-			'selectedValue'             => $default_selected,
-			'autoselect'                => $autoselect,
-			'disabledAttributesAction'  => $disabled_action,
-		);
-
-		$interactive_attributes = array(
-			'data-wp-interactive' => 'woocommerce/add-to-cart-with-options',
-			'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
-		);
-
-		if ( 'woocommerce/product-filter-dropdown' !== $display_style ) {
-			$interactive_attributes['role']            = 'radiogroup';
-			$interactive_attributes['id']              = $attribute_id;
-			$interactive_attributes['aria-labelledby'] = $attribute_id . '_label';
-		}
-
-		return sprintf(
-			'<div %s %s>%s</div>',
-			get_block_wrapper_attributes( $interactive_attributes ),
-			wp_interactivity_data_wp_context( $interactive_context ),
-			$inner_html
-		);
 	}
 
 	/**

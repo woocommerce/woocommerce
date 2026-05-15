@@ -243,16 +243,16 @@ test.describe( 'Add to Cart + Options Block', () => {
 		);
 		const logoNoOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Logo' } )
-			.getByRole( 'checkbox', { name: 'No', exact: true } );
+			.getByRole( 'radio', { name: 'No', exact: true } );
 		const colorBlueOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'checkbox', { name: 'Blue', exact: true } );
+			.getByRole( 'radio', { name: 'Blue', exact: true } );
 		const colorGreenOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'checkbox', { name: 'Green', exact: true } );
+			.getByRole( 'radio', { name: 'Green', exact: true } );
 		const colorRedOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'checkbox', { name: 'Red', exact: true } );
+			.getByRole( 'radio', { name: 'Red', exact: true } );
 		// We use the Add to Cart + Options class to make sure we don't select
 		// the Add to Cart button from the Related Products block.
 		const addToCartButton = page
@@ -386,13 +386,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 		);
 		const colorBlueOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'checkbox', { name: 'Blue', exact: true } );
+			.getByRole( 'radio', { name: 'Blue', exact: true } );
 		const colorRedOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'checkbox', { name: 'Red', exact: true } );
+			.getByRole( 'radio', { name: 'Red', exact: true } );
 		const sizeLargeOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Size' } )
-			.getByRole( 'checkbox', { name: 'Large', exact: true } );
+			.getByRole( 'radio', { name: 'Large', exact: true } );
 
 		await colorBlueOption.click();
 		await sizeLargeOption.click();
@@ -478,10 +478,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 			);
 			const petitOption = addToCartBlock
 				.getByRole( 'radiogroup', { name: 'Taille' } )
-				.getByRole( 'checkbox', { name: 'Petit', exact: true } );
+				.getByRole( 'radio', { name: 'Petit', exact: true } );
 			const grandOption = addToCartBlock
 				.getByRole( 'radiogroup', { name: 'Taille' } )
-				.getByRole( 'checkbox', { name: 'Grand', exact: true } );
+				.getByRole( 'radio', { name: 'Grand', exact: true } );
 			const addToCartButton = page.getByRole( 'button', {
 				name: 'Add to cart',
 				exact: true,
@@ -831,10 +831,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 		);
 		const logoYesOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Logo' } )
-			.getByRole( 'checkbox', { name: 'Yes', exact: true } );
+			.getByRole( 'radio', { name: 'Yes', exact: true } );
 		const colorGreenOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'checkbox', { name: 'Green', exact: true } );
+			.getByRole( 'radio', { name: 'Green', exact: true } );
 
 		await expect( colorGreenOption ).toBeEnabled();
 
@@ -990,10 +990,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 			);
 			const colorBlueOption = addToCartBlock
 				.getByRole( 'radiogroup', { name: 'Color' } )
-				.getByRole( 'checkbox', { name: 'Blue', exact: true } );
+				.getByRole( 'radio', { name: 'Blue', exact: true } );
 			const logoNoOption = addToCartBlock
 				.getByRole( 'radiogroup', { name: 'Logo' } )
-				.getByRole( 'checkbox', { name: 'No', exact: true } );
+				.getByRole( 'radio', { name: 'No', exact: true } );
 
 			await colorBlueOption.click();
 			await logoNoOption.click();
@@ -1002,7 +1002,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 			const logoYesOption = addToCartBlock
 				.getByRole( 'radiogroup', { name: 'Logo' } )
-				.getByRole( 'checkbox', { name: 'Yes', exact: true } );
+				.getByRole( 'radio', { name: 'Yes', exact: true } );
 			await logoYesOption.click();
 
 			await expect( quantityInput ).toHaveValue( '4' );
@@ -1064,7 +1064,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 
 				const colorGreenOption = addToCartBlock
 					.getByRole( 'radiogroup', { name: 'Color' } )
-					.getByRole( 'checkbox', { name: 'Green', exact: true } );
+					.getByRole( 'radio', { name: 'Green', exact: true } );
 				await colorGreenOption.click();
 
 				await expect( quantityInput ).toBeHidden();
@@ -1233,10 +1233,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 		);
 		const colorBlueOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'checkbox', { name: 'Blue', exact: true } );
+			.getByRole( 'radio', { name: 'Blue', exact: true } );
 		const logoYesOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Logo' } )
-			.getByRole( 'checkbox', { name: 'Yes', exact: true } );
+			.getByRole( 'radio', { name: 'Yes', exact: true } );
 
 		await colorBlueOption.click();
 		await logoYesOption.click();
@@ -1309,10 +1309,10 @@ test.describe( 'Add to Cart + Options Block', () => {
 		);
 		const colorBlueOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Color' } )
-			.getByRole( 'checkbox', { name: 'Blue', exact: true } );
+			.getByRole( 'radio', { name: 'Blue', exact: true } );
 		const logoYesOption = addToCartBlock
 			.getByRole( 'radiogroup', { name: 'Logo' } )
-			.getByRole( 'checkbox', { name: 'Yes', exact: true } );
+			.getByRole( 'radio', { name: 'Yes', exact: true } );
 
 		await colorBlueOption.click();
 		await logoYesOption.click();
@@ -1650,7 +1650,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					if ( optionStyle === 'chips' ) {
 						const sizeLChip = page
 							.getByRole( 'radiogroup', { name: 'Size' } )
-							.getByRole( 'checkbox', {
+							.getByRole( 'radio', {
 								name: 'L',
 								exact: true,
 							} );
@@ -1694,7 +1694,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 					if ( optionStyle === 'chips' ) {
 						const sizeLChip = page
 							.getByRole( 'radiogroup', { name: 'Size' } )
-							.getByRole( 'checkbox', {
+							.getByRole( 'radio', {
 								name: 'L',
 								exact: true,
 							} );
