@@ -231,4 +231,39 @@ class WC_Coupon_Tests extends WC_Unit_Test_Case {
 			'Line items associated with deleted products are not included in the discount calculation.'
 		);
 	}
+
+	/**
+	 * @testdox Calling save() twice persists cleared array restriction props (regression for #24570).
+	 */
+	public function test_save_twice_persists_cleared_array_restrictions(): void {
+		$coupon = new WC_Coupon();
+		$coupon->set_code( 'rsmapgj313' );
+		$coupon->set_discount_type( 'percent' );
+		$coupon->set_amount( 10 );
+		$coupon->set_product_ids( array( 11, 22 ) );
+		$coupon->set_excluded_product_ids( array( 33 ) );
+		$coupon->set_product_categories( array( 44 ) );
+		$coupon->set_excluded_product_categories( array( 55 ) );
+		$coupon->set_email_restrictions( array( 'a@example.com' ) );
+		$coupon_id = $coupon->save();
+
+		// Simulate the meta box flow: hydrate a fresh coupon, clear the restriction
+		// props, then save twice (mirroring a callback on woocommerce_coupon_options_save
+		// that invokes $coupon->save() a second time).
+		$reloaded = new WC_Coupon( $coupon_id );
+		$reloaded->set_product_ids( array() );
+		$reloaded->set_excluded_product_ids( array() );
+		$reloaded->set_product_categories( array() );
+		$reloaded->set_excluded_product_categories( array() );
+		$reloaded->set_email_restrictions( array() );
+		$reloaded->save();
+		$reloaded->save();
+
+		$fresh = new WC_Coupon( $coupon_id );
+		$this->assertSame( array(), $fresh->get_product_ids(), 'product_ids should be cleared after a double save.' );
+		$this->assertSame( array(), $fresh->get_excluded_product_ids(), 'excluded_product_ids should be cleared after a double save.' );
+		$this->assertSame( array(), $fresh->get_product_categories(), 'product_categories should be cleared after a double save.' );
+		$this->assertSame( array(), $fresh->get_excluded_product_categories(), 'excluded_product_categories should be cleared after a double save.' );
+		$this->assertSame( array(), $fresh->get_email_restrictions(), 'email_restrictions should be cleared after a double save.' );
+	}
 }

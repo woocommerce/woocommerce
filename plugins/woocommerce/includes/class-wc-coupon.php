@@ -179,6 +179,24 @@ class WC_Coupon extends WC_Legacy_Coupon {
 			$this->data_store->read( $this );
 		}
 	}
+
+	/**
+	 * Merge changes with data and clear.
+	 *
+	 * Overrides WC_Data::apply_changes which uses array_replace_recursive. The recursive
+	 * variant fails to replace existing array props (e.g. product_ids, product_categories,
+	 * email_restrictions) with empty arrays, leaving stale values behind. When save() is
+	 * invoked a second time within the same request (e.g. from a callback on
+	 * woocommerce_coupon_options_save) the data store then re-persists those stale values
+	 * because metadata_exists() now reports the meta as missing.
+	 *
+	 * @since 10.9.0
+	 */
+	public function apply_changes(): void {
+		$this->data    = array_replace( $this->data, $this->changes );
+		$this->changes = array();
+	}
+
 	/**
 	 * Checks the coupon type.
 	 *
