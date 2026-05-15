@@ -48,7 +48,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 
 		$selectable_items = $block->context['woocommerceSelectableItems'];
 		$items            = is_array( $selectable_items['items'] ?? null ) ? $selectable_items['items'] : array();
-		$store_namespace  = $selectable_items['storeNamespace'] ?? 'woocommerce/add-to-cart-with-options';
+		$store_namespace  = is_string( $selectable_items['storeNamespace'] ?? null ) ? $selectable_items['storeNamespace'] : 'woocommerce/add-to-cart-with-options';
 
 		if ( empty( $items ) ) {
 			return '';
