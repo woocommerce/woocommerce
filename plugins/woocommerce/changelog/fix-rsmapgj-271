@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Expand the saved address block at checkout when a required field (e.g. postcode) is missing, so customers can fix it instead of checkout silently failing.

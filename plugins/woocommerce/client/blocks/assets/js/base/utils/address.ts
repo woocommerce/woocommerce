@@ -176,3 +176,35 @@ export const hasAllFieldsForShippingRates = (
 		return isValidAddressKey( key, address ) && address[ key ] !== '';
 	} );
 };
+
+/**
+ * Checks if every required field in an address is populated, accounting for
+ * country-specific locale overrides (e.g. some countries do not require a
+ * state, others mark postcode as optional).
+ *
+ * Hidden fields and fields explicitly marked optional for the address country
+ * are ignored. If the address has no country we cannot determine the locale
+ * rules, so we fall back to the default field set.
+ *
+ * @param {Partial<BillingAddress | ShippingAddress>} address The address to validate.
+ * @return {boolean} True if all required address fields are filled, false otherwise.
+ */
+export const hasAllRequiredAddressFields = (
+	address: Partial< BillingAddress > | Partial< ShippingAddress >
+): boolean => {
+	const addressFormWithLocale = prepareFormFields(
+		ADDRESS_FORM_KEYS,
+		defaultFields,
+		address.country || ''
+	);
+
+	return addressFormWithLocale.every( ( { key, hidden, required } ) => {
+		if ( hidden === true || required === false ) {
+			return true;
+		}
+		const value = ( address as Record< string, string | undefined > )[
+			key
+		];
+		return typeof value === 'string' && value !== '';
+	} );
+};

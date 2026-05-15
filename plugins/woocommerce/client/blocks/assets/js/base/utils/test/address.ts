@@ -4,6 +4,7 @@
 import {
 	emptyHiddenAddressFields,
 	hasAllFieldsForShippingRates,
+	hasAllRequiredAddressFields,
 	formatShippingAddress,
 } from '@woocommerce/base-utils';
 
@@ -138,6 +139,93 @@ describe( 'hasAllFieldsForShippingRates', () => {
 
 		address.state = 'CA';
 		expect( hasAllFieldsForShippingRates( address ) ).toBe( true );
+	} );
+} );
+
+describe( 'hasAllRequiredAddressFields', () => {
+	it( 'returns false when a required field is missing (US address missing postcode)', () => {
+		const address = {
+			first_name: 'John',
+			last_name: 'Doe',
+			company: 'Company',
+			address_1: '409 Main Street',
+			address_2: 'Apt 1',
+			city: 'Sacramento',
+			postcode: '',
+			country: 'US',
+			state: 'CA',
+			email: 'john.doe@company',
+			phone: '+1234567890',
+		};
+		expect( hasAllRequiredAddressFields( address ) ).toBe( false );
+	} );
+
+	it( 'returns true when every required US field is populated', () => {
+		const address = {
+			first_name: 'John',
+			last_name: 'Doe',
+			company: 'Company',
+			address_1: '409 Main Street',
+			address_2: 'Apt 1',
+			city: 'Sacramento',
+			postcode: '95814',
+			country: 'US',
+			state: 'CA',
+			email: 'john.doe@company',
+			phone: '+1234567890',
+		};
+		expect( hasAllRequiredAddressFields( address ) ).toBe( true );
+	} );
+
+	it( 'respects country locale overrides — UK address without state is complete', () => {
+		const address = {
+			first_name: 'John',
+			last_name: 'Doe',
+			company: 'Company',
+			address_1: '409 Main Street',
+			address_2: 'Apt 1',
+			city: 'London',
+			postcode: 'W1T 4JG',
+			country: 'GB',
+			state: '',
+			email: 'john.doe@company',
+			phone: '+1234567890',
+		};
+		expect( hasAllRequiredAddressFields( address ) ).toBe( true );
+	} );
+
+	it( 'returns false when country is set but first_name is missing', () => {
+		const address = {
+			first_name: '',
+			last_name: 'Doe',
+			company: 'Company',
+			address_1: '409 Main Street',
+			address_2: 'Apt 1',
+			city: 'Sacramento',
+			postcode: '95814',
+			country: 'US',
+			state: 'CA',
+			email: 'john.doe@company',
+			phone: '+1234567890',
+		};
+		expect( hasAllRequiredAddressFields( address ) ).toBe( false );
+	} );
+
+	it( 'returns false for an empty address', () => {
+		const address = {
+			first_name: '',
+			last_name: '',
+			company: '',
+			address_1: '',
+			address_2: '',
+			city: '',
+			postcode: '',
+			country: '',
+			state: '',
+			email: '',
+			phone: '',
+		};
+		expect( hasAllRequiredAddressFields( address ) ).toBe( false );
 	} );
 } );
 

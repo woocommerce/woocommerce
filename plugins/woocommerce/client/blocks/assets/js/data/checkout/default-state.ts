@@ -1,7 +1,10 @@
 /**
  * External dependencies
  */
-import { isSameAddress } from '@woocommerce/base-utils';
+import {
+	hasAllRequiredAddressFields,
+	isSameAddress,
+} from '@woocommerce/base-utils';
 import type { AddressFormType, OrderFormValues } from '@woocommerce/settings';
 
 /**
@@ -30,17 +33,24 @@ export type CheckoutState = {
 };
 
 // Default editing state for CustomerAddress component comes from the current address and whether or not we're in the editor.
-const hasBillingAddress = !! (
-	checkoutData.billing_address.address_1 &&
-	( checkoutData.billing_address.first_name ||
-		checkoutData.billing_address.last_name )
-);
+// An address is considered "complete enough" to collapse only when it has the
+// minimum identifying fields AND every locale-required field is populated.
+// This prevents the address card from rendering collapsed when a saved
+// address is missing a required value (e.g. postcode), which would otherwise
+// silently block checkout (see RSMAPGJ-271 / woo#58166).
+const hasBillingAddress =
+	!! (
+		checkoutData.billing_address.address_1 &&
+		( checkoutData.billing_address.first_name ||
+			checkoutData.billing_address.last_name )
+	) && hasAllRequiredAddressFields( checkoutData.billing_address );
 
-const hasShippingAddress = !! (
-	checkoutData.shipping_address.address_1 &&
-	( checkoutData.shipping_address.first_name ||
-		checkoutData.shipping_address.last_name )
-);
+const hasShippingAddress =
+	!! (
+		checkoutData.shipping_address.address_1 &&
+		( checkoutData.shipping_address.first_name ||
+			checkoutData.shipping_address.last_name )
+	) && hasAllRequiredAddressFields( checkoutData.shipping_address );
 
 const billingMatchesShipping = isSameAddress(
 	checkoutData.billing_address,
