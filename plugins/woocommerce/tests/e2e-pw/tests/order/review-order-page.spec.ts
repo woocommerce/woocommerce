@@ -38,14 +38,20 @@ const REQUEST_SETTINGS_OPTION = 'woocommerce_customer_review_request_settings';
 const SITE_REVIEWS_OPTION = 'woocommerce_enable_reviews';
 
 /**
- * The tests-cli container's PHP defaults to a 128M memory limit, which on
- * some CI shards is exceeded just by plugin autoload (most reliably
- * google-listings-and-ads). Every wp-cli call in this spec routes through
- * here so each WP boot has more headroom. Local to this file.
+ * The tests-cli container's PHP 128M default is exhausted just by
+ * google-listings-and-ads's autoloader on some CI shards. None of this
+ * spec's wp-cli calls need GLA, so we skip it for every WP boot. Local to
+ * this file. Note: do NOT use this wrapper for `wp rewrite flush` — that
+ * would drop GLA's rewrite rules from the saved option and break other
+ * tests. We don't flush at all because `wc_get_review_order_url()` returns
+ * a query-string URL, not a pretty permalink.
  */
 const wpCli = ( command: string ) =>
 	wpCLI(
-		command.replace( /^wp\b/, "wp --define='memory_limit=512M'" )
+		command.replace(
+			/^wp\b/,
+			'wp --skip-plugins=google-listings-and-ads'
+		)
 	);
 
 test.describe(
@@ -57,7 +63,6 @@ test.describe(
 			await wpCli(
 				`wp option set ${ REQUEST_SETTINGS_OPTION } --format=json '{"enabled":"yes"}'`
 			);
-			await wpCli( 'wp rewrite flush' );
 		} );
 
 		test.afterAll( async () => {
