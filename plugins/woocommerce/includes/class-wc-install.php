@@ -329,6 +329,9 @@ class WC_Install {
 			'wc_update_1080_slim_orders_meta_key_index',
 			'wc_update_1080_backfill_email_template_sync_meta',
 		),
+		'10.9.0' => array(
+			'wc_update_1090_widen_product_download_directories_url_column',
+		),
 	);
 
 	/**
@@ -1967,7 +1970,7 @@ CREATE TABLE {$wpdb->prefix}wc_rate_limits (
 $product_attributes_lookup_table_creation_sql
 CREATE TABLE {$wpdb->prefix}wc_product_download_directories (
 	url_id bigint(20) unsigned NOT NULL auto_increment,
-	url varchar(256) NOT NULL,
+	url varchar(2048) NOT NULL,
 	enabled tinyint(1) NOT NULL DEFAULT 0,
 	PRIMARY KEY (url_id),
 	KEY url (url($max_index_length))

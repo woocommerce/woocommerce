@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\ProductDownloads\ApprovedDirectories;
 
+use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\ApprovedDirectoriesException;
 use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Register;
 use WC_Unit_Test_Case;
 
@@ -138,5 +139,53 @@ class RegisterTest extends WC_Unit_Test_Case {
 
 		static::$sut->enable_by_id( $approved_directory_id );
 		$this->assertTrue( static::$sut->get_by_url( 'https://foo.bar/assets/' )->is_enabled() );
+	}
+
+	/**
+	 * @testdox URLs longer than the legacy 256-character limit but within the 2048-character maximum can be added.
+	 *
+	 * Regression test for RSMAPGJ-325 / woo#53964: RFC 1035 allows domain names up to
+	 * 255 characters, so a fully-qualified URL with scheme can exceed 256 chars and used
+	 * to fail to insert into `wc_product_download_directories` because the `url` column
+	 * was VARCHAR(256). The column is now VARCHAR(2048).
+	 */
+	public function test_long_url_within_extended_limit_is_accepted() {
+		// Build a URL whose length is well above the legacy 256-char ceiling but below
+		// the new 2048-char ceiling. 8 (scheme) + 248 + 5 (".com/") = 261 characters.
+		$long_url = 'https://' . str_repeat( 'a', 248 ) . '.com/';
+		$this->assertGreaterThan( 256, strlen( $long_url ) );
+
+		$register = new Register();
+
+		try {
+			$rule_id = $register->add_approved_directory( $long_url );
+			$this->assertIsInt( $rule_id );
+			$this->assertGreaterThan( 0, $rule_id );
+
+			$stored = $register->get_by_url( $long_url );
+			$this->assertNotNull( $stored, 'The long URL should be retrievable after insertion.' );
+			$this->assertGreaterThan(
+				256,
+				strlen( $stored->get_url() ),
+				'The stored URL must not be silently truncated down to the legacy 256-character ceiling.'
+			);
+		} finally {
+			if ( isset( $rule_id ) ) {
+				$register->delete_by_id( $rule_id );
+			}
+		}
+	}
+
+	/**
+	 * @testdox URLs longer than the 2048-character maximum are rejected with a descriptive exception.
+	 */
+	public function test_url_longer_than_2048_is_rejected() {
+		$too_long_url = 'https://' . str_repeat( 'a', 2048 ) . '.com/';
+		$register     = new Register();
+
+		$this->expectException( ApprovedDirectoriesException::class );
+		$this->expectExceptionCode( ApprovedDirectoriesException::INVALID_URL );
+
+		$register->add_approved_directory( $too_long_url );
 	}
 }

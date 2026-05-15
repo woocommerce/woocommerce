@@ -296,8 +296,9 @@ class Register {
 	private function prepare_url_for_upsert( string $url ): string {
 		$url = trailingslashit( $this->normalize_url( $url ) );
 
-		if ( mb_strlen( $url ) > 256 ) {
-			throw new ApprovedDirectoriesException( __( 'Approved directory URLs cannot be longer than 256 characters.', 'woocommerce' ), ApprovedDirectoriesException::INVALID_URL );
+		if ( mb_strlen( $url ) > 2048 ) {
+			// phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped -- The message is localized and safe; this exception is caught and handled by the caller, not echoed.
+			throw new ApprovedDirectoriesException( __( 'Approved directory URLs cannot be longer than 2048 characters.', 'woocommerce' ), ApprovedDirectoriesException::INVALID_URL );
 		}
 
 		return $url;

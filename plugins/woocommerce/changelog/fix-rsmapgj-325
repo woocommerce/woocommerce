@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Widen the `url` column on `wc_product_download_directories` from VARCHAR(256) to VARCHAR(2048) so URLs whose domain is at the RFC 1035 255-character limit (plus scheme) can be stored without truncation or insert failure.

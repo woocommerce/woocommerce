@@ -3511,3 +3511,36 @@ function wc_update_1080_slim_orders_meta_key_index(): void {
 function wc_update_1080_backfill_email_template_sync_meta(): bool {
 	return WCEmailTemplateSyncBackfill::run();
 }
+
+/**
+ * Widen the `url` column on `wc_product_download_directories` from VARCHAR(256) to VARCHAR(2048).
+ *
+ * RFC 1035 permits domain names up to 255 characters, so a URL that includes the scheme
+ * (e.g. `https://`) can easily exceed the previous 256-character limit and trigger a
+ * `Data too long for column 'url'` error on insert. Widening the column to 2048 brings
+ * the schema in line with the practical upper bound for URLs while keeping the indexed
+ * key prefix unchanged (which already uses `$max_index_length`).
+ *
+ * @since 10.9.0
+ *
+ * @return void
+ */
+function wc_update_1090_widen_product_download_directories_url_column(): void {
+	global $wpdb;
+
+	$table_name = $wpdb->prefix . 'wc_product_download_directories';
+
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$column_type = $wpdb->get_var( "SELECT COLUMN_TYPE FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = '{$table_name}' AND COLUMN_NAME = 'url'" );
+
+	if ( null === $column_type ) {
+		return;
+	}
+
+	if ( 0 === stripos( (string) $column_type, 'varchar(2048)' ) ) {
+		return;
+	}
+
+	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	$wpdb->query( "ALTER TABLE `{$table_name}` MODIFY COLUMN `url` VARCHAR(2048) NOT NULL" );
+}
