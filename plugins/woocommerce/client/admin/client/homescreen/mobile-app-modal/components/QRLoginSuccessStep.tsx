@@ -59,7 +59,7 @@ export const QRLoginSuccessStep = ( {
 		if ( ! apUuid ) {
 			return;
 		}
-		recordEvent( 'mobile_app_qr_direct_login_revoked' );
+		recordEvent( 'mobile_app_qr_direct_login_revoke_attempt' );
 		await revoke( apUuid );
 	};
 

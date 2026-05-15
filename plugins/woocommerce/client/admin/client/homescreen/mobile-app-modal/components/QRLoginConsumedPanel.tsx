@@ -69,7 +69,7 @@ export const QRLoginConsumedPanel = ( {
 				variant="link"
 				className="woocommerce-qr-direct-login__revoke"
 				onClick={ () => {
-					recordEvent( 'mobile_app_qr_direct_login_revoked' );
+					recordEvent( 'mobile_app_qr_direct_login_revoke_attempt' );
 					onRevoke();
 				} }
 			>
