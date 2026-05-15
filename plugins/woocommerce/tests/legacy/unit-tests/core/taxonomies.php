@@ -196,4 +196,63 @@ class WC_Test_Taxonomies extends WC_Unit_Test_Case {
 			print_r( $terms, true ) // phpcs:ignore WordPress.PHP.DevelopmentFunctions.error_log_print_r
 		);
 	}
+
+	/**
+	 * Test that an attribute taxonomy configured with `Order by Term ID` (stored as `id`)
+	 * causes attribute terms to be returned ordered by term_id, not name.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/30052
+	 */
+	public function test_get_terms_orderby_attribute_term_id() {
+		// Create an attribute taxonomy ordered by Term ID.
+		$attribute_id = wc_create_attribute(
+			array(
+				'name'         => 'Size 30052',
+				'slug'         => 'size30052',
+				'type'         => 'select',
+				'order_by'     => 'id',
+				'has_archives' => false,
+			)
+		);
+		$this->assertIsInt( $attribute_id );
+
+		$taxonomy = wc_attribute_taxonomy_name( 'size30052' );
+		register_taxonomy(
+			$taxonomy,
+			array( 'product' ),
+			array(
+				'hierarchical' => false,
+				'public'       => false,
+			)
+		);
+
+		// Bust the cached attribute taxonomies so wc_attribute_orderby() sees the new one.
+		wp_cache_delete( 'attribute_taxonomies', 'woocommerce-attributes' );
+
+		// Insert terms in non-alphabetical order so name vs. term_id ordering differ.
+		$t1 = wp_insert_term( 'Zebra', $taxonomy ); // lowest term_id.
+		$t2 = wp_insert_term( 'Apple', $taxonomy );
+		$t3 = wp_insert_term( 'Mango', $taxonomy ); // highest term_id.
+
+		$expected_term_ids = array( $t1['term_id'], $t2['term_id'], $t3['term_id'] );
+
+		// get_terms without an explicit orderby should fall back to the attribute's configured order_by.
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => false,
+			)
+		);
+
+		$actual_term_ids = array_values( wp_list_pluck( $terms, 'term_id' ) );
+
+		$this->assertEquals(
+			$expected_term_ids,
+			$actual_term_ids,
+			'Attribute terms should be returned ordered by term_id when attribute order_by is "id".'
+		);
+
+		// Tidy up registered taxonomy.
+		unregister_taxonomy( $taxonomy );
+	}
 }

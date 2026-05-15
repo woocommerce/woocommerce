@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Order attribute terms by term_id on the frontend when the attribute is configured with the "Term ID" sort order.

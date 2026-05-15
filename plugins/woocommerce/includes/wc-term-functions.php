@@ -42,6 +42,11 @@ function wc_change_get_terms_defaults( $defaults, $taxonomies ) {
 		case 'parent':
 			$defaults['orderby'] = $orderby;
 			break;
+		case 'id':
+			// Map the attribute "Term ID" option (stored as `id`) to the
+			// `term_id` orderby value understood by `get_terms()`.
+			$defaults['orderby'] = 'term_id';
+			break;
 	}
 
 	return $defaults;
