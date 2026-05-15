@@ -28,7 +28,7 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 	 * @testdox variations need to set the status back to published if parent product is a draft
 	 */
 	public function test_expand_data_with_draft_variable() {
-		$csv_file = dirname( __FILE__ ) . '/sample.csv';
+		$csv_file = __DIR__ . '/sample.csv';
 		$raw_data = array(
 			array(
 				'type'      => ProductType::VARIABLE,
@@ -223,5 +223,123 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		WC_Helper_Product::delete_product( $product->get_id() );
 		wc_delete_attribute( $color_attr_id );
 		wc_delete_attribute( $size_attr_id );
+	}
+
+	/**
+	 * @testdox parse_images_field preserves slashes in relative paths so deep paths can be matched against the media library.
+	 */
+	public function test_parse_images_field_preserves_relative_paths() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$result = $importer->parse_images_field( 'media/image/ab/cd/ef/qa-test-image-001.jpg' );
+
+		$this->assertSame( array( 'media/image/ab/cd/ef/qa-test-image-001.jpg' ), $result );
+	}
+
+	/**
+	 * @testdox parse_images_field preserves numeric attachment IDs so pre-registered media can be attached.
+	 */
+	public function test_parse_images_field_preserves_numeric_attachment_ids() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$result = $importer->parse_images_field( '38191' );
+
+		$this->assertSame( array( '38191' ), $result );
+	}
+
+	/**
+	 * @testdox parse_images_field still sanitizes plain filenames.
+	 */
+	public function test_parse_images_field_sanitizes_plain_filenames() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$result = $importer->parse_images_field( 'image with spaces.jpg' );
+
+		$this->assertSame( array( 'image-with-spaces.jpg' ), $result );
+	}
+
+	/**
+	 * @testdox parse_images_field accepts a mixed list of URLs, paths, IDs and filenames.
+	 */
+	public function test_parse_images_field_mixed_inputs() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$result = $importer->parse_images_field( 'https://example.com/foo.jpg, media/image/ab/cd/ef/bar.jpg, 38191, plain.jpg' );
+
+		$this->assertSame(
+			array(
+				'https://example.com/foo.jpg',
+				'media/image/ab/cd/ef/bar.jpg',
+				'38191',
+				'plain.jpg',
+			),
+			$result
+		);
+	}
+
+	/**
+	 * @testdox get_attachment_id_from_url resolves a numeric value to an existing attachment post ID.
+	 */
+	public function test_get_attachment_id_from_url_resolves_numeric_attachment_id() {
+		$attachment_id = wp_insert_post(
+			array(
+				'post_title'     => 'qa-test-image-001',
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$resolved = $importer->get_attachment_id_from_url( (string) $attachment_id, 0 );
+
+		$this->assertSame( (int) $attachment_id, $resolved );
+
+		wp_delete_post( $attachment_id, true );
+	}
+
+	/**
+	 * @testdox get_attachment_id_from_url throws when a numeric value does not correspond to an attachment.
+	 */
+	public function test_get_attachment_id_from_url_throws_for_unknown_numeric_id() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$this->expectException( Exception::class );
+		$this->expectExceptionMessage( 'Unable to use image "999999999"' );
+
+		$importer->get_attachment_id_from_url( '999999999', 0 );
+	}
+
+	/**
+	 * @testdox get_attachment_id_from_url matches an attachment registered at a deep nested upload path.
+	 */
+	public function test_get_attachment_id_from_url_matches_deep_relative_path() {
+		$relative_path = 'media/image/ab/cd/ef/qa-test-image-001.jpg';
+
+		$attachment_id = wp_insert_post(
+			array(
+				'post_title'     => 'qa-test-image-001',
+				'post_status'    => 'inherit',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		update_post_meta( $attachment_id, '_wp_attached_file', $relative_path );
+
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$resolved = $importer->get_attachment_id_from_url( $relative_path, 0 );
+
+		$this->assertSame( (int) $attachment_id, $resolved );
+
+		wp_delete_post( $attachment_id, true );
 	}
 }

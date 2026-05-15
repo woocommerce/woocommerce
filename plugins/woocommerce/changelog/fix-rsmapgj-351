@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Product CSV importer now attaches pre-registered media when referenced by a relative path containing slashes or by a numeric attachment ID.

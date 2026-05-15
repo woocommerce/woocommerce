@@ -575,7 +575,7 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	/**
 	 * Get attachment ID.
 	 *
-	 * @param  string $url        Attachment URL.
+	 * @param  string $url        Attachment URL, relative path, filename, or numeric attachment ID.
 	 * @param  int    $product_id Product ID.
 	 * @return int
 	 * @throws Exception If attachment cannot be loaded.
@@ -583,6 +583,17 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	public function get_attachment_id_from_url( $url, $product_id ) {
 		if ( empty( $url ) ) {
 			return 0;
+		}
+
+		// If the value is a numeric attachment ID, resolve it directly so pre-registered media can be reused.
+		if ( ctype_digit( (string) $url ) ) {
+			$attachment_id = absint( $url );
+			if ( $attachment_id && 'attachment' === get_post_type( $attachment_id ) ) {
+				return $attachment_id;
+			}
+
+			/* translators: %s: image identifier */
+			throw new Exception( esc_html( sprintf( __( 'Unable to use image "%s".', 'woocommerce' ), $url ) ), 400 );
 		}
 
 		$id         = 0;

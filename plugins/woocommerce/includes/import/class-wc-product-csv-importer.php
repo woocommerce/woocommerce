@@ -558,7 +558,8 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 	}
 
 	/**
-	 * Parse images list from a CSV. Images can be filenames or URLs.
+	 * Parse images list from a CSV. Images can be filenames, relative paths,
+	 * URLs, or numeric attachment IDs referencing pre-registered media.
 	 *
 	 * @param string $value Field value.
 	 *
@@ -573,8 +574,28 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		$separator = apply_filters( 'woocommerce_product_import_image_separator', ',' );
 
 		foreach ( $this->explode_values( $value, $separator ) as $image ) {
+			$image = trim( $image );
+
+			if ( '' === $image ) {
+				continue;
+			}
+
 			if ( stristr( $image, '://' ) ) {
 				$images[] = esc_url_raw( $image );
+			} elseif ( ctype_digit( (string) $image ) ) {
+				// Numeric attachment ID — preserve as-is so it can be resolved to a pre-registered media item.
+				$images[] = $image;
+			} elseif ( false !== strpos( $image, '/' ) ) {
+				// Relative path (e.g. "media/image/ab/cd/ef/foo.jpg") — sanitize each segment so the
+				// directory separators are preserved while still cleaning each part of the path.
+				$segments = array_map( 'sanitize_file_name', explode( '/', $image ) );
+				$segments = array_filter(
+					$segments,
+					static function ( $segment ) {
+						return '' !== (string) $segment;
+					}
+				);
+				$images[] = implode( '/', $segments );
 			} else {
 				$images[] = sanitize_file_name( $image );
 			}
