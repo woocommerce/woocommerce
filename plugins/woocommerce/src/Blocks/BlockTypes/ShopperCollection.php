@@ -89,15 +89,23 @@ final class ShopperCollection extends AbstractBlock {
 		// `core/heading` is a static block, so the serialised markup must
 		// match what the editor would have saved (`<h2 class="wp-block-heading">…</h2>`)
 		// or it'll fail block validation when the cart page is opened in the
-		// editor. The matching `null` push onto `innerContent` is what makes
-		// `WP_Block::render()` walk into the heading when building `$content`.
+		// editor. `attrs.content` mirrors what the editor's template seeds
+		// (`{ content, level }`) so the parsed shape round-trips identically;
+		// the value is the raw string because attrs are JSON-encoded into the
+		// block comment and `esc_html()` would corrupt translations whose text
+		// contains `&`, `<`, etc. The matching `null` push onto `innerContent`
+		// is what makes `WP_Block::render()` walk into the heading when
+		// building `$content`.
 		if ( empty( $parsed_hooked_block['innerBlocks'] ) ) {
 			$region_label = $this->get_variation_config()['regionLabel'];
 			$heading_html = '<h2 class="wp-block-heading">' . esc_html( $region_label ) . '</h2>';
 
 			$parsed_hooked_block['innerBlocks'][] = array(
 				'blockName'    => 'core/heading',
-				'attrs'        => array( 'level' => 2 ),
+				'attrs'        => array(
+					'level'   => 2,
+					'content' => $region_label,
+				),
 				'innerBlocks'  => array(),
 				'innerHTML'    => $heading_html,
 				'innerContent' => array( $heading_html ),

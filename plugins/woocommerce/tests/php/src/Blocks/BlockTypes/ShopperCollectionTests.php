@@ -156,6 +156,8 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 		$heading = $result['innerBlocks'][0];
 		$this->assertSame( 'core/heading', $heading['blockName'] );
 		$this->assertSame( 2, $heading['attrs']['level'] );
+		$this->assertArrayHasKey( 'content', $heading['attrs'] );
+		$this->assertNotEmpty( $heading['attrs']['content'] );
 		$this->assertStringContainsString( '<h2 class="wp-block-heading">', $heading['innerHTML'] );
 		$this->assertSame( array( $heading['innerHTML'] ), $heading['innerContent'] );
 
