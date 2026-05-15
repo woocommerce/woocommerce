@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Default the "Used for variations" checkbox to checked on blank custom attribute rows when switching a product to Variable.

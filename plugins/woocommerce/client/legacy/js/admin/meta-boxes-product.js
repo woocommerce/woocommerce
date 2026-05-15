@@ -163,6 +163,8 @@ jQuery( function ( $ ) {
 			show_and_hide_panels();
 			change_product_type_tip( get_product_tip_content( select_val ) );
 
+			update_blank_attribute_rows_for_product_type( select_val );
+
 			$( 'ul.wc-tabs li:visible' ).eq( 0 ).find( 'a' ).trigger( 'click' );
 
 			$( document.body ).trigger(
@@ -172,6 +174,46 @@ jQuery( function ( $ ) {
 			);
 		} )
 		.trigger( 'change' );
+
+	/**
+	 * When the product type changes, update the "Used for variations" checkbox
+	 * default on any blank (empty) custom attribute rows so it reflects the new
+	 * product type. Attribute rows that have already been filled in by the user
+	 * are left untouched so we never override an explicit user choice.
+	 *
+	 * @param {string} product_type The newly selected product type.
+	 */
+	function update_blank_attribute_rows_for_product_type( product_type ) {
+		var is_variable = 'variable' === product_type;
+
+		$( '.product_attributes .woocommerce_attribute' ).each( function () {
+			var $attribute = $( this );
+
+			// Only adjust custom (non-taxonomy) attribute rows.
+			var taxonomy = $attribute.attr( 'data-taxonomy' );
+			if ( taxonomy && '' !== taxonomy ) {
+				return;
+			}
+
+			var $name = $attribute.find( 'input[name^="attribute_names"]' );
+			var $values = $attribute.find(
+				'input[name^="attribute_values"], textarea[name^="attribute_values"]'
+			);
+
+			// Only update blank rows: no name and no value entered yet.
+			if ( $name.val() || $values.val() ) {
+				return;
+			}
+
+			var $variation_checkbox = $attribute.find(
+				'input.woocommerce_attribute_used_for_variations'
+			);
+
+			if ( $variation_checkbox.length ) {
+				$variation_checkbox.prop( 'checked', is_variable );
+			}
+		} );
+	}
 
 	$( 'input#_downloadable' ).on( 'change', function () {
 		show_and_hide_panels();
