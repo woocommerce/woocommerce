@@ -1829,8 +1829,24 @@ function wc_get_gallery_image_html( $attachment_id, $main_image = false, $image_
 	$thumbnail_srcset  = wp_get_attachment_image_srcset( $attachment_id, $thumbnail_size );
 	$thumbnail_sizes   = wp_get_attachment_image_sizes( $attachment_id, $thumbnail_size );
 	$full_src          = wp_get_attachment_image_src( $attachment_id, $full_size );
-	$alt_text          = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
-	$alt_text          = ( empty( $alt_text ) && ( $product instanceof WC_Product ) ) ? woocommerce_get_alt_from_product_title_and_position( $product->get_title(), $main_image, $image_index ) : $alt_text;
+
+	// If the attachment cannot be resolved (e.g. dummy/imported data referencing a missing image),
+	// short-circuit to avoid emitting broken markup such as `<img src="" />` wrapped in an empty link.
+	if ( false === $full_src && false === $thumbnail_src ) {
+		/**
+		 * Filters the markup returned when a gallery attachment cannot be resolved.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param string $html          Markup to return. Defaults to an empty string.
+		 * @param int    $attachment_id Attachment ID that could not be resolved.
+		 * @param bool   $main_image    Whether this is the main image or a thumbnail.
+		 */
+		return apply_filters( 'woocommerce_gallery_image_html_missing_attachment', '', $attachment_id, $main_image );
+	}
+
+	$alt_text = trim( wp_strip_all_tags( get_post_meta( $attachment_id, '_wp_attachment_image_alt', true ) ) );
+	$alt_text = ( empty( $alt_text ) && ( $product instanceof WC_Product ) ) ? woocommerce_get_alt_from_product_title_and_position( $product->get_title(), $main_image, $image_index ) : $alt_text;
 
 	/**
 	 * Filters the attributes for the image markup.

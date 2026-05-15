@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Skip rendering gallery image markup when the referenced attachment cannot be resolved, preventing broken `<img src="">` output on product pages after imports of dummy data.
