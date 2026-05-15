@@ -34,10 +34,10 @@ function Component() {
 
 Example usage: `wp.data.select( EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME ).getProductShippingClass( 3 );`
 
-| Actions                                                  | Method | Description                                                                               |
-| -------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------- |
-| `createProductShippingClass( shippingClassObject )`      | POST   | Creates shipping class, see `ProductShippingClass` in [types.ts](./types.ts) for values   |
-| `deleteProductShippingClass( id )`                       | DELETE | Deletes a shipping class by ID                                                            |
+| Actions                                                 | Method | Description                                                                               |
+| ------------------------------------------------------- | ------ | ----------------------------------------------------------------------------------------- |
+| `createProductShippingClass( shippingClassObject )`     | POST   | Creates shipping class, see `ProductShippingClass` in [types.ts](./types.ts) for values   |
+| `deleteProductShippingClass( id )`                      | DELETE | Deletes a shipping class by ID                                                            |
 | `updateProductShippingClass( id, shippingClassObject )` | PUT    | Updates a shipping class, see `ProductShippingClass` in [types.ts](./types.ts) for values |
 
 Example usage: `wp.data.dispatch( EXPERIMENTAL_PRODUCT_SHIPPING_CLASSES_STORE_NAME ).updateProductShippingClass( 3, { name: 'New name' } );`
