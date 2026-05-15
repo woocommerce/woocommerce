@@ -151,7 +151,8 @@ Each item in the `items` array MUST have:
 | `value` | `string` | **Yes** | Value for selection/submission |
 | `ariaLabel` | `string` | Conditional | **Required** if `label` contains HTML |
 | `selected` | `boolean` | No | Current selection state (default: false). SSR hint only — parent's `state.selectableItems` derives the live `selected` used for bindings. |
-| `disabled` | `boolean` | No | Whether item can be selected (default: false) |
+| `disabled` | `boolean` | No | Whether item can be selected (default: false). Item stays visible but not interactive. |
+| `hidden` | `boolean` | No | Whether item should be hidden (default: false). |
 | `type` | `string` | No | Type discriminator (e.g., `"attribute/color"`) |
 
 Extra fields go in `T`. For product filters, `T = FilterItemFields`:
