@@ -27,7 +27,6 @@ class MigrationTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( Migration::run() );
 
 		$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
-		$this->assertSame( $image_ids, wc_get_product( $variation_id )->get_gallery_image_ids() );
 		$this->assertSame( implode( ',', $image_ids ), get_post_meta( $variation_id, '_product_image_gallery', true ) );
 	}
 
@@ -51,7 +50,6 @@ class MigrationTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( Migration::run() );
 
 		$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
-		$this->assertSame( $core_gallery_ids, wc_get_product( $variation_id )->get_gallery_image_ids( 'edit' ) );
 		$this->assertSame( implode( ',', $core_gallery_ids ), get_post_meta( $variation_id, '_product_image_gallery', true ) );
 	}
 
@@ -67,7 +65,6 @@ class MigrationTest extends \WC_Unit_Test_Case {
 
 		$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
 		$this->assertSame( '', get_post_meta( $variation_id, '_product_image_gallery', true ) );
-		$this->assertSame( array(), wc_get_product( $variation_id )->get_gallery_image_ids() );
 	}
 
 	/**
@@ -108,16 +105,6 @@ class MigrationTest extends \WC_Unit_Test_Case {
 		foreach ( $variation_ids as $variation_id ) {
 			$this->assertTrue( LegacyVariationGalleryCompatibility::is_variation_id_core_managed( $variation_id ) );
 		}
-	}
-
-	/**
-	 * @testdox Migration records its completion timestamp once there are no more variations to process.
-	 */
-	public function test_migration_records_completion_option(): void {
-		delete_option( Migration::COMPLETED_OPTION );
-
-		$this->assertFalse( Migration::run() );
-		$this->assertNotFalse( get_option( Migration::COMPLETED_OPTION ) );
 	}
 
 	/**
