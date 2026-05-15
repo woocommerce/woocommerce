@@ -349,8 +349,21 @@
 			$qty_input = form.$singleVariationWrap.find(
 				'.quantity input.qty[name="quantity"]'
 			),
-			$qty = $qty_input.closest( '.quantity' ),
-			purchasable = true,
+			$qty;
+
+		// Fall back to searching the whole form when the quantity input
+		// is rendered outside of `.single_variation_wrap` (custom or
+		// block-based themes), otherwise the variation's stock-derived
+		// `min`/`max` would never be applied and the product page would
+		// allow over-stock quantities that the cart page later rejects.
+		if ( ! $qty_input.length ) {
+			$qty_input = form.$form.find(
+				'.quantity input.qty[name="quantity"]'
+			);
+		}
+
+		$qty = $qty_input.closest( '.quantity' );
+		var purchasable = true,
 			variation_id = '',
 			template = false,
 			$template_html = '';
@@ -401,30 +414,32 @@
 			$qty_input
 				.val( '1' )
 				.attr( 'min', '1' )
-				.attr( 'max', '' )
+				.removeAttr( 'max' )
 				.trigger( 'change' );
 			$qty.hide();
 		} else {
 			var qty_val = parseFloat( $qty_input.val() );
+			var max_qty = parseFloat( variation.max_qty );
+			var min_qty = parseFloat( variation.min_qty );
 
 			if ( isNaN( qty_val ) ) {
-				qty_val = variation.min_qty;
+				qty_val = isNaN( min_qty ) ? 1 : min_qty;
 			} else {
-				qty_val =
-					qty_val > parseFloat( variation.max_qty )
-						? variation.max_qty
-						: qty_val;
-				qty_val =
-					qty_val < parseFloat( variation.min_qty )
-						? variation.min_qty
-						: qty_val;
+				if ( ! isNaN( max_qty ) && qty_val > max_qty ) {
+					qty_val = max_qty;
+				}
+				if ( ! isNaN( min_qty ) && qty_val < min_qty ) {
+					qty_val = min_qty;
+				}
 			}
 
-			$qty_input
-				.attr( 'min', variation.min_qty )
-				.attr( 'max', variation.max_qty )
-				.val( qty_val )
-				.trigger( 'change' );
+			$qty_input.attr( 'min', variation.min_qty );
+			if ( '' === variation.max_qty || isNaN( max_qty ) ) {
+				$qty_input.removeAttr( 'max' );
+			} else {
+				$qty_input.attr( 'max', variation.max_qty );
+			}
+			$qty_input.val( qty_val ).trigger( 'change' );
 			$qty.show();
 		}
 

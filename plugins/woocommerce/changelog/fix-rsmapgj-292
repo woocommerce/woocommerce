@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Make the variation quantity input on the product page enforce the variation's stock limit when the parent variable product does not manage stock, so the `max` attribute matches the cart page and prevents over-stock selections.
