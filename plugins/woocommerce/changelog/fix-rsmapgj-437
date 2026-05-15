@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Add a region landmark and accessible name to the Store Notices block wrapper so assistive technology can identify the notices container.
