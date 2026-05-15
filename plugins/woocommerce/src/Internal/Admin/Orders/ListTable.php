@@ -991,7 +991,7 @@ class ListTable extends WP_List_Table {
 		// Note: use of htmlspecialchars (below) is to prevent XSS when rendered by selectWoo.
 		?>
 		<select class="wc-customer-search" name="_customer_user" data-placeholder="<?php esc_attr_e( 'Filter by registered customer', 'woocommerce' ); ?>" data-allow_clear="true">
-			<option value="<?php echo esc_attr( $user_id ); ?>" selected><?php echo htmlspecialchars( wp_kses_post( $user_string ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></option>
+			<option value="<?php echo esc_attr( $user_id ); ?>" selected><?php echo htmlspecialchars( wp_kses_post( $user_string ), ENT_COMPAT ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></option>
 		</select>
 		<?php
 	}

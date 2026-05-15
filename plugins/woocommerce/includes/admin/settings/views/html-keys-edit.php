@@ -57,7 +57,8 @@ defined( 'ABSPATH' ) || exit;
 					);
 					?>
 					<select class="wc-customer-search" id="key_user" data-placeholder="<?php esc_attr_e( 'Search for a user&hellip;', 'woocommerce' ); ?>" data-allow_clear="true">
-						<option value="<?php echo esc_attr( $user_id ); ?>" selected><?php echo htmlspecialchars( wp_kses_post( $user_string ) ); // htmlspecialchars to prevent XSS when rendered by selectWoo. ?></option>
+						<?php // htmlspecialchars to prevent XSS when rendered by selectWoo. ?>
+						<option value="<?php echo esc_attr( $user_id ); ?>" selected><?php echo htmlspecialchars( wp_kses_post( $user_string ), ENT_COMPAT ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></option>
 					</select>
 				</td>
 			</tr>

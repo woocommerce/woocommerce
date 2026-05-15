@@ -614,7 +614,7 @@ class WC_Brands_Admin {
 			$current_brand   = $current_brand_slug ? get_term_by( 'slug', $current_brand_slug, 'product_brand' ) : '';
 			$selected_option = '';
 			if ( $current_brand_slug && $current_brand ) {
-				$selected_option = '<option value="' . esc_attr( $current_brand_slug ) . '" selected>' . esc_html( htmlspecialchars( wp_kses_post( $current_brand->name ) ) ) . '</option>';
+				$selected_option = '<option value="' . esc_attr( $current_brand_slug ) . '" selected>' . esc_html( htmlspecialchars( wp_kses_post( $current_brand->name ), ENT_COMPAT ) ) . '</option>';
 			}
 			$placeholder = esc_attr__( 'Filter by brand', 'woocommerce' );
 			?>

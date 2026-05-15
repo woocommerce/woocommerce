@@ -29,14 +29,14 @@ class WC_Product_Cat_Dropdown_Walker_Test extends \WC_Unit_Test_Case {
 	 * @testdox Should emit the canonical boolean `selected` attribute when the category is selected.
 	 */
 	public function test_start_el_emits_boolean_selected_attribute_when_selected(): void {
-		$category    = (object) array(
+		$category = (object) array(
 			'term_id' => 42,
 			'slug'    => 'apparel',
 			'name'    => 'Apparel',
 			'count'   => 3,
 		);
-		$output      = '';
-		$args        = array(
+		$output   = '';
+		$args     = array(
 			'selected'     => 'apparel',
 			'value'        => 'slug',
 			'hierarchical' => false,
