@@ -1236,6 +1236,18 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Status endpoint returns expired immediately when the token is empty.
+	 */
+	public function test_get_status_returns_expired_when_token_empty(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$response = $this->dispatch_status( '' );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'expired', $response->get_data()['status'] );
+	}
+
+	/**
 	 * @testdox Status endpoint hides another user's token state and reports it as expired (defense in depth).
 	 */
 	public function test_get_status_rejects_other_users(): void {
