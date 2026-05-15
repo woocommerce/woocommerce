@@ -1,0 +1,12 @@
+{
+	"name": "@woocommerce/widgets-app",
+	"version": "0.0.0",
+	"description": "Dashboard widgets surfaced by WooCommerce.",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"dependencies": {
+		"@wordpress/element": "next",
+		"@wordpress/i18n": "next",
+		"@wordpress/icons": "next"
+	}
+}

@@ -1,0 +1,6 @@
+{
+	"name": "woocommerce/hello-world",
+	"title": "Hello World",
+	"description": "A minimal WooCommerce dashboard widget example.",
+	"category": "woocommerce"
+}
