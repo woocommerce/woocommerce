@@ -1,33 +1,10 @@
 <?php
+declare( strict_types = 1 );
 /**
  * Tests for WC_Shortcode_My_Account.
  *
  * @package WooCommerce\Tests\Shortcodes
  */
-
-/**
- * Test class exposing protected helpers on WC_Shortcode_My_Account.
- */
-class WC_Test_Shortcode_My_Account_Proxy extends WC_Shortcode_My_Account {
-	/**
-	 * Public wrapper around the protected credentials helper.
-	 *
-	 * @return array|false
-	 */
-	public static function get_credentials() {
-		return self::get_password_reset_credentials();
-	}
-
-	/**
-	 * Public wrapper around the protected token consumer.
-	 *
-	 * @param string $token Token.
-	 * @return string|false
-	 */
-	public static function get_token_value( $token ) {
-		return self::get_password_reset_token_value( $token );
-	}
-}
 
 /**
  * Class WC_Test_Shortcode_My_Account.
@@ -74,8 +51,8 @@ class WC_Test_Shortcode_My_Account extends WC_Unit_Test_Case {
 		$token = WC_Shortcode_My_Account::set_password_reset_token( $value );
 		$this->assertIsString( $token );
 
-		$first  = WC_Test_Shortcode_My_Account_Proxy::get_token_value( $token );
-		$second = WC_Test_Shortcode_My_Account_Proxy::get_token_value( $token );
+		$first  = WC_Shortcode_My_Account::get_password_reset_token_value( $token );
+		$second = WC_Shortcode_My_Account::get_password_reset_token_value( $token );
 
 		$this->assertSame( $value, $first, 'First read should return stored value.' );
 		$this->assertFalse( $second, 'Second read should fail; token is single-use.' );
@@ -85,8 +62,8 @@ class WC_Test_Shortcode_My_Account extends WC_Unit_Test_Case {
 	 * @testdox get_password_reset_token_value returns false for unknown or empty tokens.
 	 */
 	public function test_get_password_reset_token_value_unknown(): void {
-		$this->assertFalse( WC_Test_Shortcode_My_Account_Proxy::get_token_value( '' ) );
-		$this->assertFalse( WC_Test_Shortcode_My_Account_Proxy::get_token_value( 'no-such-token' ) );
+		$this->assertFalse( WC_Shortcode_My_Account::get_password_reset_token_value( '' ) );
+		$this->assertFalse( WC_Shortcode_My_Account::get_password_reset_token_value( 'no-such-token' ) );
 	}
 
 	/**
@@ -95,7 +72,7 @@ class WC_Test_Shortcode_My_Account extends WC_Unit_Test_Case {
 	public function test_get_password_reset_credentials_uses_cookie(): void {
 		$_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] = '13:cookie-key';
 
-		$creds = WC_Test_Shortcode_My_Account_Proxy::get_credentials();
+		$creds = WC_Shortcode_My_Account::get_password_reset_credentials();
 
 		$this->assertIsArray( $creds, 'Credentials should be returned as an array.' );
 		$this->assertSame( '13', $creds['id'] );
@@ -113,7 +90,7 @@ class WC_Test_Shortcode_My_Account extends WC_Unit_Test_Case {
 		// No cookie, only the token query param (simulating SameSite=Strict drop).
 		$_GET['wc-resetpass-token'] = $token;
 
-		$creds = WC_Test_Shortcode_My_Account_Proxy::get_credentials();
+		$creds = WC_Shortcode_My_Account::get_password_reset_credentials();
 
 		$this->assertIsArray( $creds, 'Fallback path should produce credentials.' );
 		$this->assertSame( '21', $creds['id'] );
@@ -124,7 +101,7 @@ class WC_Test_Shortcode_My_Account extends WC_Unit_Test_Case {
 	 * @testdox get_password_reset_credentials returns false when neither cookie nor token is present.
 	 */
 	public function test_get_password_reset_credentials_returns_false_when_nothing_present(): void {
-		$this->assertFalse( WC_Test_Shortcode_My_Account_Proxy::get_credentials() );
+		$this->assertFalse( WC_Shortcode_My_Account::get_password_reset_credentials() );
 	}
 
 	/**
@@ -133,7 +110,7 @@ class WC_Test_Shortcode_My_Account extends WC_Unit_Test_Case {
 	public function test_get_password_reset_credentials_ignores_malformed_cookie(): void {
 		$_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] = 'no-colon-value';
 
-		$this->assertFalse( WC_Test_Shortcode_My_Account_Proxy::get_credentials() );
+		$this->assertFalse( WC_Shortcode_My_Account::get_password_reset_credentials() );
 	}
 
 	/**
@@ -146,8 +123,8 @@ class WC_Test_Shortcode_My_Account extends WC_Unit_Test_Case {
 
 		$_GET['wc-resetpass-token'] = $token;
 
-		$first  = WC_Test_Shortcode_My_Account_Proxy::get_credentials();
-		$second = WC_Test_Shortcode_My_Account_Proxy::get_credentials();
+		$first  = WC_Shortcode_My_Account::get_password_reset_credentials();
+		$second = WC_Shortcode_My_Account::get_password_reset_credentials();
 
 		$this->assertIsArray( $first );
 		$this->assertFalse( $second, 'Token should be invalidated after first credential lookup.' );

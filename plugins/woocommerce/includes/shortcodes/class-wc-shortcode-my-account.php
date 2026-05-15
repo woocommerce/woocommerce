@@ -287,16 +287,20 @@ class WC_Shortcode_My_Account {
 	 * @return array|false An associative array with `id` (string) and `key` (string) keys, or
 	 *                     false when no valid credentials can be retrieved.
 	 */
-	protected static function get_password_reset_credentials() {
+	public static function get_password_reset_credentials() {
 		$cookie_name = 'wp-resetpass-' . COOKIEHASH;
 
-		if ( isset( $_COOKIE[ $cookie_name ] ) && 0 < strpos( $_COOKIE[ $cookie_name ], ':' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
-			list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ $cookie_name ] ), 2 ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+		if ( isset( $_COOKIE[ $cookie_name ] ) ) {
+			$cookie_value = wp_unslash( $_COOKIE[ $cookie_name ] ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
 
-			return array(
-				'id'  => $rp_id,
-				'key' => $rp_key,
-			);
+			if ( is_string( $cookie_value ) && 0 < strpos( $cookie_value, ':' ) ) {
+				list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', $cookie_value, 2 ) );
+
+				return array(
+					'id'  => $rp_id,
+					'key' => $rp_key,
+				);
+			}
 		}
 
 		// Fallback path for SameSite=Strict (and similar) cookie drops on cross-site navigations.
@@ -334,7 +338,7 @@ class WC_Shortcode_My_Account {
 			return false;
 		}
 
-		$token = wp_generate_password( 32, false );
+		$token  = wp_generate_password( 32, false );
 		$stored = set_transient( '_wc_resetpass_token_' . $token, $value, 10 * MINUTE_IN_SECONDS );
 
 		return $stored ? $token : false;
@@ -348,7 +352,7 @@ class WC_Shortcode_My_Account {
 	 * @param string $token Token previously returned by {@see self::set_password_reset_token()}.
 	 * @return string|false Stored value, or false when the token is unknown or expired.
 	 */
-	protected static function get_password_reset_token_value( $token ) {
+	public static function get_password_reset_token_value( $token ) {
 		if ( ! is_string( $token ) || '' === $token ) {
 			return false;
 		}
