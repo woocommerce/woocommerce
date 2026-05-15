@@ -424,20 +424,24 @@ class WC_Product_Variable extends WC_Product {
 		// Multi-image variation galleries are gated on the feature flag.
 		// Check on the feature flag to be removed when feature is rolled out.
 		if ( VariationGalleryPackage::is_enabled() ) {
+			// Filter out stale attachment IDs (variation meta can point at
+			// deleted/missing attachments). Variations with no valid extras
+			// fall through to the featured-only swap path on the frontend.
 			$variation_gallery_image_ids = array_values(
 				array_filter(
 					array_map( 'intval', $variation->get_gallery_image_ids() ),
 					'wp_attachment_is_image'
 				)
 			);
-			$variation_featured_id       = (int) $variation->get_image_id();
-			$valid_featured              = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
 
-			if ( $valid_featured || ! empty( $variation_gallery_image_ids ) ) {
+			if ( ! empty( $variation_gallery_image_ids ) ) {
+				$variation_featured_id = (int) $variation->get_image_id();
+				$valid_featured        = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
+
 				$variation_gallery_html = wc_get_product_gallery_html(
 					$this,
 					array_merge(
-						array( $variation_featured_id ),
+						$valid_featured ? array( $variation_featured_id ) : array(),
 						$variation_gallery_image_ids
 					)
 				);
