@@ -574,6 +574,12 @@ function wc_get_formatted_variation( $variation, $flat = false, $include_names =
  * Uses Action Scheduler to fire events at the exact sale start/end times,
  * rather than relying on the daily cron.
  *
+ * The `$unique` flag is passed to `as_schedule_single_action()` so Action
+ * Scheduler refuses to insert a second pending action with the same hook,
+ * args, and group. This is the database-level guard against duplicates when
+ * re-entrant saves (from inside an AS sale handler) or the daily safety-net
+ * cron race with per-product AS events.
+ *
  * @since 10.5.0
  * @param WC_Product $product Product object.
  * @return void
@@ -590,7 +596,8 @@ function wc_schedule_product_sale_events( WC_Product $product ): void {
 				$start_ts,
 				'wc_product_start_scheduled_sale',
 				array( 'product_id' => $product_id ),
-				'woocommerce-sales'
+				'woocommerce-sales',
+				true
 			);
 		}
 	}
@@ -602,7 +609,8 @@ function wc_schedule_product_sale_events( WC_Product $product ): void {
 				$end_ts,
 				'wc_product_end_scheduled_sale',
 				array( 'product_id' => $product_id ),
-				'woocommerce-sales'
+				'woocommerce-sales',
+				true
 			);
 		}
 	}
