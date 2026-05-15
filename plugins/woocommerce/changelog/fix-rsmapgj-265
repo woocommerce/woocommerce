@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Respect remove_theme_support() for wc-product-gallery-zoom, -slider and -lightbox when the block-based product image gallery (and the classic single product template block) renders, so themes and sites can opt out of these legacy gallery features again.

@@ -107,9 +107,17 @@ class ProductImageGallery extends AbstractBlock {
 			return '';
 		}
 
-		add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
-		add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
-		add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
+		// Force-enable gallery features only when the theme declares support for them.
+		// This allows themes and sites to opt out via remove_theme_support(). See #61248.
+		if ( current_theme_supports( 'wc-product-gallery-zoom' ) ) {
+			add_filter( 'woocommerce_single_product_zoom_enabled', '__return_true' );
+		}
+		if ( current_theme_supports( 'wc-product-gallery-lightbox' ) ) {
+			add_filter( 'woocommerce_single_product_photoswipe_enabled', '__return_true' );
+		}
+		if ( current_theme_supports( 'wc-product-gallery-slider' ) ) {
+			add_filter( 'woocommerce_single_product_flexslider_enabled', '__return_true' );
+		}
 
 		ob_start();
 		woocommerce_show_product_sale_flash();
