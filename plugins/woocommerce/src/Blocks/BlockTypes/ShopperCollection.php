@@ -151,6 +151,14 @@ final class ShopperCollection extends AbstractBlock {
 			$list_slug = 'saved-for-later';
 		}
 
+		// Signals to the cart line items that a Saved-for-later target is present on this
+		// page, so the per-row "Save for later" button can show. Set here (rather than from
+		// Cart::enqueue_data via has_block()) because this block is typically auto-injected
+		// as a hooked block and never lives in the cart page's stored post_content.
+		if ( 'saved-for-later' === $list_slug ) {
+			$this->asset_data_registry->add( 'cartPageHasSavedForLater', true );
+		}
+
 		// Clamp to the 2-6 range the SCSS `@for $i from 2 through 6` loop and
 		// the editor `RangeControl` both support. `absint()` first defends
 		// against a code-editor override (the attribute can be set to any
