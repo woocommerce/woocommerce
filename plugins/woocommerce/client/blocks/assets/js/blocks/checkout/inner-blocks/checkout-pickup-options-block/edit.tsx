@@ -32,12 +32,10 @@ export const Edit = ( {
 	};
 	setAttributes: ( attributes: Record< string, unknown > ) => void;
 } ): JSX.Element | null => {
-	const { prefersCollection } = useSelect( ( select ) => {
-		const checkoutStore = select( checkoutStoreDescriptor );
-		return {
-			prefersCollection: checkoutStore.prefersCollection(),
-		};
-	} );
+	const prefersCollection = useSelect(
+		( select ) => select( checkoutStoreDescriptor ).prefersCollection(),
+		[]
+	);
 	const { className } = attributes;
 
 	if ( ! prefersCollection || ! LOCAL_PICKUP_ENABLED ) {

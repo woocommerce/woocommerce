@@ -171,12 +171,10 @@ export const Edit = ( {
 		// eslint-disable-next-line react-hooks/exhaustive-deps
 	}, [ setAttributes ] );
 	const { setPrefersCollection } = useDispatch( checkoutStoreDescriptor );
-	const { prefersCollection } = useSelect( ( select ) => {
-		const checkoutStore = select( checkoutStoreDescriptor );
-		return {
-			prefersCollection: checkoutStore.prefersCollection(),
-		};
-	} );
+	const prefersCollection = useSelect(
+		( select ) => select( checkoutStoreDescriptor ).prefersCollection(),
+		[]
+	);
 	const { showPrice, showIcon, className, localPickupText, shippingText } =
 		attributes;
 	const {

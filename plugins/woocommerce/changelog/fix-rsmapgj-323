@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stabilize useSelect hooks in the Checkout Pickup Options and Shipping Method block edit views to avoid "Too many re-renders" warnings in the Site Editor.
