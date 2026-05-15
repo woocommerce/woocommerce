@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Scope the single product `form.cart input` width rule to `input[type="number"]` only in the Twenty Nineteen and Twenty Seventeen themes so checkboxes and radio buttons are no longer elongated.
