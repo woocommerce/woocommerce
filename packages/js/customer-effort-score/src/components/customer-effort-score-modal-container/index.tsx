@@ -16,7 +16,19 @@ import { ADMIN_INSTALL_TIMESTAMP_OPTION_NAME } from '../../constants';
 import store from '../../store';
 
 export const CustomerEffortScoreModalContainer = () => {
-	const { createSuccessNotice } = useDispatch( 'core/notices' );
+	// The `core/notices` store is provided by WordPress core. In some
+	// environments (e.g. when the `customer-effort-score-tracks` feature is
+	// disabled and the notices script dependency isn't enqueued) `useDispatch`
+	// can return `null`, which would otherwise crash with a TypeError when
+	// destructuring. Fall back to a no-op so Analytics and other pages that
+	// render this container do not break.
+	const noticesDispatch = useDispatch( 'core/notices' ) as {
+		createSuccessNotice?: (
+			content: string,
+			options?: Record< string, unknown >
+		) => void;
+	} | null;
+	const createSuccessNotice = noticesDispatch?.createSuccessNotice;
 	const { hideCesModal } = useDispatch( store );
 	const {
 		storeAgeInWeeks,
@@ -59,14 +71,16 @@ export const CustomerEffortScoreModalContainer = () => {
 			...visibleCESModalData.tracksProps,
 		} );
 
-		createSuccessNotice(
-			visibleCESModalData.onSubmitLabel ||
-				__(
-					"Thanks for the feedback. We'll put it to good use!",
-					'woocommerce'
-				),
-			visibleCESModalData.onSubmitNoticeProps || {}
-		);
+		if ( createSuccessNotice ) {
+			createSuccessNotice(
+				visibleCESModalData.onSubmitLabel ||
+					__(
+						"Thanks for the feedback. We'll put it to good use!",
+						'woocommerce'
+					),
+				visibleCESModalData.onSubmitNoticeProps || {}
+			);
+		}
 	};
 
 	if ( ! visibleCESModalData || isLoading ) {

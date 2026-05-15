@@ -1,0 +1,5 @@
+Significance: patch
+Type: fix
+Comment: Bumps the @woocommerce/customer-effort-score dependency which contains the bug fix.
+
+Fix Analytics crashing with "Cannot destructure property 'createSuccessNotice'" when the customer-effort-score-tracks feature is disabled.
