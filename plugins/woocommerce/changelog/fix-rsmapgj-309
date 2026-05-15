@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Stop showing a misleading "out of stock and unavailable" message on the product page of a variable product whose variations have no prices set. The add-to-cart area is now suppressed entirely in that case, mirroring how simple products with no price behave.

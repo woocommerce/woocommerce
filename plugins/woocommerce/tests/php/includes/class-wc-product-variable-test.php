@@ -162,4 +162,134 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$this->assertIsBool( $has_purchasable_variations );
 		$this->assertFalse( $has_purchasable_variations );
 	}
+
+	/**
+	 * @testdox The variable add-to-cart template should not show the "out of stock and unavailable" message when no variations have a price (mirrors simple product behaviour).
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/27192
+	 */
+	public function test_variable_add_to_cart_template_suppresses_out_of_stock_message_when_no_variations_have_a_price() {
+		$product = new WC_Product_Variable();
+		$product->set_props(
+			array(
+				'name' => 'Dummy Variable Product No Price',
+				'sku'  => 'DUMMY VARIABLE NO PRICE ' . microtime(),
+			)
+		);
+
+		$attributes   = array();
+		$attributes[] = WC_Helper_Product::create_product_attribute_object( 'size', array( 'small', 'large' ) );
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		// Create two variations with no price set, so the parent is not purchasable.
+		$variations    = array();
+		$variations[]  = WC_Helper_Product::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE NO PRICE SMALL',
+			'',
+			array( 'pa_size' => 'small' )
+		);
+		$variations[]  = WC_Helper_Product::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE NO PRICE LARGE',
+			'',
+			array( 'pa_size' => 'large' )
+		);
+		$variation_ids = array_map(
+			function ( $variation ) {
+				return $variation->get_id();
+			},
+			$variations
+		);
+		$product->set_children( $variation_ids );
+		WC_Product_Variable::sync( $product->get_id() );
+
+		// Sanity: parent is not purchasable when no variation has a price.
+		$reloaded = wc_get_product( $product->get_id() );
+		$this->assertFalse( $reloaded->is_purchasable(), 'Variable product with no priced variations should not be purchasable.' );
+		$this->assertEmpty( $reloaded->get_available_variations(), 'No variations should be available when none have a price.' );
+
+		// Render the variable add-to-cart template.
+		$GLOBALS['product'] = $reloaded;
+		ob_start();
+		wc_get_template(
+			'single-product/add-to-cart/variable.php',
+			array(
+				'available_variations' => $reloaded->get_available_variations(),
+				'attributes'           => $reloaded->get_variation_attributes(),
+				'selected_attributes'  => $reloaded->get_default_attributes(),
+			)
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringNotContainsString(
+			'This product is currently out of stock and unavailable.',
+			$output,
+			'Variable products with no priced variations should not show the misleading out-of-stock message.'
+		);
+		$this->assertStringNotContainsString(
+			'<form',
+			$output,
+			'No add-to-cart form should be rendered when the variable product has no priced variations.'
+		);
+	}
+
+	/**
+	 * @testdox The variable add-to-cart template should still show the out-of-stock message when variations are priced but none are available (e.g. all hidden out-of-stock).
+	 */
+	public function test_variable_add_to_cart_template_shows_out_of_stock_message_when_priced_variations_are_unavailable() {
+		$product = new WC_Product_Variable();
+		$product->set_props(
+			array(
+				'name' => 'Dummy Variable Product Priced Hidden',
+				'sku'  => 'DUMMY VARIABLE PRICED HIDDEN ' . microtime(),
+			)
+		);
+
+		$attributes   = array();
+		$attributes[] = WC_Helper_Product::create_product_attribute_object( 'size', array( 'small' ) );
+		$product->set_attributes( $attributes );
+		$product->save();
+
+		$variations    = array();
+		$variations[]  = WC_Helper_Product::create_product_variation_object(
+			$product->get_id(),
+			'DUMMY SKU VARIABLE PRICED SMALL',
+			10,
+			array( 'pa_size' => 'small' )
+		);
+		$variation_ids = array_map(
+			function ( $variation ) {
+				return $variation->get_id();
+			},
+			$variations
+		);
+		$product->set_children( $variation_ids );
+		WC_Product_Variable::sync( $product->get_id() );
+
+		$reloaded = wc_get_product( $product->get_id() );
+		$this->assertTrue( $reloaded->is_purchasable(), 'Variable product with at least one priced variation should be purchasable.' );
+
+		// Force the available variations to be empty to simulate the "all unavailable" case
+		// (e.g. all variations out of stock with hide-out-of-stock enabled) while the parent is still
+		// purchasable. This is the scenario where the out-of-stock message is appropriate.
+		$GLOBALS['product'] = $reloaded;
+		ob_start();
+		wc_get_template(
+			'single-product/add-to-cart/variable.php',
+			array(
+				'available_variations' => array(),
+				'attributes'           => $reloaded->get_variation_attributes(),
+				'selected_attributes'  => $reloaded->get_default_attributes(),
+			)
+		);
+		$output = ob_get_clean();
+
+		$this->assertStringContainsString(
+			'This product is currently out of stock and unavailable.',
+			$output,
+			'Variable products with priced but unavailable variations should still show the out-of-stock message.'
+		);
+	}
 }
