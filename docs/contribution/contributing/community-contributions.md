@@ -12,7 +12,7 @@ WooCommerce is open source software that welcomes community contributions. To he
 
 1. **Link to a related issue** - If one exists, reference it in your PR. If you're proposing a new feature or significant change, [open an issue](https://github.com/woocommerce/woocommerce/issues/new/choose) first to discuss it.
 
-2. **Run tests locally** - Our CI tests are not automatically triggered for community contributions, so please verify your changes pass locally before submitting.
+2. **Run tests locally** - Som of the CI workflows are not automatically triggered for community contributions, so please verify your changes pass relevant tests and linting locally before submitting.
 
 3. **Consolidate related changes** - If you have multiple similar fixes (e.g., typos, documentation updates), combine them into a single PR when appropriate.
 
@@ -21,7 +21,7 @@ WooCommerce is open source software that welcomes community contributions. To he
 When you open a PR, you'll receive an immediate review from our AI code reviewer. Before a maintainer reviews your PR, please:
 
 1. **Fill out the entire PR template** - Include a clear description of your changes and test steps.
-2. **Respond to all AI review feedback** - Address any issues raised by the automated review.
+2. **Respond to all AI review feedback** - Review automated feedback and either address it, or explain why it does not apply.
 3. **Confirm tests pass** - Note in your PR that you've run the test suite locally.
 
 ## AI-assisted contributions
