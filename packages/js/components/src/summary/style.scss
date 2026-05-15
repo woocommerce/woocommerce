@@ -343,6 +343,14 @@ $border: $gray-200;
 		height: min-content;
 		background-color: $gray-100;
 		color: $gray-900;
+
+		// The delta value is rendered inside a `Text` component from
+		// `@wordpress/components`, which applies its own `color`. Force
+		// the inner text to inherit the badge color so good/bad trend
+		// colors are not overridden — see RSMAPGJ-291 / woo#37987.
+		* {
+			color: inherit;
+		}
 	}
 
 	&.is-selected {

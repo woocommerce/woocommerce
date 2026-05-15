@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix unreadable delta badge text in the Analytics Summary component by ensuring the badge's text color is inherited by nested Text elements, restoring the intended white-on-red and white-on-green contrast.
