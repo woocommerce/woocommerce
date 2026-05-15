@@ -70,7 +70,6 @@
 		0;
 	border-bottom: var(--wpds-border-width-xs, 1px) solid
 		var(--wpds-color-stroke-surface-neutral-weak, #ddd);
-	background: var(--wpds-color-bg-surface-neutral-strong, #fff);
 }
 
 .woocommerce-product-list-page__header-title {
@@ -80,7 +79,6 @@
 	font-family: var(--wpds-typography-font-family-heading);
 	font-size: var(--wpds-typography-font-size-lg, 15px);
 	font-weight: var(--wpds-typography-font-weight-medium, 500);
-	line-height: var(--wpds-typography-line-height-lg, 28px);
 	text-overflow: ellipsis;
 	white-space: nowrap;
 }
