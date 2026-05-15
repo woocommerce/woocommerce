@@ -30,6 +30,10 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 			public function validate_checkout( &$data, &$errors ) {
 				return parent::validate_checkout( $data, $errors );
 			}
+
+			public function should_create_customer_account( $data ) {
+				return parent::should_create_customer_account( $data );
+			}
 		};
 		// phpcs:enable Generic.CodeAnalysis, Squiz.Commenting
 
@@ -247,6 +251,74 @@ class WC_Checkout_Test extends \WC_Unit_Test_Case {
 		$this->assertNull( $sut->get_value( 'billing_country' ) );
 
 		WC()->customer = $orig_customer;
+	}
+
+	/**
+	 * @testdox `should_create_customer_account` returns false when the shopper is already logged in.
+	 */
+	public function test_should_create_customer_account_returns_false_when_logged_in() {
+		$user_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $user_id );
+
+		$this->assertFalse( $this->sut->should_create_customer_account( array( 'createaccount' => 1 ) ) );
+
+		wp_set_current_user( 0 );
+	}
+
+	/**
+	 * @testdox `should_create_customer_account` returns false when checkout signup is disabled, even if `createaccount` is present.
+	 */
+	public function test_should_create_customer_account_returns_false_when_registration_disabled() {
+		wp_set_current_user( 0 );
+
+		// Override the global setUp filter that forces registration enabled.
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+		add_filter( 'woocommerce_checkout_registration_enabled', '__return_false' );
+
+		$this->assertFalse( $this->sut->should_create_customer_account( array( 'createaccount' => 1 ) ) );
+
+		remove_filter( 'woocommerce_checkout_registration_enabled', '__return_false' );
+		add_filter( 'woocommerce_checkout_registration_enabled', '__return_true' );
+	}
+
+	/**
+	 * @testdox `should_create_customer_account` returns true when registration is required (guest checkout disabled).
+	 */
+	public function test_should_create_customer_account_returns_true_when_registration_required() {
+		wp_set_current_user( 0 );
+
+		add_filter( 'woocommerce_checkout_registration_required', '__return_true' );
+
+		$this->assertTrue( $this->sut->should_create_customer_account( array( 'createaccount' => 0 ) ) );
+
+		remove_filter( 'woocommerce_checkout_registration_required', '__return_true' );
+	}
+
+	/**
+	 * @testdox `should_create_customer_account` returns false for guests who did not tick the create-account checkbox.
+	 */
+	public function test_should_create_customer_account_returns_false_when_checkbox_not_ticked() {
+		wp_set_current_user( 0 );
+
+		add_filter( 'woocommerce_checkout_registration_required', '__return_false' );
+
+		$this->assertFalse( $this->sut->should_create_customer_account( array( 'createaccount' => 0 ) ) );
+		$this->assertFalse( $this->sut->should_create_customer_account( array() ) );
+
+		remove_filter( 'woocommerce_checkout_registration_required', '__return_false' );
+	}
+
+	/**
+	 * @testdox `should_create_customer_account` returns true for guests who ticked the create-account checkbox.
+	 */
+	public function test_should_create_customer_account_returns_true_when_checkbox_ticked() {
+		wp_set_current_user( 0 );
+
+		add_filter( 'woocommerce_checkout_registration_required', '__return_false' );
+
+		$this->assertTrue( $this->sut->should_create_customer_account( array( 'createaccount' => 1 ) ) );
+
+		remove_filter( 'woocommerce_checkout_registration_required', '__return_false' );
 	}
 
 	/**

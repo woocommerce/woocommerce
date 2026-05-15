@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Align shortcode checkout account creation with the Store API: do not auto-create a customer account when checkout signup is disabled in the store settings, even if `woocommerce_checkout_registration_required` is filtered to true.

@@ -1160,6 +1160,47 @@ class WC_Checkout {
 	}
 
 	/**
+	 * Decide whether a new customer account should be created during checkout.
+	 *
+	 * Mirrors the Store API logic in
+	 * `Automattic\WooCommerce\StoreApi\Routes\V1\Checkout::should_create_customer_account()`
+	 * so that shortcode and block-based checkouts behave consistently:
+	 *
+	 *  - Never create an account when the shopper is already logged in.
+	 *  - Never create an account when checkout signup is disabled in the
+	 *    store settings (`woocommerce_enable_signup_and_login_from_checkout`).
+	 *  - Force account creation when registration is required (i.e. guest
+	 *    checkout is disabled).
+	 *  - Otherwise create the account only when the shopper explicitly
+	 *    opted-in via the "Create an account?" checkbox.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param array $data Posted data.
+	 * @return bool True if a new customer account should be created.
+	 */
+	protected function should_create_customer_account( $data ) {
+		if ( is_user_logged_in() ) {
+			return false;
+		}
+
+		// If checkout signup is disabled, never auto-create an account, even
+		// if `woocommerce_checkout_registration_required` is filtered to true
+		// without a corresponding way to opt-in.
+		if ( ! $this->is_registration_enabled() ) {
+			return false;
+		}
+
+		// Guest checkout is disabled, so an account is required to complete checkout.
+		if ( $this->is_registration_required() ) {
+			return true;
+		}
+
+		// Shopper explicitly ticked the "Create an account?" checkbox.
+		return ! empty( $data['createaccount'] );
+	}
+
+	/**
 	 * Create a new customer account if needed.
 	 *
 	 * @throws Exception When not able to create customer.
@@ -1173,7 +1214,7 @@ class WC_Checkout {
 		 */
 		$customer_id = apply_filters( 'woocommerce_checkout_customer_id', get_current_user_id() );
 
-		if ( ! is_user_logged_in() && ( $this->is_registration_required() || ! empty( $data['createaccount'] ) ) ) {
+		if ( $this->should_create_customer_account( $data ) ) {
 			$username    = ! empty( $data['account_username'] ) ? $data['account_username'] : '';
 			$password    = ! empty( $data['account_password'] ) ? $data['account_password'] : '';
 			$customer_id = wc_create_new_customer(
