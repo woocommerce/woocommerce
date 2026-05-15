@@ -151,11 +151,11 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Returns the price in html format.
 	 *
-	 * Note: Variable prices do not show suffixes like other product types. This
-	 * is due to some things like tax classes being set at variation level which
-	 * could differ from the parent price. The only way to show accurate prices
-	 * would be to load the variation and get its price, which adds extra
-	 * overhead and still has edge cases where the values would be inaccurate.
+	 * Note: Variable prices do not show suffixes with dynamic placeholders
+	 * (e.g. `{price_including_tax}`) when the variations span a price range,
+	 * because tax classes can differ between variations and the resolved
+	 * placeholder value would be ambiguous. When all variations share the
+	 * same price the suffix can be resolved accurately, so it is shown.
 	 *
 	 * Additionally, ranges of prices no longer show 'striked out' sale prices
 	 * due to the strings being very long and unclear/confusing. A single range
@@ -176,14 +176,25 @@ class WC_Product_Variable extends WC_Product {
 			$max_reg_price = end( $prices['regular_price'] );
 
 			if ( $min_price !== $max_price ) {
-				$price = wc_format_price_range( $min_price, $max_price );
+				$price        = wc_format_price_range( $min_price, $max_price );
+				$suffix_price = '';
 			} elseif ( $this->is_on_sale() && $min_reg_price === $max_reg_price ) {
-				$price = wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) );
+				$price        = wc_format_sale_price( wc_price( $max_reg_price ), wc_price( $min_price ) );
+				$suffix_price = $min_price;
 			} else {
-				$price = wc_price( $min_price );
+				$price        = wc_price( $min_price );
+				$suffix_price = $min_price;
 			}
 
-			$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix(), $this );
+			/**
+			 * Filters the displayed price HTML for a variable product.
+			 *
+			 * @since 2.5.0
+			 *
+			 * @param string              $price   The price HTML (price string plus suffix).
+			 * @param WC_Product_Variable $product The variable product instance.
+			 */
+			$price = apply_filters( 'woocommerce_variable_price_html', $price . $this->get_price_suffix( $suffix_price ), $this );
 		}
 
 		return apply_filters( 'woocommerce_get_price_html', $price, $this );
@@ -192,22 +203,25 @@ class WC_Product_Variable extends WC_Product {
 	/**
 	 * Get the suffix to display after prices > 0.
 	 *
-	 * This is skipped if the suffix
-	 * has dynamic values such as {price_excluding_tax} for variable products.
+	 * Dynamic placeholders such as {price_including_tax} are normally skipped for
+	 * variable products because the resolved price would be ambiguous across the
+	 * variation range. When the caller supplies an explicit (non-empty) $price —
+	 * for example when all variations share the same price — the placeholder can
+	 * be resolved accurately, so we defer to the parent implementation.
 	 *
 	 * @see get_price_html for an explanation as to why.
-	 * @param  string  $price Price to calculate, left blank to just use get_price().
-	 * @param  integer $qty   Quantity passed on to get_price_including_tax() or get_price_excluding_tax().
+	 * @param  string|float $price Price to calculate, left blank to just use get_price().
+	 * @param  integer      $qty   Quantity passed on to get_price_including_tax() or get_price_excluding_tax().
 	 * @return string
 	 */
 	public function get_price_suffix( $price = '', $qty = 1 ) {
 		$suffix = get_option( 'woocommerce_price_display_suffix' );
 
-		if ( strstr( $suffix, '{' ) ) {
+		if ( '' === $price && strstr( $suffix, '{' ) ) {
 			return apply_filters( 'woocommerce_get_price_suffix', '', $this, $price, $qty );
-		} else {
-			return parent::get_price_suffix( $price, $qty );
 		}
+
+		return parent::get_price_suffix( (string) $price, $qty );
 	}
 
 	/**

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the price display suffix on variable products when every variation shares the same price, including when the suffix uses dynamic placeholders such as {price_including_tax}.
