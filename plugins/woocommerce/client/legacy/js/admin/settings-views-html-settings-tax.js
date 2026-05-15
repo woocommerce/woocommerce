@@ -152,15 +152,33 @@
 						this.el.innerHTML = rowTemplateEmpty();
 					}
 
+					// Filter source list by matching against both `value` (code) and `label` (name),
+					// so typing e.g. "US" matches "United States (US)" instead of relying on
+					// jQuery UI's default label-only matcher (which fails when the typed code is
+					// not a substring of the country name).
+					var matchCodeOrLabel = function( source ) {
+						return function( request, response ) {
+							var term = ( request.term || '' ).toLowerCase();
+							response( $.grep( source, function( item ) {
+								if ( ! term.length ) {
+									return true;
+								}
+								var label = ( item.label || '' ).toLowerCase(),
+									value = ( item.value || '' ).toLowerCase();
+								return -1 !== label.indexOf( term ) || -1 !== value.indexOf( term );
+							} ) );
+						};
+					};
+
 					// Initialize autocomplete for countries.
 					this.$el.find( 'td.country input' ).autocomplete({
-						source: data.countries,
+						source: matchCodeOrLabel( data.countries ),
 						minLength: 2
 					});
 
 					// Initialize autocomplete for states.
 					this.$el.find( 'td.state input' ).autocomplete({
-						source: data.states,
+						source: matchCodeOrLabel( data.states ),
 						minLength: 3
 					});
 

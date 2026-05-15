@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Filter the country and state code autocomplete dropdowns on the Standard Tax rates page by both the code (value) and the country/state name (label), so typing a 2-letter code such as "US" surfaces "United States" instead of all alphabetically-listed entries.
