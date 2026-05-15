@@ -274,6 +274,17 @@ jQuery( function ( $ ) {
 		payment_method_selected: function ( e ) {
 			e.stopPropagation();
 
+			// Sync the `checked` HTML attribute with the selected radio so that
+			// CSS / jQuery selectors targeting `[checked]` reflect the current
+			// selection (the browser updates the `checked` *property* on click
+			// but never the attribute, leaving the originally-rendered method
+			// marked as checked in the DOM source). See #25887.
+			var $payment_method_radios = $(
+				'input[name="payment_method"]'
+			);
+			$payment_method_radios.removeAttr( 'checked' );
+			$( this ).attr( 'checked', 'checked' );
+
 			if ( $( '.payment_methods input.input-radio' ).length > 1 ) {
 				var target_payment_box = $(
 						'div.payment_box.' + $( this ).attr( 'ID' )

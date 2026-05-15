@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Sync the `checked` HTML attribute on checkout payment method radios so CSS and jQuery selectors targeting `[checked]` reflect the current selection.
