@@ -112,4 +112,71 @@ class WC_Webhook_Test extends WC_Unit_Test_Case {
 		$this->assertSame( 999, $webhook2->get_user_id() );
 	}
 
+	/**
+	 * @testDox The customer.deleted webhook should be considered valid for any deleted user regardless of role.
+	 *
+	 * Mirrors the behavior of customer.created (user_register) and customer.updated (profile_update),
+	 * which fire for any user. Previously the delete_user hook was gated to users with the
+	 * 'customer' role only, which caused customer.deleted to silently skip non-customer users.
+	 *
+	 * @see https://github.com/woocommerce/woocommerce/issues/36734
+	 */
+	public function test_customer_deleted_webhook_is_enqueued_for_any_role() {
+		$subscriber_id = wp_insert_user(
+			array(
+				'user_login' => 'rsmapgj_294_subscriber',
+				'user_email' => 'rsmapgj_294_subscriber@example.com',
+				'user_pass'  => 'password',
+				'role'       => 'subscriber',
+			)
+		);
+
+		$customer_id = wp_insert_user(
+			array(
+				'user_login' => 'rsmapgj_294_customer',
+				'user_email' => 'rsmapgj_294_customer@example.com',
+				'user_pass'  => 'password',
+				'role'       => 'customer',
+			)
+		);
+
+		$webhook = new WC_Webhook();
+		$webhook->set_name( 'rsmapgj-294-customer-deleted' );
+		$webhook->set_topic( 'customer.deleted' );
+		$webhook->set_status( 'active' );
+		$webhook->set_delivery_url( 'https://example.test/webhook' );
+		$webhook->set_secret( 'secret' );
+		$webhook->save();
+
+		// Spy on enqueued deliveries via the woocommerce_webhook_should_deliver filter,
+		// which receives the webhook, the hook arg, and the current_action() at the point of evaluation.
+		$delivered_for = array();
+		$spy           = function ( $should_deliver, $hook_webhook, $arg ) use ( $webhook, &$delivered_for ) {
+			if ( $hook_webhook->get_id() === $webhook->get_id() && $should_deliver ) {
+				$delivered_for[] = (int) $arg;
+			}
+			// Prevent actual HTTP delivery in the test.
+			return false;
+		};
+		add_filter( 'woocommerce_webhook_should_deliver', $spy, 10, 3 );
+
+		try {
+			wp_delete_user( $subscriber_id );
+			wp_delete_user( $customer_id );
+		} finally {
+			remove_filter( 'woocommerce_webhook_should_deliver', $spy, 10 );
+		}
+
+		$this->assertContains(
+			$subscriber_id,
+			$delivered_for,
+			'customer.deleted should be enqueued for a deleted subscriber user.'
+		);
+		$this->assertContains(
+			$customer_id,
+			$delivered_for,
+			'customer.deleted should be enqueued for a deleted customer user.'
+		);
+	}
+
 }

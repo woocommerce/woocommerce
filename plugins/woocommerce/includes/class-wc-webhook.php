@@ -190,9 +190,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 			case 'untrashed_post':
 				$return = $this->is_valid_post_action( $arg );
 				break;
-			case 'delete_user':
-				$return = $this->is_valid_user_action( $arg );
-				break;
 		}
 
 		if ( 0 === strpos( $current_action, 'woocommerce_process_shop' ) || 0 === strpos( $current_action, 'woocommerce_process_product' ) ) {
@@ -219,24 +216,6 @@ class WC_Webhook extends WC_Legacy_Webhook {
 		if ( isset( $GLOBALS['post_type'] ) && str_replace( 'shop_', '', $GLOBALS['post_type'] ) !== $this->get_resource() ) {
 			return false;
 		}
-		return true;
-	}
-
-	/**
-	 * Validates user actions.
-	 *
-	 * @since  3.6.0
-	 * @param  mixed $arg First hook argument.
-	 * @return bool       True if validation passes.
-	 */
-	private function is_valid_user_action( $arg ) {
-		$user = get_userdata( absint( $arg ) );
-
-		// Only deliver deleted customer event for users with customer role.
-		if ( ! $user || ! in_array( 'customer', (array) $user->roles, true ) ) {
-			return false;
-		}
-
 		return true;
 	}
 

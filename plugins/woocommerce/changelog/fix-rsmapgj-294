@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fire the customer.deleted webhook for any deleted WordPress user, matching the behavior of customer.created and customer.updated.
