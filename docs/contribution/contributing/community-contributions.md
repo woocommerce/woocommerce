@@ -6,7 +6,7 @@ post_title: Community contributions
 
 # Community contributions
 
-WooCommerce is open source software that welcomes community contributions. To help us review your contribution quickly, please follow these guidelines.
+WooCommerce is open-source software that welcomes community contributions. To help us review your contribution quickly, please follow these guidelines.
 
 ## Before you submit
 
