@@ -88,6 +88,33 @@ function wc_get_page_screen_id( $for ) {
 }
 
 /**
+ * Determine whether wc_create_page() should treat an existing empty option
+ * value as an intentional merchant choice to opt out of a page.
+ *
+ * On a fresh install, WC_Install::create_options() seeds page-id options with
+ * their default empty value before WC_Install::create_pages() runs, so we must
+ * NOT treat empty values as intentional during the initial install. After the
+ * site is installed (i.e. `woocommerce_db_version` is recorded), an empty page
+ * option means the merchant cleared the selector via the settings UI and that
+ * choice must be preserved across plugin updates and Status → Tools repairs.
+ *
+ * @since 10.9.0
+ *
+ * @param string $option Option name being evaluated.
+ * @return bool True when an empty option value should be respected (no page created).
+ */
+function wc_create_page_should_respect_empty_option( $option ) {
+	if ( '' === (string) $option ) {
+		return false;
+	}
+
+	// During a fresh install woocommerce_db_version is not yet recorded.
+	$db_version = get_option( 'woocommerce_db_version' );
+
+	return ! empty( $db_version );
+}
+
+/**
  * Create a page and store the ID in an option.
  *
  * @param mixed  $slug Slug for the new page.
@@ -101,14 +128,44 @@ function wc_get_page_screen_id( $for ) {
 function wc_create_page( $slug, $option = '', $page_title = '', $page_content = '', $post_parent = 0, $post_status = 'publish' ) {
 	global $wpdb;
 
-	$option_value = get_option( $option );
+	// Sentinel default lets us distinguish "option missing from DB" (never stored)
+	// from "option exists with an empty value" (merchant intentionally cleared it).
+	$unset_sentinel  = "\0__wc_create_page_unset__\0";
+	$option_value    = '' !== $option ? get_option( $option, $unset_sentinel ) : $unset_sentinel;
+	$option_is_unset = is_string( $option_value ) && $option_value === $unset_sentinel;
 
-	if ( $option_value > 0 ) {
-		$page_object = get_post( $option_value );
+	if ( is_numeric( $option_value ) && (int) $option_value > 0 ) {
+		$page_object = get_post( (int) $option_value );
 
 		if ( $page_object && 'page' === $page_object->post_type && ! in_array( $page_object->post_status, array( 'pending', 'trash', 'future', 'auto-draft' ), true ) ) {
 			// Valid page is already in place.
 			return $page_object->ID;
+		}
+	} elseif ( '' !== $option && ! $option_is_unset && wc_create_page_should_respect_empty_option( $option ) ) {
+		/**
+		 * Filters whether wc_create_page() should respect an intentionally
+		 * empty option value (set by a merchant to opt out of a page) and skip
+		 * page creation/relinking.
+		 *
+		 * Empty values can occur in two scenarios:
+		 *
+		 *  - A merchant cleared the page selector in WooCommerce settings on an
+		 *    already-installed site. In this case the empty value must be
+		 *    respected on subsequent calls (e.g. plugin updates, Status → Tools
+		 *    "Create default pages") to avoid clobbering their choice.
+		 *  - The option was just seeded with its default empty value during a
+		 *    fresh install, in which case the page should be created as before.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool   $respect_empty Whether to skip creation when the option exists but is empty.
+		 * @param string $option        The option name being checked.
+		 * @param string $slug          The slug that would have been used for the new page.
+		 */
+		$respect_empty = apply_filters( 'woocommerce_create_page_respect_empty_option', true, $option, $slug );
+
+		if ( $respect_empty ) {
+			return 0;
 		}
 	}
 

@@ -535,4 +535,155 @@ class WC_Admin_Functions_Test extends \WC_Unit_Test_Case {
 		$order_item = new WC_Order_Item_Product( $order_item_id );
 		$this->assertEquals( 4, $order_item->get_meta( '_reduced_stock', true ), 'Reduced stock meta should be updated to new quantity' );
 	}
+
+	/**
+	 * A unique page slug helper to keep wc_create_page() tests isolated.
+	 *
+	 * @param string $prefix Slug prefix.
+	 * @return string
+	 */
+	private function unique_page_slug( $prefix ) {
+		return $prefix . '-' . uniqid();
+	}
+
+	/**
+	 * When the option name has never been stored in the database,
+	 * wc_create_page() should create a page and persist its ID.
+	 *
+	 * Regression guard for RSMAPGJ-295 / woocommerce#35361.
+	 */
+	public function test_wc_create_page_creates_when_option_missing_from_db() {
+		$option_name = 'woocommerce_test_unset_page_id_' . uniqid();
+		delete_option( $option_name );
+
+		$slug    = $this->unique_page_slug( 'wc-test-unset' );
+		$page_id = wc_create_page( $slug, $option_name, 'Test Unset Page' );
+
+		$this->assertIsNumeric( $page_id );
+		$this->assertGreaterThan( 0, (int) $page_id );
+		$this->assertEquals( (int) $page_id, (int) get_option( $option_name ) );
+
+		wp_delete_post( (int) $page_id, true );
+		delete_option( $option_name );
+	}
+
+	/**
+	 * When the merchant cleared the page selector on an already-installed site
+	 * (option exists with an empty value and woocommerce_db_version is set),
+	 * wc_create_page() must respect the choice and NOT recreate the page.
+	 *
+	 * Regression guard for RSMAPGJ-295 / woocommerce#35361.
+	 */
+	public function test_wc_create_page_respects_explicit_empty_option_on_installed_site() {
+		$option_name = 'woocommerce_test_cleared_page_id_' . uniqid();
+		// Explicitly store an empty value, mirroring what saving the settings form does
+		// when the merchant clears the selector.
+		update_option( $option_name, '' );
+
+		// An installed site has a recorded db version.
+		$previous_db_version = get_option( 'woocommerce_db_version' );
+		update_option( 'woocommerce_db_version', WC()->version );
+
+		$slug   = $this->unique_page_slug( 'wc-test-cleared' );
+		$result = wc_create_page( $slug, $option_name, 'Should Not Be Created' );
+
+		$this->assertSame( 0, $result, 'wc_create_page() should return 0 when respecting an intentionally empty option.' );
+		$this->assertSame( '', get_option( $option_name ), 'The stored option value must remain empty after wc_create_page().' );
+
+		$found = get_page_by_path( $slug );
+		$this->assertNull( $found, 'No page should have been inserted for the cleared option.' );
+
+		// Cleanup.
+		delete_option( $option_name );
+		if ( false === $previous_db_version ) {
+			delete_option( 'woocommerce_db_version' );
+		} else {
+			update_option( 'woocommerce_db_version', $previous_db_version );
+		}
+	}
+
+	/**
+	 * During a fresh install create_options() seeds page-id options with an
+	 * empty default value before create_pages() runs. In that scenario
+	 * (woocommerce_db_version not yet recorded) wc_create_page() must still
+	 * create the page.
+	 *
+	 * Regression guard for RSMAPGJ-295 / woocommerce#35361.
+	 */
+	public function test_wc_create_page_creates_during_fresh_install_with_empty_default() {
+		$option_name = 'woocommerce_test_fresh_install_page_id_' . uniqid();
+		update_option( $option_name, '' );
+
+		$previous_db_version = get_option( 'woocommerce_db_version' );
+		delete_option( 'woocommerce_db_version' );
+
+		$slug    = $this->unique_page_slug( 'wc-test-fresh' );
+		$page_id = wc_create_page( $slug, $option_name, 'Fresh Install Page' );
+
+		$this->assertIsNumeric( $page_id );
+		$this->assertGreaterThan( 0, (int) $page_id, 'On a fresh install, an empty default value should not block page creation.' );
+		$this->assertEquals( (int) $page_id, (int) get_option( $option_name ) );
+
+		wp_delete_post( (int) $page_id, true );
+		delete_option( $option_name );
+		if ( false !== $previous_db_version ) {
+			update_option( 'woocommerce_db_version', $previous_db_version );
+		}
+	}
+
+	/**
+	 * The `woocommerce_create_page_respect_empty_option` filter must allow
+	 * callers to opt out and force page (re)creation even when the option is
+	 * explicitly empty on an installed site.
+	 */
+	public function test_wc_create_page_respect_empty_option_filter_can_be_overridden() {
+		$option_name = 'woocommerce_test_filter_override_page_id_' . uniqid();
+		update_option( $option_name, '' );
+
+		$previous_db_version = get_option( 'woocommerce_db_version' );
+		update_option( 'woocommerce_db_version', WC()->version );
+
+		$filter = static function () {
+			return false;
+		};
+		add_filter( 'woocommerce_create_page_respect_empty_option', $filter );
+
+		$slug    = $this->unique_page_slug( 'wc-test-filter-override' );
+		$page_id = wc_create_page( $slug, $option_name, 'Filter Override Page' );
+
+		remove_filter( 'woocommerce_create_page_respect_empty_option', $filter );
+
+		$this->assertGreaterThan( 0, (int) $page_id );
+		$this->assertEquals( (int) $page_id, (int) get_option( $option_name ) );
+
+		wp_delete_post( (int) $page_id, true );
+		delete_option( $option_name );
+		if ( false === $previous_db_version ) {
+			delete_option( 'woocommerce_db_version' );
+		} else {
+			update_option( 'woocommerce_db_version', $previous_db_version );
+		}
+	}
+
+	/**
+	 * Verifies the helper distinguishes fresh installs from established sites.
+	 */
+	public function test_wc_create_page_should_respect_empty_option_helper() {
+		$previous_db_version = get_option( 'woocommerce_db_version' );
+
+		delete_option( 'woocommerce_db_version' );
+		$this->assertFalse( wc_create_page_should_respect_empty_option( 'woocommerce_shop_page_id' ) );
+
+		update_option( 'woocommerce_db_version', WC()->version );
+		$this->assertTrue( wc_create_page_should_respect_empty_option( 'woocommerce_shop_page_id' ) );
+
+		// Empty option name should never be treated as intentional.
+		$this->assertFalse( wc_create_page_should_respect_empty_option( '' ) );
+
+		if ( false === $previous_db_version ) {
+			delete_option( 'woocommerce_db_version' );
+		} else {
+			update_option( 'woocommerce_db_version', $previous_db_version );
+		}
+	}
 }

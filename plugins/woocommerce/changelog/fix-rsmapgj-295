@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve an intentionally empty Shop Page (and other page-id options) when WC_Install::create_pages() is called on an already-installed site, so plugin updates and Status → Tools repairs no longer overwrite the merchant's choice.
