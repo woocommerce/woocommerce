@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Update Nepal's state/province list to reflect the current ISO 3166-2:NP administrative divisions (seven provinces) instead of the deprecated 14-zone system.
