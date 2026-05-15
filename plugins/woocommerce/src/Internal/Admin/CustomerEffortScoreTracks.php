@@ -129,6 +129,23 @@ class CustomerEffortScoreTracks {
 				3
 			);
 		}
+		// When HPOS is enabled, orders are edited on the wc-orders admin page
+		// rather than post.php, so transition_post_status is not fired. Hook
+		// into the order save action instead. The CES queue already dedupes by
+		// action name, so a legacy double-fire would be a no-op.
+		// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading $_GET only to scope hook registration; the action handler itself does not act on user input.
+		$current_page = isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : '';
+		if ( 'admin.php' === $pagenow && 'wc-orders' === $current_page ) {
+			add_action(
+				'woocommerce_process_shop_order_meta',
+				array(
+					$this,
+					'run_on_woocommerce_process_shop_order_meta',
+				),
+				10,
+				2
+			);
+		}
 		$this->onsubmit_label = __( 'Thank you for your feedback!', 'woocommerce' );
 	}
 
@@ -407,9 +424,31 @@ class CustomerEffortScoreTracks {
 	}
 
 	/**
-	 * Enqueue the CES survey trigger for an existing shop order.
+	 * Hook into the HPOS order save action. Fired by
+	 * Automattic\WooCommerce\Internal\Admin\Orders\Edit::handle_order_update
+	 * when an order is updated via the HPOS order edit screen.
+	 *
+	 * @param int       $order_id The order ID.
+	 * @param \WC_Order $order    The order object.
 	 */
-	private function enqueue_ces_survey_for_edited_shop_order() {
+	public function run_on_woocommerce_process_shop_order_meta( $order_id, $order = null ): void {
+		unset( $order_id, $order );
+		// On the HPOS order edit page, window.pagenow and window.adminpage are
+		// set to the screen ID "woocommerce_page_wc-orders", so target that
+		// page when displaying the survey.
+		$this->enqueue_ces_survey_for_edited_shop_order( 'woocommerce_page_wc-orders', 'woocommerce_page_wc-orders' );
+	}
+
+	/**
+	 * Enqueue the CES survey trigger for an existing shop order.
+	 *
+	 * @param string $pagenow   Value of window.pagenow that the survey should
+	 *                          be displayed on. Defaults to 'shop_order' (the
+	 *                          legacy, non-HPOS edit screen).
+	 * @param string $adminpage Value of window.adminpage that the survey
+	 *                          should be displayed on. Defaults to 'post-php'.
+	 */
+	private function enqueue_ces_survey_for_edited_shop_order( $pagenow = 'shop_order', $adminpage = 'post-php' ) {
 		if ( $this->has_been_shown( self::SHOP_ORDER_UPDATE_ACTION_NAME ) ) {
 			return;
 		}
@@ -430,8 +469,8 @@ class CustomerEffortScoreTracks {
 					'woocommerce'
 				),
 				'onsubmit_label' => $this->onsubmit_label,
-				'pagenow'        => 'shop_order',
-				'adminpage'      => 'post-php',
+				'pagenow'        => $pagenow,
+				'adminpage'      => $adminpage,
 				'props'          => array(
 					'order_count' => $this->get_shop_order_count(),
 				),

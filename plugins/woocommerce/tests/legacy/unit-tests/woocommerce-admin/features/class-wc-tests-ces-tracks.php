@@ -118,6 +118,113 @@ class WC_Admin_Tests_CES_Tracks extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Helper to set the HPOS order edit page context for a test.
+	 *
+	 * @param string|null $page Value to set for $_GET['page'], or null to
+	 *                          unset it.
+	 * @return array{pagenow:string|null,page:string|null} Previous values for
+	 *                          restoration in tearDown_hpos_context().
+	 */
+	private function setUp_hpos_context( $page = 'wc-orders' ) {
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test helper: temporarily faking $pagenow to simulate the HPOS order edit page.
+		$GLOBALS['pagenow'] = 'admin.php';
+		$previous           = array(
+			// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Reading $_GET in test helper to back up state.
+			'page' => isset( $_GET['page'] ) ? sanitize_text_field( wp_unslash( $_GET['page'] ) ) : null,
+		);
+		if ( null === $page ) {
+			unset( $_GET['page'] );
+		} else {
+			$_GET['page'] = $page;
+		}
+		return $previous;
+	}
+
+	/**
+	 * Restore $_GET['page'] to its pre-test value.
+	 *
+	 * @param array $previous The map returned by setUp_hpos_context().
+	 */
+	private function tearDown_hpos_context( $previous ) {
+		if ( null === $previous['page'] ) {
+			unset( $_GET['page'] );
+		} else {
+			$_GET['page'] = $previous['page'];
+		}
+		// phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Test helper: restoring $pagenow that this test temporarily modified.
+		unset( $GLOBALS['pagenow'] );
+	}
+
+	/**
+	 * Verify that the HPOS order save action enqueues the shop_order_update
+	 * survey. This guards against the regression where switching to HPOS
+	 * stopped firing the survey because it relied on transition_post_status,
+	 * which is never invoked on the HPOS order edit screen.
+	 */
+	public function test_shop_order_update_triggers_ces_on_hpos_save() {
+		$previous = $this->setUp_hpos_context( 'wc-orders' );
+		delete_option( CustomerEffortScoreTracks::CES_TRACKS_QUEUE_OPTION_NAME );
+
+		new CustomerEffortScoreTracks();
+
+		/**
+		 * Simulate the order save fired by HPOS Edit::handle_order_update.
+		 *
+		 * @since 10.9.0
+		 */
+		do_action( 'woocommerce_process_shop_order_meta', 123, null );
+
+		$queue_items = get_option( CustomerEffortScoreTracks::CES_TRACKS_QUEUE_OPTION_NAME, array() );
+
+		$this->tearDown_hpos_context( $previous );
+
+		$shop_order_items = array_values(
+			array_filter(
+				$queue_items,
+				function ( $item ) {
+					return CustomerEffortScoreTracks::SHOP_ORDER_UPDATE_ACTION_NAME === $item['action'];
+				}
+			)
+		);
+
+		$this->assertCount( 1, $shop_order_items );
+		$this->assertSame( 'woocommerce_page_wc-orders', $shop_order_items[0]['pagenow'] );
+		$this->assertSame( 'woocommerce_page_wc-orders', $shop_order_items[0]['adminpage'] );
+	}
+
+	/**
+	 * Verify that the HPOS-specific hook is only registered on the wc-orders
+	 * admin page, so saving an order via some other code path does not
+	 * accidentally enqueue the survey.
+	 */
+	public function test_shop_order_update_does_not_trigger_ces_outside_hpos_edit_page() {
+		$previous = $this->setUp_hpos_context( null );
+		delete_option( CustomerEffortScoreTracks::CES_TRACKS_QUEUE_OPTION_NAME );
+
+		new CustomerEffortScoreTracks();
+
+		/**
+		 * Simulate the order save fired outside the HPOS edit page.
+		 *
+		 * @since 10.9.0
+		 */
+		do_action( 'woocommerce_process_shop_order_meta', 123, null );
+
+		$queue_items = get_option( CustomerEffortScoreTracks::CES_TRACKS_QUEUE_OPTION_NAME, array() );
+
+		$this->tearDown_hpos_context( $previous );
+
+		$shop_order_items = array_filter(
+			$queue_items,
+			function ( $item ) {
+				return CustomerEffortScoreTracks::SHOP_ORDER_UPDATE_ACTION_NAME === $item['action'];
+			}
+		);
+
+		$this->assertCount( 0, $shop_order_items );
+	}
+
+	/**
 	 * Verify that it adds `settings_area` prop.
 	 */
 	public function test_settings_area_included_in_event_props() {

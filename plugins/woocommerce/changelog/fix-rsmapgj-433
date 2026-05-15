@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix CES `shop_order_update` feedback survey not appearing after updating an order when HPOS is enabled.
