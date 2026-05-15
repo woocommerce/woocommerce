@@ -11,6 +11,10 @@ use Automattic\WooCommerce\Internal\VariationGallery\Package;
  */
 class PackageTest extends \WC_Unit_Test_Case {
 
+	/**
+	 * Reset migration-related state between tests so action queue and
+	 * completion option don't leak across cases.
+	 */
 	public function tearDown(): void {
 		WC()->queue()->cancel_all(
 			'woocommerce_run_update_callback',
@@ -90,12 +94,24 @@ class PackageTest extends \WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * The action args expected for the migration callback.
+	 *
+	 * @return array<string, mixed>
+	 */
 	private function get_migration_action_args(): array {
 		return array(
 			'update_callback' => array( Migration::class, 'run' ),
 		);
 	}
 
+	/**
+	 * Stand-in action args for an unrelated DB update callback, used to
+	 * verify the migration scheduler doesn't confuse other pending actions
+	 * for its own.
+	 *
+	 * @return array<string, mixed>
+	 */
 	private function get_unrelated_update_action_args(): array {
 		return array(
 			'update_callback' => 'some_other_update_callback',

@@ -130,6 +130,9 @@ class MigrationTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Create a test attachment.
+	 *
+	 * @param string $title Attachment title.
+	 * @return int
 	 */
 	private function create_attachment( string $title ): int {
 		return wp_insert_attachment(
