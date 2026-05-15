@@ -50,7 +50,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 	<tbody class="wc-shipping-zone-rows wc-shipping-tables-tbody"></tbody>
 
 	<tfoot data-id="0" class="wc-shipping-zone-worldwide wc-shipping-zone-rows-tfoot">
-		<td width="1%" class="wc-shipping-zone-worldwide"></td>
+		<td style="width:1%" class="wc-shipping-zone-worldwide"></td>
 		<td class="wc-shipping-zone-name">
 			<?php esc_html_e( 'Rest of the world', 'woocommerce' ); ?>
 		</td>
@@ -99,7 +99,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 <script type="text/html" id="tmpl-wc-shipping-zone-row">
 	<tr data-id="{{ data.zone_id }}">
-		<td width="1%" class="wc-shipping-zone-sort"></td>
+		<td style="width:1%" class="wc-shipping-zone-sort"></td>
 		<td class="wc-shipping-zone-name">
 			{{ data.zone_name }}
 		</td>

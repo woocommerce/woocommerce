@@ -209,11 +209,17 @@ export const PaymentPromotionRow = ( {
 						</td>
 					);
 				}
+				// Use inline CSS for column width instead of the deprecated
+				// HTML `width` attribute on <td>.
+				const style =
+					column.width !== undefined
+						? { width: column.width }
+						: undefined;
 				return (
 					<td
 						key={ column.className }
 						className={ column.className }
-						width={ column.width }
+						style={ style }
 						dangerouslySetInnerHTML={
 							column.className.includes( 'sort' ) ||
 							column.className.includes( 'renewals' )

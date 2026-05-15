@@ -114,11 +114,11 @@ do_action( 'woocommerce_shipping_zone_after_methods_table', $zone );
 
 <script type="text/html" id="tmpl-wc-shipping-zone-method-row">
 	<tr data-id="{{ data.instance_id }}" data-enabled="{{ data.enabled }}">
-		<td width="1%" class="wc-shipping-zone-method-sort"></td>
+		<td style="width:1%" class="wc-shipping-zone-method-sort"></td>
 		<td class="wc-shipping-zone-method-title">
 			{{{ data.title }}}
 		</td>
-		<td width="1%" class="wc-shipping-zone-method-enabled"><a href="#">{{{ data.enabled_icon }}}</a></td>
+		<td style="width:1%" class="wc-shipping-zone-method-enabled"><a href="#">{{{ data.enabled_icon }}}</a></td>
 		<td class="wc-shipping-zone-method-description">
 			{{{ data.method_description }}}
 		</td>

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Replace deprecated HTML `width` attribute on `<td>` elements in admin shipping zone settings and the payments promotion row with inline CSS.
