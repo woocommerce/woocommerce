@@ -5,10 +5,13 @@
  * @package WooCommerce\Tests\Post_Data.
  */
 
+use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+
 /**
  * Class WC_Post_Data_Test
  */
 class WC_Post_Data_Test extends \WC_Unit_Test_Case {
+	use HPOSToggleTrait;
 
 	/**
 	 * @testdox coupon code should be always sanitized.
@@ -161,5 +164,201 @@ class WC_Post_Data_Test extends \WC_Unit_Test_Case {
 
 		remove_action( 'woocommerce_product_published', $callback );
 		$product->delete( true );
+	}
+
+	/**
+	 * Helper: create a CPT-based shop_order post bypassing the order data store.
+	 *
+	 * Avoids triggering the data store's own delete hooks or HPOS sync, so we can
+	 * exercise the WP-level `wp_trash_post` / `before_delete_post` / `trashed_post`
+	 * / `deleted_post` hook chain on a real shop_order post regardless of whether
+	 * HPOS is authoritative in the test environment.
+	 *
+	 * @return int Post ID of the created order.
+	 */
+	private function create_cpt_shop_order_post(): int {
+		return wp_insert_post(
+			array(
+				'post_type'   => 'shop_order',
+				'post_status' => 'wc-pending',
+				'post_title'  => 'CPT order for hook test',
+			)
+		);
+	}
+
+	/**
+	 * Switch the active order data store to the CPT one so `OrderUtil::is_order()`
+	 * resolves against `wp_posts.post_type` for these hook tests.
+	 *
+	 * Disables HPOS sync first to avoid the "orders out of sync" guard when toggling.
+	 *
+	 * @return void
+	 */
+	private function switch_to_cpt_order_store(): void {
+		// Bypass the "orders out of sync" guard in CustomOrdersTableController so we
+		// can switch the authoritative store regardless of any HPOS leftovers from
+		// other tests in this class (HPOS custom tables are not rolled back by
+		// WP_UnitTestCase's transactions).
+		add_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+		$this->disable_cot_sync();
+		$this->toggle_cot_authoritative( false );
+	}
+
+	/**
+	 * Restore HPOS as the authoritative store after a CPT-mode test.
+	 *
+	 * @return void
+	 */
+	private function restore_hpos_order_store(): void {
+		$this->toggle_cot_authoritative( true );
+		remove_filter( 'wc_allow_changing_orders_storage_while_sync_is_pending', '__return_true' );
+	}
+
+	/**
+	 * @testdox woocommerce_trash_order fires when a CPT-based order is trashed via wp_trash_post.
+	 */
+	public function test_wp_trash_post_fires_woocommerce_trash_order_for_cpt_order(): void {
+		$this->switch_to_cpt_order_store();
+
+		try {
+			$order_id = $this->create_cpt_shop_order_post();
+			$this->assertGreaterThan( 0, $order_id );
+
+			$before_trash_ids = array();
+			$trash_ids        = array();
+
+			$before_callback = static function ( $id ) use ( &$before_trash_ids ) {
+				$before_trash_ids[] = $id;
+			};
+			$after_callback  = static function ( $id ) use ( &$trash_ids ) {
+				$trash_ids[] = $id;
+			};
+
+			add_action( 'woocommerce_before_trash_order', $before_callback );
+			add_action( 'woocommerce_trash_order', $after_callback );
+
+			wp_trash_post( $order_id );
+
+			remove_action( 'woocommerce_before_trash_order', $before_callback );
+			remove_action( 'woocommerce_trash_order', $after_callback );
+
+			$this->assertSame( array( $order_id ), $before_trash_ids, 'woocommerce_before_trash_order should fire once for the trashed order.' );
+			$this->assertSame( array( $order_id ), $trash_ids, 'woocommerce_trash_order should fire once for the trashed order.' );
+		} finally {
+			$this->restore_hpos_order_store();
+		}
+	}
+
+	/**
+	 * @testdox woocommerce_delete_order fires when a CPT-based order is force-deleted via wp_delete_post.
+	 */
+	public function test_wp_delete_post_fires_woocommerce_delete_order_for_cpt_order(): void {
+		$this->switch_to_cpt_order_store();
+
+		try {
+			$order_id = $this->create_cpt_shop_order_post();
+			$this->assertGreaterThan( 0, $order_id );
+
+			$before_delete_ids = array();
+			$delete_ids        = array();
+
+			$before_callback = static function ( $id ) use ( &$before_delete_ids ) {
+				$before_delete_ids[] = $id;
+			};
+			$after_callback  = static function ( $id ) use ( &$delete_ids ) {
+				$delete_ids[] = $id;
+			};
+
+			add_action( 'woocommerce_before_delete_order', $before_callback );
+			add_action( 'woocommerce_delete_order', $after_callback );
+
+			wp_delete_post( $order_id, true );
+
+			remove_action( 'woocommerce_before_delete_order', $before_callback );
+			remove_action( 'woocommerce_delete_order', $after_callback );
+
+			$this->assertSame( array( $order_id ), $before_delete_ids, 'woocommerce_before_delete_order should fire once for the deleted order.' );
+			$this->assertSame( array( $order_id ), $delete_ids, 'woocommerce_delete_order should fire once for the deleted order.' );
+		} finally {
+			$this->restore_hpos_order_store();
+		}
+	}
+
+	/**
+	 * @testdox WP post hook chain does not fire CPT-order hooks when the data store has marked the order.
+	 */
+	public function test_wp_post_hooks_skip_firing_when_order_handled_by_data_store(): void {
+		$this->switch_to_cpt_order_store();
+		$order_id = $this->create_cpt_shop_order_post();
+		$this->assertGreaterThan( 0, $order_id );
+
+		$before_trash_ids = array();
+		$trash_ids        = array();
+		$before_delete    = array();
+		$delete_ids       = array();
+
+		$cb_bt = static function ( $id ) use ( &$before_trash_ids ) {
+			$before_trash_ids[] = $id;
+		};
+		$cb_t  = static function ( $id ) use ( &$trash_ids ) {
+			$trash_ids[] = $id;
+		};
+		$cb_bd = static function ( $id ) use ( &$before_delete ) {
+			$before_delete[] = $id;
+		};
+		$cb_d  = static function ( $id ) use ( &$delete_ids ) {
+			$delete_ids[] = $id;
+		};
+
+		add_action( 'woocommerce_before_trash_order', $cb_bt );
+		add_action( 'woocommerce_trash_order', $cb_t );
+		add_action( 'woocommerce_before_delete_order', $cb_bd );
+		add_action( 'woocommerce_delete_order', $cb_d );
+
+		WC_Post_Data::set_order_handled_by_data_store( $order_id, true );
+
+		try {
+			wp_trash_post( $order_id );
+			wp_delete_post( $order_id, true );
+		} finally {
+			WC_Post_Data::set_order_handled_by_data_store( $order_id, false );
+			$this->restore_hpos_order_store();
+		}
+
+		remove_action( 'woocommerce_before_trash_order', $cb_bt );
+		remove_action( 'woocommerce_trash_order', $cb_t );
+		remove_action( 'woocommerce_before_delete_order', $cb_bd );
+		remove_action( 'woocommerce_delete_order', $cb_d );
+
+		$this->assertSame( array(), $before_trash_ids, 'woocommerce_before_trash_order must not fire when the data store has marked the order.' );
+		$this->assertSame( array(), $trash_ids, 'woocommerce_trash_order must not fire when the data store has marked the order.' );
+		$this->assertSame( array(), $before_delete, 'woocommerce_before_delete_order must not fire when the data store has marked the order.' );
+		$this->assertSame( array(), $delete_ids, 'woocommerce_delete_order must not fire when the data store has marked the order.' );
+	}
+
+	/**
+	 * @testdox woocommerce_delete_order does not fire for non-order post types.
+	 */
+	public function test_wp_delete_post_does_not_fire_woocommerce_delete_order_for_non_orders(): void {
+		$post_id = wp_insert_post(
+			array(
+				'post_title'  => 'Generic post',
+				'post_type'   => 'post',
+				'post_status' => 'publish',
+			)
+		);
+
+		$delete_ids = array();
+		$callback   = static function ( $order_id ) use ( &$delete_ids ) {
+			$delete_ids[] = $order_id;
+		};
+
+		add_action( 'woocommerce_delete_order', $callback );
+
+		wp_delete_post( $post_id, true );
+
+		remove_action( 'woocommerce_delete_order', $callback );
+
+		$this->assertSame( array(), $delete_ids, 'woocommerce_delete_order should not fire for non-order post types.' );
 	}
 }

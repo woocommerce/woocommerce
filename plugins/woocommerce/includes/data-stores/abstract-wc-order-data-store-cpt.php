@@ -296,7 +296,12 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				do_action( 'woocommerce_before_delete_order', $id, $order );
 			}
 
-			wp_delete_post( $id );
+			WC_Post_Data::set_order_handled_by_data_store( $id );
+			try {
+				wp_delete_post( $id );
+			} finally {
+				WC_Post_Data::set_order_handled_by_data_store( $id, false );
+			}
 			$order->set_id( 0 );
 
 			if ( $do_filters ) {
@@ -322,7 +327,12 @@ abstract class Abstract_WC_Order_Data_Store_CPT extends WC_Data_Store_WP impleme
 				do_action( 'woocommerce_before_trash_order', $id, $order );
 			}
 
-			wp_trash_post( $id );
+			WC_Post_Data::set_order_handled_by_data_store( $id );
+			try {
+				wp_trash_post( $id );
+			} finally {
+				WC_Post_Data::set_order_handled_by_data_store( $id, false );
+			}
 			$order->set_status( OrderStatus::TRASH );
 
 			if ( $do_filters ) {

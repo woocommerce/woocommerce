@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fire `woocommerce_trash_order`, `woocommerce_before_trash_order`, `woocommerce_delete_order` and `woocommerce_before_delete_order` when CPT-based orders are trashed or deleted from the wp-admin posts UI.

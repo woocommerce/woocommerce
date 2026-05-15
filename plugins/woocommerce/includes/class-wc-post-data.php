@@ -32,6 +32,29 @@ class WC_Post_Data {
 	private static $editing_term = null;
 
 	/**
+	 * Order IDs whose delete/trash hooks are being fired by the order data store directly.
+	 *
+	 * Used to avoid double-firing `woocommerce_before_delete_order`, `woocommerce_delete_order`,
+	 * `woocommerce_before_trash_order` and `woocommerce_trash_order` from the WP-level
+	 * `wp_trash_post` / `before_delete_post` / `trashed_post` / `deleted_post` hook chain when
+	 * the data store is the one driving the deletion (and therefore firing those hooks itself).
+	 *
+	 * @var array<int,bool>
+	 */
+	private static $orders_handled_by_data_store = array();
+
+	/**
+	 * Order IDs currently being processed by `before_delete_order()`.
+	 *
+	 * Used to prevent the cleanup from running twice when `before_delete_order()` is invoked
+	 * both via `before_delete_post` and via `woocommerce_before_delete_order` for the same
+	 * order in a single delete operation.
+	 *
+	 * @var array<int,bool>
+	 */
+	private static $orders_currently_being_deleted = array();
+
+	/**
 	 * Hook in methods.
 	 *
 	 * @return void
@@ -62,8 +85,10 @@ class WC_Post_Data {
 		add_action( 'transition_post_status', array( __CLASS__, 'transition_post_status' ), 10, 3 );
 		add_action( 'delete_post', array( __CLASS__, 'delete_post_data' ) );
 		add_action( 'wp_trash_post', array( __CLASS__, 'trash_post' ) );
+		add_action( 'trashed_post', array( __CLASS__, 'trashed_order' ) );
 		add_action( 'untrashed_post', array( __CLASS__, 'untrash_post' ) );
 		add_action( 'before_delete_post', array( __CLASS__, 'before_delete_order' ) );
+		add_action( 'deleted_post', array( __CLASS__, 'deleted_order' ), 10, 2 );
 		add_action( 'woocommerce_before_delete_order', array( __CLASS__, 'before_delete_order' ) );
 
 		// Meta cache flushing.
@@ -487,6 +512,22 @@ class WC_Post_Data {
 		if ( in_array( $post_type, wc_get_order_types( 'order-count' ), true ) ) {
 			global $wpdb;
 
+			if ( ! self::is_order_handled_by_data_store( $id ) && OrderUtil::is_order( $id, wc_get_order_types() ) ) {
+				$order = wc_get_order( $id );
+
+				if ( $order instanceof WC_Order ) {
+					/**
+					 * Fires immediately before an order is trashed.
+					 *
+					 * @since 10.9.0
+					 *
+					 * @param int      $order_id ID of the order about to be trashed.
+					 * @param WC_Order $order    Instance of the order that is about to be trashed.
+					 */
+					do_action( 'woocommerce_before_trash_order', $id, $order );
+				}
+			}
+
 			$refunds = $wpdb->get_results( $wpdb->prepare( "SELECT ID FROM $wpdb->posts WHERE post_type = 'shop_order_refund' AND post_parent = %d", $id ) );
 
 			foreach ( $refunds as $refund ) {
@@ -503,6 +544,38 @@ class WC_Post_Data {
 		} elseif ( 'product_variation' === $post_type ) {
 			wc_get_container()->get( ProductAttributesLookupDataStore::class )->on_product_deleted( $id );
 		}
+	}
+
+	/**
+	 * Fire `woocommerce_trash_order` after an order has been trashed via WP post APIs.
+	 *
+	 * Hooked to WordPress `trashed_post` so the action fires for orders trashed from any
+	 * code path (admin posts list, bulk actions, single-order edit screen), not only from
+	 * the order data store's `delete()` method.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int $id Post ID.
+	 *
+	 * @return void
+	 */
+	public static function trashed_order( $id ) {
+		if ( ! $id || self::is_order_handled_by_data_store( $id ) ) {
+			return;
+		}
+
+		if ( ! OrderUtil::is_order( $id, wc_get_order_types() ) ) {
+			return;
+		}
+
+		/**
+		 * Fires immediately after an order is trashed.
+		 *
+		 * @since 2.7.0
+		 *
+		 * @param int $order_id ID of the order that has been trashed.
+		 */
+		do_action( 'woocommerce_trash_order', $id );
 	}
 
 	/**
@@ -577,9 +650,46 @@ class WC_Post_Data {
 	 * @return void
 	 */
 	public static function before_delete_order( $order_id ) {
-		if ( OrderUtil::is_order( $order_id, wc_get_order_types() ) ) {
+		if ( ! OrderUtil::is_order( $order_id, wc_get_order_types() ) ) {
+			return;
+		}
+
+		// Re-entry guard: this handler is registered against both `before_delete_post` and
+		// `woocommerce_before_delete_order`, so it can be invoked twice for the same order
+		// when one fires the other. Run the cleanup (and bridge action) at most once per
+		// delete by remembering which order IDs are currently being processed.
+		if ( isset( self::$orders_currently_being_deleted[ $order_id ] ) ) {
+			return;
+		}
+
+		self::$orders_currently_being_deleted[ $order_id ] = true;
+
+		try {
 			// Clean up user.
 			$order = wc_get_order( $order_id );
+
+			// If a CPT-based order is being permanently deleted via the WP post APIs
+			// (e.g. from the admin posts list or "empty trash"), bridge the WP-level
+			// `before_delete_post` action into `woocommerce_before_delete_order` so
+			// integrations can subscribe to the WooCommerce action regardless of how
+			// the order is being deleted. The order data store fires the action itself
+			// in its delete() flow and marks the order via set_order_handled_by_data_store(),
+			// so we skip the bridge in that case to avoid double-firing.
+			if (
+				$order instanceof WC_Order
+				&& 'before_delete_post' === current_action()
+				&& ! self::is_order_handled_by_data_store( $order_id )
+			) {
+				/**
+				 * Fires immediately before an order is deleted from the database.
+				 *
+				 * @since 8.0.0
+				 *
+				 * @param int      $order_id ID of the order about to be deleted.
+				 * @param WC_Order $order    Instance of the order that is about to be deleted.
+				 */
+				do_action( 'woocommerce_before_delete_order', $order_id, $order );
+			}
 
 			// Check for `get_customer_id`, since this may be e.g. a refund order (which doesn't implement it).
 			$customer_id = is_callable( array( $order, 'get_customer_id' ) ) ? $order->get_customer_id() : 0;
@@ -602,7 +712,85 @@ class WC_Post_Data {
 			// Clean up items.
 			self::delete_order_items( $order_id );
 			self::delete_order_downloadable_permissions( $order_id );
+		} finally {
+			unset( self::$orders_currently_being_deleted[ $order_id ] );
 		}
+	}
+
+	/**
+	 * Fire `woocommerce_delete_order` after an order has been deleted via WP post APIs.
+	 *
+	 * Hooked to WordPress `deleted_post` so the action fires for orders deleted from any
+	 * code path (admin posts list, bulk actions, "empty trash"), not only from the order
+	 * data store's `delete()` method.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int          $id   Post ID.
+	 * @param WP_Post|null $post Post object, when available.
+	 *
+	 * @return void
+	 */
+	public static function deleted_order( $id, $post = null ) {
+		if ( ! $id || self::is_order_handled_by_data_store( $id ) ) {
+			return;
+		}
+
+		$post_type = $post instanceof WP_Post ? $post->post_type : '';
+
+		if ( '' === $post_type || ! in_array( $post_type, wc_get_order_types( 'order-count' ), true ) ) {
+			return;
+		}
+
+		/**
+		 * Fires immediately after an order is deleted.
+		 *
+		 * @since 2.7.0
+		 *
+		 * @param int $order_id ID of the order that has been deleted.
+		 */
+		do_action( 'woocommerce_delete_order', $id );
+	}
+
+	/**
+	 * Mark an order ID as currently being handled by the order data store's delete flow.
+	 *
+	 * The data store fires the `woocommerce_before_delete_order`, `woocommerce_delete_order`,
+	 * `woocommerce_before_trash_order` and `woocommerce_trash_order` actions itself; this
+	 * flag prevents the WP-level `wp_trash_post` / `before_delete_post` / `trashed_post` /
+	 * `deleted_post` listeners in this class from firing the same actions a second time.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int  $order_id Order ID.
+	 * @param bool $handled  Whether the data store is handling the order.
+	 *
+	 * @return void
+	 */
+	public static function set_order_handled_by_data_store( $order_id, $handled = true ) {
+		$order_id = (int) $order_id;
+		if ( $order_id <= 0 ) {
+			return;
+		}
+
+		if ( $handled ) {
+			self::$orders_handled_by_data_store[ $order_id ] = true;
+		} else {
+			unset( self::$orders_handled_by_data_store[ $order_id ] );
+		}
+	}
+
+	/**
+	 * Check whether an order ID is currently being handled by the order data store's delete flow.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int $order_id Order ID.
+	 *
+	 * @return bool
+	 */
+	public static function is_order_handled_by_data_store( $order_id ) {
+		return ! empty( self::$orders_handled_by_data_store[ (int) $order_id ] );
 	}
 
 	/**
