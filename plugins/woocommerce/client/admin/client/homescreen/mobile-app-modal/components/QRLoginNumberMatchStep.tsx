@@ -33,6 +33,11 @@ type QRLoginNumberMatchStepProps = {
 	 * string is the explicit cancel sentinel from the "It wasn't me" link.
 	 */
 	onChooseNumber: ( choice: string ) => Promise< void > | void;
+	/**
+	 * Optional error surfaced after an approval request fails without a state
+	 * transition.
+	 */
+	errorMessage?: React.ReactNode | null;
 };
 
 /**
@@ -95,6 +100,7 @@ export const QRLoginNumberMatchStep = ( {
 	deviceInfo,
 	challengeExpiresAt,
 	onChooseNumber,
+	errorMessage = null,
 }: QRLoginNumberMatchStepProps ) => {
 	const [ inFlight, setInFlight ] = useState( false );
 	// Tracks which choice is currently being submitted so we can render the
@@ -226,6 +232,12 @@ export const QRLoginNumberMatchStep = ( {
 							secondsRemaining
 					  ) }
 			</p>
+
+			{ errorMessage && (
+				<p className="woocommerce-qr-direct-login__error" role="alert">
+					{ errorMessage }
+				</p>
+			) }
 
 			<div className="woocommerce-qr-direct-login__match-cancel-row">
 				<p className="woocommerce-qr-direct-login__match-cancel-text">

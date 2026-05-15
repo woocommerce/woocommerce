@@ -626,4 +626,43 @@ describe( 'useQRLoginToken', () => {
 
 		expect( result.current.state ).toBe( QRLoginTokenStates.REJECTED );
 	} );
+
+	it( 'chooseNumber keeps the number-match step visible and surfaces non-terminal approval errors', async () => {
+		mockApiFetch
+			.mockResolvedValueOnce( buildResponse() )
+			.mockResolvedValueOnce( {
+				status: 'scanned',
+				numbers: [ '317', '042', '589' ],
+				device: {},
+				expires_at: NOW_SECONDS + 90,
+			} );
+
+		const { result } = renderHook( () => useQRLoginToken() );
+
+		await act( async () => {
+			await result.current.fetchToken();
+		} );
+		await act( async () => {
+			jest.advanceTimersByTime( 2600 );
+			await Promise.resolve();
+		} );
+
+		mockApiFetch.mockRejectedValueOnce( {
+			code: 'qr_login_approval_in_progress',
+			message: 'Approval is already in progress.',
+			data: { status: 409 },
+		} );
+
+		await act( async () => {
+			await result.current.chooseNumber( '042' );
+		} );
+
+		expect( result.current.state ).toBe( QRLoginTokenStates.SCANNED );
+		expect( result.current.errorCode ).toBe(
+			'qr_login_approval_in_progress'
+		);
+		expect( result.current.errorMessage ).toBe(
+			'Approval is already in progress.'
+		);
+	} );
 } );
