@@ -216,7 +216,7 @@ export const QRLoginNumberMatchStep = ( {
 
 			<p
 				className="woocommerce-qr-direct-login__match-countdown"
-				aria-live="polite"
+				aria-live={ expired ? 'polite' : 'off' }
 			>
 				{ expired
 					? __( 'This sign-in attempt has expired.', 'woocommerce' )
