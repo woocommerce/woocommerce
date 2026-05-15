@@ -25,7 +25,11 @@ import {
 	LayoutOptions,
 	CoreCollectionNames,
 } from '../../types';
-import { setQueryAttribute, getDefaultSettings } from '../../utils';
+import {
+	setQueryAttribute,
+	getDefaultSettings,
+	getLiftedControlQueryToPreserve,
+} from '../../utils';
 import ColumnsControl from './columns-control';
 import {
 	InheritQueryControl,
@@ -250,9 +254,26 @@ const ProductCollectionInspectorControls = (
 				<ToolsPanel
 					label={ __( 'Filters', 'woocommerce' ) }
 					resetAll={ ( resetAllFilters: ( () => void )[] ) => {
+						// Capture values managed by lifted (collection-specific)
+						// controls at the top of the inspector before running
+						// the filter resets. These controls live outside the
+						// Filters panel and must not be cleared by "Reset All".
+						const preservedQuery = getLiftedControlQueryToPreserve(
+							collection,
+							query
+						);
+
 						resetAllFilters.forEach( ( resetFilter ) => {
 							resetFilter();
 						} );
+
+						// Restore preserved lifted-control values if any reset
+						// callback cleared them (this can happen on initial
+						// insert before the block's `hideControls` attribute
+						// has fully propagated through the editor state).
+						if ( preservedQuery ) {
+							setQueryAttributeBind( preservedQuery );
+						}
 					} }
 					className="wc-block-editor-product-collection-inspector-toolspanel__filters"
 				>

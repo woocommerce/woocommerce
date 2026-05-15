@@ -509,6 +509,65 @@ export const getDefaultSettings = (
 	dimensions: DEFAULT_ATTRIBUTES.dimensions,
 } );
 
+/**
+ * For collections that lift one of the filter controls to the top of the
+ * inspector (e.g. Hand-Picked Products lifts the product picker, and the
+ * Products by Category/Tag/Brand collections lift their respective taxonomy
+ * picker), the Filters panel's "Reset All" button must preserve the value of
+ * the lifted control. The lifted control is not rendered inside the Filters
+ * panel — resetting it would unexpectedly clear the user's collection-defining
+ * selection.
+ *
+ * This helper returns the partial query that should be re-applied after the
+ * Filters panel's `resetAll` runs, so the lifted control's value is restored.
+ *
+ * @param collection The collection variation name.
+ * @param query      The current query attributes (captured before reset).
+ * @return A partial query, or `null` if nothing needs to be preserved.
+ */
+export const getLiftedControlQueryToPreserve = (
+	collection: string | undefined,
+	query: ProductCollectionQuery
+): Partial< ProductCollectionQuery > | null => {
+	if ( ! collection ) {
+		return null;
+	}
+
+	const preserved: Partial< ProductCollectionQuery > = {};
+
+	if ( collection === CoreCollectionNames.HAND_PICKED ) {
+		const ids = query.woocommerceHandPickedProducts;
+		if ( Array.isArray( ids ) && ids.length > 0 ) {
+			preserved.woocommerceHandPickedProducts = ids;
+		}
+	}
+
+	const taxonomySlug = ( () => {
+		if ( collection === CoreCollectionNames.BY_CATEGORY ) {
+			return 'product_cat';
+		}
+		if ( collection === CoreCollectionNames.BY_TAG ) {
+			return 'product_tag';
+		}
+		if ( collection === CoreCollectionNames.BY_BRAND ) {
+			return 'product_brand';
+		}
+		return null;
+	} )();
+
+	if ( taxonomySlug ) {
+		const termIds = query.taxQuery?.[ taxonomySlug ];
+		if ( Array.isArray( termIds ) && termIds.length > 0 ) {
+			preserved.taxQuery = {
+				...( query.taxQuery || {} ),
+				[ taxonomySlug ]: termIds,
+			};
+		}
+	}
+
+	return Object.keys( preserved ).length > 0 ? preserved : null;
+};
+
 export const getDefaultProductCollection = () =>
 	createBlock(
 		blockJson.name,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Collection: prevent the Filters panel "Reset All" from clearing the lifted collection-specific control (Hand-Picked products, By Category/Tag/Brand taxonomy) on initial block insert.
