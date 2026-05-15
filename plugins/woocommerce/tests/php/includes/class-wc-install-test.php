@@ -192,10 +192,10 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 	 */
 	public function test_is_new_install(): void {
 		// Determining if we are in a new install is based on the following three factors.
-		$version       = null;
-		$shop_id       = null;
-		$post_count    = 0;
-		$counted_posts = false;
+		$version        = null;
+		$shop_id        = null;
+		$product_exists = false;
+		$queried_posts  = false;
 
 		$supply_version = function () use ( &$version ) {
 			return $version;
@@ -205,22 +205,39 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 			return $shop_id;
 		};
 
-		$supply_post_count = function () use ( &$post_count ) {
-			$counted_posts = true;
-			return $post_count;
+		// Short-circuit the products existence check used by is_new_install().
+		// is_new_install() runs get_posts( array( 'post_type' => 'product', ... ) ).
+		// Returning an array from posts_pre_query bypasses the actual query while
+		// letting us simulate the "no products" and "one or more products" states.
+		$supply_product_existence = function ( $posts, $query ) use ( &$product_exists, &$queried_posts ) {
+			if ( ! isset( $query->query_vars['post_type'] ) || 'product' !== $query->query_vars['post_type'] ) {
+				return $posts;
+			}
+			$queried_posts = true;
+			return $product_exists ? array( 1 ) : array();
+		};
+
+		// Fail loudly if anything attempts the heavyweight wp_count_posts() path
+		// for products from within is_new_install().
+		$forbid_wp_count_posts = function ( $counts, $type ) {
+			if ( 'product' === $type ) {
+				$this->fail( 'is_new_install() must not call wp_count_posts() for the product post type.' );
+			}
+			return $counts;
 		};
 
 		// Make it straightforward to test different values for our key variables.
 		add_filter( 'option_woocommerce_version', $supply_version );
 		add_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
-		add_filter( 'wp_count_posts', $supply_post_count );
+		add_filter( 'posts_pre_query', $supply_product_existence, 10, 2 );
+		add_filter( 'wp_count_posts', $forbid_wp_count_posts, 10, 2 );
 
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null.' );
 
 		$shop_id = 1;
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null (even if the shop ID is set).' );
 
-		$post_count = 1;
+		$product_exists = true;
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is null (even if the shop ID is set and we have one or more products).' );
 
 		$version = '9.0.0';
@@ -229,19 +246,20 @@ class WC_Install_Test extends \WC_Unit_Test_Case {
 		$shop_id = null;
 		$this->assertFalse( WC_Install::is_new_install(), 'We are not in a new install if the WC version is set and we have one or more products (even if the shop ID is not set).' );
 
-		$post_count = 0;
+		$product_exists = false;
 		$this->assertTrue( WC_Install::is_new_install(), 'We are in a new install if the WC version is set but the shop ID is not set and we do not have any products.' );
 
-		$counted_posts = false;
+		$queried_posts = false;
 		$version       = '9.0.0';
 		$shop_id       = 10;
 		WC_Install::is_new_install();
-		$this->assertFalse( $counted_posts, 'For established stores (version and shop ID both set), we do not need to count the number of existing products.' );
+		$this->assertFalse( $queried_posts, 'For established stores (version and shop ID both set), we do not need to query for existing products.' );
 
 		// Cleanup.
-		remove_filter( 'option_woocommerce_db_version', $supply_version );
+		remove_filter( 'option_woocommerce_version', $supply_version );
 		remove_filter( 'woocommerce_get_shop_page_id', $supply_shop_id );
-		remove_filter( 'wp_count_posts', $supply_post_count );
+		remove_filter( 'posts_pre_query', $supply_product_existence, 10 );
+		remove_filter( 'wp_count_posts', $forbid_wp_count_posts, 10 );
 	}
 
 	/**

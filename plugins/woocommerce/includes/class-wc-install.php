@@ -825,11 +825,31 @@ class WC_Install {
 	 * @return boolean
 	 */
 	public static function is_new_install() {
-		return is_null( get_option( 'woocommerce_version', null ) )
-			|| (
-				-1 === wc_get_page_id( 'shop' )
-				&& 0 === array_sum( (array) wp_count_posts( 'product' ) )
-			);
+		if ( is_null( get_option( 'woocommerce_version', null ) ) ) {
+			return true;
+		}
+
+		if ( -1 !== wc_get_page_id( 'shop' ) ) {
+			return false;
+		}
+
+		// Only check whether any products exist; we do not need a full count grouped
+		// by post status. On stores with very large catalogs, wp_count_posts() can be
+		// expensive and would otherwise run on every admin page load via the callers
+		// of this method (e.g. WC_Admin_Notices::init()).
+		$product_ids = get_posts(
+			array(
+				'post_type'        => 'product',
+				'post_status'      => 'any',
+				'posts_per_page'   => 1,
+				'fields'           => 'ids',
+				'no_found_rows'    => true,
+				'cache_results'    => false,
+				'suppress_filters' => false,
+			)
+		);
+
+		return empty( $product_ids );
 	}
 
 	/**

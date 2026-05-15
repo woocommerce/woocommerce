@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Skip the per-status product count in WC_Install::is_new_install(); use a lightweight existence check so admin page loads are not slowed down on stores with large product catalogs.
