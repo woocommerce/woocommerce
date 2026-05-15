@@ -41,7 +41,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 					}
 
 					if ( ! $found_method && $item->get_method_id() ) {
-						echo '<option value="' . esc_attr( $item->get_method_id() ) . '" selected="selected">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
+						echo '<option value="' . esc_attr( $item->get_method_id() ) . '" selected>' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
 					} else {
 						echo '<option value="other">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
 					}

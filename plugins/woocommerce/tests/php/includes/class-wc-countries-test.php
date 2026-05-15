@@ -43,4 +43,45 @@ class WC_Countries_Test extends \WC_Unit_Test_Case {
 			),
 		);
 	}
+
+	/**
+	 * @testdox Should emit the canonical boolean `selected` attribute for the selected country option.
+	 */
+	public function test_country_dropdown_options_emits_boolean_selected_attribute(): void {
+		ob_start();
+		wc()->countries->country_dropdown_options( 'GB', '*' );
+		$output = ob_get_clean();
+
+		$this->assertStringNotContainsString(
+			'selected="selected"',
+			$output,
+			'Country dropdown options must not emit the non-boolean `selected="selected"` form.'
+		);
+		$this->assertMatchesRegularExpression(
+			'/<option selected value="GB">/',
+			$output,
+			'The selected country option should use the boolean `selected` attribute form.'
+		);
+	}
+
+	/**
+	 * @testdox Should emit the canonical boolean `selected` attribute for the selected state option.
+	 */
+	public function test_country_dropdown_options_emits_boolean_selected_for_state_option(): void {
+		// Use a country that has states defined; US is guaranteed by core defaults.
+		ob_start();
+		wc()->countries->country_dropdown_options( 'US', 'CA' );
+		$output = ob_get_clean();
+
+		$this->assertStringNotContainsString(
+			'selected="selected"',
+			$output,
+			'Country dropdown state options must not emit the non-boolean `selected="selected"` form.'
+		);
+		$this->assertMatchesRegularExpression(
+			'/<option value="US:CA" selected>/',
+			$output,
+			'The selected state option should use the boolean `selected` attribute form.'
+		);
+	}
 }

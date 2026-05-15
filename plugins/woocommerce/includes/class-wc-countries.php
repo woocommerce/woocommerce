@@ -565,7 +565,7 @@ class WC_Countries {
 						echo '<option value="' . esc_attr( $key ) . ':' . esc_attr( $state_key ) . '"';
 
 						if ( $selected_country === $key && $selected_state === $state_key ) {
-							echo ' selected="selected"';
+							echo ' selected';
 						}
 
 						echo '>' . esc_html( $value ) . ' &mdash; ' . ( $escape ? esc_html( $state_value ) : $state_value ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
@@ -575,7 +575,7 @@ class WC_Countries {
 				} else {
 					echo '<option';
 					if ( $selected_country === $key && '*' === $selected_state ) {
-						echo ' selected="selected"';
+						echo ' selected';
 					}
 					echo ' value="' . esc_attr( $key ) . '">' . ( $escape ? esc_html( $value ) : $value ) . '</option>'; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 				}

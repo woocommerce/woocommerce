@@ -734,7 +734,7 @@ if ( ! class_exists( 'WC_Admin_Settings', false ) ) :
 									>
 									<option value=""></option>
 									<?php if ( ! is_null( $page ) ) { ?>
-										<option value="<?php echo esc_attr( $option_value ); ?>" selected="selected">
+										<option value="<?php echo esc_attr( $option_value ); ?>" selected>
 										<?php echo wp_strip_all_tags( $option_display_name ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 										</option>
 									<?php } ?>

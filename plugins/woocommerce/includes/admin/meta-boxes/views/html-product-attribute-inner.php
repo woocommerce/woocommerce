@@ -67,7 +67,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								 * @param string  $name Name of selected term.
 								 * @param array   $term The selected term object.
 								 */
-								echo '<option value="' . esc_attr( $selected_term->term_id ) . '" selected="selected">' . esc_html( apply_filters( 'woocommerce_product_attribute_term_name', $selected_term->name, $selected_term ) ) . '</option>';
+								echo '<option value="' . esc_attr( $selected_term->term_id ) . '" selected>' . esc_html( apply_filters( 'woocommerce_product_attribute_term_name', $selected_term->name, $selected_term ) ) . '</option>';
 							}
 						}
 						?>

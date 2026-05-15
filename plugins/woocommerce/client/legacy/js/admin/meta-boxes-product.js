@@ -796,7 +796,7 @@ jQuery( function ( $ ) {
 									.append(
 										'<option value="' +
 											term.term_id +
-											'" selected="selected">' +
+											'" selected>' +
 											term.name +
 											'</option>'
 									);

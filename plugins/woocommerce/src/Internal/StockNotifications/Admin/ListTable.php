@@ -478,7 +478,7 @@ class ListTable extends \WP_List_Table {
 		?>
 		<select class="wc-product-search" name="customer_stock_notifications_product_filter" data-placeholder="<?php esc_attr_e( 'Select product&hellip;', 'woocommerce' ); ?>" data-allow_clear="true" id="customer_stock_notifications_product_filter">
 			<?php if ( $product_string && $product_id ) { ?>
-				<option value="<?php echo esc_attr( $product_id ); ?>" selected="selected"><?php echo wp_kses_post( htmlspecialchars( $product_string, ENT_COMPAT ) ); ?></option>
+				<option value="<?php echo esc_attr( $product_id ); ?>" selected><?php echo wp_kses_post( htmlspecialchars( $product_string, ENT_COMPAT ) ); ?></option>
 			<?php } ?>
 		</select>
 		<?php
@@ -510,7 +510,7 @@ class ListTable extends \WP_List_Table {
 		?>
 		<select class="wc-customer-search" name="customer_stock_notifications_customer_filter" data-placeholder="<?php esc_attr_e( 'Select customer&hellip;', 'woocommerce' ); ?>" data-allow_clear="true" id="customer_stock_notifications_customer_filter">
 			<?php if ( $user_string && $user_id ) { ?>
-				<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo wp_kses_post( htmlspecialchars( $user_string, ENT_COMPAT ) ); ?></option>
+				<option value="<?php echo esc_attr( $user_id ); ?>" selected><?php echo wp_kses_post( htmlspecialchars( $user_string, ENT_COMPAT ) ); ?></option>
 			<?php } ?>
 		</select>
 		<?php

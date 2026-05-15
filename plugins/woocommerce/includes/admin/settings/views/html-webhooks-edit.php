@@ -153,7 +153,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 								<?php esc_html_e( 'Legacy API v3 (deprecated)', 'woocommerce' ); ?>
 							</option>
 						<?php elseif ( ! in_array( $webhook->get_api_version(), wc_get_webhook_rest_api_versions(), true ) ) : ?>
-							<option value="<?php echo esc_attr( $webhook->get_api_version() ); ?>" selected="selected">
+							<option value="<?php echo esc_attr( $webhook->get_api_version() ); ?>" selected>
 								<?php
 									/* translators: %s: unsupported api version identifier e.g. legacy_v3 */
 									echo esc_html( sprintf( __( '%s (unsupported)', 'woocommerce' ), $webhook->get_api_version() ) );

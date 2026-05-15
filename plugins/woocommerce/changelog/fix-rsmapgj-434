@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Emit the canonical boolean `selected` attribute on hardcoded `<option>` markup rendered by WooCommerce admin dropdowns instead of the redundant `selected="selected"` form.

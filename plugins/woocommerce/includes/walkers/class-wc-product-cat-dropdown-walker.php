@@ -60,7 +60,7 @@ class WC_Product_Cat_Dropdown_Walker extends Walker {
 		$output  .= "\t<option class=\"level-$depth\" value=\"" . esc_attr( $value ) . '"';
 
 		if ( $value === $args['selected'] || ( is_array( $args['selected'] ) && in_array( $value, $args['selected'], true ) ) ) {
-			$output .= ' selected="selected"';
+			$output .= ' selected';
 		}
 
 		$output .= '>';

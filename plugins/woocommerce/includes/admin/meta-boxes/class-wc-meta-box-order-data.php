@@ -407,7 +407,7 @@ class WC_Meta_Box_Order_Data {
 								 * @param array @user_info An array containing one item with the name and email of the user currently selected as the customer for the order.
 								 */
 								?>
-								<option value="<?php echo esc_attr( $user_id ); ?>" selected="selected"><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $user_string ) ) ) ) ) ); ?></option>
+								<option value="<?php echo esc_attr( $user_id ); ?>" selected><?php echo esc_html( htmlspecialchars( wp_kses_post( current( apply_filters( 'woocommerce_json_search_found_customers', array( $user_string ) ) ) ) ) ); ?></option>
 								<?php // phpcs:enable WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 							</select>
 							<!--/email_off-->
@@ -530,7 +530,7 @@ class WC_Meta_Box_Order_Data {
 									}
 
 									if ( ! $found_method && ! empty( $payment_method ) ) {
-										echo '<option value="' . esc_attr( $payment_method ) . '" selected="selected">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
+										echo '<option value="' . esc_attr( $payment_method ) . '" selected>' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
 									} else {
 										echo '<option value="other">' . esc_html__( 'Other', 'woocommerce' ) . '</option>';
 									}
