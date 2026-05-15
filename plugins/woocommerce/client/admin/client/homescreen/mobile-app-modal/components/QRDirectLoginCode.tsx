@@ -57,7 +57,7 @@ export const QRDirectLoginCode = ( {
 	onDone,
 	onConsumed,
 	suppressInlinePanels = false,
-}: QRDirectLoginCodeProps = {} ) => {
+}: QRDirectLoginCodeProps ) => {
 	// Tracks whether _displayed has already fired for this mount so that
 	// subsequent successful refreshes (which re-enter the READY state) only
 	// emit _refreshed and don't over-count first-displays in the funnel.
