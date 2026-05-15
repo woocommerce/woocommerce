@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Apply WooCommerce button styles to bare `<button>` elements injected via WooCommerce hooks on Twenty Twenty-Two, so plugin- or theme-injected unclassed buttons match other Woo CTAs.

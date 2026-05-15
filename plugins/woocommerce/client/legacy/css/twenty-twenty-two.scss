@@ -96,7 +96,9 @@ $tt2-gray: #f7f7f7;
 	button[name="add-to-cart"],
 	input[name="submit"],
 	button.single_add_to_cart_button,
-	button[type="submit"]:not(.wp-block-search__button) {
+	button[type="submit"]:not(.wp-block-search__button),
+	button:not([class]),
+	button[class=""] {
 		display: inline-block;
 		text-align: center;
 		word-break: break-word;
