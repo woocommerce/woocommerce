@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix Out of Stock count in the WooCommerce Status dashboard widget so it includes products whose stock status was manually set to out of stock with manage stock disabled.

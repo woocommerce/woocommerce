@@ -377,7 +377,7 @@ if ( ! class_exists( 'WC_Admin_Dashboard', false ) ) :
 							"SELECT COUNT( product_id )
 							FROM {$wpdb->wc_product_meta_lookup} AS lookup
 							INNER JOIN {$wpdb->posts} as posts ON lookup.product_id = posts.ID
-							WHERE stock_quantity <= %d
+							WHERE ( stock_status = 'outofstock' OR stock_quantity <= %d )
 							AND posts.post_status = 'publish'",
 							$nostock
 						)
