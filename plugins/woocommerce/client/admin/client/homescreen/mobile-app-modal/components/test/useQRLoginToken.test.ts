@@ -104,6 +104,11 @@ describe( 'useQRLoginToken', () => {
 			path: '/wc-admin/mobile-app/qr-login-token',
 			method: 'POST',
 		} );
+		expect( mockApiFetch ).toHaveBeenCalledWith( {
+			path: '/wc-admin/mobile-app/qr-login-status',
+			method: 'POST',
+			data: { token: 'abc' },
+		} );
 		expect( result.current.state ).toBe( QRLoginTokenStates.READY );
 		expect( result.current.qrUrl ).toBe( response.qr_url );
 		expect( result.current.errorMessage ).toBeNull();

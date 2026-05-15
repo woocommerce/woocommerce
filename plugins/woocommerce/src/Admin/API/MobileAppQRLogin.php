@@ -180,7 +180,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			'/' . $this->rest_base . '/qr-login-status',
 			array(
 				array(
-					'methods'             => \WP_REST_Server::READABLE,
+					'methods'             => \WP_REST_Server::CREATABLE,
 					'callback'            => array( $this, 'get_status' ),
 					'permission_callback' => array( $this, 'get_items_permissions_check' ),
 					'args'                => array(

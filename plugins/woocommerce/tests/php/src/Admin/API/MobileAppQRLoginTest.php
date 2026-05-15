@@ -376,13 +376,13 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Issue a GET to the status endpoint.
+	 * Issue a POST to the status endpoint.
 	 *
 	 * @param string|null $token Token to query. Null omits the parameter.
 	 * @return \WP_REST_Response
 	 */
 	private function dispatch_status( ?string $token ): \WP_REST_Response {
-		$request = new WP_REST_Request( 'GET', self::STATUS_ENDPOINT );
+		$request = new WP_REST_Request( 'POST', self::STATUS_ENDPOINT );
 		if ( null !== $token ) {
 			$request->set_param( 'token', $token );
 		}

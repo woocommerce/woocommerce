@@ -197,10 +197,9 @@ export const useQRLoginToken = ( {
 
 		try {
 			const response = await apiFetch< QRLoginStatusResponse >( {
-				path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-status?token=${ encodeURIComponent(
-					token
-				) }`,
-				method: 'GET',
+				path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-status`,
+				method: 'POST',
+				data: { token },
 			} );
 
 			if ( ! isMountedRef.current ) {
