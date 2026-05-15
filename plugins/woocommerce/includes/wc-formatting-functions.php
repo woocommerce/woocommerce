@@ -280,6 +280,11 @@ function wc_format_refund_total( $amount ) {
  *
  * This function does not remove thousands - this should be done before passing a value to the function.
  *
+ * When $dp is false and a float is supplied, the result is sprintf'd at the internal rounding precision
+ * and trailing zeros are trimmed. Since 10.9.0, the trim no longer reduces a float to fewer decimals than
+ * `wc_get_price_decimals()` unless the caller explicitly requests `$trim_zeros = true`. This avoids `3.70`
+ * being stored as `3.7` once `woocommerce_internal_rounding_precision` is lowered to match the price decimals.
+ *
  * @param  float|string $number     Expects either a float or a string with a decimal separator only (no thousands).
  * @param  mixed        $dp number  Number of decimal points to use, blank to use woocommerce_price_num_decimals, or false to avoid all rounding.
  * @param  bool         $trim_zeros From end of string.
@@ -303,18 +308,40 @@ function wc_format_decimal( $number, $dp = false, $trim_zeros = false ) {
 		$number = preg_replace( '/\.(?![^.]+$)|[^0-9.-]/', '', wc_clean( $number ) );
 	}
 
+	// Track whether the caller explicitly requested an aggressive trim. When the trim
+	// is enabled implicitly below (float without an explicit $dp), trailing zeros are
+	// only trimmed down to `wc_get_price_decimals()` so values such as `3.70` are not
+	// reduced to `3.7` once the internal rounding precision is lowered via the
+	// `woocommerce_internal_rounding_precision` filter.
+	$caller_requested_trim = $trim_zeros;
+	$min_decimals          = null;
+
 	if ( false !== $dp ) {
 		$dp     = intval( '' === $dp ? wc_get_price_decimals() : $dp );
 		$number = number_format( floatval( $number ), $dp, '.', '' );
 	} elseif ( is_float( $number ) ) {
 		// DP is false - don't use number format, just return a string using whatever is given. Remove scientific notation using sprintf.
 		$number = str_replace( $decimals, '.', sprintf( '%.' . wc_get_rounding_precision() . 'f', $number ) );
-		// We already had a float, so trailing zeros are not needed.
+		// We already had a float, so excess trailing zeros are not needed.
 		$trim_zeros = true;
+		if ( ! $caller_requested_trim ) {
+			$min_decimals = wc_get_price_decimals();
+		}
 	}
 
-	if ( $trim_zeros && strstr( $number, '.' ) ) {
-		$number = rtrim( rtrim( $number, '0' ), '.' );
+	if ( $trim_zeros && is_string( $number ) && strstr( $number, '.' ) ) {
+		if ( null !== $min_decimals && $min_decimals > 0 ) {
+			list( $integer_part, $decimal_part ) = explode( '.', $number, 2 );
+			$decimal_part                        = rtrim( $decimal_part, '0' );
+
+			if ( strlen( $decimal_part ) < $min_decimals ) {
+				$decimal_part = str_pad( $decimal_part, $min_decimals, '0' );
+			}
+
+			$number = '' === $decimal_part ? $integer_part : $integer_part . '.' . $decimal_part;
+		} else {
+			$number = rtrim( rtrim( $number, '0' ), '.' );
+		}
 	}
 
 	return $number;

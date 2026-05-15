@@ -385,13 +385,38 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 
 		update_option( 'woocommerce_price_num_decimals', '8' );
 
-		// Floats.
-		$this->assertEquals( '0.00001', wc_format_decimal( 0.00001 ) );
+		// Floats. Trailing zeros are preserved down to woocommerce_price_num_decimals so
+		// formatted values are never displayed with fewer decimals than the configured price precision.
+		$this->assertEquals( '0.00001000', wc_format_decimal( 0.00001 ) );
 		$this->assertEquals( '0.22222222', wc_format_decimal( 0.22222222 ) );
 
 		update_option( 'woocommerce_price_num_decimals', '2' );
 		update_option( 'woocommerce_price_decimal_sep', '.' );
 		update_option( 'woocommerce_price_thousand_sep', ',' );
+	}
+
+	/**
+	 * Trailing zeros that fall within the configured price decimals should be kept.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/46475 — when the
+	 * `woocommerce_internal_rounding_precision` filter narrows the internal precision (e.g. to 2),
+	 * a rounded float such as `3.70` should still format as `3.70` rather than `3.7`.
+	 */
+	public function test_wc_format_decimal_keeps_trailing_zeros_within_price_decimals() {
+		$filter = static function () {
+			return 2;
+		};
+
+		add_filter( 'woocommerce_internal_rounding_precision', $filter );
+
+		try {
+			$this->assertEquals( '3.70', wc_format_decimal( 3.7 ) );
+			$this->assertEquals( '108.40', wc_format_decimal( 108.4 ) );
+			// Explicit trim_zeros = true still trims aggressively (back-compat).
+			$this->assertEquals( '3.7', wc_format_decimal( 3.7, false, true ) );
+		} finally {
+			remove_filter( 'woocommerce_internal_rounding_precision', $filter );
+		}
 	}
 
 	/**

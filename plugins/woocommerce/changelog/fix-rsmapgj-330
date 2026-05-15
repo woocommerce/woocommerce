@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve trailing zeros within the configured price decimals when wc_format_decimal() formats a float, so a custom woocommerce_internal_rounding_precision no longer renders 3.70 as 3.7.
