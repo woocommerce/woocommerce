@@ -1,4 +1,4 @@
-/**
+/*
  * These components are copy-pasted from a private repository while we wait for
  * @wordpress/ui to support an equivalent component. Remove this implementation
  * once @wordpress/ui provides one.
