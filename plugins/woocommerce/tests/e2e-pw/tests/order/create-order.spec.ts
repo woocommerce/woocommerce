@@ -47,7 +47,7 @@ const taxTotals = [ '10.00', '20.00', '240.00' ];
 async function getOrderIdFromPage( page: Page ) {
 	// get order ID from the page
 	const orderText = await page
-		.locator( 'h2.woocommerce-order-data__heading' )
+		.locator( '.woocommerce-order-data__heading' )
 		.textContent();
 	const parts = orderText.match( /([0-9])\w+/ );
 	return parts[ 0 ];

@@ -216,7 +216,7 @@ class WC_Meta_Box_Order_Data {
 			<div id="order_data" class="panel woocommerce-order-data">
 				<div class="order_data_header">
 					<div class="order_data_header_column">
-						<h2 class="woocommerce-order-data__heading">
+						<h3 class="woocommerce-order-data__heading">
 							<?php
 
 							printf(
@@ -227,7 +227,7 @@ class WC_Meta_Box_Order_Data {
 							);
 
 							?>
-						</h2>
+						</h3>
 						<p class="woocommerce-order-data__meta order_number">
 							<?php
 
@@ -311,7 +311,7 @@ class WC_Meta_Box_Order_Data {
 				?>
 				<div class="order_data_column_container">
 					<div class="order_data_column">
-						<h3><?php esc_html_e( 'General', 'woocommerce' ); ?></h3>
+						<h4><?php esc_html_e( 'General', 'woocommerce' ); ?></h4>
 
 						<p class="form-field form-field-wide">
 							<?php
@@ -415,13 +415,13 @@ class WC_Meta_Box_Order_Data {
 						<?php do_action( 'woocommerce_admin_order_data_after_order_details', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
 					<div class="order_data_column">
-						<h3>
+						<h4>
 							<?php esc_html_e( 'Billing', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 							<span>
 								<a href="#" class="load_customer_billing" style="display:none;"><?php esc_html_e( 'Load billing address', 'woocommerce' ); ?></a>
 							</span>
-						</h3>
+						</h4>
 						<div class="address">
 							<?php
 							// Display values.
@@ -553,14 +553,14 @@ class WC_Meta_Box_Order_Data {
 						<?php do_action( 'woocommerce_admin_order_data_after_billing_address', $order ); // phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment ?>
 					</div>
 					<div class="order_data_column">
-						<h3>
+						<h4>
 							<?php esc_html_e( 'Shipping', 'woocommerce' ); ?>
 							<a href="#" class="edit_address"><?php esc_html_e( 'Edit', 'woocommerce' ); ?></a>
 							<span>
 								<a href="#" class="load_customer_shipping" style="display:none;"><?php esc_html_e( 'Load shipping address', 'woocommerce' ); ?></a>
 								<a href="#" class="billing-same-as-shipping" style="display:none;"><?php esc_html_e( 'Copy billing address', 'woocommerce' ); ?></a>
 							</span>
-						</h3>
+						</h4>
 						<div class="address">
 							<?php
 							// Display values.

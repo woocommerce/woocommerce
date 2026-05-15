@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Admin order screen: demote the duplicate `Order #N details` heading and its `General`/`Billing`/`Shipping` sub-headings so the heading hierarchy no longer skips levels.
