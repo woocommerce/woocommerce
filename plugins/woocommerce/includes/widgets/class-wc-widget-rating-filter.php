@@ -110,16 +110,17 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 			if ( empty( $count ) ) {
 				continue;
 			}
-			$found = true;
-			$link  = $base_link;
+			$found     = true;
+			$link      = $base_link;
+			$is_chosen = in_array( $rating, $rating_filter, true );
 
-			if ( in_array( $rating, $rating_filter, true ) ) {
+			if ( $is_chosen ) {
 				$link_ratings = implode( ',', array_diff( $rating_filter, array( $rating ) ) );
 			} else {
 				$link_ratings = implode( ',', array_merge( $rating_filter, array( $rating ) ) );
 			}
 
-			$class       = in_array( $rating, $rating_filter, true ) ? 'wc-layered-nav-rating chosen' : 'wc-layered-nav-rating';
+			$class       = $is_chosen ? 'wc-layered-nav-rating chosen' : 'wc-layered-nav-rating';
 			$link        = apply_filters( 'woocommerce_rating_filter_link', $link_ratings ? add_query_arg( 'rating_filter', $link_ratings, $link ) : remove_query_arg( 'rating_filter' ) );
 			$rating_html = wc_get_star_rating_html( $rating );
 			$count_html  = wp_kses(
@@ -131,7 +132,15 @@ class WC_Widget_Rating_Filter extends WC_Widget {
 				)
 			);
 
-			printf( '<li class="%s"><a href="%s"><span class="star-rating">%s</span> %s</a></li>', esc_attr( $class ), esc_url( $link ), $rating_html, $count_html ); // WPCS: XSS ok.
+			$link_attrs = '';
+			if ( $is_chosen ) {
+				/* translators: %d: rating number from 1 to 5 */
+				$aria_label = sprintf( __( 'Remove filter for rated %d out of 5', 'woocommerce' ), $rating );
+				$link_attrs = ' rel="nofollow" aria-current="true" aria-label="' . esc_attr( $aria_label ) . '"';
+			}
+
+			// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $link_attrs is built from escaped values, $rating_html and $count_html are escaped above.
+			printf( '<li class="%s"><a%s href="%s"><span class="star-rating">%s</span> %s</a></li>', esc_attr( $class ), $link_attrs, esc_url( $link ), $rating_html, $count_html );
 		}
 
 		echo '</ul>';

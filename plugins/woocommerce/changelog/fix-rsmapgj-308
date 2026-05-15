@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Filter Products by Rating widget: provide clearer visual indication of the selected rating by bolding the chosen item and exposing an accessible "Remove filter" label.

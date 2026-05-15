@@ -1583,6 +1583,10 @@ p.demo_store,
 			}
 		}
 
+		li.chosen > a {
+			font-weight: 700;
+		}
+
 		li.chosen a::before {
 			@include iconbefore("\e013");
 			color: var(--wc-red);
