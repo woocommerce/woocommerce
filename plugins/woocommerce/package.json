@@ -15,14 +15,13 @@
 		"build:blocks": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/block-library...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
 		"build:classic-assets": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/classic-assets...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
 		"build:zip": "./bin/build-zip.sh",
-		"build:widgets": "BROWSERSLIST='defaults and supports es6-module' wp-build",
-		"build:widgets:watch": "BROWSERSLIST='defaults and supports es6-module' wp-build --watch",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:copy-assets:legacy": "rsync -avhW --checksum --delete --quiet client/legacy/build/css/ assets/css && rsync -avhW --checksum --delete --quiet client/legacy/build/js/ assets/js",
 		"build:project:copy-assets:admin": "rsync -avhW --checksum --delete --quiet client/admin/build/ assets/client/admin",
 		"build:project:copy-assets:blocks": "rsync -avhW --checksum --delete --quiet client/blocks/build/ assets/client/blocks && wp-scripts build-blocks-manifest --input=assets/client/blocks --output=assets/client/blocks/blocks-json.php",
 		"build:project:copy-assets:email-editor": "rsync -avhW --checksum --delete --quiet ../../packages/php/email-editor/src/ packages/email-editor/src",
 		"build:project:copy-assets:blueprint": "rsync -avhW --checksum --delete --quiet ../../packages/php/blueprint/src/ packages/blueprint/src",
+		"build:project:widgets": "BROWSERSLIST='defaults and supports es6-module' wp-build",
 		"build:project:actualize-translation-domains": "wireit",
 		"build:api": "php src/Internal/Api/DesignTime/Scripts/build-api.php",
 		"build:api:check": "php src/Internal/Api/DesignTime/Scripts/check-api-staleness.php",
@@ -101,6 +100,7 @@
 		"watch:build:classic-assets": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"@woocommerce/classic-assets...\" --filter=\"$npm_package_name\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:copy-assets": "wireit",
+		"watch:build:project:widgets": "BROWSERSLIST='defaults and supports es6-module' wp-build --watch",
 		"wp-env": "wp-env"
 	},
 	"lint-staged": {
