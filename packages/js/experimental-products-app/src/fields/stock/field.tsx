@@ -77,7 +77,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 
 		return (
 			<SelectControl
-				label={ __( 'Status', 'woocommerce' ) }
+				label={ __( 'Stock status', 'woocommerce' ) }
 				value={ selectedOption }
 				items={ options }
 				onValueChange={ ( option ) => {
