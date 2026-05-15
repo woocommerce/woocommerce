@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+Comment: Add regression coverage for wc_get_orders total filter when 'Number of decimals' is 0 — float (e.g. 12345.00) and integer (12345) representations of the same total must return identical results. Underlying normalization shipped in #60995; this locks in HPOS + CPT data store behavior to prevent regression (woocommerce/woocommerce#31483).
+

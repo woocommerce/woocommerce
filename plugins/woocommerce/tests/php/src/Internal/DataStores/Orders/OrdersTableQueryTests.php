@@ -681,6 +681,41 @@ class OrdersTableQueryTests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox Float and integer representations of the same total match identically when 'Number of decimals' is set to 0.
+	 *
+	 * Regression test for woocommerce/woocommerce#31483: with `woocommerce_price_num_decimals` = 0,
+	 * `wc_get_orders( array( 'total' => 12345.00 ) )` previously returned no orders while
+	 * `wc_get_orders( array( 'total' => 12345 ) )` correctly returned the matching order. Both
+	 * representations of the same numeric value must return identical results regardless of how
+	 * the value is passed (float, int, numeric string).
+	 */
+	public function test_total_filtering_with_zero_decimals_float_and_int_are_equivalent() {
+		$original_decimals = get_option( 'woocommerce_price_num_decimals' );
+		update_option( 'woocommerce_price_num_decimals', '0' );
+
+		try {
+			$order = OrderHelper::create_order();
+			$order->set_total( '12345' );
+			$order->save();
+			$order_id = $order->get_id();
+
+			$orders_float  = wc_get_orders( array( 'total' => 12345.00 ) );
+			$orders_int    = wc_get_orders( array( 'total' => 12345 ) );
+			$orders_string = wc_get_orders( array( 'total' => '12345.00' ) );
+
+			$this->assertCount( 1, $orders_int, 'Integer total should match the order stored with decimals=0.' );
+			$this->assertCount( 1, $orders_float, 'Float total 12345.00 should match the order stored with decimals=0.' );
+			$this->assertCount( 1, $orders_string, 'String total "12345.00" should match the order stored with decimals=0.' );
+
+			$this->assertSame( $order_id, $orders_float[0]->get_id() );
+			$this->assertSame( $order_id, $orders_int[0]->get_id() );
+			$this->assertSame( $order_id, $orders_string[0]->get_id() );
+		} finally {
+			update_option( 'woocommerce_price_num_decimals', $original_decimals );
+		}
+	}
+
+	/**
 	 * @testDox Orderby total functionality works as expected for HPOS storage.
 	 */
 	public function test_orderby_total() {

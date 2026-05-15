@@ -346,4 +346,43 @@ class WC_Tests_WC_Order_Query extends WC_Unit_Test_Case {
 		$results = $query->get_orders();
 		$this->assertEquals( 0, count( $results ) );
 	}
+
+	/**
+	 * Regression test for woocommerce/woocommerce#31483.
+	 *
+	 * With `woocommerce_price_num_decimals` set to 0, querying via `wc_get_orders` with a float
+	 * total (e.g. 12345.00) must return the same result as querying with the equivalent integer
+	 * (12345). Prior to PR #60995 the legacy post-meta query passed the unformatted value through
+	 * to a `meta_value = 12345.00` comparison, which failed to match a `_order_total` stored as
+	 * `'12345'`.
+	 */
+	public function test_order_query_total_zero_decimals_float_and_int_are_equivalent() {
+		$original_decimals = get_option( 'woocommerce_price_num_decimals' );
+		update_option( 'woocommerce_price_num_decimals', '0' );
+
+		try {
+			$order = new WC_Order();
+			$order->set_total( '12345' );
+			$order->save();
+			$order_id = $order->get_id();
+
+			$float_query  = new WC_Order_Query( array( 'total' => 12345.00 ) );
+			$int_query    = new WC_Order_Query( array( 'total' => 12345 ) );
+			$string_query = new WC_Order_Query( array( 'total' => '12345.00' ) );
+
+			$float_results  = $float_query->get_orders();
+			$int_results    = $int_query->get_orders();
+			$string_results = $string_query->get_orders();
+
+			$this->assertEquals( 1, count( $int_results ), 'Integer total should find the order when decimals=0.' );
+			$this->assertEquals( 1, count( $float_results ), 'Float total 12345.00 should find the order when decimals=0.' );
+			$this->assertEquals( 1, count( $string_results ), 'String "12345.00" should find the order when decimals=0.' );
+
+			$this->assertEquals( $order_id, $float_results[0]->get_id() );
+			$this->assertEquals( $order_id, $int_results[0]->get_id() );
+			$this->assertEquals( $order_id, $string_results[0]->get_id() );
+		} finally {
+			update_option( 'woocommerce_price_num_decimals', $original_decimals );
+		}
+	}
 }
