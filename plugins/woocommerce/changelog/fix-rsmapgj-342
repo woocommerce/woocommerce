@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix attribute slug length validation to count characters instead of bytes so multibyte (e.g. Cyrillic) slugs of 28 characters or fewer are accepted.

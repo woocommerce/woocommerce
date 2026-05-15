@@ -148,6 +148,21 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 			'Attribute slugs should not be allowed to be over 28 characters long.'
 		);
 
+		// Multibyte (Cyrillic) slug of 28 characters should be allowed even though its byte length exceeds 28.
+		$ids[] = wc_create_attribute( array( 'name' => str_repeat( 'я', 28 ) ) );
+		$this->assertIsInt(
+			end( $ids ),
+			'Attribute creation should succeed when its multibyte slug is 28 characters long, even though its byte length exceeds 28.'
+		);
+
+		// Multibyte (Cyrillic) slug of 29 characters should be rejected based on character count, not byte count.
+		$err = wc_create_attribute( array( 'name' => str_repeat( 'я', 29 ) ) );
+		$this->assertEquals(
+			'invalid_product_attribute_slug_too_long',
+			$err->get_error_code(),
+			'Attribute slugs longer than 28 characters should be rejected for multibyte strings as well.'
+		);
+
 		$err = wc_create_attribute( array( 'name' => 'Cat' ) );
 		$this->assertEquals(
 			'invalid_product_attribute_slug_reserved_name',
