@@ -879,9 +879,8 @@
 	/**
 	 * Get the default product gallery HTML used for restoring classic templates.
 	 *
-	 * Captures the live gallery DOM on first call and caches it on the form,
-	 * so any post-load mutations made by themes or extensions are preserved
-	 * across variation swaps.
+	 * Captures the template on first call and caches it on the form. Reads from
+	 * the PHP-rendered snapshot embedded in the form.
 	 */
 	$.fn.wc_get_default_product_gallery_html = function () {
 		var $form = $( this );
@@ -891,6 +890,16 @@
 			return cached;
 		}
 
+		var $template = $form.find( '.wc-product-gallery-default-template' );
+
+		if ( $template.length ) {
+			cached = $.trim( $template.html() );
+			$form.data( 'wc-product-gallery-default-html', cached );
+			return cached;
+		}
+
+		// Fallback for themes that strip the template script: snapshot the live
+		// DOM.
 		var $live = $form
 			.closest( '.product' )
 			.find( '.woocommerce-product-gallery' )
@@ -906,9 +915,7 @@
 			return cached;
 		}
 
-		// Fallback: PHP-rendered snapshot.
-		var $template = $form.find( '.wc-product-gallery-default-template' );
-		return $template.length ? $.trim( $template.html() ) : '';
+		return '';
 	};
 
 	/**

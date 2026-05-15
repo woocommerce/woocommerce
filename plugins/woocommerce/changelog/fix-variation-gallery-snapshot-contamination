@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix duplicate Product Image Gallery DOM (trigger, viewport, control nav) on classic frontend when switching between variations with and without a multi-image gallery.
