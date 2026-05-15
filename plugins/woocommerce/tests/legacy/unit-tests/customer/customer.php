@@ -54,6 +54,49 @@ class WC_Tests_Customer extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * When tax is calculated based on the shipping address but the customer has no shipping
+	 * address (for example, the cart contains only virtual products), the taxable address
+	 * should fall back to the customer's billing address rather than the store's base address.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/58206.
+	 */
+	public function test_get_taxable_address_falls_back_to_billing_when_shipping_country_is_empty() {
+		$original_tax_based_on     = WC_Helper_Customer::get_tax_based_on();
+		$original_customer_details = WC_Helper_Customer::get_customer_details();
+
+		// Build a customer with a billing address in Hungary and no shipping address (virtual product scenario).
+		$customer_data = array(
+			'id'                  => 0,
+			'date_modified'       => null,
+			'country'             => 'HU',
+			'state'               => '',
+			'postcode'            => '1051',
+			'city'                => 'Budapest',
+			'shipping_country'    => '',
+			'shipping_state'      => '',
+			'shipping_postcode'   => '',
+			'shipping_city'       => '',
+			'is_vat_exempt'       => false,
+			'calculated_shipping' => false,
+		);
+		WC_Helper_Customer::set_customer_details( $customer_data );
+
+		$customer = new WC_Customer( 0, true );
+
+		WC_Helper_Customer::set_tax_based_on( 'shipping' );
+
+		$this->assertEquals(
+			array( 'HU', '', '1051', 'Budapest' ),
+			$customer->get_taxable_address(),
+			'When tax is based on shipping but no shipping country is set, the taxable address should fall back to the billing address.'
+		);
+
+		// Reset.
+		WC_Helper_Customer::set_tax_based_on( $original_tax_based_on );
+		WC_Helper_Customer::set_customer_details( $original_customer_details );
+	}
+
+	/**
 	 * Test the is_customer_outside_base method.
 	 */
 	public function test_is_customer_outside_base() {

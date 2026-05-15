@@ -192,6 +192,12 @@ class WC_Customer extends WC_Legacy_Customer {
 			$tax_based_on = TaxBasedOn::BASE;
 		}
 
+		// Fall back to billing address when tax is based on shipping but no shipping country is
+		// available (e.g. cart contains only virtual products that don't require shipping).
+		if ( TaxBasedOn::SHIPPING === $tax_based_on && ! $this->get_shipping_country() ) {
+			$tax_based_on = TaxBasedOn::BILLING;
+		}
+
 		if ( TaxBasedOn::BASE === $tax_based_on ) {
 			$country  = WC()->countries->get_base_country();
 			$state    = WC()->countries->get_base_state();

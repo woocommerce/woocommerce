@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix tax calculation falling back to the store base address for virtual products when "Calculate tax based on" is set to the customer shipping address. The taxable address now falls back to the customer billing address when no shipping country is set, matching how orders already resolve their tax location.
