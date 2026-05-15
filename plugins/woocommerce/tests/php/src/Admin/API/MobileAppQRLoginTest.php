@@ -276,11 +276,6 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_\\_wc\\_qr\\_login\\_consumed\\_%' ESCAPE '\\\\' OR option_name LIKE '\\_transient\\_timeout\\_\\_wc\\_qr\\_login\\_consumed\\_%' ESCAPE '\\\\'"
 		);
 
-		// Remove database-backed token exchange claims.
-		$wpdb->query(
-			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_wc\\_qr\\_login\\_claim\\_%' ESCAPE '\\\\'"
-		);
-
 		// Remove rate-limit rows.
 		$wpdb->query(
 			$wpdb->prepare(
@@ -302,6 +297,11 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		// Remove database-backed token scan claims.
 		$wpdb->query(
 			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_wc\\_qr\\_login\\_scan\\_claim\\_%' ESCAPE '\\\\'"
+		);
+
+		// Remove database-backed token approval claims.
+		$wpdb->query(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_wc\\_qr\\_login\\_approve\\_claim\\_%' ESCAPE '\\\\'"
 		);
 
 		wp_cache_flush();
@@ -391,6 +391,16 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 */
 	private function token_scan_claim_key( string $token ): string {
 		return MobileAppQRLogin::SCAN_CLAIM_OPTION_PREFIX . $this->token_hash( $token );
+	}
+
+	/**
+	 * Build the database approval-claim option key for a plaintext token.
+	 *
+	 * @param string $token Plaintext token.
+	 * @return string
+	 */
+	private function token_approve_claim_key( string $token ): string {
+		return MobileAppQRLogin::APPROVE_CLAIM_OPTION_PREFIX . $this->token_hash( $token );
 	}
 
 	/**
@@ -1936,6 +1946,43 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			$claim_expires_at,
 			get_option( $claim_key ),
 			'A rejected second scan must not release another request\'s claim.'
+		);
+
+		delete_option( $claim_key );
+	}
+
+	/**
+	 * @testdox Concurrent /qr-login-approve requests on the same scanned token produce exactly one winner thanks to the atomic claim.
+	 */
+	public function test_approve_atomic_claim_rejects_concurrent_second_approval(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( 0 );
+		$scan_data = $this->dispatch_scan( $plaintext )->get_data();
+
+		wp_set_current_user( $this->admin_id );
+
+		// Pre-register the approval claim option to simulate a concurrent
+		// worker that has already grabbed the mutex but not yet completed the
+		// scanned -> approved/rejected transition. The second worker must
+		// observe the existing key and bail out without mutating the record.
+		$claim_key        = $this->token_approve_claim_key( $plaintext );
+		$claim_expires_at = (string) ( time() + 60 );
+		add_option( $claim_key, $claim_expires_at, '', false );
+
+		$response = $this->dispatch_approve( $plaintext, (string) $scan_data['real_number'] );
+
+		$this->assertSame( 409, $response->get_status() );
+		$this->assertSame( 'qr_login_approval_in_progress', $response->get_data()['code'] );
+
+		$record = get_transient( $this->token_transient_key( $plaintext ) );
+		$this->assertIsArray( $record );
+		$this->assertSame( MobileAppQRLogin::STATE_SCANNED, $record['state'] );
+		$this->assertArrayNotHasKey( 'exchange_grant', $record );
+		$this->assertSame(
+			$claim_expires_at,
+			get_option( $claim_key ),
+			'A rejected concurrent approval must not release another request\'s claim.'
 		);
 
 		delete_option( $claim_key );
