@@ -19,10 +19,23 @@ defined( 'ABSPATH' ) || exit;
 class Package {
 
 	/**
+	 * Action Scheduler hook for DB update callbacks.
+	 */
+	private const UPDATE_CALLBACK_HOOK = 'woocommerce_run_update_callback';
+
+	/**
+	 * Action Scheduler group for DB update callbacks.
+	 */
+	private const UPDATE_CALLBACK_GROUP = 'woocommerce-db-updates';
+
+	/**
 	 * The feature id used by `FeaturesController` (Settings → Advanced → Features).
 	 */
 	public const FEATURE_ID = 'variation_gallery';
 
+	/**
+	 * Option backing the variation gallery feature toggle.
+	 */
 	public const ENABLE_OPTION_NAME = 'wc_feature_woocommerce_additional_variation_images_enabled';
 
 	/**
@@ -62,17 +75,13 @@ class Package {
 		$container->get( ClassicVariationGalleryAdmin::class )->register();
 		$container->get( LegacyVariationGalleryCompatibility::class )->register();
 
-		// Defer the schedule check until Action Scheduler's data store is
-		// initialized, which doesn't happen until WP's `init` hook.
+		// Action Scheduler initializes on `init`, not `plugins_loaded`.
 		add_action( 'init', array( __CLASS__, 'maybe_schedule_migration' ), 20 );
 	}
 
 	/**
 	 * Schedule the legacy variation gallery migration if it hasn't already
-	 * completed and isn't already queued.
-	 *
-	 * Safe to call on every request: short-circuits when the completion
-	 * option is set or a pending action already exists for the callback.
+	 * completed and isn't already pending or running.
 	 *
 	 * @internal
 	 */
@@ -81,28 +90,41 @@ class Package {
 			return;
 		}
 
-		$update_callback = array( Migration::class, 'run' );
+		$args = array( 'update_callback' => array( Migration::class, 'run' ) );
 
-		$pending = WC()->queue()->search(
-			array(
-				'hook'     => 'woocommerce_run_update_callback',
-				'status'   => 'pending',
-				'per_page' => 1,
-				'group'    => 'woocommerce-db-updates',
-			)
-		);
-
-		foreach ( $pending as $action ) {
-			$args = $action->get_args();
-			if ( isset( $args['update_callback'] ) && $args['update_callback'] === $update_callback ) {
-				return;
-			}
+		if ( self::has_pending_or_running_migration( $args ) ) {
+			return;
 		}
 
 		WC()->queue()->add(
-			'woocommerce_run_update_callback',
-			array( 'update_callback' => $update_callback ),
-			'woocommerce-db-updates'
+			self::UPDATE_CALLBACK_HOOK,
+			$args,
+			self::UPDATE_CALLBACK_GROUP
 		);
+	}
+
+	/**
+	 * Determine whether the migration is already pending or running.
+	 *
+	 * @param array<string, array<int, string>> $args Exact callback args for the migration action.
+	 * @return bool
+	 */
+	private static function has_pending_or_running_migration( array $args ): bool {
+		if ( null !== WC()->queue()->get_next( self::UPDATE_CALLBACK_HOOK, $args, self::UPDATE_CALLBACK_GROUP ) ) {
+			return true;
+		}
+
+		$running_actions = WC()->queue()->search(
+			array(
+				'hook'     => self::UPDATE_CALLBACK_HOOK,
+				'args'     => $args,
+				'status'   => \ActionScheduler_Store::STATUS_RUNNING,
+				'per_page' => 1,
+				'group'    => self::UPDATE_CALLBACK_GROUP,
+			),
+			'ids'
+		);
+
+		return ! empty( $running_actions );
 	}
 }
