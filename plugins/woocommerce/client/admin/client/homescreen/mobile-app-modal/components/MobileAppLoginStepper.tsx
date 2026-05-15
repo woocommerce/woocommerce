@@ -4,16 +4,17 @@
 import React, { useState, useEffect } from '@wordpress/element';
 import { Button } from '@wordpress/components';
 import { __ } from '@wordpress/i18n';
-import { Stepper, StepperProps } from '@woocommerce/components';
+import { Stepper, StepperProps, Link } from '@woocommerce/components';
+import interpolateComponents from '@automattic/interpolate-components';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import { SendMagicLinkStates } from './';
-import { getAdminSetting } from '~/utils/admin-settings';
 import { MobileAppInstallationInfo } from '../components/MobileAppInstallationInfo';
-import { MobileAppLoginInfo } from '../components/MobileAppLoginInfo';
 import { QRDirectLoginCode } from '../components/QRDirectLoginCode';
+import { SendMagicLinkButton } from '../components/SendMagicLinkButton';
 
 export const MobileAppLoginStepper = ( {
 	step,
@@ -68,57 +69,69 @@ export const MobileAppLoginStepper = ( {
 				},
 			] );
 		} else if ( step === 'second' ) {
-			if (
+			const hasLinkedWordPressAccount =
 				isJetpackPluginInstalled &&
-				wordpressAccountEmailAddress !== undefined
-			) {
-				setStepsToDisplay( [
-					{
-						key: 'first',
-						label: __( 'App installed', 'woocommerce' ),
-						description: '',
-						content: <></>,
-					},
-					{
-						key: 'second',
-						label: __( 'Sign into the app', 'woocommerce' ),
-						description: __(
-							'Scan the QR code below with your phone to sign in instantly — no password needed.',
-							'woocommerce'
-						),
-						content: <QRDirectLoginCode />,
-					},
-				] );
-			} else {
-				const siteUrl: string = getAdminSetting( 'siteUrl' );
-				const username = getAdminSetting( 'currentUserData' ).username;
-				const loginUrl = `woocommerce://app-login?siteUrl=${ encodeURIComponent(
-					siteUrl
-				) }&username=${ encodeURIComponent( username ) }`;
-				const description = loginUrl
-					? __(
-							'Scan the QR code below and enter the wp-admin password in the app.',
-							'woocommerce'
-					  )
-					: __(
-							'Follow the instructions in the app to sign in.',
-							'woocommerce'
-					  );
-				setStepsToDisplay( [
-					{
-						key: 'first',
-						label: __( 'App installed', 'woocommerce' ),
-						description: '',
-						content: <></>,
-					},
-					{
-						key: 'second',
-						label: 'Sign into the app',
-						description,
-						content: <MobileAppLoginInfo loginUrl={ loginUrl } />,
-					},
-				] );
-			}
+				wordpressAccountEmailAddress !== undefined;
+			setStepsToDisplay( [
+				{
+					key: 'first',
+					label: __( 'App installed', 'woocommerce' ),
+					description: '',
+					content: <></>,
+				},
+				{
+					key: 'second',
+					label: __( 'Sign into the app', 'woocommerce' ),
+					description: __(
+						'Scan the QR code below with your phone to sign in instantly — no password needed.',
+						'woocommerce'
+					),
+					content: (
+						<>
+							<QRDirectLoginCode />
+							{ hasLinkedWordPressAccount && (
+								<div className="mobile-app-login-magic-link-secondary">
+									<p className="mobile-app-login-magic-link-secondary__label">
+										{ __(
+											'Or get a WordPress.com sign-in link by email:',
+											'woocommerce'
+										) }
+									</p>
+									<SendMagicLinkButton
+										onClickHandler={ sendMagicLinkHandler }
+										isFetching={
+											sendMagicLinkStatus ===
+											SendMagicLinkStates.FETCHING
+										}
+									/>
+								</div>
+							) }
+							<div className="mobile-app-login-faq">
+								{ interpolateComponents( {
+									mixedString: __(
+										'Any troubles signing in? Check out the {{link}}FAQ{{/link}}.',
+										'woocommerce'
+									),
+									components: {
+										link: (
+											<Link
+												href="https://woocommerce.com/document/android-ios-apps-login-help-faq/"
+												target="_blank"
+												type="external"
+												onClick={ () => {
+													recordEvent(
+														'onboarding_app_login_faq_click'
+													);
+												} }
+											/>
+										),
+									},
+								} ) }
+							</div>
+						</>
+					),
+				},
+			] );
 		}
 	}, [
 		step,
