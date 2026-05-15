@@ -16,17 +16,17 @@ import type { ProductResponseItem } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import type {
-	AddToCartWithOptionsStore,
-	Context as AddToCartWithOptionsStoreContext,
-} from '../frontend';
-import type { SelectableItem } from '../../../types/type-defs/selectable-items';
 import {
 	normalizeAttributeName,
 	attributeNamesMatch,
 	getVariationAttributeValue,
 } from '../../../base/utils/variations/attribute-matching';
 import setStyles from './set-styles';
+import type {
+	AddToCartWithOptionsStore,
+	Context as AddToCartWithOptionsStoreContext,
+} from '../frontend';
+import type { SelectableItem } from '../../../types/type-defs/selectable-items';
 
 type VariationOptionItem = {
 	id: string;
@@ -225,7 +225,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					disabledAttributesAction,
 					variationAttributeOptions,
 				} = context;
-				const selectedAttributes = state.selectedAttributes;
+				const { selectedAttributes } = state;
 				const hideInvalid = disabledAttributesAction === 'hide';
 
 				return variationAttributeOptions.map( ( row, index ) => {
@@ -306,7 +306,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				}
 
 				const { name } = context;
-				const selectedAttributes = state.selectedAttributes;
+				const { selectedAttributes } = state;
 				const isCurrentlySelected = selectedAttributes.some(
 					( attrObject ) =>
 						attributeNamesMatch( attrObject.attribute, name ) &&
@@ -336,13 +336,15 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const selectedAttributes = state.selectedAttributes;
+				const { selectedAttributes } = state;
 
 				const { mainProductInContext: product } = productsState;
 				if ( ! product ) {
 					return;
 				}
 
+				// Normalize included/excluded attributes to lowercase for comparison
+				// with Store API labels (e.g., "Color" vs "attribute_pa_color" → "color").
 				const normalizedIncluded = includedAttributes.map( ( attr ) =>
 					normalizeAttributeName( attr )
 				);
@@ -377,6 +379,8 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 						);
 						if ( validOptions.length === 1 ) {
 							const validOption = validOptions[ 0 ];
+							// Use the context's attribute name format for consistency.
+							// Find the matching context name by comparing normalized versions.
 							const contextName =
 								includedAttributes.find(
 									( attr ) =>
@@ -391,16 +395,17 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 		},
 		callbacks: {
 			setDefaultSelectedAttribute() {
-				const { name, selectedValue } = getContext< Context >();
-				if ( ! name ) {
+				const context = getContext< Context >();
+				if ( ! context.name ) {
 					return;
 				}
 
-				if ( selectedValue ) {
-					actions.setAttribute( name, selectedValue );
+				if ( context.selectedValue ) {
+					actions.setAttribute( context.name, context.selectedValue );
 				}
+
 				actions.autoselectAttributes( {
-					includedAttributes: [ name ],
+					includedAttributes: [ context.name ],
 				} );
 			},
 			setSelectedVariationId: () => {
@@ -523,5 +528,3 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 	},
 	{ lock: universalLock }
 );
-
-export { state };

@@ -176,7 +176,7 @@ The store registered under `storeNamespace` MUST expose:
 
 | Name | Kind | Contract |
 | --- | --- | --- |
-| `state.selectableItems` | getter | Returns iterable of items with `selected: boolean` and `index: number` derived. For product filters, items come from `getServerContext().items` (so they refresh after navigation) merged with the client SSOT (`activeFilters`). Other parents (e.g. variation attribute options) may use a dedicated server context field such as `variationAttributeOptions` on the same interactive scope. Reactive — re-evaluates when SSOT changes. |
+| `state.selectableItems` | getter | Returns iterable of items with `selected: boolean` and `index: number` derived. Items come from `getServerContext().items` (so they refresh after navigation) merged with the client SSOT (`activeFilters`). Reactive — re-evaluates when SSOT changes. |
 | `actions.toggle` | action | Toggles selection for the target item. Accepts an optional `item` argument (used when an inner block proxies the call via its own store); when omitted, falls back to `getContext().item`. Mutates parent's SSOT (e.g. `activeFilters`). |
 
 Fixed names (not configurable). The getter is `selectableItems` (not `items`) to avoid colliding with other protocols (`removableItems`, etc.) when multiple protocols live on the same store namespace.

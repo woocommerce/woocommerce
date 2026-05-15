@@ -36,7 +36,7 @@ function getClosestColor(
 }
 
 /**
- * Sets theme contrast hints for variation selector chips (and legacy pills)
+ * Sets theme contrast hints for variation selector chips.
  */
 function setStyles(): void {
 	const container = document.querySelector(

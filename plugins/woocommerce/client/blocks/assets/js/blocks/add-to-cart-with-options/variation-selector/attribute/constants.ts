@@ -34,7 +34,7 @@ export const ATTRIBUTE_ITEM_TEMPLATE: TemplateArray = [
 							fontSize: 'medium',
 						},
 					],
-					[ 'woocommerce/product-filter-chips', {} ],
+					[ 'woocommerce/product-filter-chips' ],
 				],
 			],
 		],

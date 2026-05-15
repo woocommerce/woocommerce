@@ -24,22 +24,20 @@ import {
 	ToggleControl,
 	__experimentalToggleGroupControl as ToggleGroupControl,
 	__experimentalToggleGroupControlOption as ToggleGroupControlOption,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanel as ToolsPanel,
-	// eslint-disable-next-line @wordpress/no-unsafe-wp-apis
 	__experimentalToolsPanelItem as ToolsPanelItem,
 } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
-import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
-import type { FilterItemFields } from '../../../product-filters/types';
+import { DEFAULT_ATTRIBUTES } from './constants';
 import {
 	DisplayStyleSwitcher,
 	resetDisplayStyleBlock,
 } from '../../../product-filters/components/display-style-switcher';
-import { DEFAULT_ATTRIBUTES } from './constants';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
+import type { FilterItemFields } from '../../../product-filters/types';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
 
@@ -107,7 +105,6 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 					role="button"
 					tabIndex={ 0 }
 					onClick={ onSelect }
-					onKeyDown={ onSelect }
 				>
 					<div { ...innerBlocksProps } />
 				</div>
@@ -137,9 +134,8 @@ export default function AttributeItemTemplateEdit(
 	const { blocks } = useSelect(
 		( select ) => {
 			const { getBlocks } = select( blockEditorStore );
-			const topLevel = getBlocks( clientId );
 			return {
-				blocks: topLevel,
+				blocks: getBlocks( clientId ),
 			};
 		},
 		[ clientId ]

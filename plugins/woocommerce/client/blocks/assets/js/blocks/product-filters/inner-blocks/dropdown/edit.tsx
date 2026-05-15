@@ -67,7 +67,6 @@ const Edit = ( props: EditProps ): JSX.Element => {
 						<select
 							className="wc-block-product-filter-dropdown__select"
 							aria-label={ selectableItems.groupLabel }
-							disabled
 						>
 							<option value="">
 								{ __( 'Choose an option', 'woocommerce' ) }

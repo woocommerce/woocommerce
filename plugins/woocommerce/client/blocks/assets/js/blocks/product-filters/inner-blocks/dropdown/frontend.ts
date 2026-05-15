@@ -58,7 +58,7 @@ store(
 				const parent = store< SelectableParent >( storeNamespace );
 				const value = target.value;
 
-				// Choosing the empty <option> unselect the selected option.
+				// Choosing the empty <option> unselects the selected option.
 				if ( value === '' ) {
 					const items = Array.isArray( parent.state.selectableItems )
 						? parent.state.selectableItems
