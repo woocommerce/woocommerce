@@ -58,6 +58,7 @@ describe( 'useQRLoginToken', () => {
 		jest.useFakeTimers();
 		// Pin Date.now so the countdown math is deterministic.
 		jest.setSystemTime( NOW_SECONDS * 1000 );
+		jest.spyOn( console, 'warn' ).mockImplementation( () => undefined );
 	} );
 
 	afterEach( () => {
@@ -66,6 +67,7 @@ describe( 'useQRLoginToken', () => {
 		// React emits an "update not wrapped in act()" warning.
 		jest.clearAllTimers();
 		jest.useRealTimers();
+		jest.restoreAllMocks();
 	} );
 
 	it( 'starts IDLE with empty state', () => {

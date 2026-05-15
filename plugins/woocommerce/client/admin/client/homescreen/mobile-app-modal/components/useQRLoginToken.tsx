@@ -217,10 +217,11 @@ export const useQRLoginToken = ( {
 			}
 			// `pending` and `expired` are no-ops here — the countdown timer
 			// drives the EXPIRED transition; we just keep polling on `pending`.
-		} catch {
+		} catch ( error ) {
 			// Swallow polling errors. A transient 500/429 should not break the
 			// QR flow — the next tick will retry, and the countdown will
 			// eventually push us to EXPIRED.
+			console.warn( 'QR login status polling failed.', error );
 		}
 	}, [ clearTimer, clearPollTimer ] );
 
