@@ -117,6 +117,13 @@ class ShopperList {
 	}
 
 	/**
+	 * Creation time as a MySQL DATETIME in GMT.
+	 */
+	public function get_date_created_gmt(): string {
+		return $this->date_created_gmt;
+	}
+
+	/**
 	 * Add an item, or merge quantities if it already exists.
 	 *
 	 * @param ShopperListItem $item Item to add.

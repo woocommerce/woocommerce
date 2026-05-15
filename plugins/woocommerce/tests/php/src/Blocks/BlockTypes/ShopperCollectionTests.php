@@ -5,6 +5,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\BlockTypes\ShopperCollection;
 use ReflectionClass;
+use ReflectionMethod;
 use WP_UnitTestCase;
 
 /**
@@ -130,7 +131,20 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * For a new shopper landing on the page with nothing saved, SSR must:
+	 * `render()` returns an empty string for logged-out shoppers.
+	 */
+	public function test_render_returns_empty_for_logged_out_user(): void {
+		wp_set_current_user( 0 );
+
+		$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+		$render->setAccessible( true );
+
+		$this->assertSame( '', (string) $render->invoke( $this->sut, array( 'listName' => 'saved-for-later' ), '', null ) );
+	}
+
+	/**
+	 * For a logged-in shopper whose list is empty (the new-shopper /
+	 * never-saved-an-item case), SSR must:
 	 *   - emit the empty-state `<li>` already `hidden`, so the message
 	 *     never flashes between paint and iAPI hydration, and
 	 *   - seed the wrapper's iAPI context with `hasShownItems: false` and
@@ -138,16 +152,18 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	 *     `state.isEmpty` getter has the inputs it needs to keep the
 	 *     message hidden until the shopper has actually saved an item.
 	 *
-	 * Driven through reflection on `render()` as a logged-out user,
-	 * since `prefetch_list_items` short-circuits to `[]` in that case —
-	 * no Store API call, no feature-flag wiring, no user fixture needed.
-	 * Sets `WP_Block_Supports::$block_to_render` up front so
+	 * With no saved items, `prefetch_list_items()` returns `[]` whether
+	 * the Store API route is registered or not (a 404 still resolves to
+	 * an empty array), so this stays a unit-level assertion without
+	 * feature-flag wiring or fixture items. Sets
+	 * `WP_Block_Supports::$block_to_render` up front so
 	 * `get_block_wrapper_attributes()` (which reads it for layout/style
 	 * supports) has the context it expects when called outside the
 	 * usual block-render pipeline.
 	 */
 	public function test_render_seeds_hidden_empty_state_for_new_shopper(): void {
-		wp_set_current_user( 0 );
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
 
 		$attributes = array( 'listName' => 'saved-for-later' );
 
@@ -158,11 +174,10 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 		);
 
 		try {
-			$reflection = new ReflectionClass( ShopperCollection::class );
-			$method     = $reflection->getMethod( 'render' );
-			$method->setAccessible( true );
+			$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+			$render->setAccessible( true );
 
-			$markup = (string) $method->invoke( $this->sut, $attributes, '', null );
+			$markup = (string) $render->invoke( $this->sut, $attributes, '', null );
 		} finally {
 			\WP_Block_Supports::$block_to_render = $previous_block_to_render;
 		}

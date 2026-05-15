@@ -5,22 +5,54 @@
 // which we declare as style dependencies in `block.json` so WordPress
 // enqueues them whenever this block renders. Don't duplicate those rules here.
 
+// One concrete `.columns-N` class per supported column count so narrow
+// viewports reflow to fewer columns instead of shrinking items uniformly.
+// Mirrors Product Collection's `__responsive` formula.
+$min-item-width: 150px;
+$grid-gap: var(--wp--style--block-gap, 1.5em);
+
 .wc-block-shopper-collection {
 	display: grid;
-	gap: var(--wp--style--block-gap, 1.5em);
-	grid-template-columns: repeat(
-		var(--wc-shopper-collection-columns, 3),
-		minmax(0, 1fr)
-	);
+	gap: $grid-gap;
 	list-style: none;
 	margin: 0;
 	padding: 0;
+
+	@for $i from 2 through 6 {
+		$gap-count: calc(#{$i} - 1);
+		$total-gap-width: calc(#{$gap-count} * #{$grid-gap});
+		$max-item-width: calc((100% - #{$total-gap-width}) / #{$i});
+
+		&.columns-#{ $i } {
+			grid-template-columns: repeat(
+				auto-fill,
+				minmax(max(#{$min-item-width}, #{$max-item-width}), 1fr)
+			);
+		}
+	}
 }
 
 .wc-block-shopper-collection-item {
 	display: flex;
 	flex-direction: column;
 	gap: 0.25em;
+
+	// Tombstone rows render `<a>` without an href so iAPI can keep
+	// reconciling them against the live-row template (swapping the
+	// element type would force a re-hydration). The browser already
+	// drops link semantics for hrefless anchors, but make the
+	// non-clickability explicit so any inherited link styles don't
+	// mislead pointer or keyboard users.
+	a:not([href]) {
+		cursor: default;
+		pointer-events: none;
+	}
+
+	// The atomic product-button's `display: flex` outspecifies `[hidden]`,
+	// so the move-to-cart wrapper wouldn't honor `hidden` without this.
+	.wp-block-button.wc-block-components-product-button[hidden] {
+		display: none;
+	}
 
 	// Title spacing/line-height matches Product Collection's default
 	// product-title attributes (level: 2, margin: 0 0 0.75rem, line-height: 1.4).
@@ -62,18 +94,17 @@
 		z-index: 10;
 	}
 
-	// Icon-only Remove button overlaying the image. Visually mirrors the
-	// `wc-block-components-product-sale-badge--align-right` overlay (same
-	// border, radius, colors, white fill, top-right inset over the image)
-	// so it reads as a corner badge. Symmetric padding keeps the hit
-	// area square. Hover inverts the colors for a clear affordance.
+	// Icon-only Remove button overlaying the image. Mirrors the
+	// `woocommerce-product-gallery__trigger` corner-overlay styles
+	// (white fill, circular, black icon, no border) so the affordance
+	// reads consistently with the gallery zoom trigger.
 	&__remove {
 		appearance: none;
 		background: #fff;
-		border: 1px solid #fff;
-		border-radius: 4px;
+		border: none;
+		border-radius: 100%;
 		box-sizing: border-box;
-		color: #43454b;
+		color: #000;
 		cursor: pointer;
 		display: block;
 		line-height: 0;
@@ -90,7 +121,7 @@
 		}
 
 		&:hover:not([disabled]) {
-			background: #43454b;
+			background: #000;
 			color: #fff;
 		}
 
@@ -101,7 +132,7 @@
 		// readable over both the badge body and the product image behind
 		// it. Not applied to :hover-only — pointer users keep the invert.
 		&:focus-visible:not([disabled]) {
-			outline: 2px solid #43454b;
+			outline: 2px solid #000;
 			outline-offset: 1px;
 		}
 

@@ -3,16 +3,13 @@
  */
 import { __, sprintf } from '@wordpress/i18n';
 import { useBlockProps, InspectorControls } from '@wordpress/block-editor';
-import { PanelBody, SelectControl } from '@wordpress/components';
+import { PanelBody, RangeControl, SelectControl } from '@wordpress/components';
 import { Icon, trash } from '@wordpress/icons';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 
 interface ShopperCollectionAttributes {
 	listName: string;
-	layout?: {
-		type?: string;
-		columnCount?: number;
-	};
+	columnCount: number;
 }
 
 interface EditProps {
@@ -20,7 +17,8 @@ interface EditProps {
 	setAttributes: ( attrs: Partial< ShopperCollectionAttributes > ) => void;
 }
 
-const DEFAULT_COLUMN_COUNT = 3;
+const MIN_COLUMNS = 2;
+const MAX_COLUMNS = 6;
 
 const PREVIEW_ITEMS = [
 	{
@@ -68,16 +66,10 @@ const PREVIEW_ITEMS = [
 ];
 
 const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
-	const { listName, layout } = attributes;
-	const columnCount =
-		typeof layout?.columnCount === 'number'
-			? layout.columnCount
-			: DEFAULT_COLUMN_COUNT;
+	const { listName, columnCount } = attributes;
+
 	const blockProps = useBlockProps( {
-		className: 'wc-block-shopper-collection',
-		style: {
-			'--wc-shopper-collection-columns': columnCount,
-		} as React.CSSProperties,
+		className: `wc-block-shopper-collection columns-${ columnCount }`,
 	} );
 
 	return (
@@ -100,6 +92,20 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 						onChange={ ( value: string ) =>
 							setAttributes( { listName: value } )
 						}
+					/>
+					<RangeControl
+						__next40pxDefaultSize
+						__nextHasNoMarginBottom
+						label={ __( 'Columns', 'woocommerce' ) }
+						value={ columnCount }
+						onChange={ ( value?: number ) => {
+							if ( typeof value !== 'number' ) {
+								return;
+							}
+							setAttributes( { columnCount: value } );
+						} }
+						min={ MIN_COLUMNS }
+						max={ MAX_COLUMNS }
 					/>
 				</PanelBody>
 			</InspectorControls>

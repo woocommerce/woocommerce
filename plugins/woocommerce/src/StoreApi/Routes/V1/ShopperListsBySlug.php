@@ -87,6 +87,6 @@ class ShopperListsBySlug extends AbstractRoute {
 			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Shopper list not found.', 'woocommerce' ), 404 );
 		}
 
-		return rest_ensure_response( $this->prepare_item_for_response( $list->to_array(), $request ) );
+		return rest_ensure_response( $this->prepare_item_for_response( $list, $request ) );
 	}
 }

@@ -92,6 +92,11 @@ final class ShopperCollection extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
+		// Guests have no personal list — bail before enqueuing assets or seeding state.
+		if ( ! is_user_logged_in() ) {
+			return '';
+		}
+
 		// `listName` is declared with a default in block.json, so WP core's
 		// `prepare_attributes_for_render` guarantees it's set as a string by
 		// the time we get here. `sanitize_title` is *not* redundant though:
@@ -107,8 +112,12 @@ final class ShopperCollection extends AbstractBlock {
 			$list_slug = 'saved-for-later';
 		}
 
-		// `layout` comes from `supports.layout`, not a declared attribute, so WP doesn't guarantee every nested key is set — `??` covers a partial layout object.
-		$column_count = max( 1, (int) ( $attributes['layout']['columnCount'] ?? 3 ) );
+		// Clamp to the 2-6 range the SCSS `@for $i from 2 through 6` loop and
+		// the editor `RangeControl` both support. `absint()` first defends
+		// against a code-editor override (the attribute can be set to any
+		// JSON value there); the `min`/`max` then keep the value within the
+		// range where a `&.columns-#{$i}` rule actually exists.
+		$column_count = min( 6, max( 2, absint( $attributes['columnCount'] ?? 5 ) ) );
 
 		$variation = $this->get_variation_config();
 
@@ -175,8 +184,9 @@ final class ShopperCollection extends AbstractBlock {
 		);
 
 		$wrapper_class = sprintf(
-			'wc-block-shopper-collection wc-block-shopper-collection--%s',
-			$variation['modifierSlug']
+			'wc-block-shopper-collection wc-block-shopper-collection--%s columns-%d',
+			$variation['modifierSlug'],
+			$column_count
 		);
 
 		// `hasShownItems` seeds the per-block context so the empty message
@@ -200,7 +210,6 @@ final class ShopperCollection extends AbstractBlock {
 			// Deterministic key derived from the list slug so iAPI router
 			// navigations land on the same block identity across renders.
 			'data-wp-key'         => $this->get_full_block_name() . '-' . $list_slug,
-			'style'               => sprintf( '--wc-shopper-collection-columns:%d;', $column_count ),
 		);
 
 		return sprintf(
@@ -379,7 +388,8 @@ final class ShopperCollection extends AbstractBlock {
 	 * @return string
 	 */
 	private function render_item_markup( array $item, array $variation ): string {
-		$product_exists  = ! empty( $item['product_exists'] );
+		$is_live         = ! empty( $item['is_live'] );
+		$is_purchasable  = ! empty( $item['is_purchasable'] );
 		$name            = (string) ( $item['name'] ?? '' );
 		$permalink       = (string) ( $item['permalink'] ?? '' );
 		$quantity        = (int) ( $item['quantity'] ?? 1 );
@@ -422,7 +432,7 @@ final class ShopperCollection extends AbstractBlock {
 			// innerHTML when the row's context.listItem changes.
 			?>
 			<div class="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
-				<a <?php echo $product_exists && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink">
+				<a <?php echo $is_live && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink">
 					<span
 						class="wc-block-shopper-collection-item__image-slot"
 						data-wp-context='{"htmlField":"image_html"}'
@@ -460,7 +470,7 @@ final class ShopperCollection extends AbstractBlock {
 			// for tombstones.
 			?>
 			<h2 class="wp-block-post-title has-text-align-center has-medium-font-size">
-				<a <?php echo $product_exists && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink" data-wp-text="state.currentItemDisplayName"><?php echo esc_html( $alt ); ?></a>
+				<a <?php echo $is_live && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink" data-wp-text="state.currentItemDisplayName"><?php echo esc_html( $alt ); ?></a>
 			</h2>
 			<div
 				class="price wc-block-components-product-price has-text-align-center has-small-font-size"
@@ -478,13 +488,10 @@ final class ShopperCollection extends AbstractBlock {
 			<span class="wc-block-shopper-collection-item__quantity"><?php echo esc_html( $quantity_label ); ?></span>
 			<?php if ( ! empty( $variation['showAction'] ) ) : ?>
 				<?php
-				// Always emit the wrapper with the same `data-wp-bind--hidden`
-				// the template uses, and start it hidden when the SSR-side
-				// rule (the row is a tombstone) says so. That way a state
-				// change after hydration (e.g. the product is later flagged
-				// as deleted) hides the button without iAPI having to swap
-				// the entire row out.
-				$is_move_to_cart_hidden = ! $product_exists;
+				// Always emit the wrapper so iAPI can toggle `hidden` after
+				// hydration without swapping the row out. Start hidden when
+				// the row isn't purchasable.
+				$is_move_to_cart_hidden = ! $is_purchasable;
 				?>
 			<div
 				class="wp-block-button wc-block-components-product-button"

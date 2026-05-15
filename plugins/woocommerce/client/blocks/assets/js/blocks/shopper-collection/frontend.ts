@@ -174,8 +174,7 @@ store< BlockStore >(
 				if ( ! listItem ) {
 					return true;
 				}
-				// Tombstones never have a buyable product.
-				return ! listItem.product_exists;
+				return ! listItem.is_purchasable;
 			},
 
 			// `data-wp-text` writes its argument as text-content without
@@ -234,7 +233,7 @@ store< BlockStore >(
 
 			*onClickMoveToCart(): AsyncAction< void > {
 				const { listSlug, listItem } = getContext< BlockContext >();
-				if ( ! listItem || ! listItem.product_exists ) {
+				if ( ! listItem || ! listItem.is_purchasable ) {
 					return;
 				}
 
