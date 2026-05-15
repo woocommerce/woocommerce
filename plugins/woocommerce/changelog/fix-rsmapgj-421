@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Trigger order status transition actions (e.g. `woocommerce_order_status_X_to_trash`, `woocommerce_order_status_trash`, `woocommerce_order_status_changed`) and the corresponding order note when an order is trashed via the HPOS data store.

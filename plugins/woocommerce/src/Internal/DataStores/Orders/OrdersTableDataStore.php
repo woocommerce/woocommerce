@@ -2665,39 +2665,26 @@ FROM $order_meta_table
 	 * @return void
 	 */
 	public function trash_order( $order ) {
-		global $wpdb;
-
 		if ( 'trash' === $order->get_status( 'edit' ) ) {
 			return;
 		}
 
 		$trash_metadata = array(
 			'_wp_trash_meta_status' => 'wc-' . $order->get_status( 'edit' ),
-			'_wp_trash_meta_time'   => time(),
+			'_wp_trash_meta_time'   => (string) time(),
 		);
 
-		$wpdb->update(
-			self::get_orders_table_name(),
-			array(
-				'status'           => 'trash',
-				'date_updated_gmt' => current_time( 'Y-m-d H:i:s', true ),
-			),
-			array( 'id' => $order->get_id() ),
-			array( '%s', '%s' ),
-			array( '%d' )
-		);
-
+		// Stage status change and trash metadata, then save so that WC_Order::status_transition()
+		// fires the standard transition actions (e.g. 'woocommerce_order_status_<old>_to_trash',
+		// 'woocommerce_order_status_trash', 'woocommerce_order_status_changed') and adds the
+		// transition order note. See: https://github.com/woocommerce/woocommerce/issues/46740.
 		$order->set_status( 'trash' );
 
 		foreach ( $trash_metadata as $meta_key => $meta_value ) {
-			$this->add_meta(
-				$order,
-				(object) array(
-					'key'   => $meta_key,
-					'value' => $meta_value,
-				)
-			);
+			$order->update_meta_data( $meta_key, $meta_value );
 		}
+
+		$order->save();
 
 		$data_synchronizer = wc_get_container()->get( DataSynchronizer::class );
 		if ( $data_synchronizer->data_sync_is_enabled() ) {

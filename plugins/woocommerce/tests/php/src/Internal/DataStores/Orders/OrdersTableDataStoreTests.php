@@ -596,6 +596,69 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testdox Trashing an order via the HPOS data store fires the standard status transition actions and adds a transition order note.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/46740.
+	 */
+	public function test_cot_datastore_trash_fires_status_transition_actions() {
+		$this->toggle_cot_feature_and_usage( true );
+
+		$order = $this->create_complex_cot_order();
+		$order->set_status( OrderStatus::ON_HOLD );
+		$order->save();
+		$order_id = $order->get_id();
+
+		$fired = array(
+			'specific' => 0,
+			'general'  => 0,
+			'changed'  => array(),
+		);
+
+		$specific_callback = function ( $id ) use ( &$fired, $order_id ) {
+			if ( (int) $id === (int) $order_id ) {
+				++$fired['specific'];
+			}
+		};
+		$general_callback  = function ( $id ) use ( &$fired, $order_id ) {
+			if ( (int) $id === (int) $order_id ) {
+				++$fired['general'];
+			}
+		};
+		$changed_callback  = function ( $id, $from, $to ) use ( &$fired, $order_id ) {
+			if ( (int) $id === (int) $order_id ) {
+				$fired['changed'][] = array( $from, $to );
+			}
+		};
+
+		add_action( 'woocommerce_order_status_on-hold_to_trash', $specific_callback );
+		add_action( 'woocommerce_order_status_trash', $general_callback );
+		add_action( 'woocommerce_order_status_changed', $changed_callback, 10, 3 );
+
+		try {
+			$this->sut->trash_order( $order );
+		} finally {
+			remove_action( 'woocommerce_order_status_on-hold_to_trash', $specific_callback );
+			remove_action( 'woocommerce_order_status_trash', $general_callback );
+			remove_action( 'woocommerce_order_status_changed', $changed_callback, 10 );
+		}
+
+		$this->assertSame( 1, $fired['specific'], "'woocommerce_order_status_on-hold_to_trash' should fire exactly once when trashing an order." );
+		$this->assertSame( 1, $fired['general'], "'woocommerce_order_status_trash' should fire exactly once when trashing an order." );
+		$this->assertCount( 1, $fired['changed'], "'woocommerce_order_status_changed' should fire exactly once when trashing an order." );
+		$this->assertSame( array( OrderStatus::ON_HOLD, OrderStatus::TRASH ), $fired['changed'][0] );
+
+		$order_notes = wc_get_order_notes( array( 'order_id' => $order_id ) );
+		$found_note  = false;
+		foreach ( $order_notes as $note ) {
+			if ( false !== strpos( $note->content, 'On hold' ) && false !== strpos( $note->content, 'Trash' ) ) {
+				$found_note = true;
+				break;
+			}
+		}
+		$this->assertTrue( $found_note, 'A status transition order note (On hold -> Trash) should be added when trashing an order.' );
+	}
+
+	/**
 	 * @testDox Tests the `delete()` method on the COT datastore -- full deletes.
 	 *
 	 * @return void
