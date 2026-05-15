@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix WC_Coupon restriction fields (product_ids, product_categories, email_restrictions, etc.) not being cleared when `save()` is called more than once in the same request, e.g. from a callback on `woocommerce_coupon_options_save`.
