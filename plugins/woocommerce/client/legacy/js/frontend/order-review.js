@@ -155,13 +155,16 @@
 	 * @param {boolean}     visible Whether the error should be shown.
 	 */
 	function setRowRatingError( row, visible ) {
-		var rating = row.querySelector(
-			'.woocommerce-review-order__item-rating'
+		// Anchor the error directly under the product title so the customer
+		// sees the message at the top of the row, not buried below the stars
+		// where it can be off-screen when the row is taller than the viewport.
+		var title = row.querySelector(
+			'.woocommerce-review-order__item-title'
 		);
-		if ( ! rating ) {
+		if ( ! title ) {
 			return;
 		}
-		var existing = rating.querySelector( '.' + ERROR_CLASS );
+		var existing = row.querySelector( ':scope > .' + ERROR_CLASS );
 		if ( ! visible ) {
 			if ( existing ) {
 				existing.parentNode.removeChild( existing );
@@ -179,7 +182,7 @@
 		note.className = ERROR_CLASS;
 		note.setAttribute( 'role', 'alert' );
 		note.textContent = msg;
-		rating.appendChild( note );
+		title.parentNode.insertBefore( note, title.nextSibling );
 	}
 
 	/**
