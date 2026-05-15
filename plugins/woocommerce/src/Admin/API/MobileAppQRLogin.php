@@ -662,9 +662,6 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		list( $new_password, $item ) = $app_password_result;
 
-		delete_transient( $key );
-		$this->release_token_exchange_claim( $token_hash );
-
 		// Write a "consumed" record so wc-admin's polling client can transition
 		// from "QR shown" to "Signed in successfully on {device}" and surface
 		// a revoke button. Same TTL as the original token transient — there's
@@ -680,6 +677,9 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			),
 			self::TOKEN_TTL
 		);
+
+		delete_transient( $key );
+		$this->release_token_exchange_claim( $token_hash );
 
 		return rest_ensure_response(
 			array(
