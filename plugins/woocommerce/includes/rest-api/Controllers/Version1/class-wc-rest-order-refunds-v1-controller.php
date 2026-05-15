@@ -135,12 +135,16 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 
 		$dp = is_null( $request['dp'] ) ? wc_get_price_decimals() : absint( $request['dp'] );
 
+		$refund_data = $refund->get_data();
+
 		$data = array(
-			'id'           => $refund->get_id(),
-			'date_created' => wc_rest_prepare_date_response( $refund->get_date_created() ),
-			'amount'       => wc_format_decimal( $refund->get_amount(), $dp ),
-			'reason'       => $refund->get_reason(),
-			'line_items'   => array(),
+			'id'               => $refund->get_id(),
+			'date_created'     => wc_rest_prepare_date_response( $refund->get_date_created() ),
+			'amount'           => wc_format_decimal( $refund->get_amount(), $dp ),
+			'reason'           => $refund->get_reason(),
+			'refunded_by'      => isset( $refund_data['refunded_by'] ) ? (int) $refund_data['refunded_by'] : 0,
+			'refunded_payment' => isset( $refund_data['refunded_payment'] ) ? (bool) $refund_data['refunded_payment'] : false,
+			'line_items'       => array(),
 		);
 
 		// Add line items.
@@ -340,29 +344,41 @@ class WC_REST_Order_Refunds_V1_Controller extends WC_REST_Orders_V1_Controller {
 			'title'      => $this->post_type,
 			'type'       => 'object',
 			'properties' => array(
-				'id' => array(
+				'id'               => array(
 					'description' => __( 'Unique identifier for the resource.', 'woocommerce' ),
 					'type'        => 'integer',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'date_created' => array(
+				'date_created'     => array(
 					'description' => __( "The date the order refund was created, in the site's timezone.", 'woocommerce' ),
 					'type'        => 'date-time',
 					'context'     => array( 'view', 'edit' ),
 					'readonly'    => true,
 				),
-				'amount' => array(
+				'amount'           => array(
 					'description' => __( 'Refund amount.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'reason' => array(
+				'reason'           => array(
 					'description' => __( 'Reason for refund.', 'woocommerce' ),
 					'type'        => 'string',
 					'context'     => array( 'view', 'edit' ),
 				),
-				'line_items' => array(
+				'refunded_by'      => array(
+					'description' => __( 'User ID of user who created the refund.', 'woocommerce' ),
+					'type'        => 'integer',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'refunded_payment' => array(
+					'description' => __( 'If the payment was refunded via the API.', 'woocommerce' ),
+					'type'        => 'boolean',
+					'context'     => array( 'view', 'edit' ),
+					'readonly'    => true,
+				),
+				'line_items'       => array(
 					'description' => __( 'Line items data.', 'woocommerce' ),
 					'type'        => 'array',
 					'context'     => array( 'view', 'edit' ),

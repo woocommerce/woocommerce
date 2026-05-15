@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+REST API: Include the read-only `refunded_payment` (and `refunded_by`) properties in V1 order refund responses so POST and GET return matching shapes.

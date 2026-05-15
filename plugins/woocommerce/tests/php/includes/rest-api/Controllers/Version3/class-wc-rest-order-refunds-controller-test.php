@@ -90,4 +90,42 @@ class WC_REST_Order_Refunds_Controller_Test extends WC_REST_Unit_Test_Case {
 
 		$this->assert_incomplete_meta_data_handled_correctly( wc_get_order( $response->get_data()['id'] ) );
 	}
+
+	/**
+	 * Test that the POST response on the refunds endpoint includes the
+	 * read-only refunded_payment property, matching the GET response.
+	 *
+	 * Regression test for woocommerce#27296.
+	 */
+	public function test_create_refund_response_includes_refunded_payment() {
+		wp_set_current_user( 1 );
+		$order = WC_Helper_Order::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/orders/' . $order->get_id() . '/refunds' );
+		$request->set_header( 'content-type', 'application/json' );
+		$request->set_body(
+			wp_json_encode(
+				array(
+					'amount'     => '1.00',
+					'api_refund' => false,
+				)
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 201, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'refunded_payment', $data );
+		$this->assertFalse( $data['refunded_payment'] );
+
+		// Confirm parity with the GET response for the same refund.
+		$get_request  = new WP_REST_Request( 'GET', '/wc/v3/orders/' . $order->get_id() . '/refunds/' . $data['id'] );
+		$get_response = $this->server->dispatch( $get_request );
+		$get_data     = $get_response->get_data();
+		$this->assertArrayHasKey( 'refunded_payment', $get_data );
+		$this->assertSame( $data['refunded_payment'], $get_data['refunded_payment'] );
+	}
 }
