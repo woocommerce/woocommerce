@@ -98,6 +98,85 @@ class WC_Shipping_Zone_Data_Store_CPT_Test extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox get_zone_id_from_package() returns a state-filtered zone for an optional-state country when the destination state is blank.
+	 */
+	public function test_get_zone_id_from_package_matches_state_zone_when_optional_state_is_blank() {
+		// Auckland-specific state-filtered zone, lower zone_order so it wins ordering ties.
+		$state_zone = new WC_Shipping_Zone();
+		$state_zone->set_zone_name( 'NZ Auckland' );
+		$state_zone->set_zone_order( 1 );
+		$state_zone->add_location( 'NZ:NZ-AUK', 'state' );
+		$state_zone->save();
+
+		// Country-wide NZ fallback zone, higher zone_order.
+		$country_zone = new WC_Shipping_Zone();
+		$country_zone->set_zone_name( 'NZ Fallback' );
+		$country_zone->set_zone_order( 2 );
+		$country_zone->add_location( 'NZ', 'country' );
+		$country_zone->save();
+
+		$package = array(
+			'destination' => array(
+				// Optional in NZ — left blank, as Apple/Google Pay would.
+				'country'  => 'NZ',
+				'state'    => '',
+				'postcode' => '1021',
+			),
+		);
+
+		$datastore = new WC_Shipping_Zone_Data_Store();
+		$matched   = (int) $datastore->get_zone_id_from_package( $package );
+
+		$this->assertSame(
+			$state_zone->get_id(),
+			$matched,
+			'Optional-state countries with a blank state should still match more specific state-filtered zones.'
+		);
+
+		$state_zone->delete();
+		$country_zone->delete();
+	}
+
+	/**
+	 * @testdox get_zone_id_from_package() still requires an exact state match for countries where the state field is required.
+	 */
+	public function test_get_zone_id_from_package_requires_state_for_required_state_country() {
+		// California-specific zone — US states are required, so a blank state must NOT match.
+		$state_zone = new WC_Shipping_Zone();
+		$state_zone->set_zone_name( 'US California' );
+		$state_zone->set_zone_order( 1 );
+		$state_zone->add_location( 'US:CA', 'state' );
+		$state_zone->save();
+
+		// US country fallback.
+		$country_zone = new WC_Shipping_Zone();
+		$country_zone->set_zone_name( 'US Fallback' );
+		$country_zone->set_zone_order( 2 );
+		$country_zone->add_location( 'US', 'country' );
+		$country_zone->save();
+
+		$package = array(
+			'destination' => array(
+				'country'  => 'US',
+				'state'    => '',
+				'postcode' => '94016',
+			),
+		);
+
+		$datastore = new WC_Shipping_Zone_Data_Store();
+		$matched   = (int) $datastore->get_zone_id_from_package( $package );
+
+		$this->assertSame(
+			$country_zone->get_id(),
+			$matched,
+			'Required-state countries should not wildcard-match state-filtered zones when the state is blank.'
+		);
+
+		$state_zone->delete();
+		$country_zone->delete();
+	}
+
+	/**
 	 * @testdox add_meta() returns 0 as shipping zones do not support meta storage.
 	 */
 	public function test_add_meta_returns_zero() {

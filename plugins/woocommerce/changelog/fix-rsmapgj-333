@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Match state-filtered shipping zones for countries where the state field is optional (e.g. New Zealand) even when the destination state is blank, so customers using express payment methods or checkouts that omit the optional state still see the correct shipping rates.

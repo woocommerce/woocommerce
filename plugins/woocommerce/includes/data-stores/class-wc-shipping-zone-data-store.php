@@ -313,7 +313,23 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 		// Work out criteria for our zone search.
 		$criteria   = array();
 		$criteria[] = $wpdb->prepare( "( ( location_type = 'country' AND location_code = %s )", $country );
-		$criteria[] = $wpdb->prepare( "OR ( location_type = 'state' AND location_code = %s )", $country . ':' . $state );
+
+		/*
+		 * For countries where the state field is optional at checkout (e.g. New Zealand),
+		 * the destination state can legitimately be blank — including for express payment
+		 * methods such as Apple Pay / Google Pay that do not provide a state value. In that
+		 * situation, matching `location_code = 'NZ:'` excludes every state-filtered zone
+		 * the merchant has configured, leaving customers stranded on broader fallback zones
+		 * (or no zone at all). Treat the blank state as a wildcard within the country so
+		 * state-filtered zones remain reachable; the existing `zone_order` ordering and
+		 * postcode-rule filtering below continue to pick the most specific matching zone.
+		 */
+		if ( '' === $state && $country && $this->country_has_optional_state( $country ) ) {
+			$criteria[] = $wpdb->prepare( "OR ( location_type = 'state' AND location_code LIKE %s )", $country . ':%' );
+		} else {
+			$criteria[] = $wpdb->prepare( "OR ( location_type = 'state' AND location_code = %s )", $country . ':' . $state );
+		}
+
 		$criteria[] = $wpdb->prepare( "OR ( location_type = 'continent' AND location_code = %s )", $continent );
 		$criteria[] = 'OR ( location_type IS NULL ) )';
 
@@ -347,6 +363,37 @@ class WC_Shipping_Zone_Data_Store extends WC_Data_Store_WP implements WC_Object_
 			WHERE " . implode( ' ', $criteria ) // phpcs:ignore WordPress.DB.PreparedSQL.NotPrepared
 			. ' ORDER BY zone_order ASC, zones.zone_id ASC LIMIT 1'
 		);
+	}
+
+	/**
+	 * Determine whether a country marks the address state field as optional.
+	 *
+	 * Some countries (for example New Zealand) treat the state/region/province field as
+	 * optional at checkout, which means a destination address can arrive at zone matching
+	 * with a blank state even though the merchant configured a state-filtered shipping
+	 * zone. This helper centralises the locale lookup used to decide whether to treat a
+	 * blank state as a country-wide wildcard during zone matching.
+	 *
+	 * @since 10.9.0
+	 * @param string $country Country code (uppercase ISO 3166-1 alpha-2).
+	 * @return bool True when the state field is explicitly marked as not required for the country.
+	 */
+	protected function country_has_optional_state( $country ) {
+		if ( ! function_exists( 'WC' ) || ! WC()->countries ) {
+			return false;
+		}
+
+		$locale = WC()->countries->get_country_locale();
+
+		if ( ! isset( $locale[ $country ]['state'] ) ) {
+			return false;
+		}
+
+		$state_locale = $locale[ $country ]['state'];
+
+		// `required` only counts as "optional" when the locale explicitly sets it to false.
+		// Treating an unset value as optional would change behaviour for every country.
+		return isset( $state_locale['required'] ) && false === $state_locale['required'];
 	}
 
 	/**
