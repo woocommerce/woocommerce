@@ -337,6 +337,14 @@ function wc_get_account_orders_actions( $order ) {
 		unset( $actions['cancel'] );
 	}
 
+	/**
+	 * Filters the actions available for an order on the My Account orders list.
+	 *
+	 * @since 3.2.0
+	 *
+	 * @param array    $actions Array of order actions, keyed by action slug. Each action is an array with 'url' and 'name' keys.
+	 * @param WC_Order $order   Order instance.
+	 */
 	$actions = apply_filters( 'woocommerce_my_account_my_orders_actions', $actions, $order );
 
 	if ( ! is_array( $actions ) ) {

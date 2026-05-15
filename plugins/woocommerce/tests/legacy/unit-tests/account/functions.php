@@ -218,8 +218,14 @@ class WC_Tests_Account_Functions extends WC_Unit_Test_Case {
 				$actions['invalid_string']  = 'not-an-array';
 				$actions['missing_url']     = array( 'name' => 'No URL' );
 				$actions['missing_name']    = array( 'url' => 'https://example.com' );
-				$actions['non_string_url']  = array( 'name' => 'Test', 'url' => 123 );
-				$actions['non_string_name'] = array( 'name' => true, 'url' => 'https://example.com' );
+				$actions['non_string_url']  = array(
+					'name' => 'Test',
+					'url'  => 123,
+				);
+				$actions['non_string_name'] = array(
+					'name' => true,
+					'url'  => 'https://example.com',
+				);
 				return $actions;
 			}
 		);
