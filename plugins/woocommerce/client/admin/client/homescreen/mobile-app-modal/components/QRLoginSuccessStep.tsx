@@ -3,7 +3,7 @@
  */
 import React, { useState } from '@wordpress/element';
 import { Button, Modal } from '@wordpress/components';
-import { sprintf, __ } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
@@ -11,76 +11,14 @@ import { recordEvent } from '@woocommerce/tracks';
  */
 import type { QRLoginDeviceInfo } from './useQRLoginToken';
 import { useRevokeQRLoginAccess } from './useRevokeQRLoginAccess';
+import {
+	buildQRLoginDeviceHeadline,
+	buildQRLoginDeviceSubline,
+} from './qrLoginDeviceCopy';
 
 type QRLoginSuccessStepProps = {
 	deviceInfo: QRLoginDeviceInfo | null;
 	apUuid: string | null;
-};
-
-/**
- * Build the headline shown after a successful sign-in. Prefers the device
- * model when the mobile app sent one; falls back to the OS, then to a
- * device-agnostic line for older mobile clients that don't send a device
- * payload.
- */
-const buildHeadline = ( device: QRLoginDeviceInfo | null ): string => {
-	const model = device?.model?.trim();
-	if ( model ) {
-		return sprintf(
-			/* translators: %s: device model, e.g. "iPhone 15". */
-			__( 'Signed in successfully on %s', 'woocommerce' ),
-			model
-		);
-	}
-
-	const os = device?.os?.trim();
-	if ( os ) {
-		return sprintf(
-			/* translators: %s: OS name, e.g. "iOS" or "Android". */
-			__( 'Signed in successfully on %s', 'woocommerce' ),
-			os
-		);
-	}
-
-	return __( 'Signed in successfully', 'woocommerce' );
-};
-
-/**
- * Build a single-line subline summarising the device the merchant signed in
- * with. Skips any field the mobile app didn't send so older clients don't
- * render `· undefined` artifacts.
- *
- * The model (and brand) deliberately do NOT appear here — they're already
- * shown in the headline above ("Signed in successfully on {model}"), and
- * the user feedback was clear that we should not duplicate that fact in
- * the subline.
- */
-const buildSubline = ( device: QRLoginDeviceInfo | null ): string => {
-	if ( ! device ) {
-		return '';
-	}
-
-	const parts: string[] = [];
-
-	if ( device.os ) {
-		parts.push(
-			device.os_version
-				? `${ device.os } ${ device.os_version }`
-				: device.os
-		);
-	}
-
-	if ( device.app_version ) {
-		parts.push(
-			sprintf(
-				/* translators: %s: mobile app version, e.g. "24.7.0". */
-				__( 'App version %s', 'woocommerce' ),
-				device.app_version
-			)
-		);
-	}
-
-	return parts.join( ' · ' );
 };
 
 /**
@@ -102,8 +40,8 @@ export const QRLoginSuccessStep = ( {
 	const { revoke, isRevoking, isRevoked, errorMessage } =
 		useRevokeQRLoginAccess();
 
-	const headline = buildHeadline( deviceInfo );
-	const subline = buildSubline( deviceInfo );
+	const headline = buildQRLoginDeviceHeadline( deviceInfo );
+	const subline = buildQRLoginDeviceSubline( deviceInfo );
 
 	const openConfirmDialog = () => {
 		recordEvent( 'mobile_app_qr_direct_login_revoke_intent' );

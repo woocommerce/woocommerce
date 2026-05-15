@@ -4,80 +4,23 @@
 import React from '@wordpress/element';
 import type { ReactNode } from 'react';
 import { Button } from '@wordpress/components';
-import { sprintf, __ } from '@wordpress/i18n';
+import { __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
  */
 import type { QRLoginDeviceInfo } from './useQRLoginToken';
+import {
+	buildQRLoginDeviceHeadline,
+	buildQRLoginDeviceSubline,
+} from './qrLoginDeviceCopy';
 
 type QRLoginConsumedPanelProps = {
 	deviceInfo: QRLoginDeviceInfo | null;
 	onRevoke: () => void;
 	onDone?: () => void;
 	errorMessage?: ReactNode | null;
-};
-
-/**
- * Build the headline shown after a successful sign-in. Prefers the device
- * model when the mobile app sent one; falls back to the OS, then to a
- * device-agnostic line for older mobile clients that don't yet send a
- * `device` payload.
- */
-const buildHeadline = ( device: QRLoginDeviceInfo | null ): string => {
-	const model = device?.model?.trim();
-	if ( model ) {
-		return sprintf(
-			/* translators: %s: device model, e.g. "iPhone 15". */
-			__( 'Signed in successfully on %s', 'woocommerce' ),
-			model
-		);
-	}
-
-	const os = device?.os?.trim();
-	if ( os ) {
-		return sprintf(
-			/* translators: %s: OS name, e.g. "iOS" or "Android". */
-			__( 'Signed in successfully on %s', 'woocommerce' ),
-			os
-		);
-	}
-
-	return __( 'Signed in successfully', 'woocommerce' );
-};
-
-/**
- * Build a one-line subline summarizing the device/app the merchant signed in
- * with. Skips any field the mobile app didn't send so we never render
-  " · undefined" garbage.
- */
-const buildSubline = ( device: QRLoginDeviceInfo | null ): string => {
-	if ( ! device ) {
-		return '';
-	}
-
-	const parts: string[] = [];
-
-	if ( device.os ) {
-		parts.push(
-			device.os_version
-				? `${ device.os } ${ device.os_version }`
-				: device.os
-		);
-	}
-
-	if ( device.app_version ) {
-		parts.push(
-			sprintf(
-				/* translators: %s: mobile app version, e.g. "24.7.0". */
-				__( 'App version %s', 'woocommerce' ),
-				device.app_version
-			)
-		);
-	}
-
-	return parts.join( ' · ' );
 };
 
 /**
@@ -92,8 +35,8 @@ export const QRLoginConsumedPanel = ( {
 	onDone,
 	errorMessage,
 }: QRLoginConsumedPanelProps ) => {
-	const headline = buildHeadline( deviceInfo );
-	const subline = buildSubline( deviceInfo );
+	const headline = buildQRLoginDeviceHeadline( deviceInfo );
+	const subline = buildQRLoginDeviceSubline( deviceInfo );
 
 	return (
 		<div
