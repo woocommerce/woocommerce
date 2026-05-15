@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent duplicate order actions (status-change hooks, completion emails) when the Update button on the order edit screen is double-clicked.

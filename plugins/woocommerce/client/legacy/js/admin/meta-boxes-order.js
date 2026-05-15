@@ -33,6 +33,60 @@ jQuery( function ( $ ) {
 			$( 'a.load_customer_billing' ).on( 'click', this.load_billing );
 			$( 'a.load_customer_shipping' ).on( 'click', this.load_shipping );
 			$( '#customer_user' ).on( 'change', this.change_customer_user );
+			this.prevent_double_submit();
+		},
+
+		/**
+		 * Prevent the order edit form from being submitted more than once when the
+		 * Update button is double-clicked. The browser captures form data at the
+		 * start of submission, so disabling the submit buttons after submission
+		 * starts is safe and does not drop the button's `name=save` value.
+		 *
+		 * This guards both the HPOS order edit form (`form#order`) and the legacy
+		 * post.php form (`form#post`), and also no-ops subsequent clicks on the
+		 * publish / save_order buttons.
+		 */
+		prevent_double_submit: function() {
+			var $form = $( '#woocommerce-order-actions' ).closest( 'form' );
+
+			// Fallback: HPOS uses form#order, legacy CPT uses form#post.
+			if ( ! $form.length ) {
+				$form = $( 'form#order, form#post' ).first();
+			}
+
+			if ( ! $form.length ) {
+				return;
+			}
+
+			// jQuery `.data()` keys are namespaced to avoid clashing with other
+			// scripts that may also attach state to the form element.
+			$form.on( 'submit.wc_prevent_double_submit', function() {
+				var $f = $( this );
+
+				if ( $f.data( 'wc-order-submitting' ) ) {
+					return false;
+				}
+
+				$f.data( 'wc-order-submitting', true );
+
+				// Disable the publish (legacy) and save_order (HPOS) buttons so
+				// the form cannot be resubmitted while the request is in flight.
+				$f.find( '#publish, button.save_order' )
+					.prop( 'disabled', true )
+					.addClass( 'disabled' );
+			} );
+
+			// Block direct clicks on the publish / save_order buttons once the
+			// form has been submitted, in case a click event fires after the
+			// initial submission but before the page navigates away.
+			$form.on( 'click.wc_prevent_double_submit', '#publish, button.save_order', function( e ) {
+				var $f = $( this ).closest( 'form' );
+
+				if ( $f.data( 'wc-order-submitting' ) ) {
+					e.preventDefault();
+					return false;
+				}
+			} );
 		},
 
 		change_country: function( e, stickValue ) {
