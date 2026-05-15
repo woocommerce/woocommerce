@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Preserve 0% tax rates on refund orders so they are recorded alongside non-zero rates for accurate accounting and reporting.

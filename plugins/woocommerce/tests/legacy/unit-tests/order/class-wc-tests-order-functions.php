@@ -1450,6 +1450,97 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that 0% tax rates are preserved on refund orders.
+	 *
+	 * @link https://github.com/woocommerce/woocommerce/issues/27118
+	 */
+	public function test_wc_create_refund_preserves_zero_percent_tax_27118() {
+		update_option( 'woocommerce_calc_taxes', 'yes' );
+
+		$tax_rate_id = WC_Tax::_insert_tax_rate(
+			array(
+				'tax_rate_country'  => '',
+				'tax_rate_state'    => '',
+				'tax_rate'          => '0.0000',
+				'tax_rate_name'     => 'Zero Rate',
+				'tax_rate_priority' => '1',
+				'tax_rate_compound' => '0',
+				'tax_rate_shipping' => '0',
+				'tax_rate_order'    => '1',
+				'tax_rate_class'    => '',
+			)
+		);
+
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_tax_status( ProductTaxStatus::TAXABLE );
+		$product->set_regular_price( 20 );
+		$product->save();
+
+		$order = new WC_Order();
+		$item  = new WC_Order_Item_Product();
+		$item->set_props(
+			array(
+				'product'  => $product,
+				'quantity' => 1,
+				'subtotal' => 20,
+				'total'    => 20,
+				'taxes'    => array(
+					'total'    => array( $tax_rate_id => '0' ),
+					'subtotal' => array( $tax_rate_id => '0' ),
+				),
+			)
+		);
+		$order->add_item( $item );
+
+		$tax_item = new WC_Order_Item_Tax();
+		$tax_item->set_rate( $tax_rate_id );
+		$tax_item->set_tax_total( 0 );
+		$tax_item->set_shipping_tax_total( 0 );
+		$order->add_item( $tax_item );
+
+		$order->set_total( 20 );
+		$order->save();
+
+		// Sanity check: the parent order should record the 0% tax line.
+		$order_taxes = $order->get_items( 'tax' );
+		$this->assertCount( 1, $order_taxes, 'Parent order should have a 0% tax line item.' );
+
+		$line_items = $order->get_items( 'line_item' );
+		$item_id    = array_keys( $line_items )[0];
+
+		$refund = wc_create_refund(
+			array(
+				'amount'     => 20,
+				'order_id'   => $order->get_id(),
+				'line_items' => array(
+					$item_id => array(
+						'qty'          => 1,
+						'refund_total' => 20,
+						'refund_tax'   => array( $tax_rate_id => 0 ),
+					),
+				),
+			)
+		);
+
+		$this->assertNotWPError( $refund );
+
+		// The 0% tax line should be present on the refund order.
+		$refund_taxes = $refund->get_items( 'tax' );
+		$this->assertCount( 1, $refund_taxes, '0% tax line should be carried over to the refund order.' );
+
+		$refund_tax_item = array_values( $refund_taxes )[0];
+		$this->assertEquals( $tax_rate_id, $refund_tax_item->get_rate_id() );
+		$this->assertEquals( 0.0, (float) $refund_tax_item->get_tax_total() );
+
+		// The refunded line item should also retain its 0% tax entry.
+		$refunded_line_items = $refund->get_items( 'line_item' );
+		$this->assertCount( 1, $refunded_line_items );
+		$refunded_line_item = array_values( $refunded_line_items )[0];
+		$refunded_taxes     = $refunded_line_item->get_taxes();
+		$this->assertArrayHasKey( $tax_rate_id, $refunded_taxes['total'], 'Refunded item taxes should include the 0% rate.' );
+	}
+
+	/**
 	 * Test wc_sanitize_order_id().
 	 */
 	public function test_wc_sanitize_order_id() {

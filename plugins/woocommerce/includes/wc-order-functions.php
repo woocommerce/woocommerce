@@ -606,7 +606,16 @@ function wc_create_refund( $args = array() ) {
 
 				$qty          = isset( $args['line_items'][ $item_id ]['qty'] ) ? $args['line_items'][ $item_id ]['qty'] : 0;
 				$refund_total = $args['line_items'][ $item_id ]['refund_total'];
-				$refund_tax   = isset( $args['line_items'][ $item_id ]['refund_tax'] ) ? array_filter( (array) $args['line_items'][ $item_id ]['refund_tax'] ) : array();
+				// Keep numeric entries (including a literal 0) so 0% tax rates are preserved on the refund.
+				// See https://github.com/woocommerce/woocommerce/issues/27118.
+				$refund_tax = array();
+				if ( isset( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
+					foreach ( (array) $args['line_items'][ $item_id ]['refund_tax'] as $rate_id => $tax_amount ) {
+						if ( is_numeric( $tax_amount ) ) {
+							$refund_tax[ $rate_id ] = (float) $tax_amount;
+						}
+					}
+				}
 
 				if ( empty( $qty ) && empty( $refund_total ) && empty( $args['line_items'][ $item_id ]['refund_tax'] ) ) {
 					continue;
