@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { Field, FormField } from '@wordpress/dataviews';
+import { __ } from '@wordpress/i18n';
 
 /**
  * Internal dependencies
@@ -89,84 +90,150 @@ const PARENT_DIMENSIONS_FORM_FIELD: ProductEditFormField = {
 	children: [ 'length', 'width', 'height' ],
 };
 
+function createProductEditFormGroup(
+	id: string,
+	label: string,
+	children: ProductEditFormField[]
+): ProductEditFormField {
+	return {
+		id,
+		label,
+		children,
+	};
+}
+
 const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
-	'name',
-	'product_status',
-	'catalog_visibility',
-	'regular_price',
-	'sale_price',
-	'images',
-	'downloadable',
-	'sku',
-	'stock',
-	'manage_stock',
-	'stock_quantity',
-	'categories',
-	'brands',
-	'tags',
-	'featured',
-	DIMENSIONS_FORM_FIELD,
-	'height',
+	createProductEditFormGroup(
+		'general-fields',
+		__( 'General', 'woocommerce' ),
+		[ 'name', 'product_status', 'catalog_visibility' ]
+	),
+	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
+		'regular_price',
+		'sale_price',
+	] ),
+	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+		'downloadable',
+	] ),
+	createProductEditFormGroup(
+		'inventory-fields',
+		__( 'Inventory', 'woocommerce' ),
+		[ 'sku', 'stock', 'manage_stock', 'stock_quantity' ]
+	),
+	createProductEditFormGroup(
+		'product-organization-fields',
+		__( 'Product organization', 'woocommerce' ),
+		[ 'categories', 'brands', 'tags', 'featured' ]
+	),
+	createProductEditFormGroup(
+		'shipping-fields',
+		__( 'Shipping', 'woocommerce' ),
+		[ DIMENSIONS_FORM_FIELD, 'height' ]
+	),
 ] satisfies ProductEditFormField[];
 
 const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
-	'product_status',
-	'regular_price',
-	'sale_price',
-	'images',
-	'sku',
-	'manage_stock',
-	'stock',
-	'stock_quantity',
-	'shipping_class',
-	DIMENSIONS_FORM_FIELD,
-	'height',
+	createProductEditFormGroup(
+		'general-fields',
+		__( 'General', 'woocommerce' ),
+		[ 'product_status' ]
+	),
+	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
+		'regular_price',
+		'sale_price',
+	] ),
+	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+	] ),
+	createProductEditFormGroup(
+		'inventory-fields',
+		__( 'Inventory', 'woocommerce' ),
+		[ 'sku', 'manage_stock', 'stock', 'stock_quantity' ]
+	),
+	createProductEditFormGroup(
+		'shipping-fields',
+		__( 'Shipping', 'woocommerce' ),
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'height' ]
+	),
 ] satisfies ProductEditFormField[];
 
 const VARIABLE_PRODUCT_EDIT_FORM_FIELDS = [
-	'name',
-	'product_status',
-	'catalog_visibility',
-	'images',
-	'sku',
-	'manage_stock',
-	'stock',
-	'categories',
-	'brands',
-	'tags',
-	'featured',
-	'shipping_class',
-	PARENT_DIMENSIONS_FORM_FIELD,
-	'weight',
+	createProductEditFormGroup(
+		'general-fields',
+		__( 'General', 'woocommerce' ),
+		[ 'name', 'product_status', 'catalog_visibility' ]
+	),
+	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+	] ),
+	createProductEditFormGroup(
+		'inventory-fields',
+		__( 'Inventory', 'woocommerce' ),
+		[ 'sku', 'manage_stock', 'stock' ]
+	),
+	createProductEditFormGroup(
+		'product-organization-fields',
+		__( 'Product organization', 'woocommerce' ),
+		[ 'categories', 'brands', 'tags', 'featured' ]
+	),
+	createProductEditFormGroup(
+		'shipping-fields',
+		__( 'Shipping', 'woocommerce' ),
+		[ 'shipping_class', PARENT_DIMENSIONS_FORM_FIELD, 'weight' ]
+	),
 ] satisfies ProductEditFormField[];
 
 const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
-	'name',
-	'product_status',
-	'catalog_visibility',
-	'regular_price',
-	'sale_price',
-	'images',
-	'external_url',
-	'button_text',
-	'sku',
-	'categories',
-	'brands',
-	'tags',
-	'featured',
+	createProductEditFormGroup(
+		'general-fields',
+		__( 'General', 'woocommerce' ),
+		[
+			'name',
+			'product_status',
+			'catalog_visibility',
+			'external_url',
+			'button_text',
+		]
+	),
+	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
+		'regular_price',
+		'sale_price',
+	] ),
+	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+	] ),
+	createProductEditFormGroup(
+		'inventory-fields',
+		__( 'Inventory', 'woocommerce' ),
+		[ 'sku' ]
+	),
+	createProductEditFormGroup(
+		'product-organization-fields',
+		__( 'Product organization', 'woocommerce' ),
+		[ 'categories', 'brands', 'tags', 'featured' ]
+	),
 ] satisfies ProductEditFormField[];
 
 const GROUPED_PRODUCT_EDIT_FORM_FIELDS = [
-	'name',
-	'product_status',
-	'catalog_visibility',
-	'upsell_ids',
-	'images',
-	'sku',
-	'categories',
-	'brands',
-	'tags',
-	'featured',
+	createProductEditFormGroup(
+		'general-fields',
+		__( 'General', 'woocommerce' ),
+		[ 'name', 'product_status', 'catalog_visibility', 'upsell_ids' ]
+	),
+	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+	] ),
+	createProductEditFormGroup(
+		'inventory-fields',
+		__( 'Inventory', 'woocommerce' ),
+		[ 'sku' ]
+	),
+	createProductEditFormGroup(
+		'product-organization-fields',
+		__( 'Product organization', 'woocommerce' ),
+		[ 'categories', 'brands', 'tags', 'featured' ]
+	),
 ] satisfies ProductEditFormField[];
 
 const PRODUCT_TYPE_FORM_FIELDS = {
@@ -250,6 +317,18 @@ export function isProductVariation(
 	return product.type === 'variation' || Boolean( product.parent_id );
 }
 
+function getProductEditFormFieldIds(
+	formField: ProductEditFormField
+): ProductEditFieldId[] {
+	if ( typeof formField === 'string' ) {
+		return [ formField ];
+	}
+
+	return ( formField.children ?? [] ).flatMap( ( child ) =>
+		getProductEditFormFieldIds( child as ProductEditFormField )
+	);
+}
+
 function getProductType( product: ProductEntityRecord ): ProductType {
 	if ( isProductVariation( product ) ) {
 		return 'variation';
@@ -262,16 +341,7 @@ function getProductTypeFieldIds(
 	product: ProductEntityRecord
 ): ProductEditFieldId[] {
 	return PRODUCT_TYPE_FORM_FIELDS[ getProductType( product ) ].flatMap(
-		( formField ) => {
-			if ( typeof formField === 'string' ) {
-				return [ formField ];
-			}
-
-			return ( formField.children ?? [] ).filter(
-				( child ): child is ProductEditFieldId =>
-					typeof child === 'string'
-			);
-		}
+		getProductEditFormFieldIds
 	);
 }
 
@@ -500,8 +570,38 @@ export function getVisibleProductEditFields(
 	);
 }
 
+function pruneProductEditFormField(
+	formField: ProductEditFormField,
+	visibleFieldIds: Set< string >
+): ProductEditFormField | undefined {
+	if ( typeof formField === 'string' ) {
+		return visibleFieldIds.has( formField ) ? formField : undefined;
+	}
+
+	const children = ( formField.children ?? [] )
+		.map( ( child ) =>
+			pruneProductEditFormField(
+				child as ProductEditFormField,
+				visibleFieldIds
+			)
+		)
+		.filter(
+			( child ): child is ProductEditFormField => child !== undefined
+		);
+
+	if ( children.length === 0 ) {
+		return undefined;
+	}
+
+	return {
+		...formField,
+		children,
+	};
+}
+
 export function getProductTypeFormFields(
-	products: ProductEntityRecord[]
+	products: ProductEntityRecord[],
+	visibleFields?: ProductField[]
 ): Array< FormField | string > {
 	const [ firstProduct ] = products;
 
@@ -509,5 +609,24 @@ export function getProductTypeFormFields(
 		return [];
 	}
 
-	return [ ...PRODUCT_TYPE_FORM_FIELDS[ getProductType( firstProduct ) ] ];
+	const formFields = [
+		...PRODUCT_TYPE_FORM_FIELDS[ getProductType( firstProduct ) ],
+	];
+
+	if ( ! visibleFields ) {
+		return formFields;
+	}
+
+	const visibleFieldIds = new Set(
+		visibleFields.map( ( field ) => field.id )
+	);
+
+	return formFields
+		.map( ( formField ) =>
+			pruneProductEditFormField( formField, visibleFieldIds )
+		)
+		.filter(
+			( formField ): formField is ProductEditFormField =>
+				formField !== undefined
+		);
 }

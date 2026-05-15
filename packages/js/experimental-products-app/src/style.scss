@@ -95,6 +95,25 @@
 
 .woocommerce-product-edit__form {
 	flex: 1;
+
+	// TODO: Improve grouped DataForm section spacing at the DataViews library level.
+	> .dataforms-layouts__wrapper {
+		gap: 0 !important;
+	}
+
+	.dataforms-layouts-regular__header :is(h1, h2, h3, h4, h5, h6) {
+		margin: 0 !important;
+		font-size: 15px !important;
+	}
+
+	.dataforms-layouts-regular__header + .dataforms-layouts__wrapper {
+		gap: 16px !important;
+		margin-top: 16px;
+	}
+
+	.dataforms-layouts__wrapper + .dataforms-layouts-regular__header {
+		margin-top: 32px;
+	}
 }
 
 .woocommerce-product-edit__footer {

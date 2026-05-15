@@ -493,11 +493,11 @@ describe( 'product edit utils', () => {
 				'name',
 				'product_status',
 				'catalog_visibility',
+				'external_url',
+				'button_text',
 				'regular_price',
 				'sale_price',
 				'images',
-				'external_url',
-				'button_text',
 				'sku',
 				'categories',
 				'brands',
@@ -969,90 +969,198 @@ describe( 'product edit utils', () => {
 	} );
 
 	describe( 'getProductTypeFormFields', () => {
-		it( 'uses simple product form config with height last', () => {
+		const getFormFields = ( products: ProductEntityRecord[] ) =>
+			getProductTypeFormFields(
+				products,
+				getVisibleProductEditFields(
+					getProductEditFields( productFields ),
+					products
+				)
+			);
+
+		it( 'uses grouped simple product form config', () => {
 			const product = buildProduct( {
 				type: 'simple',
 				virtual: false,
+				downloadable: true,
+				manage_stock: true,
 			} );
 
-			expect( getProductTypeFormFields( [ product ] ) ).toEqual( [
-				'name',
-				'product_status',
-				'catalog_visibility',
-				'regular_price',
-				'sale_price',
-				'images',
-				'downloadable',
-				'sku',
-				'stock',
-				'manage_stock',
-				'stock_quantity',
-				'categories',
-				'brands',
-				'tags',
-				'featured',
+			expect( getFormFields( [ product ] ) ).toEqual( [
 				{
-					id: 'dimensions',
-					layout: { type: 'row' },
-					children: [ 'weight', 'length', 'width' ],
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+					],
 				},
-				'height',
+				{
+					id: 'price-fields',
+					label: 'Price',
+					children: [ 'regular_price', 'sale_price' ],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images', 'downloadable' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku', 'manage_stock', 'stock_quantity' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
+				{
+					id: 'shipping-fields',
+					label: 'Shipping',
+					children: [
+						{
+							id: 'dimensions',
+							layout: { type: 'row' },
+							children: [ 'weight', 'length', 'width' ],
+						},
+						'height',
+					],
+				},
 			] );
 		} );
 
-		it( 'uses variable parent form config in design order', () => {
+		it( 'uses grouped variable parent form config', () => {
 			const product = buildProduct( {
 				type: 'variable',
 				virtual: false,
 			} );
 
-			expect( getProductTypeFormFields( [ product ] ) ).toEqual( [
-				'name',
-				'product_status',
-				'catalog_visibility',
-				'images',
-				'sku',
-				'manage_stock',
-				'stock',
-				'categories',
-				'brands',
-				'tags',
-				'featured',
-				'shipping_class',
+			expect( getFormFields( [ product ] ) ).toEqual( [
 				{
-					id: 'parent-dimensions',
-					layout: { type: 'row' },
-					children: [ 'length', 'width', 'height' ],
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+					],
 				},
-				'weight',
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku', 'manage_stock', 'stock' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
+				{
+					id: 'shipping-fields',
+					label: 'Shipping',
+					children: [
+						'shipping_class',
+						{
+							id: 'parent-dimensions',
+							layout: { type: 'row' },
+							children: [ 'length', 'width', 'height' ],
+						},
+						'weight',
+					],
+				},
 			] );
 		} );
 
-		it( 'uses variation product form config', () => {
+		it( 'uses grouped variation product form config', () => {
 			const product = buildProduct( {
 				id: 34,
 				parent_id: 12,
 				type: 'variation',
 				virtual: false,
 				downloadable: true,
+				manage_stock: true,
 			} );
 
-			expect( getProductTypeFormFields( [ product ] ) ).toEqual( [
-				'product_status',
-				'regular_price',
-				'sale_price',
-				'images',
-				'sku',
-				'manage_stock',
-				'stock',
-				'stock_quantity',
-				'shipping_class',
+			expect( getFormFields( [ product ] ) ).toEqual( [
 				{
-					id: 'dimensions',
-					layout: { type: 'row' },
-					children: [ 'weight', 'length', 'width' ],
+					id: 'general-fields',
+					label: 'General',
+					children: [ 'product_status' ],
 				},
-				'height',
+				{
+					id: 'price-fields',
+					label: 'Price',
+					children: [ 'regular_price', 'sale_price' ],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku', 'manage_stock', 'stock_quantity' ],
+				},
+				{
+					id: 'shipping-fields',
+					label: 'Shipping',
+					children: [
+						'shipping_class',
+						{
+							id: 'dimensions',
+							layout: { type: 'row' },
+							children: [ 'weight', 'length', 'width' ],
+						},
+						'height',
+					],
+				},
+			] );
+		} );
+
+		it( 'prunes empty groups when all descendants are hidden', () => {
+			const product = buildProduct( {
+				type: 'simple',
+				virtual: true,
+			} );
+
+			expect( getFormFields( [ product ] ) ).toEqual( [
+				{
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+					],
+				},
+				{
+					id: 'price-fields',
+					label: 'Price',
+					children: [ 'regular_price', 'sale_price' ],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku', 'stock', 'manage_stock' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
 			] );
 		} );
 	} );
