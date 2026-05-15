@@ -558,4 +558,91 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 		$this->assertStringContainsString( '<select', $actual_html );
 		$this->assertStringNotContainsString( 'type="hidden"', $actual_html );
 	}
+
+	/**
+	 * The default core `sizes` attribute is replaced with a viewport-aware
+	 * value when the requested size matches the WooCommerce thumbnail size.
+	 *
+	 * @covers ::wc_calculate_image_sizes_for_thumbnails
+	 */
+	public function test_wc_calculate_image_sizes_for_thumbnails_replaces_core_sizes_for_named_size() {
+		$thumbnail = wc_get_image_size( 'woocommerce_thumbnail' );
+		$width     = absint( $thumbnail['width'] );
+
+		$result = wc_calculate_image_sizes_for_thumbnails(
+			'(max-width: ' . $width . 'px) 100vw, ' . $width . 'px',
+			'woocommerce_thumbnail'
+		);
+
+		$this->assertStringContainsString( '(max-width: 480px) 100vw', $result );
+		$this->assertStringContainsString( '(max-width: 900px) 50vw', $result );
+		$this->assertStringContainsString( $width . 'px', $result );
+	}
+
+	/**
+	 * Size arrays whose first dimension matches the thumbnail width are
+	 * treated as thumbnail-sized images.
+	 *
+	 * @covers ::wc_calculate_image_sizes_for_thumbnails
+	 */
+	public function test_wc_calculate_image_sizes_for_thumbnails_matches_size_array() {
+		$thumbnail = wc_get_image_size( 'woocommerce_thumbnail' );
+		$width     = absint( $thumbnail['width'] );
+		$height    = absint( $thumbnail['height'] );
+
+		$result = wc_calculate_image_sizes_for_thumbnails(
+			'(max-width: ' . $width . 'px) 100vw, ' . $width . 'px',
+			array( $width, $height )
+		);
+
+		$this->assertStringContainsString( '(max-width: 480px) 100vw', $result );
+	}
+
+	/**
+	 * The sizes attribute is left untouched when the requested size is not
+	 * the WooCommerce thumbnail size.
+	 *
+	 * @covers ::wc_calculate_image_sizes_for_thumbnails
+	 */
+	public function test_wc_calculate_image_sizes_for_thumbnails_preserves_other_sizes() {
+		$result = wc_calculate_image_sizes_for_thumbnails(
+			'(max-width: 1024px) 100vw, 1024px',
+			'medium_large'
+		);
+
+		$this->assertSame( '(max-width: 1024px) 100vw, 1024px', $result );
+	}
+
+	/**
+	 * Non-string sizes values (e.g. `false` from another filter) are
+	 * returned untouched so the filter remains side-effect free.
+	 *
+	 * @covers ::wc_calculate_image_sizes_for_thumbnails
+	 */
+	public function test_wc_calculate_image_sizes_for_thumbnails_passes_through_non_string_sizes() {
+		$this->assertFalse( wc_calculate_image_sizes_for_thumbnails( false, 'woocommerce_thumbnail' ) );
+		$this->assertSame( '', wc_calculate_image_sizes_for_thumbnails( '', 'woocommerce_thumbnail' ) );
+	}
+
+	/**
+	 * The `woocommerce_product_thumbnail_sizes_attr` filter is applied to
+	 * the final value so themes and extensions can fine-tune the output.
+	 *
+	 * @covers ::wc_calculate_image_sizes_for_thumbnails
+	 */
+	public function test_wc_calculate_image_sizes_for_thumbnails_is_filterable() {
+		$callback = static function () {
+			return '100vw';
+		};
+		add_filter( 'woocommerce_product_thumbnail_sizes_attr', $callback );
+
+		$result = wc_calculate_image_sizes_for_thumbnails(
+			'(max-width: 280px) 100vw, 280px',
+			'woocommerce_thumbnail'
+		);
+
+		remove_filter( 'woocommerce_product_thumbnail_sizes_attr', $callback );
+
+		$this->assertSame( '100vw', $result );
+	}
 }

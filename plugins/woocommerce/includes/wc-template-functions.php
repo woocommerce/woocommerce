@@ -1598,6 +1598,85 @@ if ( ! function_exists( 'woocommerce_get_product_thumbnail' ) ) {
 	}
 }
 
+/**
+ * Filter the `sizes` attribute for product thumbnails so that the browser can
+ * pick an appropriately sized image source on small viewports.
+ *
+ * Core's default `wp_calculate_image_sizes()` returns
+ * `(max-width: {width}px) 100vw, {width}px` for an image registered at
+ * `{width}px`. For product thumbnails this is inaccurate on mobile where
+ * the grid typically renders multiple columns at well below the registered
+ * width, which causes browsers to download a larger source (often the 2x
+ * intrinsic size) than the rendered footprint warrants.
+ *
+ * When the requested size matches the `woocommerce_thumbnail` image size,
+ * we generate a `sizes` value that accounts for narrow viewports and the
+ * configured column count of the current product loop, so the responsive
+ * `srcset` selection lines up with what is actually painted.
+ *
+ * @since 10.9.0
+ *
+ * @param string       $sizes The computed sizes attribute value.
+ * @param string|int[] $size  The requested image size (registered name or `[width, height]`).
+ * @return string Adjusted sizes attribute value.
+ */
+function wc_calculate_image_sizes_for_thumbnails( $sizes, $size ) {
+	// Bail if another filter has already returned a non-string sizes value.
+	if ( ! is_string( $sizes ) || '' === $sizes ) {
+		return $sizes;
+	}
+
+	$thumbnail_dimensions = wc_get_image_size( 'woocommerce_thumbnail' );
+	$thumbnail_width      = isset( $thumbnail_dimensions['width'] ) ? absint( $thumbnail_dimensions['width'] ) : 0;
+
+	if ( $thumbnail_width <= 0 ) {
+		return $sizes;
+	}
+
+	// Determine whether the requested size matches the WooCommerce thumbnail size.
+	$is_thumbnail_size = false;
+	if ( is_string( $size ) ) {
+		$is_thumbnail_size = ( 'woocommerce_thumbnail' === $size );
+	} elseif ( is_array( $size ) && isset( $size[0] ) ) {
+		$is_thumbnail_size = ( absint( $size[0] ) === $thumbnail_width );
+	}
+
+	if ( ! $is_thumbnail_size ) {
+		return $sizes;
+	}
+
+	// Use the column count of the active loop when available, falling back
+	// to the configured catalog columns. Storefront and most catalog
+	// templates render 2 columns on mobile and the configured number on
+	// larger viewports, which matches the breakpoints below.
+	$loop_columns = wc_get_loop_prop( 'columns' );
+	$columns      = absint( '' !== $loop_columns ? $loop_columns : wc_get_default_products_per_row() );
+	$columns      = max( 1, $columns );
+
+	// Build a viewport-aware sizes value. The desktop slot caps at the
+	// configured thumbnail width so we never advertise a slot larger than
+	// the registered source.
+	$desktop_slot_width = max( 1, (int) floor( 100 / $columns ) );
+	$new_sizes          = sprintf(
+		'(max-width: 480px) 100vw, (max-width: 900px) 50vw, (max-width: 1200px) %1$dvw, %2$dpx',
+		$desktop_slot_width,
+		$thumbnail_width
+	);
+
+	/**
+	 * Filter the computed `sizes` attribute for WooCommerce product thumbnails.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param string       $new_sizes  The new sizes attribute value.
+	 * @param string       $sizes      The original sizes attribute value.
+	 * @param string|int[] $size       The requested image size.
+	 * @param int          $columns    The current loop column count.
+	 */
+	return apply_filters( 'woocommerce_product_thumbnail_sizes_attr', $new_sizes, $sizes, $size, $columns );
+}
+add_filter( 'wp_calculate_image_sizes', 'wc_calculate_image_sizes_for_thumbnails', 10, 2 );
+
 if ( ! function_exists( 'woocommerce_result_count' ) ) {
 
 	/**

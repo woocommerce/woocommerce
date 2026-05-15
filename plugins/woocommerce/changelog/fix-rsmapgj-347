@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Provide a viewport-aware sizes attribute for product thumbnails so mobile browsers download an appropriately sized image source instead of a much larger one.
