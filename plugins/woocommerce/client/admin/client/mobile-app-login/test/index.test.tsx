@@ -39,8 +39,12 @@ const makeReadyState = () => ( {
 	qrUrl: 'woocommerce://qr-login?token=abc&siteUrl=https%3A%2F%2Fexample.test',
 	secondsRemaining: 300,
 	errorMessage: null,
+	errorCode: null,
+	deviceInfo: null,
+	apUuid: null,
 	fetchToken: jest.fn(),
 	refreshToken: jest.fn(),
+	revoke: jest.fn(),
 } );
 
 describe( 'MobileAppLoginPage', () => {
@@ -110,8 +114,12 @@ describe( 'MobileAppLoginPage', () => {
 			qrUrl: null,
 			secondsRemaining: 0,
 			errorMessage: null,
+			errorCode: null,
+			deviceInfo: null,
+			apUuid: null,
 			fetchToken: jest.fn(),
 			refreshToken,
+			revoke: jest.fn(),
 		} );
 
 		render( <MobileAppLoginPage /> );
@@ -148,8 +156,12 @@ describe( 'MobileAppLoginPage', () => {
 			qrUrl: null,
 			secondsRemaining: 0,
 			errorMessage: 'QR login requires an HTTPS connection.',
+			errorCode: 'ssl_required',
+			deviceInfo: null,
+			apUuid: null,
 			fetchToken: jest.fn(),
 			refreshToken: jest.fn(),
+			revoke: jest.fn(),
 		} );
 
 		render( <MobileAppLoginPage /> );
@@ -168,6 +180,30 @@ describe( 'MobileAppLoginPage', () => {
 		// Error text from the hook leaks through the shared component.
 		expect(
 			screen.getByText( /QR login requires an HTTPS connection/i )
+		).toBeInTheDocument();
+	} );
+
+	it( 'renders consumed-state revoke errors on the standalone page', () => {
+		mockedUseQRLoginToken.mockReturnValue( {
+			state: QRLoginTokenStates.CONSUMED,
+			qrUrl: null,
+			secondsRemaining: 0,
+			errorMessage: 'Failed to revoke access.',
+			errorCode: null,
+			deviceInfo: { model: 'iPhone 15' },
+			apUuid: 'ap-uuid',
+			fetchToken: jest.fn(),
+			refreshToken: jest.fn(),
+			revoke: jest.fn(),
+		} );
+
+		render( <MobileAppLoginPage /> );
+
+		expect(
+			screen.getByText( /Signed in successfully on iPhone 15/i )
+		).toBeInTheDocument();
+		expect(
+			screen.getByText( /Failed to revoke access/i )
 		).toBeInTheDocument();
 	} );
 } );

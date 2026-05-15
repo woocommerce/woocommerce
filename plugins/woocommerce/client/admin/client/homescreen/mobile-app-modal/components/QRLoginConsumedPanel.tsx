@@ -2,6 +2,7 @@
  * External dependencies
  */
 import React from '@wordpress/element';
+import type { ReactNode } from 'react';
 import { Button } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
@@ -15,6 +16,7 @@ type QRLoginConsumedPanelProps = {
 	deviceInfo: QRLoginDeviceInfo | null;
 	onRevoke: () => void;
 	onDone?: () => void;
+	errorMessage?: ReactNode | null;
 };
 
 /**
@@ -88,6 +90,7 @@ export const QRLoginConsumedPanel = ( {
 	deviceInfo,
 	onRevoke,
 	onDone,
+	errorMessage,
 }: QRLoginConsumedPanelProps ) => {
 	const headline = buildHeadline( deviceInfo );
 	const subline = buildSubline( deviceInfo );
@@ -104,6 +107,12 @@ export const QRLoginConsumedPanel = ( {
 			{ subline && (
 				<p className="woocommerce-qr-direct-login__consumed-subline">
 					{ subline }
+				</p>
+			) }
+
+			{ errorMessage && (
+				<p className="woocommerce-qr-direct-login__error" role="alert">
+					{ errorMessage }
 				</p>
 			) }
 

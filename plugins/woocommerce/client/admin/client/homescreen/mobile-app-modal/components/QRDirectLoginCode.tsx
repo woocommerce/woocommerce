@@ -169,6 +169,7 @@ export const QRDirectLoginCode = ( {
 				deviceInfo={ deviceInfo }
 				onRevoke={ revoke }
 				onDone={ onDone }
+				errorMessage={ errorMessage }
 			/>
 		);
 	}
