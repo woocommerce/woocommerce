@@ -37,21 +37,32 @@ const FEATURE_FLAG_OPTION =
 const REQUEST_SETTINGS_OPTION = 'woocommerce_customer_review_request_settings';
 const SITE_REVIEWS_OPTION = 'woocommerce_enable_reviews';
 
+/**
+ * The tests-cli container's PHP defaults to a 128M memory limit, which on
+ * some CI shards is exceeded just by plugin autoload (most reliably
+ * google-listings-and-ads). Every wp-cli call in this spec routes through
+ * here so each WP boot has more headroom. Local to this file.
+ */
+const wpCli = ( command: string ) =>
+	wpCLI(
+		command.replace( /^wp\b/, "wp --define='memory_limit=512M'" )
+	);
+
 test.describe(
 	'Customer Review Request — Review Order page',
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
 		test.beforeAll( async () => {
-			await wpCLI( `wp option set ${ FEATURE_FLAG_OPTION } yes` );
-			await wpCLI(
+			await wpCli( `wp option set ${ FEATURE_FLAG_OPTION } yes` );
+			await wpCli(
 				`wp option set ${ REQUEST_SETTINGS_OPTION } --format=json '{"enabled":"yes"}'`
 			);
-			await wpCLI( 'wp rewrite flush' );
+			await wpCli( 'wp rewrite flush' );
 		} );
 
 		test.afterAll( async () => {
-			await wpCLI( `wp option delete ${ FEATURE_FLAG_OPTION }` );
-			await wpCLI( `wp option delete ${ REQUEST_SETTINGS_OPTION }` );
+			await wpCli( `wp option delete ${ FEATURE_FLAG_OPTION }` );
+			await wpCli( `wp option delete ${ REQUEST_SETTINGS_OPTION }` );
 		} );
 
 		/**
@@ -62,7 +73,7 @@ test.describe(
 		const reviewOrderUrl = async (
 			order: SeededOrder
 		): Promise< string > => {
-			const { stdout } = await wpCLI(
+			const { stdout } = await wpCli(
 				`wp eval "echo wc_get_review_order_url( wc_get_order( ${ order.id } ) );"`
 			);
 			return stdout.trim();
@@ -427,7 +438,7 @@ test.describe(
 			] );
 
 			try {
-				await wpCLI( `wp option set ${ SITE_REVIEWS_OPTION } no` );
+				await wpCli( `wp option set ${ SITE_REVIEWS_OPTION } no` );
 
 				await page.goto( await reviewOrderUrl( order ) );
 
@@ -444,7 +455,7 @@ test.describe(
 				).toHaveCount( 0 );
 			} finally {
 				// Default for fresh installs is 'yes'; restore to that.
-				await wpCLI( `wp option set ${ SITE_REVIEWS_OPTION } yes` );
+				await wpCli( `wp option set ${ SITE_REVIEWS_OPTION } yes` );
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, productIds );
 			}
@@ -458,7 +469,7 @@ test.describe(
 			] );
 
 			const hasScheduledAction = async () => {
-				const { stdout } = await wpCLI(
+				const { stdout } = await wpCli(
 					`wp eval "echo as_next_scheduled_action( 'woocommerce_send_review_request', array( ${ order.id } ) ) ? '1' : '0';"`
 				);
 				return stdout.trim().endsWith( '1' );
@@ -627,7 +638,7 @@ test.describe(
 				const variationIdForReview = async (
 					commentId: number
 				): Promise< number > => {
-					const { stdout } = await wpCLI(
+					const { stdout } = await wpCli(
 						`wp eval "echo (int) get_comment_meta( ${ commentId }, '_review_variation_id', true );"`
 					);
 					return Number( stdout.trim() );
