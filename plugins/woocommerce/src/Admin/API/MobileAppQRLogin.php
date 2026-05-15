@@ -1280,13 +1280,13 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// label if a particular device build returns an empty MODEL string.
 		// Both fields come from the platform SDK on the mobile side and are
 		// effectively always populated, but defending against an empty model
-			// is cheaper than chasing the edge case at runtime.
-			$descriptor = '' !== $model ? $model : $os;
-			if ( '' === $descriptor ) {
-				return __( 'WooCommerce Mobile App (QR Login)', 'woocommerce' );
-			}
+		// is cheaper than chasing the edge case at runtime.
+		$descriptor = '' !== $model ? $model : $os;
+		if ( '' === $descriptor ) {
+			return __( 'WooCommerce Mobile App (QR Login)', 'woocommerce' );
+		}
 
-			// Use the site's configured timezone so the date the merchant sees in
+		// Use the site's configured timezone so the date the merchant sees in
 		// the AP list matches what they'd see in the rest of wp-admin.
 		$date = wp_date( 'Y-m-d' );
 
