@@ -1,8 +1,8 @@
 name: 'CI'
 on:
   pull_request:
-    # Include labeled so adding `run: full ci` can trigger full PR CI immediately.
-    types: [opened, synchronize, reopened, labeled]
+    # Include label changes so `run: full ci` updates can refresh required checks immediately.
+    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     paths:
       - '**'
