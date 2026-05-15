@@ -2569,8 +2569,10 @@ FROM $order_meta_table
 	 * Handles the deletion of an order from the orders table when sync is disabled:
 	 *
 	 * If the corresponding row in the posts table is of placeholder type,
-	 * it's just deleted; otherwise a "deleted_from" record is created in the meta table
-	 * and the sync process will detect these and take care of deleting the appropriate post records.
+	 * it's just deleted along with any comments (order notes) and comment meta attached
+	 * to the order, since this would normally be handled by `wp_delete_post()` when sync is on.
+	 * Otherwise a "deleted_from" record is created in the meta table and the sync process
+	 * will detect these and take care of deleting the appropriate post records.
 	 *
 	 * @param int $order_id Th id of the order that has been deleted from the orders table.
 	 * @return void
@@ -2583,6 +2585,42 @@ FROM $order_meta_table
 		);
 
 		if ( DataSynchronizer::PLACEHOLDER_ORDER_POST_TYPE === $post_type ) {
+			// Collect comment IDs attached to this order (and any child orders sharing it as parent post)
+			// so we can clean up their comment meta after removing the comments themselves.
+			// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+			$comment_ids = $wpdb->get_col(
+				$wpdb->prepare(
+					"SELECT comment_ID FROM {$wpdb->comments} WHERE comment_post_ID = %d",
+					$order_id
+				)
+			);
+			// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+			if ( ! empty( $comment_ids ) ) {
+				$comment_ids       = array_map( 'intval', $comment_ids );
+				$comment_ids_count = count( $comment_ids );
+				$placeholders      = implode( ',', array_fill( 0, $comment_ids_count, '%d' ) );
+
+				// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+				$wpdb->query(
+					$wpdb->prepare(
+						"DELETE FROM {$wpdb->commentmeta} WHERE comment_id IN ($placeholders)",
+						$comment_ids
+					)
+				);
+				$wpdb->query(
+					$wpdb->prepare(
+						"DELETE FROM {$wpdb->comments} WHERE comment_ID IN ($placeholders)",
+						$comment_ids
+					)
+				);
+				// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared, WordPress.DB.PreparedSQLPlaceholders.UnfinishedPrepare
+
+				foreach ( $comment_ids as $comment_id ) {
+					clean_comment_cache( $comment_id );
+				}
+			}
+
 			$wpdb->query(
 				$wpdb->prepare(
 					"DELETE FROM {$wpdb->posts} WHERE ID=%d OR post_parent=%d",

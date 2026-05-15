@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Delete order notes (comments) and their meta when an order is deleted while HPOS is enabled without sync.

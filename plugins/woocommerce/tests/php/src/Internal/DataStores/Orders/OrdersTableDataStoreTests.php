@@ -618,6 +618,38 @@ class OrdersTableDataStoreTests extends \HposTestCase {
 	}
 
 	/**
+	 * @testDox When deleting an HPOS order without sync, the order notes (comments) and their meta are removed.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/62620.
+	 */
+	public function test_cot_datastore_delete_removes_order_notes_when_sync_disabled() {
+		global $wpdb;
+
+		$this->toggle_cot_feature_and_usage( true );
+		$this->disable_cot_sync();
+
+		$order    = OrderHelper::create_order();
+		$order_id = $order->get_id();
+
+		// Add an order note (creates a WP comment of type order_note).
+		$note_id = $order->add_order_note( 'Regression note for issue #62620.' );
+		$this->assertGreaterThan( 0, $note_id );
+		add_comment_meta( $note_id, 'qa_test_meta', 'value' );
+
+		// Sanity: comment and meta exist before deletion.
+		$this->assertEquals( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->comments} WHERE comment_ID = %d", $note_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertEquals( 1, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->commentmeta} WHERE comment_id = %d", $note_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+
+		$order->delete( true );
+
+		// After deletion, the comment and its meta should be gone.
+		$this->assertEquals( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->comments} WHERE comment_ID = %d", $note_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$this->assertEquals( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->commentmeta} WHERE comment_id = %d", $note_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		// And the placeholder post row should also be gone.
+		$this->assertEquals( 0, (int) $wpdb->get_var( $wpdb->prepare( "SELECT COUNT(*) FROM {$wpdb->posts} WHERE ID = %d", $order_id ) ) ); // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+	}
+
+	/**
 	 * @testDox Tests the `OrdersTableQuery` class on the COT datastore.
 	 */
 	public function test_cot_query_basic() {
