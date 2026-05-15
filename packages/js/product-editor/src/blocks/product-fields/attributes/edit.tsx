@@ -34,6 +34,13 @@ export function AttributesBlockEdit( {
 		handleChange,
 	} = useProductAttributes( {
 		allAttributes: entityAttributes,
+		// Product types that surface this block (e.g. grouped) do not
+		// support variations. Surface any attribute marked for variations
+		// here so previously generated variation options aren't hidden as
+		// disabled entries; the `variation` flag is preserved in the data
+		// so switching back to a variation-capable product type restores
+		// them as variation options.
+		includeVariationAttributes: true,
 		onChange: setEntityAttributes,
 		productId,
 	} );
@@ -48,9 +55,6 @@ export function AttributesBlockEdit( {
 		<div { ...blockProps }>
 			<AttributeControl
 				value={ attributeList }
-				disabledAttributeIds={ entityAttributes
-					.filter( ( attr ) => !! attr.variation )
-					.map( ( attr ) => attr.id ) }
 				uiStrings={ {
 					disabledAttributeMessage: __(
 						'Already used in Variations',

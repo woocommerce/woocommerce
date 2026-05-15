@@ -25,6 +25,15 @@ export type EnhancedProductAttribute = ProductProductAttribute & {
 type useProductAttributesProps = {
 	allAttributes: ProductProductAttribute[];
 	isVariationAttributes?: boolean;
+	/**
+	 * When true and `isVariationAttributes` is false, attributes flagged for
+	 * variations (`variation: true`) are also returned so they can be displayed
+	 * as regular attributes for product types that do not support variations
+	 * (e.g. grouped products). The underlying `variation` flag is preserved on
+	 * the attribute data so switching back to a variation-capable product type
+	 * keeps them as variation options.
+	 */
+	includeVariationAttributes?: boolean;
 	onChange: (
 		attributes: ProductProductAttribute[],
 		defaultAttributes: ProductDefaultAttribute[]
@@ -34,11 +43,16 @@ type useProductAttributesProps = {
 
 const getFilteredAttributes = (
 	attr: ProductProductAttribute[],
-	isVariationAttributes: boolean
+	isVariationAttributes: boolean,
+	includeVariationAttributes = false
 ) => {
-	return isVariationAttributes
-		? attr.filter( ( attribute ) => !! attribute.variation )
-		: attr.filter( ( attribute ) => ! attribute.variation );
+	if ( isVariationAttributes ) {
+		return attr.filter( ( attribute ) => !! attribute.variation );
+	}
+	if ( includeVariationAttributes ) {
+		return attr;
+	}
+	return attr.filter( ( attribute ) => ! attribute.variation );
 };
 
 function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
@@ -67,12 +81,19 @@ function manageDefaultAttributes( values: EnhancedProductAttribute[] ) {
 export function useProductAttributes( {
 	allAttributes = [],
 	isVariationAttributes = false,
+	includeVariationAttributes = false,
 	onChange,
 	productId,
 }: useProductAttributesProps ) {
 	const [ attributes, setAttributes ] = useState<
 		EnhancedProductAttribute[]
-	>( getFilteredAttributes( allAttributes, isVariationAttributes ) );
+	>(
+		getFilteredAttributes(
+			allAttributes,
+			isVariationAttributes,
+			includeVariationAttributes
+		)
+	);
 
 	const fetchTerms = useCallback(
 		( attributeId: number ) => {
@@ -107,20 +128,40 @@ export function useProductAttributes( {
 	const getAugmentedAttributes = (
 		atts: EnhancedProductAttribute[],
 		variation: boolean,
-		startPosition: number
+		startPosition: number,
+		preserveVariation = false
 	): ProductProductAttribute[] => {
 		return atts.map( ( { isDefault, terms, ...attribute }, index ) => ( {
 			...attribute,
-			variation,
+			variation: preserveVariation ? !! attribute.variation : variation,
 			position: startPosition + index,
 		} ) );
 	};
 
 	const handleChange = ( newAttributes: EnhancedProductAttribute[] ) => {
 		const defaultAttributes = manageDefaultAttributes( newAttributes );
-		let otherAttributes = isVariationAttributes
-			? allAttributes.filter( ( attribute ) => ! attribute.variation )
-			: allAttributes.filter( ( attribute ) => !! attribute.variation );
+
+		// When the non-variation block is rendering variation attributes
+		// (e.g. grouped products) we keep each attribute's existing
+		// `variation` flag instead of forcing it to false. This way the
+		// underlying data is preserved across product-type switches.
+		const preserveVariationFlag =
+			! isVariationAttributes && includeVariationAttributes;
+
+		let otherAttributes: ProductProductAttribute[];
+		if ( isVariationAttributes ) {
+			otherAttributes = allAttributes.filter(
+				( attribute ) => ! attribute.variation
+			);
+		} else if ( includeVariationAttributes ) {
+			// We're already rendering both variation and non-variation
+			// attributes, so there are no "other" attributes to preserve.
+			otherAttributes = [];
+		} else {
+			otherAttributes = allAttributes.filter(
+				( attribute ) => !! attribute.variation
+			);
+		}
 
 		// Remove duplicate global attributes.
 		otherAttributes = otherAttributes.filter( ( attr ) => {
@@ -144,7 +185,8 @@ export function useProductAttributes( {
 		const newAugmentedAttributes = getAugmentedAttributes(
 			newAttributes,
 			isVariationAttributes,
-			isVariationAttributes ? otherAttributes.length : 0
+			isVariationAttributes ? otherAttributes.length : 0,
+			preserveVariationFlag
 		);
 		const otherAugmentedAttributes = getAugmentedAttributes(
 			otherAttributes,
@@ -170,7 +212,11 @@ export function useProductAttributes( {
 			localAttributes,
 			globalAttributes,
 		]: ProductProductAttribute[][] = sift(
-			getFilteredAttributes( allAttributes, isVariationAttributes ),
+			getFilteredAttributes(
+				allAttributes,
+				isVariationAttributes,
+				includeVariationAttributes
+			),
 			( attr: ProductProductAttribute ) => attr.id === 0
 		);
 
@@ -185,7 +231,12 @@ export function useProductAttributes( {
 				...localAttributes,
 			] );
 		} );
-	}, [ allAttributes, isVariationAttributes, fetchTerms ] );
+	}, [
+		allAttributes,
+		isVariationAttributes,
+		includeVariationAttributes,
+		fetchTerms,
+	] );
 
 	return {
 		attributes,

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product Editor: display previously generated variation options as attributes (with the variation flag preserved) when the current product type does not support variations.

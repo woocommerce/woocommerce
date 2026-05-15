@@ -479,6 +479,69 @@ describe( 'useProductAttributes', () => {
 			);
 		} );
 
+		it( 'should include variation attributes when includeVariationAttributes is true', async () => {
+			const allAttributes = [
+				{ ...testAttributes[ 0 ] },
+				{ ...testAttributes[ 1 ], variation: true },
+				{ ...testAttributes[ 2 ] },
+			];
+			const { result, waitForNextUpdate } = renderHook(
+				useProductAttributes,
+				{
+					initialProps: {
+						allAttributes,
+						onChange: jest.fn(),
+						isVariationAttributes: false,
+						includeVariationAttributes: true,
+						productId: 123,
+					},
+				}
+			);
+			result.current.fetchAttributes();
+			jest.runOnlyPendingTimers();
+			await waitForNextUpdate();
+			expect( result.current.attributes.length ).toBe( 3 );
+			const variationAttr = result.current.attributes.find(
+				( a ) => a.name === allAttributes[ 1 ].name
+			);
+			expect( variationAttr ).toBeDefined();
+			expect( variationAttr?.variation ).toBe( true );
+		} );
+
+		it( 'should preserve the variation flag in handleChange when includeVariationAttributes is true', async () => {
+			const allAttributes = [
+				{ ...testAttributes[ 1 ], variation: true },
+				{ ...testAttributes[ 2 ], variation: false },
+			];
+			const onChange = jest.fn();
+			const { result, waitForNextUpdate } = renderHook(
+				useProductAttributes,
+				{
+					initialProps: {
+						allAttributes,
+						onChange,
+						isVariationAttributes: false,
+						includeVariationAttributes: true,
+						productId: 123,
+					},
+				}
+			);
+			result.current.fetchAttributes();
+			jest.runOnlyPendingTimers();
+			await waitForNextUpdate();
+			result.current.handleChange( [
+				{ ...allAttributes[ 0 ], isDefault: false },
+				{ ...allAttributes[ 1 ], isDefault: false },
+			] );
+			expect( onChange ).toHaveBeenCalledWith(
+				[
+					{ ...allAttributes[ 0 ], position: 0, variation: true },
+					{ ...allAttributes[ 1 ], position: 1, variation: false },
+				],
+				[]
+			);
+		} );
+
 		it( 'sets terms for any global attributes and leaves options the same', async () => {
 			const allAttributes = [
 				{ ...testAttributes[ 0 ] },
