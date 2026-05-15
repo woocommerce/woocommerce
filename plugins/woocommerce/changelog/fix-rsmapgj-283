@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix `woocommerce_wp_text_input` (and sibling field helpers) not auto-populating their value from order meta when HPOS is enabled and no explicit `value` is passed.

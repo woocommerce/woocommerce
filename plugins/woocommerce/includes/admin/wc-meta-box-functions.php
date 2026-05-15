@@ -14,6 +14,38 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit; // Exit if accessed directly
 }
 
+if ( ! function_exists( 'wc_meta_box_field_resolve_data_object' ) ) {
+	/**
+	 * Resolves the data object used to look up a meta value for a meta box field.
+	 *
+	 * When the legacy edit-order screen is used, the global `$post` is populated and the meta
+	 * value is read via `get_post_meta()`. When HPOS is enabled, the order edit screen is rendered
+	 * outside of the post context, so `$post` is empty but the global `$theorder` is set to the
+	 * current WC_Order. In that case the data object should be used so the value can be read via
+	 * `WC_Data::get_meta()`. This helper centralizes that fallback so all `woocommerce_wp_*`
+	 * field helpers behave consistently.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param WC_Data|null $data WC_Data object explicitly passed by the caller, if any.
+	 * @return WC_Data|null The data object to use for meta lookup, or null to fall back to $post.
+	 */
+	function wc_meta_box_field_resolve_data_object( ?WC_Data $data ): ?WC_Data {
+		if ( null !== $data ) {
+			return $data;
+		}
+
+		global $post, $theorder;
+
+		// Only fall back to $theorder when the post context is unavailable (e.g. HPOS edit order screen).
+		if ( empty( $post ) && $theorder instanceof WC_Data ) {
+			return $theorder;
+		}
+
+		return null;
+	}
+}
+
 /**
  * Output a text input box.
  *
@@ -23,6 +55,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 function woocommerce_wp_text_input( $field, ?WC_Data $data = null ) {
 	global $post;
 
+	$data                   = wc_meta_box_field_resolve_data_object( $data );
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
@@ -105,6 +138,7 @@ function woocommerce_wp_text_input( $field, ?WC_Data $data = null ) {
 function woocommerce_wp_hidden_input( $field, ?WC_Data $data = null ) {
 	global $post;
 
+	$data           = wc_meta_box_field_resolve_data_object( $data );
 	$field['value'] = isset( $field['value'] ) ? $field['value'] : OrderUtil::get_post_or_object_meta( $post, $data, $field['id'], true );
 	$field['class'] = isset( $field['class'] ) ? $field['class'] : '';
 
@@ -120,6 +154,7 @@ function woocommerce_wp_hidden_input( $field, ?WC_Data $data = null ) {
 function woocommerce_wp_textarea_input( $field, ?WC_Data $data = null ) {
 	global $post;
 
+	$data                   = wc_meta_box_field_resolve_data_object( $data );
 	$field['placeholder']   = isset( $field['placeholder'] ) ? $field['placeholder'] : '';
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
@@ -165,6 +200,7 @@ function woocommerce_wp_textarea_input( $field, ?WC_Data $data = null ) {
 function woocommerce_wp_checkbox( $field, ?WC_Data $data = null ) {
 	global $post;
 
+	$data                   = wc_meta_box_field_resolve_data_object( $data );
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'checkbox';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
@@ -235,6 +271,7 @@ function woocommerce_wp_checkbox( $field, ?WC_Data $data = null ) {
 function woocommerce_wp_select( $field, ?WC_Data $data = null ) {
 	global $post;
 
+	$data  = wc_meta_box_field_resolve_data_object( $data );
 	$field = wp_parse_args(
 		$field,
 		array(
@@ -293,6 +330,7 @@ function woocommerce_wp_select( $field, ?WC_Data $data = null ) {
 function woocommerce_wp_radio( $field, ?WC_Data $data = null ) {
 	global $post;
 
+	$data                   = wc_meta_box_field_resolve_data_object( $data );
 	$field['class']         = isset( $field['class'] ) ? $field['class'] : 'select short';
 	$field['style']         = isset( $field['style'] ) ? $field['style'] : '';
 	$field['wrapper_class'] = isset( $field['wrapper_class'] ) ? $field['wrapper_class'] : '';
