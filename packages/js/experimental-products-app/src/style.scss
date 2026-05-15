@@ -18,6 +18,15 @@
 	@import "./fields/visibility_summary/style.scss";
 	--wp-ui-drawer-z-index: 100000;
 	--wp-ui-select-z-index: 100001;
+
+	.dataforms-layouts-regular__field:has(.components-checkbox-control) {
+		min-height: 16px;
+
+		.dataforms-layouts-regular__field-label,
+		.dataforms-layouts-regular__field-control {
+			min-height: 16px;
+		}
+	}
 }
 
 .product_page_woocommerce-products-dashboard-snackbar {
