@@ -232,7 +232,7 @@ class AddToCartWithOptionsPage {
 			variation: boolean;
 			visible: boolean;
 		}[],
-		expectedValues: Record< string, string | RegExp > = {},
+		expectedValues: Record< string, string > = {},
 		optionStyle: 'chips' | 'dropdown'
 	) {
 		for ( let {
@@ -246,7 +246,7 @@ class AddToCartWithOptionsPage {
 						exact: true,
 					}
 				);
-				let expectedValue: string | RegExp;
+				let expectedValue: string;
 				if (
 					attributeName in expectedValues &&
 					expectedValues[ attributeName ] !== ''
