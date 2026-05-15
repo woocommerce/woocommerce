@@ -430,6 +430,138 @@ class WC_Tests_Product_Data_Store extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that a variation with a non-ASCII (Greek) attribute taxonomy slug stores
+	 * its attribute meta in the percent-encoded (sanitize_title) form so the rest of
+	 * the codebase can read it back. Regression test for woo#59199.
+	 */
+	public function test_variation_save_attributes_with_non_ascii_taxonomy_slug() {
+		$taxonomy_slug = 'χρώμα';
+		$taxonomy      = 'pa_' . $taxonomy_slug;
+		$term_slug     = 'κόκκινο';
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name'         => 'Χρώμα',
+				'slug'         => $taxonomy_slug,
+				'type'         => 'select',
+				'order_by'     => 'menu_order',
+				'has_archives' => false,
+			)
+		);
+		$this->assertIsInt( $attribute_id );
+
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			register_taxonomy( $taxonomy, 'product' );
+		}
+
+		$red_term = wp_insert_term( 'Κόκκινο', $taxonomy, array( 'slug' => $term_slug ) );
+		$this->assertIsArray( $red_term );
+
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_id );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( array( $red_term['term_id'] ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_attributes( array( $taxonomy => $term_slug ) );
+		$variation->set_regular_price( '20' );
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->save();
+
+		// Meta should be stored under the sanitised key (same form the parent uses).
+		$sanitized_meta_key = 'attribute_' . sanitize_title( $taxonomy );
+		$meta_value         = get_post_meta( $variation->get_id(), $sanitized_meta_key, true );
+		$this->assertSame( $term_slug, $meta_value );
+
+		// The legacy raw-key meta should not be set for freshly saved variations.
+		$raw_meta_key = 'attribute_' . $taxonomy;
+		$this->assertSame( '', get_post_meta( $variation->get_id(), $raw_meta_key, true ) );
+
+		// Reloading the variation should expose the value (not an empty "any").
+		$reloaded   = wc_get_product( $variation->get_id() );
+		$attributes = $reloaded->get_attributes( 'edit' );
+		$this->assertSame( $term_slug, $attributes[ sanitize_title( $taxonomy ) ] );
+
+		// find_matching_product_variation should locate the variation when given
+		// either the raw URL form or the sanitised form of the attribute key.
+		$data_store = $product->get_data_store();
+		$this->assertSame(
+			$variation->get_id(),
+			$data_store->find_matching_product_variation( $product, array( $raw_meta_key => $term_slug ) )
+		);
+		$this->assertSame(
+			$variation->get_id(),
+			$data_store->find_matching_product_variation( $product, array( $sanitized_meta_key => $term_slug ) )
+		);
+
+		// Permalink should carry the attribute query arg (cart -> product link path).
+		$permalink = $reloaded->get_permalink();
+		$this->assertNotFalse( strpos( $permalink, 'attribute_pa_' ) );
+		$this->assertNotFalse( strpos( $permalink, rawurlencode( $term_slug ) ) );
+	}
+
+	/**
+	 * Tests find_matching_product_variation against legacy raw-key meta written by
+	 * older WooCommerce versions for non-ASCII attribute taxonomy names. Regression
+	 * test for woo#59199.
+	 */
+	public function test_find_matching_product_variation_with_legacy_raw_key_meta() {
+		$taxonomy_slug = 'χρώμα2';
+		$taxonomy      = 'pa_' . $taxonomy_slug;
+		$term_slug     = 'κόκκινο';
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name'         => 'Χρώμα 2',
+				'slug'         => $taxonomy_slug,
+				'type'         => 'select',
+				'order_by'     => 'menu_order',
+				'has_archives' => false,
+			)
+		);
+		$this->assertIsInt( $attribute_id );
+
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			register_taxonomy( $taxonomy, 'product' );
+		}
+
+		$red_term = wp_insert_term( 'Κόκκινο 2', $taxonomy, array( 'slug' => $term_slug ) );
+		$this->assertIsArray( $red_term );
+
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_id );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( array( $red_term['term_id'] ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		$variation = new WC_Product_Variation();
+		$variation->set_parent_id( $product->get_id() );
+		$variation->set_regular_price( '20' );
+		$variation->set_status( ProductStatus::PUBLISH );
+		$variation->save();
+
+		// Simulate legacy data: write the variation attribute meta in raw form.
+		$raw_meta_key = 'attribute_' . $taxonomy;
+		update_post_meta( $variation->get_id(), $raw_meta_key, $term_slug );
+
+		$data_store = $product->get_data_store();
+		$this->assertSame(
+			$variation->get_id(),
+			$data_store->find_matching_product_variation( $product, array( $raw_meta_key => $term_slug ) )
+		);
+	}
+
+	/**
 	 * Tests for set_default_attributes and get_default_attributes.
 	 */
 	public function test_save_default_attributes() {

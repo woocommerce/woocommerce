@@ -3571,8 +3571,20 @@ if ( ! function_exists( 'wc_dropdown_variation_attribute_options' ) ) {
 		// Get selected value.
 		if ( false === $args['selected'] && $args['attribute'] && $args['product'] instanceof WC_Product ) {
 			$selected_key = 'attribute_' . sanitize_title( $args['attribute'] );
+			// Direct URLs may pass the attribute key in raw (un-percent-encoded) form for
+			// non-ASCII taxonomy slugs (e.g. `?attribute_pa_χρώμα=κόκκινο`), which PHP
+			// surfaces in `$_REQUEST` as the raw key rather than the percent-encoded one.
+			// Fall back to that form so pre-selection works regardless of how the URL was
+			// constructed. See woo#59199.
+			$raw_selected_key = 'attribute_' . $args['attribute'];
 			// phpcs:disable WordPress.Security.NonceVerification.Recommended
-			$args['selected'] = isset( $_REQUEST[ $selected_key ] ) ? wc_clean( wp_unslash( $_REQUEST[ $selected_key ] ) ) : $args['product']->get_variation_default_attribute( $args['attribute'] );
+			if ( isset( $_REQUEST[ $selected_key ] ) ) {
+				$args['selected'] = wc_clean( wp_unslash( $_REQUEST[ $selected_key ] ) );
+			} elseif ( $raw_selected_key !== $selected_key && isset( $_REQUEST[ $raw_selected_key ] ) ) {
+				$args['selected'] = wc_clean( wp_unslash( $_REQUEST[ $raw_selected_key ] ) );
+			} else {
+				$args['selected'] = $args['product']->get_variation_default_attribute( $args['attribute'] );
+			}
 			// phpcs:enable WordPress.Security.NonceVerification.Recommended
 		}
 

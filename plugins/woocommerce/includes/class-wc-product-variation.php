@@ -511,6 +511,13 @@ class WC_Product_Variation extends WC_Product_Simple {
 	 * Set attributes. Unlike the parent product which uses terms, variations are assigned
 	 * specific attributes using name value pairs.
 	 *
+	 * Attribute keys are normalised with `sanitize_title()` so they line up with the
+	 * keys stored in the parent product's `_product_attributes` meta (which also
+	 * uses the sanitised form). Without this, non-ASCII attribute taxonomy names
+	 * (e.g. Greek `pa_χρώμα`) would be stored as raw meta keys while the rest of
+	 * the codebase looks them up in percent-encoded form, breaking variation
+	 * matching and pre-selection. See woo#59199.
+	 *
 	 * @param array $raw_attributes array of raw attributes.
 	 */
 	public function set_attributes( $raw_attributes ) {
@@ -522,7 +529,7 @@ class WC_Product_Variation extends WC_Product_Simple {
 			if ( 0 === strpos( $key, 'attribute_' ) ) {
 				$key = substr( $key, 10 );
 			}
-			$attributes[ $key ] = $value;
+			$attributes[ sanitize_title( $key ) ] = $value;
 		}
 		$this->set_prop( 'attributes', $attributes );
 	}

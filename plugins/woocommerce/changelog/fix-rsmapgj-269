@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix variation matching, pre-selection and permalink generation when product attribute taxonomies or term slugs use non-ASCII characters such as Greek

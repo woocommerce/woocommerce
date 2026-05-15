@@ -119,6 +119,63 @@ class WC_Tests_Template_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that direct URLs using the raw (un-percent-encoded) form of a non-ASCII
+	 * attribute key (e.g. `?attribute_pa_χρώμα=...`) still pre-select the option in
+	 * the dropdown. Regression test for woo#59199.
+	 */
+	public function test_wc_dropdown_variation_attribute_options_preselects_non_ascii_raw_url_param() {
+		$taxonomy_slug = 'χρώμα3';
+		$taxonomy      = 'pa_' . $taxonomy_slug;
+		$term_slug     = 'κόκκινο';
+
+		$attribute_id = wc_create_attribute(
+			array(
+				'name'         => 'Χρώμα 3',
+				'slug'         => $taxonomy_slug,
+				'type'         => 'select',
+				'order_by'     => 'menu_order',
+				'has_archives' => false,
+			)
+		);
+		$this->assertIsInt( $attribute_id );
+
+		if ( ! taxonomy_exists( $taxonomy ) ) {
+			register_taxonomy( $taxonomy, 'product' );
+		}
+
+		$term = wp_insert_term( 'Κόκκινο 3', $taxonomy, array( 'slug' => $term_slug ) );
+		$this->assertIsArray( $term );
+
+		$product   = new WC_Product_Variable();
+		$attribute = new WC_Product_Attribute();
+		$attribute->set_id( $attribute_id );
+		$attribute->set_name( $taxonomy );
+		$attribute->set_options( array( $term['term_id'] ) );
+		$attribute->set_visible( true );
+		$attribute->set_variation( true );
+		$product->set_attributes( array( $attribute ) );
+		$product->save();
+
+		// Simulate `?attribute_pa_χρώμα3=κόκκινο` — PHP exposes the key in raw form here.
+		$_REQUEST[ 'attribute_' . $taxonomy ] = $term_slug;
+
+		ob_start();
+		wc_dropdown_variation_attribute_options(
+			array(
+				'product'   => $product,
+				'attribute' => $taxonomy,
+			)
+		);
+		$output = ob_get_clean();
+
+		unset( $_REQUEST[ 'attribute_' . $taxonomy ] );
+
+		// The matching option should be marked as selected.
+		$this->assertStringContainsString( "selected='selected'", $output );
+		$this->assertStringContainsString( 'value="' . esc_attr( sanitize_title( $term_slug ) ) . '"', $output );
+	}
+
+	/**
 	 * Test: test_wc_dropdown_variation_attribute_options_displays_aria_label_when_defined.
 	 */
 	public function test_wc_dropdown_variation_attribute_options_displays_aria_label_when_defined() {

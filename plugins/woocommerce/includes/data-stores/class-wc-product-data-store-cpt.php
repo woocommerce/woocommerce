@@ -1462,17 +1462,48 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			return 0;
 		}
 
+		// Normalise incoming attribute keys to the sanitised form used internally so
+		// that callers passing raw (un-percent-encoded) keys for non-ASCII attribute
+		// taxonomy names also match. See woo#59199.
+		if ( ! empty( $match_attributes ) ) {
+			$normalised_match_attributes = array();
+			foreach ( $match_attributes as $key => $value ) {
+				if ( is_string( $key ) && 0 === strpos( $key, 'attribute_' ) ) {
+					$normalised_key = 'attribute_' . sanitize_title( substr( $key, 10 ) );
+				} else {
+					$normalised_key = $key;
+				}
+				// First occurrence wins; this preserves explicit sanitised keys when callers pass both.
+				if ( ! array_key_exists( $normalised_key, $normalised_match_attributes ) ) {
+					$normalised_match_attributes[ $normalised_key ] = $value;
+				}
+			}
+			$match_attributes = $normalised_match_attributes;
+		}
+
 		global $wpdb;
 
 		$meta_attribute_names = array();
+		// Map of raw attribute meta key -> sanitised meta key. Used to normalise legacy
+		// variation meta where keys for non-ASCII attribute taxonomy names (e.g. Greek
+		// `pa_χρώμα`) were stored in raw rather than percent-encoded form. See woo#59199.
+		$meta_key_alias_map = array();
 
 		// Get attributes to match in meta.
 		foreach ( $product->get_attributes() as $attribute ) {
 			if ( ! $attribute->get_variation() ) {
 				continue;
 			}
-			$meta_attribute_names[] = 'attribute_' . sanitize_title( $attribute->get_name() );
+			$sanitized_meta_key     = 'attribute_' . sanitize_title( $attribute->get_name() );
+			$raw_meta_key           = 'attribute_' . $attribute->get_name();
+			$meta_attribute_names[] = $sanitized_meta_key;
+			if ( $raw_meta_key !== $sanitized_meta_key ) {
+				$meta_attribute_names[]              = $raw_meta_key;
+				$meta_key_alias_map[ $raw_meta_key ] = $sanitized_meta_key;
+			}
 		}
+
+		$meta_attribute_names = array_values( array_unique( $meta_attribute_names ) );
 
 		// Get the attributes of the variations.
 		$query = $wpdb->prepare(
@@ -1502,7 +1533,12 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		$sorted_meta = array();
 
 		foreach ( $attributes as $m ) {
-			$sorted_meta[ $m->post_id ][ $m->meta_key ] = $m->meta_value; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
+			$meta_key = isset( $meta_key_alias_map[ $m->meta_key ] ) ? $meta_key_alias_map[ $m->meta_key ] : $m->meta_key;
+			// If both a raw and a sanitised version exist for the same variation, prefer the sanitised one.
+			if ( isset( $sorted_meta[ $m->post_id ][ $meta_key ] ) && $meta_key !== $m->meta_key ) {
+				continue;
+			}
+			$sorted_meta[ $m->post_id ][ $meta_key ] = $m->meta_value; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_key
 		}
 
 		/**

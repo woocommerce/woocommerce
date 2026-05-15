@@ -1178,10 +1178,25 @@ function wc_get_product_variation_attributes( $variation_id ) {
 
 	// Get the variation attributes from meta.
 	foreach ( $all_meta as $name => $value ) {
-		// Only look at valid attribute meta, and also compare variation level attributes and remove any which do not exist at parent level.
-		if ( 0 !== strpos( $name, 'attribute_' ) || ! in_array( $name, $found_parent_attributes, true ) ) {
+		// Only look at valid attribute meta.
+		if ( 0 !== strpos( $name, 'attribute_' ) ) {
 			unset( $variation_attributes[ $name ] );
 			continue;
+		}
+
+		// Backward compatibility: historically, variation meta keys for taxonomy attributes
+		// with non-ASCII names (e.g. Greek `pa_χρώμα`) could be stored in raw form while
+		// the rest of the codebase looks them up in percent-encoded (sanitize_title) form,
+		// causing the variation to look "empty". Normalise the key so existing data still
+		// reads correctly. See woo#59199.
+		if ( ! in_array( $name, $found_parent_attributes, true ) ) {
+			$sanitized_name = 'attribute_' . sanitize_title( substr( $name, 10 ) );
+			if ( $sanitized_name !== $name && in_array( $sanitized_name, $found_parent_attributes, true ) ) {
+				$name = $sanitized_name;
+			} else {
+				unset( $variation_attributes[ $name ] );
+				continue;
+			}
 		}
 		/**
 		 * Pre 2.4 handling where 'slugs' were saved instead of the full text attribute.
