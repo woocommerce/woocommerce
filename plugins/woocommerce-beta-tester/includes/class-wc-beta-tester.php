@@ -620,16 +620,32 @@ class WC_Beta_Tester {
 			return;
 		}
 
-		// Check if WooCommerce was updated.
-		$wc_updated = false;
+		// Check if WooCommerce was in the update list.
+		$wc_in_update = false;
+		$is_bulk      = false;
 		if ( isset( $options['plugins'] ) && is_array( $options['plugins'] ) ) {
-			$wc_updated = in_array( 'woocommerce/woocommerce.php', $options['plugins'], true );
+			$wc_in_update = in_array( 'woocommerce/woocommerce.php', $options['plugins'], true );
+			$is_bulk      = true;
 		} elseif ( isset( $options['plugin'] ) ) {
-			$wc_updated = 'woocommerce/woocommerce.php' === $options['plugin'];
+			$wc_in_update = 'woocommerce/woocommerce.php' === $options['plugin'];
 		}
 
-		if ( ! $wc_updated ) {
+		if ( ! $wc_in_update ) {
 			return;
+		}
+
+		// Verify the upgrade actually succeeded.
+		$result = $upgrader->result;
+		if ( is_wp_error( $result ) ) {
+			return;
+		}
+
+		// For bulk updates, check the specific result for WooCommerce.
+		if ( $is_bulk && is_array( $result ) ) {
+			$wc_result = isset( $result['woocommerce/woocommerce.php'] ) ? $result['woocommerce/woocommerce.php'] : null;
+			if ( ! $wc_result || is_wp_error( $wc_result ) ) {
+				return;
+			}
 		}
 
 		// If we're on nightly channel, store the asset timestamp.
