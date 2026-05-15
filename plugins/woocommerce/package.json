@@ -15,6 +15,8 @@
 		"build:blocks": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/block-library...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
 		"build:classic-assets": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"@woocommerce/classic-assets...\" --filter=\"$npm_package_name\" '/^build:project:.*$/'",
 		"build:zip": "./bin/build-zip.sh",
+		"build:widgets": "wp-build",
+		"build:widgets:watch": "wp-build --watch",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:copy-assets:legacy": "rsync -avhW --checksum --delete --quiet client/legacy/build/css/ assets/css && rsync -avhW --checksum --delete --quiet client/legacy/build/js/ assets/js",
 		"build:project:copy-assets:admin": "rsync -avhW --checksum --delete --quiet client/admin/build/ assets/client/admin",
@@ -112,6 +114,12 @@
 		"!(*min).js": [
 			"eslint --fix"
 		]
+	},
+	"wpPlugin": {
+		"name": "woocommerce",
+		"scriptGlobal": "wc",
+		"packageNamespace": "woocommerce",
+		"handlePrefix": "wc"
 	},
 	"config": {
 		"wp_org_slug": "woocommerce",
@@ -924,6 +932,7 @@
 		"@woocommerce/e2e-utils-playwright": "workspace:*",
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/browserslist-config": "next",
+		"@wordpress/build": "^0.14.0",
 		"@wordpress/e2e-test-utils-playwright": "wp-6.8",
 		"@wordpress/env": "11.0.1-next.v.20260206T143.0",
 		"@wordpress/scripts": "30.6.0",
