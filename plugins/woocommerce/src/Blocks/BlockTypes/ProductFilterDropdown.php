@@ -83,7 +83,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 					<option value="">
 						<?php echo esc_html( __( 'Choose an option', 'woocommerce' ) ); ?>
 					</option>
-					<?php foreach ( $items as $index => $item ) : ?>
+					<?php foreach ( $items as $item ) : ?>
 						<?php
 						if ( ! is_array( $item ) ) {
 							continue;
