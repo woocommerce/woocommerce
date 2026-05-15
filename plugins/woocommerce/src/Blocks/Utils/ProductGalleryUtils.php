@@ -159,7 +159,14 @@ class ProductGalleryUtils {
 			_prime_post_caches( $variations );
 		}
 
-		$parent_image_ids = array_values( array_map( 'intval', self::get_product_gallery_image_ids( $product ) ) );
+		$parent_image_ids = array_values(
+			array_filter(
+				array_map( 'intval', self::get_product_gallery_image_ids( $product ) ),
+				static function ( $id ) {
+					return $id > 0 && wp_attachment_is_image( $id );
+				}
+			)
+		);
 
 		foreach ( $variations as $variation_id ) {
 			$variation_id = (int) $variation_id;
@@ -223,7 +230,7 @@ class ProductGalleryUtils {
 		}
 
 		return array(
-			'image_id'  => $variation_image_id,
+			'image_id'  => $image_ids[0],
 			'image_ids' => $image_ids,
 		);
 	}
