@@ -82,4 +82,62 @@ class BlockHooksTests extends WP_UnitTestCase {
 		);
 		delete_option( self::$option_name );
 	}
+
+	/**
+	 * Test that `register_block_hooks_metadata` exposes the block's hook placement
+	 * via the `block_hooks` property on the registered `WP_Block_Type`. This is what
+	 * lets the block editor render a toggle for the block in the anchor block's
+	 * inspector even when the block is hooked exclusively via a PHP filter.
+	 *
+	 * @return void
+	 */
+	public function test_register_block_hooks_metadata_sets_block_hooks_on_registered_type() {
+		$registry   = \WP_Block_Type_Registry::get_instance();
+		$block_name = 'woocommerce/test-block';
+
+		$was_registered = $registry->is_registered( $block_name );
+		if ( ! $was_registered ) {
+			register_block_type( $block_name );
+		}
+
+		try {
+			self::$block_instance->register_block_hooks_metadata();
+
+			$block_type = $registry->get_registered( $block_name );
+			$this->assertInstanceOf( \WP_Block_Type::class, $block_type );
+			$this->assertIsArray( $block_type->block_hooks );
+			$this->assertArrayHasKey( 'core/navigation', $block_type->block_hooks );
+			$this->assertSame( 'after', $block_type->block_hooks['core/navigation'] );
+		} finally {
+			if ( ! $was_registered ) {
+				$registry->unregister( $block_name );
+			}
+		}
+	}
+
+	/**
+	 * Test that the hooked block list does not contain the block when no placement
+	 * matches the requested anchor/position pair — even when something else (e.g.
+	 * the `block_hooks` metadata registered via `register_block_hooks_metadata`)
+	 * already added it.
+	 *
+	 * @return void
+	 */
+	public function test_register_hooked_block_strips_block_when_anchor_does_not_match() {
+		update_option( self::$option_name, '8.4.0', false );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- test code.
+		$hooked_block_types = apply_filters(
+			'hooked_block_types',
+			array( 'woocommerce/test-block' ),
+			'after',
+			'core/paragraph',
+			array( 'mock-context' )
+		);
+		$this->assertNotContains(
+			'woocommerce/test-block',
+			$hooked_block_types,
+			'Test block should be removed when the anchor does not match any placement'
+		);
+		delete_option( self::$option_name );
+	}
 }

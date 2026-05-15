@@ -52,6 +52,8 @@ class CustomerAccount extends AbstractBlock {
 		if ( version_compare( get_bloginfo( 'version' ), '6.5', '>=' ) ) {
 			add_filter( 'hooked_block_woocommerce/customer-account', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
 			add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+			// Run after block registration (priority 10) so the block type is available.
+			add_action( 'init', array( $this, 'register_block_hooks_metadata' ), 11 );
 		}
 	}
 

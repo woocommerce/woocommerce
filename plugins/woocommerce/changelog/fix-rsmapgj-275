@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Show the Mini Cart toggle alongside the Customer Account toggle in the Navigation block's hooked blocks settings panel by exposing both blocks' hook placements on their registered block types.

@@ -118,6 +118,8 @@ class MiniCart extends AbstractBlock {
 		add_action( 'wp_print_footer_scripts', array( $this, 'print_lazy_load_scripts' ), 2 );
 		add_filter( 'hooked_block_woocommerce/mini-cart', array( $this, 'modify_hooked_block_attributes' ), 10, 5 );
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
+		// Run after block registration (priority 10) so the block type is available.
+		add_action( 'init', array( $this, 'register_block_hooks_metadata' ), 11 );
 
 		// Priority 20 ensures this runs after WooCommerce block registration (priority 10)
 		// allowing us to modify the block supports in the registry after registration is complete.

@@ -8,6 +8,54 @@ namespace Automattic\WooCommerce\Blocks\Utils;
  */
 trait BlockHooksTrait {
 	/**
+	 * Expose this block's hook placements on its registered `WP_Block_Type` so the
+	 * block editor can render a toggle for it in the anchor block's inspector
+	 * (e.g. the Navigation block's hooked block toggles).
+	 *
+	 * Without this, blocks that are hooked exclusively via the `hooked_block_types`
+	 * PHP filter (as opposed to the `blockHooks` field in `block.json`) are invisible
+	 * to the editor's hooked block UI until the user has saved the template at least
+	 * once, because the metadata that drives the toggle is only populated after that.
+	 *
+	 * Setting the `block_hooks` property on the `WP_Block_Type` instance makes it
+	 * available via the block types REST endpoint and therefore to the editor.
+	 * Actual auto-insertion is still gated by `register_hooked_block` below, so
+	 * existing version-based opt-out behaviour is preserved.
+	 *
+	 * @return void
+	 */
+	public function register_block_hooks_metadata() {
+		if ( empty( $this->hooked_block_placements ) ) {
+			return;
+		}
+
+		$block_name = $this->namespace . '/' . $this->block_name;
+		$block_type = \WP_Block_Type_Registry::get_instance()->get_registered( $block_name );
+
+		if ( ! $block_type instanceof \WP_Block_Type ) {
+			return;
+		}
+
+		$block_hooks = is_array( $block_type->block_hooks ) ? $block_type->block_hooks : array();
+
+		foreach ( $this->hooked_block_placements as $placement ) {
+			if ( ! isset( $placement['anchor'], $placement['position'] ) ) {
+				continue;
+			}
+
+			// Only `before`, `after`, `first_child` and `last_child` are valid positions
+			// for the `block_hooks` property on `WP_Block_Type`.
+			if ( ! in_array( $placement['position'], array( 'before', 'after', 'first_child', 'last_child' ), true ) ) {
+				continue;
+			}
+
+			$block_hooks[ $placement['anchor'] ] = $placement['position'];
+		}
+
+		$block_type->block_hooks = $block_hooks;
+	}
+
+	/**
 	 * Callback for `hooked_block_types` to auto-inject the mini-cart block into headers after navigation.
 	 *
 	 * @param array                             $hooked_blocks An array of block slugs hooked into a given context.
@@ -23,6 +71,8 @@ trait BlockHooksTrait {
 			return $hooked_blocks;
 		}
 
+		$block_name = $this->namespace . '/' . $this->block_name;
+
 		// Cache the block hooks version.
 		static $block_hooks_version = null;
 		if ( defined( 'WP_RUN_CORE_TESTS' ) || is_null( $block_hooks_version ) ) {
@@ -30,8 +80,10 @@ trait BlockHooksTrait {
 		}
 
 		// If block hooks are disabled or the version is not set, return early.
+		// Also remove the block from the hooked list if it was added via the `block_hooks`
+		// metadata on the registered block type (which is exposed for editor toggles).
 		if ( 'no' === $block_hooks_version || false === $block_hooks_version ) {
-			return $hooked_blocks;
+			return $this->remove_self_from_hooked_blocks( $hooked_blocks );
 		}
 
 		// Valid placements are those that have no version specified,
@@ -44,6 +96,24 @@ trait BlockHooksTrait {
 			}
 		);
 
+		// If no placement applies to this anchor/position pair, the block must not be
+		// auto-inserted here even if `block_hooks` metadata on the registered block type
+		// listed it. Strip any stale entry that core may have added.
+		$placement_matches_anchor = false;
+		foreach ( $valid_placements as $placement ) {
+			if ( isset( $placement['position'], $placement['anchor'] )
+				&& $placement['position'] === $position
+				&& $placement['anchor'] === $anchor_block
+			) {
+				$placement_matches_anchor = true;
+				break;
+			}
+		}
+		if ( ! $placement_matches_anchor ) {
+			return $this->remove_self_from_hooked_blocks( $hooked_blocks );
+		}
+
+		$should_hook = false;
 		if ( $context && ! empty( $valid_placements ) ) {
 			foreach ( $valid_placements as $placement ) {
 
@@ -54,14 +124,20 @@ trait BlockHooksTrait {
 						! $this->has_block_in_content( $context )
 						&& $this->is_target_area( $context, $placement['area'] )
 					) {
-						$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
+						$should_hook = true;
+						if ( ! in_array( $block_name, $hooked_blocks, true ) ) {
+							$hooked_blocks[] = $block_name;
+						}
 					}
 
 					// If no area has been specified for this placement just insert the block.
 					// This is likely to be the case when we're inserting into the navigation block
 					// where we don't have a specific area to target.
 					if ( ! isset( $placement['area'] ) ) {
-						$hooked_blocks[] = $this->namespace . '/' . $this->block_name;
+						$should_hook = true;
+						if ( ! in_array( $block_name, $hooked_blocks, true ) ) {
+							$hooked_blocks[] = $block_name;
+						}
 					}
 
 					// If a callback has been specified for this placement, call it. This allows for custom block-specific logic to be run.
@@ -76,6 +152,30 @@ trait BlockHooksTrait {
 			}
 		}
 
+		if ( ! $should_hook ) {
+			$hooked_blocks = $this->remove_self_from_hooked_blocks( $hooked_blocks );
+		}
+
+		return $hooked_blocks;
+	}
+
+	/**
+	 * Remove this block from a list of hooked block names.
+	 *
+	 * Used to clear entries that core may have added because we declare the placement
+	 * via `block_hooks` metadata on the registered block type (so editor toggles work),
+	 * even when our placement rules say the block should not be auto-inserted.
+	 *
+	 * @param array $hooked_blocks An array of block slugs hooked into a given context.
+	 * @return array
+	 */
+	protected function remove_self_from_hooked_blocks( $hooked_blocks ) {
+		$block_name = $this->namespace . '/' . $this->block_name;
+		$key        = array_search( $block_name, $hooked_blocks, true );
+		if ( false !== $key ) {
+			unset( $hooked_blocks[ $key ] );
+			$hooked_blocks = array_values( $hooked_blocks );
+		}
 		return $hooked_blocks;
 	}
 
