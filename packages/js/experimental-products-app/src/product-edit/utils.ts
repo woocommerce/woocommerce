@@ -83,6 +83,12 @@ const DIMENSIONS_FORM_FIELD: ProductEditFormField = {
 	children: [ ...DIMENSION_GROUP_FIELD_IDS ],
 };
 
+const PARENT_DIMENSIONS_FORM_FIELD: ProductEditFormField = {
+	id: 'parent-dimensions',
+	layout: { type: 'row' as const },
+	children: [ 'length', 'width', 'height' ],
+};
+
 const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	'name',
 	'product_status',
@@ -98,43 +104,40 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	'categories',
 	'brands',
 	'tags',
+	'featured',
 	DIMENSIONS_FORM_FIELD,
 	'height',
 ] satisfies ProductEditFormField[];
 
 const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
+	'product_status',
 	'regular_price',
 	'sale_price',
 	'images',
-	'downloadable',
 	'sku',
-	'stock',
 	'manage_stock',
+	'stock',
 	'stock_quantity',
+	'shipping_class',
 	DIMENSIONS_FORM_FIELD,
 	'height',
 ] satisfies ProductEditFormField[];
 
 const VARIABLE_PRODUCT_EDIT_FORM_FIELDS = [
 	'name',
-	'short_description',
-	'description',
-	'images',
 	'product_status',
+	'catalog_visibility',
+	'images',
 	'sku',
-	'stock',
-	'stock_quantity',
 	'manage_stock',
-	'shipping_class',
-	'tax_status',
+	'stock',
 	'categories',
+	'brands',
 	'tags',
 	'featured',
-	'catalog_visibility',
-	'upsell_ids',
-	'cross_sell_ids',
-	DIMENSIONS_FORM_FIELD,
-	'height',
+	'shipping_class',
+	PARENT_DIMENSIONS_FORM_FIELD,
+	'weight',
 ] satisfies ProductEditFormField[];
 
 const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
@@ -178,7 +181,6 @@ const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'name',
 	'short_description',
 	'description',
-	'product_status',
 	'catalog_visibility',
 	'categories',
 	'brands',
