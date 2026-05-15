@@ -1,10 +1,11 @@
 <?php
-declare( strict_types = 1 );
 /**
  * Tests for WC_Shortcode_My_Account.
  *
  * @package WooCommerce\Tests\Shortcodes
  */
+
+declare( strict_types = 1 );
 
 /**
  * Class WC_Test_Shortcode_My_Account.
