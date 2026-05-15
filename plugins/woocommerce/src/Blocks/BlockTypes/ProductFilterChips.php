@@ -138,7 +138,7 @@ final class ProductFilterChips extends AbstractBlock {
 						<button
 							class="wc-block-product-filter-chips__item"
 							type="button"
-							role="checkbox"
+							role="<?php echo esc_attr( $button_role ); ?>"
 							data-wp-bind--id="context.item.id"
 							data-wp-bind--aria-label="context.item.ariaLabel"
 							data-wp-bind--value="context.item.value"
