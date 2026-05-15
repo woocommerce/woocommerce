@@ -1,0 +1,4 @@
+Type,SKU,Name,Published,Regular price,Grouped products
+grouped,GROUP-25706,Logo Collection Broken,1,,"CHILD-A-25706, CHILD-B-25706"
+simple,CHILD-A-25706,Child A,1,10,
+simple,CHILD-B-25706,Child B,1,25,

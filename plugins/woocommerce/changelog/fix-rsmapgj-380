@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix missing `_price` meta and zero `min_price`/`max_price` lookup values for grouped products imported via CSV before their linked child products.

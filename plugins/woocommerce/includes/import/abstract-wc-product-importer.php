@@ -245,6 +245,12 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 				return $object;
 			}
 
+			// Track whether this product was a placeholder (created earlier as a relative
+			// reference from a row processed before its own row). If so, any grouped
+			// products that already reference it will have synced their `_price` meta
+			// against an empty placeholder and must be re-synced after this save.
+			$was_placeholder = ( $object->get_id() && 'importing' === $object->get_status() );
+
 			if ( $object->get_id() && 'importing' !== $object->get_status() ) {
 				$updating = true;
 			}
@@ -290,6 +296,14 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			$object = apply_filters( 'woocommerce_product_import_pre_insert_product_object', $object, $data );
 			$object->save();
 
+			// If this row resolved a placeholder created for a relative reference from
+			// an earlier row, any grouped products that already reference it as a child
+			// will have synced their price meta against an empty placeholder. Re-sync
+			// those parents now that this product has its real data (including price).
+			if ( $was_placeholder && ! $is_variation ) {
+				$this->resync_grouped_parents( $object->get_id() );
+			}
+
 			do_action( 'woocommerce_product_import_inserted_product_object', $object, $data );
 
 			return array(
@@ -299,6 +313,57 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 			);
 		} catch ( Exception $e ) {
 			return new WP_Error( 'woocommerce_product_importer_error', $e->getMessage(), array( 'status' => $e->getCode() ) );
+		}
+	}
+
+	/**
+	 * Re-sync grouped products that reference a given child product.
+	 *
+	 * When a grouped product is imported before any of its children — typical when the
+	 * grouped row appears earlier in the CSV than its linked products — the importer
+	 * creates placeholder products for the missing children and `update_prices_from_children`
+	 * runs against those empty placeholders, leaving the grouped product with no `_price`
+	 * meta. That in turn leaves `min_price` / `max_price` at 0.00 in the product meta
+	 * lookup table and prevents the Regenerate Product Lookup Tables tool from fixing it.
+	 *
+	 * This method is invoked once a placeholder is resolved by its actual CSV row, so
+	 * any grouped parent that has it listed in `_children` can re-sync its prices.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int $child_id Product ID whose placeholder was just replaced with real data.
+	 * @return void
+	 */
+	protected function resync_grouped_parents( $child_id ) {
+		$child_id = absint( $child_id );
+		if ( ! $child_id ) {
+			return;
+		}
+
+		global $wpdb;
+
+		// Children are stored as a serialized PHP array in the `_children` postmeta. Match
+		// on the serialized integer token to filter parents at the DB layer before loading.
+		$serialized_token = 'i:' . $child_id . ';';
+		$parent_ids       = $wpdb->get_col(
+			$wpdb->prepare(
+				"SELECT post_id FROM {$wpdb->postmeta} WHERE meta_key = '_children' AND meta_value LIKE %s",
+				'%' . $wpdb->esc_like( $serialized_token ) . '%'
+			)
+		);
+
+		if ( empty( $parent_ids ) ) {
+			return;
+		}
+
+		foreach ( $parent_ids as $parent_id ) {
+			$parent = wc_get_product( absint( $parent_id ) );
+			if ( $parent instanceof WC_Product_Grouped ) {
+				$children = $parent->get_children( 'edit' );
+				if ( in_array( $child_id, array_map( 'absint', (array) $children ), true ) ) {
+					WC_Product_Grouped::sync( $parent );
+				}
+			}
 		}
 	}
 

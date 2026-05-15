@@ -224,4 +224,64 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		wc_delete_attribute( $color_attr_id );
 		wc_delete_attribute( $size_attr_id );
 	}
+
+	/**
+	 * @testdox Grouped products imported before their children should still receive `_price` meta and lookup table rows once those children are imported (issue #25706).
+	 */
+	public function test_grouped_product_imported_before_children_25706() {
+		global $wpdb;
+
+		$csv_file = __DIR__ . '/import-grouped-before-children-25706-data.csv';
+		$args     = array(
+			'parse'   => true,
+			'mapping' => array(
+				'Type'             => 'type',
+				'SKU'              => 'sku',
+				'Name'             => 'name',
+				'Published'        => 'published',
+				'Regular price'    => 'regular_price',
+				'Grouped products' => 'grouped_products',
+			),
+		);
+		$importer = new WC_Product_CSV_Importer( $csv_file, $args );
+		$data     = $importer->import();
+
+		$this->assertEmpty( $data['failed'], 'Import should not produce failures, got: ' . wp_json_encode( $data['failed'] ) );
+
+		$grouped_id  = wc_get_product_id_by_sku( 'GROUP-25706' );
+		$child_a_id  = wc_get_product_id_by_sku( 'CHILD-A-25706' );
+		$child_b_id  = wc_get_product_id_by_sku( 'CHILD-B-25706' );
+
+		$this->assertGreaterThan( 0, $grouped_id, 'Grouped product should exist after import' );
+		$this->assertGreaterThan( 0, $child_a_id, 'Child A should exist after import' );
+		$this->assertGreaterThan( 0, $child_b_id, 'Child B should exist after import' );
+
+		$grouped = wc_get_product( $grouped_id );
+		$this->assertInstanceOf( WC_Product_Grouped::class, $grouped );
+
+		$children = array_map( 'absint', $grouped->get_children( 'edit' ) );
+		$this->assertContains( $child_a_id, $children, 'Grouped product should reference Child A' );
+		$this->assertContains( $child_b_id, $children, 'Grouped product should reference Child B' );
+
+		$price_meta = get_post_meta( $grouped_id, '_price', false );
+		$this->assertNotEmpty( $price_meta, 'Grouped product should have _price meta entries after its children are imported' );
+
+		$prices = array_map( 'floatval', $price_meta );
+		sort( $prices );
+		$this->assertSame( array( 10.0, 25.0 ), $prices, 'Grouped product _price meta should reflect child min and max prices' );
+
+		$lookup_row = $wpdb->get_row(
+			$wpdb->prepare(
+				"SELECT min_price, max_price FROM {$wpdb->wc_product_meta_lookup} WHERE product_id = %d",
+				$grouped_id
+			)
+		);
+		$this->assertNotNull( $lookup_row, 'Grouped product should have a row in the product meta lookup table' );
+		$this->assertSame( 10.0, (float) $lookup_row->min_price, 'min_price in lookup table should match the lowest child price' );
+		$this->assertSame( 25.0, (float) $lookup_row->max_price, 'max_price in lookup table should match the highest child price' );
+
+		WC_Helper_Product::delete_product( $grouped_id );
+		WC_Helper_Product::delete_product( $child_a_id );
+		WC_Helper_Product::delete_product( $child_b_id );
+	}
 }
