@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Ensure the order's saved billing and shipping country remains selectable in the order edit screen dropdown when the store no longer sells/ships to that country, preventing silent country changes on save.

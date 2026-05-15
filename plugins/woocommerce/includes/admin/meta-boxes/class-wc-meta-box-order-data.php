@@ -52,7 +52,7 @@ class WC_Meta_Box_Order_Data {
 		 * @param WC_Order|false $order Order object.
 		 * @param string $context Context of fields (view or edit).
 		 */
-		return apply_filters(
+		$fields = apply_filters(
 			'woocommerce_admin_billing_fields',
 			array(
 				'first_name' => array(
@@ -105,6 +105,8 @@ class WC_Meta_Box_Order_Data {
 			$order,
 			$context
 		);
+
+		return self::ensure_order_country_in_options( $fields, $order, 'billing' );
 	}
 
 	/**
@@ -124,7 +126,7 @@ class WC_Meta_Box_Order_Data {
 		 * @param WC_Order|false $order Order object.
 		 * @param string $context Context of fields (view or edit).
 		 */
-		return apply_filters(
+		$fields = apply_filters(
 			'woocommerce_admin_shipping_fields',
 			array(
 				'first_name' => array(
@@ -174,6 +176,64 @@ class WC_Meta_Box_Order_Data {
 			$order,
 			$context
 		);
+
+		return self::ensure_order_country_in_options( $fields, $order, 'shipping' );
+	}
+
+	/**
+	 * Ensures the order's currently saved country is present in the country field's options.
+	 *
+	 * When a country is removed from the store's allowed sell/ship-to countries (or a
+	 * plugin filters the country list), the order edit screen would otherwise omit the
+	 * order's saved country from the dropdown. The first option would then be silently
+	 * selected on save, mutating historical order data. This guard merges the saved
+	 * country back into the options so it always remains selectable.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param mixed             $fields Address fields array (or whatever a filter returned).
+	 * @param \WC_Order|boolean $order  Order object, or false when no order context.
+	 * @param string            $group  Field group: 'billing' or 'shipping'.
+	 * @return mixed Fields with the saved country merged into options when missing.
+	 */
+	protected static function ensure_order_country_in_options( $fields, $order, $group ) {
+		if ( ! is_array( $fields ) ) {
+			return $fields;
+		}
+
+		if ( ! $order instanceof WC_Order ) {
+			return $fields;
+		}
+
+		if ( ! isset( $fields['country'] ) || ! is_array( $fields['country'] ) ) {
+			return $fields;
+		}
+
+		$getter = 'billing' === $group ? 'get_billing_country' : 'get_shipping_country';
+		if ( ! is_callable( array( $order, $getter ) ) ) {
+			return $fields;
+		}
+
+		$order_country = $order->{$getter}( 'edit' );
+		if ( empty( $order_country ) ) {
+			return $fields;
+		}
+
+		$options = isset( $fields['country']['options'] ) && is_array( $fields['country']['options'] )
+			? $fields['country']['options']
+			: array();
+
+		if ( array_key_exists( $order_country, $options ) ) {
+			return $fields;
+		}
+
+		$all_countries = WC()->countries->get_countries();
+		$country_label = isset( $all_countries[ $order_country ] ) ? $all_countries[ $order_country ] : $order_country;
+
+		$options[ $order_country ]    = $country_label;
+		$fields['country']['options'] = $options;
+
+		return $fields;
 	}
 
 	/**
