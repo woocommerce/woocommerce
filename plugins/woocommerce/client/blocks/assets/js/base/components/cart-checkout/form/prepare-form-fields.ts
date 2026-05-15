@@ -96,10 +96,26 @@ const prepareFormFields = (
 	// Address country code. If unknown, locale fields will not be merged.
 	addressCountry = ''
 ): KeyedFormFields => {
-	const localeConfigs =
+	// When a country is selected, use that country's locale overrides.
+	// When no country is selected (or the selected country has no specific locale),
+	// fall back to the default locale so customizations registered via
+	// `woocommerce_get_country_locale_default` (and the ordering/visibility of
+	// additional checkout fields injected into the default locale) are applied
+	// on first render. Without this fallback, customers landing on the block
+	// checkout in a fresh session would see the unfiltered defaults until they
+	// selected a country.
+	const defaultLocaleConfigs =
+		countryAddressFields.default !== undefined
+			? countryAddressFields.default
+			: {};
+	const countryLocaleConfigs =
 		addressCountry && countryAddressFields[ addressCountry ] !== undefined
 			? countryAddressFields[ addressCountry ]
 			: {};
+	const localeConfigs = {
+		...defaultLocaleConfigs,
+		...countryLocaleConfigs,
+	};
 
 	return fieldKeys
 		.map( ( field ) => {

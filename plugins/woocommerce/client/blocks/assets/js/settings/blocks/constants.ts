@@ -116,6 +116,13 @@ export const COUNTRY_LOCALE = Object.fromEntries(
 	} )
 );
 
+// Include the default locale (filtered via `woocommerce_get_country_locale_default`
+// and augmented with additional checkout field overrides) so locale-driven
+// customizations apply before the customer has chosen a country.
+if ( countryData.default?.locale ) {
+	COUNTRY_LOCALE.default = countryData.default.locale;
+}
+
 const defaultFieldsLocations: FieldsLocations = {
 	address: [
 		'first_name',

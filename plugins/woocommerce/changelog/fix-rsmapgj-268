@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Apply block checkout core field customizations from `woocommerce_get_country_locale_default` and the order of additional checkout fields on first render, before the customer selects a country.

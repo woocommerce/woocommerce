@@ -380,6 +380,21 @@ class CartCheckoutUtils {
 			);
 		}
 
+		// Expose the default locale so the client can apply locale-driven core
+		// field customizations (e.g. `woocommerce_get_country_locale_default`
+		// and ordering of additional checkout fields) before the customer has
+		// chosen a country. Without this entry, the block checkout falls back
+		// to the unfiltered defaults on first render and only applies the
+		// filter after a country is selected.
+		if ( isset( $country_locales['default'] ) ) {
+			$country_data['default'] = array(
+				'allowBilling'  => false,
+				'allowShipping' => false,
+				'states'        => array(),
+				'locale'        => $country_locales['default'],
+			);
+		}
+
 		return $country_data;
 	}
 

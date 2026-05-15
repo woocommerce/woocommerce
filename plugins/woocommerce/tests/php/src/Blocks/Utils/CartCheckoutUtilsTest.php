@@ -328,4 +328,50 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $result );
 	}
+
+	/**
+	 * Ensure get_country_data() exposes a `default` locale entry so block
+	 * checkout customizations applied via `woocommerce_get_country_locale_default`
+	 * are available to the client before the customer selects a country.
+	 *
+	 * Regression test for woocommerce#60542.
+	 */
+	public function test_get_country_data_exposes_default_locale() {
+		$filter = function ( $locale ) {
+			$locale['last_name']['hidden']   = true;
+			$locale['last_name']['required'] = false;
+			$locale['first_name']['label']   = 'Full name';
+			return $locale;
+		};
+
+		add_filter( 'woocommerce_get_country_locale_default', $filter );
+
+		// Reset the cached locale so the filter is applied on the next read.
+		WC()->countries->locale = array();
+
+		$data = CartCheckoutUtils::get_country_data();
+
+		remove_filter( 'woocommerce_get_country_locale_default', $filter );
+		WC()->countries->locale = array();
+
+		$this->assertArrayHasKey( 'default', $data, 'Default locale entry should be exposed.' );
+		$this->assertArrayHasKey( 'locale', $data['default'] );
+		$this->assertTrue(
+			! empty( $data['default']['locale']['last_name']['hidden'] ),
+			'Default locale should reflect the woocommerce_get_country_locale_default filter (hidden last_name).'
+		);
+		$this->assertSame(
+			'Full name',
+			$data['default']['locale']['first_name']['label'] ?? null,
+			'Default locale should reflect the woocommerce_get_country_locale_default filter (relabelled first_name).'
+		);
+		$this->assertFalse(
+			$data['default']['allowBilling'],
+			'Default locale entry must not be treated as an allowed billing country.'
+		);
+		$this->assertFalse(
+			$data['default']['allowShipping'],
+			'Default locale entry must not be treated as an allowed shipping country.'
+		);
+	}
 }
