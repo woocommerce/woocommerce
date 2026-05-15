@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Strip whitespace inserted between structural list tags (`<ul>`/`<ol>`/`<li>`) when saving product descriptions through the REST API, so descriptions authored in the classic editor survive a round-trip through the block editor without spurious line breaks between list items.

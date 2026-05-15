@@ -1676,6 +1676,56 @@ function wc_remove_non_displayable_chars( string $raw_value ): string {
 	return str_replace( $remove_chars, '', $raw_value );
 }
 
+/**
+ * Collapse whitespace inserted between structural list tags in a product description.
+ *
+ * The new product (block) editor round-trips raw HTML descriptions through Gutenberg's
+ * block parser/serializer. When a description authored in the classic editor only contains
+ * structural HTML such as `<ul><li>A</li><li>B</li></ul>`, that round-trip wraps each list
+ * item in block delimiters and the serializer reintroduces whitespace (typically `\n` or
+ * `\n\n`) between siblings. Once stored back, the description differs from the classic
+ * input even though the user added no new content there.
+ *
+ * This helper normalizes only the whitespace that appears strictly between adjacent list
+ * structural tags (`<ul>`/`<ol>`/`</ul>`/`</ol>` and `<li>`/`</li>`). Any whitespace that
+ * sits inside the visible content of an `<li>` is left untouched.
+ *
+ * @since 10.9.0
+ *
+ * @param string $description Raw product description HTML.
+ * @return string Description with structural inter-list whitespace collapsed.
+ */
+function wc_normalize_product_description_list_whitespace( $description ) {
+	if ( ! is_string( $description ) || '' === $description ) {
+		return '';
+	}
+
+	// Only run the regex pass when at least one `<li>` is present; otherwise it's a no-op.
+	if ( false === stripos( $description, '<li' ) ) {
+		return $description;
+	}
+
+	$patterns = array(
+		// Whitespace between sibling list items: </li>\s+<li> -> </li><li>.
+		'#</li>\s+<li([\s>])#i',
+		// Whitespace between the list container open and the first item: <ul>\s+<li> -> <ul><li>.
+		'#<(ul|ol)([^>]*)>\s+<li([\s>])#i',
+		// Whitespace between the last item and the list container close: </li>\s+</ul> -> </li></ul>.
+		'#</li>\s+</(ul|ol)>#i',
+	);
+
+	$replacements = array(
+		'</li><li$1',
+		'<$1$2><li$3',
+		'</li></$1>',
+	);
+
+	$normalized = preg_replace( $patterns, $replacements, $description );
+
+	// preg_replace returns null on a PCRE failure; in that case fall back to the input untouched.
+	return null === $normalized ? $description : $normalized;
+}
+
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_pay_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_checkout_order_received_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );
 add_filter( 'woocommerce_admin_settings_sanitize_option_woocommerce_myaccount_add_payment_method_endpoint', 'wc_sanitize_endpoint_slug', 10, 1 );

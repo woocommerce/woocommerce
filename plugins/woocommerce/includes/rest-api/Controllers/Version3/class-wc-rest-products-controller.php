@@ -764,12 +764,12 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 
 		// Post content.
 		if ( isset( $request['description'] ) ) {
-			$product->set_description( wp_filter_post_kses( $request['description'] ) );
+			$product->set_description( wp_filter_post_kses( wc_normalize_product_description_list_whitespace( $request['description'] ) ) );
 		}
 
 		// Post excerpt.
 		if ( isset( $request['short_description'] ) ) {
-			$product->set_short_description( wp_filter_post_kses( $request['short_description'] ) );
+			$product->set_short_description( wp_filter_post_kses( wc_normalize_product_description_list_whitespace( $request['short_description'] ) ) );
 		}
 
 		// Post status.
