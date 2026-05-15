@@ -66,7 +66,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 			),
 		);
 
-		$aria_label = $selectable_items['groupLabel'] ?? __( 'Choose an option', 'woocommerce' );
+		$aria_label = isset( $selectable_items['groupLabel'] ) && is_string( $selectable_items['groupLabel'] ) ? $selectable_items['groupLabel'] : __( 'Choose an option', 'woocommerce' );
 
 		ob_start();
 		?>
@@ -92,8 +92,8 @@ final class ProductFilterDropdown extends AbstractBlock {
 						if ( empty( $option_label ) ) {
 							continue;
 						}
-						$item_id    = $item['id'] ?? '';
-						$item_value = $item['value'] ?? '';
+						$item_id    = isset( $item['id'] ) && is_string( $item['id'] ) ? $item['id'] : '';
+						$item_value = isset( $item['value'] ) && is_string( $item['value'] ) ? $item['value'] : '';
 						?>
 						<option
 							id="<?php echo esc_attr( $item_id ); ?>"
