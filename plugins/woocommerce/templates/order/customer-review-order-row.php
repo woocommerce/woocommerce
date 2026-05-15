@@ -35,17 +35,22 @@ $image_html   = $product->get_image( 'woocommerce_thumbnail' );
 // Read from the order line item's stored meta — not the live variation — so the label keeps
 // reflecting what the customer actually bought even if catalog attributes change later.
 $variation_summary = '';
-if ( (int) $item->get_variation_id() > 0 ) {
-	$summary_parts = array();
-	foreach ( $item->get_formatted_meta_data( '_', true ) as $meta ) {
-		$summary_key   = trim( wp_strip_all_tags( (string) $meta->display_key ) );
-		$summary_value = trim( wp_strip_all_tags( (string) $meta->display_value ) );
-		if ( '' === $summary_key || '' === $summary_value ) {
+if ( (int) $item->get_variation_id() > 0 && $product instanceof WC_Product_Variation ) {
+	$summary_attributes = array();
+	foreach ( array_keys( (array) $product->get_variation_attributes() ) as $attribute_key ) {
+		$slug = str_replace( 'attribute_', '', (string) $attribute_key );
+		if ( '' === $slug ) {
 			continue;
 		}
-		$summary_parts[] = $summary_key . ': ' . $summary_value;
+		$value = $item->get_meta( $slug, true );
+		if ( '' === $value || null === $value ) {
+			continue;
+		}
+		$summary_attributes[ $slug ] = $value;
 	}
-	$variation_summary = implode( ', ', $summary_parts );
+	if ( ! empty( $summary_attributes ) ) {
+		$variation_summary = (string) wc_get_formatted_variation( $summary_attributes, true );
+	}
 }
 $rating_label_id = 'woocommerce-review-rating-label-' . $item_id;
 $review_label_id = 'woocommerce-review-text-label-' . $item_id;

@@ -512,18 +512,18 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	 * the same parent must not count toward that quota.
 	 */
 	public function test_does_not_mark_complete_when_prior_order_review_exists_for_same_parent(): void {
-		$built       = $this->make_order( 1 );
-		$order       = $built['order'];
-		$product_id  = $built['product_ids'][0];
-		$item_id     = $built['item_ids'][0];
-		$other_order = OrderHelper::create_order();
+		$variable      = WC_Helper_Product::create_variation_product();
+		$variation_ids = $variable->get_children();
+		$variation_a   = wc_get_product( $variation_ids[0] );
+		$variation_b   = wc_get_product( $variation_ids[1] );
+		$other_order   = OrderHelper::create_order();
 
-		// Pre-existing approved review from an older order, same parent product, same email.
+		// Pre-existing approved review from an older order, same parent, variation A.
 		$prior_comment_id = (int) wp_insert_comment(
 			array(
-				'comment_post_ID'      => $product_id,
+				'comment_post_ID'      => $variable->get_id(),
 				'comment_author'       => 'Jane',
-				'comment_author_email' => $order->get_billing_email(),
+				'comment_author_email' => 'jane@example.test',
 				'comment_content'      => 'Reviewed previously.',
 				'comment_type'         => 'review',
 				'comment_approved'     => 1,
@@ -531,23 +531,30 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		);
 		add_comment_meta( $prior_comment_id, 'rating', 4, true );
 		add_comment_meta( $prior_comment_id, ItemEligibility::ORDER_META_KEY, (int) $other_order->get_id(), true );
-		add_comment_meta( $prior_comment_id, ItemEligibility::VARIATION_META_KEY, 0, true );
+		add_comment_meta( $prior_comment_id, ItemEligibility::VARIATION_META_KEY, (int) $variation_a->get_id(), true );
 
-		// Force the current order to need 2 reviews on this parent: same line item appears twice.
-		$order->add_product( wc_get_product( $product_id ), 1 );
+		$order = OrderHelper::create_order();
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->set_billing_email( 'jane@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->add_product( $variation_a, 1 );
+		$order->add_product( $variation_b, 1 );
 		$order->save();
-		$item_ids       = array_keys( $order->get_items() );
-		$second_item_id = (int) end( $item_ids );
 
-		// Customer submits only ONE review for the current order.
+		$items  = array_values( $order->get_items() );
+		$item_a = $items[0];
+
+		// Customer reviews variation A on the CURRENT order. Variation B stays unreviewed.
 		$_POST = array(
 			'order_id' => $order->get_id(),
 			'key'      => $order->get_order_key(),
 			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
 			'reviews'  => array(
 				array(
-					'product_id'    => $product_id,
-					'order_item_id' => $item_id,
+					'product_id'    => $variable->get_id(),
+					'order_item_id' => $item_a->get_id(),
 					'rating'        => 5,
 				),
 			),
@@ -558,10 +565,67 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 		$fresh = wc_get_order( $order->get_id() );
 		$this->assertEmpty(
 			$fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ),
-			'Older-order reviews on the same parent product must not inflate the current order\'s review count.'
+			'Older-order reviews on the same parent product must not inflate the current order\'s per-slot count; variation B is still unreviewed.'
 		);
-		// Sanity: the unused second item id is captured to keep the relationship explicit.
-		$this->assertNotSame( $item_id, $second_item_id );
+	}
+
+	/**
+	 * @testdox Duplicate comments for the same variation row do not satisfy a sibling row's quota.
+	 *
+	 * Guards the per-slot completion count against a double-submit (concurrent
+	 * AJAX or client retry) writing two comments for the same variation: the
+	 * sibling variation row should still be considered unreviewed.
+	 */
+	public function test_duplicate_comments_for_same_slot_do_not_complete_siblings(): void {
+		$variable      = WC_Helper_Product::create_variation_product();
+		$variation_ids = $variable->get_children();
+		$variation_a   = wc_get_product( $variation_ids[0] );
+		$variation_b   = wc_get_product( $variation_ids[1] );
+
+		$order = OrderHelper::create_order();
+		foreach ( $order->get_items() as $item ) {
+			$order->remove_item( $item->get_id() );
+		}
+		$order->set_billing_email( 'jane@example.test' );
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->add_product( $variation_a, 1 );
+		$order->add_product( $variation_b, 1 );
+		$order->save();
+
+		$order_id = (int) $order->get_id();
+
+		// Simulate a double-submit by writing two approved comments tagged with variation A.
+		foreach ( array( 'First click.', 'Retry click.' ) as $body ) {
+			$cid = (int) wp_insert_comment(
+				array(
+					'comment_post_ID'      => $variable->get_id(),
+					'comment_author'       => 'Jane',
+					'comment_author_email' => 'jane@example.test',
+					'comment_content'      => $body,
+					'comment_type'         => 'review',
+					'comment_approved'     => 1,
+				)
+			);
+			add_comment_meta( $cid, 'rating', 5, true );
+			add_comment_meta( $cid, ItemEligibility::ORDER_META_KEY, $order_id, true );
+			add_comment_meta( $cid, ItemEligibility::VARIATION_META_KEY, (int) $variation_a->get_id(), true );
+		}
+
+		// Trigger completion evaluation via an empty submission.
+		$_POST = array(
+			'order_id' => $order_id,
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(),
+		);
+
+		$this->dispatch();
+
+		$fresh = wc_get_order( $order_id );
+		$this->assertEmpty(
+			$fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ),
+			'Two comments for variation A must not fill variation B\'s slot.'
+		);
 	}
 
 	/**

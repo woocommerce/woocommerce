@@ -288,24 +288,30 @@ class SubmissionHandler {
 			return;
 		}
 
-		// Build the same eligible-row set the page uses, then count required
-		// reviews per parent product. Same product appearing on N rows needs
-		// N reviews, not 1.
+		// Build the same eligible-row set the page uses, then collect the
+		// distinct (parent product, variation) slots that need a review.
+		// Counting by slot rather than per-line-item means a double-submit of
+		// the same variation can't satisfy a sibling variation's quota, and
+		// the same simple product appearing on multiple rows still only
+		// needs one review (the page collapses those rows anyway).
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented at the page-template invocation site.
 		$eligible_items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 
-		$required_reviews = array();
+		$required_slots = array();
+		$product_ids    = array();
 		foreach ( $eligible_items as $item ) {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
 			}
-			$product_id = (int) $item->get_product_id();
+			$product_id   = (int) $item->get_product_id();
+			$variation_id = (int) $item->get_variation_id();
 			if ( $product_id > 0 ) {
-				$required_reviews[ $product_id ] = ( $required_reviews[ $product_id ] ?? 0 ) + 1;
+				$required_slots[ $product_id . '|' . $variation_id ] = true;
+				$product_ids[ $product_id ]                          = $product_id;
 			}
 		}
 
-		if ( empty( $required_reviews ) ) {
+		if ( empty( $required_slots ) ) {
 			return;
 		}
 
@@ -319,7 +325,7 @@ class SubmissionHandler {
 		// reviewable items.
 		$comments = get_comments(
 			array(
-				'post__in'     => array_keys( $required_reviews ),
+				'post__in'     => array_values( $product_ids ),
 				'author_email' => $customer_email,
 				'type'         => 'review',
 				'status'       => array( 'approve', 'hold' ),
@@ -337,16 +343,18 @@ class SubmissionHandler {
 			return;
 		}
 
-		$review_counts = array();
+		// Index reviewed slots by (parent_id, variation_id); duplicate comments
+		// for the same slot still count as one toward completion.
+		$reviewed_slots = array();
 		foreach ( $comments as $comment ) {
 			if ( $comment instanceof \WP_Comment ) {
-				$post_id                   = (int) $comment->comment_post_ID;
-				$review_counts[ $post_id ] = ( $review_counts[ $post_id ] ?? 0 ) + 1;
+				$slot_key                    = (int) $comment->comment_post_ID . '|' . (int) get_comment_meta( (int) $comment->comment_ID, ItemEligibility::VARIATION_META_KEY, true );
+				$reviewed_slots[ $slot_key ] = true;
 			}
 		}
 
-		foreach ( $required_reviews as $product_id => $required ) {
-			if ( ( $review_counts[ $product_id ] ?? 0 ) < $required ) {
+		foreach ( $required_slots as $slot_key => $_ ) {
+			if ( ! isset( $reviewed_slots[ $slot_key ] ) ) {
 				return;
 			}
 		}
@@ -393,33 +401,51 @@ class SubmissionHandler {
 	 *
 	 * Used to snapshot the variation context onto the review comment at write
 	 * time (e.g. `"Size: Small, Colour: Red"`), so the value stays readable
-	 * even if the variation is later retired or its attributes change.
+	 * even if the variation is later retired or its attribute values change.
 	 *
-	 * Reads the order line item's own stored attribute meta rather than the
-	 * live `WC_Product_Variation`, so the snapshot reflects what the customer
-	 * actually bought and is immune to catalog edits that happen between
-	 * purchase and review submission. Returns an empty string for simple
-	 * products or when the line item carries no attribute meta.
+	 * Restricted to actual variation attribute slugs so personalisation /
+	 * add-on / engraving / gift-message meta from third-party plugins isn't
+	 * accidentally folded into the public review snapshot. Returns an empty
+	 * string for simple products or when the variation product can no longer
+	 * be loaded to identify its attribute slugs.
 	 *
 	 * @since 10.9.0
 	 *
 	 * @param \WC_Order_Item_Product $item Order line item.
 	 */
 	private static function format_variation_summary( \WC_Order_Item_Product $item ): string {
-		if ( (int) $item->get_variation_id() <= 0 ) {
+		$variation_id = (int) $item->get_variation_id();
+		if ( $variation_id <= 0 ) {
 			return '';
 		}
 
-		$parts = array();
-		foreach ( $item->get_formatted_meta_data( '_', true ) as $meta ) {
-			$key   = trim( wp_strip_all_tags( (string) $meta->display_key ) );
-			$value = trim( wp_strip_all_tags( (string) $meta->display_value ) );
-			if ( '' === $key || '' === $value ) {
-				continue;
-			}
-			$parts[] = $key . ': ' . $value;
+		$variation = wc_get_product( $variation_id );
+		if ( ! $variation instanceof \WC_Product_Variation ) {
+			return '';
 		}
 
-		return implode( ', ', $parts );
+		// Whitelist the attribute slugs that belong to this variation, then
+		// look each one up against the line item's stored meta so values
+		// reflect what was bought, not what the catalog now has. Keys in the
+		// item meta are stored without the `attribute_` prefix (see
+		// WC_Order_Item_Product::set_variation()).
+		$attributes = array();
+		foreach ( array_keys( (array) $variation->get_variation_attributes() ) as $attribute_key ) {
+			$slug = str_replace( 'attribute_', '', (string) $attribute_key );
+			if ( '' === $slug ) {
+				continue;
+			}
+			$value = $item->get_meta( $slug, true );
+			if ( '' === $value || null === $value ) {
+				continue;
+			}
+			$attributes[ $slug ] = $value;
+		}
+
+		if ( empty( $attributes ) ) {
+			return '';
+		}
+
+		return (string) wc_get_formatted_variation( $attributes, true );
 	}
 }
