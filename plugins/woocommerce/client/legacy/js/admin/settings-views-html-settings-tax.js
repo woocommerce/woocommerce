@@ -152,17 +152,25 @@
 						this.el.innerHTML = rowTemplateEmpty();
 					}
 
+					// Hide any lingering tipTip tooltip so it cannot overlap the
+					// autocomplete suggestions for the country/state inputs.
+					var hideTipTip = function() {
+						$( '#tiptip_holder' ).hide();
+					};
+
 					// Initialize autocomplete for countries.
 					this.$el.find( 'td.country input' ).autocomplete({
 						source: data.countries,
-						minLength: 2
-					});
+						minLength: 2,
+						open: hideTipTip
+					}).on( 'focus', hideTipTip );
 
 					// Initialize autocomplete for states.
 					this.$el.find( 'td.state input' ).autocomplete({
 						source: data.states,
-						minLength: 3
-					});
+						minLength: 3,
+						open: hideTipTip
+					}).on( 'focus', hideTipTip );
 
 					// Postcode and city don't have `name` values by default.
 					// They're only created if the contents changes, to save on database queries (I think)

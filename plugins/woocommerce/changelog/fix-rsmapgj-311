@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Prevent the column header tooltip on the Tax > Standard Rates page from overlapping the country and state autocomplete dropdowns.
