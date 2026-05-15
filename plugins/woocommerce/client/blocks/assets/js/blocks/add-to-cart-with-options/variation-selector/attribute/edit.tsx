@@ -102,7 +102,6 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			) : (
 				<div
 					{ ...blockPreviewProps }
-					role="button"
 					tabIndex={ 0 }
 					onClick={ onSelect }
 				>
