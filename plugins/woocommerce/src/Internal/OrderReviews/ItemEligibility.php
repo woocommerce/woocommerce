@@ -306,6 +306,57 @@ class ItemEligibility {
 	}
 
 	/**
+	 * Render the variation's attribute summary as a single flat line.
+	 *
+	 * Used both at write time (snapshotted into `_review_variation_summary`)
+	 * and at render time by the Review Order row template, so the two places
+	 * always agree on what label the customer sees and what the comment
+	 * stores. Restricted to actual variation attribute slugs so personalisation
+	 * / add-on / engraving / gift-message meta from third-party plugins isn't
+	 * accidentally folded into the public review snapshot. Returns an empty
+	 * string for simple products or when the variation product can no longer
+	 * be loaded to identify its attribute slugs.
+	 *
+	 * Keys in the line item meta are stored without the `attribute_` prefix
+	 * (see `WC_Order_Item_Product::set_variation()`), so we strip the prefix
+	 * from the live variation's attribute keys to match.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param WC_Order_Item_Product $item Order line item.
+	 */
+	public static function format_variation_summary( WC_Order_Item_Product $item ): string {
+		$variation_id = (int) $item->get_variation_id();
+		if ( $variation_id <= 0 ) {
+			return '';
+		}
+
+		$variation = wc_get_product( $variation_id );
+		if ( ! $variation instanceof \WC_Product_Variation ) {
+			return '';
+		}
+
+		$attributes = array();
+		foreach ( array_keys( (array) $variation->get_variation_attributes() ) as $attribute_key ) {
+			$slug = str_replace( 'attribute_', '', (string) $attribute_key );
+			if ( '' === $slug ) {
+				continue;
+			}
+			$value = $item->get_meta( $slug, true );
+			if ( '' === $value || null === $value ) {
+				continue;
+			}
+			$attributes[ $slug ] = $value;
+		}
+
+		if ( empty( $attributes ) ) {
+			return '';
+		}
+
+		return (string) wc_get_formatted_variation( $attributes, true );
+	}
+
+	/**
 	 * Whether an order has at least one item the customer can still review.
 	 *
 	 * Walks the same eligible-items list and per-item decisions the page
