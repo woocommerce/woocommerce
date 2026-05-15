@@ -1083,6 +1083,63 @@ function wc_fix_rewrite_rules( $rules ) {
 add_filter( 'rewrite_rules_array', 'wc_fix_rewrite_rules' );
 
 /**
+ * Fix request query vars for products with a purely numeric slug when the product
+ * permalink uses the `%product_cat%` tag.
+ *
+ * When the permalink structure contains `%product_cat%` (e.g. `/shop/%product_cat%/`),
+ * WordPress generates a single-post rewrite rule that allows an optional trailing
+ * numeric segment to be interpreted as a `page` (pagination) value. For a URL like
+ * `/shop/parent-cat/child-cat/12345/`, this causes the regex to match
+ * `product=child-cat` and `page=12345`, returning a 404 instead of the product whose
+ * slug is `12345`. This filter detects that scenario and reassigns the numeric value
+ * back to the `product` query var when an actual product with that slug exists.
+ *
+ * @since 10.9.0
+ *
+ * @param array $query_vars Parsed query vars from the request.
+ * @return array
+ */
+function wc_fix_numeric_product_slug_request( $query_vars ) {
+	// Only run when the product permalink uses the %product_cat% rewrite tag.
+	$permalinks = wc_get_permalink_structure();
+	if ( false === strpos( $permalinks['product_rewrite_slug'], '%product_cat%' ) ) {
+		return $query_vars;
+	}
+
+	// Require a product slug and a numeric page value to be present.
+	if ( empty( $query_vars['product'] ) || empty( $query_vars['page'] ) ) {
+		return $query_vars;
+	}
+
+	$page_value = is_array( $query_vars['page'] ) ? '' : (string) $query_vars['page'];
+	if ( '' === $page_value || ! ctype_digit( ltrim( $page_value, '/' ) ) ) {
+		return $query_vars;
+	}
+
+	$numeric_slug = ltrim( $page_value, '/' );
+
+	// If the existing product slug already resolves to a published product, leave
+	// things alone (this is a legitimate paged request).
+	$existing = get_page_by_path( $query_vars['product'], OBJECT, 'product' );
+	if ( $existing instanceof WP_Post ) {
+		return $query_vars;
+	}
+
+	// Look for a product whose slug matches the numeric trailing segment.
+	$numeric_product = get_page_by_path( $numeric_slug, OBJECT, 'product' );
+	if ( ! $numeric_product instanceof WP_Post ) {
+		return $query_vars;
+	}
+
+	$query_vars['product'] = $numeric_slug;
+	$query_vars['name']    = $numeric_slug;
+	unset( $query_vars['page'] );
+
+	return $query_vars;
+}
+add_filter( 'request', 'wc_fix_numeric_product_slug_request' );
+
+/**
  * Prevent product attachment links from breaking when using complex rewrite structures.
  *
  * @param  string $link    Link.

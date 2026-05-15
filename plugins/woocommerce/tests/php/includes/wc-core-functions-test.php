@@ -275,4 +275,141 @@ class WC_Core_Functions_Test extends \WC_Unit_Test_Case {
 		$this->assertFalse( _wc_delete_transients( true ) );
 		$this->assertFalse( _wc_delete_transients( new stdClass() ) );
 	}
+
+	/**
+	 * Helper to set the product permalink structure for a test.
+	 *
+	 * @param string $product_base The product_base value to use.
+	 */
+	private function set_product_permalink_base( $product_base ) {
+		update_option(
+			'woocommerce_permalinks',
+			array(
+				'product_base'  => $product_base,
+				'category_base' => 'product-category',
+				'tag_base'      => 'product-tag',
+			)
+		);
+	}
+
+	/**
+	 * @testdox Should reassign the product query var when the numeric slug is misinterpreted as a page.
+	 */
+	public function test_wc_fix_numeric_product_slug_request_reassigns_numeric_slug() {
+		$original = get_option( 'woocommerce_permalinks' );
+		$this->set_product_permalink_base( '/shop/%product_cat%' );
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Numeric Slug Product' );
+		$product->set_slug( '12345' );
+		$product->set_status( 'publish' );
+		$product->save();
+
+		$query_vars = wc_fix_numeric_product_slug_request(
+			array(
+				'product' => 'qa-child-cat',
+				'page'    => '12345',
+			)
+		);
+
+		$this->assertSame( '12345', $query_vars['product'], 'Numeric slug should become the product query var.' );
+		$this->assertSame( '12345', $query_vars['name'], 'Numeric slug should also populate the name query var.' );
+		$this->assertArrayNotHasKey( 'page', $query_vars, 'Page query var should be cleared once consumed.' );
+
+		$product->delete( true );
+		update_option( 'woocommerce_permalinks', is_array( $original ) ? $original : array() );
+	}
+
+	/**
+	 * @testdox Should leave query vars untouched when product permalink does not use %product_cat%.
+	 */
+	public function test_wc_fix_numeric_product_slug_request_skips_without_product_cat_placeholder() {
+		$original = get_option( 'woocommerce_permalinks' );
+		$this->set_product_permalink_base( '/shop' );
+
+		$product = new WC_Product_Simple();
+		$product->set_name( 'Numeric Slug Product Skip' );
+		$product->set_slug( '67890' );
+		$product->set_status( 'publish' );
+		$product->save();
+
+		$input      = array(
+			'product' => 'qa-child-cat',
+			'page'    => '67890',
+		);
+		$query_vars = wc_fix_numeric_product_slug_request( $input );
+
+		$this->assertSame( $input, $query_vars, 'Query vars should be untouched without %product_cat%.' );
+
+		$product->delete( true );
+		update_option( 'woocommerce_permalinks', is_array( $original ) ? $original : array() );
+	}
+
+	/**
+	 * @testdox Should leave query vars untouched when the existing product slug already resolves.
+	 */
+	public function test_wc_fix_numeric_product_slug_request_skips_when_existing_product_resolves() {
+		$original = get_option( 'woocommerce_permalinks' );
+		$this->set_product_permalink_base( '/shop/%product_cat%' );
+
+		$existing = new WC_Product_Simple();
+		$existing->set_name( 'Existing Product' );
+		$existing->set_slug( 'existing-product' );
+		$existing->set_status( 'publish' );
+		$existing->save();
+
+		$numeric = new WC_Product_Simple();
+		$numeric->set_name( 'Numeric Page' );
+		$numeric->set_slug( '42' );
+		$numeric->set_status( 'publish' );
+		$numeric->save();
+
+		$input      = array(
+			'product' => 'existing-product',
+			'page'    => '42',
+		);
+		$query_vars = wc_fix_numeric_product_slug_request( $input );
+
+		$this->assertSame( $input, $query_vars, 'Legitimate paged product requests should be preserved.' );
+
+		$existing->delete( true );
+		$numeric->delete( true );
+		update_option( 'woocommerce_permalinks', is_array( $original ) ? $original : array() );
+	}
+
+	/**
+	 * @testdox Should leave query vars untouched when no product matches the numeric slug.
+	 */
+	public function test_wc_fix_numeric_product_slug_request_skips_when_no_numeric_match() {
+		$original = get_option( 'woocommerce_permalinks' );
+		$this->set_product_permalink_base( '/shop/%product_cat%' );
+
+		$input      = array(
+			'product' => 'qa-child-cat',
+			'page'    => '99999',
+		);
+		$query_vars = wc_fix_numeric_product_slug_request( $input );
+
+		$this->assertSame( $input, $query_vars, 'Without a matching numeric product, query vars should be unchanged.' );
+
+		update_option( 'woocommerce_permalinks', is_array( $original ) ? $original : array() );
+	}
+
+	/**
+	 * @testdox Should leave query vars untouched when the page value is not purely numeric.
+	 */
+	public function test_wc_fix_numeric_product_slug_request_skips_non_numeric_page() {
+		$original = get_option( 'woocommerce_permalinks' );
+		$this->set_product_permalink_base( '/shop/%product_cat%' );
+
+		$input      = array(
+			'product' => 'qa-child-cat',
+			'page'    => 'not-a-number',
+		);
+		$query_vars = wc_fix_numeric_product_slug_request( $input );
+
+		$this->assertSame( $input, $query_vars, 'Non-numeric page values must be ignored.' );
+
+		update_option( 'woocommerce_permalinks', is_array( $original ) ? $original : array() );
+	}
 }

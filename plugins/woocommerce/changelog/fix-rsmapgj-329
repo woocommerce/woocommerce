@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix 404 when accessing a product with a purely numeric slug placed in a sub-category and using the `%product_cat%` product permalink tag.
