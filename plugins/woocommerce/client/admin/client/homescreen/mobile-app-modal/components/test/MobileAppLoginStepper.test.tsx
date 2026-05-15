@@ -33,8 +33,12 @@ const readyTokenState = {
 	qrUrl: 'woocommerce://qr-login?token=abc&siteUrl=https%3A%2F%2Fexample.test',
 	secondsRemaining: 300,
 	errorMessage: null,
+	errorCode: null,
+	deviceInfo: null,
+	apUuid: null,
 	fetchToken: jest.fn(),
 	refreshToken: jest.fn(),
+	revoke: jest.fn(),
 };
 
 const errorTokenState = {
@@ -42,15 +46,21 @@ const errorTokenState = {
 	qrUrl: null,
 	secondsRemaining: 0,
 	errorMessage: 'QR login requires an HTTPS connection.',
+	errorCode: 'ssl_required',
+	deviceInfo: null,
+	apUuid: null,
 	fetchToken: jest.fn(),
 	refreshToken: jest.fn(),
+	revoke: jest.fn(),
 };
 
 const baseProps = {
 	step: 'second' as const,
+	signInResult: null,
 	completeInstallationStepHandler: jest.fn(),
 	sendMagicLinkHandler: jest.fn(),
 	sendMagicLinkStatus: SendMagicLinkStates.INIT,
+	onSignedIn: jest.fn(),
 };
 
 describe( 'MobileAppLoginStepper', () => {

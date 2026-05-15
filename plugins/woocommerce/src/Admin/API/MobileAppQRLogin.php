@@ -80,6 +80,45 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	const APP_ID = '0b540e2f-86b7-4b8a-8e0c-f61e9bfbde59';
 
 	/**
+	 * Transient prefix for the "token consumed" record written after a successful
+	 * exchange. The wc-admin UI polls a status endpoint that reads this so it can
+	 * transition to a confirmation panel and surface the device that signed in.
+	 */
+	const CONSUMED_TRANSIENT_PREFIX = '_wc_qr_login_consumed_';
+
+	/**
+	 * Max status checks per user per 15-minute window. The polling client hits
+	 * this every ~2.5s while a QR is on screen; 600/15min ≈ 40/min, comfortably
+	 * above the polling rate but tight enough to short-circuit a misbehaving
+	 * client or a credential-stuffing scan.
+	 */
+	const MAX_STATUS_CHECKS_PER_WINDOW = 600;
+
+	/**
+	 * Max revoke attempts per user per 15-minute window.
+	 */
+	const MAX_REVOKE_ATTEMPTS = 10;
+
+	/**
+	 * Whitelisted keys for the optional `device` payload sent by the mobile app
+	 * on the exchange call. Anything outside this set is dropped before storage.
+	 *
+	 * `brand` is Android-only (`Build.BRAND`, e.g. "google", "samsung"); iOS
+	 * doesn't have a direct analogue and clients that don't have the field
+	 * just leave it absent.
+	 *
+	 * @var string[]
+	 */
+	const DEVICE_PAYLOAD_KEYS = array( 'os', 'os_version', 'model', 'brand', 'app_version' );
+
+	/**
+	 * Maximum length (chars) for any individual sanitized device-payload field.
+	 * Defends against accidental or hostile bloat ending up in transients and
+	 * the Application Password name.
+	 */
+	const DEVICE_FIELD_MAX_LENGTH = 64;
+
+	/**
 	 * Register routes.
 	 *
 	 * @return void
@@ -109,7 +148,65 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 					'callback'            => array( $this, 'exchange_token' ),
 					'permission_callback' => '__return_true',
 					'args'                => array(
+						'token'  => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+						'device' => array(
+							'required'   => false,
+							'type'       => 'object',
+							// Sanitization happens inside the callback via
+							// `sanitize_device_payload()`; we accept any object
+							// shape here and whitelist server-side.
+							'properties' => array(
+								'os'          => array( 'type' => 'string' ),
+								'os_version'  => array( 'type' => 'string' ),
+								'model'       => array( 'type' => 'string' ),
+								'brand'       => array( 'type' => 'string' ),
+								'app_version' => array( 'type' => 'string' ),
+							),
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		// Poll for token status (consumed yet?). Used by wc-admin to transition
+		// the modal from "QR shown" to "Signed in successfully on {device}".
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/qr-login-status',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::CREATABLE,
+					'callback'            => array( $this, 'get_status' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
 						'token' => array(
+							'required'          => true,
+							'type'              => 'string',
+							'sanitize_callback' => 'sanitize_text_field',
+						),
+					),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
+		// Revoke (delete) the Application Password issued by an exchange. The
+		// user must own the AP — verified inside the callback via the WP API.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/qr-login-revoke',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::DELETABLE,
+					'callback'            => array( $this, 'revoke_password' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+					'args'                => array(
+						'uuid' => array(
 							'required'          => true,
 							'type'              => 'string',
 							'sanitize_callback' => 'sanitize_text_field',
@@ -530,11 +627,18 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// Create an Application Password for the mobile app.
+		// Whitelist + sanitize the optional `device` payload. Older app versions
+		// don't send this; missing/empty is fine — falls back to the default AP
+		// name and an empty `device` array on the consumed record.
+		$device = $this->sanitize_device_payload( $request->get_param( 'device' ) );
+
+		// Create an Application Password for the mobile app. The name is
+		// descriptive (e.g. "Woo Mobile · iPhone 15 · 2026-04-28") so the user
+		// can identify it later in Users → Profile → Application Passwords.
 		$app_password_result = \WP_Application_Passwords::create_new_application_password(
 			$user_id,
 			array(
-				'name'   => __( 'WooCommerce Mobile App (QR Login)', 'woocommerce' ),
+				'name'   => $this->format_application_password_name( $device ),
 				'app_id' => self::APP_ID,
 			)
 		);
@@ -558,6 +662,22 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		list( $new_password, $item ) = $app_password_result;
 
+		// Write a "consumed" record so wc-admin's polling client can transition
+		// from "QR shown" to "Signed in successfully on {device}" and surface
+		// a revoke button. Same TTL as the original token transient — there's
+		// no value in keeping this record longer than the modal that polls it.
+		set_transient(
+			self::CONSUMED_TRANSIENT_PREFIX . $token_hash,
+			array(
+				'consumed_at' => time(),
+				'user_id'     => $user_id,
+				'ap_uuid'     => $item['uuid'],
+				'ap_name'     => $item['name'],
+				'device'      => $device,
+			),
+			self::TOKEN_TTL
+		);
+
 		delete_transient( $key );
 		$this->release_token_exchange_claim( $token_hash );
 
@@ -572,5 +692,242 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 				'uuid'                 => $item['uuid'],
 			)
 		);
+	}
+
+	/**
+	 * Get the status of a previously generated QR login token.
+	 *
+	 * Used by the wc-admin UI to poll while the QR is on screen. Returns one of:
+	 *   - `pending`  — token transient exists, has not been exchanged yet.
+	 *   - `consumed` — token has been exchanged; payload includes the device that
+	 *                  signed in and the AP UUID so the UI can render the
+	 *                  confirmation panel and (optionally) revoke the AP.
+	 *   - `expired`  — neither transient exists, so the token has expired or
+	 *                  was never valid for this user.
+	 *
+	 * The user calling this endpoint must be the same user who minted the token.
+	 * That's defense in depth — tokens are 64 random chars and not realistically
+	 * guessable, but cross-user status reads should be impossible regardless.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function get_status( $request ) {
+		$user_id = get_current_user_id();
+
+		if ( ! $this->check_status_rate_limit( $user_id ) ) {
+			return new \WP_Error(
+				'rate_limit_exceeded',
+				__( 'Too many QR login status checks. Please try again later.', 'woocommerce' ),
+				array( 'status' => 429 )
+			);
+		}
+
+		$token = (string) $request->get_param( 'token' );
+		if ( '' === $token ) {
+			return rest_ensure_response( array( 'status' => 'expired' ) );
+		}
+
+		$token_hash = hash( 'sha256', $token );
+
+		// Consumed lookup first — once a token has been exchanged we want the
+		// poll to immediately reflect that state, even though the original
+		// token transient was deleted by `exchange_token()`.
+		$consumed = get_transient( self::CONSUMED_TRANSIENT_PREFIX . $token_hash );
+		if ( is_array( $consumed ) ) {
+			// Defense in depth: only the user who minted the token can see its
+			// consumed details. We hide the record from cross-user reads to
+			// avoid leaking that a given token has been used.
+			if ( ! isset( $consumed['user_id'] ) || (int) $consumed['user_id'] !== (int) $user_id ) {
+				return rest_ensure_response( array( 'status' => 'expired' ) );
+			}
+
+			return rest_ensure_response(
+				array(
+					'status'      => 'consumed',
+					'consumed_at' => isset( $consumed['consumed_at'] ) ? (int) $consumed['consumed_at'] : null,
+					'ap_uuid'     => isset( $consumed['ap_uuid'] ) ? (string) $consumed['ap_uuid'] : null,
+					'ap_name'     => isset( $consumed['ap_name'] ) ? (string) $consumed['ap_name'] : null,
+					'device'      => isset( $consumed['device'] ) && is_array( $consumed['device'] ) ? $consumed['device'] : array(),
+				)
+			);
+		}
+
+		$pending = get_transient( self::TOKEN_TRANSIENT_PREFIX . $token_hash );
+		if ( is_array( $pending ) ) {
+			// Same defense-in-depth ownership check.
+			if ( ! isset( $pending['user_id'] ) || (int) $pending['user_id'] !== (int) $user_id ) {
+				return rest_ensure_response( array( 'status' => 'expired' ) );
+			}
+
+			return rest_ensure_response(
+				array(
+					'status'     => 'pending',
+					'expires_at' => isset( $pending['expires_at'] ) ? (int) $pending['expires_at'] : null,
+				)
+			);
+		}
+
+		return rest_ensure_response( array( 'status' => 'expired' ) );
+	}
+
+	/**
+	 * Revoke (delete) the Application Password issued by a QR login exchange.
+	 *
+	 * The current user must own the AP being revoked — verified via
+	 * `WP_Application_Passwords::get_user_application_password()`. We
+	 * deliberately do NOT use `current_user_can( 'edit_user', $user_id )`
+	 * because that would let a higher-privilege admin revoke another user's AP
+	 * here; the QR flow's revoke surface is for "I just authorized this — undo,"
+	 * not for site-wide AP management (which lives at Users → Profile).
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request Full details about the request.
+	 * @return \WP_REST_Response|\WP_Error
+	 */
+	public function revoke_password( $request ) {
+		$user_id = get_current_user_id();
+
+		if ( ! $this->check_revoke_rate_limit( $user_id ) ) {
+			return new \WP_Error(
+				'rate_limit_exceeded',
+				__( 'Too many QR login revoke attempts. Please try again later.', 'woocommerce' ),
+				array( 'status' => 429 )
+			);
+		}
+
+		if ( ! $this->are_application_passwords_available() ) {
+			return new \WP_Error(
+				'application_passwords_unavailable',
+				__( 'Application Passwords are not available on this site.', 'woocommerce' ),
+				array( 'status' => 501 )
+			);
+		}
+
+		$uuid = (string) $request->get_param( 'uuid' );
+
+		// Ownership check: the AP must exist AND belong to the current user.
+		$ap = \WP_Application_Passwords::get_user_application_password( $user_id, $uuid );
+		if ( ! is_array( $ap ) ) {
+			return new \WP_Error(
+				'application_password_not_found',
+				__( 'No matching Application Password to revoke.', 'woocommerce' ),
+				array( 'status' => 404 )
+			);
+		}
+
+		$deleted = \WP_Application_Passwords::delete_application_password( $user_id, $uuid );
+		if ( true !== $deleted ) {
+			return new \WP_Error(
+				'application_password_revoke_failed',
+				__( 'Could not revoke the Application Password. Please try again.', 'woocommerce' ),
+				array( 'status' => 500 )
+			);
+		}
+
+		return rest_ensure_response(
+			array(
+				'success' => true,
+				'uuid'    => $uuid,
+			)
+		);
+	}
+
+	/**
+	 * Whitelist + sanitize the optional `device` payload sent by the mobile app
+	 * on the exchange call.
+	 *
+	 * Returns an array of strings keyed by the whitelisted keys defined in
+	 * `DEVICE_PAYLOAD_KEYS`. Anything outside that whitelist is dropped. Each
+	 * value is run through `sanitize_text_field()` and capped at
+	 * `DEVICE_FIELD_MAX_LENGTH` characters. The function is total — pass `null`
+	 * or anything non-array and you get back `array()`.
+	 *
+	 * @param mixed $device Raw payload from the request.
+	 * @return array<string, string>
+	 */
+	private function sanitize_device_payload( $device ) {
+		if ( ! is_array( $device ) ) {
+			return array();
+		}
+
+		$sanitized = array();
+		foreach ( self::DEVICE_PAYLOAD_KEYS as $key ) {
+			if ( ! isset( $device[ $key ] ) || ! is_scalar( $device[ $key ] ) ) {
+				continue;
+			}
+			$value = sanitize_text_field( (string) $device[ $key ] );
+			if ( '' === $value ) {
+				continue;
+			}
+			if ( strlen( $value ) > self::DEVICE_FIELD_MAX_LENGTH ) {
+				$value = substr( $value, 0, self::DEVICE_FIELD_MAX_LENGTH );
+			}
+			$sanitized[ $key ] = $value;
+		}
+
+		return $sanitized;
+	}
+
+	/**
+	 * Build a descriptive name for the Application Password issued by the QR
+	 * login exchange.
+	 *
+	 * Preferred: `Woo Mobile · iPhone 15 · 2026-04-28` (model + ISO date).
+	 * Falls back to `Woo Mobile · iOS · 2026-04-28` when only the OS is known.
+	 * Falls back to the legacy literal `WooCommerce Mobile App (QR Login)` if
+	 * neither model nor OS is available — that keeps older mobile clients (which
+	 * don't send the `device` payload) working without changing their visible
+	 * AP name.
+	 *
+	 * The name is what the merchant sees in WP admin → Users → Profile →
+	 * Application Passwords, so it should be human-readable, single-line, and
+	 * not contain anything that would only make sense to an engineer.
+	 *
+	 * @param array<string, string> $device Sanitized device payload.
+	 * @return string
+	 */
+	private function format_application_password_name( array $device ): string {
+		$model = isset( $device['model'] ) ? trim( $device['model'] ) : '';
+		$os    = isset( $device['os'] ) ? trim( $device['os'] ) : '';
+
+		$descriptor = '';
+		if ( '' !== $model ) {
+			$descriptor = $model;
+		} elseif ( '' !== $os ) {
+			$descriptor = $os;
+		}
+
+		if ( '' === $descriptor ) {
+			// Legacy fallback — preserves the existing AP name format for
+			// older app versions that don't send a device payload.
+			return __( 'WooCommerce Mobile App (QR Login)', 'woocommerce' );
+		}
+
+		// Use the site's configured timezone so the date the merchant sees in
+		// the AP list matches what they'd see in the rest of wp-admin.
+		$date = wp_date( 'Y-m-d' );
+
+		/* translators: 1: device descriptor (model or OS, e.g. "iPhone 15"). 2: ISO date the AP was created. */
+		return sprintf( __( 'Woo Mobile · %1$s · %2$s', 'woocommerce' ), $descriptor, $date );
+	}
+
+	/**
+	 * Per-user rate limit for the polling status endpoint.
+	 *
+	 * @param int $user_id The user ID.
+	 * @return bool True if within rate limit.
+	 */
+	private function check_status_rate_limit( $user_id ) {
+		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_STATUS, (string) $user_id );
+	}
+
+	/**
+	 * Per-user rate limit for the revoke endpoint.
+	 *
+	 * @param int $user_id The user ID.
+	 * @return bool True if within rate limit.
+	 */
+	private function check_revoke_rate_limit( $user_id ) {
+		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_REVOKE, (string) $user_id );
 	}
 }

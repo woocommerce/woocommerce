@@ -238,6 +238,107 @@ button.components-button.send-magic-link-button {
 	}
 }
 
+// QR + meta column layout while the code is on screen (READY state only).
+// We avoid scoping these rules to `.woocommerce-qr-direct-login` itself so the LOADING /
+// EXPIRED / ERROR states keep their default stacked layout.
+.woocommerce-qr-direct-login.woocommerce-qr-direct-login--ready {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	gap: 24px;
+	flex-wrap: wrap;
+
+	.woocommerce-qr-direct-login__qr {
+		flex: 0 0 auto;
+		display: flex;
+	}
+
+	.woocommerce-qr-direct-login__meta {
+		flex: 1 1 auto;
+		display: flex;
+		flex-direction: column;
+		align-items: flex-start;
+		gap: 4px;
+		min-width: 0;
+	}
+
+	.woocommerce-qr-direct-login__timer {
+		margin: 0;
+		font-size: 14px;
+		line-height: 1.5;
+		color: $gray-900;
+	}
+}
+
+.woocommerce-qr-direct-login__error {
+	margin: 0 0 12px;
+	color: $alert-red;
+	font-size: 13px;
+	line-height: 1.4;
+}
+
+// Step 3 — sign-in success panel.
+// Mirrors the rest of the modal: 24px / 16px vertical rhythm and WP base
+// palette text colours.
+.qr-login-success-step {
+	display: flex;
+	flex-direction: column;
+	align-items: flex-start;
+	margin-top: 8px;
+
+	// Headline matches the step-2 description size (14px) per UX feedback —
+	// the stepper already provides a large step label above, so a giant
+	// in-step heading was redundant. Slightly bolder + darker to give it
+	// presence without competing with the stepper label.
+	.qr-login-success-step__heading {
+		font-size: 14px;
+		font-weight: 600;
+		line-height: 1.5;
+		margin: 0 0 4px;
+		color: $gray-900;
+	}
+
+	.qr-login-success-step__description {
+		font-size: 14px;
+		line-height: 1.5;
+		color: $gray-700;
+		margin: 0;
+		max-width: 32em;
+	}
+
+	.qr-login-success-step__device {
+		font-size: 13px;
+		line-height: 1.5;
+		color: $gray-700;
+		margin: 0 0 16px;
+	}
+
+	.qr-login-success-step__challenge {
+		font-size: 13px;
+		font-weight: 500;
+		line-height: 1.5;
+		color: $gray-900;
+		margin: 0 0 8px;
+	}
+
+	.qr-login-success-step__error {
+		margin: 12px 0 0;
+		color: $alert-red;
+		font-size: 13px;
+		line-height: 1.4;
+	}
+}
+
+// Confirmation modal — keep the action row right-aligned (Cancel | Revoke).
+.components-modal__frame.qr-login-success-step__confirm-modal {
+	.qr-login-success-step__confirm-actions {
+		display: flex;
+		justify-content: flex-end;
+		gap: 12px;
+		margin-top: 16px;
+	}
+}
+
 .email-sent-modal-body {
 	padding-block: 40px;
 	padding-inline: 56px;

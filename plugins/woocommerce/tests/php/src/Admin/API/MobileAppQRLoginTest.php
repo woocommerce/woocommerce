@@ -37,6 +37,20 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	const EXCHANGE_ENDPOINT = '/wc-admin/mobile-app/qr-login-exchange';
 
 	/**
+	 * Token status endpoint (polled by wc-admin while the QR is on screen).
+	 *
+	 * @var string
+	 */
+	const STATUS_ENDPOINT = '/wc-admin/mobile-app/qr-login-status';
+
+	/**
+	 * Application Password revoke endpoint.
+	 *
+	 * @var string
+	 */
+	const REVOKE_ENDPOINT = '/wc-admin/mobile-app/qr-login-revoke';
+
+	/**
 	 * Administrator user ID.
 	 *
 	 * @var int
@@ -235,6 +249,12 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_\\_wc\\_qr\\_login\\_token\\_%' ESCAPE '\\\\' OR option_name LIKE '\\_transient\\_timeout\\_\\_wc\\_qr\\_login\\_token\\_%' ESCAPE '\\\\'"
 		);
 
+		// Remove "consumed" transients written by exchange_token() so the
+		// status endpoint can surface them to the wc-admin polling client.
+		$wpdb->query(
+			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_transient\\_\\_wc\\_qr\\_login\\_consumed\\_%' ESCAPE '\\\\' OR option_name LIKE '\\_transient\\_timeout\\_\\_wc\\_qr\\_login\\_consumed\\_%' ESCAPE '\\\\'"
+		);
+
 		// Remove database-backed token exchange claims.
 		$wpdb->query(
 			"DELETE FROM {$wpdb->options} WHERE option_name LIKE '\\_wc\\_qr\\_login\\_claim\\_%' ESCAPE '\\\\'"
@@ -340,13 +360,45 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	/**
 	 * Issue a POST to the token-exchange endpoint.
 	 *
-	 * @param string|null $token Token to exchange. Null omits the parameter.
+	 * @param string|null                $token  Token to exchange. Null omits the parameter.
+	 * @param array<string, string>|null $device Optional device payload to send.
 	 * @return \WP_REST_Response
 	 */
-	private function dispatch_exchange( ?string $token ): \WP_REST_Response {
+	private function dispatch_exchange( ?string $token, ?array $device = null ): \WP_REST_Response {
 		$request = new WP_REST_Request( 'POST', self::EXCHANGE_ENDPOINT );
 		if ( null !== $token ) {
 			$request->set_param( 'token', $token );
+		}
+		if ( null !== $device ) {
+			$request->set_param( 'device', $device );
+		}
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Issue a POST to the status endpoint.
+	 *
+	 * @param string|null $token Token to query. Null omits the parameter.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_status( ?string $token ): \WP_REST_Response {
+		$request = new WP_REST_Request( 'POST', self::STATUS_ENDPOINT );
+		if ( null !== $token ) {
+			$request->set_param( 'token', $token );
+		}
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * Issue a DELETE to the revoke endpoint.
+	 *
+	 * @param string|null $uuid The Application Password UUID to revoke. Null omits the parameter.
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_revoke( ?string $uuid ): \WP_REST_Response {
+		$request = new WP_REST_Request( 'DELETE', self::REVOKE_ENDPOINT );
+		if ( null !== $uuid ) {
+			$request->set_param( 'uuid', $uuid );
 		}
 		return $this->server->dispatch( $request );
 	}
@@ -988,5 +1040,316 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			'#^woocommerce://qr-login\?token=[^&]+&siteUrl=[^&]+$#',
 			$qr_url
 		);
+	}
+
+	// -----------------------------------------------------------------------
+	// Consumed-status persistence on exchange success.
+	// -----------------------------------------------------------------------
+
+	/**
+	 * Convenience: generate a token as $admin_id and return the plaintext.
+	 *
+	 * @return string Plaintext token.
+	 */
+	private function generate_token_as_admin(): string {
+		wp_set_current_user( $this->admin_id );
+		$plaintext = $this->token_from_qr_url( $this->dispatch_generate()->get_data()['qr_url'] );
+		wp_set_current_user( 0 );
+		return $plaintext;
+	}
+
+	/**
+	 * @testdox Successful exchange persists a consumed-status transient keyed by the same hash as the token.
+	 */
+	public function test_exchange_token_persists_consumed_status(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		$response = $this->dispatch_exchange(
+			$plaintext,
+			array(
+				'os'          => 'Android',
+				'os_version'  => '14',
+				'model'       => 'Pixel 8 Pro',
+				'brand'       => 'google',
+				'app_version' => '24.7.0',
+			)
+		);
+		$this->assertSame( 200, $response->get_status() );
+
+		$consumed = get_transient( MobileAppQRLogin::CONSUMED_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
+		$this->assertIsArray( $consumed, 'A consumed-status transient should be written on successful exchange.' );
+		$this->assertArrayHasKey( 'consumed_at', $consumed );
+		$this->assertArrayHasKey( 'user_id', $consumed );
+		$this->assertArrayHasKey( 'ap_uuid', $consumed );
+		$this->assertArrayHasKey( 'ap_name', $consumed );
+		$this->assertArrayHasKey( 'device', $consumed );
+		$this->assertSame( $this->admin_id, (int) $consumed['user_id'] );
+		$this->assertSame( $response->get_data()['uuid'], $consumed['ap_uuid'] );
+		$this->assertSame(
+			array(
+				'os'          => 'Android',
+				'os_version'  => '14',
+				'model'       => 'Pixel 8 Pro',
+				'brand'       => 'google',
+				'app_version' => '24.7.0',
+			),
+			$consumed['device']
+		);
+	}
+
+	/**
+	 * @testdox Exchange with a device payload uses the model and date in the Application Password name.
+	 */
+	public function test_exchange_token_with_device_payload_sets_descriptive_ap_name(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		$response = $this->dispatch_exchange(
+			$plaintext,
+			array(
+				'os'          => 'iOS',
+				'os_version'  => '17.5',
+				'model'       => 'iPhone 15',
+				'app_version' => '24.7.0',
+			)
+		);
+		$this->assertSame( 200, $response->get_status() );
+
+		$aps = WP_Application_Passwords::get_user_application_passwords( $this->admin_id );
+		$this->assertCount( 1, $aps );
+		$this->assertMatchesRegularExpression(
+			'#^Woo Mobile · iPhone 15 · \d{4}-\d{2}-\d{2}$#u',
+			$aps[0]['name'],
+			'AP name should be "Woo Mobile · {model} · {YYYY-MM-DD}".'
+		);
+	}
+
+	/**
+	 * @testdox Exchange without a device payload falls back to the legacy AP name so older app clients keep working.
+	 */
+	public function test_exchange_token_falls_back_to_default_ap_name_without_device(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		$response = $this->dispatch_exchange( $plaintext );
+		$this->assertSame( 200, $response->get_status() );
+
+		$aps = WP_Application_Passwords::get_user_application_passwords( $this->admin_id );
+		$this->assertCount( 1, $aps );
+		$this->assertSame(
+			'WooCommerce Mobile App (QR Login)',
+			$aps[0]['name'],
+			'Without a device payload the AP name should keep the existing literal so the change is invisible to older mobile clients.'
+		);
+	}
+
+	/**
+	 * @testdox Exchange whitelists device-payload keys, drops anything outside the whitelist, and caps each field at 64 characters.
+	 */
+	public function test_exchange_token_sanitizes_device_fields(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		$long = str_repeat( 'A', 100 );
+		// `os` carries an HTML tag (must be stripped by sanitize_text_field),
+		// `model` is over the 64-char cap, `rogue_field` is outside the
+		// whitelist and must be dropped before storage.
+		$this->dispatch_exchange(
+			$plaintext,
+			array(
+				'os'          => 'iOS<script>',
+				'os_version'  => '17.5',
+				'model'       => $long,
+				'app_version' => '24.7.0',
+				'rogue_field' => 'should-be-dropped',
+			)
+		);
+
+		$consumed = get_transient( MobileAppQRLogin::CONSUMED_TRANSIENT_PREFIX . hash( 'sha256', $plaintext ) );
+		$this->assertIsArray( $consumed );
+		$this->assertSame( 'iOS', $consumed['device']['os'], 'sanitize_text_field should strip tags.' );
+		$this->assertSame( str_repeat( 'A', 64 ), $consumed['device']['model'], 'Each field is capped at 64 chars.' );
+		$this->assertArrayNotHasKey(
+			'rogue_field',
+			$consumed['device'],
+			'Anything outside the whitelist must be dropped server-side.'
+		);
+	}
+
+	// -----------------------------------------------------------------------
+	// Status endpoint.
+	// -----------------------------------------------------------------------
+
+	/**
+	 * @testdox Status endpoint returns pending when a token has been generated but not yet exchanged.
+	 */
+	public function test_get_status_returns_pending_when_token_active(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		wp_set_current_user( $this->admin_id );
+		$response = $this->dispatch_status( $plaintext );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'pending', $data['status'] );
+		$this->assertArrayHasKey( 'expires_at', $data );
+		$this->assertIsInt( $data['expires_at'] );
+	}
+
+	/**
+	 * @testdox Status endpoint returns consumed with the device payload after a successful exchange.
+	 */
+	public function test_get_status_returns_consumed_with_device_info(): void {
+		$plaintext = $this->generate_token_as_admin();
+
+		$exchange = $this->dispatch_exchange(
+			$plaintext,
+			array(
+				'os'          => 'Android',
+				'os_version'  => '14',
+				'model'       => 'Pixel 8',
+				'app_version' => '24.7.0',
+			)
+		);
+		$this->assertSame( 200, $exchange->get_status() );
+
+		wp_set_current_user( $this->admin_id );
+		$response = $this->dispatch_status( $plaintext );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'consumed', $data['status'] );
+		$this->assertSame( $exchange->get_data()['uuid'], $data['ap_uuid'] );
+		$this->assertSame( 'Pixel 8', $data['device']['model'] );
+		$this->assertSame( 'Android', $data['device']['os'] );
+		$this->assertIsInt( $data['consumed_at'] );
+		$this->assertNotEmpty( $data['ap_name'] );
+	}
+
+	/**
+	 * @testdox Status endpoint returns expired when neither token nor consumed transient exists.
+	 */
+	public function test_get_status_returns_expired_when_neither_transient_exists(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$response = $this->dispatch_status( 'never-minted-this-token' );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'expired', $response->get_data()['status'] );
+	}
+
+	/**
+	 * @testdox Status endpoint returns expired immediately when the token is empty.
+	 */
+	public function test_get_status_returns_expired_when_token_empty(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$response = $this->dispatch_status( '' );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'expired', $response->get_data()['status'] );
+	}
+
+	/**
+	 * @testdox Status endpoint hides another user's token state and reports it as expired (defense in depth).
+	 */
+	public function test_get_status_rejects_other_users(): void {
+		// Admin mints + exchanges the token.
+		$plaintext = $this->generate_token_as_admin();
+		$this->dispatch_exchange(
+			$plaintext,
+			array(
+				'os'    => 'iOS',
+				'model' => 'iPhone 15',
+			)
+		);
+
+		// A different shop manager polls the same token. Token guess is
+		// astronomical, but cross-user reads must still be opaque.
+		wp_set_current_user( $this->shop_manager_id );
+		$response = $this->dispatch_status( $plaintext );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertSame( 'expired', $response->get_data()['status'] );
+	}
+
+	/**
+	 * @testdox Status endpoint rejects subscribers who lack the manage_woocommerce capability.
+	 */
+	public function test_get_status_rejects_subscriber(): void {
+		wp_set_current_user( $this->subscriber_id );
+
+		$response = $this->dispatch_status( 'whatever' );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+	}
+
+	// -----------------------------------------------------------------------
+	// Revoke endpoint.
+	// -----------------------------------------------------------------------
+
+	/**
+	 * @testdox Revoke endpoint deletes the Application Password issued by a successful exchange.
+	 */
+	public function test_revoke_password_happy_path(): void {
+		$plaintext = $this->generate_token_as_admin();
+		$exchange  = $this->dispatch_exchange(
+			$plaintext,
+			array(
+				'os'    => 'iOS',
+				'model' => 'iPhone 15',
+			)
+		);
+		$this->assertSame( 200, $exchange->get_status() );
+		$uuid = $exchange->get_data()['uuid'];
+
+		$this->assertCount( 1, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+
+		wp_set_current_user( $this->admin_id );
+		$response = $this->dispatch_revoke( $uuid );
+
+		$this->assertSame( 200, $response->get_status() );
+		$this->assertTrue( $response->get_data()['success'] );
+		$this->assertSame( $uuid, $response->get_data()['uuid'] );
+		$this->assertCount(
+			0,
+			WP_Application_Passwords::get_user_application_passwords( $this->admin_id ),
+			'The Application Password must be gone after a successful revoke.'
+		);
+	}
+
+	/**
+	 * @testdox Revoke endpoint returns 404 when the UUID belongs to a different user.
+	 */
+	public function test_revoke_password_rejects_when_uuid_belongs_to_another_user(): void {
+		// Admin mints + exchanges. AP belongs to admin.
+		$plaintext = $this->generate_token_as_admin();
+		$exchange  = $this->dispatch_exchange(
+			$plaintext,
+			array(
+				'os'    => 'iOS',
+				'model' => 'iPhone 15',
+			)
+		);
+		$uuid      = $exchange->get_data()['uuid'];
+
+		// Shop manager tries to revoke admin's AP. This must fail with 404 —
+		// we don't even leak that the AP exists.
+		wp_set_current_user( $this->shop_manager_id );
+		$response = $this->dispatch_revoke( $uuid );
+
+		$this->assertSame( 404, $response->get_status() );
+		$this->assertSame( 'application_password_not_found', $response->get_data()['code'] );
+
+		// And the admin's AP is untouched.
+		$this->assertCount( 1, WP_Application_Passwords::get_user_application_passwords( $this->admin_id ) );
+	}
+
+	/**
+	 * @testdox Revoke endpoint rejects subscribers who lack the manage_woocommerce capability.
+	 */
+	public function test_revoke_password_rejects_subscriber(): void {
+		wp_set_current_user( $this->subscriber_id );
+
+		$response = $this->dispatch_revoke( 'whatever-uuid' );
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
 	}
 }

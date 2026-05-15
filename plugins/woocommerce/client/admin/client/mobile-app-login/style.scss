@@ -6,6 +6,8 @@
 	&__card {
 		width: 100%;
 		max-width: 560px;
+		border-top: 4px solid $studio-woocommerce-purple-50;
+		overflow: hidden;
 	}
 
 	&__body {
@@ -16,10 +18,19 @@
 		padding: $gap-largest;
 	}
 
+	&__brand {
+		display: block;
+		width: 95px;
+		height: 26px;
+		margin: 0 auto $gap;
+	}
+
 	&__heading {
 		font-size: 24px;
-		font-weight: 400;
-		line-height: 1.3;
+		font-weight: 600;
+		line-height: 1.25;
+		letter-spacing: 0;
+		color: $gray-900;
 		margin: 0 0 $gap;
 	}
 
@@ -32,16 +43,23 @@
 	}
 
 	&__qr {
-		margin-bottom: $gap;
+		margin-bottom: $gap-large;
 
-		// Centre the internal QR layout — `<QRDirectLoginCode />` is wrapped
-		// in a `.qr-direct-login` div with default left-aligned children,
-		// so we re-align them for this standalone single-column page.
-		.qr-direct-login {
+		// Centre the QR + meta column as a unit on this single-column page.
+		// The component itself uses a horizontal flex layout in the READY
+		// state (QR on the left, timer + renew on the right) — we just
+		// re-anchor that whole row to the centre here.
+		.woocommerce-qr-direct-login {
 			display: flex;
 			flex-direction: column;
 			align-items: center;
 			text-align: center;
+		}
+
+		.woocommerce-qr-direct-login.woocommerce-qr-direct-login--ready {
+			flex-direction: row;
+			justify-content: center;
+			text-align: left;
 		}
 	}
 
