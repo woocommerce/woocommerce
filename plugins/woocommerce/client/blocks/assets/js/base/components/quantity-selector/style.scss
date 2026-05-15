@@ -86,6 +86,10 @@
 	}
 }
 
+:where(.wc-block-components-quantity-selector .wc-block-components-quantity-selector__input) {
+	padding: 0.4em 0;
+}
+
 .theme-twentyseventeen {
 	.wc-block-components-quantity-selector
 		.wc-block-components-quantity-selector__button {
