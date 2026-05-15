@@ -221,6 +221,7 @@ export const useQRLoginToken = ( {
 			// Swallow polling errors. A transient 500/429 should not break the
 			// QR flow — the next tick will retry, and the countdown will
 			// eventually push us to EXPIRED.
+			// eslint-disable-next-line no-console
 			console.warn( 'QR login status polling failed.', error );
 		}
 	}, [ clearTimer, clearPollTimer ] );

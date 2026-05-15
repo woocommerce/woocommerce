@@ -723,7 +723,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		$token      = (string) $request->get_param( 'token' );
+		$token = (string) $request->get_param( 'token' );
 		if ( '' === $token ) {
 			return rest_ensure_response( array( 'status' => 'expired' ) );
 		}
