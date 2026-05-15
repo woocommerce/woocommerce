@@ -90,127 +90,39 @@ class VariationSelectorAttribute extends AbstractBlock {
 			'woocommerce/attributeTerms' => $attribute_terms,
 		);
 
-		$parsed = $block->parsed_block;
-		if ( ! is_array( $parsed ) ) {
-			return AddToCartWithOptionsUtils::render_block_with_context( $block, $row_context );
-		}
+		$parsed_block          = $block->parsed_block;
+		$parsed_block['attrs'] = $attributes;
 
-		$merged_attrs            = $this->merge_variation_template_attributes( $attributes, $parsed );
-		$stripped                = $parsed;
-		$stripped['innerBlocks'] = $this->strip_legacy_attribute_options_from_tree(
-			$parsed['innerBlocks'] ?? array(),
-			$merged_attrs
-		);
-		$stripped['attrs']       = $merged_attrs;
-
-		$group_block = $this->find_first_block_by_name( $stripped['innerBlocks'], 'core/group' );
-		if ( $group_block ) {
-			$display_style = $this->resolve_display_style( $merged_attrs );
-			return $this->render_core_group_row( $group_block, $row_context, $merged_attrs, $display_style );
-		}
-
-		return ( new WP_Block( $stripped, $row_context ) )->render( array( 'dynamic' => false ) );
-	}
-
-	/**
-	 * Merge variation template attributes.
-	 *
-	 * @param array<string, mixed> $render_attributes Attributes from render().
-	 * @param array<string, mixed> $parsed_block Parsed block for the template.
-	 * @return array<string, mixed>
-	 */
-	private function merge_variation_template_attributes( array $render_attributes, array $parsed_block ): array {
-		return array_merge(
-			array(
-				'displayStyle'             => 'woocommerce/product-filter-chips',
-				'autoselect'               => false,
-				'disabledAttributesAction' => 'disable',
-			),
-			$parsed_block['attrs'] ?? array(),
-			$render_attributes
-		);
-	}
-
-	/**
-	 * Removes legacy attribute-options wrapper blocks and merges their attributes.
-	 *
-	 * @param array<int, array<string, mixed>> $blocks Parsed inner blocks.
-	 * @param array<string, mixed>             $merged_attrs Merged template attributes (updated by reference when legacy blocks are found).
-	 * @return array<int, array<string, mixed>>
-	 */
-	private function strip_legacy_attribute_options_from_tree( array $blocks, array &$merged_attrs ): array {
-		$out = array();
-		foreach ( $blocks as $block ) {
-			$name = $block['blockName'] ?? '';
-			if ( 'woocommerce/add-to-cart-with-options-variation-selector-attribute-options' === $name ) {
-				foreach ( array( 'displayStyle', 'autoselect', 'disabledAttributesAction', 'optionStyle' ) as $key ) {
-					if ( array_key_exists( $key, $block['attrs'] ?? array() ) ) {
-						$merged_attrs[ $key ] = $block['attrs'][ $key ];
-					}
-				}
-				foreach ( $this->strip_legacy_attribute_options_from_tree( $block['innerBlocks'] ?? array(), $merged_attrs ) as $inner ) {
-					$out[] = $inner;
-				}
-				continue;
-			}
-			if ( ! empty( $block['innerBlocks'] ) ) {
-				$block['innerBlocks'] = $this->strip_legacy_attribute_options_from_tree( $block['innerBlocks'], $merged_attrs );
-			}
-			$out[] = $block;
-		}
-		return $out;
-	}
-
-	/**
-	 * @param array<int, array<string, mixed>> $blocks Parsed inner blocks.
-	 * @param string                           $needle Block name.
-	 * @return array<string, mixed>|null
-	 */
-	private function find_first_block_by_name( array $blocks, string $needle ): ?array {
-		foreach ( $blocks as $block ) {
-			if ( ( $block['blockName'] ?? '' ) === $needle ) {
-				return $block;
-			}
-		}
-		return null;
-	}
-
-	/**
-	 * @param array<string, mixed> $merged_attrs Merged template attributes.
-	 */
-	private function resolve_display_style( array $merged_attrs ): string {
-		if ( array_key_exists( 'displayStyle', $merged_attrs ) ) {
-			return (string) $merged_attrs['displayStyle'];
-		}
-		if ( array_key_exists( 'optionStyle', $merged_attrs ) ) {
-			return 'dropdown' === $merged_attrs['optionStyle']
-				? 'woocommerce/product-filter-dropdown'
-				: 'woocommerce/product-filter-chips';
-		}
-		return 'woocommerce/product-filter-chips';
-	}
-
-	/**
-	 * Renders a core/group row using WordPress block rendering so layout, className, and innerContent
-	 * match the editor. Chips/dropdown output is wrapped for add-to-cart-with-options interactivity.
-	 *
-	 * @param array<string, mixed> $group_node Parsed core/group block.
-	 * @param array<string, mixed> $row_context Row context (attribute id, name, terms).
-	 * @param array<string, mixed> $merged_attrs Merged template attributes.
-	 * @param string               $display_style Resolved display style block name.
-	 */
-	private function render_core_group_row( array $group_node, array $row_context, array $merged_attrs, string $display_style ): string {
-		$selectable_items_context = $this->build_selectable_items_context_for_variation_row( $row_context );
+		$display_style = $this->resolve_display_style( $attributes );
 
 		$merged_context = array_merge(
 			$row_context,
 			array(
-				'woocommerceSelectableItems' => $selectable_items_context,
+				'woocommerceSelectableItems' => $this->build_selectable_items_context_for_variation_row( $row_context ),
 			)
 		);
 
-		$wrap_chips_or_dropdown = function ( string $block_content, array $parsed_block ) use ( $merged_attrs, $row_context, $display_style ): string {
-			$name = $parsed_block['blockName'] ?? '';
+		return $this->render_inner_blocks( $parsed_block, $merged_context, $attributes, $row_context, $display_style );
+	}
+
+	/**
+	 * Render each top-level inner block for a variation attribute row.
+	 *
+	 * @param array<string, mixed> $parsed_block Parsed attribute block.
+	 * @param array<string, mixed> $merged_context Row and selectable-items context.
+	 * @param array<string, mixed> $merged_attrs Merged template attributes.
+	 * @param array<string, mixed> $row_context Row context (attribute id, name, terms).
+	 * @param string               $display_style Resolved display style block name.
+	 */
+	private function render_inner_blocks( array $parsed_block, array $merged_context, array $merged_attrs, array $row_context, string $display_style ): string {
+		$inner_blocks = $parsed_block['innerBlocks'] ?? array();
+
+		if ( empty( $inner_blocks ) ) {
+			return '';
+		}
+
+		$wrap_chips_or_dropdown = function ( string $block_content, array $inner_parsed_block ) use ( $merged_attrs, $row_context, $display_style ): string {
+			$name = $inner_parsed_block['blockName'] ?? '';
 			if ( 'woocommerce/product-filter-chips' !== $name && 'woocommerce/product-filter-dropdown' !== $name ) {
 				return $block_content;
 			}
@@ -221,10 +133,33 @@ class VariationSelectorAttribute extends AbstractBlock {
 		add_filter( 'render_block', $wrap_chips_or_dropdown, 10, 2 );
 
 		try {
-			return ( new WP_Block( $group_node, $merged_context ) )->render();
+			$content = '';
+			foreach ( $inner_blocks as $inner_block ) {
+				$content .= ( new WP_Block( $inner_block, $merged_context ) )->render();
+			}
+			return $content;
 		} finally {
 			remove_filter( 'render_block', $wrap_chips_or_dropdown, 10 );
 		}
+	}
+
+	/**
+	 * Resolve display style based on block attributes, supporting the legacy
+	 * `optionStyle` attribute.
+	 *
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return string Resolved display style block name.
+	 */
+	private function resolve_display_style( array $attributes ): string {
+		if ( array_key_exists( 'displayStyle', $attributes ) ) {
+			return (string) $attributes['displayStyle'];
+		}
+		if ( array_key_exists( 'optionStyle', $attributes ) ) {
+			return 'dropdown' === $attributes['optionStyle']
+				? 'woocommerce/product-filter-dropdown'
+				: 'woocommerce/product-filter-chips';
+		}
+		return 'woocommerce/product-filter-chips';
 	}
 
 	/**
