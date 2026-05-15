@@ -4,9 +4,14 @@
 	"description": "Dashboard widgets surfaced by WooCommerce.",
 	"private": true,
 	"license": "GPL-2.0-or-later",
+	"browserslist": [
+		"defaults and supports es6-module"
+	],
 	"dependencies": {
 		"@wordpress/element": "next",
+		"@wordpress/hooks": "next",
 		"@wordpress/i18n": "next",
-		"@wordpress/icons": "next"
+		"@wordpress/icons": "next",
+		"fast-deep-equal": "^3.1.3"
 	}
 }

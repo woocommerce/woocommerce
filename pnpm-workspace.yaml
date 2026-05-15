@@ -60,6 +60,7 @@ packages:
     - 'plugins/woocommerce/client/blocks'
     - 'plugins/woocommerce/client/legacy'
     - 'plugins/woocommerce/client/blocks/bin/eslint-plugin-woocommerce'
+    - 'plugins/woocommerce/widgets'
     - 'tools/monorepo-merge'
     - 'tools/code-analyzer'
     - 'tools/compare-perf'
