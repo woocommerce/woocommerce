@@ -1691,17 +1691,18 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		}
 
 		$query = array(
-			'fields' => "
+			'fields'  => "
 				SELECT DISTINCT ID FROM {$wpdb->posts} p
 			",
-			'join'   => '',
-			'where'  => "
+			'join'    => '',
+			'where'   => "
 				WHERE 1=1
 				AND p.post_status = 'publish'
 				AND p.post_type = 'product'
 
 			",
-			'limits' => '
+			'orderby' => '',
+			'limits'  => '
 				LIMIT ' . absint( $limit ) . '
 			',
 		);
@@ -1717,6 +1718,23 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 
 		if ( count( $exclude_ids ) ) {
 			$query['where'] .= ' AND p.ID NOT IN ( ' . implode( ',', array_map( 'absint', $exclude_ids ) ) . ' )';
+		}
+
+		/**
+		 * Filters whether related product queries should be randomised at the
+		 * SQL level. When true (the default), an `ORDER BY RAND()` clause is
+		 * added so the LIMIT selects a random subset across the full pool of
+		 * eligible products rather than always returning the same lowest-ID
+		 * rows. This ensures stores with more than ($limit + buffer) related
+		 * products can surface every product over time, instead of always
+		 * recycling the oldest ones (see #30140).
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool $shuffle Whether to randomise the SQL query. Default true.
+		 */
+		if ( apply_filters( 'woocommerce_product_related_posts_shuffle', true ) ) {
+			$query['orderby'] = ' ORDER BY RAND() ';
 		}
 
 		return $query;

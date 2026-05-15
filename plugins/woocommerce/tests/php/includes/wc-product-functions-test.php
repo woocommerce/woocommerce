@@ -676,6 +676,57 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testDox `wc_get_related_products` should be able to surface every product in the same
+	 *          category, not just the lowest-ID ones (see #30140). Run the lookup repeatedly
+	 *          and assert that, across runs, every related product is returned at least once.
+	 */
+	public function test_wc_get_related_products_reaches_all_products_in_large_category() {
+		$main_product = WC_Helper_Product::create_simple_product();
+
+		// Create enough related products to exceed the historical `LIMIT $limit + 10` cap that
+		// previously made high-ID products unreachable. 20 products with a `$limit` of 5 means
+		// the buggy implementation would only ever query the first 15 by post ID.
+		$category_term = wp_insert_term( 'Bug 30140 Category', 'product_cat' );
+		wp_set_object_terms( $main_product->get_id(), $category_term['term_id'], 'product_cat' );
+		$main_product->save();
+
+		$related_ids = array();
+		for ( $i = 0; $i < 20; $i++ ) {
+			$related = WC_Helper_Product::create_simple_product();
+			wp_set_object_terms( $related->get_id(), $category_term['term_id'], 'product_cat' );
+			$related->save();
+			$related_ids[] = $related->get_id();
+		}
+
+		// Bust the per-product transient between runs so the SQL query actually executes
+		// and the randomised result set varies. The transient name matches the function under test.
+		$seen = array();
+		for ( $run = 0; $run < 50; $run++ ) {
+			delete_transient( 'wc_related_' . $main_product->get_id() );
+			$results = wc_get_related_products( $main_product->get_id(), 5 );
+			foreach ( $results as $id ) {
+				$seen[ (int) $id ] = true;
+			}
+			if ( count( $seen ) === count( $related_ids ) ) {
+				break;
+			}
+		}
+
+		$unreached = array_diff( $related_ids, array_keys( $seen ) );
+		$this->assertEmpty(
+			$unreached,
+			'Every related product should be reachable; missed IDs: ' . implode( ',', $unreached )
+		);
+
+		// Clean up.
+		delete_transient( 'wc_related_' . $main_product->get_id() );
+		WC_Helper_Product::delete_product( $main_product->get_id() );
+		foreach ( $related_ids as $id ) {
+			WC_Helper_Product::delete_product( $id );
+		}
+	}
+
+	/**
 	 * @testdox Product permalink should use deepest category, not the one with highest parent term ID.
 	 */
 	public function test_wc_product_post_type_link_uses_deepest_category() {

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix related products only ever cycling through the lowest-ID products in a category. The data store now randomises the SQL query so every related product is reachable, regardless of how many products share the category or tag (#30140).
