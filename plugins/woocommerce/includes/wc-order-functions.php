@@ -1176,11 +1176,33 @@ function wc_get_order_note( $data ) {
 		return null;
 	}
 
+	/*
+	 * Build the note's date from `comment_date_gmt` (which is stored in UTC) so
+	 * that the rendered timestamp reflects the site's *current* timezone setting
+	 * rather than the timezone that was in effect when the note was created.
+	 * Using `comment_date` (local time at insertion) would otherwise be reinterpreted
+	 * under the new timezone, which is the cause of woocommerce/woocommerce#48953.
+	 *
+	 * Fallback to `comment_date` if `comment_date_gmt` is empty (legacy data).
+	 */
+	if ( ! empty( $data->comment_date_gmt ) && '0000-00-00 00:00:00' !== $data->comment_date_gmt ) {
+		$timestamp = wc_string_to_timestamp( $data->comment_date_gmt );
+		$datetime  = new WC_DateTime( "@{$timestamp}", new DateTimeZone( 'UTC' ) );
+
+		if ( get_option( 'timezone_string' ) ) {
+			$datetime->setTimezone( new DateTimeZone( wc_timezone_string() ) );
+		} else {
+			$datetime->set_utc_offset( (int) wc_timezone_offset() );
+		}
+	} else {
+		$datetime = wc_string_to_datetime( $data->comment_date );
+	}
+
 	return (object) apply_filters(
 		'woocommerce_get_order_note',
 		array(
 			'id'            => (int) $data->comment_ID,
-			'date_created'  => wc_string_to_datetime( $data->comment_date ),
+			'date_created'  => $datetime,
 			'content'       => $data->comment_content,
 			'customer_note' => (bool) get_comment_meta( $data->comment_ID, 'is_customer_note', true ),
 			'added_by'      => __( 'WooCommerce', 'woocommerce' ) === $data->comment_author ? 'system' : $data->comment_author,

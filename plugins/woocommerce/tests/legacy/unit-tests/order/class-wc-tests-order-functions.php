@@ -1482,6 +1482,35 @@ class WC_Tests_Order_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Order note timestamps should reflect the site's *current* timezone, not
+	 * the timezone in effect when the note was created. Regression test for
+	 * woocommerce/woocommerce#48953.
+	 */
+	public function test_wc_get_order_note_uses_current_site_timezone() {
+		$original_tz = get_option( 'timezone_string' );
+
+		// Create the note while the site is in America/New_York.
+		update_option( 'timezone_string', 'America/New_York' );
+		$order   = WC_Helper_Order::create_order();
+		$note_id = (int) $order->add_order_note( 'Timezone test note' );
+
+		// Switch the site timezone to Asia/Tokyo.
+		update_option( 'timezone_string', 'Asia/Tokyo' );
+
+		$note = wc_get_order_note( $note_id );
+		$this->assertInstanceOf( 'WC_DateTime', $note->date_created );
+		$this->assertSame( 'Asia/Tokyo', $note->date_created->getTimezone()->getName() );
+
+		// Same UTC moment, both representations.
+		$comment      = get_comment( $note_id );
+		$expected_utc = strtotime( $comment->comment_date_gmt . ' UTC' );
+		$this->assertSame( $expected_utc, $note->date_created->getTimestamp() );
+
+		// Restore.
+		update_option( 'timezone_string', $original_tz );
+	}
+
+	/**
 	 * Test wc_get_order_notes().
 	 *
 	 * @since 3.2.0

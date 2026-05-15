@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Order Notes timestamps now follow the site's current timezone instead of the timezone that was active when the note was created.
