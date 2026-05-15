@@ -1,6 +1,15 @@
 // Set up some local color variables to make the CSS more clear
 $border: $gray-200;
 
+// Accessible trend indicator colors. The default $alert-red (#d94f4f) and
+// $alert-green (#4ab866) fail WCAG 2.2 SC 1.4.3 (4.5:1 minimum) against white
+// text. These darker shades meet the AA contrast requirement and are scoped
+// to the trend indicators only so the global alert palette is unaffected.
+// - $trend-bad-bg #b32d2e on $white => 5.05:1
+// - $trend-good-bg #1e6e3e on $white => 5.31:1
+$trend-bad-bg: #b32d2e;
+$trend-good-bg: #1e6e3e;
+
 // A local mixin to generate the grid template and border logic
 @mixin make-cols( $i ) {
 	grid-template-columns: repeat($i, 1fr);
@@ -358,14 +367,28 @@ $border: $gray-200;
 		}
 	}
 
+	// Trend indicator colors. The descendant `color` rule targets the inner
+	// `Text` component so the rule survives the emotion-generated styles
+	// that set `color` directly on the rendered `<p>` (these otherwise win
+	// on cascade order despite this block's higher specificity).
+	// See WCAG 2.2 SC 1.4.3 — both the previous override and the previous
+	// palette failed the 4.5:1 minimum contrast for normal text.
 	&.is-good-trend .woocommerce-summary__item-delta {
-		background-color: $alert-green;
+		background-color: $trend-good-bg;
 		color: $white;
+
+		* {
+			color: $white;
+		}
 	}
 
 	&.is-bad-trend .woocommerce-summary__item-delta {
-		background-color: $alert-red;
+		background-color: $trend-bad-bg;
 		color: $white;
+
+		* {
+			color: $white;
+		}
 	}
 
 	.woocommerce-summary__toggle {
