@@ -414,11 +414,21 @@ class DataStore extends ReportsDataStore implements DataStoreInterface {
 
 			$this->subquery->clear_sql_clause( 'select' );
 			$this->subquery->add_sql_clause( 'select', $selections );
-			if ( in_array( $query_args['orderby'], array( 'items_sold', 'net_revenue', 'orders_count', 'variations' ), true ) ) {
-				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) . ', product_id' );
-			} else {
-				$this->subquery->add_sql_clause( 'order_by', $this->get_sql_clause( 'order_by' ) );
+			$order_by_clause = $this->get_sql_clause( 'order_by' );
+
+			/*
+			 * Always append `product_id` as a deterministic tie-breaker so that
+			 * paginated CSV exports do not duplicate or skip products when the
+			 * primary sort column contains ties (e.g. two products with the same
+			 * title, SKU, items_sold count, or `date_created` after GROUP BY).
+			 * Without this, MySQL is free to return rows in any order for tied
+			 * values, which means consecutive export batches can return
+			 * overlapping or missing product rows.
+			 */
+			if ( false === strpos( $order_by_clause, 'product_id' ) ) {
+				$order_by_clause .= ', product_id';
 			}
+			$this->subquery->add_sql_clause( 'order_by', $order_by_clause );
 			$this->subquery->add_sql_clause( 'limit', $this->get_sql_clause( 'limit' ) );
 			$products_query = $this->subquery->get_query_statement();
 		}

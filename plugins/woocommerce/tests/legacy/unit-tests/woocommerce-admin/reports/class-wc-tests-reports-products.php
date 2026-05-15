@@ -212,6 +212,96 @@ class WC_Admin_Tests_Reports_Products extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Paginated queries must be deterministic even when the primary sort
+	 * column contains ties (same product title, SKU, date, etc.). Without
+	 * a stable secondary sort key, MySQL is free to return ordered rows
+	 * differently across consecutive paginated queries, which causes CSV
+	 * exports to duplicate some products and skip others.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/41574.
+	 */
+	public function test_pagination_is_stable_with_tied_sort_columns() {
+		WC_Helper_Reports::reset_stats_dbs();
+
+		// Create several products that all share the same title so the
+		// `product_name` ORDER BY column has nothing but ties.
+		$products = array();
+		for ( $i = 0; $i < 6; $i++ ) {
+			$product = new WC_Product_Simple();
+			$product->set_name( 'Duplicate Title Product' );
+			$product->set_regular_price( 10 );
+			$product->save();
+			$products[] = $product;
+		}
+
+		$date_created = time();
+		foreach ( $products as $idx => $product ) {
+			$order = WC_Helper_Order::create_order( 1, $product );
+			$order->set_status( OrderStatus::COMPLETED );
+			$order->set_total( 40 );
+			$order->set_date_created( $date_created + $idx );
+			$order->save();
+		}
+
+		WC_Helper_Queue::run_all_pending( 'wc-admin-data' );
+
+		$data_store = new ProductsDataStore();
+		$start_time = gmdate( 'Y-m-d H:00:00', $date_created - HOUR_IN_SECONDS );
+		$end_time   = gmdate( 'Y-m-d H:00:00', $date_created + ( count( $products ) + 1 ) * HOUR_IN_SECONDS );
+
+		$base_args = array(
+			'after'    => $start_time,
+			'before'   => $end_time,
+			'order_by' => 'product_name',
+			'order'    => 'asc',
+			'per_page' => 2,
+		);
+
+		// Walk all pages and collect the product_ids returned. Each product
+		// must appear exactly once across the full result set, regardless of
+		// the fact that every row has the same product title.
+		$seen_ids = array();
+		for ( $page = 1; $page <= 3; $page++ ) {
+			$args     = array_merge( $base_args, array( 'page' => $page ) );
+			$data     = $data_store->get_data( $args );
+			$seen_ids = array_merge( $seen_ids, wp_list_pluck( $data->data, 'product_id' ) );
+			$this->assertEquals( 6, $data->total );
+			$this->assertEquals( 3, $data->pages );
+		}
+
+		$expected_ids = array_map(
+			static function ( $product ) {
+				return $product->get_id();
+			},
+			$products
+		);
+		sort( $expected_ids );
+		sort( $seen_ids );
+
+		$this->assertSame(
+			$expected_ids,
+			$seen_ids,
+			'Paginated product report results must include each product exactly once, even when the sort column has ties.'
+		);
+
+		// Same assertion when sorting by date, which is also non-unique after
+		// GROUP BY product_id.
+		$base_args['order_by'] = 'date';
+		$seen_ids              = array();
+		for ( $page = 1; $page <= 3; $page++ ) {
+			$args     = array_merge( $base_args, array( 'page' => $page ) );
+			$data     = $data_store->get_data( $args );
+			$seen_ids = array_merge( $seen_ids, wp_list_pluck( $data->data, 'product_id' ) );
+		}
+		sort( $seen_ids );
+		$this->assertSame(
+			$expected_ids,
+			$seen_ids,
+			'Paginated product report results sorted by date must not skip or duplicate rows.'
+		);
+	}
+
+	/**
 	 * Test the extended info.
 	 *
 	 * @since 3.5.0

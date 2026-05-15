@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix duplicate and missing rows in Analytics > Products CSV export by adding a deterministic `product_id` tie-breaker to the report query's ORDER BY, so paginated export batches no longer overlap or skip products when the primary sort column contains ties.
