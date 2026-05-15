@@ -26,6 +26,7 @@ use Automattic\WooCommerce\Internal\ProductDownloads\ApprovedDirectories\Registe
 use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
 use Automattic\WooCommerce\Internal\RestockRefundedItemsAdjuster;
 use Automattic\WooCommerce\Internal\Settings\OptionSanitizer;
+use Automattic\WooCommerce\Internal\StockThresholdResync;
 use Automattic\WooCommerce\Internal\Utilities\LegacyRestApiStub;
 use Automattic\WooCommerce\Internal\Utilities\WebhookUtil;
 use Automattic\WooCommerce\Internal\Admin\EmailImprovements\EmailImprovements;
@@ -357,6 +358,7 @@ final class WooCommerce {
 		$container->get( LookupDataStore::class );
 		$container->get( MatchImageBySKU::class );
 		$container->get( RestockRefundedItemsAdjuster::class );
+		$container->get( StockThresholdResync::class );
 		$container->get( CustomOrdersTableController::class );
 		$container->get( ProductCacheController::class );
 		$container->get( OptionSanitizer::class );

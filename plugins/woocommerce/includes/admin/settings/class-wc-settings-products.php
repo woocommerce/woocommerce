@@ -312,7 +312,7 @@ class WC_Settings_Products extends WC_Settings_Page {
 
 				array(
 					'title'             => __( 'Out of stock threshold', 'woocommerce' ),
-					'desc'              => __( 'When product stock reaches this amount the stock status will change to "out of stock" and you will be notified via email. This setting does not affect existing "in stock" products.', 'woocommerce' ),
+					'desc'              => __( 'When product stock reaches this amount the stock status will change to "out of stock" and you will be notified via email. Changing this value re-evaluates the stock status of existing managed-stock products in the background.', 'woocommerce' ),
 					'id'                => 'woocommerce_notify_no_stock_amount',
 					'css'               => 'width:50px;',
 					'type'              => 'number',

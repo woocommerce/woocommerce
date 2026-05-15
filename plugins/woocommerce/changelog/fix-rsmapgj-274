@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Re-evaluate the stock status of managed-stock products in the background when the site-wide "Out of stock threshold" setting changes, so products are no longer purchasable below the new threshold until their next manual save or order.
