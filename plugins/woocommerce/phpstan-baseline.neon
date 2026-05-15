@@ -52426,7 +52426,7 @@ parameters:
 			path: src/Blocks/BlockTypes/MiniCartCheckoutButtonBlock.php
 
 		-
-			message: '#^Call to function is_array\(\) with array\{''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…''\} will always evaluate to true\.$#'
+			message: '#^Call to function is_array\(\) with array\{''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…'', ''\.wc\-block\-mini\-cart…''\} will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
 			path: src/Blocks/BlockTypes/MiniCartContents.php

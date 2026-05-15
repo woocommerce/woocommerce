@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Mini-Cart: Make the "Fill" variant of the View Cart and Checkout buttons inherit Mini-Cart Contents text/background colors symmetrically.
