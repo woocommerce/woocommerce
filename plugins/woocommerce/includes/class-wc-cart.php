@@ -569,7 +569,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 */
 	public function set_total_tax( $value ) {
 		// We round here because this is a total entry, as opposed to line items in other setters.
-		$this->totals['total_tax'] = wc_round_tax_total( $value );
+		$this->totals['total_tax'] = wc_round_tax_total( $value, null, 'cart_total_tax' );
 	}
 
 	/**
@@ -998,11 +998,11 @@ class WC_Cart extends WC_Legacy_Cart {
 
 				if ( isset( $shipping_taxes[ $key ] ) ) {
 					$tax -= $shipping_taxes[ $key ];
-					$tax  = wc_round_tax_total( $tax );
+					$tax  = wc_round_tax_total( $tax, null, 'cart_tax_totals' );
 					$tax += NumberUtil::round( $shipping_taxes[ $key ], wc_get_price_decimals() );
 					unset( $shipping_taxes[ $key ] );
 				}
-				$tax_totals[ $code ]->amount          += wc_round_tax_total( $tax );
+				$tax_totals[ $code ]->amount          += wc_round_tax_total( $tax, null, 'cart_tax_totals' );
 				$tax_totals[ $code ]->formatted_amount = wc_price( $tax_totals[ $code ]->amount );
 			}
 		}
@@ -2364,7 +2364,7 @@ class WC_Cart extends WC_Legacy_Cart {
 	 * @return string formatted price
 	 */
 	public function get_cart_tax() {
-		$cart_total_tax = wc_round_tax_total( $this->get_cart_contents_tax() + $this->get_shipping_tax() + $this->get_fee_tax() );
+		$cart_total_tax = wc_round_tax_total( $this->get_cart_contents_tax() + $this->get_shipping_tax() + $this->get_fee_tax(), null, 'cart_total_tax' );
 
 		return apply_filters( 'woocommerce_get_cart_tax', $cart_total_tax ? wc_price( $cart_total_tax ) : '' );
 	}

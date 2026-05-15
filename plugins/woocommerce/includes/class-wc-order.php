@@ -2462,7 +2462,7 @@ class WC_Order extends WC_Abstract_Order {
 				}
 			}
 		}
-		return wc_round_tax_total( $total ) * -1;
+		return wc_round_tax_total( $total, null, 'order_item_tax_refund' ) * -1;
 	}
 
 	/**

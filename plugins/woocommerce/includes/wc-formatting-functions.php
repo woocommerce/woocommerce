@@ -227,15 +227,45 @@ function wc_trim_zeros( $price ) {
 /**
  * Round a tax amount.
  *
- * @param  double $value Amount to round.
+ * The optional `$context` string identifies the call site so filter consumers
+ * (such as 5-cent rounding plugins) can decide which totals should be rounded
+ * and which should be passed through. Internal call sites that pass values in
+ * cents (i.e. multiplied by 100 for precision) use a `_in_cents` suffix on
+ * their context string. See the `wc_round_tax_total` filter for details.
+ *
+ * @since 10.9.0 Added the `$context` parameter and passed it to the
+ *               `wc_round_tax_total` filter as a fifth argument.
+ *
+ * @param  double $value     Amount to round.
  * @param  int    $precision DP to round. Defaults to wc_get_price_decimals.
+ * @param  string $context   Optional. Identifier for the call site, e.g.
+ *                           `'cart_total_tax'`, `'order_discount_tax'`,
+ *                           `'line_tax'`, `'line_tax_in_cents'`. Empty
+ *                           string by default for back compat.
  * @return float
  */
-function wc_round_tax_total( $value, $precision = null ) {
+function wc_round_tax_total( $value, $precision = null, $context = '' ) {
 	$precision   = is_null( $precision ) ? wc_get_price_decimals() : intval( $precision );
 	$rounded_tax = NumberUtil::round( $value, $precision, wc_get_tax_rounding_mode() ); // phpcs:ignore PHPCompatibility.FunctionUse.NewFunctionParameters.round_modeFound
 
-	return apply_filters( 'wc_round_tax_total', $rounded_tax, $value, $precision, WC_TAX_ROUNDING_MODE );
+	/**
+	 * Filter the rounded tax total.
+	 *
+	 * @since 2.1.0
+	 * @since 10.9.0 Added the `$context` parameter so consumers can scope
+	 *                rounding to specific call sites and distinguish
+	 *                internal (in-cents) values from cart/display values.
+	 *
+	 * @param float           $rounded_tax   The rounded tax value.
+	 * @param float           $value         The original (pre-rounding) value.
+	 * @param int             $precision     Decimal places used for rounding.
+	 * @param int|string      $rounding_mode WC_TAX_ROUNDING_MODE constant (PHP rounding mode or `'auto'`).
+	 * @param string          $context       Call site identifier. May be an empty
+	 *                                       string for callers that do not specify one.
+	 *                                       Context strings ending in `_in_cents`
+	 *                                       indicate the value is multiplied by 100.
+	 */
+	return apply_filters( 'wc_round_tax_total', $rounded_tax, $value, $precision, WC_TAX_ROUNDING_MODE, $context );
 }
 
 /**

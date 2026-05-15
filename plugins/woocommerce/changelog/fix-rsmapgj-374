@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix inconsistent application of the `wc_round_tax_total` filter for custom tax rounding (e.g. 5-cent rounding). The filter now receives a `$context` argument identifying the call site, allowing consumers to distinguish internal (in-cents) intermediate values from cart-facing totals so grand totals correctly account for rounded tax.

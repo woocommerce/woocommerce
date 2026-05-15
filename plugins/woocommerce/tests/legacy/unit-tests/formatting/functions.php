@@ -280,6 +280,97 @@ class WC_Tests_Formatting_Functions extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test wc_round_tax_total() back-compat: omitting `$context` still works
+	 * and the filter still fires with the existing positional arguments.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_wc_round_tax_total_filter_back_compat() {
+		$captured = array();
+		$capture  = function ( $rounded, $value, $precision, $rounding_mode ) use ( &$captured ) {
+			$captured[] = array(
+				'rounded'       => $rounded,
+				'value'         => $value,
+				'precision'     => $precision,
+				'rounding_mode' => $rounding_mode,
+			);
+			return $rounded;
+		};
+		add_filter( 'wc_round_tax_total', $capture, 10, 4 );
+
+		$out = wc_round_tax_total( 1.246 );
+
+		remove_filter( 'wc_round_tax_total', $capture, 10 );
+
+		$this->assertEquals( 1.25, $out );
+		$this->assertCount( 1, $captured );
+		$this->assertEquals( 1.25, $captured[0]['rounded'] );
+		$this->assertEquals( 1.246, $captured[0]['value'] );
+	}
+
+	/**
+	 * Test wc_round_tax_total() forwards the new `$context` argument to the
+	 * `wc_round_tax_total` filter as the fifth parameter.
+	 *
+	 * Regression coverage for RSMAPGJ-374 / woo#25679: the filter is applied
+	 * to both "internal" (in-cents) intermediate values and cart-facing
+	 * totals; consumers (e.g. 5-cent rounding) need a way to distinguish
+	 * call sites so the grand total accounts for the rounded tax.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_wc_round_tax_total_passes_context_to_filter() {
+		$captured_contexts = array();
+		$capture           = function ( $rounded, $value, $precision, $rounding_mode, $context ) use ( &$captured_contexts ) {
+			$captured_contexts[] = $context;
+			return $rounded;
+		};
+		add_filter( 'wc_round_tax_total', $capture, 10, 5 );
+
+		wc_round_tax_total( 1.246 );
+		wc_round_tax_total( 1.246, null, 'cart_total_tax' );
+		wc_round_tax_total( 100.0, 0, 'line_tax_in_cents' );
+
+		remove_filter( 'wc_round_tax_total', $capture, 10 );
+
+		$this->assertSame( array( '', 'cart_total_tax', 'line_tax_in_cents' ), $captured_contexts );
+	}
+
+	/**
+	 * Test the 5-cent rounding scenario from the original bug report.
+	 *
+	 * The filter consumer can now opt out of rounding for the "in cents"
+	 * (internal) call site by inspecting `$context`, so the cart-facing
+	 * total still benefits from 5-cent rounding without the internal
+	 * intermediate value being corrupted.
+	 *
+	 * @since 10.9.0
+	 */
+	public function test_wc_round_tax_total_5_cent_filter_can_skip_in_cents_contexts() {
+		$five_cent = function ( $rounded, $value, $precision, $rounding_mode, $context ) {
+			// Skip rounding for any internal in-cents call site.
+			$suffix = '_in_cents';
+			if ( '' !== $context && substr( $context, -strlen( $suffix ) ) === $suffix ) {
+				return $rounded;
+			}
+			// Apply 5-cent rounding to cart-facing values only.
+			return round( $value / 5, $precision ?? 2 ) * 5;
+		};
+		add_filter( 'wc_round_tax_total', $five_cent, 10, 5 );
+
+		// 28.481 (= 149.90 * 0.19) should round to 28.50 in cart context.
+		$cart_value = wc_round_tax_total( 28.481, null, 'cart_total_tax' );
+		// Internal "in cents" value (already × 100): a naive 5-cent filter
+		// would corrupt it; the context-aware filter leaves it alone.
+		$internal_value = wc_round_tax_total( 28.481, 0, 'line_tax_in_cents' );
+
+		remove_filter( 'wc_round_tax_total', $five_cent, 10 );
+
+		$this->assertEqualsWithDelta( 28.50, $cart_value, 0.0001 );
+		$this->assertEqualsWithDelta( 28.0, $internal_value, 0.0001 );
+	}
+
+	/**
 	 * Test wc_format_refund_total().
 	 *
 	 * @since 2.2
