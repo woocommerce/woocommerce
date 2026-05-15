@@ -791,7 +791,8 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 
 	/**
 	 * Explode CSV cell values using commas by default, and handling escaped
-	 * separators.
+	 * separators as well as double-quoted substrings that may themselves
+	 * contain the separator (per RFC 4180-style quoting).
 	 *
 	 * @since  3.2.0
 	 * @param  string $value     Value to explode.
@@ -799,8 +800,25 @@ abstract class WC_Product_Importer implements WC_Importer_Interface {
 	 * @return array
 	 */
 	protected function explode_values( $value, $separator = ',' ) {
-		$value  = str_replace( '\\,', '::separator::', $value );
-		$values = explode( $separator, $value );
+		$value = str_replace( '\\,', '::separator::', $value );
+
+		// When the field contains double quotes, honour them so values
+		// like `foo, "bar, baz", qux` are split into [foo, bar, baz, qux]
+		// rather than being broken on the inner commas. str_getcsv handles
+		// RFC 4180-style quoting and also strips the surrounding quotes.
+		if ( false !== strpos( $value, '"' ) ) {
+			$values = str_getcsv( $value, $separator, '"', "\0" );
+			// str_getcsv can yield null entries for empty fields; coerce to string.
+			$values = array_map(
+				static function ( $part ) {
+					return null === $part ? '' : $part;
+				},
+				$values
+			);
+		} else {
+			$values = explode( $separator, $value );
+		}
+
 		$values = array_map( array( $this, 'explode_values_formatter' ), $values );
 
 		return $values;

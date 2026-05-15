@@ -224,4 +224,41 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		wc_delete_attribute( $color_attr_id );
 		wc_delete_attribute( $size_attr_id );
 	}
+
+	/**
+	 * @testdox parse_comma_field preserves commas inside double-quoted attribute values.
+	 *
+	 * Regression test for woocommerce/woocommerce#53617 — quoted commas in a
+	 * product attribute value (e.g. `"New, no box. Multiple quantity, minor shelf wear."`)
+	 * were being split into multiple attribute values instead of being treated
+	 * as a single value.
+	 */
+	public function test_parse_comma_field_preserves_commas_inside_double_quotes() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		// Single quoted value containing commas should stay as one value.
+		$this->assertSame(
+			array( 'New, no box. Multiple quantity, minor shelf wear.' ),
+			$importer->parse_comma_field( '"New, no box. Multiple quantity, minor shelf wear."' )
+		);
+
+		// Mixed unquoted and quoted values: only the quoted commas are preserved.
+		$this->assertSame(
+			array( 'Red', 'Blue, navy', 'Green' ),
+			$importer->parse_comma_field( 'Red, "Blue, navy", Green' )
+		);
+
+		// Backslash-escaped commas (the legacy escape syntax) continue to work.
+		$this->assertSame(
+			array( 'Red, navy', 'Green' ),
+			$importer->parse_comma_field( 'Red\\, navy, Green' )
+		);
+
+		// Values without quotes still split on commas as before.
+		$this->assertSame(
+			array( 'Red', 'Green', 'Blue' ),
+			$importer->parse_comma_field( 'Red, Green, Blue' )
+		);
+	}
 }

@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve commas inside double-quoted product attribute values when importing a CSV (e.g. `"New, no box. Multiple quantity, minor shelf wear."` now imports as one value).
