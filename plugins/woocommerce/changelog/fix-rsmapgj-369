@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Reviews blocks now request the smaller WordPress `thumbnail` image size for the product image instead of `woocommerce_thumbnail`, avoiding an oversized image download for the ~3em display.

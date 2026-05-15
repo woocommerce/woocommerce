@@ -114,6 +114,33 @@ class ProductReviews extends ControllerTestCase {
 	}
 
 	/**
+	 * The product_image field should request the small `thumbnail` size, not `woocommerce_thumbnail`,
+	 * because the reviews blocks render the image at small (~3em) dimensions.
+	 *
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/42485.
+	 */
+	public function test_product_image_uses_thumbnail_size() {
+		$captured = array();
+		$capture  = function ( $image, $attachment_id, $size ) use ( &$captured ) {
+			if ( is_string( $size ) ) {
+				$captured[] = $size;
+			}
+			return $image;
+		};
+		add_filter( 'wp_get_attachment_image_src', $capture, 10, 3 );
+
+		try {
+			$response = rest_get_server()->dispatch( new \WP_REST_Request( 'GET', '/wc/store/v1/products/reviews' ) );
+			$this->assertSame( 200, $response->get_status() );
+		} finally {
+			remove_filter( 'wp_get_attachment_image_src', $capture, 10 );
+		}
+
+		$this->assertContains( 'thumbnail', $captured, 'Reviews endpoint should request the small thumbnail image size for product images.' );
+		$this->assertNotContains( 'woocommerce_thumbnail', $captured, 'Reviews endpoint should no longer request the larger woocommerce_thumbnail size for product images.' );
+	}
+
+	/**
 	 * Test getting reviews from a specific category.
 	 */
 	public function test_get_items_with_category_id_param() {

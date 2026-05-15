@@ -168,7 +168,10 @@ class ProductReviewSchema extends AbstractSchema {
 			'product_id'             => (int) $review->comment_post_ID,
 			'product_name'           => get_the_title( (int) $review->comment_post_ID ),
 			'product_permalink'      => get_permalink( (int) $review->comment_post_ID ),
-			'product_image'          => $this->image_attachment_schema->get_item_response( get_post_thumbnail_id( (int) $review->comment_post_ID ) ),
+			// Reviews render the product image at small (~3em) dimensions, so request the
+			// smallest registered image size (`thumbnail`) for the `thumbnail` field instead
+			// of `woocommerce_thumbnail`. See https://github.com/woocommerce/woocommerce/issues/42485.
+			'product_image'          => $this->image_attachment_schema->get_item_response( get_post_thumbnail_id( (int) $review->comment_post_ID ), 'thumbnail' ),
 			'reviewer'               => $review->comment_author,
 			'review'                 => wpautop( $review->comment_content ),
 			'rating'                 => $rating,
