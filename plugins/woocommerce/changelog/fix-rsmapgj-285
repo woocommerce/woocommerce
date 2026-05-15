@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Render the Product SKU block with an "N/A" placeholder for variable products that have no parent SKU, so the interactive layer can swap in the variation SKU on selection (matching the classic theme's single-product/meta.php behavior).

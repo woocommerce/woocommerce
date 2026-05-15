@@ -63,14 +63,19 @@ class ProductSKU extends AbstractBlock {
 			return '';
 		}
 
-		$product_sku = $product->get_sku();
+		$product_sku                         = $product->get_sku();
+		$is_descendant_of_product_collection = isset( $block->context['query']['isProductCollectionBlock'] );
+		$is_variable_product                 = $product->is_type( ProductType::VARIABLE );
 
-		if ( ! $product_sku ) {
+		// Variable products may have no parent SKU while their variations do. In that case,
+		// render the block with a placeholder ("N/A") so the interactive layer can swap in
+		// the variation SKU once a variation is selected. This matches the classic theme's
+		// single-product/meta.php template behavior.
+		if ( ! $product_sku && ! $is_variable_product ) {
 			return '';
 		}
 
-		$is_descendant_of_product_collection = isset( $block->context['query']['isProductCollectionBlock'] );
-		$is_interactive                      = ! $is_descendant_of_product_collection && $product->is_type( ProductType::VARIABLE );
+		$is_interactive = ! $is_descendant_of_product_collection && $is_variable_product;
 
 		if ( $is_interactive ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
@@ -90,6 +95,10 @@ class ProductSKU extends AbstractBlock {
 
 		$interactive_attributes = $is_interactive ? 'data-wp-interactive="woocommerce/products" data-wp-text="state.productInContext.sku"' : '';
 
+		// When the parent product has no SKU (variable products only at this point), fall back
+		// to "N/A" until a variation is selected on the client, matching classic theme behavior.
+		$displayed_sku = $product_sku ? $product_sku : esc_html__( 'N/A', 'woocommerce' );
+
 		return sprintf(
 			'<div class="wc-block-components-product-sku wc-block-grid__product-sku wp-block-woocommerce-product-sku product_meta wp-block-post-terms %1$s" style="%2$s">
 				%3$s
@@ -100,7 +109,7 @@ class ProductSKU extends AbstractBlock {
 			esc_attr( $styles_and_classes['styles'] ?? '' ),
 			$prefix,
 			$interactive_attributes,
-			$product_sku,
+			$displayed_sku,
 			$suffix
 		);
 	}
