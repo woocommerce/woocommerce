@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Product CSV importer: anchor the special-column regexes in get_formatting_callback() so headings like "metamask" or "hellometa:" no longer match the meta-field pattern and are no longer formatted with the more lenient wp_kses_post callback.

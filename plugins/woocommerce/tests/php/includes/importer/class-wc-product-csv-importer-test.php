@@ -224,4 +224,63 @@ class WC_Product_CSV_Importer_Test extends \WC_Unit_Test_Case {
 		wc_delete_attribute( $color_attr_id );
 		wc_delete_attribute( $size_attr_id );
 	}
+
+	/**
+	 * @testdox get_formatting_callback() anchors special-column regexes so unrelated headings (e.g. "metamask") don't match the meta callback.
+	 *
+	 * Regression test for woo#33773 / RSMAPGJ-346.
+	 */
+	public function test_get_formatting_callback_anchors_special_column_regexes() {
+		$csv_file = __DIR__ . '/sample.csv';
+		$importer = new WC_Product_CSV_Importer( $csv_file );
+
+		$reflection       = new ReflectionClass( WC_Product_CSV_Importer::class );
+		$mapped_keys_prop = $reflection->getProperty( 'mapped_keys' );
+		$mapped_keys_prop->setAccessible( true );
+
+		$get_formatting_cb = $reflection->getMethod( 'get_formatting_callback' );
+		$get_formatting_cb->setAccessible( true );
+
+		/*
+		 * Headings exercised here:
+		 *   0: meta:my_field        - real meta column, should use wp_kses_post.
+		 *   1: metamask             - previously matched malformed /meta:*\/ regex; must fall back to wc_clean.
+		 *   2: hellometa:foo        - previously matched malformed /meta:*\/ regex; must fall back to wc_clean.
+		 *   3: meta:::::_myfield    - still begins with meta:, so use wp_kses_post.
+		 *   4: attributes:value1    - must use parse_comma_field.
+		 *   5: fooattributes:value  - must NOT match attributes:value (not anchored at start).
+		 *   6: downloads:url0       - must use parse_download_file_field.
+		 *   7: plain_heading        - must fall back to wc_clean.
+		 */
+		$mapped_keys_prop->setValue(
+			$importer,
+			array(
+				'meta:my_field',
+				'metamask',
+				'hellometa:foo',
+				'meta:::::_myfield',
+				'attributes:value1',
+				'fooattributes:value',
+				'downloads:url0',
+				'plain_heading',
+			)
+		);
+
+		$callbacks = $get_formatting_cb->invoke( $importer );
+
+		$this->assertSame( 'wp_kses_post', $callbacks[0], 'meta:my_field should use wp_kses_post' );
+		$this->assertSame( 'wc_clean', $callbacks[1], 'metamask must not match the meta: regex' );
+		$this->assertSame( 'wc_clean', $callbacks[2], 'hellometa:foo must not match the meta: regex' );
+		$this->assertSame( 'wp_kses_post', $callbacks[3], 'meta:::::_myfield begins with meta: so should use wp_kses_post' );
+
+		$this->assertIsArray( $callbacks[4] );
+		$this->assertSame( 'parse_comma_field', $callbacks[4][1], 'attributes:value1 should use parse_comma_field' );
+
+		$this->assertSame( 'wc_clean', $callbacks[5], 'fooattributes:value must not match attributes:value regex' );
+
+		$this->assertIsArray( $callbacks[6] );
+		$this->assertSame( 'parse_download_file_field', $callbacks[6][1], 'downloads:url0 should use parse_download_file_field' );
+
+		$this->assertSame( 'wc_clean', $callbacks[7], 'plain_heading should fall back to wc_clean' );
+	}
 }

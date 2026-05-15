@@ -824,12 +824,16 @@ class WC_Product_CSV_Importer extends WC_Product_Importer {
 		/**
 		 * Match special column names.
 		 */
+		// Patterns are anchored with `^` so they only match column headings that
+		// begin with the given prefix (e.g. `meta:foo`, but not `metamask` or
+		// `hellometa:foo`). `wp_kses_post` is used for `meta:` columns to allow
+		// some HTML in meta fields; other matches use stricter parsers.
 		$regex_match_data_formatting = array(
-			'/attributes:value*/'    => array( $this, 'parse_comma_field' ),
-			'/attributes:visible*/'  => array( $this, 'parse_bool_field' ),
-			'/attributes:taxonomy*/' => array( $this, 'parse_bool_field' ),
-			'/downloads:url*/'       => array( $this, 'parse_download_file_field' ),
-			'/meta:*/'               => 'wp_kses_post', // Allow some HTML in meta fields.
+			'/^attributes:value/'    => array( $this, 'parse_comma_field' ),
+			'/^attributes:visible/'  => array( $this, 'parse_bool_field' ),
+			'/^attributes:taxonomy/' => array( $this, 'parse_bool_field' ),
+			'/^downloads:url/'       => array( $this, 'parse_download_file_field' ),
+			'/^meta:/'               => 'wp_kses_post',
 		);
 
 		$callbacks = array();
