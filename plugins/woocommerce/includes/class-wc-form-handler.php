@@ -63,12 +63,22 @@ class WC_Form_Handler {
 			$action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : '';
 			$value   = sprintf( '%d:%s', $user_id, wp_unslash( $_GET['key'] ) ); // phpcs:ignore
 			WC_Shortcode_My_Account::set_reset_password_cookie( $value );
+
+			$redirect_args = array(
+				'show-reset-form' => 'true',
+				'action'          => $action,
+			);
+
+			// Issue a one-time token as a fallback for browsers that drop the reset cookie on
+			// the cross-site redirect (e.g. SameSite=Strict navigations from webmail clients).
+			$token = WC_Shortcode_My_Account::set_password_reset_token( $value );
+			if ( $token ) {
+				$redirect_args['wc-resetpass-token'] = $token;
+			}
+
 			wp_safe_redirect(
 				add_query_arg(
-					array(
-						'show-reset-form' => 'true',
-						'action'          => $action,
-					),
+					$redirect_args,
 					wc_lostpassword_url()
 				)
 			);

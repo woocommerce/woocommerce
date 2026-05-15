@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix password reset flow failing when `SameSite=Strict` cookies cause the `wp-resetpass-COOKIEHASH` cookie to be dropped on the cross-site navigation from a webmail or messaging client. The reset link redirect now also carries a one-time token that is consumed server-side as a fallback when the cookie is unavailable.

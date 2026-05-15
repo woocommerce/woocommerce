@@ -31920,7 +31920,7 @@ parameters:
 		-
 			message: '#^Constant COOKIEHASH not found\.$#'
 			identifier: constant.notFound
-			count: 4
+			count: 2
 			path: includes/shortcodes/class-wc-shortcode-my-account.php
 
 		-

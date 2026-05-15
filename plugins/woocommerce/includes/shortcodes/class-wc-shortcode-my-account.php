@@ -241,11 +241,14 @@ class WC_Shortcode_My_Account {
 			 * Process reset key / login from email confirmation link
 			 */
 		} elseif ( ! empty( $_GET['show-reset-form'] ) ) { // WPCS: input var ok, CSRF ok.
-			if ( isset( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ) && 0 < strpos( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ], ':' ) ) {  // @codingStandardsIgnoreLine
-				list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ 'wp-resetpass-' . COOKIEHASH ] ), 2 ) ); // @codingStandardsIgnoreLine
-				$userdata               = get_userdata( absint( $rp_id ) );
-				$rp_login               = $userdata ? $userdata->user_login : '';
-				$user                   = self::check_password_reset_key( $rp_key, $rp_login );
+			$reset_credentials = self::get_password_reset_credentials();
+
+			if ( is_array( $reset_credentials ) ) {
+				$rp_id    = $reset_credentials['id'];
+				$rp_key   = $reset_credentials['key'];
+				$userdata = get_userdata( absint( $rp_id ) );
+				$rp_login = $userdata ? $userdata->user_login : '';
+				$user     = self::check_password_reset_key( $rp_key, $rp_login );
 
 				// Reset key / login is correct, display reset password form with hidden key / login values.
 				if ( is_object( $user ) ) {
@@ -268,6 +271,99 @@ class WC_Shortcode_My_Account {
 				'form' => 'lost_password',
 			)
 		);
+	}
+
+	/**
+	 * Retrieve the password reset credentials (user ID and reset key) for the current request.
+	 *
+	 * Prefers the `wp-resetpass-COOKIEHASH` cookie, which is the historical mechanism. When the
+	 * cookie is missing (for example, because the browser dropped it on a cross-site navigation
+	 * such as a `SameSite=Strict` link clicked from a webmail client), falls back to a one-time
+	 * token passed via the `wc-resetpass-token` query parameter, which is resolved against a
+	 * short-lived transient written by `WC_Form_Handler::redirect_reset_password_link()`.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return array|false An associative array with `id` (string) and `key` (string) keys, or
+	 *                     false when no valid credentials can be retrieved.
+	 */
+	protected static function get_password_reset_credentials() {
+		$cookie_name = 'wp-resetpass-' . COOKIEHASH;
+
+		if ( isset( $_COOKIE[ $cookie_name ] ) && 0 < strpos( $_COOKIE[ $cookie_name ], ':' ) ) { // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+			list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', wp_unslash( $_COOKIE[ $cookie_name ] ), 2 ) ); // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized
+
+			return array(
+				'id'  => $rp_id,
+				'key' => $rp_key,
+			);
+		}
+
+		// Fallback path for SameSite=Strict (and similar) cookie drops on cross-site navigations.
+		if ( ! empty( $_GET['wc-resetpass-token'] ) ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$token = sanitize_text_field( wp_unslash( $_GET['wc-resetpass-token'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+			$value = self::get_password_reset_token_value( $token );
+
+			if ( is_string( $value ) && 0 < strpos( $value, ':' ) ) {
+				list( $rp_id, $rp_key ) = array_map( 'wc_clean', explode( ':', $value, 2 ) );
+
+				return array(
+					'id'  => $rp_id,
+					'key' => $rp_key,
+				);
+			}
+		}
+
+		return false;
+	}
+
+	/**
+	 * Store a one-time token mapping to a `user_id:key` reset value.
+	 *
+	 * The token is a random opaque identifier returned to the caller. The stored transient is
+	 * short-lived (10 minutes — matching WordPress' own reset key expiration window) and is
+	 * deleted on first successful read in {@see self::get_password_reset_token_value()}.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param string $value Value to store, in `user_id:key` format.
+	 * @return string|false Generated token on success, false on failure.
+	 */
+	public static function set_password_reset_token( $value ) {
+		if ( ! is_string( $value ) || '' === $value ) {
+			return false;
+		}
+
+		$token = wp_generate_password( 32, false );
+		$stored = set_transient( '_wc_resetpass_token_' . $token, $value, 10 * MINUTE_IN_SECONDS );
+
+		return $stored ? $token : false;
+	}
+
+	/**
+	 * Look up and consume a one-time password reset token.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param string $token Token previously returned by {@see self::set_password_reset_token()}.
+	 * @return string|false Stored value, or false when the token is unknown or expired.
+	 */
+	protected static function get_password_reset_token_value( $token ) {
+		if ( ! is_string( $token ) || '' === $token ) {
+			return false;
+		}
+
+		$key   = '_wc_resetpass_token_' . $token;
+		$value = get_transient( $key );
+
+		if ( false === $value ) {
+			return false;
+		}
+
+		// Single-use: invalidate after consumption.
+		delete_transient( $key );
+
+		return is_string( $value ) ? $value : false;
 	}
 
 	/**
