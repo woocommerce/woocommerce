@@ -110,6 +110,25 @@ export const STATES = Object.fromEntries(
 	} )
 );
 
+/**
+ * PHP-defined ordering of state keys, keyed by country code.
+ *
+ * Consumers MUST prefer this over Object.keys(STATES[ country ]) when rendering
+ * lists of states. JavaScript reorders integer-like string keys (e.g. "81")
+ * numerically when iterating an object's keys, which loses the merchant-defined
+ * ordering applied via the `woocommerce_states` filter for countries whose
+ * state codes are numeric.
+ */
+export const STATE_ORDER: Record< string, string[] > = Object.fromEntries(
+	Object.keys( COUNTRIES ).map( ( countryCode ) => {
+		const data = countryData[ countryCode ];
+		const order = Array.isArray( data?.stateOrder )
+			? data.stateOrder
+			: Object.keys( data?.states || {} );
+		return [ countryCode, order ];
+	} )
+);
+
 export const COUNTRY_LOCALE = Object.fromEntries(
 	Object.keys( COUNTRIES ).map( ( countryCode ) => {
 		return [ countryCode, countryData[ countryCode ].locale || {} ];

@@ -372,10 +372,22 @@ class CartCheckoutUtils {
 		$country_data = array();
 
 		foreach ( array_keys( $all_countries ) as $country_code ) {
+			$states = $country_states[ $country_code ] ?? array();
+
+			// Provide an explicit, PHP-defined ordering of state keys alongside the states
+			// map. This is required because JavaScript object iteration reorders
+			// integer-like string keys (e.g. "81") numerically, which can lose the
+			// merchant-defined ordering set via the `woocommerce_states` filter for
+			// countries whose state codes are numeric (US Minor Outlying Islands,
+			// Philippines, etc.). Keys are cast to strings so they round-trip through
+			// JSON and JavaScript Object.keys() without further reordering.
+			$state_order = array_map( 'strval', array_keys( $states ) );
+
 			$country_data[ $country_code ] = array(
 				'allowBilling'  => isset( $billing_countries[ $country_code ] ),
 				'allowShipping' => isset( $shipping_countries[ $country_code ] ),
-				'states'        => $country_states[ $country_code ] ?? array(),
+				'states'        => $states,
+				'stateOrder'    => $state_order,
 				'locale'        => $country_locales[ $country_code ] ?? array(),
 			);
 		}

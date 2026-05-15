@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve PHP-defined state ordering in the Checkout block state dropdown for countries with numeric state codes (e.g. US Minor Outlying Islands).

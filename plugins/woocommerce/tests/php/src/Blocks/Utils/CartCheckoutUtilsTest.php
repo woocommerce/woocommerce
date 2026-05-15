@@ -328,4 +328,67 @@ class CartCheckoutUtilsTest extends WP_UnitTestCase {
 
 		$this->assertEquals( $expected, $result );
 	}
+
+	/**
+	 * Test get_country_data() exposes a stateOrder array alongside states so
+	 * the JavaScript layer can preserve the PHP-defined ordering even when
+	 * state codes are integer-like strings (which Object.keys/Object.entries
+	 * would reorder numerically).
+	 *
+	 * Regression: PHP states.php order was lost in the Checkout block dropdown
+	 * for countries with numeric state codes (e.g. US Minor Outlying Islands).
+	 */
+	public function test_get_country_data_exposes_state_order_for_numeric_keys() {
+		// Reorder US states via the woocommerce_states filter: move Alabama (AL)
+		// to the end so insertion order differs from alphabetical order, and
+		// inject a fake numeric-key state at the start that would otherwise be
+		// reordered by Object.keys() in JavaScript.
+		$filter = static function ( $states ) {
+			if ( isset( $states['US'] ) ) {
+				$al = $states['US']['AL'];
+				unset( $states['US']['AL'] );
+				$states['US'] = array_merge( array( '99' => 'Zone 99' ), $states['US'], array( 'AL' => $al ) );
+			}
+			return $states;
+		};
+		add_filter( 'woocommerce_states', $filter );
+
+		// Reset the cached states on WC()->countries so the filter is
+		// re-applied. The geo_cache property is private; use Reflection.
+		$reset_geo_cache = static function () {
+			$countries = WC()->countries;
+			$ref       = new \ReflectionClass( $countries );
+			$prop      = $ref->getProperty( 'geo_cache' );
+			$prop->setAccessible( true );
+			$prop->setValue( $countries, array() );
+		};
+		$reset_geo_cache();
+
+		$country_data = CartCheckoutUtils::get_country_data();
+
+		remove_filter( 'woocommerce_states', $filter );
+		$reset_geo_cache();
+
+		$this->assertArrayHasKey( 'US', $country_data, 'US country data should be present.' );
+		$this->assertArrayHasKey( 'stateOrder', $country_data['US'], 'US country data should expose stateOrder.' );
+
+		$state_order = $country_data['US']['stateOrder'];
+		$this->assertIsArray( $state_order );
+		$this->assertSame( '99', reset( $state_order ), 'Numeric-keyed state should appear first per PHP-defined order.' );
+		$this->assertSame( 'AL', end( $state_order ), 'Alabama should appear last per PHP-defined order.' );
+
+		// All entries should be strings so the order round-trips through JSON
+		// without JavaScript reordering integer-like string keys numerically.
+		foreach ( $state_order as $key ) {
+			$this->assertIsString( $key, 'stateOrder entries must be strings.' );
+		}
+
+		// The states map should still contain the same set of keys as
+		// stateOrder, so consumers can look up labels by key.
+		$this->assertEqualsCanonicalizing(
+			$state_order,
+			array_map( 'strval', array_keys( $country_data['US']['states'] ) ),
+			'stateOrder and states keys must match (order-insensitive).'
+		);
+	}
 }
