@@ -271,6 +271,22 @@ body.rtl #adminmenu .wp-submenu li.wc-nav-v2-has-subflyout {
 	margin-top: 0;
 }
 
+// WP's admin-menu.css sets display:block, padding, and dimensions on
+// #adminmenu .wp-menu-image:before for all menu icon pseudo-elements.
+// Those rules don't reach our panel, so mirror the base layout here.
+// Plugins like Code Snippets rely on these dimensions being present when
+// they register their icon purely via mask-image on ::before (no explicit
+// display/size in their own CSS — they inherit it from admin-menu.css).
+// Dashicon items get their font/glyph from the global .dashicons-before
+// rules which aren't scoped to #adminmenu, so those still render correctly.
+#wc-nav-v2-wp-rail .wp-menu-image::before {
+	display: block;
+	padding: 7px 0;
+	width: 36px;
+	height: 34px;
+	vertical-align: middle;
+}
+
 // WP-rail overlay ──────────────────────────────────────────────────────────
 //
 // On Woo pages the back (←) link slides in a panel showing the original
