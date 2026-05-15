@@ -261,9 +261,24 @@ class Products extends Task {
 	 * @return bool
 	 */
 	private function is_valid_product( $product ) {
-		return ProductStatus::PUBLISH === $product->get_status() &&
+		$is_valid = ProductStatus::PUBLISH === $product->get_status() &&
 			( ! $product->get_meta( '_headstart_post' ) ||
 			get_post_meta( $product->get_id(), '_edit_last', true ) );
+
+		/**
+		 * Filter whether a product should count as a user-created product for
+		 * the "Add Products" onboarding task completion criteria.
+		 *
+		 * Themes and plugins that auto-publish sample products without setting
+		 * the `_headstart_post` meta can hook into this filter to exclude those
+		 * products from the task completion check.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool       $is_valid Whether the product counts toward task completion.
+		 * @param WC_Product $product  The product being evaluated.
+		 */
+		return (bool) apply_filters( 'woocommerce_admin_onboarding_task_products_is_valid_product', $is_valid, $product );
 	}
 
 	/**
@@ -272,6 +287,26 @@ class Products extends Task {
 	 * @return bool
 	 */
 	public static function has_products() {
+		/**
+		 * Filter the result of the user-created products check before any
+		 * caching or database lookup runs.
+		 *
+		 * Return a boolean to short-circuit the default detection logic.
+		 * This lets themes and plugins that auto-publish sample products
+		 * exclude those products from the "Add Products" onboarding task
+		 * completion criteria. Return `null` (the default) to let the
+		 * built-in detection run.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool|null $pre Whether the store has user-created products.
+		 *                       `null` to fall back to the default check.
+		 */
+		$pre = apply_filters( 'woocommerce_admin_onboarding_task_products_pre_has_products', null );
+		if ( null !== $pre ) {
+			return (bool) $pre;
+		}
+
 		$product_exists = get_transient( self::HAS_PRODUCT_TRANSIENT );
 		if ( $product_exists ) {
 			return 'yes' === $product_exists;
@@ -328,7 +363,23 @@ class Products extends Task {
 		);
 
 		set_transient( self::HAS_PRODUCT_TRANSIENT, $value );
-		return 'yes' === $value;
+
+		$has_products = 'yes' === $value;
+
+		/**
+		 * Filter the final result of the user-created products check after
+		 * the built-in detection has run.
+		 *
+		 * Themes and plugins that auto-publish sample products can use this
+		 * filter to override the result when the default SQL detection cannot
+		 * distinguish their products from user-created ones (for example, when
+		 * sample products are published without `_headstart_post` meta).
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool $has_products Whether the store has user-created products.
+		 */
+		return (bool) apply_filters( 'woocommerce_admin_onboarding_task_products_has_products', $has_products );
 	}
 
 	/**

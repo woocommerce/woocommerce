@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add filter hooks to the "Add Products" onboarding task so themes and plugins that auto-publish sample products can exclude them from task completion criteria.
