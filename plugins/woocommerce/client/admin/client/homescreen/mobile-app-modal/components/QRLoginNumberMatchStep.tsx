@@ -5,6 +5,7 @@ import React, { useEffect, useMemo, useState } from '@wordpress/element';
 import { Button, Spinner } from '@wordpress/components';
 import { sprintf, __ } from '@wordpress/i18n';
 import { recordEvent } from '@woocommerce/tracks';
+import type { ReactNode } from 'react';
 
 /**
  * Internal dependencies
@@ -37,7 +38,7 @@ type QRLoginNumberMatchStepProps = {
 	 * Optional error surfaced after an approval request fails without a state
 	 * transition.
 	 */
-	errorMessage?: React.ReactNode | null;
+	errorMessage?: ReactNode | null;
 };
 
 /**
