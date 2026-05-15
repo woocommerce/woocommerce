@@ -1293,7 +1293,7 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Exchange with a device payload uses the model and date in the Application Password name.
+	 * @testdox Exchange after scan with a device payload uses the model and date in the Application Password name.
 	 */
 	public function test_exchange_token_with_device_payload_sets_descriptive_ap_name(): void {
 		$prep = $this->prepare_exchange_token(

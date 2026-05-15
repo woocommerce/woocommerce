@@ -113,8 +113,8 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	const MAX_REVOKE_ATTEMPTS = 10;
 
 	/**
-	 * Whitelisted keys for the optional `device` payload sent by the mobile app
-	 * on the exchange call. Anything outside this set is dropped before storage.
+	 * Whitelisted keys for the `device` payload sent by the mobile app on the
+	 * scan call. Anything outside this set is dropped before storage.
 	 *
 	 * `brand` is Android-only (`Build.BRAND`, e.g. "google", "samsung"); iOS
 	 * doesn't have a direct analogue and clients that don't have the field
