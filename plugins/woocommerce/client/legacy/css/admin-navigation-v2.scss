@@ -372,12 +372,14 @@ body.wc-nav-v2-showing-wp-rail #wc-nav-v2-wp-rail {
 		}
 	}
 
-	// Top-level hover: blue background + white text, matching WP admin
-	// color-scheme hover behavior (those rules are scoped to #adminmenu).
+	// Top-level hover: color-scheme background + white text.
+	// --wc-rail-hover-bg is set by JS by reading the active color-scheme
+	// stylesheet's `#adminmenu li.menu-top:hover` rule; falls back to WP's
+	// default blue so something reasonable shows before JS runs.
 	// !important overrides any WP admin or plugin CSS that may conflict.
 	li.menu-top > a:hover,
 	li.menu-top > a:focus {
-		background-color: #2271b1 !important;
+		background-color: var(--wc-rail-hover-bg, #2271b1) !important;
 		color: #fff !important;
 		border-left: none !important;
 		box-shadow: none !important;

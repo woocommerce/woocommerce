@@ -367,6 +367,86 @@
 					}
 				}
 
+				// Hover background — read from the active color-scheme stylesheet
+				// (which overrides admin-menu.css) so the panel hover matches
+				// whatever scheme the user has chosen.
+				( function () {
+					var hoverBg = null;
+					for ( var si = 0; si < document.styleSheets.length; si++ ) {
+						try {
+							var sheetRules = document.styleSheets[ si ].cssRules;
+							for ( var ri = 0; ri < sheetRules.length; ri++ ) {
+								var r  = sheetRules[ ri ];
+								var s  = r.selectorText || '';
+								var bg = r.style && r.style.backgroundColor;
+								if ( bg && s.indexOf( '#adminmenu' ) !== -1 &&
+									( s.indexOf( ':hover' ) !== -1 || s.indexOf( 'opensub' ) !== -1 ) &&
+									s.indexOf( 'submenu' ) === -1 ) {
+									hoverBg = bg; // keep updating — last match wins
+								}
+							}
+						} catch ( e ) {}
+					}
+					if ( hoverBg ) {
+						$wpRail[ 0 ].style.setProperty( '--wc-rail-hover-bg', hoverBg );
+					}
+				}() );
+
+				// Icon mirror — some plugins (e.g. Code Snippets) register their
+				// admin menu icon via CSS rules scoped to
+				// `#adminmenu .toplevel_page_<slug> .wp-menu-image:before`.
+				// Our panel is `#wc-nav-v2-wp-rail`, not `#adminmenu`, so those
+				// rules never fire. Scan all stylesheets, rewrite any matching
+				// rule to target `#wc-nav-v2-wp-rail #toplevel_page_<slug>`,
+				// resolve relative SVG URLs to absolute, and inject a <style>.
+				( function () {
+					var injected = [];
+					for ( var si = 0; si < document.styleSheets.length; si++ ) {
+						try {
+							var sheet     = document.styleSheets[ si ];
+							var sheetBase = sheet.href
+								? sheet.href.substring( 0, sheet.href.lastIndexOf( '/' ) + 1 )
+								: '';
+							var sheetRules = sheet.cssRules;
+							for ( var ri = 0; ri < sheetRules.length; ri++ ) {
+								var rule = sheetRules[ ri ];
+								var sel  = rule.selectorText || '';
+								if ( sel.indexOf( '#adminmenu' ) === -1 ||
+									sel.indexOf( '.toplevel_page_' ) === -1 ||
+									sel.indexOf( 'wp-menu-image' ) === -1 ) {
+									continue;
+								}
+								var newSel = sel.replace(
+									/#adminmenu\s+\.toplevel_page_/g,
+									'#wc-nav-v2-wp-rail #toplevel_page_'
+								);
+								if ( newSel === sel ) {
+									continue;
+								}
+								// Resolve relative asset URLs (e.g. mask SVGs) to
+								// absolute so the injected rule loads from the
+								// original plugin path, not the document root.
+								var cssText = rule.style.cssText;
+								if ( sheetBase ) {
+									cssText = cssText.replace(
+										/url\(\s*['"]?(?!data:|https?:\/\/|\/)(.*?)['"]?\s*\)/g,
+										function ( m, p ) {
+											return 'url("' + sheetBase + p + '")';
+										}
+									);
+								}
+								injected.push( newSel + '{' + cssText + '}' );
+							}
+						} catch ( e ) {}
+					}
+					if ( injected.length ) {
+						var st    = document.createElement( 'style' );
+						st.id    = 'wc-nav-v2-rail-icon-mirror';
+						st.textContent = injected.join( '\n' );
+						document.head.appendChild( st );
+					}
+				}() );
+
 				// Flyout hover for top-level items. We can't use bindDelayedHover
 				// directly because flyouts must be position:fixed (to escape any
 				// overflow constraints on the panel) and positioned dynamically
