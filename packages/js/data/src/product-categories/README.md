@@ -34,10 +34,10 @@ function Component() {
 
 Example usage: `wp.data.select( EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME ).getProductCategory( 3 );`
 
-| Actions                                              | Method | Description                                                                            |
-| ---------------------------------------------------- | ------ | -------------------------------------------------------------------------------------- |
+| Actions                                              | Method | Description                                                                           |
+| ---------------------------------------------------- | ------ | ------------------------------------------------------------------------------------- |
 | `createProductCategory( productCategoryObject )`     | POST   | Create product category, see `ProductCategory` in [types.ts](./types.ts) for values   |
-| `deleteProductCategory( id )`                        | DELETE | Delete a product category by ID                                                        |
+| `deleteProductCategory( id )`                        | DELETE | Delete a product category by ID                                                       |
 | `updateProductCategory( id, productCategoryObject )` | PUT    | Update a product category, see `ProductCategory` in [types.ts](./types.ts) for values |
 
 Example usage: `wp.data.dispatch( EXPERIMENTAL_PRODUCT_CATEGORIES_STORE_NAME ).updateProductCategory( 3, { name: 'New name' } );`
