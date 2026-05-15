@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add semantic tagName attribute to header and footer template parts in bundled block templates so shop and product pages render proper <header> and <footer> landmarks instead of <div>.
