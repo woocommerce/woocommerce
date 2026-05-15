@@ -32,9 +32,20 @@ $product_name = $item->get_name();
 $image_html   = $product->get_image( 'woocommerce_thumbnail' );
 
 // Variation attribute summary (e.g. "Size: Small, Colour: Red"). Empty for simple products.
+// Read from the order line item's stored meta — not the live variation — so the label keeps
+// reflecting what the customer actually bought even if catalog attributes change later.
 $variation_summary = '';
-if ( $product instanceof WC_Product_Variation ) {
-	$variation_summary = (string) wc_get_formatted_variation( $product, true );
+if ( (int) $item->get_variation_id() > 0 ) {
+	$summary_parts = array();
+	foreach ( $item->get_formatted_meta_data( '_', true ) as $meta ) {
+		$summary_key   = trim( wp_strip_all_tags( (string) $meta->display_key ) );
+		$summary_value = trim( wp_strip_all_tags( (string) $meta->display_value ) );
+		if ( '' === $summary_key || '' === $summary_value ) {
+			continue;
+		}
+		$summary_parts[] = $summary_key . ': ' . $summary_value;
+	}
+	$variation_summary = implode( ', ', $summary_parts );
 }
 $rating_label_id = 'woocommerce-review-rating-label-' . $item_id;
 $review_label_id = 'woocommerce-review-text-label-' . $item_id;

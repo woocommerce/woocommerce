@@ -312,8 +312,11 @@ class SubmissionHandler {
 		// Single grouped lookup, fetching the comment objects directly so we
 		// can read comment_post_ID without a follow-up query per row. Limit
 		// to approved + pending-moderation so spam/trash never count as
-		// completion. number=>0 disables the default 20-row cap so this still
-		// works for orders with many reviewable items.
+		// completion, AND to reviews tagged with this order so an older
+		// review of the same parent product from a previous order doesn't
+		// satisfy the per-row count for the current one. number=>0 disables
+		// the default 20-row cap so this still works for orders with many
+		// reviewable items.
 		$comments = get_comments(
 			array(
 				'post__in'     => array_keys( $required_reviews ),
@@ -321,6 +324,12 @@ class SubmissionHandler {
 				'type'         => 'review',
 				'status'       => array( 'approve', 'hold' ),
 				'number'       => 0,
+				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post__in + author_email.
+					array(
+						'key'   => ItemEligibility::ORDER_META_KEY,
+						'value' => (string) $order->get_id(),
+					),
+				),
 			)
 		);
 
@@ -385,8 +394,12 @@ class SubmissionHandler {
 	 * Used to snapshot the variation context onto the review comment at write
 	 * time (e.g. `"Size: Small, Colour: Red"`), so the value stays readable
 	 * even if the variation is later retired or its attributes change.
-	 * Returns an empty string for simple products or when the line item's
-	 * product can no longer be resolved.
+	 *
+	 * Reads the order line item's own stored attribute meta rather than the
+	 * live `WC_Product_Variation`, so the snapshot reflects what the customer
+	 * actually bought and is immune to catalog edits that happen between
+	 * purchase and review submission. Returns an empty string for simple
+	 * products or when the line item carries no attribute meta.
 	 *
 	 * @since 10.9.0
 	 *
@@ -397,11 +410,16 @@ class SubmissionHandler {
 			return '';
 		}
 
-		$product = $item->get_product();
-		if ( ! $product instanceof \WC_Product_Variation ) {
-			return '';
+		$parts = array();
+		foreach ( $item->get_formatted_meta_data( '_', true ) as $meta ) {
+			$key   = trim( wp_strip_all_tags( (string) $meta->display_key ) );
+			$value = trim( wp_strip_all_tags( (string) $meta->display_value ) );
+			if ( '' === $key || '' === $value ) {
+				continue;
+			}
+			$parts[] = $key . ': ' . $value;
 		}
 
-		return (string) wc_get_formatted_variation( $product, true );
+		return implode( ', ', $parts );
 	}
 }

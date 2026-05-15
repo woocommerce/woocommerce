@@ -504,6 +504,67 @@ class SubmissionHandlerTest extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Completion stamping ignores reviews tagged to a different order, even on the same parent product.
+	 *
+	 * Per-order scope guards against an older review from a previous order
+	 * inflating the current order's review count. Two variation rows on the
+	 * current order require two current-order reviews; an older review of
+	 * the same parent must not count toward that quota.
+	 */
+	public function test_does_not_mark_complete_when_prior_order_review_exists_for_same_parent(): void {
+		$built       = $this->make_order( 1 );
+		$order       = $built['order'];
+		$product_id  = $built['product_ids'][0];
+		$item_id     = $built['item_ids'][0];
+		$other_order = OrderHelper::create_order();
+
+		// Pre-existing approved review from an older order, same parent product, same email.
+		$prior_comment_id = (int) wp_insert_comment(
+			array(
+				'comment_post_ID'      => $product_id,
+				'comment_author'       => 'Jane',
+				'comment_author_email' => $order->get_billing_email(),
+				'comment_content'      => 'Reviewed previously.',
+				'comment_type'         => 'review',
+				'comment_approved'     => 1,
+			)
+		);
+		add_comment_meta( $prior_comment_id, 'rating', 4, true );
+		add_comment_meta( $prior_comment_id, ItemEligibility::ORDER_META_KEY, (int) $other_order->get_id(), true );
+		add_comment_meta( $prior_comment_id, ItemEligibility::VARIATION_META_KEY, 0, true );
+
+		// Force the current order to need 2 reviews on this parent: same line item appears twice.
+		$order->add_product( wc_get_product( $product_id ), 1 );
+		$order->save();
+		$item_ids       = array_keys( $order->get_items() );
+		$second_item_id = (int) end( $item_ids );
+
+		// Customer submits only ONE review for the current order.
+		$_POST = array(
+			'order_id' => $order->get_id(),
+			'key'      => $order->get_order_key(),
+			'_wcnonce' => wp_create_nonce( SubmissionHandler::ACTION ),
+			'reviews'  => array(
+				array(
+					'product_id'    => $product_id,
+					'order_item_id' => $item_id,
+					'rating'        => 5,
+				),
+			),
+		);
+
+		$this->dispatch();
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertEmpty(
+			$fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ),
+			'Older-order reviews on the same parent product must not inflate the current order\'s review count.'
+		);
+		// Sanity: the unused second item id is captured to keep the relationship explicit.
+		$this->assertNotSame( $item_id, $second_item_id );
+	}
+
+	/**
 	 * @testdox A successful submission fires the woocommerce_review_order_submitted action with order + per-row results.
 	 */
 	public function test_fires_review_order_submitted_action(): void {
