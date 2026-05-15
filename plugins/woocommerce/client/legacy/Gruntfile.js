@@ -136,6 +136,7 @@ module.exports = function ( grunt ) {
 					'<%= dirs.jsDest %>/admin/wc-shipping-zone-methods.js': [
 						'<%= dirs.js %>/admin/utils/number-validation.js',
 						'<%= dirs.js %>/admin/utils/maybe-modify-decimal.js',
+						'<%= dirs.js %>/admin/utils/preserve-shipping-cost-precision.js',
 						'<%= dirs.jsDest %>/admin/wc-shipping-zone-methods.js',
 					],
 				},

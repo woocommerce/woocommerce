@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Preserve the precision of shipping rates stored with more decimal places than the configured currency precision when the shipping method settings modal is re-opened, so silently re-saving the form no longer truncates the stored value.

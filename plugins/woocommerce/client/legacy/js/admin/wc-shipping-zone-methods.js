@@ -1,4 +1,4 @@
-/* global shippingZoneMethodsLocalizeScript, ajaxurl, WCNumberValidation, WCMaybeModifyDecimal */
+/* global shippingZoneMethodsLocalizeScript, ajaxurl, WCNumberValidation, WCMaybeModifyDecimal, WCPreserveShippingCostPrecision */
 ( function( $, data, wp, ajaxurl ) {
 	$( function() {
 		var $table          = $( '.wc-shipping-zone-methods' ),
@@ -517,7 +517,11 @@
 							// There was an error modifying the decimal, so we leave the original value as-is.
 							return;
 						}
-						const formattedValue = window.wc.currency.localiseMonetaryValue( config, value );
+						// Preserve the stored shipping cost's precision so that values stored with more
+						// decimals than the configured currency precision are not silently rounded when
+						// the settings modal is re-opened. See #43838.
+						const formatConfig = WCPreserveShippingCostPrecision.getPrecisionPreservingConfig( value, config );
+						const formattedValue = window.wc.currency.localiseMonetaryValue( formatConfig, value );
 						priceInput.attr( 'value', formattedValue );
 					} );
 
