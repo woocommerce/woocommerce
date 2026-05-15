@@ -80,6 +80,12 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	const SCAN_CLAIM_OPTION_PREFIX = '_wc_qr_login_scan_claim_';
 
 	/**
+	 * Approval-claim option prefix. Prevents concurrent number choices from
+	 * racing the one-strike scanned -> approved/rejected transition.
+	 */
+	const APPROVE_CLAIM_OPTION_PREFIX = '_wc_qr_login_approve_claim_';
+
+	/**
 	 * Stable Application Passwords `app_id` for credentials issued by this
 	 * flow. Lets administrators identify QR-issued credentials in the
 	 * Application Passwords screen and revoke them in bulk.
@@ -582,6 +588,30 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 */
 	private function release_token_scan_claim( $token_hash ) {
 		delete_option( self::SCAN_CLAIM_OPTION_PREFIX . $token_hash );
+	}
+
+	/**
+	 * Atomically claim a token for approval.
+	 *
+	 * @param string $token_hash SHA-256 hash of the plaintext token.
+	 * @param int    $expires_at Unix timestamp when the claim should expire.
+	 * @return bool True if the claim was acquired.
+	 */
+	private function claim_token_for_approval( $token_hash, $expires_at ) {
+		return $this->claim_token_with_option_key(
+			self::APPROVE_CLAIM_OPTION_PREFIX . $token_hash,
+			$expires_at
+		);
+	}
+
+	/**
+	 * Release a token approval claim owned by this request.
+	 *
+	 * @param string $token_hash SHA-256 hash of the plaintext token.
+	 * @return void
+	 */
+	private function release_token_approval_claim( $token_hash ) {
+		delete_option( self::APPROVE_CLAIM_OPTION_PREFIX . $token_hash );
 	}
 
 	/**
@@ -1440,9 +1470,33 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
+		$approval_claim_expires_at = ! empty( $record['challenge']['expires_at'] )
+			? (int) $record['challenge']['expires_at']
+			: ( isset( $record['expires_at'] ) ? (int) $record['expires_at'] : time() + self::TOKEN_TTL );
+		if ( ! $this->claim_token_for_approval( $token_hash, $approval_claim_expires_at ) ) {
+			return new \WP_Error(
+				'qr_login_approval_in_progress',
+				__( 'This QR login session is already being approved.', 'woocommerce' ),
+				array( 'status' => 409 )
+			);
+		}
+
+		// Re-read after acquiring the database claim in case another request
+		// approved, rejected, or expired the challenge while this one was waiting.
+		$record = get_transient( $key );
+		if ( ! is_array( $record ) ) {
+			$this->release_token_approval_claim( $token_hash );
+			return new \WP_Error(
+				'invalid_token',
+				__( 'Invalid or expired QR login token.', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
+
 		// Same cross-user defense as get_status — only the user that minted
 		// the token can approve it.
 		if ( ! isset( $record['user_id'] ) || (int) $record['user_id'] !== (int) $user_id ) {
+			$this->release_token_approval_claim( $token_hash );
 			return new \WP_Error(
 				'invalid_token',
 				__( 'Invalid or expired QR login token.', 'woocommerce' ),
@@ -1452,6 +1506,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$current_state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
 		if ( self::STATE_SCANNED !== $current_state ) {
+			$this->release_token_approval_claim( $token_hash );
 			return new \WP_Error(
 				'qr_login_not_scanned',
 				__( 'This QR login session is not waiting for approval.', 'woocommerce' ),
@@ -1464,6 +1519,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			$record['state']    = self::STATE_EXPIRED;
 			$record['state_at'] = time();
 			set_transient( $key, $record, 60 );
+			$this->release_token_approval_claim( $token_hash );
 			return new \WP_Error(
 				'qr_login_expired',
 				__( 'The QR login challenge has expired. Please generate a new code.', 'woocommerce' ),
@@ -1491,6 +1547,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 				)
 			);
 
+			$this->release_token_approval_claim( $token_hash );
 			return rest_ensure_response( array( 'state' => self::STATE_REJECTED ) );
 		}
 
@@ -1503,6 +1560,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		);
 
 		set_transient( $key, $record, $ttl );
+		$this->release_token_approval_claim( $token_hash );
 
 		return rest_ensure_response( array( 'state' => self::STATE_APPROVED ) );
 	}
