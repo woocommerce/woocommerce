@@ -666,20 +666,27 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		// from "QR shown" to "Signed in successfully on {device}" and surface
 		// a revoke button. Same TTL as the original token transient — there's
 		// no value in keeping this record longer than the modal that polls it.
+		$consumed_record = array(
+			'consumed_at' => time(),
+			'user_id'     => $user_id,
+			'ap_uuid'     => $item['uuid'],
+			'ap_name'     => $item['name'],
+			'device'      => $device,
+		);
 		set_transient(
 			self::CONSUMED_TRANSIENT_PREFIX . $token_hash,
-			array(
-				'consumed_at' => time(),
-				'user_id'     => $user_id,
-				'ap_uuid'     => $item['uuid'],
-				'ap_name'     => $item['name'],
-				'device'      => $device,
-			),
+			$consumed_record,
 			self::TOKEN_TTL
 		);
 
 		delete_transient( $key );
 		$this->release_token_exchange_claim( $token_hash );
+
+		// Notify the merchant out-of-band so they're aware of a fresh sign-in
+		// even when they aren't currently looking at wc-admin. Wrapped in a
+		// try/catch + filter to keep the exchange path uninterrupted if the
+		// site's mailer is misconfigured.
+		$this->maybe_send_sign_in_notification_email( $user, $consumed_record );
 
 		return rest_ensure_response(
 			array(
@@ -929,5 +936,116 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 */
 	private function check_revoke_rate_limit( $user_id ) {
 		return QRLoginRateLimits::consume( QRLoginRateLimits::BUCKET_REVOKE, (string) $user_id );
+	}
+
+	/**
+	 * Send the merchant a transactional email summarizing a successful QR
+	 * sign-in, unless they (or a site owner) opt out via the
+	 * `woocommerce_qr_login_should_send_signin_email` filter.
+	 *
+	 * Wrapped so a misconfigured mailer cannot break the exchange path —
+	 * exceptions are caught silently. We deliberately do not block the API
+	 * response on email delivery; the merchant already saw the confirmation
+	 * UI in wc-admin (Task 5).
+	 *
+	 * @param \WP_User             $user            The user who minted the token (recipient).
+	 * @param array<string, mixed> $consumed_record The record we just persisted to the consumed transient. Keys: consumed_at (int), user_id (int), ap_uuid (string), ap_name (string), device (array<string, string>).
+	 * @return void
+	 */
+	private function maybe_send_sign_in_notification_email( \WP_User $user, array $consumed_record ): void {
+		/**
+		 * Filter whether to send the QR sign-in notification email.
+		 *
+		 * Default: true. Return false to suppress the send for a specific
+		 * user, environment (e.g. staging), or test run.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param bool                 $should_send     Whether to send the email.
+		 * @param \WP_User             $user            The user who minted the QR token.
+		 * @param array<string, mixed> $consumed_record The consumed record about to be emailed (keys: consumed_at, user_id, ap_uuid, ap_name, device).
+		 */
+		$should_send = (bool) apply_filters(
+			'woocommerce_qr_login_should_send_signin_email',
+			true,
+			$user,
+			$consumed_record
+		);
+
+		if ( ! $should_send ) {
+			return;
+		}
+
+		try {
+			$this->send_sign_in_notification_email( $user, $consumed_record );
+		} catch ( \Throwable $e ) {
+			// Don't surface mailer failures to the exchange response — the
+			// merchant already has the API result, and the email is best-effort.
+			// Log instead so a misconfigured mailer is observable rather than
+			// invisible. Catch \Throwable so an \Error from the mailer also
+			// stays out of the exchange path.
+			wc_get_logger()->warning(
+				sprintf(
+					'QR sign-in notification email failed for user %d: %s',
+					$user->ID,
+					$e->getMessage()
+				),
+				array( 'source' => 'mobile-app-qr-login' )
+			);
+		}
+	}
+
+	/**
+	 * Render and dispatch the sign-in notification email.
+	 *
+	 * Uses `wp_mail()` directly with our own minimal HTML shell rather than
+	 * `WC()->mailer()->wrap_message()` — the WC wrapper auto-prepends a small
+	 * site-name header that duplicates the subject line shown by most clients
+	 * and constrains the body width. Owning the wrapper lets us deliver one
+	 * coherent layout.
+	 *
+	 * @param \WP_User             $user            Recipient.
+	 * @param array<string, mixed> $consumed_record The consumed record (same shape as `maybe_send_sign_in_notification_email`).
+	 * @return void
+	 */
+	private function send_sign_in_notification_email( \WP_User $user, array $consumed_record ): void {
+		$site_name = wp_specialchars_decode(
+			(string) get_bloginfo( 'name' ),
+			ENT_QUOTES
+		);
+
+		/* translators: %s: site name. */
+		$subject = sprintf( __( 'A new device signed in to %s', 'woocommerce' ), $site_name );
+
+		$body_html = $this->render_sign_in_notification_email_body( $user, $consumed_record, $site_name, $subject );
+
+		wp_mail(
+			$user->user_email,
+			$subject,
+			$body_html,
+			array( 'Content-Type: text/html; charset=UTF-8' )
+		);
+	}
+
+	/**
+	 * Render the full HTML email document for the sign-in notification.
+	 *
+	 * @param \WP_User             $user            Recipient.
+	 * @param array<string, mixed> $consumed_record The consumed record (same shape as `maybe_send_sign_in_notification_email`).
+	 * @param string               $site_name       Decoded site name (passed in to avoid double-decoding).
+	 * @param string               $subject         Email subject; rendered as the in-body heading.
+	 * @return string Rendered HTML document.
+	 */
+	private function render_sign_in_notification_email_body( \WP_User $user, array $consumed_record, string $site_name, string $subject ): string {
+		$device           = $consumed_record['device'] ?? array();
+		$consumed_at      = isset( $consumed_record['consumed_at'] ) ? (int) $consumed_record['consumed_at'] : time();
+		$ap_name          = $consumed_record['ap_name'] ?? '';
+		$applications_url = admin_url( 'profile.php#application-passwords-section' );
+
+		ob_start();
+		include __DIR__ . '/views/mobile-app-qr-login-signin-email.php';
+		$html = ob_get_clean();
+
+		return is_string( $html ) ? $html : '';
 	}
 }
