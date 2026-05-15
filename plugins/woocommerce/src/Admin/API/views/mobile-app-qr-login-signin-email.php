@@ -34,8 +34,10 @@ if ( '' !== $device_brand && '' !== $device_model ) {
 	$display_name = ucfirst( $device_brand ) . ' ' . $device_model;
 } elseif ( '' !== $device_model ) {
 	$display_name = $device_model;
-} else {
+} elseif ( '' !== $device_os ) {
 	$display_name = $device_os;
+} else {
+	$display_name = __( 'WooCommerce mobile app', 'woocommerce' );
 }
 
 $os_line   = trim( $device_os . ( '' !== $device_os_version ? ' ' . $device_os_version : '' ) );
