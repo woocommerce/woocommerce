@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix `update_checkout` retriggering field validation when the `update_order_review` AJAX handler outputs a non-error notice (e.g. a success message).

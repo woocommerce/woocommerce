@@ -553,6 +553,83 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 	}
 
 	/**
+	 * @testdox Should return success when update_order_review produces only a non-error notice.
+	 */
+	public function test_update_order_review_returns_success_when_only_non_error_notice_is_queued() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$callback = function () {
+			wc_add_notice( 'Coupon applied.', 'success' );
+		};
+		add_action( 'woocommerce_checkout_update_order_review', $callback );
+
+		$_POST['security']  = wp_create_nonce( 'update-order-review' );
+		$_POST['post_data'] = '';
+
+		$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+		remove_action( 'woocommerce_checkout_update_order_review', $callback );
+		WC()->cart->empty_cart();
+		unset( $_POST['security'], $_POST['post_data'] );
+		$product->delete( true );
+
+		$this->assertIsArray( $response, 'AJAX handler should return a JSON-decoded array' );
+		$this->assertSame( 'success', $response['result'], 'A non-error notice (e.g. a success message) must not flip the result to "failure".' );
+		$this->assertNotEmpty( $response['messages'], 'The success notice should still be sent back in messages.' );
+	}
+
+	/**
+	 * @testdox Should return failure when update_order_review produces an error notice.
+	 */
+	public function test_update_order_review_returns_failure_when_error_notice_is_queued() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$callback = function () {
+			wc_add_notice( 'Something went wrong.', 'error' );
+		};
+		add_action( 'woocommerce_checkout_update_order_review', $callback );
+
+		$_POST['security']  = wp_create_nonce( 'update-order-review' );
+		$_POST['post_data'] = '';
+
+		$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+		remove_action( 'woocommerce_checkout_update_order_review', $callback );
+		WC()->cart->empty_cart();
+		unset( $_POST['security'], $_POST['post_data'] );
+		$product->delete( true );
+
+		$this->assertIsArray( $response, 'AJAX handler should return a JSON-decoded array' );
+		$this->assertSame( 'failure', $response['result'], 'An error notice should result in a "failure" response.' );
+		$this->assertNotEmpty( $response['messages'], 'The error notice should be sent back in messages.' );
+	}
+
+	/**
+	 * @testdox Should return success when update_order_review produces no notices.
+	 */
+	public function test_update_order_review_returns_success_when_no_notice_is_queued() {
+		$product = WC_Helper_Product::create_simple_product();
+		WC()->cart->empty_cart();
+		WC()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$_POST['security']  = wp_create_nonce( 'update-order-review' );
+		$_POST['post_data'] = '';
+
+		$response = $this->do_ajax( 'woocommerce_update_order_review' );
+
+		WC()->cart->empty_cart();
+		unset( $_POST['security'], $_POST['post_data'] );
+		$product->delete( true );
+
+		$this->assertIsArray( $response, 'AJAX handler should return a JSON-decoded array' );
+		$this->assertSame( 'success', $response['result'], 'No notices means the request should be marked as a success.' );
+	}
+
+	/**
 	 * Does the 'hard work' of triggering an ajax endpoint and capturing the response.
 	 *
 	 * @param string $ajax_action The action to be triggered.
