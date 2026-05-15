@@ -32,7 +32,8 @@ class ProductAttributeTerms extends ControllerTestCase {
 	 * Test getting items.
 	 */
 	public function test_get_items() {
-		$request = new \WP_REST_Request( 'GET', '/wc/store/v1/products/attributes/' . $this->attributes[0]['attribute_id'] . '/terms' );
+		$attribute_id = $this->attributes[0]['attribute_id'];
+		$request      = new \WP_REST_Request( 'GET', '/wc/store/v1/products/attributes/' . $attribute_id . '/terms' );
 		$request->set_param( 'hide_empty', false );
 		$response = rest_get_server()->dispatch( $request );
 		$data     = $response->get_data();
@@ -44,6 +45,29 @@ class ProductAttributeTerms extends ControllerTestCase {
 		$this->assertArrayHasKey( 'slug', $data[0] );
 		$this->assertArrayHasKey( 'description', $data[0] );
 		$this->assertArrayHasKey( 'count', $data[0] );
+		$this->assertArrayHasKey( 'parent', $data[0] );
+		// Attribute taxonomies are non-hierarchical; the route exposes the parent
+		// attribute ID so consumers know which attribute each term belongs to.
+		foreach ( $data as $item ) {
+			$this->assertEquals( (int) $attribute_id, $item['parent'] );
+		}
+	}
+
+	/**
+	 * Test prepare_item_for_response uses the attribute ID as the parent.
+	 */
+	public function test_prepare_item_uses_attribute_id_as_parent() {
+		$routes       = new \Automattic\WooCommerce\StoreApi\RoutesController( new \Automattic\WooCommerce\StoreApi\SchemaController( $this->mock_extend ) );
+		$controller   = $routes->get( 'product-attribute-terms' );
+		$attribute_id = $this->attributes[1]['attribute_id'];
+
+		$request = new \WP_REST_Request();
+		$request->set_param( 'attribute_id', $attribute_id );
+
+		$response = $controller->prepare_item_for_response( get_term_by( 'name', 'small', 'pa_size' ), $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( (int) $attribute_id, $data['parent'] );
 	}
 
 	/**

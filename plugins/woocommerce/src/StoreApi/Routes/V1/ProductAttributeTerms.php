@@ -85,4 +85,25 @@ class ProductAttributeTerms extends AbstractTermsRoute {
 
 		return $this->get_terms_response( $attribute->slug, $request );
 	}
+
+	/**
+	 * Prepare a single attribute term for response.
+	 *
+	 * Product attribute taxonomies (`pa_*`) are non-hierarchical, so the underlying
+	 * `WP_Term::$parent` is always 0. For this endpoint we instead expose the parent
+	 * attribute ID (the `attribute_id` route parameter) so consumers can tell which
+	 * attribute a term belongs to without having to track it separately.
+	 *
+	 * @param mixed                                  $item Term object to format to schema.
+	 * @param \WP_REST_Request<array<string, mixed>> $request Request object.
+	 * @return \WP_REST_Response $response Response data.
+	 */
+	public function prepare_item_for_response( $item, \WP_REST_Request $request ) {
+		if ( $item instanceof \WP_Term && isset( $request['attribute_id'] ) ) {
+			$item         = clone $item;
+			$item->parent = (int) $request['attribute_id'];
+		}
+
+		return parent::prepare_item_for_response( $item, $request );
+	}
 }

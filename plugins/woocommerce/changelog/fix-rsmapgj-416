@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Store API: Return the parent attribute ID in `parent` for terms exposed by `/wc/store/v1/products/attributes/{id}/terms`, so consumers can tell which attribute a term belongs to.
