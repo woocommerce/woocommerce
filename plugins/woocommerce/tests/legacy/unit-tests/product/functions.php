@@ -1166,7 +1166,65 @@ class WC_Tests_Product_Functions extends WC_Unit_Test_Case {
 		// Test image hosted in woocommerce_uploads which is not allowed, think shops selling photos.
 		$this->assertEquals( $expected_attr, wc_get_attachment_image_attributes( $image_attr ) );
 
+		// Regression for #35166: even users who can manage WooCommerce should
+		// get the placeholder for woocommerce_uploads/* URLs, because that
+		// directory is `.htaccess` deny-all and the real URL produces server
+		// errors / fail2ban lockouts when the browser tries to render it.
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$this->assertTrue( current_user_can( 'manage_woocommerce' ) );
+		$this->assertEquals( $expected_attr, wc_get_attachment_image_attributes( $image_attr ) );
+		wp_set_current_user( 0 );
+
 		unset( $image_attr, $expected_attr );
+	}
+
+	/**
+	 * Test: wc_prepare_attachment_for_js replaces woocommerce_uploads URLs with a placeholder.
+	 *
+	 * Regression test for #35166 — admins editing products were served the real
+	 * woocommerce_uploads URL through the media library, which is `.htaccess`
+	 * deny-all and triggers `client denied by server configuration` errors plus
+	 * fail2ban lockouts.
+	 */
+	public function test_wc_prepare_attachment_for_js() {
+		$placeholder = wc_placeholder_img_src();
+
+		// Non-woocommerce_uploads URL is left alone.
+		$response = array(
+			'url'   => 'https://wc.local/wp-content/uploads/2024/01/safe-image.jpg',
+			'full'  => array( 'url' => 'https://wc.local/wp-content/uploads/2024/01/safe-image.jpg' ),
+			'sizes' => array(
+				'thumbnail' => array( 'url' => 'https://wc.local/wp-content/uploads/2024/01/safe-image-150x150.jpg' ),
+			),
+		);
+		$this->assertEquals( $response, wc_prepare_attachment_for_js( $response ) );
+
+		$blocked_response = array(
+			'url'   => 'https://wc.local/wp-content/uploads/woocommerce_uploads/2024/01/secret.jpg',
+			'full'  => array( 'url' => 'https://wc.local/wp-content/uploads/woocommerce_uploads/2024/01/secret.jpg' ),
+			'sizes' => array(
+				'thumbnail' => array( 'url' => 'https://wc.local/wp-content/uploads/woocommerce_uploads/2024/01/secret-150x150.jpg' ),
+				'medium'    => array( 'url' => 'https://wc.local/wp-content/uploads/woocommerce_uploads/2024/01/secret-300x300.jpg' ),
+			),
+		);
+
+		$result = wc_prepare_attachment_for_js( $blocked_response );
+		$this->assertEquals( $placeholder, $result['url'] );
+		$this->assertEquals( $placeholder, $result['full']['url'] );
+		$this->assertEquals( $placeholder, $result['sizes']['thumbnail']['url'] );
+		$this->assertEquals( $placeholder, $result['sizes']['medium']['url'] );
+
+		// Admins must also receive the placeholder.
+		$admin_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin_id );
+		$this->assertTrue( current_user_can( 'manage_woocommerce' ) );
+		$result = wc_prepare_attachment_for_js( $blocked_response );
+		$this->assertEquals( $placeholder, $result['url'] );
+		$this->assertEquals( $placeholder, $result['full']['url'] );
+		$this->assertEquals( $placeholder, $result['sizes']['thumbnail']['url'] );
+		$this->assertEquals( $placeholder, $result['sizes']['medium']['url'] );
+		wp_set_current_user( 0 );
 	}
 
 	/**

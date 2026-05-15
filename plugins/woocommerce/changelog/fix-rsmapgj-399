@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Always swap `woocommerce_uploads/` image URLs for the placeholder in the media library, even for admins, so the `.htaccess`-protected directory no longer triggers server errors or fail2ban lockouts.

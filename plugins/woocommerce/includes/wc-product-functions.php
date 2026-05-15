@@ -890,17 +890,13 @@ add_action( 'woocommerce_scheduled_sales', 'wc_scheduled_sales' );
  */
 function wc_get_attachment_image_attributes( $attr ) {
 	/*
-	 * If the user can manage woocommerce, allow them to
-	 * see the image content.
-	 */
-	if ( current_user_can( 'manage_woocommerce' ) ) {
-		return $attr;
-	}
-
-	/*
-	 * If the user does not have the right capabilities,
-	 * filter out the image source and replace with placeholder
-	 * image.
+	 * Filter out the image source for files stored under `woocommerce_uploads/`
+	 * and replace it with a placeholder image, regardless of the current user's
+	 * capabilities. Those files are protected by an auto-generated `.htaccess`
+	 * with "deny from all", so loading them from the browser (e.g. in the media
+	 * library modal while editing a product) produces "client denied by server
+	 * configuration" errors. On servers running fail2ban or similar tooling,
+	 * those errors can lock admins out of their own sites (see #35166).
 	 */
 	if ( isset( $attr['src'] ) && strstr( $attr['src'], 'woocommerce_uploads/' ) ) {
 		$attr['src'] = wc_placeholder_img_src();
@@ -922,20 +918,19 @@ add_filter( 'wp_get_attachment_image_attributes', 'wc_get_attachment_image_attri
  */
 function wc_prepare_attachment_for_js( $response ) {
 	/*
-	 * If the user can manage woocommerce, allow them to
-	 * see the image content.
-	 */
-	if ( current_user_can( 'manage_woocommerce' ) ) {
-		return $response;
-	}
-
-	/*
-	 * If the user does not have the right capabilities,
-	 * filter out the image source and replace with placeholder
-	 * image.
+	 * Replace the URLs of attachments living under `woocommerce_uploads/` with a
+	 * placeholder image for every user, including users with `manage_woocommerce`.
+	 * The `woocommerce_uploads` directory ships with an auto-generated `.htaccess`
+	 * that denies direct HTTP access, so leaving the real URLs in place causes the
+	 * media library (and any other JS consumer of attachment data) to issue
+	 * requests that the server rejects, generating server-error log entries and,
+	 * on hosts running fail2ban, lockouts for legitimate admins (see #35166).
 	 */
 	if ( isset( $response['url'] ) && strstr( $response['url'], 'woocommerce_uploads/' ) ) {
-		$response['full']['url'] = wc_placeholder_img_src();
+		$response['url'] = wc_placeholder_img_src();
+		if ( isset( $response['full'] ) ) {
+			$response['full']['url'] = wc_placeholder_img_src();
+		}
 		if ( isset( $response['sizes'] ) ) {
 			foreach ( $response['sizes'] as $size => $value ) {
 				$response['sizes'][ $size ]['url'] = wc_placeholder_img_src();
