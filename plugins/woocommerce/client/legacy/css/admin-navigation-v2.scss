@@ -281,9 +281,12 @@ body.rtl #adminmenu .wp-submenu li.wc-nav-v2-has-subflyout {
 // rules which aren't scoped to #adminmenu, so those still render correctly.
 #wc-nav-v2-wp-rail .wp-menu-image::before {
 	display: block;
+	// padding: 7px 0 + height: 20px = 34px total, matching the li row height.
+	// mask-position:center then centers the icon at 17px = li center. ✓
+	// Dashicon glyphs (font-size: 20px) also fill this 20px content area.
 	padding: 7px 0;
 	width: 36px;
-	height: 34px;
+	height: 20px;
 	vertical-align: middle;
 }
 
