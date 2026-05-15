@@ -152,6 +152,46 @@ describe( 'getNewPath', () => {
 
 		expect( path ).toEqual( 'admin.php?page=custom-page&path=' );
 	} );
+
+	describe( 'relative path resolution', () => {
+		beforeEach( () => {
+			// Put history into a known nested path so getPath() returns
+			// `/automatewoo/analytics` when called without an explicit path.
+			getHistory().push(
+				'admin.php?page=wc-admin&path=%2Fautomatewoo%2Fanalytics'
+			);
+		} );
+
+		it( 'should resolve "./<segment>" against the current path', () => {
+			const path = getNewPath( {}, './workflows' );
+
+			expect( path ).toEqual(
+				'admin.php?page=wc-admin&path=%2Fautomatewoo%2Fanalytics%2Fworkflows'
+			);
+		} );
+
+		it( 'should resolve "../<segment>" against the current path', () => {
+			const path = getNewPath( {}, '../reports' );
+
+			expect( path ).toEqual(
+				'admin.php?page=wc-admin&path=%2Fautomatewoo%2Freports'
+			);
+		} );
+
+		it( 'should leave absolute paths untouched', () => {
+			const path = getNewPath( {}, '/some/absolute/path' );
+
+			expect( path ).toEqual(
+				'admin.php?page=wc-admin&path=%2Fsome%2Fabsolute%2Fpath'
+			);
+		} );
+
+		it( 'should leave non-relative bare paths untouched', () => {
+			const path = getNewPath( {}, 'workflows' );
+
+			expect( path ).toEqual( 'admin.php?page=wc-admin&path=workflows' );
+		} );
+	} );
 } );
 
 describe( 'addHistoryListener', () => {

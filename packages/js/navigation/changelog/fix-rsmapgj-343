@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix `getNewPath` so a `path` argument starting with `./` or `../` is resolved against the current path, matching the documented behavior.
