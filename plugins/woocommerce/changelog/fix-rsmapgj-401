@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+REST API: Honor the `catalog_visibility` query parameter when listing products via `wc/v3/products` so results are filtered by the requested visibility.

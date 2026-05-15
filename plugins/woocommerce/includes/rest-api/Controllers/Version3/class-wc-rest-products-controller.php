@@ -336,6 +336,44 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			);
 		}
 
+		// Filter by catalog visibility.
+		if ( ! empty( $request['catalog_visibility'] ) ) {
+			switch ( $request['catalog_visibility'] ) {
+				case CatalogVisibility::SEARCH:
+					$args['tax_query'][] = array(
+						'taxonomy' => 'product_visibility',
+						'field'    => 'slug',
+						'terms'    => array( 'exclude-from-search' ),
+						'operator' => 'NOT IN',
+					);
+					break;
+				case CatalogVisibility::CATALOG:
+					$args['tax_query'][] = array(
+						'taxonomy' => 'product_visibility',
+						'field'    => 'slug',
+						'terms'    => array( 'exclude-from-catalog' ),
+						'operator' => 'NOT IN',
+					);
+					break;
+				case CatalogVisibility::VISIBLE:
+					$args['tax_query'][] = array(
+						'taxonomy' => 'product_visibility',
+						'field'    => 'slug',
+						'terms'    => array( 'exclude-from-catalog', 'exclude-from-search' ),
+						'operator' => 'NOT IN',
+					);
+					break;
+				case CatalogVisibility::HIDDEN:
+					$args['tax_query'][] = array(
+						'taxonomy' => 'product_visibility',
+						'field'    => 'slug',
+						'terms'    => array( 'exclude-from-catalog', 'exclude-from-search' ),
+						'operator' => 'AND',
+					);
+					break;
+			}
+		}
+
 		// Filter by visibility in POS.
 		if ( true === $request['pos_products_only'] ) {
 			$args['tax_query'][] = array(
@@ -1966,6 +2004,14 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			'description'       => __( 'Limit result set to products visible in Point of Sale.', 'woocommerce' ),
 			'type'              => 'boolean',
 			'sanitize_callback' => 'wc_string_to_bool',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['catalog_visibility'] = array(
+			'description'       => __( 'Limit result set to products with a specific catalog visibility.', 'woocommerce' ),
+			'type'              => 'string',
+			'enum'              => CatalogVisibility::get_all(),
+			'sanitize_callback' => 'sanitize_text_field',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

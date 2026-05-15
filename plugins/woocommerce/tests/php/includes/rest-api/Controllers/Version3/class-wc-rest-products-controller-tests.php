@@ -2118,6 +2118,97 @@ class WC_REST_Products_Controller_Tests extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Data provider for catalog_visibility filter tests.
+	 *
+	 * @return array
+	 */
+	public function catalog_visibility_filter_provider(): array {
+		return array(
+			'visible only' => array(
+				'visibility'        => 'visible',
+				'expected_includes' => array( 'visible' ),
+				'expected_excludes' => array( 'catalog', 'search', 'hidden' ),
+			),
+			'catalog only' => array(
+				'visibility'        => 'catalog',
+				'expected_includes' => array( 'visible', 'catalog' ),
+				'expected_excludes' => array( 'search', 'hidden' ),
+			),
+			'search only'  => array(
+				'visibility'        => 'search',
+				'expected_includes' => array( 'visible', 'search' ),
+				'expected_excludes' => array( 'catalog', 'hidden' ),
+			),
+			'hidden only'  => array(
+				'visibility'        => 'hidden',
+				'expected_includes' => array( 'hidden' ),
+				'expected_excludes' => array( 'visible', 'catalog', 'search' ),
+			),
+		);
+	}
+
+	/**
+	 * @testdox catalog_visibility collection parameter limits results to products matching the given visibility.
+	 * @dataProvider catalog_visibility_filter_provider
+	 *
+	 * @param string $visibility        Visibility value passed via the catalog_visibility query parameter.
+	 * @param array  $expected_includes Visibility keys that should be present in the response.
+	 * @param array  $expected_excludes Visibility keys that should be absent from the response.
+	 */
+	public function test_collection_filter_catalog_visibility( string $visibility, array $expected_includes, array $expected_excludes ): void {
+		$products = array(
+			'visible' => WC_Helper_Product::create_simple_product(),
+			'catalog' => WC_Helper_Product::create_simple_product(),
+			'search'  => WC_Helper_Product::create_simple_product(),
+			'hidden'  => WC_Helper_Product::create_simple_product(),
+		);
+
+		foreach ( $products as $key => $product ) {
+			$product->set_catalog_visibility( $key );
+			$product->save();
+		}
+
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'catalog_visibility', $visibility );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 200, $response->get_status() );
+
+		$product_ids = wp_list_pluck( $response->get_data(), 'id' );
+
+		foreach ( $expected_includes as $key ) {
+			$this->assertContains(
+				$products[ $key ]->get_id(),
+				$product_ids,
+				sprintf( 'Product with catalog_visibility "%s" should be present when filtering by "%s".', $key, $visibility )
+			);
+		}
+
+		foreach ( $expected_excludes as $key ) {
+			$this->assertNotContains(
+				$products[ $key ]->get_id(),
+				$product_ids,
+				sprintf( 'Product with catalog_visibility "%s" should be absent when filtering by "%s".', $key, $visibility )
+			);
+		}
+
+		foreach ( $products as $product ) {
+			WC_Helper_Product::delete_product( $product->get_id() );
+		}
+	}
+
+	/**
+	 * @testdox An invalid catalog_visibility value results in a 400 error.
+	 */
+	public function test_collection_filter_catalog_visibility_invalid_value(): void {
+		$request = new WP_REST_Request( 'GET', '/wc/v3/products' );
+		$request->set_param( 'catalog_visibility', 'not-a-real-value' );
+
+		$response = $this->server->dispatch( $request );
+		$this->assertEquals( 400, $response->get_status() );
+	}
+
+	/**
 	 * @testdox Updating a product with incomplete meta_data entries does not cause errors.
 	 */
 	public function test_update_meta_data_with_incomplete_entries(): void {
