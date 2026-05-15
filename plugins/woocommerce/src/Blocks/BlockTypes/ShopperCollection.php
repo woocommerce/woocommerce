@@ -154,8 +154,9 @@ final class ShopperCollection extends AbstractBlock {
 		// Signals to the cart line items that a Saved-for-later target is present on this
 		// page, so the per-row "Save for later" button can show. Set here (rather than from
 		// Cart::enqueue_data via has_block()) because this block is typically auto-injected
-		// as a hooked block and never lives in the cart page's stored post_content.
-		if ( 'saved-for-later' === $list_slug ) {
+		// as a hooked block and never lives in the cart page's stored post_content. Scoped
+		// to the cart page so the flag stays accurate if the block is placed elsewhere.
+		if ( 'saved-for-later' === $list_slug && is_cart() ) {
 			$this->asset_data_registry->add( 'cartPageHasSavedForLater', true );
 		}
 
