@@ -23,6 +23,30 @@ defined( 'ABSPATH' ) || exit;
 class Native_Rail_Splicer {
 
 	/**
+	 * Snapshot of the global $menu / $submenu captured at the very start of
+	 * splice(), before any mutations. Used by print_wp_rail_panel() to render
+	 * the slide-in WP navigation overlay with the original menu items.
+	 *
+	 * @var array
+	 */
+	private array $original_menu    = array();
+	private array $original_submenu = array();
+
+	/**
+	 * Store the pre-mutation $menu/$submenu snapshot for print_wp_rail_panel().
+	 *
+	 * Called by Menu_Reconciler::reconcile() before any modifications so the
+	 * WP-rail overlay shows all registered items (third-party plugins, etc.).
+	 *
+	 * @param array $menu    WP global $menu before any nav-v2 mutations.
+	 * @param array $submenu WP global $submenu before any nav-v2 mutations.
+	 */
+	public function set_original_menu( array $menu, array $submenu ): void {
+		$this->original_menu    = $menu;
+		$this->original_submenu = $submenu;
+	}
+
+	/**
 	 * Splice the tree into the global $menu/$submenu when on a Woo page.
 	 *
 	 * No-op when off a Woo page — non-Woo pages keep WP's native rail and
@@ -63,6 +87,8 @@ class Native_Rail_Splicer {
 			PHP_INT_MAX
 		);
 
+		// Output the WP rail overlay immediately after #adminmenu is rendered.
+		add_action( 'adminmenu', array( $this, 'print_wp_rail_panel' ), 99 );
 	}
 
 	/**
@@ -489,6 +515,187 @@ class Native_Rail_Splicer {
 	 */
 	private static function css_slug( string $slug ): string {
 		return (string) preg_replace( '/[^A-Za-z0-9_-]/', '-', $slug );
+	}
+
+	/**
+	 * Output the WP-navigation overlay panel immediately after #adminmenu.
+	 *
+	 * Renders the original WordPress menu (captured before our mutations) as a
+	 * sibling element to #adminmenu. CSS slides it in from off-screen when the
+	 * back link is clicked; JS handles the open/close interaction.
+	 */
+	public function print_wp_rail_panel(): void {
+		if ( empty( $this->original_menu ) ) {
+			return;
+		}
+
+		// Sort by position key, then apply WP's menu_order filter so the panel
+		// matches the non-Woo page WP rail exactly — our place_woo_after_dashboard
+		// hook moves WooCommerce to directly after Dashboard here too.
+		ksort( $this->original_menu );
+
+		$raw_slugs = array_values(
+			array_filter(
+				array_map( static fn( $i ) => (string) ( $i[2] ?? '' ), $this->original_menu ),
+				static fn( $s ) => '' !== $s
+			)
+		);
+
+		// Apply the full menu_order filter chain (Site Kit, place_woo_after_dashboard,
+		// any other third-party repositioning filters) so our panel matches the non-Woo
+		// WP rail exactly.
+		//
+		// The problem: strip_phantom_slugs() (hooked at priority 20) reads global $menu
+		// to check which slugs are "live". On a Woo page, $menu has been stripped down
+		// to WC items only, so strip_phantom_slugs would remove everything else.
+		//
+		// Fix: temporarily swap global $menu to our original snapshot so strip_phantom_slugs
+		// sees all items and keeps them. We restore immediately after the filter runs.
+		global $menu;
+		$live_menu = $menu;
+		$menu      = $this->original_menu;
+		$ordered_slugs = (array) apply_filters( 'menu_order', $raw_slugs );
+		$menu      = $live_menu;
+
+		// Index by slug for ordered access; first entry wins on slug collision.
+		$by_slug = array();
+		foreach ( $this->original_menu as $item ) {
+			$s = (string) ( $item[2] ?? '' );
+			if ( '' !== $s && ! isset( $by_slug[ $s ] ) ) {
+				$by_slug[ $s ] = $item;
+			}
+		}
+
+		// phpcs:disable WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo '<div id="wc-nav-v2-wp-rail" aria-hidden="true"><ul>';
+
+		$seen = array();
+		foreach ( $ordered_slugs as $slug ) {
+			if ( isset( $seen[ $slug ] ) || ! isset( $by_slug[ $slug ] ) ) {
+				continue;
+			}
+			$seen[ $slug ] = true;
+			$item          = $by_slug[ $slug ];
+			if ( ! isset( $item[2] ) ) {
+				continue;
+			}
+
+			$css_classes = (string) ( $item[4] ?? '' );
+
+			// Render separators as-is — they carry no title, capability, or slug.
+			if ( false !== strpos( $css_classes, 'wp-menu-separator' ) ) {
+				echo '<li class="wp-menu-separator" aria-hidden="true"><div></div></li>';
+				continue;
+			}
+
+			$raw_title = (string) ( $item[0] ?? '' );
+			if ( '' === wp_strip_all_tags( $raw_title ) ) {
+				continue;
+			}
+			if ( false !== strpos( $css_classes, 'hide-if-js' ) ) {
+				continue;
+			}
+
+			$slug = (string) $item[2];
+
+			// Skip items that nav-v2 rehomes into the WC rail. They're already
+			// accessible inside the WooCommerce flyout; showing them again as
+			// separate top-level entries would create confusing duplicates.
+			if ( in_array( $slug, Rehomed_Slugs::ALL, true ) ) {
+				continue;
+			}
+
+			// Preserve badge/counter spans so WP's .menu-counter CSS renders
+			// the notification bubble; strip everything else.
+			$title     = wp_kses( $raw_title, array( 'span' => array( 'class' => true ) ) );
+			$url       = self::wp_item_href( $slug );
+			$icon_html = self::wp_menu_icon_html( (string) ( $item[6] ?? '' ) );
+
+			$children = array_values(
+				array_filter(
+					(array) ( $this->original_submenu[ $slug ] ?? array() ),
+					static function ( $sub ) {
+						if ( false !== strpos( (string) ( $sub[4] ?? '' ), 'hide-if-js' ) ) {
+							return false;
+						}
+						return current_user_can( (string) ( $sub[1] ?? 'read' ) );
+					}
+				)
+			);
+
+			// The WooCommerce item acts as a "back to Woo rail" button — suppress
+			// its flyout so clicking it just closes the overlay rather than showing
+			// the WC section submenu (which is already accessible in the Woo rail).
+			$has_sub  = ! empty( $children ) && 'woocommerce' !== $slug;
+			$li_class = 'menu-top' . ( $has_sub ? ' wp-has-submenu wp-not-current-submenu' : '' );
+			$a_class  = 'menu-top' . ( $has_sub ? ' wp-has-submenu wp-not-current-submenu' : '' );
+			$css_id   = 'wc-wp-item-' . self::css_slug( $slug );
+
+			echo '<li class="' . esc_attr( $li_class ) . '" id="' . esc_attr( $css_id ) . '">';
+			echo '<a href="' . esc_url( $url ) . '" class="' . esc_attr( $a_class ) . '">';
+			echo '<div class="wp-menu-arrow"><div></div></div>';
+			echo $icon_html;
+			echo '<div class="wp-menu-name">' . $title . '</div>';
+			echo '</a>';
+
+			if ( $has_sub ) {
+				echo '<ul class="wp-submenu wp-submenu-wrap">';
+				echo '<li class="wp-submenu-head" aria-hidden="true">' . esc_html( $title ) . '</li>';
+				foreach ( $children as $idx => $sub ) {
+					$sub_slug  = (string) ( $sub[2] ?? '#' );
+					$sub_title = wp_strip_all_tags( (string) ( $sub[0] ?? '' ) );
+					$sub_url   = self::wp_item_href( $sub_slug );
+					$li_c      = 0 === $idx ? ' class="wp-first-item"' : '';
+					$a_c       = 0 === $idx ? ' class="wp-first-item"' : '';
+					echo '<li' . $li_c . '><a href="' . esc_url( $sub_url ) . '"' . $a_c . '>' . esc_html( $sub_title ) . '</a></li>';
+				}
+				echo '</ul>';
+			}
+
+			echo '</li>';
+		}
+
+		echo '</ul></div>';
+		// phpcs:enable WordPress.Security.EscapeOutput.OutputNotEscaped
+	}
+
+	/**
+	 * Render the `<div class="wp-menu-image">` HTML for a menu icon spec.
+	 *
+	 * @param string $icon Icon value from $menu[i][6].
+	 */
+	private static function wp_menu_icon_html( string $icon ): string {
+		if ( str_starts_with( $icon, 'dashicons-' ) ) {
+			return '<div class="wp-menu-image dashicons-before ' . esc_attr( $icon ) . '" aria-hidden="true"><br></div>';
+		}
+		if ( str_starts_with( $icon, 'data:image/' ) ) {
+			return '<div class="wp-menu-image svg" aria-hidden="true" style="background-image:url(' . esc_attr( $icon ) . ')"><br></div>';
+		}
+		if ( '' !== $icon && 'none' !== $icon && 'div' !== $icon && str_contains( $icon, '/' ) ) {
+			return '<div class="wp-menu-image" aria-hidden="true"><img src="' . esc_url( $icon ) . '" alt=""></div>';
+		}
+		return '<div class="wp-menu-image dashicons-before dashicons-admin-generic" aria-hidden="true"><br></div>';
+	}
+
+	/**
+	 * Derive a renderable href from a raw menu slug.
+	 *
+	 * Slugs that already contain a `.php` extension or `://` are passed
+	 * directly to admin_url(); bare page slugs get `admin.php?page=` prepended.
+	 *
+	 * @param string $slug Raw value from $menu[i][2] or $submenu[p][i][2].
+	 */
+	private static function wp_item_href( string $slug ): string {
+		if ( '' === $slug || '#' === $slug ) {
+			return '#';
+		}
+		if ( false !== strpos( $slug, '://' ) ) {
+			return esc_url_raw( $slug );
+		}
+		if ( false !== strpos( $slug, '.php' ) || false !== strpos( $slug, '?' ) ) {
+			return admin_url( $slug );
+		}
+		return admin_url( 'admin.php?page=' . $slug );
 	}
 
 	/**

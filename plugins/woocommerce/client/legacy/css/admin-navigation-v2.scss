@@ -194,3 +194,93 @@ body.rtl #adminmenu .wp-submenu li.wc-nav-v2-has-subflyout {
 		display: none;
 	}
 }
+
+// WP-rail overlay ──────────────────────────────────────────────────────────
+//
+// On Woo pages the back (←) link slides in a panel showing the original
+// WordPress navigation so users can jump to any WP section without a
+// full page reload back to the Dashboard.
+//
+// Layout: #wc-nav-v2-wp-rail is absolutely positioned over #adminmenu inside
+// #adminmenuwrap. It slides in from the LEFT (back = going up the hierarchy)
+// while #adminmenu slides out to the RIGHT. WP's flyout .wp-submenu elements
+// use `position:fixed` so they are not clipped by the overflow:hidden we apply
+// to #adminmenuwrap during the transition.
+
+// When the WP rail overlay is open, JS sets left to wrapRect.left (on-screen).
+// We use left-based animation instead of transform so that position:fixed
+// flyout children are positioned relative to the viewport (not the panel) —
+// any transform on a parent creates a new containing block for fixed
+// descendants, which would break flyout coordinate calculations.
+body.wc-nav-v2-showing-wp-rail #wc-nav-v2-wp-rail {
+	// left value set dynamically by JS (wrapRect.left).
+}
+
+#wc-nav-v2-wp-rail {
+	// Position, size, and initial left are set by JS from #adminmenuwrap's
+	// bounding rect. We animate via `left` (not transform) so that
+	// position:fixed flyout children are positioned relative to the viewport —
+	// any transform on a parent creates a new CSS fixed-positioning context,
+	// which would offset all flyout coordinates by the panel's own top/left.
+	position: fixed;
+	top: 32px;    // Fallback; JS overrides from wrapRect.
+	left: -160px; // Fallback hidden state; JS sets to wrapRect.left - wrapRect.width.
+	width: 160px; // Fallback; JS overrides.
+	bottom: 0;
+	overflow-y: auto;
+	z-index: 9991;
+	background: #23282d; // Fallback; JS overwrites with computed #adminmenu color.
+	// Transition duration must match RAIL_SLIDE_MS in JS.
+	transition: left 240ms ease;
+
+	> ul {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+	}
+
+	// Top-level items need position:relative so flyout position:absolute works
+	// as a fallback, but JS positions flyouts as position:fixed at runtime.
+	li.menu-top {
+		position: relative;
+	}
+
+	// WP's admin-menu.css hides .wp-submenu with `top:-1000em` inside
+	// #adminmenu, but our panel is outside that scope so submenus would
+	// render inline by default. Hide them here; JS shows them on hover.
+	.wp-submenu {
+		display: none;
+	}
+
+	// Separators: WP's admin-menu.css styles these on #adminmenu specifically,
+	// so we replicate the essential rule here.
+	li.wp-menu-separator {
+		height: 5px;
+		padding: 0;
+		margin: 0;
+		overflow: hidden;
+		background: transparent;
+		cursor: default;
+	}
+
+	// Show flyout submenus when JS adds .opensub (via bindDelayedHover).
+	// :focus-within covers keyboard nav.
+	li.opensub > .wp-submenu,
+	li:focus-within > .wp-submenu {
+		display: block;
+	}
+
+	// Baseline link colours matching WP's default admin color scheme.
+	// WP's color-scheme stylesheets target #adminmenu specifically and won't
+	// cascade into this panel, so we pin sensible defaults here.
+	a,
+	.wp-submenu a {
+		color: #a7aaad;
+		text-decoration: none;
+
+		&:hover,
+		&:focus {
+			color: #fff;
+		}
+	}
+}

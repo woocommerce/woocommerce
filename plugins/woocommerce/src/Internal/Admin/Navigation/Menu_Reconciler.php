@@ -127,6 +127,11 @@ class Menu_Reconciler {
 	public function reconcile(): void {
 		global $menu, $submenu;
 
+		// Capture the pristine menu before any mutations so the WP-rail overlay
+		// panel has access to all registered items (including third-party plugins
+		// like Site Kit that live between WooCommerce and Jetpack).
+		$this->splicer->set_original_menu( (array) $menu, (array) $submenu );
+
 		// Snapshot top-level icons BEFORE remove_rehomed_top_level_items() wipes
 		// their $menu entries — otherwise rehomed plugin icons are unrecoverable.
 		$icon_map = $this->capture_top_level_icons( (array) $menu );

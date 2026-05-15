@@ -312,6 +312,182 @@
 			} );
 		}
 
+		// WP-rail overlay ─────────────────────────────────────────────────────
+		// Intercept the back (←) link on Woo pages. Instead of navigating to
+		// the Dashboard, slide in a panel showing the original WordPress
+		// navigation so the user can jump to any WP section without a page load.
+		if ( isWooPage ) {
+			var $wpRail    = $( '#wc-nav-v2-wp-rail' );
+			var $body      = $( 'body' );
+			var $adminmenu = $( '#adminmenu' );
+
+			if ( $wpRail.length ) {
+				// Size and position the panel to match #adminmenuwrap's viewport
+				// bounds. The panel is position:fixed so it slides independently
+				// of #adminmenuwrap — no overflow:hidden needed (and it would be
+				// harmful: #adminmenuwrap is position:relative, so overflow:hidden
+				// clips the position:absolute WC cascade flyouts inside it).
+				var wrapEl    = document.getElementById( 'adminmenuwrap' );
+				var wrapRect  = wrapEl.getBoundingClientRect();
+				var railLeft  = wrapRect.left;             // On-screen position.
+				var railHide  = railLeft - wrapRect.width; // Off-screen to the left.
+
+				// Set exact dimensions and start hidden (off-screen left).
+				// We animate via `left` not `transform` so position:fixed flyout
+				// children remain viewport-relative (a transform on the panel
+				// would create a new fixed-positioning containing block).
+				$wpRail.css( {
+					top:   wrapRect.top + 'px',
+					left:  railHide + 'px',
+					width: wrapRect.width + 'px',
+				} );
+
+				// Copy the computed background color from #adminmenu so the
+				// overlay panel matches the active WP admin color scheme.
+				var menuBg = window.getComputedStyle( $adminmenu[ 0 ] ).backgroundColor;
+				if ( menuBg && menuBg !== 'rgba(0, 0, 0, 0)' && menuBg !== 'transparent' ) {
+					$wpRail[ 0 ].style.backgroundColor = menuBg;
+				}
+
+				// Flyout hover for top-level items. We can't use bindDelayedHover
+				// directly because flyouts must be position:fixed (to escape any
+				// overflow constraints on the panel) and positioned dynamically
+				// from each item's viewport rect. We implement the same 600ms
+				// close-delay semantics manually.
+				( function () {
+					var flyoutTimer = null;
+					var openLi      = null;
+
+					function closeFlyout() {
+						if ( flyoutTimer ) {
+							clearTimeout( flyoutTimer );
+							flyoutTimer = null;
+						}
+						if ( openLi ) {
+							$( openLi ).find( '> .wp-submenu' ).css( 'display', 'none' );
+							$( openLi ).removeClass( 'opensub' );
+							openLi = null;
+						}
+					}
+
+					function openFlyout( li ) {
+						if ( flyoutTimer ) {
+							clearTimeout( flyoutTimer );
+							flyoutTimer = null;
+						}
+						if ( openLi && openLi !== li ) {
+							$( openLi ).find( '> .wp-submenu' ).css( 'display', 'none' );
+							$( openLi ).removeClass( 'opensub' );
+						}
+						if ( openLi !== li ) {
+							// Position the flyout as position:fixed to the right of the
+							// sidebar, vertically aligned with the hovered item. We set
+							// display:block explicitly rather than relying on the CSS cascade
+							// (WP's .wp-submenu hide/show is scoped to #adminmenu and doesn't
+							// reach our panel).
+							var $sub   = $( li ).find( '> .wp-submenu' );
+							var liRect = li.getBoundingClientRect();
+							$sub.css( {
+								display:     'block',
+								position:    'fixed',
+								left:        ( wrapRect.left + wrapRect.width ) + 'px',
+								top:         liRect.top + 'px',
+								'min-width': '185px',
+								'z-index':   '100000',
+							} );
+							$( li ).addClass( 'opensub' );
+							openLi = li;
+						}
+					}
+
+					$wpRail.on( 'mouseover.wcnavv2wprail', function ( e ) {
+						var li = e.target.closest ? e.target.closest( 'li.wp-has-submenu' ) : null;
+						if ( li && $wpRail[ 0 ].contains( li ) ) {
+							openFlyout( li );
+						} else if ( openLi && ! openLi.contains( e.target ) ) {
+							closeFlyout();
+						}
+					} );
+
+					$wpRail.on( 'mouseleave.wcnavv2wprail', function () {
+						if ( ! flyoutTimer && openLi ) {
+							flyoutTimer = setTimeout( function () {
+								closeFlyout();
+								flyoutTimer = null;
+							}, HOVER_CLOSE_DELAY );
+						}
+					} );
+
+					// Keep the flyout open when the cursor moves into it. The flyout
+					// is position:fixed so it visually leaves $wpRail's bounds, meaning
+					// mouseover on $wpRail won't re-fire. We listen at the flyout level
+					// via delegation on the fixed element itself.
+					$wpRail.on( 'mouseover.wcnavv2wprail', '.wp-submenu', function () {
+						if ( flyoutTimer ) {
+							clearTimeout( flyoutTimer );
+							flyoutTimer = null;
+						}
+					} );
+					$wpRail.on( 'mouseleave.wcnavv2wprail', '.wp-submenu', function () {
+						if ( ! flyoutTimer && openLi ) {
+							flyoutTimer = setTimeout( function () {
+								closeFlyout();
+								flyoutTimer = null;
+							}, HOVER_CLOSE_DELAY );
+						}
+					} );
+				}() );
+
+				function openWpRail() {
+					$wpRail.css( 'left', railLeft + 'px' );
+					$body.addClass( 'wc-nav-v2-showing-wp-rail' );
+					$wpRail.attr( 'aria-hidden', 'false' );
+				}
+
+				function closeWpRail() {
+					$wpRail.css( 'left', railHide + 'px' );
+					$body.removeClass( 'wc-nav-v2-showing-wp-rail' );
+					$wpRail.attr( 'aria-hidden', 'true' );
+				}
+
+				// Intercept the back link — show the WP rail instead of navigating.
+				$( document ).on( 'click.wcnavv2wprail', '#adminmenu > li > a[href$="index.php"]', function ( e ) {
+					e.preventDefault();
+					e.stopImmediatePropagation();
+					openWpRail();
+				} );
+
+				// Clicking the WooCommerce entry inside the WP rail just dismisses
+				// the overlay (user is already on a Woo page; no navigation needed).
+				$wpRail.on( 'click.wcnavv2wprail', '#wc-wp-item-woocommerce > a', function ( e ) {
+					e.preventDefault();
+					closeWpRail();
+				} );
+
+				// Dismiss when clicking outside #adminmenuwrap. The .contains()
+				// check uses the DOM tree so flyout ULs (children of items inside
+				// the wrapper) correctly count as "inside" even though they
+				// render visually to the right of the sidebar.
+				$( document ).on( 'click.wcnavv2wprail', function ( e ) {
+					if ( ! $body.hasClass( 'wc-nav-v2-showing-wp-rail' ) ) {
+						return;
+					}
+					var wrap = document.getElementById( 'adminmenuwrap' );
+					if ( wrap && ! wrap.contains( e.target ) ) {
+						closeWpRail();
+					}
+				} );
+
+				// Dismiss on Escape and return focus to the back link.
+				$( document ).on( 'keydown.wcnavv2wprail', function ( e ) {
+					if ( e.key === 'Escape' && $body.hasClass( 'wc-nav-v2-showing-wp-rail' ) ) {
+						closeWpRail();
+						$( '#adminmenu > li > a[href$="index.php"]' ).focus();
+					}
+				} );
+			}
+		}
+
 		// wc-admin's React router runs `window.wpNavMenuClassChange( page, url )`
 		// on every navigation. That function strips
 		// `wp-has-current-submenu`/`wp-menu-open` from every menu item and then
