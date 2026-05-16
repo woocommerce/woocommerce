@@ -1,0 +1,22 @@
+{
+  "canaries": [
+    {
+      "name": "admin-experimental-products",
+      "path": "/wp-admin/admin.php?page=wc-admin&path=/products",
+      "auth": "admin",
+      "description": "Experimental products app list — taxonomy chip-select fields visible in edit panel"
+    },
+    {
+      "name": "admin-products-classic",
+      "path": "/wp-admin/edit.php?post_type=product",
+      "auth": "admin",
+      "description": "Classic products list (comparison baseline)"
+    },
+    {
+      "name": "admin-wc-home",
+      "path": "/wp-admin/admin.php?page=wc-admin",
+      "auth": "admin",
+      "description": "WooCommerce admin home (sanity check)"
+    }
+  ]
+}
