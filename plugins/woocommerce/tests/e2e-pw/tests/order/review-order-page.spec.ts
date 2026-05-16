@@ -35,10 +35,16 @@ type SeededOrder = {
 
 const FEATURE_FLAG_OPTION =
 	'woocommerce_feature_customer_review_request_enabled';
+const REVIEW_REQUEST_EMAIL_ENABLED_OPTION =
+	'woocommerce_customer_review_request_enabled';
 const SITE_REVIEWS_OPTION = 'woocommerce_enable_reviews';
+const FEATURES_SETTINGS_URL =
+	'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features';
+const REVIEW_REQUEST_EMAIL_SETTINGS_URL =
+	'wp-admin/admin.php?page=wc-settings&tab=email&section=customer_review_request';
 const FEATURE_FLAG_SELECTOR = `#${ FEATURE_FLAG_OPTION }`;
 const REVIEW_REQUEST_EMAIL_ENABLED_SELECTOR =
-	'#woocommerce_customer_review_request_enabled';
+	`#${ REVIEW_REQUEST_EMAIL_ENABLED_OPTION }`;
 const SITE_REVIEWS_SETTING_PATH = `${ WC_API_PATH }/settings/products/${ SITE_REVIEWS_OPTION }`;
 
 /**
@@ -68,15 +74,11 @@ test.describe(
 			} );
 			const page = await context.newPage();
 
-			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features'
-			);
+			await page.goto( FEATURES_SETTINGS_URL );
 			await page.locator( FEATURE_FLAG_SELECTOR ).check();
 			await page.getByRole( 'button', { name: 'Save changes' } ).click();
 
-			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=email&section=customer_review_request'
-			);
+			await page.goto( REVIEW_REQUEST_EMAIL_SETTINGS_URL );
 			await page
 				.locator( REVIEW_REQUEST_EMAIL_ENABLED_SELECTOR )
 				.check();
@@ -91,17 +93,13 @@ test.describe(
 			} );
 			const page = await context.newPage();
 
-			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=email&section=customer_review_request'
-			);
+			await page.goto( REVIEW_REQUEST_EMAIL_SETTINGS_URL );
 			await page
 				.locator( REVIEW_REQUEST_EMAIL_ENABLED_SELECTOR )
 				.uncheck();
 			await page.getByRole( 'button', { name: 'Save changes' } ).click();
 
-			await page.goto(
-				'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features'
-			);
+			await page.goto( FEATURES_SETTINGS_URL );
 			await page.locator( FEATURE_FLAG_SELECTOR ).uncheck();
 			await page.getByRole( 'button', { name: 'Save changes' } ).click();
 
