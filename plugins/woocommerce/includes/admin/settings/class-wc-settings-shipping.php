@@ -172,7 +172,7 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 					'id'       => 'woocommerce_default_checkout_tab',
 					'type'     => 'select',
 					'class'    => 'wc-enhanced-select',
-					'default'  => 'shipping',
+					'default'  => 'local_pickup',
 					'options'  => array(
 						'shipping'     => __( 'Shipping', 'woocommerce' ),
 						'local_pickup' => __( 'Local pickup', 'woocommerce' ),

@@ -145,9 +145,9 @@ describe( 'prefersCollection selector', () => {
 				expect( prefersCollection( undefinedState ) ).toBe( false );
 			} );
 
-			it( 'returns false when defaultCheckoutTab setting is absent (fallback to "shipping")', () => {
-				// Default mock: getSetting('defaultCheckoutTab', 'shipping') returns 'shipping' via fallback.
-				expect( prefersCollection( undefinedState ) ).toBe( false );
+			it( 'returns true when defaultCheckoutTab setting is absent (fallback to "local_pickup")', () => {
+				// Default mock: getSetting('defaultCheckoutTab', 'local_pickup') returns 'local_pickup' via fallback — preserves existing behavior.
+				expect( prefersCollection( undefinedState ) ).toBe( true );
 			} );
 
 			it( 'returns true when defaultCheckoutTab setting is "local_pickup"', () => {

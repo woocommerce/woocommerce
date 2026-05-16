@@ -69,7 +69,7 @@ class ShippingController {
 			);
 		}
 		$this->asset_data_registry->add( 'shippingCostRequiresAddress', get_option( 'woocommerce_shipping_cost_requires_address', false ) === 'yes' );
-		$this->asset_data_registry->add( 'defaultCheckoutTab', get_option( 'woocommerce_default_checkout_tab', 'shipping' ) );
+		$this->asset_data_registry->add( 'defaultCheckoutTab', get_option( 'woocommerce_default_checkout_tab', 'local_pickup' ) );
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_footer', array( $this, 'hydrate_client_settings' ), 0 );
