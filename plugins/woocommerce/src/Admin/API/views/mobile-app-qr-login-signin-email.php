@@ -27,6 +27,9 @@ $device_os         = isset( $device['os'] ) ? trim( (string) $device['os'] ) : '
 $device_os_version = isset( $device['os_version'] ) ? trim( (string) $device['os_version'] ) : '';
 $app_version       = isset( $device['app_version'] ) ? trim( (string) $device['app_version'] ) : '';
 
+// /qr-login-scan requires a device payload, so by the time this email
+// renders we have at least an OS label. Prefer "{Brand} {Model}" when both
+// are present; fall back to model alone, then to OS.
 if ( '' !== $device_brand && '' !== $device_model ) {
 	$display_name = ucfirst( $device_brand ) . ' ' . $device_model;
 } elseif ( '' !== $device_model ) {
@@ -34,7 +37,7 @@ if ( '' !== $device_brand && '' !== $device_model ) {
 } elseif ( '' !== $device_os ) {
 	$display_name = $device_os;
 } else {
-	$display_name = __( 'A new device', 'woocommerce' );
+	$display_name = __( 'WooCommerce mobile app', 'woocommerce' );
 }
 
 $os_line   = trim( $device_os . ( '' !== $device_os_version ? ' ' . $device_os_version : '' ) );

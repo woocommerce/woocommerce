@@ -238,43 +238,26 @@ button.components-button.send-magic-link-button {
 	}
 }
 
-// QR + meta column layout while the code is on screen (READY state only).
-// We avoid scoping these rules to `.woocommerce-qr-direct-login` itself so the LOADING /
-// EXPIRED / ERROR states keep their default stacked layout.
-.woocommerce-qr-direct-login.woocommerce-qr-direct-login--ready {
-	display: flex;
-	flex-direction: row;
-	align-items: center;
-	gap: 24px;
-	flex-wrap: wrap;
+// Shared `<QRDirectLoginCode />` rules live in the partial below. They are
+// reused by the standalone wc-admin page (`client/mobile-app-login`) so both
+// surfaces render the same QR / number-match / approved / rejected layouts.
+@import "./components/qr-direct-login.scss";
 
-	.woocommerce-qr-direct-login__qr {
-		flex: 0 0 auto;
-		display: flex;
-	}
-
-	.woocommerce-qr-direct-login__meta {
-		flex: 1 1 auto;
-		display: flex;
-		flex-direction: column;
-		align-items: flex-start;
-		gap: 4px;
-		min-width: 0;
-	}
-
-	.woocommerce-qr-direct-login__timer {
-		margin: 0;
-		font-size: 14px;
-		line-height: 1.5;
-		color: $gray-900;
-	}
-}
-
-.woocommerce-qr-direct-login__error {
-	margin: 0 0 12px;
-	color: $alert-red;
+// FAQ paragraph that sits below the stepper / QR block. Adds the breathing
+// room and the thin grey divider so the link doesn't visually collide with
+// the content above it.
+.mobile-app-login-faq {
+	margin-top: 24px;
+	padding-top: 16px;
+	border-top: 1px solid #f0f0f0;
 	font-size: 13px;
-	line-height: 1.4;
+	line-height: 1.5;
+	color: $gray-700;
+	text-align: left;
+
+	a {
+		color: #007cba;
+	}
 }
 
 // Step 3 — sign-in success panel.
@@ -286,10 +269,9 @@ button.components-button.send-magic-link-button {
 	align-items: flex-start;
 	margin-top: 8px;
 
-	// Headline matches the step-2 description size (14px) per UX feedback —
-	// the stepper already provides a large step label above, so a giant
-	// in-step heading was redundant. Slightly bolder + darker to give it
-	// presence without competing with the stepper label.
+	// "Heading" + "description" are reused only by the post-revoke "Access
+	// revoked" panel; the inline success copy was dropped because the
+	// stepper label already conveys success.
 	.qr-login-success-step__heading {
 		font-size: 14px;
 		font-weight: 600;
@@ -306,11 +288,13 @@ button.components-button.send-magic-link-button {
 		max-width: 32em;
 	}
 
-	.qr-login-success-step__device {
-		font-size: 13px;
-		line-height: 1.5;
-		color: $gray-700;
-		margin: 0 0 16px;
+	// "It wasn't you?" prompt + "Revoke access" CTA on the same row to make
+	// better use of the horizontal space the stepper layout already gives us.
+	.qr-login-success-step__revoke-row {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 12px;
 	}
 
 	.qr-login-success-step__challenge {
@@ -318,7 +302,7 @@ button.components-button.send-magic-link-button {
 		font-weight: 500;
 		line-height: 1.5;
 		color: $gray-900;
-		margin: 0 0 8px;
+		margin: 0;
 	}
 
 	.qr-login-success-step__error {

@@ -26,6 +26,16 @@ export const QRLoginTokenStates = {
 	IDLE: 'idle',
 	LOADING: 'loading',
 	READY: 'ready',
+	// Task 7 — number-matching states.
+	// SCANNED:  mobile app scanned the QR; merchant must pick the right
+	//           number from a shuffled triple to complete sign-in.
+	// APPROVED: merchant picked correctly; we're waiting on the mobile
+	//           app to call /qr-login-exchange and finish the flow.
+	// REJECTED: terminal — wrong pick, or the merchant clicked
+	//           "I don't recognise this device". No retry.
+	SCANNED: 'scanned',
+	APPROVED: 'approved',
+	REJECTED: 'rejected',
 	EXPIRED: 'expired',
 	CONSUMED: 'consumed',
 	REVOKED: 'revoked',
@@ -37,9 +47,9 @@ export type QRLoginTokenState =
 
 /**
  * Whitelisted device-info shape returned by the status endpoint after a
- * successful exchange. The mobile app fills this in on the exchange request;
- * older clients omit it, in which case all fields are absent and the UI falls
- * back to generic copy. Mirrors `MobileAppQRLogin::DEVICE_PAYLOAD_KEYS`.
+ * scan or successful exchange. The mobile app fills this in on the scan
+ * request, and the server reuses that stored payload for later status
+ * responses. Mirrors `MobileAppQRLogin::DEVICE_PAYLOAD_KEYS`.
  *
  * `brand` is Android-only (`Build.BRAND`); iOS clients leave it absent.
  */
@@ -59,6 +69,14 @@ type QRLoginTokenResponse = {
 
 type QRLoginStatusResponse =
 	| { status: 'pending'; expires_at: number }
+	| {
+			status: 'scanned';
+			numbers: [ string, string, string ];
+			device: QRLoginDeviceInfo;
+			expires_at: number;
+	  }
+	| { status: 'approved' }
+	| { status: 'rejected' }
 	| {
 			status: 'consumed';
 			consumed_at: number;
@@ -105,6 +123,14 @@ export const useQRLoginToken = ( {
 		null
 	);
 	const [ apUuid, setApUuid ] = useState< string | null >( null );
+	// Task 7 — shuffled candidate numbers surfaced to the merchant during
+	// the SCANNED state. The wc-admin client never sees which one is real;
+	// the server compares the merchant's choice against its own stored value.
+	const [ candidateNumbers, setCandidateNumbers ] = useState<
+		[ string, string, string ] | null
+	>( null );
+	const [ challengeExpiresAt, setChallengeExpiresAt ] =
+		useState< number >( 0 );
 	const timerRef = useRef< ReturnType< typeof setInterval > | null >( null );
 	// Plaintext token kept in a ref (not state) so it never causes re-renders
 	// and never leaves the hook closure. The status-polling and revoke calls
@@ -214,6 +240,47 @@ export const useQRLoginToken = ( {
 				setDeviceInfo( response.device || null );
 				setState( QRLoginTokenStates.CONSUMED );
 				tokenRef.current = null;
+				return;
+			}
+
+			if ( response.status === 'scanned' ) {
+				// Mobile app scanned the QR. Surface the shuffled candidate
+				// triple so the merchant can confirm by tapping the matching
+				// number. The countdown timer is replaced by the
+				// challenge-expires-at window (90s after scan) so the user
+				// gets a clear sense of urgency for the pick.
+				clearTimer();
+				// Drop the plaintext token from React state once the scan is
+				// in. The QR view is no longer rendered (the component swaps
+				// to the number-match step), polling reads the token from
+				// `tokenRef`, and clearing the visible state limits what an
+				// XSS or malicious browser extension can scrape from the JS
+				// heap for the rest of the flow.
+				setQrUrl( null );
+				setCandidateNumbers( response.numbers );
+				setChallengeExpiresAt( response.expires_at );
+				setDeviceInfo( response.device || null );
+				setState( QRLoginTokenStates.SCANNED );
+				startCountdown( response.expires_at );
+				return;
+			}
+
+			if ( response.status === 'approved' ) {
+				// Merchant tapped correctly on this tab or another tab. Show
+				// "Signing in…" until the mobile app finishes the exchange and
+				// the next poll flips us to CONSUMED.
+				clearTimer();
+				setState( QRLoginTokenStates.APPROVED );
+				return;
+			}
+
+			if ( response.status === 'rejected' ) {
+				clearTimer();
+				clearPollTimer();
+				setQrUrl( null );
+				setCandidateNumbers( null );
+				setState( QRLoginTokenStates.REJECTED );
+				tokenRef.current = null;
 			}
 			// `pending` and `expired` are no-ops here — the countdown timer
 			// drives the EXPIRED transition; we just keep polling on `pending`.
@@ -224,7 +291,7 @@ export const useQRLoginToken = ( {
 			// eslint-disable-next-line no-console
 			console.warn( 'QR login status polling failed.', error );
 		}
-	}, [ clearTimer, clearPollTimer ] );
+	}, [ clearTimer, clearPollTimer, startCountdown ] );
 
 	const startStatusPolling = useCallback( () => {
 		clearPollTimer();
@@ -246,6 +313,8 @@ export const useQRLoginToken = ( {
 		tokenRef.current = null;
 		setApUuid( null );
 		setDeviceInfo( null );
+		setCandidateNumbers( null );
+		setChallengeExpiresAt( 0 );
 		expiresAtRef.current = 0;
 		setQrUrl( null );
 		setSecondsRemaining( 0 );
@@ -383,6 +452,92 @@ export const useQRLoginToken = ( {
 	}, [ clearTimer, clearPollTimer, startCountdown, startStatusPolling ] );
 
 	/**
+	 * Task 7 — Submit the merchant's number-match choice to /qr-login-approve.
+	 *
+	 * One-strike. The server treats any non-matching choice as a terminal
+	 * REJECTED, with no retry. We optimistically flip the local state to
+	 * APPROVED on a successful approve response so the UI updates without
+	 * waiting for the next poll tick — the next poll will confirm CONSUMED
+	 * once the mobile app finishes the exchange.
+	 *
+	 * @param choice The 3-digit string the merchant tapped, or any sentinel
+	 *               (e.g. empty string from the "It wasn't me" cancel link)
+	 *               for an explicit user-initiated rejection.
+	 */
+	const chooseNumber = useCallback(
+		async ( choice: string ) => {
+			const token = tokenRef.current;
+			if ( ! token ) {
+				return;
+			}
+
+			setErrorMessage( null );
+			setErrorCode( null );
+
+			try {
+				const response = await apiFetch< {
+					state: 'approved' | 'rejected';
+				} >( {
+					path: `${ WC_ADMIN_NAMESPACE }/mobile-app/qr-login-approve`,
+					method: 'POST',
+					data: { token, choice },
+				} );
+
+				if ( ! isMountedRef.current ) {
+					return;
+				}
+
+				if ( response.state === 'approved' ) {
+					clearTimer();
+					setCandidateNumbers( null );
+					setState( QRLoginTokenStates.APPROVED );
+				} else {
+					clearTimer();
+					clearPollTimer();
+					setCandidateNumbers( null );
+					tokenRef.current = null;
+					setState( QRLoginTokenStates.REJECTED );
+				}
+			} catch ( error: unknown ) {
+				if ( ! isMountedRef.current ) {
+					return;
+				}
+
+				const err = error as {
+					code?: string;
+					message?: string;
+					data?: { status?: number };
+				};
+
+				// 410 → challenge expired between scan and tap. Surface as
+				// REJECTED so the user sees the same "Login denied — start
+				// over" terminal screen rather than a misleading network error.
+				if (
+					err.code === 'qr_login_expired' ||
+					err.data?.status === 410
+				) {
+					clearTimer();
+					clearPollTimer();
+					setCandidateNumbers( null );
+					tokenRef.current = null;
+					setState( QRLoginTokenStates.REJECTED );
+					return;
+				}
+
+				setErrorMessage(
+					err.message ||
+						__(
+							'Failed to confirm sign-in. Please try generating a new code.',
+							'woocommerce'
+						)
+				);
+				setErrorCode( err.code ?? null );
+			}
+		},
+		[ clearTimer, clearPollTimer ]
+	);
+
+	/**
 	 * Revoke the Application Password issued by the most recent successful
 	 * exchange. Only meaningful when state === CONSUMED — earlier states
 	 * have no AP yet, REVOKED is a no-op, and EXPIRED means the consumed
@@ -442,6 +597,10 @@ export const useQRLoginToken = ( {
 		errorCode,
 		deviceInfo,
 		apUuid,
+		// Task 7.
+		candidateNumbers,
+		challengeExpiresAt,
+		chooseNumber,
 		fetchToken,
 		refreshToken: fetchToken,
 		revoke,

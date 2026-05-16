@@ -42,8 +42,11 @@ const makeReadyState = () => ( {
 	errorCode: null,
 	deviceInfo: null,
 	apUuid: null,
+	candidateNumbers: null,
+	challengeExpiresAt: 0,
 	fetchToken: jest.fn(),
 	refreshToken: jest.fn(),
+	chooseNumber: jest.fn(),
 	revoke: jest.fn(),
 } );
 
@@ -77,11 +80,13 @@ describe( 'MobileAppLoginPage', () => {
 		expect( screen.getByText( /Code expires in/i ) ).toBeInTheDocument();
 	} );
 
-	it( 'renders the troubleshooting FAQ link pointing at the help doc', () => {
+	it( 'renders the FAQ link pointing at the help doc', () => {
 		render( <MobileAppLoginPage /> );
 
+		// Copy synced with the homescreen modal so both surfaces share the
+		// same wording ("Any troubles signing in? Check out the FAQ.").
 		const faqLink = screen.getByRole( 'link', {
-			name: /troubleshooting guide/i,
+			name: /FAQ/i,
 		} );
 		expect( faqLink ).toHaveAttribute(
 			'href',
@@ -117,8 +122,11 @@ describe( 'MobileAppLoginPage', () => {
 			errorCode: null,
 			deviceInfo: null,
 			apUuid: null,
+			candidateNumbers: null,
+			challengeExpiresAt: 0,
 			fetchToken: jest.fn(),
 			refreshToken,
+			chooseNumber: jest.fn(),
 			revoke: jest.fn(),
 		} );
 
@@ -159,8 +167,11 @@ describe( 'MobileAppLoginPage', () => {
 			errorCode: 'ssl_required',
 			deviceInfo: null,
 			apUuid: null,
+			candidateNumbers: null,
+			challengeExpiresAt: 0,
 			fetchToken: jest.fn(),
 			refreshToken: jest.fn(),
+			chooseNumber: jest.fn(),
 			revoke: jest.fn(),
 		} );
 
@@ -174,7 +185,7 @@ describe( 'MobileAppLoginPage', () => {
 			} )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'link', { name: /troubleshooting guide/i } )
+			screen.getByRole( 'link', { name: /FAQ/i } )
 		).toBeInTheDocument();
 
 		// Error text from the hook leaks through the shared component.
@@ -192,8 +203,11 @@ describe( 'MobileAppLoginPage', () => {
 			errorCode: null,
 			deviceInfo: { model: 'iPhone 15' },
 			apUuid: 'ap-uuid',
+			candidateNumbers: null,
+			challengeExpiresAt: 0,
 			fetchToken: jest.fn(),
 			refreshToken: jest.fn(),
+			chooseNumber: jest.fn(),
 			revoke: jest.fn(),
 		} );
 

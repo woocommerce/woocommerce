@@ -10,22 +10,18 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
-import {
-	useQRLoginToken,
-	QRLoginTokenStates,
-	type QRLoginDeviceInfo,
-} from './useQRLoginToken';
+import { useQRLoginToken, QRLoginTokenStates } from './useQRLoginToken';
 import { QRLoginConsumedPanel } from './QRLoginConsumedPanel';
 import { QRLoginRevokedPanel } from './QRLoginRevokedPanel';
+import { QRLoginNumberMatchStep } from './QRLoginNumberMatchStep';
 
 /**
- * Snapshot the parent receives via `onConsumed`. Just the fields the parent
- * needs to render the third stepper step — `revoke` is not exposed because
- * the stepper uses its own `useRevokeQRLoginAccess` hook to keep the success
- * step self-contained after the QR component is unmounted.
+ * Snapshot the parent receives via `onConsumed`. The success step uses its
+ * own `useRevokeQRLoginAccess` hook (so it stays self-contained after the QR
+ * component is unmounted), so the only field the parent actually needs is the
+ * AP UUID to drive the revoke CTA.
  */
 export type QRLoginConsumedSnapshot = {
-	deviceInfo: QRLoginDeviceInfo | null;
 	apUuid: string | null;
 };
 
@@ -70,6 +66,9 @@ export const QRDirectLoginCode = ( {
 		errorMessage,
 		deviceInfo,
 		apUuid,
+		candidateNumbers,
+		challengeExpiresAt,
+		chooseNumber,
 		fetchToken,
 		refreshToken,
 		revoke,
@@ -97,9 +96,9 @@ export const QRDirectLoginCode = ( {
 	// `onConsumed` and keep using the inline `QRLoginConsumedPanel`.
 	useEffect( () => {
 		if ( state === QRLoginTokenStates.CONSUMED && onConsumed ) {
-			onConsumed( { deviceInfo, apUuid } );
+			onConsumed( { apUuid } );
 		}
-	}, [ state, deviceInfo, apUuid, onConsumed ] );
+	}, [ state, apUuid, onConsumed ] );
 
 	const formatTime = ( seconds: number ) => {
 		const mins = Math.floor( seconds / 60 );
@@ -155,6 +154,62 @@ export const QRDirectLoginCode = ( {
 					} }
 				>
 					{ __( 'Generate new code', 'woocommerce' ) }
+				</Button>
+			</div>
+		);
+	}
+
+	// Task 7 — number-matching states.
+	if ( state === QRLoginTokenStates.SCANNED && candidateNumbers ) {
+		return (
+			<QRLoginNumberMatchStep
+				numbers={ candidateNumbers }
+				deviceInfo={ deviceInfo }
+				challengeExpiresAt={ challengeExpiresAt }
+				onChooseNumber={ chooseNumber }
+				errorMessage={ errorMessage }
+			/>
+		);
+	}
+
+	if ( state === QRLoginTokenStates.APPROVED ) {
+		return (
+			<div
+				className="woocommerce-qr-direct-login woocommerce-qr-direct-login--approved"
+				role="status"
+				aria-live="polite"
+			>
+				<Spinner />
+				<p>
+					{ __(
+						'Confirmed. Finishing sign-in on your phone…',
+						'woocommerce'
+					) }
+				</p>
+			</div>
+		);
+	}
+
+	if ( state === QRLoginTokenStates.REJECTED ) {
+		return (
+			<div
+				className="woocommerce-qr-direct-login woocommerce-qr-direct-login--rejected"
+				role="alert"
+			>
+				<p>
+					{ __(
+						'Sign-in denied. For your security, this attempt has been cancelled.',
+						'woocommerce'
+					) }
+				</p>
+				<Button
+					variant="secondary"
+					onClick={ () => {
+						recordEvent( 'mobile_app_qr_direct_login_refreshed' );
+						refreshToken();
+					} }
+				>
+					{ __( 'Start over', 'woocommerce' ) }
 				</Button>
 			</div>
 		);
