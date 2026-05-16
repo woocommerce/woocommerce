@@ -478,26 +478,23 @@ test.describe(
 				storageState: ADMIN_STATE_PATH,
 			} );
 			const adminPage = await adminContext.newPage();
-			const scheduledActionsUrl = `wp-admin/admin.php?page=wc-status&tab=action-scheduler&s=woocommerce_send_review_request&search-args=${ order.id }&orderby=schedule&order=desc`;
+			// `s=<order id>` narrows to actions whose args contain the order id;
+			// then filter rows by hook name to identify ours.
+			const scheduledActionsUrl = `wp-admin/admin.php?page=wc-status&tab=action-scheduler&s=${ order.id }`;
+			const reviewRequestRow = adminPage
+				.locator( 'tbody tr' )
+				.filter( { hasText: 'woocommerce_send_review_request' } );
 
 			try {
 				await adminPage.goto( scheduledActionsUrl );
-				await expect(
-					adminPage.locator(
-						`tbody tr td.column-args:has-text("${ order.id }")`
-					)
-				).toHaveCount( 1 );
+				await expect( reviewRequestRow ).toHaveCount( 1 );
 
 				await restApi.put( `${ WC_API_PATH }/orders/${ order.id }`, {
 					status: 'cancelled',
 				} );
 
 				await adminPage.goto( scheduledActionsUrl );
-				await expect(
-					adminPage.locator(
-						`tbody tr td.column-args:has-text("${ order.id }")`
-					)
-				).toHaveCount( 0 );
+				await expect( reviewRequestRow ).toHaveCount( 0 );
 			} finally {
 				await adminContext.close();
 				await cleanupOrder( restApi, order.id );
@@ -624,41 +621,21 @@ test.describe(
 					} )
 				).toBeVisible();
 
-				// Parent product page: each review surfaces its own variation
-				// summary. If linkage were wrong, the wrong summary would sit
-				// next to each review and the per-text assertions would fail.
-				const { data: parentProduct } = await restApi.get(
-					`${ WC_API_PATH }/products/${ parentId }`
-				);
-				await page.goto( parentProduct.permalink );
-				// eslint-disable-next-line playwright/no-conditional-in-test -- classic themes hide reviews behind a tab; block themes don't.
-				const reviewsTab = page.locator(
-					'#tab-title-reviews a, a[href="#tab-reviews"], a[href="#reviews"]'
-				);
-				// eslint-disable-next-line playwright/no-conditional-in-test -- see above.
-				if ( ( await reviewsTab.count() ) > 0 ) {
-					await reviewsTab.first().click();
-				}
-
-				const smallComment = page
-					.locator( 'li.comment, li[class*="comment"]' )
-					.filter( { hasText: 'Small fit great' } )
-					.first();
+				// Reload — only submitted rows should pre-fill, proving each
+				// variation row got its own review (vs one shared per parent).
+				await page.goto( reviewOrderUrl( order ) );
 				await expect(
-					smallComment.locator(
-						'.woocommerce-review__variation-summary'
-					)
-				).toContainText( /Size:\s*Small/i );
-
-				const mediumComment = page
-					.locator( 'li.comment, li[class*="comment"]' )
-					.filter( { hasText: 'Medium ran short' } )
-					.first();
+					page
+						.locator( '.woocommerce-review-order__item' )
+						.nth( 0 )
+						.locator( 'textarea' )
+				).toHaveValue( 'Small fit great.' );
 				await expect(
-					mediumComment.locator(
-						'.woocommerce-review__variation-summary'
-					)
-				).toContainText( /Size:\s*Medium/i );
+					page
+						.locator( '.woocommerce-review-order__item' )
+						.nth( 1 )
+						.locator( 'textarea' )
+				).toHaveValue( 'Medium ran short.' );
 			} finally {
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, [ parentId ] );
