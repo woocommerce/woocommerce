@@ -51003,7 +51003,6 @@ parameters:
 			count: 1
 			path: src/Blocks/BlockTypes/AbstractInnerBlock.php
 
-
 		-
 			message: '#^@param Automattic\\WooCommerce\\Blocks\\BlockTypes\\WC_Product \$product does not accept actual type of parameter\: WC_Product\.$#'
 			identifier: parameter.phpDocType
