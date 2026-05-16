@@ -497,8 +497,6 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
 	$rate_keys               = array_keys( $package['rates'] );
 	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
-	$local_pickup_settings   = LocalPickupUtils::get_local_pickup_settings();
-	$prefers_pickup_default  = ! empty( $local_pickup_settings['default_tab'] );
 
 	// Block cart/checkout runs shipping calc during server-side render where cart_context is still 'shortcode'.
 	// Route block-based stores through the default-tab-aware path regardless of cart_context.
@@ -520,6 +518,9 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 				break;
 			}
 		}
+
+		$local_pickup_settings   = LocalPickupUtils::get_local_pickup_settings();
+		$prefers_pickup_default  = ! empty( $local_pickup_settings['default_tab'] );
 
 		// No shipping rate available. Only auto-select pickup when the merchant opted in.
 		if ( '' === $default && $prefers_pickup_default ) {
