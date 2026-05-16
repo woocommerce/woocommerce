@@ -4,6 +4,7 @@
 import { select } from '@wordpress/data';
 import { hasCollectableRate } from '@woocommerce/base-utils';
 import { isString, objectHasProp } from '@woocommerce/types';
+import type { CartShippingPackageShippingRate } from '@woocommerce/types';
 import { getSetting, type AddressFormType } from '@woocommerce/settings';
 
 /**
@@ -100,7 +101,7 @@ export const prefersCollection = ( state: CheckoutState ) => {
 			return false;
 		}
 		const selectedRate = shippingRates[ 0 ].shipping_rates.find(
-			( rate ) => rate.selected
+			( rate: CartShippingPackageShippingRate ) => rate.selected
 		);
 
 		if (
