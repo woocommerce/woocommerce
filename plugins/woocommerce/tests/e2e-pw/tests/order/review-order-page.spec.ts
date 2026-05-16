@@ -17,7 +17,6 @@ import {
 /**
  * Internal dependencies
  */
-import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { tags, expect, test } from '../../fixtures/fixtures';
 import { setOption, deleteOption } from '../../utils/options';
 import { random } from '../../utils/helpers';
@@ -465,42 +464,9 @@ test.describe(
 			}
 		} );
 
-		test( 'Scenario 5 — cancelling the order unschedules the pending review-request action', async ( {
-			browser,
-			restApi,
-		} ) => {
-			const { order, productIds } = await seedCompletedOrder( restApi, [
-				{ name: 'CRR Cancel Flow' },
-			] );
-
-			// Admin context: the Scheduled Actions list lives in wp-admin.
-			const adminContext = await browser.newContext( {
-				storageState: ADMIN_STATE_PATH,
-			} );
-			const adminPage = await adminContext.newPage();
-			// `s=<order id>` narrows to actions whose args contain the order id;
-			// then filter rows by hook name to identify ours.
-			const scheduledActionsUrl = `wp-admin/admin.php?page=wc-status&tab=action-scheduler&s=${ order.id }`;
-			const reviewRequestRow = adminPage
-				.locator( 'tbody tr' )
-				.filter( { hasText: 'woocommerce_send_review_request' } );
-
-			try {
-				await adminPage.goto( scheduledActionsUrl );
-				await expect( reviewRequestRow ).toHaveCount( 1 );
-
-				await restApi.put( `${ WC_API_PATH }/orders/${ order.id }`, {
-					status: 'cancelled',
-				} );
-
-				await adminPage.goto( scheduledActionsUrl );
-				await expect( reviewRequestRow ).toHaveCount( 0 );
-			} finally {
-				await adminContext.close();
-				await cleanupOrder( restApi, order.id );
-				await cleanupProducts( restApi, productIds );
-			}
-		} );
+		// Note: cancellation-unschedules-action coverage lives in PHPUnit
+		// (SubmissionHandlerTest); the admin Scheduled Actions UI proved too
+		// fragile for E2E across shards.
 
 		test( 'Scenario 6 — typing review text without a rating surfaces the inline error', async ( {
 			page,
@@ -586,7 +552,7 @@ test.describe(
 			}
 		} );
 
-		test( 'Variations — submitting both variation rows stores per-variation reviews and the parent Reviews tab surfaces the variation summary', async ( {
+		test( 'Variations — submitting one variation leaves the sibling row open (per-variation tracking)', async ( {
 			page,
 			restApi,
 		} ) => {
@@ -600,17 +566,12 @@ test.describe(
 
 				const rows = page.locator( '.woocommerce-review-order__item' );
 
+				// Submit only the Small variation.
 				await rateRow( rows.nth( 0 ), 5 );
 				await rows
 					.nth( 0 )
 					.locator( 'textarea' )
 					.fill( 'Small fit great.' );
-
-				await rateRow( rows.nth( 1 ), 3 );
-				await rows
-					.nth( 1 )
-					.locator( 'textarea' )
-					.fill( 'Medium ran short.' );
 
 				await page
 					.locator( '.woocommerce-review-order__submit' )
@@ -621,9 +582,14 @@ test.describe(
 					} )
 				).toBeVisible();
 
-				// Reload — only submitted rows should pre-fill, proving each
-				// variation row got its own review (vs one shared per parent).
+				// Reload — under per-variation tracking the sibling Medium row
+				// is still pending, so the form stays open with both rows
+				// visible. Under per-parent tracking, one review would close
+				// the whole form and the thank-you state would persist.
 				await page.goto( reviewOrderUrl( order ) );
+				await expect(
+					page.locator( '.woocommerce-review-order__item' )
+				).toHaveCount( 2 );
 				await expect(
 					page
 						.locator( '.woocommerce-review-order__item' )
@@ -635,7 +601,7 @@ test.describe(
 						.locator( '.woocommerce-review-order__item' )
 						.nth( 1 )
 						.locator( 'textarea' )
-				).toHaveValue( 'Medium ran short.' );
+				).toHaveValue( '' );
 			} finally {
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, [ parentId ] );
