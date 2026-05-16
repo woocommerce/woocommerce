@@ -24,6 +24,7 @@
 	"parent": [
 		"woocommerce/checkout-fields-block"
 	],
+	"editorStyle": "wc-blocks-editor-style",
 	"textdomain": "woocommerce",
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3
