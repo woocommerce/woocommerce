@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * CheckoutOrderSummarySubtotalBlock class.
  */
 class CheckoutOrderSummarySubtotalBlock extends AbstractInnerBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *

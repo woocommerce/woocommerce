@@ -5,6 +5,8 @@ namespace Automattic\WooCommerce\Blocks\BlockTypes;
  * CheckoutTermsBlock class.
  */
 class CheckoutTermsBlock extends AbstractInnerBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
