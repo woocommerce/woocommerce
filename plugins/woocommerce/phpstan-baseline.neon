@@ -33388,42 +33388,6 @@ parameters:
 			path: includes/wc-account-functions.php
 
 		-
-			message: '#^Cannot call method get_cancel_order_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_checkout_payment_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_order_number\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_view_order_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method needs_payment\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
 			message: '#^Parameter \#2 \$value of function wc_get_endpoint_url expects string, int given\.$#'
 			identifier: argument.type
 			count: 2
