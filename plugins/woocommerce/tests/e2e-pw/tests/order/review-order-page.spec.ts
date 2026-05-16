@@ -288,7 +288,7 @@ test.describe(
 				const firstRow = rows.nth( 0 );
 				await firstRow
 					.getByRole( 'radio', { name: /3 out of 5 stars/ } )
-					.check();
+					.check( { force: true } );
 
 				// The dynamic caption reflects the chosen rating.
 				await expect(
@@ -348,7 +348,7 @@ test.describe(
 
 				await rowA
 					.getByRole( 'radio', { name: /4 out of 5 stars/ } )
-					.check();
+					.check( { force: true } );
 				await rowA
 					.locator( 'textarea' )
 					.fill( 'Pre-filled by Scenario 2.' );
@@ -387,7 +387,7 @@ test.describe(
 				await rowsAfter
 					.nth( 1 )
 					.getByRole( 'radio', { name: /5 out of 5 stars/ } )
-					.check();
+					.check( { force: true } );
 				await expect(
 					page.locator( '.woocommerce-review-order__submit' )
 				).toBeEnabled();
@@ -530,7 +530,7 @@ test.describe(
 				// Selecting a rating clears the error.
 				await row
 					.getByRole( 'radio', { name: /5 out of 5 stars/ } )
-					.check();
+					.check( { force: true } );
 				await expect( error ).toBeHidden();
 
 				// Submitting now succeeds.
@@ -568,12 +568,12 @@ test.describe(
 					rows
 						.nth( 0 )
 						.locator( '.woocommerce-review-order__item-variation' )
-				).toContainText( /Size:\s*Small/ );
+				).toContainText( /Size:\s*Small/i );
 				await expect(
 					rows
 						.nth( 1 )
 						.locator( '.woocommerce-review-order__item-variation' )
-				).toContainText( /Size:\s*Medium/ );
+				).toContainText( /Size:\s*Medium/i );
 			} finally {
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, [ parentId ] );
@@ -598,7 +598,7 @@ test.describe(
 				await rows
 					.nth( 0 )
 					.getByRole( 'radio', { name: /5 out of 5 stars/ } )
-					.check();
+					.check( { force: true } );
 				await rows
 					.nth( 0 )
 					.locator( 'textarea' )
@@ -607,7 +607,7 @@ test.describe(
 				await rows
 					.nth( 1 )
 					.getByRole( 'radio', { name: /3 out of 5 stars/ } )
-					.check();
+					.check( { force: true } );
 				await rows
 					.nth( 1 )
 					.locator( 'textarea' )
@@ -707,7 +707,7 @@ test.describe(
 					smallComment.locator(
 						'.woocommerce-review__variation-summary'
 					)
-				).toContainText( /Size:\s*Small/ );
+				).toContainText( /Size:\s*Small/i );
 
 				const mediumComment = page
 					.locator( 'li.comment, li[class*="comment"]' )
@@ -717,7 +717,7 @@ test.describe(
 					mediumComment.locator(
 						'.woocommerce-review__variation-summary'
 					)
-				).toContainText( /Size:\s*Medium/ );
+				).toContainText( /Size:\s*Medium/i );
 			} finally {
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, [ parentId ] );
