@@ -506,31 +506,32 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	if ( $use_legacy_first_rate_default ) {
 		$default = current( $rate_keys );
 	} else {
-		$default = '';
+		$default          = '';
+		$first_pickup_key = '';
 
 		// Shipping methods always take priority over pickup when available, regardless of the
 		// "Auto-select local pickup tab" setting. The setting only controls what happens when
 		// no shipping rate is available in the package.
 		foreach ( $rate_keys as $rate_key ) {
 			$rate_method_id = current( explode( ':', $rate_key ) );
-			if ( ! in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
+			$is_pickup      = in_array( $rate_method_id, $local_pickup_method_ids, true );
+
+			if ( ! $is_pickup ) {
 				$default = $rate_key;
 				break;
 			}
+
+			if ( '' === $first_pickup_key ) {
+				$first_pickup_key = $rate_key;
+			}
 		}
 
-		$local_pickup_settings   = LocalPickupUtils::get_local_pickup_settings();
-		$prefers_pickup_default  = ! empty( $local_pickup_settings['default_tab'] );
+		$local_pickup_settings  = LocalPickupUtils::get_local_pickup_settings();
+		$prefers_pickup_default = ! empty( $local_pickup_settings['default_tab'] );
 
 		// No shipping rate available. Only auto-select pickup when the merchant opted in.
 		if ( '' === $default && $prefers_pickup_default ) {
-			foreach ( $rate_keys as $rate_key ) {
-				$rate_method_id = current( explode( ':', $rate_key ) );
-				if ( in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
-					$default = $rate_key;
-					break;
-				}
-			}
+			$default = $first_pickup_key;
 		}
 
 		// Don't auto-select pickup when shipping rates are hidden pending an address.
