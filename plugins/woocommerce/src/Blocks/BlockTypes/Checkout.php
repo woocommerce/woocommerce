@@ -17,6 +17,8 @@ use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
  * @internal
  */
 class Checkout extends AbstractBlock {
+	use EnableBlockJsonAssetsTrait;
+
 	/**
 	 * Block name.
 	 *
@@ -38,6 +40,7 @@ class Checkout extends AbstractBlock {
 	 * - Register the block with WordPress.
 	 */
 	protected function initialize() {
+		$this->asset_api->register_style( 'wc-blocks-style-checkout', $this->asset_api->get_block_asset_build_path( 'checkout', 'css' ), [], 'all', true );
 		parent::initialize();
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 		add_action( 'wp_loaded', array( $this, 'register_patterns' ) );
@@ -200,15 +203,6 @@ class Checkout extends AbstractBlock {
 			'dependencies' => $dependencies,
 		];
 		return $key ? $script[ $key ] : $script;
-	}
-
-	/**
-	 * Get the frontend style handle for this block type.
-	 *
-	 * @return string[]
-	 */
-	protected function get_block_type_style() {
-		return array_merge( parent::get_block_type_style(), [ 'wc-blocks-packages-style' ] );
 	}
 
 	/**
