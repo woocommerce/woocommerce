@@ -47,7 +47,6 @@ jest.mock( '@wordpress/data', () => {
 } );
 
 const mockSelect = select as jest.Mock;
-const { getSetting } = jest.requireMock( '@woocommerce/settings' );
 
 const pickupRate = generateShippingRate( {
 	rateId: 'pickup_location:1',
@@ -68,14 +67,6 @@ const shippingRate = generateShippingRate( {
 } );
 
 describe( 'prefersCollection selector', () => {
-	beforeEach( () => {
-		// Reset to default: getSetting('defaultCheckoutTab', true) returns true via fallback, preserves existing behavior.
-		getSetting.mockImplementation( ( key: string, fallback?: unknown ) => {
-			if ( key === 'collectableMethodIds' ) return [ 'pickup_location' ];
-			return fallback;
-		} );
-	} );
-
 	describe( 'when state.prefersCollection is explicitly set', () => {
 		it( 'returns true when state is true', () => {
 			const state = { ...defaultState, prefersCollection: true };
@@ -122,45 +113,13 @@ describe( 'prefersCollection selector', () => {
 			expect( prefersCollection( undefinedState ) ).toBeFalsy();
 		} );
 
-		describe( 'when a pickup rate is pre-selected by the server', () => {
-			beforeEach( () => {
-				const pkg = generateShippingPackage( {
-					packageId: 0,
-					shippingRates: [ pickupRate ],
-				} );
-				mockSelect.mockReturnValue( {
-					getShippingRates: () => [ pkg ],
-				} );
+		it( 'returns true when the server pre-selected a pickup rate', () => {
+			const pkg = generateShippingPackage( {
+				packageId: 0,
+				shippingRates: [ pickupRate ],
 			} );
-
-			it( 'returns false when defaultCheckoutTab setting is false', () => {
-				getSetting.mockImplementation(
-					( key: string, fallback?: unknown ) => {
-						if ( key === 'collectableMethodIds' )
-							return [ 'pickup_location' ];
-						if ( key === 'defaultCheckoutTab' ) return false;
-						return fallback;
-					}
-				);
-				expect( prefersCollection( undefinedState ) ).toBe( false );
-			} );
-
-			it( 'returns true when defaultCheckoutTab setting is absent (fallback to true)', () => {
-				// Default mock: getSetting('defaultCheckoutTab', true) returns true via fallback — preserves existing behavior.
-				expect( prefersCollection( undefinedState ) ).toBe( true );
-			} );
-
-			it( 'returns true when defaultCheckoutTab setting is true', () => {
-				getSetting.mockImplementation(
-					( key: string, fallback?: unknown ) => {
-						if ( key === 'collectableMethodIds' )
-							return [ 'pickup_location' ];
-						if ( key === 'defaultCheckoutTab' ) return true;
-						return fallback;
-					}
-				);
-				expect( prefersCollection( undefinedState ) ).toBe( true );
-			} );
+			mockSelect.mockReturnValue( { getShippingRates: () => [ pkg ] } );
+			expect( prefersCollection( undefinedState ) ).toBe( true );
 		} );
 
 		it( 'returns false when a regular shipping rate is pre-selected', () => {
