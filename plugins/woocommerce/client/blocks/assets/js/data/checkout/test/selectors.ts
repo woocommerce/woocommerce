@@ -8,7 +8,10 @@ import { select } from '@wordpress/data';
  */
 import { prefersCollection } from '../selectors';
 import { defaultState } from '../default-state';
-import { generateShippingRate, generateShippingPackage } from '../../../mocks/shipping-package';
+import {
+	generateShippingRate,
+	generateShippingPackage,
+} from '../../../mocks/shipping-package';
 
 // Must be hoisted before imports so shipping-rates.ts captures the mocked collectableMethodIds.
 jest.mock( '@woocommerce/settings', () => {
@@ -16,12 +19,14 @@ jest.mock( '@woocommerce/settings', () => {
 	return {
 		__esModule: true,
 		...actual,
-		getSetting: jest.fn().mockImplementation( ( key: string, fallback?: unknown ) => {
-			if ( key === 'collectableMethodIds' ) {
-				return [ 'pickup_location' ];
-			}
-			return fallback;
-		} ),
+		getSetting: jest
+			.fn()
+			.mockImplementation( ( key: string, fallback?: unknown ) => {
+				if ( key === 'collectableMethodIds' ) {
+					return [ 'pickup_location' ];
+				}
+				return fallback;
+			} ),
 	};
 } );
 
@@ -84,7 +89,10 @@ describe( 'prefersCollection selector', () => {
 	} );
 
 	describe( 'when state.prefersCollection is undefined (first load)', () => {
-		const undefinedState = { ...defaultState, prefersCollection: undefined };
+		const undefinedState = {
+			...defaultState,
+			prefersCollection: undefined,
+		};
 
 		it( 'returns false when there are no shipping rates', () => {
 			mockSelect.mockReturnValue( { getShippingRates: () => [] } );
@@ -126,11 +134,14 @@ describe( 'prefersCollection selector', () => {
 			} );
 
 			it( 'returns false when defaultCheckoutTab setting is "shipping"', () => {
-				getSetting.mockImplementation( ( key: string, fallback?: unknown ) => {
-					if ( key === 'collectableMethodIds' ) return [ 'pickup_location' ];
-					if ( key === 'defaultCheckoutTab' ) return 'shipping';
-					return fallback;
-				} );
+				getSetting.mockImplementation(
+					( key: string, fallback?: unknown ) => {
+						if ( key === 'collectableMethodIds' )
+							return [ 'pickup_location' ];
+						if ( key === 'defaultCheckoutTab' ) return 'shipping';
+						return fallback;
+					}
+				);
 				expect( prefersCollection( undefinedState ) ).toBe( false );
 			} );
 
@@ -140,11 +151,15 @@ describe( 'prefersCollection selector', () => {
 			} );
 
 			it( 'returns true when defaultCheckoutTab setting is "local_pickup"', () => {
-				getSetting.mockImplementation( ( key: string, fallback?: unknown ) => {
-					if ( key === 'collectableMethodIds' ) return [ 'pickup_location' ];
-					if ( key === 'defaultCheckoutTab' ) return 'local_pickup';
-					return fallback;
-				} );
+				getSetting.mockImplementation(
+					( key: string, fallback?: unknown ) => {
+						if ( key === 'collectableMethodIds' )
+							return [ 'pickup_location' ];
+						if ( key === 'defaultCheckoutTab' )
+							return 'local_pickup';
+						return fallback;
+					}
+				);
 				expect( prefersCollection( undefinedState ) ).toBe( true );
 			} );
 		} );
