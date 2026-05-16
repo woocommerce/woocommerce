@@ -8,7 +8,11 @@
  * External dependencies
  */
 import { request, type Locator } from '@playwright/test';
-import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import {
+	ApiClient,
+	WC_API_PATH,
+	WP_API_PATH,
+} from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
@@ -34,25 +38,36 @@ test.describe(
 	'Customer Review Request — Review Order page',
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
-		test.beforeAll( async ( { baseURL } ) => {
-			// Email settings option (array) is left absent so defaults apply;
-			// api_update_option only handles strings anyway.
+		// Host page permalink. The page is created by the OrderReviews
+		// Endpoint on `init` after the feature flag is enabled; we look it up
+		// once in beforeAll and reuse it for every URL we build.
+		let hostPagePermalink = '';
+
+		test.beforeAll( async ( { baseURL, restApi } ) => {
 			await setOption(
 				request,
 				baseURL || '',
 				FEATURE_FLAG_OPTION,
 				'yes'
 			);
+
+			// First REST call after enabling the flag boots WP with init
+			// firing again; that's when the host page is created.
+			const { data } = await restApi.get(
+				`${ WP_API_PATH }/pages?slug=review-order`,
+				{ data: { _fields: [ 'id', 'link' ] } }
+			);
+			hostPagePermalink = data?.[ 0 ]?.link || '';
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
 			await deleteOption( request, baseURL || '', FEATURE_FLAG_OPTION );
 		} );
 
-		// `wc_get_review_order_url()` shape; built in JS since the email's
-		// 1-day minimum delay rules out a real "click the link" flow in CI.
+		// Matches `Endpoint::get_url()` for pretty permalinks (the e2e env
+		// runs /%postname%/): /review-order/{id}/?key={key}.
 		const reviewOrderUrl = ( order: SeededOrder ): string =>
-			`?wc-review-order=${ order.id }&key=${ order.key }`;
+			`${ hostPagePermalink }${ order.id }/?key=${ order.key }`;
 
 		// Star inputs are CSS-hidden behind their <label>s for a11y; clicking
 		// the label triggers the radio without needing { force: true }.
