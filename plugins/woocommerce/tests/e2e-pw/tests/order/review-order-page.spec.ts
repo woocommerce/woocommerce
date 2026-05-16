@@ -78,6 +78,8 @@ test.describe(
 				} )
 				.click();
 
+		// Cleanup helpers log on failure rather than throw — cleanup runs in
+		// `finally`, so throwing here would mask the real test error.
 		const cleanupProducts = async ( restApi: ApiClient, ids: number[] ) => {
 			for ( const id of ids ) {
 				if ( id <= 0 ) {
@@ -87,7 +89,13 @@ test.describe(
 					.delete( `${ WC_API_PATH }/products/${ id }`, {
 						force: true,
 					} )
-					.catch( () => undefined );
+					.catch( ( err ) => {
+						// eslint-disable-next-line no-console -- surface unexpected teardown errors without masking the test failure.
+						console.warn(
+							`Failed to delete product ${ id }:`,
+							err
+						);
+					} );
 			}
 		};
 
@@ -97,7 +105,10 @@ test.describe(
 			}
 			await restApi
 				.delete( `${ WC_API_PATH }/orders/${ id }`, { force: true } )
-				.catch( () => undefined );
+				.catch( ( err ) => {
+					// eslint-disable-next-line no-console -- surface unexpected teardown errors without masking the test failure.
+					console.warn( `Failed to delete order ${ id }:`, err );
+				} );
 		};
 
 		const buildBillingEmail = ( prefix: string ): string =>
