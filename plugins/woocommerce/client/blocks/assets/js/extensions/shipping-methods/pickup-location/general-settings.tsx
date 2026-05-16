@@ -172,7 +172,7 @@ const GeneralSettings = () => {
 						'woocommerce'
 					) }
 					help={ __(
-						'When enabled, the local pickup tab will be selected by default when no customer shipping address has been entered.',
+						'When enabled, the local pickup tab is selected by default if no shipping rates are available for the customer. Shipping rates always take priority when available.',
 						'woocommerce'
 					) }
 				/>

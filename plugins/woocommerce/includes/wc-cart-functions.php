@@ -510,22 +510,22 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 	} else {
 		$default = '';
 
-		if ( $prefers_pickup_default ) {
-			// Merchant opted in: prefer the first local pickup rate as the default.
-			foreach ( $rate_keys as $rate_key ) {
-				$rate_method_id = current( explode( ':', $rate_key ) );
-				if ( in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
-					$default = $rate_key;
-					break;
-				}
+		// Shipping methods always take priority over pickup when available, regardless of the
+		// "Auto-select local pickup tab" setting. The setting only controls what happens when
+		// no shipping rate is available in the package.
+		foreach ( $rate_keys as $rate_key ) {
+			$rate_method_id = current( explode( ':', $rate_key ) );
+			if ( ! in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
+				$default = $rate_key;
+				break;
 			}
 		}
 
-		if ( '' === $default ) {
-			// Otherwise prefer the first non-pickup rate.
+		// No shipping rate available. Only auto-select pickup when the merchant opted in.
+		if ( '' === $default && $prefers_pickup_default ) {
 			foreach ( $rate_keys as $rate_key ) {
 				$rate_method_id = current( explode( ':', $rate_key ) );
-				if ( ! in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
+				if ( in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
 					$default = $rate_key;
 					break;
 				}
@@ -551,13 +551,13 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 		}
 	}
 
-	// Keep a previously-chosen local pickup rate only when the merchant has it as the default tab,
-	// so an auto-defaulted pickup doesn't override a "default to shipping" preference on reload.
+	// Preserve a previously-chosen local pickup rate so an explicit user choice isn't auto-flipped
+	// back to shipping on reload. Auto-default priority is enforced above when no chosen method exists.
 	$chosen_method_id       = current( explode( ':', $chosen_method ) );
 	$chosen_method_exists   = in_array( $chosen_method, $rate_keys, true );
 	$is_local_pickup_chosen = in_array( $chosen_method_id, $local_pickup_method_ids, true );
 
-	if ( $chosen_method_exists && $is_local_pickup_chosen && $prefers_pickup_default ) {
+	if ( $chosen_method_exists && $is_local_pickup_chosen ) {
 		$default = $chosen_method;
 
 	} else {
