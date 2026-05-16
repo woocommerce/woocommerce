@@ -20,6 +20,7 @@ import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
  * Internal dependencies
  */
 import { tags, expect, test } from '../../fixtures/fixtures';
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { wpCLI } from '../../utils/cli';
 import { random } from '../../utils/helpers';
 
@@ -34,8 +35,11 @@ type SeededOrder = {
 
 const FEATURE_FLAG_OPTION =
 	'woocommerce_feature_customer_review_request_enabled';
-const REQUEST_SETTINGS_OPTION = 'woocommerce_customer_review_request_settings';
 const SITE_REVIEWS_OPTION = 'woocommerce_enable_reviews';
+const FEATURE_FLAG_SELECTOR = `#${ FEATURE_FLAG_OPTION }`;
+const REVIEW_REQUEST_EMAIL_ENABLED_SELECTOR =
+	'#woocommerce_customer_review_request_enabled';
+const SITE_REVIEWS_SETTING_PATH = `${ WC_API_PATH }/settings/products/${ SITE_REVIEWS_OPTION }`;
 
 /**
  * The tests-cli container's PHP 128M default is exhausted just by
@@ -58,16 +62,50 @@ test.describe(
 	'Customer Review Request — Review Order page',
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
-		test.beforeAll( async () => {
-			await wpCli( `wp option set ${ FEATURE_FLAG_OPTION } yes` );
-			await wpCli(
-				`wp option set ${ REQUEST_SETTINGS_OPTION } --format=json '{"enabled":"yes"}'`
+		test.beforeAll( async ( { browser } ) => {
+			const context = await browser.newContext( {
+				storageState: ADMIN_STATE_PATH,
+			} );
+			const page = await context.newPage();
+
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features'
 			);
+			await page.locator( FEATURE_FLAG_SELECTOR ).check();
+			await page.getByRole( 'button', { name: 'Save changes' } ).click();
+
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=email&section=customer_review_request'
+			);
+			await page
+				.locator( REVIEW_REQUEST_EMAIL_ENABLED_SELECTOR )
+				.check();
+			await page.getByRole( 'button', { name: 'Save changes' } ).click();
+
+			await context.close();
 		} );
 
-		test.afterAll( async () => {
-			await wpCli( `wp option delete ${ FEATURE_FLAG_OPTION }` );
-			await wpCli( `wp option delete ${ REQUEST_SETTINGS_OPTION }` );
+		test.afterAll( async ( { browser } ) => {
+			const context = await browser.newContext( {
+				storageState: ADMIN_STATE_PATH,
+			} );
+			const page = await context.newPage();
+
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=email&section=customer_review_request'
+			);
+			await page
+				.locator( REVIEW_REQUEST_EMAIL_ENABLED_SELECTOR )
+				.uncheck();
+			await page.getByRole( 'button', { name: 'Save changes' } ).click();
+
+			await page.goto(
+				'wp-admin/admin.php?page=wc-settings&tab=advanced&section=features'
+			);
+			await page.locator( FEATURE_FLAG_SELECTOR ).uncheck();
+			await page.getByRole( 'button', { name: 'Save changes' } ).click();
+
+			await context.close();
 		} );
 
 		/**
@@ -443,7 +481,9 @@ test.describe(
 			] );
 
 			try {
-				await wpCli( `wp option set ${ SITE_REVIEWS_OPTION } no` );
+				await restApi.put( SITE_REVIEWS_SETTING_PATH, {
+					value: 'no',
+				} );
 
 				await page.goto( await reviewOrderUrl( order ) );
 
@@ -460,7 +500,9 @@ test.describe(
 				).toHaveCount( 0 );
 			} finally {
 				// Default for fresh installs is 'yes'; restore to that.
-				await wpCli( `wp option set ${ SITE_REVIEWS_OPTION } yes` );
+				await restApi.put( SITE_REVIEWS_SETTING_PATH, {
+					value: 'yes',
+				} );
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, productIds );
 			}
