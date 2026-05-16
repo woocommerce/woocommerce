@@ -4,6 +4,7 @@
 import { select } from '@wordpress/data';
 import { hasCollectableRate } from '@woocommerce/base-utils';
 import { isString, objectHasProp } from '@woocommerce/types';
+import { getSetting } from '@woocommerce/settings';
 import type { AddressFormType } from '@woocommerce/settings';
 
 /**
@@ -107,7 +108,14 @@ export const prefersCollection = ( state: CheckoutState ) => {
 			objectHasProp( selectedRate, 'method_id' ) &&
 			isString( selectedRate.method_id )
 		) {
-			return hasCollectableRate( selectedRate?.method_id );
+			if ( hasCollectableRate( selectedRate?.method_id ) ) {
+				// Server pre-selected a pickup rate. Respect the merchant's tab preference.
+				return (
+					getSetting< string >( 'defaultCheckoutTab', 'shipping' ) ===
+					'local_pickup'
+				);
+			}
+			return false;
 		}
 	}
 	return state.prefersCollection;
