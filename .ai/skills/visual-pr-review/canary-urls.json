@@ -1,0 +1,14 @@
+{
+  "canaries": [
+    { "name": "storefront-shop",           "path": "/shop/",                                     "auth": "none",     "description": "Shop archive" },
+    { "name": "storefront-single-product", "path": "/product/v-neck-t-shirt/",                   "auth": "none",     "description": "Single product page" },
+    { "name": "storefront-cart",           "path": "/cart/",                                     "auth": "customer", "description": "Cart page",      "before": "addProductToCart" },
+    { "name": "storefront-checkout",       "path": "/checkout/",                                 "auth": "customer", "description": "Checkout",       "before": "addProductToCart" },
+    { "name": "storefront-my-account",     "path": "/my-account/",                               "auth": "customer", "description": "My Account" },
+    { "name": "admin-dashboard",           "path": "/wp-admin/admin.php?page=wc-admin",          "auth": "admin",    "description": "WC admin home" },
+    { "name": "admin-products-list",       "path": "/wp-admin/edit.php?post_type=product",       "auth": "admin",    "description": "Products list" },
+    { "name": "admin-orders",              "path": "/wp-admin/admin.php?page=wc-orders",         "auth": "admin",    "description": "Orders (HPOS)" },
+    { "name": "admin-settings-general",    "path": "/wp-admin/admin.php?page=wc-settings",       "auth": "admin",    "description": "Settings — General" },
+    { "name": "admin-settings-emails",     "path": "/wp-admin/admin.php?page=wc-settings&tab=email", "auth": "admin","description": "Settings — Emails" }
+  ]
+}
