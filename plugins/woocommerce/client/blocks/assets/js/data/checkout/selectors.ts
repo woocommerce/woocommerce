@@ -4,8 +4,7 @@
 import { select } from '@wordpress/data';
 import { hasCollectableRate } from '@woocommerce/base-utils';
 import { isString, objectHasProp } from '@woocommerce/types';
-import { getSetting } from '@woocommerce/settings';
-import type { AddressFormType } from '@woocommerce/settings';
+import { getSetting, type AddressFormType } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
