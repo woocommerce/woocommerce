@@ -47,7 +47,7 @@ class AbilitiesCategories {
 				'woocommerce',
 				array(
 					'label'       => __( 'WooCommerce', 'woocommerce' ),
-					'description' => __( 'Canonical store management abilities backed by domain APIs.', 'woocommerce' ),
+					'description' => __( 'Abilities for WooCommerce store operations, including core commerce features and extension-provided capabilities.', 'woocommerce' ),
 				)
 			);
 		}
