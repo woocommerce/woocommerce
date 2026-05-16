@@ -7,7 +7,7 @@
 /**
  * External dependencies
  */
-import type { Locator } from '@playwright/test';
+import { request, type Locator } from '@playwright/test';
 import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
@@ -34,7 +34,7 @@ test.describe(
 	'Customer Review Request — Review Order page',
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
-		test.beforeAll( async ( { request, baseURL } ) => {
+		test.beforeAll( async ( { baseURL } ) => {
 			// Email settings option (array) is left absent so defaults apply;
 			// api_update_option only handles strings anyway.
 			await setOption(
@@ -45,7 +45,7 @@ test.describe(
 			);
 		} );
 
-		test.afterAll( async ( { request, baseURL } ) => {
+		test.afterAll( async ( { baseURL } ) => {
 			await deleteOption( request, baseURL || '', FEATURE_FLAG_OPTION );
 		} );
 
@@ -409,7 +409,6 @@ test.describe(
 
 		test( 'Scenario 4 — site-wide reviews disabled renders the empty-state thank-you', async ( {
 			page,
-			request,
 			baseURL,
 			restApi,
 		} ) => {
