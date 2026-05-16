@@ -64,6 +64,36 @@ function register_helper_api() {
 			'permission_callback' => 'is_allowed',
 		)
 	);
+
+	register_rest_route(
+		'e2e-order-reviews',
+		'/review-order-url/(?P<order_id>\d+)',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'api_get_review_order_url',
+			'permission_callback' => 'is_allowed',
+		)
+	);
+
+	register_rest_route(
+		'e2e-order-reviews',
+		'/scheduled-action/(?P<order_id>\d+)',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'api_has_scheduled_review_request_action',
+			'permission_callback' => 'is_allowed',
+		)
+	);
+
+	register_rest_route(
+		'e2e-order-reviews',
+		'/review-variation-id/(?P<comment_id>\d+)',
+		array(
+			'methods'             => 'GET',
+			'callback'            => 'api_get_review_variation_id',
+			'permission_callback' => 'is_allowed',
+		)
+	);
 }
 
 add_action( 'rest_api_init', 'register_helper_api' );
@@ -197,4 +227,70 @@ function activate_theme( WP_REST_Request $request ) {
 	} else {
 		return new WP_REST_Response( array( 'message' => "Theme '$theme_name' does not exist." ), 400 );
 	}
+}
+
+/**
+ * Get the review-order URL for an order ID.
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response
+ */
+function api_get_review_order_url( WP_REST_Request $request ) {
+	$order_id = absint( $request['order_id'] );
+	$order    = wc_get_order( $order_id );
+
+	if ( ! $order instanceof WC_Order ) {
+		return new WP_REST_Response( array( 'message' => 'Order not found.' ), 404 );
+	}
+
+	return new WP_REST_Response(
+		array(
+			'url' => wc_get_review_order_url( $order ),
+		),
+		200
+	);
+}
+
+/**
+ * Check whether an order has a scheduled review-request action.
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response
+ */
+function api_has_scheduled_review_request_action( WP_REST_Request $request ) {
+	$order_id = absint( $request['order_id'] );
+	$action   = false;
+
+	if ( function_exists( 'as_next_scheduled_action' ) ) {
+		$action = as_next_scheduled_action( 'woocommerce_send_review_request', array( $order_id ) );
+	}
+
+	return new WP_REST_Response(
+		array(
+			'has_scheduled_action' => false !== $action,
+		),
+		200
+	);
+}
+
+/**
+ * Get the review variation ID stored on a review comment.
+ *
+ * @param WP_REST_Request $request Request object.
+ * @return WP_REST_Response
+ */
+function api_get_review_variation_id( WP_REST_Request $request ) {
+	$comment_id = absint( $request['comment_id'] );
+	$comment    = get_comment( $comment_id );
+
+	if ( ! $comment instanceof WP_Comment ) {
+		return new WP_REST_Response( array( 'message' => 'Comment not found.' ), 404 );
+	}
+
+	return new WP_REST_Response(
+		array(
+			'variation_id' => (int) get_comment_meta( $comment_id, '_review_variation_id', true ),
+		),
+		200
+	);
 }

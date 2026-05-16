@@ -5,7 +5,7 @@
  * its own basic-auth client, independent of the browser session), then opens
  * the page logged-out, mirroring the real customer who reaches the URL via
  * the tokenized email link. The page URL itself is read back from
- * `wc_get_review_order_url()` over wp-cli so the test can't drift from the
+ * `wc_get_review_order_url()` via a test helper REST route so the test can't drift from the
  * helper it's exercising.
  *
  * Tracked as WOOPLUG-6601 (Linear).
@@ -15,14 +15,16 @@
  * External dependencies
  */
 import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
+import type { APIRequestContext } from '@playwright/test';
 
 /**
  * Internal dependencies
  */
 import { tags, expect, test } from '../../fixtures/fixtures';
 import { ADMIN_STATE_PATH } from '../../playwright.config';
-import { wpCLI } from '../../utils/cli';
 import { random } from '../../utils/helpers';
+import { encodeCredentials } from '../../utils/plugin-utils';
+import { admin } from '../../test-data/data';
 
 type SeededOrder = {
 	id: number;
@@ -46,33 +48,39 @@ const FEATURE_FLAG_SELECTOR = `#${ FEATURE_FLAG_OPTION }`;
 const REVIEW_REQUEST_EMAIL_ENABLED_SELECTOR =
 	`#${ REVIEW_REQUEST_EMAIL_ENABLED_OPTION }`;
 const SITE_REVIEWS_SETTING_PATH = `${ WC_API_PATH }/settings/products/${ SITE_REVIEWS_OPTION }`;
-
-/**
- * The tests-cli container's PHP 128M default is exhausted just by
- * google-listings-and-ads's autoloader on some CI shards. None of this
- * spec's wp-cli calls need GLA, so we skip it for every WP boot. Local to
- * this file. Note: do NOT use this wrapper for `wp rewrite flush` — that
- * would drop GLA's rewrite rules from the saved option and break other
- * tests. We don't flush at all because `wc_get_review_order_url()` returns
- * a query-string URL, not a pretty permalink.
- */
-const wpCli = ( command: string ) =>
-	wpCLI(
-		command.replace(
-			/^wp\b/,
-			'wp --skip-plugins=google-listings-and-ads'
-		)
-	);
+const REVIEW_ORDER_URL_API_PATH = './wp-json/e2e-order-reviews/review-order-url';
+const REVIEW_SCHEDULE_API_PATH = './wp-json/e2e-order-reviews/scheduled-action';
+const REVIEW_VARIATION_API_PATH =
+	'./wp-json/e2e-order-reviews/review-variation-id';
 
 test.describe(
 	'Customer Review Request — Review Order page',
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
-		test.beforeAll( async ( { browser } ) => {
+		let helperApiContext: APIRequestContext | null = null;
+
+		const getHelperApiContext = (): APIRequestContext => {
+			if ( ! helperApiContext ) {
+				throw new Error( 'Expected helper API context to be initialized.' );
+			}
+			return helperApiContext;
+		};
+
+		test.beforeAll( async ( { browser, request, baseURL } ) => {
 			const context = await browser.newContext( {
 				storageState: ADMIN_STATE_PATH,
 			} );
 			const page = await context.newPage();
+			helperApiContext = await request.newContext( {
+				baseURL,
+				extraHTTPHeaders: {
+					Authorization: `Basic ${ encodeCredentials(
+						admin.username,
+						admin.password
+					) }`,
+					cookie: '',
+				},
+			} );
 
 			await page.goto( FEATURES_SETTINGS_URL );
 			await page.locator( FEATURE_FLAG_SELECTOR ).check();
@@ -104,6 +112,9 @@ test.describe(
 			await page.getByRole( 'button', { name: 'Save changes' } ).click();
 
 			await context.close();
+			if ( helperApiContext ) {
+				await helperApiContext.dispose();
+			}
 		} );
 
 		/**
@@ -114,10 +125,14 @@ test.describe(
 		const reviewOrderUrl = async (
 			order: SeededOrder
 		): Promise< string > => {
-			const { stdout } = await wpCli(
-				`wp eval "echo wc_get_review_order_url( wc_get_order( ${ order.id } ) );"`
+			const response = await getHelperApiContext().get(
+				`${ REVIEW_ORDER_URL_API_PATH }/${ order.id }`,
+				{
+					failOnStatusCode: true,
+				}
 			);
-			return stdout.trim();
+			const data = await response.json();
+			return data.url as string;
 		};
 
 		const cleanupProducts = async ( restApi: ApiClient, ids: number[] ) => {
@@ -514,10 +529,14 @@ test.describe(
 			] );
 
 			const hasScheduledAction = async () => {
-				const { stdout } = await wpCli(
-					`wp eval "echo as_next_scheduled_action( 'woocommerce_send_review_request', array( ${ order.id } ) ) ? '1' : '0';"`
+				const response = await getHelperApiContext().get(
+					`${ REVIEW_SCHEDULE_API_PATH }/${ order.id }`,
+					{
+						failOnStatusCode: true,
+					}
 				);
-				return stdout.trim().endsWith( '1' );
+				const data = await response.json();
+				return data.has_scheduled_action as boolean;
 			};
 
 			try {
@@ -683,10 +702,14 @@ test.describe(
 				const variationIdForReview = async (
 					commentId: number
 				): Promise< number > => {
-					const { stdout } = await wpCli(
-						`wp eval "echo (int) get_comment_meta( ${ commentId }, '_review_variation_id', true );"`
+					const response = await getHelperApiContext().get(
+						`${ REVIEW_VARIATION_API_PATH }/${ commentId }`,
+						{
+							failOnStatusCode: true,
+						}
 					);
-					return Number( stdout.trim() );
+					const data = await response.json();
+					return Number( data.variation_id );
 				};
 
 				const requireReview = (
