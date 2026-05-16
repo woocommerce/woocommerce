@@ -275,4 +275,92 @@ class LocalPickupUtilsTest extends \WC_Unit_Test_Case {
 		$this->assertArrayHasKey( 'details', $result[0] );
 		$this->assertStringContainsString( 'Test Local Pickup', $result[0]['details'] );
 	}
+
+	/**
+	 * @testdox Should default default_tab to true when the stored option is missing the key.
+	 */
+	public function test_get_local_pickup_settings_defaults_default_tab_to_true_when_missing(): void {
+		update_option(
+			'woocommerce_pickup_location_settings',
+			array(
+				'enabled'    => 'yes',
+				'title'      => 'Pickup',
+				'tax_status' => 'taxable',
+				'cost'       => '',
+			)
+		);
+
+		$settings = LocalPickupUtils::get_local_pickup_settings();
+
+		$this->assertArrayHasKey( 'default_tab', $settings );
+		$this->assertTrue( $settings['default_tab'], 'default_tab should default to true when the option is missing the key' );
+
+		delete_option( 'woocommerce_pickup_location_settings' );
+	}
+
+	/**
+	 * @testdox Should return default_tab as false when the option stores 'no'.
+	 */
+	public function test_get_local_pickup_settings_returns_false_for_no(): void {
+		update_option(
+			'woocommerce_pickup_location_settings',
+			array(
+				'enabled'     => 'yes',
+				'title'       => 'Pickup',
+				'tax_status'  => 'taxable',
+				'cost'        => '',
+				'default_tab' => 'no',
+			)
+		);
+
+		$settings = LocalPickupUtils::get_local_pickup_settings();
+
+		$this->assertFalse( $settings['default_tab'], "default_tab should be false when stored as 'no'" );
+
+		delete_option( 'woocommerce_pickup_location_settings' );
+	}
+
+	/**
+	 * @testdox Should return default_tab as true when the option stores 'yes'.
+	 */
+	public function test_get_local_pickup_settings_returns_true_for_yes(): void {
+		update_option(
+			'woocommerce_pickup_location_settings',
+			array(
+				'enabled'     => 'yes',
+				'title'       => 'Pickup',
+				'tax_status'  => 'taxable',
+				'cost'        => '',
+				'default_tab' => 'yes',
+			)
+		);
+
+		$settings = LocalPickupUtils::get_local_pickup_settings();
+
+		$this->assertTrue( $settings['default_tab'], "default_tab should be true when stored as 'yes'" );
+
+		delete_option( 'woocommerce_pickup_location_settings' );
+	}
+
+	/**
+	 * @testdox Should return raw default_tab string when context is 'edit'.
+	 */
+	public function test_get_local_pickup_settings_edit_context_returns_raw_string(): void {
+		update_option(
+			'woocommerce_pickup_location_settings',
+			array(
+				'enabled'     => 'yes',
+				'title'       => 'Pickup',
+				'tax_status'  => 'taxable',
+				'cost'        => '',
+				'default_tab' => 'no',
+			)
+		);
+
+		$settings = LocalPickupUtils::get_local_pickup_settings( 'edit' );
+
+		$this->assertSame( 'no', $settings['default_tab'], "Edit context should return the raw 'no' string for default_tab" );
+
+		delete_option( 'woocommerce_pickup_location_settings' );
+	}
 }

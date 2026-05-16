@@ -45,8 +45,27 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 	public function tearDown(): void {
 		$this->zone->delete( true );
 		update_option( 'woocommerce_shipping_cost_requires_address', 'no' );
+		delete_option( 'woocommerce_pickup_location_settings' );
 		WC()->cart->cart_context = 'shortcode';
 		parent::tearDown();
+	}
+
+	/**
+	 * Persist the Local Pickup settings used by the SUT.
+	 *
+	 * @param string $default_tab Either 'yes' or 'no'.
+	 */
+	private function set_pickup_default_tab( string $default_tab ): void {
+		update_option(
+			'woocommerce_pickup_location_settings',
+			array(
+				'enabled'     => 'yes',
+				'title'       => 'Pickup',
+				'tax_status'  => 'taxable',
+				'cost'        => '',
+				'default_tab' => $default_tab,
+			)
+		);
 	}
 
 	/**
@@ -150,5 +169,53 @@ class WC_Cart_Default_Shipping_Method_Test extends WC_Unit_Test_Case {
 		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
 
 		$this->assertSame( 'local_pickup:1', $result, 'Shortcode context should always select the first rate' );
+	}
+
+	/**
+	 * @testdox Shipping rate takes priority over pickup even when default_tab is yes.
+	 */
+	public function test_shipping_takes_priority_over_pickup_when_both_available_and_default_tab_yes(): void {
+		$this->set_pickup_default_tab( 'yes' );
+
+		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
+
+		$this->assertSame( 'flat_rate:1', $result, 'Shipping should always win over pickup as the auto-default when a non-pickup rate is available' );
+	}
+
+	/**
+	 * @testdox Selects pickup as default when only pickup is available and default_tab is yes.
+	 */
+	public function test_selects_pickup_when_only_pickup_available_and_default_tab_yes(): void {
+		$this->set_pickup_default_tab( 'yes' );
+
+		$package = $this->build_package( array( 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
+
+		$this->assertSame( 'local_pickup:1', $result, 'Should auto-select pickup when no shipping rate is available and merchant opted in' );
+	}
+
+	/**
+	 * @testdox Returns empty when only pickup is available and default_tab is no.
+	 */
+	public function test_returns_empty_when_only_pickup_available_and_default_tab_no(): void {
+		$this->set_pickup_default_tab( 'no' );
+
+		$package = $this->build_package( array( 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, '' );
+
+		$this->assertSame( '', $result, 'Should not auto-select pickup when merchant opted out' );
+	}
+
+	/**
+	 * @testdox Preserves chosen pickup regardless of the default_tab setting.
+	 */
+	public function test_preserves_chosen_pickup_regardless_of_default_tab(): void {
+		$this->set_pickup_default_tab( 'no' );
+
+		$package = $this->build_package( array( 'flat_rate:1', 'local_pickup:1' ) );
+		$result  = wc_get_default_shipping_method_for_package( 0, $package, 'local_pickup:1' );
+
+		$this->assertSame( 'local_pickup:1', $result, 'An explicit pickup choice should not be reverted to shipping on reload' );
 	}
 }
