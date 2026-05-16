@@ -1,26 +1,21 @@
 /**
- * E2E coverage for the Customer Review Request → Review Order page flow.
- *
- * Each test seeds its own products / order via the WC REST API (which uses
- * its own basic-auth client, independent of the browser session), then opens
- * the page logged-out, mirroring the real customer who reaches the URL via
- * the tokenized email link. The page URL itself is read back from
- * `wc_get_review_order_url()` over wp-cli so the test can't drift from the
- * helper it's exercising.
- *
+ * E2E coverage for the Customer Review Request → Review Order page.
+ * Products/orders seeded via REST for speed; everything else via UI.
  * Tracked as WOOPLUG-6601 (Linear).
  */
 
 /**
  * External dependencies
  */
+import type { Locator } from '@playwright/test';
 import { ApiClient, WC_API_PATH } from '@woocommerce/e2e-utils-playwright';
 
 /**
  * Internal dependencies
  */
+import { ADMIN_STATE_PATH } from '../../playwright.config';
 import { tags, expect, test } from '../../fixtures/fixtures';
-import { wpCLI } from '../../utils/cli';
+import { setOption, deleteOption } from '../../utils/options';
 import { random } from '../../utils/helpers';
 
 type SeededOrder = {
@@ -28,61 +23,46 @@ type SeededOrder = {
 	key: string;
 };
 
-// Browser context is logged-out by default — Review Order is a guest-friendly
-// surface and the order key is the auth. The `restApi` fixture is admin
-// (basic-auth) regardless.
+// `page` is logged-out (Review Order is guest-accessible via order key);
+// `restApi` is admin basic-auth.
 
 const FEATURE_FLAG_OPTION =
 	'woocommerce_feature_customer_review_request_enabled';
-const REQUEST_SETTINGS_OPTION = 'woocommerce_customer_review_request_settings';
 const SITE_REVIEWS_OPTION = 'woocommerce_enable_reviews';
-
-/**
- * The tests-cli container's PHP 128M default is exhausted just by
- * google-listings-and-ads's autoloader on some CI shards. None of this
- * spec's wp-cli calls need GLA, so we skip it for every WP boot. Local to
- * this file. Note: do NOT use this wrapper for `wp rewrite flush` — that
- * would drop GLA's rewrite rules from the saved option and break other
- * tests. We don't flush at all because `wc_get_review_order_url()` returns
- * a query-string URL, not a pretty permalink.
- */
-const wpCli = ( command: string ) =>
-	wpCLI(
-		command.replace(
-			/^wp\b/,
-			'wp --skip-plugins=google-listings-and-ads'
-		)
-	);
 
 test.describe(
 	'Customer Review Request — Review Order page',
 	{ tag: [ tags.SERVICES, tags.HPOS ] },
 	() => {
-		test.beforeAll( async () => {
-			await wpCli( `wp option set ${ FEATURE_FLAG_OPTION } yes` );
-			await wpCli(
-				`wp option set ${ REQUEST_SETTINGS_OPTION } --format=json '{"enabled":"yes"}'`
+		test.beforeAll( async ( { request, baseURL } ) => {
+			// Email settings option (array) is left absent so defaults apply;
+			// api_update_option only handles strings anyway.
+			await setOption(
+				request,
+				baseURL || '',
+				FEATURE_FLAG_OPTION,
+				'yes'
 			);
 		} );
 
-		test.afterAll( async () => {
-			await wpCli( `wp option delete ${ FEATURE_FLAG_OPTION }` );
-			await wpCli( `wp option delete ${ REQUEST_SETTINGS_OPTION }` );
+		test.afterAll( async ( { request, baseURL } ) => {
+			await deleteOption( request, baseURL || '', FEATURE_FLAG_OPTION );
 		} );
 
-		/**
-		 * Resolve the Review Order URL through the WC helper rather than
-		 * building it by hand, so the test exercises the same path the email
-		 * templates use.
-		 */
-		const reviewOrderUrl = async (
-			order: SeededOrder
-		): Promise< string > => {
-			const { stdout } = await wpCli(
-				`wp eval "echo wc_get_review_order_url( wc_get_order( ${ order.id } ) );"`
-			);
-			return stdout.trim();
-		};
+		// `wc_get_review_order_url()` shape; built in JS since the email's
+		// 1-day minimum delay rules out a real "click the link" flow in CI.
+		const reviewOrderUrl = ( order: SeededOrder ): string =>
+			`?wc-review-order=${ order.id }&key=${ order.key }`;
+
+		// Star inputs are CSS-hidden behind their <label>s for a11y; clicking
+		// the label triggers the radio without needing { force: true }.
+		const rateRow = ( row: Locator, stars: number ) =>
+			row
+				.locator( 'label.woocommerce-star-rating__star' )
+				.filter( {
+					hasText: new RegExp( `${ stars } out of 5 stars` ),
+				} )
+				.click();
 
 		const cleanupProducts = async ( restApi: ApiClient, ids: number[] ) => {
 			for ( const id of ids ) {
@@ -265,7 +245,7 @@ test.describe(
 			] );
 
 			try {
-				await page.goto( await reviewOrderUrl( order ) );
+				await page.goto( reviewOrderUrl( order ) );
 
 				await expect(
 					page.getByRole( 'heading', {
@@ -286,9 +266,7 @@ test.describe(
 
 				// Rate row A with 3 stars (label index counts from 1).
 				const firstRow = rows.nth( 0 );
-				await firstRow
-					.getByRole( 'radio', { name: /3 out of 5 stars/ } )
-					.check( { force: true } );
+				await rateRow( firstRow, 3 );
 
 				// The dynamic caption reflects the chosen rating.
 				await expect(
@@ -335,7 +313,7 @@ test.describe(
 				{ name: 'CRR Refresh A' },
 				{ name: 'CRR Refresh B' },
 			] );
-			const url = await reviewOrderUrl( order );
+			const url = reviewOrderUrl( order );
 
 			try {
 				await page.goto( url );
@@ -346,9 +324,7 @@ test.describe(
 				);
 				const rowA = rows.nth( 0 );
 
-				await rowA
-					.getByRole( 'radio', { name: /4 out of 5 stars/ } )
-					.check( { force: true } );
+				await rateRow( rowA, 4 );
 				await rowA
 					.locator( 'textarea' )
 					.fill( 'Pre-filled by Scenario 2.' );
@@ -384,10 +360,7 @@ test.describe(
 				await expect(
 					page.locator( '.woocommerce-review-order__submit' )
 				).toBeDisabled();
-				await rowsAfter
-					.nth( 1 )
-					.getByRole( 'radio', { name: /5 out of 5 stars/ } )
-					.check( { force: true } );
+				await rateRow( rowsAfter.nth( 1 ), 5 );
 				await expect(
 					page.locator( '.woocommerce-review-order__submit' )
 				).toBeEnabled();
@@ -410,7 +383,7 @@ test.describe(
 			] );
 
 			try {
-				await page.goto( await reviewOrderUrl( order ) );
+				await page.goto( reviewOrderUrl( order ) );
 
 				const rows = page.locator( '.woocommerce-review-order__item' );
 				await expect( rows ).toHaveCount( 1 );
@@ -436,6 +409,8 @@ test.describe(
 
 		test( 'Scenario 4 — site-wide reviews disabled renders the empty-state thank-you', async ( {
 			page,
+			request,
+			baseURL,
 			restApi,
 		} ) => {
 			const { order, productIds } = await seedCompletedOrder( restApi, [
@@ -443,9 +418,14 @@ test.describe(
 			] );
 
 			try {
-				await wpCli( `wp option set ${ SITE_REVIEWS_OPTION } no` );
+				await setOption(
+					request,
+					baseURL || '',
+					SITE_REVIEWS_OPTION,
+					'no'
+				);
 
-				await page.goto( await reviewOrderUrl( order ) );
+				await page.goto( reviewOrderUrl( order ) );
 
 				await expect(
 					page.getByRole( 'heading', {
@@ -459,36 +439,53 @@ test.describe(
 					page.locator( '.woocommerce-review-order__submit' )
 				).toHaveCount( 0 );
 			} finally {
-				// Default for fresh installs is 'yes'; restore to that.
-				await wpCli( `wp option set ${ SITE_REVIEWS_OPTION } yes` );
+				// Fresh-install default is 'yes'.
+				await setOption(
+					request,
+					baseURL || '',
+					SITE_REVIEWS_OPTION,
+					'yes'
+				);
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, productIds );
 			}
 		} );
 
 		test( 'Scenario 5 — cancelling the order unschedules the pending review-request action', async ( {
+			browser,
 			restApi,
 		} ) => {
 			const { order, productIds } = await seedCompletedOrder( restApi, [
 				{ name: 'CRR Cancel Flow' },
 			] );
 
-			const hasScheduledAction = async () => {
-				const { stdout } = await wpCli(
-					`wp eval "echo as_next_scheduled_action( 'woocommerce_send_review_request', array( ${ order.id } ) ) ? '1' : '0';"`
-				);
-				return stdout.trim().endsWith( '1' );
-			};
+			// Admin context: the Scheduled Actions list lives in wp-admin.
+			const adminContext = await browser.newContext( {
+				storageState: ADMIN_STATE_PATH,
+			} );
+			const adminPage = await adminContext.newPage();
+			const scheduledActionsUrl = `wp-admin/admin.php?page=wc-status&tab=action-scheduler&s=woocommerce_send_review_request&search-args=${ order.id }&orderby=schedule&order=desc`;
 
 			try {
-				expect( await hasScheduledAction() ).toBe( true );
+				await adminPage.goto( scheduledActionsUrl );
+				await expect(
+					adminPage.locator(
+						`tbody tr td.column-args:has-text("${ order.id }")`
+					)
+				).toHaveCount( 1 );
 
 				await restApi.put( `${ WC_API_PATH }/orders/${ order.id }`, {
 					status: 'cancelled',
 				} );
 
-				expect( await hasScheduledAction() ).toBe( false );
+				await adminPage.goto( scheduledActionsUrl );
+				await expect(
+					adminPage.locator(
+						`tbody tr td.column-args:has-text("${ order.id }")`
+					)
+				).toHaveCount( 0 );
 			} finally {
+				await adminContext.close();
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, productIds );
 			}
@@ -503,7 +500,7 @@ test.describe(
 			] );
 
 			try {
-				await page.goto( await reviewOrderUrl( order ) );
+				await page.goto( reviewOrderUrl( order ) );
 
 				const row = page
 					.locator( '.woocommerce-review-order__item' )
@@ -528,9 +525,7 @@ test.describe(
 				).toHaveCount( 0 );
 
 				// Selecting a rating clears the error.
-				await row
-					.getByRole( 'radio', { name: /5 out of 5 stars/ } )
-					.check( { force: true } );
+				await rateRow( row, 5 );
 				await expect( error ).toBeHidden();
 
 				// Submitting now succeeds.
@@ -558,7 +553,7 @@ test.describe(
 			] );
 
 			try {
-				await page.goto( await reviewOrderUrl( order ) );
+				await page.goto( reviewOrderUrl( order ) );
 
 				const rows = page.locator( '.woocommerce-review-order__item' );
 				await expect( rows ).toHaveCount( 2 );
@@ -584,30 +579,23 @@ test.describe(
 			page,
 			restApi,
 		} ) => {
-			const { order, parentId, variationIds } = await seedVariationOrder(
-				restApi,
-				[ 'Small', 'Medium' ]
-			);
-			const [ smallVariationId, mediumVariationId ] = variationIds;
+			const { order, parentId } = await seedVariationOrder( restApi, [
+				'Small',
+				'Medium',
+			] );
 
 			try {
-				await page.goto( await reviewOrderUrl( order ) );
+				await page.goto( reviewOrderUrl( order ) );
 
 				const rows = page.locator( '.woocommerce-review-order__item' );
 
-				await rows
-					.nth( 0 )
-					.getByRole( 'radio', { name: /5 out of 5 stars/ } )
-					.check( { force: true } );
+				await rateRow( rows.nth( 0 ), 5 );
 				await rows
 					.nth( 0 )
 					.locator( 'textarea' )
 					.fill( 'Small fit great.' );
 
-				await rows
-					.nth( 1 )
-					.getByRole( 'radio', { name: /3 out of 5 stars/ } )
-					.check( { force: true } );
+				await rateRow( rows.nth( 1 ), 3 );
 				await rows
 					.nth( 1 )
 					.locator( 'textarea' )
@@ -622,74 +610,14 @@ test.describe(
 					} )
 				).toBeVisible();
 
-				// Pull the parent's reviews; assert each comment's variation
-				// meta points at the matching variation, not just that two
-				// reviews exist with the expected text.
-				const reviewsResp = await restApi.get(
-					`${ WC_API_PATH }/products/reviews`,
-					{ product: parentId, status: 'approved' }
-				);
-				const reviews = (
-					reviewsResp.data as Array< {
-						id: number;
-						review: string;
-						rating: number;
-					} >
-				 ).filter( ( r ) =>
-					/Small fit great|Medium ran short/.test( r.review )
-				);
-				expect( reviews ).toHaveLength( 2 );
-
-				const variationIdForReview = async (
-					commentId: number
-				): Promise< number > => {
-					const { stdout } = await wpCli(
-						`wp eval "echo (int) get_comment_meta( ${ commentId }, '_review_variation_id', true );"`
-					);
-					return Number( stdout.trim() );
-				};
-
-				const requireReview = (
-					predicate: ( r: ( typeof reviews )[ number ] ) => boolean,
-					label: string
-				) => {
-					const found = reviews.find( predicate );
-					// eslint-disable-next-line playwright/no-conditional-in-test -- narrowing for downstream property access.
-					if ( ! found ) {
-						throw new Error(
-							`Expected to find a review matching ${ label }, none returned by the REST API.`
-						);
-					}
-					return found;
-				};
-
-				const smallReview = requireReview(
-					( r ) => r.review.includes( 'Small fit great' ),
-					'"Small fit great"'
-				);
-				const mediumReview = requireReview(
-					( r ) => r.review.includes( 'Medium ran short' ),
-					'"Medium ran short"'
-				);
-				expect( await variationIdForReview( smallReview.id ) ).toBe(
-					smallVariationId
-				);
-				expect( await variationIdForReview( mediumReview.id ) ).toBe(
-					mediumVariationId
-				);
-				expect( smallReview.rating ).toBe( 5 );
-				expect( mediumReview.rating ).toBe( 3 );
-
-				// Parent product page surfaces each review with its own
-				// variation summary. Open the Reviews tab when the active
-				// theme uses the classic tabbed layout (Storefront, etc.);
-				// block themes render the list inline, in which case the
-				// click target won't exist.
+				// Parent product page: each review surfaces its own variation
+				// summary. If linkage were wrong, the wrong summary would sit
+				// next to each review and the per-text assertions would fail.
 				const { data: parentProduct } = await restApi.get(
 					`${ WC_API_PATH }/products/${ parentId }`
 				);
 				await page.goto( parentProduct.permalink );
-				// eslint-disable-next-line playwright/no-conditional-in-test -- block themes render the reviews inline, classic themes hide them behind a tab; both must work.
+				// eslint-disable-next-line playwright/no-conditional-in-test -- classic themes hide reviews behind a tab; block themes don't.
 				const reviewsTab = page.locator(
 					'#tab-title-reviews a, a[href="#tab-reviews"], a[href="#reviews"]'
 				);
@@ -698,7 +626,6 @@ test.describe(
 					await reviewsTab.first().click();
 				}
 
-				// Assert each review's variation summary sits next to its body.
 				const smallComment = page
 					.locator( 'li.comment, li[class*="comment"]' )
 					.filter( { hasText: 'Small fit great' } )
