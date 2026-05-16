@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow X check digit in GTIN/ISBN field for valid ISBN-10 identifiers
