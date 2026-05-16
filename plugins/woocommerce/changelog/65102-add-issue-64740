@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add 'Auto-select local pickup tab' setting to Local Pickup settings to control which tab is shown by default on block checkout when no customer address is available and local pickup is enabled.
