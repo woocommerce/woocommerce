@@ -48,10 +48,10 @@ const FEATURE_FLAG_SELECTOR = `#${ FEATURE_FLAG_OPTION }`;
 const REVIEW_REQUEST_EMAIL_ENABLED_SELECTOR =
 	`#${ REVIEW_REQUEST_EMAIL_ENABLED_OPTION }`;
 const SITE_REVIEWS_SETTING_PATH = `${ WC_API_PATH }/settings/products/${ SITE_REVIEWS_OPTION }`;
-const REVIEW_ORDER_URL_API_PATH = './wp-json/e2e-order-reviews/review-order-url';
-const REVIEW_SCHEDULE_API_PATH = './wp-json/e2e-order-reviews/scheduled-action';
-const REVIEW_VARIATION_API_PATH =
-	'./wp-json/e2e-order-reviews/review-variation-id';
+const REVIEW_ORDER_HELPER_API_BASE_PATH = './wp-json/e2e-order-reviews';
+const REVIEW_ORDER_URL_API_PATH = `${ REVIEW_ORDER_HELPER_API_BASE_PATH }/review-order-url`;
+const REVIEW_SCHEDULE_API_PATH = `${ REVIEW_ORDER_HELPER_API_BASE_PATH }/scheduled-action`;
+const REVIEW_VARIATION_API_PATH = `${ REVIEW_ORDER_HELPER_API_BASE_PATH }/review-variation-id`;
 
 test.describe(
 	'Customer Review Request — Review Order page',
