@@ -16,10 +16,11 @@ class LocalPickupUtils {
 		$pickup_location_settings = get_option(
 			'woocommerce_pickup_location_settings',
 			[
-				'enabled'    => 'no',
-				'title'      => __( 'Pickup', 'woocommerce' ),
-				'cost'       => '',
-				'tax_status' => 'taxable',
+				'enabled'     => 'no',
+				'title'       => __( 'Pickup', 'woocommerce' ),
+				'cost'        => '',
+				'tax_status'  => 'taxable',
+				'default_tab' => 'yes',
 			]
 		);
 
@@ -35,14 +36,19 @@ class LocalPickupUtils {
 			$pickup_location_settings['cost'] = '';
 		}
 
+		if ( ! isset( $pickup_location_settings['default_tab'] ) ) {
+			$pickup_location_settings['default_tab'] = 'yes';
+		}
+
 		// Return settings as is if we're editing them.
 		if ( 'edit' === $context ) {
 			return $pickup_location_settings;
 		}
 
 		// All consumers of this turn it into a bool eventually. Doing it here removes the need for that.
-		$pickup_location_settings['enabled'] = wc_string_to_bool( $pickup_location_settings['enabled'] );
-		$pickup_location_settings['title']   = wc_clean( $pickup_location_settings['title'] );
+		$pickup_location_settings['enabled']     = wc_string_to_bool( $pickup_location_settings['enabled'] );
+		$pickup_location_settings['default_tab'] = wc_string_to_bool( $pickup_location_settings['default_tab'] );
+		$pickup_location_settings['title']       = wc_clean( $pickup_location_settings['title'] );
 
 		return $pickup_location_settings;
 	}

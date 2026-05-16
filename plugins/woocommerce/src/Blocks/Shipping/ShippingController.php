@@ -69,7 +69,8 @@ class ShippingController {
 			);
 		}
 		$this->asset_data_registry->add( 'shippingCostRequiresAddress', get_option( 'woocommerce_shipping_cost_requires_address', false ) === 'yes' );
-		$this->asset_data_registry->add( 'defaultCheckoutTab', get_option( 'woocommerce_default_checkout_tab', 'local_pickup' ) );
+		$local_pickup_settings = LocalPickupUtils::get_local_pickup_settings();
+		$this->asset_data_registry->add( 'defaultCheckoutTab', $local_pickup_settings['default_tab'] ?? true );
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_footer', array( $this, 'hydrate_client_settings' ), 0 );
@@ -238,23 +239,28 @@ class ShippingController {
 					'schema' => array(
 						'type'       => 'object',
 						'properties' => array(
-							'enabled'    => array(
+							'enabled'     => array(
 								'description' => __( 'If enabled, this method will appear on the block based checkout.', 'woocommerce' ),
 								'type'        => 'string',
 								'enum'        => array( 'yes', 'no' ),
 							),
-							'title'      => array(
+							'title'       => array(
 								'description' => __( 'This controls the title which the user sees during checkout.', 'woocommerce' ),
 								'type'        => 'string',
 							),
-							'tax_status' => array(
+							'tax_status'  => array(
 								'description' => __( 'If a cost is defined, this controls if taxes are applied to that cost.', 'woocommerce' ),
 								'type'        => 'string',
 								'enum'        => array( ProductTaxStatus::TAXABLE, ProductTaxStatus::NONE ),
 							),
-							'cost'       => array(
+							'cost'        => array(
 								'description' => __( 'Optional cost to charge for local pickup.', 'woocommerce' ),
 								'type'        => 'string',
+							),
+							'default_tab' => array(
+								'description' => __( 'If enabled, the local pickup tab will be selected by default when no customer address is available.', 'woocommerce' ),
+								'type'        => 'string',
+								'enum'        => array( 'yes', 'no' ),
 							),
 						),
 					),

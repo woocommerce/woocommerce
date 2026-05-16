@@ -28,6 +28,7 @@ export type ShippingMethodSettings = {
 	title: string;
 	tax_status: string;
 	cost: string;
+	default_tab: boolean;
 };
 
 export type ReadOnlySettings = {

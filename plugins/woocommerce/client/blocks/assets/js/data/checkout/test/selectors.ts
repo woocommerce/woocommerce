@@ -69,7 +69,7 @@ const shippingRate = generateShippingRate( {
 
 describe( 'prefersCollection selector', () => {
 	beforeEach( () => {
-		// Reset to default: getSetting('defaultCheckoutTab') returns 'shipping' (via fallback).
+		// Reset to default: getSetting('defaultCheckoutTab', true) returns true via fallback, preserves existing behavior.
 		getSetting.mockImplementation( ( key: string, fallback?: unknown ) => {
 			if ( key === 'collectableMethodIds' ) return [ 'pickup_location' ];
 			return fallback;
@@ -133,30 +133,29 @@ describe( 'prefersCollection selector', () => {
 				} );
 			} );
 
-			it( 'returns false when defaultCheckoutTab setting is "shipping"', () => {
+			it( 'returns false when defaultCheckoutTab setting is false', () => {
 				getSetting.mockImplementation(
 					( key: string, fallback?: unknown ) => {
 						if ( key === 'collectableMethodIds' )
 							return [ 'pickup_location' ];
-						if ( key === 'defaultCheckoutTab' ) return 'shipping';
+						if ( key === 'defaultCheckoutTab' ) return false;
 						return fallback;
 					}
 				);
 				expect( prefersCollection( undefinedState ) ).toBe( false );
 			} );
 
-			it( 'returns true when defaultCheckoutTab setting is absent (fallback to "local_pickup")', () => {
-				// Default mock: getSetting('defaultCheckoutTab', 'local_pickup') returns 'local_pickup' via fallback — preserves existing behavior.
+			it( 'returns true when defaultCheckoutTab setting is absent (fallback to true)', () => {
+				// Default mock: getSetting('defaultCheckoutTab', true) returns true via fallback — preserves existing behavior.
 				expect( prefersCollection( undefinedState ) ).toBe( true );
 			} );
 
-			it( 'returns true when defaultCheckoutTab setting is "local_pickup"', () => {
+			it( 'returns true when defaultCheckoutTab setting is true', () => {
 				getSetting.mockImplementation(
 					( key: string, fallback?: unknown ) => {
 						if ( key === 'collectableMethodIds' )
 							return [ 'pickup_location' ];
-						if ( key === 'defaultCheckoutTab' )
-							return 'local_pickup';
+						if ( key === 'defaultCheckoutTab' ) return true;
 						return fallback;
 					}
 				);

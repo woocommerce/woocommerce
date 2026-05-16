@@ -133,6 +133,7 @@ export const SettingsProvider = ( {
 					? settings.tax_status
 					: 'taxable',
 				cost: settings.cost,
+				default_tab: settings.default_tab ? 'yes' : 'no',
 			},
 			pickup_locations: pickupLocations.map( ( location ) => ( {
 				name: location.name,

@@ -30,6 +30,7 @@ export const defaultSettings = {
 	title: __( 'Pickup', 'woocommerce' ),
 	tax_status: 'taxable',
 	cost: '',
+	default_tab: true,
 };
 
 export const defaultReadyOnlySettings = {
@@ -44,6 +45,7 @@ declare global {
 			title: string;
 			tax_status: string;
 			cost: string;
+			default_tab: boolean;
 		};
 		pickupLocations: PickupLocation[];
 		readonlySettings: typeof defaultReadyOnlySettings;
@@ -61,6 +63,10 @@ export const getInitialSettings = (): ShippingMethodSettings => {
 		title: settings?.title || defaultSettings.title,
 		tax_status: settings?.tax_status || defaultSettings.tax_status,
 		cost: settings?.cost || defaultSettings.cost,
+		default_tab:
+			typeof settings?.default_tab === 'boolean'
+				? settings.default_tab
+				: defaultSettings.default_tab,
 	};
 };
 

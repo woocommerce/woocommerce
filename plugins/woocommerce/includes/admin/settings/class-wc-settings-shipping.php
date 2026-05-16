@@ -167,20 +167,6 @@ class WC_Settings_Shipping extends WC_Settings_Page {
 				),
 
 				array(
-					'title'    => __( 'Default checkout tab', 'woocommerce' ),
-					'desc'     => __( 'Choose which tab is selected by default on block checkout when no customer address context is available and local pickup is enabled.', 'woocommerce' ),
-					'id'       => 'woocommerce_default_checkout_tab',
-					'type'     => 'select',
-					'class'    => 'wc-enhanced-select',
-					'default'  => 'local_pickup',
-					'options'  => array(
-						'shipping'     => __( 'Shipping', 'woocommerce' ),
-						'local_pickup' => __( 'Local pickup', 'woocommerce' ),
-					),
-					'autoload' => false,
-				),
-
-				array(
 					'type' => 'sectionend',
 					'id'   => 'shipping_options',
 				),

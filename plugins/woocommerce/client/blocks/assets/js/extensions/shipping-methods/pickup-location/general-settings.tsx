@@ -163,6 +163,19 @@ const GeneralSettings = () => {
 						/>
 					</>
 				) : null }
+				<CheckboxControl
+					checked={ settings.default_tab }
+					name="local_pickup_default_tab"
+					onChange={ setSettingField( 'default_tab' ) }
+					label={ __(
+						'Auto-select local pickup tab',
+						'woocommerce'
+					) }
+					help={ __(
+						'When enabled, the local pickup tab will be selected by default when no customer shipping address has been entered.',
+						'woocommerce'
+					) }
+				/>
 			</SettingsCard>
 		</SettingsSection>
 	);
