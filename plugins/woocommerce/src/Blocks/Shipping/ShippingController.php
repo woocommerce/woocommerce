@@ -70,7 +70,7 @@ class ShippingController {
 		}
 		$this->asset_data_registry->add( 'shippingCostRequiresAddress', get_option( 'woocommerce_shipping_cost_requires_address', false ) === 'yes' );
 		$local_pickup_settings = LocalPickupUtils::get_local_pickup_settings();
-		$this->asset_data_registry->add( 'defaultCheckoutTab', $local_pickup_settings['default_tab'] ?? true );
+		$this->asset_data_registry->add( 'defaultCheckoutTab', $local_pickup_settings['default_tab'] );
 		add_action( 'rest_api_init', array( $this, 'register_settings' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ) );
 		add_action( 'admin_footer', array( $this, 'hydrate_client_settings' ), 0 );
