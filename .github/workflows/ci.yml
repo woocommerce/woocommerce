@@ -1,8 +1,6 @@
 name: 'CI'
 on:
   pull_request:
-    # Include label changes so `run: full ci` updates can refresh required checks immediately.
-    types: [opened, synchronize, reopened, labeled, unlabeled]
   push:
     paths:
       - '**'
