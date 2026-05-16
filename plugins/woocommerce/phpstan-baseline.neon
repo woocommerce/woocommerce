@@ -33358,12 +33358,6 @@ parameters:
 			path: includes/walkers/class-wc-product-cat-list-walker.php
 
 		-
-			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1

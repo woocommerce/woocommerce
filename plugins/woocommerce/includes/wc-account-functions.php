@@ -299,6 +299,10 @@ function wc_get_account_orders_actions( $order ) {
 		$order    = wc_get_order( $order_id );
 	}
 
+	if ( ! $order instanceof WC_Order ) {
+		return array();
+	}
+
 	$actions = array(
 		'pay'    => array(
 			'url'        => $order->get_checkout_payment_url(),
@@ -340,7 +344,7 @@ function wc_get_account_orders_actions( $order ) {
 	/**
 	 * Filters the actions available for an order on the My Account orders list.
 	 *
-	 * @since 3.2.0
+	 * @since 2.0.0
 	 *
 	 * @param array    $actions Array of order actions, keyed by action slug. Each action is an array with 'url' and 'name' keys.
 	 * @param WC_Order $order   Order instance.
