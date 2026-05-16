@@ -136,3 +136,6 @@ CLAUDE.local.md
 
 # Docusaurus
 .docusaurus
+
+# Visual PR review skill (generated per-session, not committed)
+.ai/skills/visual-pr-review/
