@@ -111,8 +111,10 @@ export const prefersCollection = ( state: CheckoutState ) => {
 			if ( hasCollectableRate( selectedRate?.method_id ) ) {
 				// Server pre-selected a pickup rate. Respect the merchant's tab preference.
 				return (
-					getSetting< string >( 'defaultCheckoutTab', 'local_pickup' ) ===
-					'local_pickup'
+					getSetting< string >(
+						'defaultCheckoutTab',
+						'local_pickup'
+					) === 'local_pickup'
 				);
 			}
 			return false;
