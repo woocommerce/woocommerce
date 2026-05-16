@@ -497,24 +497,42 @@ function wc_get_chosen_shipping_method_for_package( $key, $package ) {
 function wc_get_default_shipping_method_for_package( $key, $package, $chosen_method ) {
 	$rate_keys               = array_keys( $package['rates'] );
 	$local_pickup_method_ids = LocalPickupUtils::get_local_pickup_method_ids();
+	$local_pickup_settings   = LocalPickupUtils::get_local_pickup_settings();
+	$prefers_pickup_default  = ! empty( $local_pickup_settings['default_tab'] );
 
-	if ( 'shortcode' === WC()->cart->cart_context ) {
+	// Block cart/checkout runs shipping calc during server-side render where cart_context is still 'shortcode'.
+	// Route block-based stores through the default-tab-aware path regardless of cart_context.
+	$is_block_based                = CartCheckoutUtils::is_cart_block_default() || CartCheckoutUtils::is_checkout_block_default();
+	$use_legacy_first_rate_default = 'shortcode' === WC()->cart->cart_context && ! $is_block_based;
+
+	if ( $use_legacy_first_rate_default ) {
 		$default = current( $rate_keys );
 	} else {
-		// No default means that when you enter block checkout, shipping is chosen rather than pickup. We should only do this if there are shipping methods available other than local pickup.
-		$default = CartCheckoutUtils::shipping_methods_exist() ? '' : current( $rate_keys );
+		$default = '';
 
-		// Default to the first method in the package that isn't a local pickup method.
-		foreach ( $rate_keys as $rate_key ) {
-			$rate_method_id = current( explode( ':', $rate_key ) );
-			if ( ! in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
-				$default = $rate_key;
-				break;
+		if ( $prefers_pickup_default ) {
+			// Merchant opted in: prefer the first local pickup rate as the default.
+			foreach ( $rate_keys as $rate_key ) {
+				$rate_method_id = current( explode( ':', $rate_key ) );
+				if ( in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
+					$default = $rate_key;
+					break;
+				}
 			}
 		}
 
-		// When shipping costs are hidden until an address is entered, don't auto-select pickup as the default.
-		// Without this, pickup gets silently selected because it's the only remaining rate after filtering.
+		if ( '' === $default ) {
+			// Otherwise prefer the first non-pickup rate.
+			foreach ( $rate_keys as $rate_key ) {
+				$rate_method_id = current( explode( ':', $rate_key ) );
+				if ( ! in_array( $rate_method_id, $local_pickup_method_ids, true ) ) {
+					$default = $rate_key;
+					break;
+				}
+			}
+		}
+
+		// Don't auto-select pickup when shipping rates are hidden pending an address.
 		if (
 			'' === $default
 			&& 'yes' === get_option( 'woocommerce_shipping_cost_requires_address' )
@@ -533,18 +551,13 @@ function wc_get_default_shipping_method_for_package( $key, $package, $chosen_met
 		}
 	}
 
-	/**
-	 * If the customer has selected local pickup, keep it selected if it's still in the package. We don't want to auto
-	 * toggle between shipping and pickup even if available shipping methods are changed.
-	 *
-	 * This is important for block-based checkout where there is an explicit toggle between shipping and pickup.
-	 */
+	// Keep a previously-chosen local pickup rate only when the merchant has it as the default tab,
+	// so an auto-defaulted pickup doesn't override a "default to shipping" preference on reload.
 	$chosen_method_id       = current( explode( ':', $chosen_method ) );
 	$chosen_method_exists   = in_array( $chosen_method, $rate_keys, true );
 	$is_local_pickup_chosen = in_array( $chosen_method_id, $local_pickup_method_ids, true );
 
-	// Default to local pickup if its chosen already.
-	if ( $chosen_method_exists && $is_local_pickup_chosen ) {
+	if ( $chosen_method_exists && $is_local_pickup_chosen && $prefers_pickup_default ) {
 		$default = $chosen_method;
 
 	} else {
