@@ -100,6 +100,11 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			{ isSelected ? (
 				<div { ...innerBlocksProps } />
 			) : (
+				// We don't need these elements to be interactive with the
+				// keyboard because the first attribute blocks are always
+				// editable. We allow clicking on the blocks of other attributes
+				// but it's not critical, so we disable the keyboard events.
+				// eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions
 				<div
 					{ ...blockPreviewProps }
 					tabIndex={ 0 }

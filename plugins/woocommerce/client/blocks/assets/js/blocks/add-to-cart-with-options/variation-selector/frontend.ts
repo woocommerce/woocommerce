@@ -6,7 +6,6 @@ import {
 	getContext,
 	getConfig,
 	getElement,
-	getServerContext,
 } from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import '@woocommerce/stores/woocommerce/products';
