@@ -12,6 +12,7 @@
 use Automattic\Jetpack\Constants;
 use Automattic\WooCommerce\Admin\Features\Features;
 use Automattic\WooCommerce\Enums\DefaultCustomerAddress;
+use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\AddressProvider\AddressProviderController;
 
 if ( ! defined( 'ABSPATH' ) ) {
@@ -56,6 +57,7 @@ class WC_Frontend_Scripts {
 		add_action( 'wp_enqueue_scripts', array( __CLASS__, 'load_scripts' ) );
 		add_action( 'wp_print_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
 		add_action( 'wp_print_footer_scripts', array( __CLASS__, 'localize_printed_scripts' ), 5 );
+		add_action( 'wp_print_scripts', array( __CLASS__, 'attach_variation_gallery_defaults' ), 5 );
 		add_action( 'enqueue_block_assets', array( __CLASS__, 'enqueue_block_assets' ) );
 	}
 
@@ -827,6 +829,39 @@ class WC_Frontend_Scripts {
 		foreach ( self::$registered_scripts as $handle ) {
 			self::localize_script( $handle );
 		}
+	}
+
+	/**
+	 * Attach the pristine product image gallery snapshot to the variation script.
+	 *
+	 * Read by `wc_get_default_product_gallery_html` in
+	 * `add-to-cart-variation.js` so the classic variation form's reset path
+	 * has a snapshot to restore.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return void
+	 */
+	public static function attach_variation_gallery_defaults() {
+		if ( ! wp_script_is( 'wc-add-to-cart-variation' ) || ! is_product() ) {
+			return;
+		}
+
+		$product = wc_get_product( get_queried_object_id() );
+
+		if ( ! $product instanceof WC_Product || ! $product->is_type( ProductType::VARIABLE ) ) {
+			return;
+		}
+
+		wp_add_inline_script(
+			'wc-add-to-cart-variation',
+			sprintf(
+				'(window.wc_variation_gallery_defaults = window.wc_variation_gallery_defaults || {})[%d] = %s;',
+				$product->get_id(),
+				wp_json_encode( wc_get_product_gallery_html( $product ) )
+			),
+			'before'
+		);
 	}
 }
 

@@ -879,15 +879,12 @@
 	/**
 	 * Get the default product gallery HTML used for restoring classic templates.
 	 *
-	 * Reads from the PHP-rendered snapshot embedded in the form
-	 * (`<script class="wc-product-gallery-default-template">`). The snapshot
-	 * is frozen at page render time, so no caching is needed.
+	 * Reads from `window.wc_variation_gallery_defaults`, populated from `wc-add-to-cart-variation` script.
 	 */
 	$.fn.wc_get_default_product_gallery_html = function () {
-		var $template = $( this ).find(
-			'.wc-product-gallery-default-template'
-		);
-		return $template.length ? $.trim( $template.html() ) : '';
+		var productId = $( this ).data( 'product_id' );
+		var defaults = window.wc_variation_gallery_defaults || {};
+		return defaults[ productId ] || '';
 	};
 
 	/**
