@@ -31,7 +31,6 @@ type SeededOrder = {
 
 const FEATURE_FLAG_OPTION =
 	'woocommerce_feature_customer_review_request_enabled';
-const SITE_REVIEWS_OPTION = 'woocommerce_enable_reviews';
 
 test.describe(
 	'Customer Review Request — Review Order page',
@@ -57,6 +56,14 @@ test.describe(
 				{ data: { _fields: [ 'id', 'link' ] } }
 			);
 			hostPagePermalink = data?.[ 0 ]?.link || '';
+
+			// Surface the host-page creation race as a clear setup failure
+			// instead of letting every scenario fail with a confusing 404.
+			if ( ! hostPagePermalink ) {
+				throw new Error(
+					'Review Order host page was not created after enabling the feature flag.'
+				);
+			}
 		} );
 
 		test.afterAll( async ( { baseURL } ) => {
@@ -432,23 +439,19 @@ test.describe(
 			}
 		} );
 
-		test( 'Scenario 4 — site-wide reviews disabled renders the empty-state thank-you', async ( {
+		test( 'Scenario 4 — order with no reviewable items renders the empty-state thank-you', async ( {
 			page,
-			baseURL,
 			restApi,
 		} ) => {
+			// All items have reviews_allowed:false → has_actionable_items()
+			// returns false → empty-state renders. Same template branch the
+			// site-wide-reviews-disabled gate hits, without mutating a global
+			// option that could leak into other tests if this one times out.
 			const { order, productIds } = await seedCompletedOrder( restApi, [
-				{ name: 'CRR Site-wide Off' },
+				{ name: 'CRR No Reviews', reviews_allowed: false },
 			] );
 
 			try {
-				await setOption(
-					request,
-					baseURL || '',
-					SITE_REVIEWS_OPTION,
-					'no'
-				);
-
 				await page.goto( reviewOrderUrl( order ) );
 
 				await expect(
@@ -463,13 +466,6 @@ test.describe(
 					page.locator( '.woocommerce-review-order__submit' )
 				).toHaveCount( 0 );
 			} finally {
-				// Fresh-install default is 'yes'.
-				await setOption(
-					request,
-					baseURL || '',
-					SITE_REVIEWS_OPTION,
-					'yes'
-				);
 				await cleanupOrder( restApi, order.id );
 				await cleanupProducts( restApi, productIds );
 			}
