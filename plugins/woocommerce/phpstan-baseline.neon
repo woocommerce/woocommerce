@@ -14119,12 +14119,6 @@ parameters:
 			path: includes/class-wc-product-variable.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wc_get_product_attachment_props expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-product-variable.php
-
-		-
 			message: '#^Parameter \#1 \$dimensions of function wc_format_dimensions expects array, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
