@@ -65,10 +65,12 @@ class VariationSelectorAttribute extends AbstractBlock {
 			return '';
 		}
 
-		$all_attribute_terms = $this->get_terms( $attribute_name, $product_attribute_terms );
-		$attribute_slug      = wc_variation_attribute_name( $attribute_name );
-		$available_values    = $available_values_by_attribute[ $attribute_slug ] ?? array();
-		$attribute_terms     = $this->filter_terms_by_available_variations( $all_attribute_terms, $available_values );
+		$attribute_slug  = wc_variation_attribute_name( $attribute_name );
+		$attribute_terms = $this->get_filtered_attribute_terms(
+			$attribute_name,
+			$product_attribute_terms,
+			$available_values_by_attribute[ $attribute_slug ] ?? array()
+		);
 
 		if ( empty( $attribute_terms ) ) {
 			return '';
@@ -123,9 +125,41 @@ class VariationSelectorAttribute extends AbstractBlock {
 	}
 
 	/**
+	 * Build filtered attribute term options for the variation selector.
+	 *
+	 * @param string $attribute_name Product attribute name.
+	 * @param array  $product_attribute_terms Custom attribute terms when not a taxonomy.
+	 * @param array  $available_values Available variation values for this attribute (value => true).
+	 * @return array Attribute terms, or empty string when none match.
+	 */
+	private function get_filtered_attribute_terms( string $attribute_name, array $product_attribute_terms, array $available_values ) {
+		global $product;
+
+		$selected_attribute = $product->get_variation_default_attribute( $attribute_name );
+		$terms              = taxonomy_exists( $attribute_name )
+			? wc_get_product_terms( $product->get_id(), $attribute_name, array( 'fields' => 'all' ) )
+			: $product_attribute_terms;
+
+		$attribute_terms = array();
+		if ( ! empty( $available_values ) ) {
+			$allows_any_value = isset( $available_values[''] );
+
+			foreach ( $terms as $term ) {
+				$option = $this->map_term_to_option( $term, $attribute_name, $product, $selected_attribute );
+
+				if ( $allows_any_value || isset( $available_values[ $option['value'] ] ) ) {
+					$attribute_terms[] = $option;
+				}
+			}
+		}
+
+		return $attribute_terms;
+	}
+
+	/**
 	 * Build a lookup of attribute values used by available variations.
 	 *
-	 * @return array<string, array<string, true>> Map of attribute slug to set of values (keys are values).
+	 * @return array Map of attribute slug to set of values (keys are values).
 	 */
 	private function get_available_variation_values_by_attribute_slug(): array {
 		global $product;
@@ -143,36 +177,10 @@ class VariationSelectorAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Filter attribute terms to those available in at least one variation.
-	 *
-	 * @param array $attribute_terms Attribute term options.
-	 * @param array $available_values Variation values keyed by attribute slug.
-	 * @return array<int, array<string, mixed>>
-	 */
-	private function filter_terms_by_available_variations( array $attribute_terms, array $available_values ): array {
-		if ( empty( $available_values ) ) {
-			return array();
-		}
-
-		$allows_any_value = isset( $available_values[''] );
-
-		return array_filter(
-			$attribute_terms,
-			function ( $term ) use ( $available_values, $allows_any_value ) {
-				if ( $allows_any_value ) {
-					return true;
-				}
-
-				return isset( $available_values[ $term['value'] ] );
-			}
-		);
-	}
-
-	/**
 	 * Resolve display style based on block attributes, supporting the legacy
 	 * `optionStyle` attribute.
 	 *
-	 * @param array<string, mixed> $attributes Block attributes.
+	 * @param array $attributes Block attributes.
 	 * @return string Resolved display style block name.
 	 */
 	private function resolve_display_style( array $attributes ): string {
@@ -221,7 +229,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 	 *
 	 * @param string $attribute_slug Attribute slug.
 	 * @param array  $attribute_terms Terms from context.
-	 * @return array<int, array<string, mixed>>
+	 * @return array
 	 */
 	private function build_variation_selectable_items( string $attribute_slug, array $attribute_terms ): array {
 		$id_prefix = sanitize_title( $attribute_slug );
@@ -245,53 +253,25 @@ class VariationSelectorAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Get product attributes terms.
-	 *
-	 * @param string $attribute_name Product Attribute Name.
-	 * @param array  $attribute_terms Product Attribute Terms.
-	 * @return array[] Array of term data with structure:
-	 *                 [
-	 *                     'label'      => (string) Display label for the term.
-	 *                     'value'      => (string) Internal value/slug for the term.
-	 *                     'isSelected' => (bool)   Whether this term is the default selection.
-	 *                 ]
-	 */
-	protected function get_terms( string $attribute_name, array $attribute_terms ): array {
-		global $product;
-
-		$is_taxonomy        = taxonomy_exists( $attribute_name );
-		$selected_attribute = $product->get_variation_default_attribute( $attribute_name );
-		$terms              = $is_taxonomy
-			? wc_get_product_terms( $product->get_id(), $attribute_name, array( 'fields' => 'all' ) )
-			: $attribute_terms;
-
-		return array_map(
-			function ( $term ) use ( $attribute_name, $product, $selected_attribute, $is_taxonomy ) {
-				return $this->map_term_to_option( $term, $is_taxonomy, $attribute_name, $product, $selected_attribute );
-			},
-			$terms
-		);
-	}
-
-	/**
 	 * Map a taxonomy term or custom attribute option to the variation row option shape.
 	 *
 	 * @param \WP_Term|string $term Term object for taxonomies, option string for custom attributes.
-	 * @param bool            $is_taxonomy Whether the attribute is a taxonomy.
 	 * @param string          $attribute_name Name of the attribute.
 	 * @param \WC_Product     $product Product object.
 	 * @param string          $selected_attribute Default selected attribute value.
-	 * @return array{label: string, value: string, isSelected: bool}
+	 * @return array
 	 */
-	private function map_term_to_option( $term, bool $is_taxonomy, string $attribute_name, \WC_Product $product, string $selected_attribute ): array {
-		if ( $is_taxonomy ) {
+	private function map_term_to_option( $term, string $attribute_name, \WC_Product $product, string $selected_attribute ): array {
+		if ( $term instanceof \WP_Term ) {
 			$value       = $term->slug;
 			$label       = $term->name;
 			$filter_item = $term;
-		} else {
+		} elseif ( is_string( $term ) ) {
 			$value       = $term;
 			$label       = $term;
 			$filter_item = null;
+		} else {
+			return array();
 		}
 
 		return array(
