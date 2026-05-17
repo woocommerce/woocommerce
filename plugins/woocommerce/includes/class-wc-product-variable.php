@@ -437,9 +437,6 @@ class WC_Product_Variable extends WC_Product {
 		// Multi-image variation galleries are gated on the feature flag.
 		// Check on the feature flag to be removed when feature is rolled out.
 		if ( VariationGalleryPackage::is_enabled() ) {
-			// Filter out stale attachment IDs (variation meta can point at
-			// deleted/missing attachments). Variations with no valid extras
-			// fall through to the featured-only swap path on the frontend.
 			$variation_gallery_image_ids = array_values(
 				array_filter(
 					array_map( 'intval', $variation->get_gallery_image_ids() ),
