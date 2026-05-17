@@ -80,4 +80,25 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( $this->structured_data->prepare_gtin( '+12345678' ), '12345678' );
 		$this->assertEquals( $this->structured_data->prepare_gtin( '123.4e-5' ), '12345' );
 	}
+
+	/**
+	 * Test simple product offer structured data includes offer-level price currency.
+	 *
+	 * @return void
+	 */
+	public function test_simple_product_offer_includes_offer_level_price_currency(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '97' );
+		$product->set_price( '97' );
+		$product->save();
+
+		$this->structured_data->generate_product_data( $product );
+
+		$data  = $this->structured_data->get_data();
+		$offer = $data[0]['offers'][0];
+
+		$this->assertEquals( '97.00', $offer['price'] );
+		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
+		$this->assertEquals( get_woocommerce_currency(), $offer['priceSpecification'][0]['priceCurrency'] );
+	}
 }
