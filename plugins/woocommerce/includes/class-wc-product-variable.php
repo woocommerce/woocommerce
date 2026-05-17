@@ -418,6 +418,19 @@ class WC_Product_Variable extends WC_Product {
 			return false;
 		}
 
+		$variation_featured_id    = (int) $variation->get_image_id();
+		$variation_featured_valid = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
+		$parent_featured_id       = (int) $this->get_image_id();
+		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
+
+		if ( $variation_featured_valid ) {
+			$resolved_image_id = $variation_featured_id;
+		} elseif ( $parent_featured_valid ) {
+			$resolved_image_id = $parent_featured_id;
+		} else {
+			$resolved_image_id = 0;
+		}
+
 		$variation_gallery_image_ids = array();
 		$variation_gallery_html      = '';
 
@@ -435,13 +448,10 @@ class WC_Product_Variable extends WC_Product {
 			);
 
 			if ( ! empty( $variation_gallery_image_ids ) ) {
-				$variation_featured_id = (int) $variation->get_image_id();
-				$valid_featured        = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
-
 				$variation_gallery_html = wc_get_product_gallery_html(
 					$this,
 					array_merge(
-						$valid_featured ? array( $variation_featured_id ) : array(),
+						$variation_featured_valid ? array( $variation_featured_id ) : array(),
 						$variation_gallery_image_ids
 					)
 				);
@@ -463,8 +473,8 @@ class WC_Product_Variable extends WC_Product {
 				'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
 				'gallery_image_ids'     => $variation_gallery_image_ids,
 				'gallery_images_html'   => $variation_gallery_html,
-				'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
-				'image_id'              => $variation->get_image_id(),
+				'image'                 => wc_get_product_attachment_props( $resolved_image_id ),
+				'image_id'              => $resolved_image_id,
 				'is_downloadable'       => $variation->is_downloadable(),
 				'is_in_stock'           => $variation->is_in_stock(),
 				'is_purchasable'        => $variation->is_purchasable(),

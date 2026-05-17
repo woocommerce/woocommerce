@@ -195,6 +195,11 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 			),
 		);
 
+		update_post_meta( $image_id, '_wp_attached_file', 'variation-featured.jpg' );
+		foreach ( $image_ids as $i => $vgid ) {
+			update_post_meta( $vgid, '_wp_attached_file', 'variation-gallery-' . ( $i + 1 ) . '.jpg' );
+		}
+
 		$variation->set_image_id( $image_id );
 		$variation->set_gallery_image_ids( $image_ids );
 		$variation->save();
@@ -236,6 +241,11 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 				)
 			),
 		);
+
+		update_post_meta( $image_id, '_wp_attached_file', 'variation-featured.jpg' );
+		foreach ( $image_ids as $i => $vgid ) {
+			update_post_meta( $vgid, '_wp_attached_file', 'variation-gallery-' . ( $i + 1 ) . '.jpg' );
+		}
 
 		$variation->set_image_id( $image_id );
 		$variation->set_gallery_image_ids( $image_ids );
