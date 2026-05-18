@@ -6,5 +6,4 @@ import { __ } from '@wordpress/i18n';
 export default {
 	name: 'woocommerce/store-activity',
 	title: __( 'Store activity', 'woocommerce' ),
-	icon: 'list-view',
 };
