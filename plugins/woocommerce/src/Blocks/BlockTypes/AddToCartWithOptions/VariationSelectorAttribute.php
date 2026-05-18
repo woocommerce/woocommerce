@@ -105,13 +105,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 			'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
 		);
 
-		$display_style = $this->resolve_display_style( $attributes );
-		if ( 'woocommerce/dropdown' !== $display_style ) {
-			$interactive_attributes['role']            = 'radiogroup';
-			$interactive_attributes['id']              = $attribute_id;
-			$interactive_attributes['aria-labelledby'] = $attribute_id . '_label';
-		}
-
 		$inner_html = '';
 		foreach ( $inner_blocks as $inner_block ) {
 			$inner_html .= ( new WP_Block( $inner_block, $context ) )->render();
@@ -178,25 +171,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Resolve display style based on block attributes, supporting the legacy
-	 * `optionStyle` attribute.
-	 *
-	 * @param array $attributes Block attributes.
-	 * @return string Resolved display style block name.
-	 */
-	private function resolve_display_style( array $attributes ): string {
-		if ( array_key_exists( 'displayStyle', $attributes ) ) {
-			return (string) $attributes['displayStyle'];
-		}
-		if ( array_key_exists( 'optionStyle', $attributes ) ) {
-			return 'dropdown' === $attributes['optionStyle']
-				? 'woocommerce/dropdown'
-				: 'woocommerce/product-filter-chips';
-		}
-		return 'woocommerce/product-filter-chips';
-	}
-
-	/**
 	 * Get the default selected attribute.
 	 *
 	 * @param string $attribute_slug The attribute's slug.
@@ -228,9 +202,9 @@ class VariationSelectorAttribute extends AbstractBlock {
 	/**
 	 * Build selectable items for the inner block protocol and client context.
 	 *
-	 * @param string $attribute_slug Attribute slug.
-	 * @param array  $attribute_terms Terms from context.
-	 * @param string $default_selected Default selected attribute value.
+	 * @param string      $attribute_slug Attribute slug.
+	 * @param array       $attribute_terms Terms from context.
+	 * @param string|null $default_selected Default selected attribute value.
 	 * @return array
 	 */
 	private function build_variation_selectable_items( string $attribute_slug, array $attribute_terms, string $default_selected ): array {

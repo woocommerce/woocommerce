@@ -54,7 +54,10 @@ final class Dropdown extends AbstractBlock {
 			return '';
 		}
 
-		$select_id = wp_unique_id( 'wc-block-dropdown-' );
+		$attribute_id = $block->context['woocommerce/attributeId'] ?? '';
+		$select_id    = is_string( $attribute_id ) && '' !== $attribute_id
+			? $attribute_id
+			: wp_unique_id( 'wc-block-dropdown-' );
 
 		$wrapper_attributes = array(
 			'data-wp-interactive' => 'woocommerce/dropdown',
