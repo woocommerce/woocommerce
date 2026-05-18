@@ -45,6 +45,38 @@ class Loader {
 		add_action( 'init', array( self::class, 'register_widget_types' ), 11 );
 		add_filter( 'dashboard-wp-admin_boot_dependencies', array( self::class, 'add_init_module_to_boot_deps' ) );
 		add_filter( 'dashboard-wp-admin_boot_dependencies', array( self::class, 'add_widget_modules_to_boot_deps' ) );
+		add_action( 'admin_enqueue_scripts', array( self::class, 'enqueue_init_module_evaluator' ), 20 );
+	}
+
+	/**
+	 * Forces the core-dashboard init module to actually run on the dashboard
+	 * page.
+	 *
+	 * wp-build's `pages/dashboard/loader.js` is an empty module — its
+	 * `boot_dependencies` are preloaded via the import map but never imported,
+	 * so their top-level code never executes. We piggyback on the dashboard
+	 * prerequisites inline script (which is where Gutenberg dispatches
+	 * `@wordpress/boot`) to add a dynamic import that evaluates the module
+	 * and runs its `addFilter` side effects.
+	 *
+	 * @param string $hook_suffix Current admin page hook suffix.
+	 */
+	public static function enqueue_init_module_evaluator( string $hook_suffix ): void {
+		$current_screen   = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+		$requested_page   = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$is_dashboard_page = (
+			'dashboard-wp-admin' === $requested_page ||
+			( $current_screen && 'dashboard' === $current_screen->id )
+		);
+
+		if ( ! $is_dashboard_page ) {
+			return;
+		}
+
+		wp_add_inline_script(
+			'dashboard-wp-admin-prerequisites',
+			'import("@woocommerce/core-dashboard-init");'
+		);
 	}
 
 	/**
