@@ -26,8 +26,8 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 				'post_mime_type' => 'image/jpeg',
 			)
 		);
-		update_post_meta( $image_id, '_wp_attached_file', 'main.jpg' );
 		$variable_product->set_image_id( $image_id );
+		update_post_meta( $image_id, '_wp_attached_file', 'product-featured.jpg' );
 
 		// Create a variation image but don't add it to the gallery.
 		$variation_image_id = wp_insert_attachment(
@@ -64,11 +64,11 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 				)
 			),
 		);
-		foreach ( $gallery_image_ids as $i => $gid ) {
-			update_post_meta( $gid, '_wp_attached_file', 'gallery-' . ( $i + 1 ) . '.jpg' );
-		}
 		$variable_product->set_gallery_image_ids( $gallery_image_ids );
 		$variable_product->save();
+		foreach ( $gallery_image_ids as $i => $gallery_image_id ) {
+			update_post_meta( $gallery_image_id, '_wp_attached_file', 'product-gallery-' . ( $i + 1 ) . '.jpg' );
+		}
 
 		$variation_gallery_image_ids = array(
 			wp_insert_attachment(
@@ -86,8 +86,8 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 				)
 			),
 		);
-		foreach ( $variation_gallery_image_ids as $i => $vgid ) {
-			update_post_meta( $vgid, '_wp_attached_file', 'variation-gallery-' . ( $i + 1 ) . '.jpg' );
+		foreach ( $variation_gallery_image_ids as $i => $variation_gallery_image_id ) {
+			update_post_meta( $variation_gallery_image_id, '_wp_attached_file', 'variation-gallery-' . ( $i + 1 ) . '.jpg' );
 		}
 
 		if ( isset( $variation ) ) {
@@ -174,5 +174,58 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 
 		$this->assertSame( $variation_image_id, $variation_entry['image_id'] );
 		$this->assertSame( array( $variation_image_id ), $variation_entry['image_ids'] );
+	}
+
+	/**
+	 * Test that variation gallery data falls back to the parent featured image when the variation featured image is stale.
+	 */
+	public function test_get_product_variation_gallery_data_falls_back_to_parent_featured_when_variation_featured_is_stale() {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+
+		$variable_product   = \WC_Helper_Product::create_variation_product();
+		$parent_featured_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Parent Featured Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$stale_featured_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Stale Variation Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$variation_gallery_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Variation Gallery Image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+
+		update_post_meta( $parent_featured_id, '_wp_attached_file', 'parent-featured.jpg' );
+		update_post_meta( $stale_featured_id, '_wp_attached_file', 'stale-featured.jpg' );
+		update_post_meta( $variation_gallery_id, '_wp_attached_file', 'variation-gallery.jpg' );
+
+		$variable_product->set_image_id( $parent_featured_id );
+		$variable_product->save();
+
+		$variation = wc_get_product( $variable_product->get_children()[0] );
+
+		wp_delete_attachment( $stale_featured_id, true );
+
+		$variation->set_image_id( $stale_featured_id );
+		$variation->set_gallery_image_ids( array( $variation_gallery_id ) );
+		$variation->save();
+
+		$variation_gallery_data = ProductGalleryUtils::get_product_variation_gallery_data( $variable_product );
+
+		$this->assertSame( $parent_featured_id, $variation_gallery_data[ $variation->get_id() ]['image_id'] );
+		$this->assertSame(
+			array( $parent_featured_id, $variation_gallery_id ),
+			$variation_gallery_data[ $variation->get_id() ]['image_ids']
+		);
 	}
 }

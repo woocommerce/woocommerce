@@ -211,8 +211,6 @@ class ProductGalleryUtils {
 				'image_ids' => array( 0 ),
 			);
 
-		// Multi-image variation galleries are gated on the feature flag.
-		// Check on the feature flag to be removed when feature is rolled out.
 		if ( ! VariationGalleryPackage::is_enabled() ) {
 			if ( $variation_image_valid ) {
 				return array(
@@ -229,9 +227,19 @@ class ProductGalleryUtils {
 			return $parent_fallback;
 		}
 
+		$selected_image_id = $variation_image_valid ? $variation_image_id : $parent_fallback['image_id'];
+
+		if ( ! $selected_image_id ) {
+			$selected_image_id = $image_ids[0];
+		}
+
+		if ( ! in_array( $selected_image_id, $image_ids, true ) ) {
+			array_unshift( $image_ids, $selected_image_id );
+		}
+
 		return array(
-			'image_id'  => $image_ids[0],
-			'image_ids' => $image_ids,
+			'image_id'  => $selected_image_id,
+			'image_ids' => array_values( array_unique( $image_ids ) ),
 		);
 	}
 

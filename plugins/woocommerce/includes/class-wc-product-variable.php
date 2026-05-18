@@ -418,22 +418,36 @@ class WC_Product_Variable extends WC_Product {
 			return false;
 		}
 
+		$variation_featured_id    = (int) $variation->get_image_id();
+		$variation_featured_valid = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
+		$parent_featured_id       = (int) $this->get_image_id();
+		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
+		$resolved_image_id        = $variation_featured_valid ? $variation_featured_id : ( $parent_featured_valid ? $parent_featured_id : 0 );
+
 		$variation_gallery_image_ids = array();
 		$variation_gallery_html      = '';
+		$selected_image_id          = $resolved_image_id;
 
-		// Multi-image variation galleries are gated on the feature flag.
-		// Check on the feature flag to be removed when feature is rolled out.
 		if ( VariationGalleryPackage::is_enabled() ) {
-			$variation_gallery_image_ids = array_map( 'intval', $variation->get_gallery_image_ids() );
+			$variation_gallery_image_ids = array_values(
+				array_filter(
+					array_map( 'intval', $variation->get_gallery_image_ids() ),
+					'wp_attachment_is_image'
+				)
+			);
 
 			if ( ! empty( $variation_gallery_image_ids ) ) {
-				$variation_gallery_html = wc_get_product_gallery_html(
-					$this,
-					array_merge(
-						array_filter( array( $variation->get_image_id() ) ),
-						$variation_gallery_image_ids
-					)
-				);
+				if ( ! $selected_image_id ) {
+					$selected_image_id = $variation_gallery_image_ids[0];
+				}
+
+				$gallery_html_ids = $variation_gallery_image_ids;
+
+				if ( ! in_array( $selected_image_id, $gallery_html_ids, true ) ) {
+					array_unshift( $gallery_html_ids, $selected_image_id );
+				}
+
+				$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
 			}
 		}
 
@@ -452,8 +466,8 @@ class WC_Product_Variable extends WC_Product {
 				'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
 				'gallery_image_ids'     => $variation_gallery_image_ids,
 				'gallery_images_html'   => $variation_gallery_html,
-				'image'                 => wc_get_product_attachment_props( $variation->get_image_id() ),
-				'image_id'              => $variation->get_image_id(),
+					'image'                 => wc_get_product_attachment_props( $selected_image_id ),
+					'image_id'              => $selected_image_id,
 				'is_downloadable'       => $variation->is_downloadable(),
 				'is_in_stock'           => $variation->is_in_stock(),
 				'is_purchasable'        => $variation->is_purchasable(),
