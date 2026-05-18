@@ -11,15 +11,17 @@ import type { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { SelectableItemsBlockContext } from '../../../../types/type-defs/selectable-items';
-import type { FilterItemFields } from '../../types';
+import type {
+	SelectableItem,
+	SelectableItemsBlockContext,
+} from '../../../../types/type-defs/selectable-items';
 import './editor.scss';
 import './style.scss';
 
 export type BlockAttributes = Record< string, never >;
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
-	context: SelectableItemsBlockContext< FilterItemFields >;
+	context: SelectableItemsBlockContext< SelectableItem >;
 };
 
 function getOptionLabel( item: {
