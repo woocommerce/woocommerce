@@ -1657,12 +1657,6 @@ class WC_Product extends WC_Abstract_Legacy_Product {
 	private static function normalize_media_gallery_video_settings( array $settings ) {
 		$normalized = array();
 
-		foreach ( array( 'controls', 'autoplay', 'loop', 'muted', 'plays_inline' ) as $key ) {
-			if ( array_key_exists( $key, $settings ) ) {
-				$normalized[ $key ] = wc_string_to_bool( $settings[ $key ] );
-			}
-		}
-
 		if ( ! empty( $settings['preload'] ) ) {
 			$preload = sanitize_key( $settings['preload'] );
 

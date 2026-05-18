@@ -2382,36 +2382,11 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 						'context'     => array( 'view', 'edit' ),
 					),
 					'settings'          => array(
-						'description' => __( 'Video playback settings.', 'woocommerce' ),
+						'description' => __( 'Video loading settings.', 'woocommerce' ),
 						'type'        => 'object',
 						'context'     => array( 'view', 'edit' ),
 						'properties'  => array(
-							'controls'     => array(
-								'description' => __( 'Whether video controls are shown.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'context'     => array( 'view', 'edit' ),
-							),
-							'autoplay'     => array(
-								'description' => __( 'Whether the video should autoplay.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'context'     => array( 'view', 'edit' ),
-							),
-							'loop'         => array(
-								'description' => __( 'Whether the video should loop.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'context'     => array( 'view', 'edit' ),
-							),
-							'muted'        => array(
-								'description' => __( 'Whether the video should be muted.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'context'     => array( 'view', 'edit' ),
-							),
-							'plays_inline' => array(
-								'description' => __( 'Whether the video should play inline.', 'woocommerce' ),
-								'type'        => 'boolean',
-								'context'     => array( 'view', 'edit' ),
-							),
-							'preload'      => array(
+							'preload' => array(
 								'description' => __( 'Video preload behavior.', 'woocommerce' ),
 								'type'        => 'string',
 								'enum'        => array( 'auto', 'metadata', 'none' ),

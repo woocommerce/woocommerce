@@ -170,8 +170,9 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 					'source_type' => 'attachment',
 					'id'          => $video_id,
 					'settings'    => array(
-						'controls' => true,
-						'preload'  => 'metadata',
+						'controls'     => true,
+						'preload'      => 'metadata',
+						'plays_inline' => false,
 					),
 				),
 				array(
@@ -200,6 +201,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 		$this->assertSame( 'video', $media_data[0]['media_type'] );
 		$this->assertSame( $poster_id, $media_data[0]['poster_id'] );
 		$this->assertSame( 'https://example.com/product-video.mp4', $media_data[0]['video_src'] );
+		$this->assertSame( array( 'preload' => 'metadata' ), $media_data[0]['settings'] );
 		$this->assertSame( $image_id, $media_data[1]['id'] );
 		$this->assertSame( 'image', $media_data[1]['media_type'] );
 
