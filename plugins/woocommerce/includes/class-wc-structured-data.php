@@ -425,7 +425,7 @@ class WC_Structured_Data {
 				( ! empty( $markup_offer['price'] ) ||
 					! empty( $markup_offer['lowPrice'] ) ||
 					! empty( $markup_offer['highPrice'] )
-				) && empty( $markup_offer['priceCurrency'] )
+				) && empty( $markup_offer['priceCurrency'] ?? null )
 			) {
 				$markup_offer['priceCurrency'] = $currency;
 			}
