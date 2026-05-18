@@ -224,9 +224,9 @@ final class ShopperCollection extends AbstractBlock {
 		wp_interactivity_config(
 			'woocommerce/shopper-collection',
 			array(
-				'quantityLabelTemplate'   => $variation['quantityLabelTemplate'],
-				'removeLabelTemplate'     => $variation['removeLabelTemplate'],
-				'removeErrorTemplate'     => $variation['removeErrorTemplate'],
+				'quantityLabelTemplate' => $variation['quantityLabelTemplate'],
+				'removeLabelTemplate'   => $variation['removeLabelTemplate'],
+				'removeErrorTemplate'   => $variation['removeErrorTemplate'],
 			)
 		);
 
