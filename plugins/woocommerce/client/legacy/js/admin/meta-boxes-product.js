@@ -1157,23 +1157,30 @@ jQuery( function ( $ ) {
 						newSelectedAttributes
 					);
 
-					// Reload variations panel.
-					var this_page = window.location.toString();
-					this_page = this_page.replace(
-						'post-new.php?',
-						'post.php?post=' +
-							woocommerce_admin_meta_boxes.post_id +
-							'&action=edit&'
+					// Reload variations panel — skipped when the product-variations-classic-redesign
+					// feature owns the variations tab (the new editor manages its own state).
+					var skipVariationsReload = document.body.classList.contains(
+						'woocommerce-feature-enabled-product-variations-classic-redesign'
 					);
 
-					$( '#variable_product_options' ).load(
-						this_page + ' #variable_product_options_inner',
-						function () {
-							$( '#variable_product_options' ).trigger(
-								'reload'
-							);
-						}
-					);
+					if ( ! skipVariationsReload ) {
+						var this_page = window.location.toString();
+						this_page = this_page.replace(
+							'post-new.php?',
+							'post.php?post=' +
+								woocommerce_admin_meta_boxes.post_id +
+								'&action=edit&'
+						);
+
+						$( '#variable_product_options' ).load(
+							this_page + ' #variable_product_options_inner',
+							function () {
+								$( '#variable_product_options' ).trigger(
+									'reload'
+								);
+							}
+						);
+					}
 
 					$( document.body ).trigger(
 						'woocommerce_attributes_saved'

@@ -32,6 +32,23 @@ class Init {
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'handle_woocommerce_product_data_tabs' ), 5 );
 		add_action( 'woocommerce_admin_process_product_object', array( $this, 'preserve_variation_attributes' ), 10, 1 );
 		add_action( 'woocommerce_before_product_object_save', array( $this, 'preserve_variation_attributes_on_legacy_ajax_save' ), 10, 1 );
+		add_filter( 'admin_body_class', array( $this, 'add_feature_body_class' ) );
+	}
+
+	/**
+	 * Appends the feature-enabled body class on product edit screens so client-side legacy code
+	 * (e.g. `meta-boxes-product.js`) can detect the redesign and skip behaviours the new editor owns.
+	 *
+	 * @since 10.9.0
+	 * @param string $classes Space-separated body class string.
+	 * @return string
+	 */
+	public function add_feature_body_class( $classes ): string {
+		if ( ! self::is_product_edit_page() ) {
+			return $classes;
+		}
+		$feature_class = sanitize_html_class( 'woocommerce-feature-enabled-' . self::FEATURE_ID );
+		return trim( $classes . ' ' . $feature_class );
 	}
 
 	/**
