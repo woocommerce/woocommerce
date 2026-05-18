@@ -5,7 +5,7 @@
 A `@wordpress/build` "init module" that runs on dashboard boot and registers WooCommerce-core contributions to the dashboard. Currently registers two Store Activity sources:
 
 - `woocommerce/orders` — recent orders, backed by a WC-side `order` entity that points at `/wc/v3/orders`.
-- `woocommerce/reviews` — recent product reviews, consumed via the stock `root/comment` entity that `@wordpress/core-data` already registers, filtered by `type='review'` and with the parent product embedded through `_embed='up'`.
+- `woocommerce/reviews` — recent product reviews, backed by a WC-side `review` entity that points at `/wc/v3/products/reviews`. We avoid `root/comment` with `type='review'` because that filter is only a `comment_type` naming convention and doesn't enforce that the parent is a product, so it can leak non-product activity into the widget.
 
 ## Contents
 
@@ -146,28 +146,27 @@ The hook returns `{ state: 'loading' | 'empty' | 'success', events? }`. Each eve
 
 ### Store Activity → Reviews
 
-`src/store-activity/reviews/use-reviews-activity.tsx` is the equivalent hook for product reviews. **No entity registration is needed here** — `@wordpress/core-data` already ships a stock `root/comment` entity backed by `/wp/v2/comments`. We just pass `type='review'` to scope the collection to WooCommerce product reviews and `_embed='up'` to inline the parent product on each record:
+`src/store-activity/reviews/use-reviews-activity.tsx` is the equivalent hook for product reviews. It reads from the WC-namespaced `woocommerce/review` entity (also registered in `data/`), which points at `/wc/v3/products/reviews` — a WooCommerce-only endpoint that guarantees every returned record is a product review:
 
 ```ts
 useSelect( ( select ) => {
     const records = select( coreStore ).getEntityRecords(
-        'root',
-        'comment',
+        WC_PRODUCT_REVIEW_ENTITY.kind,   // 'woocommerce'
+        WC_PRODUCT_REVIEW_ENTITY.name,   // 'review'
         {
             per_page: 10,
             orderby: 'date',
             order: 'desc',
-            type: 'review',
-            _embed: 'up',
+            status: 'approved',
         }
     );
     // ...
 }, [] );
 ```
 
-The timeline event renders `<reviewer> on <product>`, with the reviewer name linking to the comment edit screen (`comment.php?action=editcomment&c=…`) and the product name linking to the product edit screen (`post.php?post=…&action=edit`). Both targets are legacy WP-admin pages, so both links use `@wordpress/ui`'s `Link` — same convention as the orders source.
+**Why not `root/comment` with `type='review'`?** It looks tempting because `@wordpress/core-data` ships a stock `comment` entity at `/wp/v2/comments`, so no registration is needed. But `type='review'` only filters by `comment_type` — a naming convention — and does not guarantee the parent post is a product. A "Store Activity" widget must surface store activity only, so the safer (and a bit more verbose) path is to consume the WC-namespaced endpoint and register the entity ourselves.
 
-This source is the simpler shape because it leans on a stock entity. It's a useful blueprint for any third-party extension whose data is already exposed through a registered core-data entity — no `addEntities` call needed.
+The V3 response includes `product_id` and `product_name` directly, so we don't need to chain `_embed='up'` to inline the parent product. The timeline event renders `<reviewer> on <product>`, with the reviewer name linking to the comment edit screen (`comment.php?action=editcomment&c=…`) and the product name linking to the product edit screen (`post.php?post=…&action=edit`). Both targets are legacy WP-admin pages, so both links use `@wordpress/ui`'s `Link` — same convention as the orders source.
 
 ## See also
 
