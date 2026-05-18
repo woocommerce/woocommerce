@@ -1,25 +1,28 @@
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { starFilled } from '@wordpress/icons';
-import type { ReviewRecord } from '../../data';
+import {
+	WC_PRODUCT_REVIEW_ENTITY,
+	type ProductReviewRecord,
+} from '../../data';
 import { ReviewTimelineEvent } from './review-timeline-event';
 
 type ActivityState = 'loading' | 'empty' | 'success';
 
 /**
- * Product reviews ride the stock `root/comment` entity that
- * `@wordpress/core-data` already registers — no entity definition lives
- * in our `data/` for this source. `type: 'review'` filters the comment
- * collection to WooCommerce product reviews; `_embed: 'up'` asks the REST
- * API to inline the parent product so we can render its title without a
- * follow-up request.
+ * Reads from the WC product reviews entity registered in `data/`, backed by
+ * `/wc/v3/products/reviews`. We do NOT go through `root/comment` with
+ * `type='review'`: that filter only matches by `comment_type` (a naming
+ * convention) and has no guarantee the comment's parent is a product.
+ *
+ * Limit `status` to `approved` so unpublished/spam reviews don't surface in
+ * the dashboard timeline.
  */
 const QUERY_PARAMS = {
 	per_page: 10,
 	orderby: 'date',
 	order: 'desc',
-	type: 'review',
-	_embed: 'up',
+	status: 'approved',
 };
 
 /**
@@ -38,16 +41,20 @@ export function useReviewsActivity(): {
 	const { reviews, isResolving } = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		const records = select( coreStore ).getEntityRecords(
-			'root',
-			'comment',
+			WC_PRODUCT_REVIEW_ENTITY.kind,
+			WC_PRODUCT_REVIEW_ENTITY.name,
 			QUERY_PARAMS
-		) as ReviewRecord[] | null;
+		) as ProductReviewRecord[] | null;
 
 		return {
 			reviews: records,
 			isResolving: select( coreStore ).isResolving(
 				'getEntityRecords',
-				[ 'root', 'comment', QUERY_PARAMS ]
+				[
+					WC_PRODUCT_REVIEW_ENTITY.kind,
+					WC_PRODUCT_REVIEW_ENTITY.name,
+					QUERY_PARAMS,
+				]
 			),
 		};
 	}, [] );
@@ -66,7 +73,7 @@ export function useReviewsActivity(): {
 			id: review.id,
 			icon: starFilled,
 			renderContent: () => <ReviewTimelineEvent review={ review } />,
-			datetime: review.date_gmt,
+			datetime: review.date_created_gmt ?? review.date_created ?? '',
 		} ) ),
 	};
 }
