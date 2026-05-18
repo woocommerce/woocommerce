@@ -60,7 +60,6 @@
 		"@wordpress/api-fetch": "7.44.0",
 		"@wordpress/url": "catalog:wp-min",
 		"@wordpress/base-styles": "6.20.0",
-		"@base-ui/react": "1.4.1",
 		"clsx": "2.1.x",
 		"react": "18.3.x",
 		"react-dom": "18.3.x"
