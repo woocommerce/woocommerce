@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Cart Interactivity store: add `rethrowErrors` opt-in to `addCartItem` so callers can branch on the underlying failure.

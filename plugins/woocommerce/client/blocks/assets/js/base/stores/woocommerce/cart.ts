@@ -58,7 +58,14 @@ export type ClientCartItem = Omit<
 	quantityToAdd?: number;
 };
 
-type CartUpdateOptions = { showCartUpdatesNotices?: boolean };
+type CartUpdateOptions = {
+	showCartUpdatesNotices?: boolean;
+	// Opt-in: rethrow the underlying error instead of swallowing it into a
+	// store notice. Lets callers branch on the failure (e.g. retrying with a
+	// smaller quantity on a partial-stock error). Default `false` preserves
+	// the existing "errors become notices" behavior.
+	rethrowErrors?: boolean;
+};
 
 export type Store = {
 	state: {
@@ -339,7 +346,10 @@ const { actions } = store< Store >(
 
 			*addCartItem(
 				{ id, key, quantity, quantityToAdd, variation }: ClientCartItem,
-				{ showCartUpdatesNotices = true }: CartUpdateOptions = {}
+				{
+					showCartUpdatesNotices = true,
+					rethrowErrors = false,
+				}: CartUpdateOptions = {}
 			): AsyncAction< void > {
 				if ( quantity !== undefined && quantityToAdd !== undefined ) {
 					throw new Error(
@@ -480,6 +490,9 @@ const { actions } = store< Store >(
 						speak( messages.addedToCartText, 'polite' );
 					}
 				} catch ( error ) {
+					if ( rethrowErrors ) {
+						throw error;
+					}
 					// Show error notice
 					actions.showNoticeError( error as Error );
 				}
