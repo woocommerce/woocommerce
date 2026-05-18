@@ -394,6 +394,17 @@
 			"isIgnored": true
 		},
 		{
+			"label": "Experimental dashboard widgets — use `next` dist-tag because the wp-min catalog doesn't include packages they depend on (e.g. @wordpress/dataviews, @wordpress/ui).",
+			"dependencies": [
+				"@wordpress/**"
+			],
+			"packages": [
+				"@woocommerce/widgets-app",
+				"@woocommerce/core-dashboard-init"
+			],
+			"isIgnored": true
+		},
+		{
 			"dependencies": [
 				"@wordpress/prettier-config"
 			],
