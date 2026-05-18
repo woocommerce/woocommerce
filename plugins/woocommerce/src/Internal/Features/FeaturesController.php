@@ -625,6 +625,18 @@ class FeaturesController {
 				'is_experimental'              => true,
 				'disable_ui'                   => false,
 			),
+			'dashboard_widgets'                  => array(
+				'name'                         => __( 'Dashboard widgets', 'woocommerce' ),
+				'description'                  => __(
+					'Surface WooCommerce activity (orders, reviews, customers, and contributions from extensions) as widgets on the WP-Admin dashboard. Requires the experimental Gutenberg dashboard.',
+					'woocommerce'
+				),
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+			),
 		);
 
 		if ( ! $tracking_enabled ) {
