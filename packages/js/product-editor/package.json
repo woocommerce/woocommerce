@@ -185,10 +185,13 @@
 			},
 			"files": [
 				"webpack.config.js",
-				"src/**/*.scss"
+				"config/**/*.js",
+				"src/**/*.scss",
+				"src/**/block.json"
 			],
 			"output": [
-				"build-style"
+				"build-style",
+				"build/blocks/**"
 			],
 			"dependencies": [
 				"dependencyOutputs"
