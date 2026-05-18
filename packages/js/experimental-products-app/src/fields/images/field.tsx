@@ -149,7 +149,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			/>
 		);
 	},
-	Edit: ( { data, onChange } ) => {
+	Edit: ( { data, onChange, field } ) => {
 		const dataImages = useMemo( () => data.images ?? [], [ data.images ] );
 		const [ images, setImages ] = useState( dataImages );
 
@@ -233,7 +233,8 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		}, [ images, handleRemoveImage ] );
 
 		return (
-			<Fieldset.Root>
+			<Fieldset.Root className="woocommerce-fields-control__images-fieldset">
+				<Fieldset.Legend>{ field.label }</Fieldset.Legend>
 				<DragDropProvider onDragEnd={ handleDragEnd }>
 					<div className="woocommerce-fields-control__featured-image">
 						<div className="woocommerce-fields-controls__featured-image-uploaded-images">
