@@ -252,34 +252,82 @@ store< BlockStore >(
 					} )
 				);
 				const isVariation = listItem.variation_id > 0;
-
-				// `cartActions.addCartItem` catches its own errors and
-				// surfaces them as store notices, so the yield resolves
-				// the same way on success and failure. Snapshot the
-				// matching line's quantity, run the add, then only remove
-				// from the saved list if it actually grew.
+				const payload = {
+					id: listItem.id,
+					type: isVariation ? 'variation' : 'simple',
+					...( isVariation && { variation } ),
+				} as const;
 				const lookup = {
 					id: listItem.id,
 					...( isVariation && { variation } ),
 				};
-				const beforeItem = cartState.findItemInCart( lookup );
-				const beforeQuantity = beforeItem?.quantity ?? 0;
 
-				yield cartActions.addCartItem( {
-					id: listItem.id,
-					quantityToAdd: listItem.quantity,
-					type: isVariation ? 'variation' : 'simple',
-					...( isVariation && { variation } ),
-				} );
-
-				const afterItem = cartState.findItemInCart( lookup );
-				const afterQuantity = afterItem?.quantity ?? 0;
-
-				if ( afterQuantity <= beforeQuantity ) {
-					return;
+				// Opt into rethrow so we can branch on the failure: a
+				// partial-stock error means we still want to move what we
+				// can. Any other failure (full out-of-stock, network, etc.)
+				// leaves the saved list entry untouched so the shopper
+				// can try again later.
+				let added = false;
+				try {
+					yield cartActions.addCartItem(
+						{ ...payload, quantityToAdd: listItem.quantity },
+						{ rethrowErrors: true }
+					);
+					added = true;
+				} catch ( err ) {
+					const code = ( err as { code?: string } ).code;
+					if (
+						code ===
+						'woocommerce_rest_product_partially_out_of_stock'
+					) {
+						// `quantity_remaining` is the product's total
+						// remaining stock (matches what the message
+						// shows). Subtract what's already in the cart
+						// to get how much we can still add.
+						const remaining =
+							( err as {
+								data?: { quantity_remaining?: number };
+							} ).data?.quantity_remaining ?? 0;
+						const inCart =
+							cartState.findItemInCart( lookup )?.quantity ?? 0;
+						const addable = Math.max( 0, remaining - inCart );
+						if ( addable > 0 ) {
+							try {
+								yield cartActions.addCartItem(
+									{ ...payload, quantityToAdd: addable },
+									{ rethrowErrors: true }
+								);
+								added = true;
+								// TODO: once block-level notices are
+								// wired up (see
+								// https://github.com/woocommerce/woocommerce/pull/64961),
+								// surface an info notice covering both
+								// outcomes of this branch — the partial
+								// cart add (`addable` of
+								// `listItem.quantity` moved) and the
+								// saved-list removal that follows — so
+								// the shopper isn't left wondering why
+								// the list entry disappeared.
+							} catch {
+								// Stock changed between calls — bail and
+								// leave the saved list entry alone.
+							}
+						}
+					}
 				}
 
-				yield shopperListsActions.removeItem( listSlug, listItem.key );
+				// Once anything was successfully moved into the cart
+				// (whether the full saved quantity or a partial amount),
+				// the saved list entry is no longer useful — mirror the
+				// "Save for later" flow (cart → list removes the source
+				// cart line after the list POST succeeds, see
+				// `useSaveForLater`).
+				if ( added ) {
+					yield shopperListsActions.removeItem(
+						listSlug,
+						listItem.key
+					);
+				}
 			},
 		},
 

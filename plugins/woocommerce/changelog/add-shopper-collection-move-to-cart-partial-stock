@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Shopper Collection: when the saved quantity exceeds available stock, move the addable amount into the cart instead of failing the whole action.
