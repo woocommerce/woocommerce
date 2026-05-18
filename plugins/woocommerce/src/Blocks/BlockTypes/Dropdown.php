@@ -54,8 +54,9 @@ final class Dropdown extends AbstractBlock {
 			return '';
 		}
 
-		$attribute_id = $block->context['woocommerce/attributeId'] ?? '';
-		$select_id    = is_string( $attribute_id ) && '' !== $attribute_id
+		$attribute_id       = $block->context['woocommerce/attributeId'] ?? '';
+		$has_external_label = is_string( $attribute_id ) && '' !== $attribute_id;
+		$select_id          = $has_external_label
 			? $attribute_id
 			: wp_unique_id( 'wc-block-dropdown-' );
 
@@ -75,11 +76,17 @@ final class Dropdown extends AbstractBlock {
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<fieldset class="wc-block-dropdown__fieldset">
-				<legend class="screen-reader-text"><?php echo esc_html( __( 'Choose an option', 'woocommerce' ) ); ?></legend>
+				<?php if ( ! $has_external_label ) : ?>
+					<legend class="screen-reader-text"><?php echo esc_html( __( 'Choose an option', 'woocommerce' ) ); ?></legend>
+				<?php endif; ?>
 				<select
 					class="wc-block-dropdown__select"
 					id="<?php echo esc_attr( $select_id ); ?>"
-					aria-label="<?php echo esc_attr( $aria_label ); ?>"
+					<?php if ( $has_external_label ) : ?>
+						aria-labelledby="<?php echo esc_attr( $attribute_id . '_label' ); ?>"
+					<?php else : ?>
+						aria-label="<?php echo esc_attr( $aria_label ); ?>"
+					<?php endif; ?>
 					data-wp-bind--value="state.selectValue"
 					data-wp-on--change="actions.onDropdownChange"
 				>

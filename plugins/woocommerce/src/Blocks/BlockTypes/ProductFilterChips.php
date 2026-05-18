@@ -61,6 +61,14 @@ final class ProductFilterChips extends AbstractBlock {
 			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
 		}
 
+		$attribute_id       = $block->context['woocommerce/attributeId'] ?? '';
+		$has_external_label = is_string( $attribute_id ) && '' !== $attribute_id;
+
+		if ( $has_external_label ) {
+			$wrapper_attributes['role']            = 'single' === $block_context['selectionMode'] ? 'radiogroup' : 'group';
+			$wrapper_attributes['aria-labelledby'] = esc_attr( $attribute_id . '_label' );
+		}
+
 		$first_items             = array_slice( $items, 0, $display_limit, true );
 		$overflow_items          = array_slice( $items, $display_limit );
 		$overflow_selected_items = array_filter( $overflow_items, fn( $item ) => is_array( $item ) && ! empty( $item['selected'] ) );
@@ -81,7 +89,7 @@ final class ProductFilterChips extends AbstractBlock {
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
 			<fieldset class="wc-block-product-filter-chips__fieldset">
-				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
+				<?php if ( ! empty( $block_context['groupLabel'] ) && ! $has_external_label ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
 				<div
