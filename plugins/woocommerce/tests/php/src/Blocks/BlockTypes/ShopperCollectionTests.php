@@ -6,7 +6,7 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypes\ShopperCollection;
 use Automattic\WooCommerce\Blocks\Package;
-use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use ReflectionClass;
 use ReflectionMethod;
@@ -31,22 +31,11 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	private ShopperCollection $sut;
 
 	/**
-	 * Instantiate the block without invoking its constructor, inject a
-	 * registry mock so render() can call `->add()` without NPEing, and
-	 * reset `CartCheckoutUtils::$is_cart_page` so a cached `true` from a
-	 * prior test doesn't poison `is_cart()` checks in this one.
+	 * Instantiate the block without invoking its constructor and inject a
+	 * registry mock so render() can call `->add()` without NPEing.
 	 */
 	public function setUp(): void {
 		parent::setUp();
-
-		// `WP_UnitTestCase` doesn't restore WC-specific filters between tests, so
-		// a `__return_true` added by a prior data-provider row leaks into the next
-		// one. See `Gateways/PayPal/ButtonsTest::tearDown()` for the same pattern.
-		remove_all_filters( 'woocommerce_is_cart' );
-
-		$cache_prop = new ReflectionProperty( CartCheckoutUtils::class, 'is_cart_page' );
-		$cache_prop->setAccessible( true );
-		$cache_prop->setValue( null, null );
 
 		$reflection = new ReflectionClass( ShopperCollection::class );
 		$this->sut  = $reflection->newInstanceWithoutConstructor();
@@ -403,9 +392,20 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 		bool $expected
 	): void {
 		wp_set_current_user( $logged_in ? self::factory()->user->create( array( 'role' => 'customer' ) ) : 0 );
-		if ( $is_cart ) {
-			add_filter( 'woocommerce_is_cart', '__return_true' );
-		}
+
+		// Mock the is_cart() call routed through LegacyProxy in render(). Filter/cache
+		// approaches don't work in CI: upstream tests can define `WOOCOMMERCE_CART` via
+		// `wc_maybe_define_constant`, which makes is_cart() short-circuit to true
+		// irreversibly for the rest of the process.
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+		$legacy_proxy->reset();
+		$legacy_proxy->register_function_mocks(
+			array(
+				'is_cart' => function () use ( $is_cart ) {
+					return $is_cart;
+				},
+			)
+		);
 
 		$registry = $this->invoke_render_with_registry_mock( array( 'listName' => 'saved-for-later' ) );
 
