@@ -462,9 +462,6 @@ describe( 'product edit utils', () => {
 				'product_status',
 				'catalog_visibility',
 				'upsell_ids',
-				'regular_price',
-				'sale_price',
-				'schedule_sale',
 				'images',
 				'sku',
 				'categories',
@@ -474,6 +471,9 @@ describe( 'product edit utils', () => {
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
+				'regular_price',
+				'sale_price',
+				'schedule_sale',
 				'date_on_sale_from',
 				'date_on_sale_to',
 				'downloadable',
@@ -1068,6 +1068,40 @@ describe( 'product edit utils', () => {
 					},
 				],
 			} );
+		} );
+
+		it( 'omits the price section from grouped product form config', () => {
+			const product = buildProduct( {
+				type: 'grouped',
+			} );
+
+			expect( getFormFields( [ product ] ) ).toEqual( [
+				{
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+						'upsell_ids',
+					],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
+			] );
 		} );
 
 		it( 'uses grouped external product form config', () => {
