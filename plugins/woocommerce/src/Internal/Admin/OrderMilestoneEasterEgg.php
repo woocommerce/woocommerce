@@ -24,6 +24,33 @@ class OrderMilestoneEasterEgg {
 	 */
 	final public function init(): void {
 		add_action( 'admin_enqueue_scripts', array( $this, 'handle_admin_enqueue_scripts' ) );
+		add_action( 'wp_ajax_wc_egg_dismiss', array( $this, 'handle_ajax_dismiss' ) );
+		add_action( 'wp_ajax_wc_egg_opt_out', array( $this, 'handle_ajax_opt_out' ) );
+	}
+
+	/**
+	 * Opts the current user out of all future milestone overlays.
+	 *
+	 * @internal
+	 */
+	public function handle_ajax_opt_out(): void {
+		check_ajax_referer( 'wc_egg_dismiss', 'nonce' );
+		update_user_meta( get_current_user_id(), '_wc_egg_opted_out', '1' );
+		wp_die();
+	}
+
+	/**
+	 * Marks a milestone order as dismissed for the current user.
+	 *
+	 * @internal
+	 */
+	public function handle_ajax_dismiss(): void {
+		check_ajax_referer( 'wc_egg_dismiss', 'nonce' );
+		$order_id = isset( $_POST['order_id'] ) ? absint( wp_unslash( $_POST['order_id'] ) ) : 0;
+		if ( $order_id > 0 ) {
+			update_user_meta( get_current_user_id(), '_wc_egg_seen_' . $order_id, '1' );
+		}
+		wp_die();
 	}
 
 	/**
@@ -36,13 +63,28 @@ class OrderMilestoneEasterEgg {
 			return;
 		}
 
+		// This feature tracks WooPayments order milestones; bail if the plugin is not active.
+		if ( ! class_exists( 'WC_Payments' ) ) {
+			return;
+		}
+
+		// phpcs:disable WordPress.Security.NonceVerification.Recommended
+		$woo_egg_key  = isset( $_GET['woo_egg'] )  ? sanitize_key( wp_unslash( $_GET['woo_egg'] ) )  : '';
+		$page_param   = isset( $_GET['page'] )      ? sanitize_key( wp_unslash( $_GET['page'] ) )      : '';
+		$action_param = isset( $_GET['action'] )    ? sanitize_key( wp_unslash( $_GET['action'] ) )    : '';
+		// phpcs:enable WordPress.Security.NonceVerification.Recommended
+
 		// Preview: ?woo_egg=first|hundred|thousand lets admins preview any milestone without real orders.
-		$is_debug_preview = current_user_can( 'manage_options' ) && isset( $_GET['woo_egg'] ); // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		// Only available when WP_DEBUG is enabled to prevent accidental triggering in production.
+		$is_debug_preview = ( defined( 'WP_DEBUG' ) && WP_DEBUG ) && current_user_can( 'manage_options' ) && '' !== $woo_egg_key;
+
+		// Respect the user's opt-out preference (debug preview always shows).
+		if ( ! $is_debug_preview && get_user_meta( get_current_user_id(), '_wc_egg_opted_out', true ) ) {
+			return;
+		}
 
 		// Only run the order query on the HPOS order edit page to avoid overhead on every admin page.
-		$is_order_edit_page = isset( $_GET['page'], $_GET['action'] ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&& 'wc-orders' === $_GET['page']  // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-			&& 'edit' === $_GET['action'];    // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+		$is_order_edit_page = 'wc-orders' === $page_param && 'edit' === $action_param;
 
 		if ( ! $is_debug_preview && ! $is_order_edit_page ) {
 			return;
@@ -54,6 +96,19 @@ class OrderMilestoneEasterEgg {
 			return;
 		}
 
+		// Remove milestones the current user has already seen.
+		if ( ! $is_debug_preview ) {
+			$user_id = get_current_user_id();
+			foreach ( array_keys( $milestone_map ) as $order_id ) {
+				if ( get_user_meta( $user_id, '_wc_egg_seen_' . $order_id, true ) ) {
+					unset( $milestone_map[ $order_id ] );
+				}
+			}
+			if ( empty( $milestone_map ) ) {
+				return;
+			}
+		}
+
 		$svg_data     = $this->get_svg_data();
 		$all_messages = $this->get_milestone_messages();
 		$labels       = $this->get_ui_labels();
@@ -62,12 +117,19 @@ class OrderMilestoneEasterEgg {
 		$encoded_svg        = wp_json_encode( $svg_data );
 		$encoded_messages   = wp_json_encode( $all_messages );
 		$encoded_labels     = wp_json_encode( $labels );
+		$encoded_dismiss    = wp_json_encode(
+			array(
+				'url'   => admin_url( 'admin-ajax.php' ),
+				'nonce' => wp_create_nonce( 'wc_egg_dismiss' ),
+			)
+		);
 
 		$script = $this->get_script_template();
 		$script = str_replace( '__MILESTONES__', false !== $encoded_milestones ? $encoded_milestones : '{}', $script );
 		$script = str_replace( '__SVG_DATA__', false !== $encoded_svg ? $encoded_svg : '{}', $script );
 		$script = str_replace( '__ALL_MILESTONES__', false !== $encoded_messages ? $encoded_messages : '{}', $script );
 		$script = str_replace( '__LABELS__', false !== $encoded_labels ? $encoded_labels : '{}', $script );
+		$script = str_replace( '__DISMISS__', false !== $encoded_dismiss ? $encoded_dismiss : 'null', $script );
 
 		wp_add_inline_script( 'jquery-core', $script, 'after' );
 	}
@@ -81,22 +143,23 @@ class OrderMilestoneEasterEgg {
 		$all_real_order_ids = array_values(
 			(array) wc_get_orders(
 				array(
-					'limit'      => 1001,
-					'orderby'    => 'date',
-					'order'      => 'ASC',
-					'meta_query' => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-						'relation' => 'AND',
+					'limit'       => 1001,
+					'orderby'     => 'date',
+					'order'       => 'ASC',
+					'field_query' => array( // Uses native HPOS column — avoids slow meta_query for transaction_id.
 						array(
-							'key'     => 'transaction_id',
+							'field'   => 'transaction_id',
 							'compare' => 'EXISTS',
 						),
+					),
+					'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 						array(
 							'key'     => 'wcpay_mode',
 							'value'   => 'live',
 							'compare' => '=',
 						),
 					),
-					'return'     => 'ids',
+					'return'      => 'ids',
 				)
 			)
 		);
@@ -115,7 +178,7 @@ class OrderMilestoneEasterEgg {
 			}
 		}
 
-		return $milestone_map;
+		return apply_filters( 'wc_order_milestone_egg_map', $milestone_map );
 	}
 
 	/**
@@ -159,6 +222,7 @@ class OrderMilestoneEasterEgg {
 			'cta'        => __( "Let's go!", 'woocommerce' ),
 			'closeLabel' => __( 'Close', 'woocommerce' ),
 			'closeTitle' => __( 'Close (Esc)', 'woocommerce' ),
+			'optOut'     => __( "Don't show again", 'woocommerce' ),
 		);
 	}
 
@@ -222,10 +286,11 @@ class OrderMilestoneEasterEgg {
   var SVG_DATA       = __SVG_DATA__;
   var ALL_MILESTONES = __ALL_MILESTONES__;
   var LABELS         = __LABELS__;
+  var DISMISS        = __DISMISS__;
   var shown          = {};
   var reducedMotion  = !!(window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches);
 
-  /* ── Variant definitions ──────────────────────────────────────────────── */
+  /* -- Variant definitions ------------------------------------------------ */
   var STRING_OVERLAP_PX = 20;
   var VARIANTS = {
     lama: {
@@ -279,7 +344,7 @@ class OrderMilestoneEasterEgg {
     cfSize:   1.0,
   };
 
-  /* ── Module-level state (reset per showOverlay call) ──────────────────── */
+  /* -- Module-level state (reset per showOverlay call) -------------------- */
   var settings;
   var active, COLOR_LAYERS, HEAD_TOP_LAYER;
   var _contentBB = { topY: 0, centerY: 0, centerX: 0 };
@@ -302,7 +367,7 @@ class OrderMilestoneEasterEgg {
   var squishAmp = 0, squishVel = 0, squishAngle = 0;
   var _previousFocus = null;
 
-  /* ── Layout helpers ───────────────────────────────────────────────────── */
+  /* -- Layout helpers ----------------------------------------------------- */
   function pinataPxWidth() {
     var w = Math.min(window.innerWidth * 0.21, 266);
     return Math.max(154, w) * (active.scale || 1.0) * 0.9;
@@ -348,7 +413,7 @@ class OrderMilestoneEasterEgg {
     };
   }
 
-  /* ── Load piñata ──────────────────────────────────────────────────────── */
+  /* -- Load piñata -------------------------------------------------------- */
   async function loadPinata(variantKey) {
     var v = VARIANTS[variantKey];
     if (!v) return;
@@ -413,7 +478,7 @@ class OrderMilestoneEasterEgg {
       });
     });
 
-    // ── Detect eye circles (all groups of concentric circles in head area) ──
+    // -- Detect eye circles (all groups of concentric circles in head area) --
     eyeEls = []; eyeElsSet = null; eyeCx = 0; eyeCy = 0; eyeGroups = [];
     var headCircles = [].slice.call(svg.querySelectorAll('circle')).filter(function(c) {
       var bb; try { bb = c.getBBox(); } catch(_) { return false; }
@@ -508,7 +573,7 @@ class OrderMilestoneEasterEgg {
     mainAngle = 0; mainOmega = 0;
   }
 
-  /* ── Init ─────────────────────────────────────────────────────────────── */
+  /* -- Init --------------------------------------------------------------- */
   async function init() {
     stick.innerHTML = SVG_DATA.stick || '';
     ALL_SHAPES = [];
@@ -525,7 +590,7 @@ class OrderMilestoneEasterEgg {
     }
   }
 
-  /* ── Blink ────────────────────────────────────────────────────────────── */
+  /* -- Blink -------------------------------------------------------------- */
   function startBlink() {
     if (!eyeGroups.length) return;
     pupilEl = eyeGroups[0].pupilEl;
@@ -573,7 +638,7 @@ class OrderMilestoneEasterEgg {
     });
   }
 
-  /* ── Physics ──────────────────────────────────────────────────────────── */
+  /* -- Physics ------------------------------------------------------------ */
   function update() {
     if (!dropped) return;
 
@@ -623,7 +688,7 @@ class OrderMilestoneEasterEgg {
     document.getElementById('egg-pendulum').style.transform = 'rotate(' + mainAngle + 'rad)';
   }
 
-  /* ── Canvases ─────────────────────────────────────────────────────────── */
+  /* -- Canvases ----------------------------------------------------------- */
   function sizeCanvasHiDPI(canvas) {
     var dpr = window.devicePixelRatio || 1, w = window.innerWidth, h = window.innerHeight;
     var tw = Math.round(w * dpr), th = Math.round(h * dpr);
@@ -656,7 +721,7 @@ class OrderMilestoneEasterEgg {
 
   function sizeConfetti() { sizeCanvasHiDPI(cfCV); }
 
-  /* ── Confetti ─────────────────────────────────────────────────────────── */
+  /* -- Confetti ----------------------------------------------------------- */
   async function loadConfettiShapes() {
     var text = SVG_DATA.confetti;
     if (!text) return;
@@ -744,7 +809,7 @@ class OrderMilestoneEasterEgg {
     drawFallingPieces();
   }
 
-  /* ── Falling piñata pieces ────────────────────────────────────────────── */
+  /* -- Falling piñata pieces ---------------------------------------------- */
   function detachPiece() {
     var allLayers = COLOR_LAYERS.filter(function(l) { return l.els.length > 0; });
     if (HEAD_TOP_LAYER && HEAD_TOP_LAYER.els.length > 0) allLayers.push(HEAD_TOP_LAYER);
@@ -827,7 +892,7 @@ class OrderMilestoneEasterEgg {
 
   function clearConfetti() { live.length = 0; settled.length = 0; rebuildColumns(); }
 
-  /* ── Cursor ───────────────────────────────────────────────────────────── */
+  /* -- Cursor ------------------------------------------------------------- */
   function updateCursor() {
     if (!mActive) return;
     var rawVx = mx - lastMx;
@@ -844,7 +909,7 @@ class OrderMilestoneEasterEgg {
 
   function swingStick() { stickAngleVel -= 55; }
 
-  /* ── Hits ─────────────────────────────────────────────────────────────── */
+  /* -- Hits --------------------------------------------------------------- */
   function tryHit(cx, cy) {
     if (!dropped) return;
     var c = pinataCentre();
@@ -860,13 +925,13 @@ class OrderMilestoneEasterEgg {
     if (boomEl && boomEl.style.opacity === '0') boomEl.style.opacity = '1';
   }
 
-  /* ── Main loop ────────────────────────────────────────────────────────── */
+  /* -- Main loop ---------------------------------------------------------- */
   function loop() {
     update(); applyRotation(); drawBg(); updateConfetti(); updateFallingPieces(); drawConfetti(); updateCursor(); updatePupil();
     rafId = requestAnimationFrame(loop);
   }
 
-  /* ── Named event handlers (for cleanup) ───────────────────────────────── */
+  /* -- Named event handlers (for cleanup) --------------------------------- */
   function onMouseMove(e)  { mx = e.clientX; my = e.clientY; mActive = true; }
   function onMouseLeave()  { mActive = false; }
   function onMouseEnter()  { mActive = true; }
@@ -887,11 +952,19 @@ class OrderMilestoneEasterEgg {
     if (!t || !t.closest) { tryHit(e.clientX, e.clientY); return; }
     if (t.closest('#egg-close-btn'))     return;
     if (t.closest('.egg-celebrate-btn')) return;
+    if (t.closest('.egg-opt-out-btn'))   return;
     tryHit(e.clientX, e.clientY);
   }
 
-  /* ── Close ────────────────────────────────────────────────────────────── */
+  /* -- Close -------------------------------------------------------------- */
   function closeOverlay() {
+    if (currentMilestone && currentMilestone._orderId && DISMISS) {
+      var fd = new FormData();
+      fd.append('action',   'wc_egg_dismiss');
+      fd.append('nonce',    DISMISS.nonce);
+      fd.append('order_id', currentMilestone._orderId);
+      navigator.sendBeacon ? navigator.sendBeacon(DISMISS.url, fd) : fetch(DISMISS.url, { method: 'POST', body: fd });
+    }
     if (blinkTimer) { clearTimeout(blinkTimer); blinkTimer = null; }
     if (rafId) { cancelAnimationFrame(rafId); rafId = null; }
     document.removeEventListener('mousemove',  onMouseMove);
@@ -907,7 +980,7 @@ class OrderMilestoneEasterEgg {
     if (_previousFocus && typeof _previousFocus.focus === 'function') { _previousFocus.focus(); }
   }
 
-  /* ── Build overlay DOM ────────────────────────────────────────────────── */
+  /* -- Build overlay DOM -------------------------------------------------- */
   function buildOverlay(milestoneData) {
     var W = window.innerWidth, H = window.innerHeight;
 
@@ -926,8 +999,10 @@ class OrderMilestoneEasterEgg {
     style.id = 'woo-egg-style';
     style.textContent =
       '#woo-egg-overlay,#woo-egg-overlay *{box-sizing:border-box;margin:0;padding:0}' +
-      '#woo-egg-overlay{position:fixed;inset:0;background:#fff;z-index:999999;overflow:visible;cursor:default;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Oxygen-Sans",Ubuntu,Cantarell,"Helvetica Neue",sans-serif;color:#1e1e1e;clip-path:url(#' + clipId + ');--wp-components-color-accent:#3858e9;--wp-components-color-accent-darker-10:#2145e6}' +
+      '#woo-egg-overlay{position:fixed;inset:0;background:#fff;z-index:999999;overflow:visible;cursor:default;font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Oxygen-Sans",Ubuntu,Cantarell,"Helvetica Neue",sans-serif;color:#1e1e1e;clip-path:url(#' + clipId + ');--wp-components-color-accent:#3858e9;--wp-components-color-accent-darker-10:#2145e6;--wp-components-color-accent-darker-20:#183ad6;--wp-components-color-accent-inverted:#fff}' +
       '#woo-egg-overlay .egg-celebrate-btn.components-button{padding:6px 12px;cursor:pointer}' +
+      '#woo-egg-overlay .egg-celebrate-btn.components-button:active:not(:disabled){background:var(--wp-components-color-accent-darker-20,#183ad6);color:var(--wp-components-color-accent-inverted,#fff)}' +
+      '#woo-egg-overlay .egg-opt-out-btn.components-button:active:not(:disabled){color:var(--wp-components-color-accent,#3858e9)}' +
       '#woo-egg-overlay.near-pinata,#woo-egg-overlay.near-pinata .egg-celebrate-btn{cursor:none}' +
       '#woo-egg-overlay.near-pinata *{user-select:none}' +
       '#egg-scene{position:absolute;inset:0;overflow:visible}' +
@@ -949,6 +1024,8 @@ class OrderMilestoneEasterEgg {
       '#egg-sprinkle-bg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}' +
       '#egg-sprinkle-bg svg{width:100%;height:100%;display:block}' +
       '@keyframes egg-particle-pulse{0%,100%{opacity:1}50%{opacity:0.15}}' +
+      '#woo-egg-overlay .egg-actions{display:flex;flex-direction:column;align-items:center;gap:8px}' +
+      '#woo-egg-overlay .egg-opt-out-btn.components-button{padding:6px 12px}' +
       '@media (prefers-reduced-motion: reduce){#egg-sprinkle-bg *{animation:none!important}#egg-pinata-container svg{transition:none!important}}';
     document.head.appendChild(style);
 
@@ -967,7 +1044,10 @@ class OrderMilestoneEasterEgg {
         '<div class="egg-copy">' +
           '<h1 id="egg-headline" class="egg-headline">' + escHtml(milestoneData.title) + '</h1>' +
           '<p class="egg-body">' + escHtml(milestoneData.subtitle) + '</p>' +
-          ‘<button class="egg-celebrate-btn components-button is-primary">’ + escHtml(LABELS.cta) + ‘</button>’ +
+          '<div class="egg-actions">' +
+            '<button class="egg-celebrate-btn components-button is-primary">' + escHtml(LABELS.cta) + '</button>' +
+            '<button class="egg-opt-out-btn components-button is-tertiary">' + escHtml(LABELS.optOut) + '</button>' +
+          '</div>' +
         '</div>' +
         '<div id="egg-cursor-stick"></div>' +
       '</div>' +
@@ -1014,6 +1094,16 @@ class OrderMilestoneEasterEgg {
 
     document.getElementById('egg-close-btn').addEventListener('click', closeOverlay);
 
+    el.querySelector('.egg-opt-out-btn').addEventListener('click', function() {
+      if (DISMISS) {
+        var fd = new FormData();
+        fd.append('action', 'wc_egg_opt_out');
+        fd.append('nonce',  DISMISS.nonce);
+        navigator.sendBeacon ? navigator.sendBeacon(DISMISS.url, fd) : fetch(DISMISS.url, { method: 'POST', body: fd });
+      }
+      closeOverlay();
+    });
+
     document.addEventListener('mousemove',  onMouseMove);
     document.addEventListener('mouseleave', onMouseLeave);
     document.addEventListener('mouseenter', onMouseEnter);
@@ -1036,7 +1126,7 @@ class OrderMilestoneEasterEgg {
     return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  /* ── showOverlay ──────────────────────────────────────────────────────── */
+  /* -- showOverlay -------------------------------------------------------- */
   function showOverlay(milestoneData) {
     mainAngle = 0; mainOmega = 0; dropped = false;
     mouseVx = 0; mActive = false; stickAngle = 25; stickAngleVel = 0;
@@ -1063,7 +1153,7 @@ class OrderMilestoneEasterEgg {
     init();
   }
 
-  /* ── Milestone URL detection ──────────────────────────────────────────── */
+  /* -- Milestone URL detection -------------------------------------------- */
   function checkUrl() {
     var params = new URLSearchParams(window.location.search);
     var testKey = params.get('woo_egg');
@@ -1078,7 +1168,7 @@ class OrderMilestoneEasterEgg {
     var orderId = parseInt(params.get('id'), 10);
     if (!orderId || shown[orderId] || !milestones[orderId]) return;
     shown[orderId] = true;
-    showOverlay(milestones[orderId]);
+    showOverlay(Object.assign({}, milestones[orderId], { _orderId: orderId }));
   }
 
   window.addEventListener('load', checkUrl);
