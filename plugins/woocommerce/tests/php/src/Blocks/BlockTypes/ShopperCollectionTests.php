@@ -281,4 +281,43 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 			'Wrapper must wire the trackShownItems watcher so hasShownItems can flip to true the first time items appear in-session.'
 		);
 	}
+
+	/**
+	 * The seeded heading (and any future sibling inner blocks rendered via
+	 * `$content`) must share the empty-state visibility gating: hidden on
+	 * first paint for new shoppers / empty refreshes, revealed once the
+	 * iAPI watcher flips `context.hasShownItems`. Without this, a saved
+	 * cart page rendered with no items would show an orphaned heading
+	 * sitting above nothing.
+	 */
+	public function test_render_wraps_header_with_hidden_visibility_gate_when_empty(): void {
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		$attributes = array( 'listName' => 'saved-for-later' );
+
+		$previous_block_to_render            = \WP_Block_Supports::$block_to_render;
+		\WP_Block_Supports::$block_to_render = array(
+			'blockName' => 'woocommerce/shopper-collection',
+			'attrs'     => $attributes,
+		);
+
+		try {
+			$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+			$render->setAccessible( true );
+
+			$content = '<h2 class="wp-block-heading">Saved for later</h2>';
+			$markup  = (string) $render->invoke( $this->sut, $attributes, $content, null );
+		} finally {
+			\WP_Block_Supports::$block_to_render = $previous_block_to_render;
+		}
+
+		// The header wrapper exists, contains the heading, has the iAPI
+		// visibility bind, and is initially hidden because items is empty.
+		$this->assertMatchesRegularExpression(
+			'/<div[^>]*class="wc-block-shopper-collection__header"[^>]*data-wp-bind--hidden="!context\.hasShownItems"[^>]*\bhidden\b[^>]*>.*Saved for later/s',
+			$markup,
+			'Header wrapper must be initially hidden for an empty list so a fresh-load empty SC does not show an orphaned heading.'
+		);
+	}
 }

@@ -252,9 +252,13 @@ final class ShopperCollection extends AbstractBlock {
 
 		$list_class = sprintf( 'wc-block-shopper-collection__list columns-%d', $column_count );
 
-		// `$content` is the rendered output of the heading inner block (and
-		// any future siblings). It sits above the inner `<ul>` so the
-		// heading reads first in source order.
+		// The heading inner block (and any future siblings rendered into
+		// `$content`) is wrapped so its visibility matches the empty-state
+		// gating: hidden on first paint for shoppers who have never had
+		// items in this session, revealed once the iAPI watcher flips
+		// `context.hasShownItems` to `true`. Without this wrapper a heading
+		// would be visible even on a fresh empty page, with no list under
+		// it — visually disconnected from anything.
 		return sprintf(
 			'<section %1$s>%6$s<ul class="%7$s">%2$s%3$s%4$s%5$s</ul></section>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
@@ -262,7 +266,7 @@ final class ShopperCollection extends AbstractBlock {
 			$this->render_items_markup( $items, $variation ),
 			$this->render_empty_markup( $variation ),
 			$this->render_error_markup(),
-			$content,
+			$this->render_header_markup( $content, empty( $items ) ),
 			esc_attr( $list_class )
 		);
 	}
@@ -560,6 +564,30 @@ final class ShopperCollection extends AbstractBlock {
 		</li>
 		<?php
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Wrap the inner-block content (heading + any future siblings) in an
+	 * element whose visibility mirrors the empty-state gating: hidden when
+	 * the shopper has never seen items in this session, revealed once
+	 * `context.hasShownItems` flips to `true`. Returns an empty string when
+	 * there's no content to wrap (e.g. merchant deleted the heading and
+	 * saved), so we don't emit an empty `<div>`.
+	 *
+	 * @param string $content  Rendered inner-block content (typically the heading HTML).
+	 * @param bool   $is_empty Whether the SC list is empty on initial paint.
+	 * @return string
+	 */
+	private function render_header_markup( string $content, bool $is_empty ): string {
+		if ( '' === $content ) {
+			return '';
+		}
+		$hidden_attr = $is_empty ? ' hidden' : '';
+		return sprintf(
+			'<div class="wc-block-shopper-collection__header" data-wp-bind--hidden="!context.hasShownItems"%s>%s</div>',
+			$hidden_attr,
+			$content
+		);
 	}
 
 	/**
