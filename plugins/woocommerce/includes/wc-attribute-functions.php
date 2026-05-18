@@ -481,7 +481,8 @@ function wc_get_attribute( $id ) {
  *     @type string $name         Attribute name. Always required.
  *     @type string $slug         Attribute alphanumeric identifier.
  *     @type string $type         Type of attribute.
- *                                Core by default accepts: 'select' and 'text'.
+ *                                Core by default accepts: 'select' and
+ *                                'wc-visual' (which is experimental).
  *                                Default to 'select'.
  *     @type string $order_by     Sort order.
  *                                Accepts: 'menu_order', 'name', 'name_num' and 'id'.
