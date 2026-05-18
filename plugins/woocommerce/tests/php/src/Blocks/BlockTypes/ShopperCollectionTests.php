@@ -157,7 +157,10 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 		$this->assertSame( 'core/heading', $heading['blockName'] );
 		$this->assertSame( 2, $heading['attrs']['level'] );
 		$this->assertArrayHasKey( 'content', $heading['attrs'] );
-		$this->assertNotEmpty( $heading['attrs']['content'] );
+		// `attrs.content` is the raw translated string (no `esc_html`) —
+		// JSON encoding handles escaping at serialization time. Asserts
+		// the en_US source string the test bootstrap runs under.
+		$this->assertSame( 'Saved for later', $heading['attrs']['content'] );
 		$this->assertStringContainsString( '<h2 class="wp-block-heading">', $heading['innerHTML'] );
 		$this->assertSame( array( $heading['innerHTML'] ), $heading['innerContent'] );
 
