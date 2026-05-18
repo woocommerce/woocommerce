@@ -8,10 +8,13 @@
 		"defaults and supports es6-module"
 	],
 	"dependencies": {
+		"@wordpress/components": "next",
+		"@wordpress/dataviews": "next",
 		"@wordpress/element": "next",
 		"@wordpress/hooks": "next",
 		"@wordpress/i18n": "next",
 		"@wordpress/icons": "next",
+		"@wordpress/ui": "next",
 		"fast-deep-equal": "^3.1.3"
 	}
 }
