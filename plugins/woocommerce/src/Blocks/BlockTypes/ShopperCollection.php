@@ -319,8 +319,8 @@ final class ShopperCollection extends AbstractBlock {
 			'removeLabelTemplate'   => __( 'Remove %s from Saved for later list', 'woocommerce' ),
 			/* translators: %d: quantity of saved items. */
 			'quantityLabelTemplate' => __( 'Quantity: %d', 'woocommerce' ),
-			/* translators: 1: product name. 2: error message from the server. */
-			'removeErrorTemplate'   => __( 'Couldn’t remove “%1$s” from your saved list: %2$s', 'woocommerce' ),
+			/* translators: %s: product name. */
+			'removeErrorTemplate'   => __( 'Couldn’t remove “%s” from your saved list. Please try again.', 'woocommerce' ),
 			'actionLabel'           => __( 'Move to cart', 'woocommerce' ),
 			'actionDirective'       => 'actions.onClickMoveToCart',
 			'showAction'            => true,

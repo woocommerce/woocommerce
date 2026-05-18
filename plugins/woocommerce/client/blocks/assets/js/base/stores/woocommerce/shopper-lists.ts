@@ -172,7 +172,7 @@ async function restRequest< T >(
 // so an empty-string default would clobber the values seeded server-side via
 // `wp_interactivity_state`. State for those fields comes purely from PHP. Same
 // reason the cart store doesn't ship state defaults — see cart.ts.
-const { state, actions } = store< Store >(
+const { state } = store< Store >(
 	'woocommerce/shopper-lists',
 	{
 		actions: {
@@ -204,8 +204,12 @@ const { state, actions } = store< Store >(
 					// loadList cannot clobber a fresh add/remove.
 					list.items = items;
 				} catch ( error ) {
-					yield actions.clearNotices();
-					actions.showNoticeError( error as Error );
+					// Background data-load failures don't surface a banner
+					// — there's no user-initiated trigger to attach one to,
+					// and the server message is rarely actionable. Log the
+					// underlying error so it's still discoverable in ops.
+					// eslint-disable-next-line no-console
+					console.error( error );
 				} finally {
 					list.isLoading = false;
 				}
@@ -284,9 +288,14 @@ const { state, actions } = store< Store >(
 				}
 			},
 
-			// Mirrors `cart.ts::showNoticeError`.
+			// Dispatches `error.message` verbatim as a store-notices
+			// banner. Callers are responsible for ensuring the message is
+			// HTML-safe — the notices region renders content via
+			// `innerHTML` (see `store-notices.ts::renderNoticeContent`).
+			// In practice every caller passes a fresh `new Error(...)`
+			// composed from a translated template plus schema-supplied
+			// fields, never raw server-supplied content.
 			*showNoticeError( error: Error ): AsyncAction< void > {
-				// TODO: import directly once @woocommerce/stores/store-notices is public.
 				yield import( '@woocommerce/stores/store-notices' );
 				const { actions: noticeActions } = store< StoreNotices >(
 					'woocommerce/store-notices',
@@ -299,11 +308,6 @@ const { state, actions } = store< Store >(
 					type: 'error',
 					dismissible: true,
 				} );
-
-				// Surface the full Error (with stack) for ops debugging;
-				// the banner only shows the sanitised message.
-				// eslint-disable-next-line no-console
-				console.error( error );
 			},
 
 			// Wipe every notice in the closest store-notices context. Called
