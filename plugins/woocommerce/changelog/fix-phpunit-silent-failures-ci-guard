@@ -1,0 +1,4 @@
+Significance: patch
+Type: dev
+
+Guard PHPUnit CI runs against silent termination by checking for a completion summary line, so failures are no longer masked when PHP exits mid-test
