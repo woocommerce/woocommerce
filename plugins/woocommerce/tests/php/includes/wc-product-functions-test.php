@@ -17,6 +17,15 @@ use Automattic\WooCommerce\Testing\Tools\CodeHacking\Hacks\StaticMockerHack;
 class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 	/**
+	 * Reset the variation gallery feature-flag option after each test so
+	 * individual cases that flip it on don't leak global state.
+	 */
+	public function tearDown(): void {
+		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox If 'wc_get_price_excluding_tax' gets an order as argument, it passes the order customer to 'WC_Tax::get_rates'.
 	 *
 	 * @testWith [true, 1, true]
@@ -1037,8 +1046,6 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		$decoded_snapshot = json_decode( $matches[1] );
 		$this->assertIsString( $decoded_snapshot );
 		$this->assertStringContainsString( 'woocommerce-product-gallery', $decoded_snapshot );
-
-		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
 	}
 
 	/**
