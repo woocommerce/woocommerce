@@ -5,14 +5,8 @@ export const EXCLUDED_BLOCKS = [
 	'woocommerce/product-filter-price',
 	'woocommerce/product-filter-status',
 	'woocommerce/product-collection',
+	'woocommerce/add-to-cart-form',
 	'woocommerce/add-to-cart-with-options',
-	'woocommerce/add-to-cart-with-options-grouped-product-item',
-	'woocommerce/add-to-cart-with-options-grouped-product-item-label',
-	'woocommerce/add-to-cart-with-options-grouped-product-item-selector',
-	'woocommerce/add-to-cart-with-options-quantity-selector',
-	'woocommerce/add-to-cart-with-options-variation-description',
-	'woocommerce/add-to-cart-with-options-variation-selector',
-	'woocommerce/add-to-cart-with-options-variation-selector-attribute',
 	'core/query',
 ];
 
