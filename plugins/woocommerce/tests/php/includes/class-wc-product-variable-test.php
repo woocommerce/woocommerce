@@ -5,6 +5,15 @@
  */
 class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 	/**
+	 * Reset the feature-flag option after each test so individual cases
+	 * that flip it on don't leak global state into the rest of the suite.
+	 */
+	public function tearDown(): void {
+		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+		parent::tearDown();
+	}
+
+	/**
 	 * @testdox 'get_available_variations' returns the variations as arrays if no parameters is passed.
 	 */
 	public function test_get_available_variations_returns_array_when_no_parameter_is_passed() {

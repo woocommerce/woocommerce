@@ -10,6 +10,15 @@ use WP_UnitTestCase;
  */
 class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	/**
+	 * Reset the feature-flag option after each test so individual cases
+	 * that flip it on don't leak global state into the rest of the suite.
+	 */
+	public function tearDown(): void {
+		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+		parent::tearDown();
+	}
+
+	/**
 	 * Test get_product_gallery_image_data method.
 	 */
 	public function test_get_product_gallery_image_data() {

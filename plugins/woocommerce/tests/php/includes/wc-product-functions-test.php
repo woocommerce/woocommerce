@@ -1021,9 +1021,42 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script with non-empty markup.
+	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script when the feature is on.
 	 */
 	public function test_woocommerce_variable_add_to_cart_attaches_gallery_snapshot() {
+		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
+
+		$inline_js = $this->capture_variable_add_to_cart_inline_js();
+
+		$this->assertStringContainsString( 'wc_variation_gallery_defaults', $inline_js );
+
+		// Decode the payload back out of the inline JS and assert it contains
+		// real gallery markup, not an empty string or `null`.
+		preg_match( '/\)\[\d+\]\s*=\s*("(?:\\\\.|[^"])*");/', $inline_js, $matches );
+		$this->assertNotEmpty( $matches, 'Inline JS should expose a JSON-encoded snapshot.' );
+		$decoded_snapshot = json_decode( $matches[1] );
+		$this->assertIsString( $decoded_snapshot );
+		$this->assertStringContainsString( 'woocommerce-product-gallery', $decoded_snapshot );
+
+		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+	}
+
+	/**
+	 * @testdox Variable add-to-cart skips the gallery snapshot when the feature is off.
+	 */
+	public function test_woocommerce_variable_add_to_cart_skips_gallery_snapshot_when_feature_off() {
+		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
+
+		$inline_js = $this->capture_variable_add_to_cart_inline_js();
+
+		$this->assertStringNotContainsString( 'wc_variation_gallery_defaults', $inline_js );
+	}
+
+	/**
+	 * Render the variable add-to-cart template and return the inline JS
+	 * attached to the variation script.
+	 */
+	private function capture_variable_add_to_cart_inline_js(): string {
 		$product = WC_Helper_Product::create_variation_product();
 
 		WC_Frontend_Scripts::load_scripts();
@@ -1041,20 +1074,10 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		ob_end_clean();
 
 		$before_data = $wp_scripts->registered['wc-add-to-cart-variation']->extra['before'] ?? array();
-		$inline_js   = implode( "\n", (array) $before_data );
-
-		$this->assertStringContainsString( 'wc_variation_gallery_defaults', $inline_js );
-		$this->assertStringContainsString( '[' . $product->get_id() . ']', $inline_js );
-
-		// Decode the payload back out of the inline JS and assert it contains
-		// real gallery markup, not an empty string or `null`.
-		preg_match( '/\)\[\d+\]\s*=\s*("(?:\\\\.|[^"])*");/', $inline_js, $matches );
-		$this->assertNotEmpty( $matches, 'Inline JS should expose a JSON-encoded snapshot.' );
-		$decoded_snapshot = json_decode( $matches[1] );
-		$this->assertIsString( $decoded_snapshot );
-		$this->assertStringContainsString( 'woocommerce-product-gallery', $decoded_snapshot );
 
 		$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		WC_Helper_Product::delete_product( $product->get_id() );
+
+		return implode( "\n", (array) $before_data );
 	}
 }
