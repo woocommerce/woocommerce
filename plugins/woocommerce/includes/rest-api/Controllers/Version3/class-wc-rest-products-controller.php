@@ -1135,7 +1135,7 @@ class WC_REST_Products_Controller extends WC_REST_Products_V2_Controller {
 			$product = $this->set_product_images( $product, $request['images'] );
 
 			if ( $this->product_gallery_videos_enabled() && ! isset( $request['media_gallery'] ) ) {
-				$product->set_media_gallery( array() );
+				$product = $this->sync_media_gallery_from_legacy_images_update( $product );
 			}
 		}
 

@@ -472,11 +472,11 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
-	 * Test updating legacy product images clears stored media gallery data.
+	 * Test updating legacy product images preserves stored video gallery data.
 	 *
-	 * @testdox Should clear stored media gallery when legacy images are updated.
+	 * @testdox Should preserve stored videos when legacy images are updated.
 	 */
-	public function test_update_product_images_clears_stored_media_gallery() {
+	public function test_update_product_images_preserves_stored_video_media_gallery_items() {
 		wp_set_current_user( $this->user );
 		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
 
@@ -521,10 +521,16 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'position'    => 0,
+				),
+				array(
 					'media_type'  => 'image',
 					'source_type' => 'attachment',
 					'id'          => $new_image_id,
-					'position'    => 0,
+					'position'    => 1,
 				),
 			),
 			$this->get_media_gallery_identity_fields( $data['media_gallery'] )
@@ -533,7 +539,22 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$updated_product = wc_get_product( $product->get_id() );
 
 		$this->assertInstanceOf( WC_Product::class, $updated_product );
-		$this->assertSame( array(), $updated_product->get_media_gallery( 'edit' ) );
+		$this->assertEquals(
+			array(
+				array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'poster_id'   => $poster_id,
+				),
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $new_image_id,
+				),
+			),
+			$updated_product->get_media_gallery( 'edit' )
+		);
 		$this->assertSame( $new_image_id, (int) $updated_product->get_image_id() );
 		$this->assertSame( array(), $updated_product->get_gallery_image_ids() );
 

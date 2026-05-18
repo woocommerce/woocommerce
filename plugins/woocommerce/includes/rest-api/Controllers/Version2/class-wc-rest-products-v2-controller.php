@@ -1696,7 +1696,7 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 			$product = $this->set_product_images( $product, $request['images'] );
 
 			if ( $this->product_gallery_videos_enabled() && ! isset( $request['media_gallery'] ) ) {
-				$product->set_media_gallery( array() );
+				$product = $this->sync_media_gallery_from_legacy_images_update( $product );
 			}
 		}
 
@@ -1818,6 +1818,62 @@ class WC_REST_Products_V2_Controller extends WC_REST_CRUD_Controller {
 		$this->validate_product_media_gallery( $media_gallery );
 		$product->set_media_gallery( $media_gallery );
 		$this->sync_product_images_from_media_gallery( $product, $product->get_media_gallery( 'edit' ) );
+
+		return $product;
+	}
+
+	/**
+	 * Sync stored media gallery data after an update through the legacy images field.
+	 *
+	 * @param WC_Product $product Product instance.
+	 *
+	 * @return WC_Product
+	 */
+	protected function sync_media_gallery_from_legacy_images_update( $product ) {
+		if ( ! method_exists( $product, 'get_media_gallery' ) || ! method_exists( $product, 'set_media_gallery' ) ) {
+			return $product;
+		}
+
+		$media_gallery = $product->get_media_gallery( 'edit' );
+
+		if ( empty( $media_gallery ) ) {
+			return $product;
+		}
+
+		$image_media_items    = $this->get_media_gallery_from_images( $product );
+		$updated_media_items  = array();
+		$images_inserted      = false;
+		$has_preserved_videos = false;
+
+		foreach ( $media_gallery as $media_item ) {
+			if ( ! is_array( $media_item ) || empty( $media_item['media_type'] ) ) {
+				continue;
+			}
+
+			if ( 'image' === $media_item['media_type'] ) {
+				if ( ! $images_inserted ) {
+					$updated_media_items = array_merge( $updated_media_items, $image_media_items );
+					$images_inserted     = true;
+				}
+				continue;
+			}
+
+			if ( 'video' === $media_item['media_type'] ) {
+				$updated_media_items[] = $media_item;
+				$has_preserved_videos  = true;
+			}
+		}
+
+		if ( ! $has_preserved_videos ) {
+			$product->set_media_gallery( array() );
+			return $product;
+		}
+
+		if ( ! $images_inserted ) {
+			$updated_media_items = array_merge( $image_media_items, $updated_media_items );
+		}
+
+		$product->set_media_gallery( $updated_media_items );
 
 		return $product;
 	}
