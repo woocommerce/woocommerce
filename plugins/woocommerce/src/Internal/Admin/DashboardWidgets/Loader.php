@@ -43,6 +43,7 @@ class Loader {
 		require_once $build_file;
 
 		add_action( 'init', array( self::class, 'register_widget_types' ), 11 );
+		add_filter( 'dashboard-wp-admin_boot_dependencies', array( self::class, 'add_init_module_to_boot_deps' ) );
 		add_filter( 'dashboard-wp-admin_boot_dependencies', array( self::class, 'add_widget_modules_to_boot_deps' ) );
 	}
 
@@ -72,6 +73,23 @@ class Loader {
 				)
 			);
 		}
+	}
+
+	/**
+	 * Adds the WooCommerce core-dashboard init module to the dashboard page
+	 * boot dependencies. Loaded as a static import so its top-level filters
+	 * (e.g. `storeActivity.sources`) register before any widget renders.
+	 *
+	 * @param array $boot_dependencies Boot dependencies for the dashboard page.
+	 * @return array Updated boot dependencies.
+	 */
+	public static function add_init_module_to_boot_deps( array $boot_dependencies ): array {
+		$boot_dependencies[] = array(
+			'import' => 'static',
+			'id'     => '@woocommerce/core-dashboard-init',
+		);
+
+		return $boot_dependencies;
 	}
 
 	/**
