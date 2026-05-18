@@ -224,8 +224,9 @@ final class ShopperCollection extends AbstractBlock {
 		wp_interactivity_config(
 			'woocommerce/shopper-collection',
 			array(
-				'quantityLabelTemplate' => $variation['quantityLabelTemplate'],
-				'removeLabelTemplate'   => $variation['removeLabelTemplate'],
+				'quantityLabelTemplate'   => $variation['quantityLabelTemplate'],
+				'removeLabelTemplate'     => $variation['removeLabelTemplate'],
+				'removeErrorTemplate'     => $variation['removeErrorTemplate'],
 			)
 		);
 
@@ -319,6 +320,8 @@ final class ShopperCollection extends AbstractBlock {
 			'removeLabelTemplate'   => __( 'Remove %s from Saved for later list', 'woocommerce' ),
 			/* translators: %d: quantity of saved items. */
 			'quantityLabelTemplate' => __( 'Quantity: %d', 'woocommerce' ),
+			/* translators: 1: product name. 2: error message from the server. */
+			'removeErrorTemplate'   => __( 'Couldn’t remove “%1$s” from your saved list: %2$s', 'woocommerce' ),
 			'actionLabel'           => __( 'Move to cart', 'woocommerce' ),
 			'actionDirective'       => 'actions.onClickMoveToCart',
 			'showAction'            => true,

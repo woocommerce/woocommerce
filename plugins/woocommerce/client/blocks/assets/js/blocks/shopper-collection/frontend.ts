@@ -8,7 +8,6 @@ import {
 	store,
 	type AsyncAction,
 } from '@wordpress/interactivity';
-import { __, sprintf } from '@wordpress/i18n';
 import '@woocommerce/stores/woocommerce/shopper-lists';
 import '@woocommerce/stores/woocommerce/cart';
 import type {
@@ -24,6 +23,7 @@ const universalLock =
 type ShopperCollectionConfig = {
 	quantityLabelTemplate: string;
 	removeLabelTemplate: string;
+	removeErrorTemplate: string;
 };
 
 type BlockContext = {
@@ -237,18 +237,20 @@ store< BlockStore >(
 					// (`HtmlFormatter::format`) and `error.message` originates
 					// from a server-side WP_Error, so both are safe for the
 					// notice region's innerHTML render path. Same trust model
-					// as cart.ts::showNoticeError.
+					// as cart.ts::showNoticeError. Template comes from PHP
+					// (`wp_interactivity_config`) because iAPI script modules
+					// can't import `@wordpress/i18n`.
+					const { removeErrorTemplate } = getConfig(
+						'woocommerce/shopper-collection'
+					) as ShopperCollectionConfig;
 					yield shopperListsActions.showNoticeError(
 						new Error(
-							sprintf(
-								/* translators: 1: item name. 2: error message from the server. */
-								__(
-									'Couldn’t remove “%1$s” from your saved list: %2$s',
-									'woocommerce'
-								),
-								listItem.name,
-								( error as Error ).message
-							)
+							removeErrorTemplate
+								.replace( '%1$s', listItem.name )
+								.replace(
+									'%2$s',
+									( error as Error ).message
+								)
 						)
 					);
 				} finally {
@@ -320,17 +322,17 @@ store< BlockStore >(
 						// Cart-add already succeeded — only the saved-list
 						// cleanup failed. Surface the item context so the
 						// shopper knows which row is still hanging around.
+						const { removeErrorTemplate } = getConfig(
+							'woocommerce/shopper-collection'
+						) as ShopperCollectionConfig;
 						yield shopperListsActions.showNoticeError(
 							new Error(
-								sprintf(
-									/* translators: 1: item name. 2: error message from the server. */
-									__(
-										'Couldn’t remove “%1$s” from your saved list: %2$s',
-										'woocommerce'
-									),
-									listItem.name,
-									( error as Error ).message
-								)
+								removeErrorTemplate
+									.replace( '%1$s', listItem.name )
+									.replace(
+										'%2$s',
+										( error as Error ).message
+									)
 							)
 						);
 					}
