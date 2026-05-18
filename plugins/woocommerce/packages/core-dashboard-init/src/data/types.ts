@@ -36,3 +36,24 @@ export type OrderRecord = {
 		last_name?: string;
 	};
 };
+
+/**
+ * Partial of the `/wp/v2/comments?type=review&_embed=up` response shape.
+ * Product reviews are WordPress comments with `type='review'`; consumed via
+ * the stock `root/comment` entity that `@wordpress/core-data` already
+ * registers, so no entity registration is needed on our side.
+ */
+export type ReviewRecord = {
+	id: number;
+	author_name: string;
+	post: number;
+	date_gmt: string;
+	_embedded?: {
+		up?: Array< {
+			id: number;
+			title?: {
+				rendered?: string;
+			};
+		} >;
+	};
+};
