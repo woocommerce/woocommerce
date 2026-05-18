@@ -1,12 +1,14 @@
 // eslint-disable-next-line @wordpress/use-recommended-components -- experimental DataViews integration.
 import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
 import type { Field, View } from '@wordpress/dataviews';
+import { Spinner } from '@wordpress/components';
 import { useState, useMemo, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon } from '@wordpress/icons';
 import { StoreActivityEmptyState, ActivitySourcesLoader } from './components';
 import { useActivitySources } from './hooks';
 import type { StoreActivityEvent, ActivityHookResult } from './types';
+import './style.scss';
 
 const LAYOUT_ACTIVITY = 'activity';
 
@@ -128,7 +130,7 @@ export default function StoreActivityRender() {
 
 			{ ( isLoading || waitingForResults ) && (
 				<div className="store-activity-widget__loading">
-					<p>{ __( 'Loading…', 'woocommerce' ) }</p>
+					<Spinner />
 				</div>
 			) }
 

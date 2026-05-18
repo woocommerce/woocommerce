@@ -1,0 +1,25 @@
+.store-activity-widget {
+	// Targets the experimental DataViews activity layout.
+	// @see https://github.com/WordPress/gutenberg/tree/trunk/packages/dataviews
+	a {
+		cursor: pointer;
+	}
+
+	.dataviews-view-activity__group-header {
+		font-size: var( --wpds-font-size-md, 13px );
+		line-height: var( --wpds-font-line-height-sm, 1.54 );
+		color: var( --wpds-color-fg-content-neutral-weak );
+	}
+}
+
+.store-activity-empty-state {
+	height: 100%;
+}
+
+.store-activity-widget__loading {
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	height: 100%;
+	padding: var( --wpds-dimension-padding-md, 16px );
+}
