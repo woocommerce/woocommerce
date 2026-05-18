@@ -27,7 +27,6 @@ export function useOrdersActivity(): {
 		datetime: string;
 	} >;
 } {
-	console.log( '(3) useOrdersActivity' );
 	const { orders, isResolving } = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		const records = select( coreStore ).getEntityRecords(
