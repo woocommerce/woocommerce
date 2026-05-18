@@ -134,7 +134,7 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'shipping-fields',
 		__( 'Shipping', 'woocommerce' ),
-		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'height' ]
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'weight' ]
 	),
 ] satisfies ProductEditFormField[];
 

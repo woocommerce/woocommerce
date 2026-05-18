@@ -361,10 +361,10 @@ describe( 'product edit utils', () => {
 				'tags',
 				'featured',
 				'shipping_class',
-				'weight',
 				'length',
 				'width',
 				'height',
+				'weight',
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
@@ -1039,9 +1039,9 @@ describe( 'product edit utils', () => {
 						{
 							id: 'dimensions',
 							layout: { type: 'row' },
-							children: [ 'weight', 'length', 'width' ],
+							children: [ 'length', 'width', 'height' ],
 						},
-						'height',
+						'weight',
 					],
 				},
 			] );
@@ -1202,7 +1202,7 @@ describe( 'product edit utils', () => {
 					children: [
 						'shipping_class',
 						{
-							id: 'parent-dimensions',
+							id: 'dimensions',
 							layout: { type: 'row' },
 							children: [ 'length', 'width', 'height' ],
 						},
@@ -1260,9 +1260,9 @@ describe( 'product edit utils', () => {
 						{
 							id: 'dimensions',
 							layout: { type: 'row' },
-							children: [ 'weight', 'length', 'width' ],
+							children: [ 'length', 'width', 'height' ],
 						},
-						'height',
+						'weight',
 					],
 				},
 			] );
