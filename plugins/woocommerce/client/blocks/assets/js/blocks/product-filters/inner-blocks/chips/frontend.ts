@@ -6,7 +6,10 @@ import { store, getContext } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
+import type {
+	SelectableItem,
+	SelectableItemsParentStore,
+} from '../../../../types/type-defs/selectable-items';
 
 type ChipsItem = SelectableItem< { color?: string; index?: number } >;
 
@@ -16,53 +19,70 @@ type ChipsContext = {
 	isExpanded: boolean;
 };
 
-type ParentItemContext = {
-	item?: ChipsItem;
-};
-
 type ChipsStore = {
 	state: {
+		items: ChipsItem[];
 		itemHidden: boolean;
 		swatchHidden: boolean;
 		swatchStyle: string;
 	};
 	actions: {
+		toggle: () => void;
 		showAll: () => void;
 	};
 };
 
-function getParentItem( storeNamespace: string ): ChipsItem | undefined {
-	const parentCtx = getContext< ParentItemContext >( storeNamespace );
-	return parentCtx.item;
+function getParentStore( storeNamespace: string ) {
+	return store< SelectableItemsParentStore< { color?: string } > >(
+		storeNamespace
+	);
+}
+
+function getCurrentItem(): ChipsItem | undefined {
+	const context = getContext< { item?: ChipsItem } >();
+	return context.item;
 }
 
 const { state }: ChipsStore = store< ChipsStore >(
 	'woocommerce/product-filter-chips',
 	{
 		state: {
+			get items(): ChipsItem[] {
+				const { storeNamespace } = getContext< ChipsContext >();
+				return getParentStore(
+					storeNamespace
+				).state.selectableItems.map( ( item, index ) => ( {
+					...item,
+					index,
+				} ) );
+			},
 			get itemHidden(): boolean {
-				const { isExpanded, storeNamespace, displayLimit } =
+				const { isExpanded, displayLimit } =
 					getContext< ChipsContext >();
 				if ( isExpanded ) return false;
-				const item = getParentItem( storeNamespace );
+				const item = getCurrentItem();
 				if ( ! item ) return false;
 				if ( item.selected ) return false;
 				if ( item.index === undefined ) return false;
 				return item.index >= displayLimit;
 			},
 			get swatchHidden(): boolean {
-				const { storeNamespace } = getContext< ChipsContext >();
-				const item = getParentItem( storeNamespace );
+				const item = getCurrentItem();
 				return ! item?.color;
 			},
 			get swatchStyle(): string {
-				const { storeNamespace } = getContext< ChipsContext >();
-				const item = getParentItem( storeNamespace );
+				const item = getCurrentItem();
 				if ( ! item?.color ) return '';
 				return `background-color: ${ item.color }`;
 			},
 		},
 		actions: {
+			toggle() {
+				const { storeNamespace } = getContext< ChipsContext >();
+				getParentStore( storeNamespace ).actions.toggle(
+					getCurrentItem()
+				);
+			},
 			showAll() {
 				const context = getContext< ChipsContext >();
 				context.isExpanded = true;
