@@ -3,7 +3,7 @@
  */
 import { __ } from '@wordpress/i18n';
 import { useSelect } from '@wordpress/data';
-import { SelectControl } from '@wordpress/components';
+import { SelectControl } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
 /**
@@ -34,7 +34,10 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	label: __( 'Shipping Class', 'woocommerce' ),
 	enableSorting: false,
 	type: 'text',
-	getValue: ( { item } ) => item.shipping_class,
+	getValue: ( { item } ) =>
+		item.shipping_class_id ? item.shipping_class_id.toString() : '',
+	render: ( { item } ) => item.shipping_class ?? '',
+	isVisible: ( item ) => ! item.virtual,
 	Edit: ( { data, onChange, field } ) => {
 		const { shippingClasses } = useSelect( ( select ) => {
 			// TODO: Register shipping class entity and use it instead.
@@ -61,15 +64,18 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				  } ) )
 				: [] ),
 		];
+		const selectedOption = options.find(
+			( option ) => option.value === ( data.shipping_class ?? '' )
+		);
 
 		return (
 			<SelectControl
 				label={ field.label }
-				value={ data.shipping_class }
-				options={ options }
-				onChange={ ( value ) =>
+				value={ selectedOption }
+				items={ options }
+				onValueChange={ ( option ) =>
 					onChange( {
-						shipping_class: value,
+						shipping_class: option?.value ?? '',
 					} )
 				}
 			/>

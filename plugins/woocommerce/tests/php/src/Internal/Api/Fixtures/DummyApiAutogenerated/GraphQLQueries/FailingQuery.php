@@ -26,7 +26,7 @@ class FailingQuery {
 					'type' => Type::nonNull(Type::string()),
 						'description' => __( 'What kind of failure to raise', 'woocommerce' ),
 						'defaultValue' => 'invalid_argument',
-				),
+					),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);

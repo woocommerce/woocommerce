@@ -439,6 +439,18 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
+			'customer_review_request'            => array(
+				'name'                         => __( 'Customer review request (beta)', 'woocommerce' ),
+				'description'                  => __(
+					'Send customers a transactional email after order completion inviting them to review the products they bought, and host the per-order Review Order landing page.',
+					'woocommerce'
+				),
+				// Skip compatibility checks like the other opt-in transactional-email features.
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => false,
+			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
 				'description'                  => __(

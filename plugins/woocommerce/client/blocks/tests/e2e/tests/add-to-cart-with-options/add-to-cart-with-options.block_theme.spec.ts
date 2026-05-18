@@ -854,6 +854,7 @@ test.describe( 'Add to Cart + Options Block', () => {
 		pageObject,
 		editor,
 		requestUtils,
+		wpCoreVersion,
 	} ) => {
 		await requestUtils.activatePlugin(
 			'woocommerce-blocks-test-quantity-constraints'
@@ -941,7 +942,13 @@ test.describe( 'Add to Cart + Options Block', () => {
 			} );
 		} );
 
-		await test.step( 'in variable products', async () => {
+		await test.step( 'in variable products', async ( step ) => {
+			// eslint-disable-next-line playwright/no-skipped-test
+			step.skip(
+				wpCoreVersion === 6.8,
+				'WordPress 6.8 contains a bug that affects this experimental block without an easy workaround.'
+			);
+
 			await page.goto( '/product/hoodie/' );
 
 			const quantityInput = page.getByRole( 'spinbutton', {

@@ -21,7 +21,7 @@ class GetWidget {
 				'id' => array(
 					'type' => Type::nonNull(Type::int()),
 						'description' => __( 'The ID of the widget to fetch', 'woocommerce' ),
-					),
+						),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);

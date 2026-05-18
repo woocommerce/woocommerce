@@ -323,4 +323,19 @@ class Utils {
 		}//end try
 		// phpcs:enable WordPress.Security.EscapeOutput.ExceptionNotEscaped
 	}
+
+	/**
+	 * Lazy-initialize and return the WP_Filesystem global, or null when the
+	 * direct method isn't available (e.g. credentials prompt would be needed).
+	 */
+	public static function wp_filesystem(): ?\WP_Filesystem_Base {
+		global $wp_filesystem;
+		if ( ! $wp_filesystem ) {
+			require_once ABSPATH . 'wp-admin/includes/file.php';
+			if ( ! WP_Filesystem() ) {
+				return null;
+			}
+		}
+		return $wp_filesystem;
+	}
 }

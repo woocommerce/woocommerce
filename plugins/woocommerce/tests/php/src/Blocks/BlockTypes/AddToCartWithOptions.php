@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelec
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeOptionsMock;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 
 /**
  * Tests for the AddToCartWithOptions block type
@@ -550,5 +551,20 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		} finally {
 			remove_filter( 'woocommerce_quantity_input_args', $filter, 10 );
 		}
+	}
+
+	/**
+	 * Tests that add_quantity_stepper_classes adds wrapper and input classes to inputs.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::add_quantity_stepper_classes
+	 */
+	public function test_add_quantity_stepper_classes() {
+		$quantity_html = '<div class="quantity"><input type="number" class="input-text qty text" name="custom_name" value="1" /></div>';
+
+		$result = Utils::add_quantity_stepper_classes( $quantity_html );
+
+		$this->assertStringContainsString( 'wc-block-components-quantity-selector', $result, 'The quantity wrapper should receive the stepper wrapper class.' );
+		$this->assertStringContainsString( 'wc-block-components-quantity-selector__input', $result, 'The input should receive the stepper input class.' );
+		$this->assertStringContainsString( 'custom_name', $result, 'The original input name value should be preserved.' );
 	}
 }

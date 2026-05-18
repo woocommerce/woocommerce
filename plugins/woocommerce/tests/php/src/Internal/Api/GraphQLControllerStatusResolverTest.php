@@ -483,4 +483,98 @@ class GraphQLControllerStatusResolverTest extends WC_REST_Unit_Test_Case {
 			)->get_status()
 		);
 	}
+
+	// ------------------------------------------------------------------
+	// Debug-mode enrichment for the canonical 500: extensions.debug
+	// surfaces the wrapper exception, and extensions.previous chains
+	// through to the resolver's own throw when there was one.
+	// ------------------------------------------------------------------
+
+	/**
+	 * @testdox A throwing resolver in debug mode surfaces the wrapper message and the resolver's previous chain.
+	 */
+	public function test_throwing_resolver_in_debug_mode_surfaces_previous_chain(): void {
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$sut     = $this->controller_with_resolver( new AlwaysThrowingResolver() );
+		$request = $this->post_request( array( 'query' => '{ greeting { result } }' ) );
+		$request->set_query_params( array( '_debug' => '1' ) );
+
+		$response = $sut->handle_request( $request );
+		$this->assertSame( 500, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 'INTERNAL_ERROR', $data['errors'][0]['extensions']['code'] ?? null );
+		$this->assertSame( 'An unexpected error occurred.', $data['errors'][0]['message'] ?? null );
+
+		$debug = $data['errors'][0]['extensions']['debug'] ?? null;
+		$this->assertIsArray( $debug );
+		$this->assertSame( 'HTTP status resolver threw.', $debug['message'] ?? null );
+		$this->assertArrayHasKey( 'file', $debug );
+		$this->assertArrayHasKey( 'line', $debug );
+		$this->assertArrayHasKey( 'trace', $debug );
+
+		// The previous chain must contain the resolver's own RuntimeException
+		// with its distinctive message — that's the actual cause a developer
+		// needs to see.
+		$previous = $data['errors'][0]['extensions']['previous'] ?? null;
+		$this->assertIsArray( $previous );
+		$this->assertContains( \RuntimeException::class, array_column( $previous, 'class' ) );
+		$this->assertContains( AlwaysThrowingResolver::THROW_MESSAGE, array_column( $previous, 'message' ) );
+	}
+
+	/**
+	 * @testdox An out-of-range resolver return in debug mode surfaces the wrapper message; no previous chain (the wrapper had no cause).
+	 */
+	public function test_out_of_range_resolver_return_in_debug_mode_surfaces_wrapper_message(): void {
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$sut     = $this->controller_with_resolver( new FixedReturnResolver( 0 ) );
+		$request = $this->post_request( array( 'query' => '{ greeting { result } }' ) );
+		$request->set_query_params( array( '_debug' => '1' ) );
+
+		$response = $sut->handle_request( $request );
+		$this->assertSame( 500, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertSame( 'INTERNAL_ERROR', $data['errors'][0]['extensions']['code'] ?? null );
+
+		$debug = $data['errors'][0]['extensions']['debug'] ?? null;
+		$this->assertIsArray( $debug );
+		// The wrapper message is what surfaces here — and it's the message a
+		// developer needs to identify the bug ("the resolver returned 0").
+		$this->assertStringContainsString( 'out-of-range status code', $debug['message'] ?? '' );
+		$this->assertStringContainsString( '0', $debug['message'] ?? '' );
+
+		// Out-of-range path constructs the wrapper without a $previous, so
+		// no previous chain should be attached.
+		$this->assertArrayNotHasKey( 'previous', $data['errors'][0]['extensions'] );
+	}
+
+	/**
+	 * @testdox A throwing resolver without _debug=1 produces the canonical body — no debug or previous keys leak.
+	 */
+	public function test_throwing_resolver_without_debug_param_produces_canonical_body(): void {
+		// Even an admin: without _debug=1 the resolver-failure response stays
+		// purely generic so no resolver internals leak.
+		$admin = self::factory()->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $admin );
+
+		$sut      = $this->controller_with_resolver( new AlwaysThrowingResolver() );
+		$response = $sut->handle_request( $this->post_request( array( 'query' => '{ greeting { result } }' ) ) );
+
+		$this->assertSame( 500, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertSame( 'INTERNAL_ERROR', $data['errors'][0]['extensions']['code'] ?? null );
+		$this->assertArrayNotHasKey( 'debug', $data['errors'][0]['extensions'] );
+		$this->assertArrayNotHasKey( 'previous', $data['errors'][0]['extensions'] );
+
+		// Belt and braces: the resolver's exception message must NOT appear
+		// anywhere in the serialized response.
+		$wire = wp_json_encode( $data );
+		$this->assertIsString( $wire );
+		$this->assertStringNotContainsString( AlwaysThrowingResolver::THROW_MESSAGE, $wire );
+	}
 }

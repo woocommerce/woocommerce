@@ -1,38 +1,23 @@
 /**
- * External dependencies
+ * Internal dependencies
  */
-import type { View } from '@wordpress/dataviews';
+import { DEFAULT_VIEW as DEFAULT_PRODUCT_LIST_VIEW } from '../product-list/constants';
+import {
+	buildProductListQuery,
+	type ProductListQuery,
+} from '../product-list/query';
 
-export type VariationViewQuery = {
-	product_id: number;
-	page: number;
-	per_page: number;
-	search?: string;
-	order?: 'asc' | 'desc';
-	orderby?: 'date' | 'id' | 'include' | 'title' | 'slug' | 'menu_order';
+export type VariationViewQuery = ProductListQuery & {
+	include: number[];
 };
 
 export function buildVariationViewQuery(
-	view: View,
 	productId: number
 ): VariationViewQuery {
-	const query: VariationViewQuery = {
-		product_id: productId,
-		page: view.page ?? 1,
-		per_page: view.perPage ?? 20,
+	return {
+		...buildProductListQuery( DEFAULT_PRODUCT_LIST_VIEW ),
+		include: [ productId ],
+		page: 1,
+		per_page: 1,
 	};
-
-	if ( view.search ) {
-		query.search = view.search;
-	}
-
-	if ( view.sort?.direction ) {
-		query.order = view.sort.direction;
-	}
-
-	if ( view.sort?.field ) {
-		query.orderby = view.sort.field === 'name' ? 'title' : 'menu_order';
-	}
-
-	return query;
 }

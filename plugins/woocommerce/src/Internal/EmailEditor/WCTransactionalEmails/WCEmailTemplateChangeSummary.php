@@ -11,16 +11,33 @@ use Automattic\WooCommerce\Internal\EmailEditor\Logger;
  * Produces a localized summary of differences between a merchant's `woo_email`
  * post content and the current canonical core render of the same email.
  *
- * Algorithm: DFS-flatten both block trees → normalize known namespace aliases
- * (e.g. `woo/email-content` → `woocommerce/email-content`) → run an LCS over
- * the resulting block-name sequences → classify the residue as added /
- * removed / copy / structural. Result is cached in a transient keyed on the
- * post ID, the post and core content hashes, and the active locale, so any
- * merchant edit or core bump invalidates automatically.
+ * Two diff modes, selected per-call by post-meta presence:
+ *
+ * - **Three-way (since 10.9.0)** — when the post has
+ *   {@see WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY} meta
+ *   (every post touched by a sync-eligible writer: generator, auto-applier,
+ *   selective applier, reset endpoint, RSM-149 backfill), the summary runs
+ *   two LCS passes (yours-vs-base, core-vs-base) and classifies each block
+ *   by what changed relative to base. The diff is deterministic on any
+ *   post; the inversion guard does not fire on this path.
+ * - **Two-way (legacy fallback)** — when the meta is absent (legacy posts
+ *   not yet touched since the meta was introduced), the summary falls back
+ *   to the original `lcs_matches(core, post)` algorithm. The summary-
+ *   inversion guard (>= 5 unmatched && 0 copy && post >= 1.5x core) is
+ *   active in this path only — it bails to "Template updated — see release
+ *   notes." when it can't reliably attribute changes.
+ *
+ * Both paths normalize known namespace aliases (e.g. `woo/email-content` →
+ * `woocommerce/email-content`) and produce the same payload shape (added /
+ * removed / copy / structural) so consumers don't need a mode switch.
+ *
+ * Result is cached in a transient keyed on the post ID, the post + core +
+ * base content hashes, and the active locale; any merchant edit, core bump,
+ * or base shift invalidates automatically.
  *
  * Hash input parity with {@see WCTransactionalEmailPostsGenerator::compute_canonical_post_content()}
- * is guaranteed by construction — both sides route through the same canonical
- * render, identical to the divergence detector.
+ * is guaranteed by construction — both sides route through the same
+ * canonical render, identical to the divergence detector.
  *
  * @package Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails
  * @since 10.9.0
@@ -102,8 +119,9 @@ class WCEmailTemplateChangeSummary {
 	 * - `source_hash_to`      — `string`     — sha1 of the canonical core content for this email type. Mirrors the post's `_wc_email_template_source_hash` meta. Empty string in fallback / no-config paths where the core content can't be computed.
 	 * - `added_blocks`        — `array<int, array{name:string, label:string, path:array<int|string>}>` — blocks that would be added to the post by applying (in core, not in post). `name` is the post-alias-normalized block name (e.g. `core/heading`); `label` is its humanized form for display; `path` is the core-side index path.
 	 * - `removed_blocks`      — `array<int, array{name:string, label:string, path:array<int|string>}>` — blocks that would be removed from the post by applying (in post, not in core). Same field semantics as `added_blocks`; `path` is the post-side index path.
-	 * - `copy_changes`        — `array<int, array{block:string, before:string, after:string, occurrence:int, total:int, path:array<int|string>}>`.
+	 * - `copy_changes`        — `array<int, array{block:string, before:string, after:string, occurrence:int, total:int, path:array<int|string>, auto_resolvable?:bool}>`.
 	 *                           `before` is the merchant's current text; `after` is the canonical core text. `path` is the post-side index path.
+	 *                           `auto_resolvable` is emitted only on the three-way path: `true` when only core changed since base (safe to auto-apply), `false` when both sides changed (true conflict). Absent on two-way fallback payloads.
 	 * - `structural_changes`  — `array<int, array{kind:string, description:string, path?:array<int|string>}>` — `path` is omitted for `kind: 'reorder'` entries.
 	 * - `summary_lines`       — `string[]`   — pre-localized one-liners ready to render.
 	 * - `is_fallback`         — `bool`       — true when the diff could not be produced.
@@ -167,7 +185,10 @@ class WCEmailTemplateChangeSummary {
 		$post_hash = sha1( $post_content );
 		$core_hash = sha1( $core_content );
 
-		$cache_key = self::cache_key( $post_id, $post_hash, $core_hash, self::current_locale() );
+		$base_render = (string) get_post_meta( $post_id, WCEmailTemplateDivergenceDetector::LAST_CORE_RENDER_META_KEY, true );
+		$base_hash   = '' !== $base_render ? sha1( $base_render ) : '';
+
+		$cache_key = self::cache_key( $post_id, $post_hash, $core_hash, $base_hash, self::current_locale() );
 		$cached    = get_transient( $cache_key );
 		if ( is_array( $cached ) ) {
 			$cached['cache_hit'] = true;
@@ -196,25 +217,37 @@ class WCEmailTemplateChangeSummary {
 			return self::fallback_payload( $version_from, $version_to );
 		}
 
-		$structured = self::diff_records( $core_records, $post_records );
+		// Branch on base meta availability. When the post has been touched by a
+		// sync-eligible writer (generator, auto-applier, selective applier, reset,
+		// backfill), it has `last_core_render` and we run the three-way diff: a
+		// strict per-block (yours-vs-base, core-vs-base) comparison. The
+		// inversion-guard heuristic is not needed in this branch — three-way is
+		// deterministic on any post. Posts without the meta fall through to the
+		// legacy two-way path, which keeps the inversion guard for safety.
+		if ( '' !== $base_render ) {
+			$base_records = self::flatten_blocks( parse_blocks( $base_render ) );
+			$structured   = self::diff_records_three_way( $core_records, $base_records, $post_records );
+		} else {
+			$structured = self::diff_records( $core_records, $post_records );
 
-		// Summary-inversion guard: a heavily one-sided expansion on the post
-		// side looks like merchant work attributed to core. Without a stored
-		// old-core hash to disambiguate, fall back to the release-notes line.
-		// Under the "yours → core" convention, post-side unmatched blocks land
-		// in `removed_blocks` (would be removed by applying), so that's the
-		// signal we count here.
-		$post_total = count( $post_records );
-		$core_total = count( $core_records );
-		if (
-			0 === count( $structured['added_blocks'] )
-			&& 0 === count( $structured['copy_changes'] )
-			&& count( $structured['removed_blocks'] ) >= self::INVERSION_GUARD_THRESHOLD
-			&& $post_total >= ( self::INVERSION_GUARD_RATIO * $core_total )
-		) {
-			$payload = self::fallback_payload( $version_from, $version_to );
-			self::write_cache( $cache_key, $payload );
-			return $payload;
+			// Summary-inversion guard: a heavily one-sided expansion on the post
+			// side looks like merchant work attributed to core. Without a stored
+			// old-core render to disambiguate, fall back to the release-notes line.
+			// Under the "yours → core" convention, post-side unmatched blocks land
+			// in `removed_blocks` (would be removed by applying), so that's the
+			// signal we count here.
+			$post_total = count( $post_records );
+			$core_total = count( $core_records );
+			if (
+				0 === count( $structured['added_blocks'] )
+				&& 0 === count( $structured['copy_changes'] )
+				&& count( $structured['removed_blocks'] ) >= self::INVERSION_GUARD_THRESHOLD
+				&& $post_total >= ( self::INVERSION_GUARD_RATIO * $core_total )
+			) {
+				$payload = self::fallback_payload( $version_from, $version_to );
+				self::write_cache( $cache_key, $payload );
+				return $payload;
+			}
 		}
 
 		$summary_lines = self::to_summary_lines( $structured );
@@ -336,13 +369,14 @@ class WCEmailTemplateChangeSummary {
 	 * @param int    $post_id   The `woo_email` post ID.
 	 * @param string $post_hash sha1 of the persisted post content.
 	 * @param string $core_hash sha1 of the canonical core render.
+	 * @param string $base_hash sha1 of `_wc_email_template_last_core_render` if set; empty string otherwise. Including this in the key invalidates the cache when base shifts.
 	 * @param string $locale    Active locale.
 	 */
-	private static function cache_key( int $post_id, string $post_hash, string $core_hash, string $locale ): string {
+	private static function cache_key( int $post_id, string $post_hash, string $core_hash, string $base_hash, string $locale ): string {
 		return sprintf(
 			'wc_email_change_summary_%d_%s',
 			$post_id,
-			md5( $post_hash . '|' . $core_hash . '|' . $locale )
+			md5( $post_hash . '|' . $core_hash . '|' . $base_hash . '|' . $locale )
 		);
 	}
 
@@ -617,6 +651,210 @@ class WCEmailTemplateChangeSummary {
 		}//end foreach
 		$added_blocks   = self::reject_indices( $added_blocks, $dropped_added );
 		$removed_blocks = self::reject_indices( $removed_blocks, $dropped_removed );
+
+		return array(
+			'added_blocks'       => $added_blocks,
+			'removed_blocks'     => $removed_blocks,
+			'copy_changes'       => $copy_changes,
+			'structural_changes' => $structural_changes,
+		);
+	}
+
+	/**
+	 * Compute a three-way block-level diff between core, base, and yours.
+	 *
+	 * Two LCS passes (yours-vs-base, core-vs-base) build a tripartite alignment
+	 * keyed on base. For each base block, we then know whether yours and/or core
+	 * has changed it relative to base — yielding a four-case classification:
+	 *
+	 * - !yours_changed && !core_changed → no entry (block unchanged on both sides)
+	 * - !yours_changed &&  core_changed → copy_change (auto-resolvable to use_core)
+	 * -  yours_changed && !core_changed → no entry (merchant edit; preserve silently)
+	 * -  yours_changed &&  core_changed → copy_change (true conflict)
+	 *
+	 * Additions (in yours OR core but not in base) and removals (in base but not in
+	 * one side) are handled in dedicated passes after the matched-pair classification.
+	 * Yours-only adds become `removed_blocks` ("would be removed by wholesale apply,
+	 * preserved by selective apply"). Core-only adds become `added_blocks`. Yours-removed
+	 * but core-kept becomes a `merchant_removed` structural entry — apply does NOT re-add.
+	 *
+	 * Compared to {@see self::diff_records()}, this method removes the inversion-guard
+	 * heuristic entirely: with a known base, the diff is deterministic on any post,
+	 * including heavily-customized ones. The reorder pass is also dropped: the LCS
+	 * tail-pairing bug it compensated for cannot fire under three-way attribution.
+	 *
+	 * Structural relocations (a matched pair whose `parent_name` differs between
+	 * core and post) are intentionally not surfaced here, unlike the 2-way path's
+	 * `Moved %1$s into %2$s` entry. Selective apply preserves the merchant's
+	 * structure either way, so the move is something the merchant cannot act on.
+	 *
+	 * @internal
+	 *
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $core_records Core side (current canonical).
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $base_records Base side (canonical at last system write).
+	 * @param array<int, array{path:array<int|string>, parent_name:?string, name:string, inner_text:string}> $post_records Post side (merchant's current post_content).
+	 *
+	 * @return array{added_blocks:array<int, array<string, mixed>>, removed_blocks:array<int, array<string, mixed>>, copy_changes:array<int, array<string, mixed>>, structural_changes:array<int, array<string, mixed>>}
+	 *
+	 * @since 10.9.0
+	 */
+	public static function diff_records_three_way( array $core_records, array $base_records, array $post_records ): array {
+		$core_to_base = self::lcs_matches( $core_records, $base_records );
+		$post_to_base = self::lcs_matches( $post_records, $base_records );
+
+		// Invert into base-keyed lookups so a single iteration over base records
+		// can decide each block's fate against both sides.
+		$base_to_core = array();
+		foreach ( $core_to_base as $pair ) {
+			$base_to_core[ $pair[1] ] = $pair[0];
+		}
+		$base_to_post = array();
+		foreach ( $post_to_base as $pair ) {
+			$base_to_post[ $pair[1] ] = $pair[0];
+		}
+
+		$matched_core_indices = array();
+		$matched_post_indices = array();
+
+		$copy_changes       = array();
+		$added_blocks       = array();
+		$removed_blocks     = array();
+		$structural_changes = array();
+
+		$core_name_counts = array_count_values( array_map( static fn( array $r ): string => $r['name'], $core_records ) );
+		$occurrence_index = array();
+
+		// Pass 1: classify each base-anchored block by what changed relative to base.
+		foreach ( $base_records as $b_idx => $base ) {
+			$core_idx = $base_to_core[ $b_idx ] ?? null;
+			$post_idx = $base_to_post[ $b_idx ] ?? null;
+
+			if ( null !== $core_idx ) {
+				$matched_core_indices[ $core_idx ] = true;
+			}
+			if ( null !== $post_idx ) {
+				$matched_post_indices[ $post_idx ] = true;
+			}
+
+			if ( null === $core_idx && null === $post_idx ) {
+				// Both sides removed it — no-op.
+				continue;
+			}
+
+			if ( null === $core_idx ) {
+				// Core removed it; yours kept it. Preserve on apply.
+				$removed_blocks[] = array(
+					'name'  => $post_records[ $post_idx ]['name'],
+					'label' => self::block_label( $post_records[ $post_idx ]['name'] ),
+					'path'  => $post_records[ $post_idx ]['path'],
+				);
+				continue;
+			}
+
+			if ( null === $post_idx ) {
+				// Yours removed it; core kept it. Don't re-add — respect merchant intent.
+				$structural_changes[] = array(
+					'kind'        => 'merchant_removed',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'You removed %s; core still has it.', 'woocommerce' ),
+						self::block_label( $core_records[ $core_idx ]['name'] )
+					),
+					'path'        => $base['path'],
+				);
+				continue;
+			}
+
+			// Both sides have the block — increment occurrence ordinal for every
+			// matched pair, regardless of whether a copy_change is emitted, so
+			// "Paragraph N of M" reflects the block's true ordinal across the run.
+			// Mirrors the 2-way `diff_records()` placement of the counter.
+			$core                      = $core_records[ $core_idx ];
+			$post                      = $post_records[ $post_idx ];
+			$name                      = $core['name'];
+			$occurrence_index[ $name ] = ( $occurrence_index[ $name ] ?? 0 ) + 1;
+
+			// Known limitation: comparison is `inner_text` only; block `attrs` (colors,
+			// alignment, etc.) don't register as changes. With `auto_resolvable: true`
+			// the drawer can silently overwrite an attr-only merchant edit. Follow-up
+			// to extend the comparison to a stable hash of `attrs`.
+			$yours_changed = ( $base['inner_text'] !== $post['inner_text'] );
+			$core_changed  = ( $base['inner_text'] !== $core['inner_text'] );
+
+			if ( ! $yours_changed && ! $core_changed ) {
+				continue;
+			}
+			if ( ! $core_changed ) {
+				// Yours edited, core didn't — merchant-only edit, preserve silently.
+				continue;
+			}
+
+			// Core changed (with or without yours also changing).
+			$copy_changes[] = array(
+				'block'           => self::block_label( $name ),
+				'before'          => self::truncate_text( $post['inner_text'] ),
+				'after'           => self::truncate_text( $core['inner_text'] ),
+				'occurrence'      => $occurrence_index[ $name ],
+				'total'           => (int) ( $core_name_counts[ $name ] ?? 1 ),
+				'path'            => $post['path'],
+				'auto_resolvable' => ! $yours_changed,
+			);
+		}//end foreach
+
+		// Pass 2: unmatched core records → added_blocks. Structural wrappers
+		// (`core/group`, `core/columns`, `core/column`, `core/row`) route to
+		// `structural_changes` instead — the selective applier skips them at
+		// merge time, and surfacing them as `added_blocks` would advertise an
+		// "Added Group block" the apply will never apply. Mirrors the 2-way
+		// `diff_records()` handling of structural wrappers.
+		foreach ( $core_records as $c_idx => $rec ) {
+			if ( isset( $matched_core_indices[ $c_idx ] ) ) {
+				continue;
+			}
+			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
+				$structural_changes[] = array(
+					'kind'        => 'nest',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Added %s wrapper', 'woocommerce' ),
+						self::block_label( $rec['name'] )
+					),
+					'path'        => $rec['path'],
+				);
+				continue;
+			}
+			$added_blocks[] = array(
+				'name'  => $rec['name'],
+				'label' => self::block_label( $rec['name'] ),
+				'path'  => $rec['path'],
+			);
+		}
+
+		// Pass 3: unmatched post records → removed_blocks (yours-only additions, preserved by default).
+		// Same structural-wrapper handling as Pass 2 — yours-only structural blocks land in
+		// `structural_changes` rather than `removed_blocks`.
+		foreach ( $post_records as $p_idx => $rec ) {
+			if ( isset( $matched_post_indices[ $p_idx ] ) ) {
+				continue;
+			}
+			if ( isset( self::STRUCTURAL_BLOCK_NAMES[ $rec['name'] ] ) ) {
+				$structural_changes[] = array(
+					'kind'        => 'nest',
+					'description' => sprintf(
+						/* translators: %s: block name */
+						__( 'Removed %s wrapper', 'woocommerce' ),
+						self::block_label( $rec['name'] )
+					),
+					'path'        => $rec['path'],
+				);
+				continue;
+			}
+			$removed_blocks[] = array(
+				'name'  => $rec['name'],
+				'label' => self::block_label( $rec['name'] ),
+				'path'  => $rec['path'],
+			);
+		}
 
 		return array(
 			'added_blocks'       => $added_blocks,

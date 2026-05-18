@@ -12,6 +12,7 @@ import { renderHook } from '@testing-library/react';
 import {
 	duplicateProductAction,
 	moveToTrashAction,
+	selectAllVariationsAction,
 	useProductActions,
 } from './actions';
 import type { ProductEntityRecord } from '../fields/types';
@@ -91,6 +92,29 @@ describe( 'product list actions', () => {
 		id: 34,
 		status: 'draft',
 		name: 'Hoodie',
+	} as ProductEntityRecord;
+	const blueVariation = {
+		id: 56,
+		parent_id: 78,
+		status: 'publish',
+		name: 'Blue hoodie',
+		type: 'variation',
+	} as ProductEntityRecord;
+	const greenVariation = {
+		id: 57,
+		parent_id: 78,
+		status: 'publish',
+		name: 'Green hoodie',
+		type: 'variation',
+	} as ProductEntityRecord;
+	const variableProduct = {
+		id: 78,
+		status: 'draft',
+		name: 'Variable hoodie',
+		type: 'variable',
+		_embedded: {
+			variations: [ blueVariation, greenVariation ],
+		},
 	} as ProductEntityRecord;
 
 	const deleteEntityRecord = jest.fn();
@@ -187,6 +211,67 @@ describe( 'product list actions', () => {
 			'/products?activeView=draft&postId=12%2C34&quickEdit=true'
 		);
 		expect( onActionPerformed ).toHaveBeenCalledWith( [ product, hoodie ] );
+	} );
+
+	it( 'replaces the View action with the Select all variations action', () => {
+		const { result } = renderHook( () => useProductActions() );
+		const actionIds = result.current.map( ( action ) => action.id );
+
+		expect( actionIds ).toContain( 'select-all-variations' );
+		expect( actionIds ).not.toContain( 'view-product' );
+	} );
+
+	it( 'shows the Select all variations action only for variable products with variations', () => {
+		const selectVariationsAction = selectAllVariationsAction( {
+			navigate,
+		} );
+
+		expect( selectVariationsAction.isEligible?.( variableProduct ) ).toBe(
+			true
+		);
+		expect(
+			selectVariationsAction.isEligible?.( {
+				...variableProduct,
+				_embedded: {
+					variations: [],
+				},
+			} )
+		).toBe( false );
+		expect( selectVariationsAction.isEligible?.( product ) ).toBe( false );
+		expect(
+			selectVariationsAction.isEligible?.( {
+				...variableProduct,
+				status: 'trash',
+			} )
+		).toBe( false );
+	} );
+
+	it( 'selects all variations when the Select all variations action is triggered', () => {
+		const { result } = renderHook( () => useProductActions() );
+		const selectVariationsAction = result.current.find(
+			( action ) => action.id === 'select-all-variations'
+		);
+
+		expect( selectVariationsAction ).toBeDefined();
+
+		if ( ! selectVariationsAction ) {
+			throw new Error( 'Select all variations action not found.' );
+		}
+
+		getCallbackAction( selectVariationsAction ).callback(
+			[ variableProduct ],
+			{
+				onActionPerformed,
+			}
+		);
+
+		expect( navigate ).toHaveBeenCalledWith(
+			'/products?activeView=draft&postId=56%2C57'
+		);
+		expect( onActionPerformed ).toHaveBeenCalledWith( [
+			blueVariation,
+			greenVariation,
+		] );
 	} );
 
 	it( 'opens product editor when the Edit action is triggered', () => {

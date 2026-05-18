@@ -10,7 +10,8 @@
  * @var string $command_alias
  * @var string $return_type_expr
  * @var array  $use_statements
- * @var array  $args - each: ['name', 'type_expr', 'description', 'has_default', 'default']
+ * @var array  $args - each: ['name', 'type_expr', 'description', 'has_default', 'default', 'metadata' => array]
+ * @var array  $metadata - root-field-level metadata, name => scalar value.
  * @var bool   $has_connection_of
  * @var string $connection_type_alias
  * @var bool   $standalone_attribute_check - true when authorize() is absent and the attribute_expr is the sole authorization gate
@@ -92,6 +93,13 @@ class <?php echo $class_name; ?> {
 <?php if ( $description !== '' ) : ?>
 			'description' => __( '<?php echo $escaped_description; ?>', 'woocommerce' ),
 <?php endif; ?>
+<?php if ( ! empty( $metadata ) ) : ?>
+			'metadata' => array(
+<?php foreach ( $metadata as $meta_name => $meta_value ) : ?>
+				<?php echo var_export( $meta_name, true ); ?> => <?php echo var_export( $meta_value, true ); ?>,
+<?php endforeach; ?>
+			),
+<?php endif; ?>
 			'args' => array(
 <?php foreach ( $args as $arg ) : ?>
 				'<?php echo $arg['name']; ?>' => array(
@@ -101,6 +109,13 @@ class <?php echo $class_name; ?> {
 <?php endif; ?>
 	<?php if ( $arg['has_default'] ) : ?>
 					'defaultValue' => <?php echo var_export( $arg['default'], true ); ?>,
+<?php endif; ?>
+	<?php if ( ! empty( $arg['metadata'] ) ) : ?>
+					'metadata' => array(
+		<?php foreach ( $arg['metadata'] as $meta_name => $meta_value ) : ?>
+						<?php echo var_export( $meta_name, true ); ?> => <?php echo var_export( $meta_value, true ); ?>,
+<?php endforeach; ?>
+					),
 <?php endif; ?>
 				),
 <?php endforeach; ?>
