@@ -55,14 +55,12 @@
 	// next to a search input. The default toggle structure doesn't
 	// stretch / centre vertically on its own, so we explicitly handle
 	// both contexts:
-	//
 	// - Floating header (inside `.woocommerce-layout__activity-panel-tabs`):
 	//   wrapper stretches to the 60px bar height so the User tab aligns
 	//   with its neighbours (bell / store / display / help).
 	// - Marketplace page (inside `.woocommerce-marketplace__header`):
 	//   wrapper sits at 40px to match the WP 7.0-height search input
 	//   beside it.
-	//
 	// Both rules scope to their parent container rather than styling
 	// `__user-menu` unconditionally, otherwise the Home rule would leak
 	// onto Marketplace (and vice versa).

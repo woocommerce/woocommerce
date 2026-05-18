@@ -107,12 +107,10 @@ body.woocommerce_page_wc-admin:has(.woocommerce-layout__header-meta-icon) {
 		// design-tokens.css, and `--wp-admin-font-size-l: 15px` in the
 		// admin tokens proposal at
 		// https://core.trac.wordpress.org/ticket/65085.
-		//
 		// Weight 500 (medium) instead of the previous 600 (semibold) —
 		// aligns with `--wpds-typography-font-weight-medium`. The old
 		// 14px + 600 combo was bolding to compensate for being small;
 		// 15px + 500 reads quieter while still clearly title-y.
-		//
 		// TODO: replace these literals with CSS custom properties once
 		// WP Core exposes admin design tokens at `:root`. Tracked in
 		// the Trac ticket above. Hardcoded for now because the proposed
@@ -247,7 +245,6 @@ body.woocommerce_page_wc-admin:has(.woocommerce-layout__header-meta-icon) {
 // parses the DOM, before React has had a chance to set the class.
 // This kills the brief flash of the floating-header h1 that
 // previously appeared between first paint and React state commit.
-//
 // `:has()` is in every browser we support (Chrome 105+, Safari 15.4+,
 // Firefox 121+). Older browsers fall through to the JS-driven class
 // path above and still work — they just get the small flash.
