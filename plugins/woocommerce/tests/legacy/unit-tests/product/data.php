@@ -339,6 +339,81 @@ class WC_Tests_Product_Data extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Should clear stale media gallery data from the classic product gallery metabox when videos are disabled.
+	 */
+	public function test_product_gallery_meta_box_clears_media_gallery_items_when_videos_disabled() {
+		if ( ! class_exists( 'WC_Meta_Box_Product_Images' ) ) {
+			require_once WC_ABSPATH . 'includes/admin/meta-boxes/class-wc-meta-box-product-images.php';
+		}
+
+		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'no' );
+
+		$product      = WC_Helper_Product::create_simple_product();
+		$old_image_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'Old gallery image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$video_id     = wp_insert_attachment(
+			array(
+				'post_title'     => 'Product video',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'video/mp4',
+			)
+		);
+		$new_image_id = wp_insert_attachment(
+			array(
+				'post_title'     => 'New gallery image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$post         = get_post( $product->get_id() );
+		$_post        = $_POST; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+
+		$product->set_media_gallery(
+			array(
+				array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+				),
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $old_image_id,
+				),
+			)
+		);
+		$product->save();
+
+		try {
+			// phpcs:disable WordPress.Security.NonceVerification.Missing
+			$_POST['product-type']          = 'simple';
+			$_POST['product_image_gallery'] = (string) $new_image_id;
+			unset( $_POST['product_media_gallery'] );
+			// phpcs:enable WordPress.Security.NonceVerification.Missing
+
+			WC_Meta_Box_Product_Images::save( $product->get_id(), $post );
+		} finally {
+			$_POST = $_post;
+		}
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertInstanceOf( WC_Product::class, $updated_product );
+		$this->assertSame( array( $new_image_id ), $updated_product->get_gallery_image_ids() );
+		$this->assertSame( array(), $updated_product->get_media_gallery( 'edit' ) );
+
+		$product->delete( true );
+		wp_delete_attachment( $old_image_id, true );
+		wp_delete_attachment( $video_id, true );
+		wp_delete_attachment( $new_image_id, true );
+	}
+
+	/**
 	 * Test the onbackorder stock status.
 	 *
 	 * @since 3.3.0

@@ -433,20 +433,25 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$data     = $response->get_data();
 
 		$this->assertEquals( 200, $response->get_status() );
-		$this->assertSame( 'video', $data['media_gallery'][0]['media_type'] );
-		$this->assertSame( $video_id, $data['media_gallery'][0]['id'] );
-		$this->assertSame( $poster_id, $data['media_gallery'][0]['poster_id'] );
-		$this->assertSame( 'image', $data['media_gallery'][1]['media_type'] );
-		$this->assertSame( $image_id, $data['media_gallery'][1]['id'] );
+		$this->assertSame( 'image', $data['media_gallery'][0]['media_type'] );
+		$this->assertSame( $image_id, $data['media_gallery'][0]['id'] );
+		$this->assertSame( 'video', $data['media_gallery'][1]['media_type'] );
+		$this->assertSame( $video_id, $data['media_gallery'][1]['id'] );
+		$this->assertSame( $poster_id, $data['media_gallery'][1]['poster_id'] );
 
 		$updated_product = wc_get_product( $product->get_id() );
 
 		$this->assertInstanceOf( WC_Product::class, $updated_product );
-		$this->assertSame( $poster_id, (int) $updated_product->get_image_id() );
-		$this->assertSame( $product->get_id(), (int) get_post( $poster_id )->post_parent );
-		$this->assertSame( array( $image_id ), $updated_product->get_gallery_image_ids() );
+		$this->assertSame( $image_id, (int) $updated_product->get_image_id() );
+		$this->assertSame( $product->get_id(), (int) get_post( $image_id )->post_parent );
+		$this->assertSame( array(), $updated_product->get_gallery_image_ids() );
 		$this->assertEquals(
 			array(
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $image_id,
+				),
 				array(
 					'media_type'  => 'video',
 					'source_type' => 'attachment',
@@ -455,11 +460,6 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 					'settings'    => array(
 						'controls' => true,
 					),
-				),
-				array(
-					'media_type'  => 'image',
-					'source_type' => 'attachment',
-					'id'          => $image_id,
 				),
 			),
 			$updated_product->get_media_gallery( 'edit' )
@@ -521,15 +521,15 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$this->assertSame(
 			array(
 				array(
-					'media_type'  => 'video',
-					'source_type' => 'attachment',
-					'id'          => $video_id,
-					'position'    => 0,
-				),
-				array(
 					'media_type'  => 'image',
 					'source_type' => 'attachment',
 					'id'          => $new_image_id,
+					'position'    => 0,
+				),
+				array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
 					'position'    => 1,
 				),
 			),
@@ -542,6 +542,47 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		$this->assertEquals(
 			array(
 				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $new_image_id,
+				),
+				array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'poster_id'   => $poster_id,
+				),
+			),
+			$updated_product->get_media_gallery( 'edit' )
+		);
+		$this->assertSame( $new_image_id, (int) $updated_product->get_image_id() );
+		$this->assertSame( array(), $updated_product->get_gallery_image_ids() );
+
+		$product->delete( true );
+		wp_delete_attachment( $old_image_id, true );
+		wp_delete_attachment( $poster_id, true );
+		wp_delete_attachment( $video_id, true );
+		wp_delete_attachment( $new_image_id, true );
+	}
+
+	/**
+	 * Test updating legacy product images clears stored video gallery data when the feature is disabled.
+	 *
+	 * @testdox Should clear stored videos when legacy images are updated while product gallery videos are disabled.
+	 */
+	public function test_update_product_images_clears_stored_video_media_gallery_items_when_feature_disabled() {
+		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'no' );
+
+		$product      = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$old_image_id = $this->create_product_media_attachment( 'Old gallery image' );
+		$poster_id    = $this->create_product_media_attachment( 'Old video poster' );
+		$video_id     = $this->create_product_media_attachment( 'Old product video', 'video/mp4' );
+		$new_image_id = $this->create_product_media_attachment( 'New product image' );
+
+		$product->set_media_gallery(
+			array(
+				array(
 					'media_type'  => 'video',
 					'source_type' => 'attachment',
 					'id'          => $video_id,
@@ -550,13 +591,51 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 				array(
 					'media_type'  => 'image',
 					'source_type' => 'attachment',
-					'id'          => $new_image_id,
+					'id'          => $old_image_id,
 				),
-			),
-			$updated_product->get_media_gallery( 'edit' )
+			)
 		);
+		$product->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_body_params(
+			array(
+				'images' => array(
+					array(
+						'id'       => $new_image_id,
+						'position' => 0,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertInstanceOf( WC_Product::class, $updated_product );
 		$this->assertSame( $new_image_id, (int) $updated_product->get_image_id() );
 		$this->assertSame( array(), $updated_product->get_gallery_image_ids() );
+		$this->assertSame( array(), $updated_product->get_media_gallery( 'edit' ) );
+
+		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+
+		$get_response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+		$get_data     = $get_response->get_data();
+
+		$this->assertEquals( 200, $get_response->get_status() );
+		$this->assertSame(
+			array(
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $new_image_id,
+					'position'    => 0,
+				),
+			),
+			$this->get_media_gallery_identity_fields( $get_data['media_gallery'] )
+		);
 
 		$product->delete( true );
 		wp_delete_attachment( $old_image_id, true );

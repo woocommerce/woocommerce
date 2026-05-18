@@ -232,6 +232,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 					'media_type'  => 'video',
 					'source_type' => 'attachment',
 					'id'          => $video_id,
+					'poster_id'   => $featured_image_id,
 				),
 			)
 		);

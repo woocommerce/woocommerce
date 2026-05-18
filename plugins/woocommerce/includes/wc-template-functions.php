@@ -1827,40 +1827,6 @@ if ( ! function_exists( 'wc_get_gallery_video_poster_id' ) ) {
 	}
 }
 
-if ( ! function_exists( 'wc_media_gallery_contains_product_image' ) ) {
-	/**
-	 * Check if media gallery items already represent the product image.
-	 *
-	 * @since 10.9.0
-	 * @param array[] $media_items      Product media gallery items.
-	 * @param int     $product_image_id Product image attachment ID.
-	 * @return bool
-	 */
-	function wc_media_gallery_contains_product_image( $media_items, $product_image_id ) {
-		$product_image_id = absint( $product_image_id );
-
-		if ( ! $product_image_id ) {
-			return true;
-		}
-
-		foreach ( $media_items as $media_item ) {
-			if ( ! is_array( $media_item ) ) {
-				continue;
-			}
-
-			if ( 'image' === ( $media_item['media_type'] ?? '' ) && absint( $media_item['id'] ?? 0 ) === $product_image_id ) {
-				return true;
-			}
-
-			if ( 'video' === ( $media_item['media_type'] ?? '' ) && wc_get_gallery_video_poster_id( $media_item ) === $product_image_id ) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-}
-
 if ( ! function_exists( 'wc_get_product_media_gallery_items' ) ) {
 	/**
 	 * Get ordered media gallery items for a product.
@@ -1878,7 +1844,7 @@ if ( ! function_exists( 'wc_get_product_media_gallery_items' ) ) {
 		}
 
 		$product_gallery_videos_enabled = function_exists( 'wc_product_gallery_videos_enabled' ) && wc_product_gallery_videos_enabled();
-		$media_gallery                  = $product_gallery_videos_enabled && method_exists( $product, 'get_media_gallery' )
+		$media_gallery                  = $product_gallery_videos_enabled
 			? $product->get_media_gallery()
 			: array();
 		$media_items                    = array();
@@ -1925,18 +1891,34 @@ if ( ! function_exists( 'wc_get_product_media_gallery_items' ) ) {
 
 			$featured_image_id = $product->get_image_id();
 
-			if (
-				$featured_image_id &&
-				! wc_media_gallery_contains_product_image( $media_items, $featured_image_id )
-			) {
-				array_unshift(
-					$media_items,
-					array(
-						'media_type'  => 'image',
-						'source_type' => 'attachment',
-						'id'          => absint( $featured_image_id ),
-					)
+			if ( $featured_image_id ) {
+				$featured_image_item = array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => absint( $featured_image_id ),
 				);
+
+				foreach ( $media_items as $index => $media_item ) {
+					if (
+						'image' !== ( $media_item['media_type'] ?? '' ) ||
+						absint( $media_item['id'] ?? 0 ) !== absint( $featured_image_id )
+					) {
+						continue;
+					}
+
+					if ( 0 === $index ) {
+						$featured_image_item = array();
+					} else {
+						unset( $media_items[ $index ] );
+					}
+
+					break;
+				}
+
+				if ( ! empty( $featured_image_item ) ) {
+					array_unshift( $media_items, $featured_image_item );
+					$media_items = array_values( $media_items );
+				}
 			}
 		} else {
 			$image_ids         = array();

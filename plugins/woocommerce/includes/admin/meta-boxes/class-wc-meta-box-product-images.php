@@ -51,7 +51,9 @@ class WC_Meta_Box_Product_Images {
 
 					foreach ( $product_media_gallery as $media_item ) {
 						$attachment_id = absint( $media_item['id'] ?? 0 );
-						$media_type    = wc_clean( $media_item['media_type'] ?? 'image' );
+						$media_type    = isset( $media_item['media_type'] ) && is_string( $media_item['media_type'] )
+							? sanitize_key( $media_item['media_type'] )
+							: 'image';
 						$poster_id     = absint( $media_item['poster_id'] ?? 0 );
 						$attachment    = 'video' === $media_type
 							? self::get_video_preview_html( $attachment_id )
@@ -81,10 +83,10 @@ class WC_Meta_Box_Product_Images {
 						?>
 						<li
 							class="image <?php echo 'video' === $media_type ? 'video' : ''; ?>"
-							data-attachment_id="<?php echo esc_attr( $attachment_id ); ?>"
-							data-media_type="<?php echo esc_attr( $media_type ); ?>"
+							data-attachment_id="<?php echo esc_attr( (string) $attachment_id ); ?>"
+							data-media_type="<?php echo esc_attr( (string) $media_type ); ?>"
 							data-source_type="attachment"
-							data-poster_id="<?php echo esc_attr( $poster_id ); ?>"
+							data-poster_id="<?php echo esc_attr( (string) $poster_id ); ?>"
 						>
 							<?php echo $attachment; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							<ul class="actions">
@@ -148,9 +150,14 @@ class WC_Meta_Box_Product_Images {
 	 * @param WP_Post $post
 	 */
 	public static function save( $post_id, $post ) {
-		$product_type   = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( stripslashes( $_POST['product-type'] ) );
-		$classname      = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : ProductType::SIMPLE );
-		$product        = new $classname( $post_id );
+		$product_type = empty( $_POST['product-type'] ) ? WC_Product_Factory::get_product_type( $post_id ) : sanitize_title( wp_unslash( $_POST['product-type'] ) ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$classname    = WC_Product_Factory::get_product_classname( $post_id, $product_type ? $product_type : ProductType::SIMPLE );
+		$product      = new $classname( $post_id );
+
+		if ( ! $product instanceof WC_Product ) {
+			return;
+		}
+
 		$attachment_ids = isset( $_POST['product_image_gallery'] ) ? array_filter( explode( ',', wc_clean( $_POST['product_image_gallery'] ) ) ) : array();
 		$videos_enabled = self::product_gallery_videos_enabled();
 		$media_posted   = $videos_enabled && isset( $_POST['product_media_gallery'] ); // phpcs:ignore WordPress.Security.NonceVerification.Missing
@@ -168,6 +175,8 @@ class WC_Meta_Box_Product_Images {
 
 		if ( $videos_enabled ) {
 			$product->set_media_gallery( self::media_gallery_has_videos( $media_gallery ) ? $media_gallery : array() );
+		} else {
+			$product->set_media_gallery( array() );
 		}
 
 		$product->save();
@@ -185,7 +194,7 @@ class WC_Meta_Box_Product_Images {
 		}
 
 		$product_image_id = absint( $product->get_image_id( 'edit' ) );
-		$media_gallery    = method_exists( $product, 'get_media_gallery' ) ? $product->get_media_gallery( 'edit' ) : array();
+		$media_gallery    = $product->get_media_gallery( 'edit' );
 		$media_gallery    = self::sanitize_media_gallery( $media_gallery );
 
 		if ( ! empty( $media_gallery ) ) {

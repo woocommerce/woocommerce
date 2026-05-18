@@ -1239,8 +1239,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 		if ( isset( $request['images'] ) ) {
 			$product = $this->set_product_images( $product, $request['images'] );
 
-			if ( $this->product_gallery_videos_enabled() && ! isset( $request['media_gallery'] ) ) {
-				$product = $this->sync_media_gallery_from_legacy_images_update( $product );
+			if ( ! isset( $request['media_gallery'] ) ) {
+				$product = $this->sync_media_gallery_from_legacy_images_request( $product ); // @phpstan-ignore argument.type
 			}
 		}
 
@@ -1250,7 +1250,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 				throw new WC_REST_Exception( 'woocommerce_product_media_gallery_feature_disabled', esc_html__( 'Product gallery videos are not enabled.', 'woocommerce' ), 400 );
 			}
 
-			$product = $this->set_product_media_gallery( $product, $request['media_gallery'] );
+			$product = $this->set_product_media_gallery( $product, $request['media_gallery'] ); // @phpstan-ignore argument.type
 		}
 
 		// Allow set meta_data.
