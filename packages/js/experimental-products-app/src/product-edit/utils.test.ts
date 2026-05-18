@@ -732,7 +732,7 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expectFieldsHidden( fieldIds, [ 'downloadable' ] );
+			expect( fieldIds ).toContain( 'downloadable' );
 			expectFieldsHidden( fieldIds, shippingFieldIds );
 		} );
 
@@ -827,7 +827,7 @@ describe( 'product edit utils', () => {
 			] );
 		} );
 
-		it( 'hides downloadable fields for simple product and variation selections', () => {
+		it( 'shows downloadable fields for simple product and variation selections', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					id: 1,
@@ -842,7 +842,7 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expectFieldsHidden( fieldIds, [ 'downloadable' ] );
+			expect( fieldIds ).toContain( 'downloadable' );
 		} );
 
 		it( 'hides downloadable fields unless every bulk item supports downloads', () => {
@@ -1014,7 +1014,12 @@ describe( 'product edit utils', () => {
 				{
 					id: 'image-fields',
 					label: 'Images',
-					children: [ 'images', 'downloadable' ],
+					children: [ 'images' ],
+				},
+				{
+					id: 'downloadable-files-fields',
+					label: 'Downloadable files',
+					children: [ 'downloadable' ],
 				},
 				{
 					id: 'inventory-fields',
@@ -1236,6 +1241,11 @@ describe( 'product edit utils', () => {
 					id: 'image-fields',
 					label: 'Images',
 					children: [ 'images' ],
+				},
+				{
+					id: 'downloadable-files-fields',
+					label: 'Downloadable files',
+					children: [ 'downloadable' ],
 				},
 				{
 					id: 'inventory-fields',

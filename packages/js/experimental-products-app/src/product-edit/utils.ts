@@ -102,6 +102,13 @@ function createProductEditFormGroup(
 	};
 }
 
+const DOWNLOADABLE_FILES_FORM_FIELD: ProductEditFormField =
+	createProductEditFormGroup(
+		'downloadable-files-fields',
+		__( 'Downloadable files', 'woocommerce' ),
+		[ 'downloadable' ]
+	);
+
 const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'general-fields',
@@ -120,8 +127,8 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
-		'downloadable',
 	] ),
+	DOWNLOADABLE_FILES_FORM_FIELD,
 	createProductEditFormGroup(
 		'inventory-fields',
 		__( 'Inventory', 'woocommerce' ),
@@ -158,6 +165,7 @@ const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
 	] ),
+	DOWNLOADABLE_FILES_FORM_FIELD,
 	createProductEditFormGroup(
 		'inventory-fields',
 		__( 'Inventory', 'woocommerce' ),
