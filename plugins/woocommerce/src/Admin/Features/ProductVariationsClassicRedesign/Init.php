@@ -31,6 +31,7 @@ class Init {
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ), 20 );
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'handle_woocommerce_product_data_tabs' ), 5 );
 		add_action( 'woocommerce_admin_process_product_object', array( $this, 'preserve_variation_attributes' ), 10, 1 );
+		add_action( 'woocommerce_before_product_object_save', array( $this, 'preserve_variation_attributes_on_legacy_ajax_save' ), 10, 1 );
 	}
 
 	/**
@@ -116,6 +117,36 @@ class Init {
 		);
 
 		$product->set_attributes( array_merge( $non_variation, $existing_variation ) );
+	}
+
+	/**
+	 * Variation-attribute preservation companion for the legacy `woocommerce_save_attributes` AJAX flow.
+	 *
+	 * The legacy "Save attributes" button on the Product attributes tab triggers an AJAX handler
+	 * (`WC_AJAX::save_attributes()`) that bypasses `woocommerce_admin_process_product_object`.
+	 * That handler rebuilds the attributes array from POST data (which contains no variation rows,
+	 * since the renamed tab filters them out) and overwrites the product, wiping any persisted
+	 * variation attributes. This hook re-merges them in before `WC_Product::save()` persists.
+	 *
+	 * The guard restricts the merge to the legacy AJAX endpoint only — inline REST saves from the
+	 * new editor, programmatic `WC_Product::save()` calls, and the WordPress "Update" form-POST flow
+	 * (already covered by `preserve_variation_attributes` above) all proceed unmodified.
+	 *
+	 * @since 10.9.0
+	 * @param WC_Product $product The product being saved.
+	 */
+	public function preserve_variation_attributes_on_legacy_ajax_save( WC_Product $product ): void {
+		if ( ! wp_doing_ajax() ) {
+			return;
+		}
+
+		// phpcs:ignore WordPress.Security.NonceVerification.Missing -- Nonce verified by WC_AJAX::save_attributes() before this hook fires.
+		$action = isset( $_POST['action'] ) ? sanitize_text_field( wp_unslash( $_POST['action'] ) ) : '';
+		if ( 'woocommerce_save_attributes' !== $action ) {
+			return;
+		}
+
+		$this->preserve_variation_attributes( $product );
 	}
 
 	/**
