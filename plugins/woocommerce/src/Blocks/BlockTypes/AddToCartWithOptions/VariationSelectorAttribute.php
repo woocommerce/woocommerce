@@ -141,6 +141,10 @@ class VariationSelectorAttribute extends AbstractBlock {
 			foreach ( $terms as $term ) {
 				$option = $this->map_term_to_option( $term, $attribute_name, $product, $selected_attribute );
 
+				if ( ! isset( $option['value'] ) ) {
+					continue;
+				}
+
 				if ( $allows_any_value || isset( $available_values[ $option['value'] ] ) ) {
 					$attribute_terms[] = $option;
 				}
@@ -207,7 +211,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 	 * @param string|null $default_selected Default selected attribute value.
 	 * @return array
 	 */
-	private function build_variation_selectable_items( string $attribute_slug, array $attribute_terms, string $default_selected ): array {
+	private function build_variation_selectable_items( string $attribute_slug, array $attribute_terms, ?string $default_selected ): array {
 		$id_prefix = sanitize_title( $attribute_slug );
 		$items     = array();
 
