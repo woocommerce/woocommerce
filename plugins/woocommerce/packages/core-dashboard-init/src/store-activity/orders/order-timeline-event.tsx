@@ -1,5 +1,6 @@
 import { createInterpolateElement } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
+import { Link } from '@wordpress/ui';
 import type { OrderRecord } from '../../data';
 
 type OrderTimelineEventProps = {
@@ -15,6 +16,12 @@ function formatCustomerName( billing: OrderRecord[ 'billing' ] ): string {
 /**
  * Renders the content of a single Order activity event in the Store Activity
  * timeline.
+ *
+ * Uses `@wordpress/ui`'s `Link` for the styled anchor — it forwards standard
+ * anchor props to an `<a>` and carries WPDS tokens (brand color, focus ring).
+ * For SPA-internal destinations (routes owned by the dashboard SPA) consumers
+ * should prefer `Link` / `useNavigate` from `@wordpress/route` instead; here
+ * the target is the legacy `post.php` admin screen, which is outside the SPA.
  */
 export function OrderTimelineEvent( { order }: OrderTimelineEventProps ) {
 	const href = `/wp-admin/post.php?post=${ order.id }&action=edit`;
@@ -34,7 +41,7 @@ export function OrderTimelineEvent( { order }: OrderTimelineEventProps ) {
 						displayNumber,
 						customerName
 					),
-					{ orderLink: <a href={ href } /> }
+					{ orderLink: <Link href={ href } /> }
 				) }
 			</span>
 		);
@@ -48,7 +55,7 @@ export function OrderTimelineEvent( { order }: OrderTimelineEventProps ) {
 					__( '<orderLink>Order #%s</orderLink> placed', 'woocommerce' ),
 					displayNumber
 				),
-				{ orderLink: <a href={ href } /> }
+				{ orderLink: <Link href={ href } /> }
 			) }
 		</span>
 	);

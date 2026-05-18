@@ -15,7 +15,8 @@
 		"@wordpress/element": "next",
 		"@wordpress/hooks": "next",
 		"@wordpress/i18n": "next",
-		"@wordpress/icons": "next"
+		"@wordpress/icons": "next",
+		"@wordpress/ui": "next"
 	},
 	"devDependencies": {
 		"@types/react": "18.3.x"
