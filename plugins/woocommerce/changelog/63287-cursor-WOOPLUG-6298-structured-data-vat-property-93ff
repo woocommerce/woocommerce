@@ -1,4 +1,4 @@
 Significance: patch
-Type: dev
+Type: fix
 
-Add unit tests for the valueAddedTaxIncluded structured data fix.
+Fix: Prevent `valueAddedTaxIncluded` from being added to structured data when taxes are disabled.
