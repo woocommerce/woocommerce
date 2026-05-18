@@ -136,3 +136,5 @@ CLAUDE.local.md
 
 # Docusaurus
 .docusaurus
+
+# CI labeled-event unrelated path test marker; safe to remove after measuring workflow jobs.
