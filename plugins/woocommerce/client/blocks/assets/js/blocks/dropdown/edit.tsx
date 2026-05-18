@@ -14,7 +14,7 @@ import type { BlockEditProps } from '@wordpress/blocks';
 import type {
 	SelectableItem,
 	SelectableItemsBlockContext,
-} from '../../../../types/type-defs/selectable-items';
+} from '../../types/type-defs/selectable-items';
 import './editor.scss';
 import './style.scss';
 
@@ -49,7 +49,7 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		: [];
 
 	const blockProps = useBlockProps( {
-		className: clsx( 'wc-block-product-filter-dropdown', {
+		className: clsx( 'wc-block-dropdown', {
 			'is-loading': isLoading,
 		} ),
 	} );
@@ -57,17 +57,17 @@ const Edit = ( props: EditProps ): JSX.Element => {
 	return (
 		<div { ...blockProps }>
 			<Disabled>
-				<fieldset className="wc-block-product-filter-dropdown__fieldset">
+				<fieldset className="wc-block-dropdown__fieldset">
 					<legend className="screen-reader-text">
 						{ __( 'Choose an option', 'woocommerce' ) }
 					</legend>
 					{ isLoading ? (
-						<div className="wc-block-product-filter-dropdown__skeleton">
-							<div className="wc-block-product-filter-dropdown__skeleton-option" />
+						<div className="wc-block-dropdown__skeleton">
+							<div className="wc-block-dropdown__skeleton-option" />
 						</div>
 					) : (
 						<select
-							className="wc-block-product-filter-dropdown__select"
+							className="wc-block-dropdown__select"
 							aria-label={ selectableItems.groupLabel }
 						>
 							<option value="">

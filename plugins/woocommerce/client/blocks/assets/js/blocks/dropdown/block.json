@@ -1,6 +1,6 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
-	"name": "woocommerce/product-filter-dropdown",
+	"name": "woocommerce/dropdown",
 	"title": "Dropdown",
 	"description": "Display options in a dropdown.",
 	"category": "woocommerce",
@@ -15,7 +15,7 @@
 	},
 	"usesContext": [ "woocommerceSelectableItems" ],
 	"attributes": {},
-	"viewScriptModule": "woocommerce/product-filter-dropdown",
-	"style": "file:../woocommerce/product-filter-dropdown-style.css",
-	"editorStyle": "file:../woocommerce/product-filter-dropdown-editor.css"
+	"viewScriptModule": "woocommerce/dropdown",
+	"style": "file:../woocommerce/dropdown-style.css",
+	"editorStyle": "file:../woocommerce/dropdown-editor.css"
 }

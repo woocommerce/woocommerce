@@ -381,6 +381,7 @@ final class BlockTypesController {
 			'CatalogSorting',
 			'ClassicShortcode',
 			'CustomerAccount',
+			'Dropdown',
 			'FeaturedCategory',
 			'FeaturedProduct',
 			'MiniCart',
@@ -400,7 +401,6 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
-			'ProductFilterDropdown',
 			'ProductFilterTaxonomy',
 
 			// Keep hidden legacy filter blocks for backward compatibility.
@@ -450,6 +450,7 @@ final class BlockTypesController {
 			'ComingSoon',
 			'CouponCode',
 			'CustomerAccount',
+			'Dropdown',
 			'EmailContent',
 			'FeaturedCategory',
 			'FeaturedProduct',
@@ -477,7 +478,6 @@ final class BlockTypesController {
 			'ProductFilterClearButton',
 			'ProductFilterCheckboxList',
 			'ProductFilterChips',
-			'ProductFilterDropdown',
 			'ProductFilterTaxonomy',
 			'ProductGallery',
 			'ProductGalleryLargeImage',

@@ -594,7 +594,7 @@ Key points:
 - **Nested `data-wp-interactive`** — outer wrapper under the inner namespace, items region switches to the parent namespace so wp-each + parent selection bindings resolve there; presentational bindings (`itemHidden`, `ratingStyle`) use cross-namespace `::` back to the inner store
 - **`filterType` discriminator** — inner block can branch rendering (e.g. stars for `'rating'`) without leaking presentation into the parent store
 
-Reference implementation: `ProductFilterCheckboxList.php`, `ProductFilterChips.php`, `ProductFilterDropdown.php`, `checkbox-list/frontend.ts`, `chips/frontend.ts`, `dropdown/frontend.ts`
+Reference implementation: `ProductFilterCheckboxList.php`, `ProductFilterChips.php`, `Dropdown.php`, `product-filters/inner-blocks/checkbox-list/frontend.ts`, `product-filters/inner-blocks/chips/frontend.ts`, `dropdown/frontend.ts`
 
 ### Implementing as Parent Block (Provider)
 

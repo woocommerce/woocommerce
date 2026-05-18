@@ -105,7 +105,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 		);
 
 		$display_style = $this->resolve_display_style( $attributes );
-		if ( 'woocommerce/product-filter-dropdown' !== $display_style ) {
+		if ( 'woocommerce/dropdown' !== $display_style ) {
 			$interactive_attributes['role']            = 'radiogroup';
 			$interactive_attributes['id']              = $attribute_id;
 			$interactive_attributes['aria-labelledby'] = $attribute_id . '_label';
@@ -189,7 +189,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 		}
 		if ( array_key_exists( 'optionStyle', $attributes ) ) {
 			return 'dropdown' === $attributes['optionStyle']
-				? 'woocommerce/product-filter-dropdown'
+				? 'woocommerce/dropdown'
 				: 'woocommerce/product-filter-chips';
 		}
 		return 'woocommerce/product-filter-chips';

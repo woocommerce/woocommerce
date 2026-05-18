@@ -6,7 +6,7 @@ import { store, getContext } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
+import type { SelectableItem } from '../../types/type-defs/selectable-items';
 
 type DropdownContext = {
 	storeNamespace: string;
@@ -35,7 +35,7 @@ function isToggleableItem(
 }
 
 store(
-	'woocommerce/product-filter-dropdown',
+	'woocommerce/dropdown',
 	{
 		state: {
 			get selectValue(): string {

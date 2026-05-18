@@ -58,6 +58,7 @@ const blocks = {
 	'coming-soon': {},
 	'coupon-code': {},
 	'customer-account': {},
+	dropdown: {},
 	'email-content': {},
 	'featured-category': {
 		customDir: 'featured-items/featured-category',
@@ -144,9 +145,6 @@ const blocks = {
 	},
 	'product-filter-chips': {
 		customDir: 'product-filters/inner-blocks/chips',
-	},
-	'product-filter-dropdown': {
-		customDir: 'product-filters/inner-blocks/dropdown',
 	},
 	'product-filter-price-slider': {
 		customDir: 'product-filters/inner-blocks/price-slider',

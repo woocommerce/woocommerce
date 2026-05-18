@@ -4,9 +4,9 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 /**
- * Product Filter: Dropdown block (native select).
+ * Dropdown block (native select).
  */
-final class ProductFilterDropdown extends AbstractBlock {
+final class Dropdown extends AbstractBlock {
 
 	use EnableBlockJsonAssetsTrait;
 
@@ -15,7 +15,7 @@ final class ProductFilterDropdown extends AbstractBlock {
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'product-filter-dropdown';
+	protected $block_name = 'dropdown';
 
 	/**
 	 * Plain-text label for a select option (no HTML in `<option>`).
@@ -54,10 +54,10 @@ final class ProductFilterDropdown extends AbstractBlock {
 			return '';
 		}
 
-		$select_id = wp_unique_id( 'wc-block-product-filter-dropdown-' );
+		$select_id = wp_unique_id( 'wc-block-dropdown-' );
 
 		$wrapper_attributes = array(
-			'data-wp-interactive' => 'woocommerce/product-filter-dropdown',
+			'data-wp-interactive' => 'woocommerce/dropdown',
 			'data-wp-context'     => (string) wp_json_encode(
 				array(
 					'storeNamespace' => $store_namespace,
@@ -71,10 +71,10 @@ final class ProductFilterDropdown extends AbstractBlock {
 		ob_start();
 		?>
 		<div <?php echo get_block_wrapper_attributes( $wrapper_attributes ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>>
-			<fieldset class="wc-block-product-filter-dropdown__fieldset">
+			<fieldset class="wc-block-dropdown__fieldset">
 				<legend class="screen-reader-text"><?php echo esc_html( __( 'Choose an option', 'woocommerce' ) ); ?></legend>
 				<select
-					class="wc-block-product-filter-dropdown__select"
+					class="wc-block-dropdown__select"
 					id="<?php echo esc_attr( $select_id ); ?>"
 					aria-label="<?php echo esc_attr( $aria_label ); ?>"
 					data-wp-bind--value="state.selectValue"
