@@ -100,6 +100,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			<label><input type="checkbox" class="woocommerce_attribute_visible_on_product_page checkbox" <?php checked( $attribute->get_visible(), true ); ?> name="attribute_visibility[<?php echo esc_attr( $i ); ?>]" value="1" /> <?php esc_html_e( 'Visible on the product page', 'woocommerce' ); ?></label>
 		</td>
 	</tr>
+	<?php if ( ! \Automattic\WooCommerce\Admin\Features\Features::exists( \Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign\Init::FEATURE_ID ) ) : ?>
 	<tr>
 		<td>
 			<div class="enable_variation show_if_variable">
@@ -107,6 +108,7 @@ if ( ! defined( 'ABSPATH' ) ) {
 			</div>
 		</td>
 	</tr>
+	<?php endif; ?>
 	<?php
 	/**
 	 * Hook to display custom attribute terms.
