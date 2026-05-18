@@ -60,6 +60,15 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 			</tbody>
 		</table>
 		<div class="reset_variations_alert screen-reader-text" role="alert" aria-live="polite" aria-relevant="all"></div>
+		<?php
+			// Form-local fallback for the gallery reset snapshot. The primary
+			// channel is the inline script attached to `wc-add-to-cart-variation`
+			// from `woocommerce_variable_add_to_cart()`, but that channel only
+			// fires when the script handle is still print-able. When the form
+			// is injected after print (e.g. AJAX quick-view modals returning
+			// only markup), this template tag travels with the response.
+		?>
+		<script type="text/template" class="wc-product-gallery-default-template"><?php echo wc_get_product_gallery_html( $product ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>
 		<?php do_action( 'woocommerce_after_variations_table' ); ?>
 
 		<div class="single_variation_wrap">

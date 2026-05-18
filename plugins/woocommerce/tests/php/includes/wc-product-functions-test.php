@@ -1021,7 +1021,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script.
+	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script with non-empty markup.
 	 */
 	public function test_woocommerce_variable_add_to_cart_attaches_gallery_snapshot() {
 		$product = WC_Helper_Product::create_variation_product();
@@ -1029,7 +1029,9 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 		WC_Frontend_Scripts::load_scripts();
 
 		$wp_scripts = wp_scripts();
-		unset( $wp_scripts->registered['wc-add-to-cart-variation']->extra['before'] );
+		if ( isset( $wp_scripts->registered['wc-add-to-cart-variation'] ) ) {
+			unset( $wp_scripts->registered['wc-add-to-cart-variation']->extra['before'] );
+		}
 
 		$previous_product   = $GLOBALS['product'] ?? null;
 		$GLOBALS['product'] = $product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
@@ -1043,6 +1045,14 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'wc_variation_gallery_defaults', $inline_js );
 		$this->assertStringContainsString( '[' . $product->get_id() . ']', $inline_js );
+
+		// Decode the payload back out of the inline JS and assert it contains
+		// real gallery markup, not an empty string or `null`.
+		preg_match( '/\)\[\d+\]\s*=\s*("(?:\\\\.|[^"])*");/', $inline_js, $matches );
+		$this->assertNotEmpty( $matches, 'Inline JS should expose a JSON-encoded snapshot.' );
+		$decoded_snapshot = json_decode( $matches[1] );
+		$this->assertIsString( $decoded_snapshot );
+		$this->assertStringContainsString( 'woocommerce-product-gallery', $decoded_snapshot );
 
 		$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
 		WC_Helper_Product::delete_product( $product->get_id() );

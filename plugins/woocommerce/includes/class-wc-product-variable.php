@@ -422,11 +422,9 @@ class WC_Product_Variable extends WC_Product {
 		$variation_featured_valid = $variation_featured_id && wp_attachment_is_image( $variation_featured_id );
 		$parent_featured_id       = (int) $this->get_image_id();
 		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
-		$resolved_image_id        = $variation_featured_valid ? $variation_featured_id : ( $parent_featured_valid ? $parent_featured_id : 0 );
 
 		$variation_gallery_image_ids = array();
 		$variation_gallery_html      = '';
-		$selected_image_id          = $resolved_image_id;
 
 		if ( VariationGalleryPackage::is_enabled() ) {
 			$variation_gallery_image_ids = array_values(
@@ -435,20 +433,30 @@ class WC_Product_Variable extends WC_Product {
 					'wp_attachment_is_image'
 				)
 			);
+		}
 
-			if ( ! empty( $variation_gallery_image_ids ) ) {
-				if ( ! $selected_image_id ) {
-					$selected_image_id = $variation_gallery_image_ids[0];
-				}
+		// Fallback order: variation featured → variation gallery[0] →
+		// parent featured → 0. Variation-specific content takes precedence
+		// over the parent so a chosen variation never opens on an unrelated
+		// parent image when its own gallery is intact.
+		if ( $variation_featured_valid ) {
+			$selected_image_id = $variation_featured_id;
+		} elseif ( ! empty( $variation_gallery_image_ids ) ) {
+			$selected_image_id = $variation_gallery_image_ids[0];
+		} elseif ( $parent_featured_valid ) {
+			$selected_image_id = $parent_featured_id;
+		} else {
+			$selected_image_id = 0;
+		}
 
-				$gallery_html_ids = $variation_gallery_image_ids;
+		if ( ! empty( $variation_gallery_image_ids ) ) {
+			$gallery_html_ids = $variation_gallery_image_ids;
 
-				if ( ! in_array( $selected_image_id, $gallery_html_ids, true ) ) {
-					array_unshift( $gallery_html_ids, $selected_image_id );
-				}
-
-				$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
+			if ( $selected_image_id && ! in_array( $selected_image_id, $gallery_html_ids, true ) ) {
+				array_unshift( $gallery_html_ids, $selected_image_id );
 			}
+
+			$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
 		}
 
 		// See if prices should be shown for each variation after selection.
@@ -466,8 +474,8 @@ class WC_Product_Variable extends WC_Product {
 				'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
 				'gallery_image_ids'     => $variation_gallery_image_ids,
 				'gallery_images_html'   => $variation_gallery_html,
-					'image'                 => wc_get_product_attachment_props( $selected_image_id ),
-					'image_id'              => $selected_image_id,
+				'image'                 => wc_get_product_attachment_props( $selected_image_id ),
+				'image_id'              => $selected_image_id,
 				'is_downloadable'       => $variation->is_downloadable(),
 				'is_in_stock'           => $variation->is_in_stock(),
 				'is_purchasable'        => $variation->is_purchasable(),

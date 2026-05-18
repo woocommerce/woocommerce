@@ -227,9 +227,13 @@ class ProductGalleryUtils {
 			return $parent_fallback;
 		}
 
-		$selected_image_id = $variation_image_valid ? $variation_image_id : $parent_fallback['image_id'];
-
-		if ( ! $selected_image_id ) {
+		// Fallback order: variation featured → variation gallery[0] →
+		// parent featured → 0. Variation-specific content takes precedence
+		// over the parent so a chosen variation never opens on an unrelated
+		// parent image when its own gallery is intact.
+		if ( $variation_image_valid ) {
+			$selected_image_id = $variation_image_id;
+		} else {
 			$selected_image_id = $image_ids[0];
 		}
 
@@ -239,7 +243,7 @@ class ProductGalleryUtils {
 
 		return array(
 			'image_id'  => $selected_image_id,
-			'image_ids' => array_values( array_unique( $image_ids ) ),
+			'image_ids' => $image_ids,
 		);
 	}
 

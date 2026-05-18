@@ -879,13 +879,23 @@
 	/**
 	 * Get the default product gallery HTML used for restoring classic templates.
 	 *
-	 * Reads from `window.wc_variation_gallery_defaults`, populated when the
-	 * variable form is rendered.
+	 * Prefers `window.wc_variation_gallery_defaults` (populated when
+	 * `woocommerce_variable_add_to_cart` runs server-side). Falls back to the
+	 * form-local `<script class="wc-product-gallery-default-template">` tag
+	 * for cases where the form was injected after the script handle was
+	 * already printed — e.g. AJAX quick-view modals returning only markup.
 	 */
 	$.fn.wc_get_default_product_gallery_html = function () {
-		var productId = $( this ).data( 'product_id' );
+		var $form = $( this );
+		var productId = $form.data( 'product_id' );
 		var defaults = window.wc_variation_gallery_defaults || {};
-		return defaults[ productId ] || '';
+
+		if ( defaults[ productId ] ) {
+			return defaults[ productId ];
+		}
+
+		var $template = $form.find( '.wc-product-gallery-default-template' );
+		return $template.length ? $.trim( $template.html() ) : '';
 	};
 
 	/**
@@ -913,10 +923,6 @@
 		if ( ! $current_gallery.length || ! $new_gallery.length ) {
 			return false;
 		}
-
-		// Snapshot the live gallery before we replace it, so the reset path
-		// later restores any post-load mutations themes/extensions made.
-		$form.wc_get_default_product_gallery_html();
 
 		/**
 		 * Notify subscribers that the current gallery DOM is about to be
