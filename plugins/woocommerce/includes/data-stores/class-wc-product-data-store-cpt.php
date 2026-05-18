@@ -72,6 +72,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 		'_thumbnail_id',
 		'_file_paths',
 		'_product_image_gallery',
+		'_wc_media_gallery',
 		'_product_version',
 		'_wp_old_slug',
 		'_edit_last',
@@ -480,6 +481,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_wc_rating_count'       => 'rating_counts',
 			'_wc_review_count'       => 'review_count',
 			'_product_image_gallery' => 'gallery_image_ids',
+			'_wc_media_gallery'      => 'media_gallery',
 		);
 
 		$set_props = array();
@@ -728,6 +730,7 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 			'_virtual'               => 'virtual',
 			'_downloadable'          => 'downloadable',
 			'_product_image_gallery' => 'gallery_image_ids',
+			'_wc_media_gallery'      => 'media_gallery',
 			'_download_limit'        => 'download_limit',
 			'_download_expiry'       => 'download_expiry',
 			'_thumbnail_id'          => 'image_id',
@@ -759,6 +762,14 @@ class WC_Product_Data_Store_CPT extends WC_Data_Store_WP implements WC_Object_Da
 					break;
 				case 'gallery_image_ids':
 					$value = implode( ',', $value );
+					break;
+				case 'media_gallery':
+					if ( empty( $value ) ) {
+						$value = '';
+					} else {
+						$value = wp_json_encode( $value );
+						$value = false === $value ? '' : wp_slash( $value );
+					}
 					break;
 				case 'date_on_sale_from':
 				case 'date_on_sale_to':

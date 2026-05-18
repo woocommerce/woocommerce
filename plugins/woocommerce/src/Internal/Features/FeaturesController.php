@@ -308,6 +308,15 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'product_gallery_videos'             => array(
+				'name'                         => __( 'Product gallery videos (Beta)', 'woocommerce' ),
+				'description'                  => __( 'Enable videos in product galleries and product gallery APIs.', 'woocommerce' ),
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'cart_checkout_blocks'               => array(
 				'name'                         => __( 'Cart & Checkout Blocks', 'woocommerce' ),
 				'description'                  => __( 'Optimize for faster checkout', 'woocommerce' ),

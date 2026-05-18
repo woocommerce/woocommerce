@@ -190,6 +190,12 @@ p.demo_store,
 				outline-offset: -2px;
 			}
 
+			.woocommerce-product-gallery__video .wp-post-video {
+				display: block;
+				width: 100%;
+				height: auto;
+			}
+
 			.woocommerce-product-gallery__trigger {
 				@include woocommerce-product-gallery__trigger;
 			}
@@ -205,6 +211,7 @@ p.demo_store,
 					float: left;
 					margin: 0;
 					list-style: none;
+					position: relative;
 
 					img {
 						cursor: pointer;
@@ -215,6 +222,21 @@ p.demo_store,
 						&:hover {
 							opacity: 1;
 						}
+					}
+
+					// FlexSlider needs an image thumbnail, so no-poster videos
+					// hide that placeholder once the video preview is injected.
+					.woocommerce-product-gallery__video-thumbnail-placeholder {
+						opacity: 0;
+					}
+
+					.woocommerce-product-gallery__video-thumbnail-preview {
+						position: absolute;
+						inset: 0;
+						width: 100%;
+						height: 100%;
+						object-fit: cover;
+						pointer-events: none;
 					}
 				}
 			}

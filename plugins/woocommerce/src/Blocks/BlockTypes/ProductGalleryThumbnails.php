@@ -58,10 +58,10 @@ class ProductGalleryThumbnails extends AbstractBlock {
 		// We crop the images to square only if the aspect ratio is 1:1.
 		// Otherwise, we show the uncropped and use object-fit to crop them.
 		$image_size             = '1' === $attributes['aspectRatio'] ? 'woocommerce_thumbnail' : 'woocommerce_single';
-		$product_gallery_images = ProductGalleryUtils::get_product_gallery_image_data( $product, $image_size );
+		$product_gallery_media = ProductGalleryUtils::get_product_gallery_media_data( $product, $image_size );
 
-		// Don't show the thumbnails block if there is only one image.
-		if ( count( $product_gallery_images ) <= 1 ) {
+		// Don't show the thumbnails block if there is only one media item.
+		if ( count( $product_gallery_media ) <= 1 ) {
 			return '';
 		}
 
@@ -86,24 +86,51 @@ class ProductGalleryThumbnails extends AbstractBlock {
 				data-wp-init--hide-ghost-overflow="callbacks.hideGhostOverflow"
 				data-wp-on--scroll="actions.onScroll"
 				role="listbox">
-				<?php foreach ( $product_gallery_images as $index => $image ) : ?>
-					<div class="wc-block-product-gallery-thumbnails__thumbnail">
-						<img
-							class="<?php echo 0 === $index ? esc_attr( $img_class . ' wc-block-product-gallery-thumbnails__thumbnail__image--is-active' ) : esc_attr( $img_class ); ?>"
-							data-image-id="<?php echo esc_attr( $image['id'] ); ?>"
-							src="<?php echo esc_attr( $image['src'] ); ?>"
-							srcset="<?php echo esc_attr( $image['srcset'] ); ?>"
-							sizes="<?php echo esc_attr( $image['sizes'] ); ?>"
-							alt="<?php echo esc_attr( $image['alt'] ); ?>"
-							data-wp-on--click="actions.selectCurrentImage"
-							data-wp-on--keydown="actions.onThumbnailsArrowsKeyDown"
-							data-wp-watch="callbacks.toggleActiveThumbnailAttributes"
-							decoding="async"
-							tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
-							draggable="false"
-							loading="lazy"
-							role="option"
-							style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>" />
+				<?php foreach ( $product_gallery_media as $index => $media ) : ?>
+					<?php
+					$thumbnail_classes = 'wc-block-product-gallery-thumbnails__thumbnail';
+					if ( 'video' === ( $media['media_type'] ?? '' ) ) {
+						$thumbnail_classes .= ' wc-block-product-gallery-thumbnails__thumbnail--video';
+					}
+					$show_video_preview = 'video' === ( $media['media_type'] ?? '' ) && empty( $media['poster_id'] ) && ! empty( $media['video_src'] );
+					?>
+					<div class="<?php echo esc_attr( $thumbnail_classes ); ?>">
+						<?php if ( $show_video_preview ) : ?>
+							<video
+								class="<?php echo 0 === $index ? esc_attr( $img_class . ' wc-block-product-gallery-thumbnails__thumbnail__image--is-active' ) : esc_attr( $img_class ); ?>"
+								data-image-id="<?php echo esc_attr( $media['id'] ); ?>"
+								data-media-type="video"
+								src="<?php echo esc_url( $media['video_src'] ); ?>"
+								aria-label="<?php echo esc_attr( $media['alt'] ); ?>"
+								data-wp-on--click="actions.selectCurrentImage"
+								data-wp-on--keydown="actions.onThumbnailsArrowsKeyDown"
+								data-wp-watch="callbacks.toggleActiveThumbnailAttributes"
+								tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
+								draggable="false"
+								preload="metadata"
+								muted="muted"
+								playsinline="playsinline"
+								role="option"
+								style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>"></video>
+						<?php else : ?>
+							<img
+								class="<?php echo 0 === $index ? esc_attr( $img_class . ' wc-block-product-gallery-thumbnails__thumbnail__image--is-active' ) : esc_attr( $img_class ); ?>"
+								data-image-id="<?php echo esc_attr( $media['id'] ); ?>"
+								data-media-type="<?php echo esc_attr( $media['media_type'] ?? 'image' ); ?>"
+								src="<?php echo esc_attr( $media['src'] ); ?>"
+								srcset="<?php echo esc_attr( $media['srcset'] ); ?>"
+								sizes="<?php echo esc_attr( $media['sizes'] ); ?>"
+								alt="<?php echo esc_attr( $media['alt'] ); ?>"
+								data-wp-on--click="actions.selectCurrentImage"
+								data-wp-on--keydown="actions.onThumbnailsArrowsKeyDown"
+								data-wp-watch="callbacks.toggleActiveThumbnailAttributes"
+								decoding="async"
+								tabindex="<?php echo 0 === $index ? '0' : '-1'; ?>"
+								draggable="false"
+								loading="lazy"
+								role="option"
+								style="aspect-ratio: <?php echo esc_attr( $attributes['aspectRatio'] ); ?>" />
+						<?php endif; ?>
 					</div>
 				<?php endforeach; ?>
 			</div>

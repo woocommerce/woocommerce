@@ -12,7 +12,7 @@
  *
  * @see     https://woocommerce.com/document/template-structure/
  * @package WooCommerce\Templates
- * @version 10.5.0
+ * @version 10.9.0
  */
 
 use Automattic\WooCommerce\Enums\ProductType;
@@ -28,11 +28,18 @@ global $product;
 
 $columns           = apply_filters( 'woocommerce_product_thumbnails_columns', 4 );
 $post_thumbnail_id = $product->get_image_id();
+$media_items       = function_exists( 'wc_get_product_media_gallery_items' )
+	? wc_get_product_media_gallery_items( $product )
+	: array();
+// The helper returns the full gallery order; product-thumbnails.php renders the remaining items.
+$first_media_item = $media_items[0] ?? array();
+$first_media_id   = isset( $first_media_item['id'] ) ? absint( $first_media_item['id'] ) : $post_thumbnail_id;
+$has_media        = ! empty( $first_media_item ) && 'placeholder' !== ( $first_media_item['source_type'] ?? '' );
 $wrapper_classes   = apply_filters(
 	'woocommerce_single_product_image_gallery_classes',
 	array(
 		'woocommerce-product-gallery',
-		'woocommerce-product-gallery--' . ( $post_thumbnail_id ? 'with-images' : 'without-images' ),
+		'woocommerce-product-gallery--' . ( $has_media ? 'with-images' : 'without-images' ),
 		'woocommerce-product-gallery--columns-' . absint( $columns ),
 		'images',
 	)
@@ -41,8 +48,14 @@ $wrapper_classes   = apply_filters(
 <div class="<?php echo esc_attr( implode( ' ', array_map( 'sanitize_html_class', $wrapper_classes ) ) ); ?>" data-columns="<?php echo esc_attr( $columns ); ?>" style="opacity: 0; transition: opacity .25s ease-in-out;">
 	<div class="woocommerce-product-gallery__wrapper">
 		<?php
-		if ( $post_thumbnail_id ) {
-			$html = wc_get_gallery_image_html( $post_thumbnail_id, true );
+		if (
+			$has_media &&
+			'video' === ( $first_media_item['media_type'] ?? '' ) &&
+			function_exists( 'wc_get_gallery_video_html' )
+		) {
+			$html = wc_get_gallery_video_html( $first_media_item, true, 0 );
+		} elseif ( $has_media && $first_media_id ) {
+			$html = wc_get_gallery_image_html( $first_media_id, true );
 		} else {
 			// Check for visible children with prices to determine if variation image swapping is possible.
 			// Using get_visible_children() + get_price() is more efficient than get_available_variations()
@@ -55,7 +68,15 @@ $wrapper_classes   = apply_filters(
 			$html             .= '</div>';
 		}
 
-		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $post_thumbnail_id ); // phpcs:disable WordPress.XSS.EscapeOutput.OutputNotEscaped
+		/**
+		 * Filter product image thumbnail HTML string.
+		 *
+		 * @since 1.6.4
+		 *
+		 * @param string $html          Product image thumbnail HTML string.
+		 * @param int    $attachment_id Attachment ID.
+		 */
+		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $first_media_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 
 		do_action( 'woocommerce_product_thumbnails' );
 		?>

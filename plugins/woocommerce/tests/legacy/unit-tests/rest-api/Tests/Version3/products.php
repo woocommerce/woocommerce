@@ -35,6 +35,14 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Tear down test case.
+	 */
+	public function tearDown(): void {
+		delete_option( 'woocommerce_feature_product_gallery_videos_enabled' );
+		parent::tearDown();
+	}
+
+	/**
 	 * Test route registration.
 	 *
 	 * @since 3.5.0
@@ -330,6 +338,349 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 
 		$this->assertEquals( 'Test API Update', $data['button_text'] );
 		$this->assertEquals( 'http://automattic.com', $data['external_url'] );
+	}
+
+	/**
+	 * Test getting a product projects legacy images to the media gallery.
+	 *
+	 * @testdox Should project legacy images to media gallery responses.
+	 */
+	public function test_get_product_projects_legacy_images_to_media_gallery() {
+		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+
+		$product           = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$image_id          = $this->create_product_media_attachment( 'Main product image' );
+		$gallery_image_ids = array(
+			$this->create_product_media_attachment( 'Gallery image 1' ),
+			$this->create_product_media_attachment( 'Gallery image 2' ),
+		);
+
+		$product->set_image_id( $image_id );
+		$product->set_gallery_image_ids( $gallery_image_ids );
+		$product->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame(
+			array(
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $image_id,
+					'position'    => 0,
+				),
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $gallery_image_ids[0],
+					'position'    => 1,
+				),
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $gallery_image_ids[1],
+					'position'    => 2,
+				),
+			),
+			$this->get_media_gallery_identity_fields( $data['media_gallery'] )
+		);
+
+		$product->delete( true );
+		wp_delete_attachment( $image_id, true );
+		wp_delete_attachment( $gallery_image_ids[0], true );
+		wp_delete_attachment( $gallery_image_ids[1], true );
+	}
+
+	/**
+	 * Test updating a product media gallery persists mixed media and syncs legacy images.
+	 *
+	 * @testdox Should persist media gallery and sync legacy images.
+	 */
+	public function test_update_product_media_gallery_persists_and_syncs_legacy_images() {
+		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+
+		$product   = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$poster_id = $this->create_product_media_attachment( 'Video poster' );
+		$image_id  = $this->create_product_media_attachment( 'Gallery image' );
+		$video_id  = $this->create_product_media_attachment( 'Product video', 'video/mp4' );
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_body_params(
+			array(
+				'media_gallery' => array(
+					array(
+						'media_type'  => 'video',
+						'source_type' => 'attachment',
+						'id'          => $video_id,
+						'poster_id'   => $poster_id,
+						'settings'    => array(
+							'controls' => true,
+						),
+					),
+					array(
+						'media_type'  => 'image',
+						'source_type' => 'attachment',
+						'id'          => $image_id,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( 'video', $data['media_gallery'][0]['media_type'] );
+		$this->assertSame( $video_id, $data['media_gallery'][0]['id'] );
+		$this->assertSame( $poster_id, $data['media_gallery'][0]['poster_id'] );
+		$this->assertSame( 'image', $data['media_gallery'][1]['media_type'] );
+		$this->assertSame( $image_id, $data['media_gallery'][1]['id'] );
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertInstanceOf( WC_Product::class, $updated_product );
+		$this->assertSame( $poster_id, (int) $updated_product->get_image_id() );
+		$this->assertSame( $product->get_id(), (int) get_post( $poster_id )->post_parent );
+		$this->assertSame( array( $image_id ), $updated_product->get_gallery_image_ids() );
+		$this->assertEquals(
+			array(
+				array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'poster_id'   => $poster_id,
+					'settings'    => array(
+						'controls' => true,
+					),
+				),
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $image_id,
+				),
+			),
+			$updated_product->get_media_gallery( 'edit' )
+		);
+
+		$product->delete( true );
+		wp_delete_attachment( $poster_id, true );
+		wp_delete_attachment( $image_id, true );
+		wp_delete_attachment( $video_id, true );
+	}
+
+	/**
+	 * Test updating legacy product images clears stored media gallery data.
+	 *
+	 * @testdox Should clear stored media gallery when legacy images are updated.
+	 */
+	public function test_update_product_images_clears_stored_media_gallery() {
+		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+
+		$product      = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$old_image_id = $this->create_product_media_attachment( 'Old gallery image' );
+		$poster_id    = $this->create_product_media_attachment( 'Old video poster' );
+		$video_id     = $this->create_product_media_attachment( 'Old product video', 'video/mp4' );
+		$new_image_id = $this->create_product_media_attachment( 'New product image' );
+
+		$product->set_media_gallery(
+			array(
+				array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'poster_id'   => $poster_id,
+				),
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $old_image_id,
+				),
+			)
+		);
+		$product->save();
+
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+		$request->set_body_params(
+			array(
+				'images' => array(
+					array(
+						'id'       => $new_image_id,
+						'position' => 0,
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame(
+			array(
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $new_image_id,
+					'position'    => 0,
+				),
+			),
+			$this->get_media_gallery_identity_fields( $data['media_gallery'] )
+		);
+
+		$updated_product = wc_get_product( $product->get_id() );
+
+		$this->assertInstanceOf( WC_Product::class, $updated_product );
+		$this->assertSame( array(), $updated_product->get_media_gallery( 'edit' ) );
+		$this->assertSame( $new_image_id, (int) $updated_product->get_image_id() );
+		$this->assertSame( array(), $updated_product->get_gallery_image_ids() );
+
+		$product->delete( true );
+		wp_delete_attachment( $old_image_id, true );
+		wp_delete_attachment( $poster_id, true );
+		wp_delete_attachment( $video_id, true );
+		wp_delete_attachment( $new_image_id, true );
+	}
+
+	/**
+	 * Test media gallery attachment media types must match their requested media type.
+	 *
+	 * @testdox Should reject media gallery items with mismatched attachment media types.
+	 */
+	public function test_update_product_media_gallery_rejects_mismatched_attachment_media_types() {
+		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+
+		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$image_id = $this->create_product_media_attachment( 'Gallery image' );
+		$video_id = $this->create_product_media_attachment( 'Product video', 'video/mp4' );
+
+		$requests = array(
+			array(
+				'item' => array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+				),
+				'code' => 'woocommerce_product_media_gallery_invalid_image_id',
+			),
+			array(
+				'item' => array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $image_id,
+				),
+				'code' => 'woocommerce_product_media_gallery_invalid_video_id',
+			),
+			array(
+				'item' => array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
+					'poster_id'   => $video_id,
+				),
+				'code' => 'woocommerce_product_media_gallery_invalid_poster_id',
+			),
+		);
+
+		foreach ( $requests as $request_data ) {
+			$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+			$request->set_body_params(
+				array(
+					'media_gallery' => array( $request_data['item'] ),
+				)
+			);
+			$response = $this->server->dispatch( $request );
+			$data     = $response->get_data();
+
+			$this->assertEquals( 400, $response->get_status() );
+			$this->assertSame( $request_data['code'], $data['code'] );
+		}
+
+		$product->delete( true );
+		wp_delete_attachment( $image_id, true );
+		wp_delete_attachment( $video_id, true );
+	}
+
+	/**
+	 * Test external video embeds are not accepted yet.
+	 *
+	 * @testdox Should reject embed-backed media gallery items.
+	 */
+	public function test_update_product_media_gallery_rejects_embeds() {
+		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+
+		$product = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$request = new WP_REST_Request( 'PUT', '/wc/v3/products/' . $product->get_id() );
+
+		$request->set_body_params(
+			array(
+				'media_gallery' => array(
+					array(
+						'media_type'  => 'video',
+						'source_type' => 'embed',
+						'url'         => 'https://www.youtube.com/watch?v=abc123',
+					),
+				),
+			)
+		);
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 400, $response->get_status() );
+		$this->assertSame( array(), wc_get_product( $product->get_id() )->get_media_gallery( 'edit' ) );
+
+		$product->delete( true );
+	}
+
+	/**
+	 * Test external video embeds are not exposed by the REST media gallery yet.
+	 *
+	 * @testdox Should omit embed-backed media gallery items from responses.
+	 */
+	public function test_get_product_media_gallery_omits_embeds() {
+		wp_set_current_user( $this->user );
+		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
+
+		$product  = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\ProductHelper::create_simple_product();
+		$image_id = $this->create_product_media_attachment( 'Gallery image' );
+
+		$product->set_media_gallery(
+			array(
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $image_id,
+				),
+				array(
+					'media_type'  => 'video',
+					'source_type' => 'embed',
+					'url'         => 'https://www.youtube.com/watch?v=abc123',
+				),
+			)
+		);
+		$product->save();
+
+		$response = $this->server->dispatch( new WP_REST_Request( 'GET', '/wc/v3/products/' . $product->get_id() ) );
+		$data     = $response->get_data();
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame(
+			array(
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $image_id,
+					'position'    => 0,
+				),
+			),
+			$this->get_media_gallery_identity_fields( $data['media_gallery'] )
+		);
+
+		$product->delete( true );
+		wp_delete_attachment( $image_id, true );
 	}
 
 	/**
@@ -915,6 +1266,46 @@ class WC_Tests_API_Product extends WC_REST_Unit_Test_Case {
 		foreach ( $response_products as $response_product ) {
 			$this->assertContains( $response_product['id'], $expected_product_ids );
 		}
+	}
+
+	/**
+	 * Create a product media attachment.
+	 *
+	 * @param string $title     Attachment title.
+	 * @param string $mime_type Attachment MIME type.
+	 *
+	 * @return int
+	 */
+	private function create_product_media_attachment( $title, $mime_type = 'image/jpeg' ) {
+		return wp_insert_attachment(
+			array(
+				'post_title'     => $title,
+				'post_type'      => 'attachment',
+				'post_mime_type' => $mime_type,
+			)
+		);
+	}
+
+	/**
+	 * Get the media gallery identity fields from a REST response.
+	 *
+	 * @param array $media_gallery Media gallery response items.
+	 *
+	 * @return array
+	 */
+	private function get_media_gallery_identity_fields( $media_gallery ) {
+		$items = array();
+
+		foreach ( $media_gallery as $item ) {
+			$items[] = array(
+				'media_type'  => $item['media_type'],
+				'source_type' => $item['source_type'],
+				'id'          => $item['id'],
+				'position'    => $item['position'],
+			);
+		}
+
+		return $items;
 	}
 
 	/**

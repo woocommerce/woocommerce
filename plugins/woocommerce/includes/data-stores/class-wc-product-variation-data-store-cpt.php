@@ -375,6 +375,7 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'_stock_status'           => 'stock_status',
 			'_virtual'                => 'virtual',
 			'_product_image_gallery'  => 'gallery_image_ids',
+			'_wc_media_gallery'       => 'media_gallery',
 			'_download_limit'         => 'download_limit',
 			'_download_expiry'        => 'download_expiry',
 			'_downloadable'           => 'downloadable',

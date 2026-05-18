@@ -12,7 +12,7 @@
  *
  * @see         https://woocommerce.com/document/template-structure/
  * @package     WooCommerce\Templates
- * @version     9.8.0
+ * @version     10.9.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -28,10 +28,24 @@ if ( ! $product || ! $product instanceof WC_Product ) {
 	return '';
 }
 
-$attachment_ids = $product->get_gallery_image_ids();
+$media_items = function_exists( 'wc_get_product_media_gallery_items' )
+	? wc_get_product_media_gallery_items( $product )
+	: array();
 
-if ( $attachment_ids && $product->get_image_id() ) {
-	foreach ( $attachment_ids as $key => $attachment_id ) {
+if ( count( $media_items ) > 1 ) {
+	foreach ( array_slice( $media_items, 1 ) as $key => $media_item ) {
+		$attachment_id = isset( $media_item['id'] ) ? absint( $media_item['id'] ) : 0;
+
+		if ( ! $attachment_id ) {
+			continue;
+		}
+
+		if ( 'video' === ( $media_item['media_type'] ?? '' ) && function_exists( 'wc_get_gallery_video_html' ) ) {
+			$html = wc_get_gallery_video_html( $media_item, false, $key );
+		} else {
+			$html = wc_get_gallery_image_html( $attachment_id, false, $key );
+		}
+
 		/**
 		 * Filter product image thumbnail HTML string.
 		 *
@@ -40,6 +54,6 @@ if ( $attachment_ids && $product->get_image_id() ) {
 		 * @param string $html          Product image thumbnail HTML string.
 		 * @param int    $attachment_id Attachment ID.
 		 */
-		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', wc_get_gallery_image_html( $attachment_id, false, $key ), $attachment_id ); // PHPCS:Ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $attachment_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
 	}
 }

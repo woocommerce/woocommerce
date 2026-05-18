@@ -18,8 +18,21 @@ use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Utilities\ArrayUtil;
 use Automattic\WooCommerce\Utilities\NumberUtil;
 use Automattic\WooCommerce\Internal\ProductImage\MatchImageBySKU;
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
 defined( 'ABSPATH' ) || exit;
+
+if ( ! function_exists( 'wc_product_gallery_videos_enabled' ) ) {
+	/**
+	 * Check if product gallery videos are enabled.
+	 *
+	 * @since 10.9.0
+	 * @return bool
+	 */
+	function wc_product_gallery_videos_enabled() {
+		return FeaturesUtil::feature_is_enabled( 'product_gallery_videos' );
+	}
+}
 
 /**
  * Standard way of retrieving products based on certain parameters.

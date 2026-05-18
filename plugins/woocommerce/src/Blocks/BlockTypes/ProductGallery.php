@@ -32,20 +32,10 @@ class ProductGallery extends AbstractBlock {
 	/**
 	 * Return the dialog content.
 	 *
-	 * @param array $images An array of all images of the product.
+	 * @param array $media_items An array of all media items of the product.
 	 * @return string
 	 */
-	protected function render_dialog( $images ) {
-		$images_html = '';
-		foreach ( $images as $index => $image ) {
-			$id           = $image['id'];
-			$src          = $image['src'];
-			$srcset       = $image['srcset'];
-			$sizes        = $image['sizes'];
-			$alt          = $image['alt'];
-			$loading      = 0 === $index ? 'fetchpriority="high"' : 'loading="lazy"';
-			$images_html .= "<img data-image-id='{$id}' src='{$src}' srcset='{$srcset}' sizes='{$sizes}' loading='{$loading}' decoding='async' alt='{$alt}' />";
-		}
+	protected function render_dialog( $media_items ) {
 		ob_start();
 		?>
 			<dialog
@@ -65,13 +55,67 @@ class ProductGallery extends AbstractBlock {
 						</svg>
 					</button>
 				</div>
-				<div class="wc-block-product-gallery-dialog__content">
-						<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- Output is already escaped by WooCommerce. ?>
-						<?php echo $images_html; ?>
+				<div class="wc-block-product-gallery-dialog__content" data-wp-on--scroll="actions.onDialogScroll">
+					<?php foreach ( $media_items as $index => $media ) : ?>
+						<?php if ( 'video' === ( $media['media_type'] ?? '' ) ) : ?>
+							<?php echo $this->get_dialog_video_html( $media ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+						<?php else : ?>
+							<img
+								data-image-id="<?php echo esc_attr( $media['id'] ); ?>"
+								src="<?php echo esc_url( $media['src'] ); ?>"
+								srcset="<?php echo esc_attr( $media['srcset'] ); ?>"
+								sizes="<?php echo esc_attr( $media['sizes'] ); ?>"
+								<?php if ( 0 === $index ) : ?>
+									fetchpriority="high"
+								<?php else : ?>
+									loading="lazy"
+								<?php endif; ?>
+								decoding="async"
+								alt="<?php echo esc_attr( $media['alt'] ); ?>" />
+						<?php endif; ?>
+					<?php endforeach; ?>
 				</div>
 			</dialog>
 		<?php
 		return ob_get_clean();
+	}
+
+	/**
+	 * Get video HTML for the product gallery dialog.
+	 *
+	 * @param array $media Video media data.
+	 * @return string
+	 */
+	private function get_dialog_video_html( $media ) {
+		if ( empty( $media['video_src'] ) ) {
+			return '';
+		}
+
+		$settings = isset( $media['settings'] ) && is_array( $media['settings'] ) ? $media['settings'] : array();
+		$preload  = isset( $settings['preload'] ) && in_array(
+			$settings['preload'],
+			array( 'auto', 'metadata', 'none' ),
+			true
+		)
+			? $settings['preload']
+			: 'metadata';
+		$attrs    = array(
+			'aria-label'    => $media['alt'] ?? '',
+			'autoplay'      => 'autoplay',
+			'data-image-id' => $media['id'],
+			'data-wp-watch' => 'callbacks.syncVideoPlayback',
+			'loop'          => 'loop',
+			'muted'         => 'muted',
+			'playsinline'   => 'playsinline',
+			'preload'       => $preload,
+			'src'           => $media['video_src'],
+		);
+
+		if ( ! empty( $media['poster_id'] ) && ! empty( $media['poster_src'] ) ) {
+			$attrs['poster'] = $media['poster_src'];
+		}
+
+		return '<video ' . wc_implode_html_attributes( array_filter( $attrs ) ) . '></video>';
 	}
 
 	/**
@@ -113,14 +157,15 @@ class ProductGallery extends AbstractBlock {
 			return '';
 		}
 
-		$image_ids              = ProductGalleryUtils::get_all_image_ids( $product );
-		$number_of_images       = count( $image_ids );
+		$media_items            = ProductGalleryUtils::get_all_media_items( $product );
+		$media_ids              = ProductGalleryUtils::get_media_ids( $media_items );
+		$number_of_media        = count( $media_ids );
 		$classname              = StyleAttributesUtils::get_classes_by_attributes( $attributes, array( 'extra_classes' ) );
-		$initial_image_id       = $number_of_images > 0 ? $image_ids[0] : -1;
-		$classname_single_image = $number_of_images < 2 ? 'is-single-product-gallery-image' : '';
+		$initial_media_id       = $number_of_media > 0 ? $media_ids[0] : -1;
+		$classname_single_image = $number_of_media < 2 ? 'is-single-product-gallery-image' : '';
 		$product_id             = strval( $product->get_id() );
-		$fullsize_image_data    = ProductGalleryUtils::get_image_src_data( $image_ids, 'full', $product->get_title() );
-		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $fullsize_image_data ) );
+		$fullsize_media_data    = ProductGalleryUtils::get_media_src_data( $media_items, 'full', $product->get_title() );
+		$gallery_with_dialog    = $this->inject_dialog( $content, $this->render_dialog( $fullsize_media_data ) );
 		$p                      = new \WP_HTML_Tag_Processor( $gallery_with_dialog );
 		$html                   = $gallery_with_dialog;
 
@@ -130,13 +175,13 @@ class ProductGallery extends AbstractBlock {
 				'data-wp-context',
 				wp_json_encode(
 					array(
-						'imageData'               => $image_ids,
+						'imageData'               => $media_ids,
 						'isDialogOpen'            => false,
 						'isDragging'              => false,
 						'touchStartX'             => 0,
 						'touchCurrentX'           => 0,
 						'productId'               => $product_id,
-						'selectedImageId'         => $initial_image_id,
+						'selectedImageId'         => $initial_media_id,
 						'thumbnailsOverflow'      => [
 							'top'    => false,
 							'bottom' => false,
@@ -144,7 +189,7 @@ class ProductGallery extends AbstractBlock {
 							'right'  => false,
 						],
 						// Next/Previous Buttons block context.
-						'hideNextPreviousButtons' => $number_of_images <= 1,
+						'hideNextPreviousButtons' => $number_of_media <= 1,
 						'isDisabledPrevious'      => true,
 						'isDisabledNext'          => false,
 						'ariaLabelPrevious'       => __( 'Previous image', 'woocommerce' ),

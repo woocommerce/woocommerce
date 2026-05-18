@@ -832,6 +832,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 *
 	 * @param  WP_REST_Request $request Request object.
 	 * @param  bool            $creating If is creating a new object.
+	 * @throws WC_REST_Exception If product media gallery data is invalid.
 	 * @return WP_Error|WC_Data
 	 */
 	protected function prepare_object_for_database( $request, $creating = false ) {
@@ -1237,6 +1238,19 @@ class Controller extends WC_REST_Products_V2_Controller {
 		// Check for featured/gallery images, upload it and set it.
 		if ( isset( $request['images'] ) ) {
 			$product = $this->set_product_images( $product, $request['images'] );
+
+			if ( $this->product_gallery_videos_enabled() && ! isset( $request['media_gallery'] ) ) {
+				$product->set_media_gallery( array() );
+			}
+		}
+
+		// Check for mixed media gallery and set it.
+		if ( isset( $request['media_gallery'] ) ) {
+			if ( ! $this->product_gallery_videos_enabled() ) {
+				throw new WC_REST_Exception( 'woocommerce_product_media_gallery_feature_disabled', esc_html__( 'Product gallery videos are not enabled.', 'woocommerce' ), 400 );
+			}
+
+			$product = $this->set_product_media_gallery( $product, $request['media_gallery'] );
 		}
 
 		// Allow set meta_data.
@@ -1955,6 +1969,10 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		if ( $this->cogs_is_enabled() ) {
 			$schema = $this->add_cogs_related_product_schema( $schema, false );
+		}
+
+		if ( $this->product_gallery_videos_enabled() ) {
+			$schema['properties']['media_gallery'] = $this->get_media_gallery_schema();
 		}
 
 		// New properties added for v4.

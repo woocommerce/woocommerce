@@ -2,6 +2,11 @@ $admin-bar-height: 32px;
 $thumbnails-gradient-size: 20%;
 $thumbnails-gap: 2%;
 $dialog-padding: 20px;
+$thumbnail-video-overlay-background: rgba(0, 0, 0, 0.55);
+$thumbnail-video-overlay-color: var(--wp--preset--color--base, #fff);
+$thumbnail-video-overlay-size: 36px;
+$thumbnail-video-play-icon-height: 8px;
+$thumbnail-video-play-icon-width: 12px;
 
 :where(.wc-block-product-gallery-large-image) {
 	width: 100%;
@@ -70,6 +75,13 @@ $dialog-padding: 20px;
 		&:where(.wc-block-woocommerce-product-gallery-large-image__image--hoverZoom) {
 			cursor: zoom-in;
 		}
+	}
+
+	:where(.wc-block-woocommerce-product-gallery-large-image__video) {
+		height: 100%;
+		max-width: 100%;
+		object-fit: contain;
+		width: 100%;
 	}
 
 	:where(.wc-block-product-gallery-large-image__inner-blocks) {
@@ -244,6 +256,36 @@ $dialog-padding: 20px;
 
 :where(.wc-block-product-gallery-thumbnails__thumbnail) {
 	display: flex;
+	position: relative;
+}
+
+:where(.wc-block-product-gallery-thumbnails__thumbnail--video)::after {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-40%, -50%);
+	z-index: 1;
+	height: 0;
+	border-bottom: $thumbnail-video-play-icon-height solid transparent;
+	border-left: $thumbnail-video-play-icon-width solid currentColor;
+	border-top: $thumbnail-video-play-icon-height solid transparent;
+	color: $thumbnail-video-overlay-color;
+	pointer-events: none;
+}
+
+:where(.wc-block-product-gallery-thumbnails__thumbnail--video)::before {
+	content: "";
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	transform: translate(-50%, -50%);
+	z-index: 1;
+	width: $thumbnail-video-overlay-size;
+	height: $thumbnail-video-overlay-size;
+	background: $thumbnail-video-overlay-background;
+	border-radius: 999px;
+	pointer-events: none;
 }
 
 :where(.wc-block-product-gallery-thumbnails__thumbnail__image) {
@@ -336,7 +378,8 @@ $dialog-padding: 20px;
 		height: calc(100vh - 64px - $admin-bar-height);
 	}
 
-	img {
+	img,
+	video {
 		max-width: 1600px;
 		width: 100%;
 		height: auto;

@@ -1278,14 +1278,177 @@ jQuery( function ( $ ) {
 	} );
 
 	// Product gallery file uploads.
-	var product_gallery_frame;
-	var $image_gallery_ids = $( '#product_image_gallery' );
-	var $product_images = $( '#product_images_container' ).find(
+	let product_gallery_frame;
+	const $image_gallery_ids = $( '#product_image_gallery' );
+	const $media_gallery = $( '#product_media_gallery' );
+	const $product_images = $( '#product_images_container' ).find(
 		'ul.product_images'
 	);
 
+	function getProductGalleryMediaType( attachment ) {
+		if ( 'video' === attachment.type ) {
+			return 'video';
+		}
+
+		if ( 'image' === attachment.type ) {
+			return 'image';
+		}
+
+		return '';
+	}
+
+	function getProductGalleryAttachmentImage( attachment ) {
+		if ( attachment.sizes && attachment.sizes.thumbnail ) {
+			return attachment.sizes.thumbnail.url;
+		}
+
+		if ( attachment.image && attachment.image.src ) {
+			return attachment.image.src;
+		}
+
+		if ( attachment.thumb && attachment.thumb.src ) {
+			return attachment.thumb.src;
+		}
+
+		return attachment.icon || attachment.url;
+	}
+
+	function getProductGalleryVideoPreview( attachment ) {
+		return attachment.url || '';
+	}
+
+	function addProductGalleryMediaItemActions( $item, $el ) {
+		$( '<ul />', {
+			class: 'actions',
+		} )
+			.append(
+				$( '<li />' ).append(
+					$( '<a />', {
+						href: '#',
+						class: 'delete tips',
+						title: $el.data( 'delete' ),
+						'data-tip': $el.data( 'delete' ),
+						text: $el.data( 'text' ),
+					} )
+				)
+			)
+			.appendTo( $item );
+
+		return $item;
+	}
+
+	function createProductGalleryImageItem( attachment, $el ) {
+		const attachmentImage = getProductGalleryAttachmentImage( attachment );
+
+		if ( ! attachment.id || ! attachmentImage ) {
+			return null;
+		}
+
+		const $item = $( '<li />', {
+			class: 'image',
+		} )
+			.attr( 'data-attachment_id', attachment.id )
+			.attr( 'data-media_type', 'image' )
+			.attr( 'data-source_type', 'attachment' );
+
+		$( '<img />', {
+			src: attachmentImage,
+		} ).appendTo( $item );
+
+		return addProductGalleryMediaItemActions( $item, $el );
+	}
+
+	function createProductGalleryVideoItem( attachment, $el ) {
+		const attachmentImage = getProductGalleryAttachmentImage( attachment );
+		const videoPreview = getProductGalleryVideoPreview( attachment );
+
+		if ( ! attachment.id || ! attachmentImage ) {
+			return null;
+		}
+
+		const $item = $( '<li />', {
+			class: 'image video',
+		} )
+			.attr( 'data-attachment_id', attachment.id )
+			.attr( 'data-media_type', 'video' )
+			.attr( 'data-source_type', 'attachment' );
+
+		if ( videoPreview ) {
+			$( '<video />', {
+				class: 'woocommerce-product-gallery__video-preview',
+				src: videoPreview,
+				preload: 'metadata',
+				muted: 'muted',
+				'aria-hidden': 'true',
+			} ).appendTo( $item );
+		} else {
+			$( '<img />', {
+				src: attachmentImage,
+				class: 'woocommerce-product-gallery__video-preview',
+			} ).appendTo( $item );
+		}
+
+		return addProductGalleryMediaItemActions( $item, $el );
+	}
+
+	function createProductGalleryMediaItem( attachment, $el, allowVideos ) {
+		const mediaType = getProductGalleryMediaType( attachment );
+
+		if ( 'image' === mediaType ) {
+			return createProductGalleryImageItem( attachment, $el );
+		}
+
+		if ( allowVideos && 'video' === mediaType ) {
+			return createProductGalleryVideoItem( attachment, $el );
+		}
+
+		return null;
+	}
+
+	function getProductGalleryMediaItemData( $item ) {
+		const attachmentId = parseInt( $item.attr( 'data-attachment_id' ), 10 );
+		const mediaType = $item.attr( 'data-media_type' ) || 'image';
+
+		if ( ! attachmentId ) {
+			return null;
+		}
+
+		const mediaItem = {
+			media_type: mediaType,
+			source_type: 'attachment',
+			id: attachmentId,
+		};
+
+		if ( 'video' === mediaType ) {
+			const posterId = parseInt( $item.attr( 'data-poster_id' ), 10 );
+
+			if ( posterId ) {
+				mediaItem.poster_id = posterId;
+			}
+		}
+
+		return mediaItem;
+	}
+
+	function updateProductGalleryFields() {
+		const mediaGallery = $( '#product_images_container' )
+			.find( 'ul li.image' )
+			.css( 'cursor', 'default' )
+			.map( function () {
+				return getProductGalleryMediaItemData( $( this ) );
+			} )
+			.get();
+		const attachmentIds = mediaGallery
+			.filter( ( mediaItem ) => 'image' === mediaItem.media_type )
+			.map( ( mediaItem ) => mediaItem.id );
+
+		$image_gallery_ids.val( attachmentIds.join( ',' ) );
+		$media_gallery.val( JSON.stringify( mediaGallery ) );
+	}
+
 	$( '.add_product_images' ).on( 'click', 'a', function ( event ) {
-		var $el = $( this );
+		const $el = $( this );
+		const allowVideos = 'yes' === $el.data( 'allow_videos' );
 
 		event.preventDefault();
 
@@ -1305,51 +1468,40 @@ jQuery( function ( $ ) {
 			states: [
 				new wp.media.controller.Library( {
 					title: $el.data( 'choose' ),
+					library: wp.media.query( {
+						type: allowVideos ? [ 'image', 'video' ] : 'image',
+					} ),
 					filterable: 'all',
 					multiple: true,
 				} ),
 			],
 		} );
 
-		// When an image is selected, run a callback.
+		// When media is selected, run a callback.
 		product_gallery_frame.on( 'select', function () {
-			var selection = product_gallery_frame.state().get( 'selection' );
-			var attachment_ids = $image_gallery_ids.val();
+			const selection = product_gallery_frame.state().get( 'selection' );
 
 			selection.map( function ( attachment ) {
-				attachment = attachment.toJSON();
+				const attachmentData = attachment.toJSON();
+				const $item = createProductGalleryMediaItem(
+					attachmentData,
+					$el,
+					allowVideos
+				);
 
-				if ( attachment.id ) {
-					attachment_ids = attachment_ids
-						? attachment_ids + ',' + attachment.id
-						: attachment.id;
-					var attachment_image =
-						attachment.sizes && attachment.sizes.thumbnail
-							? attachment.sizes.thumbnail.url
-							: attachment.url;
-
-					$product_images.append(
-						'<li class="image" data-attachment_id="' +
-							attachment.id +
-							'"><img src="' +
-							attachment_image +
-							'" /><ul class="actions"><li><a href="#" class="delete" title="' +
-							$el.data( 'delete' ) +
-							'">' +
-							$el.data( 'text' ) +
-							'</a></li></ul></li>'
-					);
+				if ( $item ) {
+					$product_images.append( $item );
 				}
 			} );
 
-			$image_gallery_ids.val( attachment_ids );
+			updateProductGalleryFields();
 		} );
 
 		// Finally, open the modal.
 		product_gallery_frame.open();
 	} );
 
-	// Image ordering.
+	// Media ordering.
 	$product_images.sortable( {
 		items: 'li.image',
 		cursor: 'move',
@@ -1365,36 +1517,14 @@ jQuery( function ( $ ) {
 		stop: function ( event, ui ) {
 			ui.item.removeAttr( 'style' );
 		},
-		update: function () {
-			var attachment_ids = '';
-
-			$( '#product_images_container' )
-				.find( 'ul li.image' )
-				.css( 'cursor', 'default' )
-				.each( function () {
-					var attachment_id = $( this ).attr( 'data-attachment_id' );
-					attachment_ids = attachment_ids + attachment_id + ',';
-				} );
-
-			$image_gallery_ids.val( attachment_ids );
-		},
+		update: updateProductGalleryFields,
 	} );
 
-	// Remove images.
+	// Remove media.
 	$( '#product_images_container' ).on( 'click', 'a.delete', function () {
 		$( this ).closest( 'li.image' ).remove();
 
-		var attachment_ids = '';
-
-		$( '#product_images_container' )
-			.find( 'ul li.image' )
-			.css( 'cursor', 'default' )
-			.each( function () {
-				var attachment_id = $( this ).attr( 'data-attachment_id' );
-				attachment_ids = attachment_ids + attachment_id + ',';
-			} );
-
-		$image_gallery_ids.val( attachment_ids );
+		updateProductGalleryFields();
 
 		// Remove any lingering tooltips.
 		$( '#tiptip_holder' ).removeAttr( 'style' );
