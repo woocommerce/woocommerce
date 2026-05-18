@@ -23,6 +23,9 @@ export const DEFAULT_LAYOUTS = {
 				price: {
 					align: 'end',
 				},
+				sale_price: {
+					align: 'end',
+				},
 			},
 		},
 	} satisfies NonNullable< SupportedLayouts[ 'table' ] >,

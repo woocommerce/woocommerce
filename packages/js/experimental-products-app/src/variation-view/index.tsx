@@ -1,8 +1,19 @@
 /**
  * External dependencies
  */
-import { DataViews, type Action, type View } from '@wordpress/dataviews';
-import { Button, Stack } from '@wordpress/ui';
+import {
+	DataViews,
+	filterSortAndPaginate,
+	type Action,
+	type Field,
+	type View,
+} from '@wordpress/dataviews';
+import { Stack } from '@wordpress/ui';
+import {
+	Button,
+	privateApis as componentsPrivateApis,
+} from '@wordpress/components';
+import { moreVertical } from '@wordpress/icons';
 import { __ } from '@wordpress/i18n';
 import { useMemo, useState, useCallback, useEffect } from '@wordpress/element';
 import { useSelect } from '@wordpress/data';
@@ -12,7 +23,7 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 /**
  * Internal dependencies
  */
-import { DEFAULT_LAYOUTS, DEFAULT_VIEW, PAGE_SIZE } from './constants';
+import { DEFAULT_LAYOUTS, DEFAULT_VIEW } from './constants';
 import { buildVariationViewQuery } from './query';
 import { normalizeVariation } from './normalization';
 import { variationFields } from './fields';
@@ -29,53 +40,11 @@ import {
 const EMPTY_ARRAY: VariationEntityRecord[] = [];
 const EMPTY_PRODUCT_RECORDS: ProductEntityRecord[] = [];
 const { useHistory, useLocation } = unlock( routerPrivateApis );
+const { Menu } = unlock( componentsPrivateApis );
 
 type VariationViewProps = {
 	productId: number;
 };
-
-function variationMatchesSearch(
-	variation: VariationEntityRecord,
-	search: string
-) {
-	const value = search.trim().toLowerCase();
-
-	if ( ! value ) {
-		return true;
-	}
-
-	const searchableValues = [
-		variation.name,
-		variation.sku,
-		...( variation.attributes?.map( ( attribute ) => attribute.option ) ??
-			[] ),
-	];
-
-	return searchableValues.some( ( searchableValue ) =>
-		searchableValue?.toLowerCase().includes( value )
-	);
-}
-
-function sortVariations( variations: VariationEntityRecord[], view: View ) {
-	const { field, direction = 'asc' } = view.sort ?? {};
-
-	if ( ! field ) {
-		return variations;
-	}
-
-	const directionModifier = direction === 'desc' ? -1 : 1;
-
-	return [ ...variations ].sort( ( first, second ) => {
-		if ( field === 'name' ) {
-			return first.name.localeCompare( second.name ) * directionModifier;
-		}
-
-		return (
-			( ( first.menu_order ?? 0 ) - ( second.menu_order ?? 0 ) ) *
-			directionModifier
-		);
-	} );
-}
 
 export function VariationView( { productId }: VariationViewProps ) {
 	const { navigate } = useHistory();
@@ -129,15 +98,53 @@ export function VariationView( { productId }: VariationViewProps ) {
 		() => records?.map( normalizeVariation ) || EMPTY_ARRAY,
 		[ records ]
 	);
-	const filteredVariations = useMemo(
-		() =>
-			sortVariations(
-				allVariations.filter( ( variation ) =>
-					variationMatchesSearch( variation, view.search ?? '' )
-				),
-				view
-			),
-		[ allVariations, view ]
+
+	// Build one filterable + hideable column per variation-typed parent
+	// attribute (e.g. Theme, Color). Each variation's row supplies the option
+	// for that attribute via getValue. Merged with the static variationFields
+	// below.
+	const attributeFields = useMemo< Field< VariationEntityRecord >[] >( () => {
+		const parentAttributes = parentProduct?.attributes ?? [];
+		return parentAttributes
+			.filter( ( attr ) => attr.variation )
+			.map( ( attr ) => {
+				const fieldId = `attribute_${ attr.slug || attr.name }`;
+				const options = attr.options ?? [];
+				return {
+					id: fieldId,
+					label: attr.name,
+					header: <span>{ attr.name }</span>,
+					enableSorting: true,
+					enableHiding: true,
+					enableGlobalSearch: true,
+					filterBy: {
+						operators: [ 'is', 'isAny', 'isNone', 'isNotAny' ],
+					},
+					elements: options.map( ( option ) => ( {
+						value: option,
+						label: option,
+					} ) ),
+					getValue: ( { item }: { item: VariationEntityRecord } ) => {
+						const match = item.attributes?.find(
+							( a ) =>
+								a.slug === attr.slug || a.name === attr.name
+						);
+						return match?.option ?? '';
+					},
+					render: ( { item }: { item: VariationEntityRecord } ) => {
+						const match = item.attributes?.find(
+							( a ) =>
+								a.slug === attr.slug || a.name === attr.name
+						);
+						return <span>{ match?.option ?? '—' }</span>;
+					},
+				} as Field< VariationEntityRecord >;
+			} );
+	}, [ parentProduct ] );
+
+	const allFields = useMemo(
+		() => [ ...attributeFields, ...variationFields ],
+		[ attributeFields ]
 	);
 	const productWithVariations = useMemo( () => {
 		if ( ! parentProduct ) {
@@ -153,20 +160,14 @@ export function VariationView( { productId }: VariationViewProps ) {
 			parentProduct
 		);
 	}, [ allVariations, parentProduct ] );
-	const perPage = view.perPage || PAGE_SIZE;
-	const variations = useMemo< VariationEntityRecord[] >( () => {
-		const page = view.page ?? 1;
-		const offset = ( page - 1 ) * perPage;
 
-		return filteredVariations.slice( offset, offset + perPage );
-	}, [ filteredVariations, perPage, view.page ] );
-
-	const paginationInfo = useMemo(
-		() => ( {
-			totalItems: filteredVariations.length,
-			totalPages: Math.ceil( filteredVariations.length / perPage ),
-		} ),
-		[ filteredVariations.length, perPage ]
+	// Apply the View's search / filters / sort / pagination via DataViews'
+	// own utility so the filters panel works out of the box. Search keeps
+	// matching across name, sku, and the dynamic attribute fields (each
+	// declares enableGlobalSearch).
+	const { data: variations, paginationInfo } = useMemo(
+		() => filterSortAndPaginate( allVariations, view, allFields ),
+		[ allVariations, view, allFields ]
 	);
 
 	useEffect( () => {
@@ -242,7 +243,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 		<div className="woocommerce-variation-view">
 			<DataViews
 				data={ variations }
-				fields={ variationFields }
+				fields={ allFields }
 				view={ view }
 				onClickItem={ handleEditVariation }
 				onChangeView={ setView }
@@ -262,21 +263,61 @@ export function VariationView( { productId }: VariationViewProps ) {
 					justify="space-between"
 					className="woocommerce-variation-view__toolbar"
 				>
-					<DataViews.Search
-						label={ __( 'Search variations', 'woocommerce' ) }
-					/>
-					<Stack direction="row" gap="xs">
+					<Stack
+						direction="row"
+						align="center"
+						gap="xs"
+						className="woocommerce-variation-view__toolbar-search"
+					>
+						<DataViews.Search
+							label={ __( 'Search variations', 'woocommerce' ) }
+						/>
+						<DataViews.FiltersToggle />
+					</Stack>
+					<Stack
+						direction="row"
+						align="center"
+						gap="xs"
+						className="woocommerce-variation-view__toolbar-actions"
+					>
 						<DataViews.ViewConfig />
-						<Button
-							disabled={ selection.length === 0 }
-							onClick={ () =>
-								handleEditSelectedVariations( selection )
-							}
-						>
-							{ __( 'Edit options', 'woocommerce' ) }
-						</Button>
+						<Menu placement="bottom-end">
+							<Menu.TriggerButton
+								render={
+									<Button
+										size="compact"
+										icon={ moreVertical }
+										label={ __(
+											'Variation actions',
+											'woocommerce'
+										) }
+									/>
+								}
+							/>
+							<Menu.Popover>
+								<Menu.Group>
+									<Menu.Item onClick={ () => undefined }>
+										<Menu.ItemLabel>
+											{ __(
+												'Add variations manually',
+												'woocommerce'
+											) }
+										</Menu.ItemLabel>
+									</Menu.Item>
+									<Menu.Item onClick={ () => undefined }>
+										<Menu.ItemLabel>
+											{ __(
+												'Generate missing variations',
+												'woocommerce'
+											) }
+										</Menu.ItemLabel>
+									</Menu.Item>
+								</Menu.Group>
+							</Menu.Popover>
+						</Menu>
 					</Stack>
 				</Stack>
+				<DataViews.FiltersToggled />
 				<DataViews.Layout />
 				<DataViews.Footer />
 			</DataViews>

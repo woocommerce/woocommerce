@@ -11,14 +11,16 @@
 }
 
 .woocommerce-variation-view {
-	// DataViews is designed for a constrained editor viewport. Override to let
-	// the table grow to its natural height in the traditional metabox document flow.
-	.dataviews-wrapper {
-		height: auto;
-	}
+	// Constrain the table to a metabox-friendly height so DataViews' built-in
+	// sticky header + scrollable body kicks in. The header/toolbar stay pinned;
+	// only the rows scroll.
+	max-height: 70vh;
+	display: flex;
+	flex-direction: column;
 
-	.dataviews-layout__container {
-		overflow: visible;
+	.dataviews-wrapper {
+		flex: 1 1 auto;
+		min-height: 0;
 	}
 
 	&__toolbar {
@@ -50,5 +52,33 @@
 		height: 0;
 		overflow: hidden;
 		white-space: nowrap;
+	}
+
+	// The two-line title (name + #id) makes the row taller than DataViews'
+	// default 32px cell-wrapper. Without this, other <td>s align to baseline
+	// and appear top-stuck next to the taller cell.
+	//
+	// Known imperfection: the primary cell's outer Stack still uses DataViews'
+	// hard-coded `align: flex-start`, so the thumbnail sits at the top of the
+	// row. We accept that for now rather than chasing it with !important /
+	// :has() overrides; a fix belongs upstream in @wordpress/dataviews.
+	.dataviews-view-table tbody td {
+		vertical-align: middle;
+	}
+
+	&__name-cell {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 0;
+	}
+
+	&__name-cell-title {
+		font-weight: 500;
+	}
+
+	&__name-cell-id {
+		font-size: 12px;
+		color: var(--wpds-color-fg-content-neutral-weak, #757575);
 	}
 }
