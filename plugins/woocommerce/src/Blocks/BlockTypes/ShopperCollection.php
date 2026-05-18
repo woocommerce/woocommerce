@@ -242,19 +242,37 @@ final class ShopperCollection extends AbstractBlock {
 		// flag is set *and* the list is currently empty. The flag lives in
 		// the per-block context, so it naturally resets on every full page
 		// load — no extra Store API field or persisted flag needed.
+		// `data-wp-context---notices` seeds the store-notices namespace
+		// on the `<section>` wrapper so a single ancestor scopes both the
+		// `woocommerce/shopper-collection` context (per-block state) and
+		// the `woocommerce/store-notices` context (the notices array). The
+		// notices region and the per-row mutation handlers below share
+		// this ancestor for context resolution — same shape mini-cart and
+		// AddToCartWithOptions use.
 		$wrapper_attributes = array(
-			'class'               => $wrapper_class,
-			'data-wp-interactive' => 'woocommerce/shopper-collection',
-			'data-wp-context'     => (string) wp_json_encode(
+			'class'                     => $wrapper_class,
+			'data-wp-interactive'       => 'woocommerce/shopper-collection',
+			'data-wp-context'           => (string) wp_json_encode(
 				array(
 					'listSlug'      => $list_slug,
 					'hasShownItems' => ! empty( $items ),
+					// Keyed map of item keys mid-mutation. The block store
+					// flips an entry on at the start of `onClickRemove` /
+					// `onClickMoveToCart` and clears it in a `finally`, so a
+					// per-row `state.isCurrentItemPending` getter can drive
+					// `data-wp-bind--disabled` on the trash and Move-to-cart
+					// buttons. `stdClass` so the empty value serialises as
+					// `{}` instead of `[]` — iAPI's reactive proxy treats
+					// arrays and objects differently, and arbitrary string-
+					// key writes only fire updates on objects.
+					'pendingKeys'   => new \stdClass(),
 				)
 			),
-			'data-wp-watch'       => 'callbacks.trackShownItems',
+			'data-wp-context---notices' => 'woocommerce/store-notices::' . (string) wp_json_encode( array( 'notices' => array() ) ),
+			'data-wp-watch'             => 'callbacks.trackShownItems',
 			// Deterministic key derived from the list slug so iAPI router
 			// navigations land on the same block identity across renders.
-			'data-wp-key'         => $this->get_full_block_name() . '-' . $list_slug,
+			'data-wp-key'               => $this->get_full_block_name() . '-' . $list_slug,
 		);
 
 		$list_class = sprintf( 'wc-block-shopper-collection__list columns-%d', $column_count );
@@ -267,13 +285,13 @@ final class ShopperCollection extends AbstractBlock {
 		// would be visible even on a fresh empty page, with no list under
 		// it — visually disconnected from anything.
 		return sprintf(
-			'<section %1$s>%6$s<ul class="%7$s">%2$s%3$s%4$s%5$s</ul></section>',
+			'<section %1$s>%5$s%6$s<ul class="%7$s">%2$s%3$s%4$s</ul></section>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$this->render_template_markup( $variation ),
 			$this->render_items_markup( $items, $variation ),
 			$this->render_empty_markup( $variation ),
-			$this->render_error_markup(),
 			$this->render_header_markup( $content, empty( $items ) ),
+			$this->render_interactivity_notices_region(),
 			esc_attr( $list_class )
 		);
 	}
@@ -614,27 +632,48 @@ final class ShopperCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Render the error-state markup. Hidden on initial paint and toggled on
-	 * by the JS-side `state.hasError` getter when a request fails. The text
-	 * content is left empty here on purpose: errors only happen post-hydration,
-	 * and `data-wp-text="state.errorMessage"` writes the actual server-supplied
-	 * message — surfacing that is more useful than a generic fallback.
-	 *
-	 * phpcs:disable Generic.Commenting.Todo.TaskFound
-	 *
-	 * TODO: replace this in-list error row with a `store-notices` notice
-	 * rendered above the list. Mini-cart's pattern (cart.ts → showNoticeError →
-	 * `@woocommerce/stores/store-notices`) is the right reference: dispatch
-	 * the server message there from the JS catch blocks in shopper-lists.ts
-	 * instead of holding it on `list.error`. That gives users a dismissible,
-	 * stylistically-aligned notice rather than a row tucked into the grid.
-	 *
-	 * phpcs:enable Generic.Commenting.Todo.TaskFound
+	 * Render the iAPI store-notices region. Sibling of the items `<ul>` so
+	 * the banner reads as a block-level alert, not a list item. Mirrors
+	 * `AddToCartWithOptions::render_interactivity_notices_region()` — keep
+	 * in sync if the shape changes. The shopper-lists store dispatches
+	 * `addNotice` through `woocommerce/store-notices` on mutation failures,
+	 * and the `<template data-wp-each--notice>` below renders each one.
 	 *
 	 * @return string
 	 */
-	private function render_error_markup(): string {
-		return '<li class="wc-block-shopper-collection__error" role="alert" data-wp-bind--hidden="!state.hasError" data-wp-text="state.errorMessage" hidden></li>';
+	private function render_interactivity_notices_region(): string {
+		ob_start();
+		?>
+		<div class="wc-block-shopper-collection__notices wc-block-components-notices" data-wp-interactive="woocommerce/store-notices" data-wp-bind--hidden="!context.notices.length" hidden>
+			<template data-wp-each--notice="context.notices" data-wp-each-key="context.notice.id">
+				<div
+					class="wc-block-components-notice-banner"
+					data-wp-class--is-error="state.isError"
+					data-wp-class--is-success="state.isSuccess"
+					data-wp-class--is-info="state.isInfo"
+					data-wp-class--is-dismissible="context.notice.dismissible"
+					data-wp-bind--role="state.role"
+					data-wp-watch="callbacks.injectIcon"
+				>
+					<div class="wc-block-components-notice-banner__content">
+						<span data-wp-init="callbacks.renderNoticeContent" aria-live="assertive" aria-atomic="true"></span>
+					</div>
+					<button
+						type="button"
+						data-wp-bind--hidden="!context.notice.dismissible"
+						class="wc-block-components-button wp-element-button wc-block-components-notice-banner__dismiss contained"
+						aria-label="<?php esc_attr_e( 'Dismiss this notice', 'woocommerce' ); ?>"
+						data-wp-on--click="actions.removeNotice"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+							<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z" />
+						</svg>
+					</button>
+				</div>
+			</template>
+		</div>
+		<?php
+		return (string) ob_get_clean();
 	}
 
 	/**

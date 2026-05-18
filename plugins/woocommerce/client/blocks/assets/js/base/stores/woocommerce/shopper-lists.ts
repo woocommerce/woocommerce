@@ -4,6 +4,7 @@
 import { store } from '@wordpress/interactivity';
 import type { AsyncAction, TypeYield } from '@wordpress/interactivity';
 import type { CurrencyResponse } from '@woocommerce/types';
+import type { Store as StoreNotices } from '@woocommerce/stores/store-notices';
 
 /**
  * Mirror of `Automattic\WooCommerce\StoreApi\Schemas\V1\ShopperListItemSchema::get_properties()`.
@@ -57,7 +58,6 @@ export type RawShopperListItem = {
 export type ShopperListState = {
 	items: RawShopperListItem[];
 	isLoading: boolean;
-	error: string | null;
 };
 
 export type AddItemPayload = {
@@ -85,6 +85,7 @@ export type Store = {
 		loadList: ( slug: string ) => Promise< void >;
 		addItem: ( slug: string, payload: AddItemPayload ) => Promise< void >;
 		removeItem: ( slug: string, key: string ) => Promise< void >;
+		showNoticeError: ( error: Error ) => Promise< void >;
 	};
 };
 
@@ -103,7 +104,7 @@ const ensureListState = (
 ): ShopperListState => {
 	let list = state.lists[ slug ];
 	if ( ! list ) {
-		list = { items: [], isLoading: false, error: null };
+		list = { items: [], isLoading: false };
 		state.lists[ slug ] = list;
 	}
 	return list;
@@ -170,14 +171,13 @@ async function restRequest< T >(
 // so an empty-string default would clobber the values seeded server-side via
 // `wp_interactivity_state`. State for those fields comes purely from PHP. Same
 // reason the cart store doesn't ship state defaults — see cart.ts.
-const { state } = store< Store >(
+const { state, actions } = store< Store >(
 	'woocommerce/shopper-lists',
 	{
 		actions: {
 			*loadList( slug: string ): AsyncAction< void > {
 				const list = ensureListState( state, slug );
 				list.isLoading = true;
-				list.error = null;
 
 				try {
 					const response = ( yield restRequest<
@@ -203,7 +203,7 @@ const { state } = store< Store >(
 					// loadList cannot clobber a fresh add/remove.
 					list.items = items;
 				} catch ( error ) {
-					list.error = ( error as Error ).message;
+					actions.showNoticeError( error as Error );
 				} finally {
 					list.isLoading = false;
 				}
@@ -214,7 +214,6 @@ const { state } = store< Store >(
 				payload: AddItemPayload
 			): AsyncAction< void > {
 				const list = ensureListState( state, slug );
-				list.error = null;
 
 				try {
 					const item = ( yield restRequest< RawShopperListItem >(
@@ -249,7 +248,7 @@ const { state } = store< Store >(
 						list.items.push( item );
 					}
 				} catch ( error ) {
-					list.error = ( error as Error ).message;
+					actions.showNoticeError( error as Error );
 				}
 			},
 
@@ -259,18 +258,14 @@ const { state } = store< Store >(
 					return;
 				}
 
-				const removedIndex = list.items.findIndex(
-					( i ) => i.key === key
-				);
-				if ( removedIndex < 0 ) {
+				if ( list.items.findIndex( ( i ) => i.key === key ) < 0 ) {
 					return;
 				}
-				const removed = list.items[ removedIndex ];
 
-				// Optimistic remove.
-				list.items.splice( removedIndex, 1 );
-				list.error = null;
-
+				// Pessimistic remove: leave the row in place until the
+				// server confirms to avoid a disappear/reappear flash on
+				// failure. Buttons are disabled while pending via the
+				// block store's `pendingKeys` context.
 				try {
 					yield restRequest(
 						state,
@@ -280,10 +275,34 @@ const { state } = store< Store >(
 						{ method: 'DELETE' }
 					);
 				} catch ( error ) {
-					// Restore the row at its original position.
-					list.items.splice( removedIndex, 0, removed );
-					list.error = ( error as Error ).message;
+					actions.showNoticeError( error as Error );
+					return;
 				}
+
+				// Re-find — the list may have mutated during the await.
+				const removedIndex = list.items.findIndex(
+					( i ) => i.key === key
+				);
+				if ( removedIndex >= 0 ) {
+					list.items.splice( removedIndex, 1 );
+				}
+			},
+
+			// Mirrors `cart.ts::showNoticeError`.
+			*showNoticeError( error: Error ): AsyncAction< void > {
+				// TODO: import directly once @woocommerce/stores/store-notices is public.
+				yield import( '@woocommerce/stores/store-notices' );
+				const { actions: noticeActions } = store< StoreNotices >(
+					'woocommerce/store-notices',
+					{},
+					{ lock: universalLock }
+				);
+
+				noticeActions.addNotice( {
+					notice: error.message,
+					type: 'error',
+					dismissible: true,
+				} );
 			},
 		},
 	},
@@ -322,5 +341,4 @@ window.addEventListener( 'wc-blocks_store_sync_required', ( event: Event ) => {
 	} else {
 		list.items.push( item );
 	}
-	list.error = null;
 } );
