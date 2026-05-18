@@ -8,8 +8,6 @@ import { store, getContext } from '@wordpress/interactivity';
  */
 import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
 
-type ItemWithIndex = SelectableItem & { index?: number; color?: string };
-
 type CheckboxListContext = {
 	storeNamespace: string;
 	displayLimit: number;
@@ -17,7 +15,7 @@ type CheckboxListContext = {
 };
 
 type ParentItemContext = {
-	item?: ItemWithIndex;
+	item?: SelectableItem;
 };
 
 type CheckboxListStore = {
@@ -32,7 +30,7 @@ type CheckboxListStore = {
 	};
 };
 
-function getParentItem( storeNamespace: string ): ItemWithIndex | undefined {
+function getParentItem( storeNamespace: string ): SelectableItem | undefined {
 	const parentCtx = getContext< ParentItemContext >( storeNamespace );
 	return parentCtx.item;
 }

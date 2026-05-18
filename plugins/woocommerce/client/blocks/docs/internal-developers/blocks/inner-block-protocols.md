@@ -153,22 +153,25 @@ Each item in the `items` array MUST have:
 | `selected` | `boolean` | No | Current selection state (default: false). SSR hint only — parent's `state.selectableItems` derives the live `selected` used for bindings. |
 | `disabled` | `boolean` | No | Whether item can be selected (default: false) |
 | `type` | `string` | No | Type discriminator (e.g., `"attribute/color"`) |
+| `count` | `number` | No | Display count shown by compatible inner blocks. |
+| `color` | `string` | No | Color swatch value shown by compatible inner blocks. |
+| `depth` | `number` | No | Hierarchy depth used by compatible inner blocks for indentation. |
+| `index` | `number` | No | Derived item position used by inner blocks for show-more state. |
 
-Extra fields go in `T`. For product filters, `T = FilterItemFields`:
+Extra domain fields go in `T`. For product filters, `T = FilterItemFields`:
 
 ```typescript
 type FilterItemFields = {
-  count: number;
   termId?: number;
   parent?: number;
-  depth?: number;
   menuOrder?: number;
+  attributeQueryType?: 'and' | 'or';
 };
 
 type FilterOptionItem = SelectableItem<FilterItemFields>;
 ```
 
-Inner blocks typed against a specific `T` access extra fields type-safely. Built-in inner blocks ignore unknown fields.
+Parent blocks typed against a specific `T` access extra fields type-safely. Inner blocks should consume only protocol fields unless they intentionally implement a parent-specific UI.
 
 ### Parent Store Requirements
 
@@ -217,10 +220,6 @@ Inner blocks SHOULD:
 5. Show skeleton/loading UI when `isLoading === true`
 6. Show items up to `displayLimit` (default 15), render show-more button when exceeded
 
-Inner blocks typed against `FilterItemFields` MAY additionally:
-
-1. Show counts when `item.count` exists
-
 ---
 
 ## Design Rationale
@@ -229,9 +228,9 @@ Inner blocks typed against `FilterItemFields` MAY additionally:
 
 `SelectableItem<T>` uses a generic parameter instead of a flat union of optional fields:
 
-- Base fields are shared by all consumers (id, label, value, selected, disabled, type)
+- Base fields are shared by all consumers (id, label, value, selected, disabled, type, and presentation hints like count/color/depth/index)
 - Domain-specific fields live in `T` — typed, not untyped `[key: string]: unknown`
-- Filter blocks use `FilterOptionItem = SelectableItem<FilterItemFields>` with count, parent, depth, etc.
+- Filter blocks use `FilterOptionItem = SelectableItem<FilterItemFields>` with filter-domain fields like termId, parent, menuOrder, and attributeQueryType.
 - A variation selector would use `SelectableItem<{ price?: string; stockStatus?: string }>` etc.
 - TypeScript enforces correct shape at each call site with no extra runtime cost
 
@@ -242,7 +241,7 @@ Inner blocks typed against `FilterItemFields` MAY additionally:
 | Old `FilterOptionItem` | New `SelectableItem<FilterItemFields>` |
 | --- | --- |
 | `id?: number` (optional, number) | `id: string` (required, string — used for DOM element id) |
-| `count: number` (required) | `count: number` in `FilterItemFields` (required for filters, absent for other consumers) |
+| `count: number` (required) | `count?: number` on base type |
 | No `disabled` | `disabled?: boolean` on base type |
 | No `type` | `type?: string` on base type |
 
@@ -269,6 +268,14 @@ export type SelectableItem< T = unknown > = (
 	selected?: boolean;
 	disabled?: boolean;
 	type?: string;
+	/** Display count shown by compatible inner blocks. */
+	count?: number;
+	/** Color swatch value shown by compatible inner blocks. */
+	color?: string;
+	/** Hierarchy depth used by compatible inner blocks for indentation. */
+	depth?: number;
+	/** Derived item position used by inner blocks for show-more state. */
+	index?: number;
 } & T;
 
 export interface SelectableItemsContext< T = unknown > {
@@ -298,22 +305,21 @@ Filter blocks extend with `FilterItemFields` (from `product-filters/types.ts`):
 
 ```typescript
 export type FilterItemFields = {
-	count: number;
 	termId?: number;
 	parent?: number;
-	depth?: number;
 	menuOrder?: number;
+	attributeQueryType?: 'and' | 'or';
 };
 
 export type FilterOptionItem = SelectableItem< FilterItemFields >;
 ```
 
-Inner blocks are typed via `SelectableItemsBlockContext<FilterItemFields>`:
+Reusable inner blocks are typed via the protocol only:
 
 ```typescript
 // In checkbox-list/types.ts or chips/types.ts
 export type EditProps = BlockEditProps< BlockAttributes > & {
-	context: SelectableItemsBlockContext< FilterItemFields >;
+	context: SelectableItemsBlockContext;
 	// ...color props
 };
 ```
@@ -365,7 +371,11 @@ parameters:
         ariaLabel?: string,
         selected?: bool,
         disabled?: bool,
-        type?: string
+        type?: string,
+        count?: int,
+        color?: string,
+        depth?: int,
+        index?: int
       }
     '''
     FilterSelectableItem: '''
@@ -377,11 +387,14 @@ parameters:
         selected?: bool,
         disabled?: bool,
         type?: string,
-        count: int,
+        count?: int,
+        color?: string,
+        depth?: int,
+        index?: int,
         termId?: int,
         parent?: int,
-        depth?: int,
-        menuOrder?: int
+        menuOrder?: int,
+        attributeQueryType?: 'and'|'or'
       }
     '''
     SelectableItemsContext: '''
@@ -390,7 +403,8 @@ parameters:
         selectionMode: 'single'|'multiple',
         storeNamespace: string,
         groupLabel?: string,
-        isLoading?: bool
+        isLoading?: bool,
+        filterType?: string
       }
     '''
 ```
