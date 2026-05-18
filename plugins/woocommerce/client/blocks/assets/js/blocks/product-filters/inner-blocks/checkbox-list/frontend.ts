@@ -33,7 +33,8 @@ type CheckboxListStore = {
 	};
 };
 
-function getParentStore( storeNamespace: string ) {
+function getParentStore( storeNamespace?: string ) {
+	if ( ! storeNamespace ) return undefined;
 	return store< SelectableItemsParentStore< { color?: string } > >(
 		storeNamespace
 	);
@@ -50,9 +51,10 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 		state: {
 			get items(): CheckboxListItem[] {
 				const { storeNamespace } = getContext< CheckboxListContext >();
-				return getParentStore(
-					storeNamespace
-				).state.selectableItems.map( ( item, index ) => ( {
+				const parentItems =
+					getParentStore( storeNamespace )?.state?.selectableItems;
+				if ( ! Array.isArray( parentItems ) ) return [];
+				return parentItems.map( ( item, index ) => ( {
 					...item,
 					index,
 				} ) );
@@ -84,10 +86,10 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 		},
 		actions: {
 			toggle() {
+				const item = getCurrentItem();
+				if ( ! item ) return;
 				const { storeNamespace } = getContext< CheckboxListContext >();
-				getParentStore( storeNamespace ).actions.toggle(
-					getCurrentItem()
-				);
+				getParentStore( storeNamespace )?.actions?.toggle?.( item );
 			},
 			showAll() {
 				const context = getContext< CheckboxListContext >();

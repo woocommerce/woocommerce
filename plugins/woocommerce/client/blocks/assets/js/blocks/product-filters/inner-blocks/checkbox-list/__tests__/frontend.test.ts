@@ -106,4 +106,28 @@ describe( 'product filter checkbox list interactivity store', () => {
 
 		expect( mockParentToggle ).toHaveBeenCalledWith( item );
 	} );
+
+	it( 'returns empty items when parent store data is missing', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Checkbox list store was not registered.' );
+		}
+
+		mockGetContext.mockReturnValue( {} );
+
+		expect( mockRegisteredStore.state.items ).toEqual( [] );
+	} );
+
+	it( 'does not forward toggle without current item', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Checkbox list store was not registered.' );
+		}
+
+		mockGetContext.mockReturnValue( {
+			storeNamespace: 'woocommerce/product-filters',
+		} );
+
+		mockRegisteredStore.actions.toggle();
+
+		expect( mockParentToggle ).not.toHaveBeenCalled();
+	} );
 } );
