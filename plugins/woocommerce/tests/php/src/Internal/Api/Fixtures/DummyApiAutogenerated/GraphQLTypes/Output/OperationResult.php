@@ -21,11 +21,11 @@ class OperationResult {
 						'success' => array(
 							'type' => Type::nonNull(Type::boolean()),
 								'description' => __( 'Whether the operation succeeded', 'woocommerce' ),
-									),
+										),
 						'message' => array(
 							'type' => Type::nonNull(Type::string()),
 								'description' => __( 'A human-readable status message', 'woocommerce' ),
-									),
+										),
 					),
 				)
 			);

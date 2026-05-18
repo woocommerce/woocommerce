@@ -203,6 +203,17 @@ class WCEmailTemplateAutoApplier {
 			self::$is_auto_applying = false;
 		}//end try
 
+		// Fire `_update_applied` for the auto-applier path. Static extensions:
+		// the auto-applier only acts on `core_updated_uncustomized` posts, so
+		// `had_customizations` is always false and `auto_resolved` is always true.
+		// Gate on `$require_uncustomized`: this method is also reused by the
+		// reset endpoint (with `require_uncustomized = false`) — the reset
+		// surface is not in RSM-145's event taxonomy and must not be tagged
+		// as `applied_from='auto'`.
+		if ( $require_uncustomized ) {
+			WCEmailTemplateSyncTracker::record_auto_applied( $post_id );
+		}
+
 		return array(
 			'content'     => $canonical,
 			'version'     => $version,

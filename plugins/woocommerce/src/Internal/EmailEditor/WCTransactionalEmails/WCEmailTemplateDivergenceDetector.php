@@ -262,6 +262,33 @@ class WCEmailTemplateDivergenceDetector {
 	}
 
 	/**
+	 * Stamp {@see self::BACKFILL_COMPLETE_OPTION} on fresh WooCommerce installs.
+	 *
+	 * The RSM-149 backfill runs as a 10.8 db-update migration callback. Fresh
+	 * installs on 10.9 (or any later release) never cross the 10.8 db-update
+	 * boundary — {@see \WC_Install::needs_db_update()} short-circuits on a null
+	 * `woocommerce_db_version` — so the migration never runs and the backfill
+	 * option never flips. Without this fix, {@see self::run_sweep()} would
+	 * early-return on every subsequent WC upgrade for the lifetime of the site
+	 * and Tracks instrumentation would be silently dead.
+	 *
+	 * A fresh install has no legacy `woo_email` posts to backfill: every post
+	 * the generator creates is already 10.9-stamped at creation. The migration
+	 * is trivially complete; recording that here is the truthful statement.
+	 *
+	 * Hooked on `woocommerce_newly_installed`, the WP-style public action
+	 * contract WC fires from {@see \WC_Install::newly_installed()} after the
+	 * fresh-install flag flips.
+	 *
+	 * @return void
+	 *
+	 * @since 10.9.0
+	 */
+	public static function mark_backfill_complete_on_fresh_install(): void {
+		update_option( self::BACKFILL_COMPLETE_OPTION, 'yes' );
+	}
+
+	/**
 	 * Run the post-upgrade divergence sweep.
 	 *
 	 * Intended to be hooked on `woocommerce_updated`, which fires once per WC
@@ -447,6 +474,28 @@ class WCEmailTemplateDivergenceDetector {
 			return null;
 		}
 
+		// Fire `_update_available` on every sweep where the merchant hasn't yet
+		// reviewed the current registry version, *before* the idempotency early-
+		// return below. A post that stays `core_updated_customized` across
+		// multiple core releases (merchant sits on the divergence through 10.7,
+		// 10.8, 10.9…) still represents a fresh "update available" signal at
+		// each new `version_to`: the status meta is unchanged but the registry
+		// version has advanced, so analytics should see one event per release
+		// boundary. The per-`(post_id, version_to)` dedup transient in the
+		// tracker prevents same-release re-fires; the suppress-during-backfill
+		// gate lives there too. Order matters: we fire here rather than after
+		// the meta write so the cross-release case isn't accidentally
+		// short-circuited by the status-unchanged guard.
+		if ( self::STATUS_CORE_UPDATED_CUSTOMIZED === $status ) {
+			$sync_config  = WCEmailTemplateSyncRegistry::get_email_sync_config( $email_id );
+			$version_to   = null !== $sync_config ? (string) ( $sync_config['version'] ?? '' ) : '';
+			$version_from = (string) get_post_meta( $post_id, self::VERSION_META_KEY, true );
+
+			if ( '' !== $version_to && version_compare( $version_from, $version_to, '<' ) ) {
+				WCEmailTemplateSyncTracker::record_update_available( $post_id );
+			}
+		}
+
 		// Idempotent write: skip the meta call entirely when the status hasn't shifted,
 		// so successive reclassifies on unchanged state produce zero DB writes (and zero
 		// `update_post_metadata` filter calls observed by tests / observers).
@@ -456,6 +505,7 @@ class WCEmailTemplateDivergenceDetector {
 		}
 
 		update_post_meta( $post_id, self::STATUS_META_KEY, $status );
+
 		return $status;
 	}
 

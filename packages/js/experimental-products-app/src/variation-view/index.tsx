@@ -280,8 +280,11 @@ export function VariationView( { productId }: VariationViewProps ) {
 				<DataViews.Layout />
 				<DataViews.Footer />
 			</DataViews>
-			{ showQuickEdit && productWithVariations && (
-				<ProductEdit products={ [ productWithVariations ] } />
+			{ productWithVariations && (
+				<ProductEdit
+					products={ [ productWithVariations ] }
+					isOpen={ showQuickEdit }
+				/>
 			) }
 		</div>
 	);

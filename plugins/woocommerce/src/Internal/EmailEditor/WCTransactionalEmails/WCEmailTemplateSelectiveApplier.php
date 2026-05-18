@@ -283,6 +283,11 @@ class WCEmailTemplateSelectiveApplier {
 		// Invalidate the change-summary cache so the next read reflects the merged state.
 		WCEmailTemplateChangeSummary::reset_cache();
 
+		// Fire `_update_applied` for the selective-applier path. Static extensions:
+		// the selective applier only acts on `core_updated_customized` posts, so
+		// `had_customizations` is always true and `auto_resolved` is always false.
+		WCEmailTemplateSyncTracker::record_selective_applied( $post_id );
+
 		return array(
 			'merged_content'     => $merged_content,
 			'revision_id'        => $revision_id,

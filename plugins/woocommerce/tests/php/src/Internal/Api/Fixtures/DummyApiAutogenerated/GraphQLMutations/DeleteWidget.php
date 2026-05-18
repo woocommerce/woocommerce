@@ -21,12 +21,12 @@ class DeleteWidget {
 				'id' => array(
 					'type' => Type::nonNull(Type::int()),
 						'description' => __( 'The widget id to delete', 'woocommerce' ),
-					),
+						),
 				'force' => array(
 					'type' => Type::nonNull(Type::boolean()),
 						'description' => __( 'When true, ignore \"not found\" errors', 'woocommerce' ),
 						'defaultValue' => false,
-				),
+					),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);

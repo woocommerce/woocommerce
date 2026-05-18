@@ -22,7 +22,7 @@ class Identifiable {
 						'id' => array(
 							'type' => Type::nonNull(Type::int()),
 								'description' => __( 'The unique numeric identifier', 'woocommerce' ),
-								),
+									),
 					),
 					'resolveType' => function ( $value ) {
 						$class = get_class( $value );

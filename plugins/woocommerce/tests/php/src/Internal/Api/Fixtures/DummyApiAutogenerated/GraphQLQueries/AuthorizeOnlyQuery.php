@@ -24,7 +24,7 @@ class AuthorizeOnlyQuery {
 			'args' => array(
 				'allow' => array(
 					'type' => Type::nonNull(Type::boolean()),
-						),
+							),
 			),
 			'resolve' => array( self::class, 'resolve' ),
 		);

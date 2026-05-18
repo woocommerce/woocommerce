@@ -24,6 +24,7 @@ $gap-smallest: 4px;
 
 // Header
 $header-height: 60px;
+$header-border-width: 1px;
 $header-scroll-shadow: 0 8px 8px 0 rgba(85, 93, 102, 0.3);
 
 // Sidebar
@@ -45,8 +46,12 @@ $adminbar-height-mobile: 46px;
 $admin-menu-width: 160px;
 $admin-menu-width-collapsed: 36px;
 
-// wp-admin colors
-$wp-admin-background: #f1f1f1;
+// wp-admin colors. Hardcoded because WordPress doesn't expose them as CSS
+// custom properties on `:root` (verified via the `wp-token-check` skill).
+// Centralised here so the next person doesn't have to grep when WP shifts
+// the bar / border palette.
+$wp-admin-background: #f0f0f1; // wp-admin body background grey
+$wp-admin-border: #dcdcde; // wp-admin chrome border colour
 $wp-admin-sidebar: #24292d;
 
 // Muriel

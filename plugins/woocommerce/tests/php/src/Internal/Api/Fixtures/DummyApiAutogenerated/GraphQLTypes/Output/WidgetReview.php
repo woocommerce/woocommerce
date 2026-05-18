@@ -25,15 +25,15 @@ class WidgetReview {
 						'body' => array(
 							'type' => Type::nonNull(Type::string()),
 								'description' => __( 'The body of the review', 'woocommerce' ),
-									),
+										),
 						'score' => array(
 							'type' => Type::nonNull(Type::int()),
 								'description' => __( 'A score between 0 and 5', 'woocommerce' ),
-									),
+										),
 						'id' => array(
 							'type' => Type::nonNull(Type::int()),
 								'description' => __( 'The unique numeric identifier', 'woocommerce' ),
-									),
+										),
 					),
 				)
 			);

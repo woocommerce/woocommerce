@@ -2211,6 +2211,54 @@ class Checkout extends MockeryTestCase {
 	}
 
 	/**
+	 * Regression test for https://github.com/woocommerce/woocommerce/issues/64792.
+	 *
+	 * After a failed payment, the customer's session holds a pointer to the pending
+	 * order. A second POST on the same session must reuse that order — otherwise the
+	 * session pointer is overwritten by `set_draft_order_id()` and the first order is
+	 * orphaned. Prior to the fix, `create_or_update_draft_order()` did not consult the
+	 * session and unconditionally created a new order on every POST.
+	 */
+	public function test_post_reuses_pending_order_from_session_on_retry() {
+		// Force the first POST to fail at the order-processed hook, mirroring the
+		// real failed-payment shape from issue #64792. The throw happens after the
+		// order has been created and the session pointer set, but before the cart-
+		// clear that would normally follow a successful checkout.
+		$fail_hook = function () {
+			throw new \Automattic\WooCommerce\StoreApi\Exceptions\RouteException(
+				'woocommerce_rest_checkout_payment_failed',
+				'Forced failure for issue #64792 repro',
+				400
+			);
+		};
+		add_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+
+		$first_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		$this->assertEquals( 400, $first_response->get_status(), 'First POST should fail per the forced-failure hook.' );
+
+		$first_order_id = (int) WC()->session->get( 'store_api_draft_order' );
+		$this->assertGreaterThan( 0, $first_order_id, 'Session should hold the failed order id after a failed POST.' );
+
+		$first_order = wc_get_order( $first_order_id );
+		$this->assertInstanceOf( \WC_Order::class, $first_order );
+		$this->assertTrue( $first_order->has_status( 'pending' ), 'First order should be left in pending status after payment failure.' );
+
+		remove_action( 'woocommerce_store_api_checkout_order_processed', $fail_hook, 999 );
+
+		// Second POST on the same session should reuse the existing pending order.
+		$second_response = rest_get_server()->dispatch( $this->build_valid_post_request() );
+		$this->assertEquals( 200, $second_response->get_status(), print_r( $second_response->get_data(), true ) );
+
+		$second_order_id = (int) $second_response->get_data()['order_id'];
+		$this->assertSame(
+			$first_order_id,
+			$second_order_id,
+			'Second POST must reuse the existing pending order, not create a new one (regression: issue #64792).'
+		);
+		$this->assertSame( $first_order_id, (int) WC()->session->get( 'store_api_draft_order' ), 'Session pointer should still reference the reused order.' );
+	}
+
+	/**
 	 * Build a valid checkout POST request body for use by the sample-extension tests.
 	 *
 	 * @return \WP_REST_Request
