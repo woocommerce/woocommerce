@@ -33286,12 +33286,6 @@ parameters:
 			path: includes/walkers/class-wc-product-cat-list-walker.php
 
 		-
-			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
@@ -33319,42 +33313,6 @@ parameters:
 			message: '#^Call to an undefined method WC_Payment_Token\:\:get_last4\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_cancel_order_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_checkout_payment_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_order_number\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_view_order_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method needs_payment\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/wc-account-functions.php
 
 		-
