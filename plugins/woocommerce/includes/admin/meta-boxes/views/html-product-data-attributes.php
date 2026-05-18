@@ -62,9 +62,7 @@ if ( \Automattic\WooCommerce\Admin\Features\Features::exists( \Automattic\WooCom
 		<span class="expand-close">
 			<a href="#" class="expand_all"><?php esc_html_e( 'Expand', 'woocommerce' ); ?></a> / <a href="#" class="close_all"><?php esc_html_e( 'Close', 'woocommerce' ); ?></a>
 		</span>
-		<?php if ( ! \Automattic\WooCommerce\Admin\Features\Features::exists( \Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign\Init::FEATURE_ID ) ) : ?>
 		<button type="button" aria-disabled="true" class="button save_attributes button-primary disabled"><?php esc_html_e( 'Save attributes', 'woocommerce' ); ?></button>
-		<?php endif; ?>
 	</div>
 	<?php do_action( 'woocommerce_product_options_attributes' ); ?>
 </div>
