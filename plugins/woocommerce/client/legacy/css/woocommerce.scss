@@ -224,19 +224,30 @@ p.demo_store,
 						}
 					}
 
-					// FlexSlider needs an image thumbnail, so no-poster videos
-					// hide that placeholder once the video preview is injected.
-					.woocommerce-product-gallery__video-thumbnail-placeholder {
-						opacity: 0;
-					}
+					&.woocommerce-product-gallery__video-thumbnail {
+						// FlexSlider needs an image thumbnail, so no-poster videos
+						// hide that placeholder once the video preview is injected.
+						img.woocommerce-product-gallery__video-thumbnail-placeholder,
+						img.woocommerce-product-gallery__video-thumbnail-placeholder.flex-active,
+						img.woocommerce-product-gallery__video-thumbnail-placeholder:hover {
+							opacity: 0;
+						}
 
-					.woocommerce-product-gallery__video-thumbnail-preview {
-						position: absolute;
-						inset: 0;
-						width: 100%;
-						height: 100%;
-						object-fit: cover;
-						pointer-events: none;
+						.woocommerce-product-gallery__video-thumbnail-preview {
+							position: absolute;
+							inset: 0;
+							width: 100%;
+							height: 100%;
+							object-fit: cover;
+							opacity: 0.5;
+							pointer-events: none;
+						}
+
+						&:hover .woocommerce-product-gallery__video-thumbnail-preview,
+						.woocommerce-product-gallery__video-thumbnail-placeholder.flex-active
+							+ .woocommerce-product-gallery__video-thumbnail-preview {
+							opacity: 1;
+						}
 					}
 				}
 			}

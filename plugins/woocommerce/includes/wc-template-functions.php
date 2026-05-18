@@ -2190,12 +2190,13 @@ if ( ! function_exists( 'wc_get_gallery_video_html' ) ) {
 
 		return sprintf(
 			'<div data-thumb="%1$s" data-thumb-alt="%2$s" data-thumb-srcset="%3$s" data-thumb-sizes="%4$s" data-thumb-video-src="%5$s" ' .
-			'class="woocommerce-product-gallery__image woocommerce-product-gallery__video"><video %6$s></video></div>',
+			'class="woocommerce-product-gallery__image woocommerce-product-gallery__video"><a href="%6$s"><video %7$s></video></a></div>',
 			esc_url( $thumbnail ),
 			esc_attr( $alt_text ),
 			esc_attr( $thumbnail_srcset ? $thumbnail_srcset : '' ),
 			esc_attr( $thumbnail_sizes ? $thumbnail_sizes : '' ),
 			esc_url( $thumbnail_video_src ),
+			esc_url( $video_src ),
 			wc_implode_html_attributes( array_filter( $video_attributes ) )
 		);
 	}

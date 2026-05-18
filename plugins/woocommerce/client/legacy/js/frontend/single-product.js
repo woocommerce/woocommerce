@@ -239,6 +239,7 @@ jQuery( function( $ ) {
 		this.initZoomForTarget    = this.initZoomForTarget.bind( this );
 		this.initPhotoswipe       = this.initPhotoswipe.bind( this );
 		this.initVideoThumbnailPreviews = this.initVideoThumbnailPreviews.bind( this );
+		this.syncVideoThumbnailPreviews = this.syncVideoThumbnailPreviews.bind( this );
 		this.syncVideoPlayback    = this.syncVideoPlayback.bind( this );
 		this.getPhotoswipeVideoHtml = this.getPhotoswipeVideoHtml.bind( this );
 		this.syncPhotoswipeVideoPlayback = this.syncPhotoswipeVideoPlayback.bind( this );
@@ -278,15 +279,25 @@ jQuery( function( $ ) {
 			start: function( slider ) {
 				$target.css( 'opacity', 1 );
 				gallery.syncVideoPlayback( slider.currentSlide );
+				gallery.syncVideoThumbnailPreviews();
 			},
 			after: function( slider ) {
 				gallery.initZoomForTarget( gallery.$images.eq( slider.currentSlide ) );
 				gallery.syncVideoPlayback( slider.currentSlide );
+				gallery.syncVideoThumbnailPreviews();
 			}
 		}, args );
 
 		$target.flexslider( options );
 		gallery.initVideoThumbnailPreviews();
+		$target
+			.off( 'click.wcProductGalleryVideoThumbs', '.flex-control-thumbs img' )
+			.on( 'click.wcProductGalleryVideoThumbs', '.flex-control-thumbs img', function() {
+				window.setTimeout( function() {
+					gallery.syncVideoPlayback();
+					gallery.syncVideoThumbnailPreviews();
+				}, 0 );
+			} );
 
 		// Trigger resize after main image loads to ensure correct gallery size.
 		$( '.woocommerce-product-gallery__wrapper .woocommerce-product-gallery__image:eq(0) .wp-post-image' ).one( 'load', function() {
@@ -345,6 +356,7 @@ jQuery( function( $ ) {
 		this.$images.each( function( index, slide ) {
 			const videoSrc = $( slide ).attr( 'data-thumb-video-src' );
 			const $thumb = $thumbs.eq( index );
+			const $thumbItem = $thumb.closest( 'li' );
 
 			if ( ! videoSrc || ! $thumb.length || $thumb.siblings( 'video' ).length ) {
 				return;
@@ -355,13 +367,47 @@ jQuery( function( $ ) {
 				src: videoSrc,
 				preload: 'metadata',
 				muted: 'muted',
+				playsinline: 'playsinline',
 				'aria-hidden': 'true',
+			} ).css( {
+				position: 'absolute',
+				top: 0,
+				right: 0,
+				bottom: 0,
+				left: 0,
+				width: '100%',
+				height: '100%',
+				objectFit: 'cover',
+				opacity: 0.5,
+				pointerEvents: 'none',
 			} );
 
+			$thumbItem
+				.addClass( 'woocommerce-product-gallery__video-thumbnail' )
+				.css( 'position', 'relative' );
 			$thumb
 				.addClass( 'woocommerce-product-gallery__video-thumbnail-placeholder' )
+				.css( 'opacity', 0 )
 				.after( video );
 		} );
+
+		this.syncVideoThumbnailPreviews();
+	};
+
+	/**
+	 * Sync video thumbnail preview opacity with FlexSlider active state.
+	 */
+	ProductGallery.prototype.syncVideoThumbnailPreviews = function() {
+		this.$target
+			.find( '.flex-control-thumbs li.woocommerce-product-gallery__video-thumbnail' )
+			.each( function() {
+				const $thumbItem = $( this );
+				const isActive = $thumbItem.find( 'img.flex-active' ).length > 0;
+
+				$thumbItem
+					.find( '.woocommerce-product-gallery__video-thumbnail-preview' )
+					.css( 'opacity', isActive ? 1 : 0.5 );
+			} );
 	};
 
 	/**
