@@ -509,7 +509,6 @@ describe( 'product edit utils', () => {
 				'brands',
 				'tags',
 				'featured',
-				'shipping_class',
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
@@ -522,6 +521,7 @@ describe( 'product edit utils', () => {
 				'length',
 				'width',
 				'height',
+				'shipping_class',
 				...stockStatusFieldIds,
 				'stock_quantity',
 			] );
@@ -1153,11 +1153,6 @@ describe( 'product edit utils', () => {
 					id: 'product-organization-fields',
 					label: 'Product organization',
 					children: [ 'categories', 'brands', 'tags', 'featured' ],
-				},
-				{
-					id: 'shipping-fields',
-					label: 'Shipping',
-					children: [ 'shipping_class' ],
 				},
 			] );
 		} );

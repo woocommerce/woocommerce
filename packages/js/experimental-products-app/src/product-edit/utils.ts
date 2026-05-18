@@ -231,11 +231,6 @@ const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
 		__( 'Product organization', 'woocommerce' ),
 		[ 'categories', 'brands', 'tags', 'featured' ]
 	),
-	createProductEditFormGroup(
-		'shipping-fields',
-		__( 'Shipping', 'woocommerce' ),
-		[ 'shipping_class' ]
-	),
 ] satisfies ProductEditFormField[];
 
 const GROUPED_PRODUCT_EDIT_FORM_FIELDS = [
