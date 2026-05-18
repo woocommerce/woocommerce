@@ -2,7 +2,10 @@
 
 > **Status: Proof of Concept.** This package is part of an exploratory scaffold for surfacing WooCommerce on the experimental Gutenberg dashboard. APIs, file layouts, and conventions described here will likely move.
 
-A `@wordpress/build` "init module" that runs on dashboard boot and registers WooCommerce-core contributions to the dashboard. Currently registers a single Store Activity source (`woocommerce/orders`) that surfaces recent orders in the Store Activity widget timeline.
+A `@wordpress/build` "init module" that runs on dashboard boot and registers WooCommerce-core contributions to the dashboard. Currently registers two Store Activity sources:
+
+- `woocommerce/orders` — recent orders, backed by a WC-side `order` entity that points at `/wc/v3/orders`.
+- `woocommerce/reviews` — recent product reviews, consumed via the stock `root/comment` entity that `@wordpress/core-data` already registers, filtered by `type='review'` and with the parent product embedded through `_embed='up'`.
 
 ## Contents
 
@@ -15,10 +18,14 @@ core-dashboard-init/
     └── store-activity/
         ├── index.ts
         ├── register-sources.ts  # addFilter( 'storeActivity.sources', ... )
-        └── orders/
+        ├── orders/
+        │   ├── index.ts
+        │   ├── use-orders-activity.tsx
+        │   └── order-timeline-event.tsx
+        └── reviews/
             ├── index.ts
-            ├── use-orders-activity.tsx
-            └── order-timeline-event.tsx
+            ├── use-reviews-activity.tsx
+            └── review-timeline-event.tsx
 ```
 
 ## Why a separate package?
@@ -118,7 +125,9 @@ export const WC_ORDER_ENTITY: Entity = {
 
 Eventually, when more widgets/sources need access to orders (or to other WC entities), this `data/` subdir can graduate to a dedicated `@woocommerce/data` workspace package mirroring the shape of `@mailpoet-next/data`. For now it lives here to keep the PoC cohesive.
 
-## Source: Store Activity → Orders
+## Sources
+
+### Store Activity → Orders
 
 `src/store-activity/orders/use-orders-activity.tsx` is the React hook that the Store Activity widget calls to fetch events. It uses `@wordpress/data` + `@wordpress/core-data` against the entity registered above:
 
@@ -134,6 +143,31 @@ useSelect( ( select ) => {
 ```
 
 The hook returns `{ state: 'loading' | 'empty' | 'success', events? }`. Each event has `id`, `icon` (from `@wordpress/icons`), `renderContent` (React render fn that interpolates a link to the order edit screen and the customer name when available), and `datetime` (ISO 8601 for sorting/grouping in the widget).
+
+### Store Activity → Reviews
+
+`src/store-activity/reviews/use-reviews-activity.tsx` is the equivalent hook for product reviews. **No entity registration is needed here** — `@wordpress/core-data` already ships a stock `root/comment` entity backed by `/wp/v2/comments`. We just pass `type='review'` to scope the collection to WooCommerce product reviews and `_embed='up'` to inline the parent product on each record:
+
+```ts
+useSelect( ( select ) => {
+    const records = select( coreStore ).getEntityRecords(
+        'root',
+        'comment',
+        {
+            per_page: 10,
+            orderby: 'date',
+            order: 'desc',
+            type: 'review',
+            _embed: 'up',
+        }
+    );
+    // ...
+}, [] );
+```
+
+The timeline event renders `<reviewer> on <product>`, with the reviewer name linking to the comment edit screen (`comment.php?action=editcomment&c=…`) and the product name linking to the product edit screen (`post.php?post=…&action=edit`). Both targets are legacy WP-admin pages, so both links use `@wordpress/ui`'s `Link` — same convention as the orders source.
+
+This source is the simpler shape because it leans on a stock entity. It's a useful blueprint for any third-party extension whose data is already exposed through a registered core-data entity — no `addEntities` call needed.
 
 ## See also
 
