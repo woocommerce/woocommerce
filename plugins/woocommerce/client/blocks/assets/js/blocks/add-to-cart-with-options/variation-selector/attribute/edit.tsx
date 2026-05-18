@@ -36,10 +36,7 @@ import {
 	DisplayStyleSwitcher,
 	resetDisplayStyleBlock,
 } from '../../../product-filters/components/display-style-switcher';
-import type {
-	SelectableItem,
-	SelectableItemsContext,
-} from '../../../../types/type-defs/selectable-items';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 
 const INNER_CHIPS = 'woocommerce/product-filter-chips';
 
@@ -61,7 +58,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 		useCustomDataContext< ProductResponseAttributeItem >( 'attribute' );
 
 	const selectableContext = useMemo( () => {
-		let items = [] as SelectableItemsContext< SelectableItem >[ 'items' ];
+		let items = [];
 		if (
 			attribute &&
 			Array.isArray( attribute?.terms ) &&
@@ -72,7 +69,6 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 				label: term.name,
 				value: term.slug,
 				ariaLabel: term.name,
-				termId: term.id,
 			} ) );
 		}
 
@@ -81,7 +77,10 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			selectionMode: 'single' as const,
 			storeNamespace: 'woocommerce/add-to-cart-with-options',
 			groupLabel: '',
-		} satisfies SelectableItemsContext< SelectableItem >;
+		} satisfies SelectableItemsContext< {
+			label: string;
+			ariaLabel: string;
+		} >;
 	}, [ attribute ] );
 
 	const blockPreviewProps = useBlockPreview( {
