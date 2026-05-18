@@ -8,6 +8,7 @@ import {
 	store,
 	type AsyncAction,
 } from '@wordpress/interactivity';
+import { __, sprintf } from '@wordpress/i18n';
 import '@woocommerce/stores/woocommerce/shopper-lists';
 import '@woocommerce/stores/woocommerce/cart';
 import type {
@@ -231,6 +232,25 @@ store< BlockStore >(
 						listSlug,
 						listItem.key
 					);
+				} catch ( error ) {
+					// `listItem.name` is already wp_kses'd by the schema
+					// (`HtmlFormatter::format`) and `error.message` originates
+					// from a server-side WP_Error, so both are safe for the
+					// notice region's innerHTML render path. Same trust model
+					// as cart.ts::showNoticeError.
+					yield shopperListsActions.showNoticeError(
+						new Error(
+							sprintf(
+								/* translators: 1: item name. 2: error message from the server. */
+								__(
+									'Couldn’t remove “%1$s” from your saved list: %2$s',
+									'woocommerce'
+								),
+								listItem.name,
+								( error as Error ).message
+							)
+						)
+					);
 				} finally {
 					delete pendingKeys[ listItem.key ];
 				}
@@ -291,10 +311,29 @@ store< BlockStore >(
 						return;
 					}
 
-					yield shopperListsActions.removeItem(
-						listSlug,
-						listItem.key
-					);
+					try {
+						yield shopperListsActions.removeItem(
+							listSlug,
+							listItem.key
+						);
+					} catch ( error ) {
+						// Cart-add already succeeded — only the saved-list
+						// cleanup failed. Surface the item context so the
+						// shopper knows which row is still hanging around.
+						yield shopperListsActions.showNoticeError(
+							new Error(
+								sprintf(
+									/* translators: 1: item name. 2: error message from the server. */
+									__(
+										'Couldn’t remove “%1$s” from your saved list: %2$s',
+										'woocommerce'
+									),
+									listItem.name,
+									( error as Error ).message
+								)
+							)
+						);
+					}
 				} finally {
 					delete pendingKeys[ listItem.key ];
 				}

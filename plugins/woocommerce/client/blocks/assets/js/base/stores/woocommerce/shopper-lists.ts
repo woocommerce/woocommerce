@@ -209,46 +209,44 @@ const { state, actions } = store< Store >(
 				}
 			},
 
+			// Mutations (`addItem`, `removeItem`) intentionally do NOT
+			// catch — they let the caller decide the notice wording so
+			// per-row handlers in shopper-collection's `frontend.ts` can
+			// interpolate the item name. `loadList` still catches because
+			// its callers (page navigation, etc.) have no item context to
+			// add.
 			*addItem(
 				slug: string,
 				payload: AddItemPayload
 			): AsyncAction< void > {
 				const list = ensureListState( state, slug );
 
-				try {
-					const item = ( yield restRequest< RawShopperListItem >(
-						state,
-						`wc/store/v1/shopper-lists/${ encodeURIComponent(
-							slug
-						) }/items`,
-						{
-							method: 'POST',
-							body: JSON.stringify( payload ),
-						}
-					) ) as TypeYield<
-						typeof restRequest< RawShopperListItem >
-					>;
-
-					if ( ! isShopperListItem( item ) ) {
-						throw new Error(
-							'Invalid shopper list item response.'
-						);
+				const item = ( yield restRequest< RawShopperListItem >(
+					state,
+					`wc/store/v1/shopper-lists/${ encodeURIComponent(
+						slug
+					) }/items`,
+					{
+						method: 'POST',
+						body: JSON.stringify( payload ),
 					}
+				) ) as TypeYield< typeof restRequest< RawShopperListItem > >;
 
-					// Merge the returned item by key — replace if present,
-					// append otherwise. Re-saving the same product POSTs
-					// twice and the server merges quantity, so we mirror
-					// that behaviour locally.
-					const existingIndex = list.items.findIndex(
-						( i ) => i.key === item.key
-					);
-					if ( existingIndex >= 0 ) {
-						list.items[ existingIndex ] = item;
-					} else {
-						list.items.push( item );
-					}
-				} catch ( error ) {
-					actions.showNoticeError( error as Error );
+				if ( ! isShopperListItem( item ) ) {
+					throw new Error( 'Invalid shopper list item response.' );
+				}
+
+				// Merge the returned item by key — replace if present,
+				// append otherwise. Re-saving the same product POSTs
+				// twice and the server merges quantity, so we mirror
+				// that behaviour locally.
+				const existingIndex = list.items.findIndex(
+					( i ) => i.key === item.key
+				);
+				if ( existingIndex >= 0 ) {
+					list.items[ existingIndex ] = item;
+				} else {
+					list.items.push( item );
 				}
 			},
 
@@ -265,19 +263,15 @@ const { state, actions } = store< Store >(
 				// Pessimistic remove: leave the row in place until the
 				// server confirms to avoid a disappear/reappear flash on
 				// failure. Buttons are disabled while pending via the
-				// block store's `pendingKeys` context.
-				try {
-					yield restRequest(
-						state,
-						`wc/store/v1/shopper-lists/${ encodeURIComponent(
-							slug
-						) }/items/${ encodeURIComponent( key ) }`,
-						{ method: 'DELETE' }
-					);
-				} catch ( error ) {
-					actions.showNoticeError( error as Error );
-					return;
-				}
+				// block store's `pendingKeys` context. Errors bubble to
+				// the caller so it can compose a contextualised notice.
+				yield restRequest(
+					state,
+					`wc/store/v1/shopper-lists/${ encodeURIComponent(
+						slug
+					) }/items/${ encodeURIComponent( key ) }`,
+					{ method: 'DELETE' }
+				);
 
 				// Re-find — the list may have mutated during the await.
 				const removedIndex = list.items.findIndex(
