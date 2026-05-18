@@ -1937,6 +1937,13 @@ if ( ! function_exists( 'wc_get_product_media_gallery_items' ) ) {
 			}
 		}
 
+		$media_items = array_values(
+			array_intersect_key(
+				$media_items,
+				array_unique( array_column( $media_items, 'id' ) )
+			)
+		);
+
 		$attachment_ids = array_filter(
 			array_map(
 				static function ( $media_item ) {

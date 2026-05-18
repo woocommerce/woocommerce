@@ -131,7 +131,7 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 	/**
 	 * Test get_product_gallery_media_data method with mixed image and video items.
 	 *
-	 * @testdox Should include video items in product gallery media data.
+	 * @testdox Should include unique video items in product gallery media data.
 	 */
 	public function test_get_product_gallery_media_data_supports_videos() {
 		update_option( 'woocommerce_feature_product_gallery_videos_enabled', 'yes' );
@@ -173,6 +173,16 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 						'controls' => true,
 						'preload'  => 'metadata',
 					),
+				),
+				array(
+					'media_type'  => 'image',
+					'source_type' => 'attachment',
+					'id'          => $image_id,
+				),
+				array(
+					'media_type'  => 'video',
+					'source_type' => 'attachment',
+					'id'          => $video_id,
 				),
 				array(
 					'media_type'  => 'image',
