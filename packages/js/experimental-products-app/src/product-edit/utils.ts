@@ -111,6 +111,12 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
 		'sale_price',
+		'schedule_sale',
+		{
+			id: 'sale-schedule-dates',
+			layout: { type: 'row' as const },
+			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
+		},
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
@@ -142,6 +148,12 @@ const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
 		'sale_price',
+		'schedule_sale',
+		{
+			id: 'sale-schedule-dates',
+			layout: { type: 'row' as const },
+			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
+		},
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
@@ -199,6 +211,12 @@ const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
 		'sale_price',
+		'schedule_sale',
+		{
+			id: 'sale-schedule-dates',
+			layout: { type: 'row' as const },
+			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
+		},
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
@@ -221,6 +239,16 @@ const GROUPED_PRODUCT_EDIT_FORM_FIELDS = [
 		__( 'General', 'woocommerce' ),
 		[ 'name', 'product_status', 'catalog_visibility', 'upsell_ids' ]
 	),
+	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
+		'regular_price',
+		'sale_price',
+		'schedule_sale',
+		{
+			id: 'sale-schedule-dates',
+			layout: { type: 'row' as const },
+			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
+		},
+	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
 	] ),

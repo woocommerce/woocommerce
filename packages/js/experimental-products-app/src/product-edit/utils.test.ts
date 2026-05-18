@@ -349,6 +349,9 @@ describe( 'product edit utils', () => {
 				'catalog_visibility',
 				'regular_price',
 				'sale_price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
 				'images',
 				'sku',
 				'stock',
@@ -364,9 +367,6 @@ describe( 'product edit utils', () => {
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
 				'downloadable',
 				'external_url',
 				'button_text',
@@ -462,6 +462,9 @@ describe( 'product edit utils', () => {
 				'product_status',
 				'catalog_visibility',
 				'upsell_ids',
+				'regular_price',
+				'sale_price',
+				'schedule_sale',
 				'images',
 				'sku',
 				'categories',
@@ -470,7 +473,9 @@ describe( 'product edit utils', () => {
 				'featured',
 			] );
 			expectFieldsHidden( fieldIds, [
-				...priceFieldIds,
+				'price',
+				'date_on_sale_from',
+				'date_on_sale_to',
 				'downloadable',
 				'cross_sell_ids',
 				'external_url',
@@ -497,6 +502,7 @@ describe( 'product edit utils', () => {
 				'button_text',
 				'regular_price',
 				'sale_price',
+				'schedule_sale',
 				'images',
 				'sku',
 				'categories',
@@ -506,7 +512,6 @@ describe( 'product edit utils', () => {
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
-				'schedule_sale',
 				'date_on_sale_from',
 				'date_on_sale_to',
 				'cross_sell_ids',
@@ -629,10 +634,10 @@ describe( 'product edit utils', () => {
 				expect.arrayContaining( basePriceFieldIds )
 			);
 			expectFieldsHidden( fieldIds, [
-				'schedule_sale',
 				'date_on_sale_from',
 				'date_on_sale_to',
 			] );
+			expect( fieldIds ).toContain( 'schedule_sale' );
 			expectFieldsHidden( fieldIds, [ 'sku' ] );
 		} );
 
@@ -654,6 +659,9 @@ describe( 'product edit utils', () => {
 					'product_status',
 					'regular_price',
 					'sale_price',
+					'schedule_sale',
+					'date_on_sale_from',
+					'date_on_sale_to',
 					'images',
 					'sku',
 					'manage_stock',
@@ -670,9 +678,6 @@ describe( 'product edit utils', () => {
 				'stock',
 				'downloadable',
 				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
 				'tax_status',
 			] );
 		} );
@@ -695,6 +700,9 @@ describe( 'product edit utils', () => {
 					'sku',
 					'regular_price',
 					'sale_price',
+					'schedule_sale',
+					'date_on_sale_from',
+					'date_on_sale_to',
 					'stock',
 					'manage_stock',
 					'product_status',
@@ -706,13 +714,7 @@ describe( 'product edit utils', () => {
 				] )
 			);
 			expectFieldsHidden( fieldIds, parentOwnedFieldIds );
-			expectFieldsHidden( fieldIds, [
-				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
-				'tax_status',
-			] );
+			expectFieldsHidden( fieldIds, [ 'price', 'tax_status' ] );
 		} );
 
 		it( 'hides shipping fields for virtual variations', () => {
@@ -776,6 +778,9 @@ describe( 'product edit utils', () => {
 				expect.arrayContaining( [
 					'regular_price',
 					'sale_price',
+					'schedule_sale',
+					'date_on_sale_from',
+					'date_on_sale_to',
 					...bulkSellableInstanceFieldIds,
 				] )
 			);
@@ -784,9 +789,6 @@ describe( 'product edit utils', () => {
 				'downloadable',
 				'sku',
 				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
 			] );
 		} );
 
@@ -999,7 +1001,11 @@ describe( 'product edit utils', () => {
 				{
 					id: 'price-fields',
 					label: 'Price',
-					children: [ 'regular_price', 'sale_price' ],
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
 				},
 				{
 					id: 'image-fields',
@@ -1029,6 +1035,34 @@ describe( 'product edit utils', () => {
 					],
 				},
 			] );
+		} );
+
+		it( 'groups sale schedule date fields on the same row', () => {
+			const product = buildProduct( {
+				type: 'simple',
+				date_on_sale_from: '2026-05-06T00:00:00',
+			} );
+
+			const priceGroup = getFormFields( [ product ] ).find(
+				( formField ) =>
+					typeof formField !== 'string' &&
+					formField.id === 'price-fields'
+			);
+
+			expect( priceGroup ).toEqual( {
+				id: 'price-fields',
+				label: 'Price',
+				children: [
+					'regular_price',
+					'sale_price',
+					'schedule_sale',
+					{
+						id: 'sale-schedule-dates',
+						layout: { type: 'row' },
+						children: [ 'date_on_sale_from', 'date_on_sale_to' ],
+					},
+				],
+			} );
 		} );
 
 		it( 'uses grouped variable parent form config', () => {
@@ -1097,7 +1131,11 @@ describe( 'product edit utils', () => {
 				{
 					id: 'price-fields',
 					label: 'Price',
-					children: [ 'regular_price', 'sale_price' ],
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
 				},
 				{
 					id: 'image-fields',
@@ -1144,7 +1182,11 @@ describe( 'product edit utils', () => {
 				{
 					id: 'price-fields',
 					label: 'Price',
-					children: [ 'regular_price', 'sale_price' ],
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
 				},
 				{
 					id: 'image-fields',
