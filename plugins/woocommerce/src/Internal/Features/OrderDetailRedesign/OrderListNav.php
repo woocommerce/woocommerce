@@ -19,7 +19,7 @@ use WC_Order;
  * links).
  *
  * Gated behind the `order-detail-redesign` feature flag — caller checks
- * `FeaturesUtil::feature_is_enabled( 'order-detail-redesign' )` before invoking.
+ * `Admin\Features\Features::is_enabled( 'order-detail-redesign' )` before invoking.
  *
  * @since 10.9.0
  */
