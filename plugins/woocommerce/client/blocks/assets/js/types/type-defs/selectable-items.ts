@@ -12,14 +12,6 @@ export type SelectableItem< T = unknown > = (
 	selected?: boolean;
 	disabled?: boolean;
 	type?: string;
-	/** Display count shown by compatible inner blocks. */
-	count?: number;
-	/** Color swatch value shown by compatible inner blocks. */
-	color?: string;
-	/** Hierarchy depth used by compatible inner blocks for indentation. */
-	depth?: number;
-	/** Derived item position used by inner blocks for show-more state. */
-	index?: number;
 } & T;
 
 export interface SelectableItemsContext< T = unknown > {

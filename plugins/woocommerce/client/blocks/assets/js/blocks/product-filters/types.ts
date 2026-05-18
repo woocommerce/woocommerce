@@ -12,10 +12,13 @@ import type { SelectableItem } from '../../types/type-defs/selectable-items';
 // Filter-specific item fields
 // ----------------------------------------
 export type FilterItemFields = {
+	count?: number;
 	termId?: number;
 	parent?: number;
+	depth?: number;
 	menuOrder?: number;
 	attributeQueryType?: 'and' | 'or';
+	color?: string;
 };
 
 export type FilterOptionItem = SelectableItem< FilterItemFields >;

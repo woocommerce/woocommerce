@@ -8,6 +8,8 @@ import { store, getContext } from '@wordpress/interactivity';
  */
 import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
 
+type ChipsItem = SelectableItem< { color?: string; index?: number } >;
+
 type ChipsContext = {
 	storeNamespace: string;
 	displayLimit: number;
@@ -15,7 +17,7 @@ type ChipsContext = {
 };
 
 type ParentItemContext = {
-	item?: SelectableItem;
+	item?: ChipsItem;
 };
 
 type ChipsStore = {
@@ -29,7 +31,7 @@ type ChipsStore = {
 	};
 };
 
-function getParentItem( storeNamespace: string ): SelectableItem | undefined {
+function getParentItem( storeNamespace: string ): ChipsItem | undefined {
 	const parentCtx = getContext< ParentItemContext >( storeNamespace );
 	return parentCtx.item;
 }

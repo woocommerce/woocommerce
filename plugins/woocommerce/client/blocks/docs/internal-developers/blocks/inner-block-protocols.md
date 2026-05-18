@@ -52,7 +52,7 @@ All three protocols follow these rules:
 - **Items-carrying contexts** (`selectableItems`, `removableItems`) — parent exposes items via a protocol-named getter (`state.selectableItems`, `state.removableItems`). Generic `state.items` is intentionally avoided so multiple protocols can coexist on the same store namespace without collision
 - **Nested `data-wp-interactive`** — inner blocks keep an outer scope under their own namespace (show-more and other presentational state) and nest an inner region under the parent namespace for `data-wp-each` + selection bindings. Presentational bindings on iterated items use cross-namespace `::` syntax back to the inner store (e.g. `data-wp-bind--hidden="<own-ns>::state.itemHidden"`). Inner store reads iteration context via `getContext(storeNamespace)` — no hardcoded parent reference
 - **SSR fallback via `data-wp-each-child`** — PHP renders the initially visible items (first `displayLimit`) once with `data-wp-each-child`, each carrying its own `data-wp-context` + live bindings so hydration wires them up. The template handles the remaining items client-side
-- **Inner block owns show-more** — default `displayLimit = 15`. Inner block exposes `state.itemHidden` (reads iteration `context.item.index` via cross-namespace `getContext(storeNamespace)`) and renders the show-more button. Parent never knows about show-more
+- **Inner block owns show-more** — default `displayLimit = 15`. Inner block exposes `state.itemHidden`, may read optional iteration metadata such as `context.item.index` via cross-namespace `getContext(storeNamespace)`, and renders the show-more button. Parent never knows about show-more behavior
 
 ## Enforcement via TypeScript `satisfies`
 
@@ -153,25 +153,24 @@ Each item in the `items` array MUST have:
 | `selected` | `boolean` | No | Current selection state (default: false). SSR hint only — parent's `state.selectableItems` derives the live `selected` used for bindings. |
 | `disabled` | `boolean` | No | Whether item can be selected (default: false) |
 | `type` | `string` | No | Type discriminator (e.g., `"attribute/color"`) |
-| `count` | `number` | No | Display count shown by compatible inner blocks. |
-| `color` | `string` | No | Color swatch value shown by compatible inner blocks. |
-| `depth` | `number` | No | Hierarchy depth used by compatible inner blocks for indentation. |
-| `index` | `number` | No | Derived item position used by inner blocks for show-more state. |
 
-Extra domain fields go in `T`. For product filters, `T = FilterItemFields`:
+Extra fields go in `T`. Parents may provide domain or presentation data; consumers must treat those fields as optional and preserve the protocol-first fallback. For product filters, `T = FilterItemFields`:
 
 ```typescript
 type FilterItemFields = {
+  count?: number;
   termId?: number;
   parent?: number;
+  depth?: number;
   menuOrder?: number;
   attributeQueryType?: 'and' | 'or';
+  color?: string;
 };
 
 type FilterOptionItem = SelectableItem<FilterItemFields>;
 ```
 
-Parent blocks typed against a specific `T` access extra fields type-safely. Inner blocks should consume only protocol fields unless they intentionally implement a parent-specific UI.
+Parents type their provided data with a domain extension. Reusable inner blocks type their own optional consumer fields locally (for example, `count`, `color`, or `depth`) and must still render correctly when those fields are absent.
 
 ### Parent Store Requirements
 
@@ -179,7 +178,7 @@ The store registered under `storeNamespace` MUST expose:
 
 | Name | Kind | Contract |
 | --- | --- | --- |
-| `state.selectableItems` | getter | Returns iterable of items with `selected: boolean` and `index: number` derived. Items come from `getServerContext().items` (so they refresh after navigation) merged with the client SSOT (`activeFilters`). Reactive — re-evaluates when SSOT changes. |
+| `state.selectableItems` | getter | Returns iterable of items with `selected: boolean` derived. Items come from `getServerContext().items` (so they refresh after navigation) merged with the client SSOT (`activeFilters`). Reactive — re-evaluates when SSOT changes. Parents may include optional consumer metadata such as `index`. |
 | `actions.toggle` | action | Toggles selection for the target item. Accepts an optional `item` argument (used when an inner block proxies the call via its own store); when omitted, falls back to `getContext().item`. Mutates parent's SSOT (e.g. `activeFilters`). |
 
 Fixed names (not configurable). The getter is `selectableItems` (not `items`) to avoid colliding with other protocols (`removableItems`, etc.) when multiple protocols live on the same store namespace.
@@ -203,7 +202,7 @@ myStore satisfies SelectableItemsParentStore;
 ### Selection State Model
 
 - **SSOT** lives in parent's domain state (e.g. `context.activeFilters` for filters).
-- **Items rendered via `data-wp-each`** iterating the parent's `state.selectableItems` inside a nested-namespace region. PHP `foreach` with `data-wp-each-child` + per-item `data-wp-context` (including `index`) provides an SSR fallback for the items visible on first paint (first `displayLimit`); the rest are rendered client-side via the template.
+- **Items rendered via `data-wp-each`** iterating the parent's `state.selectableItems` inside a nested-namespace region. PHP `foreach` with `data-wp-each-child` + per-item `data-wp-context` provides an SSR fallback for the items visible on first paint (first `displayLimit`); compatible renderers may include optional metadata like `index`. The rest are rendered client-side via the template.
 - **`item.selected`** on raw items (in `getContext().items`) is only a PHP SSR hint. Parent's `state.selectableItems` re-derives `selected` from SSOT for the live binding source.
 - **`actions.toggle`** mutates SSOT only. Never touches raw `item.selected`. It reads `getContext().item` which is set by `data-wp-each` under the parent namespace (the items region switches to the parent namespace precisely so this works).
 
@@ -228,9 +227,10 @@ Inner blocks SHOULD:
 
 `SelectableItem<T>` uses a generic parameter instead of a flat union of optional fields:
 
-- Base fields are shared by all consumers (id, label, value, selected, disabled, type, and presentation hints like count/color/depth/index)
-- Domain-specific fields live in `T` — typed, not untyped `[key: string]: unknown`
-- Filter blocks use `FilterOptionItem = SelectableItem<FilterItemFields>` with filter-domain fields like termId, parent, menuOrder, and attributeQueryType.
+- Base fields are shared by all consumers (id, label, value, selected, disabled, type)
+- Domain-specific or consumer-specific fields live in `T` — typed, not untyped `[key: string]: unknown`
+- Filter blocks use `FilterOptionItem = SelectableItem<FilterItemFields>` with filter fields like count, color, depth, termId, parent, menuOrder, and attributeQueryType.
+- Inner blocks that can use optional extras define their own local extension types instead of importing parent domain types.
 - A variation selector would use `SelectableItem<{ price?: string; stockStatus?: string }>` etc.
 - TypeScript enforces correct shape at each call site with no extra runtime cost
 
@@ -241,7 +241,7 @@ Inner blocks SHOULD:
 | Old `FilterOptionItem` | New `SelectableItem<FilterItemFields>` |
 | --- | --- |
 | `id?: number` (optional, number) | `id: string` (required, string — used for DOM element id) |
-| `count: number` (required) | `count?: number` on base type |
+| `count: number` (required) | `count?: number` in `FilterItemFields` and compatible inner-block extension types |
 | No `disabled` | `disabled?: boolean` on base type |
 | No `type` | `type?: string` on base type |
 
@@ -268,14 +268,6 @@ export type SelectableItem< T = unknown > = (
 	selected?: boolean;
 	disabled?: boolean;
 	type?: string;
-	/** Display count shown by compatible inner blocks. */
-	count?: number;
-	/** Color swatch value shown by compatible inner blocks. */
-	color?: string;
-	/** Hierarchy depth used by compatible inner blocks for indentation. */
-	depth?: number;
-	/** Derived item position used by inner blocks for show-more state. */
-	index?: number;
 } & T;
 
 export interface SelectableItemsContext< T = unknown > {
@@ -305,21 +297,30 @@ Filter blocks extend with `FilterItemFields` (from `product-filters/types.ts`):
 
 ```typescript
 export type FilterItemFields = {
+	count?: number;
 	termId?: number;
 	parent?: number;
+	depth?: number;
 	menuOrder?: number;
 	attributeQueryType?: 'and' | 'or';
+	color?: string;
 };
 
 export type FilterOptionItem = SelectableItem< FilterItemFields >;
 ```
 
-Reusable inner blocks are typed via the protocol only:
+Reusable inner blocks are typed via the protocol plus local optional fields they know how to render:
 
 ```typescript
-// In checkbox-list/types.ts or chips/types.ts
+// In checkbox-list/types.ts
+type CheckboxListSelectableItemFields = {
+	count?: number;
+	color?: string;
+	depth?: number;
+};
+
 export type EditProps = BlockEditProps< BlockAttributes > & {
-	context: SelectableItemsBlockContext;
+	context: SelectableItemsBlockContext< CheckboxListSelectableItemFields >;
 	// ...color props
 };
 ```
@@ -371,11 +372,7 @@ parameters:
         ariaLabel?: string,
         selected?: bool,
         disabled?: bool,
-        type?: string,
-        count?: int,
-        color?: string,
-        depth?: int,
-        index?: int
+        type?: string
       }
     '''
     FilterSelectableItem: '''
@@ -390,7 +387,6 @@ parameters:
         count?: int,
         color?: string,
         depth?: int,
-        index?: int,
         termId?: int,
         parent?: int,
         menuOrder?: int,
@@ -484,7 +480,7 @@ If pattern **B** (mirror) is chosen, the items region stays under the inner name
 import { store, getContext } from '@wordpress/interactivity';
 import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
 
-type ItemWithIndex = SelectableItem & { index: number };
+type ItemWithIndex = SelectableItem< { index?: number } >;
 
 type CheckboxListContext = {
     storeNamespace: string;
@@ -508,6 +504,7 @@ const { state } = store( 'woocommerce/product-filter-checkbox-list', {
             const parentCtx =
                 getContext< ParentItemContext >( storeNamespace );
             if ( ! parentCtx.item ) return false;
+            if ( parentCtx.item.index === undefined ) return false;
             return parentCtx.item.index >= displayLimit;
         },
     },
@@ -524,7 +521,7 @@ const { state } = store( 'woocommerce/product-filter-checkbox-list', {
 
 **Why protocol-specific getter names (`selectableItems` / `removableItems`):** multiple protocols frequently share the same store namespace (e.g. `woocommerce/product-filters` hosts both the selectable-items store and the active-filters removable-items store). A generic `state.items` name collides across protocols and silently overrides. Protocol-aligned names (`selectableItems`, `removableItems`) make both live on the same store without interference.
 
-**PHP Renderer** — Template for `data-wp-each` plus `foreach` for SSR of the first `displayLimit` items. Each SSR item carries its `index` in `data-wp-context` so the inner store's `itemHidden` getter can decide visibility on hydration.
+**PHP Renderer** — Template for `data-wp-each` plus `foreach` for SSR of the first `displayLimit` items. Built-in renderers add optional `index` metadata in `data-wp-context` so the inner store's `itemHidden` getter can decide visibility on hydration.
 
 ```php
 protected function render( $attributes, $content, $block ) {
@@ -602,7 +599,7 @@ protected function render( $attributes, $content, $block ) {
 Key points:
 
 - **`data-wp-each` template + `foreach` SSR fallback for first `displayLimit` items** — the template renders the rest client-side, so the initial HTML stays small while the full list is still available post-hydration
-- **Per-item `data-wp-context` on SSR items includes `index`** — the inner store's `state.itemHidden` reads it via `getContext(storeNamespace).item.index` to decide visibility; hydration then attaches live bindings (`checked`, `hidden`, `toggle`) to the exact DOM wp-each reconciles
+- **Per-item `data-wp-context` on SSR items may include `index`** — built-in inner stores read it as optional consumer metadata via `getContext(storeNamespace).item.index`; hydration then attaches live bindings (`checked`, `hidden`, `toggle`) to the exact DOM wp-each reconciles
 - **Nested `data-wp-interactive`** — outer wrapper under the inner namespace, items region switches to the parent namespace so wp-each + parent selection bindings resolve there; presentational bindings (`itemHidden`, `ratingStyle`) use cross-namespace `::` back to the inner store
 - **`filterType` discriminator** — inner block can branch rendering (e.g. stars for `'rating'`) without leaking presentation into the parent store
 

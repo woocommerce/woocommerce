@@ -15,6 +15,11 @@ export type Color = {
 	color: string;
 };
 
+type ChipsSelectableItemFields = {
+	count?: number;
+	color?: string;
+};
+
 export type BlockAttributes = {
 	className: string;
 	chipText?: string;
@@ -33,7 +38,7 @@ export type BlockAttributes = {
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
 	style: Record< string, string >;
-	context: SelectableItemsBlockContext;
+	context: SelectableItemsBlockContext< ChipsSelectableItemFields >;
 	chipText: Color;
 	setChipText: ( value: string ) => void;
 	chipBackground: Color;
