@@ -82,7 +82,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that valueAddedTaxIncluded is included in product structured data when taxes are enabled
+	 * @testdox valueAddedTaxIncluded is present in product structured data when taxes are enabled.
 	 *
 	 * @return void
 	 */
@@ -124,7 +124,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that valueAddedTaxIncluded is not included in product structured data when taxes are disabled
+	 * @testdox valueAddedTaxIncluded is not present in product structured data when taxes are disabled.
 	 *
 	 * @return void
 	 */
@@ -166,7 +166,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that valueAddedTaxIncluded is included in order structured data when taxes are enabled
+	 * @testdox valueAddedTaxIncluded is present in order structured data when taxes are enabled.
 	 *
 	 * @return void
 	 */
@@ -203,7 +203,7 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Test that valueAddedTaxIncluded is not included in order structured data when taxes are disabled
+	 * @testdox valueAddedTaxIncluded is not present in order structured data when taxes are disabled.
 	 *
 	 * @return void
 	 */
