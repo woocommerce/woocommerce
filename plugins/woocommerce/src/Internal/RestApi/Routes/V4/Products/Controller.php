@@ -530,6 +530,28 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$args['meta_query'] = $this->add_meta_query( $args, wc_get_min_max_price_meta_query( $request ) );  // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 		}
 
+		$min_stock_quantity = $request['min_stock_quantity'];
+		$max_stock_quantity = $request['max_stock_quantity'];
+
+		if ( null !== $min_stock_quantity || null !== $max_stock_quantity ) {
+			$stock_quantity_product_ids = $this->get_product_ids_matching_stock_quantity_filter(
+				$min_stock_quantity,
+				$max_stock_quantity
+			);
+
+			if ( empty( $stock_quantity_product_ids ) ) {
+				$args['post__in'] = array( 0 );
+			} elseif ( ! empty( $args['post__in'] ) ) {
+				$args['post__in'] = array_values( array_intersect( array_map( 'absint', $args['post__in'] ), $stock_quantity_product_ids ) );
+
+				if ( empty( $args['post__in'] ) ) {
+					$args['post__in'] = array( 0 );
+				}
+			} else {
+				$args['post__in'] = $stock_quantity_product_ids;
+			}
+		}
+
 		// Filter product by stock_status.
 		if ( ! empty( $request['stock_status'] ) ) {
 			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
@@ -549,7 +571,15 @@ class Controller extends WC_REST_Products_V2_Controller {
 			// Use 0 when there's no on sale products to avoid return all products.
 			$on_sale_ids = empty( $on_sale_ids ) ? array( 0 ) : $on_sale_ids;
 
-			$args[ $on_sale_key ] += $on_sale_ids;
+			if ( true === $request['on_sale'] && ( null !== $min_stock_quantity || null !== $max_stock_quantity ) ) {
+				$args['post__in'] = array_values( array_intersect( array_map( 'absint', $args['post__in'] ), array_map( 'absint', $on_sale_ids ) ) );
+
+				if ( empty( $args['post__in'] ) ) {
+					$args['post__in'] = array( 0 );
+				}
+			} else {
+				$args[ $on_sale_key ] += $on_sale_ids;
+			}
 		}
 
 		// Force the post_type argument, since it's not a user input variable.
@@ -581,6 +611,56 @@ class Controller extends WC_REST_Products_V2_Controller {
 		}
 
 		return $args;
+	}
+
+	/**
+	 * Get product IDs matching the stock quantity bounds.
+	 *
+	 * Product variation stock is stored against the variation, but the products
+	 * collection returns variable parent products by default. Matching variation
+	 * rows are also mapped back to their parent product IDs.
+	 *
+	 * @param int|float|null $min_stock_quantity Minimum stock quantity.
+	 * @param int|float|null $max_stock_quantity Maximum stock quantity.
+	 * @return int[]
+	 */
+	private function get_product_ids_matching_stock_quantity_filter( $min_stock_quantity, $max_stock_quantity ): array {
+		global $wpdb;
+
+		if ( null !== $min_stock_quantity && null !== $max_stock_quantity ) {
+			$stock_quantity_where = $wpdb->prepare(
+				'lookup.stock_quantity BETWEEN %f AND %f',
+				(float) $min_stock_quantity,
+				(float) $max_stock_quantity
+			);
+		} elseif ( null !== $min_stock_quantity ) {
+			$stock_quantity_where = $wpdb->prepare( 'lookup.stock_quantity >= %f', (float) $min_stock_quantity );
+		} else {
+			$stock_quantity_where = $wpdb->prepare( 'lookup.stock_quantity <= %f', (float) $max_stock_quantity );
+		}
+
+		$product_ids = $wpdb->get_col(
+			"SELECT DISTINCT posts.ID
+			FROM {$wpdb->posts} AS posts
+			INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup
+				ON posts.ID = lookup.product_id
+			WHERE posts.post_type IN ( 'product', 'product_variation' )
+				AND lookup.stock_quantity IS NOT NULL
+				AND {$stock_quantity_where}" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		$parent_ids = $wpdb->get_col(
+			"SELECT DISTINCT posts.post_parent
+			FROM {$wpdb->posts} AS posts
+			INNER JOIN {$wpdb->wc_product_meta_lookup} AS lookup
+				ON posts.ID = lookup.product_id
+			WHERE posts.post_type = 'product_variation'
+				AND posts.post_parent > 0
+				AND lookup.stock_quantity IS NOT NULL
+				AND {$stock_quantity_where}" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		);
+
+		return array_values( array_unique( array_map( 'absint', array_merge( $product_ids, $parent_ids ) ) ) );
 	}
 
 	/**
@@ -2173,6 +2253,20 @@ class Controller extends WC_REST_Products_V2_Controller {
 			),
 			'default'           => array(),
 			'sanitize_callback' => 'wp_parse_id_list',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['min_stock_quantity'] = array(
+			'description'       => __( 'Limit result set to products with stock quantity greater than or equal to the specified amount.', 'woocommerce' ),
+			'type'              => wc_is_stock_amount_integer() ? 'integer' : 'number',
+			'sanitize_callback' => 'wc_stock_amount',
+			'validate_callback' => 'rest_validate_request_arg',
+		);
+
+		$params['max_stock_quantity'] = array(
+			'description'       => __( 'Limit result set to products with stock quantity less than or equal to the specified amount.', 'woocommerce' ),
+			'type'              => wc_is_stock_amount_integer() ? 'integer' : 'number',
+			'sanitize_callback' => 'wc_stock_amount',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 
