@@ -76,10 +76,11 @@ class VariationSelectorAttribute extends AbstractBlock {
 			return '';
 		}
 
-		$variation_items = $this->build_variation_selectable_items( $attribute_slug, $attribute_terms );
-		$attribute_label = wc_attribute_label( $attribute_name );
-		$attribute_id    = 'wc_product_attribute_' . uniqid();
-		$context         = array(
+		$default_selected = $this->get_default_selected_attribute( $attribute_slug, $attribute_terms );
+		$variation_items  = $this->build_variation_selectable_items( $attribute_slug, $attribute_terms, $default_selected );
+		$attribute_label  = wc_attribute_label( $attribute_name );
+		$attribute_id     = 'wc_product_attribute_' . uniqid();
+		$context          = array(
 			'woocommerce/attributeId'    => $attribute_id,
 			'woocommerce/attributeName'  => $attribute_name,
 			'woocommerce/attributeTerms' => $attribute_terms,
@@ -94,7 +95,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 		$interactive_context = array(
 			'name'                      => $attribute_label,
 			'variationAttributeOptions' => $variation_items,
-			'selectedValue'             => $this->get_default_selected_attribute( $attribute_slug, $attribute_terms ),
+			'selectedValue'             => $default_selected,
 			'autoselect'                => $attributes['autoselect'] ?? false,
 			'disabledAttributesAction'  => $attributes['disabledAttributesAction'] ?? 'disable',
 		);
@@ -229,9 +230,10 @@ class VariationSelectorAttribute extends AbstractBlock {
 	 *
 	 * @param string $attribute_slug Attribute slug.
 	 * @param array  $attribute_terms Terms from context.
+	 * @param string $default_selected Default selected attribute value.
 	 * @return array
 	 */
-	private function build_variation_selectable_items( string $attribute_slug, array $attribute_terms ): array {
+	private function build_variation_selectable_items( string $attribute_slug, array $attribute_terms, string $default_selected ): array {
 		$id_prefix = sanitize_title( $attribute_slug );
 		$items     = array();
 
@@ -246,6 +248,7 @@ class VariationSelectorAttribute extends AbstractBlock {
 				'label'     => (string) $attribute_term['label'],
 				'value'     => $value,
 				'ariaLabel' => (string) $attribute_term['label'],
+				'selected'  => $default_selected === $value,
 			);
 		}
 

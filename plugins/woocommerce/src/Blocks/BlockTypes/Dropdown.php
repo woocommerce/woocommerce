@@ -105,6 +105,11 @@ final class Dropdown extends AbstractBlock {
 							hidden
 								<?php
 							endif;
+							if ( ! empty( $item['selected'] ) ) :
+								?>
+								selected
+								<?php
+							endif;
 							?>
 							data-wp-each-child
 						>
