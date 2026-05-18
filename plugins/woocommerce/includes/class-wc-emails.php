@@ -310,6 +310,9 @@ class WC_Emails {
 		if ( FeaturesUtil::feature_is_enabled( 'customer_review_request' ) ) {
 			$emails['WC_Email_Customer_Review_Request'] = __DIR__ . '/emails/class-wc-email-customer-review-request.php';
 		}
+		if ( FeaturesUtil::feature_is_enabled( 'checkout_recovery' ) ) {
+			$emails['WC_Email_Customer_Checkout_Recovery'] = __DIR__ . '/emails/class-wc-email-customer-checkout-recovery.php';
+		}
 
 		// Prime caches to reduce future queries.
 		wp_prime_option_caches(
