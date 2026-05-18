@@ -1,3 +1,4 @@
+import { registerWooCommerceOrderEntity } from './data';
 import { registerStoreActivitySources } from './store-activity';
 
 /**
@@ -5,7 +6,11 @@ import { registerStoreActivitySources } from './store-activity';
  * from Loader.php's `dashboard-wp-admin_boot_dependencies` filter, so its
  * top-level code runs during module evaluation — before the store-activity
  * widget renders and reads the filter.
+ *
+ * Order matters: entities must be registered before any source's
+ * `useActivity` hook calls `getEntityRecords( ... )`.
  */
+registerWooCommerceOrderEntity();
 registerStoreActivitySources();
 
 /**

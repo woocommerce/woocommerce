@@ -6,7 +6,8 @@
 		"noEmit": true,
 		"emitDeclarationOnly": false,
 		"rootDir": ".",
-		"jsx": "react-jsx"
+		"jsx": "react-jsx",
+		"skipLibCheck": true
 	},
 	"include": [
 		"**/*.ts",
