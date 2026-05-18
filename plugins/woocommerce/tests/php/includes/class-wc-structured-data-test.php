@@ -101,4 +101,27 @@ class WC_Structured_Data_Test extends \WC_Unit_Test_Case {
 		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
 		$this->assertEquals( get_woocommerce_currency(), $offer['priceSpecification'][0]['priceCurrency'] );
 	}
+
+	/**
+	 * Test on-sale simple product offer reports the sale price at the offer top level.
+	 *
+	 * @return void
+	 */
+	public function test_simple_product_offer_on_sale_uses_sale_price_at_offer_level(): void {
+		$product = WC_Helper_Product::create_simple_product();
+		$product->set_regular_price( '100' );
+		$product->set_sale_price( '70' );
+		$product->set_price( '70' );
+		$product->save();
+
+		$this->structured_data->generate_product_data( $product );
+
+		$data  = $this->structured_data->get_data();
+		$offer = $data[0]['offers'][0];
+
+		// The offer-level `price` should reflect the sale price, matching `priceSpecification[0]['price']`.
+		$this->assertEquals( '70.00', $offer['price'] );
+		$this->assertEquals( '70.00', $offer['priceSpecification'][0]['price'] );
+		$this->assertEquals( get_woocommerce_currency(), $offer['priceCurrency'] );
+	}
 }
