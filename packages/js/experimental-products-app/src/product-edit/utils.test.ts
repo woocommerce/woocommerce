@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { Field } from '@wordpress/dataviews';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -41,9 +42,24 @@ jest.mock( '@woocommerce/settings', () => ( {
 		symbolPosition: 'left',
 		precision: 2,
 	},
+	getSetting: jest.fn(),
 } ) );
 
 describe( 'product edit utils', () => {
+	const getSettingMock = getSetting as jest.Mock;
+	const mockCostOfGoodsSoldFeatureEnabled = ( isEnabled: boolean ) => {
+		getSettingMock.mockImplementation( ( name, fallback ) =>
+			name === 'admin'
+				? {
+						features: {
+							cost_of_goods_sold: {
+								is_enabled: isEnabled,
+							},
+						},
+				  }
+				: fallback
+		);
+	};
 	const buildProduct = (
 		overrides: Partial< ProductEntityRecord > = {}
 	): ProductEntityRecord =>
@@ -60,6 +76,21 @@ describe( 'product edit utils', () => {
 			images: [],
 			...overrides,
 		} as unknown as ProductEntityRecord );
+	const buildCostOfGoodsSold = (
+		definedValue: number | string | null = 5
+	): ProductEntityRecord[ 'cost_of_goods_sold' ] => ( {
+		values: [
+			{
+				defined_value: definedValue,
+				effective_value: definedValue,
+			},
+		],
+		total_value: definedValue,
+	} );
+
+	beforeEach( () => {
+		mockCostOfGoodsSoldFeatureEnabled( true );
+	} );
 
 	it( 'returns the original values for a single selected product', () => {
 		const product = buildProduct( {
@@ -311,6 +342,7 @@ describe( 'product edit utils', () => {
 			'schedule_sale',
 			'date_on_sale_from',
 			'date_on_sale_to',
+			'cost_of_goods_sold',
 		];
 		const basePriceFieldIds = [ 'regular_price', 'sale_price' ];
 		const managedStockFieldIds = [ 'manage_stock', 'stock_quantity' ];
@@ -340,6 +372,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -349,6 +382,10 @@ describe( 'product edit utils', () => {
 				'catalog_visibility',
 				'regular_price',
 				'sale_price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
+				'cost_of_goods_sold',
 				'images',
 				'sku',
 				'stock',
@@ -357,20 +394,17 @@ describe( 'product edit utils', () => {
 				'brands',
 				'tags',
 				'featured',
-				'weight',
+				'shipping_class',
 				'length',
 				'width',
 				'height',
+				'weight',
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
 				'downloadable',
 				'external_url',
 				'button_text',
-				'shipping_class',
 				'tax_status',
 				'upsell_ids',
 				'cross_sell_ids',
@@ -396,10 +430,41 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
-			expectFieldOrder( fieldIds, [ 'regular_price', 'sale_price' ] );
+			expectFieldOrder( fieldIds, [
+				'regular_price',
+				'sale_price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
+				'cost_of_goods_sold',
+			] );
+		} );
+
+		it( 'hides cost of goods when the API data is unavailable', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					type: 'simple',
+				} ),
+			] );
+
+			expectFieldsHidden( fieldIds, [ 'cost_of_goods_sold' ] );
+		} );
+
+		it( 'hides cost of goods when the feature is disabled', () => {
+			mockCostOfGoodsSoldFeatureEnabled( false );
+
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					type: 'simple',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
+				} ),
+			] );
+
+			expectFieldsHidden( fieldIds, [ 'cost_of_goods_sold' ] );
 		} );
 
 		it( 'hides shipping fields for virtual simple products', () => {
@@ -444,10 +509,10 @@ describe( 'product edit utils', () => {
 					'length',
 					'width',
 					'height',
+					'shipping_class',
 				] )
 			);
 			expectFieldOrder( fieldIds, [ 'images', 'downloadable', 'sku' ] );
-			expectFieldsHidden( fieldIds, [ 'shipping_class' ] );
 		} );
 
 		it( 'shows grouped product fields in quick edit order', () => {
@@ -470,7 +535,12 @@ describe( 'product edit utils', () => {
 				'featured',
 			] );
 			expectFieldsHidden( fieldIds, [
-				...priceFieldIds,
+				'price',
+				'regular_price',
+				'sale_price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
 				'downloadable',
 				'cross_sell_ids',
 				'external_url',
@@ -495,6 +565,7 @@ describe( 'product edit utils', () => {
 				'catalog_visibility',
 				'regular_price',
 				'sale_price',
+				'schedule_sale',
 				'images',
 				'external_url',
 				'button_text',
@@ -506,13 +577,16 @@ describe( 'product edit utils', () => {
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
-				'schedule_sale',
 				'date_on_sale_from',
 				'date_on_sale_to',
 				'cross_sell_ids',
 				'downloadable',
 				'upsell_ids',
-				...shippingFieldIds,
+				'weight',
+				'length',
+				'width',
+				'height',
+				'shipping_class',
 				...stockStatusFieldIds,
 				'stock_quantity',
 			] );
@@ -591,6 +665,7 @@ describe( 'product edit utils', () => {
 					'featured',
 					'images',
 					'manage_stock',
+					'shipping_class',
 					'weight',
 					'length',
 					'width',
@@ -600,7 +675,6 @@ describe( 'product edit utils', () => {
 			expectFieldsHidden( fieldIds, [
 				'upsell_ids',
 				'cross_sell_ids',
-				'shipping_class',
 				'tax_status',
 				'stock_quantity',
 			] );
@@ -629,10 +703,10 @@ describe( 'product edit utils', () => {
 				expect.arrayContaining( basePriceFieldIds )
 			);
 			expectFieldsHidden( fieldIds, [
-				'schedule_sale',
 				'date_on_sale_from',
 				'date_on_sale_to',
 			] );
+			expect( fieldIds ).toContain( 'schedule_sale' );
 			expectFieldsHidden( fieldIds, [ 'sku' ] );
 		} );
 
@@ -646,6 +720,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -654,6 +729,10 @@ describe( 'product edit utils', () => {
 					'product_status',
 					'regular_price',
 					'sale_price',
+					'schedule_sale',
+					'date_on_sale_from',
+					'date_on_sale_to',
+					'cost_of_goods_sold',
 					'images',
 					'sku',
 					'manage_stock',
@@ -670,9 +749,6 @@ describe( 'product edit utils', () => {
 				'stock',
 				'downloadable',
 				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
 				'tax_status',
 			] );
 		} );
@@ -686,6 +762,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -695,6 +772,10 @@ describe( 'product edit utils', () => {
 					'sku',
 					'regular_price',
 					'sale_price',
+					'schedule_sale',
+					'date_on_sale_from',
+					'date_on_sale_to',
+					'cost_of_goods_sold',
 					'stock',
 					'manage_stock',
 					'product_status',
@@ -706,13 +787,7 @@ describe( 'product edit utils', () => {
 				] )
 			);
 			expectFieldsHidden( fieldIds, parentOwnedFieldIds );
-			expectFieldsHidden( fieldIds, [
-				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
-				'tax_status',
-			] );
+			expectFieldsHidden( fieldIds, [ 'price', 'tax_status' ] );
 		} );
 
 		it( 'hides shipping fields for virtual variations', () => {
@@ -726,7 +801,7 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expectFieldsHidden( fieldIds, [ 'downloadable' ] );
+			expect( fieldIds ).toContain( 'downloadable' );
 			expectFieldsHidden( fieldIds, shippingFieldIds );
 		} );
 
@@ -760,6 +835,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 				buildProduct( {
 					id: 34,
@@ -769,6 +845,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -776,6 +853,10 @@ describe( 'product edit utils', () => {
 				expect.arrayContaining( [
 					'regular_price',
 					'sale_price',
+					'schedule_sale',
+					'date_on_sale_from',
+					'date_on_sale_to',
+					'cost_of_goods_sold',
 					...bulkSellableInstanceFieldIds,
 				] )
 			);
@@ -784,9 +865,6 @@ describe( 'product edit utils', () => {
 				'downloadable',
 				'sku',
 				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
 			] );
 		} );
 
@@ -821,7 +899,7 @@ describe( 'product edit utils', () => {
 			] );
 		} );
 
-		it( 'hides downloadable fields for simple product and variation selections', () => {
+		it( 'shows downloadable fields for simple product and variation selections', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					id: 1,
@@ -836,7 +914,7 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expectFieldsHidden( fieldIds, [ 'downloadable' ] );
+			expect( fieldIds ).toContain( 'downloadable' );
 		} );
 
 		it( 'hides downloadable fields unless every bulk item supports downloads', () => {
@@ -928,6 +1006,7 @@ describe( 'product edit utils', () => {
 					'product_status',
 					'images',
 					'manage_stock',
+					'shipping_class',
 					'weight',
 					'length',
 					'width',
@@ -941,7 +1020,6 @@ describe( 'product edit utils', () => {
 				'sku',
 				'stock',
 				'stock_quantity',
-				'shipping_class',
 				'tax_status',
 			] );
 		} );
@@ -969,90 +1047,343 @@ describe( 'product edit utils', () => {
 	} );
 
 	describe( 'getProductTypeFormFields', () => {
-		it( 'uses simple product form config with height last', () => {
+		const getFormFields = ( products: ProductEntityRecord[] ) =>
+			getProductTypeFormFields(
+				products,
+				getVisibleProductEditFields(
+					getProductEditFields( productFields ),
+					products
+				)
+			);
+
+		it( 'uses grouped simple product form config', () => {
 			const product = buildProduct( {
 				type: 'simple',
 				virtual: false,
+				downloadable: true,
+				manage_stock: true,
+				cost_of_goods_sold: buildCostOfGoodsSold(),
 			} );
 
-			expect( getProductTypeFormFields( [ product ] ) ).toEqual( [
-				'name',
-				'product_status',
-				'catalog_visibility',
-				'regular_price',
-				'sale_price',
-				'images',
-				'downloadable',
-				'sku',
-				'stock',
-				'manage_stock',
-				'stock_quantity',
-				'categories',
-				'brands',
-				'tags',
-				'featured',
+			expect( getFormFields( [ product ] ) ).toEqual( [
 				{
-					id: 'dimensions',
-					layout: { type: 'row' },
-					children: [ 'weight', 'length', 'width' ],
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+					],
 				},
-				'height',
+				{
+					id: 'price-fields',
+					label: 'Price',
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+						'cost_of_goods_sold',
+					],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'downloadable-files-fields',
+					label: 'Downloadable files',
+					children: [ 'downloadable' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku', 'manage_stock', 'stock_quantity' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
+				{
+					id: 'shipping-fields',
+					label: 'Shipping',
+					children: [
+						'shipping_class',
+						{
+							id: 'dimensions',
+							layout: { type: 'row' },
+							children: [ 'length', 'width', 'height' ],
+						},
+						'weight',
+					],
+				},
 			] );
 		} );
 
-		it( 'uses variable parent form config in design order', () => {
+		it.each( [
+			[ 'simple product', 'simple' ],
+			[ 'variation product', 'variation' ],
+		] as const )(
+			'groups sale schedule date fields on the same row for %s',
+			( _label, productType ) => {
+				const product = buildProduct( {
+					type: productType,
+					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
+				} );
+
+				const priceGroup = getFormFields( [ product ] ).find(
+					( formField ) =>
+						typeof formField !== 'string' &&
+						formField.id === 'price-fields'
+				);
+
+				expect( priceGroup ).toEqual( {
+					id: 'price-fields',
+					label: 'Price',
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+						{
+							id: 'sale-schedule-dates',
+							layout: { type: 'row' },
+							children: [
+								'date_on_sale_from',
+								'date_on_sale_to',
+							],
+						},
+						'cost_of_goods_sold',
+					],
+				} );
+			}
+		);
+
+		it( 'omits the price section from grouped product form config', () => {
+			const product = buildProduct( {
+				type: 'grouped',
+			} );
+
+			expect( getFormFields( [ product ] ) ).toEqual( [
+				{
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+						'upsell_ids',
+					],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
+			] );
+		} );
+
+		it( 'uses grouped external product form config', () => {
+			const product = buildProduct( {
+				type: 'external',
+			} );
+
+			expect( getFormFields( [ product ] ) ).toEqual( [
+				{
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+					],
+				},
+				{
+					id: 'price-fields',
+					label: 'Price',
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'buy-button-fields',
+					label: 'Buy button',
+					children: [ 'external_url', 'button_text' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
+			] );
+		} );
+
+		it( 'uses grouped variable parent form config', () => {
 			const product = buildProduct( {
 				type: 'variable',
 				virtual: false,
 			} );
 
-			expect( getProductTypeFormFields( [ product ] ) ).toEqual( [
-				'name',
-				'product_status',
-				'catalog_visibility',
-				'images',
-				'sku',
-				'manage_stock',
-				'stock',
-				'categories',
-				'brands',
-				'tags',
-				'featured',
-				'shipping_class',
+			expect( getFormFields( [ product ] ) ).toEqual( [
 				{
-					id: 'parent-dimensions',
-					layout: { type: 'row' },
-					children: [ 'length', 'width', 'height' ],
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+					],
 				},
-				'weight',
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku', 'manage_stock', 'stock' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
+				{
+					id: 'shipping-fields',
+					label: 'Shipping',
+					children: [
+						'shipping_class',
+						{
+							id: 'dimensions',
+							layout: { type: 'row' },
+							children: [ 'length', 'width', 'height' ],
+						},
+						'weight',
+					],
+				},
 			] );
 		} );
 
-		it( 'uses variation product form config', () => {
+		it( 'uses grouped variation product form config', () => {
 			const product = buildProduct( {
 				id: 34,
 				parent_id: 12,
 				type: 'variation',
 				virtual: false,
 				downloadable: true,
+				manage_stock: true,
 			} );
 
-			expect( getProductTypeFormFields( [ product ] ) ).toEqual( [
-				'product_status',
-				'regular_price',
-				'sale_price',
-				'images',
-				'sku',
-				'manage_stock',
-				'stock',
-				'stock_quantity',
-				'shipping_class',
+			expect( getFormFields( [ product ] ) ).toEqual( [
 				{
-					id: 'dimensions',
-					layout: { type: 'row' },
-					children: [ 'weight', 'length', 'width' ],
+					id: 'general-fields',
+					label: 'General',
+					children: [ 'product_status' ],
 				},
-				'height',
+				{
+					id: 'price-fields',
+					label: 'Price',
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'downloadable-files-fields',
+					label: 'Downloadable files',
+					children: [ 'downloadable' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku', 'manage_stock', 'stock_quantity' ],
+				},
+				{
+					id: 'shipping-fields',
+					label: 'Shipping',
+					children: [
+						'shipping_class',
+						{
+							id: 'dimensions',
+							layout: { type: 'row' },
+							children: [ 'length', 'width', 'height' ],
+						},
+						'weight',
+					],
+				},
+			] );
+		} );
+
+		it( 'prunes empty groups when all descendants are hidden', () => {
+			const product = buildProduct( {
+				type: 'simple',
+				virtual: true,
+			} );
+
+			expect( getFormFields( [ product ] ) ).toEqual( [
+				{
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+					],
+				},
+				{
+					id: 'price-fields',
+					label: 'Price',
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku', 'stock', 'manage_stock' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
 			] );
 		} );
 	} );

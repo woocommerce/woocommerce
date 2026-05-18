@@ -243,63 +243,8 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 
 	/**
 	 * @testdox Should perform a deep merge so partial updates preserve unrelated sub-fields.
-	 *
-	 * Locks in the contract for forward-compatible sub-fields. When stored preferences contain
-	 * multiple sub-fields per pref (e.g. RSM-1550's `min_amount` alongside `enabled`), a partial
-	 * update that only sends one sub-field must not clobber the others. With a shallow merge
-	 * (`array_merge`), the entire sub-object is replaced; with a deep merge
-	 * (`array_replace_recursive`), only the specified sub-fields are overridden.
-	 *
-	 * Today's schema only has `enabled` per pref, so the bug is invisible. This test extends
-	 * the schema via an anonymous subclass to exercise the multi-sub-field case the future
-	 * tickets rely on.
 	 */
 	public function test_save_preferences_deep_merges_partial_updates(): void {
-		$service = new class() extends NotificationPreferencesService {
-			/**
-			 * Extended schema for the test: a second sub-field alongside `enabled`.
-			 *
-			 * @return array<string, array<string, mixed>>
-			 */
-			public function get_defaults(): array {
-				return array(
-					'store_order' => array(
-						'enabled'    => true,
-						'min_amount' => 0,
-					),
-				);
-			}
-
-			/**
-			 * Permissive sanitize for the test: preserve every sub-key in the default shape,
-			 * coercing to the type implied by its default value.
-			 *
-			 * @param string               $key           Preference key.
-			 * @param array                $value         Submitted sub-options.
-			 * @param array<string, mixed> $default_shape Default sub-options.
-			 * @return array<string, mixed>
-			 */
-			protected function sanitize_value( string $key, array $value, array $default_shape ): array {
-				$sanitized = array();
-				foreach ( $default_shape as $sub_key => $sub_default ) {
-					if ( ! array_key_exists( $sub_key, $value ) ) {
-						$sanitized[ $sub_key ] = $sub_default;
-						continue;
-					}
-					if ( is_bool( $sub_default ) ) {
-						$sanitized[ $sub_key ] = (bool) $value[ $sub_key ];
-					} elseif ( is_int( $sub_default ) ) {
-						$sanitized[ $sub_key ] = (int) $value[ $sub_key ];
-					} else {
-						$sanitized[ $sub_key ] = $value[ $sub_key ];
-					}
-				}
-				return $sanitized;
-			}
-		};
-		$service->init( $this->data_store );
-
-		// Stored state already has a non-default `min_amount`.
 		$this->data_store->method( 'read' )->willReturn(
 			array(
 				'schema_version' => NotificationPreferencesDataStore::CURRENT_SCHEMA_VERSION,
@@ -312,7 +257,6 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 			)
 		);
 
-		// Verify that a partial update of just `enabled` preserves `min_amount`.
 		$this->data_store
 			->expects( $this->once() )
 			->method( 'write' )
@@ -321,12 +265,12 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 				$this->callback(
 					function ( $envelope ) {
 						$prefs = $envelope['preferences']['store_order'];
-						return false === $prefs['enabled'] && 500 === $prefs['min_amount'];
+						return false === $prefs['enabled'] && 500.0 === $prefs['min_amount'];
 					}
 				)
 			);
 
-		$service->save_preferences(
+		$this->sut->save_preferences(
 			$this->user_id,
 			array( 'store_order' => array( 'enabled' => false ) )
 		);
@@ -347,5 +291,64 @@ class NotificationPreferencesServiceTest extends WC_Unit_Test_Case {
 			$this->assertArrayHasKey( 'enabled', $shape, "Default for {$type} should have an `enabled` sub-field." );
 			$this->assertIsBool( $shape['enabled'] );
 		}
+	}
+
+	/**
+	 * @testdox Should default min_amount to null in store_order defaults.
+	 */
+	public function test_get_defaults_includes_min_amount_for_store_order(): void {
+		$defaults = $this->sut->get_defaults();
+
+		$this->assertArrayHasKey( 'min_amount', $defaults['store_order'] );
+		$this->assertNull( $defaults['store_order']['min_amount'] );
+	}
+
+	/**
+	 * @testdox Should preserve explicit null min_amount.
+	 */
+	public function test_sanitize_preserves_null_min_amount(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'min_amount' => null ) )
+		);
+
+		$this->assertNull( $result['store_order']['min_amount'] );
+	}
+
+	/**
+	 * @testdox Should fall back to null when min_amount is non-positive.
+	 */
+	public function test_sanitize_falls_back_to_null_for_non_positive_min_amount(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'min_amount' => -50 ) )
+		);
+
+		$this->assertNull( $result['store_order']['min_amount'] );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'min_amount' => 0 ) )
+		);
+
+		$this->assertNull( $result['store_order']['min_amount'] );
+	}
+
+	/**
+	 * @testdox Should coerce string min_amount to float.
+	 */
+	public function test_sanitize_coerces_min_amount_to_float(): void {
+		$this->data_store->method( 'read' )->willReturn( null );
+
+		$result = $this->sut->save_preferences(
+			$this->user_id,
+			array( 'store_order' => array( 'min_amount' => '50' ) )
+		);
+
+		$this->assertSame( 50.0, $result['store_order']['min_amount'] );
 	}
 }
