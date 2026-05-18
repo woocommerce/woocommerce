@@ -1042,33 +1042,42 @@ describe( 'product edit utils', () => {
 			] );
 		} );
 
-		it( 'groups sale schedule date fields on the same row', () => {
-			const product = buildProduct( {
-				type: 'simple',
-				date_on_sale_from: '2026-05-06T00:00:00',
-			} );
+		it.each( [
+			[ 'simple product', 'simple' ],
+			[ 'variation product', 'variation' ],
+		] as const )(
+			'groups sale schedule date fields on the same row for %s',
+			( _label, productType ) => {
+				const product = buildProduct( {
+					type: productType,
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} );
 
-			const priceGroup = getFormFields( [ product ] ).find(
-				( formField ) =>
-					typeof formField !== 'string' &&
-					formField.id === 'price-fields'
-			);
+				const priceGroup = getFormFields( [ product ] ).find(
+					( formField ) =>
+						typeof formField !== 'string' &&
+						formField.id === 'price-fields'
+				);
 
-			expect( priceGroup ).toEqual( {
-				id: 'price-fields',
-				label: 'Price',
-				children: [
-					'regular_price',
-					'sale_price',
-					'schedule_sale',
-					{
-						id: 'sale-schedule-dates',
-						layout: { type: 'row' },
-						children: [ 'date_on_sale_from', 'date_on_sale_to' ],
-					},
-				],
-			} );
-		} );
+				expect( priceGroup ).toEqual( {
+					id: 'price-fields',
+					label: 'Price',
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+						{
+							id: 'sale-schedule-dates',
+							layout: { type: 'row' },
+							children: [
+								'date_on_sale_from',
+								'date_on_sale_to',
+							],
+						},
+					],
+				} );
+			}
+		);
 
 		it( 'omits the price section from grouped product form config', () => {
 			const product = buildProduct( {
