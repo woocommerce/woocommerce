@@ -95,24 +95,45 @@ That collides with the historical WooCommerce convention where `plugins/woocomme
 
 We'll also **suggest upstream** that `@wordpress/build` make the packages directory configurable (something like `wpPlugin.packagesDir`), so the WC-side source can move to a dedicated folder (`js-packages/`, `wp-build-packages/`) and `packages/` returns to its Composer-only role.
 
-## What "Orders" looks like
+## Data layer: `src/data/`
 
-`src/store-activity/orders/use-orders-activity.tsx` is the React hook that the Store Activity widget calls to fetch events. It uses `@wordpress/data` + `@wordpress/core-data`:
+This package registers its own `@wordpress/core-data` entity for orders, in `src/data/`. We can't use stock `getEntityRecords( 'postType', 'shop_order', ... )` because WooCommerce core does **not** register `shop_order` with `show_in_rest: true` (`includes/class-wc-post-types.php:491-530`), so the `/wp/v2/shop_order` endpoint doesn't exist.
+
+Instead we point at the stable, officially-supported REST endpoint `/wc/v3/orders`, which is HPOS-transparent and works the same whether the site uses HPOS or legacy post-meta storage.
+
+```ts
+// src/data/constants.ts
+export const WC_ORDER_ENTITY: Entity = {
+    name: 'order',
+    kind: 'woocommerce',            // namespace, like mailpoet uses 'mailpoet'
+    baseURL: '/wc/v3/orders',
+    key: 'id',
+    label: __( 'Order', 'woocommerce' ),
+    plural: __( 'Orders', 'woocommerce' ),
+    supportsPagination: true,
+};
+```
+
+`registerWooCommerceOrderEntity()` calls `dispatch( coreStore ).addEntities( [ WC_ORDER_ENTITY ] )`, gated by an idempotency `Set` so multiple boot paths can call it safely. It's invoked from `src/index.ts` **before** `registerStoreActivitySources()` so consumers can `getEntityRecords( 'woocommerce', 'order', ... )` immediately.
+
+Eventually, when more widgets/sources need access to orders (or to other WC entities), this `data/` subdir can graduate to a dedicated `@woocommerce/data` workspace package mirroring the shape of `@mailpoet-next/data`. For now it lives here to keep the PoC cohesive.
+
+## Source: Store Activity → Orders
+
+`src/store-activity/orders/use-orders-activity.tsx` is the React hook that the Store Activity widget calls to fetch events. It uses `@wordpress/data` + `@wordpress/core-data` against the entity registered above:
 
 ```ts
 useSelect( ( select ) => {
     const records = select( coreStore ).getEntityRecords(
-        'postType',
-        'shop_order',
+        WC_ORDER_ENTITY.kind,   // 'woocommerce'
+        WC_ORDER_ENTITY.name,   // 'order'
         { per_page: 10, orderby: 'date', order: 'desc' }
     );
     // ...
 }, [] );
 ```
 
-The hook returns `{ state: 'loading' | 'empty' | 'success', events? }`. Each event has `id`, `icon` (from `@wordpress/icons`), `renderContent` (React render fn), and `datetime` (ISO 8601 for sorting/grouping).
-
-> ⚠️ This is the PoC's primary unknown: whether `getEntityRecords( 'postType', 'shop_order', ... )` returns useful data in practice depends on the `shop_order` post type's REST exposure (which is HPOS-sensitive). If this approach proves unreliable, the fallback is `@wordpress/api-fetch` against `/wc/v3/orders`.
+The hook returns `{ state: 'loading' | 'empty' | 'success', events? }`. Each event has `id`, `icon` (from `@wordpress/icons`), `renderContent` (React render fn that interpolates a link to the order edit screen and the customer name when available), and `datetime` (ISO 8601 for sorting/grouping in the widget).
 
 ## See also
 
