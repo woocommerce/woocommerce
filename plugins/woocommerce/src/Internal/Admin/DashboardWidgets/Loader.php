@@ -59,17 +59,17 @@ class Loader {
 	 * `@wordpress/boot`) to add a dynamic import that evaluates the module
 	 * and runs its `addFilter` side effects.
 	 *
+	 * Safe-guard: the `dashboard-wp-admin-prerequisites` script handle is
+	 * registered by wp-build's generated `page-wp-admin.php` only when
+	 * Gutenberg's experimental dashboard infrastructure is loading the
+	 * page. If the handle is not registered, the experimental dashboard
+	 * is either turned off or this is some other admin page — either way
+	 * we have nothing to extend, so we no-op.
+	 *
 	 * @param string $hook_suffix Current admin page hook suffix.
 	 */
 	public static function enqueue_init_module_evaluator( string $hook_suffix ): void {
-		$current_screen   = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
-		$requested_page   = isset( $_GET['page'] ) ? sanitize_key( wp_unslash( $_GET['page'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
-		$is_dashboard_page = (
-			'dashboard-wp-admin' === $requested_page ||
-			( $current_screen && 'dashboard' === $current_screen->id )
-		);
-
-		if ( ! $is_dashboard_page ) {
+		if ( ! wp_script_is( 'dashboard-wp-admin-prerequisites', 'registered' ) ) {
 			return;
 		}
 
