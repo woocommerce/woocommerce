@@ -1540,19 +1540,20 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	 * Capture wp_mail() calls into a local array via the `pre_wp_mail` filter.
 	 *
 	 * The filter must return a non-null value to short-circuit the actual
-	 * mail send, so we return `true`. The captured atts include `to`,
+	 * mail send. The captured atts include `to`,
 	 * `subject`, `message`, and `headers`. Caller must remove the filter via
 	 * the returned remover closure.
 	 *
+	 * @param bool $send_result Value the filter should return from wp_mail().
 	 * @return array{captures: array<int, array<string, mixed>>, remove: callable}
 	 */
-	private function capture_wp_mail(): array {
+	private function capture_wp_mail( bool $send_result = true ): array {
 		$captures = array();
 
-		$capture = static function ( $short_circuit, $atts ) use ( &$captures ) {
+		$capture = static function ( $short_circuit, $atts ) use ( &$captures, $send_result ) {
 			unset( $short_circuit );
 			$captures[] = is_array( $atts ) ? $atts : array();
-			return true;
+			return $send_result;
 		};
 
 		add_filter( 'pre_wp_mail', $capture, 10, 2 );
@@ -1637,6 +1638,44 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		}//end try
 	}
 
+	/**
+	 * @testdox A wp_mail false return is logged without failing a successful exchange.
+	 */
+	public function test_sign_in_notification_email_false_return_is_logged_without_blocking_exchange(): void {
+		$capture = $this->capture_wp_mail( false );
+		$logger  = $this->getMockBuilder( \WC_Logger_Interface::class )->getMock();
+		$logger->expects( $this->once() )
+			->method( 'warning' )
+			->with(
+				$this->stringContains( 'QR sign-in notification email failed' ),
+				$this->callback(
+					static function ( $context ) {
+						return is_array( $context )
+							&& isset( $context['source'] )
+							&& 'mobile-app-qr-login' === $context['source'];
+					}
+				)
+			);
+
+		$logger_filter = static fn () => $logger;
+		add_filter( 'woocommerce_logging_class', $logger_filter );
+
+		try {
+			$prep     = $this->prepare_exchange_token(
+				array(
+					'os'    => 'Android',
+					'model' => 'Pixel 10',
+				)
+			);
+			$response = $this->dispatch_exchange( $prep['plaintext'], $prep['exchange_grant'] );
+
+			$this->assertSame( 200, $response->get_status() );
+			$this->assertCount( 1, $capture['captures'], 'A failed mailer return should still prove the send was attempted.' );
+		} finally {
+			remove_filter( 'woocommerce_logging_class', $logger_filter );
+			$capture['remove']();
+		}//end try
+	}
 
 	// ---------------------------------------------------------------------
 	// Task 7 — number-matching state machine.
@@ -1677,6 +1716,32 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			$this->get_qr_login_rate_limit_row( QRLoginRateLimits::BUCKET_SCAN, '203.0.113.10' )
 		);
 		$this->assertFalse( get_option( $this->token_scan_claim_key( $plaintext ), false ) );
+	}
+
+	/**
+	 * @testdox Scan endpoint caps the challenge window to the original token lifetime.
+	 */
+	public function test_scan_caps_challenge_window_to_remaining_token_lifetime(): void {
+		$plaintext     = $this->generate_token_as_admin();
+		$transient_key = $this->token_transient_key( $plaintext );
+		$record        = get_transient( $transient_key );
+		$expires_at    = time() + 20;
+
+		$this->assertIsArray( $record );
+		$record['expires_at'] = $expires_at;
+		set_transient( $transient_key, $record, 20 );
+
+		wp_set_current_user( 0 );
+		$response = $this->dispatch_scan( $plaintext );
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertGreaterThan( 0, $data['expires_in'] );
+		$this->assertLessThanOrEqual( 20, $data['expires_in'] );
+
+		$record = get_transient( $transient_key );
+		$this->assertIsArray( $record );
+		$this->assertSame( $expires_at, $record['challenge']['expires_at'] );
 	}
 
 	/**
@@ -1975,6 +2040,28 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 			get_option( $claim_key ),
 			'A rejected second scan must not release another request\'s claim.'
 		);
+
+		delete_option( $claim_key );
+	}
+
+	/**
+	 * @testdox Stale claim cleanup does not delete a fresh claim written after the stale value was observed.
+	 */
+	public function test_stale_claim_cleanup_does_not_delete_fresh_replacement_claim(): void {
+		$claim_key         = $this->token_claim_key( 'race-token' );
+		$stale_claim_value = (string) ( time() - 60 );
+		$fresh_claim_value = (string) ( time() + 60 );
+
+		$this->assertTrue( add_option( $claim_key, $stale_claim_value, '', false ) );
+		$this->assertTrue( update_option( $claim_key, $fresh_claim_value, false ) );
+
+		$controller = new MobileAppQRLogin();
+		$reflection = new \ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'delete_claim_if_value_matches' );
+		$method->setAccessible( true );
+
+		$this->assertFalse( $method->invoke( $controller, $claim_key, $stale_claim_value ) );
+		$this->assertSame( $fresh_claim_value, get_option( $claim_key ) );
 
 		delete_option( $claim_key );
 	}

@@ -598,7 +598,9 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 *
 	 * `add_option()` is backed by a unique option_name constraint, so it works
 	 * across PHP workers even on default installs without a persistent object
-	 * cache. Stale claims are cleaned once and retried.
+	 * cache. Stale claims are cleaned only if their stored value still matches
+	 * the value this request observed, avoiding deletion of another worker's
+	 * fresh claim.
 	 *
 	 * @param string $token_hash SHA-256 hash of the plaintext token.
 	 * @param int    $expires_at Unix timestamp when the token expires.
@@ -627,11 +629,34 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$existing_expires_at = (int) get_option( $claim_key, 0 );
 		if ( $existing_expires_at > 0 && $existing_expires_at <= time() ) {
-			delete_option( $claim_key );
+			$this->delete_claim_if_value_matches( $claim_key, (string) $existing_expires_at );
 			return add_option( $claim_key, (string) $claim_expires_at, '', false );
 		}
 
 		return false;
+	}
+
+	/**
+	 * Delete a claim option only if it still has the value this request observed.
+	 *
+	 * @param string $claim_key            Option key used as the claim mutex.
+	 * @param string $observed_claim_value Claim expiry value previously read from the option.
+	 * @return bool True if the observed stale claim was deleted.
+	 */
+	private function delete_claim_if_value_matches( $claim_key, $observed_claim_value ) {
+		global $wpdb;
+
+		$deleted = (int) $wpdb->query(
+			$wpdb->prepare(
+				"DELETE FROM {$wpdb->options} WHERE option_name = %s AND option_value = %s",
+				$claim_key,
+				$observed_claim_value
+			)
+		);
+
+		wp_cache_delete( $claim_key, 'options' );
+
+		return $deleted > 0;
 	}
 
 	/**
@@ -949,7 +974,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		}
 
 		// Validate token hasn't expired (belt and suspenders with transient TTL).
-		if ( ! empty( $token_data['expires_at'] ) && time() > $token_data['expires_at'] ) {
+		if ( ! empty( $token_data['expires_at'] ) && time() >= (int) $token_data['expires_at'] ) {
 			delete_transient( $key );
 			$this->delete_session_mapping_for_record( $token_data );
 			$this->release_token_exchange_claim( $token_hash );
@@ -1488,6 +1513,19 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$challenge_numbers = $this->generate_challenge_numbers();
 		$session_id        = wp_generate_uuid4();
 		$now               = time();
+		$token_expires_at  = isset( $record['expires_at'] ) ? (int) $record['expires_at'] : $now + self::TOKEN_TTL;
+
+		if ( $token_expires_at <= $now ) {
+			$this->release_token_scan_claim( $token_hash );
+			return new \WP_Error(
+				'invalid_token',
+				__( 'Invalid or expired QR login token.', 'woocommerce' ),
+				array( 'status' => 401 )
+			);
+		}
+
+		$challenge_expires_at = min( $now + self::CHALLENGE_TTL_SECONDS, $token_expires_at );
+		$challenge_ttl        = max( 1, $challenge_expires_at - $now );
 
 		// Shuffle the candidate triple ONCE at scan time and persist the chosen ordering so
 		// every subsequent /qr-login-status poll returns the same array. Re-shuffling per-poll
@@ -1503,14 +1541,16 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			'distractors' => $challenge_numbers['distractors'],
 			'shuffled'    => $candidates,
 			'session_id'  => $session_id,
-			'expires_at'  => $now + self::CHALLENGE_TTL_SECONDS,
+			'expires_at'  => $challenge_expires_at,
 			'device'      => $device,
 		);
 
-		// Re-use whatever ttl the original transient had left. Capped to
-		// CHALLENGE_TTL_SECONDS because the user has at most that long to pick.
-		$ttl_left = max( 30, ( isset( $record['expires_at'] ) ? (int) $record['expires_at'] - $now : self::CHALLENGE_TTL_SECONDS ) );
-		set_transient( $key, $record, min( $ttl_left, self::CHALLENGE_TTL_SECONDS + 30 ) );
+		// Re-use whatever TTL the original transient had left. The challenge
+		// window itself is capped to the remaining token lifetime, while the
+		// storage TTL keeps the full challenge visible for normal fresh scans.
+		$ttl_left    = max( 1, $token_expires_at - $now );
+		$storage_ttl = min( $ttl_left, self::CHALLENGE_TTL_SECONDS + 30 );
+		set_transient( $key, $record, $storage_ttl );
 
 		// Sibling transient that resolves session_id → token_hash for the
 		// app's session-status poll. Stored hashed so the session id isn't
@@ -1518,7 +1558,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		set_transient(
 			self::SESSION_TRANSIENT_PREFIX . hash( 'sha256', $session_id ),
 			$token_hash,
-			self::CHALLENGE_TTL_SECONDS + 30
+			$storage_ttl
 		);
 
 		$this->release_token_scan_claim( $token_hash );
@@ -1527,7 +1567,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			array(
 				'session_id'  => $session_id,
 				'real_number' => $challenge_numbers['real'],
-				'expires_in'  => self::CHALLENGE_TTL_SECONDS,
+				'expires_in'  => $challenge_ttl,
 			)
 		);
 	}
@@ -1599,6 +1639,18 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
+		if ( ! empty( $record['expires_at'] ) && time() >= (int) $record['expires_at'] ) {
+			$record['state']    = self::STATE_EXPIRED;
+			$record['state_at'] = time();
+			set_transient( $key, $record, 60 );
+			$this->release_token_approval_claim( $token_hash );
+			return new \WP_Error(
+				'qr_login_expired',
+				__( 'The QR login challenge has expired. Please generate a new code.', 'woocommerce' ),
+				array( 'status' => 410 )
+			);
+		}
+
 		$current_state = isset( $record['state'] ) ? (string) $record['state'] : self::STATE_PENDING;
 		if ( self::STATE_SCANNED !== $current_state ) {
 			$this->release_token_approval_claim( $token_hash );
@@ -1609,7 +1661,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			);
 		}
 
-		// Challenge expiry — the merchant has 90 s after scan to pick.
+		// Challenge expiry — normally 90 s after scan, capped by token expiry.
 		if ( ! empty( $record['challenge']['expires_at'] ) && time() > (int) $record['challenge']['expires_at'] ) {
 			$record['state']    = self::STATE_EXPIRED;
 			$record['state_at'] = time();
@@ -1650,7 +1702,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		$record['state_at']       = time();
 		$record['exchange_grant'] = bin2hex( random_bytes( self::EXCHANGE_GRANT_BYTES ) );
 		$ttl                      = max(
-			30,
+			1,
 			isset( $record['expires_at'] ) ? (int) $record['expires_at'] - time() : self::CHALLENGE_TTL_SECONDS
 		);
 
@@ -1827,10 +1879,9 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 * sign-in, unless they (or a site owner) opt out via the
 	 * `woocommerce_qr_login_should_send_signin_email` filter.
 	 *
-	 * Wrapped so a misconfigured mailer cannot break the exchange path —
-	 * exceptions are caught silently. We deliberately do not block the API
-	 * response on email delivery; the merchant already saw the confirmation
-	 * UI in wc-admin (Task 5).
+	 * Wrapped so a misconfigured mailer cannot break the exchange path. Mailer
+	 * false returns and exceptions are logged, but delivery never blocks the API
+	 * response.
 	 *
 	 * @param \WP_User             $user            The user who minted the token (recipient).
 	 * @param array<string, mixed> $consumed_record The record persisted to the consumed transient (keys: consumed_at, user_id, ap_uuid, ap_name, device).
@@ -1861,7 +1912,15 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 		}
 
 		try {
-			$this->send_sign_in_notification_email( $user, $consumed_record );
+			if ( ! $this->send_sign_in_notification_email( $user, $consumed_record ) ) {
+				wc_get_logger()->warning(
+					sprintf(
+						'QR sign-in notification email failed for user %d: wp_mail returned false',
+						$user->ID
+					),
+					array( 'source' => 'mobile-app-qr-login' )
+				);
+			}
 		} catch ( \Throwable $e ) {
 			// Don't surface mailer failures to the exchange response — the
 			// merchant already has the API result, and the email is best-effort.
@@ -1890,9 +1949,9 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	 *
 	 * @param \WP_User             $user            Recipient.
 	 * @param array<string, mixed> $consumed_record The consumed record (same shape as `maybe_send_sign_in_notification_email`).
-	 * @return void
+	 * @return bool True if WordPress accepted the message for delivery.
 	 */
-	private function send_sign_in_notification_email( \WP_User $user, array $consumed_record ): void {
+	private function send_sign_in_notification_email( \WP_User $user, array $consumed_record ): bool {
 		$site_name = wp_specialchars_decode(
 			(string) get_bloginfo( 'name' ),
 			ENT_QUOTES
@@ -1903,7 +1962,7 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 
 		$body_html = $this->render_sign_in_notification_email_body( $user, $consumed_record, $site_name, $subject );
 
-		wp_mail(
+		return wp_mail(
 			$user->user_email,
 			$subject,
 			$body_html,
