@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Rename the Attributes tab to "Product attributes", filter variation=true attributes out of it, and add a form-POST preservation handler to prevent inline-saved variation attributes from being wiped on legacy form saves (all gated on the product-variations-classic-redesign feature flag).
