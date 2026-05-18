@@ -142,6 +142,7 @@ class Loader {
 					'id'     => $widget['render_module'],
 				);
 			}
+
 			if ( ! empty( $widget['widget_module'] ) ) {
 				$boot_dependencies[] = array(
 					'import' => 'dynamic',
