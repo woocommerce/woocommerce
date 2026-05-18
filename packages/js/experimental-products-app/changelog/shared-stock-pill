@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Render the stock field as a single pill that includes the quantity ("N in stock" when managed) across both the variations view and the all-products dashboard.

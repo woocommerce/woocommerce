@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Badge, SelectControl } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
@@ -43,29 +43,36 @@ const fieldDefinition = {
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
-	isVisible: ( item ) => {
-		return ! item.manage_stock;
-	},
 	getValue: ( { item } ) => item.stock_status,
-	render: ( { item, field } ) => {
-		const match = field?.elements?.find(
-			( status ) => status.value === item.stock_status
-		);
+	render: ( { item } ) => {
+		const status: StockStatus = isValidStockStatus( item.stock_status )
+			? item.stock_status
+			: 'instock';
 
-		if ( ! match || ! isValidStockStatus( match.value ) ) {
-			return item.stock_status;
+		let label: string;
+		if ( status === 'outofstock' ) {
+			label = __( 'Out of stock', 'woocommerce' );
+		} else if ( status === 'onbackorder' ) {
+			label = __( 'On backorder', 'woocommerce' );
+		} else if (
+			item.manage_stock &&
+			typeof item.stock_quantity === 'number' &&
+			item.stock_quantity > 0
+		) {
+			label = sprintf(
+				/* translators: %d: stock quantity. */
+				__( '%d in stock', 'woocommerce' ),
+				item.stock_quantity
+			);
+		} else {
+			label = __( 'In stock', 'woocommerce' );
 		}
 
 		return (
 			<div className="woocommerce-fields-field__stock">
-				<Badge intent={ stockStatusBadgeIntent[ match.value ] }>
-					{ match.label }
+				<Badge intent={ stockStatusBadgeIntent[ status ] }>
+					{ label }
 				</Badge>
-				{ item.stock_quantity && item.stock_quantity > 0 && (
-					<span className="woocommerce-fields-field__stock-quantity">
-						({ item.stock_quantity })
-					</span>
-				) }
 			</div>
 		);
 	},
