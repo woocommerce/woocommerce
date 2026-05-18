@@ -76,16 +76,8 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'linked_products_count',
 ] as const;
 
-const DIMENSION_GROUP_FIELD_IDS = [ 'weight', 'length', 'width' ] as const;
-
 const DIMENSIONS_FORM_FIELD: ProductEditFormField = {
 	id: 'dimensions',
-	layout: { type: 'row' as const },
-	children: [ ...DIMENSION_GROUP_FIELD_IDS ],
-};
-
-const PARENT_DIMENSIONS_FORM_FIELD: ProductEditFormField = {
-	id: 'parent-dimensions',
 	layout: { type: 'row' as const },
 	children: [ 'length', 'width', 'height' ],
 };
@@ -129,7 +121,7 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'shipping-fields',
 		__( 'Shipping', 'woocommerce' ),
-		[ DIMENSIONS_FORM_FIELD, 'height' ]
+		[ DIMENSIONS_FORM_FIELD, 'weight' ]
 	),
 ] satisfies ProductEditFormField[];
 
@@ -154,7 +146,7 @@ const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'shipping-fields',
 		__( 'Shipping', 'woocommerce' ),
-		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'height' ]
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'weight' ]
 	),
 ] satisfies ProductEditFormField[];
 
@@ -180,7 +172,7 @@ const VARIABLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'shipping-fields',
 		__( 'Shipping', 'woocommerce' ),
-		[ 'shipping_class', PARENT_DIMENSIONS_FORM_FIELD, 'weight' ]
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'weight' ]
 	),
 ] satisfies ProductEditFormField[];
 
