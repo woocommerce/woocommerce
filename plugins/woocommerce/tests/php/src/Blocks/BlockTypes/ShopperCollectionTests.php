@@ -3,9 +3,14 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypes\ShopperCollection;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionProperty;
 use WP_UnitTestCase;
 
 /**
@@ -26,13 +31,21 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	private ShopperCollection $sut;
 
 	/**
-	 * Instantiate the block without invoking its constructor.
+	 * Instantiate the block without invoking its constructor and inject a
+	 * registry mock so render() can call `->add()` without NPEing.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
 		$reflection = new ReflectionClass( ShopperCollection::class );
 		$this->sut  = $reflection->newInstanceWithoutConstructor();
+
+		$registry_prop = new ReflectionProperty( ShopperCollection::class, 'asset_data_registry' );
+		$registry_prop->setAccessible( true );
+		$registry_prop->setValue(
+			$this->sut,
+			new AssetDataRegistryMock( Package::container()->get( Api::class ) )
+		);
 	}
 
 	/**
@@ -318,6 +331,87 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 			'/<div[^>]*class="wc-block-shopper-collection__header"[^>]*data-wp-bind--hidden="!context\.hasShownItems"[^>]*\bhidden\b[^>]*>.*Saved for later/s',
 			$markup,
 			'Header wrapper must be initially hidden for an empty list so a fresh-load empty SC does not show an orphaned heading.'
+		);
+	}
+
+	/**
+	 * Invoke render() against the SUT (which already has a registry injected
+	 * in setUp). Render is wrapped in a try/catch because its downstream calls
+	 * (REST prefetch, interactivity bootstrap) need bits of the request
+	 * lifecycle that aren't set up in unit tests; the flag-setting branch
+	 * runs before any of that, so a later fatal doesn't change what we
+	 * assert on.
+	 *
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return AssetDataRegistryMock The injected registry, ready to inspect.
+	 */
+	private function invoke_render_with_registry_mock( array $attributes ): AssetDataRegistryMock {
+		$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+		$render->setAccessible( true );
+
+		try {
+			$render->invoke( $this->sut, $attributes, '', null );
+		} catch ( \Throwable $e ) {
+			// Ignored: flag-setting runs before the parts of render() that need a full request lifecycle.
+			unset( $e );
+		}
+
+		$registry_prop = new ReflectionProperty( ShopperCollection::class, 'asset_data_registry' );
+		$registry_prop->setAccessible( true );
+
+		return $registry_prop->getValue( $this->sut );
+	}
+
+	/**
+	 * @return array<string, array{bool, bool, bool}>
+	 */
+	public function provider_cart_page_has_saved_for_later_flag(): array {
+		return array(
+			// label                    => array( logged_in, is_cart, expected ).
+			'set on cart, logged-in'    => array( true, true, true ),
+			'not set off the cart page' => array( true, false, false ),
+			'not set for guests'        => array( false, true, false ),
+		);
+	}
+
+	/**
+	 * `cartPageHasSavedForLater` is the wcSettings flag the cart line item row reads
+	 * to decide whether to render the "Save for later" link. The block sets it
+	 * only when rendering the saved-for-later list, on the cart page, for a
+	 * logged-in shopper — every other combination must leave it unset.
+	 *
+	 * @dataProvider provider_cart_page_has_saved_for_later_flag
+	 *
+	 * @param bool $logged_in Whether the test runs as a logged-in customer.
+	 * @param bool $is_cart   Whether `is_cart()` is forced to return true.
+	 * @param bool $expected  Whether the flag is expected to be registered.
+	 */
+	public function test_cart_page_has_saved_for_later_flag(
+		bool $logged_in,
+		bool $is_cart,
+		bool $expected
+	): void {
+		wp_set_current_user( $logged_in ? self::factory()->user->create( array( 'role' => 'customer' ) ) : 0 );
+
+		// Mock the is_cart() call routed through LegacyProxy in render(). Filter/cache
+		// approaches don't work in CI: upstream tests can define `WOOCOMMERCE_CART` via
+		// `wc_maybe_define_constant`, which makes is_cart() short-circuit to true
+		// irreversibly for the rest of the process.
+		$legacy_proxy = wc_get_container()->get( LegacyProxy::class );
+		$legacy_proxy->reset();
+		$legacy_proxy->register_function_mocks(
+			array(
+				'is_cart' => function () use ( $is_cart ) {
+					return $is_cart;
+				},
+			)
+		);
+
+		$registry = $this->invoke_render_with_registry_mock( array( 'listName' => 'saved-for-later' ) );
+
+		$this->assertSame(
+			$expected,
+			array_key_exists( 'cartPageHasSavedForLater', $registry->get() )
 		);
 	}
 }

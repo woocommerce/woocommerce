@@ -5,6 +5,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
+use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
  * Shopper Collection block.
@@ -149,6 +150,12 @@ final class ShopperCollection extends AbstractBlock {
 		$list_slug = sanitize_title( $attributes['listName'] );
 		if ( '' === $list_slug ) {
 			$list_slug = 'saved-for-later';
+		}
+
+		// Set from render() (not Cart::enqueue_data via has_block()) so it works when this
+		// block is auto-injected via the Block Hooks API and isn't in stored post_content.
+		if ( 'saved-for-later' === $list_slug && wc_get_container()->get( LegacyProxy::class )->call_function( 'is_cart' ) ) {
+			$this->asset_data_registry->add( 'cartPageHasSavedForLater', true );
 		}
 
 		// Clamp to the 2-6 range the SCSS `@for $i from 2 through 6` loop and
