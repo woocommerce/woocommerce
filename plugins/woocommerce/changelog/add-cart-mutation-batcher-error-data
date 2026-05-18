@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Cart mutation batcher: propagate the server error `data` field onto rejected request errors so callers can read structured fields like `quantity_remaining`.

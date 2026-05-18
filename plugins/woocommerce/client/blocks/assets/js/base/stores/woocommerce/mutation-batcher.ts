@@ -177,12 +177,16 @@ export function createMutationQueue< TState >(
 				const errorBody = itemResponse.body as {
 					message?: string;
 					code?: string;
+					data?: unknown;
 				};
 				errors.set(
 					requestId,
 					Object.assign(
 						new Error( errorBody?.message || 'Request failed' ),
-						{ code: errorBody?.code || 'unknown_error' }
+						{
+							code: errorBody?.code || 'unknown_error',
+							data: errorBody?.data,
+						}
 					)
 				);
 			}
