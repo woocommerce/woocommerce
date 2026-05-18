@@ -139,7 +139,7 @@ class InitTest extends WC_Unit_Test_Case {
 		$product->set_attributes( $existing_attributes );
 		$product->save();
 
-		$variation_attrs = array_filter(
+		$variation_attrs     = array_filter(
 			$product->get_attributes(),
 			array( 'WC_Meta_Box_Product_Data', 'filter_variation_attributes' )
 		);
