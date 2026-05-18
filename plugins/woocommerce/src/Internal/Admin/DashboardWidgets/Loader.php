@@ -10,6 +10,7 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Internal\Admin\DashboardWidgets;
 
+use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use WP_Widget_Type_Registry;
 
 defined( 'ABSPATH' ) || exit;
@@ -23,6 +24,10 @@ defined( 'ABSPATH' ) || exit;
  * map. Mirrors what Gutenberg does for its own widgets in
  * `lib/experimental/dashboard-widgets/widget-types.php`; cross-plugin
  * discovery is opt-in.
+ *
+ * Gated behind the `dashboard_widgets` experimental feature flag (see
+ * `FeaturesController`). The whole subsystem is a no-op when the flag is
+ * off — no hooks are registered, no PHP files included.
  */
 class Loader {
 
@@ -33,8 +38,15 @@ class Loader {
 	 * and attaches the registry + boot-deps hooks. Safe to call multiple
 	 * times: actions are no-ops if the build artifacts are missing or if
 	 * Gutenberg's experimental dashboard is not active.
+	 *
+	 * Returns early when the `dashboard_widgets` feature flag is disabled,
+	 * which is the default state on a fresh install.
 	 */
 	public static function init(): void {
+		if ( ! FeaturesUtil::feature_is_enabled( 'dashboard_widgets' ) ) {
+			return;
+		}
+
 		$build_file = plugin_dir_path( WC_PLUGIN_FILE ) . 'build/build.php';
 		if ( ! file_exists( $build_file ) ) {
 			return;
