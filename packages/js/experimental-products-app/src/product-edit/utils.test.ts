@@ -360,6 +360,7 @@ describe( 'product edit utils', () => {
 				'brands',
 				'tags',
 				'featured',
+				'shipping_class',
 				'weight',
 				'length',
 				'width',
@@ -370,7 +371,6 @@ describe( 'product edit utils', () => {
 				'downloadable',
 				'external_url',
 				'button_text',
-				'shipping_class',
 				'tax_status',
 				'upsell_ids',
 				'cross_sell_ids',
@@ -444,10 +444,10 @@ describe( 'product edit utils', () => {
 					'length',
 					'width',
 					'height',
+					'shipping_class',
 				] )
 			);
 			expectFieldOrder( fieldIds, [ 'images', 'downloadable', 'sku' ] );
-			expectFieldsHidden( fieldIds, [ 'shipping_class' ] );
 		} );
 
 		it( 'shows grouped product fields in quick edit order', () => {
@@ -509,6 +509,7 @@ describe( 'product edit utils', () => {
 				'brands',
 				'tags',
 				'featured',
+				'shipping_class',
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
@@ -517,7 +518,10 @@ describe( 'product edit utils', () => {
 				'cross_sell_ids',
 				'downloadable',
 				'upsell_ids',
-				...shippingFieldIds,
+				'weight',
+				'length',
+				'width',
+				'height',
 				...stockStatusFieldIds,
 				'stock_quantity',
 			] );
@@ -596,6 +600,7 @@ describe( 'product edit utils', () => {
 					'featured',
 					'images',
 					'manage_stock',
+					'shipping_class',
 					'weight',
 					'length',
 					'width',
@@ -605,7 +610,6 @@ describe( 'product edit utils', () => {
 			expectFieldsHidden( fieldIds, [
 				'upsell_ids',
 				'cross_sell_ids',
-				'shipping_class',
 				'tax_status',
 				'stock_quantity',
 			] );
@@ -930,6 +934,7 @@ describe( 'product edit utils', () => {
 					'product_status',
 					'images',
 					'manage_stock',
+					'shipping_class',
 					'weight',
 					'length',
 					'width',
@@ -943,7 +948,6 @@ describe( 'product edit utils', () => {
 				'sku',
 				'stock',
 				'stock_quantity',
-				'shipping_class',
 				'tax_status',
 			] );
 		} );
@@ -1026,6 +1030,7 @@ describe( 'product edit utils', () => {
 					id: 'shipping-fields',
 					label: 'Shipping',
 					children: [
+						'shipping_class',
 						{
 							id: 'dimensions',
 							layout: { type: 'row' },
@@ -1063,6 +1068,55 @@ describe( 'product edit utils', () => {
 					},
 				],
 			} );
+		} );
+
+		it( 'uses grouped external product form config', () => {
+			const product = buildProduct( {
+				type: 'external',
+			} );
+
+			expect( getFormFields( [ product ] ) ).toEqual( [
+				{
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+						'external_url',
+						'button_text',
+					],
+				},
+				{
+					id: 'price-fields',
+					label: 'Price',
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
+				{
+					id: 'shipping-fields',
+					label: 'Shipping',
+					children: [ 'shipping_class' ],
+				},
+			] );
 		} );
 
 		it( 'uses grouped variable parent form config', () => {

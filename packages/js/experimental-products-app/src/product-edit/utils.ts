@@ -135,7 +135,7 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'shipping-fields',
 		__( 'Shipping', 'woocommerce' ),
-		[ DIMENSIONS_FORM_FIELD, 'height' ]
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'height' ]
 	),
 ] satisfies ProductEditFormField[];
 
@@ -230,6 +230,11 @@ const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
 		'product-organization-fields',
 		__( 'Product organization', 'woocommerce' ),
 		[ 'categories', 'brands', 'tags', 'featured' ]
+	),
+	createProductEditFormGroup(
+		'shipping-fields',
+		__( 'Shipping', 'woocommerce' ),
+		[ 'shipping_class' ]
 	),
 ] satisfies ProductEditFormField[];
 
