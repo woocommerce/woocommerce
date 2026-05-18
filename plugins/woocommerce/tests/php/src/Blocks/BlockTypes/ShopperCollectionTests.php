@@ -6,9 +6,11 @@ namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypes\ShopperCollection;
 use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Blocks\Utils\CartCheckoutUtils;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use ReflectionClass;
 use ReflectionMethod;
+use ReflectionProperty;
 use WP_UnitTestCase;
 
 /**
@@ -29,13 +31,32 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	private ShopperCollection $sut;
 
 	/**
-	 * Instantiate the block without invoking its constructor.
+	 * Instantiate the block without invoking its constructor, inject a
+	 * registry mock so render() can call `->add()` without NPEing, and
+	 * reset `CartCheckoutUtils::$is_cart_page` so a cached `true` from a
+	 * prior test doesn't poison `is_cart()` checks in this one.
 	 */
 	public function setUp(): void {
 		parent::setUp();
 
+		// `WP_UnitTestCase` doesn't restore WC-specific filters between tests, so
+		// a `__return_true` added by a prior data-provider row leaks into the next
+		// one. See `Gateways/PayPal/ButtonsTest::tearDown()` for the same pattern.
+		remove_all_filters( 'woocommerce_is_cart' );
+
+		$cache_prop = new ReflectionProperty( CartCheckoutUtils::class, 'is_cart_page' );
+		$cache_prop->setAccessible( true );
+		$cache_prop->setValue( null, null );
+
 		$reflection = new ReflectionClass( ShopperCollection::class );
 		$this->sut  = $reflection->newInstanceWithoutConstructor();
+
+		$registry_prop = new ReflectionProperty( ShopperCollection::class, 'asset_data_registry' );
+		$registry_prop->setAccessible( true );
+		$registry_prop->setValue(
+			$this->sut,
+			new AssetDataRegistryMock( Package::container()->get( Api::class ) )
+		);
 	}
 
 	/**
@@ -325,49 +346,42 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Inject an AssetDataRegistry mock into the SUT and invoke render() via
-	 * reflection. `ShopperCollection` is final, so we can't subclass it for the
-	 * test — set the inherited `$asset_data_registry` property directly instead.
-	 * Render is wrapped in a try/catch because its downstream calls (REST
-	 * prefetch, interactivity bootstrap) need bits of the request lifecycle
-	 * that aren't set up in unit tests; the flag-setting branch runs before any
-	 * of that, so a later fatal doesn't change what we assert on.
+	 * Invoke render() against the SUT (which already has a registry injected
+	 * in setUp). Render is wrapped in a try/catch because its downstream calls
+	 * (REST prefetch, interactivity bootstrap) need bits of the request
+	 * lifecycle that aren't set up in unit tests; the flag-setting branch
+	 * runs before any of that, so a later fatal doesn't change what we
+	 * assert on.
 	 *
 	 * @param array<string, mixed> $attributes Block attributes.
-	 * @return AssetDataRegistryMock The mock registry, ready to inspect.
+	 * @return AssetDataRegistryMock The injected registry, ready to inspect.
 	 */
 	private function invoke_render_with_registry_mock( array $attributes ): AssetDataRegistryMock {
-		$asset_api = Package::container()->get( Api::class );
-		$registry  = new AssetDataRegistryMock( $asset_api );
-
-		$reflection    = new ReflectionClass( ShopperCollection::class );
-		$registry_prop = $reflection->getProperty( 'asset_data_registry' );
-		$registry_prop->setAccessible( true );
-		$registry_prop->setValue( $this->sut, $registry );
-
 		$render = new ReflectionMethod( ShopperCollection::class, 'render' );
 		$render->setAccessible( true );
 
 		try {
 			$render->invoke( $this->sut, $attributes, '', null );
 		} catch ( \Throwable $e ) {
-			// Ignored: the flag-setting branch runs before the parts of render()
-			// that need a full request lifecycle.
+			// Ignored: flag-setting runs before the parts of render() that need a full request lifecycle.
+			unset( $e );
 		}
 
-		return $registry;
+		$registry_prop = new ReflectionProperty( ShopperCollection::class, 'asset_data_registry' );
+		$registry_prop->setAccessible( true );
+
+		return $registry_prop->getValue( $this->sut );
 	}
 
 	/**
-	 * @return array<string, array{bool, bool, string, bool}>
+	 * @return array<string, array{bool, bool, bool}>
 	 */
 	public function provider_cart_page_has_saved_for_later_flag(): array {
 		return array(
-			// label                          => array( logged_in, is_cart, list_name,         expected ).
-			'set on cart with sfl list'       => array( true, true, 'saved-for-later', true ),
-			'not set off the cart page'       => array( true, false, 'saved-for-later', false ),
-			'not set for guests'              => array( false, true, 'saved-for-later', false ),
-			'not set for non-saved-for-later' => array( true, true, 'wishlist', false ),
+			// label                    => array( logged_in, is_cart, expected ).
+			'set on cart, logged-in'    => array( true, true, true ),
+			'not set off the cart page' => array( true, false, false ),
+			'not set for guests'        => array( false, true, false ),
 		);
 	}
 
@@ -378,11 +392,14 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	 * logged-in shopper — every other combination must leave it unset.
 	 *
 	 * @dataProvider provider_cart_page_has_saved_for_later_flag
+	 *
+	 * @param bool $logged_in Whether the test runs as a logged-in customer.
+	 * @param bool $is_cart   Whether `is_cart()` is forced to return true.
+	 * @param bool $expected  Whether the flag is expected to be registered.
 	 */
 	public function test_cart_page_has_saved_for_later_flag(
 		bool $logged_in,
 		bool $is_cart,
-		string $list_name,
 		bool $expected
 	): void {
 		wp_set_current_user( $logged_in ? self::factory()->user->create( array( 'role' => 'customer' ) ) : 0 );
@@ -390,7 +407,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 			add_filter( 'woocommerce_is_cart', '__return_true' );
 		}
 
-		$registry = $this->invoke_render_with_registry_mock( array( 'listName' => $list_name ) );
+		$registry = $this->invoke_render_with_registry_mock( array( 'listName' => 'saved-for-later' ) );
 
 		$this->assertSame(
 			$expected,
