@@ -370,6 +370,8 @@ class QueryCache {
 			return AST::fromArray( $data );
 		} catch ( \Throwable $e ) {
 			return false;
+		} finally {
+			OpcacheFileExpiry::ensure_scheduled();
 		}
 	}
 

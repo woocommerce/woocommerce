@@ -29,6 +29,8 @@ class EndpointTest extends WC_Unit_Test_Case {
 	 */
 	public function setUp(): void {
 		parent::setUp();
+		// Feature flag gates the OrderReviews stack.
+		update_option( 'woocommerce_feature_customer_review_request_enabled', 'yes' );
 		$this->endpoint = new Endpoint();
 
 		// `Endpoint::get_url()` derives the URL from the WC-managed Review
@@ -62,6 +64,7 @@ class EndpointTest extends WC_Unit_Test_Case {
 		}
 		wp_reset_postdata();
 		wp_set_current_user( 0 );
+		delete_option( 'woocommerce_feature_customer_review_request_enabled' );
 		parent::tearDown();
 	}
 
@@ -633,5 +636,116 @@ class EndpointTest extends WC_Unit_Test_Case {
 
 		$fresh = wc_get_order( $order->get_id() );
 		$this->assertSame( $preset, (string) $fresh->get_meta( SubmissionHandler::COMPLETED_META_KEY ) );
+	}
+
+	/**
+	 * @testdox maybe_create_host_page() re-aligns the option with the slug-routed page when duplicates exist.
+	 *
+	 * Prior activation/disable cycles can leave multiple pages with slug
+	 * `review-order`. WP's permalink routing resolves `/review-order/` to the
+	 * lowest-id match, so the option must agree with that or `gate_request()`
+	 * silently skips its work (assets never enqueue).
+	 */
+	public function test_maybe_create_host_page_adopts_slug_canonical_when_option_dangles(): void {
+		global $wpdb;
+
+		// Wipe whatever the shared setUp seeded so this test controls state.
+		$this->reset_review_order_pages();
+
+		$first_id  = (int) wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_title'   => 'Review your order',
+				'post_name'    => 'review-order',
+				'post_content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
+			)
+		);
+		$second_id = (int) wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'publish',
+				'post_title'   => 'Review your order',
+				'post_name'    => 'review-order-alt',
+				'post_content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
+			)
+		);
+		// Force the slug clash that WP's uniqueness check would normally avoid.
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->update( $wpdb->posts, array( 'post_name' => 'review-order' ), array( 'ID' => $first_id ) );
+		// phpcs:ignore WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching, WordPress.DB.DirectDatabaseQuery.SchemaChange
+		$wpdb->update( $wpdb->posts, array( 'post_name' => 'review-order' ), array( 'ID' => $second_id ) );
+		clean_post_cache( $first_id );
+		clean_post_cache( $second_id );
+
+		// Option absent so the fast-path short-circuit fails and reconciliation runs.
+		delete_option( 'woocommerce_review_order_page_id' );
+		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+
+		$this->endpoint->maybe_create_host_page();
+
+		$this->assertSame( $first_id, (int) wc_get_page_id( Endpoint::PAGE_KEY ), 'option should adopt the slug-routed (lowest-id) page' );
+		$this->assertSame( 'yes', get_option( 'woocommerce_review_order_flush_rewrite_pending' ), 'rewrite flush should be queued when the option moves' );
+	}
+
+	/**
+	 * @testdox maybe_create_host_page() republishes a draft host page and queues a rewrite flush.
+	 */
+	public function test_maybe_create_host_page_republishes_draft_host_page(): void {
+		$this->reset_review_order_pages();
+
+		$page_id = (int) wp_insert_post(
+			array(
+				'post_type'    => 'page',
+				'post_status'  => 'draft',
+				'post_title'   => 'Review your order',
+				'post_name'    => 'review-order',
+				'post_content' => '<!-- wp:shortcode -->[woocommerce_review_order]<!-- /wp:shortcode -->',
+			)
+		);
+		update_option( 'woocommerce_review_order_page_id', $page_id );
+		delete_option( 'woocommerce_review_order_flush_rewrite_pending' );
+
+		$this->endpoint->maybe_create_host_page();
+
+		$fresh = get_post( $page_id );
+		$this->assertSame( 'publish', $fresh->post_status, 'draft host page should be republished' );
+		$this->assertSame( 'yes', get_option( 'woocommerce_review_order_flush_rewrite_pending' ) );
+	}
+
+	/**
+	 * @testdox The `woocommerce_create_pages` filter injects the Review Order entry so any caller of `WC_Install::create_pages()` (e.g. Status → Tools repair) seeds the page.
+	 */
+	public function test_inject_review_order_page_filter_adds_entry_for_third_party_callers(): void {
+		$pages = $this->endpoint->inject_review_order_page( array() );
+
+		$this->assertArrayHasKey( Endpoint::PAGE_KEY, $pages );
+		$this->assertSame( 'review-order', $pages[ Endpoint::PAGE_KEY ]['name'] );
+		$this->assertStringContainsString( '[woocommerce_review_order]', $pages[ Endpoint::PAGE_KEY ]['content'] );
+
+		// Defensive: a non-array value passes through untouched (matches the
+		// guard inside the method so other filters in the chain stay intact).
+		$this->assertNull( $this->endpoint->inject_review_order_page( null ) );
+	}
+
+	/**
+	 * Remove every page that could match the Review Order lookup, plus the
+	 * stored option, so a test can stage a clean slate before exercising
+	 * `maybe_create_host_page()`.
+	 */
+	private function reset_review_order_pages(): void {
+		$candidates = get_posts(
+			array(
+				'name'             => 'review-order',
+				'post_type'        => 'page',
+				'post_status'      => 'any',
+				'numberposts'      => -1,
+				'suppress_filters' => false,
+			)
+		);
+		foreach ( $candidates as $page ) {
+			wp_delete_post( (int) $page->ID, true );
+		}
+		delete_option( 'woocommerce_review_order_page_id' );
 	}
 }
