@@ -196,7 +196,6 @@ final class ShopperCollection extends AbstractBlock {
 					$list_slug => array(
 						'items'     => $items,
 						'isLoading' => false,
-						'error'     => null,
 					),
 				),
 			)
@@ -415,6 +414,7 @@ final class ShopperCollection extends AbstractBlock {
 						class="wc-block-shopper-collection-item__remove"
 						data-wp-on--click="actions.onClickRemove"
 						data-wp-bind--aria-label="state.currentItemRemoveLabel"
+						data-wp-bind--disabled="state.isCurrentItemPending"
 					>
 						<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
 					</button>
@@ -431,6 +431,7 @@ final class ShopperCollection extends AbstractBlock {
 							type="button"
 							class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
 							data-wp-on--click="<?php echo esc_attr( $variation['actionDirective'] ); ?>"
+							data-wp-bind--disabled="state.isCurrentItemPending"
 						>
 							<?php echo esc_html( $variation['actionLabel'] ); ?>
 						</button>
@@ -525,6 +526,7 @@ final class ShopperCollection extends AbstractBlock {
 					aria-label="<?php echo esc_attr( $remove_aria ); ?>"
 					data-wp-on--click="actions.onClickRemove"
 					data-wp-bind--aria-label="state.currentItemRemoveLabel"
+					data-wp-bind--disabled="state.isCurrentItemPending"
 				>
 					<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
 				</button>
@@ -584,6 +586,7 @@ final class ShopperCollection extends AbstractBlock {
 					type="button"
 					class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
 					data-wp-on--click="<?php echo esc_attr( $variation['actionDirective'] ); ?>"
+					data-wp-bind--disabled="state.isCurrentItemPending"
 				>
 					<?php echo esc_html( $variation['actionLabel'] ); ?>
 				</button>

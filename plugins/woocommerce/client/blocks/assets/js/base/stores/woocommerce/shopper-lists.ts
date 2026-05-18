@@ -204,6 +204,7 @@ const { state, actions } = store< Store >(
 					// loadList cannot clobber a fresh add/remove.
 					list.items = items;
 				} catch ( error ) {
+					yield actions.clearNotices();
 					actions.showNoticeError( error as Error );
 				} finally {
 					list.isLoading = false;
@@ -298,6 +299,11 @@ const { state, actions } = store< Store >(
 					type: 'error',
 					dismissible: true,
 				} );
+
+				// Surface the full Error (with stack) for ops debugging;
+				// the banner only shows the sanitised message.
+				// eslint-disable-next-line no-console
+				console.error( error );
 			},
 
 			// Wipe every notice in the closest store-notices context. Called

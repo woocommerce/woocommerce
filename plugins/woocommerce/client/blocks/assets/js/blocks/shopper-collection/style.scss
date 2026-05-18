@@ -152,12 +152,3 @@ $grid-gap: var(--wp--style--block-gap, 1.5em);
 	padding: 1em 0;
 	text-align: left;
 }
-
-// Notices region is a block-level sibling of the items `<ul>`, not a grid
-// cell, so it spans naturally without `grid-column: 1 / -1`. The PHP
-// emits the wrapper with `hidden` and `data-wp-bind--hidden="!context.notices.length"`,
-// so on first paint and whenever the notices array is empty the entire
-// region collapses — no empty banner box reserving space above the list.
-.wc-block-shopper-collection__notices {
-	list-style: none;
-}
