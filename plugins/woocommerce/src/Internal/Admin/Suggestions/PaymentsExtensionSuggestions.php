@@ -1335,8 +1335,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
 					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
 						array(
 							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.mercadopago.com.ar/costs-section',
@@ -1407,8 +1407,8 @@ class PaymentsExtensionSuggestions {
 			),
 			self::MERCADO_PAGO => array(
 				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
 					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
 						array(
 							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.mercadopago.com.br/costs-section',
@@ -1443,8 +1443,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
 					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
 						array(
 							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.mercadopago.cl/costs-section',
@@ -1467,8 +1467,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
 					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
 						array(
 							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.mercadopago.com.co/costs-section',
@@ -1621,8 +1621,8 @@ class PaymentsExtensionSuggestions {
 			),
 			self::MERCADO_PAGO => array(
 				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
 					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
 						array(
 							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.mercadopago.com.mx/costs-section',
@@ -1688,8 +1688,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
 					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
 						array(
 							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.mercadopago.com.pe/costs-section',
@@ -1785,8 +1785,8 @@ class PaymentsExtensionSuggestions {
 					'tags' => array( self::TAG_PREFERRED ),
 				),
 				'_merge_on_type' => array(
+					// These URLs come from the Mercado Pago for WooCommerce extension — see `\MercadoPago\Woocommerce\Helpers\Links`.
 					'links' => array(
-						// See the extension code -> \MercadoPago\Woocommerce\Helpers\Links class.
 						array(
 							'_type' => PaymentsProviders::LINK_TYPE_PRICING,
 							'url'   => 'https://www.mercadopago.com.uy/costs-section',
