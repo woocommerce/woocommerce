@@ -25,16 +25,6 @@ class LegacyVariationGalleryCompatibility implements RegisterHooksInterface {
 	private const LEGACY_FALLBACK_DISABLED_META_KEY = '_wc_variation_gallery_legacy_fallback_disabled';
 
 	/**
-	 * Plugin file of the retired Additional Variation Images extension.
-	 */
-	private const LEGACY_EXTENSION_PLUGIN_FILE = 'woocommerce-additional-variation-images/woocommerce-additional-variation-images.php';
-
-	/**
-	 * Notice ID used when warning merchants that the legacy extension is still active.
-	 */
-	private const LEGACY_EXTENSION_NOTICE_ID = 'variation_gallery_legacy_extension_active';
-
-	/**
 	 * Get the internal meta key used to mark legacy fallback as disabled.
 	 *
 	 * @return string
@@ -88,72 +78,6 @@ class LegacyVariationGalleryCompatibility implements RegisterHooksInterface {
 	 */
 	public function register() {
 		add_filter( 'woocommerce_product_variation_get_gallery_image_ids', array( $this, 'maybe_read_legacy_gallery_image_ids' ), 10, 2 );
-		add_action( 'admin_init', array( $this, 'sync_legacy_extension_notice' ) );
-	}
-
-	/**
-	 * Show or remove an admin notice based on whether the retired Additional
-	 * Variation Images extension is still active.
-	 *
-	 * @return void
-	 */
-	public function sync_legacy_extension_notice(): void {
-		if ( ! class_exists( '\WC_Admin_Notices' ) ) {
-			return;
-		}
-
-		if ( ! function_exists( 'is_plugin_active' ) ) {
-			require_once ABSPATH . 'wp-admin/includes/plugin.php';
-		}
-
-		if ( is_plugin_active( self::LEGACY_EXTENSION_PLUGIN_FILE ) ) {
-			\WC_Admin_Notices::add_custom_notice(
-				self::LEGACY_EXTENSION_NOTICE_ID,
-				$this->get_legacy_extension_notice_html()
-			);
-			return;
-		}
-
-		\WC_Admin_Notices::remove_notice( self::LEGACY_EXTENSION_NOTICE_ID );
-	}
-
-	/**
-	 * Build the HTML body for the legacy-extension-active notice. Includes a
-	 * one-click deactivation link for users with the `deactivate_plugins`
-	 * capability; users without it just see the message. The link points at
-	 * WP's built-in plugins.php deactivate handler with a verified nonce, so
-	 * we don't need a custom AJAX endpoint or capability check beyond the
-	 * one WP already enforces on the receiving end.
-	 *
-	 * @return string
-	 */
-	private function get_legacy_extension_notice_html(): string {
-		$message_html = wpautop(
-			esc_html__( 'Variation galleries are now built into WooCommerce. Your existing images have been migrated, so the Additional Variation Images extension can be deactivated.', 'woocommerce' )
-		);
-
-		$action_html = '';
-		if ( current_user_can( 'deactivate_plugins' ) ) {
-			$deactivate_url = wp_nonce_url(
-				admin_url(
-					'plugins.php?action=deactivate&plugin=' . rawurlencode( self::LEGACY_EXTENSION_PLUGIN_FILE )
-				),
-				'deactivate-plugin_' . self::LEGACY_EXTENSION_PLUGIN_FILE
-			);
-
-			$action_html = sprintf(
-				'<p><a href="%s" class="button button-primary">%s</a></p>',
-				esc_url( $deactivate_url ),
-				esc_html__( 'Deactivate Additional Variation Images', 'woocommerce' )
-			);
-		}
-
-		return sprintf(
-			'<h4>%s</h4>%s%s',
-			esc_html__( 'Additional Variation Images can be deactivated', 'woocommerce' ),
-			$message_html,
-			$action_html
-		);
 	}
 
 	/**

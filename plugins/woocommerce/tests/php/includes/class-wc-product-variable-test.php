@@ -4,6 +4,9 @@
  * Tests for WC_Product_Variable.
  */
 class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
+	/**
+	 * Reset variation gallery feature-flag option leaked by individual tests.
+	 */
 	public function tearDown(): void {
 		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
 		parent::tearDown();

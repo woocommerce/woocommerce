@@ -9,6 +9,9 @@ use WP_UnitTestCase;
  * Tests for the ProductGalleryUtils class.
  */
 class ProductGalleryUtilsTest extends \WP_UnitTestCase {
+	/**
+	 * Reset variation gallery feature-flag option leaked by individual tests.
+	 */
 	public function tearDown(): void {
 		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
 		parent::tearDown();
