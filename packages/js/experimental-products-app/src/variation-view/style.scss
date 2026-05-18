@@ -6,6 +6,10 @@
 	overflow: clip;
 }
 
+.woocommerce-product-list__filters {
+	padding: var(--wpds-dimension-padding-sm, 8px) var(--wpds-dimension-padding-2xl, 24px);
+}
+
 .woocommerce-variation-view {
 	// DataViews is designed for a constrained editor viewport. Override to let
 	// the table grow to its natural height in the traditional metabox document flow.

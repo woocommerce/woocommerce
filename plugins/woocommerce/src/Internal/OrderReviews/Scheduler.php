@@ -154,6 +154,15 @@ class Scheduler {
 			return;
 		}
 
+		// Don't queue an email whose link would land on the empty-state page:
+		// every product on the order has reviews disabled (per-product or
+		// site-wide via `woocommerce_enable_reviews`), or every reviewable
+		// item already has a review tied to this order.
+		if ( ! ItemEligibility::has_actionable_items( $order ) ) {
+			$this->log_skip( $order_id, 'no reviewable items' );
+			return;
+		}
+
 		$when = time() + $email->get_delay_seconds();
 		as_schedule_single_action( $when, self::ACTION_HOOK, array( $order_id ) );
 

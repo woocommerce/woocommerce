@@ -96,7 +96,7 @@ function ProductEditForm( {
 	const form = {
 		type: 'regular' as const,
 		labelPosition: 'top' as const,
-		fields: getProductTypeFormFields( selectedProducts ),
+		fields: getProductTypeFormFields( selectedProducts, visibleFields ),
 	};
 
 	return (

@@ -152,9 +152,16 @@ class SubmissionHandler {
 			// $rows_in was already unslashed in handle(); avoid double-unslashing.
 			$text = isset( $row['text'] ) && is_string( $row['text'] ) ? trim( wp_kses_post( $row['text'] ) ) : '';
 
+			// Per-row result always carries `product_id` (parent product, where
+			// the review lives) and `variation_id` (0 for simple products) so
+			// callers don't have to know whether the client posted the parent
+			// or the variation id as `product_id`. Both are echoed back as
+			// soon as we resolve the line item; for early validation failures
+			// they reflect the raw submitted product id with `variation_id: 0`.
 			$result = array(
-				'product_id' => $product_id,
-				'status'     => 'error',
+				'product_id'   => $product_id,
+				'variation_id' => 0,
+				'status'       => 'error',
 			);
 
 			if ( $rating < 1 || $rating > 5 ) {
@@ -182,6 +189,11 @@ class SubmissionHandler {
 				$results[ $row_index ] = $result;
 				continue;
 			}
+
+			// Canonicalise the result fields now that we've resolved the line
+			// item: parent product id + the line's variation id (0 for simple).
+			$result['product_id']   = $line_product_id;
+			$result['variation_id'] = $line_variation_id;
 
 			// Reviews always attach to the parent product so they show on the
 			// product page regardless of which variation was bought.
@@ -255,6 +267,12 @@ class SubmissionHandler {
 			add_comment_meta( $comment_id, 'rating', $rating, true );
 			add_comment_meta( $comment_id, 'verified', 1, true );
 			add_comment_meta( $comment_id, ItemEligibility::ORDER_META_KEY, (int) $order->get_id(), true );
+			add_comment_meta( $comment_id, ItemEligibility::VARIATION_META_KEY, $line_variation_id, true );
+
+			$variation_summary = ItemEligibility::format_variation_summary( $item );
+			if ( '' !== $variation_summary ) {
+				add_comment_meta( $comment_id, ItemEligibility::VARIATION_SUMMARY_META_KEY, $variation_summary, true );
+			}
 
 			$result['comment_id']  = (int) $comment_id;
 			$result['status']      = $require_mod ? 'pending_moderation' : 'ok';
@@ -282,39 +300,54 @@ class SubmissionHandler {
 			return;
 		}
 
-		// Build the same eligible-row set the page uses, then count required
-		// reviews per parent product. Same product appearing on N rows needs
-		// N reviews, not 1.
+		// Build the same eligible-row set the page uses, then collect the
+		// distinct (parent product, variation) slots that need a review.
+		// Counting by slot rather than per-line-item means a double-submit of
+		// the same variation can't satisfy a sibling variation's quota, and
+		// the same simple product appearing on multiple rows still only
+		// needs one review (the page collapses those rows anyway).
 		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- documented at the page-template invocation site.
 		$eligible_items = (array) apply_filters( 'woocommerce_review_order_eligible_items', $order->get_items(), $order );
 
-		$required_reviews = array();
+		$required_slots = array();
+		$product_ids    = array();
 		foreach ( $eligible_items as $item ) {
 			if ( ! $item instanceof \WC_Order_Item_Product ) {
 				continue;
 			}
-			$product_id = (int) $item->get_product_id();
+			$product_id   = (int) $item->get_product_id();
+			$variation_id = (int) $item->get_variation_id();
 			if ( $product_id > 0 ) {
-				$required_reviews[ $product_id ] = ( $required_reviews[ $product_id ] ?? 0 ) + 1;
+				$required_slots[ $product_id . '|' . $variation_id ] = true;
+				$product_ids[ $product_id ]                          = $product_id;
 			}
 		}
 
-		if ( empty( $required_reviews ) ) {
+		if ( empty( $required_slots ) ) {
 			return;
 		}
 
 		// Single grouped lookup, fetching the comment objects directly so we
 		// can read comment_post_ID without a follow-up query per row. Limit
 		// to approved + pending-moderation so spam/trash never count as
-		// completion. number=>0 disables the default 20-row cap so this still
-		// works for orders with many reviewable items.
+		// completion, AND to reviews tagged with this order so an older
+		// review of the same parent product from a previous order doesn't
+		// satisfy the per-row count for the current one. number=>0 disables
+		// the default 20-row cap so this still works for orders with many
+		// reviewable items.
 		$comments = get_comments(
 			array(
-				'post__in'     => array_keys( $required_reviews ),
+				'post__in'     => array_values( $product_ids ),
 				'author_email' => $customer_email,
 				'type'         => 'review',
 				'status'       => array( 'approve', 'hold' ),
 				'number'       => 0,
+				'meta_query'   => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query -- bounded by post__in + author_email.
+					array(
+						'key'   => ItemEligibility::ORDER_META_KEY,
+						'value' => (string) $order->get_id(),
+					),
+				),
 			)
 		);
 
@@ -322,16 +355,18 @@ class SubmissionHandler {
 			return;
 		}
 
-		$review_counts = array();
+		// Index reviewed slots by (parent_id, variation_id); duplicate comments
+		// for the same slot still count as one toward completion.
+		$reviewed_slots = array();
 		foreach ( $comments as $comment ) {
 			if ( $comment instanceof \WP_Comment ) {
-				$post_id                   = (int) $comment->comment_post_ID;
-				$review_counts[ $post_id ] = ( $review_counts[ $post_id ] ?? 0 ) + 1;
+				$slot_key                    = (int) $comment->comment_post_ID . '|' . (int) get_comment_meta( (int) $comment->comment_ID, ItemEligibility::VARIATION_META_KEY, true );
+				$reviewed_slots[ $slot_key ] = true;
 			}
 		}
 
-		foreach ( $required_reviews as $product_id => $required ) {
-			if ( ( $review_counts[ $product_id ] ?? 0 ) < $required ) {
+		foreach ( $required_slots as $slot_key => $_ ) {
+			if ( ! isset( $reviewed_slots[ $slot_key ] ) ) {
 				return;
 			}
 		}
