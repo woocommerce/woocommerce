@@ -1,4 +1,7 @@
-import { registerWooCommerceOrderEntity } from './data';
+import {
+	registerWooCommerceOrderEntity,
+	registerWooCommerceProductReviewEntity,
+} from './data';
 import { registerStoreActivitySources } from './store-activity';
 
 /**
@@ -11,6 +14,7 @@ import { registerStoreActivitySources } from './store-activity';
  * `useActivity` hook calls `getEntityRecords( ... )`.
  */
 registerWooCommerceOrderEntity();
+registerWooCommerceProductReviewEntity();
 registerStoreActivitySources();
 
 /**

@@ -1,3 +1,6 @@
-export { WC_ORDER_ENTITY } from './constants';
-export { registerWooCommerceOrderEntity } from './register-entities';
-export type { Entity, OrderRecord, ReviewRecord } from './types';
+export { WC_ORDER_ENTITY, WC_PRODUCT_REVIEW_ENTITY } from './constants';
+export {
+	registerWooCommerceOrderEntity,
+	registerWooCommerceProductReviewEntity,
+} from './register-entities';
+export type { Entity, OrderRecord, ProductReviewRecord } from './types';

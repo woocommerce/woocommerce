@@ -38,22 +38,23 @@ export type OrderRecord = {
 };
 
 /**
- * Partial of the `/wp/v2/comments?type=review&_embed=up` response shape.
- * Product reviews are WordPress comments with `type='review'`; consumed via
- * the stock `root/comment` entity that `@wordpress/core-data` already
- * registers, so no entity registration is needed on our side.
+ * Partial of the `/wc/v3/products/reviews` response shape (V3 controller).
+ *
+ * We use the WC-namespaced endpoint instead of `/wp/v2/comments?type=review`
+ * to guarantee the results are WooCommerce product reviews — the WP comments
+ * filter is just a naming convention and does not enforce that the parent is
+ * a product post type.
  */
-export type ReviewRecord = {
+export type ProductReviewRecord = {
 	id: number;
-	author_name: string;
-	post: number;
-	date_gmt: string;
-	_embedded?: {
-		up?: Array< {
-			id: number;
-			title?: {
-				rendered?: string;
-			};
-		} >;
-	};
+	reviewer: string;
+	reviewer_email?: string;
+	product_id: number;
+	product_name?: string;
+	product_permalink?: string;
+	rating: number;
+	status?: string;
+	verified?: boolean;
+	date_created_gmt?: string;
+	date_created?: string;
 };
