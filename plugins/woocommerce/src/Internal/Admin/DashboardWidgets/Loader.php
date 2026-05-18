@@ -34,15 +34,30 @@ class Loader {
 	/**
 	 * Wires the loader into WordPress.
 	 *
-	 * Requires the build artifacts (which self-register script modules)
-	 * and attaches the registry + boot-deps hooks. Safe to call multiple
-	 * times: actions are no-ops if the build artifacts are missing or if
-	 * Gutenberg's experimental dashboard is not active.
+	 * Called during plugin file load from `woocommerce.php`, so the actual
+	 * setup is deferred to `plugins_loaded`. Reasons:
 	 *
-	 * Returns early when the `dashboard_widgets` feature flag is disabled,
-	 * which is the default state on a fresh install.
+	 * - `FeaturesUtil::feature_is_enabled()` instantiates `FeaturesController`
+	 *   through the DI container, which references classes like
+	 *   `WC_Site_Tracking` that are not autoloaded until WC's `includes()`
+	 *   runs on `plugins_loaded`. Checking the flag any earlier crashes.
+	 * - The downstream hooks (`init`, `admin_enqueue_scripts`,
+	 *   `dashboard-wp-admin_boot_dependencies`) all fire well after
+	 *   `plugins_loaded`, so deferring costs nothing in coverage.
 	 */
 	public static function init(): void {
+		add_action( 'plugins_loaded', array( self::class, 'maybe_bootstrap' ) );
+	}
+
+	/**
+	 * Conditionally bootstraps the dashboard widgets subsystem.
+	 *
+	 * Returns early when the `dashboard_widgets` feature flag is disabled
+	 * (the default on a fresh install) or when the build artifacts have
+	 * not been produced. Otherwise loads the build registries and attaches
+	 * the hooks that wire widgets into the dashboard page.
+	 */
+	public static function maybe_bootstrap(): void {
 		if ( ! FeaturesUtil::feature_is_enabled( 'dashboard_widgets' ) ) {
 			return;
 		}
