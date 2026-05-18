@@ -405,6 +405,16 @@
 			"isIgnored": true
 		},
 		{
+			"label": "@wordpress/build is a CLI tooling package; not in the wp-min catalog. Track its own semver line.",
+			"dependencies": [
+				"@wordpress/build"
+			],
+			"packages": [
+				"**"
+			],
+			"isIgnored": true
+		},
+		{
 			"dependencies": [
 				"@wordpress/prettier-config"
 			],
