@@ -394,6 +394,23 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 			)
 		);
 
+		// Cheap up-front capability check so wc-admin can render a permanently
+		// disabled QR card (rather than spin up a token request that will fail)
+		// when application passwords are unavailable on this site. Same gate as
+		// the token endpoint so a subscriber cannot probe site configuration.
+		register_rest_route(
+			$this->namespace,
+			'/' . $this->rest_base . '/qr-login-availability',
+			array(
+				array(
+					'methods'             => \WP_REST_Server::READABLE,
+					'callback'            => array( $this, 'get_availability' ),
+					'permission_callback' => array( $this, 'get_items_permissions_check' ),
+				),
+				'schema' => array( $this, 'get_public_item_schema' ),
+			)
+		);
+
 		parent::register_routes();
 	}
 
@@ -431,6 +448,75 @@ class MobileAppQRLogin extends \WC_REST_Data_Controller {
 	private function are_application_passwords_available() {
 		return function_exists( 'wp_is_application_passwords_available' )
 			&& wp_is_application_passwords_available();
+	}
+
+	/**
+	 * Reason codes returned by `/qr-login-availability` so wc-admin can
+	 * tailor the disabled card to the specific cause.
+	 */
+	const AVAILABILITY_REASON_HTTPS_REQUIRED        = 'https_required';
+	const AVAILABILITY_REASON_AP_UNSUPPORTED        = 'application_passwords_unsupported';
+	const AVAILABILITY_REASON_AP_DISABLED_BY_FILTER = 'application_passwords_disabled_by_filter';
+
+	/**
+	 * Report whether QR login is currently available on this site.
+	 *
+	 * Lets wc-admin render a permanently-disabled QR card with the right
+	 * explanation up-front, instead of mounting `<QRDirectLoginCode />`,
+	 * spinning, calling `/qr-login-token`, and only then showing a generic
+	 * error. The reason code is the heuristic best we can do without each
+	 * security plugin self-identifying:
+	 *
+	 *  - `https_required` — `is_ssl()` is false (and the raw `siteurl` is
+	 *    `http://`). The most common cause is a local dev environment;
+	 *    production sites without HTTPS can't use QR login at all.
+	 *  - `application_passwords_unsupported` — WordPress core's own support
+	 *    gate (`wp_is_application_passwords_supported()`) returns false.
+	 *    Ships true on every modern WP host that has SSL or is local; false
+	 *    here typically means the site is non-local + non-SSL.
+	 *  - `application_passwords_disabled_by_filter` — the WP support gate
+	 *    passes, but the `wp_is_application_passwords_available` filter
+	 *    returns false. This is the case where a security plugin (Wordfence,
+	 *    Solid Security, etc.) or a custom code snippet has explicitly
+	 *    disabled application passwords. We can't name the exact source from
+	 *    the filter alone; the docs link in the merchant-facing UI covers it.
+	 *
+	 * `nocache_headers()` so an upstream cache cannot pin a stale
+	 * "unavailable" response for a site that just installed an HTTPS cert.
+	 *
+	 * @param \WP_REST_Request<array<string, mixed>> $request The REST request (unused).
+	 * @return \WP_REST_Response
+	 */
+	public function get_availability( $request ): \WP_REST_Response {
+		unset( $request );
+
+		nocache_headers();
+
+		$site_url     = $this->get_secure_site_url();
+		$https_ok     = ! is_wp_error( $site_url );
+		$ap_supported = function_exists( 'wp_is_application_passwords_supported' )
+			&& wp_is_application_passwords_supported();
+		$ap_available = $this->are_application_passwords_available();
+
+		$available = $https_ok && $ap_available;
+		$reason    = null;
+
+		if ( ! $available ) {
+			if ( ! $https_ok ) {
+				$reason = self::AVAILABILITY_REASON_HTTPS_REQUIRED;
+			} elseif ( ! $ap_supported ) {
+				$reason = self::AVAILABILITY_REASON_AP_UNSUPPORTED;
+			} else {
+				$reason = self::AVAILABILITY_REASON_AP_DISABLED_BY_FILTER;
+			}
+		}
+
+		return rest_ensure_response(
+			array(
+				'available' => $available,
+				'reason'    => $reason,
+			)
+		);
 	}
 
 	/**

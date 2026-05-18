@@ -51,6 +51,13 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 	const REVOKE_ENDPOINT = '/wc-admin/mobile-app/qr-login-revoke';
 
 	/**
+	 * Up-front capability probe endpoint (`/qr-login-availability`).
+	 *
+	 * @var string
+	 */
+	const AVAILABILITY_ENDPOINT = '/wc-admin/mobile-app/qr-login-availability';
+
+	/**
 	 * Number-match scan endpoint (Task 7).
 	 *
 	 * @var string
@@ -2138,6 +2145,100 @@ class MobileAppQRLoginTest extends WC_REST_Unit_Test_Case {
 		$this->assertSame( 200, $post->get_status() );
 		$this->assertSame( MobileAppQRLogin::STATE_APPROVED, $post->get_data()['state'] );
 		$this->assertNotEmpty( $post->get_data()['exchange_grant'] );
+	}
+
+	// -----------------------------------------------------------------------
+	// Availability endpoint (`/qr-login-availability`).
+	// -----------------------------------------------------------------------
+
+	/**
+	 * Issue a GET to the availability endpoint.
+	 *
+	 * @return \WP_REST_Response
+	 */
+	private function dispatch_availability(): \WP_REST_Response {
+		$request = new WP_REST_Request( 'GET', self::AVAILABILITY_ENDPOINT );
+		return $this->server->dispatch( $request );
+	}
+
+	/**
+	 * @testdox Availability endpoint reports `available: true` when HTTPS + application passwords are both ready.
+	 */
+	public function test_availability_reports_available_when_https_and_application_passwords_are_ready(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$response = $this->dispatch_availability();
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertTrue( $data['available'] );
+		$this->assertNull( $data['reason'] );
+	}
+
+	/**
+	 * @testdox Availability endpoint reports `https_required` when the site is served over plain HTTP.
+	 */
+	public function test_availability_reports_https_required_when_site_is_not_secure(): void {
+		wp_set_current_user( $this->admin_id );
+		$this->force_https( false );
+		$this->force_site_url( 'http://example.org' );
+
+		$response = $this->dispatch_availability();
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertFalse( $data['available'] );
+		$this->assertSame(
+			MobileAppQRLogin::AVAILABILITY_REASON_HTTPS_REQUIRED,
+			$data['reason']
+		);
+	}
+
+	/**
+	 * @testdox Availability endpoint reports `application_passwords_disabled_by_filter` when the WP filter returns false.
+	 */
+	public function test_availability_reports_filter_when_application_passwords_filter_disables_them(): void {
+		wp_set_current_user( $this->admin_id );
+
+		add_filter( 'wp_is_application_passwords_available', '__return_false' );
+		try {
+			$response = $this->dispatch_availability();
+		} finally {
+			remove_filter( 'wp_is_application_passwords_available', '__return_false' );
+		}
+
+		$this->assertSame( 200, $response->get_status() );
+		$data = $response->get_data();
+		$this->assertFalse( $data['available'] );
+		$this->assertSame(
+			MobileAppQRLogin::AVAILABILITY_REASON_AP_DISABLED_BY_FILTER,
+			$data['reason']
+		);
+	}
+
+	/**
+	 * @testdox Availability endpoint rejects subscribers with the same capability gate as the token endpoint.
+	 */
+	public function test_availability_rejects_subscriber(): void {
+		wp_set_current_user( $this->subscriber_id );
+
+		$response = $this->dispatch_availability();
+
+		$this->assertSame( rest_authorization_required_code(), $response->get_status() );
+	}
+
+	/**
+	 * @testdox Availability endpoint emits no-cache headers so a stale unavailable response cannot be pinned.
+	 */
+	public function test_availability_emits_nocache_headers(): void {
+		wp_set_current_user( $this->admin_id );
+
+		$response = $this->dispatch_availability();
+
+		$this->assertSame( 200, $response->get_status() );
+		$headers = $response->get_headers();
+		$this->assertArrayHasKey( 'Cache-Control', $headers );
+		$this->assertStringContainsString( 'no-cache', (string) $headers['Cache-Control'] );
 	}
 
 	/**

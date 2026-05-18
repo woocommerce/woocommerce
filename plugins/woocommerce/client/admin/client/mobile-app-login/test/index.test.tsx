@@ -25,6 +25,27 @@ jest.mock( '~/homescreen/mobile-app-modal/components/useQRLoginToken', () => {
 	};
 } );
 
+// Short-circuit the up-front /qr-login-availability probe so these tests
+// reach the QR / error / expired states the assertions care about,
+// rather than getting stuck on the availability spinner. The probe has
+// its own dedicated suite — `useQRLoginAvailability.test.ts`.
+jest.mock(
+	'~/homescreen/mobile-app-modal/components/useQRLoginAvailability',
+	() => {
+		const actual = jest.requireActual(
+			'~/homescreen/mobile-app-modal/components/useQRLoginAvailability'
+		);
+		return {
+			...actual,
+			useQRLoginAvailability: () => ( {
+				isLoading: false,
+				available: true,
+				reason: null,
+			} ),
+		};
+	}
+);
+
 // Keep tests isolated from analytics side-effects.
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),

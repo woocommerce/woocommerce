@@ -19,6 +19,22 @@ jest.mock( '../useQRLoginToken', () => {
 	};
 } );
 
+// Short-circuit the up-front availability probe — these tests focus on the
+// stepper's own gating + the underlying token state machine, not on the
+// availability gate (which is covered separately by useQRLoginAvailability's
+// own tests).
+jest.mock( '../useQRLoginAvailability', () => {
+	const actual = jest.requireActual( '../useQRLoginAvailability' );
+	return {
+		...actual,
+		useQRLoginAvailability: () => ( {
+			isLoading: false,
+			available: true,
+			reason: null,
+		} ),
+	};
+} );
+
 // Mock tracks to keep tests isolated from analytics side-effects.
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),

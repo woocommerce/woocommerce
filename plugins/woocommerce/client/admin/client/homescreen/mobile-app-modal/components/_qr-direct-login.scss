@@ -187,3 +187,50 @@
 		color: $gray-900;
 	}
 }
+
+// UNAVAILABLE state. Rendered when /qr-login-availability returns
+// `available: false` — typically because a security plugin or a custom
+// filter has disabled application passwords. Stacked column layout matches
+// the other terminal states (REJECTED, EXPIRED) for visual consistency.
+.woocommerce-qr-direct-login.woocommerce-qr-direct-login--unavailable {
+	display: flex;
+	flex-direction: column;
+	align-items: stretch;
+	gap: 16px;
+
+	.woocommerce-qr-direct-login__unavailable-notice {
+		// The default Notice has a left margin from the WP admin chrome
+		// that doesn't fit inside the modal column, so strip it. The
+		// Notice also centers its body text by default; left-align to match
+		// the rest of the column.
+		margin: 0;
+		text-align: left;
+	}
+
+	.woocommerce-qr-direct-login__why {
+		font-size: 13px;
+		line-height: 1.5;
+		color: #50575e;
+
+		// The summary is the disclosure trigger, not a link — keep it as
+		// regular text colour so it doesn't masquerade as one. The native
+		// arrow marker is enough of an affordance.
+		summary {
+			cursor: pointer;
+			user-select: none;
+			padding: 4px 0;
+			color: #1d2327;
+			font-weight: 500;
+		}
+
+		ul {
+			margin: 8px 0 0 18px;
+			padding: 0;
+			list-style: disc;
+		}
+
+		li + li {
+			margin-top: 4px;
+		}
+	}
+}
