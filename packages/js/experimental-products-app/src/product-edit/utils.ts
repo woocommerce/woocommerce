@@ -200,13 +200,7 @@ const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'general-fields',
 		__( 'General', 'woocommerce' ),
-		[
-			'name',
-			'product_status',
-			'catalog_visibility',
-			'external_url',
-			'button_text',
-		]
+		[ 'name', 'product_status', 'catalog_visibility' ]
 	),
 	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
@@ -221,6 +215,11 @@ const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
 	] ),
+	createProductEditFormGroup(
+		'buy-button-fields',
+		__( 'Buy button', 'woocommerce' ),
+		[ 'external_url', 'button_text' ]
+	),
 	createProductEditFormGroup(
 		'inventory-fields',
 		__( 'Inventory', 'woocommerce' ),
