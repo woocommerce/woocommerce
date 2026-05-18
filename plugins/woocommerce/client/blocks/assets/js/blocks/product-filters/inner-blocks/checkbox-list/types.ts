@@ -15,12 +15,6 @@ export type Color = {
 	color: string;
 };
 
-type CheckboxListSelectableItemFields = {
-	count?: number;
-	color?: string;
-	depth?: number;
-};
-
 export type BlockAttributes = {
 	className: string;
 	optionElementBorder: string;
@@ -34,7 +28,11 @@ export type BlockAttributes = {
 };
 
 export type EditProps = BlockEditProps< BlockAttributes > & {
-	context: SelectableItemsBlockContext< CheckboxListSelectableItemFields >;
+	context: SelectableItemsBlockContext< {
+		count?: number;
+		color?: string;
+		depth?: number;
+	} >;
 	optionElementBorder: Color;
 	setOptionElementBorder: ( value: string ) => void;
 	optionElementSelected: Color;
