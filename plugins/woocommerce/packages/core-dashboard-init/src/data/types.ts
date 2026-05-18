@@ -58,3 +58,18 @@ export type ProductReviewRecord = {
 	date_created_gmt?: string;
 	date_created?: string;
 };
+
+/**
+ * Partial of the `/wc/v3/customers` response shape — only the fields the
+ * Store Activity widget consumes today.
+ */
+export type CustomerRecord = {
+	id: number;
+	email: string;
+	first_name?: string;
+	last_name?: string;
+	username?: string;
+	date_created_gmt?: string;
+	date_created?: string;
+	avatar_url?: string;
+};

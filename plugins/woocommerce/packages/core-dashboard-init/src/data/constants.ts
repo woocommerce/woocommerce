@@ -39,3 +39,21 @@ export const WC_PRODUCT_REVIEW_ENTITY: Entity = {
 	plural: __( 'Product reviews', 'woocommerce' ),
 	supportsPagination: true,
 };
+
+/**
+ * Entity definition for WooCommerce customers.
+ *
+ * Points at `/wc/v3/customers` — the stable REST endpoint for registered
+ * customers (i.e. users with the `customer` role). Guests who placed orders
+ * without registering are not surfaced here; for those use the order's
+ * `billing` fields.
+ */
+export const WC_CUSTOMER_ENTITY: Entity = {
+	name: 'customer',
+	kind: 'woocommerce',
+	baseURL: '/wc/v3/customers',
+	key: 'id',
+	label: __( 'Customer', 'woocommerce' ),
+	plural: __( 'Customers', 'woocommerce' ),
+	supportsPagination: true,
+};

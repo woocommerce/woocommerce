@@ -1,7 +1,11 @@
 import { dispatch } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import type { Entity } from './types';
-import { WC_ORDER_ENTITY, WC_PRODUCT_REVIEW_ENTITY } from './constants';
+import {
+	WC_CUSTOMER_ENTITY,
+	WC_ORDER_ENTITY,
+	WC_PRODUCT_REVIEW_ENTITY,
+} from './constants';
 
 const registered = new Set< string >();
 
@@ -32,4 +36,11 @@ export function registerWooCommerceOrderEntity(): void {
  */
 export function registerWooCommerceProductReviewEntity(): void {
 	registerEntity( WC_PRODUCT_REVIEW_ENTITY );
+}
+
+/**
+ * Registers the WooCommerce customer entity with `@wordpress/core-data`.
+ */
+export function registerWooCommerceCustomerEntity(): void {
+	registerEntity( WC_CUSTOMER_ENTITY );
 }

@@ -1,4 +1,5 @@
 import {
+	registerWooCommerceCustomerEntity,
 	registerWooCommerceOrderEntity,
 	registerWooCommerceProductReviewEntity,
 } from './data';
@@ -15,6 +16,7 @@ import { registerStoreActivitySources } from './store-activity';
  */
 registerWooCommerceOrderEntity();
 registerWooCommerceProductReviewEntity();
+registerWooCommerceCustomerEntity();
 registerStoreActivitySources();
 
 /**
