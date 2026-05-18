@@ -35,18 +35,26 @@ class Loader {
 	 * Wires the loader into WordPress.
 	 *
 	 * Called during plugin file load from `woocommerce.php`, so the actual
-	 * setup is deferred to `plugins_loaded`. Reasons:
+	 * setup is deferred to the `init` action. Two things conspire to make
+	 * earlier hooks unsafe:
 	 *
 	 * - `FeaturesUtil::feature_is_enabled()` instantiates `FeaturesController`
 	 *   through the DI container, which references classes like
 	 *   `WC_Site_Tracking` that are not autoloaded until WC's `includes()`
-	 *   runs on `plugins_loaded`. Checking the flag any earlier crashes.
-	 * - The downstream hooks (`init`, `admin_enqueue_scripts`,
-	 *   `dashboard-wp-admin_boot_dependencies`) all fire well after
-	 *   `plugins_loaded`, so deferring costs nothing in coverage.
+	 *   runs on `plugins_loaded`. So the check itself must be on
+	 *   `plugins_loaded` or later.
+	 * - `FeaturesController::init_feature_definitions()` calls `__()` on the
+	 *   `woocommerce` text domain for every feature label/description.
+	 *   WordPress 6.7+ warns whenever translation loading is triggered
+	 *   before the `init` action has fired (`did_action( 'init' )`), so the
+	 *   check must wait until at least `init`.
+	 *
+	 * We hook at `init` priority 1 — early enough that the higher-priority
+	 * widget-type registration (priority 11) still fires in the same `init`
+	 * cycle, late enough that the text domain is safe to load.
 	 */
 	public static function init(): void {
-		add_action( 'plugins_loaded', array( self::class, 'maybe_bootstrap' ) );
+		add_action( 'init', array( self::class, 'maybe_bootstrap' ), 1 );
 	}
 
 	/**
