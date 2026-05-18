@@ -5,6 +5,7 @@ import clsx from 'clsx';
 import { __ } from '@wordpress/i18n';
 import { Button, Icon } from '@wordpress/components';
 import { cog, help } from '@wordpress/icons';
+import { recordEvent } from '@woocommerce/tracks';
 
 /**
  * Internal dependencies
@@ -55,12 +56,23 @@ export const EmbedHeader = ( {
 					label={ __( 'Screen options', 'woocommerce' ) }
 					aria-expanded={ activeMetaIcon === 'screen-options' }
 					showTooltip
-					onClick={ () =>
+					onClick={ () => {
+						// Capture the pre-click state so we can tell `open`
+						// from `close` clicks. wp-admin's screen-meta.js flips
+						// aria-expanded synchronously inside triggerMetaIcon(),
+						// so reading it after would lose the original signal.
+						recordEvent( 'header_meta_icon_click', {
+							icon: 'screen-options',
+							action:
+								activeMetaIcon === 'screen-options'
+									? 'close'
+									: 'open',
+						} );
 						triggerMetaIcon(
 							'screen-options',
 							'#show-settings-link'
-						)
-					}
+						);
+					} }
 				>
 					<Icon icon={ cog } size={ 18 } />
 				</Button>
@@ -73,9 +85,14 @@ export const EmbedHeader = ( {
 					label={ __( 'Help', 'woocommerce' ) }
 					aria-expanded={ activeMetaIcon === 'help' }
 					showTooltip
-					onClick={ () =>
-						triggerMetaIcon( 'help', '#contextual-help-link' )
-					}
+					onClick={ () => {
+						recordEvent( 'header_meta_icon_click', {
+							icon: 'help',
+							action:
+								activeMetaIcon === 'help' ? 'close' : 'open',
+						} );
+						triggerMetaIcon( 'help', '#contextual-help-link' );
+					} }
 				>
 					<Icon icon={ help } size={ 18 } />
 				</Button>
