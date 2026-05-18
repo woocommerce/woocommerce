@@ -228,6 +228,7 @@ store< BlockStore >(
 				}
 				pendingKeys[ listItem.key ] = true;
 				try {
+					yield shopperListsActions.clearNotices();
 					yield shopperListsActions.removeItem(
 						listSlug,
 						listItem.key
@@ -247,10 +248,7 @@ store< BlockStore >(
 						new Error(
 							removeErrorTemplate
 								.replace( '%1$s', listItem.name )
-								.replace(
-									'%2$s',
-									( error as Error ).message
-								)
+								.replace( '%2$s', ( error as Error ).message )
 						)
 					);
 				} finally {
@@ -299,6 +297,7 @@ store< BlockStore >(
 
 				pendingKeys[ listItem.key ] = true;
 				try {
+					yield shopperListsActions.clearNotices();
 					yield cartActions.addCartItem( {
 						id: listItem.id,
 						quantityToAdd: listItem.quantity,

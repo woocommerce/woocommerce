@@ -86,6 +86,7 @@ export type Store = {
 		addItem: ( slug: string, payload: AddItemPayload ) => Promise< void >;
 		removeItem: ( slug: string, key: string ) => Promise< void >;
 		showNoticeError: ( error: Error ) => Promise< void >;
+		clearNotices: () => Promise< void >;
 	};
 };
 
@@ -297,6 +298,24 @@ const { state, actions } = store< Store >(
 					type: 'error',
 					dismissible: true,
 				} );
+			},
+
+			// Wipe every notice in the closest store-notices context. Called
+			// at the start of each mutation handler so a stale banner from a
+			// previous attempt doesn't survive a successful retry, and so a
+			// fresh failure replaces the old one instead of stacking. Notice
+			// IDs are snapshotted up front because `removeNotice` splices the
+			// array — iterating live would skip elements.
+			*clearNotices(): AsyncAction< void > {
+				yield import( '@woocommerce/stores/store-notices' );
+				const { state: noticeState, actions: noticeActions } =
+					store< StoreNotices >(
+						'woocommerce/store-notices',
+						{},
+						{ lock: universalLock }
+					);
+				const ids = noticeState.notices.map( ( n ) => n.id );
+				ids.forEach( ( id ) => noticeActions.removeNotice( id ) );
 			},
 		},
 	},
