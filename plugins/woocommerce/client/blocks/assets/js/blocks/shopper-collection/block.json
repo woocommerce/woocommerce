@@ -18,6 +18,7 @@
 			"default": 5
 		}
 	},
+	"allowedBlocks": [ "core/heading" ],
 	"supports": {
 		 "align": [ "wide", "full" ],
 		"interactivity": true,

@@ -131,6 +131,83 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	}
 
 	/**
+	 * The auto-injected block ships with a seeded `core/heading` inner block so
+	 * fresh cart pages render the heading on the frontend out of the box. The
+	 * matching `null` push onto `innerContent` is what makes `WP_Block::render()`
+	 * walk into the heading when building `$content`.
+	 */
+	public function test_hooked_block_attributes_seed_heading_inner_block(): void {
+		$parsed_hooked_block = array(
+			'blockName' => 'woocommerce/shopper-collection',
+			'attrs'     => array(),
+		);
+		$parsed_anchor_block = array( 'blockName' => 'woocommerce/cart' );
+
+		$result = $this->sut->set_hooked_block_attributes(
+			$parsed_hooked_block,
+			'woocommerce/shopper-collection',
+			'after',
+			$parsed_anchor_block
+		);
+
+		$this->assertArrayHasKey( 'innerBlocks', $result );
+		$this->assertCount( 1, $result['innerBlocks'] );
+
+		$heading = $result['innerBlocks'][0];
+		$this->assertSame( 'core/heading', $heading['blockName'] );
+		$this->assertSame( 2, $heading['attrs']['level'] );
+		$this->assertArrayHasKey( 'content', $heading['attrs'] );
+		// `attrs.content` is the raw translated string (no `esc_html`) —
+		// JSON encoding handles escaping at serialization time. Asserts
+		// the en_US source string the test bootstrap runs under.
+		$this->assertSame( 'Saved for later', $heading['attrs']['content'] );
+		$this->assertStringContainsString( '<h2 class="wp-block-heading">', $heading['innerHTML'] );
+		$this->assertSame( array( $heading['innerHTML'] ), $heading['innerContent'] );
+
+		$this->assertArrayHasKey( 'innerContent', $result );
+		$this->assertContains( null, $result['innerContent'] );
+	}
+
+	/**
+	 * Extensions are free to hook `hooked_block_woocommerce/shopper-collection`
+	 * to add their own inner blocks at a different priority. Our heading must
+	 * still be seeded alongside, not in place of, what they added.
+	 */
+	public function test_hooked_block_attributes_appends_heading_alongside_existing_inner_blocks(): void {
+		$existing_block      = array(
+			'blockName'    => 'core/paragraph',
+			'attrs'        => array(),
+			'innerBlocks'  => array(),
+			'innerHTML'    => '<p>From another extension</p>',
+			'innerContent' => array( '<p>From another extension</p>' ),
+		);
+		$parsed_hooked_block = array(
+			'blockName'    => 'woocommerce/shopper-collection',
+			'attrs'        => array(),
+			'innerBlocks'  => array( $existing_block ),
+			'innerContent' => array( null ),
+		);
+		$parsed_anchor_block = array( 'blockName' => 'woocommerce/cart' );
+
+		$result = $this->sut->set_hooked_block_attributes(
+			$parsed_hooked_block,
+			'woocommerce/shopper-collection',
+			'after',
+			$parsed_anchor_block
+		);
+
+		$this->assertCount( 2, $result['innerBlocks'] );
+		// The other-extension block is preserved at its original index.
+		$this->assertSame( $existing_block, $result['innerBlocks'][0] );
+		// Our heading is appended after it.
+		$this->assertSame( 'core/heading', $result['innerBlocks'][1]['blockName'] );
+		$this->assertSame( 'Saved for later', $result['innerBlocks'][1]['attrs']['content'] );
+		// Parent innerContent gains a `null` placeholder for each inner block,
+		// so `WP_Block::render()` walks into both when building `$content`.
+		$this->assertCount( 2, $result['innerContent'] );
+	}
+
+	/**
 	 * `render()` returns an empty string for logged-out shoppers.
 	 */
 	public function test_render_returns_empty_for_logged_out_user(): void {
@@ -202,6 +279,45 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 			'data-wp-watch="callbacks.trackShownItems"',
 			$markup,
 			'Wrapper must wire the trackShownItems watcher so hasShownItems can flip to true the first time items appear in-session.'
+		);
+	}
+
+	/**
+	 * The seeded heading (and any future sibling inner blocks rendered via
+	 * `$content`) must share the empty-state visibility gating: hidden on
+	 * first paint for new shoppers / empty refreshes, revealed once the
+	 * iAPI watcher flips `context.hasShownItems`. Without this, a saved
+	 * cart page rendered with no items would show an orphaned heading
+	 * sitting above nothing.
+	 */
+	public function test_render_wraps_header_with_hidden_visibility_gate_when_empty(): void {
+		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
+		wp_set_current_user( $customer_id );
+
+		$attributes = array( 'listName' => 'saved-for-later' );
+
+		$previous_block_to_render            = \WP_Block_Supports::$block_to_render;
+		\WP_Block_Supports::$block_to_render = array(
+			'blockName' => 'woocommerce/shopper-collection',
+			'attrs'     => $attributes,
+		);
+
+		try {
+			$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+			$render->setAccessible( true );
+
+			$content = '<h2 class="wp-block-heading">Saved for later</h2>';
+			$markup  = (string) $render->invoke( $this->sut, $attributes, $content, null );
+		} finally {
+			\WP_Block_Supports::$block_to_render = $previous_block_to_render;
+		}
+
+		// The header wrapper exists, contains the heading, has the iAPI
+		// visibility bind, and is initially hidden because items is empty.
+		$this->assertMatchesRegularExpression(
+			'/<div[^>]*class="wc-block-shopper-collection__header"[^>]*data-wp-bind--hidden="!context\.hasShownItems"[^>]*\bhidden\b[^>]*>.*Saved for later/s',
+			$markup,
+			'Header wrapper must be initially hidden for an empty list so a fresh-load empty SC does not show an orphaned heading.'
 		);
 	}
 }

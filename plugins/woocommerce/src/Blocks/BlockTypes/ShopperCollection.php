@@ -80,6 +80,45 @@ final class ShopperCollection extends AbstractBlock {
 			return $parsed_hooked_block;
 		}
 		$parsed_hooked_block['attrs']['listName'] = 'saved-for-later';
+
+		// Seed a `core/heading` inner block so freshly-injected SC instances
+		// ship with the same heading the editor template seeds. We append
+		// unconditionally — extensions are free to hook
+		// `hooked_block_woocommerce/shopper-collection` to add their own
+		// inner blocks, and gating on `empty( innerBlocks )` would silently
+		// suppress our heading whenever any other extension ran first.
+		//
+		// `core/heading` is a static block, so the serialised markup must
+		// match what the editor would have saved (`<h2 class="wp-block-heading">…</h2>`)
+		// or it'll fail block validation when the cart page is opened in the
+		// editor. `attrs.content` mirrors what the editor's template seeds
+		// (`{ content, level }`) so the parsed shape round-trips identically;
+		// the value is the raw string because attrs are JSON-encoded into the
+		// block comment and `esc_html()` would corrupt translations whose text
+		// contains `&`, `<`, etc. The matching `null` push onto `innerContent`
+		// is what makes `WP_Block::render()` walk into the heading when
+		// building `$content`.
+		$list_heading = $this->get_variation_config()['listHeading'];
+		$heading_html = '<h2 class="wp-block-heading">' . esc_html( $list_heading ) . '</h2>';
+
+		if ( ! isset( $parsed_hooked_block['innerBlocks'] ) || ! is_array( $parsed_hooked_block['innerBlocks'] ) ) {
+			$parsed_hooked_block['innerBlocks'] = array();
+		}
+		$parsed_hooked_block['innerBlocks'][] = array(
+			'blockName'    => 'core/heading',
+			'attrs'        => array(
+				'level'   => 2,
+				'content' => $list_heading,
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => $heading_html,
+			'innerContent' => array( $heading_html ),
+		);
+		if ( ! isset( $parsed_hooked_block['innerContent'] ) || ! is_array( $parsed_hooked_block['innerContent'] ) ) {
+			$parsed_hooked_block['innerContent'] = array();
+		}
+		$parsed_hooked_block['innerContent'][] = null;
+
 		return $parsed_hooked_block;
 	}
 
@@ -184,9 +223,8 @@ final class ShopperCollection extends AbstractBlock {
 		);
 
 		$wrapper_class = sprintf(
-			'wc-block-shopper-collection wc-block-shopper-collection--%s columns-%d',
-			$variation['modifierSlug'],
-			$column_count
+			'wc-block-shopper-collection wc-block-shopper-collection--%s',
+			$variation['modifierSlug']
 		);
 
 		// `hasShownItems` seeds the per-block context so the empty message
@@ -212,13 +250,24 @@ final class ShopperCollection extends AbstractBlock {
 			'data-wp-key'         => $this->get_full_block_name() . '-' . $list_slug,
 		);
 
+		$list_class = sprintf( 'wc-block-shopper-collection__list columns-%d', $column_count );
+
+		// The heading inner block (and any future siblings rendered into
+		// `$content`) is wrapped so its visibility matches the empty-state
+		// gating: hidden on first paint for shoppers who have never had
+		// items in this session, revealed once the iAPI watcher flips
+		// `context.hasShownItems` to `true`. Without this wrapper a heading
+		// would be visible even on a fresh empty page, with no list under
+		// it — visually disconnected from anything.
 		return sprintf(
-			'<ul %1$s>%2$s%3$s%4$s%5$s</ul>',
+			'<section %1$s>%6$s<ul class="%7$s">%2$s%3$s%4$s%5$s</ul></section>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$this->render_template_markup( $variation ),
 			$this->render_items_markup( $items, $variation ),
 			$this->render_empty_markup( $variation ),
-			$this->render_error_markup()
+			$this->render_error_markup(),
+			$this->render_header_markup( $content, empty( $items ) ),
+			esc_attr( $list_class )
 		);
 	}
 
@@ -239,6 +288,7 @@ final class ShopperCollection extends AbstractBlock {
 	private function get_variation_config(): array {
 		return array(
 			'modifierSlug'          => 'saved-for-later',
+			'listHeading'           => __( 'Saved for later', 'woocommerce' ),
 			'emptyMessage'          => __( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
 			/* translators: %s: product name. */
 			'removeLabelTemplate'   => __( 'Remove %s from Saved for later list', 'woocommerce' ),
@@ -514,6 +564,30 @@ final class ShopperCollection extends AbstractBlock {
 		</li>
 		<?php
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Wrap the inner-block content (heading + any future siblings) in an
+	 * element whose visibility mirrors the empty-state gating: hidden when
+	 * the shopper has never seen items in this session, revealed once
+	 * `context.hasShownItems` flips to `true`. Returns an empty string when
+	 * there's no content to wrap (e.g. merchant deleted the heading and
+	 * saved), so we don't emit an empty `<div>`.
+	 *
+	 * @param string $content  Rendered inner-block content (typically the heading HTML).
+	 * @param bool   $is_empty Whether the SC list is empty on initial paint.
+	 * @return string
+	 */
+	private function render_header_markup( string $content, bool $is_empty ): string {
+		if ( '' === $content ) {
+			return '';
+		}
+		$hidden_attr = $is_empty ? ' hidden' : '';
+		return sprintf(
+			'<div class="wc-block-shopper-collection__header" data-wp-bind--hidden="!context.hasShownItems"%s>%s</div>',
+			$hidden_attr,
+			$content
+		);
 	}
 
 	/**
