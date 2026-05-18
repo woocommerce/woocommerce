@@ -349,6 +349,9 @@ describe( 'product edit utils', () => {
 				'catalog_visibility',
 				'regular_price',
 				'sale_price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
 				'images',
 				'sku',
 				'stock',
@@ -357,6 +360,7 @@ describe( 'product edit utils', () => {
 				'brands',
 				'tags',
 				'featured',
+				'shipping_class',
 				'weight',
 				'length',
 				'width',
@@ -364,13 +368,9 @@ describe( 'product edit utils', () => {
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
 				'downloadable',
 				'external_url',
 				'button_text',
-				'shipping_class',
 				'tax_status',
 				'upsell_ids',
 				'cross_sell_ids',
@@ -444,10 +444,10 @@ describe( 'product edit utils', () => {
 					'length',
 					'width',
 					'height',
+					'shipping_class',
 				] )
 			);
 			expectFieldOrder( fieldIds, [ 'images', 'downloadable', 'sku' ] );
-			expectFieldsHidden( fieldIds, [ 'shipping_class' ] );
 		} );
 
 		it( 'shows grouped product fields in quick edit order', () => {
@@ -470,7 +470,12 @@ describe( 'product edit utils', () => {
 				'featured',
 			] );
 			expectFieldsHidden( fieldIds, [
-				...priceFieldIds,
+				'price',
+				'regular_price',
+				'sale_price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
 				'downloadable',
 				'cross_sell_ids',
 				'external_url',
@@ -493,11 +498,12 @@ describe( 'product edit utils', () => {
 				'name',
 				'product_status',
 				'catalog_visibility',
-				'external_url',
-				'button_text',
 				'regular_price',
 				'sale_price',
+				'schedule_sale',
 				'images',
+				'external_url',
+				'button_text',
 				'sku',
 				'categories',
 				'brands',
@@ -506,13 +512,16 @@ describe( 'product edit utils', () => {
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
-				'schedule_sale',
 				'date_on_sale_from',
 				'date_on_sale_to',
 				'cross_sell_ids',
 				'downloadable',
 				'upsell_ids',
-				...shippingFieldIds,
+				'weight',
+				'length',
+				'width',
+				'height',
+				'shipping_class',
 				...stockStatusFieldIds,
 				'stock_quantity',
 			] );
@@ -591,6 +600,7 @@ describe( 'product edit utils', () => {
 					'featured',
 					'images',
 					'manage_stock',
+					'shipping_class',
 					'weight',
 					'length',
 					'width',
@@ -600,7 +610,6 @@ describe( 'product edit utils', () => {
 			expectFieldsHidden( fieldIds, [
 				'upsell_ids',
 				'cross_sell_ids',
-				'shipping_class',
 				'tax_status',
 				'stock_quantity',
 			] );
@@ -629,10 +638,10 @@ describe( 'product edit utils', () => {
 				expect.arrayContaining( basePriceFieldIds )
 			);
 			expectFieldsHidden( fieldIds, [
-				'schedule_sale',
 				'date_on_sale_from',
 				'date_on_sale_to',
 			] );
+			expect( fieldIds ).toContain( 'schedule_sale' );
 			expectFieldsHidden( fieldIds, [ 'sku' ] );
 		} );
 
@@ -654,6 +663,9 @@ describe( 'product edit utils', () => {
 					'product_status',
 					'regular_price',
 					'sale_price',
+					'schedule_sale',
+					'date_on_sale_from',
+					'date_on_sale_to',
 					'images',
 					'sku',
 					'manage_stock',
@@ -670,9 +682,6 @@ describe( 'product edit utils', () => {
 				'stock',
 				'downloadable',
 				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
 				'tax_status',
 			] );
 		} );
@@ -695,6 +704,9 @@ describe( 'product edit utils', () => {
 					'sku',
 					'regular_price',
 					'sale_price',
+					'schedule_sale',
+					'date_on_sale_from',
+					'date_on_sale_to',
 					'stock',
 					'manage_stock',
 					'product_status',
@@ -706,13 +718,7 @@ describe( 'product edit utils', () => {
 				] )
 			);
 			expectFieldsHidden( fieldIds, parentOwnedFieldIds );
-			expectFieldsHidden( fieldIds, [
-				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
-				'tax_status',
-			] );
+			expectFieldsHidden( fieldIds, [ 'price', 'tax_status' ] );
 		} );
 
 		it( 'hides shipping fields for virtual variations', () => {
@@ -776,6 +782,9 @@ describe( 'product edit utils', () => {
 				expect.arrayContaining( [
 					'regular_price',
 					'sale_price',
+					'schedule_sale',
+					'date_on_sale_from',
+					'date_on_sale_to',
 					...bulkSellableInstanceFieldIds,
 				] )
 			);
@@ -784,9 +793,6 @@ describe( 'product edit utils', () => {
 				'downloadable',
 				'sku',
 				'price',
-				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
 			] );
 		} );
 
@@ -928,6 +934,7 @@ describe( 'product edit utils', () => {
 					'product_status',
 					'images',
 					'manage_stock',
+					'shipping_class',
 					'weight',
 					'length',
 					'width',
@@ -941,7 +948,6 @@ describe( 'product edit utils', () => {
 				'sku',
 				'stock',
 				'stock_quantity',
-				'shipping_class',
 				'tax_status',
 			] );
 		} );
@@ -999,7 +1005,11 @@ describe( 'product edit utils', () => {
 				{
 					id: 'price-fields',
 					label: 'Price',
-					children: [ 'regular_price', 'sale_price' ],
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
 				},
 				{
 					id: 'image-fields',
@@ -1020,6 +1030,7 @@ describe( 'product edit utils', () => {
 					id: 'shipping-fields',
 					label: 'Shipping',
 					children: [
+						'shipping_class',
 						{
 							id: 'dimensions',
 							layout: { type: 'row' },
@@ -1027,6 +1038,124 @@ describe( 'product edit utils', () => {
 						},
 						'height',
 					],
+				},
+			] );
+		} );
+
+		it.each( [
+			[ 'simple product', 'simple' ],
+			[ 'variation product', 'variation' ],
+		] as const )(
+			'groups sale schedule date fields on the same row for %s',
+			( _label, productType ) => {
+				const product = buildProduct( {
+					type: productType,
+					date_on_sale_from: '2026-05-06T00:00:00',
+				} );
+
+				const priceGroup = getFormFields( [ product ] ).find(
+					( formField ) =>
+						typeof formField !== 'string' &&
+						formField.id === 'price-fields'
+				);
+
+				expect( priceGroup ).toEqual( {
+					id: 'price-fields',
+					label: 'Price',
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+						{
+							id: 'sale-schedule-dates',
+							layout: { type: 'row' },
+							children: [
+								'date_on_sale_from',
+								'date_on_sale_to',
+							],
+						},
+					],
+				} );
+			}
+		);
+
+		it( 'omits the price section from grouped product form config', () => {
+			const product = buildProduct( {
+				type: 'grouped',
+			} );
+
+			expect( getFormFields( [ product ] ) ).toEqual( [
+				{
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+						'upsell_ids',
+					],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
+				},
+			] );
+		} );
+
+		it( 'uses grouped external product form config', () => {
+			const product = buildProduct( {
+				type: 'external',
+			} );
+
+			expect( getFormFields( [ product ] ) ).toEqual( [
+				{
+					id: 'general-fields',
+					label: 'General',
+					children: [
+						'name',
+						'product_status',
+						'catalog_visibility',
+					],
+				},
+				{
+					id: 'price-fields',
+					label: 'Price',
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
+				},
+				{
+					id: 'image-fields',
+					label: 'Images',
+					children: [ 'images' ],
+				},
+				{
+					id: 'buy-button-fields',
+					label: 'Buy button',
+					children: [ 'external_url', 'button_text' ],
+				},
+				{
+					id: 'inventory-fields',
+					label: 'Inventory',
+					children: [ 'sku' ],
+				},
+				{
+					id: 'product-organization-fields',
+					label: 'Product organization',
+					children: [ 'categories', 'brands', 'tags', 'featured' ],
 				},
 			] );
 		} );
@@ -1097,7 +1226,11 @@ describe( 'product edit utils', () => {
 				{
 					id: 'price-fields',
 					label: 'Price',
-					children: [ 'regular_price', 'sale_price' ],
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
 				},
 				{
 					id: 'image-fields',
@@ -1144,7 +1277,11 @@ describe( 'product edit utils', () => {
 				{
 					id: 'price-fields',
 					label: 'Price',
-					children: [ 'regular_price', 'sale_price' ],
+					children: [
+						'regular_price',
+						'sale_price',
+						'schedule_sale',
+					],
 				},
 				{
 					id: 'image-fields',
