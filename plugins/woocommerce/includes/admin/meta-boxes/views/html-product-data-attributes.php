@@ -14,6 +14,10 @@ global $wc_product_attributes;
 $attribute_taxonomies = wc_get_attribute_taxonomies();
 // Product attributes - taxonomies and custom, ordered, with visibility and variation attributes set.
 $product_attributes = $product_object->get_attributes( 'edit' );
+
+if ( \Automattic\WooCommerce\Admin\Features\Features::exists( \Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign\Init::FEATURE_ID ) ) {
+	$product_attributes = array_filter( $product_attributes, array( 'WC_Meta_Box_Product_Data', 'filter_non_variation_attributes' ) );
+}
 ?>
 <div id="product_attributes" class="panel wc-metaboxes-wrapper hidden">
 	<div class="toolbar toolbar-top">

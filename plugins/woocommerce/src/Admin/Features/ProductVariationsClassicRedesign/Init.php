@@ -7,6 +7,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign;
 
+use Automattic\WooCommerce\Internal\Caches\ProductCache;
+use WC_Meta_Box_Product_Data;
+use WC_Product;
+
 /**
  * Loads assets for the product variations classic redesign feature.
  */
@@ -26,6 +30,7 @@ class Init {
 
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_scripts' ), 20 );
 		add_filter( 'woocommerce_product_data_tabs', array( $this, 'handle_woocommerce_product_data_tabs' ), 5 );
+		add_action( 'woocommerce_admin_process_product_object', array( $this, 'preserve_variation_attributes' ), 10, 1 );
 	}
 
 	/**
@@ -48,6 +53,10 @@ class Init {
 	/**
 	 * Handle the woocommerce_product_data_tabs filter.
 	 *
+	 * Reorders Variations and Linked Products to bracket the Product attributes tab, and
+	 * renames "Attributes" to "Product attributes" so the legacy meta-box reflects its new
+	 * scope (non-variation attributes only).
+	 *
 	 * @internal
 	 *
 	 * @param array $tabs Product data tabs.
@@ -62,7 +71,51 @@ class Init {
 			$tabs['linked_product']['priority'] = 60;
 		}
 
+		if ( isset( $tabs['attribute'] ) && is_array( $tabs['attribute'] ) ) {
+			$tabs['attribute']['label'] = __( 'Product attributes', 'woocommerce' );
+		}
+
 		return $tabs;
+	}
+
+	/**
+	 * Preserves variation attributes saved by the inline editor when the legacy form-POST save handler runs.
+	 *
+	 * The legacy save handler calls prepare_attributes() which rebuilds the product attributes array
+	 * from $_POST form fields. Because the Product attributes tab filters out variation=true attributes,
+	 * those rows have no form fields and would otherwise be wiped on every WordPress "Update" click.
+	 * This handler re-merges the persisted variation attributes back into the in-flight product so
+	 * the inline REST save and the legacy form save are properly decoupled.
+	 *
+	 * @since 10.9.0
+	 * @param WC_Product $product The product being saved.
+	 */
+	public function preserve_variation_attributes( WC_Product $product ): void {
+		if ( ! $product->is_type( 'variable' ) ) {
+			return;
+		}
+
+		wc_get_container()
+			->get( ProductCache::class )
+			->remove( $product->get_id() );
+
+		$existing = wc_get_product( $product->get_id() );
+
+		if ( ! $existing ) {
+			return;
+		}
+
+		$existing_variation = array_filter(
+			array_filter( $existing->get_attributes() ),
+			array( WC_Meta_Box_Product_Data::class, 'filter_variation_attributes' )
+		);
+
+		$non_variation = array_filter(
+			array_filter( $product->get_attributes() ),
+			array( WC_Meta_Box_Product_Data::class, 'filter_non_variation_attributes' )
+		);
+
+		$product->set_attributes( array_merge( $non_variation, $existing_variation ) );
 	}
 
 	/**

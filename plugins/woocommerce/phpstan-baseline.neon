@@ -5719,12 +5719,6 @@ parameters:
 			path: includes/admin/meta-boxes/class-wc-meta-box-product-data.php
 
 		-
-			message: '#^Static method WC_Meta_Box_Product_Data\:\:filter_non_variation_attributes\(\) is unused\.$#'
-			identifier: method.unused
-			count: 1
-			path: includes/admin/meta-boxes/class-wc-meta-box-product-data.php
-
-		-
 			message: '#^Static method WC_Meta_Box_Product_Data\:\:get_product_data_tabs\(\) is unused\.$#'
 			identifier: method.unused
 			count: 1
