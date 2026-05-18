@@ -1,15 +1,10 @@
 import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { receipt } from '@wordpress/icons';
+import { WC_ORDER_ENTITY, type OrderRecord } from '../../data';
 import { OrderTimelineEvent } from './order-timeline-event';
 
 type ActivityState = 'loading' | 'empty' | 'success';
-
-type OrderRecord = {
-	id: number;
-	date_created_gmt?: string;
-	date_created?: string;
-};
 
 const QUERY_PARAMS = {
 	per_page: 10,
@@ -19,6 +14,9 @@ const QUERY_PARAMS = {
 
 /**
  * Hook that fetches recent orders and exposes them as Store Activity events.
+ *
+ * Reads from the `woocommerce/order` entity registered in `data/`, which is
+ * backed by the `/wc/v3/orders` REST endpoint.
  */
 export function useOrdersActivity(): {
 	state: ActivityState;
@@ -29,11 +27,12 @@ export function useOrdersActivity(): {
 		datetime: string;
 	} >;
 } {
+	console.log( '(3) useOrdersActivity' );
 	const { orders, isResolving } = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		const records = select( coreStore ).getEntityRecords(
-			'postType',
-			'shop_order',
+			WC_ORDER_ENTITY.kind,
+			WC_ORDER_ENTITY.name,
 			QUERY_PARAMS
 		) as OrderRecord[] | null;
 
@@ -41,7 +40,7 @@ export function useOrdersActivity(): {
 			orders: records,
 			isResolving: select( coreStore ).isResolving(
 				'getEntityRecords',
-				[ 'postType', 'shop_order', QUERY_PARAMS ]
+				[ WC_ORDER_ENTITY.kind, WC_ORDER_ENTITY.name, QUERY_PARAMS ]
 			),
 		};
 	}, [] );
