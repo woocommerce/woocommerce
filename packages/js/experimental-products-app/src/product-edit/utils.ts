@@ -94,6 +94,13 @@ function createProductEditFormGroup(
 	};
 }
 
+const DOWNLOADABLE_FILES_FORM_FIELD: ProductEditFormField =
+	createProductEditFormGroup(
+		'downloadable-files-fields',
+		__( 'Downloadable files', 'woocommerce' ),
+		[ 'downloadable' ]
+	);
+
 const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'general-fields',
@@ -103,11 +110,17 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
 		'sale_price',
+		'schedule_sale',
+		{
+			id: 'sale-schedule-dates',
+			layout: { type: 'row' as const },
+			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
+		},
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
-		'downloadable',
 	] ),
+	DOWNLOADABLE_FILES_FORM_FIELD,
 	createProductEditFormGroup(
 		'inventory-fields',
 		__( 'Inventory', 'woocommerce' ),
@@ -121,7 +134,7 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'shipping-fields',
 		__( 'Shipping', 'woocommerce' ),
-		[ DIMENSIONS_FORM_FIELD, 'weight' ]
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'height' ]
 	),
 ] satisfies ProductEditFormField[];
 
@@ -134,10 +147,17 @@ const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
 		'sale_price',
+		'schedule_sale',
+		{
+			id: 'sale-schedule-dates',
+			layout: { type: 'row' as const },
+			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
+		},
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
 	] ),
+	DOWNLOADABLE_FILES_FORM_FIELD,
 	createProductEditFormGroup(
 		'inventory-fields',
 		__( 'Inventory', 'woocommerce' ),
@@ -180,21 +200,26 @@ const EXTERNAL_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'general-fields',
 		__( 'General', 'woocommerce' ),
-		[
-			'name',
-			'product_status',
-			'catalog_visibility',
-			'external_url',
-			'button_text',
-		]
+		[ 'name', 'product_status', 'catalog_visibility' ]
 	),
 	createProductEditFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
 		'sale_price',
+		'schedule_sale',
+		{
+			id: 'sale-schedule-dates',
+			layout: { type: 'row' as const },
+			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
+		},
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
 	] ),
+	createProductEditFormGroup(
+		'buy-button-fields',
+		__( 'Buy button', 'woocommerce' ),
+		[ 'external_url', 'button_text' ]
+	),
 	createProductEditFormGroup(
 		'inventory-fields',
 		__( 'Inventory', 'woocommerce' ),
