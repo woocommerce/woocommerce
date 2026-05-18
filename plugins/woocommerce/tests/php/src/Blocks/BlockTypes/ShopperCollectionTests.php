@@ -3,7 +3,10 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
+use Automattic\WooCommerce\Blocks\Assets\Api;
 use Automattic\WooCommerce\Blocks\BlockTypes\ShopperCollection;
+use Automattic\WooCommerce\Blocks\Package;
+use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
 use ReflectionClass;
 use ReflectionMethod;
 use WP_UnitTestCase;
@@ -318,6 +321,80 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 			'/<div[^>]*class="wc-block-shopper-collection__header"[^>]*data-wp-bind--hidden="!context\.hasShownItems"[^>]*\bhidden\b[^>]*>.*Saved for later/s',
 			$markup,
 			'Header wrapper must be initially hidden for an empty list so a fresh-load empty SC does not show an orphaned heading.'
+		);
+	}
+
+	/**
+	 * Inject an AssetDataRegistry mock into the SUT and invoke render() via
+	 * reflection. `ShopperCollection` is final, so we can't subclass it for the
+	 * test — set the inherited `$asset_data_registry` property directly instead.
+	 * Render is wrapped in a try/catch because its downstream calls (REST
+	 * prefetch, interactivity bootstrap) need bits of the request lifecycle
+	 * that aren't set up in unit tests; the flag-setting branch runs before any
+	 * of that, so a later fatal doesn't change what we assert on.
+	 *
+	 * @param array<string, mixed> $attributes Block attributes.
+	 * @return AssetDataRegistryMock The mock registry, ready to inspect.
+	 */
+	private function invoke_render_with_registry_mock( array $attributes ): AssetDataRegistryMock {
+		$asset_api = Package::container()->get( Api::class );
+		$registry  = new AssetDataRegistryMock( $asset_api );
+
+		$reflection    = new ReflectionClass( ShopperCollection::class );
+		$registry_prop = $reflection->getProperty( 'asset_data_registry' );
+		$registry_prop->setAccessible( true );
+		$registry_prop->setValue( $this->sut, $registry );
+
+		$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+		$render->setAccessible( true );
+
+		try {
+			$render->invoke( $this->sut, $attributes, '', null );
+		} catch ( \Throwable $e ) {
+			// Ignored: the flag-setting branch runs before the parts of render()
+			// that need a full request lifecycle.
+		}
+
+		return $registry;
+	}
+
+	/**
+	 * @return array<string, array{bool, bool, string, bool}>
+	 */
+	public function provider_cart_page_has_saved_for_later_flag(): array {
+		return array(
+			// label                          => array( logged_in, is_cart, list_name,         expected ).
+			'set on cart with sfl list'       => array( true, true, 'saved-for-later', true ),
+			'not set off the cart page'       => array( true, false, 'saved-for-later', false ),
+			'not set for guests'              => array( false, true, 'saved-for-later', false ),
+			'not set for non-saved-for-later' => array( true, true, 'wishlist', false ),
+		);
+	}
+
+	/**
+	 * `cartPageHasSavedForLater` is the wcSettings flag the cart line item row reads
+	 * to decide whether to render the "Save for later" link. The block sets it
+	 * only when rendering the saved-for-later list, on the cart page, for a
+	 * logged-in shopper — every other combination must leave it unset.
+	 *
+	 * @dataProvider provider_cart_page_has_saved_for_later_flag
+	 */
+	public function test_cart_page_has_saved_for_later_flag(
+		bool $logged_in,
+		bool $is_cart,
+		string $list_name,
+		bool $expected
+	): void {
+		wp_set_current_user( $logged_in ? self::factory()->user->create( array( 'role' => 'customer' ) ) : 0 );
+		if ( $is_cart ) {
+			add_filter( 'woocommerce_is_cart', '__return_true' );
+		}
+
+		$registry = $this->invoke_render_with_registry_mock( array( 'listName' => $list_name ) );
+
+		$this->assertSame(
+			$expected,
+			array_key_exists( 'cartPageHasSavedForLater', $registry->get() )
 		);
 	}
 }
