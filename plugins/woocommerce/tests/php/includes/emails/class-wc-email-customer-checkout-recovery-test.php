@@ -16,6 +16,14 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	private $sut;
 
 	/**
+	 * Snapshot of the `active_plugins` option taken in setUp so tests that
+	 * mock a known recovery handler can restore the original list in tearDown.
+	 *
+	 * @var array
+	 */
+	private $original_active_plugins = array();
+
+	/**
 	 * `WC_Emails::init()` only registers the checkout recovery email class
 	 * when the `checkout_recovery` feature flag is on, so the suite has to
 	 * enable the option (and re-init the mailer to pick up the flag change)
@@ -27,6 +35,8 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		parent::setUp();
 
 		update_option( 'woocommerce_feature_checkout_recovery_enabled', 'yes' );
+
+		$this->original_active_plugins = (array) get_option( 'active_plugins', array() );
 
 		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
@@ -44,6 +54,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		delete_option( 'woocommerce_feature_checkout_recovery_enabled' );
 		delete_option( 'woocommerce_customer_checkout_recovery_settings' );
+		update_option( 'active_plugins', $this->original_active_plugins );
 
 		parent::tearDown();
 	}
@@ -201,5 +212,107 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $before + 1, $after, 'Enabled checkout recovery email must dispatch one message.' );
 		$this->assertSame( $order->get_billing_email(), $this->sut->recipient );
+	}
+
+	/**
+	 * @testdox trigger() is a no-op when the merchant has flipped the suppression toggle on.
+	 */
+	public function test_trigger_is_suppressed_when_toggle_is_on(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+		$this->sut->update_option( 'suppressed', 'yes' );
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		$this->sut->trigger( $order->get_id() );
+		$after  = count( $mailer->mock_sent );
+
+		$this->assertSame( $before, $after, 'Suppressed checkout recovery email must not dispatch.' );
+	}
+
+	/**
+	 * @testdox trigger() is a no-op when the woocommerce_checkout_recovery_suppress filter returns true.
+	 */
+	public function test_trigger_is_suppressed_when_filter_returns_true(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		$override = static fn() => true;
+		add_filter( 'woocommerce_checkout_recovery_suppress', $override );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		try {
+			$this->sut->trigger( $order->get_id() );
+			$after = count( $mailer->mock_sent );
+		} finally {
+			remove_filter( 'woocommerce_checkout_recovery_suppress', $override );
+		}
+
+		$this->assertSame( $before, $after, 'Filter-suppressed checkout recovery email must not dispatch.' );
+	}
+
+	/**
+	 * @testdox get_active_recovery_handlers() returns empty when no known recovery-handling plugin is active.
+	 */
+	public function test_active_recovery_handlers_empty_when_none_active(): void {
+		update_option( 'active_plugins', array() );
+
+		$this->assertSame( array(), WC_Email_Customer_Checkout_Recovery::get_active_recovery_handlers() );
+	}
+
+	/**
+	 * @testdox get_active_recovery_handlers() returns the AutomateWoo entry when only AutomateWoo is active.
+	 */
+	public function test_active_recovery_handlers_detects_automatewoo(): void {
+		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
+
+		$active = WC_Email_Customer_Checkout_Recovery::get_active_recovery_handlers();
+
+		$this->assertArrayHasKey( 'automatewoo/automatewoo.php', $active );
+		$this->assertSame( 'AutomateWoo', $active['automatewoo/automatewoo.php'] );
+		$this->assertArrayNotHasKey( 'mailpoet/mailpoet.php', $active );
+	}
+
+	/**
+	 * @testdox get_active_recovery_handlers() detects both AutomateWoo and MailPoet when both are active.
+	 */
+	public function test_active_recovery_handlers_detects_both(): void {
+		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php', 'mailpoet/mailpoet.php' ) );
+
+		$active = WC_Email_Customer_Checkout_Recovery::get_active_recovery_handlers();
+
+		$this->assertCount( 2, $active );
+		$this->assertArrayHasKey( 'automatewoo/automatewoo.php', $active );
+		$this->assertArrayHasKey( 'mailpoet/mailpoet.php', $active );
+	}
+
+	/**
+	 * @testdox Suppressed field default is 'yes' when a known recovery handler is active so the merchant is pre-protected from duplicate sends.
+	 */
+	public function test_suppressed_field_default_is_yes_when_handler_active(): void {
+		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
+
+		$this->sut->init_form_fields();
+
+		$this->assertArrayHasKey( 'suppressed', $this->sut->form_fields );
+		$this->assertSame( 'yes', $this->sut->form_fields['suppressed']['default'] );
+		$this->assertStringContainsString( 'AutomateWoo', $this->sut->form_fields['suppressed']['description'] );
+	}
+
+	/**
+	 * @testdox Suppressed field default is 'no' when no known recovery handler is active so core's recovery email runs by default.
+	 */
+	public function test_suppressed_field_default_is_no_when_no_handler_active(): void {
+		update_option( 'active_plugins', array() );
+
+		$this->sut->init_form_fields();
+
+		$this->assertArrayHasKey( 'suppressed', $this->sut->form_fields );
+		$this->assertSame( 'no', $this->sut->form_fields['suppressed']['default'] );
 	}
 }
