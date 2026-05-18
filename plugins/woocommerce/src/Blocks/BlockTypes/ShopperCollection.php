@@ -98,8 +98,8 @@ final class ShopperCollection extends AbstractBlock {
 		// contains `&`, `<`, etc. The matching `null` push onto `innerContent`
 		// is what makes `WP_Block::render()` walk into the heading when
 		// building `$content`.
-		$region_label = $this->get_variation_config()['regionLabel'];
-		$heading_html = '<h2 class="wp-block-heading">' . esc_html( $region_label ) . '</h2>';
+		$list_heading = $this->get_variation_config()['listHeading'];
+		$heading_html = '<h2 class="wp-block-heading">' . esc_html( $list_heading ) . '</h2>';
 
 		if ( ! isset( $parsed_hooked_block['innerBlocks'] ) || ! is_array( $parsed_hooked_block['innerBlocks'] ) ) {
 			$parsed_hooked_block['innerBlocks'] = array();
@@ -108,7 +108,7 @@ final class ShopperCollection extends AbstractBlock {
 			'blockName'    => 'core/heading',
 			'attrs'        => array(
 				'level'   => 2,
-				'content' => $region_label,
+				'content' => $list_heading,
 			),
 			'innerBlocks'  => array(),
 			'innerHTML'    => $heading_html,
@@ -272,9 +272,7 @@ final class ShopperCollection extends AbstractBlock {
 	private function get_variation_config(): array {
 		return array(
 			'modifierSlug'          => 'saved-for-later',
-			// Content for the seeded `core/heading` inner block on
-			// auto-injected SC instances (via `set_hooked_block_attributes`).
-			'regionLabel'           => __( 'Saved for later', 'woocommerce' ),
+			'listHeading'           => __( 'Saved for later', 'woocommerce' ),
 			'emptyMessage'          => __( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
 			/* translators: %s: product name. */
 			'removeLabelTemplate'   => __( 'Remove %s from Saved for later list', 'woocommerce' ),
