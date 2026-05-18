@@ -28,7 +28,7 @@ As discussed in the team conversation:
 
 **Summary**: Added filters for stock quantity ranges. The endpoint now supports `min_stock_quantity` and `max_stock_quantity`.
 
-**PR**: TBD
+**PR**: [#65117](https://github.com/woocommerce/woocommerce/pull/65117)
 
 **Breaking Changes**: None
 
