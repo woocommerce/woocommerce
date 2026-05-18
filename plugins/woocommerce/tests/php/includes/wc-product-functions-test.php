@@ -1019,4 +1019,32 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		WC_Helper_Product::delete_product( $product->get_id() );
 	}
+
+	/**
+	 * @testdox Variable add-to-cart attaches a pristine gallery snapshot to the variation script.
+	 */
+	public function test_woocommerce_variable_add_to_cart_attaches_gallery_snapshot() {
+		$product = WC_Helper_Product::create_variation_product();
+
+		WC_Frontend_Scripts::load_scripts();
+
+		$wp_scripts = wp_scripts();
+		unset( $wp_scripts->registered['wc-add-to-cart-variation']->extra['before'] );
+
+		$previous_product   = $GLOBALS['product'] ?? null;
+		$GLOBALS['product'] = $product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+
+		ob_start();
+		woocommerce_variable_add_to_cart();
+		ob_end_clean();
+
+		$before_data = $wp_scripts->registered['wc-add-to-cart-variation']->extra['before'] ?? array();
+		$inline_js   = implode( "\n", (array) $before_data );
+
+		$this->assertStringContainsString( 'wc_variation_gallery_defaults', $inline_js );
+		$this->assertStringContainsString( '[' . $product->get_id() . ']', $inline_js );
+
+		$GLOBALS['product'] = $previous_product; // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited
+		WC_Helper_Product::delete_product( $product->get_id() );
+	}
 }
