@@ -2205,10 +2205,7 @@ if ( ! function_exists( 'woocommerce_variable_add_to_cart' ) ) {
 		// Enqueue variation scripts.
 		wp_enqueue_script( 'wc-add-to-cart-variation' );
 
-		// Snapshot the default gallery so the reset path can restore it after
-		// a variation swap. Only relevant when the variation gallery feature
-		// is on — without it, the swap path never runs and the snapshot is
-		// dead weight.
+		// Attach a reset snapshot only when variation-gallery swaps are enabled.
 		if (
 			\Automattic\WooCommerce\Internal\VariationGallery\Package::is_enabled() &&
 			! isset( $attached_gallery_defaults[ $product->get_id() ] )

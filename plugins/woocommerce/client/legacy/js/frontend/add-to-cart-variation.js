@@ -879,11 +879,8 @@
 	/**
 	 * Get the default product gallery HTML used for restoring classic templates.
 	 *
-	 * Prefers the form-local `<script class="wc-product-gallery-default-template">`
-	 * tag — it's specific to this form's render context. Falls back to the
-	 * page-global `window.wc_variation_gallery_defaults`, which is attached
-	 * to the script handle and survives when the form-local tag is absent
-	 * (e.g. an old `variable.php` override that pre-dates the tag).
+	 * Prefer the snapshot embedded in this form. Fall back to the page-level
+	 * defaults for older template overrides that don't include it.
 	 */
 	$.fn.wc_get_default_product_gallery_html = function () {
 		var $form = $( this );
@@ -931,15 +928,6 @@
 		 * @since 10.8.0
 		 * @param {HTMLElement} galleryEl - The gallery root element being torn down.
 		 * @param {Object}      params    - The `wc_single_product_params` object.
-		 *
-		 * Example subscriber:
-		 *
-		 *   jQuery( document.body ).on(
-		 *       'wc-product-gallery-before-destroy',
-		 *       function ( e, galleryEl ) {
-		 *           myLightbox.detach( galleryEl );
-		 *       }
-		 *   );
 		 */
 		if ( typeof wc_single_product_params !== 'undefined' ) {
 			$current_gallery.trigger( 'wc-product-gallery-before-destroy', [
@@ -1040,10 +1028,8 @@
 			}
 
 			if ( ! reset_succeeded ) {
-				// Edge-case: A variation gallery is mounted but we have no clean snapshot
-				// to restore. Falling through to the legacy
-				// single-image mutation path here would corrupt the variation
-				// gallery DOM, so bail.
+				// Don't fall through to the single-image mutation path without
+				// a clean reset snapshot.
 				return;
 			}
 		}

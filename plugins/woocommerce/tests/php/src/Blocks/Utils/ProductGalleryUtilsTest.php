@@ -9,10 +9,6 @@ use WP_UnitTestCase;
  * Tests for the ProductGalleryUtils class.
  */
 class ProductGalleryUtilsTest extends \WP_UnitTestCase {
-	/**
-	 * Reset the feature-flag option after each test so individual cases
-	 * that flip it on don't leak global state into the rest of the suite.
-	 */
 	public function tearDown(): void {
 		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
 		parent::tearDown();
@@ -212,7 +208,6 @@ class ProductGalleryUtilsTest extends \WP_UnitTestCase {
 
 		$variation_gallery_data = ProductGalleryUtils::get_product_variation_gallery_data( $variable_product );
 
-		// Variation's own gallery item wins over the parent featured.
 		$this->assertSame( $variation_gallery_id, $variation_gallery_data[ $variation->get_id() ]['image_id'] );
 		$this->assertSame(
 			array( $variation_gallery_id ),

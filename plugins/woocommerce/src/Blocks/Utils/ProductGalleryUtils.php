@@ -184,9 +184,6 @@ class ProductGalleryUtils {
 	 * Build the gallery payload for a single variation, or null when the
 	 * variation has no images or isn't a real variation.
 	 *
-	 * Extracted so {@see self::get_product_variation_gallery_data()} reads as
-	 * "fetch + prime + project" without inlining the projection details.
-	 *
 	 * @param int   $variation_id     Variation post ID.
 	 * @param int[] $parent_image_ids Parent product's full gallery (featured + extras),
 	 *                                used as fallback when the variation has no images.
@@ -227,10 +224,7 @@ class ProductGalleryUtils {
 			return $parent_fallback;
 		}
 
-		// Fallback order: variation featured → variation gallery[0] →
-		// parent featured → 0. Variation-specific content takes precedence
-		// over the parent so a chosen variation never opens on an unrelated
-		// parent image when its own gallery is intact.
+		// Prefer variation-owned images over the parent fallback.
 		if ( $variation_image_valid ) {
 			$selected_image_id = $variation_image_id;
 		} else {

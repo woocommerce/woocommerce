@@ -61,13 +61,7 @@ do_action( 'woocommerce_before_add_to_cart_form' ); ?>
 		</table>
 		<div class="reset_variations_alert screen-reader-text" role="alert" aria-live="polite" aria-relevant="all"></div>
 		<?php
-		/*
-		 * Form-local snapshot of the default gallery, consumed by the reset
-		 * path after a variation swap. Travels with the form HTML so AJAX
-		 * renders (quick-view modals etc.) keep working even when the
-		 * page-global inline script isn't reachable. Gated on the feature
-		 * flag because the swap path doesn't fire when it's off.
-		 */
+		// Reset snapshot for cases where a theme/plugin loads the variation form later, like quick-view modals.
 		if ( \Automattic\WooCommerce\Internal\VariationGallery\Package::is_enabled() ) :
 			?>
 			<script type="text/template" class="wc-product-gallery-default-template"><?php echo wc_get_product_gallery_html( $product ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?></script>

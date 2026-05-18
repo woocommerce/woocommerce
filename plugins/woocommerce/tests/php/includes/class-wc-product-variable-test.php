@@ -4,10 +4,6 @@
  * Tests for WC_Product_Variable.
  */
 class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
-	/**
-	 * Reset the feature-flag option after each test so individual cases
-	 * that flip it on don't leak global state into the rest of the suite.
-	 */
 	public function tearDown(): void {
 		delete_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME );
 		parent::tearDown();
@@ -292,7 +288,6 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 		$available_variation = $product->get_available_variation( $variation );
 
-		// Variation's own gallery item wins over the parent featured.
 		$this->assertSame( $variation_gallery_id, $available_variation['image_id'] );
 		$this->assertStringContainsString( 'wp-image-' . $variation_gallery_id, $available_variation['gallery_images_html'] );
 		$this->assertStringNotContainsString( 'wp-image-' . $parent_featured_id, $available_variation['gallery_images_html'] );

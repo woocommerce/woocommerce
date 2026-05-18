@@ -1039,8 +1039,7 @@ class WC_Product_Functions_Tests extends \WC_Unit_Test_Case {
 
 		$this->assertStringContainsString( 'wc_variation_gallery_defaults', $inline_js );
 
-		// Decode the payload back out of the inline JS and assert it contains
-		// real gallery markup, not an empty string or `null`.
+		// Extract the JSON snapshot from the inline JS and verify it contains gallery markup.
 		preg_match( '/\)\[\d+\]\s*=\s*("(?:\\\\.|[^"])*");/', $inline_js, $matches );
 		$this->assertNotEmpty( $matches, 'Inline JS should expose a JSON-encoded snapshot.' );
 		$decoded_snapshot = json_decode( $matches[1] );

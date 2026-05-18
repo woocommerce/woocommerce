@@ -435,10 +435,7 @@ class WC_Product_Variable extends WC_Product {
 			);
 		}
 
-		// Fallback order: variation featured → variation gallery[0] →
-		// parent featured → 0. Variation-specific content takes precedence
-		// over the parent so a chosen variation never opens on an unrelated
-		// parent image when its own gallery is intact.
+		// Prefer variation-owned images over the parent fallback.
 		if ( $variation_featured_valid ) {
 			$selected_image_id = $variation_featured_id;
 		} elseif ( ! empty( $variation_gallery_image_ids ) ) {
