@@ -34,26 +34,33 @@ class Loader {
 	/**
 	 * Wires the loader into WordPress.
 	 *
-	 * Called during plugin file load from `woocommerce.php`, so the actual
-	 * setup is deferred to the `init` action. Two things conspire to make
-	 * earlier hooks unsafe:
+	 * Called during plugin file load from `woocommerce.php`. Two stages:
 	 *
-	 * - `FeaturesUtil::feature_is_enabled()` instantiates `FeaturesController`
-	 *   through the DI container, which references classes like
-	 *   `WC_Site_Tracking` that are not autoloaded until WC's `includes()`
-	 *   runs on `plugins_loaded`. So the check itself must be on
-	 *   `plugins_loaded` or later.
-	 * - `FeaturesController::init_feature_definitions()` calls `__()` on the
-	 *   `woocommerce` text domain for every feature label/description.
-	 *   WordPress 6.7+ warns whenever translation loading is triggered
-	 *   before the `init` action has fired (`did_action( 'init' )`), so the
-	 *   check must wait until at least `init`.
+	 * 1. Synchronously require the build artifacts. They auto-generate an
+	 *    `add_action( 'wp_default_scripts', ... )` for script-module
+	 *    registration; this registration must be attached before
+	 *    `wp_default_scripts` fires, which can happen any time after WP
+	 *    bootstraps (often before the `init` action). Requiring the
+	 *    artifacts here is inert when the feature is off — script modules
+	 *    just sit unused in the registry.
+	 * 2. Defer the feature-flag check and the actual hook wiring to the
+	 *    `init` action. `FeaturesUtil::feature_is_enabled()` cannot run
+	 *    earlier because it instantiates `FeaturesController` through the
+	 *    DI container, whose constructor references classes like
+	 *    `WC_Site_Tracking` (autoloaded only after WC's `includes()` runs
+	 *    on `plugins_loaded`) and calls `__()` on the `woocommerce` text
+	 *    domain (WP 6.7+ warns when translation loading is triggered
+	 *    before `init`).
 	 *
-	 * We hook at `init` priority 1 — early enough that the higher-priority
-	 * widget-type registration (priority 11) still fires in the same `init`
-	 * cycle, late enough that the text domain is safe to load.
+	 * Priority 1 on `init` is early enough that the higher-priority widget
+	 * type registration (priority 11) still fires in the same `init` cycle.
 	 */
 	public static function init(): void {
+		$build_file = plugin_dir_path( WC_PLUGIN_FILE ) . 'build/build.php';
+		if ( file_exists( $build_file ) ) {
+			require_once $build_file;
+		}
+
 		add_action( 'init', array( self::class, 'maybe_bootstrap' ), 1 );
 	}
 
@@ -61,21 +68,17 @@ class Loader {
 	 * Conditionally bootstraps the dashboard widgets subsystem.
 	 *
 	 * Returns early when the `dashboard_widgets` feature flag is disabled
-	 * (the default on a fresh install) or when the build artifacts have
-	 * not been produced. Otherwise loads the build registries and attaches
-	 * the hooks that wire widgets into the dashboard page.
+	 * (the default on a fresh install). Otherwise attaches the hooks that
+	 * wire widgets into the dashboard page.
 	 */
 	public static function maybe_bootstrap(): void {
 		if ( ! FeaturesUtil::feature_is_enabled( 'dashboard_widgets' ) ) {
 			return;
 		}
 
-		$build_file = plugin_dir_path( WC_PLUGIN_FILE ) . 'build/build.php';
-		if ( ! file_exists( $build_file ) ) {
+		if ( ! function_exists( 'woocommerce_get_registered_widget_modules' ) ) {
 			return;
 		}
-
-		require_once $build_file;
 
 		add_action( 'init', array( self::class, 'register_widget_types' ), 11 );
 		add_filter( 'dashboard-wp-admin_boot_dependencies', array( self::class, 'add_init_module_to_boot_deps' ) );
