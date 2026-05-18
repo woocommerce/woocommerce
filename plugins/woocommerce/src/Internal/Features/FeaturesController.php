@@ -451,6 +451,18 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
+			'checkout_recovery'                  => array(
+				'name'                         => __( 'Checkout recovery', 'woocommerce' ),
+				'description'                  => __(
+					'Send customers a recovery email when they leave a checkout pending, prompting them to complete their order.',
+					'woocommerce'
+				),
+				// Skip compatibility checks like the other opt-in transactional-email features.
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+				'enabled_by_default'           => false,
+				'is_experimental'              => true,
+			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
 				'description'                  => __(
