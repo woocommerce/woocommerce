@@ -88,8 +88,13 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 
 	// `allowedBlocks` is read from block.json automatically — passing it
 	// here would just duplicate the declaration. `templateLock: false`
-	// is the default so we omit that too.
-	const innerBlocksProps = useInnerBlocksProps( {}, { template: TEMPLATE } );
+	// is the default so we omit that too. The className matches the
+	// `<div>` PHP wraps `$content` in on the frontend, so any CSS keyed
+	// off `__header` applies in both contexts.
+	const innerBlocksProps = useInnerBlocksProps(
+		{ className: 'wc-block-shopper-collection__header' },
+		{ template: TEMPLATE }
+	);
 
 	return (
 		<>
