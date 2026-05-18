@@ -615,8 +615,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 	/**
 	 * Build the variation post status SQL fragment for stock quantity filtering.
 	 *
-	 * @param array $post_statuses Product statuses included in the collection query.
-	 * @param array $excluded_statuses Product statuses excluded from the collection query.
+	 * @param array  $post_statuses Product statuses included in the collection query.
+	 * @param array  $excluded_statuses Product statuses excluded from the collection query.
 	 * @param string $posts_alias Posts table alias.
 	 * @return string
 	 */
@@ -721,7 +721,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		$direct_stock_where    = $this->get_stock_quantity_where_clause( 'direct_lookup' );
 		$variation_stock_where = $this->get_stock_quantity_where_clause( 'variation_lookup' );
-		$variation_status     = $this->get_stock_quantity_variation_status_where(
+		$variation_status      = $this->get_stock_quantity_variation_status_where(
 			$this->stock_quantity_filter['post_statuses'],
 			$this->stock_quantity_filter['excluded_statuses'],
 			'variation_posts'
