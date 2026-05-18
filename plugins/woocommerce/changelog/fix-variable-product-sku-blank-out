@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Fix variable product SKU blanking out on frontend when WooCommerce Product SKU block renders statically.

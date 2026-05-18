@@ -69,8 +69,8 @@ class ProductSKU extends AbstractBlock {
 			return '';
 		}
 
-		$is_descendant_of_product_collection = isset( $block->context['query']['isProductCollectionBlock'] );
-		$is_interactive                      = ! $is_descendant_of_product_collection && $product->is_type( ProductType::VARIABLE );
+		$is_descendant_of_query_loop = isset( $block->context['query'] );
+		$is_interactive              = ! $is_descendant_of_query_loop && $product->is_type( ProductType::VARIABLE );
 
 		if ( $is_interactive ) {
 			wp_enqueue_script_module( 'woocommerce/product-elements' );
