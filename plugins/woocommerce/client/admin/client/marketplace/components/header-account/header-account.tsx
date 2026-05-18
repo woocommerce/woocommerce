@@ -64,9 +64,7 @@ export default function HeaderAccount( {
 		// passing it as <img src> rendered `[object Object]` and only
 		// recovered via the onError handler below.
 		if ( ! isConnected || ! avatarURL || useDefaultAvatar ) {
-			return (
-				<Icon icon={ commentAuthorAvatar } size={ 18 } />
-			);
+			return <Icon icon={ commentAuthorAvatar } size={ 18 } />;
 		}
 
 		// Lock the avatar to 18x18 to match every other floating-header tab
