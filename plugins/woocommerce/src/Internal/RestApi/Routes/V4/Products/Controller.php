@@ -534,9 +534,12 @@ class Controller extends WC_REST_Products_V2_Controller {
 		$max_stock_quantity = $request['max_stock_quantity'];
 
 		if ( null !== $min_stock_quantity || null !== $max_stock_quantity ) {
+			// Performance check: this precomputes matching IDs so stock quantity composes with existing post__in filters.
 			$stock_quantity_product_ids = $this->get_product_ids_matching_stock_quantity_filter(
 				$min_stock_quantity,
-				$max_stock_quantity
+				$max_stock_quantity,
+				(array) $args['post_status'],
+				$this->exclude_status
 			);
 
 			if ( empty( $stock_quantity_product_ids ) ) {
@@ -622,9 +625,11 @@ class Controller extends WC_REST_Products_V2_Controller {
 	 *
 	 * @param int|float|null $min_stock_quantity Minimum stock quantity.
 	 * @param int|float|null $max_stock_quantity Maximum stock quantity.
+	 * @param array          $post_statuses Product statuses included in the collection query.
+	 * @param array          $excluded_statuses Product statuses excluded from the collection query.
 	 * @return int[]
 	 */
-	private function get_product_ids_matching_stock_quantity_filter( $min_stock_quantity, $max_stock_quantity ): array {
+	private function get_product_ids_matching_stock_quantity_filter( $min_stock_quantity, $max_stock_quantity, array $post_statuses, array $excluded_statuses = array() ): array {
 		global $wpdb;
 
 		if ( null !== $min_stock_quantity && null !== $max_stock_quantity ) {
@@ -639,6 +644,8 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$stock_quantity_where = $wpdb->prepare( 'lookup.stock_quantity <= %f', (float) $max_stock_quantity );
 		}
 
+		$variation_status_where = $this->get_stock_quantity_variation_status_where( $post_statuses, $excluded_statuses );
+
 		$product_ids = $wpdb->get_col(
 			"SELECT DISTINCT posts.ID
 			FROM {$wpdb->posts} AS posts
@@ -649,6 +656,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 				AND {$stock_quantity_where}" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		);
 
+		// phpcs:disable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 		$parent_ids = $wpdb->get_col(
 			"SELECT DISTINCT posts.post_parent
 			FROM {$wpdb->posts} AS posts
@@ -656,11 +664,47 @@ class Controller extends WC_REST_Products_V2_Controller {
 				ON posts.ID = lookup.product_id
 			WHERE posts.post_type = 'product_variation'
 				AND posts.post_parent > 0
+				{$variation_status_where}
 				AND lookup.stock_quantity IS NOT NULL
-				AND {$stock_quantity_where}" // phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+				AND {$stock_quantity_where}"
 		);
+		// phpcs:enable WordPress.DB.PreparedSQL.InterpolatedNotPrepared
 
 		return array_values( array_unique( array_map( 'absint', array_merge( $product_ids, $parent_ids ) ) ) );
+	}
+
+	/**
+	 * Build the variation post status SQL fragment for stock quantity filtering.
+	 *
+	 * @param array $post_statuses Product statuses included in the collection query.
+	 * @param array $excluded_statuses Product statuses excluded from the collection query.
+	 * @return string
+	 */
+	private function get_stock_quantity_variation_status_where( array $post_statuses, array $excluded_statuses ): string {
+		global $wpdb;
+
+		$clauses       = array();
+		$post_statuses = array_filter( $post_statuses );
+
+		if ( ! in_array( 'any', $post_statuses, true ) && ! empty( $post_statuses ) ) {
+			$prepared_statuses = array();
+			foreach ( $post_statuses as $post_status ) {
+				$prepared_statuses[] = $wpdb->prepare( '%s', $post_status );
+			}
+
+			$clauses[] = 'posts.post_status IN ( ' . implode( ', ', $prepared_statuses ) . ' )';
+		}
+
+		if ( ! empty( $excluded_statuses ) ) {
+			$prepared_statuses = array();
+			foreach ( $excluded_statuses as $post_status ) {
+				$prepared_statuses[] = $wpdb->prepare( '%s', $post_status );
+			}
+
+			$clauses[] = 'posts.post_status NOT IN ( ' . implode( ', ', $prepared_statuses ) . ' )';
+		}
+
+		return $clauses ? 'AND ' . implode( ' AND ', $clauses ) : '';
 	}
 
 	/**

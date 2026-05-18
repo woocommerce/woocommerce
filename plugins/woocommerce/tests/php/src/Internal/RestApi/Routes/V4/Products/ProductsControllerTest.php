@@ -1352,6 +1352,41 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox Stock quantity parameters ignore unpublished variations when matching variable products.
+	 */
+	public function test_products_filter_with_stock_quantity_range_ignores_unpublished_variations(): void {
+		$variable_product       = WC_Helper_Product::create_variation_product();
+		$variation_ids          = $variable_product->get_children();
+		$draft_variation        = wc_get_product( $variation_ids[0] );
+		$non_matching_variation = wc_get_product( $variation_ids[1] );
+
+		$draft_variation->set_status( ProductStatus::DRAFT );
+		$draft_variation->set_manage_stock( true );
+		$draft_variation->set_stock_quantity( 5 );
+		$draft_variation->save();
+
+		$non_matching_variation->set_manage_stock( true );
+		$non_matching_variation->set_stock_quantity( 8 );
+		$non_matching_variation->save();
+
+		$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+		$request->set_query_params(
+			array(
+				'min_stock_quantity' => 4,
+				'max_stock_quantity' => 6,
+				'include'            => array( $variable_product->get_id() ),
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertEquals( array(), wp_list_pluck( $response->get_data(), 'id' ) );
+
+		WC_Helper_Product::delete_product( $variable_product->get_id() );
+	}
+
+	/**
 	 * @testdox The min_stock_quantity parameter includes products with the specified stock quantity.
 	 */
 	public function test_products_filter_with_min_stock_quantity(): void {
