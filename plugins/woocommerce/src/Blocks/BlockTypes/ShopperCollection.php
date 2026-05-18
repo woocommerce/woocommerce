@@ -82,9 +82,11 @@ final class ShopperCollection extends AbstractBlock {
 		$parsed_hooked_block['attrs']['listName'] = 'saved-for-later';
 
 		// Seed a `core/heading` inner block so freshly-injected SC instances
-		// ship with the same heading the editor template seeds. Only do this
-		// when nothing else has already populated `innerBlocks` (e.g. another
-		// hook running first) — we don't want to clobber a customisation.
+		// ship with the same heading the editor template seeds. We append
+		// unconditionally — extensions are free to hook
+		// `hooked_block_woocommerce/shopper-collection` to add their own
+		// inner blocks, and gating on `empty( innerBlocks )` would silently
+		// suppress our heading whenever any other extension ran first.
 		//
 		// `core/heading` is a static block, so the serialised markup must
 		// match what the editor would have saved (`<h2 class="wp-block-heading">…</h2>`)
@@ -96,25 +98,26 @@ final class ShopperCollection extends AbstractBlock {
 		// contains `&`, `<`, etc. The matching `null` push onto `innerContent`
 		// is what makes `WP_Block::render()` walk into the heading when
 		// building `$content`.
-		if ( empty( $parsed_hooked_block['innerBlocks'] ) ) {
-			$region_label = $this->get_variation_config()['regionLabel'];
-			$heading_html = '<h2 class="wp-block-heading">' . esc_html( $region_label ) . '</h2>';
+		$region_label = $this->get_variation_config()['regionLabel'];
+		$heading_html = '<h2 class="wp-block-heading">' . esc_html( $region_label ) . '</h2>';
 
-			$parsed_hooked_block['innerBlocks'][] = array(
-				'blockName'    => 'core/heading',
-				'attrs'        => array(
-					'level'   => 2,
-					'content' => $region_label,
-				),
-				'innerBlocks'  => array(),
-				'innerHTML'    => $heading_html,
-				'innerContent' => array( $heading_html ),
-			);
-			if ( ! isset( $parsed_hooked_block['innerContent'] ) || ! is_array( $parsed_hooked_block['innerContent'] ) ) {
-				$parsed_hooked_block['innerContent'] = array();
-			}
-			$parsed_hooked_block['innerContent'][] = null;
+		if ( ! isset( $parsed_hooked_block['innerBlocks'] ) || ! is_array( $parsed_hooked_block['innerBlocks'] ) ) {
+			$parsed_hooked_block['innerBlocks'] = array();
 		}
+		$parsed_hooked_block['innerBlocks'][] = array(
+			'blockName'    => 'core/heading',
+			'attrs'        => array(
+				'level'   => 2,
+				'content' => $region_label,
+			),
+			'innerBlocks'  => array(),
+			'innerHTML'    => $heading_html,
+			'innerContent' => array( $heading_html ),
+		);
+		if ( ! isset( $parsed_hooked_block['innerContent'] ) || ! is_array( $parsed_hooked_block['innerContent'] ) ) {
+			$parsed_hooked_block['innerContent'] = array();
+		}
+		$parsed_hooked_block['innerContent'][] = null;
 
 		return $parsed_hooked_block;
 	}

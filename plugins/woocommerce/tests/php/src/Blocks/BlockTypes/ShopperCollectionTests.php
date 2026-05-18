@@ -169,25 +169,22 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * If something else has already populated `innerBlocks` (e.g. another hook
-	 * running first, or a saved customisation), the seeding logic must not
-	 * clobber it.
+	 * Extensions are free to hook `hooked_block_woocommerce/shopper-collection`
+	 * to add their own inner blocks at a different priority. Our heading must
+	 * still be seeded alongside, not in place of, what they added.
 	 */
-	public function test_hooked_block_attributes_preserves_existing_inner_blocks(): void {
-		$existing_heading    = array(
-			'blockName'    => 'core/heading',
-			'attrs'        => array(
-				'level'   => 3,
-				'content' => 'My custom heading',
-			),
+	public function test_hooked_block_attributes_appends_heading_alongside_existing_inner_blocks(): void {
+		$existing_block      = array(
+			'blockName'    => 'core/paragraph',
+			'attrs'        => array(),
 			'innerBlocks'  => array(),
-			'innerHTML'    => '<h3 class="wp-block-heading">My custom heading</h3>',
-			'innerContent' => array( '<h3 class="wp-block-heading">My custom heading</h3>' ),
+			'innerHTML'    => '<p>From another extension</p>',
+			'innerContent' => array( '<p>From another extension</p>' ),
 		);
 		$parsed_hooked_block = array(
 			'blockName'    => 'woocommerce/shopper-collection',
 			'attrs'        => array(),
-			'innerBlocks'  => array( $existing_heading ),
+			'innerBlocks'  => array( $existing_block ),
 			'innerContent' => array( null ),
 		);
 		$parsed_anchor_block = array( 'blockName' => 'woocommerce/cart' );
@@ -199,8 +196,15 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 			$parsed_anchor_block
 		);
 
-		$this->assertCount( 1, $result['innerBlocks'] );
-		$this->assertSame( $existing_heading, $result['innerBlocks'][0] );
+		$this->assertCount( 2, $result['innerBlocks'] );
+		// The other-extension block is preserved at its original index.
+		$this->assertSame( $existing_block, $result['innerBlocks'][0] );
+		// Our heading is appended after it.
+		$this->assertSame( 'core/heading', $result['innerBlocks'][1]['blockName'] );
+		$this->assertSame( 'Saved for later', $result['innerBlocks'][1]['attrs']['content'] );
+		// Parent innerContent gains a `null` placeholder for each inner block,
+		// so `WP_Block::render()` walks into both when building `$content`.
+		$this->assertCount( 2, $result['innerContent'] );
 	}
 
 	/**
