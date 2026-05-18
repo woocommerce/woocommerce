@@ -375,7 +375,6 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 			'_stock_status'           => 'stock_status',
 			'_virtual'                => 'virtual',
 			'_product_image_gallery'  => 'gallery_image_ids',
-			'_wc_media_gallery'       => 'media_gallery',
 			'_download_limit'         => 'download_limit',
 			'_download_expiry'        => 'download_expiry',
 			'_downloadable'           => 'downloadable',
@@ -634,6 +633,25 @@ class WC_Product_Variation_Data_Store_CPT extends WC_Product_Data_Store_CPT impl
 		}
 
 		parent::update_post_meta( $product, $force );
+	}
+
+	/**
+	 * Update meta data in, or delete it from, the database.
+	 *
+	 * Variations do not support product media galleries.
+	 *
+	 * @param WC_Data $product    Product object.
+	 * @param string  $meta_key   Meta key to update.
+	 * @param mixed   $meta_value Value to save.
+	 * @since 10.9.0
+	 * @return bool
+	 */
+	protected function update_or_delete_post_meta( $product, $meta_key, $meta_value ) {
+		if ( '_wc_media_gallery' === $meta_key ) {
+			return false;
+		}
+
+		return parent::update_or_delete_post_meta( $product, $meta_key, $meta_value );
 	}
 
 	/**
