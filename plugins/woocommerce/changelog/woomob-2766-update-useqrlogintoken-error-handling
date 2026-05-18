@@ -1,4 +1,4 @@
 Significance: patch
 Type: tweak
 
-Update the useQRLoginToken admin hook to handle the capability-based permission errors surfaced by the mobile-app QR login endpoint.
+Improve wc-admin error handling for mobile-app QR login permission and availability failures.
