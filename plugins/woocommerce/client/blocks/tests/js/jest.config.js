@@ -92,8 +92,7 @@ module.exports = {
 			'<rootDir>/../../../../packages/js/$1/src/$2',
 		'^@woocommerce/([^/]+)/(.+)$':
 			'<rootDir>/../../../../packages/js/$1/src/$2',
-		'^@woocommerce/([^/]+)$':
-			'<rootDir>/../../../../packages/js/$1/src',
+		'^@woocommerce/([^/]+)$': '<rootDir>/../../../../packages/js/$1/src',
 	},
 	preset: '@wordpress/jest-preset-default',
 	setupFiles: [ '<rootDir>/tests/js/config/global-mocks.js' ],
