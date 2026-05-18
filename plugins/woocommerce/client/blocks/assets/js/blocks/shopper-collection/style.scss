@@ -147,7 +147,7 @@ $grid-gap: var(--wp--style--block-gap, 1.5em);
 	color: rgba(0, 0, 0, 0.7);
 	grid-column: 1 / -1;
 	padding: 1em 0;
-	text-align: center;
+	text-align: left;
 }
 
 // Error state spans every grid column so it reads as a single alert
