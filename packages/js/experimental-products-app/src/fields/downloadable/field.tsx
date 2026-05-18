@@ -142,16 +142,17 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 							| Attachment
 							| undefined;
 
-						if ( ! attachment?.id ) {
-							return;
-						}
-
-						const uploadedDownload = toUploadedDownload(
-							attachment,
-							file
-						);
+						const uploadedDownload = attachment?.id
+							? toUploadedDownload( attachment, file )
+							: undefined;
 
 						if ( ! uploadedDownload ) {
+							URL.revokeObjectURL( objectUrl );
+							setVisibleDownloads(
+								downloadsRef.current.filter(
+									( download ) => download.file !== objectUrl
+								)
+							);
 							return;
 						}
 

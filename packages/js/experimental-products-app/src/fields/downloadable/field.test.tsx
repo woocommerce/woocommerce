@@ -193,4 +193,40 @@ describe( 'downloadable field', () => {
 		expect( onChange ).not.toHaveBeenCalled();
 		expect( screen.queryByText( /manual\.pdf/ ) ).not.toBeInTheDocument();
 	} );
+
+	it.each( [
+		[ 'missing media ID', { url: 'https://example.com/manual.pdf' } ],
+		[ 'missing media URL', { id: 34 } ],
+	] )(
+		'removes the temporary download when uploaded attachment has a %s',
+		( _name, attachment ) => {
+			const { container, onChange } = renderEdit( buildProduct() );
+			const file = new File( [ 'manual' ], 'manual.pdf', {
+				type: 'application/pdf',
+			} );
+			const fileInput = container.querySelector(
+				'input[type="file"]'
+			) as HTMLInputElement;
+
+			fireEvent.change( fileInput, {
+				target: {
+					files: [ file ],
+				},
+			} );
+
+			act( () => {
+				mockUploadMedia.mock.calls[ 0 ][ 0 ].onFileChange( [
+					attachment,
+				] );
+			} );
+
+			expect( URL.revokeObjectURL ).toHaveBeenCalledWith(
+				'blob:download-file'
+			);
+			expect( onChange ).not.toHaveBeenCalled();
+			expect(
+				screen.queryByText( /manual\.pdf/ )
+			).not.toBeInTheDocument();
+		}
+	);
 } );
