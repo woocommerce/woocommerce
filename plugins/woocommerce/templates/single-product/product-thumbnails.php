@@ -40,20 +40,35 @@ if ( count( $media_items ) > 1 ) {
 			continue;
 		}
 
-		if ( 'video' === ( $media_item['media_type'] ?? '' ) && function_exists( 'wc_get_gallery_video_html' ) ) {
+		$is_video = 'video' === ( $media_item['media_type'] ?? '' ) && function_exists( 'wc_get_gallery_video_html' );
+
+		if ( $is_video ) {
 			$html = wc_get_gallery_video_html( $media_item, false, $key );
 		} else {
 			$html = wc_get_gallery_image_html( $attachment_id, false, $key );
 		}
 
-		/**
-		 * Filter product image thumbnail HTML string.
-		 *
-		 * @since 1.6.4
-		 *
-		 * @param string $html          Product image thumbnail HTML string.
-		 * @param int    $attachment_id Attachment ID.
-		 */
-		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $attachment_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		if ( $is_video ) {
+			/**
+			 * Filter product video thumbnail HTML string.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param string $html          Product video thumbnail HTML string.
+			 * @param int    $attachment_id Video attachment ID.
+			 * @param array  $media_item    Product media gallery item.
+			 */
+			echo apply_filters( 'woocommerce_single_product_video_thumbnail_html', $html, $attachment_id, $media_item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		} else {
+			/**
+			 * Filter product image thumbnail HTML string.
+			 *
+			 * @since 1.6.4
+			 *
+			 * @param string $html          Product image thumbnail HTML string.
+			 * @param int    $attachment_id Attachment ID.
+			 */
+			echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $attachment_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
 	}
 }

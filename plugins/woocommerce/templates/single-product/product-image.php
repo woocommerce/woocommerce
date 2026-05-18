@@ -35,6 +35,7 @@ $media_items       = function_exists( 'wc_get_product_media_gallery_items' )
 $first_media_item = $media_items[0] ?? array();
 $first_media_id   = isset( $first_media_item['id'] ) ? absint( $first_media_item['id'] ) : $post_thumbnail_id;
 $has_media        = ! empty( $first_media_item ) && 'placeholder' !== ( $first_media_item['source_type'] ?? '' );
+$is_video         = $has_media && 'video' === ( $first_media_item['media_type'] ?? '' ) && function_exists( 'wc_get_gallery_video_html' );
 $wrapper_classes   = apply_filters(
 	'woocommerce_single_product_image_gallery_classes',
 	array(
@@ -48,11 +49,7 @@ $wrapper_classes   = apply_filters(
 <div class="<?php echo esc_attr( implode( ' ', array_map( 'sanitize_html_class', $wrapper_classes ) ) ); ?>" data-columns="<?php echo esc_attr( $columns ); ?>" style="opacity: 0; transition: opacity .25s ease-in-out;">
 	<div class="woocommerce-product-gallery__wrapper">
 		<?php
-		if (
-			$has_media &&
-			'video' === ( $first_media_item['media_type'] ?? '' ) &&
-			function_exists( 'wc_get_gallery_video_html' )
-		) {
+		if ( $is_video ) {
 			$html = wc_get_gallery_video_html( $first_media_item, true, 0 );
 		} elseif ( $has_media && $first_media_id ) {
 			$html = wc_get_gallery_image_html( $first_media_id, true );
@@ -68,15 +65,28 @@ $wrapper_classes   = apply_filters(
 			$html             .= '</div>';
 		}
 
-		/**
-		 * Filter product image thumbnail HTML string.
-		 *
-		 * @since 1.6.4
-		 *
-		 * @param string $html          Product image thumbnail HTML string.
-		 * @param int    $attachment_id Attachment ID.
-		 */
-		echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $first_media_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		if ( $is_video ) {
+			/**
+			 * Filter product video thumbnail HTML string.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param string $html          Product video thumbnail HTML string.
+			 * @param int    $attachment_id Video attachment ID.
+			 * @param array  $media_item    Product media gallery item.
+			 */
+			echo apply_filters( 'woocommerce_single_product_video_thumbnail_html', $html, $first_media_id, $first_media_item ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		} else {
+			/**
+			 * Filter product image thumbnail HTML string.
+			 *
+			 * @since 1.6.4
+			 *
+			 * @param string $html          Product image thumbnail HTML string.
+			 * @param int    $attachment_id Attachment ID.
+			 */
+			echo apply_filters( 'woocommerce_single_product_image_thumbnail_html', $html, $first_media_id ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped
+		}
 
 		do_action( 'woocommerce_product_thumbnails' );
 		?>
