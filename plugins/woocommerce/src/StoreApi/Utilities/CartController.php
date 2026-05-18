@@ -309,7 +309,8 @@ class CartController {
 						$product->get_name(),
 						wc_format_stock_quantity_for_display( $qty_remaining, $product )
 					),
-					400
+					400,
+					array( 'quantity_remaining' => $qty_remaining ) // phpcs:ignore WordPress.Security.EscapeOutput.ExceptionNotEscaped
 				);
 			}
 		}

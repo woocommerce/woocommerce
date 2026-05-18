@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Blocks\StoreApi\Utilities;
 
+use Automattic\WooCommerce\StoreApi\Exceptions\RouteException;
 use Automattic\WooCommerce\StoreApi\Utilities\CartController;
 use Automattic\WooCommerce\Tests\Blocks\Helpers\FixtureData;
 use Yoast\PHPUnitPolyfills\TestCases\TestCase;
@@ -162,6 +163,53 @@ class CartControllerTests extends TestCase {
 
 		foreach ( $expected_errors as $expected_error ) {
 			$this->assertContains( $expected_error, $error_codes );
+		}
+	}
+
+	/**
+	 * Partial-stock errors from validate_add_to_cart must expose the
+	 * remaining stock quantity (matching what the user-facing message says)
+	 * under `additional_data` so clients can compute an addable amount and
+	 * retry with a clamped quantity.
+	 */
+	public function test_validate_add_to_cart_partial_stock_exposes_quantity_remaining(): void {
+		$class    = new CartController();
+		$fixtures = new FixtureData();
+
+		$product = $fixtures->get_simple_product(
+			array(
+				'name'          => 'Test Product Partial Stock',
+				'regular_price' => 10,
+			)
+		);
+		$product->set_manage_stock( true );
+		$product->set_stock_quantity( 3 );
+		$product->save();
+
+		// 1 already in cart, request 5 more → 6 > 3 remaining.
+		wc()->cart->add_to_cart( $product->get_id(), 1 );
+
+		$request = array(
+			'id'             => $product->get_id(),
+			'quantity'       => 5,
+			'variation'      => array(),
+			'cart_item_data' => array(),
+		);
+
+		$fresh_product = wc_get_product( $product->get_id() );
+		$this->assertInstanceOf( \WC_Product::class, $fresh_product );
+
+		try {
+			$class->validate_add_to_cart( $fresh_product, $request );
+			$this->fail( 'Expected RouteException was not thrown.' );
+		} catch ( RouteException $e ) {
+			$this->assertSame( 'woocommerce_rest_product_partially_out_of_stock', $e->getErrorCode() );
+			$additional = $e->getAdditionalData();
+			$this->assertArrayHasKey( 'quantity_remaining', $additional );
+			// Matches the value shown in the user-facing message — total
+			// stock remaining for the product, not net of what's already in
+			// the cart.
+			$this->assertSame( 3, $additional['quantity_remaining'] );
 		}
 	}
 

@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Store API: expose remaining stock quantity on partial-stock add-to-cart errors via additional_data.quantity_remaining.
