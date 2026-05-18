@@ -24,6 +24,17 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 	class WC_Email_Customer_Checkout_Recovery extends WC_Email {
 
 		/**
+		 * Plugins known to provide their own checkout recovery flow.
+		 *
+		 * Detection is install-only.
+		 * ToDo: Detect if the plugin is actually configured for checkout recovery.
+		 */
+		public const KNOWN_RECOVERY_HANDLERS = array(
+			'automatewoo/automatewoo.php' => 'AutomateWoo',
+			'mailpoet/mailpoet.php'       => 'MailPoet',
+		);
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
@@ -60,6 +71,10 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * @param int $order_id The order ID.
 		 */
 		public function trigger( $order_id ): void {
+			if ( self::is_suppressed() ) {
+				return;
+			}
+
 			$this->setup_locale();
 
 			// Reset state from any previous invocation so a call with an invalid order id
@@ -98,6 +113,55 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 */
 		public function is_automated(): bool {
 			return 'yes' === $this->get_option( 'automated', 'no' );
+		}
+
+		/**
+		 * Currently-active known recovery handlers, keyed by plugin file path with the display name as value.
+		 *
+		 * @since 10.9.0
+		 * @return array<string, string> Map of plugin file path → display name for plugins that are active.
+		 */
+		public static function get_active_recovery_handlers(): array {
+			if ( ! function_exists( 'is_plugin_active' ) ) {
+				require_once ABSPATH . 'wp-admin/includes/plugin.php';
+			}
+
+			return array_filter(
+				self::KNOWN_RECOVERY_HANDLERS,
+				static fn( $name, $slug ) => is_plugin_active( $slug ),
+				ARRAY_FILTER_USE_BOTH
+			);
+		}
+
+		/**
+		 * Whether the recovery email should be skipped.
+		 *
+		 * Returns true when either the merchant suppression toggle is on or a
+		 * `woocommerce_checkout_recovery_suppress` filter callback short-circuits
+		 * the send. Static so the manual-send handler and the scheduler can call
+		 * it without instantiating the email class.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @return bool
+		 */
+		public static function is_suppressed(): bool {
+			$settings = (array) get_option( 'woocommerce_customer_checkout_recovery_settings', array() );
+			if ( isset( $settings['suppressed'] ) && 'yes' === $settings['suppressed'] ) {
+				return true;
+			}
+
+			/**
+			 * Filter to suppress the checkout recovery email send.
+			 *
+			 * Partner plugins that handle abandoned-checkout recovery themselves can
+			 * return true here to prevent core from sending a duplicate email.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param bool $suppress Default false.
+			 */
+			return (bool) apply_filters( 'woocommerce_checkout_recovery_suppress', false );
 		}
 
 		/**
@@ -208,12 +272,31 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 				__( 'Available placeholders: %s', 'woocommerce' ),
 				'<code>' . implode( '</code>, <code>', array_map( 'esc_html', array_keys( $this->placeholders ) ) ) . '</code>'
 			);
+
+			$active_handlers      = self::get_active_recovery_handlers();
+			$suppress_default     = empty( $active_handlers ) ? 'no' : 'yes';
+			$suppress_description = empty( $active_handlers )
+				? __( 'Check this when another plugin handles abandoned checkout recovery, so customers do not receive duplicate emails.', 'woocommerce' )
+				: sprintf(
+					/* translators: %s: comma-separated list of detected plugins that already handle checkout recovery (e.g. "AutomateWoo, MailPoet"). */
+					__( '%s is active on this site. If its abandoned cart workflow is configured, leave this checked to avoid duplicate emails. Uncheck if you want WooCommerce to handle recovery instead.', 'woocommerce' ),
+					implode( ', ', $active_handlers )
+				);
+
 			$this->form_fields = array(
 				'enabled'            => array(
 					'title'   => __( 'Enable/Disable', 'woocommerce' ),
 					'type'    => 'checkbox',
 					'label'   => __( 'Enable this email notification', 'woocommerce' ),
 					'default' => 'yes',
+				),
+				'suppressed'         => array(
+					'title'       => __( 'Suppress when another tool is in use', 'woocommerce' ),
+					'type'        => 'checkbox',
+					'label'       => __( 'I have another tool handling abandoned checkout recovery', 'woocommerce' ),
+					'description' => $suppress_description,
+					'default'     => $suppress_default,
+					'desc_tip'    => true,
 				),
 				'automated'          => array(
 					'title'       => __( 'Send automatically', 'woocommerce' ),
