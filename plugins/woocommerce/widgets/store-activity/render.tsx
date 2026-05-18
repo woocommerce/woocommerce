@@ -1,3 +1,6 @@
+// eslint-disable-next-line @wordpress/use-recommended-components -- experimental DataViews integration.
+import { DataViews, filterSortAndPaginate } from '@wordpress/dataviews';
+import type { Field, View } from '@wordpress/dataviews';
 import { useState, useMemo, useCallback } from '@wordpress/element';
 import { __ } from '@wordpress/i18n';
 import { Icon } from '@wordpress/icons';
@@ -5,42 +8,75 @@ import { StoreActivityEmptyState, ActivitySourcesLoader } from './components';
 import { useActivitySources } from './hooks';
 import type { StoreActivityEvent, ActivityHookResult } from './types';
 
-/**
- * Formats an ISO 8601 datetime into a short local time string.
- */
-function formatEventTime( datetime: string ): string {
-	return new Date( datetime ).toLocaleTimeString( 'en-US', {
-		hour: 'numeric',
-		minute: '2-digit',
-		hour12: true,
-	} );
-}
+const LAYOUT_ACTIVITY = 'activity';
 
-/**
- * Groups events by their date (YYYY-MM-DD), preserving sort order within
- * each group.
- */
-function groupEventsByDate(
-	events: StoreActivityEvent[]
-): Array< [ string, StoreActivityEvent[] ] > {
-	const groups = new Map< string, StoreActivityEvent[] >();
+const fields: Field< StoreActivityEvent >[] = [
+	{
+		label: __( 'Icon', 'woocommerce' ),
+		id: 'icon',
+		type: 'media',
+		render: ( { item } ) => <Icon icon={ item.icon } />,
+		enableSorting: false,
+	},
+	{
+		label: __( 'Content', 'woocommerce' ),
+		id: 'content',
+		render: ( { item } ) => item.renderContent(),
+		enableSorting: false,
+	},
+	{
+		id: 'time',
+		label: __( 'Time', 'woocommerce' ),
+		type: 'datetime',
+		enableSorting: false,
+		getValue: ( { item } ) => item.datetime,
+		render: ( { item } ) => (
+			<span>
+				{ new Date( item.datetime ).toLocaleTimeString( 'en-US', {
+					hour: 'numeric',
+					minute: '2-digit',
+					hour12: true,
+				} ) }
+			</span>
+		),
+	},
+	{
+		id: 'date',
+		label: __( 'Date', 'woocommerce' ),
+		type: 'date',
+		enableSorting: false,
+		getValue: ( { item } ) => item.datetime.split( 'T' )[ 0 ],
+	},
+];
 
-	for ( const event of events ) {
-		const date = event.datetime.split( 'T' )[ 0 ];
-		const bucket = groups.get( date ) ?? [];
-		bucket.push( event );
-		groups.set( date, bucket );
-	}
-
-	return Array.from( groups.entries() );
-}
+const defaultView: View = {
+	type: LAYOUT_ACTIVITY,
+	search: '',
+	page: 1,
+	perPage: 20,
+	filters: [],
+	fields: [ 'time' ],
+	titleField: 'content',
+	mediaField: 'icon',
+	showMedia: true,
+	sort: {
+		field: 'datetime',
+		direction: 'desc',
+	},
+	groupBy: {
+		field: 'date',
+		direction: 'desc',
+		showLabel: false,
+	},
+};
 
 /**
  * Store Activity widget render component.
- * Aggregates events from registered sources and renders them as a
- * date-grouped list.
+ * Aggregates events from registered sources and renders them via DataViews
+ * activity layout.
  */
 export default function StoreActivityRender() {
+	const [ view, setView ] = useState< View >( defaultView );
 	const sources = useActivitySources();
 	const [ results, setResults ] = useState<
 		Record< string, ActivityHookResult >
@@ -79,10 +115,9 @@ export default function StoreActivityRender() {
 	const waitingForResults =
 		sources.length > 0 && allResults.length < sources.length;
 
-	const groupedEvents = useMemo(
-		() => groupEventsByDate( events ),
-		[ events ]
-	);
+	const { data: shownData, paginationInfo } = useMemo( () => {
+		return filterSortAndPaginate( events, view, fields );
+	}, [ events, view ] );
 
 	return (
 		<>
@@ -103,36 +138,24 @@ export default function StoreActivityRender() {
 
 			{ ! isLoading && ! waitingForResults && events.length > 0 && (
 				<div className="store-activity-widget">
-					{ groupedEvents.map( ( [ date, dayEvents ] ) => (
-						<section
-							key={ date }
-							className="store-activity-widget__group"
-						>
-							<header className="store-activity-widget__group-header">
-								{ date }
-							</header>
-							<ul className="store-activity-widget__list">
-								{ dayEvents.map( ( event ) => (
-									<li
-										key={ event.id }
-										className="store-activity-widget__event"
-									>
-										<span className="store-activity-widget__event-icon">
-											<Icon icon={ event.icon } />
-										</span>
-										<span className="store-activity-widget__event-content">
-											{ event.renderContent() }
-										</span>
-										<span className="store-activity-widget__event-time">
-											{ formatEventTime(
-												event.datetime
-											) }
-										</span>
-									</li>
-								) ) }
-							</ul>
-						</section>
-					) ) }
+					<DataViews
+						getItemId={ ( item ) => item.id.toString() }
+						paginationInfo={ paginationInfo }
+						data={ shownData }
+						view={ view }
+						fields={ fields }
+						onChangeView={ setView }
+						defaultLayouts={ {
+							[ LAYOUT_ACTIVITY ]: {
+								sort: {
+									field: 'datetime',
+									direction: 'desc',
+								},
+							},
+						} }
+					>
+						<DataViews.Layout />
+					</DataViews>
 				</div>
 			) }
 		</>
