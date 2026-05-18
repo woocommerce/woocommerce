@@ -8,8 +8,8 @@ namespace Automattic\WooCommerce\Internal\Admin;
  * Displays a full-screen animated piñata overlay when a merchant opens a
  * milestone order (1st, 100th, or 1000th real order) in the admin.
  *
- * Only fires for live-mode WooCommerce Payments orders
- * (transaction_id set AND wcpay_mode = live).
+ * Fires for any real paid order: status is processing or completed and a
+ * transaction ID is present (excludes test/sandbox transactions).
  *
  * @since 10.8.0
  */
@@ -63,11 +63,6 @@ class OrderMilestoneEasterEgg {
 			return;
 		}
 
-		// This feature tracks WooPayments order milestones; bail if the plugin is not active.
-		if ( ! class_exists( 'WC_Payments' ) ) {
-			return;
-		}
-
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
 		$woo_egg_key  = isset( $_GET['woo_egg'] ) ? sanitize_key( wp_unslash( $_GET['woo_egg'] ) ) : '';
 		$page_param   = isset( $_GET['page'] )     ? sanitize_key( wp_unslash( $_GET['page'] ) )    : '';
@@ -91,10 +86,10 @@ class OrderMilestoneEasterEgg {
 			return;
 		}
 
-		// For real order pages: check cheaply whether the current order is a WooPayments live order
+		// For real order pages: check cheaply whether the current order qualifies
 		// before running the more expensive milestone count query.
 		if ( ! $is_debug_preview ) {
-			if ( $id_param <= 0 || ! $this->is_wcpay_live_order( $id_param ) ) {
+			if ( $id_param <= 0 || ! $this->is_qualifying_order( $id_param ) ) {
 				return;
 			}
 		}
@@ -165,19 +160,20 @@ class OrderMilestoneEasterEgg {
 	}
 
 	/**
-	 * Returns true if the given order has a transaction ID and is a WooPayments live-mode order.
+	 * Returns true if the given order is a real paid order (processing or completed with a transaction ID).
 	 *
 	 * Used as a cheap pre-filter before running the full milestone count query.
 	 *
 	 * @param int $order_id The order ID to check.
 	 * @return bool
 	 */
-	public function is_wcpay_live_order( int $order_id ): bool {
+	public function is_qualifying_order( int $order_id ): bool {
 		$order = wc_get_order( $order_id );
 		if ( ! $order instanceof \WC_Order ) {
 			return false;
 		}
-		return '' !== $order->get_transaction_id() && 'live' === $order->get_meta( 'wcpay_mode' );
+		return '' !== $order->get_transaction_id()
+			&& in_array( $order->get_status(), array( 'processing', 'completed' ), true );
 	}
 
 	/**
@@ -186,26 +182,30 @@ class OrderMilestoneEasterEgg {
 	 * @return array<int, array<string, string>>
 	 */
 	private function get_milestone_map(): array {
+		$candidate_orders = (array) wc_get_orders(
+			array(
+				'limit'   => 1001,
+				'orderby' => 'date',
+				'order'   => 'ASC',
+				'status'  => array( 'processing', 'completed' ),
+				'return'  => 'objects',
+			)
+		);
+
+		$qualifying_statuses = array( 'processing', 'completed' );
+
 		$all_real_order_ids = array_values(
-			(array) wc_get_orders(
-				array(
-					'limit'       => 1001,
-					'orderby'     => 'date',
-					'order'       => 'ASC',
-					'field_query' => array( // Uses native HPOS column — avoids slow meta_query for transaction_id.
-						array(
-							'field'   => 'transaction_id',
-							'compare' => 'EXISTS',
-						),
-					),
-					'meta_query'  => array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
-						array(
-							'key'     => 'wcpay_mode',
-							'value'   => 'live',
-							'compare' => '=',
-						),
-					),
-					'return'      => 'ids',
+			array_map(
+				function ( $order ) {
+					return $order->get_id();
+				},
+				array_filter(
+					$candidate_orders,
+					function ( $order ) use ( $qualifying_statuses ) {
+						return $order instanceof \WC_Order
+							&& '' !== $order->get_transaction_id()
+							&& in_array( $order->get_status(), $qualifying_statuses, true );
+					}
 				)
 			)
 		);

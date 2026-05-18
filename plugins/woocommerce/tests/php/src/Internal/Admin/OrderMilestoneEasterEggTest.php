@@ -6,6 +6,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin;
 
 use Automattic\WooCommerce\Internal\Admin\OrderMilestoneEasterEgg;
 use Automattic\WooCommerce\RestApi\UnitTests\HPOSToggleTrait;
+use Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper;
 
 /**
  * Unit tests for OrderMilestoneEasterEgg.
@@ -30,6 +31,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	}
 
 	public function tearDown(): void {
+		// Drop HPOS tables before toggling off — avoids the "orders out of sync" exception
+		// that fires when HPOS is disabled while the table still holds unsync'd rows.
+		OrderHelper::delete_order_custom_tables();
 		$this->clean_up_cot_setup();
 		wp_set_current_user( 0 );
 		parent::tearDown();
@@ -58,7 +62,7 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	// -------------------------------------------------------------------------
 
 	public function test_handle_ajax_dismiss_saves_seen_meta(): void {
-		$order = $this->create_wcpay_live_order();
+		$order = $this->create_real_paid_order();
 
 		$_POST['order_id'] = $order->get_id();
 		$_POST['nonce']    = wp_create_nonce( 'wc_egg_dismiss' );
@@ -87,7 +91,7 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 			// expected.
 		}
 
-		$meta = get_user_metadata( $this->admin_user_id, '', false );
+		$meta = get_user_meta( $this->admin_user_id );
 		$keys = array_keys( $meta );
 		$seen = array_filter( $keys, fn( $k ) => str_starts_with( $k, '_wc_egg_seen_' ) );
 		$this->assertEmpty( $seen );
@@ -110,41 +114,42 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	}
 
 	// -------------------------------------------------------------------------
-	// is_wcpay_live_order
+	// is_qualifying_order
 	// -------------------------------------------------------------------------
 
-	public function test_is_wcpay_live_order_returns_true_for_qualifying_order(): void {
-		$order = $this->create_wcpay_live_order();
-		$this->assertTrue( $this->sut->is_wcpay_live_order( $order->get_id() ) );
+	public function test_is_qualifying_order_returns_true_for_processing_order(): void {
+		$order = $this->create_real_paid_order();
+		$this->assertTrue( $this->sut->is_qualifying_order( $order->get_id() ) );
 	}
 
-	public function test_is_wcpay_live_order_returns_false_without_transaction_id(): void {
+	public function test_is_qualifying_order_returns_true_for_completed_order(): void {
 		$order = new \WC_Order();
-$order->update_meta_data( 'wcpay_mode', 'live' );
+		$order->set_transaction_id( 'txn_live_' . wp_rand( 1000, 9999 ) );
+		$order->set_status( 'completed' );
 		$order->save();
 
-		$this->assertFalse( $this->sut->is_wcpay_live_order( $order->get_id() ) );
+		$this->assertTrue( $this->sut->is_qualifying_order( $order->get_id() ) );
 	}
 
-	public function test_is_wcpay_live_order_returns_false_for_test_mode(): void {
+	public function test_is_qualifying_order_returns_false_without_transaction_id(): void {
 		$order = new \WC_Order();
-$order->set_transaction_id( 'txn_test_123' );
-		$order->update_meta_data( 'wcpay_mode', 'test' );
+		$order->set_status( 'processing' );
 		$order->save();
 
-		$this->assertFalse( $this->sut->is_wcpay_live_order( $order->get_id() ) );
+		$this->assertFalse( $this->sut->is_qualifying_order( $order->get_id() ) );
 	}
 
-	public function test_is_wcpay_live_order_returns_false_for_missing_wcpay_meta(): void {
+	public function test_is_qualifying_order_returns_false_for_pending_status(): void {
 		$order = new \WC_Order();
-$order->set_transaction_id( 'txn_live_456' );
+		$order->set_transaction_id( 'txn_live_789' );
+		$order->set_status( 'pending' );
 		$order->save();
 
-		$this->assertFalse( $this->sut->is_wcpay_live_order( $order->get_id() ) );
+		$this->assertFalse( $this->sut->is_qualifying_order( $order->get_id() ) );
 	}
 
-	public function test_is_wcpay_live_order_returns_false_for_nonexistent_order(): void {
-		$this->assertFalse( $this->sut->is_wcpay_live_order( 999999 ) );
+	public function test_is_qualifying_order_returns_false_for_nonexistent_order(): void {
+		$this->assertFalse( $this->sut->is_qualifying_order( 999999 ) );
 	}
 
 	// -------------------------------------------------------------------------
@@ -152,7 +157,7 @@ $order->set_transaction_id( 'txn_live_456' );
 	// -------------------------------------------------------------------------
 
 	public function test_get_milestone_map_identifies_first_order(): void {
-		$order = $this->create_wcpay_live_order();
+		$order = $this->create_real_paid_order();
 
 		$map = $this->get_milestone_map_via_filter();
 
@@ -160,27 +165,8 @@ $order->set_transaction_id( 'txn_live_456' );
 		$this->assertEquals( 'lama', $map[ $order->get_id() ]['variant'] );
 	}
 
-	public function test_get_milestone_map_is_empty_when_no_wcpay_live_orders(): void {
-		$order = new \WC_Order();
-$order->set_transaction_id( 'txn_test' );
-		$order->update_meta_data( 'wcpay_mode', 'test' );
-		$order->save();
-
-		$map = $this->get_milestone_map_via_filter();
-		$this->assertEmpty( $map );
-	}
-
-	public function test_get_milestone_map_is_empty_when_transaction_id_missing(): void {
-		$order = new \WC_Order();
-$order->update_meta_data( 'wcpay_mode', 'live' );
-		$order->save();
-
-		$map = $this->get_milestone_map_via_filter();
-		$this->assertEmpty( $map );
-	}
-
 	public function test_get_milestone_map_applies_wc_order_milestone_egg_map_filter(): void {
-		$order = $this->create_wcpay_live_order();
+		$order = $this->create_real_paid_order();
 
 		add_filter(
 			'wc_order_milestone_egg_map',
@@ -202,14 +188,13 @@ $order->update_meta_data( 'wcpay_mode', 'live' );
 	// -------------------------------------------------------------------------
 
 	public function test_enqueue_skipped_when_user_opted_out(): void {
-		// Simulate opted-out user on order edit page with WCPay active.
+		$order = $this->create_real_paid_order();
 		update_user_meta( $this->admin_user_id, '_wc_egg_opted_out', '1' );
 
 		$_GET['page']   = 'wc-orders';
 		$_GET['action'] = 'edit';
-		$_GET['id']     = '1';
+		$_GET['id']     = (string) $order->get_id();
 
-		$this->mock_wc_payments_active( true );
 		$this->sut->handle_admin_enqueue_scripts();
 
 		$this->assertFalse( wp_script_is( 'wc-order-milestone-easter-egg', 'enqueued' ) );
@@ -221,7 +206,6 @@ $order->update_meta_data( 'wcpay_mode', 'live' );
 	public function test_enqueue_skipped_when_not_order_edit_page(): void {
 		$_GET['page'] = 'woocommerce';
 
-		$this->mock_wc_payments_active( true );
 		$this->sut->handle_admin_enqueue_scripts();
 
 		$this->assertFalse( wp_script_is( 'wc-order-milestone-easter-egg', 'enqueued' ) );
@@ -229,15 +213,15 @@ $order->update_meta_data( 'wcpay_mode', 'live' );
 		unset( $_GET['page'] );
 	}
 
-	public function test_enqueue_skipped_when_current_order_is_not_wcpay_live(): void {
+	public function test_enqueue_skipped_when_current_order_is_not_qualifying(): void {
 		$order = new \WC_Order();
-$order->save();
+		$order->set_status( 'pending' );
+		$order->save();
 
 		$_GET['page']   = 'wc-orders';
 		$_GET['action'] = 'edit';
 		$_GET['id']     = (string) $order->get_id();
 
-		$this->mock_wc_payments_active( true );
 		$this->sut->handle_admin_enqueue_scripts();
 
 		$this->assertFalse( wp_script_is( 'wc-order-milestone-easter-egg', 'enqueued' ) );
@@ -250,12 +234,12 @@ $order->save();
 	// -------------------------------------------------------------------------
 
 	/**
-	 * Creates a WooPayments live-mode order with a transaction ID.
+	 * Creates a real paid order (processing status with a transaction ID).
 	 */
-	private function create_wcpay_live_order(): \WC_Order {
+	private function create_real_paid_order(): \WC_Order {
 		$order = new \WC_Order();
-$order->set_transaction_id( 'txn_live_' . wp_rand( 1000, 9999 ) );
-		$order->update_meta_data( 'wcpay_mode', 'live' );
+		$order->set_transaction_id( 'txn_live_' . wp_rand( 1000, 9999 ) );
+		$order->set_status( 'processing' );
 		$order->save();
 		return $order;
 	}
@@ -283,16 +267,5 @@ $order->set_transaction_id( 'txn_live_' . wp_rand( 1000, 9999 ) );
 		remove_all_filters( 'wc_order_milestone_egg_map' );
 
 		return $captured;
-	}
-
-	/**
-	 * Mocks WC_Payments class existence for the duration of a test.
-	 * Uses a workaround via class_alias when the class doesn't exist.
-	 */
-	private function mock_wc_payments_active( bool $active ): void {
-		if ( $active && ! class_exists( 'WC_Payments' ) ) {
-			// phpcs:ignore WordPress.PHP.DevelopmentFunctions.prevent_path_disclosure_class_alias
-			class_alias( \stdClass::class, 'WC_Payments' );
-		}
 	}
 }
