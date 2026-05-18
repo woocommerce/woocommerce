@@ -2,10 +2,11 @@
 
 > **Status: Proof of Concept.** This package is part of an exploratory scaffold for surfacing WooCommerce on the experimental Gutenberg dashboard. APIs, file layouts, and conventions described here will likely move.
 
-A `@wordpress/build` "init module" that runs on dashboard boot and registers WooCommerce-core contributions to the dashboard. Currently registers two Store Activity sources:
+A `@wordpress/build` "init module" that runs on dashboard boot and registers WooCommerce-core contributions to the dashboard. Currently registers three Store Activity sources:
 
 - `woocommerce/orders` — recent orders, backed by a WC-side `order` entity that points at `/wc/v3/orders`.
 - `woocommerce/reviews` — recent product reviews, backed by a WC-side `review` entity that points at `/wc/v3/products/reviews`. We avoid `root/comment` with `type='review'` because that filter is only a `comment_type` naming convention and doesn't enforce that the parent is a product, so it can leak non-product activity into the widget.
+- `woocommerce/customers` — recently-registered customers, backed by a WC-side `customer` entity that points at `/wc/v3/customers`. Guest checkouts don't appear here (they're not registered users); they surface through `woocommerce/orders` via the order's billing fields.
 
 ## Contents
 
@@ -22,10 +23,14 @@ core-dashboard-init/
         │   ├── index.ts
         │   ├── use-orders-activity.tsx
         │   └── order-timeline-event.tsx
-        └── reviews/
+        ├── reviews/
+        │   ├── index.ts
+        │   ├── use-reviews-activity.tsx
+        │   └── review-timeline-event.tsx
+        └── customers/
             ├── index.ts
-            ├── use-reviews-activity.tsx
-            └── review-timeline-event.tsx
+            ├── use-customers-activity.tsx
+            └── customer-timeline-event.tsx
 ```
 
 ## Why a separate package?
@@ -167,6 +172,23 @@ useSelect( ( select ) => {
 **Why not `root/comment` with `type='review'`?** It looks tempting because `@wordpress/core-data` ships a stock `comment` entity at `/wp/v2/comments`, so no registration is needed. But `type='review'` only filters by `comment_type` — a naming convention — and does not guarantee the parent post is a product. A "Store Activity" widget must surface store activity only, so the safer (and a bit more verbose) path is to consume the WC-namespaced endpoint and register the entity ourselves.
 
 The V3 response includes `product_id` and `product_name` directly, so we don't need to chain `_embed='up'` to inline the parent product. The timeline event renders `<reviewer> on <product>`, with the reviewer name linking to the comment edit screen (`comment.php?action=editcomment&c=…`) and the product name linking to the product edit screen (`post.php?post=…&action=edit`). Both targets are legacy WP-admin pages, so both links use `@wordpress/ui`'s `Link` — same convention as the orders source.
+
+### Store Activity → Customers
+
+`src/store-activity/customers/use-customers-activity.tsx` is the hook for recently-registered customers. It reads from the WC-namespaced `woocommerce/customer` entity (registered in `data/`), which points at `/wc/v3/customers`. The endpoint exposes registered customers only — guests who checked out without registering are not surfaced here; that activity arrives through `woocommerce/orders` via the order's billing fields.
+
+```ts
+useSelect( ( select ) => {
+    const records = select( coreStore ).getEntityRecords(
+        WC_CUSTOMER_ENTITY.kind,   // 'woocommerce'
+        WC_CUSTOMER_ENTITY.name,   // 'customer'
+        { per_page: 10, orderby: 'registered_date', order: 'desc' }
+    );
+    // ...
+}, [] );
+```
+
+The timeline event renders `<Name> registered`, where `<Name>` is the customer's first/last name (or username, or email, in that order of preference) linking to the WP-admin user edit screen (`user-edit.php?user_id=…`). The icon is `people` from `@wordpress/icons`.
 
 ## See also
 
