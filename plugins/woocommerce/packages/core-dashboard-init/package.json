@@ -1,0 +1,23 @@
+{
+	"name": "@woocommerce/core-dashboard-init",
+	"version": "0.0.0",
+	"description": "Init module that registers WooCommerce contributions to the WP core dashboard (activity sources, etc.).",
+	"private": true,
+	"license": "GPL-2.0-or-later",
+	"type": "module",
+	"wpScriptModuleExports": "./src/index.ts",
+	"browserslist": [
+		"defaults and supports es6-module"
+	],
+	"dependencies": {
+		"@wordpress/core-data": "next",
+		"@wordpress/data": "next",
+		"@wordpress/element": "next",
+		"@wordpress/hooks": "next",
+		"@wordpress/i18n": "next",
+		"@wordpress/icons": "next"
+	},
+	"devDependencies": {
+		"@types/react": "18.3.x"
+	}
+}

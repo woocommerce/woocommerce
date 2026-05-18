@@ -26,6 +26,8 @@ tests/cli/vendor
 # Packages
 /packages/*
 !/packages/README.md
+!/packages/core-dashboard-init
+!/packages/core-dashboard-init/**
 
 # Language files
 i18n/languages/woocommerce.pot
