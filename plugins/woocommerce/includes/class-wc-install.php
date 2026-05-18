@@ -367,6 +367,7 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_checkout_recovery_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
@@ -1273,6 +1274,20 @@ class WC_Install {
 		update_option( 'woocommerce_email_improvements_first_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
 		update_option( 'woocommerce_email_improvements_last_enabled_at', gmdate( 'Y-m-d H:i:s' ) );
 		update_option( 'woocommerce_email_improvements_enabled_count', 1 );
+	}
+
+	/**
+	 * Enable the checkout recovery feature by default for new shops.
+	 *
+	 * Existing stores receiving this as a plugin update remain default-off and
+	 * must opt in via WooCommerce → Settings → Advanced → Features.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return void
+	 */
+	public static function enable_checkout_recovery_for_newly_installed() {
+		wc_get_container()->get( FeaturesController::class )->change_feature_enable( 'checkout_recovery', true );
 	}
 
 	/**
