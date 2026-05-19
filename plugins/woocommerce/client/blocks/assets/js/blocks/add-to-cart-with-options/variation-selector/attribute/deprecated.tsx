@@ -57,7 +57,15 @@ function migrateInnerBlocks(
 		}
 
 		if ( block.innerBlocks?.length ) {
-			return migrateInnerBlocks( block.innerBlocks, settings );
+			return [
+				{
+					...block,
+					innerBlocks: migrateInnerBlocks(
+						block.innerBlocks,
+						settings
+					),
+				},
+			];
 		}
 
 		return [ block ];
