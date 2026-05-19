@@ -1162,13 +1162,15 @@ jQuery( function ( $ ) {
 						newSelectedAttributes
 					);
 
-					// Reload variations panel — skipped when the product-variations-classic-redesign
-					// feature owns the variations tab (the new editor manages its own state).
-					var skipVariationsReload = document.body.classList.contains(
-						'woocommerce-feature-enabled-product-variations-classic-redesign'
+					// Reload variations panel — skipped when the variations classic redesign
+					// editor owns the panel. The mount point's presence is the durable signal:
+					// it exists whenever the new editor is active, independent of how the
+					// feature is gated (flag today, default in the future).
+					var hasClassicRedesignEditor = !! document.getElementById(
+						'woocommerce-variations-classic-root'
 					);
 
-					if ( ! skipVariationsReload ) {
+					if ( ! hasClassicRedesignEditor ) {
 						var this_page = window.location.toString();
 						this_page = this_page.replace(
 							'post-new.php?',
