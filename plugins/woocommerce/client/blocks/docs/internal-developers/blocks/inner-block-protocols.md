@@ -1,121 +1,42 @@
 # Inner Block Protocols
 
-> **Experimental:** These protocols are internal and subject to change without notice. Block context keys, action names, and type shapes documented here should not be considered a stable public API. They may be renamed, restructured, or removed in future releases.
+> **Experimental:** These protocols are internal and may change without notice.
 
-## Overview
+WooCommerce reusable inner blocks use small context protocols so they can render UI for different parent blocks without coupling to a specific parent store.
 
-This document defines the **context protocol pattern** used by WooCommerce blocks to let reusable inner blocks work with any parent store. Three concrete protocols exist today:
-
-| Context Key | Purpose | Inner Blocks |
+| Context key | Purpose | Inner blocks |
 | --- | --- | --- |
-| `woocommerceSelectableItems` | Select/deselect items (filters, variations) | checkbox-list, chips |
-| `woocommerceRemovableItems` | Remove individual items (active filters) | removable-chips |
-| `woocommerceRangeInput` | Numeric range input (price, slider) | price-slider |
+| `woocommerceSelectableItems` | Select/deselect items | checkbox-list, chips |
+| `woocommerceRemovableItems` | Remove active items | removable-chips |
+| `woocommerceRangeInput` | Numeric range input | price-slider |
 
-Each protocol follows the same pattern — only item shape and action names differ.
+## Shared pattern
 
-## Problem Statement
+- Parent provides protocol context and owns business state.
+- Inner block reads the protocol context, renders UI, and calls fixed parent actions.
+- Every context includes `storeNamespace`, which points to the parent Interactivity API store.
+- Parent stores expose protocol-scoped getters such as `state.selectableItems` or `state.removableItems`; generic `state.items` is avoided so protocols can coexist.
+- Parent stores should assert conformance with the matching `*ParentStore` TypeScript interface via `satisfies`.
+- Inner blocks may derive presentation-only data locally. Parent data should not include child-owned fields such as list indexes or show-more visibility.
+- Server-rendered fallback items use `data-wp-each-child` with per-item `data-wp-context`; hydration reconciles them with the inner store.
 
-WooCommerce blocks need reusable UI components (chips, swatches, pills, sliders) that can work inside multiple parent blocks with different Interactivity API stores. Without a protocol, inner blocks get tightly coupled to a single store namespace, preventing true reusability.
+## Selectable Items
 
-## Solution: Context Protocol Pattern
+Context key: `woocommerceSelectableItems`
 
-Inner blocks become **presentational** — they read a standardized context protocol and call parent-provided actions instead of directly referencing a specific store.
+Used by selectable list UIs such as checkbox-list and chips.
 
-```text
-┌─────────────────────────────────────────────────────────┐
-│  Protocol Specification (this document)                 │
-│  └── Defines the contract both sides must follow        │
-├─────────────────────────────────────────────────────────┤
-│  Parent Block (implements protocol)                     │
-│  ├── Registers own Interactivity store                  │
-│  ├── Provides context matching protocol shape           │
-│  ├── Implements fixed-name actions/getters              │
-│  └── Handles business logic (filtering, variation, …)   │
-├─────────────────────────────────────────────────────────┤
-│  Reusable Inner Block (consumes protocol)               │
-│  ├── Reads context per protocol specification           │
-│  ├── Renders UI based on context data                   │
-│  ├── Binds fixed-name actions/getters                   │
-│  └── Zero knowledge of parent's store/business logic    │
-└─────────────────────────────────────────────────────────┘
-```
-
-## Shared Conventions
-
-All three protocols follow these rules:
-
-- **Context key** prefixed with `woocommerce` (e.g. `woocommerceSelectableItems`)
-- **`storeNamespace`** field on every context object — tells inner block which parent store to resolve `actions.*` / `state.*` against
-- **Fixed action & getter names** (not configurable via context fields) — inner blocks hardcode them
-- **TS contract interface** (`*ParentStore`) — parents assert conformance via `satisfies`
-- **Items-carrying contexts** (`selectableItems`, `removableItems`) — parent exposes items via a protocol-named getter (`state.selectableItems`, `state.removableItems`). Generic `state.items` is intentionally avoided so multiple protocols can coexist on the same store namespace without collision
-- **Inner store owns presentation state** — built-in list UIs mirror parent items into their own store before rendering. Parent owns selection data; child owns show-more, local index, swatch/rating display, etc.
-- **SSR fallback via `data-wp-each-child`** — PHP renders initially visible items once with per-item `data-wp-context`. Hydration reconciles those nodes against the inner store's mirrored `state.items`.
-- **No parent knowledge of children** — parent provides protocol data only. Children may read optional extra item fields, but missing extras must degrade safely.
-
-## Enforcement via TypeScript `satisfies`
-
-Every protocol ships a `*ParentStore` interface. Parent stores assert:
-
-```typescript
-import type { SelectableItemsParentStore } from '../../types/type-defs/selectable-items';
-// or: RemovableItemsParentStore, RangeInputParentStore
-
-myStore satisfies SelectableItemsParentStore;
-```
-
-Missing method/getter → compile error. No runtime cost.
-
----
-
-## Protocol: Selectable Items
-
-### Context Key
-
-```text
-woocommerceSelectableItems
-```
-
-Items are dynamic (computed at render time from database queries), so parent blocks do **not** use `providesContext` in block.json. Instead, they pass context directly when rendering inner blocks:
+Parents pass the context directly when rendering inner blocks because items are computed dynamically:
 
 ```php
-// Parent block render():
 ( new \WP_Block( $parsed_block, array(
     'woocommerceSelectableItems' => $context,
 ) ) )->render();
 ```
 
-In the editor, parent blocks use `BlockContextProvider` to pass the same data:
+In the editor, use `BlockContextProvider` with the same key.
 
-```jsx
-<BlockContextProvider value={ { 'woocommerceSelectableItems': context } }>
-    { children }
-</BlockContextProvider>
-```
-
-#### Inner block.json (consumer)
-
-Inner blocks declare the context key they consume via `usesContext`, and which parents they can be nested inside via `ancestor`:
-
-```json
-{
-  "name": "woocommerce/product-filter-checkbox-list",
-  "usesContext": ["woocommerceSelectableItems"],
-  "ancestor": [
-    "woocommerce/product-filter-attribute",
-    "woocommerce/product-filter-status",
-    "woocommerce/product-filter-taxonomy",
-    "woocommerce/product-filter-rating"
-  ]
-}
-```
-
-Inner blocks receive the protocol data through `$block->context['woocommerceSelectableItems']` in PHP.
-
-### Required context
-
-Parents provide `woocommerceSelectableItems` to inner blocks.
+### Context
 
 ```typescript
 export interface SelectableItemsContext< T = unknown > {
@@ -128,16 +49,12 @@ export interface SelectableItemsContext< T = unknown > {
 }
 ```
 
-Rules:
+- `items` is the SSR/editor snapshot.
+- `storeNamespace` points to the live parent store used after hydration.
+- `groupLabel` is used for accessible fieldset labels.
+- `isLoading` and `filterType` are optional rendering hints.
 
-- `items`: SSR/editor snapshot. Parent store remains live source after hydration.
-- `selectionMode`: child chooses checkbox/radio semantics.
-- `storeNamespace`: parent Interactivity API store namespace.
-- `groupLabel`: accessible fieldset label.
-- `isLoading`: child may render skeletons.
-- `filterType`: optional parent/domain discriminator. Child must fallback when unknown.
-
-### Required item shape
+### Item shape
 
 ```typescript
 export type SelectableItem< T = unknown > = (
@@ -152,11 +69,9 @@ export type SelectableItem< T = unknown > = (
 } & T;
 ```
 
-Base stays clean: identity, label, value, selection state. Extra data lives in `T`.
+Extra data belongs in `T`. Children may read optional extra fields, but missing fields must degrade safely.
 
-### Required parent store
-
-Store named by `storeNamespace` MUST expose:
+### Parent store
 
 ```typescript
 export interface SelectableItemsParentStore< T = unknown > {
@@ -171,21 +86,13 @@ export interface SelectableItemsParentStore< T = unknown > {
 
 Rules:
 
-- `state.selectableItems`: live items, with `selected` derived from parent SSOT.
-- `actions.toggle( item? )`: toggles parent SSOT. If `item` omitted, parent may read `context.item`.
-- Parents assert `satisfies SelectableItemsParentStore< T >`.
-- Parent does **not** add child-owned fields like `index`.
+- `state.selectableItems` is the live source after hydration.
+- `actions.toggle( item? )` updates the parent source of truth.
+- Parent must not add child-owned fields such as `index` or `hidden`.
 
-### Optional consumer extensions
+### Built-in consumers
 
-Parents may add extra item fields. Children may use fields they understand. Contract:
-
-- Extra fields optional, always.
-- Missing extra field must not break rendering.
-- Parent must not shape data for a specific child.
-- Child-only metadata must be derived by child.
-
-Product filters currently provide:
+Product filters currently add these optional fields:
 
 ```typescript
 export type FilterItemFields = {
@@ -199,120 +106,91 @@ export type FilterItemFields = {
 };
 ```
 
-### Known built-in extensions
-
 | Consumer | Optional fields read | Fallback |
 | --- | --- | --- |
 | `checkbox-list` | `count`, `color`, `depth`, `filterType === 'rating'` | Text label, no count, no swatch, no indent |
-| `chips` | `count`, `color` | Text label, no count, no swatch style |
+| `chips` | `count`, `color` | Text label, no count, no swatch |
 
-Both built-ins mirror parent items and add local show-more metadata (`index`, `hidden`). Parent never provides these child-owned fields.
+Checkbox-list and chips mirror parent items into child `state.items`, adding local show-more metadata such as `index` and `hidden`. Their templates bind overflow visibility with `context.item.hidden`.
 
-### SSR / hydration gotchas
-
-- PHP renders first `displayLimit` items plus selected overflow items.
-- Template iterates child `state.items`, not parent `state.selectableItems`.
-- Child `state.items` mirrors `store(storeNamespace).state.selectableItems` and adds local show-more metadata (`index`, `hidden`).
-- Child `actions.toggle()` forwards current item to parent `actions.toggle( item )`.
-- `data-wp-each-child` SSR nodes must carry `data-wp-context={ item }` under child namespace.
-- Hydration owns the full list; hidden overflow comes from the mirrored item's `context.item.hidden` field.
-
----
-
-## Protocol: Removable Items
+## Removable Items
 
 Context key: `woocommerceRemovableItems`
 
-Used for lists of items that can be removed individually (active filter chips) with a "clear all" control.
+Used by active-filter chips and similar removable item lists.
 
-### Context Shape
+### Context
 
 ```typescript
 export interface RemovableItem {
-  type: string;   // domain discriminator (e.g. "attribute/color", "price")
-  value: string;
-  label: string;  // display text
+	type: string;
+	value: string;
+	label: string;
 }
 
 export interface RemovableItemsContext {
-  items: RemovableItem[];   // SSR snapshot — parent's state.removableItems is SSOT post-hydration
-  storeNamespace: string;
+	items: RemovableItem[];
+	storeNamespace: string;
 }
 ```
 
-### Parent Store Requirements
+### Parent store
 
 ```typescript
 export interface RemovableItemsParentStore {
-  state: {
-    removableItems: readonly RemovableItem[];   // derived from parent's SSOT; reactive
-  };
-  actions: {
-    remove: () => void;                          // remove current getContext().item
-    removeAll: () => void;                       // clear all items
-  };
+	state: {
+		removableItems: readonly RemovableItem[];
+	};
+	actions: {
+		remove: () => void;
+		removeAll: () => void;
+	};
 }
 ```
 
-The getter is `removableItems` (not `items`) for the same reason `selectableItems` is protocol-scoped — multiple protocols (removable-items + selectable-items) routinely live on the same store namespace (e.g. `woocommerce/product-filters`).
+Rendering pattern:
 
-Parents assert: `myStore satisfies RemovableItemsParentStore;`
+- Inner block iterates `state.removableItems` from the parent store.
+- SSR fallback renders `context.items` with `data-wp-each-child` and per-item context.
+- Per-item remove calls `actions.remove`; clear-all calls `actions.removeAll`.
 
-### Rendering Pattern
+Reference implementations: `ProductFilterRemovableChips.php`, `ProductFilterClearButton.php`, `inner-blocks/active-filters/frontend.ts`.
 
-Inner block (`removable-chips`):
-
-- Wrap in `data-wp-interactive="<storeNamespace>"`
-- Iterate `state.removableItems` via `data-wp-each` for reactive rendering (items can be added/removed dynamically)
-- SSR fallback: `foreach` over `context.items` with per-item `data-wp-context` and `data-wp-each-child`
-- Per-item binding: `data-wp-on--click="actions.remove"`, label via `data-wp-text="context.item.label"`
-- Clear-all button: `data-wp-on--click="actions.removeAll"`
-
-Reference implementation: `ProductFilterRemovableChips.php`, `ProductFilterClearButton.php`, `inner-blocks/active-filters/frontend.ts`.
-
----
-
-## Protocol: Range Input
+## Range Input
 
 Context key: `woocommerceRangeInput`
 
-Used for two-ended numeric range controls (price slider, generic range).
+Used by two-ended numeric controls such as price sliders.
 
-### Context Shape
+### Context
 
 ```typescript
 export interface RangeInputContext {
-  min: number;
-  max: number;
-  currentMin: number;
-  currentMax: number;
-  step?: number;
-  storeNamespace: string;
-  isLoading?: boolean;
+	min: number;
+	max: number;
+	currentMin: number;
+	currentMax: number;
+	step?: number;
+	storeNamespace: string;
+	isLoading?: boolean;
 }
 ```
 
-### Parent Store Requirements
+### Parent store
 
 ```typescript
 export interface RangeInputParentStore {
-  actions: {
-    setMin: ( event: Event ) => void;
-    setMax: ( event: Event ) => void;
-  };
+	actions: {
+		setMin: ( event: Event ) => void;
+		setMax: ( event: Event ) => void;
+	};
 }
 ```
 
-Generic names (`setMin`/`setMax`) — not price-specific — so the protocol can host non-price range inputs in the future. Parents assert: `myStore satisfies RangeInputParentStore;`
+Rendering pattern:
 
-### Rendering Pattern
+- Inner block renders min/max inputs.
+- Inputs call parent `actions.setMin` and `actions.setMax`.
+- Parent owns formatting, validation, and display state.
 
-Inner block (`price-slider`):
-
-- Wrap in `data-wp-interactive="<storeNamespace>"`
-- Two `<input type="range">`, one per bound
-- Min input: `data-wp-on--input="actions.setMin"`, `data-wp-bind--value="state.<minGetter>"` (parent decides getter — e.g. `state.minPrice`)
-- Max input: `data-wp-on--input="actions.setMax"`, analogous for max
-- Parent owns display formatting (currency, locale) via its own state getters
-
-Reference implementation: `ProductFilterPriceSlider.php`, `inner-blocks/price-filter/frontend.ts`, `inner-blocks/price-slider/frontend.ts`.
+Reference implementations: `ProductFilterPriceSlider.php`, `inner-blocks/price-filter/frontend.ts`, `inner-blocks/price-slider/frontend.ts`.
