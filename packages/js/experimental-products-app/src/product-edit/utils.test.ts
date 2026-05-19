@@ -10,12 +10,8 @@ import { getSetting } from '@woocommerce/settings';
 import type { ProductEntityRecord } from '../fields/types';
 import { productFields } from '../product-list/fields';
 import {
-	buildProductBulkEditData,
 	buildMergedProductEditData,
 	EXCLUDED_PRODUCT_EDIT_FIELD_IDS,
-	getBulkNumericEditsFromData,
-	getBulkNumericOperationFieldId,
-	getBulkNumericChangesForProduct,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
 	getProductEditRecord,
@@ -23,8 +19,14 @@ import {
 	getProductTypeFormFields,
 	getVisibleProductEditFields,
 	isProductVariation,
-	validateBulkNumericEdits,
 } from './utils';
+import {
+	buildProductBulkEditData,
+	getBulkNumericEditsFromData,
+	getBulkNumericOperationFieldId,
+	getBulkNumericChangesForProduct,
+	validateBulkNumericEdits,
+} from './bulk-edit';
 
 jest.mock( '@dnd-kit/react', () => ( {
 	DragDropProvider: ( { children }: { children: React.ReactNode } ) =>

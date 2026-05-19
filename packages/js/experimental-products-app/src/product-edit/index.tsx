@@ -26,31 +26,33 @@ import {
 import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
 import {
-	buildProductBulkEditData,
-	DEFAULT_BULK_NUMERIC_EDIT,
 	findProductInList,
-	getBulkNumericEditFromData,
-	getBulkNumericEditsFromData,
-	getBulkNumericChangesForProduct,
-	getBulkNumericOperationFieldId,
 	getProductEditRecord,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
 	getProductTypeFormFields,
 	getVisibleProductEditFields,
+	isProductVariation,
+} from './utils';
+import {
+	buildProductBulkEditData,
+	DEFAULT_BULK_NUMERIC_EDIT,
+	getBulkNumericEditFromData,
+	getBulkNumericEditsFromData,
+	getBulkNumericChangesForProduct,
+	getBulkNumericOperationFieldId,
 	isBulkNumericEditPending,
 	isBulkNumericEditValid,
 	isBulkNumericFieldId,
 	isBulkNumericOperationFieldId,
-	isProductVariation,
 	validateBulkNumericEdits,
-} from './utils';
+} from './bulk-edit';
 import type {
 	BulkNumericEdit,
 	BulkNumericFieldId,
 	ProductBulkEditFormData,
 	ProductBulkEditFieldState,
-} from './utils';
+} from './bulk-edit';
 import { saveSelectedProducts } from './save';
 import { createBulkNumericOperationField } from './bulk-numeric-control';
 

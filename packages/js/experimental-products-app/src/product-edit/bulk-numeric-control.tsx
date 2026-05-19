@@ -13,12 +13,12 @@ import type {
 	BulkNumericFieldId,
 	BulkNumericOperation,
 	ProductBulkEditFormData,
-} from './utils';
+} from './bulk-edit';
 import {
 	DEFAULT_BULK_NUMERIC_EDIT,
 	getBulkNumericOperationFieldId,
 	getBulkNumericOperations,
-} from './utils';
+} from './bulk-edit';
 
 const OPERATION_LABELS: Record< BulkNumericOperation, string > = {
 	dont_change: __( 'Don’t change', 'woocommerce' ),
