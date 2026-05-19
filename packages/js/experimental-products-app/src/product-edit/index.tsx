@@ -240,7 +240,7 @@ function getBulkEnhancedProductEditFields( {
 
 function injectBulkNumericOperationFormFields(
 	formFields: Array< FormField | string >,
-	fieldLabels: Map< string, string >
+	fieldLabels: Map< string, string | undefined >
 ): Array< FormField | string > {
 	return formFields.map( ( formField ) => {
 		if ( typeof formField === 'string' ) {
