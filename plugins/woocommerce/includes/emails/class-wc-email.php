@@ -35,7 +35,7 @@ class WC_Email extends WC_Settings_API {
 	/**
 	 * Skip-reason identifier used when the email has no recipient address.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	public const SKIP_REASON_NO_RECIPIENT = 'no_recipient';
 
@@ -1134,7 +1134,7 @@ class WC_Email extends WC_Settings_API {
 	 * emails, POS receipts) should NOT call this method and should continue to call send()
 	 * directly.
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 * @return bool Whether the email was sent successfully.
 	 */
 	protected function send_notification(): bool {
@@ -1142,7 +1142,7 @@ class WC_Email extends WC_Settings_API {
 			/**
 			 * Fires when a transactional email is not sent because the email type is disabled.
 			 *
-			 * @since 10.8.0
+			 * @since 10.9.0
 			 *
 			 * @param string   $email_id The email type ID (e.g. `customer_processing_order`).
 			 * @param WC_Email $email    The WC_Email instance.
@@ -1160,7 +1160,7 @@ class WC_Email extends WC_Settings_API {
 			 * The $reason parameter identifies why the email was not sent:
 			 * - WC_Email::SKIP_REASON_NO_RECIPIENT: No recipient address was available at send time.
 			 *
-			 * @since 10.8.0
+			 * @since 10.9.0
 			 *
 			 * @param string   $reason   Short identifier for why the email was skipped.
 			 * @param string   $email_id The email type ID.
@@ -1188,7 +1188,7 @@ class WC_Email extends WC_Settings_API {
 	 * no recipient is available so the outcome is still observable via the EmailLogger, and
 	 * otherwise delegates to send().
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 * @return bool Whether the email was sent successfully.
 	 */
 	protected function send_if_recipient(): bool {
