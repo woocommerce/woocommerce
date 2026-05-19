@@ -270,7 +270,7 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 						>
 							{ isImporting
 								? __( 'Importing…', 'woocommerce' )
-								: __( 'Start Import', 'woocommerce' ) }
+								: __( 'Start import', 'woocommerce' ) }
 						</Button>
 					</Flex>
 				</form>
