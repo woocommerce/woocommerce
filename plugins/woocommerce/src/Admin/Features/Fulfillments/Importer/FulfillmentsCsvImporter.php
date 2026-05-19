@@ -534,6 +534,7 @@ class FulfillmentsCsvImporter {
 			return null;
 		}
 
+		$needle = strtolower( $tracking_number );
 		foreach ( $fulfillments as $fulfillment ) {
 			if ( ! $fulfillment instanceof Fulfillment ) {
 				continue;
@@ -541,7 +542,7 @@ class FulfillmentsCsvImporter {
 			if ( $fulfillment->get_date_deleted() ) {
 				continue;
 			}
-			if ( (string) $fulfillment->get_tracking_number() === $tracking_number ) {
+			if ( strtolower( (string) $fulfillment->get_tracking_number() ) === $needle ) {
 				return $fulfillment;
 			}
 		}
