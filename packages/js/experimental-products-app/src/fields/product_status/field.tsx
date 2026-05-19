@@ -120,11 +120,15 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 							<span className="woocommerce-variation-status-option">
 								<span>{ item.label }</span>
 								{ item.value !== MIXED_VALUE &&
-									variationDescriptions[ item.value ?? '' ] && (
+									variationDescriptions[
+										item.value ?? ''
+									] && (
 										<span className="woocommerce-variation-status-option__description">
-											{ variationDescriptions[
-												item.value ?? ''
-											] }
+											{
+												variationDescriptions[
+													item.value ?? ''
+												]
+											}
 										</span>
 									) }
 							</span>
