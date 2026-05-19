@@ -150,9 +150,7 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 					headers={ TABLE_HEADERS }
 					rows={ tableRows }
 					rowKey={ ( _row, index ) =>
-						`${ visibleRows[ index ]?.row ?? index }-${
-							visibleRows[ index ]?.status ?? ''
-						}`
+						visibleRows[ index ]?.row ?? index
 					}
 				/>
 				{ hasMore && (

@@ -56,7 +56,7 @@ export async function prepare( args: PrepareArgs ): Promise< PrepareResponse > {
 export async function runChunk( args: RunArgs ): Promise< RunChunkResponse > {
 	const mappingForWire: Record< string, string > = {};
 	Object.entries( args.mapping ).forEach( ( [ col, key ] ) => {
-		if ( key && key !== '' ) {
+		if ( key ) {
 			mappingForWire[ col ] = key;
 		}
 	} );
