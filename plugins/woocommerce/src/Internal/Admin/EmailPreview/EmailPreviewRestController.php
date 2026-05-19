@@ -290,8 +290,15 @@ class EmailPreviewRestController extends RestApiControllerBase {
 		}
 		ob_end_clean();
 		$email_subject = $this->email_preview->get_subject();
-		$email         = new \WC_Emails();
-		$sent          = $email->send( $email_address, $email_subject, $email_content );
+		// Clone so the recipient mutation below does not persist on the EmailPreview
+		// singleton: under long-lived runtimes (Roadrunner/FrankenPHP) the cached
+		// instance is reused across requests, which would leak the test admin's
+		// address into a later send for a different recipient.
+		$email = clone $this->email_preview->get_email();
+		// Set the recipient on the WC_Email instance so it is available to hooks
+		// (e.g. woocommerce_email_sent) and log entries when the test email is sent.
+		$email->recipient = $email_address;
+		$sent             = $email->send( $email_address, $email_subject, $email_content, $email->get_headers(), $email->get_attachments() );
 
 		if ( $sent ) {
 			return array(

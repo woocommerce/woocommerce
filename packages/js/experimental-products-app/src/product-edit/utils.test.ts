@@ -570,7 +570,7 @@ describe( 'product edit utils', () => {
 		];
 		const basePriceFieldIds = [ 'regular_price', 'sale_price' ];
 		const managedStockFieldIds = [ 'manage_stock', 'stock_quantity' ];
-		const stockStatusFieldIds = [ 'stock', 'manage_stock' ];
+		const stockStatusFieldIds = [ 'manage_stock', 'stock' ];
 		const shippingFieldIds = [
 			'weight',
 			'length',
@@ -612,17 +612,17 @@ describe( 'product edit utils', () => {
 				'cost_of_goods_sold',
 				'images',
 				'sku',
-				'stock',
 				'manage_stock',
+				'stock',
 				'categories',
 				'brands',
 				'tags',
 				'featured',
 				'shipping_class',
-				'weight',
 				'length',
 				'width',
 				'height',
+				'weight',
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
@@ -1337,9 +1337,9 @@ describe( 'product edit utils', () => {
 						{
 							id: 'dimensions',
 							layout: { type: 'row' },
-							children: [ 'weight', 'length', 'width' ],
+							children: [ 'length', 'width', 'height' ],
 						},
-						'height',
+						'weight',
 					],
 				},
 			] );
@@ -1502,7 +1502,7 @@ describe( 'product edit utils', () => {
 					children: [
 						'shipping_class',
 						{
-							id: 'parent-dimensions',
+							id: 'dimensions',
 							layout: { type: 'row' },
 							children: [ 'length', 'width', 'height' ],
 						},
@@ -1560,9 +1560,9 @@ describe( 'product edit utils', () => {
 						{
 							id: 'dimensions',
 							layout: { type: 'row' },
-							children: [ 'weight', 'length', 'width' ],
+							children: [ 'length', 'width', 'height' ],
 						},
-						'height',
+						'weight',
 					],
 				},
 			] );
@@ -1601,7 +1601,7 @@ describe( 'product edit utils', () => {
 				{
 					id: 'inventory-fields',
 					label: 'Inventory',
-					children: [ 'sku', 'stock', 'manage_stock' ],
+					children: [ 'sku', 'manage_stock', 'stock' ],
 				},
 				{
 					id: 'product-organization-fields',
