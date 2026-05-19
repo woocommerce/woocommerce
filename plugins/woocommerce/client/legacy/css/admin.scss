@@ -3149,8 +3149,8 @@ ul.wc_coupon_list_block {
 						font-size: var(--wpds-typography-font-size-md, 14px);
 						font-weight: var(--wpds-typography-font-weight-medium, 500);
 						line-height: var(--wpds-typography-line-height-md, 1.4);
-						color: var(--wpds-color-fg-content-neutral, #1d2327);
-						text-decoration: none;
+						color: var(--wpds-color-fg-interactive-brand, var(--wp-admin-theme-color, #2271b1));
+						text-decoration: underline;
 					}
 
 					.wc-order-item-sku,
