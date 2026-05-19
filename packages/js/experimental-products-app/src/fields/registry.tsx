@@ -10,6 +10,7 @@ import { fieldExtensions as brandsFieldExtensions } from './brands/field';
 import { fieldExtensions as buttonTextFieldExtensions } from './button_text/field';
 import { fieldExtensions as catalogVisibilityFieldExtensions } from './catalog_visibility/field';
 import { fieldExtensions as categoriesFieldExtensions } from './categories/field';
+import { fieldExtensions as costOfGoodsSoldFieldExtensions } from './cost_of_goods_sold/field';
 import { fieldExtensions as crossSellIdsFieldExtensions } from './cross_sell_ids/field';
 import { fieldExtensions as dateFieldExtensions } from './date/field';
 import { fieldExtensions as dateOnSaleFromFieldExtensions } from './date_on_sale_from/field';
@@ -69,6 +70,7 @@ export const PRODUCT_FIELD_IDS = [
 	'schedule_sale',
 	'date_on_sale_from',
 	'date_on_sale_to',
+	'cost_of_goods_sold',
 	'price_summary',
 	'stock',
 	'stock_quantity',
@@ -119,6 +121,7 @@ const PRODUCT_FIELD_EXTENSIONS: Record<
 	schedule_sale: scheduleSaleFieldExtensions,
 	date_on_sale_from: dateOnSaleFromFieldExtensions,
 	date_on_sale_to: dateOnSaleToFieldExtensions,
+	cost_of_goods_sold: costOfGoodsSoldFieldExtensions,
 	on_sale: onSaleFieldExtensions,
 	price_summary: priceSummaryFieldExtensions,
 	stock: stockFieldExtensions,

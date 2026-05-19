@@ -169,6 +169,131 @@ class WC_REST_Product_Variations_Controller_Tests extends WC_REST_Unit_Test_Case
 	}
 
 	/**
+	 * @testdox The variation GET endpoint returns typed gallery image IDs.
+	 */
+	public function test_variation_get_returns_gallery_image_ids() {
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$variation      = wc_get_product( $parent_product->get_children()[0] );
+		$image_ids      = array(
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 1',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 2',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+		);
+
+		$variation->set_gallery_image_ids( $image_ids );
+		$variation->save();
+
+		$response = $this->server->dispatch(
+			new WP_REST_Request(
+				'GET',
+				"/wc/v3/products/{$parent_product->get_id()}/variations/{$variation->get_id()}"
+			)
+		);
+
+		$this->assertEquals( 200, $response->get_status() );
+		$this->assertSame( $image_ids, $response->get_data()['gallery_image_ids'] );
+	}
+
+	/**
+	 * @testdox The variation POST endpoint updates the gallery without touching the featured image (disjoint storage).
+	 */
+	public function test_variation_post_updates_gallery_image_ids() {
+		$parent_product       = WC_Helper_Product::create_variation_product();
+		$variation            = wc_get_product( $parent_product->get_children()[0] );
+		$pre_existing_feature = wp_insert_attachment(
+			array(
+				'post_title'     => 'Pre-existing featured image',
+				'post_type'      => 'attachment',
+				'post_mime_type' => 'image/jpeg',
+			)
+		);
+		$variation->set_image_id( $pre_existing_feature );
+		$variation->save();
+
+		$image_ids = array(
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 1',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+			wp_insert_attachment(
+				array(
+					'post_title'     => 'Variation Gallery Image 2',
+					'post_type'      => 'attachment',
+					'post_mime_type' => 'image/jpeg',
+				)
+			),
+		);
+
+		$this->update_variation_via_post_request(
+			$variation,
+			array(
+				'gallery_image_ids' => $image_ids,
+			)
+		);
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertSame( $image_ids, array_map( 'intval', $variation->get_gallery_image_ids() ) );
+		$this->assertSame(
+			$pre_existing_feature,
+			$variation->get_image_id(),
+			'Setting gallery_image_ids must not touch the featured image — they are disjoint, like on parent products.'
+		);
+		// No legacy meta exists, so the core-managed sentinel is intentionally
+		// not written: the legacy fallback would no-op anyway, and skipping the
+		// row keeps postmeta clean on stores that never used the extension.
+		$this->assertFalse(
+			\Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility::is_variation_id_core_managed(
+				$variation->get_id()
+			)
+		);
+	}
+
+	/**
+	 * @testdox The variation POST endpoint can clear a legacy-only variation gallery.
+	 */
+	public function test_variation_post_can_clear_legacy_gallery_image_ids() {
+		$parent_product = WC_Helper_Product::create_variation_product();
+		$variation      = wc_get_product( $parent_product->get_children()[0] );
+
+		update_post_meta(
+			$variation->get_id(),
+			'_wc_additional_variation_images',
+			'101,102'
+		);
+
+		$this->update_variation_via_post_request(
+			$variation,
+			array(
+				'gallery_image_ids' => array(),
+			)
+		);
+
+		$variation = wc_get_product( $variation->get_id() );
+
+		$this->assertSame( array(), $variation->get_gallery_image_ids() );
+		$this->assertTrue(
+			\Automattic\WooCommerce\Internal\VariationGallery\LegacyVariationGalleryCompatibility::is_variation_id_core_managed(
+				$variation->get_id()
+			)
+		);
+	}
+
+	/**
 	 * Test that creating a variation with attributes containing special characters in their slug
 	 * properly saves the attributes.
 	 *
