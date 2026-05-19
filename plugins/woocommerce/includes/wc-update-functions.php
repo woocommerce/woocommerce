@@ -3496,7 +3496,7 @@ function wc_update_10801_restore_orders_meta_key_value_index(): void {
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
 	$columns = $wpdb->get_results(
 		$wpdb->prepare(
-			'SHOW INDEX FROM ' . $table_name . ' WHERE Key_name = %s ORDER BY Seq_in_index',
+			'SHOW INDEX FROM ' . $table_name . ' WHERE Key_name = %s',
 			$index_name
 		)
 	);
