@@ -107,7 +107,7 @@ class FulfillmentsCsvImporter {
 		}
 
 		try {
-			$header_raw = fgetcsv( $handle, 0, $this->options['delimiter'], $this->options['enclosure'] );
+			$header_raw = fgetcsv( $handle, 0, $this->options['delimiter'], $this->options['enclosure'], '' );
 			if ( false === $header_raw || null === $header_raw ) {
 				$summary['rows'][] = $this->fail( 0, 'empty_csv', __( 'CSV file is empty.', 'woocommerce' ) );
 				++$summary['failed'];
@@ -134,7 +134,7 @@ class FulfillmentsCsvImporter {
 			$row_number          = 1; // Header is row 1.
 			$seen_tracking_pairs = array(); // Map of "order_id|tracking" => true for in-file duplicate detection.
 
-			while ( ( $row = fgetcsv( $handle, 0, $this->options['delimiter'], $this->options['enclosure'] ) ) !== false ) { // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure
+			while ( ( $row = fgetcsv( $handle, 0, $this->options['delimiter'], $this->options['enclosure'], '' ) ) !== false ) { // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure, Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
 				++$row_number;
 
 				if ( $this->is_blank_row( $row ) ) {
