@@ -112,10 +112,13 @@ class InstallJPAndWCSPlugins {
 		// requires the dedicated `install_plugins` capability — gate per-handler.
 		//
 		// Throwing (rather than returning silently) prevents `Notes::trigger_note_action()`
-		// from persisting the action's `E_WC_ADMIN_NOTE_ACTIONED` status after this hook
-		// returns: the exception aborts the REST callback before `$note->save()` runs, so
-		// the note stays in the inbox for unauthorized users. `NoteActions::trigger_note_action()`
-		// catches the typed exception and maps it to a 403 REST response.
+		// from persisting the action's `E_WC_ADMIN_NOTE_ACTIONED` status: the exception
+		// aborts the dispatch before the status-saving `$note->save()` inside
+		// `Notes::trigger_note_action()` runs, so the note stays actionable in the inbox.
+		// (The REST controller has already saved `is_read = true` at this point — that
+		// earlier save is intentional and unaffected by the cap check.)
+		// `NoteActions::trigger_note_action()` catches the typed exception and maps it
+		// to a 403 REST response.
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			throw new NoteActionForbiddenException(
 				esc_html__( 'You do not have permissions to manage plugins. Please contact your site administrator.', 'woocommerce' )
