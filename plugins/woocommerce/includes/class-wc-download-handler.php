@@ -310,14 +310,17 @@ class WC_Download_Handler {
 			);
 		}
 
+		// Compute the relative path from ABSPATH to WP_CONTENT_DIR (e.g. "wp-content" or a custom name).
+		$wp_content_relative = '/' . str_replace( ABSPATH, '', WP_CONTENT_DIR );
+
 		// See if path needs an abspath prepended to work.
 		if ( file_exists( ABSPATH . $file_path ) ) {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
 
-		} elseif ( '/wp-content' === substr( $file_path, 0, 11 ) ) {
+		} elseif ( $wp_content_relative === substr( $file_path, 0, strlen( $wp_content_relative ) ) ) {
 			$remote_file = false;
-			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, 11 ) );
+			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, strlen( $wp_content_relative ) ) );
 
 			// Check if we have an absolute path.
 		} elseif ( ( ! isset( $parsed_file_path['scheme'] ) || ! in_array( $parsed_file_path['scheme'], array( 'http', 'https', 'ftp' ), true ) ) && isset( $parsed_file_path['path'] ) ) {

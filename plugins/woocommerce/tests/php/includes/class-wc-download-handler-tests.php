@@ -54,6 +54,19 @@ class WC_Download_Handler_Tests extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test for file path starting with the WP content directory relative path.
+	 *
+	 * Ensures that paths beginning with the WP_CONTENT_DIR relative portion (e.g. /wp-content or
+	 * a custom directory name) are correctly identified as local files rather than remote ones.
+	 */
+	public function test_parse_file_path_for_wp_content_relative_path() {
+		$wp_content_relative = '/' . str_replace( ABSPATH, '', WP_CONTENT_DIR );
+		$file_path           = $wp_content_relative . '/uploads/dummy_file.jpg';
+		$parsed_file_path    = WC_Download_Handler::parse_file_path( $file_path );
+		$this->assertFalse( $parsed_file_path['remote_file'] );
+	}
+
+	/**
 	 * @testdox Customers may not use a direct download link to obtain a downloadable file that has been disabled.
 	 */
 	public function test_inactive_downloads_will_not_be_served() {
