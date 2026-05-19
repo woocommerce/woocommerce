@@ -115,7 +115,7 @@
 // Qualified with the drawer-portal so the padding wins against
 // `@wordpress/ui`'s drawer-content CSS module class on the same element.
 .woocommerce-product-edit__drawer-portal .woocommerce-product-edit {
-	padding: var(--wpds-dimension-padding-lg, 16px);
+	padding: var(--wpds-dimension-padding-xl, 20px);
 }
 
 .woocommerce-product-edit__header {
