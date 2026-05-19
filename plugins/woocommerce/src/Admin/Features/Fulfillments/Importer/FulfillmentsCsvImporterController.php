@@ -36,39 +36,11 @@ class FulfillmentsCsvImporterController {
 	 * Register hooks. Called by FulfillmentsController when the feature is enabled.
 	 */
 	public function register(): void {
-		// Render the "Import fulfillments" trigger in the orders-list filter bar, next to the
-		// existing fulfillment-status and shipping-provider filters rendered by FulfillmentsRenderer.
-		add_action( 'woocommerce_order_list_table_restrict_manage_orders', array( $this, 'render_import_trigger' ), 20 );
-		add_action( 'restrict_manage_posts', array( $this, 'render_import_trigger_legacy' ), 20 );
-
-		// Mount slot + script enqueue.
+		// The React script (`fulfillments-importer`) injects the "Import fulfillments" trigger
+		// next to the "Add order" page-title-action link on the orders list. Here we only need
+		// to mount the modal slot and enqueue the assets.
 		add_action( 'admin_footer', array( $this, 'render_modal_slot' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
-	}
-
-	/**
-	 * Render the trigger button on the HPOS orders list.
-	 */
-	public function render_import_trigger(): void {
-		if ( ! $this->should_render_importer() ) {
-			return;
-		}
-		?>
-		<button type="button" class="button wc-fulfillment-import-trigger" style="vertical-align: top;">
-			<?php esc_html_e( 'Import fulfillments', 'woocommerce' ); ?>
-		</button>
-		<?php
-	}
-
-	/**
-	 * Render the trigger button on the legacy (post-table) orders list.
-	 */
-	public function render_import_trigger_legacy(): void {
-		global $typenow;
-		if ( 'shop_order' !== $typenow ) {
-			return;
-		}
-		$this->render_import_trigger();
 	}
 
 	/**
