@@ -170,7 +170,7 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 							{ sprintf(
 								/* translators: 1: rows currently shown, 2: total rows */
 								__(
-									'Show More (Showing %1$d of %2$d)',
+									'Show more (showing %1$d of %2$d)',
 									'woocommerce'
 								),
 								tableRows.length,

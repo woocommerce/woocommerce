@@ -31,6 +31,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Bootstrap the fulfillments feature for the test run.
+	 *
+	 * @since 10.9.0
 	 */
 	public static function setUpBeforeClass(): void {
 		parent::setUpBeforeClass();
@@ -43,6 +45,8 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 	/**
 	 * Restore the original feature flag value.
+	 *
+	 * @since 10.9.0
 	 */
 	public static function tearDownAfterClass(): void {
 		if ( false === self::$original_fulfillments_flag ) {

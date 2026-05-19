@@ -133,7 +133,7 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 
 	return (
 		<Modal
-			title={ __( 'Import Fulfillments from CSV', 'woocommerce' ) }
+			title={ __( 'Import fulfillments from CSV', 'woocommerce' ) }
 			onRequestClose={ handleClose }
 			shouldCloseOnClickOutside={ ! isImporting }
 			shouldCloseOnEsc={ ! isImporting }
@@ -144,7 +144,7 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 					<ImporterSummaryPanel summary={ summary } />
 					<Flex justify="flex-end" gap={ 2 }>
 						<Button variant="secondary" onClick={ reset }>
-							{ __( 'Import Another File', 'woocommerce' ) }
+							{ __( 'Import another file', 'woocommerce' ) }
 						</Button>
 						<Button variant="primary" onClick={ handleClose }>
 							{ __( 'Done', 'woocommerce' ) }
@@ -204,10 +204,10 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 							>
 								{ file
 									? __(
-											'Choose a Different File',
+											'Choose a different file',
 											'woocommerce'
 									  )
-									: __( 'Choose CSV File', 'woocommerce' ) }
+									: __( 'Choose CSV file', 'woocommerce' ) }
 							</FormFileUpload>
 							{ file && ! isImporting && (
 								<Button

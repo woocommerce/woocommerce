@@ -121,6 +121,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		}
 
 		// CSVUploadHelper reads $_FILES under a configurable key. Stage our REST file under that key.
+		// Nonce verification is handled by the REST permission_callback (check_permission_for_fulfillments_import), not nonces.
 		$_FILES['fulfillment_import_file'] = $files['file']; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		try {
 			$csv_helper = wc_get_container()->get( CSVUploadHelper::class );
@@ -150,6 +151,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		}
 		unset( $_FILES['fulfillment_import_file'] );
 
+		// FulfillmentsCsvImporter is a per-request value object constructed with the uploaded file path and options, so it is instantiated directly rather than resolved via the DI container.
 		$importer = new FulfillmentsCsvImporter(
 			$file_path,
 			array(
