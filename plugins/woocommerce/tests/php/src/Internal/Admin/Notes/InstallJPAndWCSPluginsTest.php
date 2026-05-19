@@ -58,6 +58,7 @@ class InstallJPAndWCSPluginsTest extends WC_Unit_Test_Case {
 		// continue and persist E_WC_ADMIN_NOTE_ACTIONED on the note despite no install
 		// running.
 		$this->expectException( \Exception::class );
+		$this->expectExceptionMessage( 'You do not have permissions to manage plugins. Please contact your site administrator.' );
 
 		$this->sut->install_jp_and_wcs_plugins( $note );
 	}
@@ -73,11 +74,10 @@ class InstallJPAndWCSPluginsTest extends WC_Unit_Test_Case {
 		$other_note->set_name( 'some-other-note' );
 
 		// Wrong-note guard must short-circuit before any cap check or install attempt.
+		// Reaching the next line at all proves no exception was thrown; we record an
+		// explicit assertion to keep PHPUnit from flagging this as a risky test.
 		$this->sut->install_jp_and_wcs_plugins( $other_note );
 
-		$this->assertTrue(
-			true,
-			'Handler must short-circuit without error for non-matching notes.'
-		);
+		$this->addToAssertionCount( 1 );
 	}
 }
