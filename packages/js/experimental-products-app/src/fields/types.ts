@@ -7,6 +7,14 @@ import type {
 } from '@woocommerce/data';
 
 export type ProductEntityRecord = Omit< Product, 'categories' | 'tags' > & {
+	cost_of_goods_sold?: {
+		values?: Array< {
+			defined_value?: number | string | null;
+			effective_value?: number | string | null;
+		} >;
+		defined_value_is_additive?: boolean;
+		total_value?: number | string | null;
+	};
 	categories: Array< {
 		id: number;
 		name?: string;

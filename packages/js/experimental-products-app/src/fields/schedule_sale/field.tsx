@@ -33,9 +33,6 @@ const fieldDefinition = {
 
 export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	...fieldDefinition,
-	isVisible: ( item ) => {
-		return !! item.on_sale || !! item.sale_price;
-	},
 	Edit: ( { data, onChange, field } ) => {
 		const toggleId = useInstanceId( FormToggle, 'schedule-sale-toggle' );
 		const [ tempDateOnSaleFrom, setTempDateOnSaleFrom ] = useState(
