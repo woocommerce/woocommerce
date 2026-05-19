@@ -30,6 +30,7 @@ use Automattic\WooCommerce\Internal\AssignDefaultCategory;
 use Automattic\WooCommerce\Internal\DataStores\Orders\CustomOrdersTableController;
 use Automattic\WooCommerce\Internal\DataStores\Orders\DataSynchronizer;
 use Automattic\WooCommerce\Internal\DataStores\Orders\OrdersTableDataStore;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\DataRegenerator;
 use Automattic\WooCommerce\Internal\ProductAttributesLookup\LookupDataStore;
@@ -3462,37 +3463,74 @@ function wc_update_1080_migrate_analytics_import_option(): void {
 }
 
 /**
- * Slim the `meta_key_value` index on `wc_orders_meta` by removing the `meta_value` column.
+ * Reshape the `meta_key_value` index on `wc_orders_meta` to `(meta_key(50), meta_value(20))`.
  *
- * The original composite index `(meta_key(100), meta_value(82))` overlaps heavily with
- * `order_id_meta_key_meta_value` and the `meta_value` prefix adds significant storage
- * overhead with negligible selectivity benefit. All core queries that use this index
- * filter primarily by `meta_key`.
+ * This is labeled as a 10.8.0-2 migration because originally there was a 10.8 migration that modified the
+ * meta_key_value index to include only the meta_key column (see https://github.com/woocommerce/woocommerce/pull/63897),
+ * but later it was discovered that this caused performance issues (as commented in the same pull request),
+ * so this new migration was added. However sites where 10.8 beta was installed will already have run
+ * the original migration (the one that removed meta_value from the index) and will have their db
+ * version updated to 10.8, so this new migration wouldn't run. Hence the 10.8.0-2 marker, which
+ * sorts between 10.8.0 and 10.8.1 via version_compare() and leaves the 10.8.1 slot free for any
+ * future patch-release migrations. WooCommerce 10.8.0 beta 2 had a migration labeled as 10.8.0-1 already,
+ * hence the need to go with 10.8.0-2 for this one.
+ *
+ * Handles two starting states transparently:
+ *  - Pre-10.8 sites: the index is the original `(meta_key(100), meta_value(82))`.
+ *  - 10.8 beta sites: the index has been changed to `(meta_key(100))` only.
+ *
+ * The new prefixes are sized from profiling a production-scale table: all meta_keys fit
+ * within 47 chars (so `meta_key(50)` covers every existing key) and a 20-byte `meta_value`
+ * prefix preserves full selectivity for the affected query patterns, keeping most of the
+ * storage benefit of the slim attempt.
  *
  * @since 10.8.0
  *
  * @return void
  */
-function wc_update_1080_slim_orders_meta_key_index(): void {
+function wc_update_10802_restore_orders_meta_key_value_index(): void {
 	global $wpdb;
 
 	$table_name = $wpdb->prefix . 'wc_orders_meta';
 	$index_name = 'meta_key_value';
 
 	// phpcs:disable WordPress.DB.PreparedSQL.NotPrepared
-	$index = $wpdb->get_row(
+	$columns = $wpdb->get_results(
 		$wpdb->prepare(
-			'SHOW INDEX FROM ' . $table_name . ' WHERE Key_name = %s AND Column_name = %s',
-			$index_name,
-			'meta_value'
+			'SHOW INDEX FROM ' . $table_name . ' WHERE Key_name = %s',
+			$index_name
 		)
 	);
 	// phpcs:enable WordPress.DB.PreparedSQL.NotPrepared
 
-	if ( is_null( $index ) ) {
+	$already_correct =
+		is_array( $columns ) && 2 === count( $columns ) &&
+		'meta_key' === $columns[0]->Column_name && 50 === (int) $columns[0]->Sub_part &&
+		'meta_value' === $columns[1]->Column_name && 20 === (int) $columns[1]->Sub_part;
+
+	if ( $already_correct ) {
 		return;
 	}
 
-	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(100))" );
+	if ( empty( $columns ) ) {
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX {$index_name} (meta_key(50), meta_value(20))" );
+	} else {
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(50), meta_value(20))" );
+	}
+}
+
+/**
+ * Backfill sync meta onto pre-existing `woo_email` posts so the template
+ * divergence detector introduced in the same release (RSM-138) can classify
+ * legacy installs safely.
+ *
+ * @since 10.8.0
+ *
+ * @return bool Always false. Once-per-site is enforced by the
+ *              `woocommerce_db_version` fence in `$db_updates`.
+ */
+function wc_update_1080_backfill_email_template_sync_meta(): bool {
+	return WCEmailTemplateSyncBackfill::run();
 }

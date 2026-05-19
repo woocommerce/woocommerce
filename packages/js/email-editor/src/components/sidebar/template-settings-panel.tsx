@@ -41,7 +41,7 @@ export function TemplateSettingsPanel() {
 	return (
 		<PluginDocumentSettingPanel
 			name="template-settings-panel"
-			title={ __( 'Settings', 'woocommerce' ) }
+			title={ __( 'Settings', __i18n_text_domain__ ) }
 			className="woocommerce-email-editor__settings-panel"
 		>
 			{ templateSections.map( ( section ) => (

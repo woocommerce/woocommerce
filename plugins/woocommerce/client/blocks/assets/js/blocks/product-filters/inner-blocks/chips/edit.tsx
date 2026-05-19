@@ -52,12 +52,15 @@ const Edit = ( props: EditProps ): JSX.Element => {
 		customSelectedChipBackground,
 		customSelectedChipBorder,
 	} = attributes;
-	const { filterData } = context;
-	const { isLoading, items, showCounts } = filterData;
+	const { isLoading = false, items = [] } =
+		context?.woocommerceSelectableItems ?? {};
+
+	const hasColorSwatches = items.some( ( item ) => 'color' in item );
 
 	const blockProps = useBlockProps( {
 		className: clsx( 'wc-block-product-filter-chips', {
 			'is-loading': isLoading,
+			'is-style-swatch': hasColorSwatches,
 			...getColorClasses( attributes ),
 		} ),
 		style: getColorVars( attributes ),
@@ -101,12 +104,30 @@ const Edit = ( props: EditProps ): JSX.Element => {
 								aria-checked={ !! item.selected }
 							>
 								<span className="wc-block-product-filter-chips__label">
+									<span
+										className={ clsx(
+											'wc-block-product-filter-chips__swatch',
+											{
+												'wc-block-product-filter-chips__swatch--no-color':
+													! item.color,
+											}
+										) }
+										style={
+											item.color
+												? {
+														backgroundColor:
+															item.color,
+												  }
+												: undefined
+										}
+										aria-hidden="true"
+									/>
 									<span className="wc-block-product-filter-chips__text">
 										{ typeof item.label === 'string'
 											? decodeHtmlEntities( item.label )
 											: item.label }
 									</span>
-									{ showCounts && (
+									{ item.count !== undefined && (
 										<span className="wc-block-product-filter-chips__count">
 											{ ` (${ item.count })` }
 										</span>

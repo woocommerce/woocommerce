@@ -6,22 +6,39 @@ import { store, getContext, getConfig } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
+import type { ProductFiltersContext } from '../../types';
+import type { ProductFiltersStore } from '../../frontend';
 import type {
-	ActiveFilterItem,
-	ProductFiltersContext,
-	ProductFiltersStore,
-} from '../../frontend';
+	RemovableItem,
+	RemovableItemsParentStore,
+} from '../../../../types/type-defs/removable-items';
 
-type ActiveFiltersContext = {
-	item: ActiveFilterItem;
+type RemovableItemContext = {
+	item: RemovableItem;
 };
 
 const activeFiltersStore = {
 	state: {
-		get removeActiveFilterLabel() {
-			const { item } = getContext< ActiveFiltersContext >();
+		get removableItems() {
+			const { activeFilters } = getContext< ProductFiltersContext >();
+			return activeFilters
+				.filter( ( f ) => !! f.value )
+				.map( ( f ) => ( {
+					id: f.type + '_' + f.value,
+					type: f.type,
+					value: f.value,
+					label: f.activeLabel,
+				} ) );
+		},
+		get removeItemLabel() {
+			const { item } = getContext< RemovableItemContext >();
 			const { removeLabelTemplate } = getConfig();
-			return removeLabelTemplate.replace( '{{label}}', item.activeLabel );
+			const template =
+				typeof removeLabelTemplate === 'string'
+					? removeLabelTemplate
+					: '{{label}}';
+			const label = typeof item?.label === 'string' ? item.label : '';
+			return template.replace( '{{label}}', label );
 		},
 		get hasActiveFilters() {
 			const { activeFilters } = getContext< ProductFiltersContext >();
@@ -29,13 +46,13 @@ const activeFiltersStore = {
 		},
 	},
 	actions: {
-		removeAllActiveFilters: () => {
+		removeAll: () => {
 			const context = getContext< ProductFiltersContext >();
 			context.activeFilters = [];
 			actions.navigate();
 		},
-		removeActiveFilter: () => {
-			const { item } = getContext< ActiveFiltersContext >();
+		remove: () => {
+			const { item } = getContext< RemovableItemContext >();
 			actions.removeActiveFiltersBy(
 				( filter ) =>
 					filter.value === item.value && filter.type === item.type
@@ -44,6 +61,10 @@ const activeFiltersStore = {
 		},
 	},
 };
+
+// Compile-time protocol conformance check.
+// eslint-disable-next-line @typescript-eslint/no-unused-expressions
+activeFiltersStore satisfies RemovableItemsParentStore;
 
 const { actions } = store< ProductFiltersStore & typeof activeFiltersStore >(
 	'woocommerce/product-filters',

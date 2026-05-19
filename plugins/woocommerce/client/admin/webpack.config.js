@@ -8,6 +8,7 @@ const CopyWebpackPlugin = require( 'copy-webpack-plugin' );
 const { BundleAnalyzerPlugin } = require( 'webpack-bundle-analyzer' );
 const ForkTsCheckerWebpackPlugin = require( 'fork-ts-checker-webpack-plugin' );
 const ReactRefreshWebpackPlugin = require( '@pmmmwh/react-refresh-webpack-plugin' );
+const webpack = require( 'webpack' );
 
 /**
  * Internal dependencies
@@ -195,6 +196,12 @@ const webpackConfig = {
 	},
 	plugins: [
 		...styleConfig.plugins,
+		// Substitute the `__i18n_text_domain__` identifier used by the
+		// @woocommerce/email-editor package with the WooCommerce text
+		// domain so strings extract and translate under `woocommerce`.
+		new webpack.DefinePlugin( {
+			__i18n_text_domain__: JSON.stringify( 'woocommerce' ),
+		} ),
 		// Runs TypeScript type checker on a separate process.
 		! process.env.STORYBOOK && isWatch && new ForkTsCheckerWebpackPlugin(),
 		new CustomTemplatedPathPlugin( {

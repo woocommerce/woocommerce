@@ -1,0 +1,4 @@
+Significance: patch
+Type: add
+
+Exclude fully-refunded line items from the customer Review Order page so customers can't review products they no longer own.

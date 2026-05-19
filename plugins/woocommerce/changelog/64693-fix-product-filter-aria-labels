@@ -1,0 +1,4 @@
+Significance: patch
+Type: enhancement
+
+Add ariaLabel to attribute, status, and taxonomy product filter items for improved screen reader accessibility

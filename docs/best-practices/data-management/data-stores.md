@@ -108,7 +108,7 @@ public function read( &$coupon ) {
 	// Read should do a check to see if this is a valid coupon
 	// and otherwise	throw an 'Invalid coupon.' exception.
 	// For valid coupons, set $data to contain our database result.
-	// All props should be set using set_props with output from the database. This "hydates" the CRUD data object.
+	// All props should be set using set_props with output from the database. This "hydrates" the CRUD data object.
 	$coupon_id = $coupon->get_id();
 	$coupon->set_props( array(
 		'code'                        => $data->code,

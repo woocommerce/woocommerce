@@ -53,7 +53,7 @@ export function DatePicker( {
 }: DatePickerProps ) {
 	return (
 		<InputControl
-			label={ field.label }
+			label={ field.label ?? '' }
 			type="datetime-local"
 			value={ data[ fieldKey ] || '' }
 			min={ min ? formatDateTimeLocal( min ) : undefined }

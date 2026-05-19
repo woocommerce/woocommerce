@@ -14,6 +14,14 @@ parameters:
 		# Matches the prior test implementation; GeoIP relies on data files.
 		- includes/class-wc-geo-ip.php
 		- includes/react-admin/feature-config.php (?)
+		# The Code API (src/Api/) and its infrastructure (src/Internal/Api/)
+		# require PHP 8.1+ and use enums, named arguments, constructor
+		# property promotion, union types, and `mixed` throughout — all of
+		# which the global phpVersion: 70400 setting cannot parse or resolve.
+		# Infrastructure files also reference src/Api/ classes that PHPStan
+		# can't discover once the public API dir is excluded.
+		- src/Api/
+		- src/Internal/Api/
 	bootstrapFiles:
 		- vendor/autoload.php
 	scanDirectories:

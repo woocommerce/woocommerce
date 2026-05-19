@@ -115,4 +115,66 @@ class DefaultShippingPartnersTest extends WC_Unit_Test_Case {
 		self::rmdir( dirname( $shipping_plugin_file_path ) );
 		self::delete_folders( dirname( $shipping_plugin_file_path ) );
 	}
+
+	/**
+	 * Asserts the WooCommerce Shipping spec includes a layout_row block with required fields.
+	 *
+	 * @return void
+	 */
+	public function test_wcshipping_has_layout_row_with_required_fields() {
+		$wcs_spec = $this->get_wcshipping_spec();
+
+		$this->assertArrayHasKey( 'layout_row', $wcs_spec );
+		$row = $wcs_spec['layout_row'];
+
+		$this->assertArrayHasKey( 'image', $row );
+		$this->assertNotEmpty( $row['image'] );
+
+		$this->assertArrayHasKey( 'image_label', $row );
+		$this->assertNotEmpty( $row['image_label'] );
+
+		$this->assertArrayHasKey( 'description', $row );
+		$this->assertNotEmpty( $row['description'] );
+
+		$this->assertArrayHasKey( 'features', $row );
+		$this->assertNotEmpty( $row['features'] );
+
+		foreach ( $row['features'] as $feature ) {
+			$this->assertIsArray( $feature );
+			$this->assertArrayHasKey( 'icon', $feature );
+			$this->assertNotEmpty( $feature['icon'] );
+			$this->assertArrayHasKey( 'description', $feature );
+			$this->assertNotEmpty( $feature['description'] );
+		}
+	}
+
+	/**
+	 * Asserts the WooCommerce Shipping spec declares both row and column layouts as available.
+	 *
+	 * @return void
+	 */
+	public function test_wcshipping_available_layouts_includes_row_and_column() {
+		$wcs_spec = $this->get_wcshipping_spec();
+
+		$this->assertArrayHasKey( 'available_layouts', $wcs_spec );
+		$this->assertContains( 'row', $wcs_spec['available_layouts'] );
+		$this->assertContains( 'column', $wcs_spec['available_layouts'] );
+	}
+
+	/**
+	 * Returns the WooCommerce Shipping raw spec array, failing the test if not found.
+	 *
+	 * @return array
+	 */
+	private function get_wcshipping_spec(): array {
+		$specs = DefaultShippingPartners::get_all();
+
+		foreach ( $specs as $spec ) {
+			if ( 'woocommerce-shipping' === $spec['id'] ) {
+				return $spec;
+			}
+		}
+
+		$this->fail( 'WooCommerce Shipping spec not found.' );
+	}
 }

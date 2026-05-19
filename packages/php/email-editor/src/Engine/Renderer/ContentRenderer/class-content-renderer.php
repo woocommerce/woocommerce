@@ -126,6 +126,13 @@ class Content_Renderer {
 	private Css_Inliner $css_inliner;
 
 	/**
+	 * Render-scoped context shared across all blocks in the current content render.
+	 *
+	 * @var Rendering_Context|null
+	 */
+	private ?Rendering_Context $rendering_context = null;
+
+	/**
 	 * Content_Renderer constructor.
 	 *
 	 * @param Process_Manager     $preprocess_manager Preprocess manager.
@@ -172,6 +179,35 @@ class Content_Renderer {
 	}
 
 	/**
+	 * Set a rendering context resolved by the full email renderer.
+	 *
+	 * @param Rendering_Context $rendering_context Rendering context.
+	 * @return void
+	 */
+	public function set_rendering_context( Rendering_Context $rendering_context ): void {
+		$this->rendering_context = $rendering_context;
+	}
+
+	/**
+	 * Get the current rendering context without creating a fallback context.
+	 *
+	 * @return Rendering_Context|null
+	 */
+	public function get_current_rendering_context(): ?Rendering_Context {
+		return $this->rendering_context;
+	}
+
+	/**
+	 * Restore a previously active rendering context.
+	 *
+	 * @param Rendering_Context|null $rendering_context Rendering context.
+	 * @return void
+	 */
+	public function restore_rendering_context( ?Rendering_Context $rendering_context ): void {
+		$this->rendering_context = $rendering_context;
+	}
+
+	/**
 	 * Render the content with inlined CSS styles.
 	 *
 	 * @param WP_Post           $post Post object.
@@ -196,6 +232,10 @@ class Content_Renderer {
 	 * @return array{html: string, styles: string} Rendered HTML and collected CSS.
 	 */
 	public function render_without_css_inline( WP_Post $post, WP_Block_Template $template ): array {
+		if ( null === $this->rendering_context ) {
+			$this->rendering_context = $this->create_rendering_context( null, $post, $template );
+		}
+
 		$this->set_template_globals( $post, $template );
 		$this->initialize();
 		try {
@@ -260,7 +300,7 @@ class Content_Renderer {
 			}
 		}
 
-		$result = $this->process_manager->preprocess( $parsed_blocks, $layout, $styles );
+		$result = $this->process_manager->preprocess( $parsed_blocks, $layout, $styles, $this->get_rendering_context() );
 
 		// After the first pass: find the post-content block's width and container padding.
 		if ( null === $this->post_content_width ) {
@@ -347,29 +387,7 @@ class Content_Renderer {
 	 * @return string
 	 */
 	public function render_block( string $block_content, array $parsed_block ): string {
-		/**
-		 * Filter the email-specific context data passed to block renderers.
-		 *
-		 * This allows email sending systems to provide context data such as user ID,
-		 * email address, order information, etc., that can be used by blocks during rendering.
-		 *
-		 * Blocks that need cart product information can derive it from the user_id or recipient_email
-		 * using CartCheckoutUtils::get_cart_product_ids_for_user().
-		 *
-		 * @since 1.9.0
-		 *
-		 * @param array $email_context {
-		 *     Email-specific context data.
-		 *
-		 *     @type int    $user_id         The ID of the user receiving the email.
-		 *     @type string $recipient_email The recipient's email address.
-		 *     @type int    $order_id        The order ID (for order-related emails).
-		 *     @type string $email_type      The type of email being rendered.
-		 * }
-		 */
-		$email_context = apply_filters( 'woocommerce_email_editor_rendering_email_context', array() );
-
-		$context = new Rendering_Context( $this->theme_controller->get_theme(), $email_context );
+		$context = $this->get_rendering_context();
 
 		$block_type = $this->block_type_registry->get_registered( $parsed_block['blockName'] );
 		$result     = null;
@@ -439,7 +457,7 @@ class Content_Renderer {
 		}
 
 		$table_attrs = array(
-			'align' => 'left',
+			'align' => $this->get_rendering_context()->get_default_text_align(),
 			'width' => '100%',
 		);
 
@@ -508,6 +526,7 @@ class Content_Renderer {
 
 		$this->post_content_width = null;
 		$this->container_padding  = array();
+		$this->rendering_context  = null;
 
 		// Restore the original core/post-content render callback.
 		// Note: We always restore it, even if it was null originally.
@@ -524,6 +543,58 @@ class Content_Renderer {
 		$_wp_current_template_id      = $this->backup_template_id;
 		$wp_query                     = $this->backup_query;  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring of the query.
 		$post                         = $this->backup_post;  // phpcs:ignore WordPress.WP.GlobalVariablesOverride.Prohibited -- Restoring of the post.
+	}
+
+	/**
+	 * Get the current rendering context, lazily creating one for direct render_block() usage.
+	 *
+	 * @return Rendering_Context
+	 */
+	private function get_rendering_context(): Rendering_Context {
+		if ( null === $this->rendering_context ) {
+			$this->rendering_context = $this->create_rendering_context();
+		}
+		return $this->rendering_context;
+	}
+
+	/**
+	 * Create a rendering context from filtered email context.
+	 *
+	 * @param string|null            $language Optional email language.
+	 * @param WP_Post|null           $post Optional email post.
+	 * @param WP_Block_Template|null $template Optional block template.
+	 * @return Rendering_Context
+	 */
+	public function create_rendering_context( ?string $language = null, ?WP_Post $post = null, ?WP_Block_Template $template = null ): Rendering_Context {
+		/**
+		 * Filter the email-specific context data passed to block renderers.
+		 *
+		 * This allows email sending systems to provide context data such as user ID,
+		 * email address, order information, etc., that can be used by blocks during rendering.
+		 *
+		 * Blocks that need cart product information can derive it from the user_id or recipient_email
+		 * using CartCheckoutUtils::get_cart_product_ids_for_user().
+		 *
+		 * @since 1.9.0
+		 *
+		 * @param array $email_context {
+		 *     Email-specific context data.
+		 *
+		 *     @type int    $user_id         The ID of the user receiving the email.
+		 *     @type string $recipient_email The recipient's email address.
+		 *     @type int    $order_id        The order ID (for order-related emails).
+		 *     @type string $email_type      The type of email being rendered.
+		 *     @type bool   $is_rtl          Optional. Whether this email render should use RTL direction.
+		 * }
+		 * @param WP_Post|null           $post     Email post being rendered.
+		 * @param WP_Block_Template|null $template Block template being rendered.
+		 */
+		$email_context = apply_filters( 'woocommerce_email_editor_rendering_email_context', array(), $post, $template );
+		if ( ! is_array( $email_context ) ) {
+			$email_context = array();
+		}
+
+		return new Rendering_Context( $this->theme_controller->get_theme(), $email_context, $language );
 	}
 
 	/**

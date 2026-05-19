@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add stock status and product status indicators to the admin order product selector so admins can see which variations are out of stock, on backorder, or disabled.

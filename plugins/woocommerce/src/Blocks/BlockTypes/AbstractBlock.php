@@ -226,12 +226,14 @@ abstract class AbstractBlock {
 		];
 
 		// Conditionally override these, otherwise rely on block.json metadata.
-		if ( $this->get_block_type_style() ) {
-			$block_settings['style'] = $this->get_block_type_style();
+		$block_type_style = $this->get_block_type_style();
+		if ( $block_type_style ) {
+			$block_settings['style'] = $block_type_style;
 		}
 
-		if ( $this->get_block_type_editor_style() ) {
-			$block_settings['editor_style'] = $this->get_block_type_editor_style();
+		$block_type_editor_style = $this->get_block_type_editor_style();
+		if ( $block_type_editor_style ) {
+			$block_settings['editor_style'] = $block_type_editor_style;
 		}
 
 		if ( isset( $this->api_version ) ) {

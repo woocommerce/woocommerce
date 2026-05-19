@@ -334,6 +334,18 @@ class DataStore extends SqlQuery implements DataStoreInterface {
 				return ! empty( $param );
 			}
 		);
+
+		// Normalize DateTime objects to ISO 8601 strings to avoid cache key
+		// instability caused by microsecond-level differences in serialization.
+		array_walk(
+			$params,
+			function ( &$value ) {
+				if ( $value instanceof \DateTimeInterface ) {
+					$value = $value->format( DATE_ATOM );
+				}
+			}
+		);
+
 		ksort( $params );
 		return implode(
 			'_',
