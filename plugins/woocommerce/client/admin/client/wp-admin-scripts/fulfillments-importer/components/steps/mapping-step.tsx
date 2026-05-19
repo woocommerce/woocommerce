@@ -1,18 +1,185 @@
 /**
  * External dependencies
  */
-import React from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { __ } from '@wordpress/i18n';
+import { Button, SelectControl } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
+import type {
+	CanonicalColumnKey,
+	ColumnMapping,
+} from '../../data/types';
+import {
+	hasAllRequiredColumns,
+	REQUIRED_COLUMNS,
+} from '../../hooks/use-importer-state';
 import type { StepComponentProps } from './types';
 
-const MappingStep: React.FC< StepComponentProps > = () => (
-	<div className="woocommerce-fulfillment-importer-step woocommerce-fulfillment-importer-step--mapping">
-		<p>{ __( 'Mapping step placeholder.', 'woocommerce' ) }</p>
-	</div>
-);
+const CANONICAL_LABELS: Record< CanonicalColumnKey, string > = {
+	order_number: __( 'Order number *', 'woocommerce' ),
+	tracking_number: __( 'Tracking number *', 'woocommerce' ),
+	shipment_provider: __( 'Carrier / provider *', 'woocommerce' ),
+	tracking_url: __( 'Tracking URL', 'woocommerce' ),
+	items: __( 'Items', 'woocommerce' ),
+	'': __( 'Do not import', 'woocommerce' ),
+};
+
+const CANONICAL_OPTIONS: Array< {
+	label: string;
+	value: CanonicalColumnKey;
+} > = ( [
+	'',
+	'order_number',
+	'tracking_number',
+	'shipment_provider',
+	'tracking_url',
+	'items',
+] as CanonicalColumnKey[] ).map( ( key ) => ( {
+	value: key,
+	label: CANONICAL_LABELS[ key ],
+} ) );
+
+const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
+	const continueDisabled = ! hasAllRequiredColumns( state.mapping );
+
+	const setMapping = useCallback(
+		( col: number, value: string ) => {
+			dispatch( {
+				type: 'SET_MAPPING_FOR_COL',
+				col,
+				value: value as CanonicalColumnKey,
+			} );
+		},
+		[ dispatch ]
+	);
+
+	const onAutoDetect = useCallback( () => {
+		// Re-derive the detected mapping from the sample headers; the reducer keeps it on prepare.
+		// We just dispatch RESET_MAPPING_TO_DETECTED with whatever we already remember.
+		const detected: ColumnMapping = {};
+		state.headers.forEach( ( _, index ) => {
+			detected[ index ] = '' as CanonicalColumnKey;
+		} );
+		// We don't have the original detected mapping after manual edits, so fall back to a best-effort
+		// re-detection using a fixed alias table mirroring the server side. This keeps the button useful
+		// without an extra round-trip.
+		const ALIASES: Array< {
+			canonical: CanonicalColumnKey;
+			matches: RegExp;
+		} > = [
+			{
+				canonical: 'order_number',
+				matches: /^(order[_ ]?(number|id|no|num))$/i,
+			},
+			{
+				canonical: 'tracking_number',
+				matches: /^(tracking([_ ]?(number|no|num))?)$/i,
+			},
+			{
+				canonical: 'shipment_provider',
+				matches: /^(carrier|provider|shipment[_ ]?provider|shipping[_ ]?carrier|shipping[_ ]?provider)$/i,
+			},
+			{
+				canonical: 'tracking_url',
+				matches: /^(tracking[_ ]?url|url)$/i,
+			},
+			{ canonical: 'items', matches: /^(items|line[_ ]?items)$/i },
+		];
+		state.headers.forEach( ( header, index ) => {
+			const normalized = header.trim();
+			const match = ALIASES.find( ( a ) => a.matches.test( normalized ) );
+			detected[ index ] = ( match?.canonical ??
+				'' ) as CanonicalColumnKey;
+		} );
+		dispatch( { type: 'RESET_MAPPING_TO_DETECTED', mapping: detected } );
+	}, [ dispatch, state.headers ] );
+
+	const rows = useMemo(
+		() =>
+			state.headers.map( ( header, index ) => ( {
+				index,
+				header,
+				sample: state.sample[ index ] ?? '',
+				mapped: state.mapping[ index ] ?? '',
+			} ) ),
+		[ state.headers, state.sample, state.mapping ]
+	);
+
+	return (
+		<div className="woocommerce-fulfillment-importer-step woocommerce-fulfillment-importer-step--mapping">
+			<h2>{ __( 'Map your columns', 'woocommerce' ) }</h2>
+			<p>
+				{ __(
+					'Required fields are marked with *. Adjust any column that did not auto-detect.',
+					'woocommerce'
+				) }
+			</p>
+
+			<table
+				className="woocommerce-fulfillment-importer-mapping-table"
+				role="table"
+			>
+				<thead>
+					<tr>
+						<th>{ __( 'CSV column', 'woocommerce' ) }</th>
+						<th>{ __( 'Sample value', 'woocommerce' ) }</th>
+						<th>{ __( 'Map to field', 'woocommerce' ) }</th>
+					</tr>
+				</thead>
+				<tbody>
+					{ rows.map( ( row ) => {
+						const isRequiredAndUnmapped =
+							REQUIRED_COLUMNS.includes( row.mapped ) === false &&
+							REQUIRED_COLUMNS.some(
+								( req ) =>
+									! Object.values( state.mapping ).includes(
+										req
+									)
+							);
+						return (
+							<tr
+								key={ row.index }
+								className={
+									isRequiredAndUnmapped
+										? 'is-required-row'
+										: undefined
+								}
+							>
+								<th scope="row">{ row.header }</th>
+								<td>{ row.sample }</td>
+								<td>
+									<SelectControl
+										aria-label={ row.header }
+										value={ row.mapped }
+										options={ CANONICAL_OPTIONS }
+										onChange={ ( value: string ) =>
+											setMapping( row.index, value )
+										}
+									/>
+								</td>
+							</tr>
+						);
+					} ) }
+				</tbody>
+			</table>
+
+			<footer className="woocommerce-fulfillment-importer-step__footer">
+				<Button variant="tertiary" onClick={ onAutoDetect }>
+					{ __( 'Auto-detect', 'woocommerce' ) }
+				</Button>
+				<Button
+					variant="primary"
+					disabled={ continueDisabled }
+					onClick={ () => dispatch( { type: 'GO_IMPORT' } ) }
+				>
+					{ __( 'Start import', 'woocommerce' ) }
+				</Button>
+			</footer>
+		</div>
+	);
+};
 
 export default MappingStep;
