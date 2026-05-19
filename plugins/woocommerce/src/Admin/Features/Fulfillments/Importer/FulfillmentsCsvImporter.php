@@ -343,7 +343,11 @@ class FulfillmentsCsvImporter {
 				'notified'       => $notified,
 			);
 		} catch ( \Throwable $e ) {
-			return $this->fail( $row_number, 'save_failed', $e->getMessage(), $order->get_id() );
+			wc_get_logger()->error(
+				sprintf( 'Fulfillment import save failed on row %1$d for order %2$d: %3$s', $row_number, $order->get_id(), $e->getMessage() ),
+				array( 'source' => 'fulfillments-csv-importer' )
+			);
+			return $this->fail( $row_number, 'save_failed', __( 'Could not save fulfillment.', 'woocommerce' ), $order->get_id() );
 		}
 	}
 
