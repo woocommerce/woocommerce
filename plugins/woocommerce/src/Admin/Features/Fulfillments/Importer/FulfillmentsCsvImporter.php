@@ -26,15 +26,6 @@ defined( 'ABSPATH' ) || exit;
 class FulfillmentsCsvImporter {
 
 	/**
-	 * Default maximum number of data rows processed in a single import run.
-	 *
-	 * Beyond this limit the import returns a single failure entry rather than continuing,
-	 * to protect PHP memory on extremely large uploads. Filterable via
-	 * `woocommerce_fulfillments_csv_importer_max_rows`.
-	 */
-	private const DEFAULT_MAX_ROWS = 5000;
-
-	/**
 	 * Canonical column keys recognized by the importer.
 	 */
 	public const COL_ORDER_NUMBER    = 'order_number';
@@ -169,22 +160,6 @@ class FulfillmentsCsvImporter {
 
 			$row_number          = 1; // Header is row 1.
 			$seen_tracking_pairs = array(); // Map of "order_id|tracking" => true for in-file duplicate detection.
-			$processed_rows      = 0;
-
-			/**
-			 * Filter the maximum number of data rows the CSV importer will process in a single run.
-			 *
-			 * Beyond this limit the import returns a failure entry rather than continuing, to keep
-			 * memory bounded on very large uploads.
-			 *
-			 * @since 10.9.0
-			 *
-			 * @param int $max_rows Default maximum number of data rows.
-			 */
-			$max_rows = (int) apply_filters( 'woocommerce_fulfillments_csv_importer_max_rows', self::DEFAULT_MAX_ROWS );
-			if ( $max_rows < 1 ) {
-				$max_rows = self::DEFAULT_MAX_ROWS;
-			}
 
 			while ( true ) {
 				$row = fgetcsv( $handle, 0, $this->options['delimiter'], $this->options['enclosure'], '' );
@@ -196,22 +171,6 @@ class FulfillmentsCsvImporter {
 				if ( $this->is_blank_row( $row ) ) {
 					continue;
 				}
-
-				if ( $processed_rows >= $max_rows ) {
-					$summary['rows'][] = $this->fail(
-						$row_number,
-						'max_rows_exceeded',
-						sprintf(
-							/* translators: %d: maximum number of data rows allowed per import. */
-							__( 'Import stopped: file exceeds the maximum of %d rows per import.', 'woocommerce' ),
-							$max_rows
-						)
-					);
-					++$summary['failed'];
-					break;
-				}
-
-				++$processed_rows;
 
 				$result = $this->process_row( $row, $header_map, $row_number, $seen_tracking_pairs );
 
