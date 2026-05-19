@@ -2,6 +2,8 @@
 
 A WooCommerce dashboard widget that surfaces recent store events (orders, customers, bookings, reviews, etc.) in a chronological timeline. The widget itself ships no data — events are contributed by plugins through a WordPress filter, so any extension can populate the timeline with its own activity.
 
+> **Heads up.** The widget surface and the activity-sources filter are gated behind WooCommerce's `dashboard_widgets` experimental feature flag (off by default). Enable at **WC → Settings → Advanced → Features → Experimental features → Dashboard widgets** before testing your contribution. With the flag off, your `addFilter( 'storeActivity.sources', ... )` calls don't cause errors — they just never render anywhere.
+
 ## Activity Sources API
 
 Sources are registered via the `storeActivity.sources` filter from `@wordpress/hooks`. A source is a small object that exposes a React hook returning the events it wants to render.

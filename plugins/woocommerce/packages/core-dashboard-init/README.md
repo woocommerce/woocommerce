@@ -2,7 +2,11 @@
 
 > **Status: Proof of Concept.** This package is part of an exploratory scaffold for surfacing WooCommerce on the experimental Gutenberg dashboard. APIs, file layouts, and conventions described here will likely move.
 
-A `@wordpress/build` "init module" that runs on dashboard boot and registers WooCommerce-core contributions to the dashboard. Currently registers three Store Activity sources:
+A `@wordpress/build` "init module" that runs on dashboard boot and registers WooCommerce-core contributions to the dashboard.
+
+> **Activation.** This whole subsystem is gated behind the `dashboard_widgets` experimental feature flag, off by default. Enable at **WC → Settings → Advanced → Features → Experimental features → Dashboard widgets**. When the flag is off, nothing in this package runs — `plugins/woocommerce/src/Internal/Admin/DashboardWidgets/Loader.php::maybe_bootstrap()` short-circuits before registering any hook.
+
+It currently registers three Store Activity sources:
 
 - `woocommerce/orders` — recent orders, backed by a WC-side `order` entity that points at `/wc/v3/orders`.
 - `woocommerce/reviews` — recent product reviews, backed by a WC-side `review` entity that points at `/wc/v3/products/reviews`. We avoid `root/comment` with `type='review'` because that filter is only a `comment_type` naming convention and doesn't enforce that the parent is a product, so it can leak non-product activity into the widget.
