@@ -79,7 +79,20 @@ class NoteActions extends Notes {
 			);
 		}
 
-		$triggered_note = NotesFactory::trigger_note_action( $note, $triggered_action );
+		try {
+			$triggered_note = NotesFactory::trigger_note_action( $note, $triggered_action );
+		} catch ( \Exception $e ) {
+			// Handlers hooked into `woocommerce_note_action[_*]` throw when the current
+			// user lacks the per-action capability the handler enforces (the route-level
+			// permission check is intentionally coarser). Convert to a 403 so REST
+			// clients get correct HTTP semantics instead of a 500 from the uncaught
+			// exception.
+			return new \WP_Error(
+				'woocommerce_note_action_forbidden',
+				$e->getMessage(),
+				array( 'status' => rest_authorization_required_code() )
+			);
+		}
 
 		$data = $triggered_note->get_data();
 		$data = $this->prepare_item_for_response( $data, $request );

@@ -117,7 +117,7 @@ class InstallJPAndWCSPlugins {
 		// the note stays in the inbox for unauthorized users.
 		if ( ! current_user_can( 'install_plugins' ) ) {
 			throw new \Exception(
-				esc_html__( 'Sorry, you are not allowed to install plugins.', 'woocommerce' )
+				esc_html__( 'You do not have permissions to manage plugins. Please contact your site administrator.', 'woocommerce' )
 			);
 		}
 
