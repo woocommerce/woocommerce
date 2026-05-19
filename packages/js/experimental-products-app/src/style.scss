@@ -164,6 +164,15 @@
 	.dataforms-layouts__wrapper + .dataforms-layouts-regular__header {
 		margin-top: 32px;
 	}
+
+	// Allow row layout children (e.g. start/end sale dates) to shrink
+	// inside their flex container. Without this, the inputs' intrinsic
+	// min-width keeps them from fitting two-up in the drawer, and the
+	// second column bleeds past the right padding.
+	.dataforms-layouts-row__field-control {
+		min-width: 0;
+		flex: 1 1 0;
+	}
 }
 
 .woocommerce-product-edit__footer {

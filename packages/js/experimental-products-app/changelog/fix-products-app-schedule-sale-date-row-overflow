@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Stop the schedule-sale end date input from bleeding past the drawer's right padding in the experimental products app by letting row-layout fields shrink inside their flex container.
