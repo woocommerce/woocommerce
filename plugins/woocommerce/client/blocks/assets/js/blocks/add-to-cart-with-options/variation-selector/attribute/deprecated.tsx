@@ -48,7 +48,19 @@ function migrateInnerBlocks(
 			block.name === 'core/missing' &&
 			block.attributes.originalName === LEGACY_ATTRIBUTE_OPTIONS_BLOCK
 		) {
-			if ( block.originalContent?.includes( 'dropdown' ) ) {
+			if ( block.originalContent?.includes( '"autoselect":true' ) ) {
+				settings.autoselect = true;
+			}
+			if (
+				block.originalContent?.includes(
+					'"disabledAttributesAction":"hide"'
+				)
+			) {
+				settings.disabledAttributesAction = 'hide';
+			}
+			if (
+				block.originalContent?.includes( '"optionStyle":"dropdown"' )
+			) {
 				settings.displayStyle = INNER_DROPDOWN;
 				return [ createBlock( INNER_DROPDOWN ) ];
 			}

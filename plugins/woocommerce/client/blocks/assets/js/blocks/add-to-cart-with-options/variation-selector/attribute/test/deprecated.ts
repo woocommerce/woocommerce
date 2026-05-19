@@ -213,11 +213,15 @@ describe( 'Variation Selector Attribute block deprecation', () => {
 			);
 
 			expect( migratedAttributes.displayStyle ).toBe( INNER_DROPDOWN );
-			expect( migratedInnerBlocks ).toHaveLength( 2 );
-			expect( migratedInnerBlocks[ 0 ].name ).toBe(
+			expect( migratedInnerBlocks ).toHaveLength( 1 );
+			expect( migratedInnerBlocks[ 0 ].name ).toBe( 'core/group' );
+			expect( migratedInnerBlocks[ 0 ].innerBlocks ).toHaveLength( 2 );
+			expect( migratedInnerBlocks[ 0 ].innerBlocks[ 0 ].name ).toBe(
 				'woocommerce/add-to-cart-with-options-variation-selector-attribute-name'
 			);
-			expect( migratedInnerBlocks[ 1 ].name ).toBe( INNER_DROPDOWN );
+			expect( migratedInnerBlocks[ 0 ].innerBlocks[ 1 ].name ).toBe(
+				INNER_DROPDOWN
+			);
 		} );
 	} );
 } );
