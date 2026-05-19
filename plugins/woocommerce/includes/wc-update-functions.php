@@ -3473,7 +3473,7 @@ function wc_update_1080_migrate_analytics_import_option(): void {
  * version updated to 10.8, so this new migration wouldn't run. Hence the 10.8.0-1 marker, which
  * sorts between 10.8.0 and 10.8.1 via version_compare() and leaves the 10.8.1 slot free for any
  * future patch-release migrations.
- * 
+ *
  * Handles two starting states transparently:
  *  - Pre-10.8 sites: the index is the original `(meta_key(100), meta_value(82))`.
  *  - 10.8 beta sites: the index has been changed to `(meta_key(100))` only.
@@ -3511,8 +3511,12 @@ function wc_update_10801_restore_orders_meta_key_value_index(): void {
 		return;
 	}
 
+	$alter_sql = empty( $columns )
+		? "ALTER TABLE {$table_name} ADD INDEX {$index_name} (meta_key(50), meta_value(20))"
+		: "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(50), meta_value(20))";
+
 	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(50), meta_value(20))" );
+	$wpdb->query( $alter_sql );
 }
 
 /**
