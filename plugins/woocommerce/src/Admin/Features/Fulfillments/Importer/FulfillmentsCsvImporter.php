@@ -63,6 +63,11 @@ class FulfillmentsCsvImporter {
 	private array $fulfillments_cache = array();
 
 	/**
+	 * Default chunk size when looping import_chunk() from run().
+	 */
+	private const DEFAULT_CHUNK_SIZE = 200;
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 10.9.0
@@ -70,7 +75,7 @@ class FulfillmentsCsvImporter {
 	 * @param string               $file    Absolute path to the CSV file.
 	 * @param array<string, mixed> $options Importer options:
 	 *                                      - notify_customer (bool): Whether to fire customer notifications. Default false.
-	 *                                      - delimiter (string): CSV delimiter. Default ','.
+	 *                                      - delimiter (string): CSV delimiter, or 'auto' to sniff. Default ','.
 	 *                                      - enclosure (string): CSV enclosure. Default '"'.
 	 *                                      - update_existing (bool): Update fulfillment when one with the same tracking number
 	 *                                                                already exists on the order. Default true.
@@ -114,95 +119,435 @@ class FulfillmentsCsvImporter {
 			'rows'     => array(),
 		);
 
-		if ( ! is_readable( $this->file ) ) {
-			$summary['rows'][] = $this->fail( 0, 'file_not_readable', __( 'File is not readable.', 'woocommerce' ) );
+		$parsed = $this->parse_headers( $this->options['delimiter'] );
+		if ( isset( $parsed['error'] ) ) {
+			$summary['rows'][] = $this->fail( 0, (string) $parsed['error']['code'], (string) $parsed['error']['message'] );
 			++$summary['failed'];
 			return $summary;
+		}
+
+		$mapping = isset( $parsed['detected_mapping'] ) && is_array( $parsed['detected_mapping'] ) ? $parsed['detected_mapping'] : array();
+
+		// Preserve back-compat behavior: a missing required canonical column aborts the run with a single failed row.
+		$header_map = $this->mapping_to_header_map( $mapping );
+		$missing    = $this->find_missing_required_columns( $header_map );
+		if ( ! empty( $missing ) ) {
+			$summary['rows'][] = $this->fail(
+				0,
+				'missing_required_columns',
+				sprintf(
+					/* translators: %s: comma-separated list of missing column names. */
+					__( 'CSV is missing required column(s): %s.', 'woocommerce' ),
+					implode( ', ', $missing )
+				)
+			);
+			++$summary['failed'];
+			return $summary;
+		}
+
+		$chunk_size = $this->get_chunk_size();
+		$total      = (int) ( $parsed['total'] ?? 0 );
+		$delimiter  = (string) ( $parsed['delimiter'] ?? $this->options['delimiter'] );
+		$seen       = array();
+		$offset     = 0;
+
+		do {
+			$result = $this->import_chunk(
+				$offset,
+				$chunk_size,
+				$mapping,
+				array(
+					'notify_customer'     => $this->options['notify_customer'],
+					'update_existing'     => $this->options['update_existing'],
+					'delimiter'           => $delimiter,
+					'seen_tracking_pairs' => $seen,
+				)
+			);
+
+			foreach ( array( 'created', 'updated', 'skipped', 'failed', 'notified' ) as $key ) {
+				$summary[ $key ] += (int) ( $result['counts'][ $key ] ?? 0 );
+			}
+			if ( ! empty( $result['rows'] ) ) {
+				$summary['rows'] = array_merge( $summary['rows'], $result['rows'] );
+			}
+			if ( isset( $result['seen_tracking_pairs'] ) && is_array( $result['seen_tracking_pairs'] ) ) {
+				$seen = $result['seen_tracking_pairs'];
+			}
+
+			$offset += $chunk_size;
+		} while ( $offset < $total );
+
+		return $summary;
+	}
+
+	/**
+	 * Parse the CSV header row and return metadata sufficient to drive the column-mapping UI.
+	 *
+	 * Streams through the file once to count remaining rows and capture a single sample row.
+	 * Does not fail when required canonical columns cannot be auto-detected — the caller can
+	 * present the mapping UI so the user resolves it manually.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param string $delimiter Delimiter to use, or 'auto' to sniff from the first line.
+	 *                          Falls back to the constructor delimiter when empty.
+	 * @return array{
+	 *     headers?: array<int, string>,
+	 *     sample?: array<int, string>,
+	 *     total?: int,
+	 *     detected_mapping?: array<int, string>,
+	 *     delimiter?: string,
+	 *     error?: array{code:string, message:string}
+	 * }
+	 */
+	public function parse_headers( string $delimiter = 'auto' ): array {
+		if ( ! is_readable( $this->file ) ) {
+			return array(
+				'error' => array(
+					'code'    => 'file_not_readable',
+					'message' => __( 'File is not readable.', 'woocommerce' ),
+				),
+			);
 		}
 
 		$handle = fopen( $this->file, 'rb' );
 		if ( false === $handle ) {
-			$summary['rows'][] = $this->fail( 0, 'file_open_failed', __( 'Could not open file.', 'woocommerce' ) );
-			++$summary['failed'];
-			return $summary;
+			return array(
+				'error' => array(
+					'code'    => 'file_open_failed',
+					'message' => __( 'Could not open file.', 'woocommerce' ),
+				),
+			);
 		}
 
 		try {
-			// Strip UTF-8 BOM if present so Excel-saved CSVs match the first header alias.
-			$bom = fread( $handle, 3 );
-			if ( "\xEF\xBB\xBF" !== $bom ) {
-				rewind( $handle );
-			}
+			$this->strip_bom( $handle );
 
-			$header_raw = fgetcsv( $handle, 0, $this->options['delimiter'], $this->options['enclosure'], '' );
+			$effective_delimiter = $this->resolve_delimiter( $handle, $delimiter );
+
+			$header_raw = fgetcsv( $handle, 0, $effective_delimiter, $this->options['enclosure'], '' );
 			if ( false === $header_raw || null === $header_raw ) {
-				$summary['rows'][] = $this->fail( 0, 'empty_csv', __( 'CSV file is empty.', 'woocommerce' ) );
-				++$summary['failed'];
-				return $summary;
-			}
-
-			$header_map = $this->build_header_map( $header_raw );
-			$missing    = $this->find_missing_required_columns( $header_map );
-
-			if ( ! empty( $missing ) ) {
-				$summary['rows'][] = $this->fail(
-					0,
-					'missing_required_columns',
-					sprintf(
-						/* translators: %s: comma-separated list of missing column names. */
-						__( 'CSV is missing required column(s): %s.', 'woocommerce' ),
-						implode( ', ', $missing )
-					)
+				return array(
+					'error' => array(
+						'code'    => 'empty_csv',
+						'message' => __( 'CSV file is empty.', 'woocommerce' ),
+					),
 				);
-				++$summary['failed'];
-				return $summary;
 			}
 
-			$row_number          = 1; // Header is row 1.
-			$seen_tracking_pairs = array(); // Map of "order_id|tracking" => true for in-file duplicate detection.
+			$headers = array();
+			foreach ( $header_raw as $value ) {
+				$headers[] = is_scalar( $value ) ? (string) $value : '';
+			}
 
+			$header_map       = $this->build_header_map( $header_raw );
+			$detected_mapping = array();
+			foreach ( $header_map as $canonical => $col_index ) {
+				$detected_mapping[ (int) $col_index ] = (string) $canonical;
+			}
+
+			$sample = array();
+			$total  = 0;
 			while ( true ) {
-				$row = fgetcsv( $handle, 0, $this->options['delimiter'], $this->options['enclosure'], '' );
+				$row = fgetcsv( $handle, 0, $effective_delimiter, $this->options['enclosure'], '' );
 				if ( false === $row ) {
 					break;
 				}
-				++$row_number;
-
-				if ( $this->is_blank_row( $row ) ) {
-					continue;
-				}
-
-				$result = $this->process_row( $row, $header_map, $row_number, $seen_tracking_pairs );
-
-				if ( isset( $result['status'] ) ) {
-					switch ( $result['status'] ) {
-						case 'created':
-							++$summary['created'];
-							break;
-						case 'updated':
-							++$summary['updated'];
-							break;
-						case 'skipped':
-							++$summary['skipped'];
-							break;
-						case 'failed':
-						default:
-							++$summary['failed'];
-							break;
-					}
-
-					if ( ! empty( $result['notified'] ) ) {
-						++$summary['notified'];
+				++$total;
+				if ( empty( $sample ) && ! $this->is_blank_row( $row ) ) {
+					foreach ( $row as $value ) {
+						$sample[] = is_scalar( $value ) ? (string) $value : '';
 					}
 				}
-
-				$summary['rows'][] = $result;
 			}
+
+			return array(
+				'headers'          => $headers,
+				'sample'           => $sample,
+				'total'            => $total,
+				'detected_mapping' => $detected_mapping,
+				'delimiter'        => $effective_delimiter,
+			);
 		} finally {
 			fclose( $handle );
 		}
+	}
 
-		return $summary;
+	/**
+	 * Process a contiguous slice of CSV rows.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int                $offset  0-based row offset to start at (header is implicitly skipped).
+	 * @param int                $limit   Maximum number of CSV records to consume from the slice.
+	 * @param array<int, string> $mapping CSV column index => canonical column key. Unmapped columns
+	 *                                    may be omitted or set to "".
+	 * @param array<string, mixed> $options {
+	 *     Per-chunk overrides; fall back to constructor options when omitted.
+	 *
+	 *     @type bool                   $notify_customer
+	 *     @type bool                   $update_existing
+	 *     @type string                 $delimiter
+	 *     @type array<string, true>    $seen_tracking_pairs Cross-chunk dedupe state; pass back in to subsequent calls.
+	 * }
+	 * @return array{
+	 *     counts: array{created:int, updated:int, skipped:int, failed:int, notified:int},
+	 *     rows: array<int, array<string, mixed>>,
+	 *     seen_tracking_pairs: array<string, true>
+	 * }
+	 */
+	public function import_chunk( int $offset, int $limit, array $mapping, array $options = array() ): array {
+		$delimiter = isset( $options['delimiter'] ) && '' !== $options['delimiter'] && 'auto' !== $options['delimiter']
+			? (string) $options['delimiter']
+			: $this->options['delimiter'];
+
+		$seen_tracking_pairs = isset( $options['seen_tracking_pairs'] ) && is_array( $options['seen_tracking_pairs'] )
+			? $options['seen_tracking_pairs']
+			: array();
+
+		$counts = array(
+			'created'  => 0,
+			'updated'  => 0,
+			'skipped'  => 0,
+			'failed'   => 0,
+			'notified' => 0,
+		);
+		$rows   = array();
+
+		// Apply per-chunk option overrides so process_row sees the right flags.
+		$prev_options = $this->options;
+		if ( array_key_exists( 'notify_customer', $options ) ) {
+			$this->options['notify_customer'] = (bool) $options['notify_customer'];
+		}
+		if ( array_key_exists( 'update_existing', $options ) ) {
+			$this->options['update_existing'] = (bool) $options['update_existing'];
+		}
+		$this->options['delimiter'] = $delimiter;
+
+		try {
+			if ( $limit <= 0 ) {
+				return array(
+					'counts'              => $counts,
+					'rows'                => $rows,
+					'seen_tracking_pairs' => $seen_tracking_pairs,
+				);
+			}
+
+			if ( ! is_readable( $this->file ) ) {
+				$rows[] = $this->fail( 0, 'file_not_readable', __( 'File is not readable.', 'woocommerce' ) );
+				++$counts['failed'];
+				return array(
+					'counts'              => $counts,
+					'rows'                => $rows,
+					'seen_tracking_pairs' => $seen_tracking_pairs,
+				);
+			}
+
+			$handle = fopen( $this->file, 'rb' );
+			if ( false === $handle ) {
+				$rows[] = $this->fail( 0, 'file_open_failed', __( 'Could not open file.', 'woocommerce' ) );
+				++$counts['failed'];
+				return array(
+					'counts'              => $counts,
+					'rows'                => $rows,
+					'seen_tracking_pairs' => $seen_tracking_pairs,
+				);
+			}
+
+			try {
+				$this->strip_bom( $handle );
+
+				$header_raw = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
+				if ( false === $header_raw || null === $header_raw ) {
+					$rows[] = $this->fail( 0, 'empty_csv', __( 'CSV file is empty.', 'woocommerce' ) );
+					++$counts['failed'];
+					return array(
+						'counts'              => $counts,
+						'rows'                => $rows,
+						'seen_tracking_pairs' => $seen_tracking_pairs,
+					);
+				}
+
+				$header_map = $this->mapping_to_header_map( $mapping );
+				$missing    = $this->find_missing_required_columns( $header_map );
+				if ( ! empty( $missing ) ) {
+					$rows[] = $this->fail(
+						0,
+						'missing_required_columns',
+						sprintf(
+							/* translators: %s: comma-separated list of missing column names. */
+							__( 'CSV is missing required column(s): %s.', 'woocommerce' ),
+							implode( ', ', $missing )
+						)
+					);
+					++$counts['failed'];
+					return array(
+						'counts'              => $counts,
+						'rows'                => $rows,
+						'seen_tracking_pairs' => $seen_tracking_pairs,
+					);
+				}
+
+				// Fast-forward past $offset CSV records after the header.
+				$row_number = 1;
+				for ( $i = 0; $i < $offset; $i++ ) {
+					$row = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
+					if ( false === $row ) {
+						return array(
+							'counts'              => $counts,
+							'rows'                => $rows,
+							'seen_tracking_pairs' => $seen_tracking_pairs,
+						);
+					}
+					++$row_number;
+				}
+
+				$consumed = 0;
+				while ( $consumed < $limit ) {
+					$row = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
+					if ( false === $row ) {
+						break;
+					}
+					++$row_number;
+					++$consumed;
+
+					if ( $this->is_blank_row( $row ) ) {
+						continue;
+					}
+
+					$result = $this->process_row( $row, $header_map, $row_number, $seen_tracking_pairs );
+
+					if ( isset( $result['status'] ) ) {
+						switch ( $result['status'] ) {
+							case 'created':
+								++$counts['created'];
+								break;
+							case 'updated':
+								++$counts['updated'];
+								break;
+							case 'skipped':
+								++$counts['skipped'];
+								break;
+							case 'failed':
+							default:
+								++$counts['failed'];
+								break;
+						}
+
+						if ( ! empty( $result['notified'] ) ) {
+							++$counts['notified'];
+						}
+					}
+
+					$rows[] = $result;
+				}
+			} finally {
+				fclose( $handle );
+			}
+
+			return array(
+				'counts'              => $counts,
+				'rows'                => $rows,
+				'seen_tracking_pairs' => $seen_tracking_pairs,
+			);
+		} finally {
+			$this->options = $prev_options;
+		}
+	}
+
+	/**
+	 * Resolve the effective chunk size for one-shot run() invocations.
+	 *
+	 * @return int
+	 */
+	private function get_chunk_size(): int {
+		/**
+		 * Filter the chunk size used when looping CSV rows through the importer.
+		 *
+		 * Used both by the legacy one-shot run() wrapper and by the wizard's per-chunk REST handler
+		 * to keep behavior consistent. The server enforces sane bounds regardless of what callers send.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param int $chunk_size Default chunk size (200).
+		 */
+		$size = (int) apply_filters( 'woocommerce_fulfillments_csv_importer_chunk_size', self::DEFAULT_CHUNK_SIZE );
+		if ( $size < 1 ) {
+			$size = self::DEFAULT_CHUNK_SIZE;
+		}
+		if ( $size > 1000 ) {
+			$size = 1000;
+		}
+		return $size;
+	}
+
+	/**
+	 * Skip a leading UTF-8 BOM, rewinding if not present.
+	 *
+	 * @param resource $handle Open file handle positioned at byte 0.
+	 */
+	private function strip_bom( $handle ): void {
+		$bom = fread( $handle, 3 );
+		if ( "\xEF\xBB\xBF" !== $bom ) {
+			rewind( $handle );
+		}
+	}
+
+	/**
+	 * Resolve a delimiter, sniffing the first line when 'auto' is requested.
+	 *
+	 * Leaves the handle positioned at the start of the data so the caller can read the header.
+	 *
+	 * @param resource $handle    Open file handle positioned at the first data byte.
+	 * @param string   $requested Requested delimiter (',', ';', "\t", or 'auto').
+	 * @return string Effective single-character delimiter.
+	 */
+	private function resolve_delimiter( $handle, string $requested ): string {
+		if ( '' !== $requested && 'auto' !== $requested ) {
+			return $requested;
+		}
+
+		$position = ftell( $handle );
+		$first    = fgets( $handle );
+		if ( false !== $position ) {
+			fseek( $handle, (int) $position );
+		} else {
+			rewind( $handle );
+		}
+
+		if ( false === $first || '' === $first ) {
+			return ',';
+		}
+
+		$counts = array(
+			','  => substr_count( $first, ',' ),
+			';'  => substr_count( $first, ';' ),
+			"\t" => substr_count( $first, "\t" ),
+		);
+		arsort( $counts );
+		$best = (string) array_key_first( $counts );
+		return $counts[ $best ] > 0 ? $best : ',';
+	}
+
+	/**
+	 * Invert a column-index-keyed mapping into the canonical-keyed header map used by process_row().
+	 *
+	 * @param array<int, string> $mapping CSV column index => canonical column key. Unmapped slots may be "".
+	 * @return array<string, int> Canonical column key => CSV column index. First wins on duplicates.
+	 */
+	private function mapping_to_header_map( array $mapping ): array {
+		$header_map = array();
+		foreach ( $mapping as $col_index => $canonical ) {
+			$canonical = is_string( $canonical ) ? trim( $canonical ) : '';
+			if ( '' === $canonical ) {
+				continue;
+			}
+			$index = (int) $col_index;
+			if ( ! isset( $header_map[ $canonical ] ) ) {
+				$header_map[ $canonical ] = $index;
+			}
+		}
+		return $header_map;
 	}
 
 	/**

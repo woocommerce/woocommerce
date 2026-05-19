@@ -585,4 +585,184 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 0, $summary['failed'] );
 	}
 
+	/**
+	 * @testdox parse_headers returns headers, sample row, total and auto-detected mapping.
+	 */
+	public function test_parse_headers_returns_metadata_and_mapping(): void {
+		$csv  = "Order ID,Tracking,Carrier,URL,Items\n"
+			. "12345,1Z999AA,UPS,https://example.com,SKU-A:1\n"
+			. "67890,1Z000AA,UPS,https://example.com,SKU-B:1\n";
+		$file = $this->make_csv( $csv );
+
+		$sut    = new FulfillmentsCsvImporter( $file );
+		$parsed = $sut->parse_headers( 'auto' );
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( array( 'Order ID', 'Tracking', 'Carrier', 'URL', 'Items' ), $parsed['headers'] );
+		$this->assertSame( array( '12345', '1Z999AA', 'UPS', 'https://example.com', 'SKU-A:1' ), $parsed['sample'] );
+		$this->assertSame( 2, $parsed['total'] );
+		$this->assertSame( ',', $parsed['delimiter'] );
+
+		$mapping = $parsed['detected_mapping'];
+		$this->assertSame( FulfillmentsCsvImporter::COL_ORDER_NUMBER, $mapping[0] );
+		$this->assertSame( FulfillmentsCsvImporter::COL_TRACKING_NUMBER, $mapping[1] );
+		$this->assertSame( FulfillmentsCsvImporter::COL_PROVIDER, $mapping[2] );
+		$this->assertSame( FulfillmentsCsvImporter::COL_TRACKING_URL, $mapping[3] );
+		$this->assertSame( FulfillmentsCsvImporter::COL_ITEMS, $mapping[4] );
+	}
+
+	/**
+	 * @testdox parse_headers sniffs the delimiter when 'auto' is requested.
+	 */
+	public function test_parse_headers_auto_detects_semicolon_delimiter(): void {
+		$csv  = "order_number;tracking_number;shipment_provider\n1;TRACK-1;ups\n";
+		$file = $this->make_csv( $csv );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers( 'auto' );
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( ';', $parsed['delimiter'] );
+		$this->assertSame( array( 'order_number', 'tracking_number', 'shipment_provider' ), $parsed['headers'] );
+	}
+
+	/**
+	 * @testdox parse_headers reports an error when the file is empty.
+	 */
+	public function test_parse_headers_reports_empty_csv(): void {
+		$file   = $this->make_csv( '' );
+		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers( ',' );
+
+		$this->assertArrayHasKey( 'error', $parsed );
+		$this->assertSame( 'empty_csv', $parsed['error']['code'] );
+	}
+
+	/**
+	 * @testdox parse_headers reports an error when the file is missing.
+	 */
+	public function test_parse_headers_reports_missing_file(): void {
+		$parsed = ( new FulfillmentsCsvImporter( '/nonexistent/path/missing.csv' ) )->parse_headers( ',' );
+
+		$this->assertArrayHasKey( 'error', $parsed );
+		$this->assertSame( 'file_not_readable', $parsed['error']['code'] );
+	}
+
+	/**
+	 * @testdox import_chunk only touches the rows in the requested offset+limit range.
+	 */
+	public function test_import_chunk_only_processes_requested_range(): void {
+		$o1 = $this->make_order();
+		$o2 = $this->make_order();
+		$o3 = $this->make_order();
+		$o4 = $this->make_order();
+
+		$csv = "order_number,tracking_number,shipment_provider\n"
+			. "{$o1->get_id()},T-1,ups\n"
+			. "{$o2->get_id()},T-2,ups\n"
+			. "{$o3->get_id()},T-3,ups\n"
+			. "{$o4->get_id()},T-4,ups\n";
+		$file = $this->make_csv( $csv );
+
+		$sut    = new FulfillmentsCsvImporter( $file );
+		$result = $sut->import_chunk(
+			1,
+			2,
+			array(
+				0 => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+				1 => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+				2 => FulfillmentsCsvImporter::COL_PROVIDER,
+			)
+		);
+
+		$this->assertSame( 2, $result['counts']['created'] );
+		$this->assertCount( 2, $result['rows'] );
+
+		/** @var FulfillmentsDataStore $store */
+		$store = WC_Data_Store::load( 'order-fulfillment' );
+		$this->assertCount( 0, $store->read_fulfillments( WC_Order::class, (string) $o1->get_id() ) );
+		$this->assertCount( 1, $store->read_fulfillments( WC_Order::class, (string) $o2->get_id() ) );
+		$this->assertCount( 1, $store->read_fulfillments( WC_Order::class, (string) $o3->get_id() ) );
+		$this->assertCount( 0, $store->read_fulfillments( WC_Order::class, (string) $o4->get_id() ) );
+	}
+
+	/**
+	 * @testdox import_chunk reports missing required columns when the mapping omits them.
+	 */
+	public function test_import_chunk_reports_missing_required_columns(): void {
+		$csv  = "order_number,tracking_number,shipment_provider\n1,T-1,ups\n";
+		$file = $this->make_csv( $csv );
+
+		$result = ( new FulfillmentsCsvImporter( $file ) )->import_chunk(
+			0,
+			10,
+			array(
+				0 => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+				1 => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+			)
+		);
+
+		$this->assertSame( 1, $result['counts']['failed'] );
+		$this->assertCount( 1, $result['rows'] );
+		$this->assertStringContainsString( FulfillmentsCsvImporter::COL_PROVIDER, $result['rows'][0]['message'] );
+	}
+
+	/**
+	 * @testdox Looping import_chunk yields the same counts as one-shot run() on the same fixture.
+	 */
+	public function test_chunked_and_one_shot_produce_equivalent_counts(): void {
+		$orders = array();
+		$csv    = "order_number,tracking_number,shipment_provider\n";
+		for ( $i = 0; $i < 10; $i++ ) {
+			$order    = $this->make_order();
+			$orders[] = $order;
+			$csv     .= "{$order->get_id()},TRK-{$i},ups\n";
+		}
+		// Add a row with an unknown order to exercise the failed bucket too.
+		$csv .= "99999999,TRK-MISS,ups\n";
+
+		$one_shot_file = $this->make_csv( $csv );
+		$one_shot      = ( new FulfillmentsCsvImporter( $one_shot_file ) )->run();
+
+		// Reset for the chunked variant by creating fresh orders + a fresh file.
+		$orders = array();
+		$csv    = "order_number,tracking_number,shipment_provider\n";
+		for ( $i = 0; $i < 10; $i++ ) {
+			$order    = $this->make_order();
+			$orders[] = $order;
+			$csv     .= "{$order->get_id()},TRKB-{$i},ups\n";
+		}
+		$csv .= "99999998,TRKB-MISS,ups\n";
+
+		$chunk_file = $this->make_csv( $csv );
+		$sut        = new FulfillmentsCsvImporter( $chunk_file );
+		$parsed     = $sut->parse_headers( 'auto' );
+		$mapping    = $parsed['detected_mapping'];
+
+		$counts = array(
+			'created'  => 0,
+			'updated'  => 0,
+			'skipped'  => 0,
+			'failed'   => 0,
+			'notified' => 0,
+		);
+		$rows   = array();
+		$seen   = array();
+		$total  = $parsed['total'];
+		$limit  = 3;
+
+		for ( $offset = 0; $offset < $total; $offset += $limit ) {
+			$result = $sut->import_chunk( $offset, $limit, $mapping, array( 'seen_tracking_pairs' => $seen ) );
+			foreach ( array_keys( $counts ) as $key ) {
+				$counts[ $key ] += (int) $result['counts'][ $key ];
+			}
+			$rows = array_merge( $rows, $result['rows'] );
+			$seen = $result['seen_tracking_pairs'];
+		}
+
+		$this->assertSame( $one_shot['created'], $counts['created'] );
+		$this->assertSame( $one_shot['updated'], $counts['updated'] );
+		$this->assertSame( $one_shot['skipped'], $counts['skipped'] );
+		$this->assertSame( $one_shot['failed'], $counts['failed'] );
+		$this->assertCount( count( $one_shot['rows'] ), $rows );
+	}
+
 }
