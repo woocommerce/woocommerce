@@ -54,11 +54,11 @@ class Init {
 	 * @return array Product data tabs.
 	 */
 	public function handle_woocommerce_product_data_tabs( array $tabs ): array {
-		if ( isset( $tabs['variations'] ) ) {
+		if ( isset( $tabs['variations'] ) && is_array( $tabs['variations'] ) ) {
 			$tabs['variations']['priority'] = 40;
 		}
 
-		if ( isset( $tabs['linked_product'] ) ) {
+		if ( isset( $tabs['linked_product'] ) && is_array( $tabs['linked_product'] ) ) {
 			$tabs['linked_product']['priority'] = 60;
 		}
 
