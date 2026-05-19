@@ -9,9 +9,9 @@ namespace Automattic\WooCommerce\Internal\Admin;
  * milestone order (1st, 100th, or 1000th real order) in the admin.
  *
  * Fires for any real paid order: status is processing or completed and a
- * transaction ID is present (excludes test/sandbox transactions).
+ * transaction ID is present.
  *
- * @since 10.8.0
+ * @since 10.9.0
  */
 class OrderMilestoneEasterEgg {
 
@@ -20,7 +20,7 @@ class OrderMilestoneEasterEgg {
 	 *
 	 * @internal
 	 *
-	 * @since 10.8.0
+	 * @since 10.9.0
 	 */
 	final public function init(): void {
 		add_action( 'admin_enqueue_scripts', array( $this, 'handle_admin_enqueue_scripts' ) );
@@ -59,6 +59,18 @@ class OrderMilestoneEasterEgg {
 	 * @internal
 	 */
 	public function handle_admin_enqueue_scripts(): void {
+		/**
+		 * Filters whether the order milestone easter egg feature is enabled.
+		 *
+		 * Return false to disable the feature entirely — no order queries or assets will be loaded.
+		 *
+		 * @since 10.9.0
+		 * @param bool $enabled Whether the feature is enabled. Default true.
+		 */
+		if ( ! apply_filters( 'wc_order_milestone_egg_enabled', true ) ) {
+			return;
+		}
+
 		if ( ! function_exists( 'wc_get_orders' ) ) {
 			return;
 		}
@@ -111,6 +123,12 @@ class OrderMilestoneEasterEgg {
 			if ( empty( $milestone_map ) ) {
 				return;
 			}
+
+			// Only show the overlay when the current order is itself the milestone.
+			if ( ! isset( $milestone_map[ $id_param ] ) ) {
+				return;
+			}
+			$milestone_map = array( $id_param => $milestone_map[ $id_param ] );
 		}
 
 		// Only load the SVG variants needed for the matched milestones.
@@ -164,7 +182,8 @@ class OrderMilestoneEasterEgg {
 	}
 
 	/**
-	 * Returns true if the given order is a real paid order (processing or completed with a transaction ID).
+	 * Returns true if the given order qualifies for milestone consideration: status is
+	 * processing or completed, and a transaction ID is present.
 	 *
 	 * Used as a cheap pre-filter before running the full milestone count query.
 	 *
@@ -183,36 +202,48 @@ class OrderMilestoneEasterEgg {
 	/**
 	 * Returns a map of milestone order IDs to their milestone data.
 	 *
+	 * Paginates through processing/completed orders in chronological order until
+	 * 1000 orders with a transaction ID have been collected, ensuring milestone
+	 * positions are counted against qualifying orders only.
+	 *
 	 * @return array<int, array<string, string>>
 	 */
 	private function get_milestone_map(): array {
-		$candidate_orders = (array) wc_get_orders(
-			array(
-				'limit'   => 1001,
-				'orderby' => 'date',
-				'order'   => 'ASC',
-				'status'  => array( 'processing', 'completed' ),
-				'return'  => 'objects',
-			)
-		);
+		$qualifying_order_ids = array();
+		$page                 = 1;
+		$batch_size           = 100;
 
-		$qualifying_statuses = array( 'processing', 'completed' );
-
-		$all_real_order_ids = array_values(
-			array_map(
-				function ( $order ) {
-					return $order->get_id();
-				},
-				array_filter(
-					$candidate_orders,
-					function ( $order ) use ( $qualifying_statuses ) {
-						return $order instanceof \WC_Order
-							&& '' !== $order->get_transaction_id()
-							&& in_array( $order->get_status(), $qualifying_statuses, true );
-					}
+		while ( count( $qualifying_order_ids ) < 1000 ) {
+			$batch = (array) wc_get_orders(
+				array(
+					'limit'   => $batch_size,
+					'paged'   => $page,
+					'orderby' => 'date',
+					'order'   => 'ASC',
+					'status'  => array( 'processing', 'completed' ),
+					'return'  => 'objects',
 				)
-			)
-		);
+			);
+
+			if ( empty( $batch ) ) {
+				break;
+			}
+
+			foreach ( $batch as $order ) {
+				if ( $order instanceof \WC_Order && '' !== $order->get_transaction_id() ) {
+					$qualifying_order_ids[] = $order->get_id();
+					if ( count( $qualifying_order_ids ) >= 1000 ) {
+						break 2;
+					}
+				}
+			}
+
+			if ( count( $batch ) < $batch_size ) {
+				break;
+			}
+
+			++$page;
+		}
 
 		$positions     = array(
 			0   => 'first',
@@ -223,11 +254,17 @@ class OrderMilestoneEasterEgg {
 		$milestone_map = array();
 
 		foreach ( $positions as $pos => $key ) {
-			if ( isset( $all_real_order_ids[ $pos ] ) ) {
-				$milestone_map[ (int) $all_real_order_ids[ $pos ] ] = $messages[ $key ];
+			if ( isset( $qualifying_order_ids[ $pos ] ) ) {
+				$milestone_map[ (int) $qualifying_order_ids[ $pos ] ] = $messages[ $key ];
 			}
 		}
 
+		/**
+		 * Filters the map of milestone order IDs to their milestone data.
+		 *
+		 * @since 10.9.0
+		 * @param array<int, array<string, string>> $milestone_map Map of order ID to milestone data.
+		 */
 		return apply_filters( 'wc_order_milestone_egg_map', $milestone_map );
 	}
 

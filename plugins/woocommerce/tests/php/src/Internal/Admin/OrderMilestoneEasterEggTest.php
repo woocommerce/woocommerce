@@ -43,6 +43,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	// Hook registration
 	// -------------------------------------------------------------------------
 
+	/**
+	 * @testdox init registers all expected hooks
+	 */
 	public function test_init_registers_all_hooks(): void {
 		$this->sut->init();
 
@@ -61,6 +64,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	// AJAX handlers
 	// -------------------------------------------------------------------------
 
+	/**
+	 * @testdox handle_ajax_dismiss saves the seen meta for the given order
+	 */
 	public function test_handle_ajax_dismiss_saves_seen_meta(): void {
 		$order = $this->create_real_paid_order();
 
@@ -80,6 +86,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		);
 	}
 
+	/**
+	 * @testdox handle_ajax_dismiss does nothing when order_id is zero
+	 */
 	public function test_handle_ajax_dismiss_ignores_zero_order_id(): void {
 		$_POST['order_id'] = 0;
 		$_POST['nonce']    = wp_create_nonce( 'wc_egg_dismiss' );
@@ -97,6 +106,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		$this->assertEmpty( $seen );
 	}
 
+	/**
+	 * @testdox handle_ajax_opt_out saves the opted-out meta for the current user
+	 */
 	public function test_handle_ajax_opt_out_saves_opted_out_meta(): void {
 		$_POST['nonce']    = wp_create_nonce( 'wc_egg_dismiss' );
 		$_REQUEST['nonce'] = $_POST['nonce'];
@@ -117,11 +129,17 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	// is_qualifying_order
 	// -------------------------------------------------------------------------
 
+	/**
+	 * @testdox is_qualifying_order returns true for a processing order with a transaction ID
+	 */
 	public function test_is_qualifying_order_returns_true_for_processing_order(): void {
 		$order = $this->create_real_paid_order();
 		$this->assertTrue( $this->sut->is_qualifying_order( $order->get_id() ) );
 	}
 
+	/**
+	 * @testdox is_qualifying_order returns true for a completed order with a transaction ID
+	 */
 	public function test_is_qualifying_order_returns_true_for_completed_order(): void {
 		$order = new \WC_Order();
 		$order->set_transaction_id( 'txn_live_' . wp_rand( 1000, 9999 ) );
@@ -131,6 +149,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		$this->assertTrue( $this->sut->is_qualifying_order( $order->get_id() ) );
 	}
 
+	/**
+	 * @testdox is_qualifying_order returns false when no transaction ID is set
+	 */
 	public function test_is_qualifying_order_returns_false_without_transaction_id(): void {
 		$order = new \WC_Order();
 		$order->set_status( 'processing' );
@@ -139,6 +160,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->is_qualifying_order( $order->get_id() ) );
 	}
 
+	/**
+	 * @testdox is_qualifying_order returns false when status is not processing or completed
+	 */
 	public function test_is_qualifying_order_returns_false_for_pending_status(): void {
 		$order = new \WC_Order();
 		$order->set_transaction_id( 'txn_live_789' );
@@ -148,6 +172,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		$this->assertFalse( $this->sut->is_qualifying_order( $order->get_id() ) );
 	}
 
+	/**
+	 * @testdox is_qualifying_order returns false for a non-existent order ID
+	 */
 	public function test_is_qualifying_order_returns_false_for_nonexistent_order(): void {
 		$this->assertFalse( $this->sut->is_qualifying_order( 999999 ) );
 	}
@@ -156,6 +183,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	// get_milestone_map (via filter hook to inspect)
 	// -------------------------------------------------------------------------
 
+	/**
+	 * @testdox get_milestone_map identifies the first qualifying order as a milestone
+	 */
 	public function test_get_milestone_map_identifies_first_order(): void {
 		$order = $this->create_real_paid_order();
 
@@ -165,6 +195,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		$this->assertEquals( 'lama', $map[ $order->get_id() ]['variant'] );
 	}
 
+	/**
+	 * @testdox get_milestone_map applies the wc_order_milestone_egg_map filter
+	 */
 	public function test_get_milestone_map_applies_wc_order_milestone_egg_map_filter(): void {
 		$order = $this->create_real_paid_order();
 
@@ -187,6 +220,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 	// Opt-out gate (handle_admin_enqueue_scripts)
 	// -------------------------------------------------------------------------
 
+	/**
+	 * @testdox handle_admin_enqueue_scripts skips enqueue when the user has opted out
+	 */
 	public function test_enqueue_skipped_when_user_opted_out(): void {
 		$order = $this->create_real_paid_order();
 		update_user_meta( $this->admin_user_id, '_wc_egg_opted_out', '1' );
@@ -203,6 +239,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		delete_user_meta( $this->admin_user_id, '_wc_egg_opted_out' );
 	}
 
+	/**
+	 * @testdox handle_admin_enqueue_scripts skips enqueue when not on the order edit page
+	 */
 	public function test_enqueue_skipped_when_not_order_edit_page(): void {
 		$_GET['page'] = 'woocommerce';
 
@@ -213,6 +252,9 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		unset( $_GET['page'] );
 	}
 
+	/**
+	 * @testdox handle_admin_enqueue_scripts skips enqueue when the current order is not qualifying
+	 */
 	public function test_enqueue_skipped_when_current_order_is_not_qualifying(): void {
 		$order = new \WC_Order();
 		$order->set_status( 'pending' );
@@ -221,6 +263,29 @@ class OrderMilestoneEasterEggTest extends \WC_Unit_Test_Case {
 		$_GET['page']   = 'wc-orders';
 		$_GET['action'] = 'edit';
 		$_GET['id']     = (string) $order->get_id();
+
+		$this->sut->handle_admin_enqueue_scripts();
+
+		$this->assertFalse( wp_script_is( 'wc-order-milestone-easter-egg', 'enqueued' ) );
+
+		unset( $_GET['page'], $_GET['action'], $_GET['id'] );
+	}
+
+	/**
+	 * @testdox handle_admin_enqueue_scripts skips enqueue when the current order qualifies but is not itself a milestone
+	 */
+	public function test_enqueue_skipped_when_qualifying_order_is_not_a_milestone(): void {
+		// Create a first milestone order so the milestone map is non-empty.
+		$milestone_order = $this->create_real_paid_order();
+		unset( $milestone_order );
+
+		// Create a second qualifying order — it passes is_qualifying_order() but
+		// is not at a milestone position in the ordered list.
+		$non_milestone_order = $this->create_real_paid_order();
+
+		$_GET['page']   = 'wc-orders';
+		$_GET['action'] = 'edit';
+		$_GET['id']     = (string) $non_milestone_order->get_id();
 
 		$this->sut->handle_admin_enqueue_scripts();
 
