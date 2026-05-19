@@ -71,13 +71,17 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 	},
 	Edit: ( { data, onChange, field } ) => {
 		const options = field?.elements ?? [];
-		const selectedOption = options.find(
-			( option ) => option.value === data.stock_status
-		);
+		const selectedOption =
+			field.placeholder && ! data.stock_status
+				? undefined
+				: options.find(
+						( option ) => option.value === data.stock_status
+				  );
 
 		return (
 			<SelectControl
 				label={ __( 'Stock status', 'woocommerce' ) }
+				placeholder={ field.placeholder }
 				value={ selectedOption }
 				items={ options }
 				onValueChange={ ( option ) => {

@@ -62,6 +62,7 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			data: Partial< StockQuantityFilterRecord >
 		) => void;
 		const raw = ( data as StockQuantityFilterRecord ).stock_quantity;
+		const disabled = field.isDisabled( { item: data, field } );
 
 		if ( operator === 'between' ) {
 			const [ minRaw = '', maxRaw = '' ] = Array.isArray( raw )
@@ -109,6 +110,8 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				type="number"
 				step={ 1 }
 				value={ value }
+				placeholder={ field.placeholder }
+				disabled={ disabled }
 				onChange={ ( event ) => {
 					const next = event.target.value;
 					onChange( {

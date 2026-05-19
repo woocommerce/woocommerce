@@ -35,6 +35,7 @@ function CostOfGoodsSoldInput( {
 	validity,
 }: DataFormControlProps< ProductEntityRecord > ) {
 	const costOfGoodsSold = data.cost_of_goods_sold ?? {};
+	const disabled = field.isDisabled( { item: data, field } );
 	const [ firstValue = {}, ...remainingValues ] =
 		costOfGoodsSold.values ?? [];
 
@@ -43,6 +44,7 @@ function CostOfGoodsSoldInput( {
 			id={ `currency-input-${ field.id }` }
 			label={ field.label }
 			value={ getDefinedCostValue( data ) ?? '' }
+			placeholder={ field.placeholder }
 			onChange={ ( newValue: string ) => {
 				onChange( {
 					cost_of_goods_sold: {
@@ -61,6 +63,7 @@ function CostOfGoodsSoldInput( {
 				} );
 			} }
 			customValidity={ validity?.custom }
+			disabled={ disabled }
 		/>
 	);
 }

@@ -37,6 +37,8 @@ type CurrencyControlProps = {
 	customValidity?: NonNullable<
 		DataFormControlProps< ProductEntityRecord >[ 'validity' ]
 	>[ 'custom' ];
+	disabled?: boolean;
+	placeholder?: string;
 };
 
 export function CurrencyControl( {
@@ -45,6 +47,8 @@ export function CurrencyControl( {
 	value,
 	onChange,
 	customValidity,
+	disabled = false,
+	placeholder,
 }: CurrencyControlProps ) {
 	return (
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call -- ValidatedInputControl is a private API
@@ -53,10 +57,12 @@ export function CurrencyControl( {
 			label={ label }
 			value={ value }
 			onChange={ onChange }
+			placeholder={ placeholder }
 			type="number"
 			min={ 0 }
 			step={ step }
 			customValidity={ customValidity }
+			disabled={ disabled }
 			prefix={
 				isCurrencyLeft ? (
 					<InputControlPrefixWrapper>
@@ -92,16 +98,19 @@ export function CurrencyInput( {
 	validity,
 }: DataFormControlProps< ProductEntityRecord > ) {
 	const fieldId = field.id as CurrencyField;
+	const disabled = field.isDisabled( { item: data, field } );
 
 	return (
 		<CurrencyControl
 			id={ `currency-input-${ fieldId }` }
 			label={ field.label }
 			value={ data[ fieldId ] ?? '' }
+			placeholder={ field.placeholder }
 			onChange={ ( newValue: string ) => {
 				onChange( { [ fieldId ]: newValue } );
 			} }
 			customValidity={ validity?.custom }
+			disabled={ disabled }
 		/>
 	);
 }

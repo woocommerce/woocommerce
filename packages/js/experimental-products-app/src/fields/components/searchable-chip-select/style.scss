@@ -48,6 +48,11 @@
 		color: #1e1e1e;
 	}
 
+	&__chip--is-placeholder {
+		background: #fff;
+		color: #757575;
+	}
+
 	&__chip-prefix {
 		display: inline-flex;
 		align-items: center;
