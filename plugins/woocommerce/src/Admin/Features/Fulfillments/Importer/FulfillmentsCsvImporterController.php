@@ -54,7 +54,7 @@ class FulfillmentsCsvImporterController {
 		if ( ! $this->should_render_importer() ) {
 			return;
 		}
-		echo '<div id="wc_fulfillments_importer_panel_container"></div>';
+		echo '<div id="' . esc_attr( 'wc_fulfillments_importer_panel_container' ) . '"></div>';
 	}
 
 	/**
@@ -96,7 +96,7 @@ class FulfillmentsCsvImporterController {
 	 *
 	 * @return bool
 	 */
-	protected function should_render_importer(): bool {
+	private function should_render_importer(): bool {
 		if ( ! is_admin() || ! function_exists( 'get_current_screen' ) ) {
 			return false;
 		}
