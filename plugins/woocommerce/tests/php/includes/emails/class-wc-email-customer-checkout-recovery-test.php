@@ -60,7 +60,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Constructor wires the email id, customer flag, group, and template paths.
+	 * @testdox Constructor wires the email id, customer flag, group, and template paths (HTML, plain, block).
 	 */
 	public function test_constructor_sets_email_identity(): void {
 		$this->assertSame( 'customer_checkout_recovery', $this->sut->id );
@@ -68,6 +68,17 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'order-updates', $this->sut->email_group );
 		$this->assertSame( 'emails/customer-checkout-recovery.php', $this->sut->template_html );
 		$this->assertSame( 'emails/plain/customer-checkout-recovery.php', $this->sut->template_plain );
+		$this->assertSame( 'emails/block/customer-checkout-recovery.php', $this->sut->template_block );
+	}
+
+	/**
+	 * @testdox Constructor declares the placeholders the default copy and the Available placeholders hint advertise.
+	 */
+	public function test_constructor_declares_expected_placeholders(): void {
+		$this->assertArrayHasKey( '{site_title}', $this->sut->placeholders );
+		$this->assertArrayHasKey( '{site_address}', $this->sut->placeholders );
+		$this->assertArrayHasKey( '{order_date}', $this->sut->placeholders );
+		$this->assertArrayHasKey( '{order_number}', $this->sut->placeholders );
 	}
 
 	/**

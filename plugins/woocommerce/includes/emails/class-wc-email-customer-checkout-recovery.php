@@ -13,9 +13,9 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 	 * Customer Checkout Recovery email.
 	 *
 	 * A transactional email that prompts the customer to complete a checkout they
-	 * left pending. The send is scheduled via Action Scheduler one hour after the
-	 * pending order is created, gated on the merchant's `automated` setting. Merchants
-	 * can also trigger the email manually from the order edit page.
+	 * left pending. The send is scheduled via Action Scheduler two hours after
+	 * the pending order is created, gated on the merchant's `automated` setting.
+	 * Merchants can also trigger the email manually from the order edit page.
 	 *
 	 * @class    WC_Email_Customer_Checkout_Recovery
 	 * @version  10.9.0
@@ -27,7 +27,6 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * Plugins known to provide their own checkout recovery flow.
 		 *
 		 * Detection is install-only.
-		 * ToDo: Detect if the plugin is actually configured for checkout recovery.
 		 */
 		public const KNOWN_RECOVERY_HANDLERS = array(
 			'automatewoo/automatewoo.php' => 'AutomateWoo',
@@ -44,7 +43,10 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 			$this->email_group    = 'order-updates';
 			$this->template_html  = 'emails/customer-checkout-recovery.php';
 			$this->template_plain = 'emails/plain/customer-checkout-recovery.php';
+			$this->template_block = 'emails/block/customer-checkout-recovery.php';
 			$this->placeholders   = array(
+				'{site_title}'   => $this->get_blogname(),
+				'{site_address}' => wp_parse_url( home_url(), PHP_URL_HOST ),
 				'{order_date}'   => '',
 				'{order_number}' => '',
 			);
