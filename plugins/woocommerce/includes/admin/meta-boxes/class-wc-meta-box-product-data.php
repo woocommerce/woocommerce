@@ -8,8 +8,6 @@
  * @version  3.0.0
  */
 
-use Automattic\WooCommerce\Admin\Features\Features;
-use Automattic\WooCommerce\Admin\Features\ProductVariationsClassicRedesign\Init as VariationsClassicRedesignInit;
 use Automattic\WooCommerce\Enums\ProductStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CostOfGoodsSoldController;
@@ -75,13 +73,6 @@ class WC_Meta_Box_Product_Data {
 	 * @return array
 	 */
 	private static function get_product_data_tabs() {
-		// When the variations classic redesign is enabled, Variations becomes the
-		// entry point for variation attribute management (it manages the attributes
-		// itself), so it moves above Attributes. Linked Products shifts below.
-		$variations_redesign      = Features::exists( VariationsClassicRedesignInit::FEATURE_ID );
-		$variations_priority      = $variations_redesign ? 40 : 60;
-		$linked_products_priority = $variations_redesign ? 60 : 40;
-
 		/* phpcs:disable WooCommerce.Commenting.CommentHooks.MissingHookComment */
 		$tabs = apply_filters(
 			'woocommerce_product_data_tabs',
@@ -108,7 +99,7 @@ class WC_Meta_Box_Product_Data {
 					'label'    => __( 'Linked Products', 'woocommerce' ),
 					'target'   => 'linked_product_data',
 					'class'    => array(),
-					'priority' => $linked_products_priority,
+					'priority' => 40,
 				),
 				'attribute'      => array(
 					'label'    => __( 'Attributes', 'woocommerce' ),
@@ -120,7 +111,7 @@ class WC_Meta_Box_Product_Data {
 					'label'    => __( 'Variations', 'woocommerce' ),
 					'target'   => 'variable_product_options',
 					'class'    => array( 'show_if_variable' ),
-					'priority' => $variations_priority,
+					'priority' => 60,
 				),
 				'advanced'       => array(
 					'label'    => __( 'Advanced', 'woocommerce' ),
