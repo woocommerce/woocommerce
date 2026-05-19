@@ -21,6 +21,8 @@ import { recordEvent } from '@woocommerce/tracks';
 import type { ImporterSummary } from '../data/types';
 import ImporterSummaryPanel from './importer-summary';
 
+const MAX_UPLOAD_BYTES = 10 * 1024 * 1024; // 10 MB.
+
 interface Props {
 	isOpen: boolean;
 	onClose: () => void;
@@ -57,6 +59,16 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 	const handleFileChange = useCallback(
 		( e: React.ChangeEvent< HTMLInputElement > ) => {
 			const picked = e.target.files?.[ 0 ] ?? null;
+			if ( picked && picked.size > MAX_UPLOAD_BYTES ) {
+				setFile( null );
+				setError(
+					__(
+						'CSV file is too large. Choose a file smaller than 10 MB.',
+						'woocommerce'
+					)
+				);
+				return;
+			}
 			setFile( picked );
 			setError( null );
 		},
