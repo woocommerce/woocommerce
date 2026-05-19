@@ -101,12 +101,36 @@ final class ImportSession {
 			'notify_customer'     => $notify,
 			'update_existing'     => $update,
 			'seen_tracking_pairs' => array(),
+			'counts'              => array(
+				'created'  => 0,
+				'updated'  => 0,
+				'skipped'  => 0,
+				'failed'   => 0,
+				'notified' => 0,
+			),
+			'rows'                => array(),
 		);
 
 		set_transient( self::PREFIX . $user_id . '_' . $token, $data, self::TTL );
 		set_transient( self::INDEX_PREFIX . $user_id, $token, self::TTL );
 
 		return new self( $user_id, $token, $data );
+	}
+
+	/**
+	 * Load whichever session is currently active for a user, if any.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int $user_id User ID.
+	 * @return self|null
+	 */
+	public static function active_for_user( int $user_id ): ?self {
+		$token = get_transient( self::INDEX_PREFIX . $user_id );
+		if ( ! is_string( $token ) || '' === $token ) {
+			return null;
+		}
+		return self::load( $user_id, $token );
 	}
 
 	/**
@@ -239,6 +263,70 @@ final class ImportSession {
 	 */
 	public function update_existing(): bool {
 		return ! empty( $this->data['update_existing'] );
+	}
+
+	/**
+	 * Append the result of one chunk: advance processed, merge counts, append rows, replace dedupe state.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int                                                                    $processed_after End-of-chunk processed count (offset + rows consumed by the chunk).
+	 * @param array{created:int, updated:int, skipped:int, failed:int, notified:int} $counts          Per-chunk counts.
+	 * @param array<int, array<string, mixed>>                                       $rows            Per-row result entries from this chunk.
+	 * @param array<string, true>                                                    $seen            Cross-chunk dedupe state to persist.
+	 */
+	public function record_chunk( int $processed_after, array $counts, array $rows, array $seen ): void {
+		$prev                    = (int) ( $this->data['processed'] ?? 0 );
+		$this->data['processed'] = min( $this->total(), max( $prev, max( 0, $processed_after ) ) );
+
+		$current_counts = is_array( $this->data['counts'] ?? null ) ? $this->data['counts'] : array();
+		foreach ( array( 'created', 'updated', 'skipped', 'failed', 'notified' ) as $key ) {
+			$current_counts[ $key ] = (int) ( $current_counts[ $key ] ?? 0 ) + (int) ( $counts[ $key ] ?? 0 );
+		}
+		$this->data['counts'] = $current_counts;
+
+		if ( ! empty( $rows ) ) {
+			$existing            = is_array( $this->data['rows'] ?? null ) ? $this->data['rows'] : array();
+			$this->data['rows']  = array_merge( $existing, $rows );
+		}
+
+		$this->data['seen_tracking_pairs'] = $seen;
+		$this->persist();
+	}
+
+	/**
+	 * Cumulative counts across processed chunks.
+	 *
+	 * @return array{created:int, updated:int, skipped:int, failed:int, notified:int}
+	 */
+	public function counts(): array {
+		$counts = is_array( $this->data['counts'] ?? null ) ? $this->data['counts'] : array();
+		return array(
+			'created'  => (int) ( $counts['created'] ?? 0 ),
+			'updated'  => (int) ( $counts['updated'] ?? 0 ),
+			'skipped'  => (int) ( $counts['skipped'] ?? 0 ),
+			'failed'   => (int) ( $counts['failed'] ?? 0 ),
+			'notified' => (int) ( $counts['notified'] ?? 0 ),
+		);
+	}
+
+	/**
+	 * Per-row result entries collected across chunks.
+	 *
+	 * @return array<int, array<string, mixed>>
+	 */
+	public function rows(): array {
+		$rows = $this->data['rows'] ?? array();
+		return is_array( $rows ) ? $rows : array();
+	}
+
+	/**
+	 * Final ImporterSummary-shaped payload for the wizard's "Done" step.
+	 *
+	 * @return array<string, mixed>
+	 */
+	public function summary(): array {
+		return array_merge( $this->counts(), array( 'rows' => $this->rows() ) );
 	}
 
 	/**
