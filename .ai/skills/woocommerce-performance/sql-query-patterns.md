@@ -344,7 +344,7 @@ FROM (
 
 **If the required index does not exist:** Adding it is a prerequisite, not a reason to skip the pattern. Evaluate whether the index maintenance cost is justified (it usually is for high-read, low-write tables like `wp_wc_orders`). For example, `SELECT MAX(post_modified_gmt) FROM wp_posts WHERE post_type IN ('product', 'product_variation')` is a Pattern H candidate, but `post_modified_gmt` has no standard WordPress index — the optimization requires first adding `(post_type, post_modified_gmt)`.
 
-**Table scope:** The pattern applies to any table with a suitable composite index — not only `wp_wc_orders`. The same logic works on `wp_posts` or any custom table provided the WHERE + ORDER BY columns are covered by a single index.
+**Table scope:** The pattern applies to any table with a suitable composite index — not only `wp_wc_orders`. When HPOS is disabled, orders reside in `wp_posts` with index `type_status_date(post_type, post_status, post_date)` — a different trailing key than `wp_wc_orders`. Always verify the target table's actual index covers the WHERE + ORDER BY columns before applying the rewrite.
 
 **Canonical example:** `ListTable` in `src/Internal/Admin/Orders/ListTable.php`.
 
