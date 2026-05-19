@@ -355,13 +355,9 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		};
 
 		const headerAccount = {
-			// Stable component reference (matches the displayOptions pattern
-			// above) — passing an inline `() => <HeaderAccount ... />`
-			// arrow gave React a new component type on every parent render,
-			// remounting HeaderAccount and resetting its DropdownMenu's
-			// internal isOpen state. That's what made the first click after
-			// closing the Activity / Finish setup / Help slide-over panel
-			// fail to open the User popover.
+			// Stable component reference — an inline arrow would give React a
+			// new component type on every parent render, remounting HeaderAccount
+			// and resetting its DropdownMenu's internal isOpen state.
 			component: HeaderAccount,
 			options: { page: 'wc-admin' },
 			visible: isHomescreen,

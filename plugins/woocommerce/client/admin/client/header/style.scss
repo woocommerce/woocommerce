@@ -16,21 +16,13 @@
 }
 
 // Hide ONLY the two standard wp-admin meta-toggle wraps (Screen Options +
-// Help) that we proxy via the floating header's gear / ? icons. The parent
-// #screen-meta-links container is left alone so any third-party sibling
-// buttons (the rare plugin that injects its own `.screen-meta-toggle` div
-// directly into the strip) remain visible. Visually-hidden pattern (rather
-// than display:none) keeps the elements in the layout tree so wp-admin's
-// jQuery delegated click handlers still fire when we proxy .click() into
-// #show-settings-link / #contextual-help-link.
-// Defensive guard: only hide when the floating header's meta-icon button
-// has actually rendered (`:has(.woocommerce-layout__header-meta-icon)`).
-// If hasScreenOptions / hasContextualHelp detection misses for any reason,
-// :has() doesn't match and the user keeps access to the original wp-admin
-// strip rather than losing it entirely. Browsers without :has() support
-// (Firefox <121) also fall through to the safe state.
-.woocommerce-admin-page:has(.woocommerce-layout__header-meta-icon),
-body.woocommerce_page_wc-admin:has(.woocommerce-layout__header-meta-icon) {
+// Help) that we proxy via the floating header's gear / ? icons. Applied via
+// the server-rendered body class so the hide is immediate — no flash before
+// React mounts. The parent #screen-meta-links container is left alone so
+// third-party .screen-meta-toggle siblings remain visible. Visually-hidden
+// (not display:none) keeps the elements in the layout tree so wp-admin's
+// jQuery delegated click handlers still fire when we proxy .click().
+.woocommerce-admin-page {
 	#screen-options-link-wrap,
 	#contextual-help-link-wrap {
 		@include visually-hidden;
