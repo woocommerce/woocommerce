@@ -6,9 +6,9 @@ import { __ } from '@wordpress/i18n';
 import {
 	Button,
 	CheckboxControl,
+	FormFileUpload,
 	Modal,
 	Notice,
-	Spinner,
 } from '@wordpress/components';
 import apiFetch from '@wordpress/api-fetch';
 import { recordEvent } from '@woocommerce/tracks';
@@ -74,6 +74,11 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 		},
 		[]
 	);
+
+	const handleClearFile = useCallback( () => {
+		setFile( null );
+		setError( null );
+	}, [] );
 
 	const handleSubmit = useCallback( async ( event: React.FormEvent ) => {
 		event.preventDefault();
@@ -167,31 +172,60 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 						) }
 					</p>
 
-					<p className="woocommerce-fulfillment-importer-modal__hint">
-						<strong>
-							{ __( 'Required columns:', 'woocommerce' ) }
-						</strong>{ ' ' }
-						<code>order_number</code>, <code>tracking_number</code>,{ ' ' }
-						<code>shipment_provider</code>
-						<br />
-						<strong>
-							{ __( 'Optional columns:', 'woocommerce' ) }
-						</strong>{ ' ' }
-						<code>tracking_url</code>, <code>items</code>
-					</p>
+					<Notice
+						className="woocommerce-fulfillment-importer-modal__hint"
+						status="info"
+						isDismissible={ false }
+					>
+						<p>
+							<strong>
+								{ __( 'Required columns:', 'woocommerce' ) }
+							</strong>{ ' ' }
+							<code>order_number</code>,{ ' ' }
+							<code>tracking_number</code>,{ ' ' }
+							<code>shipment_provider</code>
+						</p>
+						<p>
+							<strong>
+								{ __( 'Optional columns:', 'woocommerce' ) }
+							</strong>{ ' ' }
+							<code>tracking_url</code>, <code>items</code>
+						</p>
+					</Notice>
 
 					<div className="woocommerce-fulfillment-importer-modal__file-row">
-						<label htmlFor="wc-fulfillments-importer-file">
+						<span className="woocommerce-fulfillment-importer-modal__file-label">
 							{ __( 'CSV file', 'woocommerce' ) }
-						</label>
-						<input
-							id="wc-fulfillments-importer-file"
-							type="file"
-							accept=".csv,.txt,text/csv,text/plain"
-							required
-							disabled={ isImporting }
-							onChange={ handleFileChange }
-						/>
+						</span>
+						<div className="woocommerce-fulfillment-importer-modal__file-picker">
+							<FormFileUpload
+								accept=".csv,.txt,text/csv,text/plain"
+								multiple={ false }
+								disabled={ isImporting }
+								onChange={ handleFileChange }
+							>
+								{ file
+									? __(
+											'Choose a different file',
+											'woocommerce'
+									  )
+									: __( 'Choose CSV file', 'woocommerce' ) }
+							</FormFileUpload>
+							<span className="woocommerce-fulfillment-importer-modal__file-name">
+								{ file
+									? file.name
+									: __( 'No file selected', 'woocommerce' ) }
+							</span>
+							{ file && ! isImporting && (
+								<Button
+									variant="tertiary"
+									isDestructive
+									onClick={ handleClearFile }
+								>
+									{ __( 'Remove', 'woocommerce' ) }
+								</Button>
+							) }
+						</div>
 					</div>
 
 					<CheckboxControl
@@ -234,14 +268,9 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 							isBusy={ isImporting }
 							disabled={ isImporting || ! file }
 						>
-							{ isImporting ? (
-								<>
-									<Spinner />
-									{ __( 'Importing…', 'woocommerce' ) }
-								</>
-							) : (
-								__( 'Start import', 'woocommerce' )
-							) }
+							{ isImporting
+								? __( 'Importing…', 'woocommerce' )
+								: __( 'Start import', 'woocommerce' ) }
 						</Button>
 					</div>
 				</form>

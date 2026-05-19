@@ -8,12 +8,15 @@
 	}
 
 	&__hint {
-		font-size: 13px;
-		color: #50575e;
-		background: #f6f7f7;
-		padding: 12px 16px;
-		border-radius: 4px;
-		line-height: 1.7;
+		margin: 0 0 16px;
+
+		p {
+			margin: 0 0 4px;
+		}
+
+		p:last-child {
+			margin-bottom: 0;
+		}
 
 		code {
 			background: #fff;
@@ -28,10 +31,22 @@
 		flex-direction: column;
 		gap: 8px;
 		margin: 16px 0;
+	}
 
-		label {
-			font-weight: 500;
-		}
+	&__file-label {
+		font-weight: 500;
+	}
+
+	&__file-picker {
+		display: flex;
+		align-items: center;
+		flex-wrap: wrap;
+		gap: 8px;
+	}
+
+	&__file-name {
+		color: #50575e;
+		font-size: 13px;
 	}
 
 	&__actions {
@@ -44,29 +59,31 @@
 
 .woocommerce-fulfillment-importer-summary {
 	&__counts {
-		list-style: disc;
-		padding-left: 20px;
 		margin: 0 0 16px;
-
-		li {
-			margin-bottom: 4px;
-		}
 	}
 
 	&__rows {
-		width: 100%;
-		max-height: 320px;
-		display: block;
+		max-height: 360px;
 		overflow: auto;
 
-		tr {
-			&.is-status-failed td {
-				color: #b32d2e;
-			}
-			&.is-status-skipped td {
-				color: #8c8f94;
-			}
+		.is-status-failed {
+			color: #b32d2e;
 		}
+
+		.is-status-skipped {
+			color: #8c8f94;
+		}
+
+		.is-status-created,
+		.is-status-updated {
+			color: #007017;
+		}
+	}
+
+	&__load-more {
+		display: flex;
+		justify-content: center;
+		margin-top: 12px;
 	}
 }
 
