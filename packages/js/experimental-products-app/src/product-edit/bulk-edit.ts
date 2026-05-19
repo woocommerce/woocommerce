@@ -276,6 +276,23 @@ export function getBulkNumericEditFromData(
 	};
 }
 
+export function isBulkNumericPercentOperation( operation: unknown ) {
+	return operation === 'increase_percent' || operation === 'decrease_percent';
+}
+
+export function isBulkNumericPercentEdit(
+	data: ProductBulkEditFormData,
+	fieldId: string
+) {
+	if ( ! isBulkNumericFieldId( fieldId ) ) {
+		return false;
+	}
+
+	return isBulkNumericPercentOperation(
+		getBulkNumericEditFromData( data, fieldId ).operation
+	);
+}
+
 export function getBulkNumericEditsFromData(
 	data: ProductBulkEditFormData
 ): Partial< Record< BulkNumericFieldId, BulkNumericEdit > > {

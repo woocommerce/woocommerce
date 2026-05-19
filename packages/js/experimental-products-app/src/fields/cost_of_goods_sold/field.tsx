@@ -13,6 +13,8 @@ import { formatCurrency, getCurrencyObject } from '../utils/currency';
 import { CurrencyControl } from '../components/currency-input';
 
 import type { ProductEntityRecord } from '../types';
+import type { ProductBulkEditFormData } from '../../product-edit/bulk-edit';
+import { isBulkNumericPercentEdit } from '../../product-edit/bulk-edit';
 
 const fieldDefinition = {
 	type: 'text',
@@ -64,6 +66,10 @@ function CostOfGoodsSoldInput( {
 			} }
 			customValidity={ validity?.custom }
 			disabled={ disabled }
+			showPercentAdornment={ isBulkNumericPercentEdit(
+				data as ProductBulkEditFormData,
+				field.id
+			) }
 		/>
 	);
 }

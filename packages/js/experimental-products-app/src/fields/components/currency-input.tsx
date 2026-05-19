@@ -18,6 +18,8 @@ import { unlock } from '../../lock-unlock';
 import type { ProductEntityRecord } from '../types';
 
 import { getCurrencyObject } from '../utils/currency';
+import type { ProductBulkEditFormData } from '../../product-edit/bulk-edit';
+import { isBulkNumericPercentEdit } from '../../product-edit/bulk-edit';
 
 const { ValidatedInputControl } = unlock( privateApis );
 
@@ -39,6 +41,7 @@ type CurrencyControlProps = {
 	>[ 'custom' ];
 	disabled?: boolean;
 	placeholder?: string;
+	showPercentAdornment?: boolean;
 };
 
 export function CurrencyControl( {
@@ -49,7 +52,22 @@ export function CurrencyControl( {
 	customValidity,
 	disabled = false,
 	placeholder,
+	showPercentAdornment = false,
 }: CurrencyControlProps ) {
+	const prefix =
+		! showPercentAdornment && isCurrencyLeft ? (
+			<InputControlPrefixWrapper>{ symbol }</InputControlPrefixWrapper>
+		) : undefined;
+	let suffix;
+
+	if ( showPercentAdornment ) {
+		suffix = <InputControlSuffixWrapper>%</InputControlSuffixWrapper>;
+	} else if ( ! isCurrencyLeft ) {
+		suffix = (
+			<InputControlSuffixWrapper>{ symbol }</InputControlSuffixWrapper>
+		);
+	}
+
 	return (
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-call -- ValidatedInputControl is a private API
 		<ValidatedInputControl
@@ -63,20 +81,8 @@ export function CurrencyControl( {
 			step={ step }
 			customValidity={ customValidity }
 			disabled={ disabled }
-			prefix={
-				isCurrencyLeft ? (
-					<InputControlPrefixWrapper>
-						{ symbol }
-					</InputControlPrefixWrapper>
-				) : undefined
-			}
-			suffix={
-				! isCurrencyLeft ? (
-					<InputControlSuffixWrapper>
-						{ symbol }
-					</InputControlSuffixWrapper>
-				) : undefined
-			}
+			prefix={ prefix }
+			suffix={ suffix }
 		/>
 	);
 }
@@ -111,6 +117,10 @@ export function CurrencyInput( {
 			} }
 			customValidity={ validity?.custom }
 			disabled={ disabled }
+			showPercentAdornment={ isBulkNumericPercentEdit(
+				data as ProductBulkEditFormData,
+				fieldId
+			) }
 		/>
 	);
 }
