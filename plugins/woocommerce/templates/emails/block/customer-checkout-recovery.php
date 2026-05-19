@@ -43,3 +43,7 @@ $order_meta_format = esc_html__( 'Order #%1$s (%2$s)', 'woocommerce' );
 printf( $order_meta_format, '<!--[woocommerce/order-number]-->', '<!--[woocommerce/order-date]-->' ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- $order_meta_format is escaped above; personalization tokens are literal HTML comments.
 ?></p>
 <!-- /wp:paragraph -->
+
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"12px"}}} -->
+<p style="font-size:12px"><a href="<!--[woocommerce/email-unsubscribe-url]-->"><?php echo esc_html__( 'Unsubscribe from checkout recovery emails', 'woocommerce' ); ?></a></p>
+<!-- /wp:paragraph -->
