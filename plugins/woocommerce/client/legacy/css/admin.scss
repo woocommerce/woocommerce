@@ -9359,12 +9359,15 @@ body.woocommerce_page_wc-settings {
 		}
 	}
 
-	.woocommerce-layout__header-heading {
-		padding: 0 0 0 30px;
-		font-weight: 600;
-		font-size: 16px;
-		color: #070707;
-	}
+	// Heading typography (font-size, font-weight, colour) AND left
+	// padding now all live in the shared
+	// `client/admin/client/header/style.scss` rule (15px / 500 /
+	// $gray-900 / $gutter-large — aligned to Gutenberg's WPDS tokens
+	// and the unified admin header direction in
+	// WordPress/gutenberg#76709). Dropped the entire Settings-specific
+	// override (font-size 16px, font-weight 600, color #070707, padding
+	// 30px) so Settings renders identically to Home and every other
+	// floating-header page on every axis.
 
 	#wpbody .woocommerce-layout,
 	.woocommerce-layout__notice-list-hide + .wrap {
@@ -9410,7 +9413,15 @@ body.woocommerce_page_wc-settings {
 		display: flex;
 		flex-wrap: wrap;
 		list-style: none;
-		padding-left: 30px;
+		// 24px to match the floating-header title's `$gap-large` (from
+		// @wordpress/base-styles) so the "Settings" h1 above and the
+		// "General / Products / ..." tab labels below line up on the
+		// same left edge. Also matches the future-state design and
+		// `$grid-unit-30` / `--wp-admin-grid-unit-30` in the admin
+		// tokens proposal at https://core.trac.wordpress.org/ticket/65085.
+		// Legacy admin.scss can't import the shared SCSS variables file
+		// directly, hence the literal.
+		padding-left: 24px;
 		padding-right: 24px;
 		gap: 24px;
 
@@ -9433,7 +9444,13 @@ body.woocommerce_page_wc-settings {
 			border: 0;
 			background: none;
 			font-weight: 500;
-			font-size: 14px;
+			// 13px to match WP's `$default-font-size` (from
+			// @wordpress/base-styles) and Gutenberg's
+			// `--wpds-typography-font-size-md` (13px). Reads as quieter
+			// chrome below the 15px floating-header h1, restoring the
+			// chrome → tabs → content hierarchy the previous 14px size
+			// was already aiming at.
+			font-size: 13px;
 			line-height: 20px;
 			color: #505050;
 			padding: 0 0 10px 0;

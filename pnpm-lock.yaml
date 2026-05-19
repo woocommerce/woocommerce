@@ -1698,6 +1698,9 @@ importers:
 
   packages/js/experimental-products-app:
     dependencies:
+      '@base-ui/react':
+        specifier: 1.4.1
+        version: 1.4.1(@date-fns/tz@1.4.1)(@types/react@18.3.28)(date-fns@4.1.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@dnd-kit/react':
         specifier: 0.4.0
         version: 0.4.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -32843,7 +32846,7 @@ snapshots:
   '@webpack-cli/configtest@2.1.1(webpack-cli@5.1.4)(webpack@5.97.1)':
     dependencies:
       webpack: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
-      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.2)(webpack@5.97.1)
+      webpack-cli: 5.1.4(webpack@5.97.1)
 
   '@webpack-cli/info@1.5.0(webpack-cli@4.10.0(webpack-bundle-analyzer@4.9.1)(webpack@5.97.1))':
     dependencies:
@@ -32853,7 +32856,7 @@ snapshots:
   '@webpack-cli/info@2.0.2(webpack-cli@5.1.4)(webpack@5.97.1)':
     dependencies:
       webpack: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
-      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.2)(webpack@5.97.1)
+      webpack-cli: 5.1.4(webpack@5.97.1)
 
   '@webpack-cli/serve@1.7.0(webpack-cli@4.10.0(webpack-bundle-analyzer@4.9.1)(webpack@5.97.1))':
     dependencies:
@@ -35578,7 +35581,7 @@ snapshots:
   '@wordpress/dependency-extraction-webpack-plugin@6.43.1-next.v.202604091042.0(webpack@5.97.1)':
     dependencies:
       json2php: 0.0.7
-      webpack: 5.97.1(@swc/core@1.15.24)(esbuild@0.18.20)(webpack-cli@5.1.4)
+      webpack: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
 
   '@wordpress/dependency-extraction-webpack-plugin@6.44.0(webpack@5.97.1)':
     dependencies:
@@ -54721,7 +54724,7 @@ snapshots:
       watchpack: 2.5.1
       webpack-sources: 3.3.4
     optionalDependencies:
-      webpack-cli: 5.1.4(webpack-bundle-analyzer@4.9.1)(webpack-dev-server@4.15.2)(webpack@5.97.1)
+      webpack-cli: 5.1.4(webpack@5.97.1)
     transitivePeerDependencies:
       - '@swc/core'
       - esbuild

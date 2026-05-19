@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add a native transactional email log. Each send attempt is recorded under WooCommerce → Status → Logs (source: transactional-emails), capturing the type, related order or object, send status, and recipient (WordPress username for registered users, "guest" for unrecognised addresses). Failed sends include the error reason from wp_mail_failed.
