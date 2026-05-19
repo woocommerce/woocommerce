@@ -6,35 +6,27 @@ import type { Field } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
-import { fieldExtensions as costOfGoodsSoldFieldExtensions } from './cost_of_goods_sold/field';
-import { fieldExtensions as dateOnSaleFromFieldExtensions } from './date_on_sale_from/field';
-import { fieldExtensions as dateOnSaleToFieldExtensions } from './date_on_sale_to/field';
-import { fieldExtensions as descriptionFieldExtensions } from './description/field';
-import { fieldExtensions as downloadableFieldExtensions } from './downloadable/field';
-import { fieldExtensions as heightFieldExtensions } from './height/field';
-import { fieldExtensions as imagesFieldExtensions } from './images/field';
-import { fieldExtensions as lengthFieldExtensions } from './length/field';
-import { fieldExtensions as manageStockFieldExtensions } from './manage_stock/field';
+import {
+	createProductFields,
+	type ProductFieldId,
+} from '../../fields/registry';
+import { fieldExtensions as allowBackordersFieldExtensions } from './allow_backorders/field';
+import { fieldExtensions as downloadableFilesFieldExtensions } from './downloadable_files/field';
+import { fieldExtensions as downloadExpiryFieldExtensions } from './download_expiry/field';
+import { fieldExtensions as downloadLimitFieldExtensions } from './download_limit/field';
+import { fieldExtensions as lowStockAmountFieldExtensions } from './low_stock_amount/field';
 import { fieldExtensions as productStatusFieldExtensions } from './product_status/field';
-import { fieldExtensions as regularPriceFieldExtensions } from './regular_price/field';
-import { fieldExtensions as salePriceFieldExtensions } from './sale_price/field';
-import { fieldExtensions as scheduleSaleFieldExtensions } from './schedule_sale/field';
-import { fieldExtensions as shippingClassFieldExtensions } from './shipping_class/field';
-import { fieldExtensions as skuFieldExtensions } from './sku/field';
-import { fieldExtensions as stockFieldExtensions } from './stock/field';
-import { fieldExtensions as stockQuantityFieldExtensions } from './stock_quantity/field';
-import { fieldExtensions as taxStatusFieldExtensions } from './tax_status/field';
+import { fieldExtensions as taxClassFieldExtensions } from './tax_class/field';
+import { fieldExtensions as virtualFieldExtensions } from './virtual/field';
 import type { ProductEntityRecord } from './types';
-import { fieldExtensions as weightFieldExtensions } from './weight/field';
-import { fieldExtensions as widthFieldExtensions } from './width/field';
 
 type VariationEditField = Field< ProductEntityRecord >;
-type VariationEditFieldExtensions = Partial< VariationEditField >;
 
-export const VARIATION_EDIT_FIELD_IDS = [
-	'product_status',
+// Fields pulled directly from the main registry with no modifications.
+const SHARED_FIELD_IDS: readonly ProductFieldId[] = [
 	'description',
 	'sku',
+	'global_unique_id',
 	'regular_price',
 	'sale_price',
 	'schedule_sale',
@@ -45,57 +37,76 @@ export const VARIATION_EDIT_FIELD_IDS = [
 	'manage_stock',
 	'stock',
 	'stock_quantity',
+	'downloadable',
+	'tax_status',
+] as const;
+
+// Shipping fields get an extra isVisible so they disappear when virtual=true.
+const SHIPPING_FIELD_IDS: readonly ProductFieldId[] = [
+	'shipping_class',
 	'weight',
 	'length',
 	'width',
 	'height',
-	'shipping_class',
-	'tax_status',
-	'downloadable',
 ] as const;
 
-export type VariationEditFieldId =
-	( typeof VARIATION_EDIT_FIELD_IDS )[ number ];
-
-const VARIATION_FIELD_EXTENSIONS: Record<
-	VariationEditFieldId,
-	VariationEditFieldExtensions
-> = {
-	product_status: productStatusFieldExtensions,
-	description: descriptionFieldExtensions,
-	sku: skuFieldExtensions,
-	regular_price: regularPriceFieldExtensions,
-	sale_price: salePriceFieldExtensions,
-	schedule_sale: scheduleSaleFieldExtensions,
-	date_on_sale_from: dateOnSaleFromFieldExtensions,
-	date_on_sale_to: dateOnSaleToFieldExtensions,
-	cost_of_goods_sold: costOfGoodsSoldFieldExtensions,
-	images: imagesFieldExtensions,
-	manage_stock: manageStockFieldExtensions,
-	stock: stockFieldExtensions,
-	stock_quantity: stockQuantityFieldExtensions,
-	weight: weightFieldExtensions,
-	length: lengthFieldExtensions,
-	width: widthFieldExtensions,
-	height: heightFieldExtensions,
-	shipping_class: shippingClassFieldExtensions,
-	tax_status: taxStatusFieldExtensions,
-	downloadable: downloadableFieldExtensions,
-};
-
-export function createVariationEditField( id: VariationEditFieldId ): VariationEditField {
+function withVirtualGuard(
+	field: VariationEditField
+): VariationEditField {
+	const existing = field.isVisible;
 	return {
-		id,
-		...VARIATION_FIELD_EXTENSIONS[ id ],
+		...field,
+		isVisible: ( item: ProductEntityRecord ) =>
+			! item.virtual &&
+			( existing === undefined || existing( item ) ),
 	};
 }
 
-export function createVariationEditFields(
-	fieldIds: readonly VariationEditFieldId[]
-): VariationEditField[] {
-	return fieldIds.map( createVariationEditField );
-}
+const sharedFields: VariationEditField[] = createProductFields( SHARED_FIELD_IDS );
 
-export const variationEditFields = createVariationEditFields(
-	VARIATION_EDIT_FIELD_IDS
+const shippingFields: VariationEditField[] = createProductFields( SHIPPING_FIELD_IDS ).map( withVirtualGuard );
+
+// Variation-exclusive field IDs — these do not exist in the main registry.
+const VARIATION_ONLY_FIELD_IDS = [
+	'product_status',
+	'tax_class',
+	'virtual',
+	'allow_backorders',
+	'low_stock_amount',
+	'downloadable_files',
+	'download_limit',
+	'download_expiry',
+] as const;
+
+export type VariationOnlyFieldId =
+	( typeof VARIATION_ONLY_FIELD_IDS )[ number ];
+
+const VARIATION_ONLY_FIELD_EXTENSIONS: Record<
+	VariationOnlyFieldId,
+	Partial< VariationEditField >
+> = {
+	product_status: productStatusFieldExtensions,
+	tax_class: taxClassFieldExtensions,
+	virtual: virtualFieldExtensions,
+	allow_backorders: allowBackordersFieldExtensions,
+	low_stock_amount: lowStockAmountFieldExtensions,
+	downloadable_files: downloadableFilesFieldExtensions,
+	download_limit: downloadLimitFieldExtensions,
+	download_expiry: downloadExpiryFieldExtensions,
+};
+
+const variationOnlyFields: VariationEditField[] = VARIATION_ONLY_FIELD_IDS.map(
+	( id ) => ( { id, ...VARIATION_ONLY_FIELD_EXTENSIONS[ id ] } )
 );
+
+// The full field list used by the variation edit drawer.
+export const variationEditFields: VariationEditField[] = [
+	...sharedFields,
+	...shippingFields,
+	...variationOnlyFields,
+];
+
+// Union type of all field IDs available in the variation panel.
+export type VariationEditFieldId =
+	| ProductFieldId
+	| VariationOnlyFieldId;
