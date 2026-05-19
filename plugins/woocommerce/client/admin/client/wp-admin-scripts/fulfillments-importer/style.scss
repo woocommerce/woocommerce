@@ -1,32 +1,232 @@
 @import "@wordpress/base-styles/colors";
 
+// WP admin chrome dimensions used for the full-screen overlay (mirrored from
+// woocommerce-shipping/client/components/label-purchase/style.scss).
+$wp-admin-bar-height: 32px;
+$wp-admin-bar-height-mobile: 46px;
+$wp-admin-sidebar-width: 160px;
+$wp-admin-sidebar-width-collapsed: 36px;
+
+// Full-screen overlay sits next to the WP sidebar and below the admin bar.
+.woocommerce-fulfillment-importer-overlay {
+	&.components-modal__screen-overlay {
+		background-color: transparent;
+		top: $wp-admin-bar-height;
+		left: $wp-admin-sidebar-width;
+		right: 0;
+		bottom: 0;
+
+		@media screen and (max-width: 782px) {
+			top: $wp-admin-bar-height-mobile;
+			left: 0;
+		}
+
+		.folded & {
+			left: $wp-admin-sidebar-width-collapsed;
+
+			@media screen and (max-width: 782px) {
+				left: 0;
+			}
+		}
+	}
+}
+
 .woocommerce-fulfillment-importer-modal {
-	.components-modal__content {
-		max-width: 720px;
-	}
-
-	&__description {
+	&.components-modal__frame {
+		height: 100%;
+		width: 100%;
+		max-width: none;
+		max-height: none;
+		border-radius: 0;
+		box-shadow: none;
+		background: $white;
 		margin: 0;
+		top: 0;
+		left: 0;
+		transform: none;
 	}
 
-	&__stack {
+	.components-modal__content {
+		padding: 0;
+		margin: 0;
+		max-width: none;
+		height: 100%;
 		display: flex;
 		flex-direction: column;
-		gap: 20px;
 	}
 
-	&__columns p {
-		margin: 0 0 4px;
+	&__layout {
+		display: flex;
+		flex-direction: column;
+		height: 100%;
+		min-height: 0;
+	}
 
-		code {
-			margin-right: 4px;
+	&__header {
+		flex-shrink: 0;
+		border-bottom: 1px solid $gray-200;
+		padding: 16px 24px;
+		background: $white;
+	}
+
+	&__header-row {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		gap: 16px;
+		margin-bottom: 12px;
+	}
+
+	&__header-leading {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+	}
+
+	&__title {
+		margin: 0;
+		font-size: 20px;
+		line-height: 1.4;
+		font-weight: 600;
+	}
+
+	&__body {
+		flex: 1 1 auto;
+		min-height: 0;
+		overflow-y: auto;
+		padding: 24px;
+	}
+}
+
+.woocommerce-fulfillment-importer-stepper {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 16px;
+	list-style: none;
+	margin: 0;
+	padding: 0;
+
+	&__step {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		color: $gray-700;
+		font-size: 13px;
+
+		&.is-current {
+			color: $gray-900;
+			font-weight: 600;
+		}
+
+		&.is-completed {
+			color: $alert-green;
 		}
 	}
 
-	&__options {
+	&__bullet {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		border: 1px solid currentColor;
+		font-size: 12px;
+		font-weight: 600;
+	}
+
+	&__step.is-completed &__bullet {
+		background: $alert-green;
+		color: $white;
+		border-color: $alert-green;
+	}
+}
+
+.woocommerce-fulfillment-importer-step {
+	display: flex;
+	flex-direction: column;
+	gap: 16px;
+	max-width: 720px;
+	margin: 0 auto;
+
+	h2 {
+		font-size: 18px;
+		margin: 0;
+	}
+
+	&__footer {
+		display: flex;
+		justify-content: flex-end;
+		gap: 8px;
+		padding-top: 16px;
+		border-top: 1px solid $gray-200;
+		margin-top: 8px;
+	}
+}
+
+.woocommerce-fulfillment-importer-mapping-table {
+	width: 100%;
+	border-collapse: collapse;
+
+	th,
+	td {
+		text-align: left;
+		padding: 8px 12px;
+		border-bottom: 1px solid $gray-100;
+		vertical-align: top;
+	}
+
+	thead th {
+		font-weight: 600;
+		color: $gray-700;
+		font-size: 12px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+	}
+
+	tr.is-required-row {
+		background: rgba(214, 54, 56, 0.04);
+	}
+}
+
+.woocommerce-fulfillment-importer-progress {
+	width: 100%;
+	height: 8px;
+	background: $gray-100;
+	border-radius: 4px;
+	overflow: hidden;
+
+	&__bar {
+		height: 100%;
+		background: $alert-green;
+		transition: width 200ms ease-out;
+	}
+}
+
+.woocommerce-fulfillment-importer-counts {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+	gap: 12px;
+	margin: 0;
+
+	> div {
 		display: flex;
 		flex-direction: column;
-		gap: 8px;
+		gap: 2px;
+		padding: 12px;
+		border: 1px solid $gray-200;
+		border-radius: 4px;
+	}
+
+	dt {
+		font-size: 12px;
+		color: $gray-700;
+	}
+
+	dd {
+		font-size: 18px;
+		font-weight: 600;
+		margin: 0;
 	}
 }
 
