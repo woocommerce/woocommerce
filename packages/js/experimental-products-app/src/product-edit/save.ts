@@ -82,6 +82,21 @@ function getVariationSaveData(
 	};
 }
 
+function sanitizeVariationForSave(
+	variation: ProductEntityRecord
+): ProductEntityRecord {
+	const data = { ...variation } as Record< string, unknown >;
+	// The REST API rejects cost_of_goods_sold when defined_value is null.
+	// Omit the field so the server retains its existing value.
+	const cogs = data.cost_of_goods_sold as
+		| { values?: Array< { defined_value: unknown } > }
+		| undefined;
+	if ( cogs?.values?.some( ( v ) => v.defined_value === null ) ) {
+		delete data.cost_of_goods_sold;
+	}
+	return data as ProductEntityRecord;
+}
+
 async function saveVariation(
 	product: ProductVariationEntityRecord,
 	editEntityRecord: EditProductRecord
@@ -94,7 +109,7 @@ async function saveVariation(
 	const savedVariation = await apiFetch< ProductVariation >( {
 		path: getProductVariationUpdatePath( product ),
 		method: 'PUT',
-		data: getVariationSaveData( editedVariation ),
+		data: getVariationSaveData( sanitizeVariationForSave( editedVariation ) ),
 	} );
 
 	if ( parentProduct ) {
