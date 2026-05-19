@@ -1,0 +1,4 @@
+Significance: minor
+Type: dev
+
+Split the variation edit drawer into a dedicated VariationEditForm component, alongside the existing ProductEditForm. Shared field registry and DataForm pipeline are unchanged.

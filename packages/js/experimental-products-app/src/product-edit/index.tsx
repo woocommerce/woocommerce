@@ -4,7 +4,6 @@
 import { Button, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { select as wpSelect, useDispatch, useSelect } from '@wordpress/data';
-import { DataForm } from '@wordpress/dataviews';
 import { useCallback, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
@@ -22,24 +21,17 @@ import {
 import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
 import {
-	buildMergedProductEditData,
 	findProductInList,
 	getProductEditRecord,
 	getProductWithUpdatedVariation,
 	getProductEditFields,
-	getProductTypeFormFields,
-	getVisibleProductEditFields,
 	isProductVariation,
 } from './utils';
+import { ProductEditForm } from './product-edit-form';
+import { VariationEditForm } from './variation-edit-form';
 import { saveSelectedProducts } from './save';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
-
-type ProductEditFormProps = {
-	editableFields: ReturnType< typeof getProductEditFields >;
-	onChange: ( changes: Partial< ProductEntityRecord > ) => void;
-	selectedProducts: ProductEntityRecord[];
-};
 
 type ProductEditProps = {
 	products: ProductEntityRecord[];
@@ -79,35 +71,6 @@ function getSaveNoticeMessage( successCount: number, failedCount: number ) {
 		),
 		successCount,
 		failedCount
-	);
-}
-
-function ProductEditForm( {
-	editableFields,
-	onChange,
-	selectedProducts,
-}: ProductEditFormProps ) {
-	const mergedData = buildMergedProductEditData( selectedProducts );
-	const visibleFields = getVisibleProductEditFields(
-		editableFields,
-		selectedProducts
-	);
-
-	const form = {
-		type: 'regular' as const,
-		labelPosition: 'top' as const,
-		fields: getProductTypeFormFields( selectedProducts, visibleFields ),
-	};
-
-	return (
-		<div className="woocommerce-product-edit__form">
-			<DataForm
-				data={ mergedData }
-				fields={ visibleFields }
-				form={ form }
-				onChange={ onChange }
-			/>
-		</div>
 	);
 }
 
@@ -438,13 +401,20 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 							</div>
 						) }
 
-					{ isReady && (
-						<ProductEditForm
-							editableFields={ editableFields }
-							onChange={ onChange }
-							selectedProducts={ selectedProducts }
-						/>
-					) }
+					{ isReady &&
+						( selectedProducts.every( isProductVariation ) ? (
+							<VariationEditForm
+								editableFields={ editableFields }
+								onChange={ onChange }
+								selectedVariations={ selectedProducts }
+							/>
+						) : (
+							<ProductEditForm
+								editableFields={ editableFields }
+								onChange={ onChange }
+								selectedProducts={ selectedProducts }
+							/>
+						) ) }
 				</Drawer.Content>
 
 				{ isReady && (
