@@ -49,6 +49,20 @@ class FulfillmentsCsvImporter {
 	private array $options;
 
 	/**
+	 * Per-run cache of resolved orders, keyed by the raw order number string from the CSV.
+	 *
+	 * @var array<string, WC_Order|null>
+	 */
+	private array $order_cache = array();
+
+	/**
+	 * Per-run cache of non-deleted fulfillments keyed by order ID.
+	 *
+	 * @var array<int, array<int, Fulfillment>>
+	 */
+	private array $fulfillments_cache = array();
+
+	/**
 	 * Constructor.
 	 *
 	 * @since 10.9.0
@@ -88,6 +102,9 @@ class FulfillmentsCsvImporter {
 	 * }
 	 */
 	public function run(): array {
+		$this->order_cache        = array();
+		$this->fulfillments_cache = array();
+
 		$summary = array(
 			'created'  => 0,
 			'updated'  => 0,
@@ -497,6 +514,10 @@ class FulfillmentsCsvImporter {
 	 * @return WC_Order|null
 	 */
 	private function resolve_order( string $order_number ): ?WC_Order {
+		if ( array_key_exists( $order_number, $this->order_cache ) ) {
+			return $this->order_cache[ $order_number ];
+		}
+
 		$order = null;
 
 		if ( ctype_digit( $order_number ) ) {
@@ -519,7 +540,11 @@ class FulfillmentsCsvImporter {
 		 */
 		$order = apply_filters( 'woocommerce_fulfillments_csv_importer_resolve_order', $order, $order_number );
 
-		return $order instanceof WC_Order ? $order : null;
+		$resolved = $order instanceof WC_Order ? $order : null;
+
+		$this->order_cache[ $order_number ] = $resolved;
+
+		return $resolved;
 	}
 
 	/**
