@@ -92,10 +92,9 @@ class NoteActions extends Notes {
 			//
 			// The ignore below matches the same `return.type` issue already captured
 			// in the PHPStan baseline for the other two WP_Error returns in this
-			// method (broken docblock on `@return` — unqualified WP class names
-			// resolve in the current namespace). Localized here to avoid growing the
-			// baseline.
-			// @phpstan-ignore-next-line return.type
+			// method (broken `@return` docblock — unqualified WP class names resolve
+			// in the current namespace). Localized here so the baseline doesn't grow.
+			// @phpstan-ignore-next-line return.type -- see rationale above.
 			return new \WP_Error(
 				'woocommerce_note_action_forbidden',
 				$e->getMessage(),
