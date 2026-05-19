@@ -23,7 +23,6 @@ const universalLock =
 type ShopperCollectionConfig = {
 	quantityLabelTemplate: string;
 	removeLabelTemplate: string;
-	removeErrorTemplate: string;
 };
 
 type BlockContext = {
@@ -228,33 +227,10 @@ store< BlockStore >(
 				}
 				pendingKeys[ listItem.key ] = true;
 				try {
-					yield shopperListsActions.clearNotices();
 					yield shopperListsActions.removeItem(
 						listSlug,
 						listItem.key
 					);
-				} catch ( error ) {
-					// Surface a generic, item-scoped notice. The
-					// underlying error is console-logged for ops/debug
-					// but not shown to the shopper: server messages on
-					// these routes (auth, nonce, internal errors) are
-					// rarely actionable for end users, and routing
-					// extension-supplied WP_Error content into the
-					// store-notices innerHTML render path is a trust
-					// surface we'd rather not maintain. Template comes
-					// from PHP (`wp_interactivity_config`) because iAPI
-					// script modules can't import `@wordpress/i18n`;
-					// `listItem.name` is wp_kses'd by the schema.
-					const { removeErrorTemplate } = getConfig(
-						'woocommerce/shopper-collection'
-					) as ShopperCollectionConfig;
-					yield shopperListsActions.showNoticeError(
-						new Error(
-							removeErrorTemplate.replace( '%s', listItem.name )
-						)
-					);
-					// eslint-disable-next-line no-console
-					console.error( error );
 				} finally {
 					delete pendingKeys[ listItem.key ];
 				}
@@ -301,7 +277,6 @@ store< BlockStore >(
 
 				pendingKeys[ listItem.key ] = true;
 				try {
-					yield shopperListsActions.clearNotices();
 					yield cartActions.addCartItem( {
 						id: listItem.id,
 						quantityToAdd: listItem.quantity,
@@ -316,31 +291,10 @@ store< BlockStore >(
 						return;
 					}
 
-					try {
-						yield shopperListsActions.removeItem(
-							listSlug,
-							listItem.key
-						);
-					} catch ( error ) {
-						// Cart-add already succeeded — only the saved-list
-						// cleanup failed. Surface the item context so the
-						// shopper knows which row is still hanging around;
-						// underlying error goes to the console only (same
-						// rationale as `onClickRemove`).
-						const { removeErrorTemplate } = getConfig(
-							'woocommerce/shopper-collection'
-						) as ShopperCollectionConfig;
-						yield shopperListsActions.showNoticeError(
-							new Error(
-								removeErrorTemplate.replace(
-									'%s',
-									listItem.name
-								)
-							)
-						);
-						// eslint-disable-next-line no-console
-						console.error( error );
-					}
+					yield shopperListsActions.removeItem(
+						listSlug,
+						listItem.key
+					);
 				} finally {
 					delete pendingKeys[ listItem.key ];
 				}

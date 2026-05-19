@@ -86,7 +86,6 @@ export type Store = {
 		addItem: ( slug: string, payload: AddItemPayload ) => Promise< void >;
 		removeItem: ( slug: string, key: string ) => Promise< void >;
 		showNoticeError: ( error: Error ) => Promise< void >;
-		clearNotices: () => Promise< void >;
 	};
 };
 
@@ -172,7 +171,7 @@ async function restRequest< T >(
 // so an empty-string default would clobber the values seeded server-side via
 // `wp_interactivity_state`. State for those fields comes purely from PHP. Same
 // reason the cart store doesn't ship state defaults — see cart.ts.
-const { state } = store< Store >(
+const { state, actions } = store< Store >(
 	'woocommerce/shopper-lists',
 	{
 		actions: {
@@ -204,10 +203,7 @@ const { state } = store< Store >(
 					// loadList cannot clobber a fresh add/remove.
 					list.items = items;
 				} catch ( error ) {
-					// Background data-load failures don't surface a banner
-					// — there's no user-initiated trigger to attach one to,
-					// and the server message is rarely actionable. Log the
-					// underlying error so it's still discoverable in ops.
+					// No user trigger to attach a banner to; log for ops.
 					// eslint-disable-next-line no-console
 					console.error( error );
 				} finally {
@@ -215,44 +211,46 @@ const { state } = store< Store >(
 				}
 			},
 
-			// Mutations (`addItem`, `removeItem`) intentionally do NOT
-			// catch — they let the caller decide the notice wording so
-			// per-row handlers in shopper-collection's `frontend.ts` can
-			// interpolate the item name. `loadList` still catches because
-			// its callers (page navigation, etc.) have no item context to
-			// add.
 			*addItem(
 				slug: string,
 				payload: AddItemPayload
 			): AsyncAction< void > {
 				const list = ensureListState( state, slug );
 
-				const item = ( yield restRequest< RawShopperListItem >(
-					state,
-					`wc/store/v1/shopper-lists/${ encodeURIComponent(
-						slug
-					) }/items`,
-					{
-						method: 'POST',
-						body: JSON.stringify( payload ),
+				try {
+					const item = ( yield restRequest< RawShopperListItem >(
+						state,
+						`wc/store/v1/shopper-lists/${ encodeURIComponent(
+							slug
+						) }/items`,
+						{
+							method: 'POST',
+							body: JSON.stringify( payload ),
+						}
+					) ) as TypeYield<
+						typeof restRequest< RawShopperListItem >
+					>;
+
+					if ( ! isShopperListItem( item ) ) {
+						throw new Error(
+							'Invalid shopper list item response.'
+						);
 					}
-				) ) as TypeYield< typeof restRequest< RawShopperListItem > >;
 
-				if ( ! isShopperListItem( item ) ) {
-					throw new Error( 'Invalid shopper list item response.' );
-				}
-
-				// Merge the returned item by key — replace if present,
-				// append otherwise. Re-saving the same product POSTs
-				// twice and the server merges quantity, so we mirror
-				// that behaviour locally.
-				const existingIndex = list.items.findIndex(
-					( i ) => i.key === item.key
-				);
-				if ( existingIndex >= 0 ) {
-					list.items[ existingIndex ] = item;
-				} else {
-					list.items.push( item );
+					// Merge the returned item by key — replace if present,
+					// append otherwise. Re-saving the same product POSTs
+					// twice and the server merges quantity, so we mirror
+					// that behaviour locally.
+					const existingIndex = list.items.findIndex(
+						( i ) => i.key === item.key
+					);
+					if ( existingIndex >= 0 ) {
+						list.items[ existingIndex ] = item;
+					} else {
+						list.items.push( item );
+					}
+				} catch ( error ) {
+					actions.showNoticeError( error as Error );
 				}
 			},
 
@@ -267,17 +265,20 @@ const { state } = store< Store >(
 				}
 
 				// Pessimistic remove: leave the row in place until the
-				// server confirms to avoid a disappear/reappear flash on
-				// failure. Buttons are disabled while pending via the
-				// block store's `pendingKeys` context. Errors bubble to
-				// the caller so it can compose a contextualised notice.
-				yield restRequest(
-					state,
-					`wc/store/v1/shopper-lists/${ encodeURIComponent(
-						slug
-					) }/items/${ encodeURIComponent( key ) }`,
-					{ method: 'DELETE' }
-				);
+				// server confirms, so failures don't flash. Buttons are
+				// disabled meanwhile via the block's `pendingKeys`.
+				try {
+					yield restRequest(
+						state,
+						`wc/store/v1/shopper-lists/${ encodeURIComponent(
+							slug
+						) }/items/${ encodeURIComponent( key ) }`,
+						{ method: 'DELETE' }
+					);
+				} catch ( error ) {
+					actions.showNoticeError( error as Error );
+					return;
+				}
 
 				// Re-find — the list may have mutated during the await.
 				const removedIndex = list.items.findIndex(
@@ -288,13 +289,7 @@ const { state } = store< Store >(
 				}
 			},
 
-			// Dispatches `error.message` verbatim as a store-notices
-			// banner. Callers are responsible for ensuring the message is
-			// HTML-safe — the notices region renders content via
-			// `innerHTML` (see `store-notices.ts::renderNoticeContent`).
-			// In practice every caller passes a fresh `new Error(...)`
-			// composed from a translated template plus schema-supplied
-			// fields, never raw server-supplied content.
+			// Mirrors `cart.ts::showNoticeError`.
 			*showNoticeError( error: Error ): AsyncAction< void > {
 				yield import( '@woocommerce/stores/store-notices' );
 				const { actions: noticeActions } = store< StoreNotices >(
@@ -308,24 +303,9 @@ const { state } = store< Store >(
 					type: 'error',
 					dismissible: true,
 				} );
-			},
 
-			// Wipe every notice in the closest store-notices context. Called
-			// at the start of each mutation handler so a stale banner from a
-			// previous attempt doesn't survive a successful retry, and so a
-			// fresh failure replaces the old one instead of stacking. Notice
-			// IDs are snapshotted up front because `removeNotice` splices the
-			// array — iterating live would skip elements.
-			*clearNotices(): AsyncAction< void > {
-				yield import( '@woocommerce/stores/store-notices' );
-				const { state: noticeState, actions: noticeActions } =
-					store< StoreNotices >(
-						'woocommerce/store-notices',
-						{},
-						{ lock: universalLock }
-					);
-				const ids = noticeState.notices.map( ( n ) => n.id );
-				ids.forEach( ( id ) => noticeActions.removeNotice( id ) );
+				// eslint-disable-next-line no-console
+				console.error( error );
 			},
 		},
 	},

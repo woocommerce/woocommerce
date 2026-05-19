@@ -225,7 +225,6 @@ final class ShopperCollection extends AbstractBlock {
 			array(
 				'quantityLabelTemplate' => $variation['quantityLabelTemplate'],
 				'removeLabelTemplate'   => $variation['removeLabelTemplate'],
-				'removeErrorTemplate'   => $variation['removeErrorTemplate'],
 			)
 		);
 
@@ -243,12 +242,7 @@ final class ShopperCollection extends AbstractBlock {
 		// the per-block context, so it naturally resets on every full page
 		// load — no extra Store API field or persisted flag needed.
 		// `data-wp-context---notices` seeds the store-notices namespace
-		// on the `<section>` wrapper so a single ancestor scopes both the
-		// `woocommerce/shopper-collection` context (per-block state) and
-		// the `woocommerce/store-notices` context (the notices array). The
-		// notices region and the per-row mutation handlers below share
-		// this ancestor for context resolution — same shape mini-cart and
-		// AddToCartWithOptions use.
+		// alongside the block's own context on the same wrapper.
 		$wrapper_attributes = array(
 			'class'                     => $wrapper_class,
 			'data-wp-interactive'       => 'woocommerce/shopper-collection',
@@ -256,15 +250,9 @@ final class ShopperCollection extends AbstractBlock {
 				array(
 					'listSlug'      => $list_slug,
 					'hasShownItems' => ! empty( $items ),
-					// Keyed map of item keys mid-mutation. The block store
-					// flips an entry on at the start of `onClickRemove` /
-					// `onClickMoveToCart` and clears it in a `finally`, so a
-					// per-row `state.isCurrentItemPending` getter can drive
-					// `data-wp-bind--disabled` on the trash and Move-to-cart
-					// buttons. `stdClass` so the empty value serialises as
-					// `{}` instead of `[]` — iAPI's reactive proxy treats
-					// arrays and objects differently, and arbitrary string-
-					// key writes only fire updates on objects.
+					// `stdClass` so it serialises as `{}`, not `[]` —
+					// iAPI's reactive proxy only fires updates on object
+					// writes, not array expandos.
 					'pendingKeys'   => new \stdClass(),
 				)
 			),
@@ -319,8 +307,6 @@ final class ShopperCollection extends AbstractBlock {
 			'removeLabelTemplate'   => __( 'Remove %s from Saved for later list', 'woocommerce' ),
 			/* translators: %d: quantity of saved items. */
 			'quantityLabelTemplate' => __( 'Quantity: %d', 'woocommerce' ),
-			/* translators: %s: product name. */
-			'removeErrorTemplate'   => __( 'Couldn’t remove “%s” from your saved list. Please try again.', 'woocommerce' ),
 			'actionLabel'           => __( 'Move to cart', 'woocommerce' ),
 			'actionDirective'       => 'actions.onClickMoveToCart',
 			'showAction'            => true,
@@ -638,12 +624,9 @@ final class ShopperCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Render the iAPI store-notices region. Sibling of the items `<ul>` so
-	 * the banner reads as a block-level alert, not a list item. Mirrors
-	 * `AddToCartWithOptions::render_interactivity_notices_region()` — keep
-	 * in sync if the shape changes. The shopper-lists store dispatches
-	 * `addNotice` through `woocommerce/store-notices` on mutation failures,
-	 * and the `<template data-wp-each--notice>` below renders each one.
+	 * Render the iAPI store-notices region. Mirrors
+	 * `AddToCartWithOptions::render_interactivity_notices_region()` —
+	 * keep in sync if the shape changes.
 	 *
 	 * @return string
 	 */
