@@ -43,14 +43,14 @@ declare(strict_types=1);
 namespace <?php echo $namespace; ?>;
 
 use <?php echo $command_fqcn; ?> as <?php echo $command_alias; ?>;
-use Automattic\WooCommerce\Internal\Api\QueryInfoExtractor;
-use Automattic\WooCommerce\Internal\Api\Utils;
+use Automattic\WooCommerce\Api\Infrastructure\QueryInfoExtractor;
+use Automattic\WooCommerce\Api\Infrastructure\ResolverHelpers;
 <?php
 // Drop any caller-supplied import whose effective short name would collide
 // with one of the imports emitted unconditionally above and below, otherwise
 // the generated file would fail to compile ("Cannot use ... because the name
 // is already in use").
-$reserved_short_names = array( $command_alias, 'QueryInfoExtractor', 'Utils', 'ResolveInfo', 'Type' );
+$reserved_short_names = array( $command_alias, 'QueryInfoExtractor', 'ResolverHelpers', 'ResolveInfo', 'Type' );
 // PHP class-name resolution (including `use`) is case-insensitive, so the
 // collision check has to be too — a caller-supplied `Foo\resolveinfo` would
 // otherwise slip past and fail at compile time of the generated file.
@@ -74,14 +74,14 @@ $use_statements             = array_values(
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;
 <?php endforeach; ?>
-use Automattic\WooCommerce\Internal\Api\Schema\ResolveInfo;
-use Automattic\WooCommerce\Internal\Api\Schema\Type;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\ResolveInfo;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 
 class <?php echo $class_name; ?> {
 	public static function get_field_definition(): array {
 		return array(
 <?php if ( $scalar_return ) : ?>
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Internal\Api\Schema\ObjectType(array(
+			'type' => Type::nonNull(new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(array(
 				'name' => '<?php echo $class_name; ?>Result',
 				'fields' => array(
 					'result' => array( 'type' => <?php echo $return_type_expr; ?> ),
@@ -121,7 +121,7 @@ class <?php echo $class_name; ?> {
 <?php endforeach; ?>
 			),
 <?php if ( $has_connection_of ) : ?>
-			'complexity' => Utils::complexity_from_pagination(...),
+			'complexity' => ResolverHelpers::complexity_from_pagination(...),
 <?php endif; ?>
 			'resolve' => array( self::class, 'resolve' ),
 		);
@@ -132,7 +132,7 @@ class <?php echo $class_name; ?> {
 		// Standalone authorization gate: no authorize() method on the command,
 		// so the autodiscovered authorization attributes are the sole guard.
 		if ( ! self::compute_preauthorized( $context['principal'] ) ) {
-			throw Utils::build_authorization_error( $context['principal'] );
+			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
 
 <?php endif; ?>
@@ -151,9 +151,9 @@ $pagination_fqcn = 'Automattic\\WooCommerce\\Api\\Pagination\\PaginationParams';
 foreach ( $execute_params as $param ) :
 	if ( ! empty( $param['unroll'] ) && $param['unroll']['fqcn'] === $pagination_fqcn ) :
 ?>
-		$execute_args['<?php echo $param['name']; ?>'] = Utils::create_pagination_params( $args );
+		$execute_args['<?php echo $param['name']; ?>'] = ResolverHelpers::create_pagination_params( $args );
 <?php elseif ( ! empty( $param['unroll'] ) ) : ?>
-		$execute_args['<?php echo $param['name']; ?>'] = Utils::create_input(
+		$execute_args['<?php echo $param['name']; ?>'] = ResolverHelpers::create_input(
 			fn() => new \<?php echo $param['unroll']['fqcn']; ?>(
 <?php foreach ( $param['unroll']['properties'] as $uprop ) : ?>
 				<?php echo $uprop['name']; ?>: <?php echo $uprop['value_expr']; ?>,
@@ -176,7 +176,7 @@ foreach ( $execute_params as $param ) :
 <?php endforeach; ?>
 
 <?php if ( $has_authorize ) : ?>
-		if ( ! Utils::authorize_command( $command, array(
+		if ( ! ResolverHelpers::authorize_command( $command, array(
 <?php foreach ( $authorize_param_names as $name ) : ?>
 			'<?php echo $name; ?>' => $execute_args['<?php echo $name; ?>'],
 <?php endforeach; ?>
@@ -190,11 +190,11 @@ foreach ( $execute_params as $param ) :
 			'_preauthorized' => <?php echo $preauthorized_expr; ?>,
 <?php endif; ?>
 		) ) ) {
-			throw Utils::build_authorization_error( $context['principal'] );
+			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
 
 <?php endif; ?>
-		$result = Utils::execute_command( $command, $execute_args );
+		$result = ResolverHelpers::execute_command( $command, $execute_args );
 
 <?php if ( $scalar_return ) : ?>
 		return array( 'result' => $result );

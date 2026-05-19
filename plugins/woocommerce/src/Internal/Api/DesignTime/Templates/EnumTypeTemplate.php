@@ -23,7 +23,7 @@ declare(strict_types=1);
 namespace <?php echo $namespace; ?>;
 
 use <?php echo $enum_fqcn; ?> as <?php echo $enum_alias; ?>;
-use Automattic\WooCommerce\Internal\Api\Schema\EnumType;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\EnumType;
 
 class <?php echo $class_name; ?> {
 	private static ?EnumType $instance = null;

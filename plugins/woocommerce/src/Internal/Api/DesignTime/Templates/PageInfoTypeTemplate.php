@@ -13,8 +13,8 @@ declare(strict_types=1);
 
 namespace <?php echo $namespace; ?>;
 
-use Automattic\WooCommerce\Internal\Api\Schema\ObjectType;
-use Automattic\WooCommerce\Internal\Api\Schema\Type;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 
 class PageInfo {
 	private static ?ObjectType $instance = null;

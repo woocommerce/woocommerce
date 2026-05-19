@@ -2,12 +2,19 @@
 
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Internal\Api;
+namespace Automattic\WooCommerce\Api\Infrastructure;
+
+use Automattic\WooCommerce\Api\Infrastructure\Schema\Error;
 
 /**
  * Shared utilities for the auto-generated GraphQL resolvers.
+ *
+ * The public surface uses only {@see Schema\Error} (a stable subclass of the
+ * engine's Error) on throws/returns so generated code never imports an
+ * engine-specific symbol — a future engine switch can rewrite the bodies
+ * here without invalidating already-committed plugin trees.
  */
-class Utils {
+class ResolverHelpers {
 	/**
 	 * Compute the complexity cost of a paginated connection field.
 	 *
@@ -40,7 +47,7 @@ class Utils {
 	 * @param array $args The GraphQL field arguments.
 	 *
 	 * @return \Automattic\WooCommerce\Api\Pagination\PaginationParams
-	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error When a pagination value is out of range.
+	 * @throws Error When a pagination value is out of range.
 	 */
 	public static function create_pagination_params( array $args ): \Automattic\WooCommerce\Api\Pagination\PaginationParams {
 		return self::create_input(
@@ -64,14 +71,14 @@ class Utils {
 	 * @param callable $factory A callable that returns the constructed object.
 	 *
 	 * @return mixed The return value of the factory.
-	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error When the factory throws InvalidArgumentException.
+	 * @throws Error When the factory throws InvalidArgumentException.
 	 */
 	public static function create_input( callable $factory ): mixed {
 		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
 		try {
 			return $factory();
 		} catch ( \InvalidArgumentException $e ) {
-			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
+			throw new Error(
 				$e->getMessage(),
 				extensions: array( 'code' => 'INVALID_ARGUMENT' )
 			);
@@ -87,7 +94,7 @@ class Utils {
 	 * @param array  $execute_args Named arguments to pass to execute().
 	 *
 	 * @return mixed The return value of execute().
-	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error On any exception from the command.
+	 * @throws Error On any exception from the command.
 	 */
 	public static function execute_command( object $command, array $execute_args ): mixed {
 		return self::translate_exceptions(
@@ -102,14 +109,14 @@ class Utils {
 	 * Mirror of execute_command() for the authorize step. Needed because an
 	 * authorize() call can throw an ApiException (e.g. UnauthorizedException
 	 * when a target record does not exist); without this wrapper the
-	 * exception would propagate up to webonyx and lose its error code and
+	 * exception would propagate up to the engine and lose its error code and
 	 * user-visible message on its way through the generic error formatter.
 	 *
 	 * @param object $command        The command instance (must have an authorize() method).
 	 * @param array  $authorize_args Named arguments to pass to authorize().
 	 *
 	 * @return bool The return value of authorize().
-	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error On any exception from the authorize method.
+	 * @throws Error On any exception from the authorize method.
 	 */
 	public static function authorize_command( object $command, array $authorize_args ): bool {
 		return self::translate_exceptions(
@@ -134,9 +141,9 @@ class Utils {
 	 *
 	 * @param object $principal The resolved request principal.
 	 */
-	public static function build_authorization_error( object $principal ): \Automattic\WooCommerce\Internal\Api\Schema\Error {
+	public static function build_authorization_error( object $principal ): Error {
 		$is_anonymous = method_exists( $principal, 'is_authenticated' ) && ! $principal->is_authenticated();
-		return new \Automattic\WooCommerce\Internal\Api\Schema\Error(
+		return new Error(
 			$is_anonymous ? 'Authentication required.' : 'You do not have permission to perform this action.',
 			extensions: array( 'code' => $is_anonymous ? 'UNAUTHORIZED' : 'FORBIDDEN' )
 		);
@@ -181,7 +188,7 @@ class Utils {
 			// (recursively). All inherited sources contribute as peers; the
 			// only thing direct attributes shadow is the inherited tree as a
 			// whole. Mirrors
-			// {@see \Automattic\WooCommerce\Internal\Api\DesignTime\Scripts\ApiBuilder::resolve_authorization()}.
+			// {@see \Automattic\WooCommerce\Api\Infrastructure\DesignTime\ApiBuilder::resolve_authorization()}.
 			$visited = array();
 			$stack   = array_merge(
 				$ref->getParentClass() ? array( $ref->getParentClass() ) : array(),
@@ -219,7 +226,7 @@ class Utils {
 	 * Collect attribute instances declared on $source whose class declares an
 	 * authorization-shaped `authorize()` method.
 	 *
-	 * Mirrors {@see \Automattic\WooCommerce\Internal\Api\DesignTime\Scripts\ApiBuilder::collect_authorization_usages()}
+	 * Mirrors {@see \Automattic\WooCommerce\Api\Infrastructure\DesignTime\ApiBuilder::collect_authorization_usages()}
 	 * for the runtime path: same direct-then-inherited precedence, same
 	 * "any class with a bool-returning authorize() method qualifies" rule.
 	 *
@@ -291,7 +298,7 @@ class Utils {
 	 * @param callable $operation Callable to invoke.
 	 *
 	 * @return mixed The return value of the callable.
-	 * @throws \Automattic\WooCommerce\Vendor\GraphQL\Error\Error On any exception from the callable.
+	 * @throws Error On any exception from the callable.
 	 */
 	public static function translate_exceptions( callable $operation ): mixed {
 		// phpcs:disable WordPress.Security.EscapeOutput.ExceptionNotEscaped -- Not HTML; serialized as JSON.
@@ -302,7 +309,7 @@ class Utils {
 			// getErrorCode() can't be silently overridden by an extensions
 			// entry keyed 'code'. The invariant "the code on the wire
 			// equals ApiException::getErrorCode()" is worth enforcing.
-			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
+			throw new Error(
 				$e->getMessage(),
 				extensions: array_merge(
 					$e->getExtensions(),
@@ -310,12 +317,12 @@ class Utils {
 				)
 			);
 		} catch ( \InvalidArgumentException $e ) {
-			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
+			throw new Error(
 				$e->getMessage(),
 				extensions: array( 'code' => 'INVALID_ARGUMENT' )
 			);
 		} catch ( \Throwable $e ) {
-			throw new \Automattic\WooCommerce\Vendor\GraphQL\Error\Error(
+			throw new Error(
 				'An unexpected error occurred.',
 				previous: $e,
 				extensions: array( 'code' => 'INTERNAL_ERROR' )

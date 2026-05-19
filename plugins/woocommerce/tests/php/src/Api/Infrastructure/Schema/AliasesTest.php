@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Tests\Internal\Api\Schema;
+namespace Automattic\WooCommerce\Tests\Api\Infrastructure\Schema;
 
-use Automattic\WooCommerce\Internal\Api\Schema\AST\StringValueNode as AliasedStringValueNode;
-use Automattic\WooCommerce\Internal\Api\Schema\ResolveInfo as AliasedResolveInfo;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\AST\StringValueNode as AliasedStringValueNode;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\ResolveInfo as AliasedResolveInfo;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\StringValueNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\ResolveInfo;
 use WC_Unit_Test_Case;
@@ -14,9 +14,9 @@ use WC_Unit_Test_Case;
  * Tests that the `aliases.php` bootstrap registers the surface aliases.
  *
  * These aliases let generated code reference the engine via the
- * Internal\Api\Schema namespace even though webonyx itself constructs the
- * instances. If the alias is broken, every resolver's `resolve()` parameter
- * type-hint check fails at request time.
+ * Api\Infrastructure\Schema namespace even though webonyx itself constructs
+ * the instances. If the alias is broken, every resolver's `resolve()`
+ * parameter type-hint check fails at request time.
  */
 class AliasesTest extends WC_Unit_Test_Case {
 	/**

@@ -17,7 +17,7 @@ namespace <?php echo $namespace; ?>;
 <?php foreach ( $mutations as $mutation ) : ?>
 use <?php echo $mutation['fqcn']; ?>;
 <?php endforeach; ?>
-use Automattic\WooCommerce\Internal\Api\Schema\ObjectType;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType;
 
 class RootMutationType {
 	private static ?ObjectType $instance = null;

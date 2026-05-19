@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Tests\Internal\Api\Schema;
+namespace Automattic\WooCommerce\Tests\Api\Infrastructure\Schema;
 
-use Automattic\WooCommerce\Internal\Api\Schema\CustomScalarType;
-use Automattic\WooCommerce\Internal\Api\Schema\EnumType;
-use Automattic\WooCommerce\Internal\Api\Schema\Error;
-use Automattic\WooCommerce\Internal\Api\Schema\InputObjectType;
-use Automattic\WooCommerce\Internal\Api\Schema\InterfaceType;
-use Automattic\WooCommerce\Internal\Api\Schema\ObjectType;
-use Automattic\WooCommerce\Internal\Api\Schema\Schema;
-use Automattic\WooCommerce\Internal\Api\Schema\Type;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\CustomScalarType;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\EnumType;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\Error;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\InputObjectType;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\InterfaceType;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\Schema;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 use Automattic\WooCommerce\Vendor\GraphQL\Error\ClientAware;
 use Automattic\WooCommerce\Vendor\GraphQL\Error\Error as WebonyxError;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\CustomScalarType as WebonyxCustomScalarType;

@@ -8,9 +8,9 @@
 
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Tests\Internal\Api;
+namespace Automattic\WooCommerce\Tests\Api\Infrastructure;
 
-use Automattic\WooCommerce\Internal\Api\QueryInfoExtractor;
+use Automattic\WooCommerce\Api\Infrastructure\QueryInfoExtractor;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\DocumentNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\FieldNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\FragmentDefinitionNode;

@@ -277,8 +277,14 @@ class ApiBuilder {
 			if ( false === chdir( $this->composer_working_dir ) ) {
 				echo "Warning: could not chdir to {$this->composer_working_dir}; skipping autoloader regeneration.\n";
 			} else {
+				// --dev so the autoload-dev PSR-4 entries (notably
+				// `Automattic\WooCommerce\Tests\` → `tests/php/src/`) stay
+				// registered. Otherwise a subsequent `build:api:test` run
+				// can't reflect the dummy-API fixtures and aborts. This is
+				// a design-time CLI script; dev autoload is a strict
+				// superset of prod, so there's no downside.
 				// phpcs:ignore WordPress.PHP.DiscouragedPHPFunctions.system_calls_passthru -- design-time CLI script; never runs in a web context.
-				passthru( 'composer dump-autoload', $code );
+				passthru( 'composer dump-autoload --dev', $code );
 				if ( false !== $original_cwd ) {
 					chdir( $original_cwd );
 				}
@@ -2070,8 +2076,8 @@ class ApiBuilder {
 		$code .= "// THIS FILE IS AUTO-GENERATED. DO NOT EDIT MANUALLY.\n\n";
 		$code .= "namespace {$namespace};\n\n";
 		$code .= "use {$node_type_namespace}\\{$node_type_class} as {$node_type_alias};\n";
-		$code .= "use Automattic\\WooCommerce\\Internal\\Api\\Schema\\ObjectType;\n";
-		$code .= "use Automattic\\WooCommerce\\Internal\\Api\\Schema\\Type;\n\n";
+		$code .= "use Automattic\\WooCommerce\\Api\\Infrastructure\\Schema\\ObjectType;\n";
+		$code .= "use Automattic\\WooCommerce\\Api\\Infrastructure\\Schema\\Type;\n\n";
 		$code .= "class {$connection_class_name} {\n";
 		$code .= "\tprivate static ?ObjectType \$instance = null;\n\n";
 		$code .= "\tpublic static function get(): ObjectType {\n";
@@ -2114,8 +2120,8 @@ class ApiBuilder {
 		$code .= "// THIS FILE IS AUTO-GENERATED. DO NOT EDIT MANUALLY.\n\n";
 		$code .= "namespace {$namespace};\n\n";
 		$code .= "use {$node_type_namespace}\\{$node_type_class} as {$node_type_alias};\n";
-		$code .= "use Automattic\\WooCommerce\\Internal\\Api\\Schema\\ObjectType;\n";
-		$code .= "use Automattic\\WooCommerce\\Internal\\Api\\Schema\\Type;\n\n";
+		$code .= "use Automattic\\WooCommerce\\Api\\Infrastructure\\Schema\\ObjectType;\n";
+		$code .= "use Automattic\\WooCommerce\\Api\\Infrastructure\\Schema\\Type;\n\n";
 		$code .= "class {$edge_class_name} {\n";
 		$code .= "\tprivate static ?ObjectType \$instance = null;\n\n";
 		$code .= "\tpublic static function get(): ObjectType {\n";

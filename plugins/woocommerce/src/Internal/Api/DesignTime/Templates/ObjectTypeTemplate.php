@@ -36,7 +36,7 @@ foreach ( $fields as $f ) {
 $reserved_short_names = array( 'ObjectType', 'Type' );
 if ( $has_paginated_connection ) {
 	$reserved_short_names[] = 'Connection';
-	$reserved_short_names[] = 'Utils';
+	$reserved_short_names[] = 'ResolverHelpers';
 }
 // PHP class-name resolution (including `use`) is case-insensitive, so the
 // collision check has to be too — a caller-supplied `Foo\resolveinfo` would
@@ -62,11 +62,11 @@ $use_statements             = array_values(
 use <?php echo $use; ?>;
 <?php endforeach; ?>
 <?php if ( $has_paginated_connection ) : ?>
+use Automattic\WooCommerce\Api\Infrastructure\ResolverHelpers;
 use Automattic\WooCommerce\Api\Pagination\Connection;
-use Automattic\WooCommerce\Internal\Api\Utils;
 <?php endif; ?>
-use Automattic\WooCommerce\Internal\Api\Schema\ObjectType;
-use Automattic\WooCommerce\Internal\Api\Schema\Type;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 
 class <?php echo $class_name; ?> {
 	private static ?ObjectType $instance = null;
@@ -133,8 +133,8 @@ class <?php echo $class_name; ?> {
 							'deprecationReason' => '<?php echo addslashes( $field['deprecation_reason'] ); ?>',
 <?php endif; ?>
 	<?php if ( ! empty( $field['paginated_connection'] ) ) : ?>
-							'complexity' => Utils::complexity_from_pagination(...),
-							'resolve'    => fn( $parent, array $args ): Connection => Utils::translate_exceptions( fn() => $parent-><?php echo $field['name']; ?>->slice( $args ) ),
+							'complexity' => ResolverHelpers::complexity_from_pagination(...),
+							'resolve'    => fn( $parent, array $args ): Connection => ResolverHelpers::translate_exceptions( fn() => $parent-><?php echo $field['name']; ?>->slice( $args ) ),
 <?php endif; ?>
 						),
 <?php endforeach; ?>

@@ -50,8 +50,8 @@ $use_statements             = array_values(
 <?php foreach ( $use_statements as $use ) : ?>
 use <?php echo $use; ?>;
 <?php endforeach; ?>
-use Automattic\WooCommerce\Internal\Api\Schema\InterfaceType;
-use Automattic\WooCommerce\Internal\Api\Schema\Type;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\InterfaceType;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 
 class <?php echo $class_name; ?> {
 	private static ?InterfaceType $instance = null;

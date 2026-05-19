@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Tests\Internal\Api\Schema;
+namespace Automattic\WooCommerce\Tests\Api\Infrastructure\Schema;
 
-use Automattic\WooCommerce\Internal\Api\Schema\Type;
+use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\BooleanType;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\FloatType;
 use Automattic\WooCommerce\Vendor\GraphQL\Type\Definition\IDType;
