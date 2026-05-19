@@ -1123,6 +1123,11 @@ jQuery( function ( $ ) {
 					$( '.product_attributes' ).html( response.data.html );
 					$( '.product_attributes' ).unblock();
 
+					// Re-enhance the replaced selects (term pickers, taxonomy
+					// dropdowns) so they render as select2 rather than native
+					// multi-selects.
+					init_select_controls();
+
 					// Hide the 'Used for variations' checkbox if not viewing a variable product
 					show_and_hide_panels();
 
