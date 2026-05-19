@@ -1,3 +1,5 @@
+@import "@wordpress/base-styles/colors";
+
 .woocommerce-fulfillment-importer-modal {
 	.components-modal__content {
 		max-width: 720px;
@@ -47,31 +49,31 @@
 	}
 
 	&__count-label {
-		color: #50575e;
+		color: $gray-700;
 		font-size: 12px;
 	}
 
 	&__empty {
 		margin: 0;
 		text-align: center;
-		color: #50575e;
+		color: $gray-700;
 	}
 
 	.woocommerce-pill {
 		&.is-status-created,
 		&.is-status-updated {
-			border-color: #007017;
-			color: #007017;
+			border-color: $alert-green;
+			color: $alert-green;
 		}
 
 		&.is-status-skipped {
-			border-color: #8c8f94;
-			color: #50575e;
+			border-color: $gray-400;
+			color: $gray-700;
 		}
 
 		&.is-status-failed {
-			border-color: #b32d2e;
-			color: #b32d2e;
+			border-color: $alert-red;
+			color: $alert-red;
 		}
 	}
 }
