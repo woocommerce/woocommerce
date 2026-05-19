@@ -45,15 +45,17 @@ function getStringValues( value: unknown ): string[] {
 
 function getNumericValues( value: unknown ): number[] {
 	const values = Array.isArray( value ) ? value : [ value ];
-	return values.map( ( item ) => {
-		if ( typeof item === 'number' ) {
-			return item;
-		}
-		if ( typeof item === 'string' ) {
-			return Number( item );
-		}
-		return Number.NaN;
-	} );
+	return values
+		.map( ( item ) => {
+			if ( typeof item === 'number' ) {
+				return item;
+			}
+			if ( typeof item === 'string' && item.trim() !== '' ) {
+				return Number( item );
+			}
+			return Number.NaN;
+		} )
+		.filter( Number.isFinite );
 }
 
 function getPriceValue( value: unknown ): string | undefined {
