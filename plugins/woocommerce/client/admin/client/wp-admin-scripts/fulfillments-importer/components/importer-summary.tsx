@@ -141,23 +141,8 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 		[]
 	);
 
-	const totalProcessed = created + updated + skipped + failed;
-
 	let resultsBlock: React.ReactNode = null;
-	if ( totalProcessed === 0 ) {
-		resultsBlock = (
-			<Card>
-				<CardBody>
-					<p className="woocommerce-fulfillment-importer-summary__empty">
-						{ __(
-							'No rows were imported. Check that the CSV has the required columns and try again.',
-							'woocommerce'
-						) }
-					</p>
-				</CardBody>
-			</Card>
-		);
-	} else if ( rows.length > 0 ) {
+	if ( rows.length > 0 ) {
 		resultsBlock = (
 			<div className="woocommerce-fulfillment-importer-summary__rows">
 				<Table
