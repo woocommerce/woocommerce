@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
 
@@ -36,6 +37,41 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		);
 
 		/**
+		 * Order meta key recording the timestamp of the most recent send.
+		 *
+		 * Written by `trigger()` after a successful dispatch (manual or automated) of the checkout recovery email.
+		 */
+		public const META_KEY_SENT_AT = '_checkout_recovery_email_sent_at';
+
+		/**
+		 * Order action id used by the recovery email send item on the order edit page.
+		 */
+		public const MANUAL_RECOVERY_EMAIL_SEND_ACTION = 'send_checkout_recovery_email';
+
+		/**
+		 * Order statuses that represent an abandoned checkout for the purposes of
+		 * the manual-send action and the trigger-level status gate.
+		 *
+		 * - `pending`        — classic checkout reached "place order" but no payment yet.
+		 * - `checkout-draft` — block checkout (Store API) parks the order here while
+		 *                     the customer is mid-flow. May have no billing email yet,
+		 *                     in which case `trigger()` no-ops.
+		 *
+		 * @var string[]
+		 */
+		private const ABANDONED_STATUSES = array(
+			OrderStatus::PENDING,
+			OrderStatus::CHECKOUT_DRAFT,
+		);
+
+		/**
+		 * Minimum age (in seconds, from `date_created`) before an order is considered
+		 * actually abandoned. Gives the customer a window to come back and complete
+		 * the checkout on their own before merchants can nudge them.
+		 */
+		public const ABANDONMENT_THRESHOLD_SECONDS = HOUR_IN_SECONDS;
+
+		/**
 		 * Constructor.
 		 */
 		public function __construct() {
@@ -56,6 +92,11 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 			// Trigger fires after Action Scheduler dispatches `woocommerce_send_checkout_recovery_notification`,
 			// or when the merchant invokes the manual-send action from the order edit page.
 			add_action( 'woocommerce_send_checkout_recovery_notification', array( $this, 'trigger' ), 10, 1 );
+
+			// Expose checkout recovery email action in the order edit dropdown for pending
+			// orders, and handle dispatch when the merchant submits it.
+			add_filter( 'woocommerce_order_actions', array( $this, 'register_order_action' ), 10, 2 );
+			add_action( 'woocommerce_order_action_' . self::MANUAL_RECOVERY_EMAIL_SEND_ACTION, array( $this, 'handle_recovery_email_send' ), 10, 1 );
 
 			parent::__construct();
 
@@ -98,42 +139,176 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 				$this->placeholders['{order_number}'] = $order->get_order_number();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() && $this->is_order_eligible_for_send() ) {
+			if (
+				$this->is_enabled()
+				&& $this->get_recipient()
+				&& $this->object instanceof WC_Order
+				&& $this->is_order_eligible_for_recovery( $this->object )
+			) {
 				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
+
+				// Record the send timestamp so the automated-scheduling integration can dedup
+				// against orders that have already been emailed via either path.
+				$this->object->update_meta_data( self::META_KEY_SENT_AT, (string) time() );
+				$this->object->save_meta_data();
 			}
 
 			$this->restore_locale();
 		}
 
 		/**
-		 * Defence-in-depth status check at send time.
+		 * Add the manual-send item to the order actions dropdown.
+		 *
+		 * Surfaced for the statuses listed in `ABANDONED_STATUSES` (pending +
+		 * checkout-draft) so merchants can't accidentally email a "pick up where
+		 * you left off" prompt to a customer whose order has already moved past
+		 * abandonment. A capability check guards against role configurations that
+		 * grant the order edit page to users without `edit_shop_orders`.
 		 *
 		 * @since 10.9.0
-		 * @return bool
+		 *
+		 * @param array         $actions Existing order actions keyed by action id.
+		 * @param WC_Order|null $order   Order being rendered, or null in contexts without one.
+		 * @return array
 		 */
-		protected function is_order_eligible_for_send(): bool {
-			if ( ! $this->object instanceof WC_Order ) {
-				return false;
+		public function register_order_action( $actions, $order ): array {
+			if ( ! $order instanceof WC_Order ) {
+				return $actions;
 			}
 
+			if ( ! current_user_can( 'edit_shop_orders' ) ) {
+				return $actions;
+			}
+
+			// Mirror trigger()'s preconditions: don't surface an action that would
+			// silently no-op when the merchant clicks it.
+			if ( ! $this->is_enabled() || self::is_suppressed() ) {
+				return $actions;
+			}
+
+			if ( ! $this->is_order_eligible_for_recovery( $order ) ) {
+				return $actions;
+			}
+
+			$actions[ self::MANUAL_RECOVERY_EMAIL_SEND_ACTION ] = __( 'Send checkout recovery email', 'woocommerce' );
+
+			return $actions;
+		}
+
+		/**
+		 * Whether an order is in a state that warrants a recovery email.
+		 *
+		 * The order must (a) be in one of the eligible statuses and (b) have lived
+		 * in that state for at least `ABANDONMENT_THRESHOLD_SECONDS`, so we don't
+		 * nudge customers who are actively still on the page.
+		 *
+		 * Single source of truth: called both by `trigger()` (defence-in-depth at
+		 * send time) and by the manual-send dropdown gates. Partners can widen the
+		 * eligible-status set via `woocommerce_checkout_recovery_eligible_statuses`
+		 * and both paths will agree.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param WC_Order $order Order to evaluate.
+		 * @return bool
+		 */
+		public function is_order_eligible_for_recovery( WC_Order $order ): bool {
 			/**
 			 * Filter the order statuses that are eligible to receive the checkout recovery email.
 			 *
-			 * Defaults to `pending` only. Partner integrations or merchants who want recovery
-			 * to fire for other states (e.g. `failed`) can widen the list here.
+			 * Defaults to the abandoned-checkout statuses (`pending`, `checkout-draft`). Partner
+			 * integrations or merchants who want recovery to fire for other states (e.g. `failed`)
+			 * can widen the list here.
 			 *
 			 * @since 10.9.0
 			 *
-			 * @param string[] $eligible_statuses Default: `[ 'pending' ]`.
+			 * @param string[] $eligible_statuses Default: ABANDONED_STATUSES.
 			 * @param WC_Order $order             Order being inspected.
 			 */
 			$eligible_statuses = (array) apply_filters(
 				'woocommerce_checkout_recovery_eligible_statuses',
-				array( OrderStatus::PENDING ),
-				$this->object
+				self::ABANDONED_STATUSES,
+				$order
+			);
+			if ( ! in_array( $order->get_status(), $eligible_statuses, true ) ) {
+				return false;
+			}
+
+			$date_created = $order->get_date_created();
+			if ( ! $date_created ) {
+				return false;
+			}
+
+			return ( time() - $date_created->getTimestamp() ) >= self::ABANDONMENT_THRESHOLD_SECONDS;
+		}
+
+		/**
+		 * Handle a merchant-initiated send from the order edit page.
+		 *
+		 * Fired by `woocommerce_order_action_send_checkout_recovery_email` after
+		 * the order metabox save flow has validated the request. We re-check the
+		 * capability and order status as defense in depth in case the hook is
+		 * invoked from a non-metabox path.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param WC_Order $order The order whose customer should receive the email.
+		 * @return void
+		 */
+		public function handle_recovery_email_send( $order ): void {
+			if ( ! $order instanceof WC_Order ) {
+				return;
+			}
+
+			if ( ! current_user_can( 'edit_shop_orders' ) ) {
+				return;
+			}
+
+			// Don't write a "manually sent" order note when the underlying trigger
+			// would silently bail. Cheaper to short-circuit here than to inspect
+			// the meta after the fact.
+			if ( ! $this->is_enabled() || self::is_suppressed() ) {
+				return;
+			}
+
+			if ( ! $this->is_order_eligible_for_recovery( $order ) ) {
+				return;
+			}
+
+			/**
+			 * Fires before the checkout recovery email is manually resent.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param WC_Order $order      Order being recovered.
+			 * @param string   $email_type Email identifier ('customer_checkout_recovery').
+			 */
+			do_action( 'woocommerce_before_resend_order_emails', $order, $this->id );
+
+			$this->trigger( $order->get_id() );
+
+			$order->add_order_note(
+				__( 'Checkout recovery email manually sent to customer.', 'woocommerce' ),
+				0,
+				true,
+				array( 'note_group' => OrderNoteGroup::EMAIL_NOTIFICATION )
 			);
 
-			return in_array( $this->object->get_status(), $eligible_statuses, true );
+			/**
+			 * Fires after the checkout recovery email has been manually resent.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param WC_Order $order      Order being recovered.
+			 * @param string   $email_type Email identifier ('customer_checkout_recovery').
+			 */
+			do_action( 'woocommerce_after_resend_order_email', $order, $this->id );
+
+			// Reuse the existing "Order updated. Email sent." admin notice (message id 11) on the
+			// classic order edit page. HPOS uses a different redirect pipeline that sets the
+			// message directly in Edit.php, so this filter is a no-op there — matching the
+			// behavior of the built-in `send_order_details` action.
+			add_filter( 'redirect_post_location', array( 'WC_Meta_Box_Order_Actions', 'set_email_sent_message' ) );
 		}
 
 		/**
