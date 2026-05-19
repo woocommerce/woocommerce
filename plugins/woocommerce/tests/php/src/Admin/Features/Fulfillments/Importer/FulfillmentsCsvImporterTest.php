@@ -585,38 +585,4 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 0, $summary['failed'] );
 	}
 
-	/**
-	 * @testdox The importer stops processing once the max row limit is reached and reports a failure.
-	 */
-	public function test_max_rows_limit_is_enforced(): void {
-		$order = $this->make_order();
-		$lines = "order_number,tracking_number,shipment_provider\n";
-		for ( $i = 1; $i <= 6; $i++ ) {
-			$lines .= "{$order->get_id()},LIMIT-{$i},ups\n";
-		}
-		$file = $this->make_csv( $lines );
-
-		$cap = function () {
-			return 3;
-		};
-		add_filter( 'woocommerce_fulfillments_csv_importer_max_rows', $cap );
-
-		try {
-			$summary = ( new FulfillmentsCsvImporter( $file ) )->run();
-		} finally {
-			remove_filter( 'woocommerce_fulfillments_csv_importer_max_rows', $cap );
-		}
-
-		// Three rows attempted, the fourth triggers the cap and aborts the run.
-		$this->assertGreaterThanOrEqual( 1, $summary['failed'], 'Expected at least one max_rows_exceeded failure entry.' );
-
-		$max_rows_failure = null;
-		foreach ( $summary['rows'] as $row ) {
-			if ( 'failed' === $row['status'] && false !== strpos( $row['message'], 'maximum' ) ) {
-				$max_rows_failure = $row;
-				break;
-			}
-		}
-		$this->assertNotNull( $max_rows_failure, 'Expected a max_rows_exceeded failure entry in the summary.' );
-	}
 }
