@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Restore the meta_value column to the meta_key_value index on the wc_orders_meta table to fix a performance regression.

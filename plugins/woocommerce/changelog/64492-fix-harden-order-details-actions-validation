@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Add defensive validation to order action links in order-details.php template to handle malformed entries from third-party extensions.

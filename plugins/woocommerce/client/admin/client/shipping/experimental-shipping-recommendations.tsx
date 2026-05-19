@@ -54,22 +54,22 @@ const ShippingRecommendations = () => {
 		useInstallPlugin();
 
 	const {
-		activePlugins,
 		installedPlugins,
+		activePlugins,
 		countryCode,
 		isSellingDigitalProductsOnly,
 	} = useSelect( ( select ) => {
 		const settings = select( settingsStore ).getSettings( 'general' );
 
-		const { getActivePlugins, getInstalledPlugins } =
+		const { getInstalledPlugins, getActivePlugins } =
 			select( pluginsStore );
 
 		const profileItems =
-			select( onboardingStore ).getProfileItems().product_types;
+			select( onboardingStore ).getProfileItems()?.product_types;
 
 		return {
-			activePlugins: getActivePlugins(),
 			installedPlugins: getInstalledPlugins(),
+			activePlugins: getActivePlugins(),
 			countryCode: getCountryCode(
 				settings.general?.woocommerce_default_country
 			),
@@ -83,12 +83,14 @@ const ShippingRecommendations = () => {
 	const extensionsForCountry =
 		COUNTRY_EXTENSIONS_MAP[ normalizedCountry ] ?? [];
 
+	// Render every country-mapped recommendation regardless of which partner
+	// is already installed: the settings page is meant to surface alternatives
+	// the merchant can evaluate and switch to. The onboarding wizard keeps a
+	// narrower selection because installing every option there at once is not
+	// desired during initial setup.
 	const visibleExtensions = isSellingDigitalProductsOnly
 		? []
-		: extensionsForCountry.filter(
-				( ext ) =>
-					! activePlugins.includes( EXTENSION_PLUGIN_SLUGS[ ext ] )
-		  );
+		: extensionsForCountry;
 
 	const visiblePluginSlugs = visibleExtensions
 		.map( ( ext ) => EXTENSION_PLUGIN_SLUGS[ ext ] )
@@ -122,6 +124,9 @@ const ShippingRecommendations = () => {
 					const isPluginInstalled = installedPlugins.includes(
 						EXTENSION_PLUGIN_SLUGS[ ext ]
 					);
+					const isPluginActive = activePlugins.includes(
+						EXTENSION_PLUGIN_SLUGS[ ext ]
+					);
 					const trackingProps = {
 						context: 'settings' as const,
 						country: normalizedCountry,
@@ -133,6 +138,7 @@ const ShippingRecommendations = () => {
 								<WooCommerceShippingItem
 									key={ ext }
 									isPluginInstalled={ isPluginInstalled }
+									isPluginActive={ isPluginActive }
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onInstallClick={ handleInstall }
 									onActivateClick={ handleActivate }
@@ -144,6 +150,7 @@ const ShippingRecommendations = () => {
 								<ShipStationItem
 									key={ ext }
 									isPluginInstalled={ isPluginInstalled }
+									isPluginActive={ isPluginActive }
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onInstallClick={ handleInstall }
 									onActivateClick={ handleActivate }
@@ -155,6 +162,7 @@ const ShippingRecommendations = () => {
 								<PacklinkItem
 									key={ ext }
 									isPluginInstalled={ isPluginInstalled }
+									isPluginActive={ isPluginActive }
 									pluginsBeingSetup={ pluginsBeingSetup }
 									onInstallClick={ handleInstall }
 									onActivateClick={ handleActivate }

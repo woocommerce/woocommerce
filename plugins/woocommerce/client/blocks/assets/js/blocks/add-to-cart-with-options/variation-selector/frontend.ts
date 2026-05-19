@@ -9,7 +9,6 @@ import {
 } from '@wordpress/interactivity';
 import { SelectedAttributes } from '@woocommerce/stores/woocommerce/cart';
 import type { ChangeEvent } from 'react';
-import type { ProductDataStore } from '@woocommerce/stores/woocommerce/product-data';
 import '@woocommerce/stores/woocommerce/products';
 import type { ProductsStore } from '@woocommerce/stores/woocommerce/products';
 import type { ProductResponseItem } from '@woocommerce/types';
@@ -17,7 +16,6 @@ import type { ProductResponseItem } from '@woocommerce/types';
 /**
  * Internal dependencies
  */
-import { getProductData } from '../frontend';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
@@ -26,7 +24,6 @@ import {
 	normalizeAttributeName,
 	attributeNamesMatch,
 	getVariationAttributeValue,
-	findMatchingVariation,
 } from '../../../base/utils/variations/attribute-matching';
 import setStyles from './set-styles';
 
@@ -50,12 +47,6 @@ setStyles();
 // Stores are locked to prevent 3PD usage until the API is stable.
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
-
-const { state: productDataState } = store< ProductDataStore >(
-	'woocommerce/product-data',
-	{},
-	{ lock: universalLock }
-);
 
 const { state: productsState } = store< ProductsStore >(
 	'woocommerce/products',
@@ -101,7 +92,7 @@ const isAttributeValueValid = ( {
 		? selectedAttributes.length - 1
 		: selectedAttributes.length;
 
-	const product = productsState.products[ productDataState.productId ];
+	const { mainProductInContext: product } = productsState;
 
 	if ( ! product?.variations?.length ) {
 		return false;
@@ -340,8 +331,7 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const product =
-					productsState.products[ productDataState.productId ];
+				const { mainProductInContext: product } = productsState;
 				if ( ! product ) {
 					return;
 				}
@@ -408,44 +398,51 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 				} );
 			},
 			setSelectedVariationId: () => {
-				const product =
-					productsState.products[ productDataState.productId ];
+				const { mainProductInContext: product } = productsState;
 
 				if ( ! product?.variations?.length ) {
 					return;
 				}
 
 				const { selectedAttributes } = getContext< Context >();
-				const matchedVariation = findMatchingVariation(
-					product,
-					selectedAttributes
-				);
+				const result = productsState.findProduct( {
+					id: product.id,
+					selectedAttributes,
+				} );
+				// findProduct returns the parent when no variation
+				// matches — only accept an actual variation.
+				const matchedVariation =
+					result && result.id !== product.id ? result : null;
 
-				const { actions: productDataActions } =
-					store< ProductDataStore >(
-						'woocommerce/product-data',
-						{},
-						{ lock: universalLock }
-					);
-				productDataActions.setVariationId(
-					matchedVariation?.id ?? null
-				);
+				const variationId = matchedVariation?.id ?? null;
+				const productContext = getContext< {
+					variationId?: number | null;
+				} >( 'woocommerce/products' );
+
+				// If there is context, update the context. Otherwise, update the state directly.
+				( productContext
+					? productContext
+					: productsState
+				).variationId = variationId;
 			},
 			validateVariation() {
 				actions.clearErrors( 'variable-product' );
 
-				const product =
-					productsState.products[ productDataState.productId ];
+				const { mainProductInContext: product } = productsState;
 
 				if ( ! product?.variations?.length ) {
 					return;
 				}
 
 				const { selectedAttributes } = getContext< Context >();
-				const matchedVariation = findMatchingVariation(
-					product,
-					selectedAttributes
-				);
+				const result = productsState.findProduct( {
+					id: product.id,
+					selectedAttributes,
+				} );
+				// findProduct returns the parent when no variation
+				// matches — only accept an actual variation.
+				const matchedVariation =
+					result && result.id !== product.id ? result : null;
 
 				const { errorMessages } = getConfig();
 
@@ -466,8 +463,6 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 
 				if ( ! variationData ) {
 					// Variation data not loaded - this is a data consistency issue.
-					// Return early; getProductData already returns null for this case,
-					// which prevents add-to-cart from proceeding.
 					return;
 				}
 
@@ -493,34 +488,29 @@ const { actions, state } = store< VariableProductAddToCartWithOptionsStore >(
 					return;
 				}
 
-				const { selectedAttributes } = getContext< Context >();
+				const { productVariationInContext: variation } = productsState;
 
-				const productObject = getProductData(
-					productDataState.productId,
-					selectedAttributes
-				);
+				if ( ! variation ) {
+					return;
+				}
 
-				if ( productObject ) {
-					const { quantity } = getContext< Context >();
-					const currentValue = quantity[ productObject.id ];
-					const { min, max } = productObject;
+				const { minimum, maximum } = variation.add_to_cart;
 
-					let newValue = currentValue;
-					if ( currentValue < min ) {
-						newValue = min;
-					} else if ( currentValue > max ) {
-						newValue = max;
-					}
+				const { quantity } = getContext< Context >();
+				const currentValue = quantity[ variation.id ];
 
-					if (
-						newValue !== ref.valueAsNumber ||
-						newValue !== currentValue
-					) {
-						actions.setQuantity(
-							productDataState.productId,
-							newValue
-						);
-					}
+				let newValue = currentValue;
+				if ( currentValue < minimum ) {
+					newValue = minimum;
+				} else if ( currentValue > maximum ) {
+					newValue = maximum;
+				}
+
+				if (
+					newValue !== ref.valueAsNumber ||
+					newValue !== currentValue
+				) {
+					actions.setQuantity( variation.id, newValue );
 				}
 			},
 		},

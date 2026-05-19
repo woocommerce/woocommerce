@@ -1,25 +1,76 @@
 /**
  * External dependencies
  */
-import { getContext, store } from '@wordpress/interactivity';
+import { store, getContext } from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
  */
-import setStyles from './set-styles';
+import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
 
-export type ChipsContext = {
-	showAll: boolean;
+type ChipsItem = SelectableItem< { color?: string } > & { index?: number };
+
+type ChipsContext = {
+	storeNamespace: string;
+	displayLimit: number;
+	isExpanded: boolean;
 };
 
-// Set selected chips styles for proper contrast.
-setStyles();
+type ParentItemContext = {
+	item?: ChipsItem;
+};
 
-store( 'woocommerce/product-filters', {
+type ChipsStore = {
+	state: {
+		itemHidden: boolean;
+		swatchHidden: boolean;
+		swatchStyle: string;
+	};
 	actions: {
-		showAllChips: () => {
-			const context = getContext< ChipsContext >();
-			context.showAll = true;
+		showAll: () => void;
+	};
+};
+
+function getParentItem( storeNamespace: string ): ChipsItem | undefined {
+	const parentCtx = getContext< ParentItemContext >( storeNamespace );
+	return parentCtx.item;
+}
+
+const { state }: ChipsStore = store< ChipsStore >(
+	'woocommerce/product-filter-chips',
+	{
+		state: {
+			get itemHidden(): boolean {
+				const { isExpanded, storeNamespace, displayLimit } =
+					getContext< ChipsContext >();
+				if ( isExpanded ) return false;
+				const item = getParentItem( storeNamespace );
+				if ( ! item ) return false;
+				if ( item.selected ) return false;
+				if ( item.index === undefined ) return false;
+				return item.index >= displayLimit;
+			},
+			get swatchHidden(): boolean {
+				const { storeNamespace } = getContext< ChipsContext >();
+				const item = getParentItem( storeNamespace );
+				return ! item?.color;
+			},
+			get swatchStyle(): string {
+				const { storeNamespace } = getContext< ChipsContext >();
+				const item = getParentItem( storeNamespace );
+				if ( ! item?.color ) return '';
+				return `background-color: ${ item.color }`;
+			},
+		},
+		actions: {
+			showAll() {
+				const context = getContext< ChipsContext >();
+				context.isExpanded = true;
+			},
 		},
 	},
-} );
+	{ lock: true }
+);
+
+export type { ChipsStore };
+export { state as chipsState };

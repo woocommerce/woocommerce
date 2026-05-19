@@ -30,12 +30,14 @@ import { EditProps, isAttributeCounts } from './types';
 import { getAttributeFromId } from './utils';
 import { getAllowedBlocks } from '../../utils/get-allowed-blocks';
 import { EXCLUDED_BLOCKS } from '../../constants';
-import { FilterOptionItem } from '../../types';
+import { FilterOptionItem, FilterItemFields } from '../../types';
+import type { SelectableItemsContext } from '../../../../types/type-defs/selectable-items';
 import { InitialDisabled } from '../../components/initial-disabled';
 import { Notice } from '../../components/notice';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
+const EMPTY_TERM_COLORS: Record< string, string > = {};
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
@@ -51,6 +53,10 @@ const Edit = ( props: EditProps ) => {
 	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
+	const termColors = getSetting< Record< string, string > >(
+		'productFilterTermColors',
+		EMPTY_TERM_COLORS
+	);
 
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		FilterOptionItem[]
@@ -96,10 +102,14 @@ const Edit = ( props: EditProps ) => {
 					return true;
 				} )
 				.map( ( term, index ) => ( {
+					id: term.id.toString(),
 					label: term.name,
 					value: term.id.toString(),
 					selected: index === 0,
-					count: term.count,
+					...( showCounts && { count: term.count } ),
+					...( term.id in termColors && {
+						color: termColors[ term.id ],
+					} ),
 				} ) );
 
 			setAttributeOptions(
@@ -117,6 +127,7 @@ const Edit = ( props: EditProps ) => {
 		isTermsLoading,
 		isFilterCountsLoading,
 		attributeObject,
+		termColors,
 	] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(
@@ -200,14 +211,15 @@ const Edit = ( props: EditProps ) => {
 			<InitialDisabled>
 				<BlockContextProvider
 					value={ {
-						filterData: {
+						woocommerceSelectableItems: {
 							items:
 								attributeOptions.length === 0 && isPreview
 									? attributeOptionsPreview
 									: attributeOptions,
+							selectionMode: 'multiple' as const,
+							storeNamespace: 'woocommerce/product-filters',
 							isLoading,
-							showCounts,
-						},
+						} satisfies SelectableItemsContext< FilterItemFields >,
 					} }
 				>
 					{ children }

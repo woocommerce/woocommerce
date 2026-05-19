@@ -144,7 +144,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 			<ToolbarGroup>
 				<ToolbarButton
 					icon="shortcode"
-					title={ __( 'Personalization Tags', 'woocommerce' ) }
+					title={ __( 'Personalization Tags', __i18n_text_domain__ ) }
 					onClick={ () => {
 						setIsModalOpened( true );
 						recordEvent(
@@ -210,7 +210,7 @@ function PersonalizationTagsButton( { contentRef }: Props ) {
 function extendRichTextFormats() {
 	registerFormatForEmail( 'woocommerce-email-editor/shortcode', {
 		name: 'woocommerce-email-editor/shortcode',
-		title: __( 'Personalization Tags', 'woocommerce' ),
+		title: __( 'Personalization Tags', __i18n_text_domain__ ),
 		className: 'woocommerce-email-editor-personalization-tags',
 		tagName: 'span',
 		attributes: {},
@@ -221,7 +221,7 @@ function extendRichTextFormats() {
 	// Register format type for using personalization tags as link attributes
 	registerFormatForEmail( 'woocommerce-email-editor/link-shortcode', {
 		name: 'woocommerce-email-editor/link-shortcode',
-		title: __( 'Personalization Tags Link', 'woocommerce' ),
+		title: __( 'Personalization Tags Link', __i18n_text_domain__ ),
 		className: 'woocommerce-email-editor-personalization-tags-link',
 		tagName: 'a',
 		attributes: {

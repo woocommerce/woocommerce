@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Update destructive action link color on API Keys and Webhooks settings pages to match WordPress 7.0's updated error red.

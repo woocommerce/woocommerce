@@ -16,6 +16,7 @@ use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelec
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeNameMock;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AddToCartWithOptionsVariationSelectorAttributeOptionsMock;
+use Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils;
 
 /**
  * Tests for the AddToCartWithOptions block type
@@ -471,6 +472,54 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 	}
 
 	/**
+	 * Tests that the VariationSelectorAttribute block returns empty string
+	 * for non-variable products (simple, grouped, external) to prevent
+	 * a fatal error from calling get_variation_attributes() on unsupported
+	 * product types.
+	 *
+	 * @covers VariationSelectorAttribute::render
+	 */
+	public function test_variation_selector_attribute_returns_empty_for_non_variable_products() {
+		global $product;
+		$original_product = $product;
+
+		$block_markup = '<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute /-->';
+
+		try {
+			// Test with a missing/invalid product context.
+			$product = null;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string when the global product is null.' );
+
+			$product = false;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string when the global product is false.' );
+
+			// Test with a simple product.
+			$simple_product = new \WC_Product_Simple();
+			$simple_product->set_regular_price( 10 );
+			$simple_product->save();
+
+			$product = $simple_product;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for simple products.' );
+
+			// Test with a grouped product.
+			$grouped_product = new \WC_Product_Grouped();
+			$grouped_product->save();
+
+			$product = $grouped_product;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for grouped products.' );
+
+			// Test with an external product.
+			$external_product = new \WC_Product_External();
+			$external_product->save();
+
+			$product = $external_product;
+			$this->assertSame( '', do_blocks( $block_markup ), 'VariationSelectorAttribute should return empty string for external products.' );
+		} finally {
+			$product = $original_product;
+		}//end try
+	}
+
+	/**
 	 * Tests that the quantity selector and its steppers are hidden when
 	 * a filter sets min and max quantity to the same value for a product.
 	 */
@@ -502,5 +551,20 @@ class AddToCartWithOptions extends \WP_UnitTestCase {
 		} finally {
 			remove_filter( 'woocommerce_quantity_input_args', $filter, 10 );
 		}
+	}
+
+	/**
+	 * Tests that add_quantity_stepper_classes adds wrapper and input classes to inputs.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\Utils::add_quantity_stepper_classes
+	 */
+	public function test_add_quantity_stepper_classes() {
+		$quantity_html = '<div class="quantity"><input type="number" class="input-text qty text" name="custom_name" value="1" /></div>';
+
+		$result = Utils::add_quantity_stepper_classes( $quantity_html );
+
+		$this->assertStringContainsString( 'wc-block-components-quantity-selector', $result, 'The quantity wrapper should receive the stepper wrapper class.' );
+		$this->assertStringContainsString( 'wc-block-components-quantity-selector__input', $result, 'The input should receive the stepper input class.' );
+		$this->assertStringContainsString( 'custom_name', $result, 'The original input name value should be preserved.' );
 	}
 }

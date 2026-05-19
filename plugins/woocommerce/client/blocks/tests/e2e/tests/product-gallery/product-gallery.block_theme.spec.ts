@@ -13,7 +13,7 @@ const blockData = {
 	name: 'woocommerce/product-gallery',
 	title: 'Product Gallery',
 	slug: 'single-product',
-	productPage: '/product/hoodie/',
+	productPage: '/product/beanie/',
 };
 
 const test = base.extend< { pageObject: ProductGalleryPage } >( {
