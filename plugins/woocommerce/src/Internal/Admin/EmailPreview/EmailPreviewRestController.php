@@ -299,8 +299,11 @@ class EmailPreviewRestController extends RestApiControllerBase {
 			return $context;
 		};
 		add_filter( 'woocommerce_email_log_context', $mark_as_test );
-		$sent = $email->send( $email_address, $email_subject, $email_content, $email->get_headers(), $email->get_attachments() );
-		remove_filter( 'woocommerce_email_log_context', $mark_as_test );
+		try {
+			$sent = $email->send( $email_address, $email_subject, $email_content, $email->get_headers(), $email->get_attachments() );
+		} finally {
+			remove_filter( 'woocommerce_email_log_context', $mark_as_test );
+		}
 
 		if ( $sent ) {
 			return array(
