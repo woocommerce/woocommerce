@@ -193,7 +193,12 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 	}
 
 	return (
-		<div className="woocommerce-fulfillment-importer-summary">
+		<div
+			className="woocommerce-fulfillment-importer-summary"
+			role="status"
+			aria-live="polite"
+			aria-atomic="true"
+		>
 			<Flex
 				className="woocommerce-fulfillment-importer-summary__counts"
 				wrap
