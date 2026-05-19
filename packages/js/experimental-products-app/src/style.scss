@@ -90,6 +90,19 @@
 	flex-shrink: 0;
 }
 
+// Wrap the Beta feedback Badge in a link without inheriting the default
+// underlined anchor styling — the Badge already provides its own affordance.
+.woocommerce-product-list-page__feedback-link {
+	display: inline-flex;
+	text-decoration: none;
+	color: inherit;
+
+	&:hover,
+	&:focus-visible {
+		text-decoration: none;
+	}
+}
+
 .woocommerce-product-list-page__header-subtitle {
 	margin: 0;
 	color: var(--wpds-color-fg-content-neutral-weak, #707070);
