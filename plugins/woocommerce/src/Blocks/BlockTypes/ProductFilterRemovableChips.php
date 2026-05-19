@@ -73,9 +73,12 @@ final class ProductFilterRemovableChips extends AbstractBlock {
 				</template>
 				<?php foreach ( $filter_items as $item ) : ?>
 					<?php
-					// translators: %s: item label.
+					$remove_label = sprintf(
+						/* translators: %s: item label. */
+						__( 'Remove filter: %s', 'woocommerce' ),
+						$item['label']
+					);
 					?>
-					<?php $remove_label = sprintf( __( 'Remove filter: %s', 'woocommerce' ), $item['label'] ); ?>
 					<li class="wc-block-product-filter-removable-chips__item" data-wp-each-child
 						<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 					>
