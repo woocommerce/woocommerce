@@ -120,6 +120,23 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
+		// Defer to wp_max_upload_size(), filterable via `import_upload_size_limit` for admins who
+		// need to raise or lower the cap.
+		$upload_limit = (int) apply_filters( 'import_upload_size_limit', wp_max_upload_size() );
+		$file_size    = isset( $files['file']['size'] ) ? (int) $files['file']['size'] : 0;
+		if ( $upload_limit > 0 && $file_size > $upload_limit ) {
+			FulfillmentsTracker::track_fulfillment_validation_error( 'import', 'woocommerce_fulfillments_import_file_too_large', 'csv_importer' );
+			return new WP_Error(
+				'woocommerce_fulfillments_import_file_too_large',
+				sprintf(
+					/* translators: %s: human-readable maximum upload size, e.g. "8 MB". */
+					__( 'The uploaded file is larger than the allowed maximum of %s.', 'woocommerce' ),
+					size_format( $upload_limit )
+				),
+				array( 'status' => WP_Http::REQUEST_ENTITY_TOO_LARGE )
+			);
+		}
+
 		// CSVUploadHelper reads $_FILES under a configurable key. Stage our REST file under that key.
 		// Nonce verification is handled by the REST permission_callback (check_permission_for_fulfillments_import), not nonces.
 		$_FILES['fulfillment_import_file'] = $files['file']; // phpcs:ignore WordPress.Security.NonceVerification.Missing
