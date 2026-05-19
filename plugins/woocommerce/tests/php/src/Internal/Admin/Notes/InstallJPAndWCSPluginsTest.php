@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Tests\Internal\Admin\Notes;
 
 use Automattic\WooCommerce\Admin\Notes\Note;
 use Automattic\WooCommerce\Internal\Admin\Notes\InstallJPAndWCSPlugins;
+use Automattic\WooCommerce\Internal\Admin\Notes\NoteActionForbiddenException;
 use WC_Unit_Test_Case;
 
 /**
@@ -54,10 +55,11 @@ class InstallJPAndWCSPluginsTest extends WC_Unit_Test_Case {
 		$note = new Note();
 		$note->set_name( InstallJPAndWCSPlugins::NOTE_NAME );
 
-		// The handler must throw — a silent return would let Notes::trigger_note_action()
-		// continue and persist E_WC_ADMIN_NOTE_ACTIONED on the note despite no install
-		// running.
-		$this->expectException( \Exception::class );
+		// The handler must throw the typed exception — a silent return would let
+		// Notes::trigger_note_action() continue and persist E_WC_ADMIN_NOTE_ACTIONED on
+		// the note despite no install running. Asserting on the specific class is what
+		// lets NoteActions::trigger_note_action() map this and only this to a 403.
+		$this->expectException( NoteActionForbiddenException::class );
 		$this->expectExceptionMessage( 'You do not have permissions to manage plugins. Please contact your site administrator.' );
 
 		$this->sut->install_jp_and_wcs_plugins( $note );
