@@ -148,7 +148,10 @@ export const quickEditAction = ( {
 	query = {},
 }: EditActionOptions ): Action< ProductEntityRecord > => ( {
 	id: 'quick-edit-product',
-	label: __( 'Quick edit', 'woocommerce' ),
+	label: ( items ) =>
+		items.length > 1
+			? __( 'Bulk editing', 'woocommerce' )
+			: __( 'Quick edit', 'woocommerce' ),
 	isPrimary: true,
 	supportsBulk: true,
 	icon: edit,
