@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { store as coreStore } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 import { __ } from '@wordpress/i18n';
 
 import type { DataFormControlProps, Field } from '@wordpress/dataviews';
@@ -38,11 +40,41 @@ function CostOfGoodsSoldInput( {
 	const [ firstValue = {}, ...remainingValues ] =
 		costOfGoodsSold.values ?? [];
 
+	const parentCost = useSelect(
+		( select ) => {
+			const parentId = data.parent_id;
+			if ( ! parentId ) {
+				return undefined;
+			}
+			const parent = select( coreStore ).getEditedEntityRecord(
+				'root',
+				'product',
+				parentId
+			) as unknown as ProductEntityRecord | undefined;
+			const definedValue =
+				parent?.cost_of_goods_sold?.values?.[ 0 ]?.defined_value;
+			return definedValue !== undefined && definedValue !== null
+				? String( definedValue )
+				: undefined;
+		},
+		[ data.parent_id ]
+	);
+
+	const variationCost = getDefinedCostValue( data );
+	const variationCostString =
+		variationCost !== undefined && variationCost !== null
+			? String( variationCost )
+			: '';
+	const isInheritedFromParent =
+		Boolean( parentCost ) && variationCostString === parentCost;
+	const displayValue = isInheritedFromParent ? '' : variationCostString;
+
 	return (
 		<CurrencyControl
 			id={ `currency-input-${ field.id }` }
 			label={ field.label }
-			value={ getDefinedCostValue( data ) ?? '' }
+			value={ displayValue }
+			placeholder={ parentCost || undefined }
 			onChange={ ( newValue: string ) => {
 				onChange( {
 					cost_of_goods_sold: {

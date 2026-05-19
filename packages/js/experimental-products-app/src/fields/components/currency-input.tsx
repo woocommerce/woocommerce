@@ -34,6 +34,7 @@ type CurrencyControlProps = {
 	label: string;
 	value: string | number;
 	onChange: ( newValue: string ) => void;
+	placeholder?: string;
 	customValidity?: NonNullable<
 		DataFormControlProps< ProductEntityRecord >[ 'validity' ]
 	>[ 'custom' ];
@@ -44,6 +45,7 @@ export function CurrencyControl( {
 	label,
 	value,
 	onChange,
+	placeholder,
 	customValidity,
 }: CurrencyControlProps ) {
 	return (
@@ -53,6 +55,7 @@ export function CurrencyControl( {
 			label={ label }
 			value={ value }
 			onChange={ onChange }
+			placeholder={ placeholder }
 			type="number"
 			min={ 0 }
 			step={ step }

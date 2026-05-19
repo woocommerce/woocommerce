@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
+import { store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import { SelectControl } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
@@ -52,11 +53,34 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			};
 		}, [] );
 
-		const options = [
-			{
-				label: __( 'No shipping class', 'woocommerce' ),
-				value: '',
+		const parentShippingClass = useSelect(
+			( select ) => {
+				const parentId = data.parent_id;
+				if ( ! parentId ) {
+					return undefined;
+				}
+				const parent = select( coreStore ).getEditedEntityRecord(
+					'root',
+					'product',
+					parentId
+				) as unknown as ProductEntityRecord | undefined;
+				return parent?.shipping_class || undefined;
 			},
+			[ data.parent_id ]
+		);
+
+		const isVariation = Boolean( data.parent_id );
+
+		// SelectControl from @wordpress/ui treats an empty-string value as
+		// "no selection" and falls back to the placeholder. Use a sentinel so
+		// the inherit/no-class option is shown like any other selectable item.
+		const DEFAULT_OPTION_VALUE = '__default__';
+		const defaultLabel = isVariation
+			? __( 'Same as parent', 'woocommerce' )
+			: __( 'No shipping class', 'woocommerce' );
+
+		const items = [
+			{ label: defaultLabel, value: DEFAULT_OPTION_VALUE },
 			...( shippingClasses?.length
 				? shippingClasses.map( ( shippingClass ) => ( {
 						label: shippingClass.name,
@@ -64,18 +88,27 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 				  } ) )
 				: [] ),
 		];
-		const selectedOption = options.find(
-			( option ) => option.value === ( data.shipping_class ?? '' )
-		);
+
+		const variationShippingClass = data.shipping_class ?? '';
+		const isInheritedFromParent =
+			isVariation && variationShippingClass === '';
+		const selectedOption = isInheritedFromParent
+			? items[ 0 ]
+			: items.find(
+					( item ) => item.value === variationShippingClass
+			  ) ?? items[ 0 ];
 
 		return (
 			<SelectControl
 				label={ field.label }
 				value={ selectedOption }
-				items={ options }
+				items={ items }
 				onValueChange={ ( option ) =>
 					onChange( {
-						shipping_class: option?.value ?? '',
+						shipping_class:
+							option?.value === DEFAULT_OPTION_VALUE
+								? ''
+								: option?.value ?? '',
 					} )
 				}
 			/>

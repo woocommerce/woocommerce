@@ -2,7 +2,8 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useEntityRecord } from '@wordpress/core-data';
+import { store as coreStore, useEntityRecord } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 import { InputControl, InputLayout } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
@@ -35,6 +36,22 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			'products'
 		);
 
+		const parentWeight = useSelect(
+			( select ) => {
+				const parentId = data.parent_id;
+				if ( ! parentId ) {
+					return undefined;
+				}
+				const parent = select( coreStore ).getEditedEntityRecord(
+					'root',
+					'product',
+					parentId
+				) as unknown as ProductEntityRecord | undefined;
+				return parent?.weight;
+			},
+			[ data.parent_id ]
+		);
+
 		if ( storeProductsSettingsResolving ) {
 			return null;
 		}
@@ -42,10 +59,15 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		const weightUnit =
 			storeProductsSettings?.values?.woocommerce_weight_unit;
 
+		const isInheritedFromParent =
+			Boolean( parentWeight ) && data.weight === parentWeight;
+		const displayValue = isInheritedFromParent ? '' : data.weight ?? '';
+
 		return (
 			<InputControl
 				label={ field.label }
-				value={ data.weight }
+				value={ displayValue }
+				placeholder={ parentWeight || undefined }
 				onChange={ ( event ) =>
 					onChange( { weight: event.target.value } )
 				}

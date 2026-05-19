@@ -1,7 +1,8 @@
 /**
  * External dependencies
  */
-import { useEntityRecord } from '@wordpress/core-data';
+import { store as coreStore, useEntityRecord } from '@wordpress/core-data';
+import { useSelect } from '@wordpress/data';
 
 import type { Field } from '@wordpress/dataviews';
 import { InputControl, InputLayout } from '@wordpress/ui';
@@ -38,6 +39,22 @@ export const createDimensionField = (
 				'products'
 			);
 
+			const parentDimension = useSelect(
+				( select ) => {
+					const parentId = data.parent_id;
+					if ( ! parentId ) {
+						return undefined;
+					}
+					const parent = select( coreStore ).getEditedEntityRecord(
+						'root',
+						'product',
+						parentId
+					) as unknown as ProductEntityRecord | undefined;
+					return parent?.dimensions?.[ key ];
+				},
+				[ data.parent_id ]
+			);
+
 			if ( storeProductsSettingsResolving ) {
 				return null;
 			}
@@ -45,10 +62,19 @@ export const createDimensionField = (
 			const dimensionUnit =
 				storeProductsSettings?.values?.woocommerce_dimension_unit;
 
+			const variationDimension = data.dimensions?.[ key ];
+			const isInheritedFromParent =
+				Boolean( parentDimension ) &&
+				variationDimension === parentDimension;
+			const displayValue = isInheritedFromParent
+				? ''
+				: variationDimension ?? '';
+
 			return (
 				<InputControl
 					label={ field.label }
-					value={ data.dimensions[ key ] }
+					value={ displayValue }
+					placeholder={ parentDimension || undefined }
 					onChange={ ( event ) => {
 						onChange( {
 							dimensions: {
