@@ -314,6 +314,7 @@ if ( 'yes' !== get_option( 'woocommerce_product_lookup_table_is_generating' ) ) 
 `SELECT MIN(col), MAX(col) FROM table WHERE ...` requires a full index scan of all matching rows. When the column is covered by a sorted composite index, the min and max can each be found in a single seek by reading one row from each end.
 
 **When it applies:** All three conditions must hold:
+
 1. The WHERE predicates on the leading index columns are equality constraints (`col = const`) or bounded ranges that the optimizer can resolve as a contiguous index segment.
 2. The ORDER BY column is the trailing key of that same index.
 3. `LIMIT 1` stops the scan after the first qualifying row.
