@@ -3,9 +3,7 @@
 .woocommerce-marketplace {
 	// Connected-user avatar in the floating-header toggle — locked to 18px
 	// so the User button matches every other tab in the bar regardless of
-	// sign-in state. The larger 30px `__menu-avatar-image` further below
-	// stays in use inside the dropdown popover content, where it should
-	// keep its existing size.
+	// sign-in state.
 	&__header-account-avatar {
 		width: 18px;
 		height: 18px;
@@ -16,12 +14,6 @@
 
 	&__menu-item span {
 		white-space: normal;
-	}
-
-	&__menu-avatar-image {
-		border-radius: 50%;
-		height: $grid-unit-30;
-		width: $grid-unit-30;
 	}
 
 	&__menu-icon {
