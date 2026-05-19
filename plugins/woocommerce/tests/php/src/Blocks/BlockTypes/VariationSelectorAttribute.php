@@ -37,7 +37,7 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Data provider for legacy attribute options block replacement styles.
+	 * Data provider for legacy Attribute Options block replacement styles.
 	 *
 	 * @return array<string, array{0: array<string, string>, 1: string, 2: string}>
 	 */
@@ -64,6 +64,7 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	/**
 	 * Tests that the block returns empty string for non-variable products.
 	 *
+	 * @testdox VariationSelectorAttribute returns an empty string for non-variable products.
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::render
 	 */
 	public function test_returns_empty_for_non_variable_products(): void {
@@ -103,8 +104,9 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that legacy attribute options blocks are replaced with dropdown or chips blocks when rendered.
+	 * Tests that legacy Attribute Options blocks are replaced with dropdown or chips blocks when rendered.
 	 *
+	 * @testdox Legacy Attribute Options block renders with %2$s and not %3$s.
 	 * @dataProvider legacy_attribute_options_block_styles_provider
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::replace_legacy_attribute_options_block
 	 *
@@ -119,13 +121,14 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 		$markup = $this->render_variation_selector_attribute( $variable_product, $inner_blocks );
 
 		$this->assertStringContainsString( 'variation-selector-attribute-name', $markup, 'Attribute name block should render.' );
-		$this->assertStringContainsString( $expected_output_class, $markup, 'Legacy attribute options block should render as the replacement block.' );
-		$this->assertStringNotContainsString( $unexpected_output_class, $markup, 'Legacy attribute options block should not render as the other option style.' );
+		$this->assertStringContainsString( $expected_output_class, $markup, 'Legacy Attribute Options block should render as the replacement block.' );
+		$this->assertStringNotContainsString( $unexpected_output_class, $markup, 'Legacy Attribute Options block should not render as the other option style.' );
 	}
 
 	/**
-	 * Tests that autoselect and disabledAttributesAction are migrated from legacy attribute options blocks.
+	 * Tests that autoselect and disabledAttributesAction are migrated from legacy Attribute Options blocks.
 	 *
+	 * @testdox autoselect and disabledAttributesAction are migrated from legacy Attribute Options block.
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::replace_legacy_attribute_options_block
 	 */
 	public function test_migrates_legacy_attribute_options_settings_when_rendered(): void {
@@ -144,8 +147,9 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Tests that legacy attribute options blocks nested in a group are replaced when rendered.
+	 * Tests that legacy Attribute Options blocks nested in a group are replaced when rendered.
 	 *
+	 * @testdox Legacy Attribute Options block nested in a group is replaced with a dropdown when rendered.
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::replace_legacy_attribute_options_block
 	 */
 	public function test_replaces_nested_legacy_attribute_options_block_when_rendered(): void {
@@ -159,8 +163,8 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 		$markup = $this->render_variation_selector_attribute( $variable_product, $inner_blocks );
 
 		$this->assertStringContainsString( 'variation-selector-attribute-name', $markup, 'Attribute name block should render.' );
-		$this->assertStringContainsString( 'wc-block-dropdown', $markup, 'Nested legacy attribute options block should render as a dropdown.' );
-		$this->assertStringNotContainsString( 'wc-block-product-filter-chips', $markup, 'Nested legacy attribute options block should not render as chips.' );
+		$this->assertStringContainsString( 'wc-block-dropdown', $markup, 'Nested legacy Attribute Options block should render as a dropdown.' );
+		$this->assertStringNotContainsString( 'wc-block-product-filter-chips', $markup, 'Nested legacy Attribute Options block should not render as chips.' );
 	}
 
 	/**
@@ -246,7 +250,7 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Get block markup for the legacy attribute options inner block.
+	 * Get block markup for the legacy Attribute Options inner block.
 	 *
 	 * @param array $attrs Legacy options block attributes.
 	 * @return string
