@@ -180,13 +180,13 @@ describe( 'product edit utils', () => {
 		expect( bulkData.fieldStates.name ).toEqual( {
 			isEmpty: false,
 			isMixed: true,
-			placeholder: '(Mixed)',
+			placeholder: 'Mixed',
 			value: undefined,
 		} );
 		expect( bulkData.fieldStates.product_status ).toEqual( {
 			isEmpty: false,
 			isMixed: true,
-			placeholder: '(Mixed)',
+			placeholder: 'Mixed',
 			value: undefined,
 		} );
 	} );

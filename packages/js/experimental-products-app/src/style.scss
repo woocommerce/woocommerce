@@ -156,6 +156,21 @@
 		font-size: 15px !important;
 	}
 
+	.dataforms-layouts-row__header {
+		gap: 0 !important;
+		margin-bottom: 8px;
+
+		:is(h1, h2, h3, h4, h5, h6) {
+			margin: 0 !important;
+			color: var(--wpds-color-fg-content-neutral, #1e1e1e);
+			font-family: var(--wpds-typography-font-family-body);
+			font-size: 11px !important;
+			font-weight: 500;
+			line-height: 1.4;
+			text-transform: uppercase;
+		}
+	}
+
 	.dataforms-layouts-regular__header + .dataforms-layouts__wrapper {
 		gap: 16px !important;
 		margin-top: 16px;

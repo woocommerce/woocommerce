@@ -41,6 +41,7 @@ type CurrencyControlProps = {
 	>[ 'custom' ];
 	disabled?: boolean;
 	placeholder?: string;
+	hideLabelFromVision?: boolean;
 	showPercentAdornment?: boolean;
 };
 
@@ -52,6 +53,7 @@ export function CurrencyControl( {
 	customValidity,
 	disabled = false,
 	placeholder,
+	hideLabelFromVision,
 	showPercentAdornment = false,
 }: CurrencyControlProps ) {
 	const prefix =
@@ -73,6 +75,7 @@ export function CurrencyControl( {
 		<ValidatedInputControl
 			id={ id }
 			label={ label }
+			hideLabelFromVision={ hideLabelFromVision }
 			value={ value }
 			onChange={ onChange }
 			placeholder={ placeholder }
@@ -91,15 +94,17 @@ export function CurrencyControl( {
  * Shared Edit component for currency fields.
  * Renders a number input with min=0 and currency prefix/suffix.
  *
- * @param root0          Props from DataForm.
- * @param root0.data     Current product entity record.
- * @param root0.field    Normalized field definition.
- * @param root0.onChange Callback to update entity values.
- * @param root0.validity Per-rule validation state from useFormValidity.
+ * @param root0                     Props from DataForm.
+ * @param root0.data                Current product entity record.
+ * @param root0.field               Normalized field definition.
+ * @param root0.hideLabelFromVision Whether to visually hide the control label.
+ * @param root0.onChange            Callback to update entity values.
+ * @param root0.validity            Per-rule validation state from useFormValidity.
  */
 export function CurrencyInput( {
 	data,
 	field,
+	hideLabelFromVision,
 	onChange,
 	validity,
 }: DataFormControlProps< ProductEntityRecord > ) {
@@ -110,6 +115,7 @@ export function CurrencyInput( {
 		<CurrencyControl
 			id={ `currency-input-${ fieldId }` }
 			label={ field.label }
+			hideLabelFromVision={ hideLabelFromVision }
 			value={ data[ fieldId ] ?? '' }
 			placeholder={ field.placeholder }
 			onChange={ ( newValue: string ) => {

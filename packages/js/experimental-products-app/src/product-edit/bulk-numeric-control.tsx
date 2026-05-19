@@ -44,6 +44,7 @@ function BulkNumericOperationControl( {
 	return (
 		<SelectControl
 			label={ field.label }
+			hideLabelFromVision
 			value={ selectedOption }
 			items={ items }
 			onValueChange={ ( option ) => {

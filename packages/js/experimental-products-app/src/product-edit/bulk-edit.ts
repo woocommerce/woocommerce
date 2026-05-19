@@ -44,7 +44,7 @@ export type BulkNumericEdit = {
 export type ProductBulkEditFormData = ProductEntityRecord &
 	Record< string, unknown >;
 
-export const BULK_EDIT_MIXED_LABEL = __( '(Mixed)', 'woocommerce' );
+export const BULK_EDIT_MIXED_LABEL = __( 'Mixed', 'woocommerce' );
 
 export const DEFAULT_BULK_NUMERIC_EDIT: BulkNumericEdit = {
 	operation: 'dont_change',

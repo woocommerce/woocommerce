@@ -33,6 +33,7 @@ function getDefinedCostValue( item: ProductEntityRecord ) {
 function CostOfGoodsSoldInput( {
 	data,
 	field,
+	hideLabelFromVision,
 	onChange,
 	validity,
 }: DataFormControlProps< ProductEntityRecord > ) {
@@ -45,6 +46,7 @@ function CostOfGoodsSoldInput( {
 		<CurrencyControl
 			id={ `currency-input-${ field.id }` }
 			label={ field.label }
+			hideLabelFromVision={ hideLabelFromVision }
 			value={ getDefinedCostValue( data ) ?? '' }
 			placeholder={ field.placeholder }
 			onChange={ ( newValue: string ) => {

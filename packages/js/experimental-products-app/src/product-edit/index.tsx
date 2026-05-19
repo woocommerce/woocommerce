@@ -239,7 +239,8 @@ function getBulkEnhancedProductEditFields( {
 }
 
 function injectBulkNumericOperationFormFields(
-	formFields: Array< FormField | string >
+	formFields: Array< FormField | string >,
+	fieldLabels: Map< string, string >
 ): Array< FormField | string > {
 	return formFields.map( ( formField ) => {
 		if ( typeof formField === 'string' ) {
@@ -249,10 +250,23 @@ function injectBulkNumericOperationFormFields(
 
 			return {
 				id: `${ formField }-bulk-edit-fields`,
+				label: fieldLabels.get( formField ),
 				layout: { type: 'row' as const },
 				children: [
-					getBulkNumericOperationFieldId( formField ),
-					formField,
+					{
+						id: getBulkNumericOperationFieldId( formField ),
+						layout: {
+							type: 'regular' as const,
+							labelPosition: 'none' as const,
+						},
+					},
+					{
+						id: formField,
+						layout: {
+							type: 'regular' as const,
+							labelPosition: 'none' as const,
+						},
+					},
 				],
 			};
 		}
@@ -261,7 +275,8 @@ function injectBulkNumericOperationFormFields(
 			...formField,
 			children: formField.children
 				? injectBulkNumericOperationFormFields(
-						formField.children as Array< FormField | string >
+						formField.children as Array< FormField | string >,
+						fieldLabels
 				  )
 				: formField.children,
 		};
@@ -327,6 +342,9 @@ function ProductEditForm( {
 		selectedProducts,
 		enhancedFields
 	);
+	const fieldLabels = new Map(
+		visibleFields.map( ( field ) => [ field.id, field.label ] )
+	);
 	const data =
 		selectedProducts.length > 1
 			? getBulkEditFormData( mergedData, bulkEditData, fieldStates )
@@ -337,7 +355,10 @@ function ProductEditForm( {
 		labelPosition: 'top' as const,
 		fields:
 			selectedProducts.length > 1
-				? injectBulkNumericOperationFormFields( formFields )
+				? injectBulkNumericOperationFormFields(
+						formFields,
+						fieldLabels
+				  )
 				: formFields,
 	};
 
