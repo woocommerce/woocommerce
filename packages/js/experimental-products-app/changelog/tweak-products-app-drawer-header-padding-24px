@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Match the experimental products app product edit drawer header's padding to the drawer body (24px on all sides, was 12px / 16px).

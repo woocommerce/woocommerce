@@ -1,4 +1,0 @@
-Significance: patch
-Type: tweak
-
-Set the experimental products app product edit drawer's content padding to 20px on all sides (was 24px on the sides and inconsistent on the top/bottom).
