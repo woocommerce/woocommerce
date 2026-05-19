@@ -48,9 +48,14 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 	const { created, updated, skipped, failed, notified, rows } = summary;
 	const [ visibleCount, setVisibleCount ] = useState( ROWS_PER_PAGE );
 
+	const visibleRows = useMemo(
+		() => rows.slice( 0, visibleCount ),
+		[ rows, visibleCount ]
+	);
+
 	const tableRows = useMemo(
 		() =>
-			rows.slice( 0, visibleCount ).map( ( row ) => {
+			visibleRows.map( ( row ) => {
 				const label = STATUS_LABEL[ row.status ];
 				return [
 					{ display: row.row, value: row.row },
@@ -73,7 +78,7 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 					{ display: row.message, value: row.message },
 				];
 			} ),
-		[ rows, visibleCount ]
+		[ visibleRows ]
 	);
 
 	const hasMore = rows.length > visibleCount;
@@ -159,7 +164,11 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 					caption={ __( 'Import results', 'woocommerce' ) }
 					headers={ TABLE_HEADERS }
 					rows={ tableRows }
-					rowKey={ ( _row, index ) => index }
+					rowKey={ ( _row, index ) =>
+						`${ visibleRows[ index ]?.row ?? index }-${
+							visibleRows[ index ]?.status ?? ''
+						}`
+					}
 				/>
 				{ hasMore && (
 					<Flex
