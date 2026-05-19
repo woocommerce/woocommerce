@@ -102,7 +102,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 							class="wc-block-product-filter-checkbox-list__item"
 							data-wp-each-child
 							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
-							data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden"
+							data-wp-bind--hidden="context.item.hidden"
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"
@@ -165,7 +165,7 @@ final class ProductFilterCheckboxList extends AbstractBlock {
 					>
 						<div
 							class="wc-block-product-filter-checkbox-list__item"
-							data-wp-bind--hidden="woocommerce/product-filter-checkbox-list::state.itemHidden"
+							data-wp-bind--hidden="context.item.hidden"
 						>
 							<label
 								class="wc-block-product-filter-checkbox-list__label"

@@ -11,7 +11,11 @@ import type {
 	SelectableItemsParentStore,
 } from '../../../../types/type-defs/selectable-items';
 
-type CheckboxListItem = SelectableItem< { color?: string; index?: number } >;
+type CheckboxListItem = SelectableItem< {
+	color?: string;
+	index?: number;
+	hidden?: boolean;
+} >;
 
 type CheckboxListContext = {
 	storeNamespace: string;
@@ -22,7 +26,6 @@ type CheckboxListContext = {
 type CheckboxListStore = {
 	state: {
 		items: CheckboxListItem[];
-		itemHidden: boolean;
 		ratingStyle: string;
 		colorSwatchStyle: string;
 		isColorSwatchEmpty: boolean;
@@ -50,24 +53,19 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 	{
 		state: {
 			get items(): CheckboxListItem[] {
-				const { storeNamespace } = getContext< CheckboxListContext >();
+				const { storeNamespace, isExpanded, displayLimit } =
+					getContext< CheckboxListContext >();
 				const parentItems =
 					getParentStore( storeNamespace )?.state?.selectableItems;
 				if ( ! Array.isArray( parentItems ) ) return [];
 				return parentItems.map( ( item, index ) => ( {
 					...item,
 					index,
+					hidden:
+						! isExpanded &&
+						! item.selected &&
+						index >= displayLimit,
 				} ) );
-			},
-			get itemHidden(): boolean {
-				const { isExpanded, displayLimit } =
-					getContext< CheckboxListContext >();
-				if ( isExpanded ) return false;
-				const item = getCurrentItem();
-				if ( ! item ) return false;
-				if ( item.selected ) return false;
-				if ( item.index === undefined ) return false;
-				return item.index >= displayLimit;
 			},
 			get ratingStyle(): string {
 				const item = getCurrentItem();

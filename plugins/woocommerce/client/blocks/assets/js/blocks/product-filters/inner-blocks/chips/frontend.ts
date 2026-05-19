@@ -11,7 +11,11 @@ import type {
 	SelectableItemsParentStore,
 } from '../../../../types/type-defs/selectable-items';
 
-type ChipsItem = SelectableItem< { color?: string; index?: number } >;
+type ChipsItem = SelectableItem< {
+	color?: string;
+	index?: number;
+	hidden?: boolean;
+} >;
 
 type ChipsContext = {
 	storeNamespace: string;
@@ -22,7 +26,6 @@ type ChipsContext = {
 type ChipsStore = {
 	state: {
 		items: ChipsItem[];
-		itemHidden: boolean;
 		swatchHidden: boolean;
 		swatchStyle: string;
 	};
@@ -49,24 +52,19 @@ const { state }: ChipsStore = store< ChipsStore >(
 	{
 		state: {
 			get items(): ChipsItem[] {
-				const { storeNamespace } = getContext< ChipsContext >();
+				const { storeNamespace, isExpanded, displayLimit } =
+					getContext< ChipsContext >();
 				const parentItems =
 					getParentStore( storeNamespace )?.state?.selectableItems;
 				if ( ! Array.isArray( parentItems ) ) return [];
 				return parentItems.map( ( item, index ) => ( {
 					...item,
 					index,
+					hidden:
+						! isExpanded &&
+						! item.selected &&
+						index >= displayLimit,
 				} ) );
-			},
-			get itemHidden(): boolean {
-				const { isExpanded, displayLimit } =
-					getContext< ChipsContext >();
-				if ( isExpanded ) return false;
-				const item = getCurrentItem();
-				if ( ! item ) return false;
-				if ( item.selected ) return false;
-				if ( item.index === undefined ) return false;
-				return item.index >= displayLimit;
 			},
 			get swatchHidden(): boolean {
 				const item = getCurrentItem();
