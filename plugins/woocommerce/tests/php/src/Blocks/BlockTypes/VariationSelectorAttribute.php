@@ -124,6 +124,26 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Tests that autoselect and disabledAttributesAction are migrated from legacy attribute options blocks.
+	 *
+	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::replace_legacy_attribute_options_block
+	 */
+	public function test_migrates_legacy_attribute_options_settings_when_rendered(): void {
+		$variable_product = $this->create_variable_product_with_variations();
+		$inner_blocks     = $this->get_attribute_name_block_markup() . $this->get_legacy_options_block_markup(
+			array(
+				'autoselect'               => true,
+				'disabledAttributesAction' => 'hide',
+			)
+		);
+
+		$markup = $this->render_variation_selector_attribute( $variable_product, $inner_blocks );
+
+		$this->assertStringContainsString( '"autoselect":true', $markup, 'Legacy autoselect should be applied to the interactivity context.' );
+		$this->assertStringContainsString( '"disabledAttributesAction":"hide"', $markup, 'Legacy disabledAttributesAction should be applied to the interactivity context.' );
+	}
+
+	/**
 	 * Tests that legacy attribute options blocks nested in a group are replaced when rendered.
 	 *
 	 * @covers \Automattic\WooCommerce\Blocks\BlockTypes\AddToCartWithOptions\VariationSelectorAttribute::replace_legacy_attribute_options_block

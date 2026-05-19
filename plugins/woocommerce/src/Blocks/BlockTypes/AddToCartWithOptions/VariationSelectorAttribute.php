@@ -92,6 +92,13 @@ class VariationSelectorAttribute extends AbstractBlock {
 			),
 		);
 
+		$inner_html = '';
+
+		foreach ( $inner_blocks as $inner_block ) {
+			$inner_block = $this->replace_legacy_attribute_options_block( $inner_block, $attributes );
+			$inner_html .= ( new WP_Block( $inner_block, $context ) )->render();
+		}
+
 		$interactive_context = array(
 			'name'                      => $attribute_label,
 			'variationAttributeOptions' => $variation_items,
@@ -105,13 +112,6 @@ class VariationSelectorAttribute extends AbstractBlock {
 			'data-wp-init'        => 'callbacks.setDefaultSelectedAttribute',
 		);
 
-		$inner_html = '';
-
-		foreach ( $inner_blocks as $inner_block ) {
-			$inner_block = $this->replace_legacy_attribute_options_block( $inner_block );
-			$inner_html .= ( new WP_Block( $inner_block, $context ) )->render();
-		}
-
 		return sprintf(
 			'<div %s %s>%s</div>',
 			get_block_wrapper_attributes( $interactive_attributes ),
@@ -121,16 +121,30 @@ class VariationSelectorAttribute extends AbstractBlock {
 	}
 
 	/**
-	 * Replace the legacy attribute options block with the new dropdown or chips block.
+	 * Replace legacy Attribute Options block and apply its settings to the parent attributes.
 	 *
-	 * @param array $inner_block The inner block to replace.
+	 * @param array $inner_block  The inner block to replace.
+	 * @param array $attributes   Parent block attributes, updated when attributes in the legacy Attribute Options block are found.
 	 * @return array The replaced inner block.
 	 */
-	private function replace_legacy_attribute_options_block( array $inner_block ): array {
+	private function replace_legacy_attribute_options_block( array $inner_block, array &$attributes ): array {
 		if ( 'woocommerce/add-to-cart-with-options-variation-selector-attribute-options' === $inner_block['blockName'] ) {
-			$option_style = $inner_block['attrs']['optionStyle'] ?? 'chips';
-			$inner_block  = array(
-				'blockName'    => 'dropdown' === $option_style ? 'woocommerce/dropdown' : 'woocommerce/product-filter-chips',
+			$legacy_attrs = $inner_block['attrs'] ?? array();
+
+			if ( array_key_exists( 'autoselect', $legacy_attrs ) && true === $legacy_attrs['autoselect'] ) {
+				$attributes['autoselect'] = true;
+			}
+
+			if ( array_key_exists( 'disabledAttributesAction', $legacy_attrs ) && 'hide' === $legacy_attrs['disabledAttributesAction'] ) {
+				$attributes['disabledAttributesAction'] = 'hide';
+			}
+
+			if ( array_key_exists( 'optionStyle', $legacy_attrs ) && 'dropdown' === $legacy_attrs['optionStyle'] ) {
+				$attributes['displayStyle'] = 'woocommerce/dropdown';
+			}
+
+			return array(
+				'blockName'    => 'woocommerce/dropdown' === $attributes['displayStyle'] ? 'woocommerce/dropdown' : 'woocommerce/product-filter-chips',
 				'attrs'        => array(),
 				'innerBlocks'  => array(),
 				'innerHTML'    => '',
@@ -138,9 +152,10 @@ class VariationSelectorAttribute extends AbstractBlock {
 			);
 		} elseif ( isset( $inner_block['innerBlocks'] ) && is_array( $inner_block['innerBlocks'] ) && ! empty( $inner_block['innerBlocks'] ) ) {
 			foreach ( $inner_block['innerBlocks'] as $key => $child_inner_block ) {
-				$inner_block['innerBlocks'][ $key ] = $this->replace_legacy_attribute_options_block( $child_inner_block );
+				$inner_block['innerBlocks'][ $key ] = $this->replace_legacy_attribute_options_block( $child_inner_block, $attributes );
 			}
 		}
+
 		return $inner_block;
 	}
 
