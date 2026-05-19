@@ -467,10 +467,11 @@ class FulfillmentsCsvImporter {
 	 * @return array<int, string> Human-friendly names of missing columns.
 	 */
 	private function find_missing_required_columns( array $header_map ): array {
+		// Column keys are the literal header values merchants must put in their CSV; do not translate.
 		$required = array(
-			self::COL_ORDER_NUMBER    => __( 'order_number', 'woocommerce' ),
-			self::COL_TRACKING_NUMBER => __( 'tracking_number', 'woocommerce' ),
-			self::COL_PROVIDER        => __( 'shipment_provider', 'woocommerce' ),
+			self::COL_ORDER_NUMBER    => self::COL_ORDER_NUMBER,
+			self::COL_TRACKING_NUMBER => self::COL_TRACKING_NUMBER,
+			self::COL_PROVIDER        => self::COL_PROVIDER,
 		);
 		$missing  = array();
 		foreach ( $required as $key => $label ) {
