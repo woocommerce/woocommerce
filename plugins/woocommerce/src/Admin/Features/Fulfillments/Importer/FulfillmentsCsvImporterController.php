@@ -70,7 +70,7 @@ class FulfillmentsCsvImporterController {
 			return;
 		}
 
-		WCAdminAssets::register_style( 'fulfillments-importer', 'style', array( 'wp-components' ) );
+		$this->enqueue_importer_style();
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'fulfillments-importer', true );
 
 		wp_localize_script(
@@ -84,6 +84,31 @@ class FulfillmentsCsvImporterController {
 		);
 
 		$this->assets_enqueued = true;
+	}
+
+	/**
+	 * Enqueue the importer style under a unique handle.
+	 *
+	 * WCAdminAssets::register_style() builds its handle as 'wc-admin-' . $style_name. On the orders
+	 * screen the Fulfillments renderer also calls register_style(..., 'style', ...), so a second call
+	 * with style_name 'style' resolves to the same handle and is dropped as already-enqueued. Bypass
+	 * that helper here and enqueue under our own handle so this CSS actually loads.
+	 *
+	 * @since 10.9.0
+	 */
+	private function enqueue_importer_style(): void {
+		$relative_path = 'fulfillments-importer/style.css';
+		$asset_file    = WC_ADMIN_ABSPATH . WC_ADMIN_DIST_CSS_FOLDER . 'fulfillments-importer/style.asset.php';
+		$version       = file_exists( $asset_file ) ? ( ( require $asset_file )['version'] ?? null ) : null;
+
+		$handle = 'wc-admin-fulfillments-importer-style';
+		wp_enqueue_style(
+			$handle,
+			plugins_url( WC_ADMIN_DIST_CSS_FOLDER . $relative_path, WC_PLUGIN_FILE ),
+			array( 'wp-components' ),
+			$version
+		);
+		wp_style_add_data( $handle, 'rtl', 'replace' );
 	}
 
 	/**
