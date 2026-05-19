@@ -6,6 +6,7 @@
  */
 
 use Automattic\WooCommerce\Enums\OrderStatus;
+use Automattic\WooCommerce\Internal\CheckoutRecovery\ManualSendHandler;
 use Automattic\WooCommerce\Internal\Orders\OrderNoteGroup;
 
 defined( 'ABSPATH' ) || exit;
@@ -45,8 +46,13 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 
 		/**
 		 * Order action id used by the recovery email send item on the order edit page.
+		 *
+		 * Re-exports `ManualSendHandler::MANUAL_SEND_ACTION` so external callers
+		 * (and tests) can reference it from the email class. Source of truth lives
+		 * on the dispatcher because its hook registration runs before this email
+		 * class file is included.
 		 */
-		public const MANUAL_RECOVERY_EMAIL_SEND_ACTION = 'send_checkout_recovery_email';
+		public const MANUAL_RECOVERY_EMAIL_SEND_ACTION = ManualSendHandler::MANUAL_SEND_ACTION;
 
 		/**
 		 * Order statuses that represent an abandoned checkout for the purposes of
@@ -91,12 +97,10 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 
 			// Trigger fires after Action Scheduler dispatches `woocommerce_send_checkout_recovery_notification`,
 			// or when the merchant invokes the manual-send action from the order edit page.
+			// The order-edit action hooks live in `Internal\CheckoutRecovery\ManualSendHandler`
+			// so the listener is in place before the admin POST runs the order-meta save flow
+			// (which happens before the mailer would otherwise be instantiated).
 			add_action( 'woocommerce_send_checkout_recovery_notification', array( $this, 'trigger' ), 10, 1 );
-
-			// Expose checkout recovery email action in the order edit dropdown for pending
-			// orders, and handle dispatch when the merchant submits it.
-			add_filter( 'woocommerce_order_actions', array( $this, 'register_order_action' ), 10, 2 );
-			add_action( 'woocommerce_order_action_' . self::MANUAL_RECOVERY_EMAIL_SEND_ACTION, array( $this, 'handle_recovery_email_send' ), 10, 1 );
 
 			parent::__construct();
 
@@ -212,7 +216,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * @param WC_Order $order Order to evaluate.
 		 * @return bool
 		 */
-		public function is_order_eligible_for_recovery( WC_Order $order ): bool {
+		protected function is_order_eligible_for_recovery( WC_Order $order ): bool {
 			/**
 			 * Filter the order statuses that are eligible to receive the checkout recovery email.
 			 *
