@@ -47,6 +47,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	/**
 	 * Get the WooCommerce REST API namespace key for this controller.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @return string
 	 */
 	protected function get_rest_api_namespace(): string {
@@ -55,6 +57,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 	/**
 	 * Register the routes for the importer.
+	 *
+	 * @since 10.9.0
 	 */
 	public function register_routes(): void {
 		register_rest_route(
@@ -88,6 +92,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 * Mirrors the pattern used by OrderFulfillmentsRestController::check_permission_for_fulfillments():
 	 * importing fulfillments is an admin-only operation, so we require manage_woocommerce.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @param WP_REST_Request $request The request for which the permission is checked.
 	 * @return bool|WP_Error True when allowed; WP_Error otherwise.
 	 */
@@ -97,6 +103,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 	/**
 	 * Handle the import request — validate the file, run the importer, return the summary.
+	 *
+	 * @since 10.9.0
 	 *
 	 * @param WP_REST_Request $request The incoming request.
 	 * @return array|WP_Error Summary on success; WP_Error on failure.
@@ -129,7 +137,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			FilesystemUtil::validate_upload_file_path( $file_path );
 
 			if ( ! wc_is_file_valid_csv( $file_path ) ) {
-				throw new \Exception( esc_html__( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+				throw new \Exception( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 			}
 		} catch ( \Throwable $e ) {
 			unset( $_FILES['fulfillment_import_file'] );
@@ -153,7 +161,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$summary = $importer->run();
 
 		if ( file_exists( $file_path ) ) {
-			@unlink( $file_path ); // phpcs:ignore WordPress.PHP.NoSilencedErrors.Discouraged
+			wp_delete_file( $file_path );
 		}
 
 		/**

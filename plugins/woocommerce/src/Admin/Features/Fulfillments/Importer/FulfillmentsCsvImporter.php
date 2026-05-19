@@ -51,6 +51,8 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Constructor.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @param string               $file    Absolute path to the CSV file.
 	 * @param array<string, mixed> $options Importer options:
 	 *                                      - notify_customer (bool): Whether to fire customer notifications. Default false.
@@ -73,6 +75,8 @@ class FulfillmentsCsvImporter {
 	 * Parse and process the CSV file.
 	 *
 	 * Each row is processed independently — a single bad row never aborts the run.
+	 *
+	 * @since 10.9.0
 	 *
 	 * @return array{
 	 *     created: int,
@@ -134,7 +138,11 @@ class FulfillmentsCsvImporter {
 			$row_number          = 1; // Header is row 1.
 			$seen_tracking_pairs = array(); // Map of "order_id|tracking" => true for in-file duplicate detection.
 
-			while ( ( $row = fgetcsv( $handle, 0, $this->options['delimiter'], $this->options['enclosure'], '' ) ) !== false ) { // phpcs:ignore Squiz.PHP.DisallowMultipleAssignments.FoundInControlStructure, Generic.CodeAnalysis.AssignmentInCondition.FoundInWhileCondition
+			while ( true ) {
+				$row = fgetcsv( $handle, 0, $this->options['delimiter'], $this->options['enclosure'], '' );
+				if ( false === $row ) {
+					break;
+				}
 				++$row_number;
 
 				if ( $this->is_blank_row( $row ) ) {
@@ -589,8 +597,8 @@ class FulfillmentsCsvImporter {
 					throw new \Exception(
 						sprintf(
 							/* translators: %s: SKU value from CSV. */
-							esc_html__( 'SKU "%s" not found on the order.', 'woocommerce' ),
-							esc_html( $parts[1] )
+							__( 'SKU "%s" not found on the order.', 'woocommerce' ),
+							$parts[1]
 						)
 					);
 				}
@@ -608,8 +616,8 @@ class FulfillmentsCsvImporter {
 					throw new \Exception(
 						sprintf(
 							/* translators: %s: order item ID from CSV. */
-							esc_html__( 'Item ID "%s" is not part of this order.', 'woocommerce' ),
-							esc_html( (string) $item_id )
+							__( 'Item ID "%s" is not part of this order.', 'woocommerce' ),
+							(string) $item_id
 						)
 					);
 				}
@@ -623,8 +631,8 @@ class FulfillmentsCsvImporter {
 			throw new \Exception(
 				sprintf(
 					/* translators: %s: items value from CSV. */
-					esc_html__( 'Invalid items entry: "%s".', 'woocommerce' ),
-					esc_html( $entry )
+					__( 'Invalid items entry: "%s".', 'woocommerce' ),
+					$entry
 				)
 			);
 		}
@@ -634,8 +642,9 @@ class FulfillmentsCsvImporter {
 			$order_item = $entry['item'];
 			$qty_input  = $entry['qty'];
 
-			if ( ! is_numeric( $qty_input ) || (float) $qty_input <= 0 ) {
-				throw new \Exception( esc_html__( 'Item quantity must be a positive number.', 'woocommerce' ) );
+			// Require an integer-valued positive quantity. Reject fractional values rather than silently truncating.
+			if ( ! is_numeric( $qty_input ) || (float) $qty_input <= 0 || (float) $qty_input !== (float) (int) $qty_input ) {
+				throw new \Exception( __( 'Item quantity must be a positive integer.', 'woocommerce' ) );
 			}
 			$qty           = (int) $qty_input;
 			$ordered_qty   = method_exists( $order_item, 'get_quantity' ) ? (int) $order_item->get_quantity() : 0;
@@ -643,7 +652,7 @@ class FulfillmentsCsvImporter {
 				throw new \Exception(
 					sprintf(
 						/* translators: 1: requested quantity, 2: ordered quantity. */
-						esc_html__( 'Item quantity %1$d exceeds the ordered quantity %2$d.', 'woocommerce' ),
+						__( 'Item quantity %1$d exceeds the ordered quantity %2$d.', 'woocommerce' ),
 						$qty,
 						$ordered_qty
 					)
@@ -706,6 +715,8 @@ class FulfillmentsCsvImporter {
 	 * Return the list of fulfillment status keys that are considered "fulfilled".
 	 *
 	 * Kept for completeness; the importer always creates fulfilled fulfillments.
+	 *
+	 * @since 10.9.0
 	 *
 	 * @return array<int, string>
 	 */
