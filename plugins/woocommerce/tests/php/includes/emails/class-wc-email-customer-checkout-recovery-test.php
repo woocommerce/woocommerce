@@ -268,6 +268,53 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox trigger() refuses to send when the order has moved past pending, even if the action is invoked directly with the order id.
+	 */
+	public function test_trigger_skips_when_order_not_pending(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		$this->sut->trigger( $order->get_id() );
+		$after = count( $mailer->mock_sent );
+
+		$this->assertSame( $before, $after, 'Recovery email must not dispatch for non-pending orders.' );
+	}
+
+	/**
+	 * @testdox The woocommerce_checkout_recovery_eligible_statuses filter widens the eligible set for trigger().
+	 */
+	public function test_trigger_eligible_statuses_filter_can_widen(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( 'failed' );
+		$order->save();
+
+		$widen = static function () {
+			return array( 'pending', 'failed' );
+		};
+		add_filter( 'woocommerce_checkout_recovery_eligible_statuses', $widen );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		try {
+			$this->sut->trigger( $order->get_id() );
+			$after = count( $mailer->mock_sent );
+		} finally {
+			remove_filter( 'woocommerce_checkout_recovery_eligible_statuses', $widen );
+		}
+
+		$this->assertSame( $before + 1, $after, 'Widened filter must allow non-default statuses to receive the email.' );
+	}
+
+	/**
 	 * @testdox is_suppressed() falls back to handler detection on fresh installs where the merchant has not saved the suppression toggle yet, so the UI default and the runtime gate stay in sync.
 	 */
 	public function test_is_suppressed_falls_back_to_handler_detection_when_option_unset(): void {

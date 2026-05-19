@@ -5,6 +5,8 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
@@ -96,11 +98,42 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 				$this->placeholders['{order_number}'] = $order->get_order_number();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
+			if ( $this->is_enabled() && $this->get_recipient() && $this->is_order_eligible_for_send() ) {
 				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 			}
 
 			$this->restore_locale();
+		}
+
+		/**
+		 * Defence-in-depth status check at send time.
+		 *
+		 * @since 10.9.0
+		 * @return bool
+		 */
+		protected function is_order_eligible_for_send(): bool {
+			if ( ! $this->object instanceof WC_Order ) {
+				return false;
+			}
+
+			/**
+			 * Filter the order statuses that are eligible to receive the checkout recovery email.
+			 *
+			 * Defaults to `pending` only. Partner integrations or merchants who want recovery
+			 * to fire for other states (e.g. `failed`) can widen the list here.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param string[] $eligible_statuses Default: `[ 'pending' ]`.
+			 * @param WC_Order $order             Order being inspected.
+			 */
+			$eligible_statuses = (array) apply_filters(
+				'woocommerce_checkout_recovery_eligible_statuses',
+				array( OrderStatus::PENDING ),
+				$this->object
+			);
+
+			return in_array( $this->object->get_status(), $eligible_statuses, true );
 		}
 
 		/**
