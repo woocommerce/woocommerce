@@ -4,8 +4,10 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import {
+	BaseControl,
 	Button,
 	CheckboxControl,
+	Flex,
 	FormFileUpload,
 	Modal,
 	Notice,
@@ -145,26 +147,29 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 
 	return (
 		<Modal
-			title={ __( 'Import fulfillments from CSV', 'woocommerce' ) }
+			title={ __( 'Import Fulfillments from CSV', 'woocommerce' ) }
 			onRequestClose={ handleClose }
 			shouldCloseOnClickOutside={ ! isImporting }
 			shouldCloseOnEsc={ ! isImporting }
 			className="woocommerce-fulfillment-importer-modal"
 		>
 			{ summary ? (
-				<>
+				<div className="woocommerce-fulfillment-importer-modal__stack">
 					<ImporterSummaryPanel summary={ summary } />
-					<div className="woocommerce-fulfillment-importer-modal__actions">
+					<Flex justify="flex-end" gap={ 2 }>
 						<Button variant="secondary" onClick={ reset }>
-							{ __( 'Import another file', 'woocommerce' ) }
+							{ __( 'Import Another File', 'woocommerce' ) }
 						</Button>
 						<Button variant="primary" onClick={ handleClose }>
 							{ __( 'Done', 'woocommerce' ) }
 						</Button>
-					</div>
-				</>
+					</Flex>
+				</div>
 			) : (
-				<form onSubmit={ handleSubmit }>
+				<form
+					onSubmit={ handleSubmit }
+					className="woocommerce-fulfillment-importer-modal__stack"
+				>
 					<p className="woocommerce-fulfillment-importer-modal__description">
 						{ __(
 							'Upload a CSV with fulfillment details for one or more orders. Each row creates or updates a fulfillment record.',
@@ -172,32 +177,39 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 						) }
 					</p>
 
-					<Notice
-						className="woocommerce-fulfillment-importer-modal__hint"
-						status="info"
-						isDismissible={ false }
-					>
+					<div className="woocommerce-fulfillment-importer-modal__columns">
 						<p>
 							<strong>
-								{ __( 'Required columns:', 'woocommerce' ) }
+								{ __( 'Required columns', 'woocommerce' ) }
 							</strong>{ ' ' }
-							<code>order_number</code>,{ ' ' }
-							<code>tracking_number</code>,{ ' ' }
+							<code>order_number</code>{ ' ' }
+							<code>tracking_number</code>{ ' ' }
 							<code>shipment_provider</code>
 						</p>
 						<p>
 							<strong>
-								{ __( 'Optional columns:', 'woocommerce' ) }
+								{ __( 'Optional columns', 'woocommerce' ) }
 							</strong>{ ' ' }
-							<code>tracking_url</code>, <code>items</code>
+							<code>tracking_url</code> <code>items</code>
 						</p>
-					</Notice>
+					</div>
 
-					<div className="woocommerce-fulfillment-importer-modal__file-row">
-						<span className="woocommerce-fulfillment-importer-modal__file-label">
-							{ __( 'CSV file', 'woocommerce' ) }
-						</span>
-						<div className="woocommerce-fulfillment-importer-modal__file-picker">
+					<BaseControl
+						id="wc-fulfillment-importer-file"
+						label={ __( 'CSV file', 'woocommerce' ) }
+						help={
+							file
+								? file.name
+								: __( 'No file selected.', 'woocommerce' )
+						}
+						__nextHasNoMarginBottom
+					>
+						<Flex
+							justify="flex-start"
+							gap={ 2 }
+							wrap
+							align="center"
+						>
 							<FormFileUpload
 								accept=".csv,.txt,text/csv,text/plain"
 								multiple={ false }
@@ -206,47 +218,49 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 							>
 								{ file
 									? __(
-											'Choose a different file',
+											'Choose a Different File',
 											'woocommerce'
 									  )
-									: __( 'Choose CSV file', 'woocommerce' ) }
+									: __( 'Choose CSV File', 'woocommerce' ) }
 							</FormFileUpload>
-							<span className="woocommerce-fulfillment-importer-modal__file-name">
-								{ file
-									? file.name
-									: __( 'No file selected', 'woocommerce' ) }
-							</span>
 							{ file && ! isImporting && (
 								<Button
 									variant="tertiary"
 									isDestructive
 									onClick={ handleClearFile }
+									aria-label={ __(
+										'Remove selected file',
+										'woocommerce'
+									) }
 								>
 									{ __( 'Remove', 'woocommerce' ) }
 								</Button>
 							) }
-						</div>
+						</Flex>
+					</BaseControl>
+
+					<div className="woocommerce-fulfillment-importer-modal__options">
+						<CheckboxControl
+							__nextHasNoMarginBottom
+							label={ __(
+								'Send shipment notification emails for imported fulfillments.',
+								'woocommerce'
+							) }
+							checked={ notifyCustomer }
+							onChange={ setNotifyCustomer }
+							disabled={ isImporting }
+						/>
+						<CheckboxControl
+							__nextHasNoMarginBottom
+							label={ __(
+								'Update existing fulfillments when the tracking number already exists on the order.',
+								'woocommerce'
+							) }
+							checked={ updateExisting }
+							onChange={ setUpdateExisting }
+							disabled={ isImporting }
+						/>
 					</div>
-
-					<CheckboxControl
-						label={ __(
-							'Send shipment notification emails for imported fulfillments.',
-							'woocommerce'
-						) }
-						checked={ notifyCustomer }
-						onChange={ setNotifyCustomer }
-						disabled={ isImporting }
-					/>
-
-					<CheckboxControl
-						label={ __(
-							'Update existing fulfillments when the tracking number already exists on the order.',
-							'woocommerce'
-						) }
-						checked={ updateExisting }
-						onChange={ setUpdateExisting }
-						disabled={ isImporting }
-					/>
 
 					{ error && (
 						<Notice status="error" isDismissible={ false }>
@@ -254,7 +268,7 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 						</Notice>
 					) }
 
-					<div className="woocommerce-fulfillment-importer-modal__actions">
+					<Flex justify="flex-end" gap={ 2 }>
 						<Button
 							variant="secondary"
 							onClick={ handleClose }
@@ -270,9 +284,9 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 						>
 							{ isImporting
 								? __( 'Importing…', 'woocommerce' )
-								: __( 'Start import', 'woocommerce' ) }
+								: __( 'Start Import', 'woocommerce' ) }
 						</Button>
-					</div>
+					</Flex>
 				</form>
 			) }
 		</Modal>

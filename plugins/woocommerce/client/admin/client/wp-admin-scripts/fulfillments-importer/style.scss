@@ -4,86 +4,74 @@
 	}
 
 	&__description {
-		margin-top: 0;
+		margin: 0;
 	}
 
-	&__hint {
-		margin: 0 0 16px;
+	&__stack {
+		display: flex;
+		flex-direction: column;
+		gap: 20px;
+	}
 
-		p {
-			margin: 0 0 4px;
-		}
-
-		p:last-child {
-			margin-bottom: 0;
-		}
+	&__columns p {
+		margin: 0 0 4px;
 
 		code {
-			background: #fff;
-			padding: 1px 6px;
-			border-radius: 3px;
-			border: 1px solid #ddd;
+			margin-right: 4px;
 		}
 	}
 
-	&__file-row {
+	&__options {
 		display: flex;
 		flex-direction: column;
 		gap: 8px;
-		margin: 16px 0;
-	}
-
-	&__file-label {
-		font-weight: 500;
-	}
-
-	&__file-picker {
-		display: flex;
-		align-items: center;
-		flex-wrap: wrap;
-		gap: 8px;
-	}
-
-	&__file-name {
-		color: #50575e;
-		font-size: 13px;
-	}
-
-	&__actions {
-		display: flex;
-		justify-content: flex-end;
-		gap: 8px;
-		margin-top: 20px;
 	}
 }
 
 .woocommerce-fulfillment-importer-summary {
 	&__counts {
-		margin: 0 0 16px;
+		margin-bottom: 16px;
 	}
 
-	&__rows {
-		max-height: 360px;
-		overflow: auto;
+	&__count {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+		min-width: 120px;
+	}
 
-		.is-status-failed {
-			color: #b32d2e;
-		}
+	&__count-value {
+		font-size: 20px;
+		font-weight: 600;
+		line-height: 1.2;
+	}
 
-		.is-status-skipped {
-			color: #8c8f94;
-		}
+	&__count-label {
+		color: #50575e;
+		font-size: 12px;
+	}
 
-		.is-status-created,
-		.is-status-updated {
+	&__empty {
+		margin: 0;
+		text-align: center;
+		color: #50575e;
+	}
+
+	.woocommerce-pill {
+		&.is-status-created,
+		&.is-status-updated {
+			border-color: #007017;
 			color: #007017;
 		}
-	}
 
-	&__load-more {
-		display: flex;
-		justify-content: center;
-		margin-top: 12px;
+		&.is-status-skipped {
+			border-color: #8c8f94;
+			color: #50575e;
+		}
+
+		&.is-status-failed {
+			border-color: #b32d2e;
+			color: #b32d2e;
+		}
 	}
 }
-
