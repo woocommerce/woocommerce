@@ -58,6 +58,11 @@ if ( $additional_content ) {
 	echo "\n\n----------------------------------------\n\n";
 }
 
+if ( ! empty( $unsubscribe_url ) ) {
+	echo esc_html__( 'Unsubscribe from checkout recovery emails:', 'woocommerce' ) . "\n";
+	echo esc_url( $unsubscribe_url ) . "\n\n";
+}
+
 /**
  * Filter the email footer text.
  *

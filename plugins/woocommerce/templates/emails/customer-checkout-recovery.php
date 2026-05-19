@@ -79,6 +79,18 @@ if ( $additional_content ) {
 	echo $email_improvements_enabled ? '</td></tr></table>' : '';
 }
 
+if ( ! empty( $unsubscribe_url ) ) :
+	?>
+<p style="font-size: 12px; line-height: 16px; color: #4d4d4d; margin-top: 24px;">
+	<a href="<?php echo esc_url( $unsubscribe_url ); ?>" style="color: #4d4d4d;">
+		<?php esc_html_e( 'Unsubscribe from checkout recovery emails', 'woocommerce' ); ?>
+	</a>
+</p>
+	<?php
+endif;
+?>
+
+<?php
 /**
  * Hook for the woocommerce_email_footer.
  *

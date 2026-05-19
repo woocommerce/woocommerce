@@ -994,7 +994,10 @@ final class WooCommerce {
 		if ( ! \Automattic\WooCommerce\Utilities\FeaturesUtil::feature_is_enabled( 'checkout_recovery' ) ) {
 			return;
 		}
-		wc_get_container()->get( \Automattic\WooCommerce\Internal\CheckoutRecovery\ManualSendHandler::class );
+		$container = wc_get_container();
+		$container->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class );
+		$container->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Endpoint::class );
+		$container->get( \Automattic\WooCommerce\Internal\CheckoutRecovery\ManualSendHandler::class );
 	}
 
 	/**
