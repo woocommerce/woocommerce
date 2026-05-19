@@ -81,10 +81,10 @@ class VariationSelectorAttribute extends AbstractBlock {
 		$attribute_label  = wc_attribute_label( $attribute_name );
 		$attribute_id     = 'wc_product_attribute_' . uniqid();
 		$context          = array(
-			'woocommerce/attributeId'    => $attribute_id,
-			'woocommerce/attributeName'  => $attribute_name,
-			'woocommerce/attributeTerms' => $attribute_terms,
-			'woocommerceSelectableItems' => array(
+			'woocommerce/attributeId'     => $attribute_id,
+			'woocommerce/attributeName'   => $attribute_name,
+			'woocommerce/attributeTerms'  => $attribute_terms,
+			'woocommerce/selectableItems' => array(
 				'items'          => $variation_items,
 				'selectionMode'  => 'single',
 				'storeNamespace' => 'woocommerce/add-to-cart-with-options',

@@ -42,11 +42,11 @@ final class Dropdown extends AbstractBlock {
 	 * @return string Rendered block type output.
 	 */
 	protected function render( $attributes, $content, $block ) {
-		if ( empty( $block->context['woocommerceSelectableItems'] ) ) {
+		if ( empty( $block->context['woocommerce/selectableItems'] ) ) {
 			return '';
 		}
 
-		$selectable_items = $block->context['woocommerceSelectableItems'];
+		$selectable_items = $block->context['woocommerce/selectableItems'];
 		$items            = is_array( $selectable_items['items'] ?? null ) ? $selectable_items['items'] : array();
 		$store_namespace  = is_string( $selectable_items['storeNamespace'] ?? null ) ? $selectable_items['storeNamespace'] : 'woocommerce/add-to-cart-with-options';
 
