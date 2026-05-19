@@ -13,6 +13,7 @@ import {
 	bellUnread,
 	listView,
 	comment,
+	store,
 } from '@wordpress/icons';
 import { STORE_KEY as CES_STORE_KEY } from '@woocommerce/customer-effort-score';
 import { H, Section } from '@woocommerce/components';
@@ -354,7 +355,11 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 		};
 
 		const headerAccount = {
-			component: () => <HeaderAccount page="wc-admin" />,
+			// Stable component reference — an inline arrow would give React a
+			// new component type on every parent render, remounting HeaderAccount
+			// and resetting its DropdownMenu's internal isOpen state.
+			component: HeaderAccount,
+			options: { page: 'wc-admin' },
 			visible: isHomescreen,
 		};
 
@@ -380,6 +385,12 @@ export const ActivityPanel = ( { isEmbedded, query } ) => {
 				( comingSoon === 'yes' &&
 					__( 'Preview store', 'woocommerce' ) ) ||
 				__( 'View store', 'woocommerce' ),
+			// Tiny shopfront icon for the literal "View store" / "Preview
+			// store" semantic, distinct from the other icons in the bar.
+			// Required because activity-panel tabs are now icon-only —
+			// a tab without an icon renders as an empty button on the
+			// floating header.
+			icon: <Icon icon={ store } />,
 			visible: isHomescreen && query.task !== 'appearance',
 			onClick: () => {
 				window.open( getAdminSetting( 'shopUrl' ) );
