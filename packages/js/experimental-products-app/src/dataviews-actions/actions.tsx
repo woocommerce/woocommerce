@@ -184,7 +184,7 @@ export const editAction = (): Action< ProductEntityRecord > => ( {
 		if ( product ) {
 			window.location.href = getAdminLink(
 				addQueryArgs( 'post.php', {
-					post: product.id,
+					post: product.parent_id ?? product.id,
 					action: 'edit',
 				} )
 			);

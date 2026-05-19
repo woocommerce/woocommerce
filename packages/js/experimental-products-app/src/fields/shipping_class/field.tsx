@@ -42,13 +42,14 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 		const { shippingClasses } = useSelect( ( select ) => {
 			// TODO: Register shipping class entity and use it instead.
 			// eslint-disable-next-line @wordpress/data-no-store-string-literals
-			const { getProductShippingClasses } = select(
+			const store = select(
 				'experimental/wc/admin/products/shipping-classes'
 			);
 			return {
 				shippingClasses:
 					// @ts-expect-error - The store return type lives in Woo core.
-					getProductShippingClasses() as ProductShippingClass[],
+					( store?.getProductShippingClasses?.() ??
+						[] ) as ProductShippingClass[],
 			};
 		}, [] );
 
