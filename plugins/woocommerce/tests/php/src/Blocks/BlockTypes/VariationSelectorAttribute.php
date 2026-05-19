@@ -48,8 +48,8 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 				'wc-block-dropdown',
 				'wc-block-product-filter-chips',
 			),
-			'chips'    => array(
-				array( 'optionStyle' => 'chips' ),
+			'pills'    => array(
+				array( 'optionStyle' => 'pills' ),
 				'wc-block-product-filter-chips',
 				'wc-block-dropdown',
 			),

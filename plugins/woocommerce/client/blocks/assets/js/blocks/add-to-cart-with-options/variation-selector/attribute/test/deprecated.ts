@@ -158,7 +158,7 @@ describe( 'Variation Selector Attribute block deprecation', () => {
 			};
 			const innerBlocks = [
 				createLegacyMissingBlock(
-					'<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute-options {"optionStyle":"chips"} /-->'
+					'<!-- wp:woocommerce/add-to-cart-with-options-variation-selector-attribute-options {"optionStyle":"pills"} /-->'
 				),
 			];
 
