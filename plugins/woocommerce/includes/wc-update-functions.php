@@ -3465,14 +3465,15 @@ function wc_update_1080_migrate_analytics_import_option(): void {
 /**
  * Reshape the `meta_key_value` index on `wc_orders_meta` to `(meta_key(50), meta_value(20))`.
  *
- * This is labeled as a 10.8.0-1 migration because originally there was a 10.8 migration that modified the
+ * This is labeled as a 10.8.0-2 migration because originally there was a 10.8 migration that modified the
  * meta_key_value index to include only the meta_key column (see https://github.com/woocommerce/woocommerce/pull/63897),
  * but later it was discovered that this caused performance issues (as commented in the same pull request),
  * so this new migration was added. However sites where 10.8 beta was installed will already have run
  * the original migration (the one that removed meta_value from the index) and will have their db
- * version updated to 10.8, so this new migration wouldn't run. Hence the 10.8.0-1 marker, which
+ * version updated to 10.8, so this new migration wouldn't run. Hence the 10.8.0-2 marker, which
  * sorts between 10.8.0 and 10.8.1 via version_compare() and leaves the 10.8.1 slot free for any
- * future patch-release migrations.
+ * future patch-release migrations. WooCommerce 10.8.0 beta 2 had a migration labeled as 10.8.0-1 already,
+ * hence the need to go with 10.8.0-2 for this one.
  *
  * Handles two starting states transparently:
  *  - Pre-10.8 sites: the index is the original `(meta_key(100), meta_value(82))`.
@@ -3487,7 +3488,7 @@ function wc_update_1080_migrate_analytics_import_option(): void {
  *
  * @return void
  */
-function wc_update_10801_restore_orders_meta_key_value_index(): void {
+function wc_update_10802_restore_orders_meta_key_value_index(): void {
 	global $wpdb;
 
 	$table_name = $wpdb->prefix . 'wc_orders_meta';

@@ -328,8 +328,8 @@ class WC_Install {
 			'wc_update_1080_migrate_analytics_import_option',
 			'wc_update_1080_backfill_email_template_sync_meta',
 		),
-		'10.8.0-1' => array(
-			'wc_update_10801_restore_orders_meta_key_value_index',
+		'10.8.0-2' => array(
+			'wc_update_10802_restore_orders_meta_key_value_index',
 		),
 	);
 
