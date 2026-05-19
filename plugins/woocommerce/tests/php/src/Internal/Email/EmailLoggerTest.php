@@ -253,6 +253,7 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_object_with_required_get_id_parameters_falls_back_to_id_property(): void {
 		$wc_object     = new class() {
+			/** @var int Mirrors WP_Post::$ID. */
 			public int $ID = 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Mirrors WP_Post::$ID.
 
 			/**
@@ -282,15 +283,16 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	 */
 	public function test_object_with_throwing_get_id_does_not_break_logging(): void {
 		$wc_object     = new class() {
+			/** @var int Mirrors WP_Post::$ID. */
 			public int $ID = 0; // phpcs:ignore WordPress.NamingConventions.ValidVariableName.UsedPropertyNotSnakeCase -- Mirrors WP_Post::$ID.
 
 			/**
 			 * get_id that always throws to simulate a misbehaving extension object.
 			 *
-			 * @return int
+			 * @return never
 			 * @throws \RuntimeException Always.
 			 */
-			public function get_id(): int {
+			public function get_id(): never {
 				throw new \RuntimeException( 'broken get_id' );
 			}
 		};
