@@ -216,6 +216,7 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $image_ids, $available_variation['gallery_image_ids'] );
 		$this->assertNotEmpty( $available_variation['gallery_images_html'] );
+		$this->assertSame( $image_id, $available_variation['gallery_selected_image_id'] );
 	}
 
 	/**
@@ -261,12 +262,13 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( array(), $available_variation['gallery_image_ids'] );
 		$this->assertSame( '', $available_variation['gallery_images_html'] );
 		$this->assertSame( $image_id, $available_variation['image_id'] );
+		$this->assertArrayNotHasKey( 'gallery_selected_image_id', $available_variation );
 	}
 
 	/**
-	 * @testdox 'get_available_variation' falls back to the variation's own gallery when the variation featured image is stale.
+	 * @testdox 'get_available_variation' keeps the legacy image fields empty when a stale featured image falls back to the variation gallery.
 	 */
-	public function test_get_available_variation_falls_back_to_variation_gallery_when_featured_is_stale() {
+	public function test_get_available_variation_preserves_legacy_image_fields_when_stale_featured_image_falls_back_to_variation_gallery() {
 		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
 
 		$product              = WC_Helper_Product::create_variation_product();
@@ -291,15 +293,17 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 		$available_variation = $product->get_available_variation( $variation );
 
-		$this->assertSame( $variation_gallery_id, $available_variation['image_id'] );
-		$this->assertStringContainsString( 'wp-image-' . $variation_gallery_id, $available_variation['gallery_images_html'] );
-		$this->assertStringNotContainsString( 'wp-image-' . $parent_featured_id, $available_variation['gallery_images_html'] );
+		$this->assertSame( 0, $available_variation['image_id'] );
+		$this->assertSame( '', $available_variation['image']['src'] );
+		$this->assertSame( $variation_gallery_id, $available_variation['gallery_selected_image_id'] );
+		$this->assertStringContainsString( 'variation-gallery.jpg', $available_variation['gallery_images_html'] );
+		$this->assertStringNotContainsString( 'parent-featured.jpg', $available_variation['gallery_images_html'] );
 	}
 
 	/**
-	 * @testdox 'get_available_variation' falls back to the parent featured image when both the variation featured image and gallery are absent.
+	 * @testdox 'get_available_variation' keeps the legacy image fields empty when a stale variation has no gallery images.
 	 */
-	public function test_get_available_variation_falls_back_to_parent_featured_when_variation_has_no_images() {
+	public function test_get_available_variation_preserves_legacy_image_fields_when_stale_variation_has_no_gallery_images() {
 		update_option( \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME, 'yes' );
 
 		$product            = WC_Helper_Product::create_variation_product();
@@ -318,8 +322,10 @@ class WC_Product_Variable_Test extends \WC_Unit_Test_Case {
 
 		$available_variation = $product->get_available_variation( $variation );
 
-		$this->assertSame( $parent_featured_id, $available_variation['image_id'] );
+		$this->assertSame( 0, $available_variation['image_id'] );
+		$this->assertSame( '', $available_variation['image']['src'] );
 		$this->assertSame( '', $available_variation['gallery_images_html'] );
+		$this->assertArrayNotHasKey( 'gallery_selected_image_id', $available_variation );
 	}
 
 	/**

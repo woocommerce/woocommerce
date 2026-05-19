@@ -846,6 +846,22 @@
 	};
 
 	/**
+	 * Resolve which image the gallery swap should land on.
+	 *
+	 * Prefers `gallery_selected_image_id` (added in WC 10.9 alongside the
+	 * variation gallery feature; carries the resolved parent/gallery fallback).
+	 * Falls back to `image_id` for pre-10.9 payloads, and finally to an empty
+	 * string.
+	 */
+	var getSelectedVariationGalleryImageId = function ( variation ) {
+		if ( ! variation ) {
+			return '';
+		}
+
+		return variation.gallery_selected_image_id || variation.image_id || '';
+	};
+
+	/**
 	 * Reset the slide position if the variation has a different image than the current one
 	 */
 	$.fn.wc_maybe_trigger_slide_position_reset = function ( variation ) {
@@ -913,8 +929,7 @@
 			$current_gallery = $product.wc_find_gallery_root(),
 			$parsed_gallery = $( $.parseHTML( $.trim( gallery_html ) ) ),
 			$new_gallery = $parsed_gallery.wc_find_gallery_root(),
-			current_image_id =
-				variation && variation.image_id ? variation.image_id : '';
+			current_image_id = getSelectedVariationGalleryImageId( variation );
 
 		if ( ! $current_gallery.length || ! $new_gallery.length ) {
 			return false;

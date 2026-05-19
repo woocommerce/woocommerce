@@ -1,0 +1,3 @@
+Significance: patch
+Type: fix
+Comment: Restores the pre-10.9 `image_id`/`image` contract on the `get_available_variation()` payload, preserving BC for themes and extensions that branch on `if ( variation.image_id )`. The new variation gallery feature's parent fallback is carried in a separate `gallery_selected_image_id` key, only added when the feature is enabled and the variation has a swap-eligible gallery.

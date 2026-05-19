@@ -423,8 +423,15 @@ class WC_Product_Variable extends WC_Product {
 		$parent_featured_id       = (int) $this->get_image_id();
 		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
 
+		// Keep the long-standing classic variation payload contract for image/image_id:
+		// the variation's own featured image when valid, 0 otherwise. The gallery
+		// feature's parent-image fallback is carried in a separate key below so it
+		// can't change the meaning of `variation.image_id` for existing consumers.
+		$classic_image_id = $variation_featured_valid ? $variation_featured_id : 0;
+
 		$variation_gallery_image_ids = array();
 		$variation_gallery_html      = '';
+		$gallery_selected_image_id   = null;
 
 		if ( VariationGalleryPackage::is_enabled() ) {
 			$variation_gallery_image_ids = array_values(
@@ -433,62 +440,78 @@ class WC_Product_Variable extends WC_Product {
 					'wp_attachment_is_image'
 				)
 			);
-		}
 
-		// Prefer variation-owned images over the parent fallback.
-		if ( $variation_featured_valid ) {
-			$selected_image_id = $variation_featured_id;
-		} elseif ( ! empty( $variation_gallery_image_ids ) ) {
-			$selected_image_id = $variation_gallery_image_ids[0];
-		} elseif ( $parent_featured_valid ) {
-			$selected_image_id = $parent_featured_id;
-		} else {
-			$selected_image_id = 0;
-		}
-
-		if ( ! empty( $variation_gallery_image_ids ) ) {
-			$gallery_html_ids = $variation_gallery_image_ids;
-
-			if ( $selected_image_id && ! in_array( $selected_image_id, $gallery_html_ids, true ) ) {
-				array_unshift( $gallery_html_ids, $selected_image_id );
+			// Resolve the image to surface in the gallery swap: variation featured →
+			// variation gallery[0] → parent featured → 0. Variation-owned content
+			// wins over the parent so a chosen variation never opens on an unrelated
+			// parent image when its own gallery is intact. Edge case: stale featured
+			// with no gallery — falls through to 0 and the swap path doesn't fire,
+			// matching pre-feature behavior.
+			if ( $variation_featured_valid ) {
+				$gallery_selected_image_id = $variation_featured_id;
+			} elseif ( ! empty( $variation_gallery_image_ids ) ) {
+				$gallery_selected_image_id = $variation_gallery_image_ids[0];
+			} elseif ( $parent_featured_valid ) {
+				$gallery_selected_image_id = $parent_featured_id;
+			} else {
+				$gallery_selected_image_id = 0;
 			}
 
-			$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
+			if ( ! empty( $variation_gallery_image_ids ) ) {
+				$gallery_html_ids = $variation_gallery_image_ids;
+
+				if ( $gallery_selected_image_id && ! in_array( $gallery_selected_image_id, $gallery_html_ids, true ) ) {
+					array_unshift( $gallery_html_ids, $gallery_selected_image_id );
+				}
+
+				$variation_gallery_html = wc_get_product_gallery_html( $this, $gallery_html_ids );
+			}
 		}
 
 		// See if prices should be shown for each variation after selection.
 		$show_variation_price = apply_filters( 'woocommerce_show_variation_price', $variation->get_price() === '' || $this->get_variation_sale_price( 'min' ) !== $this->get_variation_sale_price( 'max' ) || $this->get_variation_regular_price( 'min' ) !== $this->get_variation_regular_price( 'max' ), $this, $variation );
 
+		$available_variation = array(
+			'attributes'            => $variation->get_variation_attributes(),
+			'availability_html'     => wc_get_stock_html( $variation ),
+			'backorders_allowed'    => $variation->backorders_allowed(),
+			'dimensions'            => $variation->get_dimensions( false ),
+			'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
+			'display_price'         => wc_get_price_to_display( $variation ),
+			'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
+			'gallery_image_ids'     => $variation_gallery_image_ids,
+			'gallery_images_html'   => $variation_gallery_html,
+			'image'                 => wc_get_product_attachment_props( $classic_image_id ),
+			'image_id'              => $classic_image_id,
+			'is_downloadable'       => $variation->is_downloadable(),
+			'is_in_stock'           => $variation->is_in_stock(),
+			'is_purchasable'        => $variation->is_purchasable(),
+			'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
+			'is_virtual'            => $variation->is_virtual(),
+			'max_qty'               => 0 < $variation->get_max_purchase_quantity() ? $variation->get_max_purchase_quantity() : '',
+			'min_qty'               => $variation->get_min_purchase_quantity(),
+			'price_html'            => $show_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
+			'sku'                   => $variation->get_sku(),
+			'variation_description' => wc_format_content( $variation->get_description() ),
+			'variation_id'          => $variation->get_id(),
+			'variation_is_active'   => $variation->variation_is_active(),
+			'variation_is_visible'  => $variation->variation_is_visible(),
+			'weight'                => $variation->get_weight(),
+			'weight_html'           => wc_format_weight( $variation->get_weight() ),
+		);
+
+		// `gallery_selected_image_id` is the image the gallery swap should land on
+		// after the merchant picks this variation. Added in 10.9 alongside the
+		// variation gallery feature; only present when the feature is on and the
+		// variation has a swap-eligible gallery. Consumers should fall back to
+		// `image_id` when this key is absent.
+		if ( VariationGalleryPackage::is_enabled() && ! empty( $variation_gallery_image_ids ) ) {
+			$available_variation['gallery_selected_image_id'] = $gallery_selected_image_id;
+		}
+
 		return apply_filters(
 			'woocommerce_available_variation',
-			array(
-				'attributes'            => $variation->get_variation_attributes(),
-				'availability_html'     => wc_get_stock_html( $variation ),
-				'backorders_allowed'    => $variation->backorders_allowed(),
-				'dimensions'            => $variation->get_dimensions( false ),
-				'dimensions_html'       => wc_format_dimensions( $variation->get_dimensions( false ) ),
-				'display_price'         => wc_get_price_to_display( $variation ),
-				'display_regular_price' => wc_get_price_to_display( $variation, array( 'price' => $variation->get_regular_price() ) ),
-				'gallery_image_ids'     => $variation_gallery_image_ids,
-				'gallery_images_html'   => $variation_gallery_html,
-				'image'                 => wc_get_product_attachment_props( $selected_image_id ),
-				'image_id'              => $selected_image_id,
-				'is_downloadable'       => $variation->is_downloadable(),
-				'is_in_stock'           => $variation->is_in_stock(),
-				'is_purchasable'        => $variation->is_purchasable(),
-				'is_sold_individually'  => $variation->is_sold_individually() ? 'yes' : 'no',
-				'is_virtual'            => $variation->is_virtual(),
-				'max_qty'               => 0 < $variation->get_max_purchase_quantity() ? $variation->get_max_purchase_quantity() : '',
-				'min_qty'               => $variation->get_min_purchase_quantity(),
-				'price_html'            => $show_variation_price ? '<span class="price">' . $variation->get_price_html() . '</span>' : '',
-				'sku'                   => $variation->get_sku(),
-				'variation_description' => wc_format_content( $variation->get_description() ),
-				'variation_id'          => $variation->get_id(),
-				'variation_is_active'   => $variation->variation_is_active(),
-				'variation_is_visible'  => $variation->variation_is_visible(),
-				'weight'                => $variation->get_weight(),
-				'weight_html'           => wc_format_weight( $variation->get_weight() ),
-			),
+			$available_variation,
 			$this,
 			$variation
 		);
