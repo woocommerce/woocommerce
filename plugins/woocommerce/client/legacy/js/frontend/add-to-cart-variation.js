@@ -848,10 +848,9 @@
 	/**
 	 * Resolve which image the gallery swap should land on.
 	 *
-	 * Prefers `gallery_selected_image_id` (added in WC 10.9 alongside the
-	 * variation gallery feature; carries the resolved parent/gallery fallback).
-	 * Falls back to `image_id` for pre-10.9 payloads, and finally to an empty
-	 * string.
+	 * Prefers `gallery_selected_image_id` when available.
+	 * Falls back to `image_id` for pre-variation gallery payloads,
+	 * and finally to an empty string.
 	 */
 	var getSelectedVariationGalleryImageId = function ( variation ) {
 		if ( ! variation ) {

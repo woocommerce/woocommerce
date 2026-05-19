@@ -423,10 +423,8 @@ class WC_Product_Variable extends WC_Product {
 		$parent_featured_id       = (int) $this->get_image_id();
 		$parent_featured_valid    = $parent_featured_id && wp_attachment_is_image( $parent_featured_id );
 
-		// Keep the long-standing classic variation payload contract for image/image_id:
-		// the variation's own featured image when valid, 0 otherwise. The gallery
-		// feature's parent-image fallback is carried in a separate key below so it
-		// can't change the meaning of `variation.image_id` for existing consumers.
+		// We don't want to change the meaning of `variation.image_id` for existing consumers,
+		// so we'll keep using it for the classic image payload. See the new behavior below.
 		$classic_image_id = $variation_featured_valid ? $variation_featured_id : 0;
 
 		$variation_gallery_image_ids = array();
@@ -441,12 +439,7 @@ class WC_Product_Variable extends WC_Product {
 				)
 			);
 
-			// Resolve the image to surface in the gallery swap: variation featured →
-			// variation gallery[0] → parent featured → 0. Variation-owned content
-			// wins over the parent so a chosen variation never opens on an unrelated
-			// parent image when its own gallery is intact. Edge case: stale featured
-			// with no gallery — falls through to 0 and the swap path doesn't fire,
-			// matching pre-feature behavior.
+			// Resolve the image to surface in the gallery swap.
 			if ( $variation_featured_valid ) {
 				$gallery_selected_image_id = $variation_featured_id;
 			} elseif ( ! empty( $variation_gallery_image_ids ) ) {
