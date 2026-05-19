@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Products;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
@@ -1187,6 +1188,61 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$product_types = wp_list_pluck( $response_products, 'type' );
 		$this->assertEqualsCanonicalizing( array( ProductType::EXTERNAL, ProductType::GROUPED, ProductType::GROUPED ), $product_types );
+	}
+
+	/**
+	 * Test that the `stock_status` parameter filters products by multiple stock statuses.
+	 */
+	public function test_collection_filter_with_multiple_stock_statuses() {
+		$in_stock_product     = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Stock Filter Target In Stock',
+				'sku'  => 'stock-filter-target-in-stock',
+			)
+		);
+		$out_of_stock_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Stock Filter Target Out Of Stock',
+				'sku'  => 'stock-filter-target-out-of-stock',
+			)
+		);
+		$backorder_product    = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Stock Filter Target Backorder',
+				'sku'  => 'stock-filter-target-backorder',
+			)
+		);
+
+		$out_of_stock_product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$out_of_stock_product->save();
+		$backorder_product->set_stock_status( ProductStockStatus::ON_BACKORDER );
+		$backorder_product->save();
+
+		try {
+			$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+			$request->set_query_params(
+				array(
+					'search_name_or_sku' => 'stock-filter-target',
+					'stock_status'       => array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::ON_BACKORDER ),
+				)
+			);
+
+			$response = $this->server->dispatch( $request );
+			$this->assertEquals( 200, $response->get_status() );
+
+			$product_ids = wp_list_pluck( $response->get_data(), 'id' );
+
+			$this->assertContains( $out_of_stock_product->get_id(), $product_ids );
+			$this->assertContains( $backorder_product->get_id(), $product_ids );
+			$this->assertNotContains( $in_stock_product->get_id(), $product_ids );
+		} finally {
+			WC_Helper_Product::delete_product( $in_stock_product->get_id() );
+			WC_Helper_Product::delete_product( $out_of_stock_product->get_id() );
+			WC_Helper_Product::delete_product( $backorder_product->get_id() );
+		}
 	}
 
 	/**

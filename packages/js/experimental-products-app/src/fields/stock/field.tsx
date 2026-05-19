@@ -32,7 +32,7 @@ const fieldDefinition = {
 	enableSorting: false,
 	enableHiding: false,
 	filterBy: {
-		operators: [ 'is' ],
+		operators: [ 'isAny' ],
 	},
 	elements: [
 		{ label: __( 'In stock', 'woocommerce' ), value: 'instock' },
