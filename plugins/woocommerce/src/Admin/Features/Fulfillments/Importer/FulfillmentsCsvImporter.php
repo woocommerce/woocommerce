@@ -289,6 +289,7 @@ class FulfillmentsCsvImporter {
 				$existing->set_items( $items );
 				$changed_fields = $existing->get_changes();
 				$existing->save();
+				unset( $this->fulfillments_cache[ $order->get_id() ] );
 
 				$notified = false;
 				if ( $this->options['notify_customer'] ) {
@@ -333,6 +334,7 @@ class FulfillmentsCsvImporter {
 			}
 			$fulfillment->set_items( $items );
 			$fulfillment->save();
+			unset( $this->fulfillments_cache[ $order->get_id() ] );
 
 			$notified = false;
 			if ( $this->options['notify_customer'] && $fulfillment->get_is_fulfilled() ) {
@@ -555,15 +557,39 @@ class FulfillmentsCsvImporter {
 	 * @return Fulfillment|null
 	 */
 	private function find_existing_fulfillment( int $order_id, string $tracking_number ): ?Fulfillment {
+		$fulfillments = $this->get_order_fulfillments( $order_id );
+		$needle       = strtolower( $tracking_number );
+
+		foreach ( $fulfillments as $fulfillment ) {
+			if ( strtolower( (string) $fulfillment->get_tracking_number() ) === $needle ) {
+				return $fulfillment;
+			}
+		}
+
+		return null;
+	}
+
+	/**
+	 * Load (and cache) the non-deleted fulfillments for an order for the duration of this import run.
+	 *
+	 * @param int $order_id Order ID.
+	 * @return array<int, Fulfillment>
+	 */
+	private function get_order_fulfillments( int $order_id ): array {
+		if ( isset( $this->fulfillments_cache[ $order_id ] ) ) {
+			return $this->fulfillments_cache[ $order_id ];
+		}
+
 		try {
 			/** @var FulfillmentsDataStore $store */
 			$store        = WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments = $store->read_fulfillments( WC_Order::class, (string) $order_id );
 		} catch ( \Throwable $e ) {
-			return null;
+			$this->fulfillments_cache[ $order_id ] = array();
+			return $this->fulfillments_cache[ $order_id ];
 		}
 
-		$needle = strtolower( $tracking_number );
+		$filtered = array();
 		foreach ( $fulfillments as $fulfillment ) {
 			if ( ! $fulfillment instanceof Fulfillment ) {
 				continue;
@@ -571,12 +597,11 @@ class FulfillmentsCsvImporter {
 			if ( $fulfillment->get_date_deleted() ) {
 				continue;
 			}
-			if ( strtolower( (string) $fulfillment->get_tracking_number() ) === $needle ) {
-				return $fulfillment;
-			}
+			$filtered[] = $fulfillment;
 		}
 
-		return null;
+		$this->fulfillments_cache[ $order_id ] = $filtered;
+		return $filtered;
 	}
 
 	/**
