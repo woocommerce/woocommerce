@@ -14,7 +14,6 @@ import type {
 type ChipsItem = SelectableItem< {
 	color?: string;
 	index?: number;
-	hidden?: boolean;
 } >;
 
 type ChipsContext = {
@@ -61,9 +60,10 @@ const { state }: ChipsStore = store< ChipsStore >(
 					...item,
 					index,
 					hidden:
-						! isExpanded &&
-						! item.selected &&
-						index >= displayLimit,
+						item.hidden ||
+						( ! isExpanded &&
+							! item.selected &&
+							index >= displayLimit ),
 				} ) );
 			},
 			get swatchHidden(): boolean {

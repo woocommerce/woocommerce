@@ -14,7 +14,6 @@ import type {
 type CheckboxListItem = SelectableItem< {
 	color?: string;
 	index?: number;
-	hidden?: boolean;
 } >;
 
 type CheckboxListContext = {
@@ -62,9 +61,10 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 					...item,
 					index,
 					hidden:
-						! isExpanded &&
-						! item.selected &&
-						index >= displayLimit,
+						item.hidden ||
+						( ! isExpanded &&
+							! item.selected &&
+							index >= displayLimit ),
 				} ) );
 			},
 			get ratingStyle(): string {

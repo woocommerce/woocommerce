@@ -17,7 +17,7 @@ WooCommerce reusable inner blocks use small context protocols so they can render
 - Every context includes `storeNamespace`, which points to the parent Interactivity API store.
 - Parent stores expose protocol-scoped getters such as `state.selectableItems` or `state.removableItems`; generic `state.items` is avoided so protocols can coexist.
 - Parent stores should assert conformance with the matching `*ParentStore` TypeScript interface via `satisfies`.
-- Inner blocks may derive presentation-only data locally. Parent data should not include child-owned fields such as list indexes or show-more visibility.
+- Inner blocks may derive presentation-only data locally. Parent data should not include child-owned fields such as list indexes.
 - Server-rendered fallback items use `data-wp-each-child` with per-item `data-wp-context`; hydration reconciles them with the inner store.
 
 ## Selectable Items
@@ -65,11 +65,12 @@ export type SelectableItem< T = unknown > = (
 	value: string;
 	selected?: boolean;
 	disabled?: boolean;
+	hidden?: boolean;
 	type?: string;
 } & T;
 ```
 
-Extra data belongs in `T`. Children may read optional extra fields, but missing fields must degrade safely.
+`hidden` is optional protocol-level visibility metadata. Extra data belongs in `T`. Children may read optional extra fields, but missing fields must degrade safely.
 
 ### Parent store
 
@@ -88,7 +89,8 @@ Rules:
 
 - `state.selectableItems` is the live source after hydration.
 - `actions.toggle( item? )` updates the parent source of truth.
-- Parent must not add child-owned fields such as `index` or `hidden`.
+- `hidden` may be provided by parents or derived by children to hide an item without removing it from the collection.
+- Parent must not add child-owned fields such as `index`.
 
 ### Built-in consumers
 
@@ -111,7 +113,7 @@ export type FilterItemFields = {
 | `checkbox-list` | `count`, `color`, `depth`, `filterType === 'rating'` | Text label, no count, no swatch, no indent |
 | `chips` | `count`, `color` | Text label, no count, no swatch |
 
-Checkbox-list and chips mirror parent items into child `state.items`, adding local show-more metadata such as `index` and `hidden`. Their templates bind overflow visibility with `context.item.hidden`.
+Checkbox-list and chips mirror parent items into child `state.items`, adding local `index` for show-more and setting `hidden` when an item should be hidden. Their templates bind overflow visibility with `context.item.hidden`.
 
 ## Removable Items
 
