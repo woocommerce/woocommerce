@@ -279,7 +279,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * can choose between scheduled automatic sends and manual-only dispatch.
 		 */
 		public function init_form_fields(): void {
-			$placeholder_text  = sprintf(
+			$placeholder_text = sprintf(
 				/* translators: %s: list of placeholders */
 				__( 'Available placeholders: %s', 'woocommerce' ),
 				'<code>' . implode( '</code>, <code>', array_map( 'esc_html', array_keys( $this->placeholders ) ) ) . '</code>'

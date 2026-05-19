@@ -183,7 +183,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 		$this->sut->trigger( 0 );
-		$after  = count( $mailer->mock_sent );
+		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before, $after, 'trigger() must not send to the previous order\'s recipient when called with an invalid id.' );
 		$this->assertSame( '', $this->sut->recipient );
@@ -202,7 +202,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 		$this->sut->trigger( $order->get_id() );
-		$after  = count( $mailer->mock_sent );
+		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before, $after, 'Disabled checkout recovery email must not dispatch any mail.' );
 	}
@@ -219,7 +219,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 		$this->sut->trigger( $order->get_id() );
-		$after  = count( $mailer->mock_sent );
+		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before + 1, $after, 'Enabled checkout recovery email must dispatch one message.' );
 		$this->assertSame( $order->get_billing_email(), $this->sut->recipient );
@@ -238,7 +238,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 		$this->sut->trigger( $order->get_id() );
-		$after  = count( $mailer->mock_sent );
+		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before, $after, 'Suppressed checkout recovery email must not dispatch.' );
 	}
