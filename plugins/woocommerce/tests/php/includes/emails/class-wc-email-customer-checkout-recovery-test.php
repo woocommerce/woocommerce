@@ -1,6 +1,8 @@
 <?php
 declare( strict_types = 1 );
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 /**
  * WC_Email_Customer_Checkout_Recovery test.
  *
@@ -22,6 +24,13 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	 * @var array
 	 */
 	private $original_active_plugins = array();
+
+	/**
+	 * Admin user id created for cap-gated assertions.
+	 *
+	 * @var int
+	 */
+	private $admin_user_id = 0;
 
 	/**
 	 * `WC_Emails::init()` only registers the checkout recovery email class
@@ -56,7 +65,37 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_customer_checkout_recovery_settings' );
 		update_option( 'active_plugins', $this->original_active_plugins );
 
+		if ( $this->admin_user_id ) {
+			wp_set_current_user( 0 );
+			wp_delete_user( $this->admin_user_id );
+			$this->admin_user_id = 0;
+		}
+
 		parent::tearDown();
+	}
+
+	/**
+	 * Switch the current user to an administrator so capability-gated paths run.
+	 */
+	private function become_admin(): void {
+		$this->admin_user_id = $this->factory->user->create( array( 'role' => 'administrator' ) );
+		wp_set_current_user( $this->admin_user_id );
+	}
+
+	/**
+	 * Backdate the order's `date_created` so it clears the abandonment age threshold.
+	 *
+	 * `OrderHelper::create_order()` returns a freshly-created order, which by
+	 * definition has not yet been abandoned for the required duration. Tests that
+	 * exercise the post-threshold path call this helper to age the order past it.
+	 *
+	 * @param WC_Order $order Order to age.
+	 * @return WC_Order Reloaded order reflecting the persisted date.
+	 */
+	private function age_order_past_threshold( WC_Order $order ): WC_Order {
+		$order->set_date_created( time() - WC_Email_Customer_Checkout_Recovery::ABANDONMENT_THRESHOLD_SECONDS - MINUTE_IN_SECONDS );
+		$order->save();
+		return wc_get_order( $order->get_id() );
 	}
 
 	/**
@@ -208,13 +247,14 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox trigger() dispatches the email when enabled and the order has a billing email.
+	 * @testdox trigger() dispatches the email when enabled and the order has a billing email and is past the abandonment threshold.
 	 */
 	public function test_trigger_sends_when_enabled(): void {
 		$this->sut->update_option( 'enabled', 'yes' );
 		$this->sut->enabled = 'yes';
 
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
 
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
@@ -223,6 +263,42 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 
 		$this->assertSame( $before + 1, $after, 'Enabled checkout recovery email must dispatch one message.' );
 		$this->assertSame( $order->get_billing_email(), $this->sut->recipient );
+	}
+
+	/**
+	 * @testdox trigger() records the send timestamp on order meta so the future auto-send dedup can skip already-emailed orders.
+	 */
+	public function test_trigger_records_sent_at_meta(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+
+		$before_ts = time();
+		$this->sut->trigger( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$saved = $fresh->get_meta( WC_Email_Customer_Checkout_Recovery::META_KEY_SENT_AT );
+
+		$this->assertNotEmpty( $saved, 'Successful trigger() must persist the sent_at meta.' );
+		$this->assertGreaterThanOrEqual( $before_ts, (int) $saved );
+		$this->assertLessThanOrEqual( time() + 1, (int) $saved );
+	}
+
+	/**
+	 * @testdox trigger() does not write the sent_at meta when the email is disabled (no send happened).
+	 */
+	public function test_trigger_does_not_record_meta_when_disabled(): void {
+		$this->sut->update_option( 'enabled', 'no' );
+		$this->sut->enabled = 'no';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		$this->sut->trigger( $order->get_id() );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $fresh->get_meta( WC_Email_Customer_Checkout_Recovery::META_KEY_SENT_AT ) );
 	}
 
 	/**
@@ -268,7 +344,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox trigger() refuses to send when the order has moved past pending, even if the action is invoked directly with the order id.
+	 * @testdox trigger() refuses to send when the order has moved past the abandoned-checkout statuses, even if the action is invoked directly with the order id.
 	 */
 	public function test_trigger_skips_when_order_not_pending(): void {
 		$this->sut->update_option( 'enabled', 'yes' );
@@ -283,7 +359,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$this->sut->trigger( $order->get_id() );
 		$after = count( $mailer->mock_sent );
 
-		$this->assertSame( $before, $after, 'Recovery email must not dispatch for non-pending orders.' );
+		$this->assertSame( $before, $after, 'Recovery email must not dispatch for non-abandoned orders.' );
 	}
 
 	/**
@@ -296,6 +372,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 		$order->set_status( 'failed' );
 		$order->save();
+		$order = $this->age_order_past_threshold( $order );
 
 		$widen = static function () {
 			return array( 'pending', 'failed' );
@@ -402,5 +479,295 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( 'suppressed', $this->sut->form_fields );
 		$this->assertSame( 'no', $this->sut->form_fields['suppressed']['default'] );
+	}
+
+	/**
+	 * @testdox register_order_action() adds the manual-send entry for a pending order older than the abandonment threshold when the current user has edit_shop_orders.
+	 */
+	public function test_register_order_action_adds_entry_for_pending_order(): void {
+		$this->become_admin();
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+
+		$actions = $this->sut->register_order_action( array(), $order );
+
+		$this->assertArrayHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+		$this->assertSame( 'Send checkout recovery email', $actions[ WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION ] );
+	}
+
+	/**
+	 * @testdox register_order_action() also surfaces the action for checkout-draft orders past the abandonment threshold (Blocks Store API parks abandoned-mid-flow orders there).
+	 */
+	public function test_register_order_action_adds_entry_for_checkout_draft_order(): void {
+		$this->become_admin();
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$order = $this->age_order_past_threshold( $order );
+
+		$actions = $this->sut->register_order_action( array(), $order );
+
+		$this->assertArrayHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+	}
+
+	/**
+	 * @testdox register_order_action() hides the entry for an otherwise-eligible order that was created less than the abandonment threshold ago, so we don't nudge customers still on the page.
+	 */
+	public function test_register_order_action_skips_recent_orders(): void {
+		$this->become_admin();
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		$actions = $this->sut->register_order_action( array(), $order );
+
+		$this->assertArrayNotHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+	}
+
+	/**
+	 * @testdox register_order_action() leaves the dropdown alone once the order has moved past the abandoned-checkout statuses.
+	 */
+	public function test_register_order_action_skips_non_abandoned_orders(): void {
+		$this->become_admin();
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( OrderStatus::PROCESSING );
+		$order->save();
+
+		$actions = $this->sut->register_order_action( array(), $order );
+
+		$this->assertArrayNotHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+	}
+
+	/**
+	 * @testdox register_order_action() does not surface the action for users without edit_shop_orders, even on a pending order.
+	 */
+	public function test_register_order_action_requires_capability(): void {
+		// Logged-out / no caps.
+		wp_set_current_user( 0 );
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		$actions = $this->sut->register_order_action( array(), $order );
+
+		$this->assertArrayNotHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+	}
+
+	/**
+	 * @testdox register_order_action() returns the unchanged action list when called without an order (e.g. order-list bulk context).
+	 */
+	public function test_register_order_action_passthrough_without_order(): void {
+		$this->become_admin();
+
+		$existing = array( 'foo' => 'Foo' );
+		$actions  = $this->sut->register_order_action( $existing, null );
+
+		$this->assertSame( $existing, $actions );
+	}
+
+	/**
+	 * @testdox handle_recovery_email_send() dispatches the email, persists the sent_at meta, and records an email-notification order note.
+	 */
+	public function test_handle_recovery_email_send_dispatches_and_records_note(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_recovery_email_send( $order );
+
+		$this->assertSame( $before + 1, count( $mailer->mock_sent ), 'Manual send must dispatch one message.' );
+
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertNotEmpty( $fresh->get_meta( WC_Email_Customer_Checkout_Recovery::META_KEY_SENT_AT ) );
+
+		$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$note_strings = wp_list_pluck( $notes, 'content' );
+		$this->assertNotEmpty(
+			array_filter(
+				$note_strings,
+				static fn ( $note ) => false !== strpos( $note, 'Checkout recovery email manually sent' )
+			),
+			'Manual send must record an order note announcing the email.'
+		);
+	}
+
+	/**
+	 * @testdox handle_recovery_email_send() also dispatches for checkout-draft orders that have a billing email and are past the abandonment threshold, mirroring the dropdown gating.
+	 */
+	public function test_handle_recovery_email_send_dispatches_on_checkout_draft(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( OrderStatus::CHECKOUT_DRAFT );
+		$order->save();
+		$order = $this->age_order_past_threshold( $order );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_recovery_email_send( $order );
+
+		$this->assertSame( $before + 1, count( $mailer->mock_sent ), 'Checkout-draft order with a billing email must dispatch.' );
+	}
+
+	/**
+	 * @testdox handle_recovery_email_send() is a no-op for orders that are still inside the abandonment window so a stale dropdown submission cannot fire prematurely.
+	 */
+	public function test_handle_recovery_email_send_bails_on_recent_order(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_recovery_email_send( $order );
+
+		$this->assertSame( $before, count( $mailer->mock_sent ), 'Recent pending order must not dispatch.' );
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $fresh->get_meta( WC_Email_Customer_Checkout_Recovery::META_KEY_SENT_AT ) );
+	}
+
+	/**
+	 * @testdox handle_recovery_email_send() is a no-op when the order has moved past the abandoned-checkout statuses so a stale dropdown submission cannot resend.
+	 */
+	public function test_handle_recovery_email_send_bails_on_non_abandoned_status(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( OrderStatus::COMPLETED );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_recovery_email_send( $order );
+
+		$this->assertSame( $before, count( $mailer->mock_sent ), 'Non-abandoned order must not dispatch.' );
+		$fresh = wc_get_order( $order->get_id() );
+		$this->assertSame( '', $fresh->get_meta( WC_Email_Customer_Checkout_Recovery::META_KEY_SENT_AT ) );
+	}
+
+	/**
+	 * @testdox handle_recovery_email_send() is a no-op for users without edit_shop_orders so an unauthorized hook caller cannot fire the email.
+	 */
+	public function test_handle_recovery_email_send_requires_capability(): void {
+		wp_set_current_user( 0 );
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_recovery_email_send( $order );
+
+		$this->assertSame( $before, count( $mailer->mock_sent ), 'Unauthorized user must not dispatch the email.' );
+	}
+
+	/**
+	 * @testdox register_order_action() hides the action when the email is disabled, so the dropdown stays in sync with what trigger() would do.
+	 */
+	public function test_register_order_action_skips_when_email_disabled(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'no' );
+		$this->sut->enabled = 'no';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+
+		$actions = $this->sut->register_order_action( array(), $order );
+
+		$this->assertArrayNotHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+	}
+
+	/**
+	 * @testdox register_order_action() hides the action when suppression is on (toggle or known-handler default), so merchants don't click a no-op item.
+	 */
+	public function test_register_order_action_skips_when_suppressed(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+		$this->sut->update_option( 'suppressed', 'yes' );
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+
+		$actions = $this->sut->register_order_action( array(), $order );
+
+		$this->assertArrayNotHasKey( WC_Email_Customer_Checkout_Recovery::MANUAL_RECOVERY_EMAIL_SEND_ACTION, $actions );
+	}
+
+	/**
+	 * @testdox handle_recovery_email_send() is a no-op when the email is disabled — avoids writing a "manually sent" order note for a send that never happened.
+	 */
+	public function test_handle_recovery_email_send_bails_when_email_disabled(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'no' );
+		$this->sut->enabled = 'no';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_recovery_email_send( $order );
+
+		$this->assertSame( $before, count( $mailer->mock_sent ), 'Disabled email must not dispatch from manual handler.' );
+
+		$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$note_strings = wp_list_pluck( $notes, 'content' );
+		$this->assertEmpty(
+			array_filter(
+				$note_strings,
+				static fn ( $note ) => false !== strpos( $note, 'Checkout recovery email manually sent' )
+			),
+			'Disabled email must not record a "manually sent" order note.'
+		);
+	}
+
+	/**
+	 * @testdox handle_recovery_email_send() is a no-op when suppression is on — avoids writing a misleading order note when trigger() would also bail.
+	 */
+	public function test_handle_recovery_email_send_bails_when_suppressed(): void {
+		$this->become_admin();
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+		$this->sut->update_option( 'suppressed', 'yes' );
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order = $this->age_order_past_threshold( $order );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+
+		$this->sut->handle_recovery_email_send( $order );
+
+		$this->assertSame( $before, count( $mailer->mock_sent ), 'Suppressed email must not dispatch from manual handler.' );
+
+		$notes        = wc_get_order_notes( array( 'order_id' => $order->get_id() ) );
+		$note_strings = wp_list_pluck( $notes, 'content' );
+		$this->assertEmpty(
+			array_filter(
+				$note_strings,
+				static fn ( $note ) => false !== strpos( $note, 'Checkout recovery email manually sent' )
+			),
+			'Suppressed email must not record a "manually sent" order note.'
+		);
 	}
 }
