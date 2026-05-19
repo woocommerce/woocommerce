@@ -56,6 +56,8 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		delete_option( 'woocommerce_customer_checkout_recovery_settings' );
 		update_option( 'active_plugins', $this->original_active_plugins );
 
+		remove_all_actions( 'woocommerce_send_checkout_recovery_notification' );
+
 		parent::tearDown();
 	}
 
