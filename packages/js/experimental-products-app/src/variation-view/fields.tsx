@@ -1,6 +1,8 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
+import { Badge } from '@wordpress/ui';
 import type { Field } from '@wordpress/dataviews';
 
 /**
@@ -29,6 +31,28 @@ const REUSED_VARIATION_FIELD_IDS = [
 	'tax_status',
 ] as const satisfies readonly ProductFieldId[];
 
-export const variationFields = REUSED_VARIATION_FIELD_IDS.map(
-	( id ) => createProductField( id ) as Field< VariationEntityRecord >
-);
+export const variationFields = REUSED_VARIATION_FIELD_IDS.map( ( id ) => {
+	const field = createProductField( id ) as Field< VariationEntityRecord >;
+
+	if ( id === 'name' ) {
+		return {
+			...field,
+			render( { item }: { item: VariationEntityRecord } ) {
+				return (
+					<span className="woocommerce-variation-name">
+						<span className="woocommerce-variation-name__label">
+							{ item.name }
+						</span>
+						{ item.status === 'private' && (
+							<Badge intent="none">
+								{ __( 'Inactive', 'woocommerce' ) }
+							</Badge>
+						) }
+					</span>
+				);
+			},
+		};
+	}
+
+	return field;
+} );
