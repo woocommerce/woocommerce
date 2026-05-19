@@ -14,28 +14,34 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class PrincipalAwareQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(array(
-				'name' => 'PrincipalAwareQueryResult',
-				'fields' => array(
-					'result' => array( 'type' => Type::nonNull(Type::string()) ),
-				),
-			))),
-			'description' => __( 'Echoes the principal user_login (or \"anonymous\").', 'woocommerce' ),
-			'args' => array(
+			'type'        => Type::nonNull(
+				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
+					array(
+						'name'   => 'PrincipalAwareQueryResult',
+						'fields' => array(
+							'result' => array( 'type' => Type::nonNull( Type::string() ) ),
+						),
+					)
+				)
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'description' => __( 'Echoes the principal user_login (or \"anonymous\").', 'woocommerce' ),
+			'args'        => array(),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( PrincipalAwareQueryCommand::class );
 
-		$execute_args = array();
+		$execute_args               = array();
 		$execute_args['_principal'] = $context['principal'];
 
-		if ( ! ResolverHelpers::authorize_command( $command, array(
-			'_principal' => $context['principal'],
-		) ) ) {
+		if ( ! ResolverHelpers::authorize_command(
+			$command,
+			array(
+				'_principal' => $context['principal'],
+			)
+		) ) {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
 

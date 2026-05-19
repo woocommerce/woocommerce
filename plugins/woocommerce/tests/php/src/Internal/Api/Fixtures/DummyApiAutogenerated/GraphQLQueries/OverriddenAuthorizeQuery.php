@@ -14,16 +14,19 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class OverriddenAuthorizeQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(array(
-				'name' => 'OverriddenAuthorizeQueryResult',
-				'fields' => array(
-					'result' => array( 'type' => Type::nonNull(Type::string()) ),
-				),
-			))),
-			'description' => __( 'authorize() supersedes the cap inherited from the parent', 'woocommerce' ),
-			'args' => array(
+			'type'        => Type::nonNull(
+				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
+					array(
+						'name'   => 'OverriddenAuthorizeQueryResult',
+						'fields' => array(
+							'result' => array( 'type' => Type::nonNull( Type::string() ) ),
+						),
+					)
+				)
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'description' => __( 'authorize() supersedes the cap inherited from the parent', 'woocommerce' ),
+			'args'        => array(),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -32,8 +35,10 @@ class OverriddenAuthorizeQuery {
 
 		$execute_args = array();
 
-		if ( ! ResolverHelpers::authorize_command( $command, array(
-		) ) ) {
+		if ( ! ResolverHelpers::authorize_command(
+			$command,
+			array()
+		) ) {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
 
@@ -54,6 +59,6 @@ class OverriddenAuthorizeQuery {
 	 * method should be consulted instead).
 	 */
 	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
-		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('manage_options') )->authorize( $principal );
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_options' ) )->authorize( $principal );
 	}
 }

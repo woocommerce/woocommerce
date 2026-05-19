@@ -17,17 +17,17 @@ class Named {
 		if ( null === self::$instance ) {
 			self::$instance = new InterfaceType(
 				array(
-					'name' => 'Named',
+					'name'        => 'Named',
 					'description' => __( 'An object with a human-readable label', 'woocommerce' ),
-					'fields' => fn() => array(
+					'fields'      => fn() => array(
 						'label' => array(
-							'type' => Type::nonNull(Type::string()),
-								'description' => __( 'The display label for this object', 'woocommerce' ),
-									),
-						'id' => array(
-							'type' => Type::nonNull(Type::int()),
-								'description' => __( 'The unique numeric identifier', 'woocommerce' ),
-									),
+							'type'        => Type::nonNull( Type::string() ),
+							'description' => __( 'The display label for this object', 'woocommerce' ),
+						),
+						'id'    => array(
+							'type'        => Type::nonNull( Type::int() ),
+							'description' => __( 'The unique numeric identifier', 'woocommerce' ),
+						),
 					),
 					'resolveType' => function ( $value ) {
 						$class = get_class( $value );

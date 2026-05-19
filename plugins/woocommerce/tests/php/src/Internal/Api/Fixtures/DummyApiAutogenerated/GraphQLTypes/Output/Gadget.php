@@ -16,24 +16,24 @@ class Gadget {
 		if ( null === self::$instance ) {
 			self::$instance = new ObjectType(
 				array(
-					'name' => 'GadgetType',
+					'name'        => 'GadgetType',
 					'description' => __( 'A dummy gadget that uses a class-level #[Name] override', 'woocommerce' ),
-					'interfaces' => fn() => array(
-							NamedInterface::get(),
+					'interfaces'  => fn() => array(
+						NamedInterface::get(),
 					),
-					'fields' => fn() => array(
+					'fields'      => fn() => array(
 						'parts_count' => array(
-							'type' => Type::nonNull(Type::int()),
-								'description' => __( 'How many parts the gadget contains', 'woocommerce' ),
-										),
-						'label' => array(
-							'type' => Type::nonNull(Type::string()),
-								'description' => __( 'The display label for this object', 'woocommerce' ),
-										),
-						'id' => array(
-							'type' => Type::nonNull(Type::int()),
-								'description' => __( 'The unique numeric identifier', 'woocommerce' ),
-										),
+							'type'        => Type::nonNull( Type::int() ),
+							'description' => __( 'How many parts the gadget contains', 'woocommerce' ),
+						),
+						'label'       => array(
+							'type'        => Type::nonNull( Type::string() ),
+							'description' => __( 'The display label for this object', 'woocommerce' ),
+						),
+						'id'          => array(
+							'type'        => Type::nonNull( Type::int() ),
+							'description' => __( 'The unique numeric identifier', 'woocommerce' ),
+						),
 					),
 				)
 			);

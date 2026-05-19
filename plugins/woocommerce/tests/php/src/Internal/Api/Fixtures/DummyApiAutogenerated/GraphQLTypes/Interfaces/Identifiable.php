@@ -16,13 +16,13 @@ class Identifiable {
 		if ( null === self::$instance ) {
 			self::$instance = new InterfaceType(
 				array(
-					'name' => 'HasId',
+					'name'        => 'HasId',
 					'description' => __( 'An object with a numeric identifier', 'woocommerce' ),
-					'fields' => fn() => array(
+					'fields'      => fn() => array(
 						'id' => array(
-							'type' => Type::nonNull(Type::int()),
-								'description' => __( 'The unique numeric identifier', 'woocommerce' ),
-									),
+							'type'        => Type::nonNull( Type::int() ),
+							'description' => __( 'The unique numeric identifier', 'woocommerce' ),
+						),
 					),
 					'resolveType' => function ( $value ) {
 						$class = get_class( $value );

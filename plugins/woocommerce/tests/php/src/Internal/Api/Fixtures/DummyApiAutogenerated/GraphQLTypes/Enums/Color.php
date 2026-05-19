@@ -15,20 +15,20 @@ class Color {
 		if ( null === self::$instance ) {
 			self::$instance = new EnumType(
 				array(
-					'name' => 'Color',
+					'name'        => 'Color',
 					'description' => __( 'A simple color palette', 'woocommerce' ),
-					'values' => array(
-						'RED' => array(
-							'value' => ColorEnum::Red,
-								'description' => __( 'Red', 'woocommerce' ),
-								),
+					'values'      => array(
+						'RED'   => array(
+							'value'       => ColorEnum::Red,
+							'description' => __( 'Red', 'woocommerce' ),
+						),
 						'GREEN' => array(
-							'value' => ColorEnum::Green,
-								'description' => __( 'Green', 'woocommerce' ),
-								),
-						'BLUE' => array(
+							'value'       => ColorEnum::Green,
+							'description' => __( 'Green', 'woocommerce' ),
+						),
+						'BLUE'  => array(
 							'value' => ColorEnum::Blue,
-									),
+						),
 					),
 				)
 			);

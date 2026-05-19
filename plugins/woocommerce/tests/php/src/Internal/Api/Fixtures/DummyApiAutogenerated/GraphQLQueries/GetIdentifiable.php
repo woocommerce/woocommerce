@@ -15,15 +15,15 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class GetIdentifiable {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(NamedInterface::get()),
+			'type'        => Type::nonNull( NamedInterface::get() ),
 			'description' => __( 'Return either a Widget or a Gadget, both of which implement Named', 'woocommerce' ),
-			'args' => array(
+			'args'        => array(
 				'kind' => array(
-					'type' => Type::nonNull(Type::string()),
-						'description' => __( 'Which kind of object to return', 'woocommerce' ),
-						),
+					'type'        => Type::nonNull( Type::string() ),
+					'description' => __( 'Which kind of object to return', 'woocommerce' ),
+				),
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 

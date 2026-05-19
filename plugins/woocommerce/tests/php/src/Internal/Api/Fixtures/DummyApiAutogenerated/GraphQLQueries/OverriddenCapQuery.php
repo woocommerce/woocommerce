@@ -14,16 +14,19 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class OverriddenCapQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(array(
-				'name' => 'OverriddenCapQueryResult',
-				'fields' => array(
-					'result' => array( 'type' => Type::nonNull(Type::string()) ),
-				),
-			))),
-			'description' => __( 'Overrides the inherited manage_options with manage_categories', 'woocommerce' ),
-			'args' => array(
+			'type'        => Type::nonNull(
+				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
+					array(
+						'name'   => 'OverriddenCapQueryResult',
+						'fields' => array(
+							'result' => array( 'type' => Type::nonNull( Type::string() ) ),
+						),
+					)
+				)
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'description' => __( 'Overrides the inherited manage_options with manage_categories', 'woocommerce' ),
+			'args'        => array(),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -55,6 +58,6 @@ class OverriddenCapQuery {
 	 * method should be consulted instead).
 	 */
 	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
-		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('manage_categories') )->authorize( $principal );
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_categories' ) )->authorize( $principal );
 	}
 }

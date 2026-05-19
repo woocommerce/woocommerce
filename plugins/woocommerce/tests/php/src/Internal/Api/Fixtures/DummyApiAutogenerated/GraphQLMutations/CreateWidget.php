@@ -16,20 +16,20 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class CreateWidget {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(WidgetType::get()),
+			'type'        => Type::nonNull( WidgetType::get() ),
 			'description' => __( 'Create a new widget', 'woocommerce' ),
-			'args' => array(
-				'input' => array(
-					'type' => Type::nonNull(CreateWidgetInput::get()),
-						'description' => __( 'The data for the new widget', 'woocommerce' ),
-						),
+			'args'        => array(
+				'input'          => array(
+					'type'        => Type::nonNull( CreateWidgetInput::get() ),
+					'description' => __( 'The data for the new widget', 'woocommerce' ),
+				),
 				'related_inputs' => array(
-					'type' => Type::listOf(Type::nonNull(CreateWidgetInput::get())),
-						'description' => __( 'Related widget inputs for array input generation coverage', 'woocommerce' ),
-						'defaultValue' => NULL,
-					),
+					'type'         => Type::listOf( Type::nonNull( CreateWidgetInput::get() ) ),
+					'description'  => __( 'Related widget inputs for array input generation coverage', 'woocommerce' ),
+					'defaultValue' => null,
+				),
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -67,15 +67,15 @@ class CreateWidget {
 	 * method should be consulted instead).
 	 */
 	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
-		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('manage_options') )->authorize( $principal );
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_options' ) )->authorize( $principal );
 	}
 
 	private static function convert_create_widget_input( array $data ): \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\InputTypes\CreateWidgetInput {
 		$input = new \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\InputTypes\CreateWidgetInput();
 
-			if ( array_key_exists( 'label', $data ) ) {
+		if ( array_key_exists( 'label', $data ) ) {
 			$input->mark_provided( 'label' );
-					$input->label = $data['label'];
+				$input->label = $data['label'];
 		}
 		if ( array_key_exists( 'weight', $data ) ) {
 			$input->mark_provided( 'weight' );

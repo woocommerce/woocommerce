@@ -116,7 +116,8 @@
 	"autoload-dev": {
 		"psr-4": {
 			"Automattic\\WooCommerce\\Tests\\": "tests/php/src/",
-			"Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/"
+			"Automattic\\WooCommerce\\Testing\\Tools\\": "tests/Tools/",
+			"Automattic\\WooCommerce\\Api\\Infrastructure\\DesignTime\\": "bin/api-builder/"
 		},
 		"classmap": [
 			"tests/legacy/unit-tests/rest-api/Helpers"

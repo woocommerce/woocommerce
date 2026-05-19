@@ -84,9 +84,9 @@ if ( PHP_VERSION_ID < 80100 ) {
 	exit( 2 );
 }
 
-require_once __DIR__ . '/../../../../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
-use Automattic\WooCommerce\Internal\Api\DesignTime\Scripts\ApiBuilder;
+use Automattic\WooCommerce\Api\Infrastructure\DesignTime\ApiBuilder;
 
 $skip_linter = isset( $options['no-linter'] );
 

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-namespace Automattic\WooCommerce\Tests\Internal\Api\DesignTime\Scripts;
+namespace Automattic\WooCommerce\Tests\Api\Infrastructure\DesignTime;
 
-use Automattic\WooCommerce\Internal\Api\DesignTime\Scripts\StalenessChecker;
+use Automattic\WooCommerce\Api\Infrastructure\DesignTime\StalenessChecker;
 use WC_Unit_Test_Case;
 
 /**

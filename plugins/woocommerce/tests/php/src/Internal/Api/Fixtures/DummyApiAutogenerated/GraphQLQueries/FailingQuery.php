@@ -14,21 +14,25 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class FailingQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(array(
-				'name' => 'FailingQueryResult',
-				'fields' => array(
-					'result' => array( 'type' => Type::nonNull(Type::string()) ),
-				),
-			))),
-			'description' => __( 'Always throws an exception', 'woocommerce' ),
-			'args' => array(
-				'kind' => array(
-					'type' => Type::nonNull(Type::string()),
-						'description' => __( 'What kind of failure to raise', 'woocommerce' ),
-						'defaultValue' => 'invalid_argument',
-					),
+			'type'        => Type::nonNull(
+				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
+					array(
+						'name'   => 'FailingQueryResult',
+						'fields' => array(
+							'result' => array( 'type' => Type::nonNull( Type::string() ) ),
+						),
+					)
+				)
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'description' => __( 'Always throws an exception', 'woocommerce' ),
+			'args'        => array(
+				'kind' => array(
+					'type'         => Type::nonNull( Type::string() ),
+					'description'  => __( 'What kind of failure to raise', 'woocommerce' ),
+					'defaultValue' => 'invalid_argument',
+				),
+			),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 

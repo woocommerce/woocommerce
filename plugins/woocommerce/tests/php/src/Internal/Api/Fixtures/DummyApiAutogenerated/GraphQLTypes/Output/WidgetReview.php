@@ -16,24 +16,24 @@ class WidgetReview {
 		if ( null === self::$instance ) {
 			self::$instance = new ObjectType(
 				array(
-					'name' => 'WidgetReview',
+					'name'        => 'WidgetReview',
 					'description' => __( 'A review left for a widget', 'woocommerce' ),
-					'interfaces' => fn() => array(
-							IdentifiableInterface::get(),
+					'interfaces'  => fn() => array(
+						IdentifiableInterface::get(),
 					),
-					'fields' => fn() => array(
-						'body' => array(
-							'type' => Type::nonNull(Type::string()),
-								'description' => __( 'The body of the review', 'woocommerce' ),
-										),
+					'fields'      => fn() => array(
+						'body'  => array(
+							'type'        => Type::nonNull( Type::string() ),
+							'description' => __( 'The body of the review', 'woocommerce' ),
+						),
 						'score' => array(
-							'type' => Type::nonNull(Type::int()),
-								'description' => __( 'A score between 0 and 5', 'woocommerce' ),
-										),
-						'id' => array(
-							'type' => Type::nonNull(Type::int()),
-								'description' => __( 'The unique numeric identifier', 'woocommerce' ),
-										),
+							'type'        => Type::nonNull( Type::int() ),
+							'description' => __( 'A score between 0 and 5', 'woocommerce' ),
+						),
+						'id'    => array(
+							'type'        => Type::nonNull( Type::int() ),
+							'description' => __( 'The unique numeric identifier', 'woocommerce' ),
+						),
 					),
 				)
 			);

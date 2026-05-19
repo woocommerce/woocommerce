@@ -14,20 +14,24 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class AuthorizeThrowsQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(array(
-				'name' => 'AuthorizeThrowsQueryResult',
-				'fields' => array(
-					'result' => array( 'type' => Type::nonNull(Type::string()) ),
-				),
-			))),
-			'description' => __( 'authorize() throws to verify exception translation', 'woocommerce' ),
-			'args' => array(
-				'kind' => array(
-					'type' => Type::nonNull(Type::string()),
-						'description' => __( 'Which exception class authorize() should raise.', 'woocommerce' ),
+			'type'        => Type::nonNull(
+				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
+					array(
+						'name'   => 'AuthorizeThrowsQueryResult',
+						'fields' => array(
+							'result' => array( 'type' => Type::nonNull( Type::string() ) ),
 						),
+					)
+				)
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'description' => __( 'authorize() throws to verify exception translation', 'woocommerce' ),
+			'args'        => array(
+				'kind' => array(
+					'type'        => Type::nonNull( Type::string() ),
+					'description' => __( 'Which exception class authorize() should raise.', 'woocommerce' ),
+				),
+			),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -39,9 +43,12 @@ class AuthorizeThrowsQuery {
 			$execute_args['kind'] = $args['kind'];
 		}
 
-		if ( ! ResolverHelpers::authorize_command( $command, array(
-			'kind' => $execute_args['kind'],
-		) ) ) {
+		if ( ! ResolverHelpers::authorize_command(
+			$command,
+			array(
+				'kind' => $execute_args['kind'],
+			)
+		) ) {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
 

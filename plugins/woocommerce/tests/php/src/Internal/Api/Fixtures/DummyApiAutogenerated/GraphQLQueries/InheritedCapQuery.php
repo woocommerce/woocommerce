@@ -14,16 +14,19 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class InheritedCapQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(array(
-				'name' => 'InheritedCapQueryResult',
-				'fields' => array(
-					'result' => array( 'type' => Type::nonNull(Type::string()) ),
-				),
-			))),
-			'description' => __( 'Inherits manage_options from its abstract parent', 'woocommerce' ),
-			'args' => array(
+			'type'        => Type::nonNull(
+				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
+					array(
+						'name'   => 'InheritedCapQueryResult',
+						'fields' => array(
+							'result' => array( 'type' => Type::nonNull( Type::string() ) ),
+						),
+					)
+				)
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'description' => __( 'Inherits manage_options from its abstract parent', 'woocommerce' ),
+			'args'        => array(),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -55,6 +58,6 @@ class InheritedCapQuery {
 	 * method should be consulted instead).
 	 */
 	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
-		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('manage_options') )->authorize( $principal );
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_options' ) )->authorize( $principal );
 	}
 }

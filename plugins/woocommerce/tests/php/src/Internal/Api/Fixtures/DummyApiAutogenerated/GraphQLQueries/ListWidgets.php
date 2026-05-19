@@ -17,47 +17,47 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class ListWidgets {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(WidgetConnectionType::get()),
+			'type'        => Type::nonNull( WidgetConnectionType::get() ),
 			'description' => __( 'List widgets with cursor-based pagination', 'woocommerce' ),
-			'args' => array(
-				'first' => array(
-					'type' => Type::int(),
-						'description' => __( 'Return the first N results. Must be between 0 and 100.', 'woocommerce' ),
-						'defaultValue' => NULL,
-					),
-				'last' => array(
-					'type' => Type::int(),
-						'description' => __( 'Return the last N results. Must be between 0 and 100.', 'woocommerce' ),
-						'defaultValue' => NULL,
-					),
-				'after' => array(
-					'type' => Type::string(),
-						'description' => __( 'Return results after this cursor.', 'woocommerce' ),
-						'defaultValue' => NULL,
-					),
-				'before' => array(
-					'type' => Type::string(),
-						'description' => __( 'Return results before this cursor.', 'woocommerce' ),
-						'defaultValue' => NULL,
-					),
-				'search' => array(
-					'type' => Type::string(),
-						'description' => __( 'A free-text search term', 'woocommerce' ),
-						'defaultValue' => NULL,
-					),
-				'color' => array(
-					'type' => ColorType::get(),
-						'description' => __( 'Filter widgets by color', 'woocommerce' ),
-						'defaultValue' => NULL,
-					),
+			'args'        => array(
+				'first'        => array(
+					'type'         => Type::int(),
+					'description'  => __( 'Return the first N results. Must be between 0 and 100.', 'woocommerce' ),
+					'defaultValue' => null,
+				),
+				'last'         => array(
+					'type'         => Type::int(),
+					'description'  => __( 'Return the last N results. Must be between 0 and 100.', 'woocommerce' ),
+					'defaultValue' => null,
+				),
+				'after'        => array(
+					'type'         => Type::string(),
+					'description'  => __( 'Return results after this cursor.', 'woocommerce' ),
+					'defaultValue' => null,
+				),
+				'before'       => array(
+					'type'         => Type::string(),
+					'description'  => __( 'Return results before this cursor.', 'woocommerce' ),
+					'defaultValue' => null,
+				),
+				'search'       => array(
+					'type'         => Type::string(),
+					'description'  => __( 'A free-text search term', 'woocommerce' ),
+					'defaultValue' => null,
+				),
+				'color'        => array(
+					'type'         => ColorType::get(),
+					'description'  => __( 'Filter widgets by color', 'woocommerce' ),
+					'defaultValue' => null,
+				),
 				'min_priority' => array(
-					'type' => PriorityType::get(),
-						'description' => __( 'A second filter applied after the unrolled ones', 'woocommerce' ),
-						'defaultValue' => NULL,
-					),
+					'type'         => PriorityType::get(),
+					'description'  => __( 'A second filter applied after the unrolled ones', 'woocommerce' ),
+					'defaultValue' => null,
+				),
 			),
-			'complexity' => ResolverHelpers::complexity_from_pagination(...),
-			'resolve' => array( self::class, 'resolve' ),
+			'complexity'  => ResolverHelpers::complexity_from_pagination( ... ),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -70,12 +70,12 @@ class ListWidgets {
 
 		$command = \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\Infrastructure\ClassResolver::resolve_class( ListWidgetsCommand::class );
 
-		$query_info = QueryInfoExtractor::extract_from_info( $info, $args );
-		$execute_args = array();
+		$query_info                 = QueryInfoExtractor::extract_from_info( $info, $args );
+		$execute_args               = array();
 		$execute_args['pagination'] = ResolverHelpers::create_pagination_params( $args );
-		$execute_args['filters'] = ResolverHelpers::create_input(
+		$execute_args['filters']    = ResolverHelpers::create_input(
 			fn() => new \Automattic\WooCommerce\Tests\Internal\Api\Fixtures\DummyApi\InputTypes\WidgetFilterInput(
-				search: $args['search'] ?? NULL,
+				search: $args['search'] ?? null,
 				color: $args['color'],
 			)
 		);
@@ -101,6 +101,6 @@ class ListWidgets {
 	 * method should be consulted instead).
 	 */
 	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
-		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('manage_options') )->authorize( $principal ) && ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('edit_posts') )->authorize( $principal );
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_options' ) )->authorize( $principal ) && ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'edit_posts' ) )->authorize( $principal );
 	}
 }

@@ -14,21 +14,25 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class GetGreeting {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(array(
-				'name' => 'GetGreetingResult',
-				'fields' => array(
-					'result' => array( 'type' => Type::nonNull(Type::string()) ),
-				),
-			))),
-			'description' => __( 'Build a greeting', 'woocommerce' ),
-			'args' => array(
-				'name' => array(
-					'type' => Type::string(),
-						'description' => __( 'Who to greet (defaults to \"world\")', 'woocommerce' ),
-						'defaultValue' => NULL,
-					),
+			'type'        => Type::nonNull(
+				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
+					array(
+						'name'   => 'GetGreetingResult',
+						'fields' => array(
+							'result' => array( 'type' => Type::nonNull( Type::string() ) ),
+						),
+					)
+				)
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'description' => __( 'Build a greeting', 'woocommerce' ),
+			'args'        => array(
+				'name' => array(
+					'type'         => Type::string(),
+					'description'  => __( 'Who to greet (defaults to \"world\")', 'woocommerce' ),
+					'defaultValue' => null,
+				),
+			),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 

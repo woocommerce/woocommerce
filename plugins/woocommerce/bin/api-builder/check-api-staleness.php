@@ -13,9 +13,9 @@ if ( PHP_VERSION_ID < 80100 ) {
 	exit( 2 );
 }
 
-require_once __DIR__ . '/../../../../../vendor/autoload.php';
+require_once __DIR__ . '/../../vendor/autoload.php';
 
-use Automattic\WooCommerce\Internal\Api\DesignTime\Scripts\StalenessChecker;
+use Automattic\WooCommerce\Api\Infrastructure\DesignTime\StalenessChecker;
 
 if ( StalenessChecker::is_stale() ) {
 	fwrite( STDERR, "ERROR: Generated GraphQL API code is out of date.\n" );

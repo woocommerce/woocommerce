@@ -16,17 +16,17 @@ class WidgetFilter {
 		if ( null === self::$instance ) {
 			self::$instance = new InputObjectType(
 				array(
-					'name' => 'WidgetFilterArgs',
+					'name'        => 'WidgetFilterArgs',
 					'description' => __( 'Filters applied to a widget listing', 'woocommerce' ),
-					'fields' => fn() => array(
+					'fields'      => fn() => array(
 						'search' => array(
-							'type' => Type::string(),
-								'description' => __( 'A free-text search term', 'woocommerce' ),
-							),
-						'color' => array(
-							'type' => ColorType::get(),
-								'description' => __( 'Filter widgets by color', 'woocommerce' ),
-							),
+							'type'        => Type::string(),
+							'description' => __( 'A free-text search term', 'woocommerce' ),
+						),
+						'color'  => array(
+							'type'        => ColorType::get(),
+							'description' => __( 'Filter widgets by color', 'woocommerce' ),
+						),
 					),
 				)
 			);

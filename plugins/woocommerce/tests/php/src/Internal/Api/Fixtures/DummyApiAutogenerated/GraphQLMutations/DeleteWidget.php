@@ -15,20 +15,20 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class DeleteWidget {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(OperationResultType::get()),
+			'type'        => Type::nonNull( OperationResultType::get() ),
 			'description' => __( 'Delete a widget', 'woocommerce' ),
-			'args' => array(
-				'id' => array(
-					'type' => Type::nonNull(Type::int()),
-						'description' => __( 'The widget id to delete', 'woocommerce' ),
-						),
+			'args'        => array(
+				'id'    => array(
+					'type'        => Type::nonNull( Type::int() ),
+					'description' => __( 'The widget id to delete', 'woocommerce' ),
+				),
 				'force' => array(
-					'type' => Type::nonNull(Type::boolean()),
-						'description' => __( 'When true, ignore \"not found\" errors', 'woocommerce' ),
-						'defaultValue' => false,
-					),
+					'type'         => Type::nonNull( Type::boolean() ),
+					'description'  => __( 'When true, ignore \"not found\" errors', 'woocommerce' ),
+					'defaultValue' => false,
+				),
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -66,6 +66,6 @@ class DeleteWidget {
 	 * method should be consulted instead).
 	 */
 	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
-		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('manage_options') )->authorize( $principal );
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_options' ) )->authorize( $principal );
 	}
 }

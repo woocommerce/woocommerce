@@ -14,19 +14,23 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class AuthorizeOnlyQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(array(
-				'name' => 'AuthorizeOnlyQueryResult',
-				'fields' => array(
-					'result' => array( 'type' => Type::nonNull(Type::string()) ),
-				),
-			))),
-			'description' => __( 'Authorization decided solely by authorize()', 'woocommerce' ),
-			'args' => array(
-				'allow' => array(
-					'type' => Type::nonNull(Type::boolean()),
-							),
+			'type'        => Type::nonNull(
+				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
+					array(
+						'name'   => 'AuthorizeOnlyQueryResult',
+						'fields' => array(
+							'result' => array( 'type' => Type::nonNull( Type::string() ) ),
+						),
+					)
+				)
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'description' => __( 'Authorization decided solely by authorize()', 'woocommerce' ),
+			'args'        => array(
+				'allow' => array(
+					'type' => Type::nonNull( Type::boolean() ),
+				),
+			),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -38,9 +42,12 @@ class AuthorizeOnlyQuery {
 			$execute_args['allow'] = $args['allow'];
 		}
 
-		if ( ! ResolverHelpers::authorize_command( $command, array(
-			'allow' => $execute_args['allow'],
-		) ) ) {
+		if ( ! ResolverHelpers::authorize_command(
+			$command,
+			array(
+				'allow' => $execute_args['allow'],
+			)
+		) ) {
 			throw ResolverHelpers::build_authorization_error( $context['principal'] );
 		}
 

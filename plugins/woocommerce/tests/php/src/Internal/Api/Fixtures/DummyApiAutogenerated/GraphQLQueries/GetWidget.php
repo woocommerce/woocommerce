@@ -15,15 +15,15 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class GetWidget {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => WidgetType::get(),
+			'type'        => WidgetType::get(),
 			'description' => __( 'Fetch a single widget by ID', 'woocommerce' ),
-			'args' => array(
+			'args'        => array(
 				'id' => array(
-					'type' => Type::nonNull(Type::int()),
-						'description' => __( 'The ID of the widget to fetch', 'woocommerce' ),
-						),
+					'type'        => Type::nonNull( Type::int() ),
+					'description' => __( 'The ID of the widget to fetch', 'woocommerce' ),
+				),
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -58,6 +58,6 @@ class GetWidget {
 	 * method should be consulted instead).
 	 */
 	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
-		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('manage_options') )->authorize( $principal );
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_options' ) )->authorize( $principal );
 	}
 }

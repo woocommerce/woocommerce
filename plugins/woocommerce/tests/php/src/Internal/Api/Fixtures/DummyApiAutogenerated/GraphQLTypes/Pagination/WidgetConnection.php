@@ -21,14 +21,22 @@ class WidgetConnection {
 					'description' => __( 'A connection to a list of Widget items.', 'woocommerce' ),
 					'fields'      => fn() => array(
 						'edges'       => array(
-							'type' => Type::nonNull( Type::listOf( Type::nonNull(
-								WidgetEdge::get()
-							) ) ),
+							'type' => Type::nonNull(
+								Type::listOf(
+									Type::nonNull(
+										WidgetEdge::get()
+									)
+								)
+							),
 						),
 						'nodes'       => array(
-							'type' => Type::nonNull( Type::listOf( Type::nonNull(
-								WidgetType::get()
-							) ) ),
+							'type' => Type::nonNull(
+								Type::listOf(
+									Type::nonNull(
+										WidgetType::get()
+									)
+								)
+							),
 						),
 						'page_info'   => array(
 							'type' => Type::nonNull( PageInfo::get() ),

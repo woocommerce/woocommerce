@@ -14,16 +14,19 @@ use Automattic\WooCommerce\Api\Infrastructure\Schema\Type;
 class MergedCapsQuery {
 	public static function get_field_definition(): array {
 		return array(
-			'type' => Type::nonNull(new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(array(
-				'name' => 'MergedCapsQueryResult',
-				'fields' => array(
-					'result' => array( 'type' => Type::nonNull(Type::string()) ),
-				),
-			))),
-			'description' => __( 'Merges caps from a parent class and a trait', 'woocommerce' ),
-			'args' => array(
+			'type'        => Type::nonNull(
+				new \Automattic\WooCommerce\Api\Infrastructure\Schema\ObjectType(
+					array(
+						'name'   => 'MergedCapsQueryResult',
+						'fields' => array(
+							'result' => array( 'type' => Type::nonNull( Type::string() ) ),
+						),
+					)
+				)
 			),
-			'resolve' => array( self::class, 'resolve' ),
+			'description' => __( 'Merges caps from a parent class and a trait', 'woocommerce' ),
+			'args'        => array(),
+			'resolve'     => array( self::class, 'resolve' ),
 		);
 	}
 
@@ -55,6 +58,6 @@ class MergedCapsQuery {
 	 * method should be consulted instead).
 	 */
 	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
-		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('manage_options') )->authorize( $principal ) && ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability('edit_posts') )->authorize( $principal );
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'manage_options' ) )->authorize( $principal ) && ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'edit_posts' ) )->authorize( $principal );
 	}
 }

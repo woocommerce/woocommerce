@@ -19,7 +19,7 @@ class RootMutationType {
 				array(
 					'name'   => 'Mutation',
 					'fields' => fn() => array(
-						'increment' => Increment::get_field_definition(),
+						'increment'    => Increment::get_field_definition(),
 						'createWidget' => CreateWidget::get_field_definition(),
 						'deleteWidget' => DeleteWidget::get_field_definition(),
 					),

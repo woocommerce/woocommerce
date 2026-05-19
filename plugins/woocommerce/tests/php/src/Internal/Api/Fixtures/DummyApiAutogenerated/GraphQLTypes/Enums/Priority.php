@@ -15,21 +15,21 @@ class Priority {
 		if ( null === self::$instance ) {
 			self::$instance = new EnumType(
 				array(
-					'name' => 'TaskPriority',
+					'name'        => 'TaskPriority',
 					'description' => __( 'Priority level for a task', 'woocommerce' ),
-					'values' => array(
-						'LOW' => array(
-							'value' => PriorityEnum::Low,
-								'description' => __( 'Low priority', 'woocommerce' ),
-								),
+					'values'      => array(
+						'LOW'             => array(
+							'value'       => PriorityEnum::Low,
+							'description' => __( 'Low priority', 'woocommerce' ),
+						),
 						'NORMAL_PRIORITY' => array(
 							'value' => PriorityEnum::Normal,
-									),
-						'HIGH' => array(
-							'value' => PriorityEnum::High,
-								'description' => __( 'High priority', 'woocommerce' ),
-								'deprecationReason' => 'Use NORMAL_PRIORITY instead.',
-							),
+						),
+						'HIGH'            => array(
+							'value'             => PriorityEnum::High,
+							'description'       => __( 'High priority', 'woocommerce' ),
+							'deprecationReason' => 'Use NORMAL_PRIORITY instead.',
+						),
 					),
 				)
 			);

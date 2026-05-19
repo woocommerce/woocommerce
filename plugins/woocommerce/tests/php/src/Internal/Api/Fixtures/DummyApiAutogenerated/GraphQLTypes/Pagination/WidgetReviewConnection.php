@@ -21,14 +21,22 @@ class WidgetReviewConnection {
 					'description' => __( 'A connection to a list of WidgetReview items.', 'woocommerce' ),
 					'fields'      => fn() => array(
 						'edges'       => array(
-							'type' => Type::nonNull( Type::listOf( Type::nonNull(
-								WidgetReviewEdge::get()
-							) ) ),
+							'type' => Type::nonNull(
+								Type::listOf(
+									Type::nonNull(
+										WidgetReviewEdge::get()
+									)
+								)
+							),
 						),
 						'nodes'       => array(
-							'type' => Type::nonNull( Type::listOf( Type::nonNull(
-								WidgetReviewType::get()
-							) ) ),
+							'type' => Type::nonNull(
+								Type::listOf(
+									Type::nonNull(
+										WidgetReviewType::get()
+									)
+								)
+							),
 						),
 						'page_info'   => array(
 							'type' => Type::nonNull( PageInfo::get() ),
