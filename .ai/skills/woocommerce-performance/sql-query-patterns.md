@@ -344,6 +344,8 @@ FROM (
 
 **If the required index does not exist:** Adding it is a prerequisite, not a reason to skip the pattern. Evaluate whether the index maintenance cost is justified (it usually is for high-read, low-write tables like `wp_wc_orders`). For example, `SELECT MAX(post_modified_gmt) FROM wp_posts WHERE post_type IN ('product', 'product_variation')` is a Pattern H candidate, but `post_modified_gmt` has no standard WordPress index — the optimization requires first adding `(post_type, post_modified_gmt)`.
 
+**Table scope:** The pattern applies to any table with a suitable composite index — not only `wp_wc_orders`. The same logic works on `wp_posts` or any custom table provided the WHERE + ORDER BY columns are covered by a single index.
+
 **Canonical example:** `ListTable` in `src/Internal/Admin/Orders/ListTable.php`.
 
 ---
@@ -360,5 +362,6 @@ When writing or reviewing a SQL query:
 - [ ] Does a `WHERE` clause combine `meta_key IN (...) AND meta_value IN (...)`? Split into per-key conditions. (Pattern F)
 - [ ] Are two fan-out tables joined flat (multiplying rows)? Decouple one side as a subquery. (Pattern F)
 - [ ] Does a `wp_posts + wp_postmeta` join fetch data available in `wc_product_meta_lookup`? Use the lookup table if the regeneration guard passes. (Pattern G)
-- [ ] Does the query compute `MIN(col)` or `MAX(col)` over a large indexed table? Use `UNION ALL + LIMIT 1` if WHERE + ORDER BY share a composite index and the column is NOT NULL. (Pattern H)
+- [ ] Does any dynamic `IN (...)` list guard against empty input and sanitize values? (Cross-cutting)
+- [ ] Does the query compute `MIN(col)` or `MAX(col)` over a large indexed table? Use `UNION ALL + LIMIT 1` if WHERE + ORDER BY share a composite index and the column is `NOT NULL` (or both branches add `AND col IS NOT NULL`). (Pattern H)
 - [ ] After applying any optimization, verify the execution plan changed as expected with `EXPLAIN` — check `type`, `key`, `rows`, and `Extra` columns before and after.
