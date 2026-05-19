@@ -111,6 +111,12 @@ class FulfillmentsCsvImporter {
 		}
 
 		try {
+			// Strip UTF-8 BOM if present so Excel-saved CSVs match the first header alias.
+			$bom = fread( $handle, 3 );
+			if ( "\xEF\xBB\xBF" !== $bom ) {
+				rewind( $handle );
+			}
+
 			$header_raw = fgetcsv( $handle, 0, $this->options['delimiter'], $this->options['enclosure'], '' );
 			if ( false === $header_raw || null === $header_raw ) {
 				$summary['rows'][] = $this->fail( 0, 'empty_csv', __( 'CSV file is empty.', 'woocommerce' ) );
