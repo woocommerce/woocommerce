@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import {
 	Button,
@@ -35,6 +35,20 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 	const [ error, setError ] = useState< string | null >( null );
 	const [ summary, setSummary ] = useState< ImporterSummary | null >( null );
 
+	// Mirror form state in refs so handleSubmit can have a stable identity.
+	const fileRef = useRef< File | null >( null );
+	const notifyCustomerRef = useRef( notifyCustomer );
+	const updateExistingRef = useRef( updateExisting );
+	useEffect( () => {
+		fileRef.current = file;
+	}, [ file ] );
+	useEffect( () => {
+		notifyCustomerRef.current = notifyCustomer;
+	}, [ notifyCustomer ] );
+	useEffect( () => {
+		updateExistingRef.current = updateExisting;
+	}, [ updateExisting ] );
+
 	const reset = useCallback( () => {
 		setFile( null );
 		setNotifyCustomer( false );
@@ -52,64 +66,73 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 		onClose();
 	}, [ isImporting, reset, onClose ] );
 
-	const handleSubmit = useCallback(
-		async ( event: React.FormEvent ) => {
-			event.preventDefault();
-			if ( ! file ) {
-				setError(
-					__(
-						'Choose a CSV file before starting the import.',
-						'woocommerce'
-					)
-				);
-				return;
-			}
-
+	const handleFileChange = useCallback(
+		( e: React.ChangeEvent< HTMLInputElement > ) => {
+			const picked = e.target.files?.[ 0 ] ?? null;
+			setFile( picked );
 			setError( null );
-			setSummary( null );
-			setIsImporting( true );
-
-			recordEvent( 'fulfillments_import_started', {
-				notify_customer: notifyCustomer,
-				update_existing: updateExisting,
-			} );
-
-			const formData = new FormData();
-			formData.append( 'file', file );
-			formData.append( 'notify_customer', notifyCustomer ? '1' : '0' );
-			formData.append( 'update_existing', updateExisting ? '1' : '0' );
-
-			try {
-				const path =
-					window.wcFulfillmentsImporterSettings?.importRoute ||
-					'/wc/v3/fulfillments/import';
-				const response = ( await apiFetch( {
-					path,
-					method: 'POST',
-					body: formData,
-				} ) ) as ImporterSummary;
-				setSummary( response );
-				recordEvent( 'fulfillments_import_completed', {
-					created: response.created,
-					updated: response.updated,
-					skipped: response.skipped,
-					failed: response.failed,
-					notified: response.notified,
-				} );
-			} catch ( e ) {
-				const message =
-					( e as { message?: string } )?.message ||
-					__( 'Import failed.', 'woocommerce' );
-				setError( message );
-				recordEvent( 'fulfillments_import_failed', {
-					message,
-				} );
-			} finally {
-				setIsImporting( false );
-			}
 		},
-		[ file, notifyCustomer, updateExisting ]
+		[]
 	);
+
+	const handleSubmit = useCallback( async ( event: React.FormEvent ) => {
+		event.preventDefault();
+		const currentFile = fileRef.current;
+		const currentNotify = notifyCustomerRef.current;
+		const currentUpdate = updateExistingRef.current;
+		if ( ! currentFile ) {
+			setError(
+				__(
+					'Choose a CSV file before starting the import.',
+					'woocommerce'
+				)
+			);
+			return;
+		}
+
+		setError( null );
+		setSummary( null );
+		setIsImporting( true );
+
+		recordEvent( 'fulfillments_import_started', {
+			notify_customer: currentNotify,
+			update_existing: currentUpdate,
+		} );
+
+		const formData = new FormData();
+		formData.append( 'file', currentFile );
+		formData.append( 'notify_customer', currentNotify ? '1' : '0' );
+		formData.append( 'update_existing', currentUpdate ? '1' : '0' );
+
+		try {
+			const path =
+				window.wcFulfillmentsImporterSettings?.importRoute ||
+				'/wc/v3/fulfillments/import';
+			const response = ( await apiFetch( {
+				path,
+				method: 'POST',
+				body: formData,
+			} ) ) as ImporterSummary;
+			setSummary( response );
+			recordEvent( 'fulfillments_import_completed', {
+				created: response.created,
+				updated: response.updated,
+				skipped: response.skipped,
+				failed: response.failed,
+				notified: response.notified,
+			} );
+		} catch ( e ) {
+			const message =
+				( e as { message?: string } )?.message ||
+				__( 'Import failed.', 'woocommerce' );
+			setError( message );
+			recordEvent( 'fulfillments_import_failed', {
+				message,
+			} );
+		} finally {
+			setIsImporting( false );
+		}
+	}, [] );
 
 	if ( ! isOpen ) {
 		return null;
@@ -167,11 +190,7 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 							accept=".csv,.txt,text/csv,text/plain"
 							required
 							disabled={ isImporting }
-							onChange={ ( e ) => {
-								const picked = e.target.files?.[ 0 ] ?? null;
-								setFile( picked );
-								setError( null );
-							} }
+							onChange={ handleFileChange }
 						/>
 					</div>
 
