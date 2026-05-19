@@ -54,7 +54,7 @@ export const CheckoutRecoveryRecommendationsList = ( {
 
 const CheckoutRecoveryRecommendations = () => {
 	const activePlugins = useSelect(
-		( select ) => select( pluginsStore ).getActivePlugins(),
+		( select ) => select( pluginsStore ).getActivePlugins() ?? [],
 		[]
 	);
 

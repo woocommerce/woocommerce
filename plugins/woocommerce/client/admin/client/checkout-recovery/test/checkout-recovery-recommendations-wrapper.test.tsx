@@ -3,6 +3,7 @@
  */
 import { render } from '@testing-library/react';
 import { useSelect } from '@wordpress/data';
+import { useUser } from '@woocommerce/data';
 
 /**
  * Internal dependencies
@@ -15,6 +16,10 @@ jest.mock( '@wordpress/data', () => ( {
 	useDispatch: jest.fn(),
 } ) );
 
+jest.mock( '@woocommerce/data', () => ( {
+	useUser: jest.fn(),
+} ) );
+
 jest.mock( '@wordpress/element', () => ( {
 	...jest.requireActual( '@wordpress/element' ),
 	Suspense: () => <div>Checkout recovery recommendations</div>,
@@ -22,9 +27,6 @@ jest.mock( '@wordpress/element', () => ( {
 
 const eligibleSelectReturn = {
 	getOption: () => 'yes',
-	getCurrentUser: () => ( {
-		is_super_admin: true,
-	} ),
 	hasStartedResolution: () => true,
 	hasFinishedResolution: () => true,
 };
@@ -34,6 +36,9 @@ describe( 'CheckoutRecoveryRecommendations wrapper', () => {
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => eligibleSelectReturn )
 		);
+		( useUser as jest.Mock ).mockReturnValue( {
+			currentUserCan: () => true,
+		} );
 	} );
 
 	it( 'should not render outside wc-settings', () => {
@@ -114,15 +119,9 @@ describe( 'CheckoutRecoveryRecommendations wrapper', () => {
 	} );
 
 	it( 'should not render when the user lacks install_plugins capability', () => {
-		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
-			fn( () => ( {
-				...eligibleSelectReturn,
-				getCurrentUser: () => ( {
-					is_super_admin: false,
-					capabilities: {},
-				} ),
-			} ) )
-		);
+		( useUser as jest.Mock ).mockReturnValue( {
+			currentUserCan: () => false,
+		} );
 
 		const { queryByText } = render(
 			<CheckoutRecoveryRecommendations
