@@ -133,7 +133,7 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'inventory-fields',
 		__( 'Inventory', 'woocommerce' ),
-		[ 'sku', 'stock', 'manage_stock', 'stock_quantity' ]
+		[ 'sku', 'manage_stock', 'stock', 'stock_quantity' ]
 	),
 	createProductEditFormGroup(
 		'product-organization-fields',
