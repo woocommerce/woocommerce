@@ -736,6 +736,7 @@ describe( 'product edit utils', () => {
 					'images',
 					'sku',
 					'manage_stock',
+					'stock',
 					'stock_quantity',
 					'shipping_class',
 					'weight',
@@ -746,7 +747,6 @@ describe( 'product edit utils', () => {
 			);
 			expectFieldsHidden( fieldIds, [
 				...parentOwnedFieldIds,
-				'stock',
 				'downloadable',
 				'price',
 				'tax_status',
@@ -957,6 +957,7 @@ describe( 'product edit utils', () => {
 					'product_status',
 					'images',
 					'manage_stock',
+					'stock',
 					'shipping_class',
 					'weight',
 					'length',
@@ -969,7 +970,6 @@ describe( 'product edit utils', () => {
 				...priceFieldIds,
 				'downloadable',
 				'sku',
-				'stock',
 				'stock_quantity',
 				'tax_status',
 			] );
@@ -1005,6 +1005,7 @@ describe( 'product edit utils', () => {
 				expect.arrayContaining( [
 					'product_status',
 					'images',
+					'stock',
 					'manage_stock',
 					'shipping_class',
 					'weight',
@@ -1018,7 +1019,6 @@ describe( 'product edit utils', () => {
 				...priceFieldIds,
 				'downloadable',
 				'sku',
-				'stock',
 				'stock_quantity',
 				'tax_status',
 			] );
@@ -1098,7 +1098,12 @@ describe( 'product edit utils', () => {
 				{
 					id: 'inventory-fields',
 					label: 'Inventory',
-					children: [ 'sku', 'manage_stock', 'stock_quantity' ],
+					children: [
+						'sku',
+						'manage_stock',
+						'stock',
+						'stock_quantity',
+					],
 				},
 				{
 					id: 'product-organization-fields',
@@ -1326,7 +1331,12 @@ describe( 'product edit utils', () => {
 				{
 					id: 'inventory-fields',
 					label: 'Inventory',
-					children: [ 'sku', 'manage_stock', 'stock_quantity' ],
+					children: [
+						'sku',
+						'manage_stock',
+						'stock',
+						'stock_quantity',
+					],
 				},
 				{
 					id: 'shipping-fields',
