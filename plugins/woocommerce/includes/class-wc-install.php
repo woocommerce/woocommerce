@@ -1742,7 +1742,10 @@ class WC_Install {
 
 		// Stock Notifications Table Schema.
 		$stock_notifications_table_schema = wc_get_container()->get( StockNotificationsDataStore::class )->get_database_schema();
-		$order_stats_table_schema         = self::get_order_stats_table_schema( $collate );
+
+		// Email Unsubscribes table — generic across email types; each row pairs an email hash with an email-kind identifier.
+		$email_unsubscribes_table_schema = wc_get_container()->get( \Automattic\WooCommerce\Internal\Email\Unsubscribes\Storage::class )->get_database_schema();
+		$order_stats_table_schema        = self::get_order_stats_table_schema( $collate );
 
 		$mysql_version = wc_get_server_database_version()['number'];
 		if ( version_compare( $mysql_version, '5.6', '>=' ) ) {
@@ -2086,6 +2089,7 @@ CREATE TABLE {$wpdb->prefix}wc_category_lookup (
 ) $collate;
 $hpos_table_schema;
 $stock_notifications_table_schema;
+$email_unsubscribes_table_schema;
 		";
 
 		return $tables;
