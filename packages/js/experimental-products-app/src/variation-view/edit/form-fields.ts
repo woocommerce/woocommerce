@@ -15,52 +15,59 @@ function createFormGroup(
 	id: string,
 	label: string,
 	children: VariationFormField[]
-): VariationFormField {
-	return {
-		id,
-		label,
-		children,
-	};
+): FormField {
+	return { id, label, children };
 }
 
-const DIMENSIONS_FORM_FIELD: VariationFormField = {
+const SALE_SCHEDULE_DATES: FormField = {
+	id: 'sale-schedule-dates',
+	layout: { type: 'row' as const },
+	children: [ 'date_on_sale_from', 'date_on_sale_to' ],
+};
+
+const DIMENSIONS: FormField = {
 	id: 'dimensions',
 	layout: { type: 'row' as const },
 	children: [ 'length', 'width', 'height' ],
 };
 
-const DOWNLOADABLE_FILES_FORM_FIELD: VariationFormField = createFormGroup(
-	'downloadable-files-fields',
-	__( 'Downloadable files', 'woocommerce' ),
-	[ 'downloadable' ]
-);
-
-export const VARIATION_FORM_FIELDS = [
+export const VARIATION_FORM_FIELDS: VariationFormField[] = [
 	createFormGroup( 'general-fields', __( 'General', 'woocommerce' ), [
 		'product_status',
+		'tax_class',
 	] ),
 	createFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
 		'sale_price',
 		'schedule_sale',
-		{
-			id: 'sale-schedule-dates',
-			layout: { type: 'row' as const },
-			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
-		},
+		SALE_SCHEDULE_DATES,
 		'cost_of_goods_sold',
 	] ),
-	createFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [ 'images' ] ),
-	DOWNLOADABLE_FILES_FORM_FIELD,
+	createFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
+		'images',
+	] ),
 	createFormGroup( 'inventory-fields', __( 'Inventory', 'woocommerce' ), [
 		'sku',
+		'global_unique_id',
 		'manage_stock',
-		'stock',
 		'stock_quantity',
+		'stock',
+		'allow_backorders',
+		'low_stock_amount',
 	] ),
 	createFormGroup( 'shipping-fields', __( 'Shipping', 'woocommerce' ), [
 		'shipping_class',
-		DIMENSIONS_FORM_FIELD,
+		DIMENSIONS,
 		'weight',
 	] ),
-] satisfies VariationFormField[];
+	createFormGroup( 'details-fields', __( 'Details', 'woocommerce' ), [
+		'description',
+		'downloadable',
+		'virtual',
+	] ),
+	createFormGroup(
+		'downloadable-files-fields',
+		__( 'Downloadable files', 'woocommerce' ),
+		[ 'downloadable_files', 'download_limit', 'download_expiry' ]
+	),
+];
