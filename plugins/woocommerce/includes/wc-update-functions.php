@@ -3511,12 +3511,13 @@ function wc_update_10801_restore_orders_meta_key_value_index(): void {
 		return;
 	}
 
-	$alter_sql = empty( $columns )
-		? "ALTER TABLE {$table_name} ADD INDEX {$index_name} (meta_key(50), meta_value(20))"
-		: "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(50), meta_value(20))";
-
-	// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
-	$wpdb->query( $alter_sql );
+	if ( empty( $columns ) ) {
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "ALTER TABLE {$table_name} ADD INDEX {$index_name} (meta_key(50), meta_value(20))" );
+	} else {
+		// phpcs:ignore WordPress.DB.PreparedSQL.InterpolatedNotPrepared
+		$wpdb->query( "ALTER TABLE {$table_name} DROP INDEX {$index_name}, ADD INDEX {$index_name} (meta_key(50), meta_value(20))" );
+	}
 }
 
 /**
