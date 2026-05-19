@@ -5,6 +5,8 @@
  * @package WooCommerce\Emails
  */
 
+use Automattic\WooCommerce\Enums\OrderStatus;
+
 defined( 'ABSPATH' ) || exit;
 
 if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
@@ -13,9 +15,9 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 	 * Customer Checkout Recovery email.
 	 *
 	 * A transactional email that prompts the customer to complete a checkout they
-	 * left pending. The send is scheduled via Action Scheduler one hour after the
-	 * pending order is created, gated on the merchant's `automated` setting. Merchants
-	 * can also trigger the email manually from the order edit page.
+	 * left pending. The send is scheduled via Action Scheduler two hours after
+	 * the pending order is created, gated on the merchant's `automated` setting.
+	 * Merchants can also trigger the email manually from the order edit page.
 	 *
 	 * @class    WC_Email_Customer_Checkout_Recovery
 	 * @version  10.9.0
@@ -27,7 +29,6 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * Plugins known to provide their own checkout recovery flow.
 		 *
 		 * Detection is install-only.
-		 * ToDo: Detect if the plugin is actually configured for checkout recovery.
 		 */
 		public const KNOWN_RECOVERY_HANDLERS = array(
 			'automatewoo/automatewoo.php' => 'AutomateWoo',
@@ -44,7 +45,10 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 			$this->email_group    = 'order-updates';
 			$this->template_html  = 'emails/customer-checkout-recovery.php';
 			$this->template_plain = 'emails/plain/customer-checkout-recovery.php';
+			$this->template_block = 'emails/block/customer-checkout-recovery.php';
 			$this->placeholders   = array(
+				'{site_title}'   => $this->get_blogname(),
+				'{site_address}' => wp_parse_url( home_url(), PHP_URL_HOST ),
 				'{order_date}'   => '',
 				'{order_number}' => '',
 			);
@@ -94,11 +98,42 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 				$this->placeholders['{order_number}'] = $order->get_order_number();
 			}
 
-			if ( $this->is_enabled() && $this->get_recipient() ) {
+			if ( $this->is_enabled() && $this->get_recipient() && $this->is_order_eligible_for_send() ) {
 				$this->send( $this->get_recipient(), $this->get_subject(), $this->get_content(), $this->get_headers(), $this->get_attachments() );
 			}
 
 			$this->restore_locale();
+		}
+
+		/**
+		 * Defence-in-depth status check at send time.
+		 *
+		 * @since 10.9.0
+		 * @return bool
+		 */
+		protected function is_order_eligible_for_send(): bool {
+			if ( ! $this->object instanceof WC_Order ) {
+				return false;
+			}
+
+			/**
+			 * Filter the order statuses that are eligible to receive the checkout recovery email.
+			 *
+			 * Defaults to `pending` only. Partner integrations or merchants who want recovery
+			 * to fire for other states (e.g. `failed`) can widen the list here.
+			 *
+			 * @since 10.9.0
+			 *
+			 * @param string[] $eligible_statuses Default: `[ 'pending' ]`.
+			 * @param WC_Order $order             Order being inspected.
+			 */
+			$eligible_statuses = (array) apply_filters(
+				'woocommerce_checkout_recovery_eligible_statuses',
+				array( OrderStatus::PENDING ),
+				$this->object
+			);
+
+			return in_array( $this->object->get_status(), $eligible_statuses, true );
 		}
 
 		/**
@@ -141,13 +176,23 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * the send. Static so the manual-send handler and the scheduler can call
 		 * it without instantiating the email class.
 		 *
+		 * When the merchant has never saved the suppression toggle (so the option
+		 * key isn't present in the saved settings) the check falls back to
+		 * `get_active_recovery_handlers()`, mirroring the dynamic default applied
+		 * in `init_form_fields()`.
+		 *
 		 * @since 10.9.0
 		 *
 		 * @return bool
 		 */
 		public static function is_suppressed(): bool {
 			$settings = (array) get_option( 'woocommerce_customer_checkout_recovery_settings', array() );
-			if ( isset( $settings['suppressed'] ) && 'yes' === $settings['suppressed'] ) {
+
+			if ( isset( $settings['suppressed'] ) ) {
+				if ( 'yes' === $settings['suppressed'] ) {
+					return true;
+				}
+			} elseif ( ! empty( self::get_active_recovery_handlers() ) ) {
 				return true;
 			}
 
@@ -267,7 +312,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * can choose between scheduled automatic sends and manual-only dispatch.
 		 */
 		public function init_form_fields(): void {
-			$placeholder_text  = sprintf(
+			$placeholder_text = sprintf(
 				/* translators: %s: list of placeholders */
 				__( 'Available placeholders: %s', 'woocommerce' ),
 				'<code>' . implode( '</code>, <code>', array_map( 'esc_html', array_keys( $this->placeholders ) ) ) . '</code>'

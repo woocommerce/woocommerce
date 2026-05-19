@@ -54,7 +54,7 @@ For RC and stable releases, deploying to our staging environment and monitoring 
 3. **Update the tracking issue** to reflect that the release is blocked, including details about the bug.
 4. **Do not publish** any of the draft GitHub releases that were created, but also **do not delete** them. They will be published later along with the version that passes validation.
 5. **Coordinate with the relevant engineering team(s)** to develop a fix.
-6. **Involve Developer Advocacy** if the release schedule needs to be adjusted or communicated publicly ([read more on delays below](#release-delay)).
+6. **Involve Developer Advocacy** if the release schedule needs to be adjusted or communicated publicly ([read more on delays below](#the-release-needs-to-be-delayed-what-should-we-do)).
 
 #### How to proceed once the bug fix is merged into the release branch?
 
@@ -73,15 +73,15 @@ If a severe regression or bug is discovered (e.g., checkout failure or unrecover
    - Use the [`Release: Update stable tag`](https://github.com/woocommerce/woocommerce/actions/workflows/release-update-stable-tag.yml) workflow, making sure to check the _Revert_ option to allow downgrading.
    - Merge any auto-generated PRs right away.
 
-<h3 id="release-delay">The release needs to be delayed. What should we do?</h3>
+### The release needs to be delayed. What should we do?
 
 1. Create an internal Slack thread to communicate with the engineering teams as well as Dev Advocacy. This also provides an opportunity for teams to share any additional context and verify or challenge schedule changes.
 2. Ask Dev Advocacy to communicate the delay publicly.
 3. If there's a clear ETA on the patch release with a fix, [update the release calendar](https://developer.woocommerce.com/release-calendar/) with the new dates.
 
-Remember to not plan the patch release [too close to the weekend](#release-delay-weekend-id).
+Remember to not plan the patch release [too close to the weekend](#the-release-was-delayed-can-we-still-release-after-tuesday).
 
-<h3 id="release-delay-weekend-id">The release was delayed. Can we still release after Tuesday?</h3>
+### The release was delayed. Can we still release after Tuesday?
 
 In general, avoid releasing after Tuesday, especially close to a weekend.
 

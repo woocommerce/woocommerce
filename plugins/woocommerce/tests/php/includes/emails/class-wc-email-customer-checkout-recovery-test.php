@@ -60,7 +60,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Constructor wires the email id, customer flag, group, and template paths.
+	 * @testdox Constructor wires the email id, customer flag, group, and template paths (HTML, plain, block).
 	 */
 	public function test_constructor_sets_email_identity(): void {
 		$this->assertSame( 'customer_checkout_recovery', $this->sut->id );
@@ -68,6 +68,17 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$this->assertSame( 'order-updates', $this->sut->email_group );
 		$this->assertSame( 'emails/customer-checkout-recovery.php', $this->sut->template_html );
 		$this->assertSame( 'emails/plain/customer-checkout-recovery.php', $this->sut->template_plain );
+		$this->assertSame( 'emails/block/customer-checkout-recovery.php', $this->sut->template_block );
+	}
+
+	/**
+	 * @testdox Constructor declares the placeholders the default copy and the Available placeholders hint advertise.
+	 */
+	public function test_constructor_declares_expected_placeholders(): void {
+		$this->assertArrayHasKey( '{site_title}', $this->sut->placeholders );
+		$this->assertArrayHasKey( '{site_address}', $this->sut->placeholders );
+		$this->assertArrayHasKey( '{order_date}', $this->sut->placeholders );
+		$this->assertArrayHasKey( '{order_number}', $this->sut->placeholders );
 	}
 
 	/**
@@ -172,7 +183,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 		$this->sut->trigger( 0 );
-		$after  = count( $mailer->mock_sent );
+		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before, $after, 'trigger() must not send to the previous order\'s recipient when called with an invalid id.' );
 		$this->assertSame( '', $this->sut->recipient );
@@ -191,7 +202,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 		$this->sut->trigger( $order->get_id() );
-		$after  = count( $mailer->mock_sent );
+		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before, $after, 'Disabled checkout recovery email must not dispatch any mail.' );
 	}
@@ -208,7 +219,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 		$this->sut->trigger( $order->get_id() );
-		$after  = count( $mailer->mock_sent );
+		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before + 1, $after, 'Enabled checkout recovery email must dispatch one message.' );
 		$this->assertSame( $order->get_billing_email(), $this->sut->recipient );
@@ -227,7 +238,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
 		$this->sut->trigger( $order->get_id() );
-		$after  = count( $mailer->mock_sent );
+		$after = count( $mailer->mock_sent );
 
 		$this->assertSame( $before, $after, 'Suppressed checkout recovery email must not dispatch.' );
 	}
@@ -254,6 +265,83 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		}
 
 		$this->assertSame( $before, $after, 'Filter-suppressed checkout recovery email must not dispatch.' );
+	}
+
+	/**
+	 * @testdox trigger() refuses to send when the order has moved past pending, even if the action is invoked directly with the order id.
+	 */
+	public function test_trigger_skips_when_order_not_pending(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( 'completed' );
+		$order->save();
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		$this->sut->trigger( $order->get_id() );
+		$after = count( $mailer->mock_sent );
+
+		$this->assertSame( $before, $after, 'Recovery email must not dispatch for non-pending orders.' );
+	}
+
+	/**
+	 * @testdox The woocommerce_checkout_recovery_eligible_statuses filter widens the eligible set for trigger().
+	 */
+	public function test_trigger_eligible_statuses_filter_can_widen(): void {
+		$this->sut->update_option( 'enabled', 'yes' );
+		$this->sut->enabled = 'yes';
+
+		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
+		$order->set_status( 'failed' );
+		$order->save();
+
+		$widen = static function () {
+			return array( 'pending', 'failed' );
+		};
+		add_filter( 'woocommerce_checkout_recovery_eligible_statuses', $widen );
+
+		$mailer = tests_retrieve_phpmailer_instance();
+		$before = count( $mailer->mock_sent );
+		try {
+			$this->sut->trigger( $order->get_id() );
+			$after = count( $mailer->mock_sent );
+		} finally {
+			remove_filter( 'woocommerce_checkout_recovery_eligible_statuses', $widen );
+		}
+
+		$this->assertSame( $before + 1, $after, 'Widened filter must allow non-default statuses to receive the email.' );
+	}
+
+	/**
+	 * @testdox is_suppressed() falls back to handler detection on fresh installs where the merchant has not saved the suppression toggle yet, so the UI default and the runtime gate stay in sync.
+	 */
+	public function test_is_suppressed_falls_back_to_handler_detection_when_option_unset(): void {
+		delete_option( 'woocommerce_customer_checkout_recovery_settings' );
+		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
+
+		$this->assertTrue( WC_Email_Customer_Checkout_Recovery::is_suppressed() );
+	}
+
+	/**
+	 * @testdox is_suppressed() returns false on a fresh install when no known handler is active so core's recovery email runs by default.
+	 */
+	public function test_is_suppressed_returns_false_when_option_unset_and_no_handler(): void {
+		delete_option( 'woocommerce_customer_checkout_recovery_settings' );
+		update_option( 'active_plugins', array() );
+
+		$this->assertFalse( WC_Email_Customer_Checkout_Recovery::is_suppressed() );
+	}
+
+	/**
+	 * @testdox is_suppressed() respects a saved 'no' even when a known handler is active — merchant override wins over auto-detection.
+	 */
+	public function test_is_suppressed_respects_explicit_no_when_handler_active(): void {
+		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
+		$this->sut->update_option( 'suppressed', 'no' );
+
+		$this->assertFalse( WC_Email_Customer_Checkout_Recovery::is_suppressed() );
 	}
 
 	/**
