@@ -64,10 +64,10 @@ class OrderMilestoneEasterEgg {
 		}
 
 		// phpcs:disable WordPress.Security.NonceVerification.Recommended
-		$woo_egg_key  = isset( $_GET['woo_egg'] ) ? sanitize_key( wp_unslash( $_GET['woo_egg'] ) ) : '';
-		$page_param   = isset( $_GET['page'] )     ? sanitize_key( wp_unslash( $_GET['page'] ) )    : '';
-		$action_param = isset( $_GET['action'] )   ? sanitize_key( wp_unslash( $_GET['action'] ) )  : '';
-		$id_param     = isset( $_GET['id'] )       ? absint( wp_unslash( $_GET['id'] ) )             : 0;
+		$woo_egg_key  = isset( $_GET['woo_egg'] ) ? sanitize_text_field( wp_unslash( $_GET['woo_egg'] ) ) : '';
+		$page_param   = isset( $_GET['page'] )     ? sanitize_text_field( wp_unslash( $_GET['page'] ) )    : '';
+		$action_param = isset( $_GET['action'] )   ? sanitize_text_field( wp_unslash( $_GET['action'] ) )  : '';
+		$id_param     = isset( $_GET['id'] )       ? absint( wp_unslash( $_GET['id'] ) )                   : 0;
 		// phpcs:enable WordPress.Security.NonceVerification.Recommended
 
 		// Preview: ?woo_egg=first|hundred|thousand lets admins preview any milestone without real orders.
@@ -114,17 +114,19 @@ class OrderMilestoneEasterEgg {
 		}
 
 		// Only load the SVG variants needed for the matched milestones.
+		$all_msgs = array();
 		if ( $is_debug_preview ) {
-			$needed_variants = array_keys( $this->get_variant_map() );
+			$all_msgs        = $this->get_milestone_messages();
+			$preview_variant = $all_msgs[ $woo_egg_key ]['variant'] ?? null;
+			$needed_variants = $preview_variant ? array( $preview_variant ) : array_keys( $this->get_variant_map() );
 		} else {
 			$needed_variants = array_unique(
 				array_filter( array_column( array_values( $milestone_map ), 'variant' ) )
 			);
 		}
 
-		$svg_data     = $this->get_svg_data( $needed_variants );
-		$all_messages = $this->get_milestone_messages();
-		$labels       = $this->get_ui_labels();
+		$svg_data = $this->get_svg_data( $needed_variants );
+		$labels   = $this->get_ui_labels();
 
 		$asset_file = WC_ABSPATH . 'assets/client/admin/wp-admin-scripts/order-milestone-easter-egg.asset.php';
 		$asset      = file_exists( $asset_file )
@@ -143,20 +145,22 @@ class OrderMilestoneEasterEgg {
 		);
 
 		wp_enqueue_script( 'wc-order-milestone-easter-egg' );
-		wp_localize_script(
-			'wc-order-milestone-easter-egg',
-			'wcOrderMilestoneEgg',
-			array(
-				'milestones'    => $milestone_map,
-				'svgData'       => $svg_data,
-				'allMilestones' => $all_messages,
-				'labels'        => $labels,
-				'dismiss'       => array(
-					'url'   => admin_url( 'admin-ajax.php' ),
-					'nonce' => wp_create_nonce( 'wc_egg_dismiss' ),
-				),
-			)
+
+		$localize_data = array(
+			'milestones' => $milestone_map,
+			'svgData'    => $svg_data,
+			'labels'     => $labels,
+			'dismiss'    => array(
+				'url'   => admin_url( 'admin-ajax.php' ),
+				'nonce' => wp_create_nonce( 'wc_egg_dismiss' ),
+			),
 		);
+
+		if ( $is_debug_preview ) {
+			$localize_data['allMilestones'] = $all_msgs;
+		}
+
+		wp_localize_script( 'wc-order-milestone-easter-egg', 'wcOrderMilestoneEgg', $localize_data );
 	}
 
 	/**
@@ -235,25 +239,22 @@ class OrderMilestoneEasterEgg {
 	private function get_milestone_messages(): array {
 		return array(
 			'first'    => array(
-				'title'     => __( 'Cha-ching! Order number one', 'woocommerce' ),
-				'subtitle'  => __( "That's a big deal. Smash the llama. You've earned it.", 'woocommerce' ),
-				'variant'   => 'lama',
-				'boomText'  => __( 'One down', 'woocommerce' ),
-				'shareText' => __( 'I got my first sale with WooCommerce', 'woocommerce' ),
+				'title'    => __( 'Cha-ching! Order number one', 'woocommerce' ),
+				'subtitle' => __( "That's a big deal. Smash the llama. You've earned it.", 'woocommerce' ),
+				'variant'  => 'lama',
+				'boomText' => __( 'One down', 'woocommerce' ),
 			),
 			'hundred'  => array(
-				'title'     => __( 'Triple digits looks good on you', 'woocommerce' ),
-				'subtitle'  => __( "A hundred orders means you're juggling a lot. Take a moment to celebrate", 'woocommerce' ),
-				'variant'   => 'octo',
-				'boomText'  => __( 'Hands full', 'woocommerce' ),
-				'shareText' => __( 'I got my 100th sale with WooCommerce', 'woocommerce' ),
+				'title'    => __( 'Triple digits looks good on you', 'woocommerce' ),
+				'subtitle' => __( "A hundred orders means you're juggling a lot. Take a moment to celebrate", 'woocommerce' ),
+				'variant'  => 'octo',
+				'boomText' => __( 'Hands full', 'woocommerce' ),
 			),
 			'thousand' => array(
-				'title'     => __( 'ONE. THOUSAND. ORDERS', 'woocommerce' ),
-				'subtitle'  => __( 'Seriously. A thousand orders. This called for a bigger piñata', 'woocommerce' ),
-				'variant'   => 'whale',
-				'boomText'  => __( 'Off the charts', 'woocommerce' ),
-				'shareText' => __( 'I got my 1000th sale with WooCommerce', 'woocommerce' ),
+				'title'    => __( 'ONE. THOUSAND. ORDERS', 'woocommerce' ),
+				'subtitle' => __( 'Seriously. A thousand orders. This called for a bigger piñata', 'woocommerce' ),
+				'variant'  => 'whale',
+				'boomText' => __( 'Off the charts', 'woocommerce' ),
 			),
 		);
 	}
