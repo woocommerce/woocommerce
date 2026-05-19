@@ -206,66 +206,16 @@ export type FilterItemFields = {
 | `checkbox-list` | `count`, `color`, `depth`, `filterType === 'rating'` | Text label, no count, no swatch, no indent |
 | `chips` | `count`, `color` | Text label, no count, no swatch style |
 
-Both built-ins mirror parent items and add local `index` for show-more. Parent never provides `index`.
+Both built-ins mirror parent items and add local show-more metadata (`index`, `hidden`). Parent never provides these child-owned fields.
 
 ### SSR / hydration gotchas
 
 - PHP renders first `displayLimit` items plus selected overflow items.
 - Template iterates child `state.items`, not parent `state.selectableItems`.
-- Child `state.items` mirrors `store(storeNamespace).state.selectableItems` and adds local `index`.
+- Child `state.items` mirrors `store(storeNamespace).state.selectableItems` and adds local show-more metadata (`index`, `hidden`).
 - Child `actions.toggle()` forwards current item to parent `actions.toggle( item )`.
 - `data-wp-each-child` SSR nodes must carry `data-wp-context={ item }` under child namespace.
-- Hydration owns the full list; hidden overflow comes from child `state.itemHidden`.
-
-### Minimal child store pattern
-
-```typescript
-const { state } = store( 'woocommerce/product-filter-chips', {
-	state: {
-		get items() {
-			const { storeNamespace } = getContext< { storeNamespace: string } >();
-			return store< SelectableItemsParentStore >( storeNamespace )
-				.state.selectableItems.map( ( item, index ) => ( {
-					...item,
-					index,
-				} ) );
-		},
-		get itemHidden() {
-			const { item } = getContext< { item?: SelectableItem< { index?: number } > } >();
-			const { displayLimit, isExpanded } = getContext< { displayLimit: number; isExpanded: boolean } >();
-			return ! isExpanded && ! item?.selected && ( item?.index ?? 0 ) >= displayLimit;
-		},
-	},
-	actions: {
-		toggle() {
-			const { storeNamespace, item } = getContext< {
-				storeNamespace: string;
-				item?: SelectableItem;
-			} >();
-			store< SelectableItemsParentStore >( storeNamespace ).actions.toggle( item );
-		},
-	},
-} );
-```
-
-### Minimal renderer pattern
-
-```php
-<div data-wp-interactive="woocommerce/product-filter-chips" data-wp-context='{"storeNamespace":"woocommerce/product-filters","displayLimit":15,"isExpanded":false}'>
-	<div class="wc-block-product-filter-chips__items">
-		<?php foreach ( $visible_items as $item ) : ?>
-			<button data-wp-each-child <?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); ?> data-wp-on--click="actions.toggle">
-				<?php echo esc_html( $item['label'] ); ?>
-			</button>
-		<?php endforeach; ?>
-		<template data-wp-each--item="state.items" data-wp-each-key="context.item.id">
-			<button data-wp-on--click="actions.toggle" data-wp-text="context.item.label"></button>
-		</template>
-	</div>
-</div>
-```
-
-Reference implementation: `ProductFilterCheckboxList.php`, `ProductFilterChips.php`, `checkbox-list/frontend.ts`, `chips/frontend.ts`.
+- Hydration owns the full list; hidden overflow comes from the mirrored item's `context.item.hidden` field.
 
 ---
 
