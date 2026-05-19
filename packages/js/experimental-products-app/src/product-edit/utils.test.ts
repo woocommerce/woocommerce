@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { Field } from '@wordpress/dataviews';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -41,9 +42,24 @@ jest.mock( '@woocommerce/settings', () => ( {
 		symbolPosition: 'left',
 		precision: 2,
 	},
+	getSetting: jest.fn(),
 } ) );
 
 describe( 'product edit utils', () => {
+	const getSettingMock = getSetting as jest.Mock;
+	const mockCostOfGoodsSoldFeatureEnabled = ( isEnabled: boolean ) => {
+		getSettingMock.mockImplementation( ( name, fallback ) =>
+			name === 'admin'
+				? {
+						features: {
+							cost_of_goods_sold: {
+								is_enabled: isEnabled,
+							},
+						},
+				  }
+				: fallback
+		);
+	};
 	const buildProduct = (
 		overrides: Partial< ProductEntityRecord > = {}
 	): ProductEntityRecord =>
@@ -60,6 +76,21 @@ describe( 'product edit utils', () => {
 			images: [],
 			...overrides,
 		} as unknown as ProductEntityRecord );
+	const buildCostOfGoodsSold = (
+		definedValue: number | string | null = 5
+	): ProductEntityRecord[ 'cost_of_goods_sold' ] => ( {
+		values: [
+			{
+				defined_value: definedValue,
+				effective_value: definedValue,
+			},
+		],
+		total_value: definedValue,
+	} );
+
+	beforeEach( () => {
+		mockCostOfGoodsSoldFeatureEnabled( true );
+	} );
 
 	it( 'returns the original values for a single selected product', () => {
 		const product = buildProduct( {
@@ -311,6 +342,7 @@ describe( 'product edit utils', () => {
 			'schedule_sale',
 			'date_on_sale_from',
 			'date_on_sale_to',
+			'cost_of_goods_sold',
 		];
 		const basePriceFieldIds = [ 'regular_price', 'sale_price' ];
 		const managedStockFieldIds = [ 'manage_stock', 'stock_quantity' ];
@@ -340,6 +372,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -352,6 +385,7 @@ describe( 'product edit utils', () => {
 				'schedule_sale',
 				'date_on_sale_from',
 				'date_on_sale_to',
+				'cost_of_goods_sold',
 				'images',
 				'sku',
 				'stock',
@@ -361,10 +395,10 @@ describe( 'product edit utils', () => {
 				'tags',
 				'featured',
 				'shipping_class',
-				'weight',
 				'length',
 				'width',
 				'height',
+				'weight',
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
@@ -396,10 +430,41 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
-			expectFieldOrder( fieldIds, [ 'regular_price', 'sale_price' ] );
+			expectFieldOrder( fieldIds, [
+				'regular_price',
+				'sale_price',
+				'schedule_sale',
+				'date_on_sale_from',
+				'date_on_sale_to',
+				'cost_of_goods_sold',
+			] );
+		} );
+
+		it( 'hides cost of goods when the API data is unavailable', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					type: 'simple',
+				} ),
+			] );
+
+			expectFieldsHidden( fieldIds, [ 'cost_of_goods_sold' ] );
+		} );
+
+		it( 'hides cost of goods when the feature is disabled', () => {
+			mockCostOfGoodsSoldFeatureEnabled( false );
+
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					type: 'simple',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
+				} ),
+			] );
+
+			expectFieldsHidden( fieldIds, [ 'cost_of_goods_sold' ] );
 		} );
 
 		it( 'hides shipping fields for virtual simple products', () => {
@@ -655,6 +720,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -666,6 +732,7 @@ describe( 'product edit utils', () => {
 					'schedule_sale',
 					'date_on_sale_from',
 					'date_on_sale_to',
+					'cost_of_goods_sold',
 					'images',
 					'sku',
 					'manage_stock',
@@ -695,6 +762,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -707,6 +775,7 @@ describe( 'product edit utils', () => {
 					'schedule_sale',
 					'date_on_sale_from',
 					'date_on_sale_to',
+					'cost_of_goods_sold',
 					'stock',
 					'manage_stock',
 					'product_status',
@@ -732,7 +801,7 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expectFieldsHidden( fieldIds, [ 'downloadable' ] );
+			expect( fieldIds ).toContain( 'downloadable' );
 			expectFieldsHidden( fieldIds, shippingFieldIds );
 		} );
 
@@ -766,6 +835,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 				buildProduct( {
 					id: 34,
@@ -775,6 +845,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -785,6 +856,7 @@ describe( 'product edit utils', () => {
 					'schedule_sale',
 					'date_on_sale_from',
 					'date_on_sale_to',
+					'cost_of_goods_sold',
 					...bulkSellableInstanceFieldIds,
 				] )
 			);
@@ -827,7 +899,7 @@ describe( 'product edit utils', () => {
 			] );
 		} );
 
-		it( 'hides downloadable fields for simple product and variation selections', () => {
+		it( 'shows downloadable fields for simple product and variation selections', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					id: 1,
@@ -842,7 +914,7 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expectFieldsHidden( fieldIds, [ 'downloadable' ] );
+			expect( fieldIds ).toContain( 'downloadable' );
 		} );
 
 		it( 'hides downloadable fields unless every bulk item supports downloads', () => {
@@ -990,6 +1062,7 @@ describe( 'product edit utils', () => {
 				virtual: false,
 				downloadable: true,
 				manage_stock: true,
+				cost_of_goods_sold: buildCostOfGoodsSold(),
 			} );
 
 			expect( getFormFields( [ product ] ) ).toEqual( [
@@ -1009,12 +1082,18 @@ describe( 'product edit utils', () => {
 						'regular_price',
 						'sale_price',
 						'schedule_sale',
+						'cost_of_goods_sold',
 					],
 				},
 				{
 					id: 'image-fields',
 					label: 'Images',
-					children: [ 'images', 'downloadable' ],
+					children: [ 'images' ],
+				},
+				{
+					id: 'downloadable-files-fields',
+					label: 'Downloadable files',
+					children: [ 'downloadable' ],
 				},
 				{
 					id: 'inventory-fields',
@@ -1034,9 +1113,9 @@ describe( 'product edit utils', () => {
 						{
 							id: 'dimensions',
 							layout: { type: 'row' },
-							children: [ 'weight', 'length', 'width' ],
+							children: [ 'length', 'width', 'height' ],
 						},
-						'height',
+						'weight',
 					],
 				},
 			] );
@@ -1051,6 +1130,7 @@ describe( 'product edit utils', () => {
 				const product = buildProduct( {
 					type: productType,
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} );
 
 				const priceGroup = getFormFields( [ product ] ).find(
@@ -1074,6 +1154,7 @@ describe( 'product edit utils', () => {
 								'date_on_sale_to',
 							],
 						},
+						'cost_of_goods_sold',
 					],
 				} );
 			}
@@ -1197,7 +1278,7 @@ describe( 'product edit utils', () => {
 					children: [
 						'shipping_class',
 						{
-							id: 'parent-dimensions',
+							id: 'dimensions',
 							layout: { type: 'row' },
 							children: [ 'length', 'width', 'height' ],
 						},
@@ -1238,6 +1319,11 @@ describe( 'product edit utils', () => {
 					children: [ 'images' ],
 				},
 				{
+					id: 'downloadable-files-fields',
+					label: 'Downloadable files',
+					children: [ 'downloadable' ],
+				},
+				{
 					id: 'inventory-fields',
 					label: 'Inventory',
 					children: [ 'sku', 'manage_stock', 'stock_quantity' ],
@@ -1250,9 +1336,9 @@ describe( 'product edit utils', () => {
 						{
 							id: 'dimensions',
 							layout: { type: 'row' },
-							children: [ 'weight', 'length', 'width' ],
+							children: [ 'length', 'width', 'height' ],
 						},
-						'height',
+						'weight',
 					],
 				},
 			] );

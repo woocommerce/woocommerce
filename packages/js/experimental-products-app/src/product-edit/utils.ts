@@ -3,6 +3,7 @@
  */
 import type { Field, FormField } from '@wordpress/dataviews';
 import { __ } from '@wordpress/i18n';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -31,6 +32,12 @@ type ProductType = 'simple' | 'variation' | 'variable' | 'grouped' | 'external';
 type ProductVariationEntityRecord = ProductEntityRecord & {
 	parent_id: number;
 };
+type Feature = {
+	is_enabled?: boolean;
+};
+type AdminSettings = {
+	features?: Record< string, Feature >;
+};
 
 const PRODUCT_EDIT_FIELD_IDS = [
 	'name',
@@ -47,6 +54,7 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'schedule_sale',
 	'date_on_sale_from',
 	'date_on_sale_to',
+	'cost_of_goods_sold',
 	'price_summary',
 	'stock',
 	'stock_quantity',
@@ -76,16 +84,8 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'linked_products_count',
 ] as const;
 
-const DIMENSION_GROUP_FIELD_IDS = [ 'weight', 'length', 'width' ] as const;
-
 const DIMENSIONS_FORM_FIELD: ProductEditFormField = {
 	id: 'dimensions',
-	layout: { type: 'row' as const },
-	children: [ ...DIMENSION_GROUP_FIELD_IDS ],
-};
-
-const PARENT_DIMENSIONS_FORM_FIELD: ProductEditFormField = {
-	id: 'parent-dimensions',
 	layout: { type: 'row' as const },
 	children: [ 'length', 'width', 'height' ],
 };
@@ -102,6 +102,13 @@ function createProductEditFormGroup(
 	};
 }
 
+const DOWNLOADABLE_FILES_FORM_FIELD: ProductEditFormField =
+	createProductEditFormGroup(
+		'downloadable-files-fields',
+		__( 'Downloadable files', 'woocommerce' ),
+		[ 'downloadable' ]
+	);
+
 const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'general-fields',
@@ -117,11 +124,12 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 			layout: { type: 'row' as const },
 			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
 		},
+		'cost_of_goods_sold',
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
-		'downloadable',
 	] ),
+	DOWNLOADABLE_FILES_FORM_FIELD,
 	createProductEditFormGroup(
 		'inventory-fields',
 		__( 'Inventory', 'woocommerce' ),
@@ -135,7 +143,7 @@ const SIMPLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'shipping-fields',
 		__( 'Shipping', 'woocommerce' ),
-		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'height' ]
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'weight' ]
 	),
 ] satisfies ProductEditFormField[];
 
@@ -154,10 +162,12 @@ const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
 			layout: { type: 'row' as const },
 			children: [ 'date_on_sale_from', 'date_on_sale_to' ],
 		},
+		'cost_of_goods_sold',
 	] ),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
 	] ),
+	DOWNLOADABLE_FILES_FORM_FIELD,
 	createProductEditFormGroup(
 		'inventory-fields',
 		__( 'Inventory', 'woocommerce' ),
@@ -166,7 +176,7 @@ const VARIATION_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'shipping-fields',
 		__( 'Shipping', 'woocommerce' ),
-		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'height' ]
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'weight' ]
 	),
 ] satisfies ProductEditFormField[];
 
@@ -192,7 +202,7 @@ const VARIABLE_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'shipping-fields',
 		__( 'Shipping', 'woocommerce' ),
-		[ 'shipping_class', PARENT_DIMENSIONS_FORM_FIELD, 'weight' ]
+		[ 'shipping_class', DIMENSIONS_FORM_FIELD, 'weight' ]
 	),
 ] satisfies ProductEditFormField[];
 
@@ -285,10 +295,16 @@ const SELLABLE_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'schedule_sale',
 	'date_on_sale_from',
 	'date_on_sale_to',
+	'cost_of_goods_sold',
 ] );
 
 const BULK_UNSUPPORTED_PRODUCT_EDIT_FIELD_ID_SET =
 	new Set< ProductEditFieldId >( [ 'sku' ] );
+
+function isCostOfGoodsSoldFeatureEnabled() {
+	const adminSettings = getSetting< AdminSettings >( 'admin', {} );
+	return Boolean( adminSettings.features?.cost_of_goods_sold?.is_enabled );
+}
 
 function normalizeValue( value: unknown ) {
 	if ( value === undefined ) {
@@ -549,6 +565,13 @@ export function getVisibleProductEditFields(
 			const field = fieldsById.get( fieldId );
 
 			if ( ! field ) {
+				return visibleFields;
+			}
+
+			if (
+				field.id === 'cost_of_goods_sold' &&
+				! isCostOfGoodsSoldFeatureEnabled()
+			) {
 				return visibleFields;
 			}
 
