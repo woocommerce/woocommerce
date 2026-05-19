@@ -8,6 +8,7 @@
  * @var string $description
  * @var string $scalar_fqcn
  * @var string $scalar_alias
+ * @var array  $metadata - type-level metadata, name => scalar value.
  */
 
 $escaped_description = addslashes( $description );
@@ -33,6 +34,13 @@ class <?php echo $class_name; ?> {
 					'name'         => '<?php echo $graphql_name; ?>',
 <?php if ( $description !== '' ) : ?>
 					'description'  => __( '<?php echo $escaped_description; ?>', 'woocommerce' ),
+<?php endif; ?>
+<?php if ( ! empty( $metadata ) ) : ?>
+					'metadata'     => array(
+<?php foreach ( $metadata as $meta_name => $meta_value ) : ?>
+						<?php echo var_export( $meta_name, true ); ?> => <?php echo var_export( $meta_value, true ); ?>,
+<?php endforeach; ?>
+					),
 <?php endif; ?>
 					'serialize'    => fn( $value ) => <?php echo $scalar_alias; ?>::serialize( $value ),
 					'parseValue'   => function ( $value ) {

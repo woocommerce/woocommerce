@@ -6,7 +6,7 @@ import { createElement, useMemo } from '@wordpress/element';
 /**
  * Internal dependencies
  */
-import { SelectControl } from '../../index';
+import SelectControl from '../../select-control';
 import { ControlProps } from '../types';
 
 type SelectControlOption = {

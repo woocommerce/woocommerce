@@ -28,29 +28,42 @@ class GetProduct {
 	}
 
 	public static function resolve( mixed $root, array $args, mixed $context, ResolveInfo $info ): mixed {
-		$command = \Automattic\WooCommerce\Api\Container::get( GetProductCommand::class );
+		$command = \Automattic\WooCommerce\Api\Infrastructure\ClassResolver::resolve_class( GetProductCommand::class );
 
+		$query_info   = QueryInfoExtractor::extract_from_info( $info, $args );
 		$execute_args = array();
 		if ( array_key_exists( 'id', $args ) ) {
 			$execute_args['id'] = $args['id'];
 		}
-		$execute_args['_query_info'] = QueryInfoExtractor::extract_from_info( $info, $args );
+		$execute_args['_query_info'] = $query_info;
 
 		if ( ! Utils::authorize_command(
 			$command,
 			array(
 				'id'             => $execute_args['id'],
-				'_preauthorized' => current_user_can( 'read_product' ),
+				'_preauthorized' => self::compute_preauthorized( $context['principal'] ),
 			)
 		) ) {
-			throw new \Automattic\WooCommerce\Internal\Api\Schema\Error(
-				'You do not have permission to perform this action.',
-				extensions: array( 'code' => 'UNAUTHORIZED' )
-			);
+			throw Utils::build_authorization_error( $context['principal'] );
 		}
 
 		$result = Utils::execute_command( $command, $execute_args );
 
 		return $result;
+	}
+
+	/**
+	 * Compute the value `_preauthorized` would carry for a given principal —
+	 * the AND of the autodiscovered authorization attributes' authorize()
+	 * outcomes on this command. Single source of truth for both the resolver's
+	 * own gates and external (code-API) callers asking about authorization
+	 * without going through GraphQL execution.
+	 *
+	 * Returns true vacuously when the command has no authorization attributes
+	 * (in that case authorize() on the command is the sole guard, and that
+	 * method should be consulted instead).
+	 */
+	public static function compute_preauthorized( \Automattic\WooCommerce\Api\Infrastructure\Principal $principal ): bool {
+		return ( new \Automattic\WooCommerce\Api\Attributes\RequiredCapability( 'read_product' ) )->authorize( $principal );
 	}
 }

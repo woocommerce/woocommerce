@@ -17,4 +17,16 @@ class GraphQLController extends \Automattic\WooCommerce\Internal\Api\GraphQLCont
 			)
 		);
 	}
+
+	protected function get_class_resolver_fqcn(): ?string {
+		return \Automattic\WooCommerce\Api\Infrastructure\ClassResolver::class;
+	}
+
+	protected function get_principal_resolver_fqcn(): ?string {
+		return \Automattic\WooCommerce\Api\Infrastructure\PrincipalResolver::class;
+	}
+
+	protected function principal_resolver_takes_request(): bool {
+		return false;
+	}
 }

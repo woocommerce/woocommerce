@@ -7,7 +7,8 @@
  * @var string $graphql_name
  * @var string $description
  * @var array  $use_statements
- * @var array  $fields - each: ['name', 'type_expr', 'description']
+ * @var array  $fields - each: ['name', 'type_expr', 'description', 'metadata' => array]
+ * @var array  $metadata - type-level metadata, name => scalar value.
  */
 
 $escaped_description = addslashes( $description );
@@ -62,12 +63,26 @@ class <?php echo $class_name; ?> {
 <?php if ( $description !== '' ) : ?>
 					'description' => __( '<?php echo $escaped_description; ?>', 'woocommerce' ),
 <?php endif; ?>
+<?php if ( ! empty( $metadata ) ) : ?>
+					'metadata' => array(
+<?php foreach ( $metadata as $meta_name => $meta_value ) : ?>
+						<?php echo var_export( $meta_name, true ); ?> => <?php echo var_export( $meta_value, true ); ?>,
+<?php endforeach; ?>
+					),
+<?php endif; ?>
 					'fields' => fn() => array(
 <?php foreach ( $fields as $field ) : ?>
 						'<?php echo $field['name']; ?>' => array(
 							'type' => <?php echo $field['type_expr']; ?>,
 	<?php if ( ! empty( $field['description'] ) ) : ?>
 							'description' => __( '<?php echo addslashes( $field['description'] ); ?>', 'woocommerce' ),
+<?php endif; ?>
+	<?php if ( ! empty( $field['metadata'] ) ) : ?>
+							'metadata' => array(
+		<?php foreach ( $field['metadata'] as $meta_name => $meta_value ) : ?>
+								<?php echo var_export( $meta_name, true ); ?> => <?php echo var_export( $meta_value, true ); ?>,
+<?php endforeach; ?>
+							),
 <?php endif; ?>
 						),
 <?php endforeach; ?>

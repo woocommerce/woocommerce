@@ -18,6 +18,24 @@ use Automattic\WooCommerce\Internal\StockNotifications\Enums\NotificationCancell
 class NotificationEditPage {
 
 	/**
+	 * Email manager.
+	 *
+	 * @var EmailManager
+	 */
+	private EmailManager $email_manager;
+
+	/**
+	 * Init the service.
+	 *
+	 * @internal
+	 *
+	 * @param EmailManager $email_manager The email manager.
+	 */
+	final public function init( EmailManager $email_manager ): void {
+		$this->email_manager = $email_manager;
+	}
+
+	/**
 	 * Render page.
 	 */
 	public function output() {
@@ -77,7 +95,7 @@ class NotificationEditPage {
 			case 'cancel_notification':
 				$notification->set_status( NotificationStatus::CANCELLED );
 				$notification->set_date_cancelled( time() );
-				$notification->set_date_notified( NotificationCancellationSource::ADMIN );
+				$notification->set_cancellation_source( NotificationCancellationSource::ADMIN );
 				$result = $notification->save();
 				if ( is_wp_error( $result ) ) {
 					$notice_message = $result->get_error_message();
@@ -94,8 +112,7 @@ class NotificationEditPage {
 					$notice_message = __( 'Failed to send notification. Please make sure that the listed product is available.', 'woocommerce' );
 					NotificationsPage::add_notice( $notice_message, 'error' );
 				} else {
-					$email_manager = new EmailManager();
-					$email_manager->send_stock_notification_email( $notification );
+					$this->email_manager->send_stock_notification_email( $notification );
 					$notification->set_status( NotificationStatus::SENT );
 					$notification->set_date_notified( time() );
 					$notification->save();
@@ -105,6 +122,13 @@ class NotificationEditPage {
 				}
 				break;
 			case 'send_verification_email':
+				if ( NotificationStatus::PENDING !== $notification->get_status() ) {
+					$notice_message = __( 'Cannot resend verification: this notification is already verified or cancelled.', 'woocommerce' );
+					NotificationsPage::add_notice( $notice_message, 'error' );
+					break;
+				}
+
+				$this->email_manager->send_verify_email( $notification );
 				// translators: %s user email.
 				$notice_message = sprintf( __( 'Verification email sent to "%s".', 'woocommerce' ), $notification->get_user_email() );
 				NotificationsPage::add_notice( $notice_message, 'success' );

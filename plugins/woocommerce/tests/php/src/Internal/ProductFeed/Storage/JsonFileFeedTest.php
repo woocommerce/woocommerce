@@ -84,6 +84,58 @@ class JsonFileFeedTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * Test that get_entry_count reflects the number of rows written to the feed.
+	 */
+	public function test_get_entry_count_reflects_added_entries() {
+		$feed = new JsonFileFeed( 'test-feed' );
+		$this->assertSame( 0, $feed->get_entry_count() );
+
+		$feed->start();
+		$this->assertSame( 0, $feed->get_entry_count() );
+
+		$feed->add_entry( array( 'name' => 'First' ) );
+		$feed->add_entry( array( 'name' => 'Second' ) );
+		$this->assertSame( 2, $feed->get_entry_count() );
+
+		$feed->end();
+		$this->assertSame( 2, $feed->get_entry_count() );
+	}
+
+	/**
+	 * Test that add_entry does not count entries added before start().
+	 */
+	public function test_get_entry_count_ignores_entries_added_before_start() {
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->add_entry( array( 'name' => 'dropped' ) );
+		$this->assertSame( 0, $feed->get_entry_count() );
+	}
+
+	/**
+	 * Test that start() resets state from a previous run so the feed can be regenerated.
+	 */
+	public function test_start_resets_state_from_previous_run() {
+		$feed = new JsonFileFeed( 'test-feed' );
+		$feed->start();
+		$feed->add_entry( array( 'name' => 'First' ) );
+		$feed->add_entry( array( 'name' => 'Second' ) );
+		$feed->end();
+		$this->assertSame( 2, $feed->get_entry_count() );
+
+		$feed->start();
+		$this->assertSame( 0, $feed->get_entry_count() );
+		$this->assertNull( $feed->get_file_path() );
+
+		$feed->add_entry( array( 'name' => 'Only' ) );
+		$feed->end();
+
+		$this->assertSame( 1, $feed->get_entry_count() );
+		$this->assertSame(
+			wp_json_encode( array( array( 'name' => 'Only' ) ) ),
+			file_get_contents( $feed->get_file_path() )
+		);
+	}
+
+	/**
 	 * Test that get_file_url returns null if feed is not completed.
 	 */
 	public function test_get_file_url_returns_null_if_not_completed() {

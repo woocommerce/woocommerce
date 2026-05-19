@@ -24,6 +24,14 @@ As discussed in the team conversation:
 
 ## Change Log
 
+### 2026-05-05 - Add embedded variation links
+
+**Summary**: Added embeddable `variations` links to variable product responses so child variations can be embedded when requesting products with `_embed=1`. The product schema now exposes the `embed` context for fields that are already available in `view` context, while sensitive fields such as downloads, metadata, purchase notes, and cost of goods sold remain excluded from embedded variation responses.
+
+**PR**: [#64566](https://github.com/woocommerce/woocommerce/pull/64566)
+
+**Breaking Changes**: None
+
 ### 2025-11-07 - Make the GET `/wc/v4/products/<id>` endpoint available to users with `edit_posts` capabilities
 
 **Summary**: The GET `/wc/v4/products/<id>` REST endpoint has been updated so that users who have the `edit_posts` capability (for example Authors) can retrieve published, non-password-protected products. Access remains restricted for users without either the `edit_posts` or `read_private_products` capabilities.

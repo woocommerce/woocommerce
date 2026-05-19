@@ -6,7 +6,8 @@ import type { BlockEditProps } from '@wordpress/blocks';
 /**
  * Internal dependencies
  */
-import type { Color, FilterBlockContext } from '../../types';
+import type { RangeInputBlockContext } from '../../../../types/type-defs/range-input';
+import type { Color } from '../../types';
 
 export type BlockAttributes = {
 	showInputFields: boolean;
@@ -23,7 +24,7 @@ export type BlockAttributes = {
 };
 
 export interface EditProps extends BlockEditProps< BlockAttributes > {
-	context: FilterBlockContext;
+	context: RangeInputBlockContext;
 
 	sliderHandle: Color;
 	setSliderHandle: ( color: string ) => void;

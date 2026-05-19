@@ -992,6 +992,14 @@ jQuery( function ( $ ) {
 				security: woocommerce_admin_meta_boxes.add_attribute_nonce,
 			};
 
+			if (
+				currentAttributeTermCreationContext.isVisualAttribute &&
+				postedData &&
+				postedData.term_color
+			) {
+				data.term_color = postedData.term_color;
+			}
+
 			$.post(
 				woocommerce_admin_meta_boxes.ajax_url,
 				data,
@@ -1044,14 +1052,20 @@ jQuery( function ( $ ) {
 
 			const wrapper = this.closest( '.woocommerce_attribute' );
 			const attribute = wrapper ? wrapper.dataset.taxonomy : '';
+			const isVisualAttribute =
+				this.dataset.isVisualAttribute === 'yes';
 
 			currentAttributeTermCreationContext = {
 				wrapper,
 				attribute,
+				isVisualAttribute,
 			};
 
 			$( this ).WCBackboneModal( {
 				template: 'wc-modal-add-attribute-term',
+				variable: {
+					isVisualAttribute,
+				},
 			} );
 		}
 	);

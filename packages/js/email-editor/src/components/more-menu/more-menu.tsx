@@ -22,18 +22,18 @@ export const MoreMenu = () => {
 					<PreferenceToggleMenuItem
 						scope={ storeName }
 						name="fullscreenMode"
-						label={ __( 'Fullscreen mode', 'woocommerce' ) }
+						label={ __( 'Fullscreen mode', __i18n_text_domain__ ) }
 						info={ __(
 							'Show and hide the admin user interface',
-							'woocommerce'
+							__i18n_text_domain__
 						) }
 						messageActivated={ __(
 							'Fullscreen mode activated.',
-							'woocommerce'
+							__i18n_text_domain__
 						) }
 						messageDeactivated={ __(
 							'Fullscreen mode deactivated.',
-							'woocommerce'
+							__i18n_text_domain__
 						) }
 						shortcut={ displayShortcut.secondary( 'f' ) }
 					/>
