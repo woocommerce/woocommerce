@@ -141,13 +141,23 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * the send. Static so the manual-send handler and the scheduler can call
 		 * it without instantiating the email class.
 		 *
+		 * When the merchant has never saved the suppression toggle (so the option
+		 * key isn't present in the saved settings) the check falls back to
+		 * `get_active_recovery_handlers()`, mirroring the dynamic default applied
+		 * in `init_form_fields()`.
+		 *
 		 * @since 10.9.0
 		 *
 		 * @return bool
 		 */
 		public static function is_suppressed(): bool {
 			$settings = (array) get_option( 'woocommerce_customer_checkout_recovery_settings', array() );
-			if ( isset( $settings['suppressed'] ) && 'yes' === $settings['suppressed'] ) {
+
+			if ( isset( $settings['suppressed'] ) ) {
+				if ( 'yes' === $settings['suppressed'] ) {
+					return true;
+				}
+			} elseif ( ! empty( self::get_active_recovery_handlers() ) ) {
 				return true;
 			}
 

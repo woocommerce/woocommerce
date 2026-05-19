@@ -257,6 +257,36 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox is_suppressed() falls back to handler detection on fresh installs where the merchant has not saved the suppression toggle yet, so the UI default and the runtime gate stay in sync.
+	 */
+	public function test_is_suppressed_falls_back_to_handler_detection_when_option_unset(): void {
+		delete_option( 'woocommerce_customer_checkout_recovery_settings' );
+		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
+
+		$this->assertTrue( WC_Email_Customer_Checkout_Recovery::is_suppressed() );
+	}
+
+	/**
+	 * @testdox is_suppressed() returns false on a fresh install when no known handler is active so core's recovery email runs by default.
+	 */
+	public function test_is_suppressed_returns_false_when_option_unset_and_no_handler(): void {
+		delete_option( 'woocommerce_customer_checkout_recovery_settings' );
+		update_option( 'active_plugins', array() );
+
+		$this->assertFalse( WC_Email_Customer_Checkout_Recovery::is_suppressed() );
+	}
+
+	/**
+	 * @testdox is_suppressed() respects a saved 'no' even when a known handler is active — merchant override wins over auto-detection.
+	 */
+	public function test_is_suppressed_respects_explicit_no_when_handler_active(): void {
+		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
+		$this->sut->update_option( 'suppressed', 'no' );
+
+		$this->assertFalse( WC_Email_Customer_Checkout_Recovery::is_suppressed() );
+	}
+
+	/**
 	 * @testdox get_active_recovery_handlers() returns empty when no known recovery-handling plugin is active.
 	 */
 	public function test_active_recovery_handlers_empty_when_none_active(): void {
