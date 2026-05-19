@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { Button, Card, CardBody, Flex, FlexItem } from '@wordpress/components';
 import { Pill, Table } from '@woocommerce/components';
@@ -51,7 +51,7 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 	const tableRows = useMemo(
 		() =>
 			rows.slice( 0, visibleCount ).map( ( row ) => {
-				const label = STATUS_LABEL[ row.status ] || row.status;
+				const label = STATUS_LABEL[ row.status ];
 				return [
 					{ display: row.row, value: row.row },
 					{
@@ -78,48 +78,63 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 
 	const hasMore = rows.length > visibleCount;
 
-	const counts: Array< { key: string; value: number; label: string } > = [
-		{
-			key: 'created',
-			value: created,
-			label: _n(
-				'Fulfillment created',
-				'Fulfillments created',
-				created,
-				'woocommerce'
-			),
-		},
-		{
-			key: 'updated',
-			value: updated,
-			label: _n(
-				'Fulfillment updated',
-				'Fulfillments updated',
-				updated,
-				'woocommerce'
-			),
-		},
-		{
-			key: 'skipped',
-			value: skipped,
-			label: _n( 'Row skipped', 'Rows skipped', skipped, 'woocommerce' ),
-		},
-		{
-			key: 'failed',
-			value: failed,
-			label: _n( 'Row failed', 'Rows failed', failed, 'woocommerce' ),
-		},
-		{
-			key: 'notified',
-			value: notified,
-			label: _n(
-				'Customer notified',
-				'Customers notified',
-				notified,
-				'woocommerce'
-			),
-		},
-	];
+	const counts = useMemo<
+		Array< { key: string; value: number; label: string } >
+	>(
+		() => [
+			{
+				key: 'created',
+				value: created,
+				label: _n(
+					'Fulfillment created',
+					'Fulfillments created',
+					created,
+					'woocommerce'
+				),
+			},
+			{
+				key: 'updated',
+				value: updated,
+				label: _n(
+					'Fulfillment updated',
+					'Fulfillments updated',
+					updated,
+					'woocommerce'
+				),
+			},
+			{
+				key: 'skipped',
+				value: skipped,
+				label: _n(
+					'Row skipped',
+					'Rows skipped',
+					skipped,
+					'woocommerce'
+				),
+			},
+			{
+				key: 'failed',
+				value: failed,
+				label: _n( 'Row failed', 'Rows failed', failed, 'woocommerce' ),
+			},
+			{
+				key: 'notified',
+				value: notified,
+				label: _n(
+					'Customer notified',
+					'Customers notified',
+					notified,
+					'woocommerce'
+				),
+			},
+		],
+		[ created, updated, skipped, failed, notified ]
+	);
+
+	const handleShowMore = useCallback(
+		() => setVisibleCount( ( current ) => current + ROWS_PER_PAGE ),
+		[]
+	);
 
 	const totalProcessed = created + updated + skipped + failed;
 
@@ -151,14 +166,7 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 						className="woocommerce-fulfillment-importer-summary__load-more"
 						justify="center"
 					>
-						<Button
-							variant="secondary"
-							onClick={ () =>
-								setVisibleCount(
-									( current ) => current + ROWS_PER_PAGE
-								)
-							}
-						>
+						<Button variant="secondary" onClick={ handleShowMore }>
 							{ sprintf(
 								/* translators: 1: rows currently shown, 2: total rows */
 								__(

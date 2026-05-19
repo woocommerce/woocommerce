@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { createPortal, createRoot } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
@@ -72,7 +72,7 @@ function FulfillmentsImporterController() {
 	}, [] );
 	const close = useCallback( () => setIsOpen( false ), [] );
 
-	const triggerSlot = useMemo( () => getOrCreateTriggerSlot(), [] );
+	const [ triggerSlot ] = useState( () => getOrCreateTriggerSlot() );
 
 	return (
 		<>
