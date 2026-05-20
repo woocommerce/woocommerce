@@ -22,7 +22,7 @@ import type { StepComponentProps } from './types';
 
 const DELIMITER_OPTIONS: Array< { label: string; value: ImporterDelimiter } > =
 	[
-		{ label: __( 'Auto detect', 'woocommerce' ), value: 'auto' },
+		{ label: __( 'Auto-detect', 'woocommerce' ), value: 'auto' },
 		{ label: __( 'Comma (,)', 'woocommerce' ), value: ',' },
 		{ label: __( 'Semicolon (;)', 'woocommerce' ), value: ';' },
 		{ label: __( 'Tab', 'woocommerce' ), value: '\t' },
