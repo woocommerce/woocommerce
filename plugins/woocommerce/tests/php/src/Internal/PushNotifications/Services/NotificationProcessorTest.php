@@ -10,6 +10,7 @@ use Automattic\WooCommerce\Internal\PushNotifications\Entities\PushToken;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewOrderNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\NewReviewNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\Notifications\Notification;
+use Automattic\WooCommerce\Internal\PushNotifications\Notifications\StockNotification;
 use Automattic\WooCommerce\Internal\PushNotifications\PushNotifications;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationPreferencesService;
 use Automattic\WooCommerce\Internal\PushNotifications\Services\NotificationProcessor;
@@ -80,6 +81,12 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 					'min_amount' => null,
 				),
 				'store_review' => array( 'enabled' => true ),
+				'store_stock'  => array(
+					'enabled'      => true,
+					'low_stock'    => true,
+					'out_of_stock' => true,
+					'on_backorder' => false,
+				),
 			)
 		);
 
@@ -602,5 +609,131 @@ class NotificationProcessorTest extends WC_Unit_Test_Case {
 
 		$this->assertTrue( $result );
 		$this->assertNotEmpty( get_comment_meta( $comment_id, NotificationProcessor::SENT_META_KEY, true ) );
+	}
+
+	/**
+	 * @testdox Should handle safety net callback with a stock notification event_type.
+	 */
+	public function test_handle_safety_net_with_stock_event_type(): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 3,
+			)
+		);
+
+		$this->dispatcher->expects( $this->once() )->method( 'dispatch' )->willReturn(
+			array(
+				'success'     => true,
+				'retry_after' => null,
+			)
+		);
+
+		$this->sut->handle_safety_net( 'store_stock', $product->get_id(), 'low_stock' );
+
+		$refreshed = wc_get_product( $product->get_id() );
+		$this->assertNotEmpty(
+			$refreshed->get_meta( NotificationProcessor::SENT_META_KEY . '_low_stock' )
+		);
+	}
+
+	/**
+	 * @testdox Safety net backward compat: two-arg calls should still work for existing notification types.
+	 */
+	public function test_handle_safety_net_backward_compat_two_args(): void {
+		$this->dispatcher->expects( $this->once() )->method( 'dispatch' )->willReturn(
+			array(
+				'success'     => true,
+				'retry_after' => null,
+			)
+		);
+
+		$this->sut->handle_safety_net( 'store_order', $this->order_id );
+
+		$order = wc_get_order( $this->order_id );
+		$this->assertNotEmpty( $order->get_meta( NotificationProcessor::SENT_META_KEY ) );
+	}
+
+	/**
+	 * @testdox Safety net should propagate the stock quantity captured at trigger time when reconstructing the notification.
+	 */
+	public function test_handle_safety_net_with_stock_quantity_at_trigger(): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				// Product currently shows stock=5 (the dispatcher might re-fetch and see this).
+				'stock_quantity' => 5,
+			)
+		);
+
+		$captured_payload = null;
+		$this->dispatcher
+			->expects( $this->once() )
+			->method( 'dispatch' )
+			->with(
+				$this->callback(
+					function ( $notification ) use ( &$captured_payload ) {
+						$captured_payload = $notification->to_payload();
+						return true;
+					}
+				)
+			)
+			->willReturn(
+				array(
+					'success'     => true,
+					'retry_after' => null,
+				)
+			);
+
+		// Trigger-time stock was 1 (post-decrement), even though current product stock is 5.
+		$this->sut->handle_safety_net( 'store_stock', $product->get_id(), 'low_stock', 1 );
+
+		$this->assertNotNull( $captured_payload );
+		$this->assertSame( '1', $captured_payload['message']['args'][1] );
+	}
+
+	/**
+	 * @testdox Should skip dispatch for stock notification when the matching sub-flag is disabled.
+	 */
+	public function test_process_skips_dispatch_when_stock_sub_flag_disabled(): void {
+		$product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'manage_stock'   => true,
+				'stock_quantity' => 3,
+			)
+		);
+
+		$preferences_service = $this->createMock( NotificationPreferencesService::class );
+		$preferences_service->method( 'get_preferences' )->willReturn(
+			array(
+				'store_order'  => array(
+					'enabled'    => true,
+					'min_amount' => null,
+				),
+				'store_review' => array(
+					'enabled'    => true,
+					'max_rating' => null,
+				),
+				'store_stock'  => array(
+					'enabled'      => true,
+					'low_stock'    => false,
+					'out_of_stock' => true,
+					'on_backorder' => false,
+				),
+			)
+		);
+
+		$this->dispatcher->expects( $this->never() )->method( 'dispatch' );
+
+		$sut = new NotificationProcessor();
+		$sut->init( $this->dispatcher, $this->data_store, $preferences_service );
+
+		$notification = new StockNotification( $product->get_id(), StockNotification::EVENT_LOW_STOCK );
+		$result       = $sut->process( $notification );
+
+		$this->assertTrue( $result );
 	}
 }

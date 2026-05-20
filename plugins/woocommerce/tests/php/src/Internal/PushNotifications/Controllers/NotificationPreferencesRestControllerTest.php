@@ -465,6 +465,69 @@ class NotificationPreferencesRestControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox GET should include store_stock with all sub-flags in the defaults.
+	 */
+	public function test_get_preferences_includes_store_stock_with_sub_flags() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request  = new WP_REST_Request( 'GET', '/wc-push-notifications/preferences' );
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertArrayHasKey( 'store_stock', $data );
+		$this->assertArrayHasKey( 'enabled', $data['store_stock'] );
+		$this->assertArrayHasKey( 'low_stock', $data['store_stock'] );
+		$this->assertArrayHasKey( 'out_of_stock', $data['store_stock'] );
+		$this->assertArrayHasKey( 'on_backorder', $data['store_stock'] );
+	}
+
+	/**
+	 * @testdox POST should accept and persist store_stock sub-flag updates.
+	 */
+	public function test_post_preferences_updates_stock_sub_flags() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
+		$request->set_param(
+			'store_stock',
+			array(
+				'low_stock'    => false,
+				'on_backorder' => true,
+			)
+		);
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::OK, $response->get_status() );
+
+		$data = $response->get_data();
+		$this->assertFalse( $data['store_stock']['low_stock'] );
+		$this->assertTrue( $data['store_stock']['on_backorder'] );
+	}
+
+	/**
+	 * @testdox POST should reject non-boolean store_stock sub-fields via REST validation.
+	 */
+	public function test_post_preferences_rejects_non_boolean_stock_sub_flag() {
+		wp_set_current_user( $this->user_id );
+		$this->mock_jetpack_connection_manager_is_connected( true );
+		$this->register_routes();
+
+		$request = new WP_REST_Request( 'POST', '/wc-push-notifications/preferences' );
+		$request->set_param( 'store_stock', array( 'low_stock' => 'not-a-boolean' ) );
+
+		$response = $this->server->dispatch( $request );
+
+		$this->assertSame( WP_Http::BAD_REQUEST, $response->get_status() );
+	}
+
+	/**
 	 * @testdox Should not collide with PushTokenRestController on the WC REST namespaces filter.
 	 *
 	 * Both controllers share the URL route namespace `wc-push-notifications`, but they must use
