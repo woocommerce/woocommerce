@@ -382,9 +382,10 @@ final class ImportSession {
 	 * @return string
 	 */
 	private static function generate_token(): string {
-		if ( function_exists( 'wp_generate_uuid4' ) ) {
+		try {
+			return bin2hex( random_bytes( 16 ) );
+		} catch ( \Throwable $e ) {
 			return (string) wp_generate_uuid4();
 		}
-		return bin2hex( random_bytes( 16 ) );
 	}
 }
