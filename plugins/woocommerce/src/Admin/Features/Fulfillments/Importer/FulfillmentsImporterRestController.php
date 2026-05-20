@@ -92,9 +92,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 					'permission_callback' => fn( WP_REST_Request $request ) => $this->check_permission_for_fulfillments_import( $request ),
 					'args'                => array(
 						'delimiter'       => array(
-							'type'        => 'string',
-							'default'     => ',',
-							'description' => __( 'CSV delimiter. Defaults to comma.', 'woocommerce' ),
+							'type'              => 'string',
+							'default'           => ',',
+							'description'       => __( 'CSV delimiter. Defaults to comma.', 'woocommerce' ),
+							'sanitize_callback' => 'sanitize_text_field',
 						),
 						'notify_customer' => array(
 							'type'    => 'boolean',
@@ -119,9 +120,15 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 					'permission_callback' => fn( WP_REST_Request $request ) => $this->check_permission_for_fulfillments_import( $request ),
 					'args'                => array(
 						'token'   => array(
-							'type'        => 'string',
-							'required'    => true,
-							'description' => __( 'Import session token returned by /prepare.', 'woocommerce' ),
+							'type'              => 'string',
+							'required'          => true,
+							'description'       => __( 'Import session token returned by /prepare.', 'woocommerce' ),
+							'sanitize_callback' => 'sanitize_text_field',
+							'validate_callback' => static function ( $value ) {
+								// Accept the bin2hex(random_bytes(16)) form (32 hex chars) or the
+								// UUID v4 fallback emitted by ImportSession::generate_token().
+								return is_string( $value ) && preg_match( '/^[a-f0-9\-]{32,36}$/', $value ) === 1;
+							},
 						),
 						'offset'  => array(
 							'type'        => 'integer',
@@ -141,8 +148,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 							'required'             => true,
 							'description'          => __( 'CSV column index (stringified) → canonical column key.', 'woocommerce' ),
 							'additionalProperties' => array(
-								'type' => 'string',
-								'enum' => array(
+								'type'              => 'string',
+								'enum'              => array(
 									'',
 									FulfillmentsCsvImporter::COL_ORDER_NUMBER,
 									FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
@@ -150,6 +157,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 									FulfillmentsCsvImporter::COL_TRACKING_URL,
 									FulfillmentsCsvImporter::COL_ITEMS,
 								),
+								'sanitize_callback' => 'sanitize_text_field',
 							),
 						),
 						'options' => array(
