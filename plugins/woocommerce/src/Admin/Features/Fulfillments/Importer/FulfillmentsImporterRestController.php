@@ -364,7 +364,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$rows            = (array) $chunk_result['rows'];
 		$seen            = (array) $chunk_result['seen_tracking_pairs'];
 		$next_byte       = isset( $chunk_result['byte_offset'] ) ? (int) $chunk_result['byte_offset'] : 0;
-		$consumed        = min( $limit, max( 0, $session->total() - $offset ) );
+		$consumed        = isset( $chunk_result['consumed'] ) ? max( 0, (int) $chunk_result['consumed'] ) : 0;
 		$processed_after = min( $session->total(), $offset + $consumed );
 		$errors_for_ui   = $this->extract_errors_for_response( $rows );
 
@@ -372,7 +372,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 		$processed = $session->processed();
 		$total     = $session->total();
-		$done      = $processed >= $total;
+		// EOF reached when the importer returns fewer rows than the requested limit.
+		$done = $processed >= $total || $consumed < $limit;
 
 		$response = array(
 			'processed' => $processed,

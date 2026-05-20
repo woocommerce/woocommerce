@@ -159,6 +159,13 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 
 				callbacksRef.current.onChunk?.( response );
 
+				// Always track server-reported progress so we never over-advance past unread rows.
+				if ( typeof response.processed === 'number' && response.processed >= 0 ) {
+					offsetRef.current = response.processed;
+				} else {
+					offsetRef.current += chunkSize;
+				}
+
 				if ( response.done ) {
 					if ( response.summary ) {
 						callbacksRef.current.onFinish?.( response.summary );
@@ -166,7 +173,6 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 					return;
 				}
 
-				offsetRef.current += chunkSize;
 				if ( offsetRef.current >= total && total > 0 ) {
 					// Defensive: server should have set done=true. Stop to avoid an infinite loop.
 					return;

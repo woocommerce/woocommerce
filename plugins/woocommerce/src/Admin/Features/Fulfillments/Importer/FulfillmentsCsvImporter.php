@@ -322,7 +322,8 @@ class FulfillmentsCsvImporter {
 	 *     counts: array{created:int, updated:int, skipped:int, failed:int, notified:int},
 	 *     rows: array<int, array<string, mixed>>,
 	 *     seen_tracking_pairs: array<string, true>,
-	 *     byte_offset: int
+	 *     byte_offset: int,
+	 *     consumed: int
 	 * }
 	 */
 	public function import_chunk( int $offset, int $limit, array $mapping, array $options = array() ): array {
@@ -362,6 +363,7 @@ class FulfillmentsCsvImporter {
 					'rows'                => $rows,
 					'seen_tracking_pairs' => $seen_tracking_pairs,
 					'byte_offset'         => $byte_offset_in,
+					'consumed'            => 0,
 				);
 			}
 
@@ -373,6 +375,7 @@ class FulfillmentsCsvImporter {
 					'rows'                => $rows,
 					'seen_tracking_pairs' => $seen_tracking_pairs,
 					'byte_offset'         => $byte_offset_in,
+					'consumed'            => 0,
 				);
 			}
 
@@ -385,6 +388,7 @@ class FulfillmentsCsvImporter {
 					'rows'                => $rows,
 					'seen_tracking_pairs' => $seen_tracking_pairs,
 					'byte_offset'         => $byte_offset_in,
+					'consumed'            => 0,
 				);
 			}
 
@@ -411,6 +415,7 @@ class FulfillmentsCsvImporter {
 							'rows'                => $rows,
 							'seen_tracking_pairs' => $seen_tracking_pairs,
 							'byte_offset'         => $byte_offset_in,
+							'consumed'            => 0,
 						);
 					}
 				}
@@ -431,6 +436,7 @@ class FulfillmentsCsvImporter {
 						'rows'                => $rows,
 						'seen_tracking_pairs' => $seen_tracking_pairs,
 						'byte_offset'         => $byte_offset_in,
+						'consumed'            => 0,
 					);
 				}
 
@@ -446,6 +452,7 @@ class FulfillmentsCsvImporter {
 								'rows'                => $rows,
 								'seen_tracking_pairs' => $seen_tracking_pairs,
 								'byte_offset'         => false === $position ? $byte_offset_in : (int) $position,
+								'consumed'            => 0,
 							);
 						}
 						++$row_number;
@@ -505,6 +512,7 @@ class FulfillmentsCsvImporter {
 				'rows'                => $rows,
 				'seen_tracking_pairs' => $seen_tracking_pairs,
 				'byte_offset'         => $byte_offset_out,
+				'consumed'            => $consumed,
 			);
 		} finally {
 			$this->options = $prev_options;
