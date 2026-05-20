@@ -1397,7 +1397,7 @@ describe( 'product edit utils', () => {
 						'name',
 						'product_status',
 						'catalog_visibility',
-						'upsell_ids',
+						'grouped_products',
 					],
 				},
 				{
