@@ -32,9 +32,9 @@
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:esm": "tsc --project tsconfig.json --noCheck",
+		"build:project:esm": "node build.mjs",
 		"build:publish:project": "pnpm --if-present '/^build:publish:project:.*$/'",
-		"build:publish:project:cjs": "tsc --project tsconfig-cjs.json --noCheck",
+		"build:publish:project:cjs": "node build.mjs --cjs",
 		"build:publish:project:deps": "pnpm build",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
@@ -47,7 +47,7 @@
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:esm": "tsc --project tsconfig.json --noCheck --watch"
+		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"dependencies": {
 		"@types/node": "^24.1.0",
@@ -59,7 +59,9 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-ts-config": "workspace:*",
+		"esbuild": "^0.24.0",
 		"eslint": "^8.55.0",
+		"glob": "^10.3.10",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
