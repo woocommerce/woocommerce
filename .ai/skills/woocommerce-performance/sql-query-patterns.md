@@ -293,15 +293,23 @@ Stores one row per `(product, term)` pair with `in_stock` and variation flags. U
 
 **Canonical example:** `Filterer` in `src/Internal/ProductAttributesLookup/Filterer.php`.
 
-### Regeneration guard
+### Regeneration guards
 
-Both tables may be incomplete during background regeneration. Always gate on the option before using them:
+The two tables use different options with opposite semantics — gate each one separately:
 
 ```php
-if ( 'yes' !== get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
-    // use wc_product_meta_lookup / wc_product_attributes_lookup
+// wc_product_meta_lookup: option is truthy while the table is being regenerated.
+if ( get_option( 'woocommerce_product_lookup_table_is_generating' ) ) {
+    // fall back to wp_postmeta
 } else {
-    // fall back to wp_postmeta / wp_term_relationships
+    // use wc_product_meta_lookup
+}
+
+// wc_product_attributes_lookup: must be explicitly enabled by the merchant.
+if ( 'yes' === get_option( 'woocommerce_attribute_lookup_enabled' ) ) {
+    // use wc_product_attributes_lookup
+} else {
+    // fall back to wp_term_relationships
 }
 ```
 

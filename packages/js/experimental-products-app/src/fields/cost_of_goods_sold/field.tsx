@@ -13,6 +13,8 @@ import { formatCurrency, getCurrencyObject } from '../utils/currency';
 import { CurrencyControl } from '../components/currency-input';
 
 import type { ProductEntityRecord } from '../types';
+import type { ProductBulkEditFormData } from '../../product-edit/bulk-edit';
+import { isBulkNumericPercentEdit } from '../../product-edit/bulk-edit';
 
 const fieldDefinition = {
 	type: 'text',
@@ -31,10 +33,12 @@ function getDefinedCostValue( item: ProductEntityRecord ) {
 function CostOfGoodsSoldInput( {
 	data,
 	field,
+	hideLabelFromVision,
 	onChange,
 	validity,
 }: DataFormControlProps< ProductEntityRecord > ) {
 	const costOfGoodsSold = data.cost_of_goods_sold ?? {};
+	const disabled = field.isDisabled( { item: data, field } );
 	const [ firstValue = {}, ...remainingValues ] =
 		costOfGoodsSold.values ?? [];
 
@@ -42,7 +46,9 @@ function CostOfGoodsSoldInput( {
 		<CurrencyControl
 			id={ `currency-input-${ field.id }` }
 			label={ field.label }
+			hideLabelFromVision={ hideLabelFromVision }
 			value={ getDefinedCostValue( data ) ?? '' }
+			placeholder={ field.placeholder }
 			onChange={ ( newValue: string ) => {
 				onChange( {
 					cost_of_goods_sold: {
@@ -61,6 +67,11 @@ function CostOfGoodsSoldInput( {
 				} );
 			} }
 			customValidity={ validity?.custom }
+			disabled={ disabled }
+			showPercentAdornment={ isBulkNumericPercentEdit(
+				data as ProductBulkEditFormData,
+				field.id
+			) }
 		/>
 	);
 }
