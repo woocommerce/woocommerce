@@ -26,7 +26,5 @@
 	"publishConfig": {
 		"access": "public"
 	},
-	"devDependencies": {
-		"wireit": "0.14.12"
-	}
+	"devDependencies": {}
 }
