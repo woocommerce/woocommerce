@@ -122,16 +122,15 @@
 	display: none !important;
 }
 
-/* Edit affordance lives inside the Order Data metabox header, right-aligned
- * opposite the "Order details" title. */
-.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-data .postbox-header,
-.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-data .hndle {
-	display: flex;
-	align-items: center;
-	gap: 8px;
+/* Edit affordance: dropped into the right-side .order_data_header_column
+ * (the empty column WC reserves for plugin hooks), so it sits opposite the
+ * h2 "Order #N details" title at the top of the metabox body.
+ * The right column is already right-aligned by WC's own styles, but we
+ * align the button explicitly so we don't depend on that. */
+.woocommerce-feature-enabled-order-detail-redesign #order_data .order_data_header_column:last-child {
+	text-align: right;
 }
 .woocommerce-feature-enabled-order-detail-redesign .wc-order-data-edit {
-	margin-left: auto;
 	font-size: 13px;
 	font-weight: 400;
 	color: #2271b1;

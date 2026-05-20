@@ -181,22 +181,20 @@
 		}
 
 		function injectEditAffordance() {
-			// Place the Edit button inside the Order Data metabox header,
-			// right-aligned to sit opposite the "Order details" title.
-			if ( ! $orderDataBox.length ) {
-				return;
-			}
-			// Modern WP uses .postbox-header; older renders use .hndle directly.
-			var $header = $orderDataBox.find( '.postbox-header' ).first();
-			if ( ! $header.length ) {
-				$header = $orderDataBox.find( '.hndle' ).first();
-			}
-			if ( ! $header.length || $header.find( '.wc-order-data-edit' ).length ) {
+			// WC hides the standard WP `.postbox-header` for the Order Data
+			// metabox (see `#post-body-content, #titlediv { display:none }` in
+			// class-wc-meta-box-order-data.php). The visible header is rendered
+			// inside the metabox body: `.order_data_header` with two columns —
+			// left holds the h2 "Order #N details" + meta line, right is an
+			// empty container for plugin hooks. We drop the Edit button into
+			// that right column so it sits opposite the title.
+			var $rightCol = $( '#order_data .order_data_header_column' ).last();
+			if ( ! $rightCol.length || $rightCol.find( '.wc-order-data-edit' ).length ) {
 				return;
 			}
 			$(
 				'<button type="button" class="wc-order-data-edit">Edit</button>'
-			).appendTo( $header );
+			).appendTo( $rightCol );
 		}
 
 		function snapshotForm() {
