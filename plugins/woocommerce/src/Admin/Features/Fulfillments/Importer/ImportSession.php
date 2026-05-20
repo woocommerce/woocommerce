@@ -142,6 +142,21 @@ final class ImportSession {
 		if ( '' === $file || ! function_exists( 'as_schedule_single_action' ) ) {
 			return;
 		}
+
+		/**
+		 * Fires (via Action Scheduler) after a fulfillments import session's TTL plus a small grace
+		 * window to clean up the staged CSV when the wizard never finishes the import.
+		 *
+		 * Listeners receive the session metadata and may short-circuit by checking whether the
+		 * matching session transient still exists. The default handler is
+		 * {@see ImportSession::cleanup_abandoned_file()}.
+		 *
+		 * @since 10.9.0
+		 *
+		 * @param int    $user_id User who owned the session.
+		 * @param string $token   Session token.
+		 * @param string $file    Absolute path to the staged CSV.
+		 */
 		as_schedule_single_action(
 			time() + self::TTL + self::CLEANUP_GRACE,
 			self::CLEANUP_HOOK,
