@@ -149,7 +149,7 @@ class FulfillmentsCsvImporter {
 
 		$mapping = isset( $parsed['detected_mapping'] ) && is_array( $parsed['detected_mapping'] ) ? $parsed['detected_mapping'] : array();
 
-		// Preserve back-compat behavior: a missing required canonical column aborts the run with a single failed row.
+		// A missing required canonical column aborts the run with a single failed row.
 		$header_map = self::mapping_to_header_map( $mapping );
 		$missing    = self::find_missing_required_columns( $header_map );
 		if ( ! empty( $missing ) ) {
@@ -346,7 +346,7 @@ class FulfillmentsCsvImporter {
 		);
 		$rows   = array();
 
-		// Apply per-chunk option overrides so process_row sees the right flags.
+		// Apply per-chunk option overrides; restored in the outer finally.
 		$prev_options = $this->options;
 		if ( array_key_exists( 'notify_customer', $options ) ) {
 			$this->options['notify_customer'] = (bool) $options['notify_customer'];
@@ -401,7 +401,7 @@ class FulfillmentsCsvImporter {
 				$resumed     = false;
 
 				if ( $byte_offset_in > 0 && 0 === fseek( $handle, $byte_offset_in ) ) {
-					// Resuming from a prior chunk: header and prior rows are already past.
+					// Resuming from a prior chunk: header and earlier rows are already past.
 					$resumed = true;
 				} else {
 					$this->strip_bom( $handle );
@@ -441,7 +441,7 @@ class FulfillmentsCsvImporter {
 				}
 
 				if ( ! $resumed ) {
-					// Fast-forward past $offset CSV records after the header (legacy path when no byte offset is known).
+					// No byte offset available — fast-forward past $offset records after the header.
 					$row_number = 1;
 					for ( $i = 0; $i < $offset; $i++ ) {
 						$row = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
@@ -475,9 +475,8 @@ class FulfillmentsCsvImporter {
 					);
 				}
 
-				// Pre-resolve numeric order references for the whole chunk so a chunked REST
-				// call (which builds a fresh importer per request) does not issue N+1 wc_get_order
-				// queries before the in-memory cache warms up.
+				// A fresh importer is constructed per chunked REST request, so the per-row order
+				// cache starts cold each chunk. Prime it in one batch to avoid N+1 wc_get_order calls.
 				$this->prime_chunk_caches( $batch, $header_map );
 
 				foreach ( $batch as $entry ) {
@@ -662,7 +661,6 @@ class FulfillmentsCsvImporter {
 			return $this->fail( $row_number, 'invalid_items', $e->getMessage(), $order->get_id() );
 		}
 
-		// Determine create vs update by looking for an existing fulfillment with the same tracking number.
 		try {
 			$existing = $this->find_existing_fulfillment( $order->get_id(), $tracking_number );
 		} catch ( \RuntimeException $e ) {
@@ -886,7 +884,6 @@ class FulfillmentsCsvImporter {
 	 */
 	private function normalize_header( string $name ): string {
 		$name = strtolower( trim( $name ) );
-		// Replace any non a-z/0-9 sequence with underscore.
 		$name = preg_replace( '/[^a-z0-9]+/', '_', $name );
 		return trim( (string) $name, '_' );
 	}
@@ -921,15 +918,13 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Resolve a CSV "order number" cell to a WC_Order.
-	 *
 	 * Warm the per-row order cache for an entire chunk in one batch.
 	 *
-	 * Without this, REST callers that build a new importer instance per chunk would hit
-	 * `wc_get_order()` once per row, defeating the in-memory cache.
+	 * REST callers build a fresh importer per chunk, so without this priming step each
+	 * row would issue its own wc_get_order() call before the in-memory cache fills up.
 	 *
-	 * @param array<int, array{row_number:int, row:array<int, string>, blank:bool}> $batch       The chunk's raw rows.
-	 * @param array<string, int>                                                    $header_map  Canonical column → CSV column index.
+	 * @param array<int, array{row_number:int, row:array<int, string>, blank:bool}> $batch      The chunk's raw rows.
+	 * @param array<string, int>                                                    $header_map Canonical column => CSV column index.
 	 */
 	private function prime_chunk_caches( array $batch, array $header_map ): void {
 		if ( ! isset( $header_map[ self::COL_ORDER_NUMBER ] ) || empty( $batch ) ) {
@@ -979,8 +974,10 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * First tries a direct numeric match (the default WooCommerce order number is the order ID).
-	 * Then fires a filter so extensions providing custom order numbering schemes can resolve it.
+	 * Resolve a CSV "order number" cell to a WC_Order.
+	 *
+	 * Tries a direct numeric match first (the default WooCommerce order number is the order ID),
+	 * then fires a filter so extensions with custom order-numbering schemes can resolve it.
 	 *
 	 * @param string $order_number Raw order number from the CSV.
 	 * @return WC_Order|null
@@ -1059,8 +1056,8 @@ class FulfillmentsCsvImporter {
 				sprintf( 'Could not read fulfillments for order %1$d during CSV import: %2$s', $order_id, $e->getMessage() ),
 				array( 'source' => 'fulfillments-csv-importer' )
 			);
-			// Don't cache an empty result, otherwise a transient store error would silently
-			// downgrade subsequent rows for the same order to "create" instead of "update".
+			// Do not cache on failure: a transient store error would silently downgrade
+			// subsequent rows for the same order from "update" to "create".
 			throw new \RuntimeException( 'fulfillment_store_read_failed' );
 		}
 

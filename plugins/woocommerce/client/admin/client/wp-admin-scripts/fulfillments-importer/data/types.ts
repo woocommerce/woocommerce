@@ -31,7 +31,7 @@ export type CanonicalColumnKey =
 	| '';
 
 /**
- * Canonical column index → canonical column key. Empty string means "do not import this column".
+ * CSV column index => canonical column key. Empty string means "do not import this column".
  */
 export type ColumnMapping = Record< number, CanonicalColumnKey >;
 

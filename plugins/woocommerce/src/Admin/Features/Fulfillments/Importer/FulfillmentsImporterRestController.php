@@ -25,7 +25,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Exposes three routes:
  *
- * - `POST /wc/v3/fulfillments/import`         — back-compat orchestrator that runs the whole import in one call.
+ * - `POST /wc/v3/fulfillments/import`         — single-shot orchestrator that runs the whole import in one call.
  * - `POST /wc/v3/fulfillments/import/prepare` — uploads, parses headers, opens an ImportSession.
  * - `POST /wc/v3/fulfillments/import/run`     — processes one chunk against an existing session.
  *
@@ -187,8 +187,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Back-compat orchestrator: runs the legacy single-shot endpoint by delegating to the chunked
-	 * importer internals. Returns the same response shape callers depended on before the wizard.
+	 * Single-shot orchestrator: stages the upload and runs the full import in one request.
 	 *
 	 * @since 10.9.0
 	 *
@@ -459,9 +458,9 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
-		// CSVUploadHelper reads $_FILES under a configurable key. Stage our REST file under that key,
-		// then unconditionally restore the superglobal in finally so the assignment cannot leak.
-		// Nonce verification is handled by the REST permission_callback, not nonces.
+		// CSVUploadHelper reads from $_FILES under a configurable key. Stage our REST file under
+		// that key and restore the superglobal in finally so the assignment cannot leak.
+		// The REST permission_callback handles authentication, hence the phpcs ignore below.
 		$_FILES['fulfillment_import_file'] = $files['file']; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$file_path = '';
 		try {
@@ -539,9 +538,9 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Stringify mapping keys for the JSON response (CSV column indexes survive a round-trip).
+	 * Stringify mapping keys so JSON-encoded CSV column indexes round-trip back to the client.
 	 *
-	 * @param array<int, string> $mapping CSV column index → canonical key.
+	 * @param array<int, string> $mapping CSV column index => canonical key.
 	 * @return array<string, string>
 	 */
 	private function mapping_for_response( array $mapping ): array {
@@ -553,8 +552,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	}
 
 	/**
-	 * Shape per-row results for the chunk response so the wizard can accumulate them
-	 * client-side instead of asking the session transient to hold every row across chunks.
+	 * Shape per-row results for the chunk response.
+	 *
+	 * Per-row data is returned to the client every chunk and accumulated there, so the
+	 * session transient never has to grow to hold every processed row.
 	 *
 	 * @param array<int, array<string, mixed>> $rows Per-row results from import_chunk().
 	 * @return array<int, array<string, mixed>>
