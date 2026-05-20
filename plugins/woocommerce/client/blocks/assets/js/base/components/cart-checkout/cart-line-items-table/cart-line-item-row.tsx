@@ -133,7 +133,7 @@ const CartLineItemRow: React.ForwardRefExoticComponent<
 		);
 		// Three signals, each catching a distinct failure mode.
 		// Disabling the `cart_save_for_later` feature unregisters the
-		// shopper-collection block but leaves any prior insertion in the
+		// saved-for-later block but leaves any prior insertion in the
 		// cart page's post content (the editor renders it as an
 		// "unsupported block" notice) — so presence alone could render
 		// this link with no working destination. Inversely, the feature

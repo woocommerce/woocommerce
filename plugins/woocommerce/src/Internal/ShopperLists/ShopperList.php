@@ -101,7 +101,9 @@ class ShopperList {
 	 * @return array<string, self>
 	 */
 	public static function get_all_for_user( ?int $user_id = null ): array {
-		// For now, only saved-for-later exists.
+		// Only `saved-for-later` is registered today. Additional list types
+		// (e.g. wishlist) will be added here behind their own feature flag
+		// once the corresponding block ships.
 		return array_filter(
 			array(
 				'saved-for-later' => self::get_by_slug( 'saved-for-later', $user_id ),
