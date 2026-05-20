@@ -9,16 +9,16 @@ import { lazy, Suspense } from '@wordpress/element';
 import { EmbeddedBodyProps } from '../embedded-body-layout/embedded-body-props';
 import RecommendationsEligibilityWrapper from '../settings-recommendations/recommendations-eligibility-wrapper';
 
-const CheckoutRecoveryRecommendationsLoader = lazy(
+const AbandonedCartRecoveryRecommendationsLoader = lazy(
 	() =>
 		import(
-			/* webpackChunkName: "checkout-recovery-recommendations" */ './checkout-recovery-recommendations'
+			/* webpackChunkName: "abandoned-cart-recovery-recommendations" */ './abandoned-cart-recovery-recommendations'
 		)
 );
 
-const CHECKOUT_RECOVERY_EMAIL_SECTION = 'wc_email_customer_checkout_recovery';
+const ABANDONED_CART_RECOVERY_EMAIL_SECTION = 'wc_email_customer_abandoned_cart_recovery';
 
-export const CheckoutRecoveryRecommendations = ( {
+export const AbandonedCartRecoveryRecommendations = ( {
 	page,
 	tab,
 	section,
@@ -31,14 +31,14 @@ export const CheckoutRecoveryRecommendations = ( {
 		return null;
 	}
 
-	if ( section !== CHECKOUT_RECOVERY_EMAIL_SECTION ) {
+	if ( section !== ABANDONED_CART_RECOVERY_EMAIL_SECTION ) {
 		return null;
 	}
 
 	return (
 		<RecommendationsEligibilityWrapper>
 			<Suspense fallback={ null }>
-				<CheckoutRecoveryRecommendationsLoader />
+				<AbandonedCartRecoveryRecommendationsLoader />
 			</Suspense>
 		</RecommendationsEligibilityWrapper>
 	);

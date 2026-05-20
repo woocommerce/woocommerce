@@ -7,7 +7,7 @@ import { useSelect } from '@wordpress/data';
 /**
  * Internal dependencies
  */
-import CheckoutRecoveryRecommendations from '../checkout-recovery-recommendations';
+import AbandonedCartRecoveryRecommendations from '../abandoned-cart-recovery-recommendations';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -30,11 +30,11 @@ const mockActivePlugins = ( plugins: string[] ) => {
 	);
 };
 
-describe( 'CheckoutRecoveryRecommendations', () => {
+describe( 'AbandonedCartRecoveryRecommendations', () => {
 	it( 'renders both items when neither plugin is active', () => {
 		mockActivePlugins( [] );
 
-		render( <CheckoutRecoveryRecommendations /> );
+		render( <AbandonedCartRecoveryRecommendations /> );
 
 		expect( screen.queryByText( 'AutomateWoo' ) ).toBeInTheDocument();
 		expect( screen.queryByText( 'MailPoet' ) ).toBeInTheDocument();
@@ -43,7 +43,7 @@ describe( 'CheckoutRecoveryRecommendations', () => {
 	it( 'hides the AutomateWoo item when AutomateWoo is active', () => {
 		mockActivePlugins( [ 'automatewoo' ] );
 
-		render( <CheckoutRecoveryRecommendations /> );
+		render( <AbandonedCartRecoveryRecommendations /> );
 
 		expect( screen.queryByText( 'AutomateWoo' ) ).not.toBeInTheDocument();
 		expect( screen.queryByText( 'MailPoet' ) ).toBeInTheDocument();
@@ -52,7 +52,7 @@ describe( 'CheckoutRecoveryRecommendations', () => {
 	it( 'hides the MailPoet item when MailPoet is active', () => {
 		mockActivePlugins( [ 'mailpoet' ] );
 
-		render( <CheckoutRecoveryRecommendations /> );
+		render( <AbandonedCartRecoveryRecommendations /> );
 
 		expect( screen.queryByText( 'MailPoet' ) ).not.toBeInTheDocument();
 		expect( screen.queryByText( 'AutomateWoo' ) ).toBeInTheDocument();
@@ -61,7 +61,7 @@ describe( 'CheckoutRecoveryRecommendations', () => {
 	it( 'returns null when both plugins are already active', () => {
 		mockActivePlugins( [ 'automatewoo', 'mailpoet' ] );
 
-		const { container } = render( <CheckoutRecoveryRecommendations /> );
+		const { container } = render( <AbandonedCartRecoveryRecommendations /> );
 
 		expect( container ).toBeEmptyDOMElement();
 	} );

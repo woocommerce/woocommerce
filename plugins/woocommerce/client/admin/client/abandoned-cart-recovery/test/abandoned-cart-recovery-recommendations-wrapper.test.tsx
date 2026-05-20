@@ -8,7 +8,7 @@ import { useUser } from '@woocommerce/data';
 /**
  * Internal dependencies
  */
-import { CheckoutRecoveryRecommendations } from '../checkout-recovery-recommendations-wrapper';
+import { AbandonedCartRecoveryRecommendations } from '../abandoned-cart-recovery-recommendations-wrapper';
 
 jest.mock( '@wordpress/data', () => ( {
 	...jest.requireActual( '@wordpress/data' ),
@@ -22,7 +22,7 @@ jest.mock( '@woocommerce/data', () => ( {
 
 jest.mock( '@wordpress/element', () => ( {
 	...jest.requireActual( '@wordpress/element' ),
-	Suspense: () => <div>Checkout recovery recommendations</div>,
+	Suspense: () => <div>Abandoned cart recovery recommendations</div>,
 } ) );
 
 const eligibleSelectReturn = {
@@ -31,7 +31,7 @@ const eligibleSelectReturn = {
 	hasFinishedResolution: () => true,
 };
 
-describe( 'CheckoutRecoveryRecommendations wrapper', () => {
+describe( 'AbandonedCartRecoveryRecommendations wrapper', () => {
 	beforeEach( () => {
 		( useSelect as jest.Mock ).mockImplementation( ( fn ) =>
 			fn( () => eligibleSelectReturn )
@@ -43,35 +43,35 @@ describe( 'CheckoutRecoveryRecommendations wrapper', () => {
 
 	it( 'should not render outside wc-settings', () => {
 		const { queryByText } = render(
-			<CheckoutRecoveryRecommendations
+			<AbandonedCartRecoveryRecommendations
 				page="wc-admin"
 				tab="email"
-				section="wc_email_customer_checkout_recovery"
+				section="wc_email_customer_abandoned_cart_recovery"
 			/>
 		);
 
 		expect(
-			queryByText( 'Checkout recovery recommendations' )
+			queryByText( 'Abandoned cart recovery recommendations' )
 		).not.toBeInTheDocument();
 	} );
 
 	it( 'should not render on a non-email settings tab', () => {
 		const { queryByText } = render(
-			<CheckoutRecoveryRecommendations
+			<AbandonedCartRecoveryRecommendations
 				page="wc-settings"
 				tab="shipping"
-				section="wc_email_customer_checkout_recovery"
+				section="wc_email_customer_abandoned_cart_recovery"
 			/>
 		);
 
 		expect(
-			queryByText( 'Checkout recovery recommendations' )
+			queryByText( 'Abandoned cart recovery recommendations' )
 		).not.toBeInTheDocument();
 	} );
 
 	it( 'should not render on the email list page (no section)', () => {
 		const { queryByText } = render(
-			<CheckoutRecoveryRecommendations
+			<AbandonedCartRecoveryRecommendations
 				page="wc-settings"
 				tab="email"
 				section={ undefined }
@@ -79,13 +79,13 @@ describe( 'CheckoutRecoveryRecommendations wrapper', () => {
 		);
 
 		expect(
-			queryByText( 'Checkout recovery recommendations' )
+			queryByText( 'Abandoned cart recovery recommendations' )
 		).not.toBeInTheDocument();
 	} );
 
 	it( 'should not render on a different email section', () => {
 		const { queryByText } = render(
-			<CheckoutRecoveryRecommendations
+			<AbandonedCartRecoveryRecommendations
 				page="wc-settings"
 				tab="email"
 				section="wc_email_customer_completed_order"
@@ -93,7 +93,7 @@ describe( 'CheckoutRecoveryRecommendations wrapper', () => {
 		);
 
 		expect(
-			queryByText( 'Checkout recovery recommendations' )
+			queryByText( 'Abandoned cart recovery recommendations' )
 		).not.toBeInTheDocument();
 	} );
 
@@ -106,15 +106,15 @@ describe( 'CheckoutRecoveryRecommendations wrapper', () => {
 		);
 
 		const { queryByText } = render(
-			<CheckoutRecoveryRecommendations
+			<AbandonedCartRecoveryRecommendations
 				page="wc-settings"
 				tab="email"
-				section="wc_email_customer_checkout_recovery"
+				section="wc_email_customer_abandoned_cart_recovery"
 			/>
 		);
 
 		expect(
-			queryByText( 'Checkout recovery recommendations' )
+			queryByText( 'Abandoned cart recovery recommendations' )
 		).not.toBeInTheDocument();
 	} );
 
@@ -124,29 +124,29 @@ describe( 'CheckoutRecoveryRecommendations wrapper', () => {
 		} );
 
 		const { queryByText } = render(
-			<CheckoutRecoveryRecommendations
+			<AbandonedCartRecoveryRecommendations
 				page="wc-settings"
 				tab="email"
-				section="wc_email_customer_checkout_recovery"
+				section="wc_email_customer_abandoned_cart_recovery"
 			/>
 		);
 
 		expect(
-			queryByText( 'Checkout recovery recommendations' )
+			queryByText( 'Abandoned cart recovery recommendations' )
 		).not.toBeInTheDocument();
 	} );
 
-	it( 'should render on the checkout-recovery email section page when eligible', () => {
+	it( 'should render on the abandoned-cart-recovery email section page when eligible', () => {
 		const { getByText } = render(
-			<CheckoutRecoveryRecommendations
+			<AbandonedCartRecoveryRecommendations
 				page="wc-settings"
 				tab="email"
-				section="wc_email_customer_checkout_recovery"
+				section="wc_email_customer_abandoned_cart_recovery"
 			/>
 		);
 
 		expect(
-			getByText( 'Checkout recovery recommendations' )
+			getByText( 'Abandoned cart recovery recommendations' )
 		).toBeInTheDocument();
 	} );
 } );

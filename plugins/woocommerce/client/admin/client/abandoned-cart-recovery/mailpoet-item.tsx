@@ -6,26 +6,26 @@ import { Button } from '@wordpress/components';
 import { Pill } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
-const AUTOMATEWOO_URL =
-	'https://woocommerce.com/products/automatewoo/?utm_source=woocommerce&utm_medium=product&utm_campaign=checkout-recovery-recommendation';
+const MAILPOET_URL =
+	'https://woocommerce.com/products/mailpoet/?utm_source=woocommerce&utm_medium=product&utm_campaign=abandoned-cart-recovery-recommendation';
 
-const AutomateWooItem = () => {
+const MailPoetItem = () => {
 	const handleClick = () => {
-		recordEvent( 'checkout_recovery_recommendation_click', {
-			plugin: 'automatewoo',
+		recordEvent( 'abandoned_cart_recovery_recommendation_click', {
+			plugin: 'mailpoet',
 		} );
 	};
 
 	return (
-		<div className="woocommerce-list__item-inner woocommerce-checkout-recovery-recommendation-item">
+		<div className="woocommerce-list__item-inner woocommerce-abandoned-cart-recovery-recommendation-item">
 			<div className="woocommerce-list__item-text">
 				<span className="woocommerce-list__item-title">
-					{ __( 'AutomateWoo', 'woocommerce' ) }
+					{ __( 'MailPoet', 'woocommerce' ) }
 					<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
 				</span>
 				<span className="woocommerce-list__item-content">
 					{ __(
-						'Build multi-step recovery sequences, segment customers, and track which campaigns recover the most revenue.',
+						'Pair recovery emails with newsletters and ongoing automations so customers stay engaged after they buy.',
 						'woocommerce'
 					) }
 				</span>
@@ -33,7 +33,7 @@ const AutomateWooItem = () => {
 			<div className="woocommerce-list__item-after">
 				<Button
 					variant="secondary"
-					href={ AUTOMATEWOO_URL }
+					href={ MAILPOET_URL }
 					target="_blank"
 					rel="noreferrer"
 					onClick={ handleClick }
@@ -45,4 +45,4 @@ const AutomateWooItem = () => {
 	);
 };
 
-export default AutomateWooItem;
+export default MailPoetItem;

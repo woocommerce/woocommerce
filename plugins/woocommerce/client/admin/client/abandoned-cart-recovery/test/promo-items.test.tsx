@@ -35,7 +35,7 @@ describe( 'AutomateWooItem', () => {
 		);
 	} );
 
-	it( 'fires the checkout_recovery_recommendation_click track on CTA click', async () => {
+	it( 'fires the abandoned_cart_recovery_recommendation_click track on CTA click', async () => {
 		render( <AutomateWooItem /> );
 
 		await userEvent.click(
@@ -43,7 +43,7 @@ describe( 'AutomateWooItem', () => {
 		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'checkout_recovery_recommendation_click',
+			'abandoned_cart_recovery_recommendation_click',
 			{ plugin: 'automatewoo' }
 		);
 	} );
@@ -69,7 +69,7 @@ describe( 'MailPoetItem', () => {
 		);
 	} );
 
-	it( 'fires the checkout_recovery_recommendation_click track on CTA click', async () => {
+	it( 'fires the abandoned_cart_recovery_recommendation_click track on CTA click', async () => {
 		render( <MailPoetItem /> );
 
 		await userEvent.click(
@@ -77,7 +77,7 @@ describe( 'MailPoetItem', () => {
 		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
-			'checkout_recovery_recommendation_click',
+			'abandoned_cart_recovery_recommendation_click',
 			{ plugin: 'mailpoet' }
 		);
 	} );
