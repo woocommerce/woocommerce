@@ -198,10 +198,8 @@ final class SavedForLater extends AbstractBlock {
 		wp_interactivity_config(
 			'woocommerce/saved-for-later',
 			array(
-				/* translators: %d: quantity of saved items. */
-				'quantityLabelTemplate' => __( 'Quantity: %d', 'woocommerce' ),
-				/* translators: %s: product name. */
-				'removeLabelTemplate'   => __( 'Remove %s from Saved for later list', 'woocommerce' ),
+				'quantityLabelTemplate' => $this->get_quantity_label_template(),
+				'removeLabelTemplate'   => $this->get_remove_label_template(),
 			)
 		);
 
@@ -222,7 +220,6 @@ final class SavedForLater extends AbstractBlock {
 				)
 			),
 			'data-wp-watch'       => 'callbacks.trackShownItems',
-			'data-wp-key'         => $this->get_full_block_name(),
 		);
 
 		$list_class = sprintf( 'wc-block-saved-for-later__list columns-%d', $column_count );
@@ -342,7 +339,7 @@ final class SavedForLater extends AbstractBlock {
 						class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
 						data-wp-on--click="actions.onClickMoveToCart"
 					>
-						<?php echo esc_html__( 'Move to cart', 'woocommerce' ); ?>
+						<?php echo esc_html( $this->get_move_to_cart_label() ); ?>
 					</button>
 				</div>
 			</li>
@@ -383,10 +380,8 @@ final class SavedForLater extends AbstractBlock {
 		$price_html      = (string) ( $item['price_html'] ?? '' );
 		$variation_label = $this->get_variation_label( $item );
 
-		/* translators: %d: quantity of saved items. */
-		$quantity_label = sprintf( __( 'Quantity: %d', 'woocommerce' ), $quantity );
-		/* translators: %s: product name. */
-		$remove_aria = sprintf( __( 'Remove %s from Saved for later list', 'woocommerce' ), $alt );
+		$quantity_label = sprintf( $this->get_quantity_label_template(), $quantity );
+		$remove_aria    = sprintf( $this->get_remove_label_template(), $alt );
 
 		$is_price_hidden = '' === $price_html;
 
@@ -488,7 +483,7 @@ final class SavedForLater extends AbstractBlock {
 					class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
 					data-wp-on--click="actions.onClickMoveToCart"
 				>
-					<?php echo esc_html__( 'Move to cart', 'woocommerce' ); ?>
+					<?php echo esc_html( $this->get_move_to_cart_label() ); ?>
 				</button>
 			</div>
 		</li>
@@ -505,7 +500,7 @@ final class SavedForLater extends AbstractBlock {
 	 * saved), so we don't emit an empty `<div>`.
 	 *
 	 * @param string $content  Rendered inner-block content (typically the heading HTML).
-	 * @param bool   $is_empty Whether the SC list is empty on initial paint.
+	 * @param bool   $is_empty Whether the saved-for-later list is empty on initial paint.
 	 * @return string
 	 */
 	private function render_header_markup( string $content, bool $is_empty ): string {
@@ -557,6 +552,34 @@ final class SavedForLater extends AbstractBlock {
 	 */
 	private function render_error_markup(): string {
 		return '<li class="wc-block-saved-for-later__error" role="alert" data-wp-bind--hidden="!state.hasError" data-wp-text="state.errorMessage" hidden></li>';
+	}
+
+	/**
+	 * Sprintf template for the per-row quantity label. Used both by PHP SSR
+	 * (`render_item_markup()`) and by the JS-side getter (via
+	 * `wp_interactivity_config`) so both paths produce the same string after
+	 * `%d` interpolation.
+	 */
+	private function get_quantity_label_template(): string {
+		/* translators: %d: quantity of saved items. */
+		return __( 'Quantity: %d', 'woocommerce' );
+	}
+
+	/**
+	 * Sprintf template for the per-row remove button's aria-label. Same dual
+	 * use as the quantity template.
+	 */
+	private function get_remove_label_template(): string {
+		/* translators: %s: product name. */
+		return __( 'Remove %s from Saved for later list', 'woocommerce' );
+	}
+
+	/**
+	 * Visible label for the move-to-cart action button, used by both the
+	 * iAPI `<template>` and the SSR per-row markup.
+	 */
+	private function get_move_to_cart_label(): string {
+		return __( 'Move to cart', 'woocommerce' );
 	}
 
 	/**
