@@ -26,8 +26,22 @@ export interface UseChunkedImportArgs {
 	onError?: ( message: string ) => void;
 }
 
-const DEFAULT_CHUNK_SIZE = 200;
+const FALLBACK_CHUNK_SIZE = 200;
 const RETRY_BACKOFFS_MS = [ 250, 1000 ];
+
+/**
+ * Reads the server-resolved chunk size from the localized settings so the
+ * client never disagrees with the REST controller's `resolve_chunk_size`
+ * (and the `woocommerce_fulfillments_csv_importer_chunk_size` filter).
+ */
+function resolvedChunkSize(): number {
+	const settings = window.wcFulfillmentsImporterSettings;
+	const fromServer = settings?.chunkSize;
+	if ( typeof fromServer === 'number' && fromServer > 0 ) {
+		return Math.floor( fromServer );
+	}
+	return FALLBACK_CHUNK_SIZE;
+}
 
 function delay( ms: number, signal?: AbortSignal ): Promise< void > {
 	return new Promise( ( resolve, reject ) => {
@@ -107,7 +121,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 		mapping,
 		notifyCustomer,
 		updateExisting,
-		chunkSize = DEFAULT_CHUNK_SIZE,
+		chunkSize = resolvedChunkSize(),
 		onChunk,
 		onFinish,
 		onError,

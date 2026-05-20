@@ -80,9 +80,9 @@ class FulfillmentsCsvImporterController {
 			'wc-admin-fulfillments-importer',
 			'wcFulfillmentsImporterSettings',
 			array(
-				'restNamespace' => 'wc/v3',
-				'importRoute'   => '/wc/v3/fulfillments/import',
-				'providers'     => $this->get_provider_list_for_js(),
+				'importRoute' => '/wc/v3/fulfillments/import',
+				'chunkSize'   => FulfillmentsCsvImporter::resolve_chunk_size(),
+				'providers'   => $this->get_provider_list_for_js(),
 			)
 		);
 
