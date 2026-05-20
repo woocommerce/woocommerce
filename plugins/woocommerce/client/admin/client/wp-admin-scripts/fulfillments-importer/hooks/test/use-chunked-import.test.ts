@@ -32,6 +32,7 @@ function buildResponse(
 			failed: 0,
 			notified: 0,
 		},
+		rows: [],
 		errors: [],
 		...( done
 			? {

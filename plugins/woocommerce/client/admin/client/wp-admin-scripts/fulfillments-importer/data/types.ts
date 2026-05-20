@@ -66,6 +66,7 @@ export interface RunChunkResponse {
 	total: number;
 	done: boolean;
 	counts: RunChunkCounts;
+	rows: ImporterRowResult[];
 	errors: RunChunkError[];
 	summary?: ImporterSummary;
 }

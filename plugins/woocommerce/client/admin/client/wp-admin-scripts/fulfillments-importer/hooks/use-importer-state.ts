@@ -9,6 +9,7 @@ import { useReducer } from 'react';
 import type {
 	CanonicalColumnKey,
 	ColumnMapping,
+	ImporterRowResult,
 	ImporterSummary,
 	PrepareResponse,
 	RunChunkResponse,
@@ -36,7 +37,9 @@ export interface ImporterState {
 		updated: number;
 		skipped: number;
 		failed: number;
+		notified: number;
 	};
+	rows: ImporterRowResult[];
 	// Done step.
 	summary: ImporterSummary | null;
 	// Ambient.
@@ -79,7 +82,14 @@ export function createInitialState(): ImporterState {
 		total: 0,
 		mapping: {},
 		processed: 0,
-		counts: { created: 0, updated: 0, skipped: 0, failed: 0 },
+		counts: {
+			created: 0,
+			updated: 0,
+			skipped: 0,
+			failed: 0,
+			notified: 0,
+		},
+		rows: [],
 		summary: null,
 		error: null,
 		isBusy: false,
@@ -129,7 +139,14 @@ export function importerReducer(
 				total: action.payload.total,
 				mapping: detected,
 				processed: 0,
-				counts: { created: 0, updated: 0, skipped: 0, failed: 0 },
+				counts: {
+					created: 0,
+					updated: 0,
+					skipped: 0,
+					failed: 0,
+					notified: 0,
+				},
+				rows: [],
 				error: null,
 				isBusy: false,
 			};
@@ -149,7 +166,14 @@ export function importerReducer(
 				...state,
 				step: 'import',
 				processed: 0,
-				counts: { created: 0, updated: 0, skipped: 0, failed: 0 },
+				counts: {
+					created: 0,
+					updated: 0,
+					skipped: 0,
+					failed: 0,
+					notified: 0,
+				},
+				rows: [],
 				error: null,
 			};
 		case 'CHUNK_OK':
@@ -161,14 +185,19 @@ export function importerReducer(
 					updated: action.payload.counts.updated,
 					skipped: action.payload.counts.skipped,
 					failed: action.payload.counts.failed,
+					notified: action.payload.counts.notified,
 				},
+				rows: state.rows.concat( action.payload.rows ?? [] ),
 				error: null,
 			};
 		case 'FINISH':
 			return {
 				...state,
 				step: 'done',
-				summary: action.summary,
+				summary: {
+					...action.summary,
+					rows: state.rows,
+				},
 				isBusy: false,
 				error: null,
 			};

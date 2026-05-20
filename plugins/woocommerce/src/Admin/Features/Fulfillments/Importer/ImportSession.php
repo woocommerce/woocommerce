@@ -119,7 +119,6 @@ final class ImportSession {
 				'failed'   => 0,
 				'notified' => 0,
 			),
-			'rows'                => array(),
 		);
 
 		$stored = set_transient( self::PREFIX . $user_id . '_' . $token, $data, self::TTL );
@@ -366,17 +365,20 @@ final class ImportSession {
 	}
 
 	/**
-	 * Append the result of one chunk: advance processed, merge counts, append rows, replace dedupe state.
+	 * Advance processed, merge counts, and persist dedupe/byte-offset state.
+	 *
+	 * Per-row results are streamed back in the chunk REST response instead of accumulating
+	 * inside the session transient — otherwise a long import would persist every row result
+	 * to the transient on every chunk and blow past max_allowed_packet on the final write.
 	 *
 	 * @since 10.9.0
 	 *
 	 * @param int                                                                    $processed_after End-of-chunk processed count (offset + rows consumed by the chunk).
 	 * @param array{created:int, updated:int, skipped:int, failed:int, notified:int} $counts          Per-chunk counts.
-	 * @param array<int, array<string, mixed>>                                       $rows            Per-row result entries from this chunk.
 	 * @param array<string, true>                                                    $seen            Cross-chunk dedupe state to persist.
 	 * @param int                                                                    $byte_offset     Byte position the importer reached after this chunk, used to resume the next one without re-reading prior rows.
 	 */
-	public function record_chunk( int $processed_after, array $counts, array $rows, array $seen, int $byte_offset = 0 ): void {
+	public function record_chunk( int $processed_after, array $counts, array $seen, int $byte_offset = 0 ): void {
 		$prev                    = (int) ( $this->data['processed'] ?? 0 );
 		$this->data['processed'] = min( $this->total(), max( $prev, max( 0, $processed_after ) ) );
 
@@ -385,11 +387,6 @@ final class ImportSession {
 			$current_counts[ $key ] = (int) ( $current_counts[ $key ] ?? 0 ) + (int) ( $counts[ $key ] ?? 0 );
 		}
 		$this->data['counts'] = $current_counts;
-
-		if ( ! empty( $rows ) ) {
-			$existing           = is_array( $this->data['rows'] ?? null ) ? $this->data['rows'] : array();
-			$this->data['rows'] = array_merge( $existing, $rows );
-		}
 
 		$this->data['seen_tracking_pairs'] = $seen;
 
@@ -419,22 +416,15 @@ final class ImportSession {
 	}
 
 	/**
-	 * Per-row result entries collected across chunks.
-	 *
-	 * @return array<int, array<string, mixed>>
-	 */
-	public function rows(): array {
-		$rows = $this->data['rows'] ?? array();
-		return is_array( $rows ) ? $rows : array();
-	}
-
-	/**
 	 * Final ImporterSummary-shaped payload for the wizard's "Done" step.
+	 *
+	 * Rows are not part of the persisted session; the wizard accumulates them from each chunk's
+	 * REST response and rebuilds the summary client-side.
 	 *
 	 * @return array<string, mixed>
 	 */
 	public function summary(): array {
-		return array_merge( $this->counts(), array( 'rows' => $this->rows() ) );
+		return array_merge( $this->counts(), array( 'rows' => array() ) );
 	}
 
 	/**

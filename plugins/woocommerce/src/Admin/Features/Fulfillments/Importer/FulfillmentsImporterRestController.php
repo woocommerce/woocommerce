@@ -374,9 +374,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$next_byte       = isset( $chunk_result['byte_offset'] ) ? (int) $chunk_result['byte_offset'] : 0;
 		$consumed        = isset( $chunk_result['consumed'] ) ? max( 0, (int) $chunk_result['consumed'] ) : 0;
 		$processed_after = min( $session->total(), $offset + $consumed );
+		$rows_for_ui     = $this->prepare_rows_for_response( $rows );
 		$errors_for_ui   = $this->extract_errors_for_response( $rows );
 
-		$session->record_chunk( $processed_after, $counts, $rows, $seen, $next_byte );
+		$session->record_chunk( $processed_after, $counts, $seen, $next_byte );
 
 		$processed = $session->processed();
 		$total     = $session->total();
@@ -388,6 +389,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			'total'     => $total,
 			'done'      => $done,
 			'counts'    => $session->counts(),
+			'rows'      => $rows_for_ui,
 			'errors'    => $errors_for_ui,
 		);
 
@@ -529,6 +531,38 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$out = array();
 		foreach ( $mapping as $col => $canonical ) {
 			$out[ (string) $col ] = (string) $canonical;
+		}
+		return $out;
+	}
+
+	/**
+	 * Shape per-row results for the chunk response so the wizard can accumulate them
+	 * client-side instead of asking the session transient to hold every row across chunks.
+	 *
+	 * @param array<int, array<string, mixed>> $rows Per-row results from import_chunk().
+	 * @return array<int, array<string, mixed>>
+	 */
+	private function prepare_rows_for_response( array $rows ): array {
+		$out = array();
+		foreach ( $rows as $row ) {
+			if ( ! is_array( $row ) ) {
+				continue;
+			}
+			$entry = array(
+				'row'     => (int) ( $row['row'] ?? 0 ),
+				'status'  => (string) ( $row['status'] ?? '' ),
+				'message' => (string) ( $row['message'] ?? '' ),
+			);
+			if ( isset( $row['order_id'] ) ) {
+				$entry['order_id'] = (int) $row['order_id'];
+			}
+			if ( isset( $row['fulfillment_id'] ) ) {
+				$entry['fulfillment_id'] = (int) $row['fulfillment_id'];
+			}
+			if ( isset( $row['notified'] ) ) {
+				$entry['notified'] = (bool) $row['notified'];
+			}
+			$out[] = $entry;
 		}
 		return $out;
 	}

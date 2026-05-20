@@ -225,6 +225,10 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 4, $res1['total'] );
 		$this->assertSame( 2, $res1['counts']['created'] );
 		$this->assertArrayNotHasKey( 'summary', $res1 );
+		// Each chunk returns its own rows so the wizard can accumulate them
+		// without forcing the session transient to hold them all.
+		$this->assertArrayHasKey( 'rows', $res1 );
+		$this->assertCount( 2, $res1['rows'] );
 
 		// Second chunk: completes the import.
 		$req2 = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
@@ -240,7 +244,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 4, $res2['counts']['created'] );
 		$this->assertArrayHasKey( 'summary', $res2 );
 		$this->assertSame( 4, $res2['summary']['created'] );
-		$this->assertCount( 4, $res2['summary']['rows'] );
+		$this->assertCount( 2, $res2['rows'] );
 
 		// Session is gone after completion; the same token must not load again.
 		$this->assertNull( ImportSession::load( get_current_user_id(), $token ) );
