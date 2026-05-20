@@ -65,7 +65,6 @@ function ActivitySourceLoader( {
 	onResult,
 }: ActivitySourceLoaderProps ) {
 	const result = source.useActivity();
-	console.log( '(5) result', result );
 	const prevResultRef = useRef< ActivityHookResult | null >( null );
 
 	useEffect( () => {
