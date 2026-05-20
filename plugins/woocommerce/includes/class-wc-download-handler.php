@@ -318,7 +318,7 @@ class WC_Download_Handler {
 			$remote_file = false;
 			$file_path   = ABSPATH . $file_path;
 
-		} elseif ( $wp_content_relative === substr( $file_path, 0, strlen( $wp_content_relative ) ) ) {
+		} elseif ( substr( $file_path, 0, strlen( $wp_content_relative ) ) === $wp_content_relative ) {
 			$remote_file = false;
 			$file_path   = realpath( WP_CONTENT_DIR . substr( $file_path, strlen( $wp_content_relative ) ) );
 
@@ -428,7 +428,7 @@ class WC_Download_Handler {
 			// Extract the range string.
 			list( , $range ) = explode( '=', $http_range, 2 );
 			// Make sure the client hasn't sent us a multibyte range.
-			if ( strpos( $range, ',' ) !== false ) {
+			if ( false !== strpos( $range, ',' ) ) {
 				return $download_range;
 			}
 
@@ -734,7 +734,7 @@ class WC_Download_Handler {
 			}
 
 			// Counting of partial downloads may be disabled by the site operator.
-			if ( get_option( 'woocommerce_downloads_count_partial', 'yes' ) !== 'yes' ) {
+			if ( 'yes' !== get_option( 'woocommerce_downloads_count_partial', 'yes' ) ) {
 				return;
 			}
 
