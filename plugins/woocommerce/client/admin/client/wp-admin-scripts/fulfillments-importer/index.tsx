@@ -86,11 +86,12 @@ function FulfillmentsImporterController() {
 
 	return (
 		<>
-			{ triggerSlot &&
-				createPortal(
-					<ImportFulfillmentsTrigger onClick={ open } />,
-					triggerSlot
-				) }
+			{ triggerSlot
+				? createPortal(
+						<ImportFulfillmentsTrigger onClick={ open } />,
+						triggerSlot
+				  )
+				: null }
 			<FulfillmentsImporterModal isOpen={ isOpen } onClose={ close } />
 		</>
 	);

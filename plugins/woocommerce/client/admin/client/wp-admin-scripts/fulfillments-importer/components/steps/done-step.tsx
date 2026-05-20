@@ -18,7 +18,9 @@ const DoneStep: React.FC< StepComponentProps > = ( {
 } ) => (
 	<div className="woocommerce-fulfillment-importer-step woocommerce-fulfillment-importer-step--done">
 		<h2>{ __( 'Import complete', 'woocommerce' ) }</h2>
-		{ state.summary && <ImporterSummaryPanel summary={ state.summary } /> }
+		{ state.summary ? (
+			<ImporterSummaryPanel summary={ state.summary } />
+		) : null }
 		<footer className="woocommerce-fulfillment-importer-step__footer">
 			<Flex justify="flex-end">
 				<Button

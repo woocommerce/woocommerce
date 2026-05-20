@@ -153,7 +153,7 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 						visibleRows[ index ]?.row ?? index
 					}
 				/>
-				{ hasMore && (
+				{ hasMore ? (
 					<Flex
 						className="woocommerce-fulfillment-importer-summary__load-more"
 						justify="center"
@@ -170,7 +170,7 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 							) }
 						</Button>
 					</Flex>
-				) }
+				) : null }
 			</div>
 		);
 	}

@@ -30,13 +30,13 @@ const ModalHeader: React.FC< ModalHeaderProps > = ( {
 	<header className="woocommerce-fulfillment-importer-modal__header">
 		<div className="woocommerce-fulfillment-importer-modal__header-row">
 			<div className="woocommerce-fulfillment-importer-modal__header-leading">
-				{ onBack && (
+				{ onBack ? (
 					<Button
 						icon={ chevronLeft }
 						label={ __( 'Back', 'woocommerce' ) }
 						onClick={ onBack }
 					/>
-				) }
+				) : null }
 				<h2 className="woocommerce-fulfillment-importer-modal__title">
 					{ title }
 				</h2>

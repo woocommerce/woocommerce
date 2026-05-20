@@ -106,7 +106,7 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 				) }
 			</p>
 
-			{ ( localError || state.error ) && (
+			{ localError || state.error ? (
 				<Notice
 					status="error"
 					isDismissible
@@ -117,7 +117,7 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 				>
 					{ localError || state.error }
 				</Notice>
-			) }
+			) : null }
 
 			<BaseControl
 				id="wc-fulfillments-importer-file"

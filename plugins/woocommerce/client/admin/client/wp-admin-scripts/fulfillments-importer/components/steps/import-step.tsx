@@ -91,14 +91,14 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 				</div>
 			</dl>
 
-			{ state.error && (
+			{ state.error ? (
 				<Notice status="error" isDismissible={ false }>
 					<p>{ state.error }</p>
 					<Button variant="secondary" onClick={ retry }>
 						{ __( 'Retry', 'woocommerce' ) }
 					</Button>
 				</Notice>
-			) }
+			) : null }
 		</div>
 	);
 };
