@@ -64,6 +64,8 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 
 	const StepComponent = STEP_COMPONENTS[ state.step ];
 
+	const title = __( 'Import fulfillments', 'woocommerce' );
+
 	return (
 		<Modal
 			className="woocommerce-fulfillment-importer-modal"
@@ -76,12 +78,13 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 			// eslint-disable-next-line @typescript-eslint/ban-ts-comment
 			// @ts-ignore -- __experimentalHideHeader is supported but not in the typings shipped here.
 			__experimentalHideHeader
-			title={ __( 'Import fulfillments', 'woocommerce' ) }
+			title={ title }
+			aria-label={ title }
 		>
 			<div className="woocommerce-fulfillment-importer-modal__layout">
 				<ModalHeader
 					currentStep={ state.step }
-					title={ __( 'Import fulfillments', 'woocommerce' ) }
+					title={ title }
 					onClose={ handleClose }
 					canClose={ canClose }
 				/>

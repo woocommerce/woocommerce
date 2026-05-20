@@ -37,9 +37,9 @@ const ModalHeader: React.FC< ModalHeaderProps > = ( {
 						onClick={ onBack }
 					/>
 				) }
-				<h1 className="woocommerce-fulfillment-importer-modal__title">
+				<h2 className="woocommerce-fulfillment-importer-modal__title">
 					{ title }
-				</h1>
+				</h2>
 			</div>
 			<Button
 				icon={ closeSmall }

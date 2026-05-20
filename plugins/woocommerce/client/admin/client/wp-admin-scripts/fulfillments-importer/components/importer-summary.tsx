@@ -62,7 +62,7 @@ const ImporterSummaryPanel: React.FC< Props > = ( { summary } ) => {
 					{
 						display: (
 							<Pill className={ `is-status-${ row.status }` }>
-								<span aria-label={ label }>{ label }</span>
+								{ label }
 							</Pill>
 						),
 						value: row.status,
