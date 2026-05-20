@@ -550,7 +550,7 @@ export const permanentlyDeleteAction = (): Action< ProductEntityRecord > => ( {
 						? sprintf(
 								/* translators: %s: The product's name. */
 								__(
-									'%s will be permanently deleted and can\'t be restored.',
+									"%s will be permanently deleted and can't be restored.",
 									'woocommerce'
 								),
 								items[ 0 ]?.name ?? ''
