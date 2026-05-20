@@ -8,7 +8,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-$locales = include 'currency-info.php';
+$locales = include __DIR__ . 'currency-info.php';
 
 // Bulgaria transitions from BGN to EUR on 2026-01-01 00:00:00 UTC.
 $bg_uses_euro = ( time() >= strtotime( '2026-01-01 00:00:00 UTC' ) );
