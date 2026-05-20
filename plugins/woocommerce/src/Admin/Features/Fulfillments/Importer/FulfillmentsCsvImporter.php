@@ -96,19 +96,19 @@ class FulfillmentsCsvImporter {
 	}
 
 	/**
-	 * Normalize a delimiter input to a single character, falling back to ',' when empty
-	 * or longer than one byte. Mirrors the legacy WC_Product_CSV_Importer_Controller behavior.
+	 * Normalize a delimiter input, falling back to ',' when empty or non-string.
+	 * Mirrors the legacy WC_Product_CSV_Importer_Controller behavior.
 	 *
 	 * @since 10.9.0
 	 *
 	 * @param mixed $delimiter Raw delimiter input.
-	 * @return string One-character delimiter.
+	 * @return string Delimiter string (defaults to ',').
 	 */
 	public static function normalize_delimiter( $delimiter ): string {
 		if ( ! is_string( $delimiter ) || '' === $delimiter ) {
 			return ',';
 		}
-		return 1 === strlen( $delimiter ) ? $delimiter : ',';
+		return $delimiter;
 	}
 
 	/**
