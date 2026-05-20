@@ -122,8 +122,19 @@ final class ImportSession {
 			'rows'                => array(),
 		);
 
-		set_transient( self::PREFIX . $user_id . '_' . $token, $data, self::TTL );
-		set_transient( self::INDEX_PREFIX . $user_id, $token, self::TTL );
+		$stored = set_transient( self::PREFIX . $user_id . '_' . $token, $data, self::TTL );
+		$indexed = set_transient( self::INDEX_PREFIX . $user_id, $token, self::TTL );
+		if ( ! $stored || ! $indexed ) {
+			wc_get_logger()->error(
+				sprintf(
+					'Fulfillments import session could not be persisted for user %d (payload=%s, index=%s).',
+					$user_id,
+					$stored ? 'ok' : 'failed',
+					$indexed ? 'ok' : 'failed'
+				),
+				array( 'source' => 'fulfillments-importer' )
+			);
+		}
 
 		self::schedule_cleanup( $user_id, $token, $file );
 
@@ -449,9 +460,20 @@ final class ImportSession {
 	 * Persist the current payload back to its transient.
 	 */
 	private function persist(): void {
-		set_transient( self::PREFIX . $this->user_id . '_' . $this->token, $this->data, self::TTL );
+		$stored = set_transient( self::PREFIX . $this->user_id . '_' . $this->token, $this->data, self::TTL );
 		// Keep the user-scoped index pointer alive too.
-		set_transient( self::INDEX_PREFIX . $this->user_id, $this->token, self::TTL );
+		$indexed = set_transient( self::INDEX_PREFIX . $this->user_id, $this->token, self::TTL );
+		if ( ! $stored || ! $indexed ) {
+			wc_get_logger()->error(
+				sprintf(
+					'Fulfillments import session %s could not be persisted (payload=%s, index=%s); progress for this chunk may be lost.',
+					$this->token,
+					$stored ? 'ok' : 'failed',
+					$indexed ? 'ok' : 'failed'
+				),
+				array( 'source' => 'fulfillments-importer' )
+			);
+		}
 	}
 
 	/**
