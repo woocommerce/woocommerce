@@ -56,16 +56,16 @@ export const fieldExtensions: Partial< Field< ProductEntityRecord > > = {
 			return item.stock_status;
 		}
 
+		const stockLabel =
+			item.stock_quantity && item.stock_quantity > 0
+				? `${ match.label } (${ item.stock_quantity })`
+				: match.label;
+
 		return (
 			<div className="woocommerce-fields-field__stock">
 				<Badge intent={ stockStatusBadgeIntent[ match.value ] }>
-					{ match.label }
+					{ stockLabel }
 				</Badge>
-				{ item.stock_quantity && item.stock_quantity > 0 && (
-					<span className="woocommerce-fields-field__stock-quantity">
-						({ item.stock_quantity })
-					</span>
-				) }
 			</div>
 		);
 	},

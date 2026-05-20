@@ -352,7 +352,7 @@ export default function ProductList( {
 				paginationInfo={ paginationInfo }
 				fields={ productFields }
 				data={ data }
-				isLoading={ isLoading && ! hasResolved }
+				isLoading={ isLoading || ! hasResolved }
 				view={ view }
 				actions={ actions }
 				onChangeView={ setView }
