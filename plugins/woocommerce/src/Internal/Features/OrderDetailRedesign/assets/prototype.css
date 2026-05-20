@@ -1,0 +1,323 @@
+/* ============================================================================
+ * Order detail Update — visual prototype
+ *
+ * Non-mergeable prototype CSS for stakeholder buy-in. Scoped under
+ * `body.woocommerce-feature-enabled-order-detail-redesign` so it only
+ * applies when the feature flag is on. Overrides existing order edit
+ * styles in two ways:
+ *   1) Hides the Update + Move to Trash controls in the standard
+ *      Order Actions metabox (they live in the new Submit metabox now).
+ *   2) Makes the standard Order Data metabox visually read-only and
+ *      surfaces a single Edit affordance that opens the side panel.
+ * ============================================================================ */
+
+.woocommerce-feature-enabled-order-detail-redesign #poststuff {
+	--wc-proto-blue: #2271b1;
+	--wc-proto-blue-hover: #135e96;
+	--wc-proto-trash: #b32d2e;
+	--wc-proto-border: #c3c4c7;
+	--wc-proto-divider: #f0f0f1;
+	--wc-proto-footer-bg: #f6f7f7;
+	--wc-proto-text: #1d2327;
+	--wc-proto-muted: #50575e;
+}
+
+/* -- Submit metabox (the new one) -------------------------------------- */
+.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-submit .inside {
+	margin: 0;
+	padding: 0;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-submit {
+	padding: 12px;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-submit__field {
+	margin: 0;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-submit__field label {
+	display: block;
+	font-size: 11px;
+	font-weight: 500;
+	color: #1d2327;
+	margin-bottom: 4px;
+}
+.woocommerce-feature-enabled-order-detail-redesign #wc-order-submit-status {
+	width: 100%;
+	height: 36px;
+	padding: 0 32px 0 8px;
+	border: 1px solid #8c8f94;
+	border-radius: 2px;
+	background-color: #fff;
+	font: inherit;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-submit__footer {
+	display: flex;
+	justify-content: space-between;
+	align-items: center;
+	padding: 10px 12px;
+	background: #f6f7f7;
+	border-top: 1px solid #c3c4c7;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-submit__trash {
+	color: #b32d2e;
+	text-decoration: none;
+	font-size: 13px;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-submit__trash:hover {
+	color: #8a0000;
+	text-decoration: underline;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-submit__update {
+	min-width: 80px;
+}
+
+/* -- Strip existing Order Actions metabox -------------------------------
+ * Update + Move to Trash now live in the new Submit metabox; keep only
+ * the action dropdown + Apply button inside the existing metabox so we
+ * don't lose that functionality.
+ * --------------------------------------------------------------------- */
+.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-actions #delete-action,
+.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-actions #publishing-action,
+.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-actions .save_order {
+	display: none !important;
+}
+.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-actions #major-publishing-actions {
+	display: none !important;
+}
+
+/* -- Make Order Data metabox visually read-only -------------------------
+ * Hide the editable inputs; the JS will inject formatted read-only
+ * blocks alongside (or we let the existing display modes stay visible
+ * while suppressing the edit-toggle pencil icons).
+ * --------------------------------------------------------------------- */
+.woocommerce-feature-enabled-order-detail-redesign #order_data .edit_address,
+.woocommerce-feature-enabled-order-detail-redesign #order_data .load_customer_billing,
+.woocommerce-feature-enabled-order-detail-redesign #order_data .load_customer_shipping,
+.woocommerce-feature-enabled-order-detail-redesign #order_data a.edit_address,
+.woocommerce-feature-enabled-order-detail-redesign #order_data a.tips {
+	display: none !important;
+}
+.woocommerce-feature-enabled-order-detail-redesign #order_data .order_data_column input[type="text"],
+.woocommerce-feature-enabled-order-detail-redesign #order_data .order_data_column input[type="email"],
+.woocommerce-feature-enabled-order-detail-redesign #order_data .order_data_column input[type="tel"],
+.woocommerce-feature-enabled-order-detail-redesign #order_data .order_data_column input[type="number"],
+.woocommerce-feature-enabled-order-detail-redesign #order_data .order_data_column select,
+.woocommerce-feature-enabled-order-detail-redesign #order_data .order_data_column textarea {
+	pointer-events: none;
+	background: #f6f7f7 !important;
+	color: #1d2327 !important;
+	border-color: #dcdcde !important;
+}
+.woocommerce-feature-enabled-order-detail-redesign #order_data .order_data_column .wc-customer-search {
+	pointer-events: none;
+	opacity: 0.85;
+}
+/* Hide the inline status field in Order Data (status lives in the Submit
+ * metabox). The status row is the first .form-field after the General header
+ * containing #order_status. */
+.woocommerce-feature-enabled-order-detail-redesign #order_data .form-field:has(#order_status) {
+	display: none !important;
+}
+
+/* Edit affordance injected by JS into the Order Data metabox header */
+.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-data .postbox-header,
+.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-data .hndle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-data-edit {
+	margin-left: auto;
+	font-size: 13px;
+	font-weight: 400;
+	color: #2271b1;
+	background: none;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+	text-decoration: none;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-data-edit:hover {
+	text-decoration: underline;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-data-edit:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+	border-radius: 2px;
+}
+
+/* -- Side panel ---------------------------------------------------------- */
+.wc-order-side-panel-overlay {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.4);
+	z-index: 99998;
+	opacity: 0;
+	pointer-events: none;
+	transition: opacity 180ms ease-out;
+}
+.wc-order-side-panel-overlay.is-open {
+	opacity: 1;
+	pointer-events: auto;
+}
+
+.wc-order-side-panel {
+	position: fixed;
+	top: 0;
+	right: 0;
+	bottom: 0;
+	width: 450px;
+	max-width: 100vw;
+	background: #fff;
+	z-index: 99999;
+	display: flex;
+	flex-direction: column;
+	box-shadow: -2px 0 10px rgba(0, 0, 0, 0.18);
+	transform: translateX(100%);
+	transition: transform 220ms cubic-bezier(0.2, 0.6, 0.2, 1);
+}
+.wc-order-side-panel.is-open {
+	transform: translateX(0);
+}
+
+.wc-order-side-panel__header {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 20px;
+	border-bottom: 1px solid #dcdcde;
+	background: #fff;
+}
+.wc-order-side-panel__header h2 {
+	margin: 0;
+	font-size: 16px;
+	font-weight: 600;
+	color: #1d2327;
+	line-height: 1.3;
+}
+.wc-order-side-panel__close {
+	background: transparent;
+	border: 0;
+	width: 32px;
+	height: 32px;
+	font-size: 22px;
+	color: #1d2327;
+	cursor: pointer;
+	padding: 0;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	border-radius: 3px;
+}
+.wc-order-side-panel__close:hover {
+	background: #f0f0f1;
+}
+
+.wc-order-side-panel__body {
+	flex: 1;
+	overflow-y: auto;
+	scroll-behavior: smooth;
+}
+.wc-order-side-panel__section {
+	padding: 20px;
+	border-bottom: 8px solid #f0f0f1;
+}
+.wc-order-side-panel__section:last-child {
+	border-bottom: 0;
+}
+.wc-order-side-panel__section h3 {
+	margin: 0 0 12px;
+	font-size: 13px;
+	text-transform: uppercase;
+	letter-spacing: 0.5px;
+	color: #1d2327;
+	font-weight: 600;
+}
+.wc-order-side-panel__section-meta {
+	margin: -8px 0 12px;
+	font-size: 12px;
+	color: #50575e;
+}
+.wc-order-side-panel__section-meta a {
+	color: #2271b1;
+	text-decoration: none;
+}
+.wc-order-side-panel__section-meta a:hover {
+	text-decoration: underline;
+}
+
+.wc-order-side-panel__grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 10px;
+}
+.wc-order-side-panel__field {
+	margin: 0;
+}
+.wc-order-side-panel__field.is-full {
+	grid-column: span 2;
+}
+.wc-order-side-panel__field label {
+	display: block;
+	font-size: 11px;
+	font-weight: 500;
+	color: #1d2327;
+	margin-bottom: 4px;
+}
+.wc-osp-input {
+	width: 100%;
+	height: 36px;
+	padding: 0 8px;
+	border: 1px solid #8c8f94;
+	border-radius: 2px;
+	background: #fff;
+	font: inherit;
+	color: #1d2327;
+}
+textarea.wc-osp-input {
+	height: auto;
+	padding: 8px;
+	min-height: 70px;
+	resize: vertical;
+}
+.wc-osp-input:focus {
+	outline: 0;
+	border-color: #2271b1;
+	box-shadow: 0 0 0 1px #2271b1;
+}
+
+.wc-order-side-panel__footer {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 12px 20px;
+	border-top: 1px solid #dcdcde;
+	background: #f6f7f7;
+}
+.wc-order-side-panel__dirty {
+	font-size: 12px;
+	color: #946800;
+	visibility: hidden;
+}
+.wc-order-side-panel__dirty.is-dirty {
+	visibility: visible;
+}
+.wc-order-side-panel__actions {
+	display: flex;
+	gap: 8px;
+}
+
+/* Page-reload flash applied to <body> after Save fires */
+.woocommerce-feature-enabled-order-detail-redesign.is-flashing::after {
+	content: "";
+	position: fixed;
+	inset: 0;
+	background: rgba(255, 255, 255, 0.6);
+	z-index: 99997;
+	pointer-events: none;
+	animation: wc-osp-flash 600ms ease-out;
+}
+@keyframes wc-osp-flash {
+	0% { opacity: 0; }
+	35% { opacity: 1; }
+	100% { opacity: 0; }
+}
