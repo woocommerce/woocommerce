@@ -20,7 +20,6 @@ import {
 	attributeNamesMatch,
 	getVariationAttributeValue,
 } from '../../../base/utils/variations/attribute-matching';
-import setStyles from './set-styles';
 import type {
 	AddToCartWithOptionsStore,
 	Context as AddToCartWithOptionsStoreContext,
@@ -45,8 +44,6 @@ type Context = AddToCartWithOptionsStoreContext & {
 type ToggleContext = Context & {
 	item?: SelectableItem;
 };
-
-setStyles();
 
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';

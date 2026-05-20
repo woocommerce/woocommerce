@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import { store, getContext } from '@wordpress/interactivity';
+import { store, getContext, getElement } from '@wordpress/interactivity';
 
 /**
  * Internal dependencies
@@ -10,6 +10,7 @@ import type {
 	SelectableItem,
 	SelectableItemsParentStore,
 } from '../../../../types/type-defs/selectable-items';
+import { getClosestColor } from '../../utils/get-closest-color';
 
 type ChipsItem = SelectableItem< {
 	color?: string;
@@ -33,6 +34,9 @@ type ChipsStore = {
 	actions: {
 		toggle: () => void;
 		showAll: () => void;
+	};
+	callbacks: {
+		initColors: () => void;
 	};
 };
 
@@ -98,6 +102,41 @@ const { state }: ChipsStore = store< ChipsStore >(
 			showAll() {
 				const context = getContext< ChipsContext >();
 				context.isExpanded = true;
+			},
+		},
+		callbacks: {
+			initColors: () => {
+				const el = getElement();
+				if ( ! el.ref ) {
+					return;
+				}
+
+				const style = el.ref.style;
+				const hasBg = style.getPropertyValue(
+					'--wc-chips-background-color'
+				);
+				const hasFg = style.getPropertyValue(
+					'--wc-chips-text-color'
+				);
+
+				if ( ! hasBg ) {
+					const bg = getClosestColor( el.ref, 'backgroundColor' );
+					if ( bg ) {
+						style.setProperty(
+							'--wc-chips-background-color',
+							bg
+						);
+					}
+				}
+				if ( ! hasFg ) {
+					const fg = getClosestColor( el.ref, 'color' );
+					if ( fg ) {
+						style.setProperty(
+							'--wc-chips-text-color',
+							fg
+						);
+					}
+				}
 			},
 		},
 	},

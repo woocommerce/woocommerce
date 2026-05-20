@@ -36,9 +36,9 @@
 }
 
 .wc-block-product-filter-chips__item[aria-checked="true"] {
-	background: var(--wc-product-filters-text-color, CanvasText);
-	color: var(--wc-product-filters-background-color, Canvas);
-	border-color: var(--wc-product-filters-text-color, CanvasText);
+	background: var(--wc-chips-text-color, CanvasText);
+	color: var(--wc-chips-background-color, Canvas);
+	border-color: var(--wc-chips-text-color, CanvasText);
 
 	.has-selected-chip-text-color & {
 		color: var(--wc-product-filter-chips-selected-text);
@@ -128,7 +128,7 @@
 		}
 
 		&[aria-checked="true"] {
-			border-color: var(--wc-product-filters-text-color, CanvasText);
+			border-color: var(--wc-chips-text-color, CanvasText);
 		}
 	}
 
