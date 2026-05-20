@@ -6363,7 +6363,7 @@ parameters:
 		-
 			message: '#^Variable \$loop might not be defined\.$#'
 			identifier: variable.undefined
-			count: 51
+			count: 52
 			path: includes/admin/meta-boxes/views/html-variation-admin.php
 
 		-
@@ -14119,12 +14119,6 @@ parameters:
 			path: includes/class-wc-product-variable.php
 
 		-
-			message: '#^Parameter \#1 \$attachment_id of function wc_get_product_attachment_props expects int\|null, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: includes/class-wc-product-variable.php
-
-		-
 			message: '#^Parameter \#1 \$dimensions of function wc_format_dimensions expects array, array\|string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -15662,12 +15656,6 @@ parameters:
 
 		-
 			message: '#^Offset ''price'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\}\|array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''Offer'', priceSpecification\: array\{0\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, validThrough\: string, valueAddedTaxIncluded\?\: bool, priceType\?\: ''https\://schema\.org…''\}, 1\?\: array\{''@type''\: ''UnitPriceSpecificat…'', price\: mixed, priceCurrency\: mixed, validThrough\: string, valueAddedTaxIncluded\?\: bool, priceType\?\: ''https\://schema\.org…''\}\}\} in empty\(\) does not exist\.$#'
-			identifier: empty.offset
-			count: 1
-			path: includes/class-wc-structured-data.php
-
-		-
-			message: '#^Offset ''priceCurrency'' on array\{priceValidUntil\: string, availability\: ''https\://schema\.org…'', url\: mixed, seller\: array\{''@type''\: ''Organization'', name\: mixed, url\: mixed\}, ''@type''\: ''AggregateOffer'', lowPrice\: mixed, highPrice\: mixed, offerCount\: int\<0, max\>, \.\.\.\} in empty\(\) does not exist\.$#'
 			identifier: empty.offset
 			count: 1
 			path: includes/class-wc-structured-data.php
@@ -33286,12 +33274,6 @@ parameters:
 			path: includes/walkers/class-wc-product-cat-list-walker.php
 
 		-
-			message: '#^@param WC_Order \$order does not accept actual type of parameter\: WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: parameter.phpDocType
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
 			message: '#^Access to an undefined property WooCommerce\:\:\$payment_gateways\.$#'
 			identifier: property.notFound
 			count: 1
@@ -33319,42 +33301,6 @@ parameters:
 			message: '#^Call to an undefined method WC_Payment_Token\:\:get_last4\(\)\.$#'
 			identifier: method.notFound
 			count: 2
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_cancel_order_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_checkout_payment_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_order_number\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 3
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_status\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method get_view_order_url\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/wc-account-functions.php
-
-		-
-			message: '#^Cannot call method needs_payment\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
 			path: includes/wc-account-functions.php
 
 		-
@@ -53964,12 +53910,6 @@ parameters:
 		-
 			message: '#^Access to property \$context on an unknown class Automattic\\WooCommerce\\Blocks\\BlockTypes\\WP_Block\.$#'
 			identifier: class.notFound
-			count: 1
-			path: src/Blocks/BlockTypes/ProductGallery.php
-
-		-
-			message: '#^Call to an undefined method WC_Product\:\:get_available_variations\(\)\.$#'
-			identifier: method.notFound
 			count: 1
 			path: src/Blocks/BlockTypes/ProductGallery.php
 

@@ -6,9 +6,17 @@ import { store, getContext } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
+import type {
+	SelectableItem,
+	SelectableItemsParentStore,
+} from '../../../../types/type-defs/selectable-items';
 
-type ItemWithIndex = SelectableItem & { index?: number; color?: string };
+type CheckboxListItem = SelectableItem< {
+	color?: string;
+	index?: number;
+} >;
+
+const DEFAULT_DISPLAY_LIMIT = 15;
 
 type CheckboxListContext = {
 	storeNamespace: string;
@@ -16,60 +24,83 @@ type CheckboxListContext = {
 	isExpanded: boolean;
 };
 
-type ParentItemContext = {
-	item?: ItemWithIndex;
-};
-
 type CheckboxListStore = {
 	state: {
-		itemHidden: boolean;
+		items: CheckboxListItem[];
 		ratingStyle: string;
 		colorSwatchStyle: string;
 		isColorSwatchEmpty: boolean;
 	};
 	actions: {
+		toggle: () => void;
 		showAll: () => void;
 	};
 };
 
-function getParentItem( storeNamespace: string ): ItemWithIndex | undefined {
-	const parentCtx = getContext< ParentItemContext >( storeNamespace );
-	return parentCtx.item;
+function getParentStore( storeNamespace?: string ) {
+	if ( ! storeNamespace ) return undefined;
+	return store< SelectableItemsParentStore< { color?: string } > >(
+		storeNamespace
+	);
+}
+
+function normalizeDisplayLimit( displayLimit: number ): number {
+	const limit = Number( displayLimit );
+	if ( ! Number.isFinite( limit ) || limit < 0 ) {
+		return DEFAULT_DISPLAY_LIMIT;
+	}
+	return Math.floor( limit );
+}
+
+function getCurrentItem(): CheckboxListItem | undefined {
+	const context = getContext< { item?: CheckboxListItem } >();
+	return context.item;
 }
 
 const { state }: CheckboxListStore = store< CheckboxListStore >(
 	'woocommerce/product-filter-checkbox-list',
 	{
 		state: {
-			get itemHidden(): boolean {
-				const { isExpanded, storeNamespace, displayLimit } =
+			get items(): CheckboxListItem[] {
+				const { storeNamespace, isExpanded, displayLimit } =
 					getContext< CheckboxListContext >();
-				if ( isExpanded ) return false;
-				const item = getParentItem( storeNamespace );
-				if ( ! item ) return false;
-				if ( item.selected ) return false;
-				if ( item.index === undefined ) return false;
-				return item.index >= displayLimit;
+				const parentItems =
+					getParentStore( storeNamespace )?.state?.selectableItems;
+				if ( ! Array.isArray( parentItems ) ) return [];
+				const normalizedDisplayLimit =
+					normalizeDisplayLimit( displayLimit );
+				return parentItems.map( ( item, index ) => ( {
+					...item,
+					index,
+					hidden:
+						item.hidden ||
+						( ! isExpanded &&
+							! item.selected &&
+							index >= normalizedDisplayLimit ),
+				} ) );
 			},
 			get ratingStyle(): string {
-				const { storeNamespace } = getContext< CheckboxListContext >();
-				const item = getParentItem( storeNamespace );
+				const item = getCurrentItem();
 				if ( ! item ) return '';
 				return `width: ${ Number( item.value ) * 20 }%`;
 			},
 			get colorSwatchStyle(): string {
-				const { storeNamespace } = getContext< CheckboxListContext >();
-				const item = getParentItem( storeNamespace );
+				const item = getCurrentItem();
 				if ( ! item?.color ) return '';
 				return `background-color: ${ item.color }`;
 			},
 			get isColorSwatchEmpty(): boolean {
-				const { storeNamespace } = getContext< CheckboxListContext >();
-				const item = getParentItem( storeNamespace );
+				const item = getCurrentItem();
 				return ! item?.color;
 			},
 		},
 		actions: {
+			toggle() {
+				const item = getCurrentItem();
+				if ( ! item ) return;
+				const { storeNamespace } = getContext< CheckboxListContext >();
+				getParentStore( storeNamespace )?.actions?.toggle?.( item );
+			},
 			showAll() {
 				const context = getContext< CheckboxListContext >();
 				context.isExpanded = true;

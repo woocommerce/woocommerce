@@ -512,6 +512,18 @@ class FeaturesController {
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
 			),
+			\Automattic\WooCommerce\Internal\VariationGallery\Package::FEATURE_ID => array(
+				'name'                         => __( 'Variation gallery', 'woocommerce' ),
+				'description'                  => __(
+					'Add multiple images per product variation. Once enabled, the Additional Variation Images extension will be deactivated and its data migrated.',
+					'woocommerce'
+				),
+				'option_key'                   => \Automattic\WooCommerce\Internal\VariationGallery\Package::ENABLE_OPTION_NAME,
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'point_of_sale'                      => array(
 				'name'                         => __( 'Point of Sale', 'woocommerce' ),
 				'description'                  => __(
