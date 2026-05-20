@@ -41,7 +41,11 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 } ) => {
 	const [ state, dispatch ] = useImporterState();
 
-	const canClose = state.step !== 'import';
+	// The import step is locked while the chunk loop is running. A non-retriable
+	// failure dispatches ERROR but keeps the step as 'import', so we also allow
+	// closing whenever an error is surfaced — otherwise the modal would trap
+	// the user (no close button, no ESC, no backdrop) until a page reload.
+	const canClose = state.step !== 'import' || state.error !== null;
 
 	const handleClose = useCallback( () => {
 		if ( ! canClose ) {
