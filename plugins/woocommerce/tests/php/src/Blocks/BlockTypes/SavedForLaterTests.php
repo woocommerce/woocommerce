@@ -4,7 +4,7 @@ declare( strict_types = 1 );
 namespace Automattic\WooCommerce\Tests\Blocks\BlockTypes;
 
 use Automattic\WooCommerce\Blocks\Assets\Api;
-use Automattic\WooCommerce\Blocks\BlockTypes\ShopperCollection;
+use Automattic\WooCommerce\Blocks\BlockTypes\SavedForLater;
 use Automattic\WooCommerce\Blocks\Package;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 use Automattic\WooCommerce\Tests\Blocks\Mocks\AssetDataRegistryMock;
@@ -14,9 +14,9 @@ use ReflectionProperty;
 use WP_UnitTestCase;
 
 /**
- * Tests for the ShopperCollection block type.
+ * Tests for the SavedForLater block type.
  */
-class ShopperCollectionTests extends WP_UnitTestCase {
+class SavedForLaterTests extends WP_UnitTestCase {
 
 	/**
 	 * System under test.
@@ -26,9 +26,9 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	 * has already registered it). The filter callbacks under test only read
 	 * `$this->namespace` and `$this->block_name`, both class defaults.
 	 *
-	 * @var ShopperCollection
+	 * @var SavedForLater
 	 */
-	private ShopperCollection $sut;
+	private SavedForLater $sut;
 
 	/**
 	 * Instantiate the block without invoking its constructor and inject a
@@ -37,10 +37,10 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	public function setUp(): void {
 		parent::setUp();
 
-		$reflection = new ReflectionClass( ShopperCollection::class );
+		$reflection = new ReflectionClass( SavedForLater::class );
 		$this->sut  = $reflection->newInstanceWithoutConstructor();
 
-		$registry_prop = new ReflectionProperty( ShopperCollection::class, 'asset_data_registry' );
+		$registry_prop = new ReflectionProperty( SavedForLater::class, 'asset_data_registry' );
 		$registry_prop->setAccessible( true );
 		$registry_prop->setValue(
 			$this->sut,
@@ -52,15 +52,15 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	 * @return array<string, array{string, string, bool, bool}>
 	 */
 	public function provider_register_hooked_block(): array {
-		$cart_only         = '<!-- wp:woocommerce/cart /-->';
-		$cart_with_shopper = '<!-- wp:woocommerce/cart /--><!-- wp:woocommerce/shopper-collection {"listName":"saved-for-later"} /-->';
+		$cart_only       = '<!-- wp:woocommerce/cart /-->';
+		$cart_with_block = '<!-- wp:woocommerce/cart /--><!-- wp:woocommerce/saved-for-later /-->';
 
 		return array(
 			// label                                => array( cart_page_content, anchor, context_is_cart_page, expected_hooked ).
 			'hooked after cart on cart page'        => array( $cart_only, 'woocommerce/cart', true, true ),
 			'not hooked after non-cart anchor'      => array( $cart_only, 'core/paragraph', true, false ),
 			'not hooked when context is other page' => array( $cart_only, 'woocommerce/cart', false, false ),
-			'not hooked when already present'       => array( $cart_with_shopper, 'woocommerce/cart', true, false ),
+			'not hooked when already present'       => array( $cart_with_block, 'woocommerce/cart', true, false ),
 		);
 	}
 
@@ -97,9 +97,9 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 		$hooked = $this->sut->register_hooked_block( array(), 'after', $anchor, get_post( $context_id ) );
 
 		if ( $expected_hooked ) {
-			$this->assertContains( 'woocommerce/shopper-collection', $hooked );
+			$this->assertContains( 'woocommerce/saved-for-later', $hooked );
 		} else {
-			$this->assertNotContains( 'woocommerce/shopper-collection', $hooked );
+			$this->assertNotContains( 'woocommerce/saved-for-later', $hooked );
 		}
 	}
 
@@ -120,27 +120,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 
 		$hooked = $this->sut->register_hooked_block( array(), 'after', 'woocommerce/cart', get_post( $context_id ) );
 
-		$this->assertNotContains( 'woocommerce/shopper-collection', $hooked );
-	}
-
-	/**
-	 * The auto-injected block has its `listName` attribute set to `saved-for-later`.
-	 */
-	public function test_hooked_block_attributes_set_list_name(): void {
-		$parsed_hooked_block = array(
-			'blockName' => 'woocommerce/shopper-collection',
-			'attrs'     => array(),
-		);
-		$parsed_anchor_block = array( 'blockName' => 'woocommerce/cart' );
-
-		$result = $this->sut->set_hooked_block_attributes(
-			$parsed_hooked_block,
-			'woocommerce/shopper-collection',
-			'after',
-			$parsed_anchor_block
-		);
-
-		$this->assertSame( 'saved-for-later', $result['attrs']['listName'] );
+		$this->assertNotContains( 'woocommerce/saved-for-later', $hooked );
 	}
 
 	/**
@@ -151,14 +131,14 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	 */
 	public function test_hooked_block_attributes_seed_heading_inner_block(): void {
 		$parsed_hooked_block = array(
-			'blockName' => 'woocommerce/shopper-collection',
+			'blockName' => 'woocommerce/saved-for-later',
 			'attrs'     => array(),
 		);
 		$parsed_anchor_block = array( 'blockName' => 'woocommerce/cart' );
 
 		$result = $this->sut->set_hooked_block_attributes(
 			$parsed_hooked_block,
-			'woocommerce/shopper-collection',
+			'woocommerce/saved-for-later',
 			'after',
 			$parsed_anchor_block
 		);
@@ -182,7 +162,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	}
 
 	/**
-	 * Extensions are free to hook `hooked_block_woocommerce/shopper-collection`
+	 * Extensions are free to hook `hooked_block_woocommerce/saved-for-later`
 	 * to add their own inner blocks at a different priority. Our heading must
 	 * still be seeded alongside, not in place of, what they added.
 	 */
@@ -195,7 +175,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 			'innerContent' => array( '<p>From another extension</p>' ),
 		);
 		$parsed_hooked_block = array(
-			'blockName'    => 'woocommerce/shopper-collection',
+			'blockName'    => 'woocommerce/saved-for-later',
 			'attrs'        => array(),
 			'innerBlocks'  => array( $existing_block ),
 			'innerContent' => array( null ),
@@ -204,7 +184,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 
 		$result = $this->sut->set_hooked_block_attributes(
 			$parsed_hooked_block,
-			'woocommerce/shopper-collection',
+			'woocommerce/saved-for-later',
 			'after',
 			$parsed_anchor_block
 		);
@@ -226,10 +206,10 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	public function test_render_returns_empty_for_logged_out_user(): void {
 		wp_set_current_user( 0 );
 
-		$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+		$render = new ReflectionMethod( SavedForLater::class, 'render' );
 		$render->setAccessible( true );
 
-		$this->assertSame( '', (string) $render->invoke( $this->sut, array( 'listName' => 'saved-for-later' ), '', null ) );
+		$this->assertSame( '', (string) $render->invoke( $this->sut, array(), '', null ) );
 	}
 
 	/**
@@ -242,7 +222,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	 *     `state.isEmpty` getter has the inputs it needs to keep the
 	 *     message hidden until the shopper has actually saved an item.
 	 *
-	 * With no saved items, `prefetch_list_items()` returns `[]` whether
+	 * With no saved items, `prefetch_items()` returns `[]` whether
 	 * the Store API route is registered or not (a 404 still resolves to
 	 * an empty array), so this stays a unit-level assertion without
 	 * feature-flag wiring or fixture items. Sets
@@ -255,16 +235,16 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
 		wp_set_current_user( $customer_id );
 
-		$attributes = array( 'listName' => 'saved-for-later' );
+		$attributes = array();
 
 		$previous_block_to_render            = \WP_Block_Supports::$block_to_render;
 		\WP_Block_Supports::$block_to_render = array(
-			'blockName' => 'woocommerce/shopper-collection',
+			'blockName' => 'woocommerce/saved-for-later',
 			'attrs'     => $attributes,
 		);
 
 		try {
-			$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+			$render = new ReflectionMethod( SavedForLater::class, 'render' );
 			$render->setAccessible( true );
 
 			$markup = (string) $render->invoke( $this->sut, $attributes, '', null );
@@ -274,7 +254,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 
 		// The empty-state `<li>` is always rendered, always initially hidden.
 		$this->assertMatchesRegularExpression(
-			'/<li[^>]*class="wc-block-shopper-collection__empty"[^>]*\bhidden\b/',
+			'/<li[^>]*class="wc-block-saved-for-later__empty"[^>]*\bhidden\b/',
 			$markup,
 			'Empty-state <li> must be initially hidden so the message does not flash before iAPI hydration.'
 		);
@@ -307,16 +287,16 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 		$customer_id = self::factory()->user->create( array( 'role' => 'customer' ) );
 		wp_set_current_user( $customer_id );
 
-		$attributes = array( 'listName' => 'saved-for-later' );
+		$attributes = array();
 
 		$previous_block_to_render            = \WP_Block_Supports::$block_to_render;
 		\WP_Block_Supports::$block_to_render = array(
-			'blockName' => 'woocommerce/shopper-collection',
+			'blockName' => 'woocommerce/saved-for-later',
 			'attrs'     => $attributes,
 		);
 
 		try {
-			$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+			$render = new ReflectionMethod( SavedForLater::class, 'render' );
 			$render->setAccessible( true );
 
 			$content = '<h2 class="wp-block-heading">Saved for later</h2>';
@@ -328,7 +308,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 		// The header wrapper exists, contains the heading, has the iAPI
 		// visibility bind, and is initially hidden because items is empty.
 		$this->assertMatchesRegularExpression(
-			'/<div[^>]*class="wc-block-shopper-collection__header"[^>]*data-wp-bind--hidden="!context\.hasShownItems"[^>]*\bhidden\b[^>]*>.*Saved for later/s',
+			'/<div[^>]*class="wc-block-saved-for-later__header"[^>]*data-wp-bind--hidden="!context\.hasShownItems"[^>]*\bhidden\b[^>]*>.*Saved for later/s',
 			$markup,
 			'Header wrapper must be initially hidden for an empty list so a fresh-load empty SC does not show an orphaned heading.'
 		);
@@ -346,7 +326,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 	 * @return AssetDataRegistryMock The injected registry, ready to inspect.
 	 */
 	private function invoke_render_with_registry_mock( array $attributes ): AssetDataRegistryMock {
-		$render = new ReflectionMethod( ShopperCollection::class, 'render' );
+		$render = new ReflectionMethod( SavedForLater::class, 'render' );
 		$render->setAccessible( true );
 
 		try {
@@ -356,7 +336,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 			unset( $e );
 		}
 
-		$registry_prop = new ReflectionProperty( ShopperCollection::class, 'asset_data_registry' );
+		$registry_prop = new ReflectionProperty( SavedForLater::class, 'asset_data_registry' );
 		$registry_prop->setAccessible( true );
 
 		return $registry_prop->getValue( $this->sut );
@@ -407,7 +387,7 @@ class ShopperCollectionTests extends WP_UnitTestCase {
 			)
 		);
 
-		$registry = $this->invoke_render_with_registry_mock( array( 'listName' => 'saved-for-later' ) );
+		$registry = $this->invoke_render_with_registry_mock( array() );
 
 		$this->assertSame(
 			$expected,
