@@ -151,6 +151,7 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 								<td>{ row.sample }</td>
 								<td>
 									<SelectControl
+										__next40pxDefaultSize
 										aria-label={ sprintf(
 											/* translators: %s: CSV column header name. */
 											__(
