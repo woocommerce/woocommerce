@@ -38,9 +38,9 @@
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:bundle": "webpack",
-		"build:project:esm": "tsc --project tsconfig.json --noCheck",
+		"build:project:esm": "node build.mjs",
 		"build:publish:project": "pnpm --if-present '/^build:publish:project:.*$/'",
-		"build:publish:project:cjs": "tsc --project tsconfig-cjs.json --noCheck",
+		"build:publish:project:cjs": "node build.mjs --cjs",
 		"build:publish:project:deps": "pnpm build",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"format": "prettier --write 'src/**/*.{js,jsx,json,ts,tsx,yml,yaml,scss}'",
@@ -58,7 +58,7 @@
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
 		"watch:build:project:bundle": "webpack --watch",
-		"watch:build:project:esm": "tsc --project tsconfig.json --noCheck --watch"
+		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"lint-staged": {
 		"*.{js,jsx,json,ts,tsx,yml,yaml,scss}": "pnpm run format",
@@ -126,7 +126,9 @@
 		"@wordpress/browserslist-config": "next",
 		"@wordpress/prettier-config": "2.17.0",
 		"@wordpress/stylelint-config": "^21.0.0",
+		"esbuild": "^0.24.0",
 		"eslint": "^8.55.0",
+		"glob": "^10.3.10",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
