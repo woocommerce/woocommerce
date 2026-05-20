@@ -144,7 +144,7 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 
 		if ( operator === 'between' ) {
 			return (
-				<Stack direction="row">
+				<Stack direction="row" gap="sm">
 					<InputControl
 						label={ __( 'From', 'woocommerce' ) }
 						type="number"
