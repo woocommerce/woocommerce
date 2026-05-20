@@ -627,7 +627,11 @@ class Controller extends WC_REST_Products_V2_Controller {
 		$clauses       = array();
 		$post_statuses = array_filter( $post_statuses );
 
-		if ( ! in_array( 'any', $post_statuses, true ) && ! empty( $post_statuses ) ) {
+		if ( in_array( 'any', $post_statuses, true ) ) {
+			$post_statuses = array( ProductStatus::PUBLISH );
+		}
+
+		if ( ! empty( $post_statuses ) ) {
 			$prepared_statuses = array();
 			foreach ( $post_statuses as $post_status ) {
 				$prepared_statuses[] = $wpdb->prepare( '%s', $post_status );
