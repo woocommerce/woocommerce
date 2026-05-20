@@ -122,15 +122,32 @@
 	display: none !important;
 }
 
-/* Edit affordance lives in the page title bar, floated right of the heading.
- * We deliberately use `float: right` instead of adding flex to the .wrap
- * container — .wrap holds the heading AND the notices AND the entire
- * metabox area, so making it a flex parent would catastrophically reflow
- * the page. The hr.wp-header-end (rendered by WP right after the heading
- * + page-title-action region) clears the float so the row ends cleanly. */
-.woocommerce-feature-enabled-order-detail-redesign a.wc-order-data-edit.page-title-action {
-	float: right;
-	margin: 9px 0 0 8px;
+/* Edit affordance lives inside the Order Data metabox header, right-aligned
+ * opposite the "Order details" title. */
+.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-data .postbox-header,
+.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-data .hndle {
+	display: flex;
+	align-items: center;
+	gap: 8px;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-data-edit {
+	margin-left: auto;
+	font-size: 13px;
+	font-weight: 400;
+	color: #2271b1;
+	background: none;
+	border: 0;
+	padding: 0;
+	cursor: pointer;
+	text-decoration: none;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-data-edit:hover {
+	text-decoration: underline;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-data-edit:focus-visible {
+	outline: 2px solid #2271b1;
+	outline-offset: 2px;
+	border-radius: 2px;
 }
 
 /* Inside the General column: the second h3 needs breathing room above it so

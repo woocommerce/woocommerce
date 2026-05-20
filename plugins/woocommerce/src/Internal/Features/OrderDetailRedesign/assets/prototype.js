@@ -181,21 +181,22 @@
 		}
 
 		function injectEditAffordance() {
-			// Place the Edit button on the page title row, right-aligned via CSS
-			// `float: right`. We insert AFTER the h1 but BEFORE hr.wp-header-end
-			// so the standard WP float-clear works.
-			var $heading = $( '.wp-heading-inline' ).first();
-			if ( ! $heading.length ) {
+			// Place the Edit button inside the Order Data metabox header,
+			// right-aligned to sit opposite the "Order details" title.
+			if ( ! $orderDataBox.length ) {
 				return;
 			}
-			if ( $heading.parent().find( '.wc-order-data-edit' ).length ) {
+			// Modern WP uses .postbox-header; older renders use .hndle directly.
+			var $header = $orderDataBox.find( '.postbox-header' ).first();
+			if ( ! $header.length ) {
+				$header = $orderDataBox.find( '.hndle' ).first();
+			}
+			if ( ! $header.length || $header.find( '.wc-order-data-edit' ).length ) {
 				return;
 			}
 			$(
-				'<a href="#" class="page-title-action wc-order-data-edit" role="button">'
-					+ 'Edit order details'
-					+ '</a>'
-			).insertAfter( $heading );
+				'<button type="button" class="wc-order-data-edit">Edit</button>'
+			).appendTo( $header );
 		}
 
 		function snapshotForm() {
