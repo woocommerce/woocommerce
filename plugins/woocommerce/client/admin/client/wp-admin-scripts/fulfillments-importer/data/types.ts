@@ -19,9 +19,6 @@ export interface ImporterSummary {
 export interface ImporterSettings {
 	restNamespace: string;
 	importRoute: string;
-	prepareRoute?: string;
-	runRoute?: string;
-	chunkSize?: number;
 	providers: Array< { key: string; label: string } >;
 }
 

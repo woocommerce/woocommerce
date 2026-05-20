@@ -14,7 +14,19 @@ import type {
 	RunChunkResponse,
 } from './types';
 
-const BASE = '/wc/v3/fulfillments/import';
+const DEFAULT_BASE = '/wc/v3/fulfillments/import';
+
+/**
+ * Use the REST base localized by PHP when present so the route stays in sync
+ * with FulfillmentsCsvImporterController. Falls back to the default if the
+ * settings object is not on the page.
+ */
+function getBase(): string {
+	const route = window.wcFulfillmentsImporterSettings?.importRoute;
+	return typeof route === 'string' && route.length > 0
+		? route
+		: DEFAULT_BASE;
+}
 
 export interface PrepareArgs {
 	file: File;
@@ -44,7 +56,7 @@ export async function prepare( args: PrepareArgs ): Promise< PrepareResponse > {
 	body.append( 'update_existing', args.updateExisting ? '1' : '0' );
 
 	return apiFetch< PrepareResponse >( {
-		path: `${ BASE }/prepare`,
+		path: `${ getBase() }/prepare`,
 		method: 'POST',
 		body,
 	} );
@@ -62,7 +74,7 @@ export async function runChunk( args: RunArgs ): Promise< RunChunkResponse > {
 	} );
 
 	return apiFetch< RunChunkResponse >( {
-		path: `${ BASE }/run`,
+		path: `${ getBase() }/run`,
 		method: 'POST',
 		data: {
 			token: args.token,
