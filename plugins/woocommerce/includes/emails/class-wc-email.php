@@ -1195,7 +1195,13 @@ class WC_Email extends WC_Settings_API {
 		$recipient = $this->get_recipient();
 
 		if ( ! $recipient ) {
-			/** This action is documented in includes/emails/class-wc-email.php */
+			/**
+			 * Fires when a transactional email is not sent for a reason other than being disabled.
+			 *
+			 * This action is documented in includes/emails/class-wc-email.php
+			 *
+			 * @since 10.9.0
+			 */
 			do_action( 'woocommerce_email_skipped', self::SKIP_REASON_NO_RECIPIENT, $this->id, $this );
 			return false;
 		}

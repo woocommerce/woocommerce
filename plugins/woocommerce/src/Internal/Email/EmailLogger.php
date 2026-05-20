@@ -171,7 +171,13 @@ class EmailLogger implements RegisterHooksInterface {
 	 * @return void
 	 */
 	private function log_non_send_outcome( string $email_id, WC_Email $email, string $status, ?string $reason = null ): void {
-		/** This filter is documented in src/Internal/Email/EmailLogger.php */
+		/**
+		 * Filter whether to log this transactional email attempt.
+		 *
+		 * This filter is documented in src/Internal/Email/EmailLogger.php
+		 *
+		 * @since 10.9.0
+		 */
 		if ( ! apply_filters( 'woocommerce_email_log_enabled', true, $email_id, $email ) ) {
 			return;
 		}
@@ -202,7 +208,13 @@ class EmailLogger implements RegisterHooksInterface {
 			$context[ $object_context['type'] ] = $object_context['id'] ?? null;
 		}
 
-		/** This filter is documented in src/Internal/Email/EmailLogger.php */
+		/**
+		 * Filter the context array logged for each transactional email attempt.
+		 *
+		 * This filter is documented in src/Internal/Email/EmailLogger.php
+		 *
+		 * @since 10.9.0
+		 */
 		$context = (array) apply_filters( 'woocommerce_email_log_context', $context, $email_id, $email );
 
 		wc_get_logger()->log( WC_Log_Levels::NOTICE, $message, $context );

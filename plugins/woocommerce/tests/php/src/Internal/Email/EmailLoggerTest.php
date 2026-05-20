@@ -620,15 +620,26 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 	 */
 	private function create_testable_email( string $email_id, string $recipient, bool $is_enabled, bool $send_return = false ): object {
 		return new class( $email_id, $recipient, $is_enabled, $send_return ) extends \WC_Email {
-			/** @var bool */
+			/** @var bool Whether send() has been invoked. */
 			public bool $send_called = false;
-			/** @var array */
-			public array $send_args  = array();
+			/** @var array Arguments captured from the most recent send() call. */
+			public array $send_args = array();
 
+			/** @var string Recipient returned by get_recipient(). */
 			private string $test_recipient;
-			private bool   $test_is_enabled;
-			private bool   $test_send_return;
+			/** @var bool Value returned by is_enabled(). */
+			private bool $test_is_enabled;
+			/** @var bool Value returned by send(). */
+			private bool $test_send_return;
 
+			/**
+			 * Construct the test double.
+			 *
+			 * @param string $email_id    The email type ID to expose on the instance.
+			 * @param string $recipient   Recipient string for get_recipient().
+			 * @param bool   $is_enabled  Value to return from is_enabled().
+			 * @param bool   $send_return Value to return from send().
+			 */
 			public function __construct( string $email_id, string $recipient, bool $is_enabled, bool $send_return ) {
 				// Deliberately skip parent::__construct() to avoid side-effects in tests.
 				$this->id               = $email_id;
@@ -637,30 +648,58 @@ class EmailLoggerTest extends WC_Unit_Test_Case {
 				$this->test_send_return = $send_return;
 			}
 
+			/**
+			 * @return bool Configured is_enabled() return value.
+			 */
 			public function is_enabled(): bool {
 				return $this->test_is_enabled;
 			}
 
+			/**
+			 * @return string Configured recipient string.
+			 */
 			public function get_recipient(): string {
 				return $this->test_recipient;
 			}
 
+			/**
+			 * @return string Static test subject.
+			 */
 			public function get_subject(): string {
 				return 'Test subject';
 			}
 
+			/**
+			 * @return string Static test content.
+			 */
 			public function get_content(): string {
 				return 'Test content';
 			}
 
+			/**
+			 * @return string Empty headers string.
+			 */
 			public function get_headers(): string {
 				return '';
 			}
 
+			/**
+			 * @return array Empty attachments array.
+			 */
 			public function get_attachments(): array {
 				return array();
 			}
 
+			/**
+			 * Record the send() invocation and return the configured result.
+			 *
+			 * @param string $to          Recipient.
+			 * @param string $subject     Subject.
+			 * @param string $message     Body.
+			 * @param string $headers     Headers.
+			 * @param array  $attachments Attachments.
+			 * @return bool Configured send() return value.
+			 */
 			public function send( $to, $subject, $message, $headers, $attachments ): bool {
 				$this->send_called = true;
 				$this->send_args   = array( $to, $subject, $message, $headers, $attachments );

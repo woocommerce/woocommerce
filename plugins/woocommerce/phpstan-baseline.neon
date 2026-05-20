@@ -19129,18 +19129,6 @@ parameters:
 			path: includes/emails/class-wc-email-failed-order.php
 
 		-
-			message: '#^Cannot call method save\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/emails/class-wc-email-new-order.php
-
-		-
-			message: '#^Cannot call method update_meta_data\(\) on WC_Order\|WC_Order_Refund\|false\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: includes/emails/class-wc-email-new-order.php
-
-		-
 			message: '#^Method WC_Email_New_Order\:\:init_form_fields\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
