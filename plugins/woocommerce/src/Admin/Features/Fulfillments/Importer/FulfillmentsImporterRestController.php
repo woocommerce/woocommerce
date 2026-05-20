@@ -320,6 +320,24 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
+		// Confirm the staged file is still the one we measured at prepare-time. Otherwise a
+		// retained byte_offset would seek into the wrong bytes and silently import wrong rows.
+		$session_file       = $session->file();
+		$expected_size      = $session->file_size();
+		$expected_mtime     = $session->file_mtime();
+		$current_size       = file_exists( $session_file ) ? (int) filesize( $session_file ) : 0;
+		$current_mtime      = file_exists( $session_file ) ? (int) filemtime( $session_file ) : 0;
+		$size_changed       = $expected_size > 0 && $expected_size !== $current_size;
+		$mtime_changed      = $expected_mtime > 0 && $expected_mtime !== $current_mtime;
+		if ( ! file_exists( $session_file ) || $size_changed || $mtime_changed ) {
+			$session->delete();
+			return new WP_Error(
+				'fulfillments_import_file_changed',
+				__( 'The staged CSV was modified or removed. Please re-upload the file.', 'woocommerce' ),
+				array( 'status' => WP_Http::CONFLICT )
+			);
+		}
+
 		$offset = (int) $request->get_param( 'offset' );
 		$limit  = (int) $request->get_param( 'limit' );
 		if ( $limit <= 0 ) {

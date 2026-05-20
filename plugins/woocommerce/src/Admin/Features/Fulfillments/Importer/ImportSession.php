@@ -104,6 +104,8 @@ final class ImportSession {
 		$token = self::generate_token();
 		$data  = array(
 			'file'                => $file,
+			'file_size'           => file_exists( $file ) ? (int) filesize( $file ) : 0,
+			'file_mtime'          => file_exists( $file ) ? (int) filemtime( $file ) : 0,
 			'delimiter'           => $delimiter,
 			'headers'             => array_values( array_map( 'strval', $headers ) ),
 			'total'               => max( 0, $total ),
@@ -296,6 +298,28 @@ final class ImportSession {
 	 */
 	public function file(): string {
 		return (string) ( $this->data['file'] ?? '' );
+	}
+
+	/**
+	 * Size of the staged CSV when the session was created, in bytes.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return int
+	 */
+	public function file_size(): int {
+		return (int) ( $this->data['file_size'] ?? 0 );
+	}
+
+	/**
+	 * Modification time of the staged CSV when the session was created.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return int Unix timestamp; 0 when unknown.
+	 */
+	public function file_mtime(): int {
+		return (int) ( $this->data['file_mtime'] ?? 0 );
 	}
 
 	/**
