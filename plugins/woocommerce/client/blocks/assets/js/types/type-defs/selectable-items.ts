@@ -11,6 +11,7 @@ export type SelectableItem< T = unknown > = (
 	value: string;
 	selected?: boolean;
 	disabled?: boolean;
+	hidden?: boolean;
 	type?: string;
 } & T;
 
