@@ -1,0 +1,4 @@
+Significance: minor
+Type: add
+
+Add experimental dashboard widgets framework and a Store Activity widget, gated behind the off-by-default `dashboard_widgets` feature flag.
