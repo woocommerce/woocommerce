@@ -63,7 +63,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 
 	const termColors = getSetting< Record< string, string > >(
 		'variationSelectorTermColors',
-		EMPTY_TERM_COLORS
+		{} as Record< string, string >
 	);
 
 	const selectableContext = useMemo( () => {
