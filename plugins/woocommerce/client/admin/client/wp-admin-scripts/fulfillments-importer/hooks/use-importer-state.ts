@@ -9,7 +9,6 @@ import { useReducer } from 'react';
 import type {
 	CanonicalColumnKey,
 	ColumnMapping,
-	ImporterDelimiter,
 	ImporterSummary,
 	PrepareResponse,
 	RunChunkResponse,
@@ -21,7 +20,7 @@ export interface ImporterState {
 	step: ImporterStep;
 	// Upload step.
 	file: File | null;
-	delimiter: ImporterDelimiter;
+	delimiter: string;
 	notifyCustomer: boolean;
 	updateExisting: boolean;
 	// Mapping step.
@@ -47,7 +46,7 @@ export interface ImporterState {
 
 export type ImporterAction =
 	| { type: 'SET_FILE'; file: File | null }
-	| { type: 'SET_DELIMITER'; delimiter: ImporterDelimiter }
+	| { type: 'SET_DELIMITER'; delimiter: string }
 	| { type: 'SET_NOTIFY'; value: boolean }
 	| { type: 'SET_UPDATE_EXISTING'; value: boolean }
 	| { type: 'SET_BUSY'; value: boolean }
@@ -71,7 +70,7 @@ export function createInitialState(): ImporterState {
 	return {
 		step: 'upload',
 		file: null,
-		delimiter: 'auto',
+		delimiter: ',',
 		notifyCustomer: false,
 		updateExisting: true,
 		token: null,
@@ -118,7 +117,9 @@ export function importerReducer(
 		case 'SET_BUSY':
 			return { ...state, isBusy: action.value };
 		case 'PREPARE_OK': {
-			const detected = normalizeMapping( action.payload.detected_mapping );
+			const detected = normalizeMapping(
+				action.payload.detected_mapping
+			);
 			return {
 				...state,
 				step: 'mapping',

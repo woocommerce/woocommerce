@@ -22,8 +22,6 @@ export interface ImporterSettings {
 	providers: Array< { key: string; label: string } >;
 }
 
-export type ImporterDelimiter = 'auto' | ',' | ';' | '\t';
-
 export type CanonicalColumnKey =
 	| 'order_number'
 	| 'tracking_number'
@@ -46,7 +44,7 @@ export interface PrepareResponse {
 	 * The server returns string-keyed indices ("0", "1", …) per the REST contract.
 	 */
 	detected_mapping: Record< string, CanonicalColumnKey >;
-	delimiter: ImporterDelimiter | ',';
+	delimiter: string;
 }
 
 export interface RunChunkError {

@@ -124,7 +124,7 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	 */
 	private function open_session_for( string $file ): ImportSession {
 		$importer = new FulfillmentsCsvImporter( $file );
-		$parsed   = $importer->parse_headers( 'auto' );
+		$parsed   = $importer->parse_headers();
 		$this->assertArrayNotHasKey( 'error', $parsed );
 
 		$session          = ImportSession::create(

@@ -100,9 +100,10 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 					'args'                => array(
 						'delimiter'       => array(
 							'type'        => 'string',
-							'default'     => 'auto',
-							'enum'        => array( 'auto', ',', ';', "\t" ),
-							'description' => __( 'CSV delimiter, or auto to detect from the first line.', 'woocommerce' ),
+							'default'     => ',',
+							'minLength'   => 1,
+							'maxLength'   => 1,
+							'description' => __( 'Single-character CSV delimiter. Defaults to comma.', 'woocommerce' ),
 						),
 						'notify_customer' => array(
 							'type'    => 'boolean',
@@ -237,7 +238,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 * @return array|WP_Error
 	 */
 	protected function handle_prepare( WP_REST_Request $request ) {
-		$delimiter_param = (string) ( $request->get_param( 'delimiter' ) ?? 'auto' );
+		$delimiter_param = FulfillmentsCsvImporter::normalize_delimiter( $request->get_param( 'delimiter' ) );
 		$notify          = (bool) $request->get_param( 'notify_customer' );
 		$update          = (bool) $request->get_param( 'update_existing' );
 		$user_id         = get_current_user_id();

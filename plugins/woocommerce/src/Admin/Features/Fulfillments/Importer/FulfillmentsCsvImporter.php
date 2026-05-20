@@ -80,7 +80,7 @@ class FulfillmentsCsvImporter {
 	 * @param string               $file    Absolute path to the CSV file.
 	 * @param array<string, mixed> $options Importer options:
 	 *                                      - notify_customer (bool): Whether to fire customer notifications. Default false.
-	 *                                      - delimiter (string): CSV delimiter, or 'auto' to sniff. Default ','.
+	 *                                      - delimiter (string): Single-character CSV delimiter. Default ','.
 	 *                                      - enclosure (string): CSV enclosure. Default '"'.
 	 *                                      - update_existing (bool): Update fulfillment when one with the same tracking number
 	 *                                                                already exists on the order. Default true.
@@ -89,10 +89,26 @@ class FulfillmentsCsvImporter {
 		$this->file    = $file;
 		$this->options = array(
 			'notify_customer' => ! empty( $options['notify_customer'] ),
-			'delimiter'       => isset( $options['delimiter'] ) && '' !== $options['delimiter'] ? (string) $options['delimiter'] : ',',
+			'delimiter'       => self::normalize_delimiter( $options['delimiter'] ?? ',' ),
 			'enclosure'       => isset( $options['enclosure'] ) && '' !== $options['enclosure'] ? (string) $options['enclosure'] : '"',
 			'update_existing' => array_key_exists( 'update_existing', $options ) ? (bool) $options['update_existing'] : true,
 		);
+	}
+
+	/**
+	 * Normalize a delimiter input to a single character, falling back to ',' when empty
+	 * or longer than one byte. Mirrors the legacy WC_Product_CSV_Importer_Controller behavior.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param mixed $delimiter Raw delimiter input.
+	 * @return string One-character delimiter.
+	 */
+	public static function normalize_delimiter( $delimiter ): string {
+		if ( ! is_string( $delimiter ) || '' === $delimiter ) {
+			return ',';
+		}
+		return 1 === strlen( $delimiter ) ? $delimiter : ',';
 	}
 
 	/**
@@ -199,8 +215,7 @@ class FulfillmentsCsvImporter {
 	 *
 	 * @since 10.9.0
 	 *
-	 * @param string $delimiter Delimiter to use, or 'auto' to sniff from the first line.
-	 *                          Falls back to the constructor delimiter when empty.
+	 * @param string $delimiter Delimiter override; falls back to the constructor delimiter when empty.
 	 * @return array{
 	 *     headers?: array<int, string>,
 	 *     sample?: array<int, string>,
@@ -210,7 +225,7 @@ class FulfillmentsCsvImporter {
 	 *     error?: array{code:string, message:string}
 	 * }
 	 */
-	public function parse_headers( string $delimiter = 'auto' ): array {
+	public function parse_headers( string $delimiter = '' ): array {
 		if ( ! is_readable( $this->file ) ) {
 			return array(
 				'error' => array(
@@ -233,7 +248,7 @@ class FulfillmentsCsvImporter {
 		try {
 			$this->strip_bom( $handle );
 
-			$effective_delimiter = $this->resolve_delimiter( $handle, $delimiter );
+			$effective_delimiter = '' === $delimiter ? $this->options['delimiter'] : self::normalize_delimiter( $delimiter );
 
 			$header_raw = fgetcsv( $handle, 0, $effective_delimiter, $this->options['enclosure'], '' );
 			if ( false === $header_raw || null === $header_raw ) {
@@ -311,8 +326,8 @@ class FulfillmentsCsvImporter {
 	 * }
 	 */
 	public function import_chunk( int $offset, int $limit, array $mapping, array $options = array() ): array {
-		$delimiter = isset( $options['delimiter'] ) && '' !== $options['delimiter'] && 'auto' !== $options['delimiter']
-			? (string) $options['delimiter']
+		$delimiter = isset( $options['delimiter'] ) && '' !== $options['delimiter']
+			? self::normalize_delimiter( $options['delimiter'] )
 			: $this->options['delimiter'];
 
 		$seen_tracking_pairs = isset( $options['seen_tracking_pairs'] ) && is_array( $options['seen_tracking_pairs'] )
@@ -543,42 +558,6 @@ class FulfillmentsCsvImporter {
 		if ( "\xEF\xBB\xBF" !== $bom ) {
 			rewind( $handle );
 		}
-	}
-
-	/**
-	 * Resolve a delimiter, sniffing the first line when 'auto' is requested.
-	 *
-	 * Leaves the handle positioned at the start of the data so the caller can read the header.
-	 *
-	 * @param resource $handle    Open file handle positioned at the first data byte.
-	 * @param string   $requested Requested delimiter (',', ';', "\t", or 'auto').
-	 * @return string Effective single-character delimiter.
-	 */
-	private function resolve_delimiter( $handle, string $requested ): string {
-		if ( '' !== $requested && 'auto' !== $requested ) {
-			return $requested;
-		}
-
-		$position = ftell( $handle );
-		$first    = fgets( $handle );
-		if ( false !== $position ) {
-			fseek( $handle, (int) $position );
-		} else {
-			rewind( $handle );
-		}
-
-		if ( false === $first || '' === $first ) {
-			return ',';
-		}
-
-		$counts = array(
-			','  => substr_count( $first, ',' ),
-			';'  => substr_count( $first, ';' ),
-			"\t" => substr_count( $first, "\t" ),
-		);
-		arsort( $counts );
-		$best = (string) array_key_first( $counts );
-		return $counts[ $best ] > 0 ? $best : ',';
 	}
 
 	/**

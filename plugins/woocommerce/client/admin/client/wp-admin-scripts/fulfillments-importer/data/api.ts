@@ -8,7 +8,6 @@ import apiFetch from '@wordpress/api-fetch';
  */
 import type {
 	ColumnMapping,
-	ImporterDelimiter,
 	ImporterSummary,
 	PrepareResponse,
 	RunChunkResponse,
@@ -28,7 +27,7 @@ function getBase(): string {
 
 export interface PrepareArgs {
 	file: File;
-	delimiter: ImporterDelimiter;
+	delimiter: string;
 	notifyCustomer: boolean;
 	updateExisting: boolean;
 }
@@ -49,7 +48,7 @@ export interface RunArgs {
 export async function prepare( args: PrepareArgs ): Promise< PrepareResponse > {
 	const body = new FormData();
 	body.append( 'file', args.file );
-	body.append( 'delimiter', args.delimiter );
+	body.append( 'delimiter', args.delimiter || ',' );
 	body.append( 'notify_customer', args.notifyCustomer ? '1' : '0' );
 	body.append( 'update_existing', args.updateExisting ? '1' : '0' );
 

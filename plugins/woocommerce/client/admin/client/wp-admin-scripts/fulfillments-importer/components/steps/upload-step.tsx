@@ -10,23 +10,14 @@ import {
 	Flex,
 	FormFileUpload,
 	Notice,
-	SelectControl,
+	TextControl,
 } from '@wordpress/components';
 
 /**
  * Internal dependencies
  */
 import { prepare } from '../../data/api';
-import type { ImporterDelimiter } from '../../data/types';
 import type { StepComponentProps } from './types';
-
-const DELIMITER_OPTIONS: Array< { label: string; value: ImporterDelimiter } > =
-	[
-		{ label: __( 'Auto-detect', 'woocommerce' ), value: 'auto' },
-		{ label: __( 'Comma (,)', 'woocommerce' ), value: ',' },
-		{ label: __( 'Semicolon (;)', 'woocommerce' ), value: ';' },
-		{ label: __( 'Tab', 'woocommerce' ), value: '\t' },
-	];
 
 function formatBytes( bytes: number ): string {
 	if ( bytes < 1024 ) {
@@ -134,14 +125,19 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 				</Flex>
 			</BaseControl>
 
-			<SelectControl
+			<TextControl
 				label={ __( 'CSV delimiter', 'woocommerce' ) }
+				help={ __(
+					'Single character used to separate columns in the CSV. Defaults to comma.',
+					'woocommerce'
+				) }
 				value={ state.delimiter }
-				options={ DELIMITER_OPTIONS }
+				maxLength={ 1 }
+				placeholder=","
 				onChange={ ( value: string ) =>
 					dispatch( {
 						type: 'SET_DELIMITER',
-						delimiter: value as ImporterDelimiter,
+						delimiter: value,
 					} )
 				}
 			/>

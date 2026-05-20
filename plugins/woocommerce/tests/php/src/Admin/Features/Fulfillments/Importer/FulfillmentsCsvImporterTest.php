@@ -595,7 +595,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 		$file = $this->make_csv( $csv );
 
 		$sut    = new FulfillmentsCsvImporter( $file );
-		$parsed = $sut->parse_headers( 'auto' );
+		$parsed = $sut->parse_headers();
 
 		$this->assertArrayNotHasKey( 'error', $parsed );
 		$this->assertSame( array( 'Order ID', 'Tracking', 'Carrier', 'URL', 'Items' ), $parsed['headers'] );
@@ -612,17 +612,30 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox parse_headers sniffs the delimiter when 'auto' is requested.
+	 * @testdox parse_headers honors an explicit non-comma delimiter.
 	 */
-	public function test_parse_headers_auto_detects_semicolon_delimiter(): void {
+	public function test_parse_headers_honors_explicit_delimiter(): void {
 		$csv  = "order_number;tracking_number;shipment_provider\n1;TRACK-1;ups\n";
 		$file = $this->make_csv( $csv );
 
-		$parsed = ( new FulfillmentsCsvImporter( $file ) )->parse_headers( 'auto' );
+		$parsed = ( new FulfillmentsCsvImporter( $file, array( 'delimiter' => ';' ) ) )->parse_headers();
 
 		$this->assertArrayNotHasKey( 'error', $parsed );
 		$this->assertSame( ';', $parsed['delimiter'] );
 		$this->assertSame( array( 'order_number', 'tracking_number', 'shipment_provider' ), $parsed['headers'] );
+	}
+
+	/**
+	 * @testdox An empty delimiter option falls back to comma.
+	 */
+	public function test_empty_delimiter_falls_back_to_comma(): void {
+		$csv  = "order_number,tracking_number,shipment_provider\n1,TRACK-1,ups\n";
+		$file = $this->make_csv( $csv );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file, array( 'delimiter' => '' ) ) )->parse_headers();
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( ',', $parsed['delimiter'] );
 	}
 
 	/**
@@ -734,7 +747,7 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 
 		$chunk_file = $this->make_csv( $csv );
 		$sut        = new FulfillmentsCsvImporter( $chunk_file );
-		$parsed     = $sut->parse_headers( 'auto' );
+		$parsed     = $sut->parse_headers();
 		$mapping    = $parsed['detected_mapping'];
 
 		$counts = array(
