@@ -226,15 +226,15 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 		$original_theme = wp_get_theme()->get_stylesheet();
 		$attribute_id   = null;
 
-		$enable_visual_attribute_feature = function ( $features ) {
-			$features[] = 'wc-visual-attribute';
-			return array_unique( $features );
-		};
-
-		add_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
 		try {
 			switch_theme( 'twentytwentyfour' );
 
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+			$this->assertArrayNotHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should require the feature setting.' );
+			$this->assertTrue(
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )->change_feature_enable( 'wc-visual-attribute', true ),
+				'The visual attribute feature should be toggled on.'
+			);
 			$this->assertArrayHasKey( 'wc-visual', wc_get_attribute_types(), 'The visual attribute type should be available in block themes.' );
 
 			$attribute_id = wc_create_attribute(
@@ -260,7 +260,7 @@ class WC_Attribute_Functions_Test extends \WC_Unit_Test_Case {
 				wc_delete_attribute( $attribute_id );
 			}
 
-			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
 			switch_theme( $original_theme );
 		}//end try
 	}

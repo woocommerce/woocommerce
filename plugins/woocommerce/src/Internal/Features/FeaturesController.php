@@ -524,6 +524,19 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'wc-visual-attribute'                => array(
+				'name'                         => __( 'Color swatches for attributes', 'woocommerce' ),
+				'description'                  => __(
+					'Add color swatches to product attribute values.',
+					'woocommerce'
+				),
+				'option_key'                   => 'woocommerce_feature_wc_visual_attribute_enabled',
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'disable_ui'                   => false,
+				'skip_compatibility_checks'    => true,
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			'point_of_sale'                      => array(
 				'name'                         => __( 'Point of Sale', 'woocommerce' ),
 				'description'                  => __(

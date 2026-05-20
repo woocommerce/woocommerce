@@ -145,15 +145,13 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 		$text_term_id        = 0;
 		$suffix              = (string) wp_rand( 1000, 9999 );
 
-		$enable_visual_attribute_feature = function ( $features ) {
-			$features[] = 'wc-visual-attribute';
-			return array_unique( $features );
-		};
-
-		add_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
-
 		try {
 			switch_theme( 'twentytwentyfour' );
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
+			$this->assertTrue(
+				wc_get_container()->get( \Automattic\WooCommerce\Internal\Features\FeaturesController::class )->change_feature_enable( 'wc-visual-attribute', true ),
+				'The visual attribute feature should be toggled on.'
+			);
 
 			$visual_attribute_id = wc_create_attribute(
 				array(
@@ -224,7 +222,7 @@ class WC_AJAX_Test extends \WP_Ajax_UnitTestCase {
 				unset( $wc_product_attributes[ $taxonomy ] );
 			}
 
-			remove_filter( 'woocommerce_admin_features', $enable_visual_attribute_feature );
+			delete_option( 'woocommerce_feature_wc_visual_attribute_enabled' );
 			switch_theme( $original_theme );
 		}//end try
 	}
