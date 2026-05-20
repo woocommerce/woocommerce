@@ -167,6 +167,21 @@
 	display: none !important;
 }
 
+/* Customer-provided note promoted from inline shipping-block prefix into its
+ * own h3 + .address section below the address columns, matching the visual
+ * treatment of Billing / Shipping. */
+.woocommerce-feature-enabled-order-detail-redesign .wc-proto-customer-note-section {
+	margin-top: 24px;
+	padding-top: 16px;
+	border-top: 1px solid #f0f0f1;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-proto-customer-note-section .address {
+	max-width: 720px;
+}
+.woocommerce-feature-enabled-order-detail-redesign .wc-proto-customer-note-section .address p {
+	margin: 0;
+}
+
 /* -- Side panel ---------------------------------------------------------- */
 .wc-order-side-panel-overlay {
 	position: fixed;

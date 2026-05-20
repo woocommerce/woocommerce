@@ -41,6 +41,10 @@
 		// matching the billing/shipping address visual style.
 		rebrandGeneralColumn();
 
+		// ─── Promote the customer-provided note into its own labeled
+		// section (h3 + .address) matching billing/shipping treatment.
+		rebrandCustomerNote();
+
 		// ─── Strip the "Customer IP" entry from the order data header.
 		removeCustomerIp();
 
@@ -163,6 +167,39 @@
 
 		function pad2( v ) {
 			return ( '0' + String( v ) ).slice( -2 );
+		}
+
+		function rebrandCustomerNote() {
+			// WC renders the customer-provided note as a single <p class="order_note">
+			// inside the read-only shipping address block, with an inline
+			// "<strong>Customer provided note:</strong>" prefix.
+			// Promote it to its own h3 + .address section below the address
+			// columns so it reads the same as Billing / Shipping.
+			var $note = $( '#order_data .order_note' ).first();
+			if ( ! $note.length || $note.data( 'wc-proto-rebranded' ) ) {
+				return;
+			}
+
+			// Strip the inline "<strong>Customer provided note:</strong>" prefix
+			// from the original HTML.
+			var html = $note.html().replace( /^\s*<strong>[^<]*<\/strong>\s*/i, '' );
+
+			var $section = $(
+				'<div class="order_data_column wc-proto-customer-note-section">'
+				+ '<h3></h3>'
+				+ '<div class="address"><p></p></div>'
+				+ '</div>'
+			);
+			$section.find( 'h3' ).text( 'Customer provided note' );
+			$section.find( 'p' ).html( html );
+
+			var $container = $( '#order_data .order_data_column_container' ).first();
+			if ( $container.length ) {
+				$section.insertAfter( $container );
+			} else {
+				$section.appendTo( $note.parent() );
+			}
+			$note.data( 'wc-proto-rebranded', true ).remove();
 		}
 
 		function removeCustomerIp() {
