@@ -135,12 +135,13 @@
 	border-bottom: 1px solid var(--wp-components-color-gray-300, #ddd);
 }
 
-// Qualified to beat `@wordpress/ui`'s unlayered `:is(h1-h6).heading` defense rule, which would otherwise apply heading-xl (20px).
+// Qualified to beat `@wordpress/ui`'s unlayered `:is(h1-h6).heading` defense rule.
+// Matches the design-system Drawer header treatment (heading-xl, 20px).
 .woocommerce-product-edit__drawer .woocommerce-product-edit__title {
 	margin: 0;
-	font-size: 15px;
+	font-size: 20px;
 	font-weight: 500;
-	line-height: 20px;
+	line-height: 28px;
 	color: var(--wp-components-color-foreground, #1e1e1e);
 	overflow: hidden;
 	text-overflow: ellipsis;
