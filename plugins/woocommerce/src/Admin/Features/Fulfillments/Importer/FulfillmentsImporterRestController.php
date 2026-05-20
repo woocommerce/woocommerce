@@ -463,7 +463,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				if ( ! wc_is_file_valid_csv( $file_path ) ) {
 					throw new \Exception( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
 				}
-			} catch ( \Throwable $e ) {
+			} catch ( \Exception $e ) {
 				if ( '' !== $file_path && file_exists( $file_path ) ) {
 					wp_delete_file( $file_path );
 				}
@@ -472,6 +472,20 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 					'woocommerce_fulfillments_import_upload_failed',
 					$e->getMessage(),
 					array( 'status' => WP_Http::BAD_REQUEST )
+				);
+			} catch ( \Throwable $e ) {
+				if ( '' !== $file_path && file_exists( $file_path ) ) {
+					wp_delete_file( $file_path );
+				}
+				wc_get_logger()->error(
+					'Fulfillments importer upload failed: ' . $e->getMessage(),
+					array( 'source' => 'fulfillments-importer' )
+				);
+				FulfillmentsTracker::track_fulfillment_validation_error( 'import', 'woocommerce_fulfillments_import_upload_failed', 'csv_importer' );
+				return new WP_Error(
+					'woocommerce_fulfillments_import_upload_failed',
+					__( 'The upload could not be processed. Please try again.', 'woocommerce' ),
+					array( 'status' => WP_Http::INTERNAL_SERVER_ERROR )
 				);
 			}
 		} finally {
