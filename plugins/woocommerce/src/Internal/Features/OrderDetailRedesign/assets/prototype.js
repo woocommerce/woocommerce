@@ -34,8 +34,15 @@
 			return;
 		}
 
-		// ─── Inject Edit affordance into the Order Data metabox header ──
+		// ─── Inject Edit affordance into the page title bar ──────────────
 		injectEditAffordance();
+
+		// ─── Rebrand the General column (Date + Customer) as read-only blocks
+		// matching the billing/shipping address visual style.
+		rebrandGeneralColumn();
+
+		// ─── Strip the "Customer IP" entry from the order data header.
+		removeCustomerIp();
 
 		// ─── Side panel state ───────────────────────────────────────────
 		var initialSnapshot = null;
@@ -97,19 +104,100 @@
 
 		// ─── Helpers ────────────────────────────────────────────────────
 
+		function rebrandGeneralColumn() {
+			var $col = $( '#order_data .order_data_column' ).filter( function () {
+				return $( this ).find( 'input[name="order_date"]' ).length > 0;
+			} ).first();
+			if ( ! $col.length ) {
+				return;
+			}
+
+			var dateVal   = $col.find( 'input[name="order_date"]' ).val();
+			var hourVal   = $col.find( 'input[name="order_date_hour"]' ).val();
+			var minuteVal = $col.find( 'input[name="order_date_minute"]' ).val();
+			var $customer = $col.find( '#customer_user' );
+			var customerText = '';
+			if ( $customer.length ) {
+				customerText = ( $customer.find( 'option:selected' ).text() || '' ).trim();
+				if ( ! customerText ) {
+					customerText = 'Guest';
+				}
+			}
+			var dateText = formatHumanDate( dateVal, hourVal, minuteVal );
+
+			// Move the original inputs into a hidden container so the form still
+			// submits the same values; we only swap the visual presentation.
+			var $hidden = $( '<div class="wc-proto-hidden-fields" style="display:none"></div>' );
+			$col.find( 'input, select' ).appendTo( $hidden );
+
+			$col.empty().append( $hidden ).append(
+				$( '<h3></h3>' ).text( 'Date created' )
+			).append(
+				$( '<div class="address"></div>' ).append(
+					$( '<p></p>' ).text( dateText )
+				)
+			).append(
+				$( '<h3 class="wc-proto-second-header"></h3>' ).text( 'Customer' )
+			).append(
+				$( '<div class="address"></div>' ).append(
+					$( '<p></p>' ).text( customerText )
+				)
+			);
+		}
+
+		function formatHumanDate( date, hour, minute ) {
+			if ( ! date ) {
+				return '—';
+			}
+			var d = new Date( date + 'T' + pad2( hour || '0' ) + ':' + pad2( minute || '0' ) + ':00' );
+			if ( isNaN( d.getTime() ) ) {
+				return date + ' ' + pad2( hour ) + ':' + pad2( minute );
+			}
+			var months = [
+				'January', 'February', 'March', 'April', 'May', 'June',
+				'July', 'August', 'September', 'October', 'November', 'December',
+			];
+			return months[ d.getMonth() ] + ' ' + d.getDate() + ', ' + d.getFullYear()
+				+ ' at ' + pad2( d.getHours() ) + ':' + pad2( d.getMinutes() );
+		}
+
+		function pad2( v ) {
+			return ( '0' + String( v ) ).slice( -2 );
+		}
+
+		function removeCustomerIp() {
+			$( '.woocommerce-Order-customerIP' ).each( function () {
+				var $span = $( this );
+				var $p    = $span.parent();
+				if ( ! $p.length ) {
+					return;
+				}
+				var html = $p.html();
+				// Strip `Customer IP: <span ...>...</span>` plus the leading/trailing ". " separator.
+				html = html.replace( /\.\s*Customer IP:\s*<span[^>]*>[^<]*<\/span>/i, '' );
+				html = html.replace( /Customer IP:\s*<span[^>]*>[^<]*<\/span>\.?\s*/i, '' );
+				$p.html( html );
+			} );
+		}
+
 		function injectEditAffordance() {
-			if ( ! $orderDataBox.length ) {
+			// Place the Edit button on the page title row, right-aligned, at the same
+			// vertical level as the "Edit order #1234" heading.
+			var $heading = $( '.wp-heading-inline' ).first();
+			if ( ! $heading.length ) {
 				return;
 			}
-			var $header = $orderDataBox.find( '.postbox-header' ).first();
-			if ( ! $header.length ) {
-				$header = $orderDataBox.find( '.hndle' ).first();
-			}
-			if ( ! $header.length || $header.find( '.wc-order-data-edit' ).length ) {
+			if ( $heading.parent().find( '.wc-order-data-edit' ).length ) {
 				return;
 			}
-			$( '<button type="button" class="wc-order-data-edit">Edit</button>' )
-				.appendTo( $header );
+			$(
+				'<a href="#" class="page-title-action wc-order-data-edit" role="button">'
+					+ 'Edit order details'
+					+ '</a>'
+			).insertAfter( $heading );
+
+			// Ensure the heading bar lays out heading-left / button-right.
+			$heading.parent().addClass( 'wc-order-page-title-bar' );
 		}
 
 		function snapshotForm() {
@@ -155,10 +243,10 @@
 			$overlay.addClass( 'is-open' );
 			$panel.addClass( 'is-open' );
 
-			var wpwrap = document.getElementById( 'wpwrap' );
-			if ( wpwrap && 'inert' in wpwrap ) {
-				wpwrap.inert = true;
-			}
+			// Lock page scroll while the panel is open. We deliberately do NOT
+			// set `inert` on #wpwrap because the panel is rendered inside it
+			// via admin_footer — making wpwrap inert would also disable the
+			// panel and its close controls.
 			$( 'html' ).css( 'overflow', 'hidden' );
 
 			// Focus first input in the panel for keyboard users.
@@ -183,10 +271,6 @@
 				$overlay.prop( 'hidden', true );
 				$panel.prop( 'hidden', true );
 			}, 220 );
-			var wpwrap = document.getElementById( 'wpwrap' );
-			if ( wpwrap && 'inert' in wpwrap ) {
-				wpwrap.inert = false;
-			}
 			$( 'html' ).css( 'overflow', '' );
 			setDirty( false );
 		}

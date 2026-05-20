@@ -118,31 +118,36 @@
 	display: none !important;
 }
 
-/* Edit affordance injected by JS into the Order Data metabox header */
-.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-data .postbox-header,
-.woocommerce-feature-enabled-order-detail-redesign #woocommerce-order-data .hndle {
+/* Edit affordance lives in the page title bar, aligned right of the heading. */
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-page-title-bar {
 	display: flex;
+	flex-wrap: wrap;
 	align-items: center;
 	gap: 8px;
 }
-.woocommerce-feature-enabled-order-detail-redesign .wc-order-data-edit {
-	margin-left: auto;
-	font-size: 13px;
-	font-weight: 400;
-	color: #2271b1;
-	background: none;
-	border: 0;
-	padding: 0;
-	cursor: pointer;
-	text-decoration: none;
+.woocommerce-feature-enabled-order-detail-redesign .wc-order-page-title-bar > .wp-heading-inline {
+	margin-right: auto;
 }
-.woocommerce-feature-enabled-order-detail-redesign .wc-order-data-edit:hover {
-	text-decoration: underline;
+.woocommerce-feature-enabled-order-detail-redesign a.wc-order-data-edit.page-title-action {
+	margin-left: 0;
 }
-.woocommerce-feature-enabled-order-detail-redesign .wc-order-data-edit:focus-visible {
-	outline: 2px solid #2271b1;
-	outline-offset: 2px;
-	border-radius: 2px;
+
+/* Inside the General column: the second h3 needs breathing room above it so
+ * Date created / Customer read as two stacked sub-sections, matching the
+ * billing/shipping visual rhythm. */
+.woocommerce-feature-enabled-order-detail-redesign #order_data .wc-proto-second-header {
+	margin-top: 16px;
+}
+
+/* Hide the customer IP if the JS regex didn't catch it for any reason. */
+.woocommerce-feature-enabled-order-detail-redesign .woocommerce-Order-customerIP {
+	display: none !important;
+}
+
+/* The hidden fields container we use to keep original form inputs around for
+ * submission while presenting Date + Customer as read-only. */
+.woocommerce-feature-enabled-order-detail-redesign .wc-proto-hidden-fields {
+	display: none !important;
 }
 
 /* -- Side panel ---------------------------------------------------------- */
