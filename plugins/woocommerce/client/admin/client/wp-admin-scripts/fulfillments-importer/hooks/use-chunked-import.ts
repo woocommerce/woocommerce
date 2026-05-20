@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { __ } from '@wordpress/i18n';
 import { useCallback, useEffect, useRef, useState } from 'react';
 
 /**
@@ -169,12 +170,25 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 				if ( response.done ) {
 					if ( response.summary ) {
 						callbacksRef.current.onFinish?.( response.summary );
+					} else {
+						callbacksRef.current.onError?.(
+							__(
+								'The import finished but the summary was missing. Please try again.',
+								'woocommerce'
+							)
+						);
 					}
 					return;
 				}
 
 				if ( offsetRef.current >= total && total > 0 ) {
-					// Defensive: server should have set done=true. Stop to avoid an infinite loop.
+					// Server should have set done=true; surface so the UI can recover.
+					callbacksRef.current.onError?.(
+						__(
+							'The import did not complete cleanly. Please try again.',
+							'woocommerce'
+						)
+					);
 					return;
 				}
 			}
