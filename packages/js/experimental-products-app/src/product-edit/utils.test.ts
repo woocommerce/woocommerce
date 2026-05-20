@@ -191,6 +191,34 @@ describe( 'product edit utils', () => {
 		} );
 	} );
 
+	it( 'returns a mixed bulk field state for different grouped products', () => {
+		const products = [
+			buildProduct( {
+				id: 1,
+				type: 'grouped',
+				grouped_products: [ 10, 11 ],
+			} ),
+			buildProduct( {
+				id: 2,
+				type: 'grouped',
+				grouped_products: [ 12 ],
+			} ),
+		];
+
+		const bulkData = buildProductBulkEditData(
+			products,
+			getProductEditFields( productFields )
+		);
+
+		expect( bulkData.data.grouped_products ).toEqual( [] );
+		expect( bulkData.fieldStates.grouped_products ).toEqual( {
+			isEmpty: false,
+			isMixed: true,
+			placeholder: 'Mixed',
+			value: undefined,
+		} );
+	} );
+
 	it( 'returns bulk field state for shared and empty values', () => {
 		const products = [
 			buildProduct( {

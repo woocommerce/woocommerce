@@ -17,7 +17,7 @@
 		gap: 12px;
 		width: 100%;
 		// Override the base searchable-chip-select rule that bolds selected
-		// items — grouped products should keep regular weight across all rows.
+		// items; grouped products should keep regular weight across all rows.
 		font-weight: var(--wpds-typography-font-weight-regular, 400);
 	}
 
