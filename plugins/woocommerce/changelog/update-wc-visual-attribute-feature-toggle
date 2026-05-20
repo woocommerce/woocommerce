@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Expose the wc-visual attribute type through WooCommerce feature settings instead of the wc-admin beta feature list.

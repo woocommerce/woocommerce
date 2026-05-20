@@ -7,20 +7,11 @@ import { privateApis as routerPrivateApis } from '@wordpress/router';
 import { store as coreStore } from '@wordpress/core-data';
 import { useSelect } from '@wordpress/data';
 import clsx from 'clsx';
-import { Button, Icon, Stack, Tabs } from '@wordpress/ui';
-import { privateApis as componentsPrivateApis } from '@wordpress/components';
+import { Button, Stack, Tabs } from '@wordpress/ui';
 import { privateApis as editorPrivateApis } from '@wordpress/editor';
 import { addQueryArgs } from '@wordpress/url';
 import { getAdminLink } from '@woocommerce/settings';
 import { __ } from '@wordpress/i18n';
-import {
-	tag,
-	alignNone,
-	category,
-	link,
-	chevronDown,
-	chevronUp,
-} from '@wordpress/icons';
 
 /**
  * Internal dependencies
@@ -47,46 +38,8 @@ import { useProductActions } from '../dataviews-actions';
 import { ProductListEmptyState } from './empty-state';
 import { ProductListPage, ProductListPageHeader } from './page';
 
-const { Menu } = unlock( componentsPrivateApis );
 const { usePostActions } = unlock( editorPrivateApis );
 const { useHistory, useLocation } = unlock( routerPrivateApis );
-
-const PRODUCT_TYPE_MENU_ITEMS = [
-	{
-		key: 'simple',
-		icon: tag,
-		label: __( 'Simple product', 'woocommerce' ),
-		info: __( 'A standalone item with no variations.', 'woocommerce' ),
-		queryArgs: {},
-	},
-	{
-		key: 'variable',
-		icon: alignNone,
-		label: __( 'Variable product', 'woocommerce' ),
-		info: __(
-			'An item with variations like color or size.',
-			'woocommerce'
-		),
-		queryArgs: { product_type: 'variable' },
-	},
-	{
-		key: 'grouped',
-		icon: category,
-		label: __( 'Grouped product', 'woocommerce' ),
-		info: __( 'A collection of related products.', 'woocommerce' ),
-		queryArgs: { product_type: 'grouped' },
-	},
-	{
-		key: 'external',
-		icon: link,
-		label: __( 'Affiliate product', 'woocommerce' ),
-		info: __(
-			'A product you promote and earn commission on.',
-			'woocommerce'
-		),
-		queryArgs: { product_type: 'external' },
-	},
-] as const;
 
 export type ProductListProps = {
 	subTitle?: string;
@@ -130,7 +83,6 @@ export default function ProductList( {
 	const [ selection, setSelection ] = useState( () =>
 		getSelectionFromPostId( postId )
 	);
-	const [ isMenuOpen, setIsMenuOpen ] = useState( false );
 
 	useEffect( () => {
 		setSelection( getSelectionFromPostId( postId ) );
@@ -272,40 +224,20 @@ export default function ProductList( {
 			>
 				{ __( 'Import', 'woocommerce' ) }
 			</Button>
-			<Menu onOpenChange={ setIsMenuOpen } placement="bottom-end">
-				<Menu.TriggerButton
-					disabled={ canCreateRecord === false }
-					render={ <Button variant="solid" size="compact" /> }
-				>
-					{ __( 'Add new', 'woocommerce' ) }
-					<Button.Icon
-						icon={ isMenuOpen ? chevronUp : chevronDown }
-					/>
-				</Menu.TriggerButton>
-				<Menu.Popover>
-					<Menu.Group>
-						{ PRODUCT_TYPE_MENU_ITEMS.map( ( item ) => (
-							<Menu.Item
-								key={ item.key }
-								prefix={ <Icon icon={ item.icon } /> }
-								onClick={ () => {
-									window.location.href = getAdminLink(
-										addQueryArgs( 'post-new.php', {
-											post_type: 'product',
-											...item.queryArgs,
-										} )
-									);
-								} }
-							>
-								<Menu.ItemLabel>{ item.label }</Menu.ItemLabel>
-								<Menu.ItemHelpText>
-									{ item.info }
-								</Menu.ItemHelpText>
-							</Menu.Item>
-						) ) }
-					</Menu.Group>
-				</Menu.Popover>
-			</Menu>
+			<Button
+				disabled={ canCreateRecord === false }
+				size="compact"
+				variant="solid"
+				onClick={ () =>
+					( window.location.href = getAdminLink(
+						addQueryArgs( 'post-new.php', {
+							post_type: 'product',
+						} )
+					) )
+				}
+			>
+				{ __( 'Add new product', 'woocommerce' ) }
+			</Button>
 		</Stack>
 	);
 
