@@ -132,7 +132,7 @@ class ShopperListItems extends AbstractRoute {
 	protected function get_route_response( \WP_REST_Request $request ) {
 		$list = ShopperList::get_by_slug( (string) $request['slug'] );
 		if ( ! $list ) {
-			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Shopper list not found.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Your saved list isn\'t available right now.', 'woocommerce' ), 404 );
 		}
 
 		$items = array_values( $list->get_items() );
@@ -161,7 +161,7 @@ class ShopperListItems extends AbstractRoute {
 		$list = ShopperList::get_by_slug( (string) $request['slug'] );
 
 		if ( ! $list ) {
-			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Shopper list not found.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Your saved list isn\'t available right now.', 'woocommerce' ), 404 );
 		}
 
 		[ $lookup_id, $variation, $quantity ] = $this->resolve_item_payload( $request );

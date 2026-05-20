@@ -1,0 +1,4 @@
+Significance: patch
+Type: tweak
+
+Shopper Collection: surface mutation errors via the store-notices banner instead of an in-list error row, and disable the affected row's controls while the request is in flight.

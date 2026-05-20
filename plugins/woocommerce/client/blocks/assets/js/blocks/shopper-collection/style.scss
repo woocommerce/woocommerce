@@ -152,13 +152,3 @@ $grid-gap: var(--wp--style--block-gap, 1.5em);
 	padding: 1em 0;
 	text-align: left;
 }
-
-// Error state spans every grid column so it reads as a single alert
-// rather than a badly-sized cell when the collection has a multi-column
-// layout. Same treatment as the empty state above for symmetry.
-.wc-block-shopper-collection__error {
-	color: #b91c1c;
-	grid-column: 1 / -1;
-	padding: 1em 0;
-	text-align: center;
-}
