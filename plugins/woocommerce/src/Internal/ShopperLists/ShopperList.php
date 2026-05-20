@@ -70,6 +70,12 @@ class ShopperList {
 	 * @return self|false
 	 */
 	public static function get_by_slug( string $slug, ?int $user_id = null ) {
+		// Gate disabled or unknown slugs upfront so previously-persisted lists
+		// don't bypass the feature flag (the Store API surfaces this as 404).
+		if ( ! wc_get_container()->get( ShopperListsController::class )->is_enabled( $slug ) ) {
+			return false;
+		}
+
 		$user_id = absint( $user_id ? $user_id : get_current_user_id() );
 		if ( ! $user_id ) {
 			return false;
@@ -81,18 +87,13 @@ class ShopperList {
 			return self::from_array( $stored, $user_id );
 		}
 
-		// In-memory list; saved on the first save(). Disabled or unknown
-		// slugs return false (the Store API returns a 404 for them).
-		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled( $slug ) ) {
-			return new self(
-				$user_id,
-				$slug,
-				current_time( 'mysql', true ),
-				array()
-			);
-		}
-
-		return false;
+		// In-memory list; saved on the first save().
+		return new self(
+			$user_id,
+			$slug,
+			current_time( 'mysql', true ),
+			array()
+		);
 	}
 
 	/**

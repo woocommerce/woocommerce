@@ -11,9 +11,15 @@ use WC_Unit_Test_Case;
  */
 class ShopperListsControllerTests extends WC_Unit_Test_Case {
 
-	private const SFL_OPTION_FILTER      = 'pre_option_woocommerce_cart_save_for_later_enabled';
-	private const WISHLIST_OPTION_FILTER = 'pre_option_woocommerce_product_wishlist_enabled';
-	private const FLUSH_QUEUE_OPTION     = 'woocommerce_queue_flush_rewrite_rules';
+	private const FLUSH_QUEUE_OPTION = 'woocommerce_queue_flush_rewrite_rules';
+
+	/**
+	 * Map of shopper-list slug => feature option key.
+	 */
+	private const LIST_OPTIONS = array(
+		'saved-for-later' => 'woocommerce_cart_save_for_later_enabled',
+		'wishlist'        => 'woocommerce_product_wishlist_enabled',
+	);
 
 	/**
 	 * System under test.
@@ -21,20 +27,6 @@ class ShopperListsControllerTests extends WC_Unit_Test_Case {
 	 * @var ShopperListsController|null
 	 */
 	private $sut;
-
-	/**
-	 * Whether the SFL feature should report enabled for the current test.
-	 *
-	 * @var bool
-	 */
-	private $sfl_enabled = false;
-
-	/**
-	 * Whether the wishlist feature should report enabled for the current test.
-	 *
-	 * @var bool
-	 */
-	private $wishlist_enabled = false;
 
 	/**
 	 * Set up.
@@ -45,17 +37,16 @@ class ShopperListsControllerTests extends WC_Unit_Test_Case {
 		// the controller has no constructor deps, and hooks attached by one
 		// test don't leak into the shared container instance.
 		$this->sut = new ShopperListsController();
-		add_filter( self::SFL_OPTION_FILTER, array( $this, 'filter_save_for_later_option' ) );
-		add_filter( self::WISHLIST_OPTION_FILTER, array( $this, 'filter_wishlist_option' ) );
+		// Start every test with all features off; individual tests opt in.
+		foreach ( array_keys( self::LIST_OPTIONS ) as $slug ) {
+			$this->disable_list( $slug );
+		}
 	}
 
 	/**
 	 * Tear down.
 	 */
 	public function tearDown(): void {
-		remove_filter( self::SFL_OPTION_FILTER, array( $this, 'filter_save_for_later_option' ) );
-		remove_filter( self::WISHLIST_OPTION_FILTER, array( $this, 'filter_wishlist_option' ) );
-
 		if ( null !== $this->sut ) {
 			$endpoint = $this->sut->get_wishlist_endpoint();
 			remove_filter( 'woocommerce_get_query_vars', array( $this->sut, 'add_wishlist_query_var' ) );
@@ -64,37 +55,42 @@ class ShopperListsControllerTests extends WC_Unit_Test_Case {
 			remove_action( 'woocommerce_account_' . $endpoint . '_endpoint', array( $this->sut, 'render_wishlist_endpoint' ) );
 		}
 
+		foreach ( array_keys( self::LIST_OPTIONS ) as $slug ) {
+			$this->disable_list( $slug );
+		}
 		delete_option( self::FLUSH_QUEUE_OPTION );
 
-		$this->sfl_enabled      = false;
-		$this->wishlist_enabled = false;
-		$this->sut              = null;
+		$this->sut = null;
 		parent::tearDown();
 	}
 
 	/**
-	 * Filter callback returning the SFL option value for the current test.
-	 */
-	public function filter_save_for_later_option(): string {
-		return $this->sfl_enabled ? 'yes' : 'no';
-	}
-
-	/**
-	 * Filter callback returning the wishlist option value for the current test.
-	 */
-	public function filter_wishlist_option(): string {
-		return $this->wishlist_enabled ? 'yes' : 'no';
-	}
-
-	/**
-	 * Set the feature state pair for this test.
+	 * Enable the feature backing the given shopper-list slug.
 	 *
-	 * @param bool $sfl      Whether to report cart_save_for_later as enabled.
-	 * @param bool $wishlist Whether to report product_wishlist as enabled.
+	 * @param string $slug List slug.
+	 */
+	private function enable_list( string $slug ): void {
+		update_option( self::LIST_OPTIONS[ $slug ], 'yes' );
+	}
+
+	/**
+	 * Disable the feature backing the given shopper-list slug.
+	 *
+	 * @param string $slug List slug.
+	 */
+	private function disable_list( string $slug ): void {
+		update_option( self::LIST_OPTIONS[ $slug ], 'no' );
+	}
+
+	/**
+	 * Convenience for the (sfl, wishlist) combinations used by the providers.
+	 *
+	 * @param bool $sfl      Whether to enable cart_save_for_later.
+	 * @param bool $wishlist Whether to enable product_wishlist.
 	 */
 	private function set_features( bool $sfl, bool $wishlist ): void {
-		$this->sfl_enabled      = $sfl;
-		$this->wishlist_enabled = $wishlist;
+		$sfl ? $this->enable_list( 'saved-for-later' ) : $this->disable_list( 'saved-for-later' );
+		$wishlist ? $this->enable_list( 'wishlist' ) : $this->disable_list( 'wishlist' );
 	}
 
 	/**

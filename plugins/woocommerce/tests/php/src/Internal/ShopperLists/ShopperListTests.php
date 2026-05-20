@@ -15,6 +15,14 @@ class ShopperListTests extends WC_Unit_Test_Case {
 	private const SAVED_FOR_LATER_SLUG = 'saved-for-later';
 
 	/**
+	 * Map of shopper-list slug => feature option key.
+	 */
+	private const LIST_OPTIONS = array(
+		'saved-for-later' => 'woocommerce_cart_save_for_later_enabled',
+		'wishlist'        => 'woocommerce_product_wishlist_enabled',
+	);
+
+	/**
 	 * @var int
 	 */
 	private $user_id;
@@ -33,12 +41,9 @@ class ShopperListTests extends WC_Unit_Test_Case {
 	 * Set up.
 	 */
 	public function setUp(): void {
-		// `saved-for-later` depends on the `cart_save_for_later` feature
-		// flag. Filter the option read so `ShopperList::get_by_slug()`
-		// returns a list without writing the option to the database.
-		add_filter( 'pre_option_woocommerce_cart_save_for_later_enabled', array( $this, 'filter_save_for_later_enabled' ) );
-
 		parent::setUp();
+		$this->enable_list( self::SAVED_FOR_LATER_SLUG );
+
 		$this->user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
 		$this->product = \WC_Helper_Product::create_simple_product(
 			true,
@@ -57,15 +62,29 @@ class ShopperListTests extends WC_Unit_Test_Case {
 		if ( $this->product ) {
 			$this->product->delete( true );
 		}
-		remove_filter( 'pre_option_woocommerce_cart_save_for_later_enabled', array( $this, 'filter_save_for_later_enabled' ) );
+		foreach ( array_keys( self::LIST_OPTIONS ) as $slug ) {
+			$this->disable_list( $slug );
+		}
+		delete_option( 'woocommerce_queue_flush_rewrite_rules' );
 		parent::tearDown();
 	}
 
 	/**
-	 * Filter callback that forces the SFL option to `yes` for the lifetime of the test.
+	 * Enable the feature backing the given shopper-list slug.
+	 *
+	 * @param string $slug List slug.
 	 */
-	public function filter_save_for_later_enabled(): string {
-		return 'yes';
+	private function enable_list( string $slug ): void {
+		update_option( self::LIST_OPTIONS[ $slug ], 'yes' );
+	}
+
+	/**
+	 * Disable the feature backing the given shopper-list slug.
+	 *
+	 * @param string $slug List slug.
+	 */
+	private function disable_list( string $slug ): void {
+		update_option( self::LIST_OPTIONS[ $slug ], 'no' );
 	}
 
 	/**
@@ -95,6 +114,22 @@ class ShopperListTests extends WC_Unit_Test_Case {
 		$this->assertFalse( ShopperList::get_by_slug( 'wishlist', $this->user_id ) );
 		$this->assertFalse( ShopperList::get_by_slug( 'INVALID', $this->user_id ) );
 		$this->assertFalse( ShopperList::get_by_slug( '', $this->user_id ) );
+	}
+
+	/**
+	 * @testdox get_by_slug should return false when the feature is disabled, even when the list has persisted items.
+	 */
+	public function test_load_returns_false_when_feature_disabled_for_persisted_list(): void {
+		// Persist a list while the feature is on.
+		$list = ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id );
+		$list->add_item( $this->item );
+		$list->save();
+		$meta_key = ShopperList::META_KEY_PREFIX . self::SAVED_FOR_LATER_SLUG;
+		$this->assertIsArray( Users::get_site_user_meta( $this->user_id, $meta_key ) );
+
+		// Disable the feature; the persisted list must no longer be returned.
+		$this->disable_list( self::SAVED_FOR_LATER_SLUG );
+		$this->assertFalse( ShopperList::get_by_slug( self::SAVED_FOR_LATER_SLUG, $this->user_id ) );
 	}
 
 	/**
