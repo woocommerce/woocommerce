@@ -659,6 +659,8 @@ class FulfillmentsCsvImporter {
 				$existing->set_status( 'fulfilled' );
 				$existing->set_tracking_number( $tracking_number );
 				$existing->set_shipment_provider( $provider );
+				// An empty tracking_url cell on an update row intentionally preserves the existing URL;
+				// merchants who want to clear it should remove the fulfillment instead.
 				if ( '' !== $tracking_url ) {
 					$existing->set_tracking_url( $tracking_url );
 				}
