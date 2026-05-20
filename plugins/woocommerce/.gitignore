@@ -30,6 +30,9 @@ tests/cli/vendor
 !/packages/README.md
 !/packages/core-dashboard-init
 !/packages/core-dashboard-init/**
+# ...but never the package's installed dependencies (the `**` above re-includes
+# them, overriding the root .gitignore's node_modules rule).
+/packages/core-dashboard-init/node_modules/
 
 # Language files
 i18n/languages/woocommerce.pot
