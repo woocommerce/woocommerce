@@ -42,6 +42,29 @@ const CANONICAL_OPTIONS: Array< {
 	label: CANONICAL_LABELS[ key ],
 } ) );
 
+const HEADER_ALIASES: Array< {
+	canonical: CanonicalColumnKey;
+	matches: RegExp;
+} > = [
+	{
+		canonical: 'order_number',
+		matches: /^(order[_ ]?(number|id|no|num))$/i,
+	},
+	{
+		canonical: 'tracking_number',
+		matches: /^(tracking([_ ]?(number|no|num))?)$/i,
+	},
+	{
+		canonical: 'shipment_provider',
+		matches: /^(carrier|provider|shipment[_ ]?provider|shipping[_ ]?carrier|shipping[_ ]?provider)$/i,
+	},
+	{
+		canonical: 'tracking_url',
+		matches: /^(tracking[_ ]?url|url)$/i,
+	},
+	{ canonical: 'items', matches: /^(items|line[_ ]?items)$/i },
+];
+
 const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	const continueDisabled = ! hasAllRequiredColumns( state.mapping );
 
@@ -57,45 +80,29 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 	);
 
 	const onAutoDetect = useCallback( () => {
-		// Re-derive the detected mapping from the sample headers; the reducer keeps it on prepare.
-		// We just dispatch RESET_MAPPING_TO_DETECTED with whatever we already remember.
+		// Re-derive a best-effort mapping from sample headers using a fixed alias
+		// table that mirrors the server side, so this stays useful without an
+		// extra round-trip after manual edits.
 		const detected: ColumnMapping = {};
-		state.headers.forEach( ( _, index ) => {
-			detected[ index ] = '' as CanonicalColumnKey;
-		} );
-		// We don't have the original detected mapping after manual edits, so fall back to a best-effort
-		// re-detection using a fixed alias table mirroring the server side. This keeps the button useful
-		// without an extra round-trip.
-		const ALIASES: Array< {
-			canonical: CanonicalColumnKey;
-			matches: RegExp;
-		} > = [
-			{
-				canonical: 'order_number',
-				matches: /^(order[_ ]?(number|id|no|num))$/i,
-			},
-			{
-				canonical: 'tracking_number',
-				matches: /^(tracking([_ ]?(number|no|num))?)$/i,
-			},
-			{
-				canonical: 'shipment_provider',
-				matches: /^(carrier|provider|shipment[_ ]?provider|shipping[_ ]?carrier|shipping[_ ]?provider)$/i,
-			},
-			{
-				canonical: 'tracking_url',
-				matches: /^(tracking[_ ]?url|url)$/i,
-			},
-			{ canonical: 'items', matches: /^(items|line[_ ]?items)$/i },
-		];
 		state.headers.forEach( ( header, index ) => {
 			const normalized = header.trim();
-			const match = ALIASES.find( ( a ) => a.matches.test( normalized ) );
+			const match = HEADER_ALIASES.find( ( a ) =>
+				a.matches.test( normalized )
+			);
 			detected[ index ] = ( match?.canonical ??
 				'' ) as CanonicalColumnKey;
 		} );
 		dispatch( { type: 'RESET_MAPPING_TO_DETECTED', mapping: detected } );
 	}, [ dispatch, state.headers ] );
+
+	const mappedValues = useMemo(
+		() => new Set( Object.values( state.mapping ).filter( Boolean ) ),
+		[ state.mapping ]
+	);
+	const hasMissingRequired = useMemo(
+		() => REQUIRED_COLUMNS.some( ( req ) => ! mappedValues.has( req ) ),
+		[ mappedValues ]
+	);
 
 	const rows = useMemo(
 		() =>
@@ -118,10 +125,7 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 				) }
 			</p>
 
-			<table
-				className="woocommerce-fulfillment-importer-mapping-table"
-				role="table"
-			>
+			<table className="woocommerce-fulfillment-importer-mapping-table">
 				<thead>
 					<tr>
 						<th>{ __( 'CSV column', 'woocommerce' ) }</th>
@@ -132,13 +136,8 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 				<tbody>
 					{ rows.map( ( row ) => {
 						const isRequiredAndUnmapped =
-							REQUIRED_COLUMNS.includes( row.mapped ) === false &&
-							REQUIRED_COLUMNS.some(
-								( req ) =>
-									! Object.values( state.mapping ).includes(
-										req
-									)
-							);
+							! REQUIRED_COLUMNS.includes( row.mapped ) &&
+							hasMissingRequired;
 						return (
 							<tr
 								key={ row.index }
