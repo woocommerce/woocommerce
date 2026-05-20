@@ -14,10 +14,6 @@ import { GroupedProductsEdit } from '../components/grouped-products-edit';
 
 const fieldDefinition = {
 	label: __( 'Grouped products', 'woocommerce' ),
-	description: __(
-		'Pick the products that make up this grouped product. They appear together on the store front.',
-		'woocommerce'
-	),
 	enableSorting: false,
 	enableHiding: false,
 	filterBy: false,

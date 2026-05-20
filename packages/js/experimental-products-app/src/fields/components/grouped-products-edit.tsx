@@ -69,10 +69,9 @@ export function GroupedProductsEdit( {
 		setIsLoadingSelected( true );
 
 		void resolveSelect( coreStore )
-			.getEntityRecords( 'postType', 'product', {
+			.getEntityRecords( 'root', 'product', {
 				include: selectedIds,
 				per_page: selectedIds.length,
-				_fields: [ 'id', 'name', 'images' ],
 			} )
 			.then( ( records: unknown ) => {
 				if ( cancelled || ! Array.isArray( records ) ) {
@@ -117,12 +116,11 @@ export function GroupedProductsEdit( {
 
 		const timer = window.setTimeout( () => {
 			void resolveSelect( coreStore )
-				.getEntityRecords( 'postType', 'product', {
+				.getEntityRecords( 'root', 'product', {
 					search: query,
 					per_page: SEARCH_PER_PAGE,
 					exclude: excludeIds,
-					_fields: [ 'id', 'name', 'images' ],
-				} )
+					} )
 				.then( ( records: unknown ) => {
 					if ( requestId !== searchRequestIdRef.current ) {
 						return;
