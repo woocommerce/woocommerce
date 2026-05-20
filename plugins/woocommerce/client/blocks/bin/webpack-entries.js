@@ -69,7 +69,13 @@ const blocks = {
 	'featured-product': {
 		customDir: 'featured-items/featured-product',
 	},
-	'filter-wrapper': {},
+	'filter-wrapper': {
+		// Frontend-only lazy component registration; exclude from styling build.
+		stylingExcludePatterns: [
+			/\/frontend\.(t|j)sx?$/,
+			/\/block\.(t|j)sx?$/,
+		],
+	},
 	'handpicked-products': {},
 	// We need to keep the legacy-template id, so we need to add a custom config to point to the renamed classic-template folder
 	'legacy-template': {
@@ -266,15 +272,32 @@ const cartAndCheckoutBlocks = {
 // Returns the entries for each block given a relative path (ie: `index.js`,
 // `**/*.scss`...).
 // It also filters out elements with undefined props and experimental blocks.
-const getBlockEntries = ( relativePath, blockEntries = blocks ) => {
+const getBlockEntries = (
+	relativePath,
+	blockEntries = blocks,
+	{ applyStylingExclusions = false } = {}
+) => {
 	return Object.fromEntries(
 		Object.entries( blockEntries )
 			.map( ( [ blockCode, config ] ) => {
-				const filePaths = glob.sync(
-					`./assets/js/blocks/${ config.customDir || blockCode }/` +
-						relativePath,
-					{ dotRelative: true }
-				);
+				const filePaths = glob
+					.sync(
+						`./assets/js/blocks/${
+							config.customDir || blockCode
+						}/` + relativePath,
+						{ dotRelative: true }
+					)
+					.filter( ( filePath ) => {
+						if ( ! applyStylingExclusions ) {
+							return true;
+						}
+
+						const excludePatterns =
+							config.stylingExcludePatterns || [];
+						return ! excludePatterns.some( ( pattern ) =>
+							pattern.test( filePath )
+						);
+					} );
 				if ( filePaths.length > 0 ) {
 					return [ blockCode, filePaths ];
 				}
@@ -317,7 +340,8 @@ const blockStylingEntries = getBlockEntries(
 				);
 			} )
 		),
-	}
+	},
+	{ applyStylingExclusions: true }
 );
 
 const entries = {
