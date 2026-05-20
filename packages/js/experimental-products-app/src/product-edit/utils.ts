@@ -81,6 +81,7 @@ const PRODUCT_EDIT_FIELD_IDS = [
 	'tax_status',
 	'upsell_ids',
 	'cross_sell_ids',
+	'grouped_products',
 	'linked_products_count',
 ] as const;
 
@@ -246,7 +247,7 @@ const GROUPED_PRODUCT_EDIT_FORM_FIELDS = [
 	createProductEditFormGroup(
 		'general-fields',
 		__( 'General', 'woocommerce' ),
-		[ 'name', 'product_status', 'catalog_visibility', 'upsell_ids' ]
+		[ 'name', 'product_status', 'catalog_visibility', 'grouped_products' ]
 	),
 	createProductEditFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
@@ -283,6 +284,7 @@ const PARENT_OWNED_PRODUCT_EDIT_FIELD_ID_SET = new Set< ProductEditFieldId >( [
 	'featured',
 	'upsell_ids',
 	'cross_sell_ids',
+	'grouped_products',
 	'external_url',
 	'button_text',
 ] );

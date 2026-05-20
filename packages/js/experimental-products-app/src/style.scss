@@ -23,6 +23,7 @@
 .product_page_woocommerce-products-dashboard,
 #woocommerce-variations-classic-root,
 .woocommerce-product-edit__drawer-portal {
+	@import "./fields/components/grouped-products-edit.scss";
 	@import "./fields/components/list-item/style.scss";
 	@import "./fields/components/searchable-chip-select/style.scss";
 	@import "./fields/components/taxonomy-edit/style.scss";
