@@ -70,7 +70,9 @@ class FulfillmentsCsvImporterController {
 			return;
 		}
 
-		WCAdminAssets::register_style( 'fulfillments-importer', 'style', array( 'wp-components' ) );
+		// The importer's CSS is bundled into the fulfillments stylesheet (see
+		// client/wp-admin-scripts/fulfillments/style.scss) which FulfillmentsRenderer
+		// already enqueues on this screen, so we only register the script here.
 		WCAdminAssets::register_script( 'wp-admin-scripts', 'fulfillments-importer', true );
 
 		wp_localize_script(
