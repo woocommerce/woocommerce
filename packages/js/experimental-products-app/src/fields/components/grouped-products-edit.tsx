@@ -1,6 +1,7 @@
 /**
  * External dependencies
  */
+import { Combobox as BaseCombobox } from '@base-ui/react/combobox';
 import { Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { resolveSelect } from '@wordpress/data';
@@ -8,7 +9,6 @@ import type { DataFormControlProps } from '@wordpress/dataviews';
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
-import { Stack } from '@wordpress/ui';
 import type { Product } from '@woocommerce/data';
 
 /**
@@ -226,12 +226,27 @@ export function GroupedProductsEdit( {
 					value={ item }
 					disabled={ item.disabled }
 				>
-					<Stack
-						direction="row"
-						align="center"
-						style={ { gap: '12px' } }
-						className="woocommerce-grouped-products-edit__option"
-					>
+					<div className="woocommerce-grouped-products-edit__option">
+						<BaseCombobox.ItemIndicator
+							className="woocommerce-grouped-products-edit__option-indicator"
+							aria-hidden="true"
+						>
+							<svg
+								width="16"
+								height="16"
+								viewBox="0 0 24 24"
+								fill="none"
+								xmlns="http://www.w3.org/2000/svg"
+							>
+								<path
+									d="M5 13l4 4L19 7"
+									stroke="currentColor"
+									strokeWidth="2"
+									strokeLinecap="round"
+									strokeLinejoin="round"
+								/>
+							</svg>
+						</BaseCombobox.ItemIndicator>
 						{ item.image?.src ? (
 							<img
 								src={ item.image.src }
@@ -244,7 +259,7 @@ export function GroupedProductsEdit( {
 						<span className="woocommerce-grouped-products-edit__option-label">
 							{ item.label }
 						</span>
-					</Stack>
+					</div>
 				</Combobox.Item>
 			) }
 		</SearchableChipSelectControl>
