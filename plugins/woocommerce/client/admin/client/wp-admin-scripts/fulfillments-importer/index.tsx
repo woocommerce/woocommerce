@@ -9,10 +9,11 @@ import { recordEvent } from '@woocommerce/tracks';
 /**
  * Internal dependencies
  */
+import FulfillmentsImporterModal from './components/fulfillments-importer-modal';
+
 // The importer's CSS is bundled into wp-admin-scripts/fulfillments/style.css
 // (see fulfillments/style.scss) so it loads via the renderer's already-enqueued
 // handle and no second wc-admin-style enqueue is needed.
-import FulfillmentsImporterModal from './components/fulfillments-importer-modal';
 
 const TRIGGER_CLASS = 'wc-fulfillment-import-trigger';
 const TRIGGER_SLOT_ID = 'wc-fulfillments-importer-trigger-slot';

@@ -8,10 +8,7 @@ import { Button, SelectControl } from '@wordpress/components';
 /**
  * Internal dependencies
  */
-import type {
-	CanonicalColumnKey,
-	ColumnMapping,
-} from '../../data/types';
+import type { CanonicalColumnKey, ColumnMapping } from '../../data/types';
 import {
 	hasAllRequiredColumns,
 	REQUIRED_COLUMNS,
@@ -30,14 +27,16 @@ const CANONICAL_LABELS: Record< CanonicalColumnKey, string > = {
 const CANONICAL_OPTIONS: Array< {
 	label: string;
 	value: CanonicalColumnKey;
-} > = ( [
-	'',
-	'order_number',
-	'tracking_number',
-	'shipment_provider',
-	'tracking_url',
-	'items',
-] as CanonicalColumnKey[] ).map( ( key ) => ( {
+} > = (
+	[
+		'',
+		'order_number',
+		'tracking_number',
+		'shipment_provider',
+		'tracking_url',
+		'items',
+	] as CanonicalColumnKey[]
+ ).map( ( key ) => ( {
 	value: key,
 	label: CANONICAL_LABELS[ key ],
 } ) );
@@ -56,7 +55,8 @@ const HEADER_ALIASES: Array< {
 	},
 	{
 		canonical: 'shipment_provider',
-		matches: /^(carrier|provider|shipment[_ ]?provider|shipping[_ ]?carrier|shipping[_ ]?provider)$/i,
+		matches:
+			/^(carrier|provider|shipment[_ ]?provider|shipping[_ ]?carrier|shipping[_ ]?provider)$/i,
 	},
 	{
 		canonical: 'tracking_url',

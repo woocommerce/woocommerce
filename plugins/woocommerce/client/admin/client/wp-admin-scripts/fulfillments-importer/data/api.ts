@@ -23,9 +23,7 @@ const DEFAULT_BASE = '/wc/v3/fulfillments/import';
  */
 function getBase(): string {
 	const route = window.wcFulfillmentsImporterSettings?.importRoute;
-	return typeof route === 'string' && route.length > 0
-		? route
-		: DEFAULT_BASE;
+	return typeof route === 'string' && route.length > 0 ? route : DEFAULT_BASE;
 }
 
 export interface PrepareArgs {

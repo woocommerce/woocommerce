@@ -182,14 +182,7 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 			runningRef.current = false;
 			setIsRunning( false );
 		}
-	}, [
-		token,
-		total,
-		mapping,
-		notifyCustomer,
-		updateExisting,
-		chunkSize,
-	] );
+	}, [ token, total, mapping, notifyCustomer, updateExisting, chunkSize ] );
 
 	const retry = useCallback( () => {
 		// Resume from wherever we left off without resetting offsetRef.

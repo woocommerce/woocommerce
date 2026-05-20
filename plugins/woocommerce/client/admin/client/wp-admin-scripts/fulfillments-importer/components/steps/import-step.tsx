@@ -37,7 +37,10 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 
 	const percent =
 		state.total > 0
-			? Math.min( 100, Math.round( ( state.processed / state.total ) * 100 ) )
+			? Math.min(
+					100,
+					Math.round( ( state.processed / state.total ) * 100 )
+			  )
 			: 0;
 
 	const statusLabel = sprintf(
