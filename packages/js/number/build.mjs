@@ -18,7 +18,7 @@ const options = {
 	format,
 	platform: 'neutral',
 	target: 'esnext',
-	loader: { '.js': 'jsx', '.jsx': 'jsx', '.ts': 'tsx', '.tsx': 'tsx' },
+	loader: { '.js': 'jsx', '.jsx': 'jsx', '.ts': 'ts', '.tsx': 'tsx' },
 	jsx: 'transform',
 	jsxFactory: 'createElement',
 	jsxFragment: 'Fragment',
