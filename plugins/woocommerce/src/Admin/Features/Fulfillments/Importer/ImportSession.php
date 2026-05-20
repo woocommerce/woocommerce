@@ -98,6 +98,7 @@ final class ImportSession {
 			'headers'             => array_values( array_map( 'strval', $headers ) ),
 			'total'               => max( 0, $total ),
 			'processed'           => 0,
+			'byte_offset'         => 0,
 			'notify_customer'     => $notify,
 			'update_existing'     => $update,
 			'seen_tracking_pairs' => array(),
@@ -266,6 +267,17 @@ final class ImportSession {
 	}
 
 	/**
+	 * End-of-file byte offset reached by the most recent chunk.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return int
+	 */
+	public function byte_offset(): int {
+		return (int) ( $this->data['byte_offset'] ?? 0 );
+	}
+
+	/**
 	 * Append the result of one chunk: advance processed, merge counts, append rows, replace dedupe state.
 	 *
 	 * @since 10.9.0
@@ -274,8 +286,9 @@ final class ImportSession {
 	 * @param array{created:int, updated:int, skipped:int, failed:int, notified:int} $counts          Per-chunk counts.
 	 * @param array<int, array<string, mixed>>                                       $rows            Per-row result entries from this chunk.
 	 * @param array<string, true>                                                    $seen            Cross-chunk dedupe state to persist.
+	 * @param int                                                                    $byte_offset     Byte position the importer reached after this chunk, used to resume the next one without re-reading prior rows.
 	 */
-	public function record_chunk( int $processed_after, array $counts, array $rows, array $seen ): void {
+	public function record_chunk( int $processed_after, array $counts, array $rows, array $seen, int $byte_offset = 0 ): void {
 		$prev                    = (int) ( $this->data['processed'] ?? 0 );
 		$this->data['processed'] = min( $this->total(), max( $prev, max( 0, $processed_after ) ) );
 
@@ -291,6 +304,12 @@ final class ImportSession {
 		}
 
 		$this->data['seen_tracking_pairs'] = $seen;
+
+		if ( $byte_offset > 0 ) {
+			$prev_byte                 = (int) ( $this->data['byte_offset'] ?? 0 );
+			$this->data['byte_offset'] = max( $prev_byte, $byte_offset );
+		}
+
 		$this->persist();
 	}
 

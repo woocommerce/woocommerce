@@ -145,11 +145,12 @@ class FulfillmentsCsvImporter {
 			return $summary;
 		}
 
-		$chunk_size = $this->get_chunk_size();
-		$total      = (int) ( $parsed['total'] ?? 0 );
-		$delimiter  = (string) ( $parsed['delimiter'] ?? $this->options['delimiter'] );
-		$seen       = array();
-		$offset     = 0;
+		$chunk_size  = $this->get_chunk_size();
+		$total       = (int) ( $parsed['total'] ?? 0 );
+		$delimiter   = (string) ( $parsed['delimiter'] ?? $this->options['delimiter'] );
+		$seen        = array();
+		$offset      = 0;
+		$byte_offset = 0;
 
 		do {
 			$result = $this->import_chunk(
@@ -161,6 +162,7 @@ class FulfillmentsCsvImporter {
 					'update_existing'     => $this->options['update_existing'],
 					'delimiter'           => $delimiter,
 					'seen_tracking_pairs' => $seen,
+					'byte_offset'         => $byte_offset,
 				)
 			);
 
@@ -172,6 +174,9 @@ class FulfillmentsCsvImporter {
 			}
 			if ( isset( $result['seen_tracking_pairs'] ) && is_array( $result['seen_tracking_pairs'] ) ) {
 				$seen = $result['seen_tracking_pairs'];
+			}
+			if ( isset( $result['byte_offset'] ) && is_int( $result['byte_offset'] ) ) {
+				$byte_offset = $result['byte_offset'];
 			}
 
 			$offset += $chunk_size;
@@ -289,11 +294,15 @@ class FulfillmentsCsvImporter {
 	 *     @type bool                   $update_existing
 	 *     @type string                 $delimiter
 	 *     @type array<string, true>    $seen_tracking_pairs Cross-chunk dedupe state; pass back in to subsequent calls.
+	 *     @type int                    $byte_offset         Optional byte position (from a prior chunk's `byte_offset` result) to
+	 *                                                       fseek to instead of forward-reading `$offset` rows. When > 0, the
+	 *                                                       header read is skipped — callers must have already validated mapping.
 	 * }
 	 * @return array{
 	 *     counts: array{created:int, updated:int, skipped:int, failed:int, notified:int},
 	 *     rows: array<int, array<string, mixed>>,
-	 *     seen_tracking_pairs: array<string, true>
+	 *     seen_tracking_pairs: array<string, true>,
+	 *     byte_offset: int
 	 * }
 	 */
 	public function import_chunk( int $offset, int $limit, array $mapping, array $options = array() ): array {
@@ -304,6 +313,8 @@ class FulfillmentsCsvImporter {
 		$seen_tracking_pairs = isset( $options['seen_tracking_pairs'] ) && is_array( $options['seen_tracking_pairs'] )
 			? $options['seen_tracking_pairs']
 			: array();
+
+		$byte_offset_in = isset( $options['byte_offset'] ) ? max( 0, (int) $options['byte_offset'] ) : 0;
 
 		$counts = array(
 			'created'  => 0,
@@ -330,6 +341,7 @@ class FulfillmentsCsvImporter {
 					'counts'              => $counts,
 					'rows'                => $rows,
 					'seen_tracking_pairs' => $seen_tracking_pairs,
+					'byte_offset'         => $byte_offset_in,
 				);
 			}
 
@@ -340,6 +352,7 @@ class FulfillmentsCsvImporter {
 					'counts'              => $counts,
 					'rows'                => $rows,
 					'seen_tracking_pairs' => $seen_tracking_pairs,
+					'byte_offset'         => $byte_offset_in,
 				);
 			}
 
@@ -351,25 +364,37 @@ class FulfillmentsCsvImporter {
 					'counts'              => $counts,
 					'rows'                => $rows,
 					'seen_tracking_pairs' => $seen_tracking_pairs,
+					'byte_offset'         => $byte_offset_in,
 				);
 			}
 
-			try {
-				$this->strip_bom( $handle );
+			$byte_offset_out = $byte_offset_in;
 
-				$header_raw = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
-				if ( false === $header_raw || null === $header_raw ) {
-					$rows[] = $this->fail( 0, 'empty_csv', __( 'CSV file is empty.', 'woocommerce' ) );
-					++$counts['failed'];
-					return array(
-						'counts'              => $counts,
-						'rows'                => $rows,
-						'seen_tracking_pairs' => $seen_tracking_pairs,
-					);
+			try {
+				$header_map  = $this->mapping_to_header_map( $mapping );
+				$missing     = $this->find_missing_required_columns( $header_map );
+				$row_number  = $offset + 1;
+				$resumed     = false;
+
+				if ( $byte_offset_in > 0 && 0 === fseek( $handle, $byte_offset_in ) ) {
+					// Resuming from a prior chunk: header and prior rows are already past.
+					$resumed = true;
+				} else {
+					$this->strip_bom( $handle );
+
+					$header_raw = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
+					if ( false === $header_raw || null === $header_raw ) {
+						$rows[] = $this->fail( 0, 'empty_csv', __( 'CSV file is empty.', 'woocommerce' ) );
+						++$counts['failed'];
+						return array(
+							'counts'              => $counts,
+							'rows'                => $rows,
+							'seen_tracking_pairs' => $seen_tracking_pairs,
+							'byte_offset'         => $byte_offset_in,
+						);
+					}
 				}
 
-				$header_map = $this->mapping_to_header_map( $mapping );
-				$missing    = $this->find_missing_required_columns( $header_map );
 				if ( ! empty( $missing ) ) {
 					$rows[] = $this->fail(
 						0,
@@ -385,21 +410,26 @@ class FulfillmentsCsvImporter {
 						'counts'              => $counts,
 						'rows'                => $rows,
 						'seen_tracking_pairs' => $seen_tracking_pairs,
+						'byte_offset'         => $byte_offset_in,
 					);
 				}
 
-				// Fast-forward past $offset CSV records after the header.
-				$row_number = 1;
-				for ( $i = 0; $i < $offset; $i++ ) {
-					$row = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
-					if ( false === $row ) {
-						return array(
-							'counts'              => $counts,
-							'rows'                => $rows,
-							'seen_tracking_pairs' => $seen_tracking_pairs,
-						);
+				if ( ! $resumed ) {
+					// Fast-forward past $offset CSV records after the header (legacy path when no byte offset is known).
+					$row_number = 1;
+					for ( $i = 0; $i < $offset; $i++ ) {
+						$row = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
+						if ( false === $row ) {
+							$position = ftell( $handle );
+							return array(
+								'counts'              => $counts,
+								'rows'                => $rows,
+								'seen_tracking_pairs' => $seen_tracking_pairs,
+								'byte_offset'         => false === $position ? $byte_offset_in : (int) $position,
+							);
+						}
+						++$row_number;
 					}
-					++$row_number;
 				}
 
 				$consumed = 0;
@@ -441,6 +471,11 @@ class FulfillmentsCsvImporter {
 
 					$rows[] = $result;
 				}
+
+				$position = ftell( $handle );
+				if ( false !== $position ) {
+					$byte_offset_out = (int) $position;
+				}
 			} finally {
 				fclose( $handle );
 			}
@@ -449,6 +484,7 @@ class FulfillmentsCsvImporter {
 				'counts'              => $counts,
 				'rows'                => $rows,
 				'seen_tracking_pairs' => $seen_tracking_pairs,
+				'byte_offset'         => $byte_offset_out,
 			);
 		} finally {
 			$this->options = $prev_options;

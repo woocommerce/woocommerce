@@ -355,17 +355,19 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				'update_existing'     => $update_existing,
 				'delimiter'           => $session->delimiter(),
 				'seen_tracking_pairs' => $session->seen_tracking_pairs(),
+				'byte_offset'         => $session->byte_offset(),
 			)
 		);
 
 		$counts          = (array) $chunk_result['counts'];
 		$rows            = (array) $chunk_result['rows'];
 		$seen            = (array) $chunk_result['seen_tracking_pairs'];
+		$next_byte       = isset( $chunk_result['byte_offset'] ) ? (int) $chunk_result['byte_offset'] : 0;
 		$consumed        = min( $limit, max( 0, $session->total() - $offset ) );
 		$processed_after = min( $session->total(), $offset + $consumed );
 		$errors_for_ui   = $this->extract_errors_for_response( $rows );
 
-		$session->record_chunk( $processed_after, $counts, $rows, $seen );
+		$session->record_chunk( $processed_after, $counts, $rows, $seen, $next_byte );
 
 		$processed = $session->processed();
 		$total     = $session->total();
