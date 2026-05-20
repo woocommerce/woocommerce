@@ -9,7 +9,7 @@ Current areas of exploration:
 -   A more flexible table-based product view
 -   Better filtering, sorting, and scanning
 -   Inline handling of product variations
--   Faster quick edit and bulk edit flows
+-   Faster quick edit and [bulk edit flows](docs/bulk-editing.md)
 -   A clearer extension surface for integrations
 
 ## Try It Quickly

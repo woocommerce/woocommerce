@@ -3,8 +3,8 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\Tests\Internal\Api;
 
-use Automattic\WooCommerce\Internal\Api\GraphQLController;
-use Automattic\WooCommerce\Internal\Api\Main;
+use Automattic\WooCommerce\Api\Infrastructure\GraphQLControllerBase;
+use Automattic\WooCommerce\Api\Infrastructure\Main;
 use Automattic\WooCommerce\Internal\Api\QueryCache;
 use Automattic\WooCommerce\Internal\Api\Settings;
 use Automattic\WooCommerce\Internal\Features\FeaturesController;
@@ -121,7 +121,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 
 		$this->assertArrayHasKey( Main::OPTION_ENDPOINT_URL, $by_id );
 		$this->assertSame( 'text', $by_id[ Main::OPTION_ENDPOINT_URL ]['type'] );
-		$this->assertSame( GraphQLController::DEFAULT_ENDPOINT_URL, $by_id[ Main::OPTION_ENDPOINT_URL ]['default'] );
+		$this->assertSame( GraphQLControllerBase::DEFAULT_ENDPOINT_URL, $by_id[ Main::OPTION_ENDPOINT_URL ]['default'] );
 	}
 
 	/**
@@ -243,7 +243,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( Main::OPTION_MAX_QUERY_DEPTH, $by_id );
 		$this->assertSame( 'number', $by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['type'] );
 		$this->assertSame(
-			(string) GraphQLController::DEFAULT_MAX_QUERY_DEPTH,
+			(string) GraphQLControllerBase::DEFAULT_MAX_QUERY_DEPTH,
 			$by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['default']
 		);
 		$this->assertSame( '1', $by_id[ Main::OPTION_MAX_QUERY_DEPTH ]['custom_attributes']['min'] );
@@ -259,7 +259,7 @@ class SettingsTest extends WC_Unit_Test_Case {
 		$this->assertArrayHasKey( Main::OPTION_MAX_QUERY_COMPLEXITY, $by_id );
 		$this->assertSame( 'number', $by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['type'] );
 		$this->assertSame(
-			(string) GraphQLController::DEFAULT_MAX_QUERY_COMPLEXITY,
+			(string) GraphQLControllerBase::DEFAULT_MAX_QUERY_COMPLEXITY,
 			$by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['default']
 		);
 		$this->assertSame( '1', $by_id[ Main::OPTION_MAX_QUERY_COMPLEXITY ]['custom_attributes']['min'] );

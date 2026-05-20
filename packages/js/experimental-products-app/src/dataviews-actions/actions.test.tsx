@@ -15,6 +15,7 @@ import {
 	moveToTrashAction,
 	permanentlyDeleteAction,
 	restoreAction,
+	quickEditAction,
 	selectAllVariationsAction,
 	useProductActions,
 } from './actions';
@@ -93,6 +94,15 @@ function getCallbackAction( action: Action< ProductEntityRecord > ) {
 			}
 		) => Promise< void >;
 	};
+}
+
+function getActionLabel(
+	action: Action< ProductEntityRecord >,
+	items: ProductEntityRecord[]
+) {
+	return typeof action.label === 'string'
+		? action.label
+		: action.label( items );
 }
 
 describe( 'product list actions', () => {
@@ -203,6 +213,17 @@ describe( 'product list actions', () => {
 		);
 
 		expect( quickEditProductAction?.supportsBulk ).toBe( true );
+	} );
+
+	it( 'renames Quick edit to Bulk editing when multiple products are selected', () => {
+		const action = quickEditAction( {
+			navigate,
+		} );
+
+		expect( getActionLabel( action, [ product ] ) ).toBe( 'Quick edit' );
+		expect( getActionLabel( action, [ product, hoodie ] ) ).toBe(
+			'Bulk editing'
+		);
 	} );
 
 	it( 'opens quick edit panel with all selected products when triggered as a bulk action', () => {

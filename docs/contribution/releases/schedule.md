@@ -72,4 +72,4 @@ Due to business needs or any critical bugs discovered during testing, the releas
 
 We do not take this decision lightly and only do so to guarantee the stability of a release. When this happens, we will always communicate the situation ([example](https://developer.woocommerce.com/2025/06/02/woocommerce-9-9-release-is-delayed/)) and update the release calendar.
 
-For details on how a delay is managed, refer to the [release troubleshooting guide](/docs/contribution/releases/troubleshooting#release-delay).
+For details on how a delay is managed, refer to the [release troubleshooting guide](/docs/contribution/releases/troubleshooting/#the-release-needs-to-be-delayed-what-should-we-do).
