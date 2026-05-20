@@ -433,6 +433,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		// CSVUploadHelper reads $_FILES under a configurable key. Stage our REST file under that key.
 		// Nonce verification is handled by the REST permission_callback, not nonces.
 		$_FILES['fulfillment_import_file'] = $files['file']; // phpcs:ignore WordPress.Security.NonceVerification.Missing
+		$file_path                         = '';
 		try {
 			$csv_helper = wc_get_container()->get( CSVUploadHelper::class );
 			$upload     = $csv_helper->handle_csv_upload(
@@ -452,6 +453,9 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			}
 		} catch ( \Throwable $e ) {
 			unset( $_FILES['fulfillment_import_file'] );
+			if ( '' !== $file_path && file_exists( $file_path ) ) {
+				wp_delete_file( $file_path );
+			}
 			FulfillmentsTracker::track_fulfillment_validation_error( 'import', 'woocommerce_fulfillments_import_upload_failed', 'csv_importer' );
 			return new WP_Error(
 				'woocommerce_fulfillments_import_upload_failed',
