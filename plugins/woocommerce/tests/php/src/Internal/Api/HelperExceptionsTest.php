@@ -18,7 +18,7 @@ use WC_Unit_Test_Case;
  * the throw site.
  *
  * The actual code → status mapping that turns these into HTTP responses lives
- * in {@see \Automattic\WooCommerce\Internal\Api\GraphQLController} and is
+ * in {@see \Automattic\WooCommerce\Api\Infrastructure\GraphQLControllerBase} and is
  * exercised end-to-end via {@see SecurityTest::test_invalid_token_error_code_maps_to_401()}
  * and similar; this file just verifies the exception classes themselves carry
  * the right metadata.
