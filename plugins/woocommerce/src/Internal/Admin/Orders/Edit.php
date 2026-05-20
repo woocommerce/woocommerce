@@ -70,19 +70,75 @@ class Edit {
 	/**
 	 * Hooks all meta-boxes for order edit page. This is static since this may be called by post edit form rendering.
 	 *
-	 * @param string $screen_id Screen ID.
-	 * @param string $title Title of the page.
+	 * @param string        $screen_id Screen ID.
+	 * @param string        $title     Title of the page.
+	 * @param WC_Order|null $order     Optional. The order being edited. When provided, drives default visibility for content-aware meta boxes.
 	 */
-	public static function add_order_meta_boxes( string $screen_id, string $title ) {
+	public static function add_order_meta_boxes( string $screen_id, string $title, ?WC_Order $order = null ) {
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-data', sprintf( __( '%s data', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Data::output', $screen_id, 'normal', 'high' );
 		add_meta_box( 'woocommerce-order-items', __( 'Items', 'woocommerce' ), 'WC_Meta_Box_Order_Items::output', $screen_id, 'normal', 'high' );
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-notes', sprintf( __( '%s notes', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Notes::output', $screen_id, 'side', 'default' );
 		add_meta_box( 'woocommerce-order-downloads', __( 'Downloadable product permissions', 'woocommerce' ) . wc_help_tip( __( 'Note: Permissions for order items will automatically be granted when the order status changes to processing/completed.', 'woocommerce' ) ), 'WC_Meta_Box_Order_Downloads::output', $screen_id, 'normal', 'default' );
+		self::maybe_hide_downloads_meta_box_by_default( $screen_id, $order );
 		/* Translators: %s order type name. */
 		add_meta_box( 'woocommerce-order-actions', sprintf( __( '%s actions', 'woocommerce' ), $title ), 'WC_Meta_Box_Order_Actions::output', $screen_id, 'side', 'high' );
 		self::maybe_register_order_attribution( $screen_id, $title );
+	}
+
+	/**
+	 * Hide the Downloadable product permissions meta box by default on orders without downloadable items.
+	 *
+	 * The meta box stays registered so it remains available in the Screen Options panel. Users can still
+	 * toggle visibility there; their stored preference takes precedence over this default on subsequent visits.
+	 *
+	 * @param string        $screen_id Screen ID the meta box was registered against.
+	 * @param WC_Order|null $order     The order being edited. When null, the default visibility is left unchanged.
+	 */
+	private static function maybe_hide_downloads_meta_box_by_default( string $screen_id, ?WC_Order $order ): void {
+		if ( ! $order instanceof WC_Order ) {
+			return;
+		}
+
+		/**
+		 * Filters whether the Downloadable product permissions meta box is hidden by default on the order edit screen.
+		 *
+		 * Returning true adds the meta box to the screen's default-hidden list; returning false leaves it visible by default.
+		 * The user's saved Screen Options preference, when set, still wins.
+		 *
+		 * @param bool     $hidden_default Whether the meta box should be hidden by default. Defaults to true when the order has no downloadable items.
+		 * @param WC_Order $order          The order being edited.
+		 *
+		 * @since 10.9.0
+		 */
+		$hidden_default = (bool) apply_filters(
+			'woocommerce_order_downloads_meta_box_default_hidden',
+			! $order->has_downloadable_item(),
+			$order
+		);
+
+		if ( ! $hidden_default ) {
+			return;
+		}
+
+		add_filter(
+			'default_hidden_meta_boxes',
+			static function ( $hidden, $screen ) use ( $screen_id ) {
+				if ( ! $screen instanceof \WP_Screen || $screen->id !== $screen_id ) {
+					return $hidden;
+				}
+
+				$hidden = (array) $hidden;
+				if ( ! in_array( 'woocommerce-order-downloads', $hidden, true ) ) {
+					$hidden[] = 'woocommerce-order-downloads';
+				}
+
+				return $hidden;
+			},
+			10,
+			2
+		);
 	}
 
 	/**
@@ -151,7 +207,7 @@ class Edit {
 
 		$this->add_save_meta_boxes();
 		$this->handle_order_update();
-		$this->add_order_meta_boxes( $this->screen_id, __( 'Order', 'woocommerce' ) );
+		$this->add_order_meta_boxes( $this->screen_id, __( 'Order', 'woocommerce' ), $this->order );
 		$this->add_order_specific_meta_box();
 		$this->add_order_taxonomies_meta_box();
 
