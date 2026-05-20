@@ -8,8 +8,14 @@ import type {
 	ProductType,
 } from '@woocommerce/data';
 
-export type ProductListQuery = Omit< ProductQuery, 'status' > & {
+type ProductStockStatus = 'instock' | 'outofstock' | 'onbackorder';
+
+export type ProductListQuery = Omit<
+	ProductQuery,
+	'status' | 'stock_status'
+> & {
 	status?: ProductStatus | ProductStatus[];
+	stock_status?: ProductStockStatus | ProductStockStatus[];
 	_embed?: number;
 	search_name_or_sku?: string;
 	exclude_status?: ProductStatus[];
@@ -141,10 +147,13 @@ function applyBrandFilter( query: ProductListQuery, filter: Filter ) {
 }
 
 function applyStockFilter( query: ProductListQuery, filter: Filter ) {
-	const [ stockStatus ] = getStringValues( filter.value );
+	const stockStatuses = getStringValues(
+		filter.value
+	) as ProductStockStatus[];
 
-	if ( stockStatus ) {
-		query.stock_status = stockStatus as ProductListQuery[ 'stock_status' ];
+	if ( stockStatuses.length > 0 ) {
+		query.stock_status =
+			stockStatuses.length === 1 ? stockStatuses[ 0 ] : stockStatuses;
 	}
 }
 

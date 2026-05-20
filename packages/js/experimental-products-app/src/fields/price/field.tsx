@@ -100,7 +100,7 @@ export const fieldExtensions: Partial< Field< PriceFilterData > > = {
 		// since partially saved products may send empty or NaN-like values here.
 		if ( item.on_sale && Number.isFinite( regularPrice ) ) {
 			return (
-				<Stack direction="row">
+				<Stack direction="row" gap="xs">
 					<s>{ formatCurrency( regularPrice, currency.code ) }</s>
 					<span>{ formatCurrency( price, currency.code ) }</span>
 				</Stack>
