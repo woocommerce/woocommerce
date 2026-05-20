@@ -31,9 +31,9 @@
 	"scripts": {
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
-		"build:project:esm": "tsc --project tsconfig.json --noCheck",
+		"build:project:esm": "node build.mjs",
 		"build:publish:project": "pnpm --if-present '/^build:publish:project:.*$/'",
-		"build:publish:project:cjs": "tsc --project tsconfig-cjs.json --noCheck",
+		"build:publish:project:cjs": "node build.mjs --cjs",
 		"build:publish:project:deps": "pnpm build",
 		"changelog": "XDEBUG_MODE=off composer install --quiet && composer exec -- changelogger",
 		"update:php": "XDEBUG_MODE=off composer update --quiet",
@@ -46,7 +46,7 @@
 		"test:js": "jest --config ./jest.config.json --passWithNoTests",
 		"watch:build": "pnpm --if-present --workspace-concurrency=Infinity --filter=\"$npm_package_name...\" --parallel '/^watch:build:project:.*$/'",
 		"watch:build:project": "pnpm --if-present run '/^watch:build:project:.*$/'",
-		"watch:build:project:esm": "tsc --project tsconfig.json --noCheck --watch"
+		"watch:build:project:esm": "node build.mjs --watch"
 	},
 	"lint-staged": {
 		"*.(t|j)s?(x)": [
@@ -77,8 +77,8 @@
 	"devDependencies": {
 		"@babel/core": "7.25.7",
 		"@babel/runtime": "7.25.7",
-		"@testing-library/react": "^16.x.x",
 		"@testing-library/dom": "^10.4.x",
+		"@testing-library/react": "^16.x.x",
 		"@types/jest": "29.5.x",
 		"@types/lodash": "^4.14.202",
 		"@types/md5": "^2.3.5",
@@ -88,7 +88,9 @@
 		"@woocommerce/eslint-plugin": "workspace:*",
 		"@woocommerce/internal-js-tests": "workspace:*",
 		"@woocommerce/internal-ts-config": "workspace:*",
+		"esbuild": "^0.24.0",
 		"eslint": "^8.55.0",
+		"glob": "^10.3.10",
 		"jest": "29.5.x",
 		"jest-cli": "29.5.x",
 		"jest-environment-jsdom": "29.5.x",
