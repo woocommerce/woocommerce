@@ -13,11 +13,11 @@ export {
 export {
 	Editor as __experimentalEditor,
 	initBlocks as __experimentalInitBlocks,
-	ProductEditorSettings,
+	type ProductEditorSettings,
 } from './editor';
 export {
 	BlockIcon as __experimentalBlockIcon,
-	BlockIconProps,
+	type BlockIconProps,
 } from './block-icon';
 export { FeedbackBar as __experimentalProductMVPCESFooter } from './feedback-bar';
 export { ProductMVPFeedbackModal as __experimentalProductMVPFeedbackModal } from './product-mvp-feedback-modal';
@@ -38,7 +38,7 @@ export * from './remove-confirmation-modal';
 
 export {
 	ManageDownloadLimitsModal as __experimentalManageDownloadLimitsModal,
-	ManageDownloadLimitsModalProps,
+	type ManageDownloadLimitsModalProps,
 } from './manage-download-limits-modal';
 
 export { Checkbox as __experimentalCheckboxControl } from './checkbox-control';
@@ -48,54 +48,54 @@ export * from './modal-editor-welcome-guide';
 
 export {
 	TextControl as __experimentalTextControl,
-	TextControlProps,
+	type TextControlProps,
 } from './text-control';
 
 export {
 	AddProductsModal as __experimentalAddProductsModal,
-	AddProductsModalProps,
+	type AddProductsModalProps,
 } from './add-products-modal';
 
 export {
 	BlockFill as __experimentalBlockFill,
 	BlockSlot as __experimentalBlockSlot,
 	SectionActions as __experimentalSectionActions,
-	BlockFillProps,
-	BlockSlotProps,
+	type BlockFillProps,
+	type BlockSlotProps,
 } from './block-slot-fill';
 
 export { Label as __experimentalLabel } from './label/label';
 export { ButtonWithDropdownMenu as __experimentalButtonWithDropdownMenu } from './button-with-dropdown-menu';
 export {
 	FormattedPrice as __experimentalFormattedPrice,
-	FormattedPriceProps,
+	type FormattedPriceProps,
 } from './formatted-price';
 
 export {
 	ProductList as __experimentalProductList,
-	ProductListProps,
+	type ProductListProps,
 } from './product-list';
 
 export {
 	ProductSelect as __experimentalProductSelect,
-	ProductSelectProps,
+	type ProductSelectProps,
 } from './product-select';
 
 export {
 	ProductImage as __experimentalProductImage,
-	ProductImageProps,
+	type ProductImageProps,
 } from './product-image';
 
 export { Notice as __experimentalNotice } from './notice';
 
 export {
 	SchedulePublishModal as __experimentalSchedulePublishModal,
-	SchedulePublishModalProps,
+	type SchedulePublishModalProps,
 } from './schedule-publish-modal';
 
 export {
 	CustomFields as __experimentalCustomFields,
-	CustomFieldsProps,
+	type CustomFieldsProps,
 } from './custom-fields';
 
 export { PluginSidebar as __experimentalModalBlockEditorPluginSidebar } from './iframe-editor';

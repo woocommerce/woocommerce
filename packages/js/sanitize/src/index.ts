@@ -1,12 +1,12 @@
 export {
-	WooCommerceSanitizePolicyType,
+	type WooCommerceSanitizePolicyType,
 	getTrustedTypesPolicy,
 } from './trusted-types-policy';
 export {
 	DEFAULT_ALLOWED_TAGS,
 	DEFAULT_ALLOWED_ATTR,
-	SanitizeReturnKind,
-	SanitizeReturnType,
-	SanitizeConfig,
+	type SanitizeReturnKind,
+	type SanitizeReturnType,
+	type SanitizeConfig,
 	sanitizeHTML,
 } from './sanitize';

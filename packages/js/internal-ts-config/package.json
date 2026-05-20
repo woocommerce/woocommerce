@@ -18,21 +18,15 @@
 		"build": "pnpm --if-present --workspace-concurrency=Infinity --stream --filter=\"$npm_package_name...\" '/^build:project:.*$/'",
 		"build:project": "pnpm --if-present '/^build:project:.*$/'",
 		"build:project:types": "node scripts/generate-types.mjs generate",
-		"lint": "pnpm --if-present '/^lint:lang:.*$/'",
-		"lint:fix": "pnpm --if-present '/^lint:fix:lang:.*$/'",
-		"lint:fix:lang:js": "eslint 'types/**/*.d.ts' --fix",
-		"lint:lang:js": "eslint 'types/**/*.d.ts'",
 		"postinstall": "pnpm build:project:types",
 		"types:update-patch": "node scripts/generate-types.mjs update-patch"
 	},
 	"devDependencies": {
 		"@types/wordpress__block-editor": "14.21.8",
-		"@woocommerce/eslint-plugin": "workspace:*",
 		"@wordpress/core-data": "7.19.6",
 		"@wordpress/data": "10.19.2",
 		"@wordpress/editor": "14.19.7",
 		"@wordpress/notices": "5.19.2",
-		"eslint": "^8.55.0",
 		"typescript": "5.7.x"
 	}
 }
