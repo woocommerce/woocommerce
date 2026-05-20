@@ -72,7 +72,9 @@ describe( 'AbandonedCartRecoveryRecommendations', () => {
 	it( 'returns null when both plugins are already active', () => {
 		mockActivePlugins( [ 'automatewoo', 'mailpoet' ] );
 
-		const { container } = render( <AbandonedCartRecoveryRecommendations /> );
+		const { container } = render(
+			<AbandonedCartRecoveryRecommendations />
+		);
 
 		expect( container ).toBeEmptyDOMElement();
 	} );

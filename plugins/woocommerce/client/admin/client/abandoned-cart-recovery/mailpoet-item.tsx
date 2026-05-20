@@ -38,7 +38,9 @@ const MailPoetItem = ( {
 					{
 						actions: [
 							{
-								url: getAdminLink( 'admin.php?page=mailpoet-newsletters' ),
+								url: getAdminLink(
+									'admin.php?page=mailpoet-newsletters'
+								),
 								label: __( 'Set up MailPoet', 'woocommerce' ),
 							},
 						],

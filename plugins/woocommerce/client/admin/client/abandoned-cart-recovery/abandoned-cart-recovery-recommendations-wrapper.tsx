@@ -16,7 +16,8 @@ const AbandonedCartRecoveryRecommendationsLoader = lazy(
 		)
 );
 
-const ABANDONED_CART_RECOVERY_EMAIL_SECTION = 'wc_email_customer_abandoned_cart_recovery';
+const ABANDONED_CART_RECOVERY_EMAIL_SECTION =
+	'wc_email_customer_abandoned_cart_recovery';
 
 export const AbandonedCartRecoveryRecommendations = ( {
 	page,
