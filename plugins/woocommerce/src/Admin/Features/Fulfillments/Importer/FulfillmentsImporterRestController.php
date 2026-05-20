@@ -94,10 +94,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 						'delimiter'       => array(
 							'type'              => 'string',
 							'default'           => ',',
-							'minLength'         => 1,
-							'maxLength'         => 1,
 							'description'       => __( 'Single-character CSV delimiter. Defaults to comma.', 'woocommerce' ),
-							'sanitize_callback' => 'sanitize_text_field',
+							'sanitize_callback' => array( FulfillmentsCsvImporter::class, 'normalize_delimiter' ),
 						),
 						'notify_customer' => array(
 							'type'    => 'boolean',
