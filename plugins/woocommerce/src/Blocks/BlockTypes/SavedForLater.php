@@ -185,7 +185,6 @@ final class SavedForLater extends AbstractBlock {
 					self::LIST_SLUG => array(
 						'items'     => $items,
 						'isLoading' => false,
-						'error'     => null,
 					),
 				),
 			)
@@ -211,15 +210,22 @@ final class SavedForLater extends AbstractBlock {
 		// flag is set *and* the list is currently empty. The flag lives in
 		// the per-block context, so it naturally resets on every full page
 		// load — no extra Store API field or persisted flag needed.
+		// `data-wp-context---notices` seeds the store-notices namespace
+		// alongside the block's own context on the same wrapper.
 		$wrapper_attributes = array(
-			'class'               => 'wc-block-saved-for-later',
-			'data-wp-interactive' => 'woocommerce/saved-for-later',
-			'data-wp-context'     => (string) wp_json_encode(
+			'class'                     => 'wc-block-saved-for-later',
+			'data-wp-interactive'       => 'woocommerce/saved-for-later',
+			'data-wp-context'           => (string) wp_json_encode(
 				array(
 					'hasShownItems' => ! empty( $items ),
+					// `stdClass` so it serialises as `{}`, not `[]` —
+					// iAPI's reactive proxy only fires updates on object
+					// writes, not array expandos.
+					'pendingKeys'   => new \stdClass(),
 				)
 			),
-			'data-wp-watch'       => 'callbacks.trackShownItems',
+			'data-wp-context---notices' => 'woocommerce/store-notices::' . (string) wp_json_encode( array( 'notices' => array() ) ),
+			'data-wp-watch'             => 'callbacks.trackShownItems',
 		);
 
 		$list_class = sprintf( 'wc-block-saved-for-later__list columns-%d', $column_count );
@@ -232,13 +238,13 @@ final class SavedForLater extends AbstractBlock {
 		// would be visible even on a fresh empty page, with no list under
 		// it — visually disconnected from anything.
 		return sprintf(
-			'<section %1$s>%6$s<ul class="%7$s">%2$s%3$s%4$s%5$s</ul></section>',
+			'<section %1$s>%5$s%6$s<ul class="%7$s">%2$s%3$s%4$s</ul></section>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
 			$this->render_template_markup(),
 			$this->render_items_markup( $items ),
 			$this->render_empty_markup(),
-			$this->render_error_markup(),
 			$this->render_header_markup( $content, empty( $items ) ),
+			$this->render_interactivity_notices_region(),
 			esc_attr( $list_class )
 		);
 	}
@@ -323,6 +329,7 @@ final class SavedForLater extends AbstractBlock {
 						class="wc-block-saved-for-later-item__remove"
 						data-wp-on--click="actions.onClickRemove"
 						data-wp-bind--aria-label="state.currentItemRemoveLabel"
+						data-wp-bind--disabled="state.isCurrentItemPending"
 					>
 						<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
 					</button>
@@ -338,6 +345,7 @@ final class SavedForLater extends AbstractBlock {
 						type="button"
 						class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
 						data-wp-on--click="actions.onClickMoveToCart"
+						data-wp-bind--disabled="state.isCurrentItemPending"
 					>
 						<?php echo esc_html( $this->get_move_to_cart_label() ); ?>
 					</button>
@@ -424,6 +432,7 @@ final class SavedForLater extends AbstractBlock {
 					aria-label="<?php echo esc_attr( $remove_aria ); ?>"
 					data-wp-on--click="actions.onClickRemove"
 					data-wp-bind--aria-label="state.currentItemRemoveLabel"
+					data-wp-bind--disabled="state.isCurrentItemPending"
 				>
 					<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
 				</button>
@@ -482,6 +491,7 @@ final class SavedForLater extends AbstractBlock {
 					type="button"
 					class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
 					data-wp-on--click="actions.onClickMoveToCart"
+					data-wp-bind--disabled="state.isCurrentItemPending"
 				>
 					<?php echo esc_html( $this->get_move_to_cart_label() ); ?>
 				</button>
@@ -531,16 +541,45 @@ final class SavedForLater extends AbstractBlock {
 	}
 
 	/**
-	 * Render the error-state markup. Hidden on initial paint and toggled on
-	 * by the JS-side `state.hasError` getter when a request fails. The text
-	 * content is left empty here on purpose: errors only happen post-hydration,
-	 * and `data-wp-text="state.errorMessage"` writes the actual server-supplied
-	 * message — surfacing that is more useful than a generic fallback.
+	 * Render the iAPI store-notices region. Mirrors
+	 * `AddToCartWithOptions::render_interactivity_notices_region()` —
+	 * keep in sync if the shape changes.
 	 *
 	 * @return string
 	 */
-	private function render_error_markup(): string {
-		return '<li class="wc-block-saved-for-later__error" role="alert" data-wp-bind--hidden="!state.hasError" data-wp-text="state.errorMessage" hidden></li>';
+	private function render_interactivity_notices_region(): string {
+		ob_start();
+		?>
+		<div class="wc-block-saved-for-later__notices wc-block-components-notices" data-wp-interactive="woocommerce/store-notices" data-wp-bind--hidden="!context.notices.length" hidden>
+			<template data-wp-each--notice="context.notices" data-wp-each-key="context.notice.id">
+				<div
+					class="wc-block-components-notice-banner"
+					data-wp-class--is-error="state.isError"
+					data-wp-class--is-success="state.isSuccess"
+					data-wp-class--is-info="state.isInfo"
+					data-wp-class--is-dismissible="context.notice.dismissible"
+					data-wp-bind--role="state.role"
+					data-wp-watch="callbacks.injectIcon"
+				>
+					<div class="wc-block-components-notice-banner__content">
+						<span data-wp-init="callbacks.renderNoticeContent" aria-live="assertive" aria-atomic="true"></span>
+					</div>
+					<button
+						type="button"
+						data-wp-bind--hidden="!context.notice.dismissible"
+						class="wc-block-components-button wp-element-button wc-block-components-notice-banner__dismiss contained"
+						aria-label="<?php esc_attr_e( 'Dismiss this notice', 'woocommerce' ); ?>"
+						data-wp-on--click="actions.removeNotice"
+					>
+						<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+							<path d="M13 11.8l6.1-6.3-1-1-6.1 6.2-6.1-6.2-1 1 6.1 6.3-6.5 6.7 1 1 6.5-6.6 6.5 6.6 1-1z" />
+						</svg>
+					</button>
+				</div>
+			</template>
+		</div>
+		<?php
+		return (string) ob_get_clean();
 	}
 
 	/**

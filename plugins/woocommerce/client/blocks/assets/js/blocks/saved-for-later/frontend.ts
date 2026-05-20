@@ -35,13 +35,14 @@ type BlockContext = {
 	hasShownItems: boolean;
 	listItem?: RawShopperListItem;
 	htmlField?: 'price_html' | 'image_html';
+	// Item keys currently mid-mutation, used to disable per-row buttons.
+	pendingKeys: Record< string, true >;
 };
 
 type BlockStore = {
 	state: {
 		currentItems: RawShopperListItem[];
-		hasError: boolean;
-		errorMessage: string;
+		isCurrentItemPending: boolean;
 		isEmpty: boolean;
 		isMoveToCartHidden: boolean;
 		isPriceHidden: boolean;
@@ -141,12 +142,9 @@ store< BlockStore >(
 				return getList( LIST_SLUG )?.items ?? [];
 			},
 
-			get hasError(): boolean {
-				return !! getList( LIST_SLUG )?.error;
-			},
-
-			get errorMessage(): string {
-				return getList( LIST_SLUG )?.error ?? '';
+			get isCurrentItemPending(): boolean {
+				const { listItem, pendingKeys } = getContext< BlockContext >();
+				return !! listItem && !! pendingKeys[ listItem.key ];
 			},
 
 			get isEmpty(): boolean {
@@ -222,16 +220,28 @@ store< BlockStore >(
 
 		actions: {
 			*onClickRemove(): AsyncAction< void > {
-				const { listItem } = getContext< BlockContext >();
-				if ( ! listItem ) {
+				const { listItem, pendingKeys } = getContext< BlockContext >();
+				if ( ! listItem || pendingKeys[ listItem.key ] ) {
 					return;
 				}
-				yield shopperListsActions.removeItem( LIST_SLUG, listItem.key );
+				pendingKeys[ listItem.key ] = true;
+				try {
+					yield shopperListsActions.removeItem(
+						LIST_SLUG,
+						listItem.key
+					);
+				} finally {
+					delete pendingKeys[ listItem.key ];
+				}
 			},
 
 			*onClickMoveToCart(): AsyncAction< void > {
-				const { listItem } = getContext< BlockContext >();
-				if ( ! listItem || ! listItem.is_purchasable ) {
+				const { listItem, pendingKeys } = getContext< BlockContext >();
+				if (
+					! listItem ||
+					! listItem.is_purchasable ||
+					pendingKeys[ listItem.key ]
+				) {
 					return;
 				}
 
@@ -263,21 +273,29 @@ store< BlockStore >(
 				const beforeItem = cartState.findItemInCart( lookup );
 				const beforeQuantity = beforeItem?.quantity ?? 0;
 
-				yield cartActions.addCartItem( {
-					id: listItem.id,
-					quantityToAdd: listItem.quantity,
-					type: isVariation ? 'variation' : 'simple',
-					...( isVariation && { variation } ),
-				} );
+				pendingKeys[ listItem.key ] = true;
+				try {
+					yield cartActions.addCartItem( {
+						id: listItem.id,
+						quantityToAdd: listItem.quantity,
+						type: isVariation ? 'variation' : 'simple',
+						...( isVariation && { variation } ),
+					} );
 
-				const afterItem = cartState.findItemInCart( lookup );
-				const afterQuantity = afterItem?.quantity ?? 0;
+					const afterItem = cartState.findItemInCart( lookup );
+					const afterQuantity = afterItem?.quantity ?? 0;
 
-				if ( afterQuantity <= beforeQuantity ) {
-					return;
+					if ( afterQuantity <= beforeQuantity ) {
+						return;
+					}
+
+					yield shopperListsActions.removeItem(
+						LIST_SLUG,
+						listItem.key
+					);
+				} finally {
+					delete pendingKeys[ listItem.key ];
 				}
-
-				yield shopperListsActions.removeItem( LIST_SLUG, listItem.key );
 			},
 		},
 

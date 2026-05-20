@@ -84,7 +84,7 @@ class ShopperListsBySlug extends AbstractRoute {
 		$list = ShopperList::get_by_slug( (string) $request['slug'] );
 
 		if ( ! $list ) {
-			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Shopper list not found.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Your saved list isn\'t available right now.', 'woocommerce' ), 404 );
 		}
 
 		return rest_ensure_response( $this->prepare_item_for_response( $list, $request ) );
