@@ -98,14 +98,10 @@ export function GroupedProductsEdit( {
 		};
 	}, [ selectedIds ] );
 
-	// Debounced product search.
+	// Browseable list of products in the dropdown. Empty input loads the
+	// first page of the catalog; typing debounces a server-side search.
 	useEffect( () => {
 		const query = inputValue.trim();
-		if ( ! query ) {
-			setSuggestions( [] );
-			setIsSearching( false );
-			return;
-		}
 
 		setIsSearching( true );
 		const requestId = ++searchRequestIdRef.current;
@@ -114,13 +110,20 @@ export function GroupedProductsEdit( {
 			? [ data.id, ...selectedIds ]
 			: selectedIds;
 
+		const queryParams: Record< string, unknown > = {
+			per_page: SEARCH_PER_PAGE,
+			exclude: excludeIds,
+			orderby: 'title',
+			order: 'asc',
+		};
+		if ( query ) {
+			queryParams.search = query;
+		}
+
+		const delay = query ? SEARCH_DEBOUNCE_MS : 0;
 		const timer = window.setTimeout( () => {
 			void resolveSelect( coreStore )
-				.getEntityRecords( 'root', 'product', {
-					search: query,
-					per_page: SEARCH_PER_PAGE,
-					exclude: excludeIds,
-					} )
+				.getEntityRecords( 'root', 'product', queryParams )
 				.then( ( records: unknown ) => {
 					if ( requestId !== searchRequestIdRef.current ) {
 						return;
@@ -136,21 +139,21 @@ export function GroupedProductsEdit( {
 						setIsSearching( false );
 					}
 				} );
-		}, SEARCH_DEBOUNCE_MS );
+		}, delay );
 
 		return () => {
 			window.clearTimeout( timer );
 		};
 	}, [ inputValue, selectedIds, data?.id ] );
 
-	// Merge selected + suggestions so SearchableChipSelect can resolve
-	// labels/images for both.
+	// Browseable catalog first (suggestions exclude already-selected), then
+	// selected products appended so the chips can resolve their labels.
 	const items = useMemo( () => {
 		const byValue = new Map< string, Item >();
-		for ( const item of selectedProducts ) {
+		for ( const item of suggestions ) {
 			byValue.set( item.value, item );
 		}
-		for ( const item of suggestions ) {
+		for ( const item of selectedProducts ) {
 			if ( ! byValue.has( item.value ) ) {
 				byValue.set( item.value, item );
 			}
@@ -174,10 +177,8 @@ export function GroupedProductsEdit( {
 
 	const emptyContent = isSearching ? (
 		<Spinner />
-	) : inputValue.trim() ? (
-		__( 'No products found.', 'woocommerce' )
 	) : (
-		__( 'Type to search products…', 'woocommerce' )
+		__( 'No products found.', 'woocommerce' )
 	);
 
 	return (
