@@ -2085,7 +2085,7 @@ class Controller extends WC_REST_Products_V2_Controller {
 		unset( $params['in_stock'] );
 		$params['stock_status'] = array(
 			'description'       => __( 'Limit result set to products with any of the specified stock statuses.', 'woocommerce' ),
-			'type'              => 'array',
+			'type'              => array( 'string', 'array' ),
 			'items'             => array(
 				'type' => 'string',
 				'enum' => array_keys( wc_get_product_stock_status_options() ),
