@@ -127,6 +127,7 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 			</BaseControl>
 
 			<TextControl
+				__next40pxDefaultSize
 				label={ __( 'CSV delimiter', 'woocommerce' ) }
 				help={ __(
 					'Character used to separate columns in the CSV. Defaults to comma.',
