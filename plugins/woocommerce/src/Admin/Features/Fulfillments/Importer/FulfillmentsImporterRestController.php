@@ -438,40 +438,43 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
-		// CSVUploadHelper reads $_FILES under a configurable key. Stage our REST file under that key.
+		// CSVUploadHelper reads $_FILES under a configurable key. Stage our REST file under that key,
+		// then unconditionally restore the superglobal in finally so the assignment cannot leak.
 		// Nonce verification is handled by the REST permission_callback, not nonces.
 		$_FILES['fulfillment_import_file'] = $files['file']; // phpcs:ignore WordPress.Security.NonceVerification.Missing
 		$file_path = '';
 		try {
-			$csv_helper = wc_get_container()->get( CSVUploadHelper::class );
-			$upload     = $csv_helper->handle_csv_upload(
-				'fulfillment',
-				'fulfillment_import_file',
-				array(
-					'csv' => 'text/csv',
-					'txt' => 'text/plain',
-				)
-			);
-			$file_path = (string) ( $upload['file'] ?? '' );
+			try {
+				$csv_helper = wc_get_container()->get( CSVUploadHelper::class );
+				$upload     = $csv_helper->handle_csv_upload(
+					'fulfillment',
+					'fulfillment_import_file',
+					array(
+						'csv' => 'text/csv',
+						'txt' => 'text/plain',
+					)
+				);
+				$file_path  = (string) ( $upload['file'] ?? '' );
 
-			FilesystemUtil::validate_upload_file_path( $file_path );
+				FilesystemUtil::validate_upload_file_path( $file_path );
 
-			if ( ! wc_is_file_valid_csv( $file_path ) ) {
-				throw new \Exception( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+				if ( ! wc_is_file_valid_csv( $file_path ) ) {
+					throw new \Exception( __( 'Invalid file type. The importer supports CSV and TXT file formats.', 'woocommerce' ) );
+				}
+			} catch ( \Throwable $e ) {
+				if ( '' !== $file_path && file_exists( $file_path ) ) {
+					wp_delete_file( $file_path );
+				}
+				FulfillmentsTracker::track_fulfillment_validation_error( 'import', 'woocommerce_fulfillments_import_upload_failed', 'csv_importer' );
+				return new WP_Error(
+					'woocommerce_fulfillments_import_upload_failed',
+					$e->getMessage(),
+					array( 'status' => WP_Http::BAD_REQUEST )
+				);
 			}
-		} catch ( \Throwable $e ) {
+		} finally {
 			unset( $_FILES['fulfillment_import_file'] );
-			if ( '' !== $file_path && file_exists( $file_path ) ) {
-				wp_delete_file( $file_path );
-			}
-			FulfillmentsTracker::track_fulfillment_validation_error( 'import', 'woocommerce_fulfillments_import_upload_failed', 'csv_importer' );
-			return new WP_Error(
-				'woocommerce_fulfillments_import_upload_failed',
-				$e->getMessage(),
-				array( 'status' => WP_Http::BAD_REQUEST )
-			);
 		}
-		unset( $_FILES['fulfillment_import_file'] );
 
 		return $file_path;
 	}
