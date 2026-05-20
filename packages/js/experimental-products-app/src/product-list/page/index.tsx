@@ -52,10 +52,7 @@ export function ProductListPageHeader( {
 						rel="noopener noreferrer"
 					>
 						<Badge intent="none">
-							{ __(
-								'Beta · Share feedback',
-								'woocommerce'
-							) }
+							{ __( 'Beta · Share feedback', 'woocommerce' ) }
 						</Badge>
 					</a>
 				</Stack>
