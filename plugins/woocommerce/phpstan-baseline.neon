@@ -66379,12 +66379,6 @@ parameters:
 			path: src/Internal/ProductFilters/FilterData.php
 
 		-
-			message: '#^Binary operation "\." between non\-falsy\-string and array\|string results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Internal/ProductFilters/FilterData.php
-
-		-
 			message: '#^Method Automattic\\WooCommerce\\Internal\\ProductFilters\\FilterData\:\:get_cache\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
