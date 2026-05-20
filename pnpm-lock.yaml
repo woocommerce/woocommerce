@@ -1866,7 +1866,7 @@ importers:
         version: 5.1.4(webpack@5.97.1)
       webpack-remove-empty-scripts:
         specifier: 1.0.x
-        version: 1.0.4(webpack@5.97.1(@swc/core@1.15.24))
+        version: 1.0.4(webpack@5.97.1)
       wireit:
         specifier: 0.14.12
         version: 0.14.12
@@ -2200,7 +2200,7 @@ importers:
         version: 10.5.2(sass@1.69.5)(webpack@5.97.1(@swc/core@1.15.24))
       webpack-remove-empty-scripts:
         specifier: 1.0.x
-        version: 1.0.4(webpack@5.97.1(@swc/core@1.15.24))
+        version: 1.0.4(webpack@5.97.1)
     devDependencies:
       '@babel/core':
         specifier: 7.25.7
@@ -2824,7 +2824,7 @@ importers:
         version: 5.1.4(webpack@5.97.1)
       webpack-remove-empty-scripts:
         specifier: 1.0.x
-        version: 1.0.4(webpack@5.97.1(@swc/core@1.15.24))
+        version: 1.0.4(webpack@5.97.1)
       wireit:
         specifier: 0.14.12
         version: 0.14.12
@@ -3184,7 +3184,7 @@ importers:
         version: 5.1.4(webpack@5.97.1)
       webpack-remove-empty-scripts:
         specifier: 1.0.x
-        version: 1.0.4(webpack@5.97.1(@swc/core@1.15.24))
+        version: 1.0.4(webpack@5.97.1)
       wireit:
         specifier: 0.14.12
         version: 0.14.12
@@ -3579,9 +3579,60 @@ importers:
       '@stripe/react-connect-js':
         specifier: ^3.3.21
         version: 3.3.34(@stripe/connect-js@3.3.35)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
+      '@woocommerce/admin-layout':
+        specifier: workspace:*
+        version: link:../../../../packages/js/admin-layout
+      '@woocommerce/components':
+        specifier: workspace:*
+        version: link:../../../../packages/js/components
+      '@woocommerce/csv-export':
+        specifier: workspace:*
+        version: link:../../../../packages/js/csv-export
+      '@woocommerce/currency':
+        specifier: workspace:*
+        version: link:../../../../packages/js/currency
+      '@woocommerce/customer-effort-score':
+        specifier: workspace:*
+        version: link:../../../../packages/js/customer-effort-score
+      '@woocommerce/data':
+        specifier: workspace:*
+        version: link:../../../../packages/js/data
+      '@woocommerce/date':
+        specifier: workspace:*
+        version: link:../../../../packages/js/date
+      '@woocommerce/email-editor':
+        specifier: workspace:*
+        version: link:../../../../packages/js/email-editor
+      '@woocommerce/experimental':
+        specifier: workspace:*
+        version: link:../../../../packages/js/experimental
+      '@woocommerce/explat':
+        specifier: workspace:*
+        version: link:../../../../packages/js/explat
+      '@woocommerce/navigation':
+        specifier: workspace:*
+        version: link:../../../../packages/js/navigation
+      '@woocommerce/number':
+        specifier: workspace:*
+        version: link:../../../../packages/js/number
+      '@woocommerce/onboarding':
+        specifier: workspace:*
+        version: link:../../../../packages/js/onboarding
+      '@woocommerce/product-editor':
+        specifier: workspace:*
+        version: link:../../../../packages/js/product-editor
+      '@woocommerce/remote-logging':
+        specifier: workspace:*
+        version: link:../../../../packages/js/remote-logging
       '@woocommerce/sanitize':
         specifier: workspace:*
         version: link:../../../../packages/js/sanitize
+      '@woocommerce/settings-editor':
+        specifier: workspace:*
+        version: link:../../../../packages/js/settings-editor
+      '@woocommerce/tracks':
+        specifier: workspace:*
+        version: link:../../../../packages/js/tracks
       '@wordpress/a11y':
         specifier: catalog:wp-min
         version: 4.19.1
@@ -3826,48 +3877,18 @@ importers:
       '@typescript-eslint/parser':
         specifier: ^5.62.0
         version: 5.62.0(eslint@8.57.1)(typescript@5.7.3)
-      '@woocommerce/admin-layout':
-        specifier: workspace:*
-        version: link:../../../../packages/js/admin-layout
       '@woocommerce/block-templates':
         specifier: workspace:*
         version: link:../../../../packages/js/block-templates
-      '@woocommerce/components':
-        specifier: workspace:*
-        version: link:../../../../packages/js/components
-      '@woocommerce/csv-export':
-        specifier: workspace:*
-        version: link:../../../../packages/js/csv-export
-      '@woocommerce/currency':
-        specifier: workspace:*
-        version: link:../../../../packages/js/currency
-      '@woocommerce/customer-effort-score':
-        specifier: workspace:*
-        version: link:../../../../packages/js/customer-effort-score
-      '@woocommerce/data':
-        specifier: workspace:*
-        version: link:../../../../packages/js/data
-      '@woocommerce/date':
-        specifier: workspace:*
-        version: link:../../../../packages/js/date
       '@woocommerce/dependency-extraction-webpack-plugin':
         specifier: workspace:*
         version: link:../../../../packages/js/dependency-extraction-webpack-plugin
-      '@woocommerce/email-editor':
-        specifier: workspace:*
-        version: link:../../../../packages/js/email-editor
       '@woocommerce/eslint-plugin':
         specifier: workspace:*
         version: link:../../../../packages/js/eslint-plugin
-      '@woocommerce/experimental':
-        specifier: workspace:*
-        version: link:../../../../packages/js/experimental
       '@woocommerce/experimental-products-app':
         specifier: workspace:*
         version: link:../../../../packages/js/experimental-products-app
-      '@woocommerce/explat':
-        specifier: workspace:*
-        version: link:../../../../packages/js/explat
       '@woocommerce/internal-js-tests':
         specifier: workspace:*
         version: link:../../../../packages/js/internal-js-tests
@@ -3877,30 +3898,9 @@ importers:
       '@woocommerce/internal-ts-config':
         specifier: workspace:*
         version: link:../../../../packages/js/internal-ts-config
-      '@woocommerce/navigation':
-        specifier: workspace:*
-        version: link:../../../../packages/js/navigation
       '@woocommerce/notices':
         specifier: workspace:*
         version: link:../../../../packages/js/notices
-      '@woocommerce/number':
-        specifier: workspace:*
-        version: link:../../../../packages/js/number
-      '@woocommerce/onboarding':
-        specifier: workspace:*
-        version: link:../../../../packages/js/onboarding
-      '@woocommerce/product-editor':
-        specifier: workspace:*
-        version: link:../../../../packages/js/product-editor
-      '@woocommerce/remote-logging':
-        specifier: workspace:*
-        version: link:../../../../packages/js/remote-logging
-      '@woocommerce/settings-editor':
-        specifier: workspace:*
-        version: link:../../../../packages/js/settings-editor
-      '@woocommerce/tracks':
-        specifier: workspace:*
-        version: link:../../../../packages/js/tracks
       '@wordpress/babel-preset-default':
         specifier: next
         version: 8.43.1-next.v.202604091042.0
@@ -54582,7 +54582,7 @@ snapshots:
       flat: 5.0.2
       wildcard: 2.0.1
 
-  webpack-remove-empty-scripts@1.0.4(webpack@5.97.1(@swc/core@1.15.24)):
+  webpack-remove-empty-scripts@1.0.4(webpack@5.97.1):
     dependencies:
       ansis: 1.5.2
       webpack: 5.97.1(@swc/core@1.15.24)(webpack-cli@5.1.4)
