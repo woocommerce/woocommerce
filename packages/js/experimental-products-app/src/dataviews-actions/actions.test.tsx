@@ -505,10 +505,15 @@ describe( 'product list actions', () => {
 		): ActionModal< ProductEntityRecord > =>
 			action as ActionModal< ProductEntityRecord >;
 
-		it( 'is eligible only for trashed products', () => {
+		it( 'is eligible for trashed products and for any variation', () => {
 			const action = permanentlyDeleteAction();
+			const variation = {
+				...product,
+				type: 'variation',
+			} as ProductEntityRecord;
 
 			expect( action.isEligible?.( trashedProduct ) ).toBe( true );
+			expect( action.isEligible?.( variation ) ).toBe( true );
 			expect( action.isEligible?.( product ) ).toBe( false );
 		} );
 

@@ -12,8 +12,8 @@
 	line-height: 1.4;
 
 	&:focus-within {
-		border-color: var( --wp-admin-theme-color, #3858e9 );
-		box-shadow: 0 0 0 1px var( --wp-admin-theme-color, #3858e9 );
+		border-color: var(--wp-admin-theme-color, #3858e9);
+		box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #3858e9);
 		outline: 2px solid transparent;
 	}
 
@@ -65,7 +65,7 @@
 	}
 
 	&__chip-content {
-		padding: 2px 4px 2px 8px;
+		padding: 2px 8px 2px 8px;
 	}
 
 	&__chip-remove,
@@ -110,13 +110,13 @@
 
 	&__popup {
 		box-sizing: border-box;
-		width: var( --anchor-width );
-		max-height: min( var( --available-height ), 320px );
+		width: var(--anchor-width);
+		max-height: min(var(--available-height), 320px);
 		overflow: auto;
 		border: 1px solid #c3c4c7;
 		border-radius: 2px;
 		background: #fff;
-		box-shadow: 0 2px 6px rgb( 0 0 0 / 20% );
+		box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
 	}
 
 	&__list {
@@ -134,7 +134,7 @@
 		cursor: default;
 
 		&[data-highlighted] {
-			background: var( --wp-admin-theme-color, #3858e9 );
+			background: var(--wp-admin-theme-color, #3858e9);
 			color: #fff;
 		}
 

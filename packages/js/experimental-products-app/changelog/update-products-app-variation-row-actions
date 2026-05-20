@@ -1,0 +1,4 @@
+Significance: minor
+Type: update
+
+Tailor the row actions on variation rows in the experimental products app product list: keep Quick edit and Edit, hide Duplicate, and replace Move to trash with Permanently delete (using the existing delete-confirmation modal).
