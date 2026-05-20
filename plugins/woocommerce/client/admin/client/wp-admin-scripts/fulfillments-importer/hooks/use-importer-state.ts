@@ -69,6 +69,15 @@ export const REQUIRED_COLUMNS: CanonicalColumnKey[] = [
 	'shipment_provider',
 ];
 
+const CANONICAL_COLUMN_KEYS: ReadonlySet< CanonicalColumnKey > = new Set( [
+	'',
+	'order_number',
+	'tracking_number',
+	'shipment_provider',
+	'tracking_url',
+	'items',
+] );
+
 export function createInitialState(): ImporterState {
 	return {
 		step: 'upload',
@@ -101,7 +110,10 @@ function normalizeMapping(
 ): ColumnMapping {
 	const out: ColumnMapping = {};
 	Object.entries( wireMapping || {} ).forEach( ( [ col, key ] ) => {
-		out[ Number( col ) ] = ( key || '' ) as CanonicalColumnKey;
+		const candidate = ( key || '' ) as CanonicalColumnKey;
+		out[ Number( col ) ] = CANONICAL_COLUMN_KEYS.has( candidate )
+			? candidate
+			: '';
 	} );
 	return out;
 }
