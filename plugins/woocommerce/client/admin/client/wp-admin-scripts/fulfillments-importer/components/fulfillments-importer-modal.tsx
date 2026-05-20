@@ -51,9 +51,16 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 		onClose();
 	}, [ canClose, dispatch, onClose ] );
 
-	// Reset reducer state when the modal is closed externally so the next open starts fresh.
+	// Reset reducer state when the modal is closed externally so the next open
+	// starts fresh. Skip on first mount when nothing has happened yet.
+	const wasOpenRef = React.useRef( false );
 	useEffect( () => {
-		if ( ! isOpen ) {
+		if ( isOpen ) {
+			wasOpenRef.current = true;
+			return;
+		}
+		if ( wasOpenRef.current ) {
+			wasOpenRef.current = false;
 			dispatch( { type: 'RESET' } );
 		}
 	}, [ isOpen, dispatch ] );
