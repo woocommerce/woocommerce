@@ -203,6 +203,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			return $file_path;
 		}
 
+		// FulfillmentsCsvImporter is constructed per-request with a file path and runtime options,
+		// so it is intentionally not container-managed.
 		$importer = new FulfillmentsCsvImporter(
 			$file_path,
 			array(
