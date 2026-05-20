@@ -159,6 +159,63 @@ describe( 'buildProductListQuery', () => {
 		expect( query.stock_status ).toBe( 'onbackorder' );
 	} );
 
+	it( 'maps stock filters from multiple selected stock statuses', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'stock',
+					operator: 'isAny',
+					value: [ 'instock', 'onbackorder' ],
+				},
+			],
+		} as View );
+
+		expect( query.stock_status ).toEqual( [ 'instock', 'onbackorder' ] );
+	} );
+
+	it( 'ignores empty stock filters until a value is selected', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'stock',
+					operator: 'isAny',
+					value: [],
+				},
+			],
+		} as View );
+
+		expect( query.stock_status ).toBeUndefined();
+	} );
+
+	it( 'ignores empty taxonomy filters until a value is selected', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'brands',
+					operator: 'isAny',
+					value: undefined,
+				},
+				{
+					field: 'categories',
+					operator: 'isAny',
+					value: '',
+				},
+				{
+					field: 'tags',
+					operator: 'isAny',
+					value: [],
+				},
+			],
+		} as View );
+
+		expect( query.brand ).toBeUndefined();
+		expect( query.category ).toBeUndefined();
+		expect( query.tag ).toBeUndefined();
+	} );
+
 	it( 'maps the tags isAny filter to the tag query param', () => {
 		const query = buildProductListQuery( {
 			...baseView,
