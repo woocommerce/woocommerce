@@ -255,40 +255,40 @@
 
 	<!-- API templates: suppress rules that don't apply to PHP templates -->
 	<rule ref="Generic.PHP.RequireStrictTypes">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="PSR12.Files.FileHeader">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="Generic.Commenting">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="Squiz.Commenting">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.PHP.DiscouragedPHPFunctions.serialize_var_export">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.CodeAnalysis.AssignmentInTernaryCondition">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.PHP.DontExtract">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.Security.EscapeOutput">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.PHP.YodaConditions">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.PHP.DevelopmentFunctions">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="Generic.WhiteSpace.ScopeIndent">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 	<rule ref="WordPress.WP.GlobalVariablesOverride">
-		<exclude-pattern>bin/api-builder/templates/</exclude-pattern>
+		<exclude-pattern>bin/api-builder/code-templates/</exclude-pattern>
 	</rule>
 
 	<!-- API build scripts: suppress WordPress-specific rules (CLI-only code) -->
