@@ -47,6 +47,40 @@ function delay( ms: number, signal?: AbortSignal ): Promise< void > {
 	} );
 }
 
+/**
+ * Returns the HTTP status of an apiFetch/REST error if one is present.
+ * apiFetch surfaces failures as `{ code, message, data: { status } }`.
+ */
+function errorStatus( error: unknown ): number | null {
+	if (
+		error &&
+		typeof error === 'object' &&
+		'data' in error &&
+		( error as { data?: unknown } ).data &&
+		typeof ( error as { data: { status?: unknown } } ).data.status ===
+			'number'
+	) {
+		return ( error as { data: { status: number } } ).data.status;
+	}
+	return null;
+}
+
+/**
+ * True for errors that are worth retrying: network failures (no status),
+ * 408 Request Timeout, 429 Too Many Requests, and any 5xx.
+ * 4xx responses other than 408/429 are caller errors and should not retry.
+ */
+function isRetriable( error: unknown ): boolean {
+	const status = errorStatus( error );
+	if ( status === null ) {
+		return true;
+	}
+	if ( status === 408 || status === 429 ) {
+		return true;
+	}
+	return status >= 500;
+}
+
 function errorMessage( error: unknown ): string {
 	if ( error instanceof Error ) {
 		return error.message;
@@ -143,13 +177,14 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 						) {
 							return;
 						}
-						if ( attempt >= RETRY_BACKOFFS_MS.length ) {
+						if (
+							! isRetriable( error ) ||
+							attempt >= RETRY_BACKOFFS_MS.length
+						) {
 							throw error;
 						}
-						await delay(
-							RETRY_BACKOFFS_MS[ attempt ] as number,
-							signal
-						);
+						const backoff = RETRY_BACKOFFS_MS[ attempt ] ?? 0;
+						await delay( backoff, signal );
 						attempt++;
 					}
 				}
