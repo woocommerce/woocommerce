@@ -118,6 +118,7 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 					<FormFileUpload
 						accept=".csv,text/csv,text/plain"
 						onChange={ onFileChosen }
+						__next40pxDefaultSize
 					>
 						{ __( 'Choose CSV file', 'woocommerce' ) }
 					</FormFileUpload>
