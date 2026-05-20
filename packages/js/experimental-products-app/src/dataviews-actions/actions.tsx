@@ -2,9 +2,15 @@
  * External dependencies
  */
 import apiFetch from '@wordpress/api-fetch';
+import {
+	Button,
+	__experimentalHStack as HStack,
+	__experimentalText as Text,
+	__experimentalVStack as VStack,
+} from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { dispatch } from '@wordpress/data';
-import { edit, trash } from '@wordpress/icons';
+import { backup, edit, trash } from '@wordpress/icons';
 import { __, _n, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
@@ -408,6 +414,180 @@ export const moveToTrashAction = (): Action< ProductEntityRecord > => ( {
 	},
 } );
 
+export const restoreAction = (): Action< ProductEntityRecord > => ( {
+	id: 'restore-product',
+	label: __( 'Restore', 'woocommerce' ),
+	supportsBulk: true,
+	icon: backup,
+	isEligible( product ) {
+		return product.status === 'trash';
+	},
+	async callback( items, { onActionPerformed } ) {
+		const {
+			editEntityRecord,
+			saveEditedEntityRecord,
+			invalidateResolutionForStoreSelector,
+		} = dispatch( coreStore );
+		const { createErrorNotice, createSuccessNotice } =
+			dispatch( noticesStore );
+
+		const results = await Promise.allSettled(
+			items.map( async ( product ) => {
+				await editEntityRecord( 'root', 'product', product.id, {
+					status: 'draft',
+				} );
+				return saveEditedEntityRecord( 'root', 'product', product.id, {
+					throwOnError: true,
+				} );
+			} )
+		);
+		const successfulItems = getSuccessfulItems( items, results );
+		const failedResults = results.filter(
+			( result ) => result.status === 'rejected'
+		);
+
+		if ( successfulItems.length > 0 ) {
+			await invalidateResolutionForStoreSelector( 'getEntityRecords' );
+			createSuccessNotice(
+				successfulItems.length === 1
+					? __( 'Product successfully restored', 'woocommerce' )
+					: sprintf(
+							/* translators: %s: number of products. */
+							_n(
+								'%s product successfully restored',
+								'%s products successfully restored',
+								successfulItems.length,
+								'woocommerce'
+							),
+							successfulItems.length
+					  ),
+				{ type: 'snackbar' }
+			);
+			onActionPerformed?.( successfulItems );
+		}
+
+		if ( failedResults.length > 0 ) {
+			createErrorNotice(
+				getErrorMessage(
+					( failedResults[ 0 ] as PromiseRejectedResult ).reason
+				),
+				{ type: 'snackbar' }
+			);
+		}
+	},
+} );
+
+export const permanentlyDeleteAction = (): Action< ProductEntityRecord > => ( {
+	id: 'permanently-delete-product',
+	label: __( 'Permanently delete', 'woocommerce' ),
+	supportsBulk: true,
+	icon: trash,
+	isEligible( product ) {
+		return product.status === 'trash';
+	},
+	modalHeader: ( items ) =>
+		items.length === 1
+			? __( 'Delete product?', 'woocommerce' )
+			: __( 'Delete products?', 'woocommerce' ),
+	RenderModal: ( { items, closeModal, onActionPerformed } ) => {
+		const onConfirm = async () => {
+			const { deleteEntityRecord, invalidateResolutionForStoreSelector } =
+				dispatch( coreStore );
+			const { createErrorNotice, createSuccessNotice } =
+				dispatch( noticesStore );
+
+			const results = await Promise.allSettled(
+				items.map( ( product ) =>
+					deleteEntityRecord( 'root', 'product', product.id, {
+						force: true,
+						throwOnError: true,
+					} )
+				)
+			);
+			const successfulItems = getSuccessfulItems( items, results );
+			const failedResults = results.filter(
+				( result ) => result.status === 'rejected'
+			);
+
+			if ( successfulItems.length > 0 ) {
+				await invalidateResolutionForStoreSelector(
+					'getEntityRecords'
+				);
+				createSuccessNotice(
+					successfulItems.length === 1
+						? __( 'Product permanently deleted', 'woocommerce' )
+						: sprintf(
+								/* translators: %s: number of products. */
+								_n(
+									'%s product permanently deleted',
+									'%s products permanently deleted',
+									successfulItems.length,
+									'woocommerce'
+								),
+								successfulItems.length
+						  ),
+					{ type: 'snackbar' }
+				);
+				onActionPerformed?.( successfulItems );
+			}
+
+			if ( failedResults.length > 0 ) {
+				createErrorNotice(
+					getErrorMessage(
+						( failedResults[ 0 ] as PromiseRejectedResult ).reason
+					),
+					{ type: 'snackbar' }
+				);
+			}
+
+			closeModal?.();
+		};
+
+		return (
+			<VStack spacing="5">
+				<Text>
+					{ items.length === 1
+						? sprintf(
+								/* translators: %s: The product's name. */
+								__(
+									'"%s" will be permanently deleted and can\'t be restored.',
+									'woocommerce'
+								),
+								items[ 0 ]?.name ?? ''
+						  )
+						: sprintf(
+								/* translators: %s: number of products. */
+								_n(
+									"%s product will be permanently deleted and can't be restored.",
+									"%s products will be permanently deleted and can't be restored.",
+									items.length,
+									'woocommerce'
+								),
+								items.length
+						  ) }
+				</Text>
+				<HStack justify="flex-end">
+					<Button
+						__next40pxDefaultSize
+						variant="tertiary"
+						onClick={ closeModal }
+					>
+						{ __( 'Cancel', 'woocommerce' ) }
+					</Button>
+					<Button
+						__next40pxDefaultSize
+						variant="primary"
+						isDestructive
+						onClick={ onConfirm }
+					>
+						{ __( 'Delete permanently', 'woocommerce' ) }
+					</Button>
+				</HStack>
+			</VStack>
+		);
+	},
+} );
+
 export const useProductActions = () => {
 	const { navigate } = useHistory();
 	const { path, query = {} } = useLocation();
@@ -427,6 +607,8 @@ export const useProductActions = () => {
 			} ),
 			duplicateProductAction(),
 			moveToTrashAction(),
+			restoreAction(),
+			permanentlyDeleteAction(),
 		],
 		[ navigate, path, query ]
 	);

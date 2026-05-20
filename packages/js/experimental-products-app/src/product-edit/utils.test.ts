@@ -20,6 +20,13 @@ import {
 	getVisibleProductEditFields,
 	isProductVariation,
 } from './utils';
+import {
+	buildProductBulkEditData,
+	getBulkNumericEditsFromData,
+	getBulkNumericOperationFieldId,
+	getBulkNumericChangesForProduct,
+	validateBulkNumericEdits,
+} from './bulk-edit';
 
 jest.mock( '@dnd-kit/react', () => ( {
 	DragDropProvider: ( { children }: { children: React.ReactNode } ) =>
@@ -148,6 +155,223 @@ describe( 'product edit utils', () => {
 				categories: [],
 			} )
 		);
+	} );
+
+	it( 'returns bulk field state for mixed values', () => {
+		const products = [
+			buildProduct( {
+				id: 1,
+				name: 'Beanie',
+				status: 'publish',
+			} ),
+			buildProduct( {
+				id: 2,
+				name: 'Hoodie',
+				status: 'draft',
+			} ),
+		];
+
+		const bulkData = buildProductBulkEditData(
+			products,
+			getProductEditFields( productFields )
+		);
+
+		expect( bulkData.data.name ).toBe( '' );
+		expect( bulkData.fieldStates.name ).toEqual( {
+			isEmpty: false,
+			isMixed: true,
+			placeholder: 'Mixed',
+			value: undefined,
+		} );
+		expect( bulkData.fieldStates.product_status ).toEqual( {
+			isEmpty: false,
+			isMixed: true,
+			placeholder: 'Mixed',
+			value: undefined,
+		} );
+	} );
+
+	it( 'returns bulk field state for shared and empty values', () => {
+		const products = [
+			buildProduct( {
+				id: 1,
+				name: 'Beanie',
+				regular_price: '',
+			} ),
+			buildProduct( {
+				id: 2,
+				name: 'Beanie',
+				regular_price: '',
+			} ),
+		];
+
+		const bulkData = buildProductBulkEditData(
+			products,
+			getProductEditFields( productFields )
+		);
+
+		expect( bulkData.fieldStates.name ).toEqual( {
+			isEmpty: false,
+			isMixed: false,
+			placeholder: undefined,
+			value: 'Beanie',
+		} );
+		expect( bulkData.fieldStates.regular_price ).toEqual( {
+			isEmpty: true,
+			isMixed: false,
+			placeholder: undefined,
+			value: '',
+		} );
+	} );
+
+	describe( 'getBulkNumericChangesForProduct', () => {
+		it( 'returns no edits for the don’t change operation', () => {
+			expect(
+				getBulkNumericChangesForProduct(
+					buildProduct( { regular_price: '10' } ),
+					{
+						regular_price: {
+							operation: 'dont_change',
+							value: '',
+						},
+					}
+				)
+			).toEqual( {} );
+		} );
+
+		it( 'reads numeric edits from injected bulk operation fields', () => {
+			expect(
+				getBulkNumericEditsFromData( {
+					[ getBulkNumericOperationFieldId( 'regular_price' ) ]:
+						'increase',
+					regular_price: '5',
+					[ getBulkNumericOperationFieldId( 'stock_quantity' ) ]:
+						'set',
+					stock_quantity: 12,
+					cost_of_goods_sold: buildCostOfGoodsSold( '7' ),
+				} as unknown as ProductEntityRecord )
+			).toEqual(
+				expect.objectContaining( {
+					regular_price: {
+						operation: 'increase',
+						value: '5',
+					},
+					stock_quantity: {
+						operation: 'set',
+						value: '12',
+					},
+					cost_of_goods_sold: {
+						operation: 'dont_change',
+						value: '7',
+					},
+				} )
+			);
+		} );
+
+		it( 'sets, increases, and decreases money values', () => {
+			const product = buildProduct( { regular_price: '10' } );
+
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					regular_price: { operation: 'set', value: '12' },
+				} )
+			).toEqual( { regular_price: '12.00' } );
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					regular_price: { operation: 'increase', value: '5' },
+				} )
+			).toEqual( { regular_price: '15.00' } );
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					regular_price: { operation: 'decrease', value: '20' },
+				} )
+			).toEqual( { regular_price: '0.00' } );
+		} );
+
+		it( 'applies percentage operations to money values', () => {
+			const product = buildProduct( { sale_price: '20' } );
+
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					sale_price: {
+						operation: 'increase_percent',
+						value: '10',
+					},
+				} )
+			).toEqual( { sale_price: '22.00' } );
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					sale_price: {
+						operation: 'decrease_percent',
+						value: '25',
+					},
+				} )
+			).toEqual( { sale_price: '15.00' } );
+		} );
+
+		it( 'sets, increases, and decreases stock quantity as integers', () => {
+			const product = buildProduct( { stock_quantity: 10 } );
+
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					stock_quantity: { operation: 'set', value: '7' },
+				} )
+			).toEqual( { stock_quantity: 7 } );
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					stock_quantity: { operation: 'increase', value: '3' },
+				} )
+			).toEqual( { stock_quantity: 13 } );
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					stock_quantity: { operation: 'decrease', value: '20' },
+				} )
+			).toEqual( { stock_quantity: 0 } );
+		} );
+
+		it( 'updates the nested cost of goods value', () => {
+			const product = buildProduct( {
+				cost_of_goods_sold: buildCostOfGoodsSold( '5' ),
+			} );
+
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					cost_of_goods_sold: {
+						operation: 'increase',
+						value: '2',
+					},
+				} )
+			).toEqual( {
+				cost_of_goods_sold: {
+					values: [
+						{
+							defined_value: '7.00',
+							effective_value: '5',
+						},
+					],
+					total_value: '5',
+				},
+			} );
+		} );
+
+		it( 'validates projected sale prices before save', () => {
+			expect(
+				validateBulkNumericEdits(
+					[
+						buildProduct( {
+							regular_price: '10',
+							sale_price: '9',
+						} ),
+					],
+					{
+						regular_price: {
+							operation: 'decrease',
+							value: '2',
+						},
+					}
+				)
+			).toBe( 'Sale price must be lower than the regular price.' );
+		} );
 	} );
 
 	it( 'excludes summary and count fields from the edit field list', () => {

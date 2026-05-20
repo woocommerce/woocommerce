@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Api;
 
+use Automattic\WooCommerce\Api\Infrastructure\Main;
+use Automattic\WooCommerce\Api\Infrastructure\ResolverHelpers;
+
 /**
  * Deletes expired OPcache cache files via Action Scheduler.
  */
@@ -36,7 +39,7 @@ class OpcacheFileExpiry {
 			return 0;
 		}
 
-		$fs = Utils::wp_filesystem();
+		$fs = ResolverHelpers::wp_filesystem();
 		if ( ! $fs ) {
 			return 0;
 		}

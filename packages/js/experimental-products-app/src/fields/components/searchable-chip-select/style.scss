@@ -48,6 +48,11 @@
 		color: #1e1e1e;
 	}
 
+	&__chip--is-placeholder {
+		background: #fff;
+		color: #757575;
+	}
+
 	&__chip-prefix {
 		display: inline-flex;
 		align-items: center;
@@ -151,8 +156,15 @@
 	}
 
 	&__label {
-		margin-bottom: 4px;
-		font-weight: 500;
+		margin-bottom: 8px;
+		// Match the uppercase 11px treatment used by `@wordpress/ui`'s
+		// Field.Label primitive so the chip-select's label aligns with the
+		// rest of the DataForm fields (Name, Status, Catalog visibility, …).
+		font-size: var(--wpds-typography-font-size-xs, 11px);
+		font-weight: var(--wpds-typography-font-weight-medium, 499);
+		line-height: var(--wpds-typography-line-height-xs, 16px);
+		text-transform: uppercase;
+		color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 	}
 
 	&__description {

@@ -3,8 +3,9 @@
  */
 import apiFetch from '@wordpress/api-fetch';
 import { dispatch } from '@wordpress/data';
-import type { Action } from '@wordpress/dataviews';
+import type { Action, ActionModal } from '@wordpress/dataviews';
 import { renderHook } from '@testing-library/react';
+import React from 'react';
 
 /**
  * Internal dependencies
@@ -12,6 +13,8 @@ import { renderHook } from '@testing-library/react';
 import {
 	duplicateProductAction,
 	moveToTrashAction,
+	permanentlyDeleteAction,
+	restoreAction,
 	quickEditAction,
 	selectAllVariationsAction,
 	useProductActions,
@@ -19,6 +22,16 @@ import {
 import type { ProductEntityRecord } from '../fields/types';
 
 jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+
+jest.mock( '@wordpress/components', () => ( {
+	Button: 'button',
+	__experimentalHStack: ( { children }: { children: React.ReactNode } ) =>
+		children,
+	__experimentalText: ( { children }: { children: React.ReactNode } ) =>
+		children,
+	__experimentalVStack: ( { children }: { children: React.ReactNode } ) =>
+		children,
+} ) );
 
 jest.mock( '@wordpress/core-data', () => ( {
 	store: 'mock-core-store',
@@ -128,6 +141,8 @@ describe( 'product list actions', () => {
 	} as ProductEntityRecord;
 
 	const deleteEntityRecord = jest.fn();
+	const editEntityRecord = jest.fn();
+	const saveEditedEntityRecord = jest.fn();
 	const invalidateResolution = jest.fn();
 	const invalidateResolutionForStoreSelector = jest.fn();
 	const createSuccessNotice = jest.fn();
@@ -151,6 +166,8 @@ describe( 'product list actions', () => {
 			if ( storeName === 'mock-core-store' ) {
 				return {
 					deleteEntityRecord,
+					editEntityRecord,
+					saveEditedEntityRecord,
 					invalidateResolution,
 					invalidateResolutionForStoreSelector,
 				};
@@ -405,5 +422,117 @@ describe( 'product list actions', () => {
 		);
 		expect( onActionPerformed ).toHaveBeenCalledWith( [ product ] );
 		expect( createErrorNotice ).not.toHaveBeenCalled();
+	} );
+
+	describe( 'restoreAction', () => {
+		const trashedProduct = {
+			...product,
+			status: 'trash',
+		} as ProductEntityRecord;
+
+		it( 'is eligible only for trashed products', () => {
+			const action = restoreAction();
+
+			expect( action.isEligible?.( trashedProduct ) ).toBe( true );
+			expect( action.isEligible?.( product ) ).toBe( false );
+		} );
+
+		it( 'restores products by saving status as draft and invalidates the query', async () => {
+			saveEditedEntityRecord.mockResolvedValue( {
+				id: 12,
+				status: 'draft',
+			} );
+
+			await getCallbackAction( restoreAction() ).callback(
+				[ trashedProduct ],
+				{ onActionPerformed }
+			);
+
+			expect( editEntityRecord ).toHaveBeenCalledWith(
+				'root',
+				'product',
+				12,
+				{ status: 'draft' }
+			);
+			expect( saveEditedEntityRecord ).toHaveBeenCalledWith(
+				'root',
+				'product',
+				12,
+				{ throwOnError: true }
+			);
+			expect( invalidateResolutionForStoreSelector ).toHaveBeenCalledWith(
+				'getEntityRecords'
+			);
+			expect( createSuccessNotice ).toHaveBeenCalledWith(
+				'Product successfully restored',
+				{ type: 'snackbar' }
+			);
+			expect( onActionPerformed ).toHaveBeenCalledWith( [
+				trashedProduct,
+			] );
+			expect( createErrorNotice ).not.toHaveBeenCalled();
+		} );
+
+		it( 'shows an error notice when restore fails', async () => {
+			saveEditedEntityRecord.mockRejectedValueOnce(
+				new Error( 'Restore failed' )
+			);
+
+			await getCallbackAction( restoreAction() ).callback(
+				[ trashedProduct ],
+				{ onActionPerformed }
+			);
+
+			expect( createSuccessNotice ).not.toHaveBeenCalled();
+			expect( createErrorNotice ).toHaveBeenCalledWith(
+				'Restore failed',
+				{
+					type: 'snackbar',
+				}
+			);
+			expect( onActionPerformed ).not.toHaveBeenCalled();
+		} );
+	} );
+
+	describe( 'permanentlyDeleteAction', () => {
+		const trashedProduct = {
+			...product,
+			status: 'trash',
+		} as ProductEntityRecord;
+
+		const getModalAction = (
+			action: Action< ProductEntityRecord >
+		): ActionModal< ProductEntityRecord > =>
+			action as ActionModal< ProductEntityRecord >;
+
+		it( 'is eligible only for trashed products', () => {
+			const action = permanentlyDeleteAction();
+
+			expect( action.isEligible?.( trashedProduct ) ).toBe( true );
+			expect( action.isEligible?.( product ) ).toBe( false );
+		} );
+
+		it( 'uses a singular modal header for a single product', () => {
+			const action = getModalAction( permanentlyDeleteAction() );
+			const header = action.modalHeader;
+
+			expect( typeof header ).toBe( 'function' );
+			expect(
+				typeof header === 'function'
+					? header( [ trashedProduct ] )
+					: header
+			).toBe( 'Delete product?' );
+		} );
+
+		it( 'uses a plural modal header for multiple products', () => {
+			const action = getModalAction( permanentlyDeleteAction() );
+			const header = action.modalHeader;
+
+			expect(
+				typeof header === 'function'
+					? header( [ trashedProduct, trashedProduct ] )
+					: header
+			).toBe( 'Delete products?' );
+		} );
 	} );
 } );
