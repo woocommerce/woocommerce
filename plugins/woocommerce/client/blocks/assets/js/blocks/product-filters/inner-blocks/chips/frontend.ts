@@ -6,9 +6,17 @@ import { store, getContext } from '@wordpress/interactivity';
 /**
  * Internal dependencies
  */
-import type { SelectableItem } from '../../../../types/type-defs/selectable-items';
+import type {
+	SelectableItem,
+	SelectableItemsParentStore,
+} from '../../../../types/type-defs/selectable-items';
 
-type ChipsItem = SelectableItem< { color?: string } > & { index?: number };
+type ChipsItem = SelectableItem< {
+	color?: string;
+	index?: number;
+} >;
+
+const DEFAULT_DISPLAY_LIMIT = 15;
 
 type ChipsContext = {
 	storeNamespace: string;
@@ -16,53 +24,77 @@ type ChipsContext = {
 	isExpanded: boolean;
 };
 
-type ParentItemContext = {
-	item?: ChipsItem;
-};
-
 type ChipsStore = {
 	state: {
-		itemHidden: boolean;
+		items: ChipsItem[];
 		swatchHidden: boolean;
 		swatchStyle: string;
 	};
 	actions: {
+		toggle: () => void;
 		showAll: () => void;
 	};
 };
 
-function getParentItem( storeNamespace: string ): ChipsItem | undefined {
-	const parentCtx = getContext< ParentItemContext >( storeNamespace );
-	return parentCtx.item;
+function getParentStore( storeNamespace?: string ) {
+	if ( ! storeNamespace ) return undefined;
+	return store< SelectableItemsParentStore< { color?: string } > >(
+		storeNamespace
+	);
+}
+
+function normalizeDisplayLimit( displayLimit: number ): number {
+	const limit = Number( displayLimit );
+	if ( ! Number.isFinite( limit ) || limit < 0 ) {
+		return DEFAULT_DISPLAY_LIMIT;
+	}
+	return Math.floor( limit );
+}
+
+function getCurrentItem(): ChipsItem | undefined {
+	const context = getContext< { item?: ChipsItem } >();
+	return context.item;
 }
 
 const { state }: ChipsStore = store< ChipsStore >(
 	'woocommerce/product-filter-chips',
 	{
 		state: {
-			get itemHidden(): boolean {
-				const { isExpanded, storeNamespace, displayLimit } =
+			get items(): ChipsItem[] {
+				const { storeNamespace, isExpanded, displayLimit } =
 					getContext< ChipsContext >();
-				if ( isExpanded ) return false;
-				const item = getParentItem( storeNamespace );
-				if ( ! item ) return false;
-				if ( item.selected ) return false;
-				if ( item.index === undefined ) return false;
-				return item.index >= displayLimit;
+				const parentItems =
+					getParentStore( storeNamespace )?.state?.selectableItems;
+				if ( ! Array.isArray( parentItems ) ) return [];
+				const normalizedDisplayLimit =
+					normalizeDisplayLimit( displayLimit );
+				return parentItems.map( ( item, index ) => ( {
+					...item,
+					index,
+					hidden:
+						item.hidden ||
+						( ! isExpanded &&
+							! item.selected &&
+							index >= normalizedDisplayLimit ),
+				} ) );
 			},
 			get swatchHidden(): boolean {
-				const { storeNamespace } = getContext< ChipsContext >();
-				const item = getParentItem( storeNamespace );
+				const item = getCurrentItem();
 				return ! item?.color;
 			},
 			get swatchStyle(): string {
-				const { storeNamespace } = getContext< ChipsContext >();
-				const item = getParentItem( storeNamespace );
+				const item = getCurrentItem();
 				if ( ! item?.color ) return '';
 				return `background-color: ${ item.color }`;
 			},
 		},
 		actions: {
+			toggle() {
+				const item = getCurrentItem();
+				if ( ! item ) return;
+				const { storeNamespace } = getContext< ChipsContext >();
+				getParentStore( storeNamespace )?.actions?.toggle?.( item );
+			},
 			showAll() {
 				const context = getContext< ChipsContext >();
 				context.isExpanded = true;

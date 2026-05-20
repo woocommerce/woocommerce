@@ -346,7 +346,7 @@ describe( 'product edit utils', () => {
 		];
 		const basePriceFieldIds = [ 'regular_price', 'sale_price' ];
 		const managedStockFieldIds = [ 'manage_stock', 'stock_quantity' ];
-		const stockStatusFieldIds = [ 'stock', 'manage_stock' ];
+		const stockStatusFieldIds = [ 'manage_stock', 'stock' ];
 		const shippingFieldIds = [
 			'weight',
 			'length',
@@ -388,8 +388,8 @@ describe( 'product edit utils', () => {
 				'cost_of_goods_sold',
 				'images',
 				'sku',
-				'stock',
 				'manage_stock',
+				'stock',
 				'categories',
 				'brands',
 				'tags',
@@ -1377,7 +1377,7 @@ describe( 'product edit utils', () => {
 				{
 					id: 'inventory-fields',
 					label: 'Inventory',
-					children: [ 'sku', 'stock', 'manage_stock' ],
+					children: [ 'sku', 'manage_stock', 'stock' ],
 				},
 				{
 					id: 'product-organization-fields',
