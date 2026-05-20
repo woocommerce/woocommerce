@@ -28,7 +28,11 @@ type Item = SearchableChipSelectItem & {
 	image?: { src: string; alt: string };
 };
 
-function productToItem( product: Pick< Product, 'id' | 'name' | 'images' > ): Item {
+function productToItem(
+	product: Pick< Product, 'id' | 'name' > & {
+		images?: { src: string; alt: string }[];
+	}
+): Item {
 	const thumbnail = product.images?.[ 0 ];
 	return {
 		value: product.id.toString(),
@@ -166,7 +170,9 @@ export function GroupedProductsEdit( {
 	}, [ selectedProducts, suggestions ] );
 
 	const value = useMemo( () => {
-		const byValue = new Map( items.map( ( item ) => [ item.value, item ] ) );
+		const byValue = new Map(
+			items.map( ( item ) => [ item.value, item ] )
+		);
 		return selectedIds
 			.map( ( id ) => byValue.get( id.toString() ) )
 			.filter( ( item ): item is Item => item !== undefined );
