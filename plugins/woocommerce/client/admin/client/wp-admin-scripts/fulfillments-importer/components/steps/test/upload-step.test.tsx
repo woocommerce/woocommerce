@@ -2,7 +2,7 @@
  * External dependencies
  */
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 
 jest.mock( '../../../data/api', () => ( {
 	prepare: jest.fn(),
@@ -74,10 +74,12 @@ describe( 'UploadStep', () => {
 		} );
 
 		fireEvent.click( continueButton );
-		await new Promise( ( resolve ) => setTimeout( resolve, 0 ) );
 
-		expect( mockedPrepare ).toHaveBeenCalledTimes( 1 );
-		const prepareOk = dispatched.find( ( a ) => a.type === 'PREPARE_OK' );
-		expect( prepareOk ).toBeTruthy();
+		await waitFor( () => {
+			expect( mockedPrepare ).toHaveBeenCalledTimes( 1 );
+			expect(
+				dispatched.find( ( a ) => a.type === 'PREPARE_OK' )
+			).toBeTruthy();
+		} );
 	} );
 } );
