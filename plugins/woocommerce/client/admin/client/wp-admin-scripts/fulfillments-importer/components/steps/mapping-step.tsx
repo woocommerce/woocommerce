@@ -2,7 +2,7 @@
  * External dependencies
  */
 import React, { useCallback, useMemo } from 'react';
-import { __ } from '@wordpress/i18n';
+import { __, sprintf } from '@wordpress/i18n';
 import { Button, SelectControl } from '@wordpress/components';
 
 /**
@@ -151,7 +151,14 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 								<td>{ row.sample }</td>
 								<td>
 									<SelectControl
-										aria-label={ row.header }
+										aria-label={ sprintf(
+											/* translators: %s: CSV column header name. */
+											__(
+												'Map column %s',
+												'woocommerce'
+											),
+											row.header
+										) }
 										value={ row.mapped }
 										options={ CANONICAL_OPTIONS }
 										onChange={ ( value: string ) =>
