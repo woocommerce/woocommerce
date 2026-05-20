@@ -305,8 +305,8 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				'<code>' . implode( '</code>, <code>', array_map( 'esc_html', array_keys( $this->placeholders ) ) ) . '</code>'
 			);
 
-			$active_handlers    = self::get_active_recovery_handlers();
-			$enabled_default    = empty( $active_handlers ) ? 'yes' : 'no';
+			$active_handlers     = self::get_active_recovery_handlers();
+			$enabled_default     = empty( $active_handlers ) ? 'yes' : 'no';
 			$enabled_description = empty( $active_handlers )
 				? ''
 				: sprintf(
