@@ -333,7 +333,10 @@ export const duplicateProductAction = (): Action< ProductEntityRecord > => ( {
 	supportsBulk: true,
 	isEligible( item ) {
 		return (
-			!! item && item.status !== 'trash' && item.status !== 'auto-draft'
+			!! item &&
+			item.status !== 'trash' &&
+			item.status !== 'auto-draft' &&
+			item.type !== 'variation'
 		);
 	},
 	async callback( items, { onActionPerformed } ) {
@@ -360,7 +363,10 @@ export const moveToTrashAction = (): Action< ProductEntityRecord > => ( {
 	supportsBulk: true,
 	icon: trash,
 	isEligible( product ) {
-		return product.status !== 'trash';
+		// Variations skip the trash and go straight to permanent delete
+		// (see `permanentlyDeleteAction`), since the variations REST endpoint
+		// doesn't support a soft-trash state.
+		return product.status !== 'trash' && product.type !== 'variation';
 	},
 	async callback( items, { onActionPerformed } ) {
 		const { deleteEntityRecord } = dispatch( coreStore );
@@ -483,7 +489,9 @@ export const permanentlyDeleteAction = (): Action< ProductEntityRecord > => ( {
 	supportsBulk: true,
 	icon: trash,
 	isEligible( product ) {
-		return product.status === 'trash';
+		// Variations are deleted directly (no trash step), so show this
+		// action for them regardless of status.
+		return product.status === 'trash' || product.type === 'variation';
 	},
 	modalHeader: ( items ) =>
 		items.length === 1
