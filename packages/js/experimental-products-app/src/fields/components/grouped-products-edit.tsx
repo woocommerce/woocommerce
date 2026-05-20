@@ -227,26 +227,28 @@ export function GroupedProductsEdit( {
 					disabled={ item.disabled }
 				>
 					<div className="woocommerce-grouped-products-edit__option">
-						<BaseCombobox.ItemIndicator
+						<span
 							className="woocommerce-grouped-products-edit__option-indicator"
 							aria-hidden="true"
 						>
-							<svg
-								width="16"
-								height="16"
-								viewBox="0 0 24 24"
-								fill="none"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<path
-									d="M5 13l4 4L19 7"
-									stroke="currentColor"
-									strokeWidth="2"
-									strokeLinecap="round"
-									strokeLinejoin="round"
-								/>
-							</svg>
-						</BaseCombobox.ItemIndicator>
+							<BaseCombobox.ItemIndicator>
+								<svg
+									width="16"
+									height="16"
+									viewBox="0 0 24 24"
+									fill="none"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path
+										d="M5 13l4 4L19 7"
+										stroke="currentColor"
+										strokeWidth="2"
+										strokeLinecap="round"
+										strokeLinejoin="round"
+									/>
+								</svg>
+							</BaseCombobox.ItemIndicator>
+						</span>
 						{ item.image?.src ? (
 							<img
 								src={ item.image.src }

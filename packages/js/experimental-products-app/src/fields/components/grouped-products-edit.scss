@@ -18,8 +18,10 @@
 		width: 100%;
 	}
 
-	// Reserve space for the checkmark even when an item isn't selected so the
-	// thumbnail / label columns stay aligned across the whole list.
+	// Always-present placeholder that reserves space for the checkmark, so the
+	// thumbnail / label columns stay aligned whether or not the row is
+	// selected. base-ui's <ItemIndicator> only renders its DOM when selected,
+	// so the placeholder wrapper handles the slot layout.
 	&__option-indicator {
 		display: inline-flex;
 		flex-shrink: 0;
@@ -28,10 +30,6 @@
 		width: 16px;
 		height: 16px;
 		color: var(--wp-components-color-foreground, #1e1e1e);
-
-		&[data-unselected] {
-			visibility: hidden;
-		}
 	}
 
 	&__option-thumbnail {
