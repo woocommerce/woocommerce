@@ -177,12 +177,12 @@ describe( 'product filter chips interactivity store', () => {
 
 		mockRegisteredStore.callbacks.initColors();
 
-		expect( element.style.getPropertyValue( '--wc-chips-background-color' ) ).toBe(
-			'rgb(255, 255, 255)'
-		);
-		expect( element.style.getPropertyValue( '--wc-chips-text-color' ) ).toBe(
-			'rgb(0, 0, 0)'
-		);
+		expect(
+			element.style.getPropertyValue( '--wc-chips-background-color' )
+		).toBe( 'rgb(255, 255, 255)' );
+		expect(
+			element.style.getPropertyValue( '--wc-chips-text-color' )
+		).toBe( 'rgb(0, 0, 0)' );
 	} );
 
 	it( 'does not override existing theme contrast CSS variables', () => {
@@ -195,21 +195,18 @@ describe( 'product filter chips interactivity store', () => {
 			'--wc-chips-background-color',
 			'rgb(1, 2, 3)'
 		);
-		element.style.setProperty(
-			'--wc-chips-text-color',
-			'rgb(4, 5, 6)'
-		);
+		element.style.setProperty( '--wc-chips-text-color', 'rgb(4, 5, 6)' );
 
 		mockGetElement.mockReturnValue( { ref: element } );
 
 		mockRegisteredStore.callbacks.initColors();
 
 		expect( mockGetClosestColor ).not.toHaveBeenCalled();
-		expect( element.style.getPropertyValue( '--wc-chips-background-color' ) ).toBe(
-			'rgb(1, 2, 3)'
-		);
-		expect( element.style.getPropertyValue( '--wc-chips-text-color' ) ).toBe(
-			'rgb(4, 5, 6)'
-		);
+		expect(
+			element.style.getPropertyValue( '--wc-chips-background-color' )
+		).toBe( 'rgb(1, 2, 3)' );
+		expect(
+			element.style.getPropertyValue( '--wc-chips-text-color' )
+		).toBe( 'rgb(4, 5, 6)' );
 	} );
 } );

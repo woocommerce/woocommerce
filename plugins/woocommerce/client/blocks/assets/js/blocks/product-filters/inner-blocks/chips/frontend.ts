@@ -115,26 +115,18 @@ const { state }: ChipsStore = store< ChipsStore >(
 				const hasBg = style.getPropertyValue(
 					'--wc-chips-background-color'
 				);
-				const hasFg = style.getPropertyValue(
-					'--wc-chips-text-color'
-				);
+				const hasFg = style.getPropertyValue( '--wc-chips-text-color' );
 
 				if ( ! hasBg ) {
 					const bg = getClosestColor( el.ref, 'backgroundColor' );
 					if ( bg ) {
-						style.setProperty(
-							'--wc-chips-background-color',
-							bg
-						);
+						style.setProperty( '--wc-chips-background-color', bg );
 					}
 				}
 				if ( ! hasFg ) {
 					const fg = getClosestColor( el.ref, 'color' );
 					if ( fg ) {
-						style.setProperty(
-							'--wc-chips-text-color',
-							fg
-						);
+						style.setProperty( '--wc-chips-text-color', fg );
 					}
 				}
 			},
