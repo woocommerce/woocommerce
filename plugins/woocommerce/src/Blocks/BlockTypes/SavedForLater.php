@@ -8,20 +8,27 @@ use Automattic\WooCommerce\Blocks\Utils\BlocksSharedState;
 use Automattic\WooCommerce\Proxies\LegacyProxy;
 
 /**
- * Shopper Collection block.
+ * Saved for Later block.
  *
- * Renders a collection curated by the shopper (e.g. Saved for Later) wired to
- * the `shopper-lists` Store API endpoints via the shared `woocommerce/shopper-lists`
- * iAPI store. PHP prefetches the active list so the first paint is already
- * populated; JS then takes over for adds, removes, and Move-to-cart.
+ * Renders the shopper's "Saved for Later" list, wired to the `shopper-lists`
+ * Store API endpoints via the shared `woocommerce/shopper-lists` iAPI store.
+ * PHP prefetches the list so the first paint is already populated; JS then
+ * takes over for adds, removes, and Move-to-cart.
  */
-final class ShopperCollection extends AbstractBlock {
+final class SavedForLater extends AbstractBlock {
+	/**
+	 * The list slug this block renders. Constant — when additional list
+	 * types ship as their own blocks (e.g. Wishlist), each one will
+	 * hardcode its own slug.
+	 */
+	private const LIST_SLUG = 'saved-for-later';
+
 	/**
 	 * Block name.
 	 *
 	 * @var string
 	 */
-	protected $block_name = 'shopper-collection';
+	protected $block_name = 'saved-for-later';
 
 	/**
 	 * Initialize this block type.
@@ -31,7 +38,7 @@ final class ShopperCollection extends AbstractBlock {
 
 		// We do not use `BlockHooksTrait` currently as it has issues with PHPStan.
 		add_filter( 'hooked_block_types', array( $this, 'register_hooked_block' ), 9, 4 );
-		add_filter( 'hooked_block_woocommerce/shopper-collection', array( $this, 'set_hooked_block_attributes' ), 10, 4 );
+		add_filter( 'hooked_block_woocommerce/saved-for-later', array( $this, 'set_hooked_block_attributes' ), 10, 4 );
 	}
 
 	/**
@@ -65,7 +72,7 @@ final class ShopperCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Set the `listName` attribute on the auto-injected block.
+	 * Seed a default heading inner block on the auto-injected block.
 	 *
 	 * @param array|null $parsed_hooked_block The parsed hooked block array, or null to suppress insertion.
 	 * @param string     $hooked_block_type   The hooked block type name.
@@ -80,12 +87,11 @@ final class ShopperCollection extends AbstractBlock {
 		if ( ! isset( $parsed_anchor_block['blockName'] ) || 'woocommerce/cart' !== $parsed_anchor_block['blockName'] ) {
 			return $parsed_hooked_block;
 		}
-		$parsed_hooked_block['attrs']['listName'] = 'saved-for-later';
 
-		// Seed a `core/heading` inner block so freshly-injected SC instances
+		// Seed a `core/heading` inner block so freshly-injected instances
 		// ship with the same heading the editor template seeds. We append
 		// unconditionally — extensions are free to hook
-		// `hooked_block_woocommerce/shopper-collection` to add their own
+		// `hooked_block_woocommerce/saved-for-later` to add their own
 		// inner blocks, and gating on `empty( innerBlocks )` would silently
 		// suppress our heading whenever any other extension ran first.
 		//
@@ -99,7 +105,7 @@ final class ShopperCollection extends AbstractBlock {
 		// contains `&`, `<`, etc. The matching `null` push onto `innerContent`
 		// is what makes `WP_Block::render()` walk into the heading when
 		// building `$content`.
-		$list_heading = $this->get_variation_config()['listHeading'];
+		$list_heading = __( 'Saved for later', 'woocommerce' );
 		$heading_html = '<h2 class="wp-block-heading">' . esc_html( $list_heading ) . '</h2>';
 
 		if ( ! isset( $parsed_hooked_block['innerBlocks'] ) || ! is_array( $parsed_hooked_block['innerBlocks'] ) ) {
@@ -137,24 +143,9 @@ final class ShopperCollection extends AbstractBlock {
 			return '';
 		}
 
-		// `listName` is declared with a default in block.json, so WP core's
-		// `prepare_attributes_for_render` guarantees it's set as a string by
-		// the time we get here. `sanitize_title` is *not* redundant though:
-		// the schema only enforces `type: string`, and the block editor's
-		// "Edit as HTML" path lets anyone override the attribute with an
-		// arbitrary string. The slug then flows into a REST URL, into the
-		// `data-wp-context` JSON, into `data-wp-key`, and into the
-		// `wc-block-shopper-collection--{slug}` CSS modifier class — so we
-		// normalize it to `[a-z0-9_-]+` here. Empty result falls back to the
-		// declared default.
-		$list_slug = sanitize_title( $attributes['listName'] );
-		if ( '' === $list_slug ) {
-			$list_slug = 'saved-for-later';
-		}
-
 		// Set from render() (not Cart::enqueue_data via has_block()) so it works when this
 		// block is auto-injected via the Block Hooks API and isn't in stored post_content.
-		if ( 'saved-for-later' === $list_slug && wc_get_container()->get( LegacyProxy::class )->call_function( 'is_cart' ) ) {
+		if ( wc_get_container()->get( LegacyProxy::class )->call_function( 'is_cart' ) ) {
 			$this->asset_data_registry->add( 'cartPageHasSavedForLater', true );
 		}
 
@@ -164,8 +155,6 @@ final class ShopperCollection extends AbstractBlock {
 		// JSON value there); the `min`/`max` then keep the value within the
 		// range where a `&.columns-#{$i}` rule actually exists.
 		$column_count = min( 6, max( 2, absint( $attributes['columnCount'] ?? 5 ) ) );
-
-		$variation = $this->get_variation_config();
 
 		wp_enqueue_script_module( $this->get_full_block_name() );
 
@@ -178,7 +167,7 @@ final class ShopperCollection extends AbstractBlock {
 		// first click.
 		BlocksSharedState::load_cart_state( $consent );
 
-		$items = $this->prefetch_list_items( $list_slug );
+		$items = $this->prefetch_items();
 
 		// Seed the shared shopper-lists store with the rest URL, the
 		// pre-fetched items, and a starter nonce. The starter nonce is
@@ -193,7 +182,7 @@ final class ShopperCollection extends AbstractBlock {
 				'restUrl' => get_rest_url(),
 				'nonce'   => wp_create_nonce( 'wc_store_api' ),
 				'lists'   => array(
-					$list_slug => array(
+					self::LIST_SLUG => array(
 						'items'     => $items,
 						'isLoading' => false,
 					),
@@ -201,36 +190,16 @@ final class ShopperCollection extends AbstractBlock {
 			)
 		);
 
-		// Only the templates the JS getters consume need to flow through
-		// `wp_interactivity_config`. Visible strings (empty / error /
-		// action label) are rendered server-side and toggled with
-		// directives, so no need to duplicate them here.
-		// NOTE: this config is global per namespace, so multiple
-		// shopper-collection blocks on the same page would clobber each
-		// other's labels. v1 ships with one collection per page; if we
-		// later need multi-instance, move these into per-block context.
-		// phpcs:disable Generic.Commenting.Todo.TaskFound
-		// TODO: scope these labels per list type once a second variation
-		// (Wishlist, etc.) lands. Two shopper-collection blocks on the
-		// same page would otherwise share one set of templates — the
-		// last one rendered wins, so a Wishlist row would say
-		// "Quantity: 3" using Saved-for-later's wording (or the other
-		// way around). Move into `data-wp-context` keyed by listSlug,
-		// or namespace the config keys (e.g.
-		// `quantityLabelTemplate.{slug}`) and update the JS getters to
-		// pick the right one off the per-row context.
-		// phpcs:enable Generic.Commenting.Todo.TaskFound
+		// Templates flow through `wp_interactivity_config` so the JS-side
+		// getters can interpolate them (`%d`, `%s`). Visible strings (empty
+		// state, error, action label) are rendered server-side and toggled
+		// with directives, so they don't need to ride here too.
 		wp_interactivity_config(
-			'woocommerce/shopper-collection',
+			'woocommerce/saved-for-later',
 			array(
-				'quantityLabelTemplate' => $variation['quantityLabelTemplate'],
-				'removeLabelTemplate'   => $variation['removeLabelTemplate'],
+				'quantityLabelTemplate' => $this->get_quantity_label_template(),
+				'removeLabelTemplate'   => $this->get_remove_label_template(),
 			)
-		);
-
-		$wrapper_class = sprintf(
-			'wc-block-shopper-collection wc-block-shopper-collection--%s',
-			$variation['modifierSlug']
 		);
 
 		// `hasShownItems` seeds the per-block context so the empty message
@@ -244,11 +213,10 @@ final class ShopperCollection extends AbstractBlock {
 		// `data-wp-context---notices` seeds the store-notices namespace
 		// alongside the block's own context on the same wrapper.
 		$wrapper_attributes = array(
-			'class'                     => $wrapper_class,
-			'data-wp-interactive'       => 'woocommerce/shopper-collection',
+			'class'                     => 'wc-block-saved-for-later',
+			'data-wp-interactive'       => 'woocommerce/saved-for-later',
 			'data-wp-context'           => (string) wp_json_encode(
 				array(
-					'listSlug'      => $list_slug,
 					'hasShownItems' => ! empty( $items ),
 					// `stdClass` so it serialises as `{}`, not `[]` —
 					// iAPI's reactive proxy only fires updates on object
@@ -258,12 +226,9 @@ final class ShopperCollection extends AbstractBlock {
 			),
 			'data-wp-context---notices' => 'woocommerce/store-notices::' . (string) wp_json_encode( array( 'notices' => array() ) ),
 			'data-wp-watch'             => 'callbacks.trackShownItems',
-			// Deterministic key derived from the list slug so iAPI router
-			// navigations land on the same block identity across renders.
-			'data-wp-key'               => $this->get_full_block_name() . '-' . $list_slug,
 		);
 
-		$list_class = sprintf( 'wc-block-shopper-collection__list columns-%d', $column_count );
+		$list_class = sprintf( 'wc-block-saved-for-later__list columns-%d', $column_count );
 
 		// The heading inner block (and any future siblings rendered into
 		// `$content`) is wrapped so its visibility matches the empty-state
@@ -275,9 +240,9 @@ final class ShopperCollection extends AbstractBlock {
 		return sprintf(
 			'<section %1$s>%5$s%6$s<ul class="%7$s">%2$s%3$s%4$s</ul></section>',
 			get_block_wrapper_attributes( $wrapper_attributes ),
-			$this->render_template_markup( $variation ),
-			$this->render_items_markup( $items, $variation ),
-			$this->render_empty_markup( $variation ),
+			$this->render_template_markup(),
+			$this->render_items_markup( $items ),
+			$this->render_empty_markup(),
 			$this->render_header_markup( $content, empty( $items ) ),
 			$this->render_interactivity_notices_region(),
 			esc_attr( $list_class )
@@ -285,48 +250,18 @@ final class ShopperCollection extends AbstractBlock {
 	}
 
 	/**
-	 * Per-list-type rendering config. Centralises every string and
-	 * behaviour switch that differs across list types so the renderer
-	 * stays generic.
+	 * Prefetch the saved-for-later items via `rest_do_request()`. Logged-out
+	 * users short-circuit to an empty list — the route requires authentication
+	 * and we don't want to fire an API call that's only going to 401.
 	 *
-	 * Today only `saved-for-later` exists, so the config is returned
-	 * verbatim. When a second list type lands (Wishlist, Recently
-	 * Viewed, etc.), turn this into a lookup keyed by the list slug
-	 * and add the slug as a parameter. Unknown slugs in that future
-	 * lookup should render the empty state or surface an error rather
-	 * than silently borrow another list type's copy.
-	 *
-	 * @return array<string, mixed>
-	 */
-	private function get_variation_config(): array {
-		return array(
-			'modifierSlug'          => 'saved-for-later',
-			'listHeading'           => __( 'Saved for later', 'woocommerce' ),
-			'emptyMessage'          => __( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' ),
-			/* translators: %s: product name. */
-			'removeLabelTemplate'   => __( 'Remove %s from Saved for later list', 'woocommerce' ),
-			/* translators: %d: quantity of saved items. */
-			'quantityLabelTemplate' => __( 'Quantity: %d', 'woocommerce' ),
-			'actionLabel'           => __( 'Move to cart', 'woocommerce' ),
-			'actionDirective'       => 'actions.onClickMoveToCart',
-			'showAction'            => true,
-		);
-	}
-
-	/**
-	 * Prefetch the items in a list via `rest_do_request()`. Logged-out users
-	 * short-circuit to an empty list — the route requires authentication and
-	 * we don't want to fire an API call that's only going to 401.
-	 *
-	 * @param string $list_slug The list slug.
 	 * @return array<int, array<string, mixed>> Items in the schema response shape.
 	 */
-	private function prefetch_list_items( string $list_slug ): array {
+	private function prefetch_items(): array {
 		if ( ! is_user_logged_in() ) {
 			return array();
 		}
 
-		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/shopper-lists/' . $list_slug . '/items' );
+		$request  = new \WP_REST_Request( 'GET', '/wc/store/v1/shopper-lists/' . self::LIST_SLUG . '/items' );
 		$response = rest_do_request( $request );
 
 		if ( $response->is_error() ) {
@@ -338,10 +273,10 @@ final class ShopperCollection extends AbstractBlock {
 			// for ops to act on. Anyone investigating a regression can
 			// flip the WC logger to debug to surface them.
 			wc_get_logger()->debug(
-				sprintf( 'Shopper Collection prefetch failed: %s', $message ),
+				sprintf( 'Saved for Later prefetch failed: %s', $message ),
 				array(
-					'source' => 'shopper-collection',
-					'data'   => array( 'slug' => $list_slug ),
+					'source' => 'saved-for-later',
+					'data'   => array( 'slug' => self::LIST_SLUG ),
 				)
 			);
 			return array();
@@ -365,22 +300,16 @@ final class ShopperCollection extends AbstractBlock {
 	 * the client. Pre-rendered children sit alongside as `data-wp-each-child`
 	 * elements so first paint is populated.
 	 *
-	 * @param array<string, mixed> $variation Per-list-type rendering config.
 	 * @return string
 	 */
-	private function render_template_markup( array $variation ): string {
-		$item_class = sprintf(
-			'wc-block-shopper-collection-item wc-block-shopper-collection-item--%s',
-			$variation['modifierSlug']
-		);
-
+	private function render_template_markup(): string {
 		ob_start();
 		?>
 		<template
 			data-wp-each--list-item="state.currentItems"
 			data-wp-each-key="context.listItem.key"
 		>
-			<li class="<?php echo esc_attr( $item_class ); ?>">
+			<li class="wc-block-saved-for-later-item">
 				<?php
 				// Single anchor for both live products and tombstones. For
 				// tombstones `permalink` is empty, so iAPI removes the `href`
@@ -393,36 +322,34 @@ final class ShopperCollection extends AbstractBlock {
 				?>
 				<div class="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
 					<a data-wp-bind--href="context.listItem.permalink">
-						<span class="wc-block-shopper-collection-item__image-slot" data-wp-context='{"htmlField":"image_html"}' data-wp-watch="callbacks.updateInnerHtml"></span>
+						<span class="wc-block-saved-for-later-item__image-slot" data-wp-context='{"htmlField":"image_html"}' data-wp-watch="callbacks.updateInnerHtml"></span>
 					</a>
 					<button
 						type="button"
-						class="wc-block-shopper-collection-item__remove"
+						class="wc-block-saved-for-later-item__remove"
 						data-wp-on--click="actions.onClickRemove"
 						data-wp-bind--aria-label="state.currentItemRemoveLabel"
 						data-wp-bind--disabled="state.isCurrentItemPending"
 					>
 						<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
 					</button>
-					<span class="wc-block-shopper-collection-item__variation" data-wp-bind--hidden="!state.currentItemVariationLabel" data-wp-text="state.currentItemVariationLabel"></span>
+					<span class="wc-block-saved-for-later-item__variation" data-wp-bind--hidden="!state.currentItemVariationLabel" data-wp-text="state.currentItemVariationLabel"></span>
 				</div>
 				<h2 class="wp-block-post-title has-text-align-center has-medium-font-size">
 					<a data-wp-bind--href="context.listItem.permalink" data-wp-text="state.currentItemDisplayName"></a>
 				</h2>
 				<div class="price wc-block-components-product-price has-text-align-center has-small-font-size" data-wp-bind--hidden="state.isPriceHidden" data-wp-context='{"htmlField":"price_html"}' data-wp-watch="callbacks.updateInnerHtml"></div>
-				<span class="wc-block-shopper-collection-item__quantity" data-wp-text="state.currentItemQuantityLabel"></span>
-				<?php if ( ! empty( $variation['showAction'] ) ) : ?>
-					<div class="wp-block-button wc-block-components-product-button" data-wp-bind--hidden="state.isMoveToCartHidden">
-						<button
-							type="button"
-							class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
-							data-wp-on--click="<?php echo esc_attr( $variation['actionDirective'] ); ?>"
-							data-wp-bind--disabled="state.isCurrentItemPending"
-						>
-							<?php echo esc_html( $variation['actionLabel'] ); ?>
-						</button>
-					</div>
-				<?php endif; ?>
+				<span class="wc-block-saved-for-later-item__quantity" data-wp-text="state.currentItemQuantityLabel"></span>
+				<div class="wp-block-button wc-block-components-product-button" data-wp-bind--hidden="state.isMoveToCartHidden">
+					<button
+						type="button"
+						class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
+						data-wp-on--click="actions.onClickMoveToCart"
+						data-wp-bind--disabled="state.isCurrentItemPending"
+					>
+						<?php echo esc_html( $this->get_move_to_cart_label() ); ?>
+					</button>
+				</div>
 			</li>
 		</template>
 		<?php
@@ -433,14 +360,13 @@ final class ShopperCollection extends AbstractBlock {
 	 * Render the SSR markup for each item. JS will reconcile these via
 	 * `data-wp-each-child` after hydration.
 	 *
-	 * @param array<int, array<string, mixed>> $items     Schema-shape items.
-	 * @param array<string, mixed>             $variation Per-list-type rendering config.
+	 * @param array<int, array<string, mixed>> $items Schema-shape items.
 	 * @return string
 	 */
-	private function render_items_markup( array $items, array $variation ): string {
+	private function render_items_markup( array $items ): string {
 		$markup = '';
 		foreach ( $items as $item ) {
-			$markup .= $this->render_item_markup( $item, $variation );
+			$markup .= $this->render_item_markup( $item );
 		}
 		return $markup;
 	}
@@ -448,11 +374,10 @@ final class ShopperCollection extends AbstractBlock {
 	/**
 	 * Render a single SSR item.
 	 *
-	 * @param array<string, mixed> $item      Schema-shape item.
-	 * @param array<string, mixed> $variation Per-list-type rendering config.
+	 * @param array<string, mixed> $item Schema-shape item.
 	 * @return string
 	 */
-	private function render_item_markup( array $item, array $variation ): string {
+	private function render_item_markup( array $item ): string {
 		$is_live         = ! empty( $item['is_live'] );
 		$is_purchasable  = ! empty( $item['is_purchasable'] );
 		$name            = (string) ( $item['name'] ?? '' );
@@ -463,15 +388,10 @@ final class ShopperCollection extends AbstractBlock {
 		$price_html      = (string) ( $item['price_html'] ?? '' );
 		$variation_label = $this->get_variation_label( $item );
 
-		$quantity_label = sprintf( $variation['quantityLabelTemplate'], $quantity );
-		$remove_aria    = sprintf( $variation['removeLabelTemplate'], $alt );
+		$quantity_label = sprintf( $this->get_quantity_label_template(), $quantity );
+		$remove_aria    = sprintf( $this->get_remove_label_template(), $alt );
 
 		$is_price_hidden = '' === $price_html;
-
-		$item_class = sprintf(
-			'wc-block-shopper-collection-item wc-block-shopper-collection-item--%s',
-			$variation['modifierSlug']
-		);
 
 		$context = array(
 			'listItem' => $item,
@@ -480,7 +400,7 @@ final class ShopperCollection extends AbstractBlock {
 		ob_start();
 		?>
 		<li
-			class="<?php echo esc_attr( $item_class ); ?>"
+			class="wc-block-saved-for-later-item"
 			data-wp-each-child
 			<?php // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 			<?php echo wp_interactivity_data_wp_context( $context ); ?>
@@ -499,7 +419,7 @@ final class ShopperCollection extends AbstractBlock {
 			<div class="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
 				<a <?php echo $is_live && '' !== $permalink ? 'href="' . esc_url( $permalink ) . '"' : ''; ?> data-wp-bind--href="context.listItem.permalink">
 					<span
-						class="wc-block-shopper-collection-item__image-slot"
+						class="wc-block-saved-for-later-item__image-slot"
 						data-wp-context='{"htmlField":"image_html"}'
 						data-wp-watch="callbacks.updateInnerHtml"
 					>
@@ -508,7 +428,7 @@ final class ShopperCollection extends AbstractBlock {
 				</a>
 				<button
 					type="button"
-					class="wc-block-shopper-collection-item__remove"
+					class="wc-block-saved-for-later-item__remove"
 					aria-label="<?php echo esc_attr( $remove_aria ); ?>"
 					data-wp-on--click="actions.onClickRemove"
 					data-wp-bind--aria-label="state.currentItemRemoveLabel"
@@ -517,7 +437,7 @@ final class ShopperCollection extends AbstractBlock {
 					<?php echo $this->get_remove_icon_svg(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static SVG markup. ?>
 				</button>
 				<span
-					class="wc-block-shopper-collection-item__variation"
+					class="wc-block-saved-for-later-item__variation"
 					data-wp-bind--hidden="!state.currentItemVariationLabel"
 					data-wp-text="state.currentItemVariationLabel"
 					<?php
@@ -551,14 +471,13 @@ final class ShopperCollection extends AbstractBlock {
 			>
 				<?php echo wp_kses_post( $price_html ); ?>
 			</div>
-			<span class="wc-block-shopper-collection-item__quantity"><?php echo esc_html( $quantity_label ); ?></span>
-			<?php if ( ! empty( $variation['showAction'] ) ) : ?>
-				<?php
-				// Always emit the wrapper so iAPI can toggle `hidden` after
-				// hydration without swapping the row out. Start hidden when
-				// the row isn't purchasable.
-				$is_move_to_cart_hidden = ! $is_purchasable;
-				?>
+			<span class="wc-block-saved-for-later-item__quantity"><?php echo esc_html( $quantity_label ); ?></span>
+			<?php
+			// Always emit the wrapper so iAPI can toggle `hidden` after
+			// hydration without swapping the row out. Start hidden when
+			// the row isn't purchasable.
+			$is_move_to_cart_hidden = ! $is_purchasable;
+			?>
 			<div
 				class="wp-block-button wc-block-components-product-button"
 				data-wp-bind--hidden="state.isMoveToCartHidden"
@@ -571,13 +490,12 @@ final class ShopperCollection extends AbstractBlock {
 				<button
 					type="button"
 					class="wp-block-button__link wp-element-button add_to_cart_button wc-block-components-product-button__button"
-					data-wp-on--click="<?php echo esc_attr( $variation['actionDirective'] ); ?>"
+					data-wp-on--click="actions.onClickMoveToCart"
 					data-wp-bind--disabled="state.isCurrentItemPending"
 				>
-					<?php echo esc_html( $variation['actionLabel'] ); ?>
+					<?php echo esc_html( $this->get_move_to_cart_label() ); ?>
 				</button>
 			</div>
-			<?php endif; ?>
 		</li>
 		<?php
 		return (string) ob_get_clean();
@@ -592,7 +510,7 @@ final class ShopperCollection extends AbstractBlock {
 	 * saved), so we don't emit an empty `<div>`.
 	 *
 	 * @param string $content  Rendered inner-block content (typically the heading HTML).
-	 * @param bool   $is_empty Whether the SC list is empty on initial paint.
+	 * @param bool   $is_empty Whether the saved-for-later list is empty on initial paint.
 	 * @return string
 	 */
 	private function render_header_markup( string $content, bool $is_empty ): string {
@@ -601,7 +519,7 @@ final class ShopperCollection extends AbstractBlock {
 		}
 		$hidden_attr = $is_empty ? ' hidden' : '';
 		return sprintf(
-			'<div class="wc-block-shopper-collection__header" data-wp-bind--hidden="!context.hasShownItems"%s>%s</div>',
+			'<div class="wc-block-saved-for-later__header" data-wp-bind--hidden="!context.hasShownItems"%s>%s</div>',
 			$hidden_attr,
 			$content
 		);
@@ -613,13 +531,12 @@ final class ShopperCollection extends AbstractBlock {
 	 * never shows the message, since `state.isEmpty` requires the JS-side
 	 * `hasShownItems` context flag to flip first.
 	 *
-	 * @param array<string, mixed> $variation Per-list-type rendering config.
 	 * @return string
 	 */
-	private function render_empty_markup( array $variation ): string {
+	private function render_empty_markup(): string {
 		return sprintf(
-			'<li class="wc-block-shopper-collection__empty" data-wp-bind--hidden="!state.isEmpty" hidden>%s</li>',
-			esc_html( $variation['emptyMessage'] )
+			'<li class="wc-block-saved-for-later__empty" data-wp-bind--hidden="!state.isEmpty" hidden>%s</li>',
+			esc_html__( 'Nothing saved yet — items you save from the cart will appear here.', 'woocommerce' )
 		);
 	}
 
@@ -633,7 +550,7 @@ final class ShopperCollection extends AbstractBlock {
 	private function render_interactivity_notices_region(): string {
 		ob_start();
 		?>
-		<div class="wc-block-shopper-collection__notices wc-block-components-notices" data-wp-interactive="woocommerce/store-notices" data-wp-bind--hidden="!context.notices.length" hidden>
+		<div class="wc-block-saved-for-later__notices wc-block-components-notices" data-wp-interactive="woocommerce/store-notices" data-wp-bind--hidden="!context.notices.length" hidden>
 			<template data-wp-each--notice="context.notices" data-wp-each-key="context.notice.id">
 				<div
 					class="wc-block-components-notice-banner"
@@ -663,6 +580,34 @@ final class ShopperCollection extends AbstractBlock {
 		</div>
 		<?php
 		return (string) ob_get_clean();
+	}
+
+	/**
+	 * Sprintf template for the per-row quantity label. Used both by PHP SSR
+	 * (`render_item_markup()`) and by the JS-side getter (via
+	 * `wp_interactivity_config`) so both paths produce the same string after
+	 * `%d` interpolation.
+	 */
+	private function get_quantity_label_template(): string {
+		/* translators: %d: quantity of saved items. */
+		return __( 'Quantity: %d', 'woocommerce' );
+	}
+
+	/**
+	 * Sprintf template for the per-row remove button's aria-label. Same dual
+	 * use as the quantity template.
+	 */
+	private function get_remove_label_template(): string {
+		/* translators: %s: product name. */
+		return __( 'Remove %s from Saved for later list', 'woocommerce' );
+	}
+
+	/**
+	 * Visible label for the move-to-cart action button, used by both the
+	 * iAPI `<template>` and the SSR per-row markup.
+	 */
+	private function get_move_to_cart_label(): string {
+		return __( 'Move to cart', 'woocommerce' );
 	}
 
 	/**
@@ -726,7 +671,7 @@ final class ShopperCollection extends AbstractBlock {
 	 * inner blocks (they rely on WP_Query / $post loop context, which
 	 * this block doesn't have — it hydrates from a Store API call), so
 	 * declaring them as style dependencies is the only way to get WP
-	 * to enqueue their CSS whenever Shopper Collection renders.
+	 * to enqueue their CSS whenever Saved for Later renders.
 	 *
 	 * @return null
 	 */

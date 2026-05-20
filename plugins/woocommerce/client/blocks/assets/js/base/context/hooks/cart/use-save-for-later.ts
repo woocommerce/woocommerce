@@ -11,9 +11,9 @@ import { cartStore } from '@woocommerce/block-data';
  * Save a cart line item to the saved-for-later shopper list.
  *
  * Dispatches the wp.data cart store's `saveForLater` thunk, which POSTs the
- * item and emits a `wc-blocks_store_sync_required` event. A Shopper
- * Collection block on the same page picks up that event in its iAPI store
- * and applies the new row reactively.
+ * item and emits a `wc-blocks_store_sync_required` event. A Saved for Later
+ * block on the same page picks up that event in its iAPI store and applies
+ * the new row reactively.
  *
  * Resolves to `true` on success so the caller can chain the cart removal;
  * on failure surfaces an error notice in the cart context and resolves to

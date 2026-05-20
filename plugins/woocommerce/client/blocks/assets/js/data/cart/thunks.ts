@@ -490,7 +490,7 @@ export const removeItemFromCart =
  *
  * On success, emits a `wc-blocks_store_sync_required` event with the saved
  * item in `detail.item` so a `woocommerce/shopper-lists` iAPI store on the
- * same page (rendered by a Shopper Collection block) can splice the row
+ * same page (rendered by a Saved for Later block) can splice the row
  * into its local state — no extra GET, no race window between a slow
  * refetch and concurrent mutations. Same envelope the cart's iAPI → wp.data
  * sync uses to ship payloads (`detail.type === 'from_iAPI'` carries

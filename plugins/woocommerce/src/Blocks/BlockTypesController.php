@@ -555,7 +555,7 @@ final class BlockTypesController {
 		);
 
 		if ( FeaturesUtil::feature_is_enabled( 'cart_save_for_later' ) ) {
-			$block_types[] = 'ShopperCollection';
+			$block_types[] = 'SavedForLater';
 		}
 
 		if ( wp_is_block_theme() ) {

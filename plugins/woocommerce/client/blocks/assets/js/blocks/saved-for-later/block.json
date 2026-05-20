@@ -1,18 +1,14 @@
 {
 	"$schema": "https://schemas.wp.org/trunk/block.json",
 	"apiVersion": 3,
-	"name": "woocommerce/shopper-collection",
+	"name": "woocommerce/saved-for-later",
 	"version": "1.0.0",
-	"title": "Shopper Collection",
-	"description": "Display a collection curated by the shopper, such as items they've saved for later.",
+	"title": "Saved for Later",
+	"description": "Display items the shopper has saved from their cart for later.",
 	"category": "woocommerce",
-	"keywords": [ "WooCommerce", "Saved for Later", "Wishlist", "Shopper Collection" ],
+	"keywords": [ "WooCommerce", "Saved for Later" ],
 	"textdomain": "woocommerce",
 	"attributes": {
-		"listName": {
-			"type": "string",
-			"default": "saved-for-later"
-		},
 		"columnCount": {
 			"type": "number",
 			"default": 5
@@ -38,9 +34,9 @@
 			"background": true
 		}
 	},
-	"viewScriptModule": "woocommerce/shopper-collection",
+	"viewScriptModule": "woocommerce/saved-for-later",
 	"style": [
-		"file:../woocommerce/shopper-collection-style.css",
+		"file:../woocommerce/saved-for-later-style.css",
 		"wc-blocks-style-product-image",
 		"woocommerce-product-price-style",
 		"woocommerce-product-button-style"

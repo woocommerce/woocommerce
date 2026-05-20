@@ -7,18 +7,17 @@ import {
 	useInnerBlocksProps,
 	InspectorControls,
 } from '@wordpress/block-editor';
-import { PanelBody, RangeControl, SelectControl } from '@wordpress/components';
+import { PanelBody, RangeControl } from '@wordpress/components';
 import { Icon, trash } from '@wordpress/icons';
 import { PLACEHOLDER_IMG_SRC } from '@woocommerce/settings';
 
-interface ShopperCollectionAttributes {
-	listName: string;
+interface SavedForLaterAttributes {
 	columnCount: number;
 }
 
 interface EditProps {
-	attributes: ShopperCollectionAttributes;
-	setAttributes: ( attrs: Partial< ShopperCollectionAttributes > ) => void;
+	attributes: SavedForLaterAttributes;
+	setAttributes: ( attrs: Partial< SavedForLaterAttributes > ) => void;
 }
 
 const MIN_COLUMNS = 2;
@@ -80,10 +79,10 @@ const PREVIEW_ITEMS = [
 ];
 
 const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
-	const { listName, columnCount } = attributes;
+	const { columnCount } = attributes;
 
 	const blockProps = useBlockProps( {
-		className: 'wc-block-shopper-collection',
+		className: 'wc-block-saved-for-later',
 	} );
 
 	// `allowedBlocks` is read from block.json automatically — passing it
@@ -92,31 +91,14 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 	// `<div>` PHP wraps `$content` in on the frontend, so any CSS keyed
 	// off `__header` applies in both contexts.
 	const innerBlocksProps = useInnerBlocksProps(
-		{ className: 'wc-block-shopper-collection__header' },
+		{ className: 'wc-block-saved-for-later__header' },
 		{ template: TEMPLATE }
 	);
 
 	return (
 		<>
 			<InspectorControls>
-				<PanelBody title={ __( 'Collection settings', 'woocommerce' ) }>
-					<SelectControl
-						label={ __( 'List', 'woocommerce' ) }
-						help={ __(
-							'Choose which shopper list this block displays.',
-							'woocommerce'
-						) }
-						value={ listName }
-						options={ [
-							{
-								label: __( 'Saved for Later', 'woocommerce' ),
-								value: 'saved-for-later',
-							},
-						] }
-						onChange={ ( value: string ) =>
-							setAttributes( { listName: value } )
-						}
-					/>
+				<PanelBody title={ __( 'Settings', 'woocommerce' ) }>
 					<RangeControl
 						__next40pxDefaultSize
 						__nextHasNoMarginBottom
@@ -136,12 +118,12 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 			<section { ...blockProps }>
 				<div { ...innerBlocksProps } />
 				<ul
-					className={ `wc-block-shopper-collection__list columns-${ columnCount }` }
+					className={ `wc-block-saved-for-later__list columns-${ columnCount }` }
 				>
 					{ PREVIEW_ITEMS.map( ( item ) => (
 						<li
 							key={ item.key }
-							className="wc-block-shopper-collection-item"
+							className="wc-block-saved-for-later-item"
 						>
 							<div className="wc-block-components-product-image wc-block-components-product-image--aspect-ratio-auto">
 								<a
@@ -152,7 +134,7 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 								</a>
 								<button
 									type="button"
-									className="wc-block-shopper-collection-item__remove"
+									className="wc-block-saved-for-later-item__remove"
 									aria-label={ sprintf(
 										/* translators: %s: product name. */
 										__(
@@ -166,7 +148,7 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 									<Icon icon={ trash } size={ 24 } />
 								</button>
 								{ item.variation && (
-									<span className="wc-block-shopper-collection-item__variation">
+									<span className="wc-block-saved-for-later-item__variation">
 										{ item.variation }
 									</span>
 								) }
@@ -184,7 +166,7 @@ const Edit = ( { attributes, setAttributes }: EditProps ): JSX.Element => {
 									{ item.price }
 								</span>
 							</div>
-							<span className="wc-block-shopper-collection-item__quantity">
+							<span className="wc-block-saved-for-later-item__quantity">
 								{ item.quantity }
 							</span>
 							<div className="wp-block-button wc-block-components-product-button">

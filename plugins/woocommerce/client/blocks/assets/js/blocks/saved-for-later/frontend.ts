@@ -20,13 +20,14 @@ import { sanitizeHTML } from '@woocommerce/sanitize';
 const universalLock =
 	'I acknowledge that using a private store means my plugin will inevitably break on the next store release.';
 
-type ShopperCollectionConfig = {
+const LIST_SLUG = 'saved-for-later';
+
+type SavedForLaterConfig = {
 	quantityLabelTemplate: string;
 	removeLabelTemplate: string;
 };
 
 type BlockContext = {
-	listSlug: string;
 	// Wrapper-scoped flag: starts as `items.length > 0` from SSR and the
 	// `trackShownItems` callback flips it to `true` the first time the
 	// list has any items at runtime. Lives in iAPI context so it resets
@@ -134,12 +135,11 @@ const formatVariationLabel = ( item: RawShopperListItem ): string => {
 const getList = ( slug: string ) => shopperListsState.lists[ slug ] ?? null;
 
 store< BlockStore >(
-	'woocommerce/shopper-collection',
+	'woocommerce/saved-for-later',
 	{
 		state: {
 			get currentItems(): RawShopperListItem[] {
-				const { listSlug } = getContext< BlockContext >();
-				return getList( listSlug )?.items ?? [];
+				return getList( LIST_SLUG )?.items ?? [];
 			},
 
 			get isCurrentItemPending(): boolean {
@@ -148,11 +148,11 @@ store< BlockStore >(
 			},
 
 			get isEmpty(): boolean {
-				const ctx = getContext< BlockContext >();
-				const list = getList( ctx.listSlug );
+				const list = getList( LIST_SLUG );
 				if ( ! list ) {
 					return false;
 				}
+				const ctx = getContext< BlockContext >();
 				return (
 					ctx.hasShownItems &&
 					! list.isLoading &&
@@ -190,8 +190,8 @@ store< BlockStore >(
 					return '';
 				}
 				const { quantityLabelTemplate } = getConfig(
-					'woocommerce/shopper-collection'
-				) as ShopperCollectionConfig;
+					'woocommerce/saved-for-later'
+				) as SavedForLaterConfig;
 				return quantityLabelTemplate.replace(
 					'%d',
 					String( listItem.quantity )
@@ -204,8 +204,8 @@ store< BlockStore >(
 					return '';
 				}
 				const { removeLabelTemplate } = getConfig(
-					'woocommerce/shopper-collection'
-				) as ShopperCollectionConfig;
+					'woocommerce/saved-for-later'
+				) as SavedForLaterConfig;
 				return removeLabelTemplate.replace(
 					'%s',
 					decodeEntities( listItem.name )
@@ -220,15 +220,14 @@ store< BlockStore >(
 
 		actions: {
 			*onClickRemove(): AsyncAction< void > {
-				const { listSlug, listItem, pendingKeys } =
-					getContext< BlockContext >();
+				const { listItem, pendingKeys } = getContext< BlockContext >();
 				if ( ! listItem || pendingKeys[ listItem.key ] ) {
 					return;
 				}
 				pendingKeys[ listItem.key ] = true;
 				try {
 					yield shopperListsActions.removeItem(
-						listSlug,
+						LIST_SLUG,
 						listItem.key
 					);
 				} finally {
@@ -237,8 +236,7 @@ store< BlockStore >(
 			},
 
 			*onClickMoveToCart(): AsyncAction< void > {
-				const { listSlug, listItem, pendingKeys } =
-					getContext< BlockContext >();
+				const { listItem, pendingKeys } = getContext< BlockContext >();
 				if (
 					! listItem ||
 					! listItem.is_purchasable ||
@@ -292,7 +290,7 @@ store< BlockStore >(
 					}
 
 					yield shopperListsActions.removeItem(
-						listSlug,
+						LIST_SLUG,
 						listItem.key
 					);
 				} finally {
@@ -313,7 +311,7 @@ store< BlockStore >(
 			// transition we want during the session.
 			trackShownItems: () => {
 				const ctx = getContext< BlockContext >();
-				const list = getList( ctx.listSlug );
+				const list = getList( LIST_SLUG );
 				if ( list && list.items.length > 0 && ! ctx.hasShownItems ) {
 					ctx.hasShownItems = true;
 				}
