@@ -8,9 +8,9 @@ This document defines the **context protocol pattern** used by WooCommerce block
 
 | Context Key | Purpose | Inner Blocks |
 | --- | --- | --- |
-| `woocommerceSelectableItems` | Select/deselect items (filters, variation attributes) | checkbox-list, chips, dropdown |
-| `woocommerceRemovableItems` | Remove individual items (active filters) | removable-chips |
-| `woocommerceRangeInput` | Numeric range input (price, slider) | price-slider |
+| `woocommerce/selectableItems` | Select/deselect items (filters, variation attributes) | checkbox-list, chips, dropdown |
+| `woocommerce/removableItems` | Remove individual items (active filters) | removable-chips |
+| `woocommerce/rangeInput` | Numeric range input (price, slider) | price-slider |
 
 Each protocol follows the same pattern — only item shape and action names differ.
 
@@ -45,7 +45,7 @@ Inner blocks become **presentational** — they read a standardized context prot
 
 All three protocols follow these rules:
 
-- **Context key** prefixed with `woocommerce` (e.g. `woocommerceSelectableItems`)
+- **Context key** prefixed with `woocommerce` (e.g. `woocommerce/selectableItems`)
 - **`storeNamespace`** field on every context object — tells inner block which parent store to resolve `actions.*` / `state.*` against
 - **Fixed action & getter names** (not configurable via context fields) — inner blocks hardcode them
 - **TS contract interface** (`*ParentStore`) — parents assert conformance via `satisfies`
@@ -74,7 +74,7 @@ Missing method/getter → compile error. No runtime cost.
 ### Context Key
 
 ```text
-woocommerceSelectableItems
+woocommerce/selectableItems
 ```
 
 Items are dynamic (computed at render time from database queries), so parent blocks do **not** use `providesContext` in block.json. Instead, they pass context directly when rendering inner blocks:
@@ -82,14 +82,14 @@ Items are dynamic (computed at render time from database queries), so parent blo
 ```php
 // Parent block render():
 ( new \WP_Block( $parsed_block, array(
-    'woocommerceSelectableItems' => $context,
+    'woocommerce/selectableItems' => $context,
 ) ) )->render();
 ```
 
 In the editor, parent blocks use `BlockContextProvider` to pass the same data:
 
 ```jsx
-<BlockContextProvider value={ { 'woocommerceSelectableItems': context } }>
+<BlockContextProvider value={ { 'woocommerce/selectableItems': context } }>
     { children }
 </BlockContextProvider>
 ```
@@ -101,7 +101,7 @@ Inner blocks declare the context key they consume via `usesContext`, and which p
 ```json
 {
   "name": "woocommerce/product-filter-checkbox-list",
-  "usesContext": ["woocommerceSelectableItems"],
+  "usesContext": ["woocommerce/selectableItems"],
   "ancestor": [
     "woocommerce/product-filter-attribute",
     "woocommerce/product-filter-status",
@@ -111,7 +111,7 @@ Inner blocks declare the context key they consume via `usesContext`, and which p
 }
 ```
 
-Inner blocks receive the protocol data through `$block->context['woocommerceSelectableItems']` in PHP.
+Inner blocks receive the protocol data through `$block->context['woocommerce/selectableItems']` in PHP.
 
 ### SelectableItemsContext
 
@@ -283,7 +283,7 @@ export interface SelectableItemsContext< T = unknown > {
 }
 
 export type SelectableItemsBlockContext< T = unknown > = {
-	'woocommerceSelectableItems': SelectableItemsContext< T >;
+	'woocommerce/selectableItems': SelectableItemsContext< T >;
 };
 
 export interface SelectableItemsParentStore< T = unknown > {
@@ -339,7 +339,7 @@ class ProductFilterAttribute extends AbstractBlock {
             'groupLabel'     => $attributes['label'] ?? '',
         ];
 
-        $block->context['woocommerceSelectableItems'] = $context;
+        $block->context['woocommerce/selectableItems'] = $context;
 
         return sprintf(
             '<div %s>%s</div>',
@@ -410,7 +410,7 @@ block.json:
 ```json
 {
   "name": "woocommerce/product-filter-checkbox-list",
-  "usesContext": ["woocommerceSelectableItems"],
+  "usesContext": ["woocommerce/selectableItems"],
   "supports": {
     "interactivity": true
   }
@@ -516,11 +516,11 @@ const { state } = store( 'woocommerce/product-filter-checkbox-list', {
 
 ```php
 protected function render( $attributes, $content, $block ) {
-    if ( empty( $block->context['woocommerceSelectableItems'] ) ) {
+    if ( empty( $block->context['woocommerce/selectableItems'] ) ) {
         return '';
     }
 
-    $block_context   = $block->context['woocommerceSelectableItems'];
+    $block_context   = $block->context['woocommerce/selectableItems'];
     $items           = $block_context['items'] ?? array();
     $store_namespace = $block_context['storeNamespace'] ?? 'woocommerce/product-filters';
     $display_limit   = 15;
@@ -618,7 +618,7 @@ class ProductFilterAttribute extends AbstractBlock {
         ];
 
         // Provide context to inner blocks
-        $block->context['woocommerceSelectableItems'] = $selectable_context;
+        $block->context['woocommerce/selectableItems'] = $selectable_context;
 
         // Render inner blocks
         return sprintf(
@@ -636,7 +636,7 @@ class ProductFilterAttribute extends AbstractBlock {
 
 ## Protocol: Removable Items
 
-Context key: `woocommerceRemovableItems`
+Context key: `woocommerce/removableItems`
 
 Used for lists of items that can be removed individually (active filter chips) with a "clear all" control.
 
@@ -689,7 +689,7 @@ Reference implementation: `ProductFilterRemovableChips.php`, `ProductFilterClear
 
 ## Protocol: Range Input
 
-Context key: `woocommerceRangeInput`
+Context key: `woocommerce/rangeInput`
 
 Used for two-ended numeric range controls (price slider, generic range).
 

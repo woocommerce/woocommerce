@@ -42,7 +42,7 @@ function getOptionLabel( item: {
 
 const Edit = ( props: EditProps ): JSX.Element => {
 	const { context } = props;
-	const selectableItems = context?.woocommerceSelectableItems ?? {};
+	const selectableItems = context?.[ 'woocommerce/selectableItems' ] ?? {};
 	const isLoading = selectableItems.isLoading ?? false;
 	const items = Array.isArray( selectableItems.items )
 		? selectableItems.items
