@@ -468,19 +468,66 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Apply fixed cart discount to items.
+	 * Apply a fixed cart-level discount across eligible items.
 	 *
-	 * @since  3.2.0
-	 * @param  WC_Coupon $coupon Coupon object. Passed through filters.
-	 * @param  array     $items_to_apply Array of items to apply the coupon to.
-	 * @param  int       $amount Fixed discount amount to apply in cents. Leave blank to pull from coupon.
-	 * @return int Total discounted.
+	 * Distributes the flat discount amount only across items that satisfy the
+	 * coupon's product ID or product category restrictions (OR logic). Items
+	 * that match neither restriction are excluded from the discount entirely.
+	 *
+	 * @param  WC_Coupon $coupon          Coupon object.
+	 * @param  array     $items_to_apply  Cart items to consider for discount.
+	 * @param  int|null  $amount          Discount amount with precision, or null to use coupon amount.
+	 * @return int Total discount applied (with precision).
 	 */
 	protected function apply_coupon_fixed_cart( $coupon, $items_to_apply, $amount = null ) {
 		$total_discount = 0;
 		$amount         = $amount ? $amount : wc_add_number_precision( (float) $coupon->get_amount() );
 		$items_to_apply = array_filter( $items_to_apply, array( $this, 'filter_products_with_price' ) );
-		$item_count     = array_sum( wp_list_pluck( $items_to_apply, 'quantity' ) );
+
+		// Filter items down to only those eligible under the coupon's product ID or
+		// category restrictions before distributing the discount. OR logic applies:
+		// an item qualifies if it matches a listed product ID OR a listed category.
+		// Non-eligible items receive no portion of the discount.
+		$has_product_restriction  = count( $coupon->get_product_ids() ) > 0;
+		$has_category_restriction = count( $coupon->get_product_categories() ) > 0;
+
+		if ( $has_product_restriction || $has_category_restriction ) {
+			$items_to_apply = array_filter(
+				$items_to_apply,
+				function ( $item ) use ( $coupon, $has_product_restriction, $has_category_restriction ) {
+					if ( ! $item->object ) {
+						return false;
+					}
+
+					$product    = $item->object;
+					$product_id = $product['product_id'];
+					$parent_id  = $product['data']->parent_id;
+
+					// Allow if product ID or parent ID matches an allowed product ID.
+					if ( $has_product_restriction ) {
+						$allowed_ids = $coupon->get_product_ids();
+
+						if ( in_array( $product_id, $allowed_ids, true ) || in_array( $parent_id, $allowed_ids, true ) ) {
+							return true;
+						}
+					}
+
+					// Allow if the product belongs to an allowed category.
+					if ( $has_category_restriction ) {
+						$lookup_id    = isset( $product['variation'] ) ? $parent_id : $product_id;
+						$product_cats = wc_get_product_cat_ids( $lookup_id );
+
+						if ( array_intersect( $product_cats, $coupon->get_product_categories() ) ) {
+							return true;
+						}
+					}
+
+					return false;
+				}
+			);
+		}
+
+		$item_count = array_sum( wp_list_pluck( $items_to_apply, 'quantity' ) );
 
 		if ( ! $item_count ) {
 			return $total_discount;
@@ -490,7 +537,7 @@ class WC_Discounts {
 			// If there is no amount we still send it through so filters are fired.
 			$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, 0 );
 		} else {
-			$per_item_discount = absint( $amount / $item_count ); // round it down to the nearest cent.
+			$per_item_discount = absint( $amount / $item_count ); // Round down to the nearest cent.
 
 			if ( $per_item_discount > 0 ) {
 				$total_discount = $this->apply_coupon_fixed_product( $coupon, $items_to_apply, $per_item_discount );
@@ -505,6 +552,7 @@ class WC_Discounts {
 				$total_discount += $this->apply_coupon_remainder( $coupon, $items_to_apply, $amount );
 			}
 		}
+
 		return $total_discount;
 	}
 
