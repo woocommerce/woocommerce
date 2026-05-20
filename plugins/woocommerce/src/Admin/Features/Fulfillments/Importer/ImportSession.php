@@ -383,8 +383,9 @@ final class ImportSession {
 		$this->data['seen_tracking_pairs'] = $seen;
 
 		if ( $byte_offset > 0 ) {
-			$prev_byte                 = (int) ( $this->data['byte_offset'] ?? 0 );
-			$this->data['byte_offset'] = max( $prev_byte, $byte_offset );
+			// Take the offset the importer just reported verbatim. Clamping with max() would
+			// silently ignore a corrected (lower) offset on retry and cause rows to be skipped.
+			$this->data['byte_offset'] = $byte_offset;
 		}
 
 		$this->persist();
