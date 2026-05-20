@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useCallback, useEffect } from 'react';
+import React, { useCallback, useEffect, useRef } from 'react';
 import { __ } from '@wordpress/i18n';
 import { Modal } from '@wordpress/components';
 
@@ -53,7 +53,7 @@ const FulfillmentsImporterModal: React.FC< Props > = ( {
 
 	// Reset reducer state when the modal is closed externally so the next open
 	// starts fresh. Skip on first mount when nothing has happened yet.
-	const wasOpenRef = React.useRef( false );
+	const wasOpenRef = useRef( false );
 	useEffect( () => {
 		if ( isOpen ) {
 			wasOpenRef.current = true;
