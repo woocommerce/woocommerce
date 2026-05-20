@@ -983,6 +983,10 @@ class FulfillmentsCsvImporter {
 			$store        = WC_Data_Store::load( 'order-fulfillment' );
 			$fulfillments = $store->read_fulfillments( WC_Order::class, (string) $order_id );
 		} catch ( \Throwable $e ) {
+			wc_get_logger()->error(
+				sprintf( 'Could not read fulfillments for order %1$d during CSV import: %2$s', $order_id, $e->getMessage() ),
+				array( 'source' => 'fulfillments-csv-importer' )
+			);
 			$this->fulfillments_cache[ $order_id ] = array();
 			return $this->fulfillments_cache[ $order_id ];
 		}
