@@ -93,7 +93,7 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox Settings form exposes both the standard enabled toggle and the automated toggle, with the chosen defaults (enabled=yes, automated=no).
+	 * @testdox Settings form exposes enabled + automated as checkboxes with the chosen defaults (enabled=yes, automated=no). No separate suppress toggle — handler detection drives the enabled default instead.
 	 */
 	public function test_form_fields_expose_enabled_and_automated(): void {
 		$this->sut->init_form_fields();
@@ -103,6 +103,8 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 		$this->assertArrayHasKey( 'subject', $this->sut->form_fields );
 		$this->assertArrayHasKey( 'heading', $this->sut->form_fields );
 		$this->assertArrayHasKey( 'additional_content', $this->sut->form_fields );
+
+		$this->assertArrayNotHasKey( 'suppressed', $this->sut->form_fields, 'Suppress toggle should be consolidated into the enabled default.' );
 
 		$this->assertSame( 'yes', $this->sut->form_fields['enabled']['default'] );
 		$this->assertSame( 'checkbox', $this->sut->form_fields['enabled']['type'] );
@@ -228,24 +230,6 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox trigger() is a no-op when the merchant has flipped the suppression toggle on.
-	 */
-	public function test_trigger_is_suppressed_when_toggle_is_on(): void {
-		$this->sut->update_option( 'enabled', 'yes' );
-		$this->sut->enabled = 'yes';
-		$this->sut->update_option( 'suppressed', 'yes' );
-
-		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
-
-		$mailer = tests_retrieve_phpmailer_instance();
-		$before = count( $mailer->mock_sent );
-		$this->sut->trigger( $order->get_id() );
-		$after = count( $mailer->mock_sent );
-
-		$this->assertSame( $before, $after, 'Suppressed abandoned cart recovery email must not dispatch.' );
-	}
-
-	/**
 	 * @testdox trigger() is a no-op when the woocommerce_abandoned_cart_recovery_suppress filter returns true.
 	 */
 	public function test_trigger_is_suppressed_when_filter_returns_true(): void {
@@ -317,32 +301,9 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox is_suppressed() falls back to handler detection on fresh installs where the merchant has not saved the suppression toggle yet, so the UI default and the runtime gate stay in sync.
+	 * @testdox is_suppressed() returns false by default so the email isn't blocked when no partner filter is registered.
 	 */
-	public function test_is_suppressed_falls_back_to_handler_detection_when_option_unset(): void {
-		delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );
-		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
-
-		$this->assertTrue( WC_Email_Customer_Abandoned_Cart_Recovery::is_suppressed() );
-	}
-
-	/**
-	 * @testdox is_suppressed() returns false on a fresh install when no known handler is active so core's recovery email runs by default.
-	 */
-	public function test_is_suppressed_returns_false_when_option_unset_and_no_handler(): void {
-		delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );
-		update_option( 'active_plugins', array() );
-
-		$this->assertFalse( WC_Email_Customer_Abandoned_Cart_Recovery::is_suppressed() );
-	}
-
-	/**
-	 * @testdox is_suppressed() respects a saved 'no' even when a known handler is active — merchant override wins over auto-detection.
-	 */
-	public function test_is_suppressed_respects_explicit_no_when_handler_active(): void {
-		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
-		$this->sut->update_option( 'suppressed', 'no' );
-
+	public function test_is_suppressed_defaults_to_false(): void {
 		$this->assertFalse( WC_Email_Customer_Abandoned_Cart_Recovery::is_suppressed() );
 	}
 
@@ -382,27 +343,26 @@ class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case 
 	}
 
 	/**
-	 * @testdox Suppressed field default is 'yes' when a known recovery handler is active so the merchant is pre-protected from duplicate sends.
+	 * @testdox Enabled field defaults to 'no' when a known recovery handler is active so the merchant is pre-protected from duplicate sends, and the description names the detected plugin.
 	 */
-	public function test_suppressed_field_default_is_yes_when_handler_active(): void {
+	public function test_enabled_field_default_is_no_when_handler_active(): void {
 		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
 
 		$this->sut->init_form_fields();
 
-		$this->assertArrayHasKey( 'suppressed', $this->sut->form_fields );
-		$this->assertSame( 'yes', $this->sut->form_fields['suppressed']['default'] );
-		$this->assertStringContainsString( 'AutomateWoo', $this->sut->form_fields['suppressed']['description'] );
+		$this->assertSame( 'no', $this->sut->form_fields['enabled']['default'] );
+		$this->assertStringContainsString( 'AutomateWoo', $this->sut->form_fields['enabled']['description'] );
 	}
 
 	/**
-	 * @testdox Suppressed field default is 'no' when no known recovery handler is active so core's recovery email runs by default.
+	 * @testdox Enabled field defaults to 'yes' when no known recovery handler is active so core's recovery email runs by default, and the description is empty.
 	 */
-	public function test_suppressed_field_default_is_no_when_no_handler_active(): void {
+	public function test_enabled_field_default_is_yes_when_no_handler_active(): void {
 		update_option( 'active_plugins', array() );
 
 		$this->sut->init_form_fields();
 
-		$this->assertArrayHasKey( 'suppressed', $this->sut->form_fields );
-		$this->assertSame( 'no', $this->sut->form_fields['suppressed']['default'] );
+		$this->assertSame( 'yes', $this->sut->form_fields['enabled']['default'] );
+		$this->assertSame( '', $this->sut->form_fields['enabled']['description'] );
 	}
 }

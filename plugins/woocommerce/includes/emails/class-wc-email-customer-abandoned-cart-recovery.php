@@ -171,31 +171,18 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 		/**
 		 * Whether the recovery email should be skipped.
 		 *
-		 * Returns true when either the merchant suppression toggle is on or a
-		 * `woocommerce_abandoned_cart_recovery_suppress` filter callback short-circuits
-		 * the send. Static so the manual-send handler and the scheduler can call
-		 * it without instantiating the email class.
-		 *
-		 * When the merchant has never saved the suppression toggle (so the option
-		 * key isn't present in the saved settings) the check falls back to
-		 * `get_active_recovery_handlers()`, mirroring the dynamic default applied
-		 * in `init_form_fields()`.
+		 * The merchant's own opt-out lives on the `enabled` toggle in Settings → Emails,
+		 * which `trigger()` checks via `is_enabled()`. This method is the additional gate
+		 * partner plugins (AutomateWoo, MailPoet, etc.) can hook into to short-circuit
+		 * the send without touching the merchant's saved settings. Static so the
+		 * manual-send handler and the scheduler can call it without instantiating
+		 * the email class.
 		 *
 		 * @since 10.9.0
 		 *
 		 * @return bool
 		 */
 		public static function is_suppressed(): bool {
-			$settings = (array) get_option( 'woocommerce_customer_abandoned_cart_recovery_settings', array() );
-
-			if ( isset( $settings['suppressed'] ) ) {
-				if ( 'yes' === $settings['suppressed'] ) {
-					return true;
-				}
-			} elseif ( ! empty( self::get_active_recovery_handlers() ) ) {
-				return true;
-			}
-
 			/**
 			 * Filter to suppress the abandoned cart recovery email send.
 			 *
@@ -318,30 +305,24 @@ if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 				'<code>' . implode( '</code>, <code>', array_map( 'esc_html', array_keys( $this->placeholders ) ) ) . '</code>'
 			);
 
-			$active_handlers      = self::get_active_recovery_handlers();
-			$suppress_default     = empty( $active_handlers ) ? 'no' : 'yes';
-			$suppress_description = empty( $active_handlers )
-				? __( 'Check this when another plugin handles abandoned cart recovery, so customers do not receive duplicate emails.', 'woocommerce' )
+			$active_handlers    = self::get_active_recovery_handlers();
+			$enabled_default    = empty( $active_handlers ) ? 'yes' : 'no';
+			$enabled_description = empty( $active_handlers )
+				? ''
 				: sprintf(
 					/* translators: %s: comma-separated list of detected plugins that already handle abandoned cart recovery (e.g. "AutomateWoo, MailPoet"). */
-					__( '%s is active on this site. If its abandoned cart workflow is configured, leave this checked to avoid duplicate emails. Uncheck if you want WooCommerce to handle recovery instead.', 'woocommerce' ),
+					__( '%s is active on this site and already handles abandoned cart recovery. We\'ve turned this off so customers don\'t receive duplicate emails. Enable anyway if you want WooCommerce to handle recovery instead.', 'woocommerce' ),
 					implode( ', ', $active_handlers )
 				);
 
 			$this->form_fields = array(
 				'enabled'            => array(
-					'title'   => __( 'Enable/Disable', 'woocommerce' ),
-					'type'    => 'checkbox',
-					'label'   => __( 'Enable this email notification', 'woocommerce' ),
-					'default' => 'yes',
-				),
-				'suppressed'         => array(
-					'title'       => __( 'Suppress when another tool is in use', 'woocommerce' ),
+					'title'       => __( 'Enable/Disable', 'woocommerce' ),
 					'type'        => 'checkbox',
-					'label'       => __( 'I have another tool handling abandoned cart recovery', 'woocommerce' ),
-					'description' => $suppress_description,
-					'default'     => $suppress_default,
-					'desc_tip'    => true,
+					'label'       => __( 'Enable this email notification', 'woocommerce' ),
+					'description' => $enabled_description,
+					'default'     => $enabled_default,
+					'desc_tip'    => '' !== $enabled_description,
 				),
 				'automated'          => array(
 					'title'       => __( 'Send automatically', 'woocommerce' ),
