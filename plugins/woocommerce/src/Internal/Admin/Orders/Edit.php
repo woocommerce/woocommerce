@@ -88,13 +88,14 @@ class Edit {
 	}
 
 	/**
-	 * Hide the Downloadable product permissions meta box by default on orders without downloadable items.
+	 * Hide the Downloadable product permissions meta box on orders without downloadable items.
 	 *
-	 * The meta box stays registered so it remains available in the Screen Options panel. Users can still
-	 * toggle visibility there; their stored preference takes precedence over this default on subsequent visits.
+	 * The meta box stays registered so it remains available in the Screen Options panel. This filter
+	 * runs on every page load so the order-content-based default applies consistently regardless of
+	 * any prior Screen Options preferences the user may have saved on the order edit screen.
 	 *
 	 * @param string        $screen_id Screen ID the meta box was registered against.
-	 * @param WC_Order|null $order     The order being edited. When null, the default visibility is left unchanged.
+	 * @param WC_Order|null $order     The order being edited. When null, visibility is left unchanged.
 	 */
 	private static function maybe_hide_downloads_meta_box_by_default( string $screen_id, ?WC_Order $order ): void {
 		if ( ! $order instanceof WC_Order ) {
@@ -104,8 +105,7 @@ class Edit {
 		/**
 		 * Filters whether the Downloadable product permissions meta box is hidden by default on the order edit screen.
 		 *
-		 * Returning true adds the meta box to the screen's default-hidden list; returning false leaves it visible by default.
-		 * The user's saved Screen Options preference, when set, still wins.
+		 * Returning true forces the meta box into the screen's hidden list on every page load; returning false leaves the user's Screen Options preference intact.
 		 *
 		 * @param bool     $hidden_default Whether the meta box should be hidden by default. Defaults to true when the order has no downloadable items.
 		 * @param WC_Order $order          The order being edited.
@@ -123,7 +123,7 @@ class Edit {
 		}
 
 		add_filter(
-			'default_hidden_meta_boxes',
+			'hidden_meta_boxes',
 			static function ( $hidden, $screen ) use ( $screen_id ) {
 				if ( ! $screen instanceof \WP_Screen || $screen->id !== $screen_id ) {
 					return $hidden;

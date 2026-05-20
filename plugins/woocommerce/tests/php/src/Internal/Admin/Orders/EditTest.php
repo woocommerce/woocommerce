@@ -28,7 +28,7 @@ class EditTest extends \WC_Unit_Test_Case {
 	 */
 	public function tearDown(): void {
 		// Clean up filters registered during the test so they don't leak across tests.
-		remove_all_filters( 'default_hidden_meta_boxes' );
+		remove_all_filters( 'hidden_meta_boxes' );
 		remove_all_filters( 'woocommerce_order_downloads_meta_box_default_hidden' );
 
 		// Reset the meta boxes registered by add_order_meta_boxes() so global state stays clean.
@@ -80,7 +80,8 @@ class EditTest extends \WC_Unit_Test_Case {
 		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order', $order );
 
 		$unrelated_screen = WP_Screen::get( 'dashboard' );
-		$hidden           = apply_filters( 'default_hidden_meta_boxes', array(), $unrelated_screen );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Simulating core WP filter to exercise the meta box visibility rule under test.
+		$hidden = apply_filters( 'hidden_meta_boxes', array(), $unrelated_screen );
 
 		$this->assertNotContains(
 			'woocommerce-order-downloads',
@@ -159,12 +160,13 @@ class EditTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Apply the default_hidden_meta_boxes filter as WordPress would, against the test screen.
+	 * Apply the hidden_meta_boxes filter as WordPress would, against the test screen.
 	 *
 	 * @return array
 	 */
 	private function apply_default_hidden_filter(): array {
 		$screen = WP_Screen::get( self::TEST_SCREEN_ID );
-		return (array) apply_filters( 'default_hidden_meta_boxes', array(), $screen );
+		// phpcs:ignore WooCommerce.Commenting.CommentHooks.MissingHookComment -- Simulating core WP filter to exercise the meta box visibility rule under test.
+		return (array) apply_filters( 'hidden_meta_boxes', array(), $screen );
 	}
 }
