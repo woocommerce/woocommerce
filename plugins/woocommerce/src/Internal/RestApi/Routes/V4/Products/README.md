@@ -24,6 +24,14 @@ As discussed in the team conversation:
 
 ## Change Log
 
+### 2026-05-19 - Support multiple stock status filters
+
+**Summary**: Updated the collection `stock_status` query parameter to accept an array of stock statuses, enabling clients to request products matching any selected stock status. The endpoint now validates each value against WooCommerce stock status options, sanitizes the parameter with `wp_parse_list`, and applies the filter with an `_stock_status IN (...)` meta query. Single stock status values remain supported through list parsing.
+
+**PR**: [65155](https://github.com/woocommerce/woocommerce/pull/65155)
+
+**Breaking Changes**: None
+
 ### 2026-05-18 - Add stock quantity filters
 
 **Summary**: Added filters for stock quantity ranges. The endpoint now supports `min_stock_quantity` and `max_stock_quantity`.

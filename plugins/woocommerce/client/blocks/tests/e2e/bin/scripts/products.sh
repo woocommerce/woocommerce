@@ -34,6 +34,8 @@ wp post term set $hoodie_product_id product_brand $brand_id --by=id
 wp post term set $beanie_product_id product_brand $brand_id --by=id
 wp post term set $album_product_id product_brand $brand_id --by=id
 
+wp post meta update $beanie_product_id _product_image_gallery "$image1,$image2,$image3"
+
 # This is a non-hacky work around to set up the cross sells product.
 cap_product_id=$(wp post list --post_type=product --field=ID --name="Cap" --format=ids)
 wp post meta update $beanie_product_id _crosssell_ids "$cap_product_id"

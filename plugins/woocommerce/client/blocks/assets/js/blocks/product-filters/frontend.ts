@@ -149,9 +149,8 @@ const productFiltersStore = {
 				: getContext< ProductFiltersContext >();
 			const items = server.items;
 			if ( ! Array.isArray( items ) ) return [];
-			return items.map( ( item, index ) => ( {
+			return items.map( ( item ) => ( {
 				...item,
-				index,
 				selected: state.activeFilters.some(
 					( filter ) =>
 						filter.type === item.type && filter.value === item.value

@@ -159,6 +159,63 @@ describe( 'buildProductListQuery', () => {
 		expect( query.stock_status ).toBe( 'onbackorder' );
 	} );
 
+	it( 'maps stock filters from multiple selected stock statuses', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'stock',
+					operator: 'isAny',
+					value: [ 'instock', 'onbackorder' ],
+				},
+			],
+		} as View );
+
+		expect( query.stock_status ).toEqual( [ 'instock', 'onbackorder' ] );
+	} );
+
+	it( 'ignores empty stock filters until a value is selected', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'stock',
+					operator: 'isAny',
+					value: [],
+				},
+			],
+		} as View );
+
+		expect( query.stock_status ).toBeUndefined();
+	} );
+
+	it( 'ignores empty taxonomy filters until a value is selected', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'brands',
+					operator: 'isAny',
+					value: undefined,
+				},
+				{
+					field: 'categories',
+					operator: 'isAny',
+					value: '',
+				},
+				{
+					field: 'tags',
+					operator: 'isAny',
+					value: [],
+				},
+			],
+		} as View );
+
+		expect( query.brand ).toBeUndefined();
+		expect( query.category ).toBeUndefined();
+		expect( query.tag ).toBeUndefined();
+	} );
+
 	it( 'maps the tags isAny filter to the tag query param', () => {
 		const query = buildProductListQuery( {
 			...baseView,
@@ -203,7 +260,8 @@ describe( 'buildProductListQuery', () => {
 
 		expect( query.brand ).toEqual( '8,9' );
 	} );
-	it( 'maps the shipping_class isAny filter to the shipping_class query param', () => {
+
+	it( 'ignores shipping_class filters', () => {
 		const query = buildProductListQuery( {
 			...baseView,
 			filters: [
@@ -215,23 +273,9 @@ describe( 'buildProductListQuery', () => {
 			],
 		} as View );
 
-		expect( query.shipping_class ).toEqual( '3,4' );
+		expect( query.shipping_class ).toBeUndefined();
 	} );
 
-	it( 'maps the shipping_class isNone filter to exclude_shipping_class', () => {
-		const query = buildProductListQuery( {
-			...baseView,
-			filters: [
-				{
-					field: 'shipping_class',
-					operator: 'isNone',
-					value: [ '3', 4 ],
-				},
-			],
-		} as View );
-
-		expect( query.exclude_shipping_class ).toEqual( [ 3, 4 ] );
-	} );
 	it( 'maps the stock_quantity is filter to both min and max', () => {
 		const query = buildProductListQuery( {
 			...baseView,

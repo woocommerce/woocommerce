@@ -4,6 +4,7 @@ declare(strict_types=1);
 namespace Automattic\WooCommerce\Tests\Internal\RestApi\Routes\V4\Products;
 
 use Automattic\WooCommerce\Enums\ProductStatus;
+use Automattic\WooCommerce\Enums\ProductStockStatus;
 use Automattic\WooCommerce\Enums\ProductType;
 use Automattic\WooCommerce\Internal\RestApi\Routes\V4\Products\Controller as ProductsController;
 use Automattic\WooCommerce\Internal\CostOfGoodsSold\CogsAwareUnitTestSuiteTrait;
@@ -1187,6 +1188,108 @@ class ProductsControllerTest extends WC_REST_Unit_Test_Case {
 
 		$product_types = wp_list_pluck( $response_products, 'type' );
 		$this->assertEqualsCanonicalizing( array( ProductType::EXTERNAL, ProductType::GROUPED, ProductType::GROUPED ), $product_types );
+	}
+
+	/**
+	 * @testdox Should accept scalar and array stock status collection filters.
+	 *
+	 * @dataProvider stock_status_filter_query_provider
+	 *
+	 * @param string|array $stock_status_query Query value for the stock_status parameter.
+	 * @param array        $expected_stock_statuses Expected normalized stock status values.
+	 */
+	public function test_collection_filter_with_stock_statuses( $stock_status_query, array $expected_stock_statuses ): void {
+		$normalized_stock_status = null;
+		$capture_stock_status    = static function ( $response, $handler, $request ) use ( &$normalized_stock_status ) {
+			if ( '/wc/v4/products' === $request->get_route() ) {
+				$normalized_stock_status = $request->get_param( 'stock_status' );
+			}
+
+			return $response;
+		};
+
+		$in_stock_product     = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Stock Filter Target In Stock',
+				'sku'  => 'stock-filter-target-in-stock',
+			)
+		);
+		$out_of_stock_product = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Stock Filter Target Out Of Stock',
+				'sku'  => 'stock-filter-target-out-of-stock',
+			)
+		);
+		$backorder_product    = WC_Helper_Product::create_simple_product(
+			true,
+			array(
+				'name' => 'Stock Filter Target Backorder',
+				'sku'  => 'stock-filter-target-backorder',
+			)
+		);
+
+		$in_stock_product->set_stock_status( ProductStockStatus::IN_STOCK );
+		$in_stock_product->save();
+		$out_of_stock_product->set_stock_status( ProductStockStatus::OUT_OF_STOCK );
+		$out_of_stock_product->save();
+		$backorder_product->set_stock_status( ProductStockStatus::ON_BACKORDER );
+		$backorder_product->save();
+
+		try {
+			add_filter( 'rest_request_before_callbacks', $capture_stock_status, 10, 3 );
+
+			$request = new WP_REST_Request( 'GET', '/wc/v4/products' );
+			$request->set_query_params(
+				array(
+					'search_name_or_sku' => 'stock-filter-target',
+					'stock_status'       => $stock_status_query,
+				)
+			);
+
+			$response = $this->server->dispatch( $request );
+			$this->assertEquals( 200, $response->get_status() );
+			$this->assertEquals( $expected_stock_statuses, $normalized_stock_status, 'Stock status should be normalized to a list.' );
+
+			$product_ids = wp_list_pluck( $response->get_data(), 'id' );
+			$products    = array(
+				ProductStockStatus::IN_STOCK     => $in_stock_product,
+				ProductStockStatus::OUT_OF_STOCK => $out_of_stock_product,
+				ProductStockStatus::ON_BACKORDER => $backorder_product,
+			);
+
+			foreach ( $products as $stock_status => $product ) {
+				if ( in_array( $stock_status, $expected_stock_statuses, true ) ) {
+					$this->assertContains( $product->get_id(), $product_ids );
+				} else {
+					$this->assertNotContains( $product->get_id(), $product_ids );
+				}
+			}
+		} finally {
+			remove_filter( 'rest_request_before_callbacks', $capture_stock_status, 10 );
+			WC_Helper_Product::delete_product( $in_stock_product->get_id() );
+			WC_Helper_Product::delete_product( $out_of_stock_product->get_id() );
+			WC_Helper_Product::delete_product( $backorder_product->get_id() );
+		}
+	}
+
+	/**
+	 * Data provider for stock status collection filters.
+	 *
+	 * @return array
+	 */
+	public function stock_status_filter_query_provider() {
+		return array(
+			'scalar stock status'  => array(
+				ProductStockStatus::IN_STOCK,
+				array( ProductStockStatus::IN_STOCK ),
+			),
+			'array stock statuses' => array(
+				array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::ON_BACKORDER ),
+				array( ProductStockStatus::OUT_OF_STOCK, ProductStockStatus::ON_BACKORDER ),
+			),
+		);
 	}
 
 	/**

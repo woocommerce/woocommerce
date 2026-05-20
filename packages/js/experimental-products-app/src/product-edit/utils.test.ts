@@ -2,6 +2,7 @@
  * External dependencies
  */
 import type { Field } from '@wordpress/dataviews';
+import { getSetting } from '@woocommerce/settings';
 
 /**
  * Internal dependencies
@@ -19,6 +20,13 @@ import {
 	getVisibleProductEditFields,
 	isProductVariation,
 } from './utils';
+import {
+	buildProductBulkEditData,
+	getBulkNumericEditsFromData,
+	getBulkNumericOperationFieldId,
+	getBulkNumericChangesForProduct,
+	validateBulkNumericEdits,
+} from './bulk-edit';
 
 jest.mock( '@dnd-kit/react', () => ( {
 	DragDropProvider: ( { children }: { children: React.ReactNode } ) =>
@@ -41,9 +49,24 @@ jest.mock( '@woocommerce/settings', () => ( {
 		symbolPosition: 'left',
 		precision: 2,
 	},
+	getSetting: jest.fn(),
 } ) );
 
 describe( 'product edit utils', () => {
+	const getSettingMock = getSetting as jest.Mock;
+	const mockCostOfGoodsSoldFeatureEnabled = ( isEnabled: boolean ) => {
+		getSettingMock.mockImplementation( ( name, fallback ) =>
+			name === 'admin'
+				? {
+						features: {
+							cost_of_goods_sold: {
+								is_enabled: isEnabled,
+							},
+						},
+				  }
+				: fallback
+		);
+	};
 	const buildProduct = (
 		overrides: Partial< ProductEntityRecord > = {}
 	): ProductEntityRecord =>
@@ -60,6 +83,21 @@ describe( 'product edit utils', () => {
 			images: [],
 			...overrides,
 		} as unknown as ProductEntityRecord );
+	const buildCostOfGoodsSold = (
+		definedValue: number | string | null = 5
+	): ProductEntityRecord[ 'cost_of_goods_sold' ] => ( {
+		values: [
+			{
+				defined_value: definedValue,
+				effective_value: definedValue,
+			},
+		],
+		total_value: definedValue,
+	} );
+
+	beforeEach( () => {
+		mockCostOfGoodsSoldFeatureEnabled( true );
+	} );
 
 	it( 'returns the original values for a single selected product', () => {
 		const product = buildProduct( {
@@ -117,6 +155,251 @@ describe( 'product edit utils', () => {
 				categories: [],
 			} )
 		);
+	} );
+
+	it( 'returns bulk field state for mixed values', () => {
+		const products = [
+			buildProduct( {
+				id: 1,
+				name: 'Beanie',
+				status: 'publish',
+			} ),
+			buildProduct( {
+				id: 2,
+				name: 'Hoodie',
+				status: 'draft',
+			} ),
+		];
+
+		const bulkData = buildProductBulkEditData(
+			products,
+			getProductEditFields( productFields )
+		);
+
+		expect( bulkData.data.name ).toBe( '' );
+		expect( bulkData.fieldStates.name ).toEqual( {
+			isEmpty: false,
+			isMixed: true,
+			placeholder: 'Mixed',
+			value: undefined,
+		} );
+		expect( bulkData.fieldStates.product_status ).toEqual( {
+			isEmpty: false,
+			isMixed: true,
+			placeholder: 'Mixed',
+			value: undefined,
+		} );
+	} );
+
+	it( 'returns a mixed bulk field state for different grouped products', () => {
+		const products = [
+			buildProduct( {
+				id: 1,
+				type: 'grouped',
+				grouped_products: [ 10, 11 ],
+			} ),
+			buildProduct( {
+				id: 2,
+				type: 'grouped',
+				grouped_products: [ 12 ],
+			} ),
+		];
+
+		const bulkData = buildProductBulkEditData(
+			products,
+			getProductEditFields( productFields )
+		);
+
+		expect( bulkData.data.grouped_products ).toEqual( [] );
+		expect( bulkData.fieldStates.grouped_products ).toEqual( {
+			isEmpty: false,
+			isMixed: true,
+			placeholder: 'Mixed',
+			value: undefined,
+		} );
+	} );
+
+	it( 'returns bulk field state for shared and empty values', () => {
+		const products = [
+			buildProduct( {
+				id: 1,
+				name: 'Beanie',
+				regular_price: '',
+			} ),
+			buildProduct( {
+				id: 2,
+				name: 'Beanie',
+				regular_price: '',
+			} ),
+		];
+
+		const bulkData = buildProductBulkEditData(
+			products,
+			getProductEditFields( productFields )
+		);
+
+		expect( bulkData.fieldStates.name ).toEqual( {
+			isEmpty: false,
+			isMixed: false,
+			placeholder: undefined,
+			value: 'Beanie',
+		} );
+		expect( bulkData.fieldStates.regular_price ).toEqual( {
+			isEmpty: true,
+			isMixed: false,
+			placeholder: undefined,
+			value: '',
+		} );
+	} );
+
+	describe( 'getBulkNumericChangesForProduct', () => {
+		it( 'returns no edits for the don’t change operation', () => {
+			expect(
+				getBulkNumericChangesForProduct(
+					buildProduct( { regular_price: '10' } ),
+					{
+						regular_price: {
+							operation: 'dont_change',
+							value: '',
+						},
+					}
+				)
+			).toEqual( {} );
+		} );
+
+		it( 'reads numeric edits from injected bulk operation fields', () => {
+			expect(
+				getBulkNumericEditsFromData( {
+					[ getBulkNumericOperationFieldId( 'regular_price' ) ]:
+						'increase',
+					regular_price: '5',
+					[ getBulkNumericOperationFieldId( 'stock_quantity' ) ]:
+						'set',
+					stock_quantity: 12,
+					cost_of_goods_sold: buildCostOfGoodsSold( '7' ),
+				} as unknown as ProductEntityRecord )
+			).toEqual(
+				expect.objectContaining( {
+					regular_price: {
+						operation: 'increase',
+						value: '5',
+					},
+					stock_quantity: {
+						operation: 'set',
+						value: '12',
+					},
+					cost_of_goods_sold: {
+						operation: 'dont_change',
+						value: '7',
+					},
+				} )
+			);
+		} );
+
+		it( 'sets, increases, and decreases money values', () => {
+			const product = buildProduct( { regular_price: '10' } );
+
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					regular_price: { operation: 'set', value: '12' },
+				} )
+			).toEqual( { regular_price: '12.00' } );
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					regular_price: { operation: 'increase', value: '5' },
+				} )
+			).toEqual( { regular_price: '15.00' } );
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					regular_price: { operation: 'decrease', value: '20' },
+				} )
+			).toEqual( { regular_price: '0.00' } );
+		} );
+
+		it( 'applies percentage operations to money values', () => {
+			const product = buildProduct( { sale_price: '20' } );
+
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					sale_price: {
+						operation: 'increase_percent',
+						value: '10',
+					},
+				} )
+			).toEqual( { sale_price: '22.00' } );
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					sale_price: {
+						operation: 'decrease_percent',
+						value: '25',
+					},
+				} )
+			).toEqual( { sale_price: '15.00' } );
+		} );
+
+		it( 'sets, increases, and decreases stock quantity as integers', () => {
+			const product = buildProduct( { stock_quantity: 10 } );
+
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					stock_quantity: { operation: 'set', value: '7' },
+				} )
+			).toEqual( { stock_quantity: 7 } );
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					stock_quantity: { operation: 'increase', value: '3' },
+				} )
+			).toEqual( { stock_quantity: 13 } );
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					stock_quantity: { operation: 'decrease', value: '20' },
+				} )
+			).toEqual( { stock_quantity: 0 } );
+		} );
+
+		it( 'updates the nested cost of goods value', () => {
+			const product = buildProduct( {
+				cost_of_goods_sold: buildCostOfGoodsSold( '5' ),
+			} );
+
+			expect(
+				getBulkNumericChangesForProduct( product, {
+					cost_of_goods_sold: {
+						operation: 'increase',
+						value: '2',
+					},
+				} )
+			).toEqual( {
+				cost_of_goods_sold: {
+					values: [
+						{
+							defined_value: '7.00',
+							effective_value: '5',
+						},
+					],
+					total_value: '5',
+				},
+			} );
+		} );
+
+		it( 'validates projected sale prices before save', () => {
+			expect(
+				validateBulkNumericEdits(
+					[
+						buildProduct( {
+							regular_price: '10',
+							sale_price: '9',
+						} ),
+					],
+					{
+						regular_price: {
+							operation: 'decrease',
+							value: '2',
+						},
+					}
+				)
+			).toBe( 'Sale price must be lower than the regular price.' );
+		} );
 	} );
 
 	it( 'excludes summary and count fields from the edit field list', () => {
@@ -309,12 +592,11 @@ describe( 'product edit utils', () => {
 			'regular_price',
 			'sale_price',
 			'schedule_sale',
-			'date_on_sale_from',
-			'date_on_sale_to',
+			'cost_of_goods_sold',
 		];
 		const basePriceFieldIds = [ 'regular_price', 'sale_price' ];
 		const managedStockFieldIds = [ 'manage_stock', 'stock_quantity' ];
-		const stockStatusFieldIds = [ 'stock', 'manage_stock' ];
+		const stockStatusFieldIds = [ 'manage_stock', 'stock' ];
 		const shippingFieldIds = [
 			'weight',
 			'length',
@@ -340,6 +622,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -350,21 +633,20 @@ describe( 'product edit utils', () => {
 				'regular_price',
 				'sale_price',
 				'schedule_sale',
-				'date_on_sale_from',
-				'date_on_sale_to',
+				'cost_of_goods_sold',
 				'images',
 				'sku',
-				'stock',
 				'manage_stock',
+				'stock',
 				'categories',
 				'brands',
 				'tags',
 				'featured',
 				'shipping_class',
-				'weight',
 				'length',
 				'width',
 				'height',
+				'weight',
 			] );
 			expectFieldsHidden( fieldIds, [
 				'price',
@@ -396,10 +678,39 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
-			expectFieldOrder( fieldIds, [ 'regular_price', 'sale_price' ] );
+			expectFieldOrder( fieldIds, [
+				'regular_price',
+				'sale_price',
+				'schedule_sale',
+				'cost_of_goods_sold',
+			] );
+		} );
+
+		it( 'hides cost of goods when the API data is unavailable', () => {
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					type: 'simple',
+				} ),
+			] );
+
+			expectFieldsHidden( fieldIds, [ 'cost_of_goods_sold' ] );
+		} );
+
+		it( 'hides cost of goods when the feature is disabled', () => {
+			mockCostOfGoodsSoldFeatureEnabled( false );
+
+			const fieldIds = getVisibleFieldIds( [
+				buildProduct( {
+					type: 'simple',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
+				} ),
+			] );
+
+			expectFieldsHidden( fieldIds, [ 'cost_of_goods_sold' ] );
 		} );
 
 		it( 'hides shipping fields for virtual simple products', () => {
@@ -461,7 +772,7 @@ describe( 'product edit utils', () => {
 				'name',
 				'product_status',
 				'catalog_visibility',
-				'upsell_ids',
+				'grouped_products',
 				'images',
 				'sku',
 				'categories',
@@ -655,6 +966,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -664,8 +976,7 @@ describe( 'product edit utils', () => {
 					'regular_price',
 					'sale_price',
 					'schedule_sale',
-					'date_on_sale_from',
-					'date_on_sale_to',
+					'cost_of_goods_sold',
 					'images',
 					'sku',
 					'manage_stock',
@@ -695,6 +1006,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -705,8 +1017,7 @@ describe( 'product edit utils', () => {
 					'regular_price',
 					'sale_price',
 					'schedule_sale',
-					'date_on_sale_from',
-					'date_on_sale_to',
+					'cost_of_goods_sold',
 					'stock',
 					'manage_stock',
 					'product_status',
@@ -732,7 +1043,7 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expectFieldsHidden( fieldIds, [ 'downloadable' ] );
+			expect( fieldIds ).toContain( 'downloadable' );
 			expectFieldsHidden( fieldIds, shippingFieldIds );
 		} );
 
@@ -766,6 +1077,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 				buildProduct( {
 					id: 34,
@@ -775,6 +1087,7 @@ describe( 'product edit utils', () => {
 					on_sale: true,
 					sale_price: '12',
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} ),
 			] );
 
@@ -783,8 +1096,7 @@ describe( 'product edit utils', () => {
 					'regular_price',
 					'sale_price',
 					'schedule_sale',
-					'date_on_sale_from',
-					'date_on_sale_to',
+					'cost_of_goods_sold',
 					...bulkSellableInstanceFieldIds,
 				] )
 			);
@@ -827,7 +1139,7 @@ describe( 'product edit utils', () => {
 			] );
 		} );
 
-		it( 'hides downloadable fields for simple product and variation selections', () => {
+		it( 'shows downloadable fields for simple product and variation selections', () => {
 			const fieldIds = getVisibleFieldIds( [
 				buildProduct( {
 					id: 1,
@@ -842,7 +1154,7 @@ describe( 'product edit utils', () => {
 				} ),
 			] );
 
-			expectFieldsHidden( fieldIds, [ 'downloadable' ] );
+			expect( fieldIds ).toContain( 'downloadable' );
 		} );
 
 		it( 'hides downloadable fields unless every bulk item supports downloads', () => {
@@ -990,6 +1302,7 @@ describe( 'product edit utils', () => {
 				virtual: false,
 				downloadable: true,
 				manage_stock: true,
+				cost_of_goods_sold: buildCostOfGoodsSold(),
 			} );
 
 			expect( getFormFields( [ product ] ) ).toEqual( [
@@ -1009,12 +1322,18 @@ describe( 'product edit utils', () => {
 						'regular_price',
 						'sale_price',
 						'schedule_sale',
+						'cost_of_goods_sold',
 					],
 				},
 				{
 					id: 'image-fields',
 					label: 'Images',
-					children: [ 'images', 'downloadable' ],
+					children: [ 'images' ],
+				},
+				{
+					id: 'downloadable-files-fields',
+					label: 'Downloadable files',
+					children: [ 'downloadable' ],
 				},
 				{
 					id: 'inventory-fields',
@@ -1034,9 +1353,9 @@ describe( 'product edit utils', () => {
 						{
 							id: 'dimensions',
 							layout: { type: 'row' },
-							children: [ 'weight', 'length', 'width' ],
+							children: [ 'length', 'width', 'height' ],
 						},
-						'height',
+						'weight',
 					],
 				},
 			] );
@@ -1046,11 +1365,12 @@ describe( 'product edit utils', () => {
 			[ 'simple product', 'simple' ],
 			[ 'variation product', 'variation' ],
 		] as const )(
-			'groups sale schedule date fields on the same row for %s',
+			'uses schedule sale as a compound price field for %s',
 			( _label, productType ) => {
 				const product = buildProduct( {
 					type: productType,
 					date_on_sale_from: '2026-05-06T00:00:00',
+					cost_of_goods_sold: buildCostOfGoodsSold(),
 				} );
 
 				const priceGroup = getFormFields( [ product ] ).find(
@@ -1066,14 +1386,7 @@ describe( 'product edit utils', () => {
 						'regular_price',
 						'sale_price',
 						'schedule_sale',
-						{
-							id: 'sale-schedule-dates',
-							layout: { type: 'row' },
-							children: [
-								'date_on_sale_from',
-								'date_on_sale_to',
-							],
-						},
+						'cost_of_goods_sold',
 					],
 				} );
 			}
@@ -1092,7 +1405,7 @@ describe( 'product edit utils', () => {
 						'name',
 						'product_status',
 						'catalog_visibility',
-						'upsell_ids',
+						'grouped_products',
 					],
 				},
 				{
@@ -1197,7 +1510,7 @@ describe( 'product edit utils', () => {
 					children: [
 						'shipping_class',
 						{
-							id: 'parent-dimensions',
+							id: 'dimensions',
 							layout: { type: 'row' },
 							children: [ 'length', 'width', 'height' ],
 						},
@@ -1238,6 +1551,11 @@ describe( 'product edit utils', () => {
 					children: [ 'images' ],
 				},
 				{
+					id: 'downloadable-files-fields',
+					label: 'Downloadable files',
+					children: [ 'downloadable' ],
+				},
+				{
 					id: 'inventory-fields',
 					label: 'Inventory',
 					children: [ 'sku', 'manage_stock', 'stock_quantity' ],
@@ -1250,9 +1568,9 @@ describe( 'product edit utils', () => {
 						{
 							id: 'dimensions',
 							layout: { type: 'row' },
-							children: [ 'weight', 'length', 'width' ],
+							children: [ 'length', 'width', 'height' ],
 						},
-						'height',
+						'weight',
 					],
 				},
 			] );
@@ -1291,7 +1609,7 @@ describe( 'product edit utils', () => {
 				{
 					id: 'inventory-fields',
 					label: 'Inventory',
-					children: [ 'sku', 'stock', 'manage_stock' ],
+					children: [ 'sku', 'manage_stock', 'stock' ],
 				},
 				{
 					id: 'product-organization-fields',

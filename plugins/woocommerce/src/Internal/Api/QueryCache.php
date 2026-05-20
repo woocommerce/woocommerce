@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Automattic\WooCommerce\Internal\Api;
 
+use Automattic\WooCommerce\Api\Infrastructure\Main;
+use Automattic\WooCommerce\Api\Infrastructure\ResolverHelpers;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\AST\DocumentNode;
 use Automattic\WooCommerce\Vendor\GraphQL\Language\Parser;
 use Automattic\WooCommerce\Vendor\GraphQL\Utils\AST;
@@ -326,7 +328,7 @@ class QueryCache {
 			return false;
 		}
 
-		$fs = Utils::wp_filesystem();
+		$fs = ResolverHelpers::wp_filesystem();
 		if ( ! $fs || ! $fs->is_writable( $dir ) ) {
 			return false;
 		}
@@ -402,7 +404,7 @@ class QueryCache {
 			return;
 		}
 
-		$fs = Utils::wp_filesystem();
+		$fs = ResolverHelpers::wp_filesystem();
 		if ( ! $fs || ! $fs->move( $tmp, $path, true ) ) {
 			if ( $fs ) {
 				$fs->delete( $tmp );

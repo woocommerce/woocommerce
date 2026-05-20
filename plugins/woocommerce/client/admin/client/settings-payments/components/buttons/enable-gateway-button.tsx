@@ -172,7 +172,7 @@ export const EnableGatewayButton = ( {
 					} else {
 						createErrorNotice(
 							sprintf(
-								/* translators: %s: payment gateway title. */
+								/* translators: %s: payment gateway title, or 'this payment method'. */
 								__(
 									'Finish setting up %s before enabling it.',
 									'woocommerce'
