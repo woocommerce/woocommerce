@@ -57,13 +57,17 @@
 	background: #f6f7f7;
 	border-top: 1px solid #c3c4c7;
 }
-.woocommerce-feature-enabled-order-detail-redesign .wc-order-submit__trash {
-	color: #b32d2e;
+.woocommerce-feature-enabled-order-detail-redesign a.wc-order-submit__trash,
+.woocommerce-feature-enabled-order-detail-redesign a.wc-order-submit__trash:link,
+.woocommerce-feature-enabled-order-detail-redesign a.wc-order-submit__trash:visited {
+	color: #b32d2e !important;
 	text-decoration: none;
 	font-size: 13px;
 }
-.woocommerce-feature-enabled-order-detail-redesign .wc-order-submit__trash:hover {
-	color: #8a0000;
+.woocommerce-feature-enabled-order-detail-redesign a.wc-order-submit__trash:hover,
+.woocommerce-feature-enabled-order-detail-redesign a.wc-order-submit__trash:focus,
+.woocommerce-feature-enabled-order-detail-redesign a.wc-order-submit__trash:active {
+	color: #8a0000 !important;
 	text-decoration: underline;
 }
 .woocommerce-feature-enabled-order-detail-redesign .wc-order-submit__update {
@@ -118,18 +122,15 @@
 	display: none !important;
 }
 
-/* Edit affordance lives in the page title bar, aligned right of the heading. */
-.woocommerce-feature-enabled-order-detail-redesign .wc-order-page-title-bar {
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	gap: 8px;
-}
-.woocommerce-feature-enabled-order-detail-redesign .wc-order-page-title-bar > .wp-heading-inline {
-	margin-right: auto;
-}
+/* Edit affordance lives in the page title bar, floated right of the heading.
+ * We deliberately use `float: right` instead of adding flex to the .wrap
+ * container — .wrap holds the heading AND the notices AND the entire
+ * metabox area, so making it a flex parent would catastrophically reflow
+ * the page. The hr.wp-header-end (rendered by WP right after the heading
+ * + page-title-action region) clears the float so the row ends cleanly. */
 .woocommerce-feature-enabled-order-detail-redesign a.wc-order-data-edit.page-title-action {
-	margin-left: 0;
+	float: right;
+	margin: 9px 0 0 8px;
 }
 
 /* Inside the General column: the second h3 needs breathing room above it so

@@ -181,8 +181,9 @@
 		}
 
 		function injectEditAffordance() {
-			// Place the Edit button on the page title row, right-aligned, at the same
-			// vertical level as the "Edit order #1234" heading.
+			// Place the Edit button on the page title row, right-aligned via CSS
+			// `float: right`. We insert AFTER the h1 but BEFORE hr.wp-header-end
+			// so the standard WP float-clear works.
 			var $heading = $( '.wp-heading-inline' ).first();
 			if ( ! $heading.length ) {
 				return;
@@ -195,9 +196,6 @@
 					+ 'Edit order details'
 					+ '</a>'
 			).insertAfter( $heading );
-
-			// Ensure the heading bar lays out heading-left / button-right.
-			$heading.parent().addClass( 'wc-order-page-title-bar' );
 		}
 
 		function snapshotForm() {
