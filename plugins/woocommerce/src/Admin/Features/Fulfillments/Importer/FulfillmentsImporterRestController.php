@@ -328,8 +328,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$limit   = min( $limit, FulfillmentsCsvImporter::resolve_chunk_size() );
 		$mapping = $this->normalize_mapping_input( $request->get_param( 'mapping' ) );
 
-		$header_map = $this->mapping_to_header_map( $mapping );
-		$missing    = $this->find_missing_required_columns( $header_map );
+		$header_map = FulfillmentsCsvImporter::mapping_to_header_map( $mapping );
+		$missing    = FulfillmentsCsvImporter::find_missing_required_columns( $header_map );
 		if ( ! empty( $missing ) ) {
 			return new WP_Error(
 				'fulfillments_import_mapping_invalid',
@@ -531,45 +531,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			$out[ (string) $col ] = (string) $canonical;
 		}
 		return $out;
-	}
-
-	/**
-	 * Invert a column-index mapping into the canonical-keyed shape used to detect missing required columns.
-	 *
-	 * @param array<int, string> $mapping CSV column index → canonical key.
-	 * @return array<string, int>
-	 */
-	private function mapping_to_header_map( array $mapping ): array {
-		$out = array();
-		foreach ( $mapping as $col => $canonical ) {
-			$canonical = is_string( $canonical ) ? trim( $canonical ) : '';
-			if ( '' === $canonical || isset( $out[ $canonical ] ) ) {
-				continue;
-			}
-			$out[ $canonical ] = (int) $col;
-		}
-		return $out;
-	}
-
-	/**
-	 * Return the canonical keys that are required but not present in the supplied header map.
-	 *
-	 * @param array<string, int> $header_map Canonical column key → CSV column index.
-	 * @return array<int, string>
-	 */
-	private function find_missing_required_columns( array $header_map ): array {
-		$required = array(
-			FulfillmentsCsvImporter::COL_ORDER_NUMBER,
-			FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
-			FulfillmentsCsvImporter::COL_PROVIDER,
-		);
-		$missing  = array();
-		foreach ( $required as $key ) {
-			if ( ! isset( $header_map[ $key ] ) ) {
-				$missing[] = $key;
-			}
-		}
-		return $missing;
 	}
 
 	/**

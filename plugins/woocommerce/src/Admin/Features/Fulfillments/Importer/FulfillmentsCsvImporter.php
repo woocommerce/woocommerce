@@ -150,8 +150,8 @@ class FulfillmentsCsvImporter {
 		$mapping = isset( $parsed['detected_mapping'] ) && is_array( $parsed['detected_mapping'] ) ? $parsed['detected_mapping'] : array();
 
 		// Preserve back-compat behavior: a missing required canonical column aborts the run with a single failed row.
-		$header_map = $this->mapping_to_header_map( $mapping );
-		$missing    = $this->find_missing_required_columns( $header_map );
+		$header_map = self::mapping_to_header_map( $mapping );
+		$missing    = self::find_missing_required_columns( $header_map );
 		if ( ! empty( $missing ) ) {
 			$summary['rows'][] = $this->fail(
 				0,
@@ -395,8 +395,8 @@ class FulfillmentsCsvImporter {
 			$byte_offset_out = $byte_offset_in;
 
 			try {
-				$header_map  = $this->mapping_to_header_map( $mapping );
-				$missing     = $this->find_missing_required_columns( $header_map );
+				$header_map  = self::mapping_to_header_map( $mapping );
+				$missing     = self::find_missing_required_columns( $header_map );
 				$row_number  = $offset + 1;
 				$resumed     = false;
 
@@ -571,10 +571,12 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Invert a column-index-keyed mapping into the canonical-keyed header map used by process_row().
 	 *
+	 * @since 10.9.0
+	 *
 	 * @param array<int, string> $mapping CSV column index => canonical column key. Unmapped slots may be "".
 	 * @return array<string, int> Canonical column key => CSV column index. First wins on duplicates.
 	 */
-	private function mapping_to_header_map( array $mapping ): array {
+	public static function mapping_to_header_map( array $mapping ): array {
 		$header_map = array();
 		foreach ( $mapping as $col_index => $canonical ) {
 			$canonical = is_string( $canonical ) ? trim( $canonical ) : '';
@@ -809,10 +811,12 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Determine which required columns are missing.
 	 *
+	 * @since 10.9.0
+	 *
 	 * @param array<string, int> $header_map Header map.
 	 * @return array<int, string> Human-friendly names of missing columns.
 	 */
-	private function find_missing_required_columns( array $header_map ): array {
+	public static function find_missing_required_columns( array $header_map ): array {
 		// Column keys are the literal header values merchants must put in their CSV; do not translate.
 		$required = array(
 			self::COL_ORDER_NUMBER    => self::COL_ORDER_NUMBER,
