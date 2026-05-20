@@ -1,8 +1,8 @@
 <?php
 /**
- * Customer checkout recovery email
+ * Customer abandoned cart recovery email
  *
- * This template can be overridden by copying it to yourtheme/woocommerce/emails/customer-checkout-recovery.php.
+ * This template can be overridden by copying it to yourtheme/woocommerce/emails/customer-abandoned-cart-recovery.php.
  *
  * HOWEVER, on occasion WooCommerce will need to update template files and you
  * (the theme developer) will need to copy the new files to your theme to

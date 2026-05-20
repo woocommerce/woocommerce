@@ -369,7 +369,7 @@ class WC_Install {
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'maybe_enable_hpos' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'add_coming_soon_option' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_email_improvements_for_newly_installed' ), 20 );
-		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_checkout_recovery_for_newly_installed' ), 20 );
+		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_abandoned_cart_recovery_for_newly_installed' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_customer_stock_notifications_signups' ), 20 );
 		add_action( 'woocommerce_newly_installed', array( __CLASS__, 'enable_analytics_scheduled_import' ), 20 );
 		add_action( 'woocommerce_updated', array( __CLASS__, 'enable_email_improvements_for_existing_merchants' ), 20 );
@@ -1281,7 +1281,7 @@ class WC_Install {
 	}
 
 	/**
-	 * Enable the checkout recovery feature by default for new shops.
+	 * Enable the abandoned cart recovery feature by default for new shops.
 	 *
 	 * Existing stores receiving this as a plugin update remain default-off and
 	 * must opt in via WooCommerce → Settings → Advanced → Features.
@@ -1290,8 +1290,8 @@ class WC_Install {
 	 *
 	 * @return void
 	 */
-	public static function enable_checkout_recovery_for_newly_installed() {
-		wc_get_container()->get( FeaturesController::class )->change_feature_enable( 'checkout_recovery', true );
+	public static function enable_abandoned_cart_recovery_for_newly_installed() {
+		wc_get_container()->get( FeaturesController::class )->change_feature_enable( 'abandoned_cart_recovery', true );
 	}
 
 	/**

@@ -451,8 +451,8 @@ class FeaturesController {
 				'enabled_by_default'           => false,
 				'is_experimental'              => false,
 			),
-			'checkout_recovery'                  => array(
-				'name'                         => __( 'Checkout recovery', 'woocommerce' ),
+			'abandoned_cart_recovery'            => array(
+				'name'                         => __( 'Abandoned cart recovery', 'woocommerce' ),
 				'description'                  => __(
 					'Send a reminder email to shoppers who didn\'t finish checking out.',
 					'woocommerce'

@@ -1,6 +1,6 @@
 <?php
 /**
- * Class WC_Email_Customer_Checkout_Recovery file.
+ * Class WC_Email_Customer_Abandoned_Cart_Recovery file.
  *
  * @package WooCommerce\Emails
  */
@@ -9,24 +9,24 @@ use Automattic\WooCommerce\Enums\OrderStatus;
 
 defined( 'ABSPATH' ) || exit;
 
-if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
+if ( ! class_exists( 'WC_Email_Customer_Abandoned_Cart_Recovery', false ) ) :
 
 	/**
-	 * Customer Checkout Recovery email.
+	 * Customer Abandoned Cart Recovery email.
 	 *
 	 * A transactional email that prompts the customer to complete a checkout they
 	 * left pending. The send is scheduled via Action Scheduler two hours after
 	 * the pending order is created, gated on the merchant's `automated` setting.
 	 * Merchants can also trigger the email manually from the order edit page.
 	 *
-	 * @class    WC_Email_Customer_Checkout_Recovery
+	 * @class    WC_Email_Customer_Abandoned_Cart_Recovery
 	 * @version  10.9.0
 	 * @package  WooCommerce\Classes\Emails
 	 */
-	class WC_Email_Customer_Checkout_Recovery extends WC_Email {
+	class WC_Email_Customer_Abandoned_Cart_Recovery extends WC_Email {
 
 		/**
-		 * Plugins known to provide their own checkout recovery flow.
+		 * Plugins known to provide their own abandoned cart recovery flow.
 		 *
 		 * Detection is install-only.
 		 */
@@ -39,13 +39,13 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * Constructor.
 		 */
 		public function __construct() {
-			$this->id             = 'customer_checkout_recovery';
+			$this->id             = 'customer_abandoned_cart_recovery';
 			$this->customer_email = true;
-			$this->title          = __( 'Checkout recovery', 'woocommerce' );
+			$this->title          = __( 'Abandoned cart recovery', 'woocommerce' );
 			$this->email_group    = 'order-updates';
-			$this->template_html  = 'emails/customer-checkout-recovery.php';
-			$this->template_plain = 'emails/plain/customer-checkout-recovery.php';
-			$this->template_block = 'emails/block/customer-checkout-recovery.php';
+			$this->template_html  = 'emails/customer-abandoned-cart-recovery.php';
+			$this->template_plain = 'emails/plain/customer-abandoned-cart-recovery.php';
+			$this->template_block = 'emails/block/customer-abandoned-cart-recovery.php';
 			$this->placeholders   = array(
 				'{site_title}'   => $this->get_blogname(),
 				'{site_address}' => wp_parse_url( home_url(), PHP_URL_HOST ),
@@ -53,9 +53,9 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 				'{order_number}' => '',
 			);
 
-			// Trigger fires after Action Scheduler dispatches `woocommerce_send_checkout_recovery_notification`,
+			// Trigger fires after Action Scheduler dispatches `woocommerce_send_abandoned_cart_recovery_notification`,
 			// or when the merchant invokes the manual-send action from the order edit page.
-			add_action( 'woocommerce_send_checkout_recovery_notification', array( $this, 'trigger' ), 10, 1 );
+			add_action( 'woocommerce_send_abandoned_cart_recovery_notification', array( $this, 'trigger' ), 10, 1 );
 
 			parent::__construct();
 
@@ -66,7 +66,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		/**
 		 * Trigger the sending of this email.
 		 *
-		 * Wired to `woocommerce_send_checkout_recovery_notification`, which Action
+		 * Wired to `woocommerce_send_abandoned_cart_recovery_notification`, which Action
 		 * Scheduler fires with the order id as its single argument. Also called
 		 * directly by the manual-send action on the order edit page.
 		 *
@@ -117,7 +117,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 			}
 
 			/**
-			 * Filter the order statuses that are eligible to receive the checkout recovery email.
+			 * Filter the order statuses that are eligible to receive the abandoned cart recovery email.
 			 *
 			 * Defaults to `pending` only. Partner integrations or merchants who want recovery
 			 * to fire for other states (e.g. `failed`) can widen the list here.
@@ -128,7 +128,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 			 * @param WC_Order $order             Order being inspected.
 			 */
 			$eligible_statuses = (array) apply_filters(
-				'woocommerce_checkout_recovery_eligible_statuses',
+				'woocommerce_abandoned_cart_recovery_eligible_statuses',
 				array( OrderStatus::PENDING ),
 				$this->object
 			);
@@ -172,7 +172,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * Whether the recovery email should be skipped.
 		 *
 		 * Returns true when either the merchant suppression toggle is on or a
-		 * `woocommerce_checkout_recovery_suppress` filter callback short-circuits
+		 * `woocommerce_abandoned_cart_recovery_suppress` filter callback short-circuits
 		 * the send. Static so the manual-send handler and the scheduler can call
 		 * it without instantiating the email class.
 		 *
@@ -186,7 +186,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * @return bool
 		 */
 		public static function is_suppressed(): bool {
-			$settings = (array) get_option( 'woocommerce_customer_checkout_recovery_settings', array() );
+			$settings = (array) get_option( 'woocommerce_customer_abandoned_cart_recovery_settings', array() );
 
 			if ( isset( $settings['suppressed'] ) ) {
 				if ( 'yes' === $settings['suppressed'] ) {
@@ -197,16 +197,16 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 			}
 
 			/**
-			 * Filter to suppress the checkout recovery email send.
+			 * Filter to suppress the abandoned cart recovery email send.
 			 *
-			 * Partner plugins that handle abandoned-checkout recovery themselves can
+			 * Partner plugins that handle abandoned cart recovery themselves can
 			 * return true here to prevent core from sending a duplicate email.
 			 *
 			 * @since 10.9.0
 			 *
 			 * @param bool $suppress Default false.
 			 */
-			return (bool) apply_filters( 'woocommerce_checkout_recovery_suppress', false );
+			return (bool) apply_filters( 'woocommerce_abandoned_cart_recovery_suppress', false );
 		}
 
 		/**
@@ -214,7 +214,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 *
 		 * Returns the order's pay endpoint, which resumes the checkout for the
 		 * pending order. A future iteration may swap this for a single-use signed
-		 * URL with explicit expiry (see `woocommerce_checkout_recovery_url` filter).
+		 * URL with explicit expiry (see `woocommerce_abandoned_cart_recovery_url` filter).
 		 *
 		 * @since  10.9.0
 		 * @return string
@@ -225,14 +225,14 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 			}
 
 			/**
-			 * Filter the URL included in the checkout recovery email.
+			 * Filter the URL included in the abandoned cart recovery email.
 			 *
 			 * @since 10.9.0
 			 *
 			 * @param string   $url   Default: the pending order's pay endpoint.
 			 * @param WC_Order $order Order being recovered.
 			 */
-			return (string) apply_filters( 'woocommerce_checkout_recovery_url', $this->object->get_checkout_payment_url(), $this->object );
+			return (string) apply_filters( 'woocommerce_abandoned_cart_recovery_url', $this->object->get_checkout_payment_url(), $this->object );
 		}
 
 		/**
@@ -321,9 +321,9 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 			$active_handlers      = self::get_active_recovery_handlers();
 			$suppress_default     = empty( $active_handlers ) ? 'no' : 'yes';
 			$suppress_description = empty( $active_handlers )
-				? __( 'Check this when another plugin handles abandoned checkout recovery, so customers do not receive duplicate emails.', 'woocommerce' )
+				? __( 'Check this when another plugin handles abandoned cart recovery, so customers do not receive duplicate emails.', 'woocommerce' )
 				: sprintf(
-					/* translators: %s: comma-separated list of detected plugins that already handle checkout recovery (e.g. "AutomateWoo, MailPoet"). */
+					/* translators: %s: comma-separated list of detected plugins that already handle abandoned cart recovery (e.g. "AutomateWoo, MailPoet"). */
 					__( '%s is active on this site. If its abandoned cart workflow is configured, leave this checked to avoid duplicate emails. Uncheck if you want WooCommerce to handle recovery instead.', 'woocommerce' ),
 					implode( ', ', $active_handlers )
 				);
@@ -338,7 +338,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 				'suppressed'         => array(
 					'title'       => __( 'Suppress when another tool is in use', 'woocommerce' ),
 					'type'        => 'checkbox',
-					'label'       => __( 'I have another tool handling abandoned checkout recovery', 'woocommerce' ),
+					'label'       => __( 'I have another tool handling abandoned cart recovery', 'woocommerce' ),
 					'description' => $suppress_description,
 					'default'     => $suppress_default,
 					'desc_tip'    => true,
@@ -391,4 +391,4 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 
 endif;
 
-return new WC_Email_Customer_Checkout_Recovery();
+return new WC_Email_Customer_Abandoned_Cart_Recovery();

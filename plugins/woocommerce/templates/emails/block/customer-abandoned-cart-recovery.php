@@ -1,6 +1,6 @@
 <?php
 /**
- * Customer checkout recovery email (initial block content)
+ * Customer abandoned cart recovery email (initial block content)
  *
  * This template can be overridden by editing it in the WooCommerce email editor.
  *

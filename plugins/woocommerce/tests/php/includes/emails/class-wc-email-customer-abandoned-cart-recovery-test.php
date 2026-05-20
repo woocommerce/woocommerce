@@ -2,16 +2,16 @@
 declare( strict_types = 1 );
 
 /**
- * WC_Email_Customer_Checkout_Recovery test.
+ * WC_Email_Customer_Abandoned_Cart_Recovery test.
  *
- * @covers WC_Email_Customer_Checkout_Recovery
+ * @covers WC_Email_Customer_Abandoned_Cart_Recovery
  */
-class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
+class WC_Email_Customer_Abandoned_Cart_Recovery_Test extends \WC_Unit_Test_Case {
 
 	/**
 	 * The System Under Test.
 	 *
-	 * @var WC_Email_Customer_Checkout_Recovery
+	 * @var WC_Email_Customer_Abandoned_Cart_Recovery
 	 */
 	private $sut;
 
@@ -24,8 +24,8 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	private $original_active_plugins = array();
 
 	/**
-	 * `WC_Emails::init()` only registers the checkout recovery email class
-	 * when the `checkout_recovery` feature flag is on, so the suite has to
+	 * `WC_Emails::init()` only registers the abandoned cart recovery email class
+	 * when the `abandoned_cart_recovery` feature flag is on, so the suite has to
 	 * enable the option (and re-init the mailer to pick up the flag change)
 	 * before exercising the mailer-level registration. Doing it here makes
 	 * every test self-contained rather than relying on the incidental order
@@ -34,17 +34,17 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	public function setUp(): void {
 		parent::setUp();
 
-		update_option( 'woocommerce_feature_checkout_recovery_enabled', 'yes' );
+		update_option( 'woocommerce_feature_abandoned_cart_recovery_enabled', 'yes' );
 
 		$this->original_active_plugins = (array) get_option( 'active_plugins', array() );
 
 		$bootstrap = \WC_Unit_Tests_Bootstrap::instance();
 		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email.php';
-		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-checkout-recovery.php';
+		require_once $bootstrap->plugin_dir . '/includes/emails/class-wc-email-customer-abandoned-cart-recovery.php';
 
 		WC()->mailer()->init();
 
-		$this->sut = new WC_Email_Customer_Checkout_Recovery();
+		$this->sut = new WC_Email_Customer_Abandoned_Cart_Recovery();
 	}
 
 	/**
@@ -52,11 +52,11 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	 * doesn't leak state into unrelated test classes.
 	 */
 	public function tearDown(): void {
-		delete_option( 'woocommerce_feature_checkout_recovery_enabled' );
-		delete_option( 'woocommerce_customer_checkout_recovery_settings' );
+		delete_option( 'woocommerce_feature_abandoned_cart_recovery_enabled' );
+		delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );
 		update_option( 'active_plugins', $this->original_active_plugins );
 
-		remove_all_actions( 'woocommerce_send_checkout_recovery_notification' );
+		remove_all_actions( 'woocommerce_send_abandoned_cart_recovery_notification' );
 
 		parent::tearDown();
 	}
@@ -65,12 +65,12 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	 * @testdox Constructor wires the email id, customer flag, group, and template paths (HTML, plain, block).
 	 */
 	public function test_constructor_sets_email_identity(): void {
-		$this->assertSame( 'customer_checkout_recovery', $this->sut->id );
+		$this->assertSame( 'customer_abandoned_cart_recovery', $this->sut->id );
 		$this->assertTrue( $this->sut->is_customer_email() );
 		$this->assertSame( 'order-updates', $this->sut->email_group );
-		$this->assertSame( 'emails/customer-checkout-recovery.php', $this->sut->template_html );
-		$this->assertSame( 'emails/plain/customer-checkout-recovery.php', $this->sut->template_plain );
-		$this->assertSame( 'emails/block/customer-checkout-recovery.php', $this->sut->template_block );
+		$this->assertSame( 'emails/customer-abandoned-cart-recovery.php', $this->sut->template_html );
+		$this->assertSame( 'emails/plain/customer-abandoned-cart-recovery.php', $this->sut->template_plain );
+		$this->assertSame( 'emails/block/customer-abandoned-cart-recovery.php', $this->sut->template_block );
 	}
 
 	/**
@@ -144,7 +144,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The woocommerce_checkout_recovery_url filter can replace the generated URL so a follow-up can swap in a tokenized URL without touching templates.
+	 * @testdox The woocommerce_abandoned_cart_recovery_url filter can replace the generated URL so a follow-up can swap in a tokenized URL without touching templates.
 	 */
 	public function test_recovery_url_is_filterable(): void {
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
@@ -153,12 +153,12 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$override = static function () {
 			return 'https://example.test/custom-recovery';
 		};
-		add_filter( 'woocommerce_checkout_recovery_url', $override );
+		add_filter( 'woocommerce_abandoned_cart_recovery_url', $override );
 
 		try {
 			$this->assertSame( 'https://example.test/custom-recovery', $this->sut->get_recovery_url() );
 		} finally {
-			remove_filter( 'woocommerce_checkout_recovery_url', $override );
+			remove_filter( 'woocommerce_abandoned_cart_recovery_url', $override );
 		}
 	}
 
@@ -168,7 +168,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	public function test_is_registered_with_wc_emails(): void {
 		$emails = WC()->mailer()->get_emails();
 
-		$this->assertArrayHasKey( 'WC_Email_Customer_Checkout_Recovery', $emails );
+		$this->assertArrayHasKey( 'WC_Email_Customer_Abandoned_Cart_Recovery', $emails );
 	}
 
 	/**
@@ -206,7 +206,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$this->sut->trigger( $order->get_id() );
 		$after = count( $mailer->mock_sent );
 
-		$this->assertSame( $before, $after, 'Disabled checkout recovery email must not dispatch any mail.' );
+		$this->assertSame( $before, $after, 'Disabled abandoned cart recovery email must not dispatch any mail.' );
 	}
 
 	/**
@@ -223,7 +223,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$this->sut->trigger( $order->get_id() );
 		$after = count( $mailer->mock_sent );
 
-		$this->assertSame( $before + 1, $after, 'Enabled checkout recovery email must dispatch one message.' );
+		$this->assertSame( $before + 1, $after, 'Enabled abandoned cart recovery email must dispatch one message.' );
 		$this->assertSame( $order->get_billing_email(), $this->sut->recipient );
 	}
 
@@ -242,11 +242,11 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$this->sut->trigger( $order->get_id() );
 		$after = count( $mailer->mock_sent );
 
-		$this->assertSame( $before, $after, 'Suppressed checkout recovery email must not dispatch.' );
+		$this->assertSame( $before, $after, 'Suppressed abandoned cart recovery email must not dispatch.' );
 	}
 
 	/**
-	 * @testdox trigger() is a no-op when the woocommerce_checkout_recovery_suppress filter returns true.
+	 * @testdox trigger() is a no-op when the woocommerce_abandoned_cart_recovery_suppress filter returns true.
 	 */
 	public function test_trigger_is_suppressed_when_filter_returns_true(): void {
 		$this->sut->update_option( 'enabled', 'yes' );
@@ -255,7 +255,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$order = \Automattic\WooCommerce\RestApi\UnitTests\Helpers\OrderHelper::create_order();
 
 		$override = static fn() => true;
-		add_filter( 'woocommerce_checkout_recovery_suppress', $override );
+		add_filter( 'woocommerce_abandoned_cart_recovery_suppress', $override );
 
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
@@ -263,10 +263,10 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 			$this->sut->trigger( $order->get_id() );
 			$after = count( $mailer->mock_sent );
 		} finally {
-			remove_filter( 'woocommerce_checkout_recovery_suppress', $override );
+			remove_filter( 'woocommerce_abandoned_cart_recovery_suppress', $override );
 		}
 
-		$this->assertSame( $before, $after, 'Filter-suppressed checkout recovery email must not dispatch.' );
+		$this->assertSame( $before, $after, 'Filter-suppressed abandoned cart recovery email must not dispatch.' );
 	}
 
 	/**
@@ -289,7 +289,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The woocommerce_checkout_recovery_eligible_statuses filter widens the eligible set for trigger().
+	 * @testdox The woocommerce_abandoned_cart_recovery_eligible_statuses filter widens the eligible set for trigger().
 	 */
 	public function test_trigger_eligible_statuses_filter_can_widen(): void {
 		$this->sut->update_option( 'enabled', 'yes' );
@@ -302,7 +302,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		$widen = static function () {
 			return array( 'pending', 'failed' );
 		};
-		add_filter( 'woocommerce_checkout_recovery_eligible_statuses', $widen );
+		add_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
 
 		$mailer = tests_retrieve_phpmailer_instance();
 		$before = count( $mailer->mock_sent );
@@ -310,7 +310,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 			$this->sut->trigger( $order->get_id() );
 			$after = count( $mailer->mock_sent );
 		} finally {
-			remove_filter( 'woocommerce_checkout_recovery_eligible_statuses', $widen );
+			remove_filter( 'woocommerce_abandoned_cart_recovery_eligible_statuses', $widen );
 		}
 
 		$this->assertSame( $before + 1, $after, 'Widened filter must allow non-default statuses to receive the email.' );
@@ -320,20 +320,20 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	 * @testdox is_suppressed() falls back to handler detection on fresh installs where the merchant has not saved the suppression toggle yet, so the UI default and the runtime gate stay in sync.
 	 */
 	public function test_is_suppressed_falls_back_to_handler_detection_when_option_unset(): void {
-		delete_option( 'woocommerce_customer_checkout_recovery_settings' );
+		delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );
 		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
 
-		$this->assertTrue( WC_Email_Customer_Checkout_Recovery::is_suppressed() );
+		$this->assertTrue( WC_Email_Customer_Abandoned_Cart_Recovery::is_suppressed() );
 	}
 
 	/**
 	 * @testdox is_suppressed() returns false on a fresh install when no known handler is active so core's recovery email runs by default.
 	 */
 	public function test_is_suppressed_returns_false_when_option_unset_and_no_handler(): void {
-		delete_option( 'woocommerce_customer_checkout_recovery_settings' );
+		delete_option( 'woocommerce_customer_abandoned_cart_recovery_settings' );
 		update_option( 'active_plugins', array() );
 
-		$this->assertFalse( WC_Email_Customer_Checkout_Recovery::is_suppressed() );
+		$this->assertFalse( WC_Email_Customer_Abandoned_Cart_Recovery::is_suppressed() );
 	}
 
 	/**
@@ -343,7 +343,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
 		$this->sut->update_option( 'suppressed', 'no' );
 
-		$this->assertFalse( WC_Email_Customer_Checkout_Recovery::is_suppressed() );
+		$this->assertFalse( WC_Email_Customer_Abandoned_Cart_Recovery::is_suppressed() );
 	}
 
 	/**
@@ -352,7 +352,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	public function test_active_recovery_handlers_empty_when_none_active(): void {
 		update_option( 'active_plugins', array() );
 
-		$this->assertSame( array(), WC_Email_Customer_Checkout_Recovery::get_active_recovery_handlers() );
+		$this->assertSame( array(), WC_Email_Customer_Abandoned_Cart_Recovery::get_active_recovery_handlers() );
 	}
 
 	/**
@@ -361,7 +361,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	public function test_active_recovery_handlers_detects_automatewoo(): void {
 		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php' ) );
 
-		$active = WC_Email_Customer_Checkout_Recovery::get_active_recovery_handlers();
+		$active = WC_Email_Customer_Abandoned_Cart_Recovery::get_active_recovery_handlers();
 
 		$this->assertArrayHasKey( 'automatewoo/automatewoo.php', $active );
 		$this->assertSame( 'AutomateWoo', $active['automatewoo/automatewoo.php'] );
@@ -374,7 +374,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	public function test_active_recovery_handlers_detects_both(): void {
 		update_option( 'active_plugins', array( 'automatewoo/automatewoo.php', 'mailpoet/mailpoet.php' ) );
 
-		$active = WC_Email_Customer_Checkout_Recovery::get_active_recovery_handlers();
+		$active = WC_Email_Customer_Abandoned_Cart_Recovery::get_active_recovery_handlers();
 
 		$this->assertCount( 2, $active );
 		$this->assertArrayHasKey( 'automatewoo/automatewoo.php', $active );
