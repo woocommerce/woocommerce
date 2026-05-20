@@ -2,6 +2,7 @@
  * External dependencies
  */
 import { DataForm } from '@wordpress/dataviews';
+import type { FormField } from '@wordpress/dataviews';
 
 /**
  * Internal dependencies
@@ -13,12 +14,37 @@ import {
 	getVisibleProductEditFields,
 } from '../../product-edit/utils';
 import { VARIATION_FORM_FIELDS } from './form-fields';
+import type { VariationEditFieldId } from '../fields/registry';
+
+type VariationFormField = VariationEditFieldId | FormField;
 
 type VariationEditFormProps = {
 	editableFields: ReturnType< typeof getProductEditFields >;
 	onChange: ( changes: Partial< ProductEntityRecord > ) => void;
 	selectedVariations: ProductEntityRecord[];
 };
+
+function pruneFormFields(
+	fields: VariationFormField[],
+	visibleIds: Set< string >
+): VariationFormField[] {
+	return fields.reduce< VariationFormField[] >( ( acc, field ) => {
+		if ( typeof field === 'string' ) {
+			if ( visibleIds.has( field ) ) {
+				acc.push( field );
+			}
+			return acc;
+		}
+		const prunedChildren = pruneFormFields(
+			( field.children ?? [] ) as VariationFormField[],
+			visibleIds
+		);
+		if ( prunedChildren.length > 0 ) {
+			acc.push( { ...field, children: prunedChildren } );
+		}
+		return acc;
+	}, [] );
+}
 
 export function VariationEditForm( {
 	editableFields,
@@ -30,11 +56,12 @@ export function VariationEditForm( {
 		editableFields,
 		selectedVariations
 	);
+	const visibleFieldIds = new Set( visibleFields.map( ( f ) => f.id ) );
 
 	const form = {
 		type: 'regular' as const,
 		labelPosition: 'top' as const,
-		fields: VARIATION_FORM_FIELDS,
+		fields: pruneFormFields( VARIATION_FORM_FIELDS, visibleFieldIds ),
 	};
 
 	return (
