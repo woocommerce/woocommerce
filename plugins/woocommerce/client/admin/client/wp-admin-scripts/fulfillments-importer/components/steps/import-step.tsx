@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { __, sprintf } from '@wordpress/i18n';
 import { Button, Notice } from '@wordpress/components';
 
@@ -29,11 +29,16 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 		},
 	} );
 
-	// Kick off the loop once when the step mounts. run() is guarded by an
-	// internal running ref so re-invocations from identity changes are no-ops.
+	// Kick off the loop exactly once when the step mounts. Re-running on
+	// identity changes (e.g. mapping edits in another step's reducer) could
+	// silently restart an import that had already errored and reset its
+	// running guard, so the latest run is captured in a ref instead.
+	const runRef = useRef( run );
+	runRef.current = run;
 	useEffect( () => {
-		void run();
-	}, [ run ] );
+		void runRef.current();
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [] );
 
 	const percent =
 		state.total > 0
