@@ -2,7 +2,7 @@
  * External dependencies
  */
 import { render, screen } from '@testing-library/react';
-import { useSelect } from '@wordpress/data';
+import { useSelect, useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -31,6 +31,17 @@ const mockActivePlugins = ( plugins: string[] ) => {
 };
 
 describe( 'AbandonedCartRecoveryRecommendations', () => {
+	beforeEach( () => {
+		// The recommendations card calls useDispatch( pluginsStore ) for the
+		// install hook and useDispatch( 'core/notices' ) inside MailPoetItem
+		// for the success notice. A single stub covers both since neither test
+		// exercises the install flow itself.
+		( useDispatch as jest.Mock ).mockReturnValue( {
+			installAndActivatePlugins: jest.fn().mockResolvedValue( undefined ),
+			createSuccessNotice: jest.fn(),
+		} );
+	} );
+
 	it( 'renders both items when neither plugin is active', () => {
 		mockActivePlugins( [] );
 

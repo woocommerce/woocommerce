@@ -2,11 +2,11 @@
  * External dependencies
  */
 import { __ } from '@wordpress/i18n';
-import { useSelect } from '@wordpress/data';
-import { Children } from '@wordpress/element';
+import { useSelect, useDispatch } from '@wordpress/data';
+import { Children, useState } from '@wordpress/element';
 import { CardFooter } from '@wordpress/components';
 import { Text } from '@woocommerce/experimental';
-import { pluginsStore } from '@woocommerce/data';
+import { pluginsStore, PluginNames } from '@woocommerce/data';
 import { getAdminLink } from '@woocommerce/settings';
 
 /**
@@ -17,9 +17,47 @@ import {
 	DismissableListHeading,
 } from '../settings-recommendations/dismissable-list';
 import { TrackedLink } from '~/components/tracked-link/tracked-link';
+import { createNoticesFromResponse } from '../lib/notices';
 import AutomateWooItem from './automatewoo-item';
 import MailPoetItem from './mailpoet-item';
 import './abandoned-cart-recovery-recommendations.scss';
+
+/**
+ * Install-and-activate hook used by the recommendation card.
+ *
+ * Tracks which plugin slugs are currently being set up so item buttons can show
+ * a busy state and be disabled while any install is in flight. Mirrors the
+ * shipping recommendation hook (`shipping-recommendations.tsx#useInstallPlugin`)
+ * with a narrower surface — we only need the combined install+activate path.
+ */
+export const useInstallPlugin = () => {
+	const [ pluginsBeingSetup, setPluginsBeingSetup ] = useState<
+		Array< string >
+	>( [] );
+
+	const { installAndActivatePlugins } = useDispatch( pluginsStore );
+
+	const handleSetup = ( slugs: string[] ): PromiseLike< void > => {
+		if ( pluginsBeingSetup.length > 0 ) {
+			return Promise.resolve();
+		}
+
+		setPluginsBeingSetup( slugs );
+
+		return installAndActivatePlugins( slugs as Partial< PluginNames >[] )
+			.then( () => {
+				setPluginsBeingSetup( [] );
+			} )
+			.catch( ( response: { errors: Record< string, string > } ) => {
+				createNoticesFromResponse( response );
+				setPluginsBeingSetup( [] );
+
+				return Promise.reject();
+			} );
+	};
+
+	return [ pluginsBeingSetup, handleSetup ] as const;
+};
 
 export const AbandonedCartRecoveryRecommendationsList = ( {
 	children,
@@ -75,6 +113,8 @@ const AbandonedCartRecoveryRecommendations = () => {
 		[]
 	);
 
+	const [ pluginsBeingSetup, setupPlugin ] = useInstallPlugin();
+
 	const hasAutomateWoo = activePlugins.includes( 'automatewoo' );
 	const hasMailPoet = activePlugins.includes( 'mailpoet' );
 
@@ -85,7 +125,12 @@ const AbandonedCartRecoveryRecommendations = () => {
 
 	return (
 		<AbandonedCartRecoveryRecommendationsList>
-			{ ! hasMailPoet && <MailPoetItem /> }
+			{ ! hasMailPoet && (
+				<MailPoetItem
+					pluginsBeingSetup={ pluginsBeingSetup }
+					onSetupClick={ setupPlugin }
+				/>
+			) }
 			{ ! hasAutomateWoo && <AutomateWooItem /> }
 		</AbandonedCartRecoveryRecommendationsList>
 	);

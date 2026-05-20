@@ -5,15 +5,44 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { Pill } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
+import { useDispatch } from '@wordpress/data';
+import { getAdminLink } from '@woocommerce/settings';
 
-const MAILPOET_URL =
-	'https://woocommerce.com/products/mailpoet/?utm_source=woocommerce&utm_medium=product&utm_campaign=abandoned-cart-recovery-recommendation';
+const MAILPOET_SLUG = 'mailpoet';
 
-const MailPoetItem = () => {
-	const handleClick = () => {
+type MailPoetItemProps = {
+	pluginsBeingSetup: ReadonlyArray< string >;
+	onSetupClick: ( slugs: string[] ) => PromiseLike< void >;
+};
+
+const MailPoetItem = ( {
+	pluginsBeingSetup,
+	onSetupClick,
+}: MailPoetItemProps ) => {
+	const { createSuccessNotice } = useDispatch( 'core/notices' );
+
+	const handleSetupClick = () => {
 		recordEvent( 'abandoned_cart_recovery_recommendation_click', {
-			plugin: 'mailpoet',
+			plugin: MAILPOET_SLUG,
 		} );
+
+		onSetupClick( [ MAILPOET_SLUG ] )
+			.then( () => {
+				createSuccessNotice(
+					__( '🎉 MailPoet is installed!', 'woocommerce' ),
+					{
+						actions: [
+							{
+								url: getAdminLink( 'admin.php?page=mailpoet-newsletters' ),
+								label: __( 'Set up MailPoet', 'woocommerce' ),
+							},
+						],
+					}
+				);
+			} )
+			.catch( () => {
+				// Error notice handled by createNoticesFromResponse in the install hook.
+			} );
 	};
 
 	return (
@@ -33,12 +62,11 @@ const MailPoetItem = () => {
 			<div className="woocommerce-list__item-after">
 				<Button
 					variant="secondary"
-					href={ MAILPOET_URL }
-					target="_blank"
-					rel="noreferrer"
-					onClick={ handleClick }
+					onClick={ handleSetupClick }
+					isBusy={ pluginsBeingSetup.includes( MAILPOET_SLUG ) }
+					disabled={ pluginsBeingSetup.length > 0 }
 				>
-					{ __( 'Learn more', 'woocommerce' ) }
+					{ __( 'Get started', 'woocommerce' ) }
 				</Button>
 			</div>
 		</div>

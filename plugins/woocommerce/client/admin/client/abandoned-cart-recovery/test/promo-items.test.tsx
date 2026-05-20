@@ -1,9 +1,10 @@
 /**
  * External dependencies
  */
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { recordEvent } from '@woocommerce/tracks';
+import { useDispatch } from '@wordpress/data';
 
 /**
  * Internal dependencies
@@ -13,6 +14,11 @@ import MailPoetItem from '../mailpoet-item';
 
 jest.mock( '@woocommerce/tracks', () => ( {
 	recordEvent: jest.fn(),
+} ) );
+
+jest.mock( '@wordpress/data', () => ( {
+	...jest.requireActual( '@wordpress/data' ),
+	useDispatch: jest.fn(),
 } ) );
 
 describe( 'AutomateWooItem', () => {
@@ -50,35 +56,91 @@ describe( 'AutomateWooItem', () => {
 } );
 
 describe( 'MailPoetItem', () => {
+	const createSuccessNoticeMock = jest.fn();
+
 	beforeEach( () => {
 		( recordEvent as jest.Mock ).mockClear();
+		createSuccessNoticeMock.mockClear();
+		( useDispatch as jest.Mock ).mockReturnValue( {
+			createSuccessNotice: createSuccessNoticeMock,
+		} );
 	} );
 
-	it( 'renders the MailPoet title, description, and Learn more CTA', () => {
-		render( <MailPoetItem /> );
+	it( 'renders the MailPoet title, description, and Get started CTA', () => {
+		render(
+			<MailPoetItem
+				pluginsBeingSetup={ [] }
+				onSetupClick={ () => Promise.resolve() }
+			/>
+		);
 
 		expect( screen.getByText( 'MailPoet' ) ).toBeInTheDocument();
 		expect(
 			screen.getByText( /newsletters and automated welcome series/i )
 		).toBeInTheDocument();
 		expect(
-			screen.getByRole( 'link', { name: /learn more/i } )
-		).toHaveAttribute(
-			'href',
-			expect.stringContaining( 'woocommerce.com/products/mailpoet' )
-		);
+			screen.getByRole( 'button', { name: /get started/i } )
+		).toBeInTheDocument();
 	} );
 
-	it( 'fires the abandoned_cart_recovery_recommendation_click track on CTA click', async () => {
-		render( <MailPoetItem /> );
+	it( 'calls onSetupClick with the mailpoet slug and fires the Tracks event', async () => {
+		const onSetupClick = jest.fn().mockResolvedValue( undefined );
+
+		render(
+			<MailPoetItem
+				pluginsBeingSetup={ [] }
+				onSetupClick={ onSetupClick }
+			/>
+		);
 
 		await userEvent.click(
-			screen.getByRole( 'link', { name: /learn more/i } )
+			screen.getByRole( 'button', { name: /get started/i } )
 		);
 
 		expect( recordEvent ).toHaveBeenCalledWith(
 			'abandoned_cart_recovery_recommendation_click',
 			{ plugin: 'mailpoet' }
 		);
+		expect( onSetupClick ).toHaveBeenCalledWith( [ 'mailpoet' ] );
+	} );
+
+	it( 'creates a success notice with a Set up MailPoet action when install completes', async () => {
+		const onSetupClick = jest.fn().mockResolvedValue( undefined );
+
+		render(
+			<MailPoetItem
+				pluginsBeingSetup={ [] }
+				onSetupClick={ onSetupClick }
+			/>
+		);
+
+		await userEvent.click(
+			screen.getByRole( 'button', { name: /get started/i } )
+		);
+
+		await waitFor( () => {
+			expect( createSuccessNoticeMock ).toHaveBeenCalledWith(
+				'🎉 MailPoet is installed!',
+				expect.objectContaining( {
+					actions: expect.arrayContaining( [
+						expect.objectContaining( {
+							label: 'Set up MailPoet',
+						} ),
+					] ),
+				} )
+			);
+		} );
+	} );
+
+	it( 'shows the busy state when mailpoet is in flight and disables the button', () => {
+		render(
+			<MailPoetItem
+				pluginsBeingSetup={ [ 'mailpoet' ] }
+				onSetupClick={ () => Promise.resolve() }
+			/>
+		);
+
+		const button = screen.getByRole( 'button', { name: /get started/i } );
+		expect( button ).toBeDisabled();
 	} );
 } );
