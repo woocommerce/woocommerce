@@ -124,7 +124,7 @@ class FulfillmentsCsvImporter {
 	 *     skipped: int,
 	 *     failed:  int,
 	 *     notified: int,
-	 *     rows:    array<int, array{row:int, status:string, message:string, order_id?:int, fulfillment_id?:int}>
+	 *     rows:    array<int, array{row:int, status:string, message:string, code?:string, order_id?:int, fulfillment_id?:int}>
 	 * }
 	 */
 	public function run(): array {
@@ -589,7 +589,7 @@ class FulfillmentsCsvImporter {
 	 * @param int                            $row_number           1-based row number (header is row 1).
 	 * @param array<string, true>            $seen_tracking_pairs  Reference to in-file dedupe tracker.
 	 *
-	 * @return array{row:int, status:string, message:string, order_id?:int, fulfillment_id?:int, notified?:bool}
+	 * @return array{row:int, status:string, message:string, code?:string, order_id?:int, fulfillment_id?:int, notified?:bool}
 	 */
 	private function process_row( array $row, array $header_map, int $row_number, array &$seen_tracking_pairs ): array {
 		$order_number    = $this->get_field( $row, $header_map, self::COL_ORDER_NUMBER );
@@ -750,7 +750,7 @@ class FulfillmentsCsvImporter {
 	 * Build a failed-row result and fire a validation_error tracker event.
 	 *
 	 * @param int      $row_number Row number.
-	 * @param string   $error_code Stable machine-readable code (used for analytics).
+	 * @param string   $error_code Stable machine-readable code (surfaced to the UI and analytics).
 	 * @param string   $message    Human-readable failure message (used in the report).
 	 * @param int|null $order_id   Optional order ID for context.
 	 * @return array<string, mixed>
@@ -761,6 +761,7 @@ class FulfillmentsCsvImporter {
 		$result = array(
 			'row'     => $row_number,
 			'status'  => 'failed',
+			'code'    => $error_code,
 			'message' => $message,
 		);
 		if ( null !== $order_id ) {
