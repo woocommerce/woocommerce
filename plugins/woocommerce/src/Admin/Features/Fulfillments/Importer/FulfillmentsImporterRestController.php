@@ -34,13 +34,6 @@ defined( 'ABSPATH' ) || exit;
 class FulfillmentsImporterRestController extends RestApiControllerBase {
 
 	/**
-	 * Endpoint namespace.
-	 *
-	 * @var string
-	 */
-	protected $namespace = 'wc/v3';
-
-	/**
 	 * REST API base.
 	 *
 	 * @var string
