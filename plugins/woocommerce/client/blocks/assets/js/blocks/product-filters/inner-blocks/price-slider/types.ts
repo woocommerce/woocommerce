@@ -7,7 +7,13 @@ import type { BlockEditProps } from '@wordpress/blocks';
  * Internal dependencies
  */
 import type { RangeInputBlockContext } from '../../../../types/type-defs/range-input';
-import type { Color } from '../../types';
+
+type Color = {
+	slug?: string;
+	class?: string;
+	name?: string;
+	color: string;
+};
 
 export type BlockAttributes = {
 	showInputFields: boolean;
