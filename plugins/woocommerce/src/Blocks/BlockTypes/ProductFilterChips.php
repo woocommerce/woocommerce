@@ -68,11 +68,20 @@ final class ProductFilterChips extends AbstractBlock {
 			$wrapper_attributes['style'] = esc_attr( $style ) . ';';
 		}
 
-		$visible_items  = array_slice( $items, 0, $display_limit, true );
-		$has_more_items = count( $items ) > count( $visible_items );
-		$hidden_count   = max( 0, count( $items ) - count( $visible_items ) );
-		$first_item     = reset( $items );
-		$show_counts    = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$first_items             = array_slice( $items, 0, $display_limit, true );
+		$overflow_items          = array_slice( $items, $display_limit );
+		$overflow_selected_items = array_filter( $overflow_items, fn( $item ) => is_array( $item ) && ! empty( $item['selected'] ) );
+		$visible_items           = array_merge( $first_items, $overflow_selected_items );
+		$hidden_count            = count( $items ) - count( $visible_items );
+
+		$first_item         = reset( $items );
+		$show_counts        = is_array( $first_item ) && array_key_exists( 'count', $first_item );
+		$has_color_swatches = is_array( $first_item ) && array_key_exists( 'color', $first_item );
+
+		if ( $has_color_swatches && is_string( $classes ) && ! str_contains( $classes, 'is-style-swatch' ) ) {
+			$classes                    .= ' is-style-swatch';
+			$wrapper_attributes['class'] = esc_attr( $classes );
+		}
 
 		ob_start();
 		?>
@@ -81,13 +90,9 @@ final class ProductFilterChips extends AbstractBlock {
 				<?php if ( ! empty( $block_context['groupLabel'] ) ) : ?>
 					<legend class="screen-reader-text"><?php echo esc_html( $block_context['groupLabel'] ); ?></legend>
 				<?php endif; ?>
-				<div
-					class="wc-block-product-filter-chips__items"
-					data-wp-interactive="<?php echo esc_attr( $store_namespace ); ?>"
-				>
+				<div class="wc-block-product-filter-chips__items">
 					<?php
-					foreach ( $visible_items as $index => $item ) :
-						$context_item = array_merge( $item, array( 'index' => $index ) );
+					foreach ( $visible_items as $item ) :
 						?>
 						<button
 							class="wc-block-product-filter-chips__item"
@@ -101,13 +106,22 @@ final class ProductFilterChips extends AbstractBlock {
 							aria-checked="<?php echo ! empty( $item['selected'] ) ? 'true' : 'false'; ?>"
 							<?php disabled( ! empty( $item['disabled'] ) ); ?>
 							data-wp-each-child
-							<?php echo wp_interactivity_data_wp_context( array( 'item' => $context_item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
+							<?php echo wp_interactivity_data_wp_context( array( 'item' => $item ) ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped ?>
 							data-wp-bind--aria-checked="context.item.selected"
 							data-wp-bind--disabled="context.item.disabled"
-							data-wp-bind--hidden="woocommerce/product-filter-chips::state.itemHidden"
+							data-wp-bind--hidden="context.item.hidden"
 							data-wp-on--click="actions.toggle"
 						>
 							<span class="wc-block-product-filter-chips__label">
+								<?php if ( $has_color_swatches ) : ?>
+									<span
+										class="wc-block-product-filter-chips__swatch<?php echo empty( $item['color'] ) ? ' wc-block-product-filter-chips__swatch--no-color' : ''; ?>"
+										<?php if ( ! empty( $item['color'] ) ) : ?>
+											style="background-color: <?php echo esc_attr( $item['color'] ); ?>;"
+										<?php endif; ?>
+										aria-hidden="true"
+									></span>
+								<?php endif; ?>
 								<span class="wc-block-product-filter-chips__text">
 									<?php echo esc_html( $item['label'] ); ?>
 								</span>
@@ -120,7 +134,7 @@ final class ProductFilterChips extends AbstractBlock {
 						</button>
 					<?php endforeach; ?>
 					<template
-						data-wp-each--item="state.selectableItems"
+						data-wp-each--item="state.items"
 						data-wp-each-key="context.item.id"
 					>
 						<button
@@ -132,10 +146,18 @@ final class ProductFilterChips extends AbstractBlock {
 							data-wp-bind--value="context.item.value"
 							data-wp-bind--aria-checked="context.item.selected"
 							data-wp-bind--disabled="context.item.disabled"
-							data-wp-bind--hidden="woocommerce/product-filter-chips::state.itemHidden"
+							data-wp-bind--hidden="context.item.hidden"
 							data-wp-on--click="actions.toggle"
 						>
 							<span class="wc-block-product-filter-chips__label">
+								<?php if ( $has_color_swatches ) : ?>
+									<span
+										class="wc-block-product-filter-chips__swatch"
+										data-wp-class--wc-block-product-filter-chips__swatch--no-color="woocommerce/product-filter-chips::state.swatchHidden"
+										data-wp-bind--style="woocommerce/product-filter-chips::state.swatchStyle"
+										aria-hidden="true"
+									></span>
+								<?php endif; ?>
 								<span
 									class="wc-block-product-filter-chips__text"
 									data-wp-text="context.item.label"
@@ -149,7 +171,7 @@ final class ProductFilterChips extends AbstractBlock {
 						</button>
 					</template>
 				</div>
-				<?php if ( $has_more_items ) : ?>
+				<?php if ( $hidden_count > 0 ) : ?>
 					<button
 						type="button"
 						class="wc-block-product-filter-chips__show-more"

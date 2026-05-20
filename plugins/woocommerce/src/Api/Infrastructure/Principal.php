@@ -57,11 +57,9 @@ class Principal {
 	 * model rather than inheriting a debug mode policy by accident.
 	 *
 	 * Note that this method's outcome is necessary but not sufficient for debug
-	 * mode to be active: the controller also requires either `WP_DEBUG` to be
-	 * defined and true, or the request to carry `_debug=1`. There's also a
-	 * developer escape hatch that bypasses this method entirely — when the
-	 * controller's `is_local_environment()` check is true, debug mode is
-	 * available without consulting the principal.
+	 * mode to be active: the controller also requires the request to carry
+	 * `_debug=1`. The decision can be overridden by the
+	 * `woocommerce_graphql_can_use_debug_mode` filter.
 	 */
 	public function can_use_debug_mode(): bool {
 		return user_can( $this->user, 'manage_options' );

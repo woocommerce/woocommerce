@@ -12,6 +12,7 @@ use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplatesControll
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateAutoApplier;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateDivergenceDetector;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncBackfill;
+use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCEmailTemplateSyncTracker;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmails;
 use Automattic\WooCommerce\Internal\EmailEditor\WCTransactionalEmails\WCTransactionalEmailPostsManager;
 use Automattic\WooCommerce\Internal\EmailEditor\EmailTemplates\TemplateApiController;
@@ -153,8 +154,17 @@ class Integration {
 		add_action( 'init', array( WCEmailTemplateDivergenceDetector::class, 'register_meta' ), 11 );
 		add_action( 'woocommerce_updated', array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 20 );
 		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateDivergenceDetector::class, 'run_sweep' ), 10 );
+		// Fresh installs never cross the 10.8 db-update boundary, so the RSM-149
+		// backfill never runs and `BACKFILL_COMPLETE_OPTION` is never written.
+		// Stamp it from the `woocommerce_newly_installed` action so `run_sweep()`
+		// doesn't sit dormant forever on new sites.
+		add_action( 'woocommerce_newly_installed', array( WCEmailTemplateDivergenceDetector::class, 'mark_backfill_complete_on_fresh_install' ), 20 );
 		add_action( WCEmailTemplateAutoApplier::AUTO_APPLY_AS_HOOK, array( WCEmailTemplateAutoApplier::class, 'run' ), 10 );
 		add_action( 'woocommerce_email_template_divergence_sweep_complete', array( WCEmailTemplateAutoApplier::class, 'schedule' ), 10 );
+		// RSM-145 Tracks instrumentation: fire `_backfill_completed` once when the
+		// RSM-149 sync-meta backfill finalises. The backfill class itself is in the
+		// 10.8 feature freeze, so we hook the existing action it already publishes.
+		add_action( WCEmailTemplateSyncBackfill::BACKFILL_COMPLETE_ACTION, array( WCEmailTemplateSyncTracker::class, 'on_backfill_complete' ), 20 );
 	}
 
 	/**

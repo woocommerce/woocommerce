@@ -9,6 +9,7 @@ namespace Automattic\WooCommerce\Internal\MCP;
 
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 use Automattic\WooCommerce\Internal\Abilities\AbilitiesRegistry;
+use Automattic\WooCommerce\Internal\Abilities\REST\RestAbilityFactory;
 use Automattic\WooCommerce\Internal\MCP\Transport\WooCommerceRestTransport;
 
 defined( 'ABSPATH' ) || exit;
@@ -153,8 +154,8 @@ class MCPAdapterProvider {
 	/**
 	 * Get WooCommerce abilities for MCP server.
 	 *
-	 * Filters abilities to include only those with 'woocommerce/' namespace by default,
-	 * with a filter to allow inclusion of abilities from other namespaces.
+	 * Filters abilities to include only those explicitly exposed to the deprecated
+	 * WooCommerce MCP endpoint, with a filter to override inclusion decisions.
 	 *
 	 * @return array Array of ability IDs for MCP server.
 	 */
@@ -163,12 +164,11 @@ class MCPAdapterProvider {
 		$abilities_registry = wc_get_container()->get( AbilitiesRegistry::class );
 		$all_abilities_ids  = $abilities_registry->get_abilities_ids();
 
-		// Filter abilities based on namespace and custom filter.
+		// Filter abilities based on deprecated endpoint exposure metadata and custom filter.
 		$mcp_abilities = array_filter(
 			$all_abilities_ids,
 			static function ( $ability_id ) {
-				// Include WooCommerce abilities by default.
-				$include = str_starts_with( $ability_id, 'woocommerce/' );
+				$include = self::should_include_ability_by_default( $ability_id );
 
 				// Allow filter to override inclusion decision.
 				/**
@@ -176,7 +176,12 @@ class MCPAdapterProvider {
 				 *
 				 * @since 10.3.0
 				 *
-				 * @param bool   $include    Whether to include the ability.
+				 * @param bool   $include    Whether to include the ability by default. True when the ability has
+				 *                            `expose_in_deprecated_woocommerce_mcp => true` in its metadata
+				 *                            (set automatically on REST-derived abilities by RestAbilityFactory).
+				 *                            Migration note: this value no longer represents whether the ability uses
+				 *                            the `woocommerce/` namespace.
+				 *                            Return unchanged to keep the default, or return true/false to override.
 				 * @param string $ability_id The ability ID.
 				 */
 				return apply_filters( 'woocommerce_mcp_include_ability', $include, $ability_id );
@@ -185,6 +190,34 @@ class MCPAdapterProvider {
 
 		// Re-index array.
 		return array_values( $mcp_abilities );
+	}
+
+	/**
+	 * Check if an ability should be included in the deprecated WooCommerce MCP endpoint.
+	 *
+	 * REST-derived abilities can opt in to the deprecated WooCommerce MCP endpoint.
+	 * Require explicit metadata so semantic/domain abilities can use WooCommerce
+	 * namespaces without expanding the deprecated MCP tool list.
+	 * This intentionally allows abilities from any namespace to opt in to the
+	 * deprecated endpoint while keeping namespace and transport exposure separate.
+	 *
+	 * @param string $ability_id Ability ID.
+	 * @return bool Whether to include the ability by default.
+	 */
+	private static function should_include_ability_by_default( string $ability_id ): bool {
+		// Keep the pre-check to avoid triggering _doing_it_wrong() for stale or mocked registry IDs.
+		if ( function_exists( 'wp_get_ability' ) && function_exists( 'wp_has_ability' ) && wp_has_ability( $ability_id ) ) {
+			$ability = wp_get_ability( $ability_id );
+			if ( $ability ) {
+				// Strict boolean required: truthy values like 1 or "true" are intentionally excluded.
+				return true === $ability->get_meta_item(
+					RestAbilityFactory::EXPOSE_IN_DEPRECATED_MCP_META_KEY,
+					false
+				);
+			}
+		}
+
+		return false;
 	}
 
 	/**

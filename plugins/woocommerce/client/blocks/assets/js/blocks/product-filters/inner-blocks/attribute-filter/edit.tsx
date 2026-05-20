@@ -37,6 +37,7 @@ import { Notice } from '../../components/notice';
 import { sortFilterOptions } from '../../utils/sort-filter-options';
 
 const ATTRIBUTES = getSetting< AttributeSetting[] >( 'attributes', [] );
+const EMPTY_TERM_COLORS: Record< string, string > = {};
 
 const Edit = ( props: EditProps ) => {
 	const { attributes: blockAttributes } = props;
@@ -52,6 +53,10 @@ const Edit = ( props: EditProps ) => {
 	} = blockAttributes;
 
 	const attributeObject = getAttributeFromId( attributeId );
+	const termColors = getSetting< Record< string, string > >(
+		'productFilterTermColors',
+		EMPTY_TERM_COLORS
+	);
 
 	const [ attributeOptions, setAttributeOptions ] = useState<
 		FilterOptionItem[]
@@ -102,6 +107,9 @@ const Edit = ( props: EditProps ) => {
 					value: term.id.toString(),
 					selected: index === 0,
 					...( showCounts && { count: term.count } ),
+					...( term.id in termColors && {
+						color: termColors[ term.id ],
+					} ),
 				} ) );
 
 			setAttributeOptions(
@@ -119,6 +127,7 @@ const Edit = ( props: EditProps ) => {
 		isTermsLoading,
 		isFilterCountsLoading,
 		attributeObject,
+		termColors,
 	] );
 
 	const { children, ...innerBlocksProps } = useInnerBlocksProps(

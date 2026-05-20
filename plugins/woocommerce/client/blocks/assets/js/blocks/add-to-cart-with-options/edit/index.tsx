@@ -25,7 +25,9 @@ const AddToCartOptionsEdit = (
 	props: BlockEditProps< Attributes > & { context?: { postId?: number } }
 ) => {
 	const { product } = useProduct( props.context?.postId );
-	const blockProps = useBlockProps();
+	const blockProps = useBlockProps( {
+		className: 'wc-block-add-to-cart-with-options',
+	} );
 	const blockClientId = blockProps?.id;
 
 	const {

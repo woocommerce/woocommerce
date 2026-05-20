@@ -405,6 +405,32 @@ class ControllerTest extends WC_REST_Unit_Test_Case {
 	}
 
 	/**
+	 * Regression test for WOO13-227: an unauthenticated request must not be
+	 * able to read a guest order's fulfillments. The owner-read check compares
+	 * get_current_user_id() to $order->get_customer_id(); for guest orders
+	 * both are 0, so the check needs a `get_current_user_id() > 0` guard.
+	 */
+	public function test_permission_check_unauthenticated_cannot_read_guest_order_fulfillments() {
+		$guest_order       = WC_Helper_Order::create_order( 0 );
+		$guest_fulfillment = FulfillmentsHelper::create_fulfillment(
+			array( 'entity_id' => $guest_order->get_id() )
+		);
+
+		wp_set_current_user( 0 );
+
+		$list_request = new WP_REST_Request( 'GET', '/wc/v4/fulfillments' );
+		$list_request->set_param( 'order_id', $guest_order->get_id() );
+		$list_response = rest_get_server()->dispatch( $list_request );
+		$this->assertSame( 401, $list_response->get_status() );
+
+		$get_request  = new WP_REST_Request( 'GET', '/wc/v4/fulfillments/' . $guest_fulfillment->get_id() );
+		$get_response = rest_get_server()->dispatch( $get_request );
+		$this->assertSame( 401, $get_response->get_status() );
+
+		WC_Helper_Order::delete_order( $guest_order->get_id() );
+	}
+
+	/**
 	 * Test permission check - customer accessing other's order
 	 */
 	public function test_permission_check_customer_other_order() {

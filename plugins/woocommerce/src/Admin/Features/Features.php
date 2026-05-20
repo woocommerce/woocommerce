@@ -151,6 +151,10 @@ class Features {
 		if ( FeaturesUtil::feature_is_enabled( 'blueprint' ) ) {
 			new \Automattic\WooCommerce\Admin\Features\Blueprint\Init();
 		}
+
+		if ( FeaturesUtil::feature_is_enabled( 'order-detail-redesign' ) ) {
+			new \Automattic\WooCommerce\Internal\Features\OrderDetailRedesign\Init();
+		}
 	}
 
 	/**

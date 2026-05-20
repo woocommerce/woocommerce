@@ -100,6 +100,16 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 			WCEmailTemplateDivergenceDetector::VERSION_META_KEY,
 			'9.4.0'
 		);
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
+			'abc123def456'
+		);
+		update_post_meta(
+			$post_id,
+			WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY,
+			true
+		);
 
 		$request  = new WP_REST_Request( 'GET', "/wp/v2/woo_email/{$post_id}" );
 		$response = rest_do_request( $request );
@@ -130,6 +140,27 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 			'9.4.0',
 			$data['meta'][ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ],
 			'Version meta value must reflect the stamped post meta.'
+		);
+
+		$this->assertArrayHasKey(
+			WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY,
+			$data['meta'],
+			'Source hash meta must be auto-surfaced under the meta property of the wp/v2/woo_email response.'
+		);
+		$this->assertSame(
+			'abc123def456',
+			$data['meta'][ WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY ] ?? null,
+			'Source hash meta value must reflect the stamped post meta.'
+		);
+
+		$this->assertArrayHasKey(
+			WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY,
+			$data['meta'],
+			'Backfilled meta must be auto-surfaced under the meta property of the wp/v2/woo_email response.'
+		);
+		$this->assertTrue(
+			$data['meta'][ WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY ] ?? null,
+			'Backfilled meta value must reflect the stamped post meta.'
 		);
 	}
 
@@ -171,6 +202,21 @@ class WCEmailTemplateMetaRestExposureTest extends \WC_REST_Unit_Test_Case {
 			'',
 			$data['meta'][ WCEmailTemplateDivergenceDetector::VERSION_META_KEY ],
 			'Unstamped posts must surface an empty version; the JS data hook normalises this to null.'
+		);
+
+		// WP core surfaces registered string meta with an empty-string default when no value is stored.
+		$this->assertArrayHasKey( WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY, $data['meta'] );
+		$this->assertSame(
+			'',
+			$data['meta'][ WCEmailTemplateDivergenceDetector::SOURCE_HASH_META_KEY ],
+			'Unstamped posts must surface an empty source hash.'
+		);
+
+		// WP core surfaces registered boolean meta as `false` when no value is stored.
+		$this->assertArrayHasKey( WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY, $data['meta'] );
+		$this->assertFalse(
+			$data['meta'][ WCEmailTemplateDivergenceDetector::BACKFILLED_META_KEY ],
+			'Unstamped posts must surface false for the backfilled flag.'
 		);
 	}
 }

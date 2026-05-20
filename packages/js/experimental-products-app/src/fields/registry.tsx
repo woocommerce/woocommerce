@@ -6,13 +6,18 @@ import type { Field } from '@wordpress/dataviews';
 /**
  * Internal dependencies
  */
+import { fieldExtensions as brandsFieldExtensions } from './brands/field';
 import { fieldExtensions as buttonTextFieldExtensions } from './button_text/field';
 import { fieldExtensions as catalogVisibilityFieldExtensions } from './catalog_visibility/field';
 import { fieldExtensions as categoriesFieldExtensions } from './categories/field';
+import { fieldExtensions as costOfGoodsSoldFieldExtensions } from './cost_of_goods_sold/field';
 import { fieldExtensions as crossSellIdsFieldExtensions } from './cross_sell_ids/field';
+import { fieldExtensions as dateFieldExtensions } from './date/field';
 import { fieldExtensions as dateOnSaleFromFieldExtensions } from './date_on_sale_from/field';
 import { fieldExtensions as dateOnSaleToFieldExtensions } from './date_on_sale_to/field';
 import { fieldExtensions as descriptionFieldExtensions } from './description/field';
+import { fieldExtensions as globalUniqueIdFieldExtensions } from './global_unique_id/field';
+import { fieldExtensions as groupedProductsFieldExtensions } from './grouped_products/field';
 import { fieldExtensions as downloadableFieldExtensions } from './downloadable/field';
 import { fieldExtensions as downloadableCountFieldExtensions } from './downloadable_count/field';
 import { fieldExtensions as externalUrlFieldExtensions } from './external_url/field';
@@ -61,11 +66,12 @@ export const PRODUCT_FIELD_IDS = [
 	'sku',
 	'price',
 	'regular_price',
+	'on_sale',
 	'sale_price',
 	'schedule_sale',
 	'date_on_sale_from',
 	'date_on_sale_to',
-	'on_sale',
+	'cost_of_goods_sold',
 	'price_summary',
 	'stock',
 	'stock_quantity',
@@ -73,6 +79,10 @@ export const PRODUCT_FIELD_IDS = [
 	'inventory_summary',
 	'categories',
 	'tags',
+	'brands',
+	'date',
+	'global_unique_id',
+	'grouped_products',
 	'organization_summary',
 	'type',
 	'featured',
@@ -113,6 +123,7 @@ const PRODUCT_FIELD_EXTENSIONS: Record<
 	schedule_sale: scheduleSaleFieldExtensions,
 	date_on_sale_from: dateOnSaleFromFieldExtensions,
 	date_on_sale_to: dateOnSaleToFieldExtensions,
+	cost_of_goods_sold: costOfGoodsSoldFieldExtensions,
 	on_sale: onSaleFieldExtensions,
 	price_summary: priceSummaryFieldExtensions,
 	stock: stockFieldExtensions,
@@ -121,6 +132,10 @@ const PRODUCT_FIELD_EXTENSIONS: Record<
 	inventory_summary: inventorySummaryFieldExtensions,
 	categories: categoriesFieldExtensions,
 	tags: tagsFieldExtensions,
+	brands: brandsFieldExtensions,
+	date: dateFieldExtensions,
+	global_unique_id: globalUniqueIdFieldExtensions,
+	grouped_products: groupedProductsFieldExtensions,
 	organization_summary: organizationSummaryFieldExtensions,
 	type: typeFieldExtensions,
 	featured: featuredFieldExtensions,

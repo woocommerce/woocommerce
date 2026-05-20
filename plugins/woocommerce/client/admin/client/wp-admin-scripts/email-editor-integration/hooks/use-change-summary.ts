@@ -33,6 +33,12 @@ export interface ChangeSummaryCopyChange {
 	total: number;
 	/** Post-side index path of the conflicting block. */
 	path: Array< number | string >;
+	/**
+	 * Three-way path only. `true` = merchant unchanged, core changed
+	 * (drawer can apply silently). `false` = both changed (true conflict).
+	 * Absent on two-way fallback.
+	 */
+	auto_resolvable?: boolean;
 }
 
 /**
@@ -54,6 +60,8 @@ export interface ChangeSummaryStructuralChange {
 export interface ChangeSummary {
 	version_from: string;
 	version_to: string;
+	/** sha1 of the canonical core content; consumed by RSM-145 Tracks instrumentation. */
+	source_hash_to: string;
 	added_blocks: ChangeSummaryBlockEntry[];
 	removed_blocks: ChangeSummaryBlockEntry[];
 	copy_changes: ChangeSummaryCopyChange[];

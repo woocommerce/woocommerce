@@ -32,7 +32,6 @@
 		margin: 0;
 		min-width: 40px;
 		order: 2;
-		padding: 0.4em 0;
 		text-align: center;
 		vertical-align: middle;
 
@@ -85,6 +84,10 @@
 	&[hidden] {
 		display: none;
 	}
+}
+
+:where(.wc-block-components-quantity-selector .wc-block-components-quantity-selector__input) {
+	padding: 0.4em 0;
 }
 
 .theme-twentyseventeen {

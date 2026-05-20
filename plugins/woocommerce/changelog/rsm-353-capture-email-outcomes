@@ -1,0 +1,4 @@
+Significance: minor
+Type: enhancement
+
+Track transactional email outcomes: log when emails are disabled (is_enabled() false) or skipped (no recipient) in addition to the existing send-attempt logging. Adds a defensive instanceof guard in WC_Email_New_Order::trigger() before updating order meta on a successful send.

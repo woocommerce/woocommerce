@@ -1,0 +1,157 @@
+/**
+ * External dependencies
+ */
+import apiFetch from '@wordpress/api-fetch';
+
+/**
+ * Internal dependencies
+ */
+import type { ProductEntityRecord } from '../fields/types';
+import { saveSelectedProducts } from './save';
+
+const mockGetEditedEntityRecord = jest.fn();
+const mockGetEntityRecord = jest.fn();
+
+jest.mock( '@wordpress/api-fetch', () => jest.fn() );
+
+jest.mock( '@wordpress/core-data', () => ( {
+	store: {},
+} ) );
+
+jest.mock( '@wordpress/data', () => ( {
+	select: jest.fn( () => ( {
+		getEditedEntityRecord: mockGetEditedEntityRecord,
+		getEntityRecord: mockGetEntityRecord,
+	} ) ),
+} ) );
+
+describe( 'saveSelectedProducts', () => {
+	const buildProduct = (
+		overrides: Partial< ProductEntityRecord > = {}
+	): ProductEntityRecord =>
+		( {
+			id: 10,
+			name: 'Hoodie',
+			status: 'draft',
+			type: 'simple',
+			virtual: false,
+			downloadable: false,
+			on_sale: false,
+			categories: [],
+			tags: [],
+			images: [],
+			...overrides,
+		} as unknown as ProductEntityRecord );
+
+	const buildVariation = (
+		overrides: Partial< ProductEntityRecord > = {}
+	): ProductEntityRecord =>
+		buildProduct( {
+			id: 100,
+			parent_id: 10,
+			name: 'Blue',
+			type: 'variation',
+			...overrides,
+		} );
+
+	beforeEach( () => {
+		jest.clearAllMocks();
+	} );
+
+	it( 'keeps edits for selected variations that failed after another variation saved', async () => {
+		const originalSavedVariation = buildVariation( {
+			id: 101,
+			name: 'Blue original',
+		} );
+		const originalFailedVariation = buildVariation( {
+			id: 102,
+			name: 'Green original',
+		} );
+		const originalUnselectedVariation = buildVariation( {
+			id: 103,
+			name: 'Red original',
+		} );
+		const editedSavedVariation = {
+			...originalSavedVariation,
+			name: 'Blue edited',
+		};
+		const editedFailedVariation = {
+			...originalFailedVariation,
+			name: 'Green edited',
+		};
+		const editedParent = buildProduct( {
+			id: 10,
+			type: 'variable',
+			_embedded: {
+				variations: [
+					editedSavedVariation,
+					editedFailedVariation,
+					originalUnselectedVariation,
+				],
+			},
+		} );
+		const saveError = new Error( 'Variation save failed.' );
+		const editEntityRecord = jest.fn(
+			(
+				_kind,
+				_name,
+				_recordId,
+				edits: Partial< ProductEntityRecord >
+			) => {
+				Object.assign( editedParent, edits );
+			}
+		);
+		const saveEditedEntityRecord = jest.fn( async () => editedParent );
+
+		mockGetEditedEntityRecord.mockImplementation( ( _kind, _name, id ) =>
+			id === editedParent.id ? editedParent : undefined
+		);
+		mockGetEntityRecord.mockReturnValue( undefined );
+		( apiFetch as unknown as jest.Mock )
+			.mockResolvedValueOnce( {
+				id: 101,
+				parent_id: 10,
+				name: 'Blue saved',
+				manage_stock: false,
+			} )
+			.mockRejectedValueOnce( saveError );
+
+		const results = await saveSelectedProducts( {
+			selectedProducts: [ editedSavedVariation, editedFailedVariation ],
+			editEntityRecord,
+			saveEditedEntityRecord,
+		} );
+
+		expect( saveEditedEntityRecord ).toHaveBeenCalledWith(
+			'root',
+			'product',
+			10,
+			{
+				throwOnError: true,
+			}
+		);
+		expect( editedParent._embedded?.variations ).toEqual( [
+			expect.objectContaining( {
+				id: 101,
+				name: 'Blue saved',
+			} ),
+			expect.objectContaining( {
+				id: 102,
+				name: 'Green edited',
+			} ),
+			expect.objectContaining( {
+				id: 103,
+				name: 'Red original',
+			} ),
+		] );
+		expect( results ).toEqual( [
+			expect.objectContaining( {
+				status: 'fulfilled',
+			} ),
+			{
+				status: 'rejected',
+				reason: saveError,
+			},
+		] );
+	} );
+} );
