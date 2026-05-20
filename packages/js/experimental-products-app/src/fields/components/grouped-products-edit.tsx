@@ -8,6 +8,7 @@ import type { DataFormControlProps } from '@wordpress/dataviews';
 import { useEffect, useMemo, useRef, useState } from '@wordpress/element';
 import { decodeEntities } from '@wordpress/html-entities';
 import { __ } from '@wordpress/i18n';
+import { Stack } from '@wordpress/ui';
 import type { Product } from '@woocommerce/data';
 
 /**
@@ -106,16 +107,19 @@ export function GroupedProductsEdit( {
 		setIsSearching( true );
 		const requestId = ++searchRequestIdRef.current;
 
-		const excludeIds = data?.id
-			? [ data.id, ...selectedIds ]
-			: selectedIds;
+		// Exclude only the current product itself — already-selected products
+		// stay in the dropdown so the chip-select can mark them as selected
+		// (checkmark + highlight), matching the categories treatment.
+		const excludeIds = data?.id ? [ data.id ] : [];
 
 		const queryParams: Record< string, unknown > = {
 			per_page: SEARCH_PER_PAGE,
-			exclude: excludeIds,
 			orderby: 'title',
 			order: 'asc',
 		};
+		if ( excludeIds.length > 0 ) {
+			queryParams.exclude = excludeIds;
+		}
 		if ( query ) {
 			queryParams.search = query;
 		}
@@ -222,16 +226,25 @@ export function GroupedProductsEdit( {
 					value={ item }
 					disabled={ item.disabled }
 				>
-					{ item.image?.src ? (
-						<img
-							src={ item.image.src }
-							alt={ item.image.alt ?? '' }
-							className="woocommerce-grouped-products-edit__option-thumbnail"
-						/>
-					) : (
-						<span className="woocommerce-grouped-products-edit__option-thumbnail woocommerce-grouped-products-edit__option-thumbnail--empty" />
-					) }
-					{ item.label }
+					<Stack
+						direction="row"
+						align="center"
+						style={ { gap: '12px' } }
+						className="woocommerce-grouped-products-edit__option"
+					>
+						{ item.image?.src ? (
+							<img
+								src={ item.image.src }
+								alt={ item.image.alt ?? '' }
+								className="woocommerce-grouped-products-edit__option-thumbnail"
+							/>
+						) : (
+							<span className="woocommerce-grouped-products-edit__option-thumbnail woocommerce-grouped-products-edit__option-thumbnail--empty" />
+						) }
+						<span className="woocommerce-grouped-products-edit__option-label">
+							{ item.label }
+						</span>
+					</Stack>
 				</Combobox.Item>
 			) }
 		</SearchableChipSelectControl>
