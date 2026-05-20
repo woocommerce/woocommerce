@@ -31,10 +31,18 @@ const DIMENSIONS: FormField = {
 	children: [ 'length', 'width', 'height' ],
 };
 
+const BACKORDERS_ROW: FormField = {
+	id: 'backorders-row',
+	layout: { type: 'row' as const },
+	children: [ 'allow_backorders', 'low_stock_amount' ],
+};
+
 export const VARIATION_FORM_FIELDS: VariationFormField[] = [
 	createFormGroup( 'general-fields', __( 'General', 'woocommerce' ), [
 		'product_status',
 		'tax_class',
+		'downloadable',
+		'virtual',
 	] ),
 	createFormGroup( 'price-fields', __( 'Price', 'woocommerce' ), [
 		'regular_price',
@@ -46,14 +54,18 @@ export const VARIATION_FORM_FIELDS: VariationFormField[] = [
 	createFormGroup( 'image-fields', __( 'Images', 'woocommerce' ), [
 		'images',
 	] ),
+	createFormGroup(
+		'downloadable-files-fields',
+		__( 'Downloadable files', 'woocommerce' ),
+		[ 'downloadable_files', 'download_limit', 'download_expiry' ]
+	),
 	createFormGroup( 'inventory-fields', __( 'Inventory', 'woocommerce' ), [
 		'sku',
 		'global_unique_id',
 		'manage_stock',
 		'stock_quantity',
 		'stock',
-		'allow_backorders',
-		'low_stock_amount',
+		BACKORDERS_ROW,
 	] ),
 	createFormGroup( 'shipping-fields', __( 'Shipping', 'woocommerce' ), [
 		'shipping_class',
@@ -62,12 +74,5 @@ export const VARIATION_FORM_FIELDS: VariationFormField[] = [
 	] ),
 	createFormGroup( 'details-fields', __( 'Details', 'woocommerce' ), [
 		'description',
-		'downloadable',
-		'virtual',
 	] ),
-	createFormGroup(
-		'downloadable-files-fields',
-		__( 'Downloadable files', 'woocommerce' ),
-		[ 'downloadable_files', 'download_limit', 'download_expiry' ]
-	),
 ];
