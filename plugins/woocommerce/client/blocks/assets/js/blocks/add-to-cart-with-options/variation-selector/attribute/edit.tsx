@@ -95,7 +95,7 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 	return (
 		<BlockContextProvider
 			value={ {
-				woocommerceSelectableItems: selectableContext,
+				'woocommerce/selectableItems': selectableContext,
 			} }
 		>
 			{ isSelected ? (
