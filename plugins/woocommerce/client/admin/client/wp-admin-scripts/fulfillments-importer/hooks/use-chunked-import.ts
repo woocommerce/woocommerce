@@ -38,7 +38,7 @@ function resolvedChunkSize(): number {
 	const settings = window.wcFulfillmentsImporterSettings;
 	const fromServer = settings?.chunkSize;
 	if ( typeof fromServer === 'number' && fromServer > 0 ) {
-		return Math.floor( fromServer );
+		return Math.max( 1, Math.floor( fromServer ) );
 	}
 	return FALLBACK_CHUNK_SIZE;
 }
