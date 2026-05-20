@@ -650,7 +650,16 @@ class FulfillmentsCsvImporter {
 		}
 
 		// Determine create vs update by looking for an existing fulfillment with the same tracking number.
-		$existing = $this->find_existing_fulfillment( $order->get_id(), $tracking_number );
+		try {
+			$existing = $this->find_existing_fulfillment( $order->get_id(), $tracking_number );
+		} catch ( \RuntimeException $e ) {
+			return $this->fail(
+				$row_number,
+				'store_read_failed',
+				__( 'Could not read existing fulfillments for this order. Please retry the row.', 'woocommerce' ),
+				$order->get_id()
+			);
+		}
 
 		try {
 			if ( $existing instanceof Fulfillment ) {
@@ -981,8 +990,9 @@ class FulfillmentsCsvImporter {
 				sprintf( 'Could not read fulfillments for order %1$d during CSV import: %2$s', $order_id, $e->getMessage() ),
 				array( 'source' => 'fulfillments-csv-importer' )
 			);
-			$this->fulfillments_cache[ $order_id ] = array();
-			return $this->fulfillments_cache[ $order_id ];
+			// Don't cache an empty result, otherwise a transient store error would silently
+			// downgrade subsequent rows for the same order to "create" instead of "update".
+			throw new \RuntimeException( 'fulfillment_store_read_failed' );
 		}
 
 		$filtered = array();
