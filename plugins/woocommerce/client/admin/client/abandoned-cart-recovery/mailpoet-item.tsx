@@ -8,6 +8,11 @@ import { recordEvent } from '@woocommerce/tracks';
 import { useDispatch } from '@wordpress/data';
 import { getAdminLink } from '@woocommerce/settings';
 
+/**
+ * Internal dependencies
+ */
+import { ProductIcon } from '~/marketing/components';
+
 const MAILPOET_SLUG = 'mailpoet';
 
 type MailPoetItemProps = {
@@ -47,6 +52,9 @@ const MailPoetItem = ( {
 
 	return (
 		<div className="woocommerce-list__item-inner woocommerce-abandoned-cart-recovery-recommendation-item">
+			<div className="woocommerce-list__item-before">
+				<ProductIcon product="mailpoet" />
+			</div>
 			<div className="woocommerce-list__item-text">
 				<span className="woocommerce-list__item-title">
 					{ __( 'MailPoet', 'woocommerce' ) }

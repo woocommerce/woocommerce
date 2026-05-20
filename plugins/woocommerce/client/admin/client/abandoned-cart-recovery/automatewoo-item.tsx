@@ -5,6 +5,11 @@ import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
 import { recordEvent } from '@woocommerce/tracks';
 
+/**
+ * Internal dependencies
+ */
+import { ProductIcon } from '~/marketing/components';
+
 const AUTOMATEWOO_URL =
 	'https://woocommerce.com/products/automatewoo/?utm_source=woocommerce&utm_medium=product&utm_campaign=abandoned-cart-recovery-recommendation';
 
@@ -17,6 +22,9 @@ const AutomateWooItem = () => {
 
 	return (
 		<div className="woocommerce-list__item-inner woocommerce-abandoned-cart-recovery-recommendation-item">
+			<div className="woocommerce-list__item-before">
+				<ProductIcon product="automatewoo" />
+			</div>
 			<div className="woocommerce-list__item-text">
 				<span className="woocommerce-list__item-title">
 					{ __( 'AutomateWoo', 'woocommerce' ) }
