@@ -33,6 +33,11 @@ class ShopperListTests extends WC_Unit_Test_Case {
 	 * Set up.
 	 */
 	public function setUp(): void {
+		// `saved-for-later` depends on the `cart_save_for_later` feature
+		// flag. Filter the option read so `ShopperList::get_by_slug()`
+		// returns a list without writing the option to the database.
+		add_filter( 'pre_option_woocommerce_cart_save_for_later_enabled', array( $this, 'filter_save_for_later_enabled' ) );
+
 		parent::setUp();
 		$this->user_id = $this->factory->user->create( array( 'role' => 'customer' ) );
 		$this->product = \WC_Helper_Product::create_simple_product(
@@ -52,7 +57,15 @@ class ShopperListTests extends WC_Unit_Test_Case {
 		if ( $this->product ) {
 			$this->product->delete( true );
 		}
+		remove_filter( 'pre_option_woocommerce_cart_save_for_later_enabled', array( $this, 'filter_save_for_later_enabled' ) );
 		parent::tearDown();
+	}
+
+	/**
+	 * Filter callback that forces the SFL option to `yes` for the lifetime of the test.
+	 */
+	public function filter_save_for_later_enabled(): string {
+		return 'yes';
 	}
 
 	/**
@@ -75,9 +88,10 @@ class ShopperListTests extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox get_by_slug should return false for any list slug other than saved-for-later.
+	 * @testdox get_by_slug should return false for any disabled or unknown list slug.
 	 */
 	public function test_load_returns_false_for_unsupported_list_slug(): void {
+		// `wishlist` is a known slug but its feature is off in this test class.
 		$this->assertFalse( ShopperList::get_by_slug( 'wishlist', $this->user_id ) );
 		$this->assertFalse( ShopperList::get_by_slug( 'INVALID', $this->user_id ) );
 		$this->assertFalse( ShopperList::get_by_slug( '', $this->user_id ) );

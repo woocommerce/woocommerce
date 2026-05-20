@@ -615,6 +615,17 @@ class FeaturesController {
 				'option_key'                   => 'woocommerce_cart_save_for_later_enabled',
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 			),
+			'product_wishlist'                   => array(
+				'name'                         => __( 'Wishlists', 'woocommerce' ),
+				'description'                  => __(
+					'Let shoppers save products to a wishlist from product pages.',
+					'woocommerce'
+				),
+				'is_experimental'              => true,
+				'enabled_by_default'           => false,
+				'option_key'                   => 'woocommerce_product_wishlist_enabled',
+				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
+			),
 			ProductCacheController::FEATURE_NAME => array(
 				'name'                         => __( 'Cache Product Objects', 'woocommerce' ),
 				'description'                  => __(

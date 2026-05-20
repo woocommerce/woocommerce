@@ -3,6 +3,7 @@ declare( strict_types = 1 );
 
 namespace Automattic\WooCommerce\StoreApi;
 
+use Automattic\WooCommerce\Internal\ShopperLists\ShopperListsController;
 use Automattic\WooCommerce\StoreApi\Routes\V1\AbstractRoute;
 use Automattic\WooCommerce\Utilities\FeaturesUtil;
 
@@ -99,7 +100,7 @@ class RoutesController {
 		$this->register_routes( 'v1', self::$api_namespace . '/v1' );
 		$this->register_routes( 'private', 'wc/private' );
 
-		if ( FeaturesUtil::feature_is_enabled( 'cart_save_for_later' ) ) {
+		if ( wc_get_container()->get( ShopperListsController::class )->is_enabled() ) {
 			$this->register_routes( 'shopper_lists', self::$api_namespace . '/v1' );
 		}
 
