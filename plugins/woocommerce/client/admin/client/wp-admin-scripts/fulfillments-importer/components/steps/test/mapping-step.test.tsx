@@ -10,9 +10,10 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import MappingStep from '../mapping-step';
 import { createInitialState } from '../../../hooks/use-importer-state';
 import type { ImporterAction } from '../../../hooks/use-importer-state';
+import type { ColumnMapping } from '../../../data/types';
 
 function buildStateWithHeaders(
-	mapping: Record< number, string >,
+	mapping: ColumnMapping,
 	headers: string[] = [ 'Order ID', 'Tracking', 'Carrier' ]
 ) {
 	const state = createInitialState();
@@ -20,7 +21,7 @@ function buildStateWithHeaders(
 	state.sample = [ '12345', 'TRK-1', 'UPS' ];
 	state.total = 1;
 	state.token = 'tok';
-	state.mapping = mapping as any;
+	state.mapping = mapping;
 	return state;
 }
 
@@ -72,10 +73,11 @@ describe( 'MappingStep', () => {
 	} );
 
 	it( 'auto-detects common header aliases for required columns', () => {
-		const state = buildStateWithHeaders(
-			{},
-			[ 'Order No', 'tracking_num', 'shipping provider' ]
-		);
+		const state = buildStateWithHeaders( {}, [
+			'Order No',
+			'tracking_num',
+			'shipping provider',
+		] );
 
 		const dispatched: ImporterAction[] = [];
 		render(
@@ -104,10 +106,7 @@ describe( 'MappingStep', () => {
 	} );
 
 	it( 'leaves ambiguous headers unmapped on auto-detect', () => {
-		const state = buildStateWithHeaders(
-			{},
-			[ 'foo', 'bar', 'baz' ]
-		);
+		const state = buildStateWithHeaders( {}, [ 'foo', 'bar', 'baz' ] );
 
 		const dispatched: ImporterAction[] = [];
 		render(
