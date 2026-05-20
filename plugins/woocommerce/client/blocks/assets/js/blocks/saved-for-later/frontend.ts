@@ -150,11 +150,11 @@ store< BlockStore >(
 			},
 
 			get isEmpty(): boolean {
-				const ctx = getContext< BlockContext >();
 				const list = getList( LIST_SLUG );
 				if ( ! list ) {
 					return false;
 				}
+				const ctx = getContext< BlockContext >();
 				return (
 					ctx.hasShownItems &&
 					! list.isLoading &&

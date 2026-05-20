@@ -537,17 +537,6 @@ final class SavedForLater extends AbstractBlock {
 	 * and `data-wp-text="state.errorMessage"` writes the actual server-supplied
 	 * message — surfacing that is more useful than a generic fallback.
 	 *
-	 * phpcs:disable Generic.Commenting.Todo.TaskFound
-	 *
-	 * TODO: replace this in-list error row with a `store-notices` notice
-	 * rendered above the list. Mini-cart's pattern (cart.ts → showNoticeError →
-	 * `@woocommerce/stores/store-notices`) is the right reference: dispatch
-	 * the server message there from the JS catch blocks in shopper-lists.ts
-	 * instead of holding it on `list.error`. That gives users a dismissible,
-	 * stylistically-aligned notice rather than a row tucked into the grid.
-	 *
-	 * phpcs:enable Generic.Commenting.Todo.TaskFound
-	 *
 	 * @return string
 	 */
 	private function render_error_markup(): string {
