@@ -814,6 +814,10 @@ class FeaturesController {
 			$features['product_block_editor']['disable_ui'] = true;
 		}
 
+		if ( isset( $features['wc-visual-attribute'] ) && ! wp_is_block_theme() ) {
+			$features['wc-visual-attribute']['disable_ui'] = true;
+		}
+
 		return $features;
 	}
 
