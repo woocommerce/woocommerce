@@ -12,8 +12,8 @@
 	line-height: 1.4;
 
 	&:focus-within {
-		border-color: var( --wp-admin-theme-color, #3858e9 );
-		box-shadow: 0 0 0 1px var( --wp-admin-theme-color, #3858e9 );
+		border-color: var(--wp-admin-theme-color, #3858e9);
+		box-shadow: 0 0 0 1px var(--wp-admin-theme-color, #3858e9);
 		outline: 2px solid transparent;
 	}
 
@@ -48,6 +48,11 @@
 		color: #1e1e1e;
 	}
 
+	&__chip--is-placeholder {
+		background: #fff;
+		color: #757575;
+	}
+
 	&__chip-prefix {
 		display: inline-flex;
 		align-items: center;
@@ -60,7 +65,7 @@
 	}
 
 	&__chip-content {
-		padding: 2px 4px 2px 8px;
+		padding: 2px 8px 2px 8px;
 	}
 
 	&__chip-remove,
@@ -105,13 +110,13 @@
 
 	&__popup {
 		box-sizing: border-box;
-		width: var( --anchor-width );
-		max-height: min( var( --available-height ), 320px );
+		width: var(--anchor-width);
+		max-height: min(var(--available-height), 320px);
 		overflow: auto;
 		border: 1px solid #c3c4c7;
 		border-radius: 2px;
 		background: #fff;
-		box-shadow: 0 2px 6px rgb( 0 0 0 / 20% );
+		box-shadow: 0 2px 6px rgb(0 0 0 / 20%);
 	}
 
 	&__list {
@@ -129,7 +134,7 @@
 		cursor: default;
 
 		&[data-highlighted] {
-			background: var( --wp-admin-theme-color, #3858e9 );
+			background: var(--wp-admin-theme-color, #3858e9);
 			color: #fff;
 		}
 
@@ -151,8 +156,15 @@
 	}
 
 	&__label {
-		margin-bottom: 4px;
-		font-weight: 500;
+		margin-bottom: 8px;
+		// Match the uppercase 11px treatment used by `@wordpress/ui`'s
+		// Field.Label primitive so the chip-select's label aligns with the
+		// rest of the DataForm fields (Name, Status, Catalog visibility, …).
+		font-size: var(--wpds-typography-font-size-xs, 11px);
+		font-weight: var(--wpds-typography-font-weight-medium, 499);
+		line-height: var(--wpds-typography-line-height-xs, 16px);
+		text-transform: uppercase;
+		color: var(--wpds-color-fg-content-neutral, #1e1e1e);
 	}
 
 	&__description {
