@@ -25,7 +25,7 @@ describe( 'AutomateWooItem', () => {
 
 		expect( screen.getByText( 'AutomateWoo' ) ).toBeInTheDocument();
 		expect(
-			screen.getByText( /multi-step recovery sequences/i )
+			screen.getByText( /multi-step abandoned cart sequences/i )
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'link', { name: /learn more/i } )
@@ -59,7 +59,7 @@ describe( 'MailPoetItem', () => {
 
 		expect( screen.getByText( 'MailPoet' ) ).toBeInTheDocument();
 		expect(
-			screen.getByText( /newsletters and ongoing automations/i )
+			screen.getByText( /newsletters and automated welcome series/i )
 		).toBeInTheDocument();
 		expect(
 			screen.getByRole( 'link', { name: /learn more/i } )

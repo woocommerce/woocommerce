@@ -25,7 +25,7 @@ const MailPoetItem = () => {
 				</span>
 				<span className="woocommerce-list__item-content">
 					{ __(
-						'Pair recovery emails with newsletters and ongoing automations so customers stay engaged after they buy.',
+						'Send newsletters and automated welcome series from your WooCommerce dashboard. Free and installs in one click.',
 						'woocommerce'
 					) }
 				</span>

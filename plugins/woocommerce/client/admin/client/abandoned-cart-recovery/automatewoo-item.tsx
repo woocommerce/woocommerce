@@ -3,7 +3,6 @@
  */
 import { __ } from '@wordpress/i18n';
 import { Button } from '@wordpress/components';
-import { Pill } from '@woocommerce/components';
 import { recordEvent } from '@woocommerce/tracks';
 
 const AUTOMATEWOO_URL =
@@ -21,11 +20,10 @@ const AutomateWooItem = () => {
 			<div className="woocommerce-list__item-text">
 				<span className="woocommerce-list__item-title">
 					{ __( 'AutomateWoo', 'woocommerce' ) }
-					<Pill>{ __( 'Recommended', 'woocommerce' ) }</Pill>
 				</span>
 				<span className="woocommerce-list__item-content">
 					{ __(
-						'Build multi-step recovery sequences, segment customers, and track which campaigns recover the most revenue.',
+						'Set up multi-step abandoned cart sequences, win-back flows, and review requests. Track exactly which campaigns earn the most revenue.',
 						'woocommerce'
 					) }
 				</span>
