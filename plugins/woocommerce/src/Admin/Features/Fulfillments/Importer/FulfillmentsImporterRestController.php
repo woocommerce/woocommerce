@@ -47,15 +47,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 	 */
 	protected string $rest_base = '/fulfillments/import';
 
-	/**
-	 * Hard ceiling on chunk size accepted from clients of the `/run` endpoint.
-	 */
-	private const MAX_CHUNK_SIZE = 1000;
-
-	/**
-	 * Default chunk size used when a client omits `limit` on `/run`.
-	 */
-	private const DEFAULT_CHUNK_SIZE = 200;
 
 	/**
 	 * Get the WooCommerce REST API namespace key for this controller.
@@ -148,9 +139,9 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 						),
 						'limit'   => array(
 							'type'        => 'integer',
-							'default'     => self::DEFAULT_CHUNK_SIZE,
+							'default'     => FulfillmentsCsvImporter::DEFAULT_CHUNK_SIZE,
 							'minimum'     => 1,
-							'maximum'     => self::MAX_CHUNK_SIZE,
+							'maximum'     => FulfillmentsCsvImporter::MAX_CHUNK_SIZE,
 							'description' => __( 'Maximum number of rows to process in this chunk.', 'woocommerce' ),
 						),
 						'mapping' => array(
@@ -330,9 +321,9 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		$offset  = (int) $request->get_param( 'offset' );
 		$limit   = (int) $request->get_param( 'limit' );
 		if ( $limit <= 0 ) {
-			$limit = self::DEFAULT_CHUNK_SIZE;
+			$limit = FulfillmentsCsvImporter::DEFAULT_CHUNK_SIZE;
 		}
-		$limit   = min( $limit, $this->resolve_chunk_size_ceiling() );
+		$limit   = min( $limit, FulfillmentsCsvImporter::resolve_chunk_size() );
 		$mapping = $this->normalize_mapping_input( $request->get_param( 'mapping' ) );
 
 		$header_map = $this->mapping_to_header_map( $mapping );
@@ -582,17 +573,4 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		return $out;
 	}
 
-	/**
-	 * Maximum chunk size accepted from clients, after applying the chunk-size filter and a hard ceiling.
-	 *
-	 * @return int
-	 */
-	private function resolve_chunk_size_ceiling(): int {
-		/** This filter is documented in FulfillmentsCsvImporter::get_chunk_size(). */
-		$size = (int) apply_filters( 'woocommerce_fulfillments_csv_importer_chunk_size', self::DEFAULT_CHUNK_SIZE );
-		if ( $size < 1 ) {
-			$size = self::DEFAULT_CHUNK_SIZE;
-		}
-		return min( $size, self::MAX_CHUNK_SIZE );
-	}
 }

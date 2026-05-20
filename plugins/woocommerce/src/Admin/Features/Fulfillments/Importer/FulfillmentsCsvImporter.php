@@ -65,7 +65,12 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Default chunk size when looping import_chunk() from run().
 	 */
-	private const DEFAULT_CHUNK_SIZE = 200;
+	public const DEFAULT_CHUNK_SIZE = 200;
+
+	/**
+	 * Hard ceiling enforced on the filtered chunk size, regardless of what callers request.
+	 */
+	public const MAX_CHUNK_SIZE = 1000;
 
 	/**
 	 * Constructor.
@@ -497,6 +502,20 @@ class FulfillmentsCsvImporter {
 	 * @return int
 	 */
 	private function get_chunk_size(): int {
+		return self::resolve_chunk_size();
+	}
+
+	/**
+	 * Resolve the filtered chunk size, clamped to [1, MAX_CHUNK_SIZE].
+	 *
+	 * Shared between the importer's own loop and the REST controller so a single filter and a
+	 * single hard ceiling govern both call sites.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @return int
+	 */
+	public static function resolve_chunk_size(): int {
 		/**
 		 * Filter the chunk size used when looping CSV rows through the importer.
 		 *
@@ -511,10 +530,7 @@ class FulfillmentsCsvImporter {
 		if ( $size < 1 ) {
 			$size = self::DEFAULT_CHUNK_SIZE;
 		}
-		if ( $size > 1000 ) {
-			$size = 1000;
-		}
-		return $size;
+		return min( $size, self::MAX_CHUNK_SIZE );
 	}
 
 	/**
