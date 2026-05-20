@@ -159,6 +159,33 @@ describe( 'buildProductListQuery', () => {
 		expect( query.stock_status ).toBe( 'onbackorder' );
 	} );
 
+	it( 'ignores empty taxonomy filters until a value is selected', () => {
+		const query = buildProductListQuery( {
+			...baseView,
+			filters: [
+				{
+					field: 'brands',
+					operator: 'isAny',
+					value: undefined,
+				},
+				{
+					field: 'categories',
+					operator: 'isAny',
+					value: '',
+				},
+				{
+					field: 'tags',
+					operator: 'isAny',
+					value: [],
+				},
+			],
+		} as View );
+
+		expect( query.brand ).toBeUndefined();
+		expect( query.category ).toBeUndefined();
+		expect( query.tag ).toBeUndefined();
+	} );
+
 	it( 'maps the tags isAny filter to the tag query param', () => {
 		const query = buildProductListQuery( {
 			...baseView,
