@@ -54,21 +54,25 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$controller->register();
 		$controller->initialize_fulfillments();
 
-		self::$admin_id = wp_insert_user(
+		$result = wp_insert_user(
 			array(
 				'user_login' => 'fulfill_admin_' . wp_generate_password( 6, false ),
 				'user_pass'  => wp_generate_password( 12, false ),
 				'role'       => 'administrator',
 			)
 		);
+		if ( is_wp_error( $result ) ) {
+			throw new \RuntimeException( 'Failed to create admin user: ' . $result->get_error_message() );
+		}
+		self::$admin_id = (int) $result;
 	}
 
 	/**
 	 * Tear down the feature flag and the admin user.
 	 */
 	public static function tearDownAfterClass(): void {
-		if ( ! is_wp_error( self::$admin_id ) ) {
-			wp_delete_user( (int) self::$admin_id );
+		if ( self::$admin_id > 0 ) {
+			wp_delete_user( self::$admin_id );
 		}
 		if ( false === self::$original_fulfillments_flag ) {
 			delete_option( 'woocommerce_feature_fulfillments_enabled' );
