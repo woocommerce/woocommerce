@@ -88,27 +88,141 @@ class ImportSessionTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox update_processed() persists the cumulative count across reloads.
+	 * @testdox record_chunk() advances processed, merges counts, persists dedupe and byte_offset.
 	 */
-	public function test_update_processed_persists(): void {
+	public function test_record_chunk_persists_state(): void {
 		$session = $this->make_session( 21 );
-		$session->update_processed( 75 );
+
+		$session->record_chunk(
+			10,
+			array(
+				'created'  => 7,
+				'updated'  => 2,
+				'skipped'  => 1,
+				'failed'   => 0,
+				'notified' => 3,
+			),
+			array( '100|abc' => true ),
+			1234
+		);
+		$session->record_chunk(
+			20,
+			array(
+				'created'  => 5,
+				'updated'  => 0,
+				'skipped'  => 5,
+				'failed'   => 0,
+				'notified' => 1,
+			),
+			array( '100|abc' => true, '200|xyz' => true ),
+			5678
+		);
 
 		$reloaded = ImportSession::load( 21, $session->token() );
 		$this->assertNotNull( $reloaded );
-		$this->assertSame( 75, $reloaded->processed() );
+		$this->assertSame( 20, $reloaded->processed() );
+		$this->assertSame( 5678, $reloaded->byte_offset() );
+		$this->assertSame(
+			array( '100|abc' => true, '200|xyz' => true ),
+			$reloaded->seen_tracking_pairs()
+		);
+		$counts = $reloaded->counts();
+		$this->assertSame( 12, $counts['created'] );
+		$this->assertSame( 2, $counts['updated'] );
+		$this->assertSame( 6, $counts['skipped'] );
+		$this->assertSame( 4, $counts['notified'] );
 	}
 
 	/**
-	 * @testdox update_seen_tracking_pairs() persists the cross-chunk dedupe state.
+	 * @testdox record_chunk() never regresses processed below a previously stored value.
 	 */
-	public function test_update_seen_tracking_pairs_persists(): void {
-		$session = $this->make_session( 22 );
-		$session->update_seen_tracking_pairs( array( '100|abc' => true, '200|xyz' => true ) );
+	public function test_record_chunk_never_goes_backwards_on_processed(): void {
+		$session = $this->make_session( 23 );
+		$session->record_chunk( 30, array(), array(), 999 );
+		$session->record_chunk( 10, array(), array(), 1000 );
 
-		$reloaded = ImportSession::load( 22, $session->token() );
+		$reloaded = ImportSession::load( 23, $session->token() );
 		$this->assertNotNull( $reloaded );
-		$this->assertSame( array( '100|abc' => true, '200|xyz' => true ), $reloaded->seen_tracking_pairs() );
+		$this->assertSame( 30, $reloaded->processed() );
+	}
+
+	/**
+	 * @testdox record_chunk() honors the latest byte_offset verbatim, including lower values from retries.
+	 */
+	public function test_record_chunk_byte_offset_is_not_clamped_upward(): void {
+		$session = $this->make_session( 24 );
+		$session->record_chunk( 5, array(), array(), 5000 );
+		$session->record_chunk( 10, array(), array(), 3500 );
+
+		$reloaded = ImportSession::load( 24, $session->token() );
+		$this->assertNotNull( $reloaded );
+		$this->assertSame( 3500, $reloaded->byte_offset() );
+	}
+
+	/**
+	 * @testdox active_for_user() returns the current session, or null if none.
+	 */
+	public function test_active_for_user_returns_open_session(): void {
+		$this->assertNull( ImportSession::active_for_user( 51 ) );
+
+		$session = $this->make_session( 51 );
+		$active  = ImportSession::active_for_user( 51 );
+		$this->assertNotNull( $active );
+		$this->assertSame( $session->token(), $active->token() );
+	}
+
+	/**
+	 * @testdox cleanup_abandoned_file() deletes the staged file when the session transient is gone.
+	 */
+	public function test_cleanup_abandoned_file_deletes_when_session_is_gone(): void {
+		$upload_dir = wp_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, "a,b,c\n" );
+
+		// Fake an abandoned session: no transient is set for token "ghost".
+		ImportSession::cleanup_abandoned_file( 71, 'ghost', $file );
+
+		$this->assertFileDoesNotExist( $file );
+	}
+
+	/**
+	 * @testdox cleanup_abandoned_file() leaves the file alone while the session is still active.
+	 */
+	public function test_cleanup_abandoned_file_skips_live_session(): void {
+		$upload_dir = wp_upload_dir();
+		$file       = trailingslashit( $upload_dir['basedir'] ) . 'wc-fulfillments-import-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, "a,b,c\n" );
+
+		$session = ImportSession::create(
+			81,
+			$file,
+			',',
+			array( 'order_number', 'tracking_number', 'shipment_provider' ),
+			3,
+			false,
+			true
+		);
+		$this->sessions[] = $session;
+
+		ImportSession::cleanup_abandoned_file( 81, $session->token(), $file );
+
+		$this->assertFileExists( $file );
+
+		// Test-only cleanup.
+		@unlink( $file );
+	}
+
+	/**
+	 * @testdox cleanup_abandoned_file() refuses to delete paths outside the uploads directory.
+	 */
+	public function test_cleanup_abandoned_file_refuses_paths_outside_uploads(): void {
+		$file = '/tmp/wc-fulfillments-not-in-uploads-' . wp_generate_uuid4() . '.csv';
+		file_put_contents( $file, "a,b,c\n" );
+
+		ImportSession::cleanup_abandoned_file( 91, 'no-such-token', $file );
+
+		$this->assertFileExists( $file );
+		@unlink( $file );
 	}
 
 	/**

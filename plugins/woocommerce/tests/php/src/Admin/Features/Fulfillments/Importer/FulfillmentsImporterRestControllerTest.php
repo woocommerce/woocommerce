@@ -288,4 +288,110 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 		$this->assertSame( 1, $response['counts']['failed'] );
 		$this->assertSame( 'order_not_found', $response['errors'][0]['code'] );
 	}
+
+	/**
+	 * @testdox handle_prepare stages an uploaded CSV and opens a session bound to the current user.
+	 */
+	public function test_prepare_stages_csv_and_opens_session(): void {
+		$order = OrderHelper::create_order();
+		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n";
+		$file  = $this->make_csv( $csv );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/prepare' );
+		$request->set_param( 'delimiter', ',' );
+		$request->set_param( 'notify_customer', false );
+		$request->set_param( 'update_existing', true );
+		$request->set_file_params(
+			array(
+				'file' => array(
+					'name'     => 'fulfillments.csv',
+					'type'     => 'text/csv',
+					'tmp_name' => $file,
+					'error'    => 0,
+					'size'     => filesize( $file ),
+				),
+			)
+		);
+
+		$response = $this->invoke( 'handle_prepare', $request );
+
+		$this->assertIsArray( $response );
+		$this->assertArrayHasKey( 'token', $response );
+		$this->assertSame( 1, $response['total'] );
+		$this->assertSame( ',', $response['delimiter'] );
+
+		$session = ImportSession::load( get_current_user_id(), (string) $response['token'] );
+		$this->assertNotNull( $session );
+		$this->sessions[] = $session;
+	}
+
+	/**
+	 * @testdox handle_prepare rejects an empty multipart request with a 400.
+	 */
+	public function test_prepare_rejects_missing_file(): void {
+		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/prepare' );
+		$request->set_param( 'delimiter', ',' );
+
+		$response = $this->invoke( 'handle_prepare', $request );
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'woocommerce_fulfillments_import_no_file', $response->get_error_code() );
+	}
+
+	/**
+	 * @testdox The import routes refuse callers that lack edit_shop_orders.
+	 */
+	public function test_permission_check_requires_edit_shop_orders(): void {
+		$subscriber = wp_insert_user(
+			array(
+				'user_login' => 'fulfill_subscriber_' . wp_generate_password( 6, false ),
+				'user_pass'  => wp_generate_password( 12, false ),
+				'role'       => 'subscriber',
+			)
+		);
+		$this->assertIsInt( $subscriber );
+		wp_set_current_user( (int) $subscriber );
+
+		$controller = wc_get_container()->get( FulfillmentsImporterRestController::class );
+		$reflection = new \ReflectionClass( $controller );
+		$method     = $reflection->getMethod( 'check_permission_for_fulfillments_import' );
+		$method->setAccessible( true );
+
+		$result = $method->invoke( $controller, new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' ) );
+
+		$this->assertNotSame( true, $result );
+
+		wp_delete_user( (int) $subscriber );
+	}
+
+	/**
+	 * @testdox handle_run rejects a stale session whose staged file has been modified.
+	 */
+	public function test_run_rejects_when_staged_file_has_changed(): void {
+		$order = OrderHelper::create_order();
+		$csv   = "order_number,tracking_number,shipment_provider\n{$order->get_id()},TRK-1,ups\n";
+		$file  = $this->make_csv( $csv );
+
+		$session = $this->open_session_for( $file );
+
+		// Mutate the staged file after the session was sealed.
+		file_put_contents( $file, $csv . "\n# trailing change\n" );
+		touch( $file, time() + 60 );
+
+		$request = new WP_REST_Request( 'POST', '/wc/v3/fulfillments/import/run' );
+		$request->set_param( 'token', $session->token() );
+		$request->set_param(
+			'mapping',
+			array(
+				'0' => FulfillmentsCsvImporter::COL_ORDER_NUMBER,
+				'1' => FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
+				'2' => FulfillmentsCsvImporter::COL_PROVIDER,
+			)
+		);
+
+		$response = $this->invoke( 'handle_run', $request );
+
+		$this->assertInstanceOf( \WP_Error::class, $response );
+		$this->assertSame( 'fulfillments_import_file_changed', $response->get_error_code() );
+	}
 }
