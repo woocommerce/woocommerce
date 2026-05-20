@@ -361,8 +361,8 @@ final class ImportSession {
 		$this->data['counts'] = $current_counts;
 
 		if ( ! empty( $rows ) ) {
-			$existing            = is_array( $this->data['rows'] ?? null ) ? $this->data['rows'] : array();
-			$this->data['rows']  = array_merge( $existing, $rows );
+			$existing           = is_array( $this->data['rows'] ?? null ) ? $this->data['rows'] : array();
+			$this->data['rows'] = array_merge( $existing, $rows );
 		}
 
 		$this->data['seen_tracking_pairs'] = $seen;

@@ -318,8 +318,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 			);
 		}
 
-		$offset  = (int) $request->get_param( 'offset' );
-		$limit   = (int) $request->get_param( 'limit' );
+		$offset = (int) $request->get_param( 'offset' );
+		$limit  = (int) $request->get_param( 'limit' );
 		if ( $limit <= 0 ) {
 			$limit = FulfillmentsCsvImporter::DEFAULT_CHUNK_SIZE;
 		}
@@ -440,7 +440,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		// CSVUploadHelper reads $_FILES under a configurable key. Stage our REST file under that key.
 		// Nonce verification is handled by the REST permission_callback, not nonces.
 		$_FILES['fulfillment_import_file'] = $files['file']; // phpcs:ignore WordPress.Security.NonceVerification.Missing
-		$file_path                         = '';
+		$file_path = '';
 		try {
 			$csv_helper = wc_get_container()->get( CSVUploadHelper::class );
 			$upload     = $csv_helper->handle_csv_upload(
@@ -572,5 +572,4 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 		}
 		return $out;
 	}
-
 }
