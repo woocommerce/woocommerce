@@ -460,6 +460,7 @@ class FulfillmentsCsvImporter {
 				}
 
 				$consumed = 0;
+				$batch    = array();
 				while ( $consumed < $limit ) {
 					$row = fgetcsv( $handle, 0, $delimiter, $this->options['enclosure'], '' );
 					if ( false === $row ) {
@@ -467,12 +468,24 @@ class FulfillmentsCsvImporter {
 					}
 					++$row_number;
 					++$consumed;
+					$batch[] = array(
+						'row_number' => $row_number,
+						'row'        => $row,
+						'blank'      => $this->is_blank_row( $row ),
+					);
+				}
 
-					if ( $this->is_blank_row( $row ) ) {
+				// Pre-resolve numeric order references for the whole chunk so a chunked REST
+				// call (which builds a fresh importer per request) does not issue N+1 wc_get_order
+				// queries before the in-memory cache warms up.
+				$this->prime_chunk_caches( $batch, $header_map );
+
+				foreach ( $batch as $entry ) {
+					if ( $entry['blank'] ) {
 						continue;
 					}
 
-					$result = $this->process_row( $row, $header_map, $row_number, $seen_tracking_pairs );
+					$result = $this->process_row( $entry['row'], $header_map, $entry['row_number'], $seen_tracking_pairs );
 
 					if ( isset( $result['status'] ) ) {
 						switch ( $result['status'] ) {
@@ -910,6 +923,62 @@ class FulfillmentsCsvImporter {
 	/**
 	 * Resolve a CSV "order number" cell to a WC_Order.
 	 *
+	 * Warm the per-row order cache for an entire chunk in one batch.
+	 *
+	 * Without this, REST callers that build a new importer instance per chunk would hit
+	 * `wc_get_order()` once per row, defeating the in-memory cache.
+	 *
+	 * @param array<int, array{row_number:int, row:array<int, string>, blank:bool}> $batch       The chunk's raw rows.
+	 * @param array<string, int>                                                    $header_map  Canonical column → CSV column index.
+	 */
+	private function prime_chunk_caches( array $batch, array $header_map ): void {
+		if ( ! isset( $header_map[ self::COL_ORDER_NUMBER ] ) || empty( $batch ) ) {
+			return;
+		}
+
+		$numeric_ids   = array();
+		$order_numbers = array();
+		foreach ( $batch as $entry ) {
+			if ( $entry['blank'] ) {
+				continue;
+			}
+			$order_number = $this->get_field( $entry['row'], $header_map, self::COL_ORDER_NUMBER );
+			if ( '' === $order_number || array_key_exists( $order_number, $this->order_cache ) ) {
+				continue;
+			}
+			$order_numbers[ $order_number ] = true;
+			if ( ctype_digit( $order_number ) ) {
+				$numeric_ids[] = (int) $order_number;
+			}
+		}
+
+		if ( empty( $numeric_ids ) ) {
+			return;
+		}
+
+		$numeric_ids = array_values( array_unique( $numeric_ids ) );
+		$orders      = wc_get_orders(
+			array(
+				'limit'   => count( $numeric_ids ),
+				'include' => $numeric_ids,
+				'type'    => 'shop_order',
+			)
+		);
+
+		if ( ! is_array( $orders ) ) {
+			return;
+		}
+
+		foreach ( $orders as $order ) {
+			if ( ! $order instanceof WC_Order ) {
+				continue;
+			}
+			$key                       = (string) $order->get_id();
+			$this->order_cache[ $key ] = $order;
+		}
+	}
+
+	/**
 	 * First tries a direct numeric match (the default WooCommerce order number is the order ID).
 	 * Then fires a filter so extensions providing custom order numbering schemes can resolve it.
 	 *
