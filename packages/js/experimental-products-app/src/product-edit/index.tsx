@@ -1,11 +1,15 @@
 /**
  * External dependencies
  */
-import { Button, Spinner } from '@wordpress/components';
+import { Button, CheckboxControl, Spinner } from '@wordpress/components';
 import { store as coreStore } from '@wordpress/core-data';
 import { select as wpSelect, useDispatch, useSelect } from '@wordpress/data';
-import { DataForm } from '@wordpress/dataviews';
-import { useCallback, useState } from '@wordpress/element';
+import {
+	DataForm,
+	type DataFormControlProps,
+	type FormField,
+} from '@wordpress/dataviews';
+import { useCallback, useEffect, useMemo, useState } from '@wordpress/element';
 import { __, sprintf } from '@wordpress/i18n';
 import { store as noticesStore } from '@wordpress/notices';
 import { privateApis as routerPrivateApis } from '@wordpress/router';
@@ -22,7 +26,6 @@ import {
 import type { ProductEntityRecord } from '../fields/types';
 import { unlock } from '../lock-unlock';
 import {
-	buildMergedProductEditData,
 	findProductInList,
 	getProductEditRecord,
 	getProductWithUpdatedVariation,
@@ -31,11 +34,32 @@ import {
 	getVisibleProductEditFields,
 	isProductVariation,
 } from './utils';
+import {
+	buildProductBulkEditData,
+	DEFAULT_BULK_NUMERIC_EDIT,
+	getBulkNumericEditFromData,
+	getBulkNumericEditsFromData,
+	getBulkNumericChangesForProduct,
+	getBulkNumericOperationFieldId,
+	isBulkNumericEditPending,
+	isBulkNumericEditValid,
+	isBulkNumericFieldId,
+	isBulkNumericOperationFieldId,
+	validateBulkNumericEdits,
+} from './bulk-edit';
+import type {
+	BulkNumericEdit,
+	BulkNumericFieldId,
+	ProductBulkEditFormData,
+	ProductBulkEditFieldState,
+} from './bulk-edit';
 import { saveSelectedProducts } from './save';
+import { createBulkNumericOperationField } from './bulk-numeric-control';
 
 const { useHistory, useLocation } = unlock( routerPrivateApis );
 
 type ProductEditFormProps = {
+	bulkEditData: ProductBulkEditFormData;
 	editableFields: ReturnType< typeof getProductEditFields >;
 	onChange: ( changes: Partial< ProductEntityRecord > ) => void;
 	selectedProducts: ProductEntityRecord[];
@@ -45,6 +69,219 @@ type ProductEditProps = {
 	products: ProductEntityRecord[];
 	isOpen: boolean;
 };
+
+type ProductEditField = ReturnType< typeof getProductEditFields >[ number ];
+
+function BulkBooleanControl( {
+	data,
+	field,
+	onChange,
+}: DataFormControlProps< ProductEntityRecord > ) {
+	return (
+		<CheckboxControl
+			label={ field.label }
+			checked={ false }
+			indeterminate
+			onChange={ ( value ) => {
+				onChange(
+					field.setValue( {
+						item: data,
+						value,
+					} )
+				);
+			} }
+		/>
+	);
+}
+
+function getBulkNumericPlaceholder(
+	fieldState: ProductBulkEditFieldState | undefined
+) {
+	if ( fieldState?.placeholder ) {
+		return fieldState.placeholder;
+	}
+
+	if ( ! fieldState || fieldState.isEmpty ) {
+		return undefined;
+	}
+
+	return String( fieldState.value ?? '' );
+}
+
+function getCostOfGoodsSoldDataWithValue(
+	data: ProductEntityRecord,
+	value: string
+) {
+	const costOfGoodsSold = data.cost_of_goods_sold ?? {};
+	const [ firstValue = {}, ...remainingValues ] =
+		costOfGoodsSold.values ?? [];
+
+	return {
+		...costOfGoodsSold,
+		values: [
+			{
+				...firstValue,
+				defined_value: value,
+			},
+			...remainingValues,
+		],
+	};
+}
+
+function getBulkEditFormData(
+	mergedData: ProductEntityRecord,
+	bulkEditData: ProductBulkEditFormData,
+	fieldStates: Record< string, ProductBulkEditFieldState >
+): ProductBulkEditFormData {
+	const data: ProductBulkEditFormData = {
+		...mergedData,
+		...bulkEditData,
+	};
+
+	Object.keys( fieldStates ).forEach( ( fieldId ) => {
+		if ( fieldId === 'stock' && fieldStates[ fieldId ].isMixed ) {
+			( data as Record< string, unknown > ).stock_status = '';
+			return;
+		}
+
+		if ( ! isBulkNumericFieldId( fieldId ) ) {
+			return;
+		}
+
+		const operationFieldId = getBulkNumericOperationFieldId( fieldId );
+		data[ operationFieldId ] =
+			bulkEditData[ operationFieldId ] ??
+			DEFAULT_BULK_NUMERIC_EDIT.operation;
+
+		if ( fieldId === 'cost_of_goods_sold' ) {
+			const editValue = getBulkNumericEditFromData(
+				bulkEditData,
+				fieldId
+			).value;
+
+			data.cost_of_goods_sold = getCostOfGoodsSoldDataWithValue(
+				mergedData,
+				editValue
+			);
+			return;
+		}
+
+		( data as Record< string, unknown > )[ fieldId ] =
+			bulkEditData[ fieldId ] ?? DEFAULT_BULK_NUMERIC_EDIT.value;
+	} );
+
+	return data;
+}
+
+function getBulkEnhancedProductEditFields( {
+	fieldStates,
+	isBulkEdit,
+	visibleFields,
+}: {
+	fieldStates: Record< string, ProductBulkEditFieldState >;
+	isBulkEdit: boolean;
+	visibleFields: ProductEditField[];
+} ) {
+	if ( ! isBulkEdit ) {
+		return visibleFields;
+	}
+
+	return visibleFields
+		.map( ( field ) => {
+			const fieldState = fieldStates[ field.id ];
+			const enhancedField = {
+				...field,
+				placeholder: fieldState?.placeholder ?? field.placeholder,
+				...( field.id === 'name'
+					? {
+							isValid: {
+								...field.isValid,
+								required: false,
+							},
+					  }
+					: {} ),
+			};
+
+			if ( isBulkNumericFieldId( field.id ) ) {
+				const fieldId = field.id;
+
+				return [
+					createBulkNumericOperationField( enhancedField, fieldId ),
+					{
+						...enhancedField,
+						placeholder: getBulkNumericPlaceholder( fieldState ),
+						isDisabled: ( {
+							item,
+						}: {
+							item: ProductEntityRecord;
+						} ) =>
+							getBulkNumericEditFromData(
+								item as ProductBulkEditFormData,
+								fieldId
+							).operation === DEFAULT_BULK_NUMERIC_EDIT.operation,
+					},
+				];
+			}
+
+			if (
+				fieldState?.isMixed &&
+				( field.type === 'boolean' || field.Edit === 'toggle' )
+			) {
+				return {
+					...enhancedField,
+					Edit: BulkBooleanControl,
+				};
+			}
+
+			return [ enhancedField ];
+		} )
+		.flat();
+}
+
+function injectBulkNumericOperationFormFields(
+	formFields: Array< FormField | string >,
+	fieldLabels: Map< string, string | undefined >
+): Array< FormField | string > {
+	return formFields.map( ( formField ) => {
+		if ( typeof formField === 'string' ) {
+			if ( ! isBulkNumericFieldId( formField ) ) {
+				return formField;
+			}
+
+			return {
+				id: `${ formField }-bulk-edit-fields`,
+				label: fieldLabels.get( formField ),
+				layout: { type: 'row' as const },
+				children: [
+					{
+						id: getBulkNumericOperationFieldId( formField ),
+						layout: {
+							type: 'regular' as const,
+							labelPosition: 'none' as const,
+						},
+					},
+					{
+						id: formField,
+						layout: {
+							type: 'regular' as const,
+							labelPosition: 'none' as const,
+						},
+					},
+				],
+			};
+		}
+
+		return {
+			...formField,
+			children: formField.children
+				? injectBulkNumericOperationFormFields(
+						formField.children as Array< FormField | string >,
+						fieldLabels
+				  )
+				: formField.children,
+		};
+	} );
+}
 
 function getSaveNoticeMessage( successCount: number, failedCount: number ) {
 	if ( failedCount === 0 ) {
@@ -83,27 +320,53 @@ function getSaveNoticeMessage( successCount: number, failedCount: number ) {
 }
 
 function ProductEditForm( {
+	bulkEditData,
 	editableFields,
 	onChange,
 	selectedProducts,
 }: ProductEditFormProps ) {
-	const mergedData = buildMergedProductEditData( selectedProducts );
 	const visibleFields = getVisibleProductEditFields(
 		editableFields,
 		selectedProducts
 	);
+	const { data: mergedData, fieldStates } = buildProductBulkEditData(
+		selectedProducts,
+		visibleFields
+	);
+	const enhancedFields = getBulkEnhancedProductEditFields( {
+		fieldStates,
+		isBulkEdit: selectedProducts.length > 1,
+		visibleFields,
+	} );
+	const formFields = getProductTypeFormFields(
+		selectedProducts,
+		enhancedFields
+	);
+	const fieldLabels = new Map(
+		visibleFields.map( ( field ) => [ field.id, field.label ] )
+	);
+	const data =
+		selectedProducts.length > 1
+			? getBulkEditFormData( mergedData, bulkEditData, fieldStates )
+			: mergedData;
 
 	const form = {
 		type: 'regular' as const,
 		labelPosition: 'top' as const,
-		fields: getProductTypeFormFields( selectedProducts, visibleFields ),
+		fields:
+			selectedProducts.length > 1
+				? injectBulkNumericOperationFormFields(
+						formFields,
+						fieldLabels
+				  )
+				: formFields,
 	};
 
 	return (
 		<div className="woocommerce-product-edit__form">
 			<DataForm
-				data={ mergedData }
-				fields={ visibleFields }
+				data={ data }
+				fields={ enhancedFields }
 				form={ form }
 				onChange={ onChange }
 			/>
@@ -120,8 +383,11 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 	const requestedProductIds = Array.from(
 		new Set( requestedProductIdsFromRoute )
 	);
+	const requestedProductIdsKey = requestedProductIds.join( ',' );
 
 	const [ isSaving, setIsSaving ] = useState( false );
+	const [ bulkEditData, setBulkEditData ] =
+		useState< ProductBulkEditFormData >( {} as ProductBulkEditFormData );
 
 	const editableFields = getProductEditFields( productFields );
 	const {
@@ -248,6 +514,35 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 	const { createSuccessNotice, createErrorNotice } =
 		useDispatch( noticesStore );
 
+	useEffect( () => {
+		setBulkEditData( {} as ProductBulkEditFormData );
+	}, [ requestedProductIdsKey ] );
+
+	const activeBulkNumericEdits = useMemo(
+		() =>
+			Object.fromEntries(
+				Object.entries(
+					getBulkNumericEditsFromData( bulkEditData )
+				).filter(
+					( [ fieldId, edit ] ) =>
+						isBulkNumericFieldId( fieldId ) &&
+						isBulkNumericEditPending( edit ) &&
+						isBulkNumericEditValid( fieldId, edit )
+				)
+			) as Partial< Record< BulkNumericFieldId, BulkNumericEdit > >,
+		[ bulkEditData ]
+	);
+	const hasValidBulkNumericEdits =
+		Object.keys( activeBulkNumericEdits ).length > 0;
+	const hasInvalidBulkNumericEdits = Object.entries(
+		getBulkNumericEditsFromData( bulkEditData )
+	).some(
+		( [ fieldId, edit ] ) =>
+			isBulkNumericFieldId( fieldId ) &&
+			isBulkNumericEditPending( edit ) &&
+			! isBulkNumericEditValid( fieldId, edit )
+	);
+
 	const hasNoRequestedProducts = requestedProductIds.length === 0;
 	const isReady =
 		hasResolved &&
@@ -270,14 +565,24 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 		}
 	}
 
-	const onChange = useCallback(
-		( changes: Partial< ProductEntityRecord > ) => {
+	const applySelectedProductChanges = useCallback(
+		(
+			getChangesForProduct: (
+				product: ProductEntityRecord
+			) => Partial< ProductEntityRecord >
+		) => {
 			const updatedParentProductsById = new Map<
 				number,
 				ProductEntityRecord
 			>();
 
 			selectedProducts.forEach( ( product ) => {
+				const changes = getChangesForProduct( product );
+
+				if ( Object.keys( changes ).length === 0 ) {
+					return;
+				}
+
 				if ( ! isProductVariation( product ) ) {
 					editEntityRecord( 'root', 'product', product.id, changes );
 					return;
@@ -317,6 +622,43 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 		[ editEntityRecord, selectedProducts ]
 	);
 
+	const onChange = useCallback(
+		( changes: Partial< ProductEntityRecord > ) => {
+			if ( selectedProducts.length <= 1 ) {
+				applySelectedProductChanges( () => changes );
+				return;
+			}
+
+			const bulkChanges: Record< string, unknown > = {};
+			const productChanges: Partial< ProductEntityRecord > = {};
+
+			Object.entries( changes ).forEach( ( [ fieldId, value ] ) => {
+				if (
+					isBulkNumericOperationFieldId( fieldId ) ||
+					isBulkNumericFieldId( fieldId )
+				) {
+					bulkChanges[ fieldId ] = value;
+					return;
+				}
+
+				productChanges[ fieldId as keyof ProductEntityRecord ] =
+					value as never;
+			} );
+
+			if ( Object.keys( bulkChanges ).length > 0 ) {
+				setBulkEditData( ( currentData ) => ( {
+					...currentData,
+					...bulkChanges,
+				} ) );
+			}
+
+			if ( Object.keys( productChanges ).length > 0 ) {
+				applySelectedProductChanges( () => productChanges );
+			}
+		},
+		[ applySelectedProductChanges, selectedProducts.length ]
+	);
+
 	const closeDrawer = useCallback( () => {
 		const editedProductIds = new Set(
 			selectedProducts.map( ( product ) =>
@@ -333,6 +675,8 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 			clearEntityRecordEdits( 'root', 'product', productId );
 		} );
 
+		setBulkEditData( {} as ProductBulkEditFormData );
+
 		delete nextQuery.quickEdit;
 
 		navigate( getProductListNavigationPath( path, nextQuery ) );
@@ -341,6 +685,38 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 	const onSave = useCallback( async () => {
 		if ( selectedProducts.length === 0 || isSaving ) {
 			return;
+		}
+
+		if ( hasInvalidBulkNumericEdits ) {
+			createErrorNotice(
+				__( 'Please enter a valid value.', 'woocommerce' ),
+				{
+					type: 'snackbar',
+				}
+			);
+			return;
+		}
+
+		const bulkNumericValidationError = validateBulkNumericEdits(
+			selectedProducts,
+			activeBulkNumericEdits
+		);
+
+		if ( bulkNumericValidationError ) {
+			createErrorNotice( bulkNumericValidationError, {
+				type: 'snackbar',
+			} );
+			return;
+		}
+
+		if ( hasValidBulkNumericEdits ) {
+			applySelectedProductChanges( ( product ) =>
+				getBulkNumericChangesForProduct(
+					product,
+					activeBulkNumericEdits
+				)
+			);
+			setBulkEditData( {} as ProductBulkEditFormData );
 		}
 
 		setIsSaving( true );
@@ -380,9 +756,13 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 		}
 	}, [
 		closeDrawer,
+		activeBulkNumericEdits,
+		applySelectedProductChanges,
 		createErrorNotice,
 		createSuccessNotice,
 		editEntityRecord,
+		hasInvalidBulkNumericEdits,
+		hasValidBulkNumericEdits,
 		isSaving,
 		saveEditedEntityRecord,
 		selectedProducts,
@@ -440,6 +820,7 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 
 					{ isReady && (
 						<ProductEditForm
+							bulkEditData={ bulkEditData }
 							editableFields={ editableFields }
 							onChange={ onChange }
 							selectedProducts={ selectedProducts }
@@ -460,7 +841,11 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 							variant="primary"
 							onClick={ onSave }
 							isBusy={ isSaving }
-							disabled={ isSaving || ! hasEdits }
+							disabled={
+								isSaving ||
+								hasInvalidBulkNumericEdits ||
+								( ! hasEdits && ! hasValidBulkNumericEdits )
+							}
 						>
 							{ __( 'Save', 'woocommerce' ) }
 						</Button>

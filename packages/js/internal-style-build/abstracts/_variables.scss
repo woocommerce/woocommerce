@@ -53,11 +53,12 @@ $alert-red: $error-red;
 $alert-yellow: $notice-yellow;
 $alert-green: $valid-green;
 
-// WordPress defaults
-$adminbar-height: 32px;
-$adminbar-height-mobile: 46px;
-$admin-menu-width: 160px;
-$admin-menu-width-collapsed: 36px;
+// WordPress defaults — aliased from @wordpress/base-styles/variables (already
+// imported above) so these track Core automatically if the upstream values change.
+$adminbar-height: $admin-bar-height;
+$adminbar-height-mobile: $admin-bar-height-big;
+$admin-menu-width: $admin-sidebar-width;
+$admin-menu-width-collapsed: $admin-sidebar-width-collapsed;
 
 // wp-admin colors. Hardcoded because WordPress doesn't expose them as CSS
 // custom properties on `:root` (verified via the `wp-token-check` skill).

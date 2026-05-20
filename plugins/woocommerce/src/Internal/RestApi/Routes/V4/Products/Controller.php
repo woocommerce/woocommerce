@@ -535,8 +535,9 @@ class Controller extends WC_REST_Products_V2_Controller {
 			$args['meta_query'] = $this->add_meta_query( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_meta_query
 				$args,
 				array(
-					'key'   => '_stock_status',
-					'value' => $request['stock_status'],
+					'key'     => '_stock_status',
+					'value'   => $request['stock_status'],
+					'compare' => 'IN',
 				)
 			);
 		}
@@ -2083,10 +2084,13 @@ class Controller extends WC_REST_Products_V2_Controller {
 
 		unset( $params['in_stock'] );
 		$params['stock_status'] = array(
-			'description'       => __( 'Limit result set to products with specified stock status.', 'woocommerce' ),
-			'type'              => 'string',
-			'enum'              => array_keys( wc_get_product_stock_status_options() ),
-			'sanitize_callback' => 'sanitize_text_field',
+			'description'       => __( 'Limit result set to products with any of the specified stock statuses.', 'woocommerce' ),
+			'type'              => array( 'string', 'array' ),
+			'items'             => array(
+				'type' => 'string',
+				'enum' => array_keys( wc_get_product_stock_status_options() ),
+			),
+			'sanitize_callback' => 'wp_parse_list',
 			'validate_callback' => 'rest_validate_request_arg',
 		);
 

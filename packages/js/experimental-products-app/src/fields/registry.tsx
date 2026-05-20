@@ -17,6 +17,7 @@ import { fieldExtensions as dateOnSaleFromFieldExtensions } from './date_on_sale
 import { fieldExtensions as dateOnSaleToFieldExtensions } from './date_on_sale_to/field';
 import { fieldExtensions as descriptionFieldExtensions } from './description/field';
 import { fieldExtensions as globalUniqueIdFieldExtensions } from './global_unique_id/field';
+import { fieldExtensions as groupedProductsFieldExtensions } from './grouped_products/field';
 import { fieldExtensions as downloadableFieldExtensions } from './downloadable/field';
 import { fieldExtensions as downloadableCountFieldExtensions } from './downloadable_count/field';
 import { fieldExtensions as externalUrlFieldExtensions } from './external_url/field';
@@ -81,6 +82,7 @@ export const PRODUCT_FIELD_IDS = [
 	'brands',
 	'date',
 	'global_unique_id',
+	'grouped_products',
 	'organization_summary',
 	'type',
 	'featured',
@@ -133,6 +135,7 @@ const PRODUCT_FIELD_EXTENSIONS: Record<
 	brands: brandsFieldExtensions,
 	date: dateFieldExtensions,
 	global_unique_id: globalUniqueIdFieldExtensions,
+	grouped_products: groupedProductsFieldExtensions,
 	organization_summary: organizationSummaryFieldExtensions,
 	type: typeFieldExtensions,
 	featured: featuredFieldExtensions,

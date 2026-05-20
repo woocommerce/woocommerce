@@ -35,6 +35,7 @@ export type ProductEntityRecord = Omit< Product, 'categories' | 'tags' > & {
 	global_unique_id?: string;
 	cross_sell_ids?: number[];
 	upsell_ids?: number[];
+	grouped_products?: number[];
 	date_on_sale_from?: string | null;
 	date_on_sale_to?: string | null;
 	parent_id?: number;
