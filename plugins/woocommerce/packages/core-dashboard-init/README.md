@@ -1,6 +1,6 @@
 # `@woocommerce/core-dashboard-init`
 
-> **Status: Proof of Concept.** This package is part of an exploratory scaffold for surfacing WooCommerce on the experimental Gutenberg dashboard. APIs, file layouts, and conventions described here will likely move.
+> **Status: Experimental.** This package surfaces WooCommerce on the experimental Gutenberg dashboard, gated behind the off-by-default `dashboard_widgets` feature flag. APIs, file layouts, and conventions described here may still move.
 
 A `@wordpress/build` "init module" that runs on dashboard boot and registers WooCommerce-core contributions to the dashboard.
 
@@ -132,7 +132,7 @@ export const WC_ORDER_ENTITY: Entity = {
 
 `registerWooCommerceOrderEntity()` calls `dispatch( coreStore ).addEntities( [ WC_ORDER_ENTITY ] )`, gated by an idempotency `Set` so multiple boot paths can call it safely. It's invoked from `src/index.ts` **before** `registerStoreActivitySources()` so consumers can `getEntityRecords( 'woocommerce', 'order', ... )` immediately.
 
-Eventually, when more widgets/sources need access to orders (or to other WC entities), this `data/` subdir can graduate to a dedicated `@woocommerce/data` workspace package mirroring the shape of `@mailpoet-next/data`. For now it lives here to keep the PoC cohesive.
+Eventually, when more widgets/sources need access to orders (or to other WC entities), this `data/` subdir can graduate to a dedicated `@woocommerce/data` workspace package mirroring the shape of `@mailpoet-next/data`. For now it lives here to keep the package cohesive.
 
 ## Sources
 
