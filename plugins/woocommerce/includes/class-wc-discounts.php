@@ -791,79 +791,63 @@ class WC_Discounts {
 	}
 
 	/**
-	 * Ensure coupon is valid for products in the list is valid or throw exception.
+	 * Validates that the coupon is applicable to at least one item in the cart.
+	 * Uses OR logic — passes if any cart item matches either an allowed product ID
+	 * OR an allowed product category. Both restrictions are not required simultaneously.
 	 *
-	 * @since  3.2.0
-	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
-	 * @return bool
+	 * @param WC_Coupon $coupon Coupon data.
+	 * @throws Exception When no cart item satisfies either restriction.
+	 * @return true
 	 */
-	protected function validate_coupon_product_ids( $coupon ) {
-		if ( count( $coupon->get_product_ids() ) > 0 ) {
-			$valid = false;
+	protected function validate_coupon_product_ids_or_categories( $coupon ) {
+		$has_product_restriction  = count( $coupon->get_product_ids() ) > 0;
+		$has_category_restriction = count( $coupon->get_product_categories() ) > 0;
 
-			foreach ( $this->get_items_to_validate() as $item ) {
-				if ( $item->product && ( in_array( $item->product->get_id(), $coupon->get_product_ids(), true ) || in_array( $item->product->get_parent_id(), $coupon->get_product_ids(), true ) ) ) {
-					$valid = true;
-					break;
-				}
-			}
-
-			if ( ! $valid ) {
-				throw new Exception(
-					sprintf(
-					/* translators: %s: coupon code */
-						esc_html__( 'Sorry, coupon "%s" is not applicable to selected products.', 'woocommerce' ),
-						esc_html( $coupon->get_code() )
-					),
-					109
-				);
-			}
+		// No restrictions set — all products are eligible, nothing to validate.
+		if ( ! $has_product_restriction && ! $has_category_restriction ) {
+			return true;
 		}
 
-		return true;
-	}
+		$valid = false;
 
-	/**
-	 * Ensure coupon is valid for product categories in the list is valid or throw exception.
-	 *
-	 * @since  3.2.0
-	 * @throws Exception Error message.
-	 * @param  WC_Coupon $coupon Coupon data.
-	 * @return bool
-	 */
-	protected function validate_coupon_product_categories( $coupon ) {
-		if ( count( $coupon->get_product_categories() ) > 0 ) {
-			$valid = false;
+		foreach ( $this->get_items_to_validate() as $item ) {
+			if ( ! $item->product ) {
+				continue;
+			}
 
-			foreach ( $this->get_items_to_validate() as $item ) {
-				if ( $coupon->get_exclude_sale_items() && $item->product && $item->product->is_on_sale() ) {
-					continue;
-				}
+			// Check product ID match.
+			if ( $has_product_restriction && (
+				in_array( $item->product->get_id(), $coupon->get_product_ids(), true ) ||
+				in_array( $item->product->get_parent_id(), $coupon->get_product_ids(), true )
+			) ) {
+				$valid = true;
+				break;
+			}
 
-				$product_cats = wc_get_product_cat_ids( $item->product->get_id() );
+			// Check category match.
+			if ( $has_category_restriction ) {
+				$product_cats = wc_get_product_cat_ids(
+					$item->product->is_type( 'variation' )
+						? $item->product->get_parent_id()
+						: $item->product->get_id()
+				);
 
-				if ( $item->product->get_parent_id() ) {
-					$product_cats = array_merge( $product_cats, wc_get_product_cat_ids( $item->product->get_parent_id() ) );
-				}
-
-				// If we find an item with a cat in our allowed cat list, the coupon is valid.
 				if ( count( array_intersect( $product_cats, $coupon->get_product_categories() ) ) > 0 ) {
 					$valid = true;
 					break;
 				}
 			}
+		}
 
-			if ( ! $valid ) {
-				throw new Exception(
-					sprintf(
-						/* translators: %s: coupon code */
-						esc_html__( 'Sorry, coupon "%s" is not applicable to selected products.', 'woocommerce' ),
-						esc_html( $coupon->get_code() )
-					),
-					109
-				);
-			}
+		if ( ! $valid ) {
+			throw new Exception(
+				sprintf(
+					/* translators: %s: coupon code */
+					esc_html__( 'Sorry, coupon "%s" is not applicable to selected products.', 'woocommerce' ),
+					esc_html( $coupon->get_code() )
+				),
+				WC_Coupon::E_WC_COUPON_NOT_APPLICABLE
+			);
 		}
 
 		return true;
@@ -1139,8 +1123,7 @@ class WC_Discounts {
 			$this->validate_coupon_expiry_date( $coupon );
 			$this->validate_coupon_minimum_amount( $coupon );
 			$this->validate_coupon_maximum_amount( $coupon );
-			$this->validate_coupon_product_ids( $coupon );
-			$this->validate_coupon_product_categories( $coupon );
+			$this->validate_coupon_product_ids_or_categories( $coupon );
 			$this->validate_coupon_excluded_items( $coupon );
 			$this->validate_coupon_eligible_items( $coupon );
 			$this->validate_coupon_allowed_emails( $coupon );
