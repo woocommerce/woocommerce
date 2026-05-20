@@ -165,6 +165,14 @@ const MappingStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 											setMapping( row.index, value )
 										}
 									/>
+									{ row.mapped === 'items' ? (
+										<p className="woocommerce-fulfillment-importer-mapping-help">
+											{ __(
+												'Optional. Format: "<line_item_id>:<qty>" or "sku:<SKU>:<qty>", separated by "|" or ";". Leave blank to fulfill all unfulfilled items.',
+												'woocommerce'
+											) }
+										</p>
+									) : null }
 								</td>
 							</tr>
 						);
