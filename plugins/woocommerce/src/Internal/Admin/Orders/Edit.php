@@ -103,17 +103,17 @@ class Edit {
 		}
 
 		/**
-		 * Filters whether the Downloadable product permissions meta box is hidden by default on the order edit screen.
+		 * Filters whether the Downloadable product permissions meta box is hidden on the order edit screen.
 		 *
-		 * Returning true forces the meta box into the screen's hidden list on every page load; returning false leaves the user's Screen Options preference intact.
+		 * The decision is re-applied on every page load. Returning true forces the meta box into the screen's hidden list; returning false leaves the user's Screen Options preference intact.
 		 *
-		 * @param bool     $hidden_default Whether the meta box should be hidden by default. Defaults to true when the order has no downloadable items.
-		 * @param WC_Order $order          The order being edited.
+		 * @param bool     $hidden Whether the meta box should be hidden. Defaults to true when the order has no downloadable items.
+		 * @param WC_Order $order  The order being edited.
 		 *
 		 * @since 10.9.0
 		 */
 		$hidden_default = (bool) apply_filters(
-			'woocommerce_order_downloads_meta_box_default_hidden',
+			'woocommerce_order_downloads_meta_box_hidden',
 			! $order->has_downloadable_item(),
 			$order
 		);

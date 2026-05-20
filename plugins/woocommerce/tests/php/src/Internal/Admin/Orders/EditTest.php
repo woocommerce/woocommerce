@@ -29,7 +29,7 @@ class EditTest extends \WC_Unit_Test_Case {
 	public function tearDown(): void {
 		// Clean up filters registered during the test so they don't leak across tests.
 		remove_all_filters( 'hidden_meta_boxes' );
-		remove_all_filters( 'woocommerce_order_downloads_meta_box_default_hidden' );
+		remove_all_filters( 'woocommerce_order_downloads_meta_box_hidden' );
 
 		// Reset the meta boxes registered by add_order_meta_boxes() so global state stays clean.
 		unset( $GLOBALS['wp_meta_boxes'][ self::TEST_SCREEN_ID ] );
@@ -106,12 +106,12 @@ class EditTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should allow the woocommerce_order_downloads_meta_box_default_hidden filter to force the meta box visible.
+	 * @testdox Should allow the woocommerce_order_downloads_meta_box_hidden filter to force the meta box visible.
 	 */
 	public function test_extension_filter_can_force_meta_box_visible(): void {
 		$order = WC_Helper_Order::create_order( 1, WC_Helper_Product::create_simple_product() );
 
-		add_filter( 'woocommerce_order_downloads_meta_box_default_hidden', '__return_false' );
+		add_filter( 'woocommerce_order_downloads_meta_box_hidden', '__return_false' );
 
 		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order', $order );
 
@@ -125,12 +125,12 @@ class EditTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox Should allow the woocommerce_order_downloads_meta_box_default_hidden filter to force the meta box hidden.
+	 * @testdox Should allow the woocommerce_order_downloads_meta_box_hidden filter to force the meta box hidden.
 	 */
 	public function test_extension_filter_can_force_meta_box_hidden(): void {
 		$order = $this->create_order_with_downloadable_item();
 
-		add_filter( 'woocommerce_order_downloads_meta_box_default_hidden', '__return_true' );
+		add_filter( 'woocommerce_order_downloads_meta_box_hidden', '__return_true' );
 
 		Edit::add_order_meta_boxes( self::TEST_SCREEN_ID, 'Order', $order );
 
