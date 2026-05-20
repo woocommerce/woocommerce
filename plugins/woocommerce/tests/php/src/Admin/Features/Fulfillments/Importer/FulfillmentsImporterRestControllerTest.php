@@ -339,9 +339,9 @@ class FulfillmentsImporterRestControllerTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
-	 * @testdox The import routes refuse callers that lack edit_shop_orders.
+	 * @testdox The import routes refuse callers that lack manage_woocommerce.
 	 */
-	public function test_permission_check_requires_edit_shop_orders(): void {
+	public function test_permission_check_requires_manage_woocommerce(): void {
 		$subscriber = wp_insert_user(
 			array(
 				'user_login' => 'fulfill_subscriber_' . wp_generate_password( 6, false ),

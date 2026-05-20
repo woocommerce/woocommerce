@@ -148,8 +148,8 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 							'required'             => true,
 							'description'          => __( 'CSV column index (stringified) → canonical column key.', 'woocommerce' ),
 							'additionalProperties' => array(
-								'type'              => 'string',
-								'enum'              => array(
+								'type' => 'string',
+								'enum' => array(
 									'',
 									FulfillmentsCsvImporter::COL_ORDER_NUMBER,
 									FulfillmentsCsvImporter::COL_TRACKING_NUMBER,
@@ -157,7 +157,6 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 									FulfillmentsCsvImporter::COL_TRACKING_URL,
 									FulfillmentsCsvImporter::COL_ITEMS,
 								),
-								'sanitize_callback' => 'sanitize_text_field',
 							),
 						),
 						'options' => array(
@@ -419,7 +418,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				wp_delete_file( $file );
 			}
 
-			/** This filter is documented above. */
+			/** This action is documented above. */
 			do_action( 'woocommerce_fulfillments_csv_import_completed', $summary );
 
 			$response['summary'] = $summary;
@@ -499,7 +498,7 @@ class FulfillmentsImporterRestController extends RestApiControllerBase {
 				}
 				wc_get_logger()->error(
 					'Fulfillments importer upload failed: ' . $e->getMessage(),
-					array( 'source' => 'fulfillments-importer' )
+					array( 'source' => 'fulfillments-csv-importer' )
 				);
 				FulfillmentsTracker::track_fulfillment_validation_error( 'import', 'woocommerce_fulfillments_import_upload_failed', 'csv_importer' );
 				return new WP_Error(

@@ -133,7 +133,7 @@ final class ImportSession {
 					$stored ? 'ok' : 'failed',
 					$indexed ? 'ok' : 'failed'
 				),
-				array( 'source' => 'fulfillments-importer' )
+				array( 'source' => 'fulfillments-csv-importer' )
 			);
 		}
 
@@ -417,6 +417,8 @@ final class ImportSession {
 		if ( $byte_offset > 0 ) {
 			// Take the offset the importer just reported verbatim. Clamping with max() would
 			// silently ignore a corrected (lower) offset on retry and cause rows to be skipped.
+			// A zero value means the chunk never got a real ftell() position (e.g. open failed),
+			// so we preserve the prior offset rather than rewinding to the start of the file.
 			$this->data['byte_offset'] = $byte_offset;
 		}
 
@@ -485,7 +487,7 @@ final class ImportSession {
 					$stored ? 'ok' : 'failed',
 					$indexed ? 'ok' : 'failed'
 				),
-				array( 'source' => 'fulfillments-importer' )
+				array( 'source' => 'fulfillments-csv-importer' )
 			);
 		}
 	}
