@@ -152,7 +152,12 @@ class Features {
 			new \Automattic\WooCommerce\Admin\Features\Blueprint\Init();
 		}
 
-		if ( FeaturesUtil::feature_is_enabled( 'order-detail-redesign' ) ) {
+		// `order-detail-redesign` is a wc-admin feature-config.php flag, surfaced as a
+		// toggle in Tools > WCA Test Helper > Features. `Features::is_enabled` resolves
+		// these via the `woocommerce_admin_features` filter; `FeaturesUtil::feature_is_enabled`
+		// (which queries the unrelated `FeaturesController` registry) would always return
+		// false for this flag and never instantiate Init.
+		if ( self::is_enabled( 'order-detail-redesign' ) ) {
 			new \Automattic\WooCommerce\Internal\Features\OrderDetailRedesign\Init();
 		}
 	}
