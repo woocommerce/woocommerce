@@ -5,9 +5,8 @@ import {
 	WC_PRODUCT_REVIEW_ENTITY,
 	type ProductReviewRecord,
 } from '../../data';
+import type { ActivityHookResult } from '../types';
 import { ReviewTimelineEvent } from './review-timeline-event';
-
-type ActivityState = 'loading' | 'empty' | 'success';
 
 /**
  * Reads from the WC product reviews entity registered in `data/`, backed by
@@ -29,15 +28,7 @@ const QUERY_PARAMS = {
  * Hook that fetches recent product reviews and exposes them as Store
  * Activity events.
  */
-export function useReviewsActivity(): {
-	state: ActivityState;
-	events?: Array< {
-		id: number;
-		icon: JSX.Element;
-		renderContent: () => JSX.Element;
-		datetime: string;
-	} >;
-} {
+export function useReviewsActivity(): ActivityHookResult {
 	const { reviews, isResolving } = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		const records = select( coreStore ).getEntityRecords(

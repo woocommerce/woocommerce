@@ -2,9 +2,8 @@ import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { people } from '@wordpress/icons';
 import { WC_CUSTOMER_ENTITY, type CustomerRecord } from '../../data';
+import type { ActivityHookResult } from '../types';
 import { CustomerTimelineEvent } from './customer-timeline-event';
-
-type ActivityState = 'loading' | 'empty' | 'success';
 
 const QUERY_PARAMS = {
 	per_page: 10,
@@ -20,15 +19,7 @@ const QUERY_PARAMS = {
  * guest checkouts don't show up here. Surfacing guest activity (when
  * relevant) is the orders source's job.
  */
-export function useCustomersActivity(): {
-	state: ActivityState;
-	events?: Array< {
-		id: number;
-		icon: JSX.Element;
-		renderContent: () => JSX.Element;
-		datetime: string;
-	} >;
-} {
+export function useCustomersActivity(): ActivityHookResult {
 	const { customers, isResolving } = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		const records = select( coreStore ).getEntityRecords(

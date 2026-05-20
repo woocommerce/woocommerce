@@ -2,9 +2,8 @@ import { useSelect } from '@wordpress/data';
 import { store as coreStore } from '@wordpress/core-data';
 import { receipt } from '@wordpress/icons';
 import { WC_ORDER_ENTITY, type OrderRecord } from '../../data';
+import type { ActivityHookResult } from '../types';
 import { OrderTimelineEvent } from './order-timeline-event';
-
-type ActivityState = 'loading' | 'empty' | 'success';
 
 const QUERY_PARAMS = {
 	per_page: 10,
@@ -18,15 +17,7 @@ const QUERY_PARAMS = {
  * Reads from the `woocommerce/order` entity registered in `data/`, which is
  * backed by the `/wc/v3/orders` REST endpoint.
  */
-export function useOrdersActivity(): {
-	state: ActivityState;
-	events?: Array< {
-		id: number;
-		icon: JSX.Element;
-		renderContent: () => JSX.Element;
-		datetime: string;
-	} >;
-} {
+export function useOrdersActivity(): ActivityHookResult {
 	const { orders, isResolving } = useSelect( ( select ) => {
 		// eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
 		const records = select( coreStore ).getEntityRecords(

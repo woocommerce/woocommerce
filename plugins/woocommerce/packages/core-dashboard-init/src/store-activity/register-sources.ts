@@ -2,11 +2,7 @@ import { addFilter } from '@wordpress/hooks';
 import { useCustomersActivity } from './customers';
 import { useOrdersActivity } from './orders';
 import { useReviewsActivity } from './reviews';
-
-type ActivitySource = {
-	id: string;
-	useActivity: () => unknown;
-};
+import type { ActivitySource } from './types';
 
 /**
  * Registers WooCommerce-core activity sources for the Store Activity widget.
