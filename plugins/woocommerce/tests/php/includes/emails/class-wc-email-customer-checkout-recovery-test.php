@@ -87,7 +87,7 @@ class WC_Email_Customer_Checkout_Recovery_Test extends \WC_Unit_Test_Case {
 	 * @testdox Defaults wire the expected JTBD-framed subject, heading, and additional content.
 	 */
 	public function test_default_copy(): void {
-		$this->assertSame( 'Your items at {site_title} are waiting', $this->sut->get_default_subject() );
+		$this->assertSame( 'Still want it?', $this->sut->get_default_subject() );
 		$this->assertSame( 'Pick up where you left off', $this->sut->get_default_heading() );
 		$this->assertStringContainsString( 'reply to this email', $this->sut->get_default_additional_content() );
 	}

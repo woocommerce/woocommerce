@@ -46,11 +46,11 @@ if ( $order instanceof WC_Order && ! empty( $order->get_billing_first_name() ) )
 ?>
 </p>
 
-<p><?php esc_html_e( 'Your items are still in your cart. Come back whenever you\'re ready — we saved everything for you.', 'woocommerce' ); ?></p>
+<p><?php esc_html_e( 'Your items are still in your cart. We\'ve saved everything, so come back when you\'re ready.', 'woocommerce' ); ?></p>
 
 <?php if ( ! empty( $recovery_url ) ) : ?>
 <p>
-	<a href="<?php echo esc_url( $recovery_url ); ?>"><?php esc_html_e( 'Complete your order', 'woocommerce' ); ?></a>
+	<a href="<?php echo esc_url( $recovery_url ); ?>"><?php esc_html_e( 'Finish checking out', 'woocommerce' ); ?></a>
 </p>
 <?php endif; ?>
 <?php echo $email_improvements_enabled ? '</div>' : ''; ?>

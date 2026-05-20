@@ -33,7 +33,7 @@ defined( 'ABSPATH' ) || exit;
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->
-<p> <?php echo esc_html__( 'Your items are still in your cart. Come back whenever you’re ready — we saved everything for you.', 'woocommerce' ); ?> </p>
+<p> <?php echo esc_html__( 'Your items are still in your cart. We’ve saved everything, so come back when you’re ready.', 'woocommerce' ); ?> </p>
 <!-- /wp:paragraph -->
 
 <!-- wp:paragraph -->

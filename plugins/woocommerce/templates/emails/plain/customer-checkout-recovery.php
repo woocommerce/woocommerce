@@ -30,10 +30,10 @@ if ( $order instanceof WC_Order && ! empty( $order->get_billing_first_name() ) )
 	echo esc_html__( 'Hi,', 'woocommerce' ) . "\n\n";
 }
 
-echo esc_html__( 'Your items are still in your cart. Come back whenever you\'re ready — we saved everything for you.', 'woocommerce' ) . "\n\n";
+echo esc_html__( 'Your items are still in your cart. We\'ve saved everything, so come back when you\'re ready.', 'woocommerce' ) . "\n\n";
 
 if ( ! empty( $recovery_url ) ) {
-	echo esc_html__( 'Complete your order:', 'woocommerce' ) . "\n";
+	echo esc_html__( 'Finish checking out:', 'woocommerce' ) . "\n";
 	echo esc_url( $recovery_url ) . "\n\n";
 }
 

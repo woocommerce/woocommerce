@@ -454,7 +454,7 @@ class FeaturesController {
 			'checkout_recovery'                  => array(
 				'name'                         => __( 'Checkout recovery', 'woocommerce' ),
 				'description'                  => __(
-					'Send customers a recovery email when they leave a checkout pending, prompting them to complete their order.',
+					'Send a reminder email to shoppers who didn\'t finish checking out.',
 					'woocommerce'
 				),
 				// Skip compatibility checks like the other opt-in transactional-email features.

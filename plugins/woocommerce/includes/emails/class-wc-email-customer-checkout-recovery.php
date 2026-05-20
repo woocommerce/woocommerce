@@ -60,7 +60,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 			parent::__construct();
 
 			// Must be after parent's constructor which sets `email_improvements_enabled` property.
-			$this->description = __( 'Recovery emails are sent to customers who leave checkout pending, prompting them to complete their order.', 'woocommerce' );
+			$this->description = __( 'Win back shoppers who almost bought. Automatically email customers who didn\'t finish checking out, with a one-click link back to their order.', 'woocommerce' );
 		}
 
 		/**
@@ -242,7 +242,7 @@ if ( ! class_exists( 'WC_Email_Customer_Checkout_Recovery', false ) ) :
 		 * @return string
 		 */
 		public function get_default_subject() {
-			return __( 'Your items at {site_title} are waiting', 'woocommerce' );
+			return __( 'Still want it?', 'woocommerce' );
 		}
 
 		/**
