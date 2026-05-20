@@ -43,6 +43,7 @@ class FulfillmentsCsvImporterController {
 		// to mount the modal slot and enqueue the assets.
 		add_action( 'admin_footer', array( $this, 'render_modal_slot' ) );
 		add_action( 'admin_enqueue_scripts', array( $this, 'enqueue_assets' ) );
+		add_action( ImportSession::CLEANUP_HOOK, array( ImportSession::class, 'cleanup_abandoned_file' ), 10, 3 );
 	}
 
 	/**

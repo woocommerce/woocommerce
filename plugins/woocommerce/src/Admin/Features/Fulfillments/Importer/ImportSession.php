@@ -27,6 +27,16 @@ final class ImportSession {
 	private const TTL = HOUR_IN_SECONDS;
 
 	/**
+	 * Action Scheduler hook fired to clean up an abandoned staged CSV file.
+	 */
+	public const CLEANUP_HOOK = 'woocommerce_fulfillments_import_session_cleanup';
+
+	/**
+	 * Grace period (in seconds) added to TTL before the cleanup action fires.
+	 */
+	private const CLEANUP_GRACE = 5 * MINUTE_IN_SECONDS;
+
+	/**
 	 * Prefix for session payload transients.
 	 */
 	private const PREFIX = 'wc_fulfillment_import_';
@@ -115,7 +125,51 @@ final class ImportSession {
 		set_transient( self::PREFIX . $user_id . '_' . $token, $data, self::TTL );
 		set_transient( self::INDEX_PREFIX . $user_id, $token, self::TTL );
 
+		self::schedule_cleanup( $user_id, $token, $file );
+
 		return new self( $user_id, $token, $data );
+	}
+
+	/**
+	 * Schedule a deferred cleanup action that will remove the staged file if the session is
+	 * abandoned (transient expires without the wizard ever completing the import).
+	 *
+	 * @param int    $user_id User ID.
+	 * @param string $token   Session token.
+	 * @param string $file    Absolute path to the staged CSV.
+	 */
+	private static function schedule_cleanup( int $user_id, string $token, string $file ): void {
+		if ( '' === $file || ! function_exists( 'as_schedule_single_action' ) ) {
+			return;
+		}
+		as_schedule_single_action(
+			time() + self::TTL + self::CLEANUP_GRACE,
+			self::CLEANUP_HOOK,
+			array( $user_id, $token, $file ),
+			'woocommerce-fulfillments-importer'
+		);
+	}
+
+	/**
+	 * Cleanup callback fired by Action Scheduler after the TTL grace window.
+	 *
+	 * Only deletes the file when the matching session transient has expired; if the user is
+	 * still mid-import the action becomes a no-op.
+	 *
+	 * @since 10.9.0
+	 *
+	 * @param int    $user_id User the session belongs to.
+	 * @param string $token   Session token.
+	 * @param string $file    Absolute path to the staged CSV.
+	 */
+	public static function cleanup_abandoned_file( int $user_id, string $token, string $file ): void {
+		if ( '' === $file || ! file_exists( $file ) ) {
+			return;
+		}
+		if ( false !== get_transient( self::PREFIX . $user_id . '_' . $token ) ) {
+			return;
+		}
+		wp_delete_file( $file );
 	}
 
 	/**
@@ -166,6 +220,14 @@ final class ImportSession {
 		$current = get_transient( self::INDEX_PREFIX . $this->user_id );
 		if ( $current === $this->token ) {
 			delete_transient( self::INDEX_PREFIX . $this->user_id );
+		}
+
+		if ( function_exists( 'as_unschedule_action' ) ) {
+			as_unschedule_action(
+				self::CLEANUP_HOOK,
+				array( $this->user_id, $this->token, $this->file() ),
+				'woocommerce-fulfillments-importer'
+			);
 		}
 	}
 
