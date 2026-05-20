@@ -16,6 +16,30 @@ namespace Automattic\WooCommerce\Internal\Admin;
 class OrderMilestoneEasterEgg {
 
 	/**
+	 * Option key used to cache computed milestone order IDs.
+	 */
+	private const MILESTONE_CACHE_OPTION = '_wc_order_milestone_egg_order_ids';
+
+	/**
+	 * Maximum number of qualifying orders needed to resolve all milestones.
+	 */
+	private const MAX_QUALIFYING_ORDERS = 1000;
+
+	/**
+	 * Number of orders to inspect per milestone scan batch.
+	 */
+	private const QUERY_BATCH_SIZE = 100;
+
+	/**
+	 * Milestone positions mapped to milestone message keys.
+	 */
+	private const MILESTONE_POSITIONS = array(
+		0   => 'first',
+		99  => 'hundred',
+		999 => 'thousand',
+	);
+
+	/**
 	 * Sets up the hooks.
 	 *
 	 * @internal
@@ -26,6 +50,19 @@ class OrderMilestoneEasterEgg {
 		add_action( 'admin_enqueue_scripts', array( $this, 'handle_admin_enqueue_scripts' ) );
 		add_action( 'wp_ajax_wc_egg_dismiss', array( $this, 'handle_ajax_dismiss' ) );
 		add_action( 'wp_ajax_wc_egg_opt_out', array( $this, 'handle_ajax_opt_out' ) );
+		add_action( 'woocommerce_new_order', array( $this, 'clear_milestone_cache' ), 10, 0 );
+		add_action( 'woocommerce_update_order', array( $this, 'clear_milestone_cache' ), 10, 0 );
+		add_action( 'woocommerce_delete_order', array( $this, 'clear_milestone_cache' ), 10, 0 );
+		add_action( 'woocommerce_trash_order', array( $this, 'clear_milestone_cache' ), 10, 0 );
+	}
+
+	/**
+	 * Clears the cached milestone order IDs.
+	 *
+	 * @internal
+	 */
+	public function clear_milestone_cache(): void {
+		delete_option( self::MILESTONE_CACHE_OPTION );
 	}
 
 	/**
@@ -64,8 +101,9 @@ class OrderMilestoneEasterEgg {
 		 *
 		 * Return false to disable the feature entirely — no order queries or assets will be loaded.
 		 *
-		 * @since 10.9.0
 		 * @param bool $enabled Whether the feature is enabled. Default true.
+		 *
+		 * @since 10.9.0
 		 */
 		if ( ! apply_filters( 'wc_order_milestone_egg_enabled', true ) ) {
 			return;
@@ -202,21 +240,74 @@ class OrderMilestoneEasterEgg {
 	/**
 	 * Returns a map of milestone order IDs to their milestone data.
 	 *
-	 * Paginates through processing/completed orders in chronological order until
-	 * 1000 orders with a transaction ID have been collected, ensuring milestone
-	 * positions are counted against qualifying orders only.
+	 * Uses cached milestone order IDs when available; otherwise computes and caches
+	 * them by scanning qualifying orders in chronological order.
 	 *
 	 * @return array<int, array<string, string>>
 	 */
 	private function get_milestone_map(): array {
+		$milestone_order_ids = $this->get_cached_milestone_order_ids();
+		if ( null === $milestone_order_ids ) {
+			$milestone_order_ids = $this->compute_milestone_order_ids();
+			update_option( self::MILESTONE_CACHE_OPTION, $milestone_order_ids, false );
+		}
+
+		$messages      = $this->get_milestone_messages();
+		$milestone_map = array();
+
+		foreach ( $milestone_order_ids as $key => $order_id ) {
+			if ( isset( $messages[ $key ] ) ) {
+				$milestone_map[ $order_id ] = $messages[ $key ];
+			}
+		}
+
+		/**
+		 * Filters the map of milestone order IDs to their milestone data.
+		 *
+		 * @param array<int, array<string, string>> $milestone_map Map of order ID to milestone data.
+		 *
+		 * @since 10.9.0
+		 */
+		return apply_filters( 'wc_order_milestone_egg_map', $milestone_map );
+	}
+
+	/**
+	 * Returns cached milestone order IDs, or null when the cache is missing.
+	 *
+	 * @return array<string, int>|null
+	 */
+	private function get_cached_milestone_order_ids(): ?array {
+		$cached = get_option( self::MILESTONE_CACHE_OPTION, null );
+		if ( ! is_array( $cached ) ) {
+			return null;
+		}
+
+		$milestone_order_ids = array();
+		foreach ( self::MILESTONE_POSITIONS as $key ) {
+			if ( isset( $cached[ $key ] ) ) {
+				$order_id = absint( $cached[ $key ] );
+				if ( $order_id > 0 ) {
+					$milestone_order_ids[ $key ] = $order_id;
+				}
+			}
+		}
+
+		return $milestone_order_ids;
+	}
+
+	/**
+	 * Computes milestone order IDs by scanning qualifying orders in chronological order.
+	 *
+	 * @return array<string, int>
+	 */
+	private function compute_milestone_order_ids(): array {
 		$qualifying_order_ids = array();
 		$page                 = 1;
-		$batch_size           = 100;
 
-		while ( count( $qualifying_order_ids ) < 1000 ) {
+		while ( count( $qualifying_order_ids ) < self::MAX_QUALIFYING_ORDERS ) {
 			$batch = (array) wc_get_orders(
 				array(
-					'limit'   => $batch_size,
+					'limit'   => self::QUERY_BATCH_SIZE,
 					'paged'   => $page,
 					'orderby' => 'date',
 					'order'   => 'ASC',
@@ -232,40 +323,27 @@ class OrderMilestoneEasterEgg {
 			foreach ( $batch as $order ) {
 				if ( $order instanceof \WC_Order && '' !== $order->get_transaction_id() ) {
 					$qualifying_order_ids[] = $order->get_id();
-					if ( count( $qualifying_order_ids ) >= 1000 ) {
+					if ( count( $qualifying_order_ids ) >= self::MAX_QUALIFYING_ORDERS ) {
 						break 2;
 					}
 				}
 			}
 
-			if ( count( $batch ) < $batch_size ) {
+			if ( count( $batch ) < self::QUERY_BATCH_SIZE ) {
 				break;
 			}
 
 			++$page;
 		}
 
-		$positions     = array(
-			0   => 'first',
-			99  => 'hundred',
-			999 => 'thousand',
-		);
-		$messages      = $this->get_milestone_messages();
-		$milestone_map = array();
-
-		foreach ( $positions as $pos => $key ) {
+		$milestone_order_ids = array();
+		foreach ( self::MILESTONE_POSITIONS as $pos => $key ) {
 			if ( isset( $qualifying_order_ids[ $pos ] ) ) {
-				$milestone_map[ (int) $qualifying_order_ids[ $pos ] ] = $messages[ $key ];
+				$milestone_order_ids[ $key ] = (int) $qualifying_order_ids[ $pos ];
 			}
 		}
 
-		/**
-		 * Filters the map of milestone order IDs to their milestone data.
-		 *
-		 * @since 10.9.0
-		 * @param array<int, array<string, string>> $milestone_map Map of order ID to milestone data.
-		 */
-		return apply_filters( 'wc_order_milestone_egg_map', $milestone_map );
+		return $milestone_order_ids;
 	}
 
 	/**
