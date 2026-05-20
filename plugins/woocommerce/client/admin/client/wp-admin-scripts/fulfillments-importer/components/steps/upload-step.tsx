@@ -130,15 +130,16 @@ const UploadStep: React.FC< StepComponentProps > = ( {
 				__next40pxDefaultSize
 				label={ __( 'CSV delimiter', 'woocommerce' ) }
 				help={ __(
-					'Character used to separate columns in the CSV. Defaults to comma.',
+					'Single character used to separate columns in the CSV. Defaults to comma.',
 					'woocommerce'
 				) }
 				value={ state.delimiter }
 				placeholder=","
+				maxLength={ 1 }
 				onChange={ ( value: string ) =>
 					dispatch( {
 						type: 'SET_DELIMITER',
-						delimiter: value,
+						delimiter: value.slice( 0, 1 ),
 					} )
 				}
 			/>

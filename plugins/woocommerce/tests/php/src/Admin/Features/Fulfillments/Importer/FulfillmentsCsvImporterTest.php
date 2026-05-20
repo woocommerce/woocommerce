@@ -639,6 +639,19 @@ class FulfillmentsCsvImporterTest extends \WC_Unit_Test_Case {
 	}
 
 	/**
+	 * @testdox A multi-character delimiter is clamped to its first byte so fgetcsv() does not throw.
+	 */
+	public function test_multi_character_delimiter_is_clamped_to_single_byte(): void {
+		$csv  = "order_number;tracking_number;shipment_provider\n1;TRACK-1;ups\n";
+		$file = $this->make_csv( $csv );
+
+		$parsed = ( new FulfillmentsCsvImporter( $file, array( 'delimiter' => ';;' ) ) )->parse_headers();
+
+		$this->assertArrayNotHasKey( 'error', $parsed );
+		$this->assertSame( ';', $parsed['delimiter'] );
+	}
+
+	/**
 	 * @testdox parse_headers reports an error when the file is empty.
 	 */
 	public function test_parse_headers_reports_empty_csv(): void {

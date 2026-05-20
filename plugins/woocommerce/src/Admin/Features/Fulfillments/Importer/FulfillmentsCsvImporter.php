@@ -97,7 +97,6 @@ class FulfillmentsCsvImporter {
 
 	/**
 	 * Normalize a delimiter input, falling back to ',' when empty or non-string.
-	 * Mirrors the legacy WC_Product_CSV_Importer_Controller behavior.
 	 *
 	 * @since 10.9.0
 	 *
@@ -108,7 +107,7 @@ class FulfillmentsCsvImporter {
 		if ( ! is_string( $delimiter ) || '' === $delimiter ) {
 			return ',';
 		}
-		return $delimiter;
+		return substr( $delimiter, 0, 1 );
 	}
 
 	/**
