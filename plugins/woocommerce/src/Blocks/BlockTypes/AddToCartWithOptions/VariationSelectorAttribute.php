@@ -22,16 +22,10 @@ class VariationSelectorAttribute extends AbstractBlock {
 	protected $block_name = 'add-to-cart-with-options-variation-selector-attribute';
 
 	/**
-	 * Cached map of term ID to color value for all wc-visual attribute terms.
-	 *
-	 * @var array<int, string>|null
-	 */
-	private $term_colors = null;
-
-	/**
 	 * Extra data passed through from server to client for block.
 	 *
 	 * @param array $attributes Any attributes that currently are available from the block.
+	 * @return void
 	 */
 	protected function enqueue_data( array $attributes = array() ) {
 		parent::enqueue_data( $attributes );
@@ -45,13 +39,9 @@ class VariationSelectorAttribute extends AbstractBlock {
 	 * Get color values for all wc-visual attribute terms.
 	 *
 	 * @param string|null $attribute_name Optional product attribute taxonomy name (e.g. `pa_color`). When omitted, colors for every wc-visual attribute are loaded.
-	 * @return array<int, string> Map of term ID to hex color.
+	 * @return array<int, string|null> Map of term ID to hex color.
 	 */
 	private function get_visual_attribute_term_colors( ?string $attribute_name = null ): array {
-		if ( null !== $this->term_colors ) {
-			return $this->term_colors;
-		}
-
 		$colors     = array();
 		$attributes = wc_get_attribute_taxonomies();
 
@@ -75,14 +65,14 @@ class VariationSelectorAttribute extends AbstractBlock {
 			}
 
 			foreach ( $terms as $term ) {
-				$color                    = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
-				$colors[ $term->term_id ] = $color ? $color : '';
+				$color = sanitize_hex_color( get_term_meta( $term->term_id, 'color', true ) );
+				if ( ! empty( $color ) ) {
+					$colors[ $term->term_id ] = $color;
+				}
 			}
 		}
 
-		$this->term_colors = $colors;
-
-		return $this->term_colors;
+		return $colors;
 	}
 
 	/**

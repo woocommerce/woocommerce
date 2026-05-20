@@ -212,7 +212,7 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 			$variable_product = wc_get_product( $product_id );
 			$this->assertInstanceOf( \WC_Product_Variable::class, $variable_product );
 
-			$inner_blocks = $this->get_attribute_name_block_markup() . $this->get_product_filter_chips_inner_block_markup();
+			$inner_blocks = $this->get_attribute_name_block_markup() . $this->get_chips_block_markup();
 			$markup       = $this->render_variation_selector_attribute( $variable_product, $inner_blocks );
 
 			$this->assertStringContainsString( 'is-style-swatch', $markup, 'Chips wrapper should use swatch style when colors are present.' );
@@ -338,11 +338,11 @@ class VariationSelectorAttribute extends WC_Unit_Test_Case {
 	}
 
 	/**
-	 * Block markup for the Product Filter Chips inner block (variation selector default).
+	 * Block markup for the Chips inner block (variation selector default).
 	 *
 	 * @return string
 	 */
-	private function get_product_filter_chips_inner_block_markup(): string {
+	private function get_chips_block_markup(): string {
 		return '<!-- wp:woocommerce/product-filter-chips /-->';
 	}
 

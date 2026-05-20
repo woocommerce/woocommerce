@@ -76,17 +76,21 @@ function AttributeItem( { blocks, isSelected, onSelect }: AttributeItemProps ) {
 			Array.isArray( attribute?.terms ) &&
 			attribute.terms.length > 0
 		) {
-			items = attribute.terms.map( ( term ) => ( {
-				id: `${ attribute.taxonomy }-${ term.slug }`,
-				label: term.name,
-				value: term.slug,
-				ariaLabel: term.name,
-				...( term.id in termColors
-					? { color: termColors[ term.id ] }
-					: term.id in EMPTY_TERM_COLORS
-					? { color: EMPTY_TERM_COLORS[ term.id ] }
-					: {} ),
-			} ) );
+			items = attribute.terms.map( ( term ) => {
+				let color: string | null = null;
+				if ( term.id in termColors ) {
+					color = termColors[ term.id ];
+				} else if ( term.id in EMPTY_TERM_COLORS ) {
+					color = EMPTY_TERM_COLORS[ term.id ];
+				}
+				return {
+					id: `${ attribute.taxonomy }-${ term.slug }`,
+					label: term.name,
+					value: term.slug,
+					ariaLabel: term.name,
+					...( color !== null ? { color } : {} ),
+				};
+			} );
 		}
 
 		return {

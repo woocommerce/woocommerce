@@ -70,4 +70,4 @@ export const EMPTY_TERM_COLORS: Record< string, string > = {
 	'-1': '#0000ff',
 	'-2': '#e10000',
 	'-3': '#009b00',
-} as const;
+};
