@@ -1,0 +1,4 @@
+Significance: patch
+Type: fix
+
+Allow product queries to type multiple stock statuses.
