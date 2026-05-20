@@ -461,7 +461,7 @@ class FeaturesController {
 				'skip_compatibility_checks'    => true,
 				'default_plugin_compatibility' => FeaturePluginCompatibility::COMPATIBLE,
 				'enabled_by_default'           => false,
-				'is_experimental'              => true,
+				'is_experimental'              => false,
 			),
 			'email_improvements'                 => array(
 				'name'                         => __( 'Email improvements', 'woocommerce' ),
