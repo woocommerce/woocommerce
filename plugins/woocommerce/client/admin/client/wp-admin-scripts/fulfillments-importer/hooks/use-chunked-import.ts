@@ -81,10 +81,17 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 	const [ isRunning, setIsRunning ] = useState( false );
 	const offsetRef = useRef< number >( 0 );
 	const abortRef = useRef< AbortController | null >( null );
+	const runningRef = useRef( false );
+	// Keep the latest callbacks in a ref so run() does not change identity each render.
+	const callbacksRef = useRef( { onChunk, onFinish, onError } );
+	useEffect( () => {
+		callbacksRef.current = { onChunk, onFinish, onError };
+	}, [ onChunk, onFinish, onError ] );
 
 	const cancel = useCallback( () => {
 		abortRef.current?.abort();
 		abortRef.current = null;
+		runningRef.current = false;
 		setIsRunning( false );
 	}, [] );
 
@@ -95,9 +102,10 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 	}, [] );
 
 	const run = useCallback( async () => {
-		if ( ! token || isRunning ) {
+		if ( ! token || runningRef.current ) {
 			return;
 		}
+		runningRef.current = true;
 		setIsRunning( true );
 		const controller = new AbortController();
 		abortRef.current = controller;
@@ -149,11 +157,11 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 					throw lastError ?? new Error( 'Chunk request failed' );
 				}
 
-				onChunk?.( response );
+				callbacksRef.current.onChunk?.( response );
 
 				if ( response.done ) {
 					if ( response.summary ) {
-						onFinish?.( response.summary );
+						callbacksRef.current.onFinish?.( response.summary );
 					}
 					return;
 				}
@@ -168,9 +176,10 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 			if ( ( error as DOMException )?.name === 'AbortError' ) {
 				return;
 			}
-			onError?.( errorMessage( error ) );
+			callbacksRef.current.onError?.( errorMessage( error ) );
 		} finally {
 			abortRef.current = null;
+			runningRef.current = false;
 			setIsRunning( false );
 		}
 	}, [
@@ -180,10 +189,6 @@ export function useChunkedImport( args: UseChunkedImportArgs ) {
 		notifyCustomer,
 		updateExisting,
 		chunkSize,
-		onChunk,
-		onFinish,
-		onError,
-		isRunning,
 	] );
 
 	const retry = useCallback( () => {

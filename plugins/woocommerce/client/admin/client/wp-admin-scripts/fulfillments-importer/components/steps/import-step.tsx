@@ -29,11 +29,11 @@ const ImportStep: React.FC< StepComponentProps > = ( { state, dispatch } ) => {
 		},
 	} );
 
-	// Kick off the loop once when the step mounts.
+	// Kick off the loop once when the step mounts. run() is guarded by an
+	// internal running ref so re-invocations from identity changes are no-ops.
 	useEffect( () => {
 		void run();
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [] );
+	}, [ run ] );
 
 	const percent =
 		state.total > 0
