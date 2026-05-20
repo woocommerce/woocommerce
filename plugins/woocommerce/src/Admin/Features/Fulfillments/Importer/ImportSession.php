@@ -9,6 +9,8 @@ declare( strict_types=1 );
 
 namespace Automattic\WooCommerce\Admin\Features\Fulfillments\Importer;
 
+use Automattic\WooCommerce\Internal\Utilities\FilesystemUtil;
+
 defined( 'ABSPATH' ) || exit;
 
 /**
@@ -194,6 +196,13 @@ final class ImportSession {
 			return;
 		}
 		if ( false !== get_transient( self::PREFIX . $user_id . '_' . $token ) ) {
+			return;
+		}
+		// The Action Scheduler payload is persisted, so refuse to delete anything that does not
+		// resolve inside an allowed upload location even if the args were tampered with.
+		try {
+			FilesystemUtil::validate_upload_file_path( $file );
+		} catch ( \Exception $e ) {
 			return;
 		}
 		wp_delete_file( $file );
