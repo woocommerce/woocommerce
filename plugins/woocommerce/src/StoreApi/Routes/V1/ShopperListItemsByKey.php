@@ -88,11 +88,11 @@ class ShopperListItemsByKey extends AbstractRoute {
 		$list = ShopperList::get_by_slug( (string) $request['slug'] );
 
 		if ( ! $list ) {
-			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Shopper list not found.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_shopper_list_not_found', esc_html__( 'Your saved list isn\'t available right now.', 'woocommerce' ), 404 );
 		}
 
 		if ( ! $list->remove_item( (string) $request['key'] ) ) {
-			throw new RouteException( 'woocommerce_rest_shopper_list_item_not_found', esc_html__( 'No saved item exists for the supplied key.', 'woocommerce' ), 404 );
+			throw new RouteException( 'woocommerce_rest_shopper_list_item_not_found', esc_html__( 'That item isn\'t in your saved list anymore.', 'woocommerce' ), 404 );
 		}
 
 		$list->save();
