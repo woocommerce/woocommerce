@@ -73,6 +73,7 @@ describe( 'product filter checkbox list interactivity store', () => {
 				value: 'blue',
 				selected: false,
 				index: 0,
+				hidden: false,
 			},
 			{
 				id: 'attribute-red',
@@ -80,8 +81,23 @@ describe( 'product filter checkbox list interactivity store', () => {
 				value: 'red',
 				selected: true,
 				index: 1,
+				hidden: false,
 			},
 		] );
+	} );
+
+	it( 'uses the default display limit when context limit is invalid', () => {
+		if ( ! mockRegisteredStore ) {
+			throw new Error( 'Checkbox list store was not registered.' );
+		}
+
+		mockGetContext.mockReturnValue( {
+			storeNamespace: 'woocommerce/product-filters',
+			displayLimit: -1,
+			isExpanded: false,
+		} );
+
+		expect( mockRegisteredStore.state.items[ 0 ].hidden ).toBe( false );
 	} );
 
 	it( 'forwards toggle to parent store with current item', () => {

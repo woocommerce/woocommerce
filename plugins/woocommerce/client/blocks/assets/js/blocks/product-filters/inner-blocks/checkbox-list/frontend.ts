@@ -16,6 +16,8 @@ type CheckboxListItem = SelectableItem< {
 	index?: number;
 } >;
 
+const DEFAULT_DISPLAY_LIMIT = 15;
+
 type CheckboxListContext = {
 	storeNamespace: string;
 	displayLimit: number;
@@ -42,6 +44,14 @@ function getParentStore( storeNamespace?: string ) {
 	);
 }
 
+function normalizeDisplayLimit( displayLimit: number ): number {
+	const limit = Number( displayLimit );
+	if ( ! Number.isFinite( limit ) || limit < 0 ) {
+		return DEFAULT_DISPLAY_LIMIT;
+	}
+	return Math.floor( limit );
+}
+
 function getCurrentItem(): CheckboxListItem | undefined {
 	const context = getContext< { item?: CheckboxListItem } >();
 	return context.item;
@@ -57,6 +67,8 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 				const parentItems =
 					getParentStore( storeNamespace )?.state?.selectableItems;
 				if ( ! Array.isArray( parentItems ) ) return [];
+				const normalizedDisplayLimit =
+					normalizeDisplayLimit( displayLimit );
 				return parentItems.map( ( item, index ) => ( {
 					...item,
 					index,
@@ -64,7 +76,7 @@ const { state }: CheckboxListStore = store< CheckboxListStore >(
 						item.hidden ||
 						( ! isExpanded &&
 							! item.selected &&
-							index >= displayLimit ),
+							index >= normalizedDisplayLimit ),
 				} ) );
 			},
 			get ratingStyle(): string {

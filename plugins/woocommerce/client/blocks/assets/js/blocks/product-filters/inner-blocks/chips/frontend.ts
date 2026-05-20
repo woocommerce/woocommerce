@@ -16,6 +16,8 @@ type ChipsItem = SelectableItem< {
 	index?: number;
 } >;
 
+const DEFAULT_DISPLAY_LIMIT = 15;
+
 type ChipsContext = {
 	storeNamespace: string;
 	displayLimit: number;
@@ -41,6 +43,14 @@ function getParentStore( storeNamespace?: string ) {
 	);
 }
 
+function normalizeDisplayLimit( displayLimit: number ): number {
+	const limit = Number( displayLimit );
+	if ( ! Number.isFinite( limit ) || limit < 0 ) {
+		return DEFAULT_DISPLAY_LIMIT;
+	}
+	return Math.floor( limit );
+}
+
 function getCurrentItem(): ChipsItem | undefined {
 	const context = getContext< { item?: ChipsItem } >();
 	return context.item;
@@ -56,6 +66,8 @@ const { state }: ChipsStore = store< ChipsStore >(
 				const parentItems =
 					getParentStore( storeNamespace )?.state?.selectableItems;
 				if ( ! Array.isArray( parentItems ) ) return [];
+				const normalizedDisplayLimit =
+					normalizeDisplayLimit( displayLimit );
 				return parentItems.map( ( item, index ) => ( {
 					...item,
 					index,
@@ -63,7 +75,7 @@ const { state }: ChipsStore = store< ChipsStore >(
 						item.hidden ||
 						( ! isExpanded &&
 							! item.selected &&
-							index >= displayLimit ),
+							index >= normalizedDisplayLimit ),
 				} ) );
 			},
 			get swatchHidden(): boolean {
