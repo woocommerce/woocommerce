@@ -1,7 +1,7 @@
 /**
  * External dependencies
  */
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { __ } from '@wordpress/i18n';
 import { createPortal, createRoot } from '@wordpress/element';
 import { recordEvent } from '@woocommerce/tracks';
@@ -74,7 +74,15 @@ function FulfillmentsImporterController() {
 	}, [] );
 	const close = useCallback( () => setIsOpen( false ), [] );
 
-	const [ triggerSlot ] = useState( () => getOrCreateTriggerSlot() );
+	const [ triggerSlot, setTriggerSlot ] = useState< HTMLElement | null >(
+		null
+	);
+
+	// Create the slot after mount so DOM mutation never happens during render
+	// (StrictMode invokes render-phase code twice in development).
+	useEffect( () => {
+		setTriggerSlot( getOrCreateTriggerSlot() );
+	}, [] );
 
 	return (
 		<>
