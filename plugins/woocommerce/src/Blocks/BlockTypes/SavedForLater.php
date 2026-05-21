@@ -96,23 +96,26 @@ final class SavedForLater extends AbstractBlock {
 			return $parsed_hooked_block;
 		}
 
-		// Seed a `core/heading` inner block so freshly-injected instances
-		// ship with the same heading the editor template seeds. We append
-		// unconditionally — extensions are free to hook
-		// `hooked_block_woocommerce/saved-for-later` to add their own
-		// inner blocks, and gating on `empty( innerBlocks )` would silently
-		// suppress our heading whenever any other extension ran first.
+		// Seed a `core/heading` inner block so auto-injected instances
+		// carry the same heading the editor template provides. The
+		// append is unconditional: extensions may register additional
+		// hooked inner blocks on
+		// `hooked_block_woocommerce/saved-for-later`, and gating on
+		// `empty( $parsed_hooked_block['innerBlocks'] )` would suppress
+		// this heading whenever any other extension ran first.
 		//
-		// `core/heading` is a static block, so the serialised markup must
-		// match what the editor would have saved (`<h2 class="wp-block-heading">…</h2>`)
-		// or it'll fail block validation when the cart page is opened in the
-		// editor. `attrs.content` mirrors what the editor's template seeds
-		// (`{ content, level }`) so the parsed shape round-trips identically;
-		// the value is the raw string because attrs are JSON-encoded into the
-		// block comment and `esc_html()` would corrupt translations whose text
-		// contains `&`, `<`, etc. The matching `null` push onto `innerContent`
-		// is what makes `WP_Block::render()` walk into the heading when
-		// building `$content`.
+		// `core/heading` is a static block, so the serialised markup
+		// must match the editor-saved form
+		// (`<h2 class="wp-block-heading">…</h2>`) or block validation
+		// will fail when the cart page is opened in the editor.
+		// `attrs.content` mirrors the editor template's seed
+		// (`{ content, level }`) so the parsed shape round-trips
+		// identically. The value is the raw string because attrs are
+		// JSON-encoded into the block comment delimiter; `esc_html()`
+		// would corrupt translations containing `&`, `<`, etc. The
+		// matching `null` push onto `innerContent` is required for
+		// `WP_Block::render()` to descend into the heading when
+		// assembling `$content`.
 		$list_heading = __( 'Saved for later', 'woocommerce' );
 		$heading_html = '<h2 class="wp-block-heading">' . esc_html( $list_heading ) . '</h2>';
 
@@ -210,14 +213,15 @@ final class SavedForLater extends AbstractBlock {
 			)
 		);
 
-		// `hasShownItems` seeds the per-block context so the empty message
-		// stays hidden for new shoppers who land on a page with nothing
-		// saved. The JS-side watcher flips it to `true` the first time the
-		// list has any items (whether that's the SSR seed or a runtime add
-		// via "Save for later"), and `state.isEmpty` only flips on when the
-		// flag is set *and* the list is currently empty. The flag lives in
-		// the per-block context, so it naturally resets on every full page
-		// load — no extra Store API field or persisted flag needed.
+		// `hasShownItems` seeds the per-block context so the empty
+		// message remains hidden for shoppers who load a cart page with
+		// no saved items. The JS-side watcher flips it to `true` the
+		// first time the list has any items (whether that's the SSR
+		// seed or a runtime add via "Save for later"), and
+		// `state.isEmpty` only flips on when the flag is set *and* the
+		// list is currently empty. The flag is stored in the per-block
+		// context, so it resets on each full page load — no extra Store
+		// API field or persisted flag is required.
 		// `data-wp-context---notices` seeds the store-notices namespace
 		// alongside the block's own context on the same wrapper.
 		$wrapper_attributes = array(
@@ -262,11 +266,12 @@ final class SavedForLater extends AbstractBlock {
 		if ( $response->is_error() ) {
 			$error   = $response->as_error();
 			$message = $error instanceof \WP_Error ? $error->get_error_message() : 'Unknown error';
-			// Logged at debug level on purpose: prefetch failures are
-			// often transient (network blips, auth refresh races) and
-			// the user-visible behaviour is the empty state — nothing
-			// for ops to act on. Anyone investigating a regression can
-			// flip the WC logger to debug to surface them.
+			// Logged at debug level: prefetch failures are typically
+			// transient (transport errors, authentication refresh
+			// contention) and the user-visible fallback is the empty-
+			// state message, so they don't warrant a higher log level.
+			// Increase the WC log level to surface them when
+			// investigating a regression.
 			wc_get_logger()->debug(
 				sprintf( 'Saved for Later prefetch failed: %s', $message ),
 				array(

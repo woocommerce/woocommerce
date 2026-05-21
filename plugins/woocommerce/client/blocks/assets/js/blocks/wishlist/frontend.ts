@@ -139,10 +139,11 @@ store< BlockStore >(
 				return !! listItem && !! pendingKeys[ listItem.key ];
 			},
 
-			// No `hasShownItems` gate: the visitor reached this block
-			// deliberately (My Account endpoint or merchant-placed), so
-			// showing the empty message immediately when the list is
-			// empty is the right signal.
+			// Unlike Saved for Later, Wishlist has no `hasShownItems`
+			// first-paint gate. The block is reached deliberately (My
+			// Account endpoint or a merchant-placed instance), so the
+			// empty state should be visible immediately on first paint
+			// when the list is empty.
 			get isEmpty(): boolean {
 				const list = getList( LIST_SLUG );
 				if ( ! list ) {
@@ -165,11 +166,11 @@ store< BlockStore >(
 			},
 
 			// `data-wp-text` writes its argument as text-content without
-			// running entity decoding, so a name returned by the schema as
-			// `Tom &amp; Jerry` would render literally that way. Bind
-			// templates and SSR text spans to this getter instead of the
-			// raw context field so what the browser shows matches what
-			// PHP wrote on first paint.
+			// running entity decoding. A name returned by the schema as
+			// `Tom &amp; Jerry` would otherwise render with the literal
+			// entity. Bind templates and SSR text spans to this getter
+			// (not the raw context field) so the rendered text matches
+			// the PHP-rendered first-paint output.
 			get currentItemDisplayName(): string {
 				const { listItem } = getContext< BlockContext >();
 				return listItem ? decodeEntities( listItem.name ) : '';
@@ -244,7 +245,7 @@ store< BlockStore >(
 				// matching line's quantity, run the add, then only remove
 				// from the wishlist if the cart line actually grew — that
 				// guards against partial-stock and silent-failure paths
-				// where we shouldn't drop the wishlist entry.
+				// where the wishlist entry should not be removed.
 				const lookup = {
 					id: listItem.id,
 					...( isVariation && { variation } ),

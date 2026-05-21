@@ -48,17 +48,17 @@ final class Wishlist extends AbstractBlock {
 		// Guests have no personal list — bail before enqueuing assets or
 		// seeding state. The My Account endpoint isn't reachable for
 		// guests, but the block can also be placed by a merchant on any
-		// page, where this guard is what stops it from rendering an
-		// empty shell for logged-out visitors.
+		// page, so this guard prevents the block from rendering an empty
+		// wrapper for logged-out visitors on merchant-placed instances.
 		if ( ! is_user_logged_in() ) {
 			return '';
 		}
 
 		// Clamp to the 2-6 range the SCSS `@for $i from 2 through 6` loop
-		// and the editor `RangeControl` both support. `absint()` first
-		// defends against a code-editor override (the attribute can be set
-		// to any JSON value there); the `min`/`max` then keep the value
-		// within the range where a `&.columns-#{$i}` rule actually exists.
+		// and the editor `RangeControl` both support. `absint()` coerces
+		// non-integer attribute values written through the code editor;
+		// `min`/`max` then constrain the result to the range covered by
+		// `&.columns-#{$i}` rules in the stylesheet.
 		$column_count = min( 6, max( 2, absint( $attributes['columnCount'] ?? 5 ) ) );
 
 		wp_enqueue_script_module( $this->get_full_block_name() );
@@ -153,10 +153,12 @@ final class Wishlist extends AbstractBlock {
 		if ( $response->is_error() ) {
 			$error   = $response->as_error();
 			$message = $error instanceof \WP_Error ? $error->get_error_message() : 'Unknown error';
-			// Logged at debug level on purpose: prefetch failures are
-			// often transient (network blips, auth refresh races) and
-			// the user-visible behaviour is the empty state — nothing
-			// for ops to act on.
+			// Logged at debug level: prefetch failures are typically
+			// transient (transport errors, authentication refresh
+			// contention) and the user-visible fallback is the empty-
+			// state message, so they don't warrant a higher log level.
+			// Increase the WC log level to surface them when investigating
+			// a regression.
 			wc_get_logger()->debug(
 				sprintf( 'Wishlist prefetch failed: %s', $message ),
 				array(

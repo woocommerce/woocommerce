@@ -6,14 +6,14 @@ namespace Automattic\WooCommerce\Internal\ShopperLists;
 
 /**
  * Shared markup helpers for blocks that render a shopper-list item card
- * (Saved for Later, Wishlist, …). Static helpers, not an abstract base —
- * the two blocks' lifecycles diverge enough (auto-injected vs merchant-
- * placed, different actions, different empty-state gating) that inheritance
- * is not a clean fit. Consumers stitch the fragments together with their
- * own quantity / action button / heading bits.
+ * (Saved for Later, Wishlist, …). Composed by each consuming block
+ * around its own quantity, action-button, and heading markup.
  *
- * Any change here is co-reviewed with every consuming block — drift in the
- * shared row shape will break first paint for whoever didn't get the memo.
+ * Changes to this class affect every consuming block. The shared row
+ * markup is part of the iAPI hydration contract: any divergence in
+ * element shape or binding attributes between this helper's output
+ * and a consumer's template will cause a hydration mismatch on first
+ * paint.
  */
 final class ShopperListRenderer {
 
@@ -204,10 +204,12 @@ final class ShopperListRenderer {
 
 	/**
 	 * Empty-state `<li>` that the block toggles on once `state.isEmpty`
-	 * flips. `$start_hidden = true` makes SSR ship with `hidden` so the
-	 * message doesn't flash for shoppers whose list is being populated
-	 * client-side. `$start_hidden = false` is for blocks (e.g. Wishlist)
-	 * where the message should show on first paint when the list is empty.
+	 * flips. When `$start_hidden` is true, the rendered `<li>` carries
+	 * the `hidden` attribute on first paint and is revealed by iAPI once
+	 * `state.isEmpty` flips. Used by blocks where the list is populated
+	 * asynchronously after first paint (Saved for Later). Pass false for
+	 * blocks where the empty state should be visible immediately when
+	 * the list is empty (Wishlist).
 	 *
 	 * @param string $message      Visible empty-state message.
 	 * @param string $css_class    Class attribute for the `<li>`.
