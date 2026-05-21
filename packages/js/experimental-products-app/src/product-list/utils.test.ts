@@ -47,6 +47,18 @@ describe( 'product list utils', () => {
 				'woocommerce-products-dashboard?post_type=product&activeView=draft'
 			);
 		} );
+
+		it( 'removes existing query args when a param is set to undefined', () => {
+			expect(
+				getProductListNavigationPath(
+					'woocommerce-products-dashboard?post_type=product&postId=12&quickEdit=true',
+					{
+						postId: undefined,
+						quickEdit: undefined,
+					}
+				)
+			).toBe( 'woocommerce-products-dashboard?post_type=product' );
+		} );
 	} );
 
 	describe( 'getProductsWithEmbeddedVariations', () => {

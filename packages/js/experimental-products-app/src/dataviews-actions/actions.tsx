@@ -73,11 +73,10 @@ function getSelectionPath(
 		{} as Record< string, string >
 	);
 
-	delete nextQuery.quickEdit;
-
 	return getProductListNavigationPath( path, {
 		...nextQuery,
 		postId: productIds.join( ',' ),
+		quickEdit: undefined,
 	} );
 }
 

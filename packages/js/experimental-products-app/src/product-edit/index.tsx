@@ -669,15 +669,14 @@ export default function ProductEdit( { products, isOpen }: ProductEditProps ) {
 		);
 		const nextQuery = {
 			...query,
-		} as Record< string, string >;
+			quickEdit: undefined,
+		} as Record< string, string | undefined >;
 
 		editedProductIds.forEach( ( productId ) => {
 			clearEntityRecordEdits( 'root', 'product', productId );
 		} );
 
 		setBulkEditData( {} as ProductBulkEditFormData );
-
-		delete nextQuery.quickEdit;
 
 		navigate( getProductListNavigationPath( path, nextQuery ) );
 	}, [ clearEntityRecordEdits, navigate, path, query, selectedProducts ] );

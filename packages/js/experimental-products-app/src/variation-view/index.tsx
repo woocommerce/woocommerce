@@ -182,7 +182,7 @@ export function VariationView( { productId }: VariationViewProps ) {
 			if ( items.length > 0 ) {
 				nextQuery.postId = items.join( ',' );
 			} else {
-				delete nextQuery.postId;
+				nextQuery.postId = undefined;
 			}
 
 			navigate(

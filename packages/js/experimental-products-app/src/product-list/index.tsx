@@ -97,7 +97,7 @@ export default function ProductList( {
 			if ( items.length > 0 ) {
 				nextParams.postId = items.join( ',' );
 			} else {
-				delete nextParams.postId;
+				nextParams.postId = undefined;
 			}
 
 			navigate(
@@ -125,9 +125,8 @@ export default function ProductList( {
 			const nextParams = {
 				...currentQuery,
 				activeView: nextTab,
+				postId: undefined,
 			};
-
-			delete nextParams.postId;
 
 			navigate(
 				getProductListNavigationPath( location.path, nextParams )
