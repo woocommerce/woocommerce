@@ -29,8 +29,8 @@ saveAttribute?.addEventListener( 'click', function () {
 	const attributeTypeInput = document.querySelector( '#attribute_type' );
 	const sortOrder = document.querySelector( '#attribute_orderby' );
 	recordEvent( 'product_attributes_update', {
-		attribute_type: attributeTypeInput?.value,
 		enable_archive: archiveInput?.checked ? 'yes' : 'no',
+		attribute_type: attributeTypeInput?.value,
 		default_sort_order: sortOrder?.value,
 		page: 'attributes',
 	} );
